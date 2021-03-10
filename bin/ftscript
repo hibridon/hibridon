@@ -1,5 +1,5 @@
 #!/bin/csh -f 
-# HIBRIDON bin/ftscript $Revision: 2000.2 $  
+# HIBRIDON bin/ftscript $Revision: 2004.1 $  
 # ftscript machi [mach2] [mach3] [mach4]: to convert files for machine type {mach}
 # convert all .f files to new machine, and then replaces original .f
 # files with the converted files
@@ -13,7 +13,7 @@ if ($items > 4) then
   echo "usage:  ftscript machi [mach2] [mach3] [mach4]"
   goto end
 endif
-echo "../bin/ftconv.exe << fin" > control.file
+echo "../bin/ftconv_hib.exe << fin" > control.file
 echo $1 >> control.file
 if ($items == 1) then
   set name = $1

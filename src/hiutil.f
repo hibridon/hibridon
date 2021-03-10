@@ -26,7 +26,7 @@
 * NB cstart ultrix for fortran rather than c utilities
 **********************************************************************
       subroutine vaxhlp(line1)
-* latest revision 19-aug-1991
+* latest revision 24-feb-2004
       implicit character*10(z)
       character*(*) line1
       common /coipar/ jtot1, jtot2, jtotd, jlpar, nerg,numax,numin,nud,
@@ -38,34 +38,34 @@ c;2       format (' Help not installed on this machine')
 c;        return
 c;        end
 cend
-cstart unix mac
+cstart unix
 c simulates vax vms help command
       parameter (inp=5,iout=6,ihlpmain=51,ihlpalt=52)
       parameter (maxlev=9,maxsub=50)
       character*(*) helpdir,helptail
 cend
       include "common/parhlp"
-cstart unix max
+cstart unix
       character*80 helpfile,line,lin,lin2
       character*1 pat
 cend
-cstart unix mac
+cstart unix
       logical exist
 cend
-cstart unix mac
+cstart unix
       dimension zreq(maxlev),lreq(maxlev),zsub(maxsub)
 c...  by default, looks in file help. if that is not available, then
 c     tries file name of first key in the tree.
       helpfile=helpdir//'hibrid'//helptail
 cend
-cstart unix-convex mac
+cstart unix-convex
 c;      open (ihlpmain,file=helpfile,err=299,readonly,status='old')
 cend
-cstart unix-sun unix-hp unix-dec unix-ibm unix-aix unix-iris
+cstart .not. unix-convex
 c      write(6,*) 'open ',helpfile
       open (ihlpmain,file=helpfile,err=299,status='unknown')
 cend
-cstart unix mac
+cstart unix
       zalt=' '
       level=0
       line = line1
@@ -135,7 +135,7 @@ c...    key not found in help. attempt to open alternate file.
           if (zalt.ne.' ') close(ihlp)
           zalt=zreq(1)
 cend
-cstart unix mac
+cstart unix
           helpfile='ls '//helpdir//zalt(1:lenstr(zalt))//'*'//helptail
      >     //' >helphelphelphelp'
           call system(helpfile)
@@ -153,9 +153,9 @@ c;          open (ihlpalt,file='helphelphelphelp',status='old')
 c;          open (ihlp,file=helpfile,err=29,readonly,status='old')
 cend
 cstart unix-sun unix-hp unix-dec unix-ibm unix-aix unix-iris
-          open (ihlp,file=helpfile,err=29,status='unknown')
+c;          open (ihlp,file=helpfile,err=29,status='unknown')
 cend
-cstart unix mac
+cstart unix
         end if
       end if
       rewind ihlp
@@ -420,7 +420,7 @@ c       k=index(line(i1:),';')
       character*20 cdate
 *  this is specifically adapted to the cray xmp-48 at the san diego
 *  supercomputer center running under ctss and fortlib
-cstart unix mac
+cstart unix
       character*10 ctime
       character*10 cday
       character*32 mach
@@ -443,7 +443,7 @@ c-------------------------------------------------------------------
 *
 *  -----------------------------------------------------------------
         implicit double precision(a-h,o-z)
-cstart mac
+cstart
 c;      t1=second()
 c;      t2=t1
 cend
@@ -468,7 +468,7 @@ cend
       return
       end
 *------------------------------------------------------------------------
-cstart mac
+cstart none
 c;      function second()
 c;      double precision second
 c;      second = long(362)/60.0d0
@@ -1059,7 +1059,7 @@ c
 20    lenstr=i
       return
       end
-cstart unix-convex cray mac
+cstart unix-convex cray
 c;      subroutine exit
 c;      write (6, 100)
 c;100   format (' *** EXIT FROM HIBRIDON ***')

@@ -1,5 +1,5 @@
 #!/bin/csh -f 
-# HIBRIDON bin/makehib $Revision: 99.1 $ --- create executable program
+# HIBRIDON bin/makehib $Revision: 2004.2 $ --- create executable program
 # makehib [-b -d] potname [kmax]: link hib_{potname} with maximum dimension kmax#   option -b:  do not include arrays tq1, tq2, tq3
 #   option -d:  compile himain.f and pot subroutine with debug option
 # the PATH variable should be set to include the hibridon bin directory
@@ -153,8 +153,8 @@ if (-e $basedir/h_$potname.log) then
   mv $basedir/h_$potname.log $basedir/h_$potname.log.BAK
 endif
 echo "" > $basedir/h_$potname.log
-echo "linking "$hibname"_$progname ..."
-echo "linking "$hibname"_$progname with ..." >>& $basedir/h_$potname.log
+echo "compiling pot subroutine for "$hibname"_$progname ..."
+echo "compiling pot subroutine for "$hibname"_$progname with ..." >>& $basedir/h_$potname.log
 
 set lenopt=`echo $option |awk '{printf length($0)}'`
 
@@ -222,19 +222,19 @@ else
   echo "creating /pot/common directory ..."
   cp -pr $basedir/src/common $basedir/src/pot
 endif
-
 # check if fortran converter is present
 
-if (-e ftconv.exe) then
+if (-e ftconv_hib.exe) then
 else
  echo ""
  echo "making fortran converter ..."
+ echo "making fortran converter ...">>& $basedir/h_$potname.log
  $basedir/bin/makeftconv >>& $basedir/h_$potname.log
 endif
-
 # run fortran converter
 echo ""
 echo "running fortran converter ..."
+echo "running fortran converter ..." >>& $basedir/h_$potname.log
 $basedir/bin/rpotscript $potname >>& $basedir/h_$potname.log
 # compile fortran programs
 
@@ -255,7 +255,7 @@ cd $basedir/bin
 set dt=`date +%D`
 set tm=`date +%T`
 set zn=`date +%Z`
-
+echo ""
 echo ""$hibname"_$progname being created at date $dt $tm $zn with version `cat $basedir/VERSION`"
 if (-e $basedir/src/hiversion.f) then
   rm $basedir/src/hiversion.f
@@ -301,10 +301,7 @@ cd ..
 
 echo ""
 echo "linking "$hibname"_$progname"
-echo "linking "$hibname"_$progname" >>& $basedir/h_$potname.log
-
 cd $basedir/src
-
 set osname=`uname -s`
 if ($osname == "HP-UX" && $compopt == "d") then
    echo "$osname adding /opt/langtools/lib/end.o for debugger"
@@ -317,8 +314,23 @@ endif
 if (-e "$hibname"_$progname) then
   rm pot/pot_$potname.o
 endif
-  
-mv "$hibname"_$progname ../bin/progs
+# rm himain.f if unsuccessful link
+if (-e "$hibname"_$progname) then
+else
+  echo ""
+  echo "unsuccessful link; removing himain.f ..."
+  rm himain.f
+  if (-e himain.o) then
+    rm himain.o
+  endif
+endif
+
+# move executable to ../bin/progs if successful link  
+if (-e "$hibname"_$progname) then
+  echo ""
+  echo "successful link; moving "$hibname"_$progname to ../bin/progs ..."
+  mv "$hibname"_$progname ../bin/progs
+endif
 
 cat "$hibname"_$progname.log >> $basedir/h_$potname.log
 rm "$hibname"_$progname.log

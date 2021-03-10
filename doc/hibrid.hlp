@@ -12,7 +12,7 @@ additional keywords.
 For an introduction to Close-Coupled methods for inelastic scattering, see
 the keyword, INTRO
  
-Execution of the Hibridon© package is controlled by the Hibridon© driver.
+Execution of the Hibridon package is controlled by the Hibridon driver.
 For a description of the commands to the driver, see the keyword COMMANDS
  
 The scattering calculation is controlled by
@@ -39,8 +39,8 @@ help subroutine sysdat help basis 13_pi
 To go back a level, type a null line (this will eventually return you to
 the Hibridon prompt)
  
-Current Revision of this help library:  27-Jan-1999 Applicable version of
-Hibridon©:  4.1
+Current Revision of this help library:  24-feb-2004 Applicable version of
+Hibridon©:  4.2
  
 1 INTRO
 The Close-Coupled (CC) equations

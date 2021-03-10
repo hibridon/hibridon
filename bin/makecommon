@@ -6,7 +6,6 @@ basedir=`hibriddir`
 bin=$basedir/bin
 cd $basedir/src
 
-
 if test ! -r $bin/comsplit.exe ; then $bin/ftn_hib -o $bin/comsplit.exe -n $bin/../utilities/comsplit.f ;rm $bin/../utilities/comsplit.o;fi
 
 if test -d common; then rm -r common; fi

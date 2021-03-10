@@ -687,7 +687,7 @@
 *  --------------------------------------------
       implicit double precision (a-h,o-z)
 cstart unix-ibm
-      character*1 forma, formb
+c;      character*1 forma, formb
 cend
       common /cosysr/ isrcod, junkr, aso
       common /coeint/ eint(6)
@@ -705,14 +705,14 @@ cend
         stop
       endif
 cstart unix mac .and. .not.unix-ibm
-c;       call mxma (t,1,nnmax,w,1,nmax,sc,1,nmax,n,n,n)
-c;       call mxma (sc,1,nmax,t,nnmax,1,w,1,nmax,n,n,n)
+       call mxma (t,1,nnmax,w,1,nmax,sc,1,nmax,n,n,n)
+       call mxma (sc,1,nmax,t,nnmax,1,w,1,nmax,n,n,n)
 cend
 cstart unix-ibm
-      forma='N'
-      formb='T'
-      call dgemul (t,nnmax,forma,w,nmax,forma,sc,nmax,n,n,n)
-      call dgemul (sc,nmax,forma,t,nnmax,formb,w,nmax,n,n,n)
+c;      forma='N'
+c;      formb='T'
+c;      call dgemul (t,nnmax,forma,w,nmax,forma,sc,nmax,n,n,n)
+c;      call dgemul (sc,nmax,forma,t,nnmax,formb,w,nmax,n,n,n)
 cend
       return
 *  w now contains desired product

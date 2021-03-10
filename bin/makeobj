@@ -1,5 +1,5 @@
 #!/bin/csh  -f
-# HIBRIDON bin/makeobj $Revision: 2001.1 $ --- create config files and compile source
+# HIBRIDON bin/makeobj $Revision: 2004.1 $ --- create config files and compile source
 # the PATH variable should be set to include the hibridon bin directory
 
 set basedir=`hibriddir`
@@ -30,26 +30,23 @@ else
 endif
 
 # make fortran converter
-if (-e ftconv.exe) then
+if (-e ftconv_hib.exe) then
 else
  echo ""
  echo "making fortran converter ..."
  echo "making fortran converter ..." >>& $basedir/obj.log
  $basedir/bin/makeftconv >>& $basedir/obj.log
 endif
-
 # run fortran converter on hi.f programs
 echo ""
 echo "running fortran converter ..."
 echo "running fortran converter ..." >>& $basedir/obj.log
 $basedir/bin/rftscript >>& $basedir/obj.log
-
 # create common directory
 echo ""
 echo "creating common files ..."
 echo "creating common files ..." >>& $basedir/obj.log
 $basedir/bin/makecommon >>& $basedir/obj.log
-
 # set help directory
 echo ""
 echo "setting help directory ..."
@@ -92,7 +89,7 @@ $basedir/bin/ftn_hib -n -static hinput*.f >>& $basedir/obj.log
 echo ""
 echo "compiling hiunix.c ..."
 echo "compiling hiunix.c ..." >>& $basedir/obj.log
-cc -c hiunix.c >>& $basedir/obj.log
+CC -c hiunix.c >>& $basedir/obj.log
 
 cd $basedir/bin
 echo ""

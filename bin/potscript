@@ -1,5 +1,5 @@
 #!/bin/csh -f
-# HIBRIDON bin/potscript $Revision: 2000.2 $ --- 
+# HIBRIDON bin/potscript $Revision: 2004.2 $ --- 
 # converts pot_name.f file to new machine, and then replaces original .f
 # file with the converted file
 
@@ -16,7 +16,7 @@ if ($items > 4) then
   echo "usage:  potscript machi [mach2] [mach3] [mach4]"
   goto end
 endif
-echo "../bin/ftconv.exe << fin" > control.file
+echo "ftconv_hib.exe << fin" > control.file
 set name = $1
 if ($items == 1) then
   echo $1 >> control.file

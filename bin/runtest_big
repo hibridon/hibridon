@@ -1,0 +1,42 @@
+#!/bin/csh -f
+# HIBRIDON bin/runtest $Revision: 97.1 $ --- link and run hibridon tests
+# the PATH variable should be set to include the hibridon bin directory
+
+set basedir=`hibriddir`
+
+echo "linking hibb_arn2 with -b and kmax=36 ... "
+if (-e $basedir/bin/progs/hibb_arn2_36) then
+  rm $basedir/bin/progs/hibb_arn2_36
+  echo "replacing current copy of $basedir/bin/progs/hibb_arn2_36 ..."
+endif
+set var1 = "-b arn2"
+set var2 = 36 
+$basedir/bin/makehib $var1 $var2>>& $basedir/h_arn2.log
+if (-e $basedir/bin/progs/hibb_arn2_36) then
+else
+  echo "$basedir/bin/progs/hibb_arn2_36 not created, check $basedir/h_arn2.log"
+  echo ""
+  exit
+endif
+cd $basedir
+if (-e testnew) then
+  echo ""
+  echo "removing old directory $basedir/testnew"
+  rm -r testnew
+endif
+mkdir testnew
+cp tests/*.com testnew
+cp tests/*.inp testnew
+cp tests/*.BIN testnew
+cp tests/*.fluxinp testnew
+cd testnew
+  echo "running arn2 -b tests ..."
+  $basedir/bin/progs/hibb_arn2_36 <arn2_big.com >arn2_big.log
+  echo "arn2_b tests completed, compare result files:"
+  echo "  $basedir/testnew with $basedir/tests"
+  rm $basedir/testnew/*.wfu  >>& $basedir/testnew/arn2_big.log
+  rm $basedir/testnew/*.sav  >>& $basedir/testnew/arn2_big.log
+  rm $basedir/testnew/*.smt  >>& $basedir/testnew/arn2_big.log
+  rm $basedir/testnew/*.tcb  >>& $basedir/testnew/arn2_big.log
+  rm $basedir/bin/progs/hibb_arn2_36
+exit

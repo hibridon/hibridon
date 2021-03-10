@@ -1,5 +1,6 @@
 #!/bin/csh -f 
-# HIBRIDON bin/makehib_d $Revision: 96.1 $ --- create executable program
+# HIBRIDON bin/makehib_d $Revision: 2004.1 $ --- create executable program
+#     with debug capability
 # makehib potname [kmax]: link hib_{potname} with maximum dimension kmax
 # the PATH variable should be set to include the hibridon bin directory
 # this script compiles the pot subroutine with debug option so that 
@@ -70,7 +71,7 @@ endif
 
 # check if fortran converter is present
 
-if (-e ftconv.exe) then
+if (-e ftconv_hib.exe) then
 else
  echo ""
  echo "making fortran converter ..."

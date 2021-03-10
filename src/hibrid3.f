@@ -101,7 +101,7 @@ cend
 *                    b    a
 *  this is then transformed into the local basis
 *  author:  millard alexander
-*  current revision date: 9-mar-1997
+*  current revision date: 23-feb-2004
 * ---------------------------------------------------------------------
 *  variables in call list:
 *    w:        on return:  contains transform of dh/dr
@@ -129,6 +129,10 @@ cend
       integer icol, ierr, ione, ipt, nch, nmax, nmaxm1, nmaxp1, nrow
 *  square matrices (of row dimension nmax)
       dimension w(49), vecnow(49), scmat(49)
+*  local arrays (for lapack dsyevr)
+cstart unix-darwin
+      dimension isuppz(2*nch),iwork(10*nch),work(57*nch)
+cend
 *  vectors dimensioned at least nch
       dimension eignow(7), hp(7), scr(7)
       data ione / 1 /
@@ -192,7 +196,17 @@ cend
 *  of eq.(6) of m.h. alexander, "hybrid quantum scattering algorithms ..."
 *  now call eispack eigenvalue and eigenvector routine (hp is used as
 *  a scratch vector here)
-      call rs (nmax, nch, scmat, eignow, ione, vecnow, scr, hp, ierr)
+cstart .not.unix-darwin
+c;      call rs (nmax, nch, scmat, eignow, ione, vecnow, scr, hp, ierr)
+cend
+cstart unix-darwin
+      lwork=57*nch
+      liwork=10*nch
+      abstol=0d0
+      lsup=2*nch
+      call dsyevr('V','A','L',nch,scmat,nmax,vl,vu,il,iu,abstol,m,
+     :   eignow,vecnow,nmax,isuppz,work,lwork,iwork,liwork,ierr)
+cend
       if (ierr .ne. 0) then
         write (6, 115) ierr
         write (9, 115) ierr
@@ -912,7 +926,7 @@ c
       subroutine rles (a, c, kpvt, n, m, nmax)
 *  subroutine to solve linear equations a * x = c
 *  written by:  millard alexander
-*  current revision date: 11-feb-1992
+*  current revision date: 6-apr-2004
 *  --------------------------------------------------------------------
 *  variables in call list:
 *    a:       on input: contains n x n coefficient matrix
@@ -933,20 +947,22 @@ c
       integer kpvt
       dimension a(1), c(1), kpvt(1)
       data izero /0/
-*  factor the matrix
-*           return ierr=2 if a is singular
-*           return ierr=0 otherwise
-cstart unix mac .and. .not.unix-ibm
+cstart unix .and. .not. unix-darwin
+c;*  factor the matrix
+c;*           return ierr=2 if a is singular
+c;*           return ierr=0 otherwise
+cend
+cstart unix .and. .not.unix-ibm .and. .not. unix-darwin
 c;      call sgefa (a, nmax, n, kpvt, ierr)
 cend
 cstart unix-ibm
-      call dgef(a,nmax,n,kpvt)
-      ierr=0
+c;      call dgef(a,nmax,n,kpvt)
+c;      ierr=0
 cend
 cstart unix-convex
 c;      call dgefa (a, nmax, n, kpvt, ierr)
 cend
-cstart unix mac .and. .not.unix-ibm
+cstart unix .and. .not.unix-ibm .and. .not. unix-darwin
 c;      if (ierr .eq. 2) then
 c;*  here if singular matrix
 c;        write (9, 150)
@@ -955,22 +971,42 @@ c;150     format (' *** SINGULAR MATRIX IN SGEFA; ABORT')
 c;        stop
 c;      end if
 cend
-*  now solve the linear equations (one-by-one)
-      iptc = 1
-      do 200  icol = 1, m
-*  iptc points to top of column icol for matrix c stored in packed column form
-cstart unix mac .and. .not.unix-ibm
+cstart unix .and. .not. unix-darwin
+c;*  now solve the linear equations (one-by-one)
+c;      iptc = 1
+c;      do 200  icol = 1, m
+c;*  iptc points to top of column icol for matrix c stored in packed column fo
+cend
+cstart unix  .and. .not.unix-ibm .and. .not. unix-darwin
 c;        call sgesl (a, nmax, n, kpvt, c(iptc), izero)
 cend
 cstart unix-ibm
-        call dges (a, nmax, n, kpvt, c(iptc), izero)
+c;        call dges (a, nmax, n, kpvt, c(iptc), izero)
 cend
 cstart unix-convex
 c;        call dgesl (a, nmax, n, kpvt, c(iptc), izero)
 cend
-        iptc = iptc + nmax
-200   continue
-*  solution matrix now in c
+cstart unix .and. .not. unix-darwin
+c;        iptc = iptc + nmax
+c;200   continue
+c;*  solution matrix now in c
+cend
+cstart unix-darwin
+      call dgetrf(n,n,a,nmax,kpvt,ierr)
+      if (ierr.ne.0) then
+          write (6,210) ierr
+          write (9,210) ierr
+210       format ('*** IERR = ',i2,' IN DGETRF; ABORT')
+          stop
+      endif
+      call dgetrs('N',n,m,a,nmax,kpvt,c,nmax,ierr)
+      if (ierr.ne.0) then
+          write (6,220) ierr
+          write (9,220) ierr
+220       format ('*** IERR = ',i2,' IN DGETRS; ABORT')
+          stop
+      endif
+cend
       return
       end
 * ----------------------------------------------------------------------
@@ -1548,8 +1584,8 @@ cend
       implicit double precision (a-h,o-z)
       integer isw, i, icol, l, lq, nmax, nopen
 cstart unix-ibm
-      character*1 forma
-      character*40 flxfil
+c;      character*1 forma
+c;      character*40 flxfil
 cend
       logical flagsu, photof, wavefn, kwrit, ipos, lpar, swrit,lpar2
       common /cocent/ cent(1)
@@ -1772,7 +1808,12 @@ cend
 * copy K matrix into sr
         call matmov(tmod,sr,nopen,nopen,nmax,nmax)
 * invert K matrix
-        call smxinv(sr,nmax,nopen,srsave,sisave,ierr)
+cstart .not.unix-darwin
+c;        call smxinv(sr,nmax,nopen,srsave,sisave,ierr)
+cend
+cstart unix-darwin
+        call syminv(sr,nmax,nopen,ierr)
+cend
 * save lhs for determination of real part of transition amplitudes
         do  300   icol = 1, nopen
           cj=fj(icol)
@@ -1784,13 +1825,13 @@ cend
           scmat(icol,icol)=scmat(icol,icol)-derj(icol)
 300     continue
 cstart unix mac .and. .not.unix-ibm
-c;          call mxma(scmat,1,nmax,sr,1,nmax,sisave,1,nmax,
-c;     :                nopen,nopen,nopen)
+          call mxma(scmat,1,nmax,sr,1,nmax,sisave,1,nmax,
+     :                nopen,nopen,nopen)
 cend
 cstart  unix-ibm
-        forma='N'
-        call dgemul(scmat,nmax,forma,sr,nmax,forma,
-     :                sisave,nmax,nopen,nopen,nopen)
+c;        forma='N'
+c;        call dgemul(scmat,nmax,forma,sr,nmax,forma,
+c;     :                sisave,nmax,nopen,nopen,nopen)
 cend
 * solve linear equations for real part of transition amplitudes
 * fpj is used as scratch here
@@ -1802,13 +1843,13 @@ cend
 * now calculate imaginary part of transition amplitudes
         call dscal(nopen*nphoto,onemin,q,1)
 cstart unix mac .and. .not.unix-ibm
-c;          call mxma(tmod,1,nmax,q,1,nopen,srsave,1,nmax,
-c;     :                nopen,nopen,nphoto)
+          call mxma(tmod,1,nmax,q,1,nopen,srsave,1,nmax,
+     :                nopen,nopen,nphoto)
 cend
 cstart  unix-ibm
-        forma='N'
-        call dgemul(tmod,nmax,forma,q,nopen,forma,
-     :                srsave,nmax,nopen,nopen,nphoto)
+c;        forma='N'
+c;        call dgemul(tmod,nmax,forma,q,nopen,forma,
+c;     :                srsave,nmax,nopen,nopen,nphoto)
 cend
 * store imaginary part of transition amplitudes in si
         call matmov(srsave,si,nopen,nopen,nmax,nmax)

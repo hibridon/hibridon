@@ -1084,7 +1084,7 @@ cABER
 *    PARTC,JOB,JINI,INDI,IEN,IPRINT
 *  from file {fname1}.ics
 *  author:  millard alexander
-*  current revision date:  28-sep-2001 by mha
+*  current revision date:  6-apr-2004 by mha
 *  ------------------------------------------------------------------
 *  variables in call list:
 *    zmat:    on return:  contains the nlevop x nlevop matrix of integral
@@ -1278,13 +1278,26 @@ c.....end RESTART handling
       write(3,200) jtot,(scmat(irow,jlist(j)),j=1,njj)
       if(iprint) write(6,200) jtot,(scmat(irow,jlist(j)),j=1,njj)
       do 195 j=1,njj
-        csum(j) = csum(j) + scmat(irow,jlist(j))
+        wt=1d0
+        if (jtotd.gt.1) then
+           if (jtot.eq.jfirst .or. jtot.eq.jfinal) wt=0.5d0
+        endif
+        csum(j) = csum(j) + wt*scmat(irow,jlist(j))
 195   continue
 200   format(1x,i3,(t5,10(1pd11.4)))
       goto 160
-210   if(iprint) write(6,220) (csum(j),j=1,njj)
+210   continue
+*      print *, 'jtotd', jtotd
+      call dscal(njj,dble(jtotd),csum,1)
+      if(iprint) then
+         write(6,220) (csum(j),j=1,njj)
+      else
+         write(6,225) (csum(j),j=1,njj)
+      endif
       write(3,220) (csum(j),j=1,njj)
 220   format(/1x,'SUM:',(t5,10(1pd11.4)))
+225   format(/1x,'SUM OF PARTIAL CROSS SECTIONS:  ',
+     : /5x,(t5,10(1pd11.4)))
       close(1)
       close(3)
       return
@@ -1463,10 +1476,10 @@ c
 20       format (' IEN=', i2,' RMU=', f9.4,' E=', f9.2,
      :          ' JTOT-1=', i3,' JTOT-2=', i4,' JTOT-D=', i3,/)
       else
-        write(2,21) 
+        write(2,21)
      :     inerg,rmu*xmconv,ered*econv,jfirst+0.5,maxjt+0.5,jtotd
         if(.not.batch)
-     :  write(6,21) 
+     :  write(6,21)
      :     inerg,rmu*xmconv,ered*econv,jfirst+0.5,maxjt+0.5,jtotd
 21       format ('IEN=', i2,' RMU=', f9.4,' E=', f9.2,
      :          ' JTOT-1=', f5.1,' JTOT-2=', f6.1,' JTOT-D=', i3)

@@ -1,5 +1,5 @@
 #!/bin/csh -f
-# HIBRIDON bin/makepot $Revision: 96.2 $ --- make test program to run pot_$potname
+# HIBRIDON bin/makepot $Revision: 2004.3 $ --- make test program to run pot_$potname
 
 @ items = $#argv
 set basedir=`hibriddir`
@@ -55,7 +55,7 @@ endif
 
 # check if fortran converter is present
 
-if (-e ftconv.exe) then
+if (-e ftconv_hib.exe) then
 else
  echo ""
  echo "making fortran converter ..."
@@ -83,7 +83,6 @@ $basedir/bin/ftn_hib -d runpot.f >>& $basedir/p_$potname.log
 
 echo ""
 echo "linking runpot_$potname"
-echo "linking runpot_$potname" >>& $basedir/p_$potname.log
 
 cd $basedir/src
 if (-e $basedir/src/hiblas.o) then
@@ -92,10 +91,12 @@ else
   set blas = ""
 endif
 $basedir/bin/ftn_hib -o runpot_$potname $basedir/src/pot/runpot.o  $blas \
-     $basedir/src/hipotutil.o hivector.o hiutil.o himatrix.o hiiolib.o hiunix.o>>& $basedir/p_$potname.log
+     $basedir/src/hipotutil.o hivector.o hiutil.o himatrix.o hiunix.o >>& $basedir/p_$potname.log
 
 # remove pot_potname.o if successful link
 if (-e runpot_$potname) then
+  echo ""
+  echo "successful link; moving runpot"_$potname" to ../bin/progs ..."
   #rm pot/runpot.*
 endif
   

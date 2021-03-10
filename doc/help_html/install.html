@@ -1,0 +1,115 @@
+<title>installation</title>
+<h3><center><font color=#brown >Downloading and Installing the Hibridon<font size=-2><sup>&#169;</sup></font> Package</h3>
+</center></font><hr>
+
+Version 4.1, release 5 of the Hibridon<a href=copyright.html><font size=-2><sup>&#169;</sup></font></a> 
+package is now available for the following
+machines:
+<ul>
+<li> IBM RS/6000 workstations running under AIX 3.2.5, 4.1.3, 4.1.4, 4.2, 4.3
+<ul>
+<li> Fortran Compilers:  xlf 3.2, 4.1, 7.1
+</ul>
+<li> HP 9000 series workstations running under HPUX 10.01, 10.2, 11.0
+<li> DEC Alpha workstations running under OSF 3.2
+<li> SGI workstations running under IRIX 5.2
+</ul>
+<font size=-1>Version 4.1.5 will no longer be maintained on a regular basis</font>
+</ul>
+You can obtain a copy of Hibridon 4.1.5 as
+a  <tt>g'zipped tar</tt> <a href="hib415.tar.gz">
+archive <img src=archive.gif border=1 align=bottom height=14 width=15></a> 
+ in binary format (1.6 MB)
+
+<hr>
+Version 4.2 of the Hibridon<a href=copyright.html><font size=-2><sup>&#169;</sup></font></a> package
+is now available for the following machines:
+<ul>
+<li> Apple G4 and G5 workstations running under OSX 10.3 (Panther)
+<ul>
+<li> Fortran Compiler: <a href=http://www.absoft.com/xlf/index.htm>xlf 8.1</a>
+</ul>
+<li> IBM RS/6000 workstations running under AIX 4.3
+<ul>
+<li> Fortran Compiler:  xlf 7.1
+<!--
+</ul>
+<li> HP 9000 series workstations running under HPUX 11.0
+
+</ul>
+<font size=-1>The Apple (10.3), HP (11.0) and IBM (4.3) versions will be actively maintained</font>
+-->
+</ul>
+You can obtain a copy of  Hibridon 4.2 as
+a  <tt>g'zipped tar</tt> <a href="hib42.tar.gz">
+archive <img src=archive.gif border=1 align=bottom height=14 width=15></a> 
+ in binary format (1.6 MB)
+
+<hr>
+After you have obtained the g'zipped archive, follow
+these steps:
+<ol>
+<li>Create a main hibridon directory.  We shall designate this
+here as <tt>hib4X</tt> (or hib42), although you can give it any name you want. 
+<li>Move the g'zipped tar archive into this directory
+
+<li>Uncompress and unpack the tar archive
+<tt><ul>
+   gunzip hibrid.tar.gz |tar xvf -
+<p></tt></ul>
+<li><img src=cautionsmall.gif> The Hibridon<font size=-2><sup>&#169;</sup></font> hypertext help facility (a copy of the help facility you are reading
+here) is contained  in the
+directory <p><ul><tt>hib4X/doc/hib_html</ul><p></tt>, where "X" = 4.1 or 4.2. The initial target file for 
+your web browser should be
+<p><ul><tt>hib4X/doc/hib_html/index.html</ul></tt><hr>
+
+<li>Extend your PATH environmental variable to include the <tt>bin</tt> subdirectory
+of your main hibridon directory, that is <tt>hib4X/bin</tt>  
+<p><li><img src=warning.gif align=left>
+Read the <a href=license.html>license</a> agreement.  If you <b>do not accept</b> all provisions of this agreement,
+<b>stop
+here</b>  and
+destroy the software.  If you <b>accept</b> the license
+agreement, please read <a href=acknow.html><img src=linksmall.gif border=1>
+</a> the instructions for acknowledgement of the code in any future publications
+from your group that use the Hibridon<font size=-2><sup>&#169;</sup></font> package.<br clear=left>
+<p><li><tt>cd</tt> to the subdirectory <tt>hib4X/bin</tt>.
+<p><li>Execute the command <p><tt><ul>makefirst<p></tt></ul>  This creates a number
+of local configuration files.  You will be asked if you accept the license.  Respond
+"yes" if you accept, otherwise destroy the software.
+
+<p><li>Execute the command <p><tt><ul>makeobj<p></tt></ul> <p> This compiles all the 
+hibridon<font size=-2><sup>&#169;</sup></font> source code and creates the on-line executable <tt>hib4X/bin/hib_help</tt>.
+The file <tt>hib4X/obj.log</tt> contains a log of the compilation, in case
+of failure.
+<p> 
+To obtain help at any time you can either<p>
+<ol type=a><li>Execute the command <tt>hib_help</tt> and follow instructions.
+<li>Use a Web Browser, preferably one that can interpret the &#147;frames&#147;
+feature of Netscape 2.0, to read the Hibridon<font size=-2><sup>&#169;</sup></font> HTML help library.  You 
+can obtain this as a compressed <tt>.tar</tt> archive by
+clicking <a href=ftp://mha-ibm1.umd.edu/pub/hibrid/hibhtml.tar.Z> here</a>.
+</ol>
+<p><li>Test your code by executing the command
+<p><tt><ul>runtest<p></tt></ul>
+which runs a series of <a href=tests.html>test</a> calculations.  After the tests are run, the results are saved
+in the directory <tt>hib4X/testnew</tt>.  All files in this directory should be compared
+with the canonical results, which are stored in the directory <tt>hib4X/tests</tt>.
+You should agree with these results to within at least 6 significant figures.
+<p>
+<li>You are now ready to <a href=linking.html>link</a> and <a href=run.html>run</a> your
+own code for your particular scattering problem.  Use one of the <href=potlist.html>
+potential</a> subroutines in the directory <tt>hib4X/src/pot</tt> as a guide for writing
+your own.  You will certainly find it helpful to consult the <a href=basis.html>Basis</a> and 
+<a href=system.html>Systems</a> help files.
+<p>
+<li><i>Good luck!</i></ol>
+<hr>
+<a href=mailto:mha@umd.edu><img src=Envelope.gif width=16 height=10 border=1></a> Please report
+all bugs that you may find.  They will  (hopefully) be eliminated in a timely
+manner.
+
+
+<hr>
+<a href=hibhelp.html><img src=up_arrow.gif border=0 align=middle></a>&#001;Return to <a href=hibhelp.html>Hibridon Help</a>
+

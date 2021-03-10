@@ -1,0 +1,56 @@
+#!/bin/csh -f
+# HIBRIDON bin/runtest $Revision: 2003.11 $ --- link and run hibridon tests
+# the PATH variable should be set to include the hibridon bin directory
+
+set basedir=`hibriddir`
+
+echo "linking hib_arohx_ump4 with kmax=301 ... "
+if (-e $basedir/bin/progs/hib_arohx_ump4_301) then
+  rm $basedir/bin/progs/hib_arohx_ump4_301
+  echo "replacing current copy of $basedir/bin/progs/hib_arohx_ump4_301 ..."
+endif
+set var1 = arohx_ump4
+set var2 = 301
+$basedir/bin/makehib $var1 $var2>>& $basedir/h_arohx_ump4.log
+if (-e $basedir/bin/progs/hib_arohx_ump4_301) then
+else
+  echo "$basedir/bin/progs/hib_arohx_ump4_301 not created, check
+$basedir/h_arohx_ump4.log"
+  echo ""
+  exit
+endif
+
+ 
+cd $basedir
+if (-e testnew) then
+  echo ""
+  echo "removing old directory $basedir/testnew"
+  rm -r testnew
+endif
+mkdir testnew
+cp tests/*.com testnew
+cp tests/*.inp testnew
+cp tests/*.BIN testnew
+cp tests/*.fluxinp testnew
+cd testnew
+  echo "running arohx_ump4 tests ..."
+  $basedir/bin/progs/hib_arohx_ump4_301 <aroh_jatest.com >aroh_jatest.log
+  echo "arohx tests completed, compare result files:"
+  echo "  $basedir/testnew with $basedir/tests"
+. rm $basedir/testnew/Aroh*.wfu  >>& $basedir/testnew/arohx_test.log
+  rm $basedir/testnew/Aroh*.sav  >>& $basedir/testnew/arohx_test.log
+  rm $basedir/testnew/Aroh*.smt  >>& $basedir/testnew/arohx_test.log
+  rm $basedir/testnew/Aroh*.pcs  >>& $basedir/testnew/arohx_test.log
+  rm $basedir/testnew/Aroh*.tmp  >>& $basedir/testnew/arohx_test.log
+  rm $basedir/bin/progs/hib_arohx_ump4_301
+
+# move tests if hp machine
+  set machine=`machine.exe`
+  set fchar = `echo $machine |awk '{printf index($0,"h")}'`
+  if $fchar == "11" then
+    mv $basedir/tests/hp/* $basedir/tests >>& $basedir/testnew/main.log
+  endif
+  rm $basedir/tests/hp >>& $basedir/testnew/main.log
+  echo "to compare results of all tests:"
+  echo "  $basedir/testnew/compare.com | more"
+exit

@@ -11,7 +11,7 @@
       call vaxhlp(line)
       end
       subroutine vaxhlp(line1)
-* latest revision 19-aug-1991
+* latest revision 24-feb-2004
       implicit character*10(z)
       character*(*) line1
       common /coipar/ junk(8),lscreen
@@ -22,34 +22,35 @@ c;2       format (' Help not installed on this machine')
 c;        return
 c;        end
 cend
-cstart unix unix-dec unix-ibm mac
+cstart unix unix-dec unix-ibm
 c simulates vax vms help command
       parameter (inp=5,iout=6,ihlpmain=51,ihlpalt=52)
       parameter (maxlev=9,maxsub=50)
       character*(*) helpdir,helptail
 cend
       include "common/parhlp"
-cstart unix unix-dec unix-ibm mac
+cstart unix unix-dec unix-ibm
       character*80 helpfile,line,lin,lin2
       character*1 pat
 cend
-cstart unix mac
+cstart unix
       logical exist
 cend
-cstart unix unix-dec unix-ibm mac
+cstart unix unix-dec unix-ibm
       dimension zreq(maxlev),lreq(maxlev),zsub(maxsub)
 c...  by default, looks in file help. if that is not available, then
 c     tries file name of first key in the tree.
       helpfile=helpdir//'hibrid'//helptail
+      print *, helpfile
 cend
-cstart unix-convex mac
+cstart unix-convex
 c;      open (ihlpmain,file=helpfile,err=299,readonly,status='old')
 cend
-cstart unix-sun unix-hp unix-dec unix-ibm unix-aix
+cstart unix-sun unix-hp unix-dec unix-ibm unix-aix unix-darwin
 c      write(6,*) 'open ',helpfile
       open (ihlpmain,file=helpfile,err=299,status='unknown')
 cend
-cstart unix unix-dec unix-ibm mac
+cstart unix unix-dec unix-ibm
       zalt=' '
       level=0
       line = line1
@@ -137,10 +138,10 @@ cstart unix-convex
 c;          open (ihlpalt,file='helphelphelphelp',status='old')
 c;          open (ihlp,file=helpfile,err=29,readonly,status='old')
 cend
-cstart unix-sun unix-hp unix-dec unix-ibm unix-aix
+cstart unix-sun unix-hp unix-dec unix-ibm unix-aix unix-darwin
           open (ihlp,file=helpfile,err=29,status='unknown')
 cend
-cstart unix unix-dec unix-ibm mac
+cstart unix unix-dec unix-ibm
         end if
       end if
       rewind ihlp

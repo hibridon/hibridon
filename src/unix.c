@@ -1,4 +1,4 @@
-/* unix.c $Revision: 2000.6 $ */
+/* unix.c $Revision: 2002.5 $ */
 #include "machines.h"
 
 #if defined(cray) || defined(linux) || defined(__sun) || defined(__uxp__)
@@ -33,7 +33,7 @@
 #define	ABORT	abort_
 #define	KILLME	killme_
 #define	TIMDAT	timdat_
-#define	TRAP	trap_
+#define	MOLPRO_TRAP	molpro_trap_
 #define WALLCL	wallcl_
 #define RAND	rand_
 #define SRAND	srand_
@@ -68,7 +68,7 @@
 #define	ABORT	abort
 #define	KILLME	killme
 #define	TIMDAT	timdat
-#define	TRAP	trap
+#define	MOLPRO_TRAP	molpro_trap
 #define WALLCL	wallcl
 #define RAND	rand
 #define SRAND	srand
@@ -896,7 +896,7 @@ if (errno)
    fprintf(stderr,"\n");
 FEHLER();
 }
-void TRAP()
+void MOLPRO_TRAP()
 {
 /* if environment variable NOTRAP is set, do not set up traps */
 /* ul environment variable   TRAP is set, do not set up traps */

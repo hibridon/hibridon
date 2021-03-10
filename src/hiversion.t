@@ -6,7 +6,7 @@ c;!$hp$optimize off
 cend
       subroutine version(iunit)
 * to output version number of hibridon code
-* current revision date:  4-apr-2003
+* current revision date:  24-feb-2004
       write (iunit, 10)
 10    format
      : (/' ---------------------------------------------------',
@@ -20,7 +20,7 @@ cend
      :  /'               A. BERNING, A. DEGLI-ESPOSTI,',
      :  ' C. RIST, P. DAGDIGIAN, B. POUILLY',/,
      :  '               G. VAN DER SANDEN, M. YANG, F. DE WEERD',
-     :  ', S. GREGURICK',
+     :  ', S. GREGURICK, J. KLOS',
      : /' ---------------------------------------------------',
      :  '-----------------------')
       return
@@ -33,7 +33,7 @@ c;!$hp$optimize off
 cend
       subroutine acknow(iunit,ipos)
 * to acknowledge authors of hibridon
-* current revision date:  22-apr-1997
+* current revision date:  24-feb-2004
       logical ipos
       if (ipos) write (iunit, 10)
 10    format
@@ -59,7 +59,8 @@ cend
      :  ' P. F. Vohralik, D. Lemoine,',
      :  /,' G. Corey, B. Johnson, T. Orlikowski, A. Berning,',
      :  ' A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly,',
-     :  ' G. van der Sanden, M. Yang, F. de Weerd, and S. Gregurick',
+     :  ' G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, and ',
+     :  ' J. Klos',
      : /,' --------------------------------------------------------',
      :  '-------------',
      :  '----------------------------------------------------------')
@@ -96,7 +97,8 @@ cend
      :  /,' P. F. Vohralik, D. Lemoine,',
      :  ' G. Corey, B. Johnson, T. Orlikowski, A. Berning,',
      :  /,' A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly,',
-     :  ' G. van der Sanden, M. Yang, F. de Weerd, and S. Gregurick',
+     :  ' G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, and ',
+     :  ' J. Klos',
      : /,' --------------------------------------------------------',
      :  '---------------------')
       return

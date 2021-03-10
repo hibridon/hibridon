@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# HIBRIDON makeconfig $Revision: 2003.1 $ --- set up default CONFIG file
+# HIBRIDON makeconfig $Revision: 2004.1 $ --- set up default CONFIG file
 # the PATH variable should be set to include the hibridon bin directory
 
 bin=`hibriddir`/bin
@@ -30,6 +30,15 @@ if test "$machine" = "unix unix-i4 unix-sun" ; then
     libraries="-lucb"
   fi
 fi
+if test "$machine" = "unix unix-i4 unix-darwin";then 
+   fortran="xlf -qextname -qdpc"
+   opt="-O3"
+   static="-qsave"
+   gmalloc=0
+   machine="unix unix-darwin unix-blas3"
+   libraries="$libraries /System/Library/Frameworks/vecLib.framework/vecLib"
+fi
+
 if test "$machine" = "unix unix-ibm" || test "$machine" = "unix unix-i4 unix-ibm" ; then 
   compiler_level=0.0
   syslevel=`uname -vr |awk '{printf "%d.%d\n",$2,$1}'`

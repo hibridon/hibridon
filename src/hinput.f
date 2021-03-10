@@ -1,5 +1,5 @@
 cstart unix-ibm unix-aix
-@process noopt
+c;@process noopt
 cend
 cstart unix-hp
 c;!$hp$optimize off

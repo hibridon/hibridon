@@ -15,6 +15,7 @@
 *      modified by moonbong yang 27-Sep-94
 *      completely rewritten by mha 24-apr-1997
 *      revised by mha 11-may-1997
+*      latest revision 23-feb-2004
 * definition of variables in call list:
 *      nch     number of coupled equations
 *      nmax    leading dimension of matrices w
@@ -23,6 +24,7 @@
       logical lpar, batch, lparx, wavefl
       character*40 jobnam, input, output, savfil,
      :             evalfil
+      character*1 jobz
       integer vmax,nvmax
       include "common/parpot"
 *   square matrices
@@ -31,6 +33,11 @@
       dimension v(nmax,6)
       dimension wtemp(nmax,6)
       dimension scmat(nmax,6)
+cstart unix-darwin
+* scratch vectors for dsyev
+      dimension work(57*nmax),iwork(10*nmax),isuppz(2*nmax)
+cend
+
       common /cotq1/ wr(1)
       common /cotq3/ z(1)
 * scratch vectors
@@ -124,7 +131,19 @@
 
 *      print *, '** determining eigenvalues of S matrix ...'
 
-      call rs (nmax, vmax, scmat, sc4, ione, scmat, sc11, sc5, ierr)
+cstart unix .and. .not. unix-darwin
+c;      call rs (nmax, vmax, scmat, sc4, ione, scmat, sc11, sc5, ierr)
+cend
+cstart unix-darwin
+      lwork=57*vmax
+      liwork=10*vmax
+      abstol=0d0
+      lsup=2*vmax
+
+      call dsyevr('N','A','L',vmax,scmat,nmax,vl,vu,il,iu,abstol,mm,
+     :   sc4,vecnow,nmax,isuppz,work,lwork,iwork,liwork,ierr)
+cend
+
       evalmin=sc4(idamin(vmax,sc4,1))
       write (1, 19) evalmin
       write (6, 19) evalmin
@@ -202,10 +221,29 @@
       if (wavefl) iflag=ione
 
 cstart unix-ibm
-      call dsygv(iflag,wtemp,nmax,scmat,nmax,eval,t,nmax,
-     :           ndim,sc11,naux)
+c;      call dsygv(iflag,wtemp,nmax,scmat,nmax,eval,t,nmax,
+c;     :           ndim,sc11,naux)
 cend
-cstart unix mac .and. .not. unix-ibm
+cstart unix-darwin
+       if (iflag.eq.1) then
+           jobz='v'
+       else
+           jobz='n'
+       endif
+       lwork=3*nmax
+       call dsygv(1,jobz,'l',ndim,wtemp,nmax,scmat,nmax,eval,
+     :            sc11,lwork,ierr)
+       if (ierr.ne.0) then
+         stop 'dsygv in hibound'
+       endif
+* copy eigenvectors to matrix t
+       if (iflag.eq.1) then
+          do i=1,ndim
+             call dcopy(ndim,wtemp(1,i),1,t(1,i),1)
+          enddo
+       endif
+cend
+cstart unix mac .and. .not. unix-ibm .and. .not. unix-darwin
 c;      call rsg(nmax,ndim,wtemp,scmat,eval,iflag,t,sc1,sc11,ierr)
 cend
 *  print job information

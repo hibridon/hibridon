@@ -1,27 +1,27 @@
 
  --------------------------------------------------------------------------
-           HIBRIDON SCATTERING CODE V 4.1 05/19/97 16:41:49 EDT
+           HIBRIDON SCATTERING CODE V 4.2 04/06/04 23:56:38 EDT
 
      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG
  CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI
                A. BERNING, A. DEGLI-ESPOSTI, C. RIST, P. DAGDIGIAN, B. POUILLY
-               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK
+               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, J. KLOS
  --------------------------------------------------------------------------
 
  PARTIAL CROSS SECTIONS READ FROM FILE Cctest1.pcs                             
- WRITTEN:     19-May-97  16:43:08
+ WRITTEN:      6-Apr-04  23:56:45
  LABEL:      CC INTEGRAL AND PARTIAL TESTS                   
  POT NAME:   PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
 
  LEVEL LIST FOR PARTIAL CROSS SECTIONS AT E=  500.00 CM-1
    N    J  INDEX  EINT(CM-1)
 
-   1    0     0      0.000
+   1    0     0       .000
    2    2     0     12.060
    3    4     0     40.200
    4    6     0     84.420
 
- PARTIAL CROSS SECTIONS FOR INITIAL STATE J=  0  INDEX=  0  EKIN=    500.00
+ PARTIAL CROSS SECTIONS FOR INITIAL STATE J=  0  INDEX=    0  EKIN=    500.00
  JTOT    FINAL STATES
           1          2          3          4
    0 4.0105D-03 1.2643D-03 2.8647D-04 1.5582D-03
@@ -30,4 +30,4 @@
   15 1.5433D-01 3.9928D-02 7.4559D-03 5.4156D-02
   20 1.7156D-01 5.2646D-02 9.2137D-03 7.7335D-02
 
- SUM 5.9887D-01 1.3468D-01 2.5523D-02 1.8504D-01
+ SUM 2.5554D+00 5.3864D-01 1.0386D-01 7.2796D-01

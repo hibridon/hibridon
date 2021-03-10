@@ -1,9 +1,9 @@
 #!/bin/csh -f
-# HIBRIDON bin/potcopy $Revision: 96.2 $ --- copies all pot.f files contained in include.list
+# HIBRIDON bin/potcopy $Revision: 2004.1 $ --- copies all pot.f files contained in include.list
 
 set basedir=`hibriddir`
 cd $basedir
-cd /scratch/mha/htar 
+cd /Users/mha/scratch/htar 
 set htar=`pwd`
 cd $basedir/src/pot
 cp include.list newlist

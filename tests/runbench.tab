@@ -1,3 +1,9 @@
+logd:  169 channel Ar-N2 970 steps
+airy:  169 channel Ar-N2 33 steps
+dxsec: Ar-N2 jmax=8, jtot2=100, j=4->j=4 101 angles
+tenxsc: Ar-N2 jmax=8, lambda=2, jtot2=100  0.le.j.le.4
+
+mac 1.25GHz G4, OSX10.3.2 vecLib tql2
 
 SGI 100MHZINDY 4600
 logd   4:19.29  4:18.23
@@ -41,43 +47,40 @@ airy    0:25.20  0:25.16
 dxsec  17:00.38 15:40.00
 tenxsc  1:08.28  0:58.27
 
+397 optimized -lesslp2 tql2
+logd    1:47.13  1:47.18 
+airy    0:18.50  0:18.53 
+dxsec   1:41.61  1:49.75
+tenxsc    22.20    32.04
+
+44P 367 MHz optimized -lessl tql2
+logd      27.92    27.95 
+airy       4.62     4.63 
+dxsec     13.10    21.11
+tenxsc     8.43  0:18.21
+
 SUN UltraSParc 5.1.5 noblas
 logd    6:10.14   6:06.70
 airy    1:14.89   1:12.51
 dxsec  22:40.71  21:11.08
 tenxsc  1:26.03   1:16.13
 tenxsc 0:09.81  0:00:11.38
-logd:  169 channel Ar-N2 970 steps
-airy:  169 channel Ar-N2 33 steps
 
-dxsec: Ar-N2 jmax=8, jtot2=100, j=4->j=4 101 angles
+apple 1.25GHz G4 xlf -O3 vecLib tql2 mxma
+logd      56.28     56.56
+airy       8.48      8.51
+dxsec     13.73     21.81
+tenxsc    10.01     19.81
 
-tenxsc: Ar-N2 jmax=8, lambda=2, jtot2=100  0.le.j.le.4
-      TIMING:  ELAPSED 00:02:26.94 / CPU 00:02:26.87 
-      TIMING:  ELAPSED 00:00:25.20 / CPU 00:00:25.16 
-      TIMING:  ELAPSED 00:00:22.36 / CPU 00:00:19.97 
- ** CPU TIMES:  BASIS= 00:00:00.13  POT= 00:00:01.16  LOGD= 00:02:24.58  AIRY=  00:00:00.00
- ** CPU TIMES:  BASIS= 00:00:00.15  POT= 00:00:00.04  LOGD= 00:00:00.00  AIRY=  00:00:23.56
-    ELAPSED TIME: 00:17:00.38  CPU TIME:  00:15:40.00
- ** TENXSC FINAL TIMING, ELAPSED:  00:01:08.28  CPU:  00:00:58.27 **
-      TIMING:  ELAPSED 00:02:35.05 / CPU 00:02:34.95 
-      TIMING:  ELAPSED 00:00:25.92 / CPU 00:00:25.88 
-      TIMING:  ELAPSED 00:00:22.55 / CPU 00:00:20.25 
- ** CPU TIMES:  BASIS= 00:00:00.13  POT= 00:00:01.20  LOGD= 00:02:32.69  AIRY=  00:00:00.00
- ** CPU TIMES:  BASIS= 00:00:00.14  POT= 00:00:00.01  LOGD= 00:00:00.00  AIRY=  00:00:24.29
-    ELAPSED TIME: 00:04:16.08  CPU TIME:  00:03:55.56
- ** TENXSC FINAL TIMING, ELAPSED:  00:01:10.85  CPU:  00:01:00.77 **
-      TIMING:  ELAPSED 00:02:24.04 / CPU 00:02:23.98 
-      TIMING:  ELAPSED 00:00:24.33 / CPU 00:00:24.28 
-      TIMING:  ELAPSED 00:00:21.38 / CPU 00:00:18.97 
- ** CPU TIMES:  BASIS= 00:00:00.13  POT= 00:00:01.16  LOGD= 00:02:21.71  AIRY=  00:00:00.00
- ** CPU TIMES:  BASIS= 00:00:00.12  POT= 00:00:00.00  LOGD= 00:00:00.00  AIRY=  00:00:22.78
-    ELAPSED TIME: 00:01:37.24  CPU TIME:  00:01:29.15
- ** TENXSC FINAL TIMING, ELAPSED:  00:01:05.88  CPU:  00:00:55.94 **
-      TIMING:  ELAPSED 00:01:47.18 / CPU 00:01:47.13 
-      TIMING:  ELAPSED 00:00:18.53 / CPU 00:00:18.50 
-      TIMING:  ELAPSED 00:00:10.77 / CPU 00:00:08.58 
- ** CPU TIMES:  BASIS= 00:00:00.05  POT= 00:00:01.27  LOGD= 00:01:45.34  AIRY=  00:00:00.00
- ** CPU TIMES:  BASIS= 00:00:00.05  POT= 00:00:00.06  LOGD= 00:00:00.00  AIRY=  00:00:17.70
-    ELAPSED TIME: 00:01:49.75  CPU TIME:  00:01:41.61
- ** TENXSC FINAL TIMING, ELAPSED:  00:00:32.04  CPU:  00:00:22.20 **
+apple 1.25GHz G4 xlf -O3 vecLib tql2 dgemm
+logd      58.30     56.51
+airy      10.94     10.89
+dxsec     14.08     22.14
+tenxsc    10.29     20.21
+      TIMING:  ELAPSED 00:00:58.06 / CPU 00:00:57.85 
+      TIMING:  ELAPSED 00:00:10.78 / CPU 00:00:10.78 
+      TIMING:  ELAPSED 00:00:09.56 / CPU 00:00:07.23 
+ ** CPU TIMES:  BASIS= 00:00:00.03  POT= 00:00:00.53  LOGD= 00:00:57.08  AIRY=  00:00:00.00
+ ** CPU TIMES:  BASIS= 00:00:00.03  POT= 00:00:00.00  LOGD= 00:00:00.00  AIRY=  00:00:10.46
+    ELAPSED TIME: 00:00:21.99  CPU TIME:  00:00:13.89
+ ** TENXSC FINAL TIMING, ELAPSED:  00:00:20.22  CPU:  00:00:10.38 **

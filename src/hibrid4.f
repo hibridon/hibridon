@@ -845,7 +845,7 @@ cend
 *  this subroutine first sets up the wavevector matrix at rnow
 *  then diagonalizes this matrix
 *  written by:  millard alexander
-*  current revision date: 25-sept-87
+*  current revision date: 24-feb-2004
 * ----------------------------------------------------------------
 *  variables in call list:
 *  w:           matrix of maximum row dimension nmax used to store
@@ -860,6 +860,7 @@ cend
 *     potmat:         determines wavevector matrix
 *     tred1,tqlrat:   eispack routines to obtain eigenvalues of real,
 *                     matrix
+*     dsyevr:         latest lapack eigenvalue routine
 *     dscal, dcopy:   linpack blas routines
 * ----------------------------------------------------------------
       implicit double precision (a-h,o-z)
@@ -871,6 +872,11 @@ cend
       dimension w(1)
 *  vectors dimensioned at least nch
       dimension eignow(1), scr1(1), scr2(1)
+*  local arrays (for lapack dsyevr)
+cstart unix-darwin
+      dimension isuppz(2*nch),iwork(10*nch),work(57*nch)
+cend
+
 * ------------------------------------------------------------------
       data xmin1 / -1.d0/
       nmaxp1 = nmax + 1
@@ -899,18 +905,37 @@ cend
           ipt = ipt + nmaxp1
 110     continue
       end if
-*  transform w to tridiagonal form
-*  eignow, scr1 and scr2 are used as scratch vectors here
-      call tred1 (nmax, nch, w, eignow, scr1, scr2)
-*  get eigenvalues of tridiagonal matrix
-      call tqlrat (nch, eignow, scr2, ierr)
+cstart unix-darwin
+      lwork=57*nch
+      liwork=10*nch
+      abstol=0d0
+      lsup=2*nch
+      call dsyevr('N','A','L',nch,w,nmax,vl,vu,il,iu,abstol,m,
+     :   eignow,vecnow,nmax,isuppz,work,lwork,iwork,liwork,ierr)
+
       if (ierr .ne. 0) then
-        write (9, 120) ierr
-        write (6, 120) ierr
-120     format
-     :    (' *** TQLRAT IERR =', i3, ' .N.E. 0 IN WAVEVC; ABORT ***')
+        write (6, 115) ierr
+        write (9, 115) ierr
+115     format (' *** IERR =',i3,' IN WAVEVC/DSYEVR;  ABORT ***')
+        write (9, 120) (eignow (i), i=1, nch)
+120     format (' EIGENVALUES ARE:',/,8(1pe16.8) )
         call exit
       end if
+cend
+cstart unix .and. .not. unix-darwin
+c;*  transform w to tridiagonal form
+c;*  eignow, scr1 and scr2 are used as scratch vectors here
+c;      call tred1 (nmax, nch, w, eignow, scr1, scr2)
+c;*  get eigenvalues of tridiagonal matrix
+c;      call tqlrat (nch, eignow, scr2, ierr)
+c;      if (ierr .ne. 0) then
+c;        write (9, 130) ierr
+c;        write (6, 130) ierr
+c;130     format
+c;     :    (' *** TQLRAT IERR =', i3, ' .N.E. 0 IN WAVEVC; ABORT ***')
+c;        call exit
+c;      end if
+cend
       return
       end
 * -------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-cstart unix-ibm unix-aix
+cstart unix-ibm unix-aix unix-darwin
 @process noopt
 cend
 cstart unix-hp
@@ -10,15 +10,15 @@ cend
 ****   all use must be by specific prior arrangement with:         ****
 ****     millard alexander, department of chemistry,               ****
 ****     university of maryland, college park, md, 20742           ****
-****     tel: 1.301.405.1823; email: mha@mha-ibm2.umd.edu          ****
+****     tel: 1.301.405.1823; email: mha@umd.edu                   ****
 ****   no part of this program may be copied or used for other     ****
 ****   purposes without the author's permission.                   ****
 ***********************************************************************
 *  ***  driver for log-derivative integration ***
 *  author:  millard alexander
-*  current revision date:  1-oct-2001 by mha
+*  current revision date:  23-feb-2004 by mha
       implicit double precision (a-h, o-z)
-cstart unix-ibm
+cstart unix-ibm unix-darwin
       character *40 test
 cend
 *  ----------------------------------------------------------
@@ -35,6 +35,10 @@ cend
 *     for which s-matrix will be stored on disk
 
       parameter (kmax=151, kairy = kmax,ktri=kmax*(kmax+1)/2,kbig=10)
+cstart unix-darwin
+* set size of scratch array for matrix diagonalization
+      parameter (kaux3=3*kmax)
+cend
 cstart unix-ibm
 * set size of scratch array for matrix inversion
       parameter (kaux=100*kmax)
@@ -42,7 +46,7 @@ cend
 cstart unix .and. .not.unix-ibm
 c;* set size of scratch array for matrix inversion with lapack routines
 c;* warning, this assumes a blocksize of 64
-c;      parameter (kaux=64*kmax)
+c;      parameter (kaux=128*kmax)
 cend
       parameter (klammx = 80, kfact = 2000, kout=21, ken = 10)
       parameter (kmxpho=3, knphot=1)
@@ -155,8 +159,13 @@ cend
       common /cosc8/ sc8(kmax)
       common /cosc9/ sc9(kmax)
       common /cosc10/ sc10(kmax)
+cstart unix-darwin
+      common /cosc12/ sc11(kaux3)
+cend
+cstart unix .and. .not.unix-darwin
+c;      common /cosc11/ sc11(kaux)
+cend
 cstart unix
-      common /cosc11/ sc11(kaux)
       common /cokaux/ naux
 cend
       common /cotble/ npnt, jttble(kfact)
@@ -201,7 +210,7 @@ cend
      :           sc2, sc1, sc3, sc4, sc5,
      :           sc6, sc7, sc8, sc9, tq1, tq2, tq3, men, mmax, mairy)
       end
-cstart unix-ibm unix-aix
+cstart unix-ibm unix-aix unix-darwin
 @process noopt
 cend
 cstart unix-hp
@@ -793,7 +802,7 @@ c95    format (1h ,79('='))
 
 cger (next 2 lines)
       write (9,'(/" ** J =",i5," JLPAR =",i2," STARTED")') jtot,jlpar
-cstart unix-ibm unix-aix
+cstart unix-ibm unix-aix unix-darwin
 *      call flush_(9)
       call flush(9)
 cend

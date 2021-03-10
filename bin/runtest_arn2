@@ -1,0 +1,44 @@
+#!/bin/csh -f
+# HIBRIDON bin/runtest $Revision: 96.5 $ --- link and run hibridon tests
+# the PATH variable should be set to include the hibridon bin directory
+
+set basedir=`hibriddir`
+
+echo "linking hibrid_arn2 with kmax=151 ... "
+if (-e $basedir/bin/progs/hibrid_arn2_151) then
+  rm $basedir/bin/progs/hibrid_arn2_151
+  echo "replacing current copy of $basedir/bin/progs/hibrid_arn2_151 ..."
+endif
+set var1 = arn2
+set var2 = 151
+$basedir/bin/makehib $var1 $var2>>& $basedir/h_arn2.log
+if (-e $basedir/bin/progs/hib_arn2_151) then
+else
+  echo "$basedir/bin/progs/hib_arn2_151 not created, check $basedir/h_arn2.log"
+  echo ""
+  exit
+endif
+ 
+cd $basedir
+if (-e testnew) then
+  echo ""
+  echo "removing old directory $basedir/testnew"
+  rm -r testnew
+endif
+mkdir testnew
+cp tests/*.com testnew
+cp tests/*.inp testnew
+cp tests/*.BIN testnew
+cp tests/*.fluxinp testnew
+cd testnew
+  echo "running arn2 tests ..."
+  $basedir/bin/progs/hib_arn2_151 <arn2_test.com >arn2_test.log
+  echo "arn2 tests completed, compare result files:"
+  echo "  $basedir/testnew with $basedir/tests"
+  rm $basedir/testnew/*.wfu  >>& $basedir/testnew/arn2_test.log
+  rm $basedir/testnew/*.sav  >>& $basedir/testnew/arn2_test.log
+  rm $basedir/testnew/*.smt  >>& $basedir/testnew/arn2_test.log
+  rm $basedir/testnew/*.tcb  >>& $basedir/testnew/arn2_test.log
+exit
+
+

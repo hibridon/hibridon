@@ -1,4 +1,4 @@
-/* machines.h $Revision: 2002.3 $ */
+/* machines.h $Revision: 2002.6 Patch(2002.6): opteron2 $ */
 /* MOLPRO machine characteristics for C programs */
 #ifndef __MACHINES_H__
 #define __MACHINES_H__
@@ -69,12 +69,12 @@
 #endif
 #else
 #define MACHINE_TYPE	"unix unix-i4 unix-ibm"
-#endif
 #ifndef AIX_SHM
 #define AIX_SHM 16777216 /* threshold for using shared memory segments */
 #endif
 #ifndef AIX_SHM_SEG_MAX
 #define AIX_SHM_SEG_MAX 10
+#endif
 #endif
 #include <memory.h>
 #include <sys/shm.h>
@@ -102,7 +102,9 @@
 #ifdef __alpha
 #ifndef linux
 #include <sys/types.h>
+#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
+#endif
 #include <db.h>
 #endif
 #define NAME_LU
@@ -201,9 +203,9 @@
 #define LSEEK lseek64
 #define TRUNCATE ftruncate64
 #define OFFSET __off64_t
-#else
+#else  /* LARGEFILES */
 #define TRUNCATE ftruncate
-#endif
+#endif /* LARGEFILES */
 
 #include <string.h>
 #define	NAME_LU
@@ -212,28 +214,50 @@
 #ifdef __alpha
 #ifdef I64
 #define MACHINE_TYPE	"unix unix-i8 unix-linux unix-linux-alpha"
-#else
+#else  /* I64 */
 #define MACHINE_TYPE	"unix unix-i4 unix-linux unix-linux-alpha"
-#endif
-#endif
+#endif /* I64 */
+#endif /* __alpha */
 #ifdef __ia64
 #define MACHINE_TYPE	"unix unix-i8 unix-linux unix-linux-ia64"
-#endif
-#if ! defined (__ia64) && ! defined (__alpha)
+#define MEMALLOC(n)       calloc(n , sizeof(double))
+#ifdef I64
+#ifndef FORTINT 
+#define FORTINT long long
+#endif /* FORTINT */
+#ifndef FORTINTC
+#define FORTINTC long
+#endif /* FORTINTC */
+#endif /* I64 */
+#endif /* __ia64 */
+#ifdef __x86_64__
+#ifdef I64
+#define MACHINE_TYPE	"unix unix-i8 unix-linux unix-linux-x86_64"
+#ifndef FORTINT
+#define FORTINT long long
+#endif /* FORTINT */
+#ifndef FORTINTC
+#define FORTINTC long
+#endif /* FORTINTC */
+#else  /* I64 */
+#define MACHINE_TYPE	"unix unix-i4 unix-linux unix-linux-x86_64"
+#endif /* I64 */
+#endif /* __x86_64__ */
+#if ! defined (__ia64) && ! defined (__alpha) && ! defined (__x86_64__)
 #ifdef I64
 #define MACHINE_TYPE	"unix unix-i8 unix-linux"
 #ifndef FORTINT
 #define FORTINT long long
-#endif
+#endif /* FORTINT */
 #ifndef FORTINTC
 #define FORTINTC long
-#endif
-#else
+#endif /* FORTINTC */
+#else  /* I64 */
 #define MACHINE_TYPE	"unix unix-i4 unix-linux"
-#endif
-#endif
+#endif /* I64 */
+#endif /* ! defined (__ia64) && ! defined (__alpha)  && ! defined (__x86_64__)*/
 #define HAS_UTSNAME
-#endif
+#endif /* linux */
 
 #ifdef __ppc__ 
 
@@ -308,14 +332,29 @@ typedef long clock_t;
 #endif
 
 #ifdef SX
+typedef char int8_t;
+typedef short int16_t;
+/* typedef int int32_t; */
 #define KEEPTEMP
 #define NAME_LU
 #define FORTCL_END
 #define HAS_UTSNAME
 #ifdef I64
 #define MACHINE_TYPE	"unix unix-i8 unix-nec"
+#ifndef FORTINT
+#define FORTINT long
+#endif
+#ifndef FORTINTC
+#define FORTINTC long
+#endif
 #else
 #define MACHINE_TYPE	"unix unix-i4 unix-nec"
+#ifndef FORTINT
+#define FORTINT int
+#endif
+#ifndef FORTINTC
+#define FORTINTC int
+#endif
 #endif
 #endif
 

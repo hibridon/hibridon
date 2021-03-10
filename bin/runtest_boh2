@@ -1,0 +1,46 @@
+#!/bin/csh -f
+# HIBRIDON bin/runtest_boh2 $Revision: 04.15 $ --- link and run hibridon boh2 test
+# the PATH variable should be set to include the hibridon bin directory
+
+set basedir=`hibriddir`
+
+echo "linking hib_boh2 with kmax=120 ... "
+if (-e $basedir/bin/progs/hib_boh2_120) then
+  rm $basedir/bin/progs/hib_boh2_120
+  echo "replacing current copy of $basedir/bin/progs/hib_boh2_120 ..."
+endif
+set var1 = boh2
+set var2 = 120
+$basedir/bin/makehib $var1 $var2>>& $basedir/h_boh2.log
+if (-e $basedir/bin/progs/hib_boh2_120) then
+else
+  echo "$basedir/bin/progs/hib_boh2_120 not created, check $basedir/h_boh2.log"
+  echo ""
+  exit
+endif
+ 
+cd $basedir
+if (-e testnew) then
+  echo ""
+  echo "removing old directory $basedir/testnew"
+  rm -r testnew
+endif
+mkdir testnew
+cp tests/*.com testnew
+cp tests/*.inp testnew
+cp tests/*.BIN testnew
+cp tests/*.fluxinp testnew
+cd testnew
+  echo "running boh2 tests ..."
+  $basedir/bin/progs/hib_boh2_120 <boh2_test.com >boh2_test.log
+  echo "boh2 tests completed, compare result files:"
+  echo "  $basedir/testnew with $basedir/tests"
+  rm $basedir/testnew/*.wfu  >>& $basedir/testnew/boh2_test.log
+  rm $basedir/testnew/*.sav  >>& $basedir/testnew/boh2_test.log
+  rm $basedir/testnew/*.smt  >>& $basedir/testnew/boh2_test.log
+  rm $basedir/testnew/*.tcb  >>& $basedir/testnew/boh2_test.log
+  rm $basedir/bin/progs/hib_boh2_120
+
+exit
+
+

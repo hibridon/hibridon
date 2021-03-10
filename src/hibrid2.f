@@ -169,7 +169,7 @@
 ****   all use must be by specific prior arrangement with:         ****
 ****     millard alexander, department of chemistry,               ****
 ****     university of maryland, college park, md, 20742           ****
-****     tel: 1.301.405.1823; email: mha@mha-ibm2.umd.edu          ****
+****     tel: 1.301.405.1823; email: mha@umd.edu                   ****
 ****   no part of this program may be copied or used for other     ****
 ****   purposes without the author's permission.                   ****
 ***********************************************************************
@@ -448,7 +448,12 @@ cend
             idiag = idiag + ndiag
   90     continue
 *     z now contains z(a)+z1(a,c)
-         call smxinv(z, nmax, nch, scr1, scr2, ierr)
+cstart .not.unix-darwin
+c;         call smxinv(z, nmax, nch, scr1, scr2, ierr)
+cend
+cstart unix-darwin
+        call syminv(z,nmax,nch,ierr)
+cend
          if (ierr .ne. 0) then
             write (6, 9000) kstep, ierr
             write (9, 9000) kstep, ierr
@@ -498,7 +503,12 @@ cend
                w(idiag) = one
                idiag = idiag + ndiag
  140        continue
-            call smxinv(w, nmax, nch, scr1, scr2, ierr)
+cstart .not.unix-darwin
+c;            call smxinv(w, nmax, nch, scr1, scr2, ierr)
+cend
+cstart unix-darwin
+            call syminv(w,nmax,nch,ierr)
+cend
             if (ierr .eq. 2) then
                icode = 2
                write (9,9000) kstep, icode
@@ -534,7 +544,12 @@ cend
             idiag = idiag + ndiag
  170     continue
 *     at this point z contains z(c) + z1(c,b)
-         call smxinv(z, nmax, nch, scr1, scr2, ierr)
+cstart .not.unix-darwin
+c;         call smxinv(z, nmax, nch, scr1, scr2, ierr)
+cend
+cstart unix-darwin
+         call syminv(z,nmax,nch,ierr)
+cend
          if (ierr .eq. 2) then
             icode = 3
             write (9,9000) kstep, icode
@@ -960,7 +975,7 @@ cend
           stat='old'
 * make sure sequential formatted files are appended not overwritten
 cstart unix-hp unix-dec unix-iris unix-sun
-          accs='append'
+c;          accs='append'
 cend
         else
           stat='new'
@@ -1362,7 +1377,7 @@ caber
 *  subroutine to write out selected integral cross sections
 *  from file {fname1}.ics for sigma - pi transitions
 *  author:  millard alexander
-*  latest revision date:  10-oct-2001 by mha
+*  latest revision date:  5-apr-2004 by mha
 *  ------------------------------------------------------------------
 *  variables in call list:
 *    zmat:    on return:  contains the nlevop x nlevop matrix of integral
@@ -1467,7 +1482,7 @@ cmha .xsc file is appended if it already exists
           stat='old'
 * make sure sequential formatted files are appended not overwritten
 cstart unix-hp unix-dec unix-iris unix-sun
-          accs='append'
+c;          accs='append'
 cend
 
         else
@@ -1728,7 +1743,7 @@ cmha
         nout=abs(niout)
         do  282  iout = 1, nout
           indtemp=indout(iout)
-          do 281 n = 1, isize 
+          do 281 n = 1, isize
             if (inlev(jpoint(n)) .eq. indtemp) then
               insize = insize + 1
               ipoint(insize) = jpoint(n)
@@ -1749,7 +1764,7 @@ cmha
         if (iprint) write (6, 290) xthresh
 290     format (/'% ** COLUMN HEADINGS ARE INTIAL STATES, ROW',
      :        ' HEADINGS ARE FINAL STATES **',
-     :      /'%      CROSS SECTION PRINT THRESHOLD=',1pd8.1,)
+     :      /'%      CROSS SECTION PRINT THRESHOLD=',1pd8.1)
         if (iener.lt.10) then
             write (3,295) iener
         elseif (iener.lt.100) then
@@ -1859,7 +1874,7 @@ cmha
           if (iprint) write (6, 30) ( jlev(ind(i))+0.5,
      :                                 i = 1,ncol)
           write (3, 30) ( jlev(ind(i))+0.5, i = 1,ncol)
-30        format (/11x,'%J= ', f4.1, 2x, 12 (2x, f5.1, 2x) )
+30        format (/'%',11x,'J= ', f4.1, 2x, 12 (2x, f5.1, 2x) )
         end if
         if (iprint) write (6, 40) ( inlev(ind(i)), i = 1,ncol)
         write (3, 40) ( inlev(ind(i)), i = 1,ncol)

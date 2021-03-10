@@ -1,5 +1,5 @@
 #!/bin/csh -f
-# HIBRIDON bin/mnscript $Revision: 96.1 $ ---
+# HIBRIDON bin/mnscript $Revision: 2004.1 $ ---
 # converts himain.f files to new machine, and then replaces original .f
 # files with the converted files
 @ items = $#argv
@@ -12,7 +12,7 @@ if ($items > 3) then
   echo "usage:  ftscript machi [mach2] [mach3]"
   goto end
 endif
-echo "../bin/ftconv.exe << fin" > control.file
+echo "../bin/ftconv_hib.exe << fin" > control.file
   echo $1 >> control.file
 if ($items == 1) then
   set name = $1

@@ -750,7 +750,7 @@ cend
 *
 * subroutine to open files
 * author: b. follmeg
-* current revision date: 17-may-1993 by mha
+* current revision date: 29-dec-2003 by mha
 *
 * on input: lunit  -> logical unit number, if lunit < 0 scratch file
 *           filnam -> file name
@@ -761,6 +761,7 @@ cend
 *
 *   lseg:  number of integer words per disc sector
       logical exstfl, openfl, tmpfil
+      logical od
       character*12 fmt, stat, accs
       character*(*) filnam
       character*(*) lmode
@@ -819,13 +820,19 @@ cstart unix  mac
         stat = 'scratch'
 cend
 cstart cray
-c;        stat = 'unknown'
+c;      stat = 'unknown'
+cend
+cstart unix-darwin
+        inquire(unit=iunit,opened=od)
+* if temporary file is already opened, close it
+        if (od) close(unit=iunit)
 cend
 cstart unix mac cray
         open(unit=iunit,  access='sequential',
      :          form=fmt, status=stat, err=999, iostat=ierr)
 cend
       else
+*       print *,stat
         open(unit=iunit, file=filnam, access=accs,
      :          form=fmt, status=stat, err=999, iostat=ierr)
       end if

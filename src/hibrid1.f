@@ -36,8 +36,8 @@
 ****   this integrator is not released for general public use      ****
 ****   all use must be by specific prior arrangement with:         ****
 ****     millard alexander, department of chemistry,               ****
-****     university of maryland, college park, md, 20742           ****
-****     tel: 1.301.405.1823; email: mha@mha-ibm2.umd.edu          ****
+****     university of maryland, college park, md, 20742-2021      ****
+****     tel: 1.301.405.1823; email: mha@umd.edu                   ****
 ****   no part of this program may be copied or used for other     ****
 ****   purposes without the author's permission.                   ****
 ***********************************************************************
@@ -108,7 +108,7 @@
       common /coipar/ ipar(9),jprint
       common /coselb/ ibasty
 cstart unix-ibm
-      character*1 forma, formb
+c;      character*1 forma, formb
 cend
 *  matrix dimensions (row dimension = nmax, matrices stored column by column)
       dimension z(80), w(80), tmat(80), vecnow(80), vecnew(80)
@@ -187,12 +187,12 @@ cend
 *  interval
         if (photof) then
 cstart unix mac .and. .not.unix-ibm
-c;          call mxma(tmat,1,nmax,q,1,nphoto,w,1,nmax,nch,nch,nphoto)
+          call mxma(tmat,1,nmax,q,1,nphoto,w,1,nmax,nch,nch,nphoto)
 cend
 cstart  unix-ibm
-          forma='N'
-          call dgemul(tmat,nmax,forma,q,nmax,forma,
-     :                w,nmax,nch,nch,nphoto)
+c;          forma='N'
+c;          call dgemul(tmat,nmax,forma,q,nmax,forma,
+c;     :                w,nmax,nch,nch,nphoto)
 cend
         call dcopy(nqmat,w,1,q,1)
         endif
@@ -224,7 +224,12 @@ cend
 *  invert (y  +  z )
 *           1     n
 *  hp and cc are used as scratch arrays here
-        call smxinv (z, nmax, nch, hp, cc, ierr)
+cstart .not. unix-darwin
+c;        call smxinv (z, nmax, nch, hp, cc, ierr)
+cend
+cstart unix-darwin
+        call syminv(z,nmax,nch,ierr)
+cend
         if (ierr .ne. 0) then
           write (9, 80) kstep
           write (6, 80) kstep
@@ -239,12 +244,12 @@ cend
           call vadd(1,q,1,gam1,1,nqmat)
 *  then premultiply by Z(0,rlast,rnext)
 cstart unix mac .and. .not.unix-ibm
-c;          call mxma(z,1,nmax,q,1,nphoto,tmat,1,nmax,nch,nch,nphoto)
+          call mxma(z,1,nmax,q,1,nphoto,tmat,1,nmax,nch,nch,nphoto)
 cend
 cstart  unix-ibm
-          forma='N'
-          call dgemul(z,nmax,forma,q,nmax,forma,
-     :                tmat,nmax,nch,nch,nphoto)
+c;          forma='N'
+c;          call dgemul(z,nmax,forma,q,nmax,forma,
+c;     :                tmat,nmax,nch,nch,nphoto)
 cend
 * if wavefunction desired, temporarily save local mu(a,b) propagator
 * this is now in the first column of tmat
@@ -453,12 +458,12 @@ c        npt = npt + nskip
 * if photodissociation calculation, also transform gamma2 to free basis
       if (photof) then
 cstart unix mac .and. .not.unix-ibm
-c;          call mxma(vecnow,1,nmax,q,1,nphoto,w,1,nmax,nch,nch,nphoto)
+          call mxma(vecnow,1,nmax,q,1,nphoto,w,1,nmax,nch,nch,nphoto)
 cend
 cstart  unix-ibm
-          forma='N'
-          call dgemul(vecnow,nmax,forma,q,nmax,forma,
-     :                w,nmax,nch,nch,nphoto)
+c;          forma='N'
+c;          call dgemul(vecnow,nmax,forma,q,nmax,forma,
+c;     :                w,nmax,nch,nch,nphoto)
 cend
         ind=1
         jnd=1
@@ -760,7 +765,7 @@ c
 * -----------------------------------------------------------------------
 *  to compute b * a * b-transpose
 *  author:  millard alexander
-*  current revision date:  31-jul-1991
+*  current revision date:  28-dec-2003
 * -----------------------------------------------------------------------
 *  variables in call list:
 *    a:       on return contains b * a * b-transpose
@@ -782,7 +787,7 @@ c
 c -----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
 cstart unix-ibm
-      character*1 forma, formb
+c;      character*1 forma, formb
 cend
       integer ic, icol, ifind, ipt, n, ncol, nmax, isw
       dimension a(1), b(1), c(1), diag(1)
@@ -792,15 +797,20 @@ c;      call rgmmul (isw, n, n, n, b, 1, nmax, a, 1, nmax, c, 1, nmax)
 c;      call rgmmul (isw, n, n, n, c, 1, nmax, b, nmax, 1, a, 1, nmax)
 cend
 cstart unix mac .and. .not.unix-ibm
-c;       call mxma (b,1,nmax,a,1,nmax,c,1,nmax,n,n,n)
-c;       call mxma (c,1,nmax,b,nmax,1,a,1,nmax,n,n,n)
+       call mxma (b,1,nmax,a,1,nmax,c,1,nmax,n,n,n)
+       call mxma (c,1,nmax,b,nmax,1,a,1,nmax,n,n,n)
 cend
 cstart unix-ibm
-       forma='N'
-       formb='T'
-       call dgemul (b,nmax,forma,a,nmax,forma,c,nmax,n,n,n)
-       call dgemul (c,nmax,forma,b,nmax,formb,a,nmax,n,n,n)
+c;       forma='N'
+c;       formb='T'
+c;       call dgemul (b,nmax,forma,a,nmax,forma,c,nmax,n,n,n)
+c;       call dgemul (c,nmax,forma,b,nmax,formb,a,nmax,n,n,n)
 cend
+cstart none
+c;       call dgemm('n','n',n,n,n,1.d0,a,nmax,b,nmax,0d0,c,nmax)
+c;       call dgemm('n','t',n,n,n,1.d0,c,nmax,b,nmax,0d0,a,nmax)
+cend
+
 *  a now contains desired product
       if (ifind .le. 0) return
 *  store diagonal elements in vector diag
@@ -826,7 +836,7 @@ cend
 *  calculates differential cross sections
 *  author h.-j. werner
 *  revised to included 6pole alignment:  7-apr-2003
-*  latest revision:  25-feb-04 by mha
+*  latest revision:  9-sep-99 by mha
 *  addition for negative nnout 2-8-95 by mby
 *  -------------------------------------------------------------
       implicit double precision (a-h,o-z)
@@ -1255,7 +1265,7 @@ c
      :  ('    DEGENERACY AVERAGED DXSC (ANG^2/SR) AND ',
      :       'QUADRUPOLE AND HEXAPOLE ALIGNMENT')
          do 350 i=1,nangle
-         if (iprint) 
+         if (iprint)
      :        write(6,345) angle,s(i)*fak,sm(i)/s(i),sm6(i)/s(i)
          write(2,345) angle,s(i)*fak,sm(i)/s(i),sm6(i)/s(i)
 345      format(1x,f7.2,3g15.4)

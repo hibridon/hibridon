@@ -10,7 +10,7 @@
 *  an uncorrugated surface, including possible stark mixing of
 *  the lambda-doublets by an external field
 *  author:  didier lemoine
-*  current revision date:  13-may-1997 by mha
+*  current revision date:  25-feb-2004 by mha
 * ----------------------------------------------------------------------
 *  variables call list:
 *    j:        on return contains rotational quantum numbers for each
@@ -159,6 +159,10 @@
       dimension c0(1), c1(1), c2(1), cf(1), ehold(1)
       dimension e(3,3), eig(3), sc1(3), sc2(3), vec(3,3), vii(0:2)
 *  cvtown: conversion factor from coulomb.volts to cm-1 (wavenumbers)
+cstart unix-darwin
+* work vector for dsyev
+      dimension work(9)
+cend
       data cvtown / 0.0167917d0/, ieps / -1, 1/
       zero = 0.d0
       one = 1.d0
@@ -390,7 +394,18 @@
 *  store the energies of the mixed states in the array eint
             if (j(i) .eq. 1) then
 *  only the omega=0 and omega=1 states are mixed for j = 1
-              call rs (3, 2, e, eig, 1, vec, sc1, sc2, ierr)
+cstart unix-darwin
+              lwork=9
+              call dsyev('V','L',2,e,3,eig,work,lwork,ierr)
+              do iv=1,2
+                 do jv=1,2
+                    vec(iv,jv)=e(iv,jv)
+                 enddo
+              enddo
+cend
+cstart .not. unix-darwin
+c;              call rs (3, 2, e, eig, 1, vec, sc1, sc2, ierr)
+cend
               eint(i) = eig(1+iso01)
               c0(i) = vec(1,1+iso01)
               c1(i) = vec(2,1+iso01)
@@ -400,7 +415,14 @@
               c1(nn) = vec(2,2-iso01)
               c2(nn) = zero
             else if (j(i) .ge. 2) then
-              call rs (3, 3, e, eig, 1, vec, sc1, sc2, ierr)
+cstart unix-darwin
+              lwork=9
+              call dsyev('V','L',3,e,3,eig,work,lwork,ierr)
+              call dcopy(9,e,1,vec,1)
+cend
+cstart .not.unix-darwin
+c;              call rs (3, 3, e, eig, 1, vec, sc1, sc2, ierr)
+cend
               eint(i) = eig(2-iso)
               c0(i) = vec(1,2-iso)
               c1(i) = vec(2,2-iso)
@@ -694,7 +716,6 @@
      :                   iabs(is(i)), l(i), eint(i)*econv,
      :                               c0(i), c1(i)
 335         format (2i4, a, i4, i3, i5, f10.3,3x,3f7.3)
-
           else if (imult. eq. 3) then
             if (bastst) write (6, 335) i, j(i), chf, isign(1,is(i)),
      :                               iabs(is(i)), l(i), eint(i)*econv,
@@ -841,7 +862,7 @@
       if (clist .and. bastst) then
         write (6, 470) lamsum
         write (9, 470) lamsum
-470     format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', i4)
+470     format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', i6)
       end if
       return
       end

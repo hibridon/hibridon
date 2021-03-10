@@ -1,5 +1,5 @@
 #!/bin/sh
-# HIBRIDON bin/makemachine $Revision: 2003.1 $ --- make program bin/machine.exe 
+# HIBRIDON bin/makemachine $Revision: 2003.2 $ --- make program bin/machine.exe 
 # which reports machine type
 
 # the PATH variable should be set to include the hibridon bin directory
@@ -27,6 +27,7 @@ if test -r /vol/SUNWspro6u2/SUNWspro/bin/f77; then fortran="f77";fi
 if test -r /opt/fortran/bin/f77; then fortran="/opt/fortran/bin/f77"; fi
 if test -r /opt/fortran90/bin/f90; then fortran="/opt/fortran90/bin/f90"; fi
 if test -r /usr/bin/xlf ; then fortran="xlf -qextname"; fi
+if test -r /opt/ibmcmp/xlf/8.1/bin/xlf; then fortran="xlf -qextname"; fi
 if test -r /bin/cf77 ; then fortran=cf77; fi
 if test -r /usr/bin/cf77 ; then fortran=cf77; fi
 if test -r /usr/bin/f77sx ; then fortran=f77sx; fi

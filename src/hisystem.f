@@ -842,6 +842,7 @@
 *  subroutine to read in system dependent parameters for 2pi-2sig
 *   + atom scattering using werner-follmeg potential form
 *  current revision date: 21-dec-1995 by pjd, mha, ade, ab
+*  latest revision:  24-feb-2004 by mha
 *
 *  variables in common/cobspt/ must be set in loapot!!
 *
@@ -1049,7 +1050,7 @@
      :                    isrcod+12, rspar(isrcod+12)
 16          format (' *** RSPAR(',i2,') =',1pg12.5,' AND RSPAR(',i2,
      :              ') =',1pg12.5,' BOTH NOT ZERO; ABORT ***')
-            call abort
+            stop
           endif
           if(isgpi.ne.0) then
             if(iread.ne.0) then
