@@ -932,8 +932,8 @@ c     write(6,*) 'prefac:',j1,j2,j3,x1,x3
       common /coconv/ econv, xmconv
       common /cosysi/ nscode, isicod, ispar(5)
       common /coipar/ ipar(9), iprint
-      dimension zmat(nmax,nmax),jlev(20),inlev(20),elev(20),energ(20)
-      dimension tq3(nmx,nmx), nlev(20)
+      dimension zmat(nmax,nmax),jlev(20),inlev(20),elev(20),energ(25)
+      dimension tq3(nmx,nmx), nlev(25)
 *   econv is conversion factor from cm-1 to hartrees
 *   xmconv is converson factor from amu to atomic units
       nlevmx=0
@@ -1044,7 +1044,7 @@ c     write(6,*) 'prefac:',j1,j2,j3,x1,x3
       end if
       if (wrxsec) then
         do 300  ien = 1, nerg
-          nxfile = ien + 14
+          nxfile = ien + 69
 c         rewind nxfile
           irec=(ien-1)*5+2
           if(nucros) irec=irec+nerg*5
@@ -1068,7 +1068,8 @@ cABER
          write (nxfile, 240)  nlevel, nlevop
           write (nxfile, 240) (jlev(i), inlev(i), i = 1, nlevel)
           write (nxfile, 245) (elev(i), i = 1, nlevel)
-245       format (8f16.9)
+*245       format (8f16.9)
+245       format (8(1pe15.8))
           do 250  i = 1, nlevop
             write (nxfile, 245) (zmat(j,i), j = 1, nlevop)
 250       continue
@@ -1084,7 +1085,7 @@ cABER
 *    PARTC,JOB,JINI,INDI,IEN,IPRINT
 *  from file {fname1}.ics
 *  author:  millard alexander
-*  current revision date:  6-apr-2004 by mha
+*  current revision date:  3-dec-2007 by mha
 *  ------------------------------------------------------------------
 *  variables in call list:
 *    zmat:    on return:  contains the nlevop x nlevop matrix of integral
@@ -1125,6 +1126,7 @@ cABER
       common /coisc2/ nj,jlist(1)
       common /cosc1/ elev(1)
       common /cosc2/ csum(1)
+      common /cosc3/ tsum(1)
       common /cosout/ nnout, jout(21)
       common /coiout/ niout, indout(1)
       common /coselb/ ibasty
@@ -1247,7 +1249,10 @@ cABER
 151       format(2x,'NU',t10,'FINAL STATES'/(t1,10i11))
         endif
       endif
+      wt=1d0
+      if (jtotd.gt.1) wt=0.5d0
 160   read (1, '(a)',end=210) line
+
 c.....here if RESTART-calculation has been done
       if (line(1:14).eq.' ** RESTART **') then
         read (1, 40) cdate
@@ -1277,15 +1282,23 @@ c.....end RESTART handling
       end if
       write(3,200) jtot,(scmat(irow,jlist(j)),j=1,njj)
       if(iprint) write(6,200) jtot,(scmat(irow,jlist(j)),j=1,njj)
+*     write (6,*) 'jfirst, jfinal:  ', jfirst, jfinal
       do 195 j=1,njj
-        wt=1d0
-        if (jtotd.gt.1) then
-           if (jtot.eq.jfirst .or. jtot.eq.jfinal) wt=0.5d0
-        endif
+*       wt=1d0
+*       if (jtotd.gt.1) then
+*          if (jtot.eq.jfirst .or. jtot.eq.jfinal) wt=0.5d0
+*       endif
+        tsum(j) = scmat(irow, jlist(j))
         csum(j) = csum(j) + wt*scmat(irow,jlist(j))
 195   continue
 200   format(1x,i3,(t5,10(1pd11.4)))
+      wt=1d0
       goto 160
+* if last jtot, and jtotd>1, subtract off 50% of last value, consistent with
+* trapezoidal rule interpolation
+      do 205 j=1,njj
+         csum(j)=csum(j)-05d0*tsum(j)
+205   continue
 210   continue
 *      print *, 'jtotd', jtotd
       call dscal(njj,dble(jtotd),csum,1)
@@ -1378,17 +1391,18 @@ c
 * from s-matrix elements
 *
 * author: hjw
-* current revision date: 4-apr-2003 by mha
+* current revision date: 22-jan-2008 by mha
 *
 * ------------------------------------------------------------------
       implicit double precision (a-h,o-z)
       character*(*) filnam
       character*40  icsfil, smtfil, xname
       character*20  cdate
-      character*12  elaps, cpu, string
+      character*13  elaps, cpu, string
       logical csflag, flaghf, flagsu, twomol, exstfl,
      :        batch, nucros, notequ, lpar1, lpar2, ipos,lpar3
       include "common/parpot"
+      common /cosize/ isize, isizes
       common /colpar/ lpar1(3), batch, lpar2(5), ipos, lpar3(17)
       common /cojq/   jq(1)
       common /colq/   lq(1)
@@ -1437,9 +1451,9 @@ c
       end if
 * open file for interpolation
       call dinit
-      nfile = 21
-      call gennam (xname, filnam, 0, 'tmp', lenx)
-      call dopen(1,nfile,xname)
+      nfile = 3
+       call gennam (xname, filnam, 0, 'tmp', lenx)
+       call dopen(1,nfile,xname)
 *
 * open smatrix-file
 *
@@ -1447,7 +1461,7 @@ c
 *
 * open file for integral cross sections
 *
-      call gennam(icsfil,filnam,ien,'xsc',lenft)
+      call gennam(icsfil,filnam,ien,'xxsc',lenft)
       call openf(2,icsfil,'sf',0)
 *
 * read header of smatrix-file
@@ -1569,7 +1583,9 @@ c
       if(.not. batch) call mxoutr (6, sc1, nrow, ncol, mmax, 0, notequ)
 300   call closf(1)
       close (2)
-      call dclos(1)
+*      call dclos(1)
+      close(unit=1,status='delete')
+      close(unit=3,status='delete')
       call mtime(cpu1,ela1)
       cpu1 = cpu 1 - cpu0
       ela1 = ela1 - ela0
@@ -1728,7 +1744,7 @@ c
             in2 = inrow(irow)
             j2 = jrow(irow)
             l2 = lrow(irow)
-            diag = j1.eq.j2 .and. in1.eq.in2. and.l1.eq.l2
+            diag = j1.eq.j2 .and. in1.eq.in2. and. l1.eq.l2
 *
 * convert s-matrix to t-matrix: t(j,j1,in1,l1 ; j2,in2,l2) =
 *     delta(j1,in1,l1 ; j2,in2,l2) - s(j,j1,in1,l1 ; j2,in2,l2)

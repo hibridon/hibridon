@@ -15,7 +15,7 @@
 *      modified by moonbong yang 27-Sep-94
 *      completely rewritten by mha 24-apr-1997
 *      revised by mha 11-may-1997
-*      latest revision 23-feb-2004
+*      latest revision 10-jun-2006
 * definition of variables in call list:
 *      nch     number of coupled equations
 *      nmax    leading dimension of matrices w
@@ -33,7 +33,10 @@
       dimension v(nmax,6)
       dimension wtemp(nmax,6)
       dimension scmat(nmax,6)
-cstart unix-darwin
+
+* local matrices
+      dimension sc11x(10*1051)
+cstart unix-darwin  unix-x86
 * scratch vectors for dsyev
       dimension work(57*nmax),iwork(10*nmax),isuppz(2*nmax)
 cend
@@ -41,8 +44,8 @@ cend
       common /cotq1/ wr(1)
       common /cotq3/ z(1)
 * scratch vectors
-      common /cosc1/ sc1(1)
-      common /cosc2/ sc2(1)
+      common /cosc1/ sc1(15)
+      common /cosc2/ sc2(15)
       common /cosc3/ sc3(15)
       common /cosc4/ sc4(15)
       common /cosc5/ sc5(1)
@@ -50,6 +53,7 @@ cend
       common /cosc11/ sc11(1)
       common /coiout/ niout, indout(1)
       common /coisc1/ isc1(1)
+      common /coisc2/ isc2(2)
       common /corpar/ r1,r2,c,spac,delr,hsimp,eigmin,tolai,xmu
       common /cofile/ input, output, jobnam, savfil
 
@@ -86,13 +90,13 @@ cend
       call version(1)
       write (1,1) potnam, label
 1     format (' ** POTNAM: ',(a),/,' ** LABEL: ',(a))
-      write (6, 5) r1, r2,  spac, del, vmax, c, alph
-      write (9, 5) r1, r2,  spac, del, vmax, c, alph
-      write (1, 5) r1, r2,  spac, del, vmax, c, alph
+      write (6, 5) r1, r2,  spac, del, vmax,nvmax, c, alph
+      write (9, 5) r1, r2,  spac, del, vmax,nvmax, c, alph
+      write (1, 5) r1, r2,  spac, del, vmax,nvmax, c, alph
 5     format (/,' ** BOUND STATE CALCULATION:  R1 =',
      :   f5.2,';  R2 =', f5.2,/,
-     :  6x,'DEL-START =',f5.3,', DEL-EXACT =',f8.6,
-     :  ', NO. GAUSSIANS =',i3,/,
+     :  6x,'SPAC-TRY =',f5.3,', SPAC-EXACT =',f8.6,
+     :  ', NO. GAUSSIANS =',i3,', SIZE OF TOTAL BASIS =',i4,/,
      :  6x,'C =',f4.2,', ALPH =',g10.5)
       if (nvmax .gt. nmax) then
         write (1, 10) nch, vmax, nmax
@@ -131,10 +135,10 @@ cend
 
 *      print *, '** determining eigenvalues of S matrix ...'
 
-cstart unix .and. .not. unix-darwin
+cstart unix .and. .not. unix-darwin .and..not. unix-x86
 c;      call rs (nmax, vmax, scmat, sc4, ione, scmat, sc11, sc5, ierr)
 cend
-cstart unix-darwin
+cstart unix-darwin unix-x86
       lwork=57*vmax
       liwork=10*vmax
       abstol=0d0
@@ -224,17 +228,19 @@ cstart unix-ibm
 c;      call dsygv(iflag,wtemp,nmax,scmat,nmax,eval,t,nmax,
 c;     :           ndim,sc11,naux)
 cend
-cstart unix-darwin
+cstart unix-darwin unix-x86
        if (iflag.eq.1) then
-           jobz='v'
+           jobz='V'
+           lwork=1+6*ndim+2*ndim**2
        else
-           jobz='n'
+           jobz='N'
+           lwork=2*ndim+1
        endif
-       lwork=3*nmax
-       call dsygv(1,jobz,'l',ndim,wtemp,nmax,scmat,nmax,eval,
-     :            sc11,lwork,ierr)
+       liwork=3+5*ndim
+       call dsygvd(1,jobz,'L',ndim,wtemp,nmax,scmat,nmax,eval,
+     :             sc11,lwork,iwork,liwork,ierr)
        if (ierr.ne.0) then
-         stop 'dsygv in hibound'
+         stop 'dsygvd in hibound'
        endif
 * copy eigenvectors to matrix t
        if (iflag.eq.1) then
@@ -243,7 +249,7 @@ cstart unix-darwin
           enddo
        endif
 cend
-cstart unix mac .and. .not. unix-ibm .and. .not. unix-darwin
+cstart unix mac .and. .not. unix-ibm .and. .not. unix-darwin.and..not. unix-x86
 c;      call rsg(nmax,ndim,wtemp,scmat,eval,iflag,t,sc1,sc11,ierr)
 cend
 *  print job information
@@ -272,7 +278,10 @@ cend
         nbound=0
         do k=1,ndim
             write (1,65)  eval(k)*econv
+*          if (eval(k)*econv .le. 150d0) then
+*  print out just negative energy states
           if (eval(k) .le. 0) then
+
             nbound=nbound+1
             write (9,65)  eval(k)*econv
             write (6,65)  eval(k)*econv
@@ -304,8 +313,9 @@ cend
           close(1)
           return
         else
-          nstate=min(5,nbound)
-          do in = 1, nstate
+*          nstate=min(5,nbound)
+*          do in = 1, nstate
+          do in=1,14
             write (1, 95) in
 95          format (' STATE =',i2)
             do i=1,nch

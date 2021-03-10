@@ -1,5 +1,5 @@
 #!/bin/csh -f
-# HIBRIDON bin/makepot $Revision: 2004.3 $ --- make test program to run pot_$potname
+# HIBRIDON bin/makepot $Revision: 2009.2 $ --- make test program to run pot_$potname
 
 @ items = $#argv
 set basedir=`hibriddir`
@@ -47,10 +47,12 @@ endif
 
 # check if common routines are present in /src/pot
 if (-e $basedir/src/pot/common/parpot) then
+echo "parpot exists"
 else
   echo ""
-  echo "creating /pot/common directory ..."
-  cp -pr $basedir/src/common $basedir/src/pot
+  echo "parpot doesn't exist, so "
+  echo "creating soft link to /src/common for src/pot/common directory ..."
+  ln -s $basedir/src/common $basedir/src/pot/common
 endif
 
 # check if fortran converter is present
@@ -91,7 +93,7 @@ else
   set blas = ""
 endif
 $basedir/bin/ftn_hib -o runpot_$potname $basedir/src/pot/runpot.o  $blas \
-     $basedir/src/hipotutil.o hivector.o hiutil.o himatrix.o hiunix.o >>& $basedir/p_$potname.log
+     $basedir/src/hipotutil.o hivector.o hiutil.o himatrix.o  >>& $basedir/p_$potname.log
 
 # remove pot_potname.o if successful link
 if (-e runpot_$potname) then

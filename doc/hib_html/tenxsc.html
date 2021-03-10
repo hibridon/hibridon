@@ -1,0 +1,60 @@
+<TITLE>tenxsc</TITLE>
+<h3><center><font color=#brown >Command TENXSC</h3>
+</center></font><hr>
+
+The command TENXSC allows you to calculate the tensor cross sections
+defined by Eqs. (30) and (31) of B. Follmeg, P. Rosmus, and H.-J. Werner,
+J. Chem. Phys. <b>93</b>, 4687 (1990).  The command line is
+<tt><ul>
+         TENXSC,JOB,IENERG,IFRAME,LAMMAX,KMAX,IN1,IN2,JTOTMX,JMIN,JMAX
+</tt></ul>
+where the input parameters are:
+<p> 
+<tt>JOB,IENERG</tt>&#160;  The program searches for an S-matrix in the file
+              <tt>Job{ienerg}.smt</tt>, where IENERG is an integer
+              (IENERG = 1, 2, ... etc.)<p>
+              <ul>
+              <li>The default values of JOB is <tt>JOB</tt> and of INERG is 1
+              </ul>
+<tt>IFRAME</tt> &#160;   This parameter defines the quantization frame employed in the tensor cross
+              section calculations (angle-integrated cross sections, except where indicated otherwise below).
+              <ul><tt>IFRAME=0:</tt>  The quantization axis is defined as the laboratory Z-axis, with an
+              isotropic relative velocity distribution.<p>
+              <tt>IFRAME=1:</tt>  The quantization axis lies along the initial relative velocity vector (collision frame).<p>
+              <tt>IFRAME=2:</tt>  The initial level has quantization axis along the initial relative velocity vector, and the 
+              final level has quantization axis along the final velocity vector (helicity frame).  In this case, <i>m</i>-resolved
+              differential cross sections are computed over a grid of scattering angles (0.5 deg spacing) for the (<tt>J1MIN,IN1</tt>) ->
+              <tt>J1MIN,IN1</tt>) elastic transition, and then differential tensor cross sections are computed.  The differential tensor
+              cross sections are numerically integrated to determine integral tensor cross sections.<p>
+              <p></ul>
+<tt>LAMMAX</tt> &#160;      The maximum value of the anisotropic term in the velocity
+              distribution (lower case lambda in the above article).
+              Tensor cross sections for all <b>even</b> values of lambda 
+              from 0 to LAMMAX are calculated. <img src="warningsmall.gif"> <font color=#brown>
+              At present only LAMMAX=0 is operational!</font><p>
+<tt>KMAX</tt> &#160;      The maximum value of the multipole order for which tensor cross
+              sections are calculated.  Cross sections for all values of <i>K<sub>i</sub></i> and 
+              <i>K<sub>f</sub></i> .le. KMAX are calculated.<p>
+<tt>IN1,IN2</tt>&#160;      The initial and final values of the additional index<p>
+<tt>JTOTMX</tt>&#160;       The maximum value included in the summation over total 
+              angular momentum (upper case <i>J</i> in Eqs. 30 and 31 of the 
+              above article) <p>
+<tt>JMIN,JMAX</tt>&#160;   Tensor cross sections are computed for all values of the
+              molecular rotational quantum number (lower case <i>j<sub>i</sub></i> and 
+<i>j<sub>f</sub></i>
+              in Eqs. 30 and 31 of the above article) ranging from JMIN
+              to JMAX.<p>
+<p>
+To determine the <i>S</i>-matrix elements required by the command TENXSC, you
+must carry out a prior calculation with
+<ul>the flag <tt><a href=prsmat.html>WRSMAT</a></tt>= .true.<p>
+
+<tt>JMIN ... JMAX</tt> included in the array <a href=jout.html>JOUT</a><p>
+<tt>IN1</tt> and <tt>IN2</tt> included in the array <a href=indout.html>INDOUT</a>
+</ul>
+<hr>
+Go to:
+<center>
+<a href=commands.html>Commands</a> | <a href=tenxsc.ex.html> An example of the TENXSC command</a> | <a href="mrcrs.html">MRCRS command </a> | <a href=examples.html>Examples</a> | <a href=hibhelp.html>Hibridon Help</a>
+<br>
+</center>

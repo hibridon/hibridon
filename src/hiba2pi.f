@@ -646,7 +646,9 @@
       end if
 * CHANGE HERE FOR TEST
       if (boundc) then
-         ntop=ntop-2*numin
+*         ntop=ntop-2*numin
+* mha and jacek's modification; make sure ntop equals the number of channels
+         ntop=n+1
       endif
 *  now list channels if requested
       if (clist) then
@@ -743,7 +745,7 @@
         if (bastst) then
           write (6, 360) ilam, lamnum(ilam)
           write (9, 360) ilam, lamnum(ilam)
-360       format ('ILAM=', i3, ' LAMNUM(ILAM) =', i5)
+360       format ('ILAM=', i3, ' LAMNUM(ILAM) =', i6)
         end if
         lamsum = lamsum + lamnum(ilam)
 400   continue
@@ -795,7 +797,8 @@
 *  coupled-states treatments of collisions of a molecule in a 2pi electronic
 *  state
 *  the cc matrix elements are given in eq. (29) of m.h. alexander, chem. phys.
-*  92, 337 (1985)
+*  92, 337 (1985) including the corrections given in footnote 39 of
+*  G. C. Corey and M. H. Alexander, J. Chem. Phys. 85, 5652 (1986)
 *  the cs matrix elements are given in eq. (14) of t. orlikowski and m.h.
 *  alexander, j. chem. phys. 79, 6006 (1983)
 *  note that for cc collisions of a 2pi molecule with a flat surface, the

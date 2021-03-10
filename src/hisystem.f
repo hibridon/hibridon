@@ -1,43 +1,53 @@
-*************************************************************************
-*                                                                       *
-*                 system dependent routines library                     *
-*                                                                       *
-*************************************************************************
-*                          routines included:                           *
-*  0.  baschk      check that basistype is allowed
-*  1.  sysdat      dispatcher to select specific sysdat routine         *
-*  2.  syssav      dispatcher to select specific syssav routine         *
-*  3.  ptread      dispatcher to select specific ptread routine         *
-*  4.  sy1sg (sav1sg/ptr1sg) defines, saves variables and reads         *
-*                  potential for singlet sigma scattering               *
-*  5.  sy2sg (sav2sg/ptr2sg) defines, saves variables and reads         *
-*                  potential for doublet sigma scattering               *
-*  6.  sy2pi (sav2pi/ptr2pi) defines, saves variables and reads         *
-*                  potential for doublet pi scattering                  *
-*  7.  sysgpi (savsp/ptrsp) defines, saves variables and reads          *
-*                  potential for singlet/pi sigma scattering            *
-*  8.  sypi (savpi/ptrpi) defines, save variables and reads             *
-*                  potential for general pi scattering                  *
-*  9.  systp (savstp/ptrstp) defines, save variables and reads          *
-*                  potential for symmetric top/atom scattering          *
+**************************************************************************
+*                                                                        *
+*                 system dependent routines library                      *
+*                                                                        *
+**************************************************************************
+*                          routines included:                            *
+*  0.  baschk      check that basistype is allowed                       *
+*  1.  sysdat      dispatcher to select specific sysdat routine          *
+*  2.  syssav      dispatcher to select specific syssav routine          *
+*  3.  ptread      dispatcher to select specific ptread routine          *
+*  4.  sy1sg (sav1sg/ptr1sg) defines, saves variables and reads          *
+*                  potential for singlet sigma scattering                *
+*  5.  sy2sg (sav2sg/ptr2sg) defines, saves variables and reads          *
+*                  potential for doublet sigma scattering                *
+*  6.  sy2pi (sav2pi/ptr2pi) defines, saves variables and reads          *
+*                  potential for doublet pi scattering                   *
+*  7.  sysgpi (savsp/ptrsp) defines, saves variables and reads           *
+*                  potential for singlet/pi sigma scattering             *
+*  8.  sypi (savpi/ptrpi) defines, save variables and reads              *
+*                  potential for general pi scattering                   *
+*  9.  systp (savstp/ptrstp) defines, save variables and reads           *
+*                  potential for symmetric top/atom scattering           *
+*                  this routine for sym top with inversion doubling      *
 *  10.  sy13p (sav13p/ptr13p) defines, save variables and reads          *
-*                  potential for 1S / 3P atom scattering          *
-*  11.  sy2mol (sav2mol/ptr2mol) defines, save variables and reads          *
-*                  potential for 2 singlet sigma molecule scattering
-*  12.  systpln (savstpln/ptrstpln) defines, save variables and reads
-*                  potential for symmetric top and singlet sigma molecule *
-*                  scattering
-*  13.  sy22p (sav22p/ptr22p) defines, save variables and reads         *
-*                  potential for 2S / 2P atom scattering          *
-*  14.  sy1del (sav1del/ptr1del) defines, saves variables and reads         *
-*                  potential for singlet delta scattering                  *
+*                  potential for 1S / 3P atom scattering                 *
+*  11.  sy2mol (sav2mol/ptr2mol) defines, save variables and reads       *
+*                  potential for 2 singlet sigma molecule scattering     *
+*  12.  systpln (savstpln/ptrstpln) defines, save variables and reads    *
+*                  potential for symmetric top and singlet sigma molecule*
+*                  scattering                                            *
+*  13.  sy22p (sav22p/ptr22p) defines, save variables and reads          *
+*                  potential for 2S / 2P atom scattering                 *
+*  14.  sy1del (sav1del/ptr1del) defines, saves variables and reads      *
+*                  potential for singlet delta scattering                *
 *  15.  syh2p (savh2p/ptrh2p) defines, saves variables and reads         *
-*                  potential for homonuclear+2P atom scattering
+*                  potential for homonuclear+2P atom scattering          *
 *  16.  syh3p (savh3p/ptrh3p) defines, saves variables and reads         *
-*                  potential for homonuclear+3P atom scattering
-*  17.  sy2de (sav2de/ptr2de) defines, saves variables and reads         *
-*                  potential for doublet-delta scattering
-
+*                  potential for homonuclear+3P atom scattering          *
+*  17.  sy2del (sav2de/ptr2de) defines, saves variables and reads        *
+*                  potential for doublet-delta scattering                *
+*  18.  sydiat2p (savdiat2p/ptrdiat2p) defines, saves variables and read *
+*                  potential for heteronuclear + 2P atom scattering      *
+*  19.  sysatp (savatp/ptratp) defines, saves variables and reads        *
+*                  potential for asymmetric top-atom scattering          *
+*  20.  sysch2x (savch2x/ptrch2x) defines, saves variables and reads      *
+*                  potential for CH2(X 3B1 (0,v2,0)-atom scattering      *
+*  21.  systp1 (savstp1/ptrstp1) defines, save variables and reads       *
+*                  potential for symmetric top/atom scattering           *
+*                  this routine for sym top with no inversion doubling   *
+*                                                                        *
 **************************************************************************
 * -----------------------------------------------------------------------
       subroutine baschk(ival)
@@ -53,26 +63,34 @@
 *  6:  symmetric top + atom
 *  7:  1/3 P atom + atom
 *  8:  1sigma + 1sigma
-*  9:  symetric top + 1sigma
+*  9:  symmetric top + 1sigma (with inversion doubling)
 *  10: 2S atom + 2P atom
 *  11: singlet delta + atom
 *  12: homonuclear diatomic+2P atom
 *  13: homonuclear diatomic+3P atom
 *  14: double delta + atom
+*  15: heteronuclear diatomic+2P atom
+*  16: asymmetric top + atom
+*  17: CH2(X 3B1) (0,v2,0) bender level
+*  18:  symmetric top + 1sigma (with no inversion doubling)
 *  99: user defined basis
 * author:  millard alexander
-* current revision date:  13-oct-1999
+* symmetric top routine for no inversion doubling added
+*   by p. dagdigian (mar-2011)
+* asymmetric top option added by p. dagdigian (aug-2009)
+* CH2(X 3B1) (0,v2,0) option added by p. dagdigian (jun-2010)
+* current revision date:  04-jun-2010
 *  variable in common block /comxbs/
 *     maxbas    maximum number of allowed basis types
 *     THIS SHOULD BE INCREASED AS BASIS ROUTINES ARE ADDED!!
-*     COMMON BLOCK COMXBS DEFINED IN HIMAIN.F
+*     COMMON BLOCK COMXBS DEFINED IN HIMAIN
 * -------------------------------------------------------
       common /comxbs/ maxbas
       common /coselb/ ibasty
       logical icheck
       icheck=.false.
       do 100 i=1, maxbas
-        if (ival .eq. i) icheck=.true.
+        if (ival .eq. i) icheck= .true.
 100   continue
       if (ival .eq. 99) icheck= .true.
       if (.not. icheck) then
@@ -93,6 +111,10 @@
      :         '   12 ->  HOMONUCLEAR + 2P ATOM',/,
      :         '   13 ->  HOMONUCLEAR + 3P ATOM',/,
      :         '   14 ->  DOUBLET DELTA	+ ATOM',/,
+     :         '   15 ->  HETERONUCLEAR + 2P ATOM',/,
+     :         '   16 ->  ASYMMETRIC TOP + ATOM   ',/,
+     :         '   17 ->  CH2(X 3B1) (0,V2,0) + ATOM ',/
+     :         '   18 ->  SYMMETRIC TOP + ATOM (NO INV)  ',/,
      :         '   99 -> USER DEFINED BASIS  ',/)
       endif
       return
@@ -109,7 +131,7 @@
 *    3              sy2pi             doublet pi scattering
 *    4              sysgpi            sigma/pi scattering
 *    5              sypi              general pi scattering
-*    6              systp             symmetric top scattering
+*    6              systp             symmetric top scattering - w. inversion doubling
 *    7              sy13p             1/3 P atom scattering
 *    8              sy2mol            2 1sigma molecules
 *    9              systpln           symetric top + 1 sigma molecule
@@ -118,6 +140,10 @@
 *    12             syh2p             homonuclear + 2p atom
 *    13             syh3p             homonuclear + 3p atom
 *    14             syh2del           doublet delta + atom
+*    15             sydiat2p          heteronuclear +2P atom
+*    16             sysatp            asymmetric top scattering
+*    17             sych2x            CH2(X 3B1) (0,v2,0) bender level + atom
+*    18             systp1            symmetric top scattering - no inversion doubling
 *    99             syusr             user supplied routine
 *
 *
@@ -125,6 +151,7 @@
 *  if iread = 0 return after defining variable names
 *  author: b. follmeg
 *  current revision date: 13-oct-1999
+*  current revision date: 15-mar-2011 (p. dagdigian
 *  -----------------------------------------------------------------------
       integer ibasty, irpot, iread
       logical readpt
@@ -141,7 +168,7 @@
         return
       endif
       goto (100,200,300,400,500,600,700,800,900,1000,1100,1200,
-     :      1300,1400)
+     :      1300,1400,1500,1600,1700,1800)
      :     ibasty
 *  singlet sigma variables
 100   call sy1sg(irpot, readpt, iread)
@@ -158,7 +185,7 @@
 *  general pi variables
 500   call sypi(irpot, readpt, iread)
       return
-*  symmetric top variables
+*  symmetric top variables - w. inversion doubling
 600   call systp(irpot, readpt, iread)
       return
 *  1/3 P atom variables
@@ -185,7 +212,18 @@
 * doublet delta variable
 1400  call sy2del(irpot, readpt, iread)
       return
-
+* heteronuclear + 2P atom variables
+1500  call sydiat2p(irpot, readpt, iread)
+      return
+* asymmetric top variables
+1600  call sysatp(irpot, readpt, iread)
+      return
+* CH2(X 3B1) (0,v2,0) bender level variables
+1700  call sysch2x(irpot, readpt, iread)
+      return
+*  symmetric top variables - no inversion doubling
+1800   call systp1(irpot, readpt, iread)
+      return
       end
 * -----------------------------------------------------------------------
       subroutine syssav (readpt)
@@ -199,7 +237,7 @@
 *    3              sav2pi            doublet pi scattering
 *    4              savsp             sigma/pi scattering
 *    5              savpi             general pi scattering
-*    6              savstp            symmetric top scattering
+*    6              savstp            symmetric top scattering - w. inversion doubling
 *    7              sav13p            1/3 P atom scattering
 *    8              sav2mol           1sigma+1sigma
 *    9              savstpln           symetric top + 1 sigma molecule
@@ -208,9 +246,13 @@
 *    12             savh2p            homonuclear + 2p atom
 *    13             savh3p            homonuclear + 3p atom
 *    14             sav2del           doublet delta + atom
+*    15             savdiat2p         heteronuclear +2P atom
+*    16             savatp            asymmetric top scattering
+*    17             savch2x           CH2(X 3B1) (0,v2,0) bender level + atom
+*    18             savstp1           symmetric top scattering - no inversion doubling
 *    99             savusr            user supplied routine *
 *  author: b. follmeg
-*  current revision date: 13-oct-1999
+*  current revision date: 15-mar-2011 (p. dagdigian)
 *  -----------------------------------------------------------------------
       integer ibasty
       logical readpt
@@ -222,7 +264,7 @@
          return
       endif
       goto (100,200,300,400,500,600,700,800,900,1000,1100,1200,
-     :      1300,1400)
+     :      1300,1400,1500,1600,1700,1800)
      :     ibasty
 *  singlet sigma variables
 100   call sav1sg(readpt)
@@ -239,7 +281,7 @@
 *  general pi variables
 500   call savpi(readpt)
       return
-*  symmetric top variables
+*  symmetric top variables - w. inversion doubling
 600   call savstp(readpt)
       return
 *  1/3 P atom variables
@@ -248,8 +290,9 @@
 *  1sigma+1sigma variables
 800   call sav2mol(readpt)
       return
-* symmetric top + 1 sigma molecule
-900   call savstpln(irpot, readpt, iread)
+*  symmetric top + 1 sigma molecule
+*900   call savstpln(irpot, readpt, iread) -- change call (pjd)
+900   call savstpln(readpt)
       return
 *  2/2 P atom variables
 1000  call sav22p(readpt)
@@ -257,18 +300,34 @@
 *  singlet delta variables
 1100  call sav1del(readpt)
       return
-* homonuclear + 2P atom variables
-1200  call savh2p(irpot, readpt, iread)
+*  homonuclear + 2P atom variables
+*1200  call savh2p(irpot, readpt, iread) -- change call (pjd)
+1200  call savh2p(readpt)
       return
-* homonuclear + 3P atom variables
-1300  call savh3p(irpot, readpt, iread)
+*  homonuclear + 3P atom variables
+*1300  call savh3p(irpot, readpt, iread) -- change call (pjd)
+1300  call savh3p(readpt)
       return
-* doublet-delta + atom variables
-1400  call sav2del(irpot, readpt, iread)
+*  doublet-delta + atom variables
+*1400  call sav2del(irpot, readpt, iread) -- change call (pjd)
+1400  call sav2del(readpt)
+      return
+*  heteronuclear + 2P atom variables
+*1500  call savdiat2p(irpot, readpt, iread) -- change call (pjd)
+1500  call savdiat2p(readpt)
+      return
+*  asymmetric top variables
+1600  call savatp(readpt)
+      return
+*  CH2(X 3B1) (0,v2,0) bender level variables
+1700  call savch2x(readpt)
+      return
+*  symmetric top variables - w. inversion doubling
+1800  call savstp1(readpt)
       return
       end
 * -----------------------------------------------------------------------
-      subroutine ptread (filnam,readpt)
+      subroutine ptread (filnam, readpt)
 *   dispatcher to select correct ptread routine
 *   the correct routine is selected according to value of ibasty
 *   the following ptread routines are currently available:
@@ -279,7 +338,7 @@
 *    3              ptr2pi            doublet pi scattering
 *    4              ptrsp             sigma/pi scattering
 *    5              ptrpi             general pi scattering
-*    6              ptrstp            symmetric top scattering
+*    6              ptrstp            symmetric top scattering - w. inversion doubling
 *    7              ptr13p            1/3 P atom scattering
 *    8              ptr2mol           1sigma+1sigma
 *    9              ptrstpln          symetric top + 1 sigma molecule
@@ -288,10 +347,14 @@
 *    12             pth2p             homonuclear + 2p atom
 *    13             pth3p             homonuclear + 3p atom
 *    14             pt2del            doublet delta + atom
+*    15             ptrdiat2p         heteronuclear + 2P atom
+*    16             ptratp            asymmetric top + atom
+*    17             ptrch2x           CH2(X 3B1) (0,v2,0) bender level + atom
+*    18             ptrstp1           symmetric top scattering - no inversion doubling
 *    99             ptrusr            user supplied routine
 *
 *  author: b. follmeg
-*  current revision date: 13-oct-1999
+*  current revision date: 15-mar-2011 (p. dagdigian)
 *  -----------------------------------------------------------------------
       integer ibasty
       logical readpt
@@ -303,7 +366,7 @@
          return
       endif
       goto (100,200,300,400,500,600,700,800,900,1000,1100,1200,
-     :      1300,1400)
+     :      1300,1400,1500,1600,1700,1800)
      :     ibasty
 *  singlet sigma potential
 100   call ptr1sg(filnam,readpt)
@@ -330,7 +393,8 @@
 800   call ptr2mol(filnam,readpt)
       return
 * symmetric top + 1 sigma molecule
-900   call ptrstpln(irpot, readpt, iread)
+*900   call ptrstpln(irpot, readpt, iread) -- change call (pjd)
+900   call ptrstpln(filnam,readpt)
       return
 *  2/2 P atom variables
 1000  call ptr22p(filnam,readpt)
@@ -339,13 +403,29 @@
 1100  call ptr1del(filnam,readpt)
       return
 * homonuclear + 2P atom variables
-1200  call ptrh2p(irpot, readpt, iread)
+*1200  call ptrh2p(irpot, readpt, iread) -- change call (pjd)
+1200  call ptrh2p(filnam,readpt)
       return
 * homonuclear + 3P atom variables
-1300  call ptrh3p(irpot, readpt, iread)
+*1300  call ptrh3p(irpot, readpt, iread) -- change call (pjd)
+1300  call ptrh3p(filnam,readpt)
       return
 * doublet delta + atom variables
-1400  call ptr2del(irpot, readpt, iread)
+*1400  call ptr2del(irpot, readpt, iread) -- change call (pjd)
+1400  call ptr2del(filnam,readpt)
+      return
+* heteronuclear + 2P atom variables
+*1500  call ptrdiat2p(irpot, readpt, iread) -- change call (pjd)
+1500  call ptrdiat2p(filnam,readpt)
+      return
+* asymmetric top variables
+1600  call ptratp(filnam, readpt)
+      return
+* CH2(X 3B1) (0,v2,0) bender level variables
+1700  call ptrch2x(filnam, readpt)
+      return
+*  symmetric top variables
+1800  call ptrstp1(filename,readpt)
       return
       end
 *  -----------------------------------------------------------------------
@@ -642,6 +722,7 @@
 888   write(6,1000)
 1000  format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
       return
+*
       entry ptr2sg (fname,readpt)
       line = fname
       readpt = .true.
@@ -673,6 +754,7 @@
       nlam=nlam+(lammax(1)-lammin(1))/nskip+1
       irpot=1
       return
+*
       entry sav2sg (readpt)
 *  save input parameters for doublet-sigma + atom scattering
 *  line 13:
@@ -795,6 +877,7 @@
 888   write(6,1000)
 1000  format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
       return
+*
       entry ptr2pi (fname,readpt)
       line = fname
       readpt = .true.
@@ -823,6 +906,7 @@
       close (8)
       irpot=1
       return
+*
       entry sav2pi (readpt)
 *  save input parameters for doublet-pi + atom scattering
 *  line 13:
@@ -1100,7 +1184,6 @@
       return
 *
       entry ptrsp (fname,readpt)
-*
       line = fname
       readpt = .true.
 1000  if (readpt) then
@@ -1132,7 +1215,6 @@
       return
 *
       entry savsp (readpt)
-*
       nterm=ispar(1)
       isg=ispar(2)
       ipi=ispar(3)
@@ -1191,8 +1273,8 @@
 102   format(2i4,t50,a)
 103   format(3i4,t50,a)
 105   format(4i4,t50,a)
-201   format(g14.8,t50,a)
-202   format(g14.8,2g14.6,t50,a)
+201   format(g14.6,t50,a)
+202   format(g14.6,2g14.6,t50,a)
 203   format(3g14.6,t50,a)
 204   format(i4,2g14.6,t50,a)
       write (8, 300) potfil
@@ -1338,6 +1420,7 @@
 888   write(6,1000)
 1000  format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
       return
+*
       entry ptrpi (fname,readpt)
       line = fname
       readpt = .true.
@@ -1366,6 +1449,7 @@
       close (8)
       irpot=1
       return
+*
       entry savpi (readpt)
 *  save input parameters for singlet, doublet or
 *  triplet-pi molecule + atom scattering
@@ -1499,20 +1583,41 @@
       isrcod = ircod
       irpot = 1
 *  set default values for symmetric top scattering
+
+**  for testing purposes, change nterm for test with h2o-he pot (pjd)
+**  COMMENTED OUT - BACK TO 3-FOLD SYMMETRIC SYSTEMS - pjd (3-3-2011)
+*        nterm = 4
+*        mproj(1) = 0
+*        mproj(2) = 1
+*        mproj(3) = 2
+*        mproj(4) = 3
+
         nterm = 4
         mproj(1) = 0
         mproj(2) = 3
         mproj(3) = 6
         mproj(4) = 9
       if (iread .eq. 0) then
+*        lammin(1)= 2
+*        lammin(2)= 1
+*        lammin(3)= 2
+*        lammin(4)= 3
+
         lammin(1)= 1
         lammin(2)= 3
         lammin(3)= 6
-        lammin(4)=9
+        lammin(4)= 9
+
+*        lammax(1) = 8
+*        lammax(2) = 7
+*        lammax(3) = 8
+*        lammax(4) = 7
+
         lammax(1) = 1
         lammax(2) = 3
         lammax(3) = 6
         lammax(4) = 9
+
         jmax0 = 0
         jmax1 = 1
         jmax2 = 2
@@ -1537,7 +1642,7 @@
         indout(4)=-6
         indout(5)=6
       endif
-      potfil='nopot'
+      potfil=' '
       if (iread .eq. 0) return
 *  line 18
       read (8, *, err=80) ipotsy, iop, ninv
@@ -1559,6 +1664,7 @@
 80    write(6,90)
 90    format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
       return
+*
       entry ptrstp (fname,readpt)
       line = fname
       readpt = .true.
@@ -1586,6 +1692,7 @@
       endif
       close (8)
       return
+*
       entry savstp (readpt)
 *  save input parameters for symmetric top + atom scattering
 *  the order of the write statements should be identical to the read statement
@@ -1778,6 +1885,7 @@
       close (8)
       irpot=1
       return
+*
       entry sav13p (readp)
 *  save input parameters for singlet-sigma + atom scattering
       write (8, 300) nstate, ipol, npot
@@ -1914,6 +2022,7 @@
 888   write(6,1000) iline
 1000  format(/'   *** ERROR DURING READ OF SY2MOL INPUT; LINE: ',i2)
       return
+*
       entry ptr2mol (fname,readpt)
       line = fname
       readpt = .true.
@@ -1942,6 +2051,7 @@
       close (8)
       irpot=1
       return
+*
       entry sav2mol (readpt)
 *  save input parameters for hf-hf scattering
 *  line 13:
@@ -2125,7 +2235,7 @@
         indout(4)=-6
         indout(5)=6
       endif
-      potfil='nopot'
+      potfil=' '
       if (iread .eq. 0) return
 *  line 18
       read (8, *, err=80) ipotsy, iop, ninv, ipotsy2
@@ -2178,6 +2288,7 @@
       endif
       close (8)
       return
+*
       entry savstpln (readpt)
 *  save input parameters for symmetric top + linear molecule scattering
 *  the order of the write statements should be identical to the read statement
@@ -2356,6 +2467,7 @@
       close (8)
       irpot=1
       return
+*
       entry sav22p (readp)
 *  save input parameters for singlet-sigma + atom scattering
       nphoto=iscod(2)
@@ -2475,6 +2587,7 @@
 888   write(6,1000)
 1000  format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
       return
+*
       entry ptr1del (fname,readpt)
       line = fname
       readpt = .true.
@@ -2503,6 +2616,7 @@
       close (8)
       irpot=1
       return
+*
       entry sav1del (readpt)
 *  save input parameters for singlet-delta + atom scattering
 *  line 13:
@@ -2589,7 +2703,7 @@
         jmax = 0
         iop = 1
       endif
-      potfil='nopot'
+      potfil=' '
       if (iread .eq. 0) return
 *  line 18
       read (8, *, err=80) iop, jmax
@@ -2606,6 +2720,7 @@
 80    write(6,90)
 90    format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
       return
+*
       entry ptrh2p (fname,readpt)
       line = fname
       readpt = .true.
@@ -2633,6 +2748,7 @@
       endif
       close (8)
       return
+*
       entry savh2p (readpt)
 *  save input parameters for symmetric top + atom scattering
 *  the order of the write statements should be identical to the read statement
@@ -2725,7 +2841,7 @@
         jmax = 0
         iop = 1
       endif
-      potfil='nopot'
+      potfil=' '
       if (iread .eq. 0) return
 *  line 18
       read (8, *, err=80) iop, jmax
@@ -2742,6 +2858,7 @@
 80    write(6,90)
 90    format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
       return
+*
       entry ptrh3p (fname,readpt)
       line = fname
       readpt = .true.
@@ -2769,6 +2886,7 @@
       endif
       close (8)
       return
+*
       entry savh3p (readpt)
 *  save input parameters for symmetric top + atom scattering
 *  the order of the write statements should be identical to the read statement
@@ -2897,6 +3015,7 @@
 888   write(6,1000)
 1000  format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
       return
+*
       entry ptr2del (fname,readpt)
       line = fname
       readpt = .true.
@@ -2925,6 +3044,7 @@
       close (8)
       irpot=1
       return
+*
       entry sav2del (readpt)
 *  save input parameters for doublet-delta + atom scattering
 *  line 13:
@@ -2937,3 +3057,735 @@
       write (8, 285) potfil
       return
       end
+*  -----------------------------------------------------------------------
+      subroutine sydiat2p (irpot, readpt, iread)
+*  subroutine to read in system dependent parameters for heteronuclear
+*   + 2P atom scattering
+*  if iread = 1 read data from input file
+*  if iread = 0 return after defining variable names
+*  current revision date: 22-Sep-2005 by Jacek Klos
+* NOTE THAT THIS VERSION DOES NOT USE DATA FROM VFIT (FOLLMEG FORM)
+*  -----------------------------------------------------------------------
+*  variables in common bloc /cosysr/
+*    isrcod:   total number of real system dependent variables
+*    brot:     rotational constant of molecule
+*    aso:      spin-orbit constant of atom
+*  variables in common block /cosysi/
+*    nscod:    total number of variable names which are passed to HINPUT
+*              nscod must equal isrcod + isicod + 3
+*    isicod:   total number of integer system dependent variables
+*    nterm:    number of different associated legendre terms in
+*              expansion of potential
+*    jmax:     the maximum rotational angular momenta for the diatomic
+*  variable in common /cosys/
+*    scod:    character*8 array of dimension nscode, which contains names
+*             of all system dependent parameters.  Note that the ordering
+*             of the variable names in scod must correspond to the ordering
+*             of the variable names in cosysi followed by the ordering of
+*             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
+*  -----------------------------------------------------------------------
+      logical readpt, existf
+      double precision brot, aso
+      character*1 dot
+      character*8 scod
+      character*(*) fname
+      character*40 line, filnam, potfil
+      parameter (icod=3, ircod=2)
+      parameter (lencod = icod + ircod + 3)
+      include "common/parbas"
+      common /coiout/ niout, indout(20)
+      common /cosys/ scod(lencod)
+      common /cosysi/ nscode, isicod, nterm,iop,jmax
+      common /cosysr/ isrcod, junkr, brot, aso
+      save potfil
+*  number and names of system dependent parameters
+*  first all the system dependent integer variables
+*  in the same order as in the common block /cosysi/
+*  variable names must be in uppercase of maximum length 6 characters
+*  NTERM must be the first variable
+*  followed by the system dependent real variables
+*  in the same order as in the common block /cosysr/
+*  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
+      include "common/comdot"
+      scod(1)='NTERM'
+      scod(2)='IOP'
+      scod(3)='JMAX'
+      scod(4)='BROT'
+      scod(5)='ASO'
+      scod(6)='LAMMIN'
+      scod(7)='LAMMAX'
+      scod(8)='MPROJ'
+      nscode = lencod
+      isicod = icod
+      isrcod = ircod
+      irpot = 1
+*  set default values for heteronuclear+2P atom
+        nterm = 1
+        mproj(1) = 0
+      if (iread .eq. 0) then
+        lammin(1)= 1
+        lammax(1) = 40
+        jmax = 0
+        iop = 1
+      endif
+      potfil=' '
+      if (iread .eq. 0) return
+*  line 18
+      read (8, *, err=80) iop, jmax
+*  line 21
+      read (8, *, err=80) brot, aso
+      if(.not.readpt.or.iread.eq.0) then
+        call loapot(1,' ')
+        return
+      endif
+      read (8, 60, end=100) line
+60    format (a)
+      goto 100
+* here if read error occurs
+80    write(6,90)
+90    format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+*
+      entry ptrdiat2p (fname,readpt)
+      line = fname
+      readpt = .true.
+100   if (readpt) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,102)
+102       format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+           call gennam(potfil,filnam,0,'BIN',lc)
+           filnam = potfil
+        end if
+        potfil=filnam
+        inquire(file=filnam,exist=existf)
+        if(.not.existf) then
+          write(6,105) filnam(1:lc)
+105      format(' FILE ',(a),' NOT FOUND')
+         return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+      endif
+      close (8)
+      return
+*
+      entry savdiat2p (readpt)
+*  save input parameters for heteronuclear diatom + 2P atom scattering
+*  the order of the write statements should be identical to the read statement
+*  above. for consistency with the data file written by gendat, format
+*  statements should reserve the first 30 spaces for data, spaces 31-33 should
+*  be left blank, and the names of the variables should be printed in spaces
+*  34-80
+*  line 18:
+      write (8, 220) iop, jmax
+220   format (4i4, 14x,' iop, jmax')
+*  line 21
+      write (8, 250) brot, aso
+250   format(f12.4,f14.4, 6x, '   brot, aso')
+      write (8, 60) potfil
+      return
+      end
+*  -----------------------------------------------------------------------
+      subroutine sysatp (irpot, readpt, iread)
+*  subroutine to read in system dependent parameters for asymmetric top
+*      + atom scattering
+*  if iread = 1 read data from input file
+*  if iread = 0 return after defining variable names
+*  NOTE THAT THIS VERSION DOES NOT USE DATA FROM VFIT (FOLLMEG FORM)
+*  modified from systp subroutine
+*  current revision date: 09-sep-2009 by paul dagdigian
+*  -----------------------------------------------------------------------
+*  variables in common bloc /cosysr/
+*    isrcod:   total number of real system dependent variables
+*    arot:     A rotational constant
+*    brot:     B rotational constant
+*    crot:     C rotational constant
+*    emax:     the maximum rotational energy (in cm-1) for a channel to be
+*              included in the basis
+*  variables in common block /cosysi/
+*    nscode:   total number of variable names which are passed to HINPUT
+*              nscod must equal isrcod + isicod + 3
+*    isicod:   total number of integer system dependent variables
+*    nterm:    number of different associated legendre terms in
+*              expansion of potential
+*    numpot:   the number of the potential used, this variable is passed
+*              to the pot subroutine
+*    ipotsy:   cylindrical symmetry of potential.  Use this parm to
+*              distinguish between AB2 and ABC type molecules.  for the
+*              former, only even lambda allowed (set delta_lambda = ipotsy)
+*    iop:      ortho/para label for molecular states. If ihomo=.true. then onl
+*              para states will be included if iop=1 and only ortho states if
+*              iop=-1
+*    jmax:     the maximum rotational quantum number for the asymmetric top
+*  variable in common /cosys/
+*    scod:    character*8 array of dimension nscode, which contains names
+*             of all system dependent parameters.  Note that the ordering
+*             of the variable names in scod must correspond to the ordering
+*             of the variable names in cosysi followed by the ordering of
+*             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
+*  -----------------------------------------------------------------------
+      logical readpt, existf
+      double precision arot, brot, crot, emax
+      integer lammax, lammin, mproj, numpot
+      integer icod, ircod, lencod
+      integer i, iop, iread, irpot, isicod, isrcod, ipotsy, jmax,
+     :        nscode, nterm
+      character*8 scod
+      character*1 dot
+      character*(*) fname
+      character*40 line, filnam, potfil
+      parameter (icod=5, ircod=4)
+      parameter (lencod = icod + ircod + 3)
+      include "common/parbas"
+      common /coiout/ niout, indout(20)
+      common /cosys/ scod(lencod)
+      common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, jmax
+      common /cosysr/ isrcod, junkr, arot, brot, crot, emax
+      common /conlam/ nlam
+      save potfil
+*  number and names of system dependent parameters
+*  first all the system dependent integer variables
+*  in the same order as in the common block /cosysi/
+*  variable names must be in uppercase of maximum length 6 characters
+*  NTERM must be the first variable
+*  followed by the system dependent real variables
+*  in the same order as in the common block /cosysr/
+*  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
+      include "common/comdot"
+      scod(1)='NTERM'
+      scod(2)='NUMPOT'
+      scod(3)='IPOTSY'
+      scod(4)='IOP'
+      scod(5)='JMAX'
+      scod(6)='AROT'
+      scod(7)='BROT'
+      scod(8)='CROT'
+      scod(9)='EMAX'
+      scod(10)='LAMMIN'
+      scod(11)='LAMMAX'
+      scod(12)='MPROJ'
+      nscode = lencod
+      isicod = icod
+      isrcod = ircod
+      irpot = 1
+*  set default values for asymmetric top scattering
+*  (symmetric BA2 and A2BC molecules)
+*      nterm = 4
+       nterm = 7
+      if (iread .eq. 0) then
+* mproj, lammin, lammax are already set in the potential subroutine
+*        mproj(1) = 0
+*        mproj(2) = 1
+*        mproj(3) = 2
+*        mproj(4) = 3
+*        lammin(1) = 2
+*        lammin(2) = 1
+*        lammin(3) = 2
+*        lammin(4) = 3
+*        lammax(1) = 6
+*        lammax(2) = 5
+*        lammax(3) = 6
+*        lammax(4) = 5
+
+        mproj(1) = 0
+        mproj(2) = 1
+        mproj(3) = 2
+        mproj(4) = 3
+        mproj(5) = 4
+        mproj(6) = 5
+        mproj(7) = 6
+
+        lammin(1) = 2
+        lammin(2) = 1
+        lammin(3) = 2
+        lammin(4) = 3
+        lammin(5) = 4
+        lammin(6) = 5
+        lammin(7) = 6
+        lammax(1) = 6
+        lammax(2) = 5
+        lammax(3) = 6
+        lammax(4) = 7
+        lammax(5) = 8
+ 
+
+        ipotsy = 2
+        iop = 1
+        jmax = 3
+        niout=5
+*
+*  INDOUT VALUES TO BE SET ***
+        niout=11
+        indout(1)=0
+        indout(2)=1
+        indout(3)=-1
+        indout(4)=2
+        indout(5)=-2
+        indout(6)=3
+        indout(7)=-3
+        indout(8)=4
+        indout(9)=-4
+        indout(10)=5
+        indout(11)=-5
+      endif
+      potfil=' '
+      if (iread .eq. 0) return
+*  line 18
+      read (8, *, err=80) ipotsy, iop
+*  line 19
+      read (8, *, err=80) jmax, emax
+*  line 20
+      read (8, *, err=80) arot, brot, crot
+      if(.not. readpt .or. iread .eq. 0) then
+        call loapot(1,' ')
+        return
+      endif
+      read (8, 60, end=100) line
+60    format (a)
+      goto 100
+* here if read error occurs
+80    write(6,90)
+90    format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+*
+      entry ptratp (fname, readpt)
+      line = fname
+      readpt = .true.
+100   if (readpt) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,102)
+102       format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+           call gennam(potfil,filnam,0,'BIN',lc)
+           filnam = potfil
+        end if
+        potfil=filnam
+        inquire(file=filnam,exist=existf)
+        if(.not.existf) then
+          write(6,105) filnam(1:lc)
+105      format(' FILE ',(a),' NOT FOUND')
+         return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+      endif
+      close (8)
+      return
+*
+      entry savatp (readpt)
+*  save input parameters for asymmetric top + atom scattering
+*  the order of the write statements should be identical to the read statement
+*  above. for consistency with the data file written by gendat, format
+*  statements should reserve the first 30 spaces for data, spaces 31-33 should
+*  be left blank, and the names of the variables should be printed in spaces
+*  34-80
+*  line 18:
+      write (8, 220) ipotsy, iop
+220   format (2i4, 22x,'   ipotsy, iop')
+*  line 20
+      write (8, 230) jmax, emax
+230   format (i4, g12.5,14x, '  jmax, emax')
+*  line 21
+      write (8, 250) arot, brot, crot
+250   format(3f9.4, 3x, 'arot, brot, crot')
+      write (8, 60) potfil
+      return
+      end
+*  -----------------------------------------------------------------------
+      subroutine sysch2x (irpot, readpt, iread)
+*  subroutine to read in system dependent parameters for CH2(X 3B1) (0,v2,0)
+*      bender + atom scattering
+*  if iread = 1 read data from input file
+*  if iread = 0 return after defining variable names
+*  NOTE THAT THIS VERSION DOES NOT USE DATA FROM VFIT (FOLLMEG FORM)
+*  modified from syatp subroutine
+*  current revision date: 04-jun-2010 by paul dagdigian
+*  -----------------------------------------------------------------------
+*  variables in common bloc /cosysr/
+*    isrcod:   total number of real system dependent variables
+*    emax:     the maximum rotational energy (in cm-1) for a channel to be
+*              included in the basis
+*  variables in common block /cosysi/
+*    nscode:   total number of variable names which are passed to HINPUT
+*              nscod must equal isrcod + isicod + 3
+*    isicod:   total number of integer system dependent variables
+*    nterm:    number of different associated legendre terms in
+*              expansion of potential
+*    numpot:   the number of the potential used, this variable is passed
+*              to the pot subroutine
+*    ipotsy:   cylindrical symmetry of potential.  Use this parm to
+*              distinguish between AB2 and ABC type molecules.  for the
+*              former, only even lambda allowed (set delta_lambda = ipotsy)
+*    iop:      ortho/para label for molecular states. If ihomo=.true. then onl
+*              para states will be included if iop=1 and only ortho states if
+*              iop=-1
+*    ivbend:   bend vibrational quantum number (can equal 0 to 3)
+*    jmax:     the maximum rotational quantum number for the molecule
+*  variable in common /cosys/
+*    scod:    character*8 array of dimension nscode, which contains names
+*             of all system dependent parameters.  Note that the ordering
+*             of the variable names in scod must correspond to the ordering
+*             of the variable names in cosysi followed by the ordering of
+*             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
+*  -----------------------------------------------------------------------
+      logical readpt, existf
+      double precision emax
+      integer lammax, lammin, mproj, numpot
+      integer icod, ircod, lencod
+      integer i, iop, iread, irpot, isicod, isrcod, ipotsy, jmax,
+     :        nscode, nterm, ivbend
+      character*8 scod
+      character*1 dot
+      character*(*) fname
+      character*40 line, filnam, potfil
+      parameter (icod=6, ircod=1)
+      parameter (lencod = icod + ircod + 3)
+      include "common/parbas"
+      common /coiout/ niout, indout(20)
+      common /cosys/ scod(lencod)
+      common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop,
+     :  ivbend, jmax
+      common /cosysr/ isrcod, junkr, emax
+      common /conlam/ nlam
+      save potfil
+*  number and names of system dependent parameters
+*  first all the system dependent integer variables
+*  in the same order as in the common block /cosysi/
+*  variable names must be in uppercase of maximum length 6 characters
+*  NTERM must be the first variable
+*  followed by the system dependent real variables
+*  in the same order as in the common block /cosysr/
+*  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
+      include "common/comdot"
+      scod(1)='NTERM'
+      scod(2)='NUMPOT'
+      scod(3)='IPOTSY'
+      scod(4)='IOP'
+      scod(5)='IVBEND'
+      scod(6)='JMAX'
+      scod(7)='EMAX'
+      scod(8)='LAMMIN'
+      scod(9)='LAMMAX'
+      scod(10)='MPROJ'
+      nscode = lencod
+      isicod = icod
+      isrcod = ircod
+      irpot = 1
+*  set default values for asymmetric top scattering
+*  (symmetric CH2 molecule)
+*      nterm = 4
+       nterm=7
+      if (iread .eq. 0) then
+*        mproj(1) = 0
+*        mproj(2) = 1
+*        mproj(3) = 2
+*        mproj(4) = 3
+*        lammin(1) = 2
+*        lammin(2) = 1
+*        lammin(3) = 2
+*        lammin(4) = 3
+*        lammax(1) = 6
+*        lammax(2) = 5
+*        lammax(3) = 6
+*        lammax(4) = 5
+        
+        mproj(1) = 0
+        mproj(2) = 1
+        mproj(3) = 2
+        mproj(4) = 3
+        mproj(5) = 4
+        mproj(6) = 5
+        mproj(7) = 6
+
+        lammin(1) = 2
+        lammin(2) = 1
+        lammin(3) = 2
+        lammin(4) = 3
+        lammin(5) = 4
+        lammin(6) = 5
+        lammin(7) = 6
+        lammax(1) = 6
+        lammax(2) = 5
+        lammax(3) = 6
+        lammax(4) = 7
+        lammax(5) = 8
+        lammax(6) = 7
+        lammax(7) = 8
+        
+
+        ipotsy = 2
+        iop = 1
+        jmax = 3
+        niout=5
+*
+*  INDOUT VALUES TO BE SET ***
+        niout=11
+        indout(1)=0
+        indout(2)=1
+        indout(3)=-1
+        indout(4)=2
+        indout(5)=-2
+        indout(6)=3
+        indout(7)=-3
+        indout(8)=4
+        indout(9)=-4
+        indout(10)=5
+        indout(11)=-5
+      endif
+      potfil=' '
+      if (iread .eq. 0) return
+*  line 18
+      read (8, *, err=80) ipotsy, iop, ivbend
+*  line 19
+      read (8, *, err=80) jmax, emax
+      if(.not. readpt .or. iread .eq. 0) then
+        call loapot(1,' ')
+        return
+      endif
+      read (8, 60, end=100) line
+60    format (a)
+      goto 100
+* here if read error occurs
+80    write(6,90)
+90    format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+*
+      entry ptrch2x (fname, readpt)
+      line = fname
+      readpt = .true.
+100   if (readpt) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,102)
+102       format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+           call gennam(potfil,filnam,0,'BIN',lc)
+           filnam = potfil
+        end if
+        potfil=filnam
+        inquire(file=filnam,exist=existf)
+        if(.not.existf) then
+          write(6,105) filnam(1:lc)
+105      format(' FILE ',(a),' NOT FOUND')
+         return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+      endif
+      close (8)
+      return
+*
+      entry savch2x (readpt)
+*  save input parameters for CH2(X 3B1) (0,v2,0) bender + atom scattering
+*  the order of the write statements should be identical to the read statement
+*  above. for consistency with the data file written by gendat, format
+*  statements should reserve the first 30 spaces for data, spaces 31-33 should
+*  be left blank, and the names of the variables should be printed in spaces
+*  34-80
+*  line 18:
+      write (8, 220) ipotsy, iop, ivbend
+220   format (2i4, 22x,'   ipotsy, iop, ivbend')
+*  line 20
+      write (8, 230) jmax, emax
+230   format (i4, g12.5,14x, '  jmax, emax')
+      write (8, 60) potfil
+      return
+      end
+*  -----------------------------------------------------------------------
+      subroutine systp1 (irpot, readpt, iread)
+*  subroutine to read in system dependent parameters for symmetric top
+*      + atom scattering (no inversion doubling)
+*  if iread = 1 read data from input file
+*  if iread = 0 return after defining variable names
+*  NOTE THAT THIS VERSION DOES NOT USE DATA FROM VFIT (FOLLMEG FORM)
+*  modified from sysatp subroutine
+*  current revision date: 15-mar-2011 by paul dagdigian
+*  -----------------------------------------------------------------------
+*  variables in common bloc /cosysr/
+*    isrcod:   total number of real system dependent variables
+*    brot:     B rotational constant
+*    crot:     C rotational constant
+*    emax:     the maximum rotational energy (in cm-1) for a channel to be
+*              included in the basis
+*  variables in common block /cosysi/
+*    nscode:   total number of variable names which are passed to HINPUT
+*              nscod must equal isrcod + isicod + 3
+*    isicod:   total number of integer system dependent variables
+*    nterm:    number of different associated legendre terms in
+*              expansion of potential
+*    numpot:   the number of the potential used, this variable is passed
+*              to the pot subroutine
+*    ipotsy:   cylindrical symmetry of potential.  Use this parm to
+*              distinguish between AB2 and ABC type molecules.  for the
+*              former, only even lambda allowed (set delta_lambda = ipotsy)
+*    iop:      ortho/para label for molecular states. If ihomo=.true. then onl
+*              para states will be included if iop=1 and only ortho states if
+*              iop=-1
+*    jmax:     the maximum rotational quantum number for the asymmetric top
+*  variable in common /cosys/
+*    scod:    character*8 array of dimension nscode, which contains names
+*             of all system dependent parameters.  Note that the ordering
+*             of the variable names in scod must correspond to the ordering
+*             of the variable names in cosysi followed by the ordering of
+*             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
+*  -----------------------------------------------------------------------
+      logical readpt, existf
+      double precision brot, crot, emax
+      integer lammax, lammin, mproj, numpot
+      integer icod, ircod, lencod
+      integer i, iop, iread, irpot, isicod, isrcod, ipotsy, jmax,
+     :        nscode, nterm
+      character*8 scod
+      character*1 dot
+      character*(*) fname
+      character*40 line, filnam, potfil
+      parameter (icod=5, ircod=3)
+      parameter (lencod = icod + ircod + 3)
+      include "common/parbas"
+      common /coiout/ niout, indout(20)
+      common /cosys/ scod(lencod)
+      common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, jmax
+      common /cosysr/ isrcod, junkr, brot, crot, emax
+      common /conlam/ nlam
+      save potfil
+*  number and names of system dependent parameters
+*  first all the system dependent integer variables
+*  in the same order as in the common block /cosysi/
+*  variable names must be in uppercase of maximum length 6 characters
+*  NTERM must be the first variable
+*  followed by the system dependent real variables
+*  in the same order as in the common block /cosysr/
+*  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
+      include "common/comdot"
+      scod(1)='NTERM'
+      scod(2)='NUMPOT'
+      scod(3)='IPOTSY'
+      scod(4)='IOP'
+      scod(5)='JMAX'
+      scod(6)='BROT'
+      scod(7)='CROT'
+      scod(8)='EMAX'
+      scod(9)='LAMMIN'
+      scod(10)='LAMMAX'
+      scod(11)='MPROJ'
+      nscode = lencod
+      isicod = icod
+      isrcod = ircod
+      irpot = 1
+*  set default values for asymmetric top scattering
+*  (symmetric AB3 molecules)
+      nterm = 4
+      if (iread .eq. 0) then
+        mproj(1) = 0
+        mproj(2) = 3
+        mproj(3) = 6
+        mproj(4) = 9
+        lammin(1) = 2
+        lammin(2) = 3
+        lammin(3) = 6
+        lammin(4) = 9
+        lammax(1) = 8
+        lammax(2) = 9
+        lammax(3) = 8
+        lammax(4) = 9
+        ipotsy = 3
+        iop = 1
+        jmax = 5
+        niout=5
+*
+*  INDOUT VALUES TO BE SET ***
+        niout=11
+        indout(1)=0
+        indout(2)=1
+        indout(3)=-1
+        indout(4)=2
+        indout(5)=-2
+        indout(6)=3
+        indout(7)=-3
+        indout(8)=4
+        indout(9)=-4
+        indout(10)=5
+        indout(11)=-5
+      endif
+      potfil=' '
+      if (iread .eq. 0) return
+*  line 18
+      read (8, *, err=80) ipotsy, iop
+*  line 19
+      read (8, *, err=80) jmax, emax
+*  line 20
+      read (8, *, err=80) brot, crot
+      if(.not. readpt .or. iread .eq. 0) then
+        call loapot(1,' ')
+        return
+      endif
+      read (8, 60, end=100) line
+60    format (a)
+      goto 100
+* here if read error occurs
+80    write(6,90)
+90    format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+*
+      entry ptrstp1 (fname, readpt)
+      line = fname
+      readpt = .true.
+100   if (readpt) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,102)
+102       format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+           call gennam(potfil,filnam,0,'BIN',lc)
+           filnam = potfil
+        end if
+        potfil=filnam
+        inquire(file=filnam,exist=existf)
+        if(.not.existf) then
+          write(6,105) filnam(1:lc)
+105      format(' FILE ',(a),' NOT FOUND')
+         return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+      endif
+      close (8)
+      return
+*
+      entry savstp1 (readpt)
+*  save input parameters for asymmetric top + atom scattering
+*  the order of the write statements should be identical to the read statement
+*  above. for consistency with the data file written by gendat, format
+*  statements should reserve the first 30 spaces for data, spaces 31-33 should
+*  be left blank, and the names of the variables should be printed in spaces
+*  34-80
+*  line 18:
+      write (8, 220) ipotsy, iop
+220   format (2i4, 22x,'   ipotsy, iop')
+*  line 20
+      write (8, 230) jmax, emax
+230   format (i4, g12.5,14x, '  jmax, emax')
+*  line 21
+      write (8, 250) arot, brot, crot
+250   format(3f9.4, 3x, 'arot, brot, crot')
+      write (8, 60) potfil
+      return
+      end
+*  -----------------------------------------------------------------------
+
+

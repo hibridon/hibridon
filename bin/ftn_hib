@@ -1,5 +1,5 @@
 #!/bin/sh
-#  HIBRIDON ftn $Revision: 2000.1 $ --- Compile fortran source
+#  HIBRIDON ftn $Revision: 2009.1 $ --- Compile fortran source
 # ftn [-N] [-P] [-O] [-O*] [-g] [-d] [-n] [-link] [-l lib] [-L libpath]
 #     [-o file] [files...]
 # -N omit compilation if object file is newer than source
@@ -26,6 +26,7 @@ if test -r $bin/echo ; then echo=$bin/echo ; else echo=echo ; fi
 
 . $basedir/CONFIG
 
+HIB_FFLAGS="$FSTATIC $FI64"
 
 option=$FOPT link="no" preprocess=0 extraopt=" " out="a.out" list=" " newcheck="no"
 while test $#argv ; do
@@ -55,7 +56,6 @@ while test $#argv ; do
    *) break;;
   esac
 done
-
 if test $preprocess != 0 ; then
   if test ! -r $bin/ftc ; then $echo making preprocessor ;makeftc ; fi;
 fi
@@ -78,11 +78,14 @@ do
   if test "$newcheck" = "yes" ; then
     if test -r $fileo ; then if test x`find . -name $filei -newer $fileo -print` = x ; then continue; fi; fi
   fi
-  $echo -n "compiling ${filei} ... "
+#  $echo -n "compiling ${filei} ... "
+  $echo  "compiling ${filei} ... "
   if test -r $logfi ; then rm $logfi ; fi
   if test $preprocess != 0 ; then $echo -n "preprocessing ... " ;ftc $filei ;fi
-  $echo $FC -c $MOLPRO_FFLAGS $extraopt $option $file
-  eval "$FC -c $MOLPRO_FFLAGS $extraopt $option $filei"
+  $echo $FC -c $HIB_FFLAGS $extraopt $option $file
+echo $filei
+  
+  eval "$FC -c $HIB_FFLAGS $extraopt $option $filei"
   if test $? != 0 ; then $echo failed: ; cat $logfi; rm -f `basename $filei .f`.o ; exit 1; fi;
   $echo compilation done
 done
@@ -92,6 +95,6 @@ if test "$link" = "yes" ; then
   if test -r $out'.log' ; then rm $out'.log' ;fi
   basei=`basename $i .o`
   $echo linking $out
-  $echo $FC  $MOLPRO_FFLAGS $extraopt $option $LINKOPT -o $out $list $LIBS > $out.log 2>&1
-  eval "$FC $MOLPRO_FFLAGS $extraopt $option $LINKOPT -o $out $list $LIBS>> $out.log 2>&1"
+  $echo $FC  $HIB_FFLAGS $extraopt $option $LINKOPT -o $out $list $LIBS > $out.log 2>&1
+  eval "$FC $HIB_FFLAGS $extraopt $option $LINKOPT -o $out $list $LIBS>> $out.log 2>&1"
 fi

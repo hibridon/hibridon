@@ -1,0 +1,98 @@
+#!/bin/csh -f
+# HIBRIDON bin/hibdetails $Revision: 2008.1 $ --- save details of compiler used in hibridon
+# the PATH variable should be set to include the hibridon bin directory
+
+set basedir=`hibriddir`
+set syst = `uname -s`
+# default values for option
+set flag = ""
+set opt = ""
+
+echo ""
+@ items = $#argv
+if ($items > 0) then
+  echo "usage: hibdetails"
+  goto end
+endif
+echo ""
+echo "SYSTEM CONFIGURATION IS:"
+if $syst == 'Darwin' then
+   set sysname = `system_profiler |grep "System Version"`
+   set len = `echo $sysname |awk '{printf length($0)}'`
+   set fchar = `echo $sysname |awk '{printf index($0,":")}'`
+   set sysname = `echo $sysname |awk '{printf substr($0,'$fchar'+2,'$len'-'$fchar'+1)}'`
+   set lchar = `echo $sysname |awk '{printf index($0,"(")}'`
+   set sysname = `echo $sysname |awk '{printf substr($0,0,'$lchar'-1)}'`
+   set len = `echo $sysname |awk '{printf length($0)}'`
+   set fchar = `echo $sysname |awk '{printf index($0,"M")}'`
+   set sysname = `echo $sysname |awk '{printf substr($0,'$fchar'+4,'$len'-'$fchar'+1)}'`
+   echo "System is $sysname" 
+else if $syst == 'Linux' then
+   linux_version
+   set sysname = `cat lversion`
+   echo "System is $sysname" 
+   rm lversion
+else
+   set sysname = 'unknown'
+endif
+   set mach = `grep MACH $basedir/CONFIG`
+   set len = `echo $mach |awk '{printf length($0)}'`
+   set fchar = `echo $mach |awk '{printf index($0,"=")}'`
+   set mach = `echo $mach |awk '{printf substr($0,'$fchar'+2,'$len'-'$fchar'-2)}'`
+   echo "Machine type is $mach"
+echo "      data build(1) /" > SYSCONFIG
+echo "     :  'SYS=$sysname; MACH=$mach'/" >> SYSCONFIG
+set ccc = `grep CC $basedir/CONFIG`
+set len = `echo $ccc |awk '{printf length($0)}'`
+set fchar = `echo $ccc |awk '{printf index($0,"=")}'`
+set ccc = `echo $ccc |awk '{printf substr($0,'$fchar'+2,'$len'-'$fchar'-2)}'`
+echo "C compiler is $ccc"
+set fcc = `grep FC $basedir/CONFIG`
+set len = `echo $fcc |awk '{printf length($0)}'`
+set fchar = `echo $fcc |awk '{printf index($0,"=")}'`
+set fcc = `echo $fcc |awk '{printf substr($0,'$fchar'+2,'$len'-'$fchar'-2)}'`
+set fopt = `grep FOPT $basedir/CONFIG`
+set len = `echo $fopt |awk '{printf length($0)}'`
+set fchar = `echo $fopt |awk '{printf index($0,"=")}'`
+set fopt = `echo $fopt |awk '{printf substr($0,'$fchar'+2,'$len'-'$fchar-2')}'`
+set fstatic = `grep FSTATIC $basedir/CONFIG`
+set len = `echo $fstatic |awk '{printf length($0)}'`
+set fchar = `echo $fstatic |awk '{printf index($0,"=")}'`
+set fstatic = `echo $fstatic |awk '{printf substr($0,'$fchar'+2,'$len'-'$fchar-2')}'`
+set fcc = "$fcc $fopt $fstatic"
+echo "Fortran compiler is $fcc"
+echo "      data build(2) /" >> SYSCONFIG
+echo "     :  'CC=$ccc; FC=$fcc'/">>SYSCONFIG
+set libs = `grep LIBS $basedir/CONFIG`
+set len = `echo $libs |awk '{printf length($0)}'`
+set fchar = `echo $libs |awk '{printf index($0,"=")}'`
+set libs = `echo $libs |awk '{printf substr($0,'$fchar'+2,'$len'-'$fchar-2')}'`
+echo "Mathematical Libraries are:"
+echo "$libs"
+set len = `echo "$libs" |awk '{printf length($0)}'`
+set fchar = `echo "$libs" |awk '{printf index($0,"-l")}'`
+set lib1 = `echo "$libs" |awk '{printf substr($0,0,'$fchar'-1)}'`
+set len = `echo $lib1 |awk '{printf length($0)}'`
+if ($len == 0) then
+   set lib1 = "/"
+endif
+set len = `echo $libs |awk '{printf length($0)}'`
+set lib2 = `echo "$libs" |awk '{printf substr($0,'$fchar','$len'-'$fchar'+1)}'`
+set len = `echo $lib2 |awk '{printf length($0)}'`
+set fchar = `echo $lib2 |awk '{printf index($0," ")}'`
+set lib3 = `echo $lib2 | awk '{printf substr($0,0,'$fchar'-1)}'`
+set lib4 = `echo $lib2 | awk '{printf substr($0,'$fchar','$len')}'`
+set lib2 = "LIBRARIES:  $lib3 /"
+set lib3 = "  $lib4"
+
+
+echo "      data build(3) /" >> SYSCONFIG
+echo "     :  'LIB_ROOT=$lib1'/">>SYSCONFIG
+echo "      data build(4) /" >> SYSCONFIG
+echo "     : '$lib2'/">>SYSCONFIG
+echo "      data build(5) /" >> SYSCONFIG
+echo "     : '$lib3'/">>SYSCONFIG
+echo "cend">>SYSCONFIG
+echo "      end" >> SYSCONFIG
+end:  
+exit

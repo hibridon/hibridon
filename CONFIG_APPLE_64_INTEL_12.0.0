@@ -1,0 +1,22 @@
+# HIBRIDON CONFIG generated at Sat Nov 13 19:55:28 EST 2010 for release 4.3.6
+#                 for architecture unix-darwin unix-ifort unix-darwin64
+# Machine type ..
+MACH="unix-darwin unix-ifort unix-darwin64"
+# Fortran Compiler ..
+FC="/opt/intel/composerxe-2011.0.085/bin/intel64/ifort "
+# compiler optimisation
+FOPT="-O3"
+# compiler explicit no optimisation
+FNOPT=" "
+# compiler debug flag
+FDEBUG="-g"
+# static variables
+FSTATIC="-save"
+# 64-bit integers
+FI64="-i8"
+# additional libraries and link options
+LIBS=" -L/opt/intel/composerxe-2011.0.085/mkl -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core
+-lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -lpthread"
+LINKOPT=""
+# files in src to be compiled without optimization
+NO_OPT="hinput.f himain.f hiversion.f"

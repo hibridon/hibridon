@@ -1,0 +1,87 @@
+#!/bin/csh -f
+# HIBRIDON bin/hibtest $Revision: 2009.4 $ --- link and run hibridon tests
+# the PATH variable should be set to include the hibridon bin directory
+
+set basedir=`hibriddir`
+
+echo "linking hib_h2ohe with kmax=45 ... "
+if (-e $basedir/bin/progs/hib_h2ohe_45) then
+  rm $basedir/bin/progs/hib_h2ohe_45
+  echo "replacing current copy of $basedir/bin/progs/hib_h2ohe_45 ..."
+endif
+set var1 = h2ohe
+set var2 = 45
+$basedir/bin/makehib $var1 $var2>>& $basedir/h_h2ohe.log
+if (-e $basedir/bin/progs/hib_h2ohe_45) then
+else
+  echo "$basedir/bin/progs/hib_h2ohe_45 not created, check $basedir/h_h2ohe.log"
+  echo ""
+  exit
+endif
+
+echo "linking hib_heco_sapt with kmax=55 ... "
+if (-e $basedir/bin/progs/hib_heco_sapt_55) then
+  rm $basedir/bin/progs/hib_heco_sapt_55
+  echo "replacing current copy of $basedir/bin/progs/hib_heco_sapt_55 ..."
+endif
+set var1 = heco_sapt
+set var2 = 55
+$basedir/bin/makehib $var1 $var2>>& $basedir/h_heco_sapt.log
+if (-e $basedir/bin/progs/hib_heco_sapt_55) then
+else
+  echo "$basedir/bin/progs/hib_heco_sapt_55 not created, check
+$basedir/h_heco_sapt.log"
+  echo ""
+  exit
+endif
+ 
+cd $basedir
+if (-e testnew) then
+  echo ""
+  echo "removing old directory $basedir/testnew"
+  rm -r testnew
+endif
+mkdir testnew
+cp tests/*.com testnew
+cp tests/*.inp testnew
+cp tests/*.BIN testnew
+cp tests/*.dat testnew
+cp tests/*.fluxinp testnew
+cd testnew
+
+  echo "running h2ohe tests ..."
+  mkdir potdata
+  cp h2o*.dat potdata
+  $basedir/bin/progs/hib_h2ohe_45 <h2ohe_test.com >h2ohe_test.log
+  echo "h2ohe tests completed, compare result files:"
+  echo "  $basedir/testnew with $basedir/tests"
+  rm $basedir/testnew/H2ohe*.sav  >>& $basedir/testnew/h2ohe_test.log
+  rm $basedir/testnew/H2ohe*.smt  >>& $basedir/testnew/h2ohe_test.log
+  rm $basedir/testnew/H2ohe*.pcs  >>& $basedir/testnew/h2ohe_test.log
+  rm $basedir/testnew/H2ohe*.ics  >>& $basedir/testnew/h2ohe_test.log
+  rm $basedir/bin/progs/hib_h2ohe_45
+
+  echo "running heco_sapt tests ..."
+  $basedir/bin/progs/hib_heco_sapt_55 <heco_test.com >heco_test.log
+  echo "heco_sapt tests completed, compare result files:"
+  echo "  $basedir/testnew with $basedir/tests"
+  rm $basedir/testnew/Heco*.sav  >>& $basedir/testnew/heco_test.log
+  rm $basedir/testnew/Heco1*.smt  >>& $basedir/testnew/heco_test.log
+  rm $basedir/bin/progs/hib_heco_sapt_55
+
+
+set sysname=`uname -s`
+set known = 'no'
+if $sysname == 'Darwin' then
+   if (-e /Developer/Applications/Utilities/FileMerge.app/Contents/MacOS/FileMerge) then
+      set known = 'yes'
+   endif
+endif
+
+if $known == 'no' then
+   echo "use diff to compare results of all tests:"
+else
+   echo "use opendiff to compare results of all tests:"
+   compare_OSX
+endif
+exit

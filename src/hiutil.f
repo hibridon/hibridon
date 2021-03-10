@@ -16,16 +16,25 @@
 * 9a. timdat     returns time and date
 * 10. gennam     routine to generate filenames                       *
 * 11. factlg     calculates factorials used in xf3j, xf6j, xf9j      *
-* 12. xf3j       function, returns value of 9j-symbol                *
+* 12. xf3j       function, returns value of 3j-symbol                *
 * 13. xf6j       function, returns value of 6j-symbol                *
 * 14. xf9j       function, returns value of 9j-symbol                *
 * 15. f3j0,f6j   3j and 6j routines for two molecule program
 * 16. intairy    evaluate s integrals of airy functions              *
 * 17.  cheby     evaluate expansion in chebyshev polynomials         *
+* 18. fehler     dummy subroutine for molpro2006.3 c compatibility   *
+* 19. sys_conf   determine and print out details of current machine  *
+*                and O/S                                             *
 **********************************************************************
 * NB cstart ultrix for fortran rather than c utilities
 **********************************************************************
+cstart unix-xlf
+c;@process fixed(132)
+cend
       subroutine vaxhlp(line1)
+cstart unix-ifort
+cdec$ fixedformlinesize:132
+cend
 * latest revision 24-feb-2004
       implicit character*10(z)
       character*(*) line1
@@ -409,7 +418,7 @@ c       k=index(line(i1:),';')
 * -----------------------------------------------------------------
       subroutine dater (cdate)
 *  subroutine to return calendar date and clock time
-*  current revision date: 1-jan-1996 by mha
+*  current revision date: 29-nov-2007 by mha
 *  -----------------------------------------------------------------
 *  variables in call list
 *
@@ -418,40 +427,68 @@ c       k=index(line(i1:),';')
 *              format hh:mm:ss
 *  -----------------------------------------------------------------
       character*20 cdate
-*  this is specifically adapted to the cray xmp-48 at the san diego
-*  supercomputer center running under ctss and fortlib
-cstart unix
-      character*10 ctime
-      character*10 cday
-      character*32 mach
-      call timdat(ctime,cday,mach)
-      cdate = cday//'  '//ctime//'   '
+cstart unix-xlf
+c;      character*8 d, date, c, clock
+c;      d=date()
+c;      c=clock()
+c;      cdate = d//'  '//c//'  '
+cend
+cstart unix-ifort unix-pgi
+      character*24 cdatefull
+      call fdate(cdatefull)
+      cdate=cdatefull(5:24)
+cend
+cstart unix-g95
+c;        character*24 cdatefull
+c;        cdatefull=fdate()
+c;        cdate=cdatefull(5:24)
 cend
       return
       end
 c-------------------------------------------------------------------
-      subroutine mtime(t1,t2)
+      subroutine mtime(t,te)
 *
-*  subroutine to return cpu and wall clock time in seconds
-*  current revision date: 3-jun-1991 by mha
+*  subroutine to return elapsed time in seconds
+*  current revision date: 4-dec-2007 by mha
 *
 *  -----------------------------------------------------------------
 *  variables in call list
 *
-*    t1:     on return:  contains cpu clock time in seconds
-*    t2:     on return:  contains wall clock time in seconds
+*    t:    on return:  contains cpu+system time in seconds
+*    te:   on return:  contains elapsed (wall) time in seconds
+*   note, if more than one core is being used by the process, then te will be
+*     less than t
 *
 *  -----------------------------------------------------------------
         implicit double precision(a-h,o-z)
-cstart
-c;      t1=second()
-c;      t2=t1
+cstart unix-xlf
+c;      t=timef()/1000d0
+c;      te=t
 cend
-cstart unix cray
-      double precision cpu,sys,tio
-      call timing(cpu,sys,tio)
-      t1=cpu
-      t2=sys+tio+cpu
+cstart unix-g95
+c;      real*4 tarray(2), result
+c;      call dtime(tarray,result)
+c;      t=tarray(1)
+c;      te1=result
+cend
+cstart unix-ifort
+      real*4 tt
+* use etime for user+cpu time
+* use cpu_time for user+cpu time
+      call cpu_time(tt)
+      t=tt
+* use dclock for elapsed (wall time).  this is (supposedly) accurate to
+* microseconds
+      te=dclock()
+cend
+cstart unix-pgi
+c;      real tt, tarray(2), result
+c;* use cpu_time for user+cpu time
+c;      call cpu_time(tt)
+c;      t=tt
+c;* use dtime for elapsed (wall time).
+c;      result=dtime(tarray)
+c;      te=result
 cend
 cstart ultrix-dec
 c;      common /codec/ ttim(2)
@@ -468,11 +505,15 @@ cend
       return
       end
 *------------------------------------------------------------------------
-cstart none
-c;      function second()
-c;      double precision second
-c;      second = long(362)/60.0d0
-c;      end
+      function second()
+      double precision second
+cstart unix-ifort unix-pgi
+      real*4 te
+      call cpu_time(te)
+      second=te
+cend
+cstart unix-xlf
+c;      second=timef()*1000d0
 cend
 cstart ultrix-dec
 c;      double precision function second()
@@ -480,32 +521,39 @@ c;      implicit double precision (a-h,o-z)
 c;      real et(2)
 c;      fe=etime(et(1),et(2))
 c;      second=fe
-c;      return
-c;      end
 cend
+cstart unix-g95
+c;      real*4 tarray(2), result
+c;      call dtime(tarray,result)
+c;      second=tarray(1)
+cend
+      return
+      end
 *------------------------------------------------------------------------
       subroutine gettim(sec,time)
 *
 *  author: b. follmeg
-*  current revision date: 23-sept-87
+*  current revision date: 30-nov-2007 by mha
 *
 *  subroutine to convert timing in seconds into string which contains
 *  time in format hour:min:sec:millisec (000:00:00.00)
 *  on input:  sec   -> seconds
 *  on output: time  -> string containing time (must have been dimensioned
-*                      as character*12 at least)
+*                      as character*13 at least)
       integer ihour, imin, isec, imilli
       double precision sec
-      character*(*) time
-      isecn=100*sec
-      imilli=mod(isecn,100)
-      isecn=isecn/100
+      character*13 time
+      isecn=1000*sec
+      imilli=mod(isecn,1000)
+*     write(6,*) 'sec, isec, isecn, imilli', sec, isec, isecn, imilli
+      isecn=isecn/1000
       isec=mod(isecn,60)
       isecn=isecn/60
       imin=mod(isecn,60)
       ihour=isecn/60
       write(time,10) ihour,imin,isec,imilli
-10    format(i3.2,':',i2.2,':',i2.2,'.',i2.2)
+10    format(i3.2,':',i2.2,':',i2.2,'.',i3.3)
+*     write (6,*) time
       return
       end
 * --------------------------------------------------------------------
@@ -597,7 +645,9 @@ cend
       include "common/comdot"
       xname=jobnam
       i=index(xname,dot)
-      if(i.eq.0) i=index(xname,' ')
+      if(i.eq.0) then
+         i=index(xname,' ')
+      endif
       if(ifil.eq.0) then
         ln=i-1
       else if(ifil.lt.10) then
@@ -670,7 +720,9 @@ c
       function xf3j(a,b,c,am,bm,cm)
 *     program to compute the 3j symbol (a b c / am bm cm)
 *     authors:  t. orlikowski and b. follmeg
-*     current revision date: 4-may-1997
+*     current revision date: 17-Feb-2011 by Jacek Klos
+*     (added condition check that checks if a and am, b and bm and
+*      c and cm are integers or half-integers at the same time)
 
 * --------------------------------------------------------------------------
       implicit double precision (a-h,o-z)
@@ -687,6 +739,11 @@ c
       if (abs(bm) .gt. b) goto 3
       if (abs(cm) .gt. c) goto 3
       if (am.eq.0 .and. bm.eq.0 .and.((iabc/2)*2).ne.iabc) goto 3
+c start_jk
+      if (abs(mod(a+am,one)) .gt. tol) goto 3
+      if (abs(mod(b+bm,one)) .gt. tol) goto 3
+      if (abs(mod(c+cm,one)) .gt. tol) goto 3
+c end_jk
       iacbm = nint(a - c + bm)
       ibcam = nint(b - c - am)
       iabmc = nint(a + b - c)
@@ -737,6 +794,7 @@ c
 3     xf3j = x
       return
       end
+
       function xf6j(a,b,e,d,c,f)
 *
 *                                    | a  b  e |
@@ -1059,12 +1117,12 @@ c
 20    lenstr=i
       return
       end
-cstart unix-convex cray
-c;      subroutine exit
-c;      write (6, 100)
-c;100   format (' *** EXIT FROM HIBRIDON ***')
-c;      stop
-c;      end
+cstart*unix-convex cray unix-darwin unix-x86
+*     subroutine exit
+*     write (6, 100)
+*100  format (' *** EXIT FROM HIBRIDON ***')
+*     stop
+*     end
 cend
 * ----------------------------------------------------------------------------
       subroutine intairy(x, xairy, xbiry)
@@ -1350,5 +1408,36 @@ c here follow nemeth's coefficients
 *      print *, 'i, b0, b1, b2, ac(i): ', i, b0, b1, b2, ac(i)
 10    continue
       function = b0 - half* txsq * b1
+      return
+      end
+      subroutine fehler
+      return
+      end
+      subroutine sys_conf
+      character*120 profile
+* to print out details of current hardware configuration
+cstart unix-darwin unix-x86
+      i=system("hib_sysconfig")
+      open(unit=4,file='sysprofile',access='sequential')
+      read (4,25) profile
+25    format(a120)
+      write (6,30)
+      write (9,30)
+30    format(
+     : ' ---------------------------------------------------',
+     :  '-----------------------')
+      write (6,35) profile
+      write (9,35) profile
+35    format(' CURRENT HARDWARE CONFIGURATION:',/,5x,a120,/,
+     : ' ---------------------------------------------------',
+     :  '-----------------------')
+       close(4)
+       i=system("rm -f sysprofile")
+cend
+cstart .not. unix-darwin .and. .not. unix-x86
+c;      write (6,40)
+c;      write (8,40)
+c;40    format('*** COMMAND SYSCONF NOT IMPLEMENTED FOR CURRENT O/S')
+cend
       return
       end

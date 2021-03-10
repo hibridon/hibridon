@@ -1,0 +1,75 @@
+
+The following changes have been made in bringing hibridon 4.1.5
+to relase level 4.2.1:
+9/1/06    added nelib spline.f and seval.f to hipotutil
+7/25/06   hiba2pi.f changed so that ntop=n always in bound state calculations
+7/21/06   hiba2pi.f comment at the beginning of vlm2pi changed to indicate
+          reference to correction given by G.C. Corey and M. H. Alexander, JCP 85, 5652 (1986)
+6/10/06   changed to correct cs centrifugal barrier for bound state
+          1sig (hiba1sg.f) and 2sig (hiba2sg.f)
+          changed hibound.f to write out size of total basis
+          changed hiiolib to reset numax=numin in bound state problems
+             if CS flag=true and if numin>numax in input
+6/9/06    added -lSystemStubs to makeconfig for Darwin OS X 10.4
+4/11/06   changed makeconfig to allow for aix5/xlf8.1 on powerpc_4
+          changed makeobj to use cc for hiunix rather than xlc
+10/25/05  changed call in hibound from dsygv to dsygvd - much faster.
+          change kaux3 in himain.t
+10/24/05  changed himain.t, hibound:  error in eigenvalues for bound state problem
+          corrected
+10/20/05  changed hinput, hisystem, hiba1sg to allow a 15th basis type:  
+          2P atom with a possibly heteronuclear diatomic
+3/15/05   wavevectors in angstrom in hibrid1.f - conversion factor corrected
+4/11/04   mnscript & vscript changed to allow four-element machine type from 
+          machine.exe
+4/11/04   makeconfig changed for PA8000/HPUX11.0
+4/7/04    hibrid3.f changed so that rles works on aix machines
+4/6/04    small changes to makehib and makepot
+4/6/04    small format change in prsgpi (hibrid2.f)
+4/4/04    change makepot to eliminate adding hiiolib.o in link
+2/29/04   maketar changed 
+2/29/04   copyright updated
+2/24/04   replace "call rs" with dsyev in hibound for unix-darwin
+2/24/04   replace remaining "call abort" with "stop"
+2/24/04   change ftconv.exe to ftconv_hib.exe to avoid conflict with
+          molpro
+2/24/04   all "cstart mac"'s eliminated
+2/24/04   rles changed to call lapack routines dgetrf and dgetrs
+2/24/04   call to tqlrat in wavevc replaced by call to dsyevr
+2/23/04   eigenvalue/eigenvector call in potent replaced by call to dsyevr
+2/23/04   maketar, makeconfig updated
+2/23/04   hibound corrected so that call to lapack dsygv is made
+2/23/04   minor typo corrected in /bin/runtest
+2/22/04   calls to smxinv replaced with call to syminv for matrix
+          inversion, this calls lapack dsytrf and dsytri
+12/28/03  himain and himatrix changed to allow call to lapack dspev for
+          matrix diagonalization in MacOSX version
+12/28/03  hibrid1.f changed to allow call to dgemm in dtrans instead
+          of mxma in MacOSX version
+12/28/03  hiiolib.f changed to ensure that sratch files for cs
+          calculations are closed before they are opened
+12/27/03  makeconfig and makemachine changed for MacOSX 10.3.2 with xlf 8.1beta
+
+to migrate to release 4.2, you should download the upgraded tar file for the 
+complete package from the website
+     www.chem.umd.edu/physical/alexander/hibridon     
+
+and follow the installation instructions contained on the webpage
+     www.chem.umd.edu/physical/alexander/hibridon/install.html
+
+to retain a copy of any previous versions, you may wish to
+carry out the intall in a new main hibridon directory.
+
+the current release level has been checked for the following
+operating system and compiler environments:
+
+MacOSX v. 10.3.2
+  xlf compiler 8.1
+
+not yet fully operational on the following machines
+AIX v. 4.2, 4.3
+  xlf compiler 3.2.3, 3.2.4, 7.1
+HP-UX v. 9.01, 9.02, 9.03, 10.01, 10.20, 11.0
+IRIX 6.5 f77v7.1
+OSF v3.2
+SunOS v2 rel. 4.1.4, 5.5.1, 5.7 (f77 v6.2)

@@ -1,0 +1,34 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 4.3 BUILD DATE 02/13/08 16:23:00 EST
+
+     AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI
+               A. BERNING, A. DEGLI-ESPOSTI, C. RIST, P. DAGDIGIAN, B. POUILLY
+               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, J. KLOS
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+SYS=OS X 10.5.2; MACH=unix-darwin unix-ifort
+CC=/usr/bin/cc -DNAME_LU; FC=/opt/intel/fc/10.1.007/bin/ifort -O3 -save
+LIB_ROOT=-L/Library/Frameworks/Intel_MKL.framework/Versions/10.0.1.014/lib/32
+LIBRARIES:
+-lmkl_intel -lmkl_intel_thread -lmkl_core -lmkl_intel_thread -lmkl_core -lmkl_intel_thread -lmkl_core -lguide -lpthread
+ --------------------------------------------------------------------------
+ Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  ** NERG HAS BEEN RESET TO  5
+ Hibridon>  ** J =   60 JLPAR = 1 FINISHED;  CPU: 00:00:12.381  WALL: 00:00:07.738  DATE: Feb 13 16:23:15 2008
+ ===============================================================================
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:  256
+      TIMING (FIRST ENERGY):  ELAPSED 00:00:02.881/ CPU 00:00:04.131/ MP RATIO 143.4
+      TIMING (SECOND ENERGY): ELAPSED 00:00:01.214/ CPU 00:00:02.062/ MP RATIO 169.8
+      CURRENT DATE:  Feb 13 16:23:15 200
+ ===============================================================================
+ Hibridon>  Hibridon>  Hibridon>  Hibridon>  ** J =   60 JLPAR = 1 FINISHED;  CPU: 00:00:05.324  WALL: 00:00:03.277  DATE: Feb 13 16:23:18 2008
+ ===============================================================================
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:  256
+      TIMING (FIRST ENERGY):  ELAPSED 00:00:01.699/ CPU 00:00:02.531/ MP RATIO 148.9
+      TIMING (SECOND ENERGY): ELAPSED 00:00:00.394/ CPU 00:00:00.698/ MP RATIO 177.1
+      CURRENT DATE:  Feb 13 16:23:18 200
+ ===============================================================================
+ Hibridon> 

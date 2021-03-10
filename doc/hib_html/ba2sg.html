@@ -1,0 +1,53 @@
+<TITLE>ba2sg</TITLE>
+<h3><center><font color=#brown >Basis Subroutine
+ and System Specific Parameters: Collisions between a <sup>2</sup>Sigma Molecule and a Spherical Atom
+</h3>
+</center></font><hr>
+
+<tt>BASISTYPE = 2</tt><p>
+<ul>
+	System subroutine: <tt>sy2sg</tt><p>
+	Basis subroutine: <tt>hiba2sg.f</tt></ul>
+
+
+<font size=-1><i>Ref.</i> M. H. Alexander, J. Chem. Phys. <b>76</b>, 3637 (1982).</font>
+<hr>
+The definition of the integer system dependent parameters is as follows:
+<ul>     NTERM (the number of potential surfaces involved:  this should be 1
+            in this case).  This parameter can not be changed<p>
+     NPAR:  number of symmetry components included<ul>
+               If NPAR = 1,   just <img src=eps12.gif align=bottom> = +1 states are included<br>
+               If NPAR .ne. 1, both <img src=eps12.gif align=bottom> = +1 and <img src=eps12.gif align=bottom> = - 1 states are included<br>
+</ul>
+ <p>    NRMAX:     maximum Hund's case (b) rotational quantum number N.  
+<p>ISYM:  reflection symmetry of electronic state
+<ul>
+ISYM= +1 for <img src=sigma12.gif align=bottom><sup>+</sup> states<br>
+ISYM = -1 for <img src=sigma12.gif align=bottom><sup>-</sup> states<br>
+</ul>
+
+<p>IGU:  inversion symmetry of states included in expansion.
+<ul>
+IGU = +1 for <i>gerade</i> states<br>
+IGU = -1 for <i>ungerade</i> states<br>
+for heteronuclear molecules IGU should be +1 
+</ul>
+<p>ISA:  Nuclear permutation symmetry (<i>s/a</i> label) of states included in expansion.
+<ul>
+If the <a href=flags.html>flag</a> <a href=flaghf.html>IHOMO</a> is .TRUE.,
+then only
+<i>s</i> states will be included if ISA = +1 and only <i>a</i> states if
+              ISA = -1</ul>
+
+<!-- 
+<p>N0_MAX:  (not used here)
+ -->
+</ul>
+The definition of the real system dependent parameters is as follows:
+<ul>       BROT:    rotational constant<br>
+       GSR:     spin-rotation constant<br>
+       DROT:    centrifugal distortion constant<br>
+       HROT:    second centrifugal distortion constant<br>
+</ul>
+<hr>
+<a href=hibhelp.html><img src=up_arrow.gif border=0 align=middle></a>&#160;Return to <a href=hibhelp.html>Hibridon Help</a>

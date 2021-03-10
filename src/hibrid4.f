@@ -790,9 +790,13 @@ c.....assume that jlpar=1 is stored first
 *  matrices of maximum row dimension nmax, stored in packed column form
       dimension vecnow(1), vecnew(1), tmat(1)
       data isw / 0/
-cstart cray unix mac
-      call mxma (vecnew, 1, nmax, vecnow, nmax, 1, tmat, 1, nmax,
-     :            n, n, n)
+cstart none
+c;      call mxma (vecnew, 1, nmax, vecnow, nmax, 1, tmat, 1, nmax,
+c;     :            n, n, n)
+cend
+cstart unix-darwin unix-x86
+      call dgemm('n','t',n,n,n,1.d0,vecnew,nmax,vecnow,nmax,
+     :           0d0,tmat,nmax)
 cend
 *  restore eigenvectors
       call matmov (vecnew, vecnow, n, n, nmax, nmax)
@@ -845,7 +849,7 @@ cend
 *  this subroutine first sets up the wavevector matrix at rnow
 *  then diagonalizes this matrix
 *  written by:  millard alexander
-*  current revision date: 24-feb-2004
+*  current revision date: 14-dec-2007
 * ----------------------------------------------------------------
 *  variables in call list:
 *  w:           matrix of maximum row dimension nmax used to store
@@ -867,13 +871,14 @@ cend
 *      real rnow, xmin1
 *      real eignow, scr1, scr2, w
       integer icol, ierr, ipt, nch, nmax, nmaxm1, nmaxp1, nrow
-      external dscal, dcopy, potmat, tred1, tqlrat
+      external dscal, dcopy, potmat
+*     external dscal, dcopy, potmat, tred1, tqlrat
 *  square matrix (of row dimension nmax)
       dimension w(1)
 *  vectors dimensioned at least nch
       dimension eignow(1), scr1(1), scr2(1)
 *  local arrays (for lapack dsyevr)
-cstart unix-darwin
+cstart unix-darwin unix-x86
       dimension isuppz(2*nch),iwork(10*nch),work(57*nch)
 cend
 
@@ -905,10 +910,10 @@ cend
           ipt = ipt + nmaxp1
 110     continue
       end if
-cstart unix-darwin
+cstart unix-darwin unix-x86
       lwork=57*nch
       liwork=10*nch
-      abstol=0d0
+      abstol=1.e-16
       lsup=2*nch
       call dsyevr('N','A','L',nch,w,nmax,vl,vu,il,iu,abstol,m,
      :   eignow,vecnow,nmax,isuppz,work,lwork,iwork,liwork,ierr)
@@ -922,7 +927,7 @@ cstart unix-darwin
         call exit
       end if
 cend
-cstart unix .and. .not. unix-darwin
+cstart unix .and. .not. unix-darwin .and. .not. unix-x86
 c;*  transform w to tridiagonal form
 c;*  eignow, scr1 and scr2 are used as scratch vectors here
 c;      call tred1 (nmax, nch, w, eignow, scr1, scr2)
@@ -944,7 +949,7 @@ cend
 *  subroutine to write initial header information on wavefunction file
 *  (file jobname.WFU, logical unit 22), unit is opened in subroutine openfi
 *     written by:  millard alexander
-*     latest revision:  30-dec-1995
+*     latest revision:  4-dec-2007
 *     common blocks amat and bmat are used to store real and
 *     imaginary parts of asymptotic wavefunction (only used in
 *     read of wavefunction from saved file)
@@ -984,6 +989,7 @@ cend
       dimension iword(32), word(4)
       ifil=2
       zero=0.d0
+      izero=0
       if (nchtop .gt. 300) then
         write (6, 60) nchtop
 60      format(/' *** NCHTOP=',i3,
@@ -1053,6 +1059,7 @@ cend
       entry waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto,jflux,
      :            rstart,rendld,rinf)
       ifil=2
+      izero=0
       call drest(ifil)
       call dbri(iword,32,ifil,1)
       j=1
@@ -1070,6 +1077,8 @@ cend
         write(oldpot(j:j+3),'(A4)') iword(i+15)
         j=j+4
 230   continue
+      oldlab=oldlab(1:40)
+      oldpot=oldpot(1:40)
       label=oldlab
       potnam=oldpot
       jtot=iword(26)
@@ -1278,7 +1287,7 @@ cend
       character*(*) filnam
       character*40  psifil, wavfil, amplfil, flxfil
       character*20  cdate
-      character*12  elaps, cpu
+      character*13  elaps, cpu
       character*5   s13p(12)
       logical exstfl, batch, lpar(3), photof, wavefn, adiab,
      :                ldum, csflag,kill,llpar(19),propf, sumf,
@@ -1382,7 +1391,8 @@ cend
       endif
 *
 * generate filename and check if it is present
-*
+      ien=0
+      wavfil=filnam//'.wfu'
       call gennam(wavfil,filnam,ien,'wfu',lenfs)
       inquire(file = wavfil, exist = exstfl)
       if (.not. exstfl) then
@@ -1408,7 +1418,7 @@ cend
         write (2, 12) wavfil
 12      format('    INFORMATION FROM FILE: ',(a))
         write (2,13) cdate
-13    format('    THIS CALCULATION ON:  ',(a))
+13    format('    THIS CALCULATION ON: ',(a))
       endif
       if (jflux .ne. 0) then
 * open file to save generated flux
@@ -1440,7 +1450,7 @@ cend
 17        format(/' ** TRANSFORMATION MATRIX **',/)
         endif
         write (3,18) cdate
-18      format('    THIS CALCULATION ON:  ',(a))
+18      format('    THIS CALCULATION ON: ',(a))
       endif
 * read header information, s matrix, and asymptotic wavefunction and
 * derivative
@@ -2636,10 +2646,11 @@ cend
 * subroutine to print out transformation matrix at rout
 *
 * author: millard alexander
-* current revision date: 16-oct-1999 by mha
+* current revision date: 18-may-2008 by mha
 *
 * ------------------------------------------------------------------
       implicit double precision (a-h,o-z)
+      logical renormf
       common /cowave/ irec, ifil
       common /coamat/ psir(100)
       common /cow/    sr(100)
@@ -2647,6 +2658,7 @@ cend
       common /cosc6/ sc(6)
       common /cosc7/ sc1(6)
       common /coisc2/ nlist(6)
+      dimension scrvec(64)
       irec=npts+4
       delold=1.d+18
       do 200 kstep=1, npts
@@ -2672,16 +2684,37 @@ cend
 * print out transpose matrix (reverse order since eispack
 * determines highest eigenvalue first
               ind=nchsq-nch+1
-
+* if more than 64 channels, then eliminate all elements with i>64, and renormalize vector
+              nnch=nch
+              if (nch.gt.64) then
+                 renormf=.true.
+                 write (3,162) nch
+                 write (6,162) nch
+162      format('    CHANNEL EXPANSION TRUNCATED FROM NCH =',i4,
+     :             ' TO NCH = 64;')
+                 write (3,163)
+                 write (6,163)
+163      format('       EIGENVECTOR RENORMALIZED')
+                 nnch=64
+              else
+                 renormf=.false.
+              endif
               call openf(4,'tmatrix.dat','sf',0)
               nstate=min(12,nch)
               do 190 ii=1,nstate
 *             do 190 ii=1,nch
+                if (renormf) then
+                   call dcopy(64,si(ind),1,scrvec,1)
+                   cnorm=ddot(64,scrvec,1,scrvec,1)
+                   cnorm=1d0/sqrt(cnorm)
+                   call dscal(64,cnorm,scrvec,1)
+                   call dcopy(64,scrvec,1,si(ind),1)
+                endif
                 write (3,175) -r+0.5*drnow, ii,
-     :            (si(ij), ij=ind,ind+nch-1)
+     :            (si(ij), ij=ind,ind+nnch-1)
                 write (4,175) -r+0.5*drnow, ii,
-     :            (si(ij), ij=ind,ind+nch-1)
-175           format(f7.4,i3,26f10.6)
+     :            (si(ij), ij=ind,ind+nnch-1)
+175           format(f7.4,i3,64f10.6)
                 ind=ind-nch
 190           continue
               close(4)
@@ -2695,9 +2728,16 @@ cend
 
               call openf(4,'tmatrix.dat','sf',0)
               do 195 ii=1,nstate
+                if (renormf) then
+                   call dcopy(64,si(ind),1,scrvec,1)
+                   cnorm=ddot(64,scrvec,1,scrvec,1)
+                   cnorm=1d0/sqrt(cnorm)
+                   call dscal(64,cnorm,scrvec,1)
+                   call dcopy(64,scrvec,1,si(ind),1)
+                endif
 *              do 195 ii=1,nch
                 write (4,175) -r+0.5*drnow, ii,
-     :            (si(ij), ij=ind,ind+nch-1)
+     :            (si(ij), ij=ind,ind+nnch-1)
                 ind=ind-nch
 195           continue
               close(4)

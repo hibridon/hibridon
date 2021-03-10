@@ -1,0 +1,22 @@
+# HIBRIDON CONFIG generated at Sat Feb 9 18:34:49 EST 2008 for release 4.3.1
+#                 for architecture unix-x86 unix-pgi
+# THIS IS A DEFAULT CONFIG FILE FOR USE ON LINUX INTEL PLATFORMS WITH PORTLAND GROUP PGF95 AND ACML
+# Machine type ..
+MACH="unix-x86 unix-pgi"
+# Compilers ..
+FC="/software/dt-sw0/pgi/sys/7.1/bin/pgf95 -Mcache_align"
+# compiler optimisation
+FOPT="-fast"
+# compiler explicit no optimisation
+FNOPT=" "
+# compiler debug flag
+FDEBUG="-g"
+# static variables
+FSTATIC="-Msave"
+# 64-bit integers
+FI64=" "
+# additional libraries and link options
+LIBS=" -L/cell_root/software/pgi/linux86-64/7.1-3/lib -lacml"
+LINKOPT=""
+# files in src to be compiled without optimization
+NO_OPT="hinput.f himain.f hiversion.f"

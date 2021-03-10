@@ -1,0 +1,122 @@
+#!/bin/csh -f 
+# HIBRIDON bin/compare_hibridon $Revision: 2010.1 $ --- compare src, pot, and doc files in two 
+# hibridon directories
+# compare_hibridon directory1  directory2
+
+set currentdir=`pwd`
+set basedir=`hibriddir`
+
+# default values for options and kmax
+
+@ items = $#argv
+if ($items < 2 | $items > 2) then
+  echo "usage: compare_hibridon directory1 directory2"
+  goto end
+endif
+set d1 = "/Users/$USER/$1"
+set d2 = "/Users/$USER/$2"
+
+echo "comparing hibridon directories $d1 and $d2"
+
+echo " ... source code"
+
+cd /$d1/src
+ls -1 hi*.f  > newlist
+set name = `head -1 newlist`
+set existfl = 1
+md5sum $name > directory1.md5
+sed "1,1d" newlist >newcheck
+mv newcheck newlist
+  while ($existfl != 0)
+    set name = `head -1 newlist`
+    md5sum $name >> directory1.md5
+    sed "1,1d" newlist > newcheck
+    mv newcheck newlist
+    if (-z newlist) set existfl = 0
+  end
+  rm newlist
+
+# compare with directory 2
+cd /$d2/src
+md5sum -c $d1/src/directory1.md5
+rm -rf $d1/src/directory1.md5
+
+
+echo " ... pot source code"
+
+cd /$d1/src/pot
+pwd
+ls -1 pot*.f  > newlist
+set name = `head -1 newlist`
+set existfl = 1
+md5sum $name > directory1.md5
+sed "1,1d" newlist >newcheck
+mv newcheck newlist
+  while ($existfl != 0)
+    set name = `head -1 newlist`
+    md5sum $name >> directory1.md5
+    sed "1,1d" newlist > newcheck
+    mv newcheck newlist
+    if (-z newlist) set existfl = 0
+  end
+  rm newlist
+
+# compare with directory 2
+cd /$d2/src/pot
+md5sum -c $d1/src/pot/directory1.md5
+rm -rf $d1/src/pot/directory1.md5
+
+echo " ... doc code"
+
+cd /$d1/doc
+md5sum hibrid.hlp > directory1.md5
+cd /$d2/doc
+md5sum -c $d1/doc/directory1.md5
+rm -rf $d1/doc/directory1.md5
+
+cd $d1/doc/hib_html
+
+ls -1 *.html   > newlist
+set name = `head -1 newlist`
+set existfl = 1
+md5sum $name > directory1.md5
+sed "1,1d" newlist >newcheck
+mv newcheck newlist
+  while ($existfl != 0)
+    set name = `head -1 newlist`
+    md5sum $name >> directory1.md5
+    sed "1,1d" newlist > newcheck
+    mv newcheck newlist
+    if (-z newlist) set existfl = 0
+  end
+  rm newlist
+# compare with directory 2
+cd /$d2/doc/hib_html
+md5sum -c $d1/doc/hib_html/directory1.md5
+
+cd $d1/doc/hib_html
+
+ls -1 *.gif   > newlist
+set name = `head -1 newlist`
+set existfl = 1
+md5sum $name > directory1.md5
+sed "1,1d" newlist >newcheck
+mv newcheck newlist
+  while ($existfl != 0)
+    set name = `head -1 newlist`
+    md5sum $name >> directory1.md5
+    sed "1,1d" newlist > newcheck
+    mv newcheck newlist
+    if (-z newlist) set existfl = 0
+  end
+  rm newlist
+# compare with directory 2
+cd /$d2/doc/hib_html
+md5sum -c $d1/doc/hib_html/directory1.md5
+rm -rf $d1/doc/hib_html/directory1.md5
+
+end:
+
+
+exit
+

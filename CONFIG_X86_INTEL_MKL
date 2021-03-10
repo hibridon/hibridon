@@ -1,0 +1,23 @@
+# HIBRIDON CONFIG generated at Thu Jan 31 23:15:42 EST 2008 for release 4.3.1
+#                 for architecture unix-x86 unix-ifort
+# THIS IS A DEFAULT CONFIG FILE FOR USE ON LINUX INTEL PLATFORMS WITH IFORT AND MKL LIBRARY
+# Machine type ..
+MACH="unix-x86 unix-ifort"
+# Compilers ..
+FC="/cell_root/software/intel//fce/10.1.008/bin/ifort "
+# compiler optimisation
+FOPT="-O3"
+# compiler explicit no optimisation
+FNOPT=" "
+# compiler debug flag
+CDEBUG="-g"
+FDEBUG="-g"
+# static variables
+FSTATIC="-save"
+# 64-bit integers
+FI64=" "
+# additional libraries and link options
+LIBS=" -L/cell_root/software/intel/mkl/10.0.011/lib/em64t -lmkl_em64t -lmkl_intel_thread -lmkl_core -lguide -openmp"
+LINKOPT=""
+# files in src to be compiled without optimization
+NO_OPT="hinput.f himain.f hiversion.f"

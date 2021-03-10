@@ -42,7 +42,24 @@ job=cstest
 run
 printc
 partc
-
+label=test of multiple energies
+job=multien
+jtot1=0
+jtot2=0
+jtotd=1
+csflag=f
+wrsmat=t
+wrpart=t
+wrxsec=t
+jlpar=0
+energ=100,105,106,107,100,100
+run
+printc,,,,4
+printc,,,,6
+job=mltien
+run
+intcrs,,4
+intcrs,,6
 inp=arn2_dxsec.inp
 show
 job=ccdxsec

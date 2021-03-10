@@ -1,3 +1,26 @@
+9/1/06    added nelib spline.f and seval.f to hipotutil
+7/25/06   hiba2pi.f changed so that ntop=n always in bound state calculations
+7/21/06   hiba2pi.f comment at the beginning of vlm2pi changed to indicate
+          reference to correction given by G.C. Corey and M. H. Alexander, JCP 85, 5652 (1986)
+6/10/06   changed to correct cs centrifugal barrier for bound state
+          1sig (hiba1sg.f) and 2sig (hiba2sg.f)
+          changed hibound.f to write out size of total basis
+          changed hiutil to activate subroutine exit for darwin
+          changed hiiolib to reset numax=numin in bound state problems
+             if CS flag=true and if numin>numax in input
+6/9/06    added -lSystemStubs to makeconfig for Darwin OS X 10.4
+4/11/06   changed makeconfig to allow for aix5/xlf8.1 on powerpc_4
+          changed makeobj to use cc for hiunix rather than xlc
+10/25/05  changed call in hibound from dsygv to dsygvd - much faster.
+          change kaux3 in himain.t
+10/24/05  changed himain.t, hibound:  error in eigenvalues for bound state problem
+          corrected
+10/20/05  changed hinput, hisystem, hiba1sg to allow a 15th basis type:  
+          2P atom with a possibly heteronuclear diatomic
+3/15/05   wavevectors in angstrom in hibrid1.f - conversion factor corrected
+4/11/04   mnscript & vscript changed to allow four-element machine type from
+          machine.exe
+4/11/04   makeconfig changed for PA8000/HPUX11.0
 4/7/04    hibrid3.f changed so that rles works on aix machines
 4/6/04    small changes to makehib and makepot
 4/6/04    small format change in prsgpi (hibrid2.f)

@@ -1,0 +1,46 @@
+#!/bin/csh -f
+# HIBRIDON bin/hibtest $Revision: 2009.4 $ --- link and run hibridon tests
+# the PATH variable should be set to include the hibridon bin directory
+
+set basedir=`hibriddir`
+
+echo "linking hib_ch3i with kmax=100 ... "
+if (-e $basedir/bin/progs/hib_ch3i_100) then
+  rm $basedir/bin/progs/hib_ch3i_100
+  echo "replacing current copy of $basedir/bin/progs/hib_ch3i_100 ..."
+endif
+set var1 = ch3i
+set var2 = 100
+$basedir/bin/makehib $var1 $var2>>& $basedir/h_ch3i.log
+if (-e $basedir/bin/progs/hib_ch3i_100) then
+else
+  echo "$basedir/bin/progs/hib_ch3i_100 not created, check $basedir/h_ch3i.log"
+  echo ""
+  exit
+endif
+
+ 
+cd $basedir
+if (-e testnew) then
+  echo ""
+  echo "removing old directory $basedir/testnew"
+  rm -r testnew
+endif
+mkdir testnew
+cp tests/*.com testnew
+cp tests/*.inp testnew
+cp tests/*.BIN testnew
+cp tests/*.dat testnew
+cp tests/*.fluxinp testnew
+cd testnew
+  echo "running ch3i tests ..."
+  $basedir/bin/progs/hib_ch3i_100 <ch3i_test.com >ch3i_test.log
+  echo "ch3i tests completed, compare result files:"
+  echo "  $basedir/testnew with $basedir/tests"
+  rm $basedir/testnew/*.wfu  >>& $basedir/testnew/ch3i_test.log
+  rm $basedir/testnew/*.sav  >>& $basedir/testnew/ch3i_test.log
+  rm $basedir/testnew/*.smt  >>& $basedir/testnew/ch3i_test.log
+  rm $basedir/testnew/*.tcb  >>& $basedir/testnew/ch3i_test.log
+  rm $basedir/bin/progs/hib_ch3i_100
+
+exit

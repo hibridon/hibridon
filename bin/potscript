@@ -1,5 +1,5 @@
 #!/bin/csh -f
-# HIBRIDON bin/potscript $Revision: 2004.2 $ --- 
+# HIBRIDON bin/potscript $Revision: 2011.1 $ --- 
 # converts pot_name.f file to new machine, and then replaces original .f
 # file with the converted file
 
@@ -47,7 +47,7 @@ ls -1 pot_$1.f >>control.file
 echo '' >> control.file
 echo "fin" >> control.file
 chmod +x control.file
-control.file 
+./control.file 
 echo ""
 echo "pot_$1.f file converted, copying back ..."
 rm control.file

@@ -1,12 +1,16 @@
-cstart unix-ibm unix-aix
-@process noopt
-cend
-cstart unix-hp
-c;!$hp$optimize off
+cstart unix-xlf
+@process fixed(132)
 cend
       subroutine version(iunit)
+cstart unix-ifort
+cdec$ fixedformlinesize:132
+cend
+      character*100 profile
+      character*140 build
+      common /bld_config/ build(5)
+      integer(4) i
 * to output version number of hibridon code
-* current revision date:  24-feb-2004
+* current revision date:  15-aug-2009
       write (iunit, 10)
 10    format
      : (/' ---------------------------------------------------',
@@ -14,23 +18,39 @@ cend
      :  /,9x,
      :   '  HIBRIDON SCATTERING CODE V xdate',
      : //'     AUTHORS: M. ALEXANDER, D. MANOLOPOULOS,',
-     :   ' H.-J. WERNER, B. FOLLMEG',
+     :   ' H.-J. WERNER, B. FOLLMEG, P. DAGDIGIAN',
      :  /' CONTRIBUTORS: D. LEMOINE, P. VOHRALIK,',
      :  ' G. COREY, R. JOHNSON, T. ORLIKOWSKI',
      :  /'               A. BERNING, A. DEGLI-ESPOSTI,',
-     :  ' C. RIST, P. DAGDIGIAN, B. POUILLY',/,
-     :  '               G. VAN DER SANDEN, M. YANG, F. DE WEERD',
-     :  ', S. GREGURICK, J. KLOS',
+     :  ' C. RIST, B. POUILLY, G. VAN DER SANDEN,',/,
+     :  '               M. YANG, F. DE WEERD',
+     :  ', S. GREGURICK, J. KLOS, F. LIQUE',
      : /' ---------------------------------------------------',
      :  '-----------------------')
+cstart unix-darwin .or. unix-x86
+      write (iunit,15)
+15    format(11x,'BUILD CONFIGURATION:')
+      do i=1,5
+          call linout(build(i),iunit)
+      enddo
+      write (iunit,20)
+20    format (' ---------------------------------------------------',
+     :  '-----------------------')
+cend
+cstart none
+      i=system("hib_sysconfig")
+      open(unit=8,file='sysprofile',access='sequential')
+      read (8,25) profile
+25    format(a100)
+      write (iunit,30) profile
+30    format(' CURRENT HARDWARE CONFIGURATION:',/,9x,a100,/,
+     : ' ---------------------------------------------------',
+     :  '-----------------------')
+       close(8)
+       i=system("rm -f sysprofile")
+cend
       return
       end
-cstart unix-ibm unix-aix
-@process noopt
-cend
-cstart unix-hp
-c;!$hp$optimize off
-cend
       subroutine acknow(iunit,ipos)
 * to acknowledge authors of hibridon
 * current revision date:  24-feb-2004
@@ -53,14 +73,14 @@ cend
      :  ' quantum treatment',
      :  ' of inelastic collisions and photodissociation',
      :  /,' written by',
-     :  ' M. H. Alexander, D. E.  Manolopoulos, H.-J. Werner, and',
-     : ' B. Follmeg,',
+     :  ' M. H. Alexander, D. E.  Manolopoulos, H.-J. Werner, B. Follmeg',
+     : ' and P. J. Dagdigian,',
      :  ' with contributions by',
      :  ' P. F. Vohralik, D. Lemoine,',
-     :  /,' G. Corey, B. Johnson, T. Orlikowski, A. Berning,',
-     :  ' A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly,',
-     :  ' G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, and ',
-     :  ' J. Klos',
+     :  /,' G. Corey, B. Johnson, T. Orlikowski, A. Berning, A. Degli-Esposti,',
+     :  ' C. Rist, B. Pouilly,',
+     :  ' G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick,',
+     :  /,' J. Klos, and F. Lique',
      : /,' --------------------------------------------------------',
      :  '-------------',
      :  '----------------------------------------------------------')
@@ -91,15 +111,28 @@ cend
      :  ' quantum treatment',
      :  /,' of inelastic collisions and photodissociation',
      :  ' written by',
-     :  ' M. H. Alexander,',/,' D. E.  Manolopoulos, H.-J. Werner, and',
-     : ' B. Follmeg,',
+     :  ' M. H. Alexander,',/,' D. E.  Manolopoulos, H.-J. Werner,',
+     : ' B. Follmeg, and P. J. Dagdigian,',
      :  ' with contributions by',
      :  /,' P. F. Vohralik, D. Lemoine,',
-     :  ' G. Corey, B. Johnson, T. Orlikowski, A. Berning,',
-     :  /,' A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly,',
-     :  ' G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, and ',
-     :  ' J. Klos',
+     :  ' G. Corey, B. Johnson, T. Orlikowski, A. Berning, A. Degli-Esposti,',
+     :  /,' C. Rist, B. Pouilly,',
+     :  ' G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J. Klos,',
+     :  /,' and F. Lique',
      : /,' --------------------------------------------------------',
      :  '---------------------')
       return
       end
+      subroutine linout(l,iunit)
+      character*(*) l
+      write (iunit,'(a)') l(1:lenstr(l))
+      return
+      end
+cstart unix-xlf
+@process fixed(132)
+cend
+cstart unix-darwin .or. unix-x86
+      block data config
+c variables in data config
+      character*140 build
+      common /bld_config/ build(5)

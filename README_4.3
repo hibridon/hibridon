@@ -1,0 +1,70 @@
+
+The following changes have been made in bringing hibridon 4.2.1
+to release level 4.3
+09/09     Added asymmetric top basis
+08/09     Added capability of calculating hyperfine-resolved integral cross sections
+          Added F. Lique to contributor list
+12/08-1/09 Updated and corrected hitensor.f, himain.t to allow correct determination of tensor
+           cross sections for 2Pi molecules
+12/17/07  allow one more significant figures in printed integral cross sections in hibrid2.f
+12/16/07  initialize izero in wavewr and waverd
+          replace calls to mxma in hibrid3 with dgemm under unix-darwin
+12/15/07  let abstol=1.d-16 instead of 0d0 in call to dsyevr in subroutine potent
+          change to character*12 time strings in propag
+          initialize izero in smatrx
+          replace call to mxma with call to dgemm in subroutine steppr
+          set abstol = 1.d-16 instead of 0d0 in to call dsyever in subroutine wavevc
+12/8/07   change format in hibrid2 to use floating rather than fixed format printing ics files
+12/4/07   in hibrid4 truncate oldlab and oldpot to 40 characters in waverd
+          in hiiolib_c.f and hiiolib_f.f dimension iword(32) in restrt
+          himain.t ifort mtime changed
+12/3/07   change hibrid2 to append integral cross section file in prsg, prsgpi for ifort
+          change the name of runtest to hibtest
+          removed inclusion of hiunix.c in makepot scripts
+          change hibrid5 to allow accurate determination of sum of partial cross sections after restart
+          add compare_OSX.com in tests to allow use of FileMerge.app under OSX 
+12/2/07   change hinput to truncate jobname to 8 characters
+          change hiiolib to append sequential, formatted files in openf for ifort
+12/1/07   change hiiolib.f (both c and fortran) to allow longer output for JOUT
+11/30/07  use hiunix.c from v 2006.0 from molpro
+11/30/07  use machines.h (v. 2006.3 Patch(2006.3)) from molpro
+11/29/07  in hiutil.f, change function second, dater for fortran, rather than c, calls
+11/26/07  add cc_hib procedure in ~/bin
+11/26/07  add dummy fehler subroutine to hiutil.f for compatibility with molpro2006.3 c_routines
+11/26/07  remove nooptimization flags from hiversion.t
+          change maketar to remove /src/himain.f
+          remove nooptimization flags from himain.t.   himain.f is no longer explicitly compiled 
+          in makeobj
+          explicitly compile hiinput.f and hiversion.f with -n in makeobj
+          eliminate compilation of himain.f in makeobj
+          replace hiunix.c with combination of rdabsf.c and timing_molpro.c from
+          molpro2006.3
+          replace machines.h with molpro2006.3 version
+11/25/07  eliminate makemachine, makeconfig, replace makefirst
+
+to migrate to release 4.3, you should download the upgraded tar file for the 
+complete package from the website
+     www.chem.umd.edu/groups/alexander/hibridon/hib43
+
+and follow the installation instructions contained on the webpage
+     www.chem.umd.edu/groups/alexander/hibridon/hib43/install.html
+
+to retain a copy of any previous versions, you may wish to
+carry out the intall in a new main hibridon directory.
+
+the current release level has been checked for the following
+operating system and compiler environments:
+MacOSX v. 10.5.x
+  ifort compiler 10.1.012, 11.0.064, 11.1.058
+  MKL:  10.0.2.018, 11.0.064, 11.1.058
+MacOSX v. 10.4.11
+  ifort compiler 9.1.041
+  xlf compiler 8.1
+
+not yet fully operational on the following machines
+AIX v. 4.2, 4.3
+  xlf compiler 3.2.3, 3.2.4, 7.1
+HP-UX v. 9.01, 9.02, 9.03, 10.01, 10.20, 11.0
+IRIX 6.5 f77v7.1
+OSF v3.2
+SunOS v2 rel. 4.1.4, 5.5.1, 5.7 (f77 v6.2)

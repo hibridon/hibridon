@@ -1,0 +1,47 @@
+#!/bin/csh -f
+# HIBRIDON bin/runtest $Revision: 2009.4 $ --- link and run hibridon tests
+# the PATH variable should be set to include the hibridon bin directory
+
+set basedir=`hibriddir`
+
+echo "linking hib_hecn_dgels with kmax=81 ... "
+if (-e $basedir/bin/progs/hib_hecn_dgels_81) then
+  rm $basedir/bin/progs/hib_hecn_dgels_81
+  echo "replacing current copy of $basedir/bin/progs/hib_hecn_dgels_81 ..."
+endif
+set var1 = hecn_dgels
+set var2 = 81
+$basedir/bin/makehib $var1 $var2>>& $basedir/h_hecn_dgels.log
+if (-e $basedir/bin/progs/hib_hecn_dgels_81) then
+else
+  echo "$basedir/bin/progs/hib_hecn_dgels_81 not created, check
+$basedir/h_hecn_dgels.log"
+  echo ""
+  exit
+endif
+ 
+cd $basedir
+if (-e testnew) then
+  echo ""
+  echo "removing old directory $basedir/testnew"
+  rm -r testnew
+endif
+mkdir testnew
+cp tests/*.com testnew
+cp tests/*.inp testnew
+cp tests/*.BIN testnew
+cp tests/*.dat testnew
+cp tests/*.fluxinp testnew
+cd testnew
+ echo "running hecn_dgels tests ..."
+  $basedir/bin/progs/hib_hecn_dgels_81 <hecnx_hyp.com >hecnx_test.log
+  echo "hecn_dgels tests completed, compare result files:"
+  echo "  $basedir/testnew with $basedir/tests"
+  echo "  $basedir/testnew with $basedir/tests"
+  rm $basedir/testnew/Hecn*.sav  >>& $basedir/testnew/hecnx_test.log
+  rm $basedir/testnew/Hecn*.pcs  >>& $basedir/testnew/hecnx_test.log
+  rm $basedir/testnew/Hecn*.ics  >>& $basedir/testnew/hecnx_test.log
+  rm $basedir/testnew/Hecn*.smt  >>& $basedir/testnew/hecnx_test.log
+  rm $basedir/bin/progs/hib_hecn_dgels_81
+
+exit

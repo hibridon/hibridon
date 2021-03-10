@@ -1,0 +1,72 @@
+<TITLE>bastpln</TITLE>
+<h3><center><font color=#brown >Basis Subroutine
+ and System Specific Parameters: Collision of
+a Symmetric Top with a Linear Molecule in a <sup>1</sup>&Sigma; State
+</h3>
+</center></font><hr>
+
+<tt>BASISTYPE = 9</tt><p><ul>
+	System subroutine: <tt>systpln</tt><p>
+	Basis subroutine: <tt>hibastpln.f</tt></ul>
+
+
+<p>
+A Symmetric top and a Linear Molecule in  a <sup>1</sup>&Sigma
+State <br><font size=-1><i>Ref.</i> C. Rist, M. H. Alexander, and 
+P. Valiron, J. Chem. Phys. <b>98</b>, 4662 (1993).
+</font><hr>
+The definition of the system dependent parameters is as follows:
+<ul>     NTERM (the number of potential surfaces involved:  this should be 2
+            in this case).  This parameter can not be changed<p>
+     NUMPOT:  an index representing the particular potential used.  This variable
+is passed to the POT subroutine<p>
+    IPOTSY:   cylindrical symmetry of potential.  If the <a href=flags.html>
+flag</a> <a href=ihomo.html>IHOMO</a> = .true.,
+              only
+              terms with <i>mu</i><sub>1</sub> equal to an integer multiple 
+of IPOTSY
+              can be included in the potential.  Example:  for NH<sub>3</sub>,
+              IPOTSY = 3<p>
+    IOP:      <i>ortho/para</i> label for molecular states of symmetric top. If <a href=ihomo.html>IHOMO</a> 
+=.true.
+              then 
+<ul>if IOP = 1: only <i>para</i> states included in channel expansion<br>
+if IOP = -1: only <i>ortho</i> states included in channel expansion
+              </ul><p>
+    NINV:     number of inversion doublets included
+<ul>
+              if NINV = +1, only + inversion levels included<br>
+              if NINV = -1, only - inversion levels included<br>
+              if NINV = 2, both inversion levels included<p>
+</ul>
+    KMAX:     the maximum projection quantum number included<p>
+    JMAX0:    the maximum rotational angular momenta for the k = 0 stack<p>
+    JMAX1:    the maximum rotational angular momenta for the k = 1 stack<p>
+    JMAX2:    the maximum rotational angular momenta for the k = 2 stack<p>
+    JMAX3:    the maximum rotational angular momenta for the k = 3 stack<p>
+    JMAX4:    the maximum rotational angular momenta for the k = 4 stack<p>
+    JMAX5:    the maximum rotational angular momenta for the k = 5 stack<p>
+    JMAX6:    the maximum rotational angular momenta for the k = 6 stack<p>
+    IPOTSY2:  symmetry of potential. if the linear molecule is homonuclear
+              then IPOTSY = 2 and only terms with <i>lambda</i><sub>2</sub> even can be
+              included in the potential, else IPOTSY = 1<p>
+    J2MAX:    the maximum rotational angular momentum for the linear
+              molecule<p>
+    J2MIN:    the minimum rotational angular momentum for the linear
+              molecule<p>
+</ul>
+
+The definition of the real system dependent parameters is as follows:
+<ul>
+BROT, CROT:    rotational constants of symmetric top<br>
+DROT:    rotational constant of diatomic molecule<br>
+<ul><i>E(jkj</i><sub>2</sub>) = BROT <i>j</i> (<i>j</i> + 1) + 
+(CROT - BROT) <i>k</i><sup>2</sup> + DROT <i>j</i><sub>2</sub> (<i>j</i><sub>2</sub> + 1) <br>
+</ul><p>
+
+
+</ul>
+<hr>
+<a href=hibhelp.html><img src=up_arrow.gif border=0 align=middle></a>&#001;Return to <a href=hibhelp.html>Hibridon Help</a>
+
+

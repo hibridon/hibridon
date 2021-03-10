@@ -1,0 +1,144 @@
+#!/bin/csh -f
+# HIBRIDON bin/hib_timer $Revision: 2008.2 $ --- determine benchmark timing of hibridon code
+# the PATH variable should be set to include the hibridon bin directory
+# hib_timer [-n] [-r] [filnam]: determine timing results
+#   if option -r, then tests are assumed to have been done remotely with the terminal output saved in the 
+#       files /bin/progs/timeout_arn2 and /bin/progs/timeout_arno.  This script will then analyse these files
+#       to run the time tests remotely, follow the procedure
+#          cd {hibdir}/bin/progs
+#          makehib arn2 1053
+#          cp  ../../timing/arn2_timetest.com .
+#          cp  ../../timing/Arn2_timetest.inp .
+#          submit hib_arn2_timetest <arn2_timetest.com >timeout
+#   if option filname is specified, timing results will be stored in ..hibdir/timing/time_output_filnam
+#   if option filname is not specified, timing results will be stored in ..hibdir/timing/time_output
+
+#   n is the number of threads allowed.  The default value is 1.  This parameter is ignored if -r filnam is
+#  specified.  
+@ items = $#argv
+if ($items > 3) then
+  echo "usage: hib_timer [-n] [-r] [filnam] 
+  goto end
+endif
+set filnam = ""
+set nthread = 1
+set remote = "n"
+set name = "time_output"
+if ($items == 0) then
+  echo "timing results stored in ..hibdir/timing/time_output"
+endif
+if ($items == 1) then
+  set nthread = $1
+endif
+if ($items == 2) then
+  set v1 = $2
+  set fchar = `echo $v1 |awk '{printf index($0,"-")}'`
+  set v2 = `echo $v1 |awk '{printf substr($0,2,2)}'`
+  if $v2 == "r" then
+    set remote = "y"
+    set name = "time_output" 
+  else
+     set name = "time_output_$v1" 
+  endif
+endif
+if ($items == 3) then
+  set v1 = $2
+  set fchar = `echo $v1 |awk '{printf index($0,"-")}'`
+  set v1 = `echo $v1 |awk '{printf substr($0,2,2)}'`
+  set v2 = $3
+  if $v1 == "r"  then
+     set remote = "y"
+     set name = "time_output_$v2"
+  else
+     echo "$v1 not -r; abort"
+     goto end
+  endif
+endif
+echo "timing results stored in ..hibdir/timing/$name"
+
+setenv OMP_NUM_THREADS $nthread
+setenv MKL_NUM_THREADS $nthread
+
+set basedir=`hibriddir`
+if $remote == "n" then
+   makehib arn2 1053
+   cd $basedir/timing
+   cp Arn2_timetest.inp ../bin/progs
+   cp arn2_timetest.com ../bin/progs
+   cp time_script1 ../bin/progs
+   cp time_script ../bin/progs
+   cd ../bin/progs
+   echo "running Ar-N2 time tests, this may take a few minutes ..."
+   hib_arn2_1053 <arn2_timetest.com >timeout_arn2
+   echo "time tests run, extracting results ..."
+   rm Arn2_timetest.inp
+   rm arn2_timetest.com
+   rm hib_arn2_1053
+else if $remote == "y" then
+   cd $basedir/timing
+   cp time_script1 ../bin/progs
+   cp time_script ../bin/progs
+   cd ../bin/progs
+   echo "extracting results from hibdir/bin/progs/timeout_arn2 ..."
+endif
+set vers = `grep "HIBRIDON SCATTERING CODE" -A1 timeout_arn2`
+set fchar = `echo $vers |awk '{printf index($0,"H")}'`
+set lchar = `echo $vers |awk '{printf index($0,"U")}'`
+set title = `echo $vers |awk '{printf substr($0,'$fchar','$lchar'-2)}'`
+echo "TIMING BENCHMARK:  $title" >time_output
+echo "HARDWARE CONFIGURATION:" >> time_output
+grep "CURRENT HARDWARE CONFIGURATION" -A1 timeout_arn2 >test
+tail -1 test >> time_output
+echo "NTHREAD = $nthread" >> time_output
+grep "BUILD CONFIGURATION" -A 5 timeout_arn2 >test
+sed -f time_script1 test >test1
+cat test1>> time_output
+echo "" >> time_output
+set title = `grep -m 1 "MAXIMUM NUMBER" timeout_arn2 | sed s/"      MAXIMUM "// | sed s/" USED WAS"//`
+echo "AR-N2 CALCULATION, $title" >> time_output
+grep ELAPSED timeout_arn2 > test
+sed -f time_script test >test1 
+echo "LOGD PROPAGATION TIMES" >>time_output
+head -n 2 test1 >>time_output
+echo "AIRY PROPAGATION TIMES" >>time_output 
+tail -n 2 test1 >>time_output
+rm -f test
+rm -f test1
+
+if $remote == "n" then
+   makehib arno 2053
+   cd $basedir/timing
+   cp Arno_timetest.inp ../bin/progs
+   cp arno_timetest.com ../bin/progs
+   cp time_script1 ../bin/progs
+   cp time_script ../bin/progs
+   cd ../bin/progs
+   echo "running Ar-NO time tests, this may take a few minutes ..."
+   hib_arno_2053 <arno_timetest.com >timeout_arno
+   echo "time tests run, extracting results ..."
+   rm Arno_timetest.inp
+   rm arno_timetest.com
+   rm hib_arno_2053
+else if $remote == "y" then
+   cd $basedir/timing
+   cp time_script1 ../bin/progs
+   cp time_script ../bin/progs
+   cd ../bin/progs
+   echo "extracting results from hibdir/bin/progs/timeout_arno ..."
+endif
+echo "" >>time_output
+set title = `grep -m 1 "MAXIMUM NUMBER" timeout_arno | sed s/"      MAXIMUM "// | sed s/" USED WAS"//`
+echo "AR-NO CALCULATION, $title" >> time_output
+grep ELAPSED timeout_arno > test
+sed -f time_script test >test1 
+echo "LOGD PROPAGATION TIMES" >>time_output
+head -n 2 test1 >>time_output
+echo "AIRY PROPAGATION TIMES" >>time_output 
+tail -n 2 test1 >>time_output
+echo "-----------------------------------------------------" >> time_output
+rm -f test
+rm -f test1
+
+#rm -f timeout_arno
+mv time_output ../../timing/$name
+end:

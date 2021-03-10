@@ -1,0 +1,28 @@
+<TITLE>New</TITLE>
+<h3><center><font color=#brown >Parallelism</h3>
+</center></font><hr>
+
+The major computational effort in calculations with the Hibridon code is associated with
+a series of matrix-matrix (BLAS3) operations (matrix inversions, diagonizations, and multiplications), which
+are carried out by calls to the <a href=www.netlib.org/lapack>LAPACK</a> routines DGETRF, DGETRI, DSYEVR, and DGEMM. 
+The latest version
+of Intel's (<a href=http://support.intel.com/support/performancetools/libraries/mkl/>MKL</a> math library as well as
+of Apple's veclib (/System/Library/Frameworks/Accelerate.framework/Versions/Current) include, automatically,
+parallel versions of these LAPACK routines, so that considerable performance enhancement can be
+achieved when running on multi-cpu, multi-core workstations.  
+
+<p>
+At the end of every job, the <a href=output.html>output</a> file shows the total
+ cpu and wall clock times for the calculation.  The wall time is the actual elapsed time for the job, while the cpu
+time is the time the job would take on a single cpu.  The ratio of <i>t<sub>wall</sub></i> to <i>t<sub>cpu</sub></i> is a 
+measure of the use of parallelism.
+
+<hr>
+
+Go to
+<center>
+<a href="install.html">Installation</a> | <a href="closecoupled.html">Close Coupled Equations</a> | 
+<a href="linking.html">Linking</a> |  <a href=memory.html>Memory Use</a> |
+<a href=restart.html>Restarting</a> |  <a href=timing.html>Timing</a>  | <a href=hibhelp.html>Hibridon Help</a>
+
+

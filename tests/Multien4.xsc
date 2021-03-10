@@ -1,0 +1,35 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 4.3 BUILD DATE 01/25/08 11:51:52 EST
+
+     AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI
+               A. BERNING, A. DEGLI-ESPOSTI, C. RIST, P. DAGDIGIAN, B. POUILLY
+               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, J. KLOS
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+SYS=OS X 10.4.11; MACH=unix-darwin unix-ifort
+CC=/usr/bin/cc -DNAME_LU; FC=/opt/intel/fc/10.1.007/bin/ifort -O3 -save
+LIB_ROOT=-L/Library/Frameworks/Intel_MKL.framework/Versions/10.0.1.014/Libraries/32
+LIBRARIES:
+-lmkl_intel -lmkl_intel_thread -lmkl_core -lmkl_intel_thread -lmkl_core -lmkl_intel_thread -lmkl_core -lguide -lpthread
+ --------------------------------------------------------------------------
+
+ INTEGRAL CROSS SECTIONS READ FROM FILE Multien4.ics                            
+ WRITTEN:   Jan 25 11:53:25 2008
+ LABEL:     TEST OF MULTIPLE ENERGIES                       
+ POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
+
+ ** INTEGRAL CROSS SECTIONS; IEN= 4 **
+    RMU=  16.4700  E=   100.00  JLPAR=-1  JTOT-1=  1  JTOT-2=   0  JTOT-D=  1
+ ** CC CALCULATION, JLPAR=-1 **
+
+ ** COLUMN HEADINGS ARE INTIAL STATES, ROW HEADINGS ARE FINAL STATES **
+
+            J=    0         2         4         6
+   J    I | I=    0         0         0         0
+ 
+    0    0  3.243E-02 5.086E-04 2.740E-03 4.893E-03
+    2    0  2.236E-03 4.715E-02 7.602E-03 3.083E-02
+    4    0  1.474E-02 9.305E-03 4.993E-02 1.812E-02
+    6    0  9.911E-03 1.420E-02 6.819E-03 3.358E-02

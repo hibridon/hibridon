@@ -1,0 +1,43 @@
+<TITLE>tenxsc</TITLE>
+<h3><center><font color=#brown >Command TRNPRT</h3>
+</center></font><hr>
+
+The command TRNPRT allows you to calculate the effective cross sections Q<sup>(<i>n</i></sup>(<i>E</i>), required for the calculation of transport properties.  See G. C. Maitland, M. Mustafa, W. A. Wakeham, and F. R. W. McCourt, Mol. Phys. 61, 359 (1987); L. Monchick and S. Green, J. Chem. Phys. 63, 2000 (1975); G. A. Parker and R. T Pack, J. Chem. Phys. 68, 1585 (1978).<p>  
+
+The command line is
+<tt><ul>
+         TRNPRT,JOB,IENERG,IN1,IN2,JTOTMX,JMIN,JMAX
+</tt></ul>
+where the input parameters are:
+<p> 
+<tt>JOB,IENERG</tt>&#160;  The program searches for an S-matrix in the file
+              <tt>Job{ienerg}.smt</tt>, where IENERG is an integer
+              (IENERG = 1, 2, ... etc.)<p>
+              <ul>
+              <li>The default values of JOB is <tt>JOB</tt> and of INERG is 1
+              </ul>
+<tt>IN1,IN2</tt>&#160;      The initial and final values of the additional index<p>
+<tt>JTOTMX</tt>&#160;       The maximum value included in the summation over total 
+              angular momentum (upper case <i>J</i> in Eqs. 30 and 31 of the 
+              above article) <p>
+<tt>JMIN,JMAX</tt>&#160;   Tensor cross sections are computed for all values of the
+              molecular rotational quantum number (lower case <i>j<sub>i</sub></i> and 
+<i>j<sub>f</sub></i>
+              in Eqs. 30 and 31 of the above article) ranging from JMIN
+              to JMAX.<p>
+<p>
+To determine the close-coupled <i>S</i>-matrix elements required by the command TRNPRT, you
+must carry out a prior calculation with
+<ul>The flag <tt><a href=prsmat.html>WRSMAT</a></tt>= .true.<p>
+
+<tt>JMIN ... JMAX</tt> included in the array <a href=jout.html>JOUT</a><p>
+<tt>IN1</tt> and <tt>IN2</tt> included in the array <a href=indout.html>INDOUT</a>
+</ul>
+The effective cross sections are written in the terminal output and in the file <tt>{JOB}{IENERG}.trn</tt>.
+</ul>
+<hr>
+Go to:
+<center>
+<a href=commands.html>Commands</a> | <a href=tenxsc.ex.html> An example of the TENXSC command</a> | <a href=examples.html>Examples</a> | <a href=hibhelp.html>Hibridon Help</a>
+<br>
+</center>

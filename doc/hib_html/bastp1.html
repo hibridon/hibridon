@@ -1,0 +1,47 @@
+<TITLE>bastp</TITLE>
+<h3><center><font color=#brown >Basis Subroutine
+ and System Specific Parameters: Collision of an Atom with
+a Symmetric Top, with No Inversion Doubling
+</h3>
+</center></font><hr>
+
+
+<tt>BASISTYPE = 18</tt><p>
+<ul>
+	System subroutine: <tt>systp1</tt><p>
+	Basis subroutine: <tt>hibastp1.f</tt></ul>
+
+<p>
+<font size=-1><i>Ref.</i> S. Green, J. Chem. Phys. <b>64</b>, 3463 (1976); M. H. Alexander, J. Chem. Phys. <b>77</b>, 1855 (1982).</font>
+<hr>
+The definition of the system dependent parameters is as follows:
+<ul>     NTERM (the number of potential surfaces involved:  this should be 1
+            in this case).  This parameter can not be changed<p>
+     NUMPOT:  an index representing the particular potential used.  This variable
+is passed to the POT subroutine<p>
+    IPOTSY:   cylindrical symmetry of potential.  If the <a href=flags.html>
+flag</a> <a href=ihomo.html>IHOMO</a> = .true.,
+              only
+              terms with <i>mu</i> equal to an integer multiple 
+of IPOTSY
+              can be included in the potential.  Example:  for CH<sub>3</sub>,
+              IPOTSY = 3<p>
+    IOP:      <i>ortho/para</i> label for molecular states of symmetric top. If <a href=ihomo.html>IHOMO</a> 
+=.true.
+              then 
+<ul>if IOP = 1: only <i>para</i> states included in channel expansion<br>
+if IOP = -1: only <i>ortho</i> states included in channel expansion
+              </ul><p>
+    JMAX:    the maximum rotational angular momentum included in the channel expansion<p>
+    EMAX:    the maximum energy of a state to be included in the rotational state basis<p>
+</ul>
+
+The definition of the real system dependent parameters is as follows:
+<ul>
+BROT, CROT:    rotational constants of symmetric top, so that
+<ul><i>E(jk)</i> = BROT <i>j</i> (<i>j</i> + 1) + (CROT - BROT) <i>k</i><sup>2</sup><br>
+</ul>
+</ul>
+
+<hr>
+<a href=hibhelp.html><img src=up_arrow.gif border=0 align=middle></a>&#001;Return to <a href=hibhelp.html>Hibridon Help</a>

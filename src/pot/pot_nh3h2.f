@@ -1,3 +1,19 @@
+*system: NH3-H2 using canonical Valiron expansion of potential
+      include "common/syusr"
+      subroutine driver
+      implicit double precision (a-h,o-z)
+      common /covvl/ vvl(45)
+      include "common/parpot"
+      potnam='RIST/VALIRON NH3-H2'
+       print *, potnam
+1      print *, ' r (bohr)'
+      read (5, *, end=99) r
+      call pot(vv0,r)
+      write (6, 100) vv0,vvl
+100   format(' v',/,45(1pe16.8))
+      goto 1
+99    end
+
       include "common/syusr"
       include "common/bausr"
       include "common/ground"

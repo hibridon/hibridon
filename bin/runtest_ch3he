@@ -1,0 +1,64 @@
+#!/bin/csh -f
+# HIBRIDON bin/runtest $Revision: 2009.4 $ --- link and run hibridon tests
+# the PATH variable should be set to include the hibridon bin directory
+
+set basedir=`hibriddir`
+
+
+echo "linking hib_ch3he with kmax=126 ... "
+if (-e $basedir/bin/progs/hib_ch3he_ccsdt_126) then
+  rm $basedir/bin/progs/hib_ch3he_ccsdt_126
+  echo "replacing current copy of $basedir/bin/progs/hib_ch3he_ccsdt_126 ..."
+endif
+set var1 = ch3he_ccsdt
+set var2 = 126
+$basedir/bin/makehib $var1 $var2>>& $basedir/h_ch3he_test.log
+if (-e $basedir/bin/progs/hib_ch3he_ccsdt_126) then
+else
+  echo "$basedir/bin/progs/hib_ch3he_ccsdt_126 not created, check
+$basedir/h_ch3he_test.log"
+  echo ""
+  exit
+endif
+ 
+cd $basedir
+if (-e testnew) then
+  echo ""
+  echo "removing old directory $basedir/testnew"
+  rm -r testnew
+endif
+mkdir testnew
+cp tests/*.com testnew
+cp tests/*.inp testnew
+cp tests/*.BIN testnew
+cp tests/*.dat testnew
+cp tests/*.fluxinp testnew
+cd testnew
+
+  echo "running ch3he_ccsdt tests ..."
+  mkdir potdata
+  cp ch3he*.dat potdata
+  $basedir/bin/progs/hib_ch3he_ccsdt_126 <ch3he_ccsdt.com >ch3he_test.log
+  echo "ch3he_ccsdt tests completed, compare result files:"
+  echo "  $basedir/testnew with $basedir/tests"
+  echo "  $basedir/testnew with $basedir/tests"
+  rm $basedir/testnew/Ch3he*.sav  >>& $basedir/testnew/ch3he_test.log
+  rm $basedir/testnew/Ch3he*.smt  >>& $basedir/testnew/ch3he_test.log
+  rm $basedir/bin/progs/hib_ch3he_ccsdt_126
+
+set sysname=`uname -s`
+set known = 'no'
+if $sysname == 'Darwin' then
+   if (-e /Developer/Applications/Utilities/FileMerge.app/Contents/MacOS/FileMerge) then
+      set known = 'yes'
+   endif
+endif
+
+if $known == 'no' then
+   echo "to compare results of all tests:"
+   echo "  $basedir/testnew/compare.com | more"
+else
+   echo "comparing results of all tests using Developer utility FileMerge"
+   compare_OSX
+endif
+exit

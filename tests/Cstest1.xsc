@@ -1,15 +1,22 @@
 
  --------------------------------------------------------------------------
-           HIBRIDON SCATTERING CODE V 4.1 05/19/97 16:41:49 EDT
+           HIBRIDON SCATTERING CODE V 4.3 BUILD DATE 01/25/08 11:51:52 EST
 
      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG
  CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI
                A. BERNING, A. DEGLI-ESPOSTI, C. RIST, P. DAGDIGIAN, B. POUILLY
-               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK
+               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, J. KLOS
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+SYS=OS X 10.4.11; MACH=unix-darwin unix-ifort
+CC=/usr/bin/cc -DNAME_LU; FC=/opt/intel/fc/10.1.007/bin/ifort -O3 -save
+LIB_ROOT=-L/Library/Frameworks/Intel_MKL.framework/Versions/10.0.1.014/Libraries/32
+LIBRARIES:
+-lmkl_intel -lmkl_intel_thread -lmkl_core -lmkl_intel_thread -lmkl_core -lmkl_intel_thread -lmkl_core -lguide -lpthread
  --------------------------------------------------------------------------
 
  INTEGRAL CROSS SECTIONS READ FROM FILE Cstest1.ics                             
- WRITTEN:    19-May-97  16:43:12
+ WRITTEN:   Jan 25 11:53:25 2008
  LABEL:     CC TEST OF RESTART                              
  POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
 
@@ -19,12 +26,12 @@
 
  ** COLUMN HEADINGS ARE INTIAL STATES, ROW HEADINGS ARE FINAL STATES **
 
-            J=   0        2        4        6
-   J    I | I=   0        0        0        0
+            J=    0         2         4         6
+   J    I | I=    0         0         0         0
  
-    0    0  2.68E+00 1.13E-01 1.23E-02 6.73E-02
-    2    0  5.53E-01 2.46E+00 2.97E-01 2.72E-01
-    4    0  1.02E-01 5.04E-01 4.57E+00 5.94E-01
-    6    0  7.27E-01 6.03E-01 7.76E-01 3.90E+00
-    8    0  1.09E+00 1.02E+00 8.21E-01 3.32E-01
-   10    0  2.16E-01 2.97E-01 4.34E-01 5.48E-01
+    0    0  2.677E+00 1.134E-01 1.234E-02 6.726E-02
+    2    0  5.532E-01 2.460E+00 2.972E-01 2.721E-01
+    4    0  1.021E-01 5.041E-01 4.567E+00 5.942E-01
+    6    0  7.268E-01 6.026E-01 7.757E-01 3.897E+00
+    8    0  1.086E+00 1.017E+00 8.211E-01 3.318E-01
+   10    0  2.164E-01 2.966E-01 4.342E-01 5.476E-01

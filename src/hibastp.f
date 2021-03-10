@@ -8,7 +8,10 @@
 *  of a symmetric top molecule with a structureless atom or with an
 *  uncorrugated surface
 *  authors:  millard alexander
-*  current revision date:  13-may-1997 by mha
+*  current revision date:  22-jun-1997 by p.j.dagdigian
+*    rotational channel basis now chosen by j < jmax and ehold < emax
+*    as in bastp1 basis routine.  also changed printout of basis in bastst
+*    also, added inversion splitting, labeled as delta
 * --------------------------------------------------------------------
 *  variables in call list:
 *    j:        on return contains rotational quantum numbers for each
@@ -24,7 +27,7 @@
 *       where k is the projection quantum number
 *       the plus sign refers to the "plus" inversion levels and the minus
 *       sign to the "minus" inversion levels
-*       for k=0, where only eps=+1 states exist, the index "is" is equal to ze
+*       for k=0, where only eps=+1 states exist, the index "is" is equal to zero
 *    jhold:    on return contains rotational quantum numbers for each
 *              rotational level
 *    ehold:    on return contains energy in hartrees of each rotational
@@ -40,6 +43,7 @@
 *    ieps:     on return contains epsilon label for each channel
 *    jtemp:    scratch array used to create channel list
 *    ktemp:    scratch array used to create channel list
+*    ietmp:    scratch array used to create channel list
 *    rcut:     cut-off point for keeping higher energy channels
 *              if any open channel is still closed at r=rcut, then
 *              all closed channels as well any open channels which are
@@ -82,6 +86,9 @@
 *    isrcod:   total number of real system dependent variables
 *    brot:     A=B rotational constant for prolate top
 *    crot:     C rotational constant for prolate top
+*    delta:    inversion splitting
+*    emax:     the maximum rotational energy (in cm-1) for a channel to be
+*              included in the basis
 *  variables in common block /cosysi/
 *    nscod:    total number of variable names which are passed to HINPUT
 *              nscod must equal isrcod + isicod + 3
@@ -93,27 +100,10 @@
 *    ipotsy:   cylindrical symmetry of potential.  If ihomo = .true., only
 *              terms with mu equal to an integral multiple of ipotsy
 *              can be included in the potential.  Example:  for NH3, ipotsy =
-*    iop:      ortho/para label for molecular states. If ihomo=.true. then onl
-*              para states will be included if iop=1 and only ortho states if
+*    iop:      ortho/para label for molecular states. If ihomo=.true. then only
+*              para states will be included if iop=1, and only ortho states if
 *              iop=-1
-*    ninv:     number of inversion doublets included
-*              if ninv = +1, only + inversion levels included
-*              if ninv = -1, only - inversion levels included
-*              if ninv = 2, both inversion levels included
-*    kmax:     the maximum projection quantum number included
-*    jmax0:    the maximum rotational angular momenta for the k=0 stack
-*    jmax1:    the maximum rotational angular momenta for the k=1 stack
-*    jmax2:    the maximum rotational angular momenta for the k=2 stack
-*    jmax3:    the maximum rotational angular momenta for the k=3 stack
-*    jmax4:    the maximum rotational angular momenta for the k=4 stack
-*    jmax5:    the maximum rotational angular momenta for the k=5 stack
-*    jmax6:    the maximum rotational angular momenta for the k=6 stack
-*    jmax7:    the maximum rotational angular momenta for the k=7 stack
-*    jmax8:    the maximum rotational angular momenta for the k=8 stack
-*    jmax9:    the maximum rotational angular momenta for the k=9 stack
-*    jmax10:   the maximum rotational angular momenta for the k=10 stack
-*    jmax11:   the maximum rotational angular momenta for the k=11 stack
-*    jmax12:   the maximum rotational angular momenta for the k=12 stack
+*    jmax:     the maximum rotational angular momentum for the symmetric top
 *  variable in common block /cocent/
 *    cent:      array containing centrifugal barrier of each channel
 *  variable in common block /coeint/
@@ -146,12 +136,9 @@
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
       include "common/parbas"
       include "common/parbasl"
-      common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, ninv,
-     :                kmax, jmax0, jmax1, jmax2, jmax3, jmax4, jmax5,
-     :                jmax6, jmax7, jmax8, jmax9, jmax10, jmax11,
-     :                jmax12
+      common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, jmax
       common /coipar/ iiipar(9), iprint
-      common /cosysr/ isrcod, junkr, brot, crot
+      common /cosysr/ isrcod, junkr, brot, crot, delta, emax
       common /cov2/ nv2max, junkv, v2(1)
       common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(1)
@@ -159,9 +146,9 @@
       common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
+      common /coamat/ ietmp(1)
       dimension j(1), l(1), jhold(1), ehold(1), is(1), k(1),
-     :          ieps(1), jtemp(1), ishold(1), ktemp(1),
-     :          nlami(4), jmx(0:12)
+     :          ieps(1), jtemp(1), ishold(1), ktemp(1), nlami(4)
       zero = 0.d0
       two = 2.d0
 *  check for consistency in the values of flaghf and csflag
@@ -178,27 +165,6 @@
      :   ('  *** CSFLAG = .FALSE. FOR SURFACE CALCULATION; ABORT ***')
         stop
       end if
-      jmx(0) = jmax0
-      jmx(1) = jmax1
-      jmx(2) = jmax2
-      jmx(3) = jmax3
-      jmx(4) = jmax4
-      jmx(5) = jmax5
-      jmx(6) = jmax6
-      jmx(7) = jmax7
-      jmx(8) = jmax8
-      jmx(9) = jmax9
-      jmx(10) = jmax10
-      jmx(11) = jmax11
-      jmx(12) = jmax12
-      do  15  ki = 0, kmax
-        if (ki .gt. jmx(ki) ) then
-          write (6, 10) ki, jmx(ki)
-          write (9, 10) ki, jmx(ki)
-10        format (' *** K =',i3,' .GT. JMAX(K) =',i3,'; ABORT ***')
-          stop
-        end if
-15    continue
       do 25  i = 1, nterm
         if (ihomo .and. mod(mproj(i), ipotsy) .ne. 0 ) then
           write (20, 20) i, mproj(i), ipotsy
@@ -237,79 +203,75 @@
       end if
       if (bastst) write (6, 46) nsum
       write (9, 46) nsum
-46    format (' ** TOTAL NUMBER OF ANISTROPIC TERMS IN POTENTIAL =',
+46    format (' ** TOTAL NUMBER OF ANISOTROPIC TERMS IN POTENTIAL =',
      :        i3)
       nlam = nsum
-      if (bastst) then
-        write (9, 50) nlam
-        write (6, 50) nlam
-50      format (' *** TOTAL NUMBER OF ANISTROPIC TERMS =',i3)
-      end if
       if (clist) then
         if (flagsu) then
           if (ihomo) then
             if (bastst)
-     :      write (6,55) rmu * xmconv, brot, crot, ipotsy, iop,
+     :      write (6,55) rmu * xmconv, brot, crot, delta, ipotsy, iop,
      :                   ered * econv, jtot, nu
-            write (9,55) rmu * xmconv, brot, crot, ipotsy, iop,
+            write (9,55) rmu * xmconv, brot, crot, delta, ipotsy, iop,
      :                   ered * econv, jtot, nu
 55        format(/,' **  SYMMETRIC TOP - UNCORRUGATED SURFACE **',
-     :      /,'     RMU=', f9.4,'  A=BROT=', f7.3, '  CROT=', f7.3,/,
-     :            '     POT-SYM=', i2,'  O/P=',i2,
+     :      /,'     RMU=', f9.4,'  A=BROT=', f7.3, '  CROT=', f7.3,
+     :           '  DELTA=',f7.3,/,'     POT-SYM=', i2,'  O/P=',i2,
      :           '  E=', f7.2, '       LBAR=', i5, '  NU=', i3)
           else
-            write (6,60) rmu * xmconv, brot, crot, ipotsy,
+            write (6,60) rmu * xmconv, brot, crot, delta, ipotsy,
      :                   ered * econv, jtot, nu
-            write (9,60) rmu * xmconv, brot, crot, ipotsy,
+            write (9,60) rmu * xmconv, brot, crot, delta, ipotsy,
      :                   ered * econv, jtot, nu
 60        format(/,' **  SYMMETRIC TOP - UNCORRUGATED SURFACE **',
-     :      /,'     RMU=', f9.4,'  A=BROT=', f7.3, '  CROT=', f7.3,/,
-     :            '     POT-SYM=', i2,
+     :      /,'     RMU=', f9.4,'  A=BROT=', f7.3, '  CROT=', f7.3,
+     :           '  DELTA=',f7.3,/,'     POT-SYM=', i2,
      :           '     E=', f7.2, '       LBAR=', i5, '  NU=', i3)
           end if
         else
           if (csflag) then
             if (ihomo) then
               if (bastst)
-     :        write (6,65) rmu * xmconv, brot, crot, ipotsy, iop,
+     :        write (6,65) rmu * xmconv, brot, crot, delta, ipotsy, iop,
      :                   ered * econv, jtot, nu
-              write (9,65) rmu * xmconv, brot, crot, ipotsy, iop,
+              write (9,65) rmu * xmconv, brot, crot, delta, ipotsy, iop,
      :                   ered * econv, jtot, nu
 65          format(/,' **  CS SYMMETRIC TOP **',
-     :      /,'     RMU=', f9.4,'  A=BROT=', f7.3, '  CROT=',f7.3,/,
-     :            '     POT-SYM=', i2,'  O/P=',i2,
-     :             '  E=', f7.2,'  LBAR=', i5, 2x,' NU=', i3)
+     :      /,'     RMU=', f9.4,'  A=BROT=', f7.3, '  CROT=',f7.3,
+     :           '  DELTA=',f7.3,/,'     POT-SYM=', i2,'  O/P=',i2,
+     :           '  E=', f7.2,'  LBAR=', i5, 2x,' NU=', i3)
             else
               if (bastst)
-     :        write (6,75) rmu * xmconv, brot, crot, ipotsy,
+     :        write (6,75) rmu * xmconv, brot, crot, delta, ipotsy,
      :                   ered * econv, jtot, nu
-              write (9,75) rmu * xmconv, brot, crot, ipotsy,
+              write (9,75) rmu * xmconv, brot, crot, delta, ipotsy,
      :                   ered * econv, jtot, nu
 75          format(/,' **  CS SYMMETRIC TOP **',
-     :      /,'     RMU=', f9.4,'  A=BROT=', f7.3, '  CROT=',f7.3,/,
-     :            '     POT-SYM=', i2,
-     :             '     E=', f7.2,'  LBAR=', i5, 2x,' NU=', i3)
+     :      /,'     RMU=', f9.4,'  A=BROT=', f7.3, '  CROT=',f7.3,
+     :           '  DELTA=',f7.3/,'     POT-SYM=', i2,
+     :           '     E=', f7.2,'  LBAR=', i5, 2x,' NU=', i3)
             end if
           else
             if (ihomo) then
               if (bastst)
-     :        write (6,80) rmu * xmconv, brot, crot, ipotsy, iop,
+     :        write (6,80) rmu * xmconv, brot, crot, delta, ipotsy, iop,
      :                     ered * econv, jtot, jlpar
-              write (9,80) rmu * xmconv, brot, crot, ipotsy, iop,
+              write (9,80) rmu * xmconv, brot, crot, delta, ipotsy, iop,
      :                     ered * econv, jtot, jlpar
 80          format(/,' **  CC SYMMETRIC TOP **',
-     :      /,'     RMU=', f9.4,'  A=BROT=', f7.3, '  CROT=',f7.3,/,
-     :            '     POT-SYM=', i2,'  O/P=',i2,
-     :             '  E=', f7.2, '  JTOT=', i4, 2x,' JLPAR=', i2)
+     :      /,'     RMU=', f9.4,'  A=BROT=', f7.3, '  CROT=',f7.3,
+     :           '  DELTA=',f7.3/,'     POT-SYM=', i2,'  O/P=',i2,
+     :           '  E=', f7.2, '  JTOT=', i4, 2x,' JLPAR=', i2)
             else
               if (bastst)
-     :        write (6,85) rmu * xmconv, brot, crot,
+     :        write (6,85) rmu * xmconv, brot, crot, delta,
      :                     ered * econv, jtot, jlpar
-              write (9,85) rmu * xmconv, brot, crot,
+              write (9,85) rmu * xmconv, brot, crot, delta,
      :                     ered * econv, jtot, jlpar
 85          format(/,' **  CC SYMMETRIC TOP **',
-     :      /,'     RMU=', f9.4,'  A=BROT=', f7.3, '  CROT=',f7.3,/,
-     :             '     E=', f7.2, '  JTOT=', i4, 2x,' JLPAR=', i2)
+     :      /,'     RMU=', f9.4,'  A=BROT=', f7.3, '  CROT=',f7.3,
+     :           '  DELTA=',f7.3/,
+     :           '     E=', f7.2, '  JTOT=', i4, 2x,' JLPAR=', i2)
             end if
           end if
         end if
@@ -317,14 +279,35 @@
 90      format (/' OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=',
      :          f6.2)
       end if
-*  first set up list of all j,k states included in basis
+*
+*  set up rotational basis
+*
+*  first set up list of j,k levels within the requested
+*  nuclear spin modification (iop value)
       nlist = 0
-      do 105  ki = 0, kmax
-        do 105  ji = ki, jmx(ki)
-          nlist = nlist + 1
-          ehold(nlist)= brot * ji * (ji + 1) + (crot - brot) * ki * ki
-          jtemp(nlist) = ji
-          ktemp(nlist) = ki
+      do 105  ki = 0, jmax
+        do 105  ji = ki, jmax
+          numeps = 2
+          if (ki.eq.0) numeps = 1
+          do 105 iep = 1, numeps
+*  check that level has correct nuclear permutation symmetry
+            if (ihomo) then
+*  ortho levels (iop = -1) have ki a multiple of 3
+*  all other levels are para (iop = 1)
+              if (iop.eq.-1 .and. mod(ki,ipotsy).ne.0) goto 105
+              if (iop.eq.1 .and. mod(ki,ipotsy).eq.0) goto 105
+            end if
+*  check to make sure rotational energy is less than emax
+            roteng = brot * ji * (ji + 1) + (crot - brot) * ki * ki
+            if (roteng .gt. emax) go to 105
+            nlist = nlist + 1
+            jtemp(nlist) = ji
+            ktemp(nlist) = ki
+            ietmp(nlist) = 1 - 2*(iep - 1)
+*  add inversion splitting to - inversion levels
+            isym = -ietmp(nlist) * (-1) ** jtemp(nlist)
+            if (isym .eq. -1) roteng = roteng + delta
+            ehold(nlist)= roteng / econv
 105   continue
 *  now sort this list in terms of increasing energy
       if (nlist .gt. 1) then
@@ -342,6 +325,9 @@
               ksave = ktemp(i2)
               ktemp(i2) = ktemp(i1)
               ktemp(i1) = ksave
+              isave = ietmp(i2)
+              ietmp(i2) = ietmp(i1)
+              ietmp(i1) = isave
             end if
 115       continue
 120     continue
@@ -350,69 +336,52 @@
       if (bastst) then
         write (6, 130)
 130     format (/,10x,
-     :    'SORTED LEVEL LIST',/,'   N   J   K    EINT(CM-1)')
+     :    'SORTED LEVEL LIST',/,'   N   J   K  EPS INV   EINT(CM-1)')
         do  140 i = 1, nlist
-          write (6, 135) i, jtemp(i), ktemp(i), ehold(i)
-135       format (3i4,f10.3)
+          isym = -ietmp(i) * (-1) ** jtemp(i)
+          ecm = ehold(i) * econv
+          write (6, 135) i, jtemp(i), ktemp(i), ietmp(i), isym, ecm
+135       format (5i4,f10.3)
 140     continue
       end if
-*  now set up channel and level list
+*  now set up channel and level list for scattering calculation
       n = 0
       nlevel = 0
       do 170  njk = 1, nlist
         ki = ktemp(njk)
         ji = jtemp(njk)
-        if (ihomo) then
-*  check to see if ki corresponds to an allowed k stack if interchange
-*  symmetry, this if statement is specifically for NH3
-          if (iop .eq. -1 .and. mod(ki, ipotsy) .ne. 0) go to 170
-          if (iop .eq. 1 .and. mod(ki, ipotsy) .eq. 0) go to 170
-        end if
-        iepmin = -1
-        if (ki .eq. 0) iepmin = 1
-*  now sum over inversion states except for k = 0 stack, where only
-*  epsilon = + 1 exists
-        do 160 iepsil = iepmin, 1, 2
-*  determine the product of epsilon times (-1)^j.  this is equal to
-*  the inversion symmetry of the level [Eq. (A20) of S. Green, J. Chem. Phys.
-*  73, 2740 (1980) ]
-          isym = iepsil * (-1) ** ji
-*  if only one inversion state is included in the basis, exclude this state
-*  if it has the wrong inversion symmetry
-          if (ninv .eq. 1 .and. isym .ne. 1) go to 160
-          if (ninv .eq. -1 .and. isym .ne. -1) go to 160
-*  here if this state is to be included
-          nlevel = nlevel + 1
-          ehold(nlevel)=
-     :     (brot * ji * (ji + 1) + (crot - brot) * ki * ki) / econv
-          jhold(nlevel) = ji
-*  the vector ihold will contain k times the inversion symmetry of the state
-          ishold(nlevel) = ki * isym
-          if (csflag) then
+        nlevel = nlevel + 1
+        jhold(nlevel) = ji
+        ishold(nlevel) = ietmp(njk) * ki
+*  here for cs calculations; include levels only if j is at least
+*  equal to coupled states projection index
+        if (csflag) then
 *  here for cs calculations; include state only if j at least equal to coupled
 *  states projection index
-            if (ji .ge. nu) then
-              n = n + 1
-              if (n .gt. nmax) then
-                write (6, 150) n, nmax
-                write (9, 150) n, nmax
-150             format(/' *** NCHANNELS=', i5,
-     :             ' .GT. MAX DIMENSION OF',i5,' ABORT ***')
-                stop
-              end if
-              is(n) = ishold(nlevel)
-              k(n) = ki
-              ieps(n) = iepsil
-              j(n) = ji
-              eint(n) = ehold(nlevel)
-              l(n) = jtot
-              cent(n) = jtot * (jtot + 1)
+          if (ji .ge. nu) then
+            n = n + 1
+            if (n .gt. nmax) then
+              write (6, 150) n, nmax
+              write (9, 150) n, nmax
+150           format(/' *** NCHANNELS=', i5,
+     :            ' .GT. MAX DIMENSION OF',i5,' ABORT ***')
+              stop
             end if
-          else if (.not. csflag) then
+            j(n) = ji
+            k(n) = ki
+            ieps(n) = ietmp(njk)
+            is(n) = ietmp(njk) * ki
+            eint(n) = ehold(njk)
+            l(n) = jtot
+            cent(n) = jtot * (jtot + 1)
+          end if
+        else if (.not. csflag) then
 *  here for cc calculations.  first calculate range of orbital angular
 *  momentum quantum numbers allowed for this state
+*
 *  determine parity of molecular state [Eq. (A21) of S. Green, J. Chem. Phys.
 *  73, 2740 (1980) ]
+            isym = -ietmp(njk) * (-1) ** ji
             ipar = isym * (-1) ** ki
             lmax = jtot + ji
             lmin = iabs (jtot - ji)
@@ -428,7 +397,7 @@
                 end if
                 is(n) = ishold(nlevel)
                 k(n) = ki
-                ieps(n) = iepsil
+                ieps(n) = ietmp(njk)
                 j(n) = ji
                 eint(n) = ehold(nlevel)
                 l(n) = li
@@ -499,7 +468,7 @@
      :            '; ABORT **',/,
      :    '     CHECK RCUT')
           call exit
-        endif
+        end if
       end if
 *  now list channels if requested
       if (clist) then
@@ -507,19 +476,19 @@
           if (bastst) write (6, 305)
           write (9,305)
 305       format
-     :     (/'   N   J  EPS INV  K   L    EINT(CM-1)')
+     :     (/'   N   J   K  EPS INV  L    EINT(CM-1)')
         else
           if (bastst) write (6, 310) nu
           write (9,310) nu
 310       format
-     :     (/'   N   J  EPS INV  K   L    EINT(CM-1) ** NU = ',i2)
+     :     (/'   N   J   K  EPS INV  L    EINT(CM-1) ** NU = ',i2)
         end if
         do 330  i = 1, n
-          if (k(i) .ne. 0) inv = is(i) / k(i)
+          if (k(i) .ne. 0) isym = is(i) / k(i)
           ecm = eint(i) * econv
           if (bastst)
-     :      write (6, 320) i, j(i), ieps(i), inv, k(i), l(i), ecm
-            write (9, 320) i, j(i), ieps(i), inv, k(i), l(i), ecm
+     :      write (6, 320) i, j(i), k(i), ieps(i), isym, l(i), ecm
+            write (9, 320) i, j(i), k(i), ieps(i), isym, l(i), ecm
 320         format (6i4, f10.3)
 330     continue
       end if
@@ -545,7 +514,7 @@
 *  ilam is the index for the next term in the potential matrix
 *  lb is the actual value of lambda
           ilam = ilam + 1
-          mu = ipotsy * (iterm - 1)
+          mu = mproj(iterm)
           inum = 0
           ij = 0
           do 355  icol = 1, n
@@ -562,7 +531,7 @@
                   inum = inum + 1
                   v2(i) = vee
                   iv2(i) = ij
-                  if (bastst.and. iprint.ge.2) then
+                  if (bastst .and. iprint.ge.2) then
                     write (6, 345) ilam, lb, icol, irow, i, iv2(i),
      :                             vee
                     write (9, 345) ilam, lb, icol, irow, i, iv2(i),
@@ -575,9 +544,10 @@
 355       continue
           if (i .le. nv2max) lamnum(ilam) = inum
           if (bastst) then
-            write (6, 370) ilam, lamnum(ilam)
-            write (9, 370) ilam, lamnum(ilam)
-370         format ('ILAM=',i3,' LAMNUM(ILAM) = ',i3)
+            write (6, 370) ilam, lb, mu, lamnum(lam)
+            write (9, 370) ilam, lb, mu, lamnum(ilam)
+370         format ('ILAM=',i3,' LAM=',i3,' MU=',i3,
+     :         ' LAMNUM(ILAM) = ',i6)
           end if
           lamsum = lamsum + lamnum(ilam)
 390     continue
@@ -592,8 +562,8 @@
       if (clist .and. bastst) then
         write (6, 460) lamsum
         write (9, 460) lamsum
-460     format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS',
-     :           i4)
+460     format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS ',
+     :           i6)
       end if
       return
       end
@@ -670,7 +640,7 @@
       end if
       if (k + kp .eq. mu) then
 *  n.b. for k = 0 and/or kp = 0, we recompute the same primitive matrix
-*  element (here we follow MOLSCAT, although this might be somewhat inefficien
+*  element (here we follow MOLSCAT, although this might be somewhat inefficient
 *  this is the second term in Eq. (46) of S. Green, j. chem. phys. 64, 3463
         if (.not.csflag) then
 *  cc contribution from (jp, -kp, lp / Y(lambda, mu) / j, k, l)

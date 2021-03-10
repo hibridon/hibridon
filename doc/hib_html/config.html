@@ -1,0 +1,90 @@
+<title>installation</title>
+<h3><center><font color=#brown >CONFIG</sup></font> file</h3>
+</center></font><hr>
+
+To install, compile and link the Hibridon code it 
+is essential to have a <tt>CONFIG</tt> file which corresponds properly to your machine architecture, and to your choice
+of compiler and math library.
+
+The script <tt>../bin/makefirst</tt> attempts to create a CONFIG file appropriate to your machines
+architecture.  As a reference, we have supplied with version 4.3.4 several CONFIG files, ennumerated below
+We have confirmed that Hibridon v.4.3.4 installs, compiles, and runs correctly under the architectures
+listed below.  If you have a slightly different architecture, or compiler/math library suite, then use
+the following CONFIG files as a guide.
+<hr>
+<h2><font color=brown>CONFIG files</h2></font>
+
+<table border="1" cellspacing="2" cellpadding="1">
+        <tr>
+                <th width="86" align=center valign=middle>Hardware</th>
+                <th width="86" align=center valign=middle>OS</th>
+                <th width="86" align=center valign=middle>compiler</th>
+                 <th width="184" align=center valign=middle>math library</th>
+                  <th width="184" align=center valign=middle>CONFIG file</th>      </tr>
+        <tr>
+                 <td align=center valign=middle>Apple G5</td>
+                <td align=center valign=middle>OSX 10.3</td>
+                <td align=center valign=middle>xlf 8.1</td>
+                 <td align=center valign=middle>/Library/Frameworks/vecLib.framework/vecLib</td>
+                  <td align=center valign=middle>CONFIG_APPLE_G4_G5</th>      </tr>
+        </tr>
+
+                <td align=center valign=middle>Apple Intel Core2duo or Xeon</td>
+                <td align=center valign=middle>OSX 10.5</td>
+                <td align=center valign=middle>ifort 10.1.xxx 32 bit</td>
+                 <td align=center valign=middle>/Library/Frameworks/Intel_MKL.framework/Versions/10.0.2.018</td>
+                  <td align=center valign=middle>CONFIG_APPLE_INTEL_10.1.012</th>      </tr>
+        </tr>
+                 <td align=center valign=middle>Apple Intel Core2duo or Xeon</td>
+                <td align=center valign=middle>OSX 10.5</td>
+                <td align=center valign=middle>ifort 10.1.xxx 64 bit</td>
+                 <td align=center valign=middle>/Library/Frameworks/Intel_MKL.framework/Versions/10.0.2.018</td>
+                  <td align=center valign=middle>CONFIG_APPLE_INTEL_10.1.012_64</th>      </tr>
+        </tr>
+<tr>
+                <td align=center valign=middle>Apple Intel Core2duo or Xeon</td>
+                <td align=center valign=middle>OSX 10.5</td>
+                <td align=center valign=middle>ifort 11.0.xxx 64 bit</td>
+                 <td align=center valign=middle>/opt/intel/Compiler/11.0/xxx/Frameworks/mkl</td>
+                  <td align=center valign=middle>CONFIG_APPLE_INTEL_11.0.064</th>      </tr>
+        </tr>
+        <tr>
+                <td align=center valign=middle>Apple Intel Core2duo or Xeon</td>
+                <td align=center valign=middle>OSX 10.6</td>
+                <td align=center valign=middle>ifort 11.1.xxx 64 bit</td>
+                 <td align=center valign=middle>/opt/intel/Compiler/11.1/xxx/Frameworks/mkl</td>
+                  <td align=center valign=middle>CONFIG_APPLE_INTEL_11.1.076</th>      </tr>
+        </tr>
+        <tr>
+                <td align=center valign=middle>Intel X86 Xeon</td>
+                <td align=center valign=middle>Linux</td>
+                <td align=center valign=middle>/opt/intel/fce/10.1.xxx/bin/ifort<sup>b</sup></td>
+                 <td align=center valign=middle>opt/intel/mkl/10.0.xxx</td>
+                  <td align=center valign=middle>CONFIG_X86_INTEL_10.1.013_MKL_10.0.011</th>      </tr>
+        </tr>
+                <td align=center valign=middle>Intel X86 Xeon</td>
+                <td align=center valign=middle>Linux</td>
+                <td align=center valign=middle>/opt/intel/3.2.2/Compiler/11.1/xxx/bin/intel64/ifort<sup>b</sup></td>
+                 <td align=center valign=middle>/opt/intel/3.2.2/mkl/10.2.2.025</td>
+                  <td align=center valign=middle>CONFIG_X86_INTEL_11.1.059_MKL_10.2.2.025</th>      </tr>
+        </tr>
+             <td align=center valign=middle>Intel X86 Xeon</td>
+                <td align=center valign=middle>Linux</td>
+                <td align=center valign=middle>.../pgi/linux86-64/7.1-3/7.1/bin/pgf95<sup>c</sup></td>
+                 <td align=center valign=middle>.../pgi/linux86-64/7.1-3/lib<sup>c</sup></td>
+                  <td align=center valign=middle>CONFIG_X86_PGF95_ACML</th>      </tr>
+        </tr>
+ </table>
+<br>a.  On Intel X86 platforms, to run jobs with total number of channels (<tt>kmax</tt> greater than 3941, 
+see <a href=linking.html>linking</a>), you must change the <tt>FI64</tt>
+line in the <tt>CONFIG</tt> file to read<br>
+<tt>FI64="-mcmodel=medium -shared-intel"</tt>
+<br>b.  On your installation, the Intel compiler and mkl may be located elsewhere than /opt.  Check with your system administrator.
+<br>c.  Check with your system administrator for the exact location of the pgi directory tree.
+
+
+
+
+<hr>
+<a href=hibhelp.html><img src=up_arrow.gif border=0 align=middle></a>&#001;Return to <a href=hibhelp.html>Hibridon Help</a>
+

@@ -12,6 +12,7 @@ set machine=`echo $machine|sed s/MACH=\"//`
 set machine=`echo $machine|sed s/\"//`
 cp vscript $basedir/src
 cd $basedir/src
+echo $machine
 vscript $machine
 rm vscript
 cd $basedir/bin

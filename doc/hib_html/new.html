@@ -1,0 +1,103 @@
+<TITLE>New</TITLE>
+<h3><center><font color=#brown >New Features</h3>
+</center></font><hr>
+In addition to several important bug fixes, version 4.2 of the 
+Hibridon code has the following new features:
+<ul>
+<li>An updated module (<tt>hitensor.f</tt>) for the determination of tensor cross sections
+and <i>M</i>-dependent cross sections.
+<p>
+<li>A component (<tt>hibound.f</tt>) for the determination of weakly-bound complexes involving
+atomic and/or molecular radicals, provided that the interaction potential can be
+expanded in the same <a href="potlist.html">form</a> as used for molecular scattering.
+<p>
+<li>An option, when linking the code, to exclude certain functions in exchange for an
+ability to handle a larger number of channels<p>
+<li>Documentation of the option allowing the <a href="restart.html">restart</a> of a long-running calculation after
+a power failure or system crash
+</ul>
+The on-line (<tt>doc/hibrid.hlp</tt>) and .html-based (<tt>doc/index.html</tt>) help facilities have been
+revised to include help on these items as well as examples.
+<p>Version 4.2 of the code includes:
+<ul>
+<li>Extension to Apple's G4 and G5 processor workstations running OSX 10.3 (Panther).  In order to compile
+and link on Apple workstations, you will need to have:
+<ul>
+<li>The  <a href=http://www.absoft.com/xlf/index.htm>IBM XL Fortran Compiler (XLF)</a> available from <a href=http://www.absoft.com/xlf.html> Absoft</a>
+<p>
+<li>The Mac OS X Developer Tools package, which includes gcc Version 3.3. 
+The package is available from the Apple Developer Connection  <a href=http://connect.apple.com/>
+Website</a>.  In particular, Xcode Tools v1.0 or later is required. <p>
+</ul>
+<li>Replacement of many matrix-matrix: routines with calls to version 3.0 
+<a href=http://www.netlib.org/lapack/lug/lapack_lug.html>Lapack</a> routines. 
+</ul>
+<hr>
+In addition to the changes mentioned above for version 4.2, version 4.3 of the Hibridon code has 
+ the following new features:
+<ul>
+<li>The possibility of doing calculations at up to 25 different collision <a href=energ.html>energies</a>, which
+may be chosen on a regularly spaced linear grid.
+<p>
+<li>Two possibilities for formatting the integral cross section files arising from the commands 
+<a href=printc.html><tt>PRINTC</tt></a> and <a href=intcrs.html><tt>INTCRS</tt></a>.
+<p>
+<li>A new command, <a href=sysconf.html><tt>SYSCONF</tt></a> (and an equivalent shell command <a href=sysconf.html><tt>hib_sysconfig</tt></a>) which prints out the key details
+of your current operating system.
+</ul>
+The on-line (<tt>doc/hibrid.hlp</tt>) and .html-based (<tt>doc/index.html</tt>) help facilities have been
+revised to include help on these items as well as examples.
+<hr>
+<p>Version 4.3 of the code has been developed for (and tested on) the following platforms:
+<ul>
+<li>Apple's G4 and G5 processor workstations running OSX 10.3 (Panther) and 10.4 (Tiger).  In order to compile
+and link on Apple G4 and G5 workstations, you will need to have:
+<ul>
+<li>The  <a href=http://www.absoft.com/Products/Compilers/Fortran/Mac/XLF/xlf.html>IBM XL Fortran Compiler (XLF)
+</a> available from <a href=http://www.absoft.com/Products/Compilers/Fortran/Mac/XLF/xlf.html> Absoft</a>  <img src=warningsmall.gif> <font color=red> Note, despite the indication
+on Absoft's <a href=http://www.absoft.com/Products/Compilers/Fortran/Mac/XLF/xlf.html>web page</a> that IBM XL Fortran v8.1 for Mac OS X is not supported on Mac OS X Version 10.4 - Tiger, 
+the Hibridon package does install, compile, and execute correctly under OSX 10.4.10 and 10.4.11 with XLF8.1. </font><font color=red>  Hibridon is no longer actively
+maintained on Apple PowerPC platforms.</font>
+<p>
+<li>The current version of Mac OS X Developer Tools package. 
+Under OS X 10.5 and 10.6 this package is available from the Apple Developer Connection  <a href=http://connect.apple.com/>
+Website</a>.  Under System 10.7 (Lion) the Xcode Tools package is available directly from the <a href=http://www.apple.com/mac/app-store/>App Store</a><p>
+. <p>
+</ul>
+<li>Apple Intel platforms running OSX 10.4 (Tiger) and 10.5.1 (Leopard).  In order to compile
+and link on Apple Intel platforms, you will need to have:
+<ul>
+<li>The  
+Intel <a href=http://www.intel.com/cd/software/products/asmo-na/eng/compilers/267426.htm>Fortran Compiler</a>  (ifort).<p>
+<li>The Mac OS X Developer Tools package. 
+The package is available from the Apple Developer Connection  <a href=http://connect.apple.com/>
+Website</a>.  In particular, the current version of Xcode Tools is required. 
+Under System 10.7 (Lion) this is available directly from the <a href=http://www.apple.com/mac/app-store/>App Store</a><p>
+
+</ul>
+<li>Intel Xeon (x86) based platforms running under Linux (installation under Red Hat v. 4 has 
+been explicitly tested). 
+Compilation, linking, and execution of Hibridon v. 4.3 has been successful with
+<ul>
+<li>The Intel ifort compiler and  MKL mathematics library
+<li>The Portland Group pgf95 compiler and ACML mathematics library
+</ul>
+</ul>
+<p>
+The major computational effort in calculations with the Hibridon code is associated with
+a series of matrix-matrix (BLAS3) operations (matrix inversions, diagonizations, and multiplications), which
+are carried out by calls to the <a href=www.netlib.org/lapack>LAPACK</a> routines DGERF, DGETRI, DSYEVR, and DGEMM. 
+The latest version
+of Intel's (<a href=http://support.intel.com/support/performancetools/libraries/mkl/>MKL</a> math library as well as
+of Apple's veclib (/System/Library/Frameworks/Accelerate.framework/Versions/Current) include, automatically,
+parallelized versions of these LAPACK routines, so that considerable performance enhancement can be
+achieved when running on multi-cpu, multi-core workstations.  A more in-depth discussion is given 
+on a separate <a href=parallel.html>page</a>.
+<hr>
+Go to
+<center>
+<a href="install.html">Installation</a> | <a href="timing.html">Benchmarks</a> | 
+<a href="install.html">Downloading</a> |  <a href=memory.html>Memory Limits</a> |
+<a href=restart.html>Restarting</a> | <a href=timing.html>Timing</a> | <a href=parallel.html>Parallelism</a> | <a href=linking.html>Linking</a> | <a href=hibhelp.html>Hibridon Help</a>
+
+

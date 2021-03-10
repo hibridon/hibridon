@@ -14,6 +14,7 @@ arno_ccsdt    	Arno.inp	none			NO(X2Pi)+Ar (ccsdt ab initio)
 arn2		Arn2.inp	none			N2(X1Sig+)+Ar (model)
 		M. D. Pattengill, R. A. LaBudde, and R. B. Bernstein, J. Chem. Phys. 55, 5517 (1971).
 
+
 neohx   	Neohx.inp	none			OH(X2Pi)+Ne (ab initio)
 		M. Yang and M. H. Alexander, J. Chem. Phys. 103, 3400 (1995).
 
@@ -64,6 +65,9 @@ archx_mod   archx.inp	none			CH(X2Pi)+Ar (modified ab initio)
 arohx_ump4  arohx.inp	none			OH(X2Pi)+Ar (ab initio)
                 J. Klos, G. Chalasinski, M. T. Berry, R. A. Kendall, R. Burcl, and M. M. Szczesniak, J. Chem. Phys. 112, 4952 (2000).
 
+aroh(x)         arohx.inp  none                    OH(X2Pi)+Ar (ab initio)
+                R. Tobola and J. Klos (unpublished)
+
 arnhc		arnhc.inp	none			NH(c1Pi)+Ar (ab initio)
 		M. Yang, M. H. Alexander, H.-J. Werner, R. Hohman, L. Neitsch, F. Stuhl, and P. J. Dagdigian, J. Chem. Phys. 102, 4069 (1995).
 
@@ -86,5 +90,10 @@ boh2		boh2		none			B(2s^2 2p)+H2 (ab initio)
 		M. H. Alexander, J. Chem. Phys. 99, 6014 (1993).
 		M. H. Alexander and M. Yang, J. Chem. Phys. 103, 7956 (1995).
 		M.-L. Dubernet, D. Flower, and J. M. Hutson, J. Chem. Phys. 94, 7602 (1991).
+
+h2ohe           h2ohe_test.inp  			H2O-He
+                  system:  H2O-He, i
+                SAPT PES from Patkowski et al., J. Molec. Struct. 591, 231-243 (2002)
+                subr to compute V vs. (R, theta, phi) provided by B.H.Yang and P. Stancil (U. Georgia), July-2009
 
 		

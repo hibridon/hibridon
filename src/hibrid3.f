@@ -130,7 +130,7 @@ cend
 *  square matrices (of row dimension nmax)
       dimension w(49), vecnow(49), scmat(49)
 *  local arrays (for lapack dsyevr)
-cstart unix-darwin
+cstart unix-darwin unix-x86
       dimension isuppz(2*nch),iwork(10*nch),work(57*nch)
 cend
 *  vectors dimensioned at least nch
@@ -196,13 +196,13 @@ cend
 *  of eq.(6) of m.h. alexander, "hybrid quantum scattering algorithms ..."
 *  now call eispack eigenvalue and eigenvector routine (hp is used as
 *  a scratch vector here)
-cstart .not.unix-darwin
+cstart .not.unix-darwin .and. .not. unix-x86
 c;      call rs (nmax, nch, scmat, eignow, ione, vecnow, scr, hp, ierr)
 cend
-cstart unix-darwin
+cstart unix-darwin unix-x86
       lwork=57*nch
       liwork=10*nch
-      abstol=0d0
+      abstol=1.d-16
       lsup=2*nch
       call dsyevr('V','A','L',nch,scmat,nmax,vl,vu,il,iu,abstol,m,
      :   eignow,vecnow,nmax,isuppz,work,lwork,iwork,liwork,ierr)
@@ -429,12 +429,14 @@ cABER
       common /conlam/ nlam, nlammx, lamnum(1)
       common/covvl/vvl(30)
       equivalence(ispar(1),nterm),(ispar(2),nvibmn),(ispar(3),nvibmx)
+
 10    write (6, 15)
 15    format (/,'  Potential calculation; Enter 1 for V(R,theta)',
      :   ' 2 for V-lambda(R) ',$)
       read (5, *) iresp
       if (iresp .eq. 1) then
         nvib=nvibmx-nvibmn+1
+        print *, 'nterm = ', nterm
         write (6, 30)
 30      format
      :   ('  Enter R (bohr), theta (Degrees); R=0, theta=0 to quit',$)
@@ -483,18 +485,24 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
         if(r.eq.0) return
         call pot(vv0, r)
         nskip=1
-        ntop=nlam
-        do  90  lambda = 0,ntop
-          if (lambda .eq. 0) then
-            v = vv0
-          else if (lambda .gt. 0) then
-            v = vvl(lambda)
-          end if
-          lamx=lambda
-          if (ihomo .and. ibasty .ne. 12) lamx=2*lamx
-          write (6, 85) lamx,  v, v*219474.6, v*27.211652
-85        format('  lam=',i3,' V=',g13.6,' hartree; ',
-     :         g13.6,' cm-1; ', g13.6,' ev')
+        nterm=ispar(1)
+        nfirst=1
+        do 90 iterm=1,nterm
+          write (6, 82) iterm
+82        format(' iterm = ', i2)
+          if (iterm.eq.1) then
+*            print *, 'iterm, nfirst, lamnum(iterm)+nfirst-1',
+*    :          iterm,nfirst, nfirst+lamnum(iterm)-1
+             write (6,85),
+     :           vv0, (vvl(j), j=nfirst, nfirst+lamnum(iterm)-1)
+          else
+*            print *, 'iterm, nfirst, lamnum(iterm)+nfirst-1',
+*    :       iterm,nfirst, nfirst+lamnum(iterm)-1
+             write (6,85),
+     :           (vvl(j), j=nfirst, nfirst+lamnum(iterm)-1)
+          endif
+          nfirst=nfirst+lamnum(iterm)
+85        format (25(1pe16.8))
 90      continue
         go to 70
       else
@@ -799,7 +807,7 @@ c
       logical twoen, ipos, logwr, noprin, airyfl, airypr,
      :        photof, wavefn, boundc
       logical first
-      character*12 tbs,tps,tds,tws,tairys, twfs
+      character*13 tbs,tps,tds,tws,tairys, twfs
       character*13 time
       common /copmat/ rtmn, rtmx, iflag
       common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
@@ -851,6 +859,7 @@ c
 *  now integrate coupled equations from r=rstart to r=rendld
 *  using manolopoulos log-derivative integrator
       cpup=cpupot
+      call mtime(ttx,tty)
       call runlog (z, w, amat, bmat, sc1, sc2, sc3, sc4, sc5,
      :             r, rendld, spac, eshift, itwo, twoen,
      :             td, tdm, tp, tpm, twf, twfm, logwr, noprin,
@@ -881,7 +890,6 @@ c
       end if
       call mtime(t11,t22)
       tairy = t11 - t1
-      tairym = t22 - t2
 * note that we don't need to subtract delta-time for calculation
 * of ground state wavefunction here, since it is done only in logd ste
       tp=tp+cpupot-cpup
@@ -947,12 +955,12 @@ c
       integer kpvt
       dimension a(1), c(1), kpvt(1)
       data izero /0/
-cstart unix .and. .not. unix-darwin
+cstart unix .and. .not. unix-darwin .and..not. unix-x86
 c;*  factor the matrix
 c;*           return ierr=2 if a is singular
 c;*           return ierr=0 otherwise
 cend
-cstart unix .and. .not.unix-ibm .and. .not. unix-darwin
+cstart unix .and. .not.unix-ibm .and. .not. unix-darwin .and..not. unix-x86
 c;      call sgefa (a, nmax, n, kpvt, ierr)
 cend
 cstart unix-ibm
@@ -962,7 +970,7 @@ cend
 cstart unix-convex
 c;      call dgefa (a, nmax, n, kpvt, ierr)
 cend
-cstart unix .and. .not.unix-ibm .and. .not. unix-darwin
+cstart unix .and. .not.unix-ibm .and. .not. unix-darwin .and. .not. unix-x86
 c;      if (ierr .eq. 2) then
 c;*  here if singular matrix
 c;        write (9, 150)
@@ -971,13 +979,13 @@ c;150     format (' *** SINGULAR MATRIX IN SGEFA; ABORT')
 c;        stop
 c;      end if
 cend
-cstart unix .and. .not. unix-darwin
+cstart unix .and. .not. unix-darwin .and..not. unix-x86
 c;*  now solve the linear equations (one-by-one)
 c;      iptc = 1
 c;      do 200  icol = 1, m
 c;*  iptc points to top of column icol for matrix c stored in packed column fo
 cend
-cstart unix  .and. .not.unix-ibm .and. .not. unix-darwin
+cstart unix  .and. .not.unix-ibm .and. .not. unix-darwin.and..not.unix-x86
 c;        call sgesl (a, nmax, n, kpvt, c(iptc), izero)
 cend
 cstart unix-ibm
@@ -986,12 +994,12 @@ cend
 cstart unix-convex
 c;        call dgesl (a, nmax, n, kpvt, c(iptc), izero)
 cend
-cstart unix .and. .not. unix-darwin
+cstart unix .and. .not. unix-darwin .and. .not. unix-x86
 c;        iptc = iptc + nmax
 c;200   continue
 c;*  solution matrix now in c
 cend
-cstart unix-darwin
+cstart unix-darwin unix-x86
       call dgetrf(n,n,a,nmax,kpvt,ierr)
       if (ierr.ne.0) then
           write (6,210) ierr
@@ -1118,7 +1126,7 @@ cend
       call logdb (z, w, amat, bmat,
      :            nmax, wref, z1, z2, scr1, scr2, nch,
      :            rmin, rmax, nsteps, eshift, iread, iwrite,
-     :            tl, tlw, tp, tpw, twf, twfw)
+     :            tl, tp, twf)
 *  on return: z(i,j) i=1,nch j=1,nch  now contains the log-derivative matrix
 *  at r = rmax (the final interparticle separation)
       r = rmax
@@ -1690,9 +1698,13 @@ cstart none
 c;      call rgmmul (isw, nopen, nopen, nopen, tmod, 1, nmax,
 c;     :             tmod, 1, nmax, sr, 1, nmax)
 cend
-cstart cray unix mac
-      call mxma (tmod, 1, nmax, tmod, 1, nmax, sr, 1, nmax,
-     :            nopen, nopen, nopen)
+cstart cray
+c;      call mxma (tmod, 1, nmax, tmod, 1, nmax, sr, 1, nmax,
+c;     :            nopen, nopen, nopen)
+cend
+cstart unix
+      call dgemm('n','n',nopen,nopen,nopen,1.d0,tmod,nmax,
+     :            tmod,nmax,0.d0,sr,nmax)
 cend
 *  determine imaginary part of s-matrix
 *  also put unit vector into array fpn
@@ -1808,10 +1820,10 @@ cend
 * copy K matrix into sr
         call matmov(tmod,sr,nopen,nopen,nmax,nmax)
 * invert K matrix
-cstart .not.unix-darwin
+cstart .not.unix-darwin .and. .not. unix-x86
 c;        call smxinv(sr,nmax,nopen,srsave,sisave,ierr)
 cend
-cstart unix-darwin
+cstart unix-darwin unix-x86
         call syminv(sr,nmax,nopen,ierr)
 cend
 * save lhs for determination of real part of transition amplitudes
@@ -2035,6 +2047,7 @@ cend
      :          si(nmax,nmax), bmat(nmax,nmax)
       dimension isc1(20), jq(1), lq(1), sc1(1), sc2(1), sc3(1),
      :          sc4(1), sc5(1), inq(1), q(1)
+      data izero /0/
 *  if kwrit (logwr) = .true. and photodissociation calculation, print out
 *  <psi|mu matrix at end of airprp
       if (kwrit .and. photof) then

@@ -1,0 +1,22 @@
+ HeCN(X2Sigma) RCCSD(T) Lique Spielfiedel
+ 2                             ibasty
+ T  T  F  F                     logdfl, airyfl, read  pt, bastst
+ 3.50   25.0000     .02   rstart, rendld, spa         c
+ F                              prairy
+ 1.150  1.00    60.0 1.5  tolai, rincr, rendai        , fstfac
+ 1                             nerg
+   40.00
+ 3.4687                      xmu
+ 80.0000                       rcut
+ 0 20 1   0   0   1   1       jtot1,jtot2,jtotd,j lpar,numin,numax,nud
+ 48   0                         lscreen, iprint
+ 21    2                       nnout,niout
+ 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 
+ -1  1
+ F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+ T  F  F  T  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+ F  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+ T  F  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
+ F                              rsflag 
+ 8 2  1  1  1              nmax,npar,isym,igu,isa
+ 1.89102  0.0072549  6.40d-6  0d0 brot, gsr, drot, hrot

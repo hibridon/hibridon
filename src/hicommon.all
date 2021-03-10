@@ -1,134 +1,3 @@
-*comdeck comdot
-cstart fps vax unix cray mac
-      data dot /'.'/
-cend
-cstart univac cray-cos
-c;      data dot /'$'/
-cend
-*comdeck parbasl
-*  revised 13-may-1997 by mha
-      logical llpar,lllpar,boundc,readpt
-      common /colpar/ llpar(14), readpt, lllpar(12),boundc
-*comdeck parbas
-*  revised march 1992, c.r. 13-may-1997 by mha
-      parameter (maxtrm=12,maxvib=10,maxvb2=maxvib**2)
-*  variables in common block /cobspt/
-*    lammin:   array containing minimum value of lambda for each term
-*    lammax:   array containing maximum value of lambda for each term
-*    mproj:    array containing the order of the reduced rotation matrix
-*              elements for each term.  lammin can not be less than mproj.
-*              for homonuclear molecules, the allowed values of lambda for
-*              each term range from lammin to lammax in steps of 2
-      common /cobsp2/ ntv(maxtrm),ivcol(maxvb2,maxtrm),
-     :                ivrow(maxvb2,maxtrm)
-      common /cobspt/ lammin(maxtrm), lammax(maxtrm), mproj(maxtrm)
-      common /cobsptln/ lam2(maxtrm), m2proj(maxtrm)
-*comdeck parcode
-*  iicode is the number of integer pcod's
-*  ircode is the number of real pcod's
-*  ncode is the number of bcod's
-      parameter (ncode = 31, lcode = 28, iicode = 9, ircode = 9,
-     :           icode = iicode+ircode)
-      character*8 bcod(ncode), fcod(lcode),pcod(icode),bascod
-*comdeck parhlp.t
-cstart unix
-      parameter (helpdir='xxxx/doc/',
-     :           helptail='.hlp')
-cend
-*comdeck parlbuf
-cstart vax mac fps
-c;      parameter (lbuf=512)
-cend
-cstart unix-dec
-c;      parameter (lbuf=1024)
-cend
-*comdeck parllbf
-cstart cray fps
-c;      parameter (llbuf=512)
-cend
-cstart vax unix unix-dec unix-ibm
-      parameter (llbuf=1024)
-cend
-cstart univac
-c;      parameter (llbuf=1792)
-cend
-*comdeck parpot
-      character*48 potnam, label
-      common /coptnm/ potnam, label
-*comdeck parsys
-      parameter (maxpar=100,lencod = 2*maxpar+3)
-      common /coiout/ niout, indout(20)
-*comdeck partens
-*comdeck partens
-c.....for jmax=14 (49 channels, 29 buffers)
-      parameter (jmx=14,kmx=2*jmx+1,lmx=kmx,kkmx=3*kmx)
-      parameter (lbufs = 35525, lbuflb = 1421)
-c;c.....for jmax=20 (121 channels, 41 buffers)
-c;      parameter (jmx=20,kmx=2*jmx+1,lmx=kmx,kkmx=3*kmx)
-c;      parameter (lbufs = 302621, lbuflb=4961)
-      common /cosmrb/ srealp(lbufs)
-      common /cosmib/ simagp(lbufs)
-      common /coipp/  ipackp(lbuflb)
-      common /cojpp/  jpackp(lbuflb)
-      common /colpp/  lpackp(lbuflb)
-*comdeck parvfit
-      parameter (maxang=10,maxnr=5)
-*comdeck vax1
-cstart unix-sun
-c;      integer shiftl,shiftr,popcnt,poppar,compl
-c;      logical mnpar
-cend
-cstart vax unix-convex unix-nec unix-hp unix-ibm unix-dec unix-aix
-      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
-      logical mnpar
-cend
-cstart unix-iris
-c;      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
-c;      logical mnpar
-cend
-*comdeck vax2
-cstart vax unix-convex unix-nec unix-hp unix-ibm unix-dec unix-aix
-      xor(i,j)=ieor(i,j)
-      or(i,j)=ior(i,j)
-      and(i,j)=iand(i,j)
-      shiftl(i,j)=ishft(i,j)
-      shiftr(i,j)=ishft(i,-j)
-cend
-cstart unix-iris
-c;      xor(i,j)=ieor(i,j)
-c;      or(i,j)=ior(i,j)
-c;      and(i,j)=iand(i,j)
-c;      shiftl(i,j)=ishft(i,j)
-c;      shiftr(i,j)=ishft(i,-j)
-cend
-cstart unix-sun
-c;      shiftl(i,j)=lshift(i,j)
-c;      shiftr(i,j)=lrshft(i,j)
-c;      compl(i)=not(i)
-cend
-cstart unix-convex unix-nec unix-hp ibm vax unix-ibm unix-dec unix-aix
-      compl(i)=not(i)
-cend
-cstart unix-iris
-c;      compl(i)=not(i)
-cend
-cstart unix-convex
-c;      locate(li3562,l3562,i3562,ip3562)=iisveq(l3562,li3562,i3562,ip3562)
-cend
-*comdeck syusr
-      subroutine syusr (irpot, readp, iread)
-*  dummy syusr subroutine
-      logical readp
-      character*(*)fname
-      if(.not.readp.or.iread.eq.0) then
-        call loapot(1,' ')
-        return
-      endif
-      entry ptrusr (fname)
-      entry savusr (readp)
-      entry chkusr
-      return
-      end
 *comdeck bausr
 * --------------------------------------------------------------------
       subroutine bausr (j, l, is, jhold, ehold, ishold, nlevel, nlevop,
@@ -138,6 +7,13 @@ cend
       return
       end
 * --------------------------------------------------------------------
+*comdeck comdot
+cstart fps vax unix cray mac
+      data dot /'.'/
+cend
+cstart univac cray-cos
+c;      data dot /'$'/
+cend
 *comdeck ground
       subroutine ground(wf, r, nch, nphoto, mxphot)
       implicit double precision (a-h,o-z)
@@ -148,17 +24,14 @@ cend
 *comdeck ipar
       common /coipar/ jtot1,jtot2,jtotd,jlpar,nerg,numax,numin,nud,
      :                lscreen, iprint
-*comdeck rpar
-      common /corpar/ fstfac, rincr, rcut, rendai, rendld, rstart, spac,
-     :                tolai, xmu
-*comdeck lpar
-      common /colpar/ airyfl, airypr, bastst, batch, chlist,
+*comdeck logdef
+      logical airyfl, airypr, bastst, batch, chlist,
      :                csflag, flaghf, flagsu, ihomo, ipos, logdfl,
      :                logwr, noprin, partw, readpt, rsflag, swrit,
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr, nucros, photof, wavefl, boundc
-*comdeck logdef
-      logical airyfl, airypr, bastst, batch, chlist,
+*comdeck lpar
+      common /colpar/ airyfl, airypr, bastst, batch, chlist,
      :                csflag, flaghf, flagsu, ihomo, ipos, logdfl,
      :                logwr, noprin, partw, readpt, rsflag, swrit,
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
@@ -272,7 +145,7 @@ char *malloc();
 #if (_MIPS_SZLONG == 64)
 #ifdef I64
 #ifndef FORTINT
-#define FORTINT long 
+#define FORTINT long
 #endif
 #define MACHINE_TYPE	"unix unix-i8 unix-iris unix-r8000"
 #else
@@ -453,3 +326,148 @@ typedef struct {
 #endif
 
 
+*comdeck parbas
+*  revised march 1992, c.r. 13-may-1997 by mha
+      parameter (maxtrm=12,maxvib=10,maxvb2=maxvib**2)
+*  variables in common block /cobspt/
+*    lammin:   array containing minimum value of lambda for each term
+*    lammax:   array containing maximum value of lambda for each term
+*    mproj:    array containing the order of the reduced rotation matrix
+*              elements for each term.  lammin can not be less than mproj.
+*              for homonuclear molecules, the allowed values of lambda for
+*              each term range from lammin to lammax in steps of 2
+      common /cobsp2/ ntv(maxtrm),ivcol(maxvb2,maxtrm),
+     :                ivrow(maxvb2,maxtrm)
+      common /cobspt/ lammin(maxtrm), lammax(maxtrm), mproj(maxtrm)
+      common /cobsptln/ lam2(maxtrm), m2proj(maxtrm)
+*comdeck parbasl
+*  revised 13-may-1997 by mha
+      logical llpar,lllpar,boundc,readpt
+      common /colpar/ llpar(14), readpt, lllpar(12),boundc
+*comdeck parcode
+*  iicode is the number of integer pcod's
+*  ircode is the number of real pcod's
+*  ncode is the number of bcod's
+      parameter (ncode = 31, lcode = 28, iicode = 9, ircode = 9,
+     :           icode = iicode+ircode)
+      character*8 bcod(ncode), fcod(lcode),pcod(icode),bascod
+*comdeck parhlp.t
+cstart unix
+      parameter (helpdir='/Users/mha/hib436/doc/',
+     :           helptail='.hlp')
+cend
+*comdeck parhlp.t
+cstart unix
+      parameter (helpdir='xxxx/doc/',
+     :           helptail='.hlp')
+cend
+*comdeck parlbuf
+cstart vax mac fps
+c;      parameter (lbuf=512)
+cend
+cstart unix-dec
+c;      parameter (lbuf=1024)
+cend
+*comdeck parllbf
+cstart cray fps
+c;      parameter (llbuf=512)
+cend
+cstart vax unix unix-dec unix-ibm
+      parameter (llbuf=1024)
+cend
+cstart univac
+c;      parameter (llbuf=1792)
+cend
+*comdeck parpot
+      character*48 potnam, label
+      common /coptnm/ potnam, label
+*comdeck parsys
+      parameter (maxpar=100,lencod = 2*maxpar+3)
+      common /coiout/ niout, indout(20)
+*comdeck partens
+c switched from jmax=14 to jmax=20 (pjd)
+c.....for jmax=14 (49 channels, 29 buffers)
+c      parameter (jmx=14,kmx=2*jmx+1,lmx=kmx,kkmx=3*kmx)
+c      parameter (lbufs = 35525, lbuflb = 1421)
+c      NOTE:  lbufs=5*5*7*7*29 and lbuflb=7*7*29
+c      parameter (lbufs = 499851, lbuflb = 6171)
+c      NOTE:  lbufs=9*9*11*11*51 and lbuflb=11*11*51
+c
+c  increase number of buffers from 41 to 51
+c;c.....for jmax=20 (121 channels, 51 buffers)
+c      parameter (lbufs = 302621, lbuflb=4961)
+c      NOTE:  lbufs=11*11*41*61 and lbuflb=11*11*41
+c
+c      parameter (jmx=20,kmx=2*jmx+1,lmx=kmx,kkmx=3*kmx)
+c
+c...increase size of buffers - p. dagdigian, 22-jun-2010
+      parameter (jmx=26, kmx=2*jmx+1,l mx=kmx, kkmx=3*kmx)
+c   set lbuflb = 3*length and lbufs = 3*length(length+1)/2,
+c   where length = 1500
+      parameter (lbufs = 3377250, lbuflb = 4500)
+      common /cosmrb/ srealp(lbufs)
+      common /cosmib/ simagp(lbufs)
+      common /coipp/  ipackp(lbuflb)
+      common /cojpp/  jpackp(lbuflb)
+      common /colpp/  lpackp(lbuflb)
+*comdeck parvfit
+      parameter (maxang=10,maxnr=5)
+*comdeck rpar
+      common /corpar/ fstfac, rincr, rcut, rendai, rendld, rstart, spac,
+     :                tolai, xmu
+*comdeck syusr
+      subroutine syusr (irpot, readp, iread)
+*  dummy syusr subroutine
+      logical readp
+      character*(*)fname
+      if(.not.readp.or.iread.eq.0) then
+        call loapot(1,' ')
+        return
+      endif
+      entry ptrusr (fname)
+      entry savusr (readp)
+      entry chkusr
+      return
+      end
+*comdeck vax1
+cstart unix-sun
+c;      integer shiftl,shiftr,popcnt,poppar,compl
+c;      logical mnpar
+cend
+cstart vax unix-convex unix-nec unix-hp unix-ibm unix-dec unix-aix
+      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
+      logical mnpar
+cend
+cstart unix-iris
+c;      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
+c;      logical mnpar
+cend
+*comdeck vax2
+cstart vax unix-convex unix-nec unix-hp unix-ibm unix-dec unix-aix
+      xor(i,j)=ieor(i,j)
+      or(i,j)=ior(i,j)
+      and(i,j)=iand(i,j)
+      shiftl(i,j)=ishft(i,j)
+      shiftr(i,j)=ishft(i,-j)
+cend
+cstart unix-iris
+c;      xor(i,j)=ieor(i,j)
+c;      or(i,j)=ior(i,j)
+c;      and(i,j)=iand(i,j)
+c;      shiftl(i,j)=ishft(i,j)
+c;      shiftr(i,j)=ishft(i,-j)
+cend
+cstart unix-sun
+c;      shiftl(i,j)=lshift(i,j)
+c;      shiftr(i,j)=lrshft(i,j)
+c;      compl(i)=not(i)
+cend
+cstart unix-convex unix-nec unix-hp ibm vax unix-ibm unix-dec unix-aix
+      compl(i)=not(i)
+cend
+cstart unix-iris
+c;      compl(i)=not(i)
+cend
+cstart unix-convex
+c;      locate(li3562,l3562,i3562,ip3562)=iisveq(l3562,li3562,i3562,ip3562)
+cend

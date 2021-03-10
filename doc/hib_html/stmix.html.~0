@@ -1,0 +1,39 @@
+<TITLE>stmix</TITLE>
+<h3><center><font color=#brown >Command STMIX</h3>
+</center></font><hr>
+
+The command STMIX allows you to calculate cross sections for states with mixed singlet-triplet electronic character, as in the case of mixed CH<sub>2</sub>(<sup>3</sup>B<sub>1</sub>,<sup>1</sup>A<sub>1</sub>) levels.  It is assumed that the perturbation connects a single level in the singlet manifolc with a single level in the triplet manifold.
+The command line is
+<tt><ul>
+         STMIX,JOB1,IENERG1,JOB2,IENERG2,DELE,EMAX,ISTATS,ISTATT,WSO
+</tt></ul>
+where the input parameters are:
+<p> 
+<tt>JOB1,IENERG1</tt>&#160;  These parameters locate the S-matrix for rotational levels in the singlet manifold.  This matrix should be computed using the basis subroutine BAASTP.  The program searches for an S-matrix in the file
+              <tt>Job1{ienerg1}.smt</tt>, where IENERG1 is an integer
+              (IENERG1 = 1, 2, ... etc.)<p>
+              
+<tt>JOB2,IENERG2</tt>&#160;  These parameters locate the S-matrix for rotational levels in the triplet manifold.  This matrix should be computed in a spin-free calculation using the basis subroutine BACH2X.  The program searches for an S-matrix in the file
+              <tt>Job2{ienerg1}.smt</tt>, where IENERG2 is an integer
+              (IENERG2 = 1, 2, ... etc.)<p>
+              
+
+<tt>DELE</tt> &#160;      The difference in energy between the origins of the singlet and triplet manifold, computed as ETOT(singlet) &minus; ETOT(triplet).   The subroutine checks that EDELE equals this energy difference, to within 0.1 cm<sup>&minus;1</sup>.<p>
+
+<tt>EMAX</tt>&#160;      The maximum energy of a state to be included in the rotational state basis.<p>
+
+<tt>ISTATS</tt>&#160;    The state number of the perturbed level in the singlet manifold.  The state number can be obtained by running STMIX with WSO set to zero.<p>
+
+<tt>ISTATT</tt>&#160;    The state number of the perturbed level in the triplet manifold.  The state number can be obtained by running STMIX with WSO set to zero.  It should be noted that the triplet state list includes the spin states with each value of the rotational angular momentum <i>n</i>.  The subroutine checks that the total angular momentum <i>j</i> is the same for the perturbed singlet and triplet levels.<p>
+
+<tt>WSO</tt>&#160;    The value of the spin-orbit matrix element between the two perturbed levels.  As noted above, if WSO is set to zero, the channel list will be output, but cross sections will not be computed.<p>
+
+
+</ul>
+<hr>
+Go to:
+<center>
+<a href=commands.html>Commands</a> | <a href=hibhelp.html>Hibridon Help</a>
+<br>
+</center>
+

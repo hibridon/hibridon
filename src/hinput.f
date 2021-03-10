@@ -8,24 +8,35 @@ cend
 *  subroutine to redefine system independent input parameters for
 *  hibridon code
 *  author:  h.-j. werner
-*  current revision date: 02-sep-1999 by mha
+*  current revision date:  15-mar-2011 by pjd
+*  current revision date: 23-jan-2008 by mha
 *  current revision date: 13-nov-1996 by mby to include bound states
 *  revised further:  24-feb-1998 by mha
-*  maxbas extended to 14: 13-oct-1999
-*  jobname limited to 8 characters:   04-oct-2001
+*  current revision date:  8-jul-2011 by pjd
+*  maxbas extended to 17:  4-jun-2010
+*  jobname limited to 8 characters:   04-oct-2001, format corrected 2-dec-2007
+*  added command sysconf 24-dec-2007
+*  added command to compute cross sections for mixed singlet-triplet states
+*    e.g. CH3 X3B1 - a1A1 collisions involving perturbed levels - p. dagdigian
+*  altered input list for hypxsc:  5-jan-2011 by p. dagdigian
+*  added bastp1 basis subroutine (for symmetric top without inversion doubling:
+*     p. dagdigian
+*  added calculation of transport cross sections - p. dagdigian
 * ---------------------------------------------------------------------
       implicit double precision (a-h,o-z)
 *  iicode is the number of integer pcod's
 *  ircode is the number of real pcod's
 *  ncode is the number of bcod's
-      parameter (ncode = 34, lcode = 28, iicode = 10, ircode = 9,
+*  bcod stores hibridon's commands
+*  fcod stores logical flags
+      parameter (ncode = 38, lcode = 28, iicode = 10, ircode = 9,
      :           icode = iicode+ircode)
       character*80 line
       character*40 fnam1,fnam2,jobnam,input,output,savfil,
      :             code
       character*8 bcod(ncode)
       character*8 fcod(lcode),pcod(icode),scod,bascod
-      character*9 basknd(14)
+      character*9 basknd(18)
 * dimension of codex, ihold, lhold, should be equal to largest number
 * of identical strings of 1:nnn characters in names of all variables
 * (probably 'p' is the most recurring string:  12 times in
@@ -35,7 +46,7 @@ cend
       integer ipar
       integer ibasty
       logical existf, lspar, first, openfl
-      logical lpar, logp, opti, optifl, batch
+      logical lpar, logp, opti, optifl, batch, jtrunc
       dimension a(15),ia(10), ihold(15), lhold(15),lindx(28)
       include "common/parbas"
       include "common/parpot"
@@ -65,10 +76,11 @@ cend
       common /cotwo/ numj,nj1j2(5)
 * when adding bases, change size of array basknd and size of
 * parameter kmxbas in himain.f
-      data basknd /'1-SIGMA','2-SIGMA','2-PI','SIGMA|PI',
-     :              'GEN-PI', 'SYM-TOP', '1/3-P-AT', '1SIG+1SIG',
-     :              'SYMT-LIN','2/2-P-AT','1-DELTA','HOMO+2P',
-     :              'HOMO+3P','2-DELTA'/
+      data basknd /'1-SIGMA', '2-SIGMA', '2-PI', 'SIGMA|PI',
+     :              'GEN-PI', 'SYM-TOP-I', '1/3-P-AT', '1SIG+1SIG',
+     :              'SYMT-LIN',' 2/2-P-AT', '1-DELTA', 'HOMO+2P',
+     :              'HOMO+3P', '2-DELTA', '2P-DIAT', 'ASYM-TOP',
+     :              'CH2X', 'SYM-TOP-N'/
 *  lindx is pointer from fcod order to order in common colpar
       data lindx/1,3,4,5,6,7,8,9,10,11,13,25,26,2,12,14,17,19,24,
      :           15,16,18,20,27,22,21,23,28/
@@ -164,6 +176,10 @@ c    :                xsecwr, nucros, photof, wavefl, boundc
 * flux: 2800
 * eadiab: 2850
 * j1j2:  460
+* sysconf:  2900
+* hypxsc: 2950
+* stmix:  3000
+* trnprt:  3100
 * nb after changing the following list, check that all the variables "incode"
 * that follow after address 900 are changed accordingly
       bcod(1)='CHECK'
@@ -200,6 +216,10 @@ c    :                xsecwr, nucros, photof, wavefl, boundc
       bcod(32)='FLUX'
       bcod(33)='J1J2'
       bcod(34)='EADIAB'
+      bcod(35)='SYSCONF'
+      bcod(36)='HYPXSC'
+      bcod(37)='STMIX'
+      Bcod(38)='TRNPRT'
 *
       iipar=iicode
       irpar=ircode
@@ -347,7 +367,7 @@ c         call helppr(line)
      :      1900,2800,600,
      :      800,500,1300,700,2300,
      :      1200,1600,430,2650,2800,
-     :      460,2850),i
+     :      460,2850,2900,2950,3000,3100),i
 * basis type and kind of calculation
 50    if(l.eq.0) goto 1
       l1 = l
@@ -440,17 +460,37 @@ c      call helppr(line)
       call parse(line,l,code,lc)
       call getval(code(1:lc),' ',0,j,energ(i))
       goto 310
-320   if (i .ne. nerg) then
-        if (i. le. 9) then
-          write (6, 321) i
-321       format (' ** NERG HAS BEEN RESET TO',i3)
-          nerg = i
-        else
-          write (6, 322)
-322       format (' ** NERG RESET TO 10 (MAXIMUM VALUE)')
-          nerg=10
-        end if
-      end if
+320   if (energ(1) .gt. 0) then
+         if (i .ne. nerg) then
+           if (i. le. 25) then
+             write (6, 321) i
+321          format (' ** NERG HAS BEEN RESET TO',i3)
+             nerg = i
+           else
+             write (6, 322)
+322          format (' ** NERG RESET TO 25 (MAXIMUM VALUE)')
+             nerg=25
+           end if
+         end if
+      elseif (energ(1) .lt. 0) then
+         nerg=energ(4)+0.001d0
+         if (nerg.gt.25) then
+            nerg=25
+            write (6,322)
+         endif
+         e1=energ(2)
+         delt_e=(energ(3)-e1)/(nerg-1)
+         nde=delt_e*100d0
+         delt_e=nde/100d0
+         write (6,323) e1,nerg, delt_e,e1+(nerg-1)*delt_e
+323      format(' ** GRID OF ENERGIES:  E-FIRST = ', f9.2,
+     :     '; NERG = ',i2, '; DELTA_E = ',f7.2,
+     :        '; E-LAST = ',f9.2)
+         do ii=1,nerg
+            energ(ii)=e1+(ii-1)*delt_e
+         enddo
+      endif
+
       call enord(energ,nerg)
       ipar(5) = nerg
       l1 = l
@@ -603,7 +643,7 @@ cend
      :                    j=1,numj)
         endif
 736     format(1x,(a),10i4,/,9x,10i4)
-737     format(1x,(a),i2,(a),10i4)
+737     format(1x,(a),i2,(a),20i3)
 738     format (1x,(a),1x,20(2i1,'  ') )
 739     format (1x,(a),i2,(a),20(2i1,'  ') )
         write(9,730) 'Flags:',(fcod(j),lpar(lindx(j)),j = 1,lcode)
@@ -701,20 +741,28 @@ cend
 740   format(1x,'** Energies:',(t15,5f15.6))
       lenout = index(output,' ')-1
       lenjob = index(jobnam,' ')-1
+      jtrunc = .false.
       if (lenjob.gt.8) then
-         write (6,740) jobnam
-745      format(1x,'** jobnam = ',(a),'; .gt. 8 characters in length')
-         go to 15
+         jobnam=jobnam(1:8)
+         jtrunc = .true.
       endif
       leninp=index(input,' ')-1
       write (6, 751) label
 751   format (1x,'** Label:      ',(a))
       write (6, 752) potnam
 752   format (1x,'** Pot name:      ',(a))
-      write (6, 753) input(1:leninp),
+      if (.not. jtrunc) then
+         write (6, 753) input(1:leninp),
      :     output(1:lenout), jobnam(1:lenjob)
 753   format(1x,'** Input File:  ',(a),/
      :       1x,'** Output file: ',(a),/,1x,'** Jobname:     ',(a))
+      else
+         write (6, 754) input(1:leninp),
+     :     output(1:lenout), jobnam(1:lenjob)
+754   format(1x,'** Input File:  ',(a),/
+     :       1x,'** Output file: ',(a),/,1x,'** Jobname:     ',(a),
+     :       ' (** TRUNCATED TO 8 CHARACTERS **)')
+      endif
       l1 = l
       goto 15
 * read
@@ -949,8 +997,8 @@ cend
 1830  format('   de Broglie wavelength  = ',f6.3,' bohr / 5  = ',f6.3)
       waveve = 6.283/r
       write (6, 1831) waveve, 1.8897*waveve
-1831  format ('   wavevector =', g11.5,' Bohr^-1 = ',
-     :   g11.5,' Angstroms^-1')
+1831  format ('   wavevector =', g12.5,' Bohr^-1 = ',
+     :   g12.5,' Angstroms^-1')
       l1 = l
       goto 15
 *.....print s-matrices:
@@ -1144,7 +1192,7 @@ cend
          rpar(ipr-iicode) = optval
          write(6,2170) pcod(ipr)(1:lc),optval,code(1:lcc),
      :      optacc,code(1:lcc),optacm,imx,jmx,code(1:lcc)
-2170     format(' optimized value for ',a,' = ',g10.4,/,
+2170     format(' optimized value for ',a,' = ',g11.4,/,
      1   ' average difference in old and new ',(a),' is',
      2     f10.2,'%',/,
      3   ' Largest difference in old and new ',(a),' is',
@@ -1180,12 +1228,12 @@ cend
       call intcrs(fnam1,a)
       goto 1
 *.....tensor cross sections
-*  tenxsc,jobfile,maxn,in1,in2,ienerg,jtotend,minj,maxj
+*  tenxsc,jobfile,maxn,iframe,in1,in2,ienerg,jtotend,minj,maxj
 2300  call parse(line,l,fnam1,lc)
       if(fnam1 .eq. ' ') fnam1 = jobnam
       call lower(fnam1)
       call upper(fnam1(1:1))
-      do 2310 i = 1,8
+      do 2310 i = 1,9
       a(i) = 0.d0
       if(l .eq. 0) goto 2310
       call parse(line,l,code,lc)
@@ -1294,7 +1342,80 @@ cend
      :            '   ENTER NEW VALUES')
         goto 1
       endif
-2880  call psi(fnam1,a)
+2880  continue
+      call psi(fnam1,a)
+      goto 1
+*  print out system parameters
+2900  call sys_conf
+      goto 1
+*  hyperfine xcs routine (originally written by j. klos,
+*  rewritten by p.j. dagdigian
+*  hypxsc,jobfile, ienerg ,nucspin, j1, j2
+2950  if (.not. lpar(20)) then
+        call parse(line,l,fnam1,lc)
+        if(fnam1 .eq. ' ') fnam1 = jobnam
+        call lower(fnam1)
+        call upper(fnam1(1:1))
+        do 2013 i = 1,4
+           a(i) = 0.d0
+           if(l .eq. 0) goto 2013
+           call parse(line,l,code,lc)
+           call getval(code(1:lc),' ',0,j,a(i))
+2013    continue
+        call hypxsc(fnam1,a)
+      else
+        write (6, 2012)
+2012    format(' Sorry, hyperfine cross sections not yet',
+     :         /,'  implemented for molecule-molecule collisions')
+      end if
+      goto 1
+* singlet-triplet collisional mixing - added by p. dagdigian
+3000  call parse(line,l,fnam1,lc)
+      if(fnam1 .eq. ' ') fnam1 = jobnam
+      call lower(fnam1)
+      call upper(fnam1(1:1))
+* get iener for 1st smt file
+      a(1) = 0.d0
+      if(l .eq. 0) goto 3005
+      call parse(line,l,code,lc)
+      call getval(code(1:lc),' ',0,j,a(1))
+3005  call parse(line,l,fnam2,lc)
+      if(fnam2 .eq. ' ') fnam2 = jobnam
+      call lower(fnam2)
+      call upper(fnam2(1:1))
+* get iener for 2nd smt file
+      a(2) = 0.d0
+      if(l .eq. 0) goto 3010
+      call parse(line,l,code,lc)
+      call getval(code(1:lc),' ',0,j,a(2))
+* get dele, emax, istata, istatx, hso
+3010  do 3020 i = 3, 7
+        a(i) = 0.d0
+        if(l .eq. 0) goto 3020
+        call parse(line,l,code,lc)
+        call getval(code(1:lc),' ',0,j,a(i))
+3020  continue
+      call stmix(fnam1,fnam2,a)
+      goto 1
+* transport cross sections - added by p. dagdigian
+3100  call parse(line,l,fnam1,lc)
+      if(fnam1 .eq. ' ') fnam1 = jobnam
+      call lower(fnam1)
+      call upper(fnam1(1:1))
+* get iener for 1st smt file
+      a(1) = 0.d0
+      if(l .eq. 0) goto 3105
+      call parse(line,l,code,lc)
+      call getval(code(1:lc),' ',0,j,a(1))
+* get in1, in2, jtotmx, join, jmax
+3105  do 3120 i = 2, 6
+        a(i) = 0.d0
+        if (l .eq. 2) a(l) = 1.d0
+        if (l .eq. 0) goto 3120
+        call parse(line,l,code,lc)
+        call getval(code(1:lc),' ',0,j,a(i))
+3120  continue
+      call trnprt(fnam1,a)
       goto 1
       end
       subroutine pcoder(boundc,pcod,icode)

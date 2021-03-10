@@ -10,7 +10,13 @@
 
       call vaxhlp(line)
       end
+cstart unix-xlf
+c;@process fixed(132)
+cend
       subroutine vaxhlp(line1)
+cstart unix-ifort
+c;cdec$ fixedformlinesize:132
+cend
 * latest revision 24-feb-2004
       implicit character*10(z)
       character*(*) line1
@@ -46,7 +52,7 @@ cend
 cstart unix-convex
 c;      open (ihlpmain,file=helpfile,err=299,readonly,status='old')
 cend
-cstart unix-sun unix-hp unix-dec unix-ibm unix-aix unix-darwin
+cstart unix-sun unix-hp unix-dec unix-ibm unix-aix unix-darwin unix-x86
 c      write(6,*) 'open ',helpfile
       open (ihlpmain,file=helpfile,err=299,status='unknown')
 cend
@@ -138,7 +144,7 @@ cstart unix-convex
 c;          open (ihlpalt,file='helphelphelphelp',status='old')
 c;          open (ihlp,file=helpfile,err=29,readonly,status='old')
 cend
-cstart unix-sun unix-hp unix-dec unix-ibm unix-aix unix-darwin
+cstart unix-sun unix-hp unix-dec unix-ibm unix-aix unix-darwin unix-x86
           open (ihlp,file=helpfile,err=29,status='unknown')
 cend
 cstart unix unix-dec unix-ibm

@@ -9,7 +9,7 @@
 *  of a 2sigma molecule in a hund's case(a) basis with a
 *  structureless atom or with an uncorrugated surface
 *  author:  millard alexander
-*  current revision date:  7-apr-2003 by mha
+*  current revision date:  10-jun-2006 by mha
 * --------------------------------------------------------------------
 *  variables in call list:
 *    j:        on return contains rotational quantum numbers for each
@@ -373,7 +373,15 @@ c65    continue
             is(nn) = is(i)
             nrot(nn) = nrot(i)
             l(nn) = jtot
-            cent(nn) = jtot * (jtot + 1)
+            if (.not. boundc) then
+                 cent(nn) = jtot * (jtot + 1)
+            else
+                 xjtot=jtot+0.5d0
+                 xj=j(nn)+0.5d0
+                 xnu = nu+0.5d0
+                 cent(nn)=xjtot*(xjtot+1)+xj*(xj+1)-2*xnu*xnu
+            endif
+
           end if
 85      continue
 *  set number of coupled states channels
@@ -558,7 +566,7 @@ c65    continue
         if (bastst) then
           write (6, 370) ilam, lamnum(ilam)
           write (9, 370) ilam, lamnum(ilam)
-370     format ('ILAM=',i3,' LAMNUM(ILAM) = ',i3)
+370     format ('ILAM=',i3,' LAMNUM(ILAM) = ',i6)
         end if
         lamsum = lamsum + lamnum(ilam)
 400   continue

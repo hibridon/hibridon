@@ -588,7 +588,7 @@
         if (bastst) then
           write (6, 360) ilam, lamnum(ilam)
           write (9, 360) ilam, lamnum(ilam)
-360       format ('ILAM=', i3, ' LAMNUM(ILAM) =', i4)
+360       format ('ILAM=', i3, ' LAMNUM(ILAM) =', i6)
         end if
         lamsum = lamsum + lamnum(ilam)
 400   continue

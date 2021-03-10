@@ -1,0 +1,199 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1"><title>installation</title>
+</head><body><h3><center><font color="#b00000">Downloading and Installing the Hibridon<font size="-2"><sup>©</sup></font> Package</font></center></h3>
+<font color="#b00000"></font><hr>
+
+Version 4.3 of the Hibridon<a href="copyright.html"><font size="-2"><sup>©</sup></font></a> package
+is now available for the following machines:
+<ul>
+<li> Apple G5 workstations running under OSX 10.3 (Panther) or OSX 10.4 (Tiger)
+<ul>
+<li> Fortran Compiler: <a href="http://www.absoft.com/xlf/index.htm">xlf 8.1</a>
+</li></ul>
+
+</li><li> Apple Intel workstations 
+<ul>
+<li>OSX 10.5 (Leopard); Fortran Compiler: <a href="http://www.intel.com/cd/software/products/asmo-na/eng/compilers/267426.htm"> v. 10.1, and v. 11.0</a>
+</li><li>OSX 10.6 (Snow Leopard); Fortran Compiler: <a href="http://www.intel.com/cd/software/products/asmo-na/eng/compilers/267426.htm"> v. 10.1, v. 11.1 and v. 12</a>
+ 
+</li></ul>
+</li></ul>
+<li> Xeon x86 workstations running under Linux (Redhat 4 and 5.5 have been tested)
+<ul>
+<li>Fortran Compilers:  <a href="http://www.intel.com/support/performancetools/fortran/linux/">Intel ifort v. 10.0</a>, v 11.1, and v. 12.0 as well as 
+<a href="http://www.pgroup.com/products/workpghpf.htm">Portland Group pgf95 v.7.1</a>
+</li></ul>
+</li><li> SGI Altix (Itanium ia64) running under Linux (Suse has been tested)
+<ul>
+<li>Fortran Compilers:  
+<a href="http://www.pgroup.com/products/workpghpf.htm">Portland Group pgf95 v.7.1</a>
+</li></ul>
+<!--
+<li> IBM RS/6000 workstations running under AIX 4.3
+<ul>
+<li> Fortran Compiler:  xlf 7.1
+<!--
+</ul>
+<li> HP 9000 series workstations running under HPUX 11.0
+-->
+
+<font size="-1">Only the Apple (10.5 and 10.6) and Linux x86 versions will be actively maintained.</font><p>
+
+You can obtain a copy of  Hibridon 4.3 as
+a  <tt>g'zipped tar</tt> <a href="hib43.tar.gz">
+archive <img src="install%20Files/archive.gif" align="bottom" border="1" height="14" width="15"></a> 
+ in binary format (~1 MB)
+</p><hr>
+<font h2="" color="#b00000">Prerequisites</font><p>
+</p><ul>
+<li>If you are installing on a platform that uses the Intel fortan compiler, make sure that the compiler environment
+is properly set up. 
+<ul>
+<li>For ifort v. 10, this is explained in the directory <tt>...intel/fce/{version}/doc/INSTALL.htm#settingup</tt>. <br>
+Specifically, the
+scripts 
+<ul><li><tt>...intel/fce/{version}/bin/ifortvars.sh(.csh)</tt>
+</li><li><tt>...intel/fce/{version}/bin/idbvars.sh(.csh)</tt></li></ul>
+should be executed. The "fce" directories contain the 64 bit versions of the compiler.   As can be seen in <a href="timing.html" target="timing"></a>, the 64 bit code executed ~ 1.5 times faster than
+the 32 bit code (invoked by sourceing the "fc" rather than "fce" files).
+</li><li>
+For ifort v. 11 (testing has been done with v. 11.0.064, 11.1.058,  11.1.076, 11.1.089) this is explained in the file  <tt>/opt/intel/Compiler/11.1/xxx/Documentation/en_US/documentation_f.htm</tt>.<br>
+Specifically, the scripts
+<ul><li><tt> source /opt/intel/Compiler/11.1/xxx/bin/ifortvars.csh intel64</tt>
+</li><li><tt>source /opt/intel/Compiler/11.1/xxx/bin/ifortvars.sh intel64</tt></li></ul>
+should be
+executed (by <tt>source'ing</tt> these commands) in your <tt>.profile (.login)</tt> file.
+</li><li>
+For ifort v. 12 (testing has been done with v. 12.0.0) this is explained in the file  <tt>/opt/intel/composerxe-2011.0.085/Documentation/en_US/documentation_f.htm</tt>.<br>
+Specifically, the scripts
+<ul><li><tt> source /opt/intel/bin/compilervars.csh intel64</tt>
+</li><li><tt> source /opt/intel/bin/ifortvars.csh intel64</tt>
+</li><li><tt> source /opt/intel/bin/compilervars.sh intel64</tt>
+</li><li><tt> source /opt/intel/bin/ifortvars.sh intel64</tt>
+</li></ul>should be
+executed (by <tt>source'ing</tt> these commands) in your <tt>.profile (.login)</tt> file.
+<ul><li><img src="install%20Files/warningsmall.gif">For Apple OSX 10.5 (Leopard), Hibridon works with version 10.1 of the Intel Compiler under both 32 bit (<tt> .../intel/fc</tt>) and 64 bit (<tt> .../intel/fce</tt>) modes,
+as well as with version 11.0 under 64 bit mode.
+
+</li><li><img src="install%20Files/warningsmall.gif">For Apple OSX 10.6 (Snow Leopard), Hibridon works with version 10.1 of the Intel Compiler under  32 bit (<tt> .../intel/fc</tt>) mode
+as well as with version 11.1 and 12 under 64 bit mode.
+
+</li></ul>
+
+</li><li>You will need to have a local BLAS and LAPACK library
+<ul>
+<li>If you are planning to use Intel's MKL library, make sure that the required environment variables are properly set, 
+as explained in the file <tt>userguide.pdf</tt>.  
+<ul><li>On Apple machines and ifort version 10 or 11 this is located in 
+<tt>/Library/Frameworks/Intel_MKL.framework/Documentation</tt>.  If you are using the 64 bit compiler, you should use the 64 bit (<tt>em64t</tt>) MKL libraries, rather than the 32 bit libraries.
+</li><li>On Apple machines and ifort version 12 this is located in
+<tt>/opt/intel/composerxe-2011.0.085/Documentation/en_US/documentation_f.htm</tt>
+
+</li><li>On Intel 
+Linux platforms, you may have to ask your system administrator where this file is located.
+</li></ul>
+</li><li>On Apple Intel platforms running ifort 10.x or 11.x, the command to set the required MKL environment variables is
+<ul>
+<li><tt>source /opt/intel/Compiler/1X.y/zzz/Frameworks/mkl/tools/environment/mklvarsem64t.csh</tt>
+</li><li>Or, for 32 bit
+source /opt/intel/Compiler/11.0/064/Frameworks/mkl/tools/environment/mklvars32.csh
+</li></ul>
+</li><li>On Apple Intel platforms running ifort 12.x, the command to set the required MKL environment variables is
+<ul>
+<li><tt>
+source /opt/intel/mkl/bin/intel64/mklvars_intel64.csh</tt>
+</li></ul>
+</li><li>If you are using the Portland Group compiler and planning to use the ACML Library, you may have to ask your system
+administrator where the library is located.
+</li></ul>
+</li></ul>
+<hr>
+After you have obtained the g'zipped archive, follow
+these steps:
+<ol>
+<li>Create a main hibridon directory.  We shall designate this
+here as <tt>hib43x</tt>, although you can give it any name you want. 
+</li><li>Move the g'zipped tar archive into this directory
+
+</li><li>Uncompress and unpack the tar archive
+<tt></tt><ul>
+<tt>   gunzip hib4.3.tar.gz |tar xvf -
+</tt><p><tt></tt></p></ul>
+</li><li>The Hibridon<font size="-2"><sup>©</sup></font> hypertext help facility (a copy of the help facility you are reading
+here) is contained  in the
+directory <p></p><ul><tt>hib43x/doc/hib_html.</tt></ul><p><tt></tt>The initial target file for 
+your web browser should be
+</p><p></p><ul><tt>hib43x/doc/hib_html/index.html</tt></ul><tt></tt><hr>
+
+</li><li>Extend your PATH environmental variable to include the <tt>bin</tt> subdirectory
+of your main hibridon directory, that is <tt>hib43x/bin</tt>  
+<p></p></li><li><img src="install%20Files/warning.gif" align="left">
+Read the <a href="license.html">license</a> agreement.  If you <b>do not accept</b> all provisions of this agreement,
+<b>stop
+here</b>  and
+destroy the software.  If you <b>accept</b> the license
+agreement, please read <a href="acknow.html"><img src="install%20Files/linksmall.gif" border="1">
+</a> the instructions for acknowledgement of the code in any future publications
+from your group that use the Hibridon<font size="-2"><sup>©</sup></font> package.<br clear="left">
+<p></p></li><li><tt>cd</tt> to the subdirectory <tt>hib43x/bin</tt>.
+<p></p></li><li>Execute the command <p><tt></tt></p><ul><tt>makefirst</tt></ul><p><tt></tt>  This creates a number
+of local configuration files.  
+</p><ul>
+<li>You will be asked if you accept the license.  Respond
+"yes" if you accept, otherwise destroy the software. 
+<p></p></li><li>You will also be asked to supply
+<ul>
+<li>The name of your FORTRAN compiler (the install script will suggest a default name, which you can change)
+</li><li>The name of your C compiler (the install script will suggest a default name, which you can change)
+</li><li>The path of your BLAS and LAPACK libraries (the install script will suggest a default name, which you can change)
+</li></ul>
+</li></ul><p>
+The script <tt>makefirst</tt> will create the file <tt>CONFIG</tt>
+in your top-level Hibridon directory. You should
+inspect this file to make sure you agree with the choice of compilers,
+compiler options, and BLAS/LAPACK libraries. Several default <tt>CONFIG</tt> files are supplied
+for reference, or in case the <tt>makefirst</tt> script does not execute properly at your installation.</p><p>
+The <tt>makefirst</tt> script will create a <tt>CONFIG</tt> file suitable for either a 64-bit or 32-bit.  This choice will depend on what your default
+compiler is (which you can verify by the command <tt>which ifort</tt>).
+
+</p><p></p></li><li>Execute the command <p><tt></tt></p><ul><tt>hib_makeobj</tt><p></p></ul><tt></tt> <p> This compiles all the 
+hibridon<font size="-2"><sup>©</sup></font> source code and creates the on-line executable <tt>hib43x/bin/hib_help</tt>.
+The file <tt>hib43x/obj.log</tt> contains a log of the compilation, in case
+of failure.  Check this log to search for any compiler errors.
+</p><p> 
+To obtain help at any time you can either</p><p>
+</p><ol type="a"><li>Execute the command <tt>hib_help</tt> and follow instructions.
+</li><li>Use a Web Browser to read the Hibridon<font size="-2"><sup>©</sup></font> HTML <a href="http://www.chem.umd.edu/groups/alexander/hibridon/hibhelp.html">help library</a>.
+</li></ol>
+<p></p></li><li>Test your code by executing the command
+<p><tt></tt></p><ul><tt>hibtest</tt><p></p></ul><tt></tt>
+which runs a series of <a href="tests.html">test</a> calculations.  After the tests are run, the results are saved
+in the directory <tt>hib43x/testnew</tt>.  All files in this directory should be compared
+with the canonical results, which are stored in the directory <tt>hib43x/tests</tt>.  
+<ul>
+<li>On Apple platforms
+this comparison can be done graphically, using Apple's <tt>FileMerge</tt> application, by executing
+the command <p><tt></tt></p><ul><tt>compare_OSX</tt><p></p></ul><tt></tt>
+</li><li>On non-Apple platforms, this comparison can be done by excuting the command <p><tt></tt></p><ul><tt>compare.com</tt><p></p></ul><tt></tt>
+</li></ul>
+The comparison between the files in <tt>../tests</tt> and those in <tt>../testnew</tt> should agree to within at least 6 significant figures.
+<p>
+</p></li><li>You are now ready to <a href="linking.html">link</a> and <a href="run.html">run</a> your
+own code for your particular scattering problem.  Use one of the <href=potlist.html>
+potential subroutines in the directory <tt>hib43x/src/pot</tt> as a guide for writing
+your own.  You will certainly find it helpful to consult the <a href="basis.html">Basis</a> and 
+<a href="system.html">Systems</a> help files.
+<p>
+</p></href=potlist.html></li><li>You can run several timing benchmarks by the command <tt>hib_timer</tt> and compare with the results obtained on other platforms
+(as discussed in more detail on the <a href="timing.html" target="bench">benchmark</a> page).<p>
+</p></li><li><i>Good luck!</i></li></ol>
+<hr>
+<a href="mailto:mha@umd.edu"><img src="Envelope.gif" border="1" height="10" width="16"></a> Please report
+all bugs that you may find.  They will  (hopefully) be eliminated in a timely
+manner.
+
+
+<hr>
+<a href="hibhelp.html"><img src="install%20Files/up_arrow.gif" align="middle" border="0"></a>Return to <a href="hibhelp.html">Hibridon Help</a>
+
+</li></ul></li></body></html>

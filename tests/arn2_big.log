@@ -1,11 +1,11 @@
 
  --------------------------------------------------------------------------
-           HIBRIDON SCATTERING CODE V 4.1 05/19/97 16:41:56 EDT
+           HIBRIDON SCATTERING CODE V 4.3 12/04/07 08:28:17 EST
 
      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG
  CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI
                A. BERNING, A. DEGLI-ESPOSTI, C. RIST, P. DAGDIGIAN, B. POUILLY
-               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK
+               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, J. KLOS
  --------------------------------------------------------------------------
  Hibridon>  Hibridon>  Hibridon>  Hibridon>      *** Parameters (scattering):
  JTOT1  =  20        JTOT2  =  20        JTOTD  =   5        JLPAR  =   1
@@ -14,12 +14,12 @@
  FSTFAC =  15.00     RINCR  =  3.000     RCUT   =  30.00     RENDAI =  25.00    
  RENDLD =  8.000     RSTART =  5.600     SPAC   = 0.1500     TOLAI  =  1.150    
  XMU    =  16.47    
- NOUT:  4; JOUT:   0   2   4   6
+ NOUT:  4; JOUT:  0  2  4  6
  INDOUT:    0
      *** 1-SIGMA system parameters:
  NTERM  =   1        VMIN   =   0        VMAX   =   0        JMIN   =   0
  JMAX   =   4
- BROT   =  2.010     DROT   = 0.0000E+00 HROT   = 0.0000E+00 EVIB   = 0.0000E+00
+ BROT   =  2.010     DROT   =  0.000     HROT   =  0.000     EVIB   =  0.000    
  LAMMIN:    2
  LAMMAX:    2
  MPROJ:     0
@@ -40,7 +40,7 @@
  **  CC SINGLET SIGMA DIATOMIC ** RMU=  16.4700       E= 500.00   JTOT=   20   JLPAR= 1
 
  State    B(v)         D(v)        H(v)          E(v)
-   0    2.0100     0.00000E+00 0.00000E+00     0.00000000
+   0    2.0100      0.0000      0.0000         0.00000000
 
    N   V   J    L      EINT(CM-1)
 
@@ -64,25 +64,25 @@
  ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS    26
  ** LOGD:  RSTART =  5.600   REND =  8.000   SPAC =   0.150   NSTEP =   17
  ** AIRY:  RSTART =  8.000  REND = 25.000   RINCR =  3.000   DRMIN =  2.250   DRMAX =  3.935   NSTEP =   6
- ** CPU TIMES:  BASIS= 00:00:00.00  POT= 00:00:00.00  LOGD= 00:00:00.00  AIRY=  00:00:00.00
-                PSI0= 00:00:00.00  SMAT= 00:00:00.00
+ ** CPU TIMES:  BASIS= 00:00:00.001  POT= 00:00:00.000  LOGD= 00:00:00.002  AIRY=  00:00:00.003
+                PSI0= 00:00:00.000  SMAT= 00:00:00.000
 
  ** J =   20 JLPAR = 1 COMPLETED
- CPU-TIMES:  BASIS: 00:00:00.00   POT: 00:00:00.00   LOGD:  00:00:00.00   AIRY:  00:00:00.00 
-             PSI0: 00:00:00.00   SMAT: 00:00:00.01   SOUT:  00:00:00.00   CUMULATIVE: 00:00:00.03 
-             ELAPSED:  00:00:00.15   CURRENT DATE:   19-May-97  16:43:15
+ CPU-TIMES:  BASIS: 00:00:00.001  POT: 00:00:00.000  LOGD:  00:00:00.002  AIRY:  00:00:00.003
+             PSI0: 00:00:00.000  SMAT: 00:00:00.000  SOUT:  00:00:00.001  CUMULATIVE: 00:00:00.012
+             ELAPSED:  00:00:00.040  CURRENT DATE:  Dec  4 08:28:46 2007
  TURNING POINTS (MIN/MAX) =    6.02    6.16
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:    9
-      TIMING:  ELAPSED 00:00:00.15 / CPU 00:00:00.03 
-      CURRENT DATE:   19-May-97  16:43:15
+      TIMING:  ELAPSED 00:00:00.040/ CPU 00:00:00.012
+      CURRENT DATE:  Dec  4 08:28:46 200
  ===============================================================================
  Hibridon>  Hibridon>  Hibridon>  Hibridon> 
  **  CS SINGLET SIGMA DIATOMIC ** RMU=  16.4700       E= 500.00   JTOT=   20   NU= 0
 
  State    B(v)         D(v)        H(v)          E(v)
-   0    2.0100     0.00000E+00 0.00000E+00     0.00000000
+   0    2.0100      0.0000      0.0000         0.00000000
 
    N   V   J    L      EINT(CM-1)
 
@@ -106,13 +106,13 @@
  ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS    10
  ** LOGD:  RSTART =  5.600   REND =  8.000   SPAC =   0.150   NSTEP =   17
  ** AIRY:  RSTART =  8.000  REND = 25.000   RINCR =  3.000   DRMIN =  2.250   DRMAX =  3.935   NSTEP =   6
- ** CPU TIMES:  BASIS= 00:00:00.01  POT= 00:00:00.00  LOGD= 00:00:00.00  AIRY=  00:00:00.00
-                PSI0= 00:00:00.00  SMAT= 00:00:00.00
+ ** CPU TIMES:  BASIS= 00:00:00.000  POT= 00:00:00.000  LOGD= 00:00:00.000  AIRY=  00:00:00.000
+                PSI0= 00:00:00.000  SMAT= 00:00:00.000
 
  **  CS SINGLET SIGMA DIATOMIC ** RMU=  16.4700       E= 500.00   JTOT=   20   NU= 1
 
  State    B(v)         D(v)        H(v)          E(v)
-   0    2.0100     0.00000E+00 0.00000E+00     0.00000000
+   0    2.0100      0.0000      0.0000         0.00000000
 
    N   V   J    L      EINT(CM-1)
 
@@ -135,13 +135,13 @@
  ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS     9
  ** LOGD:  RSTART =  5.600   REND =  8.000   SPAC =   0.150   NSTEP =   17
  ** AIRY:  RSTART =  8.000  REND = 25.000   RINCR =  3.000   DRMIN =  2.250   DRMAX =  3.935   NSTEP =   6
- ** CPU TIMES:  BASIS= 00:00:00.01  POT= 00:00:00.00  LOGD= 00:00:00.00  AIRY=  00:00:00.00
-                PSI0= 00:00:00.00  SMAT= 00:00:00.00
+ ** CPU TIMES:  BASIS= 00:00:00.000  POT= 00:00:00.000  LOGD= 00:00:00.000  AIRY=  00:00:00.000
+                PSI0= 00:00:00.000  SMAT= 00:00:00.000
 
  **  CS SINGLET SIGMA DIATOMIC ** RMU=  16.4700       E= 500.00   JTOT=   20   NU= 2
 
  State    B(v)         D(v)        H(v)          E(v)
-   0    2.0100     0.00000E+00 0.00000E+00     0.00000000
+   0    2.0100      0.0000      0.0000         0.00000000
 
    N   V   J    L      EINT(CM-1)
 
@@ -164,13 +164,13 @@
  ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS     9
  ** LOGD:  RSTART =  5.600   REND =  8.000   SPAC =   0.150   NSTEP =   17
  ** AIRY:  RSTART =  8.000  REND = 25.000   RINCR =  3.000   DRMIN =  2.250   DRMAX =  3.935   NSTEP =   6
- ** CPU TIMES:  BASIS= 00:00:00.00  POT= 00:00:00.00  LOGD= 00:00:00.00  AIRY=  00:00:00.01
-                PSI0= 00:00:00.00  SMAT= 00:00:00.00
+ ** CPU TIMES:  BASIS= 00:00:00.000  POT= 00:00:00.000  LOGD= 00:00:00.000  AIRY=  00:00:00.000
+                PSI0= 00:00:00.000  SMAT= 00:00:00.000
 
  **  CS SINGLET SIGMA DIATOMIC ** RMU=  16.4700       E= 500.00   JTOT=   20   NU= 3
 
  State    B(v)         D(v)        H(v)          E(v)
-   0    2.0100     0.00000E+00 0.00000E+00     0.00000000
+   0    2.0100      0.0000      0.0000         0.00000000
 
    N   V   J    L      EINT(CM-1)
 
@@ -192,13 +192,13 @@
  ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS     7
  ** LOGD:  RSTART =  5.600   REND =  8.000   SPAC =   0.150   NSTEP =   17
  ** AIRY:  RSTART =  8.000  REND = 25.000   RINCR =  3.000   DRMIN =  2.250   DRMAX =  3.935   NSTEP =   6
- ** CPU TIMES:  BASIS= 00:00:00.00  POT= 00:00:00.00  LOGD= 00:00:00.00  AIRY=  00:00:00.00
-                PSI0= 00:00:00.00  SMAT= 00:00:00.00
+ ** CPU TIMES:  BASIS= 00:00:00.000  POT= 00:00:00.000  LOGD= 00:00:00.000  AIRY=  00:00:00.000
+                PSI0= 00:00:00.000  SMAT= 00:00:00.000
 
  **  CS SINGLET SIGMA DIATOMIC ** RMU=  16.4700       E= 500.00   JTOT=   20   NU= 4
 
  State    B(v)         D(v)        H(v)          E(v)
-   0    2.0100     0.00000E+00 0.00000E+00     0.00000000
+   0    2.0100      0.0000      0.0000         0.00000000
 
    N   V   J    L      EINT(CM-1)
 
@@ -220,19 +220,19 @@
  ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS     7
  ** LOGD:  RSTART =  5.600   REND =  8.000   SPAC =   0.150   NSTEP =   17
  ** AIRY:  RSTART =  8.000  REND = 25.000   RINCR =  3.000   DRMIN =  2.250   DRMAX =  3.935   NSTEP =   6
- ** CPU TIMES:  BASIS= 00:00:00.00  POT= 00:00:00.00  LOGD= 00:00:00.00  AIRY=  00:00:00.00
-                PSI0= 00:00:00.00  SMAT= 00:00:00.00
+ ** CPU TIMES:  BASIS= 00:00:00.000  POT= 00:00:00.000  LOGD= 00:00:00.000  AIRY=  00:00:00.000
+                PSI0= 00:00:00.000  SMAT= 00:00:00.000
 
  ** J =   20 JLPAR = 1 COMPLETED
- CPU-TIMES:  BASIS: 00:00:00.02   POT: 00:00:00.00   LOGD:  00:00:00.02   AIRY:  00:00:00.03 
-             PSI0: 00:00:00.00   SMAT: 00:00:00.00   SOUT:  00:00:00.00   CUMULATIVE: 00:00:00.09 
-             ELAPSED:  00:00:00.44   CURRENT DATE:   19-May-97  16:43:15
+ CPU-TIMES:  BASIS: 00:00:00.002  POT: 00:00:00.000  LOGD:  00:00:00.004  AIRY:  00:00:00.002
+             PSI0: 00:00:00.000  SMAT: 00:00:00.001  SOUT:  00:00:00.001  CUMULATIVE: 00:00:00.013
+             ELAPSED:  00:00:00.014  CURRENT DATE:  Dec  4 08:28:46 2007
  TURNING POINTS (MIN/MAX) =    5.95    6.31
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:    6
-      TIMING:  ELAPSED 00:00:00.44 / CPU 00:00:00.09 
-      CURRENT DATE:   19-May-97  16:43:15
+      TIMING:  ELAPSED 00:00:00.014/ CPU 00:00:00.013
+      CURRENT DATE:  Dec  4 08:28:46 200
  ===============================================================================
  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>      *** Parameters (scattering):
  JTOT1  =   0        JTOT2  =  20        JTOTD  =   5        JLPAR  =   1
@@ -241,12 +241,12 @@
  FSTFAC =  15.00     RINCR  =  3.000     RCUT   =  30.00     RENDAI =  25.00    
  RENDLD =  8.000     RSTART =  5.600     SPAC   = 0.1500     TOLAI  =  1.150    
  XMU    =  16.47    
- NOUT:  4; JOUT:   0   2   4   6
+ NOUT:  4; JOUT:  0  2  4  6
  INDOUT:    0
      *** 1-SIGMA system parameters:
  NTERM  =   1        VMIN   =   0        VMAX   =   0        JMIN   =   0
  JMAX   =  10
- BROT   =  2.010     DROT   = 0.0000E+00 HROT   = 0.0000E+00 EVIB   = 0.0000E+00
+ BROT   =  2.010     DROT   =  0.000     HROT   =  0.000     EVIB   =  0.000    
  LAMMIN:    2
  LAMMAX:    2
  MPROJ:     0
@@ -265,20 +265,20 @@
  ** Jobname:     Ccbtest
  Hibridon>   CC calculation, numax set to zero
  NOPRIN = .TRUE., SO IPRINT SET TO -1
- ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00.01   WALL: 00:00:00.14   DATE:  19-May-97  16:43:16
- ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00.10   WALL: 00:00:00.37   DATE:  19-May-97  16:43:16
- ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:00.26   WALL: 00:00:00.66   DATE:  19-May-97  16:43:16
- ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:00.42   WALL: 00:00:00.95   DATE:  19-May-97  16:43:16
- ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:00.56   WALL: 00:00:01.23   DATE:  19-May-97  16:43:16
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00.003  WALL: 00:00:00.003  DATE: Dec  4 08:28:46 2007
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00.018  WALL: 00:00:00.020  DATE: Dec  4 08:28:46 2007
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:00.038  WALL: 00:00:00.042  DATE: Dec  4 08:28:46 2007
+ ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:00.059  WALL: 00:00:00.064  DATE: Dec  4 08:28:47 2007
+ ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:00.079  WALL: 00:00:00.085  DATE: Dec  4 08:28:47 2007
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:   36
-      TIMING:  ELAPSED 00:00:01.23 / CPU 00:00:00.56 
-      CURRENT DATE:   19-May-97  16:43:16
+      TIMING:  ELAPSED 00:00:00.085/ CPU 00:00:00.079
+      CURRENT DATE:  Dec  4 08:28:47 200
  ===============================================================================
  Hibridon> 
  INTEGRAL CROSS SECTIONS READ FROM FILE Ccbtest1.ics                            
- WRITTEN:    19-May-97  16:43:16
+ WRITTEN:   Dec  4 08:28:47 2007
  LABEL:     CC INTEGRAL AND PARTIAL TESTS                   
  POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
 
@@ -299,7 +299,7 @@
    10    0  1.92E-01 1.59E-01 2.23E-01 3.17E-01
  Hibridon> 
  PARTIAL CROSS SECTIONS READ FROM FILE Ccbtest1.pcs                            
- WRITTEN:     19-May-97  16:43:16
+ WRITTEN:    Dec  4 08:28:46 2007
  LABEL:      CC INTEGRAL AND PARTIAL TESTS                   
  POT NAME:   PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
 
@@ -311,7 +311,7 @@
    3    4     0     40.200
    4    6     0     84.420
 
- PARTIAL CROSS SECTIONS FOR INITIAL STATE J=  0  INDEX=  0  EKIN=    500.00
+ PARTIAL CROSS SECTIONS FOR INITIAL STATE J=  0  INDEX=    0  EKIN=    500.00
  JTOT    FINAL STATES
           1          2          3          4
    0 4.0105D-03 1.2643D-03 2.8647D-04 1.5582D-03
@@ -320,16 +320,16 @@
   15 1.5433D-01 3.9928D-02 7.4559D-03 5.4156D-02
   20 1.7156D-01 5.2646D-02 9.2137D-03 7.7335D-02
 
- SUM 5.9887D-01 1.3468D-01 2.5523D-02 1.8504D-01
+ SUM 2.9843D+00 6.7025D-01 1.2690D-01 9.2130D-01
  Hibridon>  Hibridon>  Hibridon>  Hibridon>  NOPRIN = .TRUE., SO IPRINT SET TO -1
- ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00.02   WALL: 00:00:00.15   DATE:  19-May-97  16:43:16
- ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00.10   WALL: 00:00:00.37   DATE:  19-May-97  16:43:17
- ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:00.26   WALL: 00:00:00.66   DATE:  19-May-97  16:43:17
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00.003  WALL: 00:00:00.003  DATE: Dec  4 08:28:47 2007
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00.017  WALL: 00:00:00.019  DATE: Dec  4 08:28:47 2007
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:00.038  WALL: 00:00:00.043  DATE: Dec  4 08:28:47 2007
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:   36
-      TIMING:  ELAPSED 00:00:00.66 / CPU 00:00:00.26 
-      CURRENT DATE:   19-May-97  16:43:17
+      TIMING:  ELAPSED 00:00:00.043/ CPU 00:00:00.038
+      CURRENT DATE:  Dec  4 08:28:47 200
  ===============================================================================
  Hibridon>  Hibridon>  Hibridon>  NOPRIN = .TRUE., SO IPRINT SET TO -1
 
@@ -347,17 +347,17 @@
 
  NO ERRORS DETECTED.
  ** CONTINUE CC CALCULATION AT JTOT=   15, JLPAR=    1
- ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:00.16   WALL: 00:00:00.36   DATE:  19-May-97  16:43:17
- ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:00.32   WALL: 00:00:00.66   DATE:  19-May-97  16:43:18
+ ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:00.020  WALL: 00:00:00.020  DATE: Dec  4 08:28:47 2007
+ ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:00.041  WALL: 00:00:00.042  DATE: Dec  4 08:28:47 2007
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:   36
-      TIMING:  ELAPSED 00:00:00.66 / CPU 00:00:00.32 
-      CURRENT DATE:   19-May-97  16:43:18
+      TIMING:  ELAPSED 00:00:00.042/ CPU 00:00:00.041
+      CURRENT DATE:  Dec  4 08:28:47 200
  ===============================================================================
  Hibridon> 
  INTEGRAL CROSS SECTIONS READ FROM FILE Ccbrstest1.ics                          
- WRITTEN:    19-May-97  16:43:18
+ WRITTEN:   Dec  4 08:28:47 2007
  LABEL:     CC TEST OF RESTART                              
  POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
 
@@ -378,7 +378,7 @@
    10    0  1.92E-01 1.59E-01 2.23E-01 3.17E-01
  Hibridon> 
  PARTIAL CROSS SECTIONS READ FROM FILE Ccbrstest1.pcs                          
- WRITTEN:     19-May-97  16:43:16
+ WRITTEN:    Dec  4 08:28:47 2007
  LABEL:      CC TEST OF RESTART                              
  POT NAME:   PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
 
@@ -390,7 +390,7 @@
    3    4     0     40.200
    4    6     0     84.420
 
- PARTIAL CROSS SECTIONS FOR INITIAL STATE J=  0  INDEX=  0  EKIN=    500.00
+ PARTIAL CROSS SECTIONS FOR INITIAL STATE J=  0  INDEX=    0  EKIN=    500.00
  JTOT    FINAL STATES
           1          2          3          4
    0 4.0105D-03 1.2643D-03 2.8647D-04 1.5582D-03
@@ -399,34 +399,34 @@
   15 1.5433D-01 3.9928D-02 7.4559D-03 5.4156D-02
   20 1.7156D-01 5.2646D-02 9.2137D-03 7.7335D-02
 
- SUM 5.9887D-01 1.3468D-01 2.5523D-02 1.8504D-01
+ SUM 2.9843D+00 6.7025D-01 1.2690D-01 9.2130D-01
  Hibridon>  Hibridon>  NOPRIN = .TRUE., SO IPRINT SET TO -1
- ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00.01   WALL: 00:00:00.14   DATE:  19-May-97  16:43:18
- ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00.08   WALL: 00:00:00.36   DATE:  19-May-97  16:43:18
- ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:00.24   WALL: 00:00:00.64   DATE:  19-May-97  16:43:18
- ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:00.39   WALL: 00:00:00.93   DATE:  19-May-97  16:43:18
- ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:00.55   WALL: 00:00:01.22   DATE:  19-May-97  16:43:19
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00.003  WALL: 00:00:00.004  DATE: Dec  4 08:28:47 2007
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00.017  WALL: 00:00:00.019  DATE: Dec  4 08:28:47 2007
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:00.037  WALL: 00:00:00.046  DATE: Dec  4 08:28:47 2007
+ ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:00.057  WALL: 00:00:00.068  DATE: Dec  4 08:28:47 2007
+ ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:00.079  WALL: 00:00:00.092  DATE: Dec  4 08:28:47 2007
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:   36
-      TIMING:  ELAPSED 00:00:01.22 / CPU 00:00:00.55 
-      CURRENT DATE:   19-May-97  16:43:19
+      TIMING:  ELAPSED 00:00:00.092/ CPU 00:00:00.079
+      CURRENT DATE:  Dec  4 08:28:47 200
  ===============================================================================
  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  NOPRIN = .TRUE., SO IPRINT SET TO -1
- ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00.07   WALL: 00:00:00.43   DATE:  19-May-97  16:43:19
- ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00.13   WALL: 00:00:00.82   DATE:  19-May-97  16:43:19
- ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:00.19   WALL: 00:00:01.23   DATE:  19-May-97  16:43:19
- ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:00.27   WALL: 00:00:01.64   DATE:  19-May-97  16:43:19
- ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:00.31   WALL: 00:00:02.05   DATE:  19-May-97  16:43:19
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00.010  WALL: 00:00:00.010  DATE: Dec  4 08:28:47 2007
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00.018  WALL: 00:00:00.019  DATE: Dec  4 08:28:47 2007
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:00.027  WALL: 00:00:00.030  DATE: Dec  4 08:28:47 2007
+ ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:00.034  WALL: 00:00:00.038  DATE: Dec  4 08:28:47 2007
+ ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:00.043  WALL: 00:00:00.048  DATE: Dec  4 08:28:47 2007
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:    6
-      TIMING:  ELAPSED 00:00:02.05 / CPU 00:00:00.31 
-      CURRENT DATE:   19-May-97  16:43:19
+      TIMING:  ELAPSED 00:00:00.048/ CPU 00:00:00.043
+      CURRENT DATE:  Dec  4 08:28:47 200
  ===============================================================================
  Hibridon> 
  INTEGRAL CROSS SECTIONS READ FROM FILE Csbtest1.ics                            
- WRITTEN:    19-May-97  16:43:19
+ WRITTEN:   Dec  4 08:28:47 2007
  LABEL:     CC TEST OF RESTART                              
  POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
 
@@ -447,7 +447,7 @@
    10    0  2.16E-01 2.97E-01 4.34E-01 5.48E-01
  Hibridon> 
  PARTIAL CROSS SECTIONS READ FROM FILE Csbtest1.pcs                            
- WRITTEN:     19-May-97  16:43:19
+ WRITTEN:    Dec  4 08:28:47 2007
  LABEL:      CC TEST OF RESTART                              
  POT NAME:   PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
 
@@ -459,7 +459,7 @@
    3    4     0     40.200
    4    6     0     84.420
 
- PARTIAL CROSS SECTIONS FOR INITIAL STATE J=  0  INDEX=  0  EKIN=    500.00
+ PARTIAL CROSS SECTIONS FOR INITIAL STATE J=  0  INDEX=    0  EKIN=    500.00
  JTOT    FINAL STATES
           1          2          3          4
    0 4.0587D-03 1.2347D-03 2.7209D-04 1.4751D-03
@@ -468,5 +468,5 @@
   15 1.5537D-01 3.9017D-02 7.0049D-03 5.1478D-02
   20 1.7379D-01 5.1843D-02 8.3528D-03 7.3886D-02
 
- SUM 6.0062D-01 1.3191D-01 2.3766D-02 1.7609D-01
+ SUM 2.9930D+00 6.5647D-01 1.1815D-01 8.7675D-01
  Hibridon> 

@@ -1,10 +1,18 @@
 #!/bin/csh -f
-# HIBRIDON bin/maketar $Revision: 2000.1 $ --- make hibridon tar file
-# this creates a full tar for mha's use only (no html files!)
+# HIBRIDON bin/maketar_full $Revision: 2011.2 $ --- make hibridon tar file
+# maketar 
+# this creates a full tar for mha's use including html files!
 # the PATH variable should be set to include the hibridon bin directory
 
 set basedir=`hibriddir`
-set htar=/scratch/mha/htar
+alias rm 'rm -f'
+@ items = $#argv
+if ($items > 0) then
+  echo "usage: maketar_full"
+  goto end
+endif
+set htmloption = true
+set htar=/Users/mha/scratch/htar
 cd $basedir
 if (-e $basedir/tar_full.log) then
   rm $basedir/tar_full.log
@@ -22,19 +30,25 @@ echo "copying all files to $htar ..."
 echo "copying all files to $htar ..." >>& $basedir/tar_full.log
 cp -pr $basedir/* . >>& $basedir/tar_full.log
 
-#echo ""
-#echo "getting .html files from mha-mac1 ..."
-#echo "getting .html files from mha-mac1 ..." >>& $basedir/tar_full.log
-#cd doc
-#rcp -rp mha-mac1.umd.edu:/users3/mha/public_html/hibridon hib_html
-
 
 echo ""
 echo "removing executables ..."
 echo "removing executables ..." >>& $basedir/tar_full.log
 rm -r $htar/nohe  >>& $basedir/tar_full.log
 rm -r $htar/phhe  >>& $basedir/tar_full.log
-rm -r $htar/bin/progs/* >>& $basedir/tar_full.log
+rm -r $htar/bin/progs/hib* >>& $basedir/tar_full.log
+rm -r $htar/bin/progs/runpot* >>& $basedir/tar_full.log
+rm -r $htar/bin/progs/Outpt* >>& $basedir/tar_full.log
+rm -r $htar/bin/progs/Job* >>& $basedir/tar_full.log
+rm -r $htar/bin/progs/temp* >>& $basedir/tar_full.log
+rm -r $htar/bin/progs/*.smt >>& $basedir/tar_full.log
+rm -r $htar/bin/progs/*.evl >>& $basedir/tar_full.log
+rm -r $htar/bin/progs/*.sav >>& $basedir/tar_full.log
+rm -r $htar/bin/progs/*.dat >>& $basedir/tar_full.log
+rm -r $htar/bin/progs/*.wfu >>& $basedir/tar_full.log
+rm -r $htar/bin/progs/*.log* >>& $basedir/tar_full.log
+rm -r $htar/bin/progs/*.f >>& $basedir/tar_full.log
+rm -r $htar/bin/*.exe >>& $basedir/tar.log
 rm  $htar/bin/hib_help* >>& $basedir/tar_full.log
 rm  $htar/src/*.sav >>& $basedir/tar_full.log
 rm  $htar/src/hib_* >>& $basedir/tar_full.log
@@ -43,25 +57,22 @@ rm  $htar/bin/*.log >>& $basedir/tar_full.log
 rm  $htar/*.log >>& $basedir/tar_full.log
 rm -r $htar/bin/comsplit.exe  >>& $basedir/tar_full.log
 echo ""
-echo "removing previous version files ..."
-echo "removing previous version files ..." >>& $basedir/tar_full.log
-rm -r  $htar/*.~* >>& $basedir/tar_full.log
-rm  $htar/*.~* >>& $basedir/tar_full.log
-rm  $htar/bin/*.~* >>& $basedir/tar_full.log
-rm  $htar/src/*.~* >>& $basedir/tar_full.log
-rm  $htar/src/pot/*.~* >>& $basedir/tar_full.log
-rm  $htar/doc/*.~* >>& $basedir/tar_full.log
-rm  $htar/utilities/*.~* >>& $basedir/tar_full.log
-echo ""
 echo "removing compiled object files ..."
 echo "removing compiled object files ..." >>& $basedir/tar_full.log
 rm $htar/src/*.o
 rm $htar/src/pot/*.o
 rm $htar/utilities/*.o
-
 echo ""
-echo "removing common files ..."
-echo "removing common files ..." >>& $basedir/tar.log
+echo "tar'ing common files ..."
+cd $htar/src
+cd common
+rm  *.~* >>& $basedir/tar_full.log
+cd ..
+cat common/* > hicommon.all
+tar -cf hicommon.tar common
+echo ""
+echo "removing common directories ..."
+echo "removing common directories ..." >>& $basedir/tar.log
 rm -r $htar/src/common >>& $basedir/tar.log
 rm -r $htar/src/pot/common >>& $basedir/tar.log
 echo ""
@@ -71,6 +82,7 @@ cd $htar
 rm $htar/bin/*.log.* >>& $basedir/tar_full.log
 rm $htar/bin/test* >>& $basedir/tar_full.log
 rm $htar/bin/*.BAK >>& $basedir/tar_full.log
+rm $htar/*.BAK >>& $basedir/tar_full.log
 rm $htar/tests/*.out >>& $basedir/tar_full.log
 rm $htar/tests/*.sav >>& $basedir/tar_full.log
 rm $htar/tests/Outpt* >>& $basedir/tar_full.log
@@ -97,20 +109,11 @@ tar -cvf hibrid_full.tar * >>& $basedir/tar_full.log
 #$exit
 
 echo ""
-echo "compressing tar file ..."
-echo "compressing tar file ..." >>& $basedir/tar_full.log
-compress hibrid_full.tar >>& $basedir/tar_full.log
+echo "gzip'ing tar file ..."
+echo "gzip'ing tar file ..." >>& $basedir/tar.log
+gzip hibrid_full.tar >>& $basedir/tar.log
 
+echo "$htar/hibrid_full.tar.gz created, see $basedir/tar_full.log for diagnostics"
 
-
-echo ""
-echo "$htar/hibrid_full.tar.Z created, see $basedir/tar_full.log for diagnostics"
-echo "putting hibrid_full.tar.Z file on mha-ibm2 ..."
-
-rcp -p hibrid_full.tar.Z mha-ibm2.umd.edu:/home/mha
-
-#rm hibrid_full.tar.Z
-#cd 
-#rm -r $htar
 echo ""
 exit

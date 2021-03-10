@@ -1,4 +1,23 @@
-               subroutine loapot(iunit, filnam)
+*system: NH3-He using canonical Valiron expansion of potential
+      include "common/syusr"
+      subroutine driver
+      implicit double precision (a-h,o-z)
+      common /covvl/ vvl(22)
+      include "common/parpot"
+      potnam='VALIRON NH3-HE OR NH3-pH2'
+       print *, potnam
+1      print *, ' r (bohr)'
+      read (5, *, end=99) r
+      call pot(vv0,r)
+      write (6, 100) vv0,vvl
+100   format(' v',/,22(1pe16.8))
+      goto 1
+99    end
+      include "common/bausr"
+      include "common/ground"
+* ---------------------------------------------------------------------
+      subroutine loapot(iunit, filnam)
+* ---------------------------------------------------------------------
 *  variables in common block /cobspt/
  
 *    lammin:   array containing minimum value of lambda for each term

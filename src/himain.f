@@ -1,9 +1,3 @@
-cstart unix-ibm unix-aix unix-darwin
-@process noopt
-cend
-cstart unix-hp
-c;!$hp$optimize off
-cend
       program logair
 ***********************************************************************
 ****   this code is not released for general public use            ****
@@ -16,9 +10,12 @@ cend
 ***********************************************************************
 *  ***  driver for log-derivative integration ***
 *  author:  millard alexander
-*  current revision date:  23-feb-2004 by mha
+*  revised:  15-mar-2011 by paul dagdigian (increased kmxbas to 18)
+*  current revision:  increase size of jout array in cosout - p.dagdigian -
+*      23-jun-2010
+*
       implicit double precision (a-h, o-z)
-cstart unix-ibm unix-darwin
+cstart unix-ibm unix-darwin unix-x86
       character *40 test
 cend
 *  ----------------------------------------------------------
@@ -34,10 +31,11 @@ cend
 *     kout is number of different values of rotational quantum number
 *     for which s-matrix will be stored on disk
 
-      parameter (kmax=36, kairy = kmax,ktri=kmax*(kmax+1)/2,kbig=10)
-cstart unix-darwin
-* set size of scratch array for matrix diagonalization
-      parameter (kaux3=3*kmax)
+      parameter (kmax=175, kairy = kmax,ktri=kmax*(kmax+1)/2,kbig=10)
+cstart unix-darwin unix-x86
+* set size of scratch array for matrix factorization and generalized
+*   eigenvalue determination
+      parameter (kaux3=max(66*kmax,2*kmax*kmax+1))
 cend
 cstart unix-ibm
 c;* set size of scratch array for matrix inversion
@@ -48,13 +46,19 @@ cstart unix .and. .not.unix-ibm
 * warning, this assumes a blocksize of 64
       parameter (kaux=128*kmax)
 cend
-      parameter (klammx = 80, kfact = 2000, kout=21, ken = 10)
-      parameter (kmxpho=3, knphot=1)
-      parameter (kmxbas=14)
-      parameter (kq2=2*kmax,kqmax=kmxpho*kmax)
+      parameter (klammx = 80, kfact = 2000, kout=21, ken = 25)
+      parameter (kmxpho = 3, knphot = 1)
+      parameter (kmxbas = 18)
+      parameter (kq2 = 2 * kmax, kqmax = kmxpho * kmax)
 * kv2max sets the maximum size of the v2 matrix, a reasonable size is
 * kmax**2
-      parameter (kv2max= 2* kmax * kmax)
+*
+* increase kv2max from 2 * kmax * kmax to 4 * kmax * kmax (pjd - 25-aug-2009)
+*      parameter (kv2max = 2 * kmax * kmax)
+      parameter (kv2max = 4 * kmax * kmax)
+*
+* krotmx set the maximum size of the asym top e.fn expansion
+      parameter (krotmx = 12 * kmax)
 *  variable in common block /cov2/
 *    nv2max:    maximum core memory allocated for the v2 matrix
 *    ndummy:    dummy variable for alignment
@@ -62,9 +66,9 @@ cend
 *               stored in packed column form that is (1,1), (2,1), (3,1) ...
 *               (n,1), (2,2), (3,2) ... (n,2), etc.
 *  variable in common block /coiv2/
-*   lamnum:     number of non-zero v2 matrix elements for each lambda
+*    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*   iv2:        row+column index of v2 matrix for each non-zero element
+*    iv2:       row+column index of v2 matrix for each non-zero element
 *  variable in common block /conlam/
 *    nlammx:    the maximum number of angular coupling terms allowed
 *    nlam:      the total number of angular coupling terms used
@@ -78,10 +82,10 @@ cend
 *    energ:     array containing total energies (in cm-1) at which scattering
 *               calculations are to be performed
 *  variable in common block /covvl/
-*    vvl        array to store r-dependence of each angular term in the
+*    vvl:       array to store r-dependence of each angular term in the
 *               potential
 *  variable in common block /cofact/
-*    si         table of logarithms of factorials
+*    si:        table of logarithms of factorials
 *  variables in common block /cosout/
 *    nnout:     number of different rotational levels for which s-matrix
 *               elements are to be saved in file 13,
@@ -99,19 +103,32 @@ cend
 *     maxrec:   number of records on file associated with nfl
 *     iofrec:   offset in file
 *  variables in common block /cotble/
-*     npnt      max. number of pointer
-*     jttble    array containing pointer to records in s-matrix
+*     npnt:     max. number of pointer
+*     jttble:   array containing pointer to records in s-matrix
 *  variable in common block /coqvec/
-*     mxphot    maximum number of initial states (maximum columns in q)
-*     nphoto    actual number of initial states used
-*     q         accumulated overlap matrix with ground state
+*     mxphot:   maximum number of initial states (maximum columns in q)
+*     nphoto:   actual number of initial states used
+*     q:        accumulated overlap matrix with ground state
 *               only calculated if photof = .true.
 *  variable in common block /comxbs/
-*     maxbas    maximum number of allowed basis types
+*     maxbas:   maximum number of allowed basis types
+*  variables in common block /coatpi/
+*     narray:   maximum size of asymmetric top basis fn expansion
+*               set to 12 (see krotmx above) in himain (suitable for j ² 40)
+*     isiz:    length of eigenfunction expansion for each rot. level
+*  variable in common block /coatp3/
+*     isizh:   temporary storage for length (related to isiz)
+*  variable in common block /coatpr/
+*     c:        expansion coefficients for asymmetric top rotor wave fns.
+*  variable in common block /coatp1/
+*     ctemp:    temporary storage for rot. e.fn coeffs.
+*  variable in common block /coatp2/
+*     chold:    ditto
 *  ----------------------------------------------------------
       logical lsc1
       common /comom/  xmom(3), imom(13)
-      common /cosout/ nnout, jout(21)
+* increase size of jout array from 21 to 25 - p.dagdigian - 23-jun-2010
+      common /cosout/ nnout, jout(25)
 * should be jout(kout)
       common /cov2/ nv2max, ndummy, v2(kv2max)
       common /coiv2/ iv2(kv2max)
@@ -124,6 +141,11 @@ cend
       common /cobuf/  lbuf,ibuf(1)
       common /cofil/  nfl,iofbuf,maxrec(60),iofrec(60),nwrec
       common /conlam/ nlam, nlammx, lamnum(klammx)
+      common /coatpi/ narray, isiz(krotmx)
+      common /coatp3/ isizh(krotmx)
+      common /coatpr/ c(krotmx)
+      common /coatp1/ ctemp(krotmx)
+      common /coatp2/ chold(krotmx)
 *   square matrices and vectors
       common /coz/ z(kmax,kmax)
       common /cow/ w(kmax,kmax)
@@ -131,9 +153,9 @@ cend
       common /coamat/ amat(kmax,kmax)
       common /cobmat/ bmat(kairy,kairy)
 * these matrices to store t matrices
-      common /cotq1/ tq1(kbig,kbig)
-      common /cotq2/ tq2(kbig,kbig)
-      common /cotq3/ tq3(kbig,kbig)
+      common /cotq1/ tq1(kmax,kmax)
+      common /cotq2/ tq2(kmax,kmax)
+      common /cotq3/ tq3(kmax,kmax)
       common /cojq/ jq(kmax)
       common /colq/ lq(kmax)
       common /coinq/ inq(kmax)
@@ -148,6 +170,10 @@ cend
       common /coisc6/ isc6(kmax)
       common /coisc7/ isc7(kmax)
       common /coisc8/ isc8(kmax)
+      common /coisc9/ isc9(kmax)
+      common /coisc10/ isc10(kmax)
+      common /coisc11/ isc11(kmax)
+      common /coisc12/ isc12(kmax)
       common /colsc1/ lsc1(kmax)
       common /cosc1/ sc1(kmax)
       common /cosc2/ sc2(kmax)
@@ -159,10 +185,10 @@ cend
       common /cosc8/ sc8(kmax)
       common /cosc9/ sc9(kmax)
       common /cosc10/ sc10(kmax)
-cstart unix-darwin
-      common /cosc12/ sc11(kaux3)
+cstart unix-darwin unix-x86
+      common /cosc11/ sc11(kaux3)
 cend
-cstart unix .and. .not.unix-darwin
+cstart unix .and. .not.unix-darwin .and. .not. unix-x86
 c;      common /cosc11/ sc11(kaux)
 cend
 cstart unix
@@ -179,7 +205,10 @@ cend
 *     8 kmax**2 + 25 kmax + kv2max + kfact -- with airy integration
 *   if linked with -b option, then storage requirements drop to
 *     5 kmax**2 + 25 kmax + kv2max + kfact -- with airy integration
-
+*
+*  parameter below sets maximum size of asymmetric top basis fn expansion
+      narray = 12
+*
       mairy = kairy
       mmax = kmax
       mbig=kbig
@@ -210,12 +239,6 @@ cend
      :           sc2, sc1, sc3, sc4, sc5,
      :           sc6, sc7, sc8, sc9, tq1, tq2, tq3, men, mmax, mairy)
       end
-cstart unix-ibm unix-aix unix-darwin
-@process noopt
-cend
-cstart unix-hp
-c;!$hp$optimize off
-cend
 *  -------------------------------------------------------------
       subroutine flow (z, w, zmat, amat, bmat, jq, lq, inq, jlev,
      :            elev, inlev, isc1, isc2, isc3, isc4, lsc1,
@@ -328,8 +351,9 @@ cend
 *
       implicit double precision (a-h,o-z)
       character*20 cdate
-      character*13 time,timew,cpubaw,cpuptw,cpuaiw,cpuldw,cpusmw,cpuouw,
-     :             cpuphw
+      character*13 time
+      character*13 timew,cpubaw,cpuptw,cpuaiw,cpuldw,cpusmw,cpuouw,
+     :             cpuphw,timew1,timew2,time1,time2
       logical logwr, swrit, t2writ, wrpart, partw, airyfl, airypr,
      :        ipos, noprin, chlist, wrxsec, xsecwr, writs, csflag,
      :        flaghf, clist, rsflag, t2test, logdfl, flagsu,
@@ -375,7 +399,7 @@ cend
 *  vectors
       dimension jq(10), lq(10), inq(10), jlev (1), isc1(9), isc2(1),
      :          isc3(1), isc4(1), lsc1(5), inlev(1),
-     :          elev(1), sc1(2), sc2(1), sc3(1), sc4(1), nlev(10),
+     :          elev(1), sc1(2), sc2(1), sc3(1), sc4(1), nlev(25),
      :          sc5(1), sc6(1), sc7(1), sc8(1), sc9(1), tq1(1),
      :          tq2(1), tq3(1)
       data twojlp / .false. /
@@ -421,11 +445,20 @@ cend
      : (/' *** WARNING:  NAIRY .NE. 1 BUT AIRYFL .EQ. .FALSE.')
 *  check for proper choice of output files and dimension limits
       if (nerg .gt. men) then
-        write (9, 55)
-        write (6, 55)
-55      format (/' *** TOO MANY TOTAL ENERGIES; ABORT ***')
+        write (9, 50)
+        write (6, 50)
+50      format (/' *** TOO MANY TOTAL ENERGIES; ABORT ***')
         call exit
       end if
+      if (nerg.gt.19) then
+         if (writs.and.(xsecwr.or.wrxsec))  then
+            write (6,55) nerg
+55          format
+     :   (/' NERG = ',i2,' > 19',
+     :    ' FOR WRITS .AND. (WRXSEC .OR. WRPART) ALL TRUE; ABORT ***')
+            call exit
+         endif
+      endif
       write (9, 60) nmax,nairy
 60    format (' ** NMAX=',i4,'  NAIRY=',i4)
 *  convert collision energy, rotational constant, and reduced mass
@@ -486,7 +519,7 @@ cend
       if(jfrest.gt.0) jfirst=jfrest
       jtotmx=jtop
       if(nucros) nulast=numin
-      rstart=rxpar(6)
+      if (jtot1.eq.jfirst .or. jtot1.eq.jfirst+1) rstart=rxpar(6)
 80    jtot1 = jfirst
       if (.not.boundc) jtot2 = jtotmx
       nchmax = 0
@@ -792,8 +825,11 @@ c95    format (1h ,79('='))
 *  at subsequent partial waves, adjust starting point for integration for
 *  next partial wave to be dinsid inside of innermost classical turning
 *  point but no larger than rendld
+*  10/14/08 mha:  but don't allow an increase greater than spac/2 in rstart
       if (jtot .gt. jfirst) then
-        rstart = max (rtmnla - dinsid, rstrt0)
+        rstart = max(rtmnla-dinsid,rstrt0)
+        rstart = min(rstart,rstrt0+0.5*spac)
+        rstrt0 = rstart
 *  adjust starting point of airy integration to be no less than rstart + dlogd
 *  but no larger than rendai
         rendld = min (rstart + dlogd, rendai)
@@ -802,7 +838,7 @@ c95    format (1h ,79('='))
 
 cger (next 2 lines)
       write (9,'(/" ** J =",i5," JLPAR =",i2," STARTED")') jtot,jlpar
-cstart unix-ibm unix-aix unix-darwin
+cstart unix-ibm unix-aix unix-darwin unix-x86
 *      call flush_(9)
       call flush(9)
 cend
@@ -830,7 +866,6 @@ cend
       endif
 *  now print out s-matrix and t-matrix squared, and calculate partial
 *  cross sections and print them out, if desired
-      t11=second()
       call soutpt (z, w, zmat, amat,
      :             lq, jq, inq, isc1, isc2, bmat, tq1,
      :             jlev, elev, inlev, jtot, jfirst,
@@ -840,6 +875,7 @@ cend
      :             nucros, firstj, nlevel, nlevop, nopen, nchtop,
      :             twojlp)
       cpuout = cpuout + second() - t11
+
 *  on return from soutpt:
 *     if wrxsec,xsecwr, wrpart, and partw are all .false., the upper-left
 *     nopen x nopen block of z contains the modulus squared of the t-matrix
@@ -856,6 +892,11 @@ cend
         rtmx1 = max(rtmx1,rtmx)
       end if
       ien = ien + 1
+      call mtime (tcpuf, twallf)
+      if (ien.eq.2) then
+         tcpu1=tcpuf-tcpu0
+         twall1=twallf-twall0
+      endif
 *  go back to start calculation at another energy
       if (ien .le. nerg) go to 115
 *  first partial wave has been calculated for all energies
@@ -889,8 +930,18 @@ c.....save restart information
         call mtime (tcpuf, twallf)
         tcpuf = tcpuf - tcpu0
         twallf = twallf - twall0
+        if (nerg.gt.1) then
+            tcpu2=(tcpuf-tcpu1)/(nerg-1)
+            twall2=(twallf-twall1)/(nerg-1)
+        endif
         call gettim(tcpuf,time)
+        call gettim(tcpu1,time1)
         call gettim(twallf,timew)
+        call gettim(twall1,timew1)
+        if (nerg.gt.1) then
+           call gettim(tcpu2,time2)
+           call gettim(twall2,timew2)
+        endif
         call gettim(cpubas,cpubaw)
         call gettim(cpuld,cpuldw)
         call gettim(cpuai,cpuaiw)
@@ -932,6 +983,10 @@ cend
       if (jtot1 .le. jtot2) go to 100
       if (twojlp .and. jlpar .gt. 0) then
         jlpar = -1
+        rstrt0=rxpar(6)
+        rstart=rstrt0
+        rtmnla=rstrt0
+        dinsid=0
         goto 74
       end if
 c.....next nu value if nu runs in outer loop
@@ -1004,11 +1059,12 @@ cend
      :             wrxsec, xsecwr, ipos, twomol, nucros, nlevel,
      :             nlev, nufirs, nulast, nud, jlpar, nchtop, nmax,
      :             ihomo)
+
       endif
       if (.not. bastst .and.
      :   xsecwr .or. wrxsec .or. wrpart .or. partw) then
         do 400 ien = 1, nerg
-          nfile = 14 + ien
+          nfile = 70 + ien
           close (nfile)
           if (wrpart) then
             nfile = 24 + ien
@@ -1041,12 +1097,31 @@ cend
 420   call dater (cdate)
       if (.not. optifl) then
          write (6, 350)
-         write (6,500) nchmax, timew, time, cdate
-         write (9,500) nchmax, timew, time, cdate
+         write (6,500) nchmax
+         write (9,500) nchmax
 500      format(' **** END OF CALCULATION ****',/,
-     :    '      MAXIMUM NUMBER OF CHANNELS USED WAS:  ',i3,/,
-     :    '      TIMING:  ELAPSED',(a),'/ CPU',(a),/,
-     :    '      CURRENT DATE:  ',(a))
+     :    '      MAXIMUM NUMBER OF CHANNELS USED WAS:  ',i4)
+         if (nerg.eq.1) then
+            write (6,505) timew, time, 100d0*(tcpuf/twallf)
+            write (9,505) timew, time, 100d0*(tcpuf/twallf)
+505         format('      TIMING:  ELAPSED',(a),'/ CPU',(a),
+     :             '/ MP RATIO',f7.1,' %')
+         endif
+         if (nerg.gt.1) then
+            write(6,510) timew1, time1, 100d0*(tcpu1/twall1)
+            write(9,510) timew1, time1, 100d0*(tcpu1/twall1)
+510         format('      TIMING (FIRST ENERGY):  ELAPSED',(a),
+     :            '/ CPU',(a),
+     :           '/ MP RATIO',f7.1)
+            write(6,515) timew2, time2, 100d0*(tcpu2/twall2)
+            write(9,515) timew2, time2, 100d0*(tcpu2/twall2)
+515         format('      TIMING (SECOND ENERGY): ELAPSED',(a),
+     :           '/ CPU',(a),
+     :           '/ MP RATIO',f7.1)
+         endif
+         write (6,520) cdate
+         write (9,520) cdate
+520      format('      CURRENT DATE:  ',(a19))
          write (6, 350)
          write (9, 350)
 cstart unix-dec unix-iris unix-hp

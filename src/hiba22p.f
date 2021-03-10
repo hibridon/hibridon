@@ -383,7 +383,7 @@
       if (bastst) then
         write (6, 315) ilam, lamnum(ilam)
         write (9, 315) ilam, lamnum(ilam)
-315     format ('ILAM=',i3,' LAMNUM(ILAM) = ',i3)
+315     format ('ILAM=',i3,' LAMNUM(ILAM) = ',i6)
       end if
 320   continue
       if ( i.gt. nv2max) then

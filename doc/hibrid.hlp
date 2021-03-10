@@ -1,6 +1,6 @@
 1 HELP
  
-This is the help facility for Hibridon©. This is based on a tree
+This is the help facility for Hibridon. This is based on a tree
 structure analagous to the implementation of "HELP" under the VAX/VMS
 operating system. To get a list of possible keywords at the current
 level, type '?'
@@ -39,8 +39,8 @@ help subroutine sysdat help basis 13_pi
 To go back a level, type a null line (this will eventually return you to
 the Hibridon prompt)
  
-Current Revision of this help library:  24-feb-2004 Applicable version of
-Hibridon©:  4.2
+Current Revision of this help library:  17-Aug-2009.  Applicable version of
+Hibridon:  4.3
  
 1 INTRO
 The Close-Coupled (CC) equations
@@ -123,7 +123,7 @@ Wavefunction and Fluxes
 
 	In addition to the determination of cross sections, which depend
 on the asymptotic form of the expansion coefficients F(R) in Eq. (1), the
-Hibridon© code allows you determine the R dependence of these coefficients.
+Hibridon code allows you determine the R dependence of these coefficients.
 In addition, one can also determine the flux associated with the
 scattering and photodissociation wavefunctions, which is a more meaningful
 physical quantity.  For a further discussion see Refs. 4 and 5.
@@ -169,11 +169,11 @@ oscillatory. This combination of two methods is called a hybrid
 integrator.
 
 	This user's manual describes a particular hybrid
-integrator - the Hibridon© code.The solution following method used at short
+integrator - the Hibridon code.The solution following method used at short
 range is based on the log-derivative propagator of Johnson,(6-8) as
 modified recently by Manolopoulos.(9)  The potential-following method used
 at long-range is based on the linear-reference potential of Gordon,(10,11)
-as modified recently by Alexander and Manolopoulos.(12,13) The Hibridon©
+as modified recently by Alexander and Manolopoulos.(12,13) The Hibridon
 code combines two very fast algorithms for solution of the CC equations
 with great numerical stability. To a large degree the numerical stability
 is obtained by propagation of the logarithmic derivative of the solution
@@ -436,7 +436,7 @@ e.g.
  
        ENERG=1000,2000\AIRYFL=T
  
-The Hibridon© input parser is not case sensitive, so parameters can be
+The Hibridon input parser is not case sensitive, so parameters can be
 entered in either upper or lower case.  Parameters may be abbreviated,
 although you will be asked to re-enter the parameter if there is an
 ambiguity.
@@ -472,7 +472,34 @@ will be run are specified by the input line
 If other input data occurs on the same line, then the string of energies
 must be terminated by a backslash.  Note that if the length of the array
 of energies is greater than the current value of NERG, then NERG is reset
-accordingly.  The maximum number of energies cannot exceed 10.
+accordingly.  The maximum number of energies cannot exceed 25.
+
+If other input data occurs on the same line, then the string of energies must 
+be terminated by a backslash.  Note that if the length of the array of energies 
+is greater than the current value of NERG, then NERG is reset accordingly.  
+The maximum number of energies cannot exceed 25.
+
+If the first energy is negative, then the calculations are to be preformed on a regular grid of
+energies, specified by
+
+           ENERG = {negative number},{energy1},{energ2},{nerg}
+ 
+where
+           energy1:  The initial energy
+           energy2:  The final energy
+           nerg:     The number of energies (less than or equal to 25)
+
+The spacing for the grid of energies is determined as
+
+           delta_e=(energ2-energ1)/nerg
+
+This spacing is then rounded to the nearest 0.01 cm-1, so that the final energy becomes
+
+           e_final=e_initial + (nerg-1)*delta_e
+
+which may not be exactly equal to the final energy which you initially specified.
+
+In all cases, the energy values are reordered in decreasing order, starting with the highest value.
  
 3 FSTFAC
  
@@ -674,7 +701,7 @@ or to the size of the page as revealed by the VMS command
 
           SHOW TERMINAL
 
-LSCREEN must be set correctly for the Hibridon© online help facility.
+LSCREEN must be set correctly for the Hibridon online help facility.
 
 3 NERG
  
@@ -829,7 +856,7 @@ region, so the effective distortion of the asymptotic Hamiltonian is much
 less.  Considerable time can be saved by dropping channels as Jtot
 increases.
 
-This is done in the Hibridon© code by means of the parameter RCUT, as
+This is done in the Hibridon code by means of the parameter RCUT, as
 follows:
 
 In the subroutine basis, the centrifugal barrier in each channel,
@@ -934,7 +961,7 @@ mass mbc the collision reduced mass is mu = ma mbc / ( ma + mbc)
  
 2 INPUT
 
-All the parameters needed by the Hibridon© code are assigned default
+All the parameters needed by the Hibridon code are assigned default
 values appropriate to the rotationally inelastic collision of Ar with
 N2.  You can either redefine the full set of input parameters by setting
 them one by one as described in more detail in the PARAMS help file, or
@@ -968,7 +995,7 @@ See also the help files SHOW and CHECK.
 
 In addition to the general parameters, input parameters must be supplied
 to define the particular collision system to be treated and to control the
-choice of channels and internal energies.  Currently the Hibridon© package
+choice of channels and internal energies.  Currently the Hibridon package
 can accomodate the following collision systems:
 
 
@@ -1084,7 +1111,7 @@ M. Hutson, J. Chem. Phys. 101, 1939 (1994)
  
 The subroutine SYSDAT controls the I/O of all system dependent parameters
 as well as the parameters NTERM, LAMMIN, LAMMAX, and MPROJ.  Currently the
-Hibridon© package contains SYSDAT subroutines for collisions of a
+Hibridon package contains SYSDAT subroutines for collisions of a
 structureless target with molecules in 1 Sigma, 2 Sigma, 2 Pi, 1-3 Pi
 electronic states, as well as coupled 2 Sigma and 2 Pi states, and with an
 atom in a 1P and/or 3P electronic state.
@@ -1305,7 +1332,7 @@ as follows
  
  
 After reading these instructions and examining the SYSDAT subroutines
-for supplied with the Hibridon© package, you should be able to write a
+for supplied with the Hibridon package, you should be able to write a
 SYSDAT subroutine for other systems.
  
 3 BASIS
@@ -1326,7 +1353,7 @@ To change values of flags, enter the command
  
 different flags can be separated by commas or by semicolons
  
-The Hibridon© input driver is not case sensitive, so flags can be entered
+The Hibridon input driver is not case sensitive, so flags can be entered
 in either upper or lower case.  Flags may be abbreviated, although you
 will have to re-enter the flag if there is an ambiguity.
  
@@ -1372,7 +1399,7 @@ not be complete
 
 2 BATCH
  
-To run the Hibridon© package in batch mode, set up a run stream with BATCH
+To run the Hibridon package in batch mode, set up a run stream with BATCH
 as the first line.  This supresses the input line query "Hibridon>". All
 other commands will be read from the run stream and executed.   An example
 would be:
@@ -1495,7 +1522,7 @@ homonuclear molecule.
 2 IPOS
 
 The flag IPOS controls the width of many of the matrices which are
-printed out by the Hibridon© code.  If
+printed out by the Hibridon code.  If
       IPOS = .true., printed matrices will be formated for a 
               132 character display or printer
       IPOS = .false., printed matrices will be formated for an 
@@ -1572,7 +1599,7 @@ matrix is printed out prior to the determination of the S matrix.
 2 PRPART
  
 If PRPART = .TRUE., then partial cross sections will be printed out to
-the regular output file (see the entry OUTPT in the Hibridon© help
+the regular output file (see the entry OUTPT in the Hibridon help
 library). In the case of CS calculations the contribution of each value of
 nu is also printed.  The columns of the printed matrix of partial cross
 sections correpond to the initial state and the rows, to the final state.
@@ -1718,7 +1745,7 @@ controlled by the flag PRXSEC.
  
 1 FILES
 
-All files created by the Hibridon© package are given lower case names with
+All files created by the Hibridon package are given lower case names with
 the first character in upper case.  This can be a possible source of
 confusion under UNIX (or other case sensitive) operating systems.
 
@@ -1781,7 +1808,7 @@ files which are unformatted (binary).
 
 2 OUTPUT
  
-The Hibridon© code writes all output, except for the specialized files
+The Hibridon code writes all output, except for the specialized files
 discussed in the in the JOB help entry, to a main output file (fortran
 logical unit 9, a sequential formatted file).  In addition some output is
 directed to stdout (fortran logical unit 6).  The name of the main output
@@ -1818,7 +1845,7 @@ The SAVE command is useful for creating updated input data files.
 1 COMMANDS
  
 A number of commands are available to direct the operation of the
-Hibridon© code
+Hibridon code
  
 2 CHECK
  
@@ -2154,7 +2181,7 @@ file Job{ienerg}.mcs as well as to the standard output
  
 The OPTIMIZE command allows the user to determine easily optimal values
 for the following system independent parameters which govern the accuracy of
-the Hibridon© code:
+the Hibridon code:
     
    FSTFAC, RCUT, RENDAI, RENDLD, RINCR, RSTART, SPAC, TOLAI
 
@@ -2239,9 +2266,9 @@ In cases in which you need to input data from a file to calculate the
 potential, you can do so by first writing a subroutine
 LOAPOT(iunit,filname), in which a file named {filname} is opened on
 logical unit {iunit} and subsequently read.  This subroutine must be then
-linked with the hibridon© code.
+linked with the hibridon code.
 
-When you subsequently execute the hibridon© code, you need only enter the
+When you subsequently execute the hibridon code, you need only enter the
 command
          POT={filname}
 
@@ -2439,6 +2466,10 @@ by a prior calculations with
 
 The calculated tensor cross sections are written to the file
 Job{ienerg}.tcs as well as to the standard output
+
+2 SYSCONF
+The command SYSCONF prints out relevant details of your current cpu, ram, L2 cache, bus speed, and OS.
+Currently, this command works only on Intel based cpu's.
  
 2 TESTPOT
  
@@ -2476,6 +2507,50 @@ where XMU is the collision reduced mass in atomic units.  Thus, to
 estimate the turning point of V(R) alone, without any centrifugal barrier,
 set JTOT1=0 before entering the command TURN.
 
+2 HYPXSC
+
+The command HYPXSC allows you to calculate  hyperfine-resolved integral cross 
+sections for collisions of spherical atoms with diatomic molecules in 
+singlet-Sigma, doublet-Sigma, and doublet-Pi electronic states.  These integral 
+cross sections are outputted to the file {jobname}n.hfx, where n is
+the cardinal value of the energy (see below).  The hyperfine-resolved
+cross sections are tabulated in columns as
+
+          Energy, j_i, in_i, F_i, j_f, in_f, F_f, sigma
+
+The command HYPXSC also creates the file {jobname}n.xms which contains integral cross
+sections without hyperfine resolution tabulated in columns as
+
+          Energy, j_i, in_i, j_f, in_f, sigma
+
+This is similar to the fort.7 file created in MOLSCAT
+
+The command line syntax is
+
+          HYPXSC,{jobname},nucspin,ienerg
+
+where
+      {jobnam}:  the jobname under which the S-matrices have been stored as
+                 {jobname}n.smt.  Here n denotes the value of the parameter 
+                 ienerg (see below).  The S-matrix files can be generated by 
+                 setting the flag WRSMAT = .true.  The value of {jobname} is 
+                 set by the instruction JOB={jobname}. The default value of 
+                 {jobname} is Job.
+      
+      nucspin:   variable designating the total nuclear spin I of the diatomic 
+                 nucspin=2*I (0 for I=0, 1 for I=1/2, 2 for I=1 etc)
+
+      ienerg:    the value of the energy for which the integral cross
+                 sections are to be computed. i.e. if ienerg=2, then the
+                 second energy S matrices {jobname}2.smt or second energy
+                 integral cross section file {jobname}2.ics are used.  The
+                 default value of inerg is 1.
+
+N. B. At present, the command HYPXSC is operational only for collisions of spherical
+atoms with diatomic molecules in singlet-Sigma, doublet-Sigma, and doublet-Pi electronic states. 
+Also, the maximum value of nucspin is 6, which corresponds to I=3.
+
+
 1 LINKING
 
 To link an executable module you need only execute the command
@@ -2485,7 +2560,7 @@ To link an executable module you need only execute the command
 where  
        {potname} is the name of the potential subroutine pot_{potname}.f,
        which describes the system under investigation and which must be
-       located in the Hibridon© subdirectory src/pot
+       located in the Hibridon subdirectory src/pot
 
        {kmax} is the numerical value of the maximum number of channels
 
@@ -2505,17 +2580,42 @@ will create the executable module
 
 Here is the terminal output from this command
 
-   % makehib arno 141
-   linking hib_arno_141 ...
-   machine type is unix unix-ibm
-   making fortran converter ...
-   running fortran converter ...
-   compiling pot_arno.f ...
-   hib_arno_141 being created at date 02/23/96 15:48:51 EST with version 4.0
-   converting and compiling himain with kmax = 141
-   linking hib_arno_141
-   examine /home/mha/hib40/h_arno.log for diagnostic and/or error messages
-   %
+potname is arn2
+current directory is /Users/mha/hib43/bin/progs
+compiling pot subroutine for hib_arn2_251 ...
+potname is pot_arn2.f
+
+making fortran converter ...
+
+running fortran converter ...
+
+compiling pot_arn2.f ...
+pot_arn2 successfully compiled ...
+
+hib_arn2_251 being created at date 12/25/07 07:30:18 EST with version 4.3
+
+building  Hibridon v.4.3 with Fortran direct i/o routines ...
+
+system parameters are:
+System is OS X 10.4.11
+Machine type is unix-darwin unix-ifort
+C compiler is /usr/bin/cc -DNAME_LU
+Fortran compiler is /opt/intel/fc/10.1.007/bin/ifort -O3 -save
+Mathematical Libraries are:
+-L/Library/Frameworks/Intel_MKL.framework/Versions/10.0.1.014/Libraries/32 -lmkl_intel -lmkl_intel_thread
+-lmkl_core -lmkl_intel_thread -lmkl_core -lmkl_intel_thread -lmkl_core -lguide -lpthread
+compiling hiversion ...
+
+converting himain with kmax = 251
+
+linking hib_arn2_251
+  c-based direct i/o routines used
+
+removing hiiolib*.o and (if present) hiunix.o from directory src ...
+
+successful link; moving hib_arn2_251 to ../bin/progs ...
+
+examine /Users/mha/hib43/h_arn2.log for diagnostic and/or error messages
 
 N. B. Your link will be unsuccessful unless all the requisite .o and common 
 files have been previously created.  See the installation instructions

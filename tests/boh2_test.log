@@ -1,20 +1,20 @@
 
  --------------------------------------------------------------------------
-           HIBRIDON SCATTERING CODE V 4.1.5 02/23/04 11:09:31 EST
+           HIBRIDON SCATTERING CODE V 4.3 12/04/07 08:28:36 EST
 
      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG
  CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI
                A. BERNING, A. DEGLI-ESPOSTI, C. RIST, P. DAGDIGIAN, B. POUILLY
-               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK
+               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, J. KLOS
  --------------------------------------------------------------------------
  Hibridon>  Hibridon>  Hibridon>      *** Parameters (bound-state):
  JTOT1  =   0        JTOT2  =   0        JTOTD  =  20        JLPAR  =   1
  NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
  LSCREEN=  48        IPRINT =   2
- R1     =  4.000     R2     =  10.00     C      =  .5000     SPAC   =  .5000    
- DELR   =  1.000     HSIMP  =  .1000     EIGMIN = 1.0000E-08 TOLAI  =  .1000    
+ R1     =  4.000     R2     =  10.00     C      = 0.5000     SPAC   = 0.5000    
+ DELR   =  1.000     HSIMP  = 0.1000     EIGMIN = 1.0000E-08 TOLAI  = 0.1000    
  XMU    =  1.704    
- NOUT:  5; JOUT:   0   1   0   1   2
+ NOUT:  5; JOUT:  0  1  0  1  2
  INDOUT:    0  200    1  201  201
      *** HOMO+2P system parameters:
  NTERM  =   1        IOP    =   1        JMAX   =   1
@@ -30,25 +30,29 @@
  WRPART= F    WRSMAT= F    WRXSEC= F    BOUNDC= T
  ** Maximum Channels:  120; Anisotropic Terms:  80
  ** Energies:      208.500000
- ** Energies: ***************
+ ** Label:      B-H2 PES's of ALEXANDER                         
+ ** Pot name:      ALEXANDER B(2P)H2(J=0,1) DUBERNET-HUTSON        
+ ** Input File:  Boh2_bound.inp
+ ** Output file: Outpt
+ ** Jobname:     Boh2_bou   (** TRUNCATED TO 8 CHARACTERS **)
  Hibridon> 
- **  CD 1C MOL + 2P ATOM ** RMU=   1.7037       E=   208.50   JTOT=    0   P=  .5
+ **  CD 1C MOL + 2P ATOM ** RMU=   1.7037       E=   208.50   JTOT=    0   P= 0.5
 
    N   JA(IS) JMOL  J12(J)   CENT   EINT(CM-1);  L = JTOT
-   1      .5     1     .5     1       -10.170
-   2      .5     1    1.5     4       -10.170
-   3     1.5     1     .5     1         5.085
+   1     0.5     1    0.5     1       -10.170
+   2     0.5     1    1.5     4       -10.170
+   3     1.5     1    0.5     1         5.085
    4     1.5     1    1.5     4         5.085
    5     1.5     1    2.5     9         5.085
  ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS    35
 
  ** BOUND STATE CALCULATION:  R1 = 4.00;  R2 =10.00
-      DEL-START = .500, DEL-EXACT = .500000, NO. GAUSSIANS = 13
-      C = .50, ALPH =1.0000    
+      DEL-START =0.500, DEL-EXACT =0.500000, NO. GAUSSIANS = 13, SIZE OF TOTAL BASIS =  65
+      C =0.50, ALPH =1.0000    
  ** MINIMUM EIGENVALUE OF S MATRIX = 2.7416E-06
  ** SIMPSON'S INTEGRATION OF POTENTIAL
-      DEL-R =1.00, H-START = .100, N-POINTS =  81, H-EXACT = .100000
- ** ALL EIGENVALUES SAVED IN FILE Boh2_bound.evl                          
+      DEL-R =1.00, H-START =0.100, N-POINTS =  81, H-EXACT =0.100000
+ ** ALL EIGENVALUES SAVED IN FILE Boh2_bou.evl                            
       LABEL:B-H2 PES's of ALEXANDER                         
  ** NEGATIVE EIGENVALUES ARE (CM-1):
       -47.765
@@ -56,8 +60,8 @@
       -30.742
        -7.210
        -3.415
- *** CPU TIME FOR BOUND =  00:00:00.15 
- Hibridon> No match.
-No match.
-No match.
-No match.
+ *** CPU TIME FOR BOUND =  00:00:00.047
+ Hibridon> csh: rm: No match.
+csh: rm: No match.
+csh: rm: No match.
+csh: rm: No match.

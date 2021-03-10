@@ -15,7 +15,7 @@
 *************************************************************************
 * ------------------------------------------------------------------
       subroutine default
-*  current revision date:  25-apr-1997 by mha
+*  current revision date:  22-jan-2008 by mha
 * ------------------------------------------------------------------
       implicit double precision (a-h,o-z)
       character*40 jobnam,input,output,savfil
@@ -44,7 +44,8 @@
      :                logwr, noprin, partw, readpt, rsflag, swrit,
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr, nucros, photof, wavefl, boundc
-      common /coener/ energ(10)
+*  this sets the maximum number of energies
+      common /coener/ energ(1)
       common /coconv/ econv, xmconv, ang2
 *
       jtot1=20
@@ -61,7 +62,7 @@
 *     iprint=-1 (no print); iprint=0 (min print); iprint=1 some print, etc
       iprint=0
       energ(1)=208.509d0
-      do i=2,10
+      do i=2,25
         energ(i)=0.d0
       enddo
       fstfac=15d0
@@ -156,14 +157,13 @@
 * -------------------------------------------------------------------
       subroutine logdb (z, w, amat, bmat, nmax, wref, z1, z2,
      :                  scr1, scr2, nch, rmin, rmax, nsteps,
-     :                  eshift, iread, iwrite, tl, tlw, tp, tpw
-     :                  twf, twfw)
+     :                  eshift, iread, iwrite, tl, tp, twf)
 *     routine to initialise the log derivative matrix, y, at r = rmin,
 *     and propagate it from rmin to rmax using the method described in
 *     d.e.manolopoulos, j.chem.phys., 85, 6425 (1986)
 *     references to this paper appear below in comments
 *     author:  david manolopoulos and millard alexander
-*     current revision date: 15-apr-1995
+*     current revision date: 28-nov-2007
 ***********************************************************************
 ****   this integrator is not released for general public use      ****
 ****   all use must be by specific prior arrangement with:         ****
@@ -205,18 +205,16 @@
 *                   new energy = first energy + eshift
 *     iread,iwrite  logical variables for i/o of energy-independent
 *                   information from/to unit 11
-*     tl,tlw        cpu and wall clock time used in logd integration
+*     tl            elapsed time used in logd integration
 *                   exclusive of calls to potential and ground state
 *                   wavefunction (in photodissociation calculations)
-*     tp,tpw        cpu and wall clock time used in calls to potential
-*     twf,twfw      cpu and wall clock time used in determination of ground
+*     tp            elapsed time used in calls to potential
+*     twf           elapsed time used in determination of ground
 *                   state wavefunction (this should be zero for scattering)
 *                   exclusive of calls to potential
 *                   this timing information comes from repeated calls
-*                   of the form call mtime(cpu,wall) where cpu and wall
-*                   are the current cpu and wall clock times in seconds
-*                   the user will have to incorporate a subroutine for
-*                   his specific installation
+*                   of the form call mtime(elapsed) where "elapsed"
+*                   is the current elapsed time in seconds
 *     variables in common block /cophot/
 *     photof        true if photodissociation calculation
 *                   false if scattering calculation
@@ -240,7 +238,7 @@
      :        nch, ncol, ndiag, nmax, nrow, nsteps
 *      real arg, d3, d6, eight, eshift, fac, h, half, hi, one, r, rmax,
 *     :     rmin, sqrt, tan, tanh, t0, t0w, t1, t1w, tf, tfw, th, tl,
-*     :     tlw, tn, tp, tpw, zero, wdiag
+*     :     tn, tp,  zero, wdiag
 *      real w, z
 *      real scr1, scr2, wref, z1, z2
       logical iread, iwrite, photof, wavefn
@@ -358,6 +356,7 @@ cend
          z(idiag) = sqrt(wdiag)
          idiag = idiag + ndiag
   30  continue
+
       if (nsteps .le. 0) then
         if (photof) then
           write (9, 35) nsteps
@@ -448,10 +447,10 @@ cend
             idiag = idiag + ndiag
   90     continue
 *     z now contains z(a)+z1(a,c)
-cstart .not.unix-darwin
+cstart .not.unix-darwin .and. .not. unix-x86
 c;         call smxinv(z, nmax, nch, scr1, scr2, ierr)
 cend
-cstart unix-darwin
+cstart unix-darwin unix-x86
         call syminv(z,nmax,nch,ierr)
 cend
          if (ierr .ne. 0) then
@@ -503,10 +502,10 @@ cend
                w(idiag) = one
                idiag = idiag + ndiag
  140        continue
-cstart .not.unix-darwin
+cstart .not.unix-darwin .and. .not. unix-x86
 c;            call smxinv(w, nmax, nch, scr1, scr2, ierr)
 cend
-cstart unix-darwin
+cstart unix-darwin unix-x86
             call syminv(w,nmax,nch,ierr)
 cend
             if (ierr .eq. 2) then
@@ -544,10 +543,10 @@ cend
             idiag = idiag + ndiag
  170     continue
 *     at this point z contains z(c) + z1(c,b)
-cstart .not.unix-darwin
+cstart .not.unix-darwin .and. .not. unix-x86
 c;         call smxinv(z, nmax, nch, scr1, scr2, ierr)
 cend
-cstart unix-darwin
+cstart unix-darwin unix-x86
          call syminv(z,nmax,nch,ierr)
 cend
          if (ierr .eq. 2) then
@@ -878,7 +877,7 @@ cend
 *  subroutine to write out selected integral cross sections
 *  from file {fname1}.ics
 *  author:  millard alexander
-*  latest revision date:  10-oct-2001
+*  latest revision date:  8-dec-2007
 *  last bug fix:17-may-1993 by mha
 *  ------------------------------------------------------------------
 *  variables in call list:
@@ -974,8 +973,8 @@ cend
         if (existf) then
           stat='old'
 * make sure sequential formatted files are appended not overwritten
-cstart unix-hp unix-dec unix-iris unix-sun
-c;          accs='append'
+cstart unix-hp unix-dec unix-iris unix-sun unix-ifort unix-pgi
+          accs='append'
 cend
         else
           stat='new'
@@ -1006,7 +1005,8 @@ cend
         read (1, 80)  nlevel, nlevop
         read (1, 80) (jlev(i), inlev(i), i = 1, nlevel)
         read (1, 90) (elev(i), i = 1, nlevel)
-90      format (8f16.9)
+90      format (8(1pe15.8))
+*90      format (8f16.9)
       else
         read (1, *)  nlevel, nlevop
         read (1, *) (jlev(i), inlev(i), i = 1, nlevel)
@@ -1254,7 +1254,7 @@ caber
       subroutine xscpr1 (zmat, nlevop, isize, iaver,
      :                   ipos, iprint, flaghf)
       implicit double precision (a-h,o-z)
-*      current revision date: 22-aug-90
+*      current revision date: 16-dec-2007
 *  subroutine to print out specified columns of cross section matrix
 *  if iaver = 1, then nth and (n+1) st rows are added before printing
       integer i, isize, iskip, j, jcol, jhigh, jj, jlow, jmax,
@@ -1296,16 +1296,16 @@ caber
         if (.not. flaghf) then
           if (iprint) write (6, 15) ( jlev(ind(i)), i = 1,ncol)
           write (3, 15) ( jlev(ind(i)), i = 1, ncol )
-15        format (/12x,'J=', i4, 2x, 12 (2x, i5, 2x) )
+15        format (/12x,'J=', i5, 2x, 12 (2x, i6, 2x) )
         else
           if (iprint) write (6, 30) ( jlev(ind(i))+0.5,
      :                                 i = 1,ncol)
           write (3, 30) ( jlev(ind(i))+0.5, i = 1,ncol)
-30        format (/11x,'J= ', f4.1, 2x, 12 (2x, f5.1, 2x) )
+30        format (/11x,'J= ', f5.1, 2x, 12 (2x, f6.1, 2x) )
         end if
         if (iprint) write (6, 40) ( inlev(ind(i)), i = 1,ncol)
         write (3, 40) ( inlev(ind(i)), i = 1,ncol)
-40      format ('   J    I | I=', i4, 2x, 12 (2x, i5, 2x))
+40      format ('   J    I | I=', i5, 2x, 12 (2x, i6, 2x))
         if (iprint) write (6, 50)
         write (3, 50)
 50      format (1h )
@@ -1325,14 +1325,14 @@ caber
      :            ( zmat(jrow,ind(jcol)), jcol = 1,ncol)
               write (3, 60) jlev(jrow),inrow,
      :          ( zmat(jrow,ind(jcol)), jcol = 1,ncol)
-60            format (i5, i5, 2x, 13 (1pe8.2,1x) )
+60            format (i5, i5, 2x, 13 (1pe9.3,1x) )
             else
               if (iprint)
      :          write (6, 70) jlev(jrow)+0.5, inrow,
      :            ( zmat(jrow,ind(jcol)), jcol = 1,ncol)
               write (3, 70) jlev(jrow)+0.5, inrow,
      :          ( zmat(jrow,ind(jcol)), jcol = 1,ncol)
-70            format (f5.1, i5, 2x, 13 (1pe8.2,1x) )
+70            format (f5.1, i5, 2x, 13 (1pe9.3,1x) )
             end if
           else
             if (.not. flaghf) then
@@ -1481,8 +1481,8 @@ cmha .xsc file is appended if it already exists
         if (existf) then
           stat='old'
 * make sure sequential formatted files are appended not overwritten
-cstart unix-hp unix-dec unix-iris unix-sun
-c;          accs='append'
+cstart unix-hp unix-dec unix-iris unix-sun unix-ifort unix-pgi
+          accs='append'
 cend
 
         else

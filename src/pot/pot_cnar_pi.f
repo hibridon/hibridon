@@ -8,6 +8,7 @@
       common /covvl/ vvl(11)
       common /coconv/ econv
       include "common/parpot"
+      dimension xxl(11)
       potnam='BERNING CN(A)-AR MRCI NEWFIT'
       econv=219474.6d0
 1      print *, ' r (bohr)'
@@ -15,11 +16,35 @@
       xfact=0.8
       read (5, *, end=99) r
       call pot(vv0,r)
-      write (6, 100) vv0,vvl
+*
+* addition  by pjd (16-jun-2010)
+* multiply vvl by econv to convert to cm^-1
+      xx0 = vv0*econv
+      do i=1,11
+        xxl(i) = vvl(i)*econv
+      end do
+      write (6, 100) xx0, xxl
+*
 100   format(' vsum',/,7(1pe16.8),/,
      :    '  vdif',/,5e16.8)
       goto 1
-99    end
+99    r=4
+      write (2,*) 'Vsum CN(A)-Ar'
+      do i=1,40
+         call pot(vv0,r)
+         write (2,101) r,vv0,(vvl(j), j=1,6)
+101      format(f8.4,7(pe16.8))
+         r=r+0.2d0
+      enddo
+      r=4
+      write (2,*) 'Vdif CN(A)-Ar'
+      do i=1,40
+         call pot(vv0,r)
+         write (2,102) r,(vvl(j), j=7,11)
+102      format(7(pe16.8))
+         r=r+0.2d0
+      enddo
+      end
       include "common/syusr"
       include "common/bausr"
       include "common/ground"
@@ -63,8 +88,8 @@
 * ----------------------------------------------------------------------
 
       implicit double precision (a-h,o-z)
-      dimension xlam1(14),xlam2(14),r0(14),c1(14),c2(14),c3(14),
-     :          clr(14),vsum(7),xsum(7),vdif(7),xdif(7),
+      dimension xlam1(13),xlam2(13),r0(13),c1(13),c2(13),c3(13),
+     :          clr(13),vsum(7),xsum(7),vdif(7),xdif(7),
      :          ddif(7),vap(7),va2p(7),
      :          d0(49),d2(25),aa(64)
       dimension kpvt(8),qraux(7),work(55),rsd(7),re(14)

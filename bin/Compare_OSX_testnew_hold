@@ -1,0 +1,125 @@
+#!/bin/csh -f
+# HIBRIDON bin/compare_OSX $Revision: 2010.2 $ --- compare results of current hibridon code
+# with prior results contained in directory /tests
+# the PATH variable should be set to include the hibridon bin directory
+# compare_OSX i[directory] [time], where [directory] is the directory in which the test results are to be
+# compared to /tests and [time] is the length of time FileMerge holds open each set of comparisons
+
+
+set basedir=`hibriddir`
+
+
+# set default value
+set time = 0
+set directory = "testnew"
+
+@ items = $#argv
+if ($items > 2) then
+  echo "usage: compare_OSX [directory] [time]"
+  goto end
+endif
+if ($items == 1) then
+  set directory = $1
+endif
+if ($items == 2) then
+  set directory = $1
+  set time = $2
+endif
+echo "comparing test results in directory /"$directory "with /tests"
+cd $basedir/$directory
+echo "system configuration is"
+hib_sysconfig
+cat sysprofile
+#sleep $time
+echo ""
+echo "comparing Arno results"
+opendiff Arno_tes1.ics ../tests/Arno_tes1.ics
+opendiff Arno_tes1.xsc ../tests/Arno_tes1.xsc
+opendiff Arno_tes1.dcs ../tests/Arno_tes1.dcs
+#sleep $time
+echo "comparing B-oH2 bound state results"
+opendiff Boh2_bou.evl ../tests/Boh2_bou.evl
+#sleep $time
+echo "comparing flux and wavefunction tests"
+opendiff Cc.flx ../tests/Cc.flx
+opendiff Cc.psi ../tests/Cc.psi
+#sleep $time
+echo "comparing differential cross section tests"
+opendiff Ccdxsec1.dcs ../tests/Ccdxsec1.dcs
+opendiff Ccdxsec1.xxsc ../tests/Ccdxsec1.xxsc
+#sleep $time
+echo "comparing close-coupling integral cross section tests"
+opendiff Cctest1.ics ../tests/Cctest1.ics
+opendiff Cctest1.xsc ../tests/Cctest1.xsc
+opendiff Cctest1.pcs ../tests/Cctest1.pcs
+opendiff Cctest1.psc ../tests/Cctest1.psc
+#sleep $time
+echo "comparing multi-energy integral cross sections"
+opendiff Multien4.xsc ../tests/Multien4.xsc
+opendiff Multien6.xsc ../tests/Multien6.xsc
+#sleep $time
+echo "comparing multi-energy integral cross sections from S matrices"
+opendiff Mltien4.xxsc ../tests/Mltien4.xxsc
+opendiff Mltien6.xxsc ../tests/Mltien6.xxsc
+#sleep $time
+echo "comparing restart tests"
+opendiff Ccrstest1.ics Cctest1.ics
+opendiff Ccrstest1.xsc Cctest1.xsc
+opendiff Ccrstest1.pcs Cctest1.pcs
+opendiff Ccrstest1.psc Cctest1.psc
+#sleep $time
+echo "comparing CH3I photodissociation tests"
+opendiff Ch3itest.flx ../tests/Ch3itest.flx
+opendiff Ch3itest.psi ../tests/Ch3itest.psi
+#sleep $time
+echo "comparing coupled-states Ar-N2 results"
+opendiff Cstest1.ics ../tests/Cstest1.ics
+opendiff Cstest1.xsc ../tests/Cstest1.xsc
+opendiff Cstest1.pcs ../tests/Cstest1.pcs
+opendiff Cstest1.psc ../tests/Cstest1.psc
+#sleep $time
+echo "comparing Ar-N2 'big' results"
+opendiff Ccbtest1.ics Cctest1.ics
+opendiff Ccbtest1.xsc Cctest1.xsc
+opendiff Ccbtest1.pcs Cctest1.pcs
+opendiff Ccbtest1.psc Cctest1.psc
+#sleep $time
+echo "comparing Ar-N2 'big' restart tests"
+opendiff Ccbrstest1.ics Cctest1.ics
+opendiff Ccbrstest1.xsc Cctest1.xsc
+opendiff Ccbrstest1.pcs Cctest1.pcs
+opendiff Ccbrstest1.psc Cctest1.psc
+#sleep $time
+echo "comparing tests of Vfit potential"
+opendiff Vfit_test1.ics ../tests
+opendiff Vfit_test1.xsc ../tests
+#sleep $time
+echo "comparing tests of tensor and m-dependent xsections"
+opendiff Vfit_test1.tcs ../tests
+opendiff Vfit_test1.mcs ../tests
+#sleep $time
+echo "comparing Ar-OH integral cross section tests"
+opendiff Aroh_new1.ics ../tests/Aroh_new1.ics
+opendiff Aroh_new1.xsc ../tests/Aroh_new1.xsc
+#sleep $time
+echo "comparing H2O-He integral cross section tests"
+opendiff H2ohe1.psc ../tests/H2ohe1.psc
+opendiff H2ohe1.xsc ../tests/H2ohe1.xsc
+#sleep $time
+echo "comparing He-CO integral and partial cross section tests"
+opendiff Heco1.ics ../tests
+opendiff Heco1.xsc ../tests
+opendiff Heco1.pcs ../tests
+opendiff Heco1.psc ../tests
+
+#sleep $time
+echo "comparing HeCN(X) partial, integral and hyperfine resolved cross section tests"
+opendiff Hecn1.xsc ../tests
+opendiff Hecn1.hfx ../tests
+opendiff Hecn1.xms ../tests
+
+
+exit
+end:
+
+exit

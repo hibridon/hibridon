@@ -1,0 +1,19 @@
+<TITLE>noprin</TITLE>
+<h3><center><font color=#brown >Flags NOPRIN and  CHLIST</h3>
+</center></font><hr>
+If NOPRIN = .TRUE., most printing is suppressed.  This is useful in
+production runs.  Note that setting NOPRIN = .TRUE. also sets the print
+control parameter IPRINT to -1.
+<hr>      If CHLIST = .TRUE., the channels included are listed at
+every value of <i>J<sub>tot</sub></i> (or <img src=lbarsmall.gif align=bottom>).  If CHLIST = .FALSE., then the channels are
+listed in the output file  only at the first value of <i>J<sub>tot</sub></i>.  <p>
+
+Note that the flag CHLIST controls printing the channel list
+only in the output file.  The only way to print out the list of channels on your terminal screen is to set the flag <a href=bastst.html>BASTST</a> = .TRUE., in which
+case the job will cease after the list of channels is printed, and await a new command.
+<p>When the number of channels is large, you
+will certainly want to suppress printing the list of channels.
+<hr>
+See also the <a href=iprint.html>IPRINT</a>  and <a href=bastst.html>BASTST</a> help files.
+<hr>
+<a href=hibhelp.html><img src=up_arrow.gif border=0 align=middle></a>&#001;Return to <a href=hibhelp.html>Hibridon Help</a>

@@ -81,6 +81,12 @@
       common /coskip/ nskip,iskip
       common /colpar/ lpar(14), readpt
       common /coselb/ ibasty
+*  variable in common block /conlam/
+*    nlam:      the number of angular coupling terms actually used
+*    nlammx:    the maximum number of angular coupling terms
+*    lamnum:    number of non-zero v2 matrix elements for each lambda
+*               lamnum is an array of dimension nlammx
+      common /conlam/ nlam, nlammx, lamnum(2)
       potnam='WERNER-FOLLMEG VFIT'
 * default data
       lammin(1)=2
@@ -89,7 +95,7 @@
       ntv(1)=1
       ivcol(1,1)=0
       ivrow(1,1)=0
-      ibasty=4
+*      ibasty=4
 * return at this point if readpt is false
       if (.not.readpt) return
       call openf(iunit,filnam,'sf',0)
@@ -147,9 +153,17 @@ caber
 110   format((a),/,' NUMBER OF TERMS (NTRM) READ IN: ',i2,/)
       write(6,115)
 115   format('  NTRM    LMMIN    LMMAX    MLD    NVBLOCKS')
+      nlam=0
       do 150 i=1,nterm
-      write(6,120) i,lammin(i),lammax(i),mproj(i),ntv(i)
-120   format(t4,i2,t12,i2,t21,i2,t29,i2,t36,i2)
+         lamnum(i)=lammax(i)-lammin(i)+1
+         if (i.eq.1) lamnum=lamnum-1
+         if (iskip.eq.1) then
+            nlam=nlam+lamnum(i)
+         elseif (iskip.eq.2) then
+            nlam=nlam+(lammax(i)-lammin(i))/2+1
+         endif              
+         write(6,120) i,lammin(i),lammax(i),mproj(i),ntv(i)
+120      format(t4,i2,t12,i2,t21,i2,t29,i2,t36,i2)
 150   continue
       return
 888   write(6,300) ierr
@@ -284,11 +298,12 @@ caber
              ii = ii + 1
              jj = jj + 1
              vvl(jj) = avec(ii)
-             print *, l,jj,vvl(jj)
+*             print *, l,jj,vvl(jj)
 50        continue
 80      continue
       iblkxx=iblkx
 100   continue
+
       return
       end
 * --------------------------------------------------------------------

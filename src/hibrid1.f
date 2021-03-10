@@ -18,6 +18,7 @@
 *   7. dtrans        computes  b * a * b-transpose                      *
 *   8. difcrs (ampli/sphn/plm)  computes differential cross sections    *
 *   9. difs (compar,compt2)         compares two s-matrices             *
+*  11. hypxsc        computes hyperfine-resolved integral cross sections
 *                                                                       *
 *************************************************************************
 * NB cstart aix-unix uses fortran rather than essl routines
@@ -31,7 +32,7 @@
 *                    j. chem. phys. 81, 4510 (1984)
 *                and m. alexander and d. manolopoulos, "a stable linear
 *                    reference potential algorithm for solution ..."
-*                    j. chem. phys., inpress
+*                    j. chem. phys., in press
 ***********************************************************************
 ****   this integrator is not released for general public use      ****
 ****   all use must be by specific prior arrangement with:         ****
@@ -43,7 +44,9 @@
 ***********************************************************************
 *  author:  millard alexander
 *  current revision date: 30-dec-1995
-* ----------------------------------------------------------------------------
+*  commented out diagnostic print statements in differs -
+*     p.j. dagdigian, 30-dec-2010
+* ---------------------------------------------------------------------------
 *  definition of variables in call list:
 *   z:               matrix of maximum dimension nmax*nmax
 *                    on entry z contains the initial z-matrix at r=xf
@@ -224,10 +227,10 @@ cend
 *  invert (y  +  z )
 *           1     n
 *  hp and cc are used as scratch arrays here
-cstart .not. unix-darwin
+cstart .not. unix-darwin .and. .not. unix-x86
 c;        call smxinv (z, nmax, nch, hp, cc, ierr)
 cend
-cstart unix-darwin
+cstart unix-darwin unix-x86
         call syminv(z,nmax,nch,ierr)
 cend
         if (ierr .ne. 0) then
@@ -796,9 +799,10 @@ cstart none
 c;      call rgmmul (isw, n, n, n, b, 1, nmax, a, 1, nmax, c, 1, nmax)
 c;      call rgmmul (isw, n, n, n, c, 1, nmax, b, nmax, 1, a, 1, nmax)
 cend
-cstart unix mac .and. .not.unix-ibm
-       call mxma (b,1,nmax,a,1,nmax,c,1,nmax,n,n,n)
-       call mxma (c,1,nmax,b,nmax,1,a,1,nmax,n,n,n)
+ccstart unix mac .and. .not.unix-ibm
+cstart none
+c;       call mxma (b,1,nmax,a,1,nmax,c,1,nmax,n,n,n)
+c;       call mxma (c,1,nmax,b,nmax,1,a,1,nmax,n,n,n)
 cend
 cstart unix-ibm
 c;       forma='N'
@@ -806,9 +810,9 @@ c;       formb='T'
 c;       call dgemul (b,nmax,forma,a,nmax,forma,c,nmax,n,n,n)
 c;       call dgemul (c,nmax,forma,b,nmax,formb,a,nmax,n,n,n)
 cend
-cstart none
-c;       call dgemm('n','n',n,n,n,1.d0,a,nmax,b,nmax,0d0,c,nmax)
-c;       call dgemm('n','t',n,n,n,1.d0,c,nmax,b,nmax,0d0,a,nmax)
+cstart unix .and. .not.unix-ibm
+       call dgemm('n','n',n,n,n,1.d0,b,nmax,a,nmax,0d0,c,nmax)
+       call dgemm('n','t',n,n,n,1.d0,c,nmax,b,nmax,0d0,a,nmax)
 cend
 
 *  a now contains desired product
@@ -835,18 +839,20 @@ cend
 *  -------------------------------------------------------------
 *  calculates differential cross sections
 *  author h.-j. werner
-*  revised to included 6pole alignment:  7-apr-2003
-*  latest revision:  9-sep-99 by mha
-*  addition for negative nnout 2-8-95 by mby
+*  addition for negative nnout 2-8-95 by moonbong yang
+*  revised to included 8pole alignment:  7-apr-2003
+*  latest revision:  4-sep-2010	by mha for A22+ differential alignment moment
 *  -------------------------------------------------------------
       implicit double precision (a-h,o-z)
       character*(*) fname1
       character*20 cdate1
       character*20  cdate
-      character*12  elaps, cpu
-      character*40 xnam1,xnam2
+      character*13  elaps, cpu
+      character*40 xnam1,xnam2,xnam3
+      character*1 m1string,m2string
+      character*8 amplstring
 
-      complex*16 q,qm,stampl,stamplm
+      complex*16 q,qm,stampl,stamplm,fm1m2
       logical existf,csflg1,flghf1,flgsu1,ihomo,flaghf,twomol,
      1        nucros, iprint, mflag, stflag
       parameter (maxang=901)
@@ -870,7 +876,12 @@ cend
       common /cozmat/ xintmdep(10)
       common /cov2/ nv2max, ndummy, y(1)
       common /coconv/ econv, xmconv, ang2c
-      dimension  s(maxang),sm(maxang),sm6(maxang)
+      common /codifc/ s(10)
+      dimension sm(maxang),sm6(maxang)
+* to store a22p amplitudes
+      dimension fm1m2(100,500),a22(500),a22fak(100)
+* to store rho and rho2 density matrices
+      dimension rho(100,500),rho2(100,500)
       dimension a(15)
       data pi /3.1415927d0/
 c
@@ -947,13 +958,21 @@ c
       ifil=1
 20    call gennam(xnam2,fname1,ifil,'dcs',lenx)
       call openf(2,xnam2(1:lenx),'sf',0)
-* write a header
-      call version(2)
+c.....open output file for final-m dependence of (m,m) and (m,m+2) density matrix
+      if (mflag) then
+         call gennam(xnam3,fname1,ifil,'rho',lenx)
+         call openf(3,xnam3(1:lenx),'sf',0)
+      endif
+* write a header (mha 10/22/08, don't write this for easier import into matlab)
+*      call version(2)
       call dater(cdate)
-      write (2,22) cdate
+      write (2,23) cdate
+      if (mflag) write (3,23) cdate
       write (6,22) cdate
 22    format (/,'**  DIFFERENTIAL CROSS SECTION (ANG^2/SR)',
      :    /,'    TODAYS DATE:  ',(a))
+23    format (/,'% **  DIFFERENTIAL CROSS SECTION (ANG^2/SR)',
+     :    /,'%   TODAYS DATE:  ',(a))
 c
 c.....read header of s-matrix file
 c
@@ -970,13 +989,20 @@ c
 c
 c.....print job information
 c
-      write(2,40) xnam1,cdate1,label,potnam,econv*ered1,xmconv*rmu1
+      write(2,41) xnam1,cdate1,label,potnam,econv*ered1,xmconv*rmu1
+      if (mflag)
+     :     write(3,41) xnam1,cdate1,label,potnam,econv*ered1,xmconv*rmu1
       write(6,40) xnam1,cdate1,label,potnam,econv*ered1,xmconv*rmu1
 40    format('    S-MATRICES READ FROM FILE ',(a),/,
      : '      WRITTEN:   ',(a),/,
      : '      LABEL:     ',(a)/,
      : '      POT NAME:  ',(a)/,
-     : '    E-TOT:   ',f10.3,';  REDUCED MASS:  ',1pg9.4)
+     : '    E-TOT:   ',f10.3,';  REDUCED MASS:  ',1pg11.4)
+41    format('%    S-MATRICES READ FROM FILE ',(a),/,
+     : '%     WRITTEN:   ',(a),/,
+     : '%     LABEL:     ',(a)/,
+     : '%     POT NAME:  ',(a)/,
+     : '%    E-TOT:   ',f10.3,';  REDUCED MASS:  ',1pg11.4)
       if(jtot2.eq.0) jtot2=jfinal
       jtot2=min0(jfinal,jtot2)
       if(jtotd.ne.1) then
@@ -1021,7 +1047,7 @@ c
 c
 c.....ckeck whether second level exists
 c
-c added for negative nnout by MBY 2-8-95
+c added for negative nnout by moonbong yang 2-8-95
 
 120   continue
 *     write(6,*) 'nnout=',nnout
@@ -1039,7 +1065,9 @@ c added for negative nnout by MBY 2-8-95
 c
 c.....print header
 c
-160   write(2,170) j1,in1,j2,in2,jtot1,jtot2,ca,1.8897*ca,
+160   write(2,171) j1,in1,j2,in2,jtot1,jtot2,ca,1.8897*ca,
+     :             econv*ecol,econv*ecol/8.065465
+      if (mflag) write(3,171) j1,in1,j2,in2,jtot1,jtot2,ca,1.8897*ca,
      :             econv*ecol,econv*ecol/8.065465
       write(6,170) j1,in1,j2,in2,jtot1,jtot2,ca,1.8897*ca,
      :             econv*ecol,econv*ecol/8.065465
@@ -1047,19 +1075,33 @@ c
      1        '  ->  J2=',i2,' IN2=',i4/
      1        '    SUMMING PARTIAL WAVES FROM JTOT = ',i1,
      :        ' TO',i4/
-     1        '    WAVE VECTOR IN INITIAL CHANNEL:  ',f10.4,' Bohr^2',
-     :        '; ',f10.4,' Angstroms^2',/
+     1        '    WAVE VECTOR IN INITIAL CHANNEL:  ',f10.4,' Bohr^(-1)',
+     :        '; ',f10.4,' Angstroms^(-1)',/
      :        '    COLLISION ENERGY: ',f10.4,' cm-1; ',f10.4,' meV')
+171   format('%   TRANSITION:  J1=',i2,' IN1=',i4,
+     1        '  ->  J2=',i2,' IN2=',i4/
+     1        '%   SUMMING PARTIAL WAVES FROM JTOT = ',i1,
+     :        ' TO',i4/
+     1        '%   WAVE VECTOR IN INITIAL CHANNEL:  ',f10.4,' Bohr^(-1)',
+     :        '; ',f10.4,' Angstroms^(-1)',/
+     :        '%   COLLISION ENERGY: ',f10.4,' cm-1; ',f10.4,' meV')
+
       if (stflag) then
-         write (6,171) msteric+0.5, alph1,alphm1
-         write (2,171) msteric+0.5, alph1,alphm1
+         write (6,173) msteric+0.5, alph1,alphm1
+         write (2,172) msteric+0.5, alph1,alphm1
       endif
-171   format('    STERIC (ORIENTED) CROSS SECTIONS: M = ',f4.1,/,
+172   format('%    STERIC (ORIENTED) CROSS SECTIONS: M = ',f4.1,/,
+     :        '        ALPH(1) =',f7.4,
+     :        ', ALPH(-1)=',f7.4)
+173   format('    STERIC (ORIENTED) CROSS SECTIONS: M = ',f4.1,/,
      :        '        ALPH(1) =',f7.4,
      :        ', ALPH(-1)=',f7.4)
 
       if (.not.iprint) write (6, 175) xnam2(1:lenx)
 175   format('    DIFFERENTIAL CROSS SECTIONS SAVED IN FILE: ',(a))
+      if (.not.iprint.and.mflag) write (6, 176) xnam3(1:lenx)
+176   format('    ROTATIONAL DENSITY MATRIX ELEMENTS SAVED IN FILE: ',
+     :       (a))
 c
 c.....determine number of angles per batch
 c
@@ -1103,12 +1145,20 @@ c
 200     ii=0
         nang=(ang2-ang1)/dang+1.4d0
         nangle=min0(nanghld,nang)
-        do 210 mj1=-j1p,j1
-        do 210 mj2=-j2p,j2
+        do 215 mj1=-j1p,j1
+        do 215 mj2=-j2p,j2
         do 210 i=1,nangle
         ii=ii+1
+        a22(i)=0d0
+* fm1m2 is array to accumulate f(j1m1->j2m2)
+        fm1m2(mj2+j2p+1,i)=(0d0,0d0)
+* rho is array to accumulate |f(j1m1->j2m2)|^2 summed over m1
+* rho2 is array to accumulate Ref(j1m1->j2m2)|^2 summed over m1
+        rho(mj2+j2p+1,i)=0d0
+        rho2(mj2+j2p+1,i)=0d0
         q(ii)=0d0
 210     qm(ii)=0d0
+215     continue
 c
 c.....precalculate all required spherical harmonics
 c
@@ -1184,100 +1234,208 @@ c
       fak=ang2c/(ideg1*ca**2)
       faksq=sqrt(fak)
       indm=0
-      do 340 mj1=-j1p,j1
+      do 343 mj1=-j1p,j1
       do 340 mj2=-j2p,j2
-      indm=indm+1
-      if (flaghf) then
-         xm=mj1+0.5d0
-         xmj2=mj2+0.5d0
-      else
-         xm=mj1
-         xmj2=mj2
-      endif
+         indm=indm+1
+         if (flaghf) then
+            xm=mj1+0.5d0
+            xmj2=mj2+0.5d0
+         else
+            xm=mj1
+            xmj2=mj2
+         endif
 
 * from C. H. Greene and R. N. Zare, J. Chem. Phys. 78, 6741 (1983)
+
+* quadrupole alignment
 *  A_0^(2)= <3m^2-j*(j+1)>/(j*(j+1))
+* octupole alignment
 *  A_0^(4)= <3(j*(j+1))^2-6(j*(j+1))-30m^2*j(j+1)+25m^2+35m^4>/8(j(j+1))^2
-      fjjp1=xj2*(xj2+1)
-      fjjp12=fjjp1*fjjp1
-      xm2=xmj2*xmj2
-      algfak=(3d0*xm2/fjjp1-1d0)
-      hexfak=
-     :   (3*fjjp12-6*fjjp1-30*fjjp1*xm2+25*xm2+35*xm2*xm2)/(8d0*fjjp12)
-      if (xm.lt.0d0) then
-         msign=-1
-      else
-         msign=1
-      endif
-      if (mflag) then
-        if (iprint) write (6,332) mj1, mj2
-        write (2,332) mj1, mj2
-332     format('MJ=',i2, '  MJ2=',i3,'  F-REAL        F-IMAG')
-      endif
-      aangle=ang1
-      do 339 i=1,nangle
-      ii=ii+1
+* A22+ moment
+*\begin{eqnarray}
+*A^{(2)+}_{2}(J)&=&(-1)^J \left [ \frac{2(2J-1)(2J+1)(2J+3)}{ J(J+1)}\right ]^{1/2}\nonumber \\
+*&& \times \sum_{M=-J}^{J-2} (-1)^{-M}
+*\left( {\begin{array}{*{20}c}
+*   J & 2 & J  \\
+*   { - M-2} & {  -2} & {M+2}  \\
+*\end{array}} \right) {\CMcal{R}}\left({\rho_{M+2,M}}\right )
+*\end{eqnarray}
+
+* and
+*\begin{equation}
+*\rho_{M'M}= {{\sum\limits_{M''}^{} {f_{J''M'' \to JM'}^* } f_{J''M'' \to JM}} \mathord{\left/
+* {\vphantom {{\sum\limits_{M''}^{} {f_{J''M'' \to JM'}^* } f_{J''M'' \to JM}} {\sum\limits_{M'',M'}^{} {\left|
+*{f_{J''M'' \to JM'}} \right|^2 } }}} \right.
+* \kern-\nulldelimiterspace} {\sum\limits_{M'',M'}^{} {\left| {f_{J''M'' \to JM'}} \right|^2 } }}
+*\end{equation}
+
+
+         fjjp1=xj2*(xj2+1)
+         fjjp12=fjjp1*fjjp1
+         xm2=xmj2*xmj2
+         algfak=(3d0*xm2/fjjp1-1d0)
+         octupfak=
+     :      (3*fjjp12-6*fjjp1-30*fjjp1*xm2+25*xm2+35*xm2*xm2)/
+     :      (8d0*fjjp12)
+         xj2=j2
+         if (flaghf) then
+            xj2=xj2+0.5d0
+         endif
+         a2term=
+     :       sqrt(2d0*(2*xj2-1)*(2*xj2+1)*(2*xj2+3)/(xj2*(xj2+1)))
+         threej=xf3j(xj2,2d0,xj2,-xmj2,-2d0,xmj2+2d0)
+         a22fak(mj2+j2p+1)=a2term*threej*(-1)**(xj2-xmj2)
+* new
+         threej=xf3j(xj2,2d0,xj2,-xmj2,0d0,xmj2)
+         algfak=threej*(a2term/sqrt(2d0))*(-1)**(xj2-xmj2)
+         if (xm.lt.0d0) then
+            msign=-1
+         else
+            msign=1
+         endif
+         if (mflag) then
+           if (mj1.eq.-j1p .and. mj2.eq. -j2p) then
+              write (2,331)
+              if (iprint) write (6,331)
+331           format('%',4x,'F-REAL (first line)',7x,
+     :         'F-IMAG (second line); NOT divided by (2j+1)k^2 factor')
+           endif
+           write(m1string,'(i1)') abs(mj1)
+           if (mj1.ge.0)
+     :        amplstring='fm1_'//m1string
+           if (mj1.lt.0)
+     :        amplstring='fm1_'//'m'//m1string
+           if (mj2.eq.-j2p) then
+               write (2,333) amplstring
+               if(iprint) write (6,333) amplstring
+           endif
+333        format((a),'=[')
+         endif
+* Comment(JK): Loop over DCS angular grid
+         aangle=ang1
+         do 339 i=1,nangle
+         ii=ii+1
 * space frame (z-axis is initial velocity vector) scattering amplitude
 * returned in q,  ordering of loops:
-*   inner loop:  angle
-*   middle loop:  mj2
-*   outer loop:  mj1
-* can save m-resolved amplitudes separately
-      if (mflag) then
-         if (iprint)
-     :   write (6,336) aangle,faksq*dreal(q(ii)),faksq*imag(q(ii))
-         write (2,336) aangle,faksq*dreal(q(ii)),faksq*imag(q(ii))
-336      format(1x,f7.2,2g15.4)
-      endif
-      sn=sin(aangle*pi/180d0)
+*      inner loop:  angle
+*      middle loop:  mj2
+*      outer loop:  mj1
+* can save m-resolved amplitudes separately (no longer done 9/23/10)
+*        if (mflag) then
+*           if (iprint)
+*    :      write (6,336) aangle,faksq*dreal(q(ii)),faksq*imag(q(ii))
+*           write (2,337) aangle,faksq*dreal(q(ii)),faksq*imag(q(ii))
+336         format(1x,f7.2,2g15.4)
+337         format(1x,f7.2,2g15.4)
+*        endif
+         sn=sin(aangle*pi/180d0)
 * here for steric effect
-      if (stflag) then
-         stampl=alph1*q(ii)+msign*alphm1*qm(ii)
-         stamplm=alph1*q(ii)-msign*alphm1*qm(ii)
-         if (msteric.ge.0 .and. abs(xm).ne.(msteric+0.5d0)) then
+         if (stflag) then
+            stampl=alph1*q(ii)+msign*alphm1*qm(ii)
+            stamplm=alph1*q(ii)-msign*alphm1*qm(ii)
+            if (msteric.ge.0 .and. abs(xm).ne.(msteric+0.5d0)) then
 * REPLACED 10/22/99
-*        if (msteric.ge.0 .and. mj1.ne.msteric) then
-             stampl=0d0
-             stamplm=0d0
+*           if (msteric.ge.0 .and. mj1.ne.msteric) then
+                stampl=0d0
+                stamplm=0d0
+            endif
+            term=dreal(stampl*conjg(stampl))
+            termm=dreal(stamplm*conjg(stamplm))
+            s(i)=s(i)+dreal(stampl*conjg(stampl))
+            sm(i)=sm(i)+dreal(stamplm*conjg(stamplm))
+            xint=xint+sn*term
+            xintm=xintm+sn*termm
+*            xint=xint+sn*dreal(stampl*conjg(stampl))
+*            xintm=xintm+sn*dreal(stamplm*conjg(stamplm))
+         else
+            xintmdep(indm)=xintmdep(indm)+sn*dreal(q(ii)*conjg(q(ii)))
+            dsigterm=dreal(q(ii)*conjg(q(ii)))
+            s(i)=s(i)+dsigterm
+* accumulate Re[f(j1m1->j2m2)f(j1m1->j2,m2+2)]+Re[f(j1m1->j2m2)f(j1m1->j2,m2+2)]
+            fm1m2(mj2+j2p+1,i)=q(ii)
+            rho(mj2+j2p+1,i)=rho(mj2+j2p+1,i)+dsigterm
+*           print *, 'mj1,mj2,mj2+j2p+1, fm1m2, rho(mj2+j2p+1,i):  ',
+*    :         mj1,mj2, mj2+j2p+1,fm1m2(mj2+j2p+1,i),
+*    :         rho(mj2+j2p+1,i)
+            sm(i)=sm(i)+algfak*dsigterm
+            sm6(i)=sm6(i)+octupfak*dsigterm
          endif
-         term=dreal(stampl*conjg(stampl))
-         termm=dreal(stamplm*conjg(stamplm))
-         s(i)=s(i)+dreal(stampl*conjg(stampl))
-         sm(i)=sm(i)+dreal(stamplm*conjg(stamplm))
-         xint=xint+sn*term
-         xintm=xintm+sn*termm
-*         xint=xint+sn*dreal(stampl*conjg(stampl))
-*         xintm=xintm+sn*dreal(stamplm*conjg(stamplm))
-      else
-         xintmdep(indm)=xintmdep(indm)+sn*dreal(q(ii)*conjg(q(ii)))
-         dsigterm=dreal(q(ii)*conjg(q(ii)))
-         s(i)=s(i)+dsigterm
-         sm(i)=sm(i)+algfak*dsigterm
-         sm6(i)=sm6(i)+hexfak*dsigterm
-      endif
-      aangle=aangle+dang
-339   continue
+         aangle=aangle+dang
+339      continue
 340   continue
+c       print *, 'mj1 is:  ', mj1
+      if (j2.gt.1) then
+         do 342 mj2=-j2p,j2-2
+            do 341 i=1,nangle
+c            print *, ' fm1m2(mj2+j2p+1,i),fm1m2(mj2+j2p+3,i):  ',
+c     :                   fm1m2(mj2+j2p+1,i),fm1m2(mj2+j2p+3,i)
+            term=
+     :            (dreal(fm1m2(mj2+j2p+1,i))*dreal(fm1m2(mj2+j2p+3,i))+
+     :             dimag(fm1m2(mj2+j2p+1,i))*dimag(fm1m2(mj2+j2p+3,i)))
+            rho2(mj2+j2p+1,i)=rho2(mj2+j2p+1,i)+term
+            a22(i)=a22(i)+a22fak(mj2+j2p+1)*term
+c            print *, 'mj1,mj2,term,a22fak(mj2+j2p+1):  ',
+c     :     mj1,mj2,term,a22fak(mj2+j2p+1)
+341         continue
+342      continue
+      endif
+      if (mflag) then
+         aangle=ang1
+         do i=1,nangle
+* print out real and imaginary parts of scattering amplitudes
+            write (2,344) aangle,(dreal(fm1m2(jj+j2p+1,i)),jj=-j2p,j2)
+            write (2,344) aangle,(dimag(fm1m2(jj+j2p+1,i)),jj=-j2p,j2)
+            aangle=aangle+dang
+         enddo
+         write (2,345)
+         if (iprint) write (6,345)
+      endif
+343   continue
+344   format(f8.2,26(1pg15.4))
+345   format('];')
+
+
+      write (2,346)
+      if (mflag) write (3,346)
+c  change next output to blank line (pjd, 12/11/09)
+c346   format('];')
+346   format('  ')
       if (.not.stflag) then
-         write (2,342)
-         if (iprint) write (6,342)
-342      format
+         write (2,348)
+         if (iprint) write (6,347)
+347      format
      :  ('    DEGENERACY AVERAGED DXSC (ANG^2/SR) AND ',
-     :       'QUADRUPOLE AND HEXAPOLE ALIGNMENT')
-         do 350 i=1,nangle
+     :       'A20, A40, AND A22+ MOMENTS')
+348      format
+     :  ('%   DEGENERACY AVERAGED DXSC (ANG^2/SR) AND ',
+     :       'A20, A40, AND A22+ MOMENTS',/,'dcs=[')
+         if (mflag) write (3,349)
+349      format
+     :  ('%   DIAGONAL (M-FINAL) DENSITY MATRIX (FIRST ROW)',
+     :        ' SECOND SUPRA-DIAGONAL (M,M+2) DENSITY MATRIX (2ND ROW)',
+     :        /,'rho=[')
+         do 351 i=1,nangle
+*        print *,'i, s(i), a22(i):  ', i,s(i),a22(i)
          if (iprint)
-     :        write(6,345) angle,s(i)*fak,sm(i)/s(i),sm6(i)/s(i)
-         write(2,345) angle,s(i)*fak,sm(i)/s(i),sm6(i)/s(i)
-345      format(1x,f7.2,3g15.4)
-350      angle=angle+dang
+     :        write(6,350)
+     :        angle,s(i)*fak,sm(i)/s(i),sm6(i)/s(i),a22(i)/s(i)
+         write(2,350) angle,s(i)*fak,sm(i)/s(i),sm6(i)/s(i),a22(i)/s(i)
+350      format(1x,f7.2,4g15.4)
+         if (mflag) then
+            write(3,352) angle,(rho(ij+j2p+1,i)/s(i),ij=-j2p,j2)
+            write(3,352) angle,(rho2(ij+j2p+1,i)/s(i),ij=-j2p,j2)
+         endif
+351      angle=angle+dang
+352      format(f7.2,25g15.4)
       else
          write (2,360)
          if (iprint) write (6,360)
 360      format
      :  ('    DEGENERACY AVERAGED STERIC DXSC''S: HEADS AND TAILS')
          do 370 i=1,nangle
-         if (iprint) write(6,345) angle,0.5d0*s(i)*fak,0.5d0*sm(i)*fak
-         write(2,345) angle,0.5d0*s(i)*fak,0.5d0*sm(i)*fak
+         if (iprint) write(6,350) angle,0.5d0*s(i)*fak,0.5d0*sm(i)*fak
+         write(2,361) angle,0.5d0*s(i)*fak,0.5d0*sm(i)*fak
+361      format(1x,'%',f7.2,3g15.4)
 370      angle=angle+dang
       endif
 *      ang1=angle
@@ -1298,15 +1456,19 @@ c
       if (mflag) then
          indm=0
          write(6,375) ang0,dang,ang2
-         write(2,375) ang0,dang,ang2
+         write(2,376) ang0,dang,ang2
 375      format
      :   (/,'    M-DEPENDENT (COLLISION FRAME) INTEGRAL CROSS SECTIONS',
-     :    /,9x,'ANGULAR RANGE:',f5.2,':',f3.1,':',f6.2,
+     :    /,9x,'ANGULAR RANGE:',f6.2,':',f5.2,':',f6.2,
+     :   /,'       M    M''    XSC (ANG^2)')
+376      format
+     :   (/,'%   M-DEPENDENT (COLLISION FRAME) INTEGRAL CROSS SECTIONS',
+     :    /,9x,'ANGULAR RANGE:',f6.2,':',f5.2,':',f6.2,
      :   /,'       M    M''    XSC (ANG^2)')
          algn=0d0
          xsctot=0d0
          do 385 mj1=-j1p,j1
-         do 385 mj2=-j2p,j2
+         do 384 mj2=-j2p,j2
             indm=indm+1
             if (flaghf) then
                xmj1=mj1+0.5d0
@@ -1325,16 +1487,18 @@ c     (3m^2-1)/(j*(j+1))
             if (flaghf) then
                write (6,378) xmj1,xmj2,xintmdep(indm)
                write (2,378) xmj1,xmj2,xintmdep(indm)
-378            format(4x,2f5.1,g13.4)
+378            format(4x,2f6.1,g13.4)
             else
                write (6,379) mj1,mj2,xintmdep(indm)
                write (2,379) mj1,mj2,xintmdep(indm)
 379            format(4x,2i5,g13.4)
             endif
+384      continue
 385      continue
-         write (2,386) xsctot, algn/xsctot
+         write (2,387) xsctot, algn/xsctot
          write (6,386) xsctot, algn/xsctot
-386      format(/,'    DEG. AVER. XSC =',f8.3,'; ALIGNMENT =',f6.3)
+386      format(/,'    DEG. AVER. XSC =',g12.3,'; ALIGNMENT =',f6.3)
+387      format(/,'%   DEG. AVER. XSC =',g12.3,'; ALIGNMENT =',f6.3)
 
       endif
 * determine integral oriented (steric) cross sections
@@ -1343,12 +1507,13 @@ c     (3m^2-1)/(j*(j+1))
          xintm=0.5d0*fak*xintm*2d0*pi*dang*pi/180d0	
          write (6,390) ang0,dang,ang2,xint,xintm,
      :            100d0*(xint-xintm)/(xint+xintm)
-         write (2,390) ang0,dang,ang2,xint,xintm,
+         write (2,391) ang0,dang,ang2,xint,xintm,
      :            100d0*(xint-xintm)/(xint+xintm)
 390   format (/,
-     : '    INTEGRAL ORIENTED CROSS SECTIONS; ANGLES:',f5.2,':',f3.1,
+     : '    INTEGRAL ORIENTED CROSS SECTIONS; ANGLES:',f6.2,':',f5.2,
      :   ':',f6.2,/,'    XSC-HEADS =',g13.4,'  XSC-TAILS =',g13.4,
      :   '    ASYMMETRY(%) =',f8.2)
+391      format(/,'%   DEG. AVER. XSC =',f8.3,'; ALIGNMENT =',f6.3)
       endif
 500   call mtime(cpu1,ela1)
       cpu1 = cpu1 - cpu0
@@ -1356,12 +1521,19 @@ c     (3m^2-1)/(j*(j+1))
       call gettim(cpu1,cpu)
       call gettim(ela1,elaps)
       write(6,720) elaps, cpu
-      write(2,720) elaps, cpu
+      write(2,721) elaps, cpu
 720   format(/,
      : ' ** DIFFERENTIAL CROSS SECTION CALCULATION FINISHED:',
      :       /,'    ELAPSED TIME:',(a),'  CPU TIME: ',(a))
+721   format(/,'];',/
+     : '% ** DIFFERENTIAL CROSS SECTION CALCULATION FINISHED:',
+     :       /,'%   ELAPSED TIME:',(a),'  CPU TIME: ',(a))
       call closf(1)
       close(2)
+      if (mflag) then
+         write(3,721) elaps, cpu
+         close(3)
+      endif
       return
       end
       subroutine ampli(j1,in1,j2,in2,jtot,sreal,simag,mmax,jpack,lpack,
@@ -1447,11 +1619,11 @@ c
       ii=ii+1
 c
       do 100 ll=1,llmax
-100   q(ii)=q(ii)+fak3(ll)*yy
-200   continue
-300   continue
-400   continue
-500   continue
+100   q(ii)=q(ii)+fak3(ll)*yy ! l (jk)
+200   continue ! angle (jk
+300   continue ! mj2 (jk)
+400   continue ! mj1 (jk)
+500   continue ! jlab (jk)
       return
       end
       subroutine sphn(m,lmax,theta,yr,incy)
@@ -1867,3 +2039,434 @@ c
       ermrel=100.d0*ermrel
       return
       end
+*  -------------------------------------------------------------
+      subroutine hypxsc(flname, a)
+*
+* subroutine to compute hyperfine-resolved integral
+* cross sections
+*
+* reference:  alexander and dagdigian, jcp 83, 2191 (1985)
+* see also corey and mccourt, jpca 87, 2723 (1983) for
+* expression for spin-resolved T-matrix elements
+*
+* this subroutine requires close-coupled s-matrix for
+* both parities
+*
+* cross sections written to both terminal output and
+* {jobname}n.hfx file
+*
+* author:  p.j. dagdigian
+*
+* this subroutine is a complete rewrite of an earlier
+* subroutine written by j. klos and f. lique
+* current revision date:  11-jan-2011 by pjd
+*  -------------------------------------------------------------
+      implicit double precision (a-h,o-z)
+      complex*8 t
+      character*(*) flname
+      character*20 cdate
+      character*40 smtfil, hfxfil
+      character*13 elaps, cpu
+      logical csflg, flaghf, flgsu, twmol, nucrs,
+     :        batch, fast, lpar2, lpar, exstfl,
+     :        exsmtp, exsmtn
+      include "common/partens"
+      include "common/parpot"
+      common /coisc1/ jlev(1)
+      common /coisc3/ inlev(1)
+      common /coisc5/ jout(1)
+      common /cosc1/ elev(1)
+      common /coisc7/ jlevh(1)
+      common /coisc8/ iflevh(1)
+      common /coisc9/ inlevh(1)
+      common /cosc3/ elevh(1)
+      common /coisc10/ ipack(1)
+      common /coisc11/ jpack(1)
+      common /coisc12/ lpack(1)
+      common /coconv/ econv, xmconv, ang2
+      common /codim/  nairy, mmax
+      dimension a(4)
+* mmax2 is large enough for 140 channels
+      parameter (jtotmx = 300, lenmx = 140, mmax2 = 9870)
+      dimension sreal(mmax2), simag(mmax2),
+     :  sigma(mmax,mmax)
+* storage for s-matrix elements:
+*   second letter is real (r), imaginary (i)
+*   subscripts:  jtot, jlp (= 1/2 for jlpar = +1/-1), size of channel basis array
+      dimension sr(0:jtotmx,2,mmax2), si(0:jtotmx,2,mmax2)
+* arrays with values of j, in, and l:
+*   subscripts:  jtot, jlp (= 1/2 for jlpar = +1/-1), length of channel basis
+      dimension j(0:jtotmx,2,lenmx), in(0:jtotmx,2,lenmx),
+     :  l(0:jtotmx,2,lenmx)
+* length of arrays
+*   subscripts:  jtot, jlp (= 1/2 for jlpar = +1/-1)
+      dimension length(0:jtotmx,2)
+* for positive (p) and (n) negative parity
+      dimension exsmtp(0:jtotmx), exsmtn(0:jtotmx)
+* storage for T-matrix elements
+      parameter (nlmax = 250)
+      dimension tmatr(nlmax,nlmax), tmati(nlmax,nlmax)
+*
+* initialize timer and arrays
+      call mtime(cpu0, ela0)
+*
+* nucspin is nuclear spin I times 2
+* j1min and j2max are the min and max values of the rotational
+* angular momentum for which hyperfine-resolved cross sections
+* computed
+      nucspin = a(2)
+      finuc = nucspin/2.d0
+      j1min = a(3)
+      j2max = a(4)
+*
+* generate filename of smt file and check if it is present
+*
+      iener = a(1)
+      call gennam(smtfil,flname,iener,'smt',lends)
+      inquire(file = smtfil(1:lends), exist = exstfl)
+      if (.not. exstfl) then
+          write(6,10) smtfil(1:lends)
+10        format(/' ** FILE ',(a),' NOT FOUND **'/)
+          return
+      end if
+*
+* open s-matrix file
+*
+      call openf(1, smtfil, 'du', 0)
+*
+* initialize timer and arrays
+      call mtime(cpu0, ela0)
+*
+* read header of s-matrix file
+*
+      call rdhead(1,cdate,ered,rmu,csflg,flaghf,flgsu,
+     :   twmol,nucrs,jfrst,jfinl,jtotd,numin,numax,nud,
+     :   nlevel,nlvop,nnout,jlev,inlev,elev,jout)
+*
+* we need the s-matrices as lower triangles, so nnout  m u s t  be > 0
+*
+      if (nnout.lt.0) then
+         write(6,11)
+11       format(/' ** NNOUT < 0, ABORT **'/)
+         return
+      end if
+      nout = nnout
+*
+      if (flaghf) then
+         fspin = 0.5d0
+       else
+         fspin = 0.d0
+       end if
+*
+*  molecule-molecule cross sections not implemented
+*
+      if (twmol) then
+         write(6,12)
+12       format(/' *** HYPERFINE CROSS SECTIONS FOR MOLECULE -',
+     :          ' MOLECULE COLLISIONS NOT IMPLEMENTED ***'/)
+         return
+      end if
+*
+*  molecule-surface collisions not implemented
+*
+      if (flgsu) then
+         write(6,14)
+14       format(/' *** HYPERFINE CROSS SECTIONSFOR SURFACE -',
+     :          ' COLLISIONS NOT IMPLEMENTED ***'/)
+         return
+      end if
+*
+*  CS cross sections not implemented
+      if (csflg) then
+         write(6,16)
+16       format(/' *** CS HYPERFINE CROSS SECTIONS CROSS ',
+     :          'SECTIONS NOT IMPLEMENTED ***'/)
+         return
+      end if
+*
+*  delta-jtot should be equal to one
+      if (iabs(jtotd).ne.1)
+     :    then
+        write(6,116)
+116     format(/' *** DELTA-JTOT MUST BE EQUAL TO ONE',
+     :    ' *** '/)
+        return
+      end if
+*
+* generate output file name
+      call gennam(hfxfil,flname,iener,'hfx',lendh)
+      call openf(11, hfxfil(1:lendh),'sf',0)
+*
+      ee = ered * econv
+      write (6, 22) label, potnam, smtfil, cdate
+      write (11, 22) label, potnam, smtfil, cdate
+22    format(/' HYPERFINE-RESOLVED CROSS SECTIONS'/
+     : '      LABEL:     ',(a)/
+     : '      POT NAME:  ',(a)/
+     : '      S-MATRICES READ FROM FILE ',(a),/,
+     : '      WRITTEN:   ',(a))
+      write (6,24) jfinl, ee, finuc
+      write (11,24) jfinl, ee, finuc
+24    format('      JTOT2:     ',i10/
+     :    '      ETOT:      ',f10.3,' CM(-1)'
+     :  //' NUCLEAR SPIN = ',f4.1/)
+*
+* check that arrays large enough to stare s-matrix elements
+      if (jfinl.gt.jtotmx) then
+        write(6,1093) jtotmx
+1093    format(/' ** JFINL.GT.JTOTMAX=',i3',. ABORT **'/)
+        return
+      end if
+*
+* set up list of hyperfine levels for which cross sections
+* to be calculated
+      nlevelh = 0
+      do 60 i=1, nlevel
+        if (jlev(i).lt.j1min .or. jlev(i).gt.j2max)
+     :      goto 60
+* check that level energetically allowed
+        if (elev(i).gt.ered) goto 60
+        fj = jlev(i) + fspin
+        ffmin = abs(fj - finuc)
+        ffmax = fj + finuc
+        nhyp = ffmax - ffmin + 1
+        do if=1,nhyp
+          nlevelh = nlevelh + 1
+          jlevh(nlevelh) = jlev(i)
+          inlevh(nlevelh) = inlev(i)
+* iflevh is an integer which equals F if F is integral,
+* equals F - 0.5 if F is half-integral
+          ff = ffmin + (if - 1)
+          iflevh(nlevelh) = ff
+          elevh(nlevelh) = elev(i)
+        end do
+60    continue
+*
+* clear sigma array
+      do i=1,nlevelh
+        do ii=1,nlevelh
+          sigma(i,ii) = 0.d0
+        end do
+      end do
+*
+* clear length array, in case minimum jtot > 0
+      do i=0,jfinl
+        do ii=1,2
+          length(i+1,ii) = 0.d0
+        end do
+      end do
+*
+      jtot = 0
+      jlpar = 1
+*
+* read s-matrix elements
+* this assumes that jlpar=1 is stored first
+*
+* parameter to read lower triangle of open channel(s)
+100   nopen = -1
+      call sread (0, sreal, simag, jtot, jlpar,
+     :   nu, jq, lq, inq, ipack, jpack, lpack,
+     :   1, mmax, nopen, lngth, ierr)
+      if (ierr .lt. -1) then
+        write(6,102)
+102     format(/' ** READ ERROR IN HYPXSC. ABORT **'/)
+        return
+      end if
+      if (lngth.gt.lenmx) then
+         write(6,1102) lenmx
+1102     format(/' ** LNGTH.GT.LENMX=',i3,'. ABORT **'/)
+         return
+      end if
+      jlp = 1 - (jlpar - 1)/2
+*  copy s-matrix for this jtot1/jlpar1
+      length(jtot,jlp) = lngth
+      len2 = lngth*(lngth + 1)/2
+      if (jlpar.eq.1) then
+         exsmtp(jtot) = .true.
+      else
+         exsmtn(jtot) = .true.
+      end if
+      do i = 1, lngth
+        j(jtot,jlp,i) = jpack(i)
+        in(jtot,jlp,i) = ipack(i)
+        l(jtot,jlp,i) = lpack(i)
+      end do
+      do ii = 1, len2
+        sr(jtot,jlp,ii) = sreal(ii)
+        si(jtot,jlp,ii) = simag(ii)
+      end do
+*
+* loop back to the next jtot/jlpar
+      if (jtot.lt.jfinl .or. jlpar.eq.1) goto 100
+*
+* now compute squares of T-matrix elements for each tot (vector sum
+* of jtot + nucspin)/parity pair
+      fhspin = 0.d0
+      if (flaghf .and. nucspin.eq.2*(nucspin/2) .or.
+     :  .not.flaghf .and. nucspin.ne.2*(nucspin/2))
+     :  fhspin = 0.5d0
+      iftmn = jfrst + fspin - finuc - fhspin
+      iftmn = max(0,iftmn)
+      iftmx = jfinl + fspin + finuc
+      do iftot = iftmn, iftmx
+        xftot = iftot + fhspin
+        do jlp = 1, 2
+          jlpar = 1 - (jlp -1)*2
+          do i=1,nlevelh
+            do ii=i,nlevelh
+              xj = jlevh(i) + fspin
+              xjp = jlevh(ii) + fspin
+              xf = iflevh(i) + fhspin
+              xfp = iflevh(ii) + fhspin
+              fffp = sqrt((2.d0*xf+1.d0)*(2.d0*xfp+1.d0))
+              xjttmn = max(fhspin, xftot - finuc)
+              jttmin = xjttmn - fspin
+              jttmin = max(jfrst, jttmin)
+              jttmax = xftot + finuc
+              jttmax = min(jfinl, jttmax)
+* clear T-matrix array
+              lmax2 = iftot + + fhspin+ max(iflevh(i),iflevh(ii))
+     :            + fspin + 1
+              do i1 = 1,lmax2+1
+                do i2 = 1,lmax2+1
+                  tmatr(i1,i2) = 0.d0
+                  tmati(i1,i2) = 0.d0
+                end do
+              end do
+              nftot = ftotmx - ftotmn + 1
+* sum over jtot consistent with vector addition
+*  ftot = jtot + nucspin
+              do jtot=jttmin,jttmax
+                xjtot = jtot + fspin
+                fjtot = 2.d0 * xjtot + 1.d0
+* total parity must be the same for all T-matrix elements
+* included in sum over jtot (for the same parity, jlparf
+* changes sign for each increase in jtot by 1)
+                jlparf = jlpar*(-1)**(iftot - jtot)
+                jlpt = 1 + (1 - jlparf)/2
+                do irow=1,length(jtot,jlpt)
+* flag to make sure initial level is the bra, final level the ket
+                  iflag = 0
+                  if (j(jtot,jlpt,irow).eq.jlevh(i) .and.
+     :                in(jtot,jlpt,irow).eq.inlevh(i)) then
+                      iflag = 1
+                  end if
+                  do icol=1,irow
+                    if (j(jtot,jlpt,irow).eq.jlevh(i) .and.
+     :                  in(jtot,jlpt,irow).eq.inlevh(i) .and.
+     :                  j(jtot,jlpt,icol).eq.jlevh(ii) .and.
+     :                  in(jtot,jlpt,icol).eq.inlevh(ii) .or.
+     :                  j(jtot,jlpt,icol).eq.jlevh(i) .and.
+     :                  in(jtot,jlpt,icol).eq.inlevh(i) .and.
+     :                  j(jtot,jlpt,irow).eq.jlevh(ii) .and.
+     :                  in(jtot,jlpt,irow).eq.inlevh(ii)) then
+                      is = (irow*(irow - 1))/2 + icol
+                      if (iflag.ne.1) then
+                        xl = l(jtot,jlpt,icol)
+                        xlp = l(jtot,jlpt,irow)
+                      else
+                        xl = l(jtot,jlpt,irow)
+                        xlp = l(jtot,jlpt,icol)
+                      end if
+* check that (xl,xftot,xf) and (xlp,xftot,xfp) obey the triangle
+* relations
+                      if (.not. (xftot.lt.abs(xl-xf) .or.
+     :                    xftot.gt.xl+xf .or. xftot.lt.abs(xlp-xfp)
+     :                    .or. xftot.gt.xlp+xfp)) then
+* convert S-matrix element to T-matrix element
+                        t = -cmplx(sr(jtot,jlpt,is),
+     :                      si(jtot,jlpt,is))
+* below for diagonal T-matrix element
+                        if (irow.eq.icol) then
+                          t = t + cmplx(1.d0, 0.d0)
+                        end if
+                        iph = xfp - xlp - xf + xl
+                        phase = 1.d0
+                        if (iph.ne.2*(iph/2)) phase = -1.d0
+                        t = t * phase * fffp * fjtot
+     :                      * xf6j(finuc,xj ,xf, xl, xftot,xjtot)
+     :                      * xf6j(finuc,xjp,xfp,xlp,xftot,xjtot)
+                        ll = xl
+                        lp = xlp
+                        tmatr(ll+1,lp+1) =
+     :                      tmatr(ll+1,lp+1) + real(t)
+                        tmati(ll+1,lp+1) =
+     :                      tmati(ll+1,lp+1) + aimag(t)
+* for initial level = final level, but l.ne.lp, need to include
+* both T(l,lp) and T(lp,l)
+                        if (jlevh(i).eq.jlevh(ii) .and.
+     :                      inlevh(i).eq.inlevh(ii) .and.
+     :                      xl.ne.xlp) then
+* note that T(l,lp) = T(lp,l)* (Hermitean matrix)
+                          tmatr(lp+1,ll+1) =
+     :                        tmatr(lp+1,ll+1) + real(t)
+                          tmati(lp+1,ll+1) =
+     :                        tmati(lp+1,ll+1) - aimag(t)
+                        end if
+* if statement below is end of tests for triangle relations
+                      end if
+                    end if
+                  end do
+                end do
+              end do
+              t2sum = 0.d0
+              do i1=1,lmax2+1
+                do i2=1,lmax2+1
+                  t2sum = t2sum + tmatr(i1,i2)**2
+     :                 + tmati(i1,i2)**2
+                end do
+              end do
+              sigma(i,ii) = sigma(i,ii) + t2sum
+     :              * (2.d0 * xftot + 1.d0)
+              if (i.ne.ii) then
+                sigma(ii,i) = sigma(ii,i) + t2sum
+     :              * (2.d0 * xftot + 1.d0)
+              end if
+            end do
+          end do
+        end do
+      end do
+*
+* compute cross sections for sums of squares of T-matrix elements
+      fak = acos(-1.d0) * ang2 / (2.0d0 * rmu)
+      do i=1,nlevelh
+        ffi = iflevh(i) + fhspin
+        denrow = (2.d0 * ffi + 1.d0)
+     :      * (ered - elevh(i))
+        do ii=i,nlevelh
+          fff = iflevh(ii) + fhspin
+          dencol = (2.d0 * fff + 1.d0)
+     :      * (ered - elevh(ii))
+          sigma(i,ii) = sigma(i,ii) * fak / denrow
+          if (i.ne.ii) then
+            sigma(ii,i) = sigma(ii,i) * fak / dencol
+          end if
+        end do
+      end do
+*
+* print out cross sections
+      write(6,1001)
+      write(11,1001)
+1001  format(5x,'E(CM-1)',5x,'JI',5x,'INI',3x,'FI',6x,'JF',5x,'INF',
+     :  3x,'FF',6x,'CROSS SECTION (ANG^2)')
+      ee = ered * econv
+      do 90 i=1,nlevelh
+        do 85 ii=1,nlevelh
+          xj = jlevh(i) + fspin
+          xf = iflevh(i) + fhspin
+          xjp = jlevh(ii) + fspin
+          xfp = iflevh(ii) + fhspin
+          write(6,1002) ee,xj,inlevh(i),xf,
+     :        xjp,inlevh(ii),xfp,sigma(i,ii)
+          write(11,1002) ee,xj,inlevh(i),xf,
+     :        xjp,inlevh(ii),xfp,sigma(i,ii)
+1002      format(f12.3,f8.1,i6,f6.1,3x,f6.1,i6,f6.1,
+     :        5x,1pe15.4)
+85      continue
+90    continue
+*
+      call closf(1)
+      close(11)
+      return
+      end
+*  -------------------------------------------------------------

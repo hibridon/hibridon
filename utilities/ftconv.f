@@ -7,7 +7,7 @@ c USE THIS CODE AS INPUT.
       integer lx(mxtype)
       character*30 inclh,inclt,comfil
       logical resolv,lowerc,stripb
-      character*80 l
+      character*132 l
       character*4 ext
       common/cext/ ext
       print*,'*** fortran conversion program ***'
@@ -216,7 +216,7 @@ c
       character*(*) inclh,inclt,comfil,mx(*)
       integer lx(*)
       logical resolv,lowerc,resol,stripb
-      character*80 l,str
+      character*132 l,str
       character*4 ext
       logical exist
       logical force
@@ -340,7 +340,7 @@ c...  end of files
       end
       subroutine includx(l,resolv,inclh,inclt,lowerc)
       character*(*) l,inclh,inclt
-      character*80 temp
+      character*132 temp
       logical resolv,lowerc
 c...  locate name of include block
       ifound=0
@@ -386,7 +386,7 @@ c;      parameter (maxd=400,maxl=10000)
 cend
       character*(*) l,mx(*)
       integer lx(*)
-      character*80 buff(maxl),temp
+      character*132 buff(maxl),temp
       character*16 name(maxd)
       common/cr/ ieof,nr,nw,icond
       logical lowerc
@@ -431,11 +431,11 @@ c...  now read lines into memory
 c...  write common l to output stream
       call upper (l)
       do 110 id=1,nd
-      if (l.eq.name(id)) goto 120
+      if (l.eq.name(id)) goto 132
 110   continue
       print*,l
       stop 'unknown common'
-120   do 130 i=istart(id),iend(id)
+132   do 130 i=istart(id),iend(id)
 130   call linout(buff(i))
       return
       end
@@ -445,7 +445,7 @@ c...  write common l to output stream
 10    if(l(i:i).ne.' ') goto 20
       lenstr=1
       return
-20    lenstr=min(78,i)
+20    lenstr=min(132,i)
       return
       end
       subroutine linein(ifil,l,lowerx,mx,lx,nx)

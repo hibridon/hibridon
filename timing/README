@@ -1,0 +1,34 @@
+
+You can run a test of the timing for a 961 channel Ar-N2 calculation and a 1982 Ar-NO calculation as follows:
+
+If you are running the timing test locally, then execute the command
+
+hib_timer [filnam]
+
+this will run the tests and extract the pertinent results into the file
+/hib43/timing/time_output[_filnam]
+
+where [filnam] is an optional name qualifier for the time_output file
+
+if you are running the timing test remotely, then execute the commands 
+   a.  command makehib arn2 1053
+   b.  command makehib arno 2053
+   c.  cd ../hib43/timing
+   d.  cp Arn2_timetest.inp ../bin/progs
+   e.  cp arn2_timetest.com ../bin/progs
+   f.  cp Arno_timetest.inp ../bin/progs
+   g.  cp arno_timetest.com ../bin/progs
+
+then submit to your remote queue the job
+   hib_arn2_1053 < arn2_timetest.com >timeout_arn2
+   hib_arno_2053 < arno_timetest.com >timeout_arno
+
+(note, the files Arno_timetest.inp and Arn2_timetest.inp must be available to your remote job)
+
+
+when your job has completed, it will have written the files timeout_arn2 and timeout_arno on your local machine 
+in the directory /hib43/bin/progs 
+
+execute the command hib_timer -r [filnam]
+
+the pertinent results will be written into the file /hib43/timing/time_output[_filnam]

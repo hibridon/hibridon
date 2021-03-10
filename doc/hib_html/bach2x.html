@@ -1,0 +1,58 @@
+<TITLE>bastp</TITLE>
+<h3><center><font color=#brown >Basis Subroutine
+ and System Specific Parameters: Collision of an Atom with
+a CH<sub>2</sub>(X <sup>3</sup>B<sub>1</sub>) (0,v<sub>2</sub>,0) Bender Vibrational Level
+</h3>
+</center></font><hr>
+
+
+<tt>BASISTYPE = 17</tt><p>
+<ul>
+	System subroutine: <tt>sych2x</tt><p>
+	Basis subroutine: <tt>hibach2x.f</tt></ul>
+
+<p>
+<hr>
+The definition of the system dependent parameters is as follows:
+<ul>     NTERM:  the number of potential surfaces involved.  This parameter should equal the number of MU terms 
+            in the angular expansion of the potential..  This parameter can not be changed<p>
+     NUMPOT:  an index representing the particular potential used.  This variable
+is passed to the POT subroutine<p>
+    IPOTSY:   cylindrical symmetry of potential.  The variables (theta,phi) describing the angular expansion of the
+    potential should be defined with the <i>a</i> inertial axis defined as the body-frame <i>z</i> axis and, if
+    possible, the <i>xz</i> plane as a plane of symmetry of the molecule (in this case, POTSY = 2).  
+    If the <a href=flags.html> flag</a> <a href=ihomo.html>IHOMO</a> = .true.,
+    only terms with LAMBDA + MU equal to an integer multiple of IPOTSY
+              can be included in the potential.  Example:  for H<sub>2</sub>O,
+              IPOTSY = 2<p>
+    IOP:      <i>ortho/para</i> label for molecular states of the asymmetric top. If <a href=ihomo.html>IHOMO</a> 
+=.true.
+              then 
+<ul>if IOP = 1: only <i>para</i> states included in channel expansion<br>
+if IOP = &minus;1: only <i>ortho</i> states included in channel expansion
+              </ul><p>
+    IVBEND:    the v<sub>2</sub> bending vibrational quantum number [0 <= IVBEND <= 3]<p>
+    JMAX:    the maximum rotational angular momentum included in the channel expansion<p>
+    EMAX:    the maximum energy of a state to be included in the rotational state basis<p>
+</ul>
+
+<hr>
+The CH<sub>2</sub>(X <sup>3</sup>B<sub>1</sub>) molecule has a low barrier to linearity, and its rotational energies are not at all well described by the standard rotational energy formulas.  Bunker and Jensen have developed a Morse oscillator-rotating bender internal dynamics Hamiltonian (MORBID) to compute the rovibrational energies in this electronic state [see P. Jensen and P. R. Bunker, J. Chem. Phys. <b>89</b>, 1327 (1988); P. R. Bunker, P. Jensen, W. P. Kraemer, and R. Beardworth, J. Chem. Phys. <b>85</b>, 3724 (1986)].  Rather than compute the rotational energies in a given vibrational level, here we look up the energies in a table provided by Jensen [P. Jensen, private communication (2010)].<p>
+
+The CH<sub>2</sub>(<sup>3</sup>B<sub>1</sub>) state is well described by Hund's case (b) coupling, in which the electron spin [<i>S</i>=1] is weakly coupled to the molecular frame.  As a result, the rotational rotational angular momentum <i>n</i> is coupled to the electron to yield states of total angular momentum <i>j</i> = <i>n</i> &minus; 1, <i>n</i>, <i>n</i> + 1 [if <i>n</i> >= 1].  This subroutine sets up a calculation of spin-free cross sections, for transitions between states of differing <i>n</i>.<p>
+
+Because of the large effective <i>A</i> rotational constant in the bender levels, the rotational wave functions are well approximated by symmetric top wave functions.  The latter can be expressed in a symmetrized basis as 
+<font size=-1>
+[S. Green, J. Chem. Phys. <b>64</b>, 3463 (1976)]</font>
+<ul>
+| <i>n k m s</i> > = [2(1+<i>&delta;</i><sub><i>k</i>0</sub>)]<sup>&minus;1/2</sup> [ | <i>n k m</i> > + <i>s</i> | <i>n &minus;k m</i> >]<p>
+where <i>s</i> is the symmetry index (+1 or &minus;1). 
+By setting <tt><a href=bastst.html>BASTST</a>=.TRUE.</tt>, you can output the values
+               of <i>n,  s</i>, the values of the asymmetric top prolate and oblate projection quantum numbers [<i>k<sub>p</sub></i>
+               and <i>k<sub>o</sub></i>], and the internal energies.
+
+
+
+<hr>
+<a href=hibhelp.html><img src=up_arrow.gif border=0 align=middle></a>&#001;Return to <a href=hibhelp.html>Hibridon Help</a>
+

@@ -159,7 +159,7 @@
       dimension c0(1), c1(1), c2(1), cf(1), ehold(1)
       dimension e(3,3), eig(3), sc1(3), sc2(3), vec(3,3), vii(0:2)
 *  cvtown: conversion factor from coulomb.volts to cm-1 (wavenumbers)
-cstart unix-darwin
+cstart unix-darwin .or. unix-x86
 * work vector for dsyev
       dimension work(9)
 cend
@@ -394,7 +394,7 @@ cend
 *  store the energies of the mixed states in the array eint
             if (j(i) .eq. 1) then
 *  only the omega=0 and omega=1 states are mixed for j = 1
-cstart unix-darwin
+cstart unix-darwin .or. unix-x86
               lwork=9
               call dsyev('V','L',2,e,3,eig,work,lwork,ierr)
               do iv=1,2
@@ -403,7 +403,7 @@ cstart unix-darwin
                  enddo
               enddo
 cend
-cstart .not. unix-darwin
+cstart .not. unix-darwin .and. .not. unix-x86
 c;              call rs (3, 2, e, eig, 1, vec, sc1, sc2, ierr)
 cend
               eint(i) = eig(1+iso01)
@@ -415,12 +415,12 @@ cend
               c1(nn) = vec(2,2-iso01)
               c2(nn) = zero
             else if (j(i) .ge. 2) then
-cstart unix-darwin
+cstart unix-darwin .or. unix-x86
               lwork=9
               call dsyev('V','L',3,e,3,eig,work,lwork,ierr)
               call dcopy(9,e,1,vec,1)
 cend
-cstart .not.unix-darwin
+cstart .not.unix-darwin .and. .not. unix-x86
 c;              call rs (3, 3, e, eig, 1, vec, sc1, sc2, ierr)
 cend
               eint(i) = eig(2-iso)
@@ -848,7 +848,7 @@ cend
         if (bastst) then
           write (6, 440) ilam, lamnum(ilam)
           write (9, 440) ilam, lamnum(ilam)
-440       format ('ILAM=', i3, ' LAMNUM(ILAM) =', i4)
+440       format ('ILAM=', i3, ' LAMNUM(ILAM) =', i6)
         end if
         lamsum = lamsum + lamnum(ilam)
 450   continue

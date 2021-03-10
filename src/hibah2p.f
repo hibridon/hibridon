@@ -7,16 +7,19 @@
 *  subroutine to determine angular coupling potential
 *  for collision of a doublet atom in a P state and a homonuclear molecule
 *  authors:  millard alexander
-*  current revision date:  7-apr-2003 by mha
+*  current revision date:  21-feb-2006 by mha
 * --------------------------------------------------------------------
 *  variables in call list:
-*    j:        on return contains atom+diatom angular momentum quantum number
-*              for each channel (j12)
+*    j:        for CC calculation:  returns diatom angular momentum (j) for ea
+*              for CD-case 1A and 1C calculation:  on return contains atom+dia
+*              (j12)
 *    l:        on return contains orbital angular momentum for each
 *              channel
 *    is:       on return contains atomic angular momentum (ja) of each channel
 *              (0 or 1)
-*    jhold:    on return contains j12 angular momentum quantum number
+*    jhold:    for CC calculations:  on return contains diatom angular momentu
+*              for each level
+*              for CD calculations:  on return contains atom+diatom angular mo
 *              for each level
 *    ehold:    on return contains energy in hartrees of each level
 *    ishold:   on return contains electronic angular momentum of each level
@@ -66,6 +69,9 @@
 *    quantum numbers, the total angular momentum, and the coupled-states
 *    projection index are equal to the values stored in j, jtot, and nu
 *    plus 1/2
+*  variable in common block /coisc8/
+*    isc8:     for CC calculations, on return contains atom+diatom angular mom
+*              for CD calculations, on return contains diatom angular momentum
 *  variables in common block /cosysr/
 *    isrcod:   number of real system dependent variables
 *    brot:     rotational constant of molecule
@@ -121,7 +127,7 @@
       common /coconv/ econv, xmconv
       common /cojtot/ jjtot,jjlpar
       dimension j(9), l(9), jhold(9), ehold(9), isc1(9), sc2(9), sc3(9),
-     :          sc4(9), ishold(9), is(9)
+     :          sc4(9), ishold(9), is(9), isc8(9)
       dimension lamr(17),lama(17),lam12(17), mu(17)
       dimension lamrold(9),lamaold(9),lam12old(9), muold(9)
       data lamr  /2,4,6,8,0,2,4,6,8,2,4,6,8,2,4,6,8/
@@ -247,6 +253,7 @@
                  j(n)=jmol
 *repl 5/5/98     isc1(n)=jmol
                 isc1(n)=j12i
+                isc8(n)=j12i
 * centrifugal contribution to hamiltonian
                 cent(n) = li*(li+1)
 * constant channel energy
@@ -291,6 +298,7 @@
                 is(n)=jai
                 j(n)=j12i
                 isc1(n)=jmol
+                isc8(n)=jmol
                 xj12=j12i+half
 * centrifugal contribution to hamiltonian
                 cent(n) = xjtot*(xjtot+1)+xj12*(xj12+1)-2*xnu**2
@@ -337,6 +345,7 @@
                     n = n + 1
                     if (n .gt. nmax) go to 180
                     isc1(n)=jmol
+                    isc8(n)=jmol
                     l(n) = li
                     xjtot=jtot+half
                     is(n)=jai
@@ -376,6 +385,7 @@
                   n = n + 1
                   if (n .gt. nmax) go to 180
                   isc1(n)=jmol
+                  isc8(n)=jmol
                   l(n) = li
                   is(n)=1
                   j(n)=ik
@@ -683,7 +693,7 @@
       if (bastst .and. iprint .gt. 1) then
         write (6, 315) ilam, lamnum(ilam)
         write (9, 315) ilam, lamnum(ilam)
-315     format ('ILAM=',i3,' LAMNUM(ILAM) = ',i3)
+315     format ('ILAM=',i3,' LAMNUM(ILAM) = ',i6)
       end if
 320   continue
       if ( i.gt. nv2max) then

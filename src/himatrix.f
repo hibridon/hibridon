@@ -76,7 +76,7 @@ c;      return
 c;      end
 cend
 ccstart unix-hp unix-dec unix-aix unix-darwin unix-iris unix-sun
-cstart unix .and. .not.unix-ibm .and. .not.unix-darwin
+cstart unix .and. .not.unix-ibm .and. .not.unix-darwin .and. .not.unix-x86
 c;      subroutine rsg(nm,n,a,b,w,matz,z,fv1,fv2,ierr)
 c;c
 c;      integer n,nm,ierr,matz
@@ -377,7 +377,7 @@ c;      go to 50
 c;c     .......... find both eigenvalues and eigenvectors ..........
 c;   20 call  tred2(nm,n,a,w,fv1,z)
 cend
-cstart unix .and. .not.unix-ibm .and. .not. unix-darwin
+cstart unix .and. .not.unix-ibm .and. .not. unix-darwin .and. .not.unix-x86
 c;      call  tql2(nm,n,w,fv1,z,ierr)
 c;   50 return
 c;      end
@@ -564,7 +564,7 @@ c; 1000 ierr = l
 c; 1001 return
 c;      end
 cend
-cstart unix .and. .not. unix-darwin
+cstart unix .and. .not. unix-darwin .and. .not. unix-x86
 c;      subroutine tqlrat(n,d,e2,ierr)
 c;c
 c;      integer i,j,l,m,n,l1,mml,ierr
@@ -711,7 +711,7 @@ c; 1000 ierr = l
 c; 1001 return
 c;      end
 cend
-cstart unix .and. .not. unix-darwin
+cstart unix .and. .not. unix-darwin .and. .not. unix-x86
 c;      subroutine tred1(nm,n,a,d,e,e2)
 c;c
 c;      integer i,j,k,l,n,nm,jp1
@@ -849,7 +849,7 @@ c;c
 c;      return
 c;      end
 cend
-cstart unix .and. .not. unix-darwin
+cstart unix .and. .not. unix-darwin .and. .not. unix-x86
 c;      subroutine tred2(nm,n,a,d,e,z)
 c;c
 c;      integer i,j,k,l,n,nm,jp1
@@ -1016,7 +1016,7 @@ c;      e(1) = 0.0d0
 c;      return
 c;      end
 cend
-cstart unix .and. .not. unix-darwin
+cstart unix .and. .not. unix-darwin .and. .not. unix-x86
 c;      double precision function epslon (x)
 c;      double precision x
 c;c
@@ -1093,7 +1093,7 @@ cend
 *                 using the factors computed by sgeco or sgefa.           *
 *                                                                         *
 ***************************************************************************
-cstart unix .and. .not. unix-darwin
+cstart unix .and. .not. unix-darwin .and. .not. unix-x86
 c;* ------------------------------------------------------------
 c;      subroutine sgefa(a,lda,n,ipvt,info)
 c;      implicit double precision (a-h,o-z)
@@ -1202,7 +1202,7 @@ c;      if (a(n,n) .eq. 0.0) info = n
 c;      return
 c;      end
 cend
-cstart unix .and. .not. unix-darwin
+cstart unix .and. .not. unix-darwin .and. .not. unix-x86
 c;c ------------------------------------------------
 c;      subroutine sgesl(a,lda,n,ipvt,b,job)
 c;c current revision date: 29/09/87
@@ -1327,31 +1327,37 @@ c;      return
 c;      end
 cend
 * -----------------------------------------------------------------------
-cstart unix-darwin
+cstart unix-darwin unix-x86
       subroutine syminv (a,lda,n,ierr)
       implicit double precision (a-h,o-z)
 c
 c     -----------------------------------------------------------------
-c     This subroutine uses LAPACK DSYTRF and DSYTRI
+c     This subroutine uses LAPACK DGETRF and DGETRI
 c     to invert a real symmetric indefinite matrix.
+c     latest revision:  18-feb-2008 by millard alexander (replace calls to "sy" with "ge"
+c         lapack routines
 c     -----------------------------------------------------------------
 c
       dimension a(lda,n)
-      dimension ipiv(n),work(32*n)
+      dimension ipiv(n),work(64*n)
+
 c
-      lwork = 32*n
-      call dsytrf ('L',n,a,lda,ipiv,work,lwork,ierr)
-      if (ierr .ne. 0) return
-      call dsytri('L',n,a,lda,ipiv,work,ierr)
+      lwork = 64*n
+*  form full matrix
       do j = 2,n
          do i = 1,j-1
             a(i,j) = a(j,i)
          enddo
       enddo
+
+      call dgetrf (n,n,a,lda,ipiv,ierr)
+      if (ierr .ne. 0) stop 'error in dgetrf'
+      call dgetri(n,a,lda,ipiv,work,lwork,ierr)
+      if (ierr .ne. 0) stop 'error in dgetri'
       return
       end
 cend
-cstart unix cray .and. .not. unix-darwin
+cstart unix cray .and. .not. unix-darwin .and. .not. unix-x86
 c;       subroutine smxinv (a, nmax, n, scr, kpvt, ierr)
 c;*  subroutine to invert the real symmetric matrix a using
 c;*  lapack routines dsytrf and dsytri
@@ -1378,20 +1384,20 @@ c;     :        nmax, nmaxp1
 c;      integer kpvt
 c;      dimension a(1), scr(1), kpvt(1)
 cend
-cstart unix .and. .not. unix-darwin
+cstart unix .and. .not. unix-darwin .and. .not. unix-x86
 c;      common /cosc11/ sc11(1)
 cend
 cstart unix-ibm
 c;      common /cokaux/ kaux
 c;      dimension det(2)
 cend
-cstart unix cray .and. .not. unix-darwin
+cstart unix cray .and. .not. unix-darwin .and. .not. unix-x86
 c;      data ione, izero  /1, 0/
 cend
 cstart unix-ibm
 c;      naux=kaux
 cend
-cstart cray unix .and. .not. unix-darwin
+cstart cray unix .and. .not. unix-darwin .and. .not. unix-x86
 c;      ierr = izero
 c;*  first fill in upper half of original matrix
 c;      nmaxp1 = nmax + 1
@@ -1492,7 +1498,7 @@ c;        icolpt = icolpt + nmaxp1
 c;        irowpt = irowpt + nmaxp1
 c;100   continue
 cend
-cstart cray unix .and. .not. unix-darwin
+cstart cray unix .and. .not. unix-darwin .and. .not. unix-x86
 c;        return
 c;        end
 cend
@@ -3620,44 +3626,44 @@ c
       end if
 cend
 cstart unix-blas3
-      if(mcolr.eq.1) then
-        if(mcola.eq.1.and.mcolb.eq.1) then
-          call dgemm('N','N',ncol,nrow,nlink,1.0d0,a,mrowa,
-     1                    b,max(nlink,mrowb),0.0d0,r,mrowr)
-          return
-        else if(mrowa.eq.1.and.mcolb.eq.1) then
-          call dgemm('T','N',ncol,nrow,nlink,1.0d0,a,mcola,
-     1                    b,max(nlink,mrowb),0.0d0,r,mrowr)
-          return
-        else if(mcola.eq.1.and.mrowb.eq.1) then
-          call dgemm('N','T',ncol,nrow,nlink,1.0d0,a,mrowa,
-     1                    b,mcolb,0.0d0,r,mrowr)
-          return
-        else if(mrowa.eq.1.and.mrowb.eq.1) then
-          call dgemm('T','T',ncol,nrow,nlink,1.0d0,a,mcola,
-     1                    b,mcolb,0.0d0,r,mrowr)
-          return
-        end if
-        goto 6010
-      else if(mrowr.eq.1) then
-        if(mcola.eq.1.and.mcolb.eq.1) then
-          call dgemm('T','T',nrow,ncol,nlink,1.0d0,b,max(nlink,mrowb),
-     1                     a,mrowa,0.0d0,r,mcolr)
-          return
-        else if(mrowa.eq.1.and.mcolb.eq.1) then
-          call dgemm('T','N',nrow,ncol,nlink,1.0d0,b,max(nlink,mrowb),
-     1                     a,mcola,0.0d0,r,mcolr)
-          return
-        else if(mcola.eq.1.and.mrowb.eq.1) then
-          call dgemm('N','T',nrow,ncol,nlink,1.0d0,b,mcolb,
-     1                     a,mrowa,0.0d0,r,mcolr)
-          return
-        else if(mrowa.eq.1.and.mrowb.eq.1) then
-          call dgemm('N','N',nrow,ncol,nlink,1.0d0,b,mcolb,
-     1                     a,mcola,0.0d0,r,mcolr)
-          return
-        end if
-      end if
+c;      if(mcolr.eq.1) then
+c;        if(mcola.eq.1.and.mcolb.eq.1) then
+c;          call dgemm('N','N',ncol,nrow,nlink,1.0d0,a,mrowa,
+c;     1                    b,max(nlink,mrowb),0.0d0,r,mrowr)
+c;          return
+c;        else if(mrowa.eq.1.and.mcolb.eq.1) then
+c;          call dgemm('T','N',ncol,nrow,nlink,1.0d0,a,mcola,
+c;     1                    b,max(nlink,mrowb),0.0d0,r,mrowr)
+c;          return
+c;        else if(mcola.eq.1.and.mrowb.eq.1) then
+c;          call dgemm('N','T',ncol,nrow,nlink,1.0d0,a,mrowa,
+c;     1                    b,mcolb,0.0d0,r,mrowr)
+c;          return
+c;        else if(mrowa.eq.1.and.mrowb.eq.1) then
+c;          call dgemm('T','T',ncol,nrow,nlink,1.0d0,a,mcola,
+c;     1                    b,mcolb,0.0d0,r,mrowr)
+c;          return
+c;        end if
+c;        goto 6010
+c;      else if(mrowr.eq.1) then
+c;        if(mcola.eq.1.and.mcolb.eq.1) then
+c;          call dgemm('T','T',nrow,ncol,nlink,1.0d0,b,max(nlink,mrowb),
+c;     1                     a,mrowa,0.0d0,r,mcolr)
+c;          return
+c;        else if(mrowa.eq.1.and.mcolb.eq.1) then
+c;          call dgemm('T','N',nrow,ncol,nlink,1.0d0,b,max(nlink,mrowb),
+c;     1                     a,mcola,0.0d0,r,mcolr)
+c;          return
+c;        else if(mcola.eq.1.and.mrowb.eq.1) then
+c;          call dgemm('N','T',nrow,ncol,nlink,1.0d0,b,mcolb,
+c;     1                     a,mrowa,0.0d0,r,mcolr)
+c;          return
+c;        else if(mrowa.eq.1.and.mrowb.eq.1) then
+c;          call dgemm('N','N',nrow,ncol,nlink,1.0d0,b,mcolb,
+c;     1                     a,mcola,0.0d0,r,mcolr)
+c;          return
+c;        end if
+c;      end if
 cend
 cstart .not.cray .and..not.unix-convex
 6010  mxb=mxmblk
@@ -5261,44 +5267,44 @@ c
       end if
 cend
 cstart unix-blas3
-      if(mcolr.eq.1) then
-        if(mcola.eq.1.and.mcolb.eq.1) then
-          call dgemm('N','N',ncol,nrow,nlink,1.0d0,a,mrowa,
-     1                     b,max(nlink,mrowb),1.0d0,r,mrowr)
-          return
-        else if(mrowa.eq.1.and.mcolb.eq.1) then
-          call dgemm('T','N',ncol,nrow,nlink,1.0d0,a,mcola,
-     1                     b,max(nlink,mrowb),1.0d0,r,mrowr)
-          return
-        else if(mcola.eq.1.and.mrowb.eq.1) then
-          call dgemm('N','T',ncol,nrow,nlink,1.0d0,a,mrowa,
-     1                     b,mcolb,1.0d0,r,mrowr)
-          return
-        else if(mrowa.eq.1.and.mrowb.eq.1) then
-          call dgemm('T','T',ncol,nrow,nlink,1.0d0,a,mcola,
-     1                     b,mcolb,1.0d0,r,mrowr)
-          return
-        end if
-        goto 6010
-      else if(mrowr.eq.1) then
-        if(mcola.eq.1.and.mcolb.eq.1) then
-          call dgemm('T','T',nrow,ncol,nlink,1.0d0,b,max(nlink,mrowb),
-     1                     a,mrowa,1.0d0,r,mcolr)
-          return
-        else if(mrowa.eq.1.and.mcolb.eq.1) then
-          call dgemm('T','N',nrow,ncol,nlink,1.0d0,b,max(nlink,mrowb),
-     1                     a,mcola,1.0d0,r,mcolr)
-          return
-        else if(mcola.eq.1.and.mrowb.eq.1) then
-          call dgemm('N','T',nrow,ncol,nlink,1.0d0,b,mcolb,
-     1                     a,mrowa,1.0d0,r,mcolr)
-          return
-        else if(mrowa.eq.1.and.mrowb.eq.1) then
-          call dgemm('N','N',nrow,ncol,nlink,1.0d0,b,mcolb,
-     1                     a,mcola,1.0d0,r,mcolr)
-          return
-        end if
-      end if
+c;      if(mcolr.eq.1) then
+c;        if(mcola.eq.1.and.mcolb.eq.1) then
+c;          call dgemm('N','N',ncol,nrow,nlink,1.0d0,a,mrowa,
+c;     1                     b,max(nlink,mrowb),1.0d0,r,mrowr)
+c;          return
+c;        else if(mrowa.eq.1.and.mcolb.eq.1) then
+c;          call dgemm('T','N',ncol,nrow,nlink,1.0d0,a,mcola,
+c;     1                     b,max(nlink,mrowb),1.0d0,r,mrowr)
+c;          return
+c;        else if(mcola.eq.1.and.mrowb.eq.1) then
+c;          call dgemm('N','T',ncol,nrow,nlink,1.0d0,a,mrowa,
+c;     1                     b,mcolb,1.0d0,r,mrowr)
+c;          return
+c;        else if(mrowa.eq.1.and.mrowb.eq.1) then
+c;          call dgemm('T','T',ncol,nrow,nlink,1.0d0,a,mcola,
+c;     1                     b,mcolb,1.0d0,r,mrowr)
+c;          return
+c;        end if
+c;        goto 6010
+c;      else if(mrowr.eq.1) then
+c;        if(mcola.eq.1.and.mcolb.eq.1) then
+c;          call dgemm('T','T',nrow,ncol,nlink,1.0d0,b,max(nlink,mrowb),
+c;     1                     a,mrowa,1.0d0,r,mcolr)
+c;          return
+c;        else if(mrowa.eq.1.and.mcolb.eq.1) then
+c;          call dgemm('T','N',nrow,ncol,nlink,1.0d0,b,max(nlink,mrowb),
+c;     1                     a,mcola,1.0d0,r,mcolr)
+c;          return
+c;        else if(mcola.eq.1.and.mrowb.eq.1) then
+c;          call dgemm('N','T',nrow,ncol,nlink,1.0d0,b,mcolb,
+c;     1                     a,mrowa,1.0d0,r,mcolr)
+c;          return
+c;        else if(mrowa.eq.1.and.mrowb.eq.1) then
+c;          call dgemm('N','N',nrow,ncol,nlink,1.0d0,b,mcolb,
+c;     1                     a,mcola,1.0d0,r,mcolr)
+c;          return
+c;        end if
+c;      end if
 cend
 cstart .not.cray .and..not.unix-convex
 

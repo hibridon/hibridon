@@ -1,15 +1,15 @@
 
  --------------------------------------------------------------------------
-           HIBRIDON SCATTERING CODE V 4.1 05/19/97 16:41:56 EDT
+           HIBRIDON SCATTERING CODE V 4.3 12/04/07 08:28:17 EST
 
      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG
  CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI
                A. BERNING, A. DEGLI-ESPOSTI, C. RIST, P. DAGDIGIAN, B. POUILLY
-               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK
+               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, J. KLOS
  --------------------------------------------------------------------------
 
  INTEGRAL CROSS SECTIONS READ FROM FILE Csbtest1.ics                            
- WRITTEN:    19-May-97  16:43:19
+ WRITTEN:   Dec  4 08:28:47 2007
  LABEL:     CC TEST OF RESTART                              
  POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
 

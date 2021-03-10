@@ -15,7 +15,7 @@
 *  8. basgpi     basis for sigma/pi scattering                          *
 *  9. vlsgpi     calculates v-lamda matrices for 8.                     *
 *  10. bapi     basis for general  pi scattering                        *
-*  11. vlmpi    calculates v-lamda matrices for 10                     *
+*  11. vlmpi    calculates v-lamda matrices for 10                      *
 *  12. bastp     basis for symmetric top scattering                     *
 *  13. vlmstp    calculates v-lamda matrices for 12                     *
 *  14. ba13p     basis for singlet/triplet P atom scattering            *
@@ -49,9 +49,14 @@
 *    12             bah2p             homonuclear + 2P atom
 *    13             bah3p             homonuclear + 3P atom
 *    14             ba2del            doublet delta scattering
+*    15             badiat2p          heteronuclear + 2P atom  **to check
+*    16             baastp            asymmetric top scattering
+*    17             bach2x            CH2(X B1) (0,v2,0) bender levels
+*    18             bastp1            symmetric top - no inversion doubling
+*    25             badiat3p          heteronuclear + 3P atom  **to do**
 *    99             bausr             user defined basis
 *  author: b. follmeg
-*  current revision date:  14-oct-1999 by mha
+*  current revision date:  15-mar-2011 by paul dagdigian
 * --------------------------------------------------------------------
 *  variables in call list:
 *    j:        on return contains rotational quantum numbers for each
@@ -117,8 +122,9 @@
       logical flaghf, flagsu, csflag, clist, bastst, ihomo
       integer ibasty
       common /coselb/ ibasty
-      dimension j(1), l(1), jhold(1), ehold(1), sc1(1), sc2(1), sc3(1),
-     :          sc4(1), ishold(1), is(1)
+      dimension j(1), l(1), is(1), jhold(1), ehold(1), ishold(1),
+     :         sc1(1), sc2(1), sc3(1), sc4(1)
+*
 *  select basis routine according to value of ibasty
       if (ibasty .eq. 99) then
 *  user supplied routine
@@ -129,7 +135,7 @@
         return
       endif
       goto (100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,
-     :      1400)
+     :      1400,1500,1600,1700,1800)
      :      ibasty
 *  singlet sigma basis
 100   call ba1sg (j, l, is, jhold, ehold, ishold, nlevel, nlevop,
@@ -161,7 +167,7 @@
      :                  flaghf, flagsu, csflag, clist, bastst,
      :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
       return
-*  symmetric top basis
+*  symmetric top basis, with inversion doubling
 600   call bastp (j, l, is, jhold, ehold, ishold, nlevel,
      :                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
      :                  flaghf, flagsu, csflag, clist, bastst,
@@ -215,6 +221,33 @@
      :                  flaghf, flagsu, csflag, clist, bastst,
      :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
       return
+*  heteronuclear + 2P atom basis
+c1500  call bah2p (j, l, is, jhold, ehold, ishold, nlevel,
+c    :                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
+c    :                  flaghf, flagsu, csflag, clist, bastst,
+c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+1500  call badiat2p (j, l, is, jhold, ehold, ishold, nlevel,
+     :                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
+     :                  flaghf, flagsu, csflag, clist, bastst,
+     :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+*  asymmetric top basis
+1600   call baastp (j, l, is, jhold, ehold, ishold, nlevel,
+     :                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
+     :                  flaghf, flagsu, csflag, clist, bastst,
+     :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+      return
+*  CH2(X 3B1) (0,v2,0) bender levels
+1700   call bach2x (j, l, is, jhold, ehold, ishold, nlevel,
+     :                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
+     :                  flaghf, flagsu, csflag, clist, bastst,
+     :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+      return
+*  symmetric top basis, with noinversion doubling
+1800   call bastp1 (j, l, is, jhold, ehold, ishold, nlevel,
+     :                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
+     :                  flaghf, flagsu, csflag, clist, bastst,
+     :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+      return
       end
 *--------------------------------------------------------------------
       subroutine ba1sg (j, l, is, jhold, ehold, ishold, nlevel, nlevop,
@@ -225,7 +258,7 @@
 *  subroutine to determine angular coupling potential
 *  for collision of singlet-sigma molecule with a structureless atom
 *  authors:  millard alexander and hans-joachim werner
-*  current revision date:  30-mar-1992 by mha
+*  current revision date:  18-jun-2006 by mha
 * --------------------------------------------------------------------
 *  variables in call list:
 *    j:        on return contains rotational quantum numbers for each
@@ -370,6 +403,8 @@
           call exit
         end if
       end if
+* check that jmin .ge. nu for bound state calculations (this shouldn't be a bu
+* but is?)
       nsum = 0
         iva=0
         ive=0
@@ -427,6 +462,15 @@
       if (ihomo) nskip = 2
       do 120 iv=iva,ive
       jmin=iscod(1,iv)
+      if (boundc.and.csflag) then
+          if (jmin.lt.nu) then
+             write(6, 7) jmin, nu
+             write(9, 7) jmin, nu
+7            format
+     +    (/' JMIN = ',i2,', .LT. NU = ',i2,' IN BASIS; JMIN RESET')
+             jmin=nu
+          endif
+      endif
       jmax=iscod(2,iv)
       brot=rpar(1,iv)/econv
       drot=rpar(2,iv)/econv
@@ -458,7 +502,14 @@
           n = n + 1
           if (n .gt. nmax) go to 130
           l(n) = jtot
-          cent(n) = jtot * (jtot + 1)
+          if (.not.boundc) then
+            cent(n) = jtot * (jtot + 1)
+          else
+            xjtot=jtot
+            xj=j(n)
+            xnu=nu
+            cent(n)=xjtot*(xjtot+1)+xj*(xj+1)-2*xnu*xnu
+          endif
           is(n) = ivib(iv)
           j(n) = ji
           eint(n) = ee
