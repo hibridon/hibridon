@@ -1,0 +1,78 @@
+#!/bin/csh -f
+# HIBRIDON bin/makepatch $Revision: 96.1 $ --- make hibridon patch file
+# makepatch number:  to create patch{number} tar file
+# the PATH variable should be set to include the hibridon bin directory
+@ items = $#argv
+
+if ($items == 0) then
+  echo "usage:  makepatch {patch_number}"
+  exit
+else if ($items > 1) then
+  echo "usage:  makepatch {patch_number}"
+  exit
+endif
+set number = $1
+
+echo "creating patch$number files ..."
+set basedir=`hibriddir`
+if (-e $basedir/patch$number.log) then
+  rm $basedir/patch$number.log
+endif
+if (-e $basedir/patch$number) then
+  rm -r $basedir/patch$number/*
+else
+  mkdir $basedir/patch$number
+endif
+cd $basedir
+if (-e $basedir/patch$number.list) then
+else
+  echo "file $basedir/patch$number.list not present; abort ... "
+  echo "file $basedir/patch$number.list not present; abort ... " >>& $basedir/patch$number.log
+  exit
+endif
+cp patch$number.list $basedir/patchtemp.list
+if (-z $basedir/patchtemp.list) then
+  set existfl = 0
+else
+  set existfl = 1
+endif
+  while ($existfl != 0)
+    set name = `head -1 patchtemp.list | awk '{print $1}'`
+    set dir = `head -1 patchtemp.list | awk '{print $2}'`
+    if $name == 'all' then
+      mkdir $basedir/patch$number/$dir
+      cp -p $basedir/$dir/* $basedir/patch$number/$dir
+      echo "copying directory $dir to $basedir/patch$number ..."
+    else
+      echo "copying file $dir/$name to $basedir/patch$number ..."
+      set dirnam=`echo $dir |awk -F/ '{print $2}'`
+      if $dirnam == 'hib_html' then
+        
+        rcp -rp mha-mac1.umd.edu:/users3/mha/public_html/hibridon/$name $basedir/patch$number 
+      else
+        cp $basedir/$dir/$name $basedir/patch$number
+      endif
+    endif
+    sed 1,1d patchtemp.list > $basedir/newcheck
+    mv $basedir/newcheck patchtemp.list
+    if (-z patchtemp.list) set existfl = 0
+  end
+if (-e patchtemp.list) then
+  rm patchtemp.list
+endif
+tar -cvf patch$number.tar patch$number
+compress patch$number.tar
+uuencode patch$number.tar.Z patchuu >> patch$number.tar.Z.uu
+echo ""
+echo "putting patch$number.tar.Z files on mha-ibm1 ..."
+echo "putting patch$number.tar.Z files on mha-ibm1 ..." >>& $basedir/tar.log
+
+rcp -p patch$number.tar.Z mha-ibm1.umd.edu:/home/ftp/pub/hibrid
+rcp -p patch$number.tar.Z.uu mha-ibm1.umd.edu:/home/ftp/pub/hibrid
+rcp -p README_4.0.$number mha-ibm1.umd.edu:/home/ftp/pub/hibrid
+
+rm patch$number.tar.Z
+rm patch$number.tar.Z.uu
+echo ""
+exit
+

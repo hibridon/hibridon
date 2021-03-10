@@ -1,0 +1,109 @@
+#!/bin/csh  -f
+# HIBRIDON bin/makeobj $Revision: 2001.1 $ --- create config files and compile source
+# the PATH variable should be set to include the hibridon bin directory
+
+set basedir=`hibriddir`
+
+if (-e $basedir/obj.log) then
+  mv $basedir/obj.log $basedir/obj.log.BAK
+endif
+echo "" > $basedir/obj.log
+if (-e $basedir/bin/machine.exe) then
+else
+  echo "machine.exe not here, making it now ..."
+  echo "machine.exe not here, making it now ..." >>& $basedir/obj.log
+  $basedir/bin/makemachine >& $basedir/obj.log
+  echo ""
+  echo "machine type is `machine.exe`"
+  echo "machine type is `machine.exe`" >>& $basedir/obj.log
+endif
+
+if (-e $basedir/CONFIG) then
+else
+ echo "CONFIG file not here, making it now ..."
+ echo "CONFIG file not here, making it now ..." >>& $basedir/obj.log
+ $basedir/bin/makeconfig >>& $basedir/obj.log
+ echo ""
+ echo "check and (if desired) modify $basedir/CONFIG, then rerun obj"
+ echo "check and (if desired) modify $basedir/CONFIG, then rerun obj" >>& $basedir/obj.log
+ exit
+endif
+
+# make fortran converter
+if (-e ftconv.exe) then
+else
+ echo ""
+ echo "making fortran converter ..."
+ echo "making fortran converter ..." >>& $basedir/obj.log
+ $basedir/bin/makeftconv >>& $basedir/obj.log
+endif
+
+# run fortran converter on hi.f programs
+echo ""
+echo "running fortran converter ..."
+echo "running fortran converter ..." >>& $basedir/obj.log
+$basedir/bin/rftscript >>& $basedir/obj.log
+
+# create common directory
+echo ""
+echo "creating common files ..."
+echo "creating common files ..." >>& $basedir/obj.log
+$basedir/bin/makecommon >>& $basedir/obj.log
+
+# set help directory
+echo ""
+echo "setting help directory ..."
+echo "setting help directory ..." >>& $basedir/obj.log
+if (-e $basedir/src/common/parhlp) then
+  rm $basedir/src/common/parhlp
+endif
+sed s+xxxx+"$basedir"+ $basedir/src/common/parhlp.t > $basedir/src/common/parhlp
+
+# creating hib_help program
+echo ""
+echo "creating hib_help ..."
+echo "creating hib_help ..." >>& $basedir/obj.log
+$basedir/bin/runhscript >>& $basedir/obj.log
+cd $basedir/src
+echo ""
+echo "compiling hib_help"
+echo "compiling hib_help" >>& $basedir/obj.log
+$basedir/bin/ftn_hib -o $basedir/bin/hib_help -n hhelp.f >>& $basedir/obj.log
+rm $basedir/src/hhelp.o >>& $basedir/obj.log
+# compile fortran programs
+echo ""
+echo "compiling hi*.f files (this may take a while) ..."
+echo "compiling hi*.f files (this may take a while) ..." >>& $basedir/obj.log
+
+cd $basedir/src
+$basedir/bin/ftn_hib -O -static hiamp.f >>& $basedir/obj.log
+$basedir/bin/ftn_hib -O -static hib*.f >>& $basedir/obj.log
+$basedir/bin/ftn_hib -O -static him*.f >>& $basedir/obj.log
+$basedir/bin/ftn_hib -O -static hip*.f >>& $basedir/obj.log
+$basedir/bin/ftn_hib -O -static his*.f >>& $basedir/obj.log
+$basedir/bin/ftn_hib -O -static hit*.f >>& $basedir/obj.log
+$basedir/bin/ftn_hib -O -static hiu*.f >>& $basedir/obj.log
+$basedir/bin/ftn_hib -O -static hiv*.f >>& $basedir/obj.log
+$basedir/bin/ftn_hib -O1 -static hiiolib*.f >>& $basedir/obj.log
+$basedir/bin/ftn_hib -n -static hinput*.f >>& $basedir/obj.log
+#$basedir/bin/ftn_hib -d -static hi*.f >>& $basedir/obj.log
+
+
+echo ""
+echo "compiling hiunix.c ..."
+echo "compiling hiunix.c ..." >>& $basedir/obj.log
+cc -c hiunix.c >>& $basedir/obj.log
+
+cd $basedir/bin
+echo ""
+echo "removing .log files from $basedir/bin ..."
+rm $basedir/bin/*.log >>& $basedir/obj.log
+echo "all source code converted and compiled"
+echo "all source code converted and compiled" >>& $basedir/obj.log
+echo ""
+echo "examine $basedir/obj.log for diagnostic and/or error messages"
+echo ""
+echo "run hib_help to access on-line help"
+echo ""
+
+exit

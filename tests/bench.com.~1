@@ -1,0 +1,17 @@
+inp=arn2_100.inp
+noprin=f
+airyfl=f
+spac=0.02
+rendld=25
+job=Bench
+run
+spac=0.05
+tolai=1.05
+logdfl=f
+airyfl=t
+run
+inp=arn2_dxsec.inp
+run
+difcrs,,4,0,4,0,0,10,.1,0,100
+tenxsc,,2,0,0,1,100,0,4
+exit

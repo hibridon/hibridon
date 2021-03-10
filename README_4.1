@@ -1,0 +1,90 @@
+The following changes have been made in bringing hibrid 4.0.2
+to relase level 4.1:
+5/18/97   hibrid5 and hiiolib changed to allow nucros to be transferred
+          in intchk, intpol, intpl2, and intpl3
+5/16/97   makehib changed to allow -b and -d options
+5/16/97   tests expanded to include test of restart option and -b
+5/15/97   himain.t, hibrid5.f, hiiolib.f changed to enable -b option in 
+          compiling tq1, tq2, tq3 matrices not used unless wavefl, photof = .t.
+5/13/97   all hiba*.f codes changed so that rcut is not used if boundc=.t.
+5/8/97    hibah2p.f corrected in case 1C calculation of energies
+5/6/97    himain.t and hibrid3.f changed so that nstep is set for
+          logd integration at first partial wave and then not changed
+5/6/97    no_opt made compatible for all platforms in makeconfig
+5/4/97    added compare.com to tests, changed runtest
+5/4/97    converted all single-precision constants to dp in hiutil,
+            hitensor, hibrid1, hibrid2, hibrid3, hibrid4, pot_vfit.f,
+            hiamp.f
+5/4/97    corrected hivector.f slightly
+4/30/07   hivector.f changed to include idamin and idmin
+4/29/97   hinput.f changed to include correct pcod's for bound state
+4/29/97   hiiolib.f changed to include gendat adapted for bound state
+4/29/97   runtest changed to include new bound state test
+4/28/97   runtest changed to include correct vfit,n2phetest
+4/28/97   hicommon.all changed to include new partens
+4/24/97:  hibrid3 changed so that no loop if nlam=0
+4/23/97:  hibrid3 and flow changed  so that return from bound is 
+          correct
+4/23/97:  himain changed so that nchtop = nmax in bound calculation
+4/23/97:  hibound.f changed completely
+4/23/97:  himatrix.f expanded to incorporate subroutines rsg, rebak, and
+          reduce from EISPACK
+4/18/97:  runtest changed to copy FOLLMEG.BIN from tests to testnew
+4/18/97:  hinput updated to allow 8 input variables for tenxsc
+4/18/97:  maketar updated to remove src/*.hold files
+4/18/97:  hibound.f changed to give dummy return if not unix-aix machines
+4/17/97:  hitensor updated
+4/16/97:  pot_vfit changed to give correct comparison with follmeg
+4/16/97:  hibrid.hlp changed to reflect following change in flux command
+4/16/97   hibrid4.f changed (transmt changed) so that if rout < 0
+          transformation matrices will be printed out at all R
+4/8/97:   pot_vfit.f changed (sdot -> ddot, and vv0)
+4/8/97:   hibrid3.f changed to correct testptn and testpt
+4/8/97:   hisystem.f changed to eliminate variables n0max and interp
+          from sy2sg
+4/8/97:   hiba2sg.f changed to accept lammin=0, and to eliminate
+          variables n0max and interp
+3/17/97:  makecommon updated to automatically create soft link in
+          subdirectory src/pot
+3/17/97:  updated himain.t to include boundc and boundf as logical parameters
+3/17/97:  updated common/parcode to include boundc as logical parameter
+3/17/97:  updated common/logdef and  common/lpar to include boundc as logical 
+          parameter
+3/17/97:  updated hiiolib.f to include boundc as logical parameter
+3/17/97:  updated hinput.f to include boundc as logical parameter
+3/17/97:  updated hibrid3.f to include moonbong's changes
+          (additional print to resenergy.dat in smatop, now disabled, for
+           use in cnne calculations,
+           susan gregurick's bound state programs (bound,
+           boundwavfn,i h_basis)
+3/17/97:  updated hibrid1.f to include moonbong's changes
+          (increased dimensions, also change to difcrs)
+3/14/97:  updated hiba1sg.f to expand format for > 999 channels
+3/14/97:  updated hisystem.f to include check of system parameters 
+           after they have been changed
+3/9/97:   remove bug in dcopy in subroutine potent (this does not
+           affect any computed results)
+3/5/97:   change format of output in 22P calculations in smatop
+
+
+to migrate to release 4.1, you should download by anonymous ftp the 
+upgraded tar file for the complete package
+         mha-ibm1.umd.edu:/pub/hibrid/hibrid.tar.Z
+    or
+         mha-ibm1.umd.edu:/pub/hibrid/hibrid.tar.Z.uu
+
+    and follow the installation instructions contained in the file
+         mha-ibm1.umd.edu:/pub/hibrid/README
+
+to retain a copy of any previous versions, you may wish to
+carry out the intall in a new main hibridon directory.
+
+the current release level has been checked for the following
+operating system and compiler environments:
+
+AIX v. 3.2.5, 4.1.4
+  xlf compiler 2.3, 3.1, 3.2
+HP-UX v. 9.01, 9.02, 9.03, 10.01
+IRIX 5.3, 6.1 
+OSF v3.2
+SunOS v2 rel. 4.1.4

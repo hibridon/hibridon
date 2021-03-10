@@ -1,0 +1,72 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 4.1.5 02/25/04 09:22:13 EST
+
+     AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI
+               A. BERNING, A. DEGLI-ESPOSTI, C. RIST, P. DAGDIGIAN, B. POUILLY
+               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK
+ --------------------------------------------------------------------------
+
+**  DIFFERENTIAL CROSS SECTION (ANG^2/SR)
+    TODAYS DATE:   25-Feb-04  09:22:21
+    S-MATRICES READ FROM FILE Ccdxsec1.smt                            
+      WRITTEN:    25-Feb-04  09:22:21
+      LABEL:     DIFFERENTIAL XSEC TESTS                         
+      POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
+    E-TOT:      500.000;  REDUCED MASS:  16.47    
+    TRANSITION:  J1= 0 IN1=   0  ->  J2= 2 IN2=   0
+    SUMMING PARTIAL WAVES FROM JTOT = 0 TO  20
+    WAVE VECTOR IN INITIAL CHANNEL:     11.6958 Bohr^2;    22.1015 Angstroms^2
+    COLLISION ENERGY:   500.0000 cm-1;    61.9927 meV
+    DEGENERACY AVERAGED DXSC (ANG^2/SR) AND QUADRUPOLE AND HEXAPOLE ALIGNMENT
+     .00      .5279E-01     -1.000          .2500    
+    1.00      .5023E-01     -.9905          .2421    
+    2.00      .4322E-01     -.9602          .2171    
+    3.00      .3351E-01     -.9031          .1708    
+    4.00      .2338E-01     -.8079          .9587E-01
+    5.00      .1492E-01     -.6636         -.1258E-01
+    6.00      .9389E-02     -.4994         -.1244    
+    7.00      .6982E-02     -.4652         -.1230    
+    8.00      .6931E-02     -.6349          .2465E-01
+    9.00      .7950E-02     -.8085          .1547    
+   10.00      .8788E-02     -.8878          .2045    
+
+ ** DIFFERENTIAL CROSS SECTION CALCULATION FINISHED:
+    ELAPSED TIME: 00:00:00.23  CPU TIME:  00:00:00.01
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 4.1.5 02/25/04 09:22:13 EST
+
+     AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI
+               A. BERNING, A. DEGLI-ESPOSTI, C. RIST, P. DAGDIGIAN, B. POUILLY
+               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK
+ --------------------------------------------------------------------------
+
+**  DIFFERENTIAL CROSS SECTION (ANG^2/SR)
+    TODAYS DATE:   25-Feb-04  09:22:21
+    S-MATRICES READ FROM FILE Ccdxsec1.smt                            
+      WRITTEN:    25-Feb-04  09:22:21
+      LABEL:     DIFFERENTIAL XSEC TESTS                         
+      POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
+    E-TOT:      500.000;  REDUCED MASS:  16.47    
+    TRANSITION:  J1= 2 IN1=   0  ->  J2= 2 IN2=   0
+    SUMMING PARTIAL WAVES FROM JTOT = 0 TO  20
+    WAVE VECTOR IN INITIAL CHANNEL:     11.5539 Bohr^2;    21.8334 Angstroms^2
+    COLLISION ENERGY:   487.9400 cm-1;    60.4974 meV
+    DEGENERACY AVERAGED DXSC (ANG^2/SR) AND QUADRUPOLE AND HEXAPOLE ALIGNMENT
+     .00      101.4         -.8199E-02     -.8827E-03
+    1.00      98.09         -.8060E-02     -.8665E-03
+    2.00      88.60         -.7634E-02     -.8167E-03
+    3.00      74.49         -.6893E-02     -.7293E-03
+    4.00      57.88         -.5777E-02     -.5964E-03
+    5.00      41.09         -.4180E-02     -.4038E-03
+    6.00      26.13         -.1889E-02     -.1243E-03
+    7.00      14.36          .1561E-02      .2989E-03
+    8.00      6.353          .7407E-02      .1010E-02
+    9.00      1.878          .2043E-01      .2517E-02
+   10.00      .1579          .9115E-01      .8804E-02
+
+ ** DIFFERENTIAL CROSS SECTION CALCULATION FINISHED:
+    ELAPSED TIME: 00:00:00.25  CPU TIME:  00:00:00.03

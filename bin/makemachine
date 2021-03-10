@@ -1,0 +1,42 @@
+#!/bin/sh
+# HIBRIDON bin/makemachine $Revision: 2003.1 $ --- make program bin/machine.exe 
+# which reports machine type
+
+# the PATH variable should be set to include the hibridon bin directory
+basedir=`hibriddir`
+echo $basedir
+cd $basedir/src
+if test -r hiunix.o ; then
+# here if src/hiunix.o exists
+  echo "src/hiunix.o already exists ..."
+  echo "src/hiunix.o already exists ..."  >> $basedir/bin/makemachine.log
+else
+  echo "compiling hiunix.c with cc ..." 
+  echo "compiling hiunix.c with cc ..." >> $basedir/bin/makemachine.log
+# if the native C compiler is not cc, need to adjust this for a bootstrap
+  cc -c ./hiunix.c 2>>$basedir/bin/makemachine.log
+fi
+fortran=f77
+if test -r /bin/fortran ; then (cd ../src; cc -c -O -fpa -mp unix.c); fortran="fortran -mp -fpa"; fi
+if test -r /usr/convex/fc ; then fortran=fc; fi
+if test -r /usr/bin/fc ; then fortran="fc"; fi
+# if both fc and f77 exist, use f77
+if test -r /usr/bin/f77; then fortran="f77"; fi
+if test -r /usr/bin/f77; then fortran="f77"; fi
+if test -r /vol/SUNWspro6u2/SUNWspro/bin/f77; then fortran="f77";fi
+if test -r /opt/fortran/bin/f77; then fortran="/opt/fortran/bin/f77"; fi
+if test -r /opt/fortran90/bin/f90; then fortran="/opt/fortran90/bin/f90"; fi
+if test -r /usr/bin/xlf ; then fortran="xlf -qextname"; fi
+if test -r /bin/cf77 ; then fortran=cf77; fi
+if test -r /usr/bin/cf77 ; then fortran=cf77; fi
+if test -r /usr/bin/f77sx ; then fortran=f77sx; fi
+if test -r /usr/uxp/frt ; then fortran=frt; fi
+
+echo "fortran compiler is $fortran" |tee -a  $basedir/bin/makemachine.log
+echo "compiling machine.f ... " |tee -a  $basedir/bin/makemachine.log
+
+eval $fortran -o ../bin/machine.exe ./machine.f ./hiunix.o 2>>$basedir/bin/makemachine.log
+rm -f machine.o
+cd $basedir
+echo "machine type is `machine.exe`" |tee -a  $basedir/bin/makemachine.log
+

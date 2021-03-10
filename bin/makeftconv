@@ -1,0 +1,13 @@
+#!/bin/sh
+# HIBRIDON bin/makeftconv $Revision: 2001.1 $ --- make fortran preprocessing/conversion
+# the PATH variable should be set to include the hibridon bin directory
+
+basedir=`hibriddir`
+bin=$basedir/bin
+
+if test ! -r $bin/machine.exe ; then makemachine; fi;
+machine=`machine.exe`
+
+if test ! -r $bin/ftconv.exe ; then ftn_hib -n -o $bin/ftconv.exe $basedir/utilities/ftconv.f 
+rm $basedir/utilities/ftconv.o
+fi

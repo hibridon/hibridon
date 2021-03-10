@@ -1,0 +1,21 @@
+#!/bin/csh  -f
+# HIBRIDON tests/runbench $Revision: 96.0 $ --- run timing benchmarks
+# the PATH variable should be set to include the hibridon bin directory
+
+set basedir=`hibriddir`
+
+if  (-e $basedir/bin/progs/hib_arn2_151) then
+else
+  makehib arn2 169
+endif
+echo "running benchmarks now ..."
+  $basedir/bin/progs/hib_arn2_169 <bench.com >bench.log 
+grep "TIMING:  ELAPSED" bench.log >>runbench.tab
+grep "CPU TIME" bench.log >>runbench.tab
+grep "TENXSC FINAL TIMI" bench.log >>runbench.tab
+unalias rm
+rm Bench1.*
+rm Outpt
+rm $basedir/bin/progs/hib_arn2_171
+alias rm 'rm -i'
+exit

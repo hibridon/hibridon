@@ -1,0 +1,25 @@
+                                         
+   1                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    3.0000    3.7500     .0260   rstart, rendld, spac
+  F                              prairy
+  1.000      1.00     3.8  3.75  tolai, rincr, rendai, fstfac
+   1                             nerg
+    10.0
+   30.00610                      xmu
+   30.0000                       rcut
+   0   0   1   1   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  36   0                         lscreen, iprint
+    3    1                       nnout,niout
+    0    1   12
+    0
+  F  F  F  F  F                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  T  T  T                  wrpart, prpart, prxsec, wrxsec, wavefl
+  F  T  F  F  T                  noprin, chlist, ipos, nucros, photof
+  F  F  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F                              rsflag
+   1   0   0                     nvib, vmin,vmax
+   0   0   2                                     iv,jmin,jmax
+   1.69612       .000000E+00   .000000E+00       brot,drot,hrot
+      .00000000                                  evib
+                                        

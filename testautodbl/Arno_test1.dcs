@@ -1,0 +1,49 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 4.1.2 02/17/99 09:58:33 EST
+
+     AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI
+               A. BERNING, A. DEGLI-ESPOSTI, C. RIST, P. DAGDIGIAN, B. POUILLY
+               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK
+ --------------------------------------------------------------------------
+
+**  DIFFERENTIAL CROSS SECTION (ANG^2/SR)
+    TODAYS DATE:   17-Feb-99  10:00:47
+    S-MATRICES READ FROM FILE Arno_test1.smt                          
+      WRITTEN:    17-Feb-99  10:00:16
+      LABEL:     CC STERIC EFFECT TESTS                          
+      POT NAME:  ALEXANDER Ar-NO CEPA                            
+    E-TOT:      442.000;  REDUCED MASS:  17.1    
+    TRANSITION:  J1= 0 IN1= 1  ->  J2= 2 IN2= 1
+    SUMMING PARTIAL WAVES FROM JTOT = 0 TO   5
+    WAVE VECTOR IN INITIAL CHANNEL:     11.2163 Bohr^2;    21.1955 Angstroms^2
+    COLLISION ENERGY:   442.0000 cm-1;    54.8016 meV
+    DEGENERACY AVERAGED STERIC DXSC'S: HEADS AND TAILS
+     .00      .7968E-04      .3959E-04
+    1.00      .9408E-04      .4637E-04
+    2.00      .1368E-03      .6648E-04
+    3.00      .2061E-03      .9916E-04
+    4.00      .2996E-03      .1432E-03
+    5.00      .4138E-03      .1970E-03
+    6.00      .5445E-03      .2585E-03
+    7.00      .6867E-03      .3255E-03
+    8.00      .8354E-03      .3954E-03
+    9.00      .9851E-03      .4658E-03
+   10.00      .1130E-02      .5341E-03
+   11.00      .1266E-02      .5977E-03
+   12.00      .1386E-02      .6542E-03
+   13.00      .1488E-02      .7018E-03
+   14.00      .1566E-02      .7386E-03
+   15.00      .1619E-02      .7634E-03
+   16.00      .1645E-02      .7752E-03
+   17.00      .1643E-02      .7737E-03
+   18.00      .1612E-02      .7590E-03
+   19.00      .1555E-02      .7317E-03
+   20.00      .1473E-02      .6927E-03
+
+    INTEGRAL ORIENTED CROSS SECTIONS; ANGLES:  .00:1.0: 20.00
+    XSC-HEADS =    .2624E-03  XSC-TAILS =    .1237E-03    ASYMMETRY(%) =   35.91
+
+ ** DIFFERENTIAL CROSS SECTION CALCULATION FINISHED:
+    ELAPSED TIME: 00:00:00.47  CPU TIME:  00:00:00.02

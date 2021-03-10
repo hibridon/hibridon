@@ -1,0 +1,30 @@
+                CA-HE                    
+   7                             ibasty
+  T  F  F  F                     logdfl, airyfl, readpt, bastst
+    4.0000   40.0000     .0150   rstart, rendld, spac
+  F                              prairy
+  1.000      1.00    40.0  1.00  tolai, rincr, rendai, fstfac
+   1                             nerg
+   724.2
+    3.63917                      xmu
+   30.0000                       rcut
+   4   4   1   1   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  38   0                         lscreen, iprint
+    3    2                       nnout,niout
+    0    1    2
+    0    1
+  F  F  F  F  F                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  T  F  F  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  F  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  F  F  F  T  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F                              rsflag
+   2   0   2                     nstate, ipol, npot
+  0.0000E+00   7.076       27.44           E-3P0, 3P1, 3P2
+   183.9       .9747                       E-1P1, CMIX
+  1.0000E-04   9.000       .4000       13.00       40.00     3 Pi Parameters
+  8.0000E-06   13.80       .4500       18.00       50.00     3 Sig Parameters
+  1.0000E-04   9.000       .4000       13.00       40.00     1 Pi Parameters
+  8.0000E-06   13.80       .4700       18.00       50.00     1 Sig Parameters
+  3.5000E-03   6.500       .4300      4.3000E-03             1 Sigma Morse
+   8.100      1.0000E-04  7.5000E-02                         Gaussian Coupling
+                                        

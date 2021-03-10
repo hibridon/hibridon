@@ -1,0 +1,22 @@
+   Two state curve-crossing problem      
+  99                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    3.0000    3.2000     .1000   rstart, rendld, spac
+  F                              prairy
+  1.150      3.00    15.0  1.00  tolai, rincr, rendai, fstfac
+   1                             nerg
+   336.0
+   42.00000                      xmu
+   30.0000                       rcut
+   0   0  20   1   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  48   0                         lscreen, iprint
+    1    2                       nnout,niout
+    0
+   -1    1
+  T  T  F  F  F                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  F  T                  wrpart, prpart, prxsec, wrxsec, wavefl
+  F  T  F  F  T                  noprin, chlist, ipos, nucros, photof
+  F  F  F  T  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F                              rsflag
+   1                             nphoto
+ 4.00000  1.000000               regr, caygr

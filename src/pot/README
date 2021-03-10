@@ -1,0 +1,7 @@
+This directory contains a number of potential subroutines for 
+the various systems which have been studied in our group over the past
+years.  A brief list of references is contained at the top of each
+fortran file.
+
+The file POT.LIST also contains a thumbnail description
+

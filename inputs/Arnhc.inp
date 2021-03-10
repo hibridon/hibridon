@@ -1,0 +1,25 @@
+     Alexander-Werner NH(c)-Ar PES       
+   5                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    5.0000    6.0000     .2000   rstart, rendld, spac
+  F                              prairy
+  1.000      3.00    25.0  1.00  tolai, rincr, rendai, fstfac
+   1                             nerg
+   135.0
+   16.47000                      xmu
+   30.0000                       rcut
+   1   0   4   1   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  48   2                         lscreen, iprint
+    5    4                       nnout,niout
+    0    2    4    6    8
+   -1    1   -2    2
+  F  F  F  F  F                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  F  T                  wrpart, prpart, prxsec, wrxsec, wavefl
+  F  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  F  T  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F                              rsflag
+   6   1   0   2   1   1         jmax, igu, isa, npar, imult, nman
+  16.432551    .00000             brot, aso
+  0.0000E+00  0.0000E+00  .0167 o, p, q
+    .00000    .00000             dmom, efield
+                                        

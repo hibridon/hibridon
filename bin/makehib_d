@@ -1,0 +1,151 @@
+#!/bin/csh -f 
+# HIBRIDON bin/makehib_d $Revision: 96.1 $ --- create executable program
+# makehib potname [kmax]: link hib_{potname} with maximum dimension kmax
+# the PATH variable should be set to include the hibridon bin directory
+# this script compiles the pot subroutine with debug option so that 
+# debugging can be done
+
+set basedir=`hibriddir`
+
+@ items = $#argv
+if ($items == 0) then
+  echo "usage: makehib_d potname [kmax]"
+  goto end
+endif
+if ($items > 3) then
+  echo "usage: makehib_d potname [kmax]"
+  goto end
+endif
+if ($items == 1) then
+  echo "default value of kmax=151 used"
+  set kmax = 151
+  set potname = $1
+endif
+if ($items == 2) then
+  set kmax = $2
+  set potname = $1
+endif
+set progname=$1"_"$2
+if (-e $basedir/h_$potname.log) then
+  mv $basedir/h_$potname.log $basedir/h_$potname.log.BAK
+endif
+echo "" > $basedir/h_$potname.log
+echo "linking hib_$progname ..."
+echo "linking hib_$progname with ..." >>& $basedir/h_$potname.log
+
+if (-e $basedir/bin/machine.exe) then
+  echo ""
+  echo "machine type is `machine.exe`"
+else
+  echo "$basedir/bin/machine.exe not found, re-run makeobj ..."
+  goto end
+endif
+
+if (-e $basedir/CONFIG) then
+else
+ echo "CONFIG file not here, making it now ..."
+ $basedir/bin/makeconfig >>& $basedir/h_$potname.log
+ echo ""
+ echo "check and (if desired) modify $basedir/CONFIG, then rerun $potname"
+ goto end
+endif
+
+
+# check if correct pot subroutine is present
+
+if (-e $basedir/src/pot/pot_$potname.f) then
+else
+  echo ""
+  echo "pot subroutine $basedir/src/pot/pot_$potname.f not present, abort ..."
+  goto end
+endif
+
+# check if common routines are present in /src/pot
+if (-e $basedir/src/pot/common/parpot) then
+else
+  echo ""
+  echo "creating /pot/common directory ..."
+  cp -pr $basedir/src/common $basedir/src/pot
+endif
+
+# check if fortran converter is present
+
+if (-e ftconv.exe) then
+else
+ echo ""
+ echo "making fortran converter ..."
+ $basedir/bin/makeftconv >>& $basedir/h_$potname.log
+endif
+
+# run fortran converter
+echo ""
+echo "running fortran converter ..."
+$basedir/bin/rpotscript $potname >>& $basedir/h_$potname.log
+# compile fortran programs
+
+echo ""
+echo "compiling pot_$potname.f ..."
+
+cd $basedir/src/pot >>& $basedir/h_$potname.log
+$basedir/bin/ftn_hib -d pot_$potname.f >>& $basedir/h_$potname.log
+#$basedir/bin/ftn_hib -d pot_$potname.f >>& $basedir/h_$potname.log
+
+# compile hiversion
+
+cd $basedir/bin
+set dt=`date +%D`
+set tm=`date +%T`
+set zn=`date +%Z`
+
+echo "hib_$progname being created at date $dt $tm $zn with version `cat $basedir/VERSION`"
+if (-e $basedir/src/hiversion.f) then
+  rm $basedir/src/hiversion.f
+endif
+set dt="`cat $basedir/VERSION` $dt $tm $zn"
+sed snxdaten"$dt"n $basedir/src/hiversion.t > $basedir/src/hiversion.f
+
+cd $basedir/bin
+runvscript >>& $basedir/h_$potname.log
+cd $basedir/src
+$basedir/bin/ftn_hib hiversion.f >>& $basedir/h_$potname.log
+cd ..
+
+# convert himain to include requested kmax
+  echo ""
+  echo "converting and compiling himain with kmax = $kmax"
+  echo "converting and compiling himain with kmax = $kmax" >>& $basedir/h_$potname.log
+  sed snkmax=151nkmax="$kmax"n $basedir/src/himain.t > $basedir/src/himain.f
+cd $basedir/bin
+  rmnscript >>& $basedir/h_$potname.log
+  cd $basedir/src
+  $basedir/bin/ftn_hib -d himain.f >>& $basedir/h_$potname.log
+cd ..
+
+
+# link hib_progname
+
+echo ""
+echo "linking hib_$progname"
+echo "linking hib_$progname" >>& $basedir/h_$potname.log
+
+cd $basedir/src
+
+$basedir/bin/ftn_hib -o hib_$progname *.o pot/pot_$potname.o  >>& $basedir/h_$potname.log
+
+# remove pot_potname.o if successful link
+if (-e hib_$progname) then
+  rm pot/pot_$potname.o
+endif
+  
+mv hib_$progname ../bin/progs
+
+cat hib_$progname.log >> $basedir/h_$potname.log
+rm hib_$progname.log
+
+cd $basedir/bin >>& $basedir/h_$potname.log
+end:
+echo ""
+echo "examine $basedir/h_$potname.log for diagnostic and/or error messages"
+
+exit
+

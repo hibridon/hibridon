@@ -1,0 +1,521 @@
+      subroutine difcrs(fname1,a,ihomo,flaghf)
+*  -------------------------------------------------------------
+*  calculates differential cross sections
+*  author h.-j. werner
+*  latest revision:  9-sep-99 by mha
+*  addition for negative nnout 2-8-95 by mby
+*  -------------------------------------------------------------
+      implicit double precision (a-h,o-z)
+      character*(*) fname1
+      character*20 cdate1
+      character*20  cdate
+      character*12  elaps, cpu
+      character*40 xnam1,xnam2
+
+      complex*16 q,qm,stampl,stamplm
+      logical existf,csflg1,flghf1,flgsu1,ihomo,flaghf,twomol,
+     1        nucros, iprint, mflag, stflag
+      parameter (maxang=901)
+      include "common/parpot"
+      common /coselb/ ibasty
+      common /coz/ sreal1(1)
+      common /cow/ simag1(1)
+      common /cojq/ jq(1)
+      common /colq/ lq(1)
+      common /coinq/ inq(1)
+      common /cojhld/ jlev(1)
+      common /coisc1/ inlev(1)
+      common /coisc2/ jout1(1)
+      common /cosc1/ elev(1)
+      common /cosc2/ jpack1(1)
+      common /cosc3/ lpack1(1)
+      common /cosc4/ ipack1(1)
+      common /codim/ mairy,mmax
+      common /coamat/ q(10)
+      common /cobmat/ qm(10)
+      common /cozmat/ xintmdep(10)
+      common /cov2/ nv2max, ndummy, y(1)
+      common /coconv/ econv, xmconv, ang2c
+      dimension  s(maxang),sm(maxang)
+      dimension a(15)
+      data pi /3.1415927d0/
+c
+      maxq=mmax*mmax/2
+      maxy=nv2max
+c
+c.....input parameters
+c
+      j1=a(1)
+      in1=a(2)
+      j2=a(3)
+      in2=a(4)
+      ang1=a(5)
+      ang2=a(6)
+      dang=a(7)
+      ienerg=a(8)+0.1d0
+      jtot1=0
+      jtot2=a(9)
+      iprint = .false.
+      if (a(10) .ne. 0.d0) iprint = .true.
+      mflag=.false.
+* if mflag = .true., calculate mdependent cross sections in collision frame
+      if (a(11).ne.0) mflag=.true.
+      stflag=.false.
+* if stflag = .true., calculate steric effect cross sections
+      if (a(12).ne.0) then
+         stflag=.true.
+         alph1=a(13)
+         alphm1=a(14)
+         msteric=a(15)
+         in1=iabs(in1)
+      endif
+      if (stflag) then
+         if (.not.flaghf) then
+             write (6,5)
+5            format
+     :   (' *** STFLAG = .TRUE. NOT ALLOWED FOR FLAGHF = .FALSE.')
+             return
+         else if (ibasty.ne.3) then
+             write (6,7) ibasty
+7            format
+     :   (' *** STFLAG = .TRUE. NOT ALLOWED FOR IBASTY =',i3)
+             return
+         endif
+      endif
+      if (flaghf) then
+         xj2=j2+0.5d0
+      else
+         xj2=j2
+      endif
+
+      ang0=ang1
+      if(ang2.eq.0) ang2=ang1+60.0d0
+      if(dang.eq.0) dang=1.0d0
+      if(ienerg.le.0) ienerg=1
+*      if(in1.eq.0) in1=1
+c
+c.....open s-matrix file
+c
+      call gennam(xnam1,fname1,ienerg,'smt',lenx)
+      inquire (file=xnam1(1:lenx), exist=existf)
+      if (.not. existf) then
+        write (6, 10) xnam1(1:lenx)
+10      format(/' FILE ',(a),' NOT FOUND')
+        return
+      end if
+* initialize timer
+      call mtime(cpu0,ela0)
+
+      call openf(1,xnam1(1:lenx),'du',0)
+c
+c.....open output file for differential cross sections
+c
+      ifil=1
+20    call gennam(xnam2,fname1,ifil,'dcs',lenx)
+      call openf(2,xnam2(1:lenx),'sf',0)
+* write a header
+      call version(2)
+      call dater(cdate)
+      write (2,22) cdate
+      write (6,22) cdate
+22    format (/,'**  DIFFERENTIAL CROSS SECTION (ANG^2/SR)',
+     :    /,'    TODAYS DATE:  ',(a))
+c
+c.....read header of s-matrix file
+c
+      call rdhead(1,cdate1,ered1,rmu1,csflg1,flghf1,
+     1   flgsu1,
+     1   twomol,nucros,jfirst,jfinal,jtotd,numin,numax,nud,
+     1   nlevel,nlevop,nnout,jlev,inlev,elev,jout1)
+      if(csflg1) then
+        write(6,30)
+30      format(/' DIFFERENTIAL CROSS SECTIONS NOT IMPLEMENTED FOR',
+     1    ' COUPLED STATES APPROXIMATION'/)
+        goto 500
+      end if
+c
+c.....print job information
+c
+      write(2,40) xnam1,cdate1,label,potnam,econv*ered1,xmconv*rmu1
+      write(6,40) xnam1,cdate1,label,potnam,econv*ered1,xmconv*rmu1
+40    format('    S-MATRICES READ FROM FILE ',(a),/,
+     : '      WRITTEN:   ',(a),/,
+     : '      LABEL:     ',(a)/,
+     : '      POT NAME:  ',(a)/,
+     : '    E-TOT:   ',f10.3,';  REDUCED MASS:  ',1pg9.4)
+      if(jtot2.eq.0) jtot2=jfinal
+      jtot2=min0(jfinal,jtot2)
+      if(jtotd.ne.1) then
+        write(6,50) jtotd
+50      format(' *** JTOTD =',i2,'.NE.1')
+        goto 500
+      end if
+c
+c.....check whether initial level exists
+c
+      do 60 j=1,nlevel
+60    if(jlev(j).eq.j1.and.inlev(j).eq.in1) goto 90
+
+      write(6,70) 'j1=',j1,'in1=',in1
+70    format(/1x,(a),i2,2x,(a),i2,' NOT FOUND IN LEVEL LIST'//
+     1           '   N  J  INDEX   EINT(CM-1)')
+      write(6,80) (j,jlev(j),inlev(j),elev(j)*econv,j=1,nlevel)
+80    format(1x,2i3,i5,f12.3)
+c     check if other symmetry doublet exists for steric effect
+82    if (stflag) then
+         do 85 j=1,nlevel
+85       if(jlev(j).eq.j1.and.inlev(j).eq.-in1) goto 90
+         write(6,70) 'j1=',j1,'in1=',-in1
+         write(6,80) (j,jlev(j),inlev(j),elev(j)*econv,j=1,nlevel)
+      endif
+      goto 500
+c
+c.....ca is wavevector for initial state, ecol is collision energy
+c
+* initialize for integral cross sections
+90    xint=0d0
+      xintm=0d0
+      ecol= ered1-elev(j)
+      ca=sqrt(2d0*rmu1*ecol)
+c
+      do 100 j=1,iabs(nnout)
+100   if(j1.eq.jout1(j))  goto 120
+      write(6,110) 'j1=',j1,(jout1(j),j=1,iabs(nnout))
+110   format(/1x,(a),i2,' NOT FOUND IN JOUT LIST'/
+     1        1x,'JOUT: ',20i3)
+      goto 500
+c
+c.....ckeck whether second level exists
+c
+c added for negative nnout by MBY 2-8-95
+
+120   continue
+*     write(6,*) 'nnout=',nnout
+      if(nnout.le.0) goto 160
+
+      do 130 j=1,nlevel
+130   if(jlev(j).eq.j2.and.inlev(j).eq.in2) goto 140
+      write(6,70) 'j2=',j2,'in2=',in2
+      write(6,80) (j,jlev(j),inlev(j),elev(j)*econv,j=1,nlevel)
+      goto 500
+140   do 150 j=1,iabs(nnout)
+150   if(j2.eq.jout1(j)) goto 160
+      write(6,110) 'j2=',j2,(jout1(j),j=1,iabs(nnout))
+      goto 500
+c
+c.....print header
+c
+160   write(2,170) j1,in1,j2,in2,jtot1,jtot2,ca,1.8897*ca,
+     :             econv*ecol,econv*ecol/8.065465
+      write(6,170) j1,in1,j2,in2,jtot1,jtot2,ca,1.8897*ca,
+     :             econv*ecol,econv*ecol/8.065465
+170   format('    TRANSITION:  J1=',i2,' IN1=',i4,
+     1        '  ->  J2=',i2,' IN2=',i4/
+     1        '    SUMMING PARTIAL WAVES FROM JTOT = ',i1,
+     :        ' TO',i4/
+     1        '    WAVE VECTOR IN INITIAL CHANNEL:  ',f10.4,' Bohr^2',
+     :        '; ',f10.4,' Angstroms^2',/
+     :        '    COLLISION ENERGY: ',f10.4,' cm-1; ',f10.4,' meV')
+      if (stflag) then
+         write (6,171) msteric+0.5, alph1,alphm1
+         write (2,171) msteric+0.5, alph1,alphm1
+      endif
+171   format('    STERIC (ORIENTED) CROSS SECTIONS: M = ',f4.1,/,
+     :        '        ALPH(1) =',f7.4,
+     :        ', ALPH(-1)=',f7.4)
+
+      if (.not.iprint) write (6, 175) xnam2(1:lenx)
+175   format('    DIFFERENTIAL CROSS SECTIONS SAVED IN FILE: ',(a))
+c
+c.....determine number of angles per batch
+c
+         l2max=jtot2+j2+1
+         mlmax=j1+j2+1
+         ideg1=2*j1+1
+         ideg2=2*j2+1
+         j1p=j1
+         j2p=j2
+         if(flaghf) then
+c.....here for half-integer spin
+           l2max=l2max+1
+           mlmax=mlmax+1
+           ideg1=2*j1+2
+           ideg2=2*j2+2
+           j1p=j1+1
+           j2p=j2+1
+         end if
+         ideg=ideg1*ideg2
+         nangle=(ang2-ang1)/dang+1.4d0
+         nangle=min0(maxang,nangle,maxq/(ideg1*ideg2),
+     :                             maxy/(l2max*mlmax))
+         nanghld=nangle
+         if(nangle.eq.0) then
+           write(6,180) maxq,maxy
+180        format(' *** NOT ENOUGH CORE IN DIFCRS. MAXQ=',i6,
+     :            ' MAXY=',i6)
+           return
+         end if
+c
+c
+c.....zero out m-dependent integral cross sections
+      indm=0
+      do 195 mj1=-j1p,j1
+      do 195 mj2=-j2p,j2
+         indm=indm+1
+         xintmdep(indm)=0d0
+195   continue
+c.....zero out amplitudes
+c
+200     ii=0
+        nang=(ang2-ang1)/dang+1.4d0
+        nangle=min0(nanghld,nang)
+        do 210 mj1=-j1p,j1
+        do 210 mj2=-j2p,j2
+        do 210 i=1,nangle
+        ii=ii+1
+        q(ii)=0d0
+210     qm(ii)=0d0
+c
+c.....precalculate all required spherical harmonics
+c
+        ii=0
+        do 230 ml=0,mlmax-1
+        angle=ang1
+        do 220 i=1,nangle
+        call sphn(ml,l2max-1,angle,y(ii+i),nangle)
+220     angle=angle+dang
+230     ii=ii+l2max*nangle
+        jtlast=-1
+        jplast=0
+c
+c.....read next s-matrix
+c
+250   call sread (0,sreal1, simag1, jtot, jlpar, nu1,
+     :                  jq, lq, inq, ipack1, jpack1, lpack1,
+     :                  1, mmax, nopen1, lengt1, ierr)
+      if(ierr.eq.-1) then
+         write(6,260) xnam1,jtlast,jplast
+260      format(' END OF FILE DETECTED READING FILE ',(a),
+     :     ' LAST JTOT,JLPAR PROCESSED:',2i5)
+         goto 310
+      end if
+      if(ierr.lt.-1) then
+        write(6,270) xnam1,jtlast,jplast
+270     format(' ERROR READING FILE ',(a),
+     :     ' LAST JTOT,JLPAR PROCESSED:',2i5)
+        goto 310
+      end if
+c
+c.....this assumes that jlpar=1 is stored first
+c
+      if(jtot.gt.jtot2) goto 300
+c
+c.....copy row labels into column labels if s-matrices are stored
+c.....triangular
+c
+      if(jlpar.eq.jplast.and.jtot.ne.jtlast+1) write(6,275) jtot,jtlast
+275   format(' *** WARNING: JTOT.NE.JTLAST+1:',2i4)
+      jtlast=jtot
+      jplast=jlpar
+      if(nnout.gt.0) then
+         do 290 i=1,lengt1
+         inq(i)=ipack1(i)
+         jq(i)=jpack1(i)
+290      lq(i)=lpack1(i)
+         nopen1=lengt1
+      end if
+c
+c.....calculate contributions to amplitudes for present jtot
+c
+      call ampli(j1,in1,j2,in2,jtot,sreal1,simag1,mmax,jpack1,lpack1,
+     :  ipack1,lengt1,jq,lq,inq,nopen1,y,q,l2max,nangle,ihomo,flaghf)
+c.... calculate contributions for negative initial index
+      if (stflag)
+     :   call ampli(j1,-in1,j2,in2,jtot,sreal1,simag1,mmax,
+     :     jpack1,lpack1,ipack1,lengt1,jq,lq,inq,nopen1,y,qm,
+     :     l2max,nangle,ihomo,flaghf)
+c
+c.....loop back to next jtot/jlpar
+c
+300   if(jtot.lt.jtot2.or.jlpar.eq.1) goto 250
+c
+c.....print differential cross sections for this batch of angles
+c
+310   angle=ang1
+      do 330 i=1,nangle
+      sm(i)=0d0
+330   s(i)=0d0
+      ii=0
+      fak=ang2c/(ideg1*ca**2)
+      faksq=sqrt(fak)
+      indm=0
+      do 340 mj1=-j1p,j1
+      do 340 mj2=-j2p,j2
+      indm=indm+1
+      if (flaghf) then
+         xm=mj1+0.5d0
+         xmj2=mj2+0.5d0
+      else
+         xm=mj1
+         xmj2=mj2
+      endif
+
+c  (3m^2-1)/(j*(j+1))
+      algfak=(3d0*xmj2**2/(xj2*(xj2+1d0))-1d0)
+      if (xm.lt.0d0) then
+         msign=-1
+      else
+         msign=1
+      endif
+      if (mflag) then
+        if (iprint) write (6,332) mj1, mj2
+        write (2,332) mj1, mj2
+332     format('MJ=',i2, '  MJ2=',i3,'  F-REAL        F-IMAG')
+      endif
+      aangle=ang1
+      do 339 i=1,nangle
+      ii=ii+1
+* space frame (z-axis is initial velocity vector) scattering amplitude
+* returned in q,  ordering of loops:
+*   inner loop:  angle
+*   middle loop:  mj2
+*   outer loop:  mj1
+* can save m-resolved amplitudes separately
+      if (mflag) then
+         if (iprint)
+     :   write (6,336) aangle,faksq*dreal(q(ii)),faksq*imag(q(ii))
+         write (2,336) aangle,faksq*dreal(q(ii)),faksq*imag(q(ii))
+336      format(1x,f7.2,2g15.4)
+      endif
+      sn=sin(aangle*pi/180d0)
+* here for steric effect
+      if (stflag) then 
+         stampl=alph1*q(ii)+msign*alphm1*qm(ii)
+         stamplm=alph1*q(ii)-msign*alphm1*qm(ii)
+*        if (msteric.ge.0 .and. iabs(mj1).ne.msteric) then
+* REPLACED 10/22/99
+         if (msteric.ge.0 .and. mj1.ne.msteric) then
+             stampl=0d0
+             stamplm=0d0
+         endif
+         term=dreal(stampl*conjg(stampl))
+         termm=dreal(stamplm*conjg(stamplm)) 
+         s(i)=s(i)+dreal(stampl*conjg(stampl))
+         sm(i)=sm(i)+dreal(stamplm*conjg(stamplm))
+         xint=xint+sn*term
+         xintm=xintm+sn*termm
+*         xint=xint+sn*dreal(stampl*conjg(stampl))
+*         xintm=xintm+sn*dreal(stamplm*conjg(stamplm))
+      else
+         xintmdep(indm)=xintmdep(indm)+sn*dreal(q(ii)*conjg(q(ii)))
+         dsigterm=dreal(q(ii)*conjg(q(ii)))
+         s(i)=s(i)+dsigterm
+         sm(i)=sm(i)+algfak*dsigterm
+      endif
+      aangle=aangle+dang
+339   continue
+340   continue
+      if (.not.stflag) then
+         write (2,342)
+         if (iprint) write (6,342)
+342      format
+     :  ('    DEGENERACY AVERAGED DXSC (ANG^2/SR) AND ALIGNMENT')
+         do 350 i=1,nangle
+         if (iprint) write(6,345) angle,s(i)*fak,sm(i)/s(i)
+         write(2,345) angle,s(i)*fak,sm(i)/s(i)
+345      format(1x,f7.2,2g15.4)
+350      angle=angle+dang
+      else
+         write (2,360)
+         if (iprint) write (6,360)
+360      format
+     :  ('    DEGENERACY AVERAGED STERIC DXSC''S: HEADS AND TAILS')
+         do 370 i=1,nangle
+         if (iprint) write(6,345) angle,0.5d0*s(i)*fak,0.5d0*sm(i)*fak
+         write(2,345) angle,0.5d0*s(i)*fak,0.5d0*sm(i)*fak
+370      angle=angle+dang
+      endif
+*      ang1=angle
+      ang1=angle-dang
+c
+c.....loop back if not all required angles are finished
+c
+      if(ang1.lt.ang2-0.001d0) then
+         call rdhead(1,cdate1,ered1,rmu1,csflg1,flghf1,
+     1   flgsu1,
+     1   twomol,nucros,jfirst,jfinal,jtotd,numin,numax,nud,
+     1   nlevel,nlevop,nnout,jlev,inlev,elev,jout1)
+         ang1=ang1+dang
+         goto 200
+      end if
+* determine integral m-dependent cross sections
+
+      if (mflag) then
+         indm=0
+         write(6,375) ang0,dang,ang2
+         write(2,375) ang0,dang,ang2
+375      format
+     :   (/,'    M-DEPENDENT (COLLISION FRAME) INTEGRAL CROSS SECTIONS',
+     :    /,9x,'ANGULAR RANGE:',f5.2,':',f3.1,':',f6.2,
+     :   /,'       M    M''    XSC (ANG^2)')
+         algn=0d0
+         xsctot=0d0
+         do 385 mj1=-j1p,j1
+         do 385 mj2=-j2p,j2
+            indm=indm+1
+            if (flaghf) then
+               xmj1=mj1+0.5d0
+               xmj2=mj2+0.5d0
+            else
+               xmj1=mj1
+               xmj2=mj2
+            endif
+c     (3m^2-1)/(j*(j+1))
+            algfak=(3d0*xmj2**2/(xj2*(xj2+1d0))-1d0)
+            xintmdep(indm)=xintmdep(indm)*fak*dang*2d0*pi*pi/180d0
+            xsctot=xsctot+xintmdep(indm)
+            algn=algn+algfak*xintmdep(indm)
+* correct for mj degeneracy factor of initial state
+            xintmdep(indm)=xintmdep(indm)*ideg1
+            if (flaghf) then
+               write (6,378) xmj1,xmj2,xintmdep(indm)
+               write (2,378) xmj1,xmj2,xintmdep(indm)
+378            format(4x,2f5.1,g13.4)
+            else
+               write (6,379) mj1,mj2,xintmdep(indm)
+               write (2,379) mj1,mj2,xintmdep(indm)
+379            format(4x,2i5,g13.4)
+            endif
+385      continue
+         write (2,386) xsctot, algn/xsctot
+         write (6,386) xsctot, algn/xsctot
+386      format(/,'    DEG. AVER. XSC =',f8.3,'; ALIGNMENT =',f6.3)
+
+      endif
+* determine integral oriented (steric) cross sections
+      if (stflag) then
+         xint=0.5d0*fak*xint*2d0*pi*dang*pi/180d0	
+         xintm=0.5d0*fak*xintm*2d0*pi*dang*pi/180d0	
+         write (6,390) ang0,dang,ang2,xint,xintm,
+     :            100d0*(xint-xintm)/(xint+xintm)
+         write (2,390) ang0,dang,ang2,xint,xintm,
+     :            100d0*(xint-xintm)/(xint+xintm)
+390   format (/,
+     : '    INTEGRAL ORIENTED CROSS SECTIONS; ANGLES:',f5.2,':',f3.1,
+     :   ':',f6.2,/,'    XSC-HEADS =',g13.4,'  XSC-TAILS =',g13.4,
+     :   '    ASYMMETRY(%) =',f8.2)
+      endif
+500   call mtime(cpu1,ela1)
+      cpu1 = cpu1 - cpu0
+      ela1 = ela1 - ela0
+      call gettim(cpu1,cpu)
+      call gettim(ela1,elaps)
+      write(6,720) elaps, cpu
+      write(2,720) elaps, cpu
+720   format(/,
+     : ' ** DIFFERENTIAL CROSS SECTION CALCULATION FINISHED:',
+     :       /,'    ELAPSED TIME:',(a),'  CPU TIME: ',(a))
+      call closf(1)
+      close(2)
+      return
+      end

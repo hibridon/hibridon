@@ -1,0 +1,86 @@
+From mbdtspm@hpb.ch.man.ac.uk Tue Mar  8 05:46:52 1994
+Received: from hpb.ch.man.ac.uk (actually mchhpb.ch.man.ac.uk) 
+          by nessie.mcc.ac.uk with SMTP (PP); Tue, 8 Mar 1994 10:21:06 +0000
+From: Patrick McCabe <mbdtspm@hpb.ch.man.ac.uk>
+Message-Id: <20797.9403081020@hpb.ch.man.ac.uk>
+Subject: HIbridon
+To: mha@hibridon.umd.edu (Millard Alexander)
+Date: Tue, 8 Mar 94 10:20:24 GMT
+Mailer: Elm [revision: 70.85]
+Status: OR
+
+Millard,
+
+I am just trying to generate 0->0 and 0->2 rotational cross-sestions
+via the following decks:
+
+ arn2_test.com:
+
+inp=arn2_dxsec.inp
+show
+job=ccdxsec
+run
+difcrs,ccdxsec,0,0,0,0,1,170,1,1,120
+difcrs,ccdxsec,0,0,2,0,1,170,1,1,120
+
+
+i.e. angular range 1 to 170 degrees, summing 120 J values.
+
+Arn2_dxsec.inp:
+
+      N2-Ar CC PATTENGILL POTENTIAL
+   1                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    5.6000    8.0000     .1500   rstart, rendld, spac
+  F                              prairy
+  1.150      3.00    25.0 15.00  tolai, rincr, rendai, fstfac
+   1                             nerg
+   209.0
+   16.47000                      xmu
+   30.0000                       rcut
+   0  160   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  48   0                         lscreen, iprint
+    4    1                       nnout,niout
+    0    2    4    6
+    0
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  F  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  F  F  F  T  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F                              rsflag
+   1   0   0                     nvib, vmin,vmax
+   0   0   4                                     iv,jmin,jmax
+   2.01000       .000000E+00   .000000E+00       brot,drot,hrot
+      .00000000                                  evib
+
+
+As I understand it, this will generate S-matrices at the energy of 209cm-1
+for J values 0->160 using cc techniques.
+
+Is my thinking correct? It does however fail:
+
+*** FORTRAN I/O ERROR 933: END (OR BEGIN) OF FILE WITH NO "END=" SPECIFIER
+    FILE: , UNIT: 5
+    LAST FORMAT: ((A))
+( 0)  0x802ba178   io_ded + 0x31c  [/usr/lib/pa1.1/libcl.sl]
+( 1)  0x802bd6e4   check_read + 0x40  [/usr/lib/pa1.1/libcl.sl]
+( 2)  0x802bd984   read_to_newline + 0x228  [/usr/lib/pa1.1/libcl.sl]
+( 3)  0x802bdd50   new_rc + 0x80  [/usr/lib/pa1.1/libcl.sl]
+( 4)  0x802cdf68   FTN_S_RSFE + 0x218  [/usr/lib/pa1.1/libcl.sl]
+( 5)  0x000453c0   HINPUT + 0xf84  [./../a.out]
+( 6)  0x0008e244   FLOW + 0x28c  [./../a.out]
+( 7)  0x0008df48   LOGAIR + 0x270  [./../a.out]
+
+
+Please advise.
+Sincerely 
+--
+-----------------------------------------------------------------------
+Patrick McCabe,                  |Email:  mbdtspm@hpb.ch.man.ac.uk
+Department of Chemistry,         |  Tel: UK - Manchester - 275 4686   
+University of Manchester,        |
+Oxford Road,                     |
+Manchester,                      |
+M13 9PL, UK.                     |
+-----------------------------------------------------------------------
+

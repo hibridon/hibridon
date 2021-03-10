@@ -1,0 +1,35 @@
+      CNHE INPUT for 11/7 transitions    
+   4                             ibasty
+  T  T  T  T                     logdfl, airyfl, readpt, bastst
+    4.0000    7.5000     .0400   rstart, rendld, spac
+  F                              prairy
+  1.170      1.00    30.0  5.00  tolai, rincr, rendai, fstfac
+   1                             nerg
+   562.0
+    3.46870                      xmu
+   30.0000                       rcut
+   0  20   2   1  10  16   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80   2                         lscreen, iprint
+    2    0                       nnout,niout
+    0    1
+  F  F  F  F  F                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  T  T  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  F  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  T  T  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F                              rsflag
+  -1   1   1   0                                 isg, ipi, isgpi, isa
+   1   2   1                                     igusg, nparsg, isymsg
+   1  11  11                                     nvibs, vminsg, vmaxsg
+  11   0   2                                     ivs,  nmin,  nmax
+   12.6956       .668802E-05   .000000E+00       bsg, dsg, hsg
+  -.270000E-01   .000000E+00   .000000E+00       gs, gsd, gsh
+ 2044.2000                                       esg
+  -1   2                                         igupi, nparpi
+   1   7   7                                     nvibp, vminpi, vmaxpi
+   7   0   0                                     ivp, jmin, jmax
+   14.1900       .624837E-05   .000000E+00       bpi, dpi, hpi
+   28.1400       .442757E-02   .000000E+00       aso, p, pd
+   .432010E-02   .000000E+00   .000000E+00       q, qd, qd
+ .00000000E+00   .000000E+00   .000000E+00       epi, adi, gpi
+   0   .000000E+00   .000000E+00                 ipt, a, b
+CNHE.BIN                                

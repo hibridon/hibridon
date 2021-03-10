@@ -1,0 +1,9 @@
+inp=ch3i.inp
+rstart=3.5;spac=0.1
+wavefl=t
+vmax(1)=4;vmax(2)=4
+job=ch3itest
+run
+flux,,1
+psi
+exit

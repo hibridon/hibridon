@@ -1,0 +1,113 @@
+#!/bin/csh -f
+# HIBRIDON bin/makepot $Revision: 96.2 $ --- make test program to run pot_$potname
+
+@ items = $#argv
+set basedir=`hibriddir`
+
+if ($items == 0) then
+  echo "usage: makepot potname"
+  exit
+endif
+if ($items > 1) then
+  echo "usage: makepot potname"
+  exit
+endif
+if ($items == 1) then
+  set potname = $1
+endif
+
+if (-e $basedir/p_$potname.log) then
+  mv $basedir/p_$potname.log $basedir/p_$potname.log.BAK
+endif
+
+if (-e $basedir/src/hipotutil.o) then
+else
+  echo "$basedir/src/hipotutil.o. not found, re-run makeobj ..."
+  exit
+endif
+
+if (-e $basedir/CONFIG) then
+else
+ echo "CONFIG file not here, making it now ..."
+ $basedir/bin/makeconfig >>& $basedir/p_$potname.log
+ echo ""
+ echo "check and (if desired) modify $basedir/CONFIG, then rerun makepot"
+ exit
+endif
+
+
+# check if correct pot subroutine is present
+
+if (-e $basedir/src/pot/pot_$potname.f) then
+else
+  echo ""
+  echo "pot subroutine $basedir/src/pot/pot_$potname.f not present, abort ..."
+  exit
+endif
+
+# check if common routines are present in /src/pot
+if (-e $basedir/src/pot/common/parpot) then
+else
+  echo ""
+  echo "creating /pot/common directory ..."
+  cp -pr $basedir/src/common $basedir/src/pot
+endif
+
+# check if fortran converter is present
+
+if (-e ftconv.exe) then
+else
+ echo ""
+ echo "making fortran converter ..."
+ $basedir/bin/makeftconv >>& $basedir/p_$potname.log
+endif
+
+# run fortran converter
+echo ""
+echo "running fortran converter ..."
+$basedir/bin/rpotscript $potname >>& $basedir/p_$potname.log
+
+# convert pot_potname.f to runable program
+sed sx"subroutine driver"x"program main"x $basedir/src/pot/pot_$potname.f >$basedir/src/pot/runpot.f
+
+# compile 
+
+echo ""
+echo "compiling runpot.f ..."
+
+cd $basedir/src/pot >>& $basedir/p_$potname.log
+$basedir/bin/ftn_hib -d runpot.f >>& $basedir/p_$potname.log
+
+
+# link runpot_potname
+
+echo ""
+echo "linking runpot_$potname"
+echo "linking runpot_$potname" >>& $basedir/p_$potname.log
+
+cd $basedir/src
+if (-e $basedir/src/hiblas.o) then
+  set blas = $basedir/src/hiblas.o
+else
+  set blas = ""
+endif
+$basedir/bin/ftn_hib -o runpot_$potname $basedir/src/pot/runpot.o  $blas \
+     $basedir/src/hipotutil.o hivector.o hiutil.o himatrix.o hiiolib.o hiunix.o>>& $basedir/p_$potname.log
+
+# remove pot_potname.o if successful link
+if (-e runpot_$potname) then
+  #rm pot/runpot.*
+endif
+  
+mv runpot_$potname ../bin/progs
+
+cat runpot_$potname.log >> $basedir/p_$potname.log
+rm runpot_$potname.log
+
+cd $basedir/bin >>& $basedir/p_$potname.log
+end:
+echo ""
+echo "examine $basedir/p_$potname.log for diagnostic and/or error messages"
+
+exit
+

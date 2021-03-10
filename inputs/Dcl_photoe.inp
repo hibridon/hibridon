@@ -1,0 +1,22 @@
+                     N2-Ar CC PATTENGILL 
+  10                             ibasty
+  F  T  F  F                     logdfl, airyfl, readpt, bastst
+    1.3500    1.3500     .1000   rstart, rendld, spac
+  F                              prairy
+  1.000      3.50     8.0  1.00  tolai, rincr, rendai, fstfac
+   1                             nerg
+ 15197.0
+    1.90441                      xmu
+   30.0000                       rcut
+   2   2   1  -1   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  48   0                         lscreen, iprint
+    2    2                       nnout,niout
+    0    1
+    0    1
+  F  F  F  F  F                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  F  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  T                  noprin, chlist, ipos, nucros, photof
+  T  F  F  T  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F                              rsflag
+   1           587.3    
+                                        

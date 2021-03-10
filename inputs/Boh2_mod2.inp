@@ -1,0 +1,23 @@
+B-H2 PES's of ALEXANDER                 
+  12                             ibasty
+  T  T  F  T                     logdfl, airyfl, readpt, bastst
+    3.0000    3.0000     .0500   rstart, rendld, spac
+  F                              prairy
+  1.000      8.00    20.0  1.00  tolai, rincr, rendai, fstfac
+   1                             nerg
+   208.5
+    1.70370                      xmu
+   30.0000                       rcut
+   0   0  20   1   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  48   2                         lscreen, iprint
+    5    5                       nnout,niout
+    0    1    0    1    2
+    0  200    1  201  201
+  F  F  F  F  F                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  F  T                  wrpart, prpart, prxsec, wrxsec, wavefl
+  F  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  T  T  F  T  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F                              rsflag
+   1   1
+     59.3340       10.1700         brot, aso
+nopot                                   

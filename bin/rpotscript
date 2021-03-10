@@ -1,0 +1,33 @@
+#!/bin/csh - f 
+# HIBRIDON runpotscript $Revision: 96.1 $ --- run conversion of fortran potential subroutine
+set basedir=`hibriddir`
+
+@ items = $#argv
+
+if ($items == 0) then
+  echo "usage"  runpotscript potname"
+  echo "aborting ..."
+  goto end
+endif
+if ($items > 1) then
+  echo "usage"  runpotscript potname"
+  echo "aborting ..."
+  goto end
+endif
+
+if (-e $basedir/CONFIG) then
+else
+ echo "$basedir/CONFIG file is not here, abort ..."
+ goto end
+endif
+set machine=`grep MACH $basedir/CONFIG`
+set machine=`echo $machine|sed s/MACH=\"//`
+set machine=`echo $machine|sed s/\"//`
+cp potscript $basedir/src/pot
+cd $basedir/src/pot
+potscript $1 $machine
+rm potscript
+cd $basedir/bin
+
+end:
+exit

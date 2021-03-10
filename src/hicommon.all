@@ -1,0 +1,455 @@
+*comdeck comdot
+cstart fps vax unix cray mac
+      data dot /'.'/
+cend
+cstart univac cray-cos
+c;      data dot /'$'/
+cend
+*comdeck parbasl
+*  revised 13-may-1997 by mha
+      logical llpar,lllpar,boundc,readpt
+      common /colpar/ llpar(14), readpt, lllpar(12),boundc
+*comdeck parbas
+*  revised march 1992, c.r. 13-may-1997 by mha
+      parameter (maxtrm=12,maxvib=10,maxvb2=maxvib**2)
+*  variables in common block /cobspt/
+*    lammin:   array containing minimum value of lambda for each term
+*    lammax:   array containing maximum value of lambda for each term
+*    mproj:    array containing the order of the reduced rotation matrix
+*              elements for each term.  lammin can not be less than mproj.
+*              for homonuclear molecules, the allowed values of lambda for
+*              each term range from lammin to lammax in steps of 2
+      common /cobsp2/ ntv(maxtrm),ivcol(maxvb2,maxtrm),
+     :                ivrow(maxvb2,maxtrm)
+      common /cobspt/ lammin(maxtrm), lammax(maxtrm), mproj(maxtrm)
+      common /cobsptln/ lam2(maxtrm), m2proj(maxtrm)
+*comdeck parcode
+*  iicode is the number of integer pcod's
+*  ircode is the number of real pcod's
+*  ncode is the number of bcod's
+      parameter (ncode = 31, lcode = 28, iicode = 9, ircode = 9,
+     :           icode = iicode+ircode)
+      character*8 bcod(ncode), fcod(lcode),pcod(icode),bascod
+*comdeck parhlp.t
+cstart unix
+      parameter (helpdir='xxxx/doc/',
+     :           helptail='.hlp')
+cend
+*comdeck parlbuf
+cstart vax mac fps
+c;      parameter (lbuf=512)
+cend
+cstart unix-dec
+c;      parameter (lbuf=1024)
+cend
+*comdeck parllbf
+cstart cray fps
+c;      parameter (llbuf=512)
+cend
+cstart vax unix unix-dec unix-ibm
+      parameter (llbuf=1024)
+cend
+cstart univac
+c;      parameter (llbuf=1792)
+cend
+*comdeck parpot
+      character*48 potnam, label
+      common /coptnm/ potnam, label
+*comdeck parsys
+      parameter (maxpar=100,lencod = 2*maxpar+3)
+      common /coiout/ niout, indout(20)
+*comdeck partens
+*comdeck partens
+c.....for jmax=14 (49 channels, 29 buffers)
+      parameter (jmx=14,kmx=2*jmx+1,lmx=kmx,kkmx=3*kmx)
+      parameter (lbufs = 35525, lbuflb = 1421)
+c;c.....for jmax=20 (121 channels, 41 buffers)
+c;      parameter (jmx=20,kmx=2*jmx+1,lmx=kmx,kkmx=3*kmx)
+c;      parameter (lbufs = 302621, lbuflb=4961)
+      common /cosmrb/ srealp(lbufs)
+      common /cosmib/ simagp(lbufs)
+      common /coipp/  ipackp(lbuflb)
+      common /cojpp/  jpackp(lbuflb)
+      common /colpp/  lpackp(lbuflb)
+*comdeck parvfit
+      parameter (maxang=10,maxnr=5)
+*comdeck vax1
+cstart unix-sun
+c;      integer shiftl,shiftr,popcnt,poppar,compl
+c;      logical mnpar
+cend
+cstart vax unix-convex unix-nec unix-hp unix-ibm unix-dec unix-aix
+      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
+      logical mnpar
+cend
+cstart unix-iris
+c;      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
+c;      logical mnpar
+cend
+*comdeck vax2
+cstart vax unix-convex unix-nec unix-hp unix-ibm unix-dec unix-aix
+      xor(i,j)=ieor(i,j)
+      or(i,j)=ior(i,j)
+      and(i,j)=iand(i,j)
+      shiftl(i,j)=ishft(i,j)
+      shiftr(i,j)=ishft(i,-j)
+cend
+cstart unix-iris
+c;      xor(i,j)=ieor(i,j)
+c;      or(i,j)=ior(i,j)
+c;      and(i,j)=iand(i,j)
+c;      shiftl(i,j)=ishft(i,j)
+c;      shiftr(i,j)=ishft(i,-j)
+cend
+cstart unix-sun
+c;      shiftl(i,j)=lshift(i,j)
+c;      shiftr(i,j)=lrshft(i,j)
+c;      compl(i)=not(i)
+cend
+cstart unix-convex unix-nec unix-hp ibm vax unix-ibm unix-dec unix-aix
+      compl(i)=not(i)
+cend
+cstart unix-iris
+c;      compl(i)=not(i)
+cend
+cstart unix-convex
+c;      locate(li3562,l3562,i3562,ip3562)=iisveq(l3562,li3562,i3562,ip3562)
+cend
+*comdeck syusr
+      subroutine syusr (irpot, readp, iread)
+*  dummy syusr subroutine
+      logical readp
+      character*(*)fname
+      if(.not.readp.or.iread.eq.0) then
+        call loapot(1,' ')
+        return
+      endif
+      entry ptrusr (fname)
+      entry savusr (readp)
+      entry chkusr
+      return
+      end
+*comdeck bausr
+* --------------------------------------------------------------------
+      subroutine bausr (j, l, is, jhold, ehold, ishold, nlevel, nlevop,
+     :                  sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu,
+     :                  csflag, clist, bastst, ihomo, nu, numin, jlpar,
+     :                  n, nmax, ntop)
+      return
+      end
+* --------------------------------------------------------------------
+*comdeck ground
+      subroutine ground(wf, r, nch, nphoto, mxphot)
+      implicit double precision (a-h,o-z)
+      entry wfintern(wf,yymin,nnvib,nny)
+*  dummy ground subroutine
+      return
+      end
+*comdeck ipar
+      common /coipar/ jtot1,jtot2,jtotd,jlpar,nerg,numax,numin,nud,
+     :                lscreen, iprint
+*comdeck rpar
+      common /corpar/ fstfac, rincr, rcut, rendai, rendld, rstart, spac,
+     :                tolai, xmu
+*comdeck lpar
+      common /colpar/ airyfl, airypr, bastst, batch, chlist,
+     :                csflag, flaghf, flagsu, ihomo, ipos, logdfl,
+     :                logwr, noprin, partw, readpt, rsflag, swrit,
+     :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
+     :                xsecwr, nucros, photof, wavefl, boundc
+*comdeck logdef
+      logical airyfl, airypr, bastst, batch, chlist,
+     :                csflag, flaghf, flagsu, ihomo, ipos, logdfl,
+     :                logwr, noprin, partw, readpt, rsflag, swrit,
+     :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
+     :                xsecwr, nucros, photof, wavefl, boundc
+*comdeck machines.h
+/* machines.h $Revision: 95.1 $ */
+/* MOLPRO machine characteristics for C programs */
+
+/* disk parameters for printing i/o times
+... override at compile time with -DSEEK=.....  etc.! */
+#ifndef SEEK
+#define SEEK		0.001		/* average seektime in seconds */
+#endif
+#ifndef SPEED
+#define SPEED		307250		/* speed in words per second */
+#endif
+
+
+#ifdef hpux
+#define NOGETWD
+#define MVBITs	MVBITS
+#define HAS_UTSNAME
+#ifdef hp9000s300
+#define MACHINE_TYPE	"unix unix-i4 unix-hp unix-hp300"
+#define FORTCL_END
+#define SYSTEm	SYSTEM
+#define GETENv	GETENV
+#endif
+#ifdef hp9000s800
+#define NAME_L
+#define MACHINE_TYPE	"unix unix-i4 unix-hp unix-hp800"
+#define FORTCL_END
+#endif
+#endif
+
+
+#ifdef _AIX
+#define NAME_L
+#ifdef I64
+#define MACHINE_TYPE	"unix unix-i8 unix-ibm"
+#else
+#define MACHINE_TYPE	"unix unix-i4 unix-ibm"
+#endif
+#ifndef AIX_SHM
+#define AIX_SHM 16777216 /* threshold for using shared memory segments */
+#endif
+#ifndef AIX_SHM_SEG_MAX
+#define AIX_SHM_SEG_MAX 10
+#endif
+#include <memory.h>
+#include <sys/shm.h>
+#include <sys/ipc.h>
+#include <sys/errno.h>
+#include <sys/mode.h>
+#define HAS_UTSNAME
+#define FORTCL_END
+#ifdef PAM6000
+#define CLSEG clseg
+#endif
+#ifndef RESERVE
+#define RESERVE 10000
+#endif
+#endif
+
+#ifdef ultrix
+#define NAME_LU
+#define REVERSE_BYTE
+#define MACHINE_TYPE	"unix unix-i4 unix-dec"
+#define HAS_UTSNAME
+#define FORTCL_END
+#endif
+
+#ifdef __alpha
+#define NAME_LU
+#define REVERSE_BYTE
+#define HAS_UTSNAME
+#define FORTCL_END
+#define MACHINE_TYPE	"unix unix-i4 unix-dec"
+#define MEMALLOC(n)	(char *)malloc(n * sizeof(double))
+#ifndef FORTINT
+#define FORTINT int
+#endif
+#endif
+
+#ifdef __convexc__
+#define convex
+#endif
+#ifdef convex
+#define NOMALLOCH
+char *malloc();
+#define TRACEBACK traceback_()
+#define	NAME_LU
+#define CLSEG	_clseg_
+#define MACHINE_TYPE	"unix unix-i4 unix-convex"
+#define HAS_UTSNAME
+#define FORTCL_END
+#define	OPENFLAGS	O_LARGEFILE
+#define OFFSET		off64_t
+#define	LSEEK		lseek64
+#endif
+
+#ifdef sgi
+#include <string.h>
+#include <strings.h>
+#define	NAME_LU
+#define HAS_UTSNAME
+#define FORTCL_END
+#ifndef FORTINTC
+#define FORTINTC long
+#endif
+#if (_MIPS_SZLONG == 64)
+#ifdef I64
+#ifndef FORTINT
+#define FORTINT long 
+#endif
+#define MACHINE_TYPE	"unix unix-i8 unix-iris unix-r8000"
+#else
+#ifndef FORTINT
+#define FORTINT int
+#endif
+#define MACHINE_TYPE	"unix unix-i4 unix-iris unix-r8000"
+#endif
+#define IRIX64
+#else
+#ifndef FORTINT
+#define FORTINT int
+#endif
+#define MACHINE_TYPE	"unix unix-i4 unix-iris"
+#endif
+#endif
+
+#ifdef	sun
+/* This seems to be needed for Solaris */
+#define NOGETWD
+#define	MVBITs	mvbits_
+#define	NAME_LU
+#define FORTCL_END
+typedef long clock_t;
+#define MACHINE_TYPE	"unix unix-i4 unix-sun"
+#define HAS_UTSNAME
+#endif
+
+#ifdef	sequent
+#define NOMALLOCH
+#define NOTRAP
+#define	MEMALLOC(n)	shmalloc(n * sizeof(double))
+char *shmalloc();
+#define	free shfree
+#define	NAME_LU
+#define FORTCL_END
+#define REVERSE_BYTE
+typedef long clock_t;
+#define MACHINE_TYPE	"unix unix-i4 unix-sequent"
+#endif
+
+#ifdef SX
+#define NAME_LU
+typedef long clock_t;
+#define FORTCL_END
+#define HAS_UTSNAME
+#define MACHINE_TYPE	"unix unix-i4 unix-nec"
+#endif
+
+#ifdef _UNICOS
+#include <sys/machd.h>
+#define HAS_UTSNAME
+#ifdef CRAY2
+#define MACHINE_TYPE	"cray cray-unicos cray-2"
+#define TRACEBACK tracebk()
+#else
+#ifdef _CRAYMPP
+#define MACHINE_TYPE	"cray cray-unicos cray-mpp"
+#define FORTCL_NEXT
+#define FORTINTC_DIVIDE	8
+#define GETENv	GETENV
+#else
+#ifdef  CRAYC90
+#define MACHINE_TYPE	"cray cray-unicos cray-c90"
+#else
+#define MACHINE_TYPE	"cray cray-unicos cray-ymp"
+#endif
+#endif
+#define TRACEBACK trbk()
+#endif
+#endif
+
+#ifdef __uxp__
+#define NOGETWD
+#define	MVBITs	mvbits_
+#define NAME_LU
+#define FORTCL_END
+#define HAS_UTSNAME
+#define TRACEBACK errtra_()
+#define MACHINE_TYPE	"unix unix-i4 unix-fujitsu"
+#define NOINDEX
+#endif
+
+#ifndef MACHINE_TYPE
+/*#error "Sorry, machines.h hasn't been set up for your machine"*/
+#define MACHINE_TYPE	"unknown"
+#endif
+
+/* fortran integer type */
+#ifndef FORTINT
+#define FORTINT	long
+#endif
+typedef FORTINT fortint ;
+/* fortran character string length type */
+#ifndef FORTINTC
+#define FORTINTC FORTINT
+#endif
+typedef FORTINTC fortintc ;
+
+#ifndef OPENFLAGS
+#define OPENFLAGS	0
+#endif
+#ifndef OFFSET
+#define OFFSET		off_t
+#endif
+#ifndef LSEEK
+#define LSEEK		lseek
+#endif
+
+#include <stdio.h>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <ctype.h>
+#include <math.h>
+
+
+#ifndef MEMALLOC
+#define MEMALLOC(n)	malloc(n * sizeof(double))
+/*#define MEMALLOC(n)	calloc(n , sizeof(double))*/
+#endif
+#ifndef NOMALLOCH
+#include <malloc.h>
+#endif
+
+/* sysv/ucb nonsense */
+#ifdef NOINDEX
+#define index	strchr
+#define rindex	strrchr
+#endif
+
+#ifdef NOGETWD
+char *getcwd();
+#define Getcwd(a,b)	getcwd(a,b);
+#else
+char *getwd();
+#define Getcwd(a,b)	getwd(a);
+#endif
+
+#include <sys/time.h>
+#include <sys/times.h>
+#include <sys/param.h>
+
+
+#ifdef _CRAYMPP
+#define TIMER_TICK	CLK_TCK
+#endif
+#ifndef TIMER_TICK
+#ifndef HZ
+#define TIMER_TICK      60
+#else
+#define TIMER_TICK      HZ
+#endif
+#endif
+
+
+#ifdef FORTCL_END
+#define FORTCL
+#endif
+#ifdef FORTCL_NEXT
+#define FORTCL
+#endif
+
+#ifndef MAXPATHLEN
+#define MAXPATHLEN	1024
+#endif
+
+#define MAXPARIO	8
+typedef struct {
+	int fd; OFFSET addr, size; int nd;
+	char *fn, *dn[MAXPARIO];
+} FILE_DEFINITION;
+/* PARIOTHRESH=1: parallel I/O stuff used for one thread too; otherwise set 2 */
+#ifndef PARIOTHRESH
+#define PARIOTHRESH	2
+#endif
+
+

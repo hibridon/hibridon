@@ -1,0 +1,16 @@
+#!/bin/csh -f
+# HIBRIDON makehibkey $Revision: 97.1 $ --- create encoded subroutine
+
+set basedir=`hibriddir`
+if (-e $basedir/src/hiamp.f) then
+  echo "creation of $basedir/bin/key from $basedir/src/hiamp.f"
+else
+  echo "$basedir/src/hiamp.f not found; abort"
+  exit
+endif
+cd $basedir/src
+uuencode hiamp.f key.f > hkey.uu
+cat hkey.uu | tr '[0-4][5-9]' '[5-9][0-4]' > key
+cat key | sed "sn199nxxxn" > key1
+mv key1 key
+rm hkey.uu

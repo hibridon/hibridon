@@ -1,0 +1,12 @@
+3/20/96 phhe, inp=phhe_test.inp  problem with rcut=30, channels drop
+dramatically at e=150 vs e=150.5, this goes away with rcut=300
+  in cs calcs for nu > numin, rcut will work differently, so that
+  nch can be greater than nchtop, which is set only for nu=numin
+3/17/96 flux,-2 doesn't work of 1sigma arn2 test?
+3/17/96 check flux,,1 example
+3/17/96  threshold doesn't work in difs; 3/18/96 yes, it does
+3/16/96  optimization is not working
+1/1/96
+  dbwc in hiiolib.f call dwrite with unassigned values of ioff
+  work around:  compile with static option
+

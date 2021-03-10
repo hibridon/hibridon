@@ -1,0 +1,17 @@
+#!/bin/csh -f 
+# HIBRIDON runhscript $Revision: 96.1 $ --- run conversion of hhelp.f file
+set basedir=`hibriddir`
+
+if (-e $basedir/CONFIG) then
+else
+ echo "$basedir/CONFIG file is not here, abort ..."
+ exit
+endif
+set machine=`grep MACH $basedir/CONFIG`
+set machine=`echo $machine|sed s/MACH=\"//`
+set machine=`echo $machine|sed s/\"//`
+cp $basedir/bin/hscript $basedir/src
+cd $basedir/src
+hscript $machine
+rm hscript
+cd $basedir/bin

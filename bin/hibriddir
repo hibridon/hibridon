@@ -1,0 +1,6 @@
+#!/bin/sh
+# HIBRIDON bin/hibdir $Revision: 95.1 $ --- report the pathname of the base
+#                                        hibridon directory type
+if test $0 != hibriddir ; then basedir=`echo $0|sed 's/\/hibriddir$//'`/.. ;else basedir=.. ; fi
+cd $basedir
+pwd

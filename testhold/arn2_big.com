@@ -1,0 +1,45 @@
+inp=arn2_test.inp
+out=arn2_big.out
+prxsec=t
+show
+label=CS Integral and Partial Tests
+run
+csflag=t
+numax=4
+jmax=10
+run
+noprin=t
+prt2=f
+prlogd=f
+prxsec=f
+prsmat=f
+jtot1=0
+csflag=f
+label=CC Integral and Partial Tests
+job=ccbtest
+wrxsec=t
+wrpart=t
+show
+run
+printc
+partc
+label=CC test of restart
+job=ccbrstest
+jtot2=10
+run
+rsflag=t
+jtot2=20
+run
+printc
+partc
+rsflag=f
+run
+csflag=t
+numin=0
+numax=4
+jmax=10
+job=csbtest
+run
+printc
+partc
+exit

@@ -1,0 +1,36 @@
+  CNNE INPUT for 7/3 transitions (flux, photo)       
+   4                             ibasty
+  F  T  F  F                     logdfl, airyfl, readpt, bastst
+    4.0000    4.0000     .0064   rstart, rendld, spac
+  F                              prairy
+  1.000      3.00    30.0  4.19  tolai, rincr, rendai, fstfac
+   1                             nerg
+   664.0
+   11.30251                      xmu
+   30.0000                       rcut
+   0   0   1   1   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80  -1                         lscreen, iprint
+    4    6                       nnout,niout
+    0    1    2    3     
+  103  -103  203 -203  307 -307
+  F  F  F  F  F                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  F  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  F  F  F  F  T                  noprin, chlist, ipos, nucros, photof
+  T  F  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F                              rsflag
+   1   1   1   0                                 isg, ipi, isgpi, isa
+   1   2   1                                     igusg, nparsg, isymsg
+   1   7   7                                     nvibs, vminsg, vmaxsg
+   7   0  21                                     ivs,  nmin,  nmax
+   1.76777       .653498E-05   .000000E+00       bsg, dsg, hsg
+   .627435E-02   .000000E+00   .000000E+00       gs, gsd, gsh
+ 14774.420                                       esg
+  -1   2                                         igupi, nparpi
+   1   3   3                                     nvibp, vminpi, vmaxpi
+   3   0   8                                     ivp, jmin, jmax
+   1.65528       .616757E-05   .000000E+00       bpi, dpi, hpi
+  -52.4034       .657957E-03   .000000E+00       aso, p, pd
+  -.407585E-03   .000000E+00   .000000E+00       q, qd, qd
+ 15434.860       .000000E+00   .000000E+00       epi, adi, gpi
+   7   .000000E+00   .000000E+00                 ipt, a, b
+   0.17921                                   vibmatelement73

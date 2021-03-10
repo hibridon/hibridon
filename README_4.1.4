@@ -1,0 +1,65 @@
+
+The following changes have been made in bringing hibridon 4.1.3
+to relase level 4.1.4:
+2/21/03   hibrid5.f modified to allow calculation of integral cross
+          sections for jtot_max less than jtot2 used in calculating smt file
+6/3/02    hibah2p.f modified to correct errors in CC calculations
+10/10/01  hibrid2 changed to allow appending for .xsc files on hp
+10/3/01   changes in hiiolib and hinput to restrict jobnam to 6
+          characters
+10/1/01   hivector changes so that calls to lapack routines not
+          made if blas3
+10/1/01   himatrix changed so that calls to all blas3 and blas2
+          subroutines are eliminated if unix-blas3 is set in CONFIG
+10/1/01   himatrix.f changed so that in mxma and mxmb
+          cstart unix-blas3 changed to 
+          cstart unix-blas3 .and.not.unix-hp800
+10/1/01   prsgpi in hibrid2.f changed to re-initialize insize
+          at every passage through subroutine
+10/1/01   himain.t changed to force skip to next partial wave
+          when numax lowered in cs calculations
+10/1/01   change inline optimization directives for unix-hp in
+          hiversion.t, himain.t and hinput.f to be compatible with f90
+9/19/01   formating changed again in hibrid5 to allow ouput of
+          larger channel indices
+3/25/01   formatting changed in hibrid5 to allow output of channel
+          indexes >100 in size
+6/3/00    potscript changed to incorporate consistently changes made on
+         ibm (5/18/00) and hp (2/15/99)
+5/31/00   makeconfig changed to integrate latest changes on ibms and hp
+5/18/00   ftn_hib changed so the "compilation done" is echoed at the end
+5/18/00   runhscript, potscript, ftscript changed so that alias rm is correct
+          and other small errors corrected
+5/18/00   tests changed to include differential and steric
+              differential calculations for Ar-NO
+5/18/00   maketar_full changed so that repeated common directories
+          are not copied
+5/17/00   makeconfig changed so that 
+             correct essl library is used for POWER, POWER2, and POWER3
+                machines
+             correct sgi CONFIG is created for machinetype
+             "unix unix-iris" and "unix unix-i4 unix-iris"
+5/17/00   hiunix.c changed to newer molpro version
+
+
+to migrate to release 4.1.4, you should download by anonymous ftp the 
+upgraded tar file for the complete package
+         mha-ibm1.umd.edu:/pub/hibrid/hibrid.tar.Z
+    or
+         mha-ibm1.umd.edu:/pub/hibrid/hibrid.tar.Z.uu
+
+    and follow the installation instructions contained in the file
+         mha-ibm1.umd.edu:/pub/hibrid/README
+
+to retain a copy of any previous versions, you may wish to
+carry out the intall in a new main hibridon directory.
+
+the current release level has been checked for the following
+operating system and compiler environments:
+
+AIX v. 3.2.5, 4.1.4, 4.2, 4.3
+  xlf compiler 2.3, 3.1, 3.2, 4.1, 6.1
+HP-UX v. 9.01, 9.02, 9.03, 10.01, 10.20
+IRIX 5.3, 6.1, 6.5 
+OSF v3.2
+SunOS v2 rel. 4.1.4, 5.5.1

@@ -1,0 +1,84 @@
+#!/bin/csh -f
+# HIBRIDON bin/installpatch $Revision: 96.1 $ --- update hibridon to latest release
+# installpatch number:  to install patch{number} tar file
+
+# the PATH variable should be set to include the hibridon bin directory
+
+
+set basedir=`hibriddir`
+@ items = $#argv
+
+if ($items == 0) then
+  echo "usage:  installpatch {patch_number}"
+  exit
+else if ($items > 1) then
+  echo "usage:  installpatch {patch_number}"
+  exit
+endif
+@ number = $1
+
+cd $basedir
+if (-e $basedir/patch$number.log) then
+  rm $basedir/patch$number.log
+endif
+cd $basedir
+echo ""
+set version=`cat VERSION`
+if $version == '4.0' then
+  set version = 4.0.0
+endif
+@ nversion=`cat VERSION |awk -F. '{print $3}'`
+if $nversion == $number then
+  echo "patch$number will not update hibridon, which is currently already at release $version"
+  exit
+endif
+@ oldnumber = $number - 1
+if $nversion == $oldnumber then
+  echo "updating hibridon 4.0.$oldnumber to 4.0.$number ..."
+else
+  echo "patch1 cannot update this release of hibridon ($version)"
+  exit
+endif
+cd $basedir
+cp $basedir/patch$number/patch$number.list $basedir/patchtemp.list
+if (-z $basedir/patchtemp.list) then
+  set existfl = 0
+else
+  set existfl = 1
+endif
+  while ($existfl != 0)
+    set name = `head -1 patchtemp.list | awk '{print $1}'`
+    set dir = `head -1 patchtemp.list | awk '{print $2}'`
+    if $name == 'all' then
+      if (-e $dir.~$oldnumber) then
+        rm -r $dir.~$oldnumber
+      endif
+      mv $dir $dir.~$oldnumber 
+      echo patch$number/$dir
+      ls patch$number/$dir
+      echo $dir
+      cp -pr patch$number/$dir $dir
+      echo "successful installation of update to directory $dir ..."
+      echo "successful installation of update to directory $dir ..." >>& patch$number.log
+    else
+      if $dir == '' then
+        set name1 = $name
+      else
+        set name1 = $dir/$name
+      endif
+      cp -p $name1 $name1.~$oldnumber
+      cp patch$number/$name $name1
+      echo "successful installation of update to $name1 ..."
+      echo "successful installation of update to $name1 ..." >>& patch$number.log
+    endif
+    sed 1,1d patchtemp.list > $basedir/newcheck
+    mv $basedir/newcheck patchtemp.list
+    if (-z patchtemp.list) set existfl = 0
+  end
+if (-e patchtemp.list) then
+  rm patchtemp.list
+endif
+rm -r patch$number
+echo "all software successfully installed; read $basedir/README_4.0.$number"
+echo "all software successfully installed; read $basedir/README_4.0.$number" >>& patch$number.log
+exit

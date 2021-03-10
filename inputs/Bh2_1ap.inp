@@ -1,0 +1,25 @@
+ALEXANDER V1A' B-H2                     
+   1                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    4.0000    5.0000     .0500   rstart, rendld, spac
+  F                              prairy
+  1.000      8.00    25.0 15.00  tolai, rincr, rendai, fstfac
+   1                             nerg
+   208.5
+    1.70370                      xmu
+   30.0000                       rcut
+   1   1  20   1   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  48   0                         lscreen, iprint
+    2    2                       nnout,niout
+    1    1
+    0  200
+  F  F  F  F  F                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  F  T                  wrpart, prpart, prxsec, wrxsec, wavefl
+  F  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  F  F  F  T  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F                              rsflag
+   1   0   0                     nvib, vmin,vmax
+   0   1   1                                     iv,jmin,jmax
+   60.0000       .000000E+00   .000000E+00       brot,drot,hrot
+      .00000000                                  evib
+                                        

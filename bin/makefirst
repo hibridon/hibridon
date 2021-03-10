@@ -1,0 +1,75 @@
+#!/bin/csh -f
+# HIBRIDON makefirst $Revision: 96.3 $ --- initial install script
+
+set basedir=`hibriddir`
+if (-e $basedir/src/hiamp.f) then
+  echo "re-installion of a licensed copy of hibridon 4"
+else
+  set accept="y"
+  echo -n "have you read the license agreement ($basedir/LICENSE) [y/n]?  "
+  set response=$<
+  set result="no"
+  if $response == "y" then
+    set result="yes"
+  else
+    echo "please read the license agreement before continuing"
+    echo "then reexecute makefirst and respond y"
+    exit
+  endif
+  echo -n "does your PATH include $basedir/bin [y/n]?  "
+  set response=$<
+  if $response == "y" then
+  else
+    echo "modify your PATH to include $basedir/bin"
+    exit
+  endif
+endif
+cd $basedir/bin
+set sysname=`uname -s`
+set known='no'
+if $sysname == 'AIX' then
+  cp hkey.aix hkey
+  set known='yes'
+endif
+if $sysname == 'IRIX' then
+  cp hkey.irix hkey
+  set known='yes'
+endif
+if $sysname == 'IRIX64' then
+  cp hkey.irix64 hkey
+  set known='yes'
+endif
+if $sysname == 'HP-UX' then
+  cp hkey.hpux hkey
+  set known='yes'
+endif
+if $sysname == 'OSF1' then
+  cp hkey.osf hkey
+  set known='yes'
+endif
+if $sysname == 'SunOS' then
+  cp hkey.sun hkey
+  set known='yes'
+endif
+if $known == 'no' then
+  echo "hibridon does not run under $sysname"
+  echo "abort install ..."
+  exit
+else
+cd $basedir/bin
+  if (-e makefirst.log) then
+    mv makefirst.log makefirst.BAK
+  endif
+endif
+if (-e $basedir/src/hiamp.f) then
+  echo "re-installion of a licensed copy of hibridon 4"
+else
+  chmod +x hkey
+  hkey
+  rm hkey
+endif
+echo "system name is $sysname" |tee $basedir/bin/makemachine.log
+echo "running makemachine ..." |tee -a $basedir/bin/makemachine.log
+makemachine 
+echo "running makeconfig ..." |tee -a $basedir/bin/makemachine.log
+makeconfig
