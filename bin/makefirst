@@ -328,21 +328,21 @@ else if ($HOSTTYPE == 'x86_64-linux' || $HOSTTYPE == 'ia64-linux' || $HOSTTYPE =
          set BLASLIB=""
          set LAPACKLIB="-llapack -lblas"
       else
-         echo -n "Enter the path for your library  "
+         echo -n "Enter the path for your BLAS library  "
          set responselib=$<
          set BLASLIB=""
          set LIBRARY_PATH=$responselib
          echo -n "Enter the name  s of your libraries (-lxxx, -lyyy, etc, including the hypen)  "
-         set responselib=$<
+         set responselib="$<"
          set LAPACKLIB="-L$LIBRARY_PATH $responselib"
       endif
    else
-       echo -n "Enter the path for your library  "
+       echo -n "Enter the path for your BLAS library  "
        set responselib=$<
        set BLASLIB=""
        set LIBRARY_PATH=$responselib
        echo -n "Enter the names of your libraries (-lxxx, -lyyy, etc, including the hypen)  "
-       set responselib=$<
+       set responselib="$<"
        set LAPACKLIB="-L$LIBRARY_PATH $responselib"
    endif
 else if $HOSTTYPE == 'powermac' then
