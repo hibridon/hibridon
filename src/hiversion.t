@@ -1,10 +1,4 @@
-cstart unix-xlf
-@process fixed(132)
-cend
       subroutine version(iunit)
-cstart unix-ifort
-cdec$ fixedformlinesize:132
-cend
       character*100 profile
       character*140 build
       common /bld_config/ build(5)
@@ -16,7 +10,8 @@ cend
      : (/' ---------------------------------------------------',
      :  '-----------------------',
      :  /,9x,
-     :   '  HIBRIDON SCATTERING CODE V xdate',
+     :   '  HIBRIDON SCATTERING CODE V ',
+     : 'xdate',
      : //'     AUTHORS: M. ALEXANDER, D. MANOLOPOULOS,',
      :   ' H.-J. WERNER, B. FOLLMEG, P. DAGDIGIAN',
      :  /' CONTRIBUTORS: D. LEMOINE, P. VOHRALIK,',
@@ -69,16 +64,17 @@ cend
      :  //,' All publications resulting from use of the',
      :  ' Hibridon package must include',
      :  ' the following reference:',
-     : //,' HIBRIDON is a package of programs for the time-independent',
+     : //,
+     :  ' HIBRIDON is a package of programs for the time-independent',
      :  ' quantum treatment',
      :  ' of inelastic collisions and photodissociation',
      :  /,' written by',
-     :  ' M. H. Alexander, D. E.  Manolopoulos, H.-J. Werner, B. Follmeg',
-     : ' and P. J. Dagdigian,',
+     :  ' M. H. Alexander, D. E.  Manolopoulos, H.-J. Werner,',
+     :  ' B. Follmeg and P. J. Dagdigian,',
      :  ' with contributions by',
      :  ' P. F. Vohralik, D. Lemoine,',
-     :  /,' G. Corey, B. Johnson, T. Orlikowski, A. Berning, A. Degli-Esposti,',
-     :  ' C. Rist, B. Pouilly,',
+     :  /,' G. Corey, B. Johnson, T. Orlikowski, A. Berning,',
+     :  ' A. Degli-Esposti, C. Rist, B. Pouilly,',
      :  ' G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick,',
      :  /,' J. Klos, and F. Lique',
      : /,' --------------------------------------------------------',
@@ -115,9 +111,11 @@ cend
      : ' B. Follmeg, and P. J. Dagdigian,',
      :  ' with contributions by',
      :  /,' P. F. Vohralik, D. Lemoine,',
-     :  ' G. Corey, B. Johnson, T. Orlikowski, A. Berning, A. Degli-Esposti,',
+     :  ' G. Corey, B. Johnson, T. Orlikowski, A. Berning,',
+     :  ' A. Degli-Esposti,',
      :  /,' C. Rist, B. Pouilly,',
-     :  ' G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J. Klos,',
+     :  ' G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J.',
+     :  ' Klos,',
      :  /,' and F. Lique',
      : /,' --------------------------------------------------------',
      :  '---------------------')
