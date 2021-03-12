@@ -243,7 +243,7 @@ if (-e $basedir/src/hiversion.f) then
   rm $basedir/src/hiversion.f
 endif
 set dt="`cat $basedir/VERSION` BUILD DATE $dt $tm $zn"
-sed snxdaten"$dt"n $basedir/src/hiversion.t > $basedir/src/hiversion.f
+sed "s|xdate|${dt}|" "$basedir/src/hiversion.t" > $basedir/src/hiversion.f
 # determine build system configuration
 hibdetails
 cat SYSCONFIG >> $basedir/src/hiversion.f
