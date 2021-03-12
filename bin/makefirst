@@ -1,4 +1,5 @@
-#!/bin/csh -f
+#!/bin/tcsh -f
+# note: MACHTYPE and HOSTTYPE are available in tcsh, but not csh
 # HIBRIDON makefirst $Revision: 2010.2 $ --- initial install script (this version for G4 and intel macs and i86 Linux)
 echo " "
 set basedir=`hibriddir`
@@ -51,7 +52,11 @@ cd $basedir/bin
 endif
 echo " "
 echo "system name is $sysname" |tee -a $basedir/bin/makefirst.log
-echo "machine type is $MACHTYPE" |tee -a $basedir/bin/makefirst.log
+if (! $?MACHTYPE) then
+   echo "machine type is unknown (MACHTYPE environment variable doesn't exist)" |tee -a $basedir/bin/makefirst.log
+else
+   echo "machine type is $MACHTYPE" |tee -a $basedir/bin/makefirst.log
+endif
 echo "host type is $HOSTTYPE" |tee -a $basedir/bin/makefirst.log
 echo " "
 if $HOSTTYPE == 'intel-pc' then
