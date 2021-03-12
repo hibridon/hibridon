@@ -82,7 +82,7 @@ do
   $echo  "compiling ${filei} ... "
   if test -r $logfi ; then rm $logfi ; fi
   if test $preprocess != 0 ; then $echo -n "preprocessing ... " ;ftc $filei ;fi
-  $echo $FC -c $HIB_FFLAGS $extraopt $option $file
+  $echo $FC -c $HIB_FFLAGS $extraopt $option $filei
 echo $filei
   
   eval "$FC -c $HIB_FFLAGS $extraopt $option $filei"
