@@ -84,9 +84,9 @@ if $cputype == 'intel' then
    echo -n "Your fortran compiler command is $fcompiler $opt $FS, is this correct? [y/n]  "
    set response=$<
    if $response == 'n' then
-       echo -n "Enter the name of your fortran compiler:  g95 or absoft:  "
+       echo -n "Enter the name of your fortran compiler:  g95, gfortran or absoft:  "
        set fcompiler=$<
-       if $fcompiler == 'g95' then
+       if ( $fcompiler == 'g95' || $fcompiler == 'gfortran' ) then
           set FS = -static
           set opt='-O3'
        else if $fcompiler == 'absoft' then
@@ -134,11 +134,14 @@ else if ($cputype == 'x86_64-linux' || $cputype == 'i386-linux' || $cputype == '
    echo -n "Your fortran compiler is $fcompiler $opt $FS, is this correct? [y/n]  "
    set response=$<
    if $response == 'n' then
-       echo -n "Enter the name of your fortran compiler: (g95, pgf95, pgf90 ...  "
+       echo -n "Enter the name of your fortran compiler: (g95, gfortran, pgf95, pgf90 ...  "
        set fcompiler=$<
        if $fcompiler == 'g95' then
           set FS = -static
           set opt='-O3'
+       elseif $fcompiler == 'gfortran' then
+          set FS = -static
+          set opt = '-O3'
        elseif $fcompiler == 'pgf95' then
           set FS = -
           set opt = '-fast'
@@ -210,8 +213,8 @@ else if $fcompiler == 'xlf' then
      else
         echo "fortran compiler $fcompiler not found" |tee -a $basedir/bin/makefirst.log
      endif 
-else if $fcompiler == 'g95' then
-    set FFC=`which g95`
+else if ( $fcompiler == 'g95' || $fcompiler == 'gfortran' ) then
+    set FFC=`which $fcompiler`
     set resp=`echo $FFC |grep -c "not found"`
     if $resp == 0 then
        if (-e $FFC) then 
