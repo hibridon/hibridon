@@ -367,7 +367,7 @@ c         fast = .false.
              goto 300
 * iframe = 1
 172          call sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack,
-     :             lpack,ipack,jttble,prefac,sigma,
+     :             lpack,ipack,jttble,prefac,
      :             sreal,simag,matel,lenlab,labadr,
      :             jtotpa,fast,ierr)
              goto 300
@@ -2201,7 +2201,7 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
 * current revision date: 8-mar-2010 by pj dagdigian
 *------------------------------------------------------------------------
       implicit double precision (a-h,o-z)
-* size of q for j ² 5 and 0.5 deg angle increment
+* size of q for j ï¿½ 5 and 0.5 deg angle increment
       complex*16 q(43681)
       logical diag, diagj, diagin, lpar1, lpar2, batch, ipos,
      :        twopar, fast, lpar3, flaghf
@@ -2279,7 +2279,12 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
 230   continue
       jtlast=-1
       jplast=0
-cc.....read header of s-matrix filec      call rdhead(1,cdate1,ered1,rmu1,csflg1,flghf1,flgsu1,     1   twomol,nucros,jfirst,jfi
+c
+c.....read header of s-matrix file
+c
+      call rdhead(1,cdate,ered,rmu,csflag,flaghf,flagsu,twomol,
+     :   nucros,jfirst,jfinal,jtotd,numin,numax,nud,nlevel,nlevop,nnout,
+     :   jlev,inlev,elev,jout)
 *
 *.....read next s-matrix
 *
@@ -2329,7 +2334,8 @@ c
 c.....loop back to next jtot/jlpar
 c
 300   if(jtot.lt.jfinal .or. jlpar.eq.1) goto 250
-cc.....ca is wavevector for initial state, ecol is collision energy
+c
+c.....ca is wavevector for initial state, ecol is collision energy
       ecol = ered1 - elevel
       ca=sqrt(2.d0*rmu1*ecol)
       fak=ang2c/ca**2
