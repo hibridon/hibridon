@@ -215,9 +215,18 @@ else if $fcompiler == 'xlf' then
      endif 
 else if ( $fcompiler == 'g95' || $fcompiler == 'gfortran' ) then
     set FFC=`which $fcompiler`
-    set options = '-ffixed-line-length-132 -std=legacy'
+
     # -ffixed-line-length-132 because lots of files use more than the standard 72 columns
+    set options = '-ffixed-line-length-132'
+
     # -std=legacy so that the compiler doesn't complain when the size of arrays don't match between a function declaration and a call to this function. At the moment, there's plenty of such cases in the code; these are not bugs, just an old way of doing things.
+    set options = "$options -std=legacy"
+
+    # force arrays to be allocated on the heap instead of the stack, this removes segmentation faults crash, not sure why
+    set options = "$options -fmax-stack-var-size=1"
+
+    # set options = '-ffixed-line-length-132 -std=legacy -g -Wl,--stack,1048'    
+    #  -fbounds-check'
     set resp=`echo $FFC |grep -c "not found"`
     if $resp == 0 then
        if (-e $FFC) then 
