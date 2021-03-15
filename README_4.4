@@ -1,0 +1,124 @@
+The following changes have been made in bringing hibridon 4.3
+to release level 4.4
+
+11/13     Added routines ofr collision of 1D/3P atom with atom
+10/13     Symmetric top basis routines (bastp, bastp1) now have capability
+          to molecules with equivalent spin 1 nuclei, e.g. CD3 and ND3
+6/13      Added built-in 2pi--1sigma molecule-molecule basis, ibasty=20
+          (hiba1sg, hiba2pi1sg, hisystem also modified)
+6/13      Two functions, is_twomol() and is_j12() added in hiba1sg, to check 
+          if a basis type (ibasty) is a moleule-molecule basis, and if it 
+          requires a j12 array to complete the description of the channel
+          basis.  Statements checking these in various files modified accordingly.  
+          (So that when adding a new basis various I/O and cross sections 
+          routines do not need to be changed.)
+6/13      Hibound routine rewritten, now uses dynamic allocation, and 
+          provides a simple wave vector analysis when wavefl=true.  It
+          calculates only (-tolai) bound states if tolai<0.
+6/13      Twomol is now passed to the basis routine.
+6/13      Routines tf3jm0, tf3j, tj6j and tf9j routines added to hituil. These 
+          functions take (integer) 2j, 2m as parameters.  The 3j and 6j functions 
+          are faster than the xf versions (because conversion between real 
+          number and integers is not fast and not so reliable).
+6/13      Eliminate superfluous nlami array in basis routines baastp, bach2x,
+          basyp, bastp1, bastpln
+6/13      Dynamically allocate memory for arrays etc. in hitrnprt module
+6/13      Dynamically allocate memory for arrays etc. in hiprsbr module
+          and added sinqr routine to hiiolib_f (to determine max jtot and
+          max channel length)
+4/13      Added prsbr module to compute pressure broadening cross sections
+3/13      Revised bah3p basis routine for the calculation of cross sections.
+          Shifted zero of energy so that lowest level has eint = 0.
+3/13      Revised bah2p basis routine for the calculation of cross sections.
+          Shifted zero of energy so that lowest level has eint = 0.
+11/12     Added common block conlamp to avoid duplicate use of lamnum
+11/12     Increased size of jmx to 90m and sizes of lbufs and lbuflb, in partens
+11/12     Rewrote hitrnprt.f so that all transport cross sections computed
+          with a single command
+9/12      Increased size of jout array to 50
+9/12      Increased maximum size of asymmetric top basis expansion
+9/12      Took care of problem with ibasty=4 and 19 basis types in 
+          sigk subroutine in hitensor
+9/12      Increased lengths of buffers in partens common block
+4/12      Renomed duplicate variable definitions in hisystem
+4/12      pot_nh3h2_2009 no longer writes to units that are not opened.
+4/12      Corrected the subroutine in hisystem.f that writes input files for 
+          bastpln
+4/12      New interface to eadiab.  The original interface can be accessed 
+          from the flux command.
+4/12      Allow writing only adiabatic energies to wfu files when WRSMAT set 
+          false.  Backward compatibility is lost since WRSMAT has to be set 
+          true for flux/psi calculations.  A couple of input files in the 
+          test have been modified.
+4/12      Simplify the del function in hiutil.f (used by f3j0 and f6j).  
+          This significantly improves the performance of the bastpln 
+          basis subroutine.
+4/12      Removed cf9j in hibastpln.f which calculates 9-j symbols for 
+          integers but take double precision numbers as input.  
+          The function is never called and can be substituted with 
+          existing f9j and xf9j functions.
+4/12      Moved f9j routine from hibastpln.f to hiutil.f
+4/12      Fixed bug in wrhead subroutine (corrected for alignment)
+4/12      Revised for stream I/O of wfu files
+2/12      Implemented calculation of differential cross sections
+          for molecule-molecule collisions (ibasty=9)
+1/12      Moved dlmo and pm0 routines from hibrid3.f to hiutil.f
+1/12      Fixed problem of calculation of elastic cross sections
+          for molecule-molecule collisions with INTCRS
+1/12      J12 now printed out for molecule-molecule collisions
+          when PRINTS called
+1/12      Replaced buffering s-matrix i/o routines with
+          streaming i/o routines (hibridon now requires ifort compiler)
+1/12      Time given to nearest second, but still works if date changes
+1/12      Last line "quit/exit" now optional in a .com file
+1/12      Added Q. Ma aa a contributor
+12/11     Promoted P. Dagdigian from contributor to author
+12/11     Increased nchtop to 1000 in wavewr
+12/11     Increase kmxbas to 19 to accommodate more basis routines
+12/11     Added basgpi1 basis routine - to determine angular coupling
+          potential for collisional transfer between a 2sigma state 
+          and one or more vibrational levels in a 2pi state (no
+          isolated-molecule mixing of the sigma and pi states)
+11/11     Half-integral j's now printed out with intcrs command
+11/11     Added bastp1 basis routine - to determine angular coupling
+          potential for collision of symmetric top molecule with no
+          inversion splitting (like CH3)
+10/11     Added calculation of tensor differential cross sections
+          in the geometric apse frame
+08/11     Added module to compute transport cross sections
+08/11     Included inversion splitting is symmetric top energies and
+          changed mothod of selecting rotational levels (jmax, emax)
+          in bastpln basis routine
+08/11     Included inversion splitting is symmetric top energies and
+          changed mothod of selecting rotational levels (jmax, emax)
+          in bastp basis routine
+05/11     Added module to compute cross sections for mixed singlet-triple
+          states, e.g. CH3 X3B1 - a1A1 collisions
+03/11     Added calculation of tensor differential cross sections
+          in the helicity frame
+01/11     Modified method of calculation of hyperfine-resolvec cross sections
+12/10     Commented out diagnostic print statement in diffcrs
+12/10     Added bach2x basis routine - to determine angular coupling
+          potential for collision of CH2(X3B1) in a (0,v2,0) bender
+          level (non-rigid molecule)
+07/10     Increased size of jout array in common block cosout
+09/09     Added asymmetric top basis
+
+
+
+
+to migrate to release 4.4, you should download the upgraded tar file for the 
+complete package from the website
+     www2.chem.umd.edu/groups/alexander/hibridon/hib44
+
+and follow the installation instructions contained on the webpage
+     www2.chem.umd.edu/groups/alexander/hibridon/hib44/install.html
+
+to retain a copy of any previous versions, you may wish to
+carry out the intall in a new main hibridon directory.
+
+the current release level has been checked for the following
+operating system and compiler environments:
+MacOSX v. 10.7.x
+  ifort compiler  composer_xe_2011
+  MKL:  at least 10.2

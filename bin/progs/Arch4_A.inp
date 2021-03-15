@@ -1,0 +1,24 @@
+Ar-CH4  Using Nijmegen (1997) potential-LSQ fit
+  24                           ibasty
+T  T  F  F                     logdfl, airyfl, readpt, bastst
+4.00     8.00    0.05          rstart, rendld, spac
+F                              prairy
+1.05   1.00   100.0 1.1        tolai, rincr, rendai, fstfac
+1                              nerg
+  300.00
+ 11.441450953880425           xmu
+  -100.000                    rcut
+0 140  1   0   0   1   1      jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+80  -1                        lscreen, iprint
+10  15                        nnout,niout
+0  1  2  3  4  5  6  7  8  9
+0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
+F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+F  F  F  T  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+F  F  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
+F  F                           rsflag, boundc
+   1  10                       iop, jmax
+ 5.2410356  1.10864e-4  4.425e-6    brot, dj, dk
+
+

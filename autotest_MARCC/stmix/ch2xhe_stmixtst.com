@@ -1,0 +1,15 @@
+input=ch2x3he_para.inp
+job=ch2x_p
+ener=913.693
+jtot2=40
+fstfac=1.10
+tolai=1.02
+spac=0.10
+jmax=16
+emax=1100.
+show
+run
+printc
+hypxsc,ch2x_p,1,2,1,3
+stmix,ch2_p,1,ch2x_p,1,-328.327,550,13,21,.00001
+quit

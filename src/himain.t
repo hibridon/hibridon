@@ -10,9 +10,13 @@
 ***********************************************************************
 *  ***  driver for log-derivative integration ***
 *  author:  millard alexander
-*  revised:  15-mar-2011 by paul dagdigian (increased kmxbas to 18)
-*  current revision:  increase size of jout array in cosout - p.dagdigian -
-*      23-jun-2010
+*  increase size of jout array in cosout - p.dagdigian (23-jun-2010)
+*  revised:  24-jan-2012 by p. dagdigian (added common blocks /coj12/, /co12p/)
+*  revised:  replaced statements before call to propag to accommodate
+*    q.ma's revised version of bound (28-jun-2013, p.dagdigian)
+*  revised: 16-jun-2019 by p. dagdigian (increased kmxbas to 30)
+*  added common block from ba3p2s basis routine
+*  current revision date:  19-jun-2019 (p. dagdigian)
 *
       implicit double precision (a-h, o-z)
 cstart unix-ibm unix-darwin unix-x86
@@ -31,7 +35,9 @@ cend
 *     kout is number of different values of rotational quantum number
 *     for which s-matrix will be stored on disk
 
-      parameter (kmax=151, kairy = kmax,ktri=kmax*(kmax+1)/2,kbig=10)
+*  change kmax below --  supposed to be set at compile time
+*  revised by p. dagdigian (13-dec-2019)
+      parameter (kmax=8000, kairy = kmax,ktri=kmax*(kmax+1)/2,kbig=10)
 cstart unix-darwin unix-x86
 * set size of scratch array for matrix factorization and generalized
 *   eigenvalue determination
@@ -46,19 +52,23 @@ c;* set size of scratch array for matrix inversion with lapack routines
 c;* warning, this assumes a blocksize of 64
 c;      parameter (kaux=128*kmax)
 cend
-      parameter (klammx = 80, kfact = 2000, kout=21, ken = 25)
+* modified klammx (pjd - 17-jan-2019)
+* increase size of jout array from 21 to 25 - p.dagdigian - 23-jun-2010
+* increase size of jout array from 25 to 50 - p.dagdigian - 19-sep-2012
+      parameter (klammx = 2000, kfact = 2000, kout = 50, ken = 25)
       parameter (kmxpho = 3, knphot = 1)
-      parameter (kmxbas = 18)
+      parameter (kmxbas = 30)
       parameter (kq2 = 2 * kmax, kqmax = kmxpho * kmax)
 * kv2max sets the maximum size of the v2 matrix, a reasonable size is
 * kmax**2
 *
-* increase kv2max from 2 * kmax * kmax to 4 * kmax * kmax (pjd - 25-aug-2009)
+* increase kv2max from 2 * kmax * kmax to 20 * kmax * kmax (pjd - 13-dec-2019)
 *      parameter (kv2max = 2 * kmax * kmax)
-      parameter (kv2max = 4 * kmax * kmax)
+      parameter (kv2max = 50 * kmax * kmax)
 *
 * krotmx set the maximum size of the asym top e.fn expansion
-      parameter (krotmx = 12 * kmax)
+* increased factor multiplying kmax below and narray from 12 to 100 (pjd:  19-sep-2017)
+      parameter (krotmx = 500 * kmax)
 *  variable in common block /cov2/
 *    nv2max:    maximum core memory allocated for the v2 matrix
 *    ndummy:    dummy variable for alignment
@@ -78,6 +88,9 @@ cend
 *    cent:      array containing centrifugal barrier of each channel
 *  variable in common block /coeint/
 *    eint:      array containing channel energies (in hartree)
+*  variables in common blocks /coj12/ and /coj12p/
+*    j12,j12p:  arrays containing vector sum of j1 + j2 for molecule-molecule 
+*               systems and open-shell atom - molecule systems
 *  variable in common block /coener/
 *    energ:     array containing total energies (in cm-1) at which scattering
 *               calculations are to be performed
@@ -114,7 +127,7 @@ cend
 *     maxbas:   maximum number of allowed basis types
 *  variables in common block /coatpi/
 *     narray:   maximum size of asymmetric top basis fn expansion
-*               set to 12 (see krotmx above) in himain (suitable for j ² 40)
+*               set to 500 (see krotmx above) in himain 
 *     isiz:    length of eigenfunction expansion for each rot. level
 *  variable in common block /coatp3/    
 *     isizh:   temporary storage for length (related to isiz)
@@ -127,13 +140,14 @@ cend
 *  ----------------------------------------------------------
       logical lsc1
       common /comom/  xmom(3), imom(13)
-* increase size of jout array from 21 to 25 - p.dagdigian - 23-jun-2010
-      common /cosout/ nnout, jout(25)
-* should be jout(kout)
+      common /cosout/ nnout, jout(kout)
+      common /coiout/ niout, indout(kout)
       common /cov2/ nv2max, ndummy, v2(kv2max)
       common /coiv2/ iv2(kv2max)
       common /cocent/ cent(kmax)
       common /coeint/ eint(kmax)
+      common /coj12/ j12(kmax)
+      common /coj12p/ j12pk(kmax)
       common /covvl/  vvl(klammx)
       common /cofact/ si(kfact)
       common /coener/ energ(ken)
@@ -153,9 +167,9 @@ cend
       common /coamat/ amat(kmax,kmax)
       common /cobmat/ bmat(kairy,kairy)
 * these matrices to store t matrices
-      common /cotq1/ tq1(kbig,kbig)
-      common /cotq2/ tq2(kbig,kbig)
-      common /cotq3/ tq3(kbig,kbig)
+      common /cotq1/ tq1(kmax,kmax)
+      common /cotq2/ tq2(kmax,kmax)
+      common /cotq3/ tq3(kmax,kmax)
       common /cojq/ jq(kmax)
       common /colq/ lq(kmax)
       common /coinq/ inq(kmax)
@@ -185,6 +199,10 @@ cend
       common /cosc8/ sc8(kmax)
       common /cosc9/ sc9(kmax)
       common /cosc10/ sc10(kmax)
+*  common block for ba3p2s basis routine
+      common /coeig2/  t12(5,5), t32(3,3)
+*  common block for ba3d1p basis routine
+      common /coeig/  c0(4,4), c1(3,3), c2(2,2)
 cstart unix-darwin unix-x86
       common /cosc11/ sc11(kaux3)
 cend
@@ -207,7 +225,7 @@ cend
 *     5 kmax**2 + 25 kmax + kv2max + kfact -- with airy integration
 *
 *  parameter below sets maximum size of asymmetric top basis fn expansion
-      narray = 12
+      narray = 100
 *
       mairy = kairy
       mmax = kmax
@@ -342,24 +360,25 @@ cend
 *                   false if scattering calculation
 *     wavefn        true if g(a,b) transformation matrices are saved
 *                   to be used later in computing the wavefunction
-*  variables in common block /coconv/
+*  variables in module constants
 *    econv:       conversion factor from cm-1 to hartree
 *    xmconv:      conversion factor from amu to atomic units
 *
 *  variable in common block /coopti/
 *    optifl:      flag, signals if the calculation is an optimization
 *
+      use constants
       implicit double precision (a-h,o-z)
       character*20 cdate
-      character*13 time
-      character*13 timew,cpubaw,cpuptw,cpuaiw,cpuldw,cpusmw,cpuouw,
+      character*10 time
+      character*10 timew,cpubaw,cpuptw,cpuaiw,cpuldw,cpusmw,cpuouw,
      :             cpuphw,timew1,timew2,time1,time2
       logical logwr, swrit, t2writ, wrpart, partw, airyfl, airypr,
      :        ipos, noprin, chlist, wrxsec, xsecwr, writs, csflag,
      :        flaghf, clist, rsflag, t2test, logdfl, flagsu,
      :        batch, readpt, ihomo, bastst, twojlp, firstj,
      :        twomol, surffl, nucros, ready, photof, photfl, wavefl,
-     :        wavefn, boundc, boundf
+     :        wavefn, boundc, boundf, wrsmat
 *  -------------------------------------------------------------
       logical optifl, first
       logical lsc1
@@ -385,12 +404,11 @@ cend
      :                logwr, noprin, partw, readpt, rsflag, swrit,
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr, nucros, photof, wavefl, boundc
-      common /cophot/ photfl, wavefn, boundf
+      common /cophot/ photfl, wavefn, boundf, wrsmat
       common /cosurf/ surffl
       common /coselb/ ibasty
       common /coener/ energ(1)
       common /cojlpo/ jlpold
-      common /coconv/ econv, xmconv
       common /coopti/ optifl
       common /constp/ nsteps, isteps
 *   square matrices
@@ -421,6 +439,7 @@ cend
       photfl = photof
       wavefn = wavefl
       boundf = boundc
+      wrsmat = writs
       surffl = flagsu
 *  subroutine to open required i/o files
       if (.not.bastst) call openfi (nerg)
@@ -676,10 +695,22 @@ c95    format (1h ,79('='))
         clist = .false.
         if (chlist .and.(jtot. eq. jfirst)) clist = .true.
         if (noprin) clist = .false.
+
+
+**        write(6,5554) nch, nmax, nchtop
+**5554    format('BEFORE BASIS:',3i6)
+
+
         call basis (jq, lq, inq, jlev, elev, inlev, nlevel, nlevop,
      :              sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu,
      :              csflag, clist, bastst, ihomo, nu, numin, jlpar,
-     :              nch, nmax, nchtop)
+     :              twomol, nch, nmax, nchtop)
+
+
+**        write(6,5556) nch, nmax, nchtop
+**5556    format('AFTER BASIS: ',3i6)
+
+
         if (ready) goto 370
         if (bastst) then
            write(6,140)
@@ -845,12 +876,16 @@ cend
 cstart unix-dec unix-convex unix-iris
 c;      call flush(9)
 cend
+* replace statement below to accommodate q.ma's revised
+* version of bound (28-jun-2013, p.dagdigian)
 * do not reduce maximum size of matrices if bound state calculation
-      if (boundc) then
-        ntop=nmax
-      else
-        ntop=nchtop
-      endif
+*      if (boundc) then
+*        ntop=nmax
+*      else
+*        ntop=nchtop
+*      endif
+      ntop = nchtop
+*
       call propag (z, w, zmat, amat, bmat,
      :             jq, lq, inq, isc1, sc1, sc2, sc3, sc4, sc5, sc6, sc7,
      :             sc8, sc9,
@@ -1083,11 +1118,12 @@ cend
           call dclos(1)
          endif
       endif
-      if (wavefl .and. .not. boundc)  call dclos(2)
+      if (wavefl .and. .not. boundc) close(22)
       if (writs) then
         do 410 ien = 1, nerg
         nfile = 44 + ien
         call closf (nfile)
+        close (nfile)
 410     continue
       end if
       if (nerg .gt. 1) then
@@ -1121,7 +1157,7 @@ cend
          endif
          write (6,520) cdate
          write (9,520) cdate
-520      format('      CURRENT DATE:  ',(a19))
+520      format('      CURRENT DATE:  ',(a))
          write (6, 350)
          write (9, 350)
 cstart unix-dec unix-iris unix-hp

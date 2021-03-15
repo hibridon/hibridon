@@ -1,0 +1,25 @@
+ He-CO(1Sigma) SAPT PES                         
+   1                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    3.5000   15.0000    0.1000   rstart, rendld, spac
+  F                              prairy
+  1.150     15.00    40.0  2.00  tolai, rincr, rendai, fstfac
+   1                             nerg
+    20.0000
+    3.50190                      xmu
+   80.0000                       rcut
+   0  10   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  70   0                         lscreen, iprint
+   16    1                       nnout,niout
+   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
+   0
+  F  F  T  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  T  T  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  F  F  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+   1   0   0                     nvib, vmin,vmax
+   0   0   9                                     iv,jmin,jmax
+   1.92252       0.00000       0.00000           brot,drot,hrot
+     0.00000000                                  evib
+                                        

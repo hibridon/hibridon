@@ -1,4 +1,6 @@
 *Ar-OH(A^2Sigma+) PES of Fawzy and Heaven
+* References: W. Fawzy and M. C. Heaven, J. Chem. Phys. 89, 7030 (1988)
+* U. Schnupf, J. M. Bowman, and M. C. Heaven, Chem. Phys. Lett. 189,487 (1992)
 
       subroutine driver
       implicit double precision (a-h,o-z)
@@ -61,7 +63,7 @@
       dimension xlam1(7),xlam2(7),r0(7),
      :          vsum(11),xsum(11),
      :          d0(121),aa(121),thta(11),cthta(11)
-      dimension kpvt(11),qraux(11),work(121),rsd(7),re(14)
+      dimension kpvt(11),qraux(11),work(121),rsd(11),re(14)
 
       common /covvl/ vvl(10)
       data half, zero, one, alph /0.5d0, 0.d0, 1.d0, 1.2d0/

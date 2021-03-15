@@ -1,4 +1,44 @@
 * ------------------------------------------------------------------
+*  in this header, arrays are set up as allocatable.
+*  in addition, procedures to allocate and deallocate these
+*  arrays are included here.  see below for full details about
+*  hitensor
+*
+*  revision:  6-jun-2013 (q. ma)
+* ------------------------------------------------------------------
+      module tensor
+      implicit none
+      integer :: jmx, kmx, lmx, kkmx, lbufs, lbuflb
+      parameter (jmx=90, kmx=2*jmx+1, lmx=kmx, kkmx=3*kmx)
+      parameter (lbufs=13504500, lbuflb=9000)
+      real(8), dimension(:), allocatable :: srealp, simagp
+      integer, dimension(:), allocatable :: ipackp, jpackp, lpackp
+      integer :: ialloc
+*
+      contains
+*
+      subroutine tensor_allocate()
+      allocate(srealp(lbufs), stat=ialloc)
+      allocate(simagp(lbufs), stat=ialloc)
+      allocate(ipackp(lbuflb), stat=ialloc)
+      allocate(jpackp(lbuflb), stat=ialloc)
+      allocate(lpackp(lbuflb), stat=ialloc)
+      if (ialloc .ne. 0) then
+         print *, '  *** MEMORY ALLOCATION FAILS, EXITING ***'
+         call tensor_free()
+         call exit
+      end if
+      end subroutine tensor_allocate
+*
+      subroutine tensor_free()
+      if (allocated(srealp)) deallocate(srealp)
+      if (allocated(simagp)) deallocate(simagp)
+      if (allocated(ipackp)) deallocate(ipackp)
+      if (allocated(jpackp)) deallocate(jpackp)
+      if (allocated(lpackp)) deallocate(lpackp)
+      end subroutine tensor_free
+      end module tensor
+* ------------------------------------------------------------------
       subroutine tenopa(filnam,a)
 *
 * subroutine to calculate tensor opacities from s-matrix elements
@@ -12,29 +52,48 @@
 * this subroutine requires CC s-matrix for both parities
 *
 * author: b. follmeg
-* current revision date:  24-jun-2010 by pjd
+* revision date:  13-oct-2011 by pjd
+* changed open command to open smt files for streaming reads
+* replaced call closf(1) with close(1)  (2 places)
+* revision date:  8-aug-2012 by q. ma
+*
 * revised by pj dagdigian - to get SIGK working, etc.
 *  with half-integral j and even multiplicity open-shell molecules (12-nov-2008)
 * SIGKP not working.  Do not set N (also called lambda) GT 0
 * added calculation of tensor cross sections with quantization
 *  axis along initial relative velocity vector (lambda = 0 only) (5-mar-2010)
 * added calculation of m-resolved differential cross sections for an
-*  elastic transitions in helicity frame
+*  elastic transition in the helicity frame
 *  (quant. axis for initial levels along initial velocity,
 *  quant. axis for final level along final vel. vector.  this is followed
 *  by evaluation of the tensor diff. cross sections (started 8-mar-2010, pjd)
+* added calculation of m-resolved differential cross sections for an
+*  elastic transition in the geometric apse frame.  this is followed
+*  by evaluation of tensor diff. cross sections (started 7-oct-2011, pjd).
+*  see statements after "input:" for details of types of cross sections
+*  that can be calculated
+* took care of special problem with is lables for ibasty = 4 and 19
+*  in sigk (NOTE:  this is still a problem in other types of calculations)
 *
-* latest revision of hitensor:  p.dagdigian, 24-jun-2010
-* ------------------------------------------------------------------
+* revision:  5-oct-2012 (p.j.dagdigian)
+* revision:  6-jun-2013 make common/partens as a dynamically allocated
+*     module (q. ma)
+*---------------------------------------------------------------*
+*                                                               *
+*  IMPORTANT NOTE:  ONE SHOULD READ THE INPUT FILE FOR THE      *
+*  SYSTEM BEFORE RUNNING DIFCRS, SO THAT THE LOGICAL PARAMETERS *
+*  FOR THE BASIS TYPE ARE IN MEMORY                             *
+*                                                               *
+*---------------------------------------------------------------*
+      use tensor
       implicit double precision (a-h,o-z)
       character*(*) filnam
       character*40  tcsfil, smtfil, tcbfil, dchfil
       character*20  cdate
-      character*13  elaps, cpu
+      character*10  elaps, cpu
       logical csflag, flaghf, flagsu, twomol, exstfl, lpar,
      :        batch, fast, nucros,lpar2
 *
-      include "common/partens"
       include "common/parpot"
       common /colpar/ lpar(3), batch, lpar2(23)
       common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf,
@@ -76,6 +135,7 @@
       data  tol,   zero,   nstep
      :    /1.d-7,  0.d0,     2/
 *
+      call tensor_allocate()
 * initialize timer and arays
       call mtime(cpu0,ela0)
       srealp(lbufs)=zero
@@ -83,9 +143,11 @@
       ipackp(lbuflb)=0
       jpackp(lbuflb)=0
       lpackp(lbuflb)=0
+* these 2 parameters are set in partens
       lnbufs = lbufs
       lnbufl = lbuflb
-* input
+*
+* input:
 *  iframe = 0 for quantization axis set to lab Z-axis - isotropic
 *    velocity distribution
 *  iframe = 1 for quant. axis along initial relative velocity vector
@@ -94,7 +156,15 @@
 *    velocity vector, final level along final velocity vector).  In this
 *    case, m-resolved differential cross sections computed for (j1min,in1)
 *    -> (j1min,in1) elastic transition, and then tensor cross sections
-*    determined.
+*    determined and printed out.  The m-resolved differential cross sections
+*    are also printed out if iframe is set equal to -2.
+*    NOTE:  collision frame differential cross sections (both m-resolved and
+*    tensor) can be calculated by setting iframe = +or- 2 and setting ihel
+*    equal to zero in amplih subroutine.
+*  iframe = 3 for geometric apse frame.  Calculations similar to those for
+*   iframe = 2 are carried out.  Likewise, m-resolved differential cross
+*   sections are printed out if iframe is set equal to -3.
+*
       iframe = a(2)
       n = a(3)
 * NB this variable is called lambda in Follmeg's paper and thesis
@@ -127,14 +197,14 @@
       if (.not. exstfl) then
           write(6,10) smtfil(1:lenfs)
 10        format(' ** FILE ',(a),' NOT FOUND **')
-          return
+          goto 4000
       end if
 *
 * open smatrix-file
 *
-      call openf(1,smtfil,'du',0)
+      call openf(1,smtfil,'tu',0)
 *
-      if (iframe .le. 1) then
+      if (abs(iframe) .le. 1) then
 * for iframe = 0 and 1, open file for tensor opacities
         call gennam(tcsfil,filnam,iener,'tcs',lenft)
         call openf(2,tcsfil,'sf',0)
@@ -142,10 +212,16 @@
 * open and rewind .tcb file
         open(form='formatted',unit=4,file=tcbfil)
         rewind (4)
-* for iframe = 2, instead open file for differential cross sections
+* for iframe = 2 or 3, instead open file for differential cross sections
       else
-        call gennam(dchfil,filnam,iener,'dch',lenft)
-        call openf(2,dchfil,'sf',0)
+        if (abs(iframe).eq.2) then
+          call gennam(dchfil,filnam,iener,'dch',lenft)
+          call openf(2,dchfil,'sf',0)
+        end if
+        if (abs(iframe).eq.3) then
+          call gennam(dchfil,filnam,iener,'dcga',lenft)
+          call openf(2,dchfil,'sf',0)
+        end if
       end if
 *
 * read header of smatrix-file
@@ -160,7 +236,7 @@
          write(2,11)
          if(.not.batch) write(6,11)
 11       format(' ** NNOUT < 0, ABORT **')
-         return
+         goto 4000
       end if
       nout = nnout
 *
@@ -239,7 +315,7 @@ c         fast = .false.
 * test for both in1 and in2 (pjd)
             if (j1.ne.jo) goto 30
             if (in.ne.in1 .and. in.ne.in2) goto 30
-            if (iframe .ne. 2) then
+            if (abs(iframe) .ne. 2) then
 * test that j1 lies between j1min and j2max for iframe = 0 and 1
               if (j1.lt.j1min .or. j1.gt.j2max) goto 30
 * for iframe = 2, make sure (j1min,in1) level is in list
@@ -279,7 +355,7 @@ c         fast = .false.
       if(nj.gt.jmx) then
         write(6,51) nj,jmx
 51      format(/' TENOPA: NJ =',i4, ' .GT. JMX = ',i4)
-        return
+        goto 4000
       end if
 * build up pointer table for direct access i/o
       call saddr(1,jfirst,jfinal,numin,numax,csflag,jttble,npnt,
@@ -302,7 +378,7 @@ c         fast = .false.
 * store information on job.tcb file for later transformation into
 * m-resolved cross sections
 *
-      if (iframe .le. 1) then
+      if (abs(iframe) .le. 1) then
 * write *.tcb as formatted file
 * output label and cdate in separate write statements
         write(4, *, err=999) label
@@ -326,7 +402,7 @@ c         fast = .false.
 * write level list
       write(2,65)
       if(.not. batch) write(6,65)
-      if (iframe .le. 1)  write(6,64)
+      if (abs(iframe) .le. 1)  write(6,64)
 64    format(/,' COLUMNS ARE INITIAL STATES; ROWS ARE FINAL STATES')
 * switch row and column headings to match integral cross section output
 * CORRESPONDING CHANGE IN CREATING XS ARRAYS MADE ONLY IN sigk AND sigkkp SUBRS
@@ -348,13 +424,13 @@ c         fast = .false.
 
 68    continue
 
-      if (iframe .le. 1) write(2,64)
+      if (abs(iframe) .le. 1) write(2,64)
 * loop over n
       n = minn
 * fast algorithm if n = 0
 70    if (n.eq.0) then
-         ifr = iframe + 1
-         goto (171, 172, 173), ifr
+         ifr = abs(iframe) + 1
+         goto (171, 172, 173, 174), ifr
            write (6,271) iframe
 271        format(/' IFRAME =',i3,' NOT IMPLEMENTED.  ABORT  ***')
            goto 300
@@ -364,22 +440,33 @@ c         fast = .false.
      :             lpack,ipack,jttble,prefac,sigma,
      :             sreal,simag,matel,lenlab,labadr,
      :             jtotpa,fast,ierr)
+             if(ierr.ne.0) goto 4000
              goto 300
 * iframe = 1
 172          call sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack,
      :             lpack,ipack,jttble,prefac,sigma,
      :             sreal,simag,matel,lenlab,labadr,
      :             jtotpa,fast,ierr)
+             if(ierr.ne.0) goto 4000
              goto 300
 * iframe = 2
 173          jlevel = jlev(jlist(1))
              inlevel = inlev(jlist(1))
              call dsigh(maxk,nnout,jfirst,jfinal,jtotd,jpack,lpack,
-     :             ipack,jlevel,inlevel,elev(jlist(1)),flaghf,ierr)
-             if(ierr.ne.0) return
+     :             ipack,jlevel,inlevel,elev(jlist(1)),flaghf,
+     :             iframe,ierr)
+             if(ierr.ne.0) goto 4000
+             goto 300
+* iframe = 3
+174          jlevel = jlev(jlist(1))
+             inlevel = inlev(jlist(1))
+             call dsigga(maxk,nnout,jfirst,jfinal,jtotd,jpack,lpack,
+     :             ipack,jlevel,inlevel,elev(jlist(1)),flaghf,
+     :             iframe,ierr)
+             if(ierr.ne.0) goto 4000
       else
 * here for n > 0
-         if (iframe .eq. 1) then
+         if (abs(iframe) .eq. 1) then
            write (6,72)
 72         format ('/, ** N.GT.0 CALCULATION FOR COLL. FRAME NOT',
      *       ' IMPLEMENTED.  ABORT  **')
@@ -398,13 +485,13 @@ c         fast = .false.
          if(nk.gt.kkmx) then
            write(6,76) kkmx,nk
 76         format(/' TENOPA: kkmx too small:',2i5)
-           return
+           goto 4000
          end if
          call sigkkp(n,maxk,nk,nnout,jfirst,jfinal,jtotd,nj,mmax,
      :        jpack,lpack,ipack,jttble,prefac,sigma,
      :        sreal,simag,matel,lenlab,labadr,
      :        jtotpa,kplist,f9pha,fast,ierr)
-         if(ierr.ne.0) return
+         if(ierr.ne.0) goto 4000
       end if
 * next n
       n = n + nstep
@@ -417,19 +504,21 @@ c         fast = .false.
       write(2,400) elaps, cpu
       if(.not. batch) write(6,400) elaps, cpu
 400   format(/,' ** TENXSC FINAL TIMING, ELAPSED: ',a,'  CPU: ',a,' **')
-      call closf(1)
+      close (1)
       close (2)
       close (3)
       close (4)
+      call tensor_free()
       return
 999   write(2,1000)
       if(.not.batch) write(6,1000)
 1000  format(' *** I/O ERROR IN TENOPA; ABORT')
-      call closf(1)
+      close (1)
       close (2)
       close (3)
       rewind (4)
       close (4)
+ 4000 call tensor_free()
       return
       end
 * ------------------------------------------------------------------
@@ -438,9 +527,9 @@ c         fast = .false.
 *
 * current revision date: 12-nov-2008 by pj dagdigian
 *
+      use tensor
       implicit double precision (a-h,o-z)
       logical lpar, batch, lpar2, lprnt
-      include "common/partens"
       common /colpar/ lpar(3), batch, lpar2(23)
       common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot,
      :             nwaves, jfsts, jlparf, jlpars, njmax
@@ -580,11 +669,12 @@ c end of added/modified code (pjd)
 *                            m1,m2
 *
 * ------------------------------------------------------------------
+      use tensor
       implicit double precision(a-h,o-z)
       character*(*) filnam
       character*40  tcbfil, mcsfil
       character*20  cdate
-      character*13  elaps, cpu
+      character*10  elaps, cpu
       logical flaghf, exstfl, lpar,
      :        batch,lpar2
       include "common/parpot"
@@ -668,7 +758,6 @@ c end of added/modified code (pjd)
 * NB the variable n, (minn .le. n .le. maxn in even steps)
 * is called lambda in Follmeg's paper and thesis
 * it is the moment of the velocity distribution
-
 * loop over transitions
          do 400 i = 1, njmax
             ii = jlist(i)
@@ -876,9 +965,10 @@ c end of added/modified code (pjd)
 *             ! j  j' l1! ! J  J' l2!    j1,l1,j2,l2    j1,l1,j2,l2
 *
 * author: b. follmeg
-* current revision date: 24-jun-2010 by pj dagdigian
+* current revision date: 5-oct-2012 by pj dagdigian
 *
 *------------------------------------------------------------------------
+      use tensor
       implicit double precision (a-h,o-z)
       complex*8 t, tp
       logical diag, diagj, diagin, lpar1, lpar2, batch, ipos,
@@ -887,14 +977,14 @@ c end of added/modified code (pjd)
 ** flags for diagnostic printing
       logical lprnt,lprntf
 
-      character*13 elaps, cpu
+      character*10 elaps, cpu
       common /colpar/ lpar1(3), batch, lpar2(5), ipos,lpar3(17)
       common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot,
      :            nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
       common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf,
      :                igjtp
       common /coipar/ ipar(9),iprnt
-      include "common/partens"
+      common /coselb/ ibasty
 * 3rd subscript is for state index (subscript = 5 + IN)
 * states with up to 9 state indices allowed
       common/cadr/ iadr(0:2*jmx,lmx,9)
@@ -1055,7 +1145,32 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
         l1p = lpackp(irp)
         indp = ipackp(irp)
         if (ipackp(irp).ne.in1 .and. ipackp(irp).ne.in2) goto 70
-        iadr(j1p,lmax-l1p,5+indp) = irowp
+*
+* special treatment for ibasty = 4 and 19
+        if (iabsty.eq.4 .or. ibasty.eq.19) then
+          if (mod(abs(indp),100).eq.10) then
+            write (6,1075)
+1075        format(' *** v=1 IN PI STATE NOT IMPLEMENTED.',
+     :        ' ABORT ***')
+            return
+          end if
+          if (indp.eq. 100) isub = 1
+          if (indp.eq.-100) isub = 2
+          if (indp.eq. 200) isub = 3
+          if (indp.eq.-200) isub = 4
+          if (indp.eq. 300) isub = 5
+          if (indp.eq.-300) isub = 6
+          iadr(j1p,lmax-l1p,isub) = irowp
+* all other basis types
+        else
+* check that kp < 4
+          if (abs(indp).gt.4) then
+            write (6,1074) abs(indp)
+1074        format(' *** KP =',i3,' > 4. ABORT ***')
+            return
+          end if
+          iadr(j1p,lmax-l1p,5+indp) = irowp
+        end if
 70    continue
 *
       jmx1=0
@@ -1129,8 +1244,27 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
 85        continue
           ii = (irow*(irow-1))/2 + icol
           l2m=lmax-l2
-          irowp=iadr(j1,l1m,5+ipack(irow))
-          icolp=iadr(j2,l2m,5+ipack(icol))
+* special treament for iabsty = 4 and 19
+          if (ibasty.eq.4 .or. ibasty.eq.19) then
+            if (ipack(irow).eq. 100) isubr = 1
+            if (ipack(irow).eq.-100) isubr = 2
+            if (ipack(irow).eq. 200) isubr = 3
+            if (ipack(irow).eq.-200) isubr = 4
+            if (ipack(irow).eq. 300) isubr = 5
+            if (ipack(irow).eq.-300) isubr = 6
+            if (ipack(icol).eq. 100) isubc = 1
+            if (ipack(icol).eq.-100) isubc = 2
+            if (ipack(icol).eq. 200) isubc = 3
+            if (ipack(icol).eq.-200) isubc = 4
+            if (ipack(icol).eq. 300) isubc = 5
+            if (ipack(icol).eq.-300) isubc = 6
+            irowp=iadr(j1,l1m,isubr)
+            icolp=iadr(j2,l2m,isubc)
+* all other basis types
+          else
+            irowp=iadr(j1,l1m,5+ipack(irow))
+            icolp=iadr(j2,l2m,5+ipack(icol))
+          end if
 * if l1p <> l1 or l2p <> l2, do not include this (jtot,jtotp) term
           if (irowp.eq.0 .or. icolp.eq.0) goto 200
           if(irowp.ge.icolp) then
@@ -1159,25 +1293,11 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
             t = t + (1.d0,0)
             tp = tp + (1.d0,0)
           end if
-
-*** DIAGNOSTIC PRINT
-*          write (6,*) t,tp
-
 * note below that real(t*conjg(tp)) = real(tp*conjg(t))
 * and imag(t*conjg(tp)) = -imag(tp*conjg(t))
           factor = wd * facjjp * real(t*conjg(tp))
 * terms in parentheses on RHS of next line is to include (jtot,jtotp) and (jtotp,jtot) terms
           factor = factor * (phasea + phaseb*switch)
-
-*** DIAGNOSTIC PRINT
-*            write (6,9944) jtot,jtotp,irow,icol,
-*     :        j1,in1,j2,in2,l1,l2,wd,switch
-*9944        format(' jtot=',i3,' jtotp=',i3,' irow=',i2,
-*     :        ' icol=',i2,' j1=',i2,' in1=',
-*     :        i2,' j2=',i2,' in2=',i2,' l1=',i3,' l2=',i3,
-*     :        ' wd=',f4.0,' switch=',f4.0)
-
-*
 * loop over k
           kmax = min(min2j,jplujp)
 * kmax must be <= maxk of tensor xs's to be calculated
@@ -1192,17 +1312,16 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
             kk=kk+1
             sigma(ir,ic,k+1) = sigma(ir,ic,k+1) + f6p(kk)*dencol
             sigma(ic,ir,k+1) = sigma(ic,ir,k+1) + f6p(kk)*denrow
-
-*** DIAGNOSTIC PRINT
-*              write(6,8853) k,f6p(kk)
-*8853          format('      k=',i2,' f6p=',e13.6)
-
 *
 * accummulate partial cross sections
             if (lprntf) then
 * print values for only one transition
-              istate = 1
-              if (ir.eq.istate .and. ic.eq.istate) then
+* the number of the states are obtained from the list of states
+* in tenxsc output
+              istatei = 4
+              istatef = 1
+              if ((ir.eq.istatei .and. ic.eq.istatef) .or.
+     :             (ir.eq.istatef .and. ic.eq.istatei)) then
                 if (k .eq. 0) psig0(jtot+1) = psig0(jtot+1)
      :             + f6p(kk)*denrow
                 if (k .eq. 1) psig1(jtot+1) = psig1(jtot+1)
@@ -1257,7 +1376,7 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
 
 * PRINT OUT PARTIAL CROSS SECTIONS
       if (lprntf) then
-        write (6,1011) istate,istate
+        write (6,1011) istatei,istatef
 1011    format (/' PARTIAL-JTOT CROSS SECTIONS for transition: ',
      :     '  level = ',i2,' -> ',' level = ',i2/
      :     '   jtot',7x,'P-XS(0)',8x,'P-XS(1)',8x,'P-XS(2)')
@@ -1299,6 +1418,7 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
 *** REVISIONS NOT COMPLETED (pjd)
 *
 *------------------------------------------------------------------------
+      use tensor
       implicit double precision (a-h,o-z)
       complex*8 t, tp, ai, cphase
       logical diag, diagj, diagin, lpar1, lpar2, batch, ipos,
@@ -1307,14 +1427,13 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
 ** flag for diagnostic printing
       logical lprnt2
 
-      character*13 elaps, cpu
+      character*10 elaps, cpu
       common /colpar/ lpar1(3), batch, lpar2(5), ipos,lpar3(17)
       common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot,
      :            nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
       common /cospbf/ lnbufs, lnbufl, nbuf, ihibuf,  maxlsp, maxllb,
      :               igjtp
       common /coipar/ ipar(9),iprnt
-      include "common/partens"
       common/cccpu/ tchi,tlog,tsetup,tdelt,lenk,max1,max2,max3,maxkk
 * add 3rd subscript for state index (subscript = 5 - IN) (pjd)
 * states with up to 9 state indices allowed
@@ -1407,7 +1526,7 @@ cend
 * jtot/jtotp
       jtpstp = 1
       if (fast) jtpstp = 2
-* sum over jtot and over paritites (if twopar = .true.)
+* sum over jtot and over parities (if twopar = .true.)
 10    continue
 * find address of jtot in smatrix file
       jj = jjoff + jt
@@ -1748,6 +1867,7 @@ c    1         jtot,jtotp,j1,l1,j2,l2,l1p,icolp,irowp
 * author: pj dagdigian
 * current revision date: 5-mar-2010 by pj dagdigian
 *------------------------------------------------------------------------
+      use tensor
       implicit double precision (a-h,o-z)
       complex*8 t, tp
       logical diag, diagj, diagin, lpar1, lpar2, batch, ipos,
@@ -1756,7 +1876,7 @@ c    1         jtot,jtotp,j1,l1,j2,l2,l1p,icolp,irowp
 ** flags for diagnostic printing
       logical lprnt,lprntf
 
-      character*13 elaps, cpu
+      character*10 elaps, cpu
       common /colpar/ lpar1(3), batch, lpar2(5), ipos,lpar3(17)
       common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot,
      :            nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
@@ -1764,7 +1884,6 @@ c    1         jtot,jtotp,j1,l1,j2,l2,l1p,icolp,irowp
       common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf,
      :                igjtp
       common /coipar/ ipar(9),iprnt
-      include "common/partens"
 * add 3rd subscript for state index (subscript = 5 + IN)
 * states with up to 9 state indices allowed
       common/cadr/ iadr(0:jmx,lmx,9)
@@ -2050,16 +2169,6 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
      :        * (2.d0 * xl1pp + 1.d0))
             factor = facjjp * phasea * phasel
      :        * factl * real(t*conjg(tp))
-
-*** DIAGNOSTIC PRINT
-*            write (6,9944) jtot,jtotp,irow,icol,irowp,
-*     :        icolp,j1,in1,j2,in2,l1,l2,l1pp,switch,phasel
-*9944        format(' jtot=',i3,' jtotp=',i3,' irow=',i2,
-*     :        ' icol=',i2,' irowp=',i2,' icolp=',i2,
-*     :        ' j1=',i2,' in1=',
-*     :        i2,' j2=',i2,' in2=',i2,' l1=',i3,' l2=',i3,
-*     :        ' l1pp=',i3,' sw=',f4.0,' ph_l=',f4.0)
-
 *
 * loop over k
             kmax = min(min2j,jplujp)
@@ -2091,12 +2200,6 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
               if (switch .eq. 1.d0) then
                 factr = 2.d0 * factr
               end if
-
-*  DIAGNOSTIC PRINT
-*              write (6,9922) k,factr,fmsum,xx6j
-*9922          format ('  k=',i2,' factr=',e12.4,' fmsum=',e12.4,
-*     :          ' x6j=',e12.4)
-
               sigma(ir,ic,k+1) = sigma(ir,ic,k+1) + factr*dencol
               sigma(ic,ir,k+1) = sigma(ic,ir,k+1) + factr*denrow
 *
@@ -2190,7 +2293,8 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
       end
 *-------------------------------------------------------------------------
       subroutine dsigh(maxk,nnout,jfirst,jfinal,jtotd,jpack,
-     :                lpack,ipack,jlevel,inlevel,elevel,flaghf,ierr)
+     :                lpack,ipack,jlevel,inlevel,elevel,flaghf,
+     :                iframe,ierr)
 *
 * subroutine to calculate m-resolved differential cross sections
 * for the elastic (j1,in1) -> (j1,in1) transition in the
@@ -2198,16 +2302,16 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
 * corresponding tensor cross sections
 *
 * author: pj dagdigian
-* current revision date: 8-mar-2010 by pj dagdigian
+* current revision date: 7-oct-2011 by pj dagdigian
 *------------------------------------------------------------------------
       implicit double precision (a-h,o-z)
-* size of q for j ² 5 and 0.5 deg angle increment
+* size of q for j <= 5 and 0.5 deg angle increment
       complex*16 q(43681)
       logical diag, diagj, diagin, lpar1, lpar2, batch, ipos,
      :        twopar, fast, lpar3, flaghf
       logical existf,csflg1,flghf1,flgsu1,twomol,
      :        nucros, iprint
-      character*13 elaps, cpu
+      character*10 elaps, cpu
       character*20 cdate1
       common /colpar/ lpar1(3), batch, lpar2(5), ipos,lpar3(17)
       common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot,
@@ -2245,9 +2349,15 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
       maxq = mmax*mmax/2
       maxy = nv2max
 *
+* print out m-resolved differential cross sections? (immprt = 1)
+      immprt = 0
+      if (iframe .le. 0) immprt = 1
+* flag for printing in amplih subr
+      ihfst = 0
+*
       if (jlevel .gt. 5) then
         write(6,12) jlevel
-12      format (' *** JLEVEL =',i3,' .GT. 5. TOO HIGH FOR SIGH. ABORT')
+12      format(/' *** JLEVEL =',i3,' .GT. 5. TOO HIGH FOR DSIGH. ABORT')
         return
       end if
       l2max = jfinal + jlevel + 1
@@ -2277,15 +2387,20 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
 220     continue
         ii = ii + l2max*nangle
 230   continue
-      jtlast=-1
-      jplast=0
-cc.....read header of s-matrix filec      call rdhead(1,cdate1,ered1,rmu1,csflg1,flghf1,flgsu1,     1   twomol,nucros,jfirst,jfi
+      jtlast = -1
+      jplast = 0
+c
+c.....read header of s-matrix file
+c
+      call rdhead(1,cdate1,ered1,rmu1,csflg1,flghf1,flgsu1,
+     :   twomol,nucros,jfirst,jfinal,jtotd,numin,numax,nud,
+     :   nlevel,nlevop,nnout,jlev,inlev,elev,jout1)
 *
 *.....read next s-matrix
 *
 250   call sread (0, sreal, simag, jtot, jlpar, nu,
-     :                  jq, lq, inq, ipack, jpack, lpack,
-     :                  1, mmax, nopen, length, ierr)
+     :            jq, lq, inq, ipack, jpack, lpack,
+     :            1, mmax, nopen, length, ierr)
       if(ierr .eq. -1) then
          write(6,260) xnam1,jtlast,jplast
 260      format(' END OF FILE DETECTED READING FILE ',(a),
@@ -2324,12 +2439,13 @@ c     for elastic (jlevel,inlevel) -> (jlevel,inlevel) transition
 c
       call amplih(jlevel,inlevel,jlevel,inlevel,jtot,mmax,
      :  jpack,lpack,ipack,length,jq,lq,inq,nopen,
-     :  l2max,nangle,flaghf,sreal,simag,y,q)
+     :  l2max,ihfst,nangle,flaghf,sreal,simag,y,q)
 c
 c.....loop back to next jtot/jlpar
 c
 300   if(jtot.lt.jfinal .or. jlpar.eq.1) goto 250
-cc.....ca is wavevector for initial state, ecol is collision energy
+c
+c.....ca is wavevector for initial state, ecol is collision energy
       ecol = ered1 - elevel
       ca=sqrt(2.d0*rmu1*ecol)
       fak=ang2c/ca**2
@@ -2339,7 +2455,6 @@ c
       numjm = jlevlp + jlevel + 1
 c
 c     SUPPRESS PRINTING OF M-RESOLVED CROSS SECTIONS IN PRODUCTION RUNS (immprt = 0)
-      immprt = 0
       if (immprt .ne. 0) then
       write(2,302)
 302   format(/'%   M-DEPENDENT HELICITY FRAME ELASTIC DIFFERENTIAL',
@@ -2480,8 +2595,8 @@ c     SUPPRESS THIS PRINTING
       end
 *===
       subroutine amplih(j1,inlev1,j2,inlev2,jtot,mmax,jpack,
-     :  lpack,ipack,length,jq,lq,inq,nopen,maxl2,nangle,
-     :  flaghf,sreal,simag,y,q)
+     :  lpack,ipack,length,jq,lq,inq,nopen,maxl2,ihfst,
+     :  nangle,flaghf,sreal,simag,y,q)
 c
 c calculates scattering amplitudes for given jtot and set
 c of angles
@@ -2490,7 +2605,7 @@ c     author of original ampli program:  h.-j. werner
 c     revised by p.j.dagdigian for helicity frame calculation
 c     for the transition (j1,inlev1) -> (j2,inlev2)
 c
-c     revision date: 15-mar-2010
+c     revision date: 13-oct-2011
 c
 c.....jpack,lpack,ipack: labels for rows
 c.....jq,lq,inq:         labels for columns
@@ -2505,6 +2620,7 @@ c.....jq,lq,inq:         labels for columns
       sqpi=1.772453850905516d0
       rad=57.295779513082323d0
 c
+c.....ai is sqrt(-1)
       ai=cmplx(zero, one)
       elastc = j1.eq.j2 .and. inlev1.eq.inlev2
 c
@@ -2558,13 +2674,12 @@ c
             xl1=lpack(ilab)
             fak3(ll)=fak2(ll)*xf3j(xj1,xl1,xjtot,xmj1,zero,-xmj1)
 70        continue
-c
 
+* set ihel = 1 for helicity-frame calculations, ihel = 0 for collision-frame
           ihel = 1
 
 *helicity frame calculation
           if (ihel .eq. 1) then
-
 * mj2 is helicity-frame final m quantum number
           do 300 mj2=-j2p,j2
             xmj2=dble(mj2)+spin
@@ -2579,14 +2694,13 @@ c
                 iyof=(iabs(ml2p)*maxl2+l2)*nangle
 * redrot requires rotation angle in radians
                 beta=angle/rad
-                fakp = redrot(xj2,xmj2,xmj2p,beta)
+                fakp = redrot(xj2,xmj2p,xmj2,beta)
      :            *xf3j(xj2,xl2,xjtot,xmj2p,xml2p,-xmj1)
      :            *y(iyof+iang)
                 if (ml2p.gt.0) fakp = fakp*(-1)**ml2p
                 yy = yy + fakp
 350           continue
               ii = ii + 1
-c
               do 100 ll=1,llmax
                 q(ii) = q(ii) + fak3(ll)*yy
 100           continue
@@ -2594,9 +2708,14 @@ c
 200         continue
 300       continue
 
-
           else
 *collision-frame calculation
+
+          if (ihfst.eq.0) write(6,336) ihel
+336       format(/'** ihel =',i2,' - THIS IS A COLLISION-FRAME',
+     :      ' CALCULATION')
+          ihfst = 1
+
           do 1300 mj2=-j2p,j2
             xmj2=dble(mj2)+spin
             ml2=mj1-mj2
@@ -2610,7 +2729,6 @@ c
             do 1200 iang=1,nangle
               yy=cmplx(fak*y(iyof+iang), 0.d0)
               ii = ii + 1
-c
               do 1100 ll=1,llmax
                 q(ii)=q(ii)+fak3(ll)*yy
 1100          continue
@@ -2619,7 +2737,428 @@ c
 1300      continue
           end if
 
-
+400     continue
+500   continue
+      return
+      end
+c=============
+      subroutine dsigga(maxk,nnout,jfirst,jfinal,jtotd,jpack,
+     :                lpack,ipack,jlevel,inlevel,elevel,flaghf,
+     :                iframe,ierr)
+*
+* subroutine to calculate m-resolved differential cross sections
+* for the elastic (j1,in1) -> (j1,in1) transition in the
+* geometric apse frame.  these are then used to compute the
+* corresponding tensor cross sections
+*
+* author: pj dagdigian
+* current revision date: 7-oct-2011 by pj dagdigian
+*------------------------------------------------------------------------
+      implicit double precision (a-h,o-z)
+* size of q for j <= 5 and 0.5 deg angle increment
+      complex*16 q(43681)
+      logical diag, diagj, diagin, lpar1, lpar2, batch, ipos,
+     :        twopar, fast, lpar3, flaghf
+      logical existf,csflg1,flghf1,flgsu1,twomol,
+     :        nucros, iprint
+      character*10 elaps, cpu
+      character*20 cdate1
+      common /colpar/ lpar1(3), batch, lpar2(5), ipos,lpar3(17)
+      common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot,
+     :            nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
+      common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf,
+     :                igjtp
+      common /coipar/ ipar(9),iprnt
+      common /cojq/ jq(1)
+      common /colq/ lq(1)
+      common /coinq/ inq(1)
+      common /cosc1/ elev(1)
+      common /coisc2 / jout1(1)
+* common blocks for levels for which xs's to be computed
+      common /coisc9/ jslist(1)
+      common /coisc10/ inlist(1)
+      common /cojhld/ jlev(1)
+      common /coisc1/ inlev(1)
+      common /coz/ sreal(1)
+      common /cow/ simag(1)
+      common /cov2/ nv2max, ndummy, y(1)
+      common /coconv/ econv, xmconv, ang2c
+      common /codim/ mairy, mmax
+      common /coang/ ang1, ang2, dang
+*
+      dimension jpack(1),ipack(1),lpack(1)
+* size of arrays in 2 dimension statements below are for j.le.5
+      dimension sigkto(21),sigk(21)
+      dimension sigmmp(361,11,11),mivals(11,11),
+     :  fmivals(11,11),mfvals(11,11),fmfvals(11,11)
+      data pi/3.141592653589793d0/
+      data rad/57.295779513082323d0/
+* compute dif cross sections over 0 to 180 degrees, in 0.5 deg increments
+      data ang1, ang2, dang /0.d0, 180.d0, 0.5d0/
+*
+      maxq = mmax*mmax/2
+      maxy = nv2max
+*
+* print out m-resolved differential cross sections (iframe < 0)? (immprt = 1)
+      immprt = 0
+      if (iframe .le. 0) immprt = 1
+*
+      if (jlevel .gt. 5) then
+        write(6,12) jlevel
+12      format (' *** JLEVEL =',i3,' .GT. 5. TOO HIGH FOR DSIGGA.',
+     :    ' ABORT')
+        return
+      end if
+      l2max = jfinal + jlevel + 1
+      mlmax = jlevel + jlevel + 1
+* below for half-integer spin
+      if (flaghf) then
+        l2max  = l2max + 1
+        mlmax = mlmax + 1
+      end if
+      nangle = nint((ang2 - ang1)/dang) + 1
+      mx = maxy/(l2max*mlmax)
+      jlevlp = jlevel
+* below for half-integer spin
+      if (flaghf) jlevlp = jlevel + 1
+* zero out amplitudes (complete array)
+      do 210 ii = 1, 43681
+        q(ii) = cmplx(0.d0, 0.d0)
+210   continue
+*
+* precalculate all required spherical harmonics
+      ii = 0
+      do 230 ml = 0, mlmax-1
+        angle = ang1
+        do 220 i = 1, nangle
+          call sphn(ml, l2max-1, angle, y(ii+i), nangle)
+          angle = angle + dang
+220     continue
+        ii = ii + l2max*nangle
+230   continue
+      jtlast=-1
+      jplast=0
+c
+c.....read header of s-matrix file
+c
+      call rdhead(1,cdate1,ered1,rmu1,csflg1,flghf1,flgsu1,
+     :   twomol,nucros,jfirst,jfinal,jtotd,numin,numax,nud,
+     :   nlevel,nlevop,nnout,jlev,inlev,elev,jout1)
+*
+*.....read next s-matrix
+*
+250   call sread (0, sreal, simag, jtot, jlpar, nu,
+     :                  jq, lq, inq, ipack, jpack, lpack,
+     :                  1, mmax, nopen, length, ierr)
+      if(ierr .eq. -1) then
+         write(6,260) xnam1,jtlast,jplast
+260      format(' END OF FILE DETECTED READING FILE ',(a),
+     :     ' LAST JTOT,JLPAR PROCESSED:',2i5)
+         goto 310
+      end if
+      if(ierr .lt. -1) then
+        write(6,270) xnam1,jtlast,jplast
+270     format(' ERROR READING FILE ',(a),
+     :     ' LAST JTOT,JLPAR PROCESSED:',2i5)
+        goto 310
+      end if
+*
+*.....this assumes that jlpar=1 is stored first
+*
+      if(jtot .gt. jfinal) goto 300
+*
+*.....copy row labels into column labels if s-matrices are stored
+*.....triangular
+*
+      if(jlpar.eq.jplast .and. jtot.ne.jtlast+1) write(6,275) jtot,jtlast
+275   format(' *** WARNING: JTOT.NE.JTLAST+1:',2i4)
+      jtlast=jtot
+      jplast=jlpar
+      if(nnout.gt.0) then
+        do 290 i=1,length
+          inq(i)=ipack(i)
+          jq(i)=jpack(i)
+          lq(i)=lpack(i)
+290     continue
+        nopen = length
+      end if
+c
+c.....calculate contributions to amplitudes for present jtot
+c     for elastic (jlevel,inlevel) -> (jlevel,inlevel) transition
+c
+      call amplga(jlevel,inlevel,jlevel,inlevel,jtot,mmax,
+     :  jpack,lpack,ipack,length,jq,lq,inq,nopen,
+     :  l2max,nangle,flaghf,sreal,simag,y,q)
+c
+c.....loop back to next jtot/jlpar
+c
+300   if(jtot.lt.jfinal .or. jlpar.eq.1) goto 250
+c
+c.....ca is wavevector for initial state, ecol is collision energy
+      ecol = ered1 - elevel
+      ca=sqrt(2.d0*rmu1*ecol)
+      fak=ang2c/ca**2
+c
+c.....print m -> m' differential cross sections for this batch of angles
+c
+      numjm = jlevlp + jlevel + 1
+c
+c     SUPPRESS PRINTING OF M-RESOLVED CROSS SECTIONS IN PRODUCTION RUNS (immprt = 0)
+      if (immprt .ne. 0) then
+      write(2,302)
+302   format(/'%   M-DEPENDENT GEOMETRIC APSE FRAME ELASTIC',
+     :  ' DIFFERENTIAL CROSS SECTIONS (ANG^2/STR)'/)
+      write(6,304)
+304   format(/' M-DEPENDENT GEOMETRIC APSE FRAME ELASTIC',
+     :  ' DIFFERENTIAL CROSS SECTIONS (ANG^2/STR)'/)
+      do 308 mj1 = -jlevlp, jlevel
+      do 308 mj2 = -jlevlp, jlevel
+        isub1=mj1+jlevlp+1
+        isub2=mj2+jlevlp+1
+        if (flaghf) then
+           xmj1=dble(mj1)+spin
+           xmj2=dble(mj2)+spin
+           fmivals(isub1,isub2) = xmj1
+           fmfvals(isub1,isub2) = xmj2
+        else
+           mivals(isub1,isub2) = mj1
+           mfvals(isub1,isub2) = mj2
+        end if
+308   continue
+*
+      if (flaghf) then
+        write(2,312) ((fmivals(i1,i2),
+     :    fmfvals(i1,i2),i2 = 1,numjm),
+     :    i1 = 1,numjm)
+312     format('%   ANGLE',20x,'(M -> M'')'/
+     :    '%',10x,121(1x,f4.1,'->',f4.1,2x))
+        write(6,313) ((fmivals(i1,i2),
+     :    fmfvals(i1,i2),i2 = 1,numjm),
+     :    i1 = 1,numjm)
+313     format('    ANGLE',20x,'(M -> M'')'/
+     :    10x,121(1x,f4.1,'->',f4.1,2x))
+      else
+        write(2,314) ((mivals(i1,i2),
+     :    mfvals(i1,i2),i2 = 1,numjm),
+     :    i1 = 1,numjm)
+314     format('%   ANGLE',20x,'(M -> M'')'/
+     :    '%',8x,121(4x,i2,'->',i2,4x))
+        write(6,315) ((mivals(i1,i2),
+     :    mfvals(i1,i2),i2 = 1,numjm),
+     :    i1 = 1,numjm)
+315     format('    ANGLE',20x,'(M -> M'')'/
+     :    9x,121(4x,i2,'->',i2,4x))
+      end if
+      write(2,303)
+303   format (' sigmmp_hel=[')
+      end if
+*     END OF SUPPRESSED PRINTING
+*
+      angle = ang1
+      do 350 iang=1,nangle
+        do 320 mj1 = -jlevlp, jlevel
+        do 320 mj2 = -jlevlp, jlevel
+          ii = (mj1 + jlevlp)*numjm*nangle
+     :         + (mj2 + jlevlp)*nangle + iang
+          isub1=mj1+jlevlp+1
+          isub2=mj2+jlevlp+1
+          sigmmp(iang,isub1,isub2) =
+     :      fak*dreal(q(ii)*conjg(q(ii)))
+320     continue
+c     SUPPRESS THIS PRINTING
+        if (immprt .ne. 0) then
+        write(2,355) angle,((sigmmp(iang,i1,i2),
+     :    i2 = 1,numjm), i1 = 1,numjm)
+        write(6,355) angle,((sigmmp(iang,i1,i2),
+     :    i2 = 1,numjm), i1 = 1,numjm)
+355     format(f8.2,121e14.6)
+        end if
+        angle = angle + dang
+350   continue
+      if (immprt .ne. 0) write(2,352)
+352   format(' ];')
+*     END OF SUPPRESSED PRINTING OF CROSS SECTION VALUES
+*
+* now compute differential tensor cross sections
+*
+      write(2,362) (k,k=0,maxk)
+362   format(/'%  GEOMETRIC APSE FRAME ELASTIC DIFFERENTIAL',
+     :  ' TENSOR CROSS SECTIONS (ANG^2/STR)'//'%   ANGLE',
+     :   12x,'TENSOR RANK K'/
+     :  '%',6x,21(6x,i3,4x))
+      write(6,364) (k,k=0,maxk)
+364   format(/'    GEOMETRIC APSE FRAME ELASTIC DIFFERENTIAL',
+     :  ' TENSOR CROSS SECTIONS (ANG^2/STR)'//'    ANGLE',
+     :   12x,'TENSOR RANK K'/
+     :  ' ',6x,21(6x,i3,4x))
+      write(2,363)
+363   format (' sigk_hel = [')
+* zero integral tensor cross sections
+      do 360 k1=1,maxk
+        sigkto(k1) = 0.d0
+360   continue
+      angle = ang1
+      xj1=dble(jlevel)+spin
+      do 400 iang=1,nangle
+        sn = sin(angle/rad)
+        maxk1 = maxk+1
+        do 390 k1=1,maxk1
+          xk = k1 - 1
+          fack = 2.d0*xk + 1.0d0
+          sigk(k1)=0.d0
+          do 380 mj1=-jlevlp, jlevel
+            xmj1=dble(mj1)+spin
+            do 375 mj2=-jlevlp, jlevel
+              xmj2=dble(mj2)+spin
+              ipower=nint(xj1+xj1-xmj1-xmj2)
+              iph=1.d0
+              if ((ipower/2)*2 .ne. ipower) iph=-1.d0
+              isub1=mj1+jlevlp+1
+              isub2=mj2+jlevlp+1
+              sigk(k1) = sigk(k1) + iph*fack
+     :          *xf3j(xj1,xj1,xk,xmj1,-xmj1,0.d0)
+     :          *xf3j(xj1,xj1,xk,xmj2,-xmj2,0.d0)
+     :          *sigmmp(iang,isub1,isub2)
+375         continue
+380       continue
+          sigkto(k1) = sigkto(k1) + sn*sigk(k1)
+390     continue
+        write(2,355) angle,(sigk(i),i=1,maxk1)
+        write(6,355) angle,(sigk(i),i=1,maxk1)
+        angle = angle + dang
+400   continue
+      do 401 k1=1,maxk1
+        sigkto(k1) = sigkto(k1)*(dang/rad)*2.d0*pi
+401   continue
+      write(2,352)
+      write(2,405) (k, sigkto(k+1),k=0, maxk)
+      write(6,406) (k, sigkto(k+1),k=0, maxk)
+405   format(/,'%  INTEGRAL TENSOR CROSS SECTIONS'/
+     :  '%     RANK  XS:  ',11(i6,1pe14.5))
+406   format(/,'   INTEGRAL TENSOR CROSS SECTIONS'/
+     :  '      RANK  XS:',11(i6,1pe14.5))
+*
+310   continue
+*
+      return
+      end
+*======
+      subroutine amplga(j1,inlev1,j2,inlev2,jtot,mmax,jpack,
+     :  lpack,ipack,length,jq,lq,inq,nopen,maxl2,nangle,
+     :  flaghf,sreal,simag,y,q)
+c
+c calculates scattering amplitudes for given jtot and set
+c of angles
+c
+c     author of original ampli program:  h.-j. werner
+c     revised by p.j.dagdigian for geomatric apse frame calculation
+c     for the transition (j1,inlev1) -> (j2,inlev2)
+c
+c     revision date: 13-oct-2011
+c
+c.....jpack,lpack,ipack: labels for rows
+c.....jq,lq,inq:         labels for columns
+      implicit double precision (a-h,o-z)
+      complex*16 q,ai,fak2,fak3,yy,tmat
+      parameter (zero=0.0d0,one=1.0d0)
+      logical flaghf,elastc
+      common /coang/ ang1, ang2, dang
+      dimension jpack(1),lpack(1),ipack(1),jq(1),lq(1),inq(1),q(1)
+      dimension sreal(mmax,1),simag(mmax,1),y(1)
+      dimension fak1(400),fak2(400),fak3(400),ilab1(400)
+      sqpi = 1.772453850905516d0
+      rad = 57.295779513082323d0
+      piov2 = 1.570796326794897d0
+c
+c.....ai is sqrt(-1)
+      ai=cmplx(zero, one)
+      elastc = j1.eq.j2 .and. inlev1.eq.inlev2
+c
+      if (flaghf) then
+c.....here for half-integer spin
+        fakj=sqpi*(2.d0*jtot + 2.d0)*(-1)**(j1+j2+1)
+        spin=0.5d0
+        j1p=j1+1
+        j2p=j2+1
+      else
+c.....here for integer spin
+        fakj=sqpi*(2.d0*jtot + 1.d0)*(-1)**(j1+j2)
+        spin=0.0d0
+        j1p=j1
+        j2p=j2
+      end if
+      xjtot=dble(jtot)+spin
+      xj1=dble(j1)+spin
+      xj2=dble(j2)+spin
+      ll=0
+      do 50 ilab=1,length
+        if(jpack(ilab).ne.j1 .or. ipack(ilab).ne.inlev1)
+     :     goto 50
+        l1=lpack(ilab)
+        ll=ll+1
+        fak1(ll)=fakj*sqrt(2.d0*l1 + 1.0d0)
+        ilab1(ll)=ilab
+50    continue
+      llmax=ll
+c
+      do 500 jlab=1,nopen
+        if(jq(jlab).ne.j2 .or. inq(jlab).ne.inlev2) goto 500
+        l2=lq(jlab)
+        xl2=l2
+        do 60 ll=1,llmax
+          ilab=ilab1(ll)
+          l1=lpack(ilab)
+c.....convert to t-matrix
+          tmat = -cmplx(sreal(jlab,ilab),simag(jlab,ilab))
+          if(elastc .and. l1.eq.l2) tmat = tmat + 1.0d0
+          fak2(ll)=cmplx(fak1(ll)*(-1)**(l1+l2),zero)
+     :       *(ai**(l1-l2))*tmat
+60      continue
+c
+        ii=0
+*
+* mj1 is GA-frame initial m quantum number
+        do 400 mj1=-j1p,j1
+          xmj1=dble(mj1)+spin
+* mj2 is GA-frame final m quantum number
+          do 300 mj2=-j2p,j2
+            xmj2=dble(mj2)+spin
+            angle = ang1
+            do 200 iang=1,nangle
+              ii = ii + 1
+* redrot below requires rotation angle in radians
+              betaga = piov2 + 0.5d0*angle/rad
+* mj1p is collision-frame initial m quantum number
+              do 380 mj1p=-j1p,j1
+                xmj1p=dble(mj1p)+spin
+                yy = 0.d0
+                do 70 ll=1,llmax
+                  ilab=ilab1(ll)
+                  xl1=lpack(ilab)
+                  fak3(ll)=fak2(ll)
+     :              *xf3j(xj1,xl1,xjtot,xmj1p,zero,-xmj1p)
+70              continue
+* mj2p is collision-frame final m quantum number
+                do 350 mj2p=-j2p,j2
+                  xmj2p=dble(mj2p)+spin
+                  xml2p=xmj1p - xmj2p
+                  ml2p=xml2p
+                  iyof=(iabs(ml2p)*maxl2+l2)*nangle
+                  fakp = redrot(xj1,xmj1p,xmj1,betaga)
+     :              *redrot(xj2,xmj2p,xmj2,betaga)
+     :              *xf3j(xj2,xl2,xjtot,xmj2p,xml2p,-xmj1p)
+     :              *y(iyof+iang)
+                  if (ml2p.gt.0) fakp = fakp*(-1)**ml2p
+                  do 100 ll=1,llmax
+                    yy = yy + fak3(ll)*fakp
+100               continue
+370               continue
+350             continue
+                q(ii) = q(ii) + yy
+380           continue
+              angle = angle + dang
+200         continue
+300       continue
 400     continue
 500   continue
       return
@@ -2747,4 +3286,3 @@ c
       return
       end
 c=====eof=====
-

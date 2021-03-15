@@ -1,0 +1,74 @@
+#!/usr/bin/env python2
+
+import sys
+import os
+
+from test_exec import *
+
+
+def run_tests(tests_raw, hib_dir):
+    print "Starting Hibridon tests, base directory: \033[1m{}\033[0m".format(hib_dir)
+    ncmp = {}
+    fail_count = 0
+    test_count = 0
+    tests = []
+    for t in tests_raw:
+        groupfile = os.path.join(hib_dir, "hibtest/testgroup_" + t)
+        if os.path.isfile(groupfile):
+            for line in open(groupfile, "r"):
+                l = line.strip()
+                if l: tests.append(l)
+        else:
+            tests.append(t)
+    for test in tests:
+        if not os.path.isfile(
+            os.path.join(hib_dir, "hibtest", test, "hibautotest.conf")):
+            print "** WARNING: Test", test, "does not exist."
+            continue
+        task = HibTest(test, hib_dir)
+        nc = task.execute_test()
+        test_count += 1
+        if nc is None:
+            fail_count += 1
+            continue
+        for key in nc:
+            ncmp[key] = nc[key]
+    print
+    print "%d/%d test(s) passed, %d file(s) not "\
+        "checked" % (test_count - fail_count, test_count, len(ncmp))
+    print
+    return ncmp
+
+
+def run_diff(ncmp):
+    # try:
+    #     os.unlink("test_diff.test")
+    # except OSError:
+    #     pass
+    # for f1 in ncmp:
+    #     f2 = ncmp[f1]
+    #     cmd1 = "echo " + f1 + " " + f2 + " >> test_diff.test"
+    #     cmd2 = "diff " + f1 + " " + f2 + " >> test_diff.test"
+    #     os.system(cmd1)
+    #     os.system(cmd2)
+    for f1 in ncmp:
+        print "   ", f1
+    return
+
+
+def main():
+    hib_dir = sys.argv[1]
+    if os.path.isfile(os.path.join(hib_dir, "hibtest.log")):
+        os.unlink(os.path.join(hib_dir, "hibtest.log"))
+    if len(sys.argv) == 2:
+        tests = ["regular"]
+    else:
+        tests = sys.argv[2:]
+    ncmp = run_tests(tests, hib_dir)
+    if len(ncmp) > 0:
+        print "Please check manually the following file(s):"
+        run_diff(ncmp)
+    return
+
+if __name__ == "__main__":
+    main()

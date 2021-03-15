@@ -1,8 +1,11 @@
 *system:  CN(Av=3,Xv=7)-Ar, refit of Berning's original PES's
-* this just calculates Vsigma (CN(X)+Ar) PES
-*references: Berning, A. (1995). 
-*   Energieübertragungsprozesse in Atom-Molekule Stossen, Ph. D. thesis,Universitaet Stuttgart.
-*   Alexander, M. H., X. Yang, et al. (2000). ³CN-Ar PES and low-J scattering.² J. Chem. Phys. 112: 781-791.
+*  this just calculates Vsigma (CN(X)+Ar) PES
+*  references: Berning, A. (1995). 
+*  Energieübertragungsprozesse in Atom-Molekule Stossen, Ph. D. thesis,
+*  Universitaet Stuttgart.
+*  Alexander, M. H., X. Yang, et al., "CN-Ar PES and low-J scattering,"
+*  J. Chem. Phys. 112: 781-791 (2000)
+*
       subroutine driver
       implicit double precision (a-h,o-z)
       character *48 potnam

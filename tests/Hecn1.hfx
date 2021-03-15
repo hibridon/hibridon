@@ -3,7 +3,7 @@
       LABEL:      HeCN(X2Sigma) RCCSD(T) Lique Spielfiede        
       POT NAME:  He-CN(2Sigma) CCSDT PES                         
       S-MATRICES READ FROM FILE Hecn1.smt                               
-      WRITTEN:   Jan 14 12:19:42 2011
+      WRITTEN:   Jan  2 16:21:34 2012
       JTOT2:             20
       ETOT:          40.000 CM(-1)
 

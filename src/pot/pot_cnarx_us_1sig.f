@@ -1,8 +1,15 @@
-*system:  CN(X)-Ar, refit of Udo's original PES's
-* this just calculates Vsigma (CN(X)+Ar) PES
-*references: Berning, A. (1995). 
-*   Energieübertragungsprozesse in Atom-Molekule Stossen, Ph. D. thesis,Universi*taet Stuttgart.
-*   Alexander, M. H., X. Yang, et al. (2000). ³CN-Ar PES and low-J scattering.² *J. Chem. Phys. 112: 781-791.
+*  system:  CN(X)-Ar, refit of Udo Schnupf's original PES's
+* 
+*  reference: J Han, M C. Heaven, U Schnupf, and M H. Alexander
+*  J. Chem. Phys. 128, 104308 (2008) 
+*  this just calculates Vsigma (CN(X)+Ar) PES
+*  references: Berning, A. (1995). 
+*  Energieübertragungsprozesse in Atom-Molekule Stossen, Ph. D. thesis,
+*  Universi*taet Stuttgart.
+*  Alexander, M. H., X. Yang, et al. (2000). "CN-Ar PES and low-J scattering,"
+*  J. Chem. Phys. 112: 781-791.
+
+
       include "common/syusr"
       include "common/bausr"
       include "common/ground"

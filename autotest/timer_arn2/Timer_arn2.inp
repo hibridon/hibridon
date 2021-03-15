@@ -1,0 +1,25 @@
+     N2-Ar CC PATTENGILL POTENTIAL              
+   1                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    5.5000    8.0000    0.1500   rstart, rendld, spac
+  F                              prairy
+  1.050      3.00    25.0  3.00  tolai, rincr, rendai, fstfac
+   1                             nerg
+   500.0000
+   16.47000                      xmu
+   30.0000                       rcut
+  60  60   5   1   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  48  -1                         lscreen, iprint
+    4    1                       nnout,niout
+   0   2   4   6
+   0
+  F  F  F  F  F                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  F  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  F  F  F  F                  noprin, chlist, ipos, nucros, photof
+  F  F  F  T  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+   1   0   0                     nvib, vmin,vmax
+   0   0  60                                     iv,jmin,jmax
+   2.01000       0.00000       0.00000           brot,drot,hrot
+     0.00000000                                  evib
+                                        

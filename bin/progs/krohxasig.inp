@@ -1,0 +1,23 @@
+OH(A/X) - Kr quenching colls - 1Sigma model
+   99                            ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    3.0000    9.0000    0.0100   rstart, rendld, spac
+  F                              prairy
+  1.150      8.00    50.0  5.00  tolai, rincr, rendai, fstfac
+   1                             nerg
+   32452.380
+   14.137999113                  xmu (84kr)
+  -100.000                       rcut
+   0  20   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80  -1                         lscreen, iprint
+   36    2                       nnout,niout
+   0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35  
+ 1  2
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  T  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  F  F  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+   5   5                         jmax1, jmax2
+ 32402.38 16.96506 2.0632e-3     esg1, bsg1, dsg1
+  0.  18.53487  19.090e-4        esg2, bsg2, dsg2

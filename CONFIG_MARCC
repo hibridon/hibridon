@@ -1,0 +1,5 @@
+FC = ifort
+FOPT = -O3 -xHOST
+FFLAGS = -O3 -xHOST -mcmodel=medium -align all -save -fpp -i8 -openmp
+LDFLAGS = -shared-intel
+LD_MKL = -lmkl_intel_ilp64 -lmkl_core -lmkl_intel_thread -lpthread

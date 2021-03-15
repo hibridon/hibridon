@@ -1,0 +1,365 @@
+#!/bin/csh -f 
+# HIBRIDON bin/makehib $Revision: 2016.1 $ --- create executable program
+# makehib [-b -d]  potname [kmax]: link hib_{potname} with maximum dimension kmax
+#   option -b:  do not include arrays tq1, tq2, tq3
+#   option -d:  compile himain.f and pot subroutine with debug option
+# the PATH variable should be set to include the hibridon bin directory
+
+# this version allows linking with pot/potname_f90.o if that file exists
+
+set currentdir=`pwd`
+set basedir=`hibriddir`
+
+# default values for options and kmax
+set option = ""
+set kmax = 0
+set compopt = 'o'
+set bigopt = 'n'
+
+@ items = $#argv
+if ($items == 0) then
+  echo "usage: makehib [-b -d] potname [kmax]"
+  goto end
+endif
+if ($items > 4) then
+  echo "usage: makehib [-b -d] potname [kmax]"
+  goto end
+endif
+if ($items == 1) then
+  set v1 = $1
+  set fchar =  `echo $v1 |awk '{printf index($0,"-")}'`
+  if $fchar == "1" then
+     echo "usage: makehib [-b -d] potname [kmax]"
+     goto end
+  endif
+  set potname = $v1
+endif
+if ($items == 2) then
+  set v1 = $1
+  set v2 = $2
+  set fchar =  `echo $v2 |awk '{printf index($0,"-")}'`
+  if $fchar == "1" then
+     echo "usage: makehib [-b -d] potname [kmax]"
+     goto end
+  endif
+  set fchar =  `echo $v1 |awk '{printf index($0,"-")}'`
+  if $fchar == "1" then
+    set option =  `echo $v1 |awk '{printf substr($0,2,2)}'`
+    set ok = 'no'
+    if $option == "d" then
+      set compopt = 'd'
+      set ok = 'yes' 
+    endif
+    if $option == "b" then
+      set bigopt = 'y'
+      set ok = 'yes' 
+    endif
+    if $ok == "no" then
+      echo "usage: makehib [-b -d] potname [kmax]"
+      goto end
+    endif
+    set potname = $v2
+  endif
+  if $fchar == "0" then
+    set potname = $v1
+    set kmax = $v2
+  endif
+endif
+if ($items == 3) then
+  set v1 = $1
+  set v2 = $2
+  set v3 = $3
+  set fchar =  `echo $v3 |awk '{printf index($0,"-")}'`
+  if $fchar == "1" then
+     echo "usage: makehib [-b -d] potname [kmax]"
+     goto end
+  endif
+  set option =  `echo $v1 |awk '{printf substr($0,2,2)}'`
+  set ok = 'no'
+  if $option == "d" then
+      set compopt = 'd'
+    set ok = 'yes' 
+  endif
+  if $option == "b" then
+    set bigopt = 'y'
+    set ok = 'yes' 
+  endif
+  if $ok == "no" then
+     echo "usage: makehib [-b -d] potname [kmax]"
+     goto end
+  endif
+  set fchar =  `echo $v2 |awk '{printf index($0,"-")}'`
+  if $fchar == "1" then
+    set option2 = `echo $v2 |awk '{printf substr($0,2,2)}'`
+    set ok = 'no'
+    if $option2 == "d" then
+      set compopt = 'd'
+      set ok = 'yes' 
+    endif
+    if $option2 == "b" then
+      set bigopt = 'y'
+      set ok = 'yes' 
+    endif
+    if $ok == "no" then
+      echo "usage: makehib [-b -d] potname [kmax]"
+      goto end
+    endif
+    set potname = $v3
+    set option = "$option$option2"
+  endif
+  if $fchar == "0" then
+    set potname = $v2
+    set kmax = $v3
+  endif
+endif
+if ($items == 4) then
+  set v1 = $1
+  set v2 = $2
+  set v3 = $3
+  set v4 = $4
+  set fchar =  `echo $v2 |awk '{printf index($0,"-")}'`
+  if $fchar == "0" then
+     echo "usage: makehib [-b -d] potname [kmax]"
+     goto end
+  endif
+  set fchar =  `echo $v3 |awk '{printf index($0,"-")}'`
+  if $fchar == "1" then
+     echo "usage: makehib [-b -d] potname [kmax]"
+     goto end
+  endif
+  set option = `echo $v1 |awk '{printf substr($0,2,2)}'`
+  set ok = 'no'
+  if $option == "d" then
+    set compopt = 'd'
+    set ok = 'yes' 
+  endif
+  if $option == "b" then
+    set bigopt = 'y'
+    set ok = 'yes' 
+  endif
+  if $ok == "no" then
+    echo "usage: makehib [-b -d] potname [kmax]"
+    goto end
+  endif
+  set option2 = `echo $v2 |awk '{printf substr($0,2,2)}'`
+  set ok = 'no'
+  if $option2 == "d" then
+    set compopt = 'd'
+    set ok = 'yes' 
+  endif
+  if $option2 == "b" then
+    set bigopt = 'y'
+    set ok = 'yes' 
+  endif
+  if $ok == "no" then
+    echo "usage: makehib [-b -d] potname [kmax]"
+    goto end
+  endif
+  set option = "$option$option2"
+  set potname = $v3
+  set kmax = $v4
+endif
+if $kmax == "0" then
+  echo "default value of kmax = 151 used"
+  set kmax = 151
+endif
+if $kmax == "0" then
+  echo "default value of kmax = 151 used"
+  set kmax = 151
+endif
+
+echo "potname is $potname"
+echo "current directory is `pwd`"
+set hibname=hib$option
+set progname=$potname"_"$kmax
+if (-e $basedir/h_$potname.log) then
+  mv $basedir/h_$potname.log $basedir/h_$potname.log.BAK
+endif
+echo "" > $basedir/h_$potname.log
+echo "compiling pot subroutine for "$hibname"_$progname ..."
+echo "compiling pot subroutine for "$hibname"_$progname with ..." >>& $basedir/h_$potname.log
+
+if (-e $basedir/CONFIG) then
+else
+ echo "CONFIG file not here, making it now ..."
+ $basedir/bin/makeconfig >>& $basedir/h_$potname.log
+ echo ""
+ echo "check and (if desired) modify $basedir/CONFIG, then rerun $potname"
+ goto end
+endif
+
+echo "potname is pot_$potname.f"
+# check if correct pot subroutine is present
+
+if (-e $basedir/src/pot/pot_$potname.f) then
+else
+  echo ""
+  echo "pot subroutine $basedir/src/pot/pot_$potname.f not present, abort ..."
+  goto end
+endif
+
+# check if common routines are present in /src/pot
+if (-e $basedir/src/pot/common/parpot) then
+else
+  echo ""
+  echo "creating /pot/common directory ..."
+  cp -pr $basedir/src/common $basedir/src/pot
+endif
+# check if fortran converter is present
+if (-e ftconv_hib.exe) then
+else
+ echo ""
+ echo "making fortran converter ..."
+ echo "making fortran converter ...">>& $basedir/h_$potname.log
+ $basedir/bin/makeftconv >>& $basedir/h_$potname.log
+endif
+# run fortran converter
+echo ""
+echo "running fortran converter ..."
+echo "running fortran converter ..." >>& $basedir/h_$potname.log
+$basedir/bin/rpotscript  $potname >>& $basedir/h_$potname.log
+# compile fortran programs
+
+echo ""
+echo "compiling pot_$potname.f ..."
+cd $basedir/src/pot >>& $basedir/h_$potname.log
+if $compopt == "d" then
+  $basedir/bin/ftn_hib  -d  pot_$potname.f >>& $basedir/h_$potname.log
+endif
+if $compopt == "o" then
+  $basedir/bin/ftn_hib  -O  pot_$potname.f >>& $basedir/h_$potname.log
+endif
+echo "pot_$potname successfully compiled ..."
+echo "pot_$potname successfully compiled ..." >>& $basedir/h_$potname.log
+cd $basedir/bin
+set dt=`date +%D`
+set tm=`date +%T`
+set zn=`date +%Z`
+echo ""
+echo ""$hibname"_$progname being created at date $dt $tm $zn with version `cat $basedir/VERSION`"
+echo ""$hibname"_$progname being created at date $dt $tm $zn with version `cat $basedir/VERSION`" >>& $basedir/h_$potname.log
+
+if (-e $basedir/src/hiversion.f) then
+  echo "removing old hiversion.f ..."
+  echo "removing old hiversion.f ..." >>& $basedir/h_$potname.log
+  rm $basedir/src/hiversion.f
+endif
+set dt="`cat $basedir/VERSION` BUILD DATE $dt $tm $zn"
+sed snxdaten"$dt"n $basedir/src/hiversion.t > $basedir/src/hiversion.f
+# determine build system configuration
+hibdetails
+cat SYSCONFIG >> $basedir/src/hiversion.f
+cd $basedir/bin
+runvscript >>& $basedir/h_$potname.log
+cd $basedir/src
+echo ""
+echo "compiling hiversion ..."
+# compile hiversion
+set comptest = `grep MACH ../CONFIG | grep -c pg`
+if $comptest == 1 then
+   pgf95 -c -Mextend hiversion.f >>& $basedir/h_$potname.log
+   set pgiflag = 'true'
+else
+   $basedir/bin/ftn_hib  -n hiversion.f >>& $basedir/h_$potname.log
+   set pgiflag = 'false'
+endif
+cd ..
+
+if $bigopt == "n" then
+  sed snkbig,kbignkmax,kmaxn $basedir/src/himain.t > $basedir/src/himain.tt
+endif
+if $bigopt == "y" then
+  echo ""
+  echo "incorporating big matrix option in himain"
+  echo "incorporating big matrix option in himain" >>& $basedir/h_$potname.log
+  cp $basedir/src/himain.t $basedir/src/himain.tt
+endif
+
+# convert himain to include requested kmax
+  echo ""
+  echo "converting himain with kmax = $kmax"
+  echo "converting himain with kmax = $kmax" >>& $basedir/h_$potname.log
+  sed snkmax=151nkmax="$kmax"n $basedir/src/himain.tt > $basedir/src/himain.f
+  rm $basedir/src/himain.tt >>& $basedir/h_$potname.log
+cd $basedir/bin
+  rmnscript >>& $basedir/h_$potname.log
+  cd $basedir/src
+  if $compopt == "d" then
+    $basedir/bin/ftn_hib  -d himain.f >>& $basedir/h_$potname.log
+  endif
+  if $compopt == "o" then
+    $basedir/bin/ftn_hib  -n himain.f >>& $basedir/h_$potname.log
+  endif
+# link "$hibname"_progname
+echo ""
+echo "linking "$hibname"_$progname"
+if $compopt == "d" then
+  echo "  debug option for himain.f and pot subroutine"
+  echo "  debug option for himain.f and pot subroutine" >>& $basedir/h_$potname.log
+endif
+if $bigopt == "y" then
+  echo "  large matrix option"
+  echo "  large matrix option" >>& $basedir/h_$potname.log
+endif
+echo "  fortran-based direct i/o routines used"
+echo "  fortran-based direct i/o routines used" >>& $basedir/h_$potname.log
+cd $basedir/src
+set osname=`uname -s`
+if ($osname == "HP-UX" && $compopt == "d") then
+   echo "$osname adding /opt/langtools/lib/end.o for debugger"
+   echo "$osname adding /opt/langtools/lib/end.o for debugger" >>&  $basedir/h_$potname.log
+   $basedir/bin/ftn_hib -o  "$hibname"_$progname *.o pot/pot_$potname.o  /opt/langtools/lib/end.o >>& $basedir/h_$potname.log
+else
+# check if pot/pot_$potname_f90.o is present
+   set f90objname="$basedir/src/pot/pot_$potname"
+   set f90objname = "$f90objname"_f90.o
+   if (-e "$f90objname") then 
+      echo "  linking also with $f90objname"
+      echo "  linking also with $f90objname" >>&  $basedir/h_$potname.log
+      $basedir/bin/ftn_hib -o  "$hibname"_$progname *.o pot/pot_$potname.o $f90objname >>& $basedir/h_$potname.log
+   else
+      $basedir/bin/ftn_hib -o  "$hibname"_$progname *.o pot/pot_$potname.o  >>& $basedir/h_$potname.log
+   endif
+endif
+# remove pot_potname.o if successful link
+if (-e "$hibname"_$progname) then
+  rm pot/pot_$potname.o
+endif
+# rm himain.f if unsuccessful link
+set success = "false"
+if (-e "$hibname"_$progname) then
+  set success = "true"
+  set exe = `ls -s "$hibname"_$progname`
+  set fchar = `echo $exe |awk '{printf index($0," ")}'`
+  set len = `echo $exe |awk '{printf substr($0,0,'$fchar'-1)}'`
+  if $len == 0 then
+      set success = "false"
+  endif
+endif
+if $success == "false" then
+  echo ""
+  echo "unsuccessful link; removing himain.f ..."
+  rm himain.f
+  if (-e himain.o) then
+    rm himain.o
+  endif
+endif
+
+# move executable to ../bin/progs if successful link  
+if $success == "true" then
+  echo ""
+  echo "successful link; moving "$hibname"_$progname to ../bin/progs ..."
+  mv "$hibname"_$progname ../bin/progs
+endif
+
+cat "$hibname"_$progname.log >> $basedir/h_$potname.log
+rm "$hibname"_$progname.log
+
+cd $basedir/bin >>& $basedir/h_$potname.log
+end:
+echo ""
+echo "examine $basedir/h_$potname.log for diagnostic and/or error messages"
+
+cd $currentdir
+exit
+

@@ -1,18 +1,67 @@
 #!/bin/csh -f
-# HIBRIDON bin/maketar_full $Revision: 2011.2 $ --- make hibridon tar file
-# maketar 
-# this creates a full tar for mha's use including html files!
+# HIBRIDON bin/maketar_full $Revision: 2007.1 $ --- make hibridon tar file
+# maketar [-c -h]
+# option -c: copy g'zipped tar file to mha-ibm7.umd.edu
+# option -h: include html help files
+# this creates a full tar for mha's use only (no html files!)
 # the PATH variable should be set to include the hibridon bin directory
 
 set basedir=`hibriddir`
 alias rm 'rm -f'
 @ items = $#argv
-if ($items > 0) then
-  echo "usage: maketar_full"
+if ($items > 2) then
+  echo "usage: maketar_full [-h] [-c]"
   goto end
 endif
-set htmloption = true
-set htar=/Users/mha/scratch/htar
+set htmloption = false
+set copoption = false
+if ($items == 0) then
+endif
+if ($items == 1) then
+  set v1 = $1
+  set fchar =  `echo $v1 |awk '{printf index($0,"-")}'`
+  if $fchar == "0" then
+     echo "usage: maketar_full [-h] [-c]"
+     exit
+  endif
+  set option =  `echo $v1 |awk '{printf substr($0,2,2)}'`
+  if $option == "c" then
+      set copoption = true
+  else if $option == "h" then
+      set htmloption = true
+  else
+     echo "usage: maketar_full [-h] [-c]"
+     exit
+  endif
+endif
+if ($items == 2) then
+  set v1 = $1
+  set v2 = $2
+  set option1 =  `echo $v1 |awk '{printf substr($0,2,2)}'`
+  set option2 =  `echo $v2 |awk '{printf substr($0,2,2)}'`
+  if ($option1 == "c" && $option2 == "h")  then
+     set copoption = true
+     set htmloption = true
+  else if ($option1 == "h" && $option2 == "c")  then
+     set copoption = true
+     set htmloption = true
+  else
+     echo "usage: maketar_full [-h -c]"
+     exit
+  endif
+endif  
+echo ""
+if $copoption == 'true' then
+      echo "tar file will be exported to mha-ibm7"
+else
+      echo "tar file will NOT be exported to mha-ibm7"
+endif
+if $htmloption == 'true' then
+      echo "html help file will be exported to mha-ibm7"
+else
+      echo "html help file will NOT be exported to mha-ibm7"
+endif
+set htar=/Users/pdagdig1/scratch/htar
 cd $basedir
 if (-e $basedir/tar_full.log) then
   rm $basedir/tar_full.log
@@ -29,6 +78,12 @@ echo ""
 echo "copying all files to $htar ..."
 echo "copying all files to $htar ..." >>& $basedir/tar_full.log
 cp -pr $basedir/* . >>& $basedir/tar_full.log
+
+#echo ""
+#echo "getting .html files from mha-mac1 ..."
+#echo "getting .html files from mha-mac1 ..." >>& $basedir/tar_full.log
+#cd doc
+#rcp -rp mha-mac1.umd.edu:/users3/mha/public_html/hibridon hib_html
 
 
 echo ""
@@ -62,17 +117,10 @@ echo "removing compiled object files ..." >>& $basedir/tar_full.log
 rm $htar/src/*.o
 rm $htar/src/pot/*.o
 rm $htar/utilities/*.o
+
 echo ""
-echo "tar'ing common files ..."
-cd $htar/src
-cd common
-rm  *.~* >>& $basedir/tar_full.log
-cd ..
-cat common/* > hicommon.all
-tar -cf hicommon.tar common
-echo ""
-echo "removing common directories ..."
-echo "removing common directories ..." >>& $basedir/tar.log
+echo "removing common files ..."
+echo "removing common files ..." >>& $basedir/tar.log
 rm -r $htar/src/common >>& $basedir/tar.log
 rm -r $htar/src/pot/common >>& $basedir/tar.log
 echo ""
@@ -82,7 +130,6 @@ cd $htar
 rm $htar/bin/*.log.* >>& $basedir/tar_full.log
 rm $htar/bin/test* >>& $basedir/tar_full.log
 rm $htar/bin/*.BAK >>& $basedir/tar_full.log
-rm $htar/*.BAK >>& $basedir/tar_full.log
 rm $htar/tests/*.out >>& $basedir/tar_full.log
 rm $htar/tests/*.sav >>& $basedir/tar_full.log
 rm $htar/tests/Outpt* >>& $basedir/tar_full.log
@@ -115,5 +162,19 @@ gzip hibrid_full.tar >>& $basedir/tar.log
 
 echo "$htar/hibrid_full.tar.gz created, see $basedir/tar_full.log for diagnostics"
 
+if $copoption == 'true' then
+  echo ""
+  echo "putting hibrid_full.tar.gz files on mha-ibm7 ..."
+  echo "putting hibrid_full.tar.gz files on mha-ibm7 ..." >>& $basedir/tar.log
+#  ftp -N /Users/mha/hold.netrc mha-ibm7.umd.edu
+      cd scratch
+      put hibrid_full.tar.gz
+  quit
+endif
+
+
+#rm hibrid_full.tar.Z
+#cd 
+#rm -r $htar
 echo ""
 exit

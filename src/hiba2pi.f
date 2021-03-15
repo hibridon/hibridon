@@ -379,7 +379,7 @@
      :             * (four * brot + p + two * (one - is(i) * x) * q)
           adum1=two*c32(i)
           adum2=eint(i)-cent(i)
-          c12(i) = half * atan2 (adum1,adum2) + pi2
+          c12(i) = half * atan2(adum1,adum2) + pi2
         end if
 50    continue
 *  n now contains the number of omega = 1/2 channels levels
@@ -391,7 +391,6 @@
         nmn = 1
         if (j(2) .eq. 0) nmn=2
 * nmn is the number of j=0 levels
-
         eh1=eint(1)
         eh2=eint(2)
         centh1=cent(1)
@@ -558,7 +557,7 @@
         nn = 0
         do 100  i = 1, n
 *  now take (nmax-n+i)th element, duplicate it as many times as is
-*  required for rotational degeneray, and store the new elements in
+*  required for rotational degeneracy, and store the new elements in
 *  nn, nn+1, ....
           ipoint = nmax - n + i
           ji = j(ipoint)
@@ -646,9 +645,9 @@
       end if
 * CHANGE HERE FOR TEST
       if (boundc) then
-*         ntop=ntop-2*numin
+*         ntop = ntop - 2*numin
 * mha and jacek's modification; make sure ntop equals the number of channels
-         ntop=n+1
+         ntop = n + 1
       endif
 *  now list channels if requested
       if (clist) then
@@ -656,21 +655,21 @@
           if (bastst) write (6, 200)
           write (9,200)
 200       format
-     :     (/'   N   J  EPS OMEGA   L    EINT(CM-1)  C-1/2     C-3/2')
+     :     (/'   N   J  EPS  F1/2   L   EINT(CM-1)  C-1/2     C-3/2')
         else
           if (bastst) write (6,210) xnu
           write (9,210) xnu
 210       format
-     :     (/'   N   J  EPS OMEGA   L    EINT(CM-1)  C-1/2     C-3/2',
+     :     (/'   N   J  EPS  F1/2   L   EINT(CM-1)  C-1/2     C-3/2',
      :       '    **  NU=', f4.1/)
         end if
         do 230  i = 1, n
           fj = j(i) + half
           ecm = eint(i) * econv
           if (bastst)
-     :    write (6, 220) i, fj, is(i), ifi(i), l(i), ecm,
+     :    write (6, 220) i, fj, isign(1, is(i)), ifi(i), l(i), ecm,
      :                   c12(i), c32(i)
-          write (9, 220) i, fj, is(i), ifi(i), l(i), ecm,
+          write (9, 220) i, fj, isign(1, is(i)), ifi(i), l(i), ecm,
      :                   c12(i), c32(i)
 220       format (i4, f5.1, i4, i4, i6, 3f10.3)
 230     continue
@@ -779,13 +778,13 @@
       end if
       do 450 i = 1, nn
           is(i) = ifi(i) * is(i)
-          fj = j(i) + half
-          ecm = eint(i) * econv
           if (bastst) then
-            write (6, 220) i, fj, is(i), ifi(i), l(i), ecm,
-     :                   c12(i), c32(i)
-            write (9, 220) i, fj, is(i), ifi(i), l(i), ecm,
-     :                   c12(i), c32(i)
+             fj = j(i) + half
+             ecm = eint(i) * econv
+             write (6, 220) i, fj, isign(1, is(i)), ifi(i), l(i), ecm,
+     :            c12(i), c32(i)
+             write (9, 220) i, fj, isign(1, is(i)), ifi(i), l(i), ecm,
+     :            c12(i), c32(i)
           end if
 450   continue
       return
@@ -875,3 +874,4 @@
       v = iphase * x * sqrt(xnorm)
       return
       end
+*  -----------------------------------------------------------------------

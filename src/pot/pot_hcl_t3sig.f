@@ -1,5 +1,8 @@
 *system: H(2S)+Cl(2P)
-*reference:  M. H. Alexander, B. Pouilly, and T. Duhoo, J. Chem. Phys. 99, 175
+*reference:  M. H. Alexander, B. Pouilly, and T. Duhoo,
+* J. Chem. Phys. 99, 1752 (1993)
+
+
       subroutine driver
       implicit double precision (a-h,o-z)
       common /comxm/ncache, mxmblk

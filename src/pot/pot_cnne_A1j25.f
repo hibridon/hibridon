@@ -4,6 +4,9 @@
 *  author: Moonbong Yang 27-sep-1995
 *  v1 pot is scaled by 0.17921 of vibrational matrix element of
 *  7/3
+*
+* reference:
+* Moonbong Yang and M.  H. Alexander J. Chem. Phys. 107, 7148 (1997)
 
       include "common/syusr"
       include "common/bausr"

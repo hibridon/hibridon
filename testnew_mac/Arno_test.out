@@ -1,0 +1,248 @@
+ CC INTEGRAL CROSS SECTION TESTS                 
+ ALEXANDER Ar-NO CEPA                            
+ ==============================
+     *** Parameters:
+ JTOT1  =   0        JTOT2  =   5        JTOTD  =   1        JLPAR  =   0
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  48        IPRINT =   0
+ FSTFAC =  7.000     RINCR  =  8.000     RCUT   =  30.00     RENDAI =  25.00    
+ RENDLD =  9.000     RSTART =  5.500     SPAC   = 0.1400     TOLAI  =  1.160    
+ XMU    =  17.14    
+     *** 2-PI system parameters:
+ NTERM  =   2        JMAX   =   6        IGU    =   1        ISA    =   0
+ NPAR   =   2
+ BROT   =  1.696     ASO    =  123.1     P      = 1.1720E-02 Q      = 6.7000E-04
+ LAMMIN:    1   2
+ LAMMAX:   10  10
+ MPROJ:     0   2
+     *** Flags:
+ AIRYFL= T    BASTST= F    BATCH = F    CHLIST= F    CSFLAG= F    FLAGHF= T
+ FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= T    NOPRIN= T    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= F    WAVEFL= F
+ WRPART= F    WRSMAT= F    WRXSEC= T    BOUNDC= F
+ ** Energies:      442.000000
+ NOUT: 17; JOUT:  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16
+ INDOUT:   -1   1  -2   2
+ ==============================
+ ** INTEGRAL CROSS SECTIONS SAVED IN FILE Arno_tes1.ics
+ ** RESTART INFORMATION SAVED IN FILE Arno_tes.sav
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 4.3.6 BUILD DATE 11/15/10 18:13:42 EST
+
+     AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI
+               A. BERNING, A. DEGLI-ESPOSTI, C. RIST, P. DAGDIGIAN, B. POUILLY
+               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, J. KLOS
+               F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+SYS=OS X 10.6.5; MACH=unix-darwin unix-ifort unix-darwin64
+CC=; FC=/opt/intel/composerxe-2011.0.085/bin/intel64/ifort -O3 -save
+LIB_ROOT=-L/opt/intel/composerxe-2011.0.085/mkl
+LIBRARIES:  -lmkl_intel_ilp64 /
+  -lmkl_intel_thread -lmkl_core -lpthread
+ --------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ All publications resulting from use of the integrators included in the
+ Hibridon code must include the following reference:
+
+ D. E. Manolopoulos, J. Chem. Phys. 85, 6425 (1986); M. H. Alexander and D. E.
+ Manolopoulos, J. Chem. Phys. 80, 2044 (1987).
+
+ All publications involving the determination ofphotodissociation cross sections
+ must also include the following reference:
+
+ M. H. Alexander, Comput. Phys. Commun, 75, 87 (1993).
+
+ All publications investigating flux redistribution must include the following references:
+
+ M. H. Alexander, J. Chem. Phys. 95, 8931 (1991); D. E. Manolopoulos and
+ M. H. Alexander, J. Chem. Phys.  97, 2527 (1992).
+
+ All publications resulting from use of the Hibridon package must include
+ the following reference:
+
+ HIBRIDON is a package of programs for the time-independent quantum treatment
+ of inelastic collisions and photodissociation written by M. H. Alexander,
+ D. E.  Manolopoulos, H.-J. Werner, and B. Follmeg, with contributions by
+ P. F. Vohralik, D. Lemoine, G. Corey, B. Johnson, T. Orlikowski, A. Berning,
+ A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly, G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J. Klos, and F. Lique
+ -----------------------------------------------------------------------------
+
+ ** LABEL:     CC INTEGRAL CROSS SECTION TESTS                 
+ ** POT NAME:  ALEXANDER Ar-NO CEPA                            
+ ** DATE:      Nov 15 18:13:50 2010
+ ** NMAX= 191  NAIRY= 191
+ ** NLAM= 0 RESET TO NLAM=19    IN BASIS
+
+ ** J =    0 JLPAR = 1 STARTED
+
+ ** INTEGRATION WILL START 0.560 BOHR INSIDE INNER TURNING POINT
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00.020  WALL: 00:00:00.016  DATE: Nov 15 18:13:50 2010
+
+ ** J =    1 JLPAR = 1 STARTED
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:00.080  WALL: 00:00:00.047  DATE: Nov 15 18:13:50 2010
+
+ ** J =    2 JLPAR = 1 STARTED
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:00.181  WALL: 00:00:00.097  DATE: Nov 15 18:13:50 2010
+
+ ** J =    3 JLPAR = 1 STARTED
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:00.327  WALL: 00:00:00.170  DATE: Nov 15 18:13:50 2010
+
+ ** J =    4 JLPAR = 1 STARTED
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:00.508  WALL: 00:00:00.260  DATE: Nov 15 18:13:50 2010
+
+ ** J =    5 JLPAR = 1 STARTED
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00.713  WALL: 00:00:00.363  DATE: Nov 15 18:13:50 2010
+
+ ** J =    0 JLPAR =-1 STARTED
+
+ ** INTEGRATION WILL START 0.560 BOHR INSIDE INNER TURNING POINT
+ ** J =    0 JLPAR =-1 FINISHED;  CPU: 00:00:00.736  WALL: 00:00:00.374  DATE: Nov 15 18:13:50 2010
+
+ ** J =    1 JLPAR =-1 STARTED
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:00.793  WALL: 00:00:00.403  DATE: Nov 15 18:13:50 2010
+
+ ** J =    2 JLPAR =-1 STARTED
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:00:00.880  WALL: 00:00:00.450  DATE: Nov 15 18:13:50 2010
+
+ ** J =    3 JLPAR =-1 STARTED
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:00:01.020  WALL: 00:00:00.521  DATE: Nov 15 18:13:50 2010
+
+ ** J =    4 JLPAR =-1 STARTED
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:00:01.196  WALL: 00:00:00.608  DATE: Nov 15 18:13:50 2010
+
+ ** J =    5 JLPAR =-1 STARTED
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:00:01.385  WALL: 00:00:00.723  DATE: Nov 15 18:13:50 2010
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:   106
+      TIMING:  ELAPSED 00:00:00.723/ CPU 00:00:01.385/ MP RATIO  191.7 %
+      CURRENT DATE:  Nov 15 18:13:50 201
+ ===============================================================================
+ CC DIFFERENTIAL AND STERIC EFFECT TESTS         
+ ALEXANDER Ar-NO CEPA                            
+ ==============================
+     *** Parameters:
+ JTOT1  =   0        JTOT2  =   5        JTOTD  =   1        JLPAR  =   0
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  48        IPRINT =   0
+ FSTFAC =  7.000     RINCR  =  8.000     RCUT   =  30.00     RENDAI =  25.00    
+ RENDLD =  9.000     RSTART =  5.500     SPAC   = 0.1400     TOLAI  =  1.160    
+ XMU    =  17.14    
+     *** 2-PI system parameters:
+ NTERM  =   2        JMAX   =   6        IGU    =   1        ISA    =   0
+ NPAR   =   2
+ BROT   =  1.696     ASO    =  123.1     P      = 1.1720E-02 Q      = 6.7000E-04
+ LAMMIN:    1   2
+ LAMMAX:   10  10
+ MPROJ:     0   2
+     *** Flags:
+ AIRYFL= T    BASTST= F    BATCH = F    CHLIST= F    CSFLAG= F    FLAGHF= T
+ FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= T    NOPRIN= T    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= F    WAVEFL= F
+ WRPART= F    WRSMAT= T    WRXSEC= T    BOUNDC= F
+ ** Energies:      442.000000
+ NOUT: 17; JOUT:  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16
+ INDOUT:   -1   1  -2   2
+ ==============================
+ ** INTEGRAL CROSS SECTIONS SAVED IN FILE Arno_tes1.ics
+ ** RESTART INFORMATION SAVED IN FILE Arno_tes.sav
+ ** SELECTED S-MATRIX ELEMENTS SAVED IN FILE Arno_tes1.smt
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 4.3.6 BUILD DATE 11/15/10 18:13:42 EST
+
+     AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI
+               A. BERNING, A. DEGLI-ESPOSTI, C. RIST, P. DAGDIGIAN, B. POUILLY
+               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, J. KLOS
+               F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+SYS=OS X 10.6.5; MACH=unix-darwin unix-ifort unix-darwin64
+CC=; FC=/opt/intel/composerxe-2011.0.085/bin/intel64/ifort -O3 -save
+LIB_ROOT=-L/opt/intel/composerxe-2011.0.085/mkl
+LIBRARIES:  -lmkl_intel_ilp64 /
+  -lmkl_intel_thread -lmkl_core -lpthread
+ --------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ All publications resulting from use of the integrators included in the
+ Hibridon code must include the following reference:
+
+ D. E. Manolopoulos, J. Chem. Phys. 85, 6425 (1986); M. H. Alexander and D. E.
+ Manolopoulos, J. Chem. Phys. 80, 2044 (1987).
+
+ All publications involving the determination ofphotodissociation cross sections
+ must also include the following reference:
+
+ M. H. Alexander, Comput. Phys. Commun, 75, 87 (1993).
+
+ All publications investigating flux redistribution must include the following references:
+
+ M. H. Alexander, J. Chem. Phys. 95, 8931 (1991); D. E. Manolopoulos and
+ M. H. Alexander, J. Chem. Phys.  97, 2527 (1992).
+
+ All publications resulting from use of the Hibridon package must include
+ the following reference:
+
+ HIBRIDON is a package of programs for the time-independent quantum treatment
+ of inelastic collisions and photodissociation written by M. H. Alexander,
+ D. E.  Manolopoulos, H.-J. Werner, and B. Follmeg, with contributions by
+ P. F. Vohralik, D. Lemoine, G. Corey, B. Johnson, T. Orlikowski, A. Berning,
+ A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly, G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J. Klos, and F. Lique
+ -----------------------------------------------------------------------------
+
+ ** LABEL:     CC DIFFERENTIAL AND STERIC EFFECT TESTS         
+ ** POT NAME:  ALEXANDER Ar-NO CEPA                            
+ ** DATE:      Nov 15 18:13:50 2010
+ ** NMAX= 191  NAIRY= 191
+
+ ** J =    0 JLPAR = 1 STARTED
+
+ ** INTEGRATION WILL START 0.560 BOHR INSIDE INNER TURNING POINT
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00.023  WALL: 00:00:00.011  DATE: Nov 15 18:13:50 2010
+
+ ** J =    1 JLPAR = 1 STARTED
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:00.083  WALL: 00:00:00.041  DATE: Nov 15 18:13:50 2010
+
+ ** J =    2 JLPAR = 1 STARTED
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:00.184  WALL: 00:00:00.092  DATE: Nov 15 18:13:50 2010
+
+ ** J =    3 JLPAR = 1 STARTED
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:00.326  WALL: 00:00:00.163  DATE: Nov 15 18:13:50 2010
+
+ ** J =    4 JLPAR = 1 STARTED
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:00.505  WALL: 00:00:00.252  DATE: Nov 15 18:13:51 2010
+
+ ** J =    5 JLPAR = 1 STARTED
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00.695  WALL: 00:00:00.353  DATE: Nov 15 18:13:51 2010
+
+ ** J =    0 JLPAR =-1 STARTED
+
+ ** INTEGRATION WILL START 0.560 BOHR INSIDE INNER TURNING POINT
+ ** J =    0 JLPAR =-1 FINISHED;  CPU: 00:00:00.718  WALL: 00:00:00.365  DATE: Nov 15 18:13:51 2010
+
+ ** J =    1 JLPAR =-1 STARTED
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:00.772  WALL: 00:00:00.392  DATE: Nov 15 18:13:51 2010
+
+ ** J =    2 JLPAR =-1 STARTED
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:00:00.873  WALL: 00:00:00.443  DATE: Nov 15 18:13:51 2010
+
+ ** J =    3 JLPAR =-1 STARTED
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:00:01.011  WALL: 00:00:00.511  DATE: Nov 15 18:13:51 2010
+
+ ** J =    4 JLPAR =-1 STARTED
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:00:01.189  WALL: 00:00:00.601  DATE: Nov 15 18:13:51 2010
+
+ ** J =    5 JLPAR =-1 STARTED
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:00:01.395  WALL: 00:00:00.704  DATE: Nov 15 18:13:51 2010
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:   106
+      TIMING:  ELAPSED 00:00:00.704/ CPU 00:00:01.395/ MP RATIO  198.1 %
+      CURRENT DATE:  Nov 15 18:13:51 201
+ ===============================================================================

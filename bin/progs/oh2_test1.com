@@ -1,0 +1,17 @@
+inp=o3ph2.inp
+job=E1000
+rstart=2.5
+spac=0.15
+ener=1000
+jtot2=185
+jmax=5
+show
+run
+printc
+trnprt
+jmax=7
+show
+run
+printc
+trnprt
+quit

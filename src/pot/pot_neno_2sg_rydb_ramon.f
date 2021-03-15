@@ -1,4 +1,7 @@
 *Ne-NO(^2Sigma Rydberg) PES RCCSD(T) Ramon Hernandez CPL 2006
+*reference:
+* P. Pajón-Suárez, G. Rojas-Lorenzo, J. Rubayo-Soneira,
+* R. Hernández-Lamoneda, Chem. Phys. Lett., 421,389-394 (2006)
 
       subroutine driver
       implicit double precision (a-h,o-z)

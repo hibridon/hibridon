@@ -4,27 +4,53 @@
 * Reference: François Lique, Annie Spielfiedel,
 * Nicole Feautrier,Ioan F. Schneider, Jacek Klos,
 * and Millard H. Alexander,JCP 132, 024303, 2010
+*
+*  Note:  this pot routine requires a data file to be in hibxx/bin/progs/potdata:
+*         hecn_fitmlv.dat
+*
       subroutine driver
       implicit double precision (a-h,o-z)
       common /cosysr/ xjunk(2),rshift,xfact
       common /covvl/ vvl(12)
       include "common/parpot"
+      econv=219474.6d0
       potnam='He-CN(2Sigma) CCSDT PES'
       print *, potnam
 1      print *, ' r (bohr)'
       rshift=0.5
       xfact=0.8
       read (5, *, end=99) r
+*
+*  modification to print out table of vlm's (12-aug-2014, p.dagdigian)
+      if (r.le.0.d0) goto 50
       call pot(vv0,r)
       write (6, 100) vv0,vvl
 100   format(' vsum',/,7(1pe16.8))
       goto 1
+*
+*  save table of vlm's (20-may-2013, p.dagdigian)
+50    write(6,53)
+53    format('Enter Rmin,Rmax, dR:')
+      read (5,*) rmin, rmax, dr
+      npts = nint((rmax - rmin)/dr) + 1
+      open (unit=22,file='hecnx_vlms.txt')
+      write(22,52)
+52    format(' %R/bohr  V00  V10  V20  V30  V40  V50  V60  V70',
+     :  '  V80  V90  V10,0  V11,0  V12,0')
+      do 55 ir=1,npts
+        rr = rmin + (ir - 1)*dr
+        call pot(vv0,rr)
+        write(22,110) rr,vv0*econv,(econv*vvl(j),j=1,12)
+110     format(f7.2,12(1pe16.8))
+55    continue
+      close(22)
+*
 99    end
       include "common/syusr"
       include "common/bausr"
       include "common/ground"
-      subroutine loapot(iunit,filnam)
 * ----------------------------------------------------------------
+      subroutine loapot(iunit,filnam)
       character*(*) filnam
       include "common/parbas"
       include "common/parpot"
@@ -357,7 +383,9 @@ c NOM DU FICHIER ICI ET NUMERO DU CANAL D'AFFICHAGE DES RESULTATS
         ntot=0
         ntpa=0
         ierr=0
-        open(unit=1,file=filnam,status='OLD',form='FORMATTED')
+        open(unit=1,file=
+     :    'potdata/hecn_fitmlv.dat',
+     :    status='OLD',form='FORMATTED')
         read(1,"(a80)",iostat=ierr) label
         write(input,*) 'label : ',label
         read(1,"(i10)",iostat=ierr) nterms

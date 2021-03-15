@@ -1,5 +1,7 @@
 * System:  CN(X)+Ar, scaled ab initio MRCI+Q PES's
-* Reference: M. H. Alexander to  be published.
+* Reference:
+* M. H. Alexander, Xin Yang, P J. Dagdigian, A Berning,
+* and H-J Werner J. Chem. Phys. 112, 781 (2000)
 
       include "common/syusr"
       include "common/bausr"

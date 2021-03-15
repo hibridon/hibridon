@@ -1,0 +1,21 @@
+# HIBRIDON CONFIG for Linux x86_64 and ifort 12
+# tested with Arch Linux on Jan 3, 2012, kernel 3.1.6, ifort 12.1.2
+# Machine type ..
+MACH="unix-x86 unix-ifort unix-darwin64"
+# Fortran Compiler ..
+FC="ifort -132 -mcmodel=medium -shared-intel -align all"
+# compiler optimisation
+FOPT="-O3 -xHOST"
+# compiler explicit no optimisation
+FNOPT=" "
+# compiler debug flag
+FDEBUG="-debug"
+# static variables
+FSTATIC="-save"
+# 64-bit integers
+FI64="-i8"
+# additional libraries and link options
+LIBS=" -lmkl_rt -lpthread -lm"
+LINKOPT=""
+# files in src to be compiled without optimization
+NO_OPT="hinput.f himain.f hiversion.f"

@@ -353,7 +353,7 @@ typedef struct {
       character*8 bcod(ncode), fcod(lcode),pcod(icode),bascod
 *comdeck parhlp.t
 cstart unix
-      parameter (helpdir='/Users/mha/hib436/doc/',
+      parameter (helpdir='/Users/pdagdig1/hib44/doc/',
      :           helptail='.hlp')
 cend
 *comdeck parhlp.t
@@ -394,10 +394,9 @@ c      parameter (lbufs = 499851, lbuflb = 6171)
 c      NOTE:  lbufs=9*9*11*11*51 and lbuflb=11*11*51
 c
 c  increase number of buffers from 41 to 51
-c;c.....for jmax=20 (121 channels, 51 buffers)
+c .....for jmax=20 (121 channels, 51 buffers)
 c      parameter (lbufs = 302621, lbuflb=4961)
 c      NOTE:  lbufs=11*11*41*61 and lbuflb=11*11*41
-c
 c      parameter (jmx=20,kmx=2*jmx+1,lmx=kmx,kkmx=3*kmx)
 c
 c...increase size of buffers - p. dagdigian, 22-jun-2010

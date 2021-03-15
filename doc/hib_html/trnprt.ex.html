@@ -1,0 +1,208 @@
+<TITLE>tenxsc.ex</TITLE>
+<center><h3><font color=brown>Example of the TRNPRT command</font></h3></center><hr>
+
+In this example, I have added illustrative comments in brown
+to the actual output of the run.  In addition, the various commands
+have been linked to the corresponding help files
+<hr>
+<center><a href="#run">run</a> | <a href="#trnprt">trnprt</a>  
+</center>
+<hr>
+<p>The input file used here is <tt> tests/N2phetest.inp</tt> in the Hibridon directory tree
+<p>The potential subroutine is <tt>src/pot/pot_vfit.f</tt>
+<p>The input file reads potential data from the file <tt>tests/FOLLMEG.BIN</tt>
+<p>For more information on transport cross sections see G. C. Maitland, M. Mustafa, W. A. Wakeham, and F. R. W. McCourt, 
+Mol. Phys. <b>61</b>, 359 (1987); L. Monchick and S. Green, J. Chem. Phys. <b>63</b>, 2000 (1975); 
+G. A. Parker and R. T Pack, J. Chem. Phys. <b>68</b>, 1585 (1978).
+<hr>
+<pre>
+<font color=brown>Initiate execution of your code</font>
+
+% hib_vfit_151
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 4.4 BUILD DATE 10/17/12 15:15:33 EDT
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+SYS=OS X 10.8.2; MACH=unix-darwin unix-ifort unix-darwin64
+CC=; FC=/opt/intel/composer_xe_2013.0.088/bin/intel64/ifort -O3 -save
+LIB_ROOT=-L/opt/intel/composer_xe_2013.0.088/mkl
+LIBRARIES:  -lmkl_intel_ilp64 /
+  -lmkl_intel_thread -lmkl_core -lpthread
+ --------------------------------------------------------------------------
+ 
+ Hibridon> <a href=input.html>inp</a>=<a href="N2phetest.inp.html">n2phetest.inp</a>
+
+ POTENTIAL LOADED FROM FILE FOLLMEG.BIN
+ <font color=brown>Here follows the usual output from data input into the pot_vfit potential
+ subroutine</font> 
+ LABEL:  mha's 16-apr-1997 fit to follmeg's points
+ Molecule is homonuclear
+ NUMBER OF TERMS (NTRM) READ IN:  1
+
+  NTRM    LMMIN    LMMAX    MLD    NVBLOCKS
+    1       2        4       0      1
+ Hibridon> show
+     *** Parameters (scattering):
+ JTOT1  =   0        JTOT2  =  30        JTOTD  =   1        JLPAR  =   0
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  80        IPRINT =  -1
+ FSTFAC =  5.000     RINCR  = 1.0000     RCUT   =  50.00     RENDAI =  75.00    
+ RENDLD =  6.000     RSTART =  3.500     SPAC   = 1.0000E-01 TOLAI  =  1.250    
+ XMU    =   3.50220
+ NOUT:  6; JOUT:  0  2  4  6  8 10
+ INDOUT:    0
+     *** 1-SIGMA system parameters:
+ NTERM  =   1        VMIN   =   0        VMAX   =   0        JMIN   =   0
+ JMAX   =  10
+ BROT   =  1.941     DROT   =  0.000     HROT   =  0.000     EVIB   =  0.000    
+ LAMMIN:    2
+ LAMMAX:    4
+ MPROJ:     0
+     *** Flags:
+ AIRYFL= T    BASTST= F    BATCH = F    CHLIST= T    CSFLAG= F    FLAGHF= F
+ FLAGSU= F    IHOMO = T    IPOS  = F    LOGDFL= T    NOPRIN= T    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= T    RSFLAG= F    T2TEST= F    TWOMOL= F    WAVEFL= F
+ WRPART= F    WRSMAT= T    WRXSEC= T    BOUNDC= F
+ ** Maximum Channels:  151; Anisotropic Terms: 300
+ ** Energies:      150.000000
+ ** Label:      Test of N2+_He using Follmeg-Rosmus PES         
+ ** Pot name:      WERNER-FOLLMEG VFIT                             
+ ** Input File:  N2phetest.inp
+ ** Output file: Outpt
+ ** Jobname:     Job
+  
+<font color=brown> run the calculation to generate the required S matrices</font>
+ <a name=run>Hibridon> run</a>
+
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =   11 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =   12 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =   13 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =   14 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =   16 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =   17 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =   18 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =   19 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =   21 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =   22 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =   23 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =   24 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =   25 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 17 15:16:59 2012
+ ** J =   26 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   27 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   28 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   29 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   30 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+
+ ** NCH = 0, MOVE ON TO NEXT PARTIAL WAVE
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   11 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   12 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   13 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   14 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   15 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   16 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   17 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   18 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   19 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   20 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   21 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   22 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   23 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   24 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   25 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   26 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   27 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   28 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   29 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ** J =   30 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 17 15:17:00 2012
+ ===============================================================================
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:    30
+      TIMING:  ELAPSED 00:00:01 / CPU 00:00:01 / MP RATIO  190.7 %
+      CURRENT DATE:  Oct 17 15:17:00 2012
+ ===============================================================================
+</pre>
+<tt><a name=tenxsc></a><font color=brown>invoke the command to calculate tensor
+opacities using the previously determined <i>S</i>-matrix elements</font></tt>
+<pre>
+ Hibridon> <a href="trnprt.html">tenxsc</a>,,,
+ CLOSE COUPLED TRANSPORT CROSS SECTIONS
+ S-MATRICES READ FROM FILE Job1.smt                                
+      WRITTEN:   Oct 17 15:16:59 2012
+      LABEL:     Test of N2+_He using Follmeg-Rosmus PES         
+      POT NAME:  WERNER-FOLLMEG VFIT                             
+ DATE:    Oct 17 15:17:20 2012
+
+ ENERGY:     150.000 cm(-1)    MASS:       3.502
+ SUMMING PARTIAL WAVES FROM JTOT=  0 TO JTOT= 30
+
+ COLUMNS ARE INITIAL STATES; ROWS ARE FINAL STATES
+
+ LEVEL LIST FOR TRANSPORT CROSS SECTIONS (OPEN CHANNELS)
+   N     J   INDEX  EINT(cm-1)
+   1     0     0      0.000
+   2     2     0     11.647
+   3     4     0     38.824
+   4     6     0     81.530
+   5     8     0    139.766
+
+ N =  1
+
+          1           2           3           4           5
+   1   3.7751E+01  4.0026E+00  6.7878E-01  1.8126E-01  7.8637E-02
+   2   1.8710E+01  4.6206E+01  8.3168E+00  2.2937E+00  9.4207E-01
+   3   4.3614E+00  1.2376E+01  5.4934E+01  1.1940E+01  6.0318E+00
+   4   9.8313E-01  2.7556E+00  1.1469E+01  7.5459E+01  2.5967E+01
+   5   1.0772E-01  2.8455E-01  1.4274E+00  9.2464E+00  2.1998E+02
+
+ N =  2
+
+          1           2           3           4           5
+   1   4.3181E+01  3.0217E+00  3.0875E-01 -8.1039E-03 -3.3845E+00
+   2   1.5094E+01  4.8963E+01  5.2819E+00  8.2042E-02 -3.5535E+01
+   3   2.8822E+00  9.8190E+00  5.1461E+01  3.5170E+00 -1.7007E+02
+   4   7.0678E-01  1.9617E+00  9.1491E+00  5.7778E+01 -3.9142E+02
+   5   9.0154E-02  2.3789E-01  1.2029E+00  8.0474E+00  1.5065E+02
+
+ ** TIMING ELAPSED:  00:00:08  CPU:  00:00:08 
+
+ Hibridon> exit
+</pre>
+
+<hr>
+Return to:
+<center>
+
+<a href=trnprt.html>TRNPRT command</a> | <a href=commands.html>Commands</a> | <a href=examples.html>Examples</a> | <a href=hibhelp.html>Hibridon Help</a>
+<br>
+</center>

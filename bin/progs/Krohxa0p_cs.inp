@@ -1,0 +1,22 @@
+OH(X)-Kr collision - 2Pi only
+    3                            ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+     2.900    9.0000    0.0080   rstart, rendld, spac
+  F                              prairy
+  1.150      8.00    50.0  5.00  tolai, rincr, rendai, fstfac
+   1                             nerg
+   32540.619
+   14.137999113                  xmu (84kr)
+  -100.000                       rcut
+   0 100   1   0   0  38   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80  -1                         lscreen, iprint
+   36    6                       nnout,niout
+   0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35  
+ 300 -300  100 -100  200 -200
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  T  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  T  T  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+   38   1   0   2                jmax, igu, isa, npar
+ 18.53487 -139.05088 0.235266  -0.038693    brot, aso, p, q

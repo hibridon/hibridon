@@ -1,0 +1,17 @@
+inp=H2ohe_para.inp
+emax=500
+spac=0.25
+rendld=100
+airyfl=f
+job=h2o1
+ener=337.159
+run
+inp=H2ohe_para.inp
+emax=500
+spac=0.25
+rendld=100
+airyfl=f
+job=h2o2
+ener=370.134
+run
+prsbr,h2o1,1,h2o2,1,1,1,-1,2,0,1

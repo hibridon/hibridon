@@ -1,0 +1,268 @@
+#!/bin/csh -f
+# HIBRIDON bin/maketar $Revision: 2010.2 $ --- make hibridon tar file
+# maketar [c]: make exportable (public) tar of hibridon code
+#   if option h is included, html files will be included from /doc/hib_html
+#   if option c is included, copy will be exported to /scratch/mha on
+#   mha-ibm1.umd.edu
+# the PATH variable should be set to include the hibridon bin directory
+ 
+set basedir=`hibriddir`
+alias rm 'rm -f'
+@ items = $#argv
+if ($items > 2) then
+  echo "usage: maketar [h] [c]"
+  goto end
+endif
+set htmloption = false
+set copoption = false
+if ($items == 0) then
+  echo "no html help files will be included"
+  echo "tar files will NOT be exported to mha-ibm1"
+  set copoption = false
+  set htmloption = false
+endif
+if ($items == 1) then
+  echo "html help files will be included"
+  echo "tar files will NOT be exported to mha-ibm1"
+  set copoption = false
+  set htmloption = true
+endif
+if ($items == 2) then
+  echo "html help files will be included"
+  echo "tar files will be exported to mha-ibm1"
+  set copoption = true
+  set htmloption = true
+endif
+set htar=/Users/mha/scratch/htar
+cd $basedir
+if (-e $basedir/tar.log) then
+  rm $basedir/tar.log
+endif
+cd ..
+if (-e $htar) then
+ cd $htar
+ echo "erasing /Users/mha/scratch/htar"
+ rm -r ./*
+else
+  echo "creating /Users/mha/scratch/htar"
+  mkdir $htar
+  cd $htar
+endif
+echo ""
+echo "copying all files to $htar ..."
+echo "copying all files to $htar ..." >>& $basedir/tar.log
+cp -pr $basedir/* . >>& $basedir/tar.log
+
+echo ""
+echo "removing extraneous directories ..."
+echo "removing extraneous directories ..." >>& $basedir/tar.log
+rm -r HeCN_Test_Case  >>& $basedir/tar.log
+echo "removing executables ..."
+echo "removing executables ..." >>& $basedir/tar.log
+rm -r $htar/nohe  >>& $basedir/tar.log
+rm -r $htar/phhe  >>& $basedir/tar.log
+cd $htar/bin/progs
+mv potdata ..
+cd ..
+rm -r $htar/bin/progs/* >>& $basedir/tar.log
+mv  $htar/bin/potdata progs >>& $basedir/tar.log
+rm  $htar/bin/hib_help* >>& $basedir/tar.log
+rm  $htar/bin/temp* >>& $basedir/tar.log
+rm  $htar/bin/*klos* >>& $basedir/tar.log
+rm  $htar/src/*.*inp >>& $basedir/tar.log
+rm  $htar/src/temp* >>& $basedir/tar.log
+rm  $htar/src/*.hp* >>& $basedir/tar.log
+rm  $htar/src/*.fnew >>& $basedir/tar.log
+rm  $htar/src/*.c >>& $basedir/tar.log
+rm  $htar/src/*.hold >>& $basedir/tar.log
+rm  $htar/src/*_hold >>& $basedir/tar.log
+rm  $htar/src/README >>& $basedir/tar.log
+rm  -r $htar/src/molpro_c >>& $basedir/tar.log
+rm  -r $htar/src/newmods >>& $basedir/tar.log
+rm  -r $htar/src/ibm7 >>& $basedir/tar.log
+rm  -r $htar/src/deep >>& $basedir/tar.log
+rm  -r $htar/src/pot_orig >>& $basedir/tar.log
+rm  -r $htar/src/dagdigian* >>& $basedir/tar.log
+rm  -r $htar/src/klos* >>& $basedir/tar.log
+rm   $htar/src/*.log >>& $basedir/tar.log
+rm  $htar/src/*.sav >>& $basedir/tar.log
+rm  $htar/src/hib_* >>& $basedir/tar.log
+rm  $htar/src/hi*.new >>& $basedir/tar.log
+rm  $htar/src/hi*.ibm* >>& $basedir/tar.log
+rm  $htar/src/hi*new.* >>& $basedir/tar.log
+rm  $htar/src/*temp.* >>& $basedir/tar.log
+rm  $htar/src/*.hold >>& $basedir/tar.log
+rm  $htar/src/pot/pot_vfit.f~orig >>& $basedir/tar.log
+rm  $htar/src/Outpt >>& $basedir/tar.log
+rm  -r $htar/src/ibm1 >>& $basedir/tar.log
+rm  -r $htar/src/hp2  >>& $basedir/tar.log
+rm  $htar/bin/*.hold >>& $basedir/tar.log
+rm  -r $htar/bin/conf >>& $basedir/tar.log
+rm  $htar/bin/*.exe >>& $basedir/tar.log
+rm  $htar/bin/*.log >>& $basedir/tar.log
+rm  $htar/*.log >>& $basedir/tar.log
+rm  $htar/README >>& $basedir/tar.log
+rm -r $htar/tests_4.2 >>& $basedir/tar.log
+rm  $htar/README_4.1* >>& $basedir/tar.log
+rm -r $htar/bin/comsplit.exe  >>& $basedir/tar.log
+
+if $htmloption == 'false' then
+  echo ""
+  echo "removing html help files ..."
+  rm -r $htar/doc/hib_html
+endif
+echo ""
+echo "removing previous version files ..."
+echo "removing previous version files ..." >>& $basedir/tar.log
+rm -r  $htar/*.~* >>& $basedir/tar.log
+rm  $htar/*.~* >>& $basedir/tar.log
+rm  $htar/README_4.0* >>& $basedir/tar.log
+rm  $htar/bin/*.~* >>& $basedir/tar.log
+rm  $htar/src/*.~* >>& $basedir/tar.log
+rm  $htar/src/*~* >>& $basedir/tar.log
+
+rm  $htar/src/pot/*.~* >>& $basedir/tar.log
+rm  $htar/doc/*.~* >>& $basedir/tar.log
+rm  $htar/utilities/*.~* >>& $basedir/tar.log
+echo ""
+echo "removing compiled object files ..."
+echo "removing compiled object files ..." >>& $basedir/tar.log
+rm $htar/src/*.o
+rm $htar/src/pot/*.o
+rm $htar/utilities/*.o
+rm $htar/utilities/*.log
+echo ""
+echo "removing makehibkey and hkey.f ..."
+echo "removing makehibkey and hkey.f ..." >>& $basedir/tar.log
+rm -r $htar/bin/makehibkey.* >>& $basedir/tar.log
+rm -r $htar/src/hkey.* >>& $basedir/tar.log
+echo ""
+echo "tar'ing common files ..."
+cd $htar/src
+cd common
+rm  *.~* >>& $basedir/tar.log
+cd ..
+cat common/* > hicommon.all
+tar -cf hicommon.tar common
+echo "removing common directory ..."
+echo "removing common directory ..." >>& $basedir/tar.log
+rm -r $htar/src/common >>& $basedir/tar.log
+echo ""
+echo "removing unneeded test directories"
+rm -r $htar/testautodbl >>& $basedir/tar.log
+rm -r $htar/testhold >>& $basedir/tar.log
+echo ""
+echo "removing pot.f files ..."
+echo "removing pot.f files ..." >>& $basedir/tar.log
+rm -r $htar/src/pot/common
+if (-e $htar/src/pot/pot_yang) then
+  rm -r $htar/src/pot/pot_yang
+endif
+rm  $htar/src/pot/*.f >>& $basedir/tar.log
+echo ""
+echo "copying pot.f files from include.list ..."
+echo "copying pot.f files from include.list ..." >>& $basedir/tar.log
+$basedir/bin/potcopy >>& $basedir/tar.log
+echo "removing unneeded files from pot directory ..."
+echo ""
+   cd $htar/src/pot
+   rm *sum* >>& $basedir/tar.log
+   rm *dif* >>& $basedir/tar.log
+   rm *list*  >>& $basedir/tar.log
+echo ""
+echo "removing other local files ..."
+echo "removing other local files ..." >>& $basedir/tar.log
+cd $htar
+rm buglist >>& $basedir/tar.log
+rm sysprofile >>& $basedir/tar.log
+rm testnew.tar >>& $basedir/tar.log
+rm $htar/bin/*timing* >>& $basedir/tar.log
+rm $htar/timing/*deepthought* >>& $basedir/tar.log
+rm $htar/timing/*macpro* >>& $basedir/tar.log
+rm $htar/bin/*deepthought* >>& $basedir/tar.log
+rm $htar/release_announcement >>& $basedir/tar.log
+rm -r testnew_h >>& $basedir/tar.log
+rm -r hold >>& $basedir/tar.log
+rm -r $htar/users >>& $basedir/tar.log
+rm -r $htar/bench >>& $basedir/tar.log
+rm -r smm >>& $basedir/tar.log
+rm libmass.a >>& $basedir/tar.log
+rm -r testmass >>& $basedir/tar.log
+rm invtime.m >>& $basedir/tar.log
+rm Info.workstations >>& $basedir/tar.log
+mkdir config_hold
+cp -pr CONFIG_APPLE_64_INTEL_12.0.0 config_hold
+cp -pr CONFIG_APPLE_64_IFORT11 config_hold
+cp -pr CONFIG_APPLE_INTEL config_hold
+cp -pr CONFIG_APPLE_INTEL_64 config_hold
+cp -pr CONFIG_APPLE_G4_G5 config_hold
+cp -pr CONFIG_X86_INTEL_MKL config_hold
+cp -pr CONFIG_X86_PGF95_ACML config_hold
+
+rm CONFIG* >>& $basedir/tar.log
+cp -pr config_hold/* .
+rm -r config_hold
+rm *.log.* >>& $basedir/tar.log
+rm $htar/bin/*.log.* >>& $basedir/tar.log
+rm $htar/bin/SYSCONFIG >>& $basedir/tar.log
+rm $htar/bin/test* >>& $basedir/tar.log
+rm $htar/bin/cc_hib* >>& $basedir/tar.log
+rm $htar/bin/runtest.~* >>& $basedir/tar.log
+rm $htar/bin/*.BAK >>& $basedir/tar.log
+rm $htar/bin/*hp2 >>& $basedir/tar.log
+rm $htar/doc/*.mac1 >>& $basedir/tar.log
+rm $htar/tests/*.out >>& $basedir/tar.log
+rm $htar/tests/*.sav >>& $basedir/tar.log
+rm $htar/tests/Outpt* >>& $basedir/tar.log
+rm $htar/tests/J* >>& $basedir/tar.log
+rm $htar/tests/*.smt >>& $basedir/tar.log
+rm $htar/src *.c >>& $basedir/tar.log
+rm $htar/src/utilunix.f>>& $basedir/tar.log
+rm $htar/src/machines.h>>& $basedir/tar.log
+rm $htar/src/A* >>& $basedir/tar.log
+rm $htar/src/J* >>& $basedir/tar.log
+rm $htar/src/O* >>& $basedir/tar.log
+rm -r $htar/src/io_obj >>& $basedir/tar.log
+rm $htar/hiversion.f >>& $basedir/tar.log
+rm $htar/utilities/comsplit.f >>& $basedir/tar.log
+rm $htar/release_announcement >>& $basedir/tar.log
+rm $htar/doc/hibrid.hlp.old >>& $basedir/tar.log
+rm -r $htar/testnew >>& $basedir/tar.log
+rm  $htar/hibrid*.Z >>& $basedir/tar.log
+rm  $htar/hibrid*.uu >>& $basedir/tar.log
+rm $htar/patch*.tar.Z.uu >>& $basedir/tar.log
+rm -r $htar/patch* >>& $basedir/tar.log
+
+echo ""
+echo "creating tar file ..."
+echo "creating tar file ..." >>& $basedir/tar.log
+if (-e hib436.tar.gz) then
+  rm hib436.tar.gz
+endif
+tar -cvf hib436.tar * >>& $basedir/tar.log
+
+#$exit
+
+echo ""
+echo "gzip'ing tar file ..."
+echo "gzip'ing tar file ..." >>& $basedir/tar.log
+gzip hib436.tar >>& $basedir/tar.log
+
+
+
+echo ""
+echo "$htar/hib436.tar.gz created, see $basedir/tar.log for diagnostics"
+echo ""
+
+if $copoption == 'true' then
+  echo ""
+  echo "putting hib436.tar.gz files on mha-ibm7 ..."
+  echo "putting hib436.tar.gz files on mha-ibm7 ..." >>& $basedir/tar.log
+  rcp -p hib436.tar.gz mha-macpro1.umd.edu:/scratch/mha/htar
+endif
+
+#rm hib436.tar.gz
+#cd 
+#rm -r $htar
+echo ""
+exit

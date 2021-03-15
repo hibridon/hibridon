@@ -1,4 +1,7 @@
-*Ar-OH(A^2Sigma+) PES RCCSD(T) Klos et al
+* Ar-OH(A^2Sigma+) PES, r=re of OH(A),  RCCSD(T) Klos et al
+* Reference
+* J. Klos, M. H. Alexander, M. Brouard, C. J. Eyles and F. J. Aoiz
+* J. Chem. Phys.  129, 054301 (2008)
 
       subroutine driver
       implicit double precision (a-h,o-z)

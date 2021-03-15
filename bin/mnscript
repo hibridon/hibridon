@@ -1,5 +1,5 @@
 #!/bin/csh -f
-# HIBRIDON bin/mnscript $Revision: 2011.1 $ ---
+# HIBRIDON bin/mnscript $Revision: 2004.1 $ ---
 # converts himain.f files to new machine, and then replaces original .f
 # files with the converted files
 @ items = $#argv
@@ -44,7 +44,7 @@ ls -1 himain.f >>control.file
 echo '' >> control.file
 echo "fin" >> control.file
 chmod +x control.file
-./control.file 
+control.file 
 echo ""
 echo "himain.f file converted, copying back ..."
 mv himain.new himain.f

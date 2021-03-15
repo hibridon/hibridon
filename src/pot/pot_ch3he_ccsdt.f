@@ -1,15 +1,17 @@
-*  system:  CH3-He, PES calculated by P. J. Dagdigian
+*  system:  CH3-He, PES computed by P. J. Dagdigian
 *
 *
 *  CH3 defined to lie in xy plane, with origin at center of mass (C atom)
-*  x axis is C3 symmetry axis 
-*  z axis lies along one of the CÐH bonds
+*  x axis is C3 symmetry axis
+*  z axis lies along one of the C-H bonds
 *  theta = 0 has the He lying above the CH3 plane
 *  theta = 90 has all 5 atoms coplanar
 *
 *  Note:  this pot routine requires a data file to be in hibxx/bin/progs/potdata:
 *         ch3he_pot.dat
-
+*
+*  Reference:  M.H.Alexander and P.J.Dagdigian, J. Chem. Phys. 135, 064306 (2011)
+*
       include "common/syusr"
       include "common/ground"
       include "common/bausr"
@@ -22,12 +24,12 @@
       potnam='Dagdigian CH3-He PES'
       print *, potnam
 1     print *, 'R (bohr):'
-      read (5, *, end=99) r
-      if (r.le.0.d0) goto 99
-      call pot(vv0,r)
 *  potential is returned in atomic units (hartree)
 *  convert from atomic units for printout
       econv=219474.6d0
+      read (5, *, end=99) r
+      if (r.le.0.d0) goto 99
+      call pot(vv0,r)
       write (6, 100) vv0*econv*s4pi, (econv*vvl(i), i=1,11)
 100   format(' v(lam,0):',5(1pe16.8)/' v(lam,3):',4(1pe16.8)/
      :    ' v(lam,6):'2(1pe16.8)/' v(lam,9):',1(1pe16.8))
@@ -53,6 +55,7 @@
       include "common/parbas"
       include "common/parpot" 
       common /conlam/ nlam, nlammx, lamnum(2)
+      common /cosysi/ nscode, isicod, nterm
       potnam='Dagdigian CH3-He PES'
 *
       nterm = 4
@@ -136,7 +139,7 @@
 *    ph = [0:10:60];   %grid of  7 angles
 *  All values of Ylm have been normalized
 *  Note:  The ylm terms for mu .gt. 0 are defined as:
-*           [Y(lambda,mu) + (-1)^mu * Y(lambda, -nu)]/2
+*           [Y(lambda,mu) + (-1)^mu * Y(lambda, -mu)]/2
 *
        data y00/
      : 2.8209479d-01,  2.8209479d-01,  2.8209479d-01,  2.8209479d-01,
@@ -418,7 +421,7 @@ c    call splinej(K,Rp,XX,b0,c0,d0)
 c    VNO=sevalj(K, r, Rp, XX, b0,c0,d0)
 c  where,
 c  K  the number of points to be fitted
-c  Rp, XX   orignal data, Rp & XX should have the same dimensions
+c  Rp, XX   original data, Rp & XX should have the same dimensions
 c  r  new distance, where pot need to be calculated by spline-Fitchbur
 c  VNO  pot at r, output
       implicit double precision (a-h,o-z)   
@@ -430,8 +433,8 @@ c  VNO  pot at r, output
      :  12,13,15,20/
       data ifirst /0/
       if (ifirst.eq.0) then
-*         open (unit=10,file='~/hib436/bin/progs/potdata/ch3he_pot.dat')
-         open (unit=10,file='potdata/ch3he_pot.dat')
+         open (unit=10,file=
+     :     'potdata/ch3he_pot.dat')
          read (10,*) vv
          close(10)
 *

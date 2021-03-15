@@ -1,1 +1,28 @@
-<TITLE>wavefl</TITLE><h3><center><font color=#brown >Flag WAVEFL</h3></center></font><hr>      If WAVEFL = .TRUE., then the transformation matrices are computedfor the subsequent determination of the scattering wavefunction.  Theseare written (in binary) to the file <tt>{jobname}.wfu</tt><p>  Subsequent calculation of thewavefunction is invoked by the command <a href=psi.html>PSI</a>.  Subsequent calculation of theincoming and outgoing fluxes is controlled by the command <a href=flux.html>FLUX</a>.<br><img src=cautionsmall.gif>       The total storage required to store the transformation matrix is <ul>(<i>N<sub>log</i></sub> + 2 <i>N<sub>airy</i></sub>) <tt>x</tt> <i>N<sub>ch</sub></i><sup>2</sup> + 3 <i>N<sub>airy</i></sub> <tt>x</tt> <i>N<sub>ch</i></sub>,</ul>where <i>N<sub>log</i></sub> and <i>N<sub>airy</i></sub> are the number of LODG and AIRY integration steps and <i>N<sub>ch</i></sub> is the number of channels.  Thus the file <tt>{jobname}.wfu</tt><p>can often be very large. <hr><a href=hibhelp.html><img src=up_arrow.gif border=0 align=middle></a>&#001;Return to <a href=hibhelp.html>Hibridon Help</a>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta name="generator" content="HTML Tidy for Linux (vers 25 March 2009), see www.w3.org">
+<title>wavefl</title>
+
+<style type="text/css">
+ div.c3 {margin-left: 2em}
+ div.c2 {text-align: center}
+ h3.c1 {color: brown}
+</style>
+</head>
+<body>
+<div class="c2">
+<h3 class="c1">Flag WAVEFL</h3>
+</div>
+<hr>
+<p>If WAVEFL is set TRUE, then the adiabatic energies and transformation matrices are computed for the subsequent calculations. These are written (in binary) to the file <tt>{jobname}.wfu</tt>.</p>
+<p>Subsequent calculation of the wavefunction is invoked by the command <a href="psi.html">PSI</a>. Subsequent calculation of the incoming and outgoing fluxes is controlled by the command <a href="flux.html">FLUX</a>. In addition, the command <a href="eadiab.html">EADIAB</a> can be invoked to print out adiabatic energies as a function of <i>R</i>.</p>
+<p><img src="warningsmall.gif"> The <a href="prsmat.html">WRSMAT</a> flag controls the level of output in the <tt>wfu</tt> file. If <a href="prsmat.html">WRSMAT</a> is set FALSE, only adiabatic energies will be stored and <a href="eadiab.html">EADIAB</a> is the only subsequent calculation available. If If <a href="prsmat.html">WRSMAT</a> is set TRUE, all three subsequent calculations mentioned above can be invoked.</p>
+<p><img src="cautionsmall.gif"> The total storage required to store the transformation matrix when <a href="prsmat.html">WRSMAT</a> is set TRUE is<br></p>
+<div class="c3">(<i>N<sub>log</sub></i> + 2 <i>N<sub>airy</sub></i>) <tt>x</tt> <i>N<sub>ch</sub></i><sup>2</sup> + 3 <i>N<sub>airy</sub></i> <tt>x</tt> <i>N<sub>ch</sub></i>,</div>
+<br>
+where <i>N<sub>log</sub></i> and <i>N<sub>airy</sub></i> are the number of LODG and AIRY integration steps and <i>N<sub>ch</sub></i> is the number of channels. Thus the file <tt>{jobname}.wfu</tt> can often be very large.
+<hr>
+<a href="hibhelp.html"><img src="up_arrow.gif" border="0" align="middle"></a>&#1;Return to <a href="hibhelp.html">Hibridon Help</a>
+</body>
+</html>

@@ -1,3 +1,9 @@
+* He-CO SAPT PES
+* reference: Tino G. A. Heijmen, Robert Moszynski, 
+* Paul E. S. Wormer, and Ad van der Avoird
+* J. Chem. Phys. 107, 9921 (1997)
+
+
       subroutine driver
       implicit double precision (a-h,o-z)
       common /cosysr/ xjunk(2),rshift,xfact

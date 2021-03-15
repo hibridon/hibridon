@@ -1,0 +1,23 @@
+CN(A)-Ar bound states
+   3                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    0.1000    0.8000 0.1000E-07  hsimp, delr, eigminc
+  F                              prairy
+ 0.1000     11.00  0.4000 4.500  tolai, r2, spac, r
+   1                             nerg
+   300.00
+   15.75286                      xmu
+    0.5000                       c
+   0   0  10   1   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80   0                         lscreen, iprint
+   25    4                       nnout,niout
+   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24
+  -1   1  -2   2
+  F  F  F  F  F                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  F  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  F  T  T  F  F                  noprin, chlist, ipos, nucros, photof
+  T  F  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  T                           rsflag, boundc
+  15   1   0   2                 jmax, igu, isa, npar
+  1.63762 -52.3197  0.0077 -3.976E-02 brot, aso, p, q
+                                        

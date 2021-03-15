@@ -1,0 +1,55 @@
+#!/bin/csh -f
+# HIBRIDON bin/vscript $Revision: 2004.1 $
+
+# converts hibversion.f file to new machine, and then replaces original .f
+# files with the converted files
+@ items = $#argv
+
+if ($items == 0) then
+  echo "usage:  vscript machi [mach2] [mach3] [mach4]"
+  goto end
+endif
+if ($items > 4) then
+  echo "usage:  vscript machi [mach2] [mach3] [mach4]"
+  goto end
+endif
+echo "../bin/ftconv_hib.exe << fin" > control.file
+echo $1 >> control.file
+if ($items == 1) then
+  set name = $1
+endif
+if ($items == 2) then
+  set name = $1
+  set name1 = $2
+  echo $2 >> control.file
+endif
+if ($items == 3) then
+  set name = $1
+  set name1 = $2
+  set name2 = $3
+  echo $2 >> control.file
+  echo $3 >> control.file
+endif
+if ($items == 4) then
+  set name = $1
+  set name1 = $2
+  set name2 = $3
+  set name3 = $4
+  echo $2 >> control.file
+  echo $3 >> control.file
+  echo $4 >> control.file
+endif
+
+echo '' >> control.file
+ls -1 hiversion.f >>control.file
+echo '' >> control.file
+echo "fin" >> control.file
+chmod +x control.file
+control.file 
+echo ""
+echo "hiversion.f file converted, copying back ..."
+mv hiversion.new hiversion.f
+exit
+#rm control.file
+end:
+exit

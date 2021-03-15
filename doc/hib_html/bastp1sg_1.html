@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <meta name="generator" content="HTML Tidy for Linux (vers 25 March 2009), see www.w3.org">
+
+  <title>bastp1sg</title>
+</head>
+
+<body>
+  <center>
+    <h3><font color="#brown">Basis Subroutine and System Specific Parameters: Collision of a Symmetric Top with a Linear Molecule in a <sup>1</sup>&Sigma; State, Using Coupled Representation of the PES</font></h3>
+  </center>
+  <hr>
+  <tt>BASISTYPE = 21</tt>
+  <p>
+
+  <div style="margin-left: 2em">
+    System subroutine: <tt>sysstp1sg</tt>
+
+    <p>Basis subroutine: <tt>hibastp1sg.f</tt></p>
+  </div>
+
+  <p>A Symmetric top and a Linear Molecule in a <sup>1</sup>&Sigma; State<br>
+  <font size="-1"><i>Ref.</i> C. Rist, M. H. Alexander, and P. Valiron, J. Chem. Phys. <b>98</b>, 4662 (1993).</font></p>
+
+  <p>The potential is to be fitted in the following form<br>
+  <img src="bastp1sg_fit.png"><br>
+  The angles are those defined in the above literature. Basis type 9 uses a simpler form of angular expansion, but that expansion is very inefficient in scattering calculations.</p>
+
+  <p>Unlike earlier basis routines, this basis routine allows the user to define which terms to include in the angular expansion without limitations other than the total number of terms (which is fixed in Hibridon). This information must be written to the <tt>lms</tt> array in the <tt>mod_bastp1sg</tt> module by the <tt>loapot</tt> subroutine. See <tt>pot_stp1sg_qma.f</tt> for an example.</p>
+
+  <p>Coupled states calculations are NOT supported in this basis routine.</p>
+  <hr>
+  The definition of the system dependent parameters is as follows:
+
+  <div style="margin-left: 2em">
+    <p>IPOTSY: cylindrical symmetry of potential. Presently only symmetric tops with three-fold symmetry are supported. For these system, IPOTSY = 3.</p>IOP: bitwise flag for rotational channel basis of different symmetry. The symmetry groups are:
+
+    <div style="margin-left: 2em">
+      <b>Group 0:</b> <i>k</i> is a multiple of 3, (+) inversion symmetry, <i>A<sub>2</sub></i> rotational wave function<br>
+      <b>Group 1:</b> <i>k</i> is a multiple of 3, (-) inversion symmetry, <i>A<sub>1</sub></i> rotational wave function<br>
+      <b>Group 2:</b> <i>k</i> is not a multiple of 3, (+) inversion symmetry, <i>E</i> rotational wave function<br>
+      <b>Group 3:</b> <i>k</i> is not a multiple of 3, (-) inversion symmetry, <i>E</i> rotational wave function<br>
+    </div>If group <i>i</i> is to be included in the channel basis, 2<sup><i>i</i></sup> shall be added to IOP. For example,
+
+    <div style="margin-left: 2em">
+      <b>CH<sub>3</sub></b> (ground vibrational level): <i>ortho</i>-levels have IOP = 2, and <i>para</i>-levels have IOP = 4 or IOP = 8 (the cross sections will be identical using either value).<br>
+      <b>CD<sub>3</sub></b> (ground vibrational level): <i>A<sub>1</sub></i> levels have IOP = 1, <i>A<sub>2</sub></i> levels have IOP = 2, and <i>E</i>-levels have IOP = 4 or IOP = 8 (the cross sections will be identical using either value).<br>
+      <b>NH<sub>3</sub></b>: <i>ortho</i>-levels have IOP = 3 (1 + 2, for groups 0 and 1), and <i>para</i>-levels have IOP = 12 (4 + 8, for groups 2 and 3).
+    </div>
+
+    <p>J1MAX: the maximum rotational angular momenta in the channel expansion for the symmetric top.</p>
+
+    <p>E1MAX: the maximum energy of a state to be included in the rotational state basis for the symmetric top.</p>
+
+    <p>J2MIN: the minimum rotational angular momentum for the linear molecule.</p>
+
+    <p>J2MAX: the maximum rotational angular momentum for the linear molecule.</p>
+
+    <p>IPOTSY2: step used in iterating the rotational angular momentum for the linear molecule. For H<sub>2</sub>, IPOTSY2 can be set to 2 so that either <i>para</i> (even J2MIN and J2MAX) or <i>ortho</i> (odd J2MIN and J2MAX) levels are included.</p>
+  </div>The definition of the real system dependent parameters is as follows:
+
+  <div style="margin-left: 2em">
+    BROT, CROT: rotational constants of symmetric top<br>
+    DROT: rotational constant of diatomic molecule<br>
+
+    <div style="margin-left: 2em">
+      <i>E(jkj</i><sub>2</sub>) = BROT <i>j</i> (<i>j</i> + 1) + (CROT - BROT) <i>k</i><sup>2</sup> + DROT <i>j</i><sub>2</sub> (<i>j</i><sub>2</sub> + 1)<br>
+    </div>
+
+    <p>DELTA: inversion splitting (assumed to be the same for all rotational levels). This energy is added to - inversion levels (groups 1 and 3).</p>
+  </div><img src="warningsmall.gif"> At the present time, elastic cross sections are incorrectly calculated using the INTCRS command for channels where both J and J2 are nonzero. Cross sections are correctly calculated using PRINTC.
+  <hr>
+  <a href="hibhelp.html"><img src="up_arrow.gif" border="0" align="middle"></a>&#1;Return to <a href="hibhelp.html">Hibridon Help</a>
+</body>
+</html>

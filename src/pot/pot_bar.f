@@ -1,3 +1,7 @@
+*  BAr(X2Pi) potential
+*  E. Hwang, Y.-L. Huang, P.J.Dagdigian, and M.H.Alexander, 
+*  J. Chem. Phys. 98, 8484 (1993).
+*
       subroutine loapot(iunit,filnam)
 * --------------------------------------------------------------------------
       character*(*) filnam

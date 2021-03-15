@@ -1,1 +1,87 @@
-<TITLE>flux</TITLE><h3><center><font color=#brown >Command FLUX</h3></center></font><hr>The command FLUX  requests the determination of the collision or photodissociationflux as a functionof <i>R</i> using using data stored during a previouscalculation.  For more details on the definition and determination of the fluxsee:<p><font size=-1> M. H. Alexander, J. Chem. Phys. <b>95</b>, 8931 (1991); <b>96</b>, 6672 (1992). D. E. Manolopoulos and M. H. Alexander, J. Chem. Phys. <b>97</b>, 2527 (1992);M. H. Alexander, C. Rist, and D. E. Manolopoulos, J. Chem. Phys. <b>97</b>, 4836 (1992).</font> <p>    The command line syntax is<tt><ul>           FLUX,{jobnam},IFLUX,{additional variables}</tt></ul>where<ul>       <tt>{jobname}:</tt>&#160; the jobname under which the wavefunction informationfrom the previous calculation is stored, as the file <tt>{jobname}.wfu</tt><br> <img src=warningsmall.gif> In order to create the <tt>{jobname}.wfu</tt> file, the previous calculation must havebeen carried out with the flags <a href=wavefl.html>WAVEFL</a> and <a href=airyfl.html>AIRYFL</a>both set .TRUE.<p><tt>IFLUX = </tt> &#160;<ul>          1:&#160;  for a determination of the fluxes in the diabatic                      (asymptotic) basis<p>                &minus;1:&#160;    for a determination of the fluxes in the locally                      adiabatic basis<p>                 2:&#160;    for a determination of the adiabatic energies (see also the <a href=eadiab.html>EADIAB</a> command<p>                 &minus;2:&#160;   for fluxes summed over the sign of the additional                      channel index<p>                 3:&#160;    for fluxes in coordinate space<p>                  4:&#160;    for determination of the transformation matrix <b>C</b><i>(R)</i>, defined in Eq. (6) of the help file describing the <a href=closecoupled.html>close coupling method</a><p> </ul></ul><hr>   If IFLUX = &minus;1,1, or &minus;2 then the <tt>{additional variables}</tt> are <tt>     THRESH, IPRINT, DAMP, INITIAL-J, INITIAL-L,</tt> and <tt>INITIAL-IND</tt>.  Theseare defined as follows:<ul><p><tt>THRESH:</tt>&#160;          If the local wavevector in any channel is less than                 <tt>THRESH</tt>, then the wavefunction component associated with                 this channel is killed off.  The default value of                <tt>THRESH</tt> is 0 for scattering calculations, and                 -1.e+9 for photodissociation calculations<p><tt>IPRINT:</tt>&#160;           Normally, fluxes are not printed inside of any                 energetically closed region.  To print these out                 set <tt>IPRINT</tt> not equal to zero.  The default value of                 <tt>IPRINT</tt> is 0 for scattering and 1 for photodissociation<p><tt>DAMP:</tt>&#160;            the damping factor for closed channel components (the                 default value is one)<p><tt>INITIAL-J:</tt>&#160;       the rotational angular momentum of the initial channel<p<tt>INITIAL-L:</tt>&#160;       the orbital angular momentum of the initial channel<p<tt>INITIAL-IND:</tt>&#160;     the value of the additional index of the initial channel<p><b>In addition</b>, channel fluxes are printed out ONLY for those channels which are specified in the arrays JOUT and INDOUT.</ul></ul><hr><img src=cautionsmall.gif> For a photodissociation calculation it is not nessaryto specify <tt>THRESH, IPRINT, DAMP, INITIAL-J, INITIAL-L,</tt> or <tt>INITIAL-IND</tt>.In this case the command line should be<tt><ul>     FLUX,JOB,IFLUX</tt></ul><p><hr>If IFLUX = 3 then  the <tt>{additional variables}</tt> are    <tt>NR, RMIN, DR, THRESH, IPRINT,</tt> and <tt>DAMP</tt>, where<ul><tt>NR:</tt>&#160;               | <tt>NR</tt> | is the number of coordinate space points at which the flux                   is to be determined<p><ul>                  if <tt>NR</tt> > 0, then the calculated flux is a sum over the fluxassociated with all channels with <b>positive</b> values of the additional                  index<p>                  if <tt>NR</tt> < 0, then the calculated flux is a sum over the fluxassociated with all channels with <b>negative</b> values of the additional                  index<p></ul><tt>RMIN:</tt>&#160;             Minimum value of the internal coordinate <i>r</i><p><tt>DR:</tt>&#160;               Step size in the internal coordinate <i>r</i><p><tt>THRESH:</tt>&#160;           as defined above<p><tt>IPRINT:</tt>&#160;            as defined above<p><tt>DAMP:</tt>&#160;              as defined above<p></ul>    <img src=cautionsmall.gif> Coordinate state fluxes will be determined for all valuesof the  internal coordinate <i>r</i> ranging from RMIN to RMIN+(NR -1) DR</ul><hr>If IFLUX = 4 then  <tt>{additional variables}</tt> designates <ul><tt>nstate:</tt>&#160;  The number of states for which the asymptotic &#8594; locally                  adiabatic transformation matrix is to be printed out<p><tt>R<sub>min</sub>:</tt>&#160;                The minimum value of <i>R</i> at which the asymptotic &#8594; locally                  adiabatic transformation matrix is to be printed<p> <tt>&delta;R:</tt>&#160;                The step size<p><tt>R<sub>max</sub>:</tt>&#160;                The maximum value of <i>R</i> at which the asymptotic &#8594; locally                  adiabatic transformation matrix is to be printed<p></ul>If the variable <tt>&delta;R</tt> is &#8804; 0, then the transformation matrix is printed out justfor <tt>R=R<sub>min</sub></tt>.  Otherwise, the transformation matrix is printed out for<tt>R=R<sub>min</sub>:&delta;R:R<sub>max</sub></tt>.<p>        <img src=cautionsmall.gif> <tt>nstate</tt> cannot exceed 12, it will be truncated if the input value exceeds 12.                  </ul><hr><img src=warningsmall.gif> Fluxes are determined at all values of <i>R</i> lyingbetween <a href=rendld.html>RENDLD</a> and <a href=rendld.html>RENDAI</a>, with thegrid size and spacing controlled by the same parameters which govern the AIRY integration, namely<a href=spac.html>SPAC</a>, <a href=fstfac.html>FSTFAC</a>, <a href=tolai.html>TOLAI</a>, and <a href=tolai.html>RINCR</a>.<p><img src=warningsmall.gif> The determination of collision and photodissociation fluxesshould be attempted only if you have a sophisticated understanding of the time-independent quantum description of molecular collisions.<hr>Go to:<center><a href=commands.html>Commands</a> | <a href=flux.ex.html> An example of this command | <a href=examples.html>Examples</a> | <a href=hibhelp.html>Hibridon Help</a><br></center>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta name="generator" content="HTML Tidy for Linux (vers 25 March 2009), see www.w3.org">
+<title>flux</title>
+
+<style type="text/css">
+ div.c4 {margin-left: 2em}
+ p.c3 {font-size: 80%}
+ div.c2 {text-align: center}
+ h3.c1 {color: brown}
+</style>
+
+<style type="text/css">
+ div.c1 {margin-left: 2em}
+</style>
+</head>
+<body>
+<div class="c2">
+<h3 class="c1">Command FLUX</h3>
+</div>
+<hr>
+The command FLUX requests the determination of the collision or photodissociation flux as a function of <i>R</i> using using data stored during a previous calculation. For more details on the definition and determination of the flux see:
+<p class="c3">M. H. Alexander, J. Chem. Phys. <b>95</b>, 8931 (1991); <b>96</b>, 6672 (1992). D. E. Manolopoulos and M. H. Alexander, J. Chem. Phys. <b>97</b>, 2527 (1992); M. H. Alexander, C. Rist, and D. E. Manolopoulos, J. Chem. Phys. <b>97</b>, 4836 (1992).</p>
+<p>The command line syntax is</p>
+<div class="c4"><tt>FLUX,{jobnam},IFLUX,{additional variables}</tt></div>
+where
+<div class="c4"><tt>{jobname}:</tt>&nbsp; the jobname under which the wavefunction information from the previous calculation is stored, as the file <tt>{jobname}.wfu</tt><br>
+<img src="warningsmall.gif"> In order to create the <tt>{jobname}.wfu</tt> file, the previous calculation must have been carried out with the flags <a href="wavefl.html">WAVEFL</a>, <a href="airyfl.html">AIRYFL</a> and <a href="prsmat.html">WRSMAT</a> all set TRUE.
+<p><tt>IFLUX =</tt> &nbsp;</p>
+<div class="c4">1:&nbsp; for a determination of the fluxes in the diabatic (asymptotic) basis
+<p>&minus;1:&nbsp; for a determination of the fluxes in the locally adiabatic basis</p>
+<p>2:&nbsp; for a determination of the adiabatic energies (see also the <a href="eadiab.html">EADIAB</a> command</p>
+<p>&minus;2:&nbsp; for fluxes summed over the sign of the additional channel index</p>
+<p>3:&nbsp; for fluxes in coordinate space</p>
+<p>4:&nbsp; for determination of the transformation matrix <b>C</b><i>(R)</i>, defined in Eq. (6) of the help file describing the <a href="closecoupled.html">close coupling method</a></p>
+</div>
+</div>
+<hr>
+If IFLUX = &minus;1,1, or &minus;2 then the <tt>{additional variables}</tt> are <tt>THRESH, IPRINT, DAMP, INITIAL-J, INITIAL-L,</tt> and <tt>INITIAL-IND</tt>. These are defined as follows:
+<div class="c4">
+<p><tt>THRESH:</tt>&nbsp; If the local wavevector in any channel is less than <tt>THRESH</tt>, then the wavefunction component associated with this channel is killed off. The default value of <tt>THRESH</tt> is 0 for scattering calculations, and -1.e+9 for photodissociation calculations</p>
+<p><tt>IPRINT:</tt>&nbsp; Normally, fluxes are not printed inside of any energetically closed region. To print these out set <tt>IPRINT</tt> not equal to zero. The default value of <tt>IPRINT</tt> is 0 for scattering and 1 for photodissociation</p>
+<p><tt>DAMP:</tt>&nbsp; the damping factor for closed channel components (the default value is one)</p>
+<p><tt>INITIAL-J:</tt>&nbsp; the rotational angular momentum of the initial channel</p>
+<p><tt>INITIAL-L:</tt>&nbsp; the orbital angular momentum of the initial channel</p>
+<p><tt>INITIAL-IND:</tt>&nbsp; the value of the additional index of the initial channel</p>
+<p><b>In addition</b>, channel fluxes are printed out ONLY for those channels which are specified in the arrays JOUT and INDOUT.</p>
+</div>
+<hr>
+<img src="cautionsmall.gif"> For a photodissociation calculation it is not nessary to specify <tt>THRESH, IPRINT, DAMP, INITIAL-J, INITIAL-L,</tt> or <tt>INITIAL-IND</tt>. In this case the command line should be
+<div class="c4"><tt>FLUX,JOB,IFLUX</tt></div>
+<hr>
+If IFLUX = 2 then the adiabatic energies will be printed. This command works different from <a href="eadiab.html">EADIAB</a>. The only adiabatic energies which are written out are those which correlate adiabatically at large R with the internal states of the collision partners whose rotational angular momenta and additional indices are specified in the arrays <a href="jout.html">JOUT</a> and <a href="indout.html">INDOUT</a>. Specifically, adiabatic energies are given for each channel for which
+<div class="c1"><tt>J(i) = JOUT(i)</tt></div>
+and for which the vector element <tt>INDOUT(i)</tt> corresponds to the quantum number L and the extra index of the desired channel packed into a single array as follows:
+<div class="c1"><tt>INDOUT(i) = sign[IND(i)] x [100 L(i) + | IND(i) | ]</tt></div>
+<hr>
+If IFLUX = 3 then the <tt>{additional variables}</tt> are <tt>NR, RMIN, DR, THRESH, IPRINT,</tt> and <tt>DAMP</tt>, where
+<div class="c4"><tt>NR:</tt>&nbsp; | <tt>NR</tt> | is the number of coordinate space points at which the flux is to be determined
+<div class="c4">if <tt>NR</tt> &gt; 0, then the calculated flux is a sum over the flux associated with all channels with <b>positive</b> values of the additional index
+<p>if <tt>NR</tt> &lt; 0, then the calculated flux is a sum over the flux associated with all channels with <b>negative</b> values of the additional index</p>
+</div>
+<tt>RMIN:</tt>&nbsp; Minimum value of the internal coordinate <i>r</i>
+<p><tt>DR:</tt>&nbsp; Step size in the internal coordinate <i>r</i></p>
+<p><tt>THRESH:</tt>&nbsp; as defined above</p>
+<p><tt>IPRINT:</tt>&nbsp; as defined above</p>
+<p><tt>DAMP:</tt>&nbsp; as defined above</p>
+</div>
+<img src="cautionsmall.gif"> Coordinate state fluxes will be determined for all values of the internal coordinate <i>r</i> ranging from RMIN to RMIN+(NR -1) DR
+<hr>
+If IFLUX = 4 then <tt>{additional variables}</tt> designates
+<div class="c4"><tt>nstate:</tt>&nbsp; The number of states for which the asymptotic &rarr; locally adiabatic transformation matrix is to be printed out
+<p><tt>R<sub>min</sub>:</tt>&nbsp; The minimum value of <i>R</i> at which the asymptotic &rarr; locally adiabatic transformation matrix is to be printed</p>
+<p><tt>&delta;R:</tt>&nbsp; The step size</p>
+<p><tt>R<sub>max</sub>:</tt>&nbsp; The maximum value of <i>R</i> at which the asymptotic &rarr; locally adiabatic transformation matrix is to be printed</p>
+</div>
+If the variable <tt>&delta;R</tt> is &le; 0, then the transformation matrix is printed out just for <tt>R=R<sub>min</sub></tt>. Otherwise, the transformation matrix is printed out for <tt>R=R<sub>min</sub>:&delta;R:R<sub>max</sub></tt>.
+<p><img src="cautionsmall.gif"> <tt>nstate</tt> cannot exceed 12, it will be truncated if the input value exceeds 12.</p>
+<hr>
+<img src="warningsmall.gif"> Fluxes are determined at all values of <i>R</i> lying between <a href="rendld.html">RENDLD</a> and <a href="rendld.html">RENDAI</a>, with the grid size and spacing controlled by the same parameters which govern the AIRY integration, namely <a href="spac.html">SPAC</a>, <a href="fstfac.html">FSTFAC</a>, <a href="tolai.html">TOLAI</a>, and <a href="tolai.html">RINCR</a>.
+<p><img src="warningsmall.gif"> The determination of collision and photodissociation fluxes should be attempted only if you have a sophisticated understanding of the time-independent quantum description of molecular collisions.</p>
+<hr>
+Go to:
+<div class="c2"><a href="commands.html">Commands</a> | <a href="flux.ex.html">An example of this command |</a> <a href="examples.html">Examples</a> | <a href="hibhelp.html">Hibridon Help</a><br></div>
+</body>
+</html>

@@ -1,7 +1,12 @@
 *system:  F(2P)+H2, Dubernet-Hutson expansion of li-werner-alexander PES's
-*references: M. H. Alexander, J. Chem. Phys. 99, 6014 (1993).
+*references: G. Li, H.-J. Wermer, F. Lique, and M. H. Alexander, J. Chem. Phys.
+*            127, 174302 (2007)
+* M. H. Alexander, J. Chem. Phys. 99, 6014 (1993).
 * M.-L. Dubernet and J. M. Hutson, J. Chem. Phys. 101, 1939 (1994).
-
+*
+*  Note:  this pot routine requires a data file to be in hibxx/bin/progs/potdata:
+*         fhhfit_1050.dat, fhhfit_1078_new.dat
+*
       include "common/syusr"
       include "common/ground"
       include "common/bausr"
@@ -1133,7 +1138,8 @@ c----------------------------------------------------------------------
       common/cpars5/ par_rrs5(10,npes),par_rs5(10,npes),par_ts5(10,npes)
       common/csols5/ ss5(maxpar,npes)
       data filnam/'potdata/fhhfit_1050.dat'/
-      open(91,file=filnam,status='old')
+      open(91,file='potdata/fhhfit_1050.dat',
+     :  status='old')
       do i=1,npes
         read(91,*) nmaxs5(i),lmaxs5(i),kmaxs5(i)
         read(91,*) npar_rr,(par_rrs5(k,i),k=1,npar_rr)
@@ -2393,7 +2399,8 @@ c----------------------------------------------------------------------
       common/cpar/ par_rr(10,npes),par_r(10,npes),par_theta(10,npes)
       common/csol/ s(maxpar,npes)
       data filnam/'potdata/fhhfit_1078_new.dat'/
-      open(91,file=filnam,status='old')
+      open(91,file='potdata/fhhfit_1078_new.dat',
+     :  status='old')
       do i=1,npes
         read(91,*) nmax(i),lmax(i),kmax(i)
         read(91,*) npar_rr,(par_rr(k,i),k=1,npar_rr)

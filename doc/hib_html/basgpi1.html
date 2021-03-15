@@ -1,0 +1,50 @@
+<TITLE>basgpi</TITLE>
+<h3><center><font color=#brown >Basis Subroutine
+ and System Specific Parameters: 
+Collisional Mixing of <sup>2</sup>Pi and <sup>2</sup>Sigma States of a Diatomic Molecule induced by a Spherical Atom (No Spectroscopic Perturbations)
+</h3>
+</center></font><hr>
+
+<tt>BASISTYPE = 19</tt><p>
+<ul>
+	System subroutine: <tt>sysgp1</tt><p>
+	Basis subroutine: <tt>hibasgpi1.f</tt></ul>
+
+<p>
+<font size=-1><i>Ref.</i> M. H. Alexander and G. C. Corey, J. Chem. Phys. <b>84</b>, 100 (1986);
+H.-J. Werner, B. Follmeg, M. H. Alexander, and D. Lemoine, <i>ibid.</i> <b>91</b>, 5425 (1989).</font>
+<hr>
+The vibrational levels included involve one level in the <sup>2</sup><img src=sigma12.gif> state and one or more levels in the <sup>2</sup><img src=pismall.gif> state.  The definition of the <i>integer</i>-system dependent parameters is as follows:
+<ul>     NTERM (the number of potential surfaces involved:  this can be 4, 7, 10. etc. here and must be consistent with the POT subroutine).  This parameter cannot be changed<p>
+    ISYM:   if ISYM =+1, then the electronic symmetry of the <sup>2</sup><img src=sigma12.gif> state
+              is sigma-plus
+              if ISYM = -1, then the electronic symmetry is sigma-minus<p>
+    ISA:    <i>s/a</i> symmetry index, if the molecule is homonuclear (IHOMO=T)
+              then, if ISA=+1 then only the s-levels (both for sigma and
+              pi) are included in the basis, if ISA=-1, then only the
+              a-levels are included<p>
+    IGUSG:    permutation inversion symmetry of <sup>2</sup><img src=sigma12.gif> electronic state (for homonuclear molecules, IHOMO=T)
+              <ul>IGUSG = 1 for gerade states<br>
+              IGUSG = -1 for ungerade states</ul><p>
+NMAXSG:  highest rotational level for the <sup>2</sup><img src=sigma12.gif> state<p>
+    NPARSG:   number of spin doublets in <sup>2</sup><img src=sigma12.gif> state included<p>
+     <ul>NPARSG = 2 will ensure both spin doublets<br>
+         NPARSG = 1, just <img src=eps12.gif> = 1 doublets<br>
+         NPARSG = -1, just <img src=eps12.gif> = -1 doublets</ul><p>
+    IGUPI:    permutation inversion symmetry of <sup>2</sup><img src=pismall.gif> electronic state (for homonuclear molecules, IHOMO=T)
+              <ul>IGU = 1 for gerade states<br>
+              IGU = -1 for ungerade states</ul><p>
+    NPARPI:   number of <sup>2</sup><img src=pismall.gif> symmetry doublets 
+included
+     <ul>NPARPI = 2 will ensure both lambda doublets<br>
+         NPARPI = 1, just <img src=eps12.gif> = 1 doublets<br>
+         NPARPI = -1, just <img src=eps12.gif> = -1 doublets</ul><p>
+    NUMVPI:   number of <sup>2</sup><img src=pismall.gif> vibrational levels to be included<p>
+    IVPI:     array of vibrational quantum number for <sup>2</sup><img src=pismall.gif>  vibrational levels.  Must be consistent with the potential routine<p>
+    JMAX:     array of maximum rotational angular momenta for each <sup>2</sup><img src=pismall.gif> channel<p>
+              <ul>In each spin-orbit manifold with convention
+              omega .le. j .le. jmax+0.5</ul><p>
+
+    <img src=warningsmall.gif> for heteronuclear molecules both IGUPI and IGUSG should be +1<p>
+<hr>
+<a href=hibhelp.html><img src=up_arrow.gif border=0 align=middle></a>&#160;Return to <a href=hibhelp.html>Hibridon Help</a>

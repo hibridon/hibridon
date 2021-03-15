@@ -1,5 +1,7 @@
 *system: F-H2 using adiabatic klos potentials
-* reference:  jklos
+*Reference
+*J. Klos, G. Chalasinski and M. M. Szczesniak 
+* Int. J. Quant. Chem., 90, 1038 (2002)
       include "common/syusr"
       include "common/bausr"
       include "common/ground"

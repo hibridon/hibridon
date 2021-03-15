@@ -1,0 +1,36 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 4.4 BUILD DATE 11/07/18 12:48:04 EST
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+SYS=OS X 10.13.6; MACH=unix-darwin unix-ifort unix-darwin64
+CC=; FC=/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -O3 -save -i8
+
+
+
+ --------------------------------------------------------------------------
+
+ INTEGRAL CROSS SECTIONS READ FROM FILE Heohx1.ics                              
+ WRITTEN:   Nov  7 12:48:30 2018
+ LABEL:     R. TOBOLA AND J.KLOS He-OH(X) RCCSDT 11A        
+ POT NAME:  Cybulski et al He-OH(X) RCCSDT PES              
+
+ ** INTEGRAL CROSS SECTIONS; IEN= 1 **
+    RMU=   3.2399  E=   100.00  JLPAR=-1  JTOT-1=  0.5  JTOT-2=  55.5  JTOT-D=  1
+ ** CC CALCULATION, JLPAR=-1 **
+
+ ** COLUMN HEADINGS ARE INITIAL STATES, ROW HEADINGS ARE FINAL STATES **
+
+           J=   1.5       2.5       1.5       2.5
+   J    I | I=   -1        -1         1         1
+ 
+  1.5   -1   1.088E+02  7.379E-01  6.082E-01  5.201E+00
+  1.5    1   6.085E-01  1.122E-01  1.102E+02  1.649E+00
+  2.5   -1   1.774E-01  2.585E+02  2.695E-02  1.022E+00
+  2.5    1   1.266E+00  1.035E+00  4.012E-01  2.481E+02

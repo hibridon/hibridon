@@ -1,0 +1,11 @@
+inp=Timer_arno.inp
+jlpar=1
+jmax=30
+rendld=8
+airyfl=f
+run
+rendld=5.5
+airyfl=t
+logdfl=f
+run
+exit

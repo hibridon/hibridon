@@ -1,0 +1,23 @@
+CN--H2 - treat CN as 2Sigma                  
+  26                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    4.5000   10.0000    0.2000   rstart, rendld, spac
+  F                              prairy
+  1.100      1.00    50.0  1.10  tolai, rincr, rendai, fstfac
+   1                             nerg
+    200.0000
+    1.8964                       xmu
+ -100.0000                       rcut
+   0  50   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80  -1                         lscreen, iprint
+    8   2                        nnout,niout
+  01  11  21  31  41  51  61  71
+   1  -1
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  F  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  F  F  F  F                  noprin, chlist, ipos, nucros, photof
+  T  F  F  F  T                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+  12   1   1   2                 j1max, j2min, j2max, ipotsy2 
+   1.89102  6.40e-6  0. 59.322000   b1rot, d1rot (H35Cl), gamma, b2rot
+ pot_cnh2_lique.dat             

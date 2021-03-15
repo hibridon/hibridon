@@ -1,0 +1,22 @@
+Known Problems - hibridon v4.4
+
+Bah2p basis routine:  Bound calculations give results that are not a simple
+     energy shift from previous calculation.  Problem in bound routine?
+
+Bah2p basis routine:  Problems with computing cross sections.  If run
+     program right after reading inpur file, get message NO OPEN LEVEL
+     FOUND FOR COLUMN CHANNEL  3 IN PARTCR, and program aborts.  If,
+     however, bastst is run first, then scattering calculation proceeds
+     normally.  The resulting cross sections do need to be verified.
+     Also, J12 is not checked in computing cross sections with the
+     INTCRS command.  FIXED 3/2013
+
+Bah3p, Badiat2p basis routines:  These may have similar problems as
+     Bah2p.  BAH3P FIXED 3/2013
+
+Pot_hcl_vibnew pot routine:  The eispack routine RS must be replaced
+     with the lapack routine DSYEV, to be compatible with the ifort
+     compiler and MKL library
+
+Hypxsc, Tenxsc, Trnprt:  These modules not yet extended to molecule-
+     molecule systems

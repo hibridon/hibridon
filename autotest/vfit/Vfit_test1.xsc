@@ -1,0 +1,37 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 4.3.4 BUILD DATE 11/08/09 13:21:42 EST
+
+     AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI
+               A. BERNING, A. DEGLI-ESPOSTI, C. RIST, P. DAGDIGIAN, B. POUILLY
+               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, J. KLOS
+               F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+SYS=OS X 10.6.1; MACH=unix-darwin unix-ifort unix-darwin64
+CC=; FC=/opt/intel/Compiler/11.1/076/bin/intel64/ifort -O3 -save
+LIB_ROOT=-L/opt/intel/Compiler/11.1/076/Frameworks/mkl/lib/em64t
+LIBRARIES:  -lmkl_intel_ilp64 /
+  -lmkl_intel_thread -lmkl_core -lmkl_intel_thread -lmkl_core -lmkl_intel_thread -lmkl_core -lguide -lpthread
+ --------------------------------------------------------------------------
+
+ INTEGRAL CROSS SECTIONS READ FROM FILE Vfit_test1.ics                          
+ WRITTEN:   Nov 14 11:06:01 2009
+ LABEL:     Test of N2+_He using Follmeg-Rosmus PES         
+ POT NAME:  WERNER-FOLLMEG VFIT                             
+
+ ** INTEGRAL CROSS SECTIONS; IEN= 1 **
+    RMU=   3.5022  E=   150.00  JLPAR=-1  JTOT-1=  1  JTOT-2=  20  JTOT-D=  1
+ ** CC CALCULATION, JLPAR=-1 **
+
+ ** COLUMN HEADINGS ARE INTIAL STATES, ROW HEADINGS ARE FINAL STATES **
+
+            J=    0         2         4         6         8
+   J    I | I=    0         0         0         0         0
+ 
+    0    0  5.758E+01 3.590E+00 5.042E-01 1.346E-01 9.394E-02
+    2    0  1.655E+01 6.070E+01 7.313E+00 1.594E+00 1.183E+00
+    4    0  3.363E+00 1.058E+01 6.302E+01 1.219E+01 9.676E+00
+    6    0  7.985E-01 2.051E+00 1.084E+01 1.845E+02 6.045E+01
+    8    0  1.090E-01 2.976E-01 1.682E+00 1.182E+01 9.139E+02

@@ -153,22 +153,6 @@ $basedir/h_hecn_dgels.log"
   echo ""
   exit
 endif
-
-echo "linking hib_ch3he with kmax=120 ... "
-if (-e $basedir/bin/progs/hib_ch3he_ccsdt_120) then
-  rm $basedir/bin/progs/hib_ch3he_ccsdt_120
-  echo "replacing current copy of $basedir/bin/progs/hib_ch3he_ccsdt_120 ..."
-endif
-set var1 = ch3he_ccsdt
-set var2 = 120
-$basedir/bin/makehib $var1 $var2>>& $basedir/h_ch3he_test.log
-if (-e $basedir/bin/progs/hib_ch3he_ccsdt_120) then
-else
-  echo "$basedir/bin/progs/hib_ch3he_ccsdt_120 not created, check
-$basedir/h_ch3he_test.log"
-  echo ""
-  exit
-endif
  
 cd $basedir
 if (-e testnew) then
@@ -279,16 +263,6 @@ cd testnew
   rm $basedir/testnew/Hecn*.ics  >>& $basedir/testnew/hecnx_test.log
   rm $basedir/testnew/Hecn*.smt  >>& $basedir/testnew/hecnx_test.log
   rm $basedir/bin/progs/hib_hecn_dgels_81
-
-  echo "running ch3he_ccsdt tests ..."
-  $basedir/bin/progs/hib_ch3he_ccsdt_120 <hecnx_hyp.com >ch3he_test.log
-  echo "ch3he_ccsdt tests completed, compare result files:"
-  echo "  $basedir/testnew with $basedir/tests"
-  echo "  $basedir/testnew with $basedir/tests"
-  rm $basedir/testnew/Ch3he*.sav  >>& $basedir/testnew/ch3he_test.log
-  rm $basedir/testnew/Ch3he*.ics  >>& $basedir/testnew/ch3he_test.log
-  rm $basedir/testnew/Ch3he*.smt  >>& $basedir/testnew/ch3he_test.log
-  rm $basedir/bin/progs/hib_ch3he_ccsdt_120
 
 set sysname=`uname -s`
 set known = 'no'

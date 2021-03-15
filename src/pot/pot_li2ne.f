@@ -1,5 +1,9 @@
 *system: Li2(A)-Ne using alexander-werner potential
 *reference: M. H. Alexander and H.-J. Werner, J. Chem. Phys. 95, 6524 (1991).
+*
+*  Note:  this pot routine requires a data file to be in hibxx/bin/progs/potdata:
+*         LI2NE.MHA
+*
       include "common/syusr"
       subroutine driver
       implicit double precision (a-h,o-z)
@@ -123,7 +127,7 @@
      :           mtt=mlams*(maxlin+6), mcc=mlams*(maxlin+2),
      :           mw=5*(maxlog+2) )
       character*(*) filnam
-      character*80 potlab, text
+      character*80 potlab, text, filnm1
       logical lpar,readpt,lpar1,batch,existf
       dimension tmat(mt), ttmat(mtt),  cmat(mc), ccmat(mcc),
      :          logcut(mlams), cutlog(mlams), linfirst(mlams),
@@ -202,7 +206,8 @@
       npoint=mpoint
       inclog=maxlog
       inclin=maxlin
-      inquire(file=filnam,exist=existf)
+      filnm1 = 'potdata/'//filnam
+      inquire(file=filnm1,exist=existf)
       if (.not. existf) then
         write (6, 11) filnam
 11      format
@@ -210,7 +215,7 @@
        if (batch) call exit
         return
       endif
-      open(unit=iunit,file=filnam,status='old',
+      open(unit=iunit,file=filnm1,status='old',
      :      access='sequential')
 *      open(unit=9,file='file9.out',access='sequential',status='unknown')
       read(iunit,'(a)',err=800,iostat=ierr) potlab

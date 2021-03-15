@@ -1,0 +1,45 @@
+
+compiling pot subroutine for hib_hcoh2_2001 with ...
+making fortran converter ...
+running fortran converter ...
+-: No such file or directory.
+compiling pot_hcoh2.f ... 
+/opt/intel/compilers_and_libraries_2019.5.281/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -I/opt/intel/compilers_and_libraries_2019.5.281/mac/mkl/include -c -save -i8 -O3
+compilation done
+pot_hcoh2 successfully compiled ...
+hib_hcoh2_2001 being created at date 12/11/19 18:46:51 EST with version 4.4
+removing old hiversion.f ...
+unix-darwin unix-ifort unix-darwin64
+ *** fortran conversion program ***
+ Machine type:   Machine type:   Machine type:   machine=unix-darwin                   
+ machine=unix-ifort                    
+ machine=unix                          
+ machine=unix                          
+ file: or *option:  
+ file /Users/pdagdig1/hib44/src/hiversion.new exists
+ overwrite? (y/n)[y]  output file:  /Users/pdagdig1/hib44/src/hiversion.new
+ ftconv processing completed;  lines read:                    151     written: 
+                   151
+ file: or *option:  
+hiversion.f file converted, copying back ...
+compiling hiversion.f ... 
+/opt/intel/compilers_and_libraries_2019.5.281/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -I/opt/intel/compilers_and_libraries_2019.5.281/mac/mkl/include -c -save -i8
+compilation done
+converting himain with kmax = 2001
+ *** fortran conversion program ***
+ Machine type:   Machine type:   Machine type:   machine=unix-darwin                   
+ machine=unix-ifort                    
+ machine=unix                          
+ machine=unix                          
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiversion.new
+ ftconv processing completed;  lines read:                    151     written: 
+                   151
+ file: or *option:  
+himain.f file converted, copying back ...
+mv: himain.new: No such file or directory
+compiling himain.f ... 
+/opt/intel/compilers_and_libraries_2019.5.281/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -I/opt/intel/compilers_and_libraries_2019.5.281/mac/mkl/include -c -save -i8
+compilation done
+  fortran-based direct i/o routines used
+linking hib_hcoh2_2001
+/opt/intel/compilers_and_libraries_2019.5.281/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -I/opt/intel/compilers_and_libraries_2019.5.281/mac/mkl/include -save -i8 -O3 -o hib_hcoh2_2001 hiamp.o hiba13p.o hiba1d3p.o hiba1del.o hiba1sg.o hiba1sg1sg.o hiba22p.o hiba2del.o hiba2mol.o hiba2pi.o hiba2pi1sg.o hiba2sg.o hiba2sg1sg.o hiba3p2s_mha_sovar.o hiba3sg1sg.o hibaastp.o hibaastp1.o hibaastp2.o hibaastp3.o hibach2x.o hibadiat2p.o hibah2p.o hibah3p.o hibapi.o hibasgpi.o hibasgpi1.o hibasphtp.o hibastp.o hibastp1.o hibastp1sg.o hibastpln.o hiblas.o hibound.o hibrid1.o hibrid2.o hibrid3.o hibrid4.o hibrid5.o hicommon.o hidifcrs.o hihypxsc.o hiiolib_f.o himain.o himatrix.o hinput.o hipotutil.o hiprsbr.o histmix.o hisystem.o hitensor.o hitrnprt.o hiutil.o hivector.o hiversion.o pot/pot_hcoh2.o /opt/intel/compilers_and_libraries_2019.5.281/mac/mkl/lib/libmkl_intel_ilp64.a /opt/intel/compilers_and_libraries_2019.5.281/mac/mkl/lib/libmkl_sequential.a /opt/intel/compilers_and_libraries_2019.5.281/mac/mkl/lib/libmkl_core.a -lpthread -lm -ldl

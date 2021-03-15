@@ -7,7 +7,14 @@
 *  subroutine to determine angular coupling potential
 *  for collision of a triplet atom in a P state and a homonuclear molecule
 *  authors:  millard alexander
-*  current revision date:  7-apr-2003 by mha
+*
+*  moved j12 (renamed isc1 array) to common block /coj12/ to pass array
+*  to other subrs (p.dagdigian)
+*
+*  revised routine so that CC scattering calculations work.  it appears that
+*  this routine had previously been used only for bound-state calculations
+*
+*  current revision date:  27-mar-2013 by p. dagdigian
 * --------------------------------------------------------------------
 *  variables in call list:
 *    j:        on return contains diatom angular momentum quantum number
@@ -76,27 +83,30 @@
 *    iop:      ortho (iop=1) or para (iop=0)
 *    jmax:     maximum rotational quantum number of diatomic
 *  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
-*
+*    cent:     array containing centrifugal barrier of each channel
 *  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
+*    eint:     array containing channel energies (in hartree)
+*  variable in common block /coj12/
+*    j12:      array containing vector sum of ja + j (similar situation
+*              with molecule-molecule scattering, see hibastpln basis
+*              routine
 *  variables in common block /coered/
-*    ered:      collision energy in atomic units (hartrees)
-*    rmu:       collision reduced mass in atomic units
-*               (mass of electron = 1)
+*    ered:     collision energy in atomic units (hartrees)
+*    rmu:      collision reduced mass in atomic units
+*              (mass of electron = 1)
 *  variable in common block /conlam/
-*    nlam:      the number of case(a) interaction potentials actually used
-*               this is 5 here
-*    nlammx:    the maximum number of angular coupling terms
+*    nlam:     the number of case(a) interaction potentials actually used
+*              this is 5 here
+*    nlammx:   the maximum number of angular coupling terms
 *  variable in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    v2:        lower triangle of nonzero angular coupling matrix elements
-*               only nonzero elements are stored
+*    nv2max:   maximum core memory allocated for the v2 matrix
+*    v2:       lower triangle of nonzero angular coupling matrix elements
+*              only nonzero elements are stored
 *  variable in common block /coiv2/
-*   iv2:        matrix address of v2 matrix for each non-zero element
+*   iv2:       matrix address of v2 matrix for each non-zero element
 *  variable in common block /coconv/
-*     econv:    conversion factor from cm-1 to hartrees
-*     xmconv:   converson factor from amu to atomic units
+*     econv:   conversion factor from cm-1 to hartrees
+*     xmconv:  converson factor from amu to atomic units
 *  subroutines called:
 *   vlmh3p:    returns angular coupling coefficient for particular
 *              choice of channel index
@@ -113,6 +123,7 @@
       common /conlam/ nlam, nlammx, lamnum(1)
       common /cocent/ cent(5)
       common /coeint/ eint(5)
+      common /coj12/  j12(1)
       common /coered/ ered, rmu
       common /coskip/ nskip, iskip
       common /coconv/ econv, xmconv
@@ -157,7 +168,7 @@
       write (9, 14) nsum
 14    format (' ** TOTAL NUMBER OF ANISOTROPIC TERMS=', i2)
       nlam = nsum
-      if (clist) then
+      if (bastst) then
         if (flagsu) then
           write (6,16) rmu * xmconv, ered * econv, jtot, jlpar
           write (9,16) rmu * xmconv, ered * econv, jtot, jlpar
@@ -200,7 +211,7 @@
         jtot=nu
       endif
 
-*  save jtot and jlpar fr use later in transformatin
+*  save jtot and jlpar for use later in transformatin
       jjtot=jtot
       jjlpar=jlpar
       if (iop .eq. 0) jmolmin=0
@@ -211,12 +222,14 @@
         nlevel = 0
 * sum over molecular levels
         do 105 jmol=jmolmin,jmax,2
+        erot = brot*jmol*(jmol + 1)
 * sum over atomic levels
         do 100 jai=0,2
           nlevel = nlevel+1
-          if (jai .eq. 0) ehold(nlevel)=-zero/econv
+          if (jai .eq. 0) ehold(nlevel)=zero
           if (jai .eq. 1) ehold(nlevel)=+aso1/econv
           if (jai .eq. 2) ehold(nlevel)=aso2/econv
+          ehold(nlevel) = ehold(nlevel) + erot/econv
           ishold(nlevel)=jai
           jhold(nlevel)=jmol
           xjai=jai
@@ -224,30 +237,51 @@
           j12max=jai+jmol
           do 90 j12i=j12min,j12max
             lmin=iabs(jtot-j12i)
-* error in old statement
-*            lmax=jtot+j12i+1
             lmax=jtot+j12i
             do 80 li=lmin,lmax
-              if ((-1)**li .eq. jlpar*(-1)**jtot) then
+              if ((-1)**li .eq. jlpar*(-1)**(jmolmin-1)) then
                 n = n + 1
                 if (n .gt. nmax) go to 180
                 l(n) = li
                 is(n)=jai
                 j(n)=jmol
-                isc1(n)=j12i
+                j12(n)=j12i
 * centrifugal contribution to hamiltonian
                 cent(n) = li*(li+1)
 * constant channel energy
-                sc2(n)=brot*jmol*(jmol+1)
-                if (jai .eq. 0) sc2(n)=sc2(n)-zero
-                if (jai .eq. 1) sc2(n)=sc2(n)+aso1
-                if (jai .eq. 2) sc2(n)=sc2(n)+aso2
-                sc2(n)=sc2(n)/econv
+                sc2(n) = ehold(nlevel)
               endif
 80          continue
 90        continue
 100     continue
 105     continue
+*  sort energies in order ot increasing energy
+        if (n .gt. 1) then
+          do 520 i1 = 1, n-1
+            esave = sc2(i1)
+            do 530 i2 = i1+1, n
+              if (sc2(i2) .lt. esave) then
+*  level i2 has lower energy than level i1, switch them
+                esave = sc2(i2)
+                sc2(i2) = sc2(i1)
+                sc2(i1) = esave
+                jsave = j(i2)
+                j(i2) = j(i1)
+                j(i1) = jsave
+                jsave = is(i2)
+                is(i2) = is(i1)
+                is(i1) = jsave
+                jsave = l(i2)
+                l(i2) = l(i1)
+                l(i1) = jsave
+                jsave = j12(i2)
+                j12(i2) = j12(i1)
+                j12(i1) = jsave
+              endif
+530         continue
+520       continue
+        endif
+*
 * here for CS calculations
       elseif (csflag) then
 *  assign quantum numbers and energies for CS calculations
@@ -258,12 +292,14 @@
           xnu=nu
 * sum over molecular levels
           do 125 jmol=jmolmin,jmax,2
+          erot = brot*jmol*(jmol + 1)
 * sum over atomic levels
           do 120 jai=0,2
             nlevel = nlevel+1
             if (jai .eq. 0) ehold(nlevel)=-zero/econv
             if (jai .eq. 1) ehold(nlevel)=+aso1/econv
             if (jai .eq. 2) ehold(nlevel)=aso2/econv
+            ehold(nlevel) = ehold(nlevel) + erot/econv
             ishold(nlevel)=jai
             jhold(nlevel)=jmol
             j12min=iabs(jai-jmol)
@@ -278,21 +314,18 @@
                 l(n) = li
                 is(n)=jai
                 j(n)=jmol
-                isc1(n)=j12i
+                j12(n)=j12i
                 xj12=j12i
 * centrifugal contribution to hamiltonian
                 cent(n) = xjtot*(xjtot+1)+xj12*(xj12+1)-2*xnu**2
 * constant channel energy
-                sc2(n)=brot*jmol*(jmol+1)
-                if (jai .eq. 0) sc2(n)=sc2(n)-zero
-                if (jai .eq. 1) sc2(n)=sc2(n)+aso1
-                if (jai .eq. 2) sc2(n)=sc2(n)+aso2
-                sc2(n)=sc2(n)/econv
+                 sc2(n) = ehold(nlevel)
 110           continue
             endif
 120       continue
 125       continue
         else if (.not.ihomo) then
+*
 *  here for Dubernet and Hutson case 1A
 *          if (iop .eq. 0) jmol=0
 *          if (iop .eq. 1) jmol=1
@@ -301,10 +334,11 @@
             n=0
             nlevel = 0
             do 155 jmol=jmolmin,jmax,2
+              erot = brot*jmol*(jmol + 1)
 * sum over atomic levels
-* if aso > 10000, assume aso = 0 and ja=0.5
+* if aso1 > 10000, assume aso = 0 and ja=0.5
               do 150 jai=0,2
-                if (aso .lt. 10000d0) then
+                if (aso1 .lt. 10000d0) then
                   nlevel = nlevel+1
                   if (jai .eq. 0) ehold(nlevel)=-zero/econv
                   if (jai .eq. 1) ehold(nlevel)=+aso1/econv
@@ -314,6 +348,7 @@
                   nlevel=nlevel+1
                   ehold(nlevel)=zero
                 endif
+                ehold(nlevel) = ehold(nlevel) + erot/econv
                 ishold(nlevel)=jai
                 jhold(nlevel)=jmol
                 xjai=jai
@@ -330,13 +365,13 @@
                     xjtot=jtot
                     is(n)=jai
                     j(n)=jmol
-                    isc1(n)=ik
+                    j12(n)=ik
 * centrifugal contribution to hamiltonian
                     cent(n)=xjtot*(xjtot+1)+xjai*(xjai+1)+
      :                  jmol*(jmol+1)-2*xnu**2+2*ik*xomega
 * constant channel energy
                     sc2(n)=brot*jmol*(jmol+1)
-                    if (aso .lt. 10000d0) then
+                    if (aso1 .lt. 10000d0) then
                       if (jai .eq. 0) sc2(n)=sc2(n)-zero
                       if (jai .eq. 1) sc2(n)=sc2(n)+aso1
                       if (jai .eq. 2) sc2(n)=sc2(n)+aso2
@@ -366,7 +401,7 @@
                   li=jtot
                   n = n + 1
                   if (n .gt. nmax) go to 180
-                  isc1(n)=jmol
+                  j12(n)=jmol
                   l(n) = li
                   is(n)=1
                   j(n)=ik
@@ -382,7 +417,7 @@
          endif
         endif
       endif
-
+*
 180   if (n .gt. nmax) then
         write (9, 185) n, nmax
         write (6, 185) n, nmax
@@ -424,6 +459,7 @@
               j(nn) = j(i)
               cent(nn) = cent(i)
               l(nn) = l(i)
+              j12(nn) = j12(i)
             end if
 195       continue
 *  reset number of channels
@@ -432,7 +468,48 @@
       end if
 *  return if no channels
       if (n .eq. 0) return
-      nlevop = nlevel
+*  form list of all energetically distinct rotational levels included in the
+*  channel basis and their energies and
+*  sort this list to put closed levels at end
+*  also determine number of levels which are open
+*
+*  find lowest energy
+      emin = 1.e+7
+      do 188 i = 1, nlevel
+        if (ehold(i) .lt. emin) emin = ehold(i)
+188   continue
+*  shift energies so that lowest level has zero energy
+      do 189 i = 1, n
+        eint(i) = sc2(i) - emin
+189   continue
+      do 191 i = 1, nlevel
+        ehold(i) = ehold(i) - emin
+191   continue
+*
+      nlevop = 0
+      do 580  i = 1, nlevel - 1
+        if (ehold(i) .le. ered) then
+          nlevop = nlevop + 1
+        else
+          do 75 ii = i + 1, nlevel
+            if (ehold(ii) .le. ered) then
+              nlevop = nlevop + 1
+              ikeep = jhold(i)
+              jhold(i) = jhold(ii)
+              jhold(ii) = ikeep
+              ikeep = ishold(i)
+              ishold(i) = ishold(ii)
+              ishold(ii) = ikeep
+              ekeep = ehold(i)
+              ehold(i) = ehold(ii)
+              ehold(ii) = ekeep
+              go to 580
+            end if
+75        continue
+        end if
+580    continue
+      if (ehold(nlevel) .le. ered) nlevop = nlevop + 1
+*
       ntop = max(n, nlevop)
 *  ntop is the maximum row dimension of all matrices passed in the
 *  call list of subroutines propag and soutpt.
@@ -442,23 +519,25 @@
      :       ntop = ntop + 1
       if (iop .eq. 0) jmol=0
       if (iop .eq. 1) jmol=1
-      emin=0
+
+*      emin=0
 *      emin=sc2(idmin(n,sc2,1))*econv
-      erot=brot*(jmol+1)*jmol
-      do 205 i=1,n
-        eint(i)=sc2(i)-(erot+emin)/econv
-205   continue
+*      erot=brot*(jmol+1)*jmol
+*      do 205 i=1,n
+*        eint(i)=sc2(i)-(erot+emin)/econv
+*205   continue
+
 *  now list channels if requested
-      if (clist) then
+      if (bastst) then
         if (ihomo) then
           if (.not.csflag) then
             write (6, 210)
             write (9, 210)
 210         format(/'   N   JA(IS) JMOL(J)  J12    L      EINT(CM-1)')
             do 220  i = 1, n
-              write (6, 215) i,is(i),j(i),isc1(i),l(i),
+              write (6, 215) i,is(i),j(i),j12(i),l(i),
      :             eint(i)*econv
-              write (9, 215) i,is(i),j(i),isc1(i),l(i),
+              write (9, 215) i,is(i),j(i),j12(i),l(i),
      :             eint(i)*econv
 215           format (i4, i7,i6, i8, i6, f14.3)
 220         continue
@@ -469,9 +548,9 @@
      :       (/'   N   JA(IS) JMOL(J)  J12   L  CENT    EINT(CM-1)')
             do 235  i = 1, n
               icent=cent(i)
-              write (6, 230) i,is(i),j(i),isc1(i),l(i),icent,
+              write (6, 230) i,is(i),j(i),j12(i),l(i),icent,
      :             eint(i)*econv
-              write (9, 230) i,is(i),j(i),isc1(i),l(i),icent,
+              write (9, 230) i,is(i),j(i),j12(i),l(i),icent,
      :             eint(i)*econv
 230           format (i4, i7,i6,i8, i5,i6, f14.3)
 235         continue
@@ -483,8 +562,8 @@
 255         format(/'   N   JA(IS) JMOL(J)   K   CENT    EINT(CM-1)')
             do 265  i = 1, n
               icent=cent(i)
-              write (6, 260) i,is(i),j(i),isc1(i),icent,eint(i)*econv
-              write (9, 260) i,is(i),j(i),isc1(i),icent,eint(i)*econv
+              write (6, 260) i,is(i),j(i),j12(i),icent,eint(i)*econv
+              write (9, 260) i,is(i),j(i),j12(i),icent,eint(i)*econv
 260           format (i4, i7,i6,i8,i6, f14.3)
 265         continue
           else
@@ -502,6 +581,7 @@
 
         endif
       end if
+*
 *  now calculate coupling matrix elements
 *  ordering of terms is as follows:
 *  CC calculations (csflag=.false.) and CS case 1C calculations
@@ -555,8 +635,8 @@
 *        do 310  icol= 2, 3
 *          do 300  irow = icol, 3
             ij = ntop * (icol - 1) +irow
-            j12row=isc1(irow)
-            j12col=isc1(icol)
+            j12row=j12(irow)
+            j12col=j12(icol)
             if (.not. csflag .or. (csflag .and. ihomo)) then
               call vlmh3p (irow,icol,jtot,jlpar,j(irow),j(icol),
      :        is(irow),

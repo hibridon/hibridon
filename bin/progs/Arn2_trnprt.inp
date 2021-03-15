@@ -1,0 +1,24 @@
+Ar-N2 test 
+   1                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    5.0000    9.0000    0.0500   rstart, rendld, spac
+  F                              prairy
+  1.150      8.00    50.0  2.00  tolai, rincr, rendai, fstfac
+   1                             nerg
+   200.0000
+   16.47                         xmu
+   50.0000                       rcut
+   0  20   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80  -1                         lscreen, iprint
+    7    1                       nnout,niout
+    0   2   4   6  8  10  12
+    0
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  T  F  F  T  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  F  F  F  T  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+   1  0  0                       nvib, vibmn, vibmx
+   0  0 10                       iv, jmin, jmax
+   2.01  0  0  0                 brot, drot, hrot
+   0                             evib

@@ -1,0 +1,35 @@
+CN-Ar vX=7 - vA=3 combination 
+   4                             ibasty
+  T  T  F  T                     logdfl, airyfl, readpt, bastst
+    4.4000    9.0000    0.0500   rstart, rendld, spac
+  F                              prairy
+  1.150      8.00    50.0  5.00  tolai, rincr, rendai, fstfac
+   1                             nerg
+   300.00
+   15.75286                      xmu
+   50.0000                       rcut
+   0 250   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80  -1                         lscreen, iprint
+   10    4                       nnout,niout
+   0   1   2   3   4   5   6   7   8   9  
+  -1   1  -2   2
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  T  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  F  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  T  F  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+  1  1  1  1                     isg ,ipi, isgpi ,isa
+  1  2  1                        igusg, nparsg, isymsg
+  1  7  7                        nvibs, nvmins, nvmaxs
+  7  0  4                        ivs, jmins, jmaxs
+  16.96506, 2.0632e-3, 0         bsg, dsg, hsg
+  .22555, 0, 0                   gs, gsd, gsh
+  32402.38                       esg
+  1  2                           igupi, nparpi
+  1  3  3                        nvibp, nvminp, nvmaxp
+  3  0  4                        ivp, jmaxp, jmaxp
+  18.53487, 19.090e-4, 0         bpi, dpi, hpi
+  -139.05088, .235266, 0         aso, p, pd
+  -.038693, 0, 0                 q, qd, qh
+  0, 0, 0                        epi, ad, gpi
+  7, 0, 0                        ivs, a, b

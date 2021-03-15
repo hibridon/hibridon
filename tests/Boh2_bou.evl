@@ -1,91 +1,51 @@
 
  --------------------------------------------------------------------------
-           HIBRIDON SCATTERING CODE V 4.3 BUILD DATE 01/25/08 11:52:53 EST
+           HIBRIDON SCATTERING CODE V 4.4 BUILD DATE 09/03/13 13:11:36 EDT
 
-     AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG
- CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI
-               A. BERNING, A. DEGLI-ESPOSTI, C. RIST, P. DAGDIGIAN, B. POUILLY
-               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, J. KLOS
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
  --------------------------------------------------------------------------
            BUILD CONFIGURATION:
-SYS=OS X 10.4.11; MACH=unix-darwin unix-ifort
-CC=/usr/bin/cc -DNAME_LU; FC=/opt/intel/fc/10.1.007/bin/ifort -O3 -save
-LIB_ROOT=-L/Library/Frameworks/Intel_MKL.framework/Versions/10.0.1.014/Libraries/32
-LIBRARIES:
--lmkl_intel -lmkl_intel_thread -lmkl_core -lmkl_intel_thread -lmkl_core -lmkl_intel_thread -lmkl_core -lguide -lpthread
+SYS=OS X 10.8.4; MACH=unix-darwin unix-ifort unix-darwin64
+CC=; FC=/opt/intel/composer_xe_2013.5.198/bin/intel64/ifort -O3 -xHOST -save -i8
+LIB_ROOT=-L/opt/intel/composer_xe_2013.5.198/mkl/lib
+LIBRARIES:  -lmkl_intel_ilp64 /
+  -lmkl_intel_thread -lmkl_core -lpthread -lm
  --------------------------------------------------------------------------
  ** POTNAM: ALEXANDER B(2P)H2(J=0,1) DUBERNET-HUTSON        
  ** LABEL: B-H2 PES's of ALEXANDER                         
 
  ** BOUND STATE CALCULATION:  R1 = 4.00;  R2 =10.00
-      DEL-START =0.500, DEL-EXACT =0.500000, NO. GAUSSIANS = 13, SIZE OF TOTAL BASIS =  65
-      C =0.50, ALPH =1.0000    
+      SPAC-TRY = 0.500, SPAC-EXACT = 0.500000, NO. GAUSSIANS = 13, SIZE OF TOTAL BASIS =   65
+      C = 0.50, ALPH = 1.00000    
  ** MINIMUM EIGENVALUE OF S MATRIX = 2.7416E-06
- ** SIMPSON'S INTEGRATION OF POTENTIAL
-      DEL-R =1.00, H-START =0.100, N-POINTS =  81, H-EXACT =0.100000
+ ** SIMPSON'S 3/8 RULE INTEGRATION OF POTENTIAL
+      DEL-R = 1.00, H-START = 0.100, N-POINTS =  81, H-EXACT = 0.100000
  ** EIGENVALUES (CM-1)
-      -47.765
-      -36.626
-      -30.742
-       -7.210
-       -3.415
-        5.014
-       11.202
-       11.961
-       28.831
-       34.492
-       41.716
-       49.499
-       51.061
-       78.772
-       87.910
-       96.045
-      105.851
-      110.554
-      142.056
-      156.399
-      165.835
-      179.963
-      189.254
-      218.575
-      239.553
-      250.687
-      272.676
-      287.172
-      309.766
-      336.548
-      349.623
-      385.392
-      404.970
-      413.737
-      449.823
-      466.651
-      521.339
-      538.673
-      549.491
-      585.293
-      602.244
-      672.541
-      678.430
-      716.153
-      729.308
-      751.673
-      831.680
-      924.010
-      983.134
-     1005.821
-     1056.047
-     1228.466
-     1563.297
-     1718.327
-     1726.903
-     1783.298
-     1867.599
-     2700.054
-     2976.062
-     3139.962
-     3421.181
-     6164.102
-     6760.638
-    10753.947
-    11986.855
+      -37.596
+      -26.462
+      -20.581
+        2.822
+        6.580
+       15.044
+       21.180
+       21.952
+       38.523
+       44.147
+       51.365
+       59.121
+       60.651
+       88.258
+       97.357
+      105.487
+      115.296
+      119.963
+      151.508
+      165.829
+      175.271
+      189.416
+      198.686
+      228.110

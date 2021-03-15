@@ -1,0 +1,35 @@
+<TITLE>bastp</TITLE>
+<h3><center><font color=#brown >Basis Subroutine
+ and System Specific Parameters: Collision of Spherical Top Molecule with an Atom
+</h3>
+</center></font><hr>
+
+
+<tt>BASISTYPE = 24</tt><p>
+<ul>
+	System subroutine: <tt>sysphtp</tt><p>
+	Basis subroutine: <tt>hibasphtp.f</tt></ul>
+
+<p>
+<font size=-1><i>Ref.</i> J. M. Hutson and A. E. Thornley</i>, J. Chem. Phys. <b>100</b>, 2505 (1994); T. G. A. Hiejmen, T. Korona, R. Moszynski, P. E. B. Wormer, and A. van der Avoird, J. Chem. Phys. <b>107</b>, 902 (1997).</font>
+<hr>
+The definition of the system dependent parameters is as follows:
+<ul>     NTERM:  the number of potential surfaces involved.  This parameter should equal the number of MU terms 
+            in the angular expansion of the potential.  This parameter can not be changed<p>
+     NUMPOT:  an index representing the particular potential used.  This variable
+is passed to the POT subroutine<p>
+    IOP:      nuclear spin modification label for the molecular states:
+<ul>if IOP = 1: only <i>A</i> levels included in channel expansion<br>
+if IOP = 2: only <i>E</i> levels included in channel expansion<br>if IOP = 3: only <i>F</i> levels included in channel expansion
+              </ul><p>
+    JMAX:    the maximum rotational angular momentum included in the channel expansion<p>
+</ul>
+
+The definition of the real system dependent parameter is as follows:
+<ul>
+BROT:    rotational constant of the sphericxal top
+</ul>
+<hr>
+
+<hr>
+<a href=hibhelp.html><img src=up_arrow.gif border=0 align=middle></a>&#001;Return to <a href=hibhelp.html>Hibridon Help</a>

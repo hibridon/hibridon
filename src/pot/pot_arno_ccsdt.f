@@ -1,5 +1,5 @@
 * System:  NO(X 2Pi)+Ar, new inf basis set CCSDT ab initio PES's
-* Reference: M. H. Alexander, J. Chem. Phys. to be published.
+* Reference:  M. H. Alexander J. Chem. Phys. 111, 7426 (1999)
 * NB Vlam components correspond to theta=0 for ArON!!!,
 
 

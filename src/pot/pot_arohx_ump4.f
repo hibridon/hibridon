@@ -1,5 +1,7 @@
 * System:  OH(X 2Pi)+Ar, UMP4 ab initio PES's
-* Reference: J. Klos, et al J. Chem. Phys. to be published.
+* Reference: 
+* J. Klos, G. Chalasinski, M. T. Berry, R. A. Kendall, 
+* R. Burcl, and M. M. Szczesniak, J. Chem. Phys. 112, 4952 (2000)
 
 
       subroutine driver

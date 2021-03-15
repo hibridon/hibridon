@@ -5,15 +5,21 @@
      :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
 * --------------------------------------------------------------------
 *  subroutine to determine angular coupling potential for collision
-*  of a symmetric top molecule with a structureless atom or with an
-*  uncorrugated surface
+*  of a symmetric top molecule having no inversion douling with a
+*  structureless atom or with an uncorrugated surface (basis type = 18)
 *
 *  NOTE:  this subroutine is a modification of bastp.  the parameter
 *  ninv (appropriate to molecules like NH3 that have inversion
 *  doubling) has been dropped.  input parameters changed also.
 *
-*  authors:  paul dagdigian
-*  current revision date:  15-mar-2011 by pjd
+*  this version now has the capability of setting up calculations
+*  for all 3 nuclear spin modifications of CD3.
+*
+*  author:  paul dagdigian
+*  revision:  13-mar-2013 by p.j.dagdigian (capable of setting up 3
+*     nuclear spin modifications)
+*  revision:  4-jun-2013 by q. ma (fix a bug in counting anisotropic
+*     terms)
 * --------------------------------------------------------------------
 *  variables in call list:
 *    j:        on return contains rotational quantum numbers for each
@@ -36,7 +42,7 @@
 *  symmetrical molecules (ihomo = T), the oath levels (k not a multiple
 *  of 3, iop = -1) come in degenerate pairs (eps = +/-1), which are not
 *  collisional connected.  We include only one set of these in the
-*  basis [(1,1), (2,-2), (2,-1), (3,2), (3,1), (4,-4),É].  The para levels
+*  basis [(1,1), (2,-2), (2,-1), (3,2), (3,1), (4,-4), ...].  The para levels
 *  (k a multiple of 3, iop = 1) are nondegenerate.
 *
 *    jhold:    on return contains rotational quantum numbers for each
@@ -110,12 +116,19 @@
 *              to the pot subroutine
 *    ipotsy:   cylindrical symmetry of potential.  If ihomo = .true., only
 *              terms with mu equal to an integral multiple of ipotsy
-*              can be included in the potential.  Example:  for NH3, ipotsy =
-*    iop:      ortho/para label for molecular states. If ihomo=.true. then only
-*              para states will be included if iop=1 and only ortho states if
-*              iop=-1.  Rotational levels with the body-frame projection quantum
-*              number a multiple of 3 are ortho, while levels with k not a
-*              multiple of 3 are para.
+*              can be included in the potential.  Example:  for CH3, ipotsy = 3.
+*    iop:      nuclear spin modification label for molecular levels. If ihomo=.true.
+*              then for molecules with equivalent nuclei of spin = 1/2 (e.e. CH3) only
+*              levels (denoted para) with k a multiple of 3, and only even j levels
+*              for k = 0, will be included if iop=1; only levels (denoted ortho)
+*              with k not a multiple of 3 will be included if iop=-1.
+*                For a molecule with nuclear spins = 1 (e.g. CD3), set iop = -1
+*              for rotational levels (with A1 nuclear spin symmetry) with k a
+*              multiple of 3 and the even j levels in the k = 0 stack;
+*              set iop = 2 for rotational levels (with A2 nuclear spin symmetry)
+*              with k a multiple of 3 and the odd j levels in the k = 0 stack;
+*              set iop= 1 for rotational levels (with E nuclear spin symmetry)
+*              with k not equal to a multiple of 3 (e.g. k = 1, 2, 4, 5, 7, 8,â€¦).
 *    jmax:     the maximum rotational angular momentum for the symmetric top
 *  variable in common block /cocent/
 *    cent:      array containing centrifugal barrier of each channel
@@ -161,7 +174,7 @@
       common /coconv/ econv, xmconv
       common /coamat/ ietmp(1)
       dimension j(1), l(1), jhold(1), ehold(1), is(1), k(1),
-     :          ieps(1), jtemp(1), ishold(1), ktemp(1), nlami(4)
+     :          ieps(1), jtemp(1), ishold(1), ktemp(1)
       zero = 0.d0
       two = 2.d0
 *  check for consistency in the values of flaghf and csflag
@@ -197,15 +210,9 @@
      :            ' FOR TERM',i2,'; ABORT ***')
           stop
         end if
-        lmin = lammin(i)
-        lmax = lammax(i)
-        nlami(i) = 0
         idl = 1
         if (ihomo) idl = 2
-        do lb = lmin, lmax, idl
-          nlami(i) = nlami(i) + 1
-        end do
-        nsum = nsum + nlami(i)
+        nsum = nsum + (lammax(i) - lammin(i)) / idl + 1
 35    continue
       if (nlammx .lt. nsum) then
         write (6, 40) nsum, nlammx
@@ -219,6 +226,13 @@
         write (9, 45) nsum, nlam
 45      format (' *** NLAM IN BASIS=', i3,' .NE. NLAM FROM SYSDAT=',
      :           i3, '; ABORT ***')
+        stop
+      end if
+      if (abs(iop).ne.1 .and. iop.ne.2) then
+        write (6,145) iop
+        write (9,145) iop
+145     format (' *** INVALID VALUE OF IOP (',i2,');',
+     :    ' ABORT ***')
         stop
       end if
       if (bastst) write (6, 46) nsum
@@ -311,21 +325,29 @@
           do 105 iep = 1, numeps
 *  check that level has correct nuclear permutation symmetry
             if (ihomo) then
-*  ortho levels (iop = -1) have ki a multiple of 3
-*  all other levels are para (iop = 1)
-              if (iop.eq.-1 .and. mod(ki,ipotsy).ne.0) goto 105
+*  levels with iop = -1 (called ortho levels for CH3) and iop = 2
+*  levels have k a multiple of 3.
+*  all other levels have iop = 1 (called para levels for CH3)
+              if (iop.eq.-1 .and.
+     :          mod(ki,ipotsy).ne.0) goto 105
+              if (iop.eq.2 .and.
+     :          mod(ki,ipotsy).ne.0) goto 105
               if (iop.eq.1 .and. mod(ki,ipotsy).eq.0) goto 105
 *  for ki = 0, the even j levels are ortho (iop = -1) and the odd j
-*  levels do not exist
-              if (iop.eq.-1 .and. ki.eq.0 .and.
-     :          mod(ji,2).ne.0) goto 105
-              if (iop.eq.1 .and. ki.eq.0 .and.
-     :          mod(ji,2).eq.0) goto 105
-*  for ortho levels (iop = -1) with ki > 0 and a multiple of ipotsy,
+*  levels exist only for iop = 2.
+              if (iop.eq.-1 .and. mod(ji,2).ne.0 .and.
+     :          ki.eq.0) goto 105
+              if (iop.eq.2 .and. mod(ji,2).eq.0 .and.
+     :          ki.eq.0) goto 105
+*  for iop = -1, levels with ki > 0 and a multiple of ipotsy,
 *  only the level with (-1) ** (ji+iep) exists
-              if (ki.gt.0 .and. mod(ki,ipotsy).eq.0 .and.
-     :          (-1)**(ji+iep).eq.1) goto 105
-*  include only one of the degenerate pair of para levels
+*  for iop = 2 levels with ki > 0 and a multiple of ipotsy,
+*  only the level with -(-1) ** (ji+iep) exists
+              if (iop.eq.-1 .and. ki.gt.0 .and. mod(ki,ipotsy).eq.0
+     :          .and. (-1)**(ji+iep).eq.1) goto 105
+              if (iop.eq.2 .and. ki.gt.0 .and. mod(ki,ipotsy).eq.0
+     :          .and. (-1)**(ji+iep).eq.-1) goto 105
+*  include only one of the degenerate pair of levels for iop = -1
               ies = 1 - 2*(iep - 1)
               if (iop.eq.1 .and. ies*(-1)**ji.eq.1) goto 105
             end if
@@ -361,9 +383,17 @@
 115       continue
 120     continue
       end if
-*  print this list if bastst = .true.
+c
+c     Determine the number of levels that are open asymtotically
+c
+      nlevop = 0
+      do while (nlevop .lt. nlist .and. ehold(nlevop + 1) .le. ered)
+         nlevop = nlevop + 1
+      end do
+c
+*     print this list if bastst = .true.
       if (bastst) then
-        write (6, 130)
+         write (6, 130)
 130     format (/,10x,
      :    'SORTED LEVEL LIST',/,'   N   J   K  EPS   EINT(CM-1)')
         do  140 i = 1, nlist
@@ -433,14 +463,6 @@
 155       continue
         end if
 170   continue
-*
-*  also determine number of levels which are open
-      nlevop = 0
-      do 250  i = 1, n
-        if (eint(i) .le. ered) then
-          nlevop = nlevop + 1
-        end if
-250   continue
 *  now check to see if any of the open channels are closed at r=rcut
 *  this is not done for molecule-surface collisions or for rcut < 0
       if (.not.flagsu .and. rcut .gt. 0.d0 .and..not.boundc) then
@@ -574,7 +596,7 @@
 355       continue
           if (i .le. nv2max) lamnum(ilam) = inum
           if (bastst) then
-            write (6, 370) ilam, lb, mu, lamnum(lam)
+            write (6, 370) ilam, lb, mu, lamnum(ilam)
             write (9, 370) ilam, lb, mu, lamnum(ilam)
 370         format ('ILAM=',i3,' LAM=',i3,' MU=',i3,
      :         ' LAMNUM(ILAM) = ',i6)
@@ -595,5 +617,11 @@
 460     format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS',
      :           i6)
       end if
+
+
+*      write(6,*) (lamnum(i),i=1,nlam)
+
+
+
       return
       end

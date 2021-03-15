@@ -1,0 +1,20 @@
+#!/bin/csh -f
+# HIBRIDON rftscript $Revision: 2001.1 $ --- run conversion of fortran files
+set basedir=`hibriddir`
+if (-e $basedir/CONFIG) then
+else
+ echo "$basedir/CONFIG file is not here, abort ..."
+ exit
+endif
+set machine=`grep MACH $basedir/CONFIG`
+echo $machine
+set machine=`echo $machine|sed s/MACH=\"//`
+echo $machine
+set machine=`echo $machine|sed s/\"//`
+echo $machine
+cp $basedir/bin/ftscript $basedir/src
+cd $basedir/src
+#echo $machine
+ftscript $machine
+rm ftscript
+cd $basedir/bin

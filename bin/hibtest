@@ -1,5 +1,5 @@
 #!/bin/csh -f
-# HIBRIDON bin/hibtest $Revision: 2011.1 $ --- link and run hibridon tests
+# HIBRIDON bin/hibtest $Revision: 2009.4 $ --- link and run hibridon tests
 # the PATH variable should be set to include the hibridon bin directory
 
 set basedir=`hibriddir`
@@ -106,21 +106,6 @@ else
 #  exit
 endif
 
-echo "linking hib_h2ohe with kmax=45 ... "
-if (-e $basedir/bin/progs/hib_h2ohe_45) then
-  rm $basedir/bin/progs/hib_h2ohe_45
-  echo "replacing current copy of $basedir/bin/progs/hib_h2ohe_45 ..."
-endif
-set var1 = h2ohe
-set var2 = 45
-$basedir/bin/makehib $var1 $var2>>& $basedir/h_h2ohe.log
-if (-e $basedir/bin/progs/hib_h2ohe_45) then
-else
-  echo "$basedir/bin/progs/hib_h2ohe_45 not created, check $basedir/h_h2ohe.log"
-  echo ""
-  exit
-endif
-
 echo "linking hib_heco_sapt with kmax=55 ... "
 if (-e $basedir/bin/progs/hib_heco_sapt_55) then
   rm $basedir/bin/progs/hib_heco_sapt_55
@@ -153,18 +138,32 @@ $basedir/h_hecn_dgels.log"
   exit
 endif
 
-echo "linking hib_ch3he with kmax=126 ... "
-if (-e $basedir/bin/progs/hib_ch3he_ccsdt_126) then
-  rm $basedir/bin/progs/hib_ch3he_ccsdt_126
-  echo "replacing current copy of $basedir/bin/progs/hib_ch3he_ccsdt_126 ..."
+echo "linking hib_h2ohe with kmax=45 ... "
+if (-e $basedir/bin/progs/hib_h2ohe_45) then
+  rm $basedir/bin/progs/hib_h2ohe_45
+  echo "replacing current copy of $basedir/bin/progs/hib_h2ohe_45 ..."
+endif
+set var1 = h2ohe
+set var2 = 45
+$basedir/bin/makehib $var1 $var2>>& $basedir/h_h2ohe.log
+if (-e $basedir/bin/progs/hib_h2ohe_45) then
+else
+  echo "$basedir/bin/progs/hib_h2ohe_45 not created, check $basedir/h_h2ohe.log"
+  echo ""
+  exit
+endif
+
+echo "linking hib_ch3he_ccsdt with kmax=151 …"
+if (-e $basedir/bin/progs/hib_ch3he_ccsdt_151) then
+  rm $basedir/bin/progs/hib_ch3he_ccsdt_151
+  echo "replacing current copy of $basedir/bin/progs/hib_ch3he_ccsdt_151 ..."
 endif
 set var1 = ch3he_ccsdt
-set var2 = 126
-$basedir/bin/makehib $var1 $var2>>& $basedir/h_ch3he_test.log
-if (-e $basedir/bin/progs/hib_ch3he_ccsdt_126) then
+set var2 = 151
+$basedir/bin/makehib $var1 $var2>>& $basedir/h_ch3he_ccsdt.log
+if (-e $basedir/bin/progs/hib_ch3he_ccsdt_151) then
 else
-  echo "$basedir/bin/progs/hib_ch3he_ccsdt_126 not created, check
-$basedir/h_ch3he_test.log"
+  echo "$basedir/bin/progs/hib_ch3he_ccsdt_151 not created, check $basedir/h_ch3he_ccsdt.log"
   echo ""
   exit
 endif
@@ -182,6 +181,9 @@ cp tests/*.BIN testnew
 cp tests/*.dat testnew
 cp tests/*.fluxinp testnew
 cd testnew
+  mkdir potdata
+  cp *.dat potdata
+  cp *.BIN potdata
   echo "running arn2 tests ..."
   $basedir/bin/progs/hib_arn2_151 <arn2_test.com >arn2_test.log
   echo "arn2 tests completed, compare result files:"
@@ -245,18 +247,6 @@ cd testnew
   rm $basedir/testnew/Aroh*.tmp  >>& $basedir/testnew/arohx_test.log
   rm $basedir/bin/progs/hib_arohx_ump4_301
 
-  echo "running h2ohe tests ..."
-  mkdir potdata
-  cp h2o*.dat potdata
-  $basedir/bin/progs/hib_h2ohe_45 <h2ohe_test.com >h2ohe_test.log
-  echo "h2ohe tests completed, compare result files:"
-  echo "  $basedir/testnew with $basedir/tests"
-  rm $basedir/testnew/H2ohe*.sav  >>& $basedir/testnew/h2ohe_test.log
-  rm $basedir/testnew/H2ohe*.smt  >>& $basedir/testnew/h2ohe_test.log
-  rm $basedir/testnew/H2ohe*.pcs  >>& $basedir/testnew/h2ohe_test.log
-  rm $basedir/testnew/H2ohe*.ics  >>& $basedir/testnew/h2ohe_test.log
-  rm $basedir/bin/progs/hib_h2ohe_45
-
   echo "running heco_sapt tests ..."
   $basedir/bin/progs/hib_heco_sapt_55 <heco_test.com >heco_test.log
   echo "heco_sapt tests completed, compare result files:"
@@ -266,6 +256,8 @@ cd testnew
   rm $basedir/bin/progs/hib_heco_sapt_55
 
   echo "running hecn_dgels tests ..."
+  mkdir potdata
+  cp *.dat potdata
   $basedir/bin/progs/hib_hecn_dgels_81 <hecnx_hyp.com >hecnx_test.log
   echo "hecn_dgels tests completed, compare result files:"
   echo "  $basedir/testnew with $basedir/tests"
@@ -275,14 +267,25 @@ cd testnew
   rm $basedir/testnew/Hecn*.smt  >>& $basedir/testnew/hecnx_test.log
   rm $basedir/bin/progs/hib_hecn_dgels_81
 
-  echo "running ch3he_ccsdt tests ..."
-  $basedir/bin/progs/hib_ch3he_ccsdt_126 <hecnx_hyp.com >ch3he_test.log
-  echo "ch3he_ccsdt tests completed, compare result files:"
+  echo "running h2ohe tests ..."
+  $basedir/bin/progs/hib_h2ohe_45 <h2ohe_test.com >h2ohe_test.log
+  echo "h2ohe tests completed, compare result files:"
   echo "  $basedir/testnew with $basedir/tests"
+  rm $basedir/testnew/H2ohe*.sav  >>& $basedir/testnew/h2ohe_test.log
+  rm $basedir/testnew/H2ohe*.smt  >>& $basedir/testnew/h2ohe_test.log
+  rm $basedir/testnew/H2ohe*.pcs  >>& $basedir/testnew/h2ohe_test.log
+  rm $basedir/testnew/H2ohe*.ics  >>& $basedir/testnew/h2ohe_test.log
+  rm $basedir/bin/progs/hib_h2ohe_45
+
+  echo "running ch3he_ccsdt tests …"
+  $basedir/bin/progs/hib_ch3he_ccsdt_151 <ch3he_test.com >ch3he_test.log
+  echo "ch3he_ccsdt tests completed, compare result files:"
   echo "  $basedir/testnew with $basedir/tests"
   rm $basedir/testnew/Ch3he*.sav  >>& $basedir/testnew/ch3he_test.log
   rm $basedir/testnew/Ch3he*.smt  >>& $basedir/testnew/ch3he_test.log
-  rm $basedir/bin/progs/hib_ch3he_ccsdt_126
+  rm $basedir/testnew/Ch3he*.pcs  >>& $basedir/testnew/ch3he_test.log
+  rm $basedir/testnew/Ch3he*.ics  >>& $basedir/testnew/ch3he_test.log
+  rm $basedir/bin/progs/hib_ch3he_ccsdt_151
 
 set sysname=`uname -s`
 set known = 'no'

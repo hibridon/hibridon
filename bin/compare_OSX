@@ -107,17 +107,21 @@ opendiff H2ohe1.psc ../tests/H2ohe1.psc
 opendiff H2ohe1.xsc ../tests/H2ohe1.xsc
 #sleep $time
 echo "comparing He-CO integral and partial cross section tests"
-opendiff Heco1.ics ../tests
-opendiff Heco1.xsc ../tests
-opendiff Heco1.pcs ../tests
-opendiff Heco1.psc ../tests
-
+opendiff Heco1.ics ../tests/Heco1.ics
+opendiff Heco1.xsc ../tests/Heco1.xsc
+opendiff Heco1.pcs ../tests/Heco1.pcs
+opendiff Heco1.psc ../tests/Heco1.psc
 #sleep $time
 echo "comparing HeCN(X) partial, integral and hyperfine resolved cross section tests"
-opendiff Hecn1.xsc ../tests
-opendiff Hecn1.hfx ../tests
-opendiff Hecn1.xms ../tests
-
+opendiff Hecn1.xsc ../tests/Hecn1.xsc
+opendiff Hecn1.hfx ../tests/Hecn1.hfx
+#sleep $time
+echo "comparing H2O-He integral cross section tests"
+opendiff H2ohe1.psc ../tests/H2ohe1.psc
+opendiff H2ohe1.xsc ../tests/H2ohe1.xsc
+#sleep $time
+echo "comparing CH3-He integral cross section tests"
+opendiff Ch3he1.xsc ../tests/Ch3he1.xsc
 
 exit
 end:

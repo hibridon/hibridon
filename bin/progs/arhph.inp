@@ -1,0 +1,26 @@
+'ArH+ - H collisions'
+   1                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    3.5000   10.0000    0.1000   rstart, rendld, spac
+  F                              prairy
+  1.04       1.00  100.0  1.05   tolai, rincr, rendai, fstfac
+   1                             nerg
+     300.00
+   0.98035508940                 xmu
+ -100.0000                       rcut
+   0  50   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80  -1                         lscreen, iprint
+    9   1                        nnout,niout
+   0  1  2  3  4  5  6  7  8 
+   0 
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  F  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  F  F  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+   1   0   0                     nvib, vmin,vmax
+   0   0  25                     iv,jmin,jmax
+   10.300448   6.21714E-04  0.   brot,drot,hrot
+      .00000000                  evib
+
+                                        

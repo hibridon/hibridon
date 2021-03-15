@@ -5,13 +5,19 @@
      :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
 * --------------------------------------------------------------------
 *  subroutine to determine angular coupling potential for collision
-*  of a symmetric top molecule with a structureless atom or with an
-*  uncorrugated surface
+*  of a symmetric top molecule possessing inversion doubling (e.g. NH3)
+*  with a structureless atom or with an uncorrugated surface
+*  (basis type = 6)
+*
 *  authors:  millard alexander
-*  current revision date:  22-jun-1997 by p.j.dagdigian
+*  revision:  11-aug-2011 by p.j.dagdigian
 *    rotational channel basis now chosen by j < jmax and ehold < emax
 *    as in bastp1 basis routine.  also changed printout of basis in bastst
 *    also, added inversion splitting, labeled as delta
+*  revision:  4-jun-2013 by q. ma (fix a bug in counting anisotropic
+*     terms)
+*  revision:  22-oct-2013 by p.j.dagdigian (capable of setting up 3
+*     nuclear spin modifications or nuclear spin = 1)
 * --------------------------------------------------------------------
 *  variables in call list:
 *    j:        on return contains rotational quantum numbers for each
@@ -19,7 +25,7 @@
 *    l:        on return contains orbital angular momentum for each
 *              channel
 *    is:       on return contains symmetry of inversion vibration for
-*              each channel
+*              each channel times k
 *  Note that we have adopted the following convention for the symmetry
 *  index "is" so that on return the symmetric top molecular levels can be
 *  uniquely identified by the two labels "j" and "is":
@@ -99,10 +105,16 @@
 *              to the pot subroutine
 *    ipotsy:   cylindrical symmetry of potential.  If ihomo = .true., only
 *              terms with mu equal to an integral multiple of ipotsy
-*              can be included in the potential.  Example:  for NH3, ipotsy =
-*    iop:      ortho/para label for molecular states. If ihomo=.true. then only
-*              para states will be included if iop=1, and only ortho states if
-*              iop=-1
+*              can be included in the potential.  Example:  for NH3, ipotsy = 3.
+*    iop:      nuclear spin modification label for molecular levels. If ihomo=.true.
+*              then for molecules with equivalent nuclei of spin = 1/2 (e.e. NH3) only
+*              para levels with k a multiple of 3, and only symmectric inverson levels
+*              with k = 0, will be included if iop=1; only ortho levels
+*              with k not a multiple of 3 will be included if iop=-1.
+*                For a molecule with nuclear spins = 1 (e.g. ND3), set iop as follows:
+*              iop =  2 for rotational levels with A1 nuclear spin symmetry
+*              iop = -1 for rotational levels with A2 nuclear spin symmetry
+*              iop =  1 for rotational levels with E nuclear spin symmetry
 *    jmax:     the maximum rotational angular momentum for the symmetric top
 *  variable in common block /cocent/
 *    cent:      array containing centrifugal barrier of each channel
@@ -148,7 +160,7 @@
       common /coconv/ econv, xmconv
       common /coamat/ ietmp(1)
       dimension j(1), l(1), jhold(1), ehold(1), is(1), k(1),
-     :          ieps(1), jtemp(1), ishold(1), ktemp(1), nlami(4)
+     :          ieps(1), jtemp(1), ishold(1), ktemp(1)
       zero = 0.d0
       two = 2.d0
 *  check for consistency in the values of flaghf and csflag
@@ -184,8 +196,7 @@
      :            ' FOR TERM',i2,'; ABORT ***')
           stop
         end if
-        nlami(i) = lammax(i) - lammin(i) + 1
-        nsum = nsum + nlami(i)
+        nsum = nsum + lammax(i) - lammin(i) + 1
 35    continue
       if (nlammx .lt. nsum) then
         write (6, 40) nsum, nlammx
@@ -292,9 +303,11 @@
           do 105 iep = 1, numeps
 *  check that level has correct nuclear permutation symmetry
             if (ihomo) then
-*  ortho levels (iop = -1) have ki a multiple of 3
-*  all other levels are para (iop = 1)
+*  levels with iop = -1 (called ortho levels for NH3) and
+*  iop =2 (called para levels for NH3) have ki a multiple of 3
+*  all other levels have iop = 1 (called para levels for NH3)
               if (iop.eq.-1 .and. mod(ki,ipotsy).ne.0) goto 105
+              if (iop.eq.2 .and. mod(ki,ipotsy).ne.0) goto 105
               if (iop.eq.1 .and. mod(ki,ipotsy).eq.0) goto 105
             end if
 *  check to make sure rotational energy is less than emax
@@ -306,6 +319,7 @@
             ietmp(nlist) = 1 - 2*(iep - 1)
 *  add inversion splitting to - inversion levels
             isym = -ietmp(nlist) * (-1) ** jtemp(nlist)
+            if (iop.eq.2) isym = -isym
             if (isym .eq. -1) roteng = roteng + delta
             ehold(nlist)= roteng / econv
 105   continue
@@ -339,6 +353,7 @@
      :    'SORTED LEVEL LIST',/,'   N   J   K  EPS INV   EINT(CM-1)')
         do  140 i = 1, nlist
           isym = -ietmp(i) * (-1) ** jtemp(i)
+          if (iop.eq.2) isym = -isym
           ecm = ehold(i) * econv
           write (6, 135) i, jtemp(i), ktemp(i), ietmp(i), isym, ecm
 135       format (5i4,f10.3)
@@ -348,11 +363,15 @@
       n = 0
       nlevel = 0
       do 170  njk = 1, nlist
-        ki = ktemp(njk)
         ji = jtemp(njk)
+        ki = ktemp(njk)
         nlevel = nlevel + 1
         jhold(nlevel) = ji
-        ishold(nlevel) = ietmp(njk) * ki
+*  ishold set equal to k times inversion symmetry
+        ishold(nlevel) = -ietmp(njk) * (-1.d0)**ji * ki
+*  originally, ishold set equal to k times epsilon
+*        ishold(nlevel) = ietmp(njk) * ki
+*
 *  here for cs calculations; include levels only if j is at least
 *  equal to coupled states projection index
         if (csflag) then
@@ -370,18 +389,23 @@
             j(n) = ji
             k(n) = ki
             ieps(n) = ietmp(njk)
-            is(n) = ietmp(njk) * ki
+*  is set equal to k times inversion symmetry
+            is(n) = -ietmp(njk) * (-1.d0)**ji * ki
+*  originally, ishold set equal to k times epsilon
+*            is(n) = ietmp(njk) * ki
             eint(n) = ehold(njk)
             l(n) = jtot
             cent(n) = jtot * (jtot + 1)
           end if
         else if (.not. csflag) then
+*
 *  here for cc calculations.  first calculate range of orbital angular
 *  momentum quantum numbers allowed for this state
 *
 *  determine parity of molecular state [Eq. (A21) of S. Green, J. Chem. Phys.
 *  73, 2740 (1980) ]
             isym = -ietmp(njk) * (-1) ** ji
+            if (iop.eq.2) isym = -isym
             ipar = isym * (-1) ** ki
             lmax = jtot + ji
             lmin = iabs (jtot - ji)
@@ -395,10 +419,13 @@
                   write (9, 150) n, nmax
                   stop
                 end if
-                is(n) = ishold(nlevel)
+                j(n) = ji
                 k(n) = ki
                 ieps(n) = ietmp(njk)
-                j(n) = ji
+*  is set equal to k times inversion symmetry
+                is(n) = -ietmp(njk) * (-1.d0)**ji * ki
+*  originally, ishold set equal to k times epsilon
+*                is(n) = ishold(nlevel)
                 eint(n) = ehold(nlevel)
                 l(n) = li
                 cent(n) = li * (li + 1)
@@ -544,7 +571,7 @@
 355       continue
           if (i .le. nv2max) lamnum(ilam) = inum
           if (bastst) then
-            write (6, 370) ilam, lb, mu, lamnum(lam)
+            write (6, 370) ilam, lb, mu, lamnum(ilam)
             write (9, 370) ilam, lb, mu, lamnum(ilam)
 370         format ('ILAM=',i3,' LAM=',i3,' MU=',i3,
      :         ' LAMNUM(ILAM) = ',i6)
@@ -578,7 +605,7 @@
 *  (50) of the same article.
 *  note, that in this article the bra indices (left side of matrix elements) u
 *  are primed, while in the conventions of the present subroutine the bra
-*  indices are primed and the ket indices (righ side of matrix elements),
+*  indices are primed and the ket indices (right side of matrix elements),
 *  unprimed.
 *
 *  author:  millard alexander
@@ -659,7 +686,7 @@
 * ----------------------------------------------------------------------
       subroutine prmstp (jp, lp, j, l, jtot, kp, k, lambda, mu,
      :                   vprm, csflag)
-*  subroutine to calculate primitive v-lambda matrix elements for close-couple
+*  subroutine to calculate primitive v-lambda matrix elements for close-coupled
 *  treatment of collisions of a symmetric top with an atom
 *  the primitive cc and cs matrix elements are given in eqs. (26) and (32),
 *  respectively, of s. green, j. chem. phys. 64, 3463 (1976)

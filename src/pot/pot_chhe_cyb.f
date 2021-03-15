@@ -2,19 +2,39 @@
 * New Cybulski, Chalasinski, Szczesniak PES
 * Reference: S. M. Cybulski, G. Chalasinski, M. M. Szczesniak, J. Chem.
 *    Phys. 105, 9525 (1996)
+*
       include "common/syusr"
-
+* ------------------------------------------------------------------------
       subroutine driver
       implicit double precision (a-h,o-z)
       common /covvl/ vvl(19)
+      econv=219474.6d0
 1      print *, ' r (bohr)'
       read (5, *, end=99) r
       call pot(vv0,r)
-      write (6, 100) vv0,vvl
+      if (r.le.0) goto 99
+      write (6, 100) r,vv0,vvl
 100   format(' vsum',/,5(1pe16.8),/,5e16.8,/,e16.8,/,
      :    '  vdif',/,5e16.8,/,4e16.8)
       goto 1
-99    end
+99    rr=3.0d0
+      dr=0.1d0
+      open (unit=12,file='chhe_cyb_vsum.dat')
+      write(12,109)
+      open (unit=13,file='chhe_cyb_vdif.dat')
+      write(13,109)
+109   format(' %R/bohr V00  ...')
+      do i=1,250
+        call pot(vv0,rr)
+        write (12,110) rr,vv0*econv,(econv*vvl(j),j=1,9)
+110     format(f7.2,10(1pe16.8))
+        write (13,112) rr,(econv*vvl(j),j=10,18)
+112     format(f7.2,9(1pe16.8))
+        rr = rr + dr
+      enddo
+      close(12)
+      close(13)
+      end
       include "common/bausr"
       include "common/ground"
       subroutine loapot(iunit,filnam)

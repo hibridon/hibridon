@@ -1,5 +1,8 @@
-* System:  CN(A 2Pi)+NN (v=3 geom for Rcn), from UCCSD(T)-PES
-* Reference: D. I. G. Bennett, in progress
+*  System:  CN(A 2Pi)+NN (v=3 geom for Rcn), from UCCSD(T)-PES
+*  Reference: 
+*  A. Khachatrian, P. J. Dagdigian, D. I. G. Bennett, F. Lique, 
+*  J. Klos and M. H. Alexander J. Phys. Chem. A  113, 3922 (2009)
+*  Part of the "George C. Schatz Festschrift"
 
       
       subroutine driver
@@ -8,7 +11,7 @@
       common /covvl/ vvl(11)
       common /coconv/ econv
       include "common/parpot"
-      potnam='BENNETT CN(A)-NN RCCSD(T)'
+      potnam='BENNETT CN(A)-NN UCCSD(T)'
 
       econv=219474.6d0
 1      print *, ' r (bohr)'
@@ -47,7 +50,7 @@
       character*(*) filnam
       include "common/parbas"
       include "common/parpot"
-      potnam='BENNETT CN(A)-AR RCCSD(T)'
+      potnam='BENNETT CN(A)-AR UCCSD(T)'
       lammin(1)=1
       lammax(1)=6
       lammin(2)=2

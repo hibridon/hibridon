@@ -1,0 +1,11 @@
+inp=o3p_ph2.inp
+job=oh2tst
+jtot2=0
+ener=400
+show
+run
+trnprt
+printc
+intcrs
+printc
+quit

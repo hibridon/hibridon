@@ -1,0 +1,426 @@
+#!/bin/csh -f
+# HIBRIDON makefirst $Revision: 2009.2 $ --- initial install script (this version for G4 and intel macs and i86 Linux)
+echo " "
+set basedir=`hibriddir`
+set hib_version = `cat $basedir/VERSION`
+echo "Hibridon $hib_version install, `date`, username: $USER, hostname: `hostname`"|tee $basedir/bin/makefirst.log
+echo " "
+  set accept="y"
+  echo -n "Have you read the license agreement ($basedir/LICENSE) [y/n]?  "
+  set response=$<
+  set result="no"
+  if $response == "y" then
+    set result="yes"
+  else
+    echo "Please read the license agreement before continuing"
+    echo "Then reexecute makefirst and respond y"
+    exit
+  endif
+  echo "License accepted" >> $basedir/bin/makefirst.log
+  echo " "
+  echo -n "Does your PATH include $basedir/bin [y/n]?  "
+  set response=$<
+  if $response == "y" then
+  else
+    echo "Modify your PATH to include $basedir/bin"
+    exit
+  endif
+cd $basedir/bin
+echo " "
+echo "Hibridon 4.4 base directory is $basedir" |tee -a $basedir/bin/makefirst.log
+echo "Please wait while system parameters are gathered ..."
+set sysname=`uname -s`
+set known='no'
+if $sysname == 'Darwin' then
+  set known='yes'
+  system_profiler -detailLevel mini>sysprofile
+  set opsys = `sw_vers -productVersion`
+  set opsys = `echo $opsys |awk '{printf substr($0,1,4)}'`
+endif
+if $sysname == 'Linux' then
+  set known='yes'
+endif
+if $known == 'no' then
+  echo "This version of hibridon does not run under $sysname"
+  echo "Abort install ..."
+  exit
+else
+cd $basedir/bin
+  if (-e makefirst.log) then
+    mv makefirst.log makefirst.BAK
+  endif
+endif
+echo " "
+echo "system name is $sysname" |tee -a $basedir/bin/makefirst.log
+echo "machine type is $MACHTYPE" |tee -a $basedir/bin/makefirst.log
+echo "host type is $HOSTTYPE" |tee -a $basedir/bin/makefirst.log
+echo " "
+if $HOSTTYPE == 'intel-pc' then
+   set fchar=`echo $HOSTTYPE | awk '{printf index($0,"-")}'` 
+   set cputype=`echo $HOSTTYPE | awk '{printf substr($0,0,'$fchar'-1)}'`
+else if $HOSTTYPE == 'intel-mac' then
+   set fchar=`echo $HOSTTYPE | awk '{printf index($0,"-")}'` 
+   set cputype=`echo $HOSTTYPE | awk '{printf substr($0,0,'$fchar'-1)}'`
+else if $HOSTTYPE == 'powermac' then
+   set cputype = $HOSTTYPE
+else if ($HOSTTYPE == 'x86_64-linux' || $HOSTTYPE == 'i386-linux' || $HOSTTYPE == 'i686-linux') then
+   set cputype = $HOSTTYPE
+else if $HOSTTYPE == 'ia64-linux' then
+   set cputype = "x86_64-linux" 
+else
+   echo "HOSTTPYE $HOSTTYPE not recognized; ABORT"
+   exit
+endif
+# set default as no 64 bit integers
+set fi64 = ""
+if $cputype == 'intel' then
+   set fcompiler="ifort"
+   set FS = "-save"
+   set opt="-O3"
+   echo -n "Your fortran compiler command is $fcompiler $opt $FS, is this correct? [y/n]  "
+   set response=$<
+   if $response == 'n' then
+       echo -n "Enter the name of your fortran compiler:  g95 or absoft:  "
+       set fcompiler=$<
+       if $fcompiler == 'g95' then
+          set FS = -static
+          set opt='-O3'
+       else if $fcompiler == 'absoft' then
+          echo "absoft compiler interface not yet implemented, sorry"
+          exit
+          echo -n "   Enter optimization flag:  "
+          set opt=$<
+          echo -n "   Enter static flag:  "
+          set FS=$<
+       else
+          echo "   fortran compiler $fcompiler not found; ABORT" |tee -a $basedir/bin/makefirst.log
+          exit
+       endif
+    endif
+else if $cputype == 'powermac' then
+   set fcompiler="xlf"
+   set fi64 = ""
+   set FS = "-qsave"
+   set opt="-O3"
+   echo -n "Your fortran compiler is $fcompiler $opt $FS, is this correct? [y/n]  "
+   set response=$<
+   if $response == 'n' then
+       echo -n "Enter the name of your fortran compiler:  g95 or absoft:  "
+       set fcompiler=$<
+       if $fcompiler == "g95" then
+          echo -n "   Enter optimization flag:  "
+          set opt=$<
+          echo -n "   Enter static flag:  "
+          set FS=$<
+       else if $fcompiler == "absoft" then
+          echo -n "   Enter optimization flag:  "
+          set opt=$<
+          echo -n "   Enter static flag:  "
+          set FS=$<
+       else
+          echo "   fortran compiler $fcompiler not found; ABORT" |tee -a $basedir/bin/makefirst.log
+          exit
+       endif
+    endif
+else if ($cputype == 'x86_64-linux' || $cputype == 'i386-linux' || $cputype == 'i686-linux') then
+   set fcompiler="ifort"
+   set fi64 = ""
+   set FS = "-save"
+   set opt="-O3"
+   echo -n "Your fortran compiler is $fcompiler $opt $FS, is this correct? [y/n]  "
+   set response=$<
+   if $response == 'n' then
+       echo -n "Enter the name of your fortran compiler: (g95, pgf95, pgf90 ...  "
+       set fcompiler=$<
+       if $fcompiler == 'g95' then
+          set FS = -static
+          set opt='-O3'
+       elseif $fcompiler == 'pgf95' then
+          set FS = -
+          set opt = '-fast'
+       elseif $fcompiler == 'pgf90' then
+          set FS = -
+          set opt = '-fast'
+#       else
+#          echo "   fortran compiler $fcompiler not found; ABORT" |tee -a $basedir/bin/makefirst.log
+#          exit
+       endif
+    endif
+endif
+# search for compiler on computer
+set FC = ""
+set options = ""
+set FS = ""
+set opt = ""
+if $fcompiler == 'ifort' then
+    set FFC=`which ifort`
+    if (-e $FFC) then 
+        echo "Location of fortran compiler is $FFC" |tee -a $basedir/bin/makefirst.log
+        set FC = $FFC
+        set options = ""
+        set FS = -save
+        set opt = "-O3"
+        set flag64 = "true"
+        set f64 = `echo $FFC |grep fce`
+        if $f64 == "" then
+           set f64 = `echo $FFC |grep intel64`
+        endif
+        if $f64 == "" then
+           set flag64 = "false"
+           set fi64 = ""
+           echo "You are using 32 bit architecture"
+        else
+           echo "You are using 64 bit architecture"
+           if $sysname == "Darwin" then
+              if ($opsys == '10.7' || $opsys == '10.6' || $opsys == '10.5') then
+                 set fi64 = "-i8"
+                 echo "This version of hibridon uses 64 bit integers"
+              else
+                 echo "WARNING:  64 bit architecture may not work with OSX $opsys"
+              endif
+           endif
+           set fcomposer = `echo $FFC |grep composer`
+           if $fcomposer == "" then
+               echo "You are not using the Intel's Fortran Composer"
+           else
+               echo "You are using Intel's new Fortran Composer"
+           endif
+        endif
+    else
+        echo "fortran compiler $fcompiler not found; ABORT" |tee -a $basedir/bin/makefirst.log
+        exit
+    endif 
+else if $fcompiler == 'xlf' then
+    set FFC=`which xlf`
+    set resp=`echo $FFC |grep -c "not found"`
+    if $resp == 0 then
+       if (-e $FFC) then 
+           echo "Location of fortran compiler is $FFC" |tee -a $basedir/bin/makefirst.log
+           set FC = $FFC
+           set options = "-qextname -qdpc"
+           set FS = "-qsave"
+           set opt="-O3" 
+       else
+           echo "fortran compiler $fcompiler not found" |tee -a $basedir/bin/makefirst.log
+       endif 
+     else
+        echo "fortran compiler $fcompiler not found" |tee -a $basedir/bin/makefirst.log
+     endif 
+else if $fcompiler == 'g95' then
+    set FFC=`which g95`
+    set resp=`echo $FFC |grep -c "not found"`
+    if $resp == 0 then
+       if (-e $FFC) then 
+          echo "Location of fortran compiler is $FFC" |tee -a $basedir/bin/makefirst.log
+       else
+          echo "   fortran compiler not found" |tee -a $basedir/bin/makefirst.log
+       endif
+     else
+       echo "   fortran compiler not found" |tee -a $basedir/bin/makefirst.log
+    endif 
+else if $fcompiler == 'absoft' then
+    echo "absoft compiler interface not yet implemented, sorry"
+else if $fcompiler == 'pgf95' then
+    set FFC=`which pgf95`
+    set resp=`echo $FFC |grep -c "not found"`
+    if $resp == 0 then
+       if (-e $FFC) then 
+          echo "Location of fortran compiler is $FFC" |tee -a $basedir/bin/makefirst.log
+          set FC = $FFC
+          set opt = "-fast"
+          set options = "-Mcache_align"
+          set FS =  "-Msave"
+          set fcompiler = "pgi"
+       else
+          echo "   fortran compiler not found" |tee -a $basedir/bin/makefirst.log
+       endif
+     else
+       echo "   fortran compiler not found" |tee -a $basedir/bin/makefirst.log
+    endif 
+else if $fcompiler == 'pgf90' then
+    set FFC=`which pgf90`
+    set resp=`echo $FFC |grep -c "not found"`
+    if $resp == 0 then
+       if (-e $FFC) then
+          echo "Location of fortran compiler is $FFC" |tee -a $basedir/bin/makefirst.log
+          set FC = $FFC
+          set opt = "-fast"
+          set options = "-Mcache_align -Mextend"
+          set FS =  "-Msave"
+          set fcompiler = "pgi"
+       else
+          echo "   fortran compiler not found" |tee -a $basedir/bin/makefirst.log
+       endif
+     else
+       echo "   fortran compiler not found" |tee -a $basedir/bin/makefirst.log
+    endif
+
+else
+    echo "   fortran compiler $fcompiler not found; ABORT" |tee -a $basedir/bin/makefirst.log
+    exit
+endif
+echo ""
+if ($HOSTTYPE == 'intel-pc' || $HOSTTYPE == 'intel-mac') then
+   echo -n "Are you using Intel's mklib for lapack and blas? [y/n]  "
+   set response1=$<
+
+#edit 11Jul2013
+   if ! $?MKLPATH then
+      set MKLPATH=$MKLROOT/lib
+   endif 
+
+   if $response1 == 'y' then
+      set BLASLIB=""
+      if $flag64 == "false" then
+         set fi64=""
+         set LAPACKLIB="-L$MKLPATH -lmkl_intel -lmkl_intel_thread -lmkl_core -lmkl_intel_thread -lmkl_core -lmkl_intel_thread -lmkl_core -lguide -lpthread"
+      else
+         set f11=`echo $FC | grep "11\."`
+         if $fi64 == "" then
+            set LAPACKLIB="-L$MKLPATH -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lmkl_intel_thread -lmkl_core -lmkl_intel_thread -lmkl_core -lguide -lpthread"
+         else
+            if $fcomposer == "" then
+               set LAPACKLIB="-L$MKLPATH -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -lmkl_intel_thread -lmkl_core -lmkl_intel_thread -lmkl_core -lguide -lpthread"
+            else
+               set LAPACKLIB="-L$MKLROOT -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -lpthread"
+            endif 
+         endif
+      else
+         set LABPACKLIB"=
+      else
+         goto libprint
+      endif
+   else 
+      echo -n "Are you using Apple's vecLib for lapack and blas? [y/n]  "
+      set response=$<
+      if $response == 'y' then
+         set BLASLIB=' '
+         set LAPACKLIB="/System/Library/Frameworks/Accelerate.framework/Accelerate"
+         echo "Be sure to set the environmental variable VECLIB_MAXIMUM_THREADS"
+      else
+         echo -n "Enter your custom blas library loader instructions"
+         set BLASLIB=$<
+         echo -n "Enter your custom lapack library loader instructions"
+         set BLASLIB=$<
+      endif
+   endif
+else if ($HOSTTYPE == 'x86_64-linux' || $HOSTTYPE == 'ia64-linux' || $HOSTTYPE == 'i386-linux'|| $HOSTTYPE == 'i686-linux')  then
+   echo -n "Are you using Intel's mklib for lapack and blas? [y/n]  "
+   set response1=$<
+   if $response1 == 'y' then
+      echo -n "Are you using Intel IA64 Architecture? [y/n]  "
+      set response2=$<
+      if $response2 == 'y' then
+        set BLASLIB=""
+        set LAPACKLIB="-L$LIBRARY_PATH -lmkl_ipf -lmkl_intel_thread -lmkl_core -lguide -openmp"
+        goto libprint
+      else
+        set BLASLIB=""
+        set LAPACKLIB="-L$LIBRARY_PATH -lmkl_em64t -lmkl_intel_thread -lmkl_core -lguide -openmp"
+        goto libprint
+      endif
+   else
+      echo -n "Are you using Intel x86 (686 386) Architecture with PGI Lapack? [y/n]  "
+      set response3=$<
+      if $response3 == 'y' then
+         set BLASLIB=""
+         set LAPACKLIB="-llapack -lblas"
+      else
+         echo -n "Enter the path for your library  "
+         set responselib=$<
+         set BLASLIB=""
+         set LIBRARY_PATH=$responselib
+         echo -n "Enter the name  s of your libraries (-lxxx, -lyyy, etc, including the hypen)  "
+         set responselib=$<
+         set LAPACKLIB="-L$LIBRARY_PATH $responselib"
+      endif
+   else
+       echo -n "Enter the path for your library  "
+       set responselib=$<
+       set BLASLIB=""
+       set LIBRARY_PATH=$responselib
+       echo -n "Enter the names of your libraries (-lxxx, -lyyy, etc, including the hypen)  "
+       set responselib=$<
+       set LAPACKLIB="-L$LIBRARY_PATH $responselib"
+   endif
+else if $HOSTTYPE == 'powermac' then
+   echo -n "Are you using Apple's veclib for lapack and blas? [y/n]  "
+   set response1=$<
+   if $response1 == 'y' then
+      set BLASLIB=""
+      set LAPACKLIB="/System/Library/Frameworks/vecLib.framework/vecLib"
+      goto libprint
+   else 
+      echo -n "Enter your custom blas library loader instructions"
+      set BLASLIB=$<
+      echo -n "Enter your custom lapack library loader instructions"
+      set LAPACKLIB=$<
+   endif
+endif
+libprint:
+echo ""
+if $BLASLIB != '' then
+    echo "Your BLAS library call is" |tee -a $basedir/bin/makefirst.log
+    echo "   $BLASLIB" |tee -a $basedir/bin/makefirst.log
+    echo "Your LAPACK library call is" |tee -a $basedir/bin/makefirst.log
+    echo "   $LAPACKLIB" |tee -a $basedir/bin/makefirst.log
+else
+    echo "Your BLAS and LAPACK library call is" |tee -a $basedir/bin/makefirst.log
+    echo "   $LAPACKLIB" |tee -a $basedir/bin/makefirst.log
+endif
+echo ""
+echo "Running makeconfig ..." |tee -a $basedir/bin/makefirst.log
+cd $basedir
+# save old CONFIG file if necessary
+if (-r CONFIG) then 
+    mv CONFIG CONFIG.BAK
+    echo "   Old CONFIG saved as CONFIG.BAK" |tee -a $basedir/bin/makefirst.log
+endif
+if ($HOSTTYPE == 'intel-pc' || $HOSTTYPE == 'intel-mac') then
+   set machine="unix-darwin unix-$fcompiler"
+   if $fi64 != "" then
+      set machine = "$machine unix-darwin64"
+   endif
+else if ($HOSTTYPE == 'x86_64-linux'|| $HOSTTYPE == 'ia64-linux' || $HOSTTYPE == 'i386-linux' || $HOSTTYPE == 'i686-linux' ) then
+   set machine="unix-x86 unix-$fcompiler"
+else if $HOSTTYPE == 'powermac' then
+   set machine="unix-darwin unix-xlf"
+endif
+set no_opt='hinput.f himain.f hiversion.f'
+echo "Machine type is $machine" |tee -a $basedir/bin/makefirst.log
+set date=`date` 
+set version=`cat VERSION`
+set static="$FS"
+set i64=" "
+set libraries="$BLASLIB $LAPACKLIB"
+if $HOSTTYPE == 'powermac'  then
+   set linkopt="-Wl,-stack_size -Wl,0x40000000 -Wl,-stack_addr -Wl,0xf0000000"
+else
+   set linkopt=""
+endif
+set noopt=" "
+echo "# HIBRIDON CONFIG generated at $date for release $version" >CONFIG
+echo "#                 for architecture $machine" >>CONFIG
+echo "# Machine type .." >>CONFIG
+echo MACH=\"$machine\" >>CONFIG
+echo "# Fortran Compiler .." >>CONFIG
+echo FC=\"$FFC $options -I${basedir}/src\" >>CONFIG
+echo FCPRINT=\"$FFC $options\" >>CONFIG
+echo "# compiler optimisation">>CONFIG
+echo FOPT=\"$opt\" >>CONFIG
+echo "# compiler explicit no optimisation">>CONFIG
+echo FNOPT=\"$noopt\" >>CONFIG
+echo "# compiler debug flag">>CONFIG
+echo FDEBUG=\"-g\" >>CONFIG
+echo "# static variables" >>CONFIG
+echo FSTATIC=\"$static\" >>CONFIG
+echo "# 64-bit integers">>CONFIG
+echo FI64=\"$fi64\" >>CONFIG
+echo "# additional libraries and link options">>CONFIG
+echo LIBS=\"$libraries\" >>CONFIG
+echo LINKOPT=\"$linkopt\" >>CONFIG
+echo "# files in src to be compiled without optimization" >>CONFIG
+echo NO_OPT=\"$no_opt\" >>CONFIG
+echo "CONFIG file created (`hibriddir`/CONFIG)"
+echo  "Please inspect and edit if necessary before proceeding"
+exit

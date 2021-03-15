@@ -1,5 +1,9 @@
-* this just calculates Vsigma (CN(B)+Ar) PES
-*Udo's CN(B)-Ar PES
+*  this just calculates Vsigma (CN(B)+Ar) PES
+*  CN(B)-Ar PES  - Udo Schnupf
+*
+*  reference: J Han, M C. Heaven, U Schnupf, and M H. Alexander
+*  J. Chem. Phys. 128, 104308 (2008) 
+*
       include "common/syusr"
       include "common/bausr"
       include "common/ground"

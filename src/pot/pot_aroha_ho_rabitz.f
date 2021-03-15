@@ -1,5 +1,8 @@
 *Ar-OH(A^2Sigma+) PES of Ho and Rabitz
-
+*References: 
+* Tak‐San Ho, Herschel Rabitz, Seung E. Choi, 
+* and Marsha I. Lester J. Chem. Phys. 102, 2282 (1995)
+* also  same authors   J. Chem. Phys. 104, 1187 (1996)
       subroutine driver
       implicit double precision (a-h,o-z)
       common /cosysr/ xjunk(2),rshift,xfact

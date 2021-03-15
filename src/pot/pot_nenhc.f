@@ -1,5 +1,6 @@
 * System:  NH(c 1Pi)+Ne
-
+* Reference:  G. Kerenskaya, U. Schnupf, and M. C. Heaven,
+* J. Chem. Phys. 119, 8424 (2003)
 
       include "common/syusr"
       include "common/bausr"

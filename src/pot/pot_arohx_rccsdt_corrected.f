@@ -6,6 +6,11 @@
 * ORIGIN LYING 0.86192 Angstrom instead 0.9122 ANgstrom
 * FROM HYDROGEN ATOM
 
+*Reference:  Grant Paterson , Sarantos Marinakis , 
+* Matthew L. Costen , Kenneth G. McKendrick , 
+* Jacek Klos , and Robert Tobola,J. Chem. Phys. 129, 074304 (2008)
+*[ERRATUM Grant Paterson et al. J. Chem. Phys. 131, 159901 (2009)]
+
 
 
       subroutine driver
@@ -91,7 +96,7 @@
 * for distances beyond rmax difference potential is damped
       data rmax /20d0/
 * coefficicients for d0 rotation matrices
-* stored (by column) for each of 7 angles and for l=0:6
+* stored (by column) for each of 11 angles and for l=0:10
 * angles are  0 20 40 60 80 90 100 120 140 160 180
       data d0/
      :  1.d0,!l=0
@@ -217,7 +222,7 @@
      :                    1d0/!l=10
      
 * coefficicients for d2 rotation matrices
-* stored (by column) for each of 5 angles and for l=2:6
+* stored (by column) for each of 9 angles and for l=2:10
 * angles are 20 40 60 80 90 100 120 140 160  
       data d2/
      :   0.0716339671058987d0,!l=2

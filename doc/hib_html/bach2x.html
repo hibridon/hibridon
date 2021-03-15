@@ -37,7 +37,7 @@ if IOP = &minus;1: only <i>ortho</i> states included in channel expansion
 </ul>
 
 <hr>
-The CH<sub>2</sub>(X <sup>3</sup>B<sub>1</sub>) molecule has a low barrier to linearity, and its rotational energies are not at all well described by the standard rotational energy formulas.  Bunker and Jensen have developed a Morse oscillator-rotating bender internal dynamics Hamiltonian (MORBID) to compute the rovibrational energies in this electronic state [see P. Jensen and P. R. Bunker, J. Chem. Phys. <b>89</b>, 1327 (1988); P. R. Bunker, P. Jensen, W. P. Kraemer, and R. Beardworth, J. Chem. Phys. <b>85</b>, 3724 (1986)].  Rather than compute the rotational energies in a given vibrational level, here we look up the energies in a table provided by Jensen [P. Jensen, private communication (2010)].<p>
+The CH<sub>2</sub>(X <sup>3</sup>B<sub>1</sub>) molecule has a low barrier to linearity, and its rotational energies are not at all well described by the standard rotational energy formulas.  Bunker and Jensen have developed a Morse oscillator-rotating bender internal dynamics Hamiltonian (MORBID) to compute the rovibrational energies in this electronic state [see P. Jensen and P. R. Bunker, J. Chem. Phys. <b>89</b>, 1327 (1988); P. R. Bunker, P. Jensen, W. P. Kraemer, and R. Beardworth, J. Chem. Phys. <b>85</b>, 3724 (1986)].  Rather than compute the rotational energies in a given vibrational level, here we look up the energies in a table provided by Jensen [P. Jensen, private communication (2010)].  The MORBID energies go up to <i>j</i> = 14.  The energies for higher <i>j</i> (<= 25), for IS = 0,-1,1,...,5 [where IS = abs(<i>k<sub>p</sub></i>) times the symmetry index <i>s</i>.  see <a href=baastp.html>baastp</a> basis] were estimated by extrapolation, fitting the MORBID energies to the rigid rotor expression <i>x</i>0 + <i>x</i>1*<i>j</i>*(<i>j</i>+1) for each IS stack.<p>
 
 The CH<sub>2</sub>(<sup>3</sup>B<sub>1</sub>) state is well described by Hund's case (b) coupling, in which the electron spin [<i>S</i>=1] is weakly coupled to the molecular frame.  As a result, the rotational rotational angular momentum <i>n</i> is coupled to the electron to yield states of total angular momentum <i>j</i> = <i>n</i> &minus; 1, <i>n</i>, <i>n</i> + 1 [if <i>n</i> >= 1].  This subroutine sets up a calculation of spin-free cross sections, for transitions between states of differing <i>n</i>.<p>
 
@@ -46,7 +46,7 @@ Because of the large effective <i>A</i> rotational constant in the bender levels
 [S. Green, J. Chem. Phys. <b>64</b>, 3463 (1976)]</font>
 <ul>
 | <i>n k m s</i> > = [2(1+<i>&delta;</i><sub><i>k</i>0</sub>)]<sup>&minus;1/2</sup> [ | <i>n k m</i> > + <i>s</i> | <i>n &minus;k m</i> >]<p>
-where <i>s</i> is the symmetry index (+1 or &minus;1). 
+</ul>where <i>s</i> is the symmetry index (+1 or &minus;1). 
 By setting <tt><a href=bastst.html>BASTST</a>=.TRUE.</tt>, you can output the values
                of <i>n,  s</i>, the values of the asymmetric top prolate and oblate projection quantum numbers [<i>k<sub>p</sub></i>
                and <i>k<sub>o</sub></i>], and the internal energies.

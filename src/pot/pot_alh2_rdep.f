@@ -1,8 +1,10 @@
-*system:  Al(2P)+H2, Dubernet-Hutson expansion of Williams-Alexander rdependent
-* PES's references: J. Williams, M. H. Alexander, to be published
-*  M.-L. Dubernet and J. M. Hutson, J. Chem. Phys. 101, 1939 (1994).
-*  M. H. Alexander, J. Chem. Phys. 99, 6014 (1993).
-*  M. H. Alexander and M. Yang, J. Chem. Phys. 103, 7956 (1995).
+*system:  Al(2P)+H2, Dubernet-Hutson expansion of Williams-Alexander r-dependent
+*  PES's references: J. Williams, M. H. Alexander, J. Chem. Phys. 112, 5722 (2000)
+*   M.-L. Dubernet and J. M. Hutson, J. Chem. Phys. 101, 1939 (1994).
+*   M. H. Alexander, J. Chem. Phys. 99, 6014 (1993).
+*   M. H. Alexander and M. Yang, J. Chem. Phys. 103, 7956 (1995).
+*   X. Tan, P. J. Dagdigian, J. Williams, and Millard H. Alexander,
+*       J. Chem. Phys. 114, 8938 (2001)
 
 
       include "common/syusr"
@@ -25,7 +27,7 @@
       return
       end
 * --------------------------------------------------------------------------
-*     subroutine driver
+      subroutine driver
       implicit double precision (a-h,o-z)
       character *48 potnam
       character *2 frame
@@ -66,7 +68,8 @@
        r=r+0.2
       enddo
 
-99    end
+99    return
+      end
       subroutine pot (vv0, r)
 * ----------------------------------------------------------------------
 *  subroutine to calculate the r-dependent coefficients in the
@@ -356,5 +359,5 @@
       econv=1./219474.6
       call dscal(9,econv,vvl,1)
       vv0=vv0*econv
-
+      return
       end

@@ -8,6 +8,8 @@
 *  7/3  then
 *  divided by sqrt(2) since V1(R,q)=sq(2) * Sum(V1_l(R) * d_10(q))
 *
+* reference: 
+* Moonbong Yang and M.  H. Alexander J. Chem. Phys. 107, 7148 (1997)
 
       include "common/syusr"
       include "common/bausr"

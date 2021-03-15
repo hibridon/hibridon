@@ -1,4 +1,4 @@
-cstart unix-ibm unix-aix
+Channelscstart unix-ibm unix-aix
 c;@process noopt
 cend
 cstart unix-hp
@@ -8,12 +8,9 @@ cend
 *  subroutine to redefine system independent input parameters for
 *  hibridon code
 *  author:  h.-j. werner
-*  current revision date:  15-mar-2011 by pjd
-*  current revision date: 23-jan-2008 by mha
-*  current revision date: 13-nov-1996 by mby to include bound states
+*  revision: 13-nov-1996 by mby to include bound states
 *  revised further:  24-feb-1998 by mha
-*  current revision date:  8-jul-2011 by pjd
-*  maxbas extended to 17:  4-jun-2010
+*  maxbas extended to 28:  30-jul-2018
 *  jobname limited to 8 characters:   04-oct-2001, format corrected 2-dec-2007
 *  added command sysconf 24-dec-2007
 *  added command to compute cross sections for mixed singlet-triplet states
@@ -22,6 +19,30 @@ cend
 *  added bastp1 basis subroutine (for symmetric top without inversion doubling:
 *     p. dagdigian
 *  added calculation of transport cross sections - p. dagdigian
+*  added 2sigma-2pi (no perts.) basis routine - p. dagdigian
+*  last line "quit/exit" now optional in a .com file - q. ma
+*  allow calculation of differential cross sections for ibasty=9 - p.dagdigian
+*  eliminate special call for ibasty=4 for printc command - p. dagdigian
+*
+*  revision: 15-mar-2012 by p. dagdigian
+*  revision: 20-apr-2012 by q. ma (new eadiab command)
+*  revision: 8-oct-2012 by q. ma (allow calculation for user-defined ibasty 100,
+*     whose channels have j12's)
+*  revision: 27-apr-2013 by p. dagdigian (add prsbr [pressure broadening
+*     cross sections] command)
+*  revision: 10-jul-2013 by q. ma (new 2pi--1sigma basis)
+*  revision: 18-jul-2013 by q. ma (new symtop--1sigma basis)
+*  revision: 18-sep-2014 by p. dagdigian (new 3P atom + 2S atom basis)
+*  revision: 21-jul-2015 by p. dagdigian (new spherical top-atom basis)
+*  revision: 10-may-2107 by p. dagdigian (hypxsc for mol-mol collisions implemented)
+*  revision:  1-jun-2017 by p. dagdigian (new 1sig + 1sig basis)
+*  revision:  8-jun-2017 by p. dagdigian (new 2sig + 1sig basis)
+*  revision: 19-sep-2017 by p. dagdigian (new C2V asym top basis)
+*  revision: 30-jul-2018 by p. dagdigian (new 3sig + 1sig basis)
+*  revision: 16-jan-2019 by p. dagdigian (new chiral astop + atom basis)
+*  revision: 20-jun-2019 by p. dagdigian (new C2V asym - diat molecule basis)
+*
+*  current revision: 16-jan-2019 by q. dagdigian
 * ---------------------------------------------------------------------
       implicit double precision (a-h,o-z)
 *  iicode is the number of integer pcod's
@@ -29,14 +50,14 @@ cend
 *  ncode is the number of bcod's
 *  bcod stores hibridon's commands
 *  fcod stores logical flags
-      parameter (ncode = 38, lcode = 28, iicode = 10, ircode = 9,
+      parameter (ncode = 39, lcode = 28, iicode = 10, ircode = 9,
      :           icode = iicode+ircode)
       character*80 line
       character*40 fnam1,fnam2,jobnam,input,output,savfil,
      :             code
       character*8 bcod(ncode)
       character*8 fcod(lcode),pcod(icode),scod,bascod
-      character*9 basknd(18)
+      character*9 basknd(30)
 * dimension of codex, ihold, lhold, should be equal to largest number
 * of identical strings of 1:nnn characters in names of all variables
 * (probably 'p' is the most recurring string:  12 times in
@@ -45,7 +66,7 @@ cend
       integer ixpar
       integer ipar
       integer ibasty
-      logical existf, lspar, first, openfl
+      logical existf, lspar, first, openfl, is_twomol
       logical lpar, logp, opti, optifl, batch, jtrunc
       dimension a(15),ia(10), ihold(15), lhold(15),lindx(28)
       include "common/parbas"
@@ -80,7 +101,10 @@ cend
      :              'GEN-PI', 'SYM-TOP-I', '1/3-P-AT', '1SIG+1SIG',
      :              'SYMT-LIN',' 2/2-P-AT', '1-DELTA', 'HOMO+2P',
      :              'HOMO+3P', '2-DELTA', '2P-DIAT', 'ASYM-TOP',
-     :              'CH2X', 'SYM-TOP-N'/
+     :              'CH2X', 'SYM-TOP-N', '2SG|2PI_N', '2PI|1SG',
+     :              'SYMT|1SG','1D-3P-AT','3P-2S-AT', 'SPH-TOP',
+     :              '1SG-1SG', '2SG-1SG', 'C2v-ASTP','3SG-1SG',
+     :              'CASYMTOP', 'ASYM-DIAT' /
 *  lindx is pointer from fcod order to order in common colpar
       data lindx/1,3,4,5,6,7,8,9,10,11,13,25,26,2,12,14,17,19,24,
      :           15,16,18,20,27,22,21,23,28/
@@ -180,6 +204,7 @@ c    :                xsecwr, nucros, photof, wavefl, boundc
 * hypxsc: 2950
 * stmix:  3000
 * trnprt:  3100
+* prsbr:   3200
 * nb after changing the following list, check that all the variables "incode"
 * that follow after address 900 are changed accordingly
       bcod(1)='CHECK'
@@ -219,7 +244,8 @@ c    :                xsecwr, nucros, photof, wavefl, boundc
       bcod(35)='SYSCONF'
       bcod(36)='HYPXSC'
       bcod(37)='STMIX'
-      Bcod(38)='TRNPRT'
+      bcod(38)='TRNPRT'
+      bcod(39)='PRSBR'
 *
       iipar=iicode
       irpar=ircode
@@ -258,7 +284,7 @@ cstart cray
 c;2      format(' Hibridon> ')
 cend
       call pcoder(lpar(28),pcod,icode)
-      read(5, 10) line
+      read(5, 10, end=599) line
 10    format((a))
 11    if(line .eq. ' ') goto 1
       if (line(1:1) .eq. '?') then
@@ -367,7 +393,8 @@ c         call helppr(line)
      :      1900,2800,600,
      :      800,500,1300,700,2300,
      :      1200,1600,430,2650,2800,
-     :      460,2850,2900,2950,3000,3100),i
+     :      460,2850,2900,2950,3000,
+     :      3100,3200),i
 * basis type and kind of calculation
 50    if(l.eq.0) goto 1
       l1 = l
@@ -378,7 +405,7 @@ c         call helppr(line)
       ibasty=int(val)
       call baschk(ibasty)
 * set twomolecule true
-      if (ibasty .eq. 8 .or. ibasty .eq. 9) then
+      if (is_twomol(ibasty)) then
         lpar(20)=.true.
       else
         lpar(20)=.false.
@@ -643,7 +670,7 @@ cend
      :                    j=1,numj)
         endif
 736     format(1x,(a),10i4,/,9x,10i4)
-737     format(1x,(a),i2,(a),20i3)
+737     format(1x,(a),i2,(a),20(i3,1x))
 738     format (1x,(a),1x,20(2i1,'  ') )
 739     format (1x,(a),i2,(a),20(2i1,'  ') )
         write(9,730) 'Flags:',(fcod(j),lpar(lindx(j)),j = 1,lcode)
@@ -668,6 +695,7 @@ cend
         goto 1
       end if
 * exit
+599   write (6, *)
 600   call exit
 * show all parameters and flags
 * show
@@ -681,7 +709,8 @@ cend
         write(6,710)
      :   'Parameters (bound-state):',(pcod(j),ipar(j),j = 1,iicode)
       endif
-      write(6,720)   (pcod(iicode+j),rpar(j),j = 1,ircode)
+      write(6,720)   (pcod(iicode+j),rpar(j),j = 1,ircode-1)
+      write(6,1720)  pcod(iicode+ircode), rpar(ircode)
       if(nnout.ne.0) then
         if (.not.lpar(20) ) then
           write (6,737) 'NOUT: ',nnout,
@@ -694,7 +723,7 @@ cend
       end if
       if(niout.ne.0) write (6,701) 'INDOUT:',(indout(j), j=1,niout)
 701     format(1x,(a),10i5,/,8x,10i5,/,5x,10i5)
-      if (ibasty .ne. 99) then
+      if (ibasty .lt. 99) then
         length = index(basknd(ibasty),' ') - 1
         if (length .eq. -1) length=9
 cstart unix cray mac
@@ -735,8 +764,10 @@ cend
       if(ipar(5).gt.0) write(6,740) (energ(j),j = 1,ipar(5))
 710   format(5x,'*** ',(a)/(4(1x,a7,'=',i4,7x)))
 720   format(4(1x,a7,'=',1pg11.4))
+1720  format(1x,a7,'=',f10.5)
 730   format(5x,'*** ',(a)/(6(1x,a6,'=',l2,3x)))
-731   format(1x,'** Maximum Channels: ', i4, '; Anisotropic Terms: ',i3)
+731   format(1x,'** Maximum Channels: ', i4, '; ',
+     :  'Maximum Anisotropic Terms: ',i5)
 735   format(3(1x,a7,'=',l2,9x))
 740   format(1x,'** Energies:',(t15,5f15.6))
       lenout = index(output,' ')-1
@@ -834,9 +865,11 @@ cend
 * you will be prompted for r and theta. to exit, specify r=0
 1200  if (ibasty .eq. 1 .or. ibasty .eq. 4) then
         call testptn(lpar(9))
+      else if (ibasty .eq. 20) then
+        call testpt20(lpar(9))
       else
         call testpt(lpar(9))
-      endif
+      end if
       goto 1
 * save input parameters
 *     save=filename
@@ -1030,7 +1063,10 @@ cend
       goto 1
 *.....differential cross sections:
 *  diffc,jobfile,j1,in1,j2,in2,ang1,ang2,dang,ienerg,jtotend
-2000  if (.not. lpar(20)) then
+*
+*  differential cross sections computed for atom-molecule
+*  collisions or symmetric top-linear molecule collisions
+2000  if (.not. lpar(20) .or. is_twomol(ibasty)) then
         call parse(line,l,fnam1,lc)
         if(fnam1 .eq. ' ') fnam1 = jobnam
         call lower(fnam1)
@@ -1045,7 +1081,8 @@ cend
       else
         write (6, 2011)
 2011    format(' Sorry, differential cross sections not yet',
-     :         /,'  implemented for molecule-molecule collisions')
+     :         /,'  implemented for most molecule-molecule ',
+     :         'collisions')
       end if
       goto 1
 *.....optimize
@@ -1291,9 +1328,11 @@ cend
       if(ibasty.eq. 6) write (6, 2612)
 2612  format
      : (' *** printed symmetric top cross sections should be checked')
-*      call prsg(fnam1,a)
-      if(ibasty.ne.4) call prsg(fnam1,a)
-      if(ibasty.eq.4) call prsgpi(fnam1,a)
+*
+*  eliminate special call for ibasty = 4
+      call prsg(fnam1,a)
+*      if(ibasty.ne.4) call prsg(fnam1,a)
+*      if(ibasty.eq.4) call prsgpi(fnam1,a)
       goto 1
 * print selected partial cross sections from pcs file
 2650  call parse(line,l,fnam1,lc)
@@ -1325,25 +1364,30 @@ cend
 2810  continue
       iflux=a(1)
       if (a(2) .eq. 0.d0) iflux=2
-      goto 2880
+      call psi(fnam1,a)
+      goto 1
 * adiabatic energy calculation, jobfile
 2850  call parse(line,l,fnam1,lc)
       call lower(fnam1)
       call upper(fnam1(1:1))
       if(fnam1 .eq. ' ') fnam1 = jobnam
-      a(1) = 2
-      do 2860 i=2,8
-        a(i)=0
-2860  continue
-      if (nnout .ne. niout) then
-        write (6, 2870) nnout, niout
-2870      format ('** NNOUT = ',i3, ' .NE. NIOUT = ',i3,
-     :            ' FOR ADIABATIC ENERGY CALCULATION',/,
-     :            '   ENTER NEW VALUES')
-        goto 1
-      endif
-2880  continue
-      call psi(fnam1,a)
+      call parse(line,l,code,lc)
+      if (code .eq. ' ') then
+         l1 = 1
+         l2 = 10
+      else
+         read (code, *, err=2860, end=2860) l2
+         call parse(line,l,code,lc)
+         if (code .eq. ' ') then
+            l1 = 1
+         else
+            l1 = l2
+            read (code, *, err=2860, end=2860) l2
+         end if
+      end if
+      call eadiab1(fnam1,l1,l2)
+      goto 1
+2860  write (6, *) 'Parameters to EADIAB cannot be recognized'
       goto 1
 *  print out system parameters
 2900  call sys_conf
@@ -1351,7 +1395,8 @@ cend
 *  hyperfine xcs routine (originally written by j. klos,
 *  rewritten by p.j. dagdigian
 *  hypxsc,jobfile, ienerg ,nucspin, j1, j2
-2950  if (.not. lpar(20)) then
+2950  continue
+*     if (.not. lpar(20)) then
         call parse(line,l,fnam1,lc)
         if(fnam1 .eq. ' ') fnam1 = jobnam
         call lower(fnam1)
@@ -1363,11 +1408,11 @@ cend
            call getval(code(1:lc),' ',0,j,a(i))
 2013    continue
         call hypxsc(fnam1,a)
-      else
-        write (6, 2012)
-2012    format(' Sorry, hyperfine cross sections not yet',
-     :         /,'  implemented for molecule-molecule collisions')
-      end if
+*      else
+*        write (6, 2012)
+*2012    format(' Sorry, hyperfine cross sections not yet',
+*     :         /,'  implemented for molecule-molecule collisions')
+*      end if
       goto 1
 * singlet-triplet collisional mixing - added by p. dagdigian
 3000  call parse(line,l,fnam1,lc)
@@ -1408,14 +1453,36 @@ cend
       call parse(line,l,code,lc)
       call getval(code(1:lc),' ',0,j,a(1))
 * get in1, in2, jtotmx, join, jmax
-3105  do 3120 i = 2, 6
+3105  continue
+      call trnprt(fnam1,a)
+      goto 1
+* pressure broadening cross sections - added by p. dagdigian
+3200  call parse(line,l,fnam1,lc)
+      if(fnam1 .eq. ' ') fnam1 = jobnam
+      call lower(fnam1)
+      call upper(fnam1(1:1))
+* get iener for 1st smt file
+      a(1) = 0.d0
+      if(l .eq. 0) goto 3205
+      call parse(line,l,code,lc)
+      call getval(code(1:lc),' ',0,j,a(1))
+3205  call parse(line,l,fnam2,lc)
+      if(fnam2 .eq. ' ') fnam2 = jobnam
+      call lower(fnam2)
+      call upper(fnam2(1:1))
+* get iener for 2nd smt file
+      a(2) = 0.d0
+      if(l .eq. 0) goto 3210
+      call parse(line,l,code,lc)
+      call getval(code(1:lc),' ',0,j,a(2))
+* get k, j1, in1, j2, in2, diag, j1p, in1p, j2p, in2p
+3210  do 3220 i = 3, 12
         a(i) = 0.d0
-        if (l .eq. 2) a(l) = 1.d0
-        if (l .eq. 0) goto 3120
+        if(l .eq. 0) goto 3220
         call parse(line,l,code,lc)
         call getval(code(1:lc),' ',0,j,a(i))
-3120  continue
-      call trnprt(fnam1,a)
+3220  continue
+      call prsbr(fnam1,fnam2,a)
       goto 1
       end
       subroutine pcoder(boundc,pcod,icode)

@@ -1,0 +1,40 @@
+<TITLE>bastp</TITLE>
+<h3><center><font color=#brown >Basis Subroutine
+ and System Specific Parameters: Collision of 
+ a <sup>2</sup>Sigma Diatomic Molecule with a Closed-Shell (<sup>1</sup>Sigma) Diatomic Molecule
+</h3>
+</center></font><hr>
+
+
+<tt>BASISTYPE = 26</tt><p>
+<ul>
+	System subroutine: <tt>sys2s1sg</tt><p>
+	Basis subroutine: <tt>hiba2sg1sg.f</tt></ul>
+
+<p>
+<font size=-1><i>Refs.</i> P. J. Dagdigian, J. Chem. Phys. <b>148</b>, 024304 (2018); S. Green, J. Chem. Phys. <b>62</b>, 2271 (1975).</font>
+<hr>
+The definition of the system dependent parameters is as follows:
+<ul> N1MAX:  maximum rotational angular momentum of molecule 1<p>
+     J2MIN:  minimum rotational angular momentum of molecule 2<p>
+     J2MAX:  maximum rotational angular momentum of molecule 2<p>
+     IPOTSY2:   cylindrical symmetry of potential.  Set to 2 for homonuclear molecule 2, 
+     set to 1 for homonuclear molecule 2.
+</ul>
+
+The definition of the real system dependent parameters is as follows:
+<ul>
+     B1ROT:  rotational constant of molecule 1<p>
+     D1ROT:  centrifugal distortion constant for molecule 1<p>
+     GAMMA:  spin-rotation constant for molecule 1<p>
+     B2ROT:  rotational constant for molecule 2
+</ul>
+<hr>
+               </ul>
+               By setting <tt><a href=bastst.html>BASTST</a>=.TRUE.</tt>, you can output the values
+               of quantum numbers of the two molecules and the internal energies.
+
+
+
+<hr>
+<a href=hibhelp.html><img src=up_arrow.gif border=0 align=middle></a>&#001;Return to <a href=hibhelp.html>Hibridon Help</a>

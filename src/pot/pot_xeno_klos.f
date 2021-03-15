@@ -1,6 +1,8 @@
-* System:  NO(X 2Pi)+Xe, initio RCCSD(T) PES's
-
-
+* System:  NO(X 2Pi)+Xe, ab initio RCCSD(T) PES's
+*
+* Reference:  J. Klos, F. J. Aoiz, M. Menendez, M. Brouard, H. Chadwick, 
+* and C. J. Eyles, J. Chem. Phys. 137, 014312 (2012)
+*
       subroutine driver
       implicit double precision (a-h,o-z)
       common /cosysr/ xjunk(2),rshift,xfact

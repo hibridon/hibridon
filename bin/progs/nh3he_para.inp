@@ -1,0 +1,24 @@
+NH3-He - Hodges and Wheatley potential          
+   6                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    3.5000   10.0000    0.10    rstart, rendld, spac
+  F                              prairy
+  1.150     1.00    100.0  1.50  tolai, rincr, rendai, fstfac
+   1                             nerg
+    200
+    3.240908500448958            xmu
+ -100.0000                       rcut
+   0  40   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  48   -1                         lscreen, iprint
+   11    7                       nnout,niout
+   0   1   2   3   4   5   6   7   8   9  10
+  20   0  -1   1  -2   2  -3
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  T  F  F  T  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  F  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  F  F  F  T  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+   3   1                         ipotsy, iop
+  25   200.00000                 jmax, emax
+   9.9402   6.3044   0.7903      brot, crot, delta
+                                  

@@ -1,6 +1,6 @@
 *system:  O(3P)+H2, Dubernet-Hutson expansion of scaled Alexander PES's
 *references:
-*  M. H. Alexander, J. Chem. Phys. xx, yyy (1998).
+*  M. H. Alexander, J. Chem. Phys. 108, 4467 (1998).
 *  M.-L. Dubernet and J. M. Hutson, J. Chem. Phys. 101, 1939 (1994).
 *  M. H. Alexander, J. Chem. Phys. 99, 6014 (1993).
 *  M. H. Alexander and M. Yang, J. Chem. Phys. 103, 7956 (1995).
@@ -36,6 +36,7 @@
       logical csflag, ljunk, ihomo, lljunk
       common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
       common /covvl/ vvl(9)
+      econv=219474.6d0
       potnam='ALEXANDER SCALED (s=1.21) O(3P)H2 DUBERNET-HUTSON'
       print *, potnam
       print *
@@ -53,23 +54,29 @@
       endif
       if (r .lt. 0.d0) go to 93
       call pot(vv0,r)
-      if (.not. csflag .or. (csflag .and. ihomo)) write (6, 100) vv0,vvl
+      if (.not. csflag .or. (csflag .and. ihomo)) 
+     +    write (6, 100) vv0*econv,vvl*econv
 100   format(' V000, V220, V022, V202:  ',4(1pe16.8),/,
      :       ' V222, V224, V404:  ',3(1pe16.8),/,
      :       ' V422, V424, V426:  ',3(1pe16.8))
-      if (csflag .and. .not.ihomo) write (6, 110) vv0,vvl
+      if (csflag .and. .not.ihomo) write (6, 110) 
+     +    vv0*econv,vvl*econv
 110   format(' v000, v220, v020, v200:  ',4(1pe16.8),/,
      :       ' v222, v221, v400:  ',3(1pe16.8),/,
      :       ' v420, v422, v421:  ',3(1pe16.8))
       goto 1
 93    r=4
-      do i=1,100
+      open (unit=2,file='o3ph2_hib_1998_sf_vlm.txt')
+      write (2,102)
+102   format(' %R/bohr 1V000 1V220 1V022 1V202 1V222 1V224',
+     +  ' 1V404 1V422 1V424 1V426')
+      do i=1,150
        call pot(vv0,r)
-       write(2,101) r,vv0,vvl
+       write(2,101) r,vv0*econv,vvl*econv
 101    format(f8.4,10(1pe16.8))
        r=r+0.2
       enddo
-
+      close(2)
 99    end
       subroutine pot (vv0, r)
 * ----------------------------------------------------------------------

@@ -14,9 +14,10 @@ an Asymmetric Top
 <p>
 <font size=-1><i>Ref.</i> B. J. Garrison <i>et al.</i>, J. Chem. Phys. <b>65</b>, 2193 (1976); S. Green, J. Chem. Phys. <b>64</b>, 3463 (1976); <b>67</b>, 816 (1979).</font>
 <hr>
+Here, the body-frame z axis is taken to lie along the <i>a</i> inertial axis.  For an alternate definition, see the hibaastp1 basis routine.<p>
+
 The definition of the system dependent parameters is as follows:
-<ul>     NTERM:  the number of potential surfaces involved.  This parameter should equal the number of MU terms 
-            in the angular expansion of the potential..  This parameter can not be changed<p>
+<ul>     NTERM:  the number of potential surfaces involved.  This parameter can not be changed<p>
      NUMPOT:  an index representing the particular potential used.  This variable
 is passed to the POT subroutine<p>
     IPOTSY:   cylindrical symmetry of potential.  The variables (theta,phi) describing the angular expansion of the
@@ -33,12 +34,12 @@ is passed to the POT subroutine<p>
 if IOP = &minus;1: only <i>ortho</i> states included in channel expansion
               </ul><p>
     JMAX:    the maximum rotational angular momentum included in the channel expansion<p>
-    EMAX:    the maximum energy of a state to be included in the rotational state basis<p>
 </ul>
 
 The definition of the real system dependent parameters is as follows:
 <ul>
-AROT, BROT, CROT:    rotational constants of the asymmetric top
+AROT, BROT, CROT:    rotational constants of the asymmetric top<p>
+    EMAX:    the maximum energy of a level to be included in the rotational state basis
 </ul>
 <hr>
 The rotational eigenfunctions of an asymmetric top are expanded in a symmetrized symmetric top 

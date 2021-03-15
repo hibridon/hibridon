@@ -1,0 +1,68 @@
+<TITLE>stmix</TITLE>
+<h3><center><font color=#brown >Command PRSBR</h3>
+</center></font><hr>
+
+The command PRSBR allows you to calculate pressure-broadening cross sections.
+For details, see R. Shafer and R. G. Gordon, J. Chem. Phys. <b>58</b>, 5422 (1973);
+S. Green, J. Boissoles, and C. Boulet, J. Quant. Spectrosc. Radiat. Transfer <b>39</b>, 33 (1988).
+With this module, the pressure broadening cross section for an isolated spectral line, or collisionally 
+coupled lines, can be computed.  The
+kinetic energies for the initial and final levels should be the same in the two scattering calculations.
+In addition, <tt>JTOT1</tt> and <tt>JTOT2</tt> should be the same for both calculations.
+The command line is
+<tt><ul>
+         PRSBR,JOB1,IENERG1,JOB2,IENERG2,K,J1,IN1,J2,IN2,DIAG,J1P,IN1P,J2P,IN2P
+</tt></ul>
+where the input parameters are:
+<p> 
+<tt>JOB1,IENERG1</tt>:  These parameters locate the S-matrix for a rotational level in the initial vibrational or electronic state.  The program searches for an S-matrix in the file
+              <tt>Job1{ienerg1}.smt</tt>, where IENERG1 is an integer
+              (IENERG1 = 1, 2, ... etc.)<p>
+              
+<tt>JOB2,IENERG2</tt>:  These parameters locate the S-matrix for a rotational level in the final vibrational or electronic state.  The program searches for an S-matrix in the file
+              <tt>Job2{ienerg1}.smt</tt>, where IENERG2 is an integer
+              (IENERG2 = 1, 2, ... etc.)<p>
+              
+
+<tt>K</tt>:     This is the tensor order of the cross section (K = 0 for isotropic Raman scattering, 
+K = 1 for dipole-allowed transitions, K = 2 for anisotropic Raman scattering).<p>
+
+<tt>J1</tt>:    The rotational angular momentum of the rotational level in the initial state.<p>
+
+<tt>IN1</tt>:   The state index for the rotational level in the initial state.<p>
+
+<tt>J2</tt>:    The rotational angular momentum of the rotational level in the final state.<p>
+
+<tt>IN2</tt>:   The state index for the rotational level in the final state.<p>
+
+<tt>DIAG</tt>:  This parameter equals one if a cross section for an isolated spectral line is to be
+computed.  <tt>DIAG</tt> should be set to zero to consider the collisional coupling of two spectral lines.
+The parameters below are required only if <tt>DIAG</tt> = 0.<p>
+
+<tt>J1P</tt>:    The rotational angular momentum of the rotational level in the  initial state
+of the coupled spectral line.<p>
+
+<tt>IN1P</tt>:   The state index for the rotational level in the initial state of the coupled spectral line.<p>
+
+<tt>J2P</tt>:    The rotational angular momentum of the rotational level in the final state
+of the coupled spectral line.<p>
+
+<tt>IN2P</tt>:   The state index for the rotational level in the final state of the coupled spectral line.<p>
+
+The real and imaginary parts of the pressure broadening cross section are printed in the terminal output,
+as well as in an auxiliary file, <tt>{jobname}{ienerg}.ppb</tt>.  Also outputted to this file are the
+partial cross sections vs. <tt>JTOT</tt>.<p>
+
+<img src="warningsmall.gif"> <font color=#brown>
+              For accurate calculation of the pressure broadening cross section,
+              especially the imaginary part, Logd integration should be used over
+              the full range of R.</font><p>
+
+</ul>
+<hr>
+Go to:
+<center>
+<a href=commands.html>Commands</a> | <a href=hibhelp.html>Hibridon Help</a>
+<br>
+</center>
+

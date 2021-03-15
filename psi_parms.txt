@@ -1,0 +1,9 @@
+parameters for psi command:
+
+command:
+psi,{jobname},{iener},iprint,thresh,factr,inchj,inchl,inchi
+
+
+if iprint = 0, irpint set to default value of 1
+if thresh = 0, thresh set to default value of -1.d9
+if factr = 0, factr set to default value of 1

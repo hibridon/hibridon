@@ -1,7 +1,11 @@
-*system:  CN(Av=3,Xv=7)-Ar, refit of Berning's original PES's
-*references: Berning, A. (1995). 
-*   Energieübertragungsprozesse in Atom-Molekül Stößen, Ph. D. thesis,Universität Stuttgart.
-*   Alexander, M. H., X. Yang, et al. (2000). ³CN-Ar PES and low-J scattering.² J. Chem. Phys. 112: 781-791.
+*  system:  CN(Av=3,Xv=7)-Ar, refit of Berning's original PES's
+*  references: Berning, A. (1995). 
+*  Energieübertragungsprozesse in Atom-Molekül Stößen, Ph. D. thesis,
+*  Universität Stuttgart.
+*  Alexander, M. H., X. Yang, et al. (2000). "CN-Ar PES and low-J scattering,"
+*  J. Chem. Phys. 112: 781-791.
+
+
       include "common/syusr"
       include "common/ground"
       include "common/bausr"

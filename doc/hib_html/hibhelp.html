@@ -1,5 +1,5 @@
 <img src=Computer-256.gif width=128 align=left><h3><center><font color=#brown >Hibridon<sup><font size=-1>&#169;</font>
-</sup> 4.3.7</h3>
+</sup> 4.4</h3>
 </center></font>
 
 This is the home page and hypertext help facility for Hibridon<a href=copyright.html><sup><font size=-1>&#169;</font>
@@ -15,7 +15,7 @@ scattering.
 <body><div align=right><font size=-1><i>Access counter</i>  </font><a href="http://www.tinycounter.com" target="_blank" title="web site hit counter"><img border="0" alt="web site hit counter" src="http://mycounter.tinycounter.com/index.php?user=mha11"></a>
 <div align=left>
 
-<hr><a href=new.html><img src=new.png  hspace=5 border=0>New additions</a> (Version 4.3.7)
+<hr><a href=new.html><img src=new.png  hspace=5 border=0>New additions</a> (Version 4.3.5)
 <hr>Version 4.1, release 5 of the Hibridon<a href=copyright.html><sup><font size=-3>&#169;</font></sup></a> 
 package can be installed on the following
 platforms:<p>
@@ -51,15 +51,14 @@ Version 4.3 of the Hibridon<a href=copyright.html><sup><font size=-3>&#169;</fon
 package can be installed on the following
 platforms:<p>
 <img src=computer.png width=64  align=left vspace=10 hspace=5>Apple G5 workstations 
-running under OSX 10.3.9 and 10.4.11 with the IBM xlf 8.1 compiler <font color=#brown><i>Hibridon is no longer
-actively maintained on Apple PowerPC workstations.</i></font><br><br>
-Apple Intel workstations running under OSX 10.6 with the Intel ifort compiler<br>
+running under OSX 10.3.9 and 10.4.11 with the IBM xlf 8.1 compiler<br>
+Apple Intel workstations running under OSX 10.5.1,  10.5.2, 10.5.8, 10.6.2 with the Intel ifort compiler<br>
 Xeon x86 workstations running under Linux with  the Intel (ifort) or Portland Group (pgf95)  compilers<br>
 SGI ALTIX (ia64 Itanium cpu) workstations under Linux with the Intel (ifort) compiler
-<p><a href=hib437.tar.gz><img src=archive.png  align=bottom border=1></a>You can obtain a copy of Hibridon 4.3 as
-a  <tt>g'zipped tar</tt> <a href="hib437.tar.gz">
+<p><a href=hib436.tar.gz><img src=archive.png  align=bottom border=1></a>You can obtain a copy of Hibridon 4.3 as
+a  <tt>g'zipped tar</tt> <a href="hib43.tar.gz">
 archive </a> 
- in binary format (~2 MB)<p>
+ in binary format (~1.1 MB)<p>
 
 
 <hr>
@@ -83,7 +82,7 @@ of all comments and instructions which follow the &#147;warning&#148;
 available here <a href=install.html><img src=linksmall.gif align=bottom border=1 width=12 height=10></a>
 Installation also creates your own copy of these hypertext help files.
 <hr>Calculations on any particular collision system involve </a href linking.html>linking
-several <a href=system.html>system specific</a> subroutines which define the 
+several <a href=basis.html>system specific</a> subroutines which define the 
 interaction potential energy surface(s) together with a large number of general routines, which
 have be compiled previously.
 <hr>
@@ -95,13 +94,13 @@ Execution of the Hibridon<sup><font size=-3>&#169;</font></sup> package is contr
 <ul> 
   <li>system independent <a href=params.html>parameters</a>
 
-  <li> system dependent <a href=system.html>parameters</a>
+  <li> system dependent <a href=basis.html>parameters</a>
   <li> logical <a href=flags.html>flags</a>
   <li> input and output <a href=files.html> files</a>, and job <a href=files.html>names</a>
 
 </ul><p>
 <li> At present Hibridon<sup><font size=-3>&#169;</font></sup> can treat a number of different types
-of collision <a href=system.html> systems</a>.  This is made possible
+of collision <a href=basis.html> systems</a>.  This is made possible
 by the presence of multiple system specific subroutines:
 <p>
 <ul> 
@@ -124,14 +123,13 @@ had an initial exposure to this help library.
 <hr>
 The Hibridon<a href=copyright.html><sup><font size=-1>&#169;</font>
 </sup></a> package was written by M.
-H. Alexander, D. E.  Manolopoulos, H.-J. Werner,  B. Follmeg and P. J. Dagdigian, with
+H. Alexander, D. E.  Manolopoulos, H.-J. Werner, and B. Follmeg, with
 contributions by P. F. Vohralik, D. Lemoine, G. Corey, R. Gordon, B. Johnson, T.
-Orlikowski, A. Berning, A. Degli-Esposti, C. Rist, B.
+Orlikowski, A. Berning, A. Degli-Esposti, C. Rist, P. Dagdigian, B.
 Pouilly,  G. van der Sanden, M. Yang, F. de Weerd,  S. Gregurick, J. Klos and F. Lique.  Support for its development was provided
 by grants (to MHA) from the U. S. National Science Foundation, the U. S. Army Research
 Office, the Office of Scientific Research of the U. S. Air Force, and
-(to HJW) from the German Fonds der Chemische Industrie.  Copyright (c) 1987, 1991, 1993, 1996, 2000, 2001, 2003, 2004, 2007, 
-2008, 2009, 2010, 2011 University
+(to HJW) from the German Fonds der Chemische Industrie.  Copyright (c) 1987, 1991, 1993, 1996, 2000, 2001, 2003, 2004, 2007, 2008, 2009, 2010 University
 of Maryland at College Park.  All rights reserved.<hr>
 <a href=mailto:mha@wam.umd.edu><img src=mail-forward.png width=32 border=1></a> For further inquiries
 <p>
@@ -143,8 +141,8 @@ whose untimely deaths
 to the field of inelastic molecular collisions.  <i>Ave atque vale.</i>  
 </table><p>
 <i>
-Current Revision of this help library:  </i>4-August-2011<br>
-<i>Applicable version of Hibridon<sup><font size=-3>&#169;</font></sup>:  </i>4.3.7
+Current Revision of this help library:  </i>22-sep-2010<br>
+<i>Applicable version of Hibridon<sup><font size=-3>&#169;</font></sup>:  </i>4.3.6
 <hr>
 <a href="http://www.barebones.com/products/bbedit/index.shtml">
 <img src=bw_bbedit_small_3.gif>

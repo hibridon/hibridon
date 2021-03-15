@@ -1,5 +1,5 @@
 #!/bin/csh -f 
-# HIBRIDON bin/makehib $Revision: 2011.1 $ --- create executable program
+# HIBRIDON bin/makehib $Revision: 2009.2 $ --- create executable program
 # makehib [-b -d]  potname [kmax]: link hib_{potname} with maximum dimension kmax
 #   option -b:  do not include arrays tq1, tq2, tq3
 #   option -d:  compile himain.f and pot subroutine with debug option
@@ -200,8 +200,8 @@ endif
 if (-e $basedir/src/pot/common/parpot) then
 else
   echo ""
-  echo "creating soft link for /pot/common directory ..."
-  ln -s $basedir/src/common $basedir/src/pot/common
+  echo "creating /pot/common directory ..."
+  cp -pr $basedir/src/common $basedir/src/pot
 endif
 # check if fortran converter is present
 if (-e ftconv_hib.exe) then

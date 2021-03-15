@@ -1,0 +1,6 @@
+ &fit
+ datafl='fitvij.h2',
+ nterm = 12, lammax(1)=6, lammax(2)=6, lammax(3)=6, lammax(4)=6,
+ lammax(5)=6, lammax(6)=6, lammax(7)=6, lammax(8)=6,
+ lammax(9)=6, lammax(10)=6,lammax(11)=6, lammax(12)=6
+ /

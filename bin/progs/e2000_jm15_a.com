@@ -1,0 +1,12 @@
+inp=Hch4.inp
+iop=1
+indout,3,1,2,3
+job=ajm15
+jtot2=105
+jmax=15
+ener=2000
+show
+run
+printc
+trnprt
+quit

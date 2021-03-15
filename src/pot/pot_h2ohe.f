@@ -10,7 +10,7 @@
 *  phi = 0 has all 4 atoms coplanar
 *
 *  Note:  subr heh2osapt requires 3 data files to be in hibxx/bin/progs/potdata:
-*        h2o_coefd.dat, h2o_coefi.dat, h2o_params.dat
+*         h2o_coefd.dat, h2o_coefi.dat, h2o_params.dat
 *
       include "common/syusr"
       include "common/ground"
@@ -48,6 +48,7 @@
       include "common/parpot"
       common /conlam/ nlam, nlammx, lamnum(2)
       common /coloapot/ s4pi
+      common /cosysi/ nscode, isicod, nterm
       potnam='Patkowski et al. H2O-He SAPT PES'
 *
 *  s4pi is factor to normalize isotropic term
@@ -622,8 +623,12 @@ c
         common/dind/ cd(maxc),ci(maxc),ld(6,maxc),li(6,maxc),
      1 idisp,iind,lmaxi,lmaxd
 c
-        open(unit=1,file='potdata/h2o_coefd.dat',form='formatted')
-        open(unit=2,file='potdata/h2o_coefi.dat',form='formatted')
+        open(unit=1,file=
+     :    'potdata/h2o_coefd.dat',
+     :    form='formatted')
+        open(unit=2,file=
+     :    'potdata/h2o_coefi.dat',
+     :    form='formatted')
 c
         lmaxd=0
         nmin=1000
@@ -1067,7 +1072,9 @@ c
       common/exch/lex(5,mxl),cex(maxb),nex,irpowex,iwex,iexback,igrx,
      1           idonex,exscale,lmaxex
 c
-        open(unit=7,file='potdata/h2o_params.dat',form='formatted')
+        open(unit=7,file=
+     :    'potdata/h2o_params.dat',
+     :    form='formatted')
 c
 c       read nex     - number of angular functions in expansion of exponent
 c            irpowex - largest power of R in exponent

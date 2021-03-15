@@ -40,7 +40,8 @@
 *                   sections
 *  author:  millard alexander
 *  heavily modified by h.-j. werner
-*  current revision date: 15-may-1997 by mha
+*  added common block /coj12/ to pass j12 array (p. dagdigian)
+*  current revision date: 24-jan-2012 by p.dagdigian
 * ---------------------------------------------------------------------------
 *  variables in call list
 *    tsq:     on input:  tsq contains the nopen x nopen square of the t-matrix
@@ -114,6 +115,9 @@
 *  variable in common block /coeint/
 *    eint:      array containing channel energies (in hartree)
 *    nlevel   number of energetically distinct levels included in channel basi
+*  variable in common block /coj12/
+*    j12:       array containing vector sum of j1 + j2 for molecule-molecule
+*               systems and open-shell atom - molecule systems
 *  variable in common block /cosurf/
 *    flagsu:    if .true., then molecule-surface collisons
 *  variables in common block /cosout/
@@ -129,32 +133,33 @@
 *  variable in common block /cojlpo/
 *    jlpold:    old value of parity, used to insure correct accumulation
 *               of all partial waves in cases where jlpar=0 .
-*    variables in common block /coconv/
+*    variables in module constants
 *    econv:    conversion factor from cm-1 to hartrees
 *    xmconv:   converson factor from amu to atomic units
-*    ang2:     conversion factor from square bohr to square angstroms
+*    ang2c:     conversion factor from square bohr to square angstroms
 *  variables in common block /cophot/
 *    photof    true if photodissociation calculation
 *              false if scattering calculation
 *    wavefn    true if g(a,b) transformation matrices are saved
 *              to be used later in computing the wavefunction
 *  ---------------------------------------------------------------------------
+      use constants
       implicit double precision (a-h,o-z)
       logical ipos, csflag, swrit, t2writ, writs, wrpart, partw,
      :        wrxsec, xsecwr, flaghf, t2test, flagsu, firstj, twomol,
-     :        nucros, photof, wavefn, faux, twojlp
+     :        nucros, photof, wavefn, faux, twojlp, boundf, wrsmat
       character*20 cdate
       include "common/parpot"
       common /cojsav/ jsav1, jsav2
       common /cosurf/ flagsu
       common /cocent/ cent(1)
       common /coeint/ eint(1)
+      common /coj12/ j12(1)
       common /coered/ ered, rmu
       common /cosout/ nnout, jout(21)
       common /cojlpo/ jlpold
       common /coener/ ener(1)
-      common /coconv/ econv, xmconv, ang2
-      common /cophot/ photof, wavefn
+      common /cophot/ photof, wavefn, boundf, wrsmat
       common /coqvec/ mxphot, nphoto, q
       dimension tsq(nmax,nmax), scmat(nmax,nmax), sr(nmax,nmax),
      :          si(nmax,nmax), sc1(nmax,nmax),sc2(nmax,nmax)
@@ -309,15 +314,14 @@
 *  subroutine to print partial cross sections
 *
 *  latest revision date: 27-oct-1995 by mha
-*
 * ---------------------------------------------------------------------------
+      use constants
       implicit double precision (a-h,o-z)
       character*20 cdate
       character*40 form
       logical ipos, csflag, wrpart, partw, flaghf, flagsu,twomol,nucros,
      :        twojlp,headf
       include "common/parpot"
-      common /coconv/ econv, xmconv, ang2
       common /coered/ ered, rmu
       common /cosurf/ flagsu
       common /coisc2/ nj,jlist(10)
@@ -553,10 +557,10 @@
 *
 *  latest revision date: 21-mar-1992 by mha
 * ---------------------------------------------------------------------------
+      use constants
       implicit double precision (a-h,o-z)
       logical ipos, csflag, wrpart, partw, flaghf, twomol, nucros,vrai
       common /coener/ energ(1)
-      common /coconv/ econv, xmconv
       common /coered/ ered, rmu
       dimension tsq(nmax,1),tq1(nmax,1),tq2(nmax,1),tq3(nmax,1),
      1          jlev(1),elev(1),inlev(1),nlev(1)
@@ -879,7 +883,7 @@ c     write(6,*) 'prefac:',j1,j2,j3,x1,x3
 * ---------------------------------------------------------------------------
 *  subroutine to write out integral cross sections
 *  author:  millard alexander
-*  latest revision date: 27-oct-1995 by mha
+*  latest revision date: 23-feb-2013 by p. dagdigian
 *  ------------------------------------------------------------------
 *  variables in call list:
 *    zmat:    on return:  contains the nlevop x nlevop matrix of integral
@@ -921,6 +925,7 @@ c     write(6,*) 'prefac:',j1,j2,j3,x1,x3
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
 * ----------------------------------------------------------------------
+      use constants
       implicit double precision (a-h,o-z)
       logical csflag, flaghf, wrxsec, xsecwr, ipos, flagsu, twomol,
      :        nucros, ihomo
@@ -929,9 +934,9 @@ c     write(6,*) 'prefac:',j1,j2,j3,x1,x3
       common /cojsav/ jsav1, jsav2
       common /coered/ ered, rmu
       common /cosurf/ flagsu
-      common /coconv/ econv, xmconv
       common /cosysi/ nscode, isicod, ispar(5)
       common /coipar/ ipar(9), iprint
+      common /coselb/ ibasty
       dimension zmat(nmax,nmax),jlev(20),inlev(20),elev(20),energ(25)
       dimension tq3(nmx,nmx), nlev(25)
 *   econv is conversion factor from cm-1 to hartrees
@@ -950,11 +955,11 @@ c     write(6,*) 'prefac:',j1,j2,j3,x1,x3
             write (9, 105)
 105         format
      :       (/' LEVEL LIST FOR DEGENERACY AVERAGED',
-     :         ' TRANSITION PROABABILITIES',
+     :         ' TRANSITION PROBABILITIES',
      :        /'   N   J  INDEX    EINT(CM-1)  EKIN(CM-1)',/)
           end if
           do 120  i = 1, nlevmx
-            if (.not. flaghf) then
+            if (.not. flaghf .or. ibasty.eq.12) then
               write (9, 110) i, jlev(i), inlev(i), elev(i) * econv,
      :                       (energ(ien)-elev(i)*econv,ien=1,nerg)
 110           format (i4, i5, i6, f13.3,5f11.3)
@@ -1114,6 +1119,7 @@ cABER
 *    xmu:       collision reduced mass in (c12) atomic mass units
 *    econv:     conversion factor from cm-1 to hartrees
 *  ------------------------------------------------------------------
+      use constants
       implicit double precision (a-h,o-z)
       character*(*) fname
       character*20 cdate
@@ -1131,7 +1137,6 @@ cABER
       common /coiout/ niout, indout(1)
       common /coselb/ ibasty
       dimension  a(4),scmat(nmax,1)
-      data econv / 219474.6d0/
 
 *  input parameters
       iprint=.true.
@@ -1391,18 +1396,26 @@ c
 * from s-matrix elements
 *
 * author: hjw
-* current revision date: 22-jan-2008 by mha
+* revision date: 22-jan-2008 by mha
+* half-integral j's now printed out.  revision date:  28-nov-2011
+*    (p.j.dagdigian)
 *
+* current revision date: 23-feb-2013 by p. dagdigian
+*
+* WARNING: Due to a revision of the partcr subroutine in may-30-2013,
+*     flaghf no longer applies to the second molecule (j2) in
+*     molecule-molecule collisions.
 * ------------------------------------------------------------------
+      use constants
       implicit double precision (a-h,o-z)
       character*(*) filnam
       character*40  icsfil, smtfil, xname
       character*20  cdate
-      character*13  elaps, cpu, string
+      character*10  elaps, cpu
+      character*13  string
       logical csflag, flaghf, flagsu, twomol, exstfl,
      :        batch, nucros, notequ, lpar1, lpar2, ipos,lpar3
       include "common/parpot"
-      common /cosize/ isize, isizes
       common /colpar/ lpar1(3), batch, lpar2(5), ipos, lpar3(17)
       common /cojq/   jq(1)
       common /colq/   lq(1)
@@ -1425,15 +1438,13 @@ c
       common /cosc2/  inlev(1)
       common /cosc3/  jlev(1)
       common /coered/ ered, rmu
-      common /coconv/ econv, xmconv, ang2c
       common /codim/  nairy, mmax
+      common /coselb/ ibasty
       dimension a(3)
 *
-* initialyze timer
+* initialize timer
       call mtime(cpu0,ela0)
 * input
-      spin=0
-      if(flaghf) spin=0.5d0
       eredsv=ered
       rmusav=rmu
       ien = a(1)
@@ -1457,7 +1468,7 @@ c
 *
 * open smatrix-file
 *
-      call openf(1,smtfil,'du',0)
+      call openf(1,smtfil,'tu',0)
 *
 * open file for integral cross sections
 *
@@ -1472,6 +1483,8 @@ c
      :   nnout,jlev,inlev,elev,jout)
       maxjt=jfinal
       if(maxjtot.gt.0) maxjt=min(maxjtot,jfinal)
+      spin=0
+      if(flaghf) spin=0.5d0
 *	
       write (2,15) smtfil,cdate,label,maxjt
       if (.not.batch)write (6,15) smtfil,cdate,label,maxjt
@@ -1495,7 +1508,7 @@ c
         if(.not.batch)
      :  write(6,21)
      :     inerg,rmu*xmconv,ered*econv,jfirst+0.5,maxjt+0.5,jtotd
-21       format ('IEN=', i2,' RMU=', f9.4,' E=', f9.2,
+21       format (' IEN=', i2,' RMU=', f9.4,' E=', f9.2,
      :          ' JTOT-1=', f5.1,' JTOT-2=', f6.1,' JTOT-D=', i3)
       endif
 *     stop 'in intcrs'
@@ -1529,7 +1542,7 @@ c
      :        /,'   N     J   INDEX  EINT(cm-1)')
       do 250 i = 1, nj
         jj = jlist(i)
-        if (flaghf) then
+        if (flaghf .and. ibasty.ne.12) then
           write (2, 220) i, jlev(jj)+spin, inlev(jj), elev(jj)*econv
           if(.not. batch)
      :    write (6, 220) i, jlev(jj)+spin, inlev(jj), elev(jj)*econv
@@ -1584,7 +1597,7 @@ c
 300   call closf(1)
       close (2)
 *      call dclos(1)
-      close(unit=1,status='delete')
+      close(unit=1)
       close(unit=3,status='delete')
       call mtime(cpu1,ela1)
       cpu1 = cpu 1 - cpu0
@@ -1607,7 +1620,8 @@ c
 * elements
 *
 * author: hjw with revisions by F. de Weerd and mha
-* current revision date: 21-feb-2003
+* extended to molecule-molecule calculations (p.dagdigian 24-jan-2012)
+* current revision date: 8-oct-2012 by q. ma
 *
 * ----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
@@ -1617,9 +1631,11 @@ c
       common /cojq/   jq(1)
       common /colq/   lq(1)
       common /coinq/  inq(1)
+      common /coj12/  j12(1)
       common /coisc3/ jpack(1)
       common /coisc4/ lpack(1)
       common /coisc5/ inpack(1)
+      common /coj12p/ j12pk(1)
       common /coisc6/ isc1(1)
       common /coisc7/ isc2(1)
       common /cosc1/  elev(1)
@@ -1627,6 +1643,7 @@ c
       common /cosc3/  jlev(1)
       common /coisc2/ nj,jlist(1)
       common /colpar/ lpar1(3), batch, lpar2(5), ipos, lpar3(17)
+      common /coselb/ ibasty
       dimension sigma(nmax,1),sreal(nmax,1), simag(nmax,1)
       dimension sc1(nmax,1),sc2(nmax,1),scmat(nmax,1),tsq(nmax,1)
 * clear sigma array
@@ -1639,9 +1656,12 @@ c
 5     continue
       jlpold=0
       iaddr = 0
+c
 * read s-matrix for present jtot, nu
+*
+* j12 is read into a common block for molecule-molecule collisions
 10    call sread ( iaddr, sreal, simag, jtot, jlpar, nu,
-     :            jq, lq, inq, inpack, jpack, lpack,
+     :             jq, lq, inq, inpack, jpack, lpack,
      :             1, nmax, nopen, length, ierr)
       if(jlpold.eq.0) jlpold=jlpar
       if(ierr.eq.-1) goto 100
@@ -1657,6 +1677,8 @@ c
         return
       end if
 * reset iaddr to 0 to insure sequential read
+* print our message only for every 10th jtot
+      if (jtot .eq. 10*(jtot/10)) then
       if (csflag) then
         write(2,25) jtot,nu
         if (.not.batch) write(6,25) jtot,jlpar,nu
@@ -1666,10 +1688,11 @@ c
         if (.not. batch)write(6,26) jtot,jlpar
 26      format(' READ S-MATRIX FOR JTOT=',i3,'  JLPAR=',i2)
       endif
+      endif
       iaddr = 0
 * calculate squared t-matrix
       call tsqmat(tsq,sreal,simag,inq,jq,lq,
-     1            inpack,jpack,lpack,nopen,length,nmax)
+     1   inpack,jpack,lpack,nopen,length,nmax)
 * calculate partial cross sections
       call partcr(tsq,sc1,isc1,isc2,sc2,nopen,length,
      1            inq, jq, lq, inpack, jpack, lpack,
@@ -1721,16 +1744,19 @@ c
       end
 * ----------------------------------------------------------------------
       subroutine tsqmat(tsq,sreal,simag,inrow,jrow,lrow,
-     1                  incol,jcol,lcol,nopen,ncol,nmax)
+     1          incol,jcol,lcol,nopen,ncol,nmax)
 * ----------------------------------------------------------------------
 *
-*  routine compute modulus squared t-matrix from given s-matrix
-*  current revsion date: 14.2.1990 by hjw
+*  routine to compute modulus squared t-matrix from given s-matrix
+*  current revsion date:  24-jan-2012 by p.dagdigian
 *
 * ----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
       complex*8 t
-      logical diag
+      logical diag, is_j12
+      common /coj12/ j12(1)
+      common /coj12p/ j12pk(1)
+      common /coselb/ ibasty
       dimension sreal(nmax,1), simag(nmax,1), tsq(nmax,1)
       dimension inrow(1),jrow(1),lrow(1),incol(1),jcol(1),lcol(1)
 *
@@ -1740,11 +1766,14 @@ c
          in1 = incol(icol)
          j1 = jcol(icol)
          l1 = lcol(icol)
+         if (is_j12(ibasty)) j121 = j12(icol)
          do 300 irow = 1, nopen
             in2 = inrow(irow)
             j2 = jrow(irow)
             l2 = lrow(irow)
+            if (is_j12(ibasty)) j122 = j12pk(irow)
             diag = j1.eq.j2 .and. in1.eq.in2. and. l1.eq.l2
+            if (is_j12(ibasty)) diag = diag .and. j121.eq.j122
 *
 * convert s-matrix to t-matrix: t(j,j1,in1,l1 ; j2,in2,l2) =
 *     delta(j1,in1,l1 ; j2,in2,l2) - s(j,j1,in1,l1 ; j2,in2,l2)
@@ -1769,14 +1798,27 @@ c
 *  incol, jcol, lcol: column indices of t-matrix (ncol values)
 *  inlev, jlev: quantum numbers of asymptotic states (nlevop values)
 *  elev: energy levels of asymptotic states (nlevop values)
-* isc1, isc2, sc2: scratch arrays
-*  latest revision:  7-may-1998 by mha
+*  isc1, isc2, sc2: scratch arrays
+*
+*  current revision:  20-oct-2014 by p. dagdigian
+*
+*  revision:  30-may-2013 by q. ma
+*     WARNING: starting from this revision, flaghf no longer applies
+*     to the second molecule (j2) if twomol is set true.
+*  latest revision:  include correct degeneracy factor, (2*xjrow1+1)*2,
+*  [2nd factor is 2*s2+1)] in denominator for ibasty=23 (3P + 2S atom-atom)
+*
+*  revision:  15-aug-2016 by p.dagdigian
+*     corrected degeneracy factor for j2 for ibasty = 12, 13, and 15
+*  revision:  30-aug-2016 by p. dagdigian
+*     corrected degeneracy factor for ibasty = 23
+*
 * ----------------------------------------------------------------------
+      use constants
       implicit double precision (a-h,o-z)
       logical csflag, flaghf, flagsu, twomol
       common /coered/ ered, rmu
-      common /coselb/ ibasty
-      common /coconv/ econv, xmconv, ang2
+      common /coselb/ ibasty	
       dimension tsq(nmax,1), scmat(nmax,1)
       dimension isc1(10),isc2(10),sc2(10)
       dimension jlev(10),elev(10),inlev(10)
@@ -1784,11 +1826,12 @@ c
 *
       xjtot = jtot
       if (flaghf .and. .not. csflag) xjtot = jtot + 0.5d0
+*  special fix for ibasty=23 (3P + 2S atom-atom)
+      if (ibasty.eq.23) xjtot = jtot + 0.5d0
       if (flagsu) then
         pj = 1.d0
       else
-        pi = acos(-1.d0)
-        pj = (pi * (2.d0*xjtot+1.d0)*ang2)/(2.d0*rmu)
+        pj = (pi * (2.d0*xjtot+1.d0)*ang2c)/(2.d0*rmu)
       end if
       fak=pj
       if (csflag.and.(flaghf.or.nu.ne.0)) fak = 2.d0*pj
@@ -1799,7 +1842,8 @@ c
 *  set pointer array for columns (final states)
       do 40 i = 1, ncol
         do 20 icol = 1, nlevop
-         if ( ibasty .eq. 9 .and. incol(i).ne.inlev(icol)) go to 20
+          if (is_j12(ibasty) .and. incol(i) .ne. inlev(icol))
+     $          go to 20
           if (.not. twomol .and. incol(i).ne.inlev(icol)) go to 20
           if (jcol(i) .ne. jlev(icol)) goto 20
           isc1(i) = icol
@@ -1814,19 +1858,26 @@ c
 * set pointer array and degeneracy factors for rows (initial states)
       do 140 j = 1, nopen
         do 120 irow = 1, nlevop
-           if (ibasty.eq.9 .and. inrow(j).ne.inlev(irow)) go to 120
+           if (is_j12(ibasty) .and. inrow(j).ne.inlev(irow))
+     $          go to 120
            if (.not. twomol.and.inrow(j).ne.inlev(irow)) go to 120
            if (jrow(j) .ne. jlev(irow)) goto 120
            jj = jlev(irow)
            if (.not. twomol) then
              xjrow1 = jj
-             if (ibasty.ne.12) then
-               if (flaghf) xjrow1 = xjrow1 + 0.5d0
-               denrow = (2.d0 * xjrow1 + 1.d0)
-             else
-* here for 2P atom + homonuclear molecule in which case
+             if (ibasty.eq.12 .or. ibasty.eq.13 .or.
+     $            ibasty.eq.15) then
+* here for 2P/3P atom + homonuclear molecule in which case
 * degeneracy factor is (2jmol+1)*(2*ja+1)
-               denrow=(2.d0*xjrow1+1.d0)*(2.d0*inlev(irow)+2d0)
+                xj2 = inlev(irow)
+                if (flaghf) xj2 = xj2 + 0.5d0
+                denrow = (2.d0*xjrow1+1.d0)*(2.d0*xj2+1.d0)
+* here for 3P + 2S arom-atom collision
+             elseif (ibasty .eq. 23) then
+               denrow = (2.d0 * xjrow1 + 1.d0) * 2.d0
+             else
+               if (flaghf) xjrow1 = xjrow1 + 0.5d0
+                 denrow = (2.d0 * xjrow1 + 1.d0)
              endif
            else
              jrow1 = jj / 10
@@ -1835,7 +1886,9 @@ c
              xjrow2 = jrow2
              if (flaghf) then
                xjrow1 = xjrow1 + 0.5d0
-               xjrow2 = xjrow2 + 0.5d0
+* The following statement is removed on May 30, 2013; flaghf now only
+* applies to the first molecule (j1).
+c$$$               xjrow2 = xjrow2 + 0.5d0
              end if
              denrow = (2.d0 * xjrow1 + 1.d0) * (2.d0 * xjrow2 + 1.d0)
           end if

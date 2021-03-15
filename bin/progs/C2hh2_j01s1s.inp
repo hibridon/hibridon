@@ -1,0 +1,24 @@
+C2H-H2   RCCSD(T) PES by Dagdigian (2017) - 1sg1sg    
+   25                            ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    4.5    10.0000    0.1000     rstart, rendld, spac
+  F                              prairy
+  1.050      1.00   60.0  1.50   tolai, rincr, rendai, fstfac
+   1                             nerg
+    50.0000
+    1.865305033759808            xmu
+ -100.0000                       rcut
+   0  40   1   0   0   1   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80  -1                         lscreen, iprint
+   15   2                        nnout,niout
+  00  10  20  30  40  50  60  70  02 12 22 32 42 53 62 
+ -1    1
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  T  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  T  F  F  F  T                  flaghf, csflag, flagsu, ihomo, twomol
+  F                              rsflag, boundc 
+   4   0   0   2  -1             j1max, j2min, j2max, ipotsy2, iop
+1.455918 3.52314e-6  59.322000   b1rot, d1rot, b2rot
+pot_c2hh2_14_6.dat
+

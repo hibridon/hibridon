@@ -1,6 +1,8 @@
 * System:  PH(A 3Pi)+He, original ab initio CEPA PES's
-* Reference: K. Fink and V. Staemmler
 * modified to include just v00, v20, v22
+* Reference: 
+* Ch. Kolczewski, K. Fink, V. Staemmler, and L. Neitsch
+* J. Chem. Phys. 106, 7637 (1997)
 
 
       subroutine driver

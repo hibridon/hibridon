@@ -1,0 +1,23 @@
+B-H2 PES's of ALEXANDER - test ics calc                        
+  12                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+ 3.50   25.0000     0.1          rstart, rendld, spac
+ F                               prairy
+ 1.150  1.00   100.0  1.5        tolai, rincr, rendai, fstfac
+ 1                               nerg
+   600.00
+ 3.4687                          xmu
+ -100.0000                       rcut
+ 0 20 1   0   0   1   1       j  tot1,jtot2,jtotd,j lpar,numin,numax,nud
+ 88  -1                          lscreen, iprint
+  6    2                         nnout,niout
+ 0  1  2  3  4  5 
+ 0  1 
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  T  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  T  F  F  T  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+    0   2                        iop, jmax
+     59.3340       10.1700       brot, aso
+nopot                                   

@@ -1,0 +1,24 @@
+Ar-N2 test for CCSC calc
+   1                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    6.0000    9.0000    0.05     rstart, rendld, spac
+  F                              prairy
+  1.050      8.00    20.0  1.00  tolai, rincr, rendai, fstfac
+   1                             nerg
+   200.0000
+   16.466332                     xmu
+  -100.000                       rcut
+   0   0   1   1   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80  -1                         lscreen, iprint
+   10    1                       nnout,niout
+    0  1 2  3 4 5  6  8  10  12
+    0
+  T  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  T  F  F  T  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  F  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  F  F  F  T  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+   1  0  0                       nvib, vibmn, vibmx
+   0  0  4                       iv, jmin, jmax
+   2.01  0  0  0                 brot, drot, hrot
+   0                             evib

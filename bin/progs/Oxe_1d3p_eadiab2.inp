@@ -1,0 +1,22 @@
+O-Xe 2 state                       
+   22                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    2.60000    3.0000    0.010   rstart, rendld, spac
+  F                              prairy
+  1.010      8.00    200.0 1.05  tolai, rincr, rendai, fstfac
+   1                             nerg
+   15990.0
+  14.2580610068                  xmu
+   -100.000                      rcut
+   0  200   1    0   0   0   1   jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80   -1                        lscreen, iprint
+   3    2                        nnout,niout
+   0  1  2
+   3  1
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  F  T                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  F  F  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+   2                             nstate
+   15867.681                     en1d

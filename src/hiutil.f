@@ -4,28 +4,38 @@
 *                                                                    *
 **********************************************************************
 *                         routines included:                         *
-*  1. vaxhlp/upcase,getwor     subroutine to mimic vaxhelp
+*  1. vaxhlp/upcase,getwor     subroutine to mimic vaxhelp           *
 *  2. parse      parser for analyzing command strings                *
 *  3. getval     assigns numeric command strings to variables        *
 *  4. upper      converts string to upper case string                *
 *  5. lower      converts string tp lower case string                *
 *  6. dater      subroutine to return calendar date and clock time   *
 *  7. mtime      routine to return cpu and wall clock time in seconds*
-*  8. second     function to return current cpu time
+*  8. second     function to return current cpu time                 *
 *  9. gettim     converts seconds to time string: hhh:mm:ss          *
-* 9a. timdat     returns time and date
+* 9a. timdat     returns time and date                               *
 * 10. gennam     routine to generate filenames                       *
 * 11. factlg     calculates factorials used in xf3j, xf6j, xf9j      *
 * 12. xf3j       function, returns value of 3j-symbol                *
 * 13. xf6j       function, returns value of 6j-symbol                *
 * 14. xf9j       function, returns value of 9j-symbol                *
-* 15. f3j0,f6j   3j and 6j routines for two molecule program
-* 16. intairy    evaluate s integrals of airy functions              *
-* 17.  cheby     evaluate expansion in chebyshev polynomials         *
-* 18. fehler     dummy subroutine for molpro2006.3 c compatibility   *
-* 19. sys_conf   determine and print out details of current machine  *
+* 15. f3j0       function, 3j-symbol with integer j's and zero m's   *
+* 16. f6j        function, 6j-symbol with integer j's                *
+* 17. f9j        function, 9j-symbol with integer j's                *
+* 18. intairy    evaluate s integrals of airy functions              *
+* 19. cheby      evaluate expansion in chebyshev polynomials         *
+* 20. fehler     dummy subroutine for molpro2006.3 c compatibility   *
+* 21. sys_conf   determine and print out details of current machine  *
 *                and O/S                                             *
+* 22. dlm0,pm0   reduced rotation matrix element,Legendre polynomial *
+* 23. tf3jm0     3j-symbol with m=0; use (integer) 2j as arguments   *
+* 24. tf3j       3j-symbol; use (integer) 2j and 2m as arguments     *
+* 25. tf6j       6j-symbol; use (integer) 2j as arguments            *
+* 26. tf9j       9j-symbol; use (integer) 2j as arguments            *
 **********************************************************************
+* Warning: Please make sure kfact>3j+2 where j is the maximum value
+* of angular momentum that may occur (kfact is defined in himain)
+*
 * NB cstart ultrix for fortran rather than c utilities
 **********************************************************************
 cstart unix-xlf
@@ -77,6 +87,7 @@ cend
 cstart unix
       zalt=' '
       level=0
+      levini = 0
       line = line1
       if (line.ne.' ') goto 1111
 1     if (level.lt.0) goto 99
@@ -449,7 +460,9 @@ c-------------------------------------------------------------------
       subroutine mtime(t,te)
 *
 *  subroutine to return elapsed time in seconds
-*  current revision date: 4-dec-2007 by mha
+*  use time_t time system call.  time will be given to nearest sec
+*  but will work if date changes.   q.ma
+*  current revision date: 4-jan-2011 by q.ma
 *
 *  -----------------------------------------------------------------
 *  variables in call list
@@ -479,7 +492,13 @@ cstart unix-ifort
       t=tt
 * use dclock for elapsed (wall time).  this is (supposedly) accurate to
 * microseconds
-      te=dclock()
+c      te=dclock()
+c
+c use time_t time(time_t *t) system call [see `man 2 time`]
+c this only accurate to seconds, but works fine when date changes
+      call pxftime(itime, ierror)
+      te = dble(itime)
+c
 cend
 cstart unix-pgi
 c;      real tt, tarray(2), result
@@ -533,27 +552,31 @@ cend
       subroutine gettim(sec,time)
 *
 *  author: b. follmeg
-*  current revision date: 30-nov-2007 by mha
+*  revision: 30-nov-2007 by mha
+*  revision: 12-jan-2012 by q. ma (print only hhh:mm:ss)
 *
 *  subroutine to convert timing in seconds into string which contains
 *  time in format hour:min:sec:millisec (000:00:00.00)
 *  on input:  sec   -> seconds
 *  on output: time  -> string containing time (must have been dimensioned
-*                      as character*13 at least)
+*                      as character*10 at least)
       integer ihour, imin, isec, imilli
       double precision sec
-      character*13 time
-      isecn=1000*sec
-      imilli=mod(isecn,1000)
-*     write(6,*) 'sec, isec, isecn, imilli', sec, isec, isecn, imilli
-      isecn=isecn/1000
+      character*10 time
+c$$$      isecn=1000*sec
+c$$$      imilli=mod(isecn,1000)
+c$$$*     write(6,*) 'sec, isec, isecn, imilli', sec, isec, isecn, imilli
+c$$$      isecn=isecn/1000
+      isecn = sec
       isec=mod(isecn,60)
       isecn=isecn/60
       imin=mod(isecn,60)
       ihour=isecn/60
-      write(time,10) ihour,imin,isec,imilli
-10    format(i3.2,':',i2.2,':',i2.2,'.',i3.3)
-*     write (6,*) time
+c$$$      write(time,10) ihour,imin,isec,imilli
+c$$$10    format(i3.2,':',i2.2,':',i2.2,'.',i3.3)
+c$$$*     write (6,*) time
+      write (time, 10) ihour, imin, isec
+ 10   format (i3.2, ':', i2.2, ':', i2.2)
       return
       end
 * --------------------------------------------------------------------
@@ -627,6 +650,7 @@ c;      return
 c;      end
 c;ccend
 cend
+* ----------------------------------------------------------------
       subroutine gennam(xname,jobnam,ifil,xtens,ln)
 *
 * subroutine to generate filnames
@@ -638,7 +662,8 @@ cend
 * on output: xname ->  generated filnam (e.g. filnam1.ext)
 *            ln    ->  length of xname
 *
-* current revision date: 4-jun-1991
+* alterred to allow ienerg to be as large as 999 (p.dagdigian)
+* current revision date: 15-jul-2014
 *
       character*(*) xname,jobnam,xtens
       character*1 dot
@@ -650,14 +675,18 @@ cend
       endif
       if(ifil.eq.0) then
         ln=i-1
-      else if(ifil.lt.10) then
+      elseif (ifil.lt.10) then
         write(xname(i:),10) ifil
 10      format(i1)
         ln=i
-      else
+      elseif (ifil.lt.100) then
         write(xname(i:),20) ifil
 20      format(i2)
         ln=i+1
+      else
+        write(xname(i:),30) ifil
+30      format(i3)
+        ln=i+2
       end if
       xname(ln+1:)=dot
       xname(ln+2:)=xtens
@@ -682,13 +711,13 @@ c
 5     continue
       return
       end
+* --------------------------------------------------------------------------
       function xf3jm0(a,b,c)
 *     program to compute the 3j symbol (a b c / 0 0 0)
 *     author:  b. follmeg
 *     current revision date: 14-dec-87
 *     revised by mha 4-may-1997
 *
-* --------------------------------------------------------------------------
       implicit double precision (a-h,o-z)
       common /cofact/ si(1)
       data zero,two /0.d0, 2.d0/
@@ -794,7 +823,7 @@ c end_jk
 3     xf3j = x
       return
       end
-
+* --------------------------------------------------------------------------
       function xf6j(a,b,e,d,c,f)
 *
 *                                    | a  b  e |
@@ -1021,9 +1050,14 @@ c end_jk
       end
 * -------------------------------------------------------------------
       function f3j0(j1,j2,j3)
+c     current revision: 19-apr-2012 by q. ma (check input)
       implicit double precision (a-h,o-z)
       common /cofact/ si(1)
       j=j1+j2+j3
+      if(mod(j,2).or.j3.lt.iabs(j1-j2).or.j3.gt.(j1+j2)) then
+         f3j0=0d0
+         return
+      end if
       jp=j/2
       jpp=jp+1
       jp1=jpp-j1
@@ -1083,27 +1117,37 @@ c end_jk
       end
 * -------------------------------------------------------------------
       function del(j1,j2,j3)
+c     current revision: 25-apr-2012 by q. ma
+c
+c     A loop was used originally to handle high-j case, but it slows
+c     down the calculation significantly.  This modified function
+c     requires (j1+j2+j3+2).le.kfact (defined in himain).
       implicit double precision (a-h,o-z)
       common /cofact/ si(1)
-      j=j1+j2+j3+1
-      k1=j-2*j1
-      k2=j-2*j2
-      k3=j-2*j3
-      k=k1
-      l1=k2
-      l2=k3
-      if(k.ge.k2) go to 7
-      k=k2
-      l1=k1
-      l2=k3
-7     if(k.ge.k3) go to 4
-      k=k3
-      l1=k1
-      l2=k2
-4     d=0.
-      do 3 l=k,j
-3     d=d+dlog(dfloat(l))
-      del=(si(l1)+si(l2)-d)/2.0d0
+      del=(si(j1+j2-j3+1)+si(j1-j2+j3+1)+si(-j1+j2+j3+1)
+     $     -si(j1+j2+j3+2))/2d0
+      return
+      end
+* -------------------------------------------------------------------
+      function f9j(i1,i2,i3,i4,i5,i6,i7,i8,i9)
+      implicit double precision (a-h,o-z)
+      data zero /0.d0/
+      kmin=max0(iabs(i6-i2),iabs(i8-i4))
+      kmin=max0(kmin,iabs(i9-i1))
+      kmax=min0((i6+i2),(i8+i4))
+      kmax=min0(kmax,(i9+i1))
+      sum=zero
+      f9j=zero
+      do 20 k=kmin,kmax
+        b2=f6j(i1,i2,i3,i6,i9,k)
+        if(b2.eq.zero) goto 20
+        b3=f6j(i4,i7,i1,i9,k,i8)
+        if(b3.eq.zero) goto 20
+        b4=f6j(i5,i8,i2,k,i6,i4)
+        if(b4.eq.zero) goto 20
+        sum=sum+(2*k+1)*b2*b3*b4
+ 20   continue
+      f9j=sum
       return
       end
 * -------------------------------------------------------------------
@@ -1441,3 +1485,301 @@ c;40    format('*** COMMAND SYSCONF NOT IMPLEMENTED FOR CURRENT O/S')
 cend
       return
       end
+* -------------------------------------------------------------------------
+      function dlm0(ll,m,theta)
+      implicit double precision(a-h,o-z)
+c                          m0
+c...function to calculate d  (cos(theta) as defined in "brink and satchler"
+c                          l
+c   this is only a dummy function for correct phase
+c
+      l=ll
+      dlm0=(-1)**m*pm1(l,m,theta)
+      return
+      end
+      function pm1(l,m,theta)
+c
+c  calculates value of legendre polynomial for l,m,theta
+c
+      implicit double precision(a-h,o-z)
+      data pi/3.1415926535897932d0/
+      data zero, one, two, one80 /0.d0, 1.d0, 2.d0, 180.d0/
+      thedeg=(theta*pi)/one80
+c
+c  if m>l pm1=0 !
+c
+      if(m.gt.l) then
+        pm1=zero
+        return
+      end if
+      lmax=l
+      x=cos(thedeg)
+      if (m.ge.0) go to 1
+      write (6,100)
+100   format('  NEGATIVE M IN LEGENDRE ROUTINE:  ABORT')
+      stop
+c     call exit
+1     if (m.gt.0) go to 5
+c  here for regular legendre polynomials
+      pm1=one
+      pm2=zero
+      do 2 l=1,lmax
+      pp=((two*l-one)*x*pm1-(l-one)*pm2)/float(l)
+      pm2=pm1
+2     pm1=pp
+      return
+c
+c  here for alexander-legendre polynomials
+c
+5     imax=2*m
+      rat=1.
+      do 6 i=2,imax,2
+      ai=i
+6     rat=rat*((ai-one)/ai)
+      y=sin(thedeg)
+      pm1=sqrt(rat)*(y**m)
+      pm2=zero
+      low=m+1
+      do 10 l=low,lmax
+      al=(l+m)*(l-m)
+      al=one/al
+      al2=((l+m-1)*(l-m-1))*al
+      al=sqrt(al)
+      al2=sqrt(al2)
+      pp=(two*l-one)*x*pm1*al-pm2*al2
+      pm2=pm1
+10    pm1=pp
+      return
+      end
+c     ------------------------------------------------------------------
+      logical function tf_triang_fail(two_ja, two_jb, two_jc)
+      implicit none
+      integer, intent(in) :: two_ja, two_jb, two_jc
+      tf_triang_fail = (two_jc .gt. (two_ja + two_jb)) .or.
+     $     (two_jc .lt. iabs(two_ja - two_jb)) .or.
+     $     (mod(two_ja + two_jb + two_jc, 2) .ne. 0)
+      return
+      end function tf_triang_fail
+c     ------------------------------------------------------------------
+      real(8) function tdel(two_ja, two_jb, two_jc)
+      implicit none
+      integer, intent(in) :: two_ja, two_jb, two_jc
+      common /cofact/ si
+      real(8), dimension(0:1) :: si
+      integer :: j
+c
+      j = (two_ja + two_jb + two_jc) / 2
+      tdel = (si(j - two_ja) + si(j - two_jb) + si(j - two_jc)
+     $     - si(j + 1)) / 2d0
+      return
+      end function tdel
+c     ------------------------------------------------------------------
+      real(8) function tf3jm0(two_ja, two_jb, two_jc)
+c     3j-symbol (ja jb jc / 0 0 0)
+c     Modified from f3j0 by Q. Ma
+      implicit none
+      integer, intent(in) :: two_ja, two_jb, two_jc
+      common /cofact/ si
+      real(8), dimension(0:1) :: si
+      real(8) :: tdel
+      integer :: j, jp
+      tf3jm0 = 0d0
+      if ((two_jc .gt. (two_ja + two_jb)) .or.
+     $     (two_jc .lt. iabs(two_ja - two_jb))) return
+      if ((mod(two_ja, 2) .ne. 0) .or. (mod(two_jb, 2) .ne. 0)
+     $     .or. (mod(two_jc, 2) .ne. 0)) return
+      j = (two_ja + two_jb + two_jc) / 2
+c     Check for even sum
+      jp = j / 2
+      if (mod(j, 2) .ne. 0) return
+      tf3jm0 = si(jp) - si(jp - two_ja / 2) - si(jp - two_jb / 2)
+     $     - si(jp - two_jc / 2) + tdel(two_ja, two_jb, two_jc)
+      tf3jm0 = (-1) ** jp * dexp(tf3jm0)
+      return
+      end
+c     ------------------------------------------------------------------
+      function tf3j(two_ja, two_jb, two_jc,
+     $     two_ma, two_mb, two_mc)
+c     Compute the 3j symbol (ja jb jc / ma mb mc)
+c     Modified from xf3j by Q. Ma
+c     ------------------------------------------------------------------
+      implicit real(8) (a-h, o-z)
+      integer, intent(in) :: two_ja, two_jb, two_jc, two_ma, two_mb,
+     $     two_mc
+      common /cofact/ si
+      real(8), dimension(1) :: si
+      tf3j = 0d0
+      if (two_ma + two_mb + two_mc .ne. 0) return
+      if ((two_jc .gt. (two_ja + two_jb)) .or.
+     $     (two_jc .lt. iabs(two_ja - two_jb))) return
+      if ((iabs(two_ma) .gt. two_ja) .or. (iabs(two_mb) .gt. two_jb)
+     $     .or. (iabs(two_mc) .gt. two_jc)) return
+      if ((mod(two_ja + two_ma, 2) .ne. 0)
+     $     .or. (mod(two_jb + two_mb, 2) .ne. 0)
+     $     .or. (mod(two_jc + two_mc, 2) .ne. 0)) return
+      if (two_ma .eq. 0 .and. two_mb .eq. 0) then
+         tf3j = tf3jm0(two_ja, two_jb, two_jc)
+         return
+      end if
+      iabc = two_ja + two_jb + two_jc
+      if (mod(iabc, 2) .ne. 0) return
+      iabc = iabc / 2
+      iacbm = (two_ja - two_jc + two_mb) / 2
+      ibcam = (two_jb - two_jc - two_ma) / 2
+      iabmc = iabc - two_jc
+      iamam = (two_ja - two_ma) / 2
+      ibpbm = (two_jb + two_mb) / 2
+      iapam = (two_ja + two_ma) / 2 + 1
+      ibmbm = (two_jb - two_mb) / 2 + 1
+      icpcm = (two_jc + two_mc) / 2 + 1
+      icmcm = (two_jc - two_mc) / 2 + 1
+      minchi = max(0, ibcam, iacbm)
+      maxchi = min(iabmc, iamam, ibpbm) - minchi
+      iabmc = iabmc - minchi
+      iaam = iamam - minchi
+      ibbm = ibpbm - minchi
+      ibcam = minchi - ibcam
+      iacbm = minchi - iacbm
+      iamam = iamam + 1
+      ibpbm = ibpbm + 1
+      j1 = iabc - two_ja + 1
+      j2 = iabc - two_jb + 1
+      j3 = iabc - two_jc + 1
+      j4 = iabc + 2
+      delta = si(j1) + si(j2) + si(j3) - si(j4)
+      ll = 0
+      x = 1d0
+      if (maxchi.le.0) goto 2
+      a1 = dble(ibcam + maxchi + 1)
+      a2 = dble(iacbm + maxchi + 1)
+      a3 = dble(minchi + maxchi + 1)
+      b1 = dble(iabmc - maxchi)
+      b2 = dble(iaam - maxchi)
+      b3 = dble(ibbm - maxchi)
+      do 1 ichi = 1, maxchi
+      xchi = dble(ichi)
+      xb = (a1 - xchi) * (a2 - xchi) * (a3 - xchi)
+ 1    x = 1d0 - (b1 + xchi) * (b2 + xchi) * (b3 + xchi) * x / xb
+      if(x) 4,3,2
+ 4    x = -x
+      ll = 1
+ 2    x = dlog(x) - si(iabmc+1) - si(iaam+1) - si(ibbm+1) - si(ibcam+1)
+     :            - si(iacbm+1) - si(minchi+1)
+      x = 2d0 * x + si(iapam) + si(iamam) + si(ibpbm) + si(ibmbm) +
+     :           si(icpcm) + si(icmcm) + delta
+      x = dexp( x / 2d0)
+      l = ll + minchi + (two_jb - two_ja + two_mc) / 2
+      if( 2 * (l/2) .ne. l) x = -x
+ 3    tf3j = x
+      return
+      end
+c     ------------------------------------------------------------------
+      function tf6j(two_ja, two_jb, two_je, two_jd, two_jc, two_jf)
+c
+c                           | a  b  e |
+c     Compute the 6j symbol {         }
+c                           | d  c  f |
+c     Modified from xf6j by Q. Ma
+c     ------------------------------------------------------------------
+      implicit real(8) (a-h,o-z)
+      integer, intent(in) :: two_ja, two_jb, two_je, two_jd, two_jc,
+     $     two_jf
+      common /cofact/ si(1)
+      real(8), parameter :: tol=1d-10, zero=0d0, one=1d0, two=2d0
+      logical :: tf_triang_fail
+      x=zero
+      tf6j = 0d0
+      if (tf_triang_fail(two_ja, two_jb, two_je)) return
+      iabe = (two_ja + two_jb + two_je) / 2
+      if (tf_triang_fail(two_jd, two_jc, two_je)) return
+      idce = (two_jd + two_jc + two_je) / 2
+      if (tf_triang_fail(two_ja, two_jc, two_jf)) return
+      iacf = (two_ja + two_jc + two_jf) / 2
+      if (tf_triang_fail(two_jd, two_jb, two_jf)) return
+      idbf = (two_jd + two_jb + two_jf) / 2
+      iabdc = iabe + idce - two_je
+      iaedf = iabe + idbf - two_jb
+      ibecf = iabe + iacf - two_ja
+      minchi = max(iabe,idce,iacf,idbf,-1)
+      maxchi = min(iabdc,iaedf,ibecf) - minchi
+* indices for deltas
+      delta = zero
+      i2a = two_ja - 1
+      i2b = two_jb - 1
+      i2c = two_jc - 1
+      i2d = two_jd - 1
+      i2e = two_je - 1
+      i2f = two_jf - 1
+* delta(abe)
+      j1 = iabe - i2a
+      j2 = iabe - i2b
+      j3 = iabe - i2e
+      j4 = iabe + 2
+      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
+* delta(dce)
+      j1 = idce - i2d
+      j2 = idce - i2c
+      j3 = idce - i2e
+      j4 = idce + 2
+      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
+* delta(acf)
+      j1 = iacf - i2a
+      j2 = iacf - i2c
+      j3 = iacf - i2f
+      j4 = iacf + 2
+      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
+* delta(dbf)
+      j1 = idbf - i2d
+      j2 = idbf - i2b
+      j3 = idbf - i2f
+      j4 = idbf + 2
+      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
+      delta = 0.5d0 * delta
+      iabdc = iabdc - minchi
+      iaedf = iaedf - minchi
+      ibecf = ibecf - minchi
+      iabe = minchi - iabe
+      idce = minchi - idce
+      iacf = minchi - iacf
+      idbf = minchi - idbf
+      abdc = dble(iabdc - maxchi)
+      aedf = dble(iaedf - maxchi)
+      becf = dble(ibecf - maxchi)
+      abe = dble(maxchi + iabe + 1)
+      dce = dble(maxchi + idce + 1)
+      acf = dble(maxchi + iacf + 1)
+      dbf = dble(maxchi + idbf + 1)
+* loop over chi
+      x = 1.d0
+      ipower = 0
+      if (maxchi .le. 0) goto 30
+      ii = minchi + maxchi + 2
+      do 10 ichi = 1, maxchi
+         xchi = dble(ichi)
+         xa = (abdc + xchi) * (aedf + xchi) * (becf + xchi)
+         xb = (abe - xchi) * (dce - xchi) * (acf - xchi) * (dbf - xchi)
+         x = 1.d0 - xa * (ii - ichi) * x / xb
+10    continue
+      if (x) 20,40,30
+20    x = -x
+      ipower = 1
+30    x = dlog(x) + si(minchi+2)-si(iabdc+1)-si(iaedf+1)-si(ibecf+1)
+     :            - si(iabe+1)-si(idce+1)-si(iacf+1)-si(idbf+1) + delta
+      ipower = ipower + minchi
+      x = (-1.d0)**ipower * dexp(x)
+40    tf6j = x
+      return
+      end function tf6j
+c     ------------------------------------------------------------------
+      real(8) function tf9j(two_ja, two_jb, two_jc, two_jd, two_je,
+     $     two_jf, two_jg, two_jh, two_ji)
+      implicit none
+      integer, intent(in) :: two_ja, two_jb, two_jc, two_jd, two_je,
+     $     two_jf, two_jg, two_jh, two_ji
+      real(8) :: xf9j
+      tf9j = xf9j(two_ja / 2d0, two_jb / 2d0, two_jc / 2d0,
+     $     two_jd / 2d0, two_je / 2d0, two_jf / 2d0,
+     $     two_jg / 2d0, two_jh / 2d0, two_ji / 2d0)
+      return
+      end function tf9j
+c     ------------------------------------------------------------------

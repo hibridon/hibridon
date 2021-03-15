@@ -1,0 +1,140 @@
+#!/bin/csh -f
+# HIBRIDON sysconfig $Revision: 2016.1 $ --- report on system parameters
+# currently working for OSX 10.9 (Mavericks) 10.10 (Yosemite) and 10.11 (El Capitan)
+# if file proc_cpuinfo is present for linux machines, then this script will read it first
+echo " "
+set basedir=`hibriddir`
+set sysname=`uname -s`
+if $sysname == 'Darwin' then
+#   echo " running system_profile -basic ..."
+#   system_profiler -detailLevel basic>sysprofile
+   system_profiler SPHardwareDataType>&sysprofile
+   set opsys = `sw_vers -productVersion`
+   set opsys = `echo $opsys |awk '{printf substr($0,1,5)}'`
+   if ($opsys == "10.11"|| $opsys == "10.10") then
+      set pname = `grep "Processor Name" sysprofile`
+      set len = `echo $pname |awk '{printf length($0)}'`
+      set fchar = `echo $pname |awk '{printf index($0,":")}'`
+      set pname = `echo $pname |awk '{printf substr($0,'$fchar'+2,'$len'-'$fchar'+1)}'`
+      set pspeed = `grep "Processor Speed" sysprofile`
+      set opsys = `echo "OSX" $opsys`
+      goto end_sys
+   if ($opsys == "10.5" || $opsys == "10.6") then
+      set pname = `grep "Processor Name" sysprofile`
+      set len = `echo $pname |awk '{printf length($0)}'`
+      set fchar = `echo $pname |awk '{printf index($0,":")}'`
+      set pname = `echo $pname |awk '{printf substr($0,'$fchar'+2,'$len'-'$fchar'+1)}'`
+      set pspeed = `grep "Processor Speed" sysprofile`
+   else
+      set pname = `grep "CPU Type" sysprofile`
+      set len = `echo $pname |awk '{printf length($0)}'`
+      set fchar = `echo $pname |awk '{printf index($0,":")}'`
+      set pname = `echo $pname |awk '{printf substr($0,'$fchar'+2,'$len'-'$fchar'+1)}'`
+      set lchar = `echo $pname |awk '{printf index($0,"(")}'`
+      set pname = `echo $pname |awk '{printf substr($0,0,'$lchar'-1)}'`
+      set pspeed = `grep "CPU Speed" sysprofile`
+   endif
+   endif
+   end_sys:
+
+   set len = `echo $pspeed |awk '{printf length($0)}'`
+   set fchar = `echo $pspeed |awk '{printf index($0,":")}'`
+   set pspeed = `echo $pspeed |awk '{printf substr($0,'$fchar'+2,'$len'-'$fchar'+1)}'`
+   set pname = "$pname; $pspeed"
+   set mem = `grep "Memory" sysprofile`
+   set lchar = `echo $mem |awk '{printf index($0,"B")}'`
+   set mem = `echo $mem |awk '{printf substr($0,0,'$lchar'+1)}'`
+   set len = `echo $mem |awk '{printf length($0)}'`
+   set fchar = `echo $mem |awk '{printf index($0,":")}'`
+   set mem = `echo $mem |awk '{printf substr($0,'$fchar'+2,'$len'-'$fchar'+1)}'`
+   set cache = `grep "L2 Cache" sysprofile`
+   set len = `echo $cache |awk '{printf length($0)}'`
+   set fchar = `echo $cache |awk '{printf index($0,":")}'`
+   set cache = `echo $cache |awk '{printf substr($0,'$fchar'+2,'$len'-'$fchar'+1)}'`
+   set bus = `grep "Bus Speed" sysprofile`
+   set pname = "$pname; $mem RAM; $cache L2 cache; $bus"
+   set pname = "$pname $opsys"
+   echo $pname>sysprofile
+else if $sysname == 'Linux' then
+# determine which version of unix
+   linux_version
+   set opsys = `cat lversion`
+   rm lversion
+   if (-e $basedir/bin/progs/proc_cpuinfo) then
+      cat $basedir/bin/progs/proc_cpuinfo >> sysinfo
+   else
+      cat /proc/cpuinfo >> sysinfo
+   endif
+   set pname = `grep -m 1 "model name" sysinfo`
+   set len = `echo $pname |awk '{printf length($0)}'`
+   if $len == 0 then
+      set pname = `grep -m 1 "cpu MHz" sysinfo | awk '{printf substr($4,1,4)}'`
+      set pname="CPU CLOCK $pname MHz"
+   else
+      set fchar = `echo $pname |awk '{printf index($0,":")}'`
+      set pname = `echo $pname |awk '{printf substr($0,'$fchar'+2,'$len'-'$fchar'+1)}'`
+   endif
+   set ncore = `grep -m 1 "cpu core" sysinfo`
+   set len = `echo $ncore |awk '{printf length($0)}'`
+   if $len == 0 then
+      set core = 'single-core'
+   else
+      set len = `echo $ncore |awk '{printf length($0)}'`
+      set fchar = `echo $ncore |awk '{printf index($0,":")}'`
+      set ncore = `echo $ncore |awk '{printf substr($0,'$fchar'+2,'$len'-'$fchar'+1)}'`
+      if $ncore == 1 then
+           set core = 'single-core'
+      else if $ncore == 2 then
+           set core = 'dual-core'
+      else if $ncore == 4 then
+           set core = 'quad-core'
+      else if $ncore == 6 then
+           set core = 'hex-core'
+      else if $ncore == 8 then
+           set core = 'octa-core'
+      else if $ncore == 10 then
+           set core = 'deca-core'
+      else if $ncore == 12 then
+           set core = 'twelve-core'
+      else if $ncore == 14 then
+           set core = '4teen-core'
+      else if $ncore == 16 then
+           set core = '6teen-core'
+      else if $ncore == 18 then
+           set core = '8teen-core'
+      else if $ncore == 20 then
+           set core = 'OMG-core'
+      endif
+   endif
+   set ncpu = `grep processor sysinfo |wc`
+   set ncpu = `echo $ncpu |awk '{printf substr($0,1,2)}'`
+   if $ncpu == 1 then
+        set cpu = 'Single'
+   else if $ncpu == 2 then
+        set cpu = 'Dual'
+   else if $ncpu == 3 then
+        set cpu = 'Triple'
+   else if $ncpu == 4 then
+        set cpu = 'Quad'
+   else if $ncpu == 8 then
+        set cpu = 'Eight'
+   else
+        set cpu = $ncpu
+   endif
+   set cache = `grep -m 1 "cache size" sysinfo`
+   set len = `echo $cache |awk '{printf length($0)}'`
+   set fchar = `echo $cache |awk '{printf index($0,":")}'`
+   set cache = `echo $cache |awk '{printf substr($0,'$fchar'+2,'$len'-'$fchar'+1)}'`
+
+   set mem = `grep -m 1 "MemTotal" /proc/meminfo`
+   set len = `echo $mem |awk '{printf length($0)}'`
+   set fchar = `echo $mem |awk '{printf index($0,":")}'`
+   set mem = `echo $mem |awk '{printf substr($0,'$fchar'+2,'$len'-'$fchar'+1)}'`
+   set cpuname = "$cpu $core; $pname; $mem RAM; $cache L2 cache; $opsys"
+   echo $cpuname>sysprofile
+   rm sysinfo
+else
+  echo "System name $sysname not recognized"
+  exit
+endif
+endif

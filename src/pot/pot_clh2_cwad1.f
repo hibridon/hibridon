@@ -1,4 +1,6 @@
+*reference: G. Capecchi, H.-J. Werner Phys. Chem. Chem. Phys. 6, 4975 (2004)
 *system: Cl-H2 using CW-ADiabatic
+*
       include "common/syusr"
       subroutine driver
       implicit double precision (a-h,o-z)

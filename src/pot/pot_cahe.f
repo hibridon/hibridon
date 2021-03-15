@@ -112,10 +112,20 @@
       if (npot. eq. 1) then
 * here for original msv potentials
         call potmsv1(r,vp,vs,re(1),de(1),be(1),rl(1),cl(1))
-        vvl(1)=vp
-        vvl(2)=vs
-        vvl(3)=vp
-        vvl(4)=vs
+        vv0=0.d0;
+c Commented ou by J. Klos 2012.11.22
+c        vvl(1)=vp
+c        vvl(2)=vs
+c The coupling formula which is coded is identical to
+c Aquilanti's formula Eq. 2.10 in Aquilanti, Grossi
+c J. Chem. Phys. 73,1165 (1980)
+c where coupling elements multiply v_mu, not v_pi and v_sigma
+c vvl(1) is v_0, isotropic part
+c vvl(2) is v_2, anisotropic part
+        vvl(1)=(vs+2.d0*vp)/3.d0
+        vvl(2)=5.d0*(vs-vp)/3.d0
+        vvl(3)=(vs+2.d0*vp)/3.d0
+        vvl(4)=5.d0*(vs-vp)/3.d0
       else if (npot. eq. 2) then
 * here for new msv potentials + coupling for the 1sigma state
         call pot1(r,vp1,vs1,vp3,vs3)
@@ -124,10 +134,10 @@
         call pot2(r,vp1,vs1,vp3,vs3)
       endif
       if (npot .gt. 1) then
-        vvl(1)=vp1
-        vvl(2)=vs1
-        vvl(3)=vp3
-        vvl(4)=vs3
+        vvl(1)=(vs1+2.d0*vp1)/3.d0
+        vvl(2)=5.d0*(vs1-vp1)/3.d0
+        vvl(3)=(vs3+2.d0*vp3)/3.d0
+        vvl(4)=5.d0*(vs3-vp3)/3.d0
       endif
       return
       end
@@ -503,19 +513,19 @@ c -----------------------------------------------------------------------
       ns1 = n1si -1
         dvlf1si =( vl1si(n1si) - vl1si(ns1)) / (x1si(n1si) - x1si(ns1))
         dvli1si =( vl1si(2) - vl1si(1)) / (x1si(2) - x1si(1))
-        call dspline ( x1si, vl1si(1), n1si, dvlf1si, dvli1si, dvl1si)
+        call dspline1 ( x1si, vl1si(1), n1si, dvlf1si, dvli1si, dvl1si)
       ns3 = n3si -1
         dvlf3si = (vl3si(n3si) - vl3si(ns3)) / (x3si(n3si) - x3si(ns3))
         dvli3si = (vl3si(2) - vl3si(1)) / (x3si(2) - x3si(1))
-        call dspline ( x3si, vl3si(1), n3si, dvlf3si, dvli3si, dvl3si)
+        call dspline1 ( x3si, vl3si(1), n3si, dvlf3si, dvli3si, dvl3si)
       nt1 = n1pi -1
         dvlf1pi =( vl1pi(n1pi) - vl1pi(nt1)) / (x1pi(n1pi) - x1pi(nt1))
         dvli1pi =( vl1pi(2) - vl1pi(1)) / (x1pi(2) - x1pi(1))
-        call dspline ( x1pi, vl1pi(1), n1pi, dvlf1pi, dvli1pi, dvl1pi)
+        call dspline1 ( x1pi, vl1pi(1), n1pi, dvlf1pi, dvli1pi, dvl1pi)
       nt3 = n3pi -1
         dvlf3pi = (vl3pi(n3pi) - vl3pi(nt3)) / (x3pi(n3pi) - x3pi(nt3))
         dvli3pi = (vl3pi(2) - vl3pi(1)) / (x3pi(2) - x3pi(1))
-        call dspline ( x3pi, vl3pi(1), n3pi, dvlf3pi, dvli3pi, dvl3pi)
+        call dspline1 ( x3pi, vl3pi(1), n3pi, dvlf3pi, dvli3pi, dvl3pi)
  
         interp = 0
       end if
@@ -541,22 +551,22 @@ c -----------------------------------------------------------------------
         do i = 3, 4
         vvl(i) = - c6(i-1) * rz**(-6)
         end do
-        call dsplint (x1si, vl1si(1), dvl1si(1), n1si, rz, vvl(1))
+        call dsplint1 (x1si, vl1si(1), dvl1si(1), n1si, rz, vvl(1))
       end if
  
       if (rz .gt. rl2(3) .and. rz .le. rl1 ) then
         vvl(4) = - c6(3) * rz**(-6)
-        call dsplint (x1si, vl1si(1), dvl1si(1), n1si, rz, vvl(1))
-        call dsplint (x3si, vl3si(1), dvl3si(1), n3si, rz, vvl(2))
-        call dsplint (x1pi, vl1pi(1), dvl1pi(1), n1pi, rz, vvl(3))
+        call dsplint1 (x1si, vl1si(1), dvl1si(1), n1si, rz, vvl(1))
+        call dsplint1 (x3si, vl3si(1), dvl3si(1), n3si, rz, vvl(2))
+        call dsplint1 (x1pi, vl1pi(1), dvl1pi(1), n1pi, rz, vvl(3))
       end if
  
 * here for spline interpolation
       if ( rz .le. rl2(3) ) then
-      call dsplint (x1si, vl1si(1), dvl1si(1), n1si, rz, vvl(1))
-      call dsplint (x3si, vl3si(1), dvl3si(1), n3si, rz, vvl(2))
-      call dsplint (x1pi, vl1pi(1), dvl1pi(1), n1pi, rz, vvl(3))
-      call dsplint (x3pi, vl3pi(1), dvl3pi(1), n3pi, rz, vvl(4))
+      call dsplint1 (x1si, vl1si(1), dvl1si(1), n1si, rz, vvl(1))
+      call dsplint1 (x3si, vl3si(1), dvl3si(1), n3si, rz, vvl(2))
+      call dsplint1 (x1pi, vl1pi(1), dvl1pi(1), n1pi, rz, vvl(3))
+      call dsplint1 (x3pi, vl3pi(1), dvl3pi(1), n3pi, rz, vvl(4))
       end if
  
 *     write (6, 1000) rz, vvl(1), vvl(2), vvl(3), vvl(4)
@@ -569,7 +579,7 @@ c -----------------------------------------------------------------------
       return
       end
 * ------------------------------------
-      subroutine dspline(x,y,n,yp1,ypn,y2)
+      subroutine dspline1(x,y,n,yp1,ypn,y2)
       implicit double precision(a-h,o-z)
       parameter (nmax=300)
       dimension x(n),y(n),y2(n),u(nmax)
@@ -607,7 +617,7 @@ c -----------------------------------------------------------------------
 12    continue
       return
       end
-      subroutine dsplint(xa,ya,y2a,n,x,y)
+      subroutine dsplint1(xa,ya,y2a,n,x,y)
       implicit double precision(a-h,o-z)
       dimension xa(n),ya(n),y2a(n)
       save

@@ -1,28 +1,55 @@
 * System:  CH(X 2Pi)+He, original ab initio CEPA PES's
-* Reference: M. H. Alexander, W. Kearney, and A. F. Wagner, J. Chem.  Phys. 10
+* Reference: 
+* Albert F. Wagner, Thom H. Dunning, and Randall A. Kok,
+* J. Chem. Phys. 100, 1326 (1994) ; 
+* M. H. Alexander, W. Kearney, and A. F. Wagner,
+* J. Chem. Phys. 100, 1338 (1994).
+*
+*  Note:  this pot routine requires a data file to be in hibxx/bin/progs/potdata:
+*         chhe_abin.dat
+*
       include "common/syusr"
       subroutine driver
       implicit double precision (a-h,o-z)
-      character*13 filnam
+      character*60 filnam, filnm1
       character*80 delete
       logical lpar, lpar1, batch, readpt
       common /colpar/ lpar(3), batch,lpar1(10),readpt
       common /covvl/ vvl(11)
+      econv=219474.6d0
       readpt=.true.
       batch=.true.
       filnam='chhe_abin.dat'
       open(unit=9,file='fort.9',status='unknown',
      :      access='sequential')
       delete='rm fort.9'
+      filnm1 = 'potdata/'//filnam
       call loapot(10,filnam)
 1      print *, ' r (bohr)'
       read (5, *, end=99) r
       call pot(vv0,r)
+      if (r.le.0) goto 99
       write (6, 100) vv0,vvl
 100   format(' vsum',/,8(1pe16.8),/,
      :    '  vdif',/,4e16.8)
       goto 1
-99    call system(delete)
+99    rr=3.0d0
+      dr=0.1d0
+      open (unit=12,file='chhe_cyb_vsum.dat')
+      write(12,109)
+      open (unit=13,file='chhe_cyb_vdif.dat')
+      write(13,109)
+109   format(' %R/bohr V00  ...')
+      do i=1,250
+        call pot(vv0,rr)
+        write (12,110) rr,vv0*econv,(econv*vvl(j),j=1,7)
+110     format(f7.2,19(1pe16.8))
+        write (13,110) rr,vv0*econv,(econv*vvl(j),j=8,11)
+        rr = rr + dr
+      enddo
+      close(12)
+      close(13)
+      call system(delete)
       end
       include "common/bausr"
       include "common/ground"
@@ -75,10 +102,10 @@
 *              both lambda doublets)
 
 
+      implicit double precision (a-h,o-z)
       logical existf, readpt, lpar, lpar1, batch
       character*(*) filnam
-      character*75 title
-      implicit double precision (a-h,o-z)
+      character*75 title, filnm1
       include "common/parbas"
       include "common/parpot"
 
@@ -152,7 +179,8 @@
 
 c input is handled here
 c first read in the .5(a''+a') surface parameters
-      inquire(file=filnam,exist=existf)
+      filnm1 = 'potdata/'//filnam
+      inquire(file=filnm1,exist=existf)
       if (.not. existf) then
         write (6, 11) filnam
 11      format
@@ -160,7 +188,7 @@ c first read in the .5(a''+a') surface parameters
         if (batch) call exit
         return
       endif
-      open(unit=iunit,file=filnam,status='old',
+      open(unit=iunit,file=filnm1,status='old',
      :      access='sequential')
       read(iunit,180)title
 180   format(a)

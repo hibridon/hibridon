@@ -1,0 +1,875 @@
+* --------------------------------------------------------------------
+      subroutine ba3p2s (j, l, is, jhold, ehold, ishold, nlevel, nlevop,
+     :                  isc1, rcut, jtot, flaghf, flagsu,
+     :                  csflag, clist, bastst, ihomo, nu, numin, jlpar,
+     :                  n, nmax, ntop)
+* --------------------------------------------------------------------
+*  subroutine to determine coupling potential (electrostatic + spin-orbit)
+*  for collision involving the 3P state of atom in a p^4 electronic
+*  configuration with an atom in a 2S state
+*  (based on the ba1d3p basis routine)
+*
+*  the spin-orbit part of the W matrix computed as W(R) - W(R=inf)
+*
+*  j12 array is in common block /coj12/ to pass to other subrs
+*
+*  author:  paul dagdigian
+*  current revision date:  13-feb-2015 by p.dagdigian
+* --------------------------------------------------------------------
+*  variables in call list:
+*    j:        on return contains electronic angular momentum quantum number
+*              for each channel (j = 0, 1, 2 for the 3P spin-orbit levels
+*    l:        on return contains orbital angular momentum for each
+*              channel
+*    is:       on return contains electronic spin of each channel (0 or 1)
+*    jhold:    on return contains electronic angular momentum quantum number
+*              for each level
+*    ehold:    on return contains energy in hartrees of each level
+*    ishold:   on return contains spin multiplicity of each level
+*    nlevel:   on return contains number of energetically distinct
+*              levels used in channel basis
+*    nlevop:   on return contains number of energetically distinct
+*              levels used in channel basis which are open
+*              asymptotically
+*    isc1:     scratch vector of length at least nmax
+*    rcut:     cut-off point for keeping higher energy channels
+*              if any open channel is still closed at r=rcut, then
+*              all closed channels as well any open channels which are
+*              still closed at r=rcut are dropped from basis
+*              note that this is ignored in molecule-surface collisions!!!
+*    jtot:     total angular momentum
+*    flaghf:   if .true., then system with half-integer spin
+*              if .false., then system with integer spin (this is the case
+*              here)
+*    flagsu:   if .true., then molecule-surface collisons
+*    csflag:   if .true., then coupled-states calculation
+*              if .false., the close-coupled calculation
+*    clist:    if .true., then quantum numbers and energies listed for
+*              each channel
+*    bastst:   if .true., then execution terminates after the first call
+*              to basis
+*    ihomo:    if .true. , then homonuclear molecule
+*              if .false., then heteronuclear molecule
+*              if the molecule is homonuclear (ihomo = .true.), the
+*              rotational levels included go from jmin to jmax in steps
+*              of 2 and only even lambda terms in the anisotropy are
+*              included
+*    nu:       coupled-states projection index
+*    numin:    minimum coupled states projection index
+*              for cc calculations nu and numin are both set = 0 by calling
+*              program
+*    jlpar:    total parity of included channels in cc calculation
+*              only those channels are included for which
+*                  (-1)**(l-jtot)=jlpar
+*              n.b. jlpar=+1 corresponds to f levels, jlpar=-1, to e levels
+*    n:        on return equals number of channels
+*    nmax:     maximum dimension of arrays
+*    ntop:     maximum row dimension of all matrices passed to subroutines
+*              propag and soutpt.  ntop is set in basis only if nu = numin
+*              otherwise it is unchanged from the value supplied by the
+*              calling program
+*    note!!!   if flaghf = .true., then the true values of the rotational
+*    quantum numbers, the total angular momentum, and the coupled-states
+*    projection index are equal to the values stored in j, jtot, and nu
+*    plus 1/2
+*  variables in common block /cosysr/
+*    isrcod:   number of real system dependent variables (none here)
+*  variables in common block /cosysi/
+*    nscode:   total number of system dependent variables
+*    isicod:   total number of integer system dependent variables
+*    nterm:    number of different types of electronic coupling terms
+*              this should be 1 here
+*  variable in common block /cocent/
+*    cent:      array containing centrifugal barrier of each channel
+*  variable in common block /coeint/
+*    eint:      array containing channel energies (in hartree)
+*  variable in common block /coj12/
+*    j12:      array containing vector sum of ja + j (similar
+*              situation with molecule-molecule scattering,
+*              see hibastpln basis routine)
+*  variables in common block /coered/
+*    ered:      collision energy in atomic units (hartrees)
+*    rmu:       collision reduced mass in atomic units
+*               (mass of electron = 1)
+*  variable in common block /conlam/
+*    nlam:      the number of case(a) interaction potentials actually used
+*               this is :  nlam = nlam0 + nlam1
+*               if only 1D channels, nlam = 3 (1Sigma+, 1Pi, 1Delta PE curves)
+*               if only 3P channels, nlam = 6 (3Sigma- and 3Pi PE curves
+*               and two spin-orbit matrix elements Axy and Axz, and the
+*               R=inf values of Axy and Azy)
+*               if both 1D and 3P channels, nlam= 19 (5 PE curves mentioned above,
+*               2 spin-orbit 3P matrix elements, and 5 spin-orbit matrix
+*               elements describing 1D-3P coupling, and the R-inf values of
+*               7 spin-orbit matrix elements)
+*    nlammx:    the maximum number of angular coupling terms
+*  variable in common block /cov2/
+*    nv2max:    maximum core memory allocated for the v2 matrix
+*    v2:        lower triangle of nonzero angular coupling matrix elements
+*               only nonzero elements are stored
+*  variable in common block /coiv2/
+*   iv2:        matrix address of v2 matrix for each non-zero element
+*  variable in common block /coconv/
+*     econv:    conversion factor from cm-1 to hartrees
+*     xmconv:   converson factor from amu to atomic units
+*  subroutines called:
+*   vlm13p:    returns angular coupling coefficient for particular
+*              choice of channel index
+*
+*  subroutines called:
+*  xf3j:     evaluates 3j symbol
+*  xf9j:     evaluates 9j symbol
+* ------------------------------------------------------------
+      implicit double precision (a-h,o-z)
+      logical ihomo, flaghf, csflag, clist, flagsu, bastst
+      include "common/parbas"
+      include "common/parbasl"
+
+      common /cosysi/ nscode, isicod, nterm, nstate
+      common /cosysr/ isrcod, junkr, en1d
+      common /cov2/ nv2max, junkv, v2(1)
+      common /coiv2/ iv2(1)
+      common /conlam/ nlam, nlammx, lamnum(1)
+      common /cocent/ cent(1)
+      common /coeint/ eint(1)
+      common /coj12/  j12(1)
+      common /coered/ ered, rmu
+      common /coskip/ nskip, iskip
+      common /covvl/  vvl(19)
+*  econv is conversion factor from cm-1 to hartrees
+*  xmconv is converson factor from amu to atomic units
+      common /coconv/ econv, xmconv
+*  matrices for transformation between atomic and molecular BF functions
+      common /coeig/  t12(5,5), t32(3,3)
+      dimension c12(5,5), c32(3,3)
+*  quantum numbers for BF atomic and basis functions
+      dimension
+     +  fjo32(3), fj32(3), flam32(3), sigm32(3), stot32(3),
+     +  fjo12(5), fj12(5), flam12(5), sigm12(5), stot12(5)
+      data flo, so, flh, sh, fjh /1.d0, 1.d0, 0.d0, 0.5d0, 0.5d0/
+*  atomic BF basis functions (omega=3/2)
+      data fjo32 /2.d0, 2.d0, 1.d0/, fj32 /2.5d0, 1.5d0, 1.5d0/
+*  molecular BF basis functions (omega=3/2)
+      data flam32 /1.d0, 0.d0, 1.d0/, sigm32 /0.5d0, 1.5d0, 0.5d0/,
+     +  stot32 /1.5d0, 1.5d0, 0.5d0/
+*  atomic BF basis functions (omega=1/2)
+      data fjo12 /2.d0, 2.d0, 1.d0, 1.d0, 0.d0/,
+     +  fj12 /2.5d0, 1.5d0, 1.5d0, 0.5d0, 0.5d0/
+*  molecular BF basis functions (omega=1/2)
+      data flam12 /-1.d0, 1.d0, 0.d0, 1.d0, 0.d0/,
+     +  sigm12 /1.5d0, -0.5d0, 0.5d0, -0.5d0, 0.5d0/,
+     +  stot12 /1.5d0, 1.5d0, 1.5d0, 0.5d0, 0.5d0/
+      dimension j(1), l(1), jhold(1), ehold(1),
+     :          ishold(1), is(1), ieig(2), isc1(1)
+*  scratch arrays for computing asymmetric top energies and wave fns.
+      dimension en0(4), en12(5), en32(3), vec(5,5), work(288)
+      zero = 0.d0
+      two = 2.d0
+*  check for consistency in the values of flaghf and csflag
+      if (flaghf) then
+        write (6, 5)
+        write (9, 5)
+5       format (' *** FLAGHF = .TRUE. FOR 3P/2S ATOM; ABORT ***' )
+        if (bastst) then
+          return
+        else
+          call exit
+        end if
+      end if
+      if (csflag) then
+        write (6, 8)
+        write (9, 8)
+8      format
+     :   ('  *** CSFLAG SET .FALSE. FOR 3P/2S ATOM CALCULATION ***')
+        csflag=.false.
+      end if
+      nsum = 0
+      if (nlam .ne. nsum) then
+        if (bastst) write (6, 14) nsum
+        write (9, 14) nsum
+14      format (' ** TOTAL NUMBER OF ANISOTROPIC TERMS=', i2)
+        nlam = nsum
+      end if
+      if (bastst) then
+        if (flagsu) then
+          write (6,16) rmu * xmconv, ered * econv, jtot, jlpar
+          write (9,16) rmu * xmconv, ered * econv, jtot, jlpar
+16        format(/' **  3P/2S ATOM ON UNCORRUGATED SURFACE ** RMU=',f9.4,
+     :      ' E=', f7.2, /, '         JTOT=', i5, 2x,' JLPAR=',i2)
+        else
+          write (6,20) npot,
+     :        rmu * xmconv, ered * econv, jtot, jlpar
+          write (9,20) npot,
+     :        rmu * xmconv, ered * econv, jtot, jlpar
+20        format(/,' **  CC 3P/2S ATOM ; NPOT =',i2,' ** RMU=', f9.4,
+     :        ' E=', f10.2, /, '         JTOT=', i5, 2x,' JLPAR=',i2)
+        end if
+        if (.not. flagsu) write (9,30) rcut
+30      format (/' OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=',
+     :          f6.2)
+      endif
+*
+*  get OH atom spin-orbit parameters, for calculating asymptotic
+*  electrostatic + spin-orbit atomic energies
+*  matrix elements from Parlant and Yarkony [JCP 110, 363 (1999)],
+*  as corrected by Krems et al. [ApJ 647, 1531 (2006)]
+      aa = 151.686
+      a = -aa / 6.d0
+      b = -aa*sqrt(2.d0)/6.d0
+      c = -0.5d0*aa*sqrt(2.d0/3.d0)
+      d = 0.5d0*aa/sqrt(3.d0)
+      e = -aa*sqrt(2.d0)/3.d0
+      f = -aa/3.d0
+      g = 0.5d0*aa/sqrt(3.d0)
+*
+*  omega=5/2 atomic Hamiltonian.  BF molecular basis:  4Pi5/2
+      en52 = 3.d0 * a
+*
+*  omega=3/2 atomic Hamiltonian.  BF molecular basis:  4Pi3/2, 4Sig-3/2, X2Pi3/2
+      isize = 3
+      c32(1,1) = a
+      c32(1,2) = c
+      c32(2,1) = c32(1,2)
+      c32(1,3) = b
+      c32(3,1) = c32(1,3)
+      c32(2,2) = 0.d0
+      c32(2,3) = g
+      c32(3,2) = c32(2,3)
+      c32(3,3) = f
+cstart unix-darwin .or. unix-x86
+      lwork = 144
+      call dsyev('V','L',isize,c32,isize,en32,work,lwork,ierr)
+cend
+cstart .not. unix-darwin .and. .not. unix-x86
+c;      write (6,1225)
+c;1225    format('  *** DSYEV NOT ACCESSIBLE IN THIS VERSION OF CODE.')
+c;        call exit
+cend
+*
+*  omega=1/2 atomic Hamiltonian.  basis:  4Pi1/2, 4Pi'1/2, 4Sig-1/2, X2Pi1/2, 2Sig1/2-
+      isize = 5
+      c12(1,1) = - 3.d0*a
+      c12(1,2) = 0.d0
+      c12(2,1) = c12(1,2)
+      c12(1,3) = c
+      c12(3,1) = c12(1,3)
+      c12(1,4) = 0.d0
+      c12(4,1) = c12(1,4)
+      c12(1,5) = d
+      c12(5,1) = c12(1,5)
+      c12(2,2) = -a
+      c12(2,3) = 2.d0*c/sqrt(3.d0)
+      c12(3,2) = c12(2,3)
+      c12(2,4) = b
+      c12(4,2) = c12(2,4)
+      c12(2,5) = -d/sqrt(3.d0)
+      c12(5,2) = c12(2,5)
+      c12(3,3) = 0.d0
+      c12(3,4) = g/sqrt(3.d0)
+      c12(4,3) = c12(3,4)
+      c12(3,5) = 0.d0
+      c12(5,3) = c12(3,5)
+      c12(4,4) = -f
+      c12(4,5) = e
+      c12(5,4) = c12(4,5)
+      c12(5,5) = 0.d0
+      lwork = 144
+      call dsyev('V','L',isize,c12,isize,en12,work,lwork,ierr)
+*
+*  assign quantum numbers and energies
+*  zero of energy is energy of lowest (3P2) level
+      n=0
+      nlevel = 0
+      jmin=0
+      jmax=2
+*  order of the j levels for p^4 orbital occupancy
+      do 120 ji=jmax, jmin, -1
+*  now determine j12 values - vector coupling of j(O) + j(H) [=1/2]
+        fj12mn = abs(ji - fjh)
+        fj12mx = ji + fjh
+        j12min = fj12mn
+        j12max = fj12mx
+        do 119 j12i = j12min,j12max
+          lmin = abs(jtot-j12i)
+          lmax = jtot + j12i + 1
+          do 110 li=lmin,lmax
+
+***            ix = (-1) ** (li - jtot)
+
+            ix = (-1) ** (li + 1)
+
+            if (ix .eq. jlpar) then
+*  here for correct orbital angular momentum
+              n = n + 1
+              if (n .gt. nmax) go to 130
+              l(n) = li
+              cent(n) = li * (li + 1.)
+              is(n) = 3
+              j(n) = ji
+              j12(n) = j12i
+              goto (102,104,106),ji + 1
+102             eint(n) = (en12(5) - en12(1))/econv
+                goto 108
+104             eint(n) = (en12(3) - en12(1))/econv
+                goto 108
+106             eint(n) = 0.d0
+108           continue
+            end if
+110       continue
+          nlevel = nlevel + 1
+          goto (112,114,116),ji + 1
+112         ehold(nlevel) = (en12(5) - en12(1))/econv
+            goto 115
+114         ehold(nlevel) = (en12(3) - en12(1))/econv
+            goto 115
+116         ehold(nlevel) = 0.d0
+115       continue
+          jhold(nlevel) = ji
+          ishold(nlevel) = 3
+*  eliminate duplicate channels
+          if (nlevel.gt.1 .and.
+     +      ehold(nlevel).eq.ehold(nlevel-1)) nlevel = nlevel - 1
+119     continue
+120   continue
+130   if (n .gt. nmax) then
+        write (9, 140) n, nmax
+        write (6, 140) n, nmax
+140     format(/' *** NCHANNELS=', i4,' .GT. MAX DIMENSION OF',
+     :         i4,'; ABORT')
+        if (bastst) then
+          return
+        else
+          call exit
+        end if
+      end if
+*  now check to see if any of the open channels are closed at r=rcut
+*  this is not done for molecule-surface collisions or for rcut < 0
+      if (.not.flagsu .and. rcut .gt. 0.d0 .and..not.boundc) then
+        emin = 1.e+7
+        do 145  i = 1, n
+          if (eint(i) .le. ered) then
+*  here if channel is
+            if ( jtot * (jtot + 1) / (2. * rmu * rcut * rcut)
+     :          .gt. (ered - eint(i)) ) then
+*  here if channel is open asymptotically but closed at r = rcut
+              if (eint(i) .lt. emin) emin = eint(i)
+*  emin now contains the lowest channel energy for which this
+*  condition is met
+            end if
+          end if
+ 145    continue
+*  now eliminate all channels with eint .ge. emin if any of the channels
+*  are open asymptotically but closed at r = rcut
+        if (emin.lt.ered) then
+          nn = 0
+          do 150 i = 1, n
+            if (eint(i) .lt. emin) then
+*  here if this channel is to be included
+              nn = nn + 1
+              eint(nn) = eint(i)
+              is(nn) = is(i)
+              j(nn) = j(i)
+              j12(nn) = j12(i)
+              cent(nn) = cent(i)
+              l(nn) = l(i)
+            end if
+150       continue
+*  reset number of channels
+          n = nn
+        end if
+      end if
+*  return if no channels
+      if (n .eq. 0) return
+*  form list of energetically open levels and sort list
+*  to put closed channels at end
+      nlevop = 0
+      if (nlevel .gt. 1) then
+        do 180 i = 1, nlevel - 1
+          if (ehold(i) .le. ered) then
+            nlevop = nlevop + 1
+          else
+            do 175 ii = i + 1, nlevel
+              if (ehold(ii) .le. ered) then
+                nlevop = nlevop + 1
+                ikeep = jhold(i)
+                jhold(i) = jhold(ii)
+                jhold(ii) = ikeep
+                ikeep = ishold(i)
+                ishold(i) = ishold(ii)
+                ishold(ii) = ikeep
+                ekeep = ehold(i)
+                ehold(i) = ehold(ii)
+                ehold(ii) = ekeep
+                goto 180
+              endif
+175         continue
+          endif
+180     continue
+      if (ehold(nlevel) .le. ered) nlevop = nlevop + 1
+      else
+*  here for only one level
+        if (ehold(1) .le. ered) then
+          nlevop = 1
+        else
+          nlevop = 0
+        endif
+      endif
+      if (nlevop .le. 0) then
+        write (9,185)
+        write (6,185)
+185     format('*** NO OPEN LEVELS IN BA3P2S; ABORT')	
+        if (bastst) return
+        call exit
+      endif
+*  ntop is the maximum row dimension of all matrices passed in the
+*  call list of subroutines propag and soutpt.
+      ntop = max(n, nlevop)
+*  for fps make sure this is an odd number, for faster bank access.
+*  this has no effect on vax or cray
+        if (mod(ntop,2) .eq. 0 .and. ntop .lt. nmax)
+     :       ntop = ntop + 1
+
+
+
+*++++  INCREASE SIZE OF NTOP
+      ntop = ntop + 4
+
+
+*
+*  now list channels if requested
+      if (bastst) then
+        write (6,1255)
+        write (9,1255)
+1255    format(/' ASYMPTOTIC ATOMIC ENERGY LEVELS'
+     +    /'   N   S   J      EINT(CM-1)')
+        do 1265 i = 1, nlevel
+          write (6,2260) i, ishold(i), jhold(i), ehold(i) * econv
+          write (9,2260) i, ishold(i), jhold(i), ehold(i) * econv
+2260      format (3i4, f13.3)
+1265    continue
+        write (6, 255)
+        write (9, 255)
+255     format(/' CHANNEL BASIS FUNCTIONS'
+     +      /'   N   S   J   J12    L      EINT(CM-1)')
+        do 265  i = 1, n
+          write (6, 260) i, is(i), j(i), j12(i), l(i), eint(i) * econv
+          write (9, 260) i, is(i), j(i), j12(i), l(i), eint(i) * econv
+260       format (3i4, 2i5, f13.3)
+265     continue
+      end if
+*
+*  now calculate coupling matrix elements
+      if (bastst) then
+        write (6, 280)
+        write (9, 280)
+280     format (/' ILAM  LAMBDA  ICOL  IROW   I    IV2    VEE')
+      end if
+*
+*  compute transformation between jo, jh, j and Lambda, S, Sigma
+*  BF basis sets
+*
+*  omega = 1/2
+      omega = 0.5d0
+      do ia = 1, 5
+        do im = 1, 5
+          iph = flo - stot12(im) + 0.5d0
+          t12(im,ia) = sqrt((2.d0*stot12(im)+1.d0)*(2.d0*fjh+1.d0)
+     +      *(2.d0*fjo12(ia)+1.d0)*(2.d0*flo+1.d0))
+     +      *(-1.d0)**iph * sqrt(2.d0*fj12(ia)+1.d0)
+     +      *xf3j(flo,stot12(im),fj12(ia),flam12(im),
+     +          sigm12(im),-omega)
+     +      *xf9j(flo,so,fjo12(ia), flh,sh,fjh,
+     +          flo,stot12(im),fj12(ia))
+        enddo
+      enddo
+*
+*  omega = 3/2
+      omega = 1.5d0
+      do ia = 1, 3
+        do im = 1, 3
+          iph = flo - stot32(im) + 1.5d0
+          t32(im,ia) = sqrt((2.d0*stot32(im)+1.d0)*(2.d0*fjh+1.d0)
+     +      *(2.d0*fjo32(ia)+1.d0)*(2.d0*flo+1.d0))
+     +      *(-1.d0)**iph * sqrt(2.d0*fj32(ia)+1.d0)
+     +      *xf3j(flo,stot32(im),fj32(ia),flam32(im),
+     +          sigm32(im),-omega)
+     +      *xf9j(flo,so,fjo32(ia), flh,sh,fjh,
+     +          flo,stot32(im),fj32(ia))
+        enddo
+      enddo
+*
+*  i counts v2 elements
+*  inum counts v2 elements for given lambda
+*  ilam counts number of v2 matrices
+*  ij is address of given v2 element in present v2 matrix
+      i = 0
+      ilam=0
+      do 320 lb = 1, 18
+        ilam = ilam+1
+        inum = 0
+        do 310  icol= 1, n
+          do 300  irow = icol, n
+            ij = ntop * (icol - 1) +irow
+            call vlm3p2s (j(irow), j12(irow), l(irow),
+     :        j(icol), j12(icol), l(icol), jtot, lb, vee)
+            if (vee .eq. 0) goto 300
+              i = i + 1
+              inum = inum + 1
+              if (i .gt. nv2max) goto 300
+                v2(i) = vee
+                iv2(i) = ij
+                if (bastst) then
+                  write (6, 290) ilam, lb, icol, irow, i, iv2(i),
+     :                           vee
+                  write (9, 290) ilam, lb, icol, irow, i, iv2(i),
+     :                           vee
+290               format (i4, 2i7, 2i6, i6, g17.8)
+                endif
+300       continue
+310     continue
+410     if(ilam.gt.nlammx) then
+        write(6,311) ilam
+311     format(/' ILAM.GT.NLAMMX IN BA3P2S')
+        call exit
+      end if
+      lamnum(ilam) = inum
+      if (bastst) then
+        write (6, 315) ilam, lamnum(ilam)
+        write (9, 315) ilam, lamnum(ilam)
+315     format ('ILAM=',i3,' LAMNUM(ILAM) = ',i6)
+      end if
+320   continue
+      nlam = ilam
+      if ( i.gt. nv2max) then
+        write (6, 350) i, nv2max
+        write (9, 350) i, nv2max
+350     format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6,
+     :           ' .GT. NV2MAX=',i6,'; ABORT ***')
+        if (bastst) then
+          return
+        else
+          call exit
+        end if
+      end if
+      if (bastst) then
+        write (6, 360) i
+        write (9, 360) i
+360     format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS',
+     :           i6)
+      end if
+      return
+      end
+* --------------------------------------------------------------------
+      subroutine vlm3p2s (j1, j12_1, l1, j2, j12_2, l2, jtot, lb, vee)
+* --------------------------------------------------------------------
+*  subroutine to evaluate the angular coupling matrix element for
+*  inelastic collisions of a 3P atom with a 2S atom
+
+*  author:  paul dagdigian
+*  current revision date: 18-dec-2014
+* --------------------------------------------------------------------
+*  variables in call list:
+*  j1,j12_1,l1:    initial electronic and orbital angular momenta
+*  j2,j12_2,l2:    final electronic and orbital angular momenta
+*  jtot:     total angular momentum
+*  lb:       value of expansion index:
+*            lb=1:  X2Pi potential
+*            lb=2:  4Pi potential
+*            lb=3:  2Sigma- potential
+*            lb=4:  4Sigma- potential
+*            lb=5:  A spin-orbit matrix element
+*            lb=6:  B spin-orbit matrix element
+*            lb=7:  C spin-orbit matrix element
+*            lb=8:  D spin-orbit matrix element
+*            lb=9:  E spin-orbit matrix element
+*           lb=10:  F spin-orbit matrix element
+*           lb=11:  G spin-orbit matrix element
+*           lb=12:  A spin-orbit matrix element for large R
+*           lb=13:  B spin-orbit matrix element for large R
+*           lb=14:  C spin-orbit matrix element for large R
+*           lb=15:  D spin-orbit matrix element for large R
+*           lb=16:  E spin-orbit matrix element for large R
+*           lb=17:  F spin-orbit matrix element for large R
+*           lb=18:  G spin-orbit matrix element for large R
+*
+*  vee:      on return:  contains desired coupling matrix element
+*  subroutines called:
+*  xf3j:     evaluates 3j symbol
+* --------------------------------------------------------------------
+      implicit double precision (a-h,o-z)
+      common /coeig/  t12(5,5), t32(3,3)
+      dimension v12(5,5),v32(3,3),a12(5,5),a32(3,3)
+      vee = 0.d0
+      xl1 = l1
+      xl2 = l2
+      xj1 = j1
+      xj2 = j2
+      xj12_1 = j12_1 + 0.5d0
+      xj12_2 = j12_2 + 0.5d0
+      xjtot = jtot + 0.5d0
+      xl12 = sqrt((2.d0*xl1 + 1.d0) * (2.d0*xl2 + 1.d0))
+      xfj12 = xf3j(xl1, xj12_1, xjtot, 0.d0, 0.5d0, -0.5d0)
+     +  * xf3j(xl2, xj12_2, xjtot, 0.d0, 0.5d0, -0.5d0)
+      xfj32 = xf3j(xl1, xj12_1, xjtot, 0.d0, 1.5d0, -1.5d0)
+     +  * xf3j(xl2, xj12_2, xjtot, 0.d0, 1.5d0, -1.5d0)
+      xfj52 = xf3j(xl1, xj12_1, xjtot, 0.d0, 2.5d0, -2.5d0)
+     +  * xf3j(xl2, xj12_2, xjtot, 0.d0, 2.5d0, -2.5d0)
+*  clear body-frame Lambda,S,Sigma pot/Hso matrices for Omega = 1/2, 3/2
+      do i = 1,5
+        do j = 1,5
+          v12(i,j) = 0.d0
+        enddo
+      enddo
+      do i = 1,3
+        do j = 1,3
+          v32(i,j) = 0.d0
+        enddo
+      enddo
+* get basis #'s for omega = 1/2 and 3/2 BF components of atomic basis functions
+      i11 = 1
+      i13 = 1
+      if (j1.eq.2 .and. j12_1.eq.1) then
+        i11 = 2
+        i13 = 2
+      endif
+      if (j1.eq.1 .and. j12_1.eq.1) then
+        i11 = 3
+        i13 = 3
+      endif
+      if (j1.eq.1 .and. j12_1.eq.0) then
+        i11 = 4
+        i13 = 0
+      endif
+      if (j1.eq.0) then
+        i11 = 5
+        i13 = 0
+      endif
+*
+      i21 = 1
+      i23 = 1
+      if (j2.eq.2 .and. j12_2.eq.1) then
+        i21 = 2
+        i23 = 2
+      endif
+      if (j2.eq.1 .and. j12_2.eq.1) then
+        i21 = 3
+        i23 = 3
+      endif
+      if (j2.eq.1 .and. j12_2.eq.0) then
+        i21 = 4
+        i23 = 0
+      endif
+      if (j2.eq.0) then
+        i21 = 5
+        i23 = 0
+      endif
+*
+      sign = 1.d0
+      goto (10,20,30,40,50,60,70,80,90,100,110,
+     +  120,130,140,150,160,170,180),lb
+      goto 1000
+*
+*  X2Pi PE curve - mat elements below in Lambda,S,Sigma,Omega basis
+10    v12(4,4) = 1.d0
+      v32(3,3) = 1.d0
+*  compute matrix element in j1,j2,j12,Omega basis
+      call dgemm('t','n',5,5,5,1.d0,t12,5,v12,5,0.d0,a12,5)
+      call dgemm('n','n',5,5,5,1.d0,a12,5,t12,5,0.d0,v12,5)
+      vee12 = v12(i11,i21)
+      vee32 = 0.d0
+      if (i13.ne.0 .and. i23.ne.0) then
+        call dgemm('t','n',3,3,3,1.d0,t32,3,v32,3,0.d0,a32,3)
+        call dgemm('n','n',3,3,3,1.d0,a32,3,t32,3,0.d0,v32,3)
+        vee32 = v32(i13,i23)
+      endif
+      vee = 2.d0 * xl12 * (vee12 * xfj12 + vee32 * xfj32)
+      goto 1000
+*
+*  4Pi PE curve
+20    v12(1,1) = 1.d0
+      v12(2,2) = 1.d0
+      v32(1,1) = 1.d0
+      vee52 = 1.d0
+*  compute matrix element in j1,j2,j12,Omega basis
+      call dgemm('t','n',5,5,5,1.d0,t12,5,v12,5,0.d0,a12,5)
+      call dgemm('n','n',5,5,5,1.d0,a12,5,t12,5,0.d0,v12,5)
+      vee12 = v12(i11,i21)
+      vee32 = 0.d0
+      if (i13.ne.0 .and. i23.ne.0) then
+        call dgemm('t','n',3,3,3,1.d0,t32,3,v32,3,0.d0,a32,3)
+        call dgemm('n','n',3,3,3,1.d0,a32,3,t32,3,0.d0,v32,3)
+        vee32 = v32(i13,i23)
+      endif
+      vee = 2.d0 * xl12 * (vee12 * xfj12 + vee32 * xfj32
+     +  + vee52 * xfj52)
+      goto 1000
+*
+*  2Sigma- curve
+30    v12(5,5) = 1.d0
+*  compute matrix element in j1,j2,j12,Omega basis
+      call dgemm('t','n',5,5,5,1.d0,t12,5,v12,5,0.d0,a12,5)
+      call dgemm('n','n',5,5,5,1.d0,a12,5,t12,5,0.d0,v12,5)
+      vee12 = v12(i11,i21)
+      vee = 2.d0 * xl12 * vee12 * xfj12
+      goto 1000
+*
+*  4Sigma- curve
+40    v12(3,3) = 1.d0
+      v32(2,2) = 1.d0
+*  compute matrix element in j1,j2,j12,Omega basis
+      call dgemm('t','n',5,5,5,1.d0,t12,5,v12,5,0.d0,a12,5)
+      call dgemm('n','n',5,5,5,1.d0,a12,5,t12,5,0.d0,v12,5)
+      vee12 = v12(i11,i21)
+      vee32 = 0.d0
+      if (i13.ne.0 .and. i23.ne.0) then
+        call dgemm('t','n',3,3,3,1.d0,t32,3,v32,3,0.d0,a32,3)
+        call dgemm('n','n',3,3,3,1.d0,a32,3,t32,3,0.d0,v32,3)
+        vee32 = v32(i13,i23)
+      endif
+      vee = 2.d0 * xl12 * (vee12 * xfj12 + vee32 * xfj32)
+      goto 1000
+*
+*  A spin-orbit matrix element
+50    v12(1,1) = -3.d0
+      v12(2,2) = -1.d0
+      v32(1,1) = 1.d0
+      vee52 = 3.d0
+*  compute matrix element in j1,j2,j12,Omega basis
+      call dgemm('t','n',5,5,5,1.d0,t12,5,v12,5,0.d0,a12,5)
+      call dgemm('n','n',5,5,5,1.d0,a12,5,t12,5,0.d0,v12,5)
+      vee12 = v12(i11,i21)
+      vee32 = 0.d0
+      if (i13.ne.0 .and. i23.ne.0) then
+        call dgemm('t','n',3,3,3,1.d0,t32,3,v32,3,0.d0,a32,3)
+        call dgemm('n','n',3,3,3,1.d0,a32,3,t32,3,0.d0,v32,3)
+        vee32 = v32(i13,i23)
+      endif
+      vee = 2.d0 * xl12 * (vee12 * xfj12 + vee32 * xfj32
+     +  + vee52 * xfj52) * sign
+      goto 1000
+*  A for R=inf
+120   sign = -1.d0
+      goto 50
+*
+*  B spin-orbit matrix element
+60    v12(2,4) = 1.d0
+      v12(4,2) = v12(2,4)
+      v32(1,3) = 1.d0
+      v32(3,1) = v32(1,3)
+*  compute matrix element in j1,j2,j12,Omega basis
+      call dgemm('t','n',5,5,5,1.d0,t12,5,v12,5,0.d0,a12,5)
+      call dgemm('n','n',5,5,5,1.d0,a12,5,t12,5,0.d0,v12,5)
+      vee12 = v12(i11,i21)
+      vee32 = 0.d0
+      if (i13.ne.0 .and. i23.ne.0) then
+        call dgemm('t','n',3,3,3,1.d0,t32,3,v32,3,0.d0,a32,3)
+        call dgemm('n','n',3,3,3,1.d0,a32,3,t32,3,0.d0,v32,3)
+        vee32 = v32(i13,i23)
+      endif
+      vee = 2.d0 * xl12 * (vee12 * xfj12 + vee32 * xfj32)
+     +  * sign
+      goto 1000
+*  B for R=inf
+130   sign = -1.d0
+      goto 60
+*
+*  C spin-orbit matrix element
+70    v12(1,3) = 1.d0
+      v12(3,1) = v12(1,3)
+      v12(2,3) = 2.d0 / sqrt(3.d0)
+      v12(3,2) = v12(2,3)
+      v32(1,2) = 1.d0
+      v32(2,1) = v32(1,2)
+*  compute matrix element in j1,j2,j12,Omega basis
+      call dgemm('t','n',5,5,5,1.d0,t12,5,v12,5,0.d0,a12,5)
+      call dgemm('n','n',5,5,5,1.d0,a12,5,t12,5,0.d0,v12,5)
+      vee12 = v12(i11,i21)
+      vee32 = 0.d0
+      if (i13.ne.0 .and. i23.ne.0) then
+        call dgemm('t','n',3,3,3,1.d0,t32,3,v32,3,0.d0,a32,3)
+        call dgemm('n','n',3,3,3,1.d0,a32,3,t32,3,0.d0,v32,3)
+        vee32 = v32(i13,i23)
+      endif
+      vee = 2.d0 * xl12 * (vee12 * xfj12 + vee32 * xfj32)
+     +  * sign
+      goto 1000
+*  C for R=inf
+140   sign = -1.d0
+      goto 70
+*
+*  D spin-orbit matrix element
+80    v12(1,5) = 1.d0
+      v12(5,1) = v12(1,5)
+      v12(2,5) = - 1. /sqrt(3.d0)
+      v12(5,2) = v12(2,5)
+*  compute matrix element in j1,j2,j12,Omega basis
+      call dgemm('t','n',5,5,5,1.d0,t12,5,v12,5,0.d0,a12,5)
+      call dgemm('n','n',5,5,5,1.d0,a12,5,t12,5,0.d0,v12,5)
+      vee12 = v12(i11,i21)
+      vee = 2.d0 * xl12 * vee12 * sign
+      goto 1000
+*  D for R=inf
+150   sign = -1.d0
+      goto 80
+*
+*  E spin-orbit matrix element
+90    v12(4,5) = 1.d0
+      v12(5,4) = v12(4,5)
+*  compute matrix element in j1,j2,j12,Omega basis
+      call dgemm('t','n',5,5,5,1.d0,t12,5,v12,5,0.d0,a12,5)
+      call dgemm('n','n',5,5,5,1.d0,a12,5,t12,5,0.d0,v12,5)
+      vee12 = v12(i11,i21)
+      vee = 2.d0 * xl12 * vee12 * sign
+      goto 1000
+*  E for R=inf
+160   sign = -1.d0
+      goto 90
+*
+*  F spin-orbit matrix element
+100   v12(4,4) = -1.d0
+      v32(3,3) = 1.d0
+*  compute matrix element in j1,j2,j12,Omega basis
+      call dgemm('t','n',5,5,5,1.d0,t12,5,v12,5,0.d0,a12,5)
+      call dgemm('n','n',5,5,5,1.d0,a12,5,t12,5,0.d0,v12,5)
+      vee12 = v12(i11,i21)
+      vee32 = 0.d0
+      if (i13.ne.0 .and. i23.ne.0) then
+        call dgemm('t','n',3,3,3,1.d0,t32,3,v32,3,0.d0,a32,3)
+        call dgemm('n','n',3,3,3,1.d0,a32,3,t32,3,0.d0,v32,3)
+        vee32 = v32(i13,i23)
+      endif
+      vee = 2.d0 * xl12 * (vee12 * xfj12 + vee32 * xfj32)
+     +  * sign
+      vee = 2.d0 * xl12 * (vee12 * xfj12 + vee32 * xfj32)
+     +  * sign
+      goto 1000
+*  F for R=inf
+170   sign = -1.d0
+      goto 100
+*
+*  G spin-orbit matrix element
+110   v12(3,4) = 1.d0 / sqrt(3.d0)
+      v12(4,3) = v12(3,4)
+      v32(2,3) = 1.d0
+      v32(3,2) = v32(2,3)
+*  compute matrix element in j1,j2,j12,Omega basis
+      call dgemm('t','n',5,5,5,1.d0,t12,5,v12,5,0.d0,a12,5)
+      call dgemm('n','n',5,5,5,1.d0,a12,5,t12,5,0.d0,v12,5)
+      vee12 = v12(i11,i21)
+      vee32 = 0.d0
+      if (i13.ne.0 .and. i23.ne.0) then
+        call dgemm('t','n',3,3,3,1.d0,t32,3,v32,3,0.d0,a32,3)
+        call dgemm('n','n',3,3,3,1.d0,a32,3,t32,3,0.d0,v32,3)
+        vee32 = v32(i13,i23)
+      endif
+      vee = 2.d0 * xl12 * (vee12 * xfj12 + vee32 * xfj32)
+     +  * sign
+      vee = 2.d0 * xl12 * (vee12 * xfj12 + vee32 * xfj32)
+     +  * sign
+      goto 1000
+*  G for R=inf
+180   sign = -1.d0
+      goto 110
+1000  return
+      end
+* ------------------------------eof-----------------------------------

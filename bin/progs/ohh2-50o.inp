@@ -1,0 +1,25 @@
+OH--H2 CCSD PES TZBF OHRE H2R0                  
+  20                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    3.5000   10.0000    0.2000   rstart, rendld, spac
+  F                              prairy
+  1.100      1.00   100.0  1.50  tolai, rincr, rendai, fstfac
+   1                             nerg
+    150.0000
+    1.80202                      xmu
+ -100.0000                       rcut
+   0  40   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80  -1                         lscreen, iprint
+    6    4                       nnout,niout
+  01  11  21  31  41  51 
+  -2    2   -1    1
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  T  F  F  T  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  T  F  F  F  T                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+   5   2                         j1max, npar
+   1   1   2                     j2min, j2max, iptsy2
+   18.5480  -139.2100     0.2350    -0.0391 brot, aso, p, q
+   59.322000                     drot
+ pot_ohh2_ccsdf12_avtzbf.dat             

@@ -1,0 +1,23 @@
+R. TOBOLA AND J.KLOS He-OH(X) RCCSDT 11A        
+   3                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    3.5000    3.5000    0.0300   rstart, rendld, spac
+  F                              prairy
+  1.030      1.00   100.0  1.50  tolai, rincr, rendai, fstfac
+   3                             nerg
+     1.2100     1.0800     0.9500
+    3.23990                      xmu
+  100.0000                       rcut
+   0  20   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80  -1                         lscreen, iprint
+    2    2                       nnout,niout
+   1   1
+  -201 101
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  T  T  T                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  T  F  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+   3   1   0   2                  jmax, igu, isa, npar
+  18.54800 -139.2100  0.235     -3.910E-02 brot, aso, p, q
+                                        

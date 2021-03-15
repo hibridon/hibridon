@@ -1,0 +1,87 @@
+
+% **  DIFFERENTIAL CROSS SECTION (ANG^2/SR)
+%   TODAYS DATE:  Aug 21 16:32:05 2014
+%    S-MATRICES READ FROM FILE Job1.smt                                
+%     WRITTEN:   Aug 21 16:32:04 2014
+%     LABEL:     CC DIFFERENTIAL AND STERIC EFFECT TESTS         
+%     POT NAME:  ALEXANDER Ar-NO CEPA                            
+%    E-TOT:      442.000;  REDUCED MASS:    17.14    
+%   TRANSITION:  J1=   0 IN1=   1  ->  J2=   2 IN2=   1
+%   SUMMING PARTIAL WAVES FROM JTOT = 0 TO   5
+%   WAVE VECTOR IN INITIAL CHANNEL:     11.2163 Bohr^(-1);    21.1955 Angstroms^(-1)
+%   COLLISION ENERGY:   442.0000 cm-1;    54.8016 meV
+%    STERIC (ORIENTED) CROSS SECTIONS: M =  0.5
+        ALPH(1) = 1.1760, ALPH(-1)= 0.7850
+  
+    DEGENERACY AVERAGED STERIC DXSC'S: HEADS AND TAILS
+ %   0.00     0.3984E-04     0.1979E-04
+ %   1.00     0.4704E-04     0.2319E-04
+ %   2.00     0.6838E-04     0.3324E-04
+ %   3.00     0.1031E-03     0.4958E-04
+ %   4.00     0.1498E-03     0.7160E-04
+ %   5.00     0.2069E-03     0.9848E-04
+ %   6.00     0.2722E-03     0.1292E-03
+ %   7.00     0.3434E-03     0.1627E-03
+ %   8.00     0.4177E-03     0.1977E-03
+ %   9.00     0.4925E-03     0.2329E-03
+ %  10.00     0.5651E-03     0.2670E-03
+ %  11.00     0.6328E-03     0.2988E-03
+ %  12.00     0.6930E-03     0.3271E-03
+ %  13.00     0.7438E-03     0.3509E-03
+ %  14.00     0.7831E-03     0.3693E-03
+ %  15.00     0.8097E-03     0.3817E-03
+ %  16.00     0.8226E-03     0.3876E-03
+ %  17.00     0.8214E-03     0.3868E-03
+ %  18.00     0.8062E-03     0.3795E-03
+ %  19.00     0.7775E-03     0.3658E-03
+ %  20.00     0.7365E-03     0.3464E-03
+
+%   DEG. AVER. XSC =   0.000; ALIGNMENT = 1.000
+
+%   DEG. AVER. XSC =  20.000; ALIGNMENT = 0.000
+
+%   DEG. AVER. XSC =   0.000; ALIGNMENT =35.915
+
+];
+% ** DIFFERENTIAL CROSS SECTION CALCULATION FINISHED:
+%   ELAPSED TIME: 00:00:00   CPU TIME:  00:00:00 
+
+% **  DIFFERENTIAL CROSS SECTION (ANG^2/SR)
+%   TODAYS DATE:  Aug 21 16:32:05 2014
+%    S-MATRICES READ FROM FILE Job1.smt                                
+%     WRITTEN:   Aug 21 16:32:04 2014
+%     LABEL:     CC DIFFERENTIAL AND STERIC EFFECT TESTS         
+%     POT NAME:  ALEXANDER Ar-NO CEPA                            
+%    E-TOT:      442.000;  REDUCED MASS:    17.14    
+%   TRANSITION:  J1=   0 IN1=  -1  ->  J2=   3 IN2=   1
+%   SUMMING PARTIAL WAVES FROM JTOT = 0 TO   5
+%   WAVE VECTOR IN INITIAL CHANNEL:     11.2162 Bohr^(-1);    21.1952 Angstroms^(-1)
+%   COLLISION ENERGY:   441.9869 cm-1;    54.7999 meV
+  
+%   DEGENERACY AVERAGED DXSC (ANG^2/SR) AND A20, A40, A22+, A21+ AND A11- MOMENTS
+dcs=[
+    0.00     0.5011E-04    -0.9524         0.2721          0.000          0.000          0.000    
+    1.00     0.6137E-04    -0.9519         0.2716         0.5188E-02     0.3098E-01     0.3856    
+    2.00     0.9474E-04    -0.9504         0.2702         0.1291E-01     0.6082E-01     0.4894    
+    3.00     0.1490E-03    -0.9481         0.2680         0.1724E-01     0.9001E-01     0.4509    
+    4.00     0.2221E-03    -0.9449         0.2650         0.1855E-01     0.1190         0.3837    
+    5.00     0.3115E-03    -0.9408         0.2611         0.1793E-01     0.1478         0.3204    
+    6.00     0.4138E-03    -0.9358         0.2565         0.1599E-01     0.1765         0.2665    
+    7.00     0.5253E-03    -0.9299         0.2510         0.1306E-01     0.2049         0.2212    
+    8.00     0.6420E-03    -0.9231         0.2448         0.9320E-02     0.2331         0.1827    
+    9.00     0.7595E-03    -0.9155         0.2378         0.4850E-02     0.2610         0.1494    
+   10.00     0.8736E-03    -0.9070         0.2301        -0.2955E-03     0.2886         0.1199    
+   11.00     0.9803E-03    -0.8976         0.2217        -0.6087E-02     0.3157         0.9341E-01
+   12.00     0.1076E-02    -0.8874         0.2127        -0.1251E-01     0.3424         0.6907E-01
+   13.00     0.1156E-02    -0.8764         0.2031        -0.1955E-01     0.3687         0.4633E-01
+   14.00     0.1219E-02    -0.8645         0.1929        -0.2723E-01     0.3944         0.2472E-01
+   15.00     0.1263E-02    -0.8518         0.1823        -0.3553E-01     0.4195         0.3846E-02
+   16.00     0.1285E-02    -0.8383         0.1711        -0.4448E-01     0.4440        -0.1662E-01
+   17.00     0.1285E-02    -0.8240         0.1596        -0.5411E-01     0.4678        -0.3700E-01
+   18.00     0.1263E-02    -0.8090         0.1477        -0.6443E-01     0.4908        -0.5759E-01
+   19.00     0.1221E-02    -0.7931         0.1355        -0.7552E-01     0.5130        -0.7870E-01
+   20.00     0.1159E-02    -0.7766         0.1231        -0.8742E-01     0.5342        -0.1007    
+
+];
+% ** DIFFERENTIAL CROSS SECTION CALCULATION FINISHED:
+%   ELAPSED TIME: 00:00:00   CPU TIME:  00:00:00 

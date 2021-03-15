@@ -1,0 +1,35 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 4.3.4 BUILD DATE 11/16/09 21:53:28 EST
+
+     AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI
+               A. BERNING, A. DEGLI-ESPOSTI, C. RIST, P. DAGDIGIAN, B. POUILLY
+               G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, J. KLOS
+               F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+SYS=OS X 10.6.2; MACH=unix-darwin unix-ifort unix-darwin64
+CC=; FC=/opt/intel/Compiler/11.1/076/bin/intel64/ifort -O3 -save
+LIB_ROOT=-L/opt/intel/Compiler/11.1/076/Frameworks/mkl/lib/em64t
+LIBRARIES:  -lmkl_intel_ilp64 /
+  -lmkl_intel_thread -lmkl_core -lmkl_intel_thread -lmkl_core -lmkl_intel_thread -lmkl_core -lguide -lpthread
+ --------------------------------------------------------------------------
+
+ INTEGRAL CROSS SECTIONS READ FROM FILE Heco1.ics                               
+ WRITTEN:   Nov 16 21:53:52 2009
+ LABEL:      He-CO(1Sigma) SAPT PES                         
+ POT NAME:  HeCO Moszynski et al. SAPT PES                  
+
+ ** INTEGRAL CROSS SECTIONS; IEN= 1 **
+    RMU=   3.5019  E=    20.00  JLPAR=-1  JTOT-1=  1  JTOT-2=  10  JTOT-D=  1
+ ** CC CALCULATION, JLPAR=-1 **
+
+ ** COLUMN HEADINGS ARE INTIAL STATES, ROW HEADINGS ARE FINAL STATES **
+
+            J=    0         1         2
+   J    I | I=    0         0         0
+ 
+    0    0  2.302E+02 7.027E+00 5.338E+00
+    1    0  1.703E+01 2.440E+02 2.692E+01
+    2    0  1.130E+01 2.351E+01 2.385E+02

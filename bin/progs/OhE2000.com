@@ -1,0 +1,10 @@
+inp=Oh_3p2s.inp
+job=Oh2000
+jtot2=120
+ener=2000
+wrpart=t
+show
+run
+printc
+partc,,2,3
+quit

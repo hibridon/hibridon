@@ -1,0 +1,40 @@
+#!/bin/bash
+
+hib_version=hib44
+file_list=hib44_filelist
+
+basedir=`hibriddir`
+if [ "x$TMPDIR" == "x" ]; then
+    tmpdir="/tmp"
+else
+    tmpdir="$TMPDIR"
+fi
+tmphibdir=$tmpdir/$hib_version
+
+if [ -d "$tmphibdir" ]; then
+    rm -rf $tmphibdir
+fi
+mkdir $tmphibdir
+
+cd $basedir
+while read line
+do
+    dir_name=`dirname "$line"`
+    if ! [ "$dir_name" == "." ]; then
+	dir=$tmphibdir/${dir_name#"./"}
+	file=$dir/`basename "$line"`
+	if ! [ -d "$dir" ]; then
+	    mkdir -p "$dir"
+	fi
+	cp "$line" "$file"
+    else
+	file=$tmphibdir/`basename "$line"`
+	cp "$line" "$file"
+    fi
+done <$file_list
+
+cd $tmpdir
+tar -czf $hib_version.tar.gz $hib_version
+cp $hib_version.tar.gz $basedir
+
+echo "$hib_version.tar.gz stored in $basedir."

@@ -1,7 +1,10 @@
 *system:  Cl(2P)+H2, Dubernet-Hutson expansion of capecchi-werner PES's
-*references: G. Capecchi, H.-J. Werner (to be published)
+*references: G. Capecchi, H.-J. Werner Phys. Chem. Chem. Phys. 6, 4975 (2004)
 * M.-L. Dubernet and J. M. Hutson, J. Chem. Phys. 101, 1939 (1994).
-
+*
+*  Note:  this pot routine requires data files to be in hibxx/bin/progs/potdata:
+*         three.param4, cwfit.dat, BW.3p
+*
       include "common/syusr"
       include "common/ground"
       include "common/bausr"

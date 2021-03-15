@@ -1,5 +1,5 @@
 #!/bin/csh -f
-# HIBRIDON bin/hscript $Revision: 2011.1 $ 
+# HIBRIDON bin/hscript $Revision: 2004.1 $ 
 # converts hhelp.f file to new machine, and then replaces original .f
 # file with the converted file
 @ items = $#argv
@@ -33,7 +33,7 @@ ls -1 hhelp.f >>control.file
 echo '' >> control.file
 echo "fin" >> control.file
 chmod +x control.file
-./control.file 
+control.file 
 echo ""
 echo "hhelp.f file converted, copying back ..."
 mv hhelp.new hhelp.f

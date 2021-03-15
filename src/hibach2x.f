@@ -21,14 +21,16 @@
 *  since CH2(X 3B1) is well described by Hund's case (b) coupling
 *
 *  the MORBID energies go up to j = 14.  the energies for higher j (<= 25),
-*  for IS = 0,-1,1,É,5, were estimated by extrapolation, fitting the MORBID
+*  for IS = 0,-1,1,...,5, were estimated by extrapolation, fitting the MORBID
 *  energies to the rigid rotor expression x0 + x1*j*(j+1) for each IS stack.
 *  the extrapolated energies are appended to the MORBID energy list below.
 *
 *  prmatp, which is in hibaastp.f, is called
 *
 *  author:  paul dagdigian
-*  current revision date:  29-dec-2010 by pjd
+*  revision:  29-dec-2010 by pjd
+*  revision:  4-jun-2014 by q. ma (fix a bug in counting anisotropic
+*      terms)
 * --------------------------------------------------------------------
 *  variables in call list:
 *    j:        on return contains rotational quantum number for each
@@ -84,7 +86,7 @@
 *              program
 *    jlpar:    total parity of included channels in cc calculation
 *              only those channels are included for which
-*                  -(-1)**(is+j+kp+l-jtot)=jlpar
+*                  -is*(-1)**(j+kp+l-jtot)=jlpar
 *              where parity designates the parity of the molecular state
 *              in cs calculation jlpar is set equal to 1 in calling program.
 *              note that the initial minus sign comes from the electronic
@@ -163,7 +165,7 @@
       common /coconv/ econv, xmconv
       dimension j(1), l(1), is(1), jhold(1), ehold(1),
      :          ishold(1), etemp(1), fjtemp(1), fktemp(1),
-     :          fistmp(1), nlami(4)
+     :          fistmp(1)
 *  table of rotational energies from Jensen's MORBID calculation
       dimension ch2x_e(6,282)
       data num_x /282/
@@ -511,13 +513,7 @@
      :            ' FOR TERM',i2,'; ABORT ***')
           stop
         end if
-        lmin = lammin(i)
-        lmax = lammax(i)
-        nlami(i) = 0
-        do lb = lmin, lmax, ipotsy
-          nlami(i) = nlami(i) + 1
-        end do
-        nsum = nsum + nlami(i)
+        nsum = nsum + (lammax(i) - lammin(i)) / ipotsy + 1
 35    continue
       if (nlammx .lt. nsum) then
         write (6, 40) nsum, nlammx
@@ -542,7 +538,7 @@
       end if
       if (bastst) write (6, 46) nsum
       write (9, 46) nsum
-46    format (' ** TOTAL NUMBER OF ANISTROPIC TERMS IN POTENTIAL =',
+46    format (' ** TOTAL NUMBER OF ANISOTROPIC TERMS IN POTENTIAL =',
      :        i3)
       nlam = nsum
       if (clist) then
@@ -925,9 +921,10 @@
 *  indices are primed and the ket indices (right-hand side of matrix elements),
 *  unprimed.
 *
-*  NOTE:  because the effective A rotational constant of the CH2(X 3B1) (0,v2,0)
-*  bender level are large, particularly for v2 ³ 2, the rotational wave functions
-*  are well described by symmetric top wave functions
+*  NOTE: because the effective A rotational constant of the CH2(X 3B1)
+*  (0,v2,0) bender level are large, particularly for v2 >= 2, the
+*  rotational wave functions are well described by symmetric top wave
+*  functions
 *
 *  subroutine calls prmatp, which is in hibaastp.f
 *

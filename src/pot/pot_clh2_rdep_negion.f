@@ -1,6 +1,8 @@
-*system:  Cl(2P)+H2, Dubernet-Hutson expansion of Capecchi-Werner rdependent
-* PES's references: G. Capecchi and H-J Werner, to be published, M. H. Alexander,
-*      to be published
+* system:  Cl(2P)+H2, Dubernet-Hutson expansion of Capecchi-Werner r-dependent
+* PES
+* References:
+*  G. Capecchi, H.-J. Werner Phys. Chem. Chem. Phys. 6, 4975 (2004)
+*  M. H. Alexander  to be published
 *  M.-L. Dubernet and J. M. Hutson, J. Chem. Phys. 101, 1939 (1994).
 *  M. H. Alexander, J. Chem. Phys. 99, 6014 (1993).
 *  M. H. Alexander and M. Yang, J. Chem. Phys. 103, 7956 (1995).

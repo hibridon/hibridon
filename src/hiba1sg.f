@@ -6,27 +6,21 @@
 *                          routines included:                           *
 *                                                                       *
 *  1. basis      dispatcher routine to select basis                     *
+*                see in header for basis subroutine for list of basis   *
+*                routines currently available                           *
 *  2. ba1sg      basis for singlet sigma scattering                     *
-*  3. vlm1sg     calculates v-lamda matrices for 2.                     *
-*  4. ba2sg      basis for doublet sigma scattering                     *
-*  5. vlm2sg     calculates v-lamda matrices for 4.                     *
-*  6. ba2pi      basis for doublet pi scattering                        *
-*  7. vlm2pi     calculates v-lamda matrices for 6.                     *
-*  8. basgpi     basis for sigma/pi scattering                          *
-*  9. vlsgpi     calculates v-lamda matrices for 8.                     *
-*  10. bapi     basis for general  pi scattering                        *
-*  11. vlmpi    calculates v-lamda matrices for 10                      *
-*  12. bastp     basis for symmetric top scattering                     *
-*  13. vlmstp    calculates v-lamda matrices for 12                     *
-*  14. ba13p     basis for singlet/triplet P atom scattering            *
-*  15. vlmstp    calculates v-lamda matrices for 14                     *
+*  3. vlm1sg     calculates v-lamda matrices for above                  *
+*  4. is_twomol check if a basis is for mol-mol collision (j=10j1+j2)   *
+*  5. is_j12    check if j12 is used in a basis                         *
+*                                                                       *
+*     current revision:  24-jul-2019 (p.dagdigian)                       *
 *                                                                       *
 *************************************************************************
 * --------------------------------------------------------------------
       subroutine basis (j, l, is, jhold, ehold, ishold, nlevel, nlevop,
      :                  sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu,
      :                  csflag, clist, bastst, ihomo, nu, numin, jlpar,
-     :                  n, nmax, ntop)
+     :                  twomol, n, nmax, ntop)
 * --------------------------------------------------------------------
 *
 *  dispatcher to select the correct basis routine for given problem
@@ -40,7 +34,7 @@
 *    3              ba2pi             doublet pi scattering
 *    4              basgpi            sigma/pi scattering
 *    5              bapi              general pi scattering
-*    6              basstp            symmetric top scattering
+*    6              bastp             symmetric top scattering
 *    7              ba13p             1/3 P atom scattering
 *    8              ba2mol            1sigma + 1sigma
 *    9              bastpln           symmetric top + linear molecule
@@ -53,10 +47,22 @@
 *    16             baastp            asymmetric top scattering
 *    17             bach2x            CH2(X B1) (0,v2,0) bender levels
 *    18             bastp1            symmetric top - no inversion doubling
-*    25             badiat3p          heteronuclear + 3P atom  **to do**
-*    99             bausr             user defined basis
+*    19             basgpi1           2sigma | 2pi + atom (no pertubations)
+*    20             ba2pi1sg          2pi molecule + 1sigma molecules
+*    21             bastp1sg          symmetric top + 1sigma molecules
+*    22             ba1d3p            1D/3P atom + closed-shell atom
+*    23             ba3p2s            3P atom + 2S atom
+*    24             basphtp           spherical top + atom scattering
+*    25             ba1s1sg           1sigma + 1sigma (different molecules)
+*    26             ba2sg1sg          2sigma + 1sigma molecules
+*    27             baastp1           C2v asymmetric top scattering, w body-frame
+*                                     quant axis along C2 axis (compatible w MOLSCAT)
+*    28             ba3sg1sg          3sigma + 1sigma molecules
+*    29             baastp2           chiral asymmetric top + atom scattering
+*    30             baastp3           C2v asymmetric top + linear molecule
+*    99 or higher   bausr             user defined basis
 *  author: b. follmeg
-*  current revision date:  15-mar-2011 by paul dagdigian
+*  current revision of list:  20-jun-2019 (p.dagdigian)
 * --------------------------------------------------------------------
 *  variables in call list:
 *    j:        on return contains rotational quantum numbers for each
@@ -119,14 +125,14 @@
       integer j, l, is, jhold, ishold, nlevel, nlevop, jtot, nu,
      :        jlpar, n, nmax
 *      real ehold, sc1, sc2, sc3, sc4, rcut
-      logical flaghf, flagsu, csflag, clist, bastst, ihomo
+      logical flaghf, flagsu, csflag, clist, bastst, ihomo, twomol
       integer ibasty
       common /coselb/ ibasty
       dimension j(1), l(1), is(1), jhold(1), ehold(1), ishold(1),
      :         sc1(1), sc2(1), sc3(1), sc4(1)
 *
 *  select basis routine according to value of ibasty
-      if (ibasty .eq. 99) then
+      if (ibasty .ge. 99) then
 *  user supplied routine
         call bausr(j, l, is, jhold, ehold, ishold, nlevel, nlevop,
      :                  sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu,
@@ -135,7 +141,8 @@
         return
       endif
       goto (100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,
-     :      1400,1500,1600,1700,1800)
+     :      1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,
+     :      2500,2600,2700,2800,2900,3000)
      :      ibasty
 *  singlet sigma basis
 100   call ba1sg (j, l, is, jhold, ehold, ishold, nlevel, nlevop,
@@ -242,11 +249,80 @@ c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
      :                  flaghf, flagsu, csflag, clist, bastst,
      :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
       return
-*  symmetric top basis, with noinversion doubling
+*  symmetric top basis, with no inversion doubling
 1800   call bastp1 (j, l, is, jhold, ehold, ishold, nlevel,
      :                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
      :                  flaghf, flagsu, csflag, clist, bastst,
      :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+      return
+*  2sig-2pi + atom scattering (one 2sigma state and one or more 2pi
+*   vibrational levels, no sigma-pi spectroscopic perturbations)
+1900   call basgpi1 (j, l, is, jhold, ehold, ishold, nlevel,
+     :                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
+     :                  flaghf, flagsu, csflag, clist, bastst,
+     :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+      return
+*  2pi + 1sigma molecules
+ 2000 call ba2pi1sg(j, l, is, jhold, ehold, ishold, nlevel,
+     $     nlevop, rcut, jtot, flaghf, flagsu, csflag, clist,
+     $     bastst, ihomo, nu, numin, jlpar, twomol, n, nmax, ntop)
+      return
+*  symmetric top + 1sigma molecules
+ 2100 call bastp1sg(j, l, is, jhold, ehold, ishold, nlevel,
+     $     nlevop, rcut, jtot, flaghf, flagsu, csflag, clist,
+     $     bastst, ihomo, nu, numin, jlpar, twomol, n, nmax, ntop)
+      return
+*  1D/3P atom + closed-shell atom
+ 2200 call ba1d3p(j, l, is, jhold, ehold, ishold, nlevel,
+     $     nlevop, rcut, jtot, flaghf, flagsu, csflag, clist,
+     $     bastst, ihomo, nu, numin, jlpar, n, nmax, ntop)
+      return
+*   3P atom + 2S atom
+ 2300 call ba3p2s (j, l, is, jhold, ehold, ishold, nlevel,
+     :     nlevop, rcut, jtot, flaghf, flagsu, csflag, clist,
+     :     bastst, ihomo, nu, numin, jlpar, n, nmax, ntop)
+      return
+*   spherical top + atom
+ 2400 call basphtp (j, l, is, jhold, ehold, ishold, nlevel,
+     :     nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
+     :     flaghf, flagsu, csflag, clist, bastst, ihomo,
+     :     nu, numin, jlpar, n, nmax, ntop)
+      return
+*   1sigma + 1sigma basis (different molecules)
+ 2500 call ba1s1sg (j, l, is, jhold, ehold, ishold, nlevel,
+     :     nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
+     :     flaghf, flagsu, csflag, clist, bastst, ihomo,
+     :     nu, numin, jlpar, n, nmax, ntop)
+      return
+*   2sigma + 1sigma basis
+ 2600 call ba2s1sg (j, l, is, jhold, ehold, ishold, nlevel,
+     :     nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
+     :     flaghf, flagsu, csflag, clist, bastst, ihomo,
+     :     nu, numin, jlpar, n, nmax, ntop)
+      return
+*   C2v asymmetric top + atom scattering
+ 2700 call baastp1 (j, l, is, jhold, ehold, ishold, nlevel,
+     :     nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
+     :     flaghf, flagsu, csflag, clist, bastst, ihomo,
+     :     nu, numin, jlpar, n, nmax, ntop)
+      return
+*   3sigma + 1sigma basis
+ 2800 call ba3s1sg (j, l, is, jhold, ehold, ishold, nlevel,
+     :     nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
+     :     flaghf, flagsu, csflag, clist, bastst, ihomo,
+     :     nu, numin, jlpar, n, nmax, ntop)
+      return
+*   chiral asymmetric top + atom scattering
+ 2900 call baastp2 (j, l, is, jhold, ehold, ishold, nlevel,
+     :     nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
+     :     flaghf, flagsu, csflag, clist, bastst, ihomo,
+     :     nu, numin, jlpar, n, nmax, ntop)
+      return
+*   C2v asymmetric top + linear molecule scattering
+ 3000 call baastp3 (j, l, is, jhold, ehold, ishold, nlevel,
+     :     nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
+     :     flaghf, flagsu, csflag, clist, bastst, ihomo,
+     :     nu, numin, jlpar, n, nmax, ntop)
       return
       end
 *--------------------------------------------------------------------
@@ -816,3 +892,46 @@ c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
       end if
       return
       end
+c     ------------------------------------------------------------------
+      logical function is_twomol(ibasty)
+c     ------------------------------------------------------------------
+c
+c     checks if a basis is for molecule-molecule collision (j=10j1+j2)
+c
+c     written by q. ma
+c     current revision:  24-jul-2019 (p.dagdigian)
+c     ------------------------------------------------------------------
+      implicit none
+      integer, intent(in) :: ibasty
+      if ((ibasty .eq. 9) .or. (ibasty .eq. 20) .or. (ibasty .eq. 21)
+     $      .or. (ibasty .eq. 25) .or. (ibasty .eq. 26)
+     $      .or. (ibasty .eq. 28) .or. (ibasty .eq. 30) 
+     $      .or. (ibasty .eq. 100))
+     $     then
+         is_twomol = .true.
+      else
+         is_twomol = .false.
+      end if
+      return
+      end function is_twomol
+c     ------------------------------------------------------------------
+      logical function is_j12(ibasty)
+c     ------------------------------------------------------------------
+c
+c     checks if j12 is used in a basis
+c
+c     written by q. ma
+c     current revision:  17-oct-2018 (p.dagdigian)
+c     ------------------------------------------------------------------
+      implicit none
+      integer, intent(in) :: ibasty
+      logical :: is_twomol
+      if (is_twomol(ibasty) .or. (ibasty .eq. 12)
+     $     .or. (ibasty .eq. 13) .or. (ibasty .eq. 15)
+     $     .or. (ibasty .eq. 23)) then
+         is_j12 = .true.
+      else
+         is_j12 = .false.
+      end if
+      return
+      end function is_j12

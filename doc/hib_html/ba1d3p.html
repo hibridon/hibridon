@@ -1,0 +1,30 @@
+<TITLE>bastp</TITLE>
+<h3><center><font color=#brown >Basis Subroutine
+ and System Specific Parameters: Collision Involving the <sup>1</sup><i>D</i> and <sup>3</sup><i>P</i> States of an Atom with Electron Configuration <i>p</i><sup>2</sup> or <i>p</i><sup>4</sup> of an Atom with a Structureless Atom
+</h3>
+</center></font><hr>
+
+
+<tt>BASISTYPE = 22</tt><p>
+<ul>
+	System subroutine: <tt>sy1d3p</tt><p>
+	Basis subroutine: <tt>hiba1d3pp.f</tt></ul>
+
+<p>
+<font size=-1><i>Ref.</i> P. J. Dagdigian, M. H. Alexander, and J. Klos J. Chem. Phys. <b>143</b>, 054306 (2015).</font>
+<hr>
+The definition of the system dependent parameters is as follows:
+<ul>     NTERM:  the number of potential surfaces involved.  This parameter can not be changed<p>
+    NSTATE:   number of electronic states included:<p>
+    <ul>set NSTATE=0 for just the <sup>1</sup><i>D</i> state<br>
+        set NSTATE=1 for just the <sup>3</sup><i>P</i> state<br>
+        set NSTATE=2 for both <sup>1</sup><i>D</i> and <sup>3</sup><i>P</i> states</ul><p>
+    
+The definition of the real system dependent parameters is as follows:
+<ul>
+EN1D:    energy of the <sup>1</sup><i>D</i> state relative to that of ths <sup>3</sup><i>P</i> state.
+</ul>
+<hr>
+
+<hr>
+<a href=hibhelp.html><img src=up_arrow.gif border=0 align=middle></a>&#001;Return to <a href=hibhelp.html>Hibridon Help</a>

@@ -1,7 +1,10 @@
 *system:  F+H2, expansion of Stark-werner PES's r=1.4
 *references: M. H. Alexander, J. Chem. Phys. 99, 6014 (1993).
 * M.-L. Dubernet and J. M. Hutson, J. Chem. Phys. 101, 1939 (1994).
-
+*
+*  Note:  this pot routine requires a data file to be in hibxx/bin/progs/potdata:
+*         three.param, two.param
+*
       include "common/syusr"
       include "common/ground"
       include "common/bausr"
@@ -1576,13 +1579,15 @@ c
       save icall,a,b,c,d,p,ma,np
 c
       if (icall .eq. 0) then
-         open (unit=1,file='three.param',status='old')
+         open (unit=1,file='potdata/three.param',
+     :     status='old')
          i=1
    2     read (1,*,end=3) nparm,b(i),c(i),d(i),a(i)
             i=i+1
             goto 2
    3     ma=i-1
-         open (unit=1,file='two.param',status='old')
+         open (unit=1,file='potdata/two.param',
+    :      status='old')
          i=1
    4     read (1,*,end=5) p(i)
             i=i+1
@@ -1637,7 +1642,7 @@ c..... read the three-body-parameters
 c..... (computed with the levenberg-marquardt-procedure)
 c..... nparm is the actual number of a parameter
 c
-      open(3,file='three.param')
+      open(3,file='potdata/three.param')
       i=1
    10 read(3,*,end=11) nparm(i),b(i),c(i),d(i),a(i)
       i=i+1
@@ -1649,7 +1654,7 @@ c
 c.... read the two-body-parameters p
 c.... (computed with an extended-rydberg-fit)
 c
-      open(1,file='two.param')
+      open(1,file='potdata/two.param')
       i=1
    12 read(1,*,end=111) p(i)
       i=i+1

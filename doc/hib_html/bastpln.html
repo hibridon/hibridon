@@ -1,7 +1,6 @@
 <TITLE>bastpln</TITLE>
-<h3><center><font color=#brown >Basis Subroutine
- and System Specific Parameters: Collision of
-a Symmetric Top with a Linear Molecule in a <sup>1</sup>&Sigma; State
+<h3><center><font color=#brown >Basis Subroutine and System Specific Parameters: 
+Collision of a Symmetric Top with a Linear Molecule in a <sup>1</sup>&Sigma; State with Inversion Doubling
 </h3>
 </center></font><hr>
 
@@ -11,7 +10,7 @@ a Symmetric Top with a Linear Molecule in a <sup>1</sup>&Sigma; State
 
 
 <p>
-A Symmetric top and a Linear Molecule in  a <sup>1</sup>&Sigma
+A Symmetric top and a Linear Molecule in  a <sup>1</sup>&Sigma;
 State <br><font size=-1><i>Ref.</i> C. Rist, M. H. Alexander, and 
 P. Valiron, J. Chem. Phys. <b>98</b>, 4662 (1993).
 </font><hr>
@@ -33,23 +32,11 @@ of IPOTSY
 <ul>if IOP = 1: only <i>para</i> states included in channel expansion<br>
 if IOP = -1: only <i>ortho</i> states included in channel expansion
               </ul><p>
-    NINV:     number of inversion doublets included
-<ul>
-              if NINV = +1, only + inversion levels included<br>
-              if NINV = -1, only - inversion levels included<br>
-              if NINV = 2, both inversion levels included<p>
-</ul>
-    KMAX:     the maximum projection quantum number included<p>
-    JMAX0:    the maximum rotational angular momenta for the k = 0 stack<p>
-    JMAX1:    the maximum rotational angular momenta for the k = 1 stack<p>
-    JMAX2:    the maximum rotational angular momenta for the k = 2 stack<p>
-    JMAX3:    the maximum rotational angular momenta for the k = 3 stack<p>
-    JMAX4:    the maximum rotational angular momenta for the k = 4 stack<p>
-    JMAX5:    the maximum rotational angular momenta for the k = 5 stack<p>
-    JMAX6:    the maximum rotational angular momenta for the k = 6 stack<p>
-    IPOTSY2:  symmetry of potential. if the linear molecule is homonuclear
+    JMAX:     the maximum rotational angular momenta in the channel expansion<p>
+    EMAX:     the maximum energy of a state to be included in the rotational state basis<p>
+IPOTSY2:  symmetry of potential. if the linear molecule is homonuclear
               then IPOTSY = 2 and only terms with <i>lambda</i><sub>2</sub> even can be
-              included in the potential, else IPOTSY = 1<p>
+              included in the potential, else IPOTSY2 = 1<p>
     J2MAX:    the maximum rotational angular momentum for the linear
               molecule<p>
     J2MIN:    the minimum rotational angular momentum for the linear
@@ -59,14 +46,20 @@ if IOP = -1: only <i>ortho</i> states included in channel expansion
 The definition of the real system dependent parameters is as follows:
 <ul>
 BROT, CROT:    rotational constants of symmetric top<br>
-DROT:    rotational constant of diatomic molecule<br>
+DROT:    rotational constant of diatomic molecule<br><p>
 <ul><i>E(jkj</i><sub>2</sub>) = BROT <i>j</i> (<i>j</i> + 1) + 
 (CROT - BROT) <i>k</i><sup>2</sup> + DROT <i>j</i><sub>2</sub> (<i>j</i><sub>2</sub> + 1) <br>
-</ul><p>
+</ul>
+<p>
+    DELTA:   inversion splitting (assumed to be the same for all rotational levels).  This energy is added to - inversion levels.<p>
+<p>
+</ul>
+<img src="warningsmall.gif">  At the present time, elastic cross sections are incorrectly calculated using the INTCRS command for channels where both J and J2 are nonzero.  Cross sections are correctly calculated using PRINTC.
 
 
 </ul>
 <hr>
 <a href=hibhelp.html><img src=up_arrow.gif border=0 align=middle></a>&#001;Return to <a href=hibhelp.html>Hibridon Help</a>
+
 
 

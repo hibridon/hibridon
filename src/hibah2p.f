@@ -7,7 +7,14 @@
 *  subroutine to determine angular coupling potential
 *  for collision of a doublet atom in a P state and a homonuclear molecule
 *  authors:  millard alexander
-*  current revision date:  21-feb-2006 by mha
+*
+*  moved j12 (renamed isc1 array) to common block /coj12/ to pass array
+*  to other subrs (p.dagdigian)
+*
+*  revised routine so that CC scattering calculations work.  it appears that
+*  this routine had previously been used only for bound-state calculations
+*
+*  current revision date:  14-mar-2013 by p.dagdigian
 * --------------------------------------------------------------------
 *  variables in call list:
 *    j:        for CC calculation:  returns diatom angular momentum (j) for ea
@@ -85,27 +92,30 @@
 *    jmax:     maximum rotational quantum number of diatomic
 *  variable in common block /cocent/
 *    cent:      array containing centrifugal barrier of each channel
-*
 *  variable in common block /coeint/
 *    eint:      array containing channel energies (in hartree)
+*  variable in common block /coj12/
+*    j12:      array containing vector sum of ja + j (similar
+*              situation with molecule-molecule scattering,
+*              see hibastpln basis routine)
 *  variables in common block /coered/
-*    ered:      collision energy in atomic units (hartrees)
-*    rmu:       collision reduced mass in atomic units
-*               (mass of electron = 1)
+*    ered:     collision energy in atomic units (hartrees)
+*    rmu:      collision reduced mass in atomic units
+*              (mass of electron = 1)
 *  variable in common block /conlam/
-*    nlam:      the number of case(a) interaction potentials actually used
-*               if this has not been set in the pot subroutine, it it
-*               here set to 5
-*    nlammx:    the maximum number of angular coupling terms
+*    nlam:     the number of case(a) interaction potentials actually used
+*              if this has not been set in the pot subroutine, it it
+*              here set to 5
+*    nlammx:   the maximum number of angular coupling terms
 *  variable in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    v2:        lower triangle of nonzero angular coupling matrix elements
-*               only nonzero elements are stored
+*    nv2max:   maximum core memory allocated for the v2 matrix
+*    v2:       lower triangle of nonzero angular coupling matrix elements
+*              only nonzero elements are stored
 *  variable in common block /coiv2/
-*   iv2:        matrix address of v2 matrix for each non-zero element
+*   iv2:       matrix address of v2 matrix for each non-zero element
 *  variable in common block /coconv/
-*     econv:    conversion factor from cm-1 to hartrees
-*     xmconv:   converson factor from amu to atomic units
+*     econv:   conversion factor from cm-1 to hartrees
+*     xmconv:  converson factor from amu to atomic units
 *  subroutines called:
 *   vlmh2p:    returns angular coupling coefficient for particular
 *              choice of channel index
@@ -122,6 +132,7 @@
       common /conlam/ nlam, nlammx, lamnum(1)
       common /cocent/ cent(5)
       common /coeint/ eint(5)
+      common /coj12/ j12(1)
       common /coered/ ered, rmu
       common /coskip/ nskip, iskip
       common /coconv/ econv, xmconv
@@ -155,7 +166,7 @@
         if (bastst) then
           return
         else
-          call exit
+          stop
         end if
       end if
       if (flaghf) then
@@ -163,46 +174,55 @@
       else
         xnu=nu
       endif
+*  check that iop equals 0 or 1 only
+      if (iop.ne.0 .and. iop.ne.1) then
+        write (6,6) iop
+        write (6,9) iop
+6       format (' *** IOP =',i2,'.  THIS PARAMETER MUST EQUAL 0 OR 1;',
+     :    ' ABORT ***')
+        stop
+      end if
       if(nterm.ne.1) then
         write(6,9) nterm
         write(9,9) nterm
-9       format(' *** NTERM = ',i3,' .NE. 1 FOR MOL + 2P ATOM; ABORT')
-        call exit
+9       format(' *** NTERM = ',i3,' .NE. 1 FOR MOL + 2P ATOM;',
+     :    ' ABORT ***')
+        stop
       end if
       if (nlam.eq.0) nlam=5
       nsum=nlam
       if (bastst) write (6, 14) nsum
       write (9, 14) nsum
 14    format (' ** TOTAL NUMBER OF ANISOTROPIC TERMS=', i2)
-      if (clist) then
+      if (bastst) then
         if (flagsu) then
-          write (6,16) rmu * xmconv, ered * econv, jtot, jlpar
-          write (9,16) rmu * xmconv, ered * econv, jtot, jlpar
+          write (6,16) rmu * xmconv, ered * econv, jtot+half, jlpar
+          write (9,16) rmu * xmconv, ered * econv, jtot+half, jlpar
 16        format(/
      :  ' **  MOL + 2P ATOM ON UNCORRUGATED SURFACE ** RMU=',f9.4,
-     :  '             E=', f9.2, /, ' JTOT=', i5, 2x,' JLPAR=',i2)
+     :  '             E=', f9.2, /, ' JTOT=', f5.1, 2x,' JLPAR=',i2)
         else
           if(.not.csflag) then
             write (6,20)
-     :          rmu * xmconv, ered * econv, jtot, jlpar
+     :          rmu * xmconv, ered * econv, jtot+half, jlpar
             write (9,20)
-     :          rmu * xmconv, ered * econv, jtot, jlpar
+     :          rmu * xmconv, ered * econv, jtot+half, jlpar
 20          format(/,' **  CC MOL + 2P ATOM',' ** RMU=', f9.4,
-     :           '       E=',f9.2,'   JTOT=', i5, 2x,' JLPAR=',i2)
+     :           '       E=',f9.2,'   JTOT=', f5.1, 2x,' JLPAR=',i2)
           else if (csflag .and. ihomo) then
             write (6,22)
-     :          rmu * xmconv, ered * econv, jtot, xnu
+     :          rmu * xmconv, ered * econv, jtot+half, xnu
             write (9,22)
-     :          rmu * xmconv, ered * econv, jtot, xnu
+     :          rmu * xmconv, ered * econv, jtot+half, xnu
 22          format(/,' **  CD 1C MOL + 2P ATOM',' ** RMU=', f9.4,
-     :           '       E=',f9.2,'   JTOT=', i5, 2x,' P=',f4.1)
+     :           '       E=',f9.2,'   JTOT=', f5.1, 2x,' P=',f4.1)
           else if (csflag .and. .not.ihomo) then
             write (6,23)
-     :          rmu * xmconv, ered * econv, jtot, xnu
+     :          rmu * xmconv, ered * econv, jtot+half, xnu
             write (9,23)
-     :          rmu * xmconv, ered * econv, jtot, xnu
+     :          rmu * xmconv, ered * econv, jtot+half, xnu
 23          format(/,' **  CD 1A MOL + 2P ATOM',' ** RMU=', f9.4,
-     :           '       E=',f9.2,'   JTOT=', i5, 2x,' P=',f7.2)
+     :           '       E=',f9.2,'   JTOT=', f5.1, 2x,' P=',f7.2)
           endif
         end if
         if (.not. flagsu) write (9,30) rcut
@@ -216,11 +236,11 @@
 35      format (' NU =',i3,' .GT. JTOT =',i3,'; JTOT RESET TO NU')
         jtot=nu
       endif
-
-*  save jtot and jlpar fr use later in transformatin
+*
+*  save jtot and jlpar for use later in transformation
       jjtot=jtot
       jjlpar=jlpar
-      if (iop .eq. 0) jmolmin=0
+      jmolmin=0
       if (iop .eq. 1) jmolmin=1
       if (.not. csflag) then
 *  assign quantum numbers and energies for CC calculations
@@ -231,15 +251,16 @@
 * sum over atomic levels
         do 100 jai=0,1
           nlevel = nlevel+1
-          if (jai .eq. 0) ehold(nlevel)=-aso/econv
-          if (jai .eq. 1) ehold(nlevel)=aso/(econv*two)
+* rotational energy
+          erot = brot*jmol*(jmol+1)
+          ehold(nlevel)=(erot-aso)/econv
+          if (jai .eq. 1) ehold(nlevel)=(erot+aso/two)/econv
+          jhold(nlevel)=jmol
           ishold(nlevel)=jai
           xjai=jai+half
           j12min=abs(xjai-jmol)-half
           j12max=jai+jmol
           do 90 j12i=j12min,j12max
-*repl 5/5/98 jhold(nlevel)=j12i
-            jhold(nlevel)=jmol
             lmin=iabs(jtot-j12i)
             lmax=jtot+j12i+1
             do 80 li=lmin,lmax
@@ -249,24 +270,18 @@
                 if (n .gt. nmax) go to 180
                 l(n) = li
                 is(n)=jai
-*repl 5/5/98     j(n)=j12i
-                 j(n)=jmol
-*repl 5/5/98     isc1(n)=jmol
-                isc1(n)=j12i
+                j(n)=jmol
+                j12(n)=j12i
                 isc8(n)=j12i
 * centrifugal contribution to hamiltonian
                 cent(n) = li*(li+1)
-* constant channel energy
-                sc2(n)=brot*jmol*(jmol+1)
-                if (jai .eq. 0) sc2(n)=sc2(n)-aso
-                if (jai .eq. 1) sc2(n)=sc2(n)+aso/two
-                sc2(n)=sc2(n)/econv
+                sc2(n)=ehold(nlevel)
               endif
-              ehold(nlevel)=sc2(n)
 80          continue
 90        continue
 100     continue
 105     continue
+*
 * here for CS calculations
       elseif (csflag) then
 *  assign quantum numbers and energies for CS calculations
@@ -277,6 +292,7 @@
           xnu=nu+half
 * sum over molecular levels
           do 125 jmol=jmolmin,jmax,2
+          erot = brot*jmol*(jmol + 1)
 * sum over atomic levels
           do 120 jai=0,1
             xjai=jai+half
@@ -288,6 +304,7 @@
                 nlevel = nlevel+1
                 if (jai .eq. 0) ehold(nlevel)=-aso/econv
                 if (jai .eq. 1) ehold(nlevel)=aso/(econv*two)
+                ehold(nlevel) = ehold(nlevel) + erot/econv
                 ishold(nlevel)=jai
                 jhold(nlevel)=j12i
                 li=jtot
@@ -297,7 +314,7 @@
                 l(n) = li
                 is(n)=jai
                 j(n)=j12i
-                isc1(n)=jmol
+                j12(n)=jmol
                 isc8(n)=jmol
                 xj12=j12i+half
 * centrifugal contribution to hamiltonian
@@ -320,6 +337,7 @@
             n=0
             nlevel = 0
             do 155 jmol=jmolmin,jmax,2
+            erot = brot*jmol*(jmol + 1)
 * sum over atomic levels
 * if aso > 10000, assume aso = 0 and ja=0.5
               do 150 jai=0,1
@@ -332,6 +350,7 @@
                   nlevel=nlevel+1
                   ehold(nlevel)=zero
                 endif
+                ehold(nlevel) = ehold(nlevel) + erot/econv
                 ishold(nlevel)=jai
                 xjai=jai+half
                 mink=-jmol
@@ -344,7 +363,7 @@
                     li=jtot
                     n = n + 1
                     if (n .gt. nmax) go to 180
-                    isc1(n)=jmol
+                    j12(n)=jmol
                     isc8(n)=jmol
                     l(n) = li
                     xjtot=jtot+half
@@ -384,7 +403,7 @@
                   li=jtot
                   n = n + 1
                   if (n .gt. nmax) go to 180
-                  isc1(n)=jmol
+                  j12(n)=jmol
                   isc8(n)=jmol
                   l(n) = li
                   is(n)=1
@@ -401,7 +420,7 @@
          endif
         endif
       endif
-
+*
 180   if (n .gt. nmax) then
         write (9, 185) n, nmax
         write (6, 185) n, nmax
@@ -410,35 +429,48 @@
         if (bastst) then
           return
         else
-          call exit
+          stop
         end if
       end if
+*
+*  find lowest energy
+      emin = 1.e+7
+      do 188 i = 1, n
+        if (sc2(i) .lt. emin) emin = sc2(i)
+188   continue
+*  shift energies so that lowest level has zero energy
+      do 189 i = 1, n
+        eint(i) = sc2(i) - emin
+189   continue
+      do 191 i = 1, nlevel
+        ehold(i) = ehold(i) - emin
+191   continue
 *  now check to see if any of the open channels are closed at r=rcut
 *  this is not done for molecule-surface collisions or for rcut < 0
 *  or for bound state calculations!
       if (.not.flagsu .and. rcut .gt. 0.d0 .and..not.boundc) then
         emin = 1.e+7
         do 190  i = 1, n
-          if (sc2(i) .le. ered) then
+          if (eint(i) .le. ered) then
 *  here if channel is
             if ( jtot * (jtot + 1) / (2. * rmu * rcut * rcut)
-     :          .gt. (ered - sc2(i)) ) then
+     :          .gt. (ered - eint(i)) ) then
 *  here if channel is open asymptotically but closed at r = rcut
-              if (sc2(i) .lt. emin) emin = sc2(i)
+              if (eint(i) .lt. emin) emin = eint(i)
 *  emin now contains the lowest channel energy for which this
 *  condition is met
             end if
           end if
  190    continue
-*  now eliminate all channels with sc2(eint) .ge. emin if any of the channels
+*  now eliminate all channels with eint .ge. emin if any of the channels
 *  are open asymptotically but closed at r = rcut
         if (emin.lt.ered) then
           nn = 0
           do 195 i = 1, n
-            if (sc2(i) .lt. emin) then
+            if (eint(i) .lt. emin) then
 *  here if this channel is to be included
               nn = nn + 1
-              sc2(nn) = sc2(i)
+              eint(nn) = eint(i)
               is(nn) = is(i)
               j(nn) = j(i)
               cent(nn) = cent(i)
@@ -451,40 +483,34 @@
       end if
 *  return if no channels
       if (n .eq. 0) return
-*  eliminate closed channels from level list
-* sort level list in terms of increasing energy
-      if (nlevel.gt.1) then
-         do i=1,nlevel-1
-            elow=ehold(i)
-            do ji=i+1,nlevel
-               ex=ehold(ji)
-               if (ex.lt.elow) then
-                 ilow=ji
-                 elow=ex
-               endif
-            enddo
-* ilow is now index of lowest energy
-* swap levels
-            if (ilow.ne.i) then
-               eswap=ehold(i)
-               ehold(i)=ehold(ilow)
-               ehold(ilow)=eswap
-               jswap=jhold(i)
-               jhold(i)=jhold(ilow)
-               jhold(ilow)=jswap
-               iswap=ishold(i)
-               ishold(i)=ishold(ilow)
-               ishold(ilow)=iswap
-            endif
-         enddo
-      endif
-      nlevop=0
-      do i=1,nlevel
-         if (ered-ehold(i).gt.0d0) then
-            nlevop=nlevop+1
-         endif
-      enddo
-
+*  form list of all energetically distinct rotational levels included in the
+*  channel basis and their energies and
+*  sort this list to put closed levels at end
+*  also determine number of levels which are open
+      nlevop = 0
+      do 580  i = 1, nlevel - 1
+        if (ehold(i) .le. ered) then
+          nlevop = nlevop + 1
+        else
+          do 75 ii = i + 1, nlevel
+            if (ehold(ii) .le. ered) then
+              nlevop = nlevop + 1
+              ikeep = jhold(i)
+              jhold(i) = jhold(ii)
+              jhold(ii) = ikeep
+              ikeep = ishold(i)
+              ishold(i) = ishold(ii)
+              ishold(ii) = ikeep
+              ekeep = ehold(i)
+              ehold(i) = ehold(ii)
+              ehold(ii) = ekeep
+              go to 580
+            end if
+75        continue
+        end if
+580    continue
+      if (ehold(nlevel) .le. ered) nlevop = nlevop + 1
+*
       ntop = max(n, nlevop)
 *  ntop is the maximum row dimension of all matrices passed in the
 *  call list of subroutines propag and soutpt.
@@ -492,28 +518,19 @@
 *  this has no effect on vax or cray
         if (mod(ntop,2) .eq. 0 .and. ntop .lt. nmax)
      :       ntop = ntop + 1
-*  shift so that zero of energy is average spin-orbit state
-*  e.g. j=3/2 are shifted by aso/2 and j=1/2 by -aso
-      if (iop .eq. 0) jmol=0
-      if (iop .eq. 1) jmol=1
-      emin=0
-      erot=brot*(jmol+1)*jmol
-      do 205 i=1,n
-        eint(i)=sc2(i)-(erot+emin)/econv
-205   continue
 *  now list channels if requested
-      if (clist) then
+      if (bastst) then
         if (ihomo) then
           if (.not.csflag) then
             write (6, 210)
             write (9, 210)
-210         format(/'   N   JA(IS) JMOL  J12(J)    L      EINT(CM-1)')
+210         format(/'   N   JA(IS) JMOL  J12(J)    L    EINT(CM-1)')
             do 220  i = 1, n
-              write (6, 215) i,is(i)+half,j(i),isc1(i)+half,l(i),
+              write (6, 215) i,is(i)+half,j(i),j12(i)+half,l(i),
      :             eint(i)*econv
-              write (9, 215) i,is(i)+half,j(i),isc1(i)+half,l(i),
+              write (9, 215) i,is(i)+half,j(i),j12(i)+half,l(i),
      :             eint(i)*econv
-215           format (i4, f8.1,i5, f7.1, i5, f14.3)
+215           format (i4, f8.1,i5, f7.1, i7, f12.3)
 220         continue
           else
             write (6, 225)
@@ -524,9 +541,9 @@
               xs=is(i)+half
               xj=j(i)+half
               icent=cent(i)
-              write (6, 230) i,xs,isc1(i),xj,icent,eint(i)*econv
-              write (9, 230) i,xs,isc1(i),xj,icent,eint(i)*econv
-230           format (i4, f8.1,i6,f7.1, i6, f14.3)
+              write (6, 230) i,xs,j12(i),xj,icent,eint(i)*econv
+              write (9, 230) i,xs,j12(i),xj,icent,eint(i)*econv
+230           format (i4, f8.1,i6,f7.1, i8, f12.3)
 235         continue
           endif
         elseif (.not.ihomo) then
@@ -538,8 +555,8 @@
             do 265  i = 1, n
               xs=is(i)+half
               icent=cent(i)
-              write (6, 260) i,xs,isc1(i),j(i),l(i),icent,eint(i)*econv
-              write (9, 260) i,xs,isc1(i),j(i),l(i),icent,eint(i)*econv
+              write (6, 260) i,xs,j12(i),j(i),l(i),icent,eint(i)*econv
+              write (9, 260) i,xs,j12(i),j(i),l(i),icent,eint(i)*econv
 260           format (i4, f8.1,4i6, f14.3)
 265         continue
           else
@@ -547,16 +564,16 @@
             write (9, 270)
 270         format(/'   N   LA(IS)  JMOL  K(J)   CENT    EINT(CM-1)')
             do 275  i = 1, n
-              write (6, 272) i,is(i),isc1(i),j(i),idnint(cent(i)),
+              write (6, 272) i,is(i),j12(i),j(i),idnint(cent(i)),
      :                       eint(i)*econv
-              write (9, 272) i,is(i),isc1(i),j(i),idnint(cent(i)),
+              write (9, 272) i,is(i),j12(i),j(i),idnint(cent(i)),
      :                       eint(i)*econv
 272           format (i4, i8,3i6, f14.3)
 275         continue
           end if
-
         endif
       end if
+*
 *  now calculate coupling matrix elements
 *  ordering of terms is as follows:
 *  CS calculations case 1A (csflag=.true. and ihomo=.false)
@@ -596,7 +613,9 @@
 *    lam=15  V426(R)
 *    lam=16  V628(R)
 *    lam=17  V8210(R)
-      if (bastst .and. iprint .gt. 1) then
+*
+*  print out matrix elements in BASTST = T and CHLIST = T
+      if (bastst .and. clist) then
         if (.not.csflag .or. (csflag .and. ihomo)) then
           write (6, 280)
           write (9, 280)
@@ -636,19 +655,17 @@
 *        do 310  icol= 2, 3
 *          do 300  irow = icol, 3
             ij = ntop * (icol - 1) +irow
-*repl 5/5/98jrow=isc1(irow)
-*repl 5/5/98jcol=isc1(icol)
-* 6/13/2002:  reverse definition of j and j12 for CD calculations
+*6/13/2002:  reverse definition of j and j12 for CD calculations
             if (csflag) then
-               jrow=isc1(irow)
-               jcol=isc1(icol)
+               jrow=j12(irow)
+               jcol=j12(icol)
                j12row=j(irow)
                j12col=j(icol)
             else
                jrow=j(irow)
                jcol=j(icol)
-               j12row=isc1(irow)
-               j12col=isc1(icol)
+               j12row=j12(irow)
+               j12col=j12(icol)
             endif
             if (.not. csflag .or. (csflag .and. ihomo)) then
               call vlmh2p (irow, icol, jtot, jlpar, jrow, jcol,is(irow),
@@ -668,7 +685,7 @@
               if (i .gt. nv2max) goto 300
                 v2(i) = vee
                 iv2(i) = ij
-                if (bastst .and. iprint .gt. 1) then
+                if (bastst .and. clist) then
                   if (.not. csflag .or. (csflag .and. ihomo)) then
                     write (6, 290) ilam, ilamr,ilama,ilam12, icol, irow,
      :                           i, iv2(i), vee

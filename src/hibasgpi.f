@@ -1,9 +1,9 @@
 * ----------------------------------------------------------------------
       subroutine basgpi (j, l, is, jhold, ehold, ishold, nlevel,
      :                  nlevop, iom, iohold, nvhold, nlv,
-     :                  rcut, jtot,flaghf, flagsu, csflag, clist,
-     :                  bastst,ihomo, nu, numin, jlpar, n, nmax, ntop)
-* --------------------------------------------------------------------
+     :                  rcut, jtot, flaghf, flagsu, csflag, clist,
+     :                  bastst, ihomo, nu, numin, jlpar, n, nmax, ntop)
+* ----------------------------------------------------------------------
 *  subroutine to determine angular coupling potential for collision of a
 *  molecule in either a 2pi electronic state in an intermediate coupling
 *  basis or in a 2sigma electronic state in a hund's case (a) coupling
@@ -31,7 +31,7 @@
 *           for omega = 3/2   is = (200+ivp)*eps
 *           for sigma         is = (300+ivs)*eps
 *        where  eps = +1 or -1 is the "true" case (a) symmetry index
-*        end ivs, ivp are the vibartional quantum numbers
+*        end ivs, ivp are the vibrational quantum numbers
 *    jhold:    on return contains rotational quantum numbers for each
 *              rotational level
 *    ehold:    on return contains energy in hartrees of each rotational
@@ -873,6 +873,7 @@ c342       continue
       call exit
 295   continue
       i=0
+*
 *  i counts v2 elements
 *  ilam counts number of v2 matrices
 *  inum counts v2 elements for given ilam
@@ -970,9 +971,9 @@ c342       continue
                i = i + 1
                inum = inum + 1
                if (bastst .and. iprint.gt.1) then
-                 write (6, 340) it,ivr,ivc,il,ilam,i,irow,icol,
+                 write (6, 340) it,ivr,ivc,il,ilam,i,icol,irow,
      :                          ij,vee
-                 write (9, 340) it,ivr,ivc,il,ilam,i,irow,icol,
+                 write (9, 340) it,ivr,ivc,il,ilam,i,icol,irow,
      :                          ij,vee
 340              format (1x,3i3,6i6, g17.8)
                end if
@@ -988,7 +989,7 @@ c342       continue
              write (6, 420) it,ivr,ivc,il,inum
              write (9, 420) it,ivr,ivc,il,inum
 420          format(' ITERM=',i1,'  IVR=',i2,'  IVC=',i2,'  LAMBDA=',i2,
-     :              ' NUMBER OF NONZERO MATRIX ELEMENTS',i6)
+     :              ' NUMBER OF NONZERO MATRIX ELEMENTS',i8)
            end if
            if(inum.ne.0) nlam=ilam
 450      continue
@@ -1012,7 +1013,7 @@ c342       continue
         write (6, 630) i
         write (9, 630) i
 630     format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS',
-     :           i7)
+     :           i9)
       end if
 *  set epsilon equal to +/- 2 for nominally omega=3/2 pi states
 *  and equal to +/- 3 for sigma states

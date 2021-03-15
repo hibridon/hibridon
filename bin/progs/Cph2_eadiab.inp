@@ -1,0 +1,23 @@
+Cp-H2 scattering on Halvick PESs                
+  12                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    1.0000   2.0000    0.0200   rstart, rendld, spac
+  F                              prairy
+  1.150      1.00    80.0  1.50  tolai, rincr, rendai, fstfac
+   1                             nerg
+   1000.0000
+    1.72577                      xmu
+ -100.0000                       rcut
+   0 100   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  46   2                         lscreen, iprint
+    6    2                       nnout,niout
+   0   1   2   4   3   5
+   0   1
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  F  T                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  T  F  F  T  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+   1   2                         iop, jmax
+     59.3340       42.28         brot, aso
+                                        

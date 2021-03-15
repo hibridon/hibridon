@@ -1,5 +1,8 @@
 *Ar-OH(A^2Sigma+) PES RCCSD(T) Klos et al
 
+*  reported in Klos, Alexander, Brouard, Eyles, and Aoiz,
+*  J. Chem. Phys. 129, 054301 (2008)
+
       subroutine driver
       implicit double precision (a-h,o-z)
       common /cosysr/ xjunk(2),rshift,xfact
@@ -7,13 +10,13 @@
       include "common/parpot"
       potnam='Klos et al Ar-OH(A^2Sigma+) CCSDT PES'
       print *, potnam
-1      print *, ' r (bohr)'
+1      print *, ' r(bohr)'
       rshift=0.5
       xfact=0.8
       read (5, *, end=99) r
       call pot(vv0,r)
       write (6, 100) vv0,vvl
-100   format(' vsum',/,7(1pe16.8))
+100   format(' vsig',/,12(1pe16.8))
       goto 1
 99    end
 

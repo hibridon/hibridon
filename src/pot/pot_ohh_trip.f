@@ -1,7 +1,6 @@
 * System:  OH(X 2Pi)+H, triplet potentials from MRCI calculations
 * Reference: M. H. Alexander, E. J. Rackham, D. E. Manolopoulos,
-*     J. Chem. Phys. to be published.
-
+* J. Chem. Phys. 121, 5221 (2004)
 
       subroutine driver
       implicit double precision (a-h,o-z)

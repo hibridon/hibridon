@@ -1,0 +1,23 @@
+'Input for CH2(X)-He calculations'   
+   17                            ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    3.5000    8.0000    0.0800   rstart, rendld, spac
+  F                              prairy
+  1.05       1.00   100.0  1.20  tolai, rincr, rendai, fstfac
+   1                             nerg
+     300.000
+   3.11345856                    xmu
+  100.0000                       rcut
+   0 100   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80  -1                         lscreen, iprint
+   13    9                       nnout,niout
+   0   1   2   3   4   5   6   7   8   9  10  11  12
+   0   1  -1   2  -2   3  -3   4  -4 
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  F  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  F  F  F  T  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+   2   1   0                     ipotsy, iop, ivbend
+  15  1500.0                     jmax, emax
+                                        

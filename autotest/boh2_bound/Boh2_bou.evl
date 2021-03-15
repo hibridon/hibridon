@@ -1,0 +1,109 @@
+  -----------------------------------------------------------------------------
+   HIBRIDON SCATTERING CODE V 4.4 (UNOFFICIAL)
+   BUILD TIME: Jun 28 2013 13:27:42
+   git commit a39749bb8274ca8765092d3c753d6a3d271b610c
+ 
+   AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER,
+            B. FOLLMEG, P. DAGDIGIAN
+   CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI
+                 A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY
+                 G. VAN DER SANDEN, M. YANG, F. DE WEERD S. GREGURICK, J. KLOS
+                 F. LIQUE, Q. MA
+  -----------------------------------------------------------------------------
+ 
+   BUILD CONFIGURATION:
+   OPERATIONAL SYSTEM: Linux x86_64 3.9.7-1-ARCH
+   PROCESSOR: unknown
+   FORTRAN COMPILER: ifort (IFORT) 13.1.0 20130121
+   LIBRARIES: -lmkl_rt -openmp -lpthread
+   COMPILER OPTIONS: -O3 -xHOST -mcmodel=medium -align all -save -fpp -i8
+ 
+  -----------------------------------------------------------------------------
+ ** POTNAM: ALEXANDER B(2P)H2(J=0,1) DUBERNET-HUTSON        
+ ** LABEL: B-H2 PES's of ALEXANDER                         
+
+ ** BOUND STATE CALCULATION:  R1 = 4.00;  R2 =10.00
+      SPAC-TRY = 0.100, SPAC-EXACT = 0.100000, NO. GAUSSIANS = 61, SIZE OF TOTAL BASIS =  305
+      C = 0.60, ALPH =  36.000    
+ ** MINIMUM EIGENVALUE OF S MATRIX = 1.0400E-05
+ ** SIMPSON'S 3/8 RULE INTEGRATION OF POTENTIAL
+      DEL-R = 1.00, H-START = 0.050, N-POINTS = 161, H-EXACT = 0.050000
+ ** EIGENVALUES (CM-1)
+      -37.461
+      -25.834
+      -19.674
+       11.986
+       17.700
+       25.341
+       33.522
+       34.650
+       69.797
+       79.963
+       89.925
+       99.570
+      105.091
+      146.404
+      164.174
+      176.305
+      191.612
+      203.882
+      240.073
+      266.108
+      280.164
+      307.516
+      326.656
+      349.311
+  -----------------------------------------------------------------------------
+   HIBRIDON SCATTERING CODE V 4.4 (UNOFFICIAL)
+   BUILD TIME: Jun 28 2013 13:27:42
+   git commit a39749bb8274ca8765092d3c753d6a3d271b610c
+ 
+   AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER,
+            B. FOLLMEG, P. DAGDIGIAN
+   CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI
+                 A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY
+                 G. VAN DER SANDEN, M. YANG, F. DE WEERD S. GREGURICK, J. KLOS
+                 F. LIQUE, Q. MA
+  -----------------------------------------------------------------------------
+ 
+   BUILD CONFIGURATION:
+   OPERATIONAL SYSTEM: Linux x86_64 3.9.7-1-ARCH
+   PROCESSOR: unknown
+   FORTRAN COMPILER: ifort (IFORT) 13.1.0 20130121
+   LIBRARIES: -lmkl_rt -openmp -lpthread
+   COMPILER OPTIONS: -O3 -xHOST -mcmodel=medium -align all -save -fpp -i8
+ 
+  -----------------------------------------------------------------------------
+ ** POTNAM: ALEXANDER B(2P)H2(J=0,1) DUBERNET-HUTSON        
+ ** LABEL: B-H2 PES's of ALEXANDER                         
+
+ ** BOUND STATE CALCULATION:  R1 = 4.00;  R2 =10.00
+      SPAC-TRY = 0.100, SPAC-EXACT = 0.100000, NO. GAUSSIANS = 61, SIZE OF TOTAL BASIS =  305
+      C = 0.60, ALPH =  36.000    
+ ** MINIMUM EIGENVALUE OF S MATRIX = 1.0400E-05
+ **   3 POINT(S) GAUSS-HERMITE QUADRATURE
+ ** EIGENVALUES (CM-1)
+      -37.461
+      -25.834
+      -19.674
+       11.986
+       17.700
+       25.341
+       33.522
+       34.650
+       69.797
+       79.963
+       89.925
+       99.570
+      105.091
+      146.404
+      164.174
+      176.305
+      191.612
+      203.882
+      240.073
+      266.108
+      280.164
+      307.516
+      326.656
+      349.311

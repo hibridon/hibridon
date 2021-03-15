@@ -1,0 +1,23 @@
+modulus of S matrix                             
+   3                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    2.6900   15.0000    0.0047   rstart, rendld, spac
+  F                              prairy
+  1.900      1.00    24.0  3.36  tolai, rincr, rendai, fstfac
+   1                             nerg
+  2000.0
+    3.65447                      xmu
+   30.0000                       rcut
+  0  100   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  48   0                         lscreen, iprint
+   15    2                       nnout,niout
+   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14
+  -1   1
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  T  F  F  T  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  F  T  F  F                  noprin, chlist, ipos, nucros, photof
+  T  F  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+  11   1   0   2                  jmax, igu, isa, npar
+   0.38940  -95.5900  2.700E-03 -6.200E-05 brot, aso, p, q
+                                        

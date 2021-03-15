@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <meta name="generator" content="HTML Tidy for Linux (vers 25 March 2009), see www.w3.org">
+
+  <title>ba2pi</title>
+</head>
+
+<body>
+  <center>
+    <h3><font color="#brown">Basis Subroutine and System Specific Parameters: Collisions between a <sup>2</sup>&Pi; Molecule and a <sup>1</sup>&Sigma; Molecule</font></h3>
+  </center>
+  <hr>
+  <p><tt>BASISTYPE = 20</tt></p>
+
+  <div style="margin-left: 2em">
+    <p>System subroutine: <tt>sy2pi1sg</tt></p>
+
+    <p>Basis subroutine: <tt>hiba2pi1sg.f</tt></p>
+
+    <p>A <sup>2</sup>&Pi; Molecule and a <sup>1</sup>&Sigma; Molecule<br>
+    <font size="-1"><i>Ref.</i> S. M. Miller and D. C. Clary, J. Chem. Phys. <b>98</b>, 1843 (1993); A. R. Offer and M. C. van Hemert, J. Chem. Phys. <b>99</b>, 3836 (1993); P. E. S. Wormer <i>et al.</i> J. Chem. Phys. <b>122</b>, 244325 (2005).</font>
+
+  <p>Unlike earlier basis routines, this basis routine allows the user to define which terms to include in the angular expansion without limitations other than the total number of terms (which is fixed in Hibridon). This information must be written to the <tt>lms</tt> array in the <tt>mod_ba2pi1sg</tt> module by the <tt>loapot</tt> subroutine. See <tt>pot_ohh2.f</tt> for an example.</p>
+
+  <p>Coupled states calculations are NOT supported in this basis routine.</p>
+  <hr>
+  The definition of the system dependent parameters is as follows:
+
+  <div style="margin-left: 2em">
+    <p>J1MAX: the maximum rotational quantum number, minus 1/2, in the channel expansion for the <sup>2</sup>&Pi; molecule.</p>
+
+    <div style="margin-left: 2em">
+      J1MAX is an integer variable. Because we are dealing here with a molecule with half-integer spin, the allowed channel rotational angular momenta run from 1/2 to JMAX+1/2.
+    </div>
+
+    <p>NPAR: number of lambda-doublet components included.</p>
+
+    <div style="margin-left: 2em">
+      If NPAR = 1, just &epsilon; = +1 states are included.<br>
+      If NPAR .ne. 1, both &epsilon; = +1 and &epsilon; = - 1 states are included.<br>
+    </div>
+
+    <p>J2MIN: the minimum rotational angular momentum for the <sup>1</sup>&Sigma; molecule.</p>
+
+    <p>J2MAX: the maximum rotational angular momentum for the <sup>1</sup>&Sigma; molecule.</p>
+
+    <p>IPOTSY2: step used in iterating the rotational angular momentum for the <sup>1</sup>&Sigma; molecule.</p>
+
+    <div style="margin-left: 2em">
+      For H<sub>2</sub>, IPOTSY2 can be set to 2 so that either <i>para</i> (even J2MIN and J2MAX) or <i>ortho</i> (odd J2MIN and J2MAX) levels are included.<br>
+    </div>
+
+    <p>BROT: rotational constant of the <sup>2</sup>&Pi; molecule</p>
+
+    <p>ASO: spin-orbit constant of the <sup>2</sup>&Pi; molecule</p>
+
+    <p>P, Q: lambda-doubling constants of the <sup>2</sup>&Pi; molecule</p>
+
+    <p>DROT: rotational constant of the <sup>1</sup>&Sigma; molecule</p>
+    <hr>
+    <a href="hibhelp.html"><img src="up_arrow.gif" border="0" align="middle"></a>&nbsp;Return to <a href="hibhelp.html">Hibridon Help</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,26 @@
+NH3-H2 - A1-para levels                       
+  21                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    4.0000   25.0000    0.3000   rstart, rendld, spac
+  F                              prairy
+  2.000      1.00   100.0  1.10  tolai, rincr, rendai, fstfac
+   1                             nerg
+    706.956
+    1.83149                      xmu
+ -100.0000                       rcut
+   0  75   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80  -1                         lscreen, iprint
+    7    5                       nnout,niout
+  0  10  20  30  40  50  60  
+  0  3  -3  6  -6
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  F  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  F  F  F  F  T                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+   3  17                         ipotsy, iop
+  14  600.00                     j1max, e1max
+   0   4   2                     j2min, j2max, ipotsy2
+    5.1432    3.1015    0.0530   brot, crot, delta
+   59.3398                       drot
+ pot_nd3h2_2009_stp1sg.txt                        

@@ -1,0 +1,9 @@
+# H2O--He SAPT Potential (adaped from the original hibtest)
+
+[ch3he]
+title = H2O--He SAPT Potential
+makecmd = makehib h2ohe 45
+input = h2ohe_test.com H2ohe_test.inp
+potdata = h2o_coefd.dat h2o_params.dat h2o_coefi.dat
+exec = hib_h2ohe_45 < h2ohe_test.com > /dev/null
+output = H2ohe1.psc H2ohe1.xsc

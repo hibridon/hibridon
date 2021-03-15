@@ -1,0 +1,27 @@
+OH(A/X)-Kr quenching colls (vX=0 only)
+   19                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    3.0000    3.0000    0.0080   rstart, rendld, spac
+  F                              prairy
+  1.150      8.00    50.0  5.00  tolai, rincr, rendai, fstfac
+   1                             nerg
+   32490.0
+   14.137999113                  xmu (84kr)
+  -100.000                       rcut
+   0 100   1   0   0 100   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80  -1                         lscreen, iprint
+    6    6                       nnout,niout
+   0    1    2    3    4    5 
+   300 -300  100 -100  200 -200
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  T  T                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  T  T  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+  1  1  1 35  2                  isym, isa, igusg, nmaxsg, nparsg
+  1  2                           igupi, nparpi 
+ 32402.38 16.96506 2.0632e-3 .22555   esg, bsg, dsg, gsr
+  1                              numvpi
+  0 35                           ivibpi, jmax
+  0.  18.53487  19.090e-4        epi, bpi, dpi
+ -139.05088 .235266  -.038693    aso,  p, q

@@ -8,6 +8,10 @@
 *  1 loapot (vcalc, testpt, pot) loads and calculates pot.     *
 *                                                                   *
 *********************************************************************
+*
+*  Note:  this pot routine requires a data file to be in hibxx/bin/progs/potdata:
+*         filnam (cetermined in last line of input file)
+*
       include "common/syusr"
       include "common/bausr"
       include "common/ground"
@@ -62,7 +66,7 @@
 * --------------------------------------------------------------------------
       implicit double precision(a-h,o-z)
       character*(*) filnam
-      character*80 potlab
+      character*80 potlab, filnm1
       include "common/parpot"
       logical readpt, lpar
       common /coptx/ nblkx,maxpwx,minmpx,maxmpx,mpsstx,junk,
@@ -81,12 +85,6 @@
       common /coskip/ nskip,iskip
       common /colpar/ lpar(14), readpt
       common /coselb/ ibasty
-*  variable in common block /conlam/
-*    nlam:      the number of angular coupling terms actually used
-*    nlammx:    the maximum number of angular coupling terms
-*    lamnum:    number of non-zero v2 matrix elements for each lambda
-*               lamnum is an array of dimension nlammx
-      common /conlam/ nlam, nlammx, lamnum(2)
       potnam='WERNER-FOLLMEG VFIT'
 * default data
       lammin(1)=2
@@ -98,7 +96,8 @@
 *      ibasty=4
 * return at this point if readpt is false
       if (.not.readpt) return
-      call openf(iunit,filnam,'sf',0)
+      filnm1 = 'potdata/'//filnam
+      call openf(iunit,filnm1,'sf',0)
 caber
       rewind iunit
 caber
@@ -153,17 +152,9 @@ caber
 110   format((a),/,' NUMBER OF TERMS (NTRM) READ IN: ',i2,/)
       write(6,115)
 115   format('  NTRM    LMMIN    LMMAX    MLD    NVBLOCKS')
-      nlam=0
       do 150 i=1,nterm
-         lamnum(i)=lammax(i)-lammin(i)+1
-         if (i.eq.1) lamnum=lamnum-1
-         if (iskip.eq.1) then
-            nlam=nlam+lamnum(i)
-         elseif (iskip.eq.2) then
-            nlam=nlam+(lammax(i)-lammin(i))/2+1
-         endif              
-         write(6,120) i,lammin(i),lammax(i),mproj(i),ntv(i)
-120      format(t4,i2,t12,i2,t21,i2,t29,i2,t36,i2)
+      write(6,120) i,lammin(i),lammax(i),mproj(i),ntv(i)
+120   format(t4,i2,t12,i2,t21,i2,t29,i2,t36,i2)
 150   continue
       return
 888   write(6,300) ierr
@@ -303,7 +294,6 @@ caber
 80      continue
       iblkxx=iblkx
 100   continue
-
       return
       end
 * --------------------------------------------------------------------

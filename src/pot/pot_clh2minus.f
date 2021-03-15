@@ -1,4 +1,7 @@
 *system: Cl-H2 minus using Alexander avqz  potential
+*
+* Reference:  M.H.Alexander, J. Chem. Phys. 118, 9637 (2003)
+*
       include "common/syusr"
       subroutine driver
       implicit double precision (a-h,o-z)

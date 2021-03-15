@@ -1,0 +1,10 @@
+inp=arno.inp
+run
+jmax=2
+run
+jmax=3
+run
+jmax=8
+run
+jmax=10
+run

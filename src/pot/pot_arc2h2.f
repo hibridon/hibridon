@@ -1,5 +1,6 @@
 * System:  C2H2(X 1Sigma+)+Ar,  ab initio CCSDT(1.1) Surfaces
-* Reference: M. Yang, M. H. Alexander, H.-J. Werner, and R. Bemish, J. Chem. P
+* Reference: M. Yang, M. H. Alexander, H.-J. Werner, and R. Bemish,
+* J. Chem. Phys. 105, 10462 (1996)
       include "common/syusr"
       include "common/bausr"
       include "common/ground"

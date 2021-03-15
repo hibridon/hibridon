@@ -1,0 +1,411 @@
+
+making fortran converter ...
+running fortran converter ...
+MACH="unix-darwin unix-ifort unix-darwin64"
+unix-darwin unix-ifort unix-darwin64"
+unix-darwin unix-ifort unix-darwin64
+ *** fortran conversion program ***
+ Machine type:   Machine type:   Machine type:   Machine type:   machine=unix-darwin                   
+ machine=unix-ifort                    
+ machine=unix-darwin64                 
+ machine=unix                          
+ machine=unix                          
+ machine=unix                          
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiamp.new
+ ftconv processing completed;  lines read:                    123     written: 
+                   122
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiba13p.new
+ ftconv processing completed;  lines read:                    749     written: 
+                   742
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiba1d3p.new
+ ftconv processing completed;  lines read:                   1760     written: 
+                  1750
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiba1del.new
+ ftconv processing completed;  lines read:                   2469     written: 
+                  2458
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiba1sg.new
+ ftconv processing completed;  lines read:                   3388     written: 
+                  3376
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiba1sg1sg.new
+ ftconv processing completed;  lines read:                   3895     written: 
+                  3882
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiba22p.new
+ ftconv processing completed;  lines read:                   4626     written: 
+                  4607
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiba2del.new
+ ftconv processing completed;  lines read:                   5489     written: 
+                  5468
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiba2mol.new
+ ftconv processing completed;  lines read:                   5993     written: 
+                  5971
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiba2pi.new
+ ftconv processing completed;  lines read:                   6870     written: 
+                  6847
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiba2pi1sg.new
+ ftconv processing completed;  lines read:                   7288     written: 
+                  7265
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiba2sg.new
+ ftconv processing completed;  lines read:                   7974     written: 
+                  7950
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiba2sg1sg.new
+ ftconv processing completed;  lines read:                   8518     written: 
+                  8490
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiba3p2s.new
+ ftconv processing completed;  lines read:                   9386     written: 
+                  9354
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiba3sg1sg.new
+ ftconv processing completed;  lines read:                  10010     written: 
+                  9967
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibaastp.new
+ ftconv processing completed;  lines read:                  11140     written: 
+                 11094
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibaastp1.new
+ ftconv processing completed;  lines read:                  12250     written: 
+                 12202
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibach2x.new
+ ftconv processing completed;  lines read:                  13263     written: 
+                 13211
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibadiat2p.new
+ ftconv processing completed;  lines read:                  13986     written: 
+                 13928
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibah2p.new
+ ftconv processing completed;  lines read:                  14932     written: 
+                 14869
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibah3p.new
+ ftconv processing completed;  lines read:                  15851     written: 
+                 15780
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibapi.new
+ ftconv processing completed;  lines read:                  16812     written: 
+                 16741
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibasgpi.new
+ ftconv processing completed;  lines read:                  18191     written: 
+                 18118
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibasgpi1.new
+ ftconv processing completed;  lines read:                  19267     written: 
+                 19194
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibasphtp.new
+ ftconv processing completed;  lines read:                  20276     written: 
+                 20195
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibastp.new
+ ftconv processing completed;  lines read:                  21039     written: 
+                 20958
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibastp1.new
+ ftconv processing completed;  lines read:                  21666     written: 
+                 21580
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibastp1sg.new
+ ftconv processing completed;  lines read:                  22171     written: 
+                 22085
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibastpln.new
+ ftconv processing completed;  lines read:                  23049     written: 
+                 22957
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiblas.new
+ ftconv processing completed;  lines read:                  24199     written: 
+                 24107
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibound.new
+ ftconv processing completed;  lines read:                  24733     written: 
+                 24641
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibrid1.new
+ ftconv processing completed;  lines read:                  25908     written: 
+                 25810
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibrid2.new
+ ftconv processing completed;  lines read:                  27926     written: 
+                 27822
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibrid3.new
+ ftconv processing completed;  lines read:                  30233     written: 
+                 30120
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibrid4.new
+ ftconv processing completed;  lines read:                  33162     written: 
+                 33028
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hibrid5.new
+ ftconv processing completed;  lines read:                  35080     written: 
+                 34942
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hicommon.new
+ ftconv processing completed;  lines read:                  35104     written: 
+                 34966
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hidifcrs.new
+ ftconv processing completed;  lines read:                  36263     written: 
+                 36111
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hihypxsc.new
+ ftconv processing completed;  lines read:                  36974     written: 
+                 36819
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiiolib_c.new
+ ftconv processing completed;  lines read:                  39537     written: 
+                 39378
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiiolib_f.new
+ ftconv processing completed;  lines read:                  42062     written: 
+                 41890
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/himatrix.new
+ ftconv processing completed;  lines read:                  50157     written: 
+                 49975
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hinput.new
+ ftconv processing completed;  lines read:                  51665     written: 
+                 51482
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hipotutil.new
+ ftconv processing completed;  lines read:                  53474     written: 
+                 53290
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiprsbr.new
+ ftconv processing completed;  lines read:                  54198     written: 
+                 54014
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/histmix.new
+ ftconv processing completed;  lines read:                  55302     written: 
+                 55117
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hisystem.new
+ ftconv processing completed;  lines read:                  60519     written: 
+                 60314
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hitensor.new
+ ftconv processing completed;  lines read:                  63807     written: 
+                 63569
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hitrnprt.new
+ ftconv processing completed;  lines read:                  64780     written: 
+                 64535
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiutil.new
+ ftconv processing completed;  lines read:                  66565     written: 
+                 66311
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hivector.new
+ ftconv processing completed;  lines read:                  68307     written: 
+                 68052
+ file: or *option:  
+all hi*.f files converted, copying back ...
+untar'ing common files ...
+x ./._common
+x common/
+x common/._.DS_Store
+x common/.DS_Store
+x common/bausr
+x common/comdot
+x common/ground
+x common/hicommon.tar
+x common/ipar
+x common/logdef
+x common/lpar
+x common/._machines.h
+x common/machines.h
+x common/._parbas
+x common/parbas
+x common/parbasl
+x common/parcode
+x common/parhlp
+x common/._parhlp.t
+x common/parhlp.t
+x common/parlbuf
+x common/parllbf
+x common/parpot
+x common/parsys
+x common/._partens
+x common/partens
+x common/parvfit
+x common/rpar
+x common/syusr
+x common/vax1
+x common/vax2
+setting help directory ...
+creating hib_help ...
+ *** fortran conversion program ***
+ Machine type:   Machine type:   Machine type:   machine=unix-darwin                   
+ machine=unix-ifort                    
+ machine=unix                          
+ machine=unix                          
+ file: or *option:   output file:  /Users/pdagdig1/hib44/src/hiversion.new
+ ftconv processing completed;  lines read:                    151     written: 
+                   151
+ file: or *option:  
+hhelp.f file converted, copying back ...
+mv: hhelp.new: No such file or directory
+compiling hib_help
+compiling hhelp.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8
+compilation done
+linking /Users/pdagdig1/hib44/bin/hib_help
+removing old object files hi*.o ...
+compiling hi*.f files (this may take a few minutes) ...
+compiling hiamp.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hiba13p.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hiba1d3p.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hiba1del.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hiba1sg.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hiba1sg1sg.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hiba22p.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hiba2del.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hiba2mol.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hiba2pi.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hiba2pi1sg.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hiba2sg.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hiba2sg1sg.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hiba3p2s.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hiba3sg1sg.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hibaastp.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hibaastp1.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hibach2x.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hibadiat2p.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hibah2p.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hibah3p.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hibapi.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hibasgpi.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hibasgpi1.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hibasphtp.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hibastp.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hibastp1.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hibastp1sg.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hibastpln.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hiblas.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hibound.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hibrid1.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hibrid2.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+hibrid2.f(797): error #7002: Error in opening the compiled module file.  Check INCLUDE paths.   [CONSTANTS]
+      use constants
+----------^
+hibrid2.f(1436): error #7002: Error in opening the compiled module file.  Check INCLUDE paths.   [CONSTANTS]
+      use constants
+----------^
+compilation aborted for hibrid2.f (code 1)
+failed:
+cat: hibrid2.log: No such file or directory
+compiling himatrix.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+common/vax1(7): remark #7713: This statement function has not been used.   [AND]
+      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
+---------------------^
+common/vax1(7): remark #7713: This statement function has not been used.   [XOR]
+      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
+--------------^
+common/vax1(7): remark #7713: This statement function has not been used.   [OR]
+      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
+------------------^
+common/vax1(7): remark #7713: This statement function has not been used.   [SHIFTL]
+      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
+-------------------------^
+common/vax1(7): remark #7713: This statement function has not been used.   [SHIFTR]
+      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
+--------------------------------^
+common/vax1(7): remark #7713: This statement function has not been used.   [COMPL]
+      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
+-----------------------------------------------------^
+common/vax1(7): remark #7713: This statement function has not been used.   [AND]
+      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
+---------------------^
+common/vax1(7): remark #7713: This statement function has not been used.   [XOR]
+      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
+--------------^
+common/vax1(7): remark #7713: This statement function has not been used.   [OR]
+      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
+------------------^
+common/vax1(7): remark #7713: This statement function has not been used.   [SHIFTL]
+      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
+-------------------------^
+common/vax1(7): remark #7713: This statement function has not been used.   [SHIFTR]
+      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
+--------------------------------^
+common/vax1(7): remark #7713: This statement function has not been used.   [COMPL]
+      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
+-----------------------------------------------------^
+compilation done
+compiling hihypxsc.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hidifcrs.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+hidifcrs.f(36): error #7002: Error in opening the compiled module file.  Check INCLUDE paths.   [CONSTANTS]
+      use constants
+----------^
+compilation aborted for hidifcrs.f (code 1)
+failed:
+cat: hidifcrs.log: No such file or directory
+compiling hicommon.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hipotutil.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hiprsbr.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling histmix.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hisystem.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hitensor.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hitrnprt.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hiutil.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hivector.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O3
+compilation done
+compiling hiiolib_f.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8 -O1
+compilation done
+compiling hinput.f ... 
+/opt/intel/compilers_and_libraries_2018.3.185/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -c -save -i8
+compilation done
+all source code converted and compiled

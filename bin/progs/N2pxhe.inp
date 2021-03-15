@@ -1,0 +1,23 @@
+N2+HE INPUT for X-state rigid rotor             
+   2                             ibasty
+  T  T  T  F                     logdfl, airyfl, readpt, bastst
+    3.5000    8.0000     .0500   rstart, rendld, spac
+  F                              prairy
+  1.300      1.00   100.0  5.00  tolai, rincr, rendai, fstfac
+   1                             nerg
+   150.0000
+    3.50220                      xmu
+   50.0000                       rcut
+   0  28   1   1   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80  -1                         lscreen, iprint
+    3    2                       nnout,niout
+    0    1    2
+    1   -1
+  F  F  F  F  F                  prlogd, prsmat, prt2, t2test, wrsmat
+  T  F  F  F  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  F  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  T  T  F  T  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+  10   2   1   1   1                             nrmax, npar, isym, igu, isa
+    1.788900   .6755E-02   .0000E+00   .0000E+00 brot, gsr, drot, hrot
+N2PXHE.BIN                              

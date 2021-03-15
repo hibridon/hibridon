@@ -1,0 +1,26 @@
+NH3-H2 - para-para levels        
+   9                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    0.1000    0.8000 0.1000E-07  hsimp, delr, eigminc
+  F                              prairy
+ 0.1000     11.00  0.4000 4.500  tolai, r2, spac, r
+   1                             nerg
+     235.0
+    1.80229902                   xmu
+    0.5000                       c
+   0  20   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80   -1                        lscreen, iprint
+     6    8                      nnout,niout
+   10  20  30  40  50  60
+    -1   1  -2   2  -4   4  -5   5
+  F  F  F  F  F                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  F  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  F  T  T  F  F                  noprin, chlist, ipos, nucros, photof
+  F  F  F  T  T                  flaghf, csflag, flagsu, ihomo, twomol
+  F  T                           rsflag, boundc
+   3   1   2   2                 ipotsy, iop, ninv, ipotsy2
+  6                              jmax
+  0  2                           j2min, j2max
+   9.9402 6.3044 0.7903  400.    brot, crot, delta, emax
+  59.380100                      drot
+

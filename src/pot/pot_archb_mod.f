@@ -1,5 +1,6 @@
 * System:  CH(B 2Sigma-)+Ar,  modified ab initio MRCI+Q PES's
-* Reference:  M. H. Alexander, S. Gregurick, P. J. Dagdigian, G. W. Lemire, M.
+* Reference:  M. H. Alexander, S. Gregurick, P. J. Dagdigian, G. W. Lemire, 
+* M. J. McQuaid, and R. C. Sausa, J. Chem. Phys. 101, 4547 (1994).
 
       include "common/syusr"
       include "common/bausr"

@@ -1,0 +1,23 @@
+H2S-H2 CCSD(T) (10,6,th=1) PES by PJD        
+   30                            ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    4.25   10.0000    0.2500     rstart, rendld, spac
+  F                              prairy
+  1.050      1.00   60.0  1.50   tolai, rincr, rendai, fstfac
+   1                             nerg
+   100.0000
+    1.902803821586546            xmu
+ -100.0000                       rcut
+   0  40   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80  -1                         lscreen, iprint
+   10    5                       nnout,niout
+  01  11  21  31  41  51  61  71  81  91 
+    0   1  -1   2  -2
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  F  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  F  F  F  T  T                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+   5  -1   1   1   2             j1max, iop, j2min, j2max, ipotsy2
+ 10.36276336 9.0172992277 4.72959296 1000. 59.322000  arot, brot, crot, emax, b2rot
+   pot_h2sh2_10_6_th1.dat

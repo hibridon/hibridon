@@ -1,0 +1,12 @@
+      data build(1) /
+     :  'SYS=OS X 10.13.6; MACH=unix-darwin unix-ifort unix-darwin64'/
+      data build(2) /
+     :  'CC=; FC=/opt/intel/compilers_and_libraries_2019.5.281/mac/bin/intel64/ifort -O3 -save -i8'/
+      data build(3) /
+     :  ''/
+      data build(4) /
+     : ''/
+      data build(5) /
+     : ''/
+cend
+      end

@@ -33,5 +33,6 @@ cp Heco1.pcs testnew_hold
 cp Heco1.psc testnew_hold
 cp Hecn1.xsc testnew_hold
 cp Hecn1.hfx testnew_hold
+cp Hecn1.xms testnew_hold
 
 exit

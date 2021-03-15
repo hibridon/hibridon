@@ -26,11 +26,14 @@ flag</a> <a href=ihomo.html>IHOMO</a> = .true.,
 of IPOTSY
               can be included in the potential.  Example:  for CH<sub>3</sub>,
               IPOTSY = 3<p>
-    IOP:      <i>ortho/para</i> label for molecular states of symmetric top. If <a href=ihomo.html>IHOMO</a> 
+    IOP:      <i>ortho/para</i> label for molecular states of symmetric top.  
+    For nuclear spin <i>I</i> = 1/2 (e.g. in CH<sub>3</sub>), rotational levels with <i>k</i> = 0 (even <i>j</i> levels only), 3, 6, ... (<i>i.e.</i> a multiple of 3) belong to the <i>ortho</i> nuclear spin modification, while levels with <i>k</i> not a multiple of 3 are <i>para</i>. If <a href=ihomo.html>IHOMO</a> 
 =.true.
               then 
 <ul>if IOP = 1: only <i>para</i> states included in channel expansion<br>
-if IOP = -1: only <i>ortho</i> states included in channel expansion
+if IOP = -1: only <i>ortho</i> states included in channel expansion<br>
+for molecules with nuclear spin <i>I</i> = 1 (e.g. in CD<sub>3</sub>), set IOP = -1, 2, 1 to access levels
+associated with the <i>A</i><sub>1</sub>, <i>A</i><sub>2</sub>, <i>E</i> nuclear spin modifications, respectively
               </ul><p>
     JMAX:    the maximum rotational angular momentum included in the channel expansion<p>
     EMAX:    the maximum energy of a state to be included in the rotational state basis<p>

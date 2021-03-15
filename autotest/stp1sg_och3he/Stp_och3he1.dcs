@@ -1,0 +1,56 @@
+
+% **  DIFFERENTIAL CROSS SECTION (ANG^2/SR)
+%   TODAYS DATE:  Jul 18 22:38:20 2013
+%    S-MATRICES READ FROM FILE Job1.smt                                
+%     WRITTEN:   Jul 18 22:31:25 2013
+%     LABEL:     TEST INPUT FOR CH3-HE SCATTERING                
+%     POT NAME:  SYMMETRIC TOP--1SIGMA GENERAL POT ROUTINE       
+%    E-TOT:      150.000;  REDUCED MASS:    3.161    
+%   TRANSITION:  J1=  20 IN1=   0  ->  J2=  30 IN2=  -3
+%   SUMMING PARTIAL WAVES FROM JTOT = 0 TO  40
+%   WAVE VECTOR IN INITIAL CHANNEL:      2.2041 Bohr^(-1);     4.1650 Angstroms^(-1)
+%   COLLISION ENERGY:    92.5326 cm-1;    11.4727 meV
+
+%  DEGENERACY AVERAGED DXSC (ANG^2/SR)
+dcs = [
+    0.00     0.5241E-01
+    5.00     0.1991    
+   10.00     0.3288    
+   15.00     0.2917    
+   20.00     0.5184    
+   25.00     0.2222    
+   30.00     0.3142    
+   35.00     0.4161    
+   40.00     0.2404    
+   45.00     0.4178    
+   50.00     0.3382    
+   55.00     0.3478    
+   60.00     0.4293    
+   65.00     0.3708    
+   70.00     0.4237    
+   75.00     0.4395    
+   80.00     0.4290    
+   85.00     0.4631    
+   90.00     0.4618    
+   95.00     0.4683    
+  100.00     0.4904    
+  105.00     0.4923    
+  110.00     0.4987    
+  115.00     0.5122    
+  120.00     0.5161    
+  125.00     0.5177    
+  130.00     0.5233    
+  135.00     0.5297    
+  140.00     0.5372    
+  145.00     0.5437    
+  150.00     0.5451    
+  155.00     0.5421    
+  160.00     0.5404    
+  165.00     0.5420    
+  170.00     0.5455    
+  175.00     0.5488    
+  180.00     0.5506    
+
+];
+% ** DIFFERENTIAL CROSS SECTION CALCULATION FINISHED:
+%   ELAPSED TIME: 00:00:00   CPU TIME:  00:00:00 

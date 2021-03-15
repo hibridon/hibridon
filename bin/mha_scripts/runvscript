@@ -1,0 +1,17 @@
+#!/bin/csh -f 
+# HIBRIDON runvscript $Revision: 96.1 $ --- run conversion of hiversion.f file
+set basedir=`hibriddir`
+
+if (-e $basedir/CONFIG) then
+else
+ echo "$basedir/CONFIG file is not here, abort ..."
+ exit
+endif
+set machine=`grep MACH $basedir/CONFIG`
+set machine=`echo $machine|sed s/MACH=\"//`
+set machine=`echo $machine|sed s/\"//`
+cp vscript $basedir/src
+cd $basedir/src
+vscript $machine
+#rm vscript
+cd $basedir/bin

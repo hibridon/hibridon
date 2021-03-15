@@ -1,0 +1,23 @@
+CH3-He Vib QMa                                  
+  99                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    4.0000   10.0000    0.0865   rstart, rendld, spac
+  F                              prairy
+  1.100      1.00   100.0  1.50  tolai, rincr, rendai, fstfac
+   1                             nerg
+   642.5000
+    3.16056                      xmu
+  -50.0000                       rcut
+   0  25   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80  -1                         lscreen, iprint
+   13   14                       nnout,niout
+   0    1    2    3    4    5    6    7    8    9   10   11   12
+   0    3   -3    6   -6    9   -9   12  -12  100  103 -103  106 -106
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  F  F  F  T  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  F  F  F  T  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+   3      -1                     ipotsy, iop
+  40       3                     jmax, vmax
+1235.25 1235.25 1467.00 1235.25  emax0, emax1, emax2, emax3

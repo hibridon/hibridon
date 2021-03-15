@@ -1617,7 +1617,7 @@ c;*
 c;      end
 cend
 cstart .not. unix-dec
-      subroutine  dset(n,da,dx,incx)
+      subroutine dset(n,da,dx,incx)
 c
 c     sets a vector equal to a constant
 c     uses unrolled loops for increment equal to one.

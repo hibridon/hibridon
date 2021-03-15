@@ -3,6 +3,9 @@
 * obtained from 3D PES by averaging over 
 * OH(v=0) wavefunction
 * Calculations by  J. Klos
+*Reference: L. Scharfenberg, J. Klos, P. J. Dagdigian,
+*           M. H. Alexander,G. Meijer, S. Y. T. van der Meerakker
+*           Phys. Chem. Chem. Phys. 12, 10660-10670 (2010)
 
 
 
@@ -19,8 +22,8 @@
       read (5, *, end=99) r
       call pot(vv0,r)
       write (6, 100) vv0,vvl
-100   format(' vsum',/,7(1pe16.8),/,
-     :    '  vdif',/,5e16.8)
+100   format(' vsum',/,11(1pe16.8),/,
+     :    '  vdif',/,9e16.8)
       goto 1
 99    end
 
@@ -2271,7 +2274,7 @@ C       Purpose: Compute the beta function B(p,q)
 C       Input :  p  --- Parameter  ( p > 0 )
 C                q  --- Parameter  ( q > 0 )
 C       Output:  BT --- B(p,q)
-C       Routine called: GAMMA for computing â(x)
+C       Routine called: GAMMA for computing B(x)
 C       ==========================================
 C
         IMPLICIT DOUBLE PRECISION (A-H,O-Z)

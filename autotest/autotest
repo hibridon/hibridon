@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ "x`which python2`" == "x" ]; then
+    PYBIN="python"
+else
+    PYBIN="python2"
+fi
+
+HIB_DIR=`hibriddir`
+
+$PYBIN hibtest.py $HIB_DIR $@

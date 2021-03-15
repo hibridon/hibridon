@@ -8,7 +8,7 @@ F                              prairy
   150.00
 3.1605556                     xmu
 100.000                       rcut
-0  40  1   0   0   1   1      jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+0  20  1   0   0   1   1      jtot1,jtot2,jtotd,jlpar,numin,numax,nud
 80  -1                        lscreen, iprint
  7   5                        nnout,niout
 0  1  2  3  4  5  6

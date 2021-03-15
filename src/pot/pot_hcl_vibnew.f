@@ -1,5 +1,13 @@
 *system: H(2S)+Cl(2P)
-*reference:  M. H. Alexander, B. Pouilly, and T. Duhoo, J. Chem. Phys. 99, 175
+*reference:  M. H. Alexander, B. Pouilly, and T. Duhoo, 
+* J. Chem. Phys. 99, 1752 (1993)
+
+
+*  to run this pot routine, the eispack routine RS must be replaced
+*  with the lapack routine DSYEV, to be compatible with the ifort
+*  compiler and MKL library
+
+
       subroutine driver
       implicit double precision (a-h,o-z)
       common /comxm/ncache, mxmblk
@@ -657,12 +665,15 @@ c  -----------------------------------------------------------------
       if (ibran .eq. -1) then
         hlfactor=j-1
         hlfacsig=j
+      end if
       if (ibran .eq. 0) then
         hlfactor=2*j+1
         hlfacsig=zero
+      end if
       if (ibran .eq. 1) then
         hlfactor=j+2
         hlfacsig=j+1
+      end if
       hlfactor=sqrt(hlfactor/(2*j+1))
       hlfacsig=sqrt(hlfacsig/(2*j+1))
       call dset(6,zero,wf,1)
@@ -708,98 +719,14 @@ c  -----------------------------------------------------------------
       return
       end
 * --------------------------------------------------
-      subroutine tcasea22(j,jlpar)
-* -----------------------------------------
-*   matrix to transform from case a to case e, solely for 22P scattering
-*   this matrix, tatoe, for total-j=j is returned
-*   author:  brigitte pouilly and millard alexander
-*   latest revision date:  30-dec-1995
-* -----------------------------------------
-      implicit double precision (a-h,o-z)
-      common /cotrans/ t(6,6)
-      data zero, one,two ,three,six/0.d0, 1.d0, 2.d0, 3.d0, 6.d0/
-      if (j .lt. 2) then
-* error if jtot is less than 2
-        write (6, 5) jtot
-5       format (' *** JTOT = ',i2,' .LT. 2 IN TCASEA; ABORT **')
-        stop
-      endif
-* initialization of the matrix tatoe
-      call dset(36,zero,t,1)
 *
-      xj=j
-      xjp1=j+1
-      xjp2=j+2
-      xjm1=j-1
-      if(jlpar.lt.0) then
-* here for e-labelled states
-* transformation from asymptotic states (rows) into case (a) states (columns)
-* with ordering (of columns)
-*  3Sig1, 3Pi0, 3Pi1, 3Pi2, 1Sig, 1Pi1
-        t(1,1)=-sqrt(xjp1/three)
-        t(1,2)= sqrt(two*xj/three)
-        t(1,3)= sqrt(xjp1/three)
-        t(1,5)=-sqrt(xj/three)
-        t(1,6)=-sqrt(xjp1/three)
-        t(2,1)=t(1,5)
-        t(2,2)=-sqrt(two*xjp1/three)
-        t(2,3)= sqrt(xj/three)
-        t(2,5)= sqrt(xjp1/three)
-        t(2,6)=-sqrt(xj/three)
-        t(3,5)= sqrt(two*xj/three)
-        t(3,6)= sqrt(two*xjp1/three)
-        t(3,1)=-sqrt(xjp1/six)
-        t(3,2)= sqrt(xj/three)
-        t(3,3)= sqrt(xjp1/six)
-        t(4,5)=-sqrt(2*xjp1/three)
-        t(4,6)= sqrt(2*xj/three)
-        t(4,1)=-sqrt(xj/six)
-        t(4,2)=-sqrt(xjp1/three)
-        t(4,3)= sqrt(xj/six)
-        t(5,1)= sqrt(xjm1/two)
-        t(5,3)=t(5,1)
-        t(5,4)= sqrt(xj+two)
-        t(6,1)=-sqrt((xj+two)/two)
-        t(6,3)=t(6,1)
-        t(6,4)= sqrt(xjm1)
-        denom=one/sqrt(two*xj+one)
-        call dscal(36,denom,t,1)
-* here for f-labelled states
-*  3Sig1, 3Pi0, 3Pi1, 3Pi2, 3Sig0, 1Pi1
-
-      else
-        t(1,5)=-sqrt(one/three)
-        t(1,2)= sqrt(two/three)
-        t(2,1)=t(1,5)
-        t(2,3)=-t(1,5)
-        t(2,6)=t(1,5)
-        t(3,1)=-sqrt(one/six)
-        t(3,3)= sqrt(one/six)
-        t(3,6)=sqrt(two/three)
-        t(4,5)=sqrt(xj*xjm1)
-        t(4,1)= sqrt(xjp1*xjm1)
-        t(4,2)=sqrt(xj*xjm1/two)
-        t(4,3)= sqrt(xjp1*xjm1)
-        t(4,4)=sqrt(xjp1*xjp2/two)
-        denom=one/sqrt((two*xj+one)*(two*xj-one))
-        call dscal(6,denom,t(4,1),6)
-        t(5,5)=-sqrt(two*xj*xjp1/three)
-        t(5,1)=-sqrt(three/two)
-        t(5,2)=-sqrt(xjp1*xj/three)
-        t(5,3)=-sqrt(three/two)
-        t(5,4)=sqrt(three*xjp2*xjm1)
-        denom=one/sqrt((two*xj+three)*(two*xj-one))
-        call dscal(6,denom,t(5,1),6)
-        t(6,5)=sqrt(xjp1*xjp2)
-        t(6,1)=-sqrt(xj*xjp2)
-        t(6,2)= sqrt(xjp1*xjp2/two)
-        t(6,3)=-sqrt(xjp2*xj)
-        t(6,4)=sqrt(xj*xjm1/two)
-        denom=one/sqrt((two*xj+one)*(two*xj+three))
-        call dscal(6,denom,t(6,1),6)
-      endif
-      return
-      end
+*  subroutine tcasea22 called by this pot routine.  this subr is part
+*  of the basisi routine ba22p in hiba22p.f
+*
+*  this subr was deleted from this file
+*  p. dagdigian, 23-jan-2011
+*
+* -----------------------------------------
       subroutine potmath (w, r, nch, nmax)
 *  determine negative of lower triangle of w(r) matrix.  see eq. (3) of
 *  m.h. alexander, "hybrid quantum scattering algorithms ..."

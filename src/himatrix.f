@@ -1339,16 +1339,21 @@ c         lapack routines
 c     -----------------------------------------------------------------
 c
       dimension a(lda,n)
-      dimension ipiv(n),work(64*n)
+      dimension ipiv(4*n),work(256*n)
 
 c
-      lwork = 64*n
+      lwork = 256*n
 *  form full matrix
       do j = 2,n
          do i = 1,j-1
             a(i,j) = a(j,i)
          enddo
       enddo
+
+
+*      write(6,444) lda,n
+*444   format ('calling dgetrf:  lda=',i8,'  n=',i8)
+
 
       call dgetrf (n,n,a,lda,ipiv,ierr)
       if (ierr .ne. 0) stop 'error in dgetrf'
@@ -2607,8 +2612,8 @@ c.....unrolled version for ibm6000 and other risc machines
       implicit double precision (a-h,o-z)
       common /comxm/ ncache, mxmblk
       include "common/vax1"
-      dimension r(*),a(*),b(*)
       include "common/vax2"
+      dimension r(*),a(*),b(*)
       if(ncol.eq.0.or.nrow.eq.0) return
       if(nlink.eq.0) then
         ijj=1

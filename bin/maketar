@@ -69,16 +69,13 @@ mv  $htar/bin/potdata progs >>& $basedir/tar.log
 rm  $htar/bin/hib_help* >>& $basedir/tar.log
 rm  $htar/bin/temp* >>& $basedir/tar.log
 rm  $htar/bin/*klos* >>& $basedir/tar.log
-rm  $htar/bin_bashs* >>& $basedir/tar.log
 rm  $htar/src/*.*inp >>& $basedir/tar.log
 rm  $htar/src/temp* >>& $basedir/tar.log
-rm  $htar/src/*dell1* >>& $basedir/tar.log
-rm  $htar/src/*test >>& $basedir/tar.log
 rm  $htar/src/*.hp* >>& $basedir/tar.log
 rm  $htar/src/*.fnew >>& $basedir/tar.log
 rm  $htar/src/*.c >>& $basedir/tar.log
 rm  $htar/src/*.hold >>& $basedir/tar.log
-rm  $htar/src/*.paul >>& $basedir/tar.log
+rm  $htar/src/*_hold >>& $basedir/tar.log
 rm  $htar/src/README >>& $basedir/tar.log
 rm  -r $htar/src/molpro_c >>& $basedir/tar.log
 rm  -r $htar/src/newmods >>& $basedir/tar.log
@@ -87,7 +84,6 @@ rm  -r $htar/src/deep >>& $basedir/tar.log
 rm  -r $htar/src/pot_orig >>& $basedir/tar.log
 rm  -r $htar/src/dagdigian* >>& $basedir/tar.log
 rm  -r $htar/src/klos* >>& $basedir/tar.log
-rm  -r $htar/src/testcommon* >>& $basedir/tar.log
 rm   $htar/src/*.log >>& $basedir/tar.log
 rm  $htar/src/*.sav >>& $basedir/tar.log
 rm  $htar/src/hib_* >>& $basedir/tar.log
@@ -185,9 +181,7 @@ rm $htar/timing/*deepthought* >>& $basedir/tar.log
 rm $htar/timing/*macpro* >>& $basedir/tar.log
 rm $htar/bin/*deepthought* >>& $basedir/tar.log
 rm $htar/release_announcement >>& $basedir/tar.log
-rm -r bin_bash >>& $basedir/tar.log
 rm -r testnew_h >>& $basedir/tar.log
-rm -r testnew_mac >>& $basedir/tar.log
 rm -r hold >>& $basedir/tar.log
 rm -r $htar/users >>& $basedir/tar.log
 rm -r $htar/bench >>& $basedir/tar.log
@@ -197,7 +191,6 @@ rm -r testmass >>& $basedir/tar.log
 rm invtime.m >>& $basedir/tar.log
 rm Info.workstations >>& $basedir/tar.log
 mkdir config_hold
-cp -pr CONFIG_APPLE_64_COMPOSER_2011_5 config_hold
 cp -pr CONFIG_APPLE_64_INTEL_12.0.0 config_hold
 cp -pr CONFIG_APPLE_64_IFORT11 config_hold
 cp -pr CONFIG_APPLE_INTEL config_hold
@@ -243,32 +236,32 @@ rm -r $htar/patch* >>& $basedir/tar.log
 echo ""
 echo "creating tar file ..."
 echo "creating tar file ..." >>& $basedir/tar.log
-if (-e hib437.tar.gz) then
-  rm hib437.tar.gz
+if (-e hibrid.tar.gz) then
+  rm hibrid.tar.gz
 endif
-tar -cvf hib437.tar * >>& $basedir/tar.log
+tar -cvf hibrid.tar * >>& $basedir/tar.log
 
 #$exit
 
 echo ""
 echo "gzip'ing tar file ..."
 echo "gzip'ing tar file ..." >>& $basedir/tar.log
-gzip hib437.tar >>& $basedir/tar.log
+gzip hibrid.tar >>& $basedir/tar.log
 
 
 
 echo ""
-echo "$htar/hib437.tar.gz created, see $basedir/tar.log for diagnostics"
+echo "$htar/hibrid.tar.gz created, see $basedir/tar.log for diagnostics"
 echo ""
 
 if $copoption == 'true' then
   echo ""
-  echo "putting hib437.tar.gz files on mha-ibm7 ..."
-  echo "putting hib437.tar.gz files on mha-ibm7 ..." >>& $basedir/tar.log
-  rcp -p hib437.tar.gz mha-macpro1.umd.edu:/scratch/mha/htar
+  echo "putting hibrid.tar.gz files on mha-ibm7 ..."
+  echo "putting hibrid.tar.gz files on mha-ibm7 ..." >>& $basedir/tar.log
+  rcp -p hibrid.tar.gz mha-macpro1.umd.edu:/scratch/mha/htar
 endif
 
-#rm hib437.tar.gz
+#rm hibrid.tar.gz
 #cd 
 #rm -r $htar
 echo ""

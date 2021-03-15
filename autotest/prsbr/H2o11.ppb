@@ -1,0 +1,25 @@
+
+ PRESSURE BROADENING CROSS SECTION
+ S-MATRICES FOR INITIAL LEVEL READ FROM FILE H2o11.smt                               
+   WRITTEN:   Feb  8 13:48:08 2018  JTOT2=  10
+ S-MATRICES FOR FINAL LEVEL READ FROM FILE H2o21.smt                               
+   WRITTEN:   Feb  8 13:48:12 2018  JTOT2=  10
+ COLLISION ENERGY =   300.000 CM^(-1)
+
+ DIAGONAL PRESSURE BROADENING CROSS SECTION (ANG^2) - K = 1
+    J1=  1 IN1= -1 -> J2=  2 IN2=  0
+    REAL PART =  4.4241E+00  IMAG PART = -1.8670E-01
+
+ PARTIAL CROSS SECTIONS (ANG^2)
+      JTOT        REAL PART          IMAG PART
+         0        1.5900E-02         1.2159E-03
+         1        1.2928E-01        -4.5241E-03
+         2        2.1425E-01        -7.5934E-03
+         3        2.9745E-01        -1.0706E-02
+         4        3.7808E-01        -1.3920E-02
+         5        4.5513E-01        -1.7304E-02
+         6        5.2776E-01        -2.0759E-02
+         7        5.9473E-01        -2.4358E-02
+         8        6.5496E-01        -2.8028E-02
+         9        7.0699E-01        -3.1787E-02
+        10        4.4953E-01        -2.8934E-02

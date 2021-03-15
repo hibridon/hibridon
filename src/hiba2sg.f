@@ -9,8 +9,9 @@
 *  of a 2sigma molecule in a hund's case(a) basis with a
 *  structureless atom or with an uncorrugated surface
 *  author:  millard alexander
-*  current revision date:  10-jun-2006 by mha
-* --------------------------------------------------------------------
+*  fixed is label to take care of +/- symmetry of the sigma state
+*  current revision date: 9-dec-2011 by p.j.dagdigian
+*  --------------------------------------------------------------------
 *  variables in call list:
 *    j:        on return contains rotational quantum numbers for each
 *              channel
@@ -160,6 +161,13 @@
      :   ('  *** CSFLAG = .FALSE. FOR SURFACE CALCULATION; ABORT ***')
         stop
       end if
+*  check that isym equals +1 or -1
+      if (abs(isym).ne.1) then
+        write (6, 112)
+        write (6, 112)
+112     format (' *** ISYM MUST EQUAL +1 OR -1; ABORT ***')
+        call exit
+      end if
 *  check for consistency in values of nterm, lammin, lammax, mproj
       if (nterm .gt. 1) then
         write (6, 9) nterm
@@ -215,7 +223,7 @@
      :      write (6,20) rmu * xmconv, brotsg, gsr, isym, igu, isa,
      :                   ered * econv, jtot, xnu
 20          format(/,' **  2SIGMA UNCORRUGATED SURFACE **',
-     :      '     RMU=', f9.4,'  BROT=', f7.3,'  G-SR=',g9.3,
+     :      '     RMU=', f9.4,'  BROT=', f7.3,'  G-SR=',g10.3,
      :      '  +/-=', i2,' g/u=',i2,
      :    '  s/a=', i2,/,'     E=', f7.2, '       LBAR=', i5,
      :    '  NU=', f5.1)
@@ -226,7 +234,7 @@
      :      write (6,24) rmu * xmconv, brotsg, gsr, isym, ered * econv,
      :                 jtot, xnu
 24          format(/,' **  2SIGMA UNCORRUGATED SURFACE **',
-     :      '     RMU=', f9.4,'  BROT=', f7.3,'  G-SR=',g9.3,
+     :      '     RMU=', f9.4,'  BROT=', f7.3,'  G-SR=',g10.3,
      :      '  +/-=', i2,
      :       /,'     E=', f7.2, '       LBAR=', i5,
      :    '  NU=', f5.1)
@@ -240,7 +248,7 @@
      :        write (6,25) rmu * xmconv, brotsg, gsr, isym, igu, isa,
      :                     ered * econv, jtot, xnu
 25            format(/,' ** CS 2SIGMA ** RMU=', f8.4,
-     :             '  BROT=', f7.3,'  G-SR=',g9.3,
+     :             '  BROT=', f7.3,'  G-SR=',g10.3,
      :         ' +/-=', i2,' g/u=', i2,
      :        ' s/a=', i2,/,'     E=', f7.2,'  LBAR=', i5, 2x,
      :        '  NU=', f5.1)
@@ -251,7 +259,7 @@
               write (9,30) rmu * xmconv, brotsg, gsr, isym, igu, isa,
      :                     ered * econv, xjtot, jlpar
 30            format(/,' **  CC 2SIGMA ** RMU=', f8.4,
-     :             '  BROT=', f7.3,'  G-SR=',g9.3,
+     :             '  BROT=', f7.3,'  G-SR=',g10.3,
      :            ' +/-=', i2,' g/u=', i2,
      :     ' s/a=', i2,/,'     E=', f7.2,'  JTOT=', f5.1,
      :       2x,' JLPAR=', i2)
@@ -264,7 +272,7 @@
      :        write (6,31) rmu * xmconv, brotsg, gsr, isym,
      :                     ered * econv, jtot, xnu
 31            format(/,' **  CS 2SIGMA ** RMU=', f9.4,
-     :             '  BROT=', f7.3,'  G-SR=',g9.3, '  +/-=', i2,
+     :             '  BROT=', f7.3,'  G-SR=',g10.3, '  +/-=', i2,
      :               /,'     E=', f7.2,'  LBAR=', i5, 2x,
      :     ' NU=', f5.1)
             else
@@ -274,7 +282,7 @@
               write (9,32) rmu * xmconv, brotsg, gsr, isym,
      :                     ered * econv, xjtot, jlpar
 32            format(/,' **  CC 2SIGMA ** RMU=', f9.4,
-     :             '  BROT=', f7.3,'  G-SR=',g9.3, '  +/-=', i2,
+     :             '  BROT=', f7.3,'  G-SR=',g10.3, '  +/-=', i2,
      :        /,'     E=', f7.2,'  JTOT=', f5.1,
      :          2x,' JLPAR=', i2)
             end if
@@ -316,6 +324,8 @@
              nn1 = x * (x - is(n))
              eint(n) = brotsg * nn1 - drotsg*nn1**2 + hrotsg*nn1**3
      :                       - half * (1 - is(n) * x) * gsr
+*  next statement to take care of +/- symmetry of the sigma state
+             is(n) = is(n) * isym
           end if
 40      continue
 45    continue
@@ -591,8 +601,8 @@ c65    continue
       subroutine vlm2sg (jp, lp, j, l, jtot, lambda, iepsp, ieps,
      :                   v, csflag)
 *  subroutine to calculate v-lambda matrices for close-coupled and
-*  coupled-states treatments of collisions of a molecule in a 2sigma electroni
-*  state
+*  coupled-states treatments of collisions of a molecule in a 2sigma
+*  electronic state
 *  latest revision date:  21-feb-89
 *  the cc matrix elements are given in eq. (15) of m.h. alexander,
 *  j. chem. phys. 76, 3637 (1982)
@@ -673,3 +683,4 @@ c65    continue
       v = iphase * x * sqrt(xnorm)
       return
       end
+*  -----------------------------------------------------------------------

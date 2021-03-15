@@ -1,0 +1,23 @@
+Ne-OH(X) SCATTERING                            
+   3                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    4.0000    8.0000    0.1691   rstart, rendld, spac
+  F                              prairy
+  1.05       1.00   100.0  1.50  tolai, rincr, rendai, fstfac
+   1                             nerg
+   90.00
+   9.2291029                       xmu
+  -100.0000                       rcut
+   0  50   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  80  -1                         lscreen, iprint
+   16    4                       nnout,niout
+   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
+  -2   2  -1   1
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  T  F  F  T  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  T  F  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+   5   1   0   2                  jmax, igu, isa, npar
+  18.54800 -139.2100  0.235     -3.910E-02 brot, aso, p, q
+                                        

@@ -1,0 +1,23 @@
+O(3P)-H2 collisions - Warehime MRCI PESs                
+  13                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    3.0000   25.0000    0.2000   rstart, rendld, spac
+  F                              prairy
+  1.150      1.00    80.0  1.50  tolai, rincr, rendai, fstfac
+   1                             nerg
+   300.0000
+    1.790069096783086            xmu
+ -100.0000                       rcut
+   0 100   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  72  -1                         lscreen, iprint
+    6    4                       nnout,niout
+   0   1   2   4   3   5
+   0   1   2   3
+  F  F  F  F  T                  prlogd, prsmat, prt2, t2test, wrsmat
+  T  F  F  T  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  T  F  F  F                  noprin, chlist, ipos, nucros, photof
+  F  F  F  T  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+   1   3                         iop, jmax
+   59.3340  -68.0  -226.5        brot, aso1, aso2
+                                        

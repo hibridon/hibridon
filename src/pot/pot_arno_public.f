@@ -2,6 +2,8 @@
 * Reference: M. H. Alexander, J. Chem. Phys. to be published.
 * NB Vlam components correspond to theta=0 for ArON!!!,
 *  this is for distribution
+* published
+* (ab initio CCSD(T)) M. H. Alexander J. Chem. Phys. 111, 7426 (1999)
 
 *     subroutine driver
       implicit double precision (a-h,o-z)

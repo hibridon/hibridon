@@ -12,13 +12,25 @@
 *   8. openf    utility to open files                               *
 *   9. openfi   selects and opens all files for a run               *
 *  10. restrt (rsave)   restart utility (useful when system crash)  *
-*  11. sread (readrc/rdhead/inbfi/saddr) buffered s-matrix i/o      *
-*  12. swrite (nexrec/wrhead/outbfi/clear) buffered s-matrix i/o    *
+*  11. sread (sinqr/readrc/rdhead/saddr) stream s-matrix i/o        *
+*  12. swrite (wrhead) stream s-matrix i/o                          *
 *  13. assgn    assigns and opens direct access files               *
 *  14. rdabsf (wrabsf/fwait) read/write absolute routines           *
 *  14. tmpnm    generates a unique filename                         *
 *                                                                   *
 *********************************************************************
+c     ------------------------------------------------------------------
+c     Interface changes: 09-jan-2012 by q. ma
+c
+c     Use stream I/O for s-matrices.  The system will do the buffering.
+c     The following subroutines are no longer used and are removed:
+c
+c     inbfi, inbfr, outbfi, outbfr, nexrec, clear, movrc8, movcr8
+c
+c     "TR" (replace current file) or "TU" (keep current file) mode
+c     should be used for S-matrix file when calling openf.
+c     ------------------------------------------------------------------
+c
 *  NB cstart ultrix-dec for i/o with fortran instead of c routines
 * ---------------------------------------------------------------
       subroutine fimove (nxfile)
@@ -51,7 +63,7 @@
 * current revision date: 4-oct-87
 *
 * -------------------------------------------------------------------
-       common/cofil/ nfl,iofbuf,maxrec(60),iofrec(60),nwrec
+       common /cofil/ nfl,iofbuf,maxrec(60),iofrec(60),nwrec
        common /coener/ energ(1)
        ierr=0
        iaddr=0
@@ -77,7 +89,7 @@
        return
        end
 * ---------------------------------------------------------------
-       subroutine gendat
+      subroutine gendat
 *  subroutine to read system independent input parameters for hibridon code
 *
 *  author:  millard alexander
@@ -240,11 +252,6 @@
 *    nnout:     number of different rotational levels for which s-matrix
 *               elements are to be saved in files smat1, smat2, ...
 *    jout(i):   values of rotational angular momentum for these lvels
-*  variables in common block /cophot/
-*     photof        true if photodissociation calculation
-*                   false if scattering calculation
-*     wavefn        true if g(a,b) transformation matrices are saved
-*                   to be used later in computing the wavefunction
 *  variable in common block /coselb/
 *     ibasty    basistype
 *
@@ -252,6 +259,7 @@
 * subroutines called: open
 *
 * ----------------------------------------------------------------
+      use constants
       implicit double precision (a-h,o-z)
       integer jout
       integer i, jlpar, jtot1, jtot2, jtotd, length, nerg, nnout,
@@ -282,7 +290,6 @@
       common /cofile/ input, output, jobnam, savfil
       common /coener/ energ(1)
       common /coered/ ered, rmu
-      common /coconv/ econv, xmconv
 
 * ----------------------------------------------------------------
 *  open unit 8 for standard input
@@ -497,10 +504,9 @@
 176       format (' PRPART SET .FALSE., SINCE PHOTFL OR WAVEFN .TRUE.')
           partw = .false.
         endif
-        if (writs) then
-          write (6, 178)
-178       format (' WRSMAT SET .FALSE., SINCE PHOTOF OR WAVEFN .TRUE.')
-          writs = .false.
+        if (.not. writs) then
+          if (wavefl) write (6, 178)
+178       format (' WRSMAT IS .FALSE., ONLY ADIABATIC ENERGIES SAVED')
         endif
         if (xsecwr) then
           write (6, 179)
@@ -676,17 +682,12 @@
 305   format (2i5,20x,'   nnout,niout')
 *  line 12
       nline=nline+1
-      if (twomol) then
-       write (8,310,err=999)(jout(i)/10,mod(jout(i),10),i=1,iabs(nnout))
-310    format (20('  ',2i1))
-      else
-        write (8, 315, err=999) (jout(i), i=1, iabs(nnout) )
-315     format (20i4)
-      end if
+      write (8, 315, err=999) (jout(i), i=1, iabs(nnout))
+315   format (20(i4, 1x))
 *  line 13
       if(niout.gt.0) then
         nline=nline+1
-        write (8, 315, err=999) (indout(i), i=1, niout )
+        write (8, 315, err=999) (indout(i), i=1, niout)
       endif
 *  line 14
         nline=nline+1
@@ -723,13 +724,12 @@
 * ---------------------------------------------------------------
       block data io
 * ---------------------------------------------------------------
-* current revision date: 5-mar-2008
+*     revision date: 5-mar-2008
 *
 *  variables in common block /clseg/
 *    lseg:      number of integer words per disc sector
 *    intrel:    number of integer words per real words
 *    lchar:     number of characters per integer word
-      common/clseg/ lseg, intrel, lchar
 *  variables in common block /cobuf/
 *    lbuf:    length of i/o buffer
 *    ibuf:      i/o buffer
@@ -738,11 +738,12 @@
 *    isizes:    size of s-matrix file (only needed for univac, optional
 *               on vax
 * -----------------------------------------------------
-      common /cosize/ isize,isizes
+      common /clseg/ lseg, intrel, lchar
+      common /cosize/ isize, isizes
 cstart unix-darwin64
       common/cobuf/ lbuf,ibuf(1024)
-      data lseg, intrel, lchar /1024,1,8/
-      data lbuf/1024/
+      data lseg, intrel, lchar /1024, 1, 8/
+      data lbuf /1024/
 cend
 cstart unix .and..not. unix-darwin64
 c;      common/cobuf/ lbuf,ibuf(1024)
@@ -755,22 +756,27 @@ c;      data lbuf/512/
 c;      data lseg, intrel, lchar /512,1,8/
 cend
       end
-* ---------------------------------------------------------------
+c
+c     ------------------------------------------------------------
       subroutine openf(lunit,filnam,lmode,isize)
-* --------------------------------------------------------
+c     ------------------------------------------------------------
 *
-* subroutine to open files
-* author: b. follmeg
-* current revision date: 29-dec-2003 by mha
+*     subroutine to open files
+*     author: b. follmeg
+*     revision: 29-dec-2003 by mha
+*     revision: 07-jan-2012 by q. ma (add stream I/O mode)
+*     current revision: 30-mar-2012 by q. ma
 *
-* on input: lunit  -> logical unit number, if lunit < 0 scratch file
-*           filnam -> file name
-*           lmode  -> 'SF' sequential/formatted
-*                     'SU' sequential/unformatted
-*                     'DU' direct/unformatted using assgn, wrabsf, rdabsf, fwa
-*           isize  -> number of tracks (only for univac and vax)
-*
-*   lseg:  number of integer words per disc sector
+*     on input: lunit  -> logical unit number, if lunit < 0 scratch file
+*     filnam -> file name
+*     lmode  -> 'SF' sequential/formatted
+*               'SU' sequential/unformatted
+*               'DU' direct/unformatted using assgn, wrabsf, rdabsf, fwa
+*               'TW' stream/replace current file
+*               'TU" stream/unformatted/read/write
+*     isize  -> number of tracks (only for univac and vax)
+*     lseg:  number of integer words per disc sector
+c     ------------------------------------------------------------
       logical exstfl, openfl, tmpfil
       logical od
       character*12 fmt, stat, accs
@@ -799,6 +805,35 @@ cend
          end if
          return
       end if
+c
+c     Stream i/o mode, replace, read/write
+      if (mode .eq. 'TW') then
+         inquire (file=filnam, exist=exstfl, opened=openfl)
+         if (openfl) then
+            print *, '*** WARNING:  ', filnam, ' NOT CLOSED'
+         end if
+         open (unit=iunit, file=filnam, access='STREAM',
+     $        status='REPLACE', err=999, iostat=ierr,
+     $        buffered='YES')
+         return
+      end if
+c
+c     Stream i/o mode, exist file, read/write
+      if (mode .eq. 'TU') then
+         inquire (file=filnam, exist=exstfl, opened=openfl)
+         if (.not. exstfl) then
+            print *, '*** ERROR: ', filnam, 'NOT FOUND'
+            call exit()
+         end if
+         if (openfl) then
+            print *, '*** WARNING: ', filnam, 'NOT CLOSED'
+         end if
+         open (unit=iunit, file=filnam, access='STREAM',
+     $        status='OLD', err=999, iostat=ierr,
+     $        buffered='YES')
+         return
+      end if
+c
 * select access
       if(mode(1:1).ne.'S') then
          write(6,10) mode
@@ -858,12 +893,15 @@ cend
      :       ' *** PROGRAM WILL BE STOPPED !')
       stop
       end
+c     ------------------------------------------------------------
+
 *  --------------------------------------------------------------------
       subroutine openfi (nerg)
 *  subroutine to open required i/o files for hibridon program
 *  author:  millard alexander
 *  modifications: bernd follmeg, g. v. s.
-*  current revision date:  11-may-1997 by mha
+*  revision:  11-may-1997 by mha
+*  revision:  30-mar-2012 by q. ma (stream I/O for wfu files)
 *  --------------------------------------------------------------------
 *  variables in call list:
 *    nerg:       number of different total energies at which scattering
@@ -1036,16 +1074,18 @@ c.....open direct access file for interpolation and restart
           call gennam (xname, jobnam(1:8), 0, 'wfu', lenx)
         else
           call gennam (xname, jobnam, 0, 'wfu', lenx)
-        endif
-          if (rsflag) then
-            inquire (file=xname, exist=existf)
-            if (.not. existf) then
+        end if
+        if (rsflag) then
+           inquire (file=xname, exist=existf)
+           if (.not. existf) then
               write (9, 300) xname(1:lenx)
               write (6, 300) xname(1:lenx)
               call exit
-            end if
-          end if
-        call dopen(2,nfile,xname)
+           end if
+           call openf(22, xname, 'TU', 0)
+        else
+           call openf(22, xname, 'TW', 0)
+        end if
         write (6, 210) xname(1:lenx)
         write (9, 210) xname(1:lenx)
 210     format (' ** WAVEFUNCTION SAVED IN FILE ',(a))
@@ -1097,23 +1137,25 @@ c.....open direct access file for interpolation and restart
 280     continue
       end if
 *  open files smatn for storage of selected s-matrix elements
-      if (writs) then
+      if (writs .and. .not. photof .and. .not. wavefl) then
         do 330  ifile = 1, nerg
         nfile = ifile + 44
           call gennam(xname, jobnam, ifile, 'smt', lenx)
           if(ifile.eq.1) xnam1=xname
           if (rsflag) then
-            inquire (file=xname, exist=existf)
-            if (.not. existf) then
-              lenx=index(xname,' ')-1
-              write (9, 300) xname(1:lenx)
-              write (6, 300) xname(1:lenx)
-300           format(/' RESTART ATTEMPTED, BUT FILE',a,
-     :                ' DOES NOT EXIST')
-              call exit
-            end if
+             inquire (file=xname, exist=existf)
+             if (.not. existf) then
+                lenx=index(xname,' ')-1
+                write (9, 300) xname(1:lenx)
+                write (6, 300) xname(1:lenx)
+ 300            format(/' RESTART ATTEMPTED, BUT FILE',a,
+     :               ' DOES NOT EXIST')
+                call exit
+             end if
+             call openf(nfile, xname, 'TR', isizes)
+          else
+             call openf(nfile, xname, 'TW', isizes)
           end if
-          call openf(nfile, xname, 'du', isizes)
           if (rsflag) then
 * read s-matrix header
             newlab=label
@@ -1149,6 +1191,8 @@ c.....open direct access file for interpolation and restart
       end if
       return
       end
+*---------------------------------------------------------------------
+
 * --------------------------------------------------------------------
       subroutine restrt (jtot,jtop,jtotd,jlpar,nu,nutop,nud,nerg,nlev,
      :               nchmax,rtmn1,rtmx1,dinsid, writs, csflag, nucros)
@@ -1278,111 +1322,48 @@ c.....reserve space for restart information
       call dopen(1,3,savfil)
       return
       end
-      subroutine inbfi(ia,n)
-*  buffer routine for s-matrices
-*  author: h.j. werner
-*  current revision date: 14-jun-1990 by mha
-      implicit double precision (a-h,o-z)
-      common/clseg/ lseg,intrel,lchar
-      common/cobuf/ lbuf,ibuf(7)
-      common/cofil/ nfl,iofbuf,maxrec(60),iofrec(60),nwrec
-      dimension ia(1)
-*
-*  read n elements of array ia from buffer
-*
-*  lseg = sector length (as in open statement), provided in common clseg
-*  intrel = number of integer words per real word
-*  lchar = number of characters per integer word
-*  lbuf = max. buffer length (should be multiple of lseg)
-*  nfl = current file
-*  iofbuf = current offset in buffer
-*  iofrec(ifile) = offset in file
-*
-*  maxrec(ifile) = current number of s-matrices on file
-*  nwrec = number of words for one logical record (each jtot one record)
-*            (should be multiple of lseg)
-*
-      nr=n
-      iofa=0
-      goto 10
-*
-      entry inbfr(ia,n)
-      nr=n*intrel
-      iofa=0
-10    if(nr.le.0) return
-      if(iofbuf.eq.lbuf) then
-          call rdabsf(nfl,ibuf,lbuf/intrel,iofrec(nfl)/intrel)
-          call fwait(nfl)
-          iofrec(nfl)=iofrec(nfl)+lbuf
-          iofbuf=0
-      end if
-      m=min0(nr,lbuf-iofbuf)
-      do 20 i=1,m
-20    ia(iofa+i)=ibuf(iofbuf+i)
-      iofa=iofa+m
-      iofbuf=iofbuf+m
-      nr=nr-m
-      goto 10
-*
-* fill first buffer for given jtot
-*
-      entry readrc(iadr,nfile,lrec,jtot,jlpar,nu,nopen,length,nnout)
-      nfl=nfile
-*
-*  if iadr.eq.0 read next record
-*  if iadr.gt.0 read at address iadr
-*  it is assumed here that lseg.ge.7
-*
-      if(iadr.gt.0) iofrec(nfl)=iadr
-      call rdabsf(nfl,ibuf,lseg/intrel,iofrec(nfl)/intrel)
-      call fwait(nfl)
-* ibuf=-1 signals end of file
-      if (ibuf(1).eq. -1) then
-        lrec=-1
-        return
-      endif
-      call rdabsf(nfl,ibuf,lbuf/intrel,iofrec(nfl)/intrel)
-      call fwait(nfl)
-      iadr=iofrec(nfl)
-      iofrec(nfl)=iofrec(nfl)+lbuf
-      lenbuf=lseg
-      iofbuf=7
-      nwrec=ibuf(1)-lseg
-      lrec=ibuf(1)
-      jtot=ibuf(2)
-      jlpar=ibuf(3)
-      nu=ibuf(4)
-      nopen=ibuf(5)
-      length=ibuf(6)
-      nnout=ibuf(7)
+c
+c     ------------------------------------------------------------
+      subroutine readrc(iadr, nfile, lrec, jtot, jlpar, nu, nopen,
+     $     length, nnout)
+c     author: h.j. werner
+c     revision: 14-jun-1990 by mha
+c     rewritten: 07-jan-2012 by q. ma
+c
+c     Read the header of the s-matrix for a single partial wave
+c
+c     INPUT ARGUMENTS:
+c     iadr: 0 if read next record, otherwize read from byte iadr (one
+c     based) of the file.
+c
+c     RETURNED ARGUMENTS:
+c     lrec: on return contains the size in byte current s-matrix,
+c     or -1 on end of file
+c     Other parameters have their traditional meanings.
+c     ------------------------------------------------------------
+      implicit double precision (a-h, o-z)
+      if (iadr .eq. 0) inquire (nfile, pos=iadr)
+      read (nfile, pos=iadr, end=900, err=950)
+     $     lrec, jtot, jlpar, nu, nopen, length ,nnout
       return
-      end
-*---------------------------------------------------------------------
-      subroutine movrc8(ia,text)
-      character*(*) text
-      dimension ia(1)
-      l=len(text)
-      do 10 j=1,l
-10    text(j:j)=char(ia(j))
+c
+ 900  lrec = -1
       return
+ 950  write (0, *) '*** ERROR READING S-MATRIX FILE (readrc). ABORT.'
+      call exit()
       end
-      subroutine movcr8(text,ia)
-      character*(*) text
-      dimension ia(1)
-      l=len(text)
-      do 10 j=1,l
-10    ia(j)=ichar(text(j:j))
-      return
-      end
-* --------------------------------------------------------------------
+c     ------------------------------------------------------------
+c
+c     ------------------------------------------------------------
       subroutine rdhead(nfile,cdate,ered,rmu,csflag,flaghf,
-     :  flagsu,twomol,nucros,jfirst,jfinal,jtotd,numin,numax,nud,
-     :  nlevel,nlevop,nnout,jlev,inlev,elev,jout)
+     :     flagsu,twomol,nucros,jfirst,jfinal,jtotd,numin,numax,nud,
+     :     nlevel,nlevop,nnout,jlev,inlev,elev,jout)
 *
-*  subroutine to read header from file nfile
-*  authors: h.j. werner and b. follmeg
-*  current revision date: 27-oct-95
-* --------------------------------------------------------------------
+*     subroutine to read header from file nfile
+*     authors: h.j. werner and b. follmeg
+*     revision: 27-oct-95
+c     major revision: 07-jan-2012 by q. ma
+c     ------------------------------------------------------------
       implicit double precision (a-h,o-z)
       logical csflag, flaghf, flagsu, twomol, nucros
       character*20 cdate
@@ -1392,73 +1373,94 @@ c.....reserve space for restart information
       common/cobuf/ lbuf,ibuf(1)
       dimension idate(20),ilabel(48), ipotnm(48)
       dimension jlev(1), inlev(1), elev(1), jout(1)
-*
-      nfl=nfile
-      call rdabsf(nfl,ibuf,lbuf/intrel,0)
-      call fwait(nfl)
-      lenbuf=lbuf
-      iofbuf=0
-      nwrec=ibuf(1)-lseg
-      iofrec(nfl)=lbuf
-*
+      character*8 csize8
+      character*4 csize4
+
+c     Read the magic number (from the start of the file)
+      read (nfile, pos=1, end=900, err=950) csize8
 *     first word on file contains the length of the header
-*
-      ldate = 20
-      llabel= 48
-      lpotnm=48
-      call inbfi(lenhd,1)
-      call inbfi(idate,ldate)
-      call inbfi(ilabel,llabel)
-      call inbfi(ipotnm,lpotnm)
-      call movrc8(idate,cdate)
-      call movrc8(ilabel,label)
-      call movrc8(ipotnm,potnam)
-      call inbfr(ered,1)
-      call inbfr(rmu,1)
-      call inbfi(csflag,1)
-      call inbfi(flaghf,1)
-      call inbfi(flagsu,1)
-      call inbfi(twomol,1)
-      call inbfi(nucros,1)
-      call inbfi(jfirst,1)
-      call inbfi(jfinal,1)
-      call inbfi(jtotd,1)
-      call inbfi(numin,1)
-      call inbfi(numax,1)
-      call inbfi(nud,1)
-      call inbfi(nlevel,1)
-      call inbfi(nlevop,1)
-      call inbfi(nnout,1)
-      call inbfi(jlev,nlevel)
-      call inbfi(inlev,nlevel)
-      call inbfr(elev,nlevel)
-      call inbfi(jout,iabs(nnout))
+      read (nfile, end=900, err=950) lenhd
+c
+      read (nfile, end=900, err=950) cdate, label, potnam
+c     Four bytes for alignment
+      read (nfile, end=900, err=950) csize4
+c
+      read (nfile, end=900, err=950) ered, rmu, csflag, flaghf, flagsu,
+     $     twomol, nucros, jfirst, jfinal, jtotd, numin, numax,
+     $     nud, nlevel, nlevop, nnout, ibasty
+      read (nfile, end=900, err=950) (jlev(i), i=1, nlevel),
+     $     (inlev(i), i=1, nlevel), (elev(i), i=1, nlevel)
+      read (nfile, end=900, err=950) (jout(i), i=1, iabs(nnout))
+c
+      read (nfile, end=900, err=950) csize8
+      if (csize8 .ne. 'ENDOFHDR') goto 950
+      return
+c
+ 900  continue
+ 950  write (0, *) '*** ERROR READING S-MATRIX FILE. ABORT.'
+      call exit
+      end
+c     ------------------------------------------------------------------
+      subroutine sinqr(nfile, njtot, nchmx)
+c
+c     Subroutine to scan an s-matrix file for the number of partial
+c     waves and the maximum number of channels.
+c
+c     If any error occured, njtot is set to -1.
+c
+c     The file pointer will be pointed to the end of the file on return.
+c     It is recommended to call this subroutine prior to calling rdhead.
+c
+c     Author: Qianli Ma
+c     ------------------------------------------------------------------
+      implicit none
+      integer nfile, njtot, nchmx, iaddr, lrec
+      integer jtot, jlpar, nu, nopen, length, nnout
+c
+c     Read the length of the header
+      read (nfile, pos=9, end=900, err=950) iaddr
+c
+      njtot = 0
+      nchmx = 0
+      iaddr = iaddr + 1
+ 20   call readrc(iaddr, nfile, lrec, jtot, jlpar, nu, nopen, length,
+     $     nnout)
+      if (lrec .lt. 0) return
+      njtot = njtot + 1
+      if (nchmx .lt. length) nchmx = length
+      iaddr = iaddr + lrec
+      goto 20
+ 900  continue
+ 950  njtot = -1
       return
       end
-* --------------------------------------------------------------------
+c     ------------------------------------------------------------
       subroutine saddr(nfile,jfirst,jfinal,numin,numax,csflag,
      :                 iadr,nmax,jfsts,jlparf,jlpars,ierr)
-* subroutine to built up a pointer table needed for direct access io
-* author: h.j. werner and b. follmeg
-* current revision date 6-sept-88
-* variables in call list:
-*  on input:
-*  nfile:   logical unit number
-*  jfirst:  the first jtot value for the first parity
-*  jfinal:  the maximum value of jtot
-*  numin:   min. value of coupled states proj. index
-*  numax:   max. value of coupled states proj. index
-*  csflag:  coupled states flag
-*  nmax:    dimension of array iadr
+*     subroutine to built up a pointer table needed for direct access io
+c
+*     author: h.j. werner and b. follmeg
+*     revision: 6-sept-88
+c     revision: 7-jan-2012 by q. ma (use physical file offset for iaddr)
+c     ------------------------------------------------------------
+*     variables in call list:
+*     on input:
+*     nfile:   logical unit number
+*     jfirst:  the first jtot value for the first parity
+*     jfinal:  the maximum value of jtot
+*     numin:   min. value of coupled states proj. index
+*     numax:   max. value of coupled states proj. index
+*     csflag:  coupled states flag
+*     nmax:    dimension of array iadr
 *
-*  on return:
-*  iadr:    array, contains addresses of jtot records
-*  jfsts:   the first jtot value for the second parity (if there is any,
-*           else jfsts is set to -1)
-*  jlparf:  the first parity
-*  jlpars:  second parity, if not present jlpars = 0
-*  ierr:    error flag, if .ne. 0 an error has occured
-*
+*     on return:
+*     iadr:    array, contains addresses of jtot records
+*     jfsts:   the first jtot value for the second parity (if there is
+*           any, else jfsts is set to -1)
+*     jlparf:  the first parity
+*     jlpars:  second parity, if not present jlpars = 0
+*     ierr:    error flag, if .ne. 0 an error has occured
+c     ------------------------------------------------------------
       logical csflag
       integer nfile, iadr, nmax, jfirst, jfsts, jfinal, numin,
      :        numax, ierr, jlpars, jlparf
@@ -1474,7 +1476,7 @@ c.....reserve space for restart information
         numin=0
         numax=0
       end if
-* nwaves is number of partial waves
+*     nwaves is number of partial waves
       nwaves = jfinal - jfirst + 1
       nrec = nwaves * (numax-numin+1) * jln
       if(nrec.gt.nmax) then
@@ -1483,7 +1485,7 @@ c.....reserve space for restart information
         ierr=1
         return
       end if
-* initialize address array
+*     initialize address array
       do 10 i=1,nrec
 10    iadr(i)=-1
 *
@@ -1492,10 +1494,12 @@ c.....reserve space for restart information
       nparit = 0
       jfsts=-1
       jlpars=0
-      iaddr=0
+c     Use the absolute file pointer address in bytes
+      inquire (nfile, pos=iaddr)
+c$$$      iaddr=0
 *
 20    call readrc(iaddr,nfile,lrec,jtot,jlpar,nu,nopen,length,nnout)
-* end of file detected ?
+*     end of file detected ?
       if(lrec.lt.0) goto 40
 *
       if(jlpar.ne.jlpold) then
@@ -1520,107 +1524,145 @@ c.....reserve space for restart information
       end if
       jj = (jlp + nu - numin) * nwaves + jtot + 1
       iadr(jj)=iaddr
-*      write(6,30) jtot,jlpar,nu,jj,iaddr,jfsts
-*30    format(' jtot=',i3,'  jlpar=',i2,'  nu=',i3,'  jj=',i3,
-*     :       ' iad=',i6, ' jfsts=',i6)
+c$$$      write(6,30) jtot,jlpar,nu,jj,iaddr,jfsts
+c$$$ 30   format(' jtot=',i3,'  jlpar=',i2,'  nu=',i3,'  jj=',i3,
+c$$$      :       ' iad=',i6, ' jfsts=',i6)
       iaddr=iaddr+lrec
       goto 20
 40    return
       end
-* -----------------------------------------------------------------------
+c     ------------------------------------------------------------
+c
+c     ------------------------------------------------------------
       subroutine sread (iadr, sreal, simag, jtot, jlpar, nu,
      :                  jq, lq, inq, inpack, jpack, lpack,
      :                  nfile, nmax, nopen, length, ierr)
-* authors: h.j. werner and b. follmeg
-* current revision date: 21-feb-2006 by mha
+*     authors: h.j. werner and b. follmeg
+*     revision: 21-feb-2006 by mha
+*     major revision: 07-feb-2012 by q. ma
+*     added /coj12/ common block (p.dagdigian)
+*     current revision:  8-oct-2012 by q. ma
+*
 *     read real and imaginary parts of s-matrix together with
 *     other information as written in soutpt, swrite
 *     if iadr = 0 read sequential (next record)
 *     if iadr > 0 read absolute
 *     if nopen = -1, the lower triangle is filled
+c     ------------------------------------------------------------
       implicit double precision (a-h,o-z)
       logical triang
       dimension sreal(nmax,1), simag(nmax,1),
-     1    jpack(1), lpack(1),inpack(1),jq(1),lq(1),inq(1)
-*  variable in common block /coselb/
+     1     jpack(1), lpack(1),inpack(1),jq(1),lq(1),inq(1)
+*     variable in common block /coselb/
 *     ibasty    basistype
       common /coselb/ ibasty
-      common  /coisc11/ isc7(9)
-      common  /coisc12/ j12q(9)
+      common /coj12p/ j12pk(1)
+      common /coj12/ j12(1)
+      character*8 csize8
+c
       ierr=0
       triang =.false.
-      if(nopen.lt.0) then
-        triang = .true.
-        nopen = iabs(nopen)
+      if (nopen .lt. 0) then
+         triang = .true.
+         nopen = iabs(nopen)
       end if
-* on return:
-* the vectors jpack, lpack, inpack will hold the column indices of the
-*             packed basis (dimension length)
-* the vectors jq, lq, inq will hold the row indices of the packed
-*             basis (dimension nopen)
-* read next s-matrix header
+*     on return:
+c
+*     the vectors jpack, lpack, inpack will hold the column indices of
+*     the packed basis (dimension length)
+c
+*     the vectors jq, lq, inq will hold the row indices of the packed
+*     basis (dimension nopen)
+c
+*     read next s-matrix header
       iaddr = iadr
       call readrc(iaddr,nfile,lrec,jtot,jlpar,nu,nopen,length,nnout)
-      if(lrec.lt.0) goto 400
+      if (lrec .lt. 0) goto 900
 *
-      call inbfi(jpack, length)
-      call inbfi(lpack, length)
-      call inbfi(inpack,length)
-      if ((ibasty.eq.12).or.(ibasty.eq.13).or.(ibasty.eq.15))
-     :   call inbfi(isc7,length)
+      read (nfile, end=900, err=950) (jpack(i), i=1, length),
+     $     (lpack(i), i=1, length), (inpack(i), i=1, length)
+      if (is_j12(ibasty))
+     $     read (nfile, end=900, err=950) (j12pk(i), i=1, length)
+
+
+
+*      write(6,*) 'SREAD'
+*      write(6,*) jtot,jlpar,length
+*      write(6,*) (j12pk(i), i=1, length)
+
+
+
+c
       if (nnout .gt. 0) then
          do 50 i = 1, length
-         jq(i) = jpack(i)
-         lq(i) = lpack(i)
-         inq(i)= inpack(i)
-      if ((ibasty.eq.12).or.(ibasty.eq.13).or.(ibasty.eq.15))
-     :   j12q(i)=isc7(i)
-50       continue
+            jq(i) = jpack(i)
+            lq(i) = lpack(i)
+            inq(i)= inpack(i)
+            if (is_j12(ibasty)) j12(i) = j12pk(i)
+ 50      continue
          nopen = length
          if (triang) then
-            ioff =1
+            ioff = 1
             do 70 irow = 1, length
-               call inbfr(sreal(ioff,1), irow)
-               call inbfr(simag(ioff,1), irow)
+               read (nfile, end=900, err=950)
+     $              (sreal(ioff + i, 1), i=0, irow - 1),
+     $              (simag(ioff + i, 1), i=0, irow - 1)
                ioff = ioff + irow
-70          continue
-            return
+ 70         continue
+            goto 800
          end if
-* read s-matrix
+*     read s-matrix
          do 80  icol = 1, length
-            call inbfr(sreal(1,icol), icol)
-            call inbfr(simag(1,icol), icol)
+            read (nfile, end=900, err=950)
+     $           (sreal(i, icol), i=1, icol),
+     $           (simag(i, icol), i=1, icol)
 80       continue
-* fill lower triangle
-         do 90 icol=1,length
-         do 90 irow=1,icol
-         sreal(icol,irow)=sreal(irow,icol)
-90       simag(icol,irow)=simag(irow,icol)
+*     fill lower triangle
+         do icol=1,length
+            do irow=1,icol
+               sreal(icol,irow)=sreal(irow,icol)
+               simag(icol,irow)=simag(irow,icol)
+            end do
+         end do
+c
       else if (nnout .le. 0) then
-*  here if you have written out columns of the s-matrix
-         call inbfi(jq, nopen)
-         call inbfi(lq, nopen)
-         call inbfi(inq,nopen)
-         if ((ibasty.eq.12).or.(ibasty.eq.13).or.(ibasty.eq.15))
-     :      call inbfi(j12q,nopen)
-*  now read columns of the s-matrix
-         do 140  icol = 1, length
-            call inbfr(sreal(1,icol), nopen)
-            call inbfr(simag(1,icol), nopen)
-140      continue
+*     here if you have written out columns of the s-matrix
+         read (nfile, end=900, err=950) (jq(i), i=1, nopen),
+     $        (lq(i), i=1, nopen), (inq(i), i=1, nopen)
+         if (is_j12(ibasty)) read (nfile, end=900, err=950)
+     $        (j12(i), i=1, nopen)
+*     now read columns of the s-matrix
+         do 140 icol = 1, length
+            read (nfile, end=900, err=950)
+     $           (sreal(i, icol), i=1, nopen),
+     $           (simag(i, icol), i=1, nopen)
+ 140     continue
       end if
+c
+c     Read eight bytes "ENDOFSMT"
+ 800  read (nfile, end=900, err=950) csize8
+      if (csize8 .ne. 'ENDOFSMT') goto 950
       return
-400   ierr=lrec
+c
+c     End-of-file
+ 900  continue
+c     Read error
+ 950  ierr = -1
       return
       end
-*--------------------------------------------------------------------
+c     ------------------------------------------------------------
+c
+c     ------------------------------------------------------------
       subroutine swrite (sreal, simag, jtot, jlpar, nu,
      :                   jq, lq, inq, iorder, inpack, jpack, lpack,
      :                   epack, nfile, nmax, nopen)
 *  subroutine to write selected elements of s-matrix to file nfile
 *  author:  millard alexander
 *  modified by  h.j. werner and b. follmeg
-*  current revision date: 21-feb-2006 by mha
+*  revision: 21-feb-2006 by mha
+*  major revision: 07-jan-2012 by q. ma
+*  added /coj12/ common block (p.dagdigian)
+*  current revision:  8-oct-2012 by q. ma
 *  ------------------------------------------------------------------
 *  variables in call list:
 *    sreal:     on entry: contains real part of open-channel s-matrix
@@ -1660,12 +1702,15 @@ c.....reserve space for restart information
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
 *  variable in common block /coeint/
 *    eint:      array containing channel energies (in hartree)
+*  variable in common block /coj12/
+*    j12:       array containing vector sum of j1 + j2 for molecule-molecule
+*               systems and open-shell atom - molecule systems
 *  ------------------------------------------------------------------
       implicit double precision (a-h,o-z)
       integer ic, icol, ii, ir, irow, jtot, jlpar, length, nmax,
      :        nnout, nopen, nfile, nu, mmout
-      integer jout, jq, jpack, lq, lpack, inq, inpack
-*      real simag, sreal, eint, epack, ered, rmu
+      integer jout, jq, jpack, lq, lpack, inq, inpack, nchnid
+      logical is_j12
       common /clseg/ lseg,intrel,lchar
       common /coeint/ eint(1)
       common /coered/ ered, rmu
@@ -1673,248 +1718,171 @@ c.....reserve space for restart information
 *  variable in common block /coselb/
 *     ibasty    basistype
       common /coselb/ ibasty
-      common  /coisc11/ isc7(9)
-      common  /coisc12/ j12q(9)
+      common /coj12p/ j12pk(1)
+      common /coj12/ j12(1)
       dimension sreal(nmax,nmax), simag(nmax,nmax),
      :          jq(1), lq(1), inq(1), jpack(1), lpack(1),
      :          epack(1), inpack(1), iorder(1)
-*  the vector iorder will point to the position in the unpacked basis of each
-*  state in the packed basis
-*  the vector jpack will hold the rotational quantum numbers in the packed bas
-*  the vector lpack will hold the orbital angular momenta of each channel in
-*  the packed basis
-*  the vector epack will hold the channel energies in the packed basis
-*  the vector inpack will hold the symmetry indices in the packed basis
-*  first sum over the unpacked states
-        mmout=iabs(nnout)
-        length = 0
-        do 30  icol = 1, nopen
-*  now sum over the packed states, find labels
-          do 20  ii = 1, mmout
+      integer int_t
+      double precision dble_t
+c
+
+      if (is_j12(ibasty)) then
+c     some basis have an additional channel parameter j12
+         nchnid = 4
+      else
+c     by default, each channel is uses three parameters: j, l, ind
+         nchnid = 3
+      end if
+c
+*     the vector iorder will point to the position in the unpacked basis
+*     of each state in the packed basis
+c
+*     the vector jpack will hold the rotational quantum numbers in the
+*     packed bas
+c
+*     the vector lpack will hold the orbital angular momenta of each
+*     channel in the packed basis
+c
+*     the vector epack will hold the channel energies in the packed basis
+c
+*     the vector inpack will hold the symmetry indices in the packed basis
+*     first sum over the unpacked states
+c
+      mmout = iabs(nnout)
+      length = 0
+      do 30 icol = 1, nopen
+*     now sum over the packed states, find labels
+         do 20  ii = 1, mmout
             if (jq(icol) .eq. jout(ii) ) then
-*  here if match
-              length = length + 1
-              jpack(length) = jq(icol)
-              lpack(length) = lq(icol)
-              epack(length) = eint(icol)
-              inpack(length) = inq(icol)
-              if ((ibasty.eq.12).or.(ibasty.eq.13).or.(ibasty.eq.15))
-     :             isc7(length) = j12q(icol)
-              iorder(length) = icol
-              go to 30
+*     here if match
+               length = length + 1
+               jpack(length) = jq(icol)
+               lpack(length) = lq(icol)
+               epack(length) = eint(icol)
+               inpack(length) = inq(icol)
+               if (is_j12(ibasty)) j12pk(length) = j12(icol)
+               iorder(length) = icol
+               go to 30
             end if
-20        continue
-30      continue
-*  calculate number of words that will be written
-        nrecw = 7 + 3 * length
-        if(nnout.gt.0) then
-           nrecw = nrecw+length*(length+1)*intrel
-        else
-           nrecw = nrecw+3*nopen+2*length*nopen*intrel
-        end if
-*  write out general information on next record
-        call nexrec(nfile,nrecw,jtot,jlpar,nu,nopen,length,nnout)
-        call outbfi(jpack,length)
-        call outbfi(lpack,length)
-        call outbfi(inpack,length)
-        if ((ibasty.eq.12).or.(ibasty.eq.13).or.(ibasty.eq.15))
-     :             call outbfi(isc7,length)
-*  here we pack the s-matrix and print out just those elements for which
-*  the initial and final rotational quantum numbers correspond to an element
-*  in the array jout
+ 20      continue
+ 30   continue
+*     calculate number of words that will be written
+      nrecw = sizeof(int_t) * 7 + sizeof(int_t) * nchnid * length
+      if(nnout.gt.0) then
+         nrecw = nrecw + sizeof(dble_t) * length * (length + 1)
+      else
+         nrecw = nrecw + sizeof(int_t) * nchnid * nopen +
+     $        sizeof(dble_t) * 2 * length * nopen
+      end if
+      nrecw = nrecw + 8
+*     write out general information on next record
+      write (nfile, err=950) nrecw, jtot, jlpar, nu, nopen,
+     $     length ,nnout
+      write (nfile, err=950) (jpack(i), i=1, length)
+      write (nfile, err=950) (lpack(i), i=1, length)
+      write (nfile, err=950) (inpack(i), i=1, length)
+      if (is_j12(ibasty)) write (nfile, err=950) (j12pk(i), i=1, length)
+*     here we pack the s-matrix and print out just those elements for
+*     which the initial and final rotational quantum numbers correspond
+*     to an element in the array jout
       if (nnout .gt. 0) then
-*  the dimension of the packed s-matrix is length x length
-*  now pack the real part of the s-matrix
-        do 45  icol = 1, length
-          ic = iorder(icol)
-          do 40  irow = 1, length
-            ir = iorder(irow)
-            sreal(irow,icol) = sreal(ir,ic)
-            simag(irow,icol) = simag(ir,ic)
-40        continue
-45      continue
-* write s-matrix into buffer
-        do 80  icol = 1, length
-           call outbfr(sreal(1,icol),icol)
-           call outbfr(simag(1,icol),icol)
-80      continue
-*  here if you want to print out columns of the s-matrix
+*     the dimension of the packed s-matrix is length x length now pack
+*     the real part of the s-matrix
+         do 45  icol = 1, length
+            ic = iorder(icol)
+            do 40  irow = 1, length
+               ir = iorder(irow)
+               sreal(irow,icol) = sreal(ir,ic)
+               simag(irow,icol) = simag(ir,ic)
+ 40         continue
+ 45      continue
+*     write s-matrix into buffer
+         do 80  icol = 1, length
+            write (nfile, err=950) (sreal(i, icol), i=1, icol)
+            write (nfile, err=950) (simag(i, icol), i=1, icol)
+ 80      continue
+*     here if you want to print out columns of the s-matrix
       else if (nnout .le. 0) then
-         call outbfi(jq,nopen)
-         call outbfi(lq,nopen)
-         call outbfi(inq,nopen)
-         if ((ibasty.eq.12).or.(ibasty.eq.13).or.(ibasty.eq.15))
-     :             call outbfi(j12q,nopen)
-*  now write out columns of the s-matrix into buffer
-*  length is the number of columns of the s-matrix to save
-        do 140  ii = 1, length
-          icol = iorder(ii)
-          call outbfr(sreal(1,icol),nopen)
-          call outbfr(simag(1,icol),nopen)
-140     continue
+         write (nfile, err=950) (jq(i), i=1, nopen)
+         write (nfile, err=950) (lq(i), i=1, nopen)
+         write (nfile, err=950) (inq(i), i=1, nopen)
+         if (is_j12(ibasty)) write (nfile, err=950) (j12(i), i=1, nopen)
+*     now write out columns of the s-matrix into buffer length is the
+*     number of columns of the s-matrix to save
+         do 140  ii = 1, length
+            icol = iorder(ii)
+            write (nfile, err=950) (sreal(i, icol), i=1, nopen),
+     $           (simag(i, icol), i=1, nopen)
+ 140     continue
       end if
-      call clear
+      write (nfile, err=950) 'ENDOFSMT'
       return
+c
+c     On error
+ 950  write (0, *) '*** ERROR WRITING S-MATRIX FILE. ABORT.'
+      call exit()
       end
-*--------------------------------------------------------------------
-      subroutine outbfi(ia,n)
-*  buffer routine for s-matrices
-*  author: h.j. werner
-*  current revision date: 23-jan-90
-      implicit double precision (a-h,o-z)
-      dimension ia(1)
-      logical ldum,rsflag,lpar
-      common /colpar/ ldum(15),rsflag,lpar(11)
-      common/clseg/ lseg,intrel,lchar
-      common/cobuf/ lbuf,ibuf(7)
-      common/cofil/ nfl,iofbuf,maxrec(60),iofrec(60),nwrec,lenbuf
-*
-*  buffer out n elements of array ia
-*
-*  lseg = sector length (as in open statement), provided in common clseg
-*  intrel = number of integer words per real word
-*  lchar = number of characters per integer word
-*  lbuf = buffer length (should be multiple of lseg)
-*  nfl = current file
-*  iofbuf = offset in buffer
-*  iofrec(ifile) = offset in file
-*  maxrec(ifile) = current number of s-matrices on file
-*  nwrec = number of words per logical record (should be multiple of lseg)
-*  (n.b. the arrays for one jtot-value will be saved on one logical record,
-*  where the number of logical records is not the same as the number of
-*  physical records)
-      nr=n
-      iofa=0
-      goto 10
-*
-      entry outbfr(ia,n)
-      nr=n*intrel
-      iofa=0
-*
-10    m=min0(nr,lbuf-iofbuf)
-      do 20 i=1,m
-20    ibuf(iofbuf+i)=ia(iofa+i)
-      iofa=iofa+m
-      iofbuf=iofbuf+m
-      nr=nr-m
-* write out buffer if necessary
-      if(iofbuf.eq.lbuf) then
-        call wrabsf(nfl,ibuf,lbuf/intrel,iofrec(nfl)/intrel)
-        call fwait(nfl)
-        iofrec(nfl)=iofrec(nfl)+lbuf
-        iofbuf=0
-      end if
-*
-      if(nr.gt.0) goto 10
-      return
-*
-*  clear last buffer
-*
-      entry clear
-*
-      if(iofbuf.gt.0) then
-        iadr=iofrec(nfl)
-c       l=((iofbuf-1)/lseg+1)*lseg
-c       call wrabsf(nfl,ibuf,l/intrel,iofrec(nfl)/intrel)
-        call wrabsf(nfl,ibuf,lbuf/intrel,iofrec(nfl)/intrel)
-        call fwait(nfl)
-c       iofrec(nfl)=iofrec(nfl)+l
-        iofrec(nfl)=iofrec(nfl)+lbuf
-      end if
-*  avoid writing end of file if header is replaced in restart
-      if(rsflag.and.iadr.eq.0) return
-*
-*  write dummy record indicating eof
-*
-      ibuf(1)=-1
-      call wrabsf(nfl,ibuf,lseg/intrel,iofrec(nfl)/intrel)
-      call fwait(nfl)
-      return
-*
-*  start new s-matrix record. it is assumed that buffer is cleared!
-*
-      entry nexrec(nfile,nrecw,jtot,jlpar,nu,nopen,length,nnout)
-*
-      nwrec=((nrecw-1)/lseg+1)*lseg
-      lenbuf=0
-      ibuf(1)=nwrec
-      ibuf(2)=jtot
-      ibuf(3)=jlpar
-      ibuf(4)=nu
-      ibuf(5)=nopen
-      ibuf(6)=length
-      ibuf(7)=nnout
-      iofbuf=7
-      nfl=nfile
-      maxrec(nfl)=maxrec(nfl)+1
-*  start address for each s-matrix is multiple of lseg
-      return
-      end
-*---------------------------------------------------------------------
+c     ------------------------------------------------------------
+c
+c     ------------------------------------------------------------
       subroutine wrhead(nfile,cdate,
-     :  ered,rmu,csflag,flaghf,
-     :  flagsu,twomol,nucros,jfirst,jfinal,jtotd,numin,numax,nud,
-     :  nlevel,nlevop,nnout,jlev,inlev,elev,jout)
+     :     ered,rmu,csflag,flaghf,
+     :     flagsu,twomol,nucros,jfirst,jfinal,jtotd,numin,numax,nud,
+     :     nlevel,nlevop,nnout,jlev,inlev,elev,jout)
 *
-*  initialize buffering for file nfile and write general information
-*  (header)
+*     initialize buffering for file nfile and write general information
+*     (header)
 *
-* author: h.j. werner
-*  current revision date: 27-oct-1995 by mha
-*---------------------------------------------------------------------
+*     author: h.j. werner
+*     revision: 27-oct-1995 by mha
+c     major revision: 07-jan-2012 by q.ma (stream I/O, write ibasty)
+c     ------------------------------------------------------------
       implicit double precision (a-h,o-z)
-      logical csflag, flaghf, flagsu,twomol, nucros
+      logical csflag, flaghf, flagsu, twomol, nucros
       character*20 cdate
       include "common/parpot"
-      common/clseg/ lseg,intrel,lchar
-      common/cofil/ nfl,iofbuf,maxrec(60),iofrec(60),nwrec,lenbuf
-*
-*  equivalence to avoid trouble with string descriptors in buffering
-*
+      common /coselb/ ibasty
       dimension jlev(1),inlev(1),elev(1),jout(1)
-      dimension idate(20),ilabel(48),ipotnm(48)
-*
-      call movcr8(label,ilabel)
-      call movcr8(potnam,ipotnm)
-      call movcr8(cdate,idate)
-      iofrec(nfile)=0
-      maxrec(nfile)=0
-      iofbuf=0
-      lenbuf=0
-      nfl=nfile
-*
-      ldate = 20
-      llabel= 48
-      lpotnm = 48
-      lenhd=ldate+llabel+lpotnm+
-     :      2*intrel+15+(2+intrel)*nlevel+iabs(nnout)
-      call outbfi(lenhd,1)
-      call outbfi(idate,ldate)
-      call outbfi(ilabel,llabel)
-      call outbfi(ipotnm,lpotnm)
-      call outbfr(ered,1)
-      call outbfr(rmu,1)
-      call outbfi(csflag,1)
-      call outbfi(flaghf,1)
-      call outbfi(flagsu,1)
-      call outbfi(twomol,1)
-      call outbfi(nucros,1)
-      call outbfi(jfirst,1)
-      call outbfi(jfinal,1)
-      call outbfi(jtotd,1)
-      call outbfi(numin,1)
-      call outbfi(numax,1)
-      call outbfi(nud,1)
-      call outbfi(nlevel,1)
-      call outbfi(nlevop,1)
-      call outbfi(nnout,1)
-      call outbfi(jlev,nlevel)
-      call outbfi(inlev,nlevel)
-      call outbfr(elev,nlevel)
-      call outbfi(jout,iabs(nnout))
-      call clear
+      integer int_t
+      double precision double_t
+c     Calculate the length of the header (in bytes)
+      lenhd = sizeof(cdate) + sizeof(label) + sizeof(potnam) +
+     $     sizeof(dble_t) * 2 + sizeof(int_t) * 16 +
+     $     (sizeof(int_t) * 2 + sizeof(dble_t)) * nlevel +
+     $     sizeof(int_t) * iabs(nnout) + 20
+c
+c     Write eight-byte file magic number
+      write (nfile, err=950) char(128), 'SMT', char(0), char(2),
+     $     char(0), char(0)
+c
+      write (nfile, err=950) lenhd
+      write (nfile, err=950) cdate, label, potnam
+c     Four zero-bytes for alignment / C struct compatibility
+      write (nfile, err=950) char(0), char(0), char(0), char(0)
+c
+      write (nfile, err=950) ered, rmu
+      write (nfile, err=950) csflag, flaghf, flagsu, twomol, nucros,
+     $     jfirst, jfinal, jtotd, numin, numax, nud, nlevel, nlevop,
+     $     nnout, ibasty
+c
+      write (nfile, err=950) (jlev(i), i=1, nlevel)
+      write (nfile, err=950) (inlev(i), i=1, nlevel)
+      write (nfile, err=950) (elev(i), i=1, nlevel)
+c
+      write (nfile, err=950) (jout(i), i=1, iabs(nnout))
+c
+      write (nfile, err=950) 'ENDOFHDR'
+c
+      return
+c
+c     On error:
+ 950  write (0, *) '*** ERROR WRITING S-MATRIX FILE. ABORT.'
+      call exit()
       return
       end
+c     ------------------------------------------------------------
+c
 * -------------------------------------------------------------------
       subroutine dread(ii,l,ifil,irec,iof)
 * --------------------------------------------------------------
