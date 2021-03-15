@@ -444,7 +444,7 @@ c         fast = .false.
              goto 300
 * iframe = 1
 172          call sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack,
-     :             lpack,ipack,jttble,prefac,sigma,
+     :             lpack,ipack,jttble,prefac,
      :             sreal,simag,matel,lenlab,labadr,
      :             jtotpa,fast,ierr)
              if(ierr.ne.0) goto 4000

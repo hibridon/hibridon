@@ -1,4 +1,5 @@
-#!/bin/csh -f
+#!/bin/tcsh -f
+# note: MACHTYPE and HOSTTYPE are available in tcsh, but not csh
 # HIBRIDON makefirst $Revision: 2016.1 $ --- initial install script (this version and intel macs and i86 Linux)
 # no longer works for G4 macs
 echo " "
@@ -61,6 +62,11 @@ endif
 echo " "
 echo "system name is $sysname" |tee -a $basedir/bin/makefirst.log
 echo "machine type is $MACHTYPE" |tee -a $basedir/bin/makefirst.log
+if (! $?MACHTYPE) then
+   echo "machine type is unknown (MACHTYPE environment variable doesn't exist)" |tee -a $basedir/bin/makefirst.log
+else
+   echo "machine type is $MACHTYPE" |tee -a $basedir/bin/makefirst.log
+endif
 # HOSTTYPE environmental variable is no longer used in OSX Mavericks or Yosemite
 if $sysname == 'Darwin' then
    set HOSTTYPE = $MACHTYPE
@@ -90,9 +96,9 @@ if $cputype == 'intel-mac' then
    echo -n "Your fortran compiler command is $fcompiler $opt $FS, is this correct? [y/n]  "
    set response=$<
    if $response == 'n' then
-       echo -n "Enter the name of your fortran compiler:  g95 or absoft:  "
+       echo -n "Enter the name of your fortran compiler:  g95, gfortran or absoft:  "
        set fcompiler=$<
-       if $fcompiler == 'g95' then
+       if ( $fcompiler == 'g95' || $fcompiler == 'gfortran' ) then
           set FS = -static
           set opt='-O3'
        else if $fcompiler == 'absoft' then
@@ -115,11 +121,14 @@ else if ($cputype == 'x86_64-linux' || $cputype == 'i386-linux' || $cputype == '
    echo -n "Your fortran compiler is $fcompiler $opt $FS, is this correct? [y/n]  "
    set response=$<
    if $response == 'n' then
-       echo -n "Enter the name of your fortran compiler: (g95, pgf95, pgf90 ...  "
+       echo -n "Enter the name of your fortran compiler: (g95, gfortran, pgf95, pgf90 ...  "
        set fcompiler=$<
        if $fcompiler == 'g95' then
           set FS = -static
           set opt='-O3'
+       elseif $fcompiler == 'gfortran' then
+          set FS = -static
+          set opt = '-O3'
        elseif $fcompiler == 'pgf95' then
           set FS = -
           set opt = '-fast'
@@ -175,8 +184,8 @@ if $fcompiler == 'ifort' then
         echo "fortran compiler $fcompiler not found; ABORT" |tee -a $basedir/bin/makefirst.log
         exit
     endif 
-else if $fcompiler == 'g95' then
-    set FFC=`which g95`
+else if ( $fcompiler == 'g95' || $fcompiler == 'gfortran' ) then
+    set FFC=`which $compiler`
     set resp=`echo $FFC |grep -c "not found"`
     if $resp == 0 then
        if (-e $FFC) then 
@@ -295,21 +304,21 @@ else if ($HOSTTYPE == 'x86_64-linux' || $HOSTTYPE == 'ia64-linux' || $HOSTTYPE =
          set BLASLIB=""
          set LAPACKLIB="-llapack -lblas"
       else
-         echo -n "Enter the path for your library  "
+         echo -n "Enter the path for your BLAS library  "
          set responselib=$<
          set BLASLIB=""
          set LIBRARY_PATH=$responselib
          echo -n "Enter the name  s of your libraries (-lxxx, -lyyy, etc, including the hypen)  "
-         set responselib=$<
+         set responselib="$<"
          set LAPACKLIB="-L$LIBRARY_PATH $responselib"
       endif
    else
-       echo -n "Enter the path for your library  "
+       echo -n "Enter the path for your BLAS library  "
        set responselib=$<
        set BLASLIB=""
        set LIBRARY_PATH=$responselib
        echo -n "Enter the names of your libraries (-lxxx, -lyyy, etc, including the hypen)  "
-       set responselib=$<
+       set responselib="$<"
        set LAPACKLIB="-L$LIBRARY_PATH $responselib"
    endif
 else if $HOSTTYPE == 'powermac' then
