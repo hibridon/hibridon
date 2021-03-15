@@ -276,6 +276,8 @@ cd testnew
   rm $basedir/bin/progs/hib_hecn_dgels_81
 
   echo "running ch3he_ccsdt tests ..."
+  mkdir -p potdata
+  cp ch3he_*.dat potdata
   $basedir/bin/progs/hib_ch3he_ccsdt_126 <hecnx_hyp.com >ch3he_test.log
   echo "ch3he_ccsdt tests completed, compare result files:"
   echo "  $basedir/testnew with $basedir/tests"
