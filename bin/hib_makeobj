@@ -81,15 +81,18 @@ echo "compiling hi*.f files (this may take a few minutes) ..."
 echo "compiling hi*.f files (this may take a few minutes) ..." >>& $basedir/obj.log
 
 cd $basedir/src
-$basedir/bin/ftn_hib  -O  hiamp.f >>& $basedir/obj.log
+# compile files with modules inside first
+$basedir/bin/ftn_hib  -O  hicommon.f >>& $basedir/obj.log
+$basedir/bin/ftn_hib  -O  hit*.f >>& $basedir/obj.log
 $basedir/bin/ftn_hib  -O  hib*.f >>& $basedir/obj.log
+
+
+$basedir/bin/ftn_hib  -O  hiamp.f >>& $basedir/obj.log
 $basedir/bin/ftn_hib  -O  himatrix.f >>& $basedir/obj.log
 $basedir/bin/ftn_hib  -O  hihypxsc.f >>& $basedir/obj.log
 $basedir/bin/ftn_hib  -O  hidifcrs.f >>& $basedir/obj.log
-$basedir/bin/ftn_hib  -O  hicommon.f >>& $basedir/obj.log
 $basedir/bin/ftn_hib  -O  hip*.f >>& $basedir/obj.log
 $basedir/bin/ftn_hib  -O  his*.f >>& $basedir/obj.log
-$basedir/bin/ftn_hib  -O  hit*.f >>& $basedir/obj.log
 $basedir/bin/ftn_hib  -O  hiu*.f >>& $basedir/obj.log
 $basedir/bin/ftn_hib  -O  hivector.f >>& $basedir/obj.log
 $basedir/bin/ftn_hib  -O1   hiiolib_f.f >>& $basedir/obj.log
