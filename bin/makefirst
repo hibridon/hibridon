@@ -195,6 +195,9 @@ else if ( $fcompiler == 'g95' || $fcompiler == 'gfortran' ) then
     # force arrays to be allocated on the heap instead of the stack, this removes segmentation faults crash, not sure why
     set options = "$options -fmax-stack-var-size=1"
 
+    # use large model to prevent linking errors (elocation truncated to fit: R_X86_64_PC32) because the common blocks are too big to fit in the default memory model
+    set options = "$options -mcmodel=large"
+
     # set options = '-ffixed-line-length-132 -std=legacy -g -Wl,--stack,1048'    
     #  -fbounds-check'
     set resp=`echo $FFC |grep -c "not found"`
