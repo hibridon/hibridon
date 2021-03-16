@@ -35,6 +35,7 @@
       character*20 cdate
       character*40 xname
       logical  existf, csflag, flaghf, flagsu, twomol, nucros
+      logical is_j12
       dimension ia(4)
       include "common/parpot"
       common /coz/ sreal(1)

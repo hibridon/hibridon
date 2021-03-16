@@ -1817,6 +1817,7 @@ c
       use constants
       implicit double precision (a-h,o-z)
       logical csflag, flaghf, flagsu, twomol
+      logical is_j12
       common /coered/ ered, rmu
       common /coselb/ ibasty	
       dimension tsq(nmax,1), scmat(nmax,1)

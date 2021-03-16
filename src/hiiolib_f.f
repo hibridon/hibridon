@@ -1562,6 +1562,7 @@ c     ------------------------------------------------------------
 c     ------------------------------------------------------------
       implicit double precision (a-h,o-z)
       logical triang
+      logical is_j12
       dimension sreal(nmax,1), simag(nmax,1),
      1     jpack(1), lpack(1),inpack(1),jq(1),lq(1),inq(1)
 *     variable in common block /coselb/
