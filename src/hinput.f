@@ -1,4 +1,4 @@
-Channelscstart unix-ibm unix-aix
+cstart unix-ibm unix-aix
 c;@process noopt
 cend
 cstart unix-hp
