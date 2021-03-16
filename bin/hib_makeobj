@@ -141,7 +141,7 @@ if ("$res" != "") then
 endif
 set res = `grep " unix-gfortran" $basedir/CONFIG`
 if ("$res" != "") then
-   set res1 = `grep "error" $basedir/obj.log`
+   set res1 = `grep "[eE]rror" $basedir/obj.log`
    if "$res1" == "" then
        echo "all compilations successfully completed"
    else
