@@ -220,7 +220,7 @@
 *
 *  flaghf should be the same for both smt files
 *
-      if (flghf1.ne.flghf2) then
+      if (flghf1.neqv.flghf2) then
         write (6,18)
 18      format(/' *** FLAGHF SHOULD BE THE SAME FOR BOTH ',
      :    'SMT FILES ***'/)
