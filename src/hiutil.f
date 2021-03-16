@@ -1054,7 +1054,7 @@ c     current revision: 19-apr-2012 by q. ma (check input)
       implicit double precision (a-h,o-z)
       common /cofact/ si(1)
       j=j1+j2+j3
-      if(mod(j,2).or.j3.lt.iabs(j1-j2).or.j3.gt.(j1+j2)) then
+      if( (mod(j,2).ne.0) .or. (j3.lt.iabs(j1-j2)) .or. (j3.gt.(j1+j2)) ) then
          f3j0=0d0
          return
       end if
