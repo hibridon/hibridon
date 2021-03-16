@@ -47,7 +47,7 @@ ls -1 pot_$1.f >>control.file
 echo '' >> control.file
 echo "fin" >> control.file
 chmod +x control.file
-control.file 
+./control.file 
 echo ""
 echo "pot_$1.f file converted, copying back ..."
 rm control.file
