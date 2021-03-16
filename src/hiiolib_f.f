@@ -812,9 +812,15 @@ c     Stream i/o mode, replace, read/write
          if (openfl) then
             print *, '*** WARNING:  ', filnam, ' NOT CLOSED'
          end if
+cstart .not. unix-gfortran
+c;         open (unit=iunit, file=filnam, access='STREAM',
+c;     $        status='REPLACE', err=999, iostat=ierr,
+c;     $        buffered='YES')
+cend
+cstart unix-gfortran
          open (unit=iunit, file=filnam, access='STREAM',
-     $        status='REPLACE', err=999, iostat=ierr,
-     $        buffered='YES')
+     $        status='REPLACE', err=999, iostat=ierr)
+cend
          return
       end if
 c
@@ -828,9 +834,14 @@ c     Stream i/o mode, exist file, read/write
          if (openfl) then
             print *, '*** WARNING: ', filnam, 'NOT CLOSED'
          end if
-         open (unit=iunit, file=filnam, access='STREAM',
-     $        status='OLD', err=999, iostat=ierr,
-     $        buffered='YES')
+cstart .not. unix-gfortran
+c;         open (unit=iunit, file=filnam, access='STREAM',
+c;     $        status='OLD', err=999, iostat=ierr,
+c;     $        buffered='YES')
+cend
+cstart unix-gfortran
+         open (unit=iunit, file=filnam, status='OLD', err=999, iostat=ierr)
+cend
          return
       end if
 c
