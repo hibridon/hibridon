@@ -14,7 +14,7 @@ set var2 = 151
 $basedir/bin/makehib $var1 $var2>>& $basedir/h_arn2.log
 if (-e $basedir/bin/progs/hib_arn2_151) then
 else
-  echo "$basedir/bin/progs/hib_arn2_151 not created, check $basedir/h_arn2.log"
+  echo "$basedir/bin/progs/hib_arn2_151 not created, check $basedir/hibtest_h_arn2.log"
   echo ""
   exit
 endif
@@ -25,10 +25,10 @@ if (-e $basedir/bin/progs/hibb_arn2_36) then
 endif
 set var1 = "-b arn2"
 set var2 = 36 
-$basedir/bin/makehib $var1 $var2>>& $basedir/h_arn2.log
+$basedir/bin/makehib $var1 $var2>>& $basedir/hibtest_h_arn2.log
 if (-e $basedir/bin/progs/hibb_arn2_36) then
 else
-  echo "$basedir/bin/progs/hibb_arn2_36 not created, check $basedir/h_arn2.log"
+  echo "$basedir/bin/progs/hibb_arn2_36 not created, check $basedir/hibtest_h_arn2.log"
   echo ""
   exit
 endif
@@ -39,10 +39,10 @@ if (-e $basedir/bin/progs/hib_vfit_36) then
 endif
 set var1 = vfit
 set var2 = 36
-$basedir/bin/makehib $var1 $var2>>& $basedir/h_vfit.log
+$basedir/bin/makehib $var1 $var2>>& $basedir/hibtest_h_vfit.log
 if (-e $basedir/bin/progs/hib_vfit_36) then
 else
-  echo "$basedir/bin/progs/hib_vfit_36 not created, check $basedir/h_vfit.log"
+  echo "$basedir/bin/progs/hib_vfit_36 not created, check $basedir/hibtest_h_vfit.log"
   echo ""
   exit
 endif
@@ -53,10 +53,10 @@ if (-e $basedir/bin/progs/hib_arno_191) then
 endif
 set var1 = arno
 set var2 = 191
-$basedir/bin/makehib $var1 $var2>>& $basedir/h_arno.log
+$basedir/bin/makehib $var1 $var2>>& $basedir/hibtest_h_arno.log
 if (-e $basedir/bin/progs/hib_arno_191) then
 else
-  echo "$basedir/bin/progs/hib_arno_191 not created, check $basedir/h_arno.log"
+  echo "$basedir/bin/progs/hib_arno_191 not created, check $basedir/hibtest_h_arno.log"
   echo ""
   exit
 endif
@@ -68,10 +68,10 @@ if (-e $basedir/bin/progs/hib_ch3i_100) then
 endif
 set var1 = ch3i
 set var2 = 100
-$basedir/bin/makehib $var1 $var2>>& $basedir/h_ch3i.log
+$basedir/bin/makehib $var1 $var2>>& $basedir/hibtest_h_ch3i.log
 if (-e $basedir/bin/progs/hib_ch3i_100) then
 else
-  echo "$basedir/bin/progs/hib_ch3i_100 not created, check $basedir/h_ch3i.log"
+  echo "$basedir/bin/progs/hib_ch3i_100 not created, check $basedir/hibtest_h_ch3i.log"
   echo ""
   exit
 endif
@@ -83,10 +83,10 @@ if (-e $basedir/bin/progs/hib_boh2_120) then
 endif
 set var1 = boh2
 set var2 = 120
-$basedir/bin/makehib $var1 $var2>>& $basedir/h_boh2.log
+$basedir/bin/makehib $var1 $var2>>& $basedir/hibtest_h_boh2.log
 if (-e $basedir/bin/progs/hib_boh2_120) then
 else
-  echo "$basedir/bin/progs/hib_boh2_120 not created, check $basedir/h_boh2.log"
+  echo "$basedir/bin/progs/hib_boh2_120 not created, check $basedir/hibtest_h_boh2.log"
   echo ""
   exit
 endif
@@ -98,10 +98,10 @@ if (-e $basedir/bin/progs/hib_arohx_ump4_301) then
 endif
 set var1 = arohx_ump4
 set var2 = 301
-$basedir/bin/makehib $var1 $var2>>& $basedir/h_arohx_ump4.log
+$basedir/bin/makehib $var1 $var2>>& $basedir/hibtest_h_arohx_ump4.log
 if (-e $basedir/bin/progs/hib_arohx_ump4_301) then
 else
-  echo "$basedir/bin/progs/hib_arohx_ump4_301 not created, check $basedir/h_arohx_ump4.log"
+  echo "$basedir/bin/progs/hib_arohx_ump4_301 not created, check $basedir/hibtest_h_arohx_ump4.log"
   echo ""
 #  exit
 endif
@@ -113,11 +113,11 @@ if (-e $basedir/bin/progs/hib_heco_sapt_55) then
 endif
 set var1 = heco_sapt
 set var2 = 55
-$basedir/bin/makehib $var1 $var2>>& $basedir/h_heco_sapt.log
+$basedir/bin/makehib $var1 $var2>>& $basedir/hibtest_h_heco_sapt.log
 if (-e $basedir/bin/progs/hib_heco_sapt_55) then
 else
   echo "$basedir/bin/progs/hib_heco_sapt_55 not created, check
-$basedir/h_heco_sapt.log"
+$basedir/hibtest_h_heco_sapt.log"
   echo ""
   exit
 endif
@@ -129,11 +129,11 @@ if (-e $basedir/bin/progs/hib_hecn_dgels_81) then
 endif
 set var1 = hecn_dgels
 set var2 = 81
-$basedir/bin/makehib $var1 $var2>>& $basedir/h_hecn_dgels.log
+$basedir/bin/makehib $var1 $var2>>& $basedir/hibtest_h_hecn_dgels.log
 if (-e $basedir/bin/progs/hib_hecn_dgels_81) then
 else
   echo "$basedir/bin/progs/hib_hecn_dgels_81 not created, check
-$basedir/h_hecn_dgels.log"
+$basedir/hibtest_h_hecn_dgels.log"
   echo ""
   exit
 endif
@@ -145,10 +145,10 @@ if (-e $basedir/bin/progs/hib_h2ohe_45) then
 endif
 set var1 = h2ohe
 set var2 = 45
-$basedir/bin/makehib $var1 $var2>>& $basedir/h_h2ohe.log
+$basedir/bin/makehib $var1 $var2>>& $basedir/hibtest_h_h2ohe.log
 if (-e $basedir/bin/progs/hib_h2ohe_45) then
 else
-  echo "$basedir/bin/progs/hib_h2ohe_45 not created, check $basedir/h_h2ohe.log"
+  echo "$basedir/bin/progs/hib_h2ohe_45 not created, check $basedir/hibtest_h_h2ohe.log"
   echo ""
   exit
 endif
@@ -160,10 +160,10 @@ if (-e $basedir/bin/progs/hib_ch3he_ccsdt_151) then
 endif
 set var1 = ch3he_ccsdt
 set var2 = 151
-$basedir/bin/makehib $var1 $var2>>& $basedir/h_ch3he_ccsdt.log
+$basedir/bin/makehib $var1 $var2>>& $basedir/hibtest_h_ch3he_ccsdt.log
 if (-e $basedir/bin/progs/hib_ch3he_ccsdt_151) then
 else
-  echo "$basedir/bin/progs/hib_ch3he_ccsdt_151 not created, check $basedir/h_ch3he_ccsdt.log"
+  echo "$basedir/bin/progs/hib_ch3he_ccsdt_151 not created, check $basedir/hibtest_h_ch3he_ccsdt.log"
   echo ""
   exit
 endif
@@ -188,6 +188,7 @@ cd testnew
   $basedir/bin/progs/hib_arn2_151 <arn2_test.com >arn2_test.log
   echo "arn2 tests completed, compare result files:"
   echo "  $basedir/testnew with $basedir/tests"
+  exit()
   rm $basedir/testnew/*.wfu  >>& $basedir/testnew/arn2_test.log
   rm $basedir/testnew/*.sav  >>& $basedir/testnew/arn2_test.log
   rm $basedir/testnew/*.smt  >>& $basedir/testnew/arn2_test.log
