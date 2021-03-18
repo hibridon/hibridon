@@ -37,7 +37,7 @@ cend
 
 *  change kmax below --  supposed to be set at compile time
 *  revised by p. dagdigian (13-dec-2019)
-      parameter (kmax=8000, kairy = kmax,ktri=kmax*(kmax+1)/2,kbig=10)
+      parameter (kmax=2000, kairy = kmax,ktri=kmax*(kmax+1)/2,kbig=10)
 cstart unix-darwin unix-x86
 * set size of scratch array for matrix factorization and generalized
 *   eigenvalue determination
@@ -152,7 +152,7 @@ cend
       common /cofact/ si(kfact)
       common /coener/ energ(ken)
       common /clseg/  lseg,intrel,lchar
-      common /cobuf/  lbuf,ibuf(1)
+      common /cobuf/  lbuf,ibuf(1024)
       common /cofil/  nfl,iofbuf,maxrec(60),iofrec(60),nwrec
       common /conlam/ nlam, nlammx, lamnum(klammx)
       common /coatpi/ narray, isiz(krotmx)
