@@ -188,7 +188,6 @@ cd testnew
   $basedir/bin/progs/hib_arn2_151 <arn2_test.com >arn2_test.log
   echo "arn2 tests completed, compare result files:"
   echo "  $basedir/testnew with $basedir/tests"
-  exit()
   rm $basedir/testnew/*.wfu  >>& $basedir/testnew/arn2_test.log
   rm $basedir/testnew/*.sav  >>& $basedir/testnew/arn2_test.log
   rm $basedir/testnew/*.smt  >>& $basedir/testnew/arn2_test.log
