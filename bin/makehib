@@ -303,17 +303,13 @@ echo "  fortran-based direct i/o routines used"
 echo "  fortran-based direct i/o routines used" >>& $basedir/h_$potname.log
 cd $basedir/src
 set osname=`uname -s`
-# some object files such as hiba3p2s_* are variants of others. Only one of them should be chosen for linking as linking them togetther would cause the link to fail with duplicate symbols
-set std_obj_files = `find . -maxdepth 1 -regex '[^_]+\.o' -exec basename {} \;` # all object files that don't have an underscore in their name
-set std_obj_files = "$std_obj_files hiiolib_f.o"
-set a3p2s_variant_obj_file = 'hiba3p2s_origPJD.o'  # graffy: not sure that this is the 'standard' one amongst the variants.
-# one of hiba3p2s_20180711.o  hiba3p2s_9jcorr.o  hiba3p2s_9j.o  hiba3p2s_mha_corr.o  hiba3p2s_mha.o  hiba3p2s_mha_sovar.o  hiba3p2s_origPJD.o
+set std_obj_files = *.o
 if ($osname == "HP-UX" && $compopt == "d") then
    echo "$osname adding /opt/langtools/lib/end.o for debugger"
    echo "$osname adding /opt/langtools/lib/end.o for debugger" >>&  $basedir/h_$potname.log
-   $basedir/bin/ftn_hib -o  "$hibname"_$progname $std_obj_files $a3p2s_variant_obj_file pot/pot_$potname.o  /opt/langtools/lib/end.o >>& $basedir/h_$potname.log
+   $basedir/bin/ftn_hib -o  "$hibname"_$progname $std_obj_files pot/pot_$potname.o  /opt/langtools/lib/end.o >>& $basedir/h_$potname.log
 else
-   $basedir/bin/ftn_hib -o  "$hibname"_$progname $std_obj_files $a3p2s_variant_obj_file pot/pot_$potname.o >>& $basedir/h_$potname.log
+   $basedir/bin/ftn_hib -o  "$hibname"_$progname $std_obj_files pot/pot_$potname.o >>& $basedir/h_$potname.log
 endif
 # remove pot_potname.o if successful link
 if (-e "$hibname"_$progname) then

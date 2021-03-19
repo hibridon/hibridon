@@ -6,25 +6,18 @@
 *  subroutine to determine coupling potential (electrostatic + spin-orbit)
 *  for collision involving the 3P state of atom in a p^4 electronic
 *  configuration with an atom in a 2S state
-*  this is a revision of the basis routine written originally by p.dagdigian
-*  the latter is stored in /hibxx/src as hiba3p2s.f~origPJD
-*  the revision is based no notes written by m. alexander, p. dagdigian, and
-*  j. klos:
-*     "The Calculation of (some) atomic and molecular spin-orbit coupling
-*     matrix elements"
-*     "The case (e) scattering basis for O(3P)-H(2S) collisions" and addendum
-*     "Matrix element of the potential in HIBRIDON"
+*  (based on the ba1d3p basis routine)
 *
-*  switch sign of pairty for computing allowed values of L (4-oct-2019 pjd)
-*
-*  the spin-orbit part of the W matrix computed as W(R) - W(R=inf)
-*  here, the spin-orbit parameters are assumed to be independent of R
+*  THIS IS A REVISION OF DAGDIGIAN'S ORIGINAL BASIS ROUTINE, USING THE
+*  TRANSFORMAITON WORKED OUT BY SINGER, FREED, AND BAND, FREED, JCP 79,
+*  6060 (1983).  UNLIKE THE ROUTINE hiba3p2s.f~origPJD, THE SPIN-ORBIT
+*  COUPLING IS PARAMETERIZED WITH JUST TWO PARAMETERS and APERP, WORKED
+*  OUT IN MHA'S NOTES.  APAR AND APERP ARE ASSUMED TO BE CONSTANTS.
 *
 *  j12 array is in common block /coj12/ to pass to other subrs
 *
 *  author:  paul dagdigian
-*  slight update 12-nov-2018 by m. h. alexander
-*  current revision date: 4-oct-2019 by p. dagdigian
+*  current revision date:  14-jan-2019 by p.dagdigian
 * --------------------------------------------------------------------
 *  variables in call list:
 *    j:        on return contains electronic angular momentum quantum number
@@ -46,7 +39,7 @@
 *              if any open channel is still closed at r=rcut, then
 *              all closed channels as well any open channels which are
 *              still closed at r=rcut are dropped from basis
-*              NOTE:  rcut option not implemented here
+*              note that this is ignored in molecule-surface collisions!!!
 *    jtot:     total angular momentum
 *    flaghf:   if .true., then system with half-integer spin
 *              if .false., then system with integer spin (this is the case
@@ -89,7 +82,6 @@
 *    isicod:   total number of integer system dependent variables
 *    nterm:    number of different types of electronic coupling terms
 *              this should be 1 here
-*    nvib:     initial vibrational state of A state, in photodissociation calculation
 *  variable in common block /cocent/
 *    cent:      array containing centrifugal barrier of each channel
 *  variable in common block /coeint/
@@ -98,21 +90,21 @@
 *    j12:      array containing vector sum of ja + j (similar
 *              situation with molecule-molecule scattering,
 *              see hibastpln basis routine)
-*  EXTRA COMMON BLOCKS FOR L and JA, to transfer to subroutine ground
-*  variables in common cojtot
-*     jjtot     total angular momentum jtot
-*     jjlpar    parity parameter jlpar
-*  variable in commmon block /coja/
-*     jja:      atomic electronic angular momentum for each channel for 3P+2S scattering 
-*  variable in common block /coel/
-*     ll:       orbital angular momentum for each channel for 3P+2S scattering
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units
 *               (mass of electron = 1)
 *  variable in common block /conlam/
-*    nlam:      the number of case(a) interaction potentials and spin-orbit
-*               matrix elements actually used
+*    nlam:      the number of case(a) interaction potentials actually used
+*               this is :  nlam = nlam0 + nlam1
+*               if only 1D channels, nlam = 3 (1Sigma+, 1Pi, 1Delta PE curves)
+*               if only 3P channels, nlam = 6 (3Sigma- and 3Pi PE curves
+*               and two spin-orbit matrix elements Axy and Axz, and the
+*               R=inf values of Axy and Azy)
+*               if both 1D and 3P channels, nlam= 18 (4 PE curves mentioned above,
+*               2 spin-orbit 3P matrix elements, and 5 spin-orbit matrix
+*               elements describing 1D-3P coupling, and the R-inf values of
+*               7 spin-orbit matrix elements)
 *    nlammx:    the maximum number of angular coupling terms
 *  variable in common block /cov2/
 *    nv2max:    maximum core memory allocated for the v2 matrix
@@ -129,21 +121,21 @@
 *
 *  subroutines called:
 *  xf3j:     evaluates 3j symbol
+*  xf9j:     evaluates 9j symbol
 * ------------------------------------------------------------
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
       include "common/parbas"
       include "common/parbasl"
-      common /cosysi/ nscode, isicod, nterm, nvib
-      common /cosysr/ isrcod
-      common /coipar/ iiipar(9), iprint
+      common /cosysi/ nscode, isicod, nterm, nstate
+      common /cosysr/ isrcod, junkr, en1d
       common /cov2/ nv2max, junkv, v2(1)
       common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /cocent/ cent(1)
       common /coeint/ eint(1)
-*  common blocks cojtot, coj12, coja,  coel  used to transmit to ground subroutine 
       common /coj12/  j12(1)
+*  common blocks cojtot, coj12, coja, and coel used to transmit to ground subroutine
       common /cojtot/ jjtot, jjlpar
       common /coja/  jja(9)
       common /coel/  ll(9)
@@ -154,63 +146,72 @@
 *  xmconv is converson factor from amu to atomic units
       common /coconv/ econv, xmconv
 *  arrays in argument list
-      dimension j(1), l(1), is(1), jhold(1), ehold(1), ishold(1)
-      data fjh / 0.5d0 /
-      data ifirst / 1/
-*
-      jjtot = jtot
-      jjlpar = jlpar
-*
-*  check for consistency in the values of flaghf, csflag, and flagsu
+      dimension j(1), l(1), is(1),jhold(1),ehold(1),ishold(1)
+*  matrices for transformation between atomic and molecular BF functions
+      common /coeig/  t12(5,5), t32(3,3)
+      dimension c12(5,5), c32(3,3)
+*  quantum numbers for BF atomic and basis functions
+      dimension
+     +  fjo32(3), fj32(3), flam32(3), sigm32(3), stot32(3),
+     +  fjo12(5), fj12(5), flam12(5), sigm12(5), stot12(5)
+      data flo, so, flh, sh, fjh /1.d0, 1.d0, 0.d0, 0.5d0, 0.5d0/
+*  atomic BF basis functions (omega=3/2)
+      data fjo32 /2.d0, 2.d0, 1.d0/, fj32 /2.5d0, 1.5d0, 1.5d0/
+*  molecular BF basis functions (omega=3/2)
+      data flam32 /1.d0, 0.d0, 1.d0/, sigm32 /0.5d0, 1.5d0, 0.5d0/,
+     +  stot32 /1.5d0, 1.5d0, 0.5d0/
+*  atomic BF basis functions (omega=1/2)
+      data fjo12 /2.d0, 2.d0, 1.d0, 1.d0, 0.d0/,
+     +  fj12 /2.5d0, 1.5d0, 1.5d0, 0.5d0, 0.5d0/
+*  molecular BF basis functions (omega=1/2)
+      data flam12 /-1.d0, 1.d0, 0.d0, 1.d0, 0.d0/,
+     +  sigm12 /1.5d0, -0.5d0, 0.5d0, -0.5d0, 0.5d0/,
+     +  stot12 /1.5d0, 1.5d0, 1.5d0, 0.5d0, 0.5d0/
+*  scratch arrays for computing asymmetric top energies and wave fns.
+      dimension en0(4), en12(5), en32(3), vec(5,5), work(288)
+      zero = 0.d0
+      two = 2.d0
+*  check for consistency in the values of flaghf and csflag
       if (flaghf) then
         write (6, 5)
         write (9, 5)
-5       format (' *** FLAGHF = .TRUE. FOR 3P/2S ATOM; ABORT ***')
+5       format (' *** FLAGHF = .TRUE. FOR 3P/2S ATOM; ABORT ***' )
         if (bastst) then
           return
         else
           call exit
         end if
       end if
-c
       if (csflag) then
         write (6, 8)
         write (9, 8)
-8       format('  *** CSFLAG = .TRUE. FOR 3P/2S ATOM; ABORT ***')
-        if (bastst) then
-          return
-        else
-          call exit
-        end if
+8      format
+     :   ('  *** CSFLAG SET .FALSE. FOR 3P/2S ATOM CALCULATION ***')
+        csflag=.false.
       end if
-c
-      if (flagsu) then
-        write (6, 109)
-        write (9, 109)
-109     format('  *** FLAGSU = .TRUE. FOR 3P/2S ATOM; ABORT ***')
-        if (bastst) then
-          return
-        else
-          call exit
-        end if
-      end if
-c
       if (bastst) then
         write (6, 14) nlam
         write (9, 14) nlam
 14      format (' ** TOTAL NUMBER OF ANISOTROPIC TERMS=', i2)
-        write (6,20) npot,
-     :    rmu * xmconv, ered * econv, jtot, jlpar
-        write (9,20) npot,
-     :    rmu * xmconv, ered * econv, jtot, jlpar
-20      format(/,' **  CC 3P/2S ATOM ; NPOT =',i2,' ** RMU=', f9.4,
-     :    ' E=', f10.2, /, '         JTOT=', i5, 2x,' JLPAR=',i2)
-      else
-* determine spline fit to vibrational wavefunction and coupling potentials
-*  for SH and OH, this can be a dummy entry elsewise
-*  DELETE THE CALL BELOW.  THIS SUBR IS A DUMMY SUBR (3-oct-2019, pjd)
-*        call spline_fit(ifirst)
       end if
+      if (bastst) then
+        if (flagsu) then
+          write (6,16) rmu * xmconv, ered * econv, jtot, jlpar
+          write (9,16) rmu * xmconv, ered * econv, jtot, jlpar
+16        format(/' **  3P/2S ATOM ON UNCORRUGATED SURFACE ** RMU=',f9.4,
+     :      ' E=', f7.2, /, '         JTOT=', i5, 2x,' JLPAR=',i2)
+        else
+          write (6,20) npot,
+     :        rmu * xmconv, ered * econv, jtot, jlpar
+          write (9,20) npot,
+     :        rmu * xmconv, ered * econv, jtot, jlpar
+20        format(/,' **  CC 3P/2S ATOM ; NPOT =',i2,' ** RMU=', f9.4,
+     :        ' E=', f10.2, /, '         JTOT=', i5, 2x,' JLPAR=',i2)
+        end if
+        if (.not. flagsu) write (9,30) rcut
+30      format (/' OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=',
+     :          f6.2)
+      endif
 *
 *  form list of spin-orbit levels and determine the energetically open levels
 *  order of the j levels for p^4 orbital occupancy
@@ -285,11 +286,7 @@ c
           lmax = jtot + j12i + 1
           do 110 li=lmin,lmax
 *  parity in symmetry-adapted basis
-*            ix = (-1) ** li
-
-*  switch sign of parity for computing allowed values of L (4-oct-2019 pjd)
-            ix = (-1) ** (li + 1)
-
+            ix = (-1) ** li
             if (ix .eq. jlpar) then
 *  here for correct orbital angular momentum
               n = n + 1
@@ -326,6 +323,8 @@ c
 *  this has no effect on vax or cray
 *        if (mod(ntop,2) .eq. 0 .and. ntop .lt. nmax)
 *     :       ntop = ntop + 1
+*++++  INCREASE SIZE OF NTOP
+*      ntop = ntop + 4
 *
 *  now list channels if requested
       if (bastst) then
@@ -356,6 +355,39 @@ c
 280     format (/' ILAM  LAMBDA  ICOL  IROW   I    IV2    VEE')
       end if
 *
+*  compute transformation between jo, jh, j and Lambda, S, Sigma
+*  BF basis sets
+*
+*  omega = 1/2
+      omega = 0.5d0
+      do ia = 1, 5
+        do im = 1, 5
+          iph = flo - stot12(im) + 0.5d0
+          t12(im,ia) = sqrt((2.d0*stot12(im)+1.d0)*(2.d0*fjh+1.d0)
+     +      *(2.d0*fjo12(ia)+1.d0)*(2.d0*flo+1.d0))
+     +      *(-1.d0)**iph * sqrt(2.d0*fj12(ia)+1.d0)
+     +      *xf3j(flo,stot12(im),fj12(ia),flam12(im),
+     +          sigm12(im),-omega)
+     +      *xf9j(flo,so,fjo12(ia), flh,sh,fjh,
+     +          flo,stot12(im),fj12(ia))
+        enddo
+      enddo
+*
+*  omega = 3/2
+      omega = 1.5d0
+      do ia = 1, 3
+        do im = 1, 3
+          iph = flo - stot32(im) + 1.5d0
+          t32(im,ia) = sqrt((2.d0*stot32(im)+1.d0)*(2.d0*fjh+1.d0)
+     +      *(2.d0*fjo32(ia)+1.d0)*(2.d0*flo+1.d0))
+     +      *(-1.d0)**iph * sqrt(2.d0*fj32(ia)+1.d0)
+     +      *xf3j(flo,stot32(im),fj32(ia),flam32(im),
+     +          sigm32(im),-omega)
+     +      *xf9j(flo,so,fjo32(ia), flh,sh,fjh,
+     +          flo,stot32(im),fj32(ia))
+        enddo
+      enddo
+*
 *  i counts v2 elements
 *  inum counts v2 elements for given lambda
 *  ilam counts number of v2 matrices
@@ -376,7 +408,7 @@ c
               if (i .gt. nv2max) goto 300
                 v2(i) = vee
                 iv2(i) = ij
-                if (bastst .and. iprint.ge.2) then
+                if (bastst) then
                   write (6, 290) ilam, lb, icol, irow, i, iv2(i),
      :                           vee
                   write (9, 290) ilam, lb, icol, irow, i, iv2(i),
@@ -423,7 +455,7 @@ c
 *  inelastic collisions of a 3P atom with a 2S atom
 
 *  author:  paul dagdigian
-*  current revision date: 19-feb-2018
+*  current revision date: 18-dec-2014
 * --------------------------------------------------------------------
 *  variables in call list:
 *  j1,j12_1,l1:    initial electronic and orbital angular momenta
@@ -434,19 +466,16 @@ c
 *            lb=2:  4Pi potential
 *            lb=3:  2Sigma- potential
 *            lb=4:  4Sigma- potential
-*            lb=5:  apar spin-orbit matrix element
-*            lb=6:  aperp spin-orbit matrix element
-*
-*  the matrix element is evaluated using Eqs. 31/32 in the report "The case (e) 
-*  scattering basis for O(3P)-H(2S) collisions," along with the matrix elements
-*  of the electrostatic and spin-orbit interactions in the fully coupled basis
-*  given by Eqs. 208-211 and Eqs. 201-206, respectively.
+*            lb=5:  apar spin-orbit matrix element (assumed independent of R)
+*            lb=6:  aperp spin-orbit matrix element (assumed independent of R)
 *
 *  vee:      on return:  contains desired coupling matrix element
 *  subroutines called:
 *  xf3j:     evaluates 3j symbol
 * --------------------------------------------------------------------
       implicit double precision (a-h,o-z)
+      common /coeig/  t12(5,5), t32(3,3)
+      dimension v12(5,5),v32(3,3),a12(5,5),a32(3,3)
       vee = 0.d0
       xl1 = l1
       xl2 = l2
@@ -455,235 +484,133 @@ c
       xj12_1 = j12_1 + 0.5d0
       xj12_2 = j12_2 + 0.5d0
       xjtot = jtot + 0.5d0
-*
-*  check for parity restriction
-      if ( (l1 + l2) .ne. 2*((l1 + l2)/2) )
-     :  goto 1000
-*
       xl12 = sqrt((2.d0*xl1 + 1.d0) * (2.d0*xl2 + 1.d0))
-      xfj12 = xf3j(xl1, xj12_1, xjtot, 0.d0,-0.5d0, 0.5d0)
-     +  * xf3j(xl2, xj12_2, xjtot, 0.d0,-0.5d0, 0.5d0)
-      xfj32 = xf3j(xl1, xj12_1, xjtot, 0.d0, -1.5d0, 1.5d0)
-     +  * xf3j(xl2, xj12_2, xjtot, 0.d0,-1.5d0, 1.5d0)
-      xfj52 = xf3j(xl1, xj12_1, xjtot, 0.d0, -2.5d0, 2.5d0)
-     +  * xf3j(xl2, xj12_2, xjtot, 0.d0,-2.5d0, 2.5d0)
+      xfj12 = xf3j(xl1, xj12_1, xjtot, 0.d0, 0.5d0, -0.5d0)
+     +  * xf3j(xl2, xj12_2, xjtot, 0.d0, 0.5d0, -0.5d0)
+      xfj32 = xf3j(xl1, xj12_1, xjtot, 0.d0, 1.5d0, -1.5d0)
+     +  * xf3j(xl2, xj12_2, xjtot, 0.d0, 1.5d0, -1.5d0)
+      xfj52 = xf3j(xl1, xj12_1, xjtot, 0.d0, 2.5d0, -2.5d0)
+     +  * xf3j(xl2, xj12_2, xjtot, 0.d0, 2.5d0, -2.5d0)
+*  clear body-frame Lambda,S,Sigma pot/Hso matrices for Omega = 1/2, 3/2
+      do i = 1,5
+        do j = 1,5
+          v12(i,j) = 0.d0
+        enddo
+      enddo
+      do i = 1,3
+        do j = 1,3
+          v32(i,j) = 0.d0
+        enddo
+      enddo
+* get basis #'s for omega = 1/2 and 3/2 BF components of atomic basis functions
+      i11 = 1
+      i13 = 1
+      if (j1.eq.2 .and. j12_1.eq.1) then
+        i11 = 2
+        i13 = 2
+      endif
+      if (j1.eq.1 .and. j12_1.eq.1) then
+        i11 = 3
+        i13 = 3
+      endif
+      if (j1.eq.1 .and. j12_1.eq.0) then
+        i11 = 4
+        i13 = 0
+      endif
+      if (j1.eq.0) then
+        i11 = 5
+        i13 = 0
+      endif
 *
-*  spin-orbit parameters assumed to be independent of R
-*  so matrix elements of apar and aperp not required
-*  since Hso computed as Hso(R) - Hso(R=inf)
-      iacnst = 1
+      i21 = 1
+      i23 = 1
+      if (j2.eq.2 .and. j12_2.eq.1) then
+        i21 = 2
+        i23 = 2
+      endif
+      if (j2.eq.1 .and. j12_2.eq.1) then
+        i21 = 3
+        i23 = 3
+      endif
+      if (j2.eq.1 .and. j12_2.eq.0) then
+        i21 = 4
+        i23 = 0
+      endif
+      if (j2.eq.0) then
+        i21 = 5
+        i23 = 0
+      endif
 *
-      if (j1 .eq. 2 .and. xj12_1 .eq. 2.5d0) ist1 = 1
-      if (j1 .eq. 2 .and. xj12_1 .eq. 1.5d0) ist1 = 2
-      if (j1 .eq. 1 .and. xj12_1 .eq. 1.5d0) ist1 = 3
-      if (j1 .eq. 1 .and. xj12_1 .eq. 0.5d0) ist1 = 4
-      if (j1 .eq. 0 .and. xj12_1 .eq. 0.5d0) ist1 = 5
-*
-      if (j2 .eq. 2 .and. xj12_2 .eq. 2.5d0) ist2 = 1
-      if (j2 .eq. 2 .and. xj12_2 .eq. 1.5d0) ist2 = 2
-      if (j2 .eq. 1 .and. xj12_2 .eq. 1.5d0) ist2 = 3
-      if (j2 .eq. 1 .and. xj12_2 .eq. 0.5d0) ist2 = 4
-      if (j2 .eq. 0 .and. xj12_2 .eq. 0.5d0) ist2 = 5
-*
-      vee12 = 0.d0
-      vee32 = 0.d0
-      vee52 = 0.d0
+      sign = 1.d0
       goto (10,20,30,40,50,60),lb
-      goto 1500
-*
-*  Matrix elements below are in j_, j, Omega basis
-*
-*  X2Pi state
-10    if (ist1 .eq. 2 .and. ist2 .eq. 2) vee32 = 25.d0 / 30.d0
-      if ((ist1 .eq. 2 .and. ist2 .eq. 3) .or.
-     +  (ist1 .eq. 3 .and. ist2 .eq. 2)) then
-          vee32 = - sqrt(5.d0) * 5.d0 / 30.d0
-      end if
-      if (ist1 .eq. 3 .and. ist2 .eq. 3) vee32 = 1.d0 / 6.d0
-      if (ist1 .eq. 2 .and. ist2 .eq. 2) vee12 = 25.d0 / 90.d0
-      if ((ist1 .eq. 2 .and. ist2 .eq. 3) .or.
-     +  (ist1 .eq. 3 .and. ist2 .eq. 2)) then
-          vee12 = - sqrt(5.d0) * 5.d0 / 90.d0
-      end if
-      if ((ist1 .eq. 2 .and. ist2 .eq. 4) .or.
-     +  (ist1 .eq. 4 .and. ist2 .eq. 2)) then
-          vee12 = sqrt(10.d0) * 10.d0 / 90.d0
-      end if
-      if ((ist1 .eq. 2 .and. ist2 .eq. 5) .or.
-     +  (ist1 .eq. 5 .and. ist2 .eq. 2)) then
-          vee12 = - sqrt(5.d0) * 5.d0 / 45.d0
-      end if
-      if (ist1 .eq. 3 .and. ist2 .eq. 3) vee12 = 1.d0 / 18.d0
-      if ((ist1 .eq. 3 .and. ist2 .eq. 4) .or.
-     +  (ist1 .eq. 4 .and. ist2 .eq. 3)) then
-          vee12 = - sqrt(2.d0) * 2.d0 / 18.d0
-      end if
-      if ((ist1 .eq. 3 .and. ist2 .eq. 5) .or.
-     +  (ist1 .eq. 5 .and. ist2 .eq. 3)) vee12 = 1.d0 / 9.d0
-      if (ist1 .eq. 4 .and. ist2 .eq. 4) vee12 = 4.d0 / 9.d0
-      if ((ist1 .eq. 4 .and. ist2 .eq. 5) .or.
-     +  (ist1 .eq. 5 .and. ist2 .eq. 4)) then
-          vee12 = - sqrt(2.d0) * 2.d0 / 9.d0
-      end if
-      if (ist1 .eq. 5 .and. ist2 .eq. 5) vee12 = 2.d0 / 9.d0
       goto 1000
 *
-*  4Pi state
-20    if (ist1 .eq. 1 .and. ist2 .eq. 1) vee52 = 1.d0
-      if (ist1 .eq. 1 .and. ist2 .eq. 1) vee32 = 3.d0 / 5.d0
-      if ((ist1 .eq. 1 .and. ist2 .eq. 2) .or.
-     +  (ist1 .eq. 2 .and. ist2 .eq. 1)) vee32 = 1.d0 / 5.d0
-      if ((ist1 .eq. 1 .and. ist2 .eq. 3) .or.
-     +  (ist1 .eq. 3 .and. ist2 .eq.1)) vee32 = 1.d0 / sqrt(5.d0)
-      if (ist1 .eq. 2 .and. ist2 .eq. 2) vee32 = 2.d0 / 30.d0
-      if ((ist1 .eq. 2 .and. ist2 .eq. 3) .or.
-     +  (ist1 .eq. 3 .and. ist2 .eq. 2)) then
-          vee32 = sqrt(5.d0) * 2.d0 / 30.d0
-      end if
-      if (ist1 .eq. 3 .and. ist2 .eq. 3) vee32 = 2.d0 / 6.d0
-      if (ist1 .eq. 1 .and. ist2. eq. 1) vee12 = 2.d0 / 5.d0
-      if ((ist1 .eq. 1 .and. ist2 .eq. 2) .or.   
-     +  (ist1 .eq. 2 .and. ist2 .eq. 1)) vee12 = sqrt(6.d0) / 30.d0
-      if ((ist1 .eq. 1 .and. ist2 .eq. 3) .or.   
-     +  (ist1 .eq. 3 .and. ist2 .eq. 1)) vee12 = 1.d0 / sqrt(30.d0)
-      if ((ist1 .eq. 1 .and. ist2 .eq. 4) .or.   
-     +  (ist1 .eq. 4 .and. ist2 .eq. 1)) vee12 = 1.d0 / sqrt(15.d0)
-      if ((ist1 .eq. 1 .and. ist2 .eq. 5) .or.   
-     +  (ist1 .eq. 5 .and. ist2 .eq. 1)) vee12 = sqrt(2.d0 / 15.d0)
-      if (ist1 .eq. 2 .and. ist2 .eq. 2) vee12 = 14.d0 / 90.d0
-      if ((ist1 .eq. 2 .and. ist2 .eq. 3) .or.   
-     +  (ist1 .eq. 3 .and. ist2 .eq. 2)) then
-          vee12 = sqrt(5.d0) * 14.d0 / 90.d0
-      end if
-      if ((ist1 .eq. 2 .and. ist2 .eq. 4) .or.   
-     +  (ist1 .eq. 4 .and. ist2 .eq. 2)) vee12 = - sqrt(10.d0) / 90.d0
-      if ((ist1 .eq. 2 .and. ist2 .eq. 5) .or.   
-     +  (ist1 .eq. 5 .and. ist2 .eq. 2)) vee12 = - sqrt(5.d0) / 45.d0
-      if (ist1 .eq. 3 .and. ist2 .eq. 3) vee12 = 14.d0 / 18.d0 
-      if ((ist1 .eq. 3 .and. ist2 .eq. 4) .or.   
-     +  (ist1 .eq. 4 .and. ist2 .eq. 3)) vee12 = - sqrt(2.d0) / 18.d0
-      if ((ist1 .eq. 3 .and. ist2 .eq. 5) .or.   
-     +  (ist1 .eq. 5 .and. ist2 .eq. 3)) vee12 = - 1.d0 / 9.d0
-      if (ist1 .eq. 4 .and. ist2 .eq. 4) vee12 = 2.d0 / 9.d0 
-      if ((ist1 .eq. 4 .and. ist2 .eq. 5) .or.   
-     +  (ist1 .eq. 5 .and. ist2 .eq. 4)) vee12 = sqrt(2.d0) 
-     +  * 2.d0 / 9.d0      
-      if (ist1 .eq. 5 .and. ist2 .eq. 5) vee12 = 4.d0 / 9.d0 
+*  X2Pi PE curve - mat elements below in Lambda,S,Sigma,Omega basis
+10    v12(4,4) = 1.d0
+      v32(3,3) = 1.d0
+*  compute matrix element in j1,j2,j12,Omega basis
+      call dgemm('t','n',5,5,5,1.d0,t12,5,v12,5,0.d0,a12,5)
+      call dgemm('n','n',5,5,5,1.d0,a12,5,t12,5,0.d0,v12,5)
+      vee12 = v12(i11,i21)
+      vee32 = 0.d0
+      if (i13.ne.0 .and. i23.ne.0) then
+        call dgemm('t','n',3,3,3,1.d0,t32,3,v32,3,0.d0,a32,3)
+        call dgemm('n','n',3,3,3,1.d0,a32,3,t32,3,0.d0,v32,3)
+        vee32 = v32(i13,i23)
+      endif
+      vee = 2.d0 * xl12 * (vee12 * xfj12 + vee32 * xfj32)
       goto 1000
 *
-*  2Sigma- state
-30    if (ist1 .eq. 2 .and. ist2 .eq. 2) vee12 = 50.d0 / 90.d0  
-      if ((ist1 .eq. 2 .and. ist2 .eq. 3) .or.
-     +  (ist1 .eq. 3 .and. ist2 .eq. 2)) vee12 = - sqrt(5.d0)  
-     +  * 10.d0 / 90.d0
-      if ((ist1 .eq. 2 .and. ist2 .eq. 4) .or.
-     +  (ist1 .eq. 4 .and. ist2 .eq. 2)) vee12 = - sqrt(10.d0) 
-     +  * 10.d0 / 90.d0
-      if ((ist1 .eq. 2 .and. ist2 .eq. 5) .or.
-     +  (ist1 .eq. 5 .and. ist2 .eq. 2)) then
-          vee12 = sqrt(5.d0) * 5.d0 / 45.d0
-      end if
-      if (ist1 .eq. 3 .and. ist2 .eq. 3) vee12 = 2.d0 / 18.d0  
-      if ((ist1 .eq. 3 .and. ist2 .eq. 4) .or.
-     +  (ist1 .eq. 4 .and. ist2 .eq. 3)) then
-          vee12 = sqrt(2.d0) * 2.d0 / 18.d0
-      end if
-      if ((ist1 .eq. 3 .and. ist2 .eq. 5) .or.
-     +  (ist1 .eq. 5 .and. ist2 .eq. 3)) vee12 = - 1.d0 / 9.d0
-      if (ist1 .eq. 4 .and. ist2 .eq. 4) vee12 = 2.d0 / 9.d0  
-      if ((ist1 .eq. 4 .and. ist2 .eq. 5) .or.
-     +  (ist1 .eq. 5 .and. ist2 .eq. 4)) vee12 = - sqrt(2.d0) / 9.d0
-      if (ist1 .eq. 5 .and. ist2 .eq. 5) vee12 = 1.d0 / 9.d0  
+*  4Pi PE curve
+20    v12(1,1) = 1.d0
+      v12(2,2) = 1.d0
+      v32(1,1) = 1.d0
+      vee52 = 1.d0
+*  compute matrix element in j1,j2,j12,Omega basis
+      call dgemm('t','n',5,5,5,1.d0,t12,5,v12,5,0.d0,a12,5)
+      call dgemm('n','n',5,5,5,1.d0,a12,5,t12,5,0.d0,v12,5)
+      vee12 = v12(i11,i21)
+      vee32 = 0.d0
+      if (i13.ne.0 .and. i23.ne.0) then
+        call dgemm('t','n',3,3,3,1.d0,t32,3,v32,3,0.d0,a32,3)
+        call dgemm('n','n',3,3,3,1.d0,a32,3,t32,3,0.d0,v32,3)
+        vee32 = v32(i13,i23)
+      endif
+      vee = 2.d0 * xl12 * (vee12 * xfj12 + vee32 * xfj32
+     +  + vee52 * xfj52)
       goto 1000
 *
-*  4Sigma- state
-40    if (ist1 .eq. 1 .and. ist2 .eq. 1) vee32 = 2.d0 / 5.d0
-      if ((ist1 .eq. 1 .and. ist2 .eq. 2) .or.
-     +  (ist1 .eq. 2 .and. ist2 .eq. 1)) vee32 = - 1.d0 / 5.d0
-      if ((ist1 .eq. 1 .and. ist2 .eq. 3) .or.
-     +  (ist1 .eq. 3 .and. ist2 .eq. 1)) vee32 = - 1.d0 / sqrt(5.d0)
-      if (ist1 .eq. 2 .and. ist2 .eq. 2) vee32 = 3.d0 / 30.d0
-      if ((ist1 .eq. 2 .and. ist2 .eq. 3) .or.
-     +  (ist1 .eq. 3 .and. ist2 .eq. 2)) then
-          vee32 = sqrt(5.d0) * 3.d0 / 30.d0
-      end if
-      if (ist1 .eq. 3 .and. ist2 .eq. 3) vee32 = 3.d0 / 6.d0
-      if (ist1 .eq. 1 .and. ist2 .eq. 1) vee12 = 3.d0 / 5.d0  
-      if ((ist1 .eq. 1 .and. ist2 .eq. 2) .or.
-     +  (ist1 .eq. 2 .and. ist2 .eq. 1)) vee12 = - sqrt(6.d0) / 30.d0
-      if ((ist1 .eq. 1 .and. ist2 .eq. 3) .or.
-     +  (ist1 .eq. 3 .and. ist2 .eq. 1)) vee12 = - 1.d0 / sqrt(30.d0)
-      if ((ist1 .eq. 1 .and. ist2 .eq. 4) .or.
-     +  (ist1 .eq. 4 .and. ist2 .eq. 1)) vee12 = - 1.d0 / sqrt(15.d0)
-      if ((ist1 .eq. 1 .and. ist2 .eq. 5) .or.
-     +  (ist1 .eq. 5 .and. ist2 .eq. 1)) vee12 = - sqrt(2.d0 / 15.d0)
-      if (ist1 .eq. 2 .and. ist2 .eq. 2) vee12 = 1.d0 / 90.d0
-      if ((ist1 .eq. 2 .and. ist2 .eq. 3) .or.
-     +  (ist1 .eq. 3 .and. ist2 .eq. 2)) vee12 = sqrt(5.d0) / 90.d0
-      if ((ist1 .eq. 2 .and. ist2 .eq. 4) .or.
-     +  (ist1 .eq. 4 .and. ist2 .eq. 2)) vee12 = sqrt(10.d0) / 90.d0
-      if ((ist1 .eq. 2 .and. ist2 .eq. 5) .or.
-     +  (ist1 .eq. 5 .and. ist2 .eq. 2)) vee12 = sqrt(5.d0) / 45.d0
-      if (ist1 .eq. 3 .and. ist2 .eq. 3) vee12 = 1.d0 / 18.d0
-      if ((ist1 .eq. 3 .and. ist2 .eq. 4) .or.
-     +  (ist1 .eq. 4 .and. ist2 .eq. 3)) vee12 = sqrt(2.d0) / 18.d0
-      if ((ist1 .eq. 3 .and. ist2 .eq. 5) .or.
-     +  (ist1 .eq. 5 .and. ist2 .eq. 3)) vee12 = 1.d0 / 9.d0
-      if (ist1 .eq. 4 .and. ist2 .eq. 4) vee12 = 1.d0 / 9.d0
-      if ((ist1 .eq. 4 .and. ist2 .eq. 5) .or.
-     +  (ist1 .eq. 5 .and. ist2 .eq. 4)) vee12 = sqrt(2.d0) / 9.d0
-      if (ist1 .eq. 5 .and. ist2 .eq. 5) vee12 = 2.d0 / 9.d0
+*  2Sigma- curve
+30    v12(5,5) = 1.d0
+*  compute matrix element in j1,j2,j12,Omega basis
+      call dgemm('t','n',5,5,5,1.d0,t12,5,v12,5,0.d0,a12,5)
+      call dgemm('n','n',5,5,5,1.d0,a12,5,t12,5,0.d0,v12,5)
+      vee12 = v12(i11,i21)
+      vee = 2.d0 * xl12 * vee12 * xfj12
+      goto 1000
+*
+*  4Sigma- curve
+40    v12(3,3) = 1.d0
+      v32(2,2) = 1.d0
+*  compute matrix element in j1,j2,j12,Omega basis
+      call dgemm('t','n',5,5,5,1.d0,t12,5,v12,5,0.d0,a12,5)
+      call dgemm('n','n',5,5,5,1.d0,a12,5,t12,5,0.d0,v12,5)
+      vee12 = v12(i11,i21)
+      vee32 = 0.d0
+      if (i13.ne.0 .and. i23.ne.0) then
+        call dgemm('t','n',3,3,3,1.d0,t32,3,v32,3,0.d0,a32,3)
+        call dgemm('n','n',3,3,3,1.d0,a32,3,t32,3,0.d0,v32,3)
+        vee32 = v32(i13,i23)
+      endif
+      vee = 2.d0 * xl12 * (vee12 * xfj12 + vee32 * xfj32)
       goto 1000
 *
 *  apar spin-orbit matrix element
-50    if (ist1 .eq. 1 .and. ist2 .eq. 1) vee52 = - 0.5d0
-      if (ist1 .eq. 1 .and. ist2 .eq. 1) vee32 = - 1.d0 / 10.d0
-      if ((ist1 .eq. 1 .and. ist2 .eq. 2) .or.
-     +  (ist1 .eq. 2 .and. ist2 .eq. 1)) vee32 = - 1.d0 / 5.d0
-      if (ist1 .eq. 2 .and. ist2 .eq. 2) vee32 = - 4.d0 / 10.d0
-      if (ist1 .eq. 3 .and. ist2 .eq. 3) vee32 = 0.5d0
-      if (ist1 .eq. 1 .and. ist2 .eq. 1) vee12 = 1.d0 / 10.d0
-      if ((ist1 .eq. 1 .and. ist2 .eq. 2) .or.
-     +  (ist1 .eq. 2 .and. ist2 .eq. 1)) vee12 = - sqrt(6.d0) / 30.d0
-      if ((ist1 .eq. 1 .and. ist2 .eq. 5) .or.
-     +  (ist1 .eq. 5 .and. ist2 .eq. 1)) vee12 = 1.d0 / sqrt(30.d0)
-      if (ist1 .eq. 2 .and. ist2 .eq. 2) vee12 = - 2.d0 / 30.d0
-      if ((ist1 .eq. 2 .and. ist2 .eq. 5) .or.
-     +  (ist1 .eq. 5 .and. ist2 .eq. 2)) vee12 = - 1.0 / sqrt(45.d0)
-      if (ist1 .eq. 3 .and. ist2 .eq. 3) vee12 = 2.d0 / 6.d0
-      if ((ist1 .eq. 3 .and. ist2 .eq. 4) .or.
-     +  (ist1 .eq. 4 .and. ist2 .eq. 3)) vee12 = - 1.0 / sqrt(18.d0)
-      if (ist1 .eq. 4 .and. ist2 .eq. 4) vee12 = 1.d0 / 6.d0
-      if (ist1 .eq. 5 .and. ist2 .eq. 5) vee12 = 1.d0 / 3.d0
+50    vee = 0.d0
       goto 1000
 *
 *  aperp spin-orbit matrix element
-60    if (ist1 .eq. 1 .and. ist2 .eq. 1) vee32 = - 4.d0 / 10.d0
-      if ((ist1 .eq. 1 .and. ist2 .eq. 2) .or.
-     +  (ist1 .eq. 2 .and. ist2 .eq. 1)) vee32 = 1.d0 / 5.d0
-      if (ist1 .eq. 2 .and. ist2 .eq. 2) vee32 = - 1.d0 / 10.d0
-      if (ist1 .eq. 1 .and. ist2 .eq. 1) vee12 = - 6.d0 / 10.d0
-      if ((ist1 .eq. 1 .and. ist2 .eq. 2) .or.
-     +  (ist1 .eq. 2 .and. ist2 .eq. 1)) vee12 = sqrt(6.d0) / 30.d0
-      if ((ist1 .eq. 1 .and. ist2 .eq. 5) .or.
-     +  (ist1 .eq. 5 .and. ist2 .eq. 1)) vee12 = - 1.d0 / sqrt(30.d0)
-      if (ist1 .eq. 2 .and. ist2 .eq. 2) vee12 = 17.d0 / 30.d0
-      if ((ist1 .eq. 2 .and. ist2 .eq. 5) .or.
-     +  (ist1 .eq. 5 .and. ist2 .eq. 2)) vee12 = 1.0 / sqrt(45.d0)
-      if (ist1 .eq. 3 .and. ist2 .eq. 3) vee12 = 1.d0 / 6.d0
-      if ((ist1 .eq. 3 .and. ist2 .eq. 4) .or.
-     +  (ist1 .eq. 4 .and. ist2 .eq. 3)) vee12 = 1.0 / sqrt(18.d0)
-      if (ist1 .eq. 4 .and. ist2 .eq. 4) vee12 = 2.d0 / 6.d0
-      if (ist1 .eq. 5 .and. ist2 .eq. 5) vee12 = 2.d0 / 3.d0
-      goto 1000
-c
-1000  vee = 2.d0 * xl12 * (vee12 * xfj12 + vee32 * xfj32
-     +  + vee52 * xfj52)
-*
-*  provision for constant spin-orbit parameters
-      if (iacnst .eq. 1) then
-        if (lb .eq. 5 .or. lb .eq.6) vee = 0.d0
-      end if
-1500  return
+60    vee = 0.d0
+1000  return
       end
 * ------------------------------eof-----------------------------------
