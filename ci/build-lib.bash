@@ -127,8 +127,26 @@ function test_build()
         error "hib_makeobj failed"
         return $RETURNCODE_FAILURE
     fi
-
     export PATH=$old_path
+
+    gfortran $hibridon_root_path/ci/comp_tests.f90 -o $hibridon_root_path/ci/comp_tests.x
+    echo ''
+    echo '************************'
+    echo 'Comparing outputs from tests...'
+    echo '************************'
+
+    files=("Csbtest1.ics" "Cctest1.ics" "Ccbrstest1.ics" "Ccbtest1.ics" "Ccrstest1.ics" "Cstest1.ics") 
+    #files=`cd "$hibridon_root_path"/testnew/ && ls *.ics`
+    # Pour l'instant test seulement sur les fichiers ics qui ne posent pas de problème
+    # de dépassement du nombre de colones.
+    for file in "${files[@]}"
+    do
+	   echo "$file"...
+           $hibridon_root_path/ci/comp_tests.x $hibridon_root_path/tests/$file $hibridon_root_path/testnew/$file
+    done
+    echo '************************'
+
+
 }
 
 function build_lib()
