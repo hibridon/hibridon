@@ -37,7 +37,7 @@ cend
 
 *  change kmax below --  supposed to be set at compile time
 *  revised by p. dagdigian (13-dec-2019)
-      parameter (kmax=2000, kairy = kmax,ktri=kmax*(kmax+1)/2,kbig=10)
+      parameter (kmax=151, kairy = kmax,ktri=kmax*(kmax+1)/2,kbig=10)
 cstart unix-darwin unix-x86
 * set size of scratch array for matrix factorization and generalized
 *   eigenvalue determination
