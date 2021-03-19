@@ -90,7 +90,7 @@ function test_build()
         error "some tests gave results that are too different from the expected results (see $compare_result_file_path for details)"
         return $RETURNCODE_FAILURE
     fi
-    return $RETURNCODE_FAILURE
+    return $RETURNCODE_SUCCESS
 }
 
 test_build "$HIBRIDON_ROOT_PATH" "$TEMP_PATH"
