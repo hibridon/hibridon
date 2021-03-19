@@ -57,9 +57,9 @@ function unattended_makefirst()
 
 	expect <<-EOF
 	spawn $hibridon_root_path/bin/makefirst
-	expect -ex "Have you read the license agreement (/home/graffy/work/hibridon/LICENSE) \[y/n\]?  "
+	expect -ex "Have you read the license agreement ($(hibriddir)/LICENSE) \[y/n\]?  "
 	send "y\r"
-	expect -ex "Does your PATH include /home/graffy/work/hibridon/bin \[y/n\]?  "
+	expect -ex "Does your PATH include $(hibriddir)/bin \[y/n\]?  "
 	send "y\r"
 	expect -ex "Your fortran compiler is ifort -O3 -save, is this correct? \[y/n\]  "
 	send "n\r"
