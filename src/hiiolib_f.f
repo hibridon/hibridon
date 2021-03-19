@@ -840,7 +840,7 @@ c;     $        status='OLD', err=999, iostat=ierr,
 c;     $        buffered='YES')
 cend
 cstart unix-gfortran
-         open (unit=iunit, file=filnam, status='OLD', err=999, iostat=ierr)
+         open (unit=iunit, file=filnam, access='STREAM', status='OLD', err=999, iostat=ierr)
 cend
          return
       end if
