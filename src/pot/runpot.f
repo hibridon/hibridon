@@ -1,11 +1,17 @@
-c     pot routine for the interaction of HCO with H2
-c     computed by P. Dagdigian (2019)
+c     ----------------------------------------------------------------- 
+c     pot routine for the RCCSD(T)-F12a/aVTZ NH - H2 PES 
+c     computed by Y. Kalugina
 c
-c     to be used with the baastp3 basis routine, for collision
-c     of an asymmetric top molecule of C2v symmetry with a linear molecule
+c     points fit with LAmax = 10, LBmax = 4
 c
-c     revised from pot_h2sh2_12_6.f pot routine
-c     current revision:  2-dec-2019 (p. dagdigian)
+c     to be used with the 3Sigma-1Sigma basis routine (in hiba3sg1sg.f)
+c     data file used:  pot_nhh2_10_4.dat
+c
+c     pot matrix elements are computed assuming the angular dependence defined
+c     in the appendix of green, jcp 62, 2271 (1975)
+c
+c     revised from pot_c2hh2.f
+c     current revision:  27-jan-2021 (p. dagdigian)
 c     ------------------------------------------------------------------
 c     Dummy subroutines for user-defined bases.
       include "common/syusr"
@@ -14,7 +20,7 @@ c     Dummy subroutines for user-defined bases.
 c     ----------------------------------------------------------------- 
 C     Module containing the shared arrays for this pot routine
 c
-      module mod_hcoh2
+      module mod_nhh2
       implicit none
       integer :: nr1
       real(8), dimension(:), allocatable :: rr1
@@ -23,13 +29,13 @@ c
       real(8) econv, xmconv, sq4pi
       parameter (econv=219474.6315343234d0,
      $  xmconv=0.0005485799094979479d0, sq4pi=3.544907701811032d0)
-      end module mod_hcoh2
+      end module mod_nhh2
 c     ----------------------------------------------------------------- 
-c     loapot subroutine loads pot parameters for HCO-H2 interaction
+c     loapot subroutine loads pot parameters for NH - H2 interaction
 c     ----------------------------------------------------------------- 
       subroutine loapot (iunit, file_name)
-      use mod_asymln
-      use mod_hcoh2
+      use mod_1sg1sg
+      use mod_nhh2
       implicit none
 C     common/parbas is replaced by module ba1sg1sg to allow more
 C     parameters be passed between the pot routine and the basis routine
@@ -45,7 +51,7 @@ C     A call to this subroutine with a string containing a space will be
 C     made at the time hibridon loads. Input file is not available at
 C     the time.
       if (file_name .eq. " ") return
-      pot_name = 'HCO-H2 12-4 CCSD(T) PES'
+      pot_name = 'NH - H2 PES'
       call datfln(trim(file_name), file_path)
       open (unit=iunit, file=file_path, status="old")
 C 
@@ -67,10 +73,13 @@ C
       allocate(coef1(nr1, nv))
 C     
       do iv = 1, nv
-         read (iunit, *) lms(iv)%l1, lms(iv)%m1, lms(iv)%l2, 
-     :     lms(iv)%ltot
+         read (iunit, *) lms(iv)%l1, lms(iv)%l2, lms(iv)%ltot
          read (iunit, *) (coef1(ir, iv), ir = 1, nr1)
       end do
+c******
+c  fix normalization of coeffs and convert to a.u.
+c      coef1 = coef1 * sq4pi / econv
+c******
 c  convert to a.u.
       coef1 = coef1 / econv
 C     
@@ -85,13 +94,14 @@ C     Spline parameters prepared here
 C     ------------------------------------------------------------------
 C     Main program for makepot
       program main
-      use mod_asymln
-      use mod_hcoh2
+      use mod_1sg1sg
+      use mod_c2hh2
       implicit none
       common /conlam/ nlam
       common /covvl/ vvl
       real(8), dimension(1) :: vvl
-      character(40), parameter :: data_file_name='pot_hcoh2_12_4.dat'
+      character(40), parameter :: data_file_name=
+     :  'pot_nhh2_10_4.dat'
       real(8) :: r, vv0
       integer :: i, nv, nlam
       call loapot(10, data_file_name)
@@ -100,37 +110,34 @@ C     Main program for makepot
       call pot(vv0, r)
 
 c******
-c      write (6, 20) (lms(i)%l1, lms(i)%m1, lms(i)%l2, lms(i)%ltot,
+c      write (6, 20) (lms(i)%l1, lms(i)%l2, lms(i)%ltot,
 c     $     vvl(i) * econv / sq4pi, i=1, nlam)
 c******
 
-      write (6, 20) (lms(i)%l1, lms(i)%m1, lms(i)%l2, lms(i)%ltot,
+      write (6, 20) (lms(i)%l1, lms(i)%l2, lms(i)%ltot,
      $     vvl(i) * econv, i=1, nlam)
- 20   format (3(4(i2, 1x), 1x, 1pe16.8, 2x))
+ 20   format (3(3(i2, 1x), 1x, 1pe16.8, 2x))
       goto 10
+C 99   return
  99   stop
       end program main
 C     ------------------------------------------------------------------
       subroutine pot(vv0, r_inp)
-      use mod_asymln
-      use mod_hcoh2
+      use mod_1sg1sg
+      use mod_nhh2
       implicit none
       common /conlam/ nlam
       common /covvl/ vvl
       real(8), dimension(1) :: vvl
-      double precision vv0, r_inp, r, rmax
+      double precision vv0, r_inp, r
       double precision seval
       integer iv, nlam
-      data rmax /300.d0/
       vv0 = 0.d0
-c  determine splined coefficients st r=R
-c  first make sure r is not greater than 300 bohr
-      if (r_inp .gt. 300.d0) then
-        write(6,110) r,rmax
-110     format(' stop.  r =',f8.4,' greater than 300 bohr')
-        stop
+      if (r_inp .lt. 4.25d0) then
+         r = 4.25d0
+      else
+         r = r_inp
       end if
-      r = r_inp
       do iv = 1, nlam
          vvl(iv) = seval(nr1, r, rr1, coef1(1, iv), spl_b1(1, iv),
      $        spl_c1(1, iv), spl_d1(1, iv))

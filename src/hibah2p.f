@@ -13,8 +13,11 @@
 *
 *  revised routine so that CC scattering calculations work.  it appears that
 *  this routine had previously been used only for bound-state calculations
+*  (4-mar-2013 by p.dagdigian)
 *
-*  current revision date:  14-mar-2013 by p.dagdigian
+*  edited list of SF lambda values
+*
+*  current revision date:  3-sep-2020 by p.dagdigian
 * --------------------------------------------------------------------
 *  variables in call list:
 *    j:        for CC calculation:  returns diatom angular momentum (j) for ea
@@ -139,12 +142,18 @@
       common /cojtot/ jjtot,jjlpar
       dimension j(9), l(9), jhold(9), ehold(9), isc1(9), sc2(9), sc3(9),
      :          sc4(9), ishold(9), is(9), isc8(9)
-      dimension lamr(17),lama(17),lam12(17), mu(17)
+      dimension lamr(13),lama(13),lam12(13), mu(13)
       dimension lamrold(9),lamaold(9),lam12old(9), muold(9)
-      data lamr  /2,4,6,8,0,2,4,6,8,2,4,6,8,2,4,6,8/
-      data lama  /0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2/
-      data lam12 /2,4,6,8,2,0,2,4,6,2,4,6,8,4,6,8,10/
-      data mu    /0,0,0,0,0,0,0,0,0,2,2,2,2,1,1,1,1/
+*  edited the list below (3-sep-2020)
+      data lamr  /2,4,6,0,2,4,6,2,4,6,2,4,6/
+      data lama  /0,0,0,2,2,2,2,2,2,2,2,2,2/
+      data lam12 /2,4,6,2,0,2,4,2,4,6,4,6,8/
+      data mu    /0,0,0,0,0,0,0,2,2,2,1,1,1/
+**  original list
+*      data lamr  /2,4,6,8,0,2,4,6,8,2,4,6,8,2,4,6,8/
+*      data lama  /0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2/
+*      data lam12 /2,4,6,8,2,0,2,4,6,2,4,6,8,4,6,8,10/
+*      data mu    /0,0,0,0,0,0,0,0,0,2,2,2,2,1,1,1,1/
 *  here is information on lambda terms for compatability with older
 *  pot subroutines
       data lamrold /2,0,2,2,2,4,4,4,4/
@@ -637,7 +646,7 @@
         ilam=ilam+1
         inum = 0
         ij=0
-        if (lammax(1) .eq. 17) then
+        if (lammax(1) .eq. 13) then
 * here for new (14-feb-1998) generation of pot subroutines
           ilamr=lamr(il)
           ilama=lama(il)

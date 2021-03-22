@@ -1,12 +1,13 @@
 # edited by J. Klos on 31-jul-2018 -- updated ifort version for Mac OS
+# further edit for ifort version on 29-apr-2020 by p. dagdigian
 # 
 # HIBRIDON CONFIG generated at Tue Mar 8 09:44:57 EST 2016 for release 4.4
 #                 for architecture unix-darwin unix-ifort unix-darwin64
 # Machine type ..
 MACH="unix-darwin unix-ifort unix-darwin64"
 # Fortran Compiler ..
-FC="/opt/intel/compilers_and_libraries_2019.5.281/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -I${MKLROOT}/include"
-FCPRINT="/opt/intel/compilers_and_libraries_2019.5.281/mac/bin/intel64/ifort"
+FC="/opt/intel/compilers_and_libraries_2020.1.216/mac/bin/intel64/ifort -I/Users/pdagdig1/hib44/src -I${MKLROOT}/include"
+FCPRINT="/opt/intel/compilers_and_libraries_2020.1.216/mac/bin/intel64/ifort"
 # compiler optimisation
 FOPT="-O3"
 # compiler explicit no optimisation
@@ -28,7 +29,7 @@ LIBS="${MKLROOT}/lib/libmkl_intel_ilp64.a ${MKLROOT}/lib/libmkl_sequential.a ${M
 #LIBS=" ${MKLROOT}/lib/libmkl_intel_ilp64.a ${MKLROOT}/lib/libmkl_intel_thread.a ${MKLROOT}/lib/libmkl_core.a -liomp5 -lpthread -lm -ldl" 
 
 #Dynamic MKL linking
-#LIBS=" -L/opt/intel/compilers_and_libraries_2018.5.281/mac/mkl/lib -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -lpthread -lm -liomp5"
+#LIBS=" -L/opt/intel/compilers_and_libraries_2020.1.216/mac/mkl/lib -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -lpthread -lm -liomp5"
 
 #Apple Accelerate framework
 #LIBS="-framework accelerate" 

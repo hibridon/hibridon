@@ -1481,6 +1481,7 @@ c
      :   ered,rmu,csflag,flaghf,flagsu,twomol,
      :   nucros,jfirst,jfinal,jtotd,numin,numax,nud,nlevel,nlevop,
      :   nnout,jlev,inlev,elev,jout)
+
       maxjt=jfinal
       if(maxjtot.gt.0) maxjt=min(maxjtot,jfinal)
       spin=0

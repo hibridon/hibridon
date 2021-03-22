@@ -119,9 +119,13 @@ c
 *    jmax:     the maximum rotational angular momentum for the asymmetric top
 *    iop:      for a molecule of C2v symmetry, this parameter is the ortho/para 
 *              label for the asymmetric top states.  para states only
-*              included if iop=1, and only ortho states if iop=-1
-*              IMPORTANT:  for only, iop should be set to zero so that the
-*              proper rotatioonal Hamiltonian is employed.
+*              included if iop=1, and only ortho states if iop=-1.  in this
+*              case, the body-frame z axis should be along the C2 axis.
+*              IMPORTANT:  for molecules with a plane of symmetry only 
+*              (Cs symmetry), iop should be set to zero so that 
+*              the a axis is the body-frame z axis.
+*              With these considerations, the proper rotatioonal Hamiltonian
+*              will be employed.
 *    j2min:    minimum rotational angular momentum of molecule 2
 *    j2max:    maximum rotational angular momentum of molecule 2
 *    ipotsy2:  symmetry of potential.  set to 2 for homonuclear

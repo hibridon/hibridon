@@ -1,7 +1,7 @@
 Cp-H2 scattering on Halvick PESs                
   12                             ibasty
   T  T  F  F                     logdfl, airyfl, readpt, bastst
-    1.0000   2.0000    0.0200   rstart, rendld, spac
+    1.8000   2.0000    0.0200   rstart, rendld, spac
   F                              prairy
   1.150      1.00    80.0  1.50  tolai, rincr, rendai, fstfac
    1                             nerg

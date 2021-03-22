@@ -22,7 +22,7 @@
 *
 *  author:  paul dagdigian
 *  slight update 12-nov-2018 by m. h. alexander
-*  current revision date: 9-octias-2019 by p. dagdigian
+*  current revision date: 9-oct-2019 by p. dagdigian
 * --------------------------------------------------------------------
 *  variables in call list:
 *    j:        on return contains electronic angular momentum quantum number

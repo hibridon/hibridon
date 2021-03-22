@@ -16,7 +16,7 @@ cend
      : (/' ---------------------------------------------------',
      :  '-----------------------',
      :  /,9x,
-     :   '  HIBRIDON SCATTERING CODE V 4.4 BUILD DATE 02/11/20 10:26:28 EST',
+     :   '  HIBRIDON SCATTERING CODE V 4.4 BUILD DATE 02/11/21 14:28:32 EST',
      : //'      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS,',
      :   ' H.-J. WERNER, B. FOLLMEG,'/
      :   '               P. DAGDIGIAN',
@@ -140,7 +140,7 @@ c variables in data config
       data build(1) /
      :  'SYS=OS X 10.13.6; MACH=unix-darwin unix-ifort unix-darwin64'/
       data build(2) /
-     :  'CC=; FC=/opt/intel/compilers_and_libraries_2019.5.281/mac/bin/intel64/ifort -O3 -save -i8'/
+     :  'CC=; FC=/opt/intel/compilers_and_libraries_2020.1.216/mac/bin/intel64/ifort -O3 -save -i8'/
       data build(3) /
      :  ''/
       data build(4) /

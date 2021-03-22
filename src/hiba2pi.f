@@ -8,8 +8,10 @@
 *  of a 2pi molecule in an intermediate coupling basis with a
 *  structureless atom or with an uncorrugated surface
 *  authors:  millard alexander and hans-joachim werner
-*  current revision date:  7-apr-2003 by mha
-*  to allow corrent diagonal centrifugal term for bound state CD
+*  revised:  7-apr-2003 by mha
+*    to allow corrent diagonal centrifugal term for bound state CD
+*  revised:  changed formating of output of pot matrix elements
+*  current revision date:  19-dec-2020 by p.dagdigian
 * --------------------------------------------------------------------
 *  variables in call list:
 *    j:        on return contains rotational quantum numbers for each
@@ -688,7 +690,8 @@
       if (bastst .and. iprint .gt. 1) then
         write (6, 285)
         write (9, 285)
-285     format (/' ILAM  LAMBDA  ICOL  IROW   I    IV2    VEE')
+285     format (/' ILAM  LAMBDA      ICOL      IROW       I',
+     :    '        IV2    VEE')
       end if
       do 400 ilam = 1, nlam
 *  ilam is the angular expansion label
@@ -737,14 +740,14 @@
                 if(.not.bastst .or. iprint .le. 1) goto 350
                   write (6, 290) ilam, lb, icol, irow, i, iv2(i),vee
                   write (9, 290) ilam, lb, icol, irow, i, iv2(i),vee
-290               format (i4, 2i7, 2i6, i6, g17.8)
+290               format (i4, i7, 3i10, i10, g17.8)
 350       continue
 355     continue
         if (i .le. nv2max) lamnum(ilam) = inum
         if (bastst) then
           write (6, 360) ilam, lamnum(ilam)
           write (9, 360) ilam, lamnum(ilam)
-360       format ('ILAM=', i3, ' LAMNUM(ILAM) =', i6)
+360       format ('ILAM=', i3, ' LAMNUM(ILAM) =', i9)
         end if
         lamsum = lamsum + lamnum(ilam)
 400   continue
@@ -758,7 +761,8 @@
       if (clist .and. bastst) then
         write (6, 430) lamsum
         write (9, 430) lamsum
-430     format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', i4)
+430     format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS',
+     :    i10)
       end if
 * now multiply is array by ifi array, so that index will equal +/- 1 for
 * F1 levels and +/- 2 for F2 levels

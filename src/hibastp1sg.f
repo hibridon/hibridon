@@ -26,7 +26,7 @@ c
 c     extended to include the 3 nuclear symmetry permutations of ND3
 c     (20-nov-2014, p. dagdigian)
 c
-c     current revision:  24-nov-2104 (p. dagdigian)
+c     current revision:  24-nov-2014 (p. dagdigian)
 c     ------------------------------------------------------------------
 c     This module contains (explictly) the number of terms and their
 c     indices in the expansion of the PES.  Its contents should be
