@@ -1585,7 +1585,9 @@ cend
 *  written by:  millard alexander
 *  current revision date (algorithm):  5-mar-1997
 *  revised on 30-mar-2012 by q. ma for stream I/O of wfu files
-*  current revision: 8-oct-2012 by q. ma
+*  revised on 21-dec-2020 by p. dagdigian to check to overflow/underflow
+*    in ricatti-bessel funcstions and abort run
+*  current revision: 21-dec-2020 by p. dagdigian
 * ---------------------------------------------------------------------
 *  variables in call list:
 *    tmod:    on input:  tmod contains the log-derivative matrix at r
@@ -1709,6 +1711,16 @@ c     dependent) size of built-in types
         p = pk(i)
         call cbesj (l, p, r, cj, cpj)
         call cbesn (l, p, r, cn, cpn)
+*
+*  check for overflow/underflow in ricatti-bessel functions
+        if (isnan(cj)) then
+          write(6,445)
+          write(9,445)
+445       format(/' *** OVERFLOW/UNDERFLOW IN RICATTI-BESSEL FUNCTIONS.',
+     :      'ABORT ***'/)
+          stop
+        end if
+*
         fj(i) = cj
         fn(i) = cn
         fpj(i) = cpj
