@@ -5,11 +5,13 @@
 Computer Software for
 Molecular Inelastic Scattering and Photodissociation
 
-Documentation is available in [<hibridon_root_path>/doc](doc)
+Documentation is available on
+- [http://www2.chem.umd.edu/groups/alexander/hibridon]
+- [<hibridon_root_path>/doc](doc)
 
 Changes:
 - [ReleaseNotes](ReleaseNotes)
 - [README_4.2.1](README_4.2.1) : changes from `hibridon` 4.1.5 to 4.2.1
-- [README_4.3](README_4.3) : changes from `hibridon` 4.2.1 to 4.3- 
+- [README_4.3](README_4.3) : changes from `hibridon` 4.2.1 to 4.3 
 - [README_4.4](README_4.4) : changes since `hibridon` 4.3
 
