@@ -53,9 +53,10 @@ c;* warning, this assumes a blocksize of 64
 c;      parameter (kaux=128*kmax)
 cend
 * modified klammx (pjd - 17-jan-2019)
+* increased kfact (pjd - 15-dec-2020)
 * increase size of jout array from 21 to 25 - p.dagdigian - 23-jun-2010
 * increase size of jout array from 25 to 50 - p.dagdigian - 19-sep-2012
-      parameter (klammx = 2000, kfact = 2000, kout = 50, ken = 25)
+      parameter (klammx = 2000, kfact = 3500, kout = 50, ken = 25)
       parameter (kmxpho = 3, knphot = 1)
       parameter (kmxbas = 30)
       parameter (kq2 = 2 * kmax, kqmax = kmxpho * kmax)

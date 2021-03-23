@@ -627,7 +627,7 @@
      :      write(2,2020) k,j1,in1,j2,in2,sigmar,sigmai
 2020      format(/' DIAGONAL PRESSURE BROADENING ',
      :      'CROSS SECTION (ANG^2) - K =',i2/4x,'J1=',i3,
-     :      ' IN1=',i3,' -> J2=',i3,' IN2=',i3/4x,
+     :      ' IN1=',i3,' -> J2=',i3,' IN2=',i3/'%',3x,
      :      'REAL PART =',1pe12.4,'  IMAG PART =',1pe12.4)
         else
           write(6,1030) k,j1,in1,j2,in2,j1p,in1p,j2p,in2p,
@@ -638,7 +638,7 @@
 1030      format(/' PRESSURE BROADENING ',
      :      'CROSS SECTION (ANG^2) - K =',i2/6x,'J1= ',i3,
      :      ' IN1= ',i3,' -> J2= ',i3,' IN2= ',i3/4x,'J1P=',i3,
-     :      ' IN1P=',i3,' -> J2P=',i3,' IN2P=',i3/4x,
+     :      ' IN1P=',i3,' -> J2P=',i3,' IN2P=',i3/'%',3x,
      :      'REAL PART =,'1pe12.4,'  IMAG PART =',1pe12.4)
         end if
       else
