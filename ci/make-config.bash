@@ -1,4 +1,5 @@
 HIBRIDON_ROOT_PATH="$1"
+TEMP_PATH="$2"
 
 RETURNCODE_SUCCESS=0
 RETURNCODE_FAILURE=1
@@ -86,95 +87,4 @@ function unattended_makefirst()
     export PATH=$old_path
 }
 
-
-function build()
-{
-    local hibridon_root_path="$1"
-    local old_path=$PATH
-    export PATH=$PATH:$hibridon_root_path/bin
-
-    if [ "$(command_is_available tcsh)" != 'true' ]
-    then
-        error "failed to find tcsh, which is the language makefirst script is written in"
-        return $RETURNCODE_FAILURE
-    fi
-
-    hib_makeobj
-    if [ $? != 0 ]
-    then
-        error "hib_makeobj failed"
-        return $RETURNCODE_FAILURE
-    fi
-
-    export PATH=$old_path
-}
-
-function test_build()
-{
-    local hibridon_root_path="$1"
-    local old_path=$PATH
-    export PATH=$PATH:$hibridon_root_path/bin
-
-    if [ "$(command_is_available tcsh)" != 'true' ]
-    then
-        error "failed to find tcsh, which is the language makefirst script is written in"
-        return $RETURNCODE_FAILURE
-    fi
-
-    hibtest
-    if [ $? != 0 ]
-    then
-        error "hib_makeobj failed"
-        return $RETURNCODE_FAILURE
-    fi
-    export PATH=$old_path
-
-    gfortran $hibridon_root_path/ci/comp_tests.f90 -o $hibridon_root_path/ci/comp_tests.x
-    echo ''
-    echo '************************'
-    echo 'Comparing outputs from tests...'
-    echo '************************'
-
-    files=("Csbtest1.ics" "Cctest1.ics" "Ccbrstest1.ics" "Ccbtest1.ics" "Ccrstest1.ics" "Cstest1.ics") 
-    #files=`cd "$hibridon_root_path"/testnew/ && ls *.ics`
-    # Pour l'instant test seulement sur les fichiers ics qui ne posent pas de problème
-    # de dépassement du nombre de colones.
-    for file in "${files[@]}"
-    do
-	   echo "$file"...
-           $hibridon_root_path/ci/comp_tests.x $hibridon_root_path/tests/$file $hibridon_root_path/testnew/$file
-    done
-    echo '************************'
-
-
-}
-
-function build_lib()
-{
-    local hibridon_root_path="$1"
-
-    unattended_makefirst $hibridon_root_path
-    if [ $? != 0 ]
-    then
-        error "unattended_makefirst failed"
-        return $RETURNCODE_FAILURE
-    fi
-    build $hibridon_root_path
-    if [ $? != 0 ]
-    then
-        error "build failed"
-        return $RETURNCODE_FAILURE
-    fi
-    test_build $hibridon_root_path
-    if [ $? != 0 ]
-    then
-        error "test_build failed"
-        return $RETURNCODE_FAILURE
-    fi
-
-}
-
-# unattended_makefirst $HIBRIDON_ROOT_PATH
-# build $HIBRIDON_ROOT_PATH
-# test_build $HIBRIDON_ROOT_PATH
-build_lib $HIBRIDON_ROOT_PATH
+unattended_makefirst $HIBRIDON_ROOT_PATH
