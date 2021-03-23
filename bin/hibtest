@@ -181,7 +181,7 @@ cp tests/*.BIN testnew
 cp tests/*.dat testnew
 cp tests/*.fluxinp testnew
 cd testnew
-  mkdir potdata
+  mkdir -p potdata
   cp *.dat potdata
   cp *.BIN potdata
   echo "running arn2 tests ..."
@@ -256,7 +256,7 @@ cd testnew
   rm $basedir/bin/progs/hib_heco_sapt_55
 
   echo "running hecn_dgels tests ..."
-  mkdir potdata
+  mkdir -p potdata
   cp *.dat potdata
   $basedir/bin/progs/hib_hecn_dgels_81 <hecnx_hyp.com >hecnx_test.log
   echo "hecn_dgels tests completed, compare result files:"
