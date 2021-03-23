@@ -1,7 +1,7 @@
 pipeline {
     agent {label 'physix_agent'}
     environment {
-        HIBRIDON_ROOT_PATH = '${PWD}/build'
+        HIBRIDON_ROOT_PATH = '${PWD}'
     }
     stages {
         stage('Building hibridon...') {
