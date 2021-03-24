@@ -1,5 +1,6 @@
 HIBRIDON_ROOT_PATH="$1"
 TEMP_PATH="$2"
+CONFIG_ID="$3"  # 'fr.univ-rennes1.ipr.physix.gfortran' or 'fr.univ-rennes1.ipr.physix.ifort'
 
 RETURNCODE_SUCCESS=0
 RETURNCODE_FAILURE=1
@@ -57,6 +58,18 @@ function test_build()
 {
     local hibridon_root_path="$1"
     local temp_path="$2"
+    local config_id="$3" # 'fr.univ-rennes1.ipr.physix.gfortran' or 'fr.univ-rennes1.ipr.physix.ifort'
+
+    case $config_id in 
+        'fr.univ-rennes1.ipr.physix.ifort')
+            local ifort_module='compilers/ifort/19.1.1'
+            module load "$ifort_module"
+            if [ $? != 0 ]
+            then
+                error "failed to load module $ifort_module"
+            fi
+            ;;
+    esac
 
     local old_path=$PATH
     export PATH=$PATH:$hibridon_root_path/bin
@@ -93,4 +106,4 @@ function test_build()
     return $RETURNCODE_SUCCESS
 }
 
-test_build "$HIBRIDON_ROOT_PATH" "$TEMP_PATH"
+test_build "$HIBRIDON_ROOT_PATH" "$TEMP_PATH" "$CONFIG_ID"

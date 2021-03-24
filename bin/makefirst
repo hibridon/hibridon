@@ -151,7 +151,7 @@ if $fcompiler == 'ifort' then
     if (-e $FFC) then 
         echo "Location of fortran compiler is $FFC" |tee -a $basedir/bin/makefirst.log
         set FC = $FFC
-        set options = ""
+        set options = "-extend_source 132"
         set FS = -save
         set opt = "-O3"
         set flag64 = "true"

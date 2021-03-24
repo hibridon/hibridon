@@ -6,12 +6,12 @@ pipeline {
     stages {
         stage('Building hibridon...') {
             steps {
-                sh 'make HIBRIDON_ROOT_PATH=$HIBRIDON_ROOT_PATH build'
+                sh 'make HIBRIDON_ROOT_PATH=$HIBRIDON_ROOT_PATH CONFIG_ID=fr.univ-rennes1.ipr.physix.gfortran build'
             }
         }
         stage('Testing hibridon...') {
             steps {
-                sh 'make HIBRIDON_ROOT_PATH=$HIBRIDON_ROOT_PATH test'
+                sh 'make HIBRIDON_ROOT_PATH=$HIBRIDON_ROOT_PATH CONFIG_ID=fr.univ-rennes1.ipr.physix.gfortran test'
             }
         }
         stage('Cleaning up...') {
