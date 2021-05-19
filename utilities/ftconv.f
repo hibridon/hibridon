@@ -259,15 +259,14 @@ c...  this escape allows introduction of further options
       open (unit=1,file=l,form='formatted',access='sequential',
      >  status='old')
       rewind 1
-      inquire(1,name=l)
 cstart batch
 c;      write(6,*) 'input file  ',l(1:lenstr(l))
 cend
-      i=index(l,'.for')
+      i=index(l,'.for', back=.true.)
       if(i.ne.0) then
         l(i:)='.f'
       else
-        i=index(l,'.')
+        i=index(l,'.', back=.true.)
         l(i:)=ext
       end if
       inquire(file=l,exist=exist)
