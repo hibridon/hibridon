@@ -157,6 +157,11 @@ if $fcompiler == 'ifort' then
         # use large model to prevent linking errors (relocation truncated to fit: R_X86_64_PC32) because the common blocks are too big to fit in the default memory model
         set options = "$options -mcmodel=large"
 
+        # force arrays to be allocated on the heap instead of the stack, this removes segmentation faults crash, not sure why
+        # the following option means : automatic arrays and arrays created for temporary computations are allocated on the stack if their size can be determined at compile time and if it doesn't exceed 10kb.
+        # this option seems necessary for big values of kmax (eg kmax=5000), according to bdesrousseaux, otherwise the user will experience a segmentation fault. I guess that without this option, the stack becomes too small to contain such big arrays...
+        set options = "$options -heap-arrays 10"
+
         set FS = -save
         set opt = "-O3"
         set flag64 = "true"
