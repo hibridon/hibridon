@@ -435,11 +435,11 @@ c...  now read lines into memory
 c...  write common l to output stream
       call upper (l)
       do 110 id=1,nd
-      if (l.eq.name(id)) goto 1320
+      if (l.eq.name(id)) goto 132
 110   continue
       print*,l
       stop 'unknown common'
-1320   do 130 i=istart(id),iend(id)
+132   do 130 i=istart(id),iend(id)
 130   call linout(buff(i))
       return
       end
