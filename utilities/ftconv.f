@@ -11,7 +11,7 @@ c note: we set the lengths of strings to a huge value (1320)
 c which should be big enough to handle any source code
 c line length. 132 proved to be insufficient and we can't really
 c predict a max source code line length, as compiling options
-c are included as strings in fortran code (see bug #5)
+c are included as strings in fortran code (see bug #6)
       character*1320 l
       character*4 ext
       common/cext/ ext
