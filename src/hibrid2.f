@@ -948,8 +948,8 @@ c
 *     real a, elev, scmat, zmat
       integer i, ienerg, iout, isize, j, jbegin, jend, jfinal,
      :        jfirst, jj1, jj2, jlpar, jtemp, jtotd, lenx, n, nlevel,
-     :        nlevop, nnout, nout, numax, numin, nud, iaver
-      integer inlev, ipoint, jlev, jout
+     :        nlevop, nout, numax, numin, nud, iaver
+      integer inlev, ipoint, jlev
       include "common/parpot"
       common /coz/ zmat(1)
       common /cow/ scmat(1)

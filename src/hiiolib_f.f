@@ -262,8 +262,7 @@ c
       use mod_cosout
       use constants
       implicit double precision (a-h,o-z)
-      integer jout
-      integer i, jlpar, jtot1, jtot2, jtotd, length, nerg, nnout,
+      integer i, jlpar, jtot1, jtot2, jtotd, length, nerg,
      :        numax, numin, ibasty
       logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
      :        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf,
@@ -1722,8 +1721,8 @@ c     ------------------------------------------------------------
       use mod_cosout
       implicit double precision (a-h,o-z)
       integer ic, icol, ii, ir, irow, jtot, jlpar, length, nmax,
-     :        nnout, nopen, nfile, nu, mmout
-      integer jout, jq, jpack, lq, lpack, inq, inpack, nchnid
+     :        nopen, nfile, nu, mmout
+      integer jq, jpack, lq, lpack, inq, inpack, nchnid
       logical is_j12
       common /clseg/ lseg,intrel,lchar
       common /coeint/ eint(1)
