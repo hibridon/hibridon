@@ -13,10 +13,10 @@ module mod_cosout
    integer, dimension(:), allocatable :: jout
    integer, allocatable               :: nnout
    contains
-   subroutine allocate_comom(n) 
+   subroutine allocate_cosout(n) 
       integer, intent(in) :: n
       allocate(jout(n)) ; allocate(nnout)
-   end subroutine allocate_comom
+   end subroutine allocate_cosout
 end module mod_cosout
 
 module mod_coiout
@@ -24,10 +24,10 @@ module mod_coiout
    integer, dimension(:), allocatable :: indout
    integer, allocatable               :: niout
    contains
-   subroutine allocate_comom(n) 
+   subroutine allocate_coiout(n) 
       integer, intent(in) :: n
       allocate(indout(n)) ; allocate(niout)
-   end subroutine allocate_comom
+   end subroutine allocate_coiout
 end module mod_coiout
 
 module mod_cov2
@@ -35,10 +35,10 @@ module mod_cov2
    real(8), dimension(:), allocatable :: v2
    integer, allocatable               :: nv2max, ndummy
    contains
-   subroutine allocate_comom(n) 
+   subroutine allocate_cov2(n) 
       integer, intent(in) :: n
       allocate(v2(n)) ; allocate(nv2max) ; allocate(ndummy)
-   end subroutine allocate_comom
+   end subroutine allocate_cov2
 end module mod_cov2
 
  
