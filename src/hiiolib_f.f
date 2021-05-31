@@ -259,6 +259,7 @@ c
 * subroutines called: open
 *
 * ----------------------------------------------------------------
+      use mod_cosout
       use constants
       implicit double precision (a-h,o-z)
       integer jout
@@ -285,7 +286,7 @@ c
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr, nucros, photof, wavefl, boundc
       common /coskip/ nskip,iskip
-      common /cosout/ nnout, jout(21)
+      !common /cosout/ nnout, jout(21)
       common /coiout/ niout, indout(1)
       common /cofile/ input, output, jobnam, savfil
       common /coener/ energ(1)
@@ -741,14 +742,14 @@ c
       common /clseg/ lseg, intrel, lchar
       common /cosize/ isize, isizes
 cstart unix-darwin64
-      common/cobuf/ lbuf,ibuf(1024)
-      data lseg, intrel, lchar /1024, 1, 8/
-      data lbuf /1024/
+c;      common/cobuf/ lbuf,ibuf(1024)
+c;      data lseg, intrel, lchar /1024, 1, 8/
+c;      data lbuf /1024/
 cend
 cstart unix .and..not. unix-darwin64
-c;      common/cobuf/ lbuf,ibuf(1024)
-c;      data lseg, intrel, lchar /1024,2,4/
-c;      data lbuf/1024/
+      common/cobuf/ lbuf,ibuf(1024)
+      data lseg, intrel, lchar /1024,2,4/
+      data lbuf/1024/
 cend
 cstart cray
 c;      common/cobuf/ lbuf,ibuf(512)
@@ -867,7 +868,7 @@ c
         stat='old'
 * make sure sequential formatted files are appended not overwritten
 cstart unix-hp unix-dec unix-iris unix-sun unix-ifort unix-pgi
-        accs='append'
+c;        accs='append'
 cend
       else
         stat='new'
@@ -880,9 +881,9 @@ cstart cray
 c;      stat = 'unknown'
 cend
 cstart unix-darwin
-        inquire(unit=iunit,opened=od)
-* if temporary file is already opened, close it
-        if (od) close(unit=iunit)
+c;        inquire(unit=iunit,opened=od)
+c;* if temporary file is already opened, close it
+c;        if (od) close(unit=iunit)
 cend
 cstart unix mac cray
         open(unit=iunit,  access='sequential',
@@ -1718,6 +1719,7 @@ c     ------------------------------------------------------------
 *    j12:       array containing vector sum of j1 + j2 for molecule-molecule
 *               systems and open-shell atom - molecule systems
 *  ------------------------------------------------------------------
+      use mod_cosout
       implicit double precision (a-h,o-z)
       integer ic, icol, ii, ir, irow, jtot, jlpar, length, nmax,
      :        nnout, nopen, nfile, nu, mmout
@@ -1726,7 +1728,7 @@ c     ------------------------------------------------------------
       common /clseg/ lseg,intrel,lchar
       common /coeint/ eint(1)
       common /coered/ ered, rmu
-      common /cosout/ nnout, jout(21)
+      !common /cosout/ nnout, jout(21)
 *  variable in common block /coselb/
 *     ibasty    basistype
       common /coselb/ ibasty

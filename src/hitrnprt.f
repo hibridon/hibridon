@@ -31,6 +31,7 @@
 *
 * current revision date:  24-jul-2015 by pjd
 * ------------------------------------------------------------------
+      use mod_cosout
       implicit double precision (a-h,o-z)
       character*(*) filnam
       character*40  trnfil, smtfil
@@ -46,7 +47,7 @@
      :                igjtp
       common /cotrn/  spin, maxjt,
      :     nwaves, jfsts, jlparf, jlpars, njmax, jpmax
-      common /cosout/ nnout, jout(25)
+      !common /cosout/ nnout, jout(25)
       common /coisc2/ inlev(1)
       common /coisc3/ jlev(1)
       common /coisc4/ jpack(1)

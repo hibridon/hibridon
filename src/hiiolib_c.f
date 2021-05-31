@@ -252,6 +252,7 @@
 * subroutines called: open
 *
 * ----------------------------------------------------------------
+      use mod_cosout
       implicit double precision (a-h,o-z)
       integer jout
       integer i, jlpar, jtot1, jtot2, jtotd, length, nerg, nnout,
@@ -277,7 +278,7 @@
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr, nucros, photof, wavefl, boundc
       common /coskip/ nskip,iskip
-      common /cosout/ nnout, jout(21)
+      !common /cosout/ nnout, jout(21)
       common /coiout/ niout, indout(1)
       common /cofile/ input, output, jobnam, savfil
       common /coener/ energ(1)
@@ -816,7 +817,7 @@ cend
         stat='old'
 * make sure sequential formatted files are appended not overwritten
 cstart unix-hp unix-dec unix-iris unix-sun unix-ifort
-        accs='append'
+c;        accs='append'
 cend
       else
         stat='new'
@@ -829,9 +830,9 @@ cstart cray
 c;      stat = 'unknown'
 cend
 cstart unix-darwin
-        inquire(unit=iunit,opened=od)
-* if temporary file is already opened, close it
-        if (od) close(unit=iunit)
+c;        inquire(unit=iunit,opened=od)
+c;* if temporary file is already opened, close it
+c;        if (od) close(unit=iunit)
 cend
 cstart unix mac cray
         open(unit=iunit,  access='sequential',
@@ -1665,6 +1666,7 @@ c.....reserve space for restart information
 *  variable in common block /coeint/
 *    eint:      array containing channel energies (in hartree)
 *  ------------------------------------------------------------------
+      use mod_cosout
       implicit double precision (a-h,o-z)
       integer ic, icol, ii, ir, irow, jtot, jlpar, length, nmax,
      :        nnout, nopen, nfile, nu, mmout
@@ -1673,7 +1675,7 @@ c.....reserve space for restart information
       common /clseg/ lseg,intrel,lchar
       common /coeint/ eint(1)
       common /coered/ ered, rmu
-      common /cosout/ nnout, jout(21)
+      !common /cosout/ nnout, jout(21)
 *  variable in common block /coselb/
 *     ibasty    basistype
       common /coselb/ ibasty
