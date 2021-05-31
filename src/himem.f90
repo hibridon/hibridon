@@ -41,22 +41,122 @@ module mod_cov2
    end subroutine allocate_cov2
 end module mod_cov2
 
+module mod_coiv2
+   implicit none
+   real(8), dimension(:), allocatable :: iv2
+   contains
+   subroutine allocate_coiv2(n) 
+      integer, intent(in) :: n
+      allocate(iv2(n)) ;
+   end subroutine allocate_coiv2
+end module mod_coiv2
+
+module mod_cocent
+   implicit none
+   real(8), dimension(:), allocatable :: cent
+   contains
+   subroutine allocate_cocent(n) 
+      integer, intent(in) :: n
+      allocate(cent(n)) ;
+   end subroutine allocate_cocent
+end module mod_cocent
+
+module mod_coeint
+   implicit none
+   real(8), dimension(:), allocatable :: eint
+   contains
+   subroutine allocate_coeint(n) 
+      integer, intent(in) :: n
+      allocate(eint(n)) ;
+   end subroutine allocate_coeint
+end module mod_coeint
+
+module mod_coj12
+   implicit none
+   real(8), dimension(:), allocatable :: j12
+   contains
+   subroutine allocate_coj12(n) 
+      integer, intent(in) :: n
+      allocate(j12(n)) ;
+   end subroutine allocate_coj12
+end module mod_coj12
+
+module mod_coj12pk
+   implicit none
+   real(8), dimension(:), allocatable :: j12pk
+   contains
+   subroutine allocate_coj12pk(n) 
+      integer, intent(in) :: n
+      allocate(j12pk(n)) ;
+   end subroutine allocate_coj12pk
+end module mod_coj12pk
  
+module mod_covvl
+   implicit none
+   real(8), dimension(:), allocatable :: vvl
+   contains
+   subroutine allocate_covvl(n) 
+      integer, intent(in) :: n
+      allocate(vvl(n)) ;
+   end subroutine allocate_covvl
+end module mod_covvl
+
+module mod_cofact
+   implicit none
+   real(8), dimension(:), allocatable :: si
+   contains
+   subroutine allocate_cofact(n) 
+      integer, intent(in) :: n
+      allocate(si(n)) ;
+   end subroutine allocate_cofact
+end module mod_cofact
+
+module mod_coener
+   implicit none
+   real(8), dimension(:), allocatable :: energ
+   contains
+   subroutine allocate_coener(n) 
+      integer, intent(in) :: n
+      allocate(energ(n)) ;
+   end subroutine allocate_coener
+end module mod_coener
+
+module mod_clseg
+   implicit none
+   integer, allocatable :: lseg, intrel, lchar
+   contains
+   subroutine allocate_clseg() 
+      allocate(lseg) ; allocate(intrel) ; allocate(lchar) ;
+   end subroutine allocate_clseg
+end module mod_clseg
+
+module mod_cobuf
+   implicit none
+   integer, dimension(:), allocatable :: ibuf
+   integer, allocatable               :: lbuf
+   contains
+   subroutine allocate_cobuf() 
+      allocate(ibuf(1024)) ; allocate(lbuf) ;
+   end subroutine allocate_cobuf
+end module mod_cobuf
+
+
+
  ! All the commons blocks from himain.t:
-    ! common /comom/  xmom(3), imom(13)
-    !   common /cosout/ nnout, jout(kout)
-    !   common /coiout/ niout, indout(kout)
-    !   common /cov2/ nv2max, ndummy, v2(kv2max)
-    !   common /coiv2/ iv2(kv2max)
-    !   common /cocent/ cent(kmax)
-    !   common /coeint/ eint(kmax)
-    !   common /coj12/ j12(kmax)
-    !   common /coj12p/ j12pk(kmax)
-    !   common /covvl/  vvl(klammx)
-    !   common /cofact/ si(kfact)
-    !   common /coener/ energ(ken)
-    !   common /clseg/  lseg,intrel,lchar
-    !   common /cobuf/  lbuf,ibuf(1024)
+    !!   common /comom/  xmom(3), imom(13)
+    !!   common /cosout/ nnout, jout(kout)
+    !!   common /coiout/ niout, indout(kout)
+    !!   common /cov2/ nv2max, ndummy, v2(kv2max)
+    !!   common /coiv2/ iv2(kv2max)
+    !!   common /cocent/ cent(kmax)
+    !!   common /coeint/ eint(kmax)
+    !!   common /coj12/ j12(kmax)
+    !!   common /coj12p/ j12pk(kmax)
+    !!   common /covvl/  vvl(klammx)
+    !!   common /cofact/ si(kfact)
+    !!  common /coener/ energ(ken)
+    !!   common /clseg/  lseg,intrel,lchar
+    !!   common /cobuf/  lbuf,ibuf(1024)
     !   common /cofil/  nfl,iofbuf,maxrec(60),iofrec(60),nwrec
     !   common /conlam/ nlam, nlammx, lamnum(klammx)
     !   common /coatpi/ narray, isiz(krotmx)
