@@ -140,7 +140,338 @@ module mod_cobuf
    end subroutine allocate_cobuf
 end module mod_cobuf
 
+module mod_cofil
+   implicit none
+   integer, dimension(:), allocatable :: maxrec, iofrec
+   integer, allocatable               :: nfl, iofbuf, nwrec
+   contains
+   subroutine allocate_cofil() 
+      allocate(maxrec(60)) ; allocate(iofrec(60)) ;
+      allocate(nfl)        ; allocate(iofbuf)      ; allocate(nwrec)
+   end subroutine allocate_cofil
+end module mod_cofil
 
+module mod_conlam
+   implicit none
+   integer, dimension(:), allocatable :: lamnum
+   integer, allocatable               :: nlam, nlammx
+   contains
+   subroutine allocate_conlam(n)
+      integer, intent(in) :: n 
+      allocate(lamnum(n)) ; allocate(nlam) ; allocate(nlammx)
+   end subroutine allocate_conlam
+end module mod_conlam
+
+module mod_coatpi
+   implicit none
+   integer, dimension(:), allocatable :: isiz
+   integer, allocatable               :: narray
+   contains
+   subroutine allocate_coatpi(n)
+      integer, intent(in) :: n 
+      allocate(isiz(n)) ; allocate(narray) 
+   end subroutine allocate_coatpi
+end module mod_coatpi
+
+module mod_coatp3
+   implicit none
+   integer, dimension(:), allocatable :: isizh
+   contains
+   subroutine allocate_coatp3(n)
+      integer, intent(in) :: n 
+      allocate(isizh(n))
+   end subroutine allocate_coatp3
+end module mod_coatp3
+
+module mod_coatpr
+   implicit none
+   real(8), dimension(:), allocatable :: c
+   contains
+   subroutine allocate_coatpr(n)
+      integer, intent(in) :: n 
+      allocate(c(n))
+   end subroutine allocate_coatpr
+end module mod_coatpr
+
+module mod_coatp1
+   implicit none
+   real(8), dimension(:), allocatable :: ctemp
+   contains
+   subroutine allocate_coatp1(n)
+      integer, intent(in) :: n 
+      allocate(ctemp(n))
+   end subroutine allocate_coatp1
+end module mod_coatp1
+
+module mod_coatp2
+   implicit none
+   real(8), dimension(:), allocatable :: chold
+   contains
+   subroutine allocate_coatp2(n)
+      integer, intent(in) :: n 
+      allocate(chold(n))
+   end subroutine allocate_coatp2
+end module mod_coatp2
+
+module mod_coz
+   implicit none
+   real(8), dimension(:,:), allocatable :: z
+   contains
+   subroutine allocate_coz(n)
+      integer, intent(in) :: n 
+      allocate(z(n,n))
+   end subroutine allocate_coz
+end module mod_coz
+
+module mod_cow
+   implicit none
+   real(8), dimension(:,:), allocatable :: w
+   contains
+   subroutine allocate_cow(n)
+      integer, intent(in) :: n 
+      allocate(w(n,n))
+   end subroutine allocate_cow
+end module mod_cow
+
+module mod_cozmat
+   implicit none
+   real(8), dimension(:,:), allocatable :: zmat
+   contains
+   subroutine allocate_cozmat(n)
+      integer, intent(in) :: n 
+      allocate(zmat(n,n))
+   end subroutine allocate_cozmat
+end module mod_cozmat
+
+module mod_coamat
+   implicit none
+   real(8), dimension(:,:), allocatable :: amat
+   contains
+   subroutine allocate_coamat(n)
+      integer, intent(in) :: n 
+      allocate(amat(n,n))
+   end subroutine allocate_coamat
+end module mod_coamat
+
+module mod_cobmat
+   implicit none
+   real(8), dimension(:,:), allocatable :: bmat
+   contains
+   subroutine allocate_cobmat(n)
+      integer, intent(in) :: n 
+      allocate(bmat(n,n))
+   end subroutine allocate_cobmat
+end module mod_cobmat
+
+module mod_cotq1
+   implicit none
+   real(8), dimension(:,:), allocatable :: tq1
+   contains
+   subroutine allocate_cotq1(n)
+      integer, intent(in) :: n 
+      allocate(tq1(n,n))
+   end subroutine allocate_cotq1
+end module mod_cotq1
+
+module mod_cotq2
+   implicit none
+   real(8), dimension(:,:), allocatable :: tq2
+   contains
+   subroutine allocate_cotq2(n)
+      integer, intent(in) :: n 
+      allocate(tq2(n,n))
+   end subroutine allocate_cotq2
+end module mod_cotq2
+
+module mod_cotq3
+   implicit none
+   real(8), dimension(:,:), allocatable :: tq3
+   contains
+   subroutine allocate_cotq3(n)
+      integer, intent(in) :: n 
+      allocate(tq3(n,n))
+   end subroutine allocate_cotq3
+end module mod_cotq3
+
+module mod_cojq
+   implicit none
+   real(8), dimension(:), allocatable :: jq
+   contains
+   subroutine allocate_cojq(n)
+      integer, intent(in) :: n 
+      allocate(jq(n))
+   end subroutine allocate_cojq
+end module mod_cojq
+
+module mod_colq
+   implicit none
+   real(8), dimension(:), allocatable :: lq
+   contains
+   subroutine allocate_colq(n)
+      integer, intent(in) :: n 
+      allocate(lq(n))
+   end subroutine allocate_colq
+end module mod_colq
+
+module mod_coinq
+   implicit none
+   integer, dimension(:), allocatable :: inq
+   contains
+   subroutine allocate_coinq(n)
+      integer, intent(in) :: n 
+      allocate(inq(n))
+   end subroutine allocate_coinq
+end module mod_coinq
+
+module mod_cojhld
+   implicit none
+   integer, dimension(:), allocatable :: jhold
+   contains
+   subroutine allocate_cojhld(n)
+      integer, intent(in) :: n 
+      allocate(jhold(n))
+   end subroutine allocate_cojhld
+end module mod_cojhld
+
+module mod_coehld
+   implicit none
+   real(8), dimension(:), allocatable :: ehold
+   contains
+   subroutine allocate_coehld(n)
+      integer, intent(in) :: n 
+      allocate(ehold(n))
+   end subroutine allocate_coehld
+end module mod_coehld
+
+module mod_coinhl
+   implicit none
+   integer, dimension(:), allocatable :: inhold
+   contains
+   subroutine allocate_coinhl(n)
+      integer, intent(in) :: n 
+      allocate(inhold(n))
+   end subroutine allocate_coinhl
+end module mod_coinhl
+
+module mod_coisc1
+   implicit none
+   integer, dimension(:), allocatable :: isc1
+   contains
+   subroutine allocate_coisc1(n)
+      integer, intent(in) :: n 
+      allocate(isc1(n))
+   end subroutine allocate_coisc1
+end module mod_coisc1
+
+module mod_coisc2
+   implicit none
+   integer, dimension(:), allocatable :: isc2
+   contains
+   subroutine allocate_coisc2(n)
+      integer, intent(in) :: n 
+      allocate(isc2(n))
+   end subroutine allocate_coisc2
+end module mod_coisc2
+
+module mod_coisc3
+   implicit none
+   integer, dimension(:), allocatable :: isc3
+   contains
+   subroutine allocate_coisc3(n)
+      integer, intent(in) :: n 
+      allocate(isc3(n))
+   end subroutine allocate_coisc3
+end module mod_coisc3
+
+module mod_coisc4
+   implicit none
+   integer, dimension(:), allocatable :: isc4
+   contains
+   subroutine allocate_coisc4(n)
+      integer, intent(in) :: n 
+      allocate(isc4(n))
+   end subroutine allocate_coisc4
+end module mod_coisc4
+
+module mod_coisc5
+   implicit none
+   integer, dimension(:), allocatable :: isc5
+   contains
+   subroutine allocate_coisc5(n)
+      integer, intent(in) :: n 
+      allocate(isc5(n))
+   end subroutine allocate_coisc5
+end module mod_coisc5
+
+module mod_coisc6
+   implicit none
+   integer, dimension(:), allocatable :: isc6
+   contains
+   subroutine allocate_coisc6(n)
+      integer, intent(in) :: n 
+      allocate(isc6(n))
+   end subroutine allocate_coisc6
+end module mod_coisc6
+
+module mod_coisc7
+   implicit none
+   integer, dimension(:), allocatable :: isc7
+   contains
+   subroutine allocate_coisc7(n)
+      integer, intent(in) :: n 
+      allocate(isc7(n))
+   end subroutine allocate_coisc7
+end module mod_coisc7
+
+module mod_coisc8
+   implicit none
+   integer, dimension(:), allocatable :: isc8
+   contains
+   subroutine allocate_coisc8(n)
+      integer, intent(in) :: n 
+      allocate(isc8(n))
+   end subroutine allocate_coisc8
+end module mod_coisc8
+
+module mod_coisc9
+   implicit none
+   integer, dimension(:), allocatable :: isc9
+   contains
+   subroutine allocate_coisc9(n)
+      integer, intent(in) :: n 
+      allocate(isc9(n))
+   end subroutine allocate_coisc9
+end module mod_coisc9
+
+module mod_coisc10
+   implicit none
+   integer, dimension(:), allocatable :: isc10
+   contains
+   subroutine allocate_coisc10(n)
+      integer, intent(in) :: n 
+      allocate(isc10(n))
+   end subroutine allocate_coisc10
+end module mod_coisc10
+
+module mod_coisc11
+   implicit none
+   integer, dimension(:), allocatable :: isc11
+   contains
+   subroutine allocate_coisc11(n)
+      integer, intent(in) :: n 
+      allocate(isc11(n))
+   end subroutine allocate_coisc11
+end module mod_coisc11
+
+module mod_coisc12
+   implicit none
+   integer, dimension(:), allocatable :: isc12
+   contains
+   subroutine allocate_coisc12(n)
+      integer, intent(in) :: n 
+      allocate(isc12(n))
+   end subroutine allocate_coisc12
+end module mod_coisc12
 
  ! All the commons blocks from himain.t:
     !!   common /comom/  xmom(3), imom(13)
@@ -157,39 +488,39 @@ end module mod_cobuf
     !!  common /coener/ energ(ken)
     !!   common /clseg/  lseg,intrel,lchar
     !!   common /cobuf/  lbuf,ibuf(1024)
-    !   common /cofil/  nfl,iofbuf,maxrec(60),iofrec(60),nwrec
-    !   common /conlam/ nlam, nlammx, lamnum(klammx)
-    !   common /coatpi/ narray, isiz(krotmx)
-    !   common /coatp3/ isizh(krotmx)
-    !   common /coatpr/ c(krotmx)
-    !   common /coatp1/ ctemp(krotmx)
-    !   common /coatp2/ chold(krotmx)
-    !   common /coz/ z(kmax,kmax)
-    !   common /cow/ w(kmax,kmax)
-    !   common /cozmat/ zmat(kmax,kmax)
-    !   common /coamat/ amat(kmax,kmax)
-    !   common /cobmat/ bmat(kairy,kairy)
-    !   common /cotq1/ tq1(kmax,kmax)
-    !   common /cotq2/ tq2(kmax,kmax)
-    !   common /cotq3/ tq3(kmax,kmax)
-    !   common /cojq/ jq(kmax)
-    !   common /colq/ lq(kmax)
-    !   common /coinq/ inq(kmax)
-    !   common /cojhld/ jhold(kmax)
-    !   common /coehld/ ehold(kmax)
-    !   common /coinhl/ inhold(kmax)
-    !   common /coisc1/ isc1(kmax)
-    !   common /coisc2/ isc2(kmax)
-    !   common /coisc3/ isc3(kmax)
-    !   common /coisc4/ isc4(kmax)
-    !   common /coisc5/ isc5(kmax)
-    !   common /coisc6/ isc6(kmax)
-    !   common /coisc7/ isc7(kmax)
-    !   common /coisc8/ isc8(kmax)
-    !   common /coisc9/ isc9(kmax)
-    !   common /coisc10/ isc10(kmax)
-    !   common /coisc11/ isc11(kmax)
-    !   common /coisc12/ isc12(kmax)
+    !!   common /cofil/  nfl,iofbuf,maxrec(60),iofrec(60),nwrec
+    !!   common /conlam/ nlam, nlammx, lamnum(klammx)
+    !!   common /coatpi/ narray, isiz(krotmx)
+    !!   common /coatp3/ isizh(krotmx)
+    !!   common /coatpr/ c(krotmx)
+    !!   common /coatp1/ ctemp(krotmx)
+    !!   common /coatp2/ chold(krotmx)
+    !!   common /coz/ z(kmax,kmax)
+    !!   common /cow/ w(kmax,kmax)
+    !!   common /cozmat/ zmat(kmax,kmax)
+    !!   common /coamat/ amat(kmax,kmax)
+    !!   common /cobmat/ bmat(kairy,kairy)
+    !!   common /cotq1/ tq1(kmax,kmax)
+    !!   common /cotq2/ tq2(kmax,kmax)
+    !!   common /cotq3/ tq3(kmax,kmax)
+    !!   common /cojq/ jq(kmax)
+    !!   common /colq/ lq(kmax)
+    !!   common /coinq/ inq(kmax)
+    !!   common /cojhld/ jhold(kmax)
+    !!   common /coehld/ ehold(kmax)
+    !!   common /coinhl/ inhold(kmax)
+    !!   common /coisc1/ isc1(kmax)
+    !!   common /coisc2/ isc2(kmax)
+    !!   common /coisc3/ isc3(kmax)
+    !!   common /coisc4/ isc4(kmax)
+    !!   common /coisc5/ isc5(kmax)
+    !!   common /coisc6/ isc6(kmax)
+    !!   common /coisc7/ isc7(kmax)
+    !!   common /coisc8/ isc8(kmax)
+    !!   common /coisc9/ isc9(kmax)
+    !!   common /coisc10/ isc10(kmax)
+    !!   common /coisc11/ isc11(kmax)
+    !!   common /coisc12/ isc12(kmax)
     !   common /colsc1/ lsc1(kmax)
     !   common /cosc1/ sc1(kmax)
     !   common /cosc2/ sc2(kmax)
