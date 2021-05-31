@@ -1,10 +1,10 @@
-cstart unix-xlf
+#if defined(XLF)
 @process fixed(132)
-cend
+#endif
       subroutine version(iunit)
-cstart unix-ifort
+#if defined(__INTEL_COMPILER)
 cdec$ fixedformlinesize:132
-cend
+#endif
       character*100 profile
       character*140 build
       common /bld_config/ build(5)
@@ -28,7 +28,7 @@ cend
      :  ', S. GREGURICK, F. LIQUE',
      : /' ---------------------------------------------------',
      :  '-----------------------')
-cstart unix-darwin .or. unix-x86
+#if defined(__MACH__) || defined(__LINUX__)
       write (iunit,15)
 15    format(11x,'BUILD CONFIGURATION:')
       do i=1,5
@@ -37,7 +37,7 @@ cstart unix-darwin .or. unix-x86
       write (iunit,20)
 20    format (' ---------------------------------------------------',
      :  '-----------------------')
-cend
+#endif
 cstart none
       i=system("hib_sysconfig")
       open(unit=8,file='sysprofile',access='sequential')
@@ -129,10 +129,10 @@ cend
       write (iunit,'(a)') l(1:lenstr(l))
       return
       end
-cstart unix-xlf
+#if defined(XLF)
 @process fixed(132)
-cend
-cstart unix-darwin .or. unix-x86
+#endif
+#if defined(__MACH__) || defined(__LINUX__)
       block data config
 c variables in data config
       character*140 build

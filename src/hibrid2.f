@@ -991,7 +991,10 @@ c
         if (existf) then
           stat='old'
 * make sure sequential formatted files are appended not overwritten
-cstart unix-hp unix-dec unix-iris unix-sun unix-ifort unix-pgi
+#if defined(__INTEL_COMPILER) || defined(__PGI)
+          accs='append'
+#endif
+cstart unix-hp unix-dec unix-iris unix-sun
           accs='append'
 cend
         else
@@ -1501,7 +1504,10 @@ cmha .xsc file is appended if it already exists
         if (existf) then
           stat='old'
 * make sure sequential formatted files are appended not overwritten
-cstart unix-hp unix-dec unix-iris unix-sun unix-ifort unix-pgi
+#if defined(__INTEL_COMPILER) || defined(__PGI)
+          accs='append'
+#endif
+cstart unix-hp unix-dec unix-iris unix-sun
           accs='append'
 cend
 

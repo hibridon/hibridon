@@ -2,9 +2,9 @@ cstart unix-xlf
 c;@process fixed(132)
 cend
       subroutine version(iunit)
-cstart unix-ifort
+#if defined(__INTEL_COMPILER)
 cdec$ fixedformlinesize:132
-cend
+#endif
       character*100 profile
       character*140 build
       common /bld_config/ build(5)

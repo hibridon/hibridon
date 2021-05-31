@@ -95,7 +95,7 @@ echo "     : ''/">>SYSCONFIG
 echo "      data build(5) /" >> SYSCONFIG
 #echo "     : '$lib3'/">>SYSCONFIG
 echo "     : ''/">>SYSCONFIG
-echo "cend">>SYSCONFIG
+echo "#endif">>SYSCONFIG
 echo "      end" >> SYSCONFIG
 end:  
 exit

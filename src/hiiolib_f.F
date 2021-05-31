@@ -817,10 +817,10 @@ c;         open (unit=iunit, file=filnam, access='STREAM',
 c;     $        status='REPLACE', err=999, iostat=ierr,
 c;     $        buffered='YES')
 cend
-cstart unix-gfortran
+#if defined(__GFORTRAN__)
          open (unit=iunit, file=filnam, access='STREAM',
      $        status='REPLACE', err=999, iostat=ierr)
-cend
+#endif
          return
       end if
 c
@@ -834,14 +834,13 @@ c     Stream i/o mode, exist file, read/write
          if (openfl) then
             print *, '*** WARNING: ', filnam, 'NOT CLOSED'
          end if
-cstart .not. unix-gfortran
-c;         open (unit=iunit, file=filnam, access='STREAM',
-c;     $        status='OLD', err=999, iostat=ierr,
-c;     $        buffered='YES')
-cend
-cstart unix-gfortran
+#if defined(__GFORTRAN__)
          open (unit=iunit, file=filnam, access='STREAM', status='OLD', err=999, iostat=ierr)
-cend
+#else
+         open (unit=iunit, file=filnam, access='STREAM',
+     $        status='OLD', err=999, iostat=ierr,
+     $        buffered='YES')
+#endif
          return
       end if
 c
@@ -866,7 +865,10 @@ c
         if (openfl) return
         stat='old'
 * make sure sequential formatted files are appended not overwritten
-cstart unix-hp unix-dec unix-iris unix-sun unix-ifort unix-pgi
+#if defined(__INTEL_COMPILER) || defined(__PGI)
+        accs='append'
+#endif
+cstart unix-hp unix-dec unix-iris unix-sun
         accs='append'
 cend
       else

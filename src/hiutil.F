@@ -42,9 +42,9 @@ cstart unix-xlf
 c;@process fixed(132)
 cend
       subroutine vaxhlp(line1)
-cstart unix-ifort
+#if defined(__INTEL_COMPILER)
 cdec$ fixedformlinesize:132
-cend
+#endif
 * latest revision 24-feb-2004
       implicit character*10(z)
       character*(*) line1
@@ -444,16 +444,16 @@ c;      d=date()
 c;      c=clock()
 c;      cdate = d//'  '//c//'  '
 cend
-cstart unix-ifort unix-pgi
+#if defined(__INTEL_COMPILER) || defined(__PGI)
       character*24 cdatefull
       call fdate(cdatefull)
       cdate=cdatefull(5:24)
-cend
-cstart unix-g95
-c;        character*24 cdatefull
-c;        cdatefull=fdate()
-c;        cdate=cdatefull(5:24)
-cend
+#endif
+#if defined(__GFORTRAN__) || defined(__G95__)
+      character*24 cdatefull
+      cdatefull=fdate()
+      cdate=cdatefull(5:24)
+#endif
       return
       end
 c-------------------------------------------------------------------
@@ -478,13 +478,13 @@ cstart unix-xlf
 c;      t=timef()/1000d0
 c;      te=t
 cend
-cstart unix-g95
-c;      real*4 tarray(2), result
-c;      call dtime(tarray,result)
-c;      t=tarray(1)
-c;      te1=result
-cend
-cstart unix-ifort
+#if defined(__G95__)
+      real*4 tarray(2), result
+      call dtime(tarray,result)
+      t=tarray(1)
+      te1=result
+#endif
+#if defined(__INTEL_COMPILER)
       real*4 tt
 * use etime for user+cpu time
 * use cpu_time for user+cpu time
@@ -499,7 +499,8 @@ c this only accurate to seconds, but works fine when date changes
       call pxftime(itime, ierror)
       te = dble(itime)
 c
-cend
+#endif
+
 cstart unix-pgi
 c;      real tt, tarray(2), result
 c;* use cpu_time for user+cpu time
@@ -526,11 +527,11 @@ cend
 *------------------------------------------------------------------------
       function second()
       double precision second
-cstart unix-ifort unix-pgi
+#if defined(__INTEL_COMPILER) || defined(__PGI)
       real*4 te
       call cpu_time(te)
       second=te
-cend
+#endif
 cstart unix-xlf
 c;      second=timef()*1000d0
 cend
@@ -541,11 +542,11 @@ c;      real et(2)
 c;      fe=etime(et(1),et(2))
 c;      second=fe
 cend
-cstart unix-g95
-c;      real*4 tarray(2), result
-c;      call dtime(tarray,result)
-c;      second=tarray(1)
-cend
+#if defined(__G95__)
+      real*4 tarray(2), result
+      call dtime(tarray,result)
+      second=tarray(1)
+#endif
       return
       end
 *------------------------------------------------------------------------

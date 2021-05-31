@@ -815,8 +815,11 @@ cend
         if (openfl) return
         stat='old'
 * make sure sequential formatted files are appended not overwritten
-cstart unix-hp unix-dec unix-iris unix-sun unix-ifort
-        accs='append'
+#if defined(__INTEL_COMPILER) || defined(__PGI)
+          accs='append'
+#endif
+cstart unix-hp unix-dec unix-iris unix-sun
+          accs='append'
 cend
       else
         stat='new'

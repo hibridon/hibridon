@@ -14,9 +14,9 @@ cstart unix-xlf
 c;@process fixed(132)
 cend
       subroutine vaxhlp(line1)
-cstart unix-ifort
+#if defined(__INTEL_COMPILER)
 c;cdec$ fixedformlinesize:132
-cend
+#endif
 * latest revision 24-feb-2004
       implicit character*10(z)
       character*(*) line1
