@@ -83,6 +83,7 @@ echo "compiling hi*.f files (this may take a few minutes) ..." >>& $basedir/obj.
 cd $basedir/src
 # compile files with modules inside first
 $basedir/bin/ftn_hib  -O  hicommon.f >>& $basedir/obj.log
+$basedir/bin/ftn_hib  -O  himem.f90 >>& $basedir/obj.log
 $basedir/bin/ftn_hib  -O  hit*.f >>& $basedir/obj.log
 $basedir/bin/ftn_hib  -O  hib*.f >>& $basedir/obj.log
 

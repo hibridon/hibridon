@@ -63,14 +63,14 @@ for i in $*
 do
   base=`basename $i`
   if test $i != $base ; then dirni=`echo $i|sed "s/\/$base//"` ;else dirni=. ; fi
-  basef=`basename $i .f`
+  basef=`basename $i | awk -F. '{print $1}'`
   baseo=`basename $i .o`
   if test "$baseo" != "$base"; then
     if test "$dirni" != "." ; then baseo="$dirni/$baseo"; fi
     list="$list $baseo.o"
     continue;
   fi
-  filei=$basef'.f'
+  filei=$base #$basef'.f'
   fileo=$basef'.o'
   logfi=$basef'.log'
   if test "$dirni" != "." ; then fileo=$dirni/$fileo ; cd $dirni; fi
@@ -84,7 +84,7 @@ do
   if test $preprocess != 0 ; then $echo -n "preprocessing ... " ;ftc $filei ;fi
   $echo $FC -c $HIB_FFLAGS $extraopt $option $filei
   eval "$FC -c $HIB_FFLAGS $extraopt $option $filei"
-  if test $? != 0 ; then $echo failed: ; cat $logfi; rm -f `basename $filei .f`.o ; exit 1; fi;
+  if test $? != 0 ; then $echo failed: ; cat $logfi; rm -f $fileo ; exit 1; fi;
   $echo compilation done
 done
 

@@ -142,10 +142,7 @@ cend
 *  ----------------------------------------------------------
       logical lsc1
       common /comom/  xmom(3), imom(13)
-      !BD:
       !common /cosout/ nnout, jout(kout)
-      call allocate_cosout(kout)
-      !/BD
       common /coiout/ niout, indout(kout)
       common /cov2/ nv2max, ndummy, v2(kv2max)
       common /coiv2/ iv2(kv2max)
@@ -230,6 +227,8 @@ cend
 *     5 kmax**2 + 25 kmax + kv2max + kfact -- with airy integration
 *
 *  parameter below sets maximum size of asymmetric top basis fn expansion
+      call allocate_cosout(kout)
+
       narray = 100
 *
       mairy = kairy
