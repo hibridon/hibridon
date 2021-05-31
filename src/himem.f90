@@ -1,13 +1,3 @@
-module mod_comom
-   implicit none
-   real(8), dimension(:), allocatable :: xmom
-   integer, dimension(:), allocatable :: imom
-   contains
-   subroutine allocate_comom() 
-      allocate(xmom(3)) ; allocate(imom(13))   
-   end subroutine allocate_comom
-end module mod_comom
-
 module mod_cosout
    implicit none
    integer, dimension(:), allocatable :: jout
