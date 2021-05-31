@@ -1,3 +1,45 @@
+module mod_comom
+   implicit none
+   real(8), dimension(:), allocatable :: xmom
+   integer, dimension(:), allocatable :: imom
+   contains
+   subroutine allocate_comom() 
+      allocate(xmom(3)) ; allocate(imom(13))   
+   end subroutine allocate_comom
+end module mod_comom
+
+module mod_cosout
+   implicit none
+   integer, dimension(:), allocatable :: jout
+   integer, allocatable               :: nnout
+   contains
+   subroutine allocate_comom(n) 
+      integer, intent(in) :: n
+      allocate(jout(n)) ; allocate(nnout)
+   end subroutine allocate_comom
+end module mod_cosout
+
+module mod_coiout
+   implicit none
+   integer, dimension(:), allocatable :: indout
+   integer, allocatable               :: niout
+   contains
+   subroutine allocate_comom(n) 
+      integer, intent(in) :: n
+      allocate(indout(n)) ; allocate(niout)
+   end subroutine allocate_comom
+end module mod_coiout
+
+module mod_cov2
+   implicit none
+   real(8), dimension(:), allocatable :: v2
+   integer, allocatable               :: nv2max, ndummy
+   contains
+   subroutine allocate_comom(n) 
+      integer, intent(in) :: n
+      allocate(v2(n)) ; allocate(nv2max) ; allocate(ndummy)
+   end subroutine allocate_comom
+end module mod_cov2
 
  
  ! All the commons blocks from himain.t:
