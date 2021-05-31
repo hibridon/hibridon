@@ -473,6 +473,215 @@ module mod_coisc12
    end subroutine allocate_coisc12
 end module mod_coisc12
 
+module mod_colsc1
+   implicit none
+   integer, dimension(:), allocatable :: lsc1
+   contains
+   subroutine allocate_colsc1(n)
+      integer, intent(in) :: n 
+      allocate(lsc1(n))
+   end subroutine allocate_colsc1
+end module mod_colsc1
+
+module mod_cosc1
+   implicit none
+   real(8), dimension(:), allocatable :: sc1
+   contains
+   subroutine allocate_cosc1(n)
+      integer, intent(in) :: n 
+      allocate(sc1(n))
+   end subroutine allocate_cosc1
+end module mod_cosc1
+
+module mod_cosc2
+   implicit none
+   real(8), dimension(:), allocatable :: sc2
+   contains
+   subroutine allocate_cosc2(n)
+      integer, intent(in) :: n 
+      allocate(sc2(n))
+   end subroutine allocate_cosc2
+end module mod_cosc2
+
+module mod_cosc3
+   implicit none
+   real(8), dimension(:), allocatable :: sc3
+   contains
+   subroutine allocate_cosc3(n)
+      integer, intent(in) :: n 
+      allocate(sc3(n))
+   end subroutine allocate_cosc3
+end module mod_cosc3
+
+module mod_cosc4
+   implicit none
+   real(8), dimension(:), allocatable :: sc4
+   contains
+   subroutine allocate_cosc4(n)
+      integer, intent(in) :: n 
+      allocate(sc4(n))
+   end subroutine allocate_cosc4
+end module mod_cosc4
+
+module mod_cosc5
+   implicit none
+   real(8), dimension(:), allocatable :: sc5
+   contains
+   subroutine allocate_cosc5(n)
+      integer, intent(in) :: n 
+      allocate(sc5(n))
+   end subroutine allocate_cosc5
+end module mod_cosc5
+
+module mod_cosc6
+   implicit none
+   real(8), dimension(:), allocatable :: sc6
+   contains
+   subroutine allocate_cosc6(n)
+      integer, intent(in) :: n 
+      allocate(sc6(n))
+   end subroutine allocate_cosc6
+end module mod_cosc6
+
+module mod_cosc7
+   implicit none
+   real(8), dimension(:), allocatable :: sc7
+   contains
+   subroutine allocate_cosc7(n)
+      integer, intent(in) :: n 
+      allocate(sc7(n))
+   end subroutine allocate_cosc7
+end module mod_cosc7
+
+module mod_cosc8
+   implicit none
+   real(8), dimension(:), allocatable :: sc8
+   contains
+   subroutine allocate_cosc8(n)
+      integer, intent(in) :: n 
+      allocate(sc8(n))
+   end subroutine allocate_cosc8
+end module mod_cosc8
+
+module mod_cosc9
+   implicit none
+   real(8), dimension(:), allocatable :: sc9
+   contains
+   subroutine allocate_cosc9(n)
+      integer, intent(in) :: n 
+      allocate(sc9(n))
+   end subroutine allocate_cosc9
+end module mod_cosc9
+
+module mod_cosc10
+   implicit none
+   real(8), dimension(:), allocatable :: sc10
+   contains
+   subroutine allocate_cosc10(n)
+      integer, intent(in) :: n 
+      allocate(sc10(n))
+   end subroutine allocate_cosc10
+end module mod_cosc10
+
+module mod_cosc11
+   implicit none
+   real(8), dimension(:), allocatable :: sc11
+   contains
+   subroutine allocate_cosc11(n)
+      integer, intent(in) :: n 
+      allocate(sc11(n))
+   end subroutine allocate_cosc11
+end module mod_cosc11
+
+module mod_coeig
+   implicit none
+   real(8), dimension(:,:), allocatable :: c0, c1, c2
+   contains
+   subroutine allocate_coeig()
+      allocate(c0(4,4)) ; allocate(c1(3,3)) ; allocate(c2(2,2))
+   end subroutine allocate_coeig
+end module mod_coeig
+
+module mod_coeig2
+   implicit none
+   real(8), dimension(:,:), allocatable :: t12, t32
+   contains
+   subroutine allocate_coeig2()
+      allocate(t12(5,5)) ; allocate(t32(3,3))
+   end subroutine allocate_coeig2
+end module mod_coeig2
+
+module mod_cokaux
+   implicit none
+   integer, allocatable :: naux
+   contains
+   subroutine allocate_cokaux()
+      allocate(naux)
+   end subroutine allocate_cokaux
+end module mod_cokaux
+
+module mod_cotble
+   implicit none
+   integer, dimension(:), allocatable :: jttble
+   integer, allocatable               :: npnt
+   contains
+   subroutine allocate_cotble(n)
+      integer, intent(in) :: n
+      allocate(jttble(n)) ; allocate(npnt)
+   end subroutine allocate_cotble
+end module mod_cotble
+
+module mod_coqvec
+   implicit none
+   real(8), dimension(:), allocatable :: q
+   integer, allocatable               :: mxphot, nphoto
+   contains
+   subroutine allocate_coqvec(n)
+      integer, intent(in) :: n
+      allocate(q(n)) ; allocate(mxphot) ; allocate(nphoto)
+   end subroutine allocate_coqvec
+end module mod_coqvec
+
+module mod_coqvec2
+   implicit none
+   real(8), dimension(:), allocatable :: q2
+   contains
+   subroutine allocate_coqvec2(n)
+      integer, intent(in) :: n
+      allocate(q2(n)) 
+   end subroutine allocate_coqvec2
+end module mod_coqvec2
+
+module mod_codim
+   implicit none
+   integer, allocatable :: mairy, mmax, mbig
+   contains
+   subroutine allocate_codim()
+      allocate(mairy) ; allocate(mmax) ; allocate(mbig) 
+   end subroutine allocate_codim
+end module mod_codim
+
+module mod_comxbs
+   implicit none
+   integer, allocatable :: maxbas
+   contains
+   subroutine allocate_comxbs()
+      allocate(maxbas)
+   end subroutine allocate_comxbs
+end module mod_comxbs
+
+module mod_comxm
+   implicit none
+   integer, allocatable :: ncache, mxmblk
+   contains
+   subroutine allocate_comxm()
+      allocate(ncache) ; allocate(mxmblk)
+   end subroutine allocate_comxm
+end module mod_comxm
+
+
+
+
  ! All the commons blocks from himain.t:
     !!   common /comom/  xmom(3), imom(13)
     !!   common /cosout/ nnout, jout(kout)
@@ -521,25 +730,25 @@ end module mod_coisc12
     !!   common /coisc10/ isc10(kmax)
     !!   common /coisc11/ isc11(kmax)
     !!   common /coisc12/ isc12(kmax)
-    !   common /colsc1/ lsc1(kmax)
-    !   common /cosc1/ sc1(kmax)
-    !   common /cosc2/ sc2(kmax)
-    !   common /cosc3/ sc3(kmax)
-    !   common /cosc4/ sc4(kmax)
-    !   common /cosc5/ sc5(kmax)
-    !   common /cosc6/ sc6(kmax)
-    !   common /cosc7/ sc7(kmax)
-    !   common /cosc8/ sc8(kmax)
-    !   common /cosc9/ sc9(kmax)
-    !   common /cosc10/ sc10(kmax)
-    !   common /coeig2/  t12(5,5), t32(3,3)
-    !   common /coeig/  c0(4,4), c1(3,3), c2(2,2)
-    !   common /cosc11/ sc11(kaux3)
-    !   common /cosc11/ sc11(kaux)
-    !   common /cokaux/ naux
-    !   common /cotble/ npnt, jttble(kfact)
-    !   common /coqvec/ mxphot, nphoto, q(kqmax)
-    !   common /coqvec2/ q2(kq2)
-    !   common /codim/ mairy,mmax,mbig
-    !   common /comxbs/ maxbas
-    !   common /comxm/ ncache, mxmblk
+    !!   common /colsc1/ lsc1(kmax)
+    !!   common /cosc1/ sc1(kmax)
+    !!   common /cosc2/ sc2(kmax)
+    !!   common /cosc3/ sc3(kmax)
+    !!   common /cosc4/ sc4(kmax)
+    !!   common /cosc5/ sc5(kmax)
+    !!   common /cosc6/ sc6(kmax)
+    !!   common /cosc7/ sc7(kmax)
+    !!   common /cosc8/ sc8(kmax)
+    !!   common /cosc9/ sc9(kmax)
+    !!   common /cosc10/ sc10(kmax)
+    !!   common /coeig2/  t12(5,5), t32(3,3)
+    !!   common /coeig/  c0(4,4), c1(3,3), c2(2,2)
+    !!   common /cosc11/ sc11(kaux3)
+    !!   common /cosc11/ sc11(kaux)
+    !!   common /cokaux/ naux
+    !!   common /cotble/ npnt, jttble(kfact)
+    !!   common /coqvec/ mxphot, nphoto, q(kqmax)
+    !!   common /coqvec2/ q2(kq2)
+    !!   common /codim/ mairy,mmax,mbig
+    !!   common /comxbs/ maxbas
+    !!   common /comxm/ ncache, mxmblk
