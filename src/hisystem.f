@@ -141,12 +141,9 @@
 * added 3sigma + 1sigma basis routine (pjd, 30-jun-2018)
 * added chiral asymmetric top basis routine (pjd, 16-jan-2019)
 *
-*  variable in common block /comxbs/
-*     maxbas    maximum number of allowed basis types
-*     THIS SHOULD BE INCREASED AS BASIS ROUTINES ARE ADDED!!
 *     COMMON BLOCK COMXBS DEFINED IN HIMAIN
 * -------------------------------------------------------
-      common /comxbs/ maxbas
+      use mod_comxbs, only: maxbas
       common /coselb/ ibasty
       logical icheck
       icheck=.false.

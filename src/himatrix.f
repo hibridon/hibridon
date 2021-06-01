@@ -2609,8 +2609,8 @@ c--------------------------------------------------------------------
      1                r,mcolr,mrowr,ncol,nlink,nrow)
 c--------------------------------------------------------------------
 c.....unrolled version for ibm6000 and other risc machines
+      use mod_comxm, only: ncache, mxmblk
       implicit double precision (a-h,o-z)
-      common /comxm/ ncache, mxmblk
       include "common/vax1"
       include "common/vax2"
       dimension r(*),a(*),b(*)
@@ -4259,8 +4259,8 @@ c--------------------------------------------------------------------
      1                r,mcolr,mrowr,ncol,nlink,nrow)
 c--------------------------------------------------------------------
 c.....unrolled version for ibm6000 and other risc machines
+      use mod_comxm
       implicit double precision (a-h,o-z)
-      common /comxm/ ncache, mxmblk
       include "common/vax1"
       dimension r(*),a(*),b(*)
       include "common/vax2"

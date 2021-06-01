@@ -145,6 +145,7 @@
 *  ---------------------------------------------------------------------------
       use mod_cosout
       use constants
+      use mod_coqvec, only: nphoto
       implicit double precision (a-h,o-z)
       logical ipos, csflag, swrit, t2writ, writs, wrpart, partw,
      :        wrxsec, xsecwr, flaghf, t2test, flagsu, firstj, twomol,
@@ -161,7 +162,6 @@
       common /cojlpo/ jlpold
       common /coener/ ener(1)
       common /cophot/ photof, wavefn, boundf, wrsmat
-      common /coqvec/ mxphot, nphoto, q
       dimension tsq(nmax,nmax), scmat(nmax,nmax), sr(nmax,nmax),
      :          si(nmax,nmax), sc1(nmax,nmax),sc2(nmax,nmax)
       dimension isc1(1), isc2(1), jq(1), lq(1), inq(1),

@@ -78,13 +78,6 @@
 *                   false if scattering calculation
 *     wavefn        true if G(a,b) transformation matrices are saved
 *                   to be used later in computing the wavefunction
-*  variables in common block /coqvec/
-*     mxphot        maximum column dimension of q matrix
-*     nphoto        actual collumn dimension of q matrix
-*     q             accumulated gamma2 inhomogeneous propagator
-*                   only calculated if photof = .true.
-*                   this is stored as a column vector for each separate
-*                   ground-state wavefunction
 *  variable in common block /cowave/
 *     irec          record number of last written G(a,b) matrix
 *     ifil          local unit number for G(a,b) file
@@ -101,6 +94,7 @@
 *             calculation at energy=en+eshift
 *     noprin:       if .true., then most printing is suppressed
 * ----------------------------------------------------------------------------
+      use mod_coqvec, only: nphoto, q
       implicit double precision (a-h, o-z)
       integer i, icol, iend, ierr, ipt, itwo, izero, kstep, maxstp,
      :        nch, ncol, nmax, npt, nskip
@@ -108,7 +102,6 @@
       common /cophot/ photof, wavefn, boundf, wrsmat
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
-      common /coqvec/ mxphot, nphoto, q
       common /cosc10/ sc10(2)
       common /coered/ ered, rmu
       common /coipar/ ipar(9),jprint
@@ -121,8 +114,6 @@ cend
 *  vectors dimensioned nch
       dimension eigold(80),eignow(80),hp(80),y1(80),y2(80),cc(80),
      :    y4(80),gam1(80), gam2(80)
-*  vectors dimensioned nphoto*nch
-      dimension q(80)
       data izero, ione, zero, one /0, 1, 0.d0, 1.d0/
 *  powr is the power at which step sizes increase
 *  only for tolai < 1
@@ -542,11 +533,10 @@ c
 *    nmax:     maximum row dimension of matrices and maximum dimension of
 *              vectors
 * ----------------------------------------------------------------------
+      use mod_coqvec2, only: q => q2
       implicit double precision (a-h,o-z)
 *  square matrices (of row dimension nmax)
       dimension vecnow(80), scr(80)
-      dimension q(80)
-      common /coqvec2/ q
       common /cotq1/ tmat(80)
       data one, onemn, half, sq3 /1.d0, -1.d0, 0.5d0, 1.732050807d0/
       ra = rnow - half * drnow / sq3
@@ -866,6 +856,7 @@ cend
 *   authors:  joachim werner and millard alexander
 *   current revision date 19-mar-1996
 *  ------------------------------------------------------------
+      use mod_codim, only: mmax
       implicit double precision (a-h,o-z)
       character*(*) fname1,fname2
       character*20 cdate1,cdate2
@@ -893,7 +884,6 @@ cend
       common /cosc5/ lpack2(1)
       common /coisc2/ ipack1(1)
       common /coisc3/ ipack2(1)
-      common /codim/ mairy,mmax
 c
       zero=0
       acc=0

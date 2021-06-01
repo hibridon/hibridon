@@ -1,5 +1,10 @@
       program logair
       use mod_cosout
+      use mod_coqvec, only: allocate_coqvec
+      use mod_coqvec2, only: allocate_coqvec2
+      use mod_codim, only: allocate_codim, mairy, mmax
+      use mod_comxbs, only: allocate_comxbs
+      use mod_comxm, only: allocate_comxm
 ***********************************************************************
 ****   this code is not released for general public use            ****
 ****   all use must be by specific prior arrangement with:         ****
@@ -120,13 +125,6 @@ cend
 *  variables in common block /cotble/
 *     npnt:     max. number of pointer
 *     jttble:   array containing pointer to records in s-matrix
-*  variable in common block /coqvec/
-*     mxphot:   maximum number of initial states (maximum columns in q)
-*     nphoto:   actual number of initial states used
-*     q:        accumulated overlap matrix with ground state
-*               only calculated if photof = .true.
-*  variable in common block /comxbs/
-*     maxbas:   maximum number of allowed basis types
 *  variables in common block /coatpi/
 *     narray:   maximum size of asymmetric top basis fn expansion
 *               set to 500 (see krotmx above) in himain 
@@ -215,11 +213,6 @@ cstart unix
       common /cokaux/ naux
 cend
       common /cotble/ npnt, jttble(kfact)
-      common /coqvec/ mxphot, nphoto, q(kqmax)
-      common /coqvec2/ q2(kq2)
-      common /codim/ mairy,mmax,mbig
-      common /comxbs/ maxbas
-      common /comxm/ ncache, mxmblk
 *   total matrix and vector storage required is:
 *     7 kmax**2 + 25 kmax + kv2max + kfact -- without airy integration
 *     8 kmax**2 + 25 kmax + kv2max + kfact -- with airy integration
@@ -229,17 +222,17 @@ cend
 *  parameter below sets maximum size of asymmetric top basis fn expansion
       call allocate_cosout(kout)
 
+      call allocate_coqvec(kqmax, kmxpho, knphot)
+      call allocate_coqvec2(kq2)
+      call allocate_codim(kairy, kmax, kbig)
+      call allocate_comxbs(kmxbas)
+      call allocate_comxm()
+
       narray = 100
 *
-      mairy = kairy
-      mmax = kmax
-      mbig=kbig
 cstart unix-ibm
       naux=max(kaux,1800)
 cend
-      mxphot = kmxpho
-      nphoto = knphot
-      maxbas = kmxbas
       men = ken
       npnt = kfact
       nv2max = kv2max
@@ -248,13 +241,6 @@ cend
 *  coupling coefficient routines:  factlg(i)=log(fact(i-1))
       call factlg(kfact)
       call finit
-*  determine cache and block sizes for matrix multiply
-c.....ncache: cache size in words
-      ncache=4096
-cstart unix-hp
-c;      ncache=16000
-cend
-      mxmblk=64
 * start scattering calculation
       call flow (z, w, zmat, amat, bmat, jq, lq, inq, jhold, ehold,
      :           inhold, isc1, isc2, isc3, isc4, lsc1,

@@ -225,12 +225,6 @@ c     The constants module should be used in new subroutines.
 *                   false if scattering calculation
 *     wavefn        true if g(a,b) transformation matrices are saved
 *                   to be used later in computing the wavefunction
-*     variables in common block /coqvec/
-*     mxphot        maximum dimension of q matrix
-*     nphoto        actual collumn dimension of q matrix
-*     q             accumulated overlap matrix with ground state
-*                   only calculated if photof = .true.
-*                   this is stored with each wavefunction as a column vector
 *     variable in common block /cowave/
 *     irec          record number of last written g(a,b) matrix
 *     ifil          local unit number for g(a,b) file
@@ -238,6 +232,7 @@ c     The constants module should be used in new subroutines.
 *     symmetry of the matrices z and w is not exploited in these loops,
 *     and blas routines are not used for o(n) loops
 *  ------------------------------------------------------------------
+      use mod_coqvec, only: mxphot, nphoto, q
       implicit double precision (a-h,o-z)
       integer ich, icode, icol, idiag, ierr, ij, irow, istep, kstep,
      :        nch, ncol, ndiag, nmax, nrow, nsteps
@@ -251,8 +246,7 @@ c     The constants module should be used in new subroutines.
 *      external mtime, potmat, daxpy, smxinv, dscal
 *     matrices z, w, amat, and bmat are stored column by column as one-dimensi
       dimension z(1), w(1), amat(1), bmat(1)
-      dimension wref(1), q(1), z1(1), z2(1), scr1(1), scr2(1)
-      common /coqvec/ mxphot, nphoto, q
+      dimension wref(1), z1(1), z2(1), scr1(1), scr2(1)
       common /cophot/ photof, wavefn, boundf, wrsmat
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev

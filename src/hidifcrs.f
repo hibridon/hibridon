@@ -34,6 +34,7 @@
 *  types, but not to other basis types requiring the j12 array
 *  -------------------------------------------------------------
       use constants
+      use mod_codim, only: mmax
       implicit double precision (a-h,o-z)
       character*(*) fname1
       character*20 cdate1
@@ -62,7 +63,6 @@
       common /cosc3/ lpack1(1)
       common /cosc4/ ipack1(1)
       common /coj12p/ j12pk(1)
-      common /codim/ mairy,mmax
       real(8), dimension(:), allocatable :: s, sm, sm6
 * to store a22p,a21p and a11p amplitudes
       complex(8), dimension(:, :), allocatable :: fm1m2
