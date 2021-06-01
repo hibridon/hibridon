@@ -1,5 +1,6 @@
       program logair
       use mod_cosout
+      use mod_cotble, only: allocate_cotble
       use mod_coqvec, only: allocate_coqvec
       use mod_coqvec2, only: allocate_coqvec2
       use mod_codim, only: allocate_codim, mairy, mmax
@@ -122,9 +123,6 @@ cend
 *     iofbuf:   buffer offset
 *     maxrec:   number of records on file associated with nfl
 *     iofrec:   offset in file
-*  variables in common block /cotble/
-*     npnt:     max. number of pointer
-*     jttble:   array containing pointer to records in s-matrix
 *  variables in common block /coatpi/
 *     narray:   maximum size of asymmetric top basis fn expansion
 *               set to 500 (see krotmx above) in himain 
@@ -212,7 +210,6 @@ cend
 cstart unix
       common /cokaux/ naux
 cend
-      common /cotble/ npnt, jttble(kfact)
 *   total matrix and vector storage required is:
 *     7 kmax**2 + 25 kmax + kv2max + kfact -- without airy integration
 *     8 kmax**2 + 25 kmax + kv2max + kfact -- with airy integration
@@ -222,6 +219,7 @@ cend
 *  parameter below sets maximum size of asymmetric top basis fn expansion
       call allocate_cosout(kout)
 
+      call allocate_cotble(kfact)
       call allocate_coqvec(kqmax, kmxpho, knphot)
       call allocate_coqvec2(kq2)
       call allocate_codim(kairy, kmax, kbig)
@@ -234,7 +232,6 @@ cstart unix-ibm
       naux=max(kaux,1800)
 cend
       men = ken
-      npnt = kfact
       nv2max = kv2max
       nlammx = klammx
 *  calculate array containing logs of factorials for use in vector

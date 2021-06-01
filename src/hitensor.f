@@ -86,6 +86,8 @@
 *                                                               *
 *---------------------------------------------------------------*
       use mod_cosout
+      use mod_cotble, only: npnt, jttble
+
       use tensor
       implicit double precision (a-h,o-z)
       character*(*) filnam
@@ -126,7 +128,6 @@
       common /coz/    sreal(1)
       common /cow/    simag(1)
       common /cobmat/ sigma(kkmx*jmx*jmx)
-      common /cotble/ npnt, jttble(1)
       common /ckli/  kplist(0:kmx)
       common /cf9a/ f9pha(kkmx)
       common /coconv/ econv, xmconv, ang2c
