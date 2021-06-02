@@ -1,0 +1,7 @@
+*comdeck parlbuf
+cstart vax mac fps
+c;      parameter (lbuf=512)
+cend
+cstart unix-dec
+c;      parameter (lbuf=1024)
+cend

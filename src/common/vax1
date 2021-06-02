@@ -1,0 +1,13 @@
+*comdeck vax1
+cstart unix-sun
+c;      integer shiftl,shiftr,popcnt,poppar,compl
+c;      logical mnpar
+cend
+cstart vax unix-convex unix-nec unix-hp unix-ibm unix-dec unix-aix
+      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
+      logical mnpar
+cend
+cstart unix-iris
+c;      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
+c;      logical mnpar
+cend
