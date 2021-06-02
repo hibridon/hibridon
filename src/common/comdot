@@ -1,0 +1,7 @@
+*comdeck comdot
+cstart fps vax unix cray mac
+      data dot /'.'/
+cend
+cstart univac cray-cos
+c;      data dot /'$'/
+cend

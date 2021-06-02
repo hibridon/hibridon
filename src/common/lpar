@@ -1,0 +1,6 @@
+*comdeck lpar
+      common /colpar/ airyfl, airypr, bastst, batch, chlist,
+     :                csflag, flaghf, flagsu, ihomo, ipos, logdfl,
+     :                logwr, noprin, partw, readpt, rsflag, swrit,
+     :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
+     :                xsecwr, nucros, photof, wavefl, boundc
