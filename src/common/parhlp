@@ -1,5 +1,0 @@
-*comdeck parhlp.t
-cstart unix
-      parameter (helpdir='/Users/pdagdig1/hib44/doc/',
-     :           helptail='.hlp')
-cend
