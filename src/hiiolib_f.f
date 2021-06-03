@@ -1717,16 +1717,15 @@ c     ------------------------------------------------------------
 *    j12:       array containing vector sum of j1 + j2 for molecule-molecule
 *               systems and open-shell atom - molecule systems
 *  ------------------------------------------------------------------
-      use mod_cosout
+      use mod_cosout, only: nnout, jout
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       integer ic, icol, ii, ir, irow, jtot, jlpar, length, nmax,
      :        nopen, nfile, nu, mmout
       integer jq, jpack, lq, lpack, inq, inpack, nchnid
       logical is_j12
       common /clseg/ lseg,intrel,lchar
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
-      !common /cosout/ nnout, jout(21)
 *  variable in common block /coselb/
 *     ibasty    basistype
       common /coselb/ ibasty

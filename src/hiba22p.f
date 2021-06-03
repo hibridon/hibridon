@@ -685,12 +685,12 @@
 *  author:  millard alexander
 *  latest revision date:  4-oct-1992
 *  --------------------------------------------
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
 cstart unix-ibm
 c;      character*1 forma, formb
 cend
       common /cosysr/ isrcod, junkr, aso
-      common /coeint/ eint(6)
       common /coconv/ econv, xmconv
       common /cotrans/ t(6,6)
       common /cojtot/ j,jlpar

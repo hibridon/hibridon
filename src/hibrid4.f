@@ -1042,6 +1042,7 @@ c
 c     current revision: 20-apr-2012 by q. ma
 c
 * -------------------------------------------------------
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       character*48 oldlab, oldpot
       character*20 cdate, olddat
@@ -1057,7 +1058,6 @@ c
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr, nucros, photof, wavefl
       common /coered/ ered, rmu
-      common /coeint/ eint(25)
       common /cojq/   jq(1)
       common /colq/   lq(1)
       common /coinq/  inq(1)
@@ -1346,6 +1346,7 @@ c
       use constants
       use mod_coqvec, only: nphoto
       use mod_cocent, only: sc2 => cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       character*(*) filnam
       character*40  psifil, wavfil, amplfil, flxfil
@@ -1362,7 +1363,6 @@ c
       common /cojq/   jq(60)
       common /colq/   lq(10)
       common /coinq/  inq(60)
-      common /coeint/ eint(100)
       common /cow/    sr(100)
       common /cozmat/ si(100)
       common /coamat/ psir(100)

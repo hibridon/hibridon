@@ -61,25 +61,25 @@ module mod_coeint
    end subroutine allocate_coeint
 end module mod_coeint
 
-! module mod_coj12
-!    implicit none
-!    real(8), dimension(:), allocatable :: j12
-!    contains
-!    subroutine allocate_coj12(n)
-!       integer, intent(in) :: n
-!       allocate(j12(n)) ;
-!    end subroutine allocate_coj12
-! end module mod_coj12
+module mod_coj12
+   implicit none
+   real(8), dimension(:), allocatable :: j12
+   contains
+   subroutine allocate_coj12(n)
+      integer, intent(in) :: n
+      allocate(j12(n)) ;
+   end subroutine allocate_coj12
+end module mod_coj12
 
-! module mod_coj12pk
-!    implicit none
-!    real(8), dimension(:), allocatable :: j12pk
-!    contains
-!    subroutine allocate_coj12pk(n)
-!       integer, intent(in) :: n
-!       allocate(j12pk(n)) ;
-!    end subroutine allocate_coj12pk
-! end module mod_coj12pk
+module mod_coj12pk
+   implicit none
+   real(8), dimension(:), allocatable :: j12pk
+   contains
+   subroutine allocate_coj12pk(n)
+      integer, intent(in) :: n
+      allocate(j12pk(n)) ;
+   end subroutine allocate_coj12pk
+end module mod_coj12pk
 
 ! module mod_covvl
 !    implicit none

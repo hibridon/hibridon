@@ -2110,9 +2110,9 @@ c
 *     ifil          local unit number for g(a,b) file
 *  ---------------------------------------------------------------------------
       use mod_coqvec, only: nphoto, q
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical photof, wavefn, kwrit, ipos, boundf, wrsmat
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /cophot/ photof, wavefn, boundf, wrsmat
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
