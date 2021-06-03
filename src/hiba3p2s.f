@@ -123,6 +123,7 @@
 *  xf3j:     evaluates 3j symbol
 *  xf9j:     evaluates 9j symbol
 * ------------------------------------------------------------
+      use mod_coeig2, only: t12, t32
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
       include "common/parbas"
@@ -148,7 +149,6 @@
 *  arrays in argument list
       dimension j(1), l(1), is(1),jhold(1),ehold(1),ishold(1)
 *  matrices for transformation between atomic and molecular BF functions
-      common /coeig/  t12(5,5), t32(3,3)
       dimension c12(5,5), c32(3,3)
 *  quantum numbers for BF atomic and basis functions
       dimension
@@ -473,8 +473,8 @@
 *  subroutines called:
 *  xf3j:     evaluates 3j symbol
 * --------------------------------------------------------------------
+      use mod_coeig2, only:  t12, t32
       implicit double precision (a-h,o-z)
-      common /coeig/  t12(5,5), t32(3,3)
       dimension v12(5,5),v32(3,3),a12(5,5),a32(3,3)
       vee = 0.d0
       xl1 = l1

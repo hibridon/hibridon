@@ -1,5 +1,10 @@
       program logair
       use mod_cosout
+
+      use mod_coeig2, only: allocate_coeig2
+cstart unix-ibm
+      use mod_cokaux, only: allocate_cokaux
+cend
       use mod_cotble, only: allocate_cotble
       use mod_coqvec, only: allocate_coqvec
       use mod_coqvec2, only: allocate_coqvec2
@@ -197,8 +202,7 @@ cend
       common /cosc8/ sc8(kmax)
       common /cosc9/ sc9(kmax)
       common /cosc10/ sc10(kmax)
-*  common block for ba3p2s basis routine
-      common /coeig2/  t12(5,5), t32(3,3)
+
 *  common block for ba3d1p basis routine
       common /coeig/  c0(4,4), c1(3,3), c2(2,2)
 cstart unix-darwin unix-x86
@@ -206,9 +210,6 @@ cstart unix-darwin unix-x86
 cend
 cstart unix .and. .not.unix-darwin .and. .not. unix-x86
 c;      common /cosc11/ sc11(kaux)
-cend
-cstart unix
-      common /cokaux/ naux
 cend
 *   total matrix and vector storage required is:
 *     7 kmax**2 + 25 kmax + kv2max + kfact -- without airy integration
@@ -219,6 +220,10 @@ cend
 *  parameter below sets maximum size of asymmetric top basis fn expansion
       call allocate_cosout(kout)
 
+      call allocate_coeig2()
+cstart unix-ibm
+      call allocate_cokaux(anaux=max(kaux,1800))
+cend
       call allocate_cotble(kfact)
       call allocate_coqvec(kqmax, kmxpho, knphot)
       call allocate_coqvec2(kq2)
@@ -228,9 +233,7 @@ cend
 
       narray = 100
 *
-cstart unix-ibm
-      naux=max(kaux,1800)
-cend
+
       men = ken
       nv2max = kv2max
       nlammx = klammx

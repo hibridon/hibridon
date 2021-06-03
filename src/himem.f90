@@ -592,23 +592,27 @@ end module mod_cosout
 !    end subroutine allocate_coeig
 ! end module mod_coeig
 
-! module mod_coeig2
-!    implicit none
-!    real(8), dimension(:,:), allocatable :: t12, t32
-!    contains
-!    subroutine allocate_coeig2()
-!       allocate(t12(5,5)) ; allocate(t32(3,3))
-!    end subroutine allocate_coeig2
-! end module mod_coeig2
+module mod_coeig2
+   ! * module for ba3p2s basis routine
+   ! matrices for transformation between atomic and molecular BF functions
+   implicit none
+   real(8), dimension(:,:), allocatable :: t12, t32
+   contains
+   subroutine allocate_coeig2()
+      allocate(t12(5,5)) ; allocate(t32(3,3))
+   end subroutine allocate_coeig2
+end module mod_coeig2
 
-! module mod_cokaux
-!    implicit none
-!    integer, allocatable :: naux
-!    contains
-!    subroutine allocate_cokaux()
-!       allocate(naux)
-!    end subroutine allocate_cokaux
-! end module mod_cokaux
+module mod_cokaux
+   implicit none
+   integer, allocatable :: naux
+   contains
+   subroutine allocate_cokaux(anaux)
+      integer, intent(in) :: anaux
+      allocate(naux)
+      naux = anaux
+   end subroutine allocate_cokaux
+end module mod_cokaux
 
 module mod_cotble
    ! *     npnt:     max. number of pointer
