@@ -259,7 +259,8 @@ c
 * subroutines called: open
 *
 * ----------------------------------------------------------------
-      use mod_cosout
+      use mod_cosout, only: nnout, jout
+      use mod_coiout, only: niout, indout
       use constants
       implicit double precision (a-h,o-z)
       integer i, jlpar, jtot1, jtot2, jtotd, length, nerg,
@@ -285,8 +286,6 @@ c
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr, nucros, photof, wavefl, boundc
       common /coskip/ nskip,iskip
-      !common /cosout/ nnout, jout(21)
-      common /coiout/ niout, indout(1)
       common /cofile/ input, output, jobnam, savfil
       common /coener/ energ(1)
       common /coered/ ered, rmu
@@ -1560,6 +1559,8 @@ c     ------------------------------------------------------------
 *     if iadr > 0 read absolute
 *     if nopen = -1, the lower triangle is filled
 c     ------------------------------------------------------------
+      use mod_coj12, only: j12
+      use mod_coj12p, only: j12pk
       implicit double precision (a-h,o-z)
       logical triang
       logical is_j12
@@ -1568,8 +1569,6 @@ c     ------------------------------------------------------------
 *     variable in common block /coselb/
 *     ibasty    basistype
       common /coselb/ ibasty
-      common /coj12p/ j12pk(1)
-      common /coj12/ j12(1)
       character*8 csize8
 c
       ierr=0
@@ -1718,21 +1717,20 @@ c     ------------------------------------------------------------
 *    j12:       array containing vector sum of j1 + j2 for molecule-molecule
 *               systems and open-shell atom - molecule systems
 *  ------------------------------------------------------------------
-      use mod_cosout
+      use mod_cosout, only: nnout, jout
+      use mod_coeint, only: eint
+      use mod_coj12, only: j12
+      use mod_coj12p, only: j12pk
       implicit double precision (a-h,o-z)
       integer ic, icol, ii, ir, irow, jtot, jlpar, length, nmax,
      :        nopen, nfile, nu, mmout
       integer jq, jpack, lq, lpack, inq, inpack, nchnid
       logical is_j12
       common /clseg/ lseg,intrel,lchar
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
-      !common /cosout/ nnout, jout(21)
 *  variable in common block /coselb/
 *     ibasty    basistype
       common /coselb/ ibasty
-      common /coj12p/ j12pk(1)
-      common /coj12/ j12(1)
       dimension sreal(nmax,nmax), simag(nmax,nmax),
      :          jq(1), lq(1), inq(1), jpack(1), lpack(1),
      :          epack(1), inpack(1), iorder(1)

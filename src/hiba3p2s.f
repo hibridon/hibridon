@@ -124,25 +124,25 @@
 *  xf9j:     evaluates 9j symbol
 * ------------------------------------------------------------
       use mod_coeig2, only: t12, t32
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
+      use mod_coj12, only: j12
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
       include "common/parbas"
       include "common/parbasl"
       common /cosysi/ nscode, isicod, nterm, nstate
       common /cosysr/ isrcod, junkr, en1d
-      common /cov2/ nv2max, junkv, v2(1)
-      common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
-      common /coj12/  j12(1)
-*  common blocks cojtot, coj12, coja, and coel used to transmit to ground subroutine
+*  common blocks cojtot, coja, and coel used to transmit to ground subroutine
       common /cojtot/ jjtot, jjlpar
       common /coja/  jja(9)
       common /coel/  ll(9)
       common /coered/ ered, rmu
       common /coskip/ nskip, iskip
-      common /covvl/  vvl(6)
 *  econv is conversion factor from cm-1 to hartrees
 *  xmconv is converson factor from amu to atomic units
       common /coconv/ econv, xmconv

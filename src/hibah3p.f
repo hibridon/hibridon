@@ -111,19 +111,19 @@
 *   vlmh3p:    returns angular coupling coefficient for particular
 *              choice of channel index
 * ------------------------------------------------------------
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
+      use mod_coj12, only: j12
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
       include "common/parbas"
       include "common/parbasl"
       common /cosysr/ isrcod, junkr, brot,aso1, aso2
       common /cosysi/ nscode, isicod, nterm, iop,jmax
-      common /cov2/ nv2max, junkv, v2(1)
-      common /coiv2/ iv2(1)
       common /coipar/ iiipar(9), iprint
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /cocent/ cent(5)
-      common /coeint/ eint(5)
-      common /coj12/  j12(1)
       common /coered/ ered, rmu
       common /coskip/ nskip, iskip
       common /coconv/ econv, xmconv

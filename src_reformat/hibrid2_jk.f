@@ -17,6 +17,8 @@
       subroutine default
 *  current revision date:  22-jan-2008 by mha
 * ------------------------------------------------------------------
+      use mod_cosout, only: nnout, jout
+      use mod_coiout, only: niout, indout
       implicit double precision (a-h,o-z)
       character*40 jobnam,input,output,savfil
       logical logwr, swrit, t2writ, wrpart, partw, airyfl, airypr,
@@ -32,8 +34,6 @@
       common /cosysl/ islcod, lspar(maxpar)
       common /cosys/ scod(maxpar*2+3)
 * nb if the nextcommon is changed, it should be also changed in common/parsys
-      common /coiout/ niout, indout(20)
-      common /cosout/ nnout, jout(21)
       common /coselb/ ibasty
       common /coipar/ jtot1,jtot2,jtotd,jlpar,nerg,numax,numin,nud,
      :                lscreen, iprint
@@ -926,6 +926,8 @@ cjk          form='(1x,i3,i4,i7,  (t18,10(1pd11.3)))'
 *    xmu:       collision reduced mass in (c12) atomic mass units
 *    econv:     conversion factor from cm-1 to hartrees
 *  ------------------------------------------------------------------
+      use mod_cosout, only: nnout, jout
+      use mod_coiout, only: niout, indout
       implicit double precision (a-h,o-z)
       character*(*) fname
       character*20 cdate
@@ -951,8 +953,6 @@ cjk          form='(1x,i3,i4,i7,  (t18,10(1pd11.3)))'
       common /coisc2/ jpoint(5)
       common /colq/ ipoint(5)
       common /cosc1/ elev(5)
-      common /cosout/ nnout, jout(21)
-      common /coiout/ niout, indout(5)
       common /coselb/ ibasty
       dimension  a(3)
       data econv / 219474.6d0/
@@ -1431,6 +1431,8 @@ cjk 70            format (f5.1, i5, 2x, 13 (1pe10.3,1x) )
 *  ------------------------------------------------------------------
 *      implicit none
       use constants
+      use mod_cosout, only: nnout, jout
+      use mod_coiout, only: niout, indout
       implicit double precision (a-h,o-z)
       character*(*) fname
       character*20 cdate
@@ -1456,8 +1458,6 @@ cmha
 cmha
       common /colq/ ipoint(1)
       common /cosc1/ elev(1)
-      common /cosout/ nnout, jout(21)
-      common /coiout/ niout, indout(5)
       common /coener/ energ(1)
       common /coselb/ ibasty
       dimension  a(4)

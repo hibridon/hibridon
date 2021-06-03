@@ -9,97 +9,97 @@ module mod_cosout
    end subroutine allocate_cosout
 end module mod_cosout
 
-! module mod_coiout
-!    implicit none
-!    integer, dimension(:), allocatable :: indout
-!    integer, allocatable               :: niout
-!    contains
-!    subroutine allocate_coiout(n)
-!       integer, intent(in) :: n
-!       allocate(indout(n)) ; allocate(niout)
-!    end subroutine allocate_coiout
-! end module mod_coiout
+module mod_coiout
+   implicit none
+   integer, dimension(:), allocatable :: indout
+   integer, allocatable               :: niout
+   contains
+   subroutine allocate_coiout(n)
+      integer, intent(in) :: n
+      allocate(indout(n)) ; allocate(niout)
+   end subroutine allocate_coiout
+end module mod_coiout
 
-! module mod_cov2
-!    implicit none
-!    real(8), dimension(:), allocatable :: v2
-!    integer, allocatable               :: nv2max, ndummy
-!    contains
-!    subroutine allocate_cov2(n)
-!       integer, intent(in) :: n
-!       allocate(v2(n)) ; allocate(nv2max) ; allocate(ndummy)
-!    end subroutine allocate_cov2
-! end module mod_cov2
+module mod_cov2
+   implicit none
+   real(8), dimension(:), allocatable :: v2
+   integer, allocatable               :: nv2max, ndummy
+   contains
+   subroutine allocate_cov2(n)
+      integer, intent(in) :: n
+      allocate(v2(n)) ; allocate(nv2max) ; allocate(ndummy)
+   end subroutine allocate_cov2
+end module mod_cov2
 
-! module mod_coiv2
-!    implicit none
-!    real(8), dimension(:), allocatable :: iv2
-!    contains
-!    subroutine allocate_coiv2(n)
-!       integer, intent(in) :: n
-!       allocate(iv2(n)) ;
-!    end subroutine allocate_coiv2
-! end module mod_coiv2
+module mod_coiv2
+   implicit none
+   real(8), dimension(:), allocatable :: iv2
+   contains
+   subroutine allocate_coiv2(n)
+      integer, intent(in) :: n
+      allocate(iv2(n)) ;
+   end subroutine allocate_coiv2
+end module mod_coiv2
 
-! module mod_cocent
-!    implicit none
-!    real(8), dimension(:), allocatable :: cent
-!    contains
-!    subroutine allocate_cocent(n)
-!       integer, intent(in) :: n
-!       allocate(cent(n)) ;
-!    end subroutine allocate_cocent
-! end module mod_cocent
+module mod_cocent
+   implicit none
+   real(8), dimension(:), allocatable :: cent
+   contains
+   subroutine allocate_cocent(n)
+      integer, intent(in) :: n
+      allocate(cent(n)) ;
+   end subroutine allocate_cocent
+end module mod_cocent
 
-! module mod_coeint
-!    implicit none
-!    real(8), dimension(:), allocatable :: eint
-!    contains
-!    subroutine allocate_coeint(n)
-!       integer, intent(in) :: n
-!       allocate(eint(n)) ;
-!    end subroutine allocate_coeint
-! end module mod_coeint
+module mod_coeint
+   implicit none
+   real(8), dimension(:), allocatable :: eint
+   contains
+   subroutine allocate_coeint(n)
+      integer, intent(in) :: n
+      allocate(eint(n)) ;
+   end subroutine allocate_coeint
+end module mod_coeint
 
-! module mod_coj12
-!    implicit none
-!    real(8), dimension(:), allocatable :: j12
-!    contains
-!    subroutine allocate_coj12(n)
-!       integer, intent(in) :: n
-!       allocate(j12(n)) ;
-!    end subroutine allocate_coj12
-! end module mod_coj12
+module mod_coj12
+   implicit none
+   real(8), dimension(:), allocatable :: j12
+   contains
+   subroutine allocate_coj12(n)
+      integer, intent(in) :: n
+      allocate(j12(n)) ;
+   end subroutine allocate_coj12
+end module mod_coj12
 
-! module mod_coj12pk
-!    implicit none
-!    real(8), dimension(:), allocatable :: j12pk
-!    contains
-!    subroutine allocate_coj12pk(n)
-!       integer, intent(in) :: n
-!       allocate(j12pk(n)) ;
-!    end subroutine allocate_coj12pk
-! end module mod_coj12pk
+module mod_coj12p
+   implicit none
+   real(8), dimension(:), allocatable :: j12pk
+   contains
+   subroutine allocate_coj12p(n)
+      integer, intent(in) :: n
+      allocate(j12pk(n)) ;
+   end subroutine allocate_coj12p
+end module mod_coj12p
 
-! module mod_covvl
-!    implicit none
-!    real(8), dimension(:), allocatable :: vvl
-!    contains
-!    subroutine allocate_covvl(n)
-!       integer, intent(in) :: n
-!       allocate(vvl(n)) ;
-!    end subroutine allocate_covvl
-! end module mod_covvl
+module mod_covvl
+   implicit none
+   real(8), dimension(:), allocatable :: vvl
+   contains
+   subroutine allocate_covvl(n)
+      integer, intent(in) :: n
+      allocate(vvl(n)) ;
+   end subroutine allocate_covvl
+end module mod_covvl
 
-! module mod_cofact
-!    implicit none
-!    real(8), dimension(:), allocatable :: si
-!    contains
-!    subroutine allocate_cofact(n)
-!       integer, intent(in) :: n
-!       allocate(si(n)) ;
-!    end subroutine allocate_cofact
-! end module mod_cofact
+module mod_cofact
+   implicit none
+   real(8), dimension(:), allocatable :: si
+   contains
+   subroutine allocate_cofact(n)
+      integer, intent(in) :: n
+      allocate(si(n)) ;
+   end subroutine allocate_cofact
+end module mod_cofact
 
 ! module mod_coener
 !    implicit none

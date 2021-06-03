@@ -102,6 +102,10 @@
 *   vlm22p:    returns angular coupling coefficient for particular
 *              choice of channel index
 * ------------------------------------------------------------
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
       include "common/parbas"
@@ -109,11 +113,7 @@
       common /cosysr/ isrcod, junkr, aso
 
       common /cosysi/ nscode, isicod, nterm, nphoto
-      common /cov2/ nv2max, junkv, v2(1)
-      common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /coskip/ nskip, iskip
       common /coconv/ econv, xmconv
@@ -685,12 +685,12 @@
 *  author:  millard alexander
 *  latest revision date:  4-oct-1992
 *  --------------------------------------------
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
 cstart unix-ibm
 c;      character*1 forma, formb
 cend
       common /cosysr/ isrcod, junkr, aso
-      common /coeint/ eint(6)
       common /coconv/ econv, xmconv
       common /cotrans/ t(6,6)
       common /cojtot/ j,jlpar

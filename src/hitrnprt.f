@@ -614,6 +614,7 @@
 *
 * current revision date:  23-jun-2015 by pjd
 *------------------------------------------------------------------------
+      use mod_coj12, only: j12
       implicit double precision (a-h,o-z)
       complex*8 t, tp
       logical diag, diagj, diagin, diagp, diagjp, diagnp,
@@ -632,7 +633,6 @@
       common /cojq/ jq(1)
       common /colq/ lq(1)
       common /coinq/ inq(1)
-      common /coj12/ j12(1)
       common /coz/ sreal(1)
       common /cow/ simag(1)
       common /coselb/ ibasty
