@@ -1,6 +1,6 @@
       program logair
       use mod_cosout
-
+      use mod_cosc11, only: allocate_cosc11
       use mod_coeig, only: allocate_coeig
       use mod_coeig2, only: allocate_coeig2
 cstart unix-ibm
@@ -205,10 +205,10 @@ cend
       common /cosc10/ sc10(kmax)
 
 cstart unix-darwin unix-x86
-      common /cosc11/ sc11(kaux3)
+      call allocate_cosc11(kaux3)
 cend
 cstart unix .and. .not.unix-darwin .and. .not. unix-x86
-c;      common /cosc11/ sc11(kaux)
+c;      call allocate_cosc11(kaux)
 cend
 *   total matrix and vector storage required is:
 *     7 kmax**2 + 25 kmax + kv2max + kfact -- without airy integration

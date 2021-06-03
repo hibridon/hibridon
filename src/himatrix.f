@@ -1383,14 +1383,16 @@ c;*  subroutines used:
 c;*  dsytrf, dsytri:   lapack routines to factor and to invert a symmetric, re
 c;*                  matrix
 c;* -----------------------------------------------------------------------
+cend
+cstart unix .and. .not. unix-darwin .and. .not. unix-x86
+c;      use mod_cosc11, only: sc11
+cend
+cstart unix cray .and. .not. unix-darwin .and. .not. unix-x86
 c;      implicit double  precision (a-h,o-z)
 c;      integer icol, icolpt, ierr, ione, irowpt, izero, n, ncol,
 c;     :        nmax, nmaxp1
 c;      integer kpvt
 c;      dimension a(1), scr(1), kpvt(1)
-cend
-cstart unix .and. .not. unix-darwin .and. .not. unix-x86
-c;      common /cosc11/ sc11(1)
 cend
 cstart unix-ibm
 c;      common /cokaux/ kaux
