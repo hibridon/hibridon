@@ -1559,6 +1559,7 @@ c     ------------------------------------------------------------
 *     if iadr > 0 read absolute
 *     if nopen = -1, the lower triangle is filled
 c     ------------------------------------------------------------
+      use mod_coj12, only: j12
       implicit double precision (a-h,o-z)
       logical triang
       logical is_j12
@@ -1568,7 +1569,6 @@ c     ------------------------------------------------------------
 *     ibasty    basistype
       common /coselb/ ibasty
       common /coj12p/ j12pk(1)
-      common /coj12/ j12(1)
       character*8 csize8
 c
       ierr=0
@@ -1719,6 +1719,7 @@ c     ------------------------------------------------------------
 *  ------------------------------------------------------------------
       use mod_cosout, only: nnout, jout
       use mod_coeint, only: eint
+      use mod_coj12, only: j12
       implicit double precision (a-h,o-z)
       integer ic, icol, ii, ir, irow, jtot, jlpar, length, nmax,
      :        nopen, nfile, nu, mmout
@@ -1730,7 +1731,6 @@ c     ------------------------------------------------------------
 *     ibasty    basistype
       common /coselb/ ibasty
       common /coj12p/ j12pk(1)
-      common /coj12/ j12(1)
       dimension sreal(nmax,nmax), simag(nmax,nmax),
      :          jq(1), lq(1), inq(1), jpack(1), lpack(1),
      :          epack(1), inpack(1), iorder(1)

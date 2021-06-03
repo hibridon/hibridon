@@ -128,6 +128,7 @@
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_coj12, only: j12
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
       include "common/parbas"
@@ -135,8 +136,7 @@
       common /cosysi/ nscode, isicod, nterm, nstate
       common /cosysr/ isrcod, junkr, en1d
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /coj12/  j12(1)
-*  common blocks cojtot, coj12, coja, and coel used to transmit to ground subroutine
+*  common blocks cojtot, coja, and coel used to transmit to ground subroutine
       common /cojtot/ jjtot, jjlpar
       common /coja/  jja(9)
       common /coel/  ll(9)

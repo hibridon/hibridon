@@ -5,6 +5,7 @@
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_coj12, only: j12
       use mod_coeig, only: allocate_coeig
       use mod_coeig2, only: allocate_coeig2
 cstart unix-ibm
@@ -148,7 +149,6 @@ cend
 *  ----------------------------------------------------------
       logical lsc1
       common /comom/  xmom(3), imom(13)
-      common /coj12/ j12(kmax)
       common /coj12p/ j12pk(kmax)
       common /covvl/  vvl(klammx)
       common /cofact/ si(kfact)

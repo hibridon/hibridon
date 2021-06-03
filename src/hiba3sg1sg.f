@@ -148,6 +148,7 @@ c      end module mod_1sg1sg
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_coj12, only: j12
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
       include "common/parbas"
@@ -158,7 +159,6 @@ c      end module mod_1sg1sg
       common /cosysr/ isrcod, junkr, b1rot, d1rot, flmbda, gamma, b2rot
       common /coselb/ ibasty
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /coj12/  j12(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       common /coatpr/ c(1)

@@ -169,6 +169,7 @@
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_coj12, only: j12
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst, twomol
       character*40 fname
@@ -178,7 +179,6 @@
      :                jmax, ipotsy2, j2max, j2min
       common /cosysr/ isrcod, junkr, brot, crot, delta, emax, drot
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /coj12/ j12(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       common /co2mol/ twomol

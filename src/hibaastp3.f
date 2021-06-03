@@ -206,6 +206,7 @@ c
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_coj12, only: j12
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
       include "common/parbas"
@@ -215,7 +216,6 @@ c
       common /cosysr/ isrcod, junkr, arot, brot, crot, emax, b2rot
       common /coipar/ iiipar(9), iprint
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /coj12/  j12(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       common /coatpi/ narray, isiz(1)

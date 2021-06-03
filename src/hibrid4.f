@@ -30,6 +30,7 @@
 *   current revision date: 19-jun-2015 by p.dagdigian
 * ----------------------------------------------------------------------
       use mod_cosout
+      use mod_coj12, only: j12
       use constants
       implicit double precision (a-h,o-z)
       character*(*) fname
@@ -44,7 +45,6 @@
       common /cojq/ jq(1)
       common /colq/ lq(1)
       common /coinq/ inq(1)
-      common /coj12/ j12(1)
       common /coinhl/ jlev(1)
       common /cosc1/ elev(1)
       common /coisc2/ jpack(1)
