@@ -9,16 +9,16 @@ module mod_cosout
    end subroutine allocate_cosout
 end module mod_cosout
 
-! module mod_coiout
-!    implicit none
-!    integer, dimension(:), allocatable :: indout
-!    integer, allocatable               :: niout
-!    contains
-!    subroutine allocate_coiout(n)
-!       integer, intent(in) :: n
-!       allocate(indout(n)) ; allocate(niout)
-!    end subroutine allocate_coiout
-! end module mod_coiout
+module mod_coiout
+   implicit none
+   integer, dimension(:), allocatable :: indout
+   integer, allocatable               :: niout
+   contains
+   subroutine allocate_coiout(n)
+      integer, intent(in) :: n
+      allocate(indout(n)) ; allocate(niout)
+   end subroutine allocate_coiout
+end module mod_coiout
 
 ! module mod_cov2
 !    implicit none

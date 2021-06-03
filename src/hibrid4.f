@@ -1341,7 +1341,8 @@ c
 * special version for 13p collisions
 *
 * ------------------------------------------------------------------
-      use mod_cosout
+      use mod_cosout, only: nnout, jout
+      use mod_coiout, only: niout, indout
       use constants
       use mod_coqvec, only: nphoto
 
@@ -1370,8 +1371,6 @@ c
       common /cotq1/  dpsir(100)
       common /cotq2/  dpsii(100)
       common /cotq3/  scmat2(100)
-      !common /cosout/ nnout, jout(21)
-      common /coiout/ niout, indout(10)
       common /coisc1/ ipack(10)
       common /coisc2/ nlist(50)
       common /coisc3/ nalist(60)
@@ -2304,6 +2303,7 @@ c
 * current revision: 20-apr-2012 by q. ma
 *
 * ------------------------------------------------------------------
+      use mod_coiout, only: niout, indout
       implicit double precision (a-h,o-z)
       logical adiab, kill, photof, propf, sumf, coordf, ifull
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
@@ -2327,8 +2327,6 @@ c
       common /coered/ ered, rmu
       common /coground/ ifull
       common /cotrans/ ttrans(36)
-      common /coselb/ ibasty
-      common /coiout/ niout, indout(10)
       dimension scc(100)
       data zero, one, onemin /0.d0, 1.d0, -1.d0/
       data ione, mone /1,-1/

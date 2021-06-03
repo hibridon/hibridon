@@ -259,7 +259,8 @@ c
 * subroutines called: open
 *
 * ----------------------------------------------------------------
-      use mod_cosout
+      use mod_cosout, only: nnout, jout
+      use mod_coiout, only: niout, indout
       use constants
       implicit double precision (a-h,o-z)
       integer i, jlpar, jtot1, jtot2, jtotd, length, nerg,
@@ -285,8 +286,6 @@ c
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr, nucros, photof, wavefl, boundc
       common /coskip/ nskip,iskip
-      !common /cosout/ nnout, jout(21)
-      common /coiout/ niout, indout(1)
       common /cofile/ input, output, jobnam, savfil
       common /coener/ energ(1)
       common /coered/ ered, rmu

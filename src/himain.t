@@ -1,5 +1,6 @@
       program logair
-      use mod_cosout
+      use mod_cosout, only: nnout, jout
+      use mod_coiout, only: niout, indout
 
       use mod_coeig, only: allocate_coeig
       use mod_coeig2, only: allocate_coeig2
@@ -144,8 +145,6 @@ cend
 *  ----------------------------------------------------------
       logical lsc1
       common /comom/  xmom(3), imom(13)
-      !common /cosout/ nnout, jout(kout)
-      common /coiout/ niout, indout(kout)
       common /cov2/ nv2max, ndummy, v2(kv2max)
       common /coiv2/ iv2(kv2max)
       common /cocent/ cent(kmax)

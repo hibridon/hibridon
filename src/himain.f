@@ -18,6 +18,7 @@
 *  added common block from ba3p2s basis routine
 *  current revision date:  19-jun-2019 (p. dagdigian)
 *
+      use mod_coiout, only: niout, indout
       implicit double precision (a-h, o-z)
 cstart unix-ibm unix-darwin unix-x86
       character *40 test
@@ -141,7 +142,6 @@ cend
       logical lsc1
       common /comom/  xmom(3), imom(13)
       common /cosout/ nnout, jout(kout)
-      common /coiout/ niout, indout(kout)
       common /cov2/ nv2max, ndummy, v2(kv2max)
       common /coiv2/ iv2(kv2max)
       common /cocent/ cent(kmax)
