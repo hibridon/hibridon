@@ -81,15 +81,15 @@ module mod_coj12p
    end subroutine allocate_coj12p
 end module mod_coj12p
 
-! module mod_covvl
-!    implicit none
-!    real(8), dimension(:), allocatable :: vvl
-!    contains
-!    subroutine allocate_covvl(n)
-!       integer, intent(in) :: n
-!       allocate(vvl(n)) ;
-!    end subroutine allocate_covvl
-! end module mod_covvl
+module mod_covvl
+   implicit none
+   real(8), dimension(:), allocatable :: vvl
+   contains
+   subroutine allocate_covvl(n)
+      integer, intent(in) :: n
+      allocate(vvl(n)) ;
+   end subroutine allocate_covvl
+end module mod_covvl
 
 ! module mod_cofact
 !    implicit none
