@@ -277,14 +277,14 @@ cend
 *  -------------------------------------------------------------------
       use mod_cov2, only: nv2max, junkv => ndummy, v2
       use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       integer i, iflag, ilam, lamnum, nch, nlam, nlammx, nmax, nv2max
       integer iv2
       common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
       common /conlam/ nlam, nlammx, lamnum(1)
       common /copmat/ rtmn, rtmx, iflag
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /covvl/ vvl(1)
       common /coselb/ ibasty
@@ -1647,6 +1647,8 @@ cend
 *    vmul:      vector times a vector
 * --------------------------------------------------------------------
       use mod_coqvec, only: nphoto, q
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       integer isw, i, icol, l, lq, nmax, nopen
 cstart unix-ibm
@@ -1655,8 +1657,6 @@ c;      character*40 flxfil
 cend
       logical flagsu, photof, wavefn, kwrit, ipos, lpar, swrit, lpar2,
      $     boundf, wrsmat
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /cosurf/ flagsu
       common /cophot/ photof, wavefn, boundf, wrsmat

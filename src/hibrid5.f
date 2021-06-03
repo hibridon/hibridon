@@ -146,6 +146,8 @@
       use mod_cosout
       use constants
       use mod_coqvec, only: nphoto
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical ipos, csflag, swrit, t2writ, writs, wrpart, partw,
      :        wrxsec, xsecwr, flaghf, t2test, flagsu, firstj, twomol,
@@ -154,8 +156,6 @@
       include "common/parpot"
       common /cojsav/ jsav1, jsav2
       common /cosurf/ flagsu
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coj12/ j12(1)
       common /coered/ ered, rmu
       !common /cosout/ nnout, jout(21)

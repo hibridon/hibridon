@@ -1345,7 +1345,7 @@ c
       use mod_coiout, only: niout, indout
       use constants
       use mod_coqvec, only: nphoto
-
+      use mod_cocent, only: sc2 => cent
       implicit double precision (a-h,o-z)
       character*(*) filnam
       character*40  psifil, wavfil, amplfil, flxfil
@@ -1383,7 +1383,6 @@ c
       common /cosc6/ sc(100)
       common /cosc7/ sc1(100)
 * common for y1, y2, y4
-      common /cocent/ sc2(1)
       common /coered/ ered, rmu
       common /codim/  nairy, mmax
       common /coselb/ ibasty
@@ -2304,6 +2303,7 @@ c
 *
 * ------------------------------------------------------------------
       use mod_coiout, only: niout, indout
+      use mod_cocent, only: sc2 => cent
       implicit double precision (a-h,o-z)
       logical adiab, kill, photof, propf, sumf, coordf, ifull
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
@@ -2323,7 +2323,6 @@ c
       common /cosc7/ sc1(6)
       common /cosc8/ sc8(6)
       common /cosc9/ sc9(6)
-      common /cocent/ sc2(6)
       common /coered/ ered, rmu
       common /coground/ ifull
       common /cotrans/ ttrans(36)
@@ -2620,6 +2619,7 @@ c
 *
 * ------------------------------------------------------------------
       implicit double precision (a-h,o-z)
+      use mod_cocent, only: sc2 => cent
       common /coered/ ered, rmu
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
@@ -2629,7 +2629,6 @@ c
       common /cosc8/ sc8(6)
       common /cosc7/ sc7(6)
 * common for y1, y2, y4
-      common /cocent/ sc2(6)
       data zero, one, onemin, two,   conv
      :    /0.d0, 1.d0, -1.d0, 2.d0, 219474.6d0/
         do 420 kstep=1, npts

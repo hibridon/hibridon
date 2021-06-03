@@ -133,6 +133,8 @@
 * --------------------------------------------------------------------
       use mod_cov2, only: nv2max, junkv => ndummy, v2
       use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
       include "common/parbas"
@@ -141,8 +143,6 @@
       common /coipar/ iiipar(9), iprint
       common /cosysr/ isrcod, junkr, brot
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       common /coatpi/ narray

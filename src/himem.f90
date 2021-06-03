@@ -41,25 +41,25 @@ module mod_coiv2
    end subroutine allocate_coiv2
 end module mod_coiv2
 
-! module mod_cocent
-!    implicit none
-!    real(8), dimension(:), allocatable :: cent
-!    contains
-!    subroutine allocate_cocent(n)
-!       integer, intent(in) :: n
-!       allocate(cent(n)) ;
-!    end subroutine allocate_cocent
-! end module mod_cocent
+module mod_cocent
+   implicit none
+   real(8), dimension(:), allocatable :: cent
+   contains
+   subroutine allocate_cocent(n)
+      integer, intent(in) :: n
+      allocate(cent(n)) ;
+   end subroutine allocate_cocent
+end module mod_cocent
 
-! module mod_coeint
-!    implicit none
-!    real(8), dimension(:), allocatable :: eint
-!    contains
-!    subroutine allocate_coeint(n)
-!       integer, intent(in) :: n
-!       allocate(eint(n)) ;
-!    end subroutine allocate_coeint
-! end module mod_coeint
+module mod_coeint
+   implicit none
+   real(8), dimension(:), allocatable :: eint
+   contains
+   subroutine allocate_coeint(n)
+      integer, intent(in) :: n
+      allocate(eint(n)) ;
+   end subroutine allocate_coeint
+end module mod_coeint
 
 ! module mod_coj12
 !    implicit none

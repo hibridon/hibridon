@@ -3,6 +3,8 @@
       use mod_coiout, only: niout, indout
       use mod_cov2, only: nv2max, ndummy, v2
       use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       use mod_coeig, only: allocate_coeig
       use mod_coeig2, only: allocate_coeig2
 cstart unix-ibm
@@ -146,8 +148,6 @@ cend
 *  ----------------------------------------------------------
       logical lsc1
       common /comom/  xmom(3), imom(13)
-      common /cocent/ cent(kmax)
-      common /coeint/ eint(kmax)
       common /coj12/ j12(kmax)
       common /coj12p/ j12pk(kmax)
       common /covvl/  vvl(klammx)
@@ -355,7 +355,9 @@ cend
 *  variable in common block /coopti/
 *    optifl:      flag, signals if the calculation is an optimization
 *
-      use mod_cosout
+      use mod_cosout, only: nnout, jout
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       use constants
       implicit double precision (a-h,o-z)
       character*20 cdate
@@ -380,8 +382,6 @@ cend
       common /cosavi/ iipar, ixpar(8)
       common /cosavr/ irpar(2), rxpar(9)
       common /copmat/ rtmn, rtmx, iflag
-      common /coeint/ eint(1)
-      common /cocent/ cent(1)
       common /coered/ ered, rmu
       common /coipar/ jtot1, jtot2, jtotd, jlpar, nerg,numax,numin,nud,
      :                lscreen, iprint

@@ -138,6 +138,8 @@
 * ----------------------------------------------------------------------
       use mod_cov2, only: nv2max, junkv => ndummy, v2
       use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
       character*80 string
@@ -151,8 +153,6 @@
      :                npar, imult, nman
       common /cosysr/ isrcod, junkr, brot, aso, o, p, q, dmom, efield
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       dimension j(1), is(1), l(1), jhold(1), ishold(1), ieps(2)
