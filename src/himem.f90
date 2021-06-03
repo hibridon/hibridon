@@ -91,15 +91,15 @@ module mod_covvl
    end subroutine allocate_covvl
 end module mod_covvl
 
-! module mod_cofact
-!    implicit none
-!    real(8), dimension(:), allocatable :: si
-!    contains
-!    subroutine allocate_cofact(n)
-!       integer, intent(in) :: n
-!       allocate(si(n)) ;
-!    end subroutine allocate_cofact
-! end module mod_cofact
+module mod_cofact
+   implicit none
+   real(8), dimension(:), allocatable :: si
+   contains
+   subroutine allocate_cofact(n)
+      integer, intent(in) :: n
+      allocate(si(n)) ;
+   end subroutine allocate_cofact
+end module mod_cofact
 
 ! module mod_coener
 !    implicit none

@@ -1,13 +1,14 @@
       program logair
-      use mod_cosout, only: nnout, jout
-      use mod_coiout, only: niout, indout
-      use mod_cov2, only: nv2max, ndummy, v2
-      use mod_coiv2, only: iv2
-      use mod_cocent, only: cent
-      use mod_coeint, only: eint
-      use mod_coj12, only: j12
-      use mod_coj12p, only: j12pk
-      use mod_covvl, only: vvl
+      use mod_cosout, only: allocate_cosout
+      use mod_coiout, only: allocate_coiout
+      use mod_cov2, only: allocate_cov2
+      use mod_coiv2, only: allocate_coiv2
+      use mod_cocent, only: allocate_cocent
+      use mod_coeint, only: allocate_coeint
+      use mod_coj12, only: allocate_coj12
+      use mod_coj12p, only: allocate_coj12p
+      use mod_covvl, only: allocate_covvl
+      use mod_cofact, only: allocate_cofact
       use mod_coeig, only: allocate_coeig
       use mod_coeig2, only: allocate_coeig2
 cstart unix-ibm
@@ -151,7 +152,6 @@ cend
 *  ----------------------------------------------------------
       logical lsc1
       common /comom/  xmom(3), imom(13)
-      common /cofact/ si(kfact)
       common /coener/ energ(ken)
       common /clseg/  lseg,intrel,lchar
       common /cobuf/  lbuf,ibuf(1024)
@@ -224,6 +224,7 @@ cend
       call allocate_coj12(kmax)
       call allocate_coj12p(kmax)
       call allocate_covvl(klammx)
+      call allocate_cofact(kfact)
       call allocate_coeig()
       call allocate_coeig2()
 cstart unix-ibm
