@@ -216,7 +216,13 @@ cend
 *
 *  parameter below sets maximum size of asymmetric top basis fn expansion
       call allocate_cosout(kout)
-
+      call alocate_coiout(kout)
+      call alocate_cov2(kv2max)
+      call alocate_coiv2(kv2max)
+      call alocate_cocent(kmax)
+      call alocate_coeint(kmax)
+      call alocate_coj12(kmax)
+      call alocate_coj12p(kmax)
       call allocate_coeig()
       call allocate_coeig2()
 cstart unix-ibm

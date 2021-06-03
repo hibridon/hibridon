@@ -71,15 +71,15 @@ module mod_coj12
    end subroutine allocate_coj12
 end module mod_coj12
 
-module mod_coj12pk
+module mod_coj12p
    implicit none
    real(8), dimension(:), allocatable :: j12pk
    contains
-   subroutine allocate_coj12pk(n)
+   subroutine allocate_coj12p(n)
       integer, intent(in) :: n
       allocate(j12pk(n)) ;
-   end subroutine allocate_coj12pk
-end module mod_coj12pk
+   end subroutine allocate_coj12p
+end module mod_coj12p
 
 ! module mod_covvl
 !    implicit none
