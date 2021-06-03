@@ -29,8 +29,9 @@
 *   and for 2P atom + molecule system
 *   current revision date: 19-jun-2015 by p.dagdigian
 * ----------------------------------------------------------------------
-      use mod_cosout
+      use mod_cosout, only : nnout, jout
       use mod_coj12, only: j12
+      use mod_coj12p, only: j12pk
       use constants
       implicit double precision (a-h,o-z)
       character*(*) fname
@@ -49,8 +50,6 @@
       common /cosc1/ elev(1)
       common /coisc2/ jpack(1)
       common /coisc3/ lpack(1)
-      common /coj12p/ j12pk(1)
-      !common /cosout/ nnout, jout(21)
       common /coisc1/ inlev(1)
       common /coisc4/ ipack(1)
       common /codim/ nairy, nmax

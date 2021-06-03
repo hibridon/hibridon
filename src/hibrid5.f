@@ -1628,6 +1628,7 @@ c
 * ----------------------------------------------------------------------
       use mod_cosout, only: nnout, jout
       use mod_coj12, only: j12
+      use mod_coj12p, only: j12pk
       implicit double precision (a-h,o-z)
       logical twomol, flagsu, nucros
       logical csflag, flaghf, lpar1, lpar2, batch, ipos, lpar3
@@ -1637,7 +1638,6 @@ c
       common /coisc3/ jpack(1)
       common /coisc4/ lpack(1)
       common /coisc5/ inpack(1)
-      common /coj12p/ j12pk(1)
       common /coisc6/ isc1(1)
       common /coisc7/ isc2(1)
       common /cosc1/  elev(1)
@@ -1754,10 +1754,10 @@ c
 *
 * ----------------------------------------------------------------------
       use mod_coj12, only: j12
+      use mod_coj12p, only: j12pk
       implicit double precision (a-h,o-z)
       complex*8 t
       logical diag, is_j12
-      common /coj12p/ j12pk(1)
       common /coselb/ ibasty
       dimension sreal(nmax,1), simag(nmax,1), tsq(nmax,1)
       dimension inrow(1),jrow(1),lrow(1),incol(1),jcol(1),lcol(1)
