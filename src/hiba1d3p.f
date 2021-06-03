@@ -116,6 +116,7 @@
 *   vlm13p:    returns angular coupling coefficient for particular
 *              choice of channel index
 * ------------------------------------------------------------
+      use mod_coeig, only: c0, c1, c2
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
       include "common/parbas"
@@ -135,7 +136,6 @@
 *   xmconv is converson factor from amu to atomic units
       common /coconv/ econv, xmconv
 *   eigenvectors for the atomic Hamiltonian
-      common /coeig/  c0(4,4), c1(3,3), c2(2,2)
       dimension j(1), l(1), jhold(1), ehold(1),
      :          ishold(1), is(1), ieig(0:2)
 *  scratch arrays for computing asymmetric top energies and wave fns.
@@ -669,8 +669,8 @@ cend
 *  xf3j:     evaluates 3j symbol
 *  xf6j:     evaluates 6j symbol
 * --------------------------------------------------------------------
+      use mod_coeig, only: c0, c1, c2
       implicit double precision (a-h,o-z)
-      common /coeig/  c0(4,4), c1(3,3), c2(2,2)
       data onth, twth, frth, sqrt2, onsqt3 /0.333333333333333d0,
      +  0.666666666666667d0, 1.333333333333333d0,
      +  1.414213562373095d0, 0.577350269189626d0 /
