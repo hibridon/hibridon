@@ -276,11 +276,11 @@ cend
 *              vector
 *  -------------------------------------------------------------------
       use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
       implicit double precision (a-h,o-z)
       integer i, iflag, ilam, lamnum, nch, nlam, nlammx, nmax, nv2max
       integer iv2
       common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
-      common /coiv2/ iv2(100)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /copmat/ rtmn, rtmx, iflag
       common /cocent/ cent(1)

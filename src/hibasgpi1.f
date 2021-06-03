@@ -168,6 +168,7 @@
 *               (in hiba2pi.f)
 * --------------------------------------------------------------------
       use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
       implicit double precision (a-h,o-z)
       logical csflag, clist, flaghf, flagsu, ihomo, bastst
       include "common/parbas"
@@ -176,7 +177,6 @@
      :  nmaxsg, nparsg, igupi, nparpi, numvpi, ispar(10)
       common /cosysr/ isrcod, junkr, esg, bsg, dsg, gsr, rspar(40)
       common /coipar/ iiipar(9), iprint
-      common /coiv2/ iv2(1)
       common /cotq1/ vec(3,3)
       common /coisc1/ ivec(1)
       common /coisc2/ nrot(1)

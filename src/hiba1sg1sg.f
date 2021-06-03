@@ -129,6 +129,7 @@ c
 * --------------------------------------------------------------------
       use mod_1sg1sg
       use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
       include "common/parbas"
@@ -138,7 +139,6 @@ c
      :  ipotsy2
       common /cosysr/ isrcod, junkr, b1rot, d1rot, b2rot
       common /coselb/ ibasty
-      common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /cocent/ cent(1)
       common /coeint/ eint(1)

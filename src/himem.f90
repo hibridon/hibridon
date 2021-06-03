@@ -31,15 +31,15 @@ module mod_cov2
    end subroutine allocate_cov2
 end module mod_cov2
 
-! module mod_coiv2
-!    implicit none
-!    real(8), dimension(:), allocatable :: iv2
-!    contains
-!    subroutine allocate_coiv2(n)
-!       integer, intent(in) :: n
-!       allocate(iv2(n)) ;
-!    end subroutine allocate_coiv2
-! end module mod_coiv2
+module mod_coiv2
+   implicit none
+   real(8), dimension(:), allocatable :: iv2
+   contains
+   subroutine allocate_coiv2(n)
+      integer, intent(in) :: n
+      allocate(iv2(n)) ;
+   end subroutine allocate_coiv2
+end module mod_coiv2
 
 ! module mod_cocent
 !    implicit none

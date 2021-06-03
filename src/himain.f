@@ -19,6 +19,8 @@
 *  current revision date:  19-jun-2019 (p. dagdigian)
 *
       use mod_coiout, only: niout, indout
+      use mod_cov2, only: nv2max, ndummy, v2
+      use mod_coiv2, only: iv2
       implicit double precision (a-h, o-z)
 cstart unix-ibm unix-darwin unix-x86
       character *40 test
@@ -142,8 +144,6 @@ cend
       logical lsc1
       common /comom/  xmom(3), imom(13)
       common /cosout/ nnout, jout(kout)
-      common /cov2/ nv2max, ndummy, v2(kv2max)
-      common /coiv2/ iv2(kv2max)
       common /cocent/ cent(kmax)
       common /coeint/ eint(kmax)
       common /coj12/ j12(kmax)

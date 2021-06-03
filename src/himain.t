@@ -2,6 +2,7 @@
       use mod_cosout, only: nnout, jout
       use mod_coiout, only: niout, indout
       use mod_cov2, only: nv2max, ndummy, v2
+      use mod_coiv2, only: iv2
       use mod_coeig, only: allocate_coeig
       use mod_coeig2, only: allocate_coeig2
 cstart unix-ibm
@@ -145,7 +146,6 @@ cend
 *  ----------------------------------------------------------
       logical lsc1
       common /comom/  xmom(3), imom(13)
-      common /coiv2/ iv2(kv2max)
       common /cocent/ cent(kmax)
       common /coeint/ eint(kmax)
       common /coj12/ j12(kmax)

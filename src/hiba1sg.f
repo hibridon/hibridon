@@ -435,6 +435,7 @@ c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
 *
 * --------------------------------------------------------------------
       use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
       include "common/parbas"
@@ -444,7 +445,6 @@ c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
       common /cosysi/ nscode, isicod, nterm, nvmin, nvmax,
      :                iscod(2,maxvib)
       common /cosysr/ isrcod, junkr, rpar(4,maxvib)
-      common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /cocent/ cent(1)
       common /coeint/ eint(1)

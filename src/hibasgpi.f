@@ -187,6 +187,7 @@
 *              choice of channel index
 * --------------------------------------------------------------------
       use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
       implicit double precision (a-h,o-z)
       logical csflag, clist, flaghf, flagsu, ihomo, bastst
       include "common/parbas"
@@ -196,7 +197,6 @@
       common /cosysi/ nscode, isicod, ispar(10)
 *  these parameters must be the same as in hisysgpi
       common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
-      common /coiv2/ iv2(1)
       common /cotq1/ vec(3,3,1)
       common /coisc1/ ivec(1)
       common /coisc2/ ivhold(1)
