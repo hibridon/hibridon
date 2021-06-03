@@ -45,11 +45,6 @@ echo ""
 echo "running fortran converter ..."
 echo "running fortran converter ..." >>& $basedir/obj.log
 $basedir/bin/rftscript >>& $basedir/obj.log
-# create common directory
-echo ""
-echo "untar'ing common files ..."
-echo "untar'ing common files ..." >>& $basedir/obj.log
-tar -xvf $basedir/src/hicommon.tar >>& $basedir/obj.log
 # set help directory
 echo ""
 echo "setting help directory ..."

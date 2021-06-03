@@ -1,0 +1,7 @@
+*comdeck ground
+      subroutine ground(wf, r, nch, nphoto, mxphot)
+      implicit double precision (a-h,o-z)
+      entry wfintern(wf,yymin,nnvib,nny)
+*  dummy ground subroutine
+      return
+      end

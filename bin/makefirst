@@ -151,7 +151,17 @@ if $fcompiler == 'ifort' then
     if (-e $FFC) then 
         echo "Location of fortran compiler is $FFC" |tee -a $basedir/bin/makefirst.log
         set FC = $FFC
-        set options = "-extend_source 132"
+        # allow for source code lines of up to 132 columns (maximum allowed in intel fortran compiler)
+        set options = '-extend-source 132'
+
+        # use large model to prevent linking errors (relocation truncated to fit: R_X86_64_PC32) because the common blocks are too big to fit in the default memory model
+        set options = "$options -mcmodel=large"
+
+        # force arrays to be allocated on the heap instead of the stack, this removes segmentation faults crash, not sure why
+        # the following option means : automatic arrays and arrays created for temporary computations are allocated on the stack if their size can be determined at compile time and if it doesn't exceed 10kb.
+        # this option seems necessary for big values of kmax (eg kmax=5000), according to bdesrousseaux, otherwise the user will experience a segmentation fault. I guess that without this option, the stack becomes too small to contain such big arrays...
+        set options = "$options -heap-arrays 10"
+
         set FS = -save
         set opt = "-O3"
         set flag64 = "true"
@@ -186,7 +196,9 @@ if $fcompiler == 'ifort' then
     endif 
 else if ( $fcompiler == 'g95' || $fcompiler == 'gfortran' ) then
     set FFC=`which $fcompiler`
-# -ffixed-line-length-132 because lots of files use more than the standard 72 columns
+    # allow for source code lines of up to 132 columns whichi is the maximum allowed in intel fortran compiler
+    # (true, we are compiling with gfortran here, having the same restriction here will ease detecting lines that exceed 132 columns,
+    # they would break intel fortran's build)
     set options = '-ffixed-line-length-132'
 
     # -std=legacy so that the compiler doesn't complain when the size of arrays don't match between a function declaration and a call to this function. At the moment, there's plenty of such cases in the code; these are not bugs, just an old way of doing things.
@@ -195,7 +207,7 @@ else if ( $fcompiler == 'g95' || $fcompiler == 'gfortran' ) then
     # force arrays to be allocated on the heap instead of the stack, this removes segmentation faults crash, not sure why
     set options = "$options -fmax-stack-var-size=1"
 
-    # use large model to prevent linking errors (elocation truncated to fit: R_X86_64_PC32) because the common blocks are too big to fit in the default memory model
+    # use large model to prevent linking errors (relocation truncated to fit: R_X86_64_PC32) because the common blocks are too big to fit in the default memory model
     set options = "$options -mcmodel=large"
 
     # set options = '-ffixed-line-length-132 -std=legacy -g -Wl,--stack,1048'    

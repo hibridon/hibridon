@@ -8,6 +8,7 @@ set syst = `uname -s`
 set flag = ""
 set opt = ""
 
+
 echo ""
 @ items = $#argv
 if ($items > 0) then
@@ -32,8 +33,10 @@ endif
    set fchar = `echo $mach |awk '{printf index($0,"=")}'`
    set mach = `echo $mach |awk '{printf substr($0,'$fchar'+2,'$len'-'$fchar'-2)}'`
    echo "Machine type is $mach"
+set max_build_string_length = 122  # 132 (max num columns allowed in fortran) - 6 (for left margin) - 1 (for space) - 1 (opening quote) - 1 (closing quote) - 1 (final slash)
 echo "      data build(1) /" > SYSCONFIG
-echo "     :  'SYS=$sysname; MACH=$mach'/" >> SYSCONFIG
+set build1_message = "SYS=$sysname; MACH=$mach"
+echo "     : '"`echo -n $build1_message | cut -c -$max_build_string_length`"'/">>SYSCONFIG
 set ccc = `grep CC $basedir/CONFIG`
 set len = `echo $ccc |awk '{printf length($0)}'`
 set fchar = `echo $ccc |awk '{printf index($0,"=")}'`
@@ -58,7 +61,8 @@ set fi64 = `echo $fi64 |awk '{printf substr($0,'$fchar'+2,'$len'-'$fchar-2')}'`
 set fcc = "$fcc $fopt $fstatic $fi64"
 echo "Fortran compiler is $fcc"
 echo "      data build(2) /" >> SYSCONFIG
-echo "     :  'CC=$ccc; FC=$fcc'/">>SYSCONFIG
+set build2_message = "CC=$ccc; FC=$fcc"
+echo "     : '"`echo -n $build2_message | cut -c -$max_build_string_length`"'/">>SYSCONFIG
 set libs = `grep LIBS $basedir/CONFIG`
 set len = `echo $libs |awk '{printf length($0)}'`
 set fchar = `echo $libs |awk '{printf index($0,"=")}'`

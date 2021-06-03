@@ -1,0 +1,2 @@
+*comdeck parvfit
+      parameter (maxang=10,maxnr=5)
