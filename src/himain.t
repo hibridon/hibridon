@@ -7,6 +7,7 @@
       use mod_coeint, only: eint
       use mod_coj12, only: j12
       use mod_coj12p, only: j12pk
+      use mod_covvl, only: vvl
       use mod_coeig, only: allocate_coeig
       use mod_coeig2, only: allocate_coeig2
 cstart unix-ibm
@@ -150,7 +151,6 @@ cend
 *  ----------------------------------------------------------
       logical lsc1
       common /comom/  xmom(3), imom(13)
-      common /covvl/  vvl(klammx)
       common /cofact/ si(kfact)
       common /coener/ energ(ken)
       common /clseg/  lseg,intrel,lchar
@@ -216,13 +216,14 @@ cend
 *
 *  parameter below sets maximum size of asymmetric top basis fn expansion
       call allocate_cosout(kout)
-      call alocate_coiout(kout)
-      call alocate_cov2(kv2max)
-      call alocate_coiv2(kv2max)
-      call alocate_cocent(kmax)
-      call alocate_coeint(kmax)
-      call alocate_coj12(kmax)
-      call alocate_coj12p(kmax)
+      call allocate_coiout(kout)
+      call allocate_cov2(kv2max)
+      call allocate_coiv2(kv2max)
+      call allocate_cocent(kmax)
+      call allocate_coeint(kmax)
+      call allocate_coj12(kmax)
+      call allocate_coj12p(kmax)
+      call allocate_covvl(klammx)
       call allocate_coeig()
       call allocate_coeig2()
 cstart unix-ibm

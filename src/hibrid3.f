@@ -279,6 +279,7 @@ cend
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       integer i, iflag, ilam, lamnum, nch, nlam, nlammx, nmax, nv2max
       integer iv2
@@ -286,7 +287,6 @@ cend
       common /conlam/ nlam, nlammx, lamnum(1)
       common /copmat/ rtmn, rtmx, iflag
       common /coered/ ered, rmu
-      common /covvl/ vvl(1)
       common /coselb/ ibasty
       dimension w(100)
       zero = 0.d0

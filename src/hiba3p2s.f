@@ -129,6 +129,7 @@
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_coj12, only: j12
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
       include "common/parbas"
@@ -142,7 +143,6 @@
       common /coel/  ll(9)
       common /coered/ ered, rmu
       common /coskip/ nskip, iskip
-      common /covvl/  vvl(6)
 *  econv is conversion factor from cm-1 to hartrees
 *  xmconv is converson factor from amu to atomic units
       common /coconv/ econv, xmconv
