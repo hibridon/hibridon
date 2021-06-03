@@ -20,16 +20,16 @@ module mod_coiout
    end subroutine allocate_coiout
 end module mod_coiout
 
-! module mod_cov2
-!    implicit none
-!    real(8), dimension(:), allocatable :: v2
-!    integer, allocatable               :: nv2max, ndummy
-!    contains
-!    subroutine allocate_cov2(n)
-!       integer, intent(in) :: n
-!       allocate(v2(n)) ; allocate(nv2max) ; allocate(ndummy)
-!    end subroutine allocate_cov2
-! end module mod_cov2
+module mod_cov2
+   implicit none
+   real(8), dimension(:), allocatable :: v2
+   integer, allocatable               :: nv2max, ndummy
+   contains
+   subroutine allocate_cov2(n)
+      integer, intent(in) :: n
+      allocate(v2(n)) ; allocate(nv2max) ; allocate(ndummy)
+   end subroutine allocate_cov2
+end module mod_cov2
 
 ! module mod_coiv2
 !    implicit none

@@ -144,6 +144,7 @@ c      end module mod_1sg1sg
 *              particular choice of channel index
 * --------------------------------------------------------------------
       use mod_1sg1sg
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
       include "common/parbas"
@@ -153,7 +154,6 @@ c      end module mod_1sg1sg
      :  ipotsy2
       common /cosysr/ isrcod, junkr, b1rot, d1rot, flmbda, gamma, b2rot
       common /coselb/ ibasty
-      common /cov2/ nv2max, junkv, v2(1)
       common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /cocent/ cent(1)

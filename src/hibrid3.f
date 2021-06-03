@@ -275,11 +275,11 @@ cend
 *    vsmul:    multiplies vector by scalar and stores result in another
 *              vector
 *  -------------------------------------------------------------------
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
       implicit double precision (a-h,o-z)
       integer i, iflag, ilam, lamnum, nch, nlam, nlammx, nmax, nv2max
       integer iv2
       common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
-      common /cov2/ nv2max, ndummy, v2(1)
       common /coiv2/ iv2(100)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /copmat/ rtmn, rtmx, iflag

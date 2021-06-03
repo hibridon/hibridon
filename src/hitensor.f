@@ -2307,6 +2307,7 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
 * current revision date: 7-oct-2011 by pj dagdigian
 *------------------------------------------------------------------------
       use mod_codim, only: mmax
+      use mod_cov2, only: nv2max, ndummy, y => v2
       implicit double precision (a-h,o-z)
 * size of q for j <= 5 and 0.5 deg angle increment
       complex*16 q(43681)
@@ -2334,7 +2335,6 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
       common /coisc1/ inlev(1)
       common /coz/ sreal(1)
       common /cow/ simag(1)
-      common /cov2/ nv2max, ndummy, y(1)
       common /coconv/ econv, xmconv, ang2c
       common /coang/ ang1, ang2, dang
 *
@@ -2757,6 +2757,7 @@ c=============
 * current revision date: 7-oct-2011 by pj dagdigian
 *------------------------------------------------------------------------
       use mod_codim, only: mmax
+      use mod_cov2, only: nv2max, ndummy, y => v2
       implicit double precision (a-h,o-z)
 * size of q for j <= 5 and 0.5 deg angle increment
       complex*16 q(43681)
@@ -2784,7 +2785,6 @@ c=============
       common /coisc1/ inlev(1)
       common /coz/ sreal(1)
       common /cow/ simag(1)
-      common /cov2/ nv2max, ndummy, y(1)
       common /coconv/ econv, xmconv, ang2c
       common /coang/ ang1, ang2, dang
 *

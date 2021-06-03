@@ -117,6 +117,7 @@
 *              choice of channel index
 * ------------------------------------------------------------
       use mod_coeig, only: c0, c1, c2
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
       include "common/parbas"
@@ -124,7 +125,6 @@
 
       common /cosysi/ nscode, isicod, nterm, nstate
       common /cosysr/ isrcod, junkr, en1d
-      common /cov2/ nv2max, junkv, v2(1)
       common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(12)
       common /cocent/ cent(1)

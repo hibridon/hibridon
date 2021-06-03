@@ -1,7 +1,7 @@
       program logair
       use mod_cosout, only: nnout, jout
       use mod_coiout, only: niout, indout
-
+      use mod_cov2, only: nv2max, ndummy, v2
       use mod_coeig, only: allocate_coeig
       use mod_coeig2, only: allocate_coeig2
 cstart unix-ibm
@@ -145,7 +145,6 @@ cend
 *  ----------------------------------------------------------
       logical lsc1
       common /comom/  xmom(3), imom(13)
-      common /cov2/ nv2max, ndummy, v2(kv2max)
       common /coiv2/ iv2(kv2max)
       common /cocent/ cent(kmax)
       common /coeint/ eint(kmax)
@@ -381,7 +380,6 @@ cend
       common /cosavi/ iipar, ixpar(8)
       common /cosavr/ irpar(2), rxpar(9)
       common /copmat/ rtmn, rtmx, iflag
-      !common /cosout/ nnout, jout(21)
       common /coeint/ eint(1)
       common /cocent/ cent(1)
       common /coered/ ered, rmu
