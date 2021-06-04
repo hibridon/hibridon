@@ -2611,8 +2611,8 @@ c--------------------------------------------------------------------
 c.....unrolled version for ibm6000 and other risc machines
       implicit double precision (a-h,o-z)
       common /comxm/ ncache, mxmblk
-      include "common/vax1"
-      include "common/vax2"
+#include "common/vax1"
+#include "common/vax2"
       dimension r(*),a(*),b(*)
       if(ncol.eq.0.or.nrow.eq.0) return
       if(nlink.eq.0) then
@@ -4261,9 +4261,9 @@ c--------------------------------------------------------------------
 c.....unrolled version for ibm6000 and other risc machines
       implicit double precision (a-h,o-z)
       common /comxm/ ncache, mxmblk
-      include "common/vax1"
+#include "common/vax1"
       dimension r(*),a(*),b(*)
-      include "common/vax2"
+#include "common/vax2"
       if(ncol.eq.0.or.nrow.eq.0.or.nlink.eq.0) return
       if(nlink.eq.1) then
         jj=1

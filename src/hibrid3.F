@@ -426,8 +426,8 @@ cABER
       implicit double precision(a-h,o-z)
       logical ihomo
       common /coselb/ ibasty
-      include "common/parsys"
-      include "common/parbas"
+#include "common/parsys"
+#include "common/parbas"
       common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
       common /cosysi/ nscode, isicod, ispar(maxpar)
       common /conlam/ nlam, nlammx, lamnum(1)
@@ -520,8 +520,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       implicit double precision(a-h,o-z)
       logical ihomo
       common /coselb/ ibasty
-      include "common/parsys"
-      include "common/parbas"
+#include "common/parsys"
+#include "common/parbas"
       common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
       common /cosysi/ nscode, isicod, ispar(maxpar)
       common /conlam/ nlam, nlammx, lamnum(1)
@@ -663,8 +663,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       implicit double precision(a-h,o-z)
       logical ihomo
       common /coselb/ ibasty
-      include "common/parsys"
-      include "common/parbas"
+#include "common/parsys"
+#include "common/parbas"
       common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
       common /cosysi/ nscode, isicod, ispar(maxpar)
       common /conlam/ nlam, nlammx, lamnum(1)

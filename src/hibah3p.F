@@ -113,8 +113,8 @@
 * ------------------------------------------------------------
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
-      include "common/parbas"
-      include "common/parbasl"
+#include "common/parbas"
+#include "common/parbasl"
       common /cosysr/ isrcod, junkr, brot,aso1, aso2
       common /cosysi/ nscode, isicod, nterm, iop,jmax
       common /cov2/ nv2max, junkv, v2(1)

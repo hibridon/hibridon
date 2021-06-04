@@ -69,8 +69,8 @@
       logical existf, lspar, first, openfl, is_twomol
       logical lpar, logp, opti, optifl, batch, jtrunc
       dimension a(15),ia(10), ihold(15), lhold(15),lindx(28)
-      include "common/parbas"
-      include "common/parpot"
+#include "common/parbas"
+#include "common/parpot"
       common /cosavi/ iipar, ixpar(iicode)
       common /cosavr/ irpar, junks, rxpar(ircode)
       common /coener/ energ(1)

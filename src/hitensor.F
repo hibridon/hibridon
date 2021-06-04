@@ -94,7 +94,7 @@
       logical csflag, flaghf, flagsu, twomol, exstfl, lpar,
      :        batch, fast, nucros,lpar2
 *
-      include "common/parpot"
+#include "common/parpot"
       common /colpar/ lpar(3), batch, lpar2(23)
       common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf,
      :                igjtp
@@ -677,7 +677,7 @@ c end of added/modified code (pjd)
       character*10  elaps, cpu
       logical flaghf, exstfl, lpar,
      :        batch,lpar2
-      include "common/parpot"
+#include "common/parpot"
       common /colpar/ lpar(3), batch,lpar2(23)
       common /coipar/ ipar(9),iprnt
       common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot,
@@ -805,7 +805,7 @@ c end of added/modified code (pjd)
       logical lpar, batch, flaghf, lpar2
       character*20  cdate
 *
-      include "common/parpot"
+#include "common/parpot"
       common /colpar/ lpar(3), batch,lpar2(23)
       common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot,
      :             nwaves, jfsts, jlparf, jlpars, njmax

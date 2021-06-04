@@ -874,7 +874,7 @@ c#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
 
       logical existf,csflg1,csflg2,flghf1,flghf2,flgsu1,flgsu2
       logical twoml1,twoml2,nucr1,nucr2
-      include "common/parpot"
+#include "common/parpot"
       common /coz/ sreal1(1)
       common /cow/ sreal2(1)
       common /cozmat/ simag1(1)

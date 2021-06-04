@@ -141,8 +141,8 @@
       character*80 string
       character*27 case
       character*2 chf
-      include "common/parbas"
-      include "common/parbasl"
+#include "common/parbas"
+#include "common/parbasl"
       common /coipar/ iiipar(9), iprint
       common /corpar/ xjunk(3), rendai
       common /cosysi/ nscode, isicod, nterm, jmax, igu, isa,

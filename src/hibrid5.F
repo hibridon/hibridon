@@ -149,7 +149,7 @@
      :        wrxsec, xsecwr, flaghf, t2test, flagsu, firstj, twomol,
      :        nucros, photof, wavefn, faux, twojlp, boundf, wrsmat
       character*20 cdate
-      include "common/parpot"
+#include "common/parpot"
       common /cojsav/ jsav1, jsav2
       common /cosurf/ flagsu
       common /cocent/ cent(1)
@@ -321,7 +321,7 @@
       character*40 form
       logical ipos, csflag, wrpart, partw, flaghf, flagsu,twomol,nucros,
      :        twojlp,headf
-      include "common/parpot"
+#include "common/parpot"
       common /coered/ ered, rmu
       common /cosurf/ flagsu
       common /coisc2/ nj,jlist(10)
@@ -930,7 +930,7 @@ c     write(6,*) 'prefac:',j1,j2,j3,x1,x3
       logical csflag, flaghf, wrxsec, xsecwr, ipos, flagsu, twomol,
      :        nucros, ihomo
       character*20 cdate
-      include "common/parpot"
+#include "common/parpot"
       common /cojsav/ jsav1, jsav2
       common /coered/ ered, rmu
       common /cosurf/ flagsu
@@ -1126,7 +1126,7 @@ cABER
       character*40 xnam1, xnam2
       character*80 line
       logical csflag, flaghf, iprint, flagsu, twomol, existf, nucros
-      include "common/parpot"
+#include "common/parpot"
       common /cojhld/ jlev(1)
       common /coisc1/ inlev(1)
       common /coisc2/ nj,jlist(1)
@@ -1415,7 +1415,7 @@ c
       character*13  string
       logical csflag, flaghf, flagsu, twomol, exstfl,
      :        batch, nucros, notequ, lpar1, lpar2, ipos,lpar3
-      include "common/parpot"
+#include "common/parpot"
       common /colpar/ lpar1(3), batch, lpar2(5), ipos, lpar3(17)
       common /cojq/   jq(1)
       common /colq/   lq(1)

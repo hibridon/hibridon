@@ -46,7 +46,7 @@
       complex(8) :: stampl, stamplm
       logical existf,csflg1,flghf1,flgsu1,ihomo,flaghf,twomol,
      1        nucros,iprint,mflag,stflag,is_twomol
-      include "common/parpot"
+#include "common/parpot"
       common /coselb/ ibasty
       common /coz/ sreal1(1)
       common /cow/ simag1(1)

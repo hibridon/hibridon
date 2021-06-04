@@ -34,7 +34,7 @@ c simulates vax vms help command
       parameter (maxlev=9,maxsub=50)
       character*(*) helpdir,helptail
 #endif
-      include "common/parhlp"
+#include "common/parhlp"
 #if defined(HIB_UNIX) || defined(HIB_UNIX_DEC)  || defined(HIB_UNIX_IBM)
       character*80 helpfile,line,lin,lin2
       character*1 pat

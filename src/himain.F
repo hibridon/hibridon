@@ -383,7 +383,7 @@ c.....ncache: cache size in words
 *  -------------------------------------------------------------
       logical optifl, first
       logical lsc1
-      include "common/parpot"
+#include "common/parpot"
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
       real secnds
       common /codec/ ttim(2)

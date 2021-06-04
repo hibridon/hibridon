@@ -150,8 +150,8 @@
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
       character*1 slab
-      include "common/parbas"
-      include "common/parbasl"
+#include "common/parbas"
+#include "common/parbasl"
       common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop,
      :  ivbend, jmax
       common /coipar/ iiipar(9), iprint

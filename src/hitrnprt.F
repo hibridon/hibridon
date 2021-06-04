@@ -40,7 +40,7 @@
      :        batch, nucros,lpar2
       logical is_j12, is_twomol
 *
-      include "common/parpot"
+#include "common/parpot"
       common /colpar/ lpar(3), batch, lpar2(23)
       common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf,
      :                igjtp

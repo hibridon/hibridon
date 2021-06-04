@@ -25,7 +25,7 @@
      :        readpt, ihomo, bastst, twomol, nucros, photof, wavefl,
      :        boundc
       parameter (maxpar=150)
-      include "common/parpot"
+#include "common/parpot"
       common /cofile/ input, output, jobnam, savfil
       common /cosysi/ nscode, isicod, ispar(maxpar)
       common /cosysr/ isrcod, junkr, rspar(maxpar)
@@ -948,7 +948,7 @@ c
      :        jfirst, jj1, jj2, jlpar, jtemp, jtotd, lenx, n, nlevel,
      :        nlevop, nnout, nout, numax, numin, nud, iaver
       integer inlev, ipoint, jlev, jout
-      include "common/parpot"
+#include "common/parpot"
       common /coz/ zmat(1)
       common /cow/ scmat(1)
       common /cojhld/ jlev(5)
@@ -1449,7 +1449,7 @@ cmha
       logical csflag, flaghf, iprint, ipos, flagsu, twomol, existf,
      :        openfl,lpar(17),
      :        airyfl, airypr, bastst, batch, chlist, ihomo, eprint
-      include "common/parpot"
+#include "common/parpot"
       common /colpar/ airyfl, airypr, bastst, batch, chlist,
      :                csflag, flaghf, flagsu, ihomo, ipos,lpar
       common /coz/ zmat(1)
