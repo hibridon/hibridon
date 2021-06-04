@@ -33,7 +33,7 @@ c     nmax    Leading dimension of the w matrix used in Hibridon
 c     ------------------------------------------------------------------
       implicit none
       integer, intent(in) :: nch, nmax
-      include "common/parpot"
+#include "common/parpot"
       common /corpar/ r1, r2, c, spac, delr, hsimp, eigmin, tolai, xmu
       real(8) :: r1, r2, c, spac, delr, hsimp, eigmin, tolai, xmu
       common /cofile/ input, output, jobnam, savfil

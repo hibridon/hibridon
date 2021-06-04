@@ -28,7 +28,7 @@
       logical csflg1, flghf1, flgsu1, twmol1, nucrs1,
      :     csflg2, flghf2, flgsu2, twmol2, nucrs2,
      :     batch, fast, lpar2, lpar, exstfl, sngsmt, trpsmt
-      include "common/parpot"
+#include "common/parpot"
       common /coisc1/ jlev1(1)
       common /coisc2/ jlev2(1)
       common /coisc3/ inlev1(1)
@@ -693,7 +693,7 @@
       implicit double precision (a-h, o-z)
       logical sngsmt, trpsmt
       complex*8 t
-      include "common/parpot"
+#include "common/parpot"
       common /coisc1/ jlev1(1)
       common /coisc2/ jlev2(1)
       common /coisc3/ inlev1(1)

@@ -132,8 +132,8 @@ c      end module mod_1sg1sg
       use mod_1sg1sg
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
-      include "common/parbas"
-      include "common/parbasl"
+#include "common/parbas"
+#include "common/parbasl"
       common /coipar/ iiipar(9), iprint
       common /cosysi/ nscode, isicod, n1max, j2min, j2max,
      :  ipotsy2

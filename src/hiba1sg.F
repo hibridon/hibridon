@@ -436,8 +436,8 @@ c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
 * --------------------------------------------------------------------
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
-      include "common/parbas"
-      include "common/parbasl"
+#include "common/parbas"
+#include "common/parbasl"
       common /covib/ nvib,ivib(maxvib)
       common /coipar/ iiipar(9), iprint
       common /cosysi/ nscode, isicod, nterm, nvmin, nvmax,

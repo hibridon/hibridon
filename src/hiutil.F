@@ -63,7 +63,7 @@ c simulates vax vms help command
       parameter (maxlev=9,maxsub=50)
       character*(*) helpdir,helptail
 #endif
-      include "common/parhlp"
+#include "common/parhlp"
 #if defined(HIB_UNIX)
       character*80 helpfile,line,lin,lin2
       character*1 pat
@@ -668,7 +668,7 @@ c#endif
 *
       character*(*) xname,jobnam,xtens
       character*1 dot
-      include "common/comdot"
+#include "common/comdot"
       xname=jobnam
       i=index(xname,dot)
       if(i.eq.0) then

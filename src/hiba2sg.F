@@ -127,8 +127,8 @@
 *              choice of channel index
 * --------------------------------------------------------------------
       logical clist, csflag, flaghf, flagsu, ihomo, bastst
-      include "common/parbas"
-      include "common/parbasl"
+#include "common/parbas"
+#include "common/parbasl"
       common /cosysr/ isrcod, junkr, brotsg, gsr, drotsg, hrotsg
       common /cosysi/ nscode, isicod, nterm, nrmax, npar, isym, igu,
      :                isa

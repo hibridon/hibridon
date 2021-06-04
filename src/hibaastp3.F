@@ -204,8 +204,8 @@ c
       use mod_asymln
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
-      include "common/parbas"
-      include "common/parbasl"
+#include "common/parbas"
+#include "common/parbasl"
       common /cosysi/ nscode, isicod, nterm, numpot, jmax, iop, 
      :  j2min, j2max, ipotsy2
       common /cosysr/ isrcod, junkr, arot, brot, crot, emax, b2rot

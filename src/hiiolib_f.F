@@ -271,7 +271,7 @@ c
      :        boundc
       character*40 input, jobnam, output, savfil
       character*(*) filnam
-      include "common/parpot"
+#include "common/parpot"
       common /coselb/ ibasty
       common /coipar/ jtot1, jtot2, jtotd,jlpar,nerg,numax, numin, nud,
      :                lscreen, iprint
@@ -976,7 +976,7 @@ c     ------------------------------------------------------------
      :        t2test, t2writ, writs, wrpart, wrxsec,
      :        xsecwr, twomol, nucros, photof, wavefl, boundc
       character*40  oldlab,newlab
-      include "common/parpot"
+#include "common/parpot"
       character*40 xname,xnam1
       character*20 cdate
       character*40 input,output,jobnam,savfil
@@ -1219,7 +1219,7 @@ c.....open direct access file for interpolation and restart
       character*40 oldlab
       integer jtot, nchmax
       character*40 input,output,jobnam,savfil
-      include "common/parpot"
+#include "common/parpot"
       common /cofile/ input,output,jobnam,savfil
       common /coener/ energ(1)
       common /cobmat/ q(1)
@@ -1380,7 +1380,7 @@ c     ------------------------------------------------------------
       implicit double precision (a-h,o-z)
       logical csflag, flaghf, flagsu, twomol, nucros
       character*20 cdate
-      include "common/parpot"
+#include "common/parpot"
       common/clseg/ lseg,intrel,lchar
       common/cofil/ nfl,iofbuf,maxrec(60),iofrec(60),nwrec,lenbuf
       common/cobuf/ lbuf,ibuf(1)
@@ -1855,7 +1855,7 @@ c     ------------------------------------------------------------
       implicit double precision (a-h,o-z)
       logical csflag, flaghf, flagsu, twomol, nucros
       character*20 cdate
-      include "common/parpot"
+#include "common/parpot"
       common /coselb/ ibasty
       dimension jlev(1),inlev(1),elev(1),jout(1)
       integer int_t
@@ -1920,7 +1920,7 @@ c
       implicit double precision (a-h,o-z)
       character*(*) name
       parameter (maxun=2, maxrec=5000)
-      include "common/parllbf"
+#include "common/parllbf"
       common/cdbf/ ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf(llbuf)
       common/clseg/ lseg,intrel,lchar
       common /cobuf/ lbuf,ibuf(1)

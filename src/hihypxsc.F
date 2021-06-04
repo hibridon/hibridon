@@ -36,7 +36,7 @@
       character*10 elaps, cpu
       logical csflg, flaghf, flgsu, twmol, nucrs,
      :     batch, fast, lpar2, lpar, exstfl
-      include "common/parpot"
+#include "common/parpot"
       common /coisc1/ jlev(1)
       common /coisc3/ inlev(1)
       common /coisc5/ jout(1)

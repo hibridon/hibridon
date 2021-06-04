@@ -239,7 +239,7 @@
       integer ibasty, irpot, iread
       logical readpt
       common /coselb/ ibasty
-      include "common/parbas"
+#include "common/parbas"
 * set default for vibrational quantum numbers to zero for each term
       do 10 it=1,maxtrm
       ivrow(1,it)=0
@@ -691,12 +691,12 @@
       character*8 scod
       character*(*) fname
       character*60 filnam, line, potfil, filnm1
-      include "common/parsys"
+#include "common/parsys"
       common /cosys/ scod(lencod)
       common /cosysi/ nscode,isicod,iscod(maxpar)
       common /cosysr/ isrcod, junkr, rcod(maxpar)
       common /conlam/ nlam
-      include "common/parbas"
+#include "common/parbas"
       common/covib/ nvib,ivib(maxvib)
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
@@ -705,7 +705,7 @@
       common /coselb/ ibasty
       save potfil
       equivalence(iscod(1),nterm),(iscod(2),nvibmn),(iscod(3),nvibmx)
-      include "common/comdot"
+#include "common/comdot"
 *     number and names of system dependent parameters
 *  set default values for singlet-sigma scattering
       nterm = 1
@@ -873,8 +873,8 @@
       character*8 scod
       character*(*) fname
       character*60 line,filnam,potfil, filnm1
-      include "common/parsys"
-      include "common/parbas"
+#include "common/parsys"
+#include "common/parbas"
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, nrmax, npar, isym, igu,
      :                isa
@@ -887,7 +887,7 @@
       common /coskip/ nskip,iskip
       character*1 dot
       save potfil
-      include "common/comdot"
+#include "common/comdot"
       irpot = 1
 *     number and names of system dependent parameters
       isicod = 6
@@ -1029,14 +1029,14 @@
 *
 *  subroutines called: loapot(iunit,filnam)
       implicit double precision (a-h,o-z)
-      include "common/parsys"
+#include "common/parsys"
       logical readpt, existf
       integer irpot
       character*1 dot
       character*8 scod
       character*(*) fname
       character*60 filnam, line, potfil, filnm1
-      include "common/parbas"
+#include "common/parbas"
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, jmax, igu, isa, npar
       common /cosysr/ isrcod, junkr, brot, aso, p, q
@@ -1047,7 +1047,7 @@
       common /conlam/ nlam
       common /coskip/ nskip,iskip
       save potfil
-      include "common/comdot"
+#include "common/comdot"
       isicod = 5
       isrcod = 4
       nscode = isicod+isrcod
@@ -1153,14 +1153,14 @@
 *  variables in common/cobspt/ must be set in loapot!!
 *
       implicit double precision (a-h,o-z)
-      include "common/parsys"
+#include "common/parsys"
       logical readpt, existf
       character*8 scod,rcod
       character*8 char
       character*(*) fname
       character*1 dot
       character*60 filnam, line, potfil, filnm1
-      include "common/parbas"
+#include "common/parbas"
       common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
       common /cosys/ scod(lencod)
       common /cosyr/ rcod(maxpar)
@@ -1173,7 +1173,7 @@
       common /coskip/ nskip,iskip
       common /conlam/ nlam
       save potfil
-      include "common/comdot"
+#include "common/comdot"
 *  set default values for 2pi-2sigma scattering
       do 5 i=1,maxpar
       rpar=0
@@ -1555,14 +1555,14 @@
       logical readpt, existf
       logical         airyfl, airypr, bastst, batch, chlist, csflag,
      :                flaghf, flagsu, ihomo,lpar
-      include "common/parsys"
+#include "common/parsys"
       character*8 scod
       character*(*) fname
       character*60 filnam, line, potfil, filnm1
       character*1 dot
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
      :                flaghf, flagsu, ihomo,lpar(18)
-      include "common/parbas"
+#include "common/parbas"
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, jmax, igu, isa,
      :                npar, imult, nman
@@ -1571,7 +1571,7 @@
       common /conlam/ nlam
       common /coskip/ nskip,iskip
       save potfil
-      include "common/comdot"
+#include "common/comdot"
       potfil = ' '
 *  number and names of system dependent parameters
 *  first all the system dependent integer variables
@@ -1751,7 +1751,7 @@
       character*60 line, filnam, potfil, filnm1
       parameter (icod = 5, ircod = 4)
       parameter (lencod = icod + ircod + 3)
-      include "common/parbas"
+#include "common/parbas"
       common /coiout/ niout, indout(20)
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, jmax
@@ -1766,7 +1766,7 @@
 *  followed by the system dependent real variables
 *  in the same order as in the common block /cosysr/
 *  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
-      include "common/comdot"
+#include "common/comdot"
       scod(1)='NTERM'
       scod(2)='NUMPOT'
       scod(3)='IPOTSY'
@@ -1921,7 +1921,7 @@
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
-      include "common/parsys"
+#include "common/parsys"
       integer irpot
       logical readp
       logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
@@ -1939,14 +1939,14 @@
      :                        rl(4), cl(4), cmix, alphg, rgaus,
      :                        agaus, demor, remor, bemor,dissmor
       common /conlam/ nlam
-      include "common/parbas"
+#include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
      :                flaghf, flagsu, ihomo, ipos, logdfl, logwr,
      :                noprin, partw, readpt, rsflag, swrit,
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr,lpar(3)
-      include "common/comdot"
+#include "common/comdot"
       save potfil
 *  number and names of system dependent parameters
 *  first all the system dependent integer variables
@@ -2119,7 +2119,7 @@
 *    brot, drot, hrot:    rotational constants of the molecule in cm-1
 *  -----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
-      include "common/parsys"
+#include "common/parsys"
       logical readpt, existf
       integer irpot
       character*1 dot
@@ -2132,7 +2132,7 @@
       common /conlam/ nlam
       common /cotwo/ numj,nj1j2(3)
       save potfil
-      include "common/comdot"
+#include "common/comdot"
       nscode = lencod
 *     number and names of system dependent parameters
       isicod = 2
@@ -2321,14 +2321,14 @@
       character*60 line, filnam, potfil, filnm1
       parameter (icod=9, ircod=5)
       parameter (lencod = icod + ircod + 5)
-      include "common/parbas"
+#include "common/parbas"
       common /coiout/ niout, indout(20)
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, ninv,
      :                jmax, ipotsy2, j2max, j2min
       common /co2mol/ twomol
       common /cosysr/ isrcod, junkr, brot, crot, delta, emax, drot
-      include "common/comdot"
+#include "common/comdot"
       save potfil
       twomol = .true.
 *  number and names of system dependent parameters
@@ -2500,7 +2500,7 @@
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
-      include "common/parsys"
+#include "common/parsys"
       integer irpot
       logical readp
       logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
@@ -2516,14 +2516,14 @@
       common /coipar/ jtot1,jtot2,jtotd,jlpar
       common /cosysr/ isrcod, junkr, rcod(maxpar)
       common /conlam/ nlam
-      include "common/parbas"
+#include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
      :                flaghf, flagsu, ihomo, ipos, logdfl, logwr,
      :                noprin, partw, readpt, rsflag, swrit,
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr,lpar(3)
-      include "common/comdot"
+#include "common/comdot"
       save potfil
 *  number and names of system dependent parameters
 *  first all the system dependent integer variables
@@ -2680,14 +2680,14 @@
 *
 *  subroutines called: loapot(iunit,filnam)
       implicit double precision (a-h,o-z)
-      include "common/parsys"
+#include "common/parsys"
       logical readpt, existf
       integer irpot
       character*1 dot
       character*8 scod
       character*(*) fname
       character*60 filnam, line, potfil, filnm1
-      include "common/parbas"
+#include "common/parbas"
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, jmax, igu, isa, npar
       common /cosysr/ isrcod, junkr, brot,  q
@@ -2698,7 +2698,7 @@
       common /conlam/ nlam
       common /coskip/ nskip,iskip
       save potfil
-      include "common/comdot"
+#include "common/comdot"
       isicod = 5
       isrcod = 2
       nscode = isicod+isrcod
@@ -2828,7 +2828,7 @@
       character*60 line, filnam, potfil, filnm1
       parameter (icod=3, ircod=2)
       parameter (lencod = icod + ircod + 3)
-      include "common/parbas"
+#include "common/parbas"
       common /coiout/ niout, indout(20)
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, iop, jmax
@@ -2842,7 +2842,7 @@
 *  followed by the system dependent real variables
 *  in the same order as in the common block /cosysr/
 *  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
-      include "common/comdot"
+#include "common/comdot"
       scod(1)='NTERM'
       scod(2)='IOP'
       scod(3)='JMAX'
@@ -2966,7 +2966,7 @@
       character*60 line, filnam, potfil, filnm1
       parameter (icod=3, ircod=3)
       parameter (lencod = icod + ircod + 3)
-      include "common/parbas"
+#include "common/parbas"
       common /coiout/ niout, indout(20)
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, iop, jmax
@@ -2980,7 +2980,7 @@
 *  followed by the system dependent real variables
 *  in the same order as in the common block /cosysr/
 *  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
-      include "common/comdot"
+#include "common/comdot"
       scod(1)='NTERM'
       scod(2)='IOP'
       scod(3)='JMAX'
@@ -3109,14 +3109,14 @@
 *
 *  subroutines called: loapot(iunit,filnam)
       implicit double precision (a-h,o-z)
-      include "common/parsys"
+#include "common/parsys"
       logical readpt, existf
       integer irpot
       character*1 dot
       character*8 scod
       character*(*) fname
       character*60 filnam, line, potfil, filnm1
-      include "common/parbas"
+#include "common/parbas"
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, jmax, igu, isa, npar
       common /cosysr/ isrcod, junkr, brot, aso, p, q
@@ -3127,7 +3127,7 @@
       common /conlam/ nlam
       common /coskip/ nskip,iskip
       save potfil
-      include "common/comdot"
+#include "common/comdot"
       isicod = 5
       isrcod = 4
       nscode = isicod+isrcod
@@ -3256,7 +3256,7 @@
       character*60 line, filnam, potfil, filnm1
       parameter (icod=3, ircod=2)
       parameter (lencod = icod + ircod + 3)
-      include "common/parbas"
+#include "common/parbas"
       common /coiout/ niout, indout(20)
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm,iop,jmax
@@ -3270,7 +3270,7 @@
 *  followed by the system dependent real variables
 *  in the same order as in the common block /cosysr/
 *  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
-      include "common/comdot"
+#include "common/comdot"
       scod(1)='NTERM'
       scod(2)='IOP'
       scod(3)='JMAX'
@@ -3406,7 +3406,7 @@
       character*60 line, filnam, potfil, filnm1
       parameter (icod=5, ircod=4)
       parameter (lencod = icod + ircod + 3)
-      include "common/parbas"
+#include "common/parbas"
       common /coiout/ niout, indout(20)
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, jmax
@@ -3421,7 +3421,7 @@
 *  followed by the system dependent real variables
 *  in the same order as in the common block /cosysr/
 *  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
-      include "common/comdot"
+#include "common/comdot"
       scod(1)='NTERM'
       scod(2)='NUMPOT'
       scod(3)='IPOTSY'
@@ -3615,7 +3615,7 @@
       character*60 line, filnam, potfil, filnm1
       parameter (icod=6, ircod=1)
       parameter (lencod = icod + ircod + 3)
-      include "common/parbas"
+#include "common/parbas"
       common /coiout/ niout, indout(20)
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop,
@@ -3631,7 +3631,7 @@
 *  followed by the system dependent real variables
 *  in the same order as in the common block /cosysr/
 *  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
-      include "common/comdot"
+#include "common/comdot"
       scod(1)='NTERM'
       scod(2)='NUMPOT'
       scod(3)='IPOTSY'
@@ -3806,7 +3806,7 @@
       character*60 line, filnam, potfil, filnm1
       parameter (icod=5, ircod=3)
       parameter (lencod = icod + ircod + 3)
-      include "common/parbas"
+#include "common/parbas"
       common /coiout/ niout, indout(20)
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, jmax
@@ -3821,7 +3821,7 @@
 *  followed by the system dependent real variables
 *  in the same order as in the common block /cosysr/
 *  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
-      include "common/comdot"
+#include "common/comdot"
       scod(1)='NTERM'
       scod(2)='NUMPOT'
       scod(3)='IPOTSY'
@@ -4003,14 +4003,14 @@
 *  variables in common/cobspt/ must be set in loapot!!
 *
       implicit double precision (a-h,o-z)
-      include "common/parsys"
+#include "common/parsys"
       logical readpt, existf
       character*8 scod, rcod
       character*8 char
       character*(*) fname
       character*1 dot
       character*60 filnam, line, potfil, filnm1
-      include "common/parbas"
+#include "common/parbas"
       common /cosys/ scod(maxpar)
       common /cosyr/ rcod(maxpar)
       common /cosysi/ nscode, isicod, ispar(maxpar)
@@ -4027,7 +4027,7 @@
       common /conlam/ nlam
       common /covibp/ ivpi(5)
       save potfil
-      include "common/comdot"
+#include "common/comdot"
       irpot = 1
 *     number and names of system dependent parameters
 *  first all the system dependent integer variables
@@ -4310,7 +4310,7 @@ c     ------------------------------------------------------------------
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
-      include "common/parsys"
+#include "common/parsys"
       integer irpot
       logical readp
       logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
@@ -4326,14 +4326,14 @@ c     ------------------------------------------------------------------
       common /cosysi/ nscode, isicod, nterm, nstate, ipol, npot
       common /cosysr/ isrcod, junkr, en1d
       common /conlam/ nlam
-      include "common/parbas"
+#include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
      :                flaghf, flagsu, ihomo, ipos, logdfl, logwr,
      :                noprin, partw, readpt, rsflag, swrit,
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr,lpar(3)
-      include "common/comdot"
+#include "common/comdot"
       save potfil
 *  number and names of system dependent parameters
 *  first all the system dependent integer variables
@@ -4437,7 +4437,7 @@ c     ------------------------------------------------------------------
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
-      include "common/parsys"
+#include "common/parsys"
       integer irpot
       logical readp
       logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
@@ -4453,14 +4453,14 @@ c     ------------------------------------------------------------------
       common /cosysi/ nscode, isicod, nterm, nvib
       common /cosysr/ isrcod
       common /conlam/ nlam
-      include "common/parbas"
+#include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
      :                flaghf, flagsu, ihomo, ipos, logdfl, logwr,
      :                noprin, partw, readpt, rsflag, swrit,
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr,lpar(3)
-      include "common/comdot"
+#include "common/comdot"
       save potfil
 *  number and names of system dependent parameters
 *  first all the system dependent integer variables
@@ -4565,7 +4565,7 @@ c     ------------------------------------------------------------------
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
-      include "common/parsys"
+#include "common/parsys"
       integer irpot
       logical readp
       logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
@@ -4581,14 +4581,14 @@ c     ------------------------------------------------------------------
       common /cosysi/ nscode, isicod, nterm, iop, jmax
       common /cosysr/ isrcod, junkr, brot, dj, dk
       common /conlam/ nlam
-      include "common/parbas"
+#include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
      :                flaghf, flagsu, ihomo, ipos, logdfl, logwr,
      :                noprin, partw, readpt, rsflag, swrit,
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr,lpar(3)
-      include "common/comdot"
+#include "common/comdot"
       save potfil
 *  number and names of system dependent parameters
 *  first all the system dependent integer variables
@@ -4708,7 +4708,7 @@ c     ------------------------------------------------------------------
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
-      include "common/parsys"
+#include "common/parsys"
       integer irpot
       logical readp
       logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
@@ -4724,14 +4724,14 @@ c     ------------------------------------------------------------------
       common /cosysi/ nscode, isicod, j1max, j2min, j2max, ipotsy2, iop
       common /cosysr/ isrcod, junkr, b1rot, d1rot, b2rot
       common /conlam/ nlam
-      include "common/parbas"
+#include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
      :                flaghf, flagsu, ihomo, ipos, logdfl, logwr,
      :                noprin, partw, readpt, rsflag, swrit,
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr,lpar(3)
-      include "common/comdot"
+#include "common/comdot"
       save potfil
 *  number and names of system dependent parameters
 *  first all the system dependent integer variables
@@ -4837,7 +4837,7 @@ c  read the last few lines of the input file
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
-      include "common/parsys"
+#include "common/parsys"
       integer irpot
       logical readp
       logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
@@ -4853,14 +4853,14 @@ c  read the last few lines of the input file
       common /cosysi/ nscode, isicod, n1max, j2min, j2max, ipotsy2
       common /cosysr/ isrcod, junkr, b1rot, d1rot, gamma, b2rot
       common /conlam/ nlam
-      include "common/parbas"
+#include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
      :                flaghf, flagsu, ihomo, ipos, logdfl, logwr,
      :                noprin, partw, readpt, rsflag, swrit,
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr,lpar(3)
-      include "common/comdot"
+#include "common/comdot"
       save potfil
 *  number and names of system dependent parameters
 *  first all the system dependent integer variables
@@ -4985,7 +4985,7 @@ c  read the last few lines of the input file
       character*60 line, filnam, potfil, filnm1
       parameter (icod=4, ircod=4)
       parameter (lencod = icod + ircod + 3)
-      include "common/parbas"
+#include "common/parbas"
       common /coiout/ niout, indout(20)
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, numpot, iop, jmax
@@ -5000,7 +5000,7 @@ c  read the last few lines of the input file
 *  followed by the system dependent real variables
 *  in the same order as in the common block /cosysr/
 *  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
-      include "common/comdot"
+#include "common/comdot"
       scod(1)='NTERM'
       scod(2)='NUMPOT'
       scod(3)='IOP'
@@ -5159,7 +5159,7 @@ c  read the last few lines of the input file
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
-      include "common/parsys"
+#include "common/parsys"
       integer irpot
       logical readp
       logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
@@ -5174,14 +5174,14 @@ c  read the last few lines of the input file
       common /cosysi/ nscode, isicod, j1max, j2min, j2max, ipotsy2
       common /cosysr/ isrcod, junkr, b1rot, d1rot, flmbda, gamma, b2rot
       common /conlam/ nlam
-      include "common/parbas"
+#include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
      :                flaghf, flagsu, ihomo, ipos, logdfl, logwr,
      :                noprin, partw, readpt, rsflag, swrit,
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr,lpar(3)
-      include "common/comdot"
+#include "common/comdot"
       save potfil
 *  number and names of system dependent parameters
 *  first all the system dependent integer variables
@@ -5286,7 +5286,7 @@ c  read the last few lines of the input file
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
-      include "common/parsys"
+#include "common/parsys"
       integer irpot
       logical readp
       logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
@@ -5301,14 +5301,14 @@ c  read the last few lines of the input file
       common /cosysi/ nscode, isicod, nterm, numpot, jmax
       common /cosysr/ isrcod, junkr, arot, brot, crot, emax
       common /conlam/ nlam
-      include "common/parbas"
+#include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
      :                flaghf, flagsu, ihomo, ipos, logdfl, logwr,
      :                noprin, partw, readpt, rsflag, swrit,
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr,lpar(3)
-      include "common/comdot"
+#include "common/comdot"
       save potfil
 *  number and names of system dependent parameters
 *  first all the system dependent integer variables
@@ -5423,7 +5423,7 @@ c  read the last few lines of the input file
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
-      include "common/parsys"
+#include "common/parsys"
       integer irpot
       logical readp
       logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
@@ -5439,14 +5439,14 @@ c  read the last few lines of the input file
      :  j2min, j2max, ipotsy2
       common /cosysr/ isrcod, junkr, arot, brot, crot, emax, b2rot
       common /conlam/ nlam
-      include "common/parbas"
+#include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
      :                flaghf, flagsu, ihomo, ipos, logdfl, logwr,
      :                noprin, partw, readpt, rsflag, swrit,
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr,lpar(3)
-      include "common/comdot"
+#include "common/comdot"
       save potfil
 *  number and names of system dependent parameters
 *  first all the system dependent integer variables

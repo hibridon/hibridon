@@ -168,7 +168,7 @@
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst, twomol
       character*40 fname
-      include "common/parbas"
+#include "common/parbas"
       common /coipar/ iiipar(9), iprint
       common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, ninv,
      :                jmax, ipotsy2, j2max, j2min

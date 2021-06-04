@@ -29,7 +29,7 @@
      :        batch, fast, lpar2, lpar, exstfl, diagst,
      :        diagj, diagin,
      :        diagjp, daginp, diag, diagp
-      include "common/parpot"
+#include "common/parpot"
       common /coisc1/ jlev1(1)
       common /coisc2/ jlev2(1)
       common /coisc3/ inlev1(1)

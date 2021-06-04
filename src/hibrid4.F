@@ -37,7 +37,7 @@
       logical  existf, csflag, flaghf, flagsu, twomol, nucros
       logical is_j12
       dimension ia(4)
-      include "common/parpot"
+#include "common/parpot"
       common /coz/ sreal(1)
       common /cozmat/ simag(1)
       common /cojq/ jq(1)
@@ -1049,7 +1049,7 @@ c
      :                logwr, noprin, partw, readpt, rsflag, swrit,
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr, nucros, photof, wavefl
-      include "common/parpot"
+#include "common/parpot"
       common /colpar/ airyfl, airypr, bastst, batch, chlist,
      :                csflag, flaghf, flagsu, ihomo, ipos, logdfl,
      :                logwr, noprin, partw, readpt, rsflag, swrit,
