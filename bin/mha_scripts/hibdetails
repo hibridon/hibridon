@@ -91,7 +91,7 @@ echo "     :  'LIB_ROOT=$libs'/">>SYSCONFIG
 #echo "     : '$lib2'/">>SYSCONFIG
 #echo "      data build(5) /" >> SYSCONFIG
 #echo "     : '$lib3'/">>SYSCONFIG
-echo "cend">>SYSCONFIG
+echo "#endif">>SYSCONFIG
 echo "      end" >> SYSCONFIG
 end:  
 exit
