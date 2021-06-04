@@ -49,7 +49,7 @@ cdec$ fixedformlinesize:132
      :  '-----------------------')
        close(8)
        i=system("rm -f sysprofile")
-cend
+#endif
       return
       end
       subroutine acknow(iunit,ipos)

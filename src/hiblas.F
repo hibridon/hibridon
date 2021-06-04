@@ -88,7 +88,7 @@ c;      if(n.le.0)return
 c;      call  sswap (n,dx,incx,dy,incy)
 c;      return
 c;      end
-cend
+#endif
 #if defined(HIB_UNIX_NOBLAS)
 c;      double precision function dasum(n,dx,incx)
 c;c
@@ -764,7 +764,7 @@ c;      dnrm2 = xmax * dsqrt(sum)
 c;  300 continue
 c;      return
 c;      end
-cend
+#endif
 * --------------------------------------------------
 * single-precision basic linear algebra (blas) routines for compatability
 * with old subroutines
@@ -807,7 +807,7 @@ c;         smax = xmag
 c;   30 continue
 c;      return
 c;      end
-cend
+#endif
 #if defined(HIB_NONE)
 c;      subroutine saxpy (n, sa, sx, incx, sy, incy)
 c;*
@@ -852,7 +852,7 @@ c;        sy(i + 1) = sy(i + 1) + sa * sx(i + 1)
 c;        sy(i + 2) = sy(i + 2) + sa * sx(i + 2)
 c;        sy(i + 3) = sy(i + 3) + sa * sx(i + 3)
 c;   50 continue
-cend
+#endif
 c#if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
 #if defined(HIB_NONE)
 c;*        clean-up loop so remaining vector length is a multiple of 6
@@ -872,7 +872,7 @@ c;        sy(i + 3) = sy(i + 3) + sa * sx(i + 3)
 c;        sy(i + 4) = sy(i + 4) + sa * sx(i + 4)
 c;        sy(i + 5) = sy(i + 5) + sa * sx(i + 5)
 c;   50 continue
-cend
+#endif
 #if defined(HIB_NONE)
 c;      return
 c;*
@@ -964,7 +964,7 @@ c;        iy = iy + incy
 c;   10 continue
 c;      return
 c;*         code for both increments equal to 1
-cend
+#endif
 c#if defined(HIB_UNIX_HP) || defined(HIB_MAC)
 #if defined(HIB_NONE)
 c;*         clean - up loop so remaining vector length is a multiple of 5
@@ -981,7 +981,7 @@ c;     :                sx(i + 2) * sy(i + 2) + sx(i + 3) * sy(i + 3) +
 c;     :                sx(i + 4) * sy(i + 4)
 c;   50 continue
 c;      return
-cend
+#endif
 c#if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
 #if defined(HIB_NONE)
 c;   20 do 30 i = 1, n
@@ -989,7 +989,7 @@ c;        sdot = sdot + sx(i) * sy(i)
 c;*        ncount=ncount+2
 c;   30 continue
 c;      return
-cend
+#endif
 c#if defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_MAC) || defined(HIB_UNIX_IRIS)
 #if defined(HIB_NONE)
 c;*         code for positive equal increments .ne. 1
@@ -1103,7 +1103,7 @@ c;        sy(i) = stemp1
 c;   70   continue
 c;      return
 c;      end
-cend
+#endif
 #if defined(HIB_NONE)
 c;      subroutine srot(n,dx,incx,dy,incy,dc,ds)
 c;c
@@ -1147,4 +1147,4 @@ c;   40 continue
 c;c
 c;      return
 c;      end
-cend
+#endif

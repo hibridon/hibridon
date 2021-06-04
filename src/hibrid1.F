@@ -115,7 +115,7 @@
       common /coselb/ ibasty
 #if defined(HIB_UNIX_IBM)
 c;      character*1 forma, formb
-cend
+#endif
 *  matrix dimensions (row dimension = nmax, matrices stored column by column)
       dimension z(80), w(80), tmat(80), vecnow(80), vecnew(80)
 *  vectors dimensioned nch
@@ -199,12 +199,12 @@ c     dependent) built-in types
         if (photof) then
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
           call mxma(tmat,1,nmax,q,1,nphoto,w,1,nmax,nch,nch,nphoto)
-cend
+#endif
 #if defined(HIB_UNIX_IBM)
 c;          forma='N'
 c;          call dgemul(tmat,nmax,forma,q,nmax,forma,
 c;     :                w,nmax,nch,nch,nphoto)
-cend
+#endif
         call dcopy(nqmat,w,1,q,1)
         endif
 *  determine ground state wavefunction and derivative and then
@@ -237,10 +237,10 @@ cend
 *  hp and cc are used as scratch arrays here
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;        call smxinv (z, nmax, nch, hp, cc, ierr)
-cend
+#endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
         call syminv(z,nmax,nch,ierr)
-cend
+#endif
         if (ierr .ne. 0) then
           write (9, 80) kstep
           write (6, 80) kstep
@@ -256,12 +256,12 @@ cend
 *  then premultiply by Z(0,rlast,rnext)
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
           call mxma(z,1,nmax,q,1,nphoto,tmat,1,nmax,nch,nch,nphoto)
-cend
+#endif
 #if defined(HIB_UNIX_IBM)
 c;          forma='N'
 c;          call dgemul(z,nmax,forma,q,nmax,forma,
 c;     :                tmat,nmax,nch,nch,nphoto)
-cend
+#endif
 * if wavefunction desired, temporarily save local mu(a,b) propagator
 * this is now in the first column of tmat
         if (wavefn) call dcopy(nch,tmat,1,sc10,1)
@@ -479,12 +479,12 @@ c
       if (photof) then
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
           call mxma(vecnow,1,nmax,q,1,nphoto,w,1,nmax,nch,nch,nphoto)
-cend
+#endif
 #if defined(HIB_UNIX_IBM)
 c;          forma='N'
 c;          call dgemul(vecnow,nmax,forma,q,nmax,forma,
 c;     :                w,nmax,nch,nch,nphoto)
-cend
+#endif
         ind=1
         jnd=1
         do 265 i=1,nphoto
@@ -811,29 +811,29 @@ c -----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
 #if defined(HIB_UNIX_IBM)
 c;      character*1 forma, formb
-cend
+#endif
       integer ic, icol, ifind, ipt, n, ncol, nmax, isw
       dimension a(1), b(1), c(1), diag(1)
       isw = 0
 #if defined(HIB_NONE)
 c;      call rgmmul (isw, n, n, n, b, 1, nmax, a, 1, nmax, c, 1, nmax)
 c;      call rgmmul (isw, n, n, n, c, 1, nmax, b, nmax, 1, a, 1, nmax)
-cend
+#endif
 c#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
 #if defined(HIB_NONE)
 c;       call mxma (b,1,nmax,a,1,nmax,c,1,nmax,n,n,n)
 c;       call mxma (c,1,nmax,b,nmax,1,a,1,nmax,n,n,n)
-cend
+#endif
 #if defined(HIB_UNIX_IBM)
 c;       forma='N'
 c;       formb='T'
 c;       call dgemul (b,nmax,forma,a,nmax,forma,c,nmax,n,n,n)
 c;       call dgemul (c,nmax,forma,b,nmax,formb,a,nmax,n,n,n)
-cend
+#endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_IBM)
        call dgemm('n','n',n,n,n,1.d0,b,nmax,a,nmax,0d0,c,nmax)
        call dgemm('n','t',n,n,n,1.d0,c,nmax,b,nmax,0d0,a,nmax)
-cend
+#endif
 
 *  a now contains desired product
       if (ifind .le. 0) return

@@ -1,10 +1,10 @@
 #if defined(HIB_UNIX_XLF)
 c;@process fixed(132)
-cend
+#endif
       subroutine version(iunit)
 #if defined(HIB_UNIX_IFORT)
 cdec$ fixedformlinesize:132
-cend
+#endif
       character*100 profile
       character*140 build
       common /bld_config/ build(5)
@@ -37,7 +37,7 @@ cend
       write (iunit,20)
 20    format (' ---------------------------------------------------',
      :  '-----------------------')
-cend
+#endif
 #if defined(HIB_NONE)
 c;      i=system("hib_sysconfig")
 c;      open(unit=8,file='sysprofile',access='sequential')
@@ -49,7 +49,7 @@ c;     : ' ---------------------------------------------------',
 c;     :  '-----------------------')
 c;       close(8)
 c;       i=system("rm -f sysprofile")
-cend
+#endif
       return
       end
       subroutine acknow(iunit,ipos)
@@ -131,7 +131,7 @@ cend
       end
 #if defined(HIB_UNIX_XLF)
 c;@process fixed(132)
-cend
+#endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       block data config
 c variables in data config
@@ -147,5 +147,5 @@ c variables in data config
      : ''/
       data build(5) /
      : ''/
-cend
+#endif
       end

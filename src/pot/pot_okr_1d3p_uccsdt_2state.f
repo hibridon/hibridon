@@ -1,6 +1,6 @@
 #if defined(HIB_UNIX_IFORT)
 cdec$ fixedformlinesize:132
-cend
+#endif
 
 *  System:  O(1D,3P) + Kr
 *  Theory  Level for 3Pi, 3Sigma, 1Sigma, 1Delta curves: 

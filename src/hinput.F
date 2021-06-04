@@ -1,9 +1,9 @@
 #if defined(HIB_UNIX_IBM) || defined(HIB_UNIX_AIX)
 c;@process noopt
-cend
+#endif
 #if defined(HIB_UNIX_HP)
 c;!$hp$optimize off
-cend
+#endif
       subroutine hinput(first)
 *  subroutine to redefine system independent input parameters for
 *  hibridon code
@@ -279,10 +279,10 @@ c    :                xsecwr, nucros, photof, wavefl, boundc
 *  doesn't accept this extension
 #if defined(HIB_UNIX) || defined(HIB_MAC)
 2     format(' Hibridon> ',$)
-cend
+#endif
 #if defined(HIB_CRAY)
 c;2      format(' Hibridon> ')
-cend
+#endif
       call pcoder(lpar(28),pcod,icode)
       read(5, 10, end=599) line
 10    format((a))
@@ -652,7 +652,7 @@ c      call helppr(line)
 #if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
           write(9,710) basknd(ibasty)(1:length)//' system parameters:',
      :             (scod(j),ispar(j),j = 1,isicod)
-cend
+#endif
         else
           write(9,710) 'User defined system parameters:',
      :               (scod(j),ispar(j),j = 1,isicod)
@@ -729,7 +729,7 @@ cend
 #if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
           write(6,710) basknd(ibasty)(1:length)//' system parameters:',
      :             (scod(j),ispar(j),j = 1,isicod)
-cend
+#endif
       else
         write(6,710) 'user defined system parameters:',
      :               (scod(j),ispar(j),j = 1,isicod)
@@ -1280,10 +1280,10 @@ cend
 c;      call exit
 c;      write(6,2320)
 c;2320  format(' Sorry, tensor cross sections not yet implemented')
-cend
+#endif
 #if defined(HIB_UNIX)
       call tenopa(fnam1,a)
-cend
+#endif
       goto 1
 *....nnout must be preceded by jout
 2400  write (6, 2410)
@@ -1306,10 +1306,10 @@ cend
 c;      call exit
 c;      write(6,2520)
 c;2520  format(' M-resolved cross sections not yet implemented')
-cend
+#endif
 #if defined(HIB_UNIX) || defined(HIB_CRAY)
       call mrcrs(fnam1,a)
-cend
+#endif
       goto 1
 * print selected integral cross sections from ics file
 2600  call parse(line,l,fnam1,lc)

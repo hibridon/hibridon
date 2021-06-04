@@ -1,6 +1,6 @@
 #if defined(HIB_UNIX_IFORT)
 cdec$ fixedformlinesize:132
-cend
+#endif
 
 *  System:  O(1D,3P) + Ar
 *  Theory  Level: MRCISD+Q(Davidson) aug-cc-pvqz-DK BSSE and SC corrected

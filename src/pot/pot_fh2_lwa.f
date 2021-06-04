@@ -893,7 +893,7 @@ c filter diabatic diagonal potentials, nothing < -12000 and nothing > 30000
 #if defined(HIB_UNIX_IBM)
 c;        call dgells(0,cmat,8,v,9,xth,5,dummy,tol,8,5,4,nk,
 c;     :       aux,28)
-cend
+#endif
 #if (defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
           lwork=390
           call dgels('N',9,6,1,scmat,9,cvec,9,aux,
@@ -911,7 +911,7 @@ cend
           endif
 *         print *, (cvec(i),i=1,6)
 *         print *, polyval(cvec,x,5)
-cend
+#endif
 * damping factor for short and long range
 *        xmin = one-exp(-alphhf*(0.7d0-rehf))
          xmin = one-exp(-alphhf*(1.0d0-rehf))

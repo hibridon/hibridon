@@ -688,7 +688,7 @@
       implicit double precision (a-h,o-z)
 #if defined(HIB_UNIX_IBM)
 c;      character*1 forma, formb
-cend
+#endif
       common /cosysr/ isrcod, junkr, aso
       common /coeint/ eint(6)
       common /coconv/ econv, xmconv
@@ -707,13 +707,13 @@ cend
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
        call mxma (t,1,nnmax,w,1,nmax,sc,1,nmax,n,n,n)
        call mxma (sc,1,nmax,t,nnmax,1,w,1,nmax,n,n,n)
-cend
+#endif
 #if defined(HIB_UNIX_IBM)
 c;      forma='N'
 c;      formb='T'
 c;      call dgemul (t,nnmax,forma,w,nmax,forma,sc,nmax,n,n,n)
 c;      call dgemul (sc,nmax,forma,t,nnmax,formb,w,nmax,n,n,n)
-cend
+#endif
       return
 *  w now contains desired product
 * restore internal energies of each channel

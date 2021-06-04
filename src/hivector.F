@@ -45,13 +45,13 @@ c ------------------------------------------------------------------
 *  ia and ib point to one position before the top of the jth
 *  column of each matrix
       do 20  j = 1, nc
-cend
+#endif
 #if defined(HIB_UNIX_CONVEX)
 c;      call scopy (nr, a(ia+1), 1, b(ib+1), 1)
-cend
+#endif
 #if (defined(HIB_UNIX) || defined(HIB_CRAY)) && !defined(HIB_UNIX_CONVEX)
         call dcopy (nr, a(ia+1), 1, b(ib+1), 1)
-cend
+#endif
 #if defined(HIB_UNIX) || defined(HIB_CRAY)
         ia = ia + na
         ib = ib + nb
@@ -77,13 +77,13 @@ cend
 *  -----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
       dimension a(1)
-cend
+#endif
 #if defined(HIB_UNIX_CONVEX)
 c;      nc = ( isamax (n, a, na) - 1) * na + 1
-cend
+#endif
 #if (defined(HIB_UNIX) || defined(HIB_CRAY)) && !defined(HIB_UNIX_CONVEX)
       nc = ( idamax (n, a, na) - 1) * na + 1
-cend
+#endif
 #if defined(HIB_UNIX) || defined(HIB_CRAY)
       c = abs( a(nc) )
       return
@@ -107,15 +107,15 @@ cend
       dimension a(1), c(1)
 *  first copy vector a into vector c
 *  then multiply by scalar constant
-cend
+#endif
 #if defined(HIB_UNIX_CONVEX)
 c;      call scopy (n, a, na, c, nc)
 c;      call sscal (n, b, c, nc)
-cend
+#endif
 #if defined(HIB_UNIX) || defined(HIB_CRAY) && !defined(HIB_UNIX_CONVEX)
       call dcopy (n, a, na, c, nc)
       call dscal (n, b, c, nc)
-cend
+#endif
 #if defined(HIB_UNIX) || defined(HIB_CRAY)
       return
       end
@@ -219,7 +219,7 @@ c
    50 continue
       return
       end
-cend
+#endif
 #if defined(HIB_UNIX_SUN)
 c;      logical          function lsame( ca, cb )
 c;*
@@ -349,7 +349,7 @@ c;*
 c;*     End of XERBLA
 c;*
 c;      end
-cend
+#endif
 #if defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_IBM) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
 c;      integer          function ilaenv( ispec, name, opts, n1, n2, n3,
 c;     $                 n4 )
@@ -1615,7 +1615,7 @@ c;*
 c;*     End of DLASYF
 c;*
 c;      end
-cend
+#endif
 #if !defined(HIB_UNIX_DEC)
       subroutine dset(n,da,dx,incx)
 c
@@ -1663,7 +1663,7 @@ c
    50 continue
       return
       end
-cend
+#endif
 #if defined(HIB_UNIX) && (!defined(HIB_UNIX_IBM) || !defined(HIB_UNIX_DEC))
       integer function idamin(n, sx, incx)
 *
@@ -1739,4 +1739,4 @@ cend
    30 continue
       return
       end
-cend
+#endif

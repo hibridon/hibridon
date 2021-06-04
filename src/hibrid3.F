@@ -59,7 +59,7 @@
       dimension eigold(1), hp(1)
 #if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
       dimension tmat(1)
-cend
+#endif
       isecnd = .false.
       lunit=10
       if (itwo .gt. 0) isecnd = .true.
@@ -78,7 +78,7 @@ cend
         write (10) rnow, drnow, (hp(i) , i = 1, n),
      :        (eigold(i) , i = 1, n), (tmat(i), i=1, nsq)
       endif
-cend
+#endif
 *  now shift energies (if subsequent energy)
       if (isecnd) then
         do  30   i = 1, n
@@ -134,7 +134,7 @@ cend
 *  local arrays (for lapack dsyevr)
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       dimension isuppz(2*nch),iwork(10*nch),work(57*nch)
-cend
+#endif
 *  vectors dimensioned at least nch
       dimension eignow(7), hp(7), scr(7)
       data ione / 1 /
@@ -200,7 +200,7 @@ cend
 *  a scratch vector here)
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      call rs (nmax, nch, scmat, eignow, ione, vecnow, scr, hp, ierr)
-cend
+#endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       lwork=57*nch
       liwork=10*nch
@@ -208,7 +208,7 @@ cend
       lsup=2*nch
       call dsyevr('V','A','L',nch,scmat,nmax,vl,vu,il,iu,abstol,m,
      :   eignow,vecnow,nmax,isuppz,work,lwork,iwork,liwork,ierr)
-cend
+#endif
       if (ierr .ne. 0) then
         write (6, 115) ierr
         write (9, 115) ierr
@@ -1025,17 +1025,17 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 c;*  factor the matrix
 c;*           return ierr=2 if a is singular
 c;*           return ierr=0 otherwise
-cend
+#endif
 #if defined(HIB_UNIX)  && !defined(HIB_UNIX_IBM) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      call sgefa (a, nmax, n, kpvt, ierr)
-cend
+#endif
 #if defined(HIB_UNIX_IBM)
 c;      call dgef(a,nmax,n,kpvt)
 c;      ierr=0
-cend
+#endif
 #if defined(HIB_UNIX_CONVEX)
 c;      call dgefa (a, nmax, n, kpvt, ierr)
-cend
+#endif
 #if defined(HIB_UNIX)  && !defined(HIB_UNIX_IBM) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      if (ierr .eq. 2) then
 c;*  here if singular matrix
@@ -1044,27 +1044,27 @@ c;        write (6, 150)
 c;150     format (' *** SINGULAR MATRIX IN SGEFA; ABORT')
 c;        stop
 c;      end if
-cend
+#endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;*  now solve the linear equations (one-by-one)
 c;      iptc = 1
 c;      do 200  icol = 1, m
 c;*  iptc points to top of column icol for matrix c stored in packed column fo
-cend
+#endif
 #if defined(HIB_UNIX)  && !defined(HIB_UNIX_IBM) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;        call sgesl (a, nmax, n, kpvt, c(iptc), izero)
-cend
+#endif
 #if defined(HIB_UNIX_IBM)
 c;        call dges (a, nmax, n, kpvt, c(iptc), izero)
-cend
+#endif
 #if defined(HIB_UNIX_CONVEX)
 c;        call dgesl (a, nmax, n, kpvt, c(iptc), izero)
-cend
+#endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;        iptc = iptc + nmax
 c;200   continue
 c;*  solution matrix now in c
-cend
+#endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       call dgetrf(n,n,a,nmax,kpvt,ierr)
       if (ierr.ne.0) then
@@ -1080,7 +1080,7 @@ cend
 220       format ('*** IERR = ',i2,' IN DGETRS; ABORT')
           stop
       endif
-cend
+#endif
       return
       end
 * ----------------------------------------------------------------------
@@ -1664,7 +1664,7 @@ cend
 #if defined(HIB_UNIX_IBM)
 c;      character*1 forma
 c;      character*40 flxfil
-cend
+#endif
       logical flagsu, photof, wavefn, kwrit, ipos, lpar, swrit, lpar2,
      $     boundf, wrsmat
       common /cocent/ cent(1)
@@ -1790,15 +1790,15 @@ c
 #if defined(HIB_NONE)
 c;      call rgmmul (isw, nopen, nopen, nopen, tmod, 1, nmax,
 c;     :             tmod, 1, nmax, sr, 1, nmax)
-cend
+#endif
 #if defined(HIB_CRAY)
 c;      call mxma (tmod, 1, nmax, tmod, 1, nmax, sr, 1, nmax,
 c;     :            nopen, nopen, nopen)
-cend
+#endif
 #if defined(HIB_UNIX)
       call dgemm('n','n',nopen,nopen,nopen,1.d0,tmod,nmax,
      :            tmod,nmax,0.d0,sr,nmax)
-cend
+#endif
 *  determine imaginary part of s-matrix
 *  also put unit vector into array fpn
       do 80  icol = 1, nopen
@@ -1816,11 +1816,11 @@ cend
 #if defined(HIB_NONE)
 c;      call rgmmul (isw, nopen, nopen, nopen, tmod, 1, nmax,
 c;     :             si, 1, nmax, sr, 1, nmax)
-cend
+#endif
 #if defined(HIB_CRAY) || defined(HIB_UNIX) || defined(HIB_MAC)
       call mxma (tmod, 1, nmax, si, 1, nmax, sr, 1, nmax,
      :            nopen, nopen, nopen)
-cend
+#endif
 *  the matrix sr now contains s-real - del, i.e. the negative of the
 *  t-matrix
 *  now calculate t-squared
@@ -1917,10 +1917,10 @@ cend
 * invert K matrix
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;        call smxinv(sr,nmax,nopen,srsave,sisave,ierr)
-cend
+#endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
         call syminv(sr,nmax,nopen,ierr)
-cend
+#endif
 * save lhs for determination of real part of transition amplitudes
         do  300   icol = 1, nopen
           cj=fj(icol)
@@ -1934,12 +1934,12 @@ cend
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
           call mxma(scmat,1,nmax,sr,1,nmax,sisave,1,nmax,
      :                nopen,nopen,nopen)
-cend
+#endif
 #if defined(HIB_UNIX_IBM)
 c;        forma='N'
 c;        call dgemul(scmat,nmax,forma,sr,nmax,forma,
 c;     :                sisave,nmax,nopen,nopen,nopen)
-cend
+#endif
 * solve linear equations for real part of transition amplitudes
 * fpj is used as scratch here
         call rles(sisave,q,fpj,nopen,nphoto,nmax)
@@ -1952,12 +1952,12 @@ cend
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
           call mxma(tmod,1,nmax,q,1,nopen,srsave,1,nmax,
      :                nopen,nopen,nphoto)
-cend
+#endif
 #if defined(HIB_UNIX_IBM)
 c;        forma='N'
 c;        call dgemul(tmod,nmax,forma,q,nopen,forma,
 c;     :                srsave,nmax,nopen,nopen,nphoto)
-cend
+#endif
 * store imaginary part of transition amplitudes in si
         call matmov(srsave,si,nopen,nopen,nmax,nmax)
 * transpose transition amplitudes for output
