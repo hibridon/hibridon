@@ -10,11 +10,11 @@
 
       call vaxhlp(line)
       end
-#if defined(unix-xlf)
+#if defined(HIB_UNIX_XLF)
 @process fixed(132)
 #endif
       subroutine vaxhlp(line1)
-#if defined(unix-ifort)
+#if defined(HIB_UNIX_IFORT)
 cdec$ fixedformlinesize:132
 #endif
 * latest revision 24-feb-2004

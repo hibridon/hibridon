@@ -815,7 +815,7 @@
         if (openfl) return
         stat='old'
 * make sure sequential formatted files are appended not overwritten
-#if defined(unix-ifort) || defined(unix-pgi)
+#if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_PGI)
           accs='append'
 #endif
 #if defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)

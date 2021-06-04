@@ -2,7 +2,7 @@
 @process fixed(132)
 #endif
       subroutine version(iunit)
-#if defined(unix-ifort)
+#if defined(HIB_UNIX_IFORT)
 cdec$ fixedformlinesize:132
 #endif
       character*100 profile
@@ -28,7 +28,7 @@ cdec$ fixedformlinesize:132
      :  ', S. GREGURICK, F. LIQUE',
      : /' ---------------------------------------------------',
      :  '-----------------------')
-#if defined(unix-darwin) || defined(unix-x86)
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       write (iunit,15)
 15    format(11x,'BUILD CONFIGURATION:')
       do i=1,5
@@ -132,7 +132,7 @@ cdec$ fixedformlinesize:132
 #if defined(XLF)
 @process fixed(132)
 #endif
-#if defined(unix-darwin) || defined(unix-x86)
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       block data config
 c variables in data config
       character*140 build
