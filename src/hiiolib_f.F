@@ -745,12 +745,12 @@ c
       data lseg, intrel, lchar /1024, 1, 8/
       data lbuf /1024/
 cend
-cstart unix .and..not. unix-darwin64
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN)
 c;      common/cobuf/ lbuf,ibuf(1024)
 c;      data lseg, intrel, lchar /1024,2,4/
 c;      data lbuf/1024/
 cend
-cstart cray
+#if defined(HIB_CRAY)
 c;      common/cobuf/ lbuf,ibuf(512)
 c;      data lbuf/512/
 c;      data lseg, intrel, lchar /512,1,8/
@@ -812,7 +812,7 @@ c     Stream i/o mode, replace, read/write
          if (openfl) then
             print *, '*** WARNING:  ', filnam, ' NOT CLOSED'
          end if
-cstart .not. unix-gfortran
+#if !defined(HIB_UNIX_GFORTRAN)
 c;         open (unit=iunit, file=filnam, access='STREAM',
 c;     $        status='REPLACE', err=999, iostat=ierr,
 c;     $        buffered='YES')
@@ -868,17 +868,17 @@ c
 #if defined(unix-ifort) || defined(unix-pgi)
         accs='append'
 #endif
-cstart unix-hp unix-dec unix-iris unix-sun
+#if defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
         accs='append'
 cend
       else
         stat='new'
       end if
       if (tmpfil) then
-cstart unix  mac
+#if defined(HIB_UNIX) || defined(HIB_MAC)
         stat = 'scratch'
 cend
-cstart cray
+#if defined(HIB_CRAY)
 c;      stat = 'unknown'
 cend
 #if defined(HIB_UNIX_DARWIN)
@@ -886,7 +886,7 @@ cend
 * if temporary file is already opened, close it
         if (od) close(unit=iunit)
 cend
-cstart unix mac cray
+#if defined(HIB_UNIX) || defined(HIB_MAC) || defined(HIB_CRAY)
         open(unit=iunit,  access='sequential',
      :          form=fmt, status=stat, err=999, iostat=ierr)
 cend
@@ -1006,7 +1006,7 @@ c     ------------------------------------------------------------
         end if
 *  open units 10, 11, and 12 for storage of channel parameters, transformation
 *  and quadrature matrices if more than one energy desired
-cstart unix cray mac
+#if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
         if (airyfl) then
           call tmpnm (10, xname)
 * open scratch file (unit is therefore negativ here, see open)
@@ -2446,7 +2446,7 @@ c     id=getpid()
       end
 cend
 * ---------------------------------------------------------------
-cstart none
+#if defined(HIB_NONE)
 c;*********************************************************************
 c;*                                                                   *
 c;*             utility programs for unix systems                     *

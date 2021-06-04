@@ -1454,10 +1454,10 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
       dimension sigma(nk,nj,nj), f9pha(nk)
       data tol /1.d-10/
       data zero /0.d0/
-cstart unix
+#if defined(HIB_UNIX)
       data ai / (0.d0,1.d0)/
 cend
-cstart cray
+#if defined(HIB_CRAY)
 c;      data ai / (0.d0,1.d0)/
 cend
 

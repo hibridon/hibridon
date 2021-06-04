@@ -3,11 +3,11 @@
 c;      integer shiftl,shiftr,popcnt,poppar,compl
 c;      logical mnpar
 cend
-cstart unix-aix vax unix-convex unix-nec unix-hp unix-ibm unix-dec
+#if defined(HIB_UNIX_AIX) || defined(HIB_VAX) || defined(HIB_UNIX_CONVEX) || defined(HIB_UNIX_NEC) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_IBM) || defined(HIB_UNIX_DEC)
       integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
       logical mnpar
 cend
-cstart unix-iris
+#if defined(HIB_UNIX_IRIS)
 c;      integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
 c;      logical mnpar
 cend

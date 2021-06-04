@@ -1,4 +1,4 @@
-cstart unix-xlf
+#if defined(HIB_UNIX_XLF)
 c;@process fixed(132)
 cend
       subroutine version(iunit)
@@ -38,7 +38,7 @@ cend
 20    format (' ---------------------------------------------------',
      :  '-----------------------')
 cend
-cstart none
+#if defined(HIB_NONE)
 c;      i=system("hib_sysconfig")
 c;      open(unit=8,file='sysprofile',access='sequential')
 c;      read (8,25) profile
@@ -129,7 +129,7 @@ cend
       write (iunit,'(a)') l(1:lenstr(l))
       return
       end
-cstart unix-xlf
+#if defined(HIB_UNIX_XLF)
 c;@process fixed(132)
 cend
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)

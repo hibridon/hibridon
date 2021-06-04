@@ -739,12 +739,12 @@
 *               on vax
 * -----------------------------------------------------
       common /cosize/ isize,isizes
-cstart unix
+#if defined(HIB_UNIX)
       common/cobuf/ lbuf,ibuf(1024)
       data lseg, intrel, lchar /1024,2,4/
       data lbuf/1024/
 cend
-cstart cray
+#if defined(HIB_CRAY)
 c;      common/cobuf/ lbuf,ibuf(512)
 c;      data lbuf/512/
 c;      data lseg, intrel, lchar /512,1,8/
@@ -818,17 +818,17 @@ cend
 #if defined(unix-ifort) || defined(unix-pgi)
           accs='append'
 #endif
-cstart unix-hp unix-dec unix-iris unix-sun
+#if defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
           accs='append'
 cend
       else
         stat='new'
       end if
       if (tmpfil) then
-cstart unix  mac
+#if defined(HIB_UNIX) || defined(HIB_MAC)
         stat = 'scratch'
 cend
-cstart cray
+#if defined(HIB_CRAY)
 c;      stat = 'unknown'
 cend
 #if defined(HIB_UNIX_DARWIN)
@@ -836,7 +836,7 @@ cend
 * if temporary file is already opened, close it
         if (od) close(unit=iunit)
 cend
-cstart unix mac cray
+#if defined(HIB_UNIX) || defined(HIB_MAC) || defined(HIB_CRAY)
         open(unit=iunit,  access='sequential',
      :          form=fmt, status=stat, err=999, iostat=ierr)
 cend
@@ -953,7 +953,7 @@ cend
         end if
 *  open units 10, 11, and 12 for storage of channel parameters, transformation
 *  and quadrature matrices if more than one energy desired
-cstart unix cray mac
+#if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
         if (airyfl) then
           call tmpnm (10, xname)
 * open scratch file (unit is therefore negativ here, see open)
@@ -2303,7 +2303,7 @@ c
 *   2. rdabsf (wrabsf/fwait) read/write absolute routines           *
 *   3. tmpnm    generates a unique filename                         *
 *********************************************************************
-cstart none
+#if defined(HIB_NONE)
 c;      subroutine assgn(luni,filnam,isize,icat)
 c;*
 c;*  routine to assign and open files
@@ -2460,7 +2460,7 @@ c;      return
 c;c
 c;      end
 cend
-cstart none
+#if defined(HIB_NONE)
 c;      subroutine tmpnm(ifil,name)
 c;c.....should generate a unique filename
 c;      character*14 name
@@ -2473,7 +2473,7 @@ c;      return
 c;      end
 cend
 * ---------------------------------------------------------------
-cstart unix
+#if defined(HIB_UNIX)
 *********************************************************************
 *                                                                   *
 *             utility programs for unix systems                     *

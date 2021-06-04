@@ -279,7 +279,7 @@ c
         half = h / two
         if (photof) nqmax=nch*nphoto
 *       initialize q vector
-cstart unix cray
+#if defined(HIB_UNIX) || defined(HIB_CRAY)
         call dset(nqmax, zero, q, 1)
 cend
       end if
@@ -324,7 +324,7 @@ cend
            wt = simpwt
            isimp=1
 *     multiply psi(0) mu(0) by simpson's rule wt at first point
-cstart unix cray
+#if defined(HIB_UNIX) || defined(HIB_CRAY)
            call dscal (nqmax, wt, q, 1)
 cend
            call mtime(t1,t1w)
@@ -348,7 +348,7 @@ cend
 *     first zero out z matrix
       icol = 1
       do 20  ich = 1, nch
-cstart unix cray mac
+#if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
          call dscal (nch, zero, z(icol), nrow)
 cend
          icol = icol + ncol
@@ -384,7 +384,7 @@ cend
       icol = 1
       do 40  ich = 1, nch
 
-cstart unix cray
+#if defined(HIB_UNIX) || defined(HIB_CRAY)
          call dscal (nch, fac, z(icol), nrow)
 cend
          icol = icol + ncol
@@ -458,7 +458,7 @@ cend
             idiag = idiag + ndiag
   90     continue
 *     z now contains z(a)+z1(a,c)
-cstart .not.unix-darwin .and. .not. unix-x86
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;         call smxinv(z, nmax, nch, scr1, scr2, ierr)
 cend
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
@@ -513,7 +513,7 @@ cend
                w(idiag) = one
                idiag = idiag + ndiag
  140        continue
-cstart .not.unix-darwin .and. .not. unix-x86
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;            call smxinv(w, nmax, nch, scr1, scr2, ierr)
 cend
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
@@ -554,7 +554,7 @@ cend
             idiag = idiag + ndiag
  170     continue
 *     at this point z contains z(c) + z1(c,b)
-cstart .not.unix-darwin .and. .not. unix-x86
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;         call smxinv(z, nmax, nch, scr1, scr2, ierr)
 cend
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
@@ -994,7 +994,7 @@ c
 #if defined(unix-ifort) || defined(unix-pgi)
           accs='append'
 #endif
-cstart unix-hp unix-dec unix-iris unix-sun
+#if defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
           accs='append'
 cend
         else
@@ -1507,7 +1507,7 @@ cmha .xsc file is appended if it already exists
 #if defined(unix-ifort) || defined(unix-pgi)
           accs='append'
 #endif
-cstart unix-hp unix-dec unix-iris unix-sun
+#if defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
           accs='append'
 cend
 

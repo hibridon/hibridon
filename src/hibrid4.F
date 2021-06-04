@@ -799,7 +799,7 @@ c.....assume that jlpar=1 is stored first
 *  matrices of maximum row dimension nmax, stored in packed column form
       dimension vecnow(1), vecnew(1), tmat(1)
       data isw / 0/
-cstart none
+#if defined(HIB_NONE)
 c;      call mxma (vecnew, 1, nmax, vecnow, nmax, 1, tmat, 1, nmax,
 c;     :            n, n, n)
 cend
@@ -936,7 +936,7 @@ cend
         call exit
       end if
 cend
-cstart unix .and. .not. unix-darwin .and. .not. unix-x86
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;*  transform w to tridiagonal form
 c;*  eignow, scr1 and scr2 are used as scratch vectors here
 c;      call tred1 (nmax, nch, w, eignow, scr1, scr2)

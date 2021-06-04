@@ -812,7 +812,7 @@
       enddo
       return
       end
-cstart none
+#if defined(HIB_NONE)
 c;      function voh(roh)
 c;* to evaluate the OH (avqz mrci) potential
 c;      implicit double precision (a-h,o-z)

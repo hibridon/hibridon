@@ -57,7 +57,7 @@
       integer i, itwo, n, nmax
       logical isecnd
       dimension eigold(1), hp(1)
-cstart unix cray mac
+#if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
       dimension tmat(1)
 cend
       isecnd = .false.
@@ -69,7 +69,7 @@ cend
 *    in which case logical unit 10 will be written
 *  read/write rnow, drnow, diagonal elements of transformed dw/dr matrix,
 *  and diagonal elements of transformed w matrix
-cstart unix cray mac
+#if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
       nsq = nmax * nmax
       if (isecnd) then
         read (10) rnow, drnow, (hp(i) , i = 1, n),
@@ -198,7 +198,7 @@ cend
 *  of eq.(6) of m.h. alexander, "hybrid quantum scattering algorithms ..."
 *  now call eispack eigenvalue and eigenvector routine (hp is used as
 *  a scratch vector here)
-cstart .not.unix-darwin .and. .not. unix-x86
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      call rs (nmax, nch, scmat, eignow, ione, vecnow, scr, hp, ierr)
 cend
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
@@ -1021,22 +1021,22 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       integer kpvt
       dimension a(1), c(1), kpvt(1)
       data izero /0/
-cstart unix .and. .not. unix-darwin .and..not. unix-x86
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;*  factor the matrix
 c;*           return ierr=2 if a is singular
 c;*           return ierr=0 otherwise
 cend
-cstart unix .and. .not.unix-ibm .and. .not. unix-darwin .and..not. unix-x86
+#if defined(HIB_UNIX)  && !defined(HIB_UNIX_IBM) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      call sgefa (a, nmax, n, kpvt, ierr)
 cend
 #if defined(HIB_UNIX_IBM)
 c;      call dgef(a,nmax,n,kpvt)
 c;      ierr=0
 cend
-cstart unix-convex
+#if defined(HIB_UNIX_CONVEX)
 c;      call dgefa (a, nmax, n, kpvt, ierr)
 cend
-cstart unix .and. .not.unix-ibm .and. .not. unix-darwin .and. .not. unix-x86
+#if defined(HIB_UNIX)  && !defined(HIB_UNIX_IBM) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      if (ierr .eq. 2) then
 c;*  here if singular matrix
 c;        write (9, 150)
@@ -1045,22 +1045,22 @@ c;150     format (' *** SINGULAR MATRIX IN SGEFA; ABORT')
 c;        stop
 c;      end if
 cend
-cstart unix .and. .not. unix-darwin .and..not. unix-x86
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;*  now solve the linear equations (one-by-one)
 c;      iptc = 1
 c;      do 200  icol = 1, m
 c;*  iptc points to top of column icol for matrix c stored in packed column fo
 cend
-cstart unix  .and. .not.unix-ibm .and. .not. unix-darwin.and..not.unix-x86
+#if defined(HIB_UNIX)  && !defined(HIB_UNIX_IBM) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;        call sgesl (a, nmax, n, kpvt, c(iptc), izero)
 cend
 #if defined(HIB_UNIX_IBM)
 c;        call dges (a, nmax, n, kpvt, c(iptc), izero)
 cend
-cstart unix-convex
+#if defined(HIB_UNIX_CONVEX)
 c;        call dgesl (a, nmax, n, kpvt, c(iptc), izero)
 cend
-cstart unix .and. .not. unix-darwin .and. .not. unix-x86
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;        iptc = iptc + nmax
 c;200   continue
 c;*  solution matrix now in c
@@ -1787,15 +1787,15 @@ c
       if (.not. photof) then
 * here for scattering
 *  calculate r**2, store in sr
-cstart none
+#if defined(HIB_NONE)
 c;      call rgmmul (isw, nopen, nopen, nopen, tmod, 1, nmax,
 c;     :             tmod, 1, nmax, sr, 1, nmax)
 cend
-cstart cray
+#if defined(HIB_CRAY)
 c;      call mxma (tmod, 1, nmax, tmod, 1, nmax, sr, 1, nmax,
 c;     :            nopen, nopen, nopen)
 cend
-cstart unix
+#if defined(HIB_UNIX)
       call dgemm('n','n',nopen,nopen,nopen,1.d0,tmod,nmax,
      :            tmod,nmax,0.d0,sr,nmax)
 cend
@@ -1813,11 +1813,11 @@ cend
       call rles (sr, si, fpj, nopen, nopen, nmax)
 *  determine real part of s-matrix
 *  see eq.(68) of r.g. gordon, meth. comp. phys. 10 (1971) 81
-cstart none
+#if defined(HIB_NONE)
 c;      call rgmmul (isw, nopen, nopen, nopen, tmod, 1, nmax,
 c;     :             si, 1, nmax, sr, 1, nmax)
 cend
-cstart cray unix mac
+#if defined(HIB_CRAY) || defined(HIB_UNIX) || defined(HIB_MAC)
       call mxma (tmod, 1, nmax, si, 1, nmax, sr, 1, nmax,
      :            nopen, nopen, nopen)
 cend
@@ -1915,7 +1915,7 @@ cend
 * copy K matrix into sr
         call matmov(tmod,sr,nopen,nopen,nmax,nmax)
 * invert K matrix
-cstart .not.unix-darwin .and. .not. unix-x86
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;        call smxinv(sr,nmax,nopen,srsave,sisave,ierr)
 cend
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
@@ -1931,11 +1931,11 @@ cend
 290       continue
           scmat(icol,icol)=scmat(icol,icol)-derj(icol)
 300     continue
-cstart unix mac .and. .not.unix-ibm
+#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
           call mxma(scmat,1,nmax,sr,1,nmax,sisave,1,nmax,
      :                nopen,nopen,nopen)
 cend
-cstart  unix-ibm
+#if defined(HIB_UNIX_IBM)
 c;        forma='N'
 c;        call dgemul(scmat,nmax,forma,sr,nmax,forma,
 c;     :                sisave,nmax,nopen,nopen,nopen)
@@ -1949,11 +1949,11 @@ cend
         call matmov(q,sr,nopen,nopen,nopen,nmax)
 * now calculate imaginary part of transition amplitudes
         call dscal(nopen*nphoto,onemin,q,1)
-cstart unix mac .and. .not.unix-ibm
+#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
           call mxma(tmod,1,nmax,q,1,nopen,srsave,1,nmax,
      :                nopen,nopen,nphoto)
 cend
-cstart  unix-ibm
+#if defined(HIB_UNIX_IBM)
 c;        forma='N'
 c;        call dgemul(tmod,nmax,forma,q,nopen,forma,
 c;     :                srsave,nmax,nopen,nopen,nphoto)

@@ -1,10 +1,10 @@
 *comdeck parllbf
-cstart cray fps
+#if defined(HIB_CRAY) || defined(HIB_FPS)
 c;      parameter (llbuf=512)
 cend
-cstart vax unix unix-dec unix-ibm
+#if defined(HIB_VAX) || defined(HIB_UNIX) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IBM)
       parameter (llbuf=1024)
 cend
-cstart univac
+#if defined(HIB_UNIVAC)
 c;      parameter (llbuf=1792)
 cend

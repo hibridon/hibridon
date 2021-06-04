@@ -1,7 +1,7 @@
 #if defined(HIB_UNIX_IBM) || defined(HIB_UNIX_AIX)
 c;@process noopt
 cend
-cstart unix-hp
+#if defined(HIB_UNIX_HP)
 c;!$hp$optimize off
 cend
       subroutine hinput(first)
@@ -277,10 +277,10 @@ c    :                xsecwr, nucros, photof, wavefl, boundc
 *  in this next statement the $ sign implies no line feed
 *  replace this with an equivalent formatting character if your system
 *  doesn't accept this extension
-cstart unix mac
+#if defined(HIB_UNIX) || defined(HIB_MAC)
 2     format(' Hibridon> ',$)
 cend
-cstart cray
+#if defined(HIB_CRAY)
 c;2      format(' Hibridon> ')
 cend
       call pcoder(lpar(28),pcod,icode)
@@ -649,7 +649,7 @@ c      call helppr(line)
         if (ibasty .ne. 99) then
           length = index(basknd(ibasty),' ') - 1
           if (length .eq. -1) length=8
-cstart unix cray mac
+#if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
           write(9,710) basknd(ibasty)(1:length)//' system parameters:',
      :             (scod(j),ispar(j),j = 1,isicod)
 cend
@@ -726,7 +726,7 @@ cend
       if (ibasty .lt. 99) then
         length = index(basknd(ibasty),' ') - 1
         if (length .eq. -1) length=9
-cstart unix cray mac
+#if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
           write(6,710) basknd(ibasty)(1:length)//' system parameters:',
      :             (scod(j),ispar(j),j = 1,isicod)
 cend
@@ -1276,12 +1276,12 @@ cend
       call parse(line,l,code,lc)
       call getval(code(1:lc),' ',0,j,a(i))
 2310  continue
-cstart mac
+#if defined(HIB_MAC)
 c;      call exit
 c;      write(6,2320)
 c;2320  format(' Sorry, tensor cross sections not yet implemented')
 cend
-cstart unix
+#if defined(HIB_UNIX)
       call tenopa(fnam1,a)
 cend
       goto 1
@@ -1302,12 +1302,12 @@ cend
       call parse(line,l,code,lc)
       call getval(code(1:lc),' ',0,j,a(i))
 2510  continue
-cstart mac
+#if defined(HIB_MAC)
 c;      call exit
 c;      write(6,2520)
 c;2520  format(' M-resolved cross sections not yet implemented')
 cend
-cstart unix cray
+#if defined(HIB_UNIX) || defined(HIB_CRAY)
       call mrcrs(fnam1,a)
 cend
       goto 1

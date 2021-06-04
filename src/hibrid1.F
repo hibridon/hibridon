@@ -197,10 +197,10 @@ c     dependent) built-in types
 *  if photodissociation calculation, transform gamma2 into local
 *  interval
         if (photof) then
-cstart unix mac .and. .not.unix-ibm
+#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
           call mxma(tmat,1,nmax,q,1,nphoto,w,1,nmax,nch,nch,nphoto)
 cend
-cstart  unix-ibm
+#if defined(HIB_UNIX_IBM)
 c;          forma='N'
 c;          call dgemul(tmat,nmax,forma,q,nmax,forma,
 c;     :                w,nmax,nch,nch,nphoto)
@@ -235,7 +235,7 @@ cend
 *  invert (y  +  z )
 *           1     n
 *  hp and cc are used as scratch arrays here
-cstart .not. unix-darwin .and. .not. unix-x86
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;        call smxinv (z, nmax, nch, hp, cc, ierr)
 cend
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
@@ -254,10 +254,10 @@ cend
 *  add gamma1(rlast,rnext) to gamma2(0,rlast) to form zeta(0,rlast,nrext)
           call vadd(1,q,1,gam1,1,nqmat)
 *  then premultiply by Z(0,rlast,rnext)
-cstart unix mac .and. .not.unix-ibm
+#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
           call mxma(z,1,nmax,q,1,nphoto,tmat,1,nmax,nch,nch,nphoto)
 cend
-cstart  unix-ibm
+#if defined(HIB_UNIX_IBM)
 c;          forma='N'
 c;          call dgemul(z,nmax,forma,q,nmax,forma,
 c;     :                tmat,nmax,nch,nch,nphoto)
@@ -477,10 +477,10 @@ c
 260   call transp (vecnow, nch, nmax)
 * if photodissociation calculation, also transform gamma2 to free basis
       if (photof) then
-cstart unix mac .and. .not.unix-ibm
+#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
           call mxma(vecnow,1,nmax,q,1,nphoto,w,1,nmax,nch,nch,nphoto)
 cend
-cstart  unix-ibm
+#if defined(HIB_UNIX_IBM)
 c;          forma='N'
 c;          call dgemul(vecnow,nmax,forma,q,nmax,forma,
 c;     :                w,nmax,nch,nch,nphoto)
@@ -815,12 +815,12 @@ cend
       integer ic, icol, ifind, ipt, n, ncol, nmax, isw
       dimension a(1), b(1), c(1), diag(1)
       isw = 0
-cstart none
+#if defined(HIB_NONE)
 c;      call rgmmul (isw, n, n, n, b, 1, nmax, a, 1, nmax, c, 1, nmax)
 c;      call rgmmul (isw, n, n, n, c, 1, nmax, b, nmax, 1, a, 1, nmax)
 cend
-ccstart unix mac .and. .not.unix-ibm
-cstart none
+c#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
+#if defined(HIB_NONE)
 c;       call mxma (b,1,nmax,a,1,nmax,c,1,nmax,n,n,n)
 c;       call mxma (c,1,nmax,b,nmax,1,a,1,nmax,n,n,n)
 cend
@@ -830,7 +830,7 @@ c;       formb='T'
 c;       call dgemul (b,nmax,forma,a,nmax,forma,c,nmax,n,n,n)
 c;       call dgemul (c,nmax,forma,b,nmax,formb,a,nmax,n,n,n)
 cend
-cstart unix .and. .not.unix-ibm
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_IBM)
        call dgemm('n','n',n,n,n,1.d0,b,nmax,a,nmax,0d0,c,nmax)
        call dgemm('n','t',n,n,n,1.d0,c,nmax,b,nmax,0d0,a,nmax)
 cend

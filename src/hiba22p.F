@@ -704,7 +704,7 @@ cend
 10      format ('*** N =',i3,' .NE. 6 IN TRANS22; ABORT ***')
         stop
       endif
-cstart unix mac .and. .not.unix-ibm
+#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
        call mxma (t,1,nnmax,w,1,nmax,sc,1,nmax,n,n,n)
        call mxma (sc,1,nmax,t,nnmax,1,w,1,nmax,n,n,n)
 cend

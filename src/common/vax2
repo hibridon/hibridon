@@ -1,12 +1,12 @@
 *comdeck vax2
-cstart unix-aix vax unix-convex unix-nec unix-hp unix-ibm unix-dec
+#if defined(HIB_UNIX_AIX) || defined(HIB_VAX) || defined(HIB_UNIX_CONVEX) || defined(HIB_UNIX_NEC) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_IBM) || defined(HIB_UNIX_DEC)
       xor(i,j)=ieor(i,j)
       or(i,j)=ior(i,j)
       and(i,j)=iand(i,j)
       shiftl(i,j)=ishft(i,j)
       shiftr(i,j)=ishft(i,-j)
 cend
-cstart unix-iris
+#if defined(HIB_UNIX_IRIS)
 c;      xor(i,j)=ieor(i,j)
 c;      or(i,j)=ior(i,j)
 c;      and(i,j)=iand(i,j)
@@ -18,12 +18,12 @@ c;      shiftl(i,j)=lshift(i,j)
 c;      shiftr(i,j)=lrshft(i,j)
 c;      compl(i)=not(i)
 cend
-cstart unix-convex unix-nec unix-hp unix-aix ibm vax unix-ibm unix-dec
+#if defined(HIB_UNIX_CONVEX) || defined(HIB_UNIX_NEC) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_AIX) || defined(HIB_IBM) || defined(HIB_UNIX_DEC)
       compl(i)=not(i)
 cend
-cstart unix-iris
+#if defined(HIB_UNIX_IRIS)
 c;      compl(i)=not(i)
 cend
-cstart unix-convex
+#if defined(HIB_UNIX_CONVEX)
 c;      locate(li3562,l3562,i3562,ip3562)=iisveq(l3562,li3562,i3562,ip3562)
 cend
