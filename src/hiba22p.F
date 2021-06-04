@@ -687,7 +687,7 @@
 *  --------------------------------------------
       implicit double precision (a-h,o-z)
 #if defined(HIB_UNIX_IBM)
-c;      character*1 forma, formb
+      character*1 forma, formb
 #endif
       common /cosysr/ isrcod, junkr, aso
       common /coeint/ eint(6)
@@ -709,10 +709,10 @@ c;      character*1 forma, formb
        call mxma (sc,1,nmax,t,nnmax,1,w,1,nmax,n,n,n)
 #endif
 #if defined(HIB_UNIX_IBM)
-c;      forma='N'
-c;      formb='T'
-c;      call dgemul (t,nnmax,forma,w,nmax,forma,sc,nmax,n,n,n)
-c;      call dgemul (sc,nmax,forma,t,nnmax,formb,w,nmax,n,n,n)
+      forma='N'
+      formb='T'
+      call dgemul (t,nnmax,forma,w,nmax,forma,sc,nmax,n,n,n)
+      call dgemul (sc,nmax,forma,t,nnmax,formb,w,nmax,n,n,n)
 #endif
       return
 *  w now contains desired product

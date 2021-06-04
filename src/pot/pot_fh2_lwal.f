@@ -2519,61 +2519,61 @@ c
       return
       end
 #if defined(HIB_NONE)
-c;c pm1 is included in hibrid3.f
-c;c--------------------------------------------------------------------
-c;      function pm1(l,m,theta)
-c;c--------------------------------------------------------------------
-c;c
-c;c  calculates value of legendre polynomial for l,m,theta
-c;c
-c;      implicit real*8(a-h,o-z)
-c;      data pi180/.01745329251994329444d0/
-c;c
-c;      thedeg=theta*pi180
-c;c
-c;      if(m.gt.l) then
-c;        pm1=0.d0
-c;        return
-c;      end if
-c;      lmax=l
-c;      x=cos(thedeg)
-c;      if (m.ge.0) go to 1
-c;      write (6,100)
-c;100   format('  NEGATIVE M IN LEGENDRE ROUTINE:  ABORT')
-c;      stop
-c;c
-c;1     if (m.gt.0) go to 5
-c;c  here for regular legendre polynomials
-c;      pm1=1.d0
-c;      pm2=0.d0
-c;      do 2 l=1,lmax
-c;      pp=((2*l-1)*x*pm1-(l-1)*pm2)/dble(l)
-c;      pm2=pm1
-c;2     pm1=pp
-c;      return
-c;c
-c;c  here for alexander-legendre polynomials
-c;c
-c;5     imax=2*m
-c;      rat=1.d0
-c;      do 6 i=2,imax,2
-c;      ai=i
-c;6     rat=rat*((ai-1.d0)/ai)
-c;      y=sin(thedeg)
-c;      pm1=sqrt(rat)*(y**m)
-c;      pm2=0.d0
-c;      low=m+1
-c;      do 10 l=low,lmax
-c;      al=(l+m)*(l-m)
-c;      al=1.d0/al
-c;      al2=((l+m-1)*(l-m-1))*al
-c;      al=sqrt(al)
-c;      al2=sqrt(al2)
-c;      pp=(2*l-1)*x*pm1*al-pm2*al2
-c;      pm2=pm1
-c;10    pm1=pp
-c;      return
-c;      end
+c pm1 is included in hibrid3.f
+c--------------------------------------------------------------------
+      function pm1(l,m,theta)
+c--------------------------------------------------------------------
+c
+c  calculates value of legendre polynomial for l,m,theta
+c
+      implicit real*8(a-h,o-z)
+      data pi180/.01745329251994329444d0/
+c
+      thedeg=theta*pi180
+c
+      if(m.gt.l) then
+        pm1=0.d0
+        return
+      end if
+      lmax=l
+      x=cos(thedeg)
+      if (m.ge.0) go to 1
+      write (6,100)
+100   format('  NEGATIVE M IN LEGENDRE ROUTINE:  ABORT')
+      stop
+c
+1     if (m.gt.0) go to 5
+c  here for regular legendre polynomials
+      pm1=1.d0
+      pm2=0.d0
+      do 2 l=1,lmax
+      pp=((2*l-1)*x*pm1-(l-1)*pm2)/dble(l)
+      pm2=pm1
+2     pm1=pp
+      return
+c
+c  here for alexander-legendre polynomials
+c
+5     imax=2*m
+      rat=1.d0
+      do 6 i=2,imax,2
+      ai=i
+6     rat=rat*((ai-1.d0)/ai)
+      y=sin(thedeg)
+      pm1=sqrt(rat)*(y**m)
+      pm2=0.d0
+      low=m+1
+      do 10 l=low,lmax
+      al=(l+m)*(l-m)
+      al=1.d0/al
+      al2=((l+m-1)*(l-m-1))*al
+      al=sqrt(al)
+      al2=sqrt(al2)
+      pp=(2*l-1)*x*pm1*al-pm2*al2
+      pm2=pm1
+10    pm1=pp
+      return
+      end
 #endif
 c----------------------------------------------------------------------
       subroutine distjac(r2,r3,rr,r,the)

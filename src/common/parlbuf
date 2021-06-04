@@ -1,7 +1,7 @@
 *comdeck parlbuf
 #if defined(HIB_VAX) || defined(HIB_MAC) || defined(HIB_FPS)
-c;      parameter (lbuf=512)
+      parameter (lbuf=512)
 #endif
 #if defined(HIB_UNIX_DEC)
-c;      parameter (lbuf=1024)
+      parameter (lbuf=1024)
 #endif

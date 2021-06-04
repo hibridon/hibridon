@@ -813,73 +813,73 @@
       return
       end
 #if defined(HIB_NONE)
-c;      function voh(roh)
-c;* to evaluate the OH (avqz mrci) potential
-c;      implicit double precision (a-h,o-z)
-c;      dimension coh(7)
-c;      data re,alph /1.8351666870d0,2d0/
-c;      data coh /
-c;     : 1.3800931d+5, -2.5168803d+5,  2.7423994d+5, -3.1755326d+5,
-c;     : 2.1907988d+5, -5.9144536d+1,  5.7660932d-1/
-c;      xoh=1-exp(-(roh-re)/alph)
-c;*     print *, roh,xoh
-c;      voh=polyval(coh,xoh,6)
-c;      return
-c;      end
-c;*-----------
-c;      subroutine plm(m,lmax,theta,p,incp)
-c;c
-c;c  generates alexander-legendre polynomials for m.le.l.le.lmax
-c;c
-c;      implicit double precision (a-h,o-z)
-c;      dimension p(1)
-c;      data zero, one,  two,        rad
-c;     :     /0.d0, 1.d0, 2.d0, 57.29577951308232d0/
-c;      x=cos(theta/rad)
-c;      ll = m*incp + 1
-c;      if (m.ge.0) go to 1
-c;      write (6,100)
-c;100   format('  NEGATIVE M IN LEGENDRE ROUTINE:  ABORT')
-c;      call exit
-c;1     if (m.gt.0) go to 5
-c;c  here for regular legendre polynomials
-c;      p(ll)=one
-c;      ll=ll+incp
-c;      pm1=one
-c;      pm2=zero
-c;      do 2 l=1,lmax
-c;      pp=((two*l-one)*x*pm1-(l-one)*pm2)/dble(l)
-c;      p(ll)=pp
-c;      ll=ll+incp
-c;      pm2=pm1
-c;2     pm1=pp
-c;      return
-c;c
-c;c  here for alexander-legendre polynomials
-c;c
-c;5     imax=2*m
-c;      rat=one
-c;      do 6 i=2,imax,2
-c;      ai=i
-c;6     rat=rat*((ai-one)/ai)
-c;      y=sin(theta/rad)
-c;      pm1=sqrt(rat)*(y**m)
-c;      p(ll)=pm1
-c;      ll=ll+incp
-c;      pm2=zero
-c;      low=m+1
-c;      if (low.ge.lmax) return
-c;      do 10 l=low,lmax-1
-c;      al=(l+m)*(l-m)
-c;      al=one/al
-c;      al2=((l+m-1)*(l-m-1))*al
-c;      al=sqrt(al)
-c;      al2=sqrt(al2)
-c;      pp=(two*l-one)*x*pm1*al-pm2*al2
-c;      p(ll)=pp
-c;      ll=ll+incp
-c;      pm2=pm1
-c;10    pm1=pp
-c;      return
-c;      end
+      function voh(roh)
+* to evaluate the OH (avqz mrci) potential
+      implicit double precision (a-h,o-z)
+      dimension coh(7)
+      data re,alph /1.8351666870d0,2d0/
+      data coh /
+     : 1.3800931d+5, -2.5168803d+5,  2.7423994d+5, -3.1755326d+5,
+     : 2.1907988d+5, -5.9144536d+1,  5.7660932d-1/
+      xoh=1-exp(-(roh-re)/alph)
+*     print *, roh,xoh
+      voh=polyval(coh,xoh,6)
+      return
+      end
+*-----------
+      subroutine plm(m,lmax,theta,p,incp)
+c
+c  generates alexander-legendre polynomials for m.le.l.le.lmax
+c
+      implicit double precision (a-h,o-z)
+      dimension p(1)
+      data zero, one,  two,        rad
+     :     /0.d0, 1.d0, 2.d0, 57.29577951308232d0/
+      x=cos(theta/rad)
+      ll = m*incp + 1
+      if (m.ge.0) go to 1
+      write (6,100)
+100   format('  NEGATIVE M IN LEGENDRE ROUTINE:  ABORT')
+      call exit
+1     if (m.gt.0) go to 5
+c  here for regular legendre polynomials
+      p(ll)=one
+      ll=ll+incp
+      pm1=one
+      pm2=zero
+      do 2 l=1,lmax
+      pp=((two*l-one)*x*pm1-(l-one)*pm2)/dble(l)
+      p(ll)=pp
+      ll=ll+incp
+      pm2=pm1
+2     pm1=pp
+      return
+c
+c  here for alexander-legendre polynomials
+c
+5     imax=2*m
+      rat=one
+      do 6 i=2,imax,2
+      ai=i
+6     rat=rat*((ai-one)/ai)
+      y=sin(theta/rad)
+      pm1=sqrt(rat)*(y**m)
+      p(ll)=pm1
+      ll=ll+incp
+      pm2=zero
+      low=m+1
+      if (low.ge.lmax) return
+      do 10 l=low,lmax-1
+      al=(l+m)*(l-m)
+      al=one/al
+      al2=((l+m-1)*(l-m-1))*al
+      al=sqrt(al)
+      al2=sqrt(al2)
+      pp=(two*l-one)*x*pm1*al-pm2*al2
+      p(ll)=pp
+      ll=ll+incp
+      pm2=pm1
+10    pm1=pp
+      return
+      end
 #endif

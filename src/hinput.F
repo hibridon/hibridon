@@ -1,8 +1,8 @@
 #if defined(HIB_UNIX_IBM) || defined(HIB_UNIX_AIX)
-c;@process noopt
+@process noopt
 #endif
 #if defined(HIB_UNIX_HP)
-c;!$hp$optimize off
+!$hp$optimize off
 #endif
       subroutine hinput(first)
 *  subroutine to redefine system independent input parameters for
@@ -281,7 +281,7 @@ c    :                xsecwr, nucros, photof, wavefl, boundc
 2     format(' Hibridon> ',$)
 #endif
 #if defined(HIB_CRAY)
-c;2      format(' Hibridon> ')
+2      format(' Hibridon> ')
 #endif
       call pcoder(lpar(28),pcod,icode)
       read(5, 10, end=599) line
@@ -1277,9 +1277,9 @@ c      call helppr(line)
       call getval(code(1:lc),' ',0,j,a(i))
 2310  continue
 #if defined(HIB_MAC)
-c;      call exit
-c;      write(6,2320)
-c;2320  format(' Sorry, tensor cross sections not yet implemented')
+      call exit
+      write(6,2320)
+2320  format(' Sorry, tensor cross sections not yet implemented')
 #endif
 #if defined(HIB_UNIX)
       call tenopa(fnam1,a)
@@ -1303,9 +1303,9 @@ c;2320  format(' Sorry, tensor cross sections not yet implemented')
       call getval(code(1:lc),' ',0,j,a(i))
 2510  continue
 #if defined(HIB_MAC)
-c;      call exit
-c;      write(6,2520)
-c;2520  format(' M-resolved cross sections not yet implemented')
+      call exit
+      write(6,2520)
+2520  format(' M-resolved cross sections not yet implemented')
 #endif
 #if defined(HIB_UNIX) || defined(HIB_CRAY)
       call mrcrs(fnam1,a)

@@ -72,63 +72,63 @@ c are included as strings in fortran code (see bug #6)
 ! mx = ('unix-darwin','unix-ifort') 
 #endif
 #if defined(HIB_MOLPRO)
-c;      mx(2) ='molpro'
-c;      nx=2
-c;      nxx=1
+      mx(2) ='molpro'
+      nx=2
+      nxx=1
 #endif
 #if defined(HIB_DISCO_U)
-c;      mx(1) ='disco'
-c;      nx=2
-c;      nxx=2
+      mx(1) ='disco'
+      nx=2
+      nxx=2
 #endif
 #if defined(HIB_DISCO_F)
-c;      mx(2) ='disco'
-c;      nx=2
-c;      nxx=1
+      mx(2) ='disco'
+      nx=2
+      nxx=1
 #endif
 #if defined(HIB_DEC_RISC)
-c;      mx(nxx)='dec-risc'
-c;      ext='.dec'
+      mx(nxx)='dec-risc'
+      ext='.dec'
 #endif
 #if defined(HIB_UNIX_HP)
-c;      mx(nxx)='unix-hp'
-c;      ext='.hpu'
+      mx(nxx)='unix-hp'
+      ext='.hpu'
 #endif
 #if defined(HIB_UNIX_MAC)
-c;      mx(nxx)='unix-mac'
-c;      ext='.mac'
+      mx(nxx)='unix-mac'
+      ext='.mac'
 #endif
 #if defined(HIB_UNIX_CONVEX)
-c;      mx(nxx)='unix-convex'
-c;      ext='.cvx'
+      mx(nxx)='unix-convex'
+      ext='.cvx'
 #endif
 #if defined(HIB_UNIX_SEQUENT)
-c;      mx(nxx)='unix-sequent
-c;      ext='.seq'
+      mx(nxx)='unix-sequent
+      ext='.seq'
 #endif
 #if defined(HIB_IBM_RISC)
-c;        mx(nxx)='ibm-risc'
-c;        ext='.ibm'
+        mx(nxx)='ibm-risc'
+        ext='.ibm'
 #endif
 #if defined(HIB_IBM_VM)
-c;      mx(nxx)='ibm-vm'
-c;      ext='.ibm'
+      mx(nxx)='ibm-vm'
+      ext='.ibm'
 #endif
 #if defined(HIB_VAX)
-c;      mx(nxx)='vax'
-c;      ext='.vax'
+      mx(nxx)='vax'
+      ext='.vax'
 #endif
 #if defined(HIB_CRAY_COS)
-c;      mx(nxx)='cray-cos'
-c;      ext='.cos'
+      mx(nxx)='cray-cos'
+      ext='.cos'
 #endif
 #if defined(HIB_CRAY_UNICOS)
-c;      mx(nxx)='cray-unicos'
-c;      ext='.ucs'
+      mx(nxx)='cray-unicos'
+      ext='.ucs'
 #endif
 #if defined(HIB_FPS)
-c;      mx(nxx)='fps'
-c;      ext='.fps'
+      mx(nxx)='fps'
+      ext='.fps'
 #endif
       if(mx(nxx).eq.' ') then
         write(6,25)
@@ -142,8 +142,8 @@ c;      ext='.fps'
 30       format(' machine=cray is insufficient machine type'/
      1          ' specify cray-cos or cray-unicos')
 #if defined(HIB_UNKNOWN)
-c;         nx = 0
-c;         goto 1
+         nx = 0
+         goto 1
 #endif
          stop
       end if
@@ -153,8 +153,8 @@ c;         goto 1
      1          ' specify unix-hp, unix-mac, unix-convex,',
      2          ' unix-sequent, ibm-risc, or dec-risc')
 #if defined(HIB_UNKNOWN)
-c;         nx = 0
-c;         goto 1
+         nx = 0
+         goto 1
 #endif
          stop
       else if(mx(i).eq.'ibm') then
@@ -162,8 +162,8 @@ c;         goto 1
 32       format(' machine=ibm is insufficient machine type'/
      1          ' specify ibm-risc, or ibm-vm')
 #if defined(HIB_UNKNOWN)
-c;         nx = 0
-c;         goto 1
+         nx = 0
+         goto 1
 #endif
          stop
       end if
@@ -357,7 +357,7 @@ c...    this escape allows introduction of further options
      >  status='old')
       rewind 1
 #if defined(HIB_BATCH)
-c;      write(6,*) 'input file  ',l(1:lenstr(l))
+      write(6,*) 'input file  ',l(1:lenstr(l))
 #endif
 ! compute the name of the new file from the input file name, eg:
 ! if l='hiversion.f' -> l='hiversion.new'
@@ -373,7 +373,7 @@ c;      write(6,*) 'input file  ',l(1:lenstr(l))
       inquire(file=l,exist=exist)
       if(exist) then
 #if defined(HIB_BATCH)
-c;        stop 'file exists'
+        stop 'file exists'
 celse
         write(6,30) l(1:lenstr(l))
 30      format(/1x,'file ',a,' exists'/
@@ -496,7 +496,7 @@ c     maxd: maximum number of comdecks in the common file
 c     maxl: maxiumum number of lines in the common file
 #endif
 #if defined(HIB_CRAY) || defined(HIB_UNKNOWN)
-c;      parameter (maxd=400,maxl=10000)
+      parameter (maxd=400,maxl=10000)
 #endif
       character*(*) l,mx(*)
       integer lx(*)

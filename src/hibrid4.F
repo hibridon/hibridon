@@ -800,8 +800,8 @@ c.....assume that jlpar=1 is stored first
       dimension vecnow(1), vecnew(1), tmat(1)
       data isw / 0/
 #if defined(HIB_NONE)
-c;      call mxma (vecnew, 1, nmax, vecnow, nmax, 1, tmat, 1, nmax,
-c;     :            n, n, n)
+      call mxma (vecnew, 1, nmax, vecnow, nmax, 1, tmat, 1, nmax,
+     :            n, n, n)
 #endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       call dgemm('n','t',n,n,n,1.d0,vecnew,nmax,vecnow,nmax,
@@ -937,18 +937,18 @@ c;     :            n, n, n)
       end if
 #endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;*  transform w to tridiagonal form
-c;*  eignow, scr1 and scr2 are used as scratch vectors here
-c;      call tred1 (nmax, nch, w, eignow, scr1, scr2)
-c;*  get eigenvalues of tridiagonal matrix
-c;      call tqlrat (nch, eignow, scr2, ierr)
-c;      if (ierr .ne. 0) then
-c;        write (9, 130) ierr
-c;        write (6, 130) ierr
-c;130     format
-c;     :    (' *** TQLRAT IERR =', i3, ' .N.E. 0 IN WAVEVC; ABORT ***')
-c;        call exit
-c;      end if
+*  transform w to tridiagonal form
+*  eignow, scr1 and scr2 are used as scratch vectors here
+      call tred1 (nmax, nch, w, eignow, scr1, scr2)
+*  get eigenvalues of tridiagonal matrix
+      call tqlrat (nch, eignow, scr2, ierr)
+      if (ierr .ne. 0) then
+        write (9, 130) ierr
+        write (6, 130) ierr
+130     format
+     :    (' *** TQLRAT IERR =', i3, ' .N.E. 0 IN WAVEVC; ABORT ***')
+        call exit
+      end if
 #endif
       return
       end

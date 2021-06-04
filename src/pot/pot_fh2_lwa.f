@@ -891,8 +891,8 @@ c filter diabatic diagonal potentials, nothing < -12000 and nothing > 30000
           enddo
 * solve linear equations for expansion coefficients in x
 #if defined(HIB_UNIX_IBM)
-c;        call dgells(0,cmat,8,v,9,xth,5,dummy,tol,8,5,4,nk,
-c;     :       aux,28)
+        call dgells(0,cmat,8,v,9,xth,5,dummy,tol,8,5,4,nk,
+     :       aux,28)
 #endif
 #if (defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
           lwork=390

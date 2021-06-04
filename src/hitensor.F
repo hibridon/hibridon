@@ -1458,7 +1458,7 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
       data ai / (0.d0,1.d0)/
 #endif
 #if defined(HIB_CRAY)
-c;      data ai / (0.d0,1.d0)/
+      data ai / (0.d0,1.d0)/
 #endif
 
 ** flag for diagnostic printing
