@@ -38,7 +38,7 @@ cdec$ fixedformlinesize:132
 20    format (' ---------------------------------------------------',
      :  '-----------------------')
 #endif
-cstart none
+#if defined(HIB_NONE)
       i=system("hib_sysconfig")
       open(unit=8,file='sysprofile',access='sequential')
       read (8,25) profile

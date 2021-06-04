@@ -20,7 +20,7 @@
 *     idamin, idmin
 *                                                                        *
 **************************************************************************
-cstart unix cray
+#if defined(HIB_UNIX) || defined(HIB_CRAY)
       subroutine matmov (a, b, nr, nc, na, nb)
 *  subroutine to put nr x nc matrix a into nr x nc matrix b
 *  author:  millard alexander
@@ -46,13 +46,13 @@ c ------------------------------------------------------------------
 *  column of each matrix
       do 20  j = 1, nc
 cend
-cstart unix-convex
+#if defined(HIB_UNIX_CONVEX)
 c;      call scopy (nr, a(ia+1), 1, b(ib+1), 1)
 cend
-cstart unix cray .and. .not. unix-convex
+#if (defined(HIB_UNIX) || defined(HIB_CRAY)) && !defined(HIB_UNIX_CONVEX)
         call dcopy (nr, a(ia+1), 1, b(ib+1), 1)
 cend
-cstart unix cray
+#if defined(HIB_UNIX) || defined(HIB_CRAY)
         ia = ia + na
         ib = ib + nb
 20    continue
@@ -78,13 +78,13 @@ cstart unix cray
       implicit double precision (a-h,o-z)
       dimension a(1)
 cend
-cstart unix-convex
+#if defined(HIB_UNIX_CONVEX)
 c;      nc = ( isamax (n, a, na) - 1) * na + 1
 cend
-cstart unix cray .and. .not. unix-convex
+#if (defined(HIB_UNIX) || defined(HIB_CRAY)) && !defined(HIB_UNIX_CONVEX)
       nc = ( idamax (n, a, na) - 1) * na + 1
 cend
-cstart unix cray
+#if defined(HIB_UNIX) || defined(HIB_CRAY)
       c = abs( a(nc) )
       return
       end
@@ -108,15 +108,15 @@ cstart unix cray
 *  first copy vector a into vector c
 *  then multiply by scalar constant
 cend
-cstart unix-convex
+#if defined(HIB_UNIX_CONVEX)
 c;      call scopy (n, a, na, c, nc)
 c;      call sscal (n, b, c, nc)
 cend
-cstart unix  cray .and. .not. unix-convex
+#if defined(HIB_UNIX) || defined(HIB_CRAY) && !defined(HIB_UNIX_CONVEX)
       call dcopy (n, a, na, c, nc)
       call dscal (n, b, c, nc)
 cend
-cstart unix cray
+#if defined(HIB_UNIX) || defined(HIB_CRAY)
       return
       end
 *  -----------------------------------------------------------------------
@@ -220,7 +220,7 @@ c
       return
       end
 cend
-cstart  unix-sun
+#if defined(HIB_UNIX_SUN)
 c;      logical          function lsame( ca, cb )
 c;*
 c;*  -- LAPACK auxiliary routine (version 1.0) --
@@ -350,7 +350,7 @@ c;*     End of XERBLA
 c;*
 c;      end
 cend
-cstart unix-aix unix-hp unix-ibm unix-iris unix-sun
+#if defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_IBM) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
 c;      integer          function ilaenv( ispec, name, opts, n1, n2, n3,
 c;     $                 n4 )
 c;*
@@ -1616,7 +1616,7 @@ c;*     End of DLASYF
 c;*
 c;      end
 cend
-cstart .not. unix-dec
+#if !defined(HIB_UNIX_DEC)
       subroutine dset(n,da,dx,incx)
 c
 c     sets a vector equal to a constant
@@ -1664,7 +1664,7 @@ c
       return
       end
 cend
-cstart unix .and. (.not. unix-ibm .or. .not. unix-dec)
+#if defined(HIB_UNIX) && (!defined(HIB_UNIX_IBM) || !defined(HIB_UNIX_DEC))
       integer function idamin(n, sx, incx)
 *
 *     find smallest index of minimum magnitude of double precision s

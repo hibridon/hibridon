@@ -403,7 +403,7 @@ cend
                  enddo
               enddo
 cend
-cstart .not. unix-darwin .and. .not. unix-x86
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;              call rs (3, 2, e, eig, 1, vec, sc1, sc2, ierr)
 cend
               eint(i) = eig(1+iso01)
@@ -420,7 +420,7 @@ cend
               call dsyev('V','L',3,e,3,eig,work,lwork,ierr)
               call dcopy(9,e,1,vec,1)
 cend
-cstart .not.unix-darwin .and. .not. unix-x86
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;              call rs (3, 3, e, eig, 1, vec, sc1, sc2, ierr)
 cend
               eint(i) = eig(2-iso)

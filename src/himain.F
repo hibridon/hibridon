@@ -47,7 +47,7 @@ cend
 * set size of scratch array for matrix inversion
       parameter (kaux=100*kmax)
 cend
-cstart unix .and. .not.unix-ibm
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_IBM)
 c;* set size of scratch array for matrix inversion with lapack routines
 c;* warning, this assumes a blocksize of 64
 c;      parameter (kaux=128*kmax)
@@ -207,10 +207,10 @@ cend
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       common /cosc11/ sc11(kaux3)
 cend
-cstart unix .and. .not.unix-darwin .and. .not. unix-x86
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      common /cosc11/ sc11(kaux)
 cend
-cstart unix
+#if defined(HIB_UNIX)
       common /cokaux/ naux
 cend
       common /cotble/ npnt, jttble(kfact)
@@ -248,7 +248,7 @@ cend
 *  determine cache and block sizes for matrix multiply
 c.....ncache: cache size in words
       ncache=4096
-cstart unix-hp
+#if defined(HIB_UNIX_HP)
 c;      ncache=16000
 cend
       mxmblk=64
@@ -384,7 +384,7 @@ cend
       logical optifl, first
       logical lsc1
       include "common/parpot"
-cstart unix-dec unix-iris
+#if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
 c;      real secnds
 c;      common /codec/ ttim(2)
 cend
@@ -432,7 +432,7 @@ cend
       call default
 1     call hinput(first)
       cpupt=0
-cstart unix-dec unix-iris
+#if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
 c;      ttim(1)=0.d0
 c;      ttim(2)=secnds(0.0)
 cend
@@ -874,7 +874,7 @@ cger (next 2 lines)
 *      call flush_(9)
       call flush(9)
 cend
-cstart unix-dec unix-convex unix-iris
+#if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_CONVEX) || defined(HIB_UNIX_IRIS)
 c;      call flush(9)
 cend
 * replace statement below to accommodate q.ma's revised
@@ -1003,7 +1003,7 @@ c.....save restart information
      :     ' FINISHED; ',
      :     ' CPU:',a,'  WALL:',a,'  DATE: ',a)
         endif
-cstart unix-dec unix-iris unix-hp
+#if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_HP)
 c;        call flush6
 cend
         cpubas=0
@@ -1070,7 +1070,7 @@ c.....save restart information
      :     ' COMPLETED; ',
      :      ' CPU:',a,'  ELAPSED:',a,'  CURRENT DATE: ',a)
         endif
-cstart unix-dec unix-iris unix-hp
+#if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_HP)
 c;        call flush6
 cend
         cpubas=0
@@ -1161,7 +1161,7 @@ cend
 520      format('      CURRENT DATE:  ',(a))
          write (6, 350)
          write (9, 350)
-cstart unix-dec unix-iris unix-hp
+#if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_HP)
 c;         call flush6
 cend
       end if

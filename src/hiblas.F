@@ -13,7 +13,7 @@
 * basic linear algebra (blas) routines
 * --------------------------------------------------
 * double->single compatability for convex
-cstart unix-convex
+#if defined(HIB_UNIX_CONVEX)
 c;      subroutine daxpy(n,da,dx,incx,dy,incy)
 c;c
 c;c     constant times a vector plus a vector.
@@ -89,7 +89,7 @@ c;      call  sswap (n,dx,incx,dy,incy)
 c;      return
 c;      end
 cend
-cstart unix-noblas
+#if defined(HIB_UNIX_NOBLAS)
 c;      double precision function dasum(n,dx,incx)
 c;c
 c;c     returns sum of magnitudes of double precision dx
@@ -769,7 +769,7 @@ cend
 * single-precision basic linear algebra (blas) routines for compatability
 * with old subroutines
 * --------------------------------------------------
-cstart none
+#if defined(HIB_NONE)
 c;      integer function isamax(n, sx, incx)
 c;*
 c;*     find smallest index of maximum magnitude of single precision s
@@ -808,7 +808,7 @@ c;   30 continue
 c;      return
 c;      end
 cend
-cstart none
+#if defined(HIB_NONE)
 c;      subroutine saxpy (n, sa, sx, incx, sy, incy)
 c;*
 c;*     overwrite single precision sy with single precision sa*sx +sy.
@@ -853,8 +853,8 @@ c;        sy(i + 2) = sy(i + 2) + sa * sx(i + 2)
 c;        sy(i + 3) = sy(i + 3) + sa * sx(i + 3)
 c;   50 continue
 cend
-ccstart unix-dec unix-iris
-cstart none
+c#if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
+#if defined(HIB_NONE)
 c;*        clean-up loop so remaining vector length is a multiple of 6
 c;*
 c;   20 m = mod(n, 6)
@@ -873,7 +873,7 @@ c;        sy(i + 4) = sy(i + 4) + sa * sx(i + 4)
 c;        sy(i + 5) = sy(i + 5) + sa * sx(i + 5)
 c;   50 continue
 cend
-cstart none
+#if defined(HIB_NONE)
 c;      return
 c;*
 c;*        code for equal,  positive,  nonunit increments.
@@ -965,8 +965,8 @@ c;   10 continue
 c;      return
 c;*         code for both increments equal to 1
 cend
-ccstart unix-hp mac
-cstart none
+c#if defined(HIB_UNIX_HP) || defined(HIB_MAC)
+#if defined(HIB_NONE)
 c;*         clean - up loop so remaining vector length is a multiple of 5
 c;   20 m = mod(n, 5)
 c;      if ( m  .eq.  0 ) go to 40
@@ -982,16 +982,16 @@ c;     :                sx(i + 4) * sy(i + 4)
 c;   50 continue
 c;      return
 cend
-ccstart unix-dec unix-iris
-cstart none
+c#if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
+#if defined(HIB_NONE)
 c;   20 do 30 i = 1, n
 c;        sdot = sdot + sx(i) * sy(i)
 c;*        ncount=ncount+2
 c;   30 continue
 c;      return
 cend
-ccstart unix-hp unix-dec mac unix-iris
-cstart none
+c#if defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_MAC) || defined(HIB_UNIX_IRIS)
+#if defined(HIB_NONE)
 c;*         code for positive equal increments .ne. 1
 c;   60 continue
 c;      ns = n * incx
@@ -1104,7 +1104,7 @@ c;   70   continue
 c;      return
 c;      end
 cend
-cstart none
+#if defined(HIB_NONE)
 c;      subroutine srot(n,dx,incx,dy,incy,dc,ds)
 c;c
 c;c     multiply the 2 x 2 matrix  ( dc ds) times the 2 x n matrix (dx**t)

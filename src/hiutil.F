@@ -38,7 +38,7 @@
 *
 * NB cstart ultrix for fortran rather than c utilities
 **********************************************************************
-cstart unix-xlf
+#if defined(HIB_UNIX_XLF)
 c;@process fixed(132)
 cend
       subroutine vaxhlp(line1)
@@ -50,41 +50,41 @@ cdec$ fixedformlinesize:132
       character*(*) line1
       common /coipar/ jtot1, jtot2, jtotd, jlpar, nerg,numax,numin,nud,
      :                lscreen, iprint
-cstart cray
+#if defined(HIB_CRAY)
 c;* return for these machines
 c;        write (6,2)
 c;2       format (' Help not installed on this machine')
 c;        return
 c;        end
 cend
-cstart unix
+#if defined(HIB_UNIX)
 c simulates vax vms help command
       parameter (inp=5,iout=6,ihlpmain=51,ihlpalt=52)
       parameter (maxlev=9,maxsub=50)
       character*(*) helpdir,helptail
 cend
       include "common/parhlp"
-cstart unix
+#if defined(HIB_UNIX)
       character*80 helpfile,line,lin,lin2
       character*1 pat
 cend
-cstart unix
+#if defined(HIB_UNIX)
       logical exist
 cend
-cstart unix
+#if defined(HIB_UNIX)
       dimension zreq(maxlev),lreq(maxlev),zsub(maxsub)
 c...  by default, looks in file help. if that is not available, then
 c     tries file name of first key in the tree.
       helpfile=helpdir//'hibrid'//helptail
 cend
-cstart unix-convex
+#if defined(HIB_UNIX_CONVEX)
 c;      open (ihlpmain,file=helpfile,err=299,readonly,status='old')
 cend
-cstart .not. unix-convex
+#if !defined(HIB_UNIX_CONVEX)
 c      write(6,*) 'open ',helpfile
       open (ihlpmain,file=helpfile,err=299,status='unknown')
 cend
-cstart unix
+#if defined(HIB_UNIX)
       zalt=' '
       level=0
       levini = 0
@@ -155,7 +155,7 @@ c...    key not found in help. attempt to open alternate file.
           if (zalt.ne.' ') close(ihlp)
           zalt=zreq(1)
 cend
-cstart unix
+#if defined(HIB_UNIX)
           helpfile='ls '//helpdir//zalt(1:lenstr(zalt))//'*'//helptail
      >     //' >helphelphelphelp'
           call system(helpfile)
@@ -168,14 +168,14 @@ cstart unix
 295       close (ihlpalt,status='delete')
           if (ifound.eq.0) goto 29
 cend
-cstart unix-convex
+#if defined(HIB_UNIX_CONVEX)
 c;          open (ihlpalt,file='helphelphelphelp',status='old')
 c;          open (ihlp,file=helpfile,err=29,readonly,status='old')
 cend
 #if defined(HIB_UNIX_SUN) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IBM) || defined(HIB_UNIX_AIX) || defined(HIB_UNIX_IRIS)
 c;          open (ihlp,file=helpfile,err=29,status='unknown')
 cend
-cstart unix
+#if defined(HIB_UNIX)
         end if
       end if
       rewind ihlp
@@ -438,7 +438,7 @@ c       k=index(line(i1:),';')
 *              format hh:mm:ss
 *  -----------------------------------------------------------------
       character*20 cdate
-cstart unix-xlf
+#if defined(HIB_UNIX_XLF)
 c;      character*8 d, date, c, clock
 c;      d=date()
 c;      c=clock()
@@ -474,7 +474,7 @@ c-------------------------------------------------------------------
 *
 *  -----------------------------------------------------------------
         implicit double precision(a-h,o-z)
-cstart unix-xlf
+#if defined(HIB_UNIX_XLF)
 c;      t=timef()/1000d0
 c;      te=t
 cend
@@ -501,7 +501,7 @@ c this only accurate to seconds, but works fine when date changes
 c
 #endif
 
-cstart unix-pgi
+#if defined(HIB_UNIX_PGI)
 c;      real tt, tarray(2), result
 c;* use cpu_time for user+cpu time
 c;      call cpu_time(tt)
@@ -510,7 +510,7 @@ c;* use dtime for elapsed (wall time).
 c;      result=dtime(tarray)
 c;      te=result
 cend
-cstart ultrix-dec
+#if defined(HIB_ULTRIX_DEC)
 c;      common /codec/ ttim(2)
 c;      real et, etime, secnds
 c;      dimension et(2)
@@ -532,10 +532,10 @@ cend
       call cpu_time(te)
       second=te
 #endif
-cstart unix-xlf
+#if defined(HIB_UNIX_XLF)
 c;      second=timef()*1000d0
 cend
-cstart ultrix-dec
+#if defined(HIB_ULTRIX_DEC)
 c;      double precision function second()
 c;      implicit double precision (a-h,o-z)
 c;      real et(2)
@@ -581,7 +581,7 @@ c$$$*     write (6,*) time
       return
       end
 * --------------------------------------------------------------------
-cstart none
+#if defined(HIB_NONE)
 c;ccstart mac
 c;      subroutine timdat(tim,dat,mach)
 c;c.....should return time, date and machine type
@@ -603,7 +603,7 @@ c;      call date(dat)
 c;      return
 c;      end
 c;ccend
-c;ccstart unix-dec unix-sun
+c;c#if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_SUN)
 c;      subroutine timdat(tim,dat,mach)
 c;      character *(*) tim,dat,mach
 c;      mach='DECStation  ULTRIX'
@@ -617,7 +617,7 @@ c;      return
 c;      end
 c;ccend
 cend
-cstart unix-irix
+#if defined(HIB_UNIX_IRIX)
 c;      subroutine timdat(tim,dat,mach)
 c;      character *(*) tim,dat,mach
 c;      mach='SGI IRIX'
@@ -630,8 +630,8 @@ c;      if(l.gt.9) dat(10:l)=' '
 c;      return
 c;      end
 cend
-cstart none
-c;ccstart unix-hp unix-aix unix-convex unix-ibm
+#if defined(HIB_NONE)
+c;c#if defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_IBM) || defined(HIB_UNIX_CONVEX)
 c;      subroutine timdat(tim,dat,mach)
 c;      character *(*) tim,dat,mach
 c;      character*9 a(7)
@@ -1479,7 +1479,7 @@ c here follow nemeth's coefficients
        close(4)
        i=system("rm -f sysprofile")
 cend
-cstart .not. unix-darwin .and. .not. unix-x86
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      write (6,40)
 c;      write (8,40)
 c;40    format('*** COMMAND SYSCONF NOT IMPLEMENTED FOR CURRENT O/S')

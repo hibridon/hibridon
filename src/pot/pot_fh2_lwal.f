@@ -2518,7 +2518,7 @@ c
       end if
       return
       end
-cstart none
+#if defined(HIB_NONE)
 c;c pm1 is included in hibrid3.f
 c;c--------------------------------------------------------------------
 c;      function pm1(l,m,theta)

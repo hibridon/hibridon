@@ -224,7 +224,7 @@
       lwork = 144
       call dsyev('V','L',isize,c2,isize,en2,work,lwork,ierr)
 cend
-cstart .not. unix-darwin .and. .not. unix-x86
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      write (6,1225)
 c;1225    format('  *** DSYEV NOT ACCESSIBLE IN THIS VERSION OF CODE.')
 c;        call exit
