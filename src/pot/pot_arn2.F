@@ -1,11 +1,11 @@
 *system: N2-Ar using canonical Pattengill, LaBudde, Bernstein potential
 * reference:  m.d. pattengill, r. a. labudde, r.b. bernstein,
 *  and c.f. curtiss, j. chem. phys. 55, 5517 (1971)]
-      include "common/syusr"
+#include "common/syusr"
       subroutine driver
       implicit double precision (a-h,o-z)
       common /covvl/ vvl(6)
-      include "common/parpot"
+#include "common/parpot"
       potnam='PATTENGILL-LABUDDE-BERNSTEIN AR-N2'
       print *, potnam
 1      print *, ' r (bohr)'
@@ -15,14 +15,14 @@
 100   format(' vsum',/,7(1pe16.8))
       goto 1
 99    end
-      include "common/bausr"
-      include "common/ground"
+#include "common/bausr"
+#include "common/ground"
 * --------------------------------------------------------------------------
       subroutine loapot(iunit,filnam)
 * --------------------------------------------------------------------------
       character*(*) filnam
-      include "common/parpot"
-      include "common/parbas"
+#include "common/parpot"
+#include "common/parbas"
       potnam='PATTENGILL-LABUDDE-BERNSTEIN AR-N2'
       lammin(1)=2
       lammax(1)=2
@@ -57,7 +57,7 @@
       implicit double precision (a-h,o-z)
       common /conlam/ nlam,nlammx
 
-      include "common/parbas"
+#include "common/parbas"
       common /covvl/ vvl(6)
 
 
