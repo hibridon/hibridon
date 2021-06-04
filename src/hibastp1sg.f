@@ -67,9 +67,8 @@ c     ------------------------------------------------------------------
 c
 c     The following arrays store the parameters of channels and levels.
 c     Note that j12 is stored in a common block
-      integer :: jchn(*), lchn(*), ischn(*), jlev(*), islev(*),
-     $     j12chn(1)
-      real(8) :: elev(*), echn(1), cchn(1)
+      integer :: jchn(*), lchn(*), ischn(*), jlev(*), islev(*)
+      real(8) :: elev(*)
 c     The following parameters store the number of channels, opened
 c     levels and levels
       integer :: nchn, nlevop, nlev

@@ -3255,7 +3255,6 @@
       parameter (icod=3, ircod=2)
       parameter (lencod = icod + ircod + 3)
       include "common/parbas"
-       niout, indout(20)
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm,iop,jmax
       common /cosysr/ isrcod, junkr, brot, aso

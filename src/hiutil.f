@@ -1552,7 +1552,6 @@ c
       end
 c     ------------------------------------------------------------------
       logical function tf_triang_fail(two_ja, two_jb, two_jc)
-      use mod_cofact, only: si
       implicit none
       integer, intent(in) :: two_ja, two_jb, two_jc
       tf_triang_fail = (two_jc .gt. (two_ja + two_jb)) .or.
@@ -1574,6 +1573,7 @@ c
       end function tdel
 c     ------------------------------------------------------------------
       real(8) function tf3jm0(two_ja, two_jb, two_jc)
+      use mod_cofact, only: si
 c     3j-symbol (ja jb jc / 0 0 0)
 c     Modified from f3j0 by Q. Ma
       implicit none

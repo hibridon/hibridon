@@ -39,12 +39,12 @@ c     ------------------------------------------------------------------
       use mod_coiv2, only: iv2
       use mod_cocent, only: cchn => cent
       use mod_coeint, only: echn => eint
-      use mod_coj12, only: c12chn => j12
+      use mod_coj12, only: j12chn => j12
       implicit none
 c
 c     The following arrays store the parameters of channels and levels.
       integer :: jchn(*), lchn(*), ischn(*), jlev(*), islev(*)
-      real(8) :: elev(*), echn(1), cchn(1)
+      real(8) :: elev(*)
 c     The following parameters store the number of channels, opened
 c     levels and levels
       integer :: nchn, nlevop, nlev

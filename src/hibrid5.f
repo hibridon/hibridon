@@ -1121,7 +1121,7 @@ cABER
 *    econv:     conversion factor from cm-1 to hartrees
 *  ------------------------------------------------------------------
       use mod_cosout, only: nnout, jout
-      use mod_coiout, inly: niout, indout
+      use mod_coiout, only: niout, indout
       use constants
       implicit double precision (a-h,o-z)
       character*(*) fname

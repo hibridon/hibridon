@@ -2617,8 +2617,8 @@ c
 * revised on 30-mar-2012 by q. ma for stream I/O of wfu files
 *
 * ------------------------------------------------------------------
-      implicit double precision (a-h,o-z)
       use mod_cocent, only: sc2 => cent
+      implicit double precision (a-h,o-z)
       common /coered/ ered, rmu
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev

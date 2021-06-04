@@ -281,8 +281,7 @@ cend
       use mod_coeint, only: eint
       use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
-      integer i, iflag, ilam, lamnum, nch, nlam, nlammx, nmax, nv2max
-      integer iv2
+      integer i, iflag, ilam, lamnum, nch, nlam, nlammx, nmax
       common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
       common /conlam/ nlam, nlammx, lamnum(1)
       common /copmat/ rtmn, rtmx, iflag
