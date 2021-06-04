@@ -1,6 +1,6 @@
 #if defined(HIB_UNIX_IFORT)
 cdec$ fixedformlinesize:132
-cend
+#endif
 
 *  Multiplied 1Sigma+ curve by 1.20 (20% increase in depth)
 *  revision:  22-feb-2018 (p.dagdigian)

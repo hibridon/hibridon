@@ -744,17 +744,17 @@ c
       common/cobuf/ lbuf,ibuf(1024)
       data lseg, intrel, lchar /1024, 1, 8/
       data lbuf /1024/
-cend
+#endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN)
 c;      common/cobuf/ lbuf,ibuf(1024)
 c;      data lseg, intrel, lchar /1024,2,4/
 c;      data lbuf/1024/
-cend
+#endif
 #if defined(HIB_CRAY)
 c;      common/cobuf/ lbuf,ibuf(512)
 c;      data lbuf/512/
 c;      data lseg, intrel, lchar /512,1,8/
-cend
+#endif
       end
 c
 c     ------------------------------------------------------------
@@ -816,7 +816,7 @@ c     Stream i/o mode, replace, read/write
 c;         open (unit=iunit, file=filnam, access='STREAM',
 c;     $        status='REPLACE', err=999, iostat=ierr,
 c;     $        buffered='YES')
-cend
+#endif
 #if defined(__GFORTRAN__)
          open (unit=iunit, file=filnam, access='STREAM',
      $        status='REPLACE', err=999, iostat=ierr)
@@ -870,26 +870,26 @@ c
 #endif
 #if defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
         accs='append'
-cend
+#endif
       else
         stat='new'
       end if
       if (tmpfil) then
 #if defined(HIB_UNIX) || defined(HIB_MAC)
         stat = 'scratch'
-cend
+#endif
 #if defined(HIB_CRAY)
 c;      stat = 'unknown'
-cend
+#endif
 #if defined(HIB_UNIX_DARWIN)
         inquire(unit=iunit,opened=od)
 * if temporary file is already opened, close it
         if (od) close(unit=iunit)
-cend
+#endif
 #if defined(HIB_UNIX) || defined(HIB_MAC) || defined(HIB_CRAY)
         open(unit=iunit,  access='sequential',
      :          form=fmt, status=stat, err=999, iostat=ierr)
-cend
+#endif
       else
 *       print *,stat
         open(unit=iunit, file=filnam, access=accs,
@@ -1013,7 +1013,7 @@ c     ------------------------------------------------------------
 * isize is only needed on a univac
           call openf(-10, xname, 'su', isize)
         endif
-cend
+#endif
         call tmpnm (11, xname)
         call openf(-11, xname, 'su', isize)
         call tmpnm (12, xname)
@@ -2432,7 +2432,7 @@ c
       return
 c
       end
-cend
+#endif
 #if ( defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86) ) && !defined(UNIX_CIO)
       subroutine tmpnm(ifil,name)
 c.....should generate a unique filename
@@ -2444,7 +2444,7 @@ c     id=getpid()
 10    format('T',i2.2,i5.5,'.TMP  ')
       return
       end
-cend
+#endif
 * ---------------------------------------------------------------
 #if defined(HIB_NONE)
 c;*********************************************************************
@@ -2536,4 +2536,4 @@ c;      iflag=icatf(luni)
 c;      name=nam(luni)
 c;      return
 c;      end
-cend
+#endif

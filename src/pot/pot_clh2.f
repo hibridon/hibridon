@@ -372,7 +372,7 @@ c;      if(dabs(argcos).gt.1.d0) write(6,*) 'argcos',argcos
 c;      theta=acos(argcos)*pi180
 c;      return
 c;      end
-cend
+#endif
 c----------------------------------------------------------------------
       function tgcn(rr,r,theta,icase)
 c----------------------------------------------------------------------
@@ -536,7 +536,7 @@ c;      pm2=pm1
 c;10    pm1=pp
 c;      return
 c;      end
-cend
+#endif
 c--------------------------------------------------------------------
       function dmerge(rclh1,rh2,rclh2,rr,theta)
 c--------------------------------------------------------------------

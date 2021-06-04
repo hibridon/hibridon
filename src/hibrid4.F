@@ -802,11 +802,11 @@ c.....assume that jlpar=1 is stored first
 #if defined(HIB_NONE)
 c;      call mxma (vecnew, 1, nmax, vecnow, nmax, 1, tmat, 1, nmax,
 c;     :            n, n, n)
-cend
+#endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       call dgemm('n','t',n,n,n,1.d0,vecnew,nmax,vecnow,nmax,
      :           0d0,tmat,nmax)
-cend
+#endif
 *  restore eigenvectors
       call matmov (vecnew, vecnow, n, n, nmax, nmax)
       return
@@ -889,7 +889,7 @@ cend
 *  local arrays (for lapack dsyevr)
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       dimension isuppz(2*nch),iwork(10*nch),work(57*nch)
-cend
+#endif
 
 * ------------------------------------------------------------------
       data xmin1 / -1.d0/
@@ -935,7 +935,7 @@ cend
 120     format (' EIGENVALUES ARE:',/,8(1pe16.8) )
         call exit
       end if
-cend
+#endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;*  transform w to tridiagonal form
 c;*  eignow, scr1 and scr2 are used as scratch vectors here
@@ -949,7 +949,7 @@ c;130     format
 c;     :    (' *** TQLRAT IERR =', i3, ' .N.E. 0 IN WAVEVC; ABORT ***')
 c;        call exit
 c;      end if
-cend
+#endif
       return
       end
 c

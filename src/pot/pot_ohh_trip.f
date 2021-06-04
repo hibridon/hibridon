@@ -882,4 +882,4 @@ c;      pm2=pm1
 c;10    pm1=pp
 c;      return
 c;      end
-cend
+#endif

@@ -40,7 +40,7 @@
 **********************************************************************
 #if defined(HIB_UNIX_XLF)
 c;@process fixed(132)
-cend
+#endif
       subroutine vaxhlp(line1)
 #if defined(unix-ifort)
 cdec$ fixedformlinesize:132
@@ -56,34 +56,34 @@ c;        write (6,2)
 c;2       format (' Help not installed on this machine')
 c;        return
 c;        end
-cend
+#endif
 #if defined(HIB_UNIX)
 c simulates vax vms help command
       parameter (inp=5,iout=6,ihlpmain=51,ihlpalt=52)
       parameter (maxlev=9,maxsub=50)
       character*(*) helpdir,helptail
-cend
+#endif
       include "common/parhlp"
 #if defined(HIB_UNIX)
       character*80 helpfile,line,lin,lin2
       character*1 pat
-cend
+#endif
 #if defined(HIB_UNIX)
       logical exist
-cend
+#endif
 #if defined(HIB_UNIX)
       dimension zreq(maxlev),lreq(maxlev),zsub(maxsub)
 c...  by default, looks in file help. if that is not available, then
 c     tries file name of first key in the tree.
       helpfile=helpdir//'hibrid'//helptail
-cend
+#endif
 #if defined(HIB_UNIX_CONVEX)
 c;      open (ihlpmain,file=helpfile,err=299,readonly,status='old')
-cend
+#endif
 #if !defined(HIB_UNIX_CONVEX)
 c      write(6,*) 'open ',helpfile
       open (ihlpmain,file=helpfile,err=299,status='unknown')
-cend
+#endif
 #if defined(HIB_UNIX)
       zalt=' '
       level=0
@@ -154,7 +154,7 @@ c...    key not found in help. attempt to open alternate file.
         if (zalt.ne.zreq(1)) then
           if (zalt.ne.' ') close(ihlp)
           zalt=zreq(1)
-cend
+#endif
 #if defined(HIB_UNIX)
           helpfile='ls '//helpdir//zalt(1:lenstr(zalt))//'*'//helptail
      >     //' >helphelphelphelp'
@@ -167,14 +167,14 @@ cend
           ifound=1
 295       close (ihlpalt,status='delete')
           if (ifound.eq.0) goto 29
-cend
+#endif
 #if defined(HIB_UNIX_CONVEX)
 c;          open (ihlpalt,file='helphelphelphelp',status='old')
 c;          open (ihlp,file=helpfile,err=29,readonly,status='old')
-cend
+#endif
 #if defined(HIB_UNIX_SUN) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IBM) || defined(HIB_UNIX_AIX) || defined(HIB_UNIX_IRIS)
 c;          open (ihlp,file=helpfile,err=29,status='unknown')
-cend
+#endif
 #if defined(HIB_UNIX)
         end if
       end if
@@ -258,7 +258,7 @@ c
 299   write (iout,'('' Primary help file '',a,'' is missing'')')
      >  helpfile(1:lenstr(helpfile))
       end
-cend
+#endif
 * ----------------------------------------------------------------
       subroutine upcase(l)
       character*(*) l
@@ -443,7 +443,7 @@ c;      character*8 d, date, c, clock
 c;      d=date()
 c;      c=clock()
 c;      cdate = d//'  '//c//'  '
-cend
+#endif
 #if defined(unix-ifort) || defined(unix-pgi)
       character*24 cdatefull
       call fdate(cdatefull)
@@ -477,7 +477,7 @@ c-------------------------------------------------------------------
 #if defined(HIB_UNIX_XLF)
 c;      t=timef()/1000d0
 c;      te=t
-cend
+#endif
 #if defined(__G95__)
       real*4 tarray(2), result
       call dtime(tarray,result)
@@ -509,7 +509,7 @@ c;      t=tt
 c;* use dtime for elapsed (wall time).
 c;      result=dtime(tarray)
 c;      te=result
-cend
+#endif
 #if defined(HIB_ULTRIX_DEC)
 c;      common /codec/ ttim(2)
 c;      real et, etime, secnds
@@ -521,7 +521,7 @@ c;      if (delt .lt. 0.0) delt=delt+86400.
 c;      ttim(1)=ttim(1)+delt
 c;      ttim(2)=tt2
 c;      t2=ttim(1)
-cend
+#endif
       return
       end
 *------------------------------------------------------------------------
@@ -534,14 +534,14 @@ cend
 #endif
 #if defined(HIB_UNIX_XLF)
 c;      second=timef()*1000d0
-cend
+#endif
 #if defined(HIB_ULTRIX_DEC)
 c;      double precision function second()
 c;      implicit double precision (a-h,o-z)
 c;      real et(2)
 c;      fe=etime(et(1),et(2))
 c;      second=fe
-cend
+#endif
 #if defined(__G95__)
       real*4 tarray(2), result
       call dtime(tarray,result)
@@ -616,7 +616,7 @@ c;      if(l.gt.9) dat(10:l)=' '
 c;      return
 c;      end
 c;ccend
-cend
+#endif
 #if defined(HIB_UNIX_IRIX)
 c;      subroutine timdat(tim,dat,mach)
 c;      character *(*) tim,dat,mach
@@ -629,7 +629,7 @@ c;      l=len(dat)
 c;      if(l.gt.9) dat(10:l)=' '
 c;      return
 c;      end
-cend
+#endif
 #if defined(HIB_NONE)
 c;c#if defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_IBM) || defined(HIB_UNIX_CONVEX)
 c;      subroutine timdat(tim,dat,mach)
@@ -650,7 +650,7 @@ c;      mach(11:18)=a(5)(1:8)
 c;      return
 c;      end
 c;ccend
-cend
+#endif
 * ----------------------------------------------------------------
       subroutine gennam(xname,jobnam,ifil,xtens,ln)
 *
@@ -1168,7 +1168,7 @@ c     requires (j1+j2+j3+2).le.kfact (defined in himain).
 *100  format (' *** EXIT FROM HIBRIDON ***')
 *     stop
 *     end
-cend
+#endif
 * ----------------------------------------------------------------------------
       subroutine intairy(x, xairy, xbiry)
 * ----------------------------------------------------------------------------
@@ -1478,12 +1478,12 @@ c here follow nemeth's coefficients
      :  '-----------------------')
        close(4)
        i=system("rm -f sysprofile")
-cend
+#endif
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      write (6,40)
 c;      write (8,40)
 c;40    format('*** COMMAND SYSCONF NOT IMPLEMENTED FOR CURRENT O/S')
-cend
+#endif
       return
       end
 * -------------------------------------------------------------------------

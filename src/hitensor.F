@@ -1456,10 +1456,10 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
       data zero /0.d0/
 #if defined(HIB_UNIX)
       data ai / (0.d0,1.d0)/
-cend
+#endif
 #if defined(HIB_CRAY)
 c;      data ai / (0.d0,1.d0)/
-cend
+#endif
 
 ** flag for diagnostic printing
       lprnt2 = .false.

@@ -21,7 +21,7 @@
       implicit double precision (a-h, o-z)
 #if defined(HIB_UNIX_IBM) || defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       character *40 test
-cend
+#endif
 *  ----------------------------------------------------------
 *  in the following parameter statements:
 *     kmxbas is maximum number of included basis routines, this should
@@ -42,16 +42,16 @@ cend
 * set size of scratch array for matrix factorization and generalized
 *   eigenvalue determination
       parameter (kaux3=max(66*kmax,2*kmax*kmax+1))
-cend
+#endif
 #if defined(HIB_UNIX_IBM)
 * set size of scratch array for matrix inversion
       parameter (kaux=100*kmax)
-cend
+#endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_IBM)
 c;* set size of scratch array for matrix inversion with lapack routines
 c;* warning, this assumes a blocksize of 64
 c;      parameter (kaux=128*kmax)
-cend
+#endif
 * modified klammx (pjd - 17-jan-2019)
 * increased kfact (pjd - 15-dec-2020)
 * increase size of jout array from 21 to 25 - p.dagdigian - 23-jun-2010
@@ -206,13 +206,13 @@ cend
       common /coeig/  c0(4,4), c1(3,3), c2(2,2)
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       common /cosc11/ sc11(kaux3)
-cend
+#endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      common /cosc11/ sc11(kaux)
-cend
+#endif
 #if defined(HIB_UNIX)
       common /cokaux/ naux
-cend
+#endif
       common /cotble/ npnt, jttble(kfact)
       common /coqvec/ mxphot, nphoto, q(kqmax)
       common /coqvec2/ q2(kq2)
@@ -233,7 +233,7 @@ cend
       mbig=kbig
 #if defined(HIB_UNIX_IBM)
       naux=max(kaux,1800)
-cend
+#endif
       mxphot = kmxpho
       nphoto = knphot
       maxbas = kmxbas
@@ -250,7 +250,7 @@ c.....ncache: cache size in words
       ncache=4096
 #if defined(HIB_UNIX_HP)
 c;      ncache=16000
-cend
+#endif
       mxmblk=64
 * start scattering calculation
       call flow (z, w, zmat, amat, bmat, jq, lq, inq, jhold, ehold,
@@ -387,7 +387,7 @@ cend
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
 c;      real secnds
 c;      common /codec/ ttim(2)
-cend
+#endif
       common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
       common /cosavi/ iipar, ixpar(8)
       common /cosavr/ irpar(2), rxpar(9)
@@ -435,7 +435,7 @@ cend
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
 c;      ttim(1)=0.d0
 c;      ttim(2)=secnds(0.0)
-cend
+#endif
       call mtime (tcpu0, twall0)
       photfl = photof
       wavefn = wavefl
@@ -873,10 +873,10 @@ cger (next 2 lines)
 #if defined(HIB_UNIX_IBM) || defined(HIB_UNIX_AIX)  || defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 *      call flush_(9)
       call flush(9)
-cend
+#endif
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_CONVEX) || defined(HIB_UNIX_IRIS)
 c;      call flush(9)
-cend
+#endif
 * replace statement below to accommodate q.ma's revised
 * version of bound (28-jun-2013, p.dagdigian)
 * do not reduce maximum size of matrices if bound state calculation
@@ -1005,7 +1005,7 @@ c.....save restart information
         endif
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_HP)
 c;        call flush6
-cend
+#endif
         cpubas=0
         cpuout=0
         cpuai=0
@@ -1072,7 +1072,7 @@ c.....save restart information
         endif
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_HP)
 c;        call flush6
-cend
+#endif
         cpubas=0
         cpuld=0
         cpuai=0
@@ -1163,7 +1163,7 @@ cend
          write (9, 350)
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_HP)
 c;         call flush6
-cend
+#endif
       end if
       close (23)
       endfile (9)

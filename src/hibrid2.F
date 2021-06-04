@@ -281,7 +281,7 @@ c
 *       initialize q vector
 #if defined(HIB_UNIX) || defined(HIB_CRAY)
         call dset(nqmax, zero, q, 1)
-cend
+#endif
       end if
 *     row, column and diagonal increments for matrices z and w
       nrow = 1
@@ -326,7 +326,7 @@ cend
 *     multiply psi(0) mu(0) by simpson's rule wt at first point
 #if defined(HIB_UNIX) || defined(HIB_CRAY)
            call dscal (nqmax, wt, q, 1)
-cend
+#endif
            call mtime(t1,t1w)
            twf=twf+t1-t0
            twfw=twfw+t1w-t0w
@@ -350,7 +350,7 @@ cend
       do 20  ich = 1, nch
 #if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
          call dscal (nch, zero, z(icol), nrow)
-cend
+#endif
          icol = icol + ncol
   20  continue
       idiag = 1
@@ -386,7 +386,7 @@ cend
 
 #if defined(HIB_UNIX) || defined(HIB_CRAY)
          call dscal (nch, fac, z(icol), nrow)
-cend
+#endif
          icol = icol + ncol
   40  continue
 *     propagate z matrix from rmin to rmax
@@ -460,10 +460,10 @@ cend
 *     z now contains z(a)+z1(a,c)
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;         call smxinv(z, nmax, nch, scr1, scr2, ierr)
-cend
+#endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
         call syminv(z,nmax,nch,ierr)
-cend
+#endif
          if (ierr .ne. 0) then
             write (6, 9000) kstep, ierr
             write (9, 9000) kstep, ierr
@@ -515,10 +515,10 @@ cend
  140        continue
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;            call smxinv(w, nmax, nch, scr1, scr2, ierr)
-cend
+#endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
             call syminv(w,nmax,nch,ierr)
-cend
+#endif
             if (ierr .eq. 2) then
                icode = 2
                write (9,9000) kstep, icode
@@ -556,10 +556,10 @@ cend
 *     at this point z contains z(c) + z1(c,b)
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;         call smxinv(z, nmax, nch, scr1, scr2, ierr)
-cend
+#endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
          call syminv(z,nmax,nch,ierr)
-cend
+#endif
          if (ierr .eq. 2) then
             icode = 3
             write (9,9000) kstep, icode
@@ -996,7 +996,7 @@ c
 #endif
 #if defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
           accs='append'
-cend
+#endif
         else
           stat='new'
         end if
@@ -1509,7 +1509,7 @@ cmha .xsc file is appended if it already exists
 #endif
 #if defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
           accs='append'
-cend
+#endif
 
         else
           stat='new'

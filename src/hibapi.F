@@ -162,7 +162,7 @@
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 * work vector for dsyev
       dimension work(9)
-cend
+#endif
       data cvtown / 0.0167917d0/, ieps / -1, 1/
       zero = 0.d0
       one = 1.d0
@@ -402,10 +402,10 @@ cend
                     vec(iv,jv)=e(iv,jv)
                  enddo
               enddo
-cend
+#endif
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;              call rs (3, 2, e, eig, 1, vec, sc1, sc2, ierr)
-cend
+#endif
               eint(i) = eig(1+iso01)
               c0(i) = vec(1,1+iso01)
               c1(i) = vec(2,1+iso01)
@@ -419,10 +419,10 @@ cend
               lwork=9
               call dsyev('V','L',3,e,3,eig,work,lwork,ierr)
               call dcopy(9,e,1,vec,1)
-cend
+#endif
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;              call rs (3, 3, e, eig, 1, vec, sc1, sc2, ierr)
-cend
+#endif
               eint(i) = eig(2-iso)
               c0(i) = vec(1,2-iso)
               c1(i) = vec(2,2-iso)

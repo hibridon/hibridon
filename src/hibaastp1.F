@@ -325,12 +325,12 @@
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
         lwork = 144
         call dsyev('V','L',isize,e,narray,eig,work,lwork,ierr)
-cend
+#endif
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      write (6,1225)
 c;1225    format('  *** DSYEV NOT ACCESSIBLE IN THIS VERSION OF CODE.')
 c;        call exit
-cend
+#endif
         do mm = 1, isize
           nlist = nlist + 1
 *  eigenvalues stored in order of increasing energy (lowest KP first)
