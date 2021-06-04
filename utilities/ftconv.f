@@ -55,7 +55,7 @@ c are included as strings in fortran code (see bug #6)
       mx(2)=' '
       nx=1  ! before last machine type index
       nxx=1 ! first machine type index
-cstart unknown
+#if defined(HIB_UNKNOWN)
       nx = 0
 1     write(6,10) 'Machine type:  '
 10    format(1x,a,$)
@@ -70,66 +70,66 @@ cstart unknown
 ! nx = 1 (number of machine types in input - 1)
 ! nxx = 1
 ! mx = ('unix-darwin','unix-ifort') 
-cend
-cstart molpro
+#endif
+#if defined(HIB_MOLPRO)
 c;      mx(2) ='molpro'
 c;      nx=2
 c;      nxx=1
-cend
-cstart disco-u
+#endif
+#if defined(HIB_DISCO_U)
 c;      mx(1) ='disco'
 c;      nx=2
 c;      nxx=2
-cend
-cstart disco-f
+#endif
+#if defined(HIB_DISCO_F)
 c;      mx(2) ='disco'
 c;      nx=2
 c;      nxx=1
-cend
-cstart dec-risc
+#endif
+#if defined(HIB_DEC_RISC)
 c;      mx(nxx)='dec-risc'
 c;      ext='.dec'
-cend
-cstart unix-hp
+#endif
+#if defined(HIB_UNIX_HP)
 c;      mx(nxx)='unix-hp'
 c;      ext='.hpu'
-cend
-cstart unix-mac
+#endif
+#if defined(HIB_UNIX_MAC)
 c;      mx(nxx)='unix-mac'
 c;      ext='.mac'
-cend
-cstart unix-convex
+#endif
+#if defined(HIB_UNIX_CONVEX)
 c;      mx(nxx)='unix-convex'
 c;      ext='.cvx'
-cend
-cstart unix-sequent
+#endif
+#if defined(HIB_UNIX_SEQUENT)
 c;      mx(nxx)='unix-sequent
 c;      ext='.seq'
-cend
-cstart ibm-risc
+#endif
+#if defined(HIB_IBM_RISC)
 c;        mx(nxx)='ibm-risc'
 c;        ext='.ibm'
-cend
-cstart ibm-vm
+#endif
+#if defined(HIB_IBM_VM)
 c;      mx(nxx)='ibm-vm'
 c;      ext='.ibm'
-cend
-cstart vax
+#endif
+#if defined(HIB_VAX)
 c;      mx(nxx)='vax'
 c;      ext='.vax'
-cend
-cstart cray-cos
+#endif
+#if defined(HIB_CRAY_COS)
 c;      mx(nxx)='cray-cos'
 c;      ext='.cos'
-cend
-cstart cray-unicos
+#endif
+#if defined(HIB_CRAY_UNICOS)
 c;      mx(nxx)='cray-unicos'
 c;      ext='.ucs'
-cend
-cstart fps
+#endif
+#if defined(HIB_FPS)
 c;      mx(nxx)='fps'
 c;      ext='.fps'
-cend
+#endif
       if(mx(nxx).eq.' ') then
         write(6,25)
 25      format(' NO MACHINE GIVEN')
@@ -141,10 +141,10 @@ cend
          write(6,30)
 30       format(' machine=cray is insufficient machine type'/
      1          ' specify cray-cos or cray-unicos')
-cstart unknown
+#if defined(HIB_UNKNOWN)
 c;         nx = 0
 c;         goto 1
-cend
+#endif
          stop
       end if
       if(mx(i).eq.'unix') then
@@ -152,19 +152,19 @@ cend
 31       format(' machine=unix is insufficient machine type'/
      1          ' specify unix-hp, unix-mac, unix-convex,',
      2          ' unix-sequent, ibm-risc, or dec-risc')
-cstart unknown
+#if defined(HIB_UNKNOWN)
 c;         nx = 0
 c;         goto 1
-cend
+#endif
          stop
       else if(mx(i).eq.'ibm') then
          write(6,32)
 32       format(' machine=ibm is insufficient machine type'/
      1          ' specify ibm-risc, or ibm-vm')
-cstart unknown
+#if defined(HIB_UNKNOWN)
 c;         nx = 0
 c;         goto 1
-cend
+#endif
          stop
       end if
 40    continue
@@ -291,10 +291,10 @@ c
 !     read the name of the file to preprocess (eg hiversion.f) or 
 !     an option (options start with *)
 20    format(a)
-cstart .not. batch
+#if !defined(HIB_BATCH)
 1     if(inp.eq.5) write(6,10) 'file: or *option:  '
 10    format(1x,a,$)
-cend
+#endif
 2     read(inp,20,end=101) l
 ! ../bin/ftconv_hib.exe << fin
 ! unix-darwin
@@ -356,9 +356,9 @@ c...    this escape allows introduction of further options
       open (unit=1,file=l,form='formatted',access='sequential',
      >  status='old')
       rewind 1
-cstart batch
+#if defined(HIB_BATCH)
 c;      write(6,*) 'input file  ',l(1:lenstr(l))
-cend
+#endif
 ! compute the name of the new file from the input file name, eg:
 ! if l='hiversion.f' -> l='hiversion.new'
 ! if l='hiversion.for' -> l='hiversion.f'
@@ -372,7 +372,7 @@ cend
       end if
       inquire(file=l,exist=exist)
       if(exist) then
-cstart batch
+#if defined(HIB_BATCH)
 c;        stop 'file exists'
 celse
         write(6,30) l(1:lenstr(l))
@@ -380,7 +380,7 @@ celse
      1  ' overwrite? (y/n)[y] ',$)
         read(5,20,end=101) str
         if(str(1:1).eq.'n') stop
-cend
+#endif
       end if
 ! open output file in unit 2
       write(6,*) 'output file:  ',l(1:lenstr(l))
@@ -433,9 +433,9 @@ c...  end of file exit here
       close (2)
       print*,'ftconv processing completed;  lines read: ',nr,
      1    '    written: ',nw
-cstart .not. batch
+#if !defined(HIB_BATCH)
       goto 1
-cend
+#endif
   101 continue
 c...  end of files
       end
@@ -490,14 +490,14 @@ c     print*,'l(ipos:jpos-1) ',l(ipos:jpos-1)
 !     blocks (each block starts with a line 'comdeck <deck_name>') and
 !     stores the blocks in save variables for later use by the
 !     entry comwr.
-cstart unix-hp unix-mac vax ibm eta unix-sequent unix-convex ibm-risc
+#if defined(HIB_UNIX_HP) || defined(HIB_UNIX_MAC) || defined(HIB_VAX)  || defined(HIB_IBM) || defined(HIB_ETA) || defined(HIB_UNIX_SEQUENT) || defined(HIB_UNIX_CONVEX) || defined(HIB_IBM_RISC)
       parameter (maxd=200,maxl=10)
 c     maxd: maximum number of comdecks in the common file
 c     maxl: maxiumum number of lines in the common file
-cend
-cstart cray unknown
+#endif
+#if defined(HIB_CRAY) || defined(HIB_UNKNOWN)
 c;      parameter (maxd=400,maxl=10000)
-cend
+#endif
       character*(*) l,mx(*)
       integer lx(*)
       character*1320 buff(maxl),temp

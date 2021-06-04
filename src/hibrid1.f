@@ -113,7 +113,7 @@
       common /coered/ ered, rmu
       common /coipar/ ipar(9),jprint
       common /coselb/ ibasty
-cstart unix-ibm
+#if defined(HIB_UNIX_IBM)
 c;      character*1 forma, formb
 cend
 *  matrix dimensions (row dimension = nmax, matrices stored column by column)
@@ -238,7 +238,7 @@ cend
 cstart .not. unix-darwin .and. .not. unix-x86
 c;        call smxinv (z, nmax, nch, hp, cc, ierr)
 cend
-cstart unix-darwin unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
         call syminv(z,nmax,nch,ierr)
 cend
         if (ierr .ne. 0) then
@@ -809,7 +809,7 @@ c
 *  maxmgv:      find maximum (absolute value) element in a vector
 c -----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
-cstart unix-ibm
+#if defined(HIB_UNIX_IBM)
 c;      character*1 forma, formb
 cend
       integer ic, icol, ifind, ipt, n, ncol, nmax, isw
@@ -824,7 +824,7 @@ cstart none
 c;       call mxma (b,1,nmax,a,1,nmax,c,1,nmax,n,n,n)
 c;       call mxma (c,1,nmax,b,nmax,1,a,1,nmax,n,n,n)
 cend
-cstart unix-ibm
+#if defined(HIB_UNIX_IBM)
 c;       forma='N'
 c;       formb='T'
 c;       call dgemul (b,nmax,forma,a,nmax,forma,c,nmax,n,n,n)

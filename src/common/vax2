@@ -1,5 +1,5 @@
 *comdeck vax2
-cstart vax unix-convex unix-nec unix-hp unix-ibm unix-dec unix-aix
+cstart unix-aix vax unix-convex unix-nec unix-hp unix-ibm unix-dec
       xor(i,j)=ieor(i,j)
       or(i,j)=ior(i,j)
       and(i,j)=iand(i,j)
@@ -13,12 +13,12 @@ c;      and(i,j)=iand(i,j)
 c;      shiftl(i,j)=ishft(i,j)
 c;      shiftr(i,j)=ishft(i,-j)
 cend
-cstart unix-sun
+#if defined(HIB_UNIX_SUN)
 c;      shiftl(i,j)=lshift(i,j)
 c;      shiftr(i,j)=lrshft(i,j)
 c;      compl(i)=not(i)
 cend
-cstart unix-convex unix-nec unix-hp ibm vax unix-ibm unix-dec unix-aix
+cstart unix-convex unix-nec unix-hp unix-aix ibm vax unix-ibm unix-dec
       compl(i)=not(i)
 cend
 cstart unix-iris

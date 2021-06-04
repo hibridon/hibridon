@@ -461,7 +461,7 @@ cend
 cstart .not.unix-darwin .and. .not. unix-x86
 c;         call smxinv(z, nmax, nch, scr1, scr2, ierr)
 cend
-cstart unix-darwin unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
         call syminv(z,nmax,nch,ierr)
 cend
          if (ierr .ne. 0) then
@@ -516,7 +516,7 @@ cend
 cstart .not.unix-darwin .and. .not. unix-x86
 c;            call smxinv(w, nmax, nch, scr1, scr2, ierr)
 cend
-cstart unix-darwin unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
             call syminv(w,nmax,nch,ierr)
 cend
             if (ierr .eq. 2) then
@@ -557,7 +557,7 @@ cend
 cstart .not.unix-darwin .and. .not. unix-x86
 c;         call smxinv(z, nmax, nch, scr1, scr2, ierr)
 cend
-cstart unix-darwin unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
          call syminv(z,nmax,nch,ierr)
 cend
          if (ierr .eq. 2) then

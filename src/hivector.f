@@ -350,7 +350,7 @@ c;*     End of XERBLA
 c;*
 c;      end
 cend
-cstart unix-hp unix-ibm unix-aix unix-iris unix-sun
+cstart unix-aix unix-hp unix-ibm unix-iris unix-sun
 c;      integer          function ilaenv( ispec, name, opts, n1, n2, n3,
 c;     $                 n4 )
 c;*

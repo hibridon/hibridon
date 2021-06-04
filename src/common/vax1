@@ -1,9 +1,9 @@
 *comdeck vax1
-cstart unix-sun
+#if defined(HIB_UNIX_SUN)
 c;      integer shiftl,shiftr,popcnt,poppar,compl
 c;      logical mnpar
 cend
-cstart vax unix-convex unix-nec unix-hp unix-ibm unix-dec unix-aix
+cstart unix-aix vax unix-convex unix-nec unix-hp unix-ibm unix-dec
       integer xor,or,and,shiftl,shiftr,popcnt,poppar,compl
       logical mnpar
 cend

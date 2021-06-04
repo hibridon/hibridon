@@ -124,12 +124,51 @@ add_custom_command(
 
 # -std=legacy so that the compiler doesn't complain when the size of arrays don't match between a function declaration and a call to this function. At the moment, there's plenty of such cases in the code; these are not bugs, just an old way of doing things.
 target_compile_options(hib PRIVATE "-std=legacy")
-target_compile_definitions(hib PUBLIC __LINUX__=1)
+target_compile_definitions(hib PUBLIC HIB_UNIX_X86=1)
 target_include_directories(hib PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
 add_dependencies(hib parhlp)
+
+# BATCH
+# CRAY
+# CRAY_COS
+# CRAY_UNICOS
+# DEC_RISC
+# DISCO_F
+# DISCO_U
+# ETA
+# FPS
+# IBM
+# IBM_RISC
+# IBM_VM
+# MOLPRO
+# NONE
+# UNIX
+# UNIX_AIX
+# UNIX_BLAS3
+# UNIX_CONVEX
+# UNIX_DEC
+# UNIX_HP
+# UNIX_IBM
+# UNIX_IRIS
+# UNIX_MAC
+# UNIX_S
+# UNIX_SEQUENT
+# UNIX_SUN
+# UNIX_X86
+# UNKNOWN
+# VAX
 
 add_executable(hib_arn2 src/pot/pot_arn2.f src/himain.F)
 target_compile_definitions(hib_arn2 PUBLIC KMAX=151)
 target_link_libraries(hib_arn2 hib ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
 target_include_directories(hib_arn2 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_include_directories(hib_arn2 PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
+
+add_test(arn2_test
+    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F
+    COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t ${CMAKE_CURRENT_BINARY_DIR}/SYSCONFIG > ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin"
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/SYSCONFIG
+    COMMENT "building ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F from ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t"
+)

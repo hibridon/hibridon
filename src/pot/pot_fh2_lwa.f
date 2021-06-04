@@ -890,11 +890,11 @@ c filter diabatic diagonal potentials, nothing < -12000 and nothing > 30000
              call dcopy(9,vander(1,icol),1,scmat(1,icol),1)
           enddo
 * solve linear equations for expansion coefficients in x
-cstart unix-ibm
+#if defined(HIB_UNIX_IBM)
 c;        call dgells(0,cmat,8,v,9,xth,5,dummy,tol,8,5,4,nk,
 c;     :       aux,28)
 cend
-cstart unix-hp unix-dec unix-aix unix-iris
+#if (defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
           lwork=390
           call dgels('N',9,6,1,scmat,9,cvec,9,aux,
      :        lwork,info)

@@ -42,7 +42,7 @@ cstart unix-xlf
 c;@process fixed(132)
 cend
       subroutine vaxhlp(line1)
-#if defined(__INTEL_COMPILER)
+#if defined(unix-ifort)
 cdec$ fixedformlinesize:132
 #endif
 * latest revision 24-feb-2004
@@ -172,7 +172,7 @@ cstart unix-convex
 c;          open (ihlpalt,file='helphelphelphelp',status='old')
 c;          open (ihlp,file=helpfile,err=29,readonly,status='old')
 cend
-cstart unix-sun unix-hp unix-dec unix-ibm unix-aix unix-iris
+#if defined(HIB_UNIX_SUN) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IBM) || defined(HIB_UNIX_AIX) || defined(HIB_UNIX_IRIS)
 c;          open (ihlp,file=helpfile,err=29,status='unknown')
 cend
 cstart unix
@@ -444,7 +444,7 @@ c;      d=date()
 c;      c=clock()
 c;      cdate = d//'  '//c//'  '
 cend
-#if defined(__INTEL_COMPILER) || defined(__PGI)
+#if defined(unix-ifort) || defined(unix-pgi)
       character*24 cdatefull
       call fdate(cdatefull)
       cdate=cdatefull(5:24)
@@ -484,7 +484,7 @@ cend
       t=tarray(1)
       te1=result
 #endif
-#if defined(__INTEL_COMPILER)
+#if defined(unix-ifort)
       real*4 tt
 * use etime for user+cpu time
 * use cpu_time for user+cpu time
@@ -527,7 +527,7 @@ cend
 *------------------------------------------------------------------------
       function second()
       double precision second
-#if defined(__INTEL_COMPILER) || defined(__PGI)
+#if defined(unix-ifort) || defined(unix-pgi)
       real*4 te
       call cpu_time(te)
       second=te
@@ -631,7 +631,7 @@ c;      return
 c;      end
 cend
 cstart none
-c;ccstart unix-hp unix-convex unix-ibm unix-aix
+c;ccstart unix-hp unix-aix unix-convex unix-ibm
 c;      subroutine timdat(tim,dat,mach)
 c;      character *(*) tim,dat,mach
 c;      character*9 a(7)
@@ -1461,7 +1461,7 @@ c here follow nemeth's coefficients
       subroutine sys_conf
       character*120 profile
 * to print out details of current hardware configuration
-cstart unix-darwin unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       i=system("hib_sysconfig")
       open(unit=4,file='sysprofile',access='sequential')
       read (4,25) profile

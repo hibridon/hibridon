@@ -220,7 +220,7 @@
       c2(1,2) = 2.d0 * bxd
       c2(2,1) = c2(1,2)
       c2(2,2) = en1d
-cstart unix-darwin .or. unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       lwork = 144
       call dsyev('V','L',isize,c2,isize,en2,work,lwork,ierr)
 cend

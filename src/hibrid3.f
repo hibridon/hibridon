@@ -132,7 +132,7 @@ cend
 *  square matrices (of row dimension nmax)
       dimension w(49), vecnow(49), scmat(49)
 *  local arrays (for lapack dsyevr)
-cstart unix-darwin unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       dimension isuppz(2*nch),iwork(10*nch),work(57*nch)
 cend
 *  vectors dimensioned at least nch
@@ -201,7 +201,7 @@ cend
 cstart .not.unix-darwin .and. .not. unix-x86
 c;      call rs (nmax, nch, scmat, eignow, ione, vecnow, scr, hp, ierr)
 cend
-cstart unix-darwin unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       lwork=57*nch
       liwork=10*nch
       abstol=1.d-16
@@ -1029,7 +1029,7 @@ cend
 cstart unix .and. .not.unix-ibm .and. .not. unix-darwin .and..not. unix-x86
 c;      call sgefa (a, nmax, n, kpvt, ierr)
 cend
-cstart unix-ibm
+#if defined(HIB_UNIX_IBM)
 c;      call dgef(a,nmax,n,kpvt)
 c;      ierr=0
 cend
@@ -1054,7 +1054,7 @@ cend
 cstart unix  .and. .not.unix-ibm .and. .not. unix-darwin.and..not.unix-x86
 c;        call sgesl (a, nmax, n, kpvt, c(iptc), izero)
 cend
-cstart unix-ibm
+#if defined(HIB_UNIX_IBM)
 c;        call dges (a, nmax, n, kpvt, c(iptc), izero)
 cend
 cstart unix-convex
@@ -1065,7 +1065,7 @@ c;        iptc = iptc + nmax
 c;200   continue
 c;*  solution matrix now in c
 cend
-cstart unix-darwin unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       call dgetrf(n,n,a,nmax,kpvt,ierr)
       if (ierr.ne.0) then
           write (6,210) ierr
@@ -1661,7 +1661,7 @@ cend
 * --------------------------------------------------------------------
       implicit double precision (a-h,o-z)
       integer isw, i, icol, l, lq, nmax, nopen
-cstart unix-ibm
+#if defined(HIB_UNIX_IBM)
 c;      character*1 forma
 c;      character*40 flxfil
 cend
@@ -1918,7 +1918,7 @@ cend
 cstart .not.unix-darwin .and. .not. unix-x86
 c;        call smxinv(sr,nmax,nopen,srsave,sisave,ierr)
 cend
-cstart unix-darwin unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
         call syminv(sr,nmax,nopen,ierr)
 cend
 * save lhs for determination of real part of transition amplitudes

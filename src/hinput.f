@@ -1,4 +1,4 @@
-cstart unix-ibm unix-aix
+#if defined(HIB_UNIX_IBM) || defined(HIB_UNIX_AIX)
 c;@process noopt
 cend
 cstart unix-hp

@@ -815,7 +815,7 @@ cend
         if (openfl) return
         stat='old'
 * make sure sequential formatted files are appended not overwritten
-#if defined(__INTEL_COMPILER) || defined(__PGI)
+#if defined(unix-ifort) || defined(unix-pgi)
           accs='append'
 #endif
 cstart unix-hp unix-dec unix-iris unix-sun
@@ -831,7 +831,7 @@ cend
 cstart cray
 c;      stat = 'unknown'
 cend
-cstart unix-darwin
+#if defined(HIB_UNIX_DARWIN)
         inquire(unit=iunit,opened=od)
 * if temporary file is already opened, close it
         if (od) close(unit=iunit)

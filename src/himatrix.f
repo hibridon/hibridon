@@ -1,5 +1,5 @@
-* NB cstart unix-aix rather than unix-ibm for fortran not essl routines
-cstart unix-ibm
+* NB #if defined(HIB_UNIX_AIX) rather than unix-ibm for fortran not essl routines
+#if defined(HIB_UNIX_IBM)
 c;      subroutine rs(nm,n,a,w,matz,z,fv1,fv2,ierr)
 c;c
 c;      integer n,nm,ierr,matz
@@ -74,9 +74,9 @@ c;50      continue
 c;      endif
 c;      return
 c;      end
-cend
-ccstart unix-hp unix-dec unix-aix unix-darwin unix-iris unix-sun
-cstart unix .and. .not.unix-ibm .and. .not.unix-darwin .and. .not.unix-x86
+#endif
+c#if defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_IBM) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      subroutine rsg(nm,n,a,b,w,matz,z,fv1,fv2,ierr)
 c;c
 c;      integer n,nm,ierr,matz
@@ -376,13 +376,13 @@ c;*     call  tql1(n,w,fv1,ierr)
 c;      go to 50
 c;c     .......... find both eigenvalues and eigenvectors ..........
 c;   20 call  tred2(nm,n,a,w,fv1,z)
-cend
-cstart unix .and. .not.unix-ibm .and. .not. unix-darwin .and. .not.unix-x86
+#endif
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_IBM) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      call  tql2(nm,n,w,fv1,z,ierr)
 c;   50 return
 c;      end
-cend
-cstart unix-hp unix-dec unix-aix unix-iris unix-sun
+#endif
+#if defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
 c;      subroutine tql2(nm,n,d,e,z,ierr)
 c;c
 c;      integer i,j,k,l,m,n,ii,l1,l2,nm,mml,ierr
@@ -516,14 +516,14 @@ c;c               hh = z(k, i)
 c;c               z(k,i+1) = s * hh + c * h
 c;c               z(k,i) = c * hh - s * h
 c;c  180       continue
-cend
-cstart unix-hp unix-dec unix-iris unix-aix unix-sun
+#endif
+#if defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
 c;           call drot (n, z(1,i+1), 1, z(1,i), 1, c, s)
-cend
-cstart unix-convex
+#endif
+#if defined(HIB_UNIX_CONVEX)
 c;           call srot (n, z(1,i+1), 1, z(1,i), 1, c, s)
-cend
-cstart unix-hp unix-dec unix-aix unix-iris unix-sun
+#endif
+#if defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
 c;  200    continue
 c;c
 c;         p = -s * s2 * c3 * el1 * e(l) / dl1
@@ -563,8 +563,8 @@ c;c                eigenvalue after 30 iterations ..........
 c; 1000 ierr = l
 c; 1001 return
 c;      end
-cend
-cstart unix .and. .not. unix-darwin .and. .not. unix-x86
+#endif
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      subroutine tqlrat(n,d,e2,ierr)
 c;c
 c;      integer i,j,l,m,n,l1,mml,ierr
@@ -710,8 +710,8 @@ c;c                eigenvalue after 30 iterations ..........
 c; 1000 ierr = l
 c; 1001 return
 c;      end
-cend
-cstart unix .and. .not. unix-darwin .and. .not. unix-x86
+#endif
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      subroutine tred1(nm,n,a,d,e,e2)
 c;c
 c;      integer i,j,k,l,n,nm,jp1
@@ -848,8 +848,8 @@ c;  300 continue
 c;c
 c;      return
 c;      end
-cend
-cstart unix .and. .not. unix-darwin .and. .not. unix-x86
+#endif
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      subroutine tred2(nm,n,a,d,e,z)
 c;c
 c;      integer i,j,k,l,n,nm,jp1
@@ -1015,8 +1015,8 @@ c;      z(n,n) = 1.0d0
 c;      e(1) = 0.0d0
 c;      return
 c;      end
-cend
-cstart unix .and. .not. unix-darwin .and. .not. unix-x86
+#endif
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      double precision function epslon (x)
 c;      double precision x
 c;c
@@ -1073,7 +1073,7 @@ c;      go to 10
 c;   20 pythag = p
 c;      return
 c;      end
-cend
+#endif
 ***************************************************************************
 *                                                                         *
 *                          linpack library                                *
@@ -1093,7 +1093,7 @@ cend
 *                 using the factors computed by sgeco or sgefa.           *
 *                                                                         *
 ***************************************************************************
-cstart unix .and. .not. unix-darwin .and. .not. unix-x86
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;* ------------------------------------------------------------
 c;      subroutine sgefa(a,lda,n,ipvt,info)
 c;      implicit double precision (a-h,o-z)
@@ -1201,8 +1201,8 @@ c;      ipvt(n) = n
 c;      if (a(n,n) .eq. 0.0) info = n
 c;      return
 c;      end
-cend
-cstart unix .and. .not. unix-darwin .and. .not. unix-x86
+#endif
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;c ------------------------------------------------
 c;      subroutine sgesl(a,lda,n,ipvt,b,job)
 c;c current revision date: 29/09/87
@@ -1325,9 +1325,9 @@ c;   90    continue
 c;  100 continue
 c;      return
 c;      end
-cend
+#endif
 * -----------------------------------------------------------------------
-cstart unix-darwin unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       subroutine syminv (a,lda,n,ierr)
       implicit double precision (a-h,o-z)
 c
@@ -1361,8 +1361,8 @@ c
       if (ierr .ne. 0) stop 'error in dgetri'
       return
       end
-cend
-cstart unix cray .and. .not. unix-darwin .and. .not. unix-x86
+#endif
+#if (defined(HIB_UNIX) || defined(HIB_CRAY)) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;       subroutine smxinv (a, nmax, n, scr, kpvt, ierr)
 c;*  subroutine to invert the real symmetric matrix a using
 c;*  lapack routines dsytrf and dsytri
@@ -1388,21 +1388,21 @@ c;      integer icol, icolpt, ierr, ione, irowpt, izero, n, ncol,
 c;     :        nmax, nmaxp1
 c;      integer kpvt
 c;      dimension a(1), scr(1), kpvt(1)
-cend
-cstart unix .and. .not. unix-darwin .and. .not. unix-x86
+#endif
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      common /cosc11/ sc11(1)
-cend
-cstart unix-ibm
+#endif
+#if defined(HIB_UNIX_IBM)
 c;      common /cokaux/ kaux
 c;      dimension det(2)
-cend
-cstart unix cray .and. .not. unix-darwin .and. .not. unix-x86
+#endif
+#if (defined(HIB_UNIX) || defined(HIB_CRAY)) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      data ione, izero  /1, 0/
-cend
-cstart unix-ibm
+#endif
+#if defined(HIB_UNIX_IBM)
 c;      naux=kaux
-cend
-cstart cray unix .and. .not. unix-darwin .and. .not. unix-x86
+#endif
+#if (defined(HIB_CRAY) || defined(HIB_UNIX)) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;      ierr = izero
 c;*  first fill in upper half of original matrix
 c;      nmaxp1 = nmax + 1
@@ -1417,8 +1417,8 @@ c;        call dcopy (ncol, a(icolpt), 1, a(irowpt), nmax)
 c;        icolpt = icolpt + nmaxp1
 c;        irowpt = irowpt + nmaxp1
 c; 50   continue
-cend
-cstart unix-aix unix-hp unix-dec unix-iris unix-sun
+#endif
+#if defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
 c;       lwork=64*nmax
 c;       lwork=-1
 c;       call dsytrf('U',n,a,nmax,kpvt,sc11,lwork,info)
@@ -1438,18 +1438,18 @@ c;55       format (' *** POSSIBLE SINGULARITY IN',i4,
 c;     :          'TH ROW OF MATRIX TO BE INVERTED ***')
 c;         stop
 c;       end if
-cend
-cstart unix-ibm
+#endif
+#if defined(HIB_UNIX_IBM)
 c;      call dgeicd(a, nmax, n,izero,rcont,det,sc11,naux)
-cend
+#endif
 * old linpack calls
-cstart cray
+#if defined(HIB_CRAY)
 c;      call ssifa (a, nmax, n, kpvt, ierr)
-cend
-cstart unix-convex
+#endif
+#if defined(HIB_UNIX_CONVEX)
 c;      call dsifa (a, nmax, n, kpvt, ierr)
-cend
-cstart cray unix-convex
+#endif
+#if defined(HIB_CRAY) || defined(HIB_UNIX) || defined(HIB_UNIX_CONVEX)
 c;      if (ierr .ne. 0) then
 c;        write (9, 60) ierr
 c;        write (6, 60) ierr
@@ -1457,8 +1457,8 @@ c;60      format (' *** POSSIBLE SINGULARITY IN',i4,
 c;     :          'TH ROW OF MATRIX TO BE INVERTED ***')
 c;        ierr = 0
 c;      end if
-cend
-cstart unix-aix unix-hp unix-dec  unix-iris unix-sun
+#endif
+#if defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
 c;       call dsytri('U',n,a,nmax,kpvt,sc11,info)
 c;       if (info .lt. 0) then
 c;         write (9, 64) info
@@ -1474,14 +1474,14 @@ c;65       format (' *** POSSIBLE SINGULARITY IN',i4,
 c;     :          'TH ROW OF MATRIX TO BE INVERTED ***')
 c;         stop
 c;       end if
-cend
-cstart cray
+#endif
+#if defined(HIB_CRAY)
 c;      call ssidi (a, nmax, n, kpvt, det, inert, scr, ione)
-cend
-cstart unix-convex
+#endif
+#if defined(HIB_UNIX_CONVEX)
 c;      call dsidi (a, nmax, n, kpvt, det, inert, scr, ione)
-cend
-cstart cray unix-convex unix-dec unix-hp unix-aix unix-iris unix-s
+#endif
+#if defined(HIB_UNIX_AIX) || defined(HIB_CRAY) || defined(HIB_UNIX_CONVEX) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_IRIS)  || defined(HIB_UNIX_S)
 c;*  inverse is now in upper triangle of matrix a
 c;*  copy upper triangle of inverse back into lower triangle of a
 c;      icolpt = 2
@@ -1491,24 +1491,24 @@ c;*  icolpt points to first sub-diagonal element in column icol
 c;*  irowpt points to first super-diagonal element in row icol
 c;*  ncol is number of subdiagonal elements in column icol
 c;        ncol = n - icol
-cend
-cstart unix-convex
+#endif
+#if defined(HIB_UNIX_CONVEX)
 c;      call scopy (ncol, a(irowpt), nmax, a(icolpt), 1)
-cend
-cstart cray unix-convex unix-dec unix-hp unix-aix unix-iris unix-s
+#endif
+#if defined(HIB_UNIX_AIX) || defined(HIB_CRAY) || defined(HIB_UNIX_CONVEX) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_IRIS)  || defined(HIB_UNIX_S)
 c;        call dcopy (ncol, a(irowpt), nmax, a(icolpt), 1)
-cend
-cstart cray unix-convex unix-dec unix-hp unix-aix unix-iris unix-s
+#endif
+#if defined(HIB_UNIX_AIX) || defined(HIB_CRAY) || defined(HIB_UNIX_CONVEX) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_IRIS)  || defined(HIB_UNIX_S)
 c;        icolpt = icolpt + nmaxp1
 c;        irowpt = irowpt + nmaxp1
 c;100   continue
-cend
-cstart cray unix .and. .not. unix-darwin .and. .not. unix-x86
+#endif
+#if (defined(HIB_CRAY) || defined(HIB_UNIX)) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 c;        return
 c;        end
-cend
+#endif
 *-----------------------------
-cstart none
+#if defined(HIB_NONE)
 c;      subroutine dsytri( uplo, n, a, lda, ipiv, work, info )
 c;*
 c;*  -- LAPACK routine (version 1.0b) --
@@ -2601,8 +2601,8 @@ c;*
 c;*     End of DSYTF2
 c;*
 c;      end
-cend
-cstart .not.cray .and..not.unix-convex
+#endif
+#if !defined(HIB_CRAY) && !defined(HIB_UNIX_CONVEX)
 
 c--------------------------------------------------------------------
       subroutine mxma(a,mcola,mrowa,b,mcolb,mrowb,
@@ -3629,8 +3629,8 @@ c
      1             r,mcolr,mrowr,ncol,nlink,nrow)
         return
       end if
-cend
-cstart unix-blas3
+#endif
+#if defined(HIB_UNIX_BLAS3)
 c;      if(mcolr.eq.1) then
 c;        if(mcola.eq.1.and.mcolb.eq.1) then
 c;          call dgemm('N','N',ncol,nrow,nlink,1.0d0,a,mrowa,
@@ -3669,8 +3669,8 @@ c;     1                     a,mcola,0.0d0,r,mcolr)
 c;          return
 c;        end if
 c;      end if
-cend
-cstart .not.cray .and..not.unix-convex
+#endif
+#if !defined(HIB_CRAY) && !defined(HIB_UNIX_CONVEX)
 6010  mxb=mxmblk
 *      nkb=mxmbln
       nkb=108
@@ -5270,8 +5270,8 @@ c
      1             r,mcolr,mrowr,ncol,nlink,nrow)
         return
       end if
-cend
-cstart unix-blas3
+#endif
+#if defined(HIB_UNIX_BLAS3)
 c;      if(mcolr.eq.1) then
 c;        if(mcola.eq.1.and.mcolb.eq.1) then
 c;          call dgemm('N','N',ncol,nrow,nlink,1.0d0,a,mrowa,
@@ -5310,8 +5310,8 @@ c;     1                     a,mcola,1.0d0,r,mcolr)
 c;          return
 c;        end if
 c;      end if
-cend
-cstart .not.cray .and..not.unix-convex
+#endif
+#if !defined(HIB_CRAY) && !defined(HIB_UNIX_CONVEX)
 
 6010  mxb=mxmblk
 *      nkb=mxmbln
@@ -7252,9 +7252,9 @@ c
       end if
       return
       end
-cend
+#endif
 c -------------------------
-cstart unix-dec unix-hp unix-iris unix-aix unix-sun.and..not.unix-hp800
+#if (defined(HIB_UNIX_AIX) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)) && !defined(HIB_UNIX_HP800)
 c;      subroutine dsymv ( uplo, n, alpha, a, lda, x, incx,
 c;     $                   beta, y, incy )
 c;*     .. Scalar Arguments ..
@@ -8091,5 +8091,5 @@ c;*
 c;*     End of DGEMM .
 c;*
 c;      end
-cend
+#endif
 
