@@ -812,14 +812,13 @@ c     Stream i/o mode, replace, read/write
          if (openfl) then
             print *, '*** WARNING:  ', filnam, ' NOT CLOSED'
          end if
-#if !defined(HIB_UNIX_GFORTRAN)
-         open (unit=iunit, file=filnam, access='STREAM',
-     $        status='REPLACE', err=999, iostat=ierr,
-     $        buffered='YES')
-#endif
 #if defined(__GFORTRAN__)
          open (unit=iunit, file=filnam, access='STREAM',
      $        status='REPLACE', err=999, iostat=ierr)
+#else
+         open (unit=iunit, file=filnam, access='STREAM',
+     $        status='REPLACE', err=999, iostat=ierr,
+     $        buffered='YES')
 #endif
          return
       end if
