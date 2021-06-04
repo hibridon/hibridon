@@ -591,7 +591,7 @@ c;      call date(dat)
 c;      mach='MAC IIci'
 c;      return
 c;      end
-c;ccend
+c;c#endif
 c;c#if defined(HIB_ULTRIX_DEC)
 c;      subroutine timdat(tim,dat,mach)
 c;      character*8 tim
@@ -602,7 +602,7 @@ c;      call time(tim)
 c;      call date(dat)
 c;      return
 c;      end
-c;ccend
+c;c#endif
 c;c#if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_SUN)
 c;      subroutine timdat(tim,dat,mach)
 c;      character *(*) tim,dat,mach
@@ -615,7 +615,7 @@ c;      l=len(dat)
 c;      if(l.gt.9) dat(10:l)=' '
 c;      return
 c;      end
-c;ccend
+c;c#endif
 #endif
 #if defined(HIB_UNIX_IRIX)
 c;      subroutine timdat(tim,dat,mach)
@@ -649,7 +649,7 @@ c;      mach(7:9)=a(3)(1:3)
 c;      mach(11:18)=a(5)(1:8)
 c;      return
 c;      end
-c;ccend
+c;c#endif
 #endif
 * ----------------------------------------------------------------
       subroutine gennam(xname,jobnam,ifil,xtens,ln)
