@@ -582,7 +582,7 @@ c$$$*     write (6,*) time
       end
 * --------------------------------------------------------------------
 #if defined(HIB_NONE)
-c;ccstart mac
+c;c#if defined(HIB_MAC)
 c;      subroutine timdat(tim,dat,mach)
 c;c.....should return time, date and machine type
 c;      character *(*) tim,dat,mach
@@ -592,7 +592,7 @@ c;      mach='MAC IIci'
 c;      return
 c;      end
 c;ccend
-c;ccstart ultrix-dec
+c;c#if defined(HIB_ULTRIX_DEC)
 c;      subroutine timdat(tim,dat,mach)
 c;      character*8 tim
 c;      character*9 dat
@@ -1162,7 +1162,7 @@ c     requires (j1+j2+j3+2).le.kfact (defined in himain).
 20    lenstr=i
       return
       end
-cstart*unix-convex cray unix-darwin unix-x86
+*#if defined(HIB_UNIX_CONVEX) || defined(HIB_CRAY) || defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 *     subroutine exit
 *     write (6, 100)
 *100  format (' *** EXIT FROM HIBRIDON ***')
