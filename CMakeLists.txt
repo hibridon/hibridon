@@ -35,56 +35,56 @@ else (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
 add_library(hib
-     src/hiba13p.f
-     src/hiba1d3p.f
-     src/hiba1del.f
-     src/hiba1sg1sg.f
-     src/hiba1sg.f
-     src/hiba22p.f
-     src/hiba2del.f
-     src/hiba2mol.f
-     src/hiba2pi1sg.f
-     src/hiba2pi.f
-     src/hiba2sg1sg.f
-     src/hiba2sg.f
-     src/hiba3p2s.f
-     src/hiba3sg1sg.f
-     src/hibaastp1.f
-     src/hibaastp2.f
-     src/hibaastp3.f
-     src/hibaastp.f
-     src/hibach2x.f
-     src/hibadiat2p.f
-     src/hibah2p.f
-     src/hibah3p.f
-     src/hiamp.f
-     src/hibapi.f
-     src/hibasgpi1.f
-     src/hibasgpi.f
-     src/hibasphtp.f
-     src/hibastp1.f
-     src/hibastp1sg.f
-     src/hibastp.f
-     src/hibastpln.f
-     src/hibound.f
-     src/hibrid1.f
-     src/hibrid2.f
-     src/hibrid3.f
-     src/hibrid4.f
-     src/hibrid5.f
-     src/hicommon.f
-     src/hidifcrs.f
-     src/hihypxsc.f
+     src/hiba13p.F
+     src/hiba1d3p.F
+     src/hiba1del.F
+     src/hiba1sg1sg.F
+     src/hiba1sg.F
+     src/hiba22p.F
+     src/hiba2del.F
+     src/hiba2mol.F
+     src/hiba2pi1sg.F
+     src/hiba2pi.F
+     src/hiba2sg1sg.F
+     src/hiba2sg.F
+     src/hiba3p2s.F
+     src/hiba3sg1sg.F
+     src/hibaastp1.F
+     src/hibaastp2.F
+     src/hibaastp3.F
+     src/hibaastp.F
+     src/hibach2x.F
+     src/hibadiat2p.F
+     src/hibah2p.F
+     src/hibah3p.F
+     src/hiamp.F
+     src/hibapi.F
+     src/hibasgpi1.F
+     src/hibasgpi.F
+     src/hibasphtp.F
+     src/hibastp1.F
+     src/hibastp1sg.F
+     src/hibastp.F
+     src/hibastpln.F
+     src/hibound.F
+     src/hibrid1.F
+     src/hibrid2.F
+     src/hibrid3.F
+     src/hibrid4.F
+     src/hibrid5.F
+     src/hicommon.F
+     src/hidifcrs.F
+     src/hihypxsc.F
      src/hiiolib_f.F
-     src/himatrix.f
-     src/hinput.f
-     src/hiprsbr.f
-     src/histmix.f
-     src/hisystem.f
-     src/hitensor.f
-     src/hitrnprt.f
+     src/himatrix.F
+     src/hinput.F
+     src/hiprsbr.F
+     src/histmix.F
+     src/hisystem.F
+     src/hitensor.F
+     src/hitrnprt.F
      src/hiutil.F
-     src/hivector.f
+     src/hivector.F
      ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F)
 target_compile_options(hib PRIVATE "-ffixed-line-length-132")
 
@@ -158,7 +158,7 @@ add_dependencies(hib parhlp)
 # UNKNOWN
 # VAX
 
-add_executable(hib_arn2 src/pot/pot_arn2.f src/himain.F)
+add_executable(hib_arn2 src/pot/pot_arn2.F src/himain.F)
 target_compile_definitions(hib_arn2 PUBLIC KMAX=151)
 target_link_libraries(hib_arn2 hib ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
 target_include_directories(hib_arn2 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
