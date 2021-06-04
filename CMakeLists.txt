@@ -95,6 +95,25 @@ add_custom_command(
 )
 
 add_custom_command(
+    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/src/common
+    COMMAND mkdir -p "${CMAKE_CURRENT_BINARY_DIR}/src/common"
+    COMMENT "making directory ${CMAKE_CURRENT_BINARY_DIR}/src/common"
+)
+
+
+add_custom_command(
+    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/src/common/parhlp
+    COMMAND sed "s+xxxx+${CMAKE_CURRENT_SOURCE_DIR}+" "${CMAKE_CURRENT_SOURCE_DIR}/src/common/parhlp.t" > "${CMAKE_CURRENT_BINARY_DIR}/src/common/parhlp"
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/src/common
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/common/parhlp.t
+    COMMENT "building ${CMAKE_CURRENT_BINARY_DIR}/src/common/parhlp"
+)
+
+add_custom_target(parhlp
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/src/common/parhlp
+)
+
+add_custom_command(
     OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F
     COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t ${CMAKE_CURRENT_BINARY_DIR}/SYSCONFIG > ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin"
@@ -106,7 +125,11 @@ add_custom_command(
 # -std=legacy so that the compiler doesn't complain when the size of arrays don't match between a function declaration and a call to this function. At the moment, there's plenty of such cases in the code; these are not bugs, just an old way of doing things.
 target_compile_options(hib PRIVATE "-std=legacy")
 target_compile_definitions(hib PUBLIC __LINUX__=1)
+target_include_directories(hib PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
+add_dependencies(hib parhlp)
 
 add_executable(hib_arn2 src/pot/pot_arn2.f src/himain.F)
 target_compile_definitions(hib_arn2 PUBLIC KMAX=151)
 target_link_libraries(hib_arn2 hib ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
+target_include_directories(hib_arn2 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(hib_arn2 PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
