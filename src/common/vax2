@@ -1,0 +1,29 @@
+*comdeck vax2
+cstart vax unix-convex unix-nec unix-hp unix-ibm unix-dec unix-aix
+      xor(i,j)=ieor(i,j)
+      or(i,j)=ior(i,j)
+      and(i,j)=iand(i,j)
+      shiftl(i,j)=ishft(i,j)
+      shiftr(i,j)=ishft(i,-j)
+cend
+cstart unix-iris
+c;      xor(i,j)=ieor(i,j)
+c;      or(i,j)=ior(i,j)
+c;      and(i,j)=iand(i,j)
+c;      shiftl(i,j)=ishft(i,j)
+c;      shiftr(i,j)=ishft(i,-j)
+cend
+cstart unix-sun
+c;      shiftl(i,j)=lshift(i,j)
+c;      shiftr(i,j)=lrshft(i,j)
+c;      compl(i)=not(i)
+cend
+cstart unix-convex unix-nec unix-hp ibm vax unix-ibm unix-dec unix-aix
+      compl(i)=not(i)
+cend
+cstart unix-iris
+c;      compl(i)=not(i)
+cend
+cstart unix-convex
+c;      locate(li3562,l3562,i3562,ip3562)=iisveq(l3562,li3562,i3562,ip3562)
+cend

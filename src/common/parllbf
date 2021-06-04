@@ -1,0 +1,10 @@
+*comdeck parllbf
+cstart cray fps
+c;      parameter (llbuf=512)
+cend
+cstart vax unix unix-dec unix-ibm
+      parameter (llbuf=1024)
+cend
+cstart univac
+c;      parameter (llbuf=1792)
+cend

@@ -142,12 +142,6 @@ cd $htar/src
 cd common
 rm  *.~* >>& $basedir/tar.log
 cd ..
-cat common/* > hicommon.all
-tar -cf hicommon.tar common
-echo "removing common directory ..."
-echo "removing common directory ..." >>& $basedir/tar.log
-rm -r $htar/src/pot/common >>& $basedir/tar.log
-rm -r $htar/src/common >>& $basedir/tar.log
 echo ""
 echo "removing unneeded test directories"
 rm -r $htar/testautodbl >>& $basedir/tar.log

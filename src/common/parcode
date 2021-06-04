@@ -1,0 +1,7 @@
+*comdeck parcode
+*  iicode is the number of integer pcod's
+*  ircode is the number of real pcod's
+*  ncode is the number of bcod's
+      parameter (ncode = 31, lcode = 28, iicode = 9, ircode = 9,
+     :           icode = iicode+ircode)
+      character*8 bcod(ncode), fcod(lcode),pcod(icode),bascod

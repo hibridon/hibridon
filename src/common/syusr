@@ -1,0 +1,14 @@
+*comdeck syusr
+      subroutine syusr (irpot, readp, iread)
+*  dummy syusr subroutine
+      logical readp
+      character*(*)fname
+      if(.not.readp.or.iread.eq.0) then
+        call loapot(1,' ')
+        return
+      endif
+      entry ptrusr (fname)
+      entry savusr (readp)
+      entry chkusr
+      return
+      end
