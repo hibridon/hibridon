@@ -39,7 +39,7 @@
 * NB cstart ultrix for fortran rather than c utilities
 **********************************************************************
 #if defined(HIB_UNIX_XLF)
-c;@process fixed(132)
+@process fixed(132)
 #endif
       subroutine vaxhlp(line1)
 #if defined(unix-ifort)
@@ -51,11 +51,11 @@ cdec$ fixedformlinesize:132
       common /coipar/ jtot1, jtot2, jtotd, jlpar, nerg,numax,numin,nud,
      :                lscreen, iprint
 #if defined(HIB_CRAY)
-c;* return for these machines
-c;        write (6,2)
-c;2       format (' Help not installed on this machine')
-c;        return
-c;        end
+* return for these machines
+        write (6,2)
+2       format (' Help not installed on this machine')
+        return
+        end
 #endif
 #if defined(HIB_UNIX)
 c simulates vax vms help command
@@ -78,7 +78,7 @@ c     tries file name of first key in the tree.
       helpfile=helpdir//'hibrid'//helptail
 #endif
 #if defined(HIB_UNIX_CONVEX)
-c;      open (ihlpmain,file=helpfile,err=299,readonly,status='old')
+      open (ihlpmain,file=helpfile,err=299,readonly,status='old')
 #endif
 #if !defined(HIB_UNIX_CONVEX)
 c      write(6,*) 'open ',helpfile
@@ -169,11 +169,11 @@ c...    key not found in help. attempt to open alternate file.
           if (ifound.eq.0) goto 29
 #endif
 #if defined(HIB_UNIX_CONVEX)
-c;          open (ihlpalt,file='helphelphelphelp',status='old')
-c;          open (ihlp,file=helpfile,err=29,readonly,status='old')
+          open (ihlpalt,file='helphelphelphelp',status='old')
+          open (ihlp,file=helpfile,err=29,readonly,status='old')
 #endif
 #if defined(HIB_UNIX_SUN) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IBM) || defined(HIB_UNIX_AIX) || defined(HIB_UNIX_IRIS)
-c;          open (ihlp,file=helpfile,err=29,status='unknown')
+          open (ihlp,file=helpfile,err=29,status='unknown')
 #endif
 #if defined(HIB_UNIX)
         end if
@@ -439,10 +439,10 @@ c       k=index(line(i1:),';')
 *  -----------------------------------------------------------------
       character*20 cdate
 #if defined(HIB_UNIX_XLF)
-c;      character*8 d, date, c, clock
-c;      d=date()
-c;      c=clock()
-c;      cdate = d//'  '//c//'  '
+      character*8 d, date, c, clock
+      d=date()
+      c=clock()
+      cdate = d//'  '//c//'  '
 #endif
 #if defined(unix-ifort) || defined(unix-pgi)
       character*24 cdatefull
@@ -475,8 +475,8 @@ c-------------------------------------------------------------------
 *  -----------------------------------------------------------------
         implicit double precision(a-h,o-z)
 #if defined(HIB_UNIX_XLF)
-c;      t=timef()/1000d0
-c;      te=t
+      t=timef()/1000d0
+      te=t
 #endif
 #if defined(__G95__)
       real*4 tarray(2), result
@@ -502,25 +502,25 @@ c
 #endif
 
 #if defined(HIB_UNIX_PGI)
-c;      real tt, tarray(2), result
-c;* use cpu_time for user+cpu time
-c;      call cpu_time(tt)
-c;      t=tt
-c;* use dtime for elapsed (wall time).
-c;      result=dtime(tarray)
-c;      te=result
+      real tt, tarray(2), result
+* use cpu_time for user+cpu time
+      call cpu_time(tt)
+      t=tt
+* use dtime for elapsed (wall time).
+      result=dtime(tarray)
+      te=result
 #endif
 #if defined(HIB_ULTRIX_DEC)
-c;      common /codec/ ttim(2)
-c;      real et, etime, secnds
-c;      dimension et(2)
-c;      t1=etime(et(1),et(2))
-c;      tt2=secnds(0.0)
-c;      delt=tt2-ttim(2)
-c;      if (delt .lt. 0.0) delt=delt+86400.
-c;      ttim(1)=ttim(1)+delt
-c;      ttim(2)=tt2
-c;      t2=ttim(1)
+      common /codec/ ttim(2)
+      real et, etime, secnds
+      dimension et(2)
+      t1=etime(et(1),et(2))
+      tt2=secnds(0.0)
+      delt=tt2-ttim(2)
+      if (delt .lt. 0.0) delt=delt+86400.
+      ttim(1)=ttim(1)+delt
+      ttim(2)=tt2
+      t2=ttim(1)
 #endif
       return
       end
@@ -533,14 +533,14 @@ c;      t2=ttim(1)
       second=te
 #endif
 #if defined(HIB_UNIX_XLF)
-c;      second=timef()*1000d0
+      second=timef()*1000d0
 #endif
 #if defined(HIB_ULTRIX_DEC)
-c;      double precision function second()
-c;      implicit double precision (a-h,o-z)
-c;      real et(2)
-c;      fe=etime(et(1),et(2))
-c;      second=fe
+      double precision function second()
+      implicit double precision (a-h,o-z)
+      real et(2)
+      fe=etime(et(1),et(2))
+      second=fe
 #endif
 #if defined(__G95__)
       real*4 tarray(2), result
@@ -582,74 +582,74 @@ c$$$*     write (6,*) time
       end
 * --------------------------------------------------------------------
 #if defined(HIB_NONE)
-c;c#if defined(HIB_MAC)
-c;      subroutine timdat(tim,dat,mach)
-c;c.....should return time, date and machine type
-c;      character *(*) tim,dat,mach
-c;      call time(tim)
-c;      call date(dat)
-c;      mach='MAC IIci'
-c;      return
-c;      end
-c;c#endif
-c;c#if defined(HIB_ULTRIX_DEC)
-c;      subroutine timdat(tim,dat,mach)
-c;      character*8 tim
-c;      character*9 dat
-c;      character*19 mach
-c;      mach='DECStation  ULTRIX'
-c;      call time(tim)
-c;      call date(dat)
-c;      return
-c;      end
-c;c#endif
-c;c#if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_SUN)
-c;      subroutine timdat(tim,dat,mach)
-c;      character *(*) tim,dat,mach
-c;      mach='DECStation  ULTRIX'
-c;      call timec(tim)
-c;      call datec(dat)
-c;      l=len(tim)
-c;      if(l.gt.8) tim(9:l)=' '
-c;      l=len(dat)
-c;      if(l.gt.9) dat(10:l)=' '
-c;      return
-c;      end
-c;c#endif
+c#if defined(HIB_MAC)
+      subroutine timdat(tim,dat,mach)
+c.....should return time, date and machine type
+      character *(*) tim,dat,mach
+      call time(tim)
+      call date(dat)
+      mach='MAC IIci'
+      return
+      end
+c#endif
+c#if defined(HIB_ULTRIX_DEC)
+      subroutine timdat(tim,dat,mach)
+      character*8 tim
+      character*9 dat
+      character*19 mach
+      mach='DECStation  ULTRIX'
+      call time(tim)
+      call date(dat)
+      return
+      end
+c#endif
+c#if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_SUN)
+      subroutine timdat(tim,dat,mach)
+      character *(*) tim,dat,mach
+      mach='DECStation  ULTRIX'
+      call timec(tim)
+      call datec(dat)
+      l=len(tim)
+      if(l.gt.8) tim(9:l)=' '
+      l=len(dat)
+      if(l.gt.9) dat(10:l)=' '
+      return
+      end
+c#endif
 #endif
 #if defined(HIB_UNIX_IRIX)
-c;      subroutine timdat(tim,dat,mach)
-c;      character *(*) tim,dat,mach
-c;      mach='SGI IRIX'
-c;      call timec(tim)
-c;      call datec(dat)
-c;      l=len(tim)
-c;      if(l.gt.8) tim(9:l)=' '
-c;      l=len(dat)
-c;      if(l.gt.9) dat(10:l)=' '
-c;      return
-c;      end
+      subroutine timdat(tim,dat,mach)
+      character *(*) tim,dat,mach
+      mach='SGI IRIX'
+      call timec(tim)
+      call datec(dat)
+      l=len(tim)
+      if(l.gt.8) tim(9:l)=' '
+      l=len(dat)
+      if(l.gt.9) dat(10:l)=' '
+      return
+      end
 #endif
 #if defined(HIB_NONE)
-c;c#if defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_IBM) || defined(HIB_UNIX_CONVEX)
-c;      subroutine timdat(tim,dat,mach)
-c;      character *(*) tim,dat,mach
-c;      character*9 a(7)
-c;      integer uname
-c;      call timec(tim)
-c;      call datec(dat)
-c;      l=len(tim)
-c;      if(l.gt.8) tim(9:l)=' '
-c;      l=len(dat)
-c;      if(l.gt.9) dat(10:l)=' '
-c;      i=uname(a)
-c;      mach=' '
-c;      mach(1:5)=a(1)(1:5)
-c;      mach(7:9)=a(3)(1:3)
-c;      mach(11:18)=a(5)(1:8)
-c;      return
-c;      end
-c;c#endif
+c#if defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_IBM) || defined(HIB_UNIX_CONVEX)
+      subroutine timdat(tim,dat,mach)
+      character *(*) tim,dat,mach
+      character*9 a(7)
+      integer uname
+      call timec(tim)
+      call datec(dat)
+      l=len(tim)
+      if(l.gt.8) tim(9:l)=' '
+      l=len(dat)
+      if(l.gt.9) dat(10:l)=' '
+      i=uname(a)
+      mach=' '
+      mach(1:5)=a(1)(1:5)
+      mach(7:9)=a(3)(1:3)
+      mach(11:18)=a(5)(1:8)
+      return
+      end
+c#endif
 #endif
 * ----------------------------------------------------------------
       subroutine gennam(xname,jobnam,ifil,xtens,ln)
@@ -1480,9 +1480,9 @@ c here follow nemeth's coefficients
        i=system("rm -f sysprofile")
 #endif
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;      write (6,40)
-c;      write (8,40)
-c;40    format('*** COMMAND SYSCONF NOT IMPLEMENTED FOR CURRENT O/S')
+      write (6,40)
+      write (8,40)
+40    format('*** COMMAND SYSCONF NOT IMPLEMENTED FOR CURRENT O/S')
 #endif
       return
       end

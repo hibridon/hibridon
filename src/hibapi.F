@@ -404,7 +404,7 @@
               enddo
 #endif
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;              call rs (3, 2, e, eig, 1, vec, sc1, sc2, ierr)
+              call rs (3, 2, e, eig, 1, vec, sc1, sc2, ierr)
 #endif
               eint(i) = eig(1+iso01)
               c0(i) = vec(1,1+iso01)
@@ -421,7 +421,7 @@ c;              call rs (3, 2, e, eig, 1, vec, sc1, sc2, ierr)
               call dcopy(9,e,1,vec,1)
 #endif
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;              call rs (3, 3, e, eig, 1, vec, sc1, sc2, ierr)
+              call rs (3, 3, e, eig, 1, vec, sc1, sc2, ierr)
 #endif
               eint(i) = eig(2-iso)
               c0(i) = vec(1,2-iso)

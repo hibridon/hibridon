@@ -48,9 +48,9 @@
       parameter (kaux=100*kmax)
 #endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_IBM)
-c;* set size of scratch array for matrix inversion with lapack routines
-c;* warning, this assumes a blocksize of 64
-c;      parameter (kaux=128*kmax)
+* set size of scratch array for matrix inversion with lapack routines
+* warning, this assumes a blocksize of 64
+      parameter (kaux=128*kmax)
 #endif
 * modified klammx (pjd - 17-jan-2019)
 * increased kfact (pjd - 15-dec-2020)
@@ -208,7 +208,7 @@ c;      parameter (kaux=128*kmax)
       common /cosc11/ sc11(kaux3)
 #endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;      common /cosc11/ sc11(kaux)
+      common /cosc11/ sc11(kaux)
 #endif
 #if defined(HIB_UNIX)
       common /cokaux/ naux
@@ -249,7 +249,7 @@ c;      common /cosc11/ sc11(kaux)
 c.....ncache: cache size in words
       ncache=4096
 #if defined(HIB_UNIX_HP)
-c;      ncache=16000
+      ncache=16000
 #endif
       mxmblk=64
 * start scattering calculation
@@ -385,8 +385,8 @@ c;      ncache=16000
       logical lsc1
       include "common/parpot"
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
-c;      real secnds
-c;      common /codec/ ttim(2)
+      real secnds
+      common /codec/ ttim(2)
 #endif
       common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
       common /cosavi/ iipar, ixpar(8)
@@ -433,8 +433,8 @@ c;      common /codec/ ttim(2)
 1     call hinput(first)
       cpupt=0
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
-c;      ttim(1)=0.d0
-c;      ttim(2)=secnds(0.0)
+      ttim(1)=0.d0
+      ttim(2)=secnds(0.0)
 #endif
       call mtime (tcpu0, twall0)
       photfl = photof
@@ -875,7 +875,7 @@ cger (next 2 lines)
       call flush(9)
 #endif
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_CONVEX) || defined(HIB_UNIX_IRIS)
-c;      call flush(9)
+      call flush(9)
 #endif
 * replace statement below to accommodate q.ma's revised
 * version of bound (28-jun-2013, p.dagdigian)
@@ -1004,7 +1004,7 @@ c.....save restart information
      :     ' CPU:',a,'  WALL:',a,'  DATE: ',a)
         endif
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_HP)
-c;        call flush6
+        call flush6
 #endif
         cpubas=0
         cpuout=0
@@ -1071,7 +1071,7 @@ c.....save restart information
      :      ' CPU:',a,'  ELAPSED:',a,'  CURRENT DATE: ',a)
         endif
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_HP)
-c;        call flush6
+        call flush6
 #endif
         cpubas=0
         cpuld=0
@@ -1162,7 +1162,7 @@ c;        call flush6
          write (6, 350)
          write (9, 350)
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_HP)
-c;         call flush6
+         call flush6
 #endif
       end if
       close (23)

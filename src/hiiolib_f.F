@@ -746,14 +746,14 @@ c
       data lbuf /1024/
 #endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN)
-c;      common/cobuf/ lbuf,ibuf(1024)
-c;      data lseg, intrel, lchar /1024,2,4/
-c;      data lbuf/1024/
+      common/cobuf/ lbuf,ibuf(1024)
+      data lseg, intrel, lchar /1024,2,4/
+      data lbuf/1024/
 #endif
 #if defined(HIB_CRAY)
-c;      common/cobuf/ lbuf,ibuf(512)
-c;      data lbuf/512/
-c;      data lseg, intrel, lchar /512,1,8/
+      common/cobuf/ lbuf,ibuf(512)
+      data lbuf/512/
+      data lseg, intrel, lchar /512,1,8/
 #endif
       end
 c
@@ -813,9 +813,9 @@ c     Stream i/o mode, replace, read/write
             print *, '*** WARNING:  ', filnam, ' NOT CLOSED'
          end if
 #if !defined(HIB_UNIX_GFORTRAN)
-c;         open (unit=iunit, file=filnam, access='STREAM',
-c;     $        status='REPLACE', err=999, iostat=ierr,
-c;     $        buffered='YES')
+         open (unit=iunit, file=filnam, access='STREAM',
+     $        status='REPLACE', err=999, iostat=ierr,
+     $        buffered='YES')
 #endif
 #if defined(__GFORTRAN__)
          open (unit=iunit, file=filnam, access='STREAM',
@@ -879,7 +879,7 @@ c
         stat = 'scratch'
 #endif
 #if defined(HIB_CRAY)
-c;      stat = 'unknown'
+      stat = 'unknown'
 #endif
 #if defined(HIB_UNIX_DARWIN)
         inquire(unit=iunit,opened=od)
@@ -2447,93 +2447,93 @@ c     id=getpid()
 #endif
 * ---------------------------------------------------------------
 #if defined(HIB_NONE)
-c;*********************************************************************
-c;*                                                                   *
-c;*             utility programs for unix systems                     *
-c;*                                                                   *
-c;*********************************************************************
-c;*                     routines included:                            *
-c;*                                                                   *
-c;*   1. tmpnam   generates unique temp file names                    *
-c;*   2. timdat   returns time, date and machine type as char. strings*
-c;*   3. exit     stops calculation                                   *
-c;*   4. assgn    assigns direct access files                         *
-c;*               these routines need c-routines in hiunix.c          *
-c;*         entries: finit (closes all files)                         *
-c;*                  closf (closes one file)                          *
-c;*                  chklun (checks if unit is open)                  *
-c;*                  fwait (waits for completion of i/o)              *
-c;*                                                                   *
-c;*********************************************************************
-c;      subroutine tmpnm(ifil,name)
-c;      character*14 name
-c;      integer getpid
-c;      id=getpid()
-c;      write(name,10) ifil,id
-c;10    format('t',i2.2,i5.5,'.tmp  ')
-c;      return
-c;      end
-c;      subroutine assgn(luni,name,lenn,icat)
-c;      implicit double precision (a-h,o-z)
-c;      character*(*) name
-c;      character*14 nam,blank
-c;      character*15 namx
-c;      common/disc/ ipos(98),iun(98),iostat(98),icatf(98),nam(98)
-c;      common/clseg/ lseg
-c;      data lendef/2000/,blank/'              '/
-c;      if (iun(luni).ne.0) return
-c;      if(name.eq.blank) call tmpnm(luni,name)
-c;      if(lenn.eq.0) lenn=lendef
-c;      ll=len(name)
-c;      if(ll.gt.14) name(15:)=' '
-c;      ll=min(ll,14)
-c;      nam(luni)=name
-c;      namx=name(1:ll)
-c;      icat1=index(name,'.TMP')
-c;      if(icat.eq.0.or.icat1.ne.0) then
-c;      icatf(luni)=-1
-c;c temp file
-c;      call openc(luni,namx,lenn,0)
-c;      else
-c;      icatf(luni)=1
-c;c catalog file
-c;      call openc(luni,namx,lenn,1)
-c;      end if
-c;      goto 80
-c;80    iun(luni)=luni
-c;      return
-c;c
-c;      entry finit
-c;c close all files
-c;      do 90 i=1,98
-c;      ipos(i)=1
-c;      iun(i)=0
-c;      nam(i)=' '
-c;      iostat(i)=0
-c;      icatf(i)=0
-c;90    continue
-c;      return
-c;c
-c;      entry closf(luni)
-c;c close file luni
-c;      la=luni
-c;      le=luni
-c;      do 44 l=la,le
-c;      if(iun(l).eq.0) goto 44
-c;      call closec(l)
-c;      icatf(l)=0
-c;      nam(l)=' '
-c;      iostat(l)=0
-c;      ipos(l)=1
-c;      iun(l)=0
-c;44    continue
-c;      return
-c;      entry chklun(luni,iflag,name)
-c;      name=' '
-c;      iflag=0
-c;      if(iun(luni).eq.0) return
-c;      iflag=icatf(luni)
-c;      name=nam(luni)
-c;      return
-c;      end
+*********************************************************************
+*                                                                   *
+*             utility programs for unix systems                     *
+*                                                                   *
+*********************************************************************
+*                     routines included:                            *
+*                                                                   *
+*   1. tmpnam   generates unique temp file names                    *
+*   2. timdat   returns time, date and machine type as char. strings*
+*   3. exit     stops calculation                                   *
+*   4. assgn    assigns direct access files                         *
+*               these routines need c-routines in hiunix.c          *
+*         entries: finit (closes all files)                         *
+*                  closf (closes one file)                          *
+*                  chklun (checks if unit is open)                  *
+*                  fwait (waits for completion of i/o)              *
+*                                                                   *
+*********************************************************************
+      subroutine tmpnm(ifil,name)
+      character*14 name
+      integer getpid
+      id=getpid()
+      write(name,10) ifil,id
+10    format('t',i2.2,i5.5,'.tmp  ')
+      return
+      end
+      subroutine assgn(luni,name,lenn,icat)
+      implicit double precision (a-h,o-z)
+      character*(*) name
+      character*14 nam,blank
+      character*15 namx
+      common/disc/ ipos(98),iun(98),iostat(98),icatf(98),nam(98)
+      common/clseg/ lseg
+      data lendef/2000/,blank/'              '/
+      if (iun(luni).ne.0) return
+      if(name.eq.blank) call tmpnm(luni,name)
+      if(lenn.eq.0) lenn=lendef
+      ll=len(name)
+      if(ll.gt.14) name(15:)=' '
+      ll=min(ll,14)
+      nam(luni)=name
+      namx=name(1:ll)
+      icat1=index(name,'.TMP')
+      if(icat.eq.0.or.icat1.ne.0) then
+      icatf(luni)=-1
+c temp file
+      call openc(luni,namx,lenn,0)
+      else
+      icatf(luni)=1
+c catalog file
+      call openc(luni,namx,lenn,1)
+      end if
+      goto 80
+80    iun(luni)=luni
+      return
+c
+      entry finit
+c close all files
+      do 90 i=1,98
+      ipos(i)=1
+      iun(i)=0
+      nam(i)=' '
+      iostat(i)=0
+      icatf(i)=0
+90    continue
+      return
+c
+      entry closf(luni)
+c close file luni
+      la=luni
+      le=luni
+      do 44 l=la,le
+      if(iun(l).eq.0) goto 44
+      call closec(l)
+      icatf(l)=0
+      nam(l)=' '
+      iostat(l)=0
+      ipos(l)=1
+      iun(l)=0
+44    continue
+      return
+      entry chklun(luni,iflag,name)
+      name=' '
+      iflag=0
+      if(iun(luni).eq.0) return
+      iflag=icatf(luni)
+      name=nam(luni)
+      return
+      end
 #endif

@@ -459,7 +459,7 @@ c
   90     continue
 *     z now contains z(a)+z1(a,c)
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;         call smxinv(z, nmax, nch, scr1, scr2, ierr)
+         call smxinv(z, nmax, nch, scr1, scr2, ierr)
 #endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
         call syminv(z,nmax,nch,ierr)
@@ -514,7 +514,7 @@ c;         call smxinv(z, nmax, nch, scr1, scr2, ierr)
                idiag = idiag + ndiag
  140        continue
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;            call smxinv(w, nmax, nch, scr1, scr2, ierr)
+            call smxinv(w, nmax, nch, scr1, scr2, ierr)
 #endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
             call syminv(w,nmax,nch,ierr)
@@ -555,7 +555,7 @@ c;            call smxinv(w, nmax, nch, scr1, scr2, ierr)
  170     continue
 *     at this point z contains z(c) + z1(c,b)
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;         call smxinv(z, nmax, nch, scr1, scr2, ierr)
+         call smxinv(z, nmax, nch, scr1, scr2, ierr)
 #endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
          call syminv(z,nmax,nch,ierr)

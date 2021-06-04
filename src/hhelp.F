@@ -22,11 +22,11 @@ cdec$ fixedformlinesize:132
       character*(*) line1
       common /coipar/ junk(8),lscreen
 #if defined(HIB_CRAY)
-c;* return for these machines
-c;        write (6,2)
-c;2       format (' Help not installed on this machine')
-c;        return
-c;        end
+* return for these machines
+        write (6,2)
+2       format (' Help not installed on this machine')
+        return
+        end
 #endif
 #if defined(HIB_UNIX) || defined(HIB_UNIX_DEC)  || defined(HIB_UNIX_IBM)
 c simulates vax vms help command
@@ -50,7 +50,7 @@ c     tries file name of first key in the tree.
       print *, helpfile
 #endif
 #if defined(HIB_UNIX_CONVEX)
-c;      open (ihlpmain,file=helpfile,err=299,readonly,status='old')
+      open (ihlpmain,file=helpfile,err=299,readonly,status='old')
 #endif
 #if defined(HIB_UNIX_SUN) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IBM) || defined(HIB_UNIX_AIX) || defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 c      write(6,*) 'open ',helpfile
@@ -141,8 +141,8 @@ c...    key not found in help. attempt to open alternate file.
           if (ifound.eq.0) goto 29
 #endif
 #if defined(HIB_UNIX_CONVEX)
-c;          open (ihlpalt,file='helphelphelphelp',status='old')
-c;          open (ihlp,file=helpfile,err=29,readonly,status='old')
+          open (ihlpalt,file='helphelphelphelp',status='old')
+          open (ihlp,file=helpfile,err=29,readonly,status='old')
 #endif
 #if defined(HIB_UNIX_SUN) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IBM) || defined(HIB_UNIX_AIX) || defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
           open (ihlp,file=helpfile,err=29,status='unknown')

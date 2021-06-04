@@ -745,9 +745,9 @@
       data lbuf/1024/
 #endif
 #if defined(HIB_CRAY)
-c;      common/cobuf/ lbuf,ibuf(512)
-c;      data lbuf/512/
-c;      data lseg, intrel, lchar /512,1,8/
+      common/cobuf/ lbuf,ibuf(512)
+      data lbuf/512/
+      data lseg, intrel, lchar /512,1,8/
 #endif
       end
 * ---------------------------------------------------------------
@@ -829,7 +829,7 @@ c;      data lseg, intrel, lchar /512,1,8/
         stat = 'scratch'
 #endif
 #if defined(HIB_CRAY)
-c;      stat = 'unknown'
+      stat = 'unknown'
 #endif
 #if defined(HIB_UNIX_DARWIN)
         inquire(unit=iunit,opened=od)
@@ -2304,173 +2304,173 @@ c
 *   3. tmpnm    generates a unique filename                         *
 *********************************************************************
 #if defined(HIB_NONE)
-c;      subroutine assgn(luni,filnam,isize,icat)
-c;*
-c;*  routine to assign and open files
-c;*
-c;*  luni: logical unit number
-c;*  luni .le.10:  formatted sequential files
-c;*  luni .gt.10:  unformatted direct access files
-c;*  filnam: filename
-c;*  isize: size in tracks (output, not working with fortran i/o)
-c;*  icat:  if icat=0, scratch
-c;*         if icat>0, permanent
-c;      character*(*) filnam
-c;      character*14 nam
-c;      character*12 stat
-c;      character*(*) name
-c;      common/disc/ ipos(98),iun(98),iostat(98),icatf(98),nam(98)
-c;      logical openfl,exstfl
-c;      common/clseg/ lseg,intrel,lchar
-c;*
-c;      isize=0
-c;      if(filnam.eq.' ') call tmpnm(luni,filnam)
-c;* here for standart fortran i/o
-c;      inquire (file=filnam, opened=openfl, exist=exstfl)
-c;* here if file exists
-c;      if(exstfl) then
-c;        if(openfl) return
-c;        stat='OLD'
-c;      else
-c;        stat='NEW'
-c;      end if
-c;      iun(luni)=luni
-c;      nam(luni)=filnam
-c;      ipos(luni)=0
-c;      iostat(luni)=0
-c;      icatf(luni)=icat
-c;      if(icat.ne.0) then
-c;c.....permanent file
-c;          open (luni, file=filnam, status=stat, access='DIRECT',
-c;     :           recl=8*lseg, form='UNFORMATTED',
-c;     :           iostat=ierr, err=999)
-c;      else
-c;c.....scratch file
-c;          open (luni, status='SCRATCH',access='DIRECT',recl=8*lseg,
-c;     :           form='UNFORMATTED',iostat=ierr, err=999)
-c;      end if
-c;      return
-c;* here if open error occurs
-c;999    lenfil=index(filnam,' ')-1
-c;       write(6,1000) filnam(1:lenfil),ierr
-c;1000   format(' %FATAL-ERROR IN ASSGN: cannot open ',(a),', iostat: ',
-c;     :        i4,/)
-c;       stop
-c;c
-c;      entry finit
-c;c.....closes all files
-c;      la=1
-c;      le=30
-c;      goto 43
-c;c
-c;      entry closf(luni)
-c;c.....closes luni
-c;      la=luni
-c;      le=luni
-c;43    do 44 l=la,le
-c;      if(iun(l).eq.0) goto 44
-c;      close(l)
-c;      icatf(l)=0
-c;      nam(l)=' '
-c;      iostat(l)=0
-c;      ipos(l)=1
-c;      iun(l)=0
-c;44    continue
-c;      return
-c;      entry chklun(luni,iflag,name)
-c;c.....checks status of unit
-c;      name=' '
-c;      iflag=0
-c;      if(iun(luni).eq.0) return
-c;      iflag=icatf(luni)
-c;      name=nam(luni)
-c;      return
-c;      end
-c;* ---------------------------------------------------------------
-c;      subroutine rdabsf(luni,a,l,iword)
-c;*
-c;* author: h.j. werner
-c;*
-c;* read of l double precision words into a. iword is zero adjusted adress
-c;* on file. l and iword should be multiple of lseg, otherwise unefficient
-c;      implicit double precision (a-h,o-z)
-c;      character*14 nam
-c;      common /cobuf/ lbuf,ibuf(1)
-c;      common/disc/ ipos(98),iun(98),iostat(98),icatf(98),nam(98)
-c;      common/clseg/ lseg
-c;      dimension a(1),buf(lbuf)
-c;      if(lseg.gt.lbuf) stop 'lbuf too small in rdabsf'
-c;      ibl=iword/lseg+1
-c;      m=iword-(ibl-1)*lseg
-c;      n=0
-c;      if(m.eq.0) goto 20
-c;      n=min0(lseg-m,l)
-c;      read(luni,rec=ibl) (buf(i),i=1,lseg)
-c;      ibl=ibl+1
-c;      do 15 i=1,n
-c;  15  a(i)=buf(m+i)
-c;  20  l1=l-n
-c;      if(l1.eq.0) return
-c;      lbl=(l1-1)/lseg+1
-c;      do 25 ib=1,lbl
-c;      read(luni,rec=ibl) (a(n+i),i=1,min0(l1,lseg))
-c;      ibl=ibl+1
-c;      l1=l1-lseg
-c;  25  n=n+lseg
-c;      return
-c;c
-c;      entry wrabsf(luni,a,l,iword)
-c;c
-c;      if(lseg.gt.lbuf) stop 'lbuf too small in wrabsf'
-c;      ibl=iword/lseg+1
-c;      m=iword-(ibl-1)*lseg
-c;      n=0
-c;      if(m.eq.0) goto 40
-c;c.....first address not on sector boundary
-c;      n=min0(lseg-m,l)
-c;      if(ibl.le.ipos(luni))
-c;     1   read(luni,rec=ibl) (buf(i),i=1,lseg)
-c;      do 30 i=1,n
-c;  30  buf(m+i)=a(i)
-c;      write(luni,rec=ibl) (buf(i),i=1,lseg)
-c;      ipos(luni)=max(ipos(luni),ibl)
-c;      ibl=ibl+1
-c;c.....write from next sector boundary
-c;  40  l1=l-n
-c;      if(l1.eq.0) return
-c;      lbl=l1/lseg
-c;      do 45 ib=1,lbl
-c;      write(luni,rec=ibl) (a(n+i),i=1,lseg)
-c;      ipos(luni)=max(ipos(luni),ibl)
-c;      ibl=ibl+1
-c;      l1=l1-lseg
-c;45    n=n+lseg
-c;      if(n.eq.l) return
-c;c.....last address not at end of sector
-c;      if(ibl.le.ipos(luni))
-c;     1   read(luni,rec=ibl) (buf(i),i=1,lseg)
-c;      do 50 i=1,l-n
-c;50    buf(i)=a(n+i)
-c;      write(luni,rec=ibl) (buf(i),i=1,lseg)
-c;      ipos(luni)=max(ipos(luni),ibl)
-c;      return
-c;c
-c;      entry fwait(luni)
-c;      return
-c;c
-c;      end
+      subroutine assgn(luni,filnam,isize,icat)
+*
+*  routine to assign and open files
+*
+*  luni: logical unit number
+*  luni .le.10:  formatted sequential files
+*  luni .gt.10:  unformatted direct access files
+*  filnam: filename
+*  isize: size in tracks (output, not working with fortran i/o)
+*  icat:  if icat=0, scratch
+*         if icat>0, permanent
+      character*(*) filnam
+      character*14 nam
+      character*12 stat
+      character*(*) name
+      common/disc/ ipos(98),iun(98),iostat(98),icatf(98),nam(98)
+      logical openfl,exstfl
+      common/clseg/ lseg,intrel,lchar
+*
+      isize=0
+      if(filnam.eq.' ') call tmpnm(luni,filnam)
+* here for standart fortran i/o
+      inquire (file=filnam, opened=openfl, exist=exstfl)
+* here if file exists
+      if(exstfl) then
+        if(openfl) return
+        stat='OLD'
+      else
+        stat='NEW'
+      end if
+      iun(luni)=luni
+      nam(luni)=filnam
+      ipos(luni)=0
+      iostat(luni)=0
+      icatf(luni)=icat
+      if(icat.ne.0) then
+c.....permanent file
+          open (luni, file=filnam, status=stat, access='DIRECT',
+     :           recl=8*lseg, form='UNFORMATTED',
+     :           iostat=ierr, err=999)
+      else
+c.....scratch file
+          open (luni, status='SCRATCH',access='DIRECT',recl=8*lseg,
+     :           form='UNFORMATTED',iostat=ierr, err=999)
+      end if
+      return
+* here if open error occurs
+999    lenfil=index(filnam,' ')-1
+       write(6,1000) filnam(1:lenfil),ierr
+1000   format(' %FATAL-ERROR IN ASSGN: cannot open ',(a),', iostat: ',
+     :        i4,/)
+       stop
+c
+      entry finit
+c.....closes all files
+      la=1
+      le=30
+      goto 43
+c
+      entry closf(luni)
+c.....closes luni
+      la=luni
+      le=luni
+43    do 44 l=la,le
+      if(iun(l).eq.0) goto 44
+      close(l)
+      icatf(l)=0
+      nam(l)=' '
+      iostat(l)=0
+      ipos(l)=1
+      iun(l)=0
+44    continue
+      return
+      entry chklun(luni,iflag,name)
+c.....checks status of unit
+      name=' '
+      iflag=0
+      if(iun(luni).eq.0) return
+      iflag=icatf(luni)
+      name=nam(luni)
+      return
+      end
+* ---------------------------------------------------------------
+      subroutine rdabsf(luni,a,l,iword)
+*
+* author: h.j. werner
+*
+* read of l double precision words into a. iword is zero adjusted adress
+* on file. l and iword should be multiple of lseg, otherwise unefficient
+      implicit double precision (a-h,o-z)
+      character*14 nam
+      common /cobuf/ lbuf,ibuf(1)
+      common/disc/ ipos(98),iun(98),iostat(98),icatf(98),nam(98)
+      common/clseg/ lseg
+      dimension a(1),buf(lbuf)
+      if(lseg.gt.lbuf) stop 'lbuf too small in rdabsf'
+      ibl=iword/lseg+1
+      m=iword-(ibl-1)*lseg
+      n=0
+      if(m.eq.0) goto 20
+      n=min0(lseg-m,l)
+      read(luni,rec=ibl) (buf(i),i=1,lseg)
+      ibl=ibl+1
+      do 15 i=1,n
+  15  a(i)=buf(m+i)
+  20  l1=l-n
+      if(l1.eq.0) return
+      lbl=(l1-1)/lseg+1
+      do 25 ib=1,lbl
+      read(luni,rec=ibl) (a(n+i),i=1,min0(l1,lseg))
+      ibl=ibl+1
+      l1=l1-lseg
+  25  n=n+lseg
+      return
+c
+      entry wrabsf(luni,a,l,iword)
+c
+      if(lseg.gt.lbuf) stop 'lbuf too small in wrabsf'
+      ibl=iword/lseg+1
+      m=iword-(ibl-1)*lseg
+      n=0
+      if(m.eq.0) goto 40
+c.....first address not on sector boundary
+      n=min0(lseg-m,l)
+      if(ibl.le.ipos(luni))
+     1   read(luni,rec=ibl) (buf(i),i=1,lseg)
+      do 30 i=1,n
+  30  buf(m+i)=a(i)
+      write(luni,rec=ibl) (buf(i),i=1,lseg)
+      ipos(luni)=max(ipos(luni),ibl)
+      ibl=ibl+1
+c.....write from next sector boundary
+  40  l1=l-n
+      if(l1.eq.0) return
+      lbl=l1/lseg
+      do 45 ib=1,lbl
+      write(luni,rec=ibl) (a(n+i),i=1,lseg)
+      ipos(luni)=max(ipos(luni),ibl)
+      ibl=ibl+1
+      l1=l1-lseg
+45    n=n+lseg
+      if(n.eq.l) return
+c.....last address not at end of sector
+      if(ibl.le.ipos(luni))
+     1   read(luni,rec=ibl) (buf(i),i=1,lseg)
+      do 50 i=1,l-n
+50    buf(i)=a(n+i)
+      write(luni,rec=ibl) (buf(i),i=1,lseg)
+      ipos(luni)=max(ipos(luni),ibl)
+      return
+c
+      entry fwait(luni)
+      return
+c
+      end
 #endif
 #if defined(HIB_NONE)
-c;      subroutine tmpnm(ifil,name)
-c;c.....should generate a unique filename
-c;      character*14 name
-c;c     integer getpid
-c;      id=0
-c;c     id=getpid()
-c;      write(name,10) ifil,id
-c;10    format('T',i2.2,i5.5,'.TMP  ')
-c;      return
-c;      end
+      subroutine tmpnm(ifil,name)
+c.....should generate a unique filename
+      character*14 name
+c     integer getpid
+      id=0
+c     id=getpid()
+      write(name,10) ifil,id
+10    format('T',i2.2,i5.5,'.TMP  ')
+      return
+      end
 #endif
 * ---------------------------------------------------------------
 #if defined(HIB_UNIX)

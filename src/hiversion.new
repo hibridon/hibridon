@@ -1,5 +1,5 @@
 #if defined(HIB_UNIX_XLF)
-c;@process fixed(132)
+@process fixed(132)
 #endif
       subroutine version(iunit)
 #if defined(HIB_UNIX_IFORT)
@@ -39,16 +39,16 @@ cdec$ fixedformlinesize:132
      :  '-----------------------')
 #endif
 #if defined(HIB_NONE)
-c;      i=system("hib_sysconfig")
-c;      open(unit=8,file='sysprofile',access='sequential')
-c;      read (8,25) profile
-c;25    format(a100)
-c;      write (iunit,30) profile
-c;30    format(' CURRENT HARDWARE CONFIGURATION:',/,9x,a100,/,
-c;     : ' ---------------------------------------------------',
-c;     :  '-----------------------')
-c;       close(8)
-c;       i=system("rm -f sysprofile")
+      i=system("hib_sysconfig")
+      open(unit=8,file='sysprofile',access='sequential')
+      read (8,25) profile
+25    format(a100)
+      write (iunit,30) profile
+30    format(' CURRENT HARDWARE CONFIGURATION:',/,9x,a100,/,
+     : ' ---------------------------------------------------',
+     :  '-----------------------')
+       close(8)
+       i=system("rm -f sysprofile")
 #endif
       return
       end
@@ -130,7 +130,7 @@ c;       i=system("rm -f sysprofile")
       return
       end
 #if defined(HIB_UNIX_XLF)
-c;@process fixed(132)
+@process fixed(132)
 #endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       block data config

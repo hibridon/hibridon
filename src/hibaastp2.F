@@ -273,9 +273,9 @@ c
         call dsyev('V','L',isize,e,narray,eig,work,lwork,ierr)
 #endif
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;      write (6,1225)
-c;1225    format('  *** DSYEV NOT ACCESSIBLE IN THIS VERSION OF CODE.')
-c;        call exit
+      write (6,1225)
+1225    format('  *** DSYEV NOT ACCESSIBLE IN THIS VERSION OF CODE.')
+        call exit
 #endif
         do mm = 1, isize
           nlist = nlist + 1

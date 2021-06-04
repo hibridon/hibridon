@@ -1,1078 +1,1078 @@
 * NB #if defined(HIB_UNIX_AIX) rather than unix-ibm for fortran not essl routines
 #if defined(HIB_UNIX_IBM)
-c;      subroutine rs(nm,n,a,w,matz,z,fv1,fv2,ierr)
-c;c
-c;      integer n,nm,ierr,matz
-c;      double precision a(nm,n),w(n),z(nm,n),fv1(n),fv2(n)
-c;c
-c;c     this subroutine calls the essl routine dspev to get the
-c;c     eigenvalues and eigenvectors of a real symmetric matrix.
-c;c
-c;c     on input
-c;c
-c;c        nm  must be set to the row dimension of the two-dimensional
-c;c        array parameters as declared in the calling program
-c;c        dimension statement.
-c;c
-c;c        n  is the order of the matrix  a.
-c;c
-c;c        a  contains the real symmetric matrix.
-c;c
-c;c        matz  is an integer variable set equal to zero if
-c;c        only eigenvalues are desired.  otherwise it is set to
-c;c        any non-zero integer for both eigenvalues and eigenvectors.
-c;c
-c;c     on output
-c;c
-c;c        w  contains the eigenvalues in ascending order.
-c;c
-c;c        z  contains the eigenvectors if matz is not zero.
+      subroutine rs(nm,n,a,w,matz,z,fv1,fv2,ierr)
+c
+      integer n,nm,ierr,matz
+      double precision a(nm,n),w(n),z(nm,n),fv1(n),fv2(n)
+c
+c     this subroutine calls the essl routine dspev to get the
+c     eigenvalues and eigenvectors of a real symmetric matrix.
+c
+c     on input
+c
+c        nm  must be set to the row dimension of the two-dimensional
+c        array parameters as declared in the calling program
+c        dimension statement.
+c
+c        n  is the order of the matrix  a.
+c
+c        a  contains the real symmetric matrix.
+c
+c        matz  is an integer variable set equal to zero if
+c        only eigenvalues are desired.  otherwise it is set to
+c        any non-zero integer for both eigenvalues and eigenvectors.
+c
+c     on output
+c
+c        w  contains the eigenvalues in ascending order.
+c
+c        z  contains the eigenvectors if matz is not zero.
 
 
-c;c        ierr  is an integer output variable set equal to an error
-c;c           completion code described in the documentation for tqlrat
-c;c           and tql2.  the normal completion code is zero.
-c;c
-c;c        fv1  and  fv2  are temporary storage arrays.
-c;c
-c;c
-c;c     this version dated august 1983.
-c;c
-c;c     ------------------------------------------------------------------
-c;c
-c;      ione = 1
-c;      naux=2*nm
-c;* compress matrix into lower triangle
-c;      call triang(a,nm,n)
-c;* call essl routine
-c;      call dspev(ione,a,w,z,nm,n,fv1,naux)
-c;      return
-c;      end
-c;      subroutine triang(a,nrow,n)
-c;* -------------------
-c;* subroutine to pack lower triangle of symmetric matrix, stored as
-c;* column form
-c;* input
-c;*   a:         on input: full matrix stored column by column
-c;*              on return: packed lower triangle
-c;*   nrow:      maximum row dimension of matrix
-c;*   n:         order of matrix
-c;* written by:  millard alexander
-c;* current revision date;  1-aug-91
-c;* -------------------
-c;      implicit double precision (a-h,o-z)
-c;      dimension a(25)
-c;      if (n .gt. 1) then
-c;        indnew=n+1
-c;        indold=nrow+2
-c;        do  50 i = 2, n
-c;          nelt=n-i+1
-c;          call dcopy(nelt,a(indold),1,a(indnew),1)
-c;          indold=indold+nrow+1
-c;          indnew=indnew+nelt
-c;50      continue
-c;      endif
-c;      return
-c;      end
+c        ierr  is an integer output variable set equal to an error
+c           completion code described in the documentation for tqlrat
+c           and tql2.  the normal completion code is zero.
+c
+c        fv1  and  fv2  are temporary storage arrays.
+c
+c
+c     this version dated august 1983.
+c
+c     ------------------------------------------------------------------
+c
+      ione = 1
+      naux=2*nm
+* compress matrix into lower triangle
+      call triang(a,nm,n)
+* call essl routine
+      call dspev(ione,a,w,z,nm,n,fv1,naux)
+      return
+      end
+      subroutine triang(a,nrow,n)
+* -------------------
+* subroutine to pack lower triangle of symmetric matrix, stored as
+* column form
+* input
+*   a:         on input: full matrix stored column by column
+*              on return: packed lower triangle
+*   nrow:      maximum row dimension of matrix
+*   n:         order of matrix
+* written by:  millard alexander
+* current revision date;  1-aug-91
+* -------------------
+      implicit double precision (a-h,o-z)
+      dimension a(25)
+      if (n .gt. 1) then
+        indnew=n+1
+        indold=nrow+2
+        do  50 i = 2, n
+          nelt=n-i+1
+          call dcopy(nelt,a(indold),1,a(indnew),1)
+          indold=indold+nrow+1
+          indnew=indnew+nelt
+50      continue
+      endif
+      return
+      end
 #endif
 c#if defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_IBM) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;      subroutine rsg(nm,n,a,b,w,matz,z,fv1,fv2,ierr)
-c;c
-c;      integer n,nm,ierr,matz
-c;      double precision a(nm,n),b(nm,n),w(n),z(nm,n),fv1(n),fv2(n)
-c;c
-c;c     this subroutine calls the recommended sequence of
-c;c     subroutines from the eigensystem subroutine package (eispack)
-c;c     to find the eigenvalues and eigenvectors (if desired)
-c;c     for the real symmetric generalized eigenproblem  ax = (lambda)bx.
-c;c
-c;c     on input
-c;c
-c;c        nm  must be set to the row dimension of the two-dimensional
-c;c        array parameters as declared in the calling program
-c;c        dimension statement.
-c;c
-c;c        n  is the order of the matrices  a  and  b.
-c;c
-c;c        a  contains a real symmetric matrix.
-c;c
-c;c        b  contains a positive definite real symmetric matrix.
-c;c
-c;c        matz  is an integer variable set equal to zero if
-c;c        only eigenvalues are desired.  otherwise it is set to
-c;c        any non-zero integer for both eigenvalues and eigenvectors.
-c;c
-c;c     on output
-c;c
-c;c        w  contains the eigenvalues in ascending order.
-c;c
-c;c        z  contains the eigenvectors if matz is not zero.
-c;c
-c;c        ierr  is an integer output variable set equal to an error
-c;c           completion code described in the documentation for tqlrat
-c;c           and tql2.  the normal completion code is zero.
-c;c
-c;c        fv1  and  fv2  are temporary storage arrays.
-c;c
-c;c     questions and comments should be directed to burton s. garbow,
-c;c     mathematics and computer science div, argonne national laboratory
-c;c
-c;c     this version dated august 1983.
-c;c
-c;c     ------------------------------------------------------------------
-c;c
-c;      if (n .le. nm) go to 10
-c;      ierr = 10 * n
-c;      go to 50
-c;c
-c;   10 call  reduc(nm,n,a,b,fv2,ierr)
-c;      if (ierr .ne. 0) go to 50
-c;      if (matz .ne. 0) go to 20
-c;c     .......... find eigenvalues only ..........
-c;      call  tred1(nm,n,a,w,fv1,fv2)
-c;      call  tqlrat(n,w,fv2,ierr)
-c;      go to 50
-c;c     .......... find both eigenvalues and eigenvectors ..........
-c;   20 call  tred2(nm,n,a,w,fv1,z)
-c;      call  tql2(nm,n,w,fv1,z,ierr)
-c;      if (ierr .ne. 0) go to 50
-c;      call  rebak(nm,n,b,fv2,n,z)
-c;   50 return
-c;      end
-c;      subroutine rebak(nm,n,b,dl,m,z)
-c;c
-c;      integer i,j,k,m,n,i1,ii,nm
-c;      double precision b(nm,n),dl(n),z(nm,m)
-c;      double precision x
-c;c
-c;c     this subroutine is a translation of the algol procedure rebaka,
-c;c     num. math. 11, 99-110(1968) by martin and wilkinson.
-c;c     handbook for auto. comp., vol.ii-linear algebra, 303-314(1971).
-c;c
-c;c     this subroutine forms the eigenvectors of a generalized
-c;c     symmetric eigensystem by back transforming those of the
-c;c     derived symmetric matrix determined by  reduc.
-c;c
-c;c     on input
-c;c
-c;c        nm must be set to the row dimension of two-dimensional
-c;c          array parameters as declared in the calling program
-c;c          dimension statement.
-c;c
-c;c        n is the order of the matrix system.
-c;c
-c;c        b contains information about the similarity transformation
-c;c          (cholesky decomposition) used in the reduction by  reduc
-c;c          in its strict lower triangle.
-c;c
-c;c        dl contains further information about the transformation.
-c;c
-c;c        m is the number of eigenvectors to be back transformed.
-c;c
-c;c        z contains the eigenvectors to be back transformed
-c;c          in its first m columns.
-c;c
-c;c     on output
-c;c
-c;c        z contains the transformed eigenvectors
-c;c          in its first m columns.
-c;c
-c;c     questions and comments should be directed to burton s. garbow,
-c;c     mathematics and computer science div, argonne national laboratory
-c;c
-c;c     this version dated august 1983.
-c;c
-c;c     ------------------------------------------------------------------
-c;c
-c;      if (m .eq. 0) go to 200
-c;c
-c;      do 100 j = 1, m
-c;c     .......... for i=n step -1 until 1 do -- ..........
-c;         do 100 ii = 1, n
-c;            i = n + 1 - ii
-c;            i1 = i + 1
-c;            x = z(i,j)
-c;            if (i .eq. n) go to 80
-c;c
-c;            do 60 k = i1, n
-c;   60       x = x - b(k,i) * z(k,j)
-c;c
-c;   80       z(i,j) = x / dl(i)
-c;  100 continue
-c;c
-c;  200 return
-c;      end
-c;      subroutine reduc(nm,n,a,b,dl,ierr)
-c;c
-c;      integer i,j,k,n,i1,j1,nm,nn,ierr
-c;      double precision a(nm,n),b(nm,n),dl(n)
-c;      double precision x,y
-c;c
-c;c     this subroutine is a translation of the algol procedure reduc1,
-c;c     num. math. 11, 99-110(1968) by martin and wilkinson.
-c;c     handbook for auto. comp., vol.ii-linear algebra, 303-314(1971).
-c;c
-c;c     this subroutine reduces the generalized symmetric eigenproblem
-c;c     ax=(lambda)bx, where b is positive definite, to the standard
-c;c     symmetric eigenproblem using the cholesky factorization of b.
-c;c
-c;c     on input
-c;c
-c;c        nm must be set to the row dimension of two-dimensional
-c;c          array parameters as declared in the calling program
-c;c          dimension statement.
-c;c
-c;c        n is the order of the matrices a and b.  if the cholesky
-c;c          factor l of b is already available, n should be prefixed
-c;c          with a minus sign.
-c;c
-c;c        a and b contain the real symmetric input matrices.  only the
-c;c          full upper triangles of the matrices need be supplied.  if
-c;c          n is negative, the strict lower triangle of b contains,
-c;c          instead, the strict lower triangle of its cholesky factor l.
-c;c
-c;c        dl contains, if n is negative, the diagonal elements of l.
-c;c
-c;c     on output
-c;c
-c;c        a contains in its full lower triangle the full lower triangle
-c;c          of the symmetric matrix derived from the reduction to the
-c;c          standard form.  the strict upper triangle of a is unaltered.
-c;c
-c;c        b contains in its strict lower triangle the strict lower
-c;c          triangle of its cholesky factor l.  the full upper
-c;c          triangle of b is unaltered.
-c;c
-c;c        dl contains the diagonal elements of l.
-c;c
-c;c        ierr is set to
-c;c          zero       for normal return,
-c;c          7*n+1      if b is not positive definite.
-c;c
-c;c     questions and comments should be directed to burton s. garbow,
-c;c     mathematics and computer science div, argonne national laboratory
-c;c
-c;c     this version dated august 1983.
-c;c
-c;c     ------------------------------------------------------------------
-c;c
-c;      ierr = 0
-c;      nn = iabs(n)
-c;      if (n .lt. 0) go to 100
-c;c     .......... form l in the arrays b and dl ..........
-c;      do 80 i = 1, n
-c;         i1 = i - 1
-c;c
-c;         do 80 j = i, n
-c;            x = b(i,j)
-c;            if (i .eq. 1) go to 40
-c;c
-c;            do 20 k = 1, i1
-c;   20       x = x - b(i,k) * b(j,k)
-c;c
-c;   40       if (j .ne. i) go to 60
-c;            if (x .le. 0.0d0) go to 1000
-c;            y = dsqrt(x)
-c;            dl(i) = y
-c;            go to 80
-c;   60       b(j,i) = x / y
-c;   80 continue
-c;c     .......... form the transpose of the upper triangle of inv(l)*a
-c;c                in the lower triangle of the array a ..........
-c;  100 do 200 i = 1, nn
-c;         i1 = i - 1
-c;         y = dl(i)
-c;c
-c;         do 200 j = i, nn
-c;            x = a(i,j)
-c;            if (i .eq. 1) go to 180
-c;c
-c;            do 160 k = 1, i1
-c;  160       x = x - b(i,k) * a(j,k)
-c;c
-c;  180       a(j,i) = x / y
-c;  200 continue
-c;c     .......... pre-multiply by inv(l) and overwrite ..........
-c;      do 300 j = 1, nn
-c;         j1 = j - 1
-c;c
-c;         do 300 i = j, nn
-c;            x = a(i,j)
-c;            if (i .eq. j) go to 240
-c;            i1 = i - 1
-c;c
-c;            do 220 k = j, i1
-c;  220       x = x - a(k,j) * b(i,k)
-c;c
-c;  240       if (j .eq. 1) go to 280
-c;c
-c;            do 260 k = 1, j1
-c;  260       x = x - a(j,k) * b(i,k)
-c;c
-c;  280       a(i,j) = x / dl(i)
-c;  300 continue
-c;c
-c;      go to 1001
-c;c     .......... set error -- b is not positive definite ..........
-c; 1000 ierr = 7 * n + 1
-c; 1001 return
-c;      end
-c;*** from netlib, tue may 24 12:02:59 cdt 1988 ***
-c;*  eispack eigenvalue package
-c;      subroutine rs(nm,n,a,w,matz,z,fv1,fv2,ierr)
-c;c
-c;      integer n,nm,ierr,matz
-c;      double precision a(nm,n),w(n),z(nm,n),fv1(n),fv2(n)
-c;c
-c;c     this subroutine calls the recommended sequence of
-c;c     subroutines from the eigensystem subroutine package (eispack)
-c;c     to find the eigenvalues and eigenvectors (if desired)
-c;c     of a real symmetric matrix.
-c;c
-c;c     on input
-c;c
-c;c        nm  must be set to the row dimension of the two-dimensional
-c;c        array parameters as declared in the calling program
-c;c        dimension statement.
-c;c
-c;c        n  is the order of the matrix  a.
-c;c
-c;c        a  contains the real symmetric matrix.
-c;c
-c;c        matz  is an integer variable set equal to zero if
-c;c        only eigenvalues are desired.  otherwise it is set to
-c;c        any non-zero integer for both eigenvalues and eigenvectors.
-c;c
-c;c     on output
-c;c
-c;c        w  contains the eigenvalues in ascending order.
-c;c
-c;c        z  contains the eigenvectors if matz is not zero.
-c;c
-c;c        ierr  is an integer output variable set equal to an error
-c;c           completion code described in the documentation for tqlrat
-c;c           and tql2.  the normal completion code is zero.
-c;c
-c;c        fv1  and  fv2  are temporary storage arrays.
-c;c
-c;c     questions and comments should be directed to burton s. garbow,
-c;c     mathematics and computer science div, argonne national laboratory
-c;c
-c;c     this version dated august 1983.
-c;c
-c;c     ------------------------------------------------------------------
-c;c
-c;      if (n .le. nm) go to 10
-c;      ierr = 10 * n
-c;      go to 50
-c;c
-c;   10 if (matz .ne. 0) go to 20
-c;c     .......... find eigenvalues only ..........
-c;      call  tred1(nm,n,a,w,fv1,fv2)
-c;*  tqlrat encounters catastrophic underflow on the vax
-c;      call  tqlrat(n,w,fv2,ierr)
-c;*     call  tql1(n,w,fv1,ierr)
-c;      go to 50
-c;c     .......... find both eigenvalues and eigenvectors ..........
-c;   20 call  tred2(nm,n,a,w,fv1,z)
+      subroutine rsg(nm,n,a,b,w,matz,z,fv1,fv2,ierr)
+c
+      integer n,nm,ierr,matz
+      double precision a(nm,n),b(nm,n),w(n),z(nm,n),fv1(n),fv2(n)
+c
+c     this subroutine calls the recommended sequence of
+c     subroutines from the eigensystem subroutine package (eispack)
+c     to find the eigenvalues and eigenvectors (if desired)
+c     for the real symmetric generalized eigenproblem  ax = (lambda)bx.
+c
+c     on input
+c
+c        nm  must be set to the row dimension of the two-dimensional
+c        array parameters as declared in the calling program
+c        dimension statement.
+c
+c        n  is the order of the matrices  a  and  b.
+c
+c        a  contains a real symmetric matrix.
+c
+c        b  contains a positive definite real symmetric matrix.
+c
+c        matz  is an integer variable set equal to zero if
+c        only eigenvalues are desired.  otherwise it is set to
+c        any non-zero integer for both eigenvalues and eigenvectors.
+c
+c     on output
+c
+c        w  contains the eigenvalues in ascending order.
+c
+c        z  contains the eigenvectors if matz is not zero.
+c
+c        ierr  is an integer output variable set equal to an error
+c           completion code described in the documentation for tqlrat
+c           and tql2.  the normal completion code is zero.
+c
+c        fv1  and  fv2  are temporary storage arrays.
+c
+c     questions and comments should be directed to burton s. garbow,
+c     mathematics and computer science div, argonne national laboratory
+c
+c     this version dated august 1983.
+c
+c     ------------------------------------------------------------------
+c
+      if (n .le. nm) go to 10
+      ierr = 10 * n
+      go to 50
+c
+   10 call  reduc(nm,n,a,b,fv2,ierr)
+      if (ierr .ne. 0) go to 50
+      if (matz .ne. 0) go to 20
+c     .......... find eigenvalues only ..........
+      call  tred1(nm,n,a,w,fv1,fv2)
+      call  tqlrat(n,w,fv2,ierr)
+      go to 50
+c     .......... find both eigenvalues and eigenvectors ..........
+   20 call  tred2(nm,n,a,w,fv1,z)
+      call  tql2(nm,n,w,fv1,z,ierr)
+      if (ierr .ne. 0) go to 50
+      call  rebak(nm,n,b,fv2,n,z)
+   50 return
+      end
+      subroutine rebak(nm,n,b,dl,m,z)
+c
+      integer i,j,k,m,n,i1,ii,nm
+      double precision b(nm,n),dl(n),z(nm,m)
+      double precision x
+c
+c     this subroutine is a translation of the algol procedure rebaka,
+c     num. math. 11, 99-110(1968) by martin and wilkinson.
+c     handbook for auto. comp., vol.ii-linear algebra, 303-314(1971).
+c
+c     this subroutine forms the eigenvectors of a generalized
+c     symmetric eigensystem by back transforming those of the
+c     derived symmetric matrix determined by  reduc.
+c
+c     on input
+c
+c        nm must be set to the row dimension of two-dimensional
+c          array parameters as declared in the calling program
+c          dimension statement.
+c
+c        n is the order of the matrix system.
+c
+c        b contains information about the similarity transformation
+c          (cholesky decomposition) used in the reduction by  reduc
+c          in its strict lower triangle.
+c
+c        dl contains further information about the transformation.
+c
+c        m is the number of eigenvectors to be back transformed.
+c
+c        z contains the eigenvectors to be back transformed
+c          in its first m columns.
+c
+c     on output
+c
+c        z contains the transformed eigenvectors
+c          in its first m columns.
+c
+c     questions and comments should be directed to burton s. garbow,
+c     mathematics and computer science div, argonne national laboratory
+c
+c     this version dated august 1983.
+c
+c     ------------------------------------------------------------------
+c
+      if (m .eq. 0) go to 200
+c
+      do 100 j = 1, m
+c     .......... for i=n step -1 until 1 do -- ..........
+         do 100 ii = 1, n
+            i = n + 1 - ii
+            i1 = i + 1
+            x = z(i,j)
+            if (i .eq. n) go to 80
+c
+            do 60 k = i1, n
+   60       x = x - b(k,i) * z(k,j)
+c
+   80       z(i,j) = x / dl(i)
+  100 continue
+c
+  200 return
+      end
+      subroutine reduc(nm,n,a,b,dl,ierr)
+c
+      integer i,j,k,n,i1,j1,nm,nn,ierr
+      double precision a(nm,n),b(nm,n),dl(n)
+      double precision x,y
+c
+c     this subroutine is a translation of the algol procedure reduc1,
+c     num. math. 11, 99-110(1968) by martin and wilkinson.
+c     handbook for auto. comp., vol.ii-linear algebra, 303-314(1971).
+c
+c     this subroutine reduces the generalized symmetric eigenproblem
+c     ax=(lambda)bx, where b is positive definite, to the standard
+c     symmetric eigenproblem using the cholesky factorization of b.
+c
+c     on input
+c
+c        nm must be set to the row dimension of two-dimensional
+c          array parameters as declared in the calling program
+c          dimension statement.
+c
+c        n is the order of the matrices a and b.  if the cholesky
+c          factor l of b is already available, n should be prefixed
+c          with a minus sign.
+c
+c        a and b contain the real symmetric input matrices.  only the
+c          full upper triangles of the matrices need be supplied.  if
+c          n is negative, the strict lower triangle of b contains,
+c          instead, the strict lower triangle of its cholesky factor l.
+c
+c        dl contains, if n is negative, the diagonal elements of l.
+c
+c     on output
+c
+c        a contains in its full lower triangle the full lower triangle
+c          of the symmetric matrix derived from the reduction to the
+c          standard form.  the strict upper triangle of a is unaltered.
+c
+c        b contains in its strict lower triangle the strict lower
+c          triangle of its cholesky factor l.  the full upper
+c          triangle of b is unaltered.
+c
+c        dl contains the diagonal elements of l.
+c
+c        ierr is set to
+c          zero       for normal return,
+c          7*n+1      if b is not positive definite.
+c
+c     questions and comments should be directed to burton s. garbow,
+c     mathematics and computer science div, argonne national laboratory
+c
+c     this version dated august 1983.
+c
+c     ------------------------------------------------------------------
+c
+      ierr = 0
+      nn = iabs(n)
+      if (n .lt. 0) go to 100
+c     .......... form l in the arrays b and dl ..........
+      do 80 i = 1, n
+         i1 = i - 1
+c
+         do 80 j = i, n
+            x = b(i,j)
+            if (i .eq. 1) go to 40
+c
+            do 20 k = 1, i1
+   20       x = x - b(i,k) * b(j,k)
+c
+   40       if (j .ne. i) go to 60
+            if (x .le. 0.0d0) go to 1000
+            y = dsqrt(x)
+            dl(i) = y
+            go to 80
+   60       b(j,i) = x / y
+   80 continue
+c     .......... form the transpose of the upper triangle of inv(l)*a
+c                in the lower triangle of the array a ..........
+  100 do 200 i = 1, nn
+         i1 = i - 1
+         y = dl(i)
+c
+         do 200 j = i, nn
+            x = a(i,j)
+            if (i .eq. 1) go to 180
+c
+            do 160 k = 1, i1
+  160       x = x - b(i,k) * a(j,k)
+c
+  180       a(j,i) = x / y
+  200 continue
+c     .......... pre-multiply by inv(l) and overwrite ..........
+      do 300 j = 1, nn
+         j1 = j - 1
+c
+         do 300 i = j, nn
+            x = a(i,j)
+            if (i .eq. j) go to 240
+            i1 = i - 1
+c
+            do 220 k = j, i1
+  220       x = x - a(k,j) * b(i,k)
+c
+  240       if (j .eq. 1) go to 280
+c
+            do 260 k = 1, j1
+  260       x = x - a(j,k) * b(i,k)
+c
+  280       a(i,j) = x / dl(i)
+  300 continue
+c
+      go to 1001
+c     .......... set error -- b is not positive definite ..........
+ 1000 ierr = 7 * n + 1
+ 1001 return
+      end
+*** from netlib, tue may 24 12:02:59 cdt 1988 ***
+*  eispack eigenvalue package
+      subroutine rs(nm,n,a,w,matz,z,fv1,fv2,ierr)
+c
+      integer n,nm,ierr,matz
+      double precision a(nm,n),w(n),z(nm,n),fv1(n),fv2(n)
+c
+c     this subroutine calls the recommended sequence of
+c     subroutines from the eigensystem subroutine package (eispack)
+c     to find the eigenvalues and eigenvectors (if desired)
+c     of a real symmetric matrix.
+c
+c     on input
+c
+c        nm  must be set to the row dimension of the two-dimensional
+c        array parameters as declared in the calling program
+c        dimension statement.
+c
+c        n  is the order of the matrix  a.
+c
+c        a  contains the real symmetric matrix.
+c
+c        matz  is an integer variable set equal to zero if
+c        only eigenvalues are desired.  otherwise it is set to
+c        any non-zero integer for both eigenvalues and eigenvectors.
+c
+c     on output
+c
+c        w  contains the eigenvalues in ascending order.
+c
+c        z  contains the eigenvectors if matz is not zero.
+c
+c        ierr  is an integer output variable set equal to an error
+c           completion code described in the documentation for tqlrat
+c           and tql2.  the normal completion code is zero.
+c
+c        fv1  and  fv2  are temporary storage arrays.
+c
+c     questions and comments should be directed to burton s. garbow,
+c     mathematics and computer science div, argonne national laboratory
+c
+c     this version dated august 1983.
+c
+c     ------------------------------------------------------------------
+c
+      if (n .le. nm) go to 10
+      ierr = 10 * n
+      go to 50
+c
+   10 if (matz .ne. 0) go to 20
+c     .......... find eigenvalues only ..........
+      call  tred1(nm,n,a,w,fv1,fv2)
+*  tqlrat encounters catastrophic underflow on the vax
+      call  tqlrat(n,w,fv2,ierr)
+*     call  tql1(n,w,fv1,ierr)
+      go to 50
+c     .......... find both eigenvalues and eigenvectors ..........
+   20 call  tred2(nm,n,a,w,fv1,z)
 #endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_IBM) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;      call  tql2(nm,n,w,fv1,z,ierr)
-c;   50 return
-c;      end
+      call  tql2(nm,n,w,fv1,z,ierr)
+   50 return
+      end
 #endif
 #if defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
-c;      subroutine tql2(nm,n,d,e,z,ierr)
-c;c
-c;      integer i,j,k,l,m,n,ii,l1,l2,nm,mml,ierr
-c;      double precision d(n),e(n),z(nm,n)
-c;      double precision c,c2,c3,dl1,el1,f,g,h,p,r,s,s2,tst1,tst2,pythag
-c;c
-c;c     this subroutine is a translation of the algol procedure tql2,
-c;c     num. math. 11, 293-306(1968) by bowdler, martin, reinsch, and
-c;c     wilkinson.
-c;c     handbook for auto. comp., vol.ii-linear algebra, 227-240(1971).
-c;c
-c;c     this subroutine finds the eigenvalues and eigenvectors
-c;c     of a symmetric tridiagonal matrix by the ql method.
-c;c     the eigenvectors of a full symmetric matrix can also
-c;c     be found if  tred2  has been used to reduce this
-c;c     full matrix to tridiagonal form.
-c;c
-c;c     on input
-c;c
-c;c        nm must be set to the row dimension of two-dimensional
-c;c          array parameters as declared in the calling program
-c;c          dimension statement.
-c;c
-c;c        n is the order of the matrix.
-c;c
-c;c        d contains the diagonal elements of the input matrix.
-c;c
-c;c        e contains the subdiagonal elements of the input matrix
-c;c          in its last n-1 positions.  e(1) is arbitrary.
-c;c
-c;c        z contains the transformation matrix produced in the
-c;c          reduction by  tred2, if performed.  if the eigenvectors
-c;c          of the tridiagonal matrix are desired, z must contain
-c;c          the identity matrix.
-c;c
-c;c      on output
-c;c
-c;c        d contains the eigenvalues in ascending order.  if an
-c;c          error exit is made, the eigenvalues are correct but
-c;c          unordered for indices 1,2,...,ierr-1.
-c;c
-c;c        e has been destroyed.
-c;c
-c;c        z contains orthonormal eigenvectors of the symmetric
-c;c          tridiagonal (or full) matrix.  if an error exit is made,
-c;c          z contains the eigenvectors associated with the stored
-c;c          eigenvalues.
-c;c
-c;c        ierr is set to
-c;c          zero       for normal return,
-c;c          j          if the j-th eigenvalue has not been
-c;c                     determined after 30 iterations.
-c;c
-c;c     calls pythag for  dsqrt(a*a + b*b) .
-c;c
-c;c     questions and comments should be directed to burton s. garbow,
-c;c     mathematics and computer science div, argonne national laboratory
-c;c
-c;c     this version dated august 1983.
-c;c
-c;c     ------------------------------------------------------------------
-c;c
-c;      ierr = 0
-c;      if (n .eq. 1) go to 1001
-c;c
-c;      do 100 i = 2, n
-c;  100 e(i-1) = e(i)
-c;c
-c;      f = 0.0d0
-c;      tst1 = 0.0d0
-c;      e(n) = 0.0d0
-c;c
-c;      do 240 l = 1, n
-c;         j = 0
-c;         h = dabs(d(l)) + dabs(e(l))
-c;         if (tst1 .lt. h) tst1 = h
-c;c     .......... look for small sub-diagonal element ..........
-c;         do 110 m = l, n
-c;            tst2 = tst1 + dabs(e(m))
-c;            if (tst2 .eq. tst1) go to 120
-c;c     .......... e(n) is always zero, so there is no exit
-c;c                through the bottom of the loop ..........
-c;  110    continue
-c;c
-c;  120    if (m .eq. l) go to 220
-c;  130    if (j .eq. 30) go to 1000
-c;         j = j + 1
-c;c     .......... form shift ..........
-c;         l1 = l + 1
-c;         l2 = l1 + 1
-c;         g = d(l)
-c;         p = (d(l1) - g) / (2.0d0 * e(l))
-c;         r = pythag(p,1.0d0)
-c;         d(l) = e(l) / (p + dsign(r,p))
-c;         d(l1) = e(l) * (p + dsign(r,p))
-c;         dl1 = d(l1)
-c;         h = g - d(l)
-c;         if (l2 .gt. n) go to 145
-c;c
-c;         do 140 i = l2, n
-c;  140    d(i) = d(i) - h
-c;c
-c;  145    f = f + h
-c;c     .......... ql transformation ..........
-c;         p = d(m)
-c;         c = 1.0d0
-c;         c2 = c
-c;         el1 = e(l1)
-c;         s = 0.0d0
-c;         mml = m - l
-c;c     .......... for i=m-1 step -1 until l do -- ..........
-c;c        do 200 ii = 1, mml
-c;         do 200 i=m-1,l,-1
-c;            c3 = c2
-c;            c2 = c
-c;            s2 = s
-c;c           i = m - ii
-c;            g = c * e(i)
-c;            h = c * p
-c;            r = pythag(p,e(i))
-c;            e(i+1) = s * r
-c;            s = e(i) / r
-c;            c = p / r
-c;            p = c * d(i) - s * g
-c;            d(i+1) = h + s * (c * g + s * d(i))
-c;c  replace this inner loop with blas call (millard alexander 12/24/90)
-c;c     .......... form vector ..........
-c;c            do 180 k = 1, n
-c;c               h = z(k,i+1)
-c;c               hh = z(k, i)
-c;c               z(k,i+1) = s * hh + c * h
-c;c               z(k,i) = c * hh - s * h
-c;c  180       continue
+      subroutine tql2(nm,n,d,e,z,ierr)
+c
+      integer i,j,k,l,m,n,ii,l1,l2,nm,mml,ierr
+      double precision d(n),e(n),z(nm,n)
+      double precision c,c2,c3,dl1,el1,f,g,h,p,r,s,s2,tst1,tst2,pythag
+c
+c     this subroutine is a translation of the algol procedure tql2,
+c     num. math. 11, 293-306(1968) by bowdler, martin, reinsch, and
+c     wilkinson.
+c     handbook for auto. comp., vol.ii-linear algebra, 227-240(1971).
+c
+c     this subroutine finds the eigenvalues and eigenvectors
+c     of a symmetric tridiagonal matrix by the ql method.
+c     the eigenvectors of a full symmetric matrix can also
+c     be found if  tred2  has been used to reduce this
+c     full matrix to tridiagonal form.
+c
+c     on input
+c
+c        nm must be set to the row dimension of two-dimensional
+c          array parameters as declared in the calling program
+c          dimension statement.
+c
+c        n is the order of the matrix.
+c
+c        d contains the diagonal elements of the input matrix.
+c
+c        e contains the subdiagonal elements of the input matrix
+c          in its last n-1 positions.  e(1) is arbitrary.
+c
+c        z contains the transformation matrix produced in the
+c          reduction by  tred2, if performed.  if the eigenvectors
+c          of the tridiagonal matrix are desired, z must contain
+c          the identity matrix.
+c
+c      on output
+c
+c        d contains the eigenvalues in ascending order.  if an
+c          error exit is made, the eigenvalues are correct but
+c          unordered for indices 1,2,...,ierr-1.
+c
+c        e has been destroyed.
+c
+c        z contains orthonormal eigenvectors of the symmetric
+c          tridiagonal (or full) matrix.  if an error exit is made,
+c          z contains the eigenvectors associated with the stored
+c          eigenvalues.
+c
+c        ierr is set to
+c          zero       for normal return,
+c          j          if the j-th eigenvalue has not been
+c                     determined after 30 iterations.
+c
+c     calls pythag for  dsqrt(a*a + b*b) .
+c
+c     questions and comments should be directed to burton s. garbow,
+c     mathematics and computer science div, argonne national laboratory
+c
+c     this version dated august 1983.
+c
+c     ------------------------------------------------------------------
+c
+      ierr = 0
+      if (n .eq. 1) go to 1001
+c
+      do 100 i = 2, n
+  100 e(i-1) = e(i)
+c
+      f = 0.0d0
+      tst1 = 0.0d0
+      e(n) = 0.0d0
+c
+      do 240 l = 1, n
+         j = 0
+         h = dabs(d(l)) + dabs(e(l))
+         if (tst1 .lt. h) tst1 = h
+c     .......... look for small sub-diagonal element ..........
+         do 110 m = l, n
+            tst2 = tst1 + dabs(e(m))
+            if (tst2 .eq. tst1) go to 120
+c     .......... e(n) is always zero, so there is no exit
+c                through the bottom of the loop ..........
+  110    continue
+c
+  120    if (m .eq. l) go to 220
+  130    if (j .eq. 30) go to 1000
+         j = j + 1
+c     .......... form shift ..........
+         l1 = l + 1
+         l2 = l1 + 1
+         g = d(l)
+         p = (d(l1) - g) / (2.0d0 * e(l))
+         r = pythag(p,1.0d0)
+         d(l) = e(l) / (p + dsign(r,p))
+         d(l1) = e(l) * (p + dsign(r,p))
+         dl1 = d(l1)
+         h = g - d(l)
+         if (l2 .gt. n) go to 145
+c
+         do 140 i = l2, n
+  140    d(i) = d(i) - h
+c
+  145    f = f + h
+c     .......... ql transformation ..........
+         p = d(m)
+         c = 1.0d0
+         c2 = c
+         el1 = e(l1)
+         s = 0.0d0
+         mml = m - l
+c     .......... for i=m-1 step -1 until l do -- ..........
+c        do 200 ii = 1, mml
+         do 200 i=m-1,l,-1
+            c3 = c2
+            c2 = c
+            s2 = s
+c           i = m - ii
+            g = c * e(i)
+            h = c * p
+            r = pythag(p,e(i))
+            e(i+1) = s * r
+            s = e(i) / r
+            c = p / r
+            p = c * d(i) - s * g
+            d(i+1) = h + s * (c * g + s * d(i))
+c  replace this inner loop with blas call (millard alexander 12/24/90)
+c     .......... form vector ..........
+c            do 180 k = 1, n
+c               h = z(k,i+1)
+c               hh = z(k, i)
+c               z(k,i+1) = s * hh + c * h
+c               z(k,i) = c * hh - s * h
+c  180       continue
 #endif
 #if defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
-c;           call drot (n, z(1,i+1), 1, z(1,i), 1, c, s)
+           call drot (n, z(1,i+1), 1, z(1,i), 1, c, s)
 #endif
 #if defined(HIB_UNIX_CONVEX)
-c;           call srot (n, z(1,i+1), 1, z(1,i), 1, c, s)
+           call srot (n, z(1,i+1), 1, z(1,i), 1, c, s)
 #endif
 #if defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
-c;  200    continue
-c;c
-c;         p = -s * s2 * c3 * el1 * e(l) / dl1
-c;         e(l) = s * p
-c;         d(l) = c * p
-c;         tst2 = tst1 + dabs(e(l))
-c;         if (tst2 .gt. tst1) go to 130
-c;  220    d(l) = d(l) + f
-c;  240 continue
-c;c     .......... order eigenvalues and eigenvectors ..........
-c;      do 300 ii = 2, n
-c;         i = ii - 1
-c;         k = i
-c;         p = d(i)
-c;c
-c;         do 260 j = ii, n
-c;            if (d(j) .ge. p) go to 260
-c;            k = j
-c;            p = d(j)
-c;  260    continue
-c;c
-c;         if (k .eq. i) go to 300
-c;         d(k) = d(i)
-c;         d(i) = p
-c;c
-c;         do 280 j = 1, n
-c;            p = z(j,i)
-c;            z(j,i) = z(j,k)
-c;            z(j,k) = p
-c;  280    continue
-c;c
-c;  300 continue
-c;c
-c;      go to 1001
-c;c     .......... set error -- no convergence to an
-c;c                eigenvalue after 30 iterations ..........
-c; 1000 ierr = l
-c; 1001 return
-c;      end
+  200    continue
+c
+         p = -s * s2 * c3 * el1 * e(l) / dl1
+         e(l) = s * p
+         d(l) = c * p
+         tst2 = tst1 + dabs(e(l))
+         if (tst2 .gt. tst1) go to 130
+  220    d(l) = d(l) + f
+  240 continue
+c     .......... order eigenvalues and eigenvectors ..........
+      do 300 ii = 2, n
+         i = ii - 1
+         k = i
+         p = d(i)
+c
+         do 260 j = ii, n
+            if (d(j) .ge. p) go to 260
+            k = j
+            p = d(j)
+  260    continue
+c
+         if (k .eq. i) go to 300
+         d(k) = d(i)
+         d(i) = p
+c
+         do 280 j = 1, n
+            p = z(j,i)
+            z(j,i) = z(j,k)
+            z(j,k) = p
+  280    continue
+c
+  300 continue
+c
+      go to 1001
+c     .......... set error -- no convergence to an
+c                eigenvalue after 30 iterations ..........
+ 1000 ierr = l
+ 1001 return
+      end
 #endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;      subroutine tqlrat(n,d,e2,ierr)
-c;c
-c;      integer i,j,l,m,n,l1,mml,ierr
-c;      double precision d(n),e2(n)
-c;      double precision b,c,f,g,h,p,r,s,t,epslon,pythag
-c;c
-c;c     this subroutine is a translation of the algol procedure tqlrat,
-c;c     algorithm 464, comm. acm 16, 689(1973) by reinsch.
-c;c
-c;c     this subroutine finds the eigenvalues of a symmetric
-c;c     tridiagonal matrix by the rational ql method.
-c;c
-c;c     on input
-c;c
-c;c        n is the order of the matrix.
-c;c
-c;c        d contains the diagonal elements of the input matrix.
-c;c
-c;c        e2 contains the squares of the subdiagonal elements of the
-c;c          input matrix in its last n-1 positions.  e2(1) is arbitrary.
-c;c
-c;c      on output
-c;c
-c;c        d contains the eigenvalues in ascending order.  if an
-c;c          error exit is made, the eigenvalues are correct and
-c;c          ordered for indices 1,2,...ierr-1, but may not be
-c;c          the smallest eigenvalues.
-c;c
-c;c        e2 has been destroyed.
-c;c
-c;c        ierr is set to
-c;c          zero       for normal return,
-c;c          j          if the j-th eigenvalue has not been
-c;c                     determined after 30 iterations.
-c;c
-c;c     calls pythag for  dsqrt(a*a + b*b) .
-c;c
-c;c     questions and comments should be directed to burton s. garbow,
-c;c     mathematics and computer science div, argonne national laboratory
-c;c
-c;c     this version dated august 1987.
-c;c     modified by c. moler to fix underflow/overflow difficulties,
-c;c     especially on the vax and other machines where epslon(1.0d0)**2
-c;c     nearly underflows.  see the loop involving statement 102 and
-c;c     the two statements just before statement 200.
-c;c
-c;c     ------------------------------------------------------------------
-c;c
-c;      ierr = 0
-c;      if (n .eq. 1) go to 1001
-c;c
-c;      do 100 i = 2, n
-c;  100 e2(i-1) = e2(i)
-c;c
-c;      f = 0.0d0
-c;      t = 0.0d0
-c;      e2(n) = 0.0d0
-c;c
-c;      do 290 l = 1, n
-c;         j = 0
-c;         h = dabs(d(l)) + dsqrt(e2(l))
-c;         if (t .gt. h) go to 105
-c;         t = h
-c;         b = epslon(t)
-c;         c = b * b
-c;         if (c .ne. 0.0d0) go to 105
-c;c        spliting tolerance underflowed.  look for larger value.
-c;         do 102 i = l, n
-c;            h = dabs(d(i)) + dsqrt(e2(i))
-c;            if (h .gt. t) t = h
-c;  102    continue
-c;         b = epslon(t)
-c;         c = b * b
-c;c     .......... look for small squared sub-diagonal element ..........
-c;  105    do 110 m = l, n
-c;            if (e2(m) .le. c) go to 120
-c;c     .......... e2(n) is always zero, so there is no exit
-c;c                through the bottom of the loop ..........
-c;  110    continue
-c;c
-c;  120    if (m .eq. l) go to 210
-c;  130    if (j .eq. 30) go to 1000
-c;         j = j + 1
-c;c     .......... form shift ..........
-c;         l1 = l + 1
-c;         s = dsqrt(e2(l))
-c;         g = d(l)
-c;         p = (d(l1) - g) / (2.0d0 * s)
-c;         r = pythag(p,1.0d0)
-c;         d(l) = s / (p + dsign(r,p))
-c;         h = g - d(l)
-c;c
-c;         do 140 i = l1, n
-c;  140    d(i) = d(i) - h
-c;c
-c;         f = f + h
-c;c     .......... rational ql transformation ..........
-c;         g = d(m)
-c;         if (g .eq. 0.0d0) g = b
-c;         h = g
-c;         s = 0.0d0
-c;         mml = m - l
-c;c     .......... for i=m-1 step -1 until l do -- ..........
-c;c           do 200 ii = 1, mml
-c;c           i = m - ii
-c;            do 200 i=m-1,l,-1
-c;            p = g * h
-c;            r = p + e2(i)
-c;            e2(i+1) = s * r
-c;            s = e2(i) / r
-c;            d(i+1) = h + s * (h + d(i))
-c;            g = d(i) - e2(i) / g
-c;c           avoid division by zero on next pass
-c;            if (g .eq. 0.0d0) g = epslon(d(i))
-c;            h = g * (p / r)
-c;  200    continue
-c;c
-c;         e2(l) = s * g
-c;         d(l) = h
-c;c     .......... guard against underflow in convergence test ..........
-c;         if (h .eq. 0.0d0) go to 210
-c;         if (dabs(e2(l)) .le. dabs(c/h)) go to 210
-c;         e2(l) = h * e2(l)
-c;         if (e2(l) .ne. 0.0d0) go to 130
-c;  210    p = d(l) + f
-c;c     .......... order eigenvalues ..........
-c;         if (l .eq. 1) go to 250
-c;c     .......... for i=l step -1 until 2 do -- ..........
-c;c        do 230 ii = 2, l
-c;c           i = l + 2 - ii
-c;            do 230 i=l,2,-1
-c;            if (p .ge. d(i-1)) go to 270
-c;            d(i) = d(i-1)
-c;  230    continue
-c;c
-c;  250    i = 1
-c;  270    d(i) = p
-c;  290 continue
-c;c
-c;      go to 1001
-c;c     .......... set error -- no convergence to an
-c;c                eigenvalue after 30 iterations ..........
-c; 1000 ierr = l
-c; 1001 return
-c;      end
+      subroutine tqlrat(n,d,e2,ierr)
+c
+      integer i,j,l,m,n,l1,mml,ierr
+      double precision d(n),e2(n)
+      double precision b,c,f,g,h,p,r,s,t,epslon,pythag
+c
+c     this subroutine is a translation of the algol procedure tqlrat,
+c     algorithm 464, comm. acm 16, 689(1973) by reinsch.
+c
+c     this subroutine finds the eigenvalues of a symmetric
+c     tridiagonal matrix by the rational ql method.
+c
+c     on input
+c
+c        n is the order of the matrix.
+c
+c        d contains the diagonal elements of the input matrix.
+c
+c        e2 contains the squares of the subdiagonal elements of the
+c          input matrix in its last n-1 positions.  e2(1) is arbitrary.
+c
+c      on output
+c
+c        d contains the eigenvalues in ascending order.  if an
+c          error exit is made, the eigenvalues are correct and
+c          ordered for indices 1,2,...ierr-1, but may not be
+c          the smallest eigenvalues.
+c
+c        e2 has been destroyed.
+c
+c        ierr is set to
+c          zero       for normal return,
+c          j          if the j-th eigenvalue has not been
+c                     determined after 30 iterations.
+c
+c     calls pythag for  dsqrt(a*a + b*b) .
+c
+c     questions and comments should be directed to burton s. garbow,
+c     mathematics and computer science div, argonne national laboratory
+c
+c     this version dated august 1987.
+c     modified by c. moler to fix underflow/overflow difficulties,
+c     especially on the vax and other machines where epslon(1.0d0)**2
+c     nearly underflows.  see the loop involving statement 102 and
+c     the two statements just before statement 200.
+c
+c     ------------------------------------------------------------------
+c
+      ierr = 0
+      if (n .eq. 1) go to 1001
+c
+      do 100 i = 2, n
+  100 e2(i-1) = e2(i)
+c
+      f = 0.0d0
+      t = 0.0d0
+      e2(n) = 0.0d0
+c
+      do 290 l = 1, n
+         j = 0
+         h = dabs(d(l)) + dsqrt(e2(l))
+         if (t .gt. h) go to 105
+         t = h
+         b = epslon(t)
+         c = b * b
+         if (c .ne. 0.0d0) go to 105
+c        spliting tolerance underflowed.  look for larger value.
+         do 102 i = l, n
+            h = dabs(d(i)) + dsqrt(e2(i))
+            if (h .gt. t) t = h
+  102    continue
+         b = epslon(t)
+         c = b * b
+c     .......... look for small squared sub-diagonal element ..........
+  105    do 110 m = l, n
+            if (e2(m) .le. c) go to 120
+c     .......... e2(n) is always zero, so there is no exit
+c                through the bottom of the loop ..........
+  110    continue
+c
+  120    if (m .eq. l) go to 210
+  130    if (j .eq. 30) go to 1000
+         j = j + 1
+c     .......... form shift ..........
+         l1 = l + 1
+         s = dsqrt(e2(l))
+         g = d(l)
+         p = (d(l1) - g) / (2.0d0 * s)
+         r = pythag(p,1.0d0)
+         d(l) = s / (p + dsign(r,p))
+         h = g - d(l)
+c
+         do 140 i = l1, n
+  140    d(i) = d(i) - h
+c
+         f = f + h
+c     .......... rational ql transformation ..........
+         g = d(m)
+         if (g .eq. 0.0d0) g = b
+         h = g
+         s = 0.0d0
+         mml = m - l
+c     .......... for i=m-1 step -1 until l do -- ..........
+c           do 200 ii = 1, mml
+c           i = m - ii
+            do 200 i=m-1,l,-1
+            p = g * h
+            r = p + e2(i)
+            e2(i+1) = s * r
+            s = e2(i) / r
+            d(i+1) = h + s * (h + d(i))
+            g = d(i) - e2(i) / g
+c           avoid division by zero on next pass
+            if (g .eq. 0.0d0) g = epslon(d(i))
+            h = g * (p / r)
+  200    continue
+c
+         e2(l) = s * g
+         d(l) = h
+c     .......... guard against underflow in convergence test ..........
+         if (h .eq. 0.0d0) go to 210
+         if (dabs(e2(l)) .le. dabs(c/h)) go to 210
+         e2(l) = h * e2(l)
+         if (e2(l) .ne. 0.0d0) go to 130
+  210    p = d(l) + f
+c     .......... order eigenvalues ..........
+         if (l .eq. 1) go to 250
+c     .......... for i=l step -1 until 2 do -- ..........
+c        do 230 ii = 2, l
+c           i = l + 2 - ii
+            do 230 i=l,2,-1
+            if (p .ge. d(i-1)) go to 270
+            d(i) = d(i-1)
+  230    continue
+c
+  250    i = 1
+  270    d(i) = p
+  290 continue
+c
+      go to 1001
+c     .......... set error -- no convergence to an
+c                eigenvalue after 30 iterations ..........
+ 1000 ierr = l
+ 1001 return
+      end
 #endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;      subroutine tred1(nm,n,a,d,e,e2)
-c;c
-c;      integer i,j,k,l,n,nm,jp1
-c;      double precision a(nm,n),d(n),e(n),e2(n)
-c;      double precision f,g,h,scale
-c;c
-c;c     this subroutine is a translation of the algol procedure tred1,
-c;c     num. math. 11, 181-195(1968) by martin, reinsch, and wilkinson.
-c;c     handbook for auto. comp., vol.ii-linear algebra, 212-226(1971).
-c;c
-c;c     this subroutine reduces a real symmetric matrix
-c;c     to a symmetric tridiagonal matrix using
-c;c     orthogonal similarity transformations.
-c;c
-c;c     on input
-c;c
-c;c        nm must be set to the row dimension of two-dimensional
-c;c          array parameters as declared in the calling program
-c;c          dimension statement.
-c;c
-c;c        n is the order of the matrix.
-c;c
-c;c        a contains the real symmetric input matrix.  only the
-c;c          lower triangle of the matrix need be supplied.
-c;c
-c;c     on output
-c;c
-c;c        a contains information about the orthogonal trans-
-c;c          formations used in the reduction in its strict lower
-c;c          triangle.  the full upper triangle of a is unaltered.
-c;c
-c;c        d contains the diagonal elements of the tridiagonal matrix.
-c;c
-c;c        e contains the subdiagonal elements of the tridiagonal
-c;c          matrix in its last n-1 positions.  e(1) is set to zero.
-c;c
-c;c        e2 contains the squares of the corresponding elements of e.
-c;c          e2 may coincide with e if the squares are not needed.
-c;c
-c;c     questions and comments should be directed to burton s. garbow,
-c;c     mathematics and computer science div, argonne national laboratory
-c;c
-c;c     this version dated august 1983.
-c;c
-c;c     ------------------------------------------------------------------
-c;c
-c;      do 100 i = 1, n
-c;         d(i) = a(n,i)
-c;         a(n,i) = a(i,i)
-c;  100 continue
-c;c     .......... for i=n step -1 until 1 do -- ..........
-c;c     do 300 ii = 1, n
-c;c        i = n + 1 - ii
-c;         do 300 i=n,1,-1
-c;         l = i - 1
-c;         h = 0.0d0
-c;         scale = 0.0d0
-c;         if (l .lt. 1) go to 130
-c;c     .......... scale row (algol tol then not needed) ..........
-c;         do 120 k = 1, l
-c;  120    scale = scale + dabs(d(k))
-c;c
-c;         if (scale .ne. 0.0d0) go to 140
-c;c
-c;         do 125 j = 1, l
-c;            d(j) = a(l,j)
-c;            a(l,j) = a(i,j)
-c;            a(i,j) = 0.0d0
-c;  125    continue
-c;c
-c;  130    e(i) = 0.0d0
-c;         e2(i) = 0.0d0
-c;         go to 300
-c;c
-c;  140    do 150 k = 1, l
-c;            d(k) = d(k) / scale
-c;            h = h + d(k) * d(k)
-c;  150    continue
-c;c
-c;         e2(i) = scale * scale * h
-c;         f = d(l)
-c;         g = -dsign(dsqrt(h),f)
-c;         e(i) = scale * g
-c;         h = h - f * g
-c;         d(l) = f - g
-c;         if (l .eq. 1) go to 285
-c;c     .......... form a*u ..........
-c;         do 170 j = 1, l
-c;  170    e(j) = 0.0d0
-c;c
-c;         do 240 j = 1, l
-c;            f = d(j)
-c;            g = e(j) + a(j,j) * f
-c;            jp1 = j + 1
-c;            if (l .lt. jp1) go to 220
-c;c
-c;            do 200 k = jp1, l
-c;               g = g + a(k,j) * d(k)
-c;               e(k) = e(k) + a(k,j) * f
-c;  200       continue
-c;c
-c;  220       e(j) = g
-c;  240    continue
-c;c     .......... form p ..........
-c;         f = 0.0d0
-c;c
-c;         do 245 j = 1, l
-c;            e(j) = e(j) / h
-c;            f = f + e(j) * d(j)
-c;  245    continue
-c;c
-c;         h = f / (h + h)
-c;c     .......... form q ..........
-c;         do 250 j = 1, l
-c;  250    e(j) = e(j) - h * d(j)
-c;c     .......... form reduced a ..........
-c;         do 280 j = 1, l
-c;            f = d(j)
-c;            g = e(j)
-c;c
-c;            do 260 k = j, l
-c;  260       a(k,j) = a(k,j) - f * e(k) - g * d(k)
-c;c
-c;  280    continue
-c;c
-c;  285    do 290 j = 1, l
-c;            f = d(j)
-c;            d(j) = a(l,j)
-c;            a(l,j) = a(i,j)
-c;            a(i,j) = f * scale
-c;  290    continue
-c;c
-c;  300 continue
-c;c
-c;      return
-c;      end
+      subroutine tred1(nm,n,a,d,e,e2)
+c
+      integer i,j,k,l,n,nm,jp1
+      double precision a(nm,n),d(n),e(n),e2(n)
+      double precision f,g,h,scale
+c
+c     this subroutine is a translation of the algol procedure tred1,
+c     num. math. 11, 181-195(1968) by martin, reinsch, and wilkinson.
+c     handbook for auto. comp., vol.ii-linear algebra, 212-226(1971).
+c
+c     this subroutine reduces a real symmetric matrix
+c     to a symmetric tridiagonal matrix using
+c     orthogonal similarity transformations.
+c
+c     on input
+c
+c        nm must be set to the row dimension of two-dimensional
+c          array parameters as declared in the calling program
+c          dimension statement.
+c
+c        n is the order of the matrix.
+c
+c        a contains the real symmetric input matrix.  only the
+c          lower triangle of the matrix need be supplied.
+c
+c     on output
+c
+c        a contains information about the orthogonal trans-
+c          formations used in the reduction in its strict lower
+c          triangle.  the full upper triangle of a is unaltered.
+c
+c        d contains the diagonal elements of the tridiagonal matrix.
+c
+c        e contains the subdiagonal elements of the tridiagonal
+c          matrix in its last n-1 positions.  e(1) is set to zero.
+c
+c        e2 contains the squares of the corresponding elements of e.
+c          e2 may coincide with e if the squares are not needed.
+c
+c     questions and comments should be directed to burton s. garbow,
+c     mathematics and computer science div, argonne national laboratory
+c
+c     this version dated august 1983.
+c
+c     ------------------------------------------------------------------
+c
+      do 100 i = 1, n
+         d(i) = a(n,i)
+         a(n,i) = a(i,i)
+  100 continue
+c     .......... for i=n step -1 until 1 do -- ..........
+c     do 300 ii = 1, n
+c        i = n + 1 - ii
+         do 300 i=n,1,-1
+         l = i - 1
+         h = 0.0d0
+         scale = 0.0d0
+         if (l .lt. 1) go to 130
+c     .......... scale row (algol tol then not needed) ..........
+         do 120 k = 1, l
+  120    scale = scale + dabs(d(k))
+c
+         if (scale .ne. 0.0d0) go to 140
+c
+         do 125 j = 1, l
+            d(j) = a(l,j)
+            a(l,j) = a(i,j)
+            a(i,j) = 0.0d0
+  125    continue
+c
+  130    e(i) = 0.0d0
+         e2(i) = 0.0d0
+         go to 300
+c
+  140    do 150 k = 1, l
+            d(k) = d(k) / scale
+            h = h + d(k) * d(k)
+  150    continue
+c
+         e2(i) = scale * scale * h
+         f = d(l)
+         g = -dsign(dsqrt(h),f)
+         e(i) = scale * g
+         h = h - f * g
+         d(l) = f - g
+         if (l .eq. 1) go to 285
+c     .......... form a*u ..........
+         do 170 j = 1, l
+  170    e(j) = 0.0d0
+c
+         do 240 j = 1, l
+            f = d(j)
+            g = e(j) + a(j,j) * f
+            jp1 = j + 1
+            if (l .lt. jp1) go to 220
+c
+            do 200 k = jp1, l
+               g = g + a(k,j) * d(k)
+               e(k) = e(k) + a(k,j) * f
+  200       continue
+c
+  220       e(j) = g
+  240    continue
+c     .......... form p ..........
+         f = 0.0d0
+c
+         do 245 j = 1, l
+            e(j) = e(j) / h
+            f = f + e(j) * d(j)
+  245    continue
+c
+         h = f / (h + h)
+c     .......... form q ..........
+         do 250 j = 1, l
+  250    e(j) = e(j) - h * d(j)
+c     .......... form reduced a ..........
+         do 280 j = 1, l
+            f = d(j)
+            g = e(j)
+c
+            do 260 k = j, l
+  260       a(k,j) = a(k,j) - f * e(k) - g * d(k)
+c
+  280    continue
+c
+  285    do 290 j = 1, l
+            f = d(j)
+            d(j) = a(l,j)
+            a(l,j) = a(i,j)
+            a(i,j) = f * scale
+  290    continue
+c
+  300 continue
+c
+      return
+      end
 #endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;      subroutine tred2(nm,n,a,d,e,z)
-c;c
-c;      integer i,j,k,l,n,nm,jp1
-c;      double precision a(nm,n),d(n),e(n),z(nm,n)
-c;      double precision f,g,h,hh,scale
-c;c
-c;c     this subroutine is a translation of the algol procedure tred2,
-c;c     num. math. 11, 181-195(1968) by martin, reinsch, and wilkinson.
-c;c     handbook for auto. comp., vol.ii-linear algebra, 212-226(1971).
-c;c
-c;c     this subroutine reduces a real symmetric matrix to a
-c;c     symmetric tridiagonal matrix using and accumulating
-c;c     orthogonal similarity transformations.
-c;c
-c;c     on input
-c;c
-c;c        nm must be set to the row dimension of two-dimensional
-c;c          array parameters as declared in the calling program
-c;c          dimension statement.
-c;c
-c;c        n is the order of the matrix.
-c;c
-c;c        a contains the real symmetric input matrix.  only the
-c;c          lower triangle of the matrix need be supplied.
-c;c
-c;c     on output
-c;c
-c;c        d contains the diagonal elements of the tridiagonal matrix.
-c;c
-c;c        e contains the subdiagonal elements of the tridiagonal
-c;c          matrix in its last n-1 positions.  e(1) is set to zero.
-c;c
-c;c        z contains the orthogonal transformation matrix
-c;c          produced in the reduction.
-c;c
-c;c        a and z may coincide.  if distinct, a is unaltered.
-c;c
-c;c     questions and comments should be directed to burton s. garbow,
-c;c     mathematics and computer science div, argonne national laboratory
-c;c
-c;c     this version dated august 1983.
-c;c
-c;c     ------------------------------------------------------------------
-c;c
-c;      do 100 i = 1, n
-c;c
-c;         do 80 j = i, n
-c;   80    z(j,i) = a(j,i)
-c;c
-c;         d(i) = a(n,i)
-c;  100 continue
-c;c
-c;      if (n .eq. 1) go to 510
-c;c     .......... for i=n step -1 until 2 do -- ..........
-c;c     do 300 ii = 2, n
-c;c        i = n + 2 - ii
-c;      do 300 i=n,2,-1
-c;         l = i - 1
-c;         h = 0.0d0
-c;         scale = 0.0d0
-c;         if (l .lt. 2) go to 130
-c;c     .......... scale row (algol tol then not needed) ..........
-c;         do 120 k = 1, l
-c;  120    scale = scale + dabs(d(k))
-c;c
-c;         if (scale .ne. 0.0d0) go to 140
-c;  130    e(i) = d(l)
-c;c
-c;         do 135 j = 1, l
-c;            d(j) = z(l,j)
-c;            z(i,j) = 0.0d0
-c;            z(j,i) = 0.0d0
-c;  135    continue
-c;c
-c;         go to 290
-c;c
-c;  140    do 150 k = 1, l
-c;            d(k) = d(k) / scale
-c;            h = h + d(k) * d(k)
-c;  150    continue
-c;c
-c;         f = d(l)
-c;         g = -dsign(dsqrt(h),f)
-c;         e(i) = scale * g
-c;         h = h - f * g
-c;         d(l) = f - g
-c;c     .......... form a*u ..........
-c;         do 170 j = 1, l
-c;  170    e(j) = 0.0d0
-c;c
-c;         do 240 j = 1, l
-c;            f = d(j)
-c;            z(j,i) = f
-c;            g = e(j) + z(j,j) * f
-c;            jp1 = j + 1
-c;            if (l .lt. jp1) go to 220
-c;c
-c;            do 200 k = jp1, l
-c;               g = g + z(k,j) * d(k)
-c;               e(k) = e(k) + z(k,j) * f
-c;  200       continue
-c;c
-c;  220       e(j) = g
-c;  240    continue
-c;c     .......... form p ..........
-c;         f = 0.0d0
-c;c
-c;         do 245 j = 1, l
-c;            e(j) = e(j) / h
-c;            f = f + e(j) * d(j)
-c;  245    continue
-c;c
-c;         hh = f / (h + h)
-c;c     .......... form q ..........
-c;         do 250 j = 1, l
-c;  250    e(j) = e(j) - hh * d(j)
-c;c     .......... form reduced a ..........
-c;         do 280 j = 1, l
-c;            f = d(j)
-c;            g = e(j)
-c;c
-c;            do 260 k = j, l
-c;  260       z(k,j) = z(k,j) - f * e(k) - g * d(k)
-c;c
-c;            d(j) = z(l,j)
-c;            z(i,j) = 0.0d0
-c;  280    continue
-c;c
-c;  290    d(i) = h
-c;  300 continue
-c;c     .......... accumulation of transformation matrices ..........
-c;      do 500 i = 2, n
-c;         l = i - 1
-c;         z(n,l) = z(l,l)
-c;         z(l,l) = 1.0d0
-c;         h = d(i)
-c;         if (h .eq. 0.0d0) go to 380
-c;c
-c;         do 330 k = 1, l
-c;  330    d(k) = z(k,i) / h
-c;c
-c;         do 360 j = 1, l
-c;            g = 0.0d0
-c;c
-c;            do 340 k = 1, l
-c;  340       g = g + z(k,i) * z(k,j)
-c;c
-c;            do 360 k = 1, l
-c;               z(k,j) = z(k,j) - g * d(k)
-c;  360    continue
-c;c
-c;  380    do 400 k = 1, l
-c;  400    z(k,i) = 0.0d0
-c;c
-c;  500 continue
-c;c
-c;  510 do 520 i = 1, n
-c;         d(i) = z(n,i)
-c;         z(n,i) = 0.0d0
-c;  520 continue
-c;c
-c;      z(n,n) = 1.0d0
-c;      e(1) = 0.0d0
-c;      return
-c;      end
+      subroutine tred2(nm,n,a,d,e,z)
+c
+      integer i,j,k,l,n,nm,jp1
+      double precision a(nm,n),d(n),e(n),z(nm,n)
+      double precision f,g,h,hh,scale
+c
+c     this subroutine is a translation of the algol procedure tred2,
+c     num. math. 11, 181-195(1968) by martin, reinsch, and wilkinson.
+c     handbook for auto. comp., vol.ii-linear algebra, 212-226(1971).
+c
+c     this subroutine reduces a real symmetric matrix to a
+c     symmetric tridiagonal matrix using and accumulating
+c     orthogonal similarity transformations.
+c
+c     on input
+c
+c        nm must be set to the row dimension of two-dimensional
+c          array parameters as declared in the calling program
+c          dimension statement.
+c
+c        n is the order of the matrix.
+c
+c        a contains the real symmetric input matrix.  only the
+c          lower triangle of the matrix need be supplied.
+c
+c     on output
+c
+c        d contains the diagonal elements of the tridiagonal matrix.
+c
+c        e contains the subdiagonal elements of the tridiagonal
+c          matrix in its last n-1 positions.  e(1) is set to zero.
+c
+c        z contains the orthogonal transformation matrix
+c          produced in the reduction.
+c
+c        a and z may coincide.  if distinct, a is unaltered.
+c
+c     questions and comments should be directed to burton s. garbow,
+c     mathematics and computer science div, argonne national laboratory
+c
+c     this version dated august 1983.
+c
+c     ------------------------------------------------------------------
+c
+      do 100 i = 1, n
+c
+         do 80 j = i, n
+   80    z(j,i) = a(j,i)
+c
+         d(i) = a(n,i)
+  100 continue
+c
+      if (n .eq. 1) go to 510
+c     .......... for i=n step -1 until 2 do -- ..........
+c     do 300 ii = 2, n
+c        i = n + 2 - ii
+      do 300 i=n,2,-1
+         l = i - 1
+         h = 0.0d0
+         scale = 0.0d0
+         if (l .lt. 2) go to 130
+c     .......... scale row (algol tol then not needed) ..........
+         do 120 k = 1, l
+  120    scale = scale + dabs(d(k))
+c
+         if (scale .ne. 0.0d0) go to 140
+  130    e(i) = d(l)
+c
+         do 135 j = 1, l
+            d(j) = z(l,j)
+            z(i,j) = 0.0d0
+            z(j,i) = 0.0d0
+  135    continue
+c
+         go to 290
+c
+  140    do 150 k = 1, l
+            d(k) = d(k) / scale
+            h = h + d(k) * d(k)
+  150    continue
+c
+         f = d(l)
+         g = -dsign(dsqrt(h),f)
+         e(i) = scale * g
+         h = h - f * g
+         d(l) = f - g
+c     .......... form a*u ..........
+         do 170 j = 1, l
+  170    e(j) = 0.0d0
+c
+         do 240 j = 1, l
+            f = d(j)
+            z(j,i) = f
+            g = e(j) + z(j,j) * f
+            jp1 = j + 1
+            if (l .lt. jp1) go to 220
+c
+            do 200 k = jp1, l
+               g = g + z(k,j) * d(k)
+               e(k) = e(k) + z(k,j) * f
+  200       continue
+c
+  220       e(j) = g
+  240    continue
+c     .......... form p ..........
+         f = 0.0d0
+c
+         do 245 j = 1, l
+            e(j) = e(j) / h
+            f = f + e(j) * d(j)
+  245    continue
+c
+         hh = f / (h + h)
+c     .......... form q ..........
+         do 250 j = 1, l
+  250    e(j) = e(j) - hh * d(j)
+c     .......... form reduced a ..........
+         do 280 j = 1, l
+            f = d(j)
+            g = e(j)
+c
+            do 260 k = j, l
+  260       z(k,j) = z(k,j) - f * e(k) - g * d(k)
+c
+            d(j) = z(l,j)
+            z(i,j) = 0.0d0
+  280    continue
+c
+  290    d(i) = h
+  300 continue
+c     .......... accumulation of transformation matrices ..........
+      do 500 i = 2, n
+         l = i - 1
+         z(n,l) = z(l,l)
+         z(l,l) = 1.0d0
+         h = d(i)
+         if (h .eq. 0.0d0) go to 380
+c
+         do 330 k = 1, l
+  330    d(k) = z(k,i) / h
+c
+         do 360 j = 1, l
+            g = 0.0d0
+c
+            do 340 k = 1, l
+  340       g = g + z(k,i) * z(k,j)
+c
+            do 360 k = 1, l
+               z(k,j) = z(k,j) - g * d(k)
+  360    continue
+c
+  380    do 400 k = 1, l
+  400    z(k,i) = 0.0d0
+c
+  500 continue
+c
+  510 do 520 i = 1, n
+         d(i) = z(n,i)
+         z(n,i) = 0.0d0
+  520 continue
+c
+      z(n,n) = 1.0d0
+      e(1) = 0.0d0
+      return
+      end
 #endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;      double precision function epslon (x)
-c;      double precision x
-c;c
-c;c     estimate unit roundoff in quantities of size x.
-c;c
-c;      double precision a,b,c,eps
-c;c
-c;c     this program should function properly on all systems
-c;c     satisfying the following two assumptions,
-c;c        1.  the base used in representing floating point
-c;c            numbers is not a power of three.
-c;c        2.  the quantity  a  in statement 10 is represented to
-c;c            the accuracy used in floating point variables
-c;c            that are stored in memory.
-c;c     the statement number 10 and the go to 10 are intended to
-c;c     force optimizing compilers to generate code satisfying
-c;c     assumption 2.
-c;c     under these assumptions, it should be true that,
-c;c            a  is not exactly equal to four-thirds,
-c;c            b  has a zero for its last bit or digit,
-c;c            c  is not exactly equal to one,
-c;c            eps  measures the separation of 1.0 from
-c;c                 the next larger floating point number.
-c;c     the developers of eispack would appreciate being informed
-c;c     about any systems where these assumptions do not hold.
-c;c
-c;c     this version dated 4/6/83.
-c;c
-c;      a = 4.0d0/3.0d0
-c;   10 b = a - 1.0d0
-c;      c = b + b + b
-c;      eps = dabs(c-1.0d0)
-c;      if (eps .eq. 0.0d0) go to 10
-c;      epslon = eps*dabs(x)
-c;      return
-c;      end
-c;      double precision function pythag(a,b)
-c;      double precision a,b
-c;c
-c;c     finds dsqrt(a**2+b**2) without overflow or destructive underflow
-c;c
-c;      double precision p,r,s,t,u
-c;      p = dmax1(dabs(a),dabs(b))
-c;      if (p .eq. 0.0d0) go to 20
-c;      r = (dmin1(dabs(a),dabs(b))/p)**2
-c;   10 continue
-c;         t = 4.0d0 + r
-c;         if (t .eq. 4.0d0) go to 20
-c;         s = r/t
-c;         u = 1.0d0 + 2.0d0*s
-c;         p = u*p
-c;         r = (s/u)**2 * r
-c;      go to 10
-c;   20 pythag = p
-c;      return
-c;      end
+      double precision function epslon (x)
+      double precision x
+c
+c     estimate unit roundoff in quantities of size x.
+c
+      double precision a,b,c,eps
+c
+c     this program should function properly on all systems
+c     satisfying the following two assumptions,
+c        1.  the base used in representing floating point
+c            numbers is not a power of three.
+c        2.  the quantity  a  in statement 10 is represented to
+c            the accuracy used in floating point variables
+c            that are stored in memory.
+c     the statement number 10 and the go to 10 are intended to
+c     force optimizing compilers to generate code satisfying
+c     assumption 2.
+c     under these assumptions, it should be true that,
+c            a  is not exactly equal to four-thirds,
+c            b  has a zero for its last bit or digit,
+c            c  is not exactly equal to one,
+c            eps  measures the separation of 1.0 from
+c                 the next larger floating point number.
+c     the developers of eispack would appreciate being informed
+c     about any systems where these assumptions do not hold.
+c
+c     this version dated 4/6/83.
+c
+      a = 4.0d0/3.0d0
+   10 b = a - 1.0d0
+      c = b + b + b
+      eps = dabs(c-1.0d0)
+      if (eps .eq. 0.0d0) go to 10
+      epslon = eps*dabs(x)
+      return
+      end
+      double precision function pythag(a,b)
+      double precision a,b
+c
+c     finds dsqrt(a**2+b**2) without overflow or destructive underflow
+c
+      double precision p,r,s,t,u
+      p = dmax1(dabs(a),dabs(b))
+      if (p .eq. 0.0d0) go to 20
+      r = (dmin1(dabs(a),dabs(b))/p)**2
+   10 continue
+         t = 4.0d0 + r
+         if (t .eq. 4.0d0) go to 20
+         s = r/t
+         u = 1.0d0 + 2.0d0*s
+         p = u*p
+         r = (s/u)**2 * r
+      go to 10
+   20 pythag = p
+      return
+      end
 #endif
 ***************************************************************************
 *                                                                         *
@@ -1094,237 +1094,237 @@ c;      end
 *                                                                         *
 ***************************************************************************
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;* ------------------------------------------------------------
-c;      subroutine sgefa(a,lda,n,ipvt,info)
-c;      implicit double precision (a-h,o-z)
-c;      integer lda,n,ipvt(1),info
-c;      dimension a(lda,1)
-c;c      real a(lda,1)
-c;c
-c;c     sgefa factors a real matrix by gaussian elimination.
-c;c
-c;c     sgefa is usually called by sgeco, but it can be called
-c;c     directly with a saving in time if  rcond  is not needed.
-c;c     (time for sgeco) = (1 + 9/n)*(time for sgefa) .
-c;c
-c;c     on entry
-c;c
-c;c        a       real(lda, n)
-c;c                the matrix to be factored.
-c;c
-c;c        lda     integer
-c;c                the leading dimension of the array  a .
-c;c
-c;c        n       integer
-c;c                the order of the matrix  a .
-c;c
-c;c     on return
-c;c
-c;c        a       an upper triangular matrix and the multipliers
-c;c                which were used to obtain it.
-c;c                the factorization can be written  a = l*u  where
-c;c                l  is a product of permutation and unit lower
-c;c                triangular matrices and  u  is upper triangular.
-c;c
-c;c        ipvt    integer(n)
-c;c                an integer vector of pivot indices.
-c;c
-c;c        info    integer
-c;c                = 0  normal value.
-c;c                = k  if  u(k,k) .eq. 0.0 .  this is not an error
-c;c                     condition for this subroutine, but it does
-c;c                     indicate that sgesl or sgedi will divide by zero
-c;c                     if called.  use  rcond  in sgeco for a reliable
-c;c                     indication of singularity.
-c;c
-c;c     linpack. this version dated 08/14/78 .
-c;c     cleve moler, university of new mexico, argonne national lab.
-c;c
-c;c     subroutines and functions
-c;c
-c;c     blas saxpy,sscal,isamax
-c;c
-c;c     internal variables
-c;c
-c;c      real t
-c;      integer idamax,j,k,kp1,l,nm1,idummy
-c;      idummy=1
-c;c
-c;c
-c;c     gaussian elimination with partial pivoting
-c;c
-c;      info = 0
-c;      nm1 = n - 1
-c;      if (nm1 .lt. 1) go to 70
-c;      do 60 k = 1, nm1
-c;         kp1 = k + 1
-c;c
-c;c        find l = pivot index
-c;c
-c;         l = idamax(n-k+1,a(k,k),1) + k - 1
-c;         ipvt(k) = l
-c;c
-c;c        zero pivot implies this column already triangularized
-c;c
-c;         if (a(l,k) .eq. 0.0) go to 40
-c;c
-c;c           interchange if necessary
-c;c
-c;            if (l .eq. k) go to 10
-c;               t = a(l,k)
-c;               a(l,k) = a(k,k)
-c;               a(k,k) = t
-c;   10       continue
-c;c
-c;c           compute multipliers
-c;c
-c;            t = -1.0/a(k,k)
-c;            call dscal(n-k,t,a(k+1,k),idummy)
-c;c
-c;c           row elimination with column indexing
-c;c
-c;            do 30 j = kp1, n
-c;               t = a(l,j)
-c;               if (l .eq. k) go to 20
-c;                  a(l,j) = a(k,j)
-c;                  a(k,j) = t
-c;   20          continue
-c;             call daxpy(n-k,t,a(k+1,k),idummy,a(k+1,j),idummy)
-c;   30       continue
-c;         go to 50
-c;   40    continue
-c;            info = k
-c;   50    continue
-c;   60 continue
-c;   70 continue
-c;      ipvt(n) = n
-c;      if (a(n,n) .eq. 0.0) info = n
-c;      return
-c;      end
+* ------------------------------------------------------------
+      subroutine sgefa(a,lda,n,ipvt,info)
+      implicit double precision (a-h,o-z)
+      integer lda,n,ipvt(1),info
+      dimension a(lda,1)
+c      real a(lda,1)
+c
+c     sgefa factors a real matrix by gaussian elimination.
+c
+c     sgefa is usually called by sgeco, but it can be called
+c     directly with a saving in time if  rcond  is not needed.
+c     (time for sgeco) = (1 + 9/n)*(time for sgefa) .
+c
+c     on entry
+c
+c        a       real(lda, n)
+c                the matrix to be factored.
+c
+c        lda     integer
+c                the leading dimension of the array  a .
+c
+c        n       integer
+c                the order of the matrix  a .
+c
+c     on return
+c
+c        a       an upper triangular matrix and the multipliers
+c                which were used to obtain it.
+c                the factorization can be written  a = l*u  where
+c                l  is a product of permutation and unit lower
+c                triangular matrices and  u  is upper triangular.
+c
+c        ipvt    integer(n)
+c                an integer vector of pivot indices.
+c
+c        info    integer
+c                = 0  normal value.
+c                = k  if  u(k,k) .eq. 0.0 .  this is not an error
+c                     condition for this subroutine, but it does
+c                     indicate that sgesl or sgedi will divide by zero
+c                     if called.  use  rcond  in sgeco for a reliable
+c                     indication of singularity.
+c
+c     linpack. this version dated 08/14/78 .
+c     cleve moler, university of new mexico, argonne national lab.
+c
+c     subroutines and functions
+c
+c     blas saxpy,sscal,isamax
+c
+c     internal variables
+c
+c      real t
+      integer idamax,j,k,kp1,l,nm1,idummy
+      idummy=1
+c
+c
+c     gaussian elimination with partial pivoting
+c
+      info = 0
+      nm1 = n - 1
+      if (nm1 .lt. 1) go to 70
+      do 60 k = 1, nm1
+         kp1 = k + 1
+c
+c        find l = pivot index
+c
+         l = idamax(n-k+1,a(k,k),1) + k - 1
+         ipvt(k) = l
+c
+c        zero pivot implies this column already triangularized
+c
+         if (a(l,k) .eq. 0.0) go to 40
+c
+c           interchange if necessary
+c
+            if (l .eq. k) go to 10
+               t = a(l,k)
+               a(l,k) = a(k,k)
+               a(k,k) = t
+   10       continue
+c
+c           compute multipliers
+c
+            t = -1.0/a(k,k)
+            call dscal(n-k,t,a(k+1,k),idummy)
+c
+c           row elimination with column indexing
+c
+            do 30 j = kp1, n
+               t = a(l,j)
+               if (l .eq. k) go to 20
+                  a(l,j) = a(k,j)
+                  a(k,j) = t
+   20          continue
+             call daxpy(n-k,t,a(k+1,k),idummy,a(k+1,j),idummy)
+   30       continue
+         go to 50
+   40    continue
+            info = k
+   50    continue
+   60 continue
+   70 continue
+      ipvt(n) = n
+      if (a(n,n) .eq. 0.0) info = n
+      return
+      end
 #endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;c ------------------------------------------------
-c;      subroutine sgesl(a,lda,n,ipvt,b,job)
-c;c current revision date: 29/09/87
-c;      implicit double precision (a-h,o-z)
-c;      integer lda,n,ipvt(1),job
-c;      dimension a(lda,1),b(1)
-c;c      real a(lda,1),b(1)
-c;c
-c;c     sgesl solves the real system
-c;c     a * x = b  or  trans(a) * x = b
-c;c     using the factors computed by sgeco or sgefa.
-c;c
-c;c     on entry
-c;c
-c;c        a       real(lda, n)
-c;c                the output from sgeco or sgefa.
-c;c
-c;c        lda     integer
-c;c                the leading dimension of the array  a .
-c;c
-c;c        n       integer
-c;c                the order of the matrix  a .
-c;c
-c;c        ipvt    integer(n)
-c;c                the pivot vector from sgeco or sgefa.
-c;c
-c;c        b       real(n)
-c;c                the right hand side vector.
-c;c
-c;c        job     integer
-c;c                = 0         to solve  a*x = b ,
-c;c                = nonzero   to solve  trans(a)*x = b  where
-c;c                            trans(a)  is the transpose.
-c;c
-c;c     on return
-c;c
-c;c        b       the solution vector  x .
-c;c
-c;c     error condition
-c;c
-c;c        a division by zero will occur if the input factor contains a
-c;c        zero on the diagonal.  technically this indicates singularity
-c;c        but it is often caused by improper arguments or improper
-c;c        setting of lda .  it will not occur if the subroutines are
-c;c        called correctly and if sgeco has set rcond .gt. 0.0
-c;c        or sgefa has set info .eq. 0 .
-c;c
-c;c     to compute  inverse(a) * c  where  c  is a matrix
-c;c     with  p  columns
-c;c           call sgeco(a,lda,n,ipvt,rcond,z)
-c;c           if (rcond is too small) go to ...
-c;c           do 10 j = 1, p
-c;c              call sgesl(a,lda,n,ipvt,c(1,j),0)
-c;c        10 continue
-c;c
-c;c     linpack. this version dated 08/14/78 .
-c;c     cleve moler, university of new mexico, argonne national lab.
-c;c
-c;c     subroutines and functions
-c;c
-c;c     blas saxpy,sdot
-c;c
-c;c     internal variables
-c;c
-c;c      real sdot,t
-c;      integer k,kb,l,nm1,idummy
-c;      idummy=1
-c;c
-c;      nm1 = n - 1
-c;      if (job .ne. 0) go to 50
-c;c
-c;c        job = 0 , solve  a * x = b
-c;c        first solve  l*y = b
-c;c
-c;         if (nm1 .lt. 1) go to 30
-c;         do 20 k = 1, nm1
-c;            l = ipvt(k)
-c;            t = b(l)
-c;            if (l .eq. k) go to 10
-c;               b(l) = b(k)
-c;               b(k) = t
-c;   10       continue
-c;            call daxpy(n-k,t,a(k+1,k),idummy,b(k+1),idummy)
-c;   20    continue
-c;   30    continue
-c;c
-c;c        now solve  u*x = y
-c;c
-c;         do 40 kb = 1, n
-c;            k = n + 1 - kb
-c;            b(k) = b(k)/a(k,k)
-c;            t = -b(k)
-c;            call daxpy(k-1,t,a(1,k),idummy,b(1),idummy)
-c;   40    continue
-c;      go to 100
-c;   50 continue
-c;c
-c;c        job = nonzero, solve  trans(a) * x = b
-c;c        first solve  trans(u)*y = b
-c;c
-c;         do 60 k = 1, n
-c;            t = ddot(k-1,a(1,k),idummy,b(1),idummy)
-c;            b(k) = (b(k) - t)/a(k,k)
-c;   60    continue
-c;c
-c;c        now solve trans(l)*x = y
-c;c
-c;         if (nm1 .lt. 1) go to 90
-c;         do 80 kb = 1, nm1
-c;            k = n - kb
-c;            b(k) = b(k) + ddot(n-k,a(k+1,k),idummy,b(k+1),idummy)
-c;            l = ipvt(k)
-c;            if (l .eq. k) go to 70
-c;               t = b(l)
-c;               b(l) = b(k)
-c;               b(k) = t
-c;   70       continue
-c;   80    continue
-c;   90    continue
-c;  100 continue
-c;      return
-c;      end
+c ------------------------------------------------
+      subroutine sgesl(a,lda,n,ipvt,b,job)
+c current revision date: 29/09/87
+      implicit double precision (a-h,o-z)
+      integer lda,n,ipvt(1),job
+      dimension a(lda,1),b(1)
+c      real a(lda,1),b(1)
+c
+c     sgesl solves the real system
+c     a * x = b  or  trans(a) * x = b
+c     using the factors computed by sgeco or sgefa.
+c
+c     on entry
+c
+c        a       real(lda, n)
+c                the output from sgeco or sgefa.
+c
+c        lda     integer
+c                the leading dimension of the array  a .
+c
+c        n       integer
+c                the order of the matrix  a .
+c
+c        ipvt    integer(n)
+c                the pivot vector from sgeco or sgefa.
+c
+c        b       real(n)
+c                the right hand side vector.
+c
+c        job     integer
+c                = 0         to solve  a*x = b ,
+c                = nonzero   to solve  trans(a)*x = b  where
+c                            trans(a)  is the transpose.
+c
+c     on return
+c
+c        b       the solution vector  x .
+c
+c     error condition
+c
+c        a division by zero will occur if the input factor contains a
+c        zero on the diagonal.  technically this indicates singularity
+c        but it is often caused by improper arguments or improper
+c        setting of lda .  it will not occur if the subroutines are
+c        called correctly and if sgeco has set rcond .gt. 0.0
+c        or sgefa has set info .eq. 0 .
+c
+c     to compute  inverse(a) * c  where  c  is a matrix
+c     with  p  columns
+c           call sgeco(a,lda,n,ipvt,rcond,z)
+c           if (rcond is too small) go to ...
+c           do 10 j = 1, p
+c              call sgesl(a,lda,n,ipvt,c(1,j),0)
+c        10 continue
+c
+c     linpack. this version dated 08/14/78 .
+c     cleve moler, university of new mexico, argonne national lab.
+c
+c     subroutines and functions
+c
+c     blas saxpy,sdot
+c
+c     internal variables
+c
+c      real sdot,t
+      integer k,kb,l,nm1,idummy
+      idummy=1
+c
+      nm1 = n - 1
+      if (job .ne. 0) go to 50
+c
+c        job = 0 , solve  a * x = b
+c        first solve  l*y = b
+c
+         if (nm1 .lt. 1) go to 30
+         do 20 k = 1, nm1
+            l = ipvt(k)
+            t = b(l)
+            if (l .eq. k) go to 10
+               b(l) = b(k)
+               b(k) = t
+   10       continue
+            call daxpy(n-k,t,a(k+1,k),idummy,b(k+1),idummy)
+   20    continue
+   30    continue
+c
+c        now solve  u*x = y
+c
+         do 40 kb = 1, n
+            k = n + 1 - kb
+            b(k) = b(k)/a(k,k)
+            t = -b(k)
+            call daxpy(k-1,t,a(1,k),idummy,b(1),idummy)
+   40    continue
+      go to 100
+   50 continue
+c
+c        job = nonzero, solve  trans(a) * x = b
+c        first solve  trans(u)*y = b
+c
+         do 60 k = 1, n
+            t = ddot(k-1,a(1,k),idummy,b(1),idummy)
+            b(k) = (b(k) - t)/a(k,k)
+   60    continue
+c
+c        now solve trans(l)*x = y
+c
+         if (nm1 .lt. 1) go to 90
+         do 80 kb = 1, nm1
+            k = n - kb
+            b(k) = b(k) + ddot(n-k,a(k+1,k),idummy,b(k+1),idummy)
+            l = ipvt(k)
+            if (l .eq. k) go to 70
+               t = b(l)
+               b(l) = b(k)
+               b(k) = t
+   70       continue
+   80    continue
+   90    continue
+  100 continue
+      return
+      end
 #endif
 * -----------------------------------------------------------------------
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
@@ -1363,1244 +1363,1244 @@ c
       end
 #endif
 #if (defined(HIB_UNIX) || defined(HIB_CRAY)) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;       subroutine smxinv (a, nmax, n, scr, kpvt, ierr)
-c;*  subroutine to invert the real symmetric matrix a using
-c;*  lapack routines dsytrf and dsytri
-c;*  written by:  millard alexander
-c;*  latest revision date:  13-nov-1995
-c;* -----------------------------------------------------------------------
-c;*  variables in call list:
-c;*  nmax:   maximum row dimension of matrices
-c;*  n:      actual order of matrices
-c;*  a:      symmetric matrix of order n x n, stored in packed column form
-c;*          on input:  lower triangle contains matrix to be inverted
-c;*          on return: contains inverse(a), both lower and upper triangles
-c;*  scr:    scratch vector of length n
-c;*  kpvt:   scratch vector of length n
-c;*  ierr:   on return:  set equal to 0 if normal return
-c;*                      set equal to nn if singularity due to row nn of matri
-c;*  subroutines used:
-c;*  dsytrf, dsytri:   lapack routines to factor and to invert a symmetric, re
-c;*                  matrix
-c;* -----------------------------------------------------------------------
-c;      implicit double  precision (a-h,o-z)
-c;      integer icol, icolpt, ierr, ione, irowpt, izero, n, ncol,
-c;     :        nmax, nmaxp1
-c;      integer kpvt
-c;      dimension a(1), scr(1), kpvt(1)
+       subroutine smxinv (a, nmax, n, scr, kpvt, ierr)
+*  subroutine to invert the real symmetric matrix a using
+*  lapack routines dsytrf and dsytri
+*  written by:  millard alexander
+*  latest revision date:  13-nov-1995
+* -----------------------------------------------------------------------
+*  variables in call list:
+*  nmax:   maximum row dimension of matrices
+*  n:      actual order of matrices
+*  a:      symmetric matrix of order n x n, stored in packed column form
+*          on input:  lower triangle contains matrix to be inverted
+*          on return: contains inverse(a), both lower and upper triangles
+*  scr:    scratch vector of length n
+*  kpvt:   scratch vector of length n
+*  ierr:   on return:  set equal to 0 if normal return
+*                      set equal to nn if singularity due to row nn of matri
+*  subroutines used:
+*  dsytrf, dsytri:   lapack routines to factor and to invert a symmetric, re
+*                  matrix
+* -----------------------------------------------------------------------
+      implicit double  precision (a-h,o-z)
+      integer icol, icolpt, ierr, ione, irowpt, izero, n, ncol,
+     :        nmax, nmaxp1
+      integer kpvt
+      dimension a(1), scr(1), kpvt(1)
 #endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;      common /cosc11/ sc11(1)
+      common /cosc11/ sc11(1)
 #endif
 #if defined(HIB_UNIX_IBM)
-c;      common /cokaux/ kaux
-c;      dimension det(2)
+      common /cokaux/ kaux
+      dimension det(2)
 #endif
 #if (defined(HIB_UNIX) || defined(HIB_CRAY)) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;      data ione, izero  /1, 0/
+      data ione, izero  /1, 0/
 #endif
 #if defined(HIB_UNIX_IBM)
-c;      naux=kaux
+      naux=kaux
 #endif
 #if (defined(HIB_CRAY) || defined(HIB_UNIX)) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;      ierr = izero
-c;*  first fill in upper half of original matrix
-c;      nmaxp1 = nmax + 1
-c;      icolpt = 2
-c;      irowpt = nmaxp1
-c;      do  50  icol = 1, n - 1
-c;*  icolpt points to first sub-diagonal element in column icol
-c;*  irowpt points to first super-diagonal element in row icol
-c;*  ncol is number of subdiagonal elements in column icol
-c;        ncol = n - icol
-c;        call dcopy (ncol, a(icolpt), 1, a(irowpt), nmax)
-c;        icolpt = icolpt + nmaxp1
-c;        irowpt = irowpt + nmaxp1
-c; 50   continue
+      ierr = izero
+*  first fill in upper half of original matrix
+      nmaxp1 = nmax + 1
+      icolpt = 2
+      irowpt = nmaxp1
+      do  50  icol = 1, n - 1
+*  icolpt points to first sub-diagonal element in column icol
+*  irowpt points to first super-diagonal element in row icol
+*  ncol is number of subdiagonal elements in column icol
+        ncol = n - icol
+        call dcopy (ncol, a(icolpt), 1, a(irowpt), nmax)
+        icolpt = icolpt + nmaxp1
+        irowpt = irowpt + nmaxp1
+ 50   continue
 #endif
 #if defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
-c;       lwork=64*nmax
-c;       lwork=-1
-c;       call dsytrf('U',n,a,nmax,kpvt,sc11,lwork,info)
-c;       print *, ' n, info, work(1):  ', n, info, sc11(1)
-c;       stop 'after dsytrf'
-c;       if (info .lt. 0) then
-c;         write (9, 54) info
-c;         write (6, 54) info
-c;54       format (' *** ERROR IN',i4,
-c;     :          'TH VARIABLE IN DSYTRF ***')
-c;         stop
-c;       endif
-c;       if (info .gt. 0) then
-c;         write (9, 55) info
-c;         write (6, 55) info
-c;55       format (' *** POSSIBLE SINGULARITY IN',i4,
-c;     :          'TH ROW OF MATRIX TO BE INVERTED ***')
-c;         stop
-c;       end if
+       lwork=64*nmax
+       lwork=-1
+       call dsytrf('U',n,a,nmax,kpvt,sc11,lwork,info)
+       print *, ' n, info, work(1):  ', n, info, sc11(1)
+       stop 'after dsytrf'
+       if (info .lt. 0) then
+         write (9, 54) info
+         write (6, 54) info
+54       format (' *** ERROR IN',i4,
+     :          'TH VARIABLE IN DSYTRF ***')
+         stop
+       endif
+       if (info .gt. 0) then
+         write (9, 55) info
+         write (6, 55) info
+55       format (' *** POSSIBLE SINGULARITY IN',i4,
+     :          'TH ROW OF MATRIX TO BE INVERTED ***')
+         stop
+       end if
 #endif
 #if defined(HIB_UNIX_IBM)
-c;      call dgeicd(a, nmax, n,izero,rcont,det,sc11,naux)
+      call dgeicd(a, nmax, n,izero,rcont,det,sc11,naux)
 #endif
 * old linpack calls
 #if defined(HIB_CRAY)
-c;      call ssifa (a, nmax, n, kpvt, ierr)
+      call ssifa (a, nmax, n, kpvt, ierr)
 #endif
 #if defined(HIB_UNIX_CONVEX)
-c;      call dsifa (a, nmax, n, kpvt, ierr)
+      call dsifa (a, nmax, n, kpvt, ierr)
 #endif
 #if defined(HIB_CRAY) || defined(HIB_UNIX) || defined(HIB_UNIX_CONVEX)
-c;      if (ierr .ne. 0) then
-c;        write (9, 60) ierr
-c;        write (6, 60) ierr
-c;60      format (' *** POSSIBLE SINGULARITY IN',i4,
-c;     :          'TH ROW OF MATRIX TO BE INVERTED ***')
-c;        ierr = 0
-c;      end if
+      if (ierr .ne. 0) then
+        write (9, 60) ierr
+        write (6, 60) ierr
+60      format (' *** POSSIBLE SINGULARITY IN',i4,
+     :          'TH ROW OF MATRIX TO BE INVERTED ***')
+        ierr = 0
+      end if
 #endif
 #if defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
-c;       call dsytri('U',n,a,nmax,kpvt,sc11,info)
-c;       if (info .lt. 0) then
-c;         write (9, 64) info
-c;         write (6, 64) info
-c;64       format (' *** ERROR IN',i4,
-c;     :          'TH VARIABLE IN DSYTRI ***')
-c;         stop
-c;       endif
-c;       if (info .gt. 0) then
-c;         write (9, 65) info
-c;         write (6, 65) info
-c;65       format (' *** POSSIBLE SINGULARITY IN',i4,
-c;     :          'TH ROW OF MATRIX TO BE INVERTED ***')
-c;         stop
-c;       end if
+       call dsytri('U',n,a,nmax,kpvt,sc11,info)
+       if (info .lt. 0) then
+         write (9, 64) info
+         write (6, 64) info
+64       format (' *** ERROR IN',i4,
+     :          'TH VARIABLE IN DSYTRI ***')
+         stop
+       endif
+       if (info .gt. 0) then
+         write (9, 65) info
+         write (6, 65) info
+65       format (' *** POSSIBLE SINGULARITY IN',i4,
+     :          'TH ROW OF MATRIX TO BE INVERTED ***')
+         stop
+       end if
 #endif
 #if defined(HIB_CRAY)
-c;      call ssidi (a, nmax, n, kpvt, det, inert, scr, ione)
+      call ssidi (a, nmax, n, kpvt, det, inert, scr, ione)
 #endif
 #if defined(HIB_UNIX_CONVEX)
-c;      call dsidi (a, nmax, n, kpvt, det, inert, scr, ione)
+      call dsidi (a, nmax, n, kpvt, det, inert, scr, ione)
 #endif
 #if defined(HIB_UNIX_AIX) || defined(HIB_CRAY) || defined(HIB_UNIX_CONVEX) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_IRIS)  || defined(HIB_UNIX_S)
-c;*  inverse is now in upper triangle of matrix a
-c;*  copy upper triangle of inverse back into lower triangle of a
-c;      icolpt = 2
-c;      irowpt = nmaxp1
-c;      do 100 icol = 1, n - 1
-c;*  icolpt points to first sub-diagonal element in column icol
-c;*  irowpt points to first super-diagonal element in row icol
-c;*  ncol is number of subdiagonal elements in column icol
-c;        ncol = n - icol
+*  inverse is now in upper triangle of matrix a
+*  copy upper triangle of inverse back into lower triangle of a
+      icolpt = 2
+      irowpt = nmaxp1
+      do 100 icol = 1, n - 1
+*  icolpt points to first sub-diagonal element in column icol
+*  irowpt points to first super-diagonal element in row icol
+*  ncol is number of subdiagonal elements in column icol
+        ncol = n - icol
 #endif
 #if defined(HIB_UNIX_CONVEX)
-c;      call scopy (ncol, a(irowpt), nmax, a(icolpt), 1)
+      call scopy (ncol, a(irowpt), nmax, a(icolpt), 1)
 #endif
 #if defined(HIB_UNIX_AIX) || defined(HIB_CRAY) || defined(HIB_UNIX_CONVEX) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_IRIS)  || defined(HIB_UNIX_S)
-c;        call dcopy (ncol, a(irowpt), nmax, a(icolpt), 1)
+        call dcopy (ncol, a(irowpt), nmax, a(icolpt), 1)
 #endif
 #if defined(HIB_UNIX_AIX) || defined(HIB_CRAY) || defined(HIB_UNIX_CONVEX) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_IRIS)  || defined(HIB_UNIX_S)
-c;        icolpt = icolpt + nmaxp1
-c;        irowpt = irowpt + nmaxp1
-c;100   continue
+        icolpt = icolpt + nmaxp1
+        irowpt = irowpt + nmaxp1
+100   continue
 #endif
 #if (defined(HIB_CRAY) || defined(HIB_UNIX)) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;        return
-c;        end
+        return
+        end
 #endif
 *-----------------------------
 #if defined(HIB_NONE)
-c;      subroutine dsytri( uplo, n, a, lda, ipiv, work, info )
-c;*
-c;*  -- LAPACK routine (version 1.0b) --
-c;*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-c;*     Courant Institute, Argonne National Lab, and Rice University
-c;*     October 31, 1992
-c;*
-c;*     .. Scalar Arguments ..
-c;      character          uplo
-c;      integer            info, lda, n
-c;*     ..
-c;*     .. Array Arguments ..
-c;      integer            ipiv( * )
-c;      double precision   a( lda, * ), work( * )
-c;*     ..
-c;*
-c;*  Purpose
-c;*  =======
-c;*
-c;*  DSYTRI computes the inverse of a real symmetric indefinite matrix
-c;*  A using the factorization A = U*D*U' or A = L*D*L' computed by
-c;*  DSYTRF.
-c;*
-c;*  Arguments
-c;*  =========
-c;*
-c;*  UPLO    (input) CHARACTER*1
-c;*          Specifies whether the details of the factorization are stored
-c;*          as an upper or lower triangular matrix.
-c;*          = 'U':  Upper triangular (form is A = U*D*U')
-c;*          = 'L':  Lower triangular (form is A = L*D*L')
-c;*
-c;*  N       (input) INTEGER
-c;*          The order of the matrix A.  N >= 0.
-c;*
-c;*  A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
-c;*          On entry, the block diagonal matrix D and the multipliers
-c;*          used to obtain the factor U or L as computed by DSYTRF.
-c;*
-c;*          On exit, if INFO = 0, the (symmetric) inverse of the original
-c;*          matrix.  If UPLO = 'U', the upper triangular part of the
-c;*          inverse is formed and the part of A below the diagonal is not
-c;*          referenced; if UPLO = 'L' the lower triangular part of the
-c;*          inverse is formed and the part of A above the diagonal is
-c;*          not referenced.
-c;*
-c;*  LDA     (input) INTEGER
-c;*          The leading dimension of the array A.  LDA >= max(1,N).
-c;*
-c;*  IPIV    (input) INTEGER array, dimension (N)
-c;*          Details of the interchanges and the block structure of D
-c;*          as determined by DSYTRF.
-c;*
-c;*  WORK    (workspace) DOUBLE PRECISION array, dimension (N)
-c;*
-c;*  INFO    (output) INTEGER
-c;*          = 0: successful exit
-c;*          < 0: if INFO = -k, the k-th argument had an illegal value
-c;*          > 0: if INFO = k, D(k,k) = 0; the matrix is singular and its
-c;*               inverse could not be computed.
-c;*
-c;*  =====================================================================
-c;*
-c;*     .. Parameters ..
-c;      double precision   one, zero
-c;      parameter          ( one = 1.0d+0, zero = 0.0d+0 )
-c;*     ..
-c;*     .. Local Scalars ..
-c;      logical            upper
-c;      integer            k, kp, kstep
-c;      double precision   ak, akkp1, akp1, d, t, temp
-c;*     ..
-c;*     .. External Functions ..
-c;      logical            lsame
-c;      double precision   ddot
-c;      external           lsame, ddot
-c;*     ..
-c;*     .. External Subroutines ..
-c;      external           dcopy, dswap, dsymv, xerbla
-c;*     ..
-c;*     .. Intrinsic Functions ..
-c;      intrinsic          abs, max
-c;*     ..
-c;*     .. Executable Statements ..
-c;*
-c;*     Test the input parameters.
-c;*
-c;      info = 0
-c;      upper = lsame( uplo, 'U' )
-c;      if( .not.upper .and. .not.lsame( uplo, 'L' ) ) then
-c;         info = -1
-c;      else if( n.lt.0 ) then
-c;         info = -2
-c;      else if( lda.lt.max( 1, n ) ) then
-c;         info = -4
-c;      end if
-c;      if( info.ne.0 ) then
-c;         call xerbla( 'DSYTRI', -info )
-c;         return
-c;      end if
-c;*
-c;*     Quick return if possible
-c;*
-c;      if( n.eq.0 )
-c;     $   return
-c;*
-c;*     Check that the diagonal matrix D is nonsingular.
-c;*
-c;      if( upper ) then
-c;*
-c;*        Upper triangular storage: examine D from bottom to top
-c;*
-c;         do 10 info = n, 1, -1
-c;            if( ipiv( info ).gt.0 .and. a( info, info ).eq.zero )
-c;     $         return
-c;   10    continue
-c;      else
-c;*
-c;*        Lower triangular storage: examine D from top to bottom.
-c;*
-c;         do 20 info = 1, n
-c;            if( ipiv( info ).gt.0 .and. a( info, info ).eq.zero )
-c;     $         return
-c;   20    continue
-c;      end if
-c;      info = 0
-c;*
-c;      if( upper ) then
-c;*
-c;*        Compute inv(A) from the factorization A = U*D*U'.
-c;*
-c;*        K is the main loop index, increasing from 1 to N in steps of
-c;*        1 or 2, depending on the size of the diagonal blocks.
-c;*
-c;         k = 1
-c;   30    continue
-c;*
-c;*        If K > N, exit from loop.
-c;*
-c;         if( k.gt.n )
-c;     $      go to 40
-c;*
-c;         if( ipiv( k ).gt.0 ) then
-c;*
-c;*           1 x 1 diagonal block
-c;*
-c;*           Invert the diagonal block.
-c;*
-c;            a( k, k ) = one / a( k, k )
-c;*
-c;*           Compute column K of the inverse.
-c;*
-c;            if( k.gt.1 ) then
-c;               call dcopy( k-1, a( 1, k ), 1, work, 1 )
-c;               call dsymv( uplo, k-1, -one, a, lda, work, 1, zero,
-c;     $                     a( 1, k ), 1 )
-c;               a( k, k ) = a( k, k ) - ddot( k-1, work, 1, a( 1, k ),
-c;     $                     1 )
-c;            end if
-c;            kstep = 1
-c;         else
-c;*
-c;*           2 x 2 diagonal block
-c;*
-c;*           Invert the diagonal block.
-c;*
-c;            t = abs( a( k, k+1 ) )
-c;            ak = a( k, k ) / t
-c;            akp1 = a( k+1, k+1 ) / t
-c;            akkp1 = a( k, k+1 ) / t
-c;            d = t*( ak*akp1-one )
-c;            a( k, k ) = akp1 / d
-c;            a( k+1, k+1 ) = ak / d
-c;            a( k, k+1 ) = -akkp1 / d
-c;*
-c;*           Compute columns K and K+1 of the inverse.
-c;*
-c;            if( k.gt.1 ) then
-c;               call dcopy( k-1, a( 1, k ), 1, work, 1 )
-c;               call dsymv( uplo, k-1, -one, a, lda, work, 1, zero,
-c;     $                     a( 1, k ), 1 )
-c;               a( k, k ) = a( k, k ) - ddot( k-1, work, 1, a( 1, k ),
-c;     $                     1 )
-c;               a( k, k+1 ) = a( k, k+1 ) -
-c;     $                       ddot( k-1, a( 1, k ), 1, a( 1, k+1 ), 1 )
-c;               call dcopy( k-1, a( 1, k+1 ), 1, work, 1 )
-c;               call dsymv( uplo, k-1, -one, a, lda, work, 1, zero,
-c;     $                     a( 1, k+1 ), 1 )
-c;               a( k+1, k+1 ) = a( k+1, k+1 ) -
-c;     $                         ddot( k-1, work, 1, a( 1, k+1 ), 1 )
-c;            end if
-c;            kstep = 2
-c;         end if
-c;*
-c;         kp = abs( ipiv( k ) )
-c;         if( kp.ne.k ) then
-c;*
-c;*           Interchange rows and columns K and KP in the leading
-c;*           submatrix A(1:k+1,1:k+1)
-c;*
-c;            call dswap( kp-1, a( 1, k ), 1, a( 1, kp ), 1 )
-c;            call dswap( k-kp-1, a( kp+1, k ), 1, a( kp, kp+1 ), lda )
-c;            temp = a( k, k )
-c;            a( k, k ) = a( kp, kp )
-c;            a( kp, kp ) = temp
-c;            if( kstep.eq.2 ) then
-c;               temp = a( k, k+1 )
-c;               a( k, k+1 ) = a( kp, k+1 )
-c;               a( kp, k+1 ) = temp
-c;            end if
-c;         end if
-c;*
-c;         k = k + kstep
-c;         go to 30
-c;   40    continue
-c;*
-c;      else
-c;*
-c;*        Compute inv(A) from the factorization A = L*D*L'.
-c;*
-c;*        K is the main loop index, increasing from 1 to N in steps of
-c;*        1 or 2, depending on the size of the diagonal blocks.
-c;*
-c;         k = n
-c;   50    continue
-c;*
-c;*        If K < 1, exit from loop.
-c;*
-c;         if( k.lt.1 )
-c;     $      go to 60
-c;*
-c;         if( ipiv( k ).gt.0 ) then
-c;*
-c;*           1 x 1 diagonal block
-c;*
-c;*           Invert the diagonal block.
-c;*
-c;            a( k, k ) = one / a( k, k )
-c;*
-c;*           Compute column K of the inverse.
-c;*
-c;            if( k.lt.n ) then
-c;               call dcopy( n-k, a( k+1, k ), 1, work, 1 )
-c;               call dsymv( uplo, n-k, -one, a( k+1, k+1 ), lda, work, 1,
-c;     $                     zero, a( k+1, k ), 1 )
-c;               a( k, k ) = a( k, k ) - ddot( n-k, work, 1, a( k+1, k ),
-c;     $                     1 )
-c;            end if
-c;            kstep = 1
-c;         else
-c;*
-c;*           2 x 2 diagonal block
-c;*
-c;*           Invert the diagonal block.
-c;*
-c;            t = abs( a( k, k-1 ) )
-c;            ak = a( k-1, k-1 ) / t
-c;            akp1 = a( k, k ) / t
-c;            akkp1 = a( k, k-1 ) / t
-c;            d = t*( ak*akp1-one )
-c;            a( k-1, k-1 ) = akp1 / d
-c;            a( k, k ) = ak / d
-c;            a( k, k-1 ) = -akkp1 / d
-c;*
-c;*           Compute columns K-1 and K of the inverse.
-c;*
-c;            if( k.lt.n ) then
-c;               call dcopy( n-k, a( k+1, k ), 1, work, 1 )
-c;               call dsymv( uplo, n-k, -one, a( k+1, k+1 ), lda, work, 1,
-c;     $                     zero, a( k+1, k ), 1 )
-c;               a( k, k ) = a( k, k ) - ddot( n-k, work, 1, a( k+1, k ),
-c;     $                     1 )
-c;               a( k, k-1 ) = a( k, k-1 ) -
-c;     $                       ddot( n-k, a( k+1, k ), 1, a( k+1, k-1 ),
-c;     $                       1 )
-c;               call dcopy( n-k, a( k+1, k-1 ), 1, work, 1 )
-c;               call dsymv( uplo, n-k, -one, a( k+1, k+1 ), lda, work, 1,
-c;     $                     zero, a( k+1, k-1 ), 1 )
-c;               a( k-1, k-1 ) = a( k-1, k-1 ) -
-c;     $                         ddot( n-k, work, 1, a( k+1, k-1 ), 1 )
-c;            end if
-c;            kstep = 2
-c;         end if
-c;*
-c;         kp = abs( ipiv( k ) )
-c;         if( kp.ne.k ) then
-c;*
-c;*           Interchange rows and columns K and KP in the trailing
-c;*           submatrix A(k-1:n,k-1:n)
-c;*
-c;            if( kp.lt.n )
-c;     $         call dswap( n-kp, a( kp+1, k ), 1, a( kp+1, kp ), 1 )
-c;            call dswap( kp-k-1, a( k+1, k ), 1, a( kp, k+1 ), lda )
-c;            temp = a( k, k )
-c;            a( k, k ) = a( kp, kp )
-c;            a( kp, kp ) = temp
-c;            if( kstep.eq.2 ) then
-c;               temp = a( k, k-1 )
-c;               a( k, k-1 ) = a( kp, k-1 )
-c;               a( kp, k-1 ) = temp
-c;            end if
-c;         end if
-c;*
-c;         k = k - kstep
-c;         go to 50
-c;   60    continue
-c;      end if
-c;*
-c;      return
-c;*
-c;*     End of DSYTRI
-c;*
-c;      end
-c;      subroutine dsytrf( uplo, n, a, lda, ipiv, work, lwork, info )
-c;*
-c;*  -- LAPACK routine (version 1.0) --
-c;*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-c;*     Courant Institute, Argonne National Lab, and Rice University
-c;*     February 29, 1992
-c;*
-c;*     .. Scalar Arguments ..
-c;      character          uplo
-c;      integer            info, lda, lwork, n
-c;*     ..
-c;*     .. Array Arguments ..
-c;      integer            ipiv( * )
-c;      double precision   a( lda, * ), work( lwork )
-c;*     ..
-c;*
-c;*  Purpose
-c;*  =======
-c;*
-c;*  DSYTRF computes the factorization of a real symmetric matrix A using
-c;*  the Bunch-Kaufman diagonal pivoting method:
-c;*
-c;*     A = U*D*U'  or  A = L*D*L'
-c;*
-c;*  where U (or L) is a product of permutation and unit upper (lower)
-c;*  triangular matrices, U' is the transpose of U, and D is symmetric and
-c;*  block diagonal with 1-by-1 and 2-by-2 diagonal blocks.
-c;*
-c;*  This is the blocked version of the algorithm, calling Level 3 BLAS.
-c;*
-c;*  Arguments
-c;*  =========
-c;*
-c;*  UPLO    (input) CHARACTER*1
-c;*          Specifies whether the upper or lower triangular part of the
-c;*          symmetric matrix A is stored:
-c;*          = 'U':  Upper triangular
-c;*          = 'L':  Lower triangular
-c;*
-c;*  N       (input) INTEGER
-c;*          The order of the matrix A.  N >= 0.
-c;*
-c;*  A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
-c;*          On entry, the symmetric matrix A.  If UPLO = 'U', the leading
-c;*          n-by-n upper triangular part of A contains the upper
-c;*          triangular part of the matrix A, and the strictly lower
-c;*          triangular part of A is not referenced.  If UPLO = 'L', the
-c;*          leading n-by-n lower triangular part of A contains the lower
-c;*          triangular part of the matrix A, and the strictly upper
-c;*          triangular part of A is not referenced.
-c;*
-c;*          On exit, the block diagonal matrix D and the multipliers used
-c;*          to obtain the factor U or L (see below for further details).
-c;*
-c;*  LDA     (input) INTEGER
-c;*          The leading dimension of the array A.  LDA >= max(1,N).
-c;*
-c;*  IPIV    (output) INTEGER array, dimension (N)
-c;*          Details of the interchanges and the block structure of D.
-c;*          If IPIV(k) > 0, then rows and columns k and IPIV(k) were
-c;*          interchanged and D(k,k) is a 1-by-1 diagonal block.
-c;*          If UPLO = 'U' and IPIV(k) = IPIV(k-1) < 0, then rows and
-c;*          columns k-1 and -IPIV(k) were interchanged and D(k-1:k,k-1:k)
-c;*          is a 2-by-2 diagonal block.  If UPLO = 'L' and IPIV(k) =
-c;*          IPIV(k+1) < 0, then rows and columns k+1 and -IPIV(k) were
-c;*          interchanged and D(k:k+1,k:k+1) is a 2-by-2 diagonal block.
-c;*
-c;*  WORK    (workspace) DOUBLE PRECISION array, dimension (LWORK)
-c;*          If INFO returns 0, then WORK(1) returns N*NB, the minimum
-c;*          value of LWORK required to use the optimal blocksize.
-c;*
-c;*  LWORK   (input) INTEGER
-c;*          The length of WORK.  LWORK should be >= N*NB, where NB is the
-c;*          block size returned by ILAENV.
-c;*
-c;*  INFO    (output) INTEGER
-c;*          = 0: successful exit
-c;*          < 0: if INFO = -k, the k-th argument had an illegal value
-c;*          > 0: if INFO = k, D(k,k) is exactly zero.  The factorization
-c;*               has been completed, but the block diagonal matrix D is
-c;*               exactly singular, and division by zero will occur if it
-c;*               is used to solve a system of equations.
-c;*
-c;*  Further Details
-c;*  ===============
-c;*
-c;*  If UPLO = 'U', then A = U*D*U', where
-c;*     U = P(n)*U(n)* ... *P(k)U(k)* ...,
-c;*  i.e., U is a product of terms P(k)*U(k), where k decreases from n to
-c;*  1 in steps of 1 or 2, and D is a block diagonal matrix with 1-by-1
-c;*  and 2-by-2 diagonal blocks D(k).  P(k) is a permutation matrix as
-c;*  defined by IPIV(k), and U(k) is a unit upper triangular matrix, such
-c;*  that if the diagonal block D(k) is of order s (s = 1 or 2), then
-c;*
-c;*             (   I    v    0   )   k-s
-c;*     U(k) =  (   0    I    0   )   s
-c;*             (   0    0    I   )   n-k
-c;*                k-s   s   n-k
-c;*
-c;*  If s = 1, D(k) overwrites A(k,k), and v overwrites A(1:k-1,k).
-c;*  If s = 2, the upper triangle of D(k) overwrites A(k-1,k-1), A(k-1,k),
-c;*  and A(k,k), and v overwrites A(1:k-2,k-1:k).
-c;*
-c;*  If UPLO = 'L', then A = L*D*L', where
-c;*     L = P(1)*L(1)* ... *P(k)*L(k)* ...,
-c;*  i.e., L is a product of terms P(k)*L(k), where k increases from 1 to
-c;*  n in steps of 1 or 2, and D is a block diagonal matrix with 1-by-1
-c;*  and 2-by-2 diagonal blocks D(k).  P(k) is a permutation matrix as
-c;*  defined by IPIV(k), and L(k) is a unit lower triangular matrix, such
-c;*  that if the diagonal block D(k) is of order s (s = 1 or 2), then
-c;*
-c;*             (   I    0     0   )  k-1
-c;*     L(k) =  (   0    I     0   )  s
-c;*             (   0    v     I   )  n-k-s+1
-c;*                k-1   s  n-k-s+1
-c;*
-c;*  If s = 1, D(k) overwrites A(k,k), and v overwrites A(k+1:n,k).
-c;*  If s = 2, the lower triangle of D(k) overwrites A(k,k), A(k+1,k),
-c;*  and A(k+1,k+1), and v overwrites A(k+2:n,k:k+1).
-c;*
-c;*  =====================================================================
-c;*
-c;*     .. Local Scalars ..
-c;      logical            upper
-c;      integer            iinfo, iws, j, k, kb, ldwork, nb, nbmin
-c;*     ..
-c;*     .. External Functions ..
-c;      logical            lsame
-c;      integer            ilaenv
-c;      external           lsame, ilaenv
-c;*     ..
-c;*     .. External Subroutines ..
-c;      external           dlasyf, dsytf2, xerbla
-c;*     ..
-c;*     .. Intrinsic Functions ..
-c;      intrinsic          max
-c;*     ..
-c;*     .. Executable Statements ..
-c;*
-c;*     Test the input parameters.
-c;*
-c;      info = 0
-c;      upper = lsame( uplo, 'U' )
-c;      if( .not.upper .and. .not.lsame( uplo, 'L' ) ) then
-c;         info = -1
-c;      else if( n.lt.0 ) then
-c;         info = -2
-c;      else if( lda.lt.max( 1, n ) ) then
-c;         info = -4
-c;      else if( lwork.lt.1 ) then
-c;         info = -7
-c;      end if
-c;      if( info.ne.0 ) then
-c;         call xerbla( 'DSYTRF', -info )
-c;         return
-c;      end if
-c;*
-c;*     Determine the block size
-c;*
-c;      nb = ilaenv( 1, 'DSYTRF', uplo, n, -1, -1, -1 )
-c;      nbmin = 2
-c;      ldwork = n
-c;      if( nb.gt.1 .and. nb.lt.n ) then
-c;         iws = ldwork*nb
-c;         if( lwork.lt.iws ) then
-c;            nb = max( lwork / ldwork, 1 )
-c;            nbmin = max( 2, ilaenv( 2, 'DSYTRF', uplo, n, -1, -1, -1 ) )
-c;         end if
-c;      else
-c;         iws = 1
-c;      end if
-c;      if( nb.lt.nbmin )
-c;     $   nb = n
-c;*
-c;      if( upper ) then
-c;*
-c;*        Factorize A as U*D*U' using the upper triangle of A
-c;*
-c;*        K is the main loop index, decreasing from N to 1 in steps of
-c;*        KB, where KB is the number of columns factorized by DLASYF;
-c;*        KB is either NB or NB-1, or K for the last block
-c;*
-c;         k = n
-c;   10    continue
-c;*
-c;*        If K < 1, exit from loop
-c;*
-c;         if( k.lt.1 )
-c;     $      go to 40
-c;*
-c;         if( k.gt.nb ) then
-c;*
-c;*           Factorize columns k-kb+1:k of A and use blocked code to
-c;*           update columns 1:k-kb
-c;*
-c;            call dlasyf( uplo, k, nb, kb, a, lda, ipiv, work, ldwork,
-c;     $                   iinfo )
-c;         else
-c;*
-c;*           Use unblocked code to factorize columns 1:k of A
-c;*
-c;            call dsytf2( uplo, k, a, lda, ipiv, iinfo )
-c;            kb = k
-c;         end if
-c;*
-c;*        Set INFO on the first occurrence of a zero pivot
-c;*
-c;         if( info.eq.0 .and. iinfo.gt.0 )
-c;     $      info = iinfo
-c;*
-c;*        Decrease K and return to the start of the main loop
-c;*
-c;         k = k - kb
-c;         go to 10
-c;*
-c;      else
-c;*
-c;*        Factorize A as L*D*L' using the lower triangle of A
-c;*
-c;*        K is the main loop index, increasing from 1 to N in steps of
-c;*        KB, where KB is the number of columns factorized by DLASYF;
-c;*        KB is either NB or NB-1, or N-K+1 for the last block
-c;*
-c;         k = 1
-c;   20    continue
-c;*
-c;*        If K > N, exit from loop
-c;*
-c;         if( k.gt.n )
-c;     $      go to 40
-c;*
-c;         if( k.le.n-nb ) then
-c;*
-c;*           Factorize columns k:k+kb-1 of A and use blocked code to
-c;*           update columns k+kb:n
-c;*
-c;            call dlasyf( uplo, n-k+1, nb, kb, a( k, k ), lda, ipiv( k ),
-c;     $                   work, ldwork, iinfo )
-c;         else
-c;*
-c;*           Use unblocked code to factorize columns k:n of A
-c;*
-c;            call dsytf2( uplo, n-k+1, a( k, k ), lda, ipiv( k ), iinfo )
-c;            kb = n - k + 1
-c;         end if
-c;*
-c;*        Set INFO on the first occurrence of a zero pivot
-c;*
-c;         if( info.eq.0 .and. iinfo.gt.0 )
-c;     $      info = iinfo + k - 1
-c;*
-c;*        Adjust IPIV
-c;*
-c;         do 30 j = k, k + kb - 1
-c;            if( ipiv( j ).gt.0 ) then
-c;               ipiv( j ) = ipiv( j ) + k - 1
-c;            else
-c;               ipiv( j ) = ipiv( j ) - k + 1
-c;            end if
-c;   30    continue
-c;*
-c;*        Increase K and return to the start of the main loop
-c;*
-c;         k = k + kb
-c;         go to 20
-c;*
-c;      end if
-c;*
-c;   40 continue
-c;      work( 1 ) = iws
-c;      return
-c;*
-c;*     End of DSYTRF
-c;*
-c;      end
-c;      subroutine dsytf2( uplo, n, a, lda, ipiv, info )
-c;*
-c;*  -- LAPACK routine (version 1.0b) --
-c;*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-c;*     Courant Institute, Argonne National Lab, and Rice University
-c;*     October 31, 1992
-c;*
-c;*     .. Scalar Arguments ..
-c;      character          uplo
-c;      integer            info, lda, n
-c;*     ..
-c;*     .. Array Arguments ..
-c;      integer            ipiv( * )
-c;      double precision   a( lda, * )
-c;*     ..
-c;*
-c;*  Purpose
-c;*  =======
-c;*
-c;*  DSYTF2 computes the factorization of a real symmetric matrix A using
-c;*  the Bunch-Kaufman diagonal pivoting method:
-c;*
-c;*     A = U*D*U'  or  A = L*D*L'
-c;*
-c;*  where U (or L) is a product of permutation and unit upper (lower)
-c;*  triangular matrices, U' is the transpose of U, and D is symmetric and
-c;*  block diagonal with 1-by-1 and 2-by-2 diagonal blocks.
-c;*
-c;*  This is the unblocked version of the algorithm, calling Level 2 BLAS.
-c;*
-c;*  Arguments
-c;*  =========
-c;*
-c;*  UPLO    (input) CHARACTER*1
-c;*          Specifies whether the upper or lower triangular part of the
-c;*          symmetric matrix A is stored:
-c;*          = 'U':  Upper triangular
-c;*          = 'L':  Lower triangular
-c;*
-c;*  N       (input) INTEGER
-c;*          The order of the matrix A.  N >= 0.
-c;*
-c;*  A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
-c;*          On entry, the symmetric matrix A.  If UPLO = 'U', the leading
-c;*          n-by-n upper triangular part of A contains the upper
-c;*          triangular part of the matrix A, and the strictly lower
-c;*          triangular part of A is not referenced.  If UPLO = 'L', the
-c;*          leading n-by-n lower triangular part of A contains the lower
-c;*          triangular part of the matrix A, and the strictly upper
-c;*          triangular part of A is not referenced.
-c;*
-c;*          On exit, the block diagonal matrix D and the multipliers used
-c;*          to obtain the factor U or L (see below for further details).
-c;*
-c;*  LDA     (input) INTEGER
-c;*          The leading dimension of the array A.  LDA >= max(1,N).
-c;*
-c;*  IPIV    (output) INTEGER array, dimension (N)
-c;*          Details of the interchanges and the block structure of D.
-c;*          If IPIV(k) > 0, then rows and columns k and IPIV(k) were
-c;*          interchanged and D(k,k) is a 1-by-1 diagonal block.
-c;*          If UPLO = 'U' and IPIV(k) = IPIV(k-1) < 0, then rows and
-c;*          columns k-1 and -IPIV(k) were interchanged and D(k-1:k,k-1:k)
-c;*          is a 2-by-2 diagonal block.  If UPLO = 'L' and IPIV(k) =
-c;*          IPIV(k+1) < 0, then rows and columns k+1 and -IPIV(k) were
-c;*          interchanged and D(k:k+1,k:k+1) is a 2-by-2 diagonal block.
-c;*
-c;*  INFO    (output) INTEGER
-c;*          = 0: successful exit
-c;*          < 0: if INFO = -k, the k-th argument had an illegal value
-c;*          > 0: if INFO = k, D(k,k) is exactly zero.  The factorization
-c;*               has been completed, but the block diagonal matrix D is
-c;*               exactly singular, and division by zero will occur if it
-c;*               is used to solve a system of equations.
-c;*
-c;*  Further Details
-c;*  ===============
-c;*
-c;*  If UPLO = 'U', then A = U*D*U', where
-c;*     U = P(n)*U(n)* ... *P(k)U(k)* ...,
-c;*  i.e., U is a product of terms P(k)*U(k), where k decreases from n to
-c;*  1 in steps of 1 or 2, and D is a block diagonal matrix with 1-by-1
-c;*  and 2-by-2 diagonal blocks D(k).  P(k) is a permutation matrix as
-c;*  defined by IPIV(k), and U(k) is a unit upper triangular matrix, such
-c;*  that if the diagonal block D(k) is of order s (s = 1 or 2), then
-c;*
-c;*             (   I    v    0   )   k-s
-c;*     U(k) =  (   0    I    0   )   s
-c;*             (   0    0    I   )   n-k
-c;*                k-s   s   n-k
-c;*
-c;*  If s = 1, D(k) overwrites A(k,k), and v overwrites A(1:k-1,k).
-c;*  If s = 2, the upper triangle of D(k) overwrites A(k-1,k-1), A(k-1,k),
-c;*  and A(k,k), and v overwrites A(1:k-2,k-1:k).
-c;*
-c;*  If UPLO = 'L', then A = L*D*L', where
-c;*     L = P(1)*L(1)* ... *P(k)*L(k)* ...,
-c;*  i.e., L is a product of terms P(k)*L(k), where k increases from 1 to
-c;*  n in steps of 1 or 2, and D is a block diagonal matrix with 1-by-1
-c;*  and 2-by-2 diagonal blocks D(k).  P(k) is a permutation matrix as
-c;*  defined by IPIV(k), and L(k) is a unit lower triangular matrix, such
-c;*  that if the diagonal block D(k) is of order s (s = 1 or 2), then
-c;*
-c;*             (   I    0     0   )  k-1
-c;*     L(k) =  (   0    I     0   )  s
-c;*             (   0    v     I   )  n-k-s+1
-c;*                k-1   s  n-k-s+1
-c;*
-c;*  If s = 1, D(k) overwrites A(k,k), and v overwrites A(k+1:n,k).
-c;*  If s = 2, the lower triangle of D(k) overwrites A(k,k), A(k+1,k),
-c;*  and A(k+1,k+1), and v overwrites A(k+2:n,k:k+1).
-c;*
-c;*  =====================================================================
-c;*
-c;*     .. Parameters ..
-c;      double precision   zero, one
-c;      parameter          ( zero = 0.0d+0, one = 1.0d+0 )
-c;      double precision   eight, sevten
-c;      parameter          ( eight = 8.0d+0, sevten = 17.0d+0 )
-c;*     ..
-c;*     .. Local Scalars ..
-c;      logical            upper
-c;      integer            imax, jmax, k, kk, kp, kstep
-c;      double precision   absakk, alpha, c, colmax, r1, r2, rowmax, s, t
-c;*     ..
-c;*     .. External Functions ..
-c;      logical            lsame
-c;      integer            idamax
-c;      external           lsame, idamax
-c;*     ..
-c;*     .. External Subroutines ..
-c;      external           dlaev2, drot, dscal, dswap, dsyr, xerbla
-c;*     ..
-c;*     .. Intrinsic Functions ..
-c;      intrinsic          abs, max, sqrt
-c;*     ..
-c;*     .. Executable Statements ..
-c;*
-c;*     Test the input parameters.
-c;*
-c;      info = 0
-c;      upper = lsame( uplo, 'U' )
-c;      if( .not.upper .and. .not.lsame( uplo, 'L' ) ) then
-c;         info = -1
-c;      else if( n.lt.0 ) then
-c;         info = -2
-c;      else if( lda.lt.max( 1, n ) ) then
-c;         info = -4
-c;      end if
-c;      if( info.ne.0 ) then
-c;         call xerbla( 'DSYTF2', -info )
-c;         return
-c;      end if
-c;*
-c;*     Initialize ALPHA for use in choosing pivot block size.
-c;*
-c;      alpha = ( one+sqrt( sevten ) ) / eight
-c;*
-c;      if( upper ) then
-c;*
-c;*        Factorize A as U*D*U' using the upper triangle of A
-c;*
-c;*        K is the main loop index, decreasing from N to 1 in steps of
-c;*        1 or 2
-c;*
-c;         k = n
-c;   10    continue
-c;*
-c;*        If K < 1, exit from loop
-c;*
-c;         if( k.lt.1 )
-c;     $      go to 30
-c;         kstep = 1
-c;*
-c;*        Determine rows and columns to be interchanged and whether
-c;*        a 1-by-1 or 2-by-2 pivot block will be used
-c;*
-c;         absakk = abs( a( k, k ) )
-c;*
-c;*        IMAX is the row-index of the largest off-diagonal element in
-c;*        column K, and COLMAX is its absolute value
-c;*
-c;         if( k.gt.1 ) then
-c;            imax = idamax( k-1, a( 1, k ), 1 )
-c;            colmax = abs( a( imax, k ) )
-c;         else
-c;            colmax = zero
-c;         end if
-c;*
-c;         if( max( absakk, colmax ).eq.zero ) then
-c;*
-c;*           Column K is zero: set INFO and continue
-c;*
-c;            if( info.eq.0 )
-c;     $         info = k
-c;            kp = k
-c;         else
-c;            if( absakk.ge.alpha*colmax ) then
-c;*
-c;*              no interchange, use 1-by-1 pivot block
-c;*
-c;               kp = k
-c;            else
-c;*
-c;*              JMAX is the column-index of the largest off-diagonal
-c;*              element in row IMAX, and ROWMAX is its absolute value
-c;*
-c;               jmax = imax + idamax( k-imax, a( imax, imax+1 ), lda )
-c;               rowmax = abs( a( imax, jmax ) )
-c;               if( imax.gt.1 ) then
-c;                  jmax = idamax( imax-1, a( 1, imax ), 1 )
-c;                  rowmax = max( rowmax, abs( a( jmax, imax ) ) )
-c;               end if
-c;*
-c;               if( absakk.ge.alpha*colmax*( colmax / rowmax ) ) then
-c;*
-c;*                 no interchange, use 1-by-1 pivot block
-c;*
-c;                  kp = k
-c;               else if( abs( a( imax, imax ) ).ge.alpha*rowmax ) then
-c;*
-c;*                 interchange rows and columns K and IMAX, use 1-by-1
-c;*                 pivot block
-c;*
-c;                  kp = imax
-c;               else
-c;*
-c;*                 interchange rows and columns K-1 and IMAX, use 2-by-2
-c;*                 pivot block
-c;*
-c;                  kp = imax
-c;                  kstep = 2
-c;               end if
-c;            end if
-c;*
-c;            kk = k - kstep + 1
-c;            if( kp.ne.kk ) then
-c;*
-c;*              Interchange rows and columns KK and KP in the leading
-c;*              submatrix A(1:k,1:k)
-c;*
-c;               call dswap( kp-1, a( 1, kk ), 1, a( 1, kp ), 1 )
-c;               call dswap( kk-kp-1, a( kp+1, kk ), 1, a( kp, kp+1 ),
-c;     $                     lda )
-c;               t = a( kk, kk )
-c;               a( kk, kk ) = a( kp, kp )
-c;               a( kp, kp ) = t
-c;               if( kstep.eq.2 ) then
-c;                  t = a( k-1, k )
-c;                  a( k-1, k ) = a( kp, k )
-c;                  a( kp, k ) = t
-c;               end if
-c;            end if
-c;*
-c;*           Update the leading submatrix
-c;*
-c;            if( kstep.eq.1 ) then
-c;*
-c;*              1-by-1 pivot block D(k): column k now holds
-c;*
-c;*              W(k) = U(k)*D(k)
-c;*
-c;*              where U(k) is the k-th column of U
-c;*
-c;*              Perform a rank-1 update of A(1:k-1,1:k-1) as
-c;*
-c;*              A := A - U(k)*D(k)*U(k)' = A - W(k)*1/D(k)*W(k)'
-c;*
-c;               r1 = one / a( k, k )
-c;               call dsyr( uplo, k-1, -r1, a( 1, k ), 1, a, lda )
-c;*
-c;*              Store U(k) in column k
-c;*
-c;               call dscal( k-1, r1, a( 1, k ), 1 )
-c;            else
-c;*
-c;*              2-by-2 pivot block D(k): columns k and k-1 now hold
-c;*
-c;*              ( W(k-1) W(k) ) = ( U(k-1) U(k) )*D(k)
-c;*
-c;*              where U(k) and U(k-1) are the k-th and (k-1)-th columns
-c;*              of U
-c;*
-c;*              Perform a rank-2 update of A(1:k-2,1:k-2) as
-c;*
-c;*              A := A - ( U(k-1) U(k) )*D(k)*( U(k-1) U(k) )'
-c;*                 = A - ( W(k-1) W(k) )*inv(D(k))*( W(k-1) W(k) )'
-c;*
-c;*              Convert this to two rank-1 updates by using the eigen-
-c;*              decomposition of D(k)
-c;*
-c;               call dlaev2( a( k-1, k-1 ), a( k-1, k ), a( k, k ), r1,
-c;     $                      r2, c, s )
-c;               r1 = one / r1
-c;               r2 = one / r2
-c;               call drot( k-2, a( 1, k-1 ), 1, a( 1, k ), 1, c, s )
-c;               call dsyr( uplo, k-2, -r1, a( 1, k-1 ), 1, a, lda )
-c;               call dsyr( uplo, k-2, -r2, a( 1, k ), 1, a, lda )
-c;*
-c;*              Store U(k) and U(k-1) in columns k and k-1
-c;*
-c;               call dscal( k-2, r1, a( 1, k-1 ), 1 )
-c;               call dscal( k-2, r2, a( 1, k ), 1 )
-c;               call drot( k-2, a( 1, k-1 ), 1, a( 1, k ), 1, c, -s )
-c;            end if
-c;         end if
-c;*
-c;*        Store details of the interchanges in IPIV
-c;*
-c;         if( kstep.eq.1 ) then
-c;            ipiv( k ) = kp
-c;         else
-c;            ipiv( k ) = -kp
-c;            ipiv( k-1 ) = -kp
-c;         end if
-c;*
-c;*        Decrease K and return to the start of the main loop
-c;*
-c;         k = k - kstep
-c;         go to 10
-c;*
-c;      else
-c;*
-c;*        Factorize A as L*D*L' using the lower triangle of A
-c;*
-c;*        K is the main loop index, increasing from 1 to N in steps of
-c;*        1 or 2
-c;*
-c;         k = 1
-c;   20    continue
-c;*
-c;*        If K > N, exit from loop
-c;*
-c;         if( k.gt.n )
-c;     $      go to 30
-c;         kstep = 1
-c;*
-c;*        Determine rows and columns to be interchanged and whether
-c;*        a 1-by-1 or 2-by-2 pivot block will be used
-c;*
-c;         absakk = abs( a( k, k ) )
-c;*
-c;*        IMAX is the row-index of the largest off-diagonal element in
-c;*        column K, and COLMAX is its absolute value
-c;*
-c;         if( k.lt.n ) then
-c;            imax = k + idamax( n-k, a( k+1, k ), 1 )
-c;            colmax = abs( a( imax, k ) )
-c;         else
-c;            colmax = zero
-c;         end if
-c;*
-c;         if( max( absakk, colmax ).eq.zero ) then
-c;*
-c;*           Column K is zero: set INFO and continue
-c;*
-c;            if( info.eq.0 )
-c;     $         info = k
-c;            kp = k
-c;         else
-c;            if( absakk.ge.alpha*colmax ) then
-c;*
-c;*              no interchange, use 1-by-1 pivot block
-c;*
-c;               kp = k
-c;            else
-c;*
-c;*              JMAX is the column-index of the largest off-diagonal
-c;*              element in row IMAX, and ROWMAX is its absolute value
-c;*
-c;               jmax = k - 1 + idamax( imax-k, a( imax, k ), lda )
-c;               rowmax = abs( a( imax, jmax ) )
-c;               if( imax.lt.n ) then
-c;                  jmax = imax + idamax( n-imax, a( imax+1, imax ), 1 )
-c;                  rowmax = max( rowmax, abs( a( jmax, imax ) ) )
-c;               end if
-c;*
-c;               if( absakk.ge.alpha*colmax*( colmax / rowmax ) ) then
-c;*
-c;*                 no interchange, use 1-by-1 pivot block
-c;*
-c;                  kp = k
-c;               else if( abs( a( imax, imax ) ).ge.alpha*rowmax ) then
-c;*
-c;*                 interchange rows and columns K and IMAX, use 1-by-1
-c;*                 pivot block
-c;*
-c;                  kp = imax
-c;               else
-c;*
-c;*                 interchange rows and columns K+1 and IMAX, use 2-by-2
-c;*                 pivot block
-c;*
-c;                  kp = imax
-c;                  kstep = 2
-c;               end if
-c;            end if
-c;*
-c;            kk = k + kstep - 1
-c;            if( kp.ne.kk ) then
-c;*
-c;*              Interchange rows and columns KK and KP in the trailing
-c;*              submatrix A(k:n,k:n)
-c;*
-c;               if( kp.lt.n )
-c;     $            call dswap( n-kp, a( kp+1, kk ), 1, a( kp+1, kp ), 1 )
-c;               call dswap( kp-kk-1, a( kk+1, kk ), 1, a( kp, kk+1 ),
-c;     $                     lda )
-c;               t = a( kk, kk )
-c;               a( kk, kk ) = a( kp, kp )
-c;               a( kp, kp ) = t
-c;               if( kstep.eq.2 ) then
-c;                  t = a( k+1, k )
-c;                  a( k+1, k ) = a( kp, k )
-c;                  a( kp, k ) = t
-c;               end if
-c;            end if
-c;*
-c;*           Update the trailing submatrix
-c;*
-c;            if( kstep.eq.1 ) then
-c;*
-c;*              1-by-1 pivot block D(k): column k now holds
-c;*
-c;*              W(k) = L(k)*D(k)
-c;*
-c;*              where L(k) is the k-th column of L
-c;*
-c;               if( k.lt.n ) then
-c;*
-c;*                 Perform a rank-1 update of A(k+1:n,k+1:n) as
-c;*
-c;*                 A := A - L(k)*D(k)*L(k)' = A - W(k)*(1/D(k))*W(k)'
-c;*
-c;                  r1 = one / a( k, k )
-c;                  call dsyr( uplo, n-k, -r1, a( k+1, k ), 1,
-c;     $                       a( k+1, k+1 ), lda )
-c;*
-c;*                 Store L(k) in column K
-c;*
-c;                  call dscal( n-k, r1, a( k+1, k ), 1 )
-c;               end if
-c;            else
-c;*
-c;*              2-by-2 pivot block D(k): columns K and K+1 now hold
-c;*
-c;*              ( W(k) W(k+1) ) = ( L(k) L(k+1) )*D(k)
-c;*
-c;*              where L(k) and L(k+1) are the k-th and (k+1)-th columns
-c;*              of L
-c;*
-c;               if( k.lt.n-1 ) then
-c;*
-c;*                 Perform a rank-2 update of A(k+2:n,k+2:n) as
-c;*
-c;*                 A := A - ( L(k) L(k+1) )*D(k)*( L(k) L(k+1) )'
-c;*                    = A - ( W(k) W(k+1) )*inv(D(k))*( W(k) W(k+1) )'
-c;*
-c;*                 Convert this to two rank-1 updates by using the eigen-
-c;*                 decomposition of D(k)
-c;*
-c;                  call dlaev2( a( k, k ), a( k+1, k ), a( k+1, k+1 ),
-c;     $                         r1, r2, c, s )
-c;                  r1 = one / r1
-c;                  r2 = one / r2
-c;                  call drot( n-k-1, a( k+2, k ), 1, a( k+2, k+1 ), 1, c,
-c;     $                       s )
-c;                  call dsyr( uplo, n-k-1, -r1, a( k+2, k ), 1,
-c;     $                       a( k+2, k+2 ), lda )
-c;                  call dsyr( uplo, n-k-1, -r2, a( k+2, k+1 ), 1,
-c;     $                       a( k+2, k+2 ), lda )
-c;*
-c;*                 Store L(k) and L(k+1) in columns k and k+1
-c;*
-c;                  call dscal( n-k-1, r1, a( k+2, k ), 1 )
-c;                  call dscal( n-k-1, r2, a( k+2, k+1 ), 1 )
-c;                  call drot( n-k-1, a( k+2, k ), 1, a( k+2, k+1 ), 1, c,
-c;     $                       -s )
-c;               end if
-c;            end if
-c;         end if
-c;*
-c;*        Store details of the interchanges in IPIV
-c;*
-c;         if( kstep.eq.1 ) then
-c;            ipiv( k ) = kp
-c;         else
-c;            ipiv( k ) = -kp
-c;            ipiv( k+1 ) = -kp
-c;         end if
-c;*
-c;*        Increase K and return to the start of the main loop
-c;*
-c;         k = k + kstep
-c;         go to 20
-c;*
-c;      end if
-c;*
-c;   30 continue
-c;      return
-c;*
-c;*     End of DSYTF2
-c;*
-c;      end
+      subroutine dsytri( uplo, n, a, lda, ipiv, work, info )
+*
+*  -- LAPACK routine (version 1.0b) --
+*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+*     Courant Institute, Argonne National Lab, and Rice University
+*     October 31, 1992
+*
+*     .. Scalar Arguments ..
+      character          uplo
+      integer            info, lda, n
+*     ..
+*     .. Array Arguments ..
+      integer            ipiv( * )
+      double precision   a( lda, * ), work( * )
+*     ..
+*
+*  Purpose
+*  =======
+*
+*  DSYTRI computes the inverse of a real symmetric indefinite matrix
+*  A using the factorization A = U*D*U' or A = L*D*L' computed by
+*  DSYTRF.
+*
+*  Arguments
+*  =========
+*
+*  UPLO    (input) CHARACTER*1
+*          Specifies whether the details of the factorization are stored
+*          as an upper or lower triangular matrix.
+*          = 'U':  Upper triangular (form is A = U*D*U')
+*          = 'L':  Lower triangular (form is A = L*D*L')
+*
+*  N       (input) INTEGER
+*          The order of the matrix A.  N >= 0.
+*
+*  A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
+*          On entry, the block diagonal matrix D and the multipliers
+*          used to obtain the factor U or L as computed by DSYTRF.
+*
+*          On exit, if INFO = 0, the (symmetric) inverse of the original
+*          matrix.  If UPLO = 'U', the upper triangular part of the
+*          inverse is formed and the part of A below the diagonal is not
+*          referenced; if UPLO = 'L' the lower triangular part of the
+*          inverse is formed and the part of A above the diagonal is
+*          not referenced.
+*
+*  LDA     (input) INTEGER
+*          The leading dimension of the array A.  LDA >= max(1,N).
+*
+*  IPIV    (input) INTEGER array, dimension (N)
+*          Details of the interchanges and the block structure of D
+*          as determined by DSYTRF.
+*
+*  WORK    (workspace) DOUBLE PRECISION array, dimension (N)
+*
+*  INFO    (output) INTEGER
+*          = 0: successful exit
+*          < 0: if INFO = -k, the k-th argument had an illegal value
+*          > 0: if INFO = k, D(k,k) = 0; the matrix is singular and its
+*               inverse could not be computed.
+*
+*  =====================================================================
+*
+*     .. Parameters ..
+      double precision   one, zero
+      parameter          ( one = 1.0d+0, zero = 0.0d+0 )
+*     ..
+*     .. Local Scalars ..
+      logical            upper
+      integer            k, kp, kstep
+      double precision   ak, akkp1, akp1, d, t, temp
+*     ..
+*     .. External Functions ..
+      logical            lsame
+      double precision   ddot
+      external           lsame, ddot
+*     ..
+*     .. External Subroutines ..
+      external           dcopy, dswap, dsymv, xerbla
+*     ..
+*     .. Intrinsic Functions ..
+      intrinsic          abs, max
+*     ..
+*     .. Executable Statements ..
+*
+*     Test the input parameters.
+*
+      info = 0
+      upper = lsame( uplo, 'U' )
+      if( .not.upper .and. .not.lsame( uplo, 'L' ) ) then
+         info = -1
+      else if( n.lt.0 ) then
+         info = -2
+      else if( lda.lt.max( 1, n ) ) then
+         info = -4
+      end if
+      if( info.ne.0 ) then
+         call xerbla( 'DSYTRI', -info )
+         return
+      end if
+*
+*     Quick return if possible
+*
+      if( n.eq.0 )
+     $   return
+*
+*     Check that the diagonal matrix D is nonsingular.
+*
+      if( upper ) then
+*
+*        Upper triangular storage: examine D from bottom to top
+*
+         do 10 info = n, 1, -1
+            if( ipiv( info ).gt.0 .and. a( info, info ).eq.zero )
+     $         return
+   10    continue
+      else
+*
+*        Lower triangular storage: examine D from top to bottom.
+*
+         do 20 info = 1, n
+            if( ipiv( info ).gt.0 .and. a( info, info ).eq.zero )
+     $         return
+   20    continue
+      end if
+      info = 0
+*
+      if( upper ) then
+*
+*        Compute inv(A) from the factorization A = U*D*U'.
+*
+*        K is the main loop index, increasing from 1 to N in steps of
+*        1 or 2, depending on the size of the diagonal blocks.
+*
+         k = 1
+   30    continue
+*
+*        If K > N, exit from loop.
+*
+         if( k.gt.n )
+     $      go to 40
+*
+         if( ipiv( k ).gt.0 ) then
+*
+*           1 x 1 diagonal block
+*
+*           Invert the diagonal block.
+*
+            a( k, k ) = one / a( k, k )
+*
+*           Compute column K of the inverse.
+*
+            if( k.gt.1 ) then
+               call dcopy( k-1, a( 1, k ), 1, work, 1 )
+               call dsymv( uplo, k-1, -one, a, lda, work, 1, zero,
+     $                     a( 1, k ), 1 )
+               a( k, k ) = a( k, k ) - ddot( k-1, work, 1, a( 1, k ),
+     $                     1 )
+            end if
+            kstep = 1
+         else
+*
+*           2 x 2 diagonal block
+*
+*           Invert the diagonal block.
+*
+            t = abs( a( k, k+1 ) )
+            ak = a( k, k ) / t
+            akp1 = a( k+1, k+1 ) / t
+            akkp1 = a( k, k+1 ) / t
+            d = t*( ak*akp1-one )
+            a( k, k ) = akp1 / d
+            a( k+1, k+1 ) = ak / d
+            a( k, k+1 ) = -akkp1 / d
+*
+*           Compute columns K and K+1 of the inverse.
+*
+            if( k.gt.1 ) then
+               call dcopy( k-1, a( 1, k ), 1, work, 1 )
+               call dsymv( uplo, k-1, -one, a, lda, work, 1, zero,
+     $                     a( 1, k ), 1 )
+               a( k, k ) = a( k, k ) - ddot( k-1, work, 1, a( 1, k ),
+     $                     1 )
+               a( k, k+1 ) = a( k, k+1 ) -
+     $                       ddot( k-1, a( 1, k ), 1, a( 1, k+1 ), 1 )
+               call dcopy( k-1, a( 1, k+1 ), 1, work, 1 )
+               call dsymv( uplo, k-1, -one, a, lda, work, 1, zero,
+     $                     a( 1, k+1 ), 1 )
+               a( k+1, k+1 ) = a( k+1, k+1 ) -
+     $                         ddot( k-1, work, 1, a( 1, k+1 ), 1 )
+            end if
+            kstep = 2
+         end if
+*
+         kp = abs( ipiv( k ) )
+         if( kp.ne.k ) then
+*
+*           Interchange rows and columns K and KP in the leading
+*           submatrix A(1:k+1,1:k+1)
+*
+            call dswap( kp-1, a( 1, k ), 1, a( 1, kp ), 1 )
+            call dswap( k-kp-1, a( kp+1, k ), 1, a( kp, kp+1 ), lda )
+            temp = a( k, k )
+            a( k, k ) = a( kp, kp )
+            a( kp, kp ) = temp
+            if( kstep.eq.2 ) then
+               temp = a( k, k+1 )
+               a( k, k+1 ) = a( kp, k+1 )
+               a( kp, k+1 ) = temp
+            end if
+         end if
+*
+         k = k + kstep
+         go to 30
+   40    continue
+*
+      else
+*
+*        Compute inv(A) from the factorization A = L*D*L'.
+*
+*        K is the main loop index, increasing from 1 to N in steps of
+*        1 or 2, depending on the size of the diagonal blocks.
+*
+         k = n
+   50    continue
+*
+*        If K < 1, exit from loop.
+*
+         if( k.lt.1 )
+     $      go to 60
+*
+         if( ipiv( k ).gt.0 ) then
+*
+*           1 x 1 diagonal block
+*
+*           Invert the diagonal block.
+*
+            a( k, k ) = one / a( k, k )
+*
+*           Compute column K of the inverse.
+*
+            if( k.lt.n ) then
+               call dcopy( n-k, a( k+1, k ), 1, work, 1 )
+               call dsymv( uplo, n-k, -one, a( k+1, k+1 ), lda, work, 1,
+     $                     zero, a( k+1, k ), 1 )
+               a( k, k ) = a( k, k ) - ddot( n-k, work, 1, a( k+1, k ),
+     $                     1 )
+            end if
+            kstep = 1
+         else
+*
+*           2 x 2 diagonal block
+*
+*           Invert the diagonal block.
+*
+            t = abs( a( k, k-1 ) )
+            ak = a( k-1, k-1 ) / t
+            akp1 = a( k, k ) / t
+            akkp1 = a( k, k-1 ) / t
+            d = t*( ak*akp1-one )
+            a( k-1, k-1 ) = akp1 / d
+            a( k, k ) = ak / d
+            a( k, k-1 ) = -akkp1 / d
+*
+*           Compute columns K-1 and K of the inverse.
+*
+            if( k.lt.n ) then
+               call dcopy( n-k, a( k+1, k ), 1, work, 1 )
+               call dsymv( uplo, n-k, -one, a( k+1, k+1 ), lda, work, 1,
+     $                     zero, a( k+1, k ), 1 )
+               a( k, k ) = a( k, k ) - ddot( n-k, work, 1, a( k+1, k ),
+     $                     1 )
+               a( k, k-1 ) = a( k, k-1 ) -
+     $                       ddot( n-k, a( k+1, k ), 1, a( k+1, k-1 ),
+     $                       1 )
+               call dcopy( n-k, a( k+1, k-1 ), 1, work, 1 )
+               call dsymv( uplo, n-k, -one, a( k+1, k+1 ), lda, work, 1,
+     $                     zero, a( k+1, k-1 ), 1 )
+               a( k-1, k-1 ) = a( k-1, k-1 ) -
+     $                         ddot( n-k, work, 1, a( k+1, k-1 ), 1 )
+            end if
+            kstep = 2
+         end if
+*
+         kp = abs( ipiv( k ) )
+         if( kp.ne.k ) then
+*
+*           Interchange rows and columns K and KP in the trailing
+*           submatrix A(k-1:n,k-1:n)
+*
+            if( kp.lt.n )
+     $         call dswap( n-kp, a( kp+1, k ), 1, a( kp+1, kp ), 1 )
+            call dswap( kp-k-1, a( k+1, k ), 1, a( kp, k+1 ), lda )
+            temp = a( k, k )
+            a( k, k ) = a( kp, kp )
+            a( kp, kp ) = temp
+            if( kstep.eq.2 ) then
+               temp = a( k, k-1 )
+               a( k, k-1 ) = a( kp, k-1 )
+               a( kp, k-1 ) = temp
+            end if
+         end if
+*
+         k = k - kstep
+         go to 50
+   60    continue
+      end if
+*
+      return
+*
+*     End of DSYTRI
+*
+      end
+      subroutine dsytrf( uplo, n, a, lda, ipiv, work, lwork, info )
+*
+*  -- LAPACK routine (version 1.0) --
+*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+*     Courant Institute, Argonne National Lab, and Rice University
+*     February 29, 1992
+*
+*     .. Scalar Arguments ..
+      character          uplo
+      integer            info, lda, lwork, n
+*     ..
+*     .. Array Arguments ..
+      integer            ipiv( * )
+      double precision   a( lda, * ), work( lwork )
+*     ..
+*
+*  Purpose
+*  =======
+*
+*  DSYTRF computes the factorization of a real symmetric matrix A using
+*  the Bunch-Kaufman diagonal pivoting method:
+*
+*     A = U*D*U'  or  A = L*D*L'
+*
+*  where U (or L) is a product of permutation and unit upper (lower)
+*  triangular matrices, U' is the transpose of U, and D is symmetric and
+*  block diagonal with 1-by-1 and 2-by-2 diagonal blocks.
+*
+*  This is the blocked version of the algorithm, calling Level 3 BLAS.
+*
+*  Arguments
+*  =========
+*
+*  UPLO    (input) CHARACTER*1
+*          Specifies whether the upper or lower triangular part of the
+*          symmetric matrix A is stored:
+*          = 'U':  Upper triangular
+*          = 'L':  Lower triangular
+*
+*  N       (input) INTEGER
+*          The order of the matrix A.  N >= 0.
+*
+*  A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
+*          On entry, the symmetric matrix A.  If UPLO = 'U', the leading
+*          n-by-n upper triangular part of A contains the upper
+*          triangular part of the matrix A, and the strictly lower
+*          triangular part of A is not referenced.  If UPLO = 'L', the
+*          leading n-by-n lower triangular part of A contains the lower
+*          triangular part of the matrix A, and the strictly upper
+*          triangular part of A is not referenced.
+*
+*          On exit, the block diagonal matrix D and the multipliers used
+*          to obtain the factor U or L (see below for further details).
+*
+*  LDA     (input) INTEGER
+*          The leading dimension of the array A.  LDA >= max(1,N).
+*
+*  IPIV    (output) INTEGER array, dimension (N)
+*          Details of the interchanges and the block structure of D.
+*          If IPIV(k) > 0, then rows and columns k and IPIV(k) were
+*          interchanged and D(k,k) is a 1-by-1 diagonal block.
+*          If UPLO = 'U' and IPIV(k) = IPIV(k-1) < 0, then rows and
+*          columns k-1 and -IPIV(k) were interchanged and D(k-1:k,k-1:k)
+*          is a 2-by-2 diagonal block.  If UPLO = 'L' and IPIV(k) =
+*          IPIV(k+1) < 0, then rows and columns k+1 and -IPIV(k) were
+*          interchanged and D(k:k+1,k:k+1) is a 2-by-2 diagonal block.
+*
+*  WORK    (workspace) DOUBLE PRECISION array, dimension (LWORK)
+*          If INFO returns 0, then WORK(1) returns N*NB, the minimum
+*          value of LWORK required to use the optimal blocksize.
+*
+*  LWORK   (input) INTEGER
+*          The length of WORK.  LWORK should be >= N*NB, where NB is the
+*          block size returned by ILAENV.
+*
+*  INFO    (output) INTEGER
+*          = 0: successful exit
+*          < 0: if INFO = -k, the k-th argument had an illegal value
+*          > 0: if INFO = k, D(k,k) is exactly zero.  The factorization
+*               has been completed, but the block diagonal matrix D is
+*               exactly singular, and division by zero will occur if it
+*               is used to solve a system of equations.
+*
+*  Further Details
+*  ===============
+*
+*  If UPLO = 'U', then A = U*D*U', where
+*     U = P(n)*U(n)* ... *P(k)U(k)* ...,
+*  i.e., U is a product of terms P(k)*U(k), where k decreases from n to
+*  1 in steps of 1 or 2, and D is a block diagonal matrix with 1-by-1
+*  and 2-by-2 diagonal blocks D(k).  P(k) is a permutation matrix as
+*  defined by IPIV(k), and U(k) is a unit upper triangular matrix, such
+*  that if the diagonal block D(k) is of order s (s = 1 or 2), then
+*
+*             (   I    v    0   )   k-s
+*     U(k) =  (   0    I    0   )   s
+*             (   0    0    I   )   n-k
+*                k-s   s   n-k
+*
+*  If s = 1, D(k) overwrites A(k,k), and v overwrites A(1:k-1,k).
+*  If s = 2, the upper triangle of D(k) overwrites A(k-1,k-1), A(k-1,k),
+*  and A(k,k), and v overwrites A(1:k-2,k-1:k).
+*
+*  If UPLO = 'L', then A = L*D*L', where
+*     L = P(1)*L(1)* ... *P(k)*L(k)* ...,
+*  i.e., L is a product of terms P(k)*L(k), where k increases from 1 to
+*  n in steps of 1 or 2, and D is a block diagonal matrix with 1-by-1
+*  and 2-by-2 diagonal blocks D(k).  P(k) is a permutation matrix as
+*  defined by IPIV(k), and L(k) is a unit lower triangular matrix, such
+*  that if the diagonal block D(k) is of order s (s = 1 or 2), then
+*
+*             (   I    0     0   )  k-1
+*     L(k) =  (   0    I     0   )  s
+*             (   0    v     I   )  n-k-s+1
+*                k-1   s  n-k-s+1
+*
+*  If s = 1, D(k) overwrites A(k,k), and v overwrites A(k+1:n,k).
+*  If s = 2, the lower triangle of D(k) overwrites A(k,k), A(k+1,k),
+*  and A(k+1,k+1), and v overwrites A(k+2:n,k:k+1).
+*
+*  =====================================================================
+*
+*     .. Local Scalars ..
+      logical            upper
+      integer            iinfo, iws, j, k, kb, ldwork, nb, nbmin
+*     ..
+*     .. External Functions ..
+      logical            lsame
+      integer            ilaenv
+      external           lsame, ilaenv
+*     ..
+*     .. External Subroutines ..
+      external           dlasyf, dsytf2, xerbla
+*     ..
+*     .. Intrinsic Functions ..
+      intrinsic          max
+*     ..
+*     .. Executable Statements ..
+*
+*     Test the input parameters.
+*
+      info = 0
+      upper = lsame( uplo, 'U' )
+      if( .not.upper .and. .not.lsame( uplo, 'L' ) ) then
+         info = -1
+      else if( n.lt.0 ) then
+         info = -2
+      else if( lda.lt.max( 1, n ) ) then
+         info = -4
+      else if( lwork.lt.1 ) then
+         info = -7
+      end if
+      if( info.ne.0 ) then
+         call xerbla( 'DSYTRF', -info )
+         return
+      end if
+*
+*     Determine the block size
+*
+      nb = ilaenv( 1, 'DSYTRF', uplo, n, -1, -1, -1 )
+      nbmin = 2
+      ldwork = n
+      if( nb.gt.1 .and. nb.lt.n ) then
+         iws = ldwork*nb
+         if( lwork.lt.iws ) then
+            nb = max( lwork / ldwork, 1 )
+            nbmin = max( 2, ilaenv( 2, 'DSYTRF', uplo, n, -1, -1, -1 ) )
+         end if
+      else
+         iws = 1
+      end if
+      if( nb.lt.nbmin )
+     $   nb = n
+*
+      if( upper ) then
+*
+*        Factorize A as U*D*U' using the upper triangle of A
+*
+*        K is the main loop index, decreasing from N to 1 in steps of
+*        KB, where KB is the number of columns factorized by DLASYF;
+*        KB is either NB or NB-1, or K for the last block
+*
+         k = n
+   10    continue
+*
+*        If K < 1, exit from loop
+*
+         if( k.lt.1 )
+     $      go to 40
+*
+         if( k.gt.nb ) then
+*
+*           Factorize columns k-kb+1:k of A and use blocked code to
+*           update columns 1:k-kb
+*
+            call dlasyf( uplo, k, nb, kb, a, lda, ipiv, work, ldwork,
+     $                   iinfo )
+         else
+*
+*           Use unblocked code to factorize columns 1:k of A
+*
+            call dsytf2( uplo, k, a, lda, ipiv, iinfo )
+            kb = k
+         end if
+*
+*        Set INFO on the first occurrence of a zero pivot
+*
+         if( info.eq.0 .and. iinfo.gt.0 )
+     $      info = iinfo
+*
+*        Decrease K and return to the start of the main loop
+*
+         k = k - kb
+         go to 10
+*
+      else
+*
+*        Factorize A as L*D*L' using the lower triangle of A
+*
+*        K is the main loop index, increasing from 1 to N in steps of
+*        KB, where KB is the number of columns factorized by DLASYF;
+*        KB is either NB or NB-1, or N-K+1 for the last block
+*
+         k = 1
+   20    continue
+*
+*        If K > N, exit from loop
+*
+         if( k.gt.n )
+     $      go to 40
+*
+         if( k.le.n-nb ) then
+*
+*           Factorize columns k:k+kb-1 of A and use blocked code to
+*           update columns k+kb:n
+*
+            call dlasyf( uplo, n-k+1, nb, kb, a( k, k ), lda, ipiv( k ),
+     $                   work, ldwork, iinfo )
+         else
+*
+*           Use unblocked code to factorize columns k:n of A
+*
+            call dsytf2( uplo, n-k+1, a( k, k ), lda, ipiv( k ), iinfo )
+            kb = n - k + 1
+         end if
+*
+*        Set INFO on the first occurrence of a zero pivot
+*
+         if( info.eq.0 .and. iinfo.gt.0 )
+     $      info = iinfo + k - 1
+*
+*        Adjust IPIV
+*
+         do 30 j = k, k + kb - 1
+            if( ipiv( j ).gt.0 ) then
+               ipiv( j ) = ipiv( j ) + k - 1
+            else
+               ipiv( j ) = ipiv( j ) - k + 1
+            end if
+   30    continue
+*
+*        Increase K and return to the start of the main loop
+*
+         k = k + kb
+         go to 20
+*
+      end if
+*
+   40 continue
+      work( 1 ) = iws
+      return
+*
+*     End of DSYTRF
+*
+      end
+      subroutine dsytf2( uplo, n, a, lda, ipiv, info )
+*
+*  -- LAPACK routine (version 1.0b) --
+*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+*     Courant Institute, Argonne National Lab, and Rice University
+*     October 31, 1992
+*
+*     .. Scalar Arguments ..
+      character          uplo
+      integer            info, lda, n
+*     ..
+*     .. Array Arguments ..
+      integer            ipiv( * )
+      double precision   a( lda, * )
+*     ..
+*
+*  Purpose
+*  =======
+*
+*  DSYTF2 computes the factorization of a real symmetric matrix A using
+*  the Bunch-Kaufman diagonal pivoting method:
+*
+*     A = U*D*U'  or  A = L*D*L'
+*
+*  where U (or L) is a product of permutation and unit upper (lower)
+*  triangular matrices, U' is the transpose of U, and D is symmetric and
+*  block diagonal with 1-by-1 and 2-by-2 diagonal blocks.
+*
+*  This is the unblocked version of the algorithm, calling Level 2 BLAS.
+*
+*  Arguments
+*  =========
+*
+*  UPLO    (input) CHARACTER*1
+*          Specifies whether the upper or lower triangular part of the
+*          symmetric matrix A is stored:
+*          = 'U':  Upper triangular
+*          = 'L':  Lower triangular
+*
+*  N       (input) INTEGER
+*          The order of the matrix A.  N >= 0.
+*
+*  A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
+*          On entry, the symmetric matrix A.  If UPLO = 'U', the leading
+*          n-by-n upper triangular part of A contains the upper
+*          triangular part of the matrix A, and the strictly lower
+*          triangular part of A is not referenced.  If UPLO = 'L', the
+*          leading n-by-n lower triangular part of A contains the lower
+*          triangular part of the matrix A, and the strictly upper
+*          triangular part of A is not referenced.
+*
+*          On exit, the block diagonal matrix D and the multipliers used
+*          to obtain the factor U or L (see below for further details).
+*
+*  LDA     (input) INTEGER
+*          The leading dimension of the array A.  LDA >= max(1,N).
+*
+*  IPIV    (output) INTEGER array, dimension (N)
+*          Details of the interchanges and the block structure of D.
+*          If IPIV(k) > 0, then rows and columns k and IPIV(k) were
+*          interchanged and D(k,k) is a 1-by-1 diagonal block.
+*          If UPLO = 'U' and IPIV(k) = IPIV(k-1) < 0, then rows and
+*          columns k-1 and -IPIV(k) were interchanged and D(k-1:k,k-1:k)
+*          is a 2-by-2 diagonal block.  If UPLO = 'L' and IPIV(k) =
+*          IPIV(k+1) < 0, then rows and columns k+1 and -IPIV(k) were
+*          interchanged and D(k:k+1,k:k+1) is a 2-by-2 diagonal block.
+*
+*  INFO    (output) INTEGER
+*          = 0: successful exit
+*          < 0: if INFO = -k, the k-th argument had an illegal value
+*          > 0: if INFO = k, D(k,k) is exactly zero.  The factorization
+*               has been completed, but the block diagonal matrix D is
+*               exactly singular, and division by zero will occur if it
+*               is used to solve a system of equations.
+*
+*  Further Details
+*  ===============
+*
+*  If UPLO = 'U', then A = U*D*U', where
+*     U = P(n)*U(n)* ... *P(k)U(k)* ...,
+*  i.e., U is a product of terms P(k)*U(k), where k decreases from n to
+*  1 in steps of 1 or 2, and D is a block diagonal matrix with 1-by-1
+*  and 2-by-2 diagonal blocks D(k).  P(k) is a permutation matrix as
+*  defined by IPIV(k), and U(k) is a unit upper triangular matrix, such
+*  that if the diagonal block D(k) is of order s (s = 1 or 2), then
+*
+*             (   I    v    0   )   k-s
+*     U(k) =  (   0    I    0   )   s
+*             (   0    0    I   )   n-k
+*                k-s   s   n-k
+*
+*  If s = 1, D(k) overwrites A(k,k), and v overwrites A(1:k-1,k).
+*  If s = 2, the upper triangle of D(k) overwrites A(k-1,k-1), A(k-1,k),
+*  and A(k,k), and v overwrites A(1:k-2,k-1:k).
+*
+*  If UPLO = 'L', then A = L*D*L', where
+*     L = P(1)*L(1)* ... *P(k)*L(k)* ...,
+*  i.e., L is a product of terms P(k)*L(k), where k increases from 1 to
+*  n in steps of 1 or 2, and D is a block diagonal matrix with 1-by-1
+*  and 2-by-2 diagonal blocks D(k).  P(k) is a permutation matrix as
+*  defined by IPIV(k), and L(k) is a unit lower triangular matrix, such
+*  that if the diagonal block D(k) is of order s (s = 1 or 2), then
+*
+*             (   I    0     0   )  k-1
+*     L(k) =  (   0    I     0   )  s
+*             (   0    v     I   )  n-k-s+1
+*                k-1   s  n-k-s+1
+*
+*  If s = 1, D(k) overwrites A(k,k), and v overwrites A(k+1:n,k).
+*  If s = 2, the lower triangle of D(k) overwrites A(k,k), A(k+1,k),
+*  and A(k+1,k+1), and v overwrites A(k+2:n,k:k+1).
+*
+*  =====================================================================
+*
+*     .. Parameters ..
+      double precision   zero, one
+      parameter          ( zero = 0.0d+0, one = 1.0d+0 )
+      double precision   eight, sevten
+      parameter          ( eight = 8.0d+0, sevten = 17.0d+0 )
+*     ..
+*     .. Local Scalars ..
+      logical            upper
+      integer            imax, jmax, k, kk, kp, kstep
+      double precision   absakk, alpha, c, colmax, r1, r2, rowmax, s, t
+*     ..
+*     .. External Functions ..
+      logical            lsame
+      integer            idamax
+      external           lsame, idamax
+*     ..
+*     .. External Subroutines ..
+      external           dlaev2, drot, dscal, dswap, dsyr, xerbla
+*     ..
+*     .. Intrinsic Functions ..
+      intrinsic          abs, max, sqrt
+*     ..
+*     .. Executable Statements ..
+*
+*     Test the input parameters.
+*
+      info = 0
+      upper = lsame( uplo, 'U' )
+      if( .not.upper .and. .not.lsame( uplo, 'L' ) ) then
+         info = -1
+      else if( n.lt.0 ) then
+         info = -2
+      else if( lda.lt.max( 1, n ) ) then
+         info = -4
+      end if
+      if( info.ne.0 ) then
+         call xerbla( 'DSYTF2', -info )
+         return
+      end if
+*
+*     Initialize ALPHA for use in choosing pivot block size.
+*
+      alpha = ( one+sqrt( sevten ) ) / eight
+*
+      if( upper ) then
+*
+*        Factorize A as U*D*U' using the upper triangle of A
+*
+*        K is the main loop index, decreasing from N to 1 in steps of
+*        1 or 2
+*
+         k = n
+   10    continue
+*
+*        If K < 1, exit from loop
+*
+         if( k.lt.1 )
+     $      go to 30
+         kstep = 1
+*
+*        Determine rows and columns to be interchanged and whether
+*        a 1-by-1 or 2-by-2 pivot block will be used
+*
+         absakk = abs( a( k, k ) )
+*
+*        IMAX is the row-index of the largest off-diagonal element in
+*        column K, and COLMAX is its absolute value
+*
+         if( k.gt.1 ) then
+            imax = idamax( k-1, a( 1, k ), 1 )
+            colmax = abs( a( imax, k ) )
+         else
+            colmax = zero
+         end if
+*
+         if( max( absakk, colmax ).eq.zero ) then
+*
+*           Column K is zero: set INFO and continue
+*
+            if( info.eq.0 )
+     $         info = k
+            kp = k
+         else
+            if( absakk.ge.alpha*colmax ) then
+*
+*              no interchange, use 1-by-1 pivot block
+*
+               kp = k
+            else
+*
+*              JMAX is the column-index of the largest off-diagonal
+*              element in row IMAX, and ROWMAX is its absolute value
+*
+               jmax = imax + idamax( k-imax, a( imax, imax+1 ), lda )
+               rowmax = abs( a( imax, jmax ) )
+               if( imax.gt.1 ) then
+                  jmax = idamax( imax-1, a( 1, imax ), 1 )
+                  rowmax = max( rowmax, abs( a( jmax, imax ) ) )
+               end if
+*
+               if( absakk.ge.alpha*colmax*( colmax / rowmax ) ) then
+*
+*                 no interchange, use 1-by-1 pivot block
+*
+                  kp = k
+               else if( abs( a( imax, imax ) ).ge.alpha*rowmax ) then
+*
+*                 interchange rows and columns K and IMAX, use 1-by-1
+*                 pivot block
+*
+                  kp = imax
+               else
+*
+*                 interchange rows and columns K-1 and IMAX, use 2-by-2
+*                 pivot block
+*
+                  kp = imax
+                  kstep = 2
+               end if
+            end if
+*
+            kk = k - kstep + 1
+            if( kp.ne.kk ) then
+*
+*              Interchange rows and columns KK and KP in the leading
+*              submatrix A(1:k,1:k)
+*
+               call dswap( kp-1, a( 1, kk ), 1, a( 1, kp ), 1 )
+               call dswap( kk-kp-1, a( kp+1, kk ), 1, a( kp, kp+1 ),
+     $                     lda )
+               t = a( kk, kk )
+               a( kk, kk ) = a( kp, kp )
+               a( kp, kp ) = t
+               if( kstep.eq.2 ) then
+                  t = a( k-1, k )
+                  a( k-1, k ) = a( kp, k )
+                  a( kp, k ) = t
+               end if
+            end if
+*
+*           Update the leading submatrix
+*
+            if( kstep.eq.1 ) then
+*
+*              1-by-1 pivot block D(k): column k now holds
+*
+*              W(k) = U(k)*D(k)
+*
+*              where U(k) is the k-th column of U
+*
+*              Perform a rank-1 update of A(1:k-1,1:k-1) as
+*
+*              A := A - U(k)*D(k)*U(k)' = A - W(k)*1/D(k)*W(k)'
+*
+               r1 = one / a( k, k )
+               call dsyr( uplo, k-1, -r1, a( 1, k ), 1, a, lda )
+*
+*              Store U(k) in column k
+*
+               call dscal( k-1, r1, a( 1, k ), 1 )
+            else
+*
+*              2-by-2 pivot block D(k): columns k and k-1 now hold
+*
+*              ( W(k-1) W(k) ) = ( U(k-1) U(k) )*D(k)
+*
+*              where U(k) and U(k-1) are the k-th and (k-1)-th columns
+*              of U
+*
+*              Perform a rank-2 update of A(1:k-2,1:k-2) as
+*
+*              A := A - ( U(k-1) U(k) )*D(k)*( U(k-1) U(k) )'
+*                 = A - ( W(k-1) W(k) )*inv(D(k))*( W(k-1) W(k) )'
+*
+*              Convert this to two rank-1 updates by using the eigen-
+*              decomposition of D(k)
+*
+               call dlaev2( a( k-1, k-1 ), a( k-1, k ), a( k, k ), r1,
+     $                      r2, c, s )
+               r1 = one / r1
+               r2 = one / r2
+               call drot( k-2, a( 1, k-1 ), 1, a( 1, k ), 1, c, s )
+               call dsyr( uplo, k-2, -r1, a( 1, k-1 ), 1, a, lda )
+               call dsyr( uplo, k-2, -r2, a( 1, k ), 1, a, lda )
+*
+*              Store U(k) and U(k-1) in columns k and k-1
+*
+               call dscal( k-2, r1, a( 1, k-1 ), 1 )
+               call dscal( k-2, r2, a( 1, k ), 1 )
+               call drot( k-2, a( 1, k-1 ), 1, a( 1, k ), 1, c, -s )
+            end if
+         end if
+*
+*        Store details of the interchanges in IPIV
+*
+         if( kstep.eq.1 ) then
+            ipiv( k ) = kp
+         else
+            ipiv( k ) = -kp
+            ipiv( k-1 ) = -kp
+         end if
+*
+*        Decrease K and return to the start of the main loop
+*
+         k = k - kstep
+         go to 10
+*
+      else
+*
+*        Factorize A as L*D*L' using the lower triangle of A
+*
+*        K is the main loop index, increasing from 1 to N in steps of
+*        1 or 2
+*
+         k = 1
+   20    continue
+*
+*        If K > N, exit from loop
+*
+         if( k.gt.n )
+     $      go to 30
+         kstep = 1
+*
+*        Determine rows and columns to be interchanged and whether
+*        a 1-by-1 or 2-by-2 pivot block will be used
+*
+         absakk = abs( a( k, k ) )
+*
+*        IMAX is the row-index of the largest off-diagonal element in
+*        column K, and COLMAX is its absolute value
+*
+         if( k.lt.n ) then
+            imax = k + idamax( n-k, a( k+1, k ), 1 )
+            colmax = abs( a( imax, k ) )
+         else
+            colmax = zero
+         end if
+*
+         if( max( absakk, colmax ).eq.zero ) then
+*
+*           Column K is zero: set INFO and continue
+*
+            if( info.eq.0 )
+     $         info = k
+            kp = k
+         else
+            if( absakk.ge.alpha*colmax ) then
+*
+*              no interchange, use 1-by-1 pivot block
+*
+               kp = k
+            else
+*
+*              JMAX is the column-index of the largest off-diagonal
+*              element in row IMAX, and ROWMAX is its absolute value
+*
+               jmax = k - 1 + idamax( imax-k, a( imax, k ), lda )
+               rowmax = abs( a( imax, jmax ) )
+               if( imax.lt.n ) then
+                  jmax = imax + idamax( n-imax, a( imax+1, imax ), 1 )
+                  rowmax = max( rowmax, abs( a( jmax, imax ) ) )
+               end if
+*
+               if( absakk.ge.alpha*colmax*( colmax / rowmax ) ) then
+*
+*                 no interchange, use 1-by-1 pivot block
+*
+                  kp = k
+               else if( abs( a( imax, imax ) ).ge.alpha*rowmax ) then
+*
+*                 interchange rows and columns K and IMAX, use 1-by-1
+*                 pivot block
+*
+                  kp = imax
+               else
+*
+*                 interchange rows and columns K+1 and IMAX, use 2-by-2
+*                 pivot block
+*
+                  kp = imax
+                  kstep = 2
+               end if
+            end if
+*
+            kk = k + kstep - 1
+            if( kp.ne.kk ) then
+*
+*              Interchange rows and columns KK and KP in the trailing
+*              submatrix A(k:n,k:n)
+*
+               if( kp.lt.n )
+     $            call dswap( n-kp, a( kp+1, kk ), 1, a( kp+1, kp ), 1 )
+               call dswap( kp-kk-1, a( kk+1, kk ), 1, a( kp, kk+1 ),
+     $                     lda )
+               t = a( kk, kk )
+               a( kk, kk ) = a( kp, kp )
+               a( kp, kp ) = t
+               if( kstep.eq.2 ) then
+                  t = a( k+1, k )
+                  a( k+1, k ) = a( kp, k )
+                  a( kp, k ) = t
+               end if
+            end if
+*
+*           Update the trailing submatrix
+*
+            if( kstep.eq.1 ) then
+*
+*              1-by-1 pivot block D(k): column k now holds
+*
+*              W(k) = L(k)*D(k)
+*
+*              where L(k) is the k-th column of L
+*
+               if( k.lt.n ) then
+*
+*                 Perform a rank-1 update of A(k+1:n,k+1:n) as
+*
+*                 A := A - L(k)*D(k)*L(k)' = A - W(k)*(1/D(k))*W(k)'
+*
+                  r1 = one / a( k, k )
+                  call dsyr( uplo, n-k, -r1, a( k+1, k ), 1,
+     $                       a( k+1, k+1 ), lda )
+*
+*                 Store L(k) in column K
+*
+                  call dscal( n-k, r1, a( k+1, k ), 1 )
+               end if
+            else
+*
+*              2-by-2 pivot block D(k): columns K and K+1 now hold
+*
+*              ( W(k) W(k+1) ) = ( L(k) L(k+1) )*D(k)
+*
+*              where L(k) and L(k+1) are the k-th and (k+1)-th columns
+*              of L
+*
+               if( k.lt.n-1 ) then
+*
+*                 Perform a rank-2 update of A(k+2:n,k+2:n) as
+*
+*                 A := A - ( L(k) L(k+1) )*D(k)*( L(k) L(k+1) )'
+*                    = A - ( W(k) W(k+1) )*inv(D(k))*( W(k) W(k+1) )'
+*
+*                 Convert this to two rank-1 updates by using the eigen-
+*                 decomposition of D(k)
+*
+                  call dlaev2( a( k, k ), a( k+1, k ), a( k+1, k+1 ),
+     $                         r1, r2, c, s )
+                  r1 = one / r1
+                  r2 = one / r2
+                  call drot( n-k-1, a( k+2, k ), 1, a( k+2, k+1 ), 1, c,
+     $                       s )
+                  call dsyr( uplo, n-k-1, -r1, a( k+2, k ), 1,
+     $                       a( k+2, k+2 ), lda )
+                  call dsyr( uplo, n-k-1, -r2, a( k+2, k+1 ), 1,
+     $                       a( k+2, k+2 ), lda )
+*
+*                 Store L(k) and L(k+1) in columns k and k+1
+*
+                  call dscal( n-k-1, r1, a( k+2, k ), 1 )
+                  call dscal( n-k-1, r2, a( k+2, k+1 ), 1 )
+                  call drot( n-k-1, a( k+2, k ), 1, a( k+2, k+1 ), 1, c,
+     $                       -s )
+               end if
+            end if
+         end if
+*
+*        Store details of the interchanges in IPIV
+*
+         if( kstep.eq.1 ) then
+            ipiv( k ) = kp
+         else
+            ipiv( k ) = -kp
+            ipiv( k+1 ) = -kp
+         end if
+*
+*        Increase K and return to the start of the main loop
+*
+         k = k + kstep
+         go to 20
+*
+      end if
+*
+   30 continue
+      return
+*
+*     End of DSYTF2
+*
+      end
 #endif
 #if !defined(HIB_CRAY) && !defined(HIB_UNIX_CONVEX)
 
@@ -3631,44 +3631,44 @@ c
       end if
 #endif
 #if defined(HIB_UNIX_BLAS3)
-c;      if(mcolr.eq.1) then
-c;        if(mcola.eq.1.and.mcolb.eq.1) then
-c;          call dgemm('N','N',ncol,nrow,nlink,1.0d0,a,mrowa,
-c;     1                    b,max(nlink,mrowb),0.0d0,r,mrowr)
-c;          return
-c;        else if(mrowa.eq.1.and.mcolb.eq.1) then
-c;          call dgemm('T','N',ncol,nrow,nlink,1.0d0,a,mcola,
-c;     1                    b,max(nlink,mrowb),0.0d0,r,mrowr)
-c;          return
-c;        else if(mcola.eq.1.and.mrowb.eq.1) then
-c;          call dgemm('N','T',ncol,nrow,nlink,1.0d0,a,mrowa,
-c;     1                    b,mcolb,0.0d0,r,mrowr)
-c;          return
-c;        else if(mrowa.eq.1.and.mrowb.eq.1) then
-c;          call dgemm('T','T',ncol,nrow,nlink,1.0d0,a,mcola,
-c;     1                    b,mcolb,0.0d0,r,mrowr)
-c;          return
-c;        end if
-c;        goto 6010
-c;      else if(mrowr.eq.1) then
-c;        if(mcola.eq.1.and.mcolb.eq.1) then
-c;          call dgemm('T','T',nrow,ncol,nlink,1.0d0,b,max(nlink,mrowb),
-c;     1                     a,mrowa,0.0d0,r,mcolr)
-c;          return
-c;        else if(mrowa.eq.1.and.mcolb.eq.1) then
-c;          call dgemm('T','N',nrow,ncol,nlink,1.0d0,b,max(nlink,mrowb),
-c;     1                     a,mcola,0.0d0,r,mcolr)
-c;          return
-c;        else if(mcola.eq.1.and.mrowb.eq.1) then
-c;          call dgemm('N','T',nrow,ncol,nlink,1.0d0,b,mcolb,
-c;     1                     a,mrowa,0.0d0,r,mcolr)
-c;          return
-c;        else if(mrowa.eq.1.and.mrowb.eq.1) then
-c;          call dgemm('N','N',nrow,ncol,nlink,1.0d0,b,mcolb,
-c;     1                     a,mcola,0.0d0,r,mcolr)
-c;          return
-c;        end if
-c;      end if
+      if(mcolr.eq.1) then
+        if(mcola.eq.1.and.mcolb.eq.1) then
+          call dgemm('N','N',ncol,nrow,nlink,1.0d0,a,mrowa,
+     1                    b,max(nlink,mrowb),0.0d0,r,mrowr)
+          return
+        else if(mrowa.eq.1.and.mcolb.eq.1) then
+          call dgemm('T','N',ncol,nrow,nlink,1.0d0,a,mcola,
+     1                    b,max(nlink,mrowb),0.0d0,r,mrowr)
+          return
+        else if(mcola.eq.1.and.mrowb.eq.1) then
+          call dgemm('N','T',ncol,nrow,nlink,1.0d0,a,mrowa,
+     1                    b,mcolb,0.0d0,r,mrowr)
+          return
+        else if(mrowa.eq.1.and.mrowb.eq.1) then
+          call dgemm('T','T',ncol,nrow,nlink,1.0d0,a,mcola,
+     1                    b,mcolb,0.0d0,r,mrowr)
+          return
+        end if
+        goto 6010
+      else if(mrowr.eq.1) then
+        if(mcola.eq.1.and.mcolb.eq.1) then
+          call dgemm('T','T',nrow,ncol,nlink,1.0d0,b,max(nlink,mrowb),
+     1                     a,mrowa,0.0d0,r,mcolr)
+          return
+        else if(mrowa.eq.1.and.mcolb.eq.1) then
+          call dgemm('T','N',nrow,ncol,nlink,1.0d0,b,max(nlink,mrowb),
+     1                     a,mcola,0.0d0,r,mcolr)
+          return
+        else if(mcola.eq.1.and.mrowb.eq.1) then
+          call dgemm('N','T',nrow,ncol,nlink,1.0d0,b,mcolb,
+     1                     a,mrowa,0.0d0,r,mcolr)
+          return
+        else if(mrowa.eq.1.and.mrowb.eq.1) then
+          call dgemm('N','N',nrow,ncol,nlink,1.0d0,b,mcolb,
+     1                     a,mcola,0.0d0,r,mcolr)
+          return
+        end if
+      end if
 #endif
 #if !defined(HIB_CRAY) && !defined(HIB_UNIX_CONVEX)
 6010  mxb=mxmblk
@@ -5272,44 +5272,44 @@ c
       end if
 #endif
 #if defined(HIB_UNIX_BLAS3)
-c;      if(mcolr.eq.1) then
-c;        if(mcola.eq.1.and.mcolb.eq.1) then
-c;          call dgemm('N','N',ncol,nrow,nlink,1.0d0,a,mrowa,
-c;     1                     b,max(nlink,mrowb),1.0d0,r,mrowr)
-c;          return
-c;        else if(mrowa.eq.1.and.mcolb.eq.1) then
-c;          call dgemm('T','N',ncol,nrow,nlink,1.0d0,a,mcola,
-c;     1                     b,max(nlink,mrowb),1.0d0,r,mrowr)
-c;          return
-c;        else if(mcola.eq.1.and.mrowb.eq.1) then
-c;          call dgemm('N','T',ncol,nrow,nlink,1.0d0,a,mrowa,
-c;     1                     b,mcolb,1.0d0,r,mrowr)
-c;          return
-c;        else if(mrowa.eq.1.and.mrowb.eq.1) then
-c;          call dgemm('T','T',ncol,nrow,nlink,1.0d0,a,mcola,
-c;     1                     b,mcolb,1.0d0,r,mrowr)
-c;          return
-c;        end if
-c;        goto 6010
-c;      else if(mrowr.eq.1) then
-c;        if(mcola.eq.1.and.mcolb.eq.1) then
-c;          call dgemm('T','T',nrow,ncol,nlink,1.0d0,b,max(nlink,mrowb),
-c;     1                     a,mrowa,1.0d0,r,mcolr)
-c;          return
-c;        else if(mrowa.eq.1.and.mcolb.eq.1) then
-c;          call dgemm('T','N',nrow,ncol,nlink,1.0d0,b,max(nlink,mrowb),
-c;     1                     a,mcola,1.0d0,r,mcolr)
-c;          return
-c;        else if(mcola.eq.1.and.mrowb.eq.1) then
-c;          call dgemm('N','T',nrow,ncol,nlink,1.0d0,b,mcolb,
-c;     1                     a,mrowa,1.0d0,r,mcolr)
-c;          return
-c;        else if(mrowa.eq.1.and.mrowb.eq.1) then
-c;          call dgemm('N','N',nrow,ncol,nlink,1.0d0,b,mcolb,
-c;     1                     a,mcola,1.0d0,r,mcolr)
-c;          return
-c;        end if
-c;      end if
+      if(mcolr.eq.1) then
+        if(mcola.eq.1.and.mcolb.eq.1) then
+          call dgemm('N','N',ncol,nrow,nlink,1.0d0,a,mrowa,
+     1                     b,max(nlink,mrowb),1.0d0,r,mrowr)
+          return
+        else if(mrowa.eq.1.and.mcolb.eq.1) then
+          call dgemm('T','N',ncol,nrow,nlink,1.0d0,a,mcola,
+     1                     b,max(nlink,mrowb),1.0d0,r,mrowr)
+          return
+        else if(mcola.eq.1.and.mrowb.eq.1) then
+          call dgemm('N','T',ncol,nrow,nlink,1.0d0,a,mrowa,
+     1                     b,mcolb,1.0d0,r,mrowr)
+          return
+        else if(mrowa.eq.1.and.mrowb.eq.1) then
+          call dgemm('T','T',ncol,nrow,nlink,1.0d0,a,mcola,
+     1                     b,mcolb,1.0d0,r,mrowr)
+          return
+        end if
+        goto 6010
+      else if(mrowr.eq.1) then
+        if(mcola.eq.1.and.mcolb.eq.1) then
+          call dgemm('T','T',nrow,ncol,nlink,1.0d0,b,max(nlink,mrowb),
+     1                     a,mrowa,1.0d0,r,mcolr)
+          return
+        else if(mrowa.eq.1.and.mcolb.eq.1) then
+          call dgemm('T','N',nrow,ncol,nlink,1.0d0,b,max(nlink,mrowb),
+     1                     a,mcola,1.0d0,r,mcolr)
+          return
+        else if(mcola.eq.1.and.mrowb.eq.1) then
+          call dgemm('N','T',nrow,ncol,nlink,1.0d0,b,mcolb,
+     1                     a,mrowa,1.0d0,r,mcolr)
+          return
+        else if(mrowa.eq.1.and.mrowb.eq.1) then
+          call dgemm('N','N',nrow,ncol,nlink,1.0d0,b,mcolb,
+     1                     a,mcola,1.0d0,r,mcolr)
+          return
+        end if
+      end if
 #endif
 #if !defined(HIB_CRAY) && !defined(HIB_UNIX_CONVEX)
 
@@ -7255,841 +7255,841 @@ c
 #endif
 c -------------------------
 #if (defined(HIB_UNIX_AIX) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)) && !defined(HIB_UNIX_HP800)
-c;      subroutine dsymv ( uplo, n, alpha, a, lda, x, incx,
-c;     $                   beta, y, incy )
-c;*     .. Scalar Arguments ..
-c;      double precision   alpha, beta
-c;      integer            incx, incy, lda, n
-c;      character*1        uplo
-c;*     .. Array Arguments ..
-c;      double precision   a( lda, * ), x( * ), y( * )
-c;*     ..
-c;*
-c;*  Purpose
-c;*  =======
-c;*
-c;*  DSYMV  performs the matrix-vector  operation
-c;*
-c;*     y := alpha*A*x + beta*y,
-c;*
-c;*  where alpha and beta are scalars, x and y are n element vectors and
-c;*  A is an n by n symmetric matrix.
-c;*
-c;*  Parameters
-c;*  ==========
-c;*
-c;*  UPLO   - CHARACTER*1.
-c;*           On entry, UPLO specifies whether the upper or lower
-c;*           triangular part of the array A is to be referenced as
-c;*           follows:
-c;*
-c;*              UPLO = 'U' or 'u'   Only the upper triangular part of A
-c;*                                  is to be referenced.
-c;*
-c;*              UPLO = 'L' or 'l'   Only the lower triangular part of A
-c;*                                  is to be referenced.
-c;*
-c;*           Unchanged on exit.
-c;*
-c;*  N      - INTEGER.
-c;*           On entry, N specifies the order of the matrix A.
-c;*           N must be at least zero.
-c;*           Unchanged on exit.
-c;*
-c;*  ALPHA  - DOUBLE PRECISION.
-c;*           On entry, ALPHA specifies the scalar alpha.
-c;*           Unchanged on exit.
-c;*
-c;*  A      - DOUBLE PRECISION array of DIMENSION ( LDA, n ).
-c;*           Before entry with  UPLO = 'U' or 'u', the leading n by n
-c;*           upper triangular part of the array A must contain the upper
-c;*           triangular part of the symmetric matrix and the strictly
-c;*           lower triangular part of A is not referenced.
-c;*           Before entry with UPLO = 'L' or 'l', the leading n by n
-c;*           lower triangular part of the array A must contain the lower
-c;*           triangular part of the symmetric matrix and the strictly
-c;*           upper triangular part of A is not referenced.
-c;*           Unchanged on exit.
-c;*
-c;*  LDA    - INTEGER.
-c;*           On entry, LDA specifies the first dimension of A as declared
-c;*           in the calling (sub) program. LDA must be at least
-c;*           max( 1, n ).
-c;*           Unchanged on exit.
-c;*
-c;*  X      - DOUBLE PRECISION array of dimension at least
-c;*           ( 1 + ( n - 1 )*abs( INCX ) ).
-c;*           Before entry, the incremented array X must contain the n
-c;*           element vector x.
-c;*           Unchanged on exit.
-c;*
-c;*  INCX   - INTEGER.
-c;*           On entry, INCX specifies the increment for the elements of
-c;*           X. INCX must not be zero.
-c;*           Unchanged on exit.
-c;*
-c;*  BETA   - DOUBLE PRECISION.
-c;*           On entry, BETA specifies the scalar beta. When BETA is
-c;*           supplied as zero then Y need not be set on input.
-c;*           Unchanged on exit.
-c;*
-c;*  Y      - DOUBLE PRECISION array of dimension at least
-c;*           ( 1 + ( n - 1 )*abs( INCY ) ).
-c;*           Before entry, the incremented array Y must contain the n
-c;*           element vector y. On exit, Y is overwritten by the updated
-c;*           vector y.
-c;*
-c;*  INCY   - INTEGER.
-c;*           On entry, INCY specifies the increment for the elements of
-c;*           Y. INCY must not be zero.
-c;*           Unchanged on exit.
-c;*
-c;*
-c;*  Level 2 Blas routine.
-c;*
-c;*  -- Written on 22-October-1986.
-c;*     Jack Dongarra, Argonne National Lab.
-c;*     Jeremy Du Croz, Nag Central Office.
-c;*     Sven Hammarling, Nag Central Office.
-c;*     Richard Hanson, Sandia National Labs.
-c;*
-c;*
-c;*     .. Parameters ..
-c;      double precision   one         , zero
-c;      parameter        ( one = 1.0d+0, zero = 0.0d+0 )
-c;*     .. Local Scalars ..
-c;      double precision   temp1, temp2
-c;      integer            i, info, ix, iy, j, jx, jy, kx, ky
-c;*     .. External Functions ..
-c;      logical            lsame
-c;      external           lsame
-c;*     .. External Subroutines ..
-c;      external           xerbla
-c;*     .. Intrinsic Functions ..
-c;      intrinsic          max
-c;*     ..
-c;*     .. Executable Statements ..
-c;*
-c;*     Test the input parameters.
-c;*
-c;      info = 0
-c;      if     ( .not.lsame( uplo, 'U' ).and.
-c;     $         .not.lsame( uplo, 'L' )      )then
-c;         info = 1
-c;      else if( n.lt.0 )then
-c;         info = 2
-c;      else if( lda.lt.max( 1, n ) )then
-c;         info = 5
-c;      else if( incx.eq.0 )then
-c;         info = 7
-c;      else if( incy.eq.0 )then
-c;         info = 10
-c;      end if
-c;      if( info.ne.0 )then
-c;         call xerbla( 'DSYMV ', info )
-c;         return
-c;      end if
-c;*
-c;*     Quick return if possible.
-c;*
-c;      if( ( n.eq.0 ).or.( ( alpha.eq.zero ).and.( beta.eq.one ) ) )
-c;     $   return
-c;*
-c;*     Set up the start points in  X  and  Y.
-c;*
-c;      if( incx.gt.0 )then
-c;         kx = 1
-c;      else
-c;         kx = 1 - ( n - 1 )*incx
-c;      end if
-c;      if( incy.gt.0 )then
-c;         ky = 1
-c;      else
-c;         ky = 1 - ( n - 1 )*incy
-c;      end if
-c;*
-c;*     Start the operations. In this version the elements of A are
-c;*     accessed sequentially with one pass through the triangular part
-c;*     of A.
-c;*
-c;*     First form  y := beta*y.
-c;*
-c;      if( beta.ne.one )then
-c;         if( incy.eq.1 )then
-c;            if( beta.eq.zero )then
-c;               do 10, i = 1, n
-c;                  y( i ) = zero
-c;   10          continue
-c;            else
-c;               do 20, i = 1, n
-c;                  y( i ) = beta*y( i )
-c;   20          continue
-c;            end if
-c;         else
-c;            iy = ky
-c;            if( beta.eq.zero )then
-c;               do 30, i = 1, n
-c;                  y( iy ) = zero
-c;                  iy      = iy   + incy
-c;   30          continue
-c;            else
-c;               do 40, i = 1, n
-c;                  y( iy ) = beta*y( iy )
-c;                  iy      = iy           + incy
-c;   40          continue
-c;            end if
-c;         end if
-c;      end if
-c;      if( alpha.eq.zero )
-c;     $   return
-c;      if( lsame( uplo, 'U' ) )then
-c;*
-c;*        Form  y  when A is stored in upper triangle.
-c;*
-c;         if( ( incx.eq.1 ).and.( incy.eq.1 ) )then
-c;            do 60, j = 1, n
-c;               temp1 = alpha*x( j )
-c;               temp2 = zero
-c;               do 50, i = 1, j - 1
-c;                  y( i ) = y( i ) + temp1*a( i, j )
-c;                  temp2  = temp2  + a( i, j )*x( i )
-c;   50          continue
-c;               y( j ) = y( j ) + temp1*a( j, j ) + alpha*temp2
-c;   60       continue
-c;         else
-c;            jx = kx
-c;            jy = ky
-c;            do 80, j = 1, n
-c;               temp1 = alpha*x( jx )
-c;               temp2 = zero
-c;               ix    = kx
-c;               iy    = ky
-c;               do 70, i = 1, j - 1
-c;                  y( iy ) = y( iy ) + temp1*a( i, j )
-c;                  temp2   = temp2   + a( i, j )*x( ix )
-c;                  ix      = ix      + incx
-c;                  iy      = iy      + incy
-c;   70          continue
-c;               y( jy ) = y( jy ) + temp1*a( j, j ) + alpha*temp2
-c;               jx      = jx      + incx
-c;               jy      = jy      + incy
-c;   80       continue
-c;         end if
-c;      else
-c;*
-c;*        Form  y  when A is stored in lower triangle.
-c;*
-c;         if( ( incx.eq.1 ).and.( incy.eq.1 ) )then
-c;            do 100, j = 1, n
-c;               temp1  = alpha*x( j )
-c;               temp2  = zero
-c;               y( j ) = y( j )       + temp1*a( j, j )
-c;               do 90, i = j + 1, n
-c;                  y( i ) = y( i ) + temp1*a( i, j )
-c;                  temp2  = temp2  + a( i, j )*x( i )
-c;   90          continue
-c;               y( j ) = y( j ) + alpha*temp2
-c;  100       continue
-c;         else
-c;            jx = kx
-c;            jy = ky
-c;            do 120, j = 1, n
-c;               temp1   = alpha*x( jx )
-c;               temp2   = zero
-c;               y( jy ) = y( jy )       + temp1*a( j, j )
-c;               ix      = jx
-c;               iy      = jy
-c;               do 110, i = j + 1, n
-c;                  ix      = ix      + incx
-c;                  iy      = iy      + incy
-c;                  y( iy ) = y( iy ) + temp1*a( i, j )
-c;                  temp2   = temp2   + a( i, j )*x( ix )
-c;  110          continue
-c;               y( jy ) = y( jy ) + alpha*temp2
-c;               jx      = jx      + incx
-c;               jy      = jy      + incy
-c;  120       continue
-c;         end if
-c;      end if
-c;*
-c;      return
-c;*
-c;*     End of DSYMV .
-c;*
-c;      end
-c;      subroutine dgemv ( trans, m, n, alpha, a, lda, x, incx,
-c;     $                   beta, y, incy )
-c;*     .. Scalar Arguments ..
-c;      double precision   alpha, beta
-c;      integer            incx, incy, lda, m, n
-c;      character*1        trans
-c;*     .. Array Arguments ..
-c;      double precision   a( lda, * ), x( * ), y( * )
-c;*     ..
-c;*
-c;*  Purpose
-c;*  =======
-c;*
-c;*  DGEMV  performs one of the matrix-vector operations
-c;*
-c;*     y := alpha*A*x + beta*y,   or   y := alpha*A'*x + beta*y,
-c;*
-c;*  where alpha and beta are scalars, x and y are vectors and A is an
-c;*  m by n matrix.
-c;*
-c;*  Parameters
-c;*  ==========
-c;*
-c;*  TRANS  - CHARACTER*1.
-c;*           On entry, TRANS specifies the operation to be performed as
-c;*           follows:
-c;*
-c;*              TRANS = 'N' or 'n'   y := alpha*A*x + beta*y.
-c;*
-c;*              TRANS = 'T' or 't'   y := alpha*A'*x + beta*y.
-c;*
-c;*              TRANS = 'C' or 'c'   y := alpha*A'*x + beta*y.
-c;*
-c;*           Unchanged on exit.
-c;*
-c;*  M      - INTEGER.
-c;*           On entry, M specifies the number of rows of the matrix A.
-c;*           M must be at least zero.
-c;*           Unchanged on exit.
-c;*
-c;*  N      - INTEGER.
-c;*           On entry, N specifies the number of columns of the matrix A.
-c;*           N must be at least zero.
-c;*           Unchanged on exit.
-c;*
-c;*  ALPHA  - DOUBLE PRECISION.
-c;*           On entry, ALPHA specifies the scalar alpha.
-c;*           Unchanged on exit.
-c;*
-c;*  A      - DOUBLE PRECISION array of DIMENSION ( LDA, n ).
-c;*           Before entry, the leading m by n part of the array A must
-c;*           contain the matrix of coefficients.
-c;*           Unchanged on exit.
-c;*
-c;*  LDA    - INTEGER.
-c;*           On entry, LDA specifies the first dimension of A as declared
-c;*           in the calling (sub) program. LDA must be at least
-c;*           max( 1, m ).
-c;*           Unchanged on exit.
-c;*
-c;*  X      - DOUBLE PRECISION array of DIMENSION at least
-c;*           ( 1 + ( n - 1 )*abs( INCX ) ) when TRANS = 'N' or 'n'
-c;*           and at least
-c;*           ( 1 + ( m - 1 )*abs( INCX ) ) otherwise.
-c;*           Before entry, the incremented array X must contain the
-c;*           vector x.
-c;*           Unchanged on exit.
-c;*
-c;*  INCX   - INTEGER.
-c;*           On entry, INCX specifies the increment for the elements of
-c;*           X. INCX must not be zero.
-c;*           Unchanged on exit.
-c;*
-c;*  BETA   - DOUBLE PRECISION.
-c;*           On entry, BETA specifies the scalar beta. When BETA is
-c;*           supplied as zero then Y need not be set on input.
-c;*           Unchanged on exit.
-c;*
-c;*  Y      - DOUBLE PRECISION array of DIMENSION at least
-c;*           ( 1 + ( m - 1 )*abs( INCY ) ) when TRANS = 'N' or 'n'
-c;*           and at least
-c;*           ( 1 + ( n - 1 )*abs( INCY ) ) otherwise.
-c;*           Before entry with BETA non-zero, the incremented array Y
-c;*           must contain the vector y. On exit, Y is overwritten by the
-c;*           updated vector y.
-c;*
-c;*  INCY   - INTEGER.
-c;*           On entry, INCY specifies the increment for the elements of
-c;*           Y. INCY must not be zero.
-c;*           Unchanged on exit.
-c;*
-c;*
-c;*  Level 2 Blas routine.
-c;*
-c;*  -- Written on 22-October-1986.
-c;*     Jack Dongarra, Argonne National Lab.
-c;*     Jeremy Du Croz, Nag Central Office.
-c;*     Sven Hammarling, Nag Central Office.
-c;*     Richard Hanson, Sandia National Labs.
-c;*
-c;*
-c;*     .. Parameters ..
-c;      double precision   one         , zero
-c;      parameter        ( one = 1.0d+0, zero = 0.0d+0 )
-c;*     .. Local Scalars ..
-c;      double precision   temp
-c;      integer            i, info, ix, iy, j, jx, jy, kx, ky, lenx, leny
-c;*     .. External Functions ..
-c;      logical            lsame
-c;      external           lsame
-c;*     .. External Subroutines ..
-c;      external           xerbla
-c;*     .. Intrinsic Functions ..
-c;      intrinsic          max
-c;*     ..
-c;*     .. Executable Statements ..
-c;*
-c;*     Test the input parameters.
-c;*
-c;      info = 0
-c;      if     ( .not.lsame( trans, 'N' ).and.
-c;     $         .not.lsame( trans, 'T' ).and.
-c;     $         .not.lsame( trans, 'C' )      )then
-c;         info = 1
-c;      else if( m.lt.0 )then
-c;         info = 2
-c;      else if( n.lt.0 )then
-c;         info = 3
-c;      else if( lda.lt.max( 1, m ) )then
-c;         info = 6
-c;      else if( incx.eq.0 )then
-c;         info = 8
-c;      else if( incy.eq.0 )then
-c;         info = 11
-c;      end if
-c;      if( info.ne.0 )then
-c;         call xerbla( 'DGEMV ', info )
-c;         return
-c;      end if
-c;*
-c;*     Quick return if possible.
-c;*
-c;      if( ( m.eq.0 ).or.( n.eq.0 ).or.
-c;     $    ( ( alpha.eq.zero ).and.( beta.eq.one ) ) )
-c;     $   return
-c;*
-c;*     Set  LENX  and  LENY, the lengths of the vectors x and y, and set
-c;*     up the start points in  X  and  Y.
-c;*
-c;      if( lsame( trans, 'N' ) )then
-c;         lenx = n
-c;         leny = m
-c;      else
-c;         lenx = m
-c;         leny = n
-c;      end if
-c;      if( incx.gt.0 )then
-c;         kx = 1
-c;      else
-c;         kx = 1 - ( lenx - 1 )*incx
-c;      end if
-c;      if( incy.gt.0 )then
-c;         ky = 1
-c;      else
-c;         ky = 1 - ( leny - 1 )*incy
-c;      end if
-c;*
-c;*     Start the operations. In this version the elements of A are
-c;*     accessed sequentially with one pass through A.
-c;*
-c;*     First form  y := beta*y.
-c;*
-c;      if( beta.ne.one )then
-c;         if( incy.eq.1 )then
-c;            if( beta.eq.zero )then
-c;               do 10, i = 1, leny
-c;                  y( i ) = zero
-c;   10          continue
-c;            else
-c;               do 20, i = 1, leny
-c;                  y( i ) = beta*y( i )
-c;   20          continue
-c;            end if
-c;         else
-c;            iy = ky
-c;            if( beta.eq.zero )then
-c;               do 30, i = 1, leny
-c;                  y( iy ) = zero
-c;                  iy      = iy   + incy
-c;   30          continue
-c;            else
-c;               do 40, i = 1, leny
-c;                  y( iy ) = beta*y( iy )
-c;                  iy      = iy           + incy
-c;   40          continue
-c;            end if
-c;         end if
-c;      end if
-c;      if( alpha.eq.zero )
-c;     $   return
-c;      if( lsame( trans, 'N' ) )then
-c;*
-c;*        Form  y := alpha*A*x + y.
-c;*
-c;         jx = kx
-c;         if( incy.eq.1 )then
-c;            do 60, j = 1, n
-c;               if( x( jx ).ne.zero )then
-c;                  temp = alpha*x( jx )
-c;                  do 50, i = 1, m
-c;                     y( i ) = y( i ) + temp*a( i, j )
-c;   50             continue
-c;               end if
-c;               jx = jx + incx
-c;   60       continue
-c;         else
-c;            do 80, j = 1, n
-c;               if( x( jx ).ne.zero )then
-c;                  temp = alpha*x( jx )
-c;                  iy   = ky
-c;                  do 70, i = 1, m
-c;                     y( iy ) = y( iy ) + temp*a( i, j )
-c;                     iy      = iy      + incy
-c;   70             continue
-c;               end if
-c;               jx = jx + incx
-c;   80       continue
-c;         end if
-c;      else
-c;*
-c;*        Form  y := alpha*A'*x + y.
-c;*
-c;         jy = ky
-c;         if( incx.eq.1 )then
-c;            do 100, j = 1, n
-c;               temp = zero
-c;               do 90, i = 1, m
-c;                  temp = temp + a( i, j )*x( i )
-c;   90          continue
-c;               y( jy ) = y( jy ) + alpha*temp
-c;               jy      = jy      + incy
-c;  100       continue
-c;         else
-c;            do 120, j = 1, n
-c;               temp = zero
-c;               ix   = kx
-c;               do 110, i = 1, m
-c;                  temp = temp + a( i, j )*x( ix )
-c;                  ix   = ix   + incx
-c;  110          continue
-c;               y( jy ) = y( jy ) + alpha*temp
-c;               jy      = jy      + incy
-c;  120       continue
-c;         end if
-c;      end if
-c;*
-c;      return
-c;*
-c;*     End of DGEMV .
-c;*
-c;      end
-c;      subroutine dgemm ( transa, transb, m, n, k, alpha, a, lda, b, ldb,
-c;     $                   beta, c, ldc )
-c;*     .. Scalar Arguments ..
-c;      character*1        transa, transb
-c;      integer            m, n, k, lda, ldb, ldc
-c;      double precision   alpha, beta
-c;*     .. Array Arguments ..
-c;      double precision   a( lda, * ), b( ldb, * ), c( ldc, * )
-c;*     ..
-c;*
-c;*  Purpose
-c;*  =======
-c;*
-c;*  DGEMM  performs one of the matrix-matrix operations
-c;*
-c;*     C := alpha*op( A )*op( B ) + beta*C,
-c;*
-c;*  where  op( X ) is one of
-c;*
-c;*     op( X ) = X   or   op( X ) = X',
-c;*
-c;*  alpha and beta are scalars, and A, B and C are matrices, with op( A )
-c;*  an m by k matrix,  op( B )  a  k by n matrix and  C an m by n matrix.
-c;*
-c;*  Parameters
-c;*  ==========
-c;*
-c;*  TRANSA - CHARACTER*1.
-c;*           On entry, TRANSA specifies the form of op( A ) to be used in
-c;*           the matrix multiplication as follows:
-c;*
-c;*              TRANSA = 'N' or 'n',  op( A ) = A.
-c;*
-c;*              TRANSA = 'T' or 't',  op( A ) = A'.
-c;*
-c;*              TRANSA = 'C' or 'c',  op( A ) = A'.
-c;*
-c;*           Unchanged on exit.
-c;*
-c;*  TRANSB - CHARACTER*1.
-c;*           On entry, TRANSB specifies the form of op( B ) to be used in
-c;*           the matrix multiplication as follows:
-c;*
-c;*              TRANSB = 'N' or 'n',  op( B ) = B.
-c;*
-c;*              TRANSB = 'T' or 't',  op( B ) = B'.
-c;*
-c;*              TRANSB = 'C' or 'c',  op( B ) = B'.
-c;*
-c;*           Unchanged on exit.
-c;*
-c;*  M      - INTEGER.
-c;*           On entry,  M  specifies  the number  of rows  of the  matrix
-c;*           op( A )  and of the  matrix  C.  M  must  be at least  zero.
-c;*           Unchanged on exit.
-c;*
-c;*  N      - INTEGER.
-c;*           On entry,  N  specifies the number  of columns of the matrix
-c;*           op( B ) and the number of columns of the matrix C. N must be
-c;*           at least zero.
-c;*           Unchanged on exit.
-c;*
-c;*  K      - INTEGER.
-c;*           On entry,  K  specifies  the number of columns of the matrix
-c;*           op( A ) and the number of rows of the matrix op( B ). K must
-c;*           be at least  zero.
-c;*           Unchanged on exit.
-c;*
-c;*  ALPHA  - DOUBLE PRECISION.
-c;*           On entry, ALPHA specifies the scalar alpha.
-c;*           Unchanged on exit.
-c;*
-c;*  A      - DOUBLE PRECISION array of DIMENSION ( LDA, ka ), where ka is
-c;*           k  when  TRANSA = 'N' or 'n',  and is  m  otherwise.
-c;*           Before entry with  TRANSA = 'N' or 'n',  the leading  m by k
-c;*           part of the array  A  must contain the matrix  A,  otherwise
-c;*           the leading  k by m  part of the array  A  must contain  the
-c;*           matrix A.
-c;*           Unchanged on exit.
-c;*
-c;*  LDA    - INTEGER.
-c;*           On entry, LDA specifies the first dimension of A as declared
-c;*           in the calling (sub) program. When  TRANSA = 'N' or 'n' then
-c;*           LDA must be at least  max( 1, m ), otherwise  LDA must be at
-c;*           least  max( 1, k ).
-c;*           Unchanged on exit.
-c;*
-c;*  B      - DOUBLE PRECISION array of DIMENSION ( LDB, kb ), where kb is
-c;*           n  when  TRANSB = 'N' or 'n',  and is  k  otherwise.
-c;*           Before entry with  TRANSB = 'N' or 'n',  the leading  k by n
-c;*           part of the array  B  must contain the matrix  B,  otherwise
-c;*           the leading  n by k  part of the array  B  must contain  the
-c;*           matrix B.
-c;*           Unchanged on exit.
-c;*
-c;*  LDB    - INTEGER.
-c;*           On entry, LDB specifies the first dimension of B as declared
-c;*           in the calling (sub) program. When  TRANSB = 'N' or 'n' then
-c;*           LDB must be at least  max( 1, k ), otherwise  LDB must be at
-c;*           least  max( 1, n ).
-c;*           Unchanged on exit.
-c;*
-c;*  BETA   - DOUBLE PRECISION.
-c;*           On entry,  BETA  specifies the scalar  beta.  When  BETA  is
-c;*           supplied as zero then C need not be set on input.
-c;*           Unchanged on exit.
-c;*
-c;*  C      - DOUBLE PRECISION array of DIMENSION ( LDC, n ).
-c;*           Before entry, the leading  m by n  part of the array  C must
-c;*           contain the matrix  C,  except when  beta  is zero, in which
-c;*           case C need not be set on entry.
-c;*           On exit, the array  C  is overwritten by the  m by n  matrix
-c;*           ( alpha*op( A )*op( B ) + beta*C ).
-c;*
-c;*  LDC    - INTEGER.
-c;*           On entry, LDC specifies the first dimension of C as declared
-c;*           in  the  calling  (sub)  program.   LDC  must  be  at  least
-c;*           max( 1, m ).
-c;*           Unchanged on exit.
-c;*
-c;*
-c;*  Level 3 Blas routine.
-c;*
-c;*  -- Written on 8-February-1989.
-c;*     Jack Dongarra, Argonne National Laboratory.
-c;*     Iain Duff, AERE Harwell.
-c;*     Jeremy Du Croz, Numerical Algorithms Group Ltd.
-c;*     Sven Hammarling, Numerical Algorithms Group Ltd.
-c;*
-c;*
-c;*     .. External Functions ..
-c;      logical            lsame
-c;      external           lsame
-c;*     .. External Subroutines ..
-c;      external           xerbla
-c;*     .. Intrinsic Functions ..
-c;      intrinsic          max
-c;*     .. Local Scalars ..
-c;      logical            nota, notb
-c;      integer            i, info, j, l, ncola, nrowa, nrowb
-c;      double precision   temp
-c;*     .. Parameters ..
-c;      double precision   one         , zero
-c;      parameter        ( one = 1.0d+0, zero = 0.0d+0 )
-c;*     ..
-c;*     .. Executable Statements ..
-c;*
-c;*     Set  NOTA  and  NOTB  as  true if  A  and  B  respectively are not
-c;*     transposed and set  NROWA, NCOLA and  NROWB  as the number of rows
-c;*     and  columns of  A  and the  number of  rows  of  B  respectively.
-c;*
-c;      nota  = lsame( transa, 'N' )
-c;      notb  = lsame( transb, 'N' )
-c;      if( nota )then
-c;         nrowa = m
-c;         ncola = k
-c;      else
-c;         nrowa = k
-c;         ncola = m
-c;      end if
-c;      if( notb )then
-c;         nrowb = k
-c;      else
-c;         nrowb = n
-c;      end if
-c;*
-c;*     Test the input parameters.
-c;*
-c;      info = 0
-c;      if(      ( .not.nota                 ).and.
-c;     $         ( .not.lsame( transa, 'C' ) ).and.
-c;     $         ( .not.lsame( transa, 'T' ) )      )then
-c;         info = 1
-c;      else if( ( .not.notb                 ).and.
-c;     $         ( .not.lsame( transb, 'C' ) ).and.
-c;     $         ( .not.lsame( transb, 'T' ) )      )then
-c;         info = 2
-c;      else if( m  .lt.0               )then
-c;         info = 3
-c;      else if( n  .lt.0               )then
-c;         info = 4
-c;      else if( k  .lt.0               )then
-c;         info = 5
-c;      else if( lda.lt.max( 1, nrowa ) )then
-c;         info = 8
-c;      else if( ldb.lt.max( 1, nrowb ) )then
-c;         info = 10
-c;      else if( ldc.lt.max( 1, m     ) )then
-c;         info = 13
-c;      end if
-c;      if( info.ne.0 )then
-c;         call xerbla( 'DGEMM ', info )
-c;         return
-c;      end if
-c;*
-c;*     Quick return if possible.
-c;*
-c;      if( ( m.eq.0 ).or.( n.eq.0 ).or.
-c;     $    ( ( ( alpha.eq.zero ).or.( k.eq.0 ) ).and.( beta.eq.one ) ) )
-c;     $   return
-c;*
-c;*     And if  alpha.eq.zero.
-c;*
-c;      if( alpha.eq.zero )then
-c;         if( beta.eq.zero )then
-c;            do 20, j = 1, n
-c;               do 10, i = 1, m
-c;                  c( i, j ) = zero
-c;   10          continue
-c;   20       continue
-c;         else
-c;            do 40, j = 1, n
-c;               do 30, i = 1, m
-c;                  c( i, j ) = beta*c( i, j )
-c;   30          continue
-c;   40       continue
-c;         end if
-c;         return
-c;      end if
-c;*
-c;*     Start the operations.
-c;*
-c;      if( notb )then
-c;         if( nota )then
-c;*
-c;*           Form  C := alpha*A*B + beta*C.
-c;*
-c;            do 90, j = 1, n
-c;               if( beta.eq.zero )then
-c;                  do 50, i = 1, m
-c;                     c( i, j ) = zero
-c;   50             continue
-c;               else if( beta.ne.one )then
-c;                  do 60, i = 1, m
-c;                     c( i, j ) = beta*c( i, j )
-c;   60             continue
-c;               end if
-c;               do 80, l = 1, k
-c;                  if( b( l, j ).ne.zero )then
-c;                     temp = alpha*b( l, j )
-c;                     do 70, i = 1, m
-c;                        c( i, j ) = c( i, j ) + temp*a( i, l )
-c;   70                continue
-c;                  end if
-c;   80          continue
-c;   90       continue
-c;         else
-c;*
-c;*           Form  C := alpha*A'*B + beta*C
-c;*
-c;            do 120, j = 1, n
-c;               do 110, i = 1, m
-c;                  temp = zero
-c;                  do 100, l = 1, k
-c;                     temp = temp + a( l, i )*b( l, j )
-c;  100             continue
-c;                  if( beta.eq.zero )then
-c;                     c( i, j ) = alpha*temp
-c;                  else
-c;                     c( i, j ) = alpha*temp + beta*c( i, j )
-c;                  end if
-c;  110          continue
-c;  120       continue
-c;         end if
-c;      else
-c;         if( nota )then
-c;*
-c;*           Form  C := alpha*A*B' + beta*C
-c;*
-c;            do 170, j = 1, n
-c;               if( beta.eq.zero )then
-c;                  do 130, i = 1, m
-c;                     c( i, j ) = zero
-c;  130             continue
-c;               else if( beta.ne.one )then
-c;                  do 140, i = 1, m
-c;                     c( i, j ) = beta*c( i, j )
-c;  140             continue
-c;               end if
-c;               do 160, l = 1, k
-c;                  if( b( j, l ).ne.zero )then
-c;                     temp = alpha*b( j, l )
-c;                     do 150, i = 1, m
-c;                        c( i, j ) = c( i, j ) + temp*a( i, l )
-c;  150                continue
-c;                  end if
-c;  160          continue
-c;  170       continue
-c;         else
-c;*
-c;*           Form  C := alpha*A'*B' + beta*C
-c;*
-c;            do 200, j = 1, n
-c;               do 190, i = 1, m
-c;                  temp = zero
-c;                  do 180, l = 1, k
-c;                     temp = temp + a( l, i )*b( j, l )
-c;  180             continue
-c;                  if( beta.eq.zero )then
-c;                     c( i, j ) = alpha*temp
-c;                  else
-c;                     c( i, j ) = alpha*temp + beta*c( i, j )
-c;                  end if
-c;  190          continue
-c;  200       continue
-c;         end if
-c;      end if
-c;*
-c;      return
-c;*
-c;*     End of DGEMM .
-c;*
-c;      end
+      subroutine dsymv ( uplo, n, alpha, a, lda, x, incx,
+     $                   beta, y, incy )
+*     .. Scalar Arguments ..
+      double precision   alpha, beta
+      integer            incx, incy, lda, n
+      character*1        uplo
+*     .. Array Arguments ..
+      double precision   a( lda, * ), x( * ), y( * )
+*     ..
+*
+*  Purpose
+*  =======
+*
+*  DSYMV  performs the matrix-vector  operation
+*
+*     y := alpha*A*x + beta*y,
+*
+*  where alpha and beta are scalars, x and y are n element vectors and
+*  A is an n by n symmetric matrix.
+*
+*  Parameters
+*  ==========
+*
+*  UPLO   - CHARACTER*1.
+*           On entry, UPLO specifies whether the upper or lower
+*           triangular part of the array A is to be referenced as
+*           follows:
+*
+*              UPLO = 'U' or 'u'   Only the upper triangular part of A
+*                                  is to be referenced.
+*
+*              UPLO = 'L' or 'l'   Only the lower triangular part of A
+*                                  is to be referenced.
+*
+*           Unchanged on exit.
+*
+*  N      - INTEGER.
+*           On entry, N specifies the order of the matrix A.
+*           N must be at least zero.
+*           Unchanged on exit.
+*
+*  ALPHA  - DOUBLE PRECISION.
+*           On entry, ALPHA specifies the scalar alpha.
+*           Unchanged on exit.
+*
+*  A      - DOUBLE PRECISION array of DIMENSION ( LDA, n ).
+*           Before entry with  UPLO = 'U' or 'u', the leading n by n
+*           upper triangular part of the array A must contain the upper
+*           triangular part of the symmetric matrix and the strictly
+*           lower triangular part of A is not referenced.
+*           Before entry with UPLO = 'L' or 'l', the leading n by n
+*           lower triangular part of the array A must contain the lower
+*           triangular part of the symmetric matrix and the strictly
+*           upper triangular part of A is not referenced.
+*           Unchanged on exit.
+*
+*  LDA    - INTEGER.
+*           On entry, LDA specifies the first dimension of A as declared
+*           in the calling (sub) program. LDA must be at least
+*           max( 1, n ).
+*           Unchanged on exit.
+*
+*  X      - DOUBLE PRECISION array of dimension at least
+*           ( 1 + ( n - 1 )*abs( INCX ) ).
+*           Before entry, the incremented array X must contain the n
+*           element vector x.
+*           Unchanged on exit.
+*
+*  INCX   - INTEGER.
+*           On entry, INCX specifies the increment for the elements of
+*           X. INCX must not be zero.
+*           Unchanged on exit.
+*
+*  BETA   - DOUBLE PRECISION.
+*           On entry, BETA specifies the scalar beta. When BETA is
+*           supplied as zero then Y need not be set on input.
+*           Unchanged on exit.
+*
+*  Y      - DOUBLE PRECISION array of dimension at least
+*           ( 1 + ( n - 1 )*abs( INCY ) ).
+*           Before entry, the incremented array Y must contain the n
+*           element vector y. On exit, Y is overwritten by the updated
+*           vector y.
+*
+*  INCY   - INTEGER.
+*           On entry, INCY specifies the increment for the elements of
+*           Y. INCY must not be zero.
+*           Unchanged on exit.
+*
+*
+*  Level 2 Blas routine.
+*
+*  -- Written on 22-October-1986.
+*     Jack Dongarra, Argonne National Lab.
+*     Jeremy Du Croz, Nag Central Office.
+*     Sven Hammarling, Nag Central Office.
+*     Richard Hanson, Sandia National Labs.
+*
+*
+*     .. Parameters ..
+      double precision   one         , zero
+      parameter        ( one = 1.0d+0, zero = 0.0d+0 )
+*     .. Local Scalars ..
+      double precision   temp1, temp2
+      integer            i, info, ix, iy, j, jx, jy, kx, ky
+*     .. External Functions ..
+      logical            lsame
+      external           lsame
+*     .. External Subroutines ..
+      external           xerbla
+*     .. Intrinsic Functions ..
+      intrinsic          max
+*     ..
+*     .. Executable Statements ..
+*
+*     Test the input parameters.
+*
+      info = 0
+      if     ( .not.lsame( uplo, 'U' ).and.
+     $         .not.lsame( uplo, 'L' )      )then
+         info = 1
+      else if( n.lt.0 )then
+         info = 2
+      else if( lda.lt.max( 1, n ) )then
+         info = 5
+      else if( incx.eq.0 )then
+         info = 7
+      else if( incy.eq.0 )then
+         info = 10
+      end if
+      if( info.ne.0 )then
+         call xerbla( 'DSYMV ', info )
+         return
+      end if
+*
+*     Quick return if possible.
+*
+      if( ( n.eq.0 ).or.( ( alpha.eq.zero ).and.( beta.eq.one ) ) )
+     $   return
+*
+*     Set up the start points in  X  and  Y.
+*
+      if( incx.gt.0 )then
+         kx = 1
+      else
+         kx = 1 - ( n - 1 )*incx
+      end if
+      if( incy.gt.0 )then
+         ky = 1
+      else
+         ky = 1 - ( n - 1 )*incy
+      end if
+*
+*     Start the operations. In this version the elements of A are
+*     accessed sequentially with one pass through the triangular part
+*     of A.
+*
+*     First form  y := beta*y.
+*
+      if( beta.ne.one )then
+         if( incy.eq.1 )then
+            if( beta.eq.zero )then
+               do 10, i = 1, n
+                  y( i ) = zero
+   10          continue
+            else
+               do 20, i = 1, n
+                  y( i ) = beta*y( i )
+   20          continue
+            end if
+         else
+            iy = ky
+            if( beta.eq.zero )then
+               do 30, i = 1, n
+                  y( iy ) = zero
+                  iy      = iy   + incy
+   30          continue
+            else
+               do 40, i = 1, n
+                  y( iy ) = beta*y( iy )
+                  iy      = iy           + incy
+   40          continue
+            end if
+         end if
+      end if
+      if( alpha.eq.zero )
+     $   return
+      if( lsame( uplo, 'U' ) )then
+*
+*        Form  y  when A is stored in upper triangle.
+*
+         if( ( incx.eq.1 ).and.( incy.eq.1 ) )then
+            do 60, j = 1, n
+               temp1 = alpha*x( j )
+               temp2 = zero
+               do 50, i = 1, j - 1
+                  y( i ) = y( i ) + temp1*a( i, j )
+                  temp2  = temp2  + a( i, j )*x( i )
+   50          continue
+               y( j ) = y( j ) + temp1*a( j, j ) + alpha*temp2
+   60       continue
+         else
+            jx = kx
+            jy = ky
+            do 80, j = 1, n
+               temp1 = alpha*x( jx )
+               temp2 = zero
+               ix    = kx
+               iy    = ky
+               do 70, i = 1, j - 1
+                  y( iy ) = y( iy ) + temp1*a( i, j )
+                  temp2   = temp2   + a( i, j )*x( ix )
+                  ix      = ix      + incx
+                  iy      = iy      + incy
+   70          continue
+               y( jy ) = y( jy ) + temp1*a( j, j ) + alpha*temp2
+               jx      = jx      + incx
+               jy      = jy      + incy
+   80       continue
+         end if
+      else
+*
+*        Form  y  when A is stored in lower triangle.
+*
+         if( ( incx.eq.1 ).and.( incy.eq.1 ) )then
+            do 100, j = 1, n
+               temp1  = alpha*x( j )
+               temp2  = zero
+               y( j ) = y( j )       + temp1*a( j, j )
+               do 90, i = j + 1, n
+                  y( i ) = y( i ) + temp1*a( i, j )
+                  temp2  = temp2  + a( i, j )*x( i )
+   90          continue
+               y( j ) = y( j ) + alpha*temp2
+  100       continue
+         else
+            jx = kx
+            jy = ky
+            do 120, j = 1, n
+               temp1   = alpha*x( jx )
+               temp2   = zero
+               y( jy ) = y( jy )       + temp1*a( j, j )
+               ix      = jx
+               iy      = jy
+               do 110, i = j + 1, n
+                  ix      = ix      + incx
+                  iy      = iy      + incy
+                  y( iy ) = y( iy ) + temp1*a( i, j )
+                  temp2   = temp2   + a( i, j )*x( ix )
+  110          continue
+               y( jy ) = y( jy ) + alpha*temp2
+               jx      = jx      + incx
+               jy      = jy      + incy
+  120       continue
+         end if
+      end if
+*
+      return
+*
+*     End of DSYMV .
+*
+      end
+      subroutine dgemv ( trans, m, n, alpha, a, lda, x, incx,
+     $                   beta, y, incy )
+*     .. Scalar Arguments ..
+      double precision   alpha, beta
+      integer            incx, incy, lda, m, n
+      character*1        trans
+*     .. Array Arguments ..
+      double precision   a( lda, * ), x( * ), y( * )
+*     ..
+*
+*  Purpose
+*  =======
+*
+*  DGEMV  performs one of the matrix-vector operations
+*
+*     y := alpha*A*x + beta*y,   or   y := alpha*A'*x + beta*y,
+*
+*  where alpha and beta are scalars, x and y are vectors and A is an
+*  m by n matrix.
+*
+*  Parameters
+*  ==========
+*
+*  TRANS  - CHARACTER*1.
+*           On entry, TRANS specifies the operation to be performed as
+*           follows:
+*
+*              TRANS = 'N' or 'n'   y := alpha*A*x + beta*y.
+*
+*              TRANS = 'T' or 't'   y := alpha*A'*x + beta*y.
+*
+*              TRANS = 'C' or 'c'   y := alpha*A'*x + beta*y.
+*
+*           Unchanged on exit.
+*
+*  M      - INTEGER.
+*           On entry, M specifies the number of rows of the matrix A.
+*           M must be at least zero.
+*           Unchanged on exit.
+*
+*  N      - INTEGER.
+*           On entry, N specifies the number of columns of the matrix A.
+*           N must be at least zero.
+*           Unchanged on exit.
+*
+*  ALPHA  - DOUBLE PRECISION.
+*           On entry, ALPHA specifies the scalar alpha.
+*           Unchanged on exit.
+*
+*  A      - DOUBLE PRECISION array of DIMENSION ( LDA, n ).
+*           Before entry, the leading m by n part of the array A must
+*           contain the matrix of coefficients.
+*           Unchanged on exit.
+*
+*  LDA    - INTEGER.
+*           On entry, LDA specifies the first dimension of A as declared
+*           in the calling (sub) program. LDA must be at least
+*           max( 1, m ).
+*           Unchanged on exit.
+*
+*  X      - DOUBLE PRECISION array of DIMENSION at least
+*           ( 1 + ( n - 1 )*abs( INCX ) ) when TRANS = 'N' or 'n'
+*           and at least
+*           ( 1 + ( m - 1 )*abs( INCX ) ) otherwise.
+*           Before entry, the incremented array X must contain the
+*           vector x.
+*           Unchanged on exit.
+*
+*  INCX   - INTEGER.
+*           On entry, INCX specifies the increment for the elements of
+*           X. INCX must not be zero.
+*           Unchanged on exit.
+*
+*  BETA   - DOUBLE PRECISION.
+*           On entry, BETA specifies the scalar beta. When BETA is
+*           supplied as zero then Y need not be set on input.
+*           Unchanged on exit.
+*
+*  Y      - DOUBLE PRECISION array of DIMENSION at least
+*           ( 1 + ( m - 1 )*abs( INCY ) ) when TRANS = 'N' or 'n'
+*           and at least
+*           ( 1 + ( n - 1 )*abs( INCY ) ) otherwise.
+*           Before entry with BETA non-zero, the incremented array Y
+*           must contain the vector y. On exit, Y is overwritten by the
+*           updated vector y.
+*
+*  INCY   - INTEGER.
+*           On entry, INCY specifies the increment for the elements of
+*           Y. INCY must not be zero.
+*           Unchanged on exit.
+*
+*
+*  Level 2 Blas routine.
+*
+*  -- Written on 22-October-1986.
+*     Jack Dongarra, Argonne National Lab.
+*     Jeremy Du Croz, Nag Central Office.
+*     Sven Hammarling, Nag Central Office.
+*     Richard Hanson, Sandia National Labs.
+*
+*
+*     .. Parameters ..
+      double precision   one         , zero
+      parameter        ( one = 1.0d+0, zero = 0.0d+0 )
+*     .. Local Scalars ..
+      double precision   temp
+      integer            i, info, ix, iy, j, jx, jy, kx, ky, lenx, leny
+*     .. External Functions ..
+      logical            lsame
+      external           lsame
+*     .. External Subroutines ..
+      external           xerbla
+*     .. Intrinsic Functions ..
+      intrinsic          max
+*     ..
+*     .. Executable Statements ..
+*
+*     Test the input parameters.
+*
+      info = 0
+      if     ( .not.lsame( trans, 'N' ).and.
+     $         .not.lsame( trans, 'T' ).and.
+     $         .not.lsame( trans, 'C' )      )then
+         info = 1
+      else if( m.lt.0 )then
+         info = 2
+      else if( n.lt.0 )then
+         info = 3
+      else if( lda.lt.max( 1, m ) )then
+         info = 6
+      else if( incx.eq.0 )then
+         info = 8
+      else if( incy.eq.0 )then
+         info = 11
+      end if
+      if( info.ne.0 )then
+         call xerbla( 'DGEMV ', info )
+         return
+      end if
+*
+*     Quick return if possible.
+*
+      if( ( m.eq.0 ).or.( n.eq.0 ).or.
+     $    ( ( alpha.eq.zero ).and.( beta.eq.one ) ) )
+     $   return
+*
+*     Set  LENX  and  LENY, the lengths of the vectors x and y, and set
+*     up the start points in  X  and  Y.
+*
+      if( lsame( trans, 'N' ) )then
+         lenx = n
+         leny = m
+      else
+         lenx = m
+         leny = n
+      end if
+      if( incx.gt.0 )then
+         kx = 1
+      else
+         kx = 1 - ( lenx - 1 )*incx
+      end if
+      if( incy.gt.0 )then
+         ky = 1
+      else
+         ky = 1 - ( leny - 1 )*incy
+      end if
+*
+*     Start the operations. In this version the elements of A are
+*     accessed sequentially with one pass through A.
+*
+*     First form  y := beta*y.
+*
+      if( beta.ne.one )then
+         if( incy.eq.1 )then
+            if( beta.eq.zero )then
+               do 10, i = 1, leny
+                  y( i ) = zero
+   10          continue
+            else
+               do 20, i = 1, leny
+                  y( i ) = beta*y( i )
+   20          continue
+            end if
+         else
+            iy = ky
+            if( beta.eq.zero )then
+               do 30, i = 1, leny
+                  y( iy ) = zero
+                  iy      = iy   + incy
+   30          continue
+            else
+               do 40, i = 1, leny
+                  y( iy ) = beta*y( iy )
+                  iy      = iy           + incy
+   40          continue
+            end if
+         end if
+      end if
+      if( alpha.eq.zero )
+     $   return
+      if( lsame( trans, 'N' ) )then
+*
+*        Form  y := alpha*A*x + y.
+*
+         jx = kx
+         if( incy.eq.1 )then
+            do 60, j = 1, n
+               if( x( jx ).ne.zero )then
+                  temp = alpha*x( jx )
+                  do 50, i = 1, m
+                     y( i ) = y( i ) + temp*a( i, j )
+   50             continue
+               end if
+               jx = jx + incx
+   60       continue
+         else
+            do 80, j = 1, n
+               if( x( jx ).ne.zero )then
+                  temp = alpha*x( jx )
+                  iy   = ky
+                  do 70, i = 1, m
+                     y( iy ) = y( iy ) + temp*a( i, j )
+                     iy      = iy      + incy
+   70             continue
+               end if
+               jx = jx + incx
+   80       continue
+         end if
+      else
+*
+*        Form  y := alpha*A'*x + y.
+*
+         jy = ky
+         if( incx.eq.1 )then
+            do 100, j = 1, n
+               temp = zero
+               do 90, i = 1, m
+                  temp = temp + a( i, j )*x( i )
+   90          continue
+               y( jy ) = y( jy ) + alpha*temp
+               jy      = jy      + incy
+  100       continue
+         else
+            do 120, j = 1, n
+               temp = zero
+               ix   = kx
+               do 110, i = 1, m
+                  temp = temp + a( i, j )*x( ix )
+                  ix   = ix   + incx
+  110          continue
+               y( jy ) = y( jy ) + alpha*temp
+               jy      = jy      + incy
+  120       continue
+         end if
+      end if
+*
+      return
+*
+*     End of DGEMV .
+*
+      end
+      subroutine dgemm ( transa, transb, m, n, k, alpha, a, lda, b, ldb,
+     $                   beta, c, ldc )
+*     .. Scalar Arguments ..
+      character*1        transa, transb
+      integer            m, n, k, lda, ldb, ldc
+      double precision   alpha, beta
+*     .. Array Arguments ..
+      double precision   a( lda, * ), b( ldb, * ), c( ldc, * )
+*     ..
+*
+*  Purpose
+*  =======
+*
+*  DGEMM  performs one of the matrix-matrix operations
+*
+*     C := alpha*op( A )*op( B ) + beta*C,
+*
+*  where  op( X ) is one of
+*
+*     op( X ) = X   or   op( X ) = X',
+*
+*  alpha and beta are scalars, and A, B and C are matrices, with op( A )
+*  an m by k matrix,  op( B )  a  k by n matrix and  C an m by n matrix.
+*
+*  Parameters
+*  ==========
+*
+*  TRANSA - CHARACTER*1.
+*           On entry, TRANSA specifies the form of op( A ) to be used in
+*           the matrix multiplication as follows:
+*
+*              TRANSA = 'N' or 'n',  op( A ) = A.
+*
+*              TRANSA = 'T' or 't',  op( A ) = A'.
+*
+*              TRANSA = 'C' or 'c',  op( A ) = A'.
+*
+*           Unchanged on exit.
+*
+*  TRANSB - CHARACTER*1.
+*           On entry, TRANSB specifies the form of op( B ) to be used in
+*           the matrix multiplication as follows:
+*
+*              TRANSB = 'N' or 'n',  op( B ) = B.
+*
+*              TRANSB = 'T' or 't',  op( B ) = B'.
+*
+*              TRANSB = 'C' or 'c',  op( B ) = B'.
+*
+*           Unchanged on exit.
+*
+*  M      - INTEGER.
+*           On entry,  M  specifies  the number  of rows  of the  matrix
+*           op( A )  and of the  matrix  C.  M  must  be at least  zero.
+*           Unchanged on exit.
+*
+*  N      - INTEGER.
+*           On entry,  N  specifies the number  of columns of the matrix
+*           op( B ) and the number of columns of the matrix C. N must be
+*           at least zero.
+*           Unchanged on exit.
+*
+*  K      - INTEGER.
+*           On entry,  K  specifies  the number of columns of the matrix
+*           op( A ) and the number of rows of the matrix op( B ). K must
+*           be at least  zero.
+*           Unchanged on exit.
+*
+*  ALPHA  - DOUBLE PRECISION.
+*           On entry, ALPHA specifies the scalar alpha.
+*           Unchanged on exit.
+*
+*  A      - DOUBLE PRECISION array of DIMENSION ( LDA, ka ), where ka is
+*           k  when  TRANSA = 'N' or 'n',  and is  m  otherwise.
+*           Before entry with  TRANSA = 'N' or 'n',  the leading  m by k
+*           part of the array  A  must contain the matrix  A,  otherwise
+*           the leading  k by m  part of the array  A  must contain  the
+*           matrix A.
+*           Unchanged on exit.
+*
+*  LDA    - INTEGER.
+*           On entry, LDA specifies the first dimension of A as declared
+*           in the calling (sub) program. When  TRANSA = 'N' or 'n' then
+*           LDA must be at least  max( 1, m ), otherwise  LDA must be at
+*           least  max( 1, k ).
+*           Unchanged on exit.
+*
+*  B      - DOUBLE PRECISION array of DIMENSION ( LDB, kb ), where kb is
+*           n  when  TRANSB = 'N' or 'n',  and is  k  otherwise.
+*           Before entry with  TRANSB = 'N' or 'n',  the leading  k by n
+*           part of the array  B  must contain the matrix  B,  otherwise
+*           the leading  n by k  part of the array  B  must contain  the
+*           matrix B.
+*           Unchanged on exit.
+*
+*  LDB    - INTEGER.
+*           On entry, LDB specifies the first dimension of B as declared
+*           in the calling (sub) program. When  TRANSB = 'N' or 'n' then
+*           LDB must be at least  max( 1, k ), otherwise  LDB must be at
+*           least  max( 1, n ).
+*           Unchanged on exit.
+*
+*  BETA   - DOUBLE PRECISION.
+*           On entry,  BETA  specifies the scalar  beta.  When  BETA  is
+*           supplied as zero then C need not be set on input.
+*           Unchanged on exit.
+*
+*  C      - DOUBLE PRECISION array of DIMENSION ( LDC, n ).
+*           Before entry, the leading  m by n  part of the array  C must
+*           contain the matrix  C,  except when  beta  is zero, in which
+*           case C need not be set on entry.
+*           On exit, the array  C  is overwritten by the  m by n  matrix
+*           ( alpha*op( A )*op( B ) + beta*C ).
+*
+*  LDC    - INTEGER.
+*           On entry, LDC specifies the first dimension of C as declared
+*           in  the  calling  (sub)  program.   LDC  must  be  at  least
+*           max( 1, m ).
+*           Unchanged on exit.
+*
+*
+*  Level 3 Blas routine.
+*
+*  -- Written on 8-February-1989.
+*     Jack Dongarra, Argonne National Laboratory.
+*     Iain Duff, AERE Harwell.
+*     Jeremy Du Croz, Numerical Algorithms Group Ltd.
+*     Sven Hammarling, Numerical Algorithms Group Ltd.
+*
+*
+*     .. External Functions ..
+      logical            lsame
+      external           lsame
+*     .. External Subroutines ..
+      external           xerbla
+*     .. Intrinsic Functions ..
+      intrinsic          max
+*     .. Local Scalars ..
+      logical            nota, notb
+      integer            i, info, j, l, ncola, nrowa, nrowb
+      double precision   temp
+*     .. Parameters ..
+      double precision   one         , zero
+      parameter        ( one = 1.0d+0, zero = 0.0d+0 )
+*     ..
+*     .. Executable Statements ..
+*
+*     Set  NOTA  and  NOTB  as  true if  A  and  B  respectively are not
+*     transposed and set  NROWA, NCOLA and  NROWB  as the number of rows
+*     and  columns of  A  and the  number of  rows  of  B  respectively.
+*
+      nota  = lsame( transa, 'N' )
+      notb  = lsame( transb, 'N' )
+      if( nota )then
+         nrowa = m
+         ncola = k
+      else
+         nrowa = k
+         ncola = m
+      end if
+      if( notb )then
+         nrowb = k
+      else
+         nrowb = n
+      end if
+*
+*     Test the input parameters.
+*
+      info = 0
+      if(      ( .not.nota                 ).and.
+     $         ( .not.lsame( transa, 'C' ) ).and.
+     $         ( .not.lsame( transa, 'T' ) )      )then
+         info = 1
+      else if( ( .not.notb                 ).and.
+     $         ( .not.lsame( transb, 'C' ) ).and.
+     $         ( .not.lsame( transb, 'T' ) )      )then
+         info = 2
+      else if( m  .lt.0               )then
+         info = 3
+      else if( n  .lt.0               )then
+         info = 4
+      else if( k  .lt.0               )then
+         info = 5
+      else if( lda.lt.max( 1, nrowa ) )then
+         info = 8
+      else if( ldb.lt.max( 1, nrowb ) )then
+         info = 10
+      else if( ldc.lt.max( 1, m     ) )then
+         info = 13
+      end if
+      if( info.ne.0 )then
+         call xerbla( 'DGEMM ', info )
+         return
+      end if
+*
+*     Quick return if possible.
+*
+      if( ( m.eq.0 ).or.( n.eq.0 ).or.
+     $    ( ( ( alpha.eq.zero ).or.( k.eq.0 ) ).and.( beta.eq.one ) ) )
+     $   return
+*
+*     And if  alpha.eq.zero.
+*
+      if( alpha.eq.zero )then
+         if( beta.eq.zero )then
+            do 20, j = 1, n
+               do 10, i = 1, m
+                  c( i, j ) = zero
+   10          continue
+   20       continue
+         else
+            do 40, j = 1, n
+               do 30, i = 1, m
+                  c( i, j ) = beta*c( i, j )
+   30          continue
+   40       continue
+         end if
+         return
+      end if
+*
+*     Start the operations.
+*
+      if( notb )then
+         if( nota )then
+*
+*           Form  C := alpha*A*B + beta*C.
+*
+            do 90, j = 1, n
+               if( beta.eq.zero )then
+                  do 50, i = 1, m
+                     c( i, j ) = zero
+   50             continue
+               else if( beta.ne.one )then
+                  do 60, i = 1, m
+                     c( i, j ) = beta*c( i, j )
+   60             continue
+               end if
+               do 80, l = 1, k
+                  if( b( l, j ).ne.zero )then
+                     temp = alpha*b( l, j )
+                     do 70, i = 1, m
+                        c( i, j ) = c( i, j ) + temp*a( i, l )
+   70                continue
+                  end if
+   80          continue
+   90       continue
+         else
+*
+*           Form  C := alpha*A'*B + beta*C
+*
+            do 120, j = 1, n
+               do 110, i = 1, m
+                  temp = zero
+                  do 100, l = 1, k
+                     temp = temp + a( l, i )*b( l, j )
+  100             continue
+                  if( beta.eq.zero )then
+                     c( i, j ) = alpha*temp
+                  else
+                     c( i, j ) = alpha*temp + beta*c( i, j )
+                  end if
+  110          continue
+  120       continue
+         end if
+      else
+         if( nota )then
+*
+*           Form  C := alpha*A*B' + beta*C
+*
+            do 170, j = 1, n
+               if( beta.eq.zero )then
+                  do 130, i = 1, m
+                     c( i, j ) = zero
+  130             continue
+               else if( beta.ne.one )then
+                  do 140, i = 1, m
+                     c( i, j ) = beta*c( i, j )
+  140             continue
+               end if
+               do 160, l = 1, k
+                  if( b( j, l ).ne.zero )then
+                     temp = alpha*b( j, l )
+                     do 150, i = 1, m
+                        c( i, j ) = c( i, j ) + temp*a( i, l )
+  150                continue
+                  end if
+  160          continue
+  170       continue
+         else
+*
+*           Form  C := alpha*A'*B' + beta*C
+*
+            do 200, j = 1, n
+               do 190, i = 1, m
+                  temp = zero
+                  do 180, l = 1, k
+                     temp = temp + a( l, i )*b( j, l )
+  180             continue
+                  if( beta.eq.zero )then
+                     c( i, j ) = alpha*temp
+                  else
+                     c( i, j ) = alpha*temp + beta*c( i, j )
+                  end if
+  190          continue
+  200       continue
+         end if
+      end if
+*
+      return
+*
+*     End of DGEMM .
+*
+      end
 #endif
 

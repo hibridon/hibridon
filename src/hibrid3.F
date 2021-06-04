@@ -199,7 +199,7 @@
 *  now call eispack eigenvalue and eigenvector routine (hp is used as
 *  a scratch vector here)
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;      call rs (nmax, nch, scmat, eignow, ione, vecnow, scr, hp, ierr)
+      call rs (nmax, nch, scmat, eignow, ione, vecnow, scr, hp, ierr)
 #endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       lwork=57*nch
@@ -1022,48 +1022,48 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       dimension a(1), c(1), kpvt(1)
       data izero /0/
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;*  factor the matrix
-c;*           return ierr=2 if a is singular
-c;*           return ierr=0 otherwise
+*  factor the matrix
+*           return ierr=2 if a is singular
+*           return ierr=0 otherwise
 #endif
 #if defined(HIB_UNIX)  && !defined(HIB_UNIX_IBM) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;      call sgefa (a, nmax, n, kpvt, ierr)
+      call sgefa (a, nmax, n, kpvt, ierr)
 #endif
 #if defined(HIB_UNIX_IBM)
-c;      call dgef(a,nmax,n,kpvt)
-c;      ierr=0
+      call dgef(a,nmax,n,kpvt)
+      ierr=0
 #endif
 #if defined(HIB_UNIX_CONVEX)
-c;      call dgefa (a, nmax, n, kpvt, ierr)
+      call dgefa (a, nmax, n, kpvt, ierr)
 #endif
 #if defined(HIB_UNIX)  && !defined(HIB_UNIX_IBM) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;      if (ierr .eq. 2) then
-c;*  here if singular matrix
-c;        write (9, 150)
-c;        write (6, 150)
-c;150     format (' *** SINGULAR MATRIX IN SGEFA; ABORT')
-c;        stop
-c;      end if
+      if (ierr .eq. 2) then
+*  here if singular matrix
+        write (9, 150)
+        write (6, 150)
+150     format (' *** SINGULAR MATRIX IN SGEFA; ABORT')
+        stop
+      end if
 #endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;*  now solve the linear equations (one-by-one)
-c;      iptc = 1
-c;      do 200  icol = 1, m
-c;*  iptc points to top of column icol for matrix c stored in packed column fo
+*  now solve the linear equations (one-by-one)
+      iptc = 1
+      do 200  icol = 1, m
+*  iptc points to top of column icol for matrix c stored in packed column fo
 #endif
 #if defined(HIB_UNIX)  && !defined(HIB_UNIX_IBM) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;        call sgesl (a, nmax, n, kpvt, c(iptc), izero)
+        call sgesl (a, nmax, n, kpvt, c(iptc), izero)
 #endif
 #if defined(HIB_UNIX_IBM)
-c;        call dges (a, nmax, n, kpvt, c(iptc), izero)
+        call dges (a, nmax, n, kpvt, c(iptc), izero)
 #endif
 #if defined(HIB_UNIX_CONVEX)
-c;        call dgesl (a, nmax, n, kpvt, c(iptc), izero)
+        call dgesl (a, nmax, n, kpvt, c(iptc), izero)
 #endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;        iptc = iptc + nmax
-c;200   continue
-c;*  solution matrix now in c
+        iptc = iptc + nmax
+200   continue
+*  solution matrix now in c
 #endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       call dgetrf(n,n,a,nmax,kpvt,ierr)
@@ -1662,8 +1662,8 @@ c;*  solution matrix now in c
       implicit double precision (a-h,o-z)
       integer isw, i, icol, l, lq, nmax, nopen
 #if defined(HIB_UNIX_IBM)
-c;      character*1 forma
-c;      character*40 flxfil
+      character*1 forma
+      character*40 flxfil
 #endif
       logical flagsu, photof, wavefn, kwrit, ipos, lpar, swrit, lpar2,
      $     boundf, wrsmat
@@ -1788,12 +1788,12 @@ c
 * here for scattering
 *  calculate r**2, store in sr
 #if defined(HIB_NONE)
-c;      call rgmmul (isw, nopen, nopen, nopen, tmod, 1, nmax,
-c;     :             tmod, 1, nmax, sr, 1, nmax)
+      call rgmmul (isw, nopen, nopen, nopen, tmod, 1, nmax,
+     :             tmod, 1, nmax, sr, 1, nmax)
 #endif
 #if defined(HIB_CRAY)
-c;      call mxma (tmod, 1, nmax, tmod, 1, nmax, sr, 1, nmax,
-c;     :            nopen, nopen, nopen)
+      call mxma (tmod, 1, nmax, tmod, 1, nmax, sr, 1, nmax,
+     :            nopen, nopen, nopen)
 #endif
 #if defined(HIB_UNIX)
       call dgemm('n','n',nopen,nopen,nopen,1.d0,tmod,nmax,
@@ -1814,8 +1814,8 @@ c;     :            nopen, nopen, nopen)
 *  determine real part of s-matrix
 *  see eq.(68) of r.g. gordon, meth. comp. phys. 10 (1971) 81
 #if defined(HIB_NONE)
-c;      call rgmmul (isw, nopen, nopen, nopen, tmod, 1, nmax,
-c;     :             si, 1, nmax, sr, 1, nmax)
+      call rgmmul (isw, nopen, nopen, nopen, tmod, 1, nmax,
+     :             si, 1, nmax, sr, 1, nmax)
 #endif
 #if defined(HIB_CRAY) || defined(HIB_UNIX) || defined(HIB_MAC)
       call mxma (tmod, 1, nmax, si, 1, nmax, sr, 1, nmax,
@@ -1916,7 +1916,7 @@ c;     :             si, 1, nmax, sr, 1, nmax)
         call matmov(tmod,sr,nopen,nopen,nmax,nmax)
 * invert K matrix
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-c;        call smxinv(sr,nmax,nopen,srsave,sisave,ierr)
+        call smxinv(sr,nmax,nopen,srsave,sisave,ierr)
 #endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
         call syminv(sr,nmax,nopen,ierr)
@@ -1936,9 +1936,9 @@ c;        call smxinv(sr,nmax,nopen,srsave,sisave,ierr)
      :                nopen,nopen,nopen)
 #endif
 #if defined(HIB_UNIX_IBM)
-c;        forma='N'
-c;        call dgemul(scmat,nmax,forma,sr,nmax,forma,
-c;     :                sisave,nmax,nopen,nopen,nopen)
+        forma='N'
+        call dgemul(scmat,nmax,forma,sr,nmax,forma,
+     :                sisave,nmax,nopen,nopen,nopen)
 #endif
 * solve linear equations for real part of transition amplitudes
 * fpj is used as scratch here
@@ -1954,9 +1954,9 @@ c;     :                sisave,nmax,nopen,nopen,nopen)
      :                nopen,nopen,nphoto)
 #endif
 #if defined(HIB_UNIX_IBM)
-c;        forma='N'
-c;        call dgemul(tmod,nmax,forma,q,nopen,forma,
-c;     :                srsave,nmax,nopen,nopen,nphoto)
+        forma='N'
+        call dgemul(tmod,nmax,forma,q,nopen,forma,
+     :                srsave,nmax,nopen,nopen,nphoto)
 #endif
 * store imaginary part of transition amplitudes in si
         call matmov(srsave,si,nopen,nopen,nmax,nmax)

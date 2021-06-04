@@ -3,5 +3,5 @@
       data dot /'.'/
 #endif
 #if defined(HIB_UNIVAC) || defined(HIB_CRAY_COS)
-c;      data dot /'$'/
+      data dot /'$'/
 #endif
