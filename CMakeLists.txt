@@ -125,6 +125,8 @@ add_custom_command(
 # -std=legacy so that the compiler doesn't complain when the size of arrays don't match between a function declaration and a call to this function. At the moment, there's plenty of such cases in the code; these are not bugs, just an old way of doing things.
 target_compile_options(hib PRIVATE "-std=legacy")
 target_compile_definitions(hib PUBLIC HIB_UNIX_X86=1)
+target_compile_definitions(hib PUBLIC HIB_UNIX=1)
+target_compile_definitions(hib PUBLIC HIB_UNIX_GFORTRAN=1)
 target_include_directories(hib PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
 add_dependencies(hib parhlp)
 

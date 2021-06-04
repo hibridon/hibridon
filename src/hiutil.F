@@ -1162,7 +1162,7 @@ c     requires (j1+j2+j3+2).le.kfact (defined in himain).
 20    lenstr=i
       return
       end
-*#if defined(HIB_UNIX_CONVEX) || defined(HIB_CRAY) || defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
+#if defined(HIB_UNIX_CONVEX) || defined(HIB_CRAY) || defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 *     subroutine exit
 *     write (6, 100)
 *100  format (' *** EXIT FROM HIBRIDON ***')

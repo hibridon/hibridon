@@ -1449,7 +1449,7 @@ c
 #if defined(HIB_UNIX_CONVEX)
       call dsifa (a, nmax, n, kpvt, ierr)
 #endif
-#if defined(HIB_CRAY) || defined(HIB_UNIX) || defined(HIB_UNIX_CONVEX)
+#if defined(HIB_CRAY) || defined(HIB_UNIX_CONVEX)
       if (ierr .ne. 0) then
         write (9, 60) ierr
         write (6, 60) ierr
