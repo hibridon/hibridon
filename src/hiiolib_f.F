@@ -740,7 +740,7 @@ c
 * -----------------------------------------------------
       common /clseg/ lseg, intrel, lchar
       common /cosize/ isize, isizes
-cstart unix-darwin64
+#if defined(HIB_UNIX_DARWIN64)
       common/cobuf/ lbuf,ibuf(1024)
       data lseg, intrel, lchar /1024, 1, 8/
       data lbuf /1024/
@@ -865,7 +865,7 @@ c
         if (openfl) return
         stat='old'
 * make sure sequential formatted files are appended not overwritten
-#if defined(__INTEL_COMPILER) || defined(__PGI)
+#if defined(unix-ifort) || defined(unix-pgi)
         accs='append'
 #endif
 cstart unix-hp unix-dec unix-iris unix-sun
@@ -881,7 +881,7 @@ cend
 cstart cray
 c;      stat = 'unknown'
 cend
-cstart unix-darwin
+#if defined(HIB_UNIX_DARWIN)
         inquire(unit=iunit,opened=od)
 * if temporary file is already opened, close it
         if (od) close(unit=iunit)
@@ -2276,7 +2276,7 @@ c
 *   2. rdabsf (wrabsf/fwait) read/write absolute routines           *
 *   3. tmpnm    generates a unique filename                         *
 *********************************************************************
-cstart unix-darwin .or. unix-x86 .and. .not. unix-cio
+#if ( defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86) ) && !defined(UNIX_CIO)
       subroutine assgn(luni,filnam,isize,icat)
 *
 *  routine to assign and open files
@@ -2433,7 +2433,7 @@ c
 c
       end
 cend
-cstart unix-darwin .or. unix-x86 .and. .not. unix-cio
+#if ( defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86) ) && !defined(UNIX_CIO)
       subroutine tmpnm(ifil,name)
 c.....should generate a unique filename
       character*14 name

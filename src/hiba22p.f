@@ -686,7 +686,7 @@
 *  latest revision date:  4-oct-1992
 *  --------------------------------------------
       implicit double precision (a-h,o-z)
-cstart unix-ibm
+#if defined(HIB_UNIX_IBM)
 c;      character*1 forma, formb
 cend
       common /cosysr/ isrcod, junkr, aso
@@ -708,7 +708,7 @@ cstart unix mac .and. .not.unix-ibm
        call mxma (t,1,nnmax,w,1,nmax,sc,1,nmax,n,n,n)
        call mxma (sc,1,nmax,t,nnmax,1,w,1,nmax,n,n,n)
 cend
-cstart unix-ibm
+#if defined(HIB_UNIX_IBM)
 c;      forma='N'
 c;      formb='T'
 c;      call dgemul (t,nnmax,forma,w,nmax,forma,sc,nmax,n,n,n)

@@ -1,5 +1,5 @@
 *comdeck parhlp.t
-cstart unix
+#if defined(HIB_UNIX)
       parameter (helpdir='xxxx/doc/',
      :           helptail='.hlp')
-cend
+#endif

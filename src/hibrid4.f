@@ -803,7 +803,7 @@ cstart none
 c;      call mxma (vecnew, 1, nmax, vecnow, nmax, 1, tmat, 1, nmax,
 c;     :            n, n, n)
 cend
-cstart unix-darwin unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       call dgemm('n','t',n,n,n,1.d0,vecnew,nmax,vecnow,nmax,
      :           0d0,tmat,nmax)
 cend
@@ -887,7 +887,7 @@ cend
 *  vectors dimensioned at least nch
       dimension eignow(1), scr1(1), scr2(1)
 *  local arrays (for lapack dsyevr)
-cstart unix-darwin unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       dimension isuppz(2*nch),iwork(10*nch),work(57*nch)
 cend
 
@@ -919,7 +919,7 @@ cend
           ipt = ipt + nmaxp1
 110     continue
       end if
-cstart unix-darwin unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       lwork=57*nch
       liwork=10*nch
       abstol=1.e-16

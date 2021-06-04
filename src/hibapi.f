@@ -159,7 +159,7 @@
       dimension c0(1), c1(1), c2(1), cf(1), ehold(1)
       dimension e(3,3), eig(3), sc1(3), sc2(3), vec(3,3), vii(0:2)
 *  cvtown: conversion factor from coulomb.volts to cm-1 (wavenumbers)
-cstart unix-darwin .or. unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 * work vector for dsyev
       dimension work(9)
 cend
@@ -394,7 +394,7 @@ cend
 *  store the energies of the mixed states in the array eint
             if (j(i) .eq. 1) then
 *  only the omega=0 and omega=1 states are mixed for j = 1
-cstart unix-darwin .or. unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
               lwork=9
               call dsyev('V','L',2,e,3,eig,work,lwork,ierr)
               do iv=1,2
@@ -415,7 +415,7 @@ cend
               c1(nn) = vec(2,2-iso01)
               c2(nn) = zero
             else if (j(i) .ge. 2) then
-cstart unix-darwin .or. unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
               lwork=9
               call dsyev('V','L',3,e,3,eig,work,lwork,ierr)
               call dcopy(9,e,1,vec,1)

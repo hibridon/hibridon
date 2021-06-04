@@ -10,53 +10,53 @@
 
       call vaxhlp(line)
       end
-cstart unix-xlf
-c;@process fixed(132)
-cend
+#if defined(unix-xlf)
+@process fixed(132)
+#endif
       subroutine vaxhlp(line1)
-#if defined(__INTEL_COMPILER)
-c;cdec$ fixedformlinesize:132
+#if defined(unix-ifort)
+cdec$ fixedformlinesize:132
 #endif
 * latest revision 24-feb-2004
       implicit character*10(z)
       character*(*) line1
       common /coipar/ junk(8),lscreen
-cstart cray
+#if defined(HIB_CRAY)
 c;* return for these machines
 c;        write (6,2)
 c;2       format (' Help not installed on this machine')
 c;        return
 c;        end
-cend
-cstart unix unix-dec unix-ibm
+#endif
+#if defined(HIB_UNIX) || defined(HIB_UNIX_DEC)  || defined(HIB_UNIX_IBM)
 c simulates vax vms help command
       parameter (inp=5,iout=6,ihlpmain=51,ihlpalt=52)
       parameter (maxlev=9,maxsub=50)
       character*(*) helpdir,helptail
-cend
+#endif
       include "common/parhlp"
-cstart unix unix-dec unix-ibm
+#if defined(HIB_UNIX) || defined(HIB_UNIX_DEC)  || defined(HIB_UNIX_IBM)
       character*80 helpfile,line,lin,lin2
       character*1 pat
-cend
-cstart unix
+#endif
+#if defined(HIB_UNIX)
       logical exist
-cend
-cstart unix unix-dec unix-ibm
+#endif
+#if defined(HIB_UNIX) || defined(HIB_UNIX_DEC)  || defined(HIB_UNIX_IBM)
       dimension zreq(maxlev),lreq(maxlev),zsub(maxsub)
 c...  by default, looks in file help. if that is not available, then
 c     tries file name of first key in the tree.
       helpfile=helpdir//'hibrid'//helptail
       print *, helpfile
-cend
-cstart unix-convex
+#endif
+#if defined(HIB_UNIX_CONVEX)
 c;      open (ihlpmain,file=helpfile,err=299,readonly,status='old')
-cend
-cstart unix-sun unix-hp unix-dec unix-ibm unix-aix unix-darwin unix-x86
+#endif
+#if defined(HIB_UNIX_SUN) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IBM) || defined(HIB_UNIX_AIX) || defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 c      write(6,*) 'open ',helpfile
       open (ihlpmain,file=helpfile,err=299,status='unknown')
-cend
-cstart unix unix-dec unix-ibm
+#endif
+#if defined(HIB_UNIX) || defined(HIB_UNIX_DEC)  || defined(HIB_UNIX_IBM)
       zalt=' '
       level=0
       line = line1
@@ -126,8 +126,8 @@ c...    key not found in help. attempt to open alternate file.
         if (zalt.ne.zreq(1)) then
           if (zalt.ne.' ') close(ihlp)
           zalt=zreq(1)
-cend
-cstart unix
+#endif
+#if defined(HIB_UNIX)
           helpfile='ls '//helpdir//zalt(1:lenstr(zalt))//'*'//helptail
      >     //' >helphelphelphelp'
           call system(helpfile)
@@ -139,15 +139,15 @@ cstart unix
           ifound=1
 295       close (ihlpalt,status='delete')
           if (ifound.eq.0) goto 29
-cend
-cstart unix-convex
+#endif
+#if defined(HIB_UNIX_CONVEX)
 c;          open (ihlpalt,file='helphelphelphelp',status='old')
 c;          open (ihlp,file=helpfile,err=29,readonly,status='old')
-cend
-cstart unix-sun unix-hp unix-dec unix-ibm unix-aix unix-darwin unix-x86
+#endif
+#if defined(HIB_UNIX_SUN) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IBM) || defined(HIB_UNIX_AIX) || defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
           open (ihlp,file=helpfile,err=29,status='unknown')
-cend
-cstart unix unix-dec unix-ibm
+#endif
+#if defined(HIB_UNIX) || defined(HIB_UNIX_DEC)  || defined(HIB_UNIX_IBM)
         end if
       end if
       rewind ihlp
@@ -230,7 +230,7 @@ c
 299   write (iout,'('' Primary help file '',a,'' is missing'')')
      >  helpfile(1:lenstr(helpfile))
       end
-cend
+#endif
 * ----------------------------------------------------------------
       subroutine upcase(l)
       character*(*) l

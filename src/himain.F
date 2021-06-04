@@ -19,7 +19,7 @@
 *  current revision date:  19-jun-2019 (p. dagdigian)
 *
       implicit double precision (a-h, o-z)
-cstart unix-ibm unix-darwin unix-x86
+#if defined(HIB_UNIX_IBM) || defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       character *40 test
 cend
 *  ----------------------------------------------------------
@@ -38,12 +38,12 @@ cend
 *  change kmax below --  supposed to be set at compile time
 *  revised by p. dagdigian (13-dec-2019)
       parameter (kmax=KMAX, kairy = kmax,ktri=kmax*(kmax+1)/2,kbig=10)
-cstart unix-darwin unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 * set size of scratch array for matrix factorization and generalized
 *   eigenvalue determination
       parameter (kaux3=max(66*kmax,2*kmax*kmax+1))
 cend
-cstart unix-ibm
+#if defined(HIB_UNIX_IBM)
 * set size of scratch array for matrix inversion
       parameter (kaux=100*kmax)
 cend
@@ -204,7 +204,7 @@ cend
       common /coeig2/  t12(5,5), t32(3,3)
 *  common block for ba3d1p basis routine
       common /coeig/  c0(4,4), c1(3,3), c2(2,2)
-cstart unix-darwin unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       common /cosc11/ sc11(kaux3)
 cend
 cstart unix .and. .not.unix-darwin .and. .not. unix-x86
@@ -231,7 +231,7 @@ cend
       mairy = kairy
       mmax = kmax
       mbig=kbig
-cstart unix-ibm
+#if defined(HIB_UNIX_IBM)
       naux=max(kaux,1800)
 cend
       mxphot = kmxpho
@@ -870,7 +870,7 @@ c95    format (1h ,79('='))
 
 cger (next 2 lines)
       write (9,'(/" ** J =",i5," JLPAR =",i2," STARTED")') jtot,jlpar
-cstart unix-ibm unix-aix unix-darwin unix-x86
+#if defined(HIB_UNIX_IBM) || defined(HIB_UNIX_AIX)  || defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 *      call flush_(9)
       call flush(9)
 cend

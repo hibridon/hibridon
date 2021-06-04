@@ -339,7 +339,7 @@ c
           e(2,1) = sqrt(2.d0)*e(2,1)
           e(1,2) = e(2,1)
         end if
-cstart unix-darwin .or. unix-x86
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
         lwork = 144
         call dsyev('V','L',isize,e,narray,eig,work,lwork,ierr)
 cend
