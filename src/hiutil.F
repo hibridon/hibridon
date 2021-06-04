@@ -42,7 +42,7 @@
 @process fixed(132)
 #endif
       subroutine vaxhlp(line1)
-#if defined(unix-ifort)
+#if defined(HIB_UNIX_IFORT)
 cdec$ fixedformlinesize:132
 #endif
 * latest revision 24-feb-2004
@@ -444,7 +444,7 @@ c       k=index(line(i1:),';')
       c=clock()
       cdate = d//'  '//c//'  '
 #endif
-#if defined(unix-ifort) || defined(unix-pgi)
+#if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_PGI)
       character*24 cdatefull
       call fdate(cdatefull)
       cdate=cdatefull(5:24)
@@ -484,7 +484,7 @@ c-------------------------------------------------------------------
       t=tarray(1)
       te1=result
 #endif
-#if defined(unix-ifort)
+#if defined(HIB_UNIX_IFORT)
       real*4 tt
 * use etime for user+cpu time
 * use cpu_time for user+cpu time
@@ -527,7 +527,7 @@ c
 *------------------------------------------------------------------------
       function second()
       double precision second
-#if defined(unix-ifort) || defined(unix-pgi)
+#if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_PGI)
       real*4 te
       call cpu_time(te)
       second=te
