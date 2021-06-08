@@ -232,8 +232,8 @@ add_test(NAME arn2_test_run
 
 # Check that outputs from test runs are the same as the ref ones
 add_test(NAME arn2_test_check
-    COMMAND bash -c "./check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/tests/Cctest1.ics ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2/Cctest1.ics; \
-    ./check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/tests/Ccrstest1.ics ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2/Ccrstest1.ics; \
+    COMMAND bash -c "./check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/tests/Cctest1.ics ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2/Cctest1.ics && \
+    ./check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/tests/Ccrstest1.ics ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2/Ccrstest1.ics && \
     ./check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/tests/Cstest1.ics ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2/Cstest1.ics"
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
 )
