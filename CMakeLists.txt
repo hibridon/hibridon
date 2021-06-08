@@ -209,6 +209,9 @@ enable_testing()
 # This executable compares output files from test runs and reference outputs located in the tests directory
 add_executable(check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/ci/comp_tests.f90)
 
+add_test(NAME check_outputs_build
+    COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target check_outputs)
+
 add_test(NAME arn2_test_setup
     COMMAND bash -c "mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2; \
                     cp ${CMAKE_CURRENT_SOURCE_DIR}/tests/arn2_test.com \
@@ -232,6 +235,7 @@ add_test(NAME arn2_test_check
     COMMAND bash -c "./check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/tests/Cctest1.ics ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2/Cctest1.ics; \
     ./check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/tests/Ccrstest1.ics ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2/Ccrstest1.ics; \
     ./check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/tests/Cstest1.ics ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2/Cstest1.ics"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
 )
 
 add_test(NAME arn2_test_cleanup
@@ -241,6 +245,7 @@ add_test(NAME arn2_test_cleanup
 
 set_tests_properties(arn2_test_setup PROPERTIES FIXTURES_SETUP arn2)
 set_tests_properties(arn2_test_cleanup PROPERTIES FIXTURES_CLEANUP arn2)
+
 set_tests_properties(arn2_test_run PROPERTIES FIXTURES_REQUIRED arn2)
 set_tests_properties(arn2_test_run PROPERTIES DEPENDS arn2_build)
-set_tests_properties(arn2_test_check PROPERTIES DEPENDS check_outputs)
+set_tests_properties(arn2_test_check PROPERTIES DEPENDS check_outputs_build)
