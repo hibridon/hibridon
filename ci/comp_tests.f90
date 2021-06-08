@@ -36,10 +36,9 @@ close(2)
     do j=1,ncols
         ! stop with code 2 if difference is more than 1% for one of the XSs.
         if( 100d0 * abs(xs(2,i,j) - xs(1,i,j))/max(xs(1,i,j),1d-300) > 1d0 ) then
-            error stop "FAILED : Differences between Ref and Test ICS are larger than 1 percent" 
+         stop 1
         endif
     enddo
     enddo
-
-    write(*,*) '... OK'
+    return
 end program comp_tests
