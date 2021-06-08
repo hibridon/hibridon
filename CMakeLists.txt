@@ -134,7 +134,7 @@ target_compile_options(hib PRIVATE "-std=legacy")
 target_compile_options(hib PRIVATE "-fmax-stack-var-size=1")
 
 # use large model to prevent linking errors (relocation truncated to fit: R_X86_64_PC32) because the common blocks are too big to fit in the default memory model
-target_compile_options(hib PRIVATE "-mcmodel=large")
+#target_compile_options(hib PRIVATE "-mcmodel=large")
 
 #  -fbounds-check'
 
@@ -201,30 +201,46 @@ target_compile_options(hib_arn2 PRIVATE "-std=legacy")
 target_compile_options(hib_arn2 PRIVATE "-fmax-stack-var-size=1")
 
 # use large model to prevent linking errors (relocation truncated to fit: R_X86_64_PC32) because the common blocks are too big to fit in the default memory model
-target_compile_options(hib_arn2 PRIVATE "-mcmodel=large")
+#target_compile_options(hib_arn2 PRIVATE "-mcmodel=large")
 
 
 enable_testing()
 
+# This executable compares output files from test runs and reference outputs located in the tests directory
+add_executable(check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/ci/comp_tests.f90)
+
 add_test(NAME arn2_test_setup
-    COMMAND bash -c "mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2; cp ${CMAKE_CURRENT_SOURCE_DIR}/tests/arn2_test.com ${CMAKE_CURRENT_SOURCE_DIR}/tests/Arn2_test.inp ${CMAKE_CURRENT_SOURCE_DIR}/tests/Arn2_dxsec.inp ${CMAKE_CURRENT_SOURCE_DIR}/tests/Arn2.fluxinp ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2/"
+    COMMAND bash -c "mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2; \
+                    cp ${CMAKE_CURRENT_SOURCE_DIR}/tests/arn2_test.com \
+                        ${CMAKE_CURRENT_SOURCE_DIR}/tests/Arn2_test.inp \
+                        ${CMAKE_CURRENT_SOURCE_DIR}/tests/Arn2_dxsec.inp \
+                        ${CMAKE_CURRENT_SOURCE_DIR}/tests/Arn2.fluxinp \
+                        ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2/"
 )
 
 add_test(NAME arn2_build
     COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target hib_arn2)
 
 # $basedir/bin/progs/hib_arn2_151 <arn2_test.com
-add_test(NAME arn2_test
+add_test(NAME arn2_test_run
     COMMAND bash -c "cat ./arn2_test.com | ${CMAKE_CURRENT_BINARY_DIR}/hib_arn2"
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/tests/arn2"
 )
 
+# Check that outputs from test runs are the same as the ref ones
+add_test(NAME arn2_test_check
+    COMMAND bash -c "./check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/tests/Cctest1.ics ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2/Cctest1.ics; \
+    ./check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/tests/Ccrstest1.ics ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2/Ccrstest1.ics; \
+    ./check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/tests/Cstest1.ics ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2/Cstest1.ics"
+)
+
 add_test(NAME arn2_test_cleanup
-    COMMAND rm -R ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2;
+    COMMAND ls -R ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2;
 )
 
 
 set_tests_properties(arn2_test_setup PROPERTIES FIXTURES_SETUP arn2)
 set_tests_properties(arn2_test_cleanup PROPERTIES FIXTURES_CLEANUP arn2)
-set_tests_properties(arn2_test PROPERTIES FIXTURES_REQUIRED arn2)
-set_tests_properties(arn2_test PROPERTIES DEPENDS arn2_build)
+set_tests_properties(arn2_test_run PROPERTIES FIXTURES_REQUIRED arn2)
+set_tests_properties(arn2_test_run PROPERTIES DEPENDS arn2_build)
+set_tests_properties(arn2_test_check PROPERTIES DEPENDS check_outputs)
