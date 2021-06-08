@@ -122,8 +122,22 @@ add_custom_command(
     COMMENT "building ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F from ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t"
 )
 
+# allow for source code lines of up to 132 columns whichi is the maximum allowed in intel fortran compiler
+# (true, we are compiling with gfortran here, having the same restriction here will ease detecting lines that exceed 132 columns,
+# they would break intel fortran's build)
+target_compile_options(hib PRIVATE "-ffixed-line-length-132")
+
 # -std=legacy so that the compiler doesn't complain when the size of arrays don't match between a function declaration and a call to this function. At the moment, there's plenty of such cases in the code; these are not bugs, just an old way of doing things.
 target_compile_options(hib PRIVATE "-std=legacy")
+
+# force arrays to be allocated on the heap instead of the stack, this removes segmentation faults crash, not sure why
+target_compile_options(hib PRIVATE "-fmax-stack-var-size=1")
+
+# use large model to prevent linking errors (relocation truncated to fit: R_X86_64_PC32) because the common blocks are too big to fit in the default memory model
+target_compile_options(hib PRIVATE "-mcmodel=large")
+
+#  -fbounds-check'
+
 target_compile_definitions(hib PUBLIC HIB_UNIX_X86=1)
 target_compile_definitions(hib PUBLIC HIB_UNIX=1)
 target_compile_definitions(hib PUBLIC HIB_UNIX_GFORTRAN=1)
@@ -175,11 +189,42 @@ target_link_libraries(hib_arn2 hib ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
 target_include_directories(hib_arn2 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_include_directories(hib_arn2 PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
 
-add_test(arn2_test
-    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F
-    COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t ${CMAKE_CURRENT_BINARY_DIR}/SYSCONFIG > ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin"
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/SYSCONFIG
-    COMMENT "building ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F from ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t"
+# allow for source code lines of up to 132 columns whichi is the maximum allowed in intel fortran compiler
+# (true, we are compiling with gfortran here, having the same restriction here will ease detecting lines that exceed 132 columns,
+# they would break intel fortran's build)
+target_compile_options(hib_arn2 PRIVATE "-ffixed-line-length-132")
+
+# -std=legacy so that the compiler doesn't complain when the size of arrays don't match between a function declaration and a call to this function. At the moment, there's plenty of such cases in the code; these are not bugs, just an old way of doing things.
+target_compile_options(hib_arn2 PRIVATE "-std=legacy")
+
+# force arrays to be allocated on the heap instead of the stack, this removes segmentation faults crash, not sure why
+target_compile_options(hib_arn2 PRIVATE "-fmax-stack-var-size=1")
+
+# use large model to prevent linking errors (relocation truncated to fit: R_X86_64_PC32) because the common blocks are too big to fit in the default memory model
+target_compile_options(hib_arn2 PRIVATE "-mcmodel=large")
+
+
+enable_testing()
+
+add_test(NAME arn2_test_setup
+    COMMAND bash -c "mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2; cp ${CMAKE_CURRENT_SOURCE_DIR}/tests/arn2_test.com ${CMAKE_CURRENT_SOURCE_DIR}/tests/Arn2_test.inp ${CMAKE_CURRENT_SOURCE_DIR}/tests/Arn2_dxsec.inp ${CMAKE_CURRENT_SOURCE_DIR}/tests/Arn2.fluxinp ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2/"
 )
+
+add_test(NAME arn2_build
+    COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target hib_arn2)
+
+# $basedir/bin/progs/hib_arn2_151 <arn2_test.com
+add_test(NAME arn2_test
+    COMMAND bash -c "cat ./arn2_test.com | ${CMAKE_CURRENT_BINARY_DIR}/hib_arn2"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/tests/arn2"
+)
+
+add_test(NAME arn2_test_cleanup
+    COMMAND rm -R ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2;
+)
+
+
+set_tests_properties(arn2_test_setup PROPERTIES FIXTURES_SETUP arn2)
+set_tests_properties(arn2_test_cleanup PROPERTIES FIXTURES_CLEANUP arn2)
+set_tests_properties(arn2_test PROPERTIES FIXTURES_REQUIRED arn2)
+set_tests_properties(arn2_test PROPERTIES DEPENDS arn2_build)
