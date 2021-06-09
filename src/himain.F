@@ -168,9 +168,9 @@
       common /coamat/ amat(kmax,kmax)
       common /cobmat/ bmat(kairy,kairy)
 * these matrices to store t matrices
-      common /cotq1/ tq1(kmax,kmax)
-      common /cotq2/ tq2(kmax,kmax)
-      common /cotq3/ tq3(kmax,kmax)
+      common /cotq1/ tq1(T_MATRIX_SIZE, T_MATRIX_SIZE)
+      common /cotq2/ tq2(T_MATRIX_SIZE, T_MATRIX_SIZE)
+      common /cotq3/ tq3(T_MATRIX_SIZE, T_MATRIX_SIZE)
       common /cojq/ jq(kmax)
       common /colq/ lq(kmax)
       common /coinq/ inq(kmax)

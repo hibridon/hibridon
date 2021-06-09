@@ -144,6 +144,7 @@ target_compile_definitions(hib PUBLIC HIB_UNIX_GFORTRAN=1)
 target_include_directories(hib PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
 add_dependencies(hib parhlp)
 
+# list of various architectures encountered when converting cstart/cend with fpp directives
 # BATCH
 # CRAY
 # CRAY_COS
@@ -185,6 +186,7 @@ add_dependencies(hib parhlp)
 
 add_executable(hib_arn2 src/pot/pot_arn2.F src/himain.F)
 target_compile_definitions(hib_arn2 PUBLIC KMAX=151)
+target_compile_definitions(hib_arn2 PUBLIC T_MATRIX_SIZE=kmax)
 target_link_libraries(hib_arn2 hib ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
 target_include_directories(hib_arn2 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_include_directories(hib_arn2 PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
