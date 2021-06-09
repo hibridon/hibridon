@@ -27,22 +27,22 @@ Required libraries:
 * Blas compatible library (eg Intel's Math Kernel Library)
 * Lapack compatible library (eg Intel's Math Kernel Library)
 
-1. create a directory to store hibridon source
+### 1. Create a directory to store hibridon source
 ```bash
 mkdir -p /tmp/hib_src
 ```
-2. get hibridon source code
+### 2. Get hibridon source code
 ```bash
 cd /tmp/hib_src
 git clone https://github.com/hibridon/hibridon.git
 ```
 This will create a directory /tmp/hib_src/hibridon, which is a clone of https://github.com/hibridon/hibridon.git 
-3. create a directory to store hibridon's build
+### 3. Create a directory to store hibridon's build
 ```bash
 mkdir /tmp/hib_build
 ```
 
-4. configure hibridon's build
+### 4. Configure hibridon's build
 
 ```bash
 cd /tmp/hib_build
@@ -50,12 +50,12 @@ cmake /tmp/hib_src
 ```
 This will automatically find the required libraries and create a Makefile to build hibridon. 
 
-5. build hibridon
+### 5. Build hibridon
 
 ```bash
 make
 ```
-6. test hibridon
+### 6. Test hibridon
 
 The following command will run hibridon's unit tests.
 
