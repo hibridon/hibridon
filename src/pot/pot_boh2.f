@@ -3,14 +3,14 @@
 * M.-L. Dubernet and J. M. Hutson, J. Chem. Phys. 101, 1939 (1994).
 *  M. H. Alexander and M. Yang, J. Chem. Phys. 103, 7956 (1995).
 
-      include "common/syusr"
-      include "common/ground"
-      include "common/bausr"
+#include "common/syusr"
+#include "common/ground"
+#include "common/bausr"
       subroutine loapot(iunit,filnam)
 * --------------------------------------------------------------------------
       character*(*) filnam
-      include "common/parbas"
-      include "common/parpot"
+#include "common/parbas"
+#include "common/parpot"
       common /coselb/ ibasty
       potnam='ALEXANDER B(2P)H2(J=0,1) DUBERNET-HUTSON'
       ibasty=12
