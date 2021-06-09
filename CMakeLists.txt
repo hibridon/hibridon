@@ -242,7 +242,7 @@ add_test(NAME arn2_test_check
 )
 
 add_test(NAME arn2_test_cleanup
-    COMMAND ls -R ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2;
+    COMMAND rm -R ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2;
 )
 
 
