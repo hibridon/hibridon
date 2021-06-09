@@ -12,9 +12,9 @@
 *  Note:  this pot routine requires a data file to be in hibxx/bin/progs/potdata:
 *         filnam (cetermined in last line of input file)
 *
-      include "common/syusr"
-      include "common/bausr"
-      include "common/ground"
+#include "common/syusr"
+#include "common/bausr"
+#include "common/ground"
 * --------------------------------------------------------------------------
       subroutine loapot(iunit,filnam)
 * --------------------------------------------------------------------------
@@ -67,13 +67,13 @@
       implicit double precision(a-h,o-z)
       character*(*) filnam
       character*80 potlab, filnm1
-      include "common/parpot"
+#include "common/parpot"
       logical readpt, lpar
       common /coptx/ nblkx,maxpwx,minmpx,maxmpx,mpsstx,junk,
      1  rex(20),rin(20),tanhy(250),fex(250),a1(250),ah(250),
      1  art(250),are(250)
-      include "common/parbas"
-      include "common/parvfit"
+#include "common/parbas"
+#include "common/parvfit"
       common /cosysi/ nscode, isicod, nterm
       common /copot/ nc(maxtrm),a(20,50,maxtrm),maxpw(maxtrm),
      :               minms(maxtrm),maxms(maxtrm),msstp(maxtrm),
@@ -206,8 +206,8 @@ caber
       implicit double precision(a-h,o-z)
       common /covvl/ vvl(30)
       common /cosysi/ nscode, isicod, nterm
-      include "common/parbas"
-      include "common/parvfit"
+#include "common/parbas"
+#include "common/parvfit"
       common /copot/ nc(maxtrm),a(20,50,maxtrm),maxpw(maxtrm),
      :               minms(maxtrm),maxms(maxtrm),msstp(maxtrm),
      :               mdimp(maxtrm),pinv(maxang,maxang,maxtrm),
