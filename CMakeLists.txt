@@ -85,6 +85,7 @@ add_library(hib
      src/hitrnprt.F
      src/hiutil.F
      src/hivector.F
+     src/hipotutil.F
      ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F)
 target_compile_options(hib PRIVATE "-ffixed-line-length-132")
 
@@ -199,4 +200,5 @@ add_test(NAME check_outputs_build
 
 include("tests/hib_arn2.cmake")
 include("tests/hibb_arn2.cmake")
+include("tests/hib_ch3he_ccsdt.cmake")
 
