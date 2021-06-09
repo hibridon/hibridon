@@ -2,7 +2,6 @@
 # vfit test
 #------------------------------------------------------------------------------
 
-# hib_vfit
 add_executable(hib_vfit src/pot/pot_vfit.F src/himain.F)
 target_compile_definitions(hib_vfit PUBLIC KMAX=36)
 target_compile_definitions(hib_vfit PUBLIC T_MATRIX_SIZE=kmax)
@@ -37,7 +36,7 @@ add_test(NAME hib_vfit_test_check
 )
 
 add_test(NAME hib_vfit_test_cleanup
-    COMMAND ls -R ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_vfit;
+    COMMAND rm -R ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_vfit;
 )
 
 set_tests_properties(hib_vfit_test_setup PROPERTIES FIXTURES_SETUP hib_vfit_resources)
