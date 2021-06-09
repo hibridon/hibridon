@@ -39,7 +39,7 @@ add_test(NAME hib_h2ohe_test_check
 )
 
 add_test(NAME hib_h2ohe_test_cleanup
-    COMMAND ls -R ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_h2ohe;
+    COMMAND rm -R ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_h2ohe;
 )
 
 
