@@ -8,7 +8,7 @@
       implicit double precision (a-h,o-z)
       common /cosysr/ xjunk(2),rshift,xfact
       common /covvl/ vvl(10)
-      include "common/parpot"
+#include "common/parpot"
       potnam='HeCO Moszynski et al. SAPT PES'
       print *, potnam
 1      print *, ' r (bohr)'
@@ -21,14 +21,14 @@
       goto 1
 99    end
 
-      include "common/syusr"
-      include "common/bausr"
-      include "common/ground"
+#include "common/syusr"
+#include "common/bausr"
+#include "common/ground"
       subroutine loapot(iunit,filnam)
 * ------------------------------------------------------------------------
       character*(*) filnam
-      include "common/parbas"
-      include "common/parpot"
+#include "common/parbas"
+#include "common/parpot"
       potnam='HeCO Moszynski et al. SAPT PES'
       lammin(1)=1
       lammax(1)=10
