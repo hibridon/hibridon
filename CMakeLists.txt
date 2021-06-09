@@ -200,7 +200,8 @@ add_test(NAME check_outputs_build
 
 include("tests/hib_arn2.cmake")
 include("tests/hibb_arn2.cmake")
-include("tests/hib_ch3he_ccsdt.cmake")
 include("tests/hib_vfit.cmake")
+include("tests/hib_arno.cmake")
+include("tests/hib_ch3he_ccsdt.cmake")
 include("tests/hib_h2ohe.cmake")
 
