@@ -9,7 +9,7 @@
       common /cosysr/ xjunk(2),rshift,xfact
       common /covvl/ vvl(13)
       common /coconv/ econv
-      include "common/parpot"
+#include "common/parpot"
       potnam='KLOS-CHALASINSKI Ar-OH UMP4'
       econv=219474.6d0
 1      print *, ' r (bohr)'
@@ -22,9 +22,9 @@
      :    '  vdif',/,8e16.8)
       goto 1
 99    end
-      include "common/syusr"
-      include "common/bausr"
-      include "common/ground"
+#include "common/syusr"
+#include "common/bausr"
+#include "common/ground"
 * --------------------------------------------------------------------------
       subroutine loapot(iunit,filnam)
 * --------------------------------------------------------------------------
