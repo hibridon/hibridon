@@ -18,7 +18,7 @@ add_test(NAME hib_ch3he_ccsdt_test_setup
                     cp ${CMAKE_CURRENT_SOURCE_DIR}/tests/ch3he_test.com \
                         ${CMAKE_CURRENT_SOURCE_DIR}/tests/Ch3he_test.inp \
                         ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_ch3he_ccsdt/ ; \
-                    cp ${CMAKE_CURRENT_SOURCE_DIR}/bin/progs/potdata/ch3he_pot.dat \
+                    cp ${CMAKE_CURRENT_SOURCE_DIR}/tests/ch3he_pot.dat \
                        ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_ch3he_ccsdt/potdata"
 )
 
