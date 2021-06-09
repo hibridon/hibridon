@@ -12,16 +12,16 @@
 *  Note:  subr heh2osapt requires 3 data files to be in hibxx/bin/progs/potdata:
 *         h2o_coefd.dat, h2o_coefi.dat, h2o_params.dat
 *
-      include "common/syusr"
-      include "common/ground"
-      include "common/bausr"
+#include "common/syusr"
+#include "common/ground"
+#include "common/bausr"
 * ------------------------------------------------------------------------
       subroutine driver
       implicit double precision (a-h,o-z)
       dimension xxl(15)
       common /covvl/ vvl(1)
       common /coloapot/ s4pi
-      include "common/parpot"
+#include "common/parpot"
       s4pi = sqrt ( 4.d0 * acos(-1.d0) )
       potnam='Patkowski et al. H2O-He SAPT PES'
       print *, potnam
@@ -44,8 +44,8 @@
       subroutine loapot(iunit,filnam)
       implicit double precision (a-h,o-z)
       character*(*) filnam
-      include "common/parbas"
-      include "common/parpot"
+#include "common/parbas"
+#include "common/parpot"
       common /conlam/ nlam, nlammx, lamnum(2)
       common /coloapot/ s4pi
       common /cosysi/ nscode, isicod, nterm
