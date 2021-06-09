@@ -199,4 +199,5 @@ add_test(NAME check_outputs_build
 
 include("tests/hib_arn2.cmake")
 include("tests/hibb_arn2.cmake")
+include("tests/hib_vfit.cmake")
 
