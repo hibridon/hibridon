@@ -136,7 +136,9 @@ list(APPEND HIBRIDON_COMPILE_OPTIONS "-std=legacy")
 list(APPEND HIBRIDON_COMPILE_OPTIONS "-fmax-stack-var-size=1")
 
 # use large model to prevent linking errors (relocation truncated to fit: R_X86_64_PC32) because the common blocks are too big to fit in the default memory model
-list(APPEND HIBRIDON_COMPILE_OPTIONS "-mcmodel=large")
+if(UNIX AND NOT APPLE)
+    list(APPEND HIBRIDON_COMPILE_OPTIONS "-mcmodel=large")
+endif()
 
 #  -fbounds-check'
 target_compile_options(hib PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
@@ -187,7 +189,6 @@ add_dependencies(hib parhlp)
 # UNKNOWN
 # VAX
 
-
 enable_testing()
 
 # This executable compares output files from test runs and reference outputs located in the tests directory
@@ -237,7 +238,7 @@ add_test(NAME hib_arn2_test_check
 )
 
 add_test(NAME hib_arn2_test_cleanup
-    COMMAND ls -R ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_arn2;
+    COMMAND rm -R ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_arn2;
 )
 
 
@@ -286,7 +287,7 @@ add_test(NAME hibb_arn2_test_check
 )
 
 add_test(NAME hibb_arn2_test_cleanup
-    COMMAND ls -R ${CMAKE_CURRENT_BINARY_DIR}/tests/hibb_arn2;
+    COMMAND rm -R ${CMAKE_CURRENT_BINARY_DIR}/tests/hibb_arn2;
 )
 
 set_tests_properties(hibb_arn2_test_setup PROPERTIES FIXTURES_SETUP hibb_arn2_resources)
