@@ -49,8 +49,8 @@
 * --------------------------------------------------------------------------
 *  dummy loapot subroutine
        character*(*) filnam
-      include "common/parpot"
-      include "common/parbas"
+#include "common/parpot"
+#include "common/parbas"
       common /coselb/ ibasty
       potnam='SHAPIRO-GUO-SCHATZ 2D CH3I'
       ibasty=99
@@ -116,8 +116,8 @@
       logical ifull
       dimension wf(nch),en(ngr),f(ngr,nymx),psi(nymx),gr(ngr),
      :          dmu(2),q(4)
-      include "common/parsys"
-      include "common/parbas"
+#include "common/parsys"
+#include "common/parbas"
       common /coconv/ econv, xmconv
       common /coered/ ered, rmu
       common /cosysi/ nscode,isicod,iscod(maxpar)
@@ -404,7 +404,7 @@
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
-      include "common/parsys"
+#include "common/parsys"
       integer irpot
       logical readp
       logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
@@ -420,7 +420,7 @@
       common /cosysi/ nscode,isicod,iscod(maxpar)
       common /cosysr/ isrcod, junkr, rcod(maxpar)
       common /conlam/ nlam
-      include "common/parbas"
+#include "common/parbas"
       common /cogrnd/ reg, caypot
       common /coqvec/ mxphot, nphoto, q
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
@@ -429,7 +429,7 @@
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr
       save potfil
-      include "common/comdot"
+#include "common/comdot"
       equivalence(iscod(1),nterm)
 
 *     default number and names of system dependent parameters
@@ -695,8 +695,8 @@
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
       logical clfl
-      include "common/parbas"
-      include "common/parsys"
+#include "common/parbas"
+#include "common/parsys"
       common /coipar/ iiipar(9), iprint
       common /cosysi/ nscode,isicod,iscod(maxpar)
       common /cosysr/ isrcod, junkr, rcod(maxpar)
