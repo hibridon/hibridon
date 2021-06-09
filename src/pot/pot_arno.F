@@ -7,7 +7,7 @@
       common /cosysr/ xjunk(2),rshift,xfact
       common /covvl/ vvl(19)
       common /coconv/ econv
-      include "common/parpot"
+#include "common/parpot"
       potnam='ALEXANDER Ar-NO CEPA'
       econv=219474.6d0
 1      print *, ' r (bohr)'
@@ -20,15 +20,15 @@
      :    '  vdif',/,9e16.8)
       goto 1
 99    end
-      include "common/syusr"
-      include "common/bausr"
-      include "common/ground"
+#include "common/syusr"
+#include "common/bausr"
+#include "common/ground"
 * --------------------------------------------------------------------------
       subroutine loapot(iunit,filnam)
 * --------------------------------------------------------------------------
       character*(*) filnam
-      include "common/parbas"
-      include "common/parpot"
+#include "common/parbas"
+#include "common/parpot"
       potnam='ALEXANDER Ar-NO CEPA'
       lammin(1)=1
       lammax(1)=10
