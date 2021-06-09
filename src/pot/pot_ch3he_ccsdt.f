@@ -12,14 +12,14 @@
 *
 *  Reference:  M.H.Alexander and P.J.Dagdigian, J. Chem. Phys. 135, 064306 (2011)
 *
-      include "common/syusr"
-      include "common/ground"
-      include "common/bausr"
+#include "common/syusr"
+#include "common/ground"
+#include "common/bausr"
 * ------------------------------------------------------------------------
       subroutine driver
       implicit double precision (a-h,o-z)
       common /covvl/ vvl(11)
-      include "common/parpot"
+#include "common/parpot"
       s4pi = sqrt ( 4.d0 * acos(-1.d0) )
       potnam='Dagdigian CH3-He PES'
       print *, potnam
@@ -52,8 +52,8 @@
       subroutine loapot(iunit,filnam)
       implicit double precision (a-h,o-z)
       character*(*) filnam
-      include "common/parbas"
-      include "common/parpot" 
+#include "common/parbas"
+#include "common/parpot" 
       common /conlam/ nlam, nlammx, lamnum(2)
       common /cosysi/ nscode, isicod, nterm
       potnam='Dagdigian CH3-He PES'
