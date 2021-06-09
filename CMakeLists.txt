@@ -197,9 +197,8 @@ add_executable(check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/ci/comp_tests.f90)
 add_test(NAME check_outputs_build
     COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target check_outputs)
 
-#------------------------------------------------------------------------------
-# arn2 test
-#------------------------------------------------------------------------------
+include("tests/hib_arn2.cmake")
+include("tests/hibb_arn2.cmake")
 
 # hib_arn2
 add_executable(hib_arn2 src/pot/pot_arn2.F src/himain.F)
