@@ -15,3 +15,52 @@ Changes:
 - [README_4.3](README_4.3) : changes from `hibridon` 4.2.1 to 4.3 
 - [README_4.4](README_4.4) : changes since `hibridon` 4.3
 
+## Build instructions
+
+Required tools:
+* CMake >= 2.6
+* Git
+* Fortran compiler with support for fortran 90 and fpp preprocessing (eg: gfortran or ifort).
+
+Required libraries:
+
+* Blas compatible library (eg Intel's Math Kernel Library)
+* Lapack compatible library (eg Intel's Math Kernel Library)
+
+1. create a directory to store hibridon source
+```bash
+mkdir -p /tmp/hib_src
+```
+2. get hibridon source code
+```bash
+cd /tmp/hib_src
+git clone https://github.com/hibridon/hibridon.git
+```
+This will create a repository /tmp/hib_src/hibridon, which is a clone of https://github.com/hibridon/hibridon.git 
+3. create a directory to store hibridon's build
+```bash
+mkdir /tmp/hib_build
+```
+
+4. configure hibridon's build
+
+```bash
+cd /tmp/hib_build
+cmake /tmp/hib_src
+```
+This will automatically find the required libraries and create a Makefile to build hibridon. 
+
+5. build hibridon
+
+```bash
+cd /tmp/hib_build
+make
+```
+6. test hibridon
+
+The following command will run hibridon's unit tests.
+
+```bash
+cd /tmp/hib_build
+make test
+```
