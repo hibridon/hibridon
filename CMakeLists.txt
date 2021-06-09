@@ -122,21 +122,24 @@ add_custom_command(
     COMMENT "building ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F from ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t"
 )
 
+set(HIBRIDON_COMPILE_OPTIONS  "")
+
 # allow for source code lines of up to 132 columns whichi is the maximum allowed in intel fortran compiler
 # (true, we are compiling with gfortran here, having the same restriction here will ease detecting lines that exceed 132 columns,
 # they would break intel fortran's build)
-target_compile_options(hib PRIVATE "-ffixed-line-length-132")
+list(APPEND HIBRIDON_COMPILE_OPTIONS "-ffixed-line-length-132")
 
 # -std=legacy so that the compiler doesn't complain when the size of arrays don't match between a function declaration and a call to this function. At the moment, there's plenty of such cases in the code; these are not bugs, just an old way of doing things.
-target_compile_options(hib PRIVATE "-std=legacy")
+list(APPEND HIBRIDON_COMPILE_OPTIONS "-std=legacy")
 
 # force arrays to be allocated on the heap instead of the stack, this removes segmentation faults crash, not sure why
-target_compile_options(hib PRIVATE "-fmax-stack-var-size=1")
+list(APPEND HIBRIDON_COMPILE_OPTIONS "-fmax-stack-var-size=1")
 
 # use large model to prevent linking errors (relocation truncated to fit: R_X86_64_PC32) because the common blocks are too big to fit in the default memory model
-target_compile_options(hib PRIVATE "-mcmodel=large")
+list(APPEND HIBRIDON_COMPILE_OPTIONS "-mcmodel=large")
 
 #  -fbounds-check'
+target_compile_options(hib PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
 
 target_compile_definitions(hib PUBLIC HIB_UNIX_X86=1)
 target_compile_definitions(hib PUBLIC HIB_UNIX=1)
@@ -184,27 +187,6 @@ add_dependencies(hib parhlp)
 # UNKNOWN
 # VAX
 
-add_executable(hib_arn2 src/pot/pot_arn2.F src/himain.F)
-target_compile_definitions(hib_arn2 PUBLIC KMAX=151)
-target_compile_definitions(hib_arn2 PUBLIC T_MATRIX_SIZE=kmax)
-target_link_libraries(hib_arn2 hib ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
-target_include_directories(hib_arn2 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_include_directories(hib_arn2 PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
-
-# allow for source code lines of up to 132 columns whichi is the maximum allowed in intel fortran compiler
-# (true, we are compiling with gfortran here, having the same restriction here will ease detecting lines that exceed 132 columns,
-# they would break intel fortran's build)
-target_compile_options(hib_arn2 PRIVATE "-ffixed-line-length-132")
-
-# -std=legacy so that the compiler doesn't complain when the size of arrays don't match between a function declaration and a call to this function. At the moment, there's plenty of such cases in the code; these are not bugs, just an old way of doing things.
-target_compile_options(hib_arn2 PRIVATE "-std=legacy")
-
-# force arrays to be allocated on the heap instead of the stack, this removes segmentation faults crash, not sure why
-target_compile_options(hib_arn2 PRIVATE "-fmax-stack-var-size=1")
-
-# use large model to prevent linking errors (relocation truncated to fit: R_X86_64_PC32) because the common blocks are too big to fit in the default memory model
-target_compile_options(hib_arn2 PRIVATE "-mcmodel=large")
-
 
 enable_testing()
 
@@ -213,6 +195,20 @@ add_executable(check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/ci/comp_tests.f90)
 
 add_test(NAME check_outputs_build
     COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target check_outputs)
+
+#------------------------------------------------------------------------------
+# arn2 test
+#------------------------------------------------------------------------------
+
+# hib_arn2
+add_executable(hib_arn2 src/pot/pot_arn2.F src/himain.F)
+target_compile_definitions(hib_arn2 PUBLIC KMAX=151)
+target_compile_definitions(hib_arn2 PUBLIC T_MATRIX_SIZE=kmax)
+target_link_libraries(hib_arn2 hib ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
+target_include_directories(hib_arn2 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(hib_arn2 PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
+target_compile_options(hib_arn2 PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
+
 
 add_test(NAME arn2_test_setup
     COMMAND bash -c "mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/tests/arn2; \
