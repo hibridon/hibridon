@@ -21,7 +21,7 @@ do it = 1, 2
     read(it,*) nstates, nstateso ! Read the total number of states and open channels
     ! Allocate and initialize xs
     if(.not.allocated(xs)) then ; allocate( xs(2, nstateso, nstateso) ) ; xs = -1d0 ; endif
-    j=ceiling(nstates/24.0d0)
+    j=ceiling(nstates/12.0d0)
     do i=1,j ; read(it,*) ; enddo ! Skip the next lines containing states labels
     j=ceiling(nstates/8.0d0)
     do i=1,j ; read(it,*) ; enddo ! Skip the next lines containing states energies
