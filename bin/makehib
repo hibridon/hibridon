@@ -264,13 +264,13 @@ endif
 cd ..
 
 if $bigopt == "n" then
-  sed snkbig,kbignkmax,kmaxn $basedir/src/himain.t > $basedir/src/himain.tt
+  sed s/T_MATRIX_SIZE/kmax/g $basedir/src/himain.t > $basedir/src/himain.tt
 endif
 if $bigopt == "y" then
   echo ""
   echo "incorporating big matrix option in himain"
   echo "incorporating big matrix option in himain" >>& $basedir/h_$potname.log
-  cp $basedir/src/himain.t $basedir/src/himain.tt
+  sed s/T_MATRIX_SIZE/kbig/g $basedir/src/himain.t > $basedir/src/himain.tt
 endif
 
 # convert himain to include requested kmax
