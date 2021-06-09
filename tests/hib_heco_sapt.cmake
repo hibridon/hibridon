@@ -35,7 +35,7 @@ add_test(NAME hib_heco_sapt_test_check
 )
 
 add_test(NAME hib_heco_sapt_test_cleanup
-    COMMAND ls -R ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_heco_sapt;
+    COMMAND rm -R ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_heco_sapt;
 )
 
 
