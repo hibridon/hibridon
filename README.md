@@ -36,7 +36,7 @@ mkdir -p /tmp/hib_src
 cd /tmp/hib_src
 git clone https://github.com/hibridon/hibridon.git
 ```
-This will create a repository /tmp/hib_src/hibridon, which is a clone of https://github.com/hibridon/hibridon.git 
+This will create a directory /tmp/hib_src/hibridon, which is a clone of https://github.com/hibridon/hibridon.git 
 3. create a directory to store hibridon's build
 ```bash
 mkdir /tmp/hib_build
@@ -53,7 +53,6 @@ This will automatically find the required libraries and create a Makefile to bui
 5. build hibridon
 
 ```bash
-cd /tmp/hib_build
 make
 ```
 6. test hibridon
@@ -61,6 +60,5 @@ make
 The following command will run hibridon's unit tests.
 
 ```bash
-cd /tmp/hib_build
 make test
 ```
