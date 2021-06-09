@@ -134,8 +134,9 @@ target_compile_options(hib PRIVATE "-std=legacy")
 target_compile_options(hib PRIVATE "-fmax-stack-var-size=1")
 
 # use large model to prevent linking errors (relocation truncated to fit: R_X86_64_PC32) because the common blocks are too big to fit in the default memory model
+if(UNIX AND NOT APPLE)
 target_compile_options(hib PRIVATE "-mcmodel=large")
-
+endif()
 #  -fbounds-check'
 
 target_compile_definitions(hib PUBLIC HIB_UNIX_X86=1)
@@ -201,7 +202,9 @@ target_compile_options(hib_arn2 PRIVATE "-std=legacy")
 target_compile_options(hib_arn2 PRIVATE "-fmax-stack-var-size=1")
 
 # use large model to prevent linking errors (relocation truncated to fit: R_X86_64_PC32) because the common blocks are too big to fit in the default memory model
+if(UNIX AND NOT APPLE)
 target_compile_options(hib_arn2 PRIVATE "-mcmodel=large")
+endif()
 
 
 enable_testing()
