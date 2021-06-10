@@ -12,7 +12,7 @@
       implicit double precision (a-h,o-z)
       common /cosysr/ xjunk(2),rshift,xfact
       common /covvl/ vvl(12)
-      include "common/parpot"
+#include "common/parpot"
       econv=219474.6d0
       potnam='He-CN(2Sigma) CCSDT PES'
       print *, potnam
@@ -46,14 +46,14 @@
       close(22)
 *
 99    end
-      include "common/syusr"
-      include "common/bausr"
-      include "common/ground"
+#include "common/syusr"
+#include "common/bausr"
+#include "common/ground"
 * ----------------------------------------------------------------
       subroutine loapot(iunit,filnam)
       character*(*) filnam
-      include "common/parbas"
-      include "common/parpot"
+#include "common/parbas"
+#include "common/parpot"
       potnam='He-CN(2Sigma) CCSDT PES'
       lammin(1)=1
       lammax(1)=12
