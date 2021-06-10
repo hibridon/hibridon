@@ -8,7 +8,7 @@
 *  in this version, the numerically computed integrals of products
 *  of associated Legendre polynomials are computed ocne and stored in
 *  a table for lookup in the basis routine.  the array storing these
-*  integrals is large enough for (j,j') ² 40.
+*  integrals is large enough for (j,j') ï¿½ 40.
 *
 *  we consider only the A' PES's (sigma and pi)
 *  and the A' nonadiabatic coupling between them
@@ -350,8 +350,6 @@
 *    nv2max:    maximum core memory allocated for the v2 matrix
 *    v2:        lower triangle of nonzero angular coupling matrix elements
 *               only nonzero elements are stored
-*  variable in common block /coiv2/
-*   iv2:        matrix address of v2 matrix for each non-zero element
 *  variables in common block /aleg/
 *   pint:       array for storage of integrals of products of associated 
 *               Legendre polynomials:
@@ -5655,7 +5653,7 @@ C       Purpose: Compute the beta function B(p,q)
 C       Input :  p  --- Parameter  ( p > 0 )
 C                q  --- Parameter  ( q > 0 )
 C       Output:  BT --- B(p,q)
-C       Routine called: GAMMA for computing â(x)
+C       Routine called: GAMMA for computing ï¿½(x)
 C       ==========================================
 C
         IMPLICIT DOUBLE PRECISION (A-H,O-Z)

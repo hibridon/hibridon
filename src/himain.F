@@ -2,6 +2,7 @@
       use mod_cosout, only: allocate_cosout
       use mod_coiout, only: allocate_coiout
       use mod_cov2, only: allocate_cov2
+      use mod_coiv2, only: allocate_coiv2
       use mod_coeig, only: allocate_coeig
       use mod_coeig2, only: allocate_coeig2
 #if defined(HIB_UNIX)
@@ -81,10 +82,6 @@
 * krotmx set the maximum size of the asym top e.fn expansion
 * increased factor multiplying kmax below and narray from 12 to 100 (pjd:  19-sep-2017)
       parameter (krotmx = 500 * kmax)
-*  variable in common block /coiv2/
-*    lamnum:    number of non-zero v2 matrix elements for each lambda
-*               lamnum is an array of dimension nlammx
-*    iv2:       row+column index of v2 matrix for each non-zero element
 *  variable in common block /conlam/
 *    nlammx:    the maximum number of angular coupling terms allowed
 *    nlam:      the total number of angular coupling terms used
@@ -132,7 +129,6 @@
 *  ----------------------------------------------------------
       logical lsc1
       common /comom/  xmom(3), imom(13)
-      common /coiv2/ iv2(kv2max)
       common /cocent/ cent(kmax)
       common /coeint/ eint(kmax)
       common /coj12/ j12(kmax)
@@ -205,6 +201,7 @@
       call allocate_cosout(kout)
       call allocate_coiout(kout)
       call allocate_cov2(kv2max)
+      call allocate_coiv2(kv2max)
 
       call allocate_coeig()
       call allocate_coeig2()

@@ -294,8 +294,6 @@
 *    nv2max:    maximum core memory allocated for the v2 matrix
 *    v2:        lower triangle of nonzero angular coupling matrix elements
 *               only nonzero elements are stored
-*  variable in common block /coiv2/
-*   iv2:        matrix address of v2 matrix for each non-zero element
 * --------------------------------------------------------------------
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
@@ -5203,7 +5201,7 @@ C       Purpose: Compute the beta function B(p,q)
 C       Input :  p  --- Parameter  ( p > 0 )
 C                q  --- Parameter  ( q > 0 )
 C       Output:  BT --- B(p,q)
-C       Routine called: GAMMA for computing â(x)
+C       Routine called: GAMMA for computing ï¿½(x)
 C       ==========================================
 C
         IMPLICIT DOUBLE PRECISION (A-H,O-Z)

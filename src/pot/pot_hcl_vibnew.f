@@ -747,10 +747,6 @@ c  -----------------------------------------------------------------
 *    v2:        lower triangle of nonzero elements of coupling matrix stored
 *               in packed row form that is (1,1), (2,1), (2,2), (3,1), (3,2),
 *               (3,3)  ...
-*  variable in common block /coiv2/
-*   lamnum:     number of non-zero v2 matrix elements for each lambda
-*               lamnum is an array of dimension nlammx
-*   iv2:        row+column index of v2 matrix for each non-zero element
 *  variable in common block /cocent/
 *    cent:      array containing centrifugal barrier of each channel
 *  variable in common block /coeint/

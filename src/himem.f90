@@ -84,15 +84,18 @@ module mod_cov2
    end subroutine allocate_cov2
 end module mod_cov2
 
-! module mod_coiv2
-!    implicit none
-!    real(8), dimension(:), allocatable :: iv2
-!    contains
-!    subroutine allocate_coiv2(n)
-!       integer, intent(in) :: n
-!       allocate(iv2(n)) ;
-!    end subroutine allocate_coiv2
-! end module mod_coiv2
+module mod_coiv2
+! variables in this module:
+!    iv2:  matrix address of v2 matrix for each non-zero element
+!          row+column index of v2 matrix for each non-zero element
+   implicit none
+   real(8), dimension(:), allocatable :: iv2
+   contains
+   subroutine allocate_coiv2(av2max)
+      integer, intent(in) :: av2max
+      allocate(iv2(av2max)) ;
+   end subroutine allocate_coiv2
+end module mod_coiv2
 
 ! module mod_cocent
 !    implicit none

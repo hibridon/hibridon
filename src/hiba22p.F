@@ -89,8 +89,6 @@
 *    nlam:      the number of case(a) interaction potentials actually used
 *               this is 14 here
 *    nlammx:    the maximum number of angular coupling terms
-*  variable in common block /coiv2/
-*   iv2:        matrix address of v2 matrix for each non-zero element
 *  variable in common block /coconv/
 *     econv:    conversion factor from cm-1 to hartrees
 *     xmconv:   converson factor from amu to atomic units
@@ -99,6 +97,7 @@
 *              choice of channel index
 * ------------------------------------------------------------
       use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -106,7 +105,6 @@
       common /cosysr/ isrcod, junkr, aso
 
       common /cosysi/ nscode, isicod, nterm, nphoto
-      common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /cocent/ cent(1)
       common /coeint/ eint(1)

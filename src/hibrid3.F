@@ -238,10 +238,8 @@
 *              be evaluated
 *    nch:      actual size of matrix w
 *    nmax:     maximum row and column dimension of matrix w
-*  variable in common block /coiv2/
 *   lamnum:     number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*   iv2:        row+column index of v2 matrix for each non-zero element
 *  variable in common block /cocent/
 *    cent:      array containing centrifugal barrier of each channel
 *  variable in common block /coeint/
@@ -270,11 +268,10 @@
 *              vector
 *  -------------------------------------------------------------------
       use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
       implicit double precision (a-h,o-z)
       integer i, iflag, ilam, lamnum, nch, nlam, nlammx, nmax
-      integer iv2
       common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
-      common /coiv2/ iv2(100)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /copmat/ rtmn, rtmx, iflag
       common /cocent/ cent(1)

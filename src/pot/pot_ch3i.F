@@ -685,10 +685,9 @@
 *    nlammx:    the maximum number of angular coupling terms
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variable in common block /coiv2/
-*   iv2:        matrix address of v2 matrix for each non-zero element
 * --------------------------------------------------------------------
       use mod_cov2, only: nv2max, v2
+      use mod_coiv2, only: iv2
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
       logical clfl
@@ -700,7 +699,6 @@
       common /covib/ ie(50), iv(50)
       common /coicl/ clfl
       
-      common /coiv2/ iv2(1)
       common /conlam/  nlam, nlammx,lamnum(1)
       common /cocent/ cent(1)
       common /coeint/ eint(1)

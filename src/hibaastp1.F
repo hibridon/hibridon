@@ -113,8 +113,6 @@
 *    nlammx:    the maximum number of angular coupling terms
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variable in common block /coiv2/
-*   iv2:        row+column index of v2 matrix for each non-zero element
 *  variables in common block /coconv/
 *   econv:      conversion factor from cm-1 to hartrees
 *   xmconv:     converson factor from amu to atomic units
@@ -157,6 +155,7 @@
 *   rotham:     computes matrix elements of asymmetric top hamiltonian
 * --------------------------------------------------------------------
       use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -164,7 +163,6 @@
       common /cosysi/ nscode, isicod, nterm, numpot, iop, jmax
       common /coipar/ iiipar(9), iprint
       common /cosysr/ isrcod, junkr, arot, brot, crot, emax
-      common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /cocent/ cent(1)
       common /coeint/ eint(1)

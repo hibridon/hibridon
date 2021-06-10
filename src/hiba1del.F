@@ -100,13 +100,12 @@
 *               (mass of electron = 1)
 *  variable in common block /conlam/
 *    nlam:      the total number of angular coupling terms
-*  variable in common block /coiv2/
-*   iv2:        matrix address of v2 matrix for each non-zero element
 *  subroutines called:
 *   vlm1del:    returns angular coupling coefficient for particular
 *              choice of channel index
 * --------------------------------------------------------------------
       use mod_cov2, only: nv2max, ndummy, v2
+      use mod_coiv2, only: iv2
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -114,7 +113,6 @@
       common /coipar/ iiipar(9), iprint
       common /cosysi/ nscode, isicod, nterm, jmax, igu, isa, npar
       common /cosysr/ isrcod, idum,brot,  q
-      common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx,lamnum(1)
       common /cocent/ cent(2)
       common /coeint/ eint(2)

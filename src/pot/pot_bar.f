@@ -278,8 +278,6 @@ c
 *    nv2max:    maximum core memory allocated for the v2 matrix
 *    v2:        lower triangle of nonzero angular coupling matrix elements
 *               only nonzero elements are stored
-*  variable in common block /coiv2/
-*   iv2:        matrix address of v2 matrix for each non-zero element
 * --------------------------------------------------------------------
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst

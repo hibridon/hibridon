@@ -121,8 +121,6 @@ c      end module mod_1sg1sg
 *    nlammx:    the maximum number of angular coupling terms
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variable in common block /coiv2/
-*   iv2:        matrix address of v2 matrix for each non-zero element
 *  variables in common block /coconv/
 *   econv:      conversion factor from cm-1 to hartree
 *   xmconv:     conversion factor from amu to atomic units
@@ -141,6 +139,7 @@ c      end module mod_1sg1sg
 * --------------------------------------------------------------------
       use mod_1sg1sg
       use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -150,7 +149,6 @@ c      end module mod_1sg1sg
      :  ipotsy2
       common /cosysr/ isrcod, junkr, b1rot, d1rot, flmbda, gamma, b2rot
       common /coselb/ ibasty
-      common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /cocent/ cent(1)
       common /coeint/ eint(1)

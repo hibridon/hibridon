@@ -37,7 +37,7 @@ add_test(NAME hib_ch3i_test_check
 )
 
 add_test(NAME hib_ch3i_test_cleanup
-    COMMAND rm -R ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_ch3i;
+    COMMAND ls -R ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_ch3i;
 )
 
 set_tests_properties(hib_ch3i_test_setup PROPERTIES FIXTURES_SETUP hib_ch3i_resources)

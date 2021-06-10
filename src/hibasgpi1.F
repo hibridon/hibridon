@@ -149,8 +149,6 @@
 *  variables in common block /cosgpi/
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variable in common block /coiv2/
-*   iv2:        matrix address of v2 matrix for each non-zero element
 *  variable in common block /coconv/
 *    econv:     conversion factor from cm-1 to hartrees
 *    xmconv:    converson factor from amu to atomic units
@@ -164,6 +162,7 @@
 *               (in hiba2pi.f)
 * --------------------------------------------------------------------
       use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
       implicit double precision (a-h,o-z)
       logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -172,7 +171,6 @@
      :  nmaxsg, nparsg, igupi, nparpi, numvpi, ispar(10)
       common /cosysr/ isrcod, junkr, esg, bsg, dsg, gsr, rspar(40)
       common /coipar/ iiipar(9), iprint
-      common /coiv2/ iv2(1)
       common /cotq1/ vec(3,3)
       common /coisc1/ ivec(1)
       common /coisc2/ nrot(1)
