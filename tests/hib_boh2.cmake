@@ -35,7 +35,7 @@ add_test(NAME hib_boh2_test_check
 )
 
 add_test(NAME hib_boh2_test_cleanup
-    COMMAND ls -R ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_boh2;
+    COMMAND rm -R ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_boh2;
 )
 
 
