@@ -252,9 +252,9 @@
 * subroutines called: open
 *
 * ----------------------------------------------------------------
+      use mod_cosout
       implicit double precision (a-h,o-z)
-      integer jout
-      integer i, jlpar, jtot1, jtot2, jtotd, length, nerg, nnout,
+      integer i, jlpar, jtot1, jtot2, jtotd, length, nerg,
      :        numax, numin, ibasty
       logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
      :        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf,
@@ -277,7 +277,7 @@
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr, nucros, photof, wavefl, boundc
       common /coskip/ nskip,iskip
-      common /cosout/ nnout, jout(21)
+      !common /cosout/ nnout, jout(21)
       common /coiout/ niout, indout(1)
       common /cofile/ input, output, jobnam, savfil
       common /coener/ energ(1)
@@ -1469,7 +1469,7 @@ c.....reserve space for restart information
       integer nfile, iadr, nmax, jfirst, jfsts, jfinal, numin,
      :        numax, ierr, jlpars, jlparf
       integer jln, jlp, nwaves, nrec, jlpold, nparit, jj, iaddr,
-     :        lrec, jtot, jlpar, nu, nopen, length, nnout
+     :        lrec, jtot, jlpar, nu, nopen, length
       dimension iadr(1)
 *
       ierr = 0
@@ -1668,15 +1668,16 @@ c.....reserve space for restart information
 *  variable in common block /coeint/
 *    eint:      array containing channel energies (in hartree)
 *  ------------------------------------------------------------------
+      use mod_cosout
       implicit double precision (a-h,o-z)
       integer ic, icol, ii, ir, irow, jtot, jlpar, length, nmax,
-     :        nnout, nopen, nfile, nu, mmout
-      integer jout, jq, jpack, lq, lpack, inq, inpack
+     :        nopen, nfile, nu, mmout
+      integer jq, jpack, lq, lpack, inq, inpack
 *      real simag, sreal, eint, epack, ered, rmu
       common /clseg/ lseg,intrel,lchar
       common /coeint/ eint(1)
       common /coered/ ered, rmu
-      common /cosout/ nnout, jout(21)
+      !common /cosout/ nnout, jout(21)
 *  variable in common block /coselb/
 *     ibasty    basistype
       common /coselb/ ibasty
@@ -1880,7 +1881,7 @@ c       iofrec(nfl)=iofrec(nfl)+l
 *
 *  equivalence to avoid trouble with string descriptors in buffering
 *
-      dimension jlev(1),inlev(1),elev(1),jout(1)
+      dimension jlev(1),inlev(1),elev(1)
       dimension idate(20),ilabel(48),ipotnm(48)
 *
       call movcr8(label,ilabel)

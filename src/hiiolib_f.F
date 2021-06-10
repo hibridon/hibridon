@@ -259,10 +259,10 @@ c
 * subroutines called: open
 *
 * ----------------------------------------------------------------
+      use mod_cosout
       use constants
       implicit double precision (a-h,o-z)
-      integer jout
-      integer i, jlpar, jtot1, jtot2, jtotd, length, nerg, nnout,
+      integer i, jlpar, jtot1, jtot2, jtotd, length, nerg,
      :        numax, numin, ibasty
       logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
      :        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf,
@@ -285,7 +285,7 @@ c
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr, nucros, photof, wavefl, boundc
       common /coskip/ nskip,iskip
-      common /cosout/ nnout, jout(21)
+      !common /cosout/ nnout, jout(21)
       common /coiout/ niout, indout(1)
       common /cofile/ input, output, jobnam, savfil
       common /coener/ energ(1)
@@ -1719,15 +1719,16 @@ c     ------------------------------------------------------------
 *    j12:       array containing vector sum of j1 + j2 for molecule-molecule
 *               systems and open-shell atom - molecule systems
 *  ------------------------------------------------------------------
+      use mod_cosout
       implicit double precision (a-h,o-z)
       integer ic, icol, ii, ir, irow, jtot, jlpar, length, nmax,
-     :        nnout, nopen, nfile, nu, mmout
-      integer jout, jq, jpack, lq, lpack, inq, inpack, nchnid
+     :        nopen, nfile, nu, mmout
+      integer jq, jpack, lq, lpack, inq, inpack, nchnid
       logical is_j12
       common /clseg/ lseg,intrel,lchar
       common /coeint/ eint(1)
       common /coered/ ered, rmu
-      common /cosout/ nnout, jout(21)
+      !common /cosout/ nnout, jout(21)
 *  variable in common block /coselb/
 *     ibasty    basistype
       common /coselb/ ibasty

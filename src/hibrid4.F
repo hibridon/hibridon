@@ -29,6 +29,7 @@
 *   and for 2P atom + molecule system
 *   current revision date: 19-jun-2015 by p.dagdigian
 * ----------------------------------------------------------------------
+      use mod_cosout
       use constants
       implicit double precision (a-h,o-z)
       character*(*) fname
@@ -49,7 +50,7 @@
       common /coisc2/ jpack(1)
       common /coisc3/ lpack(1)
       common /coj12p/ j12pk(1)
-      common /cosout/ nnout, jout(21)
+      !common /cosout/ nnout, jout(21)
       common /coisc1/ inlev(1)
       common /coisc4/ ipack(1)
       common /codim/ nairy, nmax
@@ -1340,6 +1341,7 @@ c
 * special version for 13p collisions
 *
 * ------------------------------------------------------------------
+      use mod_cosout
       use constants
       implicit double precision (a-h,o-z)
       character*(*) filnam
@@ -1366,7 +1368,7 @@ c
       common /cotq1/  dpsir(100)
       common /cotq2/  dpsii(100)
       common /cotq3/  scmat2(100)
-      common /cosout/ nnout, jout(21)
+      !common /cosout/ nnout, jout(21)
       common /coiout/ niout, indout(10)
       common /coisc1/ ipack(10)
       common /coisc2/ nlist(50)

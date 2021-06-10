@@ -15,6 +15,7 @@
 *************************************************************************
 * ------------------------------------------------------------------
       subroutine default
+      use mod_cosout
 *  current revision date:  22-jan-2008 by mha
 * ------------------------------------------------------------------
       implicit double precision (a-h,o-z)
@@ -33,7 +34,7 @@
       common /cosys/ scod(maxpar*2+3)
 * nb if the nextcommon is changed, it should be also changed in common/parsys
       common /coiout/ niout, indout(20)
-      common /cosout/ nnout, jout(21)
+      !common /cosout/ nnout, jout(21)
       common /coselb/ ibasty
       common /coipar/ jtot1,jtot2,jtotd,jlpar,nerg,numax,numin,nud,
      :                lscreen, iprint
@@ -931,6 +932,7 @@ c
 *    xmu:       collision reduced mass in (c12) atomic mass units
 *    econv:     conversion factor from cm-1 to hartrees
 *  ------------------------------------------------------------------
+      use mod_cosout
       implicit double precision (a-h,o-z)
       character*(*) fname
       character*20 cdate
@@ -946,8 +948,8 @@ c
 *     real a, elev, scmat, zmat
       integer i, ienerg, iout, isize, j, jbegin, jend, jfinal,
      :        jfirst, jj1, jj2, jlpar, jtemp, jtotd, lenx, n, nlevel,
-     :        nlevop, nnout, nout, numax, numin, nud, iaver
-      integer inlev, ipoint, jlev, jout
+     :        nlevop, nout, numax, numin, nud, iaver
+      integer inlev, ipoint, jlev
 #include "common/parpot"
       common /coz/ zmat(1)
       common /cow/ scmat(1)
@@ -956,7 +958,7 @@ c
       common /coisc2/ jpoint(5)
       common /colq/ ipoint(5)
       common /cosc1/ elev(5)
-      common /cosout/ nnout, jout(21)
+      !common /cosout/ nnout, jout(21)
       common /coiout/ niout, indout(5)
       common /coselb/ ibasty
       dimension  a(3)
@@ -1436,6 +1438,7 @@ caber
 *    econv:     conversion factor from cm-1 to hartrees
 *  ------------------------------------------------------------------
 *      implicit none
+      use mod_cosout
       use constants
       implicit double precision (a-h,o-z)
       character*(*) fname
@@ -1462,7 +1465,7 @@ cmha
 cmha
       common /colq/ ipoint(1)
       common /cosc1/ elev(1)
-      common /cosout/ nnout, jout(21)
+      !common /cosout/ nnout, jout(21)
       common /coiout/ niout, indout(5)
       common /coener/ energ(1)
       common /coselb/ ibasty
