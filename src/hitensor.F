@@ -104,8 +104,6 @@
       common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot,
      :            nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 *
-*  increase size of jout array from 21 to 25 - p.dagdigian - 23-jun-2010
-      !common /cosout/ nnout, jout(25)
       common /coisc2/ inlev(1)
       common /coisc3/ jlev(1)
       common /coisc4/ jpack(1)

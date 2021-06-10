@@ -1,3 +1,6 @@
+* increase size of jout array in cosout from 25 to 50 - p.dagdigian - 19-sep-2012
+* increase size of jout array in cosout from 21 to 25 - p.dagdigian - 23-jun-2010
+
 9/1/06    added nelib spline.f and seval.f to hipotutil
 7/25/06   hiba2pi.f changed so that ntop=n always in bound state calculations
 7/21/06   hiba2pi.f comment at the beginning of vlm2pi changed to indicate

@@ -1,24 +1,67 @@
 module mod_cosout
+   !  variables in common block /cosout/
+   !    nnout:     number of different rotational levels for which s-matrix
+   !               elements are to be saved in file 13,
+   !    jout(i):   values of rotational angular momentum for these lvels
+   ! *  variables in common block /cosout/
+   ! *    nnout:     number of different rotational levels for which s-matrix
+   ! *               elements are to be saved in file nfile
+   ! *    jout(i):   values of rotational angular momentum for these levels
+   ! *               if nnout is positive, than an s-matrix element will be saved
+   ! *               only if both the initial and final quantum numbers correspond
+   ! *               to one of the values of jout(i)
+   ! *               if nnout is negative, then every column of the s-matrix for
+   ! *               which the initial quantum numbers correspond to one of the
+   ! *               values of jout(i) will be printed
+   ! *  variables in common block /cosout/
+   ! *    nnout:     number of different rotational levels for which s-matrix
+   ! *               elements are to be saved in files smat1, smat2, ...
+   ! *    jout(i):   values of rotational angular momentum for these lvels
+   ! *  variables in common block /cosout/
+   ! *    nnout:     number of different rotational levels for which s-matrix
+   ! *               elements are to be saved in file nfile
+   ! *    jout(i):   values of rotational angular momentum for these levels
+   ! *               if nnout is positive, than an s-matrix element will be saved
+   ! *               only if both the initial and final quantum numbers correspond
+   ! *               to one of the values of jout(i)
+   ! *               if nnout is negative, then every column of the s-matrix for
+   ! *               which the initial quantum numbers correspond to one of the
+   ! *               values of jout(i) will be printed
+   ! from hiiolib_c.F
+   ! *  variables in common block /cosout/
+   ! *    nnout:     number of different rotational levels for which s-matrix
+   ! *               elements are to be saved in files smat1, smat2, ...
+   ! *    jout(i):   values of rotational angular momentum for these lvels
+   ! *  variables in common block /cosout/
+   ! *    nnout:     number of different rotational levels for which s-matrix
+   ! *               elements are to be saved in file nfile
+   ! *    jout(i):   values of rotational angular momentum for these levels
+   ! *               if nnout is positive, than an s-matrix element will be saved
+   ! *               only if both the initial and final quantum numbers correspond
+   ! *               to one of the values of jout(i)
+   ! *               if nnout is negative, then every column of the s-matrix for
+   ! *               which the initial quantum numbers correspond to one of the
+   ! *               values of jout(i) will be printed
    implicit none
    integer, dimension(:), allocatable :: jout
    integer, allocatable               :: nnout
    contains
-   subroutine allocate_cosout(n)
-      integer, intent(in) :: n
-      allocate(jout(n)) ; allocate(nnout)
+   subroutine allocate_cosout(aout)
+      integer, intent(in) :: aout
+      allocate(jout(aout)) ; allocate(nnout)
    end subroutine allocate_cosout
 end module mod_cosout
 
-! module mod_coiout
-!    implicit none
-!    integer, dimension(:), allocatable :: indout
-!    integer, allocatable               :: niout
-!    contains
-!    subroutine allocate_coiout(n)
-!       integer, intent(in) :: n
-!       allocate(indout(n)) ; allocate(niout)
-!    end subroutine allocate_coiout
-! end module mod_coiout
+module mod_coiout
+   implicit none
+   integer, dimension(:), allocatable :: indout
+   integer, allocatable               :: niout
+   contains
+   subroutine allocate_coiout(aout)
+      integer, intent(in) :: aout
+      allocate(indout(aout)) ; allocate(niout)
+   end subroutine allocate_coiout
+end module mod_coiout
 
 ! module mod_cov2
 !    implicit none

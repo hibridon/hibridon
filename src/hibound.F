@@ -31,6 +31,7 @@ c     Definition of variables in call list:
 c     nch     Number of coupled equations
 c     nmax    Leading dimension of the w matrix used in Hibridon
 c     ------------------------------------------------------------------
+      use mod_coiout, only: niout
       implicit none
       integer, intent(in) :: nch, nmax
 #include "common/parpot"
@@ -43,8 +44,7 @@ c     ------------------------------------------------------------------
       common /coconv/ econv, xmconv
       common /coered/ ered, rmu
       real(8) :: econv, xmconv, ered, rmu
-      common /coiout/ niout
-      integer :: niout
+
 c
       real(8), parameter :: pi=dacos(-1d0)
 c     maxpos is the maximum number of positive energies to print.

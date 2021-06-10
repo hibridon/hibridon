@@ -1,5 +1,6 @@
       program logair
-      use mod_cosout
+      use mod_cosout, only: allocate_cosout
+      use mod_coiout, only: allocate_coiout
 
       use mod_coeig, only: allocate_coeig
       use mod_coeig2, only: allocate_coeig2
@@ -23,7 +24,6 @@
 ***********************************************************************
 *  ***  driver for log-derivative integration ***
 *  author:  millard alexander
-*  increase size of jout array in cosout - p.dagdigian (23-jun-2010)
 *  revised:  24-jan-2012 by p. dagdigian (added common blocks /coj12/, /co12p/)
 *  revised:  replaced statements before call to propag to accommodate
 *    q.ma's revised version of bound (28-jun-2013, p.dagdigian)
@@ -67,8 +67,6 @@
 #endif
 * modified klammx (pjd - 17-jan-2019)
 * increased kfact (pjd - 15-dec-2020)
-* increase size of jout array from 21 to 25 - p.dagdigian - 23-jun-2010
-* increase size of jout array from 25 to 50 - p.dagdigian - 19-sep-2012
       parameter (klammx = 2000, kfact = 3500, kout = 50, ken = 25)
       parameter (kmxpho = 3, knphot = 1)
       parameter (kmxbas = 30)
@@ -113,10 +111,6 @@
 *               potential
 *  variable in common block /cofact/
 *    si:        table of logarithms of factorials
-*  variables in common block /cosout/
-*    nnout:     number of different rotational levels for which s-matrix
-*               elements are to be saved in file 13,
-*    jout(i):   values of rotational angular momentum for these lvels
 *  variables in common block /clseg/
 *    lseg:      sector length on mass storage device
 *    intrel:    number of integer words per real words
@@ -144,8 +138,6 @@
 *  ----------------------------------------------------------
       logical lsc1
       common /comom/  xmom(3), imom(13)
-      !common /cosout/ nnout, jout(kout)
-      common /coiout/ niout, indout(kout)
       common /cov2/ nv2max, ndummy, v2(kv2max)
       common /coiv2/ iv2(kv2max)
       common /cocent/ cent(kmax)
@@ -218,6 +210,7 @@
 *
 *  parameter below sets maximum size of asymmetric top basis fn expansion
       call allocate_cosout(kout)
+      call allocate_coiout(kout)
 
       call allocate_coeig()
       call allocate_coeig2()
@@ -381,7 +374,6 @@
       common /cosavi/ iipar, ixpar(8)
       common /cosavr/ irpar(2), rxpar(9)
       common /copmat/ rtmn, rtmx, iflag
-      !common /cosout/ nnout, jout(21)
       common /coeint/ eint(1)
       common /cocent/ cent(1)
       common /coered/ ered, rmu
