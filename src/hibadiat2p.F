@@ -78,8 +78,6 @@
 *              this should be 1 here
 *    iop:      ortho (iop=1) or para (iop=0)
 *    jmax:     maximum rotational quantum number of diatomic
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
 *
 *  variable in common block /coeint/
 *    eint:      array containing channel energies (in hartree)
@@ -101,6 +99,8 @@
 * ------------------------------------------------------------
       use mod_cov2, only: nv2max, junkv => ndummy, v2
       use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -109,8 +109,6 @@
       common /cosysi/ nscode, isicod, nterm, iop,jmax
       common /coipar/ iiipar(9), iprint
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /cocent/ cent(5)
-      common /coeint/ eint(5)
       common /coered/ ered, rmu
       common /coskip/ nskip, iskip
       common /coconv/ econv, xmconv

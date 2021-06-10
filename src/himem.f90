@@ -97,45 +97,47 @@ module mod_coiv2
    end subroutine allocate_coiv2
 end module mod_coiv2
 
-! module mod_cocent
-!    implicit none
-!    real(8), dimension(:), allocatable :: cent
-!    contains
-!    subroutine allocate_cocent(n)
-!       integer, intent(in) :: n
-!       allocate(cent(n)) ;
-!    end subroutine allocate_cocent
-! end module mod_cocent
+module mod_cocent
+   ! variables in this module
+   !   cent:      array containing centrifugal barrier of each channel
+   implicit none
+   real(8), dimension(:), allocatable :: cent
+   contains
+   subroutine allocate_cocent(amax)
+      integer, intent(in) :: amax
+      allocate(cent(amax)) ;
+   end subroutine allocate_cocent
+end module mod_cocent
 
-! module mod_coeint
-!    implicit none
-!    real(8), dimension(:), allocatable :: eint
-!    contains
-!    subroutine allocate_coeint(n)
-!       integer, intent(in) :: n
-!       allocate(eint(n)) ;
-!    end subroutine allocate_coeint
-! end module mod_coeint
+module mod_coeint
+   implicit none
+   real(8), dimension(:), allocatable :: eint
+   contains
+   subroutine allocate_coeint(amax)
+      integer, intent(in) :: amax
+      allocate(eint(amax)) ;
+   end subroutine allocate_coeint
+end module mod_coeint
 
-! module mod_coj12
-!    implicit none
-!    real(8), dimension(:), allocatable :: j12
-!    contains
-!    subroutine allocate_coj12(n)
-!       integer, intent(in) :: n
-!       allocate(j12(n)) ;
-!    end subroutine allocate_coj12
-! end module mod_coj12
+module mod_coj12
+   implicit none
+   real(8), dimension(:), allocatable :: j12
+   contains
+   subroutine allocate_coj12(n)
+      integer, intent(in) :: n
+      allocate(j12(n)) ;
+   end subroutine allocate_coj12
+end module mod_coj12
 
-! module mod_coj12pk
-!    implicit none
-!    real(8), dimension(:), allocatable :: j12pk
-!    contains
-!    subroutine allocate_coj12pk(n)
-!       integer, intent(in) :: n
-!       allocate(j12pk(n)) ;
-!    end subroutine allocate_coj12pk
-! end module mod_coj12pk
+module mod_coj12pk
+   implicit none
+   real(8), dimension(:), allocatable :: j12pk
+   contains
+   subroutine allocate_coj12pk(n)
+      integer, intent(in) :: n
+      allocate(j12pk(n)) ;
+   end subroutine allocate_coj12pk
+end module mod_coj12pk
 
 ! module mod_covvl
 !    implicit none

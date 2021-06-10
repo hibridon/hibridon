@@ -75,8 +75,6 @@
 *    isicod:   total number of integer system dependent variables
 *    nterm:    number of different types of electronic coupling terms
 *              this should be 1 here
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
 *               in case (a) basis
 *
 *  variable in common block /coeint/
@@ -98,6 +96,8 @@
 * ------------------------------------------------------------
       use mod_cov2, only: nv2max, junkv => ndummy, v2
       use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -106,8 +106,6 @@
 
       common /cosysi/ nscode, isicod, nterm, nphoto
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /coskip/ nskip, iskip
       common /coconv/ econv, xmconv
@@ -679,12 +677,12 @@
 *  author:  millard alexander
 *  latest revision date:  4-oct-1992
 *  --------------------------------------------
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
 #if defined(HIB_UNIX_IBM)
       character*1 forma, formb
 #endif
       common /cosysr/ isrcod, junkr, aso
-      common /coeint/ eint(6)
       common /coconv/ econv, xmconv
       common /cotrans/ t(6,6)
       common /cojtot/ j,jlpar

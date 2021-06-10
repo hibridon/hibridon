@@ -107,8 +107,6 @@
 *    nopen    on entry:  number of open channels
 *    nmax     on entry:  maximum row dimension of matrices
 *    firstj   if .true. on entry, header is written to s-matrix file
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
@@ -136,6 +134,8 @@
       use mod_cosout
       use constants
       use mod_coqvec, only: nphoto
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical ipos, csflag, swrit, t2writ, writs, wrpart, partw,
      :        wrxsec, xsecwr, flaghf, t2test, flagsu, firstj, twomol,
@@ -144,8 +144,6 @@
 #include "common/parpot"
       common /cojsav/ jsav1, jsav2
       common /cosurf/ flagsu
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coj12/ j12(1)
       common /coered/ ered, rmu
       common /cojlpo/ jlpold

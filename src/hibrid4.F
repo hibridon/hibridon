@@ -1041,6 +1041,7 @@ c
 c     current revision: 20-apr-2012 by q. ma
 c
 * -------------------------------------------------------
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       character*48 oldlab, oldpot
       character*20 cdate, olddat
@@ -1056,7 +1057,6 @@ c
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr, nucros, photof, wavefl
       common /coered/ ered, rmu
-      common /coeint/ eint(25)
       common /cojq/   jq(1)
       common /colq/   lq(1)
       common /coinq/  inq(1)
@@ -1344,7 +1344,8 @@ c
       use mod_coiout, only: niout, indout
       use constants
       use mod_coqvec, only: nphoto
-
+      use mod_cocent, only: sc2 => cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       character*(*) filnam
       character*40  psifil, wavfil, amplfil, flxfil
@@ -1361,7 +1362,6 @@ c
       common /cojq/   jq(60)
       common /colq/   lq(10)
       common /coinq/  inq(60)
-      common /coeint/ eint(100)
       common /cow/    sr(100)
       common /cozmat/ si(100)
       common /coamat/ psir(100)
@@ -1382,7 +1382,6 @@ c
       common /cosc6/ sc(100)
       common /cosc7/ sc1(100)
 * common for y1, y2, y4
-      common /cocent/ sc2(1)
       common /coered/ ered, rmu
       common /codim/  nairy, mmax
       common /coselb/ ibasty
@@ -2303,6 +2302,7 @@ c
 *
 * ------------------------------------------------------------------
       use mod_coiout, only: niout, indout
+      use mod_cocent, only: sc2 => cent
       implicit double precision (a-h,o-z)
       logical adiab, kill, photof, propf, sumf, coordf, ifull
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
@@ -2322,7 +2322,6 @@ c
       common /cosc7/ sc1(6)
       common /cosc8/ sc8(6)
       common /cosc9/ sc9(6)
-      common /cocent/ sc2(6)
       common /coered/ ered, rmu
       common /coground/ ifull
       common /cotrans/ ttrans(36)
@@ -2618,6 +2617,7 @@ c
 * revised on 30-mar-2012 by q. ma for stream I/O of wfu files
 *
 * ------------------------------------------------------------------
+      use mod_cocent, only: sc2 => cent
       implicit double precision (a-h,o-z)
       common /coered/ ered, rmu
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
@@ -2628,7 +2628,6 @@ c
       common /cosc8/ sc8(6)
       common /cosc7/ sc7(6)
 * common for y1, y2, y4
-      common /cocent/ sc2(6)
       data zero, one, onemin, two,   conv
      :    /0.d0, 1.d0, -1.d0, 2.d0, 219474.6d0/
         do 420 kstep=1, npts

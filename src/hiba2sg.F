@@ -97,8 +97,6 @@
 *    isa:      s/a symmetry index, if the molecule is homonuclear (ihomo=t)
 *              then, if isa=+1 then only the s-levels are included in the
 *              basis, if isa=-1, then only the a-levels are included
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
 *  variable in common block /coeint/
 *    eint:      array containing channel energies (in hartree)
 *               zero of energy is taken to be n=0
@@ -120,6 +118,8 @@
 * --------------------------------------------------------------------
       use mod_cov2, only: nv2max, junkv => ndummy, v2
       use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical clist, csflag, flaghf, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -129,8 +129,6 @@
      :                isa
       common /coipar/ iiipar(9), iprint
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       dimension j(1), l(1), jhold(1), ehold(1), is(1), nrot(1),

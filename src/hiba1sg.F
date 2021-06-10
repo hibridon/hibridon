@@ -404,8 +404,6 @@ c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
 *              expansion of potential
 *    jmin:     the minimum rotational angular momenta
 *    jmax:     the maximum rotational angular momenta
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
 *  variable in common block /coeint/
 *    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
@@ -430,6 +428,8 @@ c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
 * --------------------------------------------------------------------
       use mod_cov2, only: nv2max, junkv => ndummy, v2
       use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -440,8 +440,6 @@ c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
      :                iscod(2,maxvib)
       common /cosysr/ isrcod, junkr, rpar(4,maxvib)
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /coskip/ nskip, iskip
       common /coconv/ econv, xmconv

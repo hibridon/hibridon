@@ -3,6 +3,8 @@
       use mod_coiout, only: allocate_coiout
       use mod_cov2, only: allocate_cov2
       use mod_coiv2, only: allocate_coiv2
+      use mod_cocent, only: allocate_cocent
+      use mod_coeint, only: allocate_coeint
       use mod_coeig, only: allocate_coeig
       use mod_coeig2, only: allocate_coeig2
 #if defined(HIB_UNIX)
@@ -87,8 +89,6 @@
 *    nlam:      the total number of angular coupling terms used
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
 *  variable in common block /coeint/
 *    eint:      array containing channel energies (in hartree)
 *  variables in common blocks /coj12/ and /coj12p/
@@ -129,8 +129,6 @@
 *  ----------------------------------------------------------
       logical lsc1
       common /comom/  xmom(3), imom(13)
-      common /cocent/ cent(kmax)
-      common /coeint/ eint(kmax)
       common /coj12/ j12(kmax)
       common /coj12p/ j12pk(kmax)
       common /covvl/  vvl(klammx)
@@ -202,6 +200,8 @@
       call allocate_coiout(kout)
       call allocate_cov2(kv2max)
       call allocate_coiv2(kv2max)
+      call allocate_cocent(kmax)
+      call allocate_coeint(kmax)
 
       call allocate_coeig()
       call allocate_coeig2()
@@ -246,8 +246,6 @@
 *  variable in common block /coener/
 *    energ:     array containing total energies (in cm-1) at which scattering
 *               calculations are to be performed
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
@@ -339,7 +337,9 @@
 *  variable in common block /coopti/
 *    optifl:      flag, signals if the calculation is an optimization
 *
-      use mod_cosout
+      use mod_cosout, only: nnout, jout
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       use constants
       implicit double precision (a-h,o-z)
       character*20 cdate
@@ -364,8 +364,6 @@
       common /cosavi/ iipar, ixpar(8)
       common /cosavr/ irpar(2), rxpar(9)
       common /copmat/ rtmn, rtmx, iflag
-      common /coeint/ eint(1)
-      common /cocent/ cent(1)
       common /coered/ ered, rmu
       common /coipar/ jtot1, jtot2, jtotd, jlpar, nerg,numax,numin,nud,
      :                lscreen, iprint

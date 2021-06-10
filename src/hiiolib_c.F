@@ -1653,14 +1653,14 @@ c.....reserve space for restart information
 *  variable in common block /coeint/
 *    eint:      array containing channel energies (in hartree)
 *  ------------------------------------------------------------------
-      use mod_cosout
+      use mod_cosout, only: nnout, jout
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       integer ic, icol, ii, ir, irow, jtot, jlpar, length, nmax,
      :        nopen, nfile, nu, mmout
       integer jq, jpack, lq, lpack, inq, inpack
 *      real simag, sreal, eint, epack, ered, rmu
       common /clseg/ lseg,intrel,lchar
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
 *  variable in common block /coselb/
 *     ibasty    basistype

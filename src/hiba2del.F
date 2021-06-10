@@ -102,8 +102,6 @@
 *    npar:     number of symmetry doublets included (npar=2 will ensure
 *              both lambda doublets; npar=1, just eps=1 levels, npar=-1,
 *              just eps=-1 levels
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
 *  variable in common block /coeint/
 *    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
@@ -118,6 +116,8 @@
 * --------------------------------------------------------------------
       use mod_cov2, only: nv2max, ndummy, v2
       use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -126,8 +126,6 @@
       common /cosysi/ nscode, isicod, nterm, jmax, igu, isa, npar
       common /cosysr/ isrcod, idum,brot, aso, p, q
       common /conlam/ nlam, nlammx,lamnum(1)
-      common /cocent/ cent(2)
-      common /coeint/ eint(2)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       dimension j(2), l(1), jhold(1), ehold(1), is(2), ifi(1),

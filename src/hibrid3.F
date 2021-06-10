@@ -240,8 +240,6 @@
 *    nmax:     maximum row and column dimension of matrix w
 *   lamnum:     number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
 *  variable in common block /coeint/
 *    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
@@ -269,13 +267,13 @@
 *  -------------------------------------------------------------------
       use mod_cov2, only: nv2max, junkv => ndummy, v2
       use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       integer i, iflag, ilam, lamnum, nch, nlam, nlammx, nmax
       common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
       common /conlam/ nlam, nlammx, lamnum(1)
       common /copmat/ rtmn, rtmx, iflag
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /covvl/ vvl(1)
       common /coselb/ ibasty
@@ -1612,8 +1610,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *    nmax:    maximum row dimensions of matrices
 *    kwrit:   if true, k matrix is printed out
 *    ipos:    if true, 132 line printer
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
 *  variable in common block /coeint/
 *    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
@@ -1638,6 +1634,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *    vmul:      vector times a vector
 * --------------------------------------------------------------------
       use mod_coqvec, only: nphoto, q
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       integer isw, i, icol, l, lq, nmax, nopen
 #if defined(HIB_UNIX_IBM)
@@ -1646,8 +1644,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 #endif
       logical flagsu, photof, wavefn, kwrit, ipos, lpar, swrit, lpar2,
      $     boundf, wrsmat
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /cosurf/ flagsu
       common /cophot/ photof, wavefn, boundf, wrsmat
@@ -2101,9 +2097,9 @@ c
 *     ifil          local unit number for g(a,b) file
 *  ---------------------------------------------------------------------------
       use mod_coqvec, only: nphoto, q
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical photof, wavefn, kwrit, ipos, boundf, wrsmat
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /cophot/ photof, wavefn, boundf, wrsmat
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,

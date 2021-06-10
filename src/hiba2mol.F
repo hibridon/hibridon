@@ -86,8 +86,6 @@
 *    numj:     number of j1-j2 values
 *    nj1j2:    specific j1-j2 values (up to a maximum of 50)
 *              N.B. this dimension is set here
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
 *  variable in common block /coeint/
 *    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
@@ -106,6 +104,8 @@
 * --------------------------------------------------------------------
       use mod_cov2, only: nv2max, junkv => ndummy, v2
       use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -116,8 +116,6 @@
       common /cosysr/ isrcod, junkr, brot, drot, hrot
       common /coselb/ ibasty
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       dimension j(1), l(1), is(1), jhold(1), ehold(1), j12(1), j1(1),

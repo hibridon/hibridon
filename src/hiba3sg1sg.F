@@ -105,8 +105,6 @@ c      end module mod_1sg1sg
 *    j2max:    maximum rotational angular momentum of molecule 2
 *    ipotsy2:  symmetry of potential.  set to 2 for homonuclear
 *              molecule 2, set to 1 for heteronuclear molecule 2
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
 *  variable in common block /coeint/
 *    eint:      array containing channel energies (in hartree)
 *  variable in common block /coj12/
@@ -140,6 +138,8 @@ c      end module mod_1sg1sg
       use mod_1sg1sg
       use mod_cov2, only: nv2max, junkv => ndummy, v2
       use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -150,8 +150,6 @@ c      end module mod_1sg1sg
       common /cosysr/ isrcod, junkr, b1rot, d1rot, flmbda, gamma, b2rot
       common /coselb/ ibasty
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coj12/  j12(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv

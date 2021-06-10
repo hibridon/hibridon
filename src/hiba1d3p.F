@@ -83,8 +83,6 @@
 *              nstate=0:   just 1D state
 *              nstate=1:   just 3P state
 *              nstate=2:   both 1D and 3P states
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
 *  variable in common block /coeint/
 *    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
@@ -113,6 +111,9 @@
       use mod_coeig, only: c0, c1, c2
       use mod_cov2, only: nv2max, junkv => ndummy, v2
       use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
+
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -121,8 +122,6 @@
       common /cosysi/ nscode, isicod, nterm, nstate
       common /cosysr/ isrcod, junkr, en1d
       common /conlam/ nlam, nlammx, lamnum(12)
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /coskip/ nskip, iskip
       common /covvl/  vvl(19)
