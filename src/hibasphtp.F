@@ -89,8 +89,6 @@
 *                = 2 for E levels
 *                = 3 for F levels (F1 or F2)
 *    jmax:     the maximum rotational angular momentum for the spherical top
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units

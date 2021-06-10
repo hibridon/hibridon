@@ -135,8 +135,6 @@
 *              molecule
 *    j2min:    the minimum rotational angular momentum for linear
 *              molecule
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variable in common block /coj12/
 *    j12:       array containing vector sum of j1 + j2 for molecule-molecule
 *               systems and open-shell atom - molecule systems

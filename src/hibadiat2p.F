@@ -79,8 +79,6 @@
 *    iop:      ortho (iop=1) or para (iop=0)
 *    jmax:     maximum rotational quantum number of diatomic
 *
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units

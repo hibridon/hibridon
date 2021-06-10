@@ -93,8 +93,6 @@
 *              this should be 1 here
 *    iop:      ortho (iop=1) or para (iop=0)
 *    jmax:     maximum rotational quantum number of diatomic
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variable in common block /coj12/
 *    j12:      array containing vector sum of ja + j (similar
 *              situation with molecule-molecule scattering,

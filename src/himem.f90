@@ -110,6 +110,10 @@ module mod_cocent
 end module mod_cocent
 
 module mod_coeint
+   ! variables in this module
+   !   eint:     array containing channel energies (in hartree)
+   !             the zero of energy is assumed to be the 0(0,0) level
+   !             + energy of j2min level of linear molecule
    implicit none
    real(8), dimension(:), allocatable :: eint
    contains

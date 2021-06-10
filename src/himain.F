@@ -89,8 +89,6 @@
 *    nlam:      the total number of angular coupling terms used
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common blocks /coj12/ and /coj12p/
 *    j12,j12p:  arrays containing vector sum of j1 + j2 for molecule-molecule 
 *               systems and open-shell atom - molecule systems
@@ -241,8 +239,6 @@
 *  additions by: b. follmeg, h-j werner
 *  current revision date:  1-oct-2001 by mha
 *  -------------------------------------------------------------
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variable in common block /coener/
 *    energ:     array containing total energies (in cm-1) at which scattering
 *               calculations are to be performed

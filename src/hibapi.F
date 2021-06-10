@@ -107,7 +107,6 @@
 *    o, p, q:  lambda-doubling constants cm-1
 *    dmom:     dipole moment of molecule in Debye
 *    efield:   stark field in kV / cm
-*  variable in common block /coeint/
 *    eint:     array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:     collision energy in atomic units (hartrees)

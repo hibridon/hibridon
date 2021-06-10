@@ -130,10 +130,6 @@ c
 *    j2max:    maximum rotational angular momentum of molecule 2
 *    ipotsy2:  symmetry of potential.  set to 2 for homonuclear
 *              molecule 2, set to 1 for heteronuclear molecule 2
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
-*               the zero of energy is assumed to be the 0(0,0) level +
-*               energy of j2min level of linear molecule
 *  variable in common /coj12/ 
 *    j12:       array containing the j12 quantum number of each channel  
 *  variables in common block /coered/

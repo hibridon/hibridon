@@ -86,8 +86,6 @@
 *    numj:     number of j1-j2 values
 *    nj1j2:    specific j1-j2 values (up to a maximum of 50)
 *              N.B. this dimension is set here
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units

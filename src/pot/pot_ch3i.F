@@ -672,8 +672,6 @@
 *              elements for each term.  lammin can not be less than mproj.
 *              for homonuclear molecules, the allowed values of lambda for
 *              each term range from lammin to lammax in steps of 2
-*  variable in common block /coint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units

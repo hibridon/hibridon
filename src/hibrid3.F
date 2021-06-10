@@ -240,8 +240,6 @@
 *    nmax:     maximum row and column dimension of matrix w
 *   lamnum:     number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
@@ -842,8 +840,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /copmat/
 *    rtmn,rtmx: minimum and maximum turning points
 *    iflag:     variable used in determination of turning points (not used her
@@ -1610,8 +1606,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *    nmax:    maximum row dimensions of matrices
 *    kwrit:   if true, k matrix is printed out
 *    ipos:    if true, 132 line printer
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
@@ -2085,8 +2079,6 @@ c
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /cophot/
 *     photof        true if photodissociation calculation
 *                   false if scattering calculation

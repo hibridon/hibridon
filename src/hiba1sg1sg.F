@@ -103,8 +103,6 @@ c
 *    j2max:    maximum rotational angular momentum of molecule 2
 *    ipotsy:   symmetry of potential.  set to 2 for homonuclear
 *              molecule 2, set to 1 for heteronuclear molecule 2
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units

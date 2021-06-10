@@ -135,8 +135,6 @@
 *              can provide Vpi, V1, V2 for coupling with the 2sigma state
 *    ivibpi:   array of the vibrational quantum numbers of 2pi levels for
 *              which the pot routine can provide the potentials
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units

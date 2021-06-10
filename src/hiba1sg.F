@@ -404,8 +404,6 @@ c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
 *              expansion of potential
 *    jmin:     the minimum rotational angular momenta
 *    jmax:     the maximum rotational angular momenta
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units

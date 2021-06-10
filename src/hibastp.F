@@ -116,8 +116,6 @@
 *              iop = -1 for rotational levels with A2 nuclear spin symmetry
 *              iop =  1 for rotational levels with E nuclear spin symmetry
 *    jmax:     the maximum rotational angular momentum for the symmetric top
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *               the zero of energy is assumed to be the j=0, k=0 level
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)

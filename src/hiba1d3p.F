@@ -83,8 +83,6 @@
 *              nstate=0:   just 1D state
 *              nstate=1:   just 3P state
 *              nstate=2:   both 1D and 3P states
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units

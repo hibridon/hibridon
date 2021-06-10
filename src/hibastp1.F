@@ -130,8 +130,6 @@
 *              set iop= 1 for rotational levels (with E nuclear spin symmetry)
 *              with k not equal to a multiple of 3 (e.g. k = 1, 2, 4, 5, 7, 8,…).
 *    jmax:     the maximum rotational angular momentum for the symmetric top
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *               the zero of energy is assumed to be the j=0, k=0 level
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)

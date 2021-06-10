@@ -97,8 +97,6 @@
 *    isa:      s/a symmetry index, if the molecule is homonuclear (ihomo=t)
 *              then, if isa=+1 then only the s-levels are included in the
 *              basis, if isa=-1, then only the a-levels are included
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *               zero of energy is taken to be n=0
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)

@@ -90,8 +90,6 @@
 *    ipol:     =0 if no polarization state preparation
 *    ipol:     =1 if polaratization state preparation
 *    npot:     potential designator (1-4 currently allowed)
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units

@@ -102,9 +102,6 @@
 *              para states will be included if iop=1 and only ortho states if
 *              iop=-1
 *    jmax:     the maximum rotational angular momentum for the asymmetric top
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
-*               the zero of energy is assumed to be the 0(0,0) level
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units

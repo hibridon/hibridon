@@ -90,8 +90,6 @@
 *    npar:     number of symmetry doublets included (npar=2 will ensure
 *              both lambda doublets; npar=1, just eps=1 levels, npar=-1,
 *              just eps=-1 levels
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units

@@ -159,8 +159,6 @@
 *    ivibs:    vibrational quantum number for each of these
 *    nvibp:    number of vibrational terms for pi state in input file
 *    ivibp:    vibrational quantum number for each of these
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units

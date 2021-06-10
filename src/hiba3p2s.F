@@ -82,8 +82,6 @@
 *    isicod:   total number of integer system dependent variables
 *    nterm:    number of different types of electronic coupling terms
 *              this should be 1 here
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variable in common block /coj12/
 *    j12:      array containing vector sum of ja + j (similar
 *              situation with molecule-molecule scattering,
