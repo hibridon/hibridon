@@ -531,6 +531,8 @@ c.....assume that jlpar=1 is stored first
 *  written by:  millard alexander
 *  current revision date (algorithm):  30-dec-1994
 *-----------------------------------------------------------------------------
+      use mod_coqvec2, only: q => q2
+
       implicit double precision (a-h,o-z)
 *      implicit none
       double precision a, b, bfact, cs, cs1, cs2, csh, dalph2, dalpha,
@@ -541,14 +543,12 @@ c.....assume that jlpar=1 is stored first
      :    ez1, ez2, fact, oflow, one, rnow, scai1, scai2, scbi1, scbi2,
      :    sn, sn1, sn2, snh, tnhfac, width, x1, x2, xairy1, xairy2,
      :    xbiry1, xbiry2, zero
-      double precision eignow, gam1, gam2, hp, q, y1, y2, y4
+      double precision eignow, gam1, gam2, hp, y1, y2, y4
       double precision xinpt, fprop
       integer i, nch, mxphot, nphoto
       logical photof, wavefn, boundf, wrsmat
-      common /coqvec2/ q
       common /cophot/ photof, wavefn, boundf, wrsmat
       dimension eignow(1), hp(1), y1(1), y2(1), y4(1), gam1(1), gam2(1)
-      dimension q(1)
       data     doneth,        dhalf
      :  / 0.333333333333333d0, 0.5d0 /
       data zero, one /0.d0, 1.d0/
@@ -1343,6 +1343,8 @@ c
 * ------------------------------------------------------------------
       use mod_cosout
       use constants
+      use mod_coqvec, only: nphoto
+
       implicit double precision (a-h,o-z)
       character*(*) filnam
       character*40  psifil, wavfil, amplfil, flxfil
@@ -1387,7 +1389,6 @@ c
       common /codim/  nairy, mmax
       common /coselb/ ibasty
       common /cosysi/ ispar(4), ipol
-      common /coqvec/ mxphot, nphoto
       dimension a(7), sx(3)
       data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f',
      :           '3SG1e','3PI0e','3PI1e','3PI2e','1SG0e','1PI1e'/

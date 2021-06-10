@@ -443,8 +443,8 @@ cABER
         nvib=nvibmx-nvibmn+1
         print *, 'nterm = ', nterm
         write (6, 30)
-30      format
-     :   ('  Enter R (bohr), theta (Degrees); R=0, theta=0 to quit',$)
+30      format(
+     :   '  Enter R (bohr), theta (Degrees); R=0, theta=0 to quit',$)
         nstep=1
         if(ihomo) nstep=2
         rold=0
@@ -482,8 +482,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
         goto 40
       else if (iresp .eq. 2) then
        write (6, 65)
-65     format(/,
-     :   '  Enter R(bohr); R=0 to quit')
+65     format(
+     :   /'  Enter R(bohr); R=0 to quit')
 70     write(6,80)
 80      format('$ R  ?  ',$)
         read(5,*)r
@@ -576,8 +576,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       read (5, *) iresp
       if (iresp .eq. 1) then
         write (6, 30)
-30      format(/,
-     :  ' Enter R (bohr), theta (Degrees); R=0, theta=0 to quit')
+30      format(
+     :  /' Enter R (bohr), theta (Degrees); R=0, theta=0 to quit')
 40      write(6, 45)
 45      format(' R, theta ?  ')
         read(5,*) r, theta
@@ -718,8 +718,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
         goto 40
       else if (iresp .eq. 2) then
        write (6, 65)
-65     format(/,
-     :   '  Enter R(bohr); R=0 to quit')
+65     format(
+     :   /'  Enter R(bohr); R=0 to quit')
 70     write(6,80)
 80      format('$ R  ?  ',$)
         read(5,*)r
@@ -1139,13 +1139,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *                   false if scattering calculation
 *     wavefn        true if g(a,b) transformation matrices are saved
 *                   to be used later in computing the wavefunction
-*     variables in common block /coqvec/
-*     mxphot        maximum column dimension of q matrix
-*     nphoto        actual collumn dimension of q matrix
-*     q             accumulated overlap matrix with ground state
-*                   only calculated if photof = .true.
-*                   this is stored with each wavefunction as a column vector
 *  ------------------------------------------------------------------
+      use mod_coqvec, only: nphoto, q
       implicit double precision (a-h, o-z)
 *      real eshift, r, rend, rmax, rmin, spac, tl, tlw, tp, tpw
 *      real scr1, scr2, wref, z1, z2
@@ -1154,14 +1149,12 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       logical twoen, logwr, ipos, noprin, boundf, wrsmat
 *  internal logical variables
       logical iread, iwrite, print, photof, wavefn
-      common /coqvec/ mxphot, nphoto, q
       common /cophot/ photof, wavefn, boundf, wrsmat
       common /constp/ nsteps, isteps
 
 *  z, w, amat, and bmat are stored column by column in one dimensional arrays
       dimension z(1), w(1), amat(1), bmat(1)
       dimension wref(1), z1(1), z2(1), scr1(1), scr2(1)
-      dimension q(1)
       iwrite = twoen .and. (itwo.eq.0)
       iread =  twoen .and. (itwo.gt.0)
       print = .not. noprin
@@ -1642,12 +1635,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *                   false if scattering calculation
 *     wavefn        true if g(a,b) transformation matrices are saved
 *                   to be used later in computing the wavefunction
-*     variables in common block /coqvec/
-*     mxphot        maximum column dimension of q matrix
-*     nphoto        actual column dimension of q matrix (gamma2)
-*     q             accumulated overlap matrix with ground state
-*                   only calculated if photof = .true.
-*                   this is stored with each wavefunction as a column vector
 *  variables in common block /cowave/
 *     irec          record number of last written g(a,b) matrix
 *     ifil          local unit number for g(a,b) file
@@ -1659,6 +1646,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *    daxpy:     linpack blas routine
 *    vmul:      vector times a vector
 * --------------------------------------------------------------------
+      use mod_coqvec, only: nphoto, q
       implicit double precision (a-h,o-z)
       integer isw, i, icol, l, lq, nmax, nopen
 #if defined(HIB_UNIX_IBM)
@@ -1671,7 +1659,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /cosurf/ flagsu
-      common /coqvec/ mxphot, nphoto, q
       common /cophot/ photof, wavefn, boundf, wrsmat
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
@@ -1691,7 +1678,7 @@ c     dependent) size of built-in types
 *  matrix dimensions
       dimension tmod(nmax,nmax), sr(nmax,nmax), si(nmax,nmax),
      :          scmat(nmax,nmax)
-      dimension lq(5), fj(2), fn(2), fpj(2), fpn(2), pk(2), q(2),
+      dimension lq(5), fj(2), fn(2), fpj(2), fpn(2), pk(2),
      :          derj(2), dern(2)
       data isw / 0 /
       one = 1.0d0
@@ -2121,25 +2108,19 @@ c
 *  variables in common block /cowave/
 *     irec          record number of last written g(a,b) matrix
 *     ifil          local unit number for g(a,b) file
-*     variables in common block /coqvec/
-*     mxphot        maximum column dimension of q matrix
-*     nphoto        actual column dimension of q matrix
-*     q             accumulated overlap matrix with ground state
-*                   only calculated if photof = .true.
-*                   this is stored with each wavefunction as a column vector
 *  ---------------------------------------------------------------------------
+      use mod_coqvec, only: nphoto, q
       implicit double precision (a-h,o-z)
       logical photof, wavefn, kwrit, ipos, boundf, wrsmat
       common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /cophot/ photof, wavefn, boundf, wrsmat
-      common /coqvec/ mxphot, nphoto, q
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
       dimension z(nmax,nmax), amat(nmax,nmax), sr(nmax,nmax),
      :          si(nmax,nmax), bmat(nmax,nmax)
       dimension isc1(20), jq(1), lq(1), sc1(1), sc2(1), sc3(1),
-     :          sc4(1), sc5(1), inq(1), q(1)
+     :          sc4(1), sc5(1), inq(1)
       data izero /0/
 c     The following three variables are used to determine the (machine
 c     dependent) size of built-in types
