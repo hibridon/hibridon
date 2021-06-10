@@ -583,14 +583,15 @@ end module mod_cosout
 !    end subroutine allocate_cosc11
 ! end module mod_cosc11
 
-! module mod_coeig
-!    implicit none
-!    real(8), dimension(:,:), allocatable :: c0, c1, c2
-!    contains
-!    subroutine allocate_coeig()
-!       allocate(c0(4,4)) ; allocate(c1(3,3)) ; allocate(c2(2,2))
-!    end subroutine allocate_coeig
-! end module mod_coeig
+module mod_coeig
+   ! module for ba3d1p basis routine
+   implicit none
+   real(8), dimension(:,:), allocatable :: c0, c1, c2
+   contains
+   subroutine allocate_coeig()
+      allocate(c0(4,4)) ; allocate(c1(3,3)) ; allocate(c2(2,2))
+   end subroutine allocate_coeig
+end module mod_coeig
 
 module mod_coeig2
    ! * module for ba3p2s basis routine

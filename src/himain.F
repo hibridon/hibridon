@@ -1,6 +1,7 @@
       program logair
       use mod_cosout
 
+      use mod_coeig, only: allocate_coeig
       use mod_coeig2, only: allocate_coeig2
 #if defined(HIB_UNIX)
       use mod_cokaux, only: allocate_cokaux
@@ -203,8 +204,6 @@
       common /cosc9/ sc9(kmax)
       common /cosc10/ sc10(kmax)
 
-*  common block for ba3d1p basis routine
-      common /coeig/  c0(4,4), c1(3,3), c2(2,2)
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       common /cosc11/ sc11(kaux3)
 #endif
@@ -220,6 +219,7 @@
 *  parameter below sets maximum size of asymmetric top basis fn expansion
       call allocate_cosout(kout)
 
+      call allocate_coeig()
       call allocate_coeig2()
 #if defined(HIB_UNIX_IBM)
       call allocate_cokaux(anaux=max(kaux,1800))
