@@ -238,12 +238,6 @@
 *              be evaluated
 *    nch:      actual size of matrix w
 *    nmax:     maximum row and column dimension of matrix w
-*  variable in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    ndummy:    dummy variable for alignment
-*    v2:        lower triangle of nonzero elements of coupling matrix stored
-*               in packed row form that is (1,1), (2,1), (2,2), (3,1), (3,2),
-*               (3,3)  ...
 *  variable in common block /coiv2/
 *   lamnum:     number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
@@ -275,11 +269,11 @@
 *    vsmul:    multiplies vector by scalar and stores result in another
 *              vector
 *  -------------------------------------------------------------------
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
       implicit double precision (a-h,o-z)
-      integer i, iflag, ilam, lamnum, nch, nlam, nlammx, nmax, nv2max
+      integer i, iflag, ilam, lamnum, nch, nlam, nlammx, nmax
       integer iv2
       common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
-      common /cov2/ nv2max, ndummy, v2(1)
       common /coiv2/ iv2(100)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /copmat/ rtmn, rtmx, iflag

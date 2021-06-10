@@ -120,11 +120,6 @@
 *    nlammx:   the maximum number of angular coupling terms
 *    lamnum:   number of nonzero v2 matrix elements for each lambda
 *              lamnum is an array of dimension nlammx
-*  variable in common block /cov2/
-*    nv2max:   maximum core memory allocated for the v2 matrix
-*    v2:       lower triangle of nonzero elements of coupling matrix
-*              stored in packed column form that is (1,1), (2,1),
-*              (3,1) ... (n,1), (2,2), (3,2) ... (n,2), etc.
 *  variable in common block /coiv2/
 *   iv2:       row+column index of v2 matrix for each nonzero element
 *  variable in common block /coconv/
@@ -136,6 +131,7 @@
 *   vlmpi:     returns angular coupling coefficient for
 *              particular choice of channel index
 * ----------------------------------------------------------------------
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
       character*80 string
@@ -148,7 +144,6 @@
       common /cosysi/ nscode, isicod, nterm, jmax, igu, isa,
      :                npar, imult, nman
       common /cosysr/ isrcod, junkr, brot, aso, o, p, q, dmom, efield
-      common /cov2/ nv2max, junkv, v2(1)
       common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /cocent/ cent(1)

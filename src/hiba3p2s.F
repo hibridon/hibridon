@@ -106,10 +106,6 @@
 *               elements describing 1D-3P coupling, and the R-inf values of
 *               7 spin-orbit matrix elements)
 *    nlammx:    the maximum number of angular coupling terms
-*  variable in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    v2:        lower triangle of nonzero angular coupling matrix elements
-*               only nonzero elements are stored
 *  variable in common block /coiv2/
 *   iv2:        matrix address of v2 matrix for each non-zero element
 *  variable in common block /coconv/
@@ -124,13 +120,13 @@
 *  xf9j:     evaluates 9j symbol
 * ------------------------------------------------------------
       use mod_coeig2, only: t12, t32
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
 #include "common/parbasl"
       common /cosysi/ nscode, isicod, nterm, nstate
       common /cosysr/ isrcod, junkr, en1d
-      common /cov2/ nv2max, junkv, v2(1)
       common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /cocent/ cent(1)

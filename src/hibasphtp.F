@@ -102,11 +102,6 @@
 *    nlammx:    the maximum number of angular coupling terms
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variables in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    v2:        lower triangle of nonzero angular coupling matrix elements
-*               stored in packed column form that is (1,1), (2,1), (3,1) ...
-*               (n,1), (2,2), (3,2) ... (n,2), etc.
 *  variable in common block /coiv2/
 *   iv2:        row+column index of v2 matrix for each non-zero element
 *  variables in common block /coconv/
@@ -131,6 +126,7 @@
 *   prmats:     computes primitive cc and cs v-lambda matrix elements
 *               between signed-k symmetric top basis fns.
 * --------------------------------------------------------------------
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -138,7 +134,6 @@
       common /cosysi/ nscode, isicod, nterm, iop, jmax
       common /coipar/ iiipar(9), iprint
       common /cosysr/ isrcod, junkr, brot
-      common /cov2/ nv2max, junkv, v2(1)
       common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /cocent/ cent(1)

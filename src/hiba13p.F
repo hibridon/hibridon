@@ -115,10 +115,6 @@
 *               potential (nlam1)
 *    nlm(4)     the total number of terms in the expansion of the v2
 *               potential (nlam2)
-*  variable in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    v2:        lower triangle of nonzero angular coupling matrix elements
-*               only nonzero elements are stored
 *  variable in common block /coiv2/
 *   iv2:        matrix address of v2 matrix for each non-zero element
 *  variable in common block /coconv/
@@ -128,6 +124,7 @@
 *   vlm13p:    returns angular coupling coefficient for particular
 *              choice of channel index
 * ------------------------------------------------------------
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -136,7 +133,6 @@
       common /cosysi/ nscode, isicod, nterm, nstate,ipol, npot
       common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4),
      :                        rl(4), cl(4), cmix
-      common /cov2/ nv2max, junkv, v2(1)
       common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /cocent/ cent(1)

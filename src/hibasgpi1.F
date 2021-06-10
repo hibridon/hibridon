@@ -149,10 +149,6 @@
 *  variables in common block /cosgpi/
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variable in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    v2:        lower triangle of nonzero angular coupling matrix elements
-*               only nonzero elements are stored
 *  variable in common block /coiv2/
 *   iv2:        matrix address of v2 matrix for each non-zero element
 *  variable in common block /coconv/
@@ -167,6 +163,7 @@
 *   vlm2pi:     computes coupling matrix elements between case a 2pi levels
 *               (in hiba2pi.f)
 * --------------------------------------------------------------------
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
       implicit double precision (a-h,o-z)
       logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -175,7 +172,6 @@
      :  nmaxsg, nparsg, igupi, nparpi, numvpi, ispar(10)
       common /cosysr/ isrcod, junkr, esg, bsg, dsg, gsr, rspar(40)
       common /coipar/ iiipar(9), iprint
-      common /cov2/ nv2max, junkv, v2(1)
       common /coiv2/ iv2(1)
       common /cotq1/ vec(3,3)
       common /coisc1/ ivec(1)

@@ -113,17 +113,13 @@
 *               (mass of electron = 1)
 *  variable in common block /conlam/
 *    nlam:      the total number of angular coupling terms
-*  variable in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    ndummy:    dummy variable for alignment
-*    v2:        lower triangle of nonzero angular coupling matrix elements
-*               only nonzero elements are stored
 *  variable in common block /coiv2/
 *   iv2:        matrix address of v2 matrix for each non-zero element
 *  subroutines called:
 *   vlm2pi:    returns angular coupling coefficient for particular
 *              choice of channel index
 * --------------------------------------------------------------------
+      use mod_cov2, only: nv2max, ndummy, v2
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -131,7 +127,6 @@
       common /coipar/ iiipar(9), iprint
       common /cosysi/ nscode, isicod, nterm, jmax, igu, isa, npar
       common /cosysr/ isrcod, idum,brot, aso, p, q
-      common /cov2/ nv2max, ndummy, v2(1)
       common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx,lamnum(1)
       common /cocent/ cent(2)

@@ -63,16 +63,26 @@ module mod_coiout
    end subroutine allocate_coiout
 end module mod_coiout
 
-! module mod_cov2
-!    implicit none
-!    real(8), dimension(:), allocatable :: v2
-!    integer, allocatable               :: nv2max, ndummy
-!    contains
-!    subroutine allocate_cov2(n)
-!       integer, intent(in) :: n
-!       allocate(v2(n)) ; allocate(nv2max) ; allocate(ndummy)
-!    end subroutine allocate_cov2
-! end module mod_cov2
+module mod_cov2
+   ! variables in this module
+   !    nv2max:    maximum core memory allocated for the v2 matrix
+   !    ndummy:    dummy variable for alignment
+   !    v2:        lower triangle of nonzero angular coupling matrix elements
+   !               stored in packed column form that is :
+   !                  (1,1), (2,1), (3,1) ... (n,1),
+   !                         (2,2), (3,2) ... (n,2), etc.
+   !               only nonzero elements are stored
+
+   implicit none
+   real(8), dimension(:), allocatable :: v2
+   integer, allocatable               :: nv2max, ndummy
+   contains
+   subroutine allocate_cov2(av2max)
+      integer, intent(in) :: av2max
+      allocate(v2(av2max)) ; allocate(nv2max) ; allocate(ndummy)
+      nv2max = av2max
+   end subroutine allocate_cov2
+end module mod_cov2
 
 ! module mod_coiv2
 !    implicit none

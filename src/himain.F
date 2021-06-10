@@ -1,7 +1,7 @@
       program logair
       use mod_cosout, only: allocate_cosout
       use mod_coiout, only: allocate_coiout
-
+      use mod_cov2, only: allocate_cov2
       use mod_coeig, only: allocate_coeig
       use mod_coeig2, only: allocate_coeig2
 #if defined(HIB_UNIX)
@@ -81,12 +81,6 @@
 * krotmx set the maximum size of the asym top e.fn expansion
 * increased factor multiplying kmax below and narray from 12 to 100 (pjd:  19-sep-2017)
       parameter (krotmx = 500 * kmax)
-*  variable in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    ndummy:    dummy variable for alignment
-*    v2:        lower triangle of nonzero angular coupling matrix elements
-*               stored in packed column form that is (1,1), (2,1), (3,1) ...
-*               (n,1), (2,2), (3,2) ... (n,2), etc.
 *  variable in common block /coiv2/
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
@@ -138,7 +132,6 @@
 *  ----------------------------------------------------------
       logical lsc1
       common /comom/  xmom(3), imom(13)
-      common /cov2/ nv2max, ndummy, v2(kv2max)
       common /coiv2/ iv2(kv2max)
       common /cocent/ cent(kmax)
       common /coeint/ eint(kmax)
@@ -211,6 +204,7 @@
 *  parameter below sets maximum size of asymmetric top basis fn expansion
       call allocate_cosout(kout)
       call allocate_coiout(kout)
+      call allocate_cov2(kv2max)
 
       call allocate_coeig()
       call allocate_coeig2()
@@ -227,7 +221,6 @@
       narray = 100
 *
       men = ken
-      nv2max = kv2max
       nlammx = klammx
 *  calculate array containing logs of factorials for use in vector
 *  coupling coefficient routines:  factlg(i)=log(fact(i-1))

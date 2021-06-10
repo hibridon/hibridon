@@ -35,6 +35,7 @@ c     ------------------------------------------------------------------
      $     nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, bastst,
      $     ihomo, nu, numin, jlpar, twomol, nchn, nmax, ntop)
       use mod_2pi1sg
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
       implicit none
 c
 c     The following arrays store the parameters of channels and levels.
@@ -65,9 +66,6 @@ c
       integer :: nlam, nlammx, lamnum(1)
       common /coered/ ered, rmu
       real(8) :: ered, rmu
-      common /cov2/ nv2max, junkv, v2
-      integer :: nv2max, junkv
-      real(8), dimension(1) :: v2
       common /coiv2/ iv2
       integer, dimension(1) :: iv2
       common /coipar/ junkip, iprint

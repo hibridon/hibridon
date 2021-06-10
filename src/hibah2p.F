@@ -110,10 +110,6 @@
 *              if this has not been set in the pot subroutine, it it
 *              here set to 5
 *    nlammx:   the maximum number of angular coupling terms
-*  variable in common block /cov2/
-*    nv2max:   maximum core memory allocated for the v2 matrix
-*    v2:       lower triangle of nonzero angular coupling matrix elements
-*              only nonzero elements are stored
 *  variable in common block /coiv2/
 *   iv2:       matrix address of v2 matrix for each non-zero element
 *  variable in common block /coconv/
@@ -123,13 +119,13 @@
 *   vlmh2p:    returns angular coupling coefficient for particular
 *              choice of channel index
 * ------------------------------------------------------------
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
 #include "common/parbasl"
       common /cosysr/ isrcod, junkr, brot,aso
       common /cosysi/ nscode, isicod, nterm, iop,jmax
-      common /cov2/ nv2max, junkv, v2(1)
       common /coiv2/ iv2(1)
       common /coipar/ iiipar(9), iprint
       common /conlam/ nlam, nlammx, lamnum(1)
