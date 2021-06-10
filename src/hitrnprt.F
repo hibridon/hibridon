@@ -32,6 +32,7 @@
 * current revision date:  24-jul-2015 by pjd
 * ------------------------------------------------------------------
       use mod_cosout
+      use mod_cotble, only: jttble
       implicit double precision (a-h,o-z)
       character*(*) filnam
       character*40  trnfil, smtfil
@@ -64,7 +65,6 @@
       common /cosc3/  etrans(1)
       common /cozmat/ jtotpa(1)
       common /coamat/ labadr(1)
-      common /cotble/ npnt, jttble(1)
       common /coconv/ econv, xmconv, ang2c
       common /codim/  nairy, mmax
       common /coselb/ ibasty

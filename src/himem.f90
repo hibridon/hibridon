@@ -610,16 +610,19 @@ end module mod_cosout
 !    end subroutine allocate_cokaux
 ! end module mod_cokaux
 
-! module mod_cotble
-!    implicit none
-!    integer, dimension(:), allocatable :: jttble
-!    integer, allocatable               :: npnt
-!    contains
-!    subroutine allocate_cotble(n)
-!       integer, intent(in) :: n
-!       allocate(jttble(n)) ; allocate(npnt)
-!    end subroutine allocate_cotble
-! end module mod_cotble
+module mod_cotble
+   ! *     npnt:     max. number of pointer
+   ! *     jttble:   array containing pointer to records in s-matrix   
+   implicit none
+   integer, dimension(:), allocatable :: jttble
+   integer, allocatable               :: npnt
+   contains
+   subroutine allocate_cotble(afact)
+      integer, intent(in) :: afact
+      allocate(jttble(afact)) ; allocate(npnt)
+      npnt = afact
+   end subroutine allocate_cotble
+end module mod_cotble
 
 
 module mod_coqvec
