@@ -1,4 +1,4 @@
-# Hibridon v4.4 beta
+# Hibridon v5.0 alpha
 
 [![Build Status](https://jenkins.ipr.univ-rennes1.fr/buildStatus/icon?job=hibridon-build)](https://jenkins.ipr.univ-rennes1.fr/job/hibridon-build/)
 
