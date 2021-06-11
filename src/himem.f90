@@ -656,15 +656,15 @@ end module mod_cofact
 !    end subroutine allocate_cosc10
 ! end module mod_cosc10
 
-! module mod_cosc11
-!    implicit none
-!    real(8), dimension(:), allocatable :: sc11
-!    contains
-!    subroutine allocate_cosc11(n)
-!       integer, intent(in) :: n
-!       allocate(sc11(n))
-!    end subroutine allocate_cosc11
-! end module mod_cosc11
+module mod_cosc11
+   implicit none
+   real(8), dimension(:), allocatable :: sc11
+   contains
+   subroutine allocate_cosc11(aaux)
+      integer, intent(in) :: aaux
+      allocate(sc11(aaux))
+   end subroutine allocate_cosc11
+end module mod_cosc11
 
 module mod_coeig
    ! module for ba3d1p basis routine

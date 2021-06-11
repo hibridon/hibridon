@@ -9,6 +9,7 @@
       use mod_coj12p, only: allocate_coj12p
       use mod_covvl, only: allocate_covvl
       use mod_cofact, only: allocate_cofact
+      use mod_cosc11, only: allocate_cosc11
       use mod_coeig, only: allocate_coeig
       use mod_coeig2, only: allocate_coeig2
 #if defined(HIB_UNIX)
@@ -174,10 +175,10 @@
       common /cosc10/ sc10(kmax)
 
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
-      common /cosc11/ sc11(kaux3)
+      call allocate_cosc11(kaux3)
 #endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-      common /cosc11/ sc11(kaux)
+      call allocate_cosc11(kaux)
 #endif
 *   total matrix and vector storage required is:
 *     7 kmax**2 + 25 kmax + kv2max + kfact -- without airy integration
