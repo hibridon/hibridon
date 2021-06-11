@@ -172,15 +172,17 @@ module mod_covvl
    end subroutine allocate_covvl
 end module mod_covvl
 
-! module mod_cofact
-!    implicit none
-!    real(8), dimension(:), allocatable :: si
-!    contains
-!    subroutine allocate_cofact(n)
-!       integer, intent(in) :: n
-!       allocate(si(n)) ;
-!    end subroutine allocate_cofact
-! end module mod_cofact
+module mod_cofact
+   !  variable in this module
+   !    si:        table of logarithms of factorials   
+   implicit none
+   real(8), dimension(:), allocatable :: si
+   contains
+   subroutine allocate_cofact(afact)
+      integer, intent(in) :: afact
+      allocate(si(afact)) ;
+   end subroutine allocate_cofact
+end module mod_cofact
 
 ! module mod_coener
 !    implicit none
