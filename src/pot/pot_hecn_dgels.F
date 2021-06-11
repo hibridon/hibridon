@@ -9,9 +9,9 @@
 *         hecn_fitmlv.dat
 *
       subroutine driver
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       common /cosysr/ xjunk(2),rshift,xfact
-      common /covvl/ vvl(12)
 #include "common/parpot"
       econv=219474.6d0
       potnam='He-CN(2Sigma) CCSDT PES'
@@ -72,13 +72,14 @@
 *    r:      interparticle distance
 *  on return:
 *  vv0        contains isotropic term (d00 term in vsum)
-*  variable in common block /covvl/
+*  variable in module mod_covvl
 *    vvl:     vector of length 6 to store r-dependence of each term
 *             in potential expansion
 *    vvl(1-12) expansion coefficients in dl0 (l=1:12) of vsum
 * uses linear least squares routines from cmlib
 * 0 degree for He-NP and 180 for He-PN
 * ----------------------------------------------------------------------
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       dimension 
      :          vsum(13),
@@ -87,7 +88,6 @@
       dimension work(1053)
 C     dimension of work is determined by setting LWORK to -1 
 C     and looking at the value of work(1)
-      common /covvl/ vvl(12)
       data half, zero, one, alph /0.5d0, 0.d0, 1.d0, 1.2d0/
       data lwork /1053/
 C     lwork is size of work array for dgels

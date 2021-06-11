@@ -4,7 +4,6 @@
       include "common/syusr"
       subroutine driver
       implicit double precision (a-h,o-z)
-      common /covvl/ vvl(1)
       include "common/parpot"
       econv=219474.6d0
       potnam='AR-AR POTENTIAL (M.H.A. NOTES)'
@@ -44,23 +43,22 @@
 *  on return:
 *  vv0 contains the isotropic term (n=0) in the potential
 *  the coefficients for each angular term in the coupling potential
-*  [ vvl(i) for i = 1, nlam ] are returned in common block /covvl/
+*  [ vvl(i) for i = 1, nlam ] are returned in module mod_covvl
 *  vvl(1) contains the anisotropic (n=2) term in the potential
 
 *  variable in common block /conlam/
 *    nlammx:    the maximum number of anisotropic terms
 *    nlam:      the total number of angular coupling terms
-*  variable in common block /covvl/
+*  variable in module mod_covvl
 *    vvl        array to store r-dependence of each angular term in the
 *               potential
 
 *  -----------------------------------------------------------------------
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       common /conlam/ nlam,nlammx
 
       include "common/parbas"
-      common /covvl/ vvl(1)
-
 
 *  Ar-Ar potential.  Taken from notes on Quantum Molecular
 *  Collision Theory, by M.H.Alexander 

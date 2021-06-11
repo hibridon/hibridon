@@ -5,9 +5,9 @@
 
 
       subroutine driver
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       common /cosysr/ xjunk(2),rshift,xfact
-      common /covvl/ vvl(13)
       common /coconv/ econv
 #include "common/parpot"
       potnam='KLOS-CHALASINSKI Ar-OH UMP4'
@@ -63,7 +63,7 @@
 *    r:      interparticle distance
 *  on return:
 *  vv0      spherically symmetric term in V0
-*  variable in common block /covvl/
+*  variable in module mod_covvl
 *    vvl:     vector of length 13 to store r-dependence of each term
 *             in potential expansion
 *    vvl(1-8) expansion coefficients in dl0 (l=1:8) of vsum
@@ -75,13 +75,13 @@
 * latest revision date:  11-mar-1999
 * ----------------------------------------------------------------------
 
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       dimension xlam1(17),xlam2(17),vsum(10),xsum(10),vdif(10),xdif(10),
      :          ddif(10),
      :          d0(100),d2(64),aa(121)
       dimension kpvt(10),qraux(10),work(55),rsd(10), costh(10)
 
-      common /covvl/ vvl(13)
 
       data half, zero, one, alph /0.5d0, 0.d0, 1.d0, 1.2d0/
 * coefficicients for d0 rotation matrices

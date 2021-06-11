@@ -24,12 +24,12 @@
       end
 * --------------------------------------------------------------------------
       subroutine driver
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       character *48 potnam
       character *2 frame
       logical csflag, ljunk, ihomo, lljunk
       common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
-      common /covvl/ vvl(9)
       potnam='ALEXANDER B(2P)H2(J=0,1) DUBERNET-HUTSON'
       print *, potnam
       print *
@@ -75,7 +75,7 @@
 *    r:      interparticle distance
 *  on return:
 *  vv0       totally symmetric potential (v000)
-*  variable in common block /covvl/
+*  variable in module mod_covvl
 *    vvl:     vector of length 5 to store r-dependence of each term
 *             in potential expansion
 *  CS calculations case 1A (csflag=.true. and ihomo=.false)
@@ -107,10 +107,10 @@
 * ----------------------------------------------------------------------
 
 
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       logical ljunk, ihomo, csflag, lljunk
       common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
-      common /covvl/ vvl(9)
       dimension vsl1(9), vsl2(9), vsr0(9), vsc1(9), vsc2(9),
      :  vsc3(9), vscl(9)
       dimension vzzl1(9), vzzl2(9), vzzr0(9), vzzc1(9), vzzc2(9),

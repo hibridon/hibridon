@@ -38,9 +38,7 @@ C     parameters be passed between the pot routine and the basis routine
       character(48) :: pot_name, pot_label
       character*(*) :: file_name
       character(255) :: file_path
-      integer :: iunit, ir, iv, nv, ifrsts, junks, nlam, nlammx, lamnum
-      real(8), dimension(1) :: vvl
-      common /covvl/ ifrsts, junks, vvl
+      integer :: iunit, ir, iv, nv, nlam, nlammx, lamnum
 C     A call to this subroutine with a string containing a space will be
 C     made at the time hibridon loads. Input file is not available at
 C     the time.
@@ -85,15 +83,15 @@ C     Spline parameters prepared here
 C     ------------------------------------------------------------------
 C     Main program for makepot
       program main
+      use mod_covvl, only: allocate_vvl, vvl
       use mod_asymln
       use mod_hcoh2
       implicit none
       common /conlam/ nlam
-      common /covvl/ vvl
-      real(8), dimension(1) :: vvl
       character(40), parameter :: data_file_name='pot_hcoh2_12_4.dat'
       real(8) :: r, vv0
       integer :: i, nv, nlam
+      allocate_vvl()
       call loapot(10, data_file_name)
  10   print *, 'R (bohr), Ctrl+D to exit:'
       read (5, *, end=99) r
@@ -112,12 +110,11 @@ c******
       end program main
 C     ------------------------------------------------------------------
       subroutine pot(vv0, r_inp)
+      use mod_covvl, only: vvl
       use mod_asymln
       use mod_hcoh2
       implicit none
       common /conlam/ nlam
-      common /covvl/ vvl
-      real(8), dimension(1) :: vvl
       double precision vv0, r_inp, r, rmax
       double precision seval
       integer iv, nlam

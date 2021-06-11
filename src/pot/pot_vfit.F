@@ -164,13 +164,13 @@ caber
       end
 
       subroutine driver
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       character *48 potnam
       character *40 filnam
       character *2 frame
       logical lpar,readpt
       common /colpar/ lpar(14), readpt
-      common /covvl/ vvl(30)
       readpt=.true.
       potnam='WERNER-FOLLMEG VFIT'
       print *, 'potential subroutine:  ',potnam
@@ -203,8 +203,8 @@ caber
 *  author: b. follmeg
 *  current revision date: 18-aug-1998 by mha
 * -------------------------------------------------------------------
+      use mod_covvl, only: vvl
       implicit double precision(a-h,o-z)
-      common /covvl/ vvl(30)
       common /cosysi/ nscode, isicod, nterm
 #include "common/parbas"
 #include "common/parvfit"

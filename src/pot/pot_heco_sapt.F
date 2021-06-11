@@ -5,9 +5,9 @@
 
 
       subroutine driver
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       common /cosysr/ xjunk(2),rshift,xfact
-      common /covvl/ vvl(10)
 #include "common/parpot"
       potnam='HeCO Moszynski et al. SAPT PES'
       print *, potnam
@@ -47,7 +47,7 @@
 *    r:      interparticle distance
 *  on return:
 *  vv0        contains isotropic term (d00 term in vsum)
-*  variable in common block /covvl/
+*  variable in module mod_covvl
 *    vvl:     vector of length 6 to store r-dependence of each term
 *             in potential expansion
 *    vvl(1-10) expansion coefficients in dl0 (l=1:11) of vsum
@@ -61,13 +61,13 @@
 *revised for Ar-OH(A^2Sigma+) 2005 J.Klos
 * ----------------------------------------------------------------------
 
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       dimension xlam1(7),xlam2(7),r0(7),
      :          vsum(11),xsum(11),
      :          d0(121),aa(121),thta(11),cthta(11)
       dimension kpvt(11),qraux(11),work(121),rsd(11),re(14)
 
-      common /covvl/ vvl(10)
       data half, zero, one, alph /0.5d0, 0.d0, 1.d0, 1.2d0/
 * for distances beyond rmax difference potential is damped
       data rmax /13d0/
