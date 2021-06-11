@@ -2,14 +2,13 @@
 *.log
 *.BAK
 *.o
-src/pot/*
 ._*
 _*
 testnew/*
-src/pot/*
 .DS*
 src/common/*
 *.exe
 bin/SYSCONFIG
+build/*
 
 
