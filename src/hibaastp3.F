@@ -130,8 +130,6 @@ c
 *    j2max:    maximum rotational angular momentum of molecule 2
 *    ipotsy2:  symmetry of potential.  set to 2 for homonuclear
 *              molecule 2, set to 1 for heteronuclear molecule 2
-*  variable in common /coj12/ 
-*    j12:       array containing the j12 quantum number of each channel  
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units
@@ -193,6 +191,7 @@ c
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_coj12, only: j12
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -202,7 +201,6 @@ c
       common /cosysr/ isrcod, junkr, arot, brot, crot, emax, b2rot
       common /coipar/ iiipar(9), iprint
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /coj12/  j12(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       common /coatpi/ narray, isiz(1)

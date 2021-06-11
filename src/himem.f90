@@ -124,12 +124,25 @@ module mod_coeint
 end module mod_coeint
 
 module mod_coj12
+   ! variables in this module
+   !    j12:   array containing vector sum of ja + j (similar
+   !           situation with molecule-molecule scattering,
+   !           see hibastpln basis routine)
+   !    j12:      array containing vector sum of ja + j (similar
+   !              here j12 is lower-case j in alexander, dagdigian, klos notes
+   !              situation with molecule-molecule scattering,
+   !              see hibastpln basis routine)
+   !    j12:       vector resultant of j1 + j2
+   !    j12:       array containing the j12 quantum number of each channel  
+   !    j12:       array containing vector sum of j1 + j2 for molecule-molecule
+   !               systems and open-shell atom - molecule systems
+   
    implicit none
    real(8), dimension(:), allocatable :: j12
    contains
-   subroutine allocate_coj12(n)
-      integer, intent(in) :: n
-      allocate(j12(n)) ;
+   subroutine allocate_coj12(amax)
+      integer, intent(in) :: amax
+      allocate(j12(amax)) ;
    end subroutine allocate_coj12
 end module mod_coj12
 

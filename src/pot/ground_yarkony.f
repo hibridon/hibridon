@@ -18,11 +18,6 @@ c  -----------------------------------------------------------------
 *  -------------------------------------------------------
 *  variable in common block /cosysi/
 *    nvib:     initial vibrational level in A state
-*  variable in common block /coj12/
-*    j12:      array containing vector sum of ja + j (similar
-*              here j12 is lower-case j in alexander, dagdigian, klos notes
-*              situation with molecule-molecule scattering,
-*              see hibastpln basis routine)
 *  variable in commmon block /coja/
 *     jja:      atomic 3P atom electronic angular momentum for each channel for 3P+2S scattering
 *  variable in common block /coel/
@@ -34,13 +29,13 @@ c  -----------------------------------------------------------------
 *     psiv_0 -- psiv_7  vibrational wavefunctions for all 3 vibrational levels of the A state
 *               values at r=rpsi given in blockdata psiv
 *               wavefunctions normalized int(psiv_n*psiv_n)=1
+      use mod_coj12, only: j12
       implicit double precision (a-h,o-z)
       logical grndtst, grndtst1, ljunk
       common /cosysi/ junk(3), nvib
       common /colpar/ ljunk(12), noprin
 *  grndtst=.true.  if noprin=.false.
       common /cojtot/ jjtot, jjlpar
-      common /coj12/  j12(9)
       common /coja/  jja(9)
       common /coel/  ll(9)
       common /corv_A/ rpsi(212)

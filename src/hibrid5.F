@@ -111,9 +111,6 @@
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
 *    nlevel   number of energetically distinct levels included in channel basi
-*  variable in common block /coj12/
-*    j12:       array containing vector sum of j1 + j2 for molecule-molecule
-*               systems and open-shell atom - molecule systems
 *  variable in common block /cosurf/
 *    flagsu:    if .true., then molecule-surface collisons
 *  variable in common block /cojlpo/
@@ -134,6 +131,7 @@
       use mod_coqvec, only: nphoto
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_coj12, only: j12
       implicit double precision (a-h,o-z)
       logical ipos, csflag, swrit, t2writ, writs, wrpart, partw,
      :        wrxsec, xsecwr, flaghf, t2test, flagsu, firstj, twomol,
@@ -142,7 +140,6 @@
 #include "common/parpot"
       common /cojsav/ jsav1, jsav2
       common /cosurf/ flagsu
-      common /coj12/ j12(1)
       common /coered/ ered, rmu
       common /cojlpo/ jlpold
       common /coener/ ener(1)
@@ -1611,14 +1608,14 @@ c
 * current revision date: 8-oct-2012 by q. ma
 *
 * ----------------------------------------------------------------------
-      use mod_cosout
+      use mod_cosout, only: nnout, jout
+      use mod_coj12, only: j12
       implicit double precision (a-h,o-z)
       logical twomol, flagsu, nucros
       logical csflag, flaghf, lpar1, lpar2, batch, ipos, lpar3
       common /cojq/   jq(1)
       common /colq/   lq(1)
       common /coinq/  inq(1)
-      common /coj12/  j12(1)
       common /coisc3/ jpack(1)
       common /coisc4/ lpack(1)
       common /coisc5/ inpack(1)
@@ -1738,10 +1735,10 @@ c
 *  current revsion date:  24-jan-2012 by p.dagdigian
 *
 * ----------------------------------------------------------------------
+      use mod_coj12, only: j12
       implicit double precision (a-h,o-z)
       complex*8 t
       logical diag, is_j12
-      common /coj12/ j12(1)
       common /coj12p/ j12pk(1)
       common /coselb/ ibasty
       dimension sreal(nmax,1), simag(nmax,1), tsq(nmax,1)
