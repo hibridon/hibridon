@@ -6,6 +6,7 @@
       use mod_cocent, only: allocate_cocent
       use mod_coeint, only: allocate_coeint
       use mod_coj12, only: allocate_coj12
+      use mod_coj12p, only: allocate_coj12p
       use mod_coeig, only: allocate_coeig
       use mod_coeig2, only: allocate_coeig2
 #if defined(HIB_UNIX)
@@ -90,9 +91,6 @@
 *    nlam:      the total number of angular coupling terms used
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variables in common block /coj12p/
-*    j12p:  arrays containing vector sum of j1 + j2 for molecule-molecule 
-*               systems and open-shell atom - molecule systems
 *  variable in common block /coener/
 *    energ:     array containing total energies (in cm-1) at which scattering
 *               calculations are to be performed
@@ -128,7 +126,6 @@
 *  ----------------------------------------------------------
       logical lsc1
       common /comom/  xmom(3), imom(13)
-      common /coj12p/ j12pk(kmax)
       common /covvl/  vvl(klammx)
       common /cofact/ si(kfact)
       common /coener/ energ(ken)
@@ -201,6 +198,7 @@
       call allocate_cocent(kmax)
       call allocate_coeint(kmax)
       call allocate_coj12(kmax)
+      call allocate_coj12p(kmax)
 
       call allocate_coeig()
       call allocate_coeig2()

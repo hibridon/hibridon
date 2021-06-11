@@ -146,15 +146,18 @@ module mod_coj12
    end subroutine allocate_coj12
 end module mod_coj12
 
-module mod_coj12pk
+module mod_coj12p
+   !  variables in this module
+   !    j12p:  arrays containing vector sum of j1 + j2 for molecule-molecule 
+   !               systems and open-shell atom - molecule systems
    implicit none
    real(8), dimension(:), allocatable :: j12pk
    contains
-   subroutine allocate_coj12pk(n)
-      integer, intent(in) :: n
-      allocate(j12pk(n)) ;
-   end subroutine allocate_coj12pk
-end module mod_coj12pk
+   subroutine allocate_coj12p(amax)
+      integer, intent(in) :: amax
+      allocate(j12pk(amax)) ;
+   end subroutine allocate_coj12p
+end module mod_coj12p
 
 ! module mod_covvl
 !    implicit none
