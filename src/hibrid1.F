@@ -95,6 +95,7 @@
 *     noprin:       if .true., then most printing is suppressed
 * ----------------------------------------------------------------------------
       use mod_coqvec, only: nphoto, q
+      use mod_cosc10, only: sc10
       implicit double precision (a-h, o-z)
       integer i, icol, iend, ierr, ipt, itwo, izero, kstep, maxstp,
      :        nch, ncol, nmax, npt, nskip
@@ -102,7 +103,6 @@
       common /cophot/ photof, wavefn, boundf, wrsmat
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
-      common /cosc10/ sc10(2)
       common /coered/ ered, rmu
       common /coipar/ ipar(9),jprint
       common /coselb/ ibasty
