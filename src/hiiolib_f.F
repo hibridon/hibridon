@@ -1213,6 +1213,7 @@ c.....open direct access file for interpolation and restart
       character*40 oldlab
       integer jtot, nchmax
       character*40 input,output,jobnam,savfil
+      integer, parameter :: bufsize = 32
 #include "common/parpot"
       common /cofile/ input,output,jobnam,savfil
       common /coener/ energ(1)
@@ -1221,8 +1222,7 @@ c.....open direct access file for interpolation and restart
       common /cozmat/ q2(1)
       common /coamat/ q3(1)
       common /colpar/ llpar(21),wrpart, wrxsec
-
-      dimension word(30),iword(30),nlev(1)
+      dimension word(bufsize),iword(bufsize),nlev(1)
       if (.not. wrpart .and. .not .wrxsec) then
         write (6, 5)
         write (9, 5)
@@ -1231,7 +1231,7 @@ c.....open direct access file for interpolation and restart
         call exit
       endif
       call drest(1)
-      call dbri(iword,32,1,1)
+      call dbri(iword,bufsize,1,1)
       j=1
       do 10 i=1,10
       write(oldlab(j:j+3),'(A4)') iword(i)
@@ -1322,7 +1322,7 @@ c.....reserve space for restart information
       word(10+ien)=energ(ien)
       iword(22+ien)=nlev(ien)
 100   word(8+ien)=energ(ien)
-      call dbwi(iword,32,1,1)
+      call dbwi(iword,bufsize,1,1)
       call dbwr(word,20,1,0)
       call dbwc(1,1)
       call dclos(1)
@@ -2151,6 +2151,7 @@ c
 c.....sequentially buffer in "l" integer words from record "irec" on file "ifi
 c.....positive irec indicates start at beginning
 c.....zero or negative record means continue at present position
+c     ii : input buffer containing l integers
 c
       implicit double precision (a-h,o-z)
       common/clseg/ lseg,intrel,lchar
