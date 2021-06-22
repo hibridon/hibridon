@@ -405,5 +405,6 @@ program comp_tests
             endif
         enddo
     enddo
+    if(allocated(xs)) then ; deallocate( xs ) ; endif
     return
 end program comp_tests
