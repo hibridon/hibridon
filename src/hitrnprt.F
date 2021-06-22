@@ -33,6 +33,7 @@
 * ------------------------------------------------------------------
       use mod_cosout
       use mod_cotble, only: jttble
+      use mod_coisc10, only: inlist => isc10 ! inlist(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_cosc2, only: prefac => sc2 ! prefac(1)
       use mod_cosc3, only: etrans => sc3 ! etrans(1)
@@ -58,7 +59,6 @@
       common /coisc6/ ipack(1)
       common /coisc8/ jlist(1)
       common /coisc9/ jslist(1)
-      common /coisc10/ inlist(1)
       common /cojq/   jq(1)
       common /colq/   lq(1)
       common /coinq/  inq(1)
@@ -289,6 +289,7 @@
 *
 * current revision date:  15-jun-2015 by pjd
 *------------------------------------------------------------------------
+      use mod_coisc10, only: inlist => isc10 ! inlist(1)
       implicit double precision (a-h,o-z)
       complex*8 t, tp
       logical diag, diagj, diagin, diagp, diagjp, diagnp,
@@ -302,7 +303,6 @@
       common /coipar/ ipar(9),iprnt
 * common blocks for levels for which xs's to be computed
       common /coisc9/ jslist(1)
-      common /coisc10/ inlist(1)
       common /cojq/ jq(1)
       common /colq/ lq(1)
       common /coinq/ inq(1)
@@ -614,6 +614,7 @@
 * current revision date:  23-jun-2015 by pjd
 *------------------------------------------------------------------------
       use mod_coj12, only: j12
+      use mod_coisc10, only: inlist => isc10 ! inlist(1)
       implicit double precision (a-h,o-z)
       complex*8 t, tp
       logical diag, diagj, diagin, diagp, diagjp, diagnp,
@@ -628,7 +629,6 @@
       common /coipar/ ipar(9),iprnt
 * common blocks for levels for which xs's to be computed
       common /coisc9/ jslist(1)
-      common /coisc10/ inlist(1)
       common /cojq/ jq(1)
       common /colq/ lq(1)
       common /coinq/ inq(1)

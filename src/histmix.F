@@ -19,6 +19,9 @@
 *
 *  current revision:  21-jun-2013 by p. dagdigian
 * -------------------------------------------------------------------------
+      use mod_coisc10, only: ipack => isc10 ! ipack(1)
+      use mod_coisc11, only: jpack => isc11 ! jpack(1)
+      use mod_coisc12, only: lpack => isc12 ! lpack(1)
       use mod_cosc1, only: elev1 => sc1 ! elev1(1)
       use mod_cosc2, only: elev2 => sc2 ! elev2(1)
       use mod_cosc3, only: elevt => sc3 ! elevt(1)
@@ -41,9 +44,6 @@
       common /coisc7/ nlevt(1)
       common /coisc8/ jlevt(1)
       common /coisc9/ inlevt(1)
-      common /coisc10/ ipack(1)
-      common /coisc11/ jpack(1)
-      common /coisc12/ lpack(1)
       common /coconv/ econv, xmconv, ang2
       common /codim/ nairy, mmax
       dimension a(8)

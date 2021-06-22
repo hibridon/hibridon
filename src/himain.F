@@ -9,6 +9,10 @@
       use mod_coj12p, only: allocate_coj12p
       use mod_covvl, only: allocate_covvl
       use mod_cofact, only: allocate_cofact
+
+      use mod_coisc10, only: allocate_coisc10
+      use mod_coisc11, only: allocate_coisc11
+      use mod_coisc12, only: allocate_coisc12
       use mod_colsc1, only: allocate_colsc1
       use mod_cosc1, only: allocate_cosc1, sc1
       use mod_cosc2, only: allocate_cosc2, sc2
@@ -169,9 +173,9 @@
       common /coisc7/ isc7(kmax)
       common /coisc8/ isc8(kmax)
       common /coisc9/ isc9(kmax)
-      common /coisc10/ isc10(kmax)
-      common /coisc11/ isc11(kmax)
-      common /coisc12/ isc12(kmax)
+      call allocate_coisc10(kmax)
+      call allocate_coisc11(kmax)
+      call allocate_coisc12(kmax)
       call allocate_colsc1(kmax)
       call allocate_cosc1(kmax)
       call allocate_cosc2(kmax)

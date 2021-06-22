@@ -516,35 +516,35 @@ end module mod_cofact
 !    end subroutine allocate_coisc9
 ! end module mod_coisc9
 
-! module mod_coisc10
-!    implicit none
-!    integer, dimension(:), allocatable :: isc10
-!    contains
-!    subroutine allocate_coisc10(n)
-!       integer, intent(in) :: n
-!       allocate(isc10(n))
-!    end subroutine allocate_coisc10
-! end module mod_coisc10
+module mod_coisc10
+   implicit none
+   integer, dimension(:), allocatable :: isc10
+   contains
+   subroutine allocate_coisc10(n)
+      integer, intent(in) :: n
+      allocate(isc10(n))
+   end subroutine allocate_coisc10
+end module mod_coisc10
 
-! module mod_coisc11
-!    implicit none
-!    integer, dimension(:), allocatable :: isc11
-!    contains
-!    subroutine allocate_coisc11(n)
-!       integer, intent(in) :: n
-!       allocate(isc11(n))
-!    end subroutine allocate_coisc11
-! end module mod_coisc11
+module mod_coisc11
+   implicit none
+   integer, dimension(:), allocatable :: isc11
+   contains
+   subroutine allocate_coisc11(n)
+      integer, intent(in) :: n
+      allocate(isc11(n))
+   end subroutine allocate_coisc11
+end module mod_coisc11
 
-! module mod_coisc12
-!    implicit none
-!    integer, dimension(:), allocatable :: isc12
-!    contains
-!    subroutine allocate_coisc12(n)
-!       integer, intent(in) :: n
-!       allocate(isc12(n))
-!    end subroutine allocate_coisc12
-! end module mod_coisc12
+module mod_coisc12
+   implicit none
+   integer, dimension(:), allocatable :: isc12
+   contains
+   subroutine allocate_coisc12(n)
+      integer, intent(in) :: n
+      allocate(isc12(n))
+   end subroutine allocate_coisc12
+end module mod_coisc12
 
 module mod_colsc1
    implicit none

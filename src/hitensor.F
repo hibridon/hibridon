@@ -87,6 +87,7 @@
 *---------------------------------------------------------------*
       use mod_cosout
       use mod_cotble, only: npnt, jttble
+      use mod_coisc10, only: inlist => isc10 ! inlist(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_cosc2, only: prefac => sc2 ! prefac(1)
       use tensor
@@ -114,7 +115,6 @@
       common /coisc8/ jlist(1)
 * added two common blocks - levels for which xs's to be computed (pjd)
       common /coisc9/ jslist(1)
-      common /coisc10/ inlist(1)
 
       common /cojq/ jq(1)
       common /colq/ lq(1)
@@ -968,6 +968,7 @@ c end of added/modified code (pjd)
 *
 *------------------------------------------------------------------------
       use tensor
+      use mod_coisc10, only: inlist => isc10 ! inlist(1)
       implicit double precision (a-h,o-z)
       complex*8 t, tp
       logical diag, diagj, diagin, lpar1, lpar2, batch, ipos,
@@ -993,7 +994,6 @@ c end of added/modified code (pjd)
       common /coinq/ inq(1)
 * common blocks for levels for which xs's to be computed
       common /coisc9/ jslist(1)
-      common /coisc10/ inlist(1)
 *
       dimension jpack(1),ipack(1),lpack(1)
       dimension sreal(1), simag(1)
@@ -1418,6 +1418,7 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
 *
 *------------------------------------------------------------------------
       use tensor
+      use mod_coisc10, only: inlist => isc10 ! inlist(1)
       implicit double precision (a-h,o-z)
       complex*8 t, tp, ai, cphase
       logical diag, diagj, diagin, lpar1, lpar2, batch, ipos,
@@ -1444,7 +1445,6 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
       common /coinq/ inq(1)
 * added two common blocks - levels for which xs's to be computed (pjd)
       common /coisc9/ jslist(1)
-      common /coisc10/ inlist(1)
 
       dimension jpack(1),ipack(1),lpack(1)
       dimension sreal(1), simag(1)
@@ -1867,6 +1867,7 @@ c    1         jtot,jtotp,j1,l1,j2,l2,l1p,icolp,irowp
 * current revision date: 5-mar-2010 by pj dagdigian
 *------------------------------------------------------------------------
       use tensor
+      use mod_coisc10, only: inlist => isc10 ! inlist(1)
       implicit double precision (a-h,o-z)
       complex*8 t, tp
       logical diag, diagj, diagin, lpar1, lpar2, batch, ipos,
@@ -1893,7 +1894,6 @@ c    1         jtot,jtotp,j1,l1,j2,l2,l1p,icolp,irowp
       common /coinq/ inq(1)
 * common blocks for levels for which xs's to be computed
       common /coisc9/ jslist(1)
-      common /coisc10/ inlist(1)
 *
       dimension jpack(1),ipack(1),lpack(1)
       dimension sreal(1), simag(1)
@@ -2305,6 +2305,7 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
 *------------------------------------------------------------------------
       use mod_codim, only: mmax
       use mod_cov2, only: nv2max, ndummy, y => v2
+      use mod_coisc10, only: inlist => isc10 ! inlist(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
       implicit double precision (a-h,o-z)
 * size of q for j <= 5 and 0.5 deg angle increment
@@ -2327,7 +2328,6 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
       common /coisc2 / jout1(1)
 * common blocks for levels for which xs's to be computed
       common /coisc9/ jslist(1)
-      common /coisc10/ inlist(1)
       common /cojhld/ jlev(1)
       common /coisc1/ inlev(1)
       common /coz/ sreal(1)
@@ -2755,6 +2755,7 @@ c=============
 *------------------------------------------------------------------------
       use mod_codim, only: mmax
       use mod_cov2, only: nv2max, ndummy, y => v2
+      use mod_coisc10, only: inlist => isc10 ! inlist(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
       implicit double precision (a-h,o-z)
 * size of q for j <= 5 and 0.5 deg angle increment
@@ -2777,7 +2778,6 @@ c=============
       common /coisc2 / jout1(1)
 * common blocks for levels for which xs's to be computed
       common /coisc9/ jslist(1)
-      common /coisc10/ inlist(1)
       common /cojhld/ jlev(1)
       common /coisc1/ inlev(1)
       common /coz/ sreal(1)
