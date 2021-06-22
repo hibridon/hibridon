@@ -9,6 +9,7 @@
       use mod_coj12p, only: allocate_coj12p
       use mod_covvl, only: allocate_covvl
       use mod_cofact, only: allocate_cofact
+      use mod_colsc1, only: allocate_colsc1
       use mod_cosc1, only: allocate_cosc1, sc1
       use mod_cosc2, only: allocate_cosc2, sc2
       use mod_cosc3, only: allocate_cosc3, sc3
@@ -132,7 +133,6 @@
 *  variable in common block /coatp2/
 *     chold:    ditto 
 *  ----------------------------------------------------------
-      logical lsc1
       common /comom/  xmom(3), imom(13)
       common /coener/ energ(ken)
       common /clseg/  lseg,intrel,lchar
@@ -172,7 +172,7 @@
       common /coisc10/ isc10(kmax)
       common /coisc11/ isc11(kmax)
       common /coisc12/ isc12(kmax)
-      common /colsc1/ lsc1(kmax)
+      call allocate_colsc1(kmax)
       call allocate_cosc1(kmax)
       call allocate_cosc2(kmax)
       call allocate_cosc3(kmax)
