@@ -1347,6 +1347,7 @@ c
       use mod_coqvec, only: nphoto
       use mod_cocent, only: sc2 => cent
       use mod_coeint, only: eint
+      use mod_coisc5, only: nblist  => isc5   ! nblist(60)
       use mod_cosc1, only: pk  => sc1   ! pk(100)
       use mod_cosc2, only: fj  => sc2   ! fj(10)
       use mod_cosc3, only: fjp => sc3   ! fjp(10)
@@ -1382,7 +1383,6 @@ c
       common /coisc1/ ipack(10)
       common /coisc2/ nlist(50)
       common /coisc3/ nalist(60)
-      common /coisc5/ nblist(60)
 * common for y1, y2, y4
       common /coered/ ered, rmu
       common /codim/  nairy, mmax

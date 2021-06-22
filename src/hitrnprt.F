@@ -33,6 +33,10 @@
 * ------------------------------------------------------------------
       use mod_cosout
       use mod_cotble, only: jttble
+      use mod_coisc5, only: lpack => isc5 ! lpack(1)
+      use mod_coisc6, only: ipack => isc6 ! ipack(1)
+      use mod_coisc8, only: jlist => isc8 ! jlist(1)
+      use mod_coisc9, only: jslist => isc9 ! jslist(1)
       use mod_coisc10, only: inlist => isc10 ! inlist(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_cosc2, only: prefac => sc2 ! prefac(1)
@@ -55,10 +59,6 @@
       common /coisc2/ inlev(1)
       common /coisc3/ jlev(1)
       common /coisc4/ jpack(1)
-      common /coisc5/ lpack(1)
-      common /coisc6/ ipack(1)
-      common /coisc8/ jlist(1)
-      common /coisc9/ jslist(1)
       common /cojq/   jq(1)
       common /colq/   lq(1)
       common /coinq/  inq(1)
@@ -289,6 +289,7 @@
 *
 * current revision date:  15-jun-2015 by pjd
 *------------------------------------------------------------------------
+      use mod_coisc9, only: jslist => isc9 ! jslist(1)
       use mod_coisc10, only: inlist => isc10 ! inlist(1)
       implicit double precision (a-h,o-z)
       complex*8 t, tp
@@ -302,7 +303,6 @@
      :     nwaves, jfsts, jlparf, jlpars, njmax, jpmax
       common /coipar/ ipar(9),iprnt
 * common blocks for levels for which xs's to be computed
-      common /coisc9/ jslist(1)
       common /cojq/ jq(1)
       common /colq/ lq(1)
       common /coinq/ inq(1)
@@ -614,6 +614,7 @@
 * current revision date:  23-jun-2015 by pjd
 *------------------------------------------------------------------------
       use mod_coj12, only: j12
+      use mod_coisc9, only: jslist => isc9 ! jslist(1)
       use mod_coisc10, only: inlist => isc10 ! inlist(1)
       implicit double precision (a-h,o-z)
       complex*8 t, tp
@@ -628,7 +629,6 @@
      :     nwaves, jfsts, jlparf, jlpars, njmax, jpmax
       common /coipar/ ipar(9),iprnt
 * common blocks for levels for which xs's to be computed
-      common /coisc9/ jslist(1)
       common /cojq/ jq(1)
       common /colq/ lq(1)
       common /coinq/ inq(1)

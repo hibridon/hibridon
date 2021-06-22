@@ -17,6 +17,11 @@
 *  revision:  18-aug-2015 by p. dagdigian (skip in sums if xf6j's equal zero)
 * -------------------------------------------------------------------------
       use constants
+      use mod_coisc5, only: jout1 => isc5 ! jout1(1)
+      use mod_coisc6, only: jout2 => isc6 ! jout2(1)
+      use mod_coisc7, only: nlevt => isc7 ! nlevt(1)
+      use mod_coisc8, only: jlevt => isc8 ! jlevt(1)
+      use mod_coisc9, only: inlevt => isc9 ! inlevt(1)
       use mod_coisc10, only: ipack => isc10 ! ipack(1)
       use mod_coisc11, only: jpack => isc11 ! jpack(1)
       use mod_coisc12, only: lpack => isc12 ! lpack(1)
@@ -40,11 +45,6 @@
       common /coisc2/ jlev2(1)
       common /coisc3/ inlev1(1)
       common /coisc4/ inlev2(1)
-      common /coisc5/ jout1(1)
-      common /coisc6/ jout2(1)
-      common /coisc7/ nlevt(1)
-      common /coisc8/ jlevt(1)
-      common /coisc9/ inlevt(1)
       common /codim/ nairy, mmax
       dimension a(12)
 *

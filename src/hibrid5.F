@@ -599,10 +599,10 @@
 *       the previous partial cross sections on record irec+3 (if available)
 *       the second last partial cross sections on record irec+4 (if available)
 * ----------------------------------------------------------------------
+      use mod_coisc8, only: list => isc8 ! list(20)
       implicit double precision (a-h,o-z)
       logical nowrit,nucros
       dimension jlev(20)
-      common /coisc8/ list(20)
       dimension q(nmax,n),q1(nmax,n),q2(nmax,n),q3(nmax,n)
 *
       jl3=jl3a
@@ -1391,6 +1391,9 @@ c
 * ------------------------------------------------------------------
       use mod_cosout
       use constants
+      use mod_coisc5, only: inpack => isc5 ! inpack(1)
+      use mod_coisc6, only: isc1 => isc6 ! isc1(1)
+      use mod_coisc7, only: isc2 => isc7 ! isc2(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_cosc2, only: inlev => sc2 ! inlev(1)
       use mod_cosc3, only: jlev => isc3 ! jlev(1)
@@ -1418,9 +1421,6 @@ c
       common /coisc2/ nj,jlist(1)
       common /coisc3/ jpack(1)
       common /coisc4/ lpack(1)
-      common /coisc5/ inpack(1)
-      common /coisc6/ isc1(1)
-      common /coisc7/ isc2(1)
       common /coered/ ered, rmu
       common /codim/  nairy, mmax
       common /coselb/ ibasty
@@ -1611,6 +1611,9 @@ c
       use mod_cosout, only: nnout, jout
       use mod_coj12, only: j12
       use mod_coj12p, only: j12pk
+      use mod_coisc5, only: inpack => isc5 ! inpack(1)
+      use mod_coisc6, only: isc1 => isc6 ! isc1(1)
+      use mod_coisc7, only: isc2 => isc7 ! isc2(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_cosc2, only: inlev => sc2 ! inlev(1)
       use mod_cosc3, only: jlev => sc3 ! jlev(1)
@@ -1622,9 +1625,6 @@ c
       common /coinq/  inq(1)
       common /coisc3/ jpack(1)
       common /coisc4/ lpack(1)
-      common /coisc5/ inpack(1)
-      common /coisc6/ isc1(1)
-      common /coisc7/ isc2(1)
       common /coisc2/ nj,jlist(1)
       common /colpar/ lpar1(3), batch, lpar2(5), ipos, lpar3(17)
       common /coselb/ ibasty
