@@ -1105,6 +1105,9 @@ cABER
       use mod_cosout, only: nnout, jout
       use mod_coiout, only: niout, indout
       use constants
+      use mod_cosc1, only: elev => sc1 ! elev(1)
+      use mod_cosc2, only: csum => sc2 ! csum(1)
+      use mod_cosc3, only: tsum => sc3 ! tsum(1)
       implicit double precision (a-h,o-z)
       character*(*) fname
       character*20 cdate
@@ -1115,9 +1118,6 @@ cABER
       common /cojhld/ jlev(1)
       common /coisc1/ inlev(1)
       common /coisc2/ nj,jlist(1)
-      common /cosc1/ elev(1)
-      common /cosc2/ csum(1)
-      common /cosc3/ tsum(1)
       common /coselb/ ibasty
       dimension  a(4),scmat(nmax,1)
 
@@ -1391,6 +1391,9 @@ c
 * ------------------------------------------------------------------
       use mod_cosout
       use constants
+      use mod_cosc1, only: elev => sc1 ! elev(1)
+      use mod_cosc2, only: inlev => sc2 ! inlev(1)
+      use mod_cosc3, only: jlev => isc3 ! jlev(1)
       implicit double precision (a-h,o-z)
       character*(*) filnam
       character*40  icsfil, smtfil, xname
@@ -1418,9 +1421,6 @@ c
       common /coisc5/ inpack(1)
       common /coisc6/ isc1(1)
       common /coisc7/ isc2(1)
-      common /cosc1/  elev(1)
-      common /cosc2/  inlev(1)
-      common /cosc3/  jlev(1)
       common /coered/ ered, rmu
       common /codim/  nairy, mmax
       common /coselb/ ibasty
@@ -1611,6 +1611,9 @@ c
       use mod_cosout, only: nnout, jout
       use mod_coj12, only: j12
       use mod_coj12p, only: j12pk
+      use mod_cosc1, only: elev => sc1 ! elev(1)
+      use mod_cosc2, only: inlev => sc2 ! inlev(1)
+      use mod_cosc3, only: jlev => sc3 ! jlev(1)
       implicit double precision (a-h,o-z)
       logical twomol, flagsu, nucros
       logical csflag, flaghf, lpar1, lpar2, batch, ipos, lpar3
@@ -1622,9 +1625,6 @@ c
       common /coisc5/ inpack(1)
       common /coisc6/ isc1(1)
       common /coisc7/ isc2(1)
-      common /cosc1/  elev(1)
-      common /cosc2/  inlev(1)
-      common /cosc3/  jlev(1)
       common /coisc2/ nj,jlist(1)
       common /colpar/ lpar1(3), batch, lpar2(5), ipos, lpar3(17)
       common /coselb/ ibasty

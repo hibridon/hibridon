@@ -29,6 +29,8 @@
 *     current revision:  8-jan-2018 by p. dagdigian
 *     -------------------------------------------------------------
       use mod_coj12, only: j12q => j12
+      use mod_cosc1, only: elev => sc1 ! elev(1)
+      use mod_cosc3, only: elevh => sc3 ! elevh(1)
       implicit double precision (a-h,o-z)
       complex(8) t, tf
       character*(*) flname
@@ -41,11 +43,9 @@
       common /coisc1/ jlev(1)
       common /coisc3/ inlev(1)
       common /coisc5/ jout(1)
-      common /cosc1/ elev(1)
       common /coisc7/ jlevh(1)
       common /coisc8/ iflevh(1)
       common /coisc9/ inlevh(1)
-      common /cosc3/ elevh(1)
       common /coisc10/ ipack(1)
       common /coisc11/ jpack(1)
       common /coisc12/ lpack(1)

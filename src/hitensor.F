@@ -87,7 +87,8 @@
 *---------------------------------------------------------------*
       use mod_cosout
       use mod_cotble, only: npnt, jttble
-
+      use mod_cosc1, only: elev => sc1 ! elev(1)
+      use mod_cosc2, only: prefac => sc2 ! prefac(1)
       use tensor
       implicit double precision (a-h,o-z)
       character*(*) filnam
@@ -118,8 +119,6 @@
       common /cojq/ jq(1)
       common /colq/ lq(1)
       common /coinq/ inq(1)
-      common /cosc1/  elev(1)
-      common /cosc2/  prefac(1)
       common /cozmat/ jtotpa(1)
       common /coamat/ labadr(1)
       common /colnlb/ lenlab(1000)
@@ -670,6 +669,7 @@ c end of added/modified code (pjd)
 *
 * ------------------------------------------------------------------
       use tensor
+      use mod_cosc1, only: elev => sc1 ! elev(1)
       implicit double precision(a-h,o-z)
       character*(*) filnam
       character*40  tcbfil, mcsfil
@@ -685,7 +685,6 @@ c end of added/modified code (pjd)
       common /coinhl/ jlev(1)
       common /coisc2/ inlev(1)
       common /coisc3/ jlist(1)
-      common /cosc1/  elev(1)
       common /coz/    xm1lab(1)
       common /cow/    xm2lab(1)
       common /cozmat/ sigma(1)
@@ -801,6 +800,7 @@ c end of added/modified code (pjd)
 * ------------------
 * current revision date: 9-oct-1997 by pjd
 * ------------------
+      use mod_cosc2, only: sc1 => sc2 ! sc1(1)
       implicit double precision(a-h,o-z)
       logical lpar, batch, flaghf, lpar2
       character*20  cdate
@@ -813,7 +813,6 @@ c end of added/modified code (pjd)
       common /coisc5/ isc2(1)
       common /coisc6/ isc3(1)
       common /coisc7/ isc4(1)
-      common /cosc2/  sc1(1)
       dimension xm1lab(1),xm2lab(1),sigmak(mmax,1),sigmam(mmax,1)
       data tol /1.0d-10/
       data zero /0.0d0/
@@ -2306,6 +2305,7 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
 *------------------------------------------------------------------------
       use mod_codim, only: mmax
       use mod_cov2, only: nv2max, ndummy, y => v2
+      use mod_cosc1, only: elev => sc1 ! elev(1)
       implicit double precision (a-h,o-z)
 * size of q for j <= 5 and 0.5 deg angle increment
       complex*16 q(43681)
@@ -2324,7 +2324,6 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
       common /cojq/ jq(1)
       common /colq/ lq(1)
       common /coinq/ inq(1)
-      common /cosc1/ elev(1)
       common /coisc2 / jout1(1)
 * common blocks for levels for which xs's to be computed
       common /coisc9/ jslist(1)
@@ -2756,6 +2755,7 @@ c=============
 *------------------------------------------------------------------------
       use mod_codim, only: mmax
       use mod_cov2, only: nv2max, ndummy, y => v2
+      use mod_cosc1, only: elev => sc1 ! elev(1)
       implicit double precision (a-h,o-z)
 * size of q for j <= 5 and 0.5 deg angle increment
       complex*16 q(43681)
@@ -2774,7 +2774,6 @@ c=============
       common /cojq/ jq(1)
       common /colq/ lq(1)
       common /coinq/ inq(1)
-      common /cosc1/ elev(1)
       common /coisc2 / jout1(1)
 * common blocks for levels for which xs's to be computed
       common /coisc9/ jslist(1)

@@ -927,6 +927,7 @@ c
 *  ------------------------------------------------------------------
       use mod_cosout, only: nnout, jout
       use mod_coiout, only: niout, indout
+      use mod_cosc1, only: elev => sc1 ! elev(5)
       implicit double precision (a-h,o-z)
       character*(*) fname
       character*20 cdate
@@ -951,7 +952,6 @@ c
       common /coisc1/ inlev(5)
       common /coisc2/ jpoint(5)
       common /colq/ ipoint(5)
-      common /cosc1/ elev(5)
       common /coselb/ ibasty
       dimension  a(3)
       data econv / 219474.6d0/
@@ -1268,6 +1268,8 @@ caber
 * -------------------------------------------------
       subroutine xscpr1 (zmat, nlevop, isize, iaver,
      :                   ipos, iprint, flaghf)
+      use mod_cosc1, only: elev => sc1 ! elev(4)
+
       implicit double precision (a-h,o-z)
 *      current revision date: 16-dec-2007
 *  subroutine to print out specified columns of cross section matrix
@@ -1281,7 +1283,6 @@ caber
       common /cojhld/ jlev(4)
       common /coisc1/ inlev(4)
       common /colq/ ipoint(4)
-      common /cosc1/ elev(4)
       common /coselb/ ibasty
 *     first transpose the cross section matrix so that initial
 *     states are columns and final states are rows
@@ -1433,6 +1434,7 @@ caber
       use mod_cosout, only: nnout, jout
       use mod_coiout, only: niout, indout
       use constants
+      use mod_cosc1, only: elev => sc1 ! elev(1)
       implicit double precision (a-h,o-z)
       character*(*) fname
       character*20 cdate
@@ -1457,7 +1459,6 @@ cmha
       common /coisc2/ jpoint(5)
 cmha
       common /colq/ ipoint(1)
-      common /cosc1/ elev(1)
       common /coener/ energ(1)
       common /coselb/ ibasty
       dimension  a(4)
@@ -1847,6 +1848,7 @@ cmha
 * ------------------------------------------------------
       subroutine xscpr2 (zmat, xthresh, nlevop, isize, iaver,
      :                   iprint,isa)
+      use mod_cosc1, only: elev => sc1 ! elev(1)
       implicit double precision (a-h,o-z)
 
 *  current revision date:  10-oct-2001 by ab
@@ -1863,7 +1865,6 @@ cmha
       common /cojhld/ jlev(1)
       common /coisc1/ inlev(1)
       common /colq/ ipoint(1)
-      common /cosc1/ elev(1)
 *  first transpose cross section matrix so that initial states are
 *  columns and final states are rows
       call transp (zmat, nlevop, nlevop)

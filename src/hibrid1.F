@@ -857,6 +857,11 @@ c#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
 *   current revision date 19-mar-1996
 *  ------------------------------------------------------------
       use mod_codim, only: mmax
+      use mod_cosc1, only: elev => sc1 ! elev(1)
+      use mod_cosc2, only: jpack1 => sc2 ! jpack1(1)
+      use mod_cosc3, only: jpack2 => sc3 ! jpack2(1)
+      use mod_cosc4, only: lpack1 => sc4 ! lpack1(1)
+      use mod_cosc5, only: lpack2 => sc5 ! lpack2(1)
       implicit double precision (a-h,o-z)
       character*(*) fname1,fname2
       character*20 cdate1,cdate2
@@ -877,11 +882,6 @@ c#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
       common /coehld/ jout2(1)
       common /coinhl/ jlev(1)
       common /coisc1/ inlev(1)
-      common /cosc1/ elev(1)
-      common /cosc2/ jpack1(1)
-      common /cosc3/ jpack2(1)
-      common /cosc4/ lpack1(1)
-      common /cosc5/ lpack2(1)
       common /coisc2/ ipack1(1)
       common /coisc3/ ipack2(1)
 c

@@ -33,6 +33,9 @@
 * ------------------------------------------------------------------
       use mod_cosout
       use mod_cotble, only: jttble
+      use mod_cosc1, only: elev => sc1 ! elev(1)
+      use mod_cosc2, only: prefac => sc2 ! prefac(1)
+      use mod_cosc3, only: etrans => sc3 ! etrans(1)
       implicit double precision (a-h,o-z)
       character*(*) filnam
       character*40  trnfil, smtfil
@@ -59,9 +62,6 @@
       common /cojq/   jq(1)
       common /colq/   lq(1)
       common /coinq/  inq(1)
-      common /cosc1/  elev(1)
-      common /cosc2/  prefac(1)
-      common /cosc3/  etrans(1)
       common /cozmat/ jtotpa(1)
       common /coamat/ labadr(1)
       common /coconv/ econv, xmconv, ang2c
