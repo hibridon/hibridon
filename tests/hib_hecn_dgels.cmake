@@ -10,12 +10,13 @@ target_include_directories(hib_hecn_dgels PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src
 target_include_directories(hib_hecn_dgels PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
 target_compile_options(hib_hecn_dgels PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
 
-
 add_test(NAME hib_hecn_dgels_test_setup
-    COMMAND bash -c "mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_hecn_dgels \
+    COMMAND bash -c "mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_hecn_dgels/potdata \
                     &&  cp ${CMAKE_CURRENT_SOURCE_DIR}/tests/hecnx_hyp.com\
                         ${CMAKE_CURRENT_SOURCE_DIR}/tests/Hecnx.inp \
-                        ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_hecn_dgels"
+                        ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_hecn_dgels \
+                    && cp ${CMAKE_CURRENT_SOURCE_DIR}/tests/hecn_fitmlv.dat  \
+                    ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_hecn_dgels/potdata"
 )
 
 add_test(NAME hib_hecn_dgels_build
@@ -27,13 +28,22 @@ add_test(NAME hib_hecn_dgels_test_run
 )
 
 # Check that outputs from test runs are the same as the ref ones
+# Hecn1.hfx
+# Hecn1.ics
+# Hecn1.pcs
+# Hecn1.smt
+# Hecn1.xsc
+# Hecn.sav
+# hecnx_hyp.com
+# Hecnx.inp
+# Outpt
 add_test(NAME hib_hecn_dgels_test_check
-    COMMAND bash -c "false"  # todo: not implemented yet (waiting for exe to work to see what files this test produces)
+    COMMAND bash -c "./check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/tests/Hecn1.ics ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_hecn_dgels/Hecn1.ics"
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
 )
 
 add_test(NAME hib_hecn_dgels_test_cleanup
-    COMMAND rm -R ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_hecn_dgels;
+    COMMAND ls -R ${CMAKE_CURRENT_BINARY_DIR}/tests/hib_hecn_dgels;
 )
 
 set_tests_properties(hib_hecn_dgels_test_setup PROPERTIES FIXTURES_SETUP hib_hecn_dgels_resources)
