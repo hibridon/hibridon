@@ -17,7 +17,7 @@
       ! use mod_cosc6, only: allocate_cosc6
       ! use mod_cosc7, only: allocate_cosc7
       ! use mod_cosc8, only: allocate_cosc8
-      use mod_cosc9, only: allocate_cosc9
+      use mod_cosc9, only: allocate_cosc9, sc9
       use mod_cosc10, only: allocate_cosc10
       use mod_cosc11, only: allocate_cosc11
       use mod_coeig, only: allocate_coeig
