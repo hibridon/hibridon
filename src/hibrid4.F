@@ -33,6 +33,8 @@
       use mod_coj12, only: j12
       use mod_coj12p, only: j12pk
       use constants
+      use mod_cojq, only: jq ! jq(1)
+      use mod_colq, only: lq ! lq(1)
       use mod_coinq, only: inq ! inq(1)
       use mod_coinhl, only: jlev => inhold ! jlev(1)
       use mod_coisc1, only: inlev => isc1 ! inlev(1)
@@ -50,8 +52,6 @@
 #include "common/parpot"
       common /coz/ sreal(1)
       common /cozmat/ simag(1)
-      common /cojq/ jq(1)
-      common /colq/ lq(1)
       common /codim/ nairy, nmax
       common /coselb/ ibasty
 
@@ -1042,6 +1042,8 @@ c     current revision: 20-apr-2012 by q. ma
 c
 * -------------------------------------------------------
       use mod_coeint, only: eint
+      use mod_cojq, only: jq ! jq(1)
+      use mod_colq, only: lq ! lq(1)
       use mod_coinq, only: inq ! inq(1)
       use mod_coisc1, only: isc1 ! isc1(25)
       use mod_cosc1, only: sc1 ! sc1(10)
@@ -1065,8 +1067,6 @@ c
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr, nucros, photof, wavefl
       common /coered/ ered, rmu
-      common /cojq/   jq(1)
-      common /colq/   lq(1)
       common /coamat/ amat(25)
       common /cobmat/ bmat(25)
       common /cow/ w(25)
@@ -1347,6 +1347,8 @@ c
       use mod_coqvec, only: nphoto
       use mod_cocent, only: sc2 => cent
       use mod_coeint, only: eint
+      use mod_cojq, only: jq ! jq(60)
+      use mod_colq, only: lq ! lq(10)
       use mod_coinq, only: inq ! inq(60)
       use mod_coisc1, only: ipack => isc1 ! ipack(10)
       use mod_coisc2, only: nlist => isc2 ! nlist(50)
@@ -1373,8 +1375,6 @@ c
      $     inflev
       common /colpar/ lpar, batch,ldum,csflag,llpar,photof
       common /cotrans/ ttrans(36)
-      common /cojq/   jq(60)
-      common /colq/   lq(10)
       common /cow/    sr(100)
       common /cozmat/ si(100)
       common /coamat/ psir(100)

@@ -87,6 +87,8 @@
 *---------------------------------------------------------------*
       use mod_cosout
       use mod_cotble, only: npnt, jttble
+      use mod_cojq, only: jq ! jq(1)
+      use mod_colq, only: lq ! lq(1)
       use mod_coinq, only: inq ! inq(1)
       use mod_coisc2, only: inlev => isc2 ! inlev(1)
       use mod_coisc3, only: jlev => isc3 ! jlev(1)
@@ -116,8 +118,6 @@
       common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot,
      :            nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 *
-      common /cojq/ jq(1)
-      common /colq/ lq(1)
       common /cozmat/ jtotpa(1)
       common /coamat/ labadr(1)
       common /colnlb/ lenlab(1000)
@@ -526,6 +526,8 @@ c         fast = .false.
 * current revision date: 12-nov-2008 by pj dagdigian
 *
       use tensor
+      use mod_cojq, only: jqp => jq ! jqp(1)
+      use mod_colq, only: lqp => lq ! lqp(1)
       use mod_coinq, only: inqp => inq ! inqp(1)
       use mod_coisc4, only: jpack => isc4 ! jpack(1)
       use mod_coisc5, only: lpack => isc5 ! lpack(1)
@@ -538,8 +540,6 @@ c         fast = .false.
       common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf,
      :                igjtp
       common /coipar/ ipar(9), iprnt
-      common /cojq/ jqp(1)
-      common /colq/ lqp(1)
 * add these three common blocks (mha 9/30/08)
       dimension labadr(1),lenlab(1),jtotpa(1),jttble(1)
 *
@@ -967,6 +967,8 @@ c end of added/modified code (pjd)
 *
 *------------------------------------------------------------------------
       use tensor
+      use mod_cojq, only: jq ! jq(1)
+      use mod_colq, only: lq ! lq(1)
       use mod_coinq, only: inq ! inq(1)
 * modules for levels for which xs's to be computed
       use mod_coisc9, only: jslist => isc9 ! jslist(1)
@@ -991,8 +993,6 @@ c end of added/modified code (pjd)
 * states with up to 9 state indices allowed
       common/cadr/ iadr(0:2*jmx,lmx,9)
       common/c6jt/ f6a(kmx,0:2*jmx,lmx),f6p(kmx)
-      common /cojq/ jq(1)
-      common /colq/ lq(1)
 *
       dimension jpack(1),ipack(1),lpack(1)
       dimension sreal(1), simag(1)
@@ -1417,6 +1417,8 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
 *
 *------------------------------------------------------------------------
       use tensor
+      use mod_cojq, only: jq ! jq(1)
+      use mod_colq, only: lq ! lq(1)
       use mod_coinq, only: inq ! inq(1)
 * added two common blocks - levels for which xs's to be computed (pjd)
       use mod_coisc9, only: jslist => isc9 ! jslist(1)
@@ -1442,8 +1444,6 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
       common/cadr/ iadr(0:2*jmx,lmx,9)
 *      common/cadr/ iadr(0:jmx,lmx)
       common/c6jt/ f6a(kmx,0:2*jmx,lmx),f9a(3*kmx,lmx)
-      common /cojq/ jq(1)
-      common /colq/ lq(1)
 
       dimension jpack(1),ipack(1),lpack(1)
       dimension sreal(1), simag(1)
@@ -1866,6 +1866,8 @@ c    1         jtot,jtotp,j1,l1,j2,l2,l1p,icolp,irowp
 * current revision date: 5-mar-2010 by pj dagdigian
 *------------------------------------------------------------------------
       use tensor
+      use mod_cojq, only: jq ! jq(1)
+      use mod_colq, only: lq ! lq(1)
       use mod_coinq, only: inq ! inq(1)
 * common blocks for levels for which xs's to be computed
       use mod_coisc9, only: jslist => isc9 ! jslist(1)
@@ -1891,8 +1893,6 @@ c    1         jtot,jtotp,j1,l1,j2,l2,l1p,icolp,irowp
       common/cadr/ iadr(0:jmx,lmx,9)
 *      common/cadr/ iadr(0:jmx,lmx)
       common/c6jt/ f6a(kmx,0:jmx,lmx),f6p(kmx)
-      common /cojq/ jq(1)
-      common /colq/ lq(1)
 *
       dimension jpack(1),ipack(1),lpack(1)
       dimension sreal(1), simag(1)
@@ -2304,6 +2304,8 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
 *------------------------------------------------------------------------
       use mod_codim, only: mmax
       use mod_cov2, only: nv2max, ndummy, y => v2
+      use mod_cojq, only: jq ! jq(1)
+      use mod_colq, only: lq ! lq(1)
       use mod_coinq, only: inq ! inq(1)
       use mod_cojhld, only: jlev => jhold ! jlev(1)
       use mod_coisc1, only: inlev => isc1 ! inlev(1)
@@ -2326,8 +2328,6 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
       common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf,
      :                igjtp
       common /coipar/ ipar(9),iprnt
-      common /cojq/ jq(1)
-      common /colq/ lq(1)
       common /coisc2 / jout1(1)
       common /coz/ sreal(1)
       common /cow/ simag(1)
@@ -2754,6 +2754,8 @@ c=============
 *------------------------------------------------------------------------
       use mod_codim, only: mmax
       use mod_cov2, only: nv2max, ndummy, y => v2
+      use mod_cojq, only: jq ! jq(1)
+      use mod_colq, only: lq ! lq(1)
       use mod_coinq, only: inq ! inq(1)
       use mod_cojhld, only: jlev => jhold ! jlev(1)
       use mod_coisc1, only: inlev => isc1 ! inlev(1)
@@ -2776,8 +2778,6 @@ c=============
       common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf,
      :                igjtp
       common /coipar/ ipar(9),iprnt
-      common /cojq/ jq(1)
-      common /colq/ lq(1)
       common /coisc2 / jout1(1)
       common /coz/ sreal(1)
       common /cow/ simag(1)

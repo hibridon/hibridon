@@ -366,25 +366,25 @@ end module mod_cofact
 !    end subroutine allocate_cotq3
 ! end module mod_cotq3
 
-! module mod_cojq
-!    implicit none
-!    real(8), dimension(:), allocatable :: jq
-!    contains
-!    subroutine allocate_cojq(n)
-!       integer, intent(in) :: n
-!       allocate(jq(n))
-!    end subroutine allocate_cojq
-! end module mod_cojq
+module mod_cojq
+   implicit none
+   integer, dimension(:), allocatable :: jq
+   contains
+   subroutine allocate_cojq(n)
+      integer, intent(in) :: n
+      allocate(jq(n))
+   end subroutine allocate_cojq
+end module mod_cojq
 
-! module mod_colq
-!    implicit none
-!    real(8), dimension(:), allocatable :: lq
-!    contains
-!    subroutine allocate_colq(n)
-!       integer, intent(in) :: n
-!       allocate(lq(n))
-!    end subroutine allocate_colq
-! end module mod_colq
+module mod_colq
+   implicit none
+   integer, dimension(:), allocatable :: lq
+   contains
+   subroutine allocate_colq(n)
+      integer, intent(in) :: n
+      allocate(lq(n))
+   end subroutine allocate_colq
+end module mod_colq
 
 module mod_coinq
    implicit none
