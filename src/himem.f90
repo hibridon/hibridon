@@ -336,6 +336,8 @@ end module mod_cofact
 !    end subroutine allocate_cobmat
 ! end module mod_cobmat
 
+! these matrices to store t matrices
+
 module mod_cotq1
    implicit none
    real(8), dimension(:,:), allocatable :: tq1
@@ -362,15 +364,17 @@ module mod_cotq2
    end subroutine allocate_cotq2
 end module mod_cotq2
 
-! module mod_cotq3
-!    implicit none
-!    real(8), dimension(:,:), allocatable :: tq3
-!    contains
-!    subroutine allocate_cotq3(n)
-!       integer, intent(in) :: n
-!       allocate(tq3(n,n))
-!    end subroutine allocate_cotq3
-! end module mod_cotq3
+module mod_cotq3
+   implicit none
+   real(8), dimension(:,:), allocatable :: tq3
+   real(8), dimension(:), allocatable :: scmat
+   contains
+   subroutine allocate_cotq3(n)
+      integer, intent(in) :: n
+      allocate(tq3(n,n))
+      allocate(scmat(n))  ! note : the size has been found by trial and error (with all tests passing)
+   end subroutine allocate_cotq3
+end module mod_cotq3
 
 module mod_cojq
    implicit none

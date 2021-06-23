@@ -1349,6 +1349,7 @@ c
       use mod_coeint, only: eint
       use mod_cotq1, only: dpsir ! dpsir(100)
       use mod_cotq2, only: dpsii ! dpsii(100)
+      use mod_cotq3, only: scmat2 => scmat ! scmat2(100)
       use mod_cojq, only: jq ! jq(60)
       use mod_colq, only: lq ! lq(10)
       use mod_coinq, only: inq ! inq(60)
@@ -1382,7 +1383,6 @@ c
       common /coamat/ psir(100)
       common /cobmat/ psii(100)
       common /coz/    scmat(100)
-      common /cotq3/  scmat2(100)
 * common for y1, y2, y4
       common /coered/ ered, rmu
       common /codim/  nairy, mmax
@@ -2306,6 +2306,7 @@ c
       use mod_coiout, only: niout, indout
       use mod_cocent, only: sc2 => cent
       use mod_cotq2, only: scmat2 => dpsii ! scmat2(100)
+      use mod_cotq3, only: scmat3 => scmat ! scmat3(100)
       use mod_coinq, only: inq ! inq(60)
       use mod_cosc1, only: pk => sc1 ! pk(6)
       use mod_coisc2, only: nlist => isc2 ! nlist(60)
@@ -2323,7 +2324,6 @@ c
       common /cozmat/ tcoord(100)
 * steve, you may need more space, but i doubt it since tcoord is dimensioned n
       common /coz/    scmat(100)
-      common /cotq3/  scmat3(100)
       common /coered/ ered, rmu
       common /coground/ ifull
       common /cotrans/ ttrans(36)
