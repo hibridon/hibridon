@@ -857,6 +857,7 @@ c#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
 *   current revision date 19-mar-1996
 *  ------------------------------------------------------------
       use mod_codim, only: mmax
+      use mod_coinq, only: inq ! inq(1)
       use mod_cojhld, only: jout1 => jhold ! jout1(1)
       use mod_coehld, only: jout2 => ehold ! jout2(1)
       use mod_coinhl, only: jlev => inhold ! jlev(1)
@@ -883,7 +884,6 @@ c#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
       common /coamat/ simag2(1)
       common /cojq/ jq(1)
       common /colq/ lq(1)
-      common /coinq/ inq(1)
 c
       zero=0
       acc=0

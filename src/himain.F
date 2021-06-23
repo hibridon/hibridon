@@ -10,6 +10,7 @@
       use mod_covvl, only: allocate_covvl
       use mod_cofact, only: allocate_cofact
 
+      use mod_coinq, only: allocate_coinq, inq
       use mod_cojhld, only: allocate_cojhld, jhold
       use mod_coehld, only: allocate_coehld, ehold
       use mod_coinhl, only: allocate_coinhl, inhold
@@ -172,7 +173,7 @@
       common /cotq3/ tq3(T_MATRIX_SIZE, T_MATRIX_SIZE)
       common /cojq/ jq(kmax)
       common /colq/ lq(kmax)
-      common /coinq/ inq(kmax)
+      call allocate_coinq(kmax)
       call allocate_cojhld(kmax)
       call allocate_coehld(kmax)
       call allocate_coinhl(kmax)

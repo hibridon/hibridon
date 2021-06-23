@@ -386,15 +386,15 @@ end module mod_cofact
 !    end subroutine allocate_colq
 ! end module mod_colq
 
-! module mod_coinq
-!    implicit none
-!    integer, dimension(:), allocatable :: inq
-!    contains
-!    subroutine allocate_coinq(n)
-!       integer, intent(in) :: n
-!       allocate(inq(n))
-!    end subroutine allocate_coinq
-! end module mod_coinq
+module mod_coinq
+   implicit none
+   integer, dimension(:), allocatable :: inq
+   contains
+   subroutine allocate_coinq(n)
+      integer, intent(in) :: n
+      allocate(inq(n))
+   end subroutine allocate_coinq
+end module mod_coinq
 
 module mod_cojhld
    implicit none

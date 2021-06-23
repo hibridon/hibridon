@@ -33,6 +33,7 @@
 * ------------------------------------------------------------------
       use mod_cosout
       use mod_cotble, only: jttble
+      use mod_coinq, only: inq ! inq(1)
       use mod_coisc2, only: inlev => isc2 ! inlev(1)
       use mod_coisc3, only: jlev => isc3 ! jlev(1)
       use mod_coisc4, only: jpack => isc4 ! jpack(1)
@@ -61,7 +62,6 @@
      :     nwaves, jfsts, jlparf, jlpars, njmax, jpmax
       common /cojq/   jq(1)
       common /colq/   lq(1)
-      common /coinq/  inq(1)
       common /cozmat/ jtotpa(1)
       common /coamat/ labadr(1)
       common /coconv/ econv, xmconv, ang2c
@@ -289,6 +289,7 @@
 *
 * current revision date:  15-jun-2015 by pjd
 *------------------------------------------------------------------------
+      use mod_coinq, only: inq ! inq(1)
       use mod_coisc9, only: jslist => isc9 ! jslist(1)
       use mod_coisc10, only: inlist => isc10 ! inlist(1)
       implicit double precision (a-h,o-z)
@@ -305,7 +306,6 @@
 * common blocks for levels for which xs's to be computed
       common /cojq/ jq(1)
       common /colq/ lq(1)
-      common /coinq/ inq(1)
       common /coz/ sreal(1)
       common /cow/ simag(1)
       common /coselb/ ibasty
@@ -614,6 +614,7 @@
 * current revision date:  23-jun-2015 by pjd
 *------------------------------------------------------------------------
       use mod_coj12, only: j12
+      use mod_coinq, only: inq ! inq(1)
       use mod_coisc9, only: jslist => isc9 ! jslist(1)
       use mod_coisc10, only: inlist => isc10 ! inlist(1)
       implicit double precision (a-h,o-z)
@@ -631,7 +632,6 @@
 * common blocks for levels for which xs's to be computed
       common /cojq/ jq(1)
       common /colq/ lq(1)
-      common /coinq/ inq(1)
       common /coz/ sreal(1)
       common /cow/ simag(1)
       common /coselb/ ibasty
