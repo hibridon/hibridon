@@ -11,6 +11,7 @@
       use mod_cofact, only: allocate_cofact
 
       use mod_cotq1, only: allocate_cotq1, tq1
+      use mod_cotq2, only: allocate_cotq2, tq2
       use mod_cojq, only: allocate_cojq, jq
       use mod_colq, only: allocate_colq, lq
       use mod_coinq, only: allocate_coinq, inq
@@ -171,9 +172,9 @@
       common /coamat/ amat(kmax,kmax)
       common /cobmat/ bmat(kairy,kairy)
 * these matrices to store t matrices
-      common /cotq2/ tq2(T_MATRIX_SIZE, T_MATRIX_SIZE)
       common /cotq3/ tq3(T_MATRIX_SIZE, T_MATRIX_SIZE)
       call allocate_cotq1(T_MATRIX_SIZE)
+      call allocate_cotq2(T_MATRIX_SIZE)
       call allocate_cojq(kmax)
       call allocate_colq(kmax)
       call allocate_coinq(kmax)

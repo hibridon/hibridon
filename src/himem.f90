@@ -350,15 +350,17 @@ module mod_cotq1
    end subroutine allocate_cotq1
 end module mod_cotq1
 
-! module mod_cotq2
-!    implicit none
-!    real(8), dimension(:,:), allocatable :: tq2
-!    contains
-!    subroutine allocate_cotq2(n)
-!       integer, intent(in) :: n
-!       allocate(tq2(n,n))
-!    end subroutine allocate_cotq2
-! end module mod_cotq2
+module mod_cotq2
+   implicit none
+   real(8), dimension(:,:), allocatable :: tq2
+   real(8), dimension(:), allocatable :: dpsii
+   contains
+   subroutine allocate_cotq2(n)
+      integer, intent(in) :: n
+      allocate(tq2(n,n))
+      allocate(dpsii(n))  ! note : the size has been found by trial and error (with all tests passing)
+   end subroutine allocate_cotq2
+end module mod_cotq2
 
 ! module mod_cotq3
 !    implicit none
