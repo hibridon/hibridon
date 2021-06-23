@@ -963,6 +963,10 @@ c     ------------------------------------------------------------
 *  subroutines called: open
 *  --------------------------------------------------------------------
       use mod_colsc1, only: lsc1
+      use mod_coisc1, only: isc1 ! isc1(9)
+      use mod_coisc2, only: isc2 ! isc2(1)
+      use mod_coisc3, only: isc3 ! isc3(3)
+      use mod_coisc4, only: isc4 ! isc4(1)
       use mod_cosc1, only: rsc1 => sc1 ! rsc1(2)
       use mod_cosc2, only: rsc2 => sc2 ! rsc2(1)
 
@@ -986,10 +990,6 @@ c     ------------------------------------------------------------
      :                rsflag, swrit, t2test, t2writ, twomol, writs,
      :                wrpart, wrxsec, xsecwr, nucros, photof, wavefl,
      :                boundc
-      common /coisc1/ isc1(9)
-      common /coisc2/ isc2(1)
-      common /coisc3/ isc3(3)
-      common /coisc4/  isc4(1)
       common /coselb/ ibasty
       if (nerg .gt. 1) then
 *  check to see if nerg .le. 25

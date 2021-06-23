@@ -33,6 +33,9 @@
 * ------------------------------------------------------------------
       use mod_cosout
       use mod_cotble, only: jttble
+      use mod_coisc2, only: inlev => isc2 ! inlev(1)
+      use mod_coisc3, only: jlev => isc3 ! jlev(1)
+      use mod_coisc4, only: jpack => isc4 ! jpack(1)
       use mod_coisc5, only: lpack => isc5 ! lpack(1)
       use mod_coisc6, only: ipack => isc6 ! ipack(1)
       use mod_coisc8, only: jlist => isc8 ! jlist(1)
@@ -56,9 +59,6 @@
      :                igjtp
       common /cotrn/  spin, maxjt,
      :     nwaves, jfsts, jlparf, jlpars, njmax, jpmax
-      common /coisc2/ inlev(1)
-      common /coisc3/ jlev(1)
-      common /coisc4/ jpack(1)
       common /cojq/   jq(1)
       common /colq/   lq(1)
       common /coinq/  inq(1)

@@ -19,6 +19,10 @@
 *
 *  current revision:  21-jun-2013 by p. dagdigian
 * -------------------------------------------------------------------------
+      use mod_coisc1, only: jlev1 => isc1 ! jlev1(1)
+      use mod_coisc2, only: jlev2 => isc2 ! jlev2(1)
+      use mod_coisc3, only: inlev1 => isc3 ! inlev1(1)
+      use mod_coisc4, only: inlev2 => isc4 ! inlev2(1)
       use mod_coisc5, only: jout1 => isc5 ! jout1(1)
       use mod_coisc6, only: jout2 => isc6 ! jout2(1)
       use mod_coisc7, only: nlevt => isc7 ! nlevt(1)
@@ -40,10 +44,6 @@
      :     csflg2, flghf2, flgsu2, twmol2, nucrs2,
      :     batch, fast, lpar2, lpar, exstfl, sngsmt, trpsmt
 #include "common/parpot"
-      common /coisc1/ jlev1(1)
-      common /coisc2/ jlev2(1)
-      common /coisc3/ inlev1(1)
-      common /coisc4/ inlev2(1)
       common /coconv/ econv, xmconv, ang2
       common /codim/ nairy, mmax
       dimension a(8)
@@ -690,6 +690,10 @@
 *  author:  p. dagdigian
 *  current revision date:  1-jun-2010
 * -------------------------------------------------------------------------
+      use mod_coisc1, only: jlev1 => isc1 ! jlev1(1)
+      use mod_coisc2, only: jlev2 => isc2 ! jlev2(1)
+      use mod_coisc3, only: inlev1 => isc3 ! inlev1(1)
+      use mod_coisc4, only: inlev2 => isc4 ! inlev2(1)
       use mod_coisc5, only: jout1 => isc5 ! jout1(1)
       use mod_coisc6, only: jout2 => isc6 ! jout2(1)
       use mod_coisc7, only: nlevt => isc7 ! nlevt(1)
@@ -702,10 +706,6 @@
       logical sngsmt, trpsmt
       complex*8 t
 #include "common/parpot"
-      common /coisc1/ jlev1(1)
-      common /coisc2/ jlev2(1)
-      common /coisc3/ inlev1(1)
-      common /coisc4/ inlev2(1)
       common /coconv/ econv, xmconv, ang2
       double precision sigma(nlevels + nlevelt, 4)
       dimension cpert(2,2), iptsng(1), ipttrp(1)

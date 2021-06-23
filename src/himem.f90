@@ -426,45 +426,47 @@ end module mod_cofact
 !    end subroutine allocate_coinhl
 ! end module mod_coinhl
 
-! module mod_coisc1
-!    implicit none
-!    integer, dimension(:), allocatable :: isc1
-!    contains
-!    subroutine allocate_coisc1(n)
-!       integer, intent(in) :: n
-!       allocate(isc1(n))
-!    end subroutine allocate_coisc1
-! end module mod_coisc1
+module mod_coisc1
+   implicit none
+   integer, dimension(:), allocatable :: isc1
+   contains
+   subroutine allocate_coisc1(n)
+      integer, intent(in) :: n
+      allocate(isc1(n))
+   end subroutine allocate_coisc1
+end module mod_coisc1
 
-! module mod_coisc2
-!    implicit none
-!    integer, dimension(:), allocatable :: isc2
-!    contains
-!    subroutine allocate_coisc2(n)
-!       integer, intent(in) :: n
-!       allocate(isc2(n))
-!    end subroutine allocate_coisc2
-! end module mod_coisc2
+module mod_coisc2
+   implicit none
+   integer, dimension(:), allocatable :: isc2
+   integer, allocatable :: nj
+   contains
+   subroutine allocate_coisc2(n)
+      integer, intent(in) :: n
+      allocate(isc2(n))
+      allocate(nj)
+   end subroutine allocate_coisc2
+end module mod_coisc2
 
-! module mod_coisc3
-!    implicit none
-!    integer, dimension(:), allocatable :: isc3
-!    contains
-!    subroutine allocate_coisc3(n)
-!       integer, intent(in) :: n
-!       allocate(isc3(n))
-!    end subroutine allocate_coisc3
-! end module mod_coisc3
+module mod_coisc3
+   implicit none
+   integer, dimension(:), allocatable :: isc3
+   contains
+   subroutine allocate_coisc3(n)
+      integer, intent(in) :: n
+      allocate(isc3(n))
+   end subroutine allocate_coisc3
+end module mod_coisc3
 
-! module mod_coisc4
-!    implicit none
-!    integer, dimension(:), allocatable :: isc4
-!    contains
-!    subroutine allocate_coisc4(n)
-!       integer, intent(in) :: n
-!       allocate(isc4(n))
-!    end subroutine allocate_coisc4
-! end module mod_coisc4
+module mod_coisc4
+   implicit none
+   integer, dimension(:), allocatable :: isc4
+   contains
+   subroutine allocate_coisc4(n)
+      integer, intent(in) :: n
+      allocate(isc4(n))
+   end subroutine allocate_coisc4
+end module mod_coisc4
 
 module mod_coisc5
    implicit none
@@ -497,6 +499,10 @@ module mod_coisc7
 end module mod_coisc7
 
 module mod_coisc8
+   !  variable in this module
+   !    isc8:     for CC calculations, on return contains atom+diatom angular mom
+   !              for CD calculations, on return contains diatom angular momentum
+
    implicit none
    integer, dimension(:), allocatable :: isc8
    contains

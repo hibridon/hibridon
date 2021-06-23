@@ -29,6 +29,8 @@
 *     current revision:  8-jan-2018 by p. dagdigian
 *     -------------------------------------------------------------
       use mod_coj12, only: j12q => j12
+      use mod_coisc1, only: jlev => isc1 ! jlev(1)
+      use mod_coisc3, only: inlev => isc3 ! inlev(1)
       use mod_coisc5, only: jout => isc5 ! jout(1)
       use mod_coisc7, only: jlevh => isc7 ! jlevh(1)
       use mod_coisc8, only: iflevh => isc8 ! iflevh(1)
@@ -47,8 +49,6 @@
       logical csflg, flaghf, flgsu, twmol, nucrs,
      :     batch, fast, lpar2, lpar, exstfl
 #include "common/parpot"
-      common /coisc1/ jlev(1)
-      common /coisc3/ inlev(1)
       common /cojq/ jq(1)
       common /colq/ lq(1)
       common /coinq/ inq(1)
