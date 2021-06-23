@@ -180,6 +180,7 @@
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_cotq1, only: vec ! vec(3,3,1)
       use mod_coisc1, only: ivec => isc1 ! ivec(1)
       use mod_coisc2, only: ivhold => isc2 ! ivhold(1)
       use mod_coisc3, only: nlvp => isc3 ! nlvp(1)
@@ -193,7 +194,6 @@
       common /cosysi/ nscode, isicod, ispar(10)
 *  these parameters must be the same as in hisysgpi
       common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
-      common /cotq1/ vec(3,3,1)
       common /conlam/ nlam, nlammx,lamnum(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv

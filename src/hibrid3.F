@@ -1627,6 +1627,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       use mod_coqvec, only: nphoto, q
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+* temporary storage for smatrices
+      use mod_cotq1, only: srsave => dpsir ! srsave(100)
       implicit double precision (a-h,o-z)
       integer isw, i, icol, l, lq, nmax, nopen
 #if defined(HIB_UNIX_IBM)
@@ -1641,7 +1643,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
 * temporary storage for smatrices
-      common /cotq1/ srsave(100)
       common /cotq2/ sisave(100)
       common /coipar/ ipar(3),jlpar
       common /corpar/ rpar(6), spac

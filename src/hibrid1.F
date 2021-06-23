@@ -534,10 +534,10 @@ c
 *              vectors
 * ----------------------------------------------------------------------
       use mod_coqvec2, only: q => q2
+      use mod_cotq1, only: tmat => dpsir ! tmat(80)
       implicit double precision (a-h,o-z)
 *  square matrices (of row dimension nmax)
       dimension vecnow(80), scr(80)
-      common /cotq1/ tmat(80)
       data one, onemn, half, sq3 /1.d0, -1.d0, 0.5d0, 1.732050807d0/
       ra = rnow - half * drnow / sq3
       rb = rnow + half * drnow / sq3
