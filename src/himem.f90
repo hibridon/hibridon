@@ -396,25 +396,25 @@ end module mod_cofact
 !    end subroutine allocate_coinq
 ! end module mod_coinq
 
-! module mod_cojhld
-!    implicit none
-!    integer, dimension(:), allocatable :: jhold
-!    contains
-!    subroutine allocate_cojhld(n)
-!       integer, intent(in) :: n
-!       allocate(jhold(n))
-!    end subroutine allocate_cojhld
-! end module mod_cojhld
+module mod_cojhld
+   implicit none
+   integer, dimension(:), allocatable :: jhold
+   contains
+   subroutine allocate_cojhld(n)
+      integer, intent(in) :: n
+      allocate(jhold(n))
+   end subroutine allocate_cojhld
+end module mod_cojhld
 
-! module mod_coehld
-!    implicit none
-!    real(8), dimension(:), allocatable :: ehold
-!    contains
-!    subroutine allocate_coehld(n)
-!       integer, intent(in) :: n
-!       allocate(ehold(n))
-!    end subroutine allocate_coehld
-! end module mod_coehld
+module mod_coehld
+   implicit none
+   real(8), dimension(:), allocatable :: ehold
+   contains
+   subroutine allocate_coehld(n)
+      integer, intent(in) :: n
+      allocate(ehold(n))
+   end subroutine allocate_coehld
+end module mod_coehld
 
 module mod_coinhl
    implicit none

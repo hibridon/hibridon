@@ -1105,6 +1105,7 @@ cABER
       use mod_cosout, only: nnout, jout
       use mod_coiout, only: niout, indout
       use constants
+      use mod_cojhld, only: jlev => jhold ! jlev(1)
       use mod_coisc1, only: inlev => isc1 ! inlev(1)
       use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
@@ -1117,7 +1118,6 @@ cABER
       character*80 line
       logical csflag, flaghf, iprint, flagsu, twomol, existf, nucros
 #include "common/parpot"
-      common /cojhld/ jlev(1)
       common /coselb/ ibasty
       dimension  a(4),scmat(nmax,1)
 

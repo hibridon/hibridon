@@ -928,6 +928,7 @@ cjk          form='(1x,i3,i4,i7,  (t18,10(1pd11.3)))'
 *  ------------------------------------------------------------------
       use mod_cosout, only: nnout, jout
       use mod_coiout, only: niout, indout
+      use mod_cojhld, only: jlev => jhold ! jlev(5)
       use mod_coisc1, only: inlev => isc1 ! inlev(5)
       use mod_coisc2, only: jpoint => isc2 ! jpoint(5)
       use mod_cosc1, only: elev => sc1 ! elev(5)
@@ -951,7 +952,6 @@ cjk          form='(1x,i3,i4,i7,  (t18,10(1pd11.3)))'
       include "common/parpot"
       common /coz/ zmat(1)
       common /cow/ scmat(1)
-      common /cojhld/ jlev(5)
       common /colq/ ipoint(5)
       common /coselb/ ibasty
       dimension  a(3)
@@ -1232,6 +1232,7 @@ caber
       return
       end
       subroutine aver1 (zmat, scmat, n)
+      use mod_cojhld, only: jlev => jhold ! jlev(1)
       use mod_coisc1, only: inlev => isc1 ! inlev(1)
       implicit double precision (a-h,o-z)
 *  subroutine to sum and average cross section matrix over positive
@@ -1239,7 +1240,6 @@ caber
       integer i, ind, index, j, jnd, n, nn, inlev, jlev
 *     real scmat, zmat
       dimension zmat(1), scmat(n,n)
-      common /cojhld/ jlev(1)
 *  first copy cross section matrix into scmat
       call matmov (zmat, scmat, n, n, n, n)
       nn = n / 2
@@ -1266,6 +1266,7 @@ caber
 * -------------------------------------------------
       subroutine xscpr1 (zmat, nlevop, isize, iaver,
      :                   ipos, iprint, flaghf)
+      use mod_cojhld, only: jlev => jhold ! jlev(4)
       use mod_coisc1, only: inlev => isc1 ! inlev(4)
       use mod_cosc1, only: elev => sc1 ! elev(4)
       implicit double precision (a-h,o-z)
@@ -1278,7 +1279,6 @@ caber
 *     real elev, zmat
       logical ipos, iprint, flaghf
       dimension zmat(nlevop,nlevop), ind(50)
-      common /cojhld/ jlev(4)
       common /colq/ ipoint(4)
       common /coselb/ ibasty
 *     first transpose the cross section matrix so that initial
@@ -1433,6 +1433,7 @@ cjk 70            format (f5.1, i5, 2x, 13 (1pe10.3,1x) )
       use constants
       use mod_cosout, only: nnout, jout
       use mod_coiout, only: niout, indout
+      use mod_cojhld, only: jlev => jhold ! jlev(1)
       use mod_coisc1, only: inlev => isc1 ! inlev(1)
 cmha
       use mod_coisc2, only: jpoint => isc2 ! jpoint(5)
@@ -1456,7 +1457,6 @@ cmha
       common /coz/ zmat(1)
       common /cow/ scmat(1)
       common /coamat/ zbuf(1)
-      common /cojhld/ jlev(1)
       common /colq/ ipoint(1)
       common /coener/ energ(1)
       common /coselb/ ibasty
@@ -1810,6 +1810,7 @@ cmha
       return
       end
       subroutine aver2 (zmat, scmat, n)
+      use mod_cojhld, only: jlev => jhold ! jlev(1)
       use mod_coisc1, only: inlev => isc1 ! inlev(1)
       implicit double precision (a-h,o-z)
 *  subroutine to sum and average cross section matrix over positive
@@ -1817,7 +1818,6 @@ cmha
       integer i, ind, index, j, jnd, n, nn, inlev, jlev
 *     real scmat, zmat
       dimension zmat(1), scmat(n,n)
-      common /cojhld/ jlev(1)
 *  first copy cross section matrix into scmat
       call matmov (zmat, scmat, n, n, n, n)
       nn = n / 2
@@ -1844,6 +1844,7 @@ cmha
 * ------------------------------------------------------
       subroutine xscpr2 (zmat, xthresh, nlevop, isize, iaver,
      :                   iprint,isa)
+      use mod_cojhld, only: jlev => jhold ! jlev(1)
       use mod_coisc1, only: inlev => isc1 ! inlev(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
       implicit double precision (a-h,o-z)
@@ -1859,7 +1860,6 @@ cmha
       dimension zmat(nlevop,nlevop), ind(50)
       common /colpar/ airyfl, airypr, bastst, batch, chlist,
      :                csflag, flaghf, flagsu, ihomo, ipos,lpar
-      common /cojhld/ jlev(1)
       common /colq/ ipoint(1)
 *  first transpose cross section matrix so that initial states are
 *  columns and final states are rows

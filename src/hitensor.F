@@ -2305,6 +2305,7 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
 *------------------------------------------------------------------------
       use mod_codim, only: mmax
       use mod_cov2, only: nv2max, ndummy, y => v2
+      use mod_cojhld, only: jlev => jhold ! jlev(1)
       use mod_coisc1, only: inlev => isc1 ! inlev(1)
 * common blocks for levels for which xs's to be computed
       use mod_coisc9, only: jslist => isc9 ! jslist(1)
@@ -2329,7 +2330,6 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
       common /colq/ lq(1)
       common /coinq/ inq(1)
       common /coisc2 / jout1(1)
-      common /cojhld/ jlev(1)
       common /coz/ sreal(1)
       common /cow/ simag(1)
       common /coconv/ econv, xmconv, ang2c
@@ -2755,6 +2755,7 @@ c=============
 *------------------------------------------------------------------------
       use mod_codim, only: mmax
       use mod_cov2, only: nv2max, ndummy, y => v2
+      use mod_cojhld, only: jlev => jhold ! jlev(1)
       use mod_coisc1, only: inlev => isc1 ! inlev(1)
 * common blocks for levels for which xs's to be computed
       use mod_coisc9, only: jslist => isc9 ! jslist(1)
@@ -2779,7 +2780,6 @@ c=============
       common /colq/ lq(1)
       common /coinq/ inq(1)
       common /coisc2 / jout1(1)
-      common /cojhld/ jlev(1)
       common /coz/ sreal(1)
       common /cow/ simag(1)
       common /coconv/ econv, xmconv, ang2c

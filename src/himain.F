@@ -10,6 +10,8 @@
       use mod_covvl, only: allocate_covvl
       use mod_cofact, only: allocate_cofact
 
+      use mod_cojhld, only: allocate_cojhld, jhold
+      use mod_coehld, only: allocate_coehld, ehold
       use mod_coinhl, only: allocate_coinhl, inhold
       use mod_coisc1, only: allocate_coisc1, isc1
       use mod_coisc2, only: allocate_coisc2, isc2
@@ -171,8 +173,8 @@
       common /cojq/ jq(kmax)
       common /colq/ lq(kmax)
       common /coinq/ inq(kmax)
-      common /cojhld/ jhold(kmax)
-      common /coehld/ ehold(kmax)
+      call allocate_cojhld(kmax)
+      call allocate_coehld(kmax)
       call allocate_coinhl(kmax)
       call allocate_coisc1(kmax)
       call allocate_coisc2(kmax)
