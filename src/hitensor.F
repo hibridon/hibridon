@@ -120,7 +120,7 @@
      :            nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 *
       common /cozmat/ jtotpa(1)
-      common /colnlb/ lenlab(1000)
+      common /colnlb/ lenlab(MAX_NJTOT)
       common /coz/    sreal(1)
       common /cow/    simag(1)
       common /cobmat/ sigma(kkmx*jmx*jmx)
@@ -525,6 +525,7 @@ c         fast = .false.
 *
 * current revision date: 12-nov-2008 by pj dagdigian
 *
+      use ISO_FORTRAN_ENV, only : ERROR_UNIT
       use tensor
       use mod_cojq, only: jqp => jq ! jqp(1)
       use mod_colq, only: lqp => lq ! lqp(1)
@@ -620,6 +621,11 @@ c end of added/modified code (pjd)
      $      ' jtotp=',i4,' jlpar=',i3,' iaddrp=',i4)
 *
 * save pointer for s-matrix and for label arrays
+         if (jtotp+1 > MAX_NJTOT) then
+            write(ERROR_UNIT,*) 'error: max number of jtot values exceeded (please increase MAX_NJTOT)'
+            stop 1
+         end if
+
          jtotpa(jtotp+1) = ioffs - 1
          labadr(jtotp+1) = ioff - 1
          lenlab(jtotp+1) = lengtp
