@@ -33,6 +33,7 @@
 * ------------------------------------------------------------------
       use mod_cosout
       use mod_cotble, only: jttble
+      use mod_coamat, only: labadr => toto ! labadr(1)
       use mod_cojq, only: jq ! jq(1)
       use mod_colq, only: lq ! lq(1)
       use mod_coinq, only: inq ! inq(1)
@@ -63,7 +64,6 @@
       common /cotrn/  spin, maxjt,
      :     nwaves, jfsts, jlparf, jlpars, njmax, jpmax
       common /cozmat/ jtotpa(1)
-      common /coamat/ labadr(1)
       common /coconv/ econv, xmconv, ang2c
       common /codim/  nairy, mmax
       common /coselb/ ibasty

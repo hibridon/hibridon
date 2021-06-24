@@ -1394,6 +1394,7 @@ c
       use mod_cotq1, only: sc1 => dpsir ! sc1(1)
       use mod_cotq2, only: sc2 => dpsii ! sc2(1)
       use mod_cotq3, only: sc3 => scmat ! sc3(1)
+      use mod_coamat, only: sc4 => toto ! sc4(1)
       use mod_coinq, only: inq ! inq(1)
       use mod_cojq, only: jq ! jq(1)
       use mod_colq, only: lq ! lq(1)
@@ -1419,7 +1420,6 @@ c
       common /coz/    sreal(1)
       common /cow/    simag(1)
       common /cozmat/ sigma(1)
-      common /coamat/ sc4(1)
       !/ nnout, jout(21)
       common /coered/ ered, rmu
       common /codim/  nairy, mmax

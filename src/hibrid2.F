@@ -1433,6 +1433,7 @@ caber
       use mod_cosout, only: nnout, jout
       use mod_coiout, only: niout, indout
       use constants
+      use mod_coamat, only: zbuf ! zbuf(1)
       use mod_colq, only: ipoint => lq ! ipoint(1)
       use mod_cojhld, only: jlev => jhold ! jlev(1)
       use mod_coisc1, only: inlev => isc1 ! inlev(1)
@@ -1457,7 +1458,6 @@ cmha
      :                csflag, flaghf, flagsu, ihomo, ipos,lpar
       common /coz/ zmat(1)
       common /cow/ scmat(1)
-      common /coamat/ zbuf(1)
       common /coener/ energ(1)
       common /coselb/ ibasty
       dimension  a(4)
