@@ -366,8 +366,8 @@ c         call helppr(line)
       end if
       if (match .eq. 0) then
         write(6, 27) code(1:lc),(bcod(j),j = 1,ncode)
-27      format
-     :   (/' *** invalid keyword "',(a),'"; valid request keys are:'//
+27      format(
+     :    /' *** invalid keyword "',(a),'"; valid request keys are:'//
      1   (1x,6(a8,5x)))
         write(6,31) bascod, (pcod(j),j = 1,icode)
 31      format (/(1x,6(a8,5x)))
