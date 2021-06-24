@@ -34,6 +34,8 @@ else (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
+
+
 add_library(hib
      src/hiba13p.F
      src/hiba1d3p.F
@@ -77,7 +79,7 @@ add_library(hib
      src/hihypxsc.F
      src/hiiolib_f.F
      src/himatrix.F
-     src/himem.f90
+     src/himem.F90
      src/hinput.F
      src/hiprsbr.F
      src/histmix.F
@@ -89,6 +91,7 @@ add_library(hib
      src/hipotutil.F
      ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F)
 target_compile_options(hib PRIVATE "-ffixed-line-length-132")
+target_compile_definitions(hib PUBLIC MAX_NJTOT=1000)
 
 add_custom_command(
     OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/SYSCONFIG
