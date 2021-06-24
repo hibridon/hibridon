@@ -33,7 +33,7 @@
 * ------------------------------------------------------------------
       use mod_cosout
       use mod_cotble, only: jttble
-      use mod_coamat, only: labadr => toto ! labadr(1)
+      use mod_coamat, only: labadr ! labadr(1)
       use mod_cojq, only: jq ! jq(1)
       use mod_colq, only: lq ! lq(1)
       use mod_coinq, only: inq ! inq(1)
