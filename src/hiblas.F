@@ -52,7 +52,7 @@ c
       ddot = sdot(n,dx,incx,dy,incy)
       return
       end
-      subroutine  drot (n,dx,incx,dy,incy,c,s)
+      subroutine drot (n,dx,incx,dy,incy,c,s)
 c
 c     applies a plane rotation.
 c     jack dongarra, linpack, 3/11/78.
@@ -270,13 +270,18 @@ c
    60 ddot = dtemp
       return
       end
-      subroutine  drot (n,dx,incx,dy,incy,c,s)
+      subroutine drot (n,dx,incx,dy,incy,c,s)
 c
 c     applies a plane rotation.
 c     jack dongarra, linpack, 3/11/78.
 c
-      double precision dx(1),dy(1),dtemp,c,s
-      integer i,incx,incy,ix,iy,n
+      implicit none
+      integer, intent(in), parameter :: n ! the number of displacements to rotate
+      real(8), dimension(:), intent(in, out) :: dx, dy  ! the displacement vectors that are about to be rotated 
+      integer, intent(in), parameter :: incx, incy ! steps between consecutive elements
+      real(8), intent(in), parameter :: c, s  ! cosine and sine of rotation to apply
+      double precision dtemp
+      integer i,ix,iy
 c
       if(n.le.0)return
       if(incx.eq.1.and.incy.eq.1)go to 20
