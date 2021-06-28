@@ -1433,7 +1433,7 @@ cjk 70            format (f5.1, i5, 2x, 13 (1pe10.3,1x) )
       use constants
       use mod_cosout, only: nnout, jout
       use mod_coiout, only: niout, indout
-      use mod_coamat, only: zbuf => psir ! zbuf(1)
+      use mod_coamat, only: zbuf ! zbuf(1)
       use mod_colq, only: ipoint => lq ! ipoint(1)
       use mod_cojhld, only: jlev => jhold ! jlev(1)
       use mod_coisc1, only: inlev => isc1 ! inlev(1)
