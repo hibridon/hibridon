@@ -1,28 +1,29 @@
 #!/usr/bin/env python2
 
 import sys
-import os
 
 from test_exec import HibTest
+from pathlib import Path
 
 
-def run_tests(tests_raw, hib_dir):
+def run_tests(tests: list(str), hib_dir: Path):
     ncmp = {}
     fail_count = 0
     test_count = 0
     tests = []
-    for t in tests_raw:
-        groupfile = os.path.join(hib_dir, "autotest/testgroup_" + t)
-        if os.path.isfile(groupfile):
+    for test in tests:
+        groupfile = hib_dir / "autotest" / ("testgroup_" + test)
+        if groupfile.exists():
             for line in open(groupfile, "r"):
                 stripped_line = line.strip()
                 if stripped_line:
                     tests.append(stripped_line)
         else:
-            tests.append(t)
+            tests.append(test)
     for test in tests:
-        if not os.path.isfile(os.path.join(hib_dir, "autotest", test, "hibautotest.conf")):
-            print("** WARNING: Test", test, "does not exist.")
+        conf_file_path = hib_dir / "autotest" / test / "hibautotest.conf"
+        if not conf_file_path.exists():
+            print("** WARNING: Test configuration file ", conf_file_path, " does not exist.")
             continue
         task = HibTest(test, hib_dir)
         nc = task.execute_test()
@@ -56,7 +57,7 @@ def run_diff(ncmp):
 
 
 def main():
-    hib_dir = sys.argv[1]
+    hib_dir = Path(sys.argv[1])
     if len(sys.argv) == 2:
         tests = ["regular"]
     else:

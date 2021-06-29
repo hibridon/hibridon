@@ -6,17 +6,17 @@ import tempfile
 import shutil
 import sys
 import configparser
-
+from pathlib import Path
 from cmp_ics import compare_ics
 from cmp_number import compare_number
 
 
 class HibTest:
-    def __init__(self, test_name, hib_dir):
+    def __init__(self, test_name: str, hib_dir: Path):
         self.hib_dir = hib_dir
         # Read test config file
-        self.folder = os.path.join(hib_dir, "autotest", test_name)
-        config_file = os.path.join(self.folder, "hibautotest.conf")
+        self.folder = hib_dir / 'autotest' / test_name
+        config_file = self.folder / "hibautotest.conf"
         self.config = configparser.ConfigParser()
         self.config.read(config_file)
         return
@@ -28,7 +28,7 @@ class HibTest:
 
     def copy_file(self, filelist):
         for source in filelist:
-            fsrc = os.path.join(self.tmpd, source)
+            fsrc = os.path.join(tmpd, source)
             fdes = os.path.join(self.folder, source + ".test")
             try:
                 shutil.copyfile(fsrc, fdes)
@@ -62,7 +62,7 @@ class HibTest:
                 self.ncmp[fstd] = fexe
         return 0
 
-    def execute_section(self, section):
+    def execute_section(self, section, tmpd: Path):
         print("Running test for", self.config.get(section, "title"))
         sys.stdout.flush()
         # Make hibridon executable
@@ -87,7 +87,7 @@ class HibTest:
         inpfiles = self.config.get(section, "input").split()
         for inpfile in inpfiles:
             shutil.copyfile(os.path.join(self.folder, inpfile),
-                            os.path.join(self.tmpd, inpfile))
+                            os.path.join(tmpd, inpfile))
         # Copy pot data files
         potdata_dir = os.path.join(self.hib_dir, "bin/progs/potdata")
         try:
@@ -95,15 +95,15 @@ class HibTest:
         except configparser.NoOptionError:
             potdatas = []
         if potdatas and os.path.isdir(potdata_dir):
-            potdata_dir_tmp = os.path.join(self.tmpd, "potdata")
+            potdata_dir_tmp = os.path.join(tmpd, "potdata")
             if not os.path.isdir(potdata_dir_tmp):
                 os.makedirs(potdata_dir_tmp)
             for potdata in potdatas:
                 shutil.copyfile(
                     os.path.join(potdata_dir, potdata),
-                    os.path.join(self.tmpd, "potdata", potdata))
+                    os.path.join(tmpd, "potdata", potdata))
         # Execute hibridon
-        os.chdir(self.tmpd)
+        os.chdir(tmpd)
         cmd = self.config.get(section, "exec")
         os.system(cmd)
         os.chdir(self.hib_dir)
@@ -113,7 +113,7 @@ class HibTest:
         outputfiles = self.config.get(section, "output").split()
         if self.copy_file(outputfiles) != 0:
             print("... \033[31mFAILED\033[0m:")
-            print("    Unable to fetch output files, check " + self.tmpd)
+            print("    Unable to fetch output files, check " + tmpd)
             return None
         # Compare files
         self.ncmp = {}
@@ -137,12 +137,12 @@ class HibTest:
 
     def execute_test(self):
         ncmp = {}
-        self.tmpd = tempfile.mkdtemp()
+        tmpd = tempfile.mkdtemp()
         for section in self.config.sections():
-            nc = self.execute_section(section)
+            nc = self.execute_section(section, tmpd)
             if nc is None:
                 return None
             for key in nc:
                 ncmp[key] = nc[key]
-        shutil.rmtree(self.tmpd)
+        shutil.rmtree(tmpd)
         return ncmp
