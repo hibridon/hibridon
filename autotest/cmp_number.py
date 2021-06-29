@@ -1,7 +1,10 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
-def read_number_lines(f, ignore_entry):
-    l = []
+from pathlib import Path
+
+
+def read_number_lines(f: Path, ignore_entry):
+    numbers = []
     for line in open(f, "rU"):
         try:
             num = []
@@ -12,10 +15,10 @@ def read_number_lines(f, ignore_entry):
                 s.replace("D", "E")
                 num.append(float(s))
             if num:
-                l.append(num)
+                numbers.append(num)
         except ValueError:
             pass
-    return l
+    return numbers
 
 
 def compare_array(arr1, arr2, tol, eps, ignore_sign):

@@ -3,7 +3,7 @@
 import sys
 import os
 
-from test_exec import *
+from test_exec import HibTest
 
 
 def run_tests(tests_raw, hib_dir):
@@ -15,14 +15,14 @@ def run_tests(tests_raw, hib_dir):
         groupfile = os.path.join(hib_dir, "autotest/testgroup_" + t)
         if os.path.isfile(groupfile):
             for line in open(groupfile, "r"):
-                l = line.strip()
-                if l: tests.append(l)
+                stripped_line = line.strip()
+                if stripped_line:
+                    tests.append(stripped_line)
         else:
             tests.append(t)
     for test in tests:
-        if not os.path.isfile(
-            os.path.join(hib_dir, "autotest", test, "hibautotest.conf")):
-            print "** WARNING: Test", test, "does not exist."
+        if not os.path.isfile(os.path.join(hib_dir, "autotest", test, "hibautotest.conf")):
+            print("** WARNING: Test", test, "does not exist.")
             continue
         task = HibTest(test, hib_dir)
         nc = task.execute_test()
@@ -33,8 +33,8 @@ def run_tests(tests_raw, hib_dir):
         for key in nc:
             ncmp[key] = nc[key]
     print
-    print "%d/%d test(s) passed, %d file(s) not "\
-        "checked" % (test_count - fail_count, test_count, len(ncmp))
+    print("%d/%d test(s) passed, %d file(s) not "
+          "checked" % (test_count - fail_count, test_count, len(ncmp)))
     print
     return ncmp
 
@@ -51,7 +51,7 @@ def run_diff(ncmp):
     #     os.system(cmd1)
     #     os.system(cmd2)
     for f1 in ncmp:
-        print "   ", f1
+        print("   ", f1)
     return
 
 
@@ -63,9 +63,10 @@ def main():
         tests = sys.argv[2:]
     ncmp = run_tests(tests, hib_dir)
     if len(ncmp) > 0:
-        print "Please check manually the following file(s):"
+        print("Please check manually the following file(s):")
         run_diff(ncmp)
     return
+
 
 if __name__ == "__main__":
     main()

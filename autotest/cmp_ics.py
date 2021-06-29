@@ -1,4 +1,5 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
+
 
 class HibIntc:
     """I/O of integral cross section."""
@@ -22,10 +23,11 @@ class HibIntc:
         try:
             self.energy = float(f.readline().split()[0])
         except IndexError:
-            print FILENAME, "not successfully read."
+            print(FILENAME, "not successfully read.")
         # Line 5, 6: parameters
         # TODO: what are they?
-        for i in range(2): f.readline()
+        for i in range(2):
+            f.readline()
         # Line 7: number of levels and available levels
         line = f.readline().split()
         self.N_ALL = int(line[0])
