@@ -196,21 +196,93 @@ add_dependencies(hib parhlp)
 
 enable_testing()
 
+function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_COMMAND_FILE TEST_INPUT_FILES TEST_OUTPUT_FILES TEST_KMAX TEST_T_MATRIX_SIZE)
+
+  set(TEST_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests/${TEST_ID})
+  set(TEST_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests/${TEST_ID})
+  set(TEST_EXE ${TEST_ID})
+
+  add_executable(${TEST_EXE} src/pot/${TEST_POT_SRC_FILE} src/himain.F)
+  target_compile_definitions(${TEST_EXE} PUBLIC KMAX=${TEST_KMAX})
+  target_compile_definitions(${TEST_EXE} PUBLIC T_MATRIX_SIZE=${TEST_T_MATRIX_SIZE})
+  target_link_libraries(${TEST_EXE} hib ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
+  target_include_directories(${TEST_EXE} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+  target_include_directories(${TEST_EXE} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
+  target_compile_options(${TEST_EXE} PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
+
+
+  add_test(NAME ${TEST_ID}_test_setup
+      COMMAND bash -c "mkdir -p ${TEST_BUILD_DIR}/potdata && \
+                      for input_file in ${TEST_INPUT_FILES} ${TEST_COMMAND_FILE}; \
+                      do \
+                          cp ${TEST_SRC_DIR}/$input_file ${TEST_BUILD_DIR}/ ; \
+                      done ; \
+                      for pot_data_file in ${TEST_POT_DATA_FILES}; \
+                      do \
+                          cp ${TEST_SRC_DIR}/$pot_data_file ${TEST_BUILD_DIR}/potdata ; \
+                      done"
+  )
+
+  add_test(NAME ${TEST_ID}_build
+      COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target ${TEST_EXE})
+
+  # $basedir/bin/progs/arn2_151 <arn2_test.com
+  # todo: fix memory leak and remove export ASAN_OPTIONS=detect_leaks=0
+  add_test(NAME ${TEST_ID}_test_run
+      COMMAND bash -c "export ASAN_OPTIONS=detect_leaks=0; cat ./${TEST_COMMAND_FILE} | ${CMAKE_CURRENT_BINARY_DIR}/${TEST_EXE}"
+      WORKING_DIRECTORY "${TEST_BUILD_DIR}"
+  )
+  if(${TEST_ID} STREQUAL "ch3i")
+    # Check that outputs from test runs are the same as the ref ones
+    # todo: replace with a better comparer that uses a tolerance (at the moment, we compate the meaningful text but not the last line because the numbers are so tiny that they differ from a build and another)
+    add_test(NAME ${TEST_ID}_test_check
+        COMMAND bash -c "mkdir -p ${TEST_BUILD_DIR}/flx_compare \
+         && cat ${TEST_SRC_DIR}/Ch3itest.flx | tail -35 | head -34 > ${TEST_BUILD_DIR}/flx_compare/gold.txt \
+         && cat ${TEST_BUILD_DIR}/Ch3itest.flx | tail -35 | head -34 > ${TEST_BUILD_DIR}/flx_compare/measured.txt \
+         && diff ${TEST_BUILD_DIR}/flx_compare/gold.txt ${TEST_BUILD_DIR}/flx_compare/measured.txt"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    )
+  else()
+
+    # Check that outputs from test runs are the same as the ref ones
+    add_test(NAME ${TEST_ID}_test_check
+        COMMAND bash -c "set -o errexit; \
+                         for output_file in ${TEST_OUTPUT_FILES} ; \
+                         do \
+                            ./check_outputs ${TEST_SRC_DIR}/$output_file ${TEST_BUILD_DIR}/$output_file ; 
+                         done"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    )
+  endif()
+
+  add_test(NAME ${TEST_ID}_test_cleanup
+      COMMAND rm -R ${TEST_BUILD_DIR};
+  )
+
+  set_tests_properties(${TEST_ID}_test_setup PROPERTIES FIXTURES_SETUP ${TEST_ID}_resources)
+  set_tests_properties(${TEST_ID}_test_cleanup PROPERTIES FIXTURES_CLEANUP ${TEST_ID}_resources)
+
+  set_tests_properties(${TEST_ID}_test_run PROPERTIES FIXTURES_REQUIRED ${TEST_ID}_resources)
+  set_tests_properties(${TEST_ID}_test_run PROPERTIES DEPENDS ${TEST_ID}_build)
+  set_tests_properties(${TEST_ID}_test_check PROPERTIES DEPENDS check_outputs_build)
+endfunction()
+
 # This executable compares output files from test runs and reference outputs located in the tests directory
 add_executable(check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/ci/comp_tests.f90)
 
 add_test(NAME check_outputs_build
     COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target check_outputs)
 
-include("tests/hib_arn2.cmake")
-include("tests/hibb_arn2.cmake")
-include("tests/hib_vfit.cmake")
-include("tests/hib_arno.cmake")
-include("tests/hib_ch3i.cmake")
-include("tests/hib_boh2.cmake")
-include("tests/hib_arohx_ump4.cmake")
-include("tests/hib_heco_sapt.cmake")
-include("tests/hib_hecn_dgels.cmake") 
-include("tests/hib_h2ohe.cmake")
-include("tests/hib_ch3he_ccsdt.cmake")
+
+include("tests/arn2/arn2.cmake")
+include("tests/arn2_big/arn2_big.cmake")
+include("tests/vfit/vfit.cmake")
+include("tests/arno/arno.cmake")
+include("tests/ch3i/ch3i.cmake")
+include("tests/boh2/boh2.cmake")
+include("tests/aroh/aroh.cmake")
+include("tests/heco/heco.cmake")
+include("tests/hecn/hecn.cmake") 
+include("tests/h2ohe_orig/h2ohe_orig.cmake")
+include("tests/ch3he_ccsdt/ch3he_ccsdt.cmake")
 
