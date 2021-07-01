@@ -227,12 +227,21 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
   add_test(NAME ${TEST_ID}_build
       COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target ${TEST_EXE})
 
+  set(test_command_prefix "")
+
+  set(mem_leak_disabled_tests arn2 arn2_big)
+  if(${TEST_ID} IN_LIST mem_leak_disabled_tests)
+    message( WARNING "memory leak detection has been disabled on test ${TEST_ID} until its leak is fixed")
+    set(test_command_prefix "export ASAN_OPTIONS=detect_leaks=0; ")
+    # todo: fix memory leak and remove export ASAN_OPTIONS=detect_leaks=0
+  endif()
+
   # $basedir/bin/progs/arn2_151 <arn2_test.com
-  # todo: fix memory leak and remove export ASAN_OPTIONS=detect_leaks=0
   add_test(NAME ${TEST_ID}_test_run
-      COMMAND bash -c "export ASAN_OPTIONS=detect_leaks=0; cat ./${TEST_COMMAND_FILE} | ${CMAKE_CURRENT_BINARY_DIR}/${TEST_EXE}"
-      WORKING_DIRECTORY "${TEST_BUILD_DIR}"
+    COMMAND bash -c "${test_command_prefix} cat ./${TEST_COMMAND_FILE} | ${CMAKE_CURRENT_BINARY_DIR}/${TEST_EXE}"
+    WORKING_DIRECTORY "${TEST_BUILD_DIR}"
   )
+
   if(${TEST_ID} STREQUAL "ch3i")
     # Check that outputs from test runs are the same as the ref ones
     # todo: replace with a better comparer that uses a tolerance (at the moment, we compate the meaningful text but not the last line because the numbers are so tiny that they differ from a build and another)
