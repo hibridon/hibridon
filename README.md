@@ -52,6 +52,20 @@ cmake /tmp/hib_src
 ```
 This will automatically find the required libraries and create a Makefile to build hibridon. 
 
+#### to use mkl
+
+make sure your environment variable `MKL_ROOT` is set to use the mkl lbrary you want. Depending on the system you are using, This can be achieved with one of the following methods:
+- `source
+- `module load mkl/latest`
+
+Once `MKL_ROOT` is set properly, you just have to tell cmake that you want to use mkl (see [https://cmake.org/cmake/help/v3.14/module/FindBLAS.html]):
+
+```bash
+cd /tmp/hib_build
+cmake -DBLA_VENDOR=Intel10_64lp /tmp/hib_src
+```
+
+
 ### 5. Build hibridon
 
 ```bash
@@ -63,4 +77,12 @@ The following command will run hibridon's unit test:
 
 ```bash
 make test
+```
+
+### 7. one liner example
+
+This one line command configures, builds and tests hibridon from a directory containing the source code.
+
+```
+graffy@graffy-ws2:/tmp/hibridon.build$ rm -R ./* ; script -q /dev/null --command  "cmake -DCMAKE_BUILD_TYPE=Debug /home/graffy/work/hibridon" && script -q /dev/null --command "make 2>&1" | tee "/home/graffy/work/hibridon/refactor_notes/make_$(date).stdout" && ctest
 ```
