@@ -315,11 +315,15 @@ include("tests/ch3he_ccsdt/ch3he_ccsdt.cmake")
 
 # declare the test suites
 
+# test suite from autotest/testgroup_short
+
 set(short_testsuite 
   arn2
   arno)
 
 add_hibridon_testsuite("short" "${short_testsuite}")
+
+# test suite from autotest/testgroup_regular
 
 set(regular_testsuite
   arn2
@@ -335,3 +339,95 @@ set(regular_testsuite
   vfit)
 
 add_hibridon_testsuite("regular" "${regular_testsuite}")
+
+# test suite from autotest/testgroup_extended
+
+set(extended_testsuite
+  arn2
+  aroh
+  arno
+  arno_bound
+  aroh
+  arch4
+  boh2_bound
+  c2hh2
+  ch3he
+  ch3he_vib
+  ch3i
+  cph2
+  h2ohe
+  hco_trnprt
+  hecn
+  heco
+  heohx
+  heohx_ohh2pot
+  nh3h2
+  ohh2_j1
+  ohh2_j13
+  prsbr
+  stmix
+  stp1sg_pnh3ph2
+  stp1sg_och3he
+  trnprt
+  vfit)
+
+add_hibridon_testsuite("extended" "${extended_testsuite}")
+
+# test suite from autotest/testgroup_full_qma
+
+set(full_qma_testsuite
+  heco
+  nh3h2_qma
+  ch3i
+  arn2
+  aroh
+  neoh_sumi
+  h2ohe
+  nh3h2
+  trnprt
+  prsbr
+  stmix
+  ch3he
+  arno
+  vfit
+  boh2_bound
+  ch3he_vib
+  hecn
+  heohx
+  arno_bound
+  ohh2_j1
+  ohh2_j13
+  ohh2_j1_bausr
+  heohx_ohh2pot)
+
+add_hibridon_testsuite("full_qma" "${full_qma_testsuite}")
+
+# test suite from autotest/testgroup_all
+
+set(all_testsuite
+  arn2
+  aroh
+  arno
+  arno_bound
+  aroh
+  boh2_bound
+  ch3he
+  ch3he_vib
+  ch3i
+  cph2
+  h2ohe
+  hecn
+  heco
+  heohx
+  heohx_ohh2pot
+  nh3h2
+  ohh2_j1
+  ohh2_j13
+  prsbr
+  stmix
+  stp1sg_pnh3ph2
+  stp1sg_och3he
+  trnprt
+  vfit)
+
+add_hibridon_testsuite("all" "${all_testsuite}")
