@@ -1,6 +1,7 @@
 # CMake project file for hibridon
 
-cmake_minimum_required (VERSION 2.6)
+# cmake version >= 3.3 is required for IN_LIST
+cmake_minimum_required (VERSION 3.3)
 project (hibridon)
 enable_language (Fortran)
 
@@ -274,16 +275,17 @@ add_test(NAME check_outputs_build
 
 # function to declare a test suite (group of tests)
 # once a test suite has beed added, the user can lanch it using : make <TESTSUITE_ID>
-function(add_hibridon_testsuite TESTSUITE_ID TESTSUITE_TESTS)
+function(add_hibridon_testsuite TESTSUITE_ID TESTSUITE_TESTS TESTS_LIST)
   # TESTSUITE_ID : eg 'short'
   # TESTSUITE_TESTS : list of tests to include in this test suite. eg 'arn2;arno'
+  # TESTS_LIST : list of declared tests (used to check if tests in testsuite have been declared)
   set(tests_regex "")
   foreach (test_id IN LISTS TESTSUITE_TESTS)
-    #if(TEST "${test_id}_test_run")
+    if("${test_id}" IN_LIST TESTS_LIST)
       list(APPEND tests_regex "^${test_id}$")
-    #else()
-    #  message( FATAL_ERROR "missing test ${test_id} in test suite ${TESTSUITE_ID}")
-    #endif()
+    else()
+      message( FATAL_ERROR "missing test ${test_id} in test suite ${TESTSUITE_ID}")
+    endif()
   endforeach()
 
   list(JOIN tests_regex "|" testsuite_regex)
@@ -297,19 +299,39 @@ endfunction()
 
 # declare the tests
 
-include("tests/arn2/arn2.cmake")
-include("tests/arn2_big/arn2_big.cmake")
-include("tests/vfit/vfit.cmake")
-include("tests/arno/arno.cmake")
-include("tests/ch3i/ch3i.cmake")
-include("tests/boh2/boh2.cmake")
-include("tests/aroh/aroh.cmake")
-include("tests/heco/heco.cmake")
-include("tests/hecn/hecn.cmake") 
-include("tests/h2ohe_orig/h2ohe_orig.cmake")
-include("tests/ch3he_ccsdt/ch3he_ccsdt.cmake")
+set(tests_list 
+  arn2
+  arn2_big
+  arno
+  aroh
+  boh2
+  ch3he_ccsdt
+  ch3i
+  h2ohe_orig
+  heco
+  hecn 
+  vfit)
+
+foreach(test_id IN LISTS tests_list)
+  include("tests/${test_id}/${test_id}.cmake")
+endforeach()
 
 # declare the test suites
+
+set(original_testsuite
+  arn2
+  arn2_big
+  arno
+  aroh
+  boh2
+  ch3he_ccsdt
+  ch3i
+  h2ohe_orig
+  heco
+  hecn 
+  vfit)
+
+add_hibridon_testsuite("original" "${original_testsuite}" "${tests_list}")
 
 # test suite from autotest/testgroup_short
 
@@ -317,24 +339,24 @@ set(short_testsuite
   arn2
   arno)
 
-add_hibridon_testsuite("short" "${short_testsuite}")
+add_hibridon_testsuite("short" "${short_testsuite}" "${tests_list}")
 
 # test suite from autotest/testgroup_regular
 
 set(regular_testsuite
   arn2
   arno
-  boh2_bound
-  ch3he
-  h2ohe
+#  boh2_bound
+#  ch3he
+#  cph2
+#  h2ohe
+#  hco_trnprt
   hecn
-  cph2
-  nh3h2
-  ohh2_j1
-  hco_trnprt
+#  nh3h2
+#  ohh2_j1
   vfit)
 
-add_hibridon_testsuite("regular" "${regular_testsuite}")
+add_hibridon_testsuite("regular" "${regular_testsuite}" "${tests_list}")
 
 # test suite from autotest/testgroup_extended
 
@@ -342,61 +364,60 @@ set(extended_testsuite
   arn2
   aroh
   arno
-  arno_bound
-  aroh
-  arch4
-  boh2_bound
-  c2hh2
-  ch3he
-  ch3he_vib
+#  arno_bound
+#  arch4
+#  boh2_bound
+#  c2hh2
+#  ch3he
+#  ch3he_vib
   ch3i
-  cph2
-  h2ohe
-  hco_trnprt
+#  cph2
+#  h2ohe
+#  hco_trnprt
   hecn
   heco
-  heohx
-  heohx_ohh2pot
-  nh3h2
-  ohh2_j1
-  ohh2_j13
-  prsbr
-  stmix
-  stp1sg_pnh3ph2
-  stp1sg_och3he
-  trnprt
+#  heohx
+#  heohx_ohh2pot
+#  nh3h2
+#  ohh2_j1
+#  ohh2_j13
+#  prsbr
+#  stmix
+#  stp1sg_pnh3ph2
+#  stp1sg_och3he
+#  trnprt
   vfit)
 
-add_hibridon_testsuite("extended" "${extended_testsuite}")
+add_hibridon_testsuite("extended" "${extended_testsuite}" "${tests_list}")
 
 # test suite from autotest/testgroup_full_qma
 
 set(full_qma_testsuite
-  heco
-  nh3h2_qma
-  ch3i
   arn2
-  aroh
-  neoh_sumi
-  h2ohe
-  nh3h2
-  trnprt
-  prsbr
-  stmix
-  ch3he
   arno
-  vfit
-  boh2_bound
-  ch3he_vib
+#  arno_bound
+  aroh
+#  boh2_bound
+#  ch3he
+#  ch3he_vib
+  ch3i
+#  h2ohe
   hecn
-  heohx
-  arno_bound
-  ohh2_j1
-  ohh2_j13
-  ohh2_j1_bausr
-  heohx_ohh2pot)
+#  heohx
+#  heohx_ohh2pot
+  heco
+#  neoh_sumi
+#  nh3h2
+#  nh3h2_qma
+#  ohh2_j1
+#  ohh2_j13
+#  ohh2_j1_bausr
+#  prsbr
+#  stmix
+#  trnprt
+  vfit)
 
-add_hibridon_testsuite("full_qma" "${full_qma_testsuite}")
+add_hibridon_testsuite("full_qma" "${full_qma_testsuite}" "${tests_list}")
 
 # test suite from autotest/testgroup_all
 
@@ -404,26 +425,26 @@ set(all_testsuite
   arn2
   aroh
   arno
-  arno_bound
+#  arno_bound
   aroh
-  boh2_bound
-  ch3he
-  ch3he_vib
+#  boh2_bound
+#  ch3he
+#  ch3he_vib
   ch3i
-  cph2
-  h2ohe
+#  cph2
+#  h2ohe
   hecn
   heco
-  heohx
-  heohx_ohh2pot
-  nh3h2
-  ohh2_j1
-  ohh2_j13
-  prsbr
-  stmix
-  stp1sg_pnh3ph2
-  stp1sg_och3he
-  trnprt
+#  heohx
+#  heohx_ohh2pot
+#  nh3h2
+#  ohh2_j1
+#  ohh2_j13
+#  prsbr
+#  stmix
+#  stp1sg_pnh3ph2
+#  stp1sg_och3he
+#  trnprt
   vfit)
 
-add_hibridon_testsuite("all" "${all_testsuite}")
+add_hibridon_testsuite("all" "${all_testsuite}" "${tests_list}")
