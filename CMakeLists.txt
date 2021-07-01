@@ -265,6 +265,8 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
   set_tests_properties(${TEST_ID}_test_run PROPERTIES FIXTURES_REQUIRED ${TEST_ID}_resources)
   set_tests_properties(${TEST_ID}_test_run PROPERTIES DEPENDS ${TEST_ID}_build)
   set_tests_properties(${TEST_ID}_test_check PROPERTIES DEPENDS check_outputs_build)
+
+  set_tests_properties(${TEST_ID}_build ${TEST_ID}_test_run ${TEST_ID}_test_check PROPERTIES LABELS ${TEST_ID})
 endfunction()
 
 # This executable compares output files from test runs and reference outputs located in the tests directory
@@ -273,6 +275,31 @@ add_executable(check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/ci/comp_tests.f90)
 add_test(NAME check_outputs_build
     COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target check_outputs)
 
+
+# function to declare a test suite (group of tests)
+# once a test suite has beed added, the user can lanch it using : make <TESTSUITE_ID>
+function(add_hibridon_testsuite TESTSUITE_ID TESTSUITE_TESTS)
+  # TESTSUITE_ID : eg 'short'
+  # TESTSUITE_TESTS : list of tests to include in this test suite. eg 'arn2;arno'
+  set(tests_regex "")
+  foreach (test_id IN LISTS TESTSUITE_TESTS)
+    #if(TEST "${test_id}_test_run")
+      list(APPEND tests_regex "^${test_id}$")
+    #else()
+    #  message( FATAL_ERROR "missing test ${test_id} in test suite ${TESTSUITE_ID}")
+    #endif()
+  endforeach()
+
+  list(JOIN tests_regex "|" testsuite_regex)
+
+  #message(${short_testsuite})
+  # message("${testsuite_regex}")
+  # set(short_testsuite_regex "(arn2_test|arno_test)")
+  add_custom_target(testsuite_${TESTSUITE_ID} COMMAND bash -c "${CMAKE_CTEST_COMMAND} -L '(${testsuite_regex})'" VERBATIM)
+  add_dependencies(testsuite_${TESTSUITE_ID} check_outputs hib) # note: adding hib as a dependency is not mandatory, but it makes the build process of hib library more visible (warnings are visible)
+endfunction()
+
+# declare the tests
 
 include("tests/arn2/arn2.cmake")
 include("tests/arn2_big/arn2_big.cmake")
@@ -286,3 +313,25 @@ include("tests/hecn/hecn.cmake")
 include("tests/h2ohe_orig/h2ohe_orig.cmake")
 include("tests/ch3he_ccsdt/ch3he_ccsdt.cmake")
 
+# declare the test suites
+
+set(short_testsuite 
+  arn2
+  arno)
+
+add_hibridon_testsuite("short" "${short_testsuite}")
+
+set(regular_testsuite
+  arn2
+  arno
+  boh2_bound
+  ch3he
+  h2ohe
+  hecn
+  cph2
+  nh3h2
+  ohh2_j1
+  hco_trnprt
+  vfit)
+
+add_hibridon_testsuite("regular" "${regular_testsuite}")
