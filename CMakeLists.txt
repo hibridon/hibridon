@@ -5,6 +5,22 @@ cmake_minimum_required (VERSION 3.3)
 project (hibridon)
 enable_language (Fortran)
 
+set(ENABLE_CODE_COVERAGE "OFF" CACHE BOOL "to enable or disable code coverage analysis (mostly for developers)")
+
+if(ENABLE_CODE_COVERAGE)
+  find_program(COVERAGE_LCOV_EXE lcov)
+  if (NOT COVERAGE_LCOV_EXE)
+      message(FATAL_ERROR "failed to find lcov executable (tool used in in code coverage analysis)")
+  endif()
+  message(${COVERAGE_LCOV_EXE})
+
+  find_program(COVERAGE_GENHTML_EXE genhtml)
+  if (NOT COVERAGE_GENHTML_EXE)
+      message(FATAL_ERROR "failed to find genhtml executable (tool used in in code coverage analysis)")
+  endif()
+  message(${COVERAGE_GENHTML_EXE})
+endif()
+
 # set(MKLROOT )
 # set(BLA_VENDOR Intel10_64lp)
 find_package( BLAS REQUIRED )
@@ -19,6 +35,12 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # gfortran
   set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -fsanitize=address")
+  if(ENABLE_CODE_COVERAGE)
+    set(GCC_COVERAGE_COMPILE_FLAGS "-fprofile-arcs -ftest-coverage --coverage")
+    set(GCC_COVERAGE_LINK_FLAGS "-lgcov")
+    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} ${GCC_COVERAGE_COMPILE_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${GCC_COVERAGE_LINK_FLAGS}")
+  endif()
 elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   # ifort (untested)
   set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3")
@@ -210,10 +232,12 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
   target_include_directories(${TEST_EXE} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
   target_include_directories(${TEST_EXE} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
   target_compile_options(${TEST_EXE} PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
+  target_link_options(${TEST_EXE} PUBLIC ${GCC_COVERAGE_LINK_FLAGS})
 
 
   add_test(NAME ${TEST_ID}_test_setup
       COMMAND bash -c "mkdir -p ${TEST_BUILD_DIR}/potdata && \
+                      mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/coverage &&
                       for input_file in ${TEST_INPUT_FILES} ${TEST_COMMAND_FILE}; \
                       do \
                           cp ${TEST_SRC_DIR}/$input_file ${TEST_BUILD_DIR}/ ; \
@@ -265,18 +289,39 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
     )
   endif()
 
+  if(ENABLE_CODE_COVERAGE)
+    add_test(NAME ${TEST_ID}_save_coverage
+      COMMAND lcov -c -d ${CMAKE_CURRENT_BINARY_DIR}/ -o ${CMAKE_CURRENT_BINARY_DIR}/coverage/${TEST_ID}.info;
+    )
+
+    add_test(NAME ${TEST_ID}_cleanup_coverage
+      COMMAND find ${CMAKE_CURRENT_BINARY_DIR} -name "*.gcda" -delete;
+    )
+  endif()
+
   add_test(NAME ${TEST_ID}_test_cleanup
       COMMAND rm -R ${TEST_BUILD_DIR};
   )
 
   set_tests_properties(${TEST_ID}_test_setup PROPERTIES FIXTURES_SETUP ${TEST_ID}_resources)
+  if(ENABLE_CODE_COVERAGE)
+    set_tests_properties(${TEST_ID}_cleanup_coverage PROPERTIES FIXTURES_CLEANUP ${TEST_ID}_resources)
+  endif()
   set_tests_properties(${TEST_ID}_test_cleanup PROPERTIES FIXTURES_CLEANUP ${TEST_ID}_resources)
 
   set_tests_properties(${TEST_ID}_test_run PROPERTIES FIXTURES_REQUIRED ${TEST_ID}_resources)
   set_tests_properties(${TEST_ID}_test_run PROPERTIES DEPENDS ${TEST_ID}_build)
   set_tests_properties(${TEST_ID}_test_check PROPERTIES DEPENDS check_outputs_build)
 
+  if(ENABLE_CODE_COVERAGE)
+    set_tests_properties(${TEST_ID}_save_coverage PROPERTIES DEPENDS ${TEST_ID}_test_check)
+    set_tests_properties(${TEST_ID}_cleanup_coverage PROPERTIES DEPENDS ${TEST_ID}_save_coverage)
+  endif()
+
   set_tests_properties(${TEST_ID}_build ${TEST_ID}_test_run ${TEST_ID}_test_check PROPERTIES LABELS ${TEST_ID})
+  if(ENABLE_CODE_COVERAGE)
+    set_tests_properties(${TEST_ID}_save_coverage ${TEST_ID}_cleanup_coverage PROPERTIES LABELS ${TEST_ID})
+  endif()
 endfunction()
 
 # This executable compares output files from test runs and reference outputs located in the tests directory
@@ -309,6 +354,29 @@ function(add_hibridon_testsuite TESTSUITE_ID TESTSUITE_TESTS TESTS_LIST)
   add_custom_target(testsuite_${TESTSUITE_ID} COMMAND bash -c "${CMAKE_CTEST_COMMAND} -L '(${testsuite_regex})'" VERBATIM)
   add_dependencies(testsuite_${TESTSUITE_ID} check_outputs hib) # note: adding hib as a dependency is not mandatory, but it makes the build process of hib library more visible (warnings are visible)
 endfunction()
+
+if(ENABLE_CODE_COVERAGE)
+  add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/coverage/total.info COMMAND bash -c "\
+    command='${COVERAGE_LCOV_EXE} ' ; \
+    for test_coverage in $(find ${CMAKE_BINARY_DIR} -name \"*.info\") ; \
+    do \
+      command=\"\$command -a \$test_coverage\" ; \
+    done ; \
+    command=\"\$command -o ${CMAKE_BINARY_DIR}/coverage/total.info\" ; \
+    \$command" VERBATIM)
+
+  add_custom_target(html_coverages DEPENDS ${CMAKE_BINARY_DIR}/coverage/total.info VERBATIM COMMAND bash -c "\
+    for test_coverage_file in $(find ${CMAKE_BINARY_DIR}/coverage -name \"*.info\") ; \
+    do \
+      echo coucou $test_coverage_file ; \
+      html_root=${CMAKE_BINARY_DIR}/coverage/\$(basename \$test_coverage_file | sed 's/.info//') ; \
+      echo coucoucou $html_root ; \
+      mkdir -p \$html_root ; \
+      echo hello ; \
+      echo ${COVERAGE_GENHTML_EXE} ; \
+      ${COVERAGE_GENHTML_EXE} \$test_coverage_file -o \$html_root ; \
+    done ;")
+endif()
 
 # declare the tests
 
