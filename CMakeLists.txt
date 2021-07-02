@@ -5,6 +5,9 @@ cmake_minimum_required (VERSION 3.3)
 project (hibridon)
 enable_language (Fortran)
 
+# code coverage is disabled by default because:
+# 1. most users won't need it: this is targetted to developers, not users
+# 2. code coverage requires extra programs, and this would make hibridon's build process more complicate than needed for normal users
 set(ENABLE_CODE_COVERAGE "OFF" CACHE BOOL "to enable or disable code coverage analysis (mostly for developers)")
 
 if(ENABLE_CODE_COVERAGE)
