@@ -73,10 +73,22 @@ make
 ```
 ### 6. Test hibridon
 
-The following command will run hibridon's unit test:
+The following command will run all hibridon's tests:
 
 ```bash
 make test
+```
+
+You can also run a test suite (a group of tests). For example, the following command will run the test suite `short`:
+
+```bash
+make testsuite_short
+```
+
+You can also run a single test. For example, the following command will run the test `arn2`:
+
+```bash
+ctest -L '^arn2$'
 ```
 
 ### 7. one liner example
