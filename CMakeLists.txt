@@ -299,7 +299,7 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
   endif()
 
   add_test(NAME ${TEST_ID}_test_cleanup
-      COMMAND rm -R ${TEST_BUILD_DIR};
+      COMMAND ls -R ${TEST_BUILD_DIR};
   )
 
   set_tests_properties(${TEST_ID}_test_setup PROPERTIES FIXTURES_SETUP ${TEST_ID}_resources)
@@ -387,7 +387,7 @@ set(tests_list
   boh2
   ch3he_ccsdt
   ch3i
-#  cph2  this test is disabled because it fails. todo: make this test pass
+  cph2
   h2ohe_orig
   heco
   hecn 
@@ -429,7 +429,7 @@ set(regular_testsuite
   arno
 #  boh2_bound
 #  ch3he
-#  cph2
+  cph2
 #  h2ohe
 #  hco_trnprt
   hecn
@@ -452,7 +452,7 @@ set(extended_testsuite
 #  ch3he
 #  ch3he_vib
   ch3i
-#  cph2
+  cph2
 #  h2ohe
 #  hco_trnprt
   hecn
@@ -512,7 +512,7 @@ set(all_testsuite
 #  ch3he
 #  ch3he_vib
   ch3i
-#  cph2
+  cph2
 #  h2ohe
   hecn
   heco
