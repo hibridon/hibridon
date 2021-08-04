@@ -274,7 +274,7 @@ module m_diff
                 endif
                 number_index = number_index + 1
             enddo
-            vectors_differ = .TRUE.
+            vectors_differ = .FALSE.
             return
         endif
         end function vectors_differ
