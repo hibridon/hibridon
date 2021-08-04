@@ -330,8 +330,11 @@ program comp_tests
     ext = ref(j+1:len(ref))
 
     if(ext=="xsc") then
-        write(Error_Unit, *) "error: unhandled file extension : ", ext
-        stop 1
+        if(result_files_differ(ref, test, num_header_lines=32, tolerance=0.01d0)) then
+            stop 1
+        else
+            stop 0
+        endif
     endif
 
     if(ext=="pcs") then
