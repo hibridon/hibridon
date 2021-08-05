@@ -391,8 +391,9 @@ set(tests_list
   cph2
   h2ohe
   h2ohe_orig
-  heco
   hecn 
+  heco
+  nh3h2
   vfit)
 
 foreach(test_id IN LISTS tests_list)
@@ -410,8 +411,8 @@ set(original_testsuite
   ch3he_ccsdt
   ch3i
   h2ohe_orig
-  heco
   hecn 
+  heco
   vfit)
 
 add_hibridon_testsuite("original" "${original_testsuite}" "${tests_list}")
@@ -435,7 +436,7 @@ set(regular_testsuite
   h2ohe
 #  hco_trnprt
   hecn
-#  nh3h2
+  nh3h2
 #  ohh2_j1
   vfit)
 
@@ -461,7 +462,7 @@ set(extended_testsuite
   heco
 #  heohx
 #  heohx_ohh2pot
-#  nh3h2
+  nh3h2
 #  ohh2_j1
 #  ohh2_j13
 #  prsbr
@@ -490,7 +491,7 @@ set(full_qma_testsuite
 #  heohx_ohh2pot
   heco
 #  neoh_sumi
-#  nh3h2
+  nh3h2
 #  nh3h2_qma
 #  ohh2_j1
 #  ohh2_j13
@@ -520,7 +521,7 @@ set(all_testsuite
   heco
 #  heohx
 #  heohx_ohh2pot
-#  nh3h2
+  nh3h2
 #  ohh2_j1
 #  ohh2_j13
 #  prsbr

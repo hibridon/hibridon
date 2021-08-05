@@ -8,9 +8,9 @@
 *  Note:  this pot routine requires a data file to be in hibxx/bin/progs/potdata:
 *         fitvij_bf_62.h2
 *
-      include "common/syusr"
-      include "common/ground"
-      include "common/bausr"
+#include "common/syusr"
+#include "common/ground"
+#include "common/bausr"
 * ------------------------------------------------------------------------
       subroutine driver
       implicit double precision (a-h,o-z)
@@ -19,7 +19,7 @@
       common /fisurf/ conv,econv,lsurf,nv
       common /coloapot/ s4pi, nvv, ivv(300)
       common /conlam/ nlam, nlammx, lamnum
-      include "common/parpot"
+#include "common/parpot"
       potnam='RIST/VALIRON NH3-H2 2009'
       nlammx = 55
       nlam = 55
@@ -97,7 +97,7 @@
 *  -----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
       logical readpt
-      include "common/parbas"
+#include "common/parbas"
 
       integer         nscode, isicod, nterm, numpot, ipotsy, iop, ninv,
      :                kmax, jmax0, jmax1, jmax2, jmax3, jmax4, jmax5,
@@ -152,7 +152,7 @@ c    datanm:      name of namelist data file ( set with pot= )
  
       common /fiunit/ iwrite,ifile
       character*(*) filnam
-      include "common/parpot"
+#include "common/parpot"
       parameter (nvmx = 300)
       integer   ivij(nvmx), jvij(nvmx), i2vij(nvmx), j2vij(nvmx),
      :          lambda(nvmx), mu(nvmx),
@@ -446,7 +446,7 @@ c  display and list parameters
 *      implicit none
       implicit double precision (a-h,o-z)
 *      integer ivv, nvv, nlam, nlammx, kv, kvv, nvmx, lamnum
-      include "common/parpot"
+#include "common/parpot"
 
 *      double precision  r, v, vv, vv0, vvl, s4pi
       double precision  r, v, vv, vv0, s4pi
@@ -552,7 +552,7 @@ c       parameter nvmx          max number of vij terms
 *        implicit none
         implicit double precision (a-h,o-z)
 *        integer nddmx, nvmx
-        include "common/parpot"
+#include "common/parpot"
 *        parameter (nvmx = 45)
         parameter (nddmx=250)
         double precision r, v, dd, y, y1, y2, y3, yref, h, conv, econv
