@@ -385,6 +385,7 @@ set(tests_list
   arno
   aroh
   boh2
+  ch3he
   ch3he_ccsdt
   ch3i
   cph2
@@ -428,7 +429,7 @@ set(regular_testsuite
   arn2
   arno
 #  boh2_bound
-#  ch3he
+  ch3he
   cph2
 #  h2ohe
 #  hco_trnprt
@@ -449,7 +450,7 @@ set(extended_testsuite
 #  arch4
 #  boh2_bound
 #  c2hh2
-#  ch3he
+  ch3he
 #  ch3he_vib
   ch3i
   cph2
@@ -479,7 +480,7 @@ set(full_qma_testsuite
 #  arno_bound
   aroh
 #  boh2_bound
-#  ch3he
+  ch3he
 #  ch3he_vib
   ch3i
 #  h2ohe
@@ -509,7 +510,7 @@ set(all_testsuite
 #  arno_bound
   aroh
 #  boh2_bound
-#  ch3he
+  ch3he
 #  ch3he_vib
   ch3i
   cph2
