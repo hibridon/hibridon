@@ -389,6 +389,7 @@ set(tests_list
   ch3he_ccsdt
   ch3i
   cph2
+  h2ohe
   h2ohe_orig
   heco
   hecn 
@@ -431,7 +432,7 @@ set(regular_testsuite
 #  boh2_bound
   ch3he
   cph2
-#  h2ohe
+  h2ohe
 #  hco_trnprt
   hecn
 #  nh3h2
@@ -454,7 +455,7 @@ set(extended_testsuite
 #  ch3he_vib
   ch3i
   cph2
-#  h2ohe
+  h2ohe
 #  hco_trnprt
   hecn
   heco
@@ -483,7 +484,7 @@ set(full_qma_testsuite
   ch3he
 #  ch3he_vib
   ch3i
-#  h2ohe
+  h2ohe
   hecn
 #  heohx
 #  heohx_ohh2pot
@@ -514,7 +515,7 @@ set(all_testsuite
 #  ch3he_vib
   ch3i
   cph2
-#  h2ohe
+  h2ohe
   hecn
   heco
 #  heohx
