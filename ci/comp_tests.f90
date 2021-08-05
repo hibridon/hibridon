@@ -329,8 +329,10 @@ program comp_tests
     j = scan(trim(ref),".", BACK= .true.)
     ext = ref(j+1:len(ref))
 
-    if(ext=="xsc") then
-        if(result_files_differ(ref, test, num_header_lines=32, tolerance=0.01d0)) then
+    write(Output_Unit, *) 'comparing test file ', test, ' to reference file ', ref
+
+    if(ext=="dcs") then
+        if(result_files_differ(ref, test, num_header_lines=15, tolerance=0.01d0)) then
             stop 1
         else
             stop 0
@@ -344,6 +346,17 @@ program comp_tests
             stop 0
         endif
     endif
+
+    if(ext=="xsc") then
+        if(result_files_differ(ref, test, num_header_lines=32, tolerance=0.01d0)) then
+            stop 1
+        else
+            stop 0
+        endif
+    endif
+
+
+
 
     open(unit=1, status='old', file=trim(ref))
     open(unit=2, status='old', file=trim(test))
