@@ -395,6 +395,7 @@ set(tests_list
   heco
   nh3h2
   ohh2_j1
+  ohh2_j13
   vfit)
 
 foreach(test_id IN LISTS tests_list)
@@ -465,7 +466,7 @@ set(extended_testsuite
 #  heohx_ohh2pot
   nh3h2
   ohh2_j1
-#  ohh2_j13
+  ohh2_j13
 #  prsbr
 #  stmix
 #  stp1sg_pnh3ph2
@@ -495,7 +496,7 @@ set(full_qma_testsuite
   nh3h2
 #  nh3h2_qma
   ohh2_j1
-#  ohh2_j13
+  ohh2_j13
 #  ohh2_j1_bausr
 #  prsbr
 #  stmix
@@ -524,7 +525,7 @@ set(all_testsuite
 #  heohx_ohh2pot
   nh3h2
   ohh2_j1
-#  ohh2_j13
+  ohh2_j13
 #  prsbr
 #  stmix
 #  stp1sg_pnh3ph2
