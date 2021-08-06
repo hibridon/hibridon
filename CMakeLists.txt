@@ -387,6 +387,7 @@ set(tests_list
   arno
   aroh
   boh2
+  c2hh2
   ch2he
   ch3he
   ch3he_ccsdt
@@ -457,7 +458,7 @@ set(extended_testsuite
 #  arno_bound
 #  arch4
 #  boh2_bound
-#  c2hh2
+  c2hh2
   ch2he_a
   ch2he_x
 #  ch2he_stmix

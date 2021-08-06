@@ -13,9 +13,9 @@ c     revised from pot_ohh2.f, written by qianli ma
 c     current revision:  29-aug-2017 (p. dagdigian)
 c     ------------------------------------------------------------------
 c     Dummy subroutines for user-defined bases.
-      include "common/syusr"
-      include "common/bausr"
-      include "common/ground"
+#include "common/syusr"
+#include "common/bausr"
+#include "common/ground"
 c     ----------------------------------------------------------------- 
 C     Module containing the shared arrays for this pot routine
 c
