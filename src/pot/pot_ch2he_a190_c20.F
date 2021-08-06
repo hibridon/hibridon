@@ -12,14 +12,14 @@
 *  Note:  subr spline_ch2he requires 1 data file to be in hibxx/bin/progs/potdata:
 *         ch2he_a190.dat
 
-      include "common/syusr"
-      include "common/ground"
-      include "common/bausr"
+#include "common/syusr"
+#include "common/ground"
+#include "common/bausr"
 * ------------------------------------------------------------------------
       subroutine driver
       implicit double precision (a-h,o-z)
       common /covvl/ vvl(19)
-      include "common/parpot"
+#include "common/parpot"
       s4pi = sqrt ( 4.d0 * acos(-1.d0) )
       potnam='MA CH2(a)-He PES'
       print *, potnam
@@ -40,8 +40,8 @@
       subroutine loapot(iunit,filnam)
       implicit double precision (a-h,o-z)
       character*(*) filnam
-      include "common/parbas"
-      include "common/parpot" 
+#include "common/parbas"
+#include "common/parpot" 
       common /conlam/ nlam, nlammx, lamnum(2)
       common /cosysi/ nscode, isicod, nterm
       potnam='MA CH2(a)-He PES'

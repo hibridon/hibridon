@@ -219,9 +219,11 @@ add_dependencies(hib parhlp)
 enable_testing()
 
 function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_COMMAND_FILE TEST_INPUT_FILES TEST_OUTPUT_FILES TEST_KMAX TEST_T_MATRIX_SIZE)
+  message("for test ${TEST_ID}, CMAKE_CURRENT_LIST_DIR=${CMAKE_CURRENT_LIST_DIR}")
+  get_filename_component(TEST_DIRNAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 
-  set(TEST_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests/${TEST_ID})
-  set(TEST_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests/${TEST_ID})
+  set(TEST_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests/${TEST_DIRNAME})
+  set(TEST_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests/${TEST_DIRNAME})
   set(TEST_EXE ${TEST_ID})
 
   add_executable(${TEST_EXE} src/pot/${TEST_POT_SRC_FILE} src/himain.F)
@@ -236,7 +238,7 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
 
   add_test(NAME ${TEST_ID}_test_setup
       COMMAND bash -c "mkdir -p ${TEST_BUILD_DIR}/potdata && \
-                      mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/coverage &&
+                      mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/coverage && \
                       for input_file in ${TEST_INPUT_FILES} ${TEST_COMMAND_FILE}; \
                       do \
                           cp ${TEST_SRC_DIR}/$input_file ${TEST_BUILD_DIR}/ ; \
@@ -261,7 +263,7 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
 
   # $basedir/bin/progs/arn2_151 <arn2_test.com
   add_test(NAME ${TEST_ID}_test_run
-    COMMAND bash -c "${test_command_prefix} cat ./${TEST_COMMAND_FILE} | ${CMAKE_CURRENT_BINARY_DIR}/${TEST_EXE}"
+    COMMAND bash -c "${test_command_prefix} cat ./${TEST_COMMAND_FILE} | ${CMAKE_CURRENT_BINARY_DIR}/${TEST_EXE} > .${TEST_ID}.stdout"
     WORKING_DIRECTORY "${TEST_BUILD_DIR}"
   )
 
@@ -338,7 +340,7 @@ function(add_hibridon_testsuite TESTSUITE_ID TESTSUITE_TESTS TESTS_LIST)
   # TESTS_LIST : list of declared tests (used to check if tests in testsuite have been declared)
   set(tests_regex "")
   foreach (test_id IN LISTS TESTSUITE_TESTS)
-    if("${test_id}" IN_LIST TESTS_LIST)
+    if(TARGET "${test_id}")
       list(APPEND tests_regex "^${test_id}$")
     else()
       message( FATAL_ERROR "missing test ${test_id} in test suite ${TESTSUITE_ID}")
@@ -385,6 +387,7 @@ set(tests_list
   arno
   aroh
   boh2
+  ch2he
   ch3he
   ch3he_ccsdt
   ch3i
@@ -455,6 +458,9 @@ set(extended_testsuite
 #  arch4
 #  boh2_bound
 #  c2hh2
+  ch2he_a
+#  ch2he_x
+#  ch2he_stmix
   ch3he
 #  ch3he_vib
   ch3i
@@ -469,7 +475,6 @@ set(extended_testsuite
   nh3h2
   ohh2_j1
   ohh2_j13
-#  stmix
 #  stp1sg_pnh3ph2
 #  stp1sg_och3he
 #  trnprt
@@ -485,6 +490,9 @@ set(full_qma_testsuite
 #  arno_bound
   aroh
 #  boh2_bound
+  ch2he_a
+#  ch2he_x
+#  ch2he_stmix
   ch3he
 #  ch3he_vib
   ch3i
@@ -500,7 +508,6 @@ set(full_qma_testsuite
   ohh2_j1
   ohh2_j13
 #  ohh2_j1_bausr
-#  stmix
 #  trnprt
   vfit)
 
@@ -515,6 +522,9 @@ set(all_testsuite
 #  arno_bound
   aroh
 #  boh2_bound
+  ch2he_a
+#  ch2he_x
+#  ch2he_stmix
   ch3he
 #  ch3he_vib
   ch3i
@@ -528,7 +538,6 @@ set(all_testsuite
   nh3h2
   ohh2_j1
   ohh2_j13
-#  stmix
 #  stp1sg_pnh3ph2
 #  stp1sg_och3he
 #  trnprt

@@ -13,9 +13,9 @@
 *  Note:  subroutine spline_ch2he requires 1 data file to be in hib44/bin/progs/potdata:
 *         ch2he_x52_v3.dat
 *
-      include "common/syusr"
-      include "common/ground"
-      include "common/bausr"
+#include "common/syusr"
+#include "common/ground"
+#include "common/bausr"
 * ------------------------------------------------------------------------
       subroutine driver
       implicit double precision (a-h,o-z)
@@ -23,7 +23,7 @@
 *      common /vspline/ vsp_jacek(52)
       common /coloapot/ s4pi
       common /copotvec/ vec(40,21)
-      include "common/parpot"
+#include "common/parpot"
       s4pi = sqrt ( 4.d0 * acos(-1.d0) )
       rr=3.5d0
       dr=0.5d0
@@ -46,8 +46,8 @@
       subroutine loapot(iunit,filnam)
       implicit double precision (a-h,o-z)
       character*(*) filnam
-      include "common/parbas"
-      include "common/parpot" 
+#include "common/parbas"
+#include "common/parpot" 
       common /conlam/ nlam, nlammx, lamnum(2)
       potnam='MA CH2(X,030)-He PES'
 *
