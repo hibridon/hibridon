@@ -426,7 +426,7 @@
       if (ialloc .ne. 0) goto 4016
       allocate(lt(0:jfinl2, 2, mmaxt), stat=ialloc)
       if (ialloc .ne. 0) goto 4017
-      allocate(lngths(0:jfinl1, 2), stat=ialloc)
+      allocate(lngths(0:maxjtot, 2), stat=ialloc)
       if (ialloc .ne. 0) goto 4018
       allocate(lngtht(0:jfinl2, 2), stat=ialloc)
       if (ialloc .ne. 0) goto 4019
