@@ -9,9 +9,9 @@ C
 C     Data file used: pot_ohh2.dat
 C     ------------------------------------------------------------------
 C     Dummy subroutines for user-defined bases.
-      include "common/syusr"
-      include "common/bausr"
-      include "common/ground"
+#include "common/syusr"
+#include "common/bausr"
+#include "common/ground"
 C     ------------------------------------------------------------------
 C     Module containing the shared arrays for this pot routine.
       module pot_ohh2
