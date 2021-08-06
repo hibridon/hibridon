@@ -339,6 +339,15 @@ program comp_tests
         endif
     endif
 
+    if(ext=="hfx") then
+        ! the 6 first lines may contain the date of the file
+        if(result_files_differ(ref, test, num_header_lines=6, tolerance=0.01d0)) then
+            stop 1
+        else
+            stop 0
+        endif
+    endif
+
     if(ext=="ppb") then
         ! the 6 first lines may contain the date of the file
         if(result_files_differ(ref, test, num_header_lines=6, tolerance=0.01d0)) then

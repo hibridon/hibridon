@@ -263,7 +263,7 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
 
   # $basedir/bin/progs/arn2_151 <arn2_test.com
   add_test(NAME ${TEST_ID}_test_run
-    COMMAND bash -c "${test_command_prefix} cat ./${TEST_COMMAND_FILE} | ${CMAKE_CURRENT_BINARY_DIR}/${TEST_EXE} > .${TEST_ID}.stdout"
+    COMMAND bash -c "${test_command_prefix} cat ./${TEST_COMMAND_FILE} | ${CMAKE_CURRENT_BINARY_DIR}/${TEST_EXE} | tee ./${TEST_ID}.stdout"
     WORKING_DIRECTORY "${TEST_BUILD_DIR}"
   )
 
@@ -459,7 +459,7 @@ set(extended_testsuite
 #  boh2_bound
 #  c2hh2
   ch2he_a
-#  ch2he_x
+  ch2he_x
 #  ch2he_stmix
   ch3he
 #  ch3he_vib
@@ -491,7 +491,7 @@ set(full_qma_testsuite
   aroh
 #  boh2_bound
   ch2he_a
-#  ch2he_x
+  ch2he_x
 #  ch2he_stmix
   ch3he
 #  ch3he_vib
@@ -523,7 +523,7 @@ set(all_testsuite
   aroh
 #  boh2_bound
   ch2he_a
-#  ch2he_x
+  ch2he_x
 #  ch2he_stmix
   ch3he
 #  ch3he_vib
