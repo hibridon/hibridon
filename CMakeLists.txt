@@ -391,6 +391,7 @@ set(tests_list
   cph2
   h2ohe
   h2ohe_orig
+  h2ohe_prsbr
   hecn 
   heco
   nh3h2
@@ -459,6 +460,7 @@ set(extended_testsuite
   ch3i
   cph2
   h2ohe
+  h2ohe_prsbr
 #  hco_trnprt
   hecn
   heco
@@ -467,7 +469,6 @@ set(extended_testsuite
   nh3h2
   ohh2_j1
   ohh2_j13
-#  prsbr
 #  stmix
 #  stp1sg_pnh3ph2
 #  stp1sg_och3he
@@ -488,6 +489,7 @@ set(full_qma_testsuite
 #  ch3he_vib
   ch3i
   h2ohe
+  h2ohe_prsbr
   hecn
 #  heohx
 #  heohx_ohh2pot
@@ -498,7 +500,6 @@ set(full_qma_testsuite
   ohh2_j1
   ohh2_j13
 #  ohh2_j1_bausr
-#  prsbr
 #  stmix
 #  trnprt
   vfit)
@@ -519,6 +520,7 @@ set(all_testsuite
   ch3i
   cph2
   h2ohe
+  h2ohe_prsbr
   hecn
   heco
 #  heohx
@@ -526,7 +528,6 @@ set(all_testsuite
   nh3h2
   ohh2_j1
   ohh2_j13
-#  prsbr
 #  stmix
 #  stp1sg_pnh3ph2
 #  stp1sg_och3he
