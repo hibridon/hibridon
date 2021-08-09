@@ -475,7 +475,7 @@ set(extended_testsuite
   hecn
   heco
   heohx
-#  heohx_ohh2pot
+  ohh2_bausr_heohx
   nh3h2
   ohh2_j1
   ohh2_j13
@@ -503,7 +503,7 @@ set(full_qma_testsuite
   h2ohe_prsbr
   hecn
   heohx
-#  heohx_ohh2pot
+  ohh2_bausr_heohx
   heco
 #  neoh_sumi
   nh3h2
@@ -537,7 +537,7 @@ set(all_testsuite
   hecn
   heco
   heohx
-#  heohx_ohh2pot
+  ohh2_bausr_heohx
   nh3h2
   ohh2_j1
   ohh2_j13
