@@ -44,7 +44,29 @@ This will create a directory /tmp/hib_src/hibridon, which is a clone of https://
 ```bash
 mkdir /tmp/hib_build
 ```
-### 4. Configure hibridon's build
+
+### 4. Create a configuration file for your potential energy surface
+
+Create a new file with the `.user.cmake` extension at the root of the build directory (/tmp/hib_build) (e.g. `nh3h2.user.cmake`).
+
+Past the following content in this file and edit it to suit your needs:
+```
+# NH3-H2 sample cmake script
+
+set(EXE_NAME "nh3h2.exe")
+set(POT_SRC_FILE "pot_nh3h2_2009.F")
+set(p_KMAX "500")
+set(p_T_MATRIX_SIZE "500")
+
+add_hibexe("${EXE_NAME}" "${POT_SRC_FILE}" "${p_KMAX}" "${p_T_MATRIX_SIZE}")
+```
+where 
+* `EXE_NAME` will be the name of the hibridon executable,
+* `POT_SRC_FILE` is the full path to your fortran potential file,
+* `p_KMAX` is the KMAX parameter,
+* `p_T_MATRIX_SIZE` is the T_MATRIX_SIZE parameter.
+
+### 5. Configure hibridon's build
 
 ```bash
 cd /tmp/hib_build
@@ -65,13 +87,7 @@ cd /tmp/hib_build
 cmake -DBLA_VENDOR=Intel10_64lp /tmp/hib_src
 ```
 
-
-### 5. Build hibridon
-
-```bash
-make
-```
-### 6. Test hibridon
+### 6. Test hibridon (OPTIONAL)
 
 The following command will run all hibridon's tests:
 
@@ -91,10 +107,18 @@ You can also run a single test. For example, the following command will run the 
 ctest -L '^arn2$'
 ```
 
-### 7. one liner example
+### 7. Build hibridon
+
+```bash
+make <EXEC_NAME>
+```
+where `EXEC_NAME` is the executable name defined in your `user.cmake` file.
+
+### 8. one liner example
 
 This one line command configures, builds and tests hibridon from a directory containing the source code.
 
 ```
 graffy@graffy-ws2:/tmp/hibridon.build$ rm -R ./* ; script -q /dev/null --command  "cmake -DCMAKE_BUILD_TYPE=Debug /home/graffy/work/hibridon" && script -q /dev/null --command "make 2>&1" | tee "/home/graffy/work/hibridon/refactor_notes/make_$(date).stdout" && ctest
 ```
+
