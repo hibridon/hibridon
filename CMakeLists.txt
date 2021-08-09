@@ -401,6 +401,7 @@ set(tests_list
   heco
   heohx
   nh3h2
+  ohh2_bausr
   ohh2_j1
   ohh2_j13
   vfit)
@@ -507,9 +508,9 @@ set(full_qma_testsuite
 #  neoh_sumi
   nh3h2
 #  nh3h2_qma
+  ohh2_bausr_j1
   ohh2_j1
   ohh2_j13
-#  ohh2_j1_bausr
   h2ohe_trnprt
   vfit)
 

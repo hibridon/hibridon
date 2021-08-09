@@ -9,7 +9,7 @@ c     This basis routine should have ibasty = 100, so hibridon will
 c     treat it as a mol-mol problem with j12.
 c
 c     DUMMY SUBROUTINES FOR ALL USER-DEFINED BASIS/POT.
-      include "common/ground"
+#include "common/ground"
 c
 c     ------------------------------------------------------------------
 c     THE FOLLOWING SOUBROUTINE WILL BE THE MAIN FUNCTION FOR MAKEPOT.
@@ -17,7 +17,7 @@ c     NOTE THAT VVL IS IN HARTREES.
       subroutine driver
       implicit none
 c
-      include 'pot_ohh2_bausr_common.f'
+#include "pot_ohh2_bausr_common.F"
       character*40 filenm
       double precision r, vv0
       integer i
@@ -42,8 +42,8 @@ c     DATA FILE, IF REQUIRED, CAN BE LOADED WITH THIS SOUBROUTINE.
       subroutine loapot(iunit, filnam)
       implicit none
 c
-      include 'pot_ohh2_bausr_common.f'
-      include 'common/parpot'
+#include "pot_ohh2_bausr_common.F"
+#include "common/parpot"
 c
       character*(*) filnam
       integer iunit, ir, iv
@@ -114,7 +114,7 @@ c     VVL SHOULD BE IN HARTREES.
       subroutine pot(vv0, r_raw)
       implicit none
 c
-      include 'pot_ohh2_bausr_common.f'
+#include "pot_ohh2_bausr_common.F"
       real(8), intent(in) :: r_raw
       real(8), intent(out) :: vv0
       real(8) seval, r
@@ -142,7 +142,7 @@ c     ONLY IREAD IS USED: RETURN DIRECTLY IF ZERO.
       subroutine syusr(irpot, readpt, iread)
       implicit none
 c
-      include 'pot_ohh2_bausr_common.f'
+#include "pot_ohh2_bausr_common.F"
       integer irpot, iread
       logical readpt
       character*(*) fname
@@ -215,7 +215,7 @@ c     IV2, LAMNUM.
      $     clist, bastst, ihomo, nu, numin, jlpar, n, nmax, ntop)
       implicit none
 c
-      include 'pot_ohh2_bausr_common.f'
+#include "pot_ohh2_bausr_common.F"
       double precision rcut
       integer jtot, nu, numin, jlpar, nmax
       logical flaghf, flagsu, csflag, clist, bastst, ihomo
@@ -499,7 +499,7 @@ C
       end do
       if (bastst .and. iprint .ge. 2) then
          write (6, 350) i
- 350     format ('number of non-zero terms: ', 6i)
+ 350     format ('number of non-zero terms: ', i6)
          write (6, 351) (v2(i1), i1=1, i)
  351     format (10(f7.2), 1x)
          write (6, 352) (iv2(i1), i1=1, i)
