@@ -2,16 +2,16 @@
 *  References
 *   B. Pouilly, J.-M. Robbe, and M. H. Alexander, J. Chem. Phys. 91, 1658 (1989).
 *   T. Duhoo and B. Pouilly, J. Chem. Phys. 101, 7554 (1994).
-      include "common/syusr"
-      include "common/bausr"
-      include "common/ground"
+#include "common/syusr"
+#include "common/bausr"
+#include "common/ground"
 * --------------------------------------------------------------------------
       subroutine loapot(iunit,filnam)
 * --------------------------------------------------------------------------
       character*(*) filnam
       common /coselb/ ibasty
-      include "common/parbas"
-      include "common/parpot"
+#include "common/parbas"
+#include "common/parpot"
       potnam='Ca(4s5p)-He'
       ibasty=7
       lammin(1)=1
@@ -31,7 +31,7 @@
      :                        rl(4), cl(4), cmix, alphg, rgaus,
      :                        agaus, demor, remor, bemor, dissmor
       common /covvl/ vvl(4)
-      include "common/parpot"
+#include "common/parpot"
       potnam='Ca(4s5p)-He'
       print *, potnam
       print *, 
