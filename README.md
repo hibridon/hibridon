@@ -62,9 +62,11 @@ add_hibexe("${EXE_NAME}" "${POT_SRC_FILE}" "${p_KMAX}" "${p_T_MATRIX_SIZE}")
 ```
 where 
 * `EXE_NAME` will be the name of the hibridon executable
-* `POT_SRC_FILE` is the full path to your fortran potential file
+* `POT_SRC_FILE` is the file name of your potential fortran source code
 * `p_KMAX` is the KMAX parameter
 * `p_T_MATRIX_SIZE` is the T_MATRIX_SIZE parameter
+
+** Copy your potential source file at the root of the build directory (/tmp/hib_build) **
 
 ### 5. Configure hibridon's build
 
