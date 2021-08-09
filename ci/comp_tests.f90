@@ -451,7 +451,7 @@ program comp_tests
     do i=1,size(xs,2)
         do j=1,size(xs,3)
             ! stop with code 2 if difference is more than 1% for one of the XSs.
-            if( 100d0 * abs(xs(2,i,j) - xs(1,i,j))/max(xs(1,i,j),1d-300) > 1d0 ) then
+            if( 100d0 * abs(xs(2,i,j) - xs(1,i,j))/max(abs(xs(1,i,j)),1d-300) > 1d0 ) then
              stop 1
             endif
         enddo

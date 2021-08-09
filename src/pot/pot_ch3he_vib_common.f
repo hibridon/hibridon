@@ -19,8 +19,8 @@ c       XMCONV: amu to electrom mass
       parameter (ECONV=219474.6d0, XMCONV=1822.88848477d0)
 c
 c   Max number of channels
-      integer KMAX
-      parameter (KMAX=10000)
+c      integer KKMAX
+c      parameter (KMAX=10000)
 c
 c   Lengths of cod array, 
 c       ICOD, IRCOD, LENCOD: lenghts of cod array
