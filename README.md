@@ -113,7 +113,7 @@ ctest -L '^arn2$'
 ```bash
 make <EXEC_NAME>
 ```
-where `EXEC_NAME` is the executable name defined in your `user.cmake` file.
+where `EXEC_NAME` is the executable name defined in your `.user.cmake` file.
 
 ### 8. one liner example
 
