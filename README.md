@@ -57,16 +57,14 @@ set(EXE_NAME "nh3h2.exe")
 set(POT_SRC_FILE "pot_nh3h2_2009.F")
 set(p_KMAX "500")
 set(p_T_MATRIX_SIZE "500")
-
-add_hibexe("${EXE_NAME}" "${POT_SRC_FILE}" "${p_KMAX}" "${p_T_MATRIX_SIZE}")
 ```
 where 
 * `EXE_NAME` will be the name of the hibridon executable
-* `POT_SRC_FILE` is the file name of your potential fortran source code
+* `POT_SRC_FILE` is the full path to your potential fortran source code (you can just put the filename if your potential is located in the build directory)
 * `p_KMAX` is the KMAX parameter
 * `p_T_MATRIX_SIZE` is the T_MATRIX_SIZE parameter
 
-**Copy your potential source file at the root of the build directory (/tmp/hib_build)**
+
 
 ### 5. Configure hibridon's build
 
