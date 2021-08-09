@@ -558,7 +558,7 @@ add_hibridon_testsuite("all" "${all_testsuite}" "${tests_list}")
 
 # The following is to build hibridon with an user-supplied potential
 
-function(add_hibexe EXE_NAME POT_SRC_FILE POT_DATA_FILES p_KMAX p_T_MATRIX_SIZE)
+function(add_hibexe EXE_NAME POT_SRC_FILE p_KMAX p_T_MATRIX_SIZE)
   message("Adding executable ${EXE_NAME} using potential ${POT_SRC_FILE}")
  
 
