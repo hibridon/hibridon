@@ -70,7 +70,7 @@ where
 
 ```bash
 cd /tmp/hib_build
-cmake /tmp/hib_src
+cmake /tmp/hib_src/hibridon
 ```
 This will automatically find the required libraries and create a Makefile to build hibridon. 
 
