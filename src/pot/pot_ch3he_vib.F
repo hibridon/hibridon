@@ -16,14 +16,14 @@ c   Included source file  (placed in hibxx/src/pot):
 c       pot_ch3he_vib_common.f
 c
 c   These dummy subroutines are not used in this pot file
-      include "common/ground"
+#include "common/ground"
 c
 c
 c   Routine for compatibility with hib44
       subroutine datfln(filenm, fullnm)
       implicit none
-      character (len=255) :: filenm, fullnm
-      fullnm = "potdata/" // filenm
+      character (len=*) :: filenm, fullnm
+      fullnm = "potdata/" // trim(filenm)
       return
       end subroutine datfln
 c
@@ -32,7 +32,7 @@ c -------------------------------------------------------------------
       subroutine driver
       implicit double precision (a-h, o-z)
 c
-      include "pot_ch3he_vib_common.f"
+#include "pot_ch3he_vib_common.f"
 c   Main function for `makepot', no arguments, print vvl's interactively
 c
       double precision r, vv0
@@ -75,8 +75,8 @@ c -------------------------------------------------------------------
       subroutine loapot(iunit, filnam)
       implicit double precision (a-h, o-z)
 c
-      include "pot_ch3he_vib_common.f"
-      include "common/parpot"
+#include "pot_ch3he_vib_common.f"
+#include "common/parpot"
 c   Initialize parameters for the potential
 c
 c   Arguments:
@@ -120,7 +120,7 @@ c   where v2 >= v2'
 c
 c   vv0 will not be used (set to zero).
 c
-      include "pot_ch3he_vib_common.f"
+#include "pot_ch3he_vib_common.f"
 c
 c
 c   Arguments:
@@ -226,7 +226,7 @@ c
 c -------------------------------------------------------------------
       subroutine splch3(vsp, r, v2_i, v2_f)
       implicit double precision (a-h, o-z)
-      include "pot_ch3he_vib_common.f"
+#include "pot_ch3he_vib_common.f"
 c   Spline the interaction potential (integreted over vibrational
 c   coordinate Q2) to the given R for a particular (v2, v2') tuple.
 c
@@ -305,7 +305,7 @@ c -------------------------------------------------------------------
       subroutine syusr(irpot, readpt, iread)
       implicit double precision (a-h, o-z)
 c
-      include "pot_ch3he_vib_common.f"
+#include "pot_ch3he_vib_common.f"
 c   Subroutine to read parameters for CH3 v2 vibrational relaxation
 c
 c   Parameters:
@@ -402,7 +402,7 @@ c -------------------------------------------------------------------
      +                  ihomo, nu, numin, jlpar, n, nmax, ntop)
       implicit double precision (a-h, o-z)
 c
-      include "pot_ch3he_vib_common.f"
+#include "pot_ch3he_vib_common.f"
 c
 c   Arguments (13):
 c       rcut: cut-off point for keeping higher energy channels

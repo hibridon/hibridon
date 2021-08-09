@@ -391,6 +391,7 @@ set(tests_list
   ch2he
   ch3he
   ch3he_ccsdt
+  ch3he_vib
   ch3i
   cph2
   h2ohe
@@ -466,7 +467,7 @@ set(extended_testsuite
   ch2he_x
 #  ch2he_stmix
   ch3he
-#  ch3he_vib
+  ch3he_vib
   ch3i
   cph2
   h2ohe
@@ -497,7 +498,7 @@ set(full_qma_testsuite
   ch2he_x
 #  ch2he_stmix
   ch3he
-#  ch3he_vib
+  ch3he_vib
   ch3i
   h2ohe
   h2ohe_prsbr
@@ -529,7 +530,7 @@ set(all_testsuite
   ch2he_x
 #  ch2he_stmix
   ch3he
-#  ch3he_vib
+  ch3he_vib
   ch3i
   cph2
   h2ohe
