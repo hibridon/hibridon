@@ -479,7 +479,6 @@ set(extended_testsuite
   ohh2_j13
 #  stp1sg_pnh3ph2
 #  stp1sg_och3he
-#  trnprt
   vfit)
 
 add_hibridon_testsuite("extended" "${extended_testsuite}" "${tests_list}")
@@ -510,7 +509,7 @@ set(full_qma_testsuite
   ohh2_j1
   ohh2_j13
 #  ohh2_j1_bausr
-#  trnprt
+  h2ohe_trnprt
   vfit)
 
 add_hibridon_testsuite("full_qma" "${full_qma_testsuite}" "${tests_list}")
@@ -542,7 +541,7 @@ set(all_testsuite
   ohh2_j13
 #  stp1sg_pnh3ph2
 #  stp1sg_och3he
-#  trnprt
+  h2ohe_trnprt
   vfit)
 
 add_hibridon_testsuite("all" "${all_testsuite}" "${tests_list}")
