@@ -573,7 +573,7 @@ function(add_hibexe EXE_NAME POT_SRC_FILE p_KMAX p_T_MATRIX_SIZE)
 
 endfunction(add_hibexe)
 
-  file (GLOB userscripts ${CMAKE_CURRENT_BINARY_DIR}/*.cmake)
+  file (GLOB userscripts ${CMAKE_CURRENT_BINARY_DIR}/*.user.cmake)
    foreach(userscript IN LISTS userscripts)
    include (${userscript})
    message ("Added ${userscript} user executable")
