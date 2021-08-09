@@ -553,3 +553,29 @@ set(all_testsuite
   vfit)
 
 add_hibridon_testsuite("all" "${all_testsuite}" "${tests_list}")
+
+
+
+# The following is to build hibridon with an user-supplied potential
+
+function(add_hibexe EXE_NAME POT_SRC_FILE POT_DATA_FILES p_KMAX p_T_MATRIX_SIZE)
+  message("Adding executable ${EXE_NAME} using potential ${POT_SRC_FILE}")
+ 
+
+
+  add_executable(${EXE_NAME} ${POT_SRC_FILE} src/himain.F)
+  target_compile_definitions(${EXE_NAME} PUBLIC KMAX=${p_KMAX})
+  target_compile_definitions(${EXE_NAME} PUBLIC T_MATRIX_SIZE=${p_T_MATRIX_SIZE})
+  target_link_libraries(${EXE_NAME} hib ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
+  target_include_directories(${EXE_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+  target_include_directories(${EXE_NAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
+  target_compile_options(${EXE_NAME} PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
+
+endfunction(add_hibexe)
+
+  file (GLOB userscripts ${CMAKE_CURRENT_BINARY_DIR}/*.cmake)
+   foreach(userscript IN LISTS userscripts)
+   include (${userscript})
+   message ("Added ${userscript} user executable")
+  endforeach()
+
