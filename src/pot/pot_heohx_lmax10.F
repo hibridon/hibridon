@@ -11,7 +11,7 @@
       dimension thta(11),cthta(11),vap(11),va2p(11)
       common /cosysr/ xjunk(2),rshift,xfact
       common /covvl/ vvl(19)
-      include "common/parpot"
+#include "common/parpot"
       potnam='Cybulski et al He-OH(X) RCCSDT PES'
       thta(1)=0.D0
       thta(2)=20.D0
@@ -65,14 +65,14 @@
       close(10)
       end
 
-      include "common/syusr"
-      include "common/bausr"
-      include "common/ground"
+#include "common/syusr"
+#include "common/bausr"
+#include "common/ground"
       subroutine loapot(iunit,filnam)
 * ------------------------------------------------------------------------
       character*(*) filnam
-      include "common/parbas"
-      include "common/parpot"
+#include "common/parbas"
+#include "common/parpot"
 *  variable in common block /conlam/
 *    nlam:      the number of angular coupling terms actually used
 *    nlammx:    the maximum number of angular coupling terms

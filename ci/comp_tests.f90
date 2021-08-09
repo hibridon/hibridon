@@ -266,7 +266,7 @@ module m_diff
         else
             number_index = 1
             do while(number_index <= size(va))
-                if( abs(va(number_index) - vb(number_index))/max(va(number_index),1d-300) > tolerance ) then
+                if( abs(va(number_index) - vb(number_index))/max(abs(va(number_index)),1d-300) > tolerance ) then
                     write(Error_Unit, *) "at number_index ", number_index, " : ", va(number_index), &
                       & " and ", vb(number_index), " differ for more than ", tolerance*100.0d0, " percent"
                     vectors_differ = .TRUE.

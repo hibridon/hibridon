@@ -399,6 +399,7 @@ set(tests_list
   hco_trnprt 
   hecn 
   heco
+  heohx
   nh3h2
   ohh2_j1
   ohh2_j13
@@ -472,7 +473,7 @@ set(extended_testsuite
   hco_trnprt
   hecn
   heco
-#  heohx
+  heohx
 #  heohx_ohh2pot
   nh3h2
   ohh2_j1
@@ -500,7 +501,7 @@ set(full_qma_testsuite
   h2ohe
   h2ohe_prsbr
   hecn
-#  heohx
+  heohx
 #  heohx_ohh2pot
   heco
 #  neoh_sumi
@@ -534,7 +535,7 @@ set(all_testsuite
   h2ohe_prsbr
   hecn
   heco
-#  heohx
+  heohx
 #  heohx_ohh2pot
   nh3h2
   ohh2_j1
