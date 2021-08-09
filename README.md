@@ -66,7 +66,7 @@ where
 * `p_KMAX` is the KMAX parameter
 * `p_T_MATRIX_SIZE` is the T_MATRIX_SIZE parameter
 
-** Copy your potential source file at the root of the build directory (/tmp/hib_build) **
+**Copy your potential source file at the root of the build directory (/tmp/hib_build)**
 
 ### 5. Configure hibridon's build
 
