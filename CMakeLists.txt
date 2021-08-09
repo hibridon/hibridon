@@ -385,6 +385,7 @@ set(tests_list
   arn2
   arn2_big
   arno
+  arno_bound
   aroh
   boh2
   c2hh2
@@ -459,7 +460,7 @@ set(extended_testsuite
   arn2
   aroh
   arno
-#  arno_bound
+  arno_bound
 #  arch4
   boh2_b2
   c2hh2
@@ -491,7 +492,7 @@ add_hibridon_testsuite("extended" "${extended_testsuite}" "${tests_list}")
 set(full_qma_testsuite
   arn2
   arno
-#  arno_bound
+  arno_bound
   aroh
   boh2_b2
   ch2he_a
@@ -523,7 +524,7 @@ set(all_testsuite
   arn2
   aroh
   arno
-#  arno_bound
+  arno_bound
   aroh
   boh2_b2
   ch2he_a

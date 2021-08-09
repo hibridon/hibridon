@@ -1,10 +1,14 @@
 inp=arno.inp
 run
+job=jmax2
 jmax=2
 run
+job=jmax3
 jmax=3
 run
+job=jmax8
 jmax=8
 run
+job=jmax10
 jmax=10
 run

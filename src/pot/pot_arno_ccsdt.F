@@ -8,7 +8,7 @@
       common /cosysr/ xjunk(2),rshift,xfact
       common /covvl/ vvl(15)
       common /coconv/ econv
-      include "common/parpot"
+#include "common/parpot"
       potnam='ALEXANDER Ar-NO CCSDT'
       econv=219474.6d0
 1      print *, ' r (bohr)'
@@ -21,15 +21,15 @@
      :    '  vdif',/,7e16.8)
       goto 1
 99    end
-      include "common/syusr"
-      include "common/bausr"
-      include "common/ground"
+#include "common/syusr"
+#include "common/bausr"
+#include "common/ground"
 * --------------------------------------------------------------------------
       subroutine loapot(iunit,filnam)
 * --------------------------------------------------------------------------
       character*(*) filnam
-      include "common/parbas"
-      include "common/parpot"
+#include "common/parbas"
+#include "common/parpot"
       potnam='ALEXANDER Ar-NO CCSDT'
       lammin(1)=1
       lammax(1)=8
@@ -190,7 +190,7 @@
       call dqrank(aa,9,9,lsum,tol,kr,kpvt,qraux,work)
       call dqrlss(aa,9,9,lsum,kr,vsum,xsum,rsd,kpvt,qraux)
 * remove terms less than 0.2 cm-1 in size
-      do 110 i=1,11
+      do 110 i=1,9
         if (abs(xsum(i)) .lt. 0.2d0) xsum(i)=zero
 110   continue
       vv0=xsum(1)/econv
