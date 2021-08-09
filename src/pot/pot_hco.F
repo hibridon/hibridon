@@ -7,14 +7,14 @@
 *  
 *   written by p. dagdigian
 *   current revision date:  21-jan-2015
-      include "common/syusr"
-      include "common/bausr"
-      include "common/ground"
+#include "common/syusr"
+#include "common/bausr"
+#include "common/ground"
 * ------------------------------------------------------------------------
       subroutine driver
       implicit double precision (a-h,o-z)
       common /covvl/ vvl(15)
-      include "common/parpot"
+#include "common/parpot"
       econv=219474.6d0
       potnam='HCO PES-Nijmegen-lmax=15'
       print *, potnam
@@ -46,8 +46,8 @@
 * --------------------------------------------------------------------------
       implicit double precision (a-h,o-z)
       character*(*) filnam
-      include "common/parbas"
-      include "common/parpot" 
+#include "common/parbas"
+#include "common/parpot" 
       common /conlam/ nlam, nlammx, lamnum(2)
       common /cosysi/ nscode, isicod, nterm
       potnam='HCO PES-Nijmegen-lmax=15'
@@ -94,7 +94,7 @@
 * ----------------------------------------------------------------------
       implicit double precision (a-h,o-z)
       logical ljunk, ihomo, csflag, lljunk
-      include "common/parbas"
+#include "common/parbas"
       dimension v(16)
       dimension csplin(47,16)
       dimension rr(47), vl(752),vec(47)
@@ -326,7 +326,7 @@
       if (ifirst .eq. 0) then
 * spline fit of the vl coefficients
          ind=1
-         do ilam=1,19
+         do ilam=1,16
            call dcopy(47,vl(ind),1,vec,1)
 *    evaluate derivative at first point
            der1=(vec(2)-vec(1))/(rr(2)-rr(1))

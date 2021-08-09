@@ -396,6 +396,7 @@ set(tests_list
   h2ohe
   h2ohe_orig
   h2ohe_prsbr
+  hco_trnprt 
   hecn 
   heco
   nh3h2
@@ -441,7 +442,7 @@ set(regular_testsuite
   ch3he
   cph2
   h2ohe
-#  hco_trnprt
+  hco_trnprt
   hecn
   nh3h2
   ohh2_j1
@@ -468,7 +469,7 @@ set(extended_testsuite
   cph2
   h2ohe
   h2ohe_prsbr
-#  hco_trnprt
+  hco_trnprt
   hecn
   heco
 #  heohx
