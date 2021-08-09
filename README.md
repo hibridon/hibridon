@@ -49,7 +49,7 @@ mkdir /tmp/hib_build
 
 Create a new file with the `.user.cmake` extension at the root of the build directory (/tmp/hib_build) (e.g. `nh3h2.user.cmake`).
 
-Past the following content in this file and edit it to suit your needs:
+Past the following content and edit to suit your needs:
 ```
 # NH3-H2 sample cmake script
 
@@ -61,10 +61,10 @@ set(p_T_MATRIX_SIZE "500")
 add_hibexe("${EXE_NAME}" "${POT_SRC_FILE}" "${p_KMAX}" "${p_T_MATRIX_SIZE}")
 ```
 where 
-* `EXE_NAME` will be the name of the hibridon executable,
-* `POT_SRC_FILE` is the full path to your fortran potential file,
-* `p_KMAX` is the KMAX parameter,
-* `p_T_MATRIX_SIZE` is the T_MATRIX_SIZE parameter.
+* `EXE_NAME` will be the name of the hibridon executable
+* `POT_SRC_FILE` is the full path to your fortran potential file
+* `p_KMAX` is the KMAX parameter
+* `p_T_MATRIX_SIZE` is the T_MATRIX_SIZE parameter
 
 ### 5. Configure hibridon's build
 
