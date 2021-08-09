@@ -64,7 +64,7 @@ where
 * `p_KMAX` is the KMAX parameter
 * `p_T_MATRIX_SIZE` is the T_MATRIX_SIZE parameter
 
-\*Simply the filename (e.g. `pot_nh3h2_2009.F` or `./pot_nh3h2_2009.F`) if your potential is located in the build directory
+\*Simply the filename (e.g. `pot_nh3h2_2009.F` or `./pot_nh3h2_2009.F`) if your potential is located in the build directory.
 
 
 ### 5. Configure hibridon's build
