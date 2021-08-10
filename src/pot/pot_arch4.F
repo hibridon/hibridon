@@ -107,11 +107,6 @@
       common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
       common /covvl/ vvl(4)
 * here are the 69 values of R
-! todo: graffy suspects that the rr array contains an error, as it only contained 68 values
-! instead of 69. After appending a 0.0 at the end (to make some compilers happy), the test arch4 that uses this potential succeeds
-! but graffy suspects that the reference results are wrong, as they were probably produced
-! with this broken rr array.
-! So, graffy thinks that instead of adding a 0.0 at the end, the missing value is 19.250 (see https://github.com/hibridon/hibridon/issues/22)
       data rr/
      +  3.000,  3.250,  3.500,  3.750,  4.000,
      +  4.250,  4.500,  4.750,  5.000,  5.250,
@@ -126,7 +121,7 @@
      + 15.500, 15.750, 16.000, 16.250, 16.500,
      + 16.750, 17.000, 17.250, 17.500, 17.750,
      + 18.000, 18.250, 18.500, 18.750, 19.000,
-     + 19.500, 19.750, 20.000, 0.000 / 
+     + 19.250, 19.500, 19.750, 20.000 / 
 * here are column ordered angular expansion coefficients (5 total) for the
 * potential at each of 69 values of R (345 values)
       data vl/
