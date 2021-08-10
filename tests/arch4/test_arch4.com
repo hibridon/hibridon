@@ -1,3 +1,3 @@
-inp=Arch4_A.inp
+inp=Arch4_a.inp
 run
 intcrs

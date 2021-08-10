@@ -382,6 +382,7 @@ endif()
 # declare the tests
 
 set(tests_list 
+  arch4
   arn2
   arn2_big
   arno
@@ -464,7 +465,7 @@ set(extended_testsuite
   aroh
   arno
   arno_bound
-#  arch4
+  arch4
   boh2_b2
   cahe
   c2hh2

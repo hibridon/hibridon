@@ -11,14 +11,14 @@
 *
 *  the PES is fitted with 5 angular terms
 *
-      include "common/syusr"
-      include "common/ground"
-      include "common/bausr"
+#include "common/syusr"
+#include "common/ground"
+#include "common/bausr"
 * ------------------------------------------------------------------------
       subroutine driver
       implicit double precision (a-h,o-z)
       common /covvl/ vvl(4)
-      include "common/parpot"
+#include "common/parpot"
       s4pi = sqrt ( 4.d0 * acos(-1.d0) )
       econv=219474.6d0
       potnam='Ar-CH4 Nijmegen 1997'
@@ -49,8 +49,8 @@
       subroutine loapot(iunit,filnam)
       implicit double precision (a-h,o-z)
       character*(*) filnam
-      include "common/parbas"
-      include "common/parpot" 
+#include "common/parbas"
+#include "common/parpot" 
       common /conlam/ nlam, nlammx, lamnum(4)
       common /cosysi/ nscode, isicod, nterm
       potnam='Ar-CH4 Nijmegen 1997'
@@ -100,13 +100,18 @@
 *
       implicit double precision (a-h,o-z)
       logical ljunk, ihomo, csflag, lljunk
-      include "common/parbas"
+#include "common/parbas"
       dimension v(5)
       dimension csplin(69,5)
       dimension rr(69), vl(345),vec(69)
       common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
       common /covvl/ vvl(4)
 * here are the 69 values of R
+! todo: graffy suspects that the rr array contains an error, as it only contained 68 values
+! instead of 69. After appending a 0.0 at the end (to make some compilers happy), the test arch4 that uses this potential succeeds
+! but graffy suspects that the reference results are wrong, as they were probably produced
+! with this broken rr array.
+! So, graffy thinks that instead of adding a 0.0 at the end, the missing value is 19.250 (see https://github.com/hibridon/hibridon/issues/22)
       data rr/
      +  3.000,  3.250,  3.500,  3.750,  4.000,
      +  4.250,  4.500,  4.750,  5.000,  5.250,
@@ -121,7 +126,7 @@
      + 15.500, 15.750, 16.000, 16.250, 16.500,
      + 16.750, 17.000, 17.250, 17.500, 17.750,
      + 18.000, 18.250, 18.500, 18.750, 19.000,
-     + 19.500, 19.750, 20.000 /
+     + 19.500, 19.750, 20.000, 0.000 / 
 * here are column ordered angular expansion coefficients (5 total) for the
 * potential at each of 69 values of R (345 values)
       data vl/
