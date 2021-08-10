@@ -1,13 +1,11 @@
 
  INTEGRAL CROSS SECTIONS CALCULATED FROM S-MATRICES ON FILE Stp_pnh3ph21.smt                        
- WRITTEN:   Jul 18 23:14:20 2013
+ WRITTEN:   Aug 10 15:05:07 2021
  LABEL:     NH3-H2 - para-para levels                       
  JTOT_MAX:    2
  IEN= 1 RMU=   1.8023 E=    67.10 JTOT-1=  0 JTOT-2=   2 JTOT-D=  1
 
  READ S-MATRIX FOR JTOT=  0  JLPAR=-1
- READ S-MATRIX FOR JTOT=  1  JLPAR=-1
- READ S-MATRIX FOR JTOT=  2  JLPAR=-1
 
  LEVEL LIST FOR INTEGRAL CROSS SECTIONS              
    N     J   INDEX  EINT(cm-1)
