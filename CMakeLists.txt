@@ -512,7 +512,6 @@ set(full_qma_testsuite
   heohx
   ohh2_bausr_heohx
   heco
-#  neoh_sumi
   nh3h2
 #  nh3h2_qma
   ohh2_bausr_j1
