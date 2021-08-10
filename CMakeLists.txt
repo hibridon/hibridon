@@ -407,7 +407,7 @@ set(tests_list
   ohh2_bausr
   ohh2_j1
   ohh2_j13
-#  stp1sg  todo: enable after once this test is functional (see https://github.com/hibridon/hibridon/issues/21)
+  stp1sg
   vfit)
 
 foreach(test_id IN LISTS tests_list)
@@ -485,8 +485,7 @@ set(extended_testsuite
   nh3h2
   ohh2_j1
   ohh2_j13
-#  stp1sg_pnh3ph2
-#  stp1sg_och3he
+  stp1sg
   vfit)
 
 add_hibridon_testsuite("extended" "${extended_testsuite}" "${tests_list}")
@@ -549,9 +548,8 @@ set(all_testsuite
   nh3h2
   ohh2_j1
   ohh2_j13
-#  stp1sg_pnh3ph2
-#  stp1sg_och3he
   h2ohe_trnprt
+  stp1sg
   vfit)
 
 add_hibridon_testsuite("all" "${all_testsuite}" "${tests_list}")
