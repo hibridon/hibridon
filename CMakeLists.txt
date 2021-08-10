@@ -164,8 +164,9 @@ list(APPEND HIBRIDON_COMPILE_OPTIONS "-fmax-stack-var-size=1")
 
 # use large model to prevent linking errors (relocation truncated to fit: R_X86_64_PC32) because the common blocks are too big to fit in the default memory model
 if(UNIX AND NOT APPLE)
-list(APPEND HIBRIDON_COMPILE_OPTIONS "-mcmodel=large")
+    list(APPEND HIBRIDON_COMPILE_OPTIONS "-mcmodel=large")
 endif()
+
 #  -fbounds-check'
 target_compile_options(hib PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
 
@@ -214,7 +215,6 @@ add_dependencies(hib parhlp)
 # UNIX_XLF
 # UNKNOWN
 # VAX
-
 
 enable_testing()
 
