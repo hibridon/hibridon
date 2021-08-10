@@ -469,7 +469,7 @@ set(extended_testsuite
   c2hh2
   ch2he_a
   ch2he_x
-#  ch2he_stmix
+  ch2he_stmix
   ch3he
   ch3he_vib
   ch3i
@@ -501,7 +501,7 @@ set(full_qma_testsuite
   cahe
   ch2he_a
   ch2he_x
-#  ch2he_stmix
+  ch2he_stmix
   ch3he
   ch3he_vib
   ch3i
@@ -534,7 +534,7 @@ set(all_testsuite
   cahe
   ch2he_a
   ch2he_x
-#  ch2he_stmix
+  ch2he_stmix
   ch3he
   ch3he_vib
   ch3i
