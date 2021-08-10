@@ -405,6 +405,7 @@ set(tests_list
   heco
   heohx
   nh3h2
+  nh3h2_qma
   ohh2_bausr
   ohh2_j1
   ohh2_j13
@@ -486,7 +487,8 @@ set(extended_testsuite
   nh3h2
   ohh2_j1
   ohh2_j13
-  stp1sg
+  stp1sg_ch3he
+  stp1sg_nh3h2
   vfit)
 
 add_hibridon_testsuite("extended" "${extended_testsuite}" "${tests_list}")
@@ -513,7 +515,7 @@ set(full_qma_testsuite
   ohh2_bausr_heohx
   heco
   nh3h2
-#  nh3h2_qma
+  nh3h2_qma
   ohh2_bausr_j1
   ohh2_j1
   ohh2_j13
@@ -546,10 +548,12 @@ set(all_testsuite
   heohx
   ohh2_bausr_heohx
   nh3h2
+  nh3h2_qma
   ohh2_j1
   ohh2_j13
   h2ohe_trnprt
-  stp1sg
+  stp1sg_ch3he
+  stp1sg_nh3h2
   vfit)
 
 add_hibridon_testsuite("all" "${all_testsuite}" "${tests_list}")
