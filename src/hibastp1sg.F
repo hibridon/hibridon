@@ -421,10 +421,17 @@ c
       end if
       if (kp .eq. 0) pref = pref * dsqrt(0.5d0)
       if (k .eq. 0) pref = pref * dsqrt(0.5d0)
-      pref = pref * dsqrt(dble((tj1p + 1) * (2 * j2p + 1)
-     $     * (2 * j12p + 1)
-     $     * (2 * lp + 1) * (tj1 + 1) * (2 * j2 + 1) * (2 * j12 + 1)
-     $     * (2 * l + 1) * (2 * lam + 1)))
+       pref = pref * dsqrt(
+     $     * dble((tj1p + 1))
+     $     * dble((2 * j2p + 1))
+     $     * dble((2 * j12p + 1)
+     $     * dble((2 * lp + 1))
+     $     * dble((tj1 + 1)) 
+     $     * dble((2 * j2 + 1)) 
+     $     * dble((2 * j12 + 1))
+     $     * (dble(2 * l + 1))
+     $     * dble((2 * lam + 1)))
+     $ )
 c
       vstp1sg = pref * dble(iphase) * threej * sixj * ninej
       return
