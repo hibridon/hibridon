@@ -14,7 +14,7 @@ c     This basis routine should have ibasty = 100, so hibridon will
 c     treat it as a mol-mol problem with j12.
 c
 c     DUMMY SUBROUTINES FOR ALL USER-DEFINED BASIS/POT.
-      include "common/ground"
+#include "common/ground"
 c
 c     ------------------------------------------------------------------
 c     THE FOLLOWING SOUBROUTINE WILL BE THE MAIN FUNCTION FOR MAKEPOT.
@@ -22,7 +22,27 @@ c     NOTE THAT VVL IS IN HARTREES.
       subroutine driver
       implicit none
 c
-      include 'pot_nh3h2_qma_common.f'
+      integer MAX_NR, MAX_NV
+      parameter (MAX_NR=300, MAX_NV=300)
+
+      common /stpln1/ nr, nv, rr, v_pot
+      common /stpln2/ lb1, mu1, lb2, mu2
+      common /stplnb/ spl_b
+      common /stplnc/ spl_c
+      common /stplnd/ spl_d
+      integer nr, nv
+      integer lb1(MAX_NV), mu1(MAX_NV), lb2(MAX_NV), mu2(MAX_NV)
+      double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV),
+     $     spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV),
+     $     spl_d(MAX_NR, MAX_NV)
+      
+      common /covvl/ vvl
+      double precision vvl(MAX_NV)
+      
+      common /coconv/ econv, xmconv
+      double precision econv, xmconv
+      data econv /219474.6315343234d0/
+      data xmconv /0.0005485799094979479d0/
       character*40 filenm
       double precision r, vv0
       integer i
@@ -42,8 +62,29 @@ c     DATA FILE, IF REQUIRED, CAN BE LOADED WITH THIS SOUBROUTINE.
       subroutine loapot(iunit, filnam)
       implicit none
 c
-      include 'pot_nh3h2_qma_common.f'
-      include 'common/parpot'
+      integer MAX_NR, MAX_NV
+      parameter (MAX_NR=300, MAX_NV=300)
+      
+      common /stpln1/ nr, nv, rr, v_pot
+      common /stpln2/ lb1, mu1, lb2, mu2
+      common /stplnb/ spl_b
+      common /stplnc/ spl_c
+      common /stplnd/ spl_d
+      integer nr, nv
+      integer lb1(MAX_NV), mu1(MAX_NV), lb2(MAX_NV), mu2(MAX_NV)
+      double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV),
+     $     spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV),
+     $     spl_d(MAX_NR, MAX_NV)
+      
+      common /covvl/ vvl
+      double precision vvl(MAX_NV)
+      
+      common /coconv/ econv, xmconv
+      double precision econv, xmconv
+      data econv /219474.6315343234d0/
+      data xmconv /0.0005485799094979479d0/
+
+#include "common/parpot"
 c
       character*(*) filnam
       integer iunit, ir, iv
@@ -87,7 +128,28 @@ c     VVL SHOULD BE IN HARTREES.
       subroutine pot(vv0, r)
       implicit none
 c
-      include 'pot_nh3h2_qma_common.f'
+      integer MAX_NR, MAX_NV
+      parameter (MAX_NR=300, MAX_NV=300)
+      
+      common /stpln1/ nr, nv, rr, v_pot
+      common /stpln2/ lb1, mu1, lb2, mu2
+      common /stplnb/ spl_b
+      common /stplnc/ spl_c
+      common /stplnd/ spl_d
+      integer nr, nv
+      integer lb1(MAX_NV), mu1(MAX_NV), lb2(MAX_NV), mu2(MAX_NV)
+      double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV),
+     $     spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV),
+     $     spl_d(MAX_NR, MAX_NV)
+      
+      common /covvl/ vvl
+      double precision vvl(MAX_NV)
+      
+      common /coconv/ econv, xmconv
+      double precision econv, xmconv
+      data econv /219474.6315343234d0/
+      data xmconv /0.0005485799094979479d0/
+
       double precision vv0, r
       double precision seval
       integer iv
@@ -105,7 +167,28 @@ c     ONLY IREAD IS USED: RETURN DIRECTLY IF ZERO.
       subroutine syusr(irpot, readpt, iread)
       implicit none
 c
-      include 'pot_nh3h2_qma_common.f'
+      integer MAX_NR, MAX_NV
+      parameter (MAX_NR=300, MAX_NV=300)
+      
+      common /stpln1/ nr, nv, rr, v_pot
+      common /stpln2/ lb1, mu1, lb2, mu2
+      common /stplnb/ spl_b
+      common /stplnc/ spl_c
+      common /stplnd/ spl_d
+      integer nr, nv
+      integer lb1(MAX_NV), mu1(MAX_NV), lb2(MAX_NV), mu2(MAX_NV)
+      double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV),
+     $     spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV),
+     $     spl_d(MAX_NR, MAX_NV)
+      
+      common /covvl/ vvl
+      double precision vvl(MAX_NV)
+      
+      common /coconv/ econv, xmconv
+      double precision econv, xmconv
+      data econv /219474.6315343234d0/
+      data xmconv /0.0005485799094979479d0/
+
       integer irpot, iread
       logical readpt
       character*(*) fname
@@ -186,7 +269,28 @@ c     IV2, LAMNUM.
      $     clist, bastst, ihomo, nu, numin, jlpar, n, nmax, ntop)
       implicit none
 c
-      include 'pot_nh3h2_qma_common.f'
+      integer MAX_NR, MAX_NV
+      parameter (MAX_NR=300, MAX_NV=300)
+      
+      common /stpln1/ nr, nv, rr, v_pot
+      common /stpln2/ lb1, mu1, lb2, mu2
+      common /stplnb/ spl_b
+      common /stplnc/ spl_c
+      common /stplnd/ spl_d
+      integer nr, nv
+      integer lb1(MAX_NV), mu1(MAX_NV), lb2(MAX_NV), mu2(MAX_NV)
+      double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV),
+     $     spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV),
+     $     spl_d(MAX_NR, MAX_NV)
+     
+      common /covvl/ vvl
+      double precision vvl(MAX_NV)
+      
+      common /coconv/ econv, xmconv
+      double precision econv, xmconv
+      data econv /219474.6315343234d0/
+      data xmconv /0.0005485799094979479d0/
+
       double precision rcut
       integer jtot, nu, numin, jlpar, nmax
       logical flaghf, flagsu, csflag, clist, bastst, ihomo
@@ -373,7 +477,7 @@ c     Calculate coupling matrix elements
       end do
       if (bastst .and. iprint .ge. 2) then
          write (6, 350) i
- 350     format ('number of non-zero terms: ', 6i)
+ 350     format ('number of non-zero terms: ', i6)
          write (6, 351) (v2(i1), i1=1, i)
  351     format (10(f7.2), 1x)
          write (6, 352) (iv2(i1), i1=1, i)
