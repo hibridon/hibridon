@@ -422,7 +422,7 @@ c
       if (kp .eq. 0) pref = pref * dsqrt(0.5d0)
       if (k .eq. 0) pref = pref * dsqrt(0.5d0)
        pref = pref * dsqrt(
-     $     * dble((tj1p + 1))
+     $       dble((tj1p + 1))
      $     * dble((2 * j2p + 1))
      $     * dble((2 * j12p + 1)
      $     * dble((2 * lp + 1))
