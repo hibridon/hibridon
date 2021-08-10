@@ -150,6 +150,40 @@ subroutine split(input_line,array,delimiters,order,nulls)
 end subroutine split
 end module m_stringsplitter
 
+function contains_time_information(line)
+    use iso_fortran_env, only: Output_Unit
+    use m_stringsplitter, only: split
+    ! returns true if the line contains time information (eg parts of a date, elapsed time, etc.)
+    character(len=*), intent(in) :: line
+    logical :: contains_time_information
+
+    character(len=:), allocatable :: tokens(:)
+    integer :: token_index
+    call split(line, tokens)
+    token_index = 1
+    do while(token_index <= size(tokens))
+        ! write(Output_Unit,*) 'token : ', tokens(token_index)
+        if( tokens(token_index) == 'DATE:' ) then
+            ! write(Output_Unit,*) 'DATE : ', line
+            contains_time_information = .true.
+            return
+        endif
+        if( tokens(token_index) == 'WRITTEN:' ) then
+            ! write(Output_Unit,*) 'WRITTEN : ', line
+            contains_time_information = .true.
+            return
+        endif
+        if( tokens(token_index) == 'TIMING:' ) then
+            ! write(Output_Unit,*) 'TIMING : ', line
+            contains_time_information = .true.
+            return
+        endif
+        token_index = token_index + 1
+    enddo
+
+    contains_time_information = .false.
+end function contains_time_information
+
 FUNCTION is_numeric(string)
     USE ieee_arithmetic
     IMPLICIT NONE
@@ -181,69 +215,70 @@ subroutine get_file_numbers(file_name, numbers, num_header_lines)
     integer :: number_index = 1
     integer :: token_index = 1
     logical :: is_numeric
+    logical :: contains_time_information
+    integer, parameter :: PASS_FIRST = 0
+    integer, parameter :: PASS_COUNT_NUMBERS = 0
+    integer, parameter :: PASS_FILL_VECTOR = 1
+    integer, parameter :: PASS_LAST = 1
+    
+    integer :: pass = PASS_COUNT_NUMBERS
 
-    num_numbers = 0
-    num_tokens = 0
-    line_index = 1
-    open(unit=1, status='old', file=trim(file_name))
-    do
-        ! write(Output_Unit, *) 'num_numbers = ', num_numbers
-        read(file_id, '(A)', iostat=ios) line
-        if(ios /= 0) then
-            exit
+    do pass = PASS_FIRST, PASS_LAST
+        if (pass == PASS_COUNT_NUMBERS) then
+            num_numbers = 0
+            num_tokens = 0
+            open(unit=1, status='old', file=trim(file_name))
         endif
-        call split(line, tokens)
-        ! line = 'rowan atkinson'
-        ! write(Output_Unit, '(A)') 'line = ', line        
-        ! write(Output_Unit, *) 'num_tokens = ', size(tokens)
-        if ( line_index > num_header_lines ) then
-            token_index = 1
-            do while(token_index <= size(tokens))
-                if( is_numeric(tokens(token_index)) ) then
-                    num_numbers = num_numbers + 1
-                endif
-                token_index = token_index + 1
-                num_tokens = num_tokens + 1
-            enddo
+
+        if (pass == PASS_FILL_VECTOR) then
+            number_index = 1
+            rewind(file_id)
         endif
-        ! num_numbers = num_numbers + size(tokens)
-        line_index = line_index + 1
-        ! num_numbers = num_numbers + 1
+
+        line_index = 1
+        do
+            ! write(Output_Unit, *) 'num_numbers = ', num_numbers
+            read(file_id, '(A)', iostat=ios) line
+            if(ios /= 0) then
+                exit
+            endif
+            ! line = 'rowan atkinson'
+            ! write(Output_Unit, '(A)') 'line = ', line        
+            ! write(Output_Unit, *) 'num_tokens = ', size(tokens)
+            if (( line_index > num_header_lines ) .and. (.not. contains_time_information(line))) then
+                call split(line, tokens)
+                token_index = 1
+                do while(token_index <= size(tokens))
+                    if( is_numeric(tokens(token_index)) ) then
+                        if (pass == PASS_COUNT_NUMBERS) then
+                            num_numbers = num_numbers + 1
+                        endif
+                        if (pass == PASS_FILL_VECTOR) then
+                            read(tokens(token_index),*) number
+                            numbers%array(number_index) = number
+                            number_index = number_index + 1
+                        endif
+                    endif
+                    token_index = token_index + 1
+                    if (pass == PASS_COUNT_NUMBERS) then
+                        num_tokens = num_tokens + 1
+                    endif
+                enddo
+            endif
+            ! num_numbers = num_numbers + size(tokens)
+            line_index = line_index + 1
+            ! num_numbers = num_numbers + 1
+        enddo
+        if (pass == PASS_COUNT_NUMBERS) then
+            write(Output_Unit, *) 'total num_tokens = ', num_tokens
+            write(Output_Unit, *) 'total num_numbers = ', num_numbers
+            allocate(numbers%array(num_numbers))
+        endif
+        if (pass == PASS_FILL_VECTOR) then
+            close(file_id)
+        endif
     enddo
-    write(Output_Unit, *) 'total num_tokens = ', num_tokens
-    write(Output_Unit, *) 'total num_numbers = ', num_numbers
 
-    allocate(numbers%array(num_numbers))
-
-    number_index = 1
-    rewind(file_id)
-    line_index = 1
-    do
-        read(file_id, '(A)', iostat=ios) line
-        if(ios /= 0) then
-            exit
-        endif
-        call split(line, tokens)
-        ! line = 'rowan atkinson'
-        ! write(Output_Unit, '(A)') 'line = ', line
-        ! write(Output_Unit, *) 'num_tokens = ', size(tokens)
-        if ( line_index > num_header_lines ) then
-            token_index = 1
-            do while(token_index <= size(tokens))
-                if( is_numeric(tokens(token_index)) ) then
-                    read(tokens(token_index),*) number
-                    numbers%array(number_index) = number
-                    number_index = number_index + 1
-                endif
-                token_index = token_index + 1
-            enddo
-        endif
-        line_index = line_index + 1
-        ! num_numbers = num_numbers + 1
-    enddo
-
-    close(file_id)
-    write(Output_Unit, *) 'at end, num_numbers = ', num_numbers
 end
 
 module m_diff
@@ -359,6 +394,16 @@ program comp_tests
 
     if(ext=="pcs") then
         if(result_files_differ(ref, test, num_header_lines=6, tolerance=0.01d0)) then
+            stop 1
+        else
+            stop 0
+        endif
+    endif
+
+    if(ext=="stdout") then
+        ! standard output of hibridon
+        ! the 17 first lines may contain the date of the file
+        if(result_files_differ(ref, test, num_header_lines=17, tolerance=0.01d0)) then
             stop 1
         else
             stop 0
