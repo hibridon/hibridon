@@ -490,7 +490,6 @@ program comp_tests
     close(1)
     close(2)
 
-
     ! COMPARE XS
 
     do i=1,size(xs,2)
@@ -502,5 +501,6 @@ program comp_tests
         enddo
     enddo
     if(allocated(xs)) then ; deallocate( xs ) ; endif
+
     return
 end program comp_tests

@@ -482,8 +482,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
         goto 40
       else if (iresp .eq. 2) then
        write (6, 65)
-65     format
-     :   (/'  Enter R(bohr); R=0 to quit')
+65     format(/,
+     :   '  Enter R(bohr); R=0 to quit')
 70     write(6,80)
 80      format('$ R  ?  ',$)
         read(5,*)r
@@ -576,8 +576,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       read (5, *) iresp
       if (iresp .eq. 1) then
         write (6, 30)
-30      format
-     :  (/' Enter R (bohr), theta (Degrees); R=0, theta=0 to quit')
+30      format(/,
+     :  ' Enter R (bohr), theta (Degrees); R=0, theta=0 to quit')
 40      write(6, 45)
 45      format(' R, theta ?  ')
         read(5,*) r, theta
@@ -718,8 +718,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
         goto 40
       else if (iresp .eq. 2) then
        write (6, 65)
-65     format
-     :   (/'  Enter R(bohr); R=0 to quit')
+65     format(/,
+     :   '  Enter R(bohr); R=0 to quit')
 70     write(6,80)
 80      format('$ R  ?  ',$)
         read(5,*)r
