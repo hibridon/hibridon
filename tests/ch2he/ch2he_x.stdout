@@ -1,6 +1,6 @@
 
  --------------------------------------------------------------------------
-           HIBRIDON SCATTERING CODE V 4.4 BUILD DATE 02/08/18 15:01:56 EST
+           HIBRIDON SCATTERING CODE V xdate
 
       AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
                P. DAGDIGIAN
@@ -9,11 +9,11 @@
           G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
  --------------------------------------------------------------------------
            BUILD CONFIGURATION:
-SYS=OS X 10.13.2; MACH=unix-darwin unix-ifort unix-darwin64
-CC=; FC=/opt/intel//compilers_and_libraries_2018.0.104/mac/bin/intel64/ifort -O3 -save -i8
-LIB_ROOT=$MKLROOT/lib/libmkl_intel_ilp64.a $MKLROOT/lib/libmkl_intel_thread.a $MKLROOT/lib/libmkl_core.a
-LIBRARIES:  -lpthread /
-  $MKLROOT/../compiler/lib/libiomp5.a -lm
+SYS=Debian bullseye/sid ( 5.4.0-80-generic); MACH=
+CC=; FC=
+
+
+
  --------------------------------------------------------------------------
  Hibridon>  Hibridon>  Hibridon>  ** NERG HAS BEEN RESET TO  1
  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>      *** Parameters (scattering):
@@ -38,104 +38,104 @@ LIBRARIES:  -lpthread /
  PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
  PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= F    WAVEFL= F
  WRPART= F    WRSMAT= T    WRXSEC= T    BOUNDC= F
- ** Maximum Channels: 5001; Anisotropic Terms:  19
+ ** Maximum Channels: 1451; Maximum Anisotropic Terms:    19
  ** Energies:      913.693000
  ** Label:      'Input for CH2(X)-He calculations'              
  ** Pot name:      MA CH2(X,030)-He PES                            
  ** Input File:  Ch2x3he_para.inp
  ** Output file: Outpt
  ** Jobname:     Ch2x_p
- Hibridon>  ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Feb  8 15:02:00 2018
- ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Feb  8 15:02:00 2018
- ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Feb  8 15:02:00 2018
- ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Feb  8 15:02:00 2018
- ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:03   WALL: 00:00:00   DATE: Feb  8 15:02:00 2018
- ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:04   WALL: 00:00:00   DATE: Feb  8 15:02:00 2018
- ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:00:05   WALL: 00:00:00   DATE: Feb  8 15:02:00 2018
- ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:00:07   WALL: 00:00:01   DATE: Feb  8 15:02:01 2018
- ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:00:08   WALL: 00:00:01   DATE: Feb  8 15:02:01 2018
- ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:00:09   WALL: 00:00:01   DATE: Feb  8 15:02:01 2018
- ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:11   WALL: 00:00:01   DATE: Feb  8 15:02:01 2018
- ** J =   11 JLPAR = 1 FINISHED;  CPU: 00:00:12   WALL: 00:00:01   DATE: Feb  8 15:02:01 2018
- ** J =   12 JLPAR = 1 FINISHED;  CPU: 00:00:14   WALL: 00:00:01   DATE: Feb  8 15:02:01 2018
- ** J =   13 JLPAR = 1 FINISHED;  CPU: 00:00:15   WALL: 00:00:02   DATE: Feb  8 15:02:02 2018
- ** J =   14 JLPAR = 1 FINISHED;  CPU: 00:00:17   WALL: 00:00:02   DATE: Feb  8 15:02:02 2018
- ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:18   WALL: 00:00:02   DATE: Feb  8 15:02:02 2018
- ** J =   16 JLPAR = 1 FINISHED;  CPU: 00:00:20   WALL: 00:00:02   DATE: Feb  8 15:02:02 2018
- ** J =   17 JLPAR = 1 FINISHED;  CPU: 00:00:22   WALL: 00:00:02   DATE: Feb  8 15:02:02 2018
- ** J =   18 JLPAR = 1 FINISHED;  CPU: 00:00:23   WALL: 00:00:03   DATE: Feb  8 15:02:03 2018
- ** J =   19 JLPAR = 1 FINISHED;  CPU: 00:00:25   WALL: 00:00:03   DATE: Feb  8 15:02:03 2018
- ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:26   WALL: 00:00:03   DATE: Feb  8 15:02:03 2018
- ** J =   21 JLPAR = 1 FINISHED;  CPU: 00:00:28   WALL: 00:00:03   DATE: Feb  8 15:02:03 2018
- ** J =   22 JLPAR = 1 FINISHED;  CPU: 00:00:29   WALL: 00:00:03   DATE: Feb  8 15:02:03 2018
- ** J =   23 JLPAR = 1 FINISHED;  CPU: 00:00:31   WALL: 00:00:04   DATE: Feb  8 15:02:04 2018
- ** J =   24 JLPAR = 1 FINISHED;  CPU: 00:00:32   WALL: 00:00:04   DATE: Feb  8 15:02:04 2018
- ** J =   25 JLPAR = 1 FINISHED;  CPU: 00:00:34   WALL: 00:00:04   DATE: Feb  8 15:02:04 2018
- ** J =   26 JLPAR = 1 FINISHED;  CPU: 00:00:35   WALL: 00:00:04   DATE: Feb  8 15:02:04 2018
- ** J =   27 JLPAR = 1 FINISHED;  CPU: 00:00:37   WALL: 00:00:04   DATE: Feb  8 15:02:04 2018
- ** J =   28 JLPAR = 1 FINISHED;  CPU: 00:00:38   WALL: 00:00:05   DATE: Feb  8 15:02:05 2018
- ** J =   29 JLPAR = 1 FINISHED;  CPU: 00:00:40   WALL: 00:00:05   DATE: Feb  8 15:02:05 2018
- ** J =   30 JLPAR = 1 FINISHED;  CPU: 00:00:41   WALL: 00:00:05   DATE: Feb  8 15:02:05 2018
- ** J =   31 JLPAR = 1 FINISHED;  CPU: 00:00:43   WALL: 00:00:05   DATE: Feb  8 15:02:05 2018
- ** J =   32 JLPAR = 1 FINISHED;  CPU: 00:00:44   WALL: 00:00:05   DATE: Feb  8 15:02:05 2018
- ** J =   33 JLPAR = 1 FINISHED;  CPU: 00:00:46   WALL: 00:00:05   DATE: Feb  8 15:02:05 2018
- ** J =   34 JLPAR = 1 FINISHED;  CPU: 00:00:47   WALL: 00:00:06   DATE: Feb  8 15:02:06 2018
- ** J =   35 JLPAR = 1 FINISHED;  CPU: 00:00:49   WALL: 00:00:06   DATE: Feb  8 15:02:06 2018
- ** J =   36 JLPAR = 1 FINISHED;  CPU: 00:00:50   WALL: 00:00:06   DATE: Feb  8 15:02:06 2018
- ** J =   37 JLPAR = 1 FINISHED;  CPU: 00:00:52   WALL: 00:00:06   DATE: Feb  8 15:02:06 2018
- ** J =   38 JLPAR = 1 FINISHED;  CPU: 00:00:53   WALL: 00:00:06   DATE: Feb  8 15:02:06 2018
- ** J =   39 JLPAR = 1 FINISHED;  CPU: 00:00:55   WALL: 00:00:07   DATE: Feb  8 15:02:07 2018
- ** J =   40 JLPAR = 1 FINISHED;  CPU: 00:00:56   WALL: 00:00:07   DATE: Feb  8 15:02:07 2018
- ** J =    0 JLPAR =-1 FINISHED;  CPU: 00:00:57   WALL: 00:00:07   DATE: Feb  8 15:02:07 2018
- ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:57   WALL: 00:00:07   DATE: Feb  8 15:02:07 2018
- ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:00:58   WALL: 00:00:07   DATE: Feb  8 15:02:07 2018
- ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:00:59   WALL: 00:00:07   DATE: Feb  8 15:02:07 2018
- ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:01:00   WALL: 00:00:07   DATE: Feb  8 15:02:07 2018
- ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:01:01   WALL: 00:00:07   DATE: Feb  8 15:02:07 2018
- ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:01:03   WALL: 00:00:08   DATE: Feb  8 15:02:08 2018
- ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:01:04   WALL: 00:00:08   DATE: Feb  8 15:02:08 2018
- ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:01:05   WALL: 00:00:08   DATE: Feb  8 15:02:08 2018
- ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:01:07   WALL: 00:00:08   DATE: Feb  8 15:02:08 2018
- ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:01:09   WALL: 00:00:08   DATE: Feb  8 15:02:08 2018
- ** J =   11 JLPAR =-1 FINISHED;  CPU: 00:01:10   WALL: 00:00:09   DATE: Feb  8 15:02:09 2018
- ** J =   12 JLPAR =-1 FINISHED;  CPU: 00:01:12   WALL: 00:00:09   DATE: Feb  8 15:02:09 2018
- ** J =   13 JLPAR =-1 FINISHED;  CPU: 00:01:13   WALL: 00:00:09   DATE: Feb  8 15:02:09 2018
- ** J =   14 JLPAR =-1 FINISHED;  CPU: 00:01:15   WALL: 00:00:09   DATE: Feb  8 15:02:09 2018
- ** J =   15 JLPAR =-1 FINISHED;  CPU: 00:01:16   WALL: 00:00:09   DATE: Feb  8 15:02:09 2018
- ** J =   16 JLPAR =-1 FINISHED;  CPU: 00:01:18   WALL: 00:00:10   DATE: Feb  8 15:02:10 2018
- ** J =   17 JLPAR =-1 FINISHED;  CPU: 00:01:20   WALL: 00:00:10   DATE: Feb  8 15:02:10 2018
- ** J =   18 JLPAR =-1 FINISHED;  CPU: 00:01:21   WALL: 00:00:10   DATE: Feb  8 15:02:10 2018
- ** J =   19 JLPAR =-1 FINISHED;  CPU: 00:01:23   WALL: 00:00:10   DATE: Feb  8 15:02:10 2018
- ** J =   20 JLPAR =-1 FINISHED;  CPU: 00:01:24   WALL: 00:00:10   DATE: Feb  8 15:02:10 2018
- ** J =   21 JLPAR =-1 FINISHED;  CPU: 00:01:26   WALL: 00:00:11   DATE: Feb  8 15:02:11 2018
- ** J =   22 JLPAR =-1 FINISHED;  CPU: 00:01:28   WALL: 00:00:11   DATE: Feb  8 15:02:11 2018
- ** J =   23 JLPAR =-1 FINISHED;  CPU: 00:01:29   WALL: 00:00:11   DATE: Feb  8 15:02:11 2018
- ** J =   24 JLPAR =-1 FINISHED;  CPU: 00:01:31   WALL: 00:00:11   DATE: Feb  8 15:02:11 2018
- ** J =   25 JLPAR =-1 FINISHED;  CPU: 00:01:32   WALL: 00:00:11   DATE: Feb  8 15:02:11 2018
- ** J =   26 JLPAR =-1 FINISHED;  CPU: 00:01:34   WALL: 00:00:12   DATE: Feb  8 15:02:12 2018
- ** J =   27 JLPAR =-1 FINISHED;  CPU: 00:01:36   WALL: 00:00:12   DATE: Feb  8 15:02:12 2018
- ** J =   28 JLPAR =-1 FINISHED;  CPU: 00:01:37   WALL: 00:00:12   DATE: Feb  8 15:02:12 2018
- ** J =   29 JLPAR =-1 FINISHED;  CPU: 00:01:39   WALL: 00:00:12   DATE: Feb  8 15:02:12 2018
- ** J =   30 JLPAR =-1 FINISHED;  CPU: 00:01:40   WALL: 00:00:12   DATE: Feb  8 15:02:12 2018
- ** J =   31 JLPAR =-1 FINISHED;  CPU: 00:01:42   WALL: 00:00:13   DATE: Feb  8 15:02:13 2018
- ** J =   32 JLPAR =-1 FINISHED;  CPU: 00:01:44   WALL: 00:00:13   DATE: Feb  8 15:02:13 2018
- ** J =   33 JLPAR =-1 FINISHED;  CPU: 00:01:45   WALL: 00:00:13   DATE: Feb  8 15:02:13 2018
- ** J =   34 JLPAR =-1 FINISHED;  CPU: 00:01:47   WALL: 00:00:13   DATE: Feb  8 15:02:13 2018
- ** J =   35 JLPAR =-1 FINISHED;  CPU: 00:01:48   WALL: 00:00:13   DATE: Feb  8 15:02:13 2018
- ** J =   36 JLPAR =-1 FINISHED;  CPU: 00:01:50   WALL: 00:00:13   DATE: Feb  8 15:02:13 2018
- ** J =   37 JLPAR =-1 FINISHED;  CPU: 00:01:51   WALL: 00:00:14   DATE: Feb  8 15:02:14 2018
- ** J =   38 JLPAR =-1 FINISHED;  CPU: 00:01:53   WALL: 00:00:14   DATE: Feb  8 15:02:14 2018
- ** J =   39 JLPAR =-1 FINISHED;  CPU: 00:01:55   WALL: 00:00:14   DATE: Feb  8 15:02:14 2018
- ** J =   40 JLPAR =-1 FINISHED;  CPU: 00:01:56   WALL: 00:00:14   DATE: Feb  8 15:02:14 2018
+ Hibridon>  ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:48 2021
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:48 2021
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:48 2021
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:48 2021
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:48 2021
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:49 2021
+ ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:49 2021
+ ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:49 2021
+ ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:50 2021
+ ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:50 2021
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:50 2021
+ ** J =   11 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:51 2021
+ ** J =   12 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:51 2021
+ ** J =   13 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:51 2021
+ ** J =   14 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:52 2021
+ ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:52 2021
+ ** J =   16 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:53 2021
+ ** J =   17 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:53 2021
+ ** J =   18 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:53 2021
+ ** J =   19 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:54 2021
+ ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:54 2021
+ ** J =   21 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:54 2021
+ ** J =   22 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:55 2021
+ ** J =   23 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:55 2021
+ ** J =   24 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:56 2021
+ ** J =   25 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:56 2021
+ ** J =   26 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:56 2021
+ ** J =   27 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:57 2021
+ ** J =   28 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:57 2021
+ ** J =   29 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:57 2021
+ ** J =   30 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:58 2021
+ ** J =   31 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:58 2021
+ ** J =   32 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:59 2021
+ ** J =   33 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:59 2021
+ ** J =   34 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:40:59 2021
+ ** J =   35 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:00 2021
+ ** J =   36 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:00 2021
+ ** J =   37 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:01 2021
+ ** J =   38 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:01 2021
+ ** J =   39 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:01 2021
+ ** J =   40 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:02 2021
+ ** J =    0 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:02 2021
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:02 2021
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:02 2021
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:02 2021
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:02 2021
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:03 2021
+ ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:03 2021
+ ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:03 2021
+ ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:04 2021
+ ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:04 2021
+ ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:05 2021
+ ** J =   11 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:05 2021
+ ** J =   12 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:05 2021
+ ** J =   13 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:06 2021
+ ** J =   14 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:06 2021
+ ** J =   15 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:07 2021
+ ** J =   16 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:07 2021
+ ** J =   17 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:08 2021
+ ** J =   18 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:08 2021
+ ** J =   19 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:09 2021
+ ** J =   20 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:09 2021
+ ** J =   21 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:09 2021
+ ** J =   22 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:10 2021
+ ** J =   23 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:10 2021
+ ** J =   24 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:11 2021
+ ** J =   25 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:11 2021
+ ** J =   26 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:12 2021
+ ** J =   27 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:12 2021
+ ** J =   28 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:13 2021
+ ** J =   29 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:13 2021
+ ** J =   30 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:13 2021
+ ** J =   31 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:14 2021
+ ** J =   32 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:14 2021
+ ** J =   33 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:15 2021
+ ** J =   34 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:15 2021
+ ** J =   35 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:16 2021
+ ** J =   36 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:16 2021
+ ** J =   37 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:17 2021
+ ** J =   38 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:17 2021
+ ** J =   39 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:18 2021
+ ** J =   40 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 10 07:41:18 2021
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:    84
-      TIMING:  ELAPSED 00:00:14 / CPU 00:01:56 / MP RATIO  834.1 %
-      CURRENT DATE:  Feb  8 15:02:14 2018
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    NaN %
+      CURRENT DATE:  Aug 10 07:41:18 2021
  ===============================================================================
  Hibridon> 
  INTEGRAL CROSS SECTIONS READ FROM FILE Ch2x_p1.ics                             
- WRITTEN:   Feb  8 15:02:14 2018
+ WRITTEN:   Aug 10 07:41:18 2021
  LABEL:     'Input for CH2(X)-He calculations'              
  POT NAME:  MA CH2(X,030)-He PES                            
 
@@ -181,12 +181,96 @@ LIBRARIES:  -lpthread /
 %      LABEL:     'Input for CH2(X)-He calculations'              
 %      POT NAME:  MA CH2(X,030)-He PES                            
 %      S-MATRICES READ FROM FILE Ch2x_p1.smt                             
-%      WRITTEN:   Feb  8 15:02:00 2018
+%      WRITTEN:   Aug 10 07:40:48 2021
 %      JTOT2:             40
 %      ETOT:         913.693 CM(-1)
 
 % NUCLEAR SPIN =  1.0
 
+ Computing partial wave J_tot =  0.0, jlpar=   1
+ Computing partial wave J_tot =  0.0, jlpar=  -1
+ Computing partial wave J_tot =  1.0, jlpar=   1
+ Computing partial wave J_tot =  1.0, jlpar=  -1
+ Computing partial wave J_tot =  2.0, jlpar=   1
+ Computing partial wave J_tot =  2.0, jlpar=  -1
+ Computing partial wave J_tot =  3.0, jlpar=   1
+ Computing partial wave J_tot =  3.0, jlpar=  -1
+ Computing partial wave J_tot =  4.0, jlpar=   1
+ Computing partial wave J_tot =  4.0, jlpar=  -1
+ Computing partial wave J_tot =  5.0, jlpar=   1
+ Computing partial wave J_tot =  5.0, jlpar=  -1
+ Computing partial wave J_tot =  6.0, jlpar=   1
+ Computing partial wave J_tot =  6.0, jlpar=  -1
+ Computing partial wave J_tot =  7.0, jlpar=   1
+ Computing partial wave J_tot =  7.0, jlpar=  -1
+ Computing partial wave J_tot =  8.0, jlpar=   1
+ Computing partial wave J_tot =  8.0, jlpar=  -1
+ Computing partial wave J_tot =  9.0, jlpar=   1
+ Computing partial wave J_tot =  9.0, jlpar=  -1
+ Computing partial wave J_tot = 10.0, jlpar=   1
+ Computing partial wave J_tot = 10.0, jlpar=  -1
+ Computing partial wave J_tot = 11.0, jlpar=   1
+ Computing partial wave J_tot = 11.0, jlpar=  -1
+ Computing partial wave J_tot = 12.0, jlpar=   1
+ Computing partial wave J_tot = 12.0, jlpar=  -1
+ Computing partial wave J_tot = 13.0, jlpar=   1
+ Computing partial wave J_tot = 13.0, jlpar=  -1
+ Computing partial wave J_tot = 14.0, jlpar=   1
+ Computing partial wave J_tot = 14.0, jlpar=  -1
+ Computing partial wave J_tot = 15.0, jlpar=   1
+ Computing partial wave J_tot = 15.0, jlpar=  -1
+ Computing partial wave J_tot = 16.0, jlpar=   1
+ Computing partial wave J_tot = 16.0, jlpar=  -1
+ Computing partial wave J_tot = 17.0, jlpar=   1
+ Computing partial wave J_tot = 17.0, jlpar=  -1
+ Computing partial wave J_tot = 18.0, jlpar=   1
+ Computing partial wave J_tot = 18.0, jlpar=  -1
+ Computing partial wave J_tot = 19.0, jlpar=   1
+ Computing partial wave J_tot = 19.0, jlpar=  -1
+ Computing partial wave J_tot = 20.0, jlpar=   1
+ Computing partial wave J_tot = 20.0, jlpar=  -1
+ Computing partial wave J_tot = 21.0, jlpar=   1
+ Computing partial wave J_tot = 21.0, jlpar=  -1
+ Computing partial wave J_tot = 22.0, jlpar=   1
+ Computing partial wave J_tot = 22.0, jlpar=  -1
+ Computing partial wave J_tot = 23.0, jlpar=   1
+ Computing partial wave J_tot = 23.0, jlpar=  -1
+ Computing partial wave J_tot = 24.0, jlpar=   1
+ Computing partial wave J_tot = 24.0, jlpar=  -1
+ Computing partial wave J_tot = 25.0, jlpar=   1
+ Computing partial wave J_tot = 25.0, jlpar=  -1
+ Computing partial wave J_tot = 26.0, jlpar=   1
+ Computing partial wave J_tot = 26.0, jlpar=  -1
+ Computing partial wave J_tot = 27.0, jlpar=   1
+ Computing partial wave J_tot = 27.0, jlpar=  -1
+ Computing partial wave J_tot = 28.0, jlpar=   1
+ Computing partial wave J_tot = 28.0, jlpar=  -1
+ Computing partial wave J_tot = 29.0, jlpar=   1
+ Computing partial wave J_tot = 29.0, jlpar=  -1
+ Computing partial wave J_tot = 30.0, jlpar=   1
+ Computing partial wave J_tot = 30.0, jlpar=  -1
+ Computing partial wave J_tot = 31.0, jlpar=   1
+ Computing partial wave J_tot = 31.0, jlpar=  -1
+ Computing partial wave J_tot = 32.0, jlpar=   1
+ Computing partial wave J_tot = 32.0, jlpar=  -1
+ Computing partial wave J_tot = 33.0, jlpar=   1
+ Computing partial wave J_tot = 33.0, jlpar=  -1
+ Computing partial wave J_tot = 34.0, jlpar=   1
+ Computing partial wave J_tot = 34.0, jlpar=  -1
+ Computing partial wave J_tot = 35.0, jlpar=   1
+ Computing partial wave J_tot = 35.0, jlpar=  -1
+ Computing partial wave J_tot = 36.0, jlpar=   1
+ Computing partial wave J_tot = 36.0, jlpar=  -1
+ Computing partial wave J_tot = 37.0, jlpar=   1
+ Computing partial wave J_tot = 37.0, jlpar=  -1
+ Computing partial wave J_tot = 38.0, jlpar=   1
+ Computing partial wave J_tot = 38.0, jlpar=  -1
+ Computing partial wave J_tot = 39.0, jlpar=   1
+ Computing partial wave J_tot = 39.0, jlpar=  -1
+ Computing partial wave J_tot = 40.0, jlpar=   1
+ Computing partial wave J_tot = 40.0, jlpar=  -1
+ Computing partial wave J_tot = 41.0, jlpar=   1
+ Computing partial wave J_tot = 41.0, jlpar=  -1
 %     E(CM-1)     JI     INI   FI      JF     INF   FF      CROSS SECTION (ANG^2)
      913.693     1.0     0   0.0      1.0     0   0.0          4.4416E+01
      913.693     1.0     0   0.0      1.0     0   1.0          2.4431E-02
@@ -417,10 +501,10 @@ LIBRARIES:  -lpthread /
       POT NAME:  MA CH2(X,030)-He PES                            
 
  S-MATRICES FOR SINGLET READ FROM FILE Ch2_p1.smt                              
-      WRITTEN:   Feb  8 15:01:22 2018
+      WRITTEN:   Aug 10 07:36:05 2021
 
  S-MATRICES FOR TRIPLET READ FROM FILE Ch2x_p1.smt                             
-      WRITTEN:   Feb  8 15:02:00 2018
+      WRITTEN:   Aug 10 07:40:48 2021
 
  ENERGY OF TRIPLET MANIFOLD RELATIVE TO SINGLET:  -328.327
 
