@@ -7,9 +7,9 @@ C
 C     The data file used is to be defined in the input file.
 C     ------------------------------------------------------------------
 C     Dummy subroutines for user-defined bases.
-      include "common/syusr"
-      include "common/bausr"
-      include "common/ground"
+#include "common/syusr"
+#include "common/bausr"
+#include "common/ground"
 C     ------------------------------------------------------------------
 C     Module containing the shared arrays for this pot routine.
       module pot_stp1sg_qma

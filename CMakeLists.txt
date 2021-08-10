@@ -407,6 +407,7 @@ set(tests_list
   ohh2_bausr
   ohh2_j1
   ohh2_j13
+#  stp1sg  todo: enable after once this test is functional (see https://github.com/hibridon/hibridon/issues/21)
   vfit)
 
 foreach(test_id IN LISTS tests_list)
