@@ -1,4 +1,5 @@
       program logair
+      use mod_cosout
 ***********************************************************************
 ****   this code is not released for general public use            ****
 ****   all use must be by specific prior arrangement with:         ****
@@ -141,7 +142,7 @@
 *  ----------------------------------------------------------
       logical lsc1
       common /comom/  xmom(3), imom(13)
-      common /cosout/ nnout, jout(kout)
+      !common /cosout/ nnout, jout(kout)
       common /coiout/ niout, indout(kout)
       common /cov2/ nv2max, ndummy, v2(kv2max)
       common /coiv2/ iv2(kv2max)
@@ -226,6 +227,8 @@
 *     5 kmax**2 + 25 kmax + kv2max + kfact -- with airy integration
 *
 *  parameter below sets maximum size of asymmetric top basis fn expansion
+      call allocate_cosout(kout)
+
       narray = 100
 *
       mairy = kairy
@@ -368,6 +371,7 @@ c.....ncache: cache size in words
 *  variable in common block /coopti/
 *    optifl:      flag, signals if the calculation is an optimization
 *
+      use mod_cosout
       use constants
       implicit double precision (a-h,o-z)
       character*20 cdate
@@ -392,7 +396,7 @@ c.....ncache: cache size in words
       common /cosavi/ iipar, ixpar(8)
       common /cosavr/ irpar(2), rxpar(9)
       common /copmat/ rtmn, rtmx, iflag
-      common /cosout/ nnout, jout(21)
+      !common /cosout/ nnout, jout(21)
       common /coeint/ eint(1)
       common /cocent/ cent(1)
       common /coered/ ered, rmu

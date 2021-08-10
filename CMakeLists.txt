@@ -103,6 +103,7 @@ add_library(hib
      src/hihypxsc.F
      src/hiiolib_f.F
      src/himatrix.F
+     src/himem.f90
      src/hinput.F
      src/hiprsbr.F
      src/histmix.F

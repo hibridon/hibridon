@@ -143,6 +143,7 @@
 *    wavefn    true if g(a,b) transformation matrices are saved
 *              to be used later in computing the wavefunction
 *  ---------------------------------------------------------------------------
+      use mod_cosout
       use constants
       implicit double precision (a-h,o-z)
       logical ipos, csflag, swrit, t2writ, writs, wrpart, partw,
@@ -156,7 +157,7 @@
       common /coeint/ eint(1)
       common /coj12/ j12(1)
       common /coered/ ered, rmu
-      common /cosout/ nnout, jout(21)
+      !common /cosout/ nnout, jout(21)
       common /cojlpo/ jlpold
       common /coener/ ener(1)
       common /cophot/ photof, wavefn, boundf, wrsmat
@@ -315,6 +316,7 @@
 *
 *  latest revision date: 27-oct-1995 by mha
 * ---------------------------------------------------------------------------
+      use mod_cosout
       use constants
       implicit double precision (a-h,o-z)
       character*20 cdate
@@ -325,7 +327,7 @@
       common /coered/ ered, rmu
       common /cosurf/ flagsu
       common /coisc2/ nj,jlist(10)
-      common /cosout/ nnout, jout(21)
+      !common /cosout/ nnout, jout(21)
       common /coiout/ niout, indout(10)
       dimension scmat(nmax,10),jlev(10),elev(10),inlev(10)
 *  write partial opacity to unit (24+ien) if desired
@@ -1119,6 +1121,7 @@ cABER
 *    xmu:       collision reduced mass in (c12) atomic mass units
 *    econv:     conversion factor from cm-1 to hartrees
 *  ------------------------------------------------------------------
+      use mod_cosout
       use constants
       implicit double precision (a-h,o-z)
       character*(*) fname
@@ -1133,7 +1136,7 @@ cABER
       common /cosc1/ elev(1)
       common /cosc2/ csum(1)
       common /cosc3/ tsum(1)
-      common /cosout/ nnout, jout(21)
+      !common /cosout/ nnout, jout(21)
       common /coiout/ niout, indout(1)
       common /coselb/ ibasty
       dimension  a(4),scmat(nmax,1)
@@ -1406,6 +1409,7 @@ c
 *     flaghf no longer applies to the second molecule (j2) in
 *     molecule-molecule collisions.
 * ------------------------------------------------------------------
+      use mod_cosout
       use constants
       implicit double precision (a-h,o-z)
       character*(*) filnam
@@ -1427,7 +1431,7 @@ c
       common /cotq2/  sc2(1)
       common /cotq3/  sc3(1)
       common /coamat/ sc4(1)
-      common /cosout/ nnout, jout(21)
+      !/ nnout, jout(21)
       common /coisc2/ nj,jlist(1)
       common /coisc3/ jpack(1)
       common /coisc4/ lpack(1)
@@ -1624,10 +1628,11 @@ c
 * current revision date: 8-oct-2012 by q. ma
 *
 * ----------------------------------------------------------------------
+      use mod_cosout
       implicit double precision (a-h,o-z)
       logical twomol, flagsu, nucros
       logical csflag, flaghf, lpar1, lpar2, batch, ipos, lpar3
-      common /cosout/ nnout, jout(21)
+      !common /cosout/ nnout, jout(21)
       common /cojq/   jq(1)
       common /colq/   lq(1)
       common /coinq/  inq(1)

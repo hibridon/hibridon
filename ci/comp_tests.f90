@@ -438,6 +438,9 @@ program comp_tests
     open(unit=1, status='old', file=trim(ref))
     open(unit=2, status='old', file=trim(test))
 
+    ! Extract file extension in ext string variable
+    j = scan(trim(ref),".", BACK= .true.)
+    ext = ref(j+1:len(ref))
 
     if(ext=="evl") then 
         j=0
