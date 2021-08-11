@@ -31,6 +31,7 @@
 * ----------------------------------------------------------------------
       use mod_cosout
       use constants
+      use mod_codim, only: nmax => mmax
       implicit double precision (a-h,o-z)
       character*(*) fname
       character*20 cdate
@@ -53,7 +54,6 @@
       !common /cosout/ nnout, jout(21)
       common /coisc1/ inlev(1)
       common /coisc4/ ipack(1)
-      common /codim/ nairy, nmax
       common /coselb/ ibasty
 
 c
@@ -1386,8 +1386,7 @@ c
 * common for y1, y2, y4
       common /cocent/ sc2(1)
       common /coered/ ered, rmu
-      common /codim/  nairy, mmax
-      common /coselb/ ibasty
+     common /coselb/ ibasty
       common /cosysi/ ispar(4), ipol
       dimension a(7), sx(3)
       data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f',

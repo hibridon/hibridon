@@ -1409,6 +1409,7 @@ c
 *     flaghf no longer applies to the second molecule (j2) in
 *     molecule-molecule collisions.
 * ------------------------------------------------------------------
+      use mod_codim, only: mmax
       use mod_cosout
       use constants
       implicit double precision (a-h,o-z)
@@ -1442,7 +1443,6 @@ c
       common /cosc2/  inlev(1)
       common /cosc3/  jlev(1)
       common /coered/ ered, rmu
-      common /codim/  nairy, mmax
       common /coselb/ ibasty
       dimension a(3)
 *

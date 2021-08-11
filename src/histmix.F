@@ -19,6 +19,7 @@
 *
 *  current revision:  21-jun-2013 by p. dagdigian
 * -------------------------------------------------------------------------
+      use mod_codim, only: mmax
       implicit double precision (a-h, o-z)
       character*(*) flnam1, flnam2
       character*20  cdate1, cdate2
@@ -45,7 +46,6 @@
       common /coisc11/ jpack(1)
       common /coisc12/ lpack(1)
       common /coconv/ econv, xmconv, ang2
-      common /codim/ nairy, mmax
       dimension a(8)
       dimension epert(2), cpert(2,2)
 *     scratch arrays for diagonalization subroutine

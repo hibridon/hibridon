@@ -86,6 +86,7 @@
 *                                                               *
 *---------------------------------------------------------------*
       use mod_cosout
+      use mod_codim, only: mmax
       use tensor
       implicit double precision (a-h,o-z)
       character*(*) filnam
@@ -130,7 +131,6 @@
       common /ckli/  kplist(0:kmx)
       common /cf9a/ f9pha(kkmx)
       common /coconv/ econv, xmconv, ang2c
-      common /codim/  nairy, mmax
       save nout
       dimension a(9)
       data  tol,   zero,   nstep
@@ -671,6 +671,7 @@ c end of added/modified code (pjd)
 *
 * ------------------------------------------------------------------
       use tensor
+      use mod_codim, only: mmax
       implicit double precision(a-h,o-z)
       character*(*) filnam
       character*40  tcbfil, mcsfil
@@ -693,7 +694,6 @@ c end of added/modified code (pjd)
       common /coamat/ sigmam(1)
       common /cobmat/ sigmak(1)
       common /coconv/ econv, xmconv, ang2c
-      common /codim/  nairy, mmax
       data zero /0.d0/
 *
       dimension a(1)

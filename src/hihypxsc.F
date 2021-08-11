@@ -28,6 +28,7 @@
 *
 *     current revision:  8-jan-2018 by p. dagdigian
 *     -------------------------------------------------------------
+      use mod_codim, only: mmax
       implicit double precision (a-h,o-z)
       complex(8) t, tf
       character*(*) flname
@@ -53,7 +54,6 @@
       common /coinq/ inq(1)
       common /coj12/ j12q(1)
       common /coconv/ econv, xmconv, ang2
-      common /codim/ nairy, mmax
       common /coselb/ ibasty
       dimension a(4)
 *

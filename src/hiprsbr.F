@@ -17,6 +17,7 @@
 *  revision:  18-aug-2015 by p. dagdigian (skip in sums if xf6j's equal zero)
 * -------------------------------------------------------------------------
       use constants
+      use mod_codim, only: mmax
       implicit double precision (a-h, o-z)
       character*(*) flnam1, flnam2
       character*20  cdate1, cdate2
@@ -45,7 +46,6 @@
       common /coisc10/ ipack(1)
       common /coisc11/ jpack(1)
       common /coisc12/ lpack(1)
-      common /codim/ nairy, mmax
       dimension a(12)
 *
       integer, dimension(:), allocatable :: jq, lq, inq
