@@ -1,3 +1,25 @@
+c   cov2 module
+c       nv2max: maximum core memory allocated for the v2 matrix
+c       v2: lower triangle of nonzero angular coupling matrix elements stored in packed column form that is (1,1), (2,1), (3,1) ... (n,1), (2,2), (3,2) ... (n,2), etc.
+      use mod_cov2, only: nv2max, v2
+c
+c   coiv2 block
+c       iv2: row+column index of v2 matrix for each non-zero element
+      use mod_coiv2, only: iv2
+c   coiout block
+c       niout: number of level indeces included in the output of hibridon
+c       indout: level indeces included in the output of hibridon
+      use mod_coiout, only: niout, indout
+c
+c   cocent block
+c       cent: array containing centrifugal barrier of each channel
+      use mod_cocent, only: cent
+
+c   coeint block
+c       eint: array containing channel energies (in hartree). The zero of energy is assumed to be the v2=0, j=0, k=0 level
+      use mod_coeint, only: eint
+
+      implicit double precision (a-h, o-z)
 c   Define the sizes of grids
 c       V2MAX: maximum value of v2 included in the pot file
 c       V2TMAX: number of (v2, v2') combination, C(V2MAX+1, 2)
@@ -91,12 +113,6 @@ c       emax0, emax1, emax2, emax3: maximum total energy of a level to be includ
       integer isrcod, junkr
       double precision emax0, emax1, emax2, emax3
 c
-c   coiout block
-c       niout: number of level indeces included in the output of hibridon
-c       indout: level indeces included in the output of hibridon
-      common /coiout/ niout, indout
-      integer niout, indout(100)
-c
 c   conlam block
 c       nlam: the number of angular coupling terms actually used
 c       nlammx: the maximum number of angular coupling terms
@@ -110,28 +126,6 @@ c       rmu: collision reduced mass in atomic units
       common /coered/ ered, rmu
       double precision ered, rmu
 c
-c   cov2 block
-c       nv2max: maximum core memory allocated for the v2 matrix
-c       junkv: junk variable, required by hibridon
-c       v2: lower triangle of nonzero angular coupling matrix elements stored in packed column form that is (1,1), (2,1), (3,1) ... (n,1), (2,2), (3,2) ... (n,2), etc.
-      common /cov2/ nv2max, junkv, v2
-      integer nv2max, junkv
-      double precision v2(1)
-c
-c   coiv2 block
-c       iv2: row+column index of v2 matrix for each non-zero element
-      common /coiv2/ iv2
-      integer iv2(1)
-c
-c   cocent block
-c       cent: array containing centrifugal barrier of each channel
-      common /cocent/ cent
-      double precision cent(KMAX)
-c
-c   coeint block
-c       eint: array containing channel energies (in hartree). The zero of energy is assumed to be the v2=0, j=0, k=0 level
-      common /coeint/ eint
-      double precision eint(KMAX)
 c
 c   coipar block
 c       junkip: not refered to

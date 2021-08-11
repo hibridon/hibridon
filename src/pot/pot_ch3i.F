@@ -110,7 +110,7 @@
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
 
 *  -------------------------------------------------------
-
+#include "common/parsys_mod.F"
       implicit double precision (a-h, o-z)
       parameter (ngr=21, nymx=500)
       logical ifull
@@ -403,6 +403,8 @@
 *             state .
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
+      use mod_coqvec, only: mxphot, nphoto, q
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -422,7 +424,6 @@
       common /conlam/ nlam
 #include "common/parbas"
       common /cogrnd/ reg, caypot
-      common /coqvec/ mxphot, nphoto, q
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
      :                flaghf, flagsu, ihomo, ipos, logdfl, logwr,
      :                noprin, partw, readpt, rsflag, swrit,
@@ -686,6 +687,7 @@
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
       logical clfl

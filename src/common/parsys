@@ -1,3 +1,2 @@
 *comdeck parsys
       parameter (maxpar=100,lencod = 2*maxpar+3)
-      common /coiout/ niout, indout(20)

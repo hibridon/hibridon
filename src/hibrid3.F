@@ -410,6 +410,7 @@ cABER
 *
 *  added common block /conlamp/ for lamnump array
 *  current revision date:  5-nov-2012 by p.j.dagdigian
+#include "common/parsys_mod.F"
       implicit double precision(a-h,o-z)
       logical ihomo
       common /coselb/ ibasty
@@ -504,7 +505,9 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 * -------------------------------------------------------------------------
       subroutine testptn(ihomo)
 *  current revision date:  8-apr-1997 by mha
+#include "common/parsys_mod.F"
       implicit double precision(a-h,o-z)
+
       logical ihomo
       common /coselb/ ibasty
 #include "common/parsys"
@@ -647,6 +650,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *
 *  testpot for ibasty = 20 (ch2xhe v=3 - v=2)
 *  current revision date:  1-nov-2012 by lifang ms
+#include "common/parsys_mod.F"
       implicit double precision(a-h,o-z)
       logical ihomo
       common /coselb/ ibasty

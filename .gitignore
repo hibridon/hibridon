@@ -8,7 +8,6 @@ _*
 testnew/*
 src/pot/*
 .DS*
-src/common/*
 *.exe
 bin/SYSCONFIG
 hibridon.code-workspace

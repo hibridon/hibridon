@@ -678,6 +678,7 @@
 *
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
       integer irpot
       logical readp, existf
@@ -832,6 +833,7 @@
       end
 *  -----------------------------------------------------------------------
       subroutine sy2sg (irpot, readpt, iread)
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
 *  subroutine to read in system dependent parameters for doublet-sigma
 *   + atom scattering
@@ -1025,6 +1027,7 @@
 *   skip   same as nskip, used for consistency check
 *
 *  subroutines called: loapot(iunit,filnam)
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       logical readpt, existf
@@ -1149,6 +1152,7 @@
 *
 *  variables in common/cobspt/ must be set in loapot!!
 *
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       logical readpt, existf
@@ -1548,6 +1552,7 @@
 *  variables in common bloc /cosysl/
 *    islcod:   total number of logical system dependent variables
 * ----------------------------------------------------------------------
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
       logical readpt, existf
       logical         airyfl, airypr, bastst, batch, chlist, csflag,
@@ -1917,6 +1922,7 @@
 *
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -2115,6 +2121,7 @@
 *  line 14:
 *    brot, drot, hrot:    rotational constants of the molecule in cm-1
 *  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       logical readpt, existf
@@ -2496,6 +2503,7 @@
 *
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -2676,6 +2684,7 @@
 *   skip   same as nskip, used for consistency check
 *
 *  subroutines called: loapot(iunit,filnam)
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       logical readpt, existf
@@ -3105,6 +3114,7 @@
 *   skip   same as nskip, used for consistency check
 *
 *  subroutines called: loapot(iunit,filnam)
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       logical readpt, existf
@@ -3999,6 +4009,7 @@
 *
 *  variables in common/cobspt/ must be set in loapot!!
 *
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       logical readpt, existf
@@ -4306,6 +4317,7 @@ c     ------------------------------------------------------------------
 *
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -4433,6 +4445,7 @@ c     ------------------------------------------------------------------
 *
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -4561,6 +4574,7 @@ c     ------------------------------------------------------------------
 *
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -4704,6 +4718,7 @@ c     ------------------------------------------------------------------
 *
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -4833,6 +4848,7 @@ c  read the last few lines of the input file
 *
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -5155,6 +5171,7 @@ c  read the last few lines of the input file
 *
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -5282,6 +5299,7 @@ c  read the last few lines of the input file
 *
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -5419,6 +5437,7 @@ c  read the last few lines of the input file
 *
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot

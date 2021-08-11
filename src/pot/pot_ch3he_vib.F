@@ -30,7 +30,6 @@ c
 c   The `regular' pot routine
 c -------------------------------------------------------------------
       subroutine driver
-      implicit double precision (a-h, o-z)
 c
 #include "pot_ch3he_vib_common.f"
 c   Main function for `makepot', no arguments, print vvl's interactively
@@ -73,7 +72,6 @@ c
 c
 c -------------------------------------------------------------------
       subroutine loapot(iunit, filnam)
-      implicit double precision (a-h, o-z)
 c
 #include "pot_ch3he_vib_common.f"
 #include "common/parpot"
@@ -112,7 +110,6 @@ c
 c
 c -------------------------------------------------------------------
       subroutine pot(vv0, r)
-      implicit double precision (a-h, o-z)
 c   Subroutine to calculate <v_2'|v_{\lambda\mu}(Q_2, R)|v_2> in the
 c   following order:
 c       <0|v_00|0>, <0|v_20|0>, ..., <0|v_99|0>, <0|v_10|1>, ...
@@ -225,7 +222,6 @@ c
 c
 c -------------------------------------------------------------------
       subroutine splch3(vsp, r, v2_i, v2_f)
-      implicit double precision (a-h, o-z)
 #include "pot_ch3he_vib_common.f"
 c   Spline the interaction potential (integreted over vibrational
 c   coordinate Q2) to the given R for a particular (v2, v2') tuple.
@@ -303,7 +299,6 @@ c
 c   User defined basis
 c -------------------------------------------------------------------
       subroutine syusr(irpot, readpt, iread)
-      implicit double precision (a-h, o-z)
 c
 #include "pot_ch3he_vib_common.f"
 c   Subroutine to read parameters for CH3 v2 vibrational relaxation
@@ -400,7 +395,6 @@ c -------------------------------------------------------------------
      +                  nlevop, k, ieps, jtemp, ktemp, rcut, jtot,
      +                  flaghf, flagsu, csflag, clist, bastst,
      +                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-      implicit double precision (a-h, o-z)
 c
 #include "pot_ch3he_vib_common.f"
 c

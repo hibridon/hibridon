@@ -213,6 +213,11 @@ c     IV2, LAMNUM.
       subroutine bausr(j, l, is, jhold, ehold, ishold, nlevel, nlevop,
      $     sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, csflag,
      $     clist, bastst, ihomo, nu, numin, jlpar, n, nmax, ntop)
+      use mod_cov2, only: nv2max, v2
+      use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
+
       implicit none
 c
 #include "pot_ohh2_bausr_common.F"
@@ -239,15 +244,6 @@ C
       integer nlam, nlammx, lamnum(MAX_NVB + MAX_NVF)
       common /coered/ ered, rmu
       double precision ered, rmu
-      common /cov2/ nv2max, junkv, v2
-      integer nv2max, junkv
-      double precision v2(1)
-      common /coiv2/ iv2
-      integer iv2(1)
-      common /cocent/ cent
-      double precision cent(1)
-      common /coeint/ eint
-      double precision eint(1)
       common /coj12/ j12
       integer j12(1)
       common /coamat/ ietmp
