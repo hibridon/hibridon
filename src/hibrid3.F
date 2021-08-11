@@ -238,20 +238,8 @@
 *              be evaluated
 *    nch:      actual size of matrix w
 *    nmax:     maximum row and column dimension of matrix w
-*  variable in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    ndummy:    dummy variable for alignment
-*    v2:        lower triangle of nonzero elements of coupling matrix stored
-*               in packed row form that is (1,1), (2,1), (2,2), (3,1), (3,2),
-*               (3,3)  ...
-*  variable in common block /coiv2/
 *   lamnum:     number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*   iv2:        row+column index of v2 matrix for each non-zero element
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
@@ -275,16 +263,15 @@
 *    vsmul:    multiplies vector by scalar and stores result in another
 *              vector
 *  -------------------------------------------------------------------
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
-      integer i, iflag, ilam, lamnum, nch, nlam, nlammx, nmax, nv2max
-      integer iv2
+      integer i, iflag, ilam, lamnum, nch, nlam, nlammx, nmax
       common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
-      common /cov2/ nv2max, ndummy, v2(1)
-      common /coiv2/ iv2(100)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /copmat/ rtmn, rtmx, iflag
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /covvl/ vvl(1)
       common /coselb/ ibasty
@@ -853,8 +840,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /copmat/
 *    rtmn,rtmx: minimum and maximum turning points
 *    iflag:     variable used in determination of turning points (not used her
@@ -1621,10 +1606,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *    nmax:    maximum row dimensions of matrices
 *    kwrit:   if true, k matrix is printed out
 *    ipos:    if true, 132 line printer
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
@@ -1647,6 +1628,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *    vmul:      vector times a vector
 * --------------------------------------------------------------------
       use mod_coqvec, only: nphoto, q
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       integer isw, i, icol, l, lq, nmax, nopen
 #if defined(HIB_UNIX_IBM)
@@ -1655,8 +1638,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 #endif
       logical flagsu, photof, wavefn, kwrit, ipos, lpar, swrit, lpar2,
      $     boundf, wrsmat
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /cosurf/ flagsu
       common /cophot/ photof, wavefn, boundf, wrsmat
@@ -2098,8 +2079,6 @@ c
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /cophot/
 *     photof        true if photodissociation calculation
 *                   false if scattering calculation
@@ -2110,9 +2089,9 @@ c
 *     ifil          local unit number for g(a,b) file
 *  ---------------------------------------------------------------------------
       use mod_coqvec, only: nphoto, q
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical photof, wavefn, kwrit, ipos, boundf, wrsmat
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /cophot/ photof, wavefn, boundf, wrsmat
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,

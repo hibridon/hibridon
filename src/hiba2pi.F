@@ -103,27 +103,20 @@
 *    npar:     number of symmetry doublets included (npar=2 will ensure
 *              both lambda doublets; npar=1, just eps=1 levels, npar=-1,
 *              just eps=-1 levels
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units
 *               (mass of electron = 1)
 *  variable in common block /conlam/
 *    nlam:      the total number of angular coupling terms
-*  variable in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    ndummy:    dummy variable for alignment
-*    v2:        lower triangle of nonzero angular coupling matrix elements
-*               only nonzero elements are stored
-*  variable in common block /coiv2/
-*   iv2:        matrix address of v2 matrix for each non-zero element
 *  subroutines called:
 *   vlm2pi:    returns angular coupling coefficient for particular
 *              choice of channel index
 * --------------------------------------------------------------------
+      use mod_cov2, only: nv2max, ndummy, v2
+      use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -131,11 +124,7 @@
       common /coipar/ iiipar(9), iprint
       common /cosysi/ nscode, isicod, nterm, jmax, igu, isa, npar
       common /cosysr/ isrcod, idum,brot, aso, p, q
-      common /cov2/ nv2max, ndummy, v2(1)
-      common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx,lamnum(1)
-      common /cocent/ cent(2)
-      common /coeint/ eint(2)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       dimension j(2), l(1), jhold(1), ehold(1), is(2), ifi(1),

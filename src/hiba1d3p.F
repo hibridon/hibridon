@@ -83,10 +83,6 @@
 *              nstate=0:   just 1D state
 *              nstate=1:   just 3P state
 *              nstate=2:   both 1D and 3P states
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units
@@ -103,12 +99,6 @@
 *               elements describing 1D-3P coupling, and the R-inf values of
 *               7 spin-orbit matrix elements)
 *    nlammx:    the maximum number of angular coupling terms
-*  variable in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    v2:        lower triangle of nonzero angular coupling matrix elements
-*               only nonzero elements are stored
-*  variable in common block /coiv2/
-*   iv2:        matrix address of v2 matrix for each non-zero element
 *  variable in common block /coconv/
 *     econv:    conversion factor from cm-1 to hartrees
 *     xmconv:   converson factor from amu to atomic units
@@ -116,6 +106,12 @@
 *   vlm13p:    returns angular coupling coefficient for particular
 *              choice of channel index
 * ------------------------------------------------------------
+      use mod_coeig, only: c0, c1, c2
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
+
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -123,11 +119,7 @@
 
       common /cosysi/ nscode, isicod, nterm, nstate
       common /cosysr/ isrcod, junkr, en1d
-      common /cov2/ nv2max, junkv, v2(1)
-      common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(12)
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /coskip/ nskip, iskip
       common /covvl/  vvl(19)
@@ -135,7 +127,6 @@
 *   xmconv is converson factor from amu to atomic units
       common /coconv/ econv, xmconv
 *   eigenvectors for the atomic Hamiltonian
-      common /coeig/  c0(4,4), c1(3,3), c2(2,2)
       dimension j(1), l(1), jhold(1), ehold(1),
      :          ishold(1), is(1), ieig(0:2)
 *  scratch arrays for computing asymmetric top energies and wave fns.
@@ -669,8 +660,8 @@
 *  xf3j:     evaluates 3j symbol
 *  xf6j:     evaluates 6j symbol
 * --------------------------------------------------------------------
+      use mod_coeig, only: c0, c1, c2
       implicit double precision (a-h,o-z)
-      common /coeig/  c0(4,4), c1(3,3), c2(2,2)
       data onth, twth, frth, sqrt2, onsqt3 /0.333333333333333d0,
      +  0.666666666666667d0, 1.333333333333333d0,
      +  1.414213562373095d0, 0.577350269189626d0 /

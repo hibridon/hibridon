@@ -135,10 +135,6 @@
 *              molecule
 *    j2min:    the minimum rotational angular momentum for linear
 *              molecule
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variable in common block /coj12/
 *    j12:       array containing vector sum of j1 + j2 for molecule-molecule
 *               systems and open-shell atom - molecule systems
@@ -151,13 +147,6 @@
 *    nlammx:    the maximum number of angular coupling terms
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variable in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    v2:        lower triangle of nonzero angular coupling matrix
-*               elements stored in packed column form that is (1,1)
-*                (2,1), (3,1), (n,1), (2,2), (3,2) ... (n,2), etc.
-*  variable in common block /coiv2/
-*   iv2:        matrix address of v2 matrix for each non-zero element
 *  subroutines called:
 *   vlmstpln:  returns molecule-molecule angular coupling coefficient for
 *              particular choice of channel index
@@ -165,6 +154,10 @@
 *   twomol     if .true. collision between symmetric top and linear
 *              molecule, if .false. collision symmetric top-atom.
 * --------------------------------------------------------------------
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst, twomol
       character*40 fname
@@ -173,11 +166,7 @@
       common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, ninv,
      :                jmax, ipotsy2, j2max, j2min
       common /cosysr/ isrcod, junkr, brot, crot, delta, emax, drot
-      common /cov2/ nv2max, junkv, v2(1)
-      common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coj12/ j12(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv

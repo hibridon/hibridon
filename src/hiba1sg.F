@@ -404,10 +404,6 @@ c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
 *              expansion of potential
 *    jmin:     the minimum rotational angular momenta
 *    jmax:     the maximum rotational angular momenta
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units
@@ -417,12 +413,6 @@ c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
 *    nlammx:    the maximum number of angular coupling terms
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variable in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    v2:        lower triangle of nonzero angular coupling matrix elements
-*               only nonzero elements are stored
-*  variable in common block /coiv2/
-*   iv2:        matrix address of v2 matrix for each non-zero element
 *  variable in common block /coskip/
 *   nskip  for a homonuclear molecule lamda is running in steps of nskip=2
 *          for a heteronuclear molecule nskip=1
@@ -434,6 +424,10 @@ c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
 *              particular choice of initial and final channel quantum numbers
 *
 * --------------------------------------------------------------------
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -443,11 +437,7 @@ c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
       common /cosysi/ nscode, isicod, nterm, nvmin, nvmax,
      :                iscod(2,maxvib)
       common /cosysr/ isrcod, junkr, rpar(4,maxvib)
-      common /cov2/ nv2max, junkv, v2(1)
-      common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /coskip/ nskip, iskip
       common /coconv/ econv, xmconv

@@ -107,29 +107,15 @@
 *    nopen    on entry:  number of open channels
 *    nmax     on entry:  maximum row dimension of matrices
 *    firstj   if .true. on entry, header is written to s-matrix file
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *    nlevel   number of energetically distinct levels included in channel basi
 *  variable in common block /coj12/
 *    j12:       array containing vector sum of j1 + j2 for molecule-molecule
 *               systems and open-shell atom - molecule systems
 *  variable in common block /cosurf/
 *    flagsu:    if .true., then molecule-surface collisons
-*  variables in common block /cosout/
-*    nnout:     number of different rotational levels for which s-matrix
-*               elements are to be saved in file nfile
-*    jout(i):   values of rotational angular momentum for these levels
-*               if nnout is positive, than an s-matrix element will be saved
-*               only if both the initial and final quantum numbers correspond
-*               to one of the values of jout(i)
-*               if nnout is negative, then every column of the s-matrix for
-*               which the initial quantum numbers correspond to one of the
-*               values of jout(i) will be printed
 *  variable in common block /cojlpo/
 *    jlpold:    old value of parity, used to insure correct accumulation
 *               of all partial waves in cases where jlpar=0 .
@@ -146,6 +132,8 @@
       use mod_cosout
       use constants
       use mod_coqvec, only: nphoto
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical ipos, csflag, swrit, t2writ, writs, wrpart, partw,
      :        wrxsec, xsecwr, flaghf, t2test, flagsu, firstj, twomol,
@@ -154,11 +142,8 @@
 #include "common/parpot"
       common /cojsav/ jsav1, jsav2
       common /cosurf/ flagsu
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coj12/ j12(1)
       common /coered/ ered, rmu
-      !common /cosout/ nnout, jout(21)
       common /cojlpo/ jlpold
       common /coener/ ener(1)
       common /cophot/ photof, wavefn, boundf, wrsmat
@@ -316,7 +301,8 @@
 *
 *  latest revision date: 27-oct-1995 by mha
 * ---------------------------------------------------------------------------
-      use mod_cosout
+      use mod_cosout, only: nnout, jout
+      use mod_coiout, only: niout, indout
       use constants
       implicit double precision (a-h,o-z)
       character*20 cdate
@@ -327,8 +313,6 @@
       common /coered/ ered, rmu
       common /cosurf/ flagsu
       common /coisc2/ nj,jlist(10)
-      !common /cosout/ nnout, jout(21)
-      common /coiout/ niout, indout(10)
       dimension scmat(nmax,10),jlev(10),elev(10),inlev(10)
 *  write partial opacity to unit (24+ien) if desired
 *  in cs calculation this is only done if nu = numax, in which
@@ -1121,7 +1105,8 @@ cABER
 *    xmu:       collision reduced mass in (c12) atomic mass units
 *    econv:     conversion factor from cm-1 to hartrees
 *  ------------------------------------------------------------------
-      use mod_cosout
+      use mod_cosout, only: nnout, jout
+      use mod_coiout, only: niout, indout
       use constants
       implicit double precision (a-h,o-z)
       character*(*) fname
@@ -1136,8 +1121,6 @@ cABER
       common /cosc1/ elev(1)
       common /cosc2/ csum(1)
       common /cosc3/ tsum(1)
-      !common /cosout/ nnout, jout(21)
-      common /coiout/ niout, indout(1)
       common /coselb/ ibasty
       dimension  a(4),scmat(nmax,1)
 
@@ -1632,7 +1615,6 @@ c
       implicit double precision (a-h,o-z)
       logical twomol, flagsu, nucros
       logical csflag, flaghf, lpar1, lpar2, batch, ipos, lpar3
-      !common /cosout/ nnout, jout(21)
       common /cojq/   jq(1)
       common /colq/   lq(1)
       common /coinq/  inq(1)

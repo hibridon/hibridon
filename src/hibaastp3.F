@@ -130,12 +130,6 @@ c
 *    j2max:    maximum rotational angular momentum of molecule 2
 *    ipotsy2:  symmetry of potential.  set to 2 for homonuclear
 *              molecule 2, set to 1 for heteronuclear molecule 2
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
-*               the zero of energy is assumed to be the 0(0,0) level +
-*               energy of j2min level of linear molecule
 *  variable in common /coj12/ 
 *    j12:       array containing the j12 quantum number of each channel  
 *  variables in common block /coered/
@@ -147,13 +141,6 @@ c
 *    nlammx:    the maximum number of angular coupling terms
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variables in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    v2:        lower triangle of nonzero angular coupling matrix elements
-*               stored in packed column form that is (1,1), (2,1), (3,1) ...
-*               (n,1), (2,2), (3,2) ... (n,2), etc.
-*  variable in common block /coiv2/
-*   iv2:        row+column index of v2 matrix for each non-zero element
 *  variables in common block /coconv/
 *   econv:      conversion factor from cm-1 to hartrees
 *   xmconv:     converson factor from amu to atomic units
@@ -202,6 +189,10 @@ c
 *               molecules with Cs symmetry.  (set iop equal to zero in this case)
 * --------------------------------------------------------------------
       use mod_asymln
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -210,11 +201,7 @@ c
      :  j2min, j2max, ipotsy2
       common /cosysr/ isrcod, junkr, arot, brot, crot, emax, b2rot
       common /coipar/ iiipar(9), iprint
-      common /cov2/ nv2max, junkv, v2(1)
-      common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coj12/  j12(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv

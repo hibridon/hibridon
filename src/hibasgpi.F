@@ -159,10 +159,6 @@
 *    ivibs:    vibrational quantum number for each of these
 *    nvibp:    number of vibrational terms for pi state in input file
 *    ivibp:    vibrational quantum number for each of these
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units
@@ -173,12 +169,6 @@
 *  variables in common block /cosgpi/
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variable in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    v2:        lower triangle of nonzero angular coupling matrix elements
-*               only nonzero elements are stored
-*  variable in common block /coiv2/
-*   iv2:        matrix address of v2 matrix for each non-zero element
 *  variable in common block /coconv/
 *     econv:    conversion factor from cm-1 to hartrees
 *     xmconv:   converson factor from amu to atomic units
@@ -186,6 +176,10 @@
 *   vlsgpi:    returns angular coupling coefficient for particular
 *              choice of channel index
 * --------------------------------------------------------------------
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -195,16 +189,12 @@
       common /cosysi/ nscode, isicod, ispar(10)
 *  these parameters must be the same as in hisysgpi
       common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
-      common /cov2/ nv2max, junkv, v2(1)
-      common /coiv2/ iv2(1)
       common /cotq1/ vec(3,3,1)
       common /coisc1/ ivec(1)
       common /coisc2/ ivhold(1)
       common /coisc3/ nlvp(1)
       common /coisc4/ nvphol(1)
       common /conlam/ nlam, nlammx,lamnum(1)
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       dimension e(3,3), ieps(2), iepp(2), iomc(4), iomr(4), eig(3)

@@ -82,10 +82,6 @@
 *    isicod:   total number of integer system dependent variables
 *    nterm:    number of different types of electronic coupling terms
 *              this should be 1 here
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variable in common block /coj12/
 *    j12:      array containing vector sum of ja + j (similar
 *              situation with molecule-molecule scattering,
@@ -106,12 +102,6 @@
 *               elements describing 1D-3P coupling, and the R-inf values of
 *               7 spin-orbit matrix elements)
 *    nlammx:    the maximum number of angular coupling terms
-*  variable in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    v2:        lower triangle of nonzero angular coupling matrix elements
-*               only nonzero elements are stored
-*  variable in common block /coiv2/
-*   iv2:        matrix address of v2 matrix for each non-zero element
 *  variable in common block /coconv/
 *     econv:    conversion factor from cm-1 to hartrees
 *     xmconv:   converson factor from amu to atomic units
@@ -123,17 +113,18 @@
 *  xf3j:     evaluates 3j symbol
 *  xf9j:     evaluates 9j symbol
 * ------------------------------------------------------------
+      use mod_coeig2, only: t12, t32
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
 #include "common/parbasl"
       common /cosysi/ nscode, isicod, nterm, nstate
       common /cosysr/ isrcod, junkr, en1d
-      common /cov2/ nv2max, junkv, v2(1)
-      common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coj12/  j12(1)
 *  common blocks cojtot, coj12, coja, and coel used to transmit to ground subroutine
       common /cojtot/ jjtot, jjlpar
@@ -148,7 +139,6 @@
 *  arrays in argument list
       dimension j(1), l(1), is(1),jhold(1),ehold(1),ishold(1)
 *  matrices for transformation between atomic and molecular BF functions
-      common /coeig/  t12(5,5), t32(3,3)
       dimension c12(5,5), c32(3,3)
 *  quantum numbers for BF atomic and basis functions
       dimension
@@ -473,8 +463,8 @@
 *  subroutines called:
 *  xf3j:     evaluates 3j symbol
 * --------------------------------------------------------------------
+      use mod_coeig2, only:  t12, t32
       implicit double precision (a-h,o-z)
-      common /coeig/  t12(5,5), t32(3,3)
       dimension v12(5,5),v32(3,3),a12(5,5),a32(3,3)
       vee = 0.d0
       xl1 = l1

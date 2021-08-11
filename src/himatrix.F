@@ -4259,7 +4259,7 @@ c--------------------------------------------------------------------
      1                r,mcolr,mrowr,ncol,nlink,nrow)
 c--------------------------------------------------------------------
 c.....unrolled version for ibm6000 and other risc machines
-      use mod_comxm
+      use mod_comxm, only: ncache, mxmblk
       implicit double precision (a-h,o-z)
 #include "common/vax1"
       dimension r(*),a(*),b(*)

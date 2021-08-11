@@ -87,6 +87,7 @@
 *---------------------------------------------------------------*
       use mod_cosout
       use mod_codim, only: mmax
+      use mod_cotble, only: npnt, jttble
       use tensor
       implicit double precision (a-h,o-z)
       character*(*) filnam
@@ -103,8 +104,6 @@
       common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot,
      :            nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 *
-*  increase size of jout array from 21 to 25 - p.dagdigian - 23-jun-2010
-      !common /cosout/ nnout, jout(25)
       common /coisc2/ inlev(1)
       common /coisc3/ jlev(1)
       common /coisc4/ jpack(1)
@@ -127,7 +126,6 @@
       common /coz/    sreal(1)
       common /cow/    simag(1)
       common /cobmat/ sigma(kkmx*jmx*jmx)
-      common /cotble/ npnt, jttble(1)
       common /ckli/  kplist(0:kmx)
       common /cf9a/ f9pha(kkmx)
       common /coconv/ econv, xmconv, ang2c
@@ -2306,6 +2304,7 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
 * current revision date: 7-oct-2011 by pj dagdigian
 *------------------------------------------------------------------------
       use mod_codim, only: mmax
+      use mod_cov2, only: nv2max, ndummy, y => v2
       implicit double precision (a-h,o-z)
 * size of q for j <= 5 and 0.5 deg angle increment
       complex*16 q(43681)
@@ -2333,7 +2332,6 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
       common /coisc1/ inlev(1)
       common /coz/ sreal(1)
       common /cow/ simag(1)
-      common /cov2/ nv2max, ndummy, y(1)
       common /coconv/ econv, xmconv, ang2c
       common /coang/ ang1, ang2, dang
 *
@@ -2756,6 +2754,7 @@ c=============
 * current revision date: 7-oct-2011 by pj dagdigian
 *------------------------------------------------------------------------
       use mod_codim, only: mmax
+      use mod_cov2, only: nv2max, ndummy, y => v2
       implicit double precision (a-h,o-z)
 * size of q for j <= 5 and 0.5 deg angle increment
       complex*16 q(43681)
@@ -2783,7 +2782,6 @@ c=============
       common /coisc1/ inlev(1)
       common /coz/ sreal(1)
       common /cow/ simag(1)
-      common /cov2/ nv2max, ndummy, y(1)
       common /coconv/ econv, xmconv, ang2c
       common /coang/ ang1, ang2, dang
 *

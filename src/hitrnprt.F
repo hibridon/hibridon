@@ -33,6 +33,7 @@
 * ------------------------------------------------------------------
       use mod_cosout
       use mod_codim, only: mmax
+      use mod_cotble, only: jttble
       implicit double precision (a-h,o-z)
       character*(*) filnam
       character*40  trnfil, smtfil
@@ -48,7 +49,6 @@
      :                igjtp
       common /cotrn/  spin, maxjt,
      :     nwaves, jfsts, jlparf, jlpars, njmax, jpmax
-      !common /cosout/ nnout, jout(25)
       common /coisc2/ inlev(1)
       common /coisc3/ jlev(1)
       common /coisc4/ jpack(1)
@@ -65,7 +65,6 @@
       common /cosc3/  etrans(1)
       common /cozmat/ jtotpa(1)
       common /coamat/ labadr(1)
-      common /cotble/ npnt, jttble(1)
       common /coconv/ econv, xmconv, ang2c
       common /coselb/ ibasty
       save nout

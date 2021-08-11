@@ -44,7 +44,8 @@
 *
 *  current revision: 16-jan-2019 by q. dagdigian
 * ---------------------------------------------------------------------
-      use mod_cosout
+      use mod_cosout, only: nnout, jout
+      use mod_coiout, only: niout, indout
       use mod_codim, only: nmax => mmax
       implicit double precision (a-h,o-z)
 *  iicode is the number of integer pcod's
@@ -76,8 +77,6 @@
       common /cosavi/ iipar, ixpar(iicode)
       common /cosavr/ irpar, junks, rxpar(ircode)
       common /coener/ energ(1)
-      !common /cosout/ nnout, jout(21)
-      common /coiout/ niout, indout(1)
       common /cofile/ input, output, jobnam, savfil
       common /cosys/  scod(100)
       common /cokeyl/ nncode, llcode, ijcode

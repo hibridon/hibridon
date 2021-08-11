@@ -1,5 +1,16 @@
       program logair
-      use mod_cosout
+      use mod_cosout, only: allocate_cosout
+      use mod_coiout, only: allocate_coiout
+      use mod_cov2, only: allocate_cov2
+      use mod_coiv2, only: allocate_coiv2
+      use mod_cocent, only: allocate_cocent
+      use mod_coeint, only: allocate_coeint
+      use mod_coeig, only: allocate_coeig
+      use mod_coeig2, only: allocate_coeig2
+#if defined(HIB_UNIX)
+      use mod_cokaux, only: allocate_cokaux
+#endif
+      use mod_cotble, only: allocate_cotble
       use mod_coqvec, only: allocate_coqvec
       use mod_coqvec2, only: allocate_coqvec2
       use mod_codim, only: allocate_codim, mairy, mmax
@@ -16,7 +27,6 @@
 ***********************************************************************
 *  ***  driver for log-derivative integration ***
 *  author:  millard alexander
-*  increase size of jout array in cosout - p.dagdigian (23-jun-2010)
 *  revised:  24-jan-2012 by p. dagdigian (added common blocks /coj12/, /co12p/)
 *  revised:  replaced statements before call to propag to accommodate
 *    q.ma's revised version of bound (28-jun-2013, p.dagdigian)
@@ -60,8 +70,6 @@
 #endif
 * modified klammx (pjd - 17-jan-2019)
 * increased kfact (pjd - 15-dec-2020)
-* increase size of jout array from 21 to 25 - p.dagdigian - 23-jun-2010
-* increase size of jout array from 25 to 50 - p.dagdigian - 19-sep-2012
       parameter (klammx = 2000, kfact = 3500, kout = 50, ken = 25)
       parameter (kmxpho = 3, knphot = 1)
       parameter (kmxbas = 30)
@@ -76,25 +84,11 @@
 * krotmx set the maximum size of the asym top e.fn expansion
 * increased factor multiplying kmax below and narray from 12 to 100 (pjd:  19-sep-2017)
       parameter (krotmx = 500 * kmax)
-*  variable in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    ndummy:    dummy variable for alignment
-*    v2:        lower triangle of nonzero angular coupling matrix elements
-*               stored in packed column form that is (1,1), (2,1), (3,1) ...
-*               (n,1), (2,2), (3,2) ... (n,2), etc.
-*  variable in common block /coiv2/
-*    lamnum:    number of non-zero v2 matrix elements for each lambda
-*               lamnum is an array of dimension nlammx
-*    iv2:       row+column index of v2 matrix for each non-zero element
 *  variable in common block /conlam/
 *    nlammx:    the maximum number of angular coupling terms allowed
 *    nlam:      the total number of angular coupling terms used
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common blocks /coj12/ and /coj12p/
 *    j12,j12p:  arrays containing vector sum of j1 + j2 for molecule-molecule 
 *               systems and open-shell atom - molecule systems
@@ -106,10 +100,6 @@
 *               potential
 *  variable in common block /cofact/
 *    si:        table of logarithms of factorials
-*  variables in common block /cosout/
-*    nnout:     number of different rotational levels for which s-matrix
-*               elements are to be saved in file 13,
-*    jout(i):   values of rotational angular momentum for these lvels
 *  variables in common block /clseg/
 *    lseg:      sector length on mass storage device
 *    intrel:    number of integer words per real words
@@ -122,9 +112,6 @@
 *     iofbuf:   buffer offset
 *     maxrec:   number of records on file associated with nfl
 *     iofrec:   offset in file
-*  variables in common block /cotble/
-*     npnt:     max. number of pointer
-*     jttble:   array containing pointer to records in s-matrix
 *  variables in common block /coatpi/
 *     narray:   maximum size of asymmetric top basis fn expansion
 *               set to 500 (see krotmx above) in himain 
@@ -140,12 +127,6 @@
 *  ----------------------------------------------------------
       logical lsc1
       common /comom/  xmom(3), imom(13)
-      !common /cosout/ nnout, jout(kout)
-      common /coiout/ niout, indout(kout)
-      common /cov2/ nv2max, ndummy, v2(kv2max)
-      common /coiv2/ iv2(kv2max)
-      common /cocent/ cent(kmax)
-      common /coeint/ eint(kmax)
       common /coj12/ j12(kmax)
       common /coj12p/ j12pk(kmax)
       common /covvl/  vvl(klammx)
@@ -199,20 +180,13 @@
       common /cosc8/ sc8(kmax)
       common /cosc9/ sc9(kmax)
       common /cosc10/ sc10(kmax)
-*  common block for ba3p2s basis routine
-      common /coeig2/  t12(5,5), t32(3,3)
-*  common block for ba3d1p basis routine
-      common /coeig/  c0(4,4), c1(3,3), c2(2,2)
+
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       common /cosc11/ sc11(kaux3)
 #endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
       common /cosc11/ sc11(kaux)
 #endif
-#if defined(HIB_UNIX)
-      common /cokaux/ naux
-#endif
-      common /cotble/ npnt, jttble(kfact)
 *   total matrix and vector storage required is:
 *     7 kmax**2 + 25 kmax + kv2max + kfact -- without airy integration
 *     8 kmax**2 + 25 kmax + kv2max + kfact -- with airy integration
@@ -221,7 +195,18 @@
 *
 *  parameter below sets maximum size of asymmetric top basis fn expansion
       call allocate_cosout(kout)
+      call allocate_coiout(kout)
+      call allocate_cov2(kv2max)
+      call allocate_coiv2(kv2max)
+      call allocate_cocent(kmax)
+      call allocate_coeint(kmax)
 
+      call allocate_coeig()
+      call allocate_coeig2()
+#if defined(HIB_UNIX_IBM)
+      call allocate_cokaux(anaux=max(kaux,1800))
+#endif
+      call allocate_cotble(kfact)
       call allocate_coqvec(kqmax, kmxpho, knphot)
       call allocate_coqvec2(kq2)
       call allocate_codim(kairy, kmax, kbig)
@@ -230,12 +215,7 @@
 
       narray = 100
 *
-#if defined(HIB_UNIX_IBM)
-      naux=max(kaux,1800)
-#endif
       men = ken
-      npnt = kfact
-      nv2max = kv2max
       nlammx = klammx
 *  calculate array containing logs of factorials for use in vector
 *  coupling coefficient routines:  factlg(i)=log(fact(i-1))
@@ -259,13 +239,9 @@
 *  additions by: b. follmeg, h-j werner
 *  current revision date:  1-oct-2001 by mha
 *  -------------------------------------------------------------
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variable in common block /coener/
 *    energ:     array containing total energies (in cm-1) at which scattering
 *               calculations are to be performed
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
@@ -357,7 +333,9 @@
 *  variable in common block /coopti/
 *    optifl:      flag, signals if the calculation is an optimization
 *
-      use mod_cosout
+      use mod_cosout, only: nnout, jout
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       use constants
       implicit double precision (a-h,o-z)
       character*20 cdate
@@ -382,9 +360,6 @@
       common /cosavi/ iipar, ixpar(8)
       common /cosavr/ irpar(2), rxpar(9)
       common /copmat/ rtmn, rtmx, iflag
-      !common /cosout/ nnout, jout(21)
-      common /coeint/ eint(1)
-      common /cocent/ cent(1)
       common /coered/ ered, rmu
       common /coipar/ jtot1, jtot2, jtotd, jlpar, nerg,numax,numin,nud,
      :                lscreen, iprint

@@ -1,85 +1,147 @@
 module mod_cosout
+   !  variables in common block /cosout/
+   !    nnout:     number of different rotational levels for which s-matrix
+   !               elements are to be saved in file 13,
+   !    jout(i):   values of rotational angular momentum for these lvels
+   ! *  variables in common block /cosout/
+   ! *    nnout:     number of different rotational levels for which s-matrix
+   ! *               elements are to be saved in file nfile
+   ! *    jout(i):   values of rotational angular momentum for these levels
+   ! *               if nnout is positive, than an s-matrix element will be saved
+   ! *               only if both the initial and final quantum numbers correspond
+   ! *               to one of the values of jout(i)
+   ! *               if nnout is negative, then every column of the s-matrix for
+   ! *               which the initial quantum numbers correspond to one of the
+   ! *               values of jout(i) will be printed
+   ! *  variables in common block /cosout/
+   ! *    nnout:     number of different rotational levels for which s-matrix
+   ! *               elements are to be saved in files smat1, smat2, ...
+   ! *    jout(i):   values of rotational angular momentum for these lvels
+   ! *  variables in common block /cosout/
+   ! *    nnout:     number of different rotational levels for which s-matrix
+   ! *               elements are to be saved in file nfile
+   ! *    jout(i):   values of rotational angular momentum for these levels
+   ! *               if nnout is positive, than an s-matrix element will be saved
+   ! *               only if both the initial and final quantum numbers correspond
+   ! *               to one of the values of jout(i)
+   ! *               if nnout is negative, then every column of the s-matrix for
+   ! *               which the initial quantum numbers correspond to one of the
+   ! *               values of jout(i) will be printed
+   ! from hiiolib_c.F
+   ! *  variables in common block /cosout/
+   ! *    nnout:     number of different rotational levels for which s-matrix
+   ! *               elements are to be saved in files smat1, smat2, ...
+   ! *    jout(i):   values of rotational angular momentum for these lvels
+   ! *  variables in common block /cosout/
+   ! *    nnout:     number of different rotational levels for which s-matrix
+   ! *               elements are to be saved in file nfile
+   ! *    jout(i):   values of rotational angular momentum for these levels
+   ! *               if nnout is positive, than an s-matrix element will be saved
+   ! *               only if both the initial and final quantum numbers correspond
+   ! *               to one of the values of jout(i)
+   ! *               if nnout is negative, then every column of the s-matrix for
+   ! *               which the initial quantum numbers correspond to one of the
+   ! *               values of jout(i) will be printed
    implicit none
    integer, dimension(:), allocatable :: jout
    integer, allocatable               :: nnout
    contains
-   subroutine allocate_cosout(n)
-      integer, intent(in) :: n
-      allocate(jout(n)) ; allocate(nnout)
+   subroutine allocate_cosout(aout)
+      integer, intent(in) :: aout
+      allocate(jout(aout)) ; allocate(nnout)
    end subroutine allocate_cosout
 end module mod_cosout
 
-! module mod_coiout
-!    implicit none
-!    integer, dimension(:), allocatable :: indout
-!    integer, allocatable               :: niout
-!    contains
-!    subroutine allocate_coiout(n)
-!       integer, intent(in) :: n
-!       allocate(indout(n)) ; allocate(niout)
-!    end subroutine allocate_coiout
-! end module mod_coiout
+module mod_coiout
+   implicit none
+   integer, dimension(:), allocatable :: indout
+   integer, allocatable               :: niout
+   contains
+   subroutine allocate_coiout(aout)
+      integer, intent(in) :: aout
+      allocate(indout(aout)) ; allocate(niout)
+   end subroutine allocate_coiout
+end module mod_coiout
 
-! module mod_cov2
-!    implicit none
-!    real(8), dimension(:), allocatable :: v2
-!    integer, allocatable               :: nv2max, ndummy
-!    contains
-!    subroutine allocate_cov2(n)
-!       integer, intent(in) :: n
-!       allocate(v2(n)) ; allocate(nv2max) ; allocate(ndummy)
-!    end subroutine allocate_cov2
-! end module mod_cov2
+module mod_cov2
+   ! variables in this module
+   !    nv2max:    maximum core memory allocated for the v2 matrix
+   !    ndummy:    dummy variable for alignment
+   !    v2:        lower triangle of nonzero angular coupling matrix elements
+   !               stored in packed column form that is :
+   !                  (1,1), (2,1), (3,1) ... (n,1),
+   !                         (2,2), (3,2) ... (n,2), etc.
+   !               only nonzero elements are stored
 
-! module mod_coiv2
-!    implicit none
-!    real(8), dimension(:), allocatable :: iv2
-!    contains
-!    subroutine allocate_coiv2(n)
-!       integer, intent(in) :: n
-!       allocate(iv2(n)) ;
-!    end subroutine allocate_coiv2
-! end module mod_coiv2
+   implicit none
+   real(8), dimension(:), allocatable :: v2
+   integer, allocatable               :: nv2max, ndummy
+   contains
+   subroutine allocate_cov2(av2max)
+      integer, intent(in) :: av2max
+      allocate(v2(av2max)) ; allocate(nv2max) ; allocate(ndummy)
+      nv2max = av2max
+   end subroutine allocate_cov2
+end module mod_cov2
 
-! module mod_cocent
-!    implicit none
-!    real(8), dimension(:), allocatable :: cent
-!    contains
-!    subroutine allocate_cocent(n)
-!       integer, intent(in) :: n
-!       allocate(cent(n)) ;
-!    end subroutine allocate_cocent
-! end module mod_cocent
+module mod_coiv2
+! variables in this module:
+!    iv2:  matrix address of v2 matrix for each non-zero element
+!          row+column index of v2 matrix for each non-zero element
+   implicit none
+   real(8), dimension(:), allocatable :: iv2
+   contains
+   subroutine allocate_coiv2(av2max)
+      integer, intent(in) :: av2max
+      allocate(iv2(av2max)) ;
+   end subroutine allocate_coiv2
+end module mod_coiv2
 
-! module mod_coeint
-!    implicit none
-!    real(8), dimension(:), allocatable :: eint
-!    contains
-!    subroutine allocate_coeint(n)
-!       integer, intent(in) :: n
-!       allocate(eint(n)) ;
-!    end subroutine allocate_coeint
-! end module mod_coeint
+module mod_cocent
+   ! variables in this module
+   !   cent:      array containing centrifugal barrier of each channel
+   implicit none
+   real(8), dimension(:), allocatable :: cent
+   contains
+   subroutine allocate_cocent(amax)
+      integer, intent(in) :: amax
+      allocate(cent(amax)) ;
+   end subroutine allocate_cocent
+end module mod_cocent
 
-! module mod_coj12
-!    implicit none
-!    real(8), dimension(:), allocatable :: j12
-!    contains
-!    subroutine allocate_coj12(n)
-!       integer, intent(in) :: n
-!       allocate(j12(n)) ;
-!    end subroutine allocate_coj12
-! end module mod_coj12
+module mod_coeint
+   ! variables in this module
+   !   eint:     array containing channel energies (in hartree)
+   !             the zero of energy is assumed to be the 0(0,0) level
+   !             + energy of j2min level of linear molecule
+   implicit none
+   real(8), dimension(:), allocatable :: eint
+   contains
+   subroutine allocate_coeint(amax)
+      integer, intent(in) :: amax
+      allocate(eint(amax)) ;
+   end subroutine allocate_coeint
+end module mod_coeint
 
-! module mod_coj12pk
-!    implicit none
-!    real(8), dimension(:), allocatable :: j12pk
-!    contains
-!    subroutine allocate_coj12pk(n)
-!       integer, intent(in) :: n
-!       allocate(j12pk(n)) ;
-!    end subroutine allocate_coj12pk
-! end module mod_coj12pk
+module mod_coj12
+   implicit none
+   real(8), dimension(:), allocatable :: j12
+   contains
+   subroutine allocate_coj12(n)
+      integer, intent(in) :: n
+      allocate(j12(n)) ;
+   end subroutine allocate_coj12
+end module mod_coj12
+
+module mod_coj12pk
+   implicit none
+   real(8), dimension(:), allocatable :: j12pk
+   contains
+   subroutine allocate_coj12pk(n)
+      integer, intent(in) :: n
+      allocate(j12pk(n)) ;
+   end subroutine allocate_coj12pk
+end module mod_coj12pk
 
 ! module mod_covvl
 !    implicit none
@@ -583,43 +645,51 @@ end module mod_cosout
 !    end subroutine allocate_cosc11
 ! end module mod_cosc11
 
-! module mod_coeig
-!    implicit none
-!    real(8), dimension(:,:), allocatable :: c0, c1, c2
-!    contains
-!    subroutine allocate_coeig()
-!       allocate(c0(4,4)) ; allocate(c1(3,3)) ; allocate(c2(2,2))
-!    end subroutine allocate_coeig
-! end module mod_coeig
+module mod_coeig
+   ! module for ba3d1p basis routine
+   implicit none
+   real(8), dimension(:,:), allocatable :: c0, c1, c2
+   contains
+   subroutine allocate_coeig()
+      allocate(c0(4,4)) ; allocate(c1(3,3)) ; allocate(c2(2,2))
+   end subroutine allocate_coeig
+end module mod_coeig
 
-! module mod_coeig2
-!    implicit none
-!    real(8), dimension(:,:), allocatable :: t12, t32
-!    contains
-!    subroutine allocate_coeig2()
-!       allocate(t12(5,5)) ; allocate(t32(3,3))
-!    end subroutine allocate_coeig2
-! end module mod_coeig2
+module mod_coeig2
+   ! * module for ba3p2s basis routine
+   ! matrices for transformation between atomic and molecular BF functions
+   implicit none
+   real(8), dimension(:,:), allocatable :: t12, t32
+   contains
+   subroutine allocate_coeig2()
+      allocate(t12(5,5)) ; allocate(t32(3,3))
+   end subroutine allocate_coeig2
+end module mod_coeig2
 
-! module mod_cokaux
-!    implicit none
-!    integer, allocatable :: naux
-!    contains
-!    subroutine allocate_cokaux()
-!       allocate(naux)
-!    end subroutine allocate_cokaux
-! end module mod_cokaux
+module mod_cokaux
+   implicit none
+   integer, allocatable :: naux
+   contains
+   subroutine allocate_cokaux(anaux)
+      integer, intent(in) :: anaux
+      allocate(naux)
+      naux = anaux
+   end subroutine allocate_cokaux
+end module mod_cokaux
 
-! module mod_cotble
-!    implicit none
-!    integer, dimension(:), allocatable :: jttble
-!    integer, allocatable               :: npnt
-!    contains
-!    subroutine allocate_cotble(n)
-!       integer, intent(in) :: n
-!       allocate(jttble(n)) ; allocate(npnt)
-!    end subroutine allocate_cotble
-! end module mod_cotble
+module mod_cotble
+   ! *     npnt:     max. number of pointer
+   ! *     jttble:   array containing pointer to records in s-matrix   
+   implicit none
+   integer, dimension(:), allocatable :: jttble
+   integer, allocatable               :: npnt
+   contains
+   subroutine allocate_cotble(afact)
+      integer, intent(in) :: afact
+      allocate(jttble(afact)) ; allocate(npnt)
+      npnt = afact
+   end subroutine allocate_cotble
+end module mod_cotble
 
 
 module mod_coqvec

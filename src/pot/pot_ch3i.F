@@ -672,10 +672,6 @@
 *              elements for each term.  lammin can not be less than mproj.
 *              for homonuclear molecules, the allowed values of lambda for
 *              each term range from lammin to lammax in steps of 2
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
-*  variable in common block /coint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units
@@ -685,13 +681,11 @@
 *    nlammx:    the maximum number of angular coupling terms
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variable in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    v2:        lower triangle of nonzero angular coupling matrix elements
-*               only nonzero elements are stored
-*  variable in common block /coiv2/
-*   iv2:        matrix address of v2 matrix for each non-zero element
 * --------------------------------------------------------------------
+      use mod_cov2, only: nv2max, v2
+      use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
       logical clfl
@@ -702,11 +696,8 @@
       common /cosysr/ isrcod, junkr, rcod(maxpar)
       common /covib/ ie(50), iv(50)
       common /coicl/ clfl
-      common /cov2/ nv2max, junkv, v2(1)
-      common /coiv2/ iv2(1)
+      
       common /conlam/  nlam, nlammx,lamnum(1)
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       common /coiscl/ iscl(40)

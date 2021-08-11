@@ -1736,6 +1736,7 @@
 *             of the variable names in cosysi followed by the ordering of
 *             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 *  -----------------------------------------------------------------------
+      use mod_coiout, only: niout, indout
       logical readpt, existf
       double precision brot, crot, delta, emax
       integer numpot
@@ -1749,7 +1750,6 @@
       parameter (icod = 5, ircod = 4)
       parameter (lencod = icod + ircod + 3)
 #include "common/parbas"
-      common /coiout/ niout, indout(20)
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, jmax
       common /cosysr/ isrcod, junkr, brot, crot, delta, emax
@@ -2305,6 +2305,7 @@
 *             variable names in cosysr followed by LAMMIN, LAMMAX, MPROJ,
 *             LAM2 and MPROJ2.
 *  -----------------------------------------------------------------------
+      use mod_coiout, only: niout, indout
       implicit double precision (a-h,o-z)
       logical readpt, existf, twomol
       double precision brot, crot
@@ -2319,7 +2320,6 @@
       parameter (icod=9, ircod=5)
       parameter (lencod = icod + ircod + 5)
 #include "common/parbas"
-      common /coiout/ niout, indout(20)
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, ninv,
      :                jmax, ipotsy2, j2max, j2min
@@ -2817,6 +2817,7 @@
 *             of the variable names in cosysi followed by the ordering of
 *             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 *  -----------------------------------------------------------------------
+      use mod_coiout, only: niout, indout
       logical readpt, existf
       double precision brot, aso
       character*1 dot
@@ -2826,7 +2827,6 @@
       parameter (icod=3, ircod=2)
       parameter (lencod = icod + ircod + 3)
 #include "common/parbas"
-      common /coiout/ niout, indout(20)
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, iop, jmax
       common /cosysr/ isrcod, junkr, brot, aso
@@ -2955,6 +2955,7 @@
 *             of the variable names in cosysi followed by the ordering of
 *             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 *  -----------------------------------------------------------------------
+      use mod_coiout, only: niout, indout
       logical readpt, existf
       double precision brot, aso1, aso2
       character*1 dot
@@ -2964,7 +2965,6 @@
       parameter (icod=3, ircod=3)
       parameter (lencod = icod + ircod + 3)
 #include "common/parbas"
-      common /coiout/ niout, indout(20)
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, iop, jmax
       common /cosysr/ isrcod, junkr, brot, aso1, aso2
@@ -3245,6 +3245,7 @@
 *             of the variable names in cosysi followed by the ordering of
 *             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 *  -----------------------------------------------------------------------
+      use mod_coiout, only: niout, indout
       logical readpt, existf
       double precision brot, aso
       character*1 dot
@@ -3254,7 +3255,6 @@
       parameter (icod=3, ircod=2)
       parameter (lencod = icod + ircod + 3)
 #include "common/parbas"
-      common /coiout/ niout, indout(20)
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm,iop,jmax
       common /cosysr/ isrcod, junkr, brot, aso
@@ -3391,6 +3391,7 @@
 *             of the variable names in cosysi followed by the ordering of
 *             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 *  -----------------------------------------------------------------------
+      use mod_coiout, only: niout, indout      
       logical readpt, existf
       double precision arot, brot, crot, emax
       integer numpot
@@ -3404,7 +3405,6 @@
       parameter (icod=5, ircod=4)
       parameter (lencod = icod + ircod + 3)
 #include "common/parbas"
-      common /coiout/ niout, indout(20)
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, jmax
       common /cosysr/ isrcod, junkr, arot, brot, crot, emax
@@ -3600,6 +3600,7 @@
 *             of the variable names in cosysi followed by the ordering of
 *             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 *  -----------------------------------------------------------------------
+      use mod_coiout, only: niout, indout
       logical readpt, existf
       double precision emax
       integer numpot
@@ -3613,7 +3614,6 @@
       parameter (icod=6, ircod=1)
       parameter (lencod = icod + ircod + 3)
 #include "common/parbas"
-      common /coiout/ niout, indout(20)
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop,
      :  ivbend, jmax
@@ -3791,6 +3791,7 @@
 *             of the variable names in cosysi followed by the ordering of
 *             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 *  -----------------------------------------------------------------------
+      use mod_coiout, only: niout, indout
       logical readpt, existf
       double precision brot, crot, emax
       integer numpot
@@ -3804,7 +3805,6 @@
       parameter (icod=5, ircod=3)
       parameter (lencod = icod + ircod + 3)
 #include "common/parbas"
-      common /coiout/ niout, indout(20)
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, jmax
       common /cosysr/ isrcod, junkr, brot, crot, emax
@@ -4970,6 +4970,7 @@ c  read the last few lines of the input file
 *             of the variable names in cosysi followed by the ordering of
 *             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 *  -----------------------------------------------------------------------
+      use mod_coiout, only: niout, indout
       logical readpt, existf
       double precision arot, brot, crot, emax
       integer numpot
@@ -4983,7 +4984,6 @@ c  read the last few lines of the input file
       parameter (icod=4, ircod=4)
       parameter (lencod = icod + ircod + 3)
 #include "common/parbas"
-      common /coiout/ niout, indout(20)
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, numpot, iop, jmax
       common /cosysr/ isrcod, junkr, arot, brot, crot, emax

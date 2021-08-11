@@ -86,10 +86,6 @@
 *    numj:     number of j1-j2 values
 *    nj1j2:    specific j1-j2 values (up to a maximum of 50)
 *              N.B. this dimension is set here
-*  variable in common block /cocent/
-*    cent:      array containing centrifugal barrier of each channel
-*  variable in common block /coeint/
-*    eint:      array containing channel energies (in hartree)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units
@@ -100,16 +96,14 @@
 *    nlammx:    the maximum number of angular coupling terms
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variable in common block /cov2/
-*    nv2max:    maximum core memory allocated for the v2 matrix
-*    v2:        lower triangle of nonzero angular coupling matrix elements
-*               only nonzero elements are stored
-*  variable in common block /coiv2/
-*   iv2:        matrix address of v2 matrix for each non-zero element
 *  subroutines called:
 *   vlmlml:    returns molecule-molecule angular coupling coefficient for
 *              particular choice of channel index
 * --------------------------------------------------------------------
+      use mod_cov2, only: nv2max, junkv => ndummy, v2
+      use mod_coiv2, only: iv2
+      use mod_cocent, only: cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -119,11 +113,7 @@
       common /cosysi/ nscode, isicod, nterm, nsym
       common /cosysr/ isrcod, junkr, brot, drot, hrot
       common /coselb/ ibasty
-      common /cov2/ nv2max, junkv, v2(1)
-      common /coiv2/ iv2(1)
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /cocent/ cent(1)
-      common /coeint/ eint(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       dimension j(1), l(1), is(1), jhold(1), ehold(1), j12(1), j1(1),

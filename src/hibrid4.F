@@ -51,7 +51,6 @@
       common /coisc2/ jpack(1)
       common /coisc3/ lpack(1)
       common /coj12p/ j12pk(1)
-      !common /cosout/ nnout, jout(21)
       common /coisc1/ inlev(1)
       common /coisc4/ ipack(1)
       common /coselb/ ibasty
@@ -1042,6 +1041,7 @@ c
 c     current revision: 20-apr-2012 by q. ma
 c
 * -------------------------------------------------------
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       character*48 oldlab, oldpot
       character*20 cdate, olddat
@@ -1057,7 +1057,6 @@ c
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr, nucros, photof, wavefl
       common /coered/ ered, rmu
-      common /coeint/ eint(25)
       common /cojq/   jq(1)
       common /colq/   lq(1)
       common /coinq/  inq(1)
@@ -1342,9 +1341,11 @@ c
 *
 * ------------------------------------------------------------------
       use mod_cosout, only: nnout, jout
+      use mod_coiout, only: niout, indout
       use constants
       use mod_coqvec, only: nphoto
-
+      use mod_cocent, only: sc2 => cent
+      use mod_coeint, only: eint
       implicit double precision (a-h,o-z)
       character*(*) filnam
       character*40  psifil, wavfil, amplfil, flxfil
@@ -1361,7 +1362,6 @@ c
       common /cojq/   jq(60)
       common /colq/   lq(10)
       common /coinq/  inq(60)
-      common /coeint/ eint(100)
       common /cow/    sr(100)
       common /cozmat/ si(100)
       common /coamat/ psir(100)
@@ -1370,8 +1370,6 @@ c
       common /cotq1/  dpsir(100)
       common /cotq2/  dpsii(100)
       common /cotq3/  scmat2(100)
-      !common /cosout/ nnout, jout(21)
-      common /coiout/ niout, indout(10)
       common /coisc1/ ipack(10)
       common /coisc2/ nlist(50)
       common /coisc3/ nalist(60)
@@ -1384,7 +1382,6 @@ c
       common /cosc6/ sc(100)
       common /cosc7/ sc1(100)
 * common for y1, y2, y4
-      common /cocent/ sc2(1)
       common /coered/ ered, rmu
       common /coselb/ ibasty
       common /cosysi/ ispar(4), ipol
@@ -2303,6 +2300,8 @@ c
 * current revision: 20-apr-2012 by q. ma
 *
 * ------------------------------------------------------------------
+      use mod_coiout, only: niout, indout
+      use mod_cocent, only: sc2 => cent
       implicit double precision (a-h,o-z)
       logical adiab, kill, photof, propf, sumf, coordf, ifull
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
@@ -2322,12 +2321,9 @@ c
       common /cosc7/ sc1(6)
       common /cosc8/ sc8(6)
       common /cosc9/ sc9(6)
-      common /cocent/ sc2(6)
       common /coered/ ered, rmu
       common /coground/ ifull
       common /cotrans/ ttrans(36)
-      common /coselb/ ibasty
-      common /coiout/ niout, indout(10)
       dimension scc(100)
       data zero, one, onemin /0.d0, 1.d0, -1.d0/
       data ione, mone /1,-1/
@@ -2620,6 +2616,7 @@ c
 * revised on 30-mar-2012 by q. ma for stream I/O of wfu files
 *
 * ------------------------------------------------------------------
+      use mod_cocent, only: sc2 => cent
       implicit double precision (a-h,o-z)
       common /coered/ ered, rmu
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
@@ -2630,7 +2627,6 @@ c
       common /cosc8/ sc8(6)
       common /cosc7/ sc7(6)
 * common for y1, y2, y4
-      common /cocent/ sc2(6)
       data zero, one, onemin, two,   conv
      :    /0.d0, 1.d0, -1.d0, 2.d0, 219474.6d0/
         do 420 kstep=1, npts
