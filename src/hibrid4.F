@@ -1341,7 +1341,7 @@ c
 * special version for 13p collisions
 *
 * ------------------------------------------------------------------
-      use mod_cosout
+      use mod_cosout, only: nnout, jout
       use constants
       use mod_coqvec, only: nphoto
 
@@ -1386,7 +1386,7 @@ c
 * common for y1, y2, y4
       common /cocent/ sc2(1)
       common /coered/ ered, rmu
-     common /coselb/ ibasty
+      common /coselb/ ibasty
       common /cosysi/ ispar(4), ipol
       dimension a(7), sx(3)
       data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f',
