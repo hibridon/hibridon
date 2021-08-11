@@ -45,6 +45,7 @@
 *  current revision: 16-jan-2019 by q. dagdigian
 * ---------------------------------------------------------------------
       use mod_cosout
+      use mod_codim, only: nmax => mmax
       implicit double precision (a-h,o-z)
 *  iicode is the number of integer pcod's
 *  ircode is the number of real pcod's
@@ -93,7 +94,6 @@
       common /cobaco/ bascod
       common /coopti/ optifl
       common /coamat/ scmat(1)
-      common /codim/ mairy,nmax
       common /conlam/ nlam, nlammx, lamnum(1)
       common /cotwo/ numj,nj1j2(5)
 * when adding bases, change size of array basknd and size of

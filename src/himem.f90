@@ -621,53 +621,128 @@ end module mod_cosout
 !    end subroutine allocate_cotble
 ! end module mod_cotble
 
-! module mod_coqvec
-!    implicit none
-!    real(8), dimension(:), allocatable :: q
-!    integer, allocatable               :: mxphot, nphoto
-!    contains
-!    subroutine allocate_coqvec(n)
-!       integer, intent(in) :: n
-!       allocate(q(n)) ; allocate(mxphot) ; allocate(nphoto)
-!    end subroutine allocate_coqvec
-! end module mod_coqvec
 
-! module mod_coqvec2
-!    implicit none
-!    real(8), dimension(:), allocatable :: q2
-!    contains
-!    subroutine allocate_coqvec2(n)
-!       integer, intent(in) :: n
-!       allocate(q2(n))
-!    end subroutine allocate_coqvec2
-! end module mod_coqvec2
+module mod_coqvec
+   ! *  vectors dimensioned nphoto*nch
+   !       q
 
-! module mod_codim
-!    implicit none
-!    integer, allocatable :: mairy, mmax, mbig
-!    contains
-!    subroutine allocate_codim()
-!       allocate(mairy) ; allocate(mmax) ; allocate(mbig)
-!    end subroutine allocate_codim
-! end module mod_codim
+   ! *  variables in common block /coqvec/
+   ! *     mxphot        maximum column dimension of q matrix
+   ! *     nphoto        actual collumn dimension of q matrix
+   ! *     q             accumulated gamma2 inhomogeneous propagator
+   ! *                   only calculated if photof = .true.
+   ! *                   this is stored as a column vector for each separate
+   ! *                   ground-state wavefunction
+   
+   ! *     variables in common block /coqvec/
+   ! *     mxphot        maximum dimension of q matrix
+   ! *     nphoto        actual collumn dimension of q matrix
+   ! *     q             accumulated overlap matrix with ground state
+   ! *                   only calculated if photof = .true.
+   ! *                   this is stored with each wavefunction as a column vector
 
-! module mod_comxbs
-!    implicit none
-!    integer, allocatable :: maxbas
-!    contains
-!    subroutine allocate_comxbs()
-!       allocate(maxbas)
-!    end subroutine allocate_comxbs
-! end module mod_comxbs
+   ! *     variables in common block /coqvec/
+   ! *     mxphot        maximum column dimension of q matrix
+   ! *     nphoto        actual collumn dimension of q matrix
+   ! *     q             accumulated overlap matrix with ground state
+   ! *                   only calculated if photof = .true.
+   ! *                   this is stored with each wavefunction as a column vector
+   
+   ! *     variables in common block /coqvec/
+   ! *     mxphot        maximum column dimension of q matrix
+   ! *     nphoto        actual column dimension of q matrix (gamma2)
+   ! *     q             accumulated overlap matrix with ground state
+   ! *                   only calculated if photof = .true.
+   ! *                   this is stored with each wavefunction as a column vector
 
-! module mod_comxm
-!    implicit none
-!    integer, allocatable :: ncache, mxmblk
-!    contains
-!    subroutine allocate_comxm()
-!       allocate(ncache) ; allocate(mxmblk)
-!    end subroutine allocate_comxm
-! end module mod_comxm
+   ! *     variables in common block /coqvec/
+   ! *     mxphot        maximum column dimension of q matrix
+   ! *     nphoto        actual column dimension of q matrix
+   ! *     q             accumulated overlap matrix with ground state
+   ! *                   only calculated if photof = .true.
+   ! *                   this is stored with each wavefunction as a column vector
+
+   ! *     variables in common block /coqvec/
+   ! *     mxphot        maximum dimension of q matrix
+   ! *     nphoto        actual collumn dimension of q matrix
+   ! *     q             accumulated overlap matrix with ground state
+   ! *                   only calculated if photof = .true.
+   ! *                   this is stored with each wavefunction as a column vector
+
+
+   ! mxphot:   maximum number of initial states (maximum columns in q)
+   ! nphoto:   actual number of initial states used
+   ! q:        accumulated overlap matrix with ground state
+   !           only calculated if photof = .true.
+   implicit none
+   real(8), dimension(:), allocatable :: q
+   integer, allocatable               :: mxphot
+   integer, allocatable               :: nphoto
+   contains
+   subroutine allocate_coqvec(aqmax, amxpho, anphot)
+      integer, intent(in) :: aqmax
+      integer, intent(in) :: amxpho
+      integer, intent(in) :: anphot
+      allocate(q(aqmax)) ; allocate(mxphot) ; allocate(nphoto)
+      mxphot = amxpho
+      nphoto = anphot
+   end subroutine allocate_coqvec
+end module mod_coqvec
+
+module mod_coqvec2
+   implicit none
+   real(8), dimension(:), allocatable :: q2
+   contains
+   subroutine allocate_coqvec2(aq2)
+      integer, intent(in) :: aq2
+      allocate(q2(aq2))
+   end subroutine allocate_coqvec2
+end module mod_coqvec2
+
+module mod_codim
+   implicit none
+   save
+   integer, allocatable :: mairy, mmax, mbig
+   contains
+   subroutine allocate_codim(aairy, amax, abig)
+      integer, intent(in) :: aairy
+      integer, intent(in) :: amax
+      integer, intent(in) :: abig
+      allocate(mairy) ; allocate(mmax) ; allocate(mbig)
+      mairy = aairy
+      mmax = amax
+      mbig = abig
+   end subroutine allocate_codim
+end module mod_codim
+
+module mod_comxbs
+   implicit none
+   save
+   integer, allocatable :: maxbas  ! maximum number of allowed basis types 
+   ! THIS SHOULD BE INCREASED AS BASIS ROUTINES ARE ADDED
+   contains
+   subroutine allocate_comxbs(n)
+      integer, intent(in) :: n
+      allocate(maxbas) ; maxbas = n
+   end subroutine allocate_comxbs
+end module mod_comxbs
+
+module mod_comxm
+   implicit none
+   save
+   integer, allocatable :: ncache, mxmblk
+   contains
+   subroutine allocate_comxm()
+      allocate(ncache)  ! cache size in words
+      allocate(mxmblk)
+      !  determine cache and block sizes for matrix multiply
+      ncache=4096
+#if defined(HIB_UNIX_HP)
+      ncache=16000
+#endif
+      mxmblk=64
+   end subroutine allocate_comxm
+end module mod_comxm
 
 
 
