@@ -17,6 +17,6 @@
  T  F  F  T  F                  wrpart, prpart, prxsec, wrxsec, wavefl
  F  T  F  F  F                  noprin, chlist, ipos, nucros, photof
  T  F  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
- F                              rsflag 
+ F  F                           rsflag, boundc 
  8 2  1  1  1              nmax,npar,isym,igu,isa
  1.89102  0.0072549  6.40d-6  0d0 brot, gsr, drot, hrot
