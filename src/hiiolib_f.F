@@ -292,8 +292,8 @@ c
       inquire (file=input, exist=existf)
       if (.not. existf) then
         write (6, 20) input(1:length)
-20      format
-     :   (/'   *** INPUT FILE ',(a),' DOES NOT EXIST; ABORT ***')
+20      format(
+     :   /'   *** INPUT FILE ',(a),' DOES NOT EXIST; ABORT ***')
         if( batch) call exit
         return
       end if
@@ -1175,8 +1175,8 @@ c.....open direct access file for interpolation and restart
               lenx=index(xname,' ')-1
               write (9, 320) xname(1:lenx), xname, label, newlab
               write (6, 320) xname(1:lenx), xname, label, newlab
-320           format
-     :     (/' *** LABEL IN FILE ',a, ' DOES NOT MATCH INPUT DATA',
+320           format(
+     :      /' *** LABEL IN FILE ',a, ' DOES NOT MATCH INPUT DATA',
      :         '; ABORT ***',/'     ', a5,':', a, /,
      :                        '     INPUT:', a)
               label=newlab
@@ -1239,8 +1239,8 @@ c.....open direct access file for interpolation and restart
       if (oldlab .ne. label) then
           write (9, 50) oldlab, label
           write (6, 50) oldlab, label
-50        format
-     : (/' *** LABEL IN FILE TRSTRT DOES NOT MATCH INPUT DATA',
+50        format(
+     :  /' *** LABEL IN FILE TRSTRT DOES NOT MATCH INPUT DATA',
      :     '; ABORT ***',/'     TRSTRT:', a, /,
      :                        '      INPUT:', a)
           call exit

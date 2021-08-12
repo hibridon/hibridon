@@ -504,6 +504,5 @@ program comp_tests
         enddo
     enddo
     if(allocated(xs)) then ; deallocate( xs ) ; endif
-
     return
 end program comp_tests
