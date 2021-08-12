@@ -1,0 +1,12 @@
+input=ch2he_para.inp
+job=ch2_pq
+jtot2=3
+ener=585.366
+fstfac=1.10
+tolai=1.02
+spac=0.12
+emax=800.
+show
+run
+printc
+quit

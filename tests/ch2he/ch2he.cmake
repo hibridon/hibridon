@@ -14,6 +14,21 @@ set(TEST_T_MATRIX_SIZE kmax)
 add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_KMAX}" "${TEST_T_MATRIX_SIZE}")
 
 #------------------------------------------------------------------------------
+# CH2(a)--He (quick version for test coverage)
+#------------------------------------------------------------------------------
+
+set(TEST_ID ch2he_a_quick)
+set(TEST_POT_SRC_FILE "pot_ch2he_a190_c20.F")
+set(TEST_POT_DATA_FILES "ch2he_a190.dat")
+set(TEST_COMMAND_FILE "ch2ahe_stmixtst_quick.com")
+set(TEST_INPUT_FILES "Ch2he_para.inp")
+set(TEST_OUTPUT_FILES "Ch2_pq1.ics Ch2_pq1.xsc")
+set(TEST_KMAX 1451)
+set(TEST_T_MATRIX_SIZE kmax)
+
+add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_KMAX}" "${TEST_T_MATRIX_SIZE}")
+
+#------------------------------------------------------------------------------
 # CH2(X)--He and spin-resolved cross sections
 #------------------------------------------------------------------------------
 

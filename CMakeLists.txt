@@ -578,7 +578,7 @@ set(coverage_testsuite
   boh2_b2
   c2hh2
   cahe
-  ch2he_a
+  ch2he_a_quick
   ch2he_x_quick
   ch2he_stmix
   ch3he
