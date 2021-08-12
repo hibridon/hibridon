@@ -463,14 +463,14 @@ add_hibridon_testsuite("regular" "${regular_testsuite}" "${tests_list}")
 # test suite from autotest/testgroup_extended
 
 set(extended_testsuite
+  arch4
   arn2
-  aroh
   arno
   arno_bound
-  arch4
+  aroh
   boh2_b2
-  cahe
   c2hh2
+  cahe
   ch2he_a
   ch2he_x
   ch2he_stmix
@@ -484,8 +484,8 @@ set(extended_testsuite
   hecn
   heco
   heohx
-  ohh2_bausr_heohx
   nh3h2
+  ohh2_bausr_heohx
   ohh2_j1
   ohh2_j13
   stp1sg_ch3he
@@ -511,16 +511,16 @@ set(full_qma_testsuite
   ch3i
   h2ohe
   h2ohe_prsbr
+  h2ohe_trnprt
   hecn
-  heohx
-  ohh2_bausr_heohx
   heco
+  heohx
   nh3h2
   nh3h2_qma
+  ohh2_bausr_heohx
   ohh2_bausr_j1
   ohh2_j1
   ohh2_j13
-  h2ohe_trnprt
   vfit)
 
 add_hibridon_testsuite("full_qma" "${full_qma_testsuite}" "${tests_list}")
@@ -528,33 +528,81 @@ add_hibridon_testsuite("full_qma" "${full_qma_testsuite}" "${tests_list}")
 # test suite from autotest/testgroup_all
 
 set(all_testsuite
+  arch4
   arn2
-  aroh
+  arn2_big
   arno
   arno_bound
   aroh
+  boh2_b
   boh2_b2
+  c2hh2
   cahe
   ch2he_a
   ch2he_x
+  ch2he_x_quick
   ch2he_stmix
   ch3he
+  ch3he_ccsdt
   ch3he_vib
   ch3i
   cph2
   h2ohe
+  h2ohe_orig
   h2ohe_prsbr
+  h2ohe_trnprt
+  hco_trnprt
   hecn
   heco
   heohx
-  ohh2_bausr_heohx
   nh3h2
   nh3h2_qma
+  ohh2_bausr_heohx
+  ohh2_bausr_j1
   ohh2_j1
   ohh2_j13
-  h2ohe_trnprt
   stp1sg_ch3he
   stp1sg_nh3h2
   vfit)
 
 add_hibridon_testsuite("all" "${all_testsuite}" "${tests_list}")
+
+set(coverage_testsuite
+  arch4
+  arn2
+  arn2_big
+  arno
+  arno_bound
+  aroh
+  boh2_b
+  boh2_b2
+  c2hh2
+  cahe
+  ch2he_a
+  ch2he_x_quick
+  ch2he_stmix
+  ch3he
+  ch3he_ccsdt
+  ch3he_vib
+  ch3i
+  cph2
+  h2ohe
+  h2ohe_orig
+  h2ohe_prsbr
+  h2ohe_trnprt
+  hco_trnprt
+  hecn
+  heco
+  heohx
+  nh3h2
+  nh3h2_qma
+  ohh2_bausr_heohx
+  ohh2_bausr_j1
+  ohh2_j1
+  ohh2_j13
+  stp1sg_ch3he
+  stp1sg_nh3h2
+  vfit)
+
+
+add_hibridon_testsuite("coverage" "${coverage_testsuite}" "${tests_list}")
