@@ -576,7 +576,7 @@ set(coverage_testsuite
   aroh
   boh2_b
   boh2_b2
-  c2hh2
+  c2hh2_quick
   cahe
   ch2he_a_quick
   ch2he_x_quick
