@@ -199,7 +199,6 @@
       call allocate_coeint(kmax)
       call allocate_coj12(kmax)
       call allocate_coj12p(kmax)
-
       call allocate_coeig()
       call allocate_coeig2()
 #if defined(HIB_UNIX_IBM)
