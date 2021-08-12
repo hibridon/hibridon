@@ -599,7 +599,7 @@ set(coverage_testsuite
   ohh2_bausr_heohx
   ohh2_bausr_j1
   ohh2_j1
-  ohh2_j13
+  ohh2_j13_quick
   stp1sg_ch3he
   stp1sg_nh3h2
   vfit)
