@@ -425,8 +425,7 @@ c
 c
 c.....precalculate all required spherical harmonics
       if (allocated(ytmp)) deallocate(ytmp)
-      ! write(6,*) 'allocating ytmp with size ', l2max*2
-      allocate(ytmp(l2max*2))
+      allocate(ytmp(l2max))
       do ml = 0, mlmax-1
          angle=ang1
          do i = 1, nangle
