@@ -596,7 +596,7 @@ set(coverage_testsuite
   hco_trnprt
   hecn_quick
   heco
-  heohx
+  heohx_quick
   nh3h2
   nh3h2_qma
   ohh2_bausr_heohx
