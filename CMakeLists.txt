@@ -546,7 +546,7 @@ set(all_testsuite
   ch2he_stmix
   ch3he
   ch3he_quick
-  ch3he_ccsdt
+  ch3he_ccsdt_quick
   ch3he_vib
   ch3i
   cph2
