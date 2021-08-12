@@ -2,14 +2,13 @@
 *.log
 *.BAK
 *.o
-src/pot/*
 ._*
 _*
 testnew/*
-src/pot/*
 .DS*
 *.exe
 bin/SYSCONFIG
 hibridon.code-workspace
+build/*
 
 
