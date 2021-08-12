@@ -28,9 +28,8 @@ C     ------------------------------------------------------------------
 C     Main program for makepot
       subroutine driver
       use pot_ohh2
+      use mod_covvl, only: vvl
       implicit none
-      common /covvl/ vvl
-      real(8), dimension(1) :: vvl
       character(40), parameter :: data_file_name=
      $    'pot_ohh2_mrci_core1_highsym.dat'
       real(8) :: r, vv0
@@ -101,9 +100,8 @@ C     Spline parameters prepared here
 C     ------------------------------------------------------------------
       subroutine pot(vv0, r_inp)
       use pot_ohh2
+      use mod_covvl, only: vvl
       implicit none
-      common /covvl/ vvl
-      real(8), dimension(1) :: vvl
       double precision vv0, r_inp, r
       double precision seval
       integer iv

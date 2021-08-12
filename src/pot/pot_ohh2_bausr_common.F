@@ -1,3 +1,6 @@
+      use mod_covvl, only: vvl
+c     size of vvl : MAX_NVB+MAX_NVF
+      implicit none
 C     Maximum number of R's, terms of B's and F's
 C     The R grid does not need to be evenly spaced
       integer MAX_NR, MAX_NVB, MAX_NVF
@@ -19,9 +22,6 @@ C     Arrays storing information for cubic spline evaluation
       double precision splb_b(MAX_NR, MAX_NVB), splb_c(MAX_NR, MAX_NVB),
      $     splb_d(MAX_NR, MAX_NVB), splf_b(MAX_NR, MAX_NVF),
      $     splf_c(MAX_NR, MAX_NVF), splf_d(MAX_NR, MAX_NVF)
-c
-      common /covvl/ vvl
-      double precision vvl(MAX_NVB+MAX_NVF)
 c
       common /coconv/ econv, xmconv
       double precision econv, xmconv

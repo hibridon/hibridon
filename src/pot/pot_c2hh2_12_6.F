@@ -43,9 +43,7 @@ C     parameters be passed between the pot routine and the basis routine
       character(48) :: pot_name, pot_label
       character*(*) :: file_name
       character(255) :: file_path
-      integer :: iunit, ir, iv, nv, ifrsts, junks, nlam, nlammx, lamnum
-      real(8), dimension(1) :: vvl
-      common /covvl/ ifrsts, junks, vvl
+      integer :: iunit, ir, iv, nv, nlam, nlammx, lamnum
 C     A call to this subroutine with a string containing a space will be
 C     made at the time hibridon loads. Input file is not available at
 C     the time.
@@ -95,10 +93,9 @@ C     Main program for makepot
       subroutine driver
       use mod_1sg1sg
       use mod_c2hh2
+      use mod_covvl, only: vvl
       implicit none
       common /conlam/ nlam
-      common /covvl/ vvl
-      real(8), dimension(1) :: vvl
       character(40), parameter :: data_file_name='pot_c2hh2_12_6.dat'
       real(8) :: r, vv0
       integer :: i, nv, nlam
@@ -123,10 +120,9 @@ C     ------------------------------------------------------------------
       subroutine pot(vv0, r_inp)
       use mod_1sg1sg
       use mod_c2hh2
+      use mod_covvl, only: vvl
       implicit none
       common /conlam/ nlam
-      common /covvl/ vvl
-      real(8), dimension(1) :: vvl
       double precision vv0, r_inp, r
       double precision seval
       integer iv, nlam

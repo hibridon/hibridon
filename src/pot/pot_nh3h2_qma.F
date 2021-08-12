@@ -20,6 +20,7 @@ c     ------------------------------------------------------------------
 c     THE FOLLOWING SOUBROUTINE WILL BE THE MAIN FUNCTION FOR MAKEPOT.
 c     NOTE THAT VVL IS IN HARTREES.
       subroutine driver
+      use mod_covvl, only: vvl
       implicit none
 c
       integer MAX_NR, MAX_NV
@@ -35,10 +36,7 @@ c
       double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV),
      $     spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV),
      $     spl_d(MAX_NR, MAX_NV)
-      
-      common /covvl/ vvl
-      double precision vvl(MAX_NV)
-      
+            
       common /coconv/ econv, xmconv
       double precision econv, xmconv
       data econv /219474.6315343234d0/
@@ -75,9 +73,6 @@ c
       double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV),
      $     spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV),
      $     spl_d(MAX_NR, MAX_NV)
-      
-      common /covvl/ vvl
-      double precision vvl(MAX_NV)
       
       common /coconv/ econv, xmconv
       double precision econv, xmconv
@@ -126,6 +121,7 @@ c     ALWAYS SET VV0 = 0 TO AVOID CONFUSION.  THE ISOTROPIC TERM CAN BE
 c     EASILY TREAT AS ONE TERM IN THE POTENTIAL EXPANSION.  NOTE THAT
 c     VVL SHOULD BE IN HARTREES.
       subroutine pot(vv0, r)
+      use mod_covvl, only: vvl
       implicit none
 c
       integer MAX_NR, MAX_NV
@@ -141,9 +137,6 @@ c
       double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV),
      $     spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV),
      $     spl_d(MAX_NR, MAX_NV)
-      
-      common /covvl/ vvl
-      double precision vvl(MAX_NV)
       
       common /coconv/ econv, xmconv
       double precision econv, xmconv
@@ -180,9 +173,6 @@ c
       double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV),
      $     spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV),
      $     spl_d(MAX_NR, MAX_NV)
-      
-      common /covvl/ vvl
-      double precision vvl(MAX_NV)
       
       common /coconv/ econv, xmconv
       double precision econv, xmconv
@@ -289,9 +279,6 @@ c
      $     spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV),
      $     spl_d(MAX_NR, MAX_NV)
      
-      common /covvl/ vvl
-      double precision vvl(MAX_NV)
-      
       common /coconv/ econv, xmconv
       double precision econv, xmconv
       data econv /219474.6315343234d0/

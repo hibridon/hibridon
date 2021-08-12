@@ -14,10 +14,10 @@
 *  vvl(6) contains the first anisotropic (2,2) potential
 *  vvl(7) contains the second anisotropic (2,2) potential
       subroutine driver
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       logical ifull
       dimension wf(16)
-      common /covvl/ vvl(7)
       common /coered/ ered, rmu
       common /coground/ ifull
       common /covib/ie(50), iv(50)
@@ -312,13 +312,13 @@
 *  variable in common block /conlam/
 *    nlam:      the total number of angular coupling terms
 *    nlammx:    the maximum number of anisotropic terms
-*  variable in common block /covvl/
+*  variable in module mod_covvl
 *    vvl        array to store r-dependence of each angular term in the
 *               potential
+      use mod_covvl, only: vvl
       implicit double precision (a-h, o-z)
       common /conlam/ nlam, nlammx
       common /covib/ ie(50), ic(50)
-      common /covvl/ vvl(7)
 *  -----------------------------------------------------------------------
       data a11, b11, a12, b12, b13, y0, r0 / 51.53d0, 1.64d0, 25.15d0,
      :          1.3d0,

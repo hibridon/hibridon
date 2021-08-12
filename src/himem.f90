@@ -159,15 +159,18 @@ module mod_coj12p
    end subroutine allocate_coj12p
 end module mod_coj12p
 
-! module mod_covvl
-!    implicit none
-!    real(8), dimension(:), allocatable :: vvl
-!    contains
-!    subroutine allocate_covvl(n)
-!       integer, intent(in) :: n
-!       allocate(vvl(n)) ;
-!    end subroutine allocate_covvl
-! end module mod_covvl
+module mod_covvl
+   !  variable in this module
+   !    vvl:       array to store r-dependence of each angular term in the
+   !               potential   
+   implicit none
+   real(8), dimension(:), allocatable :: vvl
+   contains
+   subroutine allocate_covvl(alammx)
+      integer, intent(in) :: alammx
+      allocate(vvl(alammx)) ;
+   end subroutine allocate_covvl
+end module mod_covvl
 
 ! module mod_cofact
 !    implicit none

@@ -17,8 +17,8 @@
 #include "common/bausr"
 * ------------------------------------------------------------------------
       subroutine driver
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
-      common /covvl/ vvl(19)
 #include "common/parpot"
       s4pi = sqrt ( 4.d0 * acos(-1.d0) )
       potnam='MA CH2(a)-He PES'
@@ -90,7 +90,7 @@
 *    r:          interparticle distance
 *  on return:
 *    vv0         contains isotropic term (Y00)
-*  variable in common block /covvl/
+*  variable in module mod_covvl
 *    vvl:        vector of length 6 to store r-dependence of each term
 *                in potential expansion
 *    vvl(1-5):   expansion coefficients in Yl0 (l=2:6:2) of v(lam,0)
@@ -108,6 +108,7 @@
 * author:  lifang ma and paul dagdigian
 * latest revision date:  march-2-2011
 *
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       dimension iwork(3000),ylm(190,20)
       dimension swork(20), work(3624)
@@ -116,7 +117,6 @@
       dimension y60(190),y62(190),y44(190),y55(190),y64(190)
       dimension y66(190),y73(190),y75(190),y84(190),y86(190)
       
-      common /covvl/ vvl(19)
       common /vspline/ vsp_jacek(190)
       common /vvalue/  vv(3610),v(19,190), vvec(19)
       data c6 /1.0403914232209d7/

@@ -15,7 +15,6 @@ c     ------------------------------------------------------------------
 c     THE FOLLOWING SOUBROUTINE WILL BE THE MAIN FUNCTION FOR MAKEPOT.
 c     NOTE THAT VVL IS IN HARTREES.
       subroutine driver
-      implicit none
 c
 #include "pot_ohh2_bausr_common.F"
       character*40 filenm
@@ -40,7 +39,6 @@ c
 c     ------------------------------------------------------------------
 c     DATA FILE, IF REQUIRED, CAN BE LOADED WITH THIS SOUBROUTINE.
       subroutine loapot(iunit, filnam)
-      implicit none
 c
 #include "pot_ohh2_bausr_common.F"
 #include "common/parpot"
@@ -112,7 +110,6 @@ c     ALWAYS SET VV0 = 0 TO AVOID CONFUSION.  THE ISOTROPIC TERM CAN BE
 c     EASILY TREAT AS ONE TERM IN THE POTENTIAL EXPANSION.  NOTE THAT
 c     VVL SHOULD BE IN HARTREES.
       subroutine pot(vv0, r_raw)
-      implicit none
 c
 #include "pot_ohh2_bausr_common.F"
       real(8), intent(in) :: r_raw
@@ -140,7 +137,6 @@ c     ------------------------------------------------------------------
 c     THIS SUBROUTINE GOVERNS THE INPUT/OUTPUT OF THE BASIS ROUTINE.
 c     ONLY IREAD IS USED: RETURN DIRECTLY IF ZERO.
       subroutine syusr(irpot, readpt, iread)
-      implicit none
 c
 #include "pot_ohh2_bausr_common.F"
       integer irpot, iread
@@ -219,7 +215,6 @@ c     IV2, LAMNUM.
       use mod_coeint, only: eint
       use mod_coj12, only: j12
 
-      implicit none
 c
 #include "pot_ohh2_bausr_common.F"
       double precision rcut

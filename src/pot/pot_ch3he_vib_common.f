@@ -18,6 +18,14 @@ c       cent: array containing centrifugal barrier of each channel
 c   coeint block
 c       eint: array containing channel energies (in hartree). The zero of energy is assumed to be the v2=0, j=0, k=0 level
       use mod_coeint, only: eint
+c
+c   covvl block
+c       vvl: r-dependence of each term in potential expansion
+c   represent <v_2'|v_{\lambda\mu}(Q_2, R)|v_2> in the following order:
+c       <0|v_00|0>, <0|v_20|0>, ..., <0|v_99|0>, <0|v_10|1>, ...
+c   where v2 >= v2'
+      use mod_covvl, only: vvl
+c     size of vvl : NVVL
 
       implicit double precision (a-h, o-z)
 c   Define the sizes of grids
@@ -80,14 +88,6 @@ c       mu     =  0  0  0  0  0  3  3  3  3  6  6  9
       data lamasy /1, 3, 5, 7, 9, 4, 6, 8, 10, 7, 9, 10/
       data muasy /0, 0, 0, 0, 0, 3, 3, 3, 3, 6, 6, 9/
 c
-c
-c   covvl block
-c       vvl: r-dependence of each term in potential expansion
-c   represent <v_2'|v_{\lambda\mu}(Q_2, R)|v_2> in the following order:
-c       <0|v_00|0>, <0|v_20|0>, ..., <0|v_99|0>, <0|v_10|1>, ...
-c   where v2 >= v2'
-      common /covvl/ vvl
-      double precision vvl(NVVL)
 c
 c   cosysi block
 c       nscod: total number of variable names which are passed to HINPUT, nscod must equal isrcod + isicod + 3

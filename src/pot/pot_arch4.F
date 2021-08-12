@@ -16,8 +16,8 @@
 #include "common/bausr"
 * ------------------------------------------------------------------------
       subroutine driver
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
-      common /covvl/ vvl(4)
 #include "common/parpot"
       s4pi = sqrt ( 4.d0 * acos(-1.d0) )
       econv=219474.6d0
@@ -84,7 +84,7 @@
 *    r:          interparticle distance
 *  on return:
 *    vv0         contains isotropic term (Y00)
-*  variable in common block /covvl/
+*  variable in module mod_covvl
 *    vvl:        vector of length 4 to store r-dependence of each term
 *                in potential expansion
 *  variable in common block /coloapot/
@@ -98,6 +98,7 @@
 * this pes is a fit to 19 values of R and 190 orientations, namely
 * R = [3:0.5:10 11 12 13 15 20]
 *
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       logical ljunk, ihomo, csflag, lljunk
 #include "common/parbas"
@@ -105,7 +106,6 @@
       dimension csplin(69,5)
       dimension rr(69), vl(345),vec(69)
       common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
-      common /covvl/ vvl(4)
 * here are the 69 values of R
       data rr/
      +  3.000,  3.250,  3.500,  3.750,  4.000,

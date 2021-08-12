@@ -25,12 +25,12 @@
       end
 * --------------------------------------------------------------------------
       subroutine driver
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       character *48 potnam
       character *2 frame
       logical csflag, ljunk, ihomo, lljunk
       common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
-      common /covvl/ vvl(9)
       potnam='HALVICK C+(2P)-H2 PES'
       print *, potnam
       print *
@@ -77,7 +77,7 @@
 *    r:      interparticle distance
 *  on return:
 *  vv0       totally symmetric potential (v000)
-*  variable in common block /covvl/
+*  variable in module mod_covvl
 *    vvl:     vector of length 5 to store r-dependence of each term
 *             in potential expansion
 *  CS calculations case 1A (csflag=.true. and ihomo=.false)
@@ -98,10 +98,10 @@
 * ----------------------------------------------------------------------
 
 
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       logical ljunk, ihomo, csflag, lljunk
       common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
-      common /covvl/ vvl(4)
       dimension evec(5)
       dimension vvll(18)
       data zero, one, half /0.d0,1.d0,0.5d0/

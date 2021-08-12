@@ -12,8 +12,8 @@
 #include "common/ground"
 * ------------------------------------------------------------------------
       subroutine driver
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
-      common /covvl/ vvl(15)
 #include "common/parpot"
       econv=219474.6d0
       potnam='HCO PES-Nijmegen-lmax=15'
@@ -80,18 +80,19 @@
 *  on return:
 *  vv0 contains the isotropic term (n=0) in the potential
 *  the coefficients for each angular term in the coupling potential
-*  [ vvl(i) for i = 1, nlam ] are returned in common block /covvl/
+*  [ vvl(i) for i = 1, nlam ] are returned in module mod_covvl
 
 *  variable in common block /conlam/
 *    nlammx:    the maximum number of anisotropic terms
 *    nlam:      the total number of angular coupling terms
-*  variable in common block /covvl/
+*  variable in module mod_covvl
 *    vvl        array to store r-dependence of each angular term in the
 *               potential
 * 
 * author:  paul dagdigian
 * latest revision date:  21-jan-2015
 * ----------------------------------------------------------------------
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       logical ljunk, ihomo, csflag, lljunk
 #include "common/parbas"
@@ -99,7 +100,6 @@
       dimension csplin(47,16)
       dimension rr(47), vl(752),vec(47)
       common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
-      common /covvl/ vvl(15)
 *
 *  47 values or R
       data rr /

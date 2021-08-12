@@ -25,12 +25,12 @@
 
 * --------------------------------------------------------------------------
       subroutine driver
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       common /cosysi/ junk(5), npot
       common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4),
      :                        rl(4), cl(4), cmix, alphg, rgaus,
      :                        agaus, demor, remor, bemor, dissmor
-      common /covvl/ vvl(4)
 #include "common/parpot"
       potnam='Ca(4s5p)-He'
       print *, potnam
@@ -78,7 +78,7 @@
 *  vvl(3,4)   contains the 1pi and 1sig potentials
 *  variable in common block /conlam/ used here
 *    nlam:    the number of angular coupling terms actually used
-*  variable in common block /covvl/
+*  variable in module mod_covvl
 *    vvl:     array to store r-dependence of each
 *             angular term in the potential
 *  variable in common block /coconv/
@@ -95,9 +95,9 @@
 * author:  millard alexander and brigitte pouilly
 * latest revision date:  17-may-1994 by bp
 * ----------------------------------------------------------------------
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       common /conlam/ nlam
-      common /covvl/ vvl(4)
       common /coconv/ econv
       common /cosysi/ nscode, isicod, nterm, nstate, ipol, npot
       common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4),

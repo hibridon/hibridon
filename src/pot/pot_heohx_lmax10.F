@@ -7,10 +7,10 @@
 *         vthet_heohx.txt
 *
       subroutine driver
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       dimension thta(11),cthta(11),vap(11),va2p(11)
       common /cosysr/ xjunk(2),rshift,xfact
-      common /covvl/ vvl(19)
 #include "common/parpot"
       potnam='Cybulski et al He-OH(X) RCCSDT PES'
       thta(1)=0.D0
@@ -104,7 +104,7 @@
 *    r:      interparticle distance
 *  on return:
 *  vv0        contains isotropic term (d00 term in vsum)
-*  variable in common block /covvl/
+*  variable in module mod_covvl
 *    vvl:     vector of length 6 to store r-dependence of each term
 *             in potential expansion
 *    vvl(1-10) expansion coefficients in dl0 (l=1:10) of vsum
@@ -119,6 +119,7 @@
 * 0 degree for He-NCO and 180 for He-OCN
 * ----------------------------------------------------------------------
 
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       dimension xlam1(22),xlam2(22),r0(22),c1(22),c2(22),c3(22),
      :          clr(22),vsum(11),xsum(11),vdif(11),xdif(11),
@@ -126,7 +127,6 @@
      :          d0(121),d2(81),aa(121),thta(11),cthta(11)
       dimension kpvt(11),qraux(11),work(200),rsd(11),re(22)
 
-      common /covvl/ vvl(19)
       data half, zero, one, alph /0.5d0, 0.d0, 1.d0, 1.2d0/
 * for distances beyond rmax difference potential is damped
       data rmax /20d0/

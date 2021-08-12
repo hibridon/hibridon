@@ -17,9 +17,9 @@
 #include "common/bausr"
 * ------------------------------------------------------------------------
       subroutine driver
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       dimension xxl(15)
-      common /covvl/ vvl(1)
       common /coloapot/ s4pi
 #include "common/parpot"
       s4pi = sqrt ( 4.d0 * acos(-1.d0) )
@@ -93,7 +93,7 @@
 *    r:          interparticle distance
 *  on return:
 *    vv0         contains isotropic term (Y00)
-*  variable in common block /covvl/
+*  variable in module mod_covvl
 *    vvl:        vector of length 6 to store r-dependence of each term
 *                in potential expansion
 *    vvl(1-3):   expansion coefficients in Yl0 (l=2:6:2) of v(lam,0)
@@ -108,6 +108,7 @@
 * author:  paul dagdigian and millard alexander
 * latest revision date:  28-aug-2009
 *
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       dimension iwork(1000)
       dimension ylm(60,16), thetab(60), phib(60), vcalc(60),
@@ -120,7 +121,6 @@
      :  y42t(60), y51t(60), y53t(60), y62t(60), 
      :  y71t(60), y73t(60), y82t(60)
 *
-      common /covvl/ vvl(1)
       common /coloapot/ s4pi
 *
 *  coefficients for Ylm terms - all (lambda,mu) combinations up to lambda .le. 8

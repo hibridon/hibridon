@@ -26,9 +26,8 @@ C     ------------------------------------------------------------------
 C     Main program for makepot
       subroutine driver
       use pot_stp1sg_qma
+      use mod_covvl, only: vvl
       implicit none
-      common /covvl/ vvl
-      real(8), dimension(1) :: vvl
       real(8) :: r, vv0
       integer :: i
       character(40) :: filenm
@@ -101,9 +100,8 @@ C     Spline parameters prepared here
 C     ------------------------------------------------------------------
       subroutine pot(vv0, r_inp)
       use pot_stp1sg_qma
+      use mod_covvl, only: vvl
       implicit none
-      common /covvl/ vvl
-      real(8), dimension(1) :: vvl
       double precision vv0, r_inp, r
       double precision seval
       integer iv

@@ -254,9 +254,6 @@
 *           iflag = 0 if all channels are in classically forbidden region
 *           iflag = 1 if some channels are open
 *           iflag = 2 if all asymptotically open channels are open at r
-*  variable in common block /covvl/
-*    vvl        array to store r-dependence of each angular term in the
-*               potential
 *  subroutines called:
 *    pot:      returns r-dependence of each angular term in the potential
 *    daxpy:    blas routine
@@ -267,13 +264,13 @@
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       integer i, iflag, ilam, lamnum, nch, nlam, nlammx, nmax
       common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
       common /conlam/ nlam, nlammx, lamnum(1)
       common /copmat/ rtmn, rtmx, iflag
       common /coered/ ered, rmu
-      common /covvl/ vvl(1)
       common /coselb/ ibasty
       dimension w(100)
       zero = 0.d0
@@ -411,6 +408,7 @@ cABER
 *  added common block /conlamp/ for lamnump array
 *  current revision date:  5-nov-2012 by p.j.dagdigian
 #include "common/parsys_mod.F"
+      use mod_covvl, only: vvl
       implicit double precision(a-h,o-z)
       logical ihomo
       common /coselb/ ibasty
@@ -420,7 +418,6 @@ cABER
       common /cosysi/ nscode, isicod, ispar(maxpar)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /conlamp/ lamnump(50)
-      common/covvl/vvl(30)
       equivalence(ispar(1),nterm),(ispar(2),nvibmn),(ispar(3),nvibmx)
 
 10    write (6, 15)
@@ -506,6 +503,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       subroutine testptn(ihomo)
 *  current revision date:  8-apr-1997 by mha
 #include "common/parsys_mod.F"
+      use mod_covvl, only: vvl
       implicit double precision(a-h,o-z)
 
       logical ihomo
@@ -515,7 +513,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
       common /cosysi/ nscode, isicod, ispar(maxpar)
       common /conlam/ nlam, nlammx, lamnum(1)
-      common/covvl/vvl(30)
       dimension nvbmnr(4),nvbmxr(4),nvbmnc(4),nvbmxc(4)
       nstep=1
       if(ihomo) nstep=2
@@ -651,6 +648,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *  testpot for ibasty = 20 (ch2xhe v=3 - v=2)
 *  current revision date:  1-nov-2012 by lifang ms
 #include "common/parsys_mod.F"
+      use mod_covvl, only: vvl
       implicit double precision(a-h,o-z)
       logical ihomo
       common /coselb/ ibasty
@@ -660,7 +658,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       common /cosysi/ nscode, isicod, ispar(maxpar)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /conlamp/ lamnump(7)
-      common/covvl/vvl(30)
       equivalence(ispar(1),nterm),(ispar(2),nvibmn),(ispar(3),nvibmx)
 
 10    write (6, 15)

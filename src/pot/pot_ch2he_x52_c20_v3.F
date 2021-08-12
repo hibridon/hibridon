@@ -18,8 +18,8 @@
 #include "common/bausr"
 * ------------------------------------------------------------------------
       subroutine driver
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
-      common /covvl/ vvl(19)
 *      common /vspline/ vsp_jacek(52)
       common /coloapot/ s4pi
       common /copotvec/ vec(40,21)
@@ -101,7 +101,7 @@
 *    r:          interparticle distance
 *  on return:
 *    vv0         contains isotropic term (Y00)
-*  variable in common block /covvl/
+*  variable in module mod_covvl
 *    vvl:        vector of length 6 to store r-dependence of each term
 *                in potential expansion
 *    vvl(1-3):   expansion coefficients in Yl0 (l=2:6:2) of v(lam,0)
@@ -119,6 +119,7 @@
 * author:  lifang ma and paul dagdigian
 * latest revision date:  march-29-2011
 *
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       dimension iwork(3000),ylm(52,20)
       dimension swork(20), work(3624)
@@ -128,7 +129,6 @@
       dimension y66(52),y73(52),y75(52),y84(52),y86(52)
 *
 *
-      common /covvl/ vvl(19)
       common /coloapot/ s4pi
       common /vspline/ vsp_jacek(52)
       common /vvalue/  vv(988),v(19,52), vvec(19)

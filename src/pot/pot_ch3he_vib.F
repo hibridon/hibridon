@@ -131,7 +131,7 @@ c       vv0: zero
 c
 c
 c   Hidden returned value:
-c       /covvl/ vvl
+c       mod_covvl.vvl
 c
 c
 c   Function called:

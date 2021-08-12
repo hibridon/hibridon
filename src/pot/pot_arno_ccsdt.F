@@ -4,9 +4,9 @@
 
 
       subroutine driver
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       common /cosysr/ xjunk(2),rshift,xfact
-      common /covvl/ vvl(15)
       common /coconv/ econv
 #include "common/parpot"
       potnam='ALEXANDER Ar-NO CCSDT'
@@ -52,7 +52,7 @@
 *    r:      interparticle distance
 *  on return:
 *  vv0      spherically symmetric term in V0
-*  variable in common block /covvl/
+*  variable in module mod_covvl
 *    vvl:     vector of length 15 to store r-dependence of each term
 *             in potential expansion
 *    vvl(1-8) expansion coefficients in dl0 (l=1:8) of vsum
@@ -65,6 +65,7 @@
 * NB Vlam components correspond to theta=0 for ArON!!!,
 * ----------------------------------------------------------------------
 
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       dimension xlam1(17),xlam2(17),r0(17),c1(17),c2(17),c3(17),
      :          clr(17),vsum(9),xsum(9),vdif(9),xdif(9),
@@ -72,7 +73,6 @@
      :          d0(81),d2(49),aa(121)
       dimension kpvt(9),qraux(9),work(55),rsd(9)
 
-      common /covvl/ vvl(15)
       common /coconv/ econv
 
       data half, zero, one, alph /0.5d0, 0.d0, 1.d0, 1.2d0/

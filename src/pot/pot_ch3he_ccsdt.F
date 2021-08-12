@@ -17,8 +17,8 @@
 #include "common/bausr"
 * ------------------------------------------------------------------------
       subroutine driver
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
-      common /covvl/ vvl(11)
 #include "common/parpot"
       s4pi = sqrt ( 4.d0 * acos(-1.d0) )
       potnam='Dagdigian CH3-He PES'
@@ -104,7 +104,7 @@
 *    r:          interparticle distance
 *  on return:
 *    vv0         contains isotropic term (Y00)
-*  variable in common block /covvl/
+*  variable in module mod_covvl
 *    vvl:        vector of length 11 to store r-dependence of each term
 *                in potential expansion
 *    vvl(1-4):   expansion coefficients in Yl0 (l=2:8:2) of v(lam,0)
@@ -119,6 +119,7 @@
 * author:  paul dagdigian
 * latest revision date:  march-4-2011
 *
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       dimension iwork(1000),ylm(70,12)
       dimension swork(12), work(1812)
@@ -126,7 +127,6 @@
       dimension y33(70),y53(70),y73(70),y93(70)
       dimension y66(70),y86(70),y99(70)
 *
-      common /covvl/ vvl(11)
       common /vspline/ vsp_jacek(70)
       common /vvalue/  vv(1330),v(19,70), vvec(19)
       data c6 /1.0403914232209d7/

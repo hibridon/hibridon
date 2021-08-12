@@ -13,9 +13,9 @@
 #include "common/bausr"
 * ------------------------------------------------------------------------
       subroutine driver
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
       character*60 filnam
-      common /covvl/ vvl(300)
       common /fisurf/ conv,econv,lsurf,nv
       common /coloapot/ s4pi, nvv, ivv(300)
       common /conlam/ nlam, nlammx, lamnum
@@ -411,7 +411,7 @@ c  display and list parameters
 *  on return:
 *  vv0 contains the isotropic term d1[0,0,0]*d2[0,0,0] in the potential
 *  the coefficients for each angular term in the coupling potential
-*  [ vvl(i) for i = 1, nlam ] are returned in common block /covvl/
+*  [ vvl(i) for i = 1, nlam ] are returned in module mod_covvl
 *  in the following order:[l1,m1,l2,m2] associated with the angular
 *  function d(l1,m1,m2)*d(l2,m2,0)
 *    vvl(1) contains the [1,0,0,0] term
@@ -428,7 +428,7 @@ c  display and list parameters
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx (not used here)
  
-*  variable in common block /covvl/
+*  variable in module mod_covvl
 *    vvl        array to store r-dependence of each angular term in the
 *               potential
  
@@ -444,6 +444,7 @@ c  display and list parameters
 *  nvv is the total number of angular coupling terms
  
 *      implicit none
+      use mod_covvl, only: vvl
       implicit double precision (a-h,o-z)
 *      integer ivv, nvv, nlam, nlammx, kv, kvv, nvmx, lamnum
 #include "common/parpot"
@@ -451,9 +452,6 @@ c  display and list parameters
 *      double precision  r, v, vv, vv0, vvl, s4pi
       double precision  r, v, vv, vv0, s4pi
       common /conlam/ nlam, nlammx, lamnum(1)
-*      common /covvl/ vvl(nvmx)
-*      common /coloapot/ s4pi, ivv(nvmx), nvv
-      common /covvl/ vvl(300)
       common /coloapot/ s4pi, nvv, ivv(300)
  
       if (nlam .ne. nvv) then
