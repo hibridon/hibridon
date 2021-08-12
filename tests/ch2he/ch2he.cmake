@@ -68,7 +68,7 @@ set(TEST_ID ch2he_stmix)
 set(TEST_POT_SRC_FILE "pot_ch2he_x52_c20_v3.F")
 set(TEST_POT_DATA_FILES "ch2he_x52_v3.dat")
 set(TEST_COMMAND_FILE "ch2xhe_stmixtst2.com")
-set(TEST_INPUT_FILES "Ch2x3he_para.inp Ch2x_p1.smt") # Ch2x_p1.smt is an output of ch2he_x test
+set(TEST_INPUT_FILES "Ch2x3he_para.inp Ch2_p1.smt Ch2x_p1.smt") # Ch2x_p1.smt is an output of ch2he_x test
 set(TEST_OUTPUT_FILES "ch2he_stmix.stdout")
 set(TEST_KMAX 1451)
 set(TEST_T_MATRIX_SIZE kmax)
