@@ -11,5 +11,5 @@ show
 run
 printc
 hypxsc,ch2x_pq,1,2,1,3
-stmix,ch2_p,1,ch2x_pq,1,-328.327,550,13,21,.00001
+stmix,ch2_pq,1,ch2x_pq,1,-328.327,550,13,21,.00001
 quit
