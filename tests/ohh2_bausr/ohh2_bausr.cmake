@@ -14,6 +14,21 @@ set(TEST_T_MATRIX_SIZE kmax)
 add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_KMAX}" "${TEST_T_MATRIX_SIZE}")
 
 #------------------------------------------------------------------------------
+# OH--H2 j2=1 user-defined basis (quick version for code coverage)
+#------------------------------------------------------------------------------
+
+set(TEST_ID ohh2_bausr_j1_quick)
+set(TEST_POT_SRC_FILE "pot_ohh2_bausr.F")
+set(TEST_POT_DATA_FILES "pot_ohh2_bausr_b pot_ohh2_bausr_f")
+set(TEST_COMMAND_FILE "ohh2_bausr_j1_quick.com")
+set(TEST_INPUT_FILES "Ohh2_quick.inp")
+set(TEST_OUTPUT_FILES "Quick1.ics Quick1.pcs Quick1.xxsc")
+set(TEST_KMAX 500)
+set(TEST_T_MATRIX_SIZE kmax)
+
+add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_KMAX}" "${TEST_T_MATRIX_SIZE}")
+
+#------------------------------------------------------------------------------
 # OH(X)--He 3D PES using OH--H2 basis routine
 #------------------------------------------------------------------------------
 
