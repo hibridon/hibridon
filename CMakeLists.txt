@@ -591,7 +591,7 @@ set(coverage_testsuite
   h2ohe_prsbr
   h2ohe_trnprt
   hco_trnprt
-  hecn
+  hecn_quick
   heco
   heohx
   nh3h2
