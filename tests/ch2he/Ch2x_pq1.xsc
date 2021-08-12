@@ -9,7 +9,7 @@
           G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
  --------------------------------------------------------------------------
            BUILD CONFIGURATION:
-SYS=Debian bullseye/sid ( 5.4.0-80-generic); MACH=
+SYS=OS X 11.4; MACH=
 CC=; FC=
 
 
@@ -17,7 +17,7 @@ CC=; FC=
  --------------------------------------------------------------------------
 
  INTEGRAL CROSS SECTIONS READ FROM FILE Ch2x_pq1.ics                            
- WRITTEN:   Aug 12 09:12:39 2021
+ WRITTEN:   Aug 12 18:19:31 2021
  LABEL:     'Input for CH2(X)-He calculations'              
  POT NAME:  MA CH2(X,030)-He PES                            
 

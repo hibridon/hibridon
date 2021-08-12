@@ -52,7 +52,7 @@ set(TEST_ID ch2he_x_quick)
 set(TEST_POT_SRC_FILE "pot_ch2he_x52_c20_v3.F")
 set(TEST_POT_DATA_FILES "ch2he_x52_v3.dat")
 set(TEST_COMMAND_FILE "ch2xhe_stmixtst_quick.com")
-set(TEST_INPUT_FILES "Ch2x3he_para.inp Ch2_p1.smt") # Ch2_p1.smt is an output of ch2he_a test
+set(TEST_INPUT_FILES "Ch2x3he_para.inp Ch2_pq1.smt") # Ch2_p1q.smt is an output of ch2he_a quick test
 set(TEST_OUTPUT_FILES "Ch2x_pq1.xsc Ch2x_pq1.ics Ch2x_pq1.hfx ch2he_x_quick.stdout")
 
 set(TEST_KMAX 1451)
