@@ -1,0 +1,54 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V xdate
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+SYS=OS X 11.4; MACH=
+CC=; FC=
+
+
+
+ --------------------------------------------------------------------------
+
+ INTEGRAL CROSS SECTIONS READ FROM FILE Hcotrnq1.ics                            
+ WRITTEN:   Aug 12 17:22:12 2021
+ LABEL:     'input for H-CO collisions'                     
+ POT NAME:  HCO PES-Nijmegen-lmax=15                        
+
+ ** INTEGRAL CROSS SECTIONS; IEN= 1 **
+    RMU=   0.9728  E=   300.00  JLPAR=-1  JTOT-1=  1  JTOT-2=   4  JTOT-D=  1
+ ** CC CALCULATION, JLPAR=-1 **
+
+ ** COLUMN HEADINGS ARE INITIAL STATES, ROW HEADINGS ARE FINAL STATES **
+
+            J=    0         1         2         3         4         5         6
+   J    I | I=    0         0         0         0         0         0         0
+ 
+    0    0   5.796E+00  1.069E-01  3.064E-01  5.485E-02  7.554E-02  2.364E-02  1.350E-02
+    1    0   3.165E-01  6.654E+00  2.268E-01  5.266E-01  1.166E-01  1.273E-01  3.747E-02
+    2    0   1.473E+00  3.682E-01  6.395E+00  2.777E-01  5.855E-01  1.284E-01  1.321E-01
+    3    0   3.544E-01  1.149E+00  3.732E-01  5.620E+00  2.867E-01  6.190E-01  1.204E-01
+    4    0   5.927E-01  3.088E-01  9.556E-01  3.482E-01  5.235E+00  2.718E-01  6.179E-01
+    5    0   2.101E-01  3.819E-01  2.374E-01  8.511E-01  3.078E-01  4.751E+00  2.637E-01
+    6    0   1.283E-01  1.202E-01  2.612E-01  1.771E-01  7.482E-01  2.820E-01  4.051E+00
+    7    0   4.249E-02  6.054E-02  7.395E-02  1.896E-01  1.665E-01  6.635E-01  3.445E-01
+    8    0   1.349E-02  1.883E-02  3.333E-02  5.087E-02  1.368E-01  1.504E-01  5.559E-01
+
+            J=    7         8
+   J    I | I=    0         0
+ 
+    0    0   4.417E-03  1.473E-03
+    1    0   1.864E-02  6.090E-03
+    2    0   3.697E-02  1.750E-02
+    3    0   1.274E-01  3.590E-02
+    4    0   1.358E-01  1.172E-01
+    5    0   6.130E-01  1.459E-01
+    6    0   3.403E-01  5.767E-01
+    7    0   3.747E+00  3.982E-01
+    8    0   3.792E-01  3.657E+00

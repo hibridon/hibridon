@@ -557,6 +557,7 @@ set(all_testsuite
   h2ohe_prsbr_quick
   h2ohe_trnprt
   hco_trnprt
+  hco_trnprt_quick
   hecn
   heco
   heohx
@@ -598,7 +599,7 @@ set(coverage_testsuite
   h2ohe_orig
   h2ohe_prsbr_quick
   h2ohe_trnprt
-  hco_trnprt
+  hco_trnprt_quick
   hecn_quick
   heco
   heohx_quick
