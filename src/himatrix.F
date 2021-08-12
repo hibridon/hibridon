@@ -1383,14 +1383,14 @@ c
 *  dsytrf, dsytri:   lapack routines to factor and to invert a symmetric, re
 *                  matrix
 * -----------------------------------------------------------------------
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
+      use mod_cosc11, only: sc11
+#endif
       implicit double  precision (a-h,o-z)
       integer icol, icolpt, ierr, ione, irowpt, izero, n, ncol,
      :        nmax, nmaxp1
       integer kpvt
       dimension a(1), scr(1), kpvt(1)
-#endif
-#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-      common /cosc11/ sc11(1)
 #endif
 #if defined(HIB_UNIX_IBM)
       common /cokaux/ kaux
