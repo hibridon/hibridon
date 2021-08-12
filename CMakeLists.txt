@@ -529,6 +529,7 @@ add_hibridon_testsuite("full_qma" "${full_qma_testsuite}" "${tests_list}")
 
 set(all_testsuite
   arch4
+  arch4_quick
   arn2
   arn2_big
   arno
@@ -537,12 +538,14 @@ set(all_testsuite
   boh2_b
   boh2_b2
   c2hh2
+  c2hh2_quick
   cahe
   ch2he_a
   ch2he_x
   ch2he_x_quick
   ch2he_stmix
   ch3he
+  ch3he_quick
   ch3he_ccsdt
   ch3he_vib
   ch3i
