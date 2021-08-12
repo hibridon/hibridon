@@ -604,7 +604,7 @@ set(coverage_testsuite
   heohx_quick
   nh3h2
   nh3h2_qma
-  ohh2_bausr_heohx
+  ohh2_bausr_heohx_quick
   ohh2_bausr_j1_quick
   ohh2_j1_quick
   ohh2_j13_quick
