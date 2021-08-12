@@ -647,15 +647,15 @@ end module mod_cofact
 !    end subroutine allocate_cosc8
 ! end module mod_cosc8
 
-! module mod_cosc9
-!    implicit none
-!    real(8), dimension(:), allocatable :: sc9
-!    contains
-!    subroutine allocate_cosc9(n)
-!       integer, intent(in) :: n
-!       allocate(sc9(n))
-!    end subroutine allocate_cosc9
-! end module mod_cosc9
+module mod_cosc9
+   implicit none
+   real(8), dimension(:), allocatable :: sc9
+   contains
+   subroutine allocate_cosc9(n)
+      integer, intent(in) :: n
+      allocate(sc9(n))
+   end subroutine allocate_cosc9
+end module mod_cosc9
 
 module mod_cosc10
    implicit none
