@@ -576,12 +576,12 @@ set(coverage_testsuite
   aroh
   boh2_b
   boh2_b2
-  c2hh2
+  c2hh2_quick
   cahe
   ch2he_a_quick
   ch2he_x_quick
   ch2he_stmix
-  ch3he
+  ch3he_quick
   ch3he_ccsdt
   ch3he_vib_quick
   ch3i
