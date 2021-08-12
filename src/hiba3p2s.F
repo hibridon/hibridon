@@ -14,7 +14,7 @@
 *  COUPLING IS PARAMETERIZED WITH JUST TWO PARAMETERS and APERP, WORKED
 *  OUT IN MHA'S NOTES.  APAR AND APERP ARE ASSUMED TO BE CONSTANTS.
 *
-*  j12 array is in common block /coj12/ to pass to other subrs
+*  j12 array is in module mod_coj12 to pass to other subrs
 *
 *  author:  paul dagdigian
 *  current revision date:  14-jan-2019 by p.dagdigian
@@ -82,10 +82,6 @@
 *    isicod:   total number of integer system dependent variables
 *    nterm:    number of different types of electronic coupling terms
 *              this should be 1 here
-*  variable in common block /coj12/
-*    j12:      array containing vector sum of ja + j (similar
-*              situation with molecule-molecule scattering,
-*              see hibastpln basis routine)
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units
@@ -118,6 +114,7 @@
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_coj12, only: j12
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -125,8 +122,7 @@
       common /cosysi/ nscode, isicod, nterm, nstate
       common /cosysr/ isrcod, junkr, en1d
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /coj12/  j12(1)
-*  common blocks cojtot, coj12, coja, and coel used to transmit to ground subroutine
+*  common blocks cojtot, coja, and coel used to transmit to ground subroutine
       common /cojtot/ jjtot, jjlpar
       common /coja/  jja(9)
       common /coel/  ll(9)
