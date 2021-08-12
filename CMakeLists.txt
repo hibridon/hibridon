@@ -583,7 +583,7 @@ set(coverage_testsuite
   ch2he_stmix
   ch3he
   ch3he_ccsdt
-  ch3he_vib
+  ch3he_vib_quick
   ch3i
   cph2
   h2ohe
