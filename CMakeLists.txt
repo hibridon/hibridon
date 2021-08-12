@@ -568,7 +568,7 @@ set(all_testsuite
 add_hibridon_testsuite("all" "${all_testsuite}" "${tests_list}")
 
 set(coverage_testsuite
-  arch4
+  arch4_quick
   arn2
   arn2_big
   arno
