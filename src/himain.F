@@ -8,6 +8,7 @@
       use mod_coj12, only: allocate_coj12
       use mod_coj12p, only: allocate_coj12p
       use mod_covvl, only: allocate_covvl
+      use mod_cofact, only: allocate_cofact
       use mod_coeig, only: allocate_coeig
       use mod_coeig2, only: allocate_coeig2
 #if defined(HIB_UNIX)
@@ -95,8 +96,6 @@
 *  variable in common block /coener/
 *    energ:     array containing total energies (in cm-1) at which scattering
 *               calculations are to be performed
-*  variable in common block /cofact/
-*    si:        table of logarithms of factorials
 *  variables in common block /clseg/
 *    lseg:      sector length on mass storage device
 *    intrel:    number of integer words per real words
@@ -124,7 +123,6 @@
 *  ----------------------------------------------------------
       logical lsc1
       common /comom/  xmom(3), imom(13)
-      common /cofact/ si(kfact)
       common /coener/ energ(ken)
       common /clseg/  lseg,intrel,lchar
       common /cobuf/  lbuf,ibuf(1024)
@@ -197,6 +195,7 @@
       call allocate_coj12(kmax)
       call allocate_coj12p(kmax)
       call allocate_covvl(klammx)
+      call allocate_cofact(kfact)
       call allocate_coeig()
       call allocate_coeig2()
 #if defined(HIB_UNIX_IBM)

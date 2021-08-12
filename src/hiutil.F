@@ -704,8 +704,7 @@ c   j-symbols routines
 c   the common block cofact must be dimensioned in the main program !
 c   on input: n  maximum number  of factorials to be calculated
 c
-      double precision si
-      common /cofact/ si(1)
+      use mod_cofact, only: si
       si(1) = 0.0d0
       do 5  k = 2,n
         si(k) = si(k-1) + dlog (dble(k-1))
@@ -719,8 +718,8 @@ c
 *     current revision date: 14-dec-87
 *     revised by mha 4-may-1997
 *
+      use mod_cofact, only: si
       implicit double precision (a-h,o-z)
-      common /cofact/ si(1)
       data zero,two /0.d0, 2.d0/
       x = zero
 * check for triangular conditions
@@ -755,8 +754,8 @@ c
 *      c and cm are integers or half-integers at the same time)
 
 * --------------------------------------------------------------------------
+      use mod_cofact, only: si
       implicit double precision (a-h,o-z)
-      common /cofact/ si(1)
       data tol /1.d-10/
       data zero,one,two /0.d0, 1.d0,2.d0/
       x = zero
@@ -834,8 +833,8 @@ c end_jk
 *   current revision date: 4-may-1997
 *
 * -------------------------------------------------------------------
+      use mod_cofact, only: si
       implicit double precision (a-h,o-z)
-      common /cofact/ si(1)
       data tol,zero,one,two /1.d-10,0.d0,1.d0,2.d0/
       x=zero
 * check triangular conditions for triad ( a b e)
@@ -942,10 +941,10 @@ c end_jk
 *    (see edmonds, p. 101, eq. (6.4.3))
 *     current revision date: 3-apr-91 by mha
 *
+      use mod_cofact, only: si
       implicit double precision (a-h,o-z)
       double precision i
       logical flaghf
-      common /cofact/ si(1)
       dimension xj1(6),xj2(6)
       data tol,one /1.d-5,1.d0/
       x=0.d0
@@ -1052,8 +1051,8 @@ c end_jk
 * -------------------------------------------------------------------
       function f3j0(j1,j2,j3)
 c     current revision: 19-apr-2012 by q. ma (check input)
+      use mod_cofact, only: si
       implicit double precision (a-h,o-z)
-      common /cofact/ si(1)
       j=j1+j2+j3
       if( (mod(j,2).ne.0) .or. (j3.lt.iabs(j1-j2)) .or. (j3.gt.(j1+j2)) ) then
          f3j0=0d0
@@ -1070,8 +1069,8 @@ c     current revision: 19-apr-2012 by q. ma (check input)
       end
 * -------------------------------------------------------------------
       function f6j(j1,j2,j3,l1,l2,l3)
+      use mod_cofact, only: si
       implicit double precision (a-h,o-z)
-      common /cofact/ si(1)
       f6j=0.d0
       if(j3.gt.(j1+j2)) return
       if(j3.lt.iabs(j2-j1)) return
@@ -1123,8 +1122,8 @@ c
 c     A loop was used originally to handle high-j case, but it slows
 c     down the calculation significantly.  This modified function
 c     requires (j1+j2+j3+2).le.kfact (defined in himain).
+      use mod_cofact, only: si
       implicit double precision (a-h,o-z)
-      common /cofact/ si(1)
       del=(si(j1+j2-j3+1)+si(j1-j2+j3+1)+si(-j1+j2+j3+1)
      $     -si(j1+j2+j3+2))/2d0
       return
@@ -1554,6 +1553,7 @@ c
       end
 c     ------------------------------------------------------------------
       logical function tf_triang_fail(two_ja, two_jb, two_jc)
+      use mod_cofact, only: si
       implicit none
       integer, intent(in) :: two_ja, two_jb, two_jc
       tf_triang_fail = (two_jc .gt. (two_ja + two_jb)) .or.
@@ -1563,10 +1563,9 @@ c     ------------------------------------------------------------------
       end function tf_triang_fail
 c     ------------------------------------------------------------------
       real(8) function tdel(two_ja, two_jb, two_jc)
+      use mod_cofact, only: si
       implicit none
       integer, intent(in) :: two_ja, two_jb, two_jc
-      common /cofact/ si
-      real(8), dimension(0:1) :: si
       integer :: j
 c
       j = (two_ja + two_jb + two_jc) / 2
@@ -1578,10 +1577,9 @@ c     ------------------------------------------------------------------
       real(8) function tf3jm0(two_ja, two_jb, two_jc)
 c     3j-symbol (ja jb jc / 0 0 0)
 c     Modified from f3j0 by Q. Ma
+      use mod_cofact, only: si
       implicit none
       integer, intent(in) :: two_ja, two_jb, two_jc
-      common /cofact/ si
-      real(8), dimension(0:1) :: si
       real(8) :: tdel
       integer :: j, jp
       tf3jm0 = 0d0
@@ -1604,11 +1602,10 @@ c     ------------------------------------------------------------------
 c     Compute the 3j symbol (ja jb jc / ma mb mc)
 c     Modified from xf3j by Q. Ma
 c     ------------------------------------------------------------------
+      use mod_cofact, only: si
       implicit real(8) (a-h, o-z)
       integer, intent(in) :: two_ja, two_jb, two_jc, two_ma, two_mb,
      $     two_mc
-      common /cofact/ si
-      real(8), dimension(1) :: si
       tf3j = 0d0
       if (two_ma + two_mb + two_mc .ne. 0) return
       if ((two_jc .gt. (two_ja + two_jb)) .or.
@@ -1682,10 +1679,10 @@ c     Compute the 6j symbol {         }
 c                           | d  c  f |
 c     Modified from xf6j by Q. Ma
 c     ------------------------------------------------------------------
+      use mod_cofact, only: si
       implicit real(8) (a-h,o-z)
       integer, intent(in) :: two_ja, two_jb, two_je, two_jd, two_jc,
      $     two_jf
-      common /cofact/ si(1)
       real(8), parameter :: tol=1d-10, zero=0d0, one=1d0, two=2d0
       logical :: tf_triang_fail
       x=zero
