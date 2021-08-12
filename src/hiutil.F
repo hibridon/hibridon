@@ -245,7 +245,7 @@ c...  print sub level keys
       end if
 41    continue
 49    write (iout,48) (zsub(i),i=1,nsub)
-48    format(/' Additional information:'/30(/7a11))
+48    format(/' Additional information:'/30( /7a11))
       goto 1
 c...  no sub topics
 45    level = level-1
@@ -704,10 +704,12 @@ c   j-symbols routines
 c   the common block cofact must be dimensioned in the main program !
 c   on input: n  maximum number  of factorials to be calculated
 c
-      use mod_cofact, only: si
+      use mod_cofact, only: si, si0
       si(1) = 0.0d0
+      si0(0) = 0.0d0
       do 5  k = 2,n
         si(k) = si(k-1) + dlog (dble(k-1))
+        si0(k-1) = si0(k-2) + dlog (dble(k-1))
 5     continue
       return
       end
@@ -1563,21 +1565,21 @@ c     ------------------------------------------------------------------
       end function tf_triang_fail
 c     ------------------------------------------------------------------
       real(8) function tdel(two_ja, two_jb, two_jc)
-      use mod_cofact, only: si
+      use mod_cofact, only: si0
       implicit none
       integer, intent(in) :: two_ja, two_jb, two_jc
       integer :: j
 c
       j = (two_ja + two_jb + two_jc) / 2
-      tdel = (si(j - two_ja) + si(j - two_jb) + si(j - two_jc)
-     $     - si(j + 1)) / 2d0
+      tdel = (si0(j - two_ja) + si0(j - two_jb) + si0(j - two_jc)
+     $     - si0(j + 1)) / 2d0
       return
       end function tdel
 c     ------------------------------------------------------------------
       real(8) function tf3jm0(two_ja, two_jb, two_jc)
 c     3j-symbol (ja jb jc / 0 0 0)
 c     Modified from f3j0 by Q. Ma
-      use mod_cofact, only: si
+      use mod_cofact, only: si0
       implicit none
       integer, intent(in) :: two_ja, two_jb, two_jc
       real(8) :: tdel
@@ -1591,8 +1593,8 @@ c     Modified from f3j0 by Q. Ma
 c     Check for even sum
       jp = j / 2
       if (mod(j, 2) .ne. 0) return
-      tf3jm0 = si(jp) - si(jp - two_ja / 2) - si(jp - two_jb / 2)
-     $     - si(jp - two_jc / 2) + tdel(two_ja, two_jb, two_jc)
+      tf3jm0 = si0(jp) - si0(jp - two_ja / 2) - si0(jp - two_jb / 2)
+     $     - si0(jp - two_jc / 2) + tdel(two_ja, two_jb, two_jc)
       tf3jm0 = (-1) ** jp * dexp(tf3jm0)
       return
       end

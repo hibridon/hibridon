@@ -174,13 +174,24 @@ end module mod_covvl
 
 module mod_cofact
    !  variable in this module
-   !    si:        table of logarithms of factorials   
+   !    si:        table of logarithms of factorials (1-based index)
+   !       si(n) = ln((n-1)!) 
+   !       si(1) = ln(0!) = 0.0
+   !       si(2) = ln(1!) = ln(1) + ln(0)
+   !       si(3) = ln(2!) = ln(2) + ln(1) + ln(0)
+   !    si0:       table of logarithms of factorials (0-based index)
+   !       si0(n) = ln((n)!) 
+   !       si0(0) = ln(0!) = 0.0
+   !       si0(1) = ln(1!) = ln(1) + ln(0)
+   !       si0(2) = ln(2!) = ln(2) + ln(1) + ln(0)
    implicit none
    real(8), dimension(:), allocatable :: si
+   real(8), dimension(:), allocatable :: si0
    contains
    subroutine allocate_cofact(afact)
       integer, intent(in) :: afact
       allocate(si(afact)) ;
+      allocate(si0(0:afact-1)) ;
    end subroutine allocate_cofact
 end module mod_cofact
 
