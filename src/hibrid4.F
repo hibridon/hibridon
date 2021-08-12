@@ -2302,7 +2302,7 @@ c
 * ------------------------------------------------------------------
       use mod_coiout, only: niout, indout
       use mod_cocent, only: sc2 => cent
-      ! use mod_cosc8, only: sc8
+      use mod_cosc8, only: sc8
       use mod_cosc9, only: sc9
       implicit double precision (a-h,o-z)
       logical adiab, kill, photof, propf, sumf, coordf, ifull
@@ -2321,7 +2321,6 @@ c
       common /cosc1/ pk(6)
       common /cosc6/ sc(60)
       common /cosc7/ sc1(6)
-      common /cosc8/ sc8(6)
       common /coered/ ered, rmu
       common /coground/ ifull
       common /cotrans/ ttrans(36)
@@ -2618,7 +2617,7 @@ c
 *
 * ------------------------------------------------------------------
       use mod_cocent, only: sc2 => cent
-      ! use mod_cosc8, only: sc8
+      use mod_cosc8, only: sc8
       implicit double precision (a-h,o-z)
       common /coered/ ered, rmu
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
@@ -2626,7 +2625,6 @@ c
       common /coz/    scmat(100)
       common /coisc3/ nalist(10)
       common /cosc6/ sc(6)
-      common /cosc8/ sc8(6)
       common /cosc7/ sc7(6)
 * common for y1, y2, y4
       data zero, one, onemin, two,   conv
@@ -2866,7 +2864,7 @@ c     current revision: 20-apr-2012
 c
 c     ------------------------------------------------------------------
       use constants
-      ! use mod_cosc8, only: sc8
+      use mod_cosc8, only: sc8
       implicit double precision (a-h, o-z)
       character*(*) filnam
       logical exstfl
@@ -2875,7 +2873,6 @@ c
       common /coered/ ered, rmu
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
-      common /cosc8/ sc8(1)
 c
       double precision dble_t
 c
