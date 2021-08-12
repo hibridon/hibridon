@@ -34,6 +34,7 @@
 *---------------------------------------------------------------*
       use constants
       use mod_codim, only: mmax
+      use mod_coj12, only: j12
       implicit double precision (a-h,o-z)
       character*(*) fname1
       character*20 cdate1
@@ -53,7 +54,6 @@
       common /cojq/ jq(1)
       common /colq/ lq(1)
       common /coinq/ inq(1)
-      common /coj12/ j12(1)
       common /cojhld/ jlev(1)
       common /coisc1/ inlev(1)
       common /coisc2/ jout1(1)
@@ -950,11 +950,11 @@ c
 c.....jpack,lpack,ipack: labels for rows
 c.....jq,lq,inq:         labels for columns
 *
+      use mod_coj12, only: j12
       implicit double precision (a-h,o-z)
       complex*16 ai,yy,tmat
       parameter (zero=0.0d0, one=1.0d0, two=2.0d0)
       logical ihomo,flaghf,elastc,is_twomol,is_j12
-      common /coj12/ j12(1)
       common /coj12p/ j12pk(1)
       common /coselb/ ibasty
       dimension jpack(1),lpack(1),ipack(1),jq(1),lq(1),inq(1)

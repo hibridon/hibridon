@@ -18,18 +18,15 @@
 *  variables in common cojtot
 *     jjtot     total angular momentum jtot
 *     jjlpar    parity parameter jlpar
-*  variable in common block /coj12/
-*    j12:      array containing vector sum of ja + j (similar
-*              here j12 is lower-case j in alexander, dagdigian, klos notes
 *  variable in commmon block /coja/
 *     jja:      atomic electronic angular momentum for each channel for 3P+2S scattering
 *  variable in common block /coel/
 *     ll:       orbital angular momentum for each channel for 3P+2S scattering
 * --------------------------------------------------------
+      use mod_coj12, only: j12
       implicit double precision (a-h,o-z)
       logical tprob_tst
       common /cojtot/ jjtot, jjlpar
-      common /coj12/  j12(9)
       common /coja/  jja(9)
       common /coel/  ll(9)
       dimension fluxn(nmax,nmax)

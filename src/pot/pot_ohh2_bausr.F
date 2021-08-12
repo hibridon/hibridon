@@ -217,6 +217,7 @@ c     IV2, LAMNUM.
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_coj12, only: j12
 
       implicit none
 c
@@ -244,8 +245,6 @@ C
       integer nlam, nlammx, lamnum(MAX_NVB + MAX_NVF)
       common /coered/ ered, rmu
       double precision ered, rmu
-      common /coj12/ j12
-      integer j12(1)
       common /coamat/ ietmp
       integer ietmp(1)
       common /coipar/ junkip, iprint

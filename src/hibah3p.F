@@ -83,10 +83,6 @@
 *    iop:      ortho (iop=1) or para (iop=0)
 *    jmax:     maximum rotational quantum number of diatomic
 *    eint:     array containing channel energies (in hartree)
-*  variable in common block /coj12/
-*    j12:      array containing vector sum of ja + j (similar situation
-*              with molecule-molecule scattering, see hibastpln basis
-*              routine
 *  variables in common block /coered/
 *    ered:     collision energy in atomic units (hartrees)
 *    rmu:      collision reduced mass in atomic units
@@ -106,6 +102,7 @@
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_coj12, only: j12
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -114,7 +111,6 @@
       common /cosysi/ nscode, isicod, nterm, iop,jmax
       common /coipar/ iiipar(9), iprint
       common /conlam/ nlam, nlammx, lamnum(1)
-      common /coj12/  j12(1)
       common /coered/ ered, rmu
       common /coskip/ nskip, iskip
       common /coconv/ econv, xmconv
