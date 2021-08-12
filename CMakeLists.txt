@@ -567,6 +567,9 @@ set(all_testsuite
 
 add_hibridon_testsuite("all" "${all_testsuite}" "${tests_list}")
 
+# a suite which goal is to cover as much as possible hibridon's code,
+# ignoring the meaningfulness of the tests
+# this test suite is the one to use to detect possible regressions after refactoring code
 set(coverage_testsuite
   arch4_quick
   arn2
@@ -600,7 +603,7 @@ set(coverage_testsuite
   ohh2_bausr_j1_quick
   ohh2_j1_quick
   ohh2_j13_quick
-  stp1sg_ch3he
+  stp1sg_ch3he_quick
   stp1sg_nh3h2
   vfit)
 

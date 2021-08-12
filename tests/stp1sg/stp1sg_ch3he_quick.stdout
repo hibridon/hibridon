@@ -1,0 +1,72 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V xdate
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+SYS=Debian bullseye/sid ( 5.4.0-80-generic); MACH=
+CC=; FC=
+
+
+
+ --------------------------------------------------------------------------
+ Hibridon>  Hibridon>  Hibridon>  ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 12 14:33:36 2021
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 12 14:33:37 2021
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 12 14:33:37 2021
+ ** J =    0 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 12 14:33:37 2021
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 12 14:33:37 2021
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Aug 12 14:33:37 2021
+ ===============================================================================
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:    46
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    NaN %
+      CURRENT DATE:  Aug 12 14:33:37 2021
+ ===============================================================================
+ Hibridon> 
+**  DIFFERENTIAL CROSS SECTION (ANG^2/SR)
+    TODAYS DATE:  Aug 12 14:33:37 2021
+    S-MATRICES READ FROM FILE Ch3heq1.smt                             
+      WRITTEN:   Aug 12 14:33:36 2021
+      LABEL:     TEST INPUT FOR CH3-HE SCATTERING                
+      POT NAME:  SYMMETRIC TOP--1SIGMA GENERAL POT ROUTINE       
+    E-TOT:      150.000;  REDUCED MASS:    3.161    
+    TRANSITION:  J1=  20 IN1=   0  ->  J2=  30 IN2=  -3
+    SUMMING PARTIAL WAVES FROM JTOT = 0 TO   2
+    WAVE VECTOR IN INITIAL CHANNEL:      2.2041 Bohr^(-1);     4.1650 Angstroms^(-1)
+    COLLISION ENERGY:    92.5326 cm-1;    11.4727 meV
+    DIFFERENTIAL CROSS SECTIONS SAVED IN FILE: Ch3heq1.dcs
+
+ ** DIFFERENTIAL CROSS SECTION CALCULATION FINISHED:
+    ELAPSED TIME: 00:00:00   CPU TIME:  00:00:00 
+ Hibridon> 
+ INTEGRAL CROSS SECTIONS CALCULATED FROM S-MATRICES ON FILE Ch3heq1.smt                             
+ WRITTEN:   Aug 12 14:33:36 2021
+ LABEL:     TEST INPUT FOR CH3-HE SCATTERING                
+ JTOT_MAX:    2
+ IEN= 1 RMU=   3.1606 E=   150.00 JTOT-1=  0 JTOT-2=   2 JTOT-D=  1
+
+ READ S-MATRIX FOR JTOT=  0  JLPAR= 1
+ READ S-MATRIX FOR JTOT=  0  JLPAR=-1
+
+ LEVEL LIST FOR INTEGRAL CROSS SECTIONS              
+   N     J   INDEX  EINT(cm-1)
+   1    20     0     57.467
+   2    30    -3     71.412
+   3    40    -3    148.035
+
+ CC INTEGRAL CROSS SECTIONS
+
+ ** COLUMN HEADINGS ARE FINAL STATES, ROW HEADINGS ARE INITIAL STATES **
+
+          1           2           3
+   1   2.1339E+00  3.0636E-01  4.4862E-02
+   2   2.5766E-01  1.7860E+00  8.5069E-03
+   3   1.1736E+00  2.6461E-01  7.2147E+00
+
+ ** INTCRS FINISHED. ELAPSED TIME:  00:00:00   CPU TIME:  00:00:00  **
+ Hibridon> 

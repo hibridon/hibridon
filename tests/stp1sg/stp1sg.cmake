@@ -14,6 +14,21 @@ set(TEST_T_MATRIX_SIZE kmax)
 add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_KMAX}" "${TEST_T_MATRIX_SIZE}")
 
 #------------------------------------------------------------------------------
+# CH3(X)--He Dagdigian CCSD(T) PES with SYMTOP--1Sigma basis (quick version for code coverage)
+#------------------------------------------------------------------------------
+
+set(TEST_ID stp1sg_ch3he_quick)
+set(TEST_POT_SRC_FILE "pot_stp1sg_qma.F")
+set(TEST_POT_DATA_FILES "pot_ch3he_rigid_stp1sg.txt")
+set(TEST_COMMAND_FILE "stp1sg_ch3he_quick.com")
+set(TEST_INPUT_FILES "Stp_ch3he_quick.inp")
+set(TEST_OUTPUT_FILES "Ch3heq1.dcs Ch3heq1.ics Ch3heq1.pcs Ch3heq1.xxsc")
+set(TEST_KMAX 1000)
+set(TEST_T_MATRIX_SIZE kmax)
+
+add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_KMAX}" "${TEST_T_MATRIX_SIZE}")
+
+#------------------------------------------------------------------------------
 # p-NH3--p-H2 test with Symtop-1sigma basis
 #------------------------------------------------------------------------------
 
