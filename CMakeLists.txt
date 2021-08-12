@@ -546,6 +546,7 @@ set(all_testsuite
   ch2he_stmix
   ch3he
   ch3he_quick
+  ch3he_ccsdt
   ch3he_ccsdt_quick
   ch3he_vib
   ch3i
@@ -553,6 +554,7 @@ set(all_testsuite
   h2ohe
   h2ohe_orig
   h2ohe_prsbr
+  h2ohe_prsbr_quick
   h2ohe_trnprt
   hco_trnprt
   hecn
@@ -588,13 +590,13 @@ set(coverage_testsuite
   ch2he_x_quick
   ch2he_stmix
   ch3he_quick
-  ch3he_ccsdt
+  ch3he_ccsdt_quick
   ch3he_vib_quick
   ch3i
   cph2
   h2ohe
   h2ohe_orig
-  h2ohe_prsbr
+  h2ohe_prsbr_quick
   h2ohe_trnprt
   hco_trnprt
   hecn_quick
