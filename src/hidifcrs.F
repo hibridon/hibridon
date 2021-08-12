@@ -20,11 +20,9 @@
 *  fixed bug in calculation of K=2 moments for j2=1,1.5 31-july-2014
 *     by t. sharples
 *  included option for molecule-molecule half-integer bases
-*  added capability to treat cases with j12 but having twomol=F
 *
-*  previous revision:  26-jun-2017 some half-int. mol-mol debugging
+*  current revision:  26-jun-2017 some half-int. mol-mol debugging
 *                                 by j.klos
-*  current revision:  2-jun-2021 by p.dagdigian
 *---------------------------------------------------------------*
 *                                                               *
 *  IMPORTANT NOTE:  ONE SHOULD READ THE INPUT FILE FOR THE      *
@@ -32,7 +30,11 @@
 *  FOR THE BASIS TYPE ARE IN MEMORY                             *
 *                                                               *
 *---------------------------------------------------------------*
+*  IMPORTANT CAVEAT:  difcrs has been extended to twomol = T basis
+*  types, but not to other basis types requiring the j12 array
+*  -------------------------------------------------------------
       use constants
+      use mod_codim, only: mmax
       implicit double precision (a-h,o-z)
       character*(*) fname1
       character*20 cdate1
@@ -44,7 +46,7 @@
 
       complex(8) :: stampl, stamplm
       logical existf,csflg1,flghf1,flgsu1,ihomo,flaghf,twomol,
-     1        nucros,iprint,mflag,stflag,is_twomol,is_j12
+     1        nucros,iprint,mflag,stflag,is_twomol
 #include "common/parpot"
       common /coselb/ ibasty
       common /coz/ sreal1(1)
@@ -61,7 +63,6 @@
       common /cosc3/ lpack1(1)
       common /cosc4/ ipack1(1)
       common /coj12p/ j12pk(1)
-      common /codim/ mairy,mmax
       real(8), dimension(:), allocatable :: s, sm, sm6
 * to store a22p,a21p and a11p amplitudes
       complex(8), dimension(:, :), allocatable :: fm1m2
@@ -241,6 +242,7 @@ c
 c added for negative nnout by moonbong yang 2-8-95
 
 120   continue
+*     write(6,*) 'nnout=',nnout
       if(nnout.le.0) goto 160
 
       do 130 j=1,nlevel
@@ -300,19 +302,6 @@ c
          ideg2=2*j2+1
          j1p=j1
          j2p=j2
-         if (is_j12(ibasty)) then
-           if (is_twomol(ibasty)) then
-c  molecule-molecule case
-             l2max = jtot2 + j1/10 + mod(j1, 10)
-     $         + j2/10 + mod(j2, 10) + 1
-             mlmax = j1/10 + mod(j1, 10)
-     $         + j2/10 + mod(j2, 10) + 1     
-           else
-c  special atom-molecule collisions
-             l2max = jtot2 + j1 + in1 + j2 + in2 + 1
-             mlmax = j1 + in1 + j2 + in2 + 1
-           end if
-         end if
          if(flaghf) then
 c.....here for half-integer spin
            l2max=l2max+1
@@ -338,37 +327,20 @@ c     Allocate and zero out m-dependent integral cross sections
 c     Allocate and zero out amplitudes
       if (allocated(q)) deallocate(q)
 
-      if (is_j12(ibasty)) then
-        if (is_twomol(ibasty)) then
-c  molecule-molecule case
-          iq1min = 1
-          iq1max = (2 * j1 / 10 + 1) * (2 * mod(j1, 10) + 1)
+      if (is_twomol(ibasty)) then
+         iq1min = 1
+         iq1max = (2 * j1 / 10 + 1) * (2 * mod(j1, 10) + 1)
      $        * (2 * j2 / 10 + 1) * (2 * mod(j2, 10) + 1) * nangle
 c jk Added for half-integer molecule-molecule
-          if(flaghf) then
-            iq1max = (2 * j1 / 10 + 2) * (2 * mod(j1, 10) + 1)
+      if(flaghf) then
+         iq1max = (2 * j1 / 10 + 2) * (2 * mod(j1, 10) + 1)
      $        * (2 * j2 / 10 + 2) * (2 * mod(j2, 10) + 1) * nangle
-          endif
+      endif
 c jk
-          iq2min = 1
-          iq2max = 1
-          iq3 = 1
-        else
-c  special atom-molecule case
-          iq1min = 1
-          iq1max = (2 * j1 + 1) * (2 * in1 + 1)
-     $         * (2 * j2 + 1) * (2 * in2 + 1) * nangle
-c      half integer
-          if(flaghf) then
-            iq1max = (2 * j1 + 1) * (2 * in1 + 2)
-     $         * (2 * j2 + 1) * (2 * in2 + 2) * nangle
-          endif
-          iq2min = 1
-          iq2max = 1
-          iq3 = 1
-        end if
+         iq2min = 1
+         iq2max = 1
+         iq3 = 1
       else
-c  atom-molecule collisions
          iq1min = -j1p
          iq1max = j1
          iq2min = -j2p
@@ -425,7 +397,8 @@ c
 c
 c.....precalculate all required spherical harmonics
       if (allocated(ytmp)) deallocate(ytmp)
-      allocate(ytmp(l2max))
+      ! write(6,*) 'allocating ytmp with size ', l2max*2
+      allocate(ytmp(l2max*2))
       do ml = 0, mlmax-1
          angle=ang1
          do i = 1, nangle
@@ -499,16 +472,16 @@ c
       faksq=sqrt(fak)
 *
 *  atom-molecule case
-      if (.not. is_j12(ibasty)) then
-        do 343 mj1=-j1p,j1
-        do 340 mj2=-j2p,j2
-          if (flaghf) then
+      if (.not. is_twomol(ibasty)) then
+      do 343 mj1=-j1p,j1
+      do 340 mj2=-j2p,j2
+         if (flaghf) then
             xm=mj1+0.5d0
             xmj2=mj2+0.5d0
-          else
+         else
             xm=mj1
             xmj2=mj2
-          endif
+         endif
 
 * from C. H. Greene and R. N. Zare, J. Chem. Phys. 78, 6741 (1983)
 
@@ -807,7 +780,7 @@ c     (3m^2-1)/(j*(j+1))
 *  molecule-molecule collisions
 *
 *  compute degeneracy averaged cross sections only
-      elseif (is_twomol(ibasty)) then
+      else
         ii = 0
         j1_i = j1/10
         j1_ip=j1_i
@@ -818,9 +791,9 @@ c     (3m^2-1)/(j*(j+1))
         ideg1 = (2*j1_i + 1)*(2*j2_i + 1)
 c jk Added projections and degeneracy factor for half-integer molecule-molecule
         if (flaghf) then
-          j1_ip=j1_i+1
-          j1_fp=j1_f+1
-          ideg1 = (2*j1_i + 2)*(2*j2_i + 1)
+        j1_ip=j1_i+1
+        j1_fp=j1_f+1
+        ideg1 = (2*j1_i + 2)*(2*j2_i + 1)
         endif
 c jk
         fak = ang2c/(ideg1*ca**2)
@@ -846,50 +819,6 @@ c jk
 1350      format(1x,f7.2,1g15.4)
           angle = angle + dang
 1351    continue
-c
-      else
-c
-c  special atom-molecule cases
-*
-*  compute degeneracy averaged cross sections only
-        ii = 0
-        j1_i = j1
-        j2_i = in1
-        j2_ip = j2_i
-        j1_f = j2
-        j2_f = in2
-        j2_fp = j2_f
-        ideg1 = (2*j1_i + 1)*(2*j2_i + 1)
-c  add projections and degeneracy factor for half-integer special atom-molecule
-        if (flaghf) then
-         j2_ip=j2_i+1
-         j2_fp=j2_f+1
-         ideg1 = (2*j1_i + 1)*(2*j2_i + 2)
-        endif
-c 
-        fak = ang2c/(ideg1*ca**2)
-        do 3500 mj1_i = -j1_i, j1_i
-        do 3500 mj2_i = -j2_ip, j2_i
-        do 3500 mj1_f = -j1_f, j1_f
-        do 3500 mj2_f = -j2_fp, j2_f
-          do 3400 i = 1, nangle
-            ii =ii + 1
-            dsigterm = dreal(q(ii, 1, 1) * conjg(q(ii, 1, 1)))
-            s(i) = s(i) + dsigterm
-3400      continue
-3500    continue
-*
-        write(2,3348)
-        if (iprint) write(6,3347)
-3347    format(/'   DEGENERACY AVERAGED DXSC (ANG^2/SR)')
-3348    format(/'%  DEGENERACY AVERAGED DXSC (ANG^2/SR)'/'dcs = [')
-        angle = ang1
-        do 3351 i = 1, nangle
-          write(2,3350) angle, s(i)*fak
-          if (iprint) write(6,1350) angle, s(i)*fak
-3350      format(1x,f7.2,1g15.4)
-          angle = angle + dang
-3351    continue
       end if
 *
  500  if (allocated(y)) deallocate(y)
@@ -943,9 +872,8 @@ c
 *  modified to dynamic arrays, simplified some statements: 22-jul-2014
 *     by q. ma
 *  included option for molecule-molecule half-integer bases
-*  added capability to treat cases with j12
 *
-*  current revision date:  22-may-2021 by p. dagdigian
+*  current revision date:  23-jun-2017 by p. dagdigian
 *
 c.....jpack,lpack,ipack: labels for rows
 c.....jq,lq,inq:         labels for columns
@@ -953,7 +881,7 @@ c.....jq,lq,inq:         labels for columns
       implicit double precision (a-h,o-z)
       complex*16 ai,yy,tmat
       parameter (zero=0.0d0, one=1.0d0, two=2.0d0)
-      logical ihomo,flaghf,elastc,is_twomol,is_j12
+      logical ihomo,flaghf,elastc,is_twomol
       common /coj12/ j12(1)
       common /coj12p/ j12pk(1)
       common /coselb/ ibasty
@@ -967,19 +895,16 @@ c.....jq,lq,inq:         labels for columns
       sqpi=1.772453850905516d0
 c
       ai=cmplx(zero,one)
-      elastc=j1.eq.j2 .and. in1.eq.in2
+      elastc=j1.eq.j2.and.in1.eq.in2
 c
       if(flaghf) then
 c.....here for half-integer spin
         spin=0.5d0
-        if (.not. is_j12(ibasty)) then
+        if (.not. is_twomol(ibasty)) then
           fakj=sqpi*(two*dble(jtot) + two)*(-1)**(j1+j2+1)
           j1p=j1 + 1
-          j1_i=j1
           j2p=j2 + 1
-          j2_i=j2
-        elseif (is_twomol(ibasty)) then
-c  molecule-molecule cases
+        else
           j1_i = j1/10
           j1_ip = j1_i + 1
           j2_i = mod(j1,10)
@@ -988,29 +913,15 @@ c  molecule-molecule cases
           j2_f = mod(j2,10)
           fakj = sqpi*(two*dble(jtot) + two)
      :        *(-1)**(j1_i + j1_f + j2_i + j2_f)
-        else
-c  special atom-molecule cases
-c  note:  half integer spin applies to the atom (collider 2)
-          j1_i=j1
-          j2_i=in1
-          j2_ip=j2_i + 1
-          j1_f=j2
-          j2_f=in2
-          j2_fp=j2_f + 1
-          fakj = sqpi*(two*dble(jtot) + two)
-     :        *(-1)**(j1_i + j1_f + j2_i + j2_f)
         end if
       else
 c.....here for integer spin
         spin=0.0d0
-        if (.not. is_j12(ibasty)) then
+        if (.not. is_twomol(ibasty)) then
           fakj=sqpi*(two*dble(jtot) + one)*(-1)**(j1+j2)
           j1p=j1
-          j1_i=j1
           j2p=j2
-          j2i=j2
-        elseif (is_twomol(ibasty)) then
-c  molecule-molecule cases
+        else
           j1_i = j1/10
           j1_ip=j1_i
           j2_i = mod(j1,10)
@@ -1019,33 +930,17 @@ c  molecule-molecule cases
           j2_f = mod(j2,10)
           fakj = sqpi*(two*dble(jtot) + one)
      :        *(-1)**(j1_i + j1_f + j2_i + j2_f)
-        else
-c  special atom-molecule cases
-c  note:  half integer spin applies to the atom (collider 2)
-          j1_i=j1
-          j2_i=in1
-          j2_ip=j2_i
-          j1_f=j2
-          j2_f=in2
-          j2_fp=j2_f
-          fakj = sqpi*(two*dble(jtot) + one)
-     :        *(-1)**(j1_i + j1_f + j2_i + j2_f)
         end if
       end if
       xjtot=dble(jtot) + spin
-      if (.not. is_j12(ibasty)) then
+      if (.not. is_twomol(ibasty)) then
         xj1=dble(j1) + spin
         xj2=dble(j2) + spin
-      elseif (is_twomol(ibasty)) then
-        xj1_i = dble(j1_i) + spin
-        xj2_i = dble(j2_i)
-        xj1_f = dble(j1_f) + spin
-        xj2_f = dble(j2_f)
       else
-        xj1_i = dble(j1_i)
-        xj2_i = dble(j2_i) + spin
-        xj1_f = dble(j1_f)
-        xj2_f = dble(j2_f) + spin
+        xj1_i = j1_i + spin
+        xj2_i = j2_i
+        xj1_f = j1_f + spin
+        xj2_f = j2_f
       end if
 c
       llmax = 0
@@ -1071,30 +966,27 @@ c
       if(jq(jlab).ne.j2.or.inq(jlab).ne.in2) goto 500
       l2=lq(jlab)
       xl2=l2
-      if (is_j12(ibasty)) then
+      if (is_twomol(ibasty)) then
         j12_f = j12(jlab)
         xj12_f = j12_f + spin
       end if
       do 60 ll=1,llmax
       ilab=ilab1(ll)
       l1=lpack(ilab)
-      if (is_j12(ibasty)) then
-        j12_i = j12pk(ilab)
-        xj12_i = j12_i + spin
-      end if
+      if (is_twomol(ibasty)) j12_i = j12pk(ilab)
 c.....convert to t-matrix
       tmat=-cmplx(sreal(jlab,ilab),simag(jlab,ilab))
-      if (is_j12(ibasty)) then
-        if (elastc .and. l1.eq.l2 .and. j12_i.eq.j12_f)
-     :     tmat=tmat+1.0d0
-      else
+      if (.not.is_twomol(ibasty)) then
         if (elastc .and. l1.eq.l2) tmat=tmat+1.0d0
+      else
+        if (elastc .and. l1.eq.l2 .and.
+     :    j12_i.eq.j12_f) tmat=tmat+1.0d0
       end if
       fak2(ll)=cmplx(fak1(ll)*(-1)**(l1+l2),zero)*(ai**(l1-l2))*tmat
 60    continue
 *
 *  summation over magnetic quantum numbers
-      if (.not. is_j12(ibasty)) then
+      if (.not. is_twomol(ibasty)) then
 *  atom-molecule case here
         do 400 mj1=-j1p,j1
         xmj1=dble(mj1)+spin
@@ -1118,7 +1010,7 @@ c
 400     continue ! mj1 (jk)
 *
 *  molecule-molecule systems
-      elseif (is_twomol(ibasty)) then
+      else
         ii = 0
         do 1400 mj1_i = -j1_ip, j1_i
         do 1400 mj2_i = -j2_i, j2_i
@@ -1160,49 +1052,6 @@ c
 1200        continue
 1300      continue
 1400    continue
-      else
-c  special atom-molecule cases
-        ii = 0
-        do 3400 mj1_i = -j1_i, j1_i
-        do 3400 mj2_i = -j2_ip, j2_i
-          xmj1_i = mj1_i
-          xmj2_i = dble(mj2_i) + spin
-          mj12_i = mj1_i + mj2_i
-          xmj12_i = xmj1_i + xmj2_i
-c
-          do 3070 ll = 1, llmax
-            ilab = ilab1(ll)
-            xl1 = lpack(ilab)
-            j12_i = j12pk(ilab)
-            xj12_i = j12_i + spin
-            fak3(ll) = fak2(ll) * (-1)**j12_i
-     :        * sqrt(two * xj12_i + one)
-     :        * xf3j(xj1_i,xj2_i,xj12_i,xmj1_i,xmj2_i,-xmj12_i)
-     :        * xf3j(xj12_i,xl1,xjtot,xmj12_i,zero,-xmj12_i)
-3070      continue
-c
-          do 3300 mj1_f = -j1_f, j1_f
-          do 3300 mj2_f = -j2_fp, j2_f
-            xmj1_f = mj1_f
-            xmj2_f = dble(mj2_f) + spin
-            mj12_f = mj1_f + mj2_f
-            xmj12_f = xmj1_f + xmj2_f
-            ml2 = mj12_i - mj12_f
-            xml2 = ml2
-            iyof = (iabs(ml2) * maxl2 + l2) * nangle
-            fak = (-1)**(j12_f + ml2)
-     :        * sqrt(two * xj12_f + one)
-     :        * xf3j(xj1_f,xj2_f,xj12_f,xmj1_f,xmj2_f,-xmj12_f)
-     :        * xf3j(xj12_f,xl2,xjtot,xmj12_f,xml2,-xmj12_i)
-            if (ml2.gt.0) fak = fak * (-1)**ml2
-c
-            do 3200 iang = 1, nangle
-              yy = fak * y(l2, iabs(ml2), iang)
-              ii = ii + 1
-              q(ii, 1, 1) = q(ii, 1, 1) + sum(fak3) * yy
-3200        continue
-3300      continue
-3400    continue
       end if
 500   continue ! jlab (jk)
       deallocate(fak1)
