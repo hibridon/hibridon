@@ -756,7 +756,7 @@ c
 *      c and cm are integers or half-integers at the same time)
 
 * --------------------------------------------------------------------------
-      use mod_cofact, only: si
+      use mod_cofact, only: si0
       implicit double precision (a-h,o-z)
       data tol /1.d-10/
       data zero,one,two /0.d0, 1.d0,2.d0/
@@ -780,10 +780,10 @@ c end_jk
       iabmc = nint(a + b - c)
       iamam = nint(a - am)
       ibpbm = nint(b + bm)
-      iapam = nint(a + am) + 1
-      ibmbm = nint(b - bm) + 1
-      icpcm = nint(c + cm) + 1
-      icmcm = nint(c - cm) + 1
+      iapam = nint(a + am)
+      ibmbm = nint(b - bm)
+      icpcm = nint(c + cm)
+      icmcm = nint(c - cm)
       minchi = max0(0,ibcam,iacbm)
       maxchi = min0(iabmc,iamam,ibpbm) - minchi
       iabmc = iabmc - minchi
@@ -791,14 +791,14 @@ c end_jk
       ibbm = ibpbm - minchi
       ibcam = minchi - ibcam
       iacbm = minchi - iacbm
-      iamam = iamam + 1
-      ibpbm = ibpbm + 1
+      iamam = iamam 
+      ibpbm = ibpbm 
 * compute delta
-      j1 = iabc - nint(two*a) + 1
-      j2 = iabc - nint(two*b) + 1
-      j3 = iabc - nint(two*c) + 1
-      j4 = iabc + 2
-      delta = si(j1) + si(j2) + si(j3) - si(j4)
+      j1 = iabc - nint(two*a) 
+      j2 = iabc - nint(two*b) 
+      j3 = iabc - nint(two*c) 
+      j4 = iabc + 1
+      delta = si0(j1) + si0(j2) + si0(j3) - si0(j4)
       ll=0
       x = one
       if (maxchi.le.0) goto 2
@@ -815,10 +815,10 @@ c end_jk
       if(x) 4,3,2
 4     x = -x
       ll = 1
-2     x = dlog(x) - si(iabmc+1) - si(iaam+1) - si(ibbm+1) - si(ibcam+1)
-     :            - si(iacbm+1) - si(minchi+1)
-      x = two*x + si(iapam) + si(iamam) + si(ibpbm) + si(ibmbm) +
-     :           si(icpcm) + si(icmcm) + delta
+2     x = dlog(x) - si0(iabmc) - si0(iaam) - si0(ibbm) - si0(ibcam)
+     :            - si0(iacbm) - si0(minchi)
+      x = two*x + si0(iapam) + si0(iamam) + si0(ibpbm) + si0(ibmbm) +
+     :           si0(icpcm) + si0(icmcm) + delta
       x = dexp( x / two)
       l = ll + minchi + nint(b - a + cm)
       if( 2 * (l/2) .ne. l) x = -x
