@@ -835,7 +835,7 @@ c end_jk
 *   current revision date: 4-may-1997
 *
 * -------------------------------------------------------------------
-      use mod_cofact, only: si
+      use mod_cofact, only: si0
       implicit double precision (a-h,o-z)
       data tol,zero,one,two /1.d-10,0.d0,1.d0,2.d0/
       x=zero
@@ -866,36 +866,36 @@ c end_jk
       maxchi = min(iabdc,iaedf,ibecf) - minchi
 * indices for deltas
       delta = zero
-      i2a = nint(two*a) - 1
-      i2b = nint(two*b) - 1
-      i2c = nint(two*c) - 1
-      i2d = nint(two*d) - 1
-      i2e = nint(two*e) - 1
-      i2f = nint(two*f) - 1
+      i2a = nint(two*a)
+      i2b = nint(two*b)
+      i2c = nint(two*c)
+      i2d = nint(two*d)
+      i2e = nint(two*e)
+      i2f = nint(two*f)
 * delta(abe)
       j1 = iabe - i2a
       j2 = iabe - i2b
       j3 = iabe - i2e
-      j4 = iabe + 2
-      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
+      j4 = iabe + 1
+      delta = delta + si0(j1) + si0(j2) + si0(j3) - si0(j4)
 * delta(dce)
       j1 = idce - i2d
       j2 = idce - i2c
       j3 = idce - i2e
-      j4 = idce + 2
-      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
+      j4 = idce + 1
+      delta = delta + si0(j1) + si0(j2) + si0(j3) - si0(j4)
 * delta(acf)
       j1 = iacf - i2a
       j2 = iacf - i2c
       j3 = iacf - i2f
-      j4 = iacf + 2
-      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
+      j4 = iacf + 1
+      delta = delta + si0(j1) + si0(j2) + si0(j3) - si0(j4)
 * delta(dbf)
       j1 = idbf - i2d
       j2 = idbf - i2b
       j3 = idbf - i2f
-      j4 = idbf + 2
-      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
+      j4 = idbf + 1
+      delta = delta + si0(j1) + si0(j2) + si0(j3) - si0(j4)
       delta = 0.5d0 * delta
       iabdc = iabdc - minchi
       iaedf = iaedf - minchi
@@ -925,8 +925,8 @@ c end_jk
       if (x) 20,40,30
 20    x = -x
       ipower = 1
-30    x = dlog(x) + si(minchi+2)-si(iabdc+1)-si(iaedf+1)-si(ibecf+1)
-     :            - si(iabe+1)-si(idce+1)-si(iacf+1)-si(idbf+1) + delta
+30    x = dlog(x) + si0(minchi+1)-si0(iabdc)-si0(iaedf)-si0(ibecf)
+     :            - si0(iabe)-si0(idce)-si0(iacf)-si0(idbf) + delta
       ipower = ipower + minchi
       x = (-1.d0)**ipower * dexp(x)
 40    xf6j = x
