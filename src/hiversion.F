@@ -47,12 +47,12 @@
             close(666)
       elseif (_BUILD_SYS1_ == "Linux") then
         
-        call system('cat /sys/devices/virtual/dmi/product_name > /tmp/hw.info')
+        call system('cat /sys/devices/virtual/dmi/id/product_name > /tmp/hw.info')
             open(unit=666, file="/tmp/hw.info", status="old")
             read(666,'(a)', iostat=i) txt, txt
             close(666)
         write(iunit,'(a12,a)') "Model Name: ", trim(txt)
-        call system('cat /sys/devices/virtual/dmi/product_sku > /tmp/hw.info')
+        call system('cat /sys/devices/virtual/dmi/id/product_sku > /tmp/hw.info')
             open(unit=666, file="/tmp/hw.info", status="old")
             read(666,'(a)', iostat=i) txt, txt
             close(666)
