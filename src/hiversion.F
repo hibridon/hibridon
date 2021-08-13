@@ -49,42 +49,42 @@
         
         call system('cat /sys/devices/virtual/dmi/id/product_name > /tmp/hw.info')
             open(unit=666, file="/tmp/hw.info", status="old")
-            read(666,'(a)', iostat=i) txt, txt
+            read(666,'(2a)', iostat=i) txt, txt
             close(666)
         write(iunit,'(a12,a)') "Model Name: ", trim(txt)
         call system('cat /sys/devices/virtual/dmi/id/product_sku > /tmp/hw.info')
             open(unit=666, file="/tmp/hw.info", status="old")
-            read(666,'(a)', iostat=i) txt, txt
+            read(666,'(2a)', iostat=i) txt, txt
             close(666)
         write(iunit,'(a18,a)') "Model Identifier: ", trim(txt)
         call system('lscpu | grep -m 1 "Model name" > /tmp/hw.info')
             open(unit=666, file="/tmp/hw.info", status="old")
-            read(666,'(a)', iostat=i) txt, txt
+            read(666,'(2a)', iostat=i) txt, txt
             close(666)
         write(iunit,'(a16,a)') "Processor Name: ", trim(txt)    
         call system('lscpu | grep -m 1 "CPU MHz" > /tmp/hw.info')
             open(unit=666, file="/tmp/hw.info", status="old")
-            read(666,'(a)', iostat=i) txt, txt
+            read(666,'(2a)', iostat=i) txt, txt
             close(666)
         write(iunit,'(a17,a)') "Processor speed: ", trim(txt)    
         call system('lscpu | grep -m 1 "Socket(s)" > /tmp/hw.info')
             open(unit=666, file="/tmp/hw.info", status="old")
-            read(666,'(a)', iostat=i) txt, txt
+            read(666,'(2a)', iostat=i) txt, txt
             close(666)
         write(iunit,'(a22,a)') "Number of Processors: ", trim(txt)   
         call system('lscpu | grep -m 1 "Core(s)" > /tmp/hw.info')
             open(unit=666, file="/tmp/hw.info", status="old")
-            read(666,'(a)', iostat=i) txt, txt
+            read(666,'(2a)', iostat=i) txt, txt
             close(666)
         write(iunit,'(a23,a)') "Total Number of Cores: ", trim(txt) 
         call system('lscpu | grep -m 1 "L2" > /tmp/hw.info')
             open(unit=666, file="/tmp/hw.info", status="old")
-            read(666,'(a)', iostat=i) txt, txt
+            read(666,'(2a)', iostat=i) txt, txt
             close(666)
         write(iunit,'(a21,a)') "L2 Cache (per Core): ", trim(txt) 
         call system('lscpu | grep -m 1 "L3" > /tmp/hw.info')
             open(unit=666, file="/tmp/hw.info", status="old")
-            read(666,'(a)', iostat=i) txt, txt
+            read(666,'(2a)', iostat=i) txt, txt
             close(666)
         write(iunit,'(a10,a)') "L3 Cache: ", trim(txt) 
         call system('cat /proc/cpuinfo | grep -m 1 -o "ht" > /tmp/hw.info')
@@ -94,7 +94,7 @@
         if(trim(txt)=='ht')write(iunit,'(a35)') "Hyper-Threading Technology: Enabled" 
         call system('cat /proc/meminfo | grep "MemTotal" > /tmp/hw.info')
             open(unit=666, file="/tmp/hw.info", status="old")
-            read(666,'(a)', iostat=i) txt, txt
+            read(666,'(2a)', iostat=i) txt, txt
             close(666)
         write(iunit,'(a8,a)') "Memory: ", trim(txt) 
       endif
