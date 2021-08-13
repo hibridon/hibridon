@@ -1681,7 +1681,7 @@ c     Compute the 6j symbol {         }
 c                           | d  c  f |
 c     Modified from xf6j by Q. Ma
 c     ------------------------------------------------------------------
-      use mod_cofact, only: si
+      use mod_cofact, only: si0
       implicit real(8) (a-h,o-z)
       integer, intent(in) :: two_ja, two_jb, two_je, two_jd, two_jc,
      $     two_jf
@@ -1704,36 +1704,36 @@ c     ------------------------------------------------------------------
       maxchi = min(iabdc,iaedf,ibecf) - minchi
 * indices for deltas
       delta = zero
-      i2a = two_ja - 1
-      i2b = two_jb - 1
-      i2c = two_jc - 1
-      i2d = two_jd - 1
-      i2e = two_je - 1
-      i2f = two_jf - 1
+      i2a = two_ja 
+      i2b = two_jb 
+      i2c = two_jc 
+      i2d = two_jd 
+      i2e = two_je 
+      i2f = two_jf 
 * delta(abe)
       j1 = iabe - i2a
       j2 = iabe - i2b
       j3 = iabe - i2e
-      j4 = iabe + 2
-      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
+      j4 = iabe + 1
+      delta = delta + si0(j1) + si0(j2) + si0(j3) - si0(j4)
 * delta(dce)
       j1 = idce - i2d
       j2 = idce - i2c
       j3 = idce - i2e
-      j4 = idce + 2
-      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
+      j4 = idce + 1
+      delta = delta + si0(j1) + si0(j2) + si0(j3) - si0(j4)
 * delta(acf)
       j1 = iacf - i2a
       j2 = iacf - i2c
       j3 = iacf - i2f
-      j4 = iacf + 2
-      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
+      j4 = iacf + 1
+      delta = delta + si0(j1) + si0(j2) + si0(j3) - si0(j4)
 * delta(dbf)
       j1 = idbf - i2d
       j2 = idbf - i2b
       j3 = idbf - i2f
-      j4 = idbf + 2
-      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
+      j4 = idbf + 1
+      delta = delta + si0(j1) + si0(j2) + si0(j3) - si0(j4)
       delta = 0.5d0 * delta
       iabdc = iabdc - minchi
       iaedf = iaedf - minchi
@@ -1763,8 +1763,8 @@ c     ------------------------------------------------------------------
       if (x) 20,40,30
 20    x = -x
       ipower = 1
-30    x = dlog(x) + si(minchi+2)-si(iabdc+1)-si(iaedf+1)-si(ibecf+1)
-     :            - si(iabe+1)-si(idce+1)-si(iacf+1)-si(idbf+1) + delta
+30    x = dlog(x) + si0(minchi+1)-si0(iabdc)-si0(iaedf)-si0(ibecf)
+     :            - si0(iabe)-si0(idce)-si0(iacf)-si0(idbf) + delta
       ipower = ipower + minchi
       x = (-1.d0)**ipower * dexp(x)
 40    tf6j = x
