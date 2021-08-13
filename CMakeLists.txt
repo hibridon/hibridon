@@ -144,13 +144,29 @@ add_custom_target(parhlp
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/src/common/parhlp
 )
 
+execute_process(COMMAND bash -c "date +%D | tr -d '\n'" OUTPUT_VARIABLE build_date)
+execute_process(COMMAND bash -c "date +%T | tr -d '\n'" OUTPUT_VARIABLE build_time)
+execute_process(COMMAND bash -c "date +%Z | tr -d '\n'" OUTPUT_VARIABLE build_timezone)
+message(INFO "build_date=${build_date}")
+execute_process(COMMAND bash -c "head -1 ${CMAKE_CURRENT_SOURCE_DIR}/VERSION | tr -d '\n'" OUTPUT_VARIABLE hibridon_version)
+set(hibridon_version_string "${hibridon_version} BUILD DATE ${build_date} ${build_time} ${build_timezone}")
+message("hibridon_version_string=${hibridon_version_string}")
+
 add_custom_command(
-    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F
-    COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t ${CMAKE_CURRENT_BINARY_DIR}/SYSCONFIG > ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F
+    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/hiversion.header
+    COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t | sed 's|<hibridon_version_string>|${hibridon_version_string}|' > ${CMAKE_CURRENT_BINARY_DIR}/hiversion.header
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin"
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t
+    COMMENT "building ${CMAKE_CURRENT_BINARY_DIR}/hiversion.header from ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t"
+)
+
+add_custom_command(
+    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F
+    COMMAND cat ${CMAKE_CURRENT_BINARY_DIR}/hiversion.header ${CMAKE_CURRENT_BINARY_DIR}/SYSCONFIG > ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin"
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/hiversion.header
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/SYSCONFIG
-    COMMENT "building ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F from ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t"
+    COMMENT "building ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F from ${CMAKE_CURRENT_BINARY_DIR}/hiversion.header"
 )
 
 set(HIBRIDON_COMPILE_OPTIONS  "")

@@ -16,7 +16,7 @@ cdec$ fixedformlinesize:132
      : (/' ---------------------------------------------------',
      :  '-----------------------',
      :  /,9x,
-     :   '  HIBRIDON SCATTERING CODE V xdate',
+     :   '  HIBRIDON SCATTERING CODE V <hibridon_version_string>',
      : //'      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS,',
      :   ' H.-J. WERNER, B. FOLLMEG,'/
      :   '               P. DAGDIGIAN',
