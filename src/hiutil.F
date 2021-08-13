@@ -943,7 +943,7 @@ c end_jk
 *    (see edmonds, p. 101, eq. (6.4.3))
 *     current revision date: 3-apr-91 by mha
 *
-      use mod_cofact, only: si
+      !use mod_cofact, only: si0
       implicit double precision (a-h,o-z)
       double precision i
       logical flaghf
