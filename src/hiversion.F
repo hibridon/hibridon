@@ -23,6 +23,7 @@
        write (iunit,15)
 15     format(11x,'BUILD CONFIGURATION:')
         write(iunit,*)
+        write(iunit,'(a18,a)') 'CMAKE BUILD DATE: ', _BUILD_DATE_
         write(iunit,'(a18,a)') 'CMAKE BUILD TYPE: ', _BUILD_TYPE_
         write(iunit,'(a5,a,a1,a)')  'SYS: ', _BUILD_SYS1_ , ' ', _BUILD_SYS2_
         write(iunit,'(a11,a)') 'PROCESSOR: ', _BUILD_PROC_

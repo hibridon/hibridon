@@ -127,7 +127,8 @@ target_compile_definitions(hib PUBLIC _BUILD_SYS2_="${CMAKE_HOST_SYSTEM_VERSION}
 target_compile_definitions(hib PUBLIC _BUILD_PROC_="${CMAKE_HOST_SYSTEM_PROCESSOR}")
 target_compile_definitions(hib PUBLIC _BUILD_COMP_="${CMAKE_Fortran_COMPILER}")
 target_compile_definitions(hib PUBLIC _BUILD_FLAGS_="${HIBRIDON_COMPILE_OPTIONS}")
-
+string(TIMESTAMP TODAY "%Y-%m-%d at %H:%M")
+target_compile_definitions(hib PUBLIC _BUILD_DATE_="${TODAY}")
 
 add_custom_command(
     OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/src/common
