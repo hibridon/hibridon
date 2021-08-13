@@ -1620,6 +1620,10 @@ c
       subroutine dset(n,da,dx,incx)
 c
 c     sets a vector equal to a constant
+c     n : number of elements to set
+c     da : the constant value a to set
+c     dx : the start of the vector x 
+c     incx : the number of doubles to add to reach the next element of the vector
 c     uses unrolled loops for increment equal to one.
 c     modified by mha from linpack dscal, written originally by
 c     jack dongarra, linpack, 3/11/78.
