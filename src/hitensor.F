@@ -670,6 +670,7 @@ c end of added/modified code (pjd)
 * ------------------------------------------------------------------
       use tensor
       use mod_codim, only: mmax
+      use mod_coinhl, only: jlev => inhold ! jlev(1)
       use mod_coisc2, only: inlev => isc2 ! inlev(1)
       use mod_coisc3, only: jlist => isc3 ! jlist(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
@@ -685,7 +686,6 @@ c end of added/modified code (pjd)
       common /coipar/ ipar(9),iprnt
       common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot,
      :             nwaves, jfsts, jlparf, jlpars, njmax
-      common /coinhl/ jlev(1)
       common /coz/    xm1lab(1)
       common /cow/    xm2lab(1)
       common /cozmat/ sigma(1)

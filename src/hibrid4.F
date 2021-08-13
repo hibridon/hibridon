@@ -34,6 +34,7 @@
       use mod_coj12p, only: j12pk
       use constants
       use mod_codim, only: nmax => mmax
+      use mod_coinhl, only: jlev => inhold ! jlev(1)
       use mod_coisc1, only: inlev => isc1 ! inlev(1)
       use mod_coisc2, only: jpack => isc2 ! jpack(1)
       use mod_coisc3, only: lpack => isc3 ! lpack(1)
@@ -52,7 +53,6 @@
       common /cojq/ jq(1)
       common /colq/ lq(1)
       common /coinq/ inq(1)
-      common /coinhl/ jlev(1)
       common /coselb/ ibasty
 
 c

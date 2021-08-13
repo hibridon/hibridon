@@ -427,15 +427,15 @@ end module mod_cofact
 !    end subroutine allocate_coehld
 ! end module mod_coehld
 
-! module mod_coinhl
-!    implicit none
-!    integer, dimension(:), allocatable :: inhold
-!    contains
-!    subroutine allocate_coinhl(n)
-!       integer, intent(in) :: n
-!       allocate(inhold(n))
-!    end subroutine allocate_coinhl
-! end module mod_coinhl
+module mod_coinhl
+   implicit none
+   integer, dimension(:), allocatable :: inhold
+   contains
+   subroutine allocate_coinhl(n)
+      integer, intent(in) :: n
+      allocate(inhold(n))
+   end subroutine allocate_coinhl
+end module mod_coinhl
 
 module mod_coisc1
    implicit none
