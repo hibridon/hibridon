@@ -53,7 +53,6 @@
       common /colq/ lq(1)
       common /coinq/ inq(1)
       common /coinhl/ jlev(1)
-      common /codim/ nairy, nmax
       common /coselb/ ibasty
 
 c
