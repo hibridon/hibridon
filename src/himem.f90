@@ -327,15 +327,25 @@ end module mod_cofact
 !    end subroutine allocate_cozmat
 ! end module mod_cozmat
 
-! module mod_coamat
-!    implicit none
-!    real(8), dimension(:,:), allocatable :: amat
-!    contains
-!    subroutine allocate_coamat(n)
-!       integer, intent(in) :: n
-!       allocate(amat(n,n))
-!    end subroutine allocate_coamat
-! end module mod_coamat
+module mod_coamat
+   implicit none
+   real(8), dimension(:,:), allocatable, target :: amat
+   real(8), dimension(:), allocatable :: toto
+   real(8), dimension(:), allocatable :: zbuf
+   real(8), dimension(:), allocatable :: simag2
+   real(8), dimension(:), allocatable :: psir
+   ! real(8), dimension(:), allocatable :: labadr
+   contains
+   subroutine allocate_coamat(n)
+      integer, intent(in) :: n
+      allocate(amat(n,n))
+      allocate(toto(n*n))
+      allocate(zbuf(n))
+      allocate(simag2(n*n))
+      allocate(psir(n*n))
+      ! allocate(labadr(n*n))
+   end subroutine allocate_coamat
+end module mod_coamat
 
 ! module mod_cobmat
 !    implicit none
@@ -347,9 +357,8 @@ end module mod_cofact
 !    end subroutine allocate_cobmat
 ! end module mod_cobmat
 
-! these matrices to store t matrices
-
 module mod_cotq1
+   ! stores t matrix
    implicit none
    ! note: these members are not used at the same time
    ! (they used to be a different view of the same area in memory
@@ -372,6 +381,7 @@ module mod_cotq2
    ! note: these members are not used at the same time
    ! (they used to be a different view of the same area in memory
    ! when this module was a common block)
+   ! stores t matrix
    implicit none
    real(8), dimension(:,:), allocatable :: tq2
    real(8), dimension(:), allocatable :: dpsii
@@ -389,6 +399,7 @@ module mod_cotq3
    ! note: these members are not used at the same time
    ! (they used to be a different view of the same area in memory
    ! when this module was a common block)
+   ! stores t matrix
    implicit none
    real(8), dimension(:,:), allocatable :: tq3
    real(8), dimension(:), allocatable :: scmat

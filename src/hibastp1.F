@@ -151,6 +151,7 @@
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_coamat, only: ietmp => toto ! ietmp(1)
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -161,7 +162,6 @@
       common /conlam/ nlam, nlammx, lamnum(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
-      common /coamat/ ietmp(1)
       dimension j(1), l(1), jhold(1), ehold(1), is(1), k(1),
      :          ieps(1), jtemp(1), ishold(1), ktemp(1)
       zero = 0.d0

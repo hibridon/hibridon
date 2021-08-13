@@ -10,6 +10,11 @@
       use mod_covvl, only: allocate_covvl
       use mod_cofact, only: allocate_cofact
 
+      ! use mod_coz, only: allocate_coz, z
+      ! use mod_cow, only: allocate_cow, w
+      ! use mod_cozmat, only: allocate_cozmat, zmat
+      use mod_coamat, only: allocate_coamat, amat
+      ! use mod_cobmat, only: allocate_cobmat, bmat
       use mod_cotq1, only: allocate_cotq1, tq1
       use mod_cotq2, only: allocate_cotq2, tq2
       use mod_cotq3, only: allocate_cotq3, tq3
@@ -170,8 +175,12 @@
       common /coz/ z(kmax,kmax)
       common /cow/ w(kmax,kmax)
       common /cozmat/ zmat(kmax,kmax)
-      common /coamat/ amat(kmax,kmax)
       common /cobmat/ bmat(kairy,kairy)
+      ! call allocate_coz(kmax)
+      ! call allocate_cow(kmax)
+      ! call allocate_cozmat(kmax)
+      call allocate_coamat(kmax)
+      ! call allocate_cobmat(kairy)
       call allocate_cotq1(T_MATRIX_SIZE)
       call allocate_cotq2(T_MATRIX_SIZE)
       call allocate_cotq3(T_MATRIX_SIZE)
@@ -447,13 +456,13 @@
       if (airyfl .and. (nairy .ne. nmax)) then
         write (9, 35)
         write (6, 35)
-35      format
-     :    (/' *** NAIRY .NE. NMAX FOR AIRY INTEGRATION; ABORT ***')
+35      format(
+     :     /' *** NAIRY .NE. NMAX FOR AIRY INTEGRATION; ABORT ***')
         call exit
       end if
       if (.not. airyfl .and. (nairy. ne. 1)) write (9, 45)
-45    format
-     : (/' *** WARNING:  NAIRY .NE. 1 BUT AIRYFL .EQ. .FALSE.')
+45    format(
+     :  /' *** WARNING:  NAIRY .NE. 1 BUT AIRYFL .EQ. .FALSE.')
 *  check for proper choice of output files and dimension limits
       if (nerg .gt. men) then
         write (9, 50)
@@ -464,8 +473,8 @@
       if (nerg.gt.19) then
          if (writs.and.(xsecwr.or.wrxsec))  then
             write (6,55) nerg
-55          format
-     :   (/' NERG = ',i2,' > 19',
+55          format(
+     :    /' NERG = ',i2,' > 19',
      :    ' FOR WRITS .AND. (WRXSEC .OR. WRPART) ALL TRUE; ABORT ***')
             call exit
          endif
@@ -732,8 +741,8 @@ c95    format (1h ,79('='))
             if (nu .eq. numin) then
               write (6, 145)
               write (9, 145)
-145           format
-     :          (/' *** NCH = 0 FOR NU=NUMIN IN CS CALCULATION;',
+145           format(
+     :           /' *** NCH = 0 FOR NU=NUMIN IN CS CALCULATION;',
      :            ' END CALCULATION')
 *  reset jtot2 to reflect absence of all channels in cs calculations
               jtot2 = jtot - jtotd
