@@ -137,3 +137,15 @@ cdec$ fixedformlinesize:132
 c variables in data config
       character*140 build
       common /bld_config/ build(5)
+      data build(1) /
+     : '<hibridon_build_info1>'/
+      data build(2) /
+     : '<hibridon_build_info2>'/
+      data build(3) /
+     : '<hibridon_build_info3>'/
+      data build(4) /
+     : '<hibridon_build_info4>'/
+      data build(5) /
+     : '<hibridon_build_info5>'/
+#endif
+      end

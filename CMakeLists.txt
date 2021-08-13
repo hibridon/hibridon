@@ -120,12 +120,6 @@ target_compile_options(hib PRIVATE "-ffixed-line-length-132")
 target_compile_definitions(hib PUBLIC MAX_NJTOT=1000)
 
 add_custom_command(
-    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/SYSCONFIG
-    COMMAND "PATH=${CMAKE_CURRENT_SOURCE_DIR}/bin:$ENV{PATH}" ${CMAKE_CURRENT_SOURCE_DIR}/bin/hibdetails
-    COMMENT "building ${CMAKE_CURRENT_BINARY_DIR}/SYSCONFIG"
-)
-
-add_custom_command(
     OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/src/common
     COMMAND mkdir -p "${CMAKE_CURRENT_BINARY_DIR}/src/common"
     COMMENT "making directory ${CMAKE_CURRENT_BINARY_DIR}/src/common"
@@ -147,26 +141,26 @@ add_custom_target(parhlp
 execute_process(COMMAND bash -c "date +%D | tr -d '\n'" OUTPUT_VARIABLE build_date)
 execute_process(COMMAND bash -c "date +%T | tr -d '\n'" OUTPUT_VARIABLE build_time)
 execute_process(COMMAND bash -c "date +%Z | tr -d '\n'" OUTPUT_VARIABLE build_timezone)
-message(INFO "build_date=${build_date}")
+message("build_date=${build_date}")
 execute_process(COMMAND bash -c "head -1 ${CMAKE_CURRENT_SOURCE_DIR}/VERSION | tr -d '\n'" OUTPUT_VARIABLE hibridon_version)
 set(hibridon_version_string "${hibridon_version} BUILD DATE ${build_date} ${build_time} ${build_timezone}")
 message("hibridon_version_string=${hibridon_version_string}")
 
-add_custom_command(
-    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/hiversion.header
-    COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t | sed 's|<hibridon_version_string>|${hibridon_version_string}|' > ${CMAKE_CURRENT_BINARY_DIR}/hiversion.header
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin"
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t
-    COMMENT "building ${CMAKE_CURRENT_BINARY_DIR}/hiversion.header from ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t"
-)
+# set(hibridon_build_info1 "SYS=${CMAKE_SYSTEM}")
+set(max_build_info_length 122)
+execute_process(COMMAND bash -c "printf '%${max_build_info_length}.${max_build_info_length}s' 'SYS=${CMAKE_SYSTEM}'" OUTPUT_VARIABLE hibridon_build_info1)
+execute_process(COMMAND bash -c "printf '%${max_build_info_length}.${max_build_info_length}s' 'FC=${CMAKE_Fortran_COMPILER}'" OUTPUT_VARIABLE hibridon_build_info2)
+execute_process(COMMAND bash -c "printf '%${max_build_info_length}.${max_build_info_length}s' 'COMPILER=${Fortran_COMPILER_NAME}'" OUTPUT_VARIABLE hibridon_build_info3)
+execute_process(COMMAND bash -c "printf '%${max_build_info_length}.${max_build_info_length}s' ''" OUTPUT_VARIABLE hibridon_build_info4)
+execute_process(COMMAND bash -c "printf '%${max_build_info_length}.${max_build_info_length}s' ''" OUTPUT_VARIABLE hibridon_build_info5)
+message("hibridon_build_info1=${hibridon_build_info1}")
 
 add_custom_command(
     OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F
-    COMMAND cat ${CMAKE_CURRENT_BINARY_DIR}/hiversion.header ${CMAKE_CURRENT_BINARY_DIR}/SYSCONFIG > ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F
+    COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t | sed 's|<hibridon_version_string>|${hibridon_version_string}|' | sed 's|<hibridon_build_info1>|${hibridon_build_info1}|' | sed 's|<hibridon_build_info2>|${hibridon_build_info2}|' | sed 's|<hibridon_build_info3>|${hibridon_build_info3}|' | sed 's|<hibridon_build_info4>|${hibridon_build_info4}|' | sed 's|<hibridon_build_info5>|${hibridon_build_info5}|' > ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin"
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/hiversion.header
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/SYSCONFIG
-    COMMENT "building ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F from ${CMAKE_CURRENT_BINARY_DIR}/hiversion.header"
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t
+    COMMENT "building ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F from ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t"
 )
 
 set(HIBRIDON_COMPILE_OPTIONS  "")
