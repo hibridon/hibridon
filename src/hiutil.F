@@ -720,7 +720,7 @@ c
 *     current revision date: 14-dec-87
 *     revised by mha 4-may-1997
 *
-      use mod_cofact, only: si
+      use mod_cofact, only: si0
       implicit double precision (a-h,o-z)
       data zero,two /0.d0, 2.d0/
       x = zero
@@ -731,16 +731,16 @@ c
       ig = iabc / 2
       if (ig*2 .ne. iabc) goto 100
 * compute delta
-      j1 = iabc - nint(two*a) + 1
-      j2 = iabc - nint(two*b) + 1
-      j3 = iabc - nint(two*c) + 1
-      j4 = iabc + 2
-      delta = 0.5d0 * (si(j1) + si(j2) + si(j3) - si(j4))
-      j1 = ig + 1
-      j2 = nint(ig - a) + 1
-      j3 = nint(ig - b) + 1
-      j4 = nint(ig - c) + 1
-      x = delta + si(j1) - si(j2) - si(j3) - si(j4)
+      j1 = iabc - nint(two*a) 
+      j2 = iabc - nint(two*b) 
+      j3 = iabc - nint(two*c) 
+      j4 = iabc + 1
+      delta = 0.5d0 * (si0(j1) + si0(j2) + si0(j3) - si0(j4))
+      j1 = ig 
+      j2 = nint(ig - a) 
+      j3 = nint(ig - b) 
+      j4 = nint(ig - c)
+      x = delta + si0(j1) - si0(j2) - si0(j3) - si0(j4)
       x = dexp(x)
       ip = nint(ig + c + a - b)
       if ((ip/2)*2 .ne. ip) x = -x
