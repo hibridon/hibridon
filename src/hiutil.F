@@ -1604,7 +1604,7 @@ c     ------------------------------------------------------------------
 c     Compute the 3j symbol (ja jb jc / ma mb mc)
 c     Modified from xf3j by Q. Ma
 c     ------------------------------------------------------------------
-      use mod_cofact, only: si
+      use mod_cofact, only: si0
       implicit real(8) (a-h, o-z)
       integer, intent(in) :: two_ja, two_jb, two_jc, two_ma, two_mb,
      $     two_mc
@@ -1629,10 +1629,10 @@ c     ------------------------------------------------------------------
       iabmc = iabc - two_jc
       iamam = (two_ja - two_ma) / 2
       ibpbm = (two_jb + two_mb) / 2
-      iapam = (two_ja + two_ma) / 2 + 1
-      ibmbm = (two_jb - two_mb) / 2 + 1
-      icpcm = (two_jc + two_mc) / 2 + 1
-      icmcm = (two_jc - two_mc) / 2 + 1
+      iapam = (two_ja + two_ma) / 2 
+      ibmbm = (two_jb - two_mb) / 2 
+      icpcm = (two_jc + two_mc) / 2 
+      icmcm = (two_jc - two_mc) / 2 
       minchi = max(0, ibcam, iacbm)
       maxchi = min(iabmc, iamam, ibpbm) - minchi
       iabmc = iabmc - minchi
@@ -1640,13 +1640,13 @@ c     ------------------------------------------------------------------
       ibbm = ibpbm - minchi
       ibcam = minchi - ibcam
       iacbm = minchi - iacbm
-      iamam = iamam + 1
-      ibpbm = ibpbm + 1
-      j1 = iabc - two_ja + 1
-      j2 = iabc - two_jb + 1
-      j3 = iabc - two_jc + 1
-      j4 = iabc + 2
-      delta = si(j1) + si(j2) + si(j3) - si(j4)
+      iamam = iamam 
+      ibpbm = ibpbm 
+      j1 = iabc - two_ja 
+      j2 = iabc - two_jb 
+      j3 = iabc - two_jc 
+      j4 = iabc + 1
+      delta = si0(j1) + si0(j2) + si0(j3) - si0(j4)
       ll = 0
       x = 1d0
       if (maxchi.le.0) goto 2
@@ -1663,10 +1663,10 @@ c     ------------------------------------------------------------------
       if(x) 4,3,2
  4    x = -x
       ll = 1
- 2    x = dlog(x) - si(iabmc+1) - si(iaam+1) - si(ibbm+1) - si(ibcam+1)
-     :            - si(iacbm+1) - si(minchi+1)
-      x = 2d0 * x + si(iapam) + si(iamam) + si(ibpbm) + si(ibmbm) +
-     :           si(icpcm) + si(icmcm) + delta
+ 2    x = dlog(x) - si0(iabmc) - si0(iaam) - si0(ibbm) - si0(ibcam)
+     :            - si0(iacbm) - si0(minchi)
+      x = 2d0 * x + si0(iapam) + si0(iamam) + si0(ibpbm) + si0(ibmbm) +
+     :           si0(icpcm) + si0(icmcm) + delta
       x = dexp( x / 2d0)
       l = ll + minchi + (two_jb - two_ja + two_mc) / 2
       if( 2 * (l/2) .ne. l) x = -x
