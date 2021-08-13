@@ -1149,7 +1149,7 @@ c.....open direct access file for interpolation and restart
 *  author:  h.-j. werner
 *  latest revision:  17-jan-2008 by mha
 * --------------------------------------------------------------------
-
+      use mod_coamat, only: q3 => toto ! q3(1)
       implicit double precision (a-h,o-z)
       logical writs,csflag,nucros, llpar, wrpart, wrxsec
       character*40 oldlab
@@ -1161,7 +1161,6 @@ c.....open direct access file for interpolation and restart
       common /cobmat/ q(1)
       common /cow/ q1(1)
       common /cozmat/ q2(1)
-      common /coamat/ q3(1)
       common /colpar/ llpar(21),wrpart, wrxsec
 
       dimension word(30),iword(32),nlev(1)

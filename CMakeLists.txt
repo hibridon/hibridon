@@ -60,6 +60,8 @@ else (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
+
+
 add_library(hib
      src/hiba13p.F
      src/hiba1d3p.F
@@ -103,7 +105,7 @@ add_library(hib
      src/hihypxsc.F
      src/hiiolib_f.F
      src/himatrix.F
-     src/himem.f90
+     src/himem.F90
      src/hinput.F
      src/hiprsbr.F
      src/histmix.F
@@ -115,6 +117,7 @@ add_library(hib
      src/hipotutil.F
      ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F)
 target_compile_options(hib PRIVATE "-ffixed-line-length-132")
+target_compile_definitions(hib PUBLIC MAX_NJTOT=1000)
 
 add_custom_command(
     OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/SYSCONFIG
@@ -249,7 +252,7 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
                           cp ${TEST_SRC_DIR}/$pot_data_file ${TEST_BUILD_DIR}/potdata ; \
                       done"
   )
-
+ 
   add_test(NAME ${TEST_ID}_build
       COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target ${TEST_EXE})
 
@@ -615,3 +618,33 @@ set(coverage_testsuite
 
 
 add_hibridon_testsuite("coverage" "${coverage_testsuite}" "${tests_list}")
+
+
+# The following is to build hibridon with an user-supplied potential
+
+function(add_hibexe EXE_NAME POT_SRC_FILE p_KMAX p_T_MATRIX_SIZE)
+  message("Adding executable ${EXE_NAME} using potential ${POT_SRC_FILE}")
+ 
+
+
+  add_executable(${EXE_NAME} ${POT_SRC_FILE} src/himain.F)
+  target_compile_definitions(${EXE_NAME} PUBLIC KMAX=${p_KMAX})
+  target_compile_definitions(${EXE_NAME} PUBLIC T_MATRIX_SIZE=${p_T_MATRIX_SIZE})
+  target_link_libraries(${EXE_NAME} hib ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
+  target_include_directories(${EXE_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+  target_include_directories(${EXE_NAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
+  target_compile_options(${EXE_NAME} PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
+
+endfunction(add_hibexe)
+
+  file (GLOB userscripts ${CMAKE_CURRENT_BINARY_DIR}/*.user.cmake)
+   foreach(userscript IN LISTS userscripts)
+   include (${userscript})
+   add_hibexe("${EXE_NAME}" "${POT_SRC_FILE}" "${p_KMAX}" "${p_T_MATRIX_SIZE}")
+   message ("Added ${userscript} user executable")
+   unset(EXE_NAME)
+   unset(POT_SRC_FILE)
+   unset(p_KMAX)
+   unset(p_T_MATRIX_SIZE)
+  endforeach()
+

@@ -327,15 +327,31 @@ end module mod_cofact
 !    end subroutine allocate_cozmat
 ! end module mod_cozmat
 
-! module mod_coamat
-!    implicit none
-!    real(8), dimension(:,:), allocatable :: amat
-!    contains
-!    subroutine allocate_coamat(n)
-!       integer, intent(in) :: n
-!       allocate(amat(n,n))
-!    end subroutine allocate_coamat
-! end module mod_coamat
+module mod_coamat
+   implicit none
+   ! note: these members are not used at the same time
+   ! (they used to be a different view of the same area in memory
+   ! when this module was a common block)
+   ! todo : reduce memory usage by allocating the data only while being used
+   real(8), dimension(:,:), allocatable, target :: amat
+   real(8), dimension(:), allocatable :: toto
+   integer, dimension(:), allocatable :: ietmp
+   real(8), dimension(:), allocatable :: zbuf
+   real(8), dimension(:), allocatable :: simag2
+   real(8), dimension(:), allocatable :: psir
+   integer, dimension(:), allocatable :: labadr
+   contains
+   subroutine allocate_coamat(n)
+      integer, intent(in) :: n
+      allocate(amat(n,n))
+      allocate(toto(n*n))
+      allocate(ietmp(n))
+      allocate(zbuf(n))
+      allocate(simag2(n*n))
+      allocate(psir(n*n))
+      allocate(labadr(MAX_NJTOT))
+   end subroutine allocate_coamat
+end module mod_coamat
 
 ! module mod_cobmat
 !    implicit none
@@ -347,35 +363,59 @@ end module mod_cofact
 !    end subroutine allocate_cobmat
 ! end module mod_cobmat
 
-! module mod_cotq1
-!    implicit none
-!    real(8), dimension(:,:), allocatable :: tq1
-!    contains
-!    subroutine allocate_cotq1(n)
-!       integer, intent(in) :: n
-!       allocate(tq1(n,n))
-!    end subroutine allocate_cotq1
-! end module mod_cotq1
+module mod_cotq1
+   ! stores t matrix
+   implicit none
+   ! note: these members are not used at the same time
+   ! (they used to be a different view of the same area in memory
+   ! when this module was a common block)
+   real(8), dimension(:,:), allocatable :: tq1
+   real(8), dimension(:,:,:), allocatable :: vec
+   real(8), dimension(:), allocatable :: dpsir
+   real(8), dimension(:), allocatable :: scmat
+   contains
+   subroutine allocate_cotq1(n)
+      integer, intent(in) :: n
+      allocate(tq1(n,n))
+      allocate(vec(3,3,1))
+      allocate(dpsir(n))  ! note : the size has been found by trial and error (with all tests passing)
+      allocate(scmat(n*n))  ! note : the size has been found by trial and error (with all tests passing)
+   end subroutine allocate_cotq1
+end module mod_cotq1
 
-! module mod_cotq2
-!    implicit none
-!    real(8), dimension(:,:), allocatable :: tq2
-!    contains
-!    subroutine allocate_cotq2(n)
-!       integer, intent(in) :: n
-!       allocate(tq2(n,n))
-!    end subroutine allocate_cotq2
-! end module mod_cotq2
+module mod_cotq2
+   ! note: these members are not used at the same time
+   ! (they used to be a different view of the same area in memory
+   ! when this module was a common block)
+   ! stores t matrix
+   implicit none
+   real(8), dimension(:,:), allocatable :: tq2
+   real(8), dimension(:), allocatable :: dpsii
+   real(8), dimension(:), allocatable :: scmat
+   contains
+   subroutine allocate_cotq2(n)
+      integer, intent(in) :: n
+      allocate(tq2(n,n))
+      allocate(dpsii(n))  ! note : the size has been found by trial and error (with all tests passing)
+      allocate(scmat(n*n))  ! note : the size has been found by trial and error (with all tests passing)
+   end subroutine allocate_cotq2
+end module mod_cotq2
 
-! module mod_cotq3
-!    implicit none
-!    real(8), dimension(:,:), allocatable :: tq3
-!    contains
-!    subroutine allocate_cotq3(n)
-!       integer, intent(in) :: n
-!       allocate(tq3(n,n))
-!    end subroutine allocate_cotq3
-! end module mod_cotq3
+module mod_cotq3
+   ! note: these members are not used at the same time
+   ! (they used to be a different view of the same area in memory
+   ! when this module was a common block)
+   ! stores t matrix
+   implicit none
+   real(8), dimension(:,:), allocatable :: tq3
+   real(8), dimension(:), allocatable :: scmat
+   contains
+   subroutine allocate_cotq3(n)
+      integer, intent(in) :: n
+      allocate(tq3(n,n))
+      allocate(scmat(n*n))  ! note : the size has been found by trial and error (with all tests passing)
+   end subroutine allocate_cotq3
+end module mod_cotq3
 
 module mod_cojq
    implicit none

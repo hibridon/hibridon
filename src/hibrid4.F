@@ -1042,7 +1042,23 @@ c
 c     current revision: 20-apr-2012 by q. ma
 c
 * -------------------------------------------------------
+#define AMAT_AS_VEC_METHOD_DISTINCT 1
+#define AMAT_AS_VEC_METHOD_POINTER 2
+#define AMAT_AS_VEC_METHOD_NOVEC 3
+#define AMAT_AS_VEC_METHOD AMAT_AS_VEC_METHOD_DISTINCT
       use mod_coeint, only: eint
+#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_DISTINCT)
+      use mod_coamat, only: amat => psir ! amat(25) psir(nopen, nopen)
+#endif
+#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_POINTER)
+      use, intrinsic :: ISO_C_BINDING
+      use mod_coamat, only: amat ! amat(25)
+#endif
+#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_NOVEC)
+      use mod_coamat, only: amat ! amat(25)
+#endif
+      use mod_cotq1, only: dpsir ! dpsir(25)
+      use mod_cotq2, only: dpsii ! dpsii(25)
       use mod_cojq, only: jq ! jq(1)
       use mod_colq, only: lq ! lq(1)
       use mod_coinq, only: inq ! inq(1)
@@ -1068,12 +1084,9 @@ c
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr, nucros, photof, wavefl
       common /coered/ ered, rmu
-      common /coamat/ amat(25)
       common /cobmat/ bmat(25)
       common /cow/ w(25)
       common /cozmat/ zmat(25)
-      common /cotq1/  dpsir(25)
-      common /cotq2/  dpsii(25)
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
       dimension iword(32), word(4)
@@ -1084,6 +1097,11 @@ c     dependent) size of the built-in types
       integer int_t
       double precision dble_t
 c
+#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_POINTER)
+      real, pointer :: amat_as_vec(:)
+#endif
+
+
       ifil=22
       zero=0.d0
       izero=0
@@ -1137,10 +1155,11 @@ c
       return
 c
 c     ------------------------------------------------------------------
+c     reads header file for wavefunction (wfu file)
       entry waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto,jflux,
      :     rstart,rendld,rinf)
 c
-      ifil = 22
+      ifil = 22 ! the wfu file is expected to be open using this unit
 c     Read the magic number (from the start of the file)
       read (ifil, pos=1, end=900, err=950) csize8
       inflev = ichar(csize8(5))
@@ -1207,10 +1226,26 @@ c
       endif
 * read in channel packing list and real and imaginary parts
 * of scattering wavefunction and derivative
+#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_DISTINCT)
       read (ifil, end=900, err=950, pos=iwavsk(3))
      $     (isc1(i), i=1, nopen), (amat(i), i=1, nopsq),
      $     (bmat(i), i=1, nopsq), (dpsir(i), i=1, nopsq),
      $     (dpsii(i), i=1, nopsq)
+#endif
+#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_POINTER)
+      ! amat_as_vec is a view of the matrix amat(nopen, nopen) as a vector(nopen*nopen)
+      call C_F_POINTER (C_LOC(amat), amat_as_vec, [nopsq])
+      read (ifil, end=900, err=950, pos=iwavsk(3))
+     $     (isc1(i), i=1, nopen), (amat_as_vec(i), i=1, nopsq),
+     $     (bmat(i), i=1, nopsq), (dpsir(i), i=1, nopsq),
+     $     (dpsii(i), i=1, nopsq)
+#endif
+#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_NOVEC)
+      read (ifil, end=900, err=950, pos=iwavsk(3))
+     $     (isc1(i), i=1, nopen), amat,
+     $     (bmat(i), i=1, nopsq), (dpsir(i), i=1, nopsq),
+     $     (dpsii(i), i=1, nopsq)
+#endif
       irec = 3
       return
 c
@@ -1348,6 +1383,9 @@ c
       use mod_coqvec, only: nphoto
       use mod_cocent, only: sc2 => cent
       use mod_coeint, only: eint
+      use mod_coamat, only: psir ! psir(100) psir(nopen,nopen)
+      use mod_cotq1, only: dpsir ! dpsir(100)
+      use mod_cotq2, only: dpsii ! dpsii(100)
       use mod_cojq, only: jq ! jq(60)
       use mod_colq, only: lq ! lq(10)
       use mod_coinq, only: inq ! inq(60)
@@ -1378,12 +1416,8 @@ c
       common /cotrans/ ttrans(36)
       common /cow/    sr(100)
       common /cozmat/ si(100)
-      common /coamat/ psir(100)
       common /cobmat/ psii(100)
       common /coz/    scmat(100)
-      common /cotq1/  dpsir(100)
-      common /cotq2/  dpsii(100)
-      common /cotq3/  scmat2(100)
 * common for y1, y2, y4
       common /coered/ ered, rmu
       common /coselb/ ibasty
@@ -1922,9 +1956,9 @@ c
 * as closed channel components
           if (nch .gt. nopen) then
             call expand(nopen,nopen,nch,nch,ipack,
-     :                psir,psii,scmat,scmat2)
+     :                psir,psii,scmat)
             call expand(nopen,nopen,nch,nch,ipack,
-     :                dpsir,dpsii,scmat,scmat2)
+     :                dpsir,dpsii,scmat)
           endif
 * store desired wavefunction column (real and imaginary part) in 1st and 2nd
 * columns of psir
@@ -1948,9 +1982,9 @@ c
 * be selected
           if (nch .gt. nopen) then
             call expand(nopen,nopen,nch,nch,ipack,
-     :                  psir,psii,scmat,scmat2)
+     :                  psir,psii,scmat)
             call expand(nopen,nopen,nch,nch,ipack,
-     :                  dpsir,dpsii,scmat,scmat2)
+     :                  dpsir,dpsii,scmat)
           endif
 * store desired wavefunction column (real and imaginary part) in 1st and
 * 2nd columns of psir
@@ -1974,9 +2008,9 @@ c
      :            jflux,rstart,rendld,rinf)
           if (nch .gt. nopen) then
             call expand(nopen,nopen,nch,nch,ipack,
-     :                  psir,psii,scmat,scmat2)
+     :                  psir,psii,scmat)
             call expand(nopen,nopen,nch,nch,ipack,
-     :                  dpsir,dpsii,scmat,scmat2)
+     :                  dpsir,dpsii,scmat)
           endif
 * store desired wavefunction column (real and imaginary part) in 1st and
 * 2nd columns of psir
@@ -2005,9 +2039,9 @@ c
         if (.not. photof) then
           if (nch .gt. nopen) then
             call expand(nopen,nopen,nch,nch,ipack,
-     :           psir,psii,scmat,scmat2)
+     :           psir,psii,scmat)
             call expand(nopen,nopen,nch,nch,ipack,
-     :           dpsir,dpsii,scmat,scmat2)
+     :           dpsir,dpsii,scmat)
           endif
 * store desired wavefunction column (real and imaginary part) in 1st and 2nd
 * columns of psir
@@ -2194,9 +2228,9 @@ c
 * as closed channel components
           if (nch .gt. nopen) then
             call expand(nopen,nopen,nch,nch,ipack,
-     :                  psir,psii,scmat,scmat2)
+     :                  psir,psii,scmat)
             call expand(nopen,nopen,nch,nch,ipack,
-     :                  dpsir,dpsii,scmat,scmat2)
+     :                  dpsir,dpsii,scmat)
           endif
           if (ibasty .eq.7 .and. jlpar.eq.-1 .and. ipol.eq.1
      :      .and. .not.photof)
@@ -2208,9 +2242,9 @@ c
 * be selected
           if (nch .gt. nopen) then
             call expand(nopen,nopen,nch,nch,ipack,
-     :                  psir,psii,scmat,scmat2)
+     :                  psir,psii,scmat)
             call expand(nopen,nopen,nch,nch,ipack,
-     :                  dpsir,dpsii,scmat,scmat2)
+     :                  dpsir,dpsii,scmat)
           endif
         endif
 * store desired wavefunction column (real and imaginary part) in 1st and 2nd
@@ -2305,6 +2339,9 @@ c
 * ------------------------------------------------------------------
       use mod_coiout, only: niout, indout
       use mod_cocent, only: sc2 => cent
+      use mod_coamat, only: psir ! psir(100) (4,nch)
+      use mod_cotq2, only: scmat2 => dpsii ! scmat2(100)
+      use mod_cotq3, only: scmat3 => scmat ! scmat3(100)
       use mod_coinq, only: inq ! inq(60)
       use mod_cosc1, only: pk => sc1 ! pk(6)
       use mod_coisc2, only: nlist => isc2 ! nlist(60)
@@ -2317,13 +2354,10 @@ c
       logical adiab, kill, photof, propf, sumf, coordf, ifull
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
-      common /coamat/ psir(100)
       common /cobmat/ psii(100)
       common /cozmat/ tcoord(100)
 * steve, you may need more space, but i doubt it since tcoord is dimensioned n
       common /coz/    scmat(100)
-      common /cotq2/  scmat2(100)
-      common /cotq3/  scmat3(100)
       common /coered/ ered, rmu
       common /coground/ ifull
       common /cotrans/ ttrans(36)
@@ -2386,6 +2420,7 @@ c
 299       format (2f16.12,14(1pe22.12e3))
 * transform wave function into local basis
           if (propf) then
+* scmat2(nch, 2) = scmat(nch, nch) * psir(nch, 2)
             call mxma(scmat,1,nch,psir,1,nch,scmat2,1,nch,nch,nch,2)
             call dcopy(2*nch,scmat2,1,psii(ipoint),1)
 * here for back substitution for wavefunction
@@ -2422,6 +2457,7 @@ c
             do 300 ii=1, nch
               sc1(ii)=onemin/sc1(ii)
 300         continue
+! scmat2(nch, 4) = scmat(nch, nch) * psir(nch, 4)
             call mxma(scmat,1,nch,psir,1,nch,scmat2,1,nch,nch,nch,4)
             call dcopy(2*nch,scmat2,1,psii(ipoint),1)
             call dcopy(2*nch,scmat2(ipoint),1,psii,1)
@@ -2531,6 +2567,7 @@ c
 * 13p or 2s-2p
               if (sumf) call dset(niout,zero,scc,1)
               if (ibasty .eq. 7) then
+! psii(nch, 4) = ttrans(nch, nch) * psir(nch, 4)
                 call mxma(ttrans,nch,1,psir,1,nch,
      :                    psii,1,nch,nch,nch,4)
 * N. B.  as written, mxma multiplies psir by the transpose of ttrans
@@ -2665,17 +2702,24 @@ c
 * with assignment that original column five is singlet with el=J-1 and
 * column 6 is singlet with el=J+1
 * use orthogonal plane rotation
-      implicit double precision (a-h,o-z)
-      common /coamat/ psir(100)
+      use mod_coamat, only: psir ! psir(100) (4,nch)
+      use mod_cotq1, only: dpsir ! dpsir(100)
+      use mod_cotq2, only: dpsii ! dpsii(100)
+      implicit none
       common /cobmat/ psii(100)
-      common /cotq1/  dpsir(100)
-      common /cotq2/  dpsii(100)
-      xjtot=jtot
-      cs=sqrt(xjtot+1.d0)
-      sn=sqrt(xjtot)
-      xnorm=sqrt(2.d0*xjtot+1.d0)
-      cs=cs/xnorm
-      sn=sn/xnorm
+      real(8) :: psii
+      integer, intent(in) :: jtot
+      integer, intent(in) :: nch
+      integer :: jpoint
+      real(8) :: cs, sn ! cosine and sine of rotation angle
+      real(8) :: jtot_as_real
+      real(8) :: norm
+      jtot_as_real=jtot
+      cs=sqrt(jtot_as_real+1.d0)
+      sn=sqrt(jtot_as_real)
+      norm=sqrt(2.d0*jtot_as_real+1.d0)
+      cs=cs/norm
+      sn=sn/norm
       jpoint=4*nch+1
       call drot(nch,psir(jpoint),1,psir(jpoint+nch),1,cs,sn)
       call drot(nch,psii(jpoint),1,psii(jpoint+nch),1,cs,sn)
@@ -2693,13 +2737,13 @@ c
 * revised on 30-mar-2012 by q. ma for stream I/O of wfu files
 *
 * ------------------------------------------------------------------
+      use mod_coamat, only: psir ! psir(100)  psir(nch, 1)
       use mod_coisc2, only: nlist => isc2 ! nlist(6)
       use mod_cosc6, only: sc => sc6 ! sc(6)
       use mod_cosc7, only: sc1 => sc7 ! sc1(6)
       implicit double precision (a-h,o-z)
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
-      common /coamat/ psir(100)
       common /cow/    sr(100)
       common /cozmat/ si(100)
         irec=npts+4
@@ -2710,6 +2754,7 @@ c
           read (ifil, end=900, err=950) (sc1(i), i=1, nch)
 * read in transformation matrices
           read (ifil, end=900, err=950) (sr(i), i=1, nchsq)
+! si(nch, 1) = sr(nch, nch) * psir(nch, 1)
           call mxma(sr,1,nch,psir,1,nch,si,1,nch,nch,nch,1)
           do 160 i=1, nj
             sc(i)=si(nlist(i))
@@ -2742,7 +2787,6 @@ c
       logical renormf
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
-      common /coamat/ psir(100)
       common /cow/    sr(100)
       common /cozmat/ si(100)
       dimension scrvec(64)

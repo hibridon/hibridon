@@ -47,6 +47,7 @@
       use mod_cosout, only: nnout, jout
       use mod_coiout, only: niout, indout
       use mod_codim, only: nmax => mmax
+      use mod_coamat, only: scmat => toto ! scmat(1)
       implicit double precision (a-h,o-z)
 *  iicode is the number of integer pcod's
 *  ircode is the number of real pcod's
@@ -92,7 +93,6 @@
       common /coselb/ ibasty
       common /cobaco/ bascod
       common /coopti/ optifl
-      common /coamat/ scmat(1)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /cotwo/ numj,nj1j2(5)
 * when adding bases, change size of array basknd and size of
@@ -366,8 +366,8 @@ c         call helppr(line)
       end if
       if (match .eq. 0) then
         write(6, 27) code(1:lc),(bcod(j),j = 1,ncode)
-27      format
-     :   (/' *** invalid keyword "',(a),'"; valid request keys are:'//
+27      format(
+     :    /' *** invalid keyword "',(a),'"; valid request keys are:'//
      1   (1x,6(a8,5x)))
         write(6,31) bascod, (pcod(j),j = 1,icode)
 31      format (/(1x,6(a8,5x)))

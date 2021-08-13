@@ -2609,11 +2609,60 @@ c--------------------------------------------------------------------
      1                r,mcolr,mrowr,ncol,nlink,nrow)
 c--------------------------------------------------------------------
 c.....unrolled version for ibm6000 and other risc machines
+c subroutine mxma(a,iac,iar, b,ibc,ibr, c,icc,icr, nar,nac,nbc)
+c fortran version of cray mxma to calculate c=a*b.
+c note: *** this code should not be modified ***
+c
+c arguments:
+c a = first input matrix with effective dimensions a(nar,nac).
+c iac = spacing between consecutive elements in a column of a.
+c iar = spacing between consecutive elements in a row of a.
+c b = second input matrix with effective dimensions b(nac,nbc).
+c ibc = spacing between consecutive elements in a column of b.
+c ibr = spacing between consecutive elements in a row of b.
+c c = output matrix with effective dimensions c(nar,nbc).
+c icc = spacing between consecutive elements in a column of c.
+c icr = spacing between consecutive elements in a row of c.
+c nar = number of rows in a and c.
+c nac = number of columns in a and rows in b.
+c nbc = number of columns in b and c.
+c
+c besides allowing arbitrary sub-blocking and element spacing of
+c any of the matrices, this routine also allows the transposition
+c of any of the matrix arguments.
+c
+c for example, suppose that z(*) is dimensioned in the calling
+c program as:
+c
+c dimension z(n,*)
+c
+c then the following call will calculate a matrix product
+c involving z(*):
+c
+c call mxma(...z,1,n, ...)
+c
+c while a matrix product involving z(transpose) may be calculated
+c with:
+c call mxma(...z,n,1, ...)
+c
+c written 04-jan-85 by ron shepard.
+c
       use mod_comxm, only: ncache, mxmblk
       implicit double precision (a-h,o-z)
 #include "common/vax1"
 #include "common/vax2"
-      dimension r(*),a(*),b(*)
+      real(8), dimension(ncol*nlink*mcola*mrowa), intent(in) :: a
+      integer, intent(in) :: mcola
+      integer, intent(in) :: mrowa
+      real(8), dimension(nlink*nrow*mcolb*mrowb), intent(in) :: b
+      integer, intent(in) :: mcolb
+      integer, intent(in) :: mrowb
+      real(8), dimension(ncol*nrow*mcolr*mrowr), intent(out) :: r
+      integer, intent(in) :: mcolr
+      integer, intent(in) :: mrowr
+      integer, intent(in) :: ncol
+      integer, intent(in) :: nlink
+      integer, intent(in) :: nrow
       if(ncol.eq.0.or.nrow.eq.0) return
       if(nlink.eq.0) then
         ijj=1

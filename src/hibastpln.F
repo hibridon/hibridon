@@ -156,6 +156,7 @@
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_coj12, only: j12
+      use mod_coamat, only: ietmp ! ietmp(1)
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst, twomol
       character*40 fname
@@ -168,7 +169,6 @@
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       common /co2mol/ twomol
-      common /coamat/ ietmp(1)
       dimension j(1), l(1), jhold(1), ehold(1), is(1),
      :          ishold(1)
       dimension ieps(1), ktemp(1), jtemp(1), isc1(1)

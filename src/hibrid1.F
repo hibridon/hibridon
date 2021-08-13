@@ -534,10 +534,10 @@ c
 *              vectors
 * ----------------------------------------------------------------------
       use mod_coqvec2, only: q => q2
+      use mod_cotq1, only: tmat => dpsir ! tmat(80)
       implicit double precision (a-h,o-z)
 *  square matrices (of row dimension nmax)
       dimension vecnow(80), scr(80)
-      common /cotq1/ tmat(80)
       data one, onemn, half, sq3 /1.d0, -1.d0, 0.5d0, 1.732050807d0/
       ra = rnow - half * drnow / sq3
       rb = rnow + half * drnow / sq3
@@ -857,6 +857,7 @@ c#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
 *   current revision date 19-mar-1996
 *  ------------------------------------------------------------
       use mod_codim, only: mmax
+      use mod_coamat, only: simag2 ! simag2(1)
       use mod_cojq, only: jq ! jq(1)
       use mod_colq, only: lq ! lq(1)
       use mod_coinq, only: inq ! inq(1)
@@ -883,7 +884,6 @@ c#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
       common /coz/ sreal1(1)
       common /cow/ sreal2(1)
       common /cozmat/ simag1(1)
-      common /coamat/ simag2(1)
 c
       zero=0
       acc=0
