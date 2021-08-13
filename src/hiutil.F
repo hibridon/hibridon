@@ -1053,7 +1053,7 @@ c end_jk
 * -------------------------------------------------------------------
       function f3j0(j1,j2,j3)
 c     current revision: 19-apr-2012 by q. ma (check input)
-      use mod_cofact, only: si
+      use mod_cofact, only: si0
       implicit double precision (a-h,o-z)
       j=j1+j2+j3
       if( (mod(j,2).ne.0) .or. (j3.lt.iabs(j1-j2)) .or. (j3.gt.(j1+j2)) ) then
@@ -1061,11 +1061,11 @@ c     current revision: 19-apr-2012 by q. ma (check input)
          return
       end if
       jp=j/2
-      jpp=jp+1
+      jpp=jp
       jp1=jpp-j1
       jp2=jpp-j2
       jp3=jpp-j3
-      x=si(jpp)-si(jp1)-si(jp2)-si(jp3)+del(j1,j2,j3)
+      x=si0(jpp)-si0(jp1)-si0(jp2)-si0(jp3)+del(j1,j2,j3)
       f3j0=(-1)**jp*dexp(x)
       return
       end
