@@ -420,10 +420,12 @@ end module mod_cojhld
 module mod_coehld
    implicit none
    real(8), dimension(:), allocatable :: ehold
+   integer, dimension(:), allocatable :: eholdint
    contains
    subroutine allocate_coehld(n)
       integer, intent(in) :: n
       allocate(ehold(n))
+      allocate(eholdint(n))
    end subroutine allocate_coehld
 end module mod_coehld
 
