@@ -577,45 +577,59 @@ module mod_cosc1
    end subroutine allocate_cosc1
 end module mod_cosc1
 
+! general purpose array of scalars
+! note : sc2 and sc2int are never used at the same time, as they initially were 2 views of the same data
 module mod_cosc2
    implicit none
    real(8), dimension(:), allocatable :: sc2
+   integer, dimension(:), allocatable :: sc2int
    contains
    subroutine allocate_cosc2(n)
       integer, intent(in) :: n
       allocate(sc2(n))
+      allocate(sc2int(n))
    end subroutine allocate_cosc2
 end module mod_cosc2
 
+! general purpose array of scalars
+! note : sc3 and sc3int are never used at the same time, as they initially were 2 views of the same data
 module mod_cosc3
    implicit none
    real(8), dimension(:), allocatable :: sc3
-   integer, dimension(:), allocatable :: isc3
+   integer, dimension(:), allocatable :: sc3int
    contains
    subroutine allocate_cosc3(n)
       integer, intent(in) :: n
       allocate(sc3(n))
-      allocate(isc3(n))
+      allocate(sc3int(n))
    end subroutine allocate_cosc3
 end module mod_cosc3
 
+! general purpose array of scalars
+! note : sc4 and sc4int are never used at the same time, as they initially were 2 views of the same data
 module mod_cosc4
    implicit none
    real(8), dimension(:), allocatable :: sc4
+   integer, dimension(:), allocatable :: sc4int
    contains
    subroutine allocate_cosc4(n)
       integer, intent(in) :: n
       allocate(sc4(n))
+      allocate(sc4int(n))
    end subroutine allocate_cosc4
 end module mod_cosc4
 
+! general purpose array of scalars
+! note : sc5 and sc5int are never used at the same time, as they initially were 2 views of the same data
 module mod_cosc5
    implicit none
    real(8), dimension(:), allocatable :: sc5
+   integer, dimension(:), allocatable :: sc5int
    contains
    subroutine allocate_cosc5(n)
       integer, intent(in) :: n
       allocate(sc5(n))
+      allocate(sc5int(n))
    end subroutine allocate_cosc5
 end module mod_cosc5
 

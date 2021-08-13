@@ -858,10 +858,10 @@ c#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
 *  ------------------------------------------------------------
       use mod_codim, only: mmax
       use mod_cosc1, only: elev => sc1 ! elev(1)
-      use mod_cosc2, only: jpack1 => sc2 ! jpack1(1)
-      use mod_cosc3, only: jpack2 => sc3 ! jpack2(1)
-      use mod_cosc4, only: lpack1 => sc4 ! lpack1(1)
-      use mod_cosc5, only: lpack2 => sc5 ! lpack2(1)
+      use mod_cosc2, only: jpack1 => sc2int ! jpack1(1)
+      use mod_cosc3, only: jpack2 => sc3int ! jpack2(1)
+      use mod_cosc4, only: lpack1 => sc4int ! lpack1(1)
+      use mod_cosc5, only: lpack2 => sc5int ! lpack2(1)
       implicit double precision (a-h,o-z)
       character*(*) fname1,fname2
       character*20 cdate1,cdate2

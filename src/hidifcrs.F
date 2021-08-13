@@ -37,9 +37,9 @@
       use mod_coj12, only: j12
       use mod_coj12p, only: j12pk
       use mod_cosc1, only: elev => sc1 ! elev(1)
-      use mod_cosc2, only: jpack1 => sc2 ! jpack1(1)
-      use mod_cosc3, only: lpack1 => sc3 ! lpack1(1)
-      use mod_cosc4, only: ipack1 => sc4 ! ipack1(1)
+      use mod_cosc2, only: jpack1 => sc2int ! jpack1(1)
+      use mod_cosc3, only: lpack1 => sc3int ! lpack1(1)
+      use mod_cosc4, only: ipack1 => sc4int ! ipack1(1)
       implicit double precision (a-h,o-z)
       character*(*) fname1
       character*20 cdate1

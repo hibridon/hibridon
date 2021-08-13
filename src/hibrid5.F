@@ -1393,8 +1393,8 @@ c
       use mod_cosout
       use constants
       use mod_cosc1, only: elev => sc1 ! elev(1)
-      use mod_cosc2, only: inlev => sc2 ! inlev(1)
-      use mod_cosc3, only: jlev => isc3 ! jlev(1)
+      use mod_cosc2, only: inlev => sc2int ! inlev(1)
+      use mod_cosc3, only: jlev => sc3int ! jlev(1)
       implicit double precision (a-h,o-z)
       character*(*) filnam
       character*40  icsfil, smtfil, xname
@@ -1612,8 +1612,8 @@ c
       use mod_coj12, only: j12
       use mod_coj12p, only: j12pk
       use mod_cosc1, only: elev => sc1 ! elev(1)
-      use mod_cosc2, only: inlev => sc2 ! inlev(1)
-      use mod_cosc3, only: jlev => sc3 ! jlev(1)
+      use mod_cosc2, only: inlev => sc2int ! inlev(1)
+      use mod_cosc3, only: jlev => sc3int ! jlev(1)
       implicit double precision (a-h,o-z)
       logical twomol, flagsu, nucros
       logical csflag, flaghf, lpar1, lpar2, batch, ipos, lpar3
