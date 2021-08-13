@@ -1124,10 +1124,10 @@ c
 c     A loop was used originally to handle high-j case, but it slows
 c     down the calculation significantly.  This modified function
 c     requires (j1+j2+j3+2).le.kfact (defined in himain).
-      use mod_cofact, only: si
+      use mod_cofact, only: si0
       implicit double precision (a-h,o-z)
-      del=(si(j1+j2-j3+1)+si(j1-j2+j3+1)+si(-j1+j2+j3+1)
-     $     -si(j1+j2+j3+2))/2d0
+      del=(si0(j1+j2-j3)+si0(j1-j2+j3)+si0(-j1+j2+j3)
+     $     -si0(j1+j2+j3+1))/2d0
       return
       end
 * -------------------------------------------------------------------
