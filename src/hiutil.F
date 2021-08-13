@@ -704,14 +704,11 @@ c   j-symbols routines
 c   the common block cofact must be dimensioned in the main program !
 c   on input: n  maximum number  of factorials to be calculated
 c
-      use mod_cofact, only: si, si0
-      si(1) = 0.0d0
-      si0(0) = 0.0d0
-      do 5  k = 2,n
-        si(k) = si(k-1) + dlog (dble(k-1))
-        si0(k-1) = si0(k-2) + dlog (dble(k-1))
-5     continue
-      return
+      use mod_cofact, only: si
+      si(0) = 0.0d0
+      do k = 1, n-1
+        si(k) = si(k-1) + dlog (dble(k))
+      enddo
       end
 * --------------------------------------------------------------------------
       function xf3jm0(a,b,c)
@@ -720,7 +717,7 @@ c
 *     current revision date: 14-dec-87
 *     revised by mha 4-may-1997
 *
-      use mod_cofact, only: si0
+      use mod_cofact, only: si
       implicit double precision (a-h,o-z)
       data zero,two /0.d0, 2.d0/
       x = zero
@@ -735,12 +732,12 @@ c
       j2 = iabc - nint(two*b) 
       j3 = iabc - nint(two*c) 
       j4 = iabc + 1
-      delta = 0.5d0 * (si0(j1) + si0(j2) + si0(j3) - si0(j4))
+      delta = 0.5d0 * (si(j1) + si(j2) + si(j3) - si(j4))
       j1 = ig 
       j2 = nint(ig - a) 
       j3 = nint(ig - b) 
       j4 = nint(ig - c)
-      x = delta + si0(j1) - si0(j2) - si0(j3) - si0(j4)
+      x = delta + si(j1) - si(j2) - si(j3) - si(j4)
       x = dexp(x)
       ip = nint(ig + c + a - b)
       if ((ip/2)*2 .ne. ip) x = -x
@@ -756,7 +753,7 @@ c
 *      c and cm are integers or half-integers at the same time)
 
 * --------------------------------------------------------------------------
-      use mod_cofact, only: si0
+      use mod_cofact, only: si
       implicit double precision (a-h,o-z)
       data tol /1.d-10/
       data zero,one,two /0.d0, 1.d0,2.d0/
@@ -798,7 +795,7 @@ c end_jk
       j2 = iabc - nint(two*b) 
       j3 = iabc - nint(two*c) 
       j4 = iabc + 1
-      delta = si0(j1) + si0(j2) + si0(j3) - si0(j4)
+      delta = si(j1) + si(j2) + si(j3) - si(j4)
       ll=0
       x = one
       if (maxchi.le.0) goto 2
@@ -815,10 +812,10 @@ c end_jk
       if(x) 4,3,2
 4     x = -x
       ll = 1
-2     x = dlog(x) - si0(iabmc) - si0(iaam) - si0(ibbm) - si0(ibcam)
-     :            - si0(iacbm) - si0(minchi)
-      x = two*x + si0(iapam) + si0(iamam) + si0(ibpbm) + si0(ibmbm) +
-     :           si0(icpcm) + si0(icmcm) + delta
+2     x = dlog(x) - si(iabmc) - si(iaam) - si(ibbm) - si(ibcam)
+     :            - si(iacbm) - si(minchi)
+      x = two*x + si(iapam) + si(iamam) + si(ibpbm) + si(ibmbm) +
+     :           si(icpcm) + si(icmcm) + delta
       x = dexp( x / two)
       l = ll + minchi + nint(b - a + cm)
       if( 2 * (l/2) .ne. l) x = -x
@@ -835,7 +832,7 @@ c end_jk
 *   current revision date: 4-may-1997
 *
 * -------------------------------------------------------------------
-      use mod_cofact, only: si0
+      use mod_cofact, only: si
       implicit double precision (a-h,o-z)
       data tol,zero,one,two /1.d-10,0.d0,1.d0,2.d0/
       x=zero
@@ -877,25 +874,25 @@ c end_jk
       j2 = iabe - i2b
       j3 = iabe - i2e
       j4 = iabe + 1
-      delta = delta + si0(j1) + si0(j2) + si0(j3) - si0(j4)
+      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
 * delta(dce)
       j1 = idce - i2d
       j2 = idce - i2c
       j3 = idce - i2e
       j4 = idce + 1
-      delta = delta + si0(j1) + si0(j2) + si0(j3) - si0(j4)
+      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
 * delta(acf)
       j1 = iacf - i2a
       j2 = iacf - i2c
       j3 = iacf - i2f
       j4 = iacf + 1
-      delta = delta + si0(j1) + si0(j2) + si0(j3) - si0(j4)
+      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
 * delta(dbf)
       j1 = idbf - i2d
       j2 = idbf - i2b
       j3 = idbf - i2f
       j4 = idbf + 1
-      delta = delta + si0(j1) + si0(j2) + si0(j3) - si0(j4)
+      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
       delta = 0.5d0 * delta
       iabdc = iabdc - minchi
       iaedf = iaedf - minchi
@@ -925,8 +922,8 @@ c end_jk
       if (x) 20,40,30
 20    x = -x
       ipower = 1
-30    x = dlog(x) + si0(minchi+1)-si0(iabdc)-si0(iaedf)-si0(ibecf)
-     :            - si0(iabe)-si0(idce)-si0(iacf)-si0(idbf) + delta
+30    x = dlog(x) + si(minchi+1)-si(iabdc)-si(iaedf)-si(ibecf)
+     :            - si(iabe)-si(idce)-si(iacf)-si(idbf) + delta
       ipower = ipower + minchi
       x = (-1.d0)**ipower * dexp(x)
 40    xf6j = x
@@ -943,7 +940,7 @@ c end_jk
 *    (see edmonds, p. 101, eq. (6.4.3))
 *     current revision date: 3-apr-91 by mha
 *
-      !use mod_cofact, only: si0
+      !use mod_cofact, only: si
       implicit double precision (a-h,o-z)
       double precision i
       logical flaghf
@@ -1053,7 +1050,7 @@ c end_jk
 * -------------------------------------------------------------------
       function f3j0(j1,j2,j3)
 c     current revision: 19-apr-2012 by q. ma (check input)
-      use mod_cofact, only: si0
+      use mod_cofact, only: si
       implicit double precision (a-h,o-z)
       j=j1+j2+j3
       if( (mod(j,2).ne.0) .or. (j3.lt.iabs(j1-j2)) .or. (j3.gt.(j1+j2)) ) then
@@ -1065,13 +1062,13 @@ c     current revision: 19-apr-2012 by q. ma (check input)
       jp1=jpp-j1
       jp2=jpp-j2
       jp3=jpp-j3
-      x=si0(jpp)-si0(jp1)-si0(jp2)-si0(jp3)+del(j1,j2,j3)
+      x=si(jpp)-si(jp1)-si(jp2)-si(jp3)+del(j1,j2,j3)
       f3j0=(-1)**jp*dexp(x)
       return
       end
 * -------------------------------------------------------------------
       function f6j(j1,j2,j3,l1,l2,l3)
-      use mod_cofact, only: si0
+      use mod_cofact, only: si
       implicit double precision (a-h,o-z)
       f6j=0.d0
       if(j3.gt.(j1+j2)) return
@@ -1109,8 +1106,8 @@ c     current revision: 19-apr-2012 by q. ma (check input)
       if(x) 4,3,2
 4     x=-x
       ll=1
-2     x=dlog(x)+si0(k1+1)-si0(ia1)-si0(ia2)-si0(ia3)-si0(ib1)
-     #-si0(ib2)-si0(ib3)-si0(ib4)
+2     x=dlog(x)+si(k1+1)-si(ia1)-si(ia2)-si(ia3)-si(ib1)
+     #-si(ib2)-si(ib3)-si(ib4)
       x=x+del(j1,j2,j3)+del(j1,l2,l3)+del(l1,j2,l3)+del(l1,l2,j3)
       ll=ll+k1
       x=(-1)**ll*dexp(x)
@@ -1124,10 +1121,10 @@ c
 c     A loop was used originally to handle high-j case, but it slows
 c     down the calculation significantly.  This modified function
 c     requires (j1+j2+j3+2).le.kfact (defined in himain).
-      use mod_cofact, only: si0
+      use mod_cofact, only: si
       implicit double precision (a-h,o-z)
-      del=(si0(j1+j2-j3)+si0(j1-j2+j3)+si0(-j1+j2+j3)
-     $     -si0(j1+j2+j3+1))/2d0
+      del=(si(j1+j2-j3)+si(j1-j2+j3)+si(-j1+j2+j3)
+     $     -si(j1+j2+j3+1))/2d0
       return
       end
 * -------------------------------------------------------------------
@@ -1564,22 +1561,21 @@ c     ------------------------------------------------------------------
       end function tf_triang_fail
 c     ------------------------------------------------------------------
       real(8) function tdel(two_ja, two_jb, two_jc)
-      use mod_cofact, only: si0
+      use mod_cofact, only: si
       implicit none
       integer, intent(in) :: two_ja, two_jb, two_jc
       integer :: j
 c
       j = (two_ja + two_jb + two_jc) / 2
-      tdel = (si0(j - two_ja) + si0(j - two_jb) + si0(j - two_jc)
-     $     - si0(j + 1)) / 2d0
+      tdel = (si(j - two_ja) + si(j - two_jb) + si(j - two_jc)
+     $     - si(j + 1)) / 2d0
       return
       end function tdel
 c     ------------------------------------------------------------------
       real(8) function tf3jm0(two_ja, two_jb, two_jc)
-      use mod_cofact, only: si
 c     3j-symbol (ja jb jc / 0 0 0)
 c     Modified from f3j0 by Q. Ma
-      use mod_cofact, only: si0
+      use mod_cofact, only: si
       implicit none
       integer, intent(in) :: two_ja, two_jb, two_jc
       real(8) :: tdel
@@ -1593,8 +1589,8 @@ c     Modified from f3j0 by Q. Ma
 c     Check for even sum
       jp = j / 2
       if (mod(j, 2) .ne. 0) return
-      tf3jm0 = si0(jp) - si0(jp - two_ja / 2) - si0(jp - two_jb / 2)
-     $     - si0(jp - two_jc / 2) + tdel(two_ja, two_jb, two_jc)
+      tf3jm0 = si(jp) - si(jp - two_ja / 2) - si(jp - two_jb / 2)
+     $     - si(jp - two_jc / 2) + tdel(two_ja, two_jb, two_jc)
       tf3jm0 = (-1) ** jp * dexp(tf3jm0)
       return
       end
@@ -1604,7 +1600,7 @@ c     ------------------------------------------------------------------
 c     Compute the 3j symbol (ja jb jc / ma mb mc)
 c     Modified from xf3j by Q. Ma
 c     ------------------------------------------------------------------
-      use mod_cofact, only: si0
+      use mod_cofact, only: si
       implicit real(8) (a-h, o-z)
       integer, intent(in) :: two_ja, two_jb, two_jc, two_ma, two_mb,
      $     two_mc
@@ -1646,7 +1642,7 @@ c     ------------------------------------------------------------------
       j2 = iabc - two_jb 
       j3 = iabc - two_jc 
       j4 = iabc + 1
-      delta = si0(j1) + si0(j2) + si0(j3) - si0(j4)
+      delta = si(j1) + si(j2) + si(j3) - si(j4)
       ll = 0
       x = 1d0
       if (maxchi.le.0) goto 2
@@ -1663,10 +1659,10 @@ c     ------------------------------------------------------------------
       if(x) 4,3,2
  4    x = -x
       ll = 1
- 2    x = dlog(x) - si0(iabmc) - si0(iaam) - si0(ibbm) - si0(ibcam)
-     :            - si0(iacbm) - si0(minchi)
-      x = 2d0 * x + si0(iapam) + si0(iamam) + si0(ibpbm) + si0(ibmbm) +
-     :           si0(icpcm) + si0(icmcm) + delta
+ 2    x = dlog(x) - si(iabmc) - si(iaam) - si(ibbm) - si(ibcam)
+     :            - si(iacbm) - si(minchi)
+      x = 2d0 * x + si(iapam) + si(iamam) + si(ibpbm) + si(ibmbm) +
+     :           si(icpcm) + si(icmcm) + delta
       x = dexp( x / 2d0)
       l = ll + minchi + (two_jb - two_ja + two_mc) / 2
       if( 2 * (l/2) .ne. l) x = -x
@@ -1681,7 +1677,7 @@ c     Compute the 6j symbol {         }
 c                           | d  c  f |
 c     Modified from xf6j by Q. Ma
 c     ------------------------------------------------------------------
-      use mod_cofact, only: si0
+      use mod_cofact, only: si
       implicit real(8) (a-h,o-z)
       integer, intent(in) :: two_ja, two_jb, two_je, two_jd, two_jc,
      $     two_jf
@@ -1715,25 +1711,25 @@ c     ------------------------------------------------------------------
       j2 = iabe - i2b
       j3 = iabe - i2e
       j4 = iabe + 1
-      delta = delta + si0(j1) + si0(j2) + si0(j3) - si0(j4)
+      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
 * delta(dce)
       j1 = idce - i2d
       j2 = idce - i2c
       j3 = idce - i2e
       j4 = idce + 1
-      delta = delta + si0(j1) + si0(j2) + si0(j3) - si0(j4)
+      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
 * delta(acf)
       j1 = iacf - i2a
       j2 = iacf - i2c
       j3 = iacf - i2f
       j4 = iacf + 1
-      delta = delta + si0(j1) + si0(j2) + si0(j3) - si0(j4)
+      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
 * delta(dbf)
       j1 = idbf - i2d
       j2 = idbf - i2b
       j3 = idbf - i2f
       j4 = idbf + 1
-      delta = delta + si0(j1) + si0(j2) + si0(j3) - si0(j4)
+      delta = delta + si(j1) + si(j2) + si(j3) - si(j4)
       delta = 0.5d0 * delta
       iabdc = iabdc - minchi
       iaedf = iaedf - minchi
@@ -1763,8 +1759,8 @@ c     ------------------------------------------------------------------
       if (x) 20,40,30
 20    x = -x
       ipower = 1
-30    x = dlog(x) + si0(minchi+1)-si0(iabdc)-si0(iaedf)-si0(ibecf)
-     :            - si0(iabe)-si0(idce)-si0(iacf)-si0(idbf) + delta
+30    x = dlog(x) + si(minchi+1)-si(iabdc)-si(iaedf)-si(ibecf)
+     :            - si(iabe)-si(idce)-si(iacf)-si(idbf) + delta
       ipower = ipower + minchi
       x = (-1.d0)**ipower * dexp(x)
 40    tf6j = x
