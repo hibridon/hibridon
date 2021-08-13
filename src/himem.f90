@@ -329,8 +329,13 @@ end module mod_cofact
 
 module mod_coamat
    implicit none
+   ! note: these members are not used at the same time
+   ! (they used to be a different view of the same area in memory
+   ! when this module was a common block)
+   ! todo : reduce memory usage by allocating the data only while being used
    real(8), dimension(:,:), allocatable, target :: amat
    real(8), dimension(:), allocatable :: toto
+   integer, dimension(:), allocatable :: ietmp
    real(8), dimension(:), allocatable :: zbuf
    real(8), dimension(:), allocatable :: simag2
    real(8), dimension(:), allocatable :: psir
@@ -340,6 +345,7 @@ module mod_coamat
       integer, intent(in) :: n
       allocate(amat(n,n))
       allocate(toto(n*n))
+      allocate(ietmp(n))
       allocate(zbuf(n))
       allocate(simag2(n*n))
       allocate(psir(n*n))

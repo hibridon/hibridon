@@ -137,7 +137,7 @@
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
-      use mod_coamat, only: ietmp => toto ! ietmp(1)
+      use mod_coamat, only: ietmp ! ietmp(1)
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas"

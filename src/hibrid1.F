@@ -857,7 +857,7 @@ c#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
 *   current revision date 19-mar-1996
 *  ------------------------------------------------------------
       use mod_codim, only: mmax
-      use mod_coamat, only: simag2 => toto ! simag2(1)
+      use mod_coamat, only: simag2 ! simag2(1)
       use mod_cojq, only: jq ! jq(1)
       use mod_colq, only: lq ! lq(1)
       use mod_coinq, only: inq ! inq(1)

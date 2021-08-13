@@ -240,8 +240,6 @@ C
       integer nlam, nlammx, lamnum(MAX_NVB + MAX_NVF)
       common /coered/ ered, rmu
       double precision ered, rmu
-      common /coamat/ ietmp
-      integer ietmp(1)
       common /coipar/ junkip, iprint
       integer junkip(9), iprint
 c

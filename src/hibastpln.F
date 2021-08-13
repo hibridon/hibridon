@@ -156,7 +156,7 @@
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_coj12, only: j12
-      use mod_coamat, only: ietmp => toto ! ietmp(1)
+      use mod_coamat, only: ietmp ! ietmp(1)
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst, twomol
       character*40 fname
