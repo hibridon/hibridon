@@ -567,75 +567,77 @@ end module mod_cofact
 !    end subroutine allocate_colsc1
 ! end module mod_colsc1
 
-! module mod_cosc1
-!    implicit none
-!    real(8), dimension(:), allocatable :: sc1
-!    contains
-!    subroutine allocate_cosc1(n)
-!       integer, intent(in) :: n
-!       allocate(sc1(n))
-!    end subroutine allocate_cosc1
-! end module mod_cosc1
+module mod_cosc1
+   implicit none
+   real(8), dimension(:), allocatable :: sc1
+   contains
+   subroutine allocate_cosc1(n)
+      integer, intent(in) :: n
+      allocate(sc1(n))
+   end subroutine allocate_cosc1
+end module mod_cosc1
 
-! module mod_cosc2
-!    implicit none
-!    real(8), dimension(:), allocatable :: sc2
-!    contains
-!    subroutine allocate_cosc2(n)
-!       integer, intent(in) :: n
-!       allocate(sc2(n))
-!    end subroutine allocate_cosc2
-! end module mod_cosc2
+module mod_cosc2
+   implicit none
+   real(8), dimension(:), allocatable :: sc2
+   contains
+   subroutine allocate_cosc2(n)
+      integer, intent(in) :: n
+      allocate(sc2(n))
+   end subroutine allocate_cosc2
+end module mod_cosc2
 
-! module mod_cosc3
-!    implicit none
-!    real(8), dimension(:), allocatable :: sc3
-!    contains
-!    subroutine allocate_cosc3(n)
-!       integer, intent(in) :: n
-!       allocate(sc3(n))
-!    end subroutine allocate_cosc3
-! end module mod_cosc3
+module mod_cosc3
+   implicit none
+   real(8), dimension(:), allocatable :: sc3
+   integer, dimension(:), allocatable :: isc3
+   contains
+   subroutine allocate_cosc3(n)
+      integer, intent(in) :: n
+      allocate(sc3(n))
+      allocate(isc3(n))
+   end subroutine allocate_cosc3
+end module mod_cosc3
 
-! module mod_cosc4
-!    implicit none
-!    real(8), dimension(:), allocatable :: sc4
-!    contains
-!    subroutine allocate_cosc4(n)
-!       integer, intent(in) :: n
-!       allocate(sc4(n))
-!    end subroutine allocate_cosc4
-! end module mod_cosc4
+module mod_cosc4
+   implicit none
+   real(8), dimension(:), allocatable :: sc4
+   contains
+   subroutine allocate_cosc4(n)
+      integer, intent(in) :: n
+      allocate(sc4(n))
+   end subroutine allocate_cosc4
+end module mod_cosc4
 
-! module mod_cosc5
-!    implicit none
-!    real(8), dimension(:), allocatable :: sc5
-!    contains
-!    subroutine allocate_cosc5(n)
-!       integer, intent(in) :: n
-!       allocate(sc5(n))
-!    end subroutine allocate_cosc5
-! end module mod_cosc5
+module mod_cosc5
+   implicit none
+   real(8), dimension(:), allocatable :: sc5
+   contains
+   subroutine allocate_cosc5(n)
+      integer, intent(in) :: n
+      allocate(sc5(n))
+   end subroutine allocate_cosc5
+end module mod_cosc5
 
-! module mod_cosc6
-!    implicit none
-!    real(8), dimension(:), allocatable :: sc6
-!    contains
-!    subroutine allocate_cosc6(n)
-!       integer, intent(in) :: n
-!       allocate(sc6(n))
-!    end subroutine allocate_cosc6
-! end module mod_cosc6
+module mod_cosc6
+   implicit none
+   real(8), dimension(:), allocatable :: sc6
+   contains
+   subroutine allocate_cosc6(n)
+      integer, intent(in) :: n
+      allocate(sc6(n))
+   end subroutine allocate_cosc6
+end module mod_cosc6
 
-! module mod_cosc7
-!    implicit none
-!    real(8), dimension(:), allocatable :: sc7
-!    contains
-!    subroutine allocate_cosc7(n)
-!       integer, intent(in) :: n
-!       allocate(sc7(n))
-!    end subroutine allocate_cosc7
-! end module mod_cosc7
+module mod_cosc7
+   implicit none
+   real(8), dimension(:), allocatable :: sc7
+   contains
+   subroutine allocate_cosc7(n)
+      integer, intent(in) :: n
+      allocate(sc7(n))
+   end subroutine allocate_cosc7
+end module mod_cosc7
 
 module mod_cosc8
    implicit none

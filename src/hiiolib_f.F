@@ -962,6 +962,8 @@ c     ------------------------------------------------------------
 *
 *  subroutines called: open
 *  --------------------------------------------------------------------
+      use mod_cosc1, only: rsc1 => sc1 ! rsc1(2)
+      use mod_cosc2, only: rsc2 => sc2 ! rsc2(1)
       implicit double precision (a-h,o-z)
       integer ifile, nerg, nfile, lenx, isize, isizes
       logical airyfl, airypr, bastst, batch, chlist, csflag, existf,
@@ -986,8 +988,6 @@ c     ------------------------------------------------------------
       common /coisc2/ isc2(1)
       common /coisc3/ isc3(3)
       common /coisc4/  isc4(1)
-      common /cosc1/  rsc1(2)
-      common /cosc2/  rsc2(1)
       common /colsc1/  lsc1(5)
       common /coselb/ ibasty
       if (nerg .gt. 1) then

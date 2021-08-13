@@ -9,13 +9,13 @@
       use mod_coj12p, only: allocate_coj12p
       use mod_covvl, only: allocate_covvl
       use mod_cofact, only: allocate_cofact
-      ! use mod_cosc1, only: allocate_cosc1
-      ! use mod_cosc2, only: allocate_cosc2
-      ! use mod_cosc3, only: allocate_cosc3
-      ! use mod_cosc4, only: allocate_cosc4
-      ! use mod_cosc5, only: allocate_cosc5
-      ! use mod_cosc6, only: allocate_cosc6
-      ! use mod_cosc7, only: allocate_cosc7
+      use mod_cosc1, only: allocate_cosc1, sc1
+      use mod_cosc2, only: allocate_cosc2, sc2
+      use mod_cosc3, only: allocate_cosc3, sc3
+      use mod_cosc4, only: allocate_cosc4, sc4
+      use mod_cosc5, only: allocate_cosc5, sc5
+      use mod_cosc6, only: allocate_cosc6, sc6
+      use mod_cosc7, only: allocate_cosc7, sc7
       use mod_cosc8, only: allocate_cosc8, sc8
       use mod_cosc9, only: allocate_cosc9, sc9
       use mod_cosc10, only: allocate_cosc10
@@ -173,20 +173,13 @@
       common /coisc11/ isc11(kmax)
       common /coisc12/ isc12(kmax)
       common /colsc1/ lsc1(kmax)
-      common /cosc1/ sc1(kmax)
-      common /cosc2/ sc2(kmax)
-      common /cosc3/ sc3(kmax)
-      common /cosc4/ sc4(kmax)
-      common /cosc5/ sc5(kmax)
-      common /cosc6/ sc6(kmax)
-      common /cosc7/ sc7(kmax)
-      ! call allocate_cosc1(kmax)
-      ! call allocate_cosc2(kmax)
-      ! call allocate_cosc3(kmax)
-      ! call allocate_cosc4(kmax)
-      ! call allocate_cosc5(kmax)
-      ! call allocate_cosc6(kmax)
-      ! call allocate_cosc7(kmax)
+      call allocate_cosc1(kmax)
+      call allocate_cosc2(kmax)
+      call allocate_cosc3(kmax)
+      call allocate_cosc4(kmax)
+      call allocate_cosc5(kmax)
+      call allocate_cosc6(kmax)
+      call allocate_cosc7(kmax)
       call allocate_cosc8(kmax)
       call allocate_cosc9(kmax)
       call allocate_cosc10(kmax)

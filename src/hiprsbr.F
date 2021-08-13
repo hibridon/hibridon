@@ -18,6 +18,9 @@
 * -------------------------------------------------------------------------
       use constants
       use mod_codim, only: mmax
+      use mod_cosc1, only: elev1 => sc1 ! elev1(1)
+      use mod_cosc2, only: elev2 => sc2 ! elev2(1)
+      use mod_cosc3, only: elevt => sc3 ! elevt(1)
       implicit double precision (a-h, o-z)
       character*(*) flnam1, flnam2
       character*20  cdate1, cdate2
@@ -37,12 +40,9 @@
       common /coisc4/ inlev2(1)
       common /coisc5/ jout1(1)
       common /coisc6/ jout2(1)
-      common /cosc1/ elev1(1)
-      common /cosc2/ elev2(1)
       common /coisc7/ nlevt(1)
       common /coisc8/ jlevt(1)
       common /coisc9/ inlevt(1)
-      common /cosc3/ elevt(1)
       common /coisc10/ ipack(1)
       common /coisc11/ jpack(1)
       common /coisc12/ lpack(1)

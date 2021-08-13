@@ -36,6 +36,10 @@
       use mod_codim, only: mmax
       use mod_coj12, only: j12
       use mod_coj12p, only: j12pk
+      use mod_cosc1, only: elev => sc1 ! elev(1)
+      use mod_cosc2, only: jpack1 => sc2 ! jpack1(1)
+      use mod_cosc3, only: lpack1 => sc3 ! lpack1(1)
+      use mod_cosc4, only: ipack1 => sc4 ! ipack1(1)
       implicit double precision (a-h,o-z)
       character*(*) fname1
       character*20 cdate1
@@ -58,10 +62,6 @@
       common /cojhld/ jlev(1)
       common /coisc1/ inlev(1)
       common /coisc2/ jout1(1)
-      common /cosc1/ elev(1)
-      common /cosc2/ jpack1(1)
-      common /cosc3/ lpack1(1)
-      common /cosc4/ ipack1(1)
       real(8), dimension(:), allocatable :: s, sm, sm6
 * to store a22p,a21p and a11p amplitudes
       complex(8), dimension(:, :), allocatable :: fm1m2

@@ -34,6 +34,7 @@
       use mod_coj12p, only: j12pk
       use constants
       use mod_codim, only: nmax => mmax
+      use mod_cosc1, only: elev => sc1 ! elev(1)
       implicit double precision (a-h,o-z)
       character*(*) fname
       character*20 cdate
@@ -48,7 +49,6 @@
       common /colq/ lq(1)
       common /coinq/ inq(1)
       common /coinhl/ jlev(1)
-      common /cosc1/ elev(1)
       common /coisc2/ jpack(1)
       common /coisc3/ lpack(1)
       common /coisc1/ inlev(1)
@@ -1042,6 +1042,12 @@ c     current revision: 20-apr-2012 by q. ma
 c
 * -------------------------------------------------------
       use mod_coeint, only: eint
+      use mod_cosc1, only: sc1 ! sc1(10)
+      use mod_cosc2, only: sc2 ! sc2(10)
+      use mod_cosc3, only: sc3 ! sc3(10)
+      use mod_cosc4, only: sc4 ! sc4(10)
+      use mod_cosc5, only: sc5 ! sc5(10)
+
       implicit double precision (a-h,o-z)
       character*48 oldlab, oldpot
       character*20 cdate, olddat
@@ -1067,11 +1073,6 @@ c
       common /cotq1/  dpsir(25)
       common /cotq2/  dpsii(25)
       common /coisc1/ isc1(25)
-      common /cosc1/ sc1(10)
-      common /cosc2/ sc2(10)
-      common /cosc3/ sc3(10)
-      common /cosc4/ sc4(10)
-      common /cosc5/ sc5(10)
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
       dimension iword(32), word(4)
@@ -1346,6 +1347,14 @@ c
       use mod_coqvec, only: nphoto
       use mod_cocent, only: sc2 => cent
       use mod_coeint, only: eint
+      use mod_cosc1, only: pk  => sc1   ! pk(100)
+      use mod_cosc2, only: fj  => sc2   ! fj(10)
+      use mod_cosc3, only: fjp => sc3   ! fjp(10)
+      use mod_cosc4, only: fn  => sc4   ! fn(10)
+      use mod_cosc5, only: fnp => sc5   ! fnp(10)
+      use mod_cosc6, only: sc  => sc6   ! sc(100)
+      use mod_cosc7, only: sc1  => sc7   ! sc1(100)
+
       implicit double precision (a-h,o-z)
       character*(*) filnam
       character*40  psifil, wavfil, amplfil, flxfil
@@ -1374,13 +1383,6 @@ c
       common /coisc2/ nlist(50)
       common /coisc3/ nalist(60)
       common /coisc5/ nblist(60)
-      common /cosc1/ pk(100)
-      common /cosc2/ fj(10)
-      common /cosc3/ fjp(10)
-      common /cosc4/ fn(10)
-      common /cosc5/ fnp(10)
-      common /cosc6/ sc(100)
-      common /cosc7/ sc1(100)
 * common for y1, y2, y4
       common /coered/ ered, rmu
       common /coselb/ ibasty
@@ -2302,6 +2304,9 @@ c
 * ------------------------------------------------------------------
       use mod_coiout, only: niout, indout
       use mod_cocent, only: sc2 => cent
+      use mod_cosc1, only: pk => sc1 ! pk(6)
+      use mod_cosc6, only: sc => sc6 ! sc(60)
+      use mod_cosc7, only: sc1 => sc7 ! sc1(6)
       use mod_cosc8, only: sc8
       use mod_cosc9, only: sc9
       implicit double precision (a-h,o-z)
@@ -2318,9 +2323,6 @@ c
       common /cotq3/  scmat3(100)
       common /coisc2/ nlist(60)
       common /coisc3/ nalist(60)
-      common /cosc1/ pk(6)
-      common /cosc6/ sc(60)
-      common /cosc7/ sc1(6)
       common /coered/ ered, rmu
       common /coground/ ifull
       common /cotrans/ ttrans(36)
@@ -2617,6 +2619,8 @@ c
 *
 * ------------------------------------------------------------------
       use mod_cocent, only: sc2 => cent
+      use mod_cosc6, only: sc => sc6 ! sc(6)
+      use mod_cosc7, only: sc7  ! sc7(6)
       use mod_cosc8, only: sc8
       implicit double precision (a-h,o-z)
       common /coered/ ered, rmu
@@ -2624,8 +2628,6 @@ c
      $     inflev
       common /coz/    scmat(100)
       common /coisc3/ nalist(10)
-      common /cosc6/ sc(6)
-      common /cosc7/ sc7(6)
 * common for y1, y2, y4
       data zero, one, onemin, two,   conv
      :    /0.d0, 1.d0, -1.d0, 2.d0, 219474.6d0/
@@ -2690,14 +2692,14 @@ c
 * revised on 30-mar-2012 by q. ma for stream I/O of wfu files
 *
 * ------------------------------------------------------------------
+      use mod_cosc6, only: sc => sc6 ! sc(6)
+      use mod_cosc7, only: sc1 => sc7 ! sc1(6)
       implicit double precision (a-h,o-z)
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
       common /coamat/ psir(100)
       common /cow/    sr(100)
       common /cozmat/ si(100)
-      common /cosc6/ sc(6)
-      common /cosc7/ sc1(6)
       common /coisc2/ nlist(6)
         irec=npts+4
         do 180 kstep=1, npts
@@ -2732,6 +2734,8 @@ c
 * current revision: 20-apr-2012 by q. ma
 *
 * ------------------------------------------------------------------
+      use mod_cosc6, only: sc => sc6 ! sc(6)
+      use mod_cosc7, only: sc1 => sc7 ! sc1(6)
       implicit double precision (a-h,o-z)
       logical renormf
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
@@ -2739,8 +2743,6 @@ c
       common /coamat/ psir(100)
       common /cow/    sr(100)
       common /cozmat/ si(100)
-      common /cosc6/ sc(6)
-      common /cosc7/ sc1(6)
       common /coisc2/ nlist(6)
       dimension scrvec(64)
       irec=npts+4
