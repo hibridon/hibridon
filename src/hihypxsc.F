@@ -30,6 +30,9 @@
 *     -------------------------------------------------------------
       use mod_codim, only: mmax
       use mod_coj12, only: j12q => j12
+      use mod_cojq, only: jq ! jq(1)
+      use mod_colq, only: lq ! lq(1)
+      use mod_coinq, only: inq ! inq(1)
       use mod_coisc1, only: jlev => isc1 ! jlev(1)
       use mod_coisc3, only: inlev => isc3 ! inlev(1)
       use mod_coisc5, only: jout => isc5 ! jout(1)
@@ -50,9 +53,6 @@
       logical csflg, flaghf, flgsu, twmol, nucrs,
      :     batch, fast, lpar2, lpar, exstfl
 #include "common/parpot"
-      common /cojq/ jq(1)
-      common /colq/ lq(1)
-      common /coinq/ inq(1)
       common /coconv/ econv, xmconv, ang2
       common /coselb/ ibasty
       dimension a(4)

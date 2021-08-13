@@ -10,6 +10,11 @@
       use mod_covvl, only: allocate_covvl
       use mod_cofact, only: allocate_cofact
 
+      use mod_cojq, only: allocate_cojq, jq
+      use mod_colq, only: allocate_colq, lq
+      use mod_coinq, only: allocate_coinq, inq
+      use mod_cojhld, only: allocate_cojhld, jhold
+      use mod_coehld, only: allocate_coehld, ehold
       use mod_coinhl, only: allocate_coinhl, inhold
       use mod_coisc1, only: allocate_coisc1, isc1
       use mod_coisc2, only: allocate_coisc2, isc2
@@ -168,11 +173,11 @@
       common /cotq1/ tq1(T_MATRIX_SIZE, T_MATRIX_SIZE)
       common /cotq2/ tq2(T_MATRIX_SIZE, T_MATRIX_SIZE)
       common /cotq3/ tq3(T_MATRIX_SIZE, T_MATRIX_SIZE)
-      common /cojq/ jq(kmax)
-      common /colq/ lq(kmax)
-      common /coinq/ inq(kmax)
-      common /cojhld/ jhold(kmax)
-      common /coehld/ ehold(kmax)
+      call allocate_cojq(kmax)
+      call allocate_colq(kmax)
+      call allocate_coinq(kmax)
+      call allocate_cojhld(kmax)
+      call allocate_coehld(kmax)
       call allocate_coinhl(kmax)
       call allocate_coisc1(kmax)
       call allocate_coisc2(kmax)

@@ -1105,6 +1105,7 @@ cABER
       use mod_cosout, only: nnout, jout
       use mod_coiout, only: niout, indout
       use constants
+      use mod_cojhld, only: jlev => jhold ! jlev(1)
       use mod_coisc1, only: inlev => isc1 ! inlev(1)
       use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
@@ -1117,7 +1118,6 @@ cABER
       character*80 line
       logical csflag, flaghf, iprint, flagsu, twomol, existf, nucros
 #include "common/parpot"
-      common /cojhld/ jlev(1)
       common /coselb/ ibasty
       dimension  a(4),scmat(nmax,1)
 
@@ -1392,6 +1392,9 @@ c
       use mod_codim, only: mmax
       use mod_cosout
       use constants
+      use mod_coinq, only: inq ! inq(1)
+      use mod_cojq, only: jq ! jq(1)
+      use mod_colq, only: lq ! lq(1)
       use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
       use mod_coisc3, only: jpack => isc3 ! jpack(1)
       use mod_coisc4, only: lpack => isc4 ! lpack(1)
@@ -1411,9 +1414,6 @@ c
      :        batch, nucros, notequ, lpar1, lpar2, ipos,lpar3
 #include "common/parpot"
       common /colpar/ lpar1(3), batch, lpar2(5), ipos, lpar3(17)
-      common /cojq/   jq(1)
-      common /colq/   lq(1)
-      common /coinq/  inq(1)
       common /coz/    sreal(1)
       common /cow/    simag(1)
       common /cozmat/ sigma(1)
@@ -1611,6 +1611,9 @@ c
       use mod_cosout, only: nnout, jout
       use mod_coj12, only: j12
       use mod_coj12p, only: j12pk
+      use mod_cojq, only: jq ! jq(1)
+      use mod_colq, only: lq ! lq(1)
+      use mod_coinq, only: inq ! inq(1)
       use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
       use mod_coisc3, only: jpack => isc3 ! jpack(1)
       use mod_coisc4, only: lpack => isc4 ! lpack(1)
@@ -1623,9 +1626,6 @@ c
       implicit double precision (a-h,o-z)
       logical twomol, flagsu, nucros
       logical csflag, flaghf, lpar1, lpar2, batch, ipos, lpar3
-      common /cojq/   jq(1)
-      common /colq/   lq(1)
-      common /coinq/  inq(1)
       common /colpar/ lpar1(3), batch, lpar2(5), ipos, lpar3(17)
       common /coselb/ ibasty
       dimension sigma(nmax,1),sreal(nmax,1), simag(nmax,1)

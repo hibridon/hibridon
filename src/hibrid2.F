@@ -927,6 +927,8 @@ c
 *  ------------------------------------------------------------------
       use mod_cosout, only: nnout, jout
       use mod_coiout, only: niout, indout
+      use mod_colq, only: ipoint => lq ! ipoint(5)
+      use mod_cojhld, only: jlev => jhold ! jlev(5)
       use mod_coisc1, only: inlev => isc1 ! inlev(5)
       use mod_coisc2, only: jpoint => isc2 ! jpoint(5)
       use mod_cosc1, only: elev => sc1 ! elev(5)
@@ -946,12 +948,9 @@ c
       integer i, ienerg, iout, isize, j, jbegin, jend, jfinal,
      :        jfirst, jj1, jj2, jlpar, jtemp, jtotd, lenx, n, nlevel,
      :        nlevop, nout, numax, numin, nud, iaver
-      integer ipoint, jlev
 #include "common/parpot"
       common /coz/ zmat(1)
       common /cow/ scmat(1)
-      common /cojhld/ jlev(5)
-      common /colq/ ipoint(5)
       common /coselb/ ibasty
       dimension  a(3)
       data econv / 219474.6d0/
@@ -1234,14 +1233,14 @@ caber
       return
       end
       subroutine aver1 (zmat, scmat, n)
+      use mod_cojhld, only: jlev => jhold ! jlev(1)
       use mod_coisc1, only: inlev => isc1 ! inlev(1)
       implicit double precision (a-h,o-z)
 *  subroutine to sum and average cross section matrix over positive
 *  and negative values of index
-      integer i, ind, index, j, jnd, n, nn, jlev
+      integer i, ind, index, j, jnd, n, nn
 *     real scmat, zmat
       dimension zmat(1), scmat(n,n)
-      common /cojhld/ jlev(1)
 *  first copy cross section matrix into scmat
       call matmov (zmat, scmat, n, n, n, n)
       nn = n / 2
@@ -1268,6 +1267,8 @@ caber
 * -------------------------------------------------
       subroutine xscpr1 (zmat, nlevop, isize, iaver,
      :                   ipos, iprint, flaghf)
+      use mod_colq, only: ipoint => lq ! ipoint(4)
+      use mod_cojhld, only: jlev => jhold ! jlev(4)
       use mod_cosc1, only: elev => sc1 ! elev(4)
       use mod_coisc1, only: inlev => isc1 ! inlev(4)
 
@@ -1277,12 +1278,10 @@ caber
 *  if iaver = 1, then nth and (n+1) st rows are added before printing
       integer i, isize, iskip, j, jcol, jhigh, jj, jlow, jmax,
      :        jrow, ncol, nlevop, iaver
-      integer ind, ipoint, jlev
+      integer ind
 *     real elev, zmat
       logical ipos, iprint, flaghf
       dimension zmat(nlevop,nlevop), ind(50)
-      common /cojhld/ jlev(4)
-      common /colq/ ipoint(4)
       common /coselb/ ibasty
 *     first transpose the cross section matrix so that initial
 *     states are columns and final states are rows
@@ -1434,6 +1433,8 @@ caber
       use mod_cosout, only: nnout, jout
       use mod_coiout, only: niout, indout
       use constants
+      use mod_colq, only: ipoint => lq ! ipoint(1)
+      use mod_cojhld, only: jlev => jhold ! jlev(1)
       use mod_coisc1, only: inlev => isc1 ! inlev(1)
 cmha
       use mod_coisc2, only: jpoint => isc2 ! jpoint(5)
@@ -1457,8 +1458,6 @@ cmha
       common /coz/ zmat(1)
       common /cow/ scmat(1)
       common /coamat/ zbuf(1)
-      common /cojhld/ jlev(1)
-      common /colq/ ipoint(1)
       common /coener/ energ(1)
       common /coselb/ ibasty
       dimension  a(4)
@@ -1814,15 +1813,15 @@ cmha
       return
       end
       subroutine aver2 (zmat, scmat, n)
+      use mod_cojhld, only: jlev => jhold ! jlev(1)
       use mod_coisc1, only: inlev => isc1 ! inlev(1)
 
       implicit double precision (a-h,o-z)
 *  subroutine to sum and average cross section matrix over positive
 *  and negative values of index
-      integer i, ind, index, j, jnd, n, nn, jlev
+      integer i, ind, index, j, jnd, n, nn
 *     real scmat, zmat
       dimension zmat(1), scmat(n,n)
-      common /cojhld/ jlev(1)
 *  first copy cross section matrix into scmat
       call matmov (zmat, scmat, n, n, n, n)
       nn = n / 2
@@ -1849,6 +1848,8 @@ cmha
 * ------------------------------------------------------
       subroutine xscpr2 (zmat, xthresh, nlevop, isize, iaver,
      :                   iprint,isa)
+      use mod_colq, only: ipoint => lq ! ipoint(1)
+      use mod_cojhld, only: jlev => jhold ! jlev(1)
       use mod_coisc1, only: inlev => isc1 ! inlev(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
       implicit double precision (a-h,o-z)
@@ -1858,14 +1859,12 @@ cmha
 *  if iaver = 1, then nth and (n+1) st rows are added before printing
       integer i, isize, iskip, j, jcol, jhigh, jj, jlow, jmax,
      :        jrow, ncol, nlevop, iaver
-      integer ind, ipoint, jlev, isa
+      integer ind, isa
       logical airyfl, airypr, bastst, batch, chlist, csflag, flaghf,
      :                flagsu, ihomo, ipos, iprint,lpar(17)
       dimension zmat(nlevop,nlevop), ind(50)
       common /colpar/ airyfl, airypr, bastst, batch, chlist,
      :                csflag, flaghf, flagsu, ihomo, ipos,lpar
-      common /cojhld/ jlev(1)
-      common /colq/ ipoint(1)
 *  first transpose cross section matrix so that initial states are
 *  columns and final states are rows
       call transp (zmat, nlevop, nlevop)
