@@ -339,7 +339,7 @@ module mod_coamat
    real(8), dimension(:), allocatable :: zbuf
    real(8), dimension(:), allocatable :: simag2
    real(8), dimension(:), allocatable :: psir
-   ! real(8), dimension(:), allocatable :: labadr
+   integer, dimension(:), allocatable :: labadr
    contains
    subroutine allocate_coamat(n)
       integer, intent(in) :: n
@@ -349,7 +349,7 @@ module mod_coamat
       allocate(zbuf(n))
       allocate(simag2(n*n))
       allocate(psir(n*n))
-      ! allocate(labadr(n*n))
+      allocate(labadr(MAX_NJTOT))
    end subroutine allocate_coamat
 end module mod_coamat
 
