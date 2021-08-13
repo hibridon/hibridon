@@ -50,32 +50,32 @@
             open(unit=666, file="/tmp/hw.info", status="old")
             read(666,'(a)', iostat=i) txt
             close(666)
-        write(iunit,'(a16,a)') trim(txt)    
+        write(iunit,'(a)') trim(txt)    
         call system('lscpu | grep -m 1 "CPU MHz" > /tmp/hw.info')
             open(unit=666, file="/tmp/hw.info", status="old")
             read(666,'(a)', iostat=i) txt
             close(666)
-        write(iunit,'(a17,a)') trim(txt)    
+        write(iunit,'(a)') trim(txt)    
         call system('lscpu | grep -m 1 "Socket(s)" > /tmp/hw.info')
             open(unit=666, file="/tmp/hw.info", status="old")
             read(666,'(a)', iostat=i) txt
             close(666)
-        write(iunit,'(a22,a)') trim(txt)   
+        write(iunit,'(a)') trim(txt)   
         call system('lscpu | grep -m 1 "Core(s)" > /tmp/hw.info')
             open(unit=666, file="/tmp/hw.info", status="old")
             read(666,'(a)', iostat=i) txt
             close(666)
-        write(iunit,'(a23,a)') trim(txt) 
+        write(iunit,'(a)') trim(txt) 
         call system('lscpu | grep -m 1 "L2" > /tmp/hw.info')
             open(unit=666, file="/tmp/hw.info", status="old")
             read(666,'(a)', iostat=i) txt
             close(666)
-        write(iunit,'(a21,a)') trim(txt) 
+        write(iunit,'(a)') trim(txt) 
         call system('lscpu | grep -m 1 "L3" > /tmp/hw.info')
             open(unit=666, file="/tmp/hw.info", status="old")
             read(666,'(a)', iostat=i) txt
             close(666)
-        write(iunit,'(a10,a)') trim(txt) 
+        write(iunit,'(a)') trim(txt) 
         call system('cat /proc/cpuinfo | grep -m 1 -o "ht" > /tmp/hw.info')
             open(unit=666, file="/tmp/hw.info", status="old")
             read(666,'(a)', iostat=i) txt 
@@ -85,7 +85,7 @@
             open(unit=666, file="/tmp/hw.info", status="old")
             read(666,'(a)', iostat=i) txt
             close(666)
-        write(iunit,'(a8,a)') trim(txt) 
+        write(iunit,'(a)') trim(txt) 
       endif
       write(iunit,31)
 31    format(
