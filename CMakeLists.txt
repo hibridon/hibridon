@@ -2,7 +2,7 @@
 
 # cmake version >= 3.3 is required for IN_LIST
 cmake_minimum_required (VERSION 3.3)
-project (hibridon)
+project (hibridon VERSION 5.0)
 enable_language (Fortran)
 
 # code coverage is disabled by default because:
@@ -115,15 +115,20 @@ add_library(hib
      src/hiutil.F
      src/hivector.F
      src/hipotutil.F
-     ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F)
+     src/hiversion.F)
+
 target_compile_options(hib PRIVATE "-ffixed-line-length-132")
 target_compile_definitions(hib PUBLIC MAX_NJTOT=1000)
+# The following is for preprocessing of hiversion.F
+target_compile_definitions(hib PUBLIC _BUILD_VERS_=${PROJECT_VERSION})
+target_compile_definitions(hib PUBLIC _BUILD_TYPE_="${CMAKE_BUILD_TYPE}")
+target_compile_definitions(hib PUBLIC _BUILD_SYS1_="${CMAKE_HOST_SYSTEM_NAME}")
+target_compile_definitions(hib PUBLIC _BUILD_SYS2_="${CMAKE_HOST_SYSTEM_VERSION}")
+target_compile_definitions(hib PUBLIC _BUILD_PROC_="${CMAKE_HOST_SYSTEM_PROCESSOR}")
+target_compile_definitions(hib PUBLIC _BUILD_COMP_="${CMAKE_Fortran_COMPILER}")
+target_compile_definitions(hib PUBLIC _BUILD_FLAGS_="${HIBRIDON_COMPILE_OPTIONS}")
 
-add_custom_command(
-    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/SYSCONFIG
-    COMMAND "PATH=${CMAKE_CURRENT_SOURCE_DIR}/bin:$ENV{PATH}" ${CMAKE_CURRENT_SOURCE_DIR}/bin/hibdetails
-    COMMENT "building ${CMAKE_CURRENT_BINARY_DIR}/SYSCONFIG"
-)
+
 
 add_custom_command(
     OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/src/common
@@ -142,15 +147,6 @@ add_custom_command(
 
 add_custom_target(parhlp
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/src/common/parhlp
-)
-
-add_custom_command(
-    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F
-    COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t ${CMAKE_CURRENT_BINARY_DIR}/SYSCONFIG > ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin"
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/SYSCONFIG
-    COMMENT "building ${CMAKE_CURRENT_BINARY_DIR}/hiversion.F from ${CMAKE_CURRENT_SOURCE_DIR}/src/hiversion.t"
 )
 
 set(HIBRIDON_COMPILE_OPTIONS  "")
