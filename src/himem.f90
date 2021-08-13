@@ -557,15 +557,15 @@ end module mod_cofact
 !    end subroutine allocate_coisc12
 ! end module mod_coisc12
 
-! module mod_colsc1
-!    implicit none
-!    integer, dimension(:), allocatable :: lsc1
-!    contains
-!    subroutine allocate_colsc1(n)
-!       integer, intent(in) :: n
-!       allocate(lsc1(n))
-!    end subroutine allocate_colsc1
-! end module mod_colsc1
+module mod_colsc1
+   implicit none
+   logical, dimension(:), allocatable :: lsc1
+   contains
+   subroutine allocate_colsc1(n)
+      integer, intent(in) :: n
+      allocate(lsc1(n))
+   end subroutine allocate_colsc1
+end module mod_colsc1
 
 module mod_cosc1
    implicit none
