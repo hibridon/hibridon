@@ -1048,7 +1048,7 @@ c
 #define AMAT_AS_VEC_METHOD AMAT_AS_VEC_METHOD_DISTINCT
       use mod_coeint, only: eint
 #if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_DISTINCT)
-      use mod_coamat, only: amat => psir ! amat(25)
+      use mod_coamat, only: amat => psir ! amat(25) psir(nopen, nopen)
 #endif
 #if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_POINTER)
       use, intrinsic :: ISO_C_BINDING
@@ -1383,7 +1383,7 @@ c
       use mod_coqvec, only: nphoto
       use mod_cocent, only: sc2 => cent
       use mod_coeint, only: eint
-      use mod_coamat, only: psir ! psir(100)
+      use mod_coamat, only: psir ! psir(100) psir(nopen,nopen)
       use mod_cotq1, only: dpsir ! dpsir(100)
       use mod_cotq2, only: dpsii ! dpsii(100)
       use mod_cojq, only: jq ! jq(60)
@@ -2339,7 +2339,7 @@ c
 * ------------------------------------------------------------------
       use mod_coiout, only: niout, indout
       use mod_cocent, only: sc2 => cent
-      use mod_coamat, only: psir ! psir(100)
+      use mod_coamat, only: psir ! psir(100) (4,nch)
       use mod_cotq2, only: scmat2 => dpsii ! scmat2(100)
       use mod_cotq3, only: scmat3 => scmat ! scmat3(100)
       use mod_coinq, only: inq ! inq(60)
@@ -2702,17 +2702,24 @@ c
 * with assignment that original column five is singlet with el=J-1 and
 * column 6 is singlet with el=J+1
 * use orthogonal plane rotation
-      use mod_coamat, only: psir ! psir(100)
+      use mod_coamat, only: psir ! psir(100) (4,nch)
       use mod_cotq1, only: dpsir ! dpsir(100)
       use mod_cotq2, only: dpsii ! dpsii(100)
-      implicit double precision (a-h,o-z)
+      implicit none
       common /cobmat/ psii(100)
-      xjtot=jtot
-      cs=sqrt(xjtot+1.d0)
-      sn=sqrt(xjtot)
-      xnorm=sqrt(2.d0*xjtot+1.d0)
-      cs=cs/xnorm
-      sn=sn/xnorm
+      real(8) :: psii
+      integer, intent(in) :: jtot
+      integer, intent(in) :: nch
+      integer :: jpoint
+      real(8) :: cs, sn ! cosine and sine of rotation angle
+      real(8) :: jtot_as_real
+      real(8) :: norm
+      jtot_as_real=jtot
+      cs=sqrt(jtot_as_real+1.d0)
+      sn=sqrt(jtot_as_real)
+      norm=sqrt(2.d0*jtot_as_real+1.d0)
+      cs=cs/norm
+      sn=sn/norm
       jpoint=4*nch+1
       call drot(nch,psir(jpoint),1,psir(jpoint+nch),1,cs,sn)
       call drot(nch,psii(jpoint),1,psii(jpoint+nch),1,cs,sn)
@@ -2730,7 +2737,7 @@ c
 * revised on 30-mar-2012 by q. ma for stream I/O of wfu files
 *
 * ------------------------------------------------------------------
-      use mod_coamat, only: psir ! psir(100)
+      use mod_coamat, only: psir ! psir(100)  psir(nch, 1)
       use mod_coisc2, only: nlist => isc2 ! nlist(6)
       use mod_cosc6, only: sc => sc6 ! sc(6)
       use mod_cosc7, only: sc1 => sc7 ! sc1(6)
@@ -2773,7 +2780,6 @@ c
 * current revision: 20-apr-2012 by q. ma
 *
 * ------------------------------------------------------------------
-      use mod_coamat, only: psir ! psir(100)
       use mod_coisc2, only: nlist => isc2 ! nlist(6)
       use mod_cosc6, only: sc => sc6 ! sc(6)
       use mod_cosc7, only: sc1 => sc7 ! sc1(6)
