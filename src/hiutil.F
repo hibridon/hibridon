@@ -1071,7 +1071,7 @@ c     current revision: 19-apr-2012 by q. ma (check input)
       end
 * -------------------------------------------------------------------
       function f6j(j1,j2,j3,l1,l2,l3)
-      use mod_cofact, only: si
+      use mod_cofact, only: si0
       implicit double precision (a-h,o-z)
       f6j=0.d0
       if(j3.gt.(j1+j2)) return
@@ -1109,8 +1109,8 @@ c     current revision: 19-apr-2012 by q. ma (check input)
       if(x) 4,3,2
 4     x=-x
       ll=1
-2     x=dlog(x)+si(k1+2)-si(ia1+1)-si(ia2+1)-si(ia3+1)-si(ib1+1)
-     #-si(ib2+1)-si(ib3+1)-si(ib4+1)
+2     x=dlog(x)+si0(k1+1)-si0(ia1)-si0(ia2)-si0(ia3)-si0(ib1)
+     #-si0(ib2)-si0(ib3)-si0(ib4)
       x=x+del(j1,j2,j3)+del(j1,l2,l3)+del(l1,j2,l3)+del(l1,l2,j3)
       ll=ll+k1
       x=(-1)**ll*dexp(x)
