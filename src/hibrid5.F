@@ -1392,8 +1392,8 @@ c
       use mod_codim, only: mmax
       use mod_cosout
       use constants
-      use mod_cotq1, only: sc1 => dpsir ! sc1(1)
-      use mod_cotq2, only: sc2 => dpsii ! sc2(1)
+      use mod_cotq1, only: sc1 => scmat ! sc1(1)
+      use mod_cotq2, only: sc2 => scmat ! sc2(1)
       use mod_cotq3, only: sc3 => scmat ! sc3(1)
       use mod_coinq, only: inq ! inq(1)
       use mod_cojq, only: jq ! jq(1)

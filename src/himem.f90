@@ -351,31 +351,44 @@ end module mod_cofact
 
 module mod_cotq1
    implicit none
+   ! note: these members are not used at the same time
+   ! (they used to be a different view of the same area in memory
+   ! when this module was a common block)
    real(8), dimension(:,:), allocatable :: tq1
    real(8), dimension(:,:,:), allocatable :: vec
    real(8), dimension(:), allocatable :: dpsir
+   real(8), dimension(:), allocatable :: scmat
    contains
    subroutine allocate_cotq1(n)
       integer, intent(in) :: n
       allocate(tq1(n,n))
       allocate(vec(3,3,1))
       allocate(dpsir(n))  ! note : the size has been found by trial and error (with all tests passing)
+      allocate(scmat(n*n))  ! note : the size has been found by trial and error (with all tests passing)
    end subroutine allocate_cotq1
 end module mod_cotq1
 
 module mod_cotq2
+   ! note: these members are not used at the same time
+   ! (they used to be a different view of the same area in memory
+   ! when this module was a common block)
    implicit none
    real(8), dimension(:,:), allocatable :: tq2
    real(8), dimension(:), allocatable :: dpsii
+   real(8), dimension(:), allocatable :: scmat
    contains
    subroutine allocate_cotq2(n)
       integer, intent(in) :: n
       allocate(tq2(n,n))
       allocate(dpsii(n))  ! note : the size has been found by trial and error (with all tests passing)
+      allocate(scmat(n*n))  ! note : the size has been found by trial and error (with all tests passing)
    end subroutine allocate_cotq2
 end module mod_cotq2
 
 module mod_cotq3
+   ! note: these members are not used at the same time
+   ! (they used to be a different view of the same area in memory
+   ! when this module was a common block)
    implicit none
    real(8), dimension(:,:), allocatable :: tq3
    real(8), dimension(:), allocatable :: scmat
@@ -383,7 +396,7 @@ module mod_cotq3
    subroutine allocate_cotq3(n)
       integer, intent(in) :: n
       allocate(tq3(n,n))
-      allocate(scmat(n))  ! note : the size has been found by trial and error (with all tests passing)
+      allocate(scmat(n*n))  ! note : the size has been found by trial and error (with all tests passing)
    end subroutine allocate_cotq3
 end module mod_cotq3
 
