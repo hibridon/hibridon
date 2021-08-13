@@ -36,6 +36,8 @@
       use mod_codim, only: mmax
       use mod_coj12, only: j12
       use mod_coj12p, only: j12pk
+      use mod_coisc1, only: inlev => isc1 ! inlev(1)
+      use mod_coisc2, only: jout1 => isc2 ! jout1(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_cosc2, only: jpack1 => sc2int ! jpack1(1)
       use mod_cosc3, only: lpack1 => sc3int ! lpack1(1)
@@ -60,8 +62,6 @@
       common /colq/ lq(1)
       common /coinq/ inq(1)
       common /cojhld/ jlev(1)
-      common /coisc1/ inlev(1)
-      common /coisc2/ jout1(1)
       real(8), dimension(:), allocatable :: s, sm, sm6
 * to store a22p,a21p and a11p amplitudes
       complex(8), dimension(:, :), allocatable :: fm1m2

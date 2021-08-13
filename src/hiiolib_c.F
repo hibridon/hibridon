@@ -911,6 +911,10 @@
 *  subroutines called: open
 *  --------------------------------------------------------------------
       use mod_colsc1, only: lsc1
+      use mod_coisc1, only: isc1 ! isc1(9)
+      use mod_coisc2, only: isc2 ! isc2(1)
+      use mod_coisc3, only: isc3 ! isc3(3)
+      use mod_coisc4, only: isc4 ! isc4(1)
       use mod_cosc1, only: rsc1 => sc1 ! rsc1(2)
       use mod_cosc2, only: rsc2 => sc2 ! rsc2(1)
       implicit double precision (a-h,o-z)
@@ -933,10 +937,6 @@
      :                rsflag, swrit, t2test, t2writ, twomol, writs,
      :                wrpart, wrxsec, xsecwr, nucros, photof, wavefl,
      :                boundc
-      common /coisc1/ isc1(9)
-      common /coisc2/ isc2(1)
-      common /coisc3/ isc3(3)
-      common /coisc4/  isc4(1)
       common /coselb/ ibasty
       if (nerg .gt. 1) then
 *  check to see if nerg .le. 25
@@ -1119,8 +1119,8 @@ c.....open direct access file for interpolation and restart
               lenx=index(xname,' ')-1
               write (9, 320) xname(1:lenx), xname, label, newlab
               write (6, 320) xname(1:lenx), xname, label, newlab
-320           format
-     :     (/' *** LABEL IN FILE ',a, ' DOES NOT MATCH INPUT DATA',
+320           format(
+     :     /' *** LABEL IN FILE ',a, ' DOES NOT MATCH INPUT DATA',
      :         '; ABORT ***',/'     ', a5,':', a, /,
      :                        '     INPUT:', a)
               label=newlab
@@ -1181,8 +1181,8 @@ c.....open direct access file for interpolation and restart
       if (oldlab .ne. label) then
           write (9, 50) oldlab, label
           write (6, 50) oldlab, label
-50        format
-     : (/' *** LABEL IN FILE TRSTRT DOES NOT MATCH INPUT DATA',
+50        format(
+     :  /' *** LABEL IN FILE TRSTRT DOES NOT MATCH INPUT DATA',
      :     '; ABORT ***',/'     TRSTRT:', a, /,
      :                        '      INPUT:', a)
           call exit
@@ -1539,6 +1539,8 @@ c.....reserve space for restart information
 *     if iadr = 0 read sequential (next record)
 *     if iadr > 0 read absolute
 *     if nopen = -1, the lower triangle is filled
+      use mod_coisc7, only: isc7 ! isc7(9)
+      use mod_coisc8, only: j12q => isc8 ! j12q(9)
       implicit double precision (a-h,o-z)
       logical triang
       dimension sreal(nmax,1), simag(nmax,1),
@@ -1546,8 +1548,6 @@ c.....reserve space for restart information
 *  variable in common block /coselb/
 *     ibasty    basistype
       common /coselb/ ibasty
-      common  /coisc7/ isc7(9)
-      common  /coisc8/ j12q(9)
       ierr=0
       triang =.false.
       if(nopen.lt.0) then
@@ -1653,6 +1653,8 @@ c.....reserve space for restart information
 *  ------------------------------------------------------------------
       use mod_cosout, only: nnout, jout
       use mod_coeint, only: eint
+      use mod_coisc7, only: isc7 ! isc7(9)
+      use mod_coisc8, only: j12q => isc8 ! j12q(9)
       implicit double precision (a-h,o-z)
       integer ic, icol, ii, ir, irow, jtot, jlpar, length, nmax,
      :        nopen, nfile, nu, mmout
@@ -1663,8 +1665,6 @@ c.....reserve space for restart information
 *  variable in common block /coselb/
 *     ibasty    basistype
       common /coselb/ ibasty
-      common  /coisc7/ isc7(9)
-      common  /coisc8/ j12q(9)
       dimension sreal(nmax,nmax), simag(nmax,nmax),
      :          jq(1), lq(1), inq(1), jpack(1), lpack(1),
      :          epack(1), inpack(1), iorder(1)

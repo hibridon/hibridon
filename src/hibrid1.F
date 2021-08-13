@@ -857,6 +857,9 @@ c#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
 *   current revision date 19-mar-1996
 *  ------------------------------------------------------------
       use mod_codim, only: mmax
+      use mod_coisc1, only: inlev => isc1 ! inlev(1)
+      use mod_coisc2, only: ipack1 => isc2 ! ipack1(1)
+      use mod_coisc3, only: ipack2 => isc3 ! ipack2(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_cosc2, only: jpack1 => sc2int ! jpack1(1)
       use mod_cosc3, only: jpack2 => sc3int ! jpack2(1)
@@ -881,9 +884,6 @@ c#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
       common /cojhld/ jout1(1)
       common /coehld/ jout2(1)
       common /coinhl/ jlev(1)
-      common /coisc1/ inlev(1)
-      common /coisc2/ ipack1(1)
-      common /coisc3/ ipack2(1)
 c
       zero=0
       acc=0

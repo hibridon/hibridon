@@ -20,6 +20,18 @@
 *  current revision:  21-jun-2013 by p. dagdigian
 * -------------------------------------------------------------------------
       use mod_codim, only: mmax
+      use mod_coisc1, only: jlev1 => isc1 ! jlev1(1)
+      use mod_coisc2, only: jlev2 => isc2 ! jlev2(1)
+      use mod_coisc3, only: inlev1 => isc3 ! inlev1(1)
+      use mod_coisc4, only: inlev2 => isc4 ! inlev2(1)
+      use mod_coisc5, only: jout1 => isc5 ! jout1(1)
+      use mod_coisc6, only: jout2 => isc6 ! jout2(1)
+      use mod_coisc7, only: nlevt => isc7 ! nlevt(1)
+      use mod_coisc8, only: jlevt => isc8 ! jlevt(1)
+      use mod_coisc9, only: inlevt => isc9 ! inlevt(1)
+      use mod_coisc10, only: ipack => isc10 ! ipack(1)
+      use mod_coisc11, only: jpack => isc11 ! jpack(1)
+      use mod_coisc12, only: lpack => isc12 ! lpack(1)
       use mod_cosc1, only: elev1 => sc1 ! elev1(1)
       use mod_cosc2, only: elev2 => sc2 ! elev2(1)
       use mod_cosc3, only: elevt => sc3 ! elevt(1)
@@ -33,18 +45,6 @@
      :     csflg2, flghf2, flgsu2, twmol2, nucrs2,
      :     batch, fast, lpar2, lpar, exstfl, sngsmt, trpsmt
 #include "common/parpot"
-      common /coisc1/ jlev1(1)
-      common /coisc2/ jlev2(1)
-      common /coisc3/ inlev1(1)
-      common /coisc4/ inlev2(1)
-      common /coisc5/ jout1(1)
-      common /coisc6/ jout2(1)
-      common /coisc7/ nlevt(1)
-      common /coisc8/ jlevt(1)
-      common /coisc9/ inlevt(1)
-      common /coisc10/ ipack(1)
-      common /coisc11/ jpack(1)
-      common /coisc12/ lpack(1)
       common /coconv/ econv, xmconv, ang2
       dimension a(8)
       dimension epert(2), cpert(2,2)
@@ -690,6 +690,15 @@
 *  author:  p. dagdigian
 *  current revision date:  1-jun-2010
 * -------------------------------------------------------------------------
+      use mod_coisc1, only: jlev1 => isc1 ! jlev1(1)
+      use mod_coisc2, only: jlev2 => isc2 ! jlev2(1)
+      use mod_coisc3, only: inlev1 => isc3 ! inlev1(1)
+      use mod_coisc4, only: inlev2 => isc4 ! inlev2(1)
+      use mod_coisc5, only: jout1 => isc5 ! jout1(1)
+      use mod_coisc6, only: jout2 => isc6 ! jout2(1)
+      use mod_coisc7, only: nlevt => isc7 ! nlevt(1)
+      use mod_coisc8, only: jlevt => isc8 ! jlevt(1)
+      use mod_coisc9, only: inlevt => isc9 ! inlevt(1)
       use mod_cosc1, only: elev1 => sc1 ! elev1(1)
       use mod_cosc2, only: elev2 => sc2 ! elev2(1)
       use mod_cosc3, only: elevt => sc3 ! elevt(1)
@@ -697,15 +706,6 @@
       logical sngsmt, trpsmt
       complex*8 t
 #include "common/parpot"
-      common /coisc1/ jlev1(1)
-      common /coisc2/ jlev2(1)
-      common /coisc3/ inlev1(1)
-      common /coisc4/ inlev2(1)
-      common /coisc5/ jout1(1)
-      common /coisc6/ jout2(1)
-      common /coisc7/ nlevt(1)
-      common /coisc8/ jlevt(1)
-      common /coisc9/ inlevt(1)
       common /coconv/ econv, xmconv, ang2
       double precision sigma(nlevels + nlevelt, 4)
       dimension cpert(2,2), iptsng(1), ipttrp(1)

@@ -9,6 +9,19 @@
       use mod_coj12p, only: allocate_coj12p
       use mod_covvl, only: allocate_covvl
       use mod_cofact, only: allocate_cofact
+
+      use mod_coisc1, only: allocate_coisc1, isc1
+      use mod_coisc2, only: allocate_coisc2, isc2
+      use mod_coisc3, only: allocate_coisc3, isc3
+      use mod_coisc4, only: allocate_coisc4, isc4
+      use mod_coisc5, only: allocate_coisc5
+      use mod_coisc6, only: allocate_coisc6
+      use mod_coisc7, only: allocate_coisc7
+      use mod_coisc8, only: allocate_coisc8
+      use mod_coisc9, only: allocate_coisc9
+      use mod_coisc10, only: allocate_coisc10
+      use mod_coisc11, only: allocate_coisc11
+      use mod_coisc12, only: allocate_coisc12
       use mod_colsc1, only: allocate_colsc1
       use mod_cosc1, only: allocate_cosc1, sc1
       use mod_cosc2, only: allocate_cosc2, sc2
@@ -160,18 +173,18 @@
       common /cojhld/ jhold(kmax)
       common /coehld/ ehold(kmax)
       common /coinhl/ inhold(kmax)
-      common /coisc1/ isc1(kmax)
-      common /coisc2/ isc2(kmax)
-      common /coisc3/ isc3(kmax)
-      common /coisc4/ isc4(kmax)
-      common /coisc5/ isc5(kmax)
-      common /coisc6/ isc6(kmax)
-      common /coisc7/ isc7(kmax)
-      common /coisc8/ isc8(kmax)
-      common /coisc9/ isc9(kmax)
-      common /coisc10/ isc10(kmax)
-      common /coisc11/ isc11(kmax)
-      common /coisc12/ isc12(kmax)
+      call allocate_coisc1(kmax)
+      call allocate_coisc2(kmax)
+      call allocate_coisc3(kmax)
+      call allocate_coisc4(kmax)
+      call allocate_coisc5(kmax)
+      call allocate_coisc6(kmax)
+      call allocate_coisc7(kmax)
+      call allocate_coisc8(kmax)
+      call allocate_coisc9(kmax)
+      call allocate_coisc10(kmax)
+      call allocate_coisc11(kmax)
+      call allocate_coisc12(kmax)
       call allocate_colsc1(kmax)
       call allocate_cosc1(kmax)
       call allocate_cosc2(kmax)

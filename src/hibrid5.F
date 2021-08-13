@@ -300,6 +300,7 @@
 * ---------------------------------------------------------------------------
       use mod_cosout, only: nnout, jout
       use mod_coiout, only: niout, indout
+      use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(10)
       use constants
       implicit double precision (a-h,o-z)
       character*20 cdate
@@ -309,7 +310,6 @@
 #include "common/parpot"
       common /coered/ ered, rmu
       common /cosurf/ flagsu
-      common /coisc2/ nj,jlist(10)
       dimension scmat(nmax,10),jlev(10),elev(10),inlev(10)
 *  write partial opacity to unit (24+ien) if desired
 *  in cs calculation this is only done if nu = numax, in which
@@ -599,10 +599,10 @@
 *       the previous partial cross sections on record irec+3 (if available)
 *       the second last partial cross sections on record irec+4 (if available)
 * ----------------------------------------------------------------------
+      use mod_coisc8, only: list => isc8 ! list(20)
       implicit double precision (a-h,o-z)
       logical nowrit,nucros
       dimension jlev(20)
-      common /coisc8/ list(20)
       dimension q(nmax,n),q1(nmax,n),q2(nmax,n),q3(nmax,n)
 *
       jl3=jl3a
@@ -1105,6 +1105,8 @@ cABER
       use mod_cosout, only: nnout, jout
       use mod_coiout, only: niout, indout
       use constants
+      use mod_coisc1, only: inlev => isc1 ! inlev(1)
+      use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_cosc2, only: csum => sc2 ! csum(1)
       use mod_cosc3, only: tsum => sc3 ! tsum(1)
@@ -1116,8 +1118,6 @@ cABER
       logical csflag, flaghf, iprint, flagsu, twomol, existf, nucros
 #include "common/parpot"
       common /cojhld/ jlev(1)
-      common /coisc1/ inlev(1)
-      common /coisc2/ nj,jlist(1)
       common /coselb/ ibasty
       dimension  a(4),scmat(nmax,1)
 
@@ -1392,6 +1392,12 @@ c
       use mod_codim, only: mmax
       use mod_cosout
       use constants
+      use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
+      use mod_coisc3, only: jpack => isc3 ! jpack(1)
+      use mod_coisc4, only: lpack => isc4 ! lpack(1)
+      use mod_coisc5, only: inpack => isc5 ! inpack(1)
+      use mod_coisc6, only: isc1 => isc6 ! isc1(1)
+      use mod_coisc7, only: isc2 => isc7 ! isc2(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_cosc2, only: inlev => sc2int ! inlev(1)
       use mod_cosc3, only: jlev => sc3int ! jlev(1)
@@ -1416,12 +1422,6 @@ c
       common /cotq3/  sc3(1)
       common /coamat/ sc4(1)
       !/ nnout, jout(21)
-      common /coisc2/ nj,jlist(1)
-      common /coisc3/ jpack(1)
-      common /coisc4/ lpack(1)
-      common /coisc5/ inpack(1)
-      common /coisc6/ isc1(1)
-      common /coisc7/ isc2(1)
       common /coered/ ered, rmu
       common /coselb/ ibasty
       dimension a(3)
@@ -1611,6 +1611,12 @@ c
       use mod_cosout, only: nnout, jout
       use mod_coj12, only: j12
       use mod_coj12p, only: j12pk
+      use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
+      use mod_coisc3, only: jpack => isc3 ! jpack(1)
+      use mod_coisc4, only: lpack => isc4 ! lpack(1)
+      use mod_coisc5, only: inpack => isc5 ! inpack(1)
+      use mod_coisc6, only: isc1 => isc6 ! isc1(1)
+      use mod_coisc7, only: isc2 => isc7 ! isc2(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_cosc2, only: inlev => sc2int ! inlev(1)
       use mod_cosc3, only: jlev => sc3int ! jlev(1)
@@ -1620,12 +1626,6 @@ c
       common /cojq/   jq(1)
       common /colq/   lq(1)
       common /coinq/  inq(1)
-      common /coisc3/ jpack(1)
-      common /coisc4/ lpack(1)
-      common /coisc5/ inpack(1)
-      common /coisc6/ isc1(1)
-      common /coisc7/ isc2(1)
-      common /coisc2/ nj,jlist(1)
       common /colpar/ lpar1(3), batch, lpar2(5), ipos, lpar3(17)
       common /coselb/ ibasty
       dimension sigma(nmax,1),sreal(nmax,1), simag(nmax,1)

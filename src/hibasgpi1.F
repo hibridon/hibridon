@@ -161,6 +161,9 @@
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_coisc1, only: ivec => isc1 ! ivec(1)
+      use mod_coisc2, only: nrot => isc2 ! nrot(1)
+      use mod_coisc3, only: ifi => isc3 ! ifi(1)
       implicit double precision (a-h,o-z)
       logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -170,9 +173,6 @@
       common /cosysr/ isrcod, junkr, esg, bsg, dsg, gsr, rspar(40)
       common /coipar/ iiipar(9), iprint
       common /cotq1/ vec(3,3)
-      common /coisc1/ ivec(1)
-      common /coisc2/ nrot(1)
-      common /coisc3/ ifi(1)
       common /conlam/ nlam, nlammx, lamnum(1)
       common /covibp/ ivpi(5)
       common /covpot/ numvib,ivibpi(5)

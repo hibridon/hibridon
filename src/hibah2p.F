@@ -79,9 +79,6 @@
 *    quantum numbers, the total angular momentum, and the coupled-states
 *    projection index are equal to the values stored in j, jtot, and nu
 *    plus 1/2
-*  variable in common block /coisc8/
-*    isc8:     for CC calculations, on return contains atom+diatom angular mom
-*              for CD calculations, on return contains diatom angular momentum
 *  variables in common block /cosysr/
 *    isrcod:   number of real system dependent variables
 *    brot:     rotational constant of molecule
