@@ -1043,6 +1043,8 @@ c     current revision: 20-apr-2012 by q. ma
 c
 * -------------------------------------------------------
       use mod_coeint, only: eint
+      use mod_cotq1, only: dpsir ! dpsir(25)
+      use mod_cotq2, only: dpsii ! dpsii(25)
       use mod_cojq, only: jq ! jq(1)
       use mod_colq, only: lq ! lq(1)
       use mod_coinq, only: inq ! inq(1)
@@ -1072,8 +1074,6 @@ c
       common /cobmat/ bmat(25)
       common /cow/ w(25)
       common /cozmat/ zmat(25)
-      common /cotq1/  dpsir(25)
-      common /cotq2/  dpsii(25)
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
       dimension iword(32), word(4)
@@ -1348,6 +1348,9 @@ c
       use mod_coqvec, only: nphoto
       use mod_cocent, only: sc2 => cent
       use mod_coeint, only: eint
+      use mod_cotq1, only: dpsir ! dpsir(100)
+      use mod_cotq2, only: dpsii ! dpsii(100)
+      use mod_cotq3, only: scmat2 => scmat ! scmat2(100)
       use mod_cojq, only: jq ! jq(60)
       use mod_colq, only: lq ! lq(10)
       use mod_coinq, only: inq ! inq(60)
@@ -1381,9 +1384,6 @@ c
       common /coamat/ psir(100)
       common /cobmat/ psii(100)
       common /coz/    scmat(100)
-      common /cotq1/  dpsir(100)
-      common /cotq2/  dpsii(100)
-      common /cotq3/  scmat2(100)
 * common for y1, y2, y4
       common /coered/ ered, rmu
       common /coselb/ ibasty
@@ -2305,6 +2305,8 @@ c
 * ------------------------------------------------------------------
       use mod_coiout, only: niout, indout
       use mod_cocent, only: sc2 => cent
+      use mod_cotq2, only: scmat2 => dpsii ! scmat2(100)
+      use mod_cotq3, only: scmat3 => scmat ! scmat3(100)
       use mod_coinq, only: inq ! inq(60)
       use mod_cosc1, only: pk => sc1 ! pk(6)
       use mod_coisc2, only: nlist => isc2 ! nlist(60)
@@ -2322,8 +2324,6 @@ c
       common /cozmat/ tcoord(100)
 * steve, you may need more space, but i doubt it since tcoord is dimensioned n
       common /coz/    scmat(100)
-      common /cotq2/  scmat2(100)
-      common /cotq3/  scmat3(100)
       common /coered/ ered, rmu
       common /coground/ ifull
       common /cotrans/ ttrans(36)
@@ -2665,11 +2665,11 @@ c
 * with assignment that original column five is singlet with el=J-1 and
 * column 6 is singlet with el=J+1
 * use orthogonal plane rotation
+      use mod_cotq1, only: dpsir ! dpsir(100)
+      use mod_cotq2, only: dpsii ! dpsii(100)
       implicit double precision (a-h,o-z)
       common /coamat/ psir(100)
       common /cobmat/ psii(100)
-      common /cotq1/  dpsir(100)
-      common /cotq2/  dpsii(100)
       xjtot=jtot
       cs=sqrt(xjtot+1.d0)
       sn=sqrt(xjtot)
