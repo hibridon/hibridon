@@ -129,6 +129,8 @@ target_compile_definitions(hib PUBLIC _BUILD_COMP_="${CMAKE_Fortran_COMPILER}")
 target_compile_definitions(hib PUBLIC _BUILD_FLAGS_="${HIBRIDON_COMPILE_OPTIONS}")
 string(TIMESTAMP TODAY "%Y-%m-%d at %H:%M")
 target_compile_definitions(hib PUBLIC _BUILD_DATE_="${TODAY}")
+# The ffollowing is for preprocessing of hhelp.F and hiutil.F
+target_compile_definitions(hib PUBLIC _HELPDIR_="${CMAKE_CURRENT_SOURCE_DIR}/doc/")
 
 add_custom_command(
     OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/src/common
@@ -136,18 +138,6 @@ add_custom_command(
     COMMENT "making directory ${CMAKE_CURRENT_BINARY_DIR}/src/common"
 )
 
-
-add_custom_command(
-    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/src/common/parhlp
-    COMMAND sed "s+xxxx+${CMAKE_CURRENT_SOURCE_DIR}+" "${CMAKE_CURRENT_SOURCE_DIR}/src/common/parhlp.t" > "${CMAKE_CURRENT_BINARY_DIR}/src/common/parhlp"
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/src/common
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/common/parhlp.t
-    COMMENT "building ${CMAKE_CURRENT_BINARY_DIR}/src/common/parhlp"
-)
-
-add_custom_target(parhlp
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/src/common/parhlp
-)
 
 set(HIBRIDON_COMPILE_OPTIONS  "")
 
