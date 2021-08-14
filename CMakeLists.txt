@@ -256,28 +256,15 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
     WORKING_DIRECTORY "${TEST_BUILD_DIR}"
   )
 
-  if(${TEST_ID} STREQUAL "ch3i")
     # Check that outputs from test runs are the same as the ref ones
-    # todo: replace with a better comparer that uses a tolerance (at the moment, we compate the meaningful text but not the last line because the numbers are so tiny that they differ from a build and another)
-    add_test(NAME ${TEST_ID}_test_check
-        COMMAND bash -c "mkdir -p ${TEST_BUILD_DIR}/flx_compare \
-         && cat ${TEST_SRC_DIR}/Ch3itest.flx | tail -35 | head -34 > ${TEST_BUILD_DIR}/flx_compare/gold.txt \
-         && cat ${TEST_BUILD_DIR}/Ch3itest.flx | tail -35 | head -34 > ${TEST_BUILD_DIR}/flx_compare/measured.txt \
-         && diff ${TEST_BUILD_DIR}/flx_compare/gold.txt ${TEST_BUILD_DIR}/flx_compare/measured.txt"
-        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    )
-  else()
-
-    # Check that outputs from test runs are the same as the ref ones
-    add_test(NAME ${TEST_ID}_test_check
-        COMMAND bash -c "set -o errexit; \
-                         for output_file in ${TEST_OUTPUT_FILES} ; \
-                         do \
-                            ./check_outputs ${TEST_SRC_DIR}/$output_file ${TEST_BUILD_DIR}/$output_file ; 
-                         done"
-        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    )
-  endif()
+  add_test(NAME ${TEST_ID}_test_check
+      COMMAND bash -c "set -o errexit; \
+                        for output_file in ${TEST_OUTPUT_FILES} ; \
+                        do \
+                          ./check_outputs ${TEST_SRC_DIR}/$output_file ${TEST_BUILD_DIR}/$output_file ; 
+                        done"
+      WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+  )
 
   if(ENABLE_CODE_COVERAGE)
     add_test(NAME ${TEST_ID}_save_coverage
