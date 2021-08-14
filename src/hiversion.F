@@ -22,11 +22,11 @@
 
        write (iunit,15)
 15     format(11x,'BUILD CONFIGURATION:')
-        write(iunit,*)
         write(iunit,'(a18,a)') 'CMAKE BUILD DATE: ', _BUILD_DATE_
         write(iunit,'(a18,a)') 'CMAKE BUILD TYPE: ', _BUILD_TYPE_
-        write(iunit,'(a5,a,a1,a)')  'SYS: ', _BUILD_SYS1_ , ' ', _BUILD_SYS2_
-        write(iunit,'(a11,a)') 'PROCESSOR: ', _BUILD_PROC_
+        write(iunit,'(a5,a,a1,a,a1,a)')  'SYS: ', _BUILD_SYS1_ , ' ', 
+     :                                        _BUILD_SYS2_, ' ',
+     :                                        _BUILD_PROC_
         write(iunit,'(a10,a)') 'COMPILER: ', _BUILD_COMP_
         write(iunit,'(a17,a)') 'COMPILE OPTIONS: ', _BUILD_FLAGS_
         write (iunit,20)
