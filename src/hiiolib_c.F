@@ -1149,7 +1149,8 @@ c.....open direct access file for interpolation and restart
 *  author:  h.-j. werner
 *  latest revision:  17-jan-2008 by mha
 * --------------------------------------------------------------------
-      use mod_coamat, only: q3 => toto ! q3(1)
+      use mod_coamat, only: q3 => amat ! q3(1) Here q3 is used as a matrix (e.g. call to intchk subroutine)
+      use mod_cobmat, only: q => bmat ! q(1) Here q is used as a matrix (e.g. call to intchk subroutine)
       implicit double precision (a-h,o-z)
       logical writs,csflag,nucros, llpar, wrpart, wrxsec
       character*40 oldlab
@@ -1158,7 +1159,6 @@ c.....open direct access file for interpolation and restart
 #include "common/parpot"
       common /cofile/ input,output,jobnam,savfil
       common /coener/ energ(1)
-      common /cobmat/ q(1)
       common /cow/ q1(1)
       common /cozmat/ q2(1)
       common /colpar/ llpar(21),wrpart, wrxsec

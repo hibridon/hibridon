@@ -89,6 +89,7 @@
       use mod_codim, only: mmax
       use mod_cotble, only: npnt, jttble
       use mod_coamat, only: labadr ! labadr(1)
+      use mod_cobmat, only: sigma ! sigma(kkmx*jmx*jmx)
       use mod_cojq, only: jq ! jq(1)
       use mod_colq, only: lq ! lq(1)
       use mod_coinq, only: inq ! inq(1)
@@ -124,7 +125,6 @@
       common /colnlb/ lenlab(MAX_NJTOT)
       common /coz/    sreal(1)
       common /cow/    simag(1)
-      common /cobmat/ sigma(kkmx*jmx*jmx)
       common /ckli/  kplist(0:kmx)
       common /cf9a/ f9pha(kkmx)
       common /coconv/ econv, xmconv, ang2c
@@ -676,6 +676,7 @@ c end of added/modified code (pjd)
       use tensor
       use mod_codim, only: mmax
       use mod_coamat, only: sigmam => toto ! sigmam(1)
+      use mod_cobmat, only: sigmak => bmat ! sigmak(1)
       use mod_coinhl, only: jlev => inhold ! jlev(1)
       use mod_coisc2, only: inlev => isc2 ! inlev(1)
       use mod_coisc3, only: jlist => isc3 ! jlist(1)
@@ -695,7 +696,6 @@ c end of added/modified code (pjd)
       common /coz/    xm1lab(1)
       common /cow/    xm2lab(1)
       common /cozmat/ sigma(1)
-      common /cobmat/ sigmak(1)
       common /coconv/ econv, xmconv, ang2c
       data zero /0.d0/
 *

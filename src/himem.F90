@@ -347,15 +347,19 @@ module mod_coamat
    end subroutine allocate_coamat
 end module mod_coamat
 
-! module mod_cobmat
-!    implicit none
-!    real(8), dimension(:,:), allocatable :: bmat
-!    contains
-!    subroutine allocate_cobmat(n)
-!       integer, intent(in) :: n
-!       allocate(bmat(n,n))
-!    end subroutine allocate_cobmat
-! end module mod_cobmat
+module mod_cobmat
+   implicit none
+   real(8), dimension(:,:), allocatable :: bmat
+   real(8), dimension(:), allocatable   :: psii
+   real(8), dimension(:), allocatable   :: sigma
+   contains
+   subroutine allocate_cobmat(n)
+      integer, intent(in) :: n
+      allocate(bmat(n,n))
+      allocate(psii(n*n))
+      allocate(sigma(n*n))
+   end subroutine allocate_cobmat
+end module mod_cobmat
 
 module mod_cotq1
    ! stores t matrix

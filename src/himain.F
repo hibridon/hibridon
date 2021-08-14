@@ -14,7 +14,7 @@
       ! use mod_cow, only: allocate_cow, w
       ! use mod_cozmat, only: allocate_cozmat, zmat
       use mod_coamat, only: allocate_coamat, amat
-      ! use mod_cobmat, only: allocate_cobmat, bmat
+      use mod_cobmat, only: allocate_cobmat, bmat
       use mod_cotq1, only: allocate_cotq1, tq1
       use mod_cotq2, only: allocate_cotq2, tq2
       use mod_cotq3, only: allocate_cotq3, tq3
@@ -175,12 +175,11 @@
       common /coz/ z(kmax,kmax)
       common /cow/ w(kmax,kmax)
       common /cozmat/ zmat(kmax,kmax)
-      common /cobmat/ bmat(kairy,kairy)
       ! call allocate_coz(kmax)
       ! call allocate_cow(kmax)
       ! call allocate_cozmat(kmax)
       call allocate_coamat(kmax)
-      ! call allocate_cobmat(kairy)
+      call allocate_cobmat(kairy)
       call allocate_cotq1(T_MATRIX_SIZE)
       call allocate_cotq2(T_MATRIX_SIZE)
       call allocate_cotq3(T_MATRIX_SIZE)

@@ -1057,6 +1057,7 @@ c
 #if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_NOVEC)
       use mod_coamat, only: amat ! amat(25)
 #endif
+      use mod_cobmat, only: bmat => psii ! bmat(25), here bmat is used as a vector 
       use mod_cotq1, only: dpsir ! dpsir(25)
       use mod_cotq2, only: dpsii ! dpsii(25)
       use mod_cojq, only: jq ! jq(1)
@@ -1068,6 +1069,7 @@ c
       use mod_cosc3, only: sc3 ! sc3(10)
       use mod_cosc4, only: sc4 ! sc4(10)
       use mod_cosc5, only: sc5 ! sc5(10)
+    
 
       implicit double precision (a-h,o-z)
       character*48 oldlab, oldpot
@@ -1084,7 +1086,6 @@ c
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr, nucros, photof, wavefl
       common /coered/ ered, rmu
-      common /cobmat/ bmat(25)
       common /cow/ w(25)
       common /cozmat/ zmat(25)
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
@@ -1384,6 +1385,7 @@ c
       use mod_cocent, only: sc2 => cent
       use mod_coeint, only: eint
       use mod_coamat, only: psir ! psir(100) psir(nopen,nopen)
+      use mod_cobmat, only: psii ! psii(100) 
       use mod_cotq1, only: dpsir ! dpsir(100)
       use mod_cotq2, only: dpsii ! dpsii(100)
       use mod_cojq, only: jq ! jq(60)
@@ -1401,6 +1403,7 @@ c
       use mod_cosc6, only: sc  => sc6   ! sc(100)
       use mod_cosc7, only: sc1  => sc7   ! sc1(100)
 
+
       implicit double precision (a-h,o-z)
       character*(*) filnam
       character*40  psifil, wavfil, amplfil, flxfil
@@ -1416,7 +1419,6 @@ c
       common /cotrans/ ttrans(36)
       common /cow/    sr(100)
       common /cozmat/ si(100)
-      common /cobmat/ psii(100)
       common /coz/    scmat(100)
 * common for y1, y2, y4
       common /coered/ ered, rmu
@@ -2340,6 +2342,7 @@ c
       use mod_coiout, only: niout, indout
       use mod_cocent, only: sc2 => cent
       use mod_coamat, only: psir ! psir(100) (4,nch)
+      use mod_cobmat, only: psii ! psii(100) Here psii is used as a vector
       use mod_cotq2, only: scmat2 => dpsii ! scmat2(100)
       use mod_cotq3, only: scmat3 => scmat ! scmat3(100)
       use mod_coinq, only: inq ! inq(60)
@@ -2354,7 +2357,6 @@ c
       logical adiab, kill, photof, propf, sumf, coordf, ifull
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
-      common /cobmat/ psii(100)
       common /cozmat/ tcoord(100)
 * steve, you may need more space, but i doubt it since tcoord is dimensioned n
       common /coz/    scmat(100)
@@ -2703,11 +2705,10 @@ c
 * column 6 is singlet with el=J+1
 * use orthogonal plane rotation
       use mod_coamat, only: psir ! psir(100) (4,nch)
-      use mod_cotq1, only: dpsir ! dpsir(100)
+      use mod_cobmat, only: psii ! psii(100) Here psii is used as a vector
+      use mod_cotq1, only: dpsir ! dpsir(100) 
       use mod_cotq2, only: dpsii ! dpsii(100)
       implicit none
-      common /cobmat/ psii(100)
-      real(8) :: psii
       integer, intent(in) :: jtot
       integer, intent(in) :: nch
       integer :: jpoint
