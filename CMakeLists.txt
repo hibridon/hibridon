@@ -164,7 +164,6 @@ target_compile_definitions(hib PUBLIC HIB_UNIX_X86=1)
 target_compile_definitions(hib PUBLIC HIB_UNIX=1)
 target_compile_definitions(hib PUBLIC HIB_UNIX_GFORTRAN=1)
 target_include_directories(hib PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
-add_dependencies(hib parhlp)
 
 # list of various architectures encountered when converting cstart/cend with fpp directives
 # BATCH
