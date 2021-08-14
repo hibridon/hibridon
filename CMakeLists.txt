@@ -215,7 +215,7 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
   set(TEST_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests/${TEST_DIRNAME})
   set(TEST_EXE ${TEST_ID})
 
-  add_executable(${TEST_EXE} src/pot/${TEST_POT_SRC_FILE} src/himain.F)
+  add_executable(${TEST_EXE} ${TEST_SRC_DIR}/${TEST_POT_SRC_FILE} src/himain.F)
   target_compile_definitions(${TEST_EXE} PUBLIC KMAX=${TEST_KMAX})
   target_compile_definitions(${TEST_EXE} PUBLIC T_MATRIX_SIZE=${TEST_T_MATRIX_SIZE})
   target_link_libraries(${TEST_EXE} hib ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
