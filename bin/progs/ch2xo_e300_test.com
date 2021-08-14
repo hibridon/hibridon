@@ -1,9 +1,0 @@
-inp=ch2xhe_ortho.inp
-job=O300
-ener=300
-jtot2=67
-show
-run
-intcrs
-hypxsc,,1,2,0,100
-quit

@@ -1,7 +1,0 @@
-../bin/ftconv_hib.exe << fin
-unix-darwin
-unix-ifort
-
-hiversion.f
-
-fin

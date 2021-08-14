@@ -1,9 +1,0 @@
-inp=H2so_ph2.inp
-job=Op251
-ener=251
-jtot2=66
-jmax=7
-show
-run
-intcrs
-quit
