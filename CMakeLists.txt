@@ -163,7 +163,7 @@ target_compile_options(hib PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
 target_compile_definitions(hib PUBLIC HIB_UNIX_X86=1)
 target_compile_definitions(hib PUBLIC HIB_UNIX=1)
 target_compile_definitions(hib PUBLIC HIB_UNIX_GFORTRAN=1)
-target_include_directories(hib PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
+
 
 # list of various architectures encountered when converting cstart/cend with fpp directives
 # BATCH
@@ -220,7 +220,6 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
   target_compile_definitions(${TEST_EXE} PUBLIC T_MATRIX_SIZE=${TEST_T_MATRIX_SIZE})
   target_link_libraries(${TEST_EXE} hib ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
   target_include_directories(${TEST_EXE} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-  target_include_directories(${TEST_EXE} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
   target_compile_options(${TEST_EXE} PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
   target_link_options(${TEST_EXE} PUBLIC ${GCC_COVERAGE_LINK_FLAGS})
 
@@ -243,14 +242,13 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
 
   set(test_command_prefix "")
 
-  set(mem_leak_disabled_tests arn2 arn2_big)
-  if(${TEST_ID} IN_LIST mem_leak_disabled_tests)
-    message( WARNING "memory leak detection has been disabled on test ${TEST_ID} until its leak is fixed")
-    set(test_command_prefix "export ASAN_OPTIONS=detect_leaks=0; ")
-    # todo: fix memory leak and remove export ASAN_OPTIONS=detect_leaks=0
-  endif()
+  # set(mem_leak_disabled_tests arn2 arn2_big)
+  # if(${TEST_ID} IN_LIST mem_leak_disabled_tests)
+  #   message( WARNING "memory leak detection has been disabled on test ${TEST_ID} until its leak is fixed")
+  #   set(test_command_prefix "export ASAN_OPTIONS=detect_leaks=0; ")
+  #   # todo: fix memory leak and remove export ASAN_OPTIONS=detect_leaks=0
+  # endif()
 
-  # $basedir/bin/progs/arn2_151 <arn2_test.com
   add_test(NAME ${TEST_ID}_test_run
     COMMAND bash -c "${test_command_prefix} cat ./${TEST_COMMAND_FILE} | ${CMAKE_CURRENT_BINARY_DIR}/${TEST_EXE} | tee ./${TEST_ID}.stdout"
     WORKING_DIRECTORY "${TEST_BUILD_DIR}"
@@ -604,7 +602,6 @@ function(add_hibexe EXE_NAME POT_SRC_FILE p_KMAX p_T_MATRIX_SIZE)
   target_compile_definitions(${EXE_NAME} PUBLIC T_MATRIX_SIZE=${p_T_MATRIX_SIZE})
   target_link_libraries(${EXE_NAME} hib ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
   target_include_directories(${EXE_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-  target_include_directories(${EXE_NAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
   target_compile_options(${EXE_NAME} PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
 
 endfunction(add_hibexe)
