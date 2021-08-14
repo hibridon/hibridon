@@ -302,11 +302,13 @@ module m_diff
         else
             number_index = 1
             do while(number_index <= size(va))
+                if(abs(va(number_index))>1e-30) then
                 if( abs(va(number_index) - vb(number_index))/max(abs(va(number_index)),1d-300) > tolerance ) then
                     write(Error_Unit, *) "at number_index ", number_index, " : ", va(number_index), &
-                      & " and ", vb(number_index), " differ for more than ", tolerance*100.0d0, " percent"
+                     " and ", vb(number_index), " differ for more than ", tolerance*100.0d0, " percent"
                     vectors_differ = .TRUE.
                     return
+                endif
                 endif
                 number_index = number_index + 1
             enddo
@@ -375,6 +377,9 @@ program comp_tests
     case("pcs") ; num_header_lines = 6
     case("trn") ; num_header_lines = 7
     case("xxsc"); num_header_lines = 3
+    case ("flx") ! Header ends at first occurence of "R (BOHR) AND OUTGOING FLUXES"
+        num_header_lines(1) = get_first_occ_of("R (BOHR) AND OUTGOING FLUXES",ref)
+        num_header_lines(2) = get_first_occ_of("R (BOHR) AND OUTGOING FLUXES",test)
     case("evl") ! Header ends at first occurence of "** EIGENVALUES"
         num_header_lines(1) = get_first_occ_of("** EIGENVALUES",ref)
         num_header_lines(2) = get_first_occ_of("** EIGENVALUES",test)
