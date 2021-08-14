@@ -46,6 +46,7 @@
       use mod_cosc2, only: jpack1 => sc2int ! jpack1(1)
       use mod_cosc3, only: lpack1 => sc3int ! lpack1(1)
       use mod_cosc4, only: ipack1 => sc4int ! ipack1(1)
+      use mod_cov2, only: nv2max
       implicit double precision (a-h,o-z)
       character*(*) fname1
       character*20 cdate1
