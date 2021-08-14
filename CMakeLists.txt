@@ -117,7 +117,7 @@ add_library(hib
      src/hipotutil.F
      src/hiversion.F)
 
-target_compile_options(hib PRIVATE "-ffixed-line-length-132")
+target_compile_options(hib PRIVATE "-ffixed-line-length-132 -fwhole-file")
 target_compile_definitions(hib PUBLIC MAX_NJTOT=1000)
 # The following is for preprocessing of hiversion.F
 target_compile_definitions(hib PUBLIC _BUILD_VERS_=${PROJECT_VERSION})
