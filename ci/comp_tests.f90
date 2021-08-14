@@ -321,7 +321,7 @@ module m_diff
         implicit none
         character(len=200), intent(in) :: results1_file_name
         character(len=200), intent(in) :: results2_file_name
-        integer, intent(in) :: num_header_lines
+        integer, intent(in) :: num_header_lines(2)
         real(8) :: tolerance
         logical :: result_files_differ
     
@@ -330,7 +330,7 @@ module m_diff
         ! integer :: number_index
         ! real(8) :: number
     
-        call get_file_numbers(results1_file_name, ref_numbers, num_header_lines)
+        call get_file_numbers(results1_file_name, ref_numbers, num_header_lines(1))
         ! number_index = 1
         ! do while(number_index <= size(ref_numbers%array))
         !     number = ref_numbers%array(number_index)
@@ -338,9 +338,9 @@ module m_diff
         !     number_index = number_index + 1
         ! enddo
     
-        call get_file_numbers(results2_file_name, test_numbers, num_header_lines)
+        call get_file_numbers(results2_file_name, test_numbers, num_header_lines(2))
     
-        result_files_differ = vectors_differ(ref_numbers%array, test_numbers%array, tolerance=tolerance)
+        result_files_differ = vectors_differ(ref_numbers%array, test_numbers%array, tolerance)
     
         end function result_files_differ
         
@@ -350,160 +350,68 @@ endmodule m_diff
 program comp_tests
     use iso_fortran_env, only: Error_Unit, Output_Unit
     use m_diff, only: result_files_differ
-
     implicit none
-    character(len=200) :: ref, test, line
+    character(len=200) :: ref, test
     character(len=10) :: ext
-    integer :: nstateso, nstates, it, i, j, ios
-    real(8), dimension(:,:,:), allocatable :: xs
-    real(8) :: dumr
-
+    real(8) :: tolerance
+    integer :: num_header_lines(2)
+    ! Get test and reference files paths from command arguments
     call get_command_argument(1,ref)
     call get_command_argument(2,test)
 
     ! Extract file extension in ext string variable
-    j = scan(trim(ref),".", BACK= .true.)
-    ext = ref(j+1:len(ref))
+    ext = ref(scan(trim(ref),".", BACK= .true.)+1:len(ref))
 
-    write(Output_Unit, *) 'comparing test file ', test, ' to reference file ', ref
+    write(Output_Unit, *) 'comparing test file ', trim(test), ' to reference file ', trim(ref)
 
-    if(ext=="dcs") then
-        if(result_files_differ(ref, test, num_header_lines=15, tolerance=0.01d0)) then
-            stop 1
-        else
-            stop 0
+    ! Tolerance is set to 1%
+    tolerance=0.01d0 
+
+    select case (ext)
+    case("ics") ; num_header_lines = 3
+    case("dcs") ; num_header_lines = 15
+    case("hfx") ; num_header_lines = 6
+    case("ppb") ; num_header_lines = 6
+    case("pcs") ; num_header_lines = 6
+    case("trn") ; num_header_lines = 7
+    case("xxsc"); num_header_lines = 3
+    case("evl") ! Header ends at first occurence of "** EIGENVALUES"
+        num_header_lines(1) = get_first_occ_of("** EIGENVALUES",ref)
+        num_header_lines(2) = get_first_occ_of("** EIGENVALUES",test)
+    case("xsc") ! Header ends at first occurence of "INTEGRAL CROSS SECTIONS"
+        num_header_lines(1) = get_first_occ_of("INTEGRAL CROSS SECTIONS",ref)
+        num_header_lines(2) = get_first_occ_of("INTEGRAL CROSS SECTIONS",test)
+    case("stdout") ! Header ends at first occurence of "Hibridon>"
+        num_header_lines(1) = get_first_occ_of("Hibridon>",ref)
+        num_header_lines(2) = get_first_occ_of("Hibridon>",test)
+    end select
+
+
+    if(result_files_differ(ref, test, num_header_lines, tolerance)) stop 1
+
+
+contains 
+
+function get_first_occ_of(sub,file) result(iline)
+    implicit none
+    character(len=*), intent(in) :: sub, file
+    integer :: iline
+    character(len=200) :: line
+    integer :: ierr, i
+
+    iline=-1
+    i=0
+    open(unit=1, file=file, status='old')
+    do
+        read(1,'(a)', iostat=ierr) line
+        if(ierr.ne.0) exit
+        i = i+1
+        if (index(line, trim(sub)).ne.0) then
+            iline=i ; exit
         endif
-    endif
-
-    if(ext=="hfx") then
-        ! the 6 first lines may contain the date of the file
-        if(result_files_differ(ref, test, num_header_lines=6, tolerance=0.01d0)) then
-            stop 1
-        else
-            stop 0
-        endif
-    endif
-
-    if(ext=="ppb") then
-        ! the 6 first lines may contain the date of the file
-        if(result_files_differ(ref, test, num_header_lines=6, tolerance=0.01d0)) then
-            stop 1
-        else
-            stop 0
-        endif
-    endif
-
-    if(ext=="pcs") then
-        if(result_files_differ(ref, test, num_header_lines=6, tolerance=0.01d0)) then
-            stop 1
-        else
-            stop 0
-        endif
-    endif
-
-    if(ext=="stdout") then
-        ! standard output of hibridon
-        ! the 17 first lines may contain the date of the file
-        if(result_files_differ(ref, test, num_header_lines=17, tolerance=0.01d0)) then
-            stop 1
-        else
-            stop 0
-        endif
-    endif
-
-    if(ext=="trn") then
-        ! the 7 first lines may contain the date of the file
-        if(result_files_differ(ref, test, num_header_lines=7, tolerance=0.01d0)) then
-            stop 1
-        else
-            stop 0
-        endif
-    endif
-
-    if(ext=="xsc") then
-        if(result_files_differ(ref, test, num_header_lines=32, tolerance=0.01d0)) then
-            stop 1
-        else
-            stop 0
-        endif
-    endif
-
-    if(ext=="xxsc") then
-        if(result_files_differ(ref, test, num_header_lines=3, tolerance=0.01d0)) then
-            stop 1
-        else
-            stop 0
-        endif
-    endif
-
-    open(unit=1, status='old', file=trim(ref))
-    open(unit=2, status='old', file=trim(test))
-
-    ! Extract file extension in ext string variable
-    j = scan(trim(ref),".", BACK= .true.)
-    ext = ref(j+1:len(ref))
-
-    if(ext=="evl") then 
-        j=0
-        ! READ REF AND TEST BOUND OUTPUT FILE
-        ! First get the number of evls
-        do 
-            read(1,'(A)',iostat=ios) line 
-            if(ios/=0) exit
-            if(index(line,'** EIGENVALUES (CM-1)') /=0 ) then
-                do; read(1,*,iostat=ios) dumr ; if(ios/=0) exit ; j=j+1 ; enddo
-            endif
-        enddo
-
-        ! Allocate and initialize xs
-        allocate(xs(2,j,1))
-        rewind(1)
-        ! Now read evls values from ref and test files
-        do it = 1, 2
-            do 
-                read(it,'(A)',iostat=ios) line 
-                if(ios/=0) exit
-                if(index(line,'** EIGENVALUES (CM-1)') /=0 ) then
-                    do i = 1, j ; read(it,*) xs(it,i,1) ; write(*,*) xs(it,i,1) ; enddo
-                endif
-            enddo
-        enddo
-
-    elseif(ext=="ics") then
-        ! READ REF AND TEST ICSOUTPUT FILE
-        do it = 1, 2
-            do i = 1, 6 ; read(it,*) ; enddo ! Skip the first 6 lines
-            read(it,*) nstates, nstateso ! Read the total number of states and open channels
-            ! Allocate and initialize xs
-            if(.not.allocated(xs)) then ; allocate( xs(2, nstateso, nstateso) ) ; xs = -1d0 ; endif
-            j=ceiling(nstates/12.0d0)
-            do i=1,j ; read(it,*) ; enddo ! Skip the next lines containing states labels
-            j=ceiling(nstates/8.0d0)
-            do i=1,j ; read(it,*) ; enddo ! Skip the next lines containing states energies
-            ! Read the ICS
-            do i = 1, nstateso
-                read(it,*) xs(it,i,:)
-            enddo
-        enddo
-    
-    else
-        write(Error_Unit, *) 'unhandled file extension : ', ext
-        stop 1
-    endif
-    
-    close(1)
-    close(2)
-
-    ! COMPARE XS
-
-    do i=1,size(xs,2)
-        do j=1,size(xs,3)
-            ! stop with code 2 if difference is more than 1% for one of the XSs.
-            if( 100d0 * abs(xs(2,i,j) - xs(1,i,j))/max(abs(xs(1,i,j)),1d-300) > 1d0 ) then
-             stop 1
-            endif
-        enddo
     enddo
-    if(allocated(xs)) then ; deallocate( xs ) ; endif
-    return
+    if(iline==-1) STOP 1
+    close(1)
+end function get_first_occ_of
+
 end program comp_tests
