@@ -372,7 +372,7 @@ module mod_cotq1
       integer, intent(in) :: n
       allocate(tq1(n,n))
       allocate(vec(3,3,1))
-      allocate(dpsir(n))  ! note : the size has been found by trial and error (with all tests passing)
+      allocate(dpsir(n*n))  ! note : the size has been found by trial and error (with all tests passing)
       allocate(scmat(n*n))  ! note : the size has been found by trial and error (with all tests passing)
    end subroutine allocate_cotq1
 end module mod_cotq1
