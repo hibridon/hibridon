@@ -300,7 +300,7 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
 endfunction()
 
 # This executable compares output files from test runs and reference outputs located in the tests directory
-add_executable(check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/ci/comp_tests.f90)
+add_executable(check_outputs ${CMAKE_CURRENT_SOURCE_DIR}/ci/comp_mods.f90 ${CMAKE_CURRENT_SOURCE_DIR}/ci/comp_tests.f90)
 
 add_test(NAME check_outputs_build
     COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target check_outputs)
