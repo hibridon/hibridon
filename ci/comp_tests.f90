@@ -6,10 +6,10 @@ program comp_tests
     use iso_fortran_env, only: Error_Unit, Output_Unit
     use m_diff, only: result_files_differ
     implicit none
-    character(len=200) :: ref, test
-    character(len=10) :: ext
-    real(8) :: tolerance
-    integer :: num_header_lines(2)
+    character(len=200)  :: ref, test
+    character(len=10)   :: ext
+    real(8)             :: tolerance
+    integer             :: num_header_lines(2)
     ! Get test and reference files paths from command arguments
     call get_command_argument(1,ref)
     call get_command_argument(2,test)
@@ -22,6 +22,7 @@ program comp_tests
     ! Tolerance is set to 1%
     tolerance=0.01d0 
 
+    ! Set the number of header lines depending on the type of output file
     select case (ext)
     case("ics") ; num_header_lines = 3
     case("dcs") ; num_header_lines = 15
@@ -44,32 +45,28 @@ program comp_tests
         num_header_lines(2) = get_first_occ_of("Hibridon>",test)
     end select
 
-
+    ! Compare numeric values between reference and test files
     if(result_files_differ(ref, test, num_header_lines, tolerance)) stop 1
 
 
 contains 
 
+! This function returns the line where the first occurence of a substring is find.
+! If the substring is not detected, STOP 1.
 function get_first_occ_of(sub,file) result(iline)
     implicit none
     character(len=*), intent(in) :: sub, file
-    integer :: iline
+    integer :: iline, ierr
     character(len=200) :: line
-    integer :: ierr, i
-
-    iline=-1
-    i=0
+    iline = 0
     open(unit=1, file=file, status='old')
     do
-        read(1,'(a)', iostat=ierr) line
-        if(ierr.ne.0) exit
-        i = i+1
-        if (index(line, trim(sub)).ne.0) then
-            iline=i ; exit
-        endif
+        read(1,'(a)', iostat=ierr) line ; if(ierr.ne.0) exit ! Try to read the current line. If it fails, exit the do loop.
+        iline = iline+1 ! Increment the line number
+        if (index(line, trim(sub)).ne.0) then ; close(1) ; return ; endif ! If the substring is found, close the file and return.
     enddo
-    if(iline==-1) STOP 1
     close(1)
+    STOP 1 ! If the function did not return within the do loop, then the substring is absent -> STOP 1.
 end function get_first_occ_of
 
 
