@@ -48,7 +48,7 @@ elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   # ifort (untested)
   set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-f77rtl -O0 -g")
-elseif (Fortran_COMPILER_NAME MATCHES "g77")
+endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
 
 
