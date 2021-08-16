@@ -212,7 +212,8 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
   target_include_directories(${TEST_EXE} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
   target_compile_options(${TEST_EXE} PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
   if(ENABLE_CODE_COVERAGE)
-  target_link_options(${TEST_EXE} PUBLIC ${GCC_COVERAGE_LINK_FLAGS})
+    target_link_options(${TEST_EXE} PUBLIC ${GCC_COVERAGE_LINK_FLAGS})
+  endif()
 
 
   add_test(NAME ${TEST_ID}_test_setup
