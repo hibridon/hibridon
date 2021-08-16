@@ -313,7 +313,17 @@ function(add_hibridon_testsuite TESTSUITE_ID TESTSUITE_TESTS TESTS_LIST)
     endif()
   endforeach()
 
-  list(JOIN tests_regex "|" testsuite_regex)
+  # build testsuite_regex, which is expected to contain something like "^arn2$|^arn2_big$|^arno$|^aroh$|^boh2_b$|^ch3he_ccsdt$|^ch3i$|^h2ohe_orig$|^hecn$|^heco$|^vfit$"
+  if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
+    set(testsuite_regex_tmp "")
+    foreach(test_regex ${tests_regex})
+      string(APPEND testsuite_regex_tmp "${test_regex}|")
+    endforeach()
+    string(REGEX REPLACE "\\|$" "" testsuite_regex ${testsuite_regex_tmp})
+  else()
+    # join does exactly what we need here, but required recent versions of cmake
+    list(JOIN tests_regex "|" testsuite_regex)
+  endif()
 
   #message(${short_testsuite})
   # message("${testsuite_regex}")
