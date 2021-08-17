@@ -10,18 +10,51 @@ enable_language (Fortran)
 # 2. code coverage requires extra programs, and this would make hibridon's build process more complicate than needed for normal users
 set(ENABLE_CODE_COVERAGE "OFF" CACHE BOOL "to enable or disable code coverage analysis (mostly for developers)")
 
+# profiling is disabled by default because:
+# 1. most users won't need it: this is targetted to developers, not users
+# 2. it makes code slower
+set(ENABLE_PROFILING "OFF" CACHE BOOL "to enable or disable performance profiling (mostly for developers)")
+
+
 if(ENABLE_CODE_COVERAGE)
   find_program(COVERAGE_LCOV_EXE lcov)
   if (NOT COVERAGE_LCOV_EXE)
-      message(FATAL_ERROR "failed to find lcov executable (tool used in in code coverage analysis)")
+      message(FATAL_ERROR "failed to find lcov executable (tool used incode coverage analysis)")
   endif()
-  message(${COVERAGE_LCOV_EXE})
+  message(STATUS "COVERAGE_LCOV_EXE = ${COVERAGE_LCOV_EXE}")
 
   find_program(COVERAGE_GENHTML_EXE genhtml)
   if (NOT COVERAGE_GENHTML_EXE)
-      message(FATAL_ERROR "failed to find genhtml executable (tool used in in code coverage analysis)")
+      message(FATAL_ERROR "failed to find genhtml executable (tool used in code coverage analysis)")
   endif()
-  message(${COVERAGE_GENHTML_EXE})
+  message(STATUS "COVERAGE_GENHTML_EXE = ${COVERAGE_GENHTML_EXE}")
+endif()
+
+if(ENABLE_PROFILING)
+  find_program(PROFILING_GPROF_EXE gprof)
+  if (NOT PROFILING_GPROF_EXE)
+      message(WARNING "failed to find gprof executable (tool used to generate dpf output of performance profiling); without it, no pdf output for profiling will be produced.")
+  endif()
+  message(STATUS "PROFILING_GPROF_EXE = ${PROFILING_GPROF_EXE}")
+
+  find_program(PROFILING_GPROF2DOT_EXE gprof2dot)
+  if (NOT PROFILING_GPROF2DOT_EXE)
+      message(WARNING "failed to find gprof2dot executable (tool used to generate dpf output of performance profiling); without it, no pdf output for profiling will be produced. gprof2dot can be installed using pip install gprof2dot.")
+  endif()
+  message(STATUS "PROFILING_GPROF2DOT_EXE = ${PROFILING_GPROF2DOT_EXE}")
+
+  find_program(PROFILING_DOT_EXE dot)
+  if (NOT PROFILING_DOT_EXE)
+      message(WARNING "failed to find dot executable (graphviz tool used to generate dpf output of performance profiling); without it, no pdf output for profiling will be produced. dot executable is part of an open source software named graphviz.")
+  endif()
+  message(STATUS "PROFILING_DOT_EXE = ${PROFILING_DOT_EXE}")
+
+  if ( PROFILING_GPROF_EXE AND PROFILING_GPROF2DOT_EXE AND PROFILING_DOT_EXE )
+    set(GENERATE_PROFILING_PDF "ON")
+  else()
+    set(GENERATE_PROFILING_PDF "OFF")
+  endif()
+
 endif()
 
 # set(MKLROOT )
@@ -36,13 +69,19 @@ get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 
 if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # gfortran
-  set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3")
+  set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 -march native")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -fsanitize=address")
   if(ENABLE_CODE_COVERAGE)
     set(GCC_COVERAGE_COMPILE_FLAGS "-fprofile-arcs -ftest-coverage --coverage")
     set(GCC_COVERAGE_LINK_FLAGS "-lgcov")
     set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} ${GCC_COVERAGE_COMPILE_FLAGS}")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${GCC_COVERAGE_LINK_FLAGS}")
+  endif()
+  if(ENABLE_PROFILING)
+    set(GCC_PROFILING_COMPILE_FLAGS "-pg")
+    set(GCC_PROFILING_LINK_FLAGS "-pg")
+    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} ${GCC_PROFILING_COMPILE_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${GCC_PROFILING_LINK_FLAGS}")
   endif()
 elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   # ifort (untested)
@@ -198,11 +237,11 @@ target_compile_definitions(hib PUBLIC HIB_UNIX_GFORTRAN=1)
 enable_testing()
 
 function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_COMMAND_FILE TEST_INPUT_FILES TEST_OUTPUT_FILES TEST_KMAX TEST_T_MATRIX_SIZE)
-  message("for test ${TEST_ID}, CMAKE_CURRENT_LIST_DIR=${CMAKE_CURRENT_LIST_DIR}")
+  # message("for test ${TEST_ID}, CMAKE_CURRENT_LIST_DIR=${CMAKE_CURRENT_LIST_DIR}")
   get_filename_component(TEST_DIRNAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 
   set(TEST_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests/${TEST_DIRNAME})
-  set(TEST_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests/${TEST_DIRNAME})
+  set(TEST_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests/${TEST_ID})
   set(TEST_EXE ${TEST_ID})
 
   add_executable(${TEST_EXE} ${TEST_SRC_DIR}/${TEST_POT_SRC_FILE} src/himain.F)
@@ -266,6 +305,13 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
     )
   endif()
 
+  if(GENERATE_PROFILING_PDF)
+    add_test(NAME ${TEST_ID}_build_profiling_pdf
+      COMMAND  bash -c "${PROFILING_GPROF_EXE} ${CMAKE_CURRENT_BINARY_DIR}/${TEST_EXE}  | ${PROFILING_GPROF2DOT_EXE} | ${PROFILING_DOT_EXE} -Tpdf -o call_graph.pdf"
+      WORKING_DIRECTORY "${TEST_BUILD_DIR}"
+    )
+  endif()
+
   add_test(NAME ${TEST_ID}_test_cleanup
       COMMAND ls -R ${TEST_BUILD_DIR};
   )
@@ -289,6 +335,10 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
   if(ENABLE_CODE_COVERAGE)
     set_tests_properties(${TEST_ID}_save_coverage ${TEST_ID}_cleanup_coverage PROPERTIES LABELS ${TEST_ID})
   endif()
+  if(GENERATE_PROFILING_PDF)
+    set_tests_properties(${TEST_ID}_build_profiling_pdf PROPERTIES LABELS ${TEST_ID})
+  endif()
+
 endfunction()
 
 # This executable compares output files from test runs and reference outputs located in the tests directory
@@ -333,26 +383,28 @@ function(add_hibridon_testsuite TESTSUITE_ID TESTSUITE_TESTS TESTS_LIST)
 endfunction()
 
 if(ENABLE_CODE_COVERAGE)
+  # build 
   add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/coverage/total.info COMMAND bash -c "\
     command='${COVERAGE_LCOV_EXE} ' ; \
     for test_coverage in $(find ${CMAKE_BINARY_DIR} -name \"*.info\") ; \
     do \
+      echo adding test coverage $test_coverage to ${CMAKE_BINARY_DIR}/coverage/total.info ; \
       command=\"\$command -a \$test_coverage\" ; \
     done ; \
     command=\"\$command -o ${CMAKE_BINARY_DIR}/coverage/total.info\" ; \
-    \$command" VERBATIM)
+    \$command" VERBATIM
+    COMMENT "building total code coverage ${CMAKE_BINARY_DIR}/coverage/total.info from all code coverage files found in $(find ${CMAKE_BINARY_DIR}")
 
   add_custom_target(html_coverages DEPENDS ${CMAKE_BINARY_DIR}/coverage/total.info VERBATIM COMMAND bash -c "\
     for test_coverage_file in $(find ${CMAKE_BINARY_DIR}/coverage -name \"*.info\") ; \
     do \
-      echo coucou $test_coverage_file ; \
       html_root=${CMAKE_BINARY_DIR}/coverage/\$(basename \$test_coverage_file | sed 's/.info//') ; \
-      echo coucoucou $html_root ; \
+      echo building $html_root/index.html from $test_coverage_file ; \
       mkdir -p \$html_root ; \
-      echo hello ; \
       echo ${COVERAGE_GENHTML_EXE} ; \
-      ${COVERAGE_GENHTML_EXE} \$test_coverage_file -o \$html_root ; \
-    done ;")
+      ${COVERAGE_GENHTML_EXE} \$test_coverage_file -o \$html_root > /dev/null ; \
+    done ;"
+    COMMENT "building an html report for each code coverage file found in ${CMAKE_BINARY_DIR}/coverage")
 endif()
 
 # declare the tests
