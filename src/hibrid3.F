@@ -316,11 +316,11 @@ cABER
 *  from diagonal terms
       r2 = 1.d0 / ( r * r )
       ipt = 1
-      do  50 i = 1, nch
+      do i = 1, nch
         w(ipt) = w(ipt) + twormu * ( vv0  - (ered - eint(i)) )
      :           + r2 * cent(i)
         ipt = ipt + nmax + 1
-50    continue
+      end do
 cABER
 c       call druckq(w,nmax,nch,'potential matrix',icount)
 cABER
@@ -328,14 +328,14 @@ cABER
       wmax = - 1.e+20
       wmin = - wmax
       ipt = 1
-      do 55  i= 1, nch
-      if (w(ipt) .lt. wmin) wmin = w(ipt)
-*  ignore closed channels
-      if (eint(i) .lt. ered) then
-         if (w(ipt) .gt. wmax) wmax = w(ipt)
-      end if
-      ipt = ipt+ nmax + 1
-55    continue
+      do i = 1, nch
+        if (w(ipt) .lt. wmin) wmin = w(ipt)
+        !  ignore closed channels
+        if (eint(i) .lt. ered) then
+          if (w(ipt) .gt. wmax) wmax = w(ipt)
+        end if
+        ipt = ipt+ nmax + 1
+      end do
       if (iflag .ge. 2) go to 70
       if (wmin .gt. zero) go to 90
       if (iflag - 1) 60, 65, 90
@@ -359,7 +359,7 @@ cABER
         nmaxp1 = nmax + 1
         icolpt = 2
         irowpt = nmaxp1
-        do  150  icol = 1, nch - 1
+        do icol = 1, nch - 1
 *  icolpt points to first sub-diagonal element in column icol
 *  irowpt points to first super-diagonal element in row icol
 *  ncol is number of subdiagonal elements in column icol
@@ -367,7 +367,7 @@ cABER
           call dcopy (ncol, w(icolpt), 1, w(irowpt), nmax)
           icolpt = icolpt + nmaxp1
           irowpt = irowpt + nmaxp1
-150     continue
+        end do
 *  transform w matrix into case e basis
         call trans22(w,nch, nmax)
       endif
