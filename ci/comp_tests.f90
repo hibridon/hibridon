@@ -23,6 +23,7 @@ program comp_tests
     tolerance=0.01d0 
 
     ! Set the number of header lines depending on the type of output file
+    num_header_lines = 0
     select case (ext)
     case("ics") ; num_header_lines = 3
     case("dcs") ; num_header_lines = 15

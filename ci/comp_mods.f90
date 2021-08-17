@@ -224,7 +224,7 @@ subroutine get_file_numbers(file_name, numbers, num_header_lines)
         if (pass == PASS_COUNT_NUMBERS) then
             num_numbers = 0
             num_tokens = 0
-            open(unit=1, status='old', file=trim(file_name))
+            open(unit=file_id, status='old', file=trim(file_name))
         endif
 
         if (pass == PASS_FILL_VECTOR) then
@@ -267,8 +267,7 @@ subroutine get_file_numbers(file_name, numbers, num_header_lines)
             ! num_numbers = num_numbers + 1
         enddo
         if (pass == PASS_COUNT_NUMBERS) then
-            write(Output_Unit, *) 'total num_tokens = ', num_tokens
-            write(Output_Unit, *) 'total num_numbers = ', num_numbers
+            write(Output_Unit, *) file_name, ' : total num_tokens = ', num_tokens, ', total num_numbers = ', num_numbers
             allocate(numbers%array(num_numbers))
         endif
         if (pass == PASS_FILL_VECTOR) then
