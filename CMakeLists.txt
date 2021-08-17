@@ -69,7 +69,7 @@ get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 
 if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # gfortran
-  set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 -march native")
+  set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 -march=native")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -fsanitize=address")
   if(ENABLE_CODE_COVERAGE)
     set(GCC_COVERAGE_COMPILE_FLAGS "-fprofile-arcs -ftest-coverage --coverage")
