@@ -607,6 +607,9 @@
 *
       jl3=jl3a
       nowrit=.false.
+#ifdef DEBUG_ISSUE35
+      write(6,*) 'graffy/intpol/-2 q(1,1) =', q(1,1)
+#endif
       goto 5
 *
       entry intpl2(jlx,jl2x,jl3x,nmax,n,q,q2,q3,nucros)
@@ -645,15 +648,23 @@ c.....initialize at first j (or nu)
         else
 c.....simply add for jd=1
           call dbin(irec,jl,jpl,next,q,nmax,n)
+#ifdef DEBUG_ISSUE35
+          write(6,*) 'graffy/intpol/-1 q(1,1) =', q(1,1)
+#endif
           if(jp.eq.jpl.and.jl+1.ne.jl3) then
             write(6,15) jp,jl,jl3
 15          format(/' ERROR IN INTPOL: JP, JL, JL3:',3i4)
             call exit
           end if
-          do 20 i=1,n
-          do 20 j=1,n
-          q2(j,i)=q(j,i)
-20        q(j,i)=q(j,i)+q3(j,i)
+          do i=1,n
+            do j=1,n
+              q2(j,i)=q(j,i)
+              q(j,i)=q(j,i)+q3(j,i)
+            end do
+          end do
+#ifdef DEBUG_ISSUE35
+            write(6,*) 'graffy/intpol/0 q(1,1) =', q(1,1)
+#endif
           jf=jl3
           call dbout(irec,jf,jp,1,q,nmax,n)
           call dbout(irec+1,jl,jpl,1,q2,nmax,n)
@@ -706,11 +717,13 @@ c
       jf=jl3
       if(.not.nucros) then
         call prefac(jl1,jl2,jl3,jl+1,jf,f0,f1,f2)
-        do 41 i=1,n
-        do 41 j=1,n
-41      q(j,i)=q(j,i)+f0*q2(j,i)
-     >               +f1*(q2(j,i)-q3(j,i))
-     >               +f2*(q1(j,i)-q2(j,i))
+        do i=1,n
+          do j=1,n
+            q(j,i)=q(j,i)+f0*q2(j,i)
+     >                   +f1*(q2(j,i)-q3(j,i))
+     >                   +f2*(q1(j,i)-q2(j,i))
+          end do
+        end do
       else
 c......here for sparse algorithm
         do 42 nu=jl+1,jf
@@ -729,6 +742,9 @@ c       write(6,99) nuu,i,j,q(j,i),q1(j,i),q2(j,i),q3(j,i),f0,f1,f2
      >               +f1*(q2(j,i)-q3(j,i))
      >               +f2*(q1(j,i)-q2(j,i))
 42      continue
+#ifdef DEBUG_ISSUE35
+      write(6,*) 'graffy/intpol/1 q(1,1) =', q(1,1)
+#endif
       end if
 c
       if(nowrit) return
@@ -748,10 +764,15 @@ c
       jf=jl3
       if(.not.nucros) then
         call prefac(jl2,jl2,jl3,jl+1,jf,f0,f1,f2)
-        do 60 i=1,n
-        do 60 j=1,n
-60      q(j,i)=q(j,i)+f0*q2(j,i)
-     >               +f1*(q2(j,i)-q3(j,i))
+        do i=1,n
+          do j=1,n
+          q(j,i)=q(j,i)+f0*q2(j,i)
+     >                   +f1*(q2(j,i)-q3(j,i))
+          end do
+        end do
+#ifdef DEBUG_ISSUE35
+        write(6,*) 'graffy/intpol/2 q(1,1) =', q(1,1)
+#endif        
       else
 c......here for sparse algorithm
         do 62 nu=jl+1,jf
@@ -771,14 +792,24 @@ c99      format(1x,3i4,4f10.4,3x,3f12.3)
         q(j,i)=q(j,i)+f0*q2(j,i)
      >               +f1*(q2(j,i)-q3(j,i))
 62      continue
+#ifdef DEBUG_ISSUE35
+        write(6,*) 'graffy/intpol/3 q(1,1) =', q(1,1)
+#endif
+
 c......now all levels for j.ge.nu=jl3
       end if
+#ifdef DEBUG_ISSUE35
+      write(6,*) 'graffy/intpol/4 q(1,1) =', q(1,1)
+#endif
 *
       if(nowrit) return
 *
       call dbout(irec,jf,jp,2,q,nmax,n)
       call dbout(irec+2,jl3,jp,0,q3,nmax,n)
       call dbout(irec+3,jl2,jp2,0,q2,nmax,n)
+#ifdef DEBUG_ISSUE35
+      write(6,*) 'graffy/intpol/5 q(1,1) =', q(1,1)
+#endif
       return
       end
       subroutine nulist(nu,jf,jlev,list,nj,nleq,nlge)
@@ -838,23 +869,46 @@ c     write(6,*) 'prefac:',j1,j2,j3,x1,x3
 *  with their labels
 *
 * ---------------------------------------------------------------------------
-      implicit double precision (a-h,o-z)
-      dimension q(nmax,n)
+      implicit none
+      integer :: irec
+      integer :: i1, i2, i3
+      integer :: nmax, n
+      real(8), dimension(nmax, n) :: q
+      integer :: ifile, i
       ifile=1
       call dbwi(i1,1,ifile,irec)
       call dbwi(i2,1,ifile,0)
       call dbwi(i3,1,ifile,0)
-      do 10 i=1,n
-10    call dbwr(q(1,i),n,ifile,0)
+      do i=1,n
+        call dbwr(q(1,i),n,ifile,0)
+      end do
       call dbwc(ifile,irec)
       return
-      entry dbin(irec,i1,i2,i3,q,nmax,n)
+      end
+
+* ----------------------------------------------------------------------
+*
+*  subroutine to buffer out cross sections matrices together
+*  with their labels
+*
+* ---------------------------------------------------------------------------
+      subroutine dbin(irec,i1,i2,i3,q,nmax,n)
+      implicit none
+      integer :: irec
+      integer :: i1, i2, i3
+      integer :: nmax, n
+      real(8), dimension(nmax, n) :: q
+      integer :: ifile, i
       ifile=1
       call dbri(i1,1,ifile,irec)
       call dbri(i2,1,ifile,0)
       call dbri(i3,1,ifile,0)
-      do 20 i=1,n
-20    call dbrr(q(1,i),n,ifile,0)
+      do i=1,n
+        call dbrr(q(1,i),n,ifile,0)
+      end do
+#ifdef DEBUG_ISSUE35
+      write(6,*) 'graffy/dbin : q(1,1) = ', q(1,1)
+#endif
       return
       end
 * ----------------------------------------------------------------------
@@ -1410,7 +1464,11 @@ c
       use mod_cosc3, only: jlev => sc3int ! jlev(1)
       implicit double precision (a-h,o-z)
       character*(*) filnam
-      character*40  icsfil, smtfil, xname
+      character*40  icsfil, smtfilnam, xname
+      integer :: smt_unit = 1
+      integer :: ics_unit = 2
+      integer :: tmp_unit = 3
+      integer :: tmp_file = 1
       character*20  cdate
       character*10  elaps, cpu
       character*13  string
@@ -1437,31 +1495,30 @@ c
 *
 * generate filename and check if it is present
 *
-      call gennam(smtfil,filnam,ien,'smt',lenfs)
-      inquire(file = smtfil, exist = exstfl)
+      call gennam(smtfilnam,filnam,ien,'smt',lenfs)
+      inquire(file = smtfilnam, exist = exstfl)
       if (.not. exstfl) then
-          write(6,10) smtfil(1:lenfs)
+          write(6,10) smtfilnam(1:lenfs)
 10        format(' ** FILE ',(a),' NOT FOUND **')
           return
       end if
 * open file for interpolation
       call dinit
-      nfile = 3
-       call gennam (xname, filnam, 0, 'tmp', lenx)
-       call dopen(1,nfile,xname)
+      call gennam (xname, filnam, 0, 'tmp', lenx)
+      call dopen(tmp_file,tmp_unit,xname)
 *
 * open smatrix-file
 *
-      call openf(1,smtfil,'tu',0)
+      call openf(smt_unit,smtfilnam,'tu',0)
 *
 * open file for integral cross sections
 *
       call gennam(icsfil,filnam,ien,'xxsc',lenft)
-      call openf(2,icsfil,'sf',0)
+      call openf(ics_unit,icsfil,'sf',0)
 *
 * read header of smatrix-file
 *
-      call rdhead(1,cdate,
+      call rdhead(smt_unit,cdate,
      :   ered,rmu,csflag,flaghf,flagsu,twomol,
      :   nucros,jfirst,jfinal,jtotd,numin,numax,nud,nlevel,nlevop,
      :   nnout,jlev,inlev,elev,jout)
@@ -1470,8 +1527,8 @@ c
       spin=0
       if(flaghf) spin=0.5d0
 *	
-      write (2,15) smtfil,cdate,label,maxjt
-      if (.not.batch)write (6,15) smtfil,cdate,label,maxjt
+      write (ics_unit,15) smtfilnam,cdate,label,maxjt
+      if (.not.batch)write (6,15) smtfilnam,cdate,label,maxjt
 15    format(
      +/' INTEGRAL CROSS SECTIONS CALCULATED FROM S-MATRICES ON FILE ',
      +(a)/
@@ -1481,13 +1538,13 @@ c
 
 * write a header
       if (.not.flaghf) then
-        write(2,20) ien,rmu*xmconv,ered*econv,jfirst,maxjt,jtotd
+        write(ics_unit,20) ien,rmu*xmconv,ered*econv,jfirst,maxjt,jtotd
         if(.not.batch)
      :  write(6,20) ien,rmu*xmconv,ered*econv,jfirst,maxjt,jtotd
 20       format (' IEN=', i2,' RMU=', f9.4,' E=', f9.2,
      :          ' JTOT-1=', i3,' JTOT-2=', i4,' JTOT-D=', i3,/)
       else
-        write(2,21)
+        write(ics_unit,21)
      :     inerg,rmu*xmconv,ered*econv,jfirst+0.5,maxjt+0.5,jtotd
         if(.not.batch)
      :  write(6,21)
@@ -1509,7 +1566,7 @@ c
 120   continue
 * check if there had been any match
       if(nj.eq.0) then
-         write(2,130)
+         write(ics_unit,130)
          if(.not. batch) write(6,130)
 130      format(' *** NO TRANSITIONS FOUND, ABORT ***')
          goto 300
@@ -1520,69 +1577,69 @@ c
      :            sigma,sreal,simag,sc1,sc2,sc3,sc4,nlevop,mmax)
       string=' '
       if(nnout.lt.0) string='(COLUMNS)'
-      write (2, 210) string
+      write (ics_unit, 210) string
       if(.not. batch) write (6, 210) string
 210   format (/,' LEVEL LIST FOR INTEGRAL CROSS SECTIONS ',a,
      :        /,'   N     J   INDEX  EINT(cm-1)')
       do 250 i = 1, nj
         jj = jlist(i)
         if (flaghf .and. ibasty.ne.12) then
-          write (2, 220) i, jlev(jj)+spin, inlev(jj), elev(jj)*econv
+          write (ics_unit, 220) i, jlev(jj)+spin, inlev(jj), elev(jj)*econv
           if(.not. batch)
      :    write (6, 220) i, jlev(jj)+spin, inlev(jj), elev(jj)*econv
 220       format (i4, 1x, f5.1, i6, f11.3)
         else
-          write (2, 221) i, jlev(jj), inlev(jj), elev(jj)*econv
+          write (ics_unit, 221) i, jlev(jj), inlev(jj), elev(jj)*econv
           if(.not. batch)
      :    write (6, 221) i, jlev(jj), inlev(jj), elev(jj)*econv
 221       format (i4, 1x, i5, i6, f11.3)
         endif
 250   continue
       if(nnout.lt.0) then
-      write (2, 210) '(ROWS)'
+      write (ics_unit, 210) '(ROWS)'
         if(.not. batch) write (6, 210) '(ROWS)'
         do 255 i=1,nlevop
-          write (2, 220) i, jlev(i)+spin, inlev(i), elev(i)*econv
+          write (ics_unit, 220) i, jlev(i)+spin, inlev(i), elev(i)*econv
           if(.not. batch)
      :    write (6, 220) i, jlev(i)+spin, inlev(i), elev(i)*econv
 255     continue
       end if
       if(.not.csflag) then
-         write(2,260)
+         write(ics_unit,260)
          if(.not. batch) write(6,260)
 260      format(/,' CC INTEGRAL CROSS SECTIONS')
       else
-         write(2,270)
+         write(ics_unit,270)
          if(.not. batch) write(6,270)
 270      format(/,' CS INTEGRAL CROSS SECTIONS')
          if (.not. flaghf) then
-           write (2, 280) numin, numax, nud
+           write (ics_unit, 280) numin, numax, nud
            if (.not.batch) write (6, 280) numin, numax, nud
 280        format (' ** CS CALCULATION, NUMIN=', i2,', NUMAX=',
      :               i2,' NUD=', i2, ' **')
          else
-           write (2, 290) numin + 0.5, numax + 0.5, nud
+           write (ics_unit, 290) numin + 0.5, numax + 0.5, nud
            if (.not.batch) write (6, 290) numin+0.5, numax+ 0.5, nud
 290        format (' ** CS CALCULATION, NUMIN=', f4.1, ', NUMAX=',
      :            f4.1,' NUD=', i2, ' **')
          endif
       end if
-      write (2, 295)
+      write (ics_unit, 295)
       if (.not.batch) write (6, 295)
 295     format (/' ** COLUMN HEADINGS ARE FINAL STATES, ROW',
      :        ' HEADINGS ARE INITIAL STATES **')
       ncol=nj
       nrow=nj
       if(nnout.lt.0) nrow=nlevop
-      call mxoutr (2, sc1, nrow, ncol, mmax, 0, ipos)
+      call mxoutr (ics_unit, sc1, nrow, ncol, mmax, 0, ipos)
 * use notequ as scratch variable (ipos = .false. for screen output)
       notequ = .false.
       if(.not. batch) call mxoutr (6, sc1, nrow, ncol, mmax, 0, notequ)
-300   call closf(1)
-      close (2)
+300   call closf(tmp_file)
+      close (ics_unit)
 *      call dclos(1)
-      close(unit=1)
-      close(unit=3,status='delete')
+      close(unit=smt_unit)
+      close(unit=tmp_unit,status='delete')
       call mtime(cpu1,ela1)
       cpu1 = cpu 1 - cpu0
       ela1 = ela1 - ela0
@@ -1700,12 +1757,18 @@ c
      1              jlev,nmax,nlevop,tsq,sc1,sc2,scmat,nucros)
         if(jtot+jtotd.gt.jfinal) then
           irec=7
+#ifdef DEBUG_ISSUE35
+          write (6, *) "graffy : intpol call 1"
+#endif
           call intpol(irec,nu,numin,numax,nud,jlpar,jlpar,
      1                jlev,nmax,nlevop,sigma,sc1,sc2,tsq,nucros)
         end if
       else
         if (.not. csflag .or. (csflag .and. (nu .eq. numax) ) ) then
           irec=2
+#ifdef DEBUG_ISSUE35
+          write (6, *) "graffy : intpol call 2"
+#endif
           call intpol(irec,jtot,jfirst,jfinal,jtotd,jlpar,jlpold,
      1               jlev,nmax,nlevop,sigma,sc1,sc2,scmat,nucros)
         end if
@@ -1713,17 +1776,29 @@ c
 * loop back for next partial wave
       goto 10
 * make a compressed matrix of cross sections
-100   if(nnout.gt.0) then
-        do 110 i=1,nj
-        ii=jlist(i)
-        do 110 j=1,nj
-110     sc1(j,i)=sigma(jlist(j),ii)
+100   continue
+#ifdef DEBUG_ISSUE35
+      write (6, *) "graffy : sigma(1,1) = ", sigma(1,1)
+      write (6, *) "graffy : jlist(1) = ", jlist(1)
+#endif
+      if(nnout.gt.0) then
+        do i=1,nj
+          ii=jlist(i)
+          do j=1,nj
+            sc1(j,i)=sigma(jlist(j),ii)
+          end do
+        end do
       else
-        do 120 i=1,nj
-        ii=jlist(i)
-        do 120 j=1,nlevop
-120     sc1(j,i)=sigma(j,ii)
+        do i=1,nj
+          ii=jlist(i)
+          do j=1,nlevop
+            sc1(j,i)=sigma(j,ii)
+          end do
+        end do
       end if
+#ifdef DEBUG_ISSUE35
+      write (6, *) "graffy : sc1(1,1) = ", sc1(1,1)
+#endif
       return
       end
 * ----------------------------------------------------------------------
