@@ -721,10 +721,6 @@ c
 * ---------------------------------------------------------------
 *     revision date: 5-mar-2008
 *
-*  variables in common block /clseg/
-*    lseg:      number of integer words per disc sector
-*    intrel:    number of integer words per real words
-*    lchar:     number of characters per integer word
 *  variables in common block /cobuf/
 *    lbuf:    length of i/o buffer
 *    ibuf:      i/o buffer
@@ -733,22 +729,18 @@ c
 *    isizes:    size of s-matrix file (only needed for univac, optional
 *               on vax
 * -----------------------------------------------------
-      common /clseg/ lseg, intrel, lchar
       common /cosize/ isize, isizes
 #if defined(HIB_UNIX_DARWIN64)
       common/cobuf/ lbuf,ibuf(1024)
-      data lseg, intrel, lchar /1024, 1, 8/
       data lbuf /1024/
 #endif
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN)
       common/cobuf/ lbuf,ibuf(1024)
-      data lseg, intrel, lchar /1024,2,4/
       data lbuf/1024/
 #endif
 #if defined(HIB_CRAY)
       common/cobuf/ lbuf,ibuf(512)
       data lbuf/512/
-      data lseg, intrel, lchar /512,1,8/
 #endif
       end
 c
@@ -772,13 +764,13 @@ c     ------------------------------------------------------------
 *     isize  -> number of tracks (only for univac and vax)
 *     lseg:  number of integer words per disc sector
 c     ------------------------------------------------------------
+      use mod_clseg, only: lseg
       logical exstfl, openfl, tmpfil
       logical od
       character*12 fmt, stat, accs
       character*(*) filnam
       character*(*) lmode
       character*2  mode
-      common /clseg/ lseg
       ierr=0
       iunit = lunit
       mode = lmode(1:2)
@@ -1371,11 +1363,11 @@ c     ------------------------------------------------------------
 *     revision: 27-oct-95
 c     major revision: 07-jan-2012 by q. ma
 c     ------------------------------------------------------------
+      use mod_clseg, only: lseg
       implicit double precision (a-h,o-z)
       logical csflag, flaghf, flagsu, twomol, nucros
       character*20 cdate
 #include "common/parpot"
-      common/clseg/ lseg,intrel,lchar
       common/cofil/ nfl,iofbuf,maxrec(60),iofrec(60),nwrec,lenbuf
       common/cobuf/ lbuf,ibuf(1)
       dimension idate(20),ilabel(48), ipotnm(48)
@@ -1708,7 +1700,6 @@ c     ------------------------------------------------------------
      :        nopen, nfile, nu, mmout
       integer jq, jpack, lq, lpack, inq, inpack, nchnid
       logical is_j12
-      common /clseg/ lseg,intrel,lchar
       common /coered/ ered, rmu
 *  variable in common block /coselb/
 *     ibasty    basistype
@@ -1896,12 +1887,11 @@ c
 *    isizes:    size of s-matrix file (only needed for univac, optional
 *               on vax
 * --------------------------------------------------------------
+      use mod_clseg, only: intrel
+      use mod_cdbf, only: ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf,llbuf
       implicit double precision (a-h,o-z)
       character*(*) name
       parameter (maxun=2, maxrec=5000)
-#include "common/parllbf"
-      common/cdbf/ ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf(llbuf)
-      common/clseg/ lseg,intrel,lchar
       common /cobuf/ lbuf,ibuf(1)
       common /cdio/iadr(maxrec,maxun),len(maxrec,maxun),next(maxun),
      1             iun(maxun),iostat(maxun),last(maxun),lhea,junk
@@ -2146,21 +2136,29 @@ c
       return
       end
 * -------------------------------------------------------------------
-      subroutine dbri(ii,l,ifil,irec)
+      subroutine dbri(buffer,l,ifil,irec)
 c
 c.....sequentially buffer in "l" integer words from record "irec" on file "ifi
 c.....positive irec indicates start at beginning
 c.....zero or negative record means continue at present position
-c     ii : input buffer containing l integers
+c     buffer : input buffer containing l integers
 c
-      implicit double precision (a-h,o-z)
-      common/clseg/ lseg,intrel,lchar
-      common/cdbf/ ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf(1)
-      dimension ii(l)
+      use mod_clseg, only: intrel
+      use mod_cdbf, only: libuf,ibfil,ibrec,ibof,ibstat,idbuf
+      implicit none
+      integer, intent(in) :: l
+      integer, dimension(l), intent(out) :: buffer
+      integer, intent(in) :: ifil
+      integer, intent(in) :: irec
+
+      integer :: lre
+      integer :: i, iof, len, ibadr
+
+      ! implicit double precision (a-h,o-z)
       lre=l
       goto 5
 c
-      entry dbrr(ii,l,ifil,irec)
+      entry dbrr(buffer,l,ifil,irec)
 c
 c.....sequentially buffer in "l" real words from record "irec" on file "ifil"
 c.....positive irec indicates start at beginning
@@ -2179,8 +2177,9 @@ c
       end if
       iof=0
 10    len=min(lre,libuf-ibof)
-      do 30 i=1,len
-30    ii(iof+i)=idbuf(ibof+i)
+      do i=1,len
+        buffer(iof+i)=idbuf(ibof+i)
+      end do
       iof=iof+len
       lre=lre-len
       ibof=ibof+len
@@ -2191,17 +2190,29 @@ c
         goto 10
       end if
       return
+      end
 c
-      entry dbwi(ii,l,ifil,irec)
+      subroutine dbwi(buffer,l,ifil,irec)
 c
 c.....sequentially buffer out "l" integer words to record "irec" on file "ifil
 c.....positive irec indicates start at beginning or record
 c.....zero or negative record means start at present position
 c
+      use mod_clseg, only: intrel
+      use mod_cdbf, only: libuf,ibfil,ibrec,ibof,ibstat,idbuf
+      implicit none
+      integer, intent(in) :: l
+      integer, dimension(l), intent(in) :: buffer
+      integer, intent(in) :: ifil
+      integer, intent(in) :: irec
+
+      integer :: lre
+      integer :: i, iof, len, ibadr
+
       lre=l
       goto 50
 c
-      entry dbwr(ii,l,ifil,irec)
+      entry dbwr(buffer,l,ifil,irec)
 c
 c.....sequentially buffer out "l" real words to record "irec" on file "ifil"
 c.....positive irec indicates start at beginning of record
@@ -2220,7 +2231,7 @@ c
       iof=0
 70    len=min(lre,libuf-ibof)
       do 80 i=1,len
-80    idbuf(ibof+i)=ii(iof+i)
+80    idbuf(ibof+i)=buffer(iof+i)
       iof=iof+len
       lre=lre-len
       ibof=ibof+len
@@ -2268,13 +2279,13 @@ c
 *  isize: size in tracks (output, not working with fortran i/o)
 *  icat:  if icat=0, scratch
 *         if icat>0, permanent
+      use mod_clseg, only: lseg
       character*(*) filnam
       character*14 nam
       character*12 stat
       character*(*) name
       common/disc/ ipos(98),iun(98),iostat(98),icatf(98),nam(98)
       logical openfl,exstfl
-      common/clseg/ lseg,intrel,lchar
 *
       isize=0
       if(filnam.eq.' ') call tmpnm(luni,filnam)
@@ -2346,11 +2357,11 @@ c.....checks status of unit
 *
 * read of l double precision words into a. iword is zero adjusted adress
 * on file. l and iword should be multiple of lseg, otherwise unefficient
+      use mod_clseg, only: lseg
       implicit double precision (a-h,o-z)
       character*14 nam
       common /cobuf/ lbuf,ibuf(1)
       common/disc/ ipos(98),iun(98),iostat(98),icatf(98),nam(98)
-      common/clseg/ lseg
       dimension a(1),buf(lbuf)
       if(lseg.gt.lbuf) stop 'lbuf too small in rdabsf'
       ibl=iword/lseg+1
@@ -2446,6 +2457,7 @@ c     id=getpid()
 *                                                                   *
 *********************************************************************
       subroutine tmpnm(ifil,name)
+      use mod_clseg, only: lseg
       character*14 name
       integer getpid
       id=getpid()
@@ -2459,7 +2471,6 @@ c     id=getpid()
       character*14 nam,blank
       character*15 namx
       common/disc/ ipos(98),iun(98),iostat(98),icatf(98),nam(98)
-      common/clseg/ lseg
       data lendef/2000/,blank/'              '/
       if (iun(luni).ne.0) return
       if(name.eq.blank) call tmpnm(luni,name)

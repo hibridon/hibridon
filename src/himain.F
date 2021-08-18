@@ -1,4 +1,7 @@
       program logair
+      use mod_clseg, only: allocate_clseg
+      use mod_cdbf, only: allocate_cdbf
+            
       use mod_cosout, only: allocate_cosout
       use mod_coiout, only: allocate_coiout
       use mod_cov2, only: allocate_cov2
@@ -135,10 +138,6 @@
 *  variable in common block /coener/
 *    energ:     array containing total energies (in cm-1) at which scattering
 *               calculations are to be performed
-*  variables in common block /clseg/
-*    lseg:      sector length on mass storage device
-*    intrel:    number of integer words per real words
-*    lchar:     number of characters per integer word
 *  variables in common block /cobuf/
 *    lbuf:      buffer length (should be multiple of lseg)
 *    ibuf:      buffer used in several i/o routines
@@ -162,7 +161,6 @@
 *  ----------------------------------------------------------
       common /comom/  xmom(3), imom(13)
       common /coener/ energ(ken)
-      common /clseg/  lseg,intrel,lchar
       common /cobuf/  lbuf,ibuf(1024)
       common /cofil/  nfl,iofbuf,maxrec(60),iofrec(60),nwrec
       common /conlam/ nlam, nlammx, lamnum(klammx)
@@ -175,6 +173,8 @@
       common /coz/ z(kmax,kmax)
       common /cow/ w(kmax,kmax)
       common /cozmat/ zmat(kmax,kmax)
+      call allocate_clseg()
+      call allocate_cdbf()
       ! call allocate_coz(kmax)
       ! call allocate_cow(kmax)
       ! call allocate_cozmat(kmax)

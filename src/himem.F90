@@ -199,14 +199,68 @@ end module mod_cofact
 !    end subroutine allocate_coener
 ! end module mod_coener
 
-! module mod_clseg
-!    implicit none
-!    integer, allocatable :: lseg, intrel, lchar
-!    contains
-!    subroutine allocate_clseg()
-!       allocate(lseg) ; allocate(intrel) ; allocate(lchar) ;
-!    end subroutine allocate_clseg
-! end module mod_clseg
+module mod_cdbf
+   implicit none
+   integer, allocatable :: ldbuf
+   integer, allocatable :: libuf
+   integer, allocatable :: ibfil
+   integer, allocatable :: ibrec
+   integer, allocatable :: ibof
+   integer, allocatable :: ibstat
+   integer, dimension(:), allocatable :: idbuf
+   integer, allocatable :: llbuf
+   contains
+   subroutine allocate_cdbf()
+      allocate(llbuf)
+#if defined(HIB_CRAY) || defined(HIB_FPS)
+      llbuf=512
+#elif defined(HIB_VAX) || defined(HIB_UNIX) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IBM)
+      llbuf=1024
+#elif defined(HIB_UNIVAC)
+      llbuf=1792
+#else
+#error "unknow architecture for setting llbuf"
+#endif
+      allocate(ldbuf)
+      allocate(libuf)
+      allocate(ibfil)
+      allocate(ibrec)
+      allocate(ibof)
+      allocate(ibstat)
+      allocate(idbuf(llbuf))
+   end subroutine allocate_cdbf
+end module mod_cdbf
+
+
+module mod_clseg
+   !  variables in this module
+   !    lseg:      number of integer words per disc sector
+   !    intrel:    number of integer words per real words
+   !    lchar:     number of characters per integer word
+   implicit none
+   integer, allocatable :: lseg
+   integer, allocatable :: intrel ! size of real(8) compared to the size of an integer
+   integer, allocatable :: lchar
+   contains
+   subroutine allocate_clseg()
+      allocate(lseg) ; allocate(intrel) ; allocate(lchar) ;
+#if defined(HIB_UNIX_DARWIN64)
+      lseg = 1024
+      intrel = 1
+      lchar = 8
+#endif
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN)
+      lseg = 1024
+      intrel = 2
+      lchar = 4
+#endif
+#if defined(HIB_CRAY)
+      lseg = 512
+      intrel = 1
+      lchar = 8
+#endif
+   end subroutine allocate_clseg
+end module mod_clseg
 
 ! module mod_cobuf
 !    implicit none
@@ -910,6 +964,8 @@ end module mod_comxm
 
 
 
+ ! all the commons blocks from hiiolib_f.F:
+    !!   common/cdbf/ ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf(llbuf)
 
  ! all the commons blocks from himain.t:
     !!   common /comom/  xmom(3), imom(13)
