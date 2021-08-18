@@ -294,16 +294,22 @@ end module mod_clseg
 !    end subroutine allocate_conlam
 ! end module mod_conlam
 
-! module mod_coatpi
-!    implicit none
-!    integer, dimension(:), allocatable :: isiz
-!    integer, allocatable               :: narray
-!    contains
-!    subroutine allocate_coatpi(n)
-!       integer, intent(in) :: n
-!       allocate(isiz(n)) ; allocate(narray)
-!    end subroutine allocate_coatpi
-! end module mod_coatpi
+module mod_coatpi
+!  variables in this module
+!     narray:   maximum size of asymmetric top basis fn expansion
+!               set to 500 (see krotmx above) in himain 
+!     isiz:    length of eigenfunction expansion for each rot. level
+   implicit none
+   integer, dimension(:), allocatable :: isiz
+   integer, allocatable               :: narray
+   contains
+   subroutine allocate_coatpi(n, anarray)
+      integer, intent(in) :: n
+      integer, intent(in) :: anarray
+      allocate(isiz(n)) ; allocate(narray)
+      narray = anarray
+   end subroutine allocate_coatpi
+end module mod_coatpi
 
 ! module mod_coatp3
 !    implicit none

@@ -125,10 +125,6 @@ c
 *  variables in common block /coconv/
 *   econv:      conversion factor from cm-1 to hartrees
 *   xmconv:     converson factor from amu to atomic units
-*  variables in common block /coatpi/
-*   narray:     maximum size of asymmetric top basis fn expansion
-*               set to 12 in himain (suitable for j <= 40)
-*   isiz:       length of eigenfunction expansion for each rot. level
 *  variable in common block /coatp3/
 *   isizh:      temporary storage for length (related to isiz)
 *  variable in common block /coatpr/
@@ -168,6 +164,7 @@ c
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_coatpi, only: narray, isiz
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
       character*1 slab
@@ -180,7 +177,6 @@ c
       common /conlam/ nlam, nlammx, lamnum(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
-      common /coatpi/ narray, isiz(1)
       common /coatp3/ isizh(1)
       common /coatpr/ c(1)
       common /coatp1/ ctemp(1)
@@ -727,16 +723,13 @@ c     check for nonzro matrix element
 *    vee:      on return, contains desired matrix element
 *    indp:     number of left-side level in channel list
 *    ind:      number of right-side level in channel list
-*  variable in common block /coatpi/
-*    narray:   maximum size of asymmetric top basis fn expansion
-*              set to 12 in himain (suitable for j <= 40)
 *  variable in common block /coatpr/
 *    c:        expansion coefficients for asymmetric top rotor wave fns.
 *  subroutines called:
 *    xf3j, xf6j, prmtp2
 *  -----------------------------------------------------------------------
+      use mod_coatpi, only: narray
       implicit double precision (a-h,o-z)
-      common /coatpi/ narray
       common /coatpr/ c(1)
 *
       data one, zero, two / 1.0d0, 0.0d0, 2.0d0 /

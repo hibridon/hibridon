@@ -101,9 +101,6 @@
 *  variables in common block /coconv/
 *   econv:      conversion factor from cm-1 to hartrees
 *   xmconv:     converson factor from amu to atomic units
-*  variables in common block /coatpi/
-*   narray:     maximum size of symmetric top basis fn expansion
-*               set to 200 in himain
 *  variable in common block /coatpr/
 *   c:          expansion coefficients for spherical top rotor wave fns.
 *               in a signed-k symmmetric top basis |j,k,m>.
@@ -124,6 +121,7 @@
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_coatpi, only: narray
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -134,7 +132,6 @@
       common /conlam/ nlam, nlammx, lamnum(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
-      common /coatpi/ narray
       common /coatpr/ c(1)
       common /coatp1/ ctemp(1)
       common /coatp2/ chold(1)
@@ -852,17 +849,14 @@
 *                to the orbital angular momenta
 *    irow:     number of left-side level in channel list
 *    icol:     number of right-side level in channel list
-*  variable in common block /coatpi/
-*    narray:   maximum size of asymmetric top basis fn expansion
-*              set to 200
 *  variable in common block /coatpr/
 *    c:        expansion coefficients for asymmetric top rotor wave fns.
 *  subroutines called:
 *    xf3j, xf6j, prmats
 *  -----------------------------------------------------------------------
+      use mod_coatpi, only: narray
       implicit double precision (a-h,o-z)
       logical csflag
-      common /coatpi/ narray
       common /coatpr/ c(1)
       dimension kmin(17)
       data kmin / 0, 0, -2, -2, -4, -4, -6, -6, -8, -8, -10,

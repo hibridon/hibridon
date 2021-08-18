@@ -13,6 +13,7 @@
       use mod_covvl, only: allocate_covvl
       use mod_cofact, only: allocate_cofact
 
+      use mod_coatpi, only: allocate_coatpi
       ! use mod_coz, only: allocate_coz, z
       ! use mod_cow, only: allocate_cow, w
       ! use mod_cozmat, only: allocate_cozmat, zmat
@@ -146,10 +147,6 @@
 *     iofbuf:   buffer offset
 *     maxrec:   number of records on file associated with nfl
 *     iofrec:   offset in file
-*  variables in common block /coatpi/
-*     narray:   maximum size of asymmetric top basis fn expansion
-*               set to 500 (see krotmx above) in himain 
-*     isiz:    length of eigenfunction expansion for each rot. level
 *  variable in common block /coatp3/    
 *     isizh:   temporary storage for length (related to isiz)
 *  variable in common block /coatpr/
@@ -164,7 +161,6 @@
       common /cobuf/  lbuf,ibuf(1024)
       common /cofil/  nfl,iofbuf,maxrec(60),iofrec(60),nwrec
       common /conlam/ nlam, nlammx, lamnum(klammx)
-      common /coatpi/ narray, isiz(krotmx)
       common /coatp3/ isizh(krotmx)
       common /coatpr/ c(krotmx)
       common /coatp1/ ctemp(krotmx)
@@ -175,6 +171,8 @@
       common /cozmat/ zmat(kmax,kmax)
       call allocate_clseg()
       call allocate_cdbf()
+
+      call allocate_coatpi(krotmx, 100)
       ! call allocate_coz(kmax)
       ! call allocate_cow(kmax)
       ! call allocate_cozmat(kmax)
@@ -246,8 +244,6 @@
       call allocate_codim(kairy, kmax, kbig)
       call allocate_comxbs(kmxbas)
       call allocate_comxm()
-
-      narray = 100
 *
       men = ken
       nlammx = klammx
