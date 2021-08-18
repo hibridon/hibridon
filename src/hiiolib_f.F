@@ -1059,6 +1059,9 @@ c.....open direct access file for interpolation and restart
              end if
            end if
            savfil=xname
+#ifdef DEBUG_ISSUE35
+           write(6, *) 'issue35/openfi : savfil=', savfil
+#endif
            call dopen(1,nfile,savfil)
            write (9, 180) xname(1:lenx)
 180        format (' ** RESTART INFORMATION SAVED IN FILE ',(a))
@@ -1318,6 +1321,9 @@ c.....reserve space for restart information
       call dbwr(word,20,1,0)
       call dbwc(1,1)
       call dclos(1)
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/dres : savfil=', savfil
+#endif
       call dopen(1,3,savfil)
       return
       end
@@ -2047,6 +2053,9 @@ c
 c
 c.....open file "ifil" as unit "iunit" with filename "name"
 c
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/dopen : ifil=', ifil, 'iunit=', iunit, 'name=', name
+#endif
       if(iun(ifil).eq.iunit) return
       if(iun(ifil).ne.0) then
         write(6,75) ifil,iunit,iun(ifil)
@@ -2110,6 +2119,10 @@ c
 c
 c.....save file information and close file "ifil"
 c
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/dclos : ifil=', ifil
+#endif
+
       if(iun(ifil).eq.0) then
         write(6,95) ifil
 95      format(/' DIRECT CLOSE ERROR ON FILE',i2,
@@ -2427,9 +2440,11 @@ c
 #if ( defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86) ) && !defined(UNIX_CIO)
       subroutine tmpnm(ifil,name)
 c.....should generate a unique filename
-      character*14 name
+      implicit none
+      integer, intent(in) :: ifil
+      character (len=14), intent(out) :: name
+      integer :: id = 0
 c     integer getpid
-      id=0
 c     id=getpid()
       write(name,10) ifil,id
 10    format('T',i2.2,i5.5,'.TMP  ')

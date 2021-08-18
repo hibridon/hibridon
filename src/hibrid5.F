@@ -137,6 +137,7 @@
      :        wrxsec, xsecwr, flaghf, t2test, flagsu, firstj, twomol,
      :        nucros, photof, wavefn, faux, twojlp, boundf, wrsmat
       character*20 cdate
+      integer :: soutpt_sc_file = 1
 #include "common/parpot"
       common /cojsav/ jsav1, jsav2
       common /cosurf/ flagsu
@@ -243,6 +244,10 @@
           call swrite (sr, si, jtot, jlpar, nu, jq, lq, inq, isc1,
      :                 isc2, scmat, sc1, sc2, nfile, nmax, nopen)
       end if
+#ifdef DEBUG_ISSUE35
+      write (6, *) "issue35/soutpt/1: tsq(1,1) = ", tsq(1,1)
+#endif
+
       if (.not. xsecwr .and. .not. wrxsec .and. .not.partw
      :    .and. .not.wrpart) return
       call  partcr (tsq,  scmat, isc1, isc2, sc1, nopen, nopen,
@@ -282,8 +287,12 @@
       if (.not. csflag .or. (csflag .and. (nu .eq. numax) ) ) then
          irec=(ien-1)*5+2
          faux = .false.
+#ifdef DEBUG_ISSUE35
+      write (6, *) "issue35/soutpt: intpol call"
+      write (6, *) "issue35/soutpt: tsq(1,1) = ", tsq(1,1)
+#endif
          call intpol(irec,jtot,jfirst,jfinal,jtotd,jlpar,jlpold,
-     1                jlev,nmax,nlevop,tsq,sr,si,scmat,faux)
+     1                jlev,nmax,nlevop,tsq,sr,si,scmat,faux,soutpt_sc_file)
       end if
       return
       end
@@ -533,7 +542,7 @@
      :                 jlev,elev, inlev, jtot, jfirst,
      :                 jfinal, jtotd, nu, numin, numax, nud, jlpar,
      :                 nerg, ipos, csflag, flaghf, wrpart, partw,
-     :                 twomol, nucros, nlevel, nlev, nopen, nmax)
+     :                 twomol, nucros, nlevel, nlev, nopen, nmax, tmp_file)
 * ---------------------------------------------------------------------------
 *
 *  subroutine to sum partial cross sections over nu
@@ -553,7 +562,7 @@
         ered = ener/econv
         irec=(ien-1)*5+2
         nlevop=nlev(ien)
-        call dbin(irec,jl,jlp,nn,tsq,nmax,nlevop)
+        call dbin(tmp_file,irec,jl,jlp,nn,tsq,nmax,nlevop)
 * print partial cross sections, summed over lbar, for given nu
         if(partw.or.wrpart) then
           vrai=.false.
@@ -565,14 +574,17 @@
 * sum up over nu
         irec=(nerg+ien-1)*5+2
         vrai=.true.
+#ifdef DEBUG_ISSUE35
+        write (6, *) "issue35/nusum: intpol call"
+#endif
         call intpol(irec,nu,numin,numax,nud,jlpar,jlpar,
-     1              jlev, nmax,nlevop,tq1,tq2,tq3,tsq,vrai)
+     1              jlev, nmax,nlevop,tq1,tq2,tq3,tsq,vrai,tmp_file)
 100   continue
       return
       end
 * ----------------------------------------------------------------------
       subroutine intpol(irec,jl3a,j1,j2,jd,jp,jpi,jlev,
-     :                  nmax,n,q,q1,q2,q3,nucros)
+     :                  nmax,n,q,q1,q2,q3,nucros,tmp_file)
 * ----------------------------------------------------------------------
 *
 * subroutine to sum up and interpolate partial cross sections
@@ -604,11 +616,13 @@
       logical nowrit,nucros
       dimension jlev(20)
       dimension q(nmax,n),q1(nmax,n),q2(nmax,n),q3(nmax,n)
+      integer, intent(in) :: tmp_file
 *
       jl3=jl3a
       nowrit=.false.
 #ifdef DEBUG_ISSUE35
-      write(6,*) 'graffy/intpol/-2 q(1,1) =', q(1,1)
+      write(6,*) 'issue35/intpol tmp_file =', tmp_file
+      write(6,*) 'issue35/intpol/-2 q(1,1) =', q(1,1)
 #endif
       goto 5
 *
@@ -647,9 +661,9 @@ c.....initialize at first j (or nu)
           return
         else
 c.....simply add for jd=1
-          call dbin(irec,jl,jpl,next,q,nmax,n)
+          call dbin(tmp_file, irec,jl,jpl,next,q,nmax,n)
 #ifdef DEBUG_ISSUE35
-          write(6,*) 'graffy/intpol/-1 q(1,1) =', q(1,1)
+          write(6,*) 'issue35/intpol/-1 q(1,1) =', q(1,1)
 #endif
           if(jp.eq.jpl.and.jl+1.ne.jl3) then
             write(6,15) jp,jl,jl3
@@ -663,7 +677,7 @@ c.....simply add for jd=1
             end do
           end do
 #ifdef DEBUG_ISSUE35
-            write(6,*) 'graffy/intpol/0 q(1,1) =', q(1,1)
+            write(6,*) 'issue35/intpol/0 q(1,1) =', q(1,1)
 #endif
           jf=jl3
           call dbout(irec,jf,jp,1,q,nmax,n)
@@ -689,7 +703,7 @@ c.....initialize for jd.ne.1
         return
       end if
 c.....jl is value up to which jtot has been summed so far
-      call dbin(irec,jl,jpl,next,q,nmax,n)
+      call dbin(tmp_file, irec,jl,jpl,next,q,nmax,n)
       if(jpl.ne.jp) then
         do 30 i=1,n
         do 30 j=1,n
@@ -703,9 +717,9 @@ c.....jl is value up to which jtot has been summed so far
       end if
       nn=min(next+1,3)
       call dbout(irec+1,jl,jpl,nn,q,nmax,n)
-      call dbin(irec+2,jl2,jp2,nn,q2,nmax,n)
+      call dbin(tmp_file, irec+2,jl2,jp2,nn,q2,nmax,n)
       if(next.eq.1) goto 50
-      call dbin(irec+3,jl1,jp1,nn,q1,nmax,n)
+      call dbin(tmp_file, irec+3,jl1,jp1,nn,q1,nmax,n)
 c
 c.....we will now sum from ji to jf
 c
@@ -743,7 +757,7 @@ c       write(6,99) nuu,i,j,q(j,i),q1(j,i),q2(j,i),q3(j,i),f0,f1,f2
      >               +f2*(q1(j,i)-q2(j,i))
 42      continue
 #ifdef DEBUG_ISSUE35
-      write(6,*) 'graffy/intpol/1 q(1,1) =', q(1,1)
+      write(6,*) 'issue35/intpol/1 q(1,1) =', q(1,1)
 #endif
       end if
 c
@@ -771,7 +785,7 @@ c
           end do
         end do
 #ifdef DEBUG_ISSUE35
-        write(6,*) 'graffy/intpol/2 q(1,1) =', q(1,1)
+        write(6,*) 'issue35/intpol/2 q(1,1) =', q(1,1)
 #endif        
       else
 c......here for sparse algorithm
@@ -793,13 +807,13 @@ c99      format(1x,3i4,4f10.4,3x,3f12.3)
      >               +f1*(q2(j,i)-q3(j,i))
 62      continue
 #ifdef DEBUG_ISSUE35
-        write(6,*) 'graffy/intpol/3 q(1,1) =', q(1,1)
+        write(6,*) 'issue35/intpol/3 q(1,1) =', q(1,1)
 #endif
 
 c......now all levels for j.ge.nu=jl3
       end if
 #ifdef DEBUG_ISSUE35
-      write(6,*) 'graffy/intpol/4 q(1,1) =', q(1,1)
+      write(6,*) 'issue35/intpol/4 q(1,1) =', q(1,1)
 #endif
 *
       if(nowrit) return
@@ -808,7 +822,7 @@ c......now all levels for j.ge.nu=jl3
       call dbout(irec+2,jl3,jp,0,q3,nmax,n)
       call dbout(irec+3,jl2,jp2,0,q2,nmax,n)
 #ifdef DEBUG_ISSUE35
-      write(6,*) 'graffy/intpol/5 q(1,1) =', q(1,1)
+      write(6,*) 'issue35/intpol/5 q(1,1) =', q(1,1)
 #endif
       return
       end
@@ -892,22 +906,27 @@ c     write(6,*) 'prefac:',j1,j2,j3,x1,x3
 *  with their labels
 *
 * ---------------------------------------------------------------------------
-      subroutine dbin(irec,i1,i2,i3,q,nmax,n)
+      subroutine dbin(ifile,irec,i1,i2,i3,q,nmax,n)
       implicit none
+      integer, intent(in) :: ifile
       integer :: irec
-      integer :: i1, i2, i3
+      integer, intent(out) :: i1, i2, i3
       integer :: nmax, n
-      real(8), dimension(nmax, n) :: q
-      integer :: ifile, i
-      ifile=1
-      call dbri(i1,1,ifile,irec)
-      call dbri(i2,1,ifile,0)
-      call dbri(i3,1,ifile,0)
+      real(8), dimension(nmax, n), intent(out) :: q
+      integer :: i
+      integer :: ifile2 = 1
+      ifile2 = ifile
+#ifdef DEBUG_ISSUE35
+      write(6,*) 'issue34/dbin : ifile = ', ifile
+#endif
+      call dbri(i1,1,ifile2,irec)
+      call dbri(i2,1,ifile2,0)
+      call dbri(i3,1,ifile2,0)
       do i=1,n
         call dbrr(q(1,i),n,ifile,0)
       end do
 #ifdef DEBUG_ISSUE35
-      write(6,*) 'graffy/dbin : q(1,1) = ', q(1,1)
+      write(6,*) 'issue35/dbin : q(1,1) = ', q(1,1)
 #endif
       return
       end
@@ -976,6 +995,7 @@ c     write(6,*) 'prefac:',j1,j2,j3,x1,x3
       common /coselb/ ibasty
       dimension zmat(nmax,nmax),jlev(20),inlev(20),elev(20),energ(25)
       dimension tq3(nmx,nmx), nlev(25)
+      integer :: cs_file = 1
 *   econv is conversion factor from cm-1 to hartrees
 *   xmconv is converson factor from amu to atomic units
       nlevmx=0
@@ -1071,7 +1091,7 @@ c     write(6,*) 'prefac:',j1,j2,j3,x1,x3
 190       continue
           if ((jmin .le. numax .or. iprint.ge.2) .or. .not.csflag)
      :        then
-            call dbin(irec,jhold,jphold,nn,zmat,nmax,nlevop)
+            call dbin(cs_file, irec,jhold,jphold,nn,zmat,nmax,nlevop)
             call mxoutc (9,zmat,nlevop,nmax,ipos,csflag,flaghf,twomol,
      :                 numax,jlev,inlev)
           else
@@ -1091,7 +1111,7 @@ c         rewind nxfile
           irec=(ien-1)*5+2
           if(nucros) irec=irec+nerg*5
           nlevop=nlev(ien)
-          call dbin(irec,jhold,jphold,nn,zmat,nmax,nlevop)
+          call dbin(cs_file, irec,jhold,jphold,nn,zmat,nmax,nlevop)
           call dater (cdate)
           write (nxfile, 215) cdate
 215       format (1x,a)
@@ -1370,15 +1390,16 @@ c
       implicit double precision (a-h,o-z)
       logical nucros
       dimension q(nmax,n),q1(nmax,n),q2(nmax,n),q3(nmax,n)
+      integer :: cs_file = 1
 c
       write(6,5)
       write(9,5)
 5     format(/' CHECKING INTERPOLATION DATA IN RESTART FILE:'/)
-      call dbin(irec+1,jl,jpl,next,q,nmax,n)
+      call dbin(cs_file, irec+1,jl,jpl,next,q,nmax,n)
       write(6,6) jl,jpl
       write(9,6) jl,jpl
 6     format(' READ INTEGRAL CROSS SECTIONS FOR J=',i3,'  JP=',i2)
-      call dbin(irec+2,jl3,jp3,nn,q3,nmax,n)
+      call dbin(cs_file, irec+2,jl3,jp3,nn,q3,nmax,n)
       write(6,7) jl3,jp3
       write(9,7) jl3,jp3
 7     format(' READ PARTIAL  CROSS SECTIONS FOR J=',i3,'  JP=',i2)
@@ -1388,21 +1409,21 @@ c
 10      q(j,i)=q(j,i)+q3(j,i)
         goto 15
       else if(next.eq.2) then
-        call dbin(irec+3,jl2,jp2,nn,q2,nmax,n)
+        call dbin(cs_file, irec+3,jl2,jp2,nn,q2,nmax,n)
         write(6,7) jl2,jp2
         write(9,7) jl2,jp2
         call intpl2(jl,jl2,jl3,nmax,n,q,q2,q3,nucros)
         goto 15
       else if(next.ge.3) then
-        call dbin(irec+3,jl2,jp2,nn,q2,nmax,n)
+        call dbin(cs_file, irec+3,jl2,jp2,nn,q2,nmax,n)
         write(6,7) jl2,jp2
         write(9,7) jl2,jp2
-        call dbin(irec+4,jl1,jp1,nn,q1,nmax,n)
+        call dbin(cs_file, irec+4,jl1,jp1,nn,q1,nmax,n)
         write(6,7) jl1,jp1
         write(9,7) jl1,jp1
         call intpl3(jl,jl1,jl2,jl3,nmax,n,q,q1,q2,q3,nucros)
       end if
-15    call dbin(irec,jf,jp,nn,q1,nmax,n)
+15    call dbin(cs_file, irec,jf,jp,nn,q1,nmax,n)
       write(6,6) jf,jp
       write(9,6) jf,jp
       if(jl3.ne.jf.or.jp3.ne.jp) then
@@ -1574,7 +1595,7 @@ c
 * now compute cross sections
       call intcr(csflag,flaghf,twomol,flagsu,nucros,
      1            numin,numax,nud,jfirst,jfinal,jtotd,maxjt,
-     :            sigma,sreal,simag,sc1,sc2,sc3,sc4,nlevop,mmax)
+     :            sigma,sreal,simag,sc1,sc2,sc3,sc4,nlevop,mmax,tmp_file)
       string=' '
       if(nnout.lt.0) string='(COLUMNS)'
       write (ics_unit, 210) string
@@ -1655,7 +1676,7 @@ c
 * ----------------------------------------------------------------------
       subroutine intcr(csflag,flaghf,twomol,flagsu,nucros,
      1           numin,numax,nud,jfirst,jfinal,jtotd,maxjt,
-     2           sigma,sreal,simag,sc1,sc2,scmat,tsq,nlevop,nmax)
+     2           sigma,sreal,simag,sc1,sc2,scmat,tsq,nlevop,nmax,tmp_file)
 *
 * subroutine to calculate integral cross sections from s-matrix
 * elements
@@ -1687,6 +1708,7 @@ c
       common /coselb/ ibasty
       dimension sigma(nmax,1),sreal(nmax,1), simag(nmax,1)
       dimension sc1(nmax,1),sc2(nmax,1),scmat(nmax,1),tsq(nmax,1)
+      integer, intent(in) :: tmp_file
 * clear sigma array
       one=1.0d0
       zero=0.0d0
@@ -1753,24 +1775,27 @@ c
 * sum up partial cross sections to get integral cross sections
       if(csflag.and.nucros) then
         irec=2
-        call intpol(irec,jtot,jfirst,jfinal,jtotd,jlpar,jlpold,
-     1              jlev,nmax,nlevop,tsq,sc1,sc2,scmat,nucros)
+#ifdef DEBUG_ISSUE35
+        write (6, *) "issue35/intcr: intpol call 0"
+#endif
+      call intpol(irec,jtot,jfirst,jfinal,jtotd,jlpar,jlpold,
+     1              jlev,nmax,nlevop,tsq,sc1,sc2,scmat,nucros,tmp_file)
         if(jtot+jtotd.gt.jfinal) then
           irec=7
 #ifdef DEBUG_ISSUE35
-          write (6, *) "graffy : intpol call 1"
+          write (6, *) "issue35/intcr: intpol call 1"
 #endif
           call intpol(irec,nu,numin,numax,nud,jlpar,jlpar,
-     1                jlev,nmax,nlevop,sigma,sc1,sc2,tsq,nucros)
+     1                jlev,nmax,nlevop,sigma,sc1,sc2,tsq,nucros, tmp_file)
         end if
       else
         if (.not. csflag .or. (csflag .and. (nu .eq. numax) ) ) then
           irec=2
 #ifdef DEBUG_ISSUE35
-          write (6, *) "graffy : intpol call 2"
+          write (6, *) "issue35/intcr: intpol call 2"
 #endif
           call intpol(irec,jtot,jfirst,jfinal,jtotd,jlpar,jlpold,
-     1               jlev,nmax,nlevop,sigma,sc1,sc2,scmat,nucros)
+     1               jlev,nmax,nlevop,sigma,sc1,sc2,scmat,nucros,tmp_file)
         end if
       end if
 * loop back for next partial wave
@@ -1778,8 +1803,8 @@ c
 * make a compressed matrix of cross sections
 100   continue
 #ifdef DEBUG_ISSUE35
-      write (6, *) "graffy : sigma(1,1) = ", sigma(1,1)
-      write (6, *) "graffy : jlist(1) = ", jlist(1)
+      write (6, *) "issue35/intcr: sigma(1,1) = ", sigma(1,1)
+      write (6, *) "issue35/intcr: jlist(1) = ", jlist(1)
 #endif
       if(nnout.gt.0) then
         do i=1,nj
@@ -1797,7 +1822,7 @@ c
         end do
       end if
 #ifdef DEBUG_ISSUE35
-      write (6, *) "graffy : sc1(1,1) = ", sc1(1,1)
+      write (6, *) "issue35 : sc1(1,1) = ", sc1(1,1)
 #endif
       return
       end

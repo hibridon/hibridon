@@ -260,6 +260,11 @@ c     dependent) built-in types
       double precision dble_t
       character char_t
 c
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/logdb/0 : w(1)=', w(1)
+      write(6, *) 'issue35/logdb/0 : w(2)=', w(2)
+#endif
+
 *     make sure that rmin, rmax and nsteps are the same if second
 *     energy calculation
       if (iwrite) write (11) rmin, rmax, nsteps
@@ -299,12 +304,22 @@ c
             w(idiag) = w(idiag) - eshift
             idiag = idiag + ndiag
   10     continue
-         if (photof) read (11) (q(i), i=1, nqmax)
+#ifdef DEBUG_ISSUE35
+         write(6, *) 'issue35/logdb/0/1 : w(2)=', w(2)
+#endif
+      if (photof) read (11) (q(i), i=1, nqmax)
       else
          istep = 0
          r = rmin
          call mtime(t0,t0w)
+#ifdef DEBUG_ISSUE35
+         write(6, *) 'issue35/logdb/0/2 : w(2)=', w(2)
+#endif
          call potmat(w, r, nch, nmax)
+#ifdef DEBUG_ISSUE35
+         write(6, *) 'issue35/logdb/0/3 : w(2)=', w(2)
+         stop 1
+#endif
          call mtime(t1,t1w)
          tp = tp + t1 - t0
          tpw = tpw + t1w - t0w
@@ -335,6 +350,12 @@ c
             if (photof) write (11) (q(i), i=1, nqmax)
          endif
       endif
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/logdb/0.0 : w(1)=', w(1)
+      write(6, *) 'issue35/logdb/0.0 : w(2)=', w(2)
+      stop 1
+#endif
+
 *     use diagonal approximation to wkb initial value for log
 *     derivative matrix  (eqn 16)
 *     rmin is assumed to lie inside the classically forbidden
@@ -371,6 +392,10 @@ c
           return
         endif
       endif
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/logdb/1 : z(1)=', z(1)
+#endif
+
 *     with a constant step size it is convenient to propagate
 *     the matrix z = h*y rather than the log derivative matrix, y
 *     (eqns 10, 12, 13 and 14 are simply multiplied through by h)
@@ -383,6 +408,12 @@ c
 #endif
          icol = icol + ncol
   40  continue
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/logdb/2 : z(1)=', z(1)
+      write(6, *) 'issue35/logdb/2 : w(2)=', w(2)
+      stop 1
+#endif
+
 *     propagate z matrix from rmin to rmax
       do 250  kstep = 1, nsteps
 *     apply quadrature contribution at beginning of sector,
@@ -406,7 +437,15 @@ c
             istep = istep + 1
             r = rmin + istep * h
             call mtime(t0,t0w)
+#ifdef DEBUG_ISSUE35
+            write(6, *) 'issue35/logdb/pre_potmat : w(2)=', w(2)
+#endif
+   
             call potmat(w, r, nch, nmax)
+#ifdef DEBUG_ISSUE35
+            write(6, *) 'issue35/logdb/pre_potmat : w(2)=', w(2)
+            stop 1
+#endif
             call mtime(t1,t1w)
             tp = tp + t1 - t0
             tpw = tpw + t1w - t0w
@@ -451,6 +490,13 @@ c
             z(idiag) = z(idiag) + z1(ich)
             idiag = idiag + ndiag
   90     continue
+#ifdef DEBUG_ISSUE35
+         write(6, *) 'issue35/logdb/2.00 : z(1)=', z(1)
+         write(6, *) 'issue35/logdb/2.00 : w(1)=', w(1)
+         write(6, *) 'issue35/logdb/2.00 : w(2)=', w(2)
+         stop 1
+#endif
+
 *     z now contains z(a)+z1(a,c)
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
          call smxinv(z, nmax, nch, scr1, scr2, ierr)
@@ -487,6 +533,13 @@ c
             z(idiag) = z(idiag) + z1(ich)
             idiag = idiag + ndiag
  120     continue
+#ifdef DEBUG_ISSUE35
+         write(6, *) 'issue35/logdb/2.01 : z(1)=', z(1)
+         write(6, *) 'issue35/logdb/2.01 : w(1)=', w(1)
+         write(6, *) 'issue35/logdb/2.01 : w(2)=', w(2)
+         stop 1
+#endif
+
 *     evaluate quadrature contribution at sector mid-point,
 *     r = c  (eqn 12)     (first energy calculation only)
          if (iread) then
@@ -507,10 +560,19 @@ c
                w(idiag) = one
                idiag = idiag + ndiag
  140        continue
+#ifdef DEBUG_ISSUE35
+            write(6, *) 'issue35/logdb/2.01.0 : w(1)=', w(1)
+            write(6, *) 'issue35/logdb/2.01.0 : w(2)=', w(2)
+            stop 1
+#endif
+
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
             call smxinv(w, nmax, nch, scr1, scr2, ierr)
 #endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
+#ifdef DEBUG_ISSUE35
+            write(6, *) 'issue35/logdb/2.01.01 : w(1)=', w(1)
+#endif
             call syminv(w,nmax,nch,ierr)
 #endif
             if (ierr .eq. 2) then
@@ -519,6 +581,10 @@ c
                call exit
             endif
             idiag = 1
+#ifdef DEBUG_ISSUE35
+            write(6, *) 'issue35/logdb/2.01.1 : w(1)=', w(1)
+#endif
+   
             do  150 ich = 1, nch
                w(idiag) = w(idiag) - one
                idiag = idiag + ndiag
@@ -536,10 +602,23 @@ c
 *     simultaneously  (eqn 13)
          fac = eight
          icol = 1
+#ifdef DEBUG_ISSUE35
+         write(6, *) 'issue35/logdb/2.02 : z(1)=', z(1)
+         write(6, *) 'issue35/logdb/2.02 : nch=', nch
+         write(6, *) 'issue35/logdb/2.02 : fac=', fac
+         write(6, *) 'issue35/logdb/2.02 : w(icol)=', w(icol)
+         write(6, *) 'issue35/logdb/2.02 : nrow=', nrow
+         write(6, *) 'issue35/logdb/2.02 : z(icol)=', z(icol)
+#endif
          do  160 ich = 1, nch
             call daxpy (nch, fac, w(icol), nrow, z(icol), nrow)
             icol = icol + ncol
  160     continue
+#ifdef DEBUG_ISSUE35
+         write(6, *) 'issue35/logdb/2.0 : z(1)=', z(1)
+         stop 1
+#endif
+
 *     propagate z matrix across the second half sector
 *     from r = c to r = b   (eqn 14)
          idiag = 1
@@ -592,6 +671,11 @@ c     nrlogd is the number of LOGD records - used to seek the wfu file
              iendwv = iendwv + lrlogd
           endif
         endif
+#ifdef DEBUG_ISSUE35
+        write(6, *) 'issue35/logdb/2.1 : z(1)=', z(1)
+        stop 1
+#endif
+
 *     accumulate overlap matrix with ground state
 *     if photodissociation calculation
         if (photof) then
@@ -639,6 +723,11 @@ c     nrlogd is the number of LOGD records - used to seek the wfu file
 *     contribution at r = b  (eqn 11)
          fac = - d3
          idiag = 1
+#ifdef DEBUG_ISSUE35
+         write(6, *) 'issue35/logdb/2.2 : z(1)=', z(1)
+         stop 1
+#endif
+
          do  200 ich = 1, nch
             z(idiag) = z(idiag) + fac * wref(ich)
             idiag = idiag + ndiag
@@ -680,6 +769,11 @@ c     nrlogd is the number of LOGD records - used to seek the wfu file
  220     continue
 *     propagation loop ends here
  250  continue
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/logdb/3 : z(1)=', z(1)
+      stop 1
+#endif
+
 *     recover the log derivative matrix, y, at r = rmax
       fac = hi
       icol = 1

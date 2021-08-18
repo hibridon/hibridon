@@ -886,6 +886,9 @@ cger (next 2 lines)
 *      endif
       ntop = nchtop
 *
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/flow : z(1,1)=', z(1,1)
+#endif
       call propag (z, w, zmat, amat, bmat,
      :             jq, lq, inq, isc1, sc1, sc2, sc3, sc4, sc5, sc6, sc7,
      :             sc8, sc9,

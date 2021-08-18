@@ -15,6 +15,8 @@ set(ENABLE_CODE_COVERAGE "OFF" CACHE BOOL "to enable or disable code coverage an
 # 2. it makes code slower
 set(ENABLE_PROFILING "OFF" CACHE BOOL "to enable or disable performance profiling (mostly for developers)")
 
+set(ENABLE_ISSUE35_DEBUGGING "OFF" CACHE BOOL "enable traces to investigate issue #35")
+
 
 if(ENABLE_CODE_COVERAGE)
   find_program(COVERAGE_LCOV_EXE lcov)
@@ -160,6 +162,11 @@ string(TIMESTAMP TODAY "%Y-%m-%d at %H:%M")
 target_compile_definitions(hib PUBLIC _BUILD_DATE_="${TODAY}")
 # The ffollowing is for preprocessing of hhelp.F and hiutil.F
 target_compile_definitions(hib PUBLIC _HELPDIR_="${CMAKE_CURRENT_SOURCE_DIR}/doc/")
+
+if(ENABLE_ISSUE35_DEBUGGING)
+  target_compile_definitions(hib PUBLIC DEBUG_ISSUE35="dummy")
+endif()
+
 
 add_custom_command(
     OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/src/common

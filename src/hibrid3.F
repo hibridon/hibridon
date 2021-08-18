@@ -276,6 +276,11 @@
       zero = 0.d0
       one = 1.d0
       two = 2.d0
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/potmat/0 : v2(2)=', v2(2)
+      stop 1
+#endif
+
 cABER only for testing potential-matrix
 c     if (r.le.3.41) icount=0
 cABER
@@ -298,6 +303,14 @@ cABER
         iwpt = iwpt + nmax + 1
 20    continue
       ioff = 0
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/potmat/3 : w(2)=', w(2)
+      write(6, *) 'issue35/potmat/3 : v2(2)=', v2(2)
+      ! write(6, *) 'issue35/potmat/3 : iv2=', iv2
+      ! write(6, *) 'issue35/potmat/3 : vvl=', vvl
+      stop 1
+#endif
+
 cABER
 c       call druckq(w,nmax,nch,'potential matrix',icount)
 cABER
@@ -309,6 +322,11 @@ cABER
            ioff = ioff + lamnum(ilam)
 40      continue
       endif
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/potmat/4 : w(2)=', w(2)
+      stop 1
+#endif
+
 cABER
 c       call druckq(w,nmax,nch,'potential matrix',icount)
 cABER
@@ -321,6 +339,11 @@ cABER
      :           + r2 * cent(i)
         ipt = ipt + nmax + 1
       end do
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/potmat/5 : w(2)=', w(2)
+      stop 1
+#endif
+
 cABER
 c       call druckq(w,nmax,nch,'potential matrix',icount)
 cABER
@@ -911,11 +934,19 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *  now integrate coupled equations from r=rstart to r=rendld
 *  using manolopoulos log-derivative integrator
       cpup=cpupot
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/propag/1 : z(1,1)=', z(1,1)
+#endif
+
       call mtime(ttx,tty)
       call runlog (z, w, amat, bmat, sc1, sc2, sc3, sc4, sc5,
      :             r, rendld, spac, eshift, itwo, twoen,
      :             td, tdm, tp, tpm, twf, twfm, logwr, noprin,
      :             ipos, nch, nmax)
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/propag : z(1,1)=', z(1,1)
+#endif
+
 *  on return from runlog, z contains the log-derivative matrix at r = rendld
 *  branch to airy integration if desired. integrate coupled equations
 *  from r=rendld to r=rendai using alexander-manolopoulos linear reference
@@ -1168,10 +1199,17 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       endif
 *  logdb initialises the log-derivative matrix at r = rmin
 *  and propagates it from rmin to rmax
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/runlog/1 : z(1)=', z(1)
+#endif
       call logdb (z, w, amat, bmat,
      :            nmax, wref, z1, z2, scr1, scr2, nch,
      :            rmin, rmax, nsteps, eshift, iread, iwrite,
      :            tl, tp, twf)
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/runlog/2 : z(1)=', z(1)
+#endif
+
 *  on return: z(i,j) i=1,nch j=1,nch  now contains the log-derivative matrix
 *  at r = rmax (the final interparticle separation)
       r = rmax

@@ -327,6 +327,9 @@
       data (uf(29,ii), ii=1,11) /0.d0, -.707107d0, 7*0.d0,                ! j=10 F1
      :     .707107d0, 0.d0/
       data (uf(30,ii), ii=1,11) /.707107d0, 9*0.d0, .707107d0/            ! j=10 F2
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/basphtp/0 : v2(2)=', v2(2)
+#endif
 *
 *  check for consistency in the values of flaghf and csflag
       if (flaghf) then
@@ -748,12 +751,24 @@
               if (csflag) lrow = nu
               call vlmats (j(irow), lrow, j(icol), l(icol), jtot,
      :          lb, vee, csflag, irow, icol)
+#ifdef DEBUG_ISSUE35
+              write(6, *) 'issue35/basphtp/3 : vee=', vee
+#endif
+
 *  check for nonzero v2 matrix element
               if (abs(vee) .gt. 1.d-15) then
-                i = i + 1
+#ifdef DEBUG_ISSUE35
+                write(6, *) 'issue35/basphtp/4 : vee=', vee
+                stop 1
+#endif
+                  i = i + 1
                 if (i .le. nv2max) then
                   inum = inum + 1
                   v2(i) = vee
+#ifdef DEBUG_ISSUE35
+                  if (i == 2 ) write(6, *) 'issue35/basphtp/5 : vee=', vee
+#endif
+            
                   iv2(i) = ij
                   if (bastst.and. iprint.ge.2) then
                     write (6, 345) ilam, lb, icol, irow, i, iv2(i),
@@ -787,6 +802,11 @@
 460     format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS ',
      :           i5)
       end if
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/basphtp/9 : v2(2)=', v2(2)
+      stop 1
+#endif
+
       return
       end
 * --------------------------------------------------------------------
@@ -847,13 +867,25 @@
       dimension kmin(17)
       data kmin / 0, 0, -2, -2, -4, -4, -6, -6, -8, -8, -10,
      :  -10, -12, -12, -14, -14, 16 /
+#ifdef DEBUG_ISSUE35
+      real(8) :: issue35_prod, issue35_cisubp, issue35_cisub, issue35_cisub_1, issue35_cisub_2, toto6
+#endif
       sq514 = sqrt(5.d0 / 14.d0)
       sq72 = sqrt(7.d0 / 2.d0)
       sq1113 = sqrt(11.d0 / 13.d0)
 *
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/vlmats/0 : lambda=', lambda
+#endif
+
       v = 0.d0
       isize = 2 * (j/2) + 1
       isizp = 2 * (jp/2) + 1
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/vlmats/1 : isize=', isize
+      write(6, *) 'issue35/vlmats/1 : isizp=', isizp
+#endif
+
       do 100 mm = 1,isize
       do 100 nn = 1,isizp
         isub = (icol - 1) * narray + mm
@@ -867,6 +899,10 @@
           call prmats (jp, lp, j, l, jtot, kp, k,
      :          3, -2, vpr3m2, csflag)
           vprm = vprm32 + vpr3m2
+#ifdef DEBUG_ISSUE35
+          write(6, *) 'issue35/vlmats/3 : vprm=', vprm
+#endif
+    
           goto 900
 400       call prmats (jp, lp, j, l, jtot, kp, k,
      :          4, 0, vprm40, csflag)
@@ -894,8 +930,38 @@
      :          7, -6, vpr7m6, csflag)
           vprm = (vprm72 + vpr7m2)
      :      - sq1113 * (vprm76 + vpr7m6)
-900     v = v + vprm * c(isubp) * c(isub)
+900   continue
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/vlmats/7 : v=', v
+      issue35_cisubp = c(isubp)
+      issue35_cisub = c(isub)
+      issue35_prod = c(isubp) * c(isub)
+#endif
+#ifdef DEBUG_ISSUE35
+      v = v + vprm * issue35_prod
+#else
+      v = v + vprm * c(isubp) * c(isub)
+#endif
+#ifdef DEBUG_ISSUE35
+      issue35_cisub_1 = c(isub)
+      write(6, *) 'issue35/vlmats/8 : issue35_prod=', issue35_prod
+      issue35_cisub_2 = c(isub)
+      write(6, *) 'issue35/vlmats/8 : issue35_cisubp=', issue35_cisubp
+      write(6, *) 'issue35/vlmats/8 : issue35_cisub=', issue35_cisub
+      write(6, *) 'issue35/vlmats/8 : issue35_cisub_1=', issue35_cisub_1
+      write(6, *) 'issue35/vlmats/8 : issue35_cisub_2=', issue35_cisub_2
+      write(6, *) 'issue35/vlmats/8 : isubp=', isubp
+      write(6, *) 'issue35/vlmats/8 : c(isubp)=', c(isubp)
+      write(6, *) 'issue35/vlmats/8 : isub=', isub
+      write(6, *) 'issue35/vlmats/8 : c(isub)=', c(isub)
+      write(6, *) 'issue35/vlmats/8 : v=', v
+#endif
+
 100   continue
+#ifdef DEBUG_ISSUE35
+      write(6, *) 'issue35/vlmats/9 : v=', v
+#endif
+
       return
       end
 * ----------------------------------------------------------------------
