@@ -127,27 +127,6 @@ c
 *   xmconv:     converson factor from amu to atomic units
 *  variable in common block /coatp3/
 *   isizh:      temporary storage for length (related to isiz)
-*  variable in common block /coatpr/
-*   c:          expansion coefficients for asymmetric top rotor wave fns.
-*               in a symmetrized symmetric top basis.  these basis functions
-*               are given by green, jcp 64, 3463 (1976) as:
-*                  |j,k,m,s> = [2*(1+delta(k,0)]^-1 *
-*                      (|j,k,m> + (-1)*s * |j,-k,m>)
-*               (note that green uses eps = (-1)*s for the symmetry index.)
-*               in this basis, the asymmetric top hamiltonian block diagonalizes
-*               into 4 groups:  (1) k even, s = +1, (2) k even, s= -1,
-*               (3) k odd, s = =1, and (4) k odd, s = _1.
-*               the expansion coefficients stored in the array c are:
-*               c(k=0), c(k=2), ... c(k=j) for even k, and
-*               c(k=1), c(k=3), ... c(k=j) for odd k.
-*               the levels are denoted in the channel list by j and the
-*               symmetry index is.  the prolate-limit projection quantum number kp
-*               equals abs(is), and s is the sign of is.  the oblate limit projection
-*               quantum number ko can be obtained as follows:
-*                  if is >= 0, then ko = j - kp
-*                  if is < 0, then ko = j + 1 - kp
-*               if bastst=t, the values of j, is, kp, and ko are printed out, as
-*               well as the values of the expansion coefficients
 *  variable in common block /coatp1/
 *   ctemp:      temporary storage for rot. e.fn coeffs.
 *  variable in common block /coatp2/
@@ -165,6 +144,7 @@ c
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_coatpi, only: narray, isiz
+      use mod_coatpr, only: c
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
       character*1 slab
@@ -178,7 +158,6 @@ c
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       common /coatp3/ isizh(1)
-      common /coatpr/ c(1)
       common /coatp1/ ctemp(1)
       common /coatp2/ chold(1)
       dimension j(1), l(1), is(1), jhold(1), ehold(1),
@@ -723,14 +702,12 @@ c     check for nonzro matrix element
 *    vee:      on return, contains desired matrix element
 *    indp:     number of left-side level in channel list
 *    ind:      number of right-side level in channel list
-*  variable in common block /coatpr/
-*    c:        expansion coefficients for asymmetric top rotor wave fns.
 *  subroutines called:
 *    xf3j, xf6j, prmtp2
 *  -----------------------------------------------------------------------
       use mod_coatpi, only: narray
+      use mod_coatpr, only: c
       implicit double precision (a-h,o-z)
-      common /coatpr/ c(1)
 *
       data one, zero, two / 1.0d0, 0.0d0, 2.0d0 /
       data onsq4p /0.282094791773878d0 /

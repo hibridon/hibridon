@@ -101,12 +101,6 @@
 *  variables in common block /coconv/
 *   econv:      conversion factor from cm-1 to hartrees
 *   xmconv:     converson factor from amu to atomic units
-*  variable in common block /coatpr/
-*   c:          expansion coefficients for spherical top rotor wave fns.
-*               in a signed-k symmmetric top basis |j,k,m>.
-*               if c(+k) = c(-k), then eps = +1, or if c(+k) = -c(-k), eps = -1.
-*               the expansion coefficients for a given eps stored in the array c are:
-*               c(k=-j), c(k=-j+2), ... c(k=j-10, c(k=j).
 *  variable in common block /coatp1/
 *   ctemp:      temporary storage for rot. e.fn coeffs.
 *  variable in common block /coatp2/
@@ -122,6 +116,7 @@
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_coatpi, only: narray
+      use mod_coatpr, only: c
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -132,7 +127,6 @@
       common /conlam/ nlam, nlammx, lamnum(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
-      common /coatpr/ c(1)
       common /coatp1/ ctemp(1)
       common /coatp2/ chold(1)
       dimension j(1), l(1), is(1), jhold(1), ehold(1),
@@ -849,15 +843,13 @@
 *                to the orbital angular momenta
 *    irow:     number of left-side level in channel list
 *    icol:     number of right-side level in channel list
-*  variable in common block /coatpr/
-*    c:        expansion coefficients for asymmetric top rotor wave fns.
 *  subroutines called:
 *    xf3j, xf6j, prmats
 *  -----------------------------------------------------------------------
       use mod_coatpi, only: narray
+      use mod_coatpr, only: c
       implicit double precision (a-h,o-z)
       logical csflag
-      common /coatpr/ c(1)
       dimension kmin(17)
       data kmin / 0, 0, -2, -2, -4, -4, -6, -6, -8, -8, -10,
      :  -10, -12, -12, -14, -14, 16 /

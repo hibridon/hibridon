@@ -118,10 +118,6 @@ c      end module mod_1sg1sg
 *  variables in common block /coconv/
 *   econv:      conversion factor from cm-1 to hartree
 *   xmconv:     conversion factor from amu to atomic units
-*  variable in common block /coatpr/
-*   c:          expansion coefficienfs for the rotational/fine-structure
-*               wave functions in the symmetrized basis:
-*               (1) sigma=1, eps=+1; (2) sigma=1, eps=-1, (3) sigma = 0, eps=+1
 *  variable in common block /coatp1/
 *   ctemp:      temporary storage for rot. e.fn coeffs.
 *  variable in common block /coatp2/
@@ -137,6 +133,7 @@ c      end module mod_1sg1sg
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_coj12, only: j12
+      use mod_coatpr, only: c
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -149,7 +146,6 @@ c      end module mod_1sg1sg
       common /conlam/ nlam, nlammx, lamnum(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
-      common /coatpr/ c(1)
       common /coatp1/ ctemp(1)
       common /coatp2/ chold(1)
       dimension j(1), l(1), is(1), jhold(1), ehold(1),
@@ -565,8 +561,8 @@ c     initialize potential to zero
 *  current revision date:  1-aug-2018 (p.dagdigian)
 * --------------------------------------------------------------------
       use mod_1sg1sg
+      use mod_coatpr, only: c
       implicit double precision (a-h,o-z)
-      common /coatpr/ c(1)
       data one, two/ 1.d0, 2.d0/,
      :  sq4pi3 / 44.546623974653656d0 /
       vee = 0.d0

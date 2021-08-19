@@ -321,15 +321,49 @@ end module mod_coatpi
 !    end subroutine allocate_coatp3
 ! end module mod_coatp3
 
-! module mod_coatpr
-!    implicit none
-!    real(8), dimension(:), allocatable :: c
-!    contains
-!    subroutine allocate_coatpr(n)
-!       integer, intent(in) :: n
-!       allocate(c(n))
-!    end subroutine allocate_coatpr
-! end module mod_coatpr
+module mod_coatpr
+   ! variable in this module
+   !      c:        expansion coefficients for asymmetric top rotor wave fns.   
+   ! *   c:          expansion coefficienfs for the rotational/fine-structure
+   ! *               wave functions in the symmetrized basis:
+   ! *               (1) sigma=1, eps=+1; (2) sigma=1, eps=-1, (3) sigma = 0, eps=+1
+   ! *  variable in common block /coatpr/
+   ! *   c:          expansion coefficients for spherical top rotor wave fns.
+   ! *               in a signed-k symmmetric top basis |j,k,m>.
+   ! *               if c(+k) = c(-k), then eps = +1, or if c(+k) = -c(-k), eps = -1.
+   ! *               the expansion coefficients for a given eps stored in the array c are:
+   ! *               c(k=-j), c(k=-j+2), ... c(k=j-10, c(k=j).
+   ! *  variable in common block /coatpr/
+   ! *   c:          expansion coefficients for asymmetric top rotor wave fns.
+   ! *               in a symmetrized symmetric top basis.  these basis functions
+   ! *               are given by green, jcp 64, 3463 (1976) as:
+   ! *                  |j,k,m,s> = [2*(1+delta(k,0)]^-1 *
+   ! *                      (|j,k,m> + (-1)*s * |j,-k,m>)
+   ! *               (note that green uses eps = (-1)*s for the symmetry index.)
+   ! *               in this basis, the asymmetric top hamiltonian block diagonalizes
+   ! *               into 4 groups:  (1) k even, s = +1, (2) k even, s= -1,
+   ! *               (3) k odd, s = =1, and (4) k odd, s = _1.
+   ! *               the expansion coefficients stored in the array c are:
+   ! *               c(k=0), c(k=2), ... c(k=j) for even k, and
+   ! *               c(k=1), c(k=3), ... c(k=j) for odd k.
+   ! *               the levels are denoted in the channel list by j and the
+   ! *               symmetry index is.  the prolate-limit projection quantum number kp
+   ! *               equals abs(is), and s is the sign of is.  the oblate limit projection
+   ! *               quantum number ko can be obtained as follows:
+   ! *                  if is >= 0, then ko = j - kp
+   ! *                  if is < 0, then ko = j + 1 - kp
+   ! *               if bastst=t, the values of j, is, kp, and ko are printed out, as
+   ! *               well as the values of the expansion coefficients
+
+   
+   implicit none
+   real(8), dimension(:), allocatable :: c
+   contains
+   subroutine allocate_coatpr(n)
+      integer, intent(in) :: n
+      allocate(c(n))
+   end subroutine allocate_coatpr
+end module mod_coatpr
 
 ! module mod_coatp1
 !    implicit none
