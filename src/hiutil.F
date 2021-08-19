@@ -474,18 +474,21 @@ c-------------------------------------------------------------------
 *     less than t
 *
 *  -----------------------------------------------------------------
-        implicit double precision(a-h,o-z)
+      implicit none
+      real(8), intent(out) :: t
+      real(8), intent(out) :: te
 #if defined(HIB_UNIX_XLF)
       t=timef()/1000d0
       te=t
 #endif
-#if defined(__G95__)
-      real*4 tarray(2), result
-      call dtime(tarray,result)
-      t=tarray(1)
-      te1=result
-#endif
-#if defined(HIB_UNIX_IFORT)
+#if defined(__G95__) || defined(__GFORTRAN__)
+      real*4 :: tarray(2), user_and_system_time
+      integer*8 :: wall_time ! wallclock time ; epoch time in seconds (since 01/01/1970)
+      call etime(tarray, user_and_system_time)
+      t = user_and_system_time
+      wall_time = time8()
+      te = dble(wall_time)
+#elif defined(HIB_UNIX_IFORT)
       real*4 tt
 * use etime for user+cpu time
 * use cpu_time for user+cpu time
@@ -500,9 +503,7 @@ c this only accurate to seconds, but works fine when date changes
       call pxftime(itime, ierror)
       te = dble(itime)
 c
-#endif
-
-#if defined(HIB_UNIX_PGI)
+#elif defined(HIB_UNIX_PGI)
       real tt, tarray(2), result
 * use cpu_time for user+cpu time
       call cpu_time(tt)
@@ -510,11 +511,11 @@ c
 * use dtime for elapsed (wall time).
       result=dtime(tarray)
       te=result
-#endif
-#if defined(HIB_ULTRIX_DEC)
+#elif defined(HIB_ULTRIX_DEC)
       common /codec/ ttim(2)
       real et, etime, secnds
       dimension et(2)
+      real(8) t1, t2, tt2, delt
       t1=etime(et(1),et(2))
       tt2=secnds(0.0)
       delt=tt2-ttim(2)
@@ -522,31 +523,32 @@ c
       ttim(1)=ttim(1)+delt
       ttim(2)=tt2
       t2=ttim(1)
+#else
+#error "This fortran compiler is not handled in this function"
 #endif
       return
       end
 *------------------------------------------------------------------------
       function second()
       double precision second
-#if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_PGI)
+#if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_PGI) || defined(__GFORTRAN__)
       real*4 te
       call cpu_time(te)
       second=te
-#endif
-#if defined(HIB_UNIX_XLF)
+#elif defined(HIB_UNIX_XLF)
       second=timef()*1000d0
-#endif
-#if defined(HIB_ULTRIX_DEC)
+#elif defined(HIB_ULTRIX_DEC)
       double precision function second()
       implicit double precision (a-h,o-z)
       real et(2)
       fe=etime(et(1),et(2))
       second=fe
-#endif
-#if defined(__G95__)
+#elif defined(__G95__)
       real*4 tarray(2), result
       call dtime(tarray,result)
       second=tarray(1)
+#else
+#error "This fortran compiler is not handled in this function"
 #endif
       return
       end
