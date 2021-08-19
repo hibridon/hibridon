@@ -189,15 +189,18 @@ module mod_cofact
    end subroutine allocate_cofact
 end module mod_cofact
 
-! module mod_coener
-!    implicit none
-!    real(8), dimension(:), allocatable :: energ
-!    contains
-!    subroutine allocate_coener(n)
-!       integer, intent(in) :: n
-!       allocate(energ(n)) ;
-!    end subroutine allocate_coener
-! end module mod_coener
+module mod_coener
+   ! *  variable in this module
+   ! *    energ:     array containing total energies (in cm-1) at which scattering
+   ! *               calculations are to be performed
+   implicit none
+   real(8), dimension(:), allocatable :: energ
+   contains
+   subroutine allocate_coener(n)
+      integer, intent(in) :: n
+      allocate(energ(n)) ;
+   end subroutine allocate_coener
+end module mod_coener
 
 module mod_cdbf
    implicit none

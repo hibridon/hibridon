@@ -19,6 +19,7 @@
 * ------------------------------------------------------------------
       use mod_cosout, only: nnout, jout
       use mod_coiout, only: niout, indout
+      use mod_coener, only: energ
       implicit double precision (a-h,o-z)
       character*40 jobnam,input,output,savfil
       logical logwr, swrit, t2writ, wrpart, partw, airyfl, airypr,
@@ -45,7 +46,6 @@
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr, nucros, photof, wavefl, boundc
 *  this sets the maximum number of energies
-      common /coener/ energ(1)
 c     This common block is kept in this subroutine for backward
 c     compatibility.
 c     The constants module should be used in new subroutines.
@@ -1535,6 +1535,7 @@ cmha
       use mod_coisc2, only: jpoint => isc2 ! jpoint(5)
 cmha
       use mod_cosc1, only: elev => sc1 ! elev(1)
+      use mod_coener, only: energ
       implicit double precision (a-h,o-z)
       character*(*) fname
       character*20 cdate
@@ -1552,7 +1553,6 @@ cmha
      :                csflag, flaghf, flagsu, ihomo, ipos,lpar
       common /coz/ zmat(1)
       common /cow/ scmat(1)
-      common /coener/ energ(1)
       common /coselb/ ibasty
       dimension  a(4)
 *  input parameters

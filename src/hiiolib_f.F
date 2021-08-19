@@ -51,6 +51,7 @@ c
       end
 * -------------------------------------------------------------------
        subroutine fimovs(nfile,jtot,jlpar,nu,ien,ierr)
+       use mod_coener, only: energ
        implicit double precision (a-h,o-z)
 *
 * subroutine to move s-matrix file to jtot,jlpar partial wave
@@ -64,7 +65,6 @@ c
 *
 * -------------------------------------------------------------------
        common /cofil/ nfl,iofbuf,maxrec(60),iofrec(60),nwrec
-       common /coener/ energ(1)
        ierr=0
        iaddr=0
        maxrec(nfile)=0
@@ -245,9 +245,6 @@ c
 *                 are present:  these may include
 *                    trstrt, tmp10, tmp11, xsecn (or tmpxn), smatn,
 *                    psecn, tmp35, ...
-*  variable in common block /coener/
-*    energ:     array containing total energies (in cm-1) at which scattering
-*               calculations are to be performed
 *  variable in common block /coselb/
 *     ibasty    basistype
 *
@@ -258,6 +255,7 @@ c
       use mod_cosout, only: nnout, jout
       use mod_coiout, only: niout, indout
       use constants
+      use mod_coener, only: energ
       implicit double precision (a-h,o-z)
       integer i, jlpar, jtot1, jtot2, jtotd, length, nerg,
      :        numax, numin, ibasty
@@ -283,7 +281,6 @@ c
      :                xsecwr, nucros, photof, wavefl, boundc
       common /coskip/ nskip,iskip
       common /cofile/ input, output, jobnam, savfil
-      common /coener/ energ(1)
       common /coered/ ered, rmu
 
 * ----------------------------------------------------------------
@@ -1205,6 +1202,7 @@ c.....open direct access file for interpolation and restart
 * --------------------------------------------------------------------
       use mod_coamat, only: q3 => amat ! q3(1)
       use mod_cobmat, only: q => bmat ! q(1)
+      use mod_coener, only: energ
       implicit double precision (a-h,o-z)
       logical writs,csflag,nucros, llpar, wrpart, wrxsec
       character*40 oldlab
@@ -1213,7 +1211,6 @@ c.....open direct access file for interpolation and restart
       integer, parameter :: bufsize = 32
 #include "common/parpot"
       common /cofile/ input,output,jobnam,savfil
-      common /coener/ energ(1)
       common /cow/ q1(1)
       common /cozmat/ q2(1)
       common /colpar/ llpar(21),wrpart, wrxsec

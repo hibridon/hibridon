@@ -12,6 +12,7 @@
       use mod_coj12p, only: allocate_coj12p
       use mod_covvl, only: allocate_covvl
       use mod_cofact, only: allocate_cofact
+      use mod_coener, only: allocate_coener
 
       use mod_coatpi, only: allocate_coatpi
       use mod_coatpr, only: allocate_coatpr
@@ -137,9 +138,6 @@
 *    nlam:      the total number of angular coupling terms used
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variable in common block /coener/
-*    energ:     array containing total energies (in cm-1) at which scattering
-*               calculations are to be performed
 *  variables in common block /cobuf/
 *    lbuf:      buffer length (should be multiple of lseg)
 *    ibuf:      buffer used in several i/o routines
@@ -156,7 +154,6 @@
 *     chold:    ditto 
 *  ----------------------------------------------------------
       common /comom/  xmom(3), imom(13)
-      common /coener/ energ(ken)
       common /cobuf/  lbuf,ibuf(1024)
       common /cofil/  nfl,iofbuf,maxrec(60),iofrec(60),nwrec
       common /conlam/ nlam, nlammx, lamnum(klammx)
@@ -167,6 +164,7 @@
       common /coz/ z(kmax,kmax)
       common /cow/ w(kmax,kmax)
       common /cozmat/ zmat(kmax,kmax)
+      call allocate_coener(ken)
       call allocate_clseg()
       call allocate_cdbf()
 
@@ -269,9 +267,6 @@
 *  additions by: b. follmeg, h-j werner
 *  current revision date:  1-oct-2001 by mha
 *  -------------------------------------------------------------
-*  variable in common block /coener/
-*    energ:     array containing total energies (in cm-1) at which scattering
-*               calculations are to be performed
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
@@ -366,6 +361,7 @@
       use mod_cosout, only: nnout, jout
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_coener, only: energ
       use constants
       implicit double precision (a-h,o-z)
       character*20 cdate
@@ -403,7 +399,6 @@
       common /cophot/ photfl, wavefn, boundf, wrsmat
       common /cosurf/ surffl
       common /coselb/ ibasty
-      common /coener/ energ(1)
       common /cojlpo/ jlpold
       common /coopti/ optifl
       common /constp/ nsteps, isteps

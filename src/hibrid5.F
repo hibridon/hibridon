@@ -132,6 +132,7 @@
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_coj12, only: j12
+      use mod_coener, only: ener => energ
       implicit double precision (a-h,o-z)
       logical ipos, csflag, swrit, t2writ, writs, wrpart, partw,
      :        wrxsec, xsecwr, flaghf, t2test, flagsu, firstj, twomol,
@@ -143,7 +144,6 @@
       common /cosurf/ flagsu
       common /coered/ ered, rmu
       common /cojlpo/ jlpold
-      common /coener/ ener(1)
       common /cophot/ photof, wavefn, boundf, wrsmat
       dimension tsq(nmax,nmax), scmat(nmax,nmax), sr(nmax,nmax),
      :          si(nmax,nmax), sc1(nmax,nmax),sc2(nmax,nmax)
@@ -550,9 +550,9 @@
 *  latest revision date: 21-mar-1992 by mha
 * ---------------------------------------------------------------------------
       use constants
+      use mod_coener, only: energ
       implicit double precision (a-h,o-z)
       logical ipos, csflag, wrpart, partw, flaghf, twomol, nucros,vrai
-      common /coener/ energ(1)
       common /coered/ ered, rmu
       dimension tsq(nmax,1),tq1(nmax,1),tq2(nmax,1),tq3(nmax,1),
      1          jlev(1),elev(1),inlev(1),nlev(1)

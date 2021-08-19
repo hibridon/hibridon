@@ -48,6 +48,7 @@
       use mod_coiout, only: niout, indout
       use mod_codim, only: nmax => mmax
       use mod_coamat, only: scmat => toto ! scmat(1)
+      use mod_coener, only: energ
       implicit double precision (a-h,o-z)
 *  iicode is the number of integer pcod's
 *  ircode is the number of real pcod's
@@ -77,7 +78,6 @@
 #include "common/parpot"
       common /cosavi/ iipar, ixpar(iicode)
       common /cosavr/ irpar, junks, rxpar(ircode)
-      common /coener/ energ(1)
       common /cofile/ input, output, jobnam, savfil
       common /cosys/  scod(100)
       common /cokeyl/ nncode, llcode, ijcode
