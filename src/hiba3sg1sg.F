@@ -118,8 +118,6 @@ c      end module mod_1sg1sg
 *  variables in common block /coconv/
 *   econv:      conversion factor from cm-1 to hartree
 *   xmconv:     conversion factor from amu to atomic units
-*  variable in common block /coatp1/
-*   ctemp:      temporary storage for rot. e.fn coeffs.
 *  variable in common block /coatp2/
 *   chold:      ditto
 *
@@ -134,6 +132,7 @@ c      end module mod_1sg1sg
       use mod_coeint, only: eint
       use mod_coj12, only: j12
       use mod_coatpr, only: c
+      use mod_coatp1, only: ctemp
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -146,7 +145,6 @@ c      end module mod_1sg1sg
       common /conlam/ nlam, nlammx, lamnum(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
-      common /coatp1/ ctemp(1)
       common /coatp2/ chold(1)
       dimension j(1), l(1), is(1), jhold(1), ehold(1),
      :    e1(1), sc2(1), sc3(1), sc4(1), ishold(1)

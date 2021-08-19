@@ -16,6 +16,7 @@
 
       use mod_coatpi, only: allocate_coatpi
       use mod_coatpr, only: allocate_coatpr
+      use mod_coatp1, only: allocate_coatp1
       ! use mod_coz, only: allocate_coz, z
       ! use mod_cow, only: allocate_cow, w
       ! use mod_cozmat, only: allocate_cozmat, zmat
@@ -148,8 +149,6 @@
 *     iofrec:   offset in file
 *  variable in common block /coatp3/    
 *     isizh:   temporary storage for length (related to isiz)
-*  variable in common block /coatp1/
-*     ctemp:    temporary storage for rot. e.fn coeffs.
 *  variable in common block /coatp2/
 *     chold:    ditto 
 *  ----------------------------------------------------------
@@ -158,7 +157,6 @@
       common /cofil/  nfl,iofbuf,maxrec(60),iofrec(60),nwrec
       common /conlam/ nlam, nlammx, lamnum(klammx)
       common /coatp3/ isizh(krotmx)
-      common /coatp1/ ctemp(krotmx)
       common /coatp2/ chold(krotmx)
 *   square matrices and vectors
       common /coz/ z(kmax,kmax)
@@ -170,6 +168,7 @@
 
       call allocate_coatpi(krotmx, 100)
       call allocate_coatpr(krotmx)
+      call allocate_coatp1(krotmx)
       
       ! call allocate_coz(kmax)
       ! call allocate_cow(kmax)

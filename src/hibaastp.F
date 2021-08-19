@@ -116,8 +116,6 @@
 *   xmconv:     converson factor from amu to atomic units
 *  variable in common block /coatp3/
 *   isizh:      temporary storage for length (related to isiz)
-*  variable in common block /coatp1/
-*   ctemp:      temporary storage for rot. e.fn coeffs.
 *  variable in common block /coatp2/
 *   chold:      ditto
 *  subroutines called:
@@ -133,6 +131,7 @@
       use mod_coeint, only: eint
       use mod_coatpi, only: narray, isiz
       use mod_coatpr, only: c
+      use mod_coatp1, only: ctemp
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
       character*1 slab
@@ -145,7 +144,6 @@
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       common /coatp3/ isizh(1)
-      common /coatp1/ ctemp(1)
       common /coatp2/ chold(1)
       dimension j(1), l(1), is(1), jhold(1), ehold(1),
      :          ishold(1), etemp(1), fjtemp(1), fktemp(1),

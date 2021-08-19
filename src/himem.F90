@@ -368,15 +368,17 @@ module mod_coatpr
    end subroutine allocate_coatpr
 end module mod_coatpr
 
-! module mod_coatp1
-!    implicit none
-!    real(8), dimension(:), allocatable :: ctemp
-!    contains
-!    subroutine allocate_coatp1(n)
-!       integer, intent(in) :: n
-!       allocate(ctemp(n))
-!    end subroutine allocate_coatp1
-! end module mod_coatp1
+module mod_coatp1
+   ! *  variable in this module
+   ! *   ctemp:      temporary storage for rot. e.fn coeffs.   
+   implicit none
+   real(8), dimension(:), allocatable :: ctemp
+   contains
+   subroutine allocate_coatp1(n)
+      integer, intent(in) :: n
+      allocate(ctemp(n))
+   end subroutine allocate_coatp1
+end module mod_coatp1
 
 ! module mod_coatp2
 !    implicit none
