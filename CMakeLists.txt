@@ -72,7 +72,22 @@ get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # gfortran
   set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 -march=native")
-  set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -fsanitize=address")
+  set (warning_options "-Wall -Wextra") # activate all wanings
+
+  # set (warning_options "${warning_options} -Wno-do-subscript")
+  # set (warning_options "${warning_options} -Wno-unused-dummy-argument")
+  # set (warning_options "${warning_options} -Wno-unused-variable")
+  # set (warning_options "${warning_options} -Wno-unused-parameter")
+  # set (warning_options "${warning_options} -Wno-conversion")
+  # set (warning_options "${warning_options} -Wno-argument-mismatch")
+  # set (warning_options "${warning_options} -Wno-unused-label")
+  # set (warning_options "${warning_options} -Wno-tabs")
+  # set (warning_options "${warning_options} -Wno-compare-reals")
+  # set (warning_options "${warning_options} -Wno-intrinsic-shadow")
+  # set (warning_options "${warning_options} -Wno-character-truncation")
+  
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -fsanitize=address ${warning_options} ")
+  # todo: add -fbounds-check once all mismatched declarations of variables (eg in common blocks) have been fixed
   if(ENABLE_CODE_COVERAGE)
     set(GCC_COVERAGE_COMPILE_FLAGS "-fprofile-arcs -ftest-coverage --coverage")
     set(GCC_COVERAGE_LINK_FLAGS "-lgcov")
