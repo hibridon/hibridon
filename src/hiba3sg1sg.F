@@ -118,8 +118,6 @@ c      end module mod_1sg1sg
 *  variables in common block /coconv/
 *   econv:      conversion factor from cm-1 to hartree
 *   xmconv:     conversion factor from amu to atomic units
-*  variable in common block /coatp2/
-*   chold:      ditto
 *
 *  subroutines called:
 *   v3sgsg:    returns molecule-molecule angular coupling coefficient for
@@ -133,6 +131,7 @@ c      end module mod_1sg1sg
       use mod_coj12, only: j12
       use mod_coatpr, only: c
       use mod_coatp1, only: ctemp
+      use mod_coatp2, only: chold
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -145,7 +144,6 @@ c      end module mod_1sg1sg
       common /conlam/ nlam, nlammx, lamnum(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
-      common /coatp2/ chold(1)
       dimension j(1), l(1), is(1), jhold(1), ehold(1),
      :    e1(1), sc2(1), sc3(1), sc4(1), ishold(1)
       dimension j1(2000),is1(2000), fnn1(3,3), fnn2(3,3),

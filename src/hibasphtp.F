@@ -101,8 +101,6 @@
 *  variables in common block /coconv/
 *   econv:      conversion factor from cm-1 to hartrees
 *   xmconv:     converson factor from amu to atomic units
-*  variable in common block /coatp2/
-*   chold:      ditto
 *  subroutines called:
 *   vlmats:     returns angular coupling coefficient for particular
 *               choice of channel index
@@ -116,6 +114,7 @@
       use mod_coatpi, only: narray
       use mod_coatpr, only: c
       use mod_coatp1, only: ctemp
+      use mod_coatp2, only: chold
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -126,7 +125,6 @@
       common /conlam/ nlam, nlammx, lamnum(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
-      common /coatp2/ chold(1)
       dimension j(1), l(1), is(1), jhold(1), ehold(1),
      :          ishold(1), etemp(1), fjtemp(1), fitemp(1),
      :          fistmp(1)

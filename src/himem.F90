@@ -380,15 +380,17 @@ module mod_coatp1
    end subroutine allocate_coatp1
 end module mod_coatp1
 
-! module mod_coatp2
-!    implicit none
-!    real(8), dimension(:), allocatable :: chold
-!    contains
-!    subroutine allocate_coatp2(n)
-!       integer, intent(in) :: n
-!       allocate(chold(n))
-!    end subroutine allocate_coatp2
-! end module mod_coatp2
+module mod_coatp2
+   ! *  variable in this module
+   ! *   chold:      ditto   
+   implicit none
+   real(8), dimension(:), allocatable :: chold
+   contains
+   subroutine allocate_coatp2(n)
+      integer, intent(in) :: n
+      allocate(chold(n))
+   end subroutine allocate_coatp2
+end module mod_coatp2
 
 ! module mod_coz
 !    implicit none
