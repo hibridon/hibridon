@@ -314,15 +314,17 @@ module mod_coatpi
    end subroutine allocate_coatpi
 end module mod_coatpi
 
-! module mod_coatp3
-!    implicit none
-!    integer, dimension(:), allocatable :: isizh
-!    contains
-!    subroutine allocate_coatp3(n)
-!       integer, intent(in) :: n
-!       allocate(isizh(n))
-!    end subroutine allocate_coatp3
-! end module mod_coatp3
+module mod_coatp3
+   ! variable in this module
+   !   isizh:      temporary storage for length (related to isiz)
+   implicit none
+   integer, dimension(:), allocatable :: isizh
+   contains
+   subroutine allocate_coatp3(n)
+      integer, intent(in) :: n
+      allocate(isizh(n))
+   end subroutine allocate_coatp3
+end module mod_coatp3
 
 module mod_coatpr
    ! variable in this module
