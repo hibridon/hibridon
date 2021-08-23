@@ -1,17 +1,57 @@
 pipeline {
     agent {label 'physix_agent'}
     environment {
-        HIBRIDON_ROOT_PATH = '${PWD}'
+        HIBRIDON_ROOT_PATH = "${WORKSPACE}"
+        HIBRIDON_BUILD_ROOT_PATH = "${WORKSPACE}/build"
     }
     stages {
-        stage('Building hibridon...') {
-            steps {
-                sh 'make HIBRIDON_ROOT_PATH=$HIBRIDON_ROOT_PATH CONFIG_ID=fr.univ-rennes1.ipr.physix.gfortran build'
-            }
-        }
-        stage('Testing hibridon...') {
-            steps {
-                sh 'make HIBRIDON_ROOT_PATH=$HIBRIDON_ROOT_PATH CONFIG_ID=fr.univ-rennes1.ipr.physix.gfortran test'
+        stage('Build and test hibridon...') {
+            matrix {
+                axes {
+                    axis {
+                        name 'COMPILER'
+                        values 'gfortran', 'ifort' 
+                    }                   
+                    axis {
+                        name 'BUILD_TYPE'
+                        values 'Debug', 'Release' 
+                    }                   
+                }
+                stages {
+                    stage('Building hibridon') {
+                        steps {
+                            sh "echo $SHELL"
+                            sh '''#!/bin/bash
+                                echo "hello world"
+                                echo HIBRIDON_ROOT_PATH=${HIBRIDON_ROOT_PATH}
+                                ls ${HIBRIDON_ROOT_PATH}
+                            '''
+                            sh "rm -Rf ${HIBRIDON_BUILD_ROOT_PATH}/${COMPILER}/${BUILD_TYPE}"
+                            sh "mkdir -p ${HIBRIDON_BUILD_ROOT_PATH}/${COMPILER}/${BUILD_TYPE}"
+                            sh '''#!/bin/bash
+                                echo coucou
+                                cd ${HIBRIDON_BUILD_ROOT_PATH}/${COMPILER}/${BUILD_TYPE}
+                                if [ "${COMPILER}" = 'ifort' ]
+                                then
+                                    echo totoro &&
+                                    . /etc/profile.d/modules.sh &&
+                                    module load compilers/ifort/latest &&
+                                    which ifort
+                                    cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_Fortran_COMPILER=ifort -DBLA_VENDOR=Intel10_64lp "$HIBRIDON_ROOT_PATH"
+                                elif [ "${COMPILER}" = 'gfortran' ]
+                                then
+                                    cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} "$HIBRIDON_ROOT_PATH"
+                                fi &&
+                                make hib
+                                '''
+                        }
+                    }
+                    stage('Testing hibridon') {
+                        steps {
+                            sh "pwd && cd ${HIBRIDON_BUILD_ROOT_PATH}/${COMPILER}/${BUILD_TYPE} && make testsuite_coverage"
+                        }
+                    }
+                }                
             }
         }
         stage('Cleaning up...') {
