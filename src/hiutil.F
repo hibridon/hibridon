@@ -489,6 +489,7 @@ c-------------------------------------------------------------------
       wall_time = time8()
       te = dble(wall_time)
 #elif defined(HIB_UNIX_IFORT)
+      integer :: itime, ierror
       real*4 tt
 * use etime for user+cpu time
 * use cpu_time for user+cpu time

@@ -88,6 +88,19 @@ cd /tmp/hib_build
 cmake -DBLA_VENDOR=Intel10_64lp /tmp/hib_src
 ```
 
+#### to configure the build with intel fortran...
+
+make sure you have set the environment variables such that the `ifort` command works. Depending on the system you are using, This can be achieved with one of the following methods:
+- `source <intel_mkl_root_dir>/bin/compilervars.sh`
+- `module load mkl/latest`
+
+Once `ifort` is in your path, you just have to tell cmake that you want to use ifort as the fortran compiler using the option `-DCMAKE_Fortran_COMPILER=ifort`, eg:
+
+```bash
+cd /tmp/hib_build
+cmake -DCMAKE_Fortran_COMPILER=ifort /tmp/hib_src
+```
+
 ### 6. Test hibridon (OPTIONAL)
 
 The following command will run all hibridon's tests:

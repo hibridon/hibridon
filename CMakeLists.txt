@@ -74,17 +74,17 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 -march=native")
   set (warning_options "-Wall -Wextra") # activate all wanings
 
-  # set (warning_options "${warning_options} -Wno-do-subscript")
-  # set (warning_options "${warning_options} -Wno-unused-dummy-argument")
-  # set (warning_options "${warning_options} -Wno-unused-variable")
-  # set (warning_options "${warning_options} -Wno-unused-parameter")
-  # set (warning_options "${warning_options} -Wno-conversion")
-  # set (warning_options "${warning_options} -Wno-argument-mismatch")
-  # set (warning_options "${warning_options} -Wno-unused-label")
-  # set (warning_options "${warning_options} -Wno-tabs")
-  # set (warning_options "${warning_options} -Wno-compare-reals")
-  # set (warning_options "${warning_options} -Wno-intrinsic-shadow")
-  # set (warning_options "${warning_options} -Wno-character-truncation")
+  set (warning_options "${warning_options} -Wno-do-subscript")
+  set (warning_options "${warning_options} -Wno-unused-dummy-argument")
+  set (warning_options "${warning_options} -Wno-unused-variable")
+  set (warning_options "${warning_options} -Wno-unused-parameter")
+  set (warning_options "${warning_options} -Wno-conversion")
+  set (warning_options "${warning_options} -Wno-argument-mismatch")
+  set (warning_options "${warning_options} -Wno-unused-label")
+  set (warning_options "${warning_options} -Wno-tabs")
+  set (warning_options "${warning_options} -Wno-compare-reals")
+  set (warning_options "${warning_options} -Wno-intrinsic-shadow")
+  set (warning_options "${warning_options} -Wno-character-truncation")
   
   set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -fsanitize=address ${warning_options} ")
   # todo: add -fbounds-check once all mismatched declarations of variables (eg in common blocks) have been fixed
@@ -101,9 +101,11 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${GCC_PROFILING_LINK_FLAGS}")
   endif()
 elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
-  # ifort (untested)
-  set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3")
-  set (CMAKE_Fortran_FLAGS_DEBUG   "-f77rtl -O0 -g")
+  # ifort
+  # set (warning_options "-warn all") # activate all wanings
+  set (warning_options "") # activate all wanings
+  set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3 ${warning_options}")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-f77rtl -O0 -g ${warning_options}")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
 
@@ -163,7 +165,6 @@ add_library(hib
      src/hipotutil.F
      src/hiversion.F)
 
-target_compile_options(hib PRIVATE "-ffixed-line-length-132")
 target_compile_definitions(hib PUBLIC MAX_NJTOT=1000)
 # The following is for preprocessing of hiversion.F
 target_compile_definitions(hib PUBLIC _BUILD_VERS_=${PROJECT_VERSION})
@@ -192,16 +193,33 @@ add_custom_command(
 
 set(HIBRIDON_COMPILE_OPTIONS  "")
 
-# allow for source code lines of up to 132 columns whichi is the maximum allowed in intel fortran compiler
+# allow for source code lines of up to 132 columns which is the maximum allowed in intel fortran compiler
 # (true, we are compiling with gfortran here, having the same restriction here will ease detecting lines that exceed 132 columns,
 # they would break intel fortran's build)
-list(APPEND HIBRIDON_COMPILE_OPTIONS "-ffixed-line-length-132")
+if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS "-ffixed-line-length-132")
+elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS "-extend-source" "132")
+  # source code lines can be of any length, as compilation options are included as source code strings (see bug #5)
+  list(APPEND HIBRIDON_COMPILE_OPTIONS "-no-wrap-margin")
+endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
-# -std=legacy so that the compiler doesn't complain when the size of arrays don't match between a function declaration and a call to this function. At the moment, there's plenty of such cases in the code; these are not bugs, just an old way of doing things.
-list(APPEND HIBRIDON_COMPILE_OPTIONS "-std=legacy")
 
-# force arrays to be allocated on the heap instead of the stack, this removes segmentation faults crash, not sure why
-list(APPEND HIBRIDON_COMPILE_OPTIONS "-fmax-stack-var-size=1")
+if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+  # -std=legacy so that the compiler doesn't complain when the size of arrays don't match between a function declaration and a call to this function. At the moment, there's plenty of such cases in the code; these are not bugs, just an old way of doing things.
+  list(APPEND HIBRIDON_COMPILE_OPTIONS "-std=legacy")
+endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+
+
+if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+  # force arrays to be allocated on the heap instead of the stack, this removes segmentation faults crash, not sure why
+  list(APPEND HIBRIDON_COMPILE_OPTIONS "-fmax-stack-var-size=1")
+elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
+  # force arrays to be allocated on the heap instead of the stack, this removes segmentation faults crash, not sure why
+  # the following option means : automatic arrays and arrays created for temporary computations are allocated on the stack if their size can be determined at compile time and if it doesn't exceed 10kb.
+  # this option seems necessary for big values of kmax (eg kmax=5000), according to bdesrousseaux, otherwise the user will experience a segmentation fault. I guess that without this option, the stack becomes too small to contain such big arrays...
+  list(APPEND HIBRIDON_COMPILE_OPTIONS "-heap-arrays 10")
+endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
 # use large model to prevent linking errors (relocation truncated to fit: R_X86_64_PC32) because the common blocks are too big to fit in the default memory model
 if(UNIX AND NOT APPLE)
@@ -211,9 +229,15 @@ endif()
 #  -fbounds-check'
 target_compile_options(hib PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
 
-target_compile_definitions(hib PUBLIC HIB_UNIX_X86=1)
-target_compile_definitions(hib PUBLIC HIB_UNIX=1)
-target_compile_definitions(hib PUBLIC HIB_UNIX_GFORTRAN=1)
+if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+  target_compile_definitions(hib PUBLIC HIB_UNIX_X86=1)
+  target_compile_definitions(hib PUBLIC HIB_UNIX=1)
+  target_compile_definitions(hib PUBLIC HIB_UNIX_GFORTRAN=1)
+elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
+  target_compile_definitions(hib PUBLIC HIB_UNIX_X86=1)
+  target_compile_definitions(hib PUBLIC HIB_UNIX=1)
+  target_compile_definitions(hib PUBLIC HIB_UNIX_IFORT=1)
+endif()
 
 
 # list of various architectures encountered when converting cstart/cend with fpp directives
