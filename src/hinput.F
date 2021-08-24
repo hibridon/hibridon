@@ -1311,7 +1311,7 @@ c      call helppr(line)
       call mrcrs(fnam1,a)
 #endif
       goto 1
-* print selected integral cross sections from ics file
+* printc : print selected integral cross sections from ics file
 2600  call parse(line,l,fnam1,lc)
       if(fnam1 .eq. ' ') fnam1 = jobnam
       call lower(fnam1)
