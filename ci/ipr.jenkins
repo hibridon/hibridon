@@ -1,3 +1,4 @@
+// Jenkinsfile for jenkins.ipr.univ-rennes1.fr (Institut de Physique de Rennes)
 pipeline {
     agent {label 'physix_agent'}
     environment {
