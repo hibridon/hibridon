@@ -900,7 +900,7 @@
         jtpmax = jlevt(istatt)
       end if
       if (sngsmt.and.trpsmt) then
-        jmolmx = max(jsgmax,ntpmax)
+        jmolmx = max(jsgmax,jtpmax)
       else
         if (sngsmt) jmolmx = jsgmax
         if (trpsmt) jmolmx = jtpmax
