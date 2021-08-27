@@ -232,7 +232,7 @@ c     The constants module should be used in new subroutines.
 *     symmetry of the matrices z and w is not exploited in these loops,
 *     and blas routines are not used for o(n) loops
 *  ------------------------------------------------------------------
-      use mod_coqvec, only: mxphot, nphoto, q
+      use mod_coqvec, only: mxphot, nphoto, q ! q is an output of this subroutine
       implicit double precision (a-h,o-z)
       integer ich, icode, icol, idiag, ierr, ij, irow, istep, kstep,
      :        nch, ncol, ndiag, nmax, nrow, nsteps
@@ -259,6 +259,8 @@ c     dependent) built-in types
       integer int_t
       double precision dble_t
       character char_t
+      integer :: nqmax
+      nqmax = 0
 c
 #ifdef DEBUG_ISSUE35
       write(6, *) 'issue35/logdb/0 : w(1)=', w(1)
@@ -276,11 +278,13 @@ c
         d3 = h * h / three
         d6 = - h * h / six
         half = h / two
-        if (photof) nqmax=nch*nphoto
-*       initialize q vector
+        if (photof) then
+           nqmax=nch*nphoto
+*          initialize q vector
 #if defined(HIB_UNIX) || defined(HIB_CRAY)
-        call dset(nqmax, zero, q, 1)
+           call dset(nqmax, zero, q, 1)
 #endif
+         end if 
       end if
 *     row, column and diagonal increments for matrices z and w
       nrow = 1
