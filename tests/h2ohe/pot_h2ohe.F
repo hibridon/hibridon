@@ -756,6 +756,8 @@ c
       common/damp/ ldum(5,mxl),cdum(maxb),ndum
       common/realm/ almre(0:50,0:50)
       data oa(1) /0.d0/, oc /0.d0,0.d0/
+      integer :: iperm
+      iperm = 0
 c
         r = rpt(1)
         oa(2) = rpt(2)
