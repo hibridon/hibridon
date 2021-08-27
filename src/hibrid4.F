@@ -2363,6 +2363,7 @@ c
       common /coered/ ered, rmu
       common /coground/ ifull
       common /cotrans/ ttrans(36)
+      common /coselb/ ibasty
       dimension scc(100)
       data zero, one, onemin /0.d0, 1.d0, -1.d0/
       data ione, mone /1,-1/
