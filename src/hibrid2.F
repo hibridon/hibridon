@@ -260,6 +260,7 @@ c     dependent) built-in types
       double precision dble_t
       character char_t
       integer :: nqmax
+      real(8) :: simpwt  ! simpson quadrature weight
       nqmax = 0
 c
 #ifdef DEBUG_ISSUE35
@@ -271,6 +272,7 @@ c
 *     energy calculation
       if (iwrite) write (11) rmin, rmax, nsteps
       if (iread ) read  (11) rmin, rmax, nsteps
+      simpwt = 0.d0
       if (nsteps .ne. 0) then
         h = (rmax - rmin) / (2 * nsteps)
         hi = one / h

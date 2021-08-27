@@ -2176,7 +2176,8 @@ c.....zero or negative record means continue at present position
 c
       lre=l*intrel
 c
-5     if(irec.gt.0) then
+5     ibadr = 0
+      if(irec.gt.0) then
         if(ibstat.eq.1) call dwrite(idbuf,libuf,ibfil,ibrec,ibadr)
         ibstat=0
         ibof=0

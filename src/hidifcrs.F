@@ -59,6 +59,7 @@
       complex(8) :: stampl, stamplm
       logical existf,csflg1,flghf1,flgsu1,ihomo,flaghf,twomol,
      1        nucros,iprint,mflag,stflag,is_twomol,is_j12
+      integer :: ii
 #include "common/parpot"
       common /coselb/ ibasty
       common /coz/ sreal1(1)
@@ -583,6 +584,7 @@ c
          endif
 * Comment(JK): Loop over DCS angular grid
          aangle=ang1
+         ii = 0
          do 339 i=1,nangle
          ii=ii+1
 * space frame (z-axis is initial velocity vector) scattering amplitude

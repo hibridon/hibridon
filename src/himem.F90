@@ -895,7 +895,7 @@ module mod_coqvec
 
    ! *  variables in common block /coqvec/
    ! *     mxphot        maximum column dimension of q matrix
-   ! *     nphoto        actual collumn dimension of q matrix
+   ! *     nphoto        actual column dimension of q matrix
    ! *     q             accumulated gamma2 inhomogeneous propagator
    ! *                   only calculated if photof = .true.
    ! *                   this is stored as a column vector for each separate

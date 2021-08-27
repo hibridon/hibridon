@@ -127,6 +127,8 @@ c      end module mod_1sg1sg
       use mod_coj12, only: j12
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
+      integer :: ifs1
+      integer :: nn
 #include "common/parbas"
 #include "common/parbasl"
       common /coipar/ iiipar(9), iprint
@@ -141,6 +143,8 @@ c      end module mod_1sg1sg
      :    sc1(1), sc2(1), sc3(1), sc4(1), ishold(1)
       data zero, ione, itwo, ithree / 0.d0, 1, 2, 3 /
 *  check for consistency in the values of flaghf and csflag
+      ifs1 = 0
+      nn = 0
       if (.not. flaghf) then
         write (9, 5)
 5       format (' *** FLAGHF = .FALSE. FOR DOUBLET SYSTEM; ABORT ***' )
@@ -214,10 +218,10 @@ c
 c  DON'T subtract energy of lowest H2 level
               ehold(nlevel) = b1rot * nn1 - d1rot * nn1**2
      :            + b2rot * j2 * (j2 + 1.d0)
-              if (ifs1.eq.1) then
-                ehold(nlevel) = ehold(nlevel) + 0.5d0 * gamma * n1
-              else
-                ehold(nlevel) = ehold(nlevel)
+                if (ifs1.eq.1) then
+                  ehold(nlevel) = ehold(nlevel) + 0.5d0 * gamma * n1
+                else
+                  ehold(nlevel) = ehold(nlevel)
      :             - 0.5d0 * gamma * (n1 + 1.d0)
               end if
               ehold(nlevel) = ehold(nlevel) / econv

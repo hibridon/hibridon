@@ -362,6 +362,7 @@
       use mod_coener, only: energ
       use constants
       implicit double precision (a-h,o-z)
+      integer :: jtotmx
       character*20 cdate
       character*10 time
       character*10 timew,cpubaw,cpuptw,cpuaiw,cpuldw,cpusmw,cpuouw,
@@ -472,6 +473,7 @@
 *  convert collision energy, rotational constant, and reduced mass
 *  to atomic units
       rmu = xmu / xmconv
+      jtotmx = 0
 *  reduce maximum jtot if all channels are closed (not for bound states)
       if (.not.boundc) then
         jtop = sqrt (energ(1) / econv * rcut * rcut * 2.d0 * rmu )

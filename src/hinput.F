@@ -71,6 +71,7 @@
       integer ixpar
       integer ipar
       integer ibasty
+      integer nerg
       logical existf, lspar, first, openfl, is_twomol
       logical lpar, logp, opti, optifl, batch, jtrunc
       dimension a(15),ia(10), ihold(15), lhold(15),lindx(28)
@@ -117,6 +118,7 @@ c    :                xsecwr, nucros, photof, wavefl, boundc
       data batch /.false./
       save ipr, opti, a, a1, acc, acclas, optval, optacc, istep, inam,
      :     fnam1, fnam2, code, lc, jtot2x, irpot, irinp
+      nerg = 0
       bascod='BASISTYP'
       pcod(1)='JTOT1'
       pcod(2)='JTOT2'

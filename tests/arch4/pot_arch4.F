@@ -106,6 +106,7 @@
       dimension csplin(69,5)
       dimension rr(69), vl(345),vec(69)
       common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
+      integer :: ifirst
 * here are the 69 values of R
       data rr/
      +  3.000,  3.250,  3.500,  3.750,  4.000,
@@ -217,6 +218,7 @@
      + -0.0000000e+00 /
 *
 * spline fit
+      ifirst = 0
       if (ifirst .eq. 0) then
 * spline fit of the vl coefficients
          ind=1

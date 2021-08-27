@@ -109,10 +109,83 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   endif()
 elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   # ifort
-  # set (warning_options "-warn all") # activate all wanings
-  set (warning_options "") # activate all wanings
+  set (warning_options "")
+  # set (warning_options "-warn all") # activate all warnings
+
+  # [no]alignments
+  #     Determines whether warnings occur for data that is not naturally aligned. 
+  set (warning_options "${warning_options} -warn alignments")
+
+  # [no]declarations
+  #     Determines whether warnings occur for any undeclared names. 
+  set (warning_options "${warning_options} -warn declarations")
+
+  # [no]errors
+  #     Determines whether warnings are changed to errors. 
+  # set (warning_options "${warning_options} -warn noerrors")
+
+  # [no]externals
+  #     Determines whether warnings occur for any dummy procedures or procedure calls that have no explicit interface or have not been declared external. 
+  set (warning_options "${warning_options} -warn externals")
+
+  # [no]general
+  #     Determines whether warning messages and informational messages are issued by the compiler. 
+  set (warning_options "${warning_options} -warn general")
+
+  # [no]ignore_loc
+  #     Determines whether warnings occur when %LOC is stripped from an actual argument. 
+  set (warning_options "${warning_options} -warn ignore_loc")
+
+  # [no]interfaces
+  #     Determines whether the compiler checks the interfaces of all SUBROUTINEs called and FUNCTIONs invoked in your compilation against an external set of interface blocks.
+  # this option causes the following errors (that can't be disabled by diag-disable):
+  # error #6633: The type of the actual argument differs from the type of the dummy argument.
+  # error #6634: The shape matching rules of actual arguments and dummy arguments have been violated.
+  # error #7983: The storage extent of the dummy argument exceeds that of the actual argument.
+  # set (warning_options "${warning_options} -warn interfaces")
+
+
+  # [no]shape
+  #     Determines whether array conformance violations are diagnosed with errors or warnings when used with the check shape
+  #     option. 
+  set (warning_options "${warning_options} -warn shape")
+
+  # [no]stderrors
+  #     Determines whether warnings about Fortran standard violations are changed to errors.
+
+  # [no]truncated_source
+  #     Determines whether warnings occur when source exceeds the maximum column width in fixed-format files. 
+  set (warning_options "${warning_options} -warn truncated_source")
+
+  # [no]uncalled
+  #     Determines whether warnings occur when a statement function is never called 
+  set (warning_options "${warning_options} -warn uncalled")
+
+  # [no]unused
+  #     Determines whether warnings occur for declared variables that are never used. 
+  set (warning_options "${warning_options} -warn unused")
+
+  # [no]usage
+  #     Determines whether warnings occur for questionable programming practices. 
+  set (warning_options "${warning_options} -warn usage")
+
+  # disable warning #6717: This name has not been given an explicit type
+  set (warning_options "${warning_options} -diag-disable 6717")
+
+  # disable remark #7712: This variable has not been used.
+  set (warning_options "${warning_options} -diag-disable 7712")
+
+  # disable warning #8889: Explicit declaration of the EXTERNAL attribute is required.
+  set (warning_options "${warning_options} -diag-disable 8889")
+  
+
+  # set (warning_options "") # activate all wanings
   set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3 ${warning_options}")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-f77rtl -O0 -g ${warning_options}")
+
+  # check uses of uninitialized variables in run time
+  # this is very useful as these are always bugs that cause the program to behave randomly with ifort (gfortran initializes data with zero)
+  set (CMAKE_Fortran_FLAGS_DEBUG   "${CMAKE_Fortran_FLAGS_DEBUG} -check uninit")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
 

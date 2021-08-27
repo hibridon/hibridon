@@ -126,7 +126,6 @@
  11      format(/' ** NNOUT < 0, ABORT **'/)
          goto 4000
       end if
-      nout = nnout
 *
 *     read header of 2nd s-matrix file
 *
@@ -138,13 +137,12 @@
 *
       mmaxst = max(mmaxs, mmaxt)
 *
-*     we need the s-matrices as lower triangles, so nnout1  m u s t  be > 0
+*     we need the s-matrices as lower triangles, so nnout2  m u s t  be > 0
 *
       if (nnout2.lt.0) then
          write(6,11)
          goto 4000
       end if
-      nout = nnout
 *
 *     molecule-molecule cross sections not implemented
 *
