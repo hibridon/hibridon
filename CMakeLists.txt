@@ -86,7 +86,14 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   set (warning_options "${warning_options} -Wno-intrinsic-shadow")
   set (warning_options "${warning_options} -Wno-character-truncation")
   
-  set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -fsanitize=address ${warning_options} ")
+  set (CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g  -fsanitize=address ${warning_options}")
+
+  # don't initialize local variables to zero : initialize them with dummy values to force failures which help detect uninitialized variables as -Wuninitialized doesn't detect everything (see issue #38 or https://stackoverflow.com/questions/39591300/gfortran-wuninitialized-flag-misses-variable-in-do-loop)
+  # by default, gfortran initializes integers to 0, but not ifort : as a result, some bugs in the code are hidden with gfortran default options
+  # set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -fno-init-local-zero")
+  # set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -finit-integer=333333333")
+  # set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -finit-real=snan")
+
   # todo: add -fbounds-check once all mismatched declarations of variables (eg in common blocks) have been fixed
   if(ENABLE_CODE_COVERAGE)
     set(GCC_COVERAGE_COMPILE_FLAGS "-fprofile-arcs -ftest-coverage --coverage")
