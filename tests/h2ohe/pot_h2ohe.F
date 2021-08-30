@@ -947,6 +947,7 @@ c       subroutine potentot(rpt,vex,vsp,valas,der,imode,timb)
        parameter (mxl=100)
        parameter (maxb=4*mxl,maxp=800)
         dimension rr(10), rpt(6), oa(3), ob(3), oc(2)
+        integer :: iperm
       common/exch/lex(5,mxl),cex(maxb),nex,irpowex,iwex,iexback,igrx,
      1 idonex,exscale
       common/spher/lsp(5,mxl),csp(maxb),nsp,irpowsp,iwsp,ispback,igrt
@@ -955,6 +956,7 @@ c       subroutine potentot(rpt,vex,vsp,valas,der,imode,timb)
       data cm    /219474.63d0/
       data oa(1) /0.d0/, oc /0.d0,0.d0/
 c
+        iperm = 0
         r = rpt(1)
         oa(2) = rpt(2)
         oa(3) = rpt(3)
