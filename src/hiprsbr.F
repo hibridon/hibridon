@@ -124,7 +124,6 @@
         close(1)
         return
       end if
-      nout = nnout
 *
 * read header of 2nd s-matrix file
 *
@@ -141,7 +140,6 @@
          close(11)
          return
       end if
-      nout = nnout
 *
 *  molecule-molecule cross sections not implemented
 *
