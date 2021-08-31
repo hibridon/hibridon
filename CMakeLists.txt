@@ -181,7 +181,7 @@ elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
 
   # set (warning_options "") # activate all wanings
   set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${warning_options}")
-  set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g ${warning_options}")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g -traceback -fp-stack-check ${warning_options}")
 
   # check uses of uninitialized variables in run time
   # this is very useful as these are always bugs that cause the program to behave randomly with ifort (gfortran initializes data with zero)
