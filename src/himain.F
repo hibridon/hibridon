@@ -360,6 +360,7 @@
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_coener, only: energ
+      use mod_hiba1sg, only : basis
       use constants
       implicit double precision (a-h,o-z)
       integer :: jtotmx

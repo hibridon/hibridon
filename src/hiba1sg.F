@@ -16,6 +16,8 @@
 *     current revision:  24-jul-2019 (p.dagdigian)                       *
 *                                                                       *
 *************************************************************************
+      module mod_hiba1sg
+      contains
 * --------------------------------------------------------------------
       subroutine basis (j, l, is, jhold, ehold, ishold, nlevel, nlevop,
      :                  sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu,
@@ -122,14 +124,19 @@
 *    projection index are equal to the values stored in j, jtot, and nu
 *    plus 1/2
       implicit double precision (a-h,o-z)
-      integer j, l, is, jhold, ishold, nlevel, nlevop, jtot, nu,
+      integer :: j(:)
+      integer :: l(:)
+      integer :: is(:)
+      integer :: jhold(:)
+      real(8) :: ehold(:)
+      integer :: ishold(:)
+      real(8) :: sc1(:), sc2(:), sc3(:), sc4(:)
+      integer nlevel, nlevop, jtot, nu,
      :        jlpar, n, nmax
 *      real ehold, sc1, sc2, sc3, sc4, rcut
       logical flaghf, flagsu, csflag, clist, bastst, ihomo, twomol
       integer ibasty
       common /coselb/ ibasty
-      dimension j(1), l(1), is(1), jhold(1), ehold(1), ishold(1),
-     :         sc1(1), sc2(1), sc3(1), sc4(1)
 *
 *  select basis routine according to value of ibasty
       if (ibasty .ge. 99) then
@@ -441,8 +448,11 @@ c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
       common /coered/ ered, rmu
       common /coskip/ nskip, iskip
       common /coconv/ econv, xmconv
-      dimension j(5), l(5), jhold(5), ehold(5), sc1(5), sc2(5), sc3(5),
-     :          sc4(5), ishold(5), is(5)
+      integer :: j(:)
+      integer :: l(:)
+      integer :: is(:)
+      dimension jhold(5), ehold(5), sc1(5), sc2(5), sc3(5),
+     :          sc4(5), ishold(5)
 *   econv is conversion factor from cm-1 to hartrees
 *   xmconv is converson factor from amu to atomic units
       zero = 0.d0
@@ -882,6 +892,7 @@ c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
       end if
       return
       end
+      end module mod_hiba1sg
 c     ------------------------------------------------------------------
       logical function is_twomol(ibasty)
 c     ------------------------------------------------------------------
