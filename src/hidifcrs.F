@@ -60,6 +60,9 @@
       logical existf,csflg1,flghf1,flgsu1,ihomo,flaghf,twomol,
      1        nucros,iprint,mflag,stflag,is_twomol,is_j12
       integer :: ii
+      integer, parameter :: smt_unit = 1
+      integer, parameter :: dcs_unit = 2
+      integer, parameter :: rho_unit = 3
 #include "common/parpot"
       common /coselb/ ibasty
       common /coz/ sreal1(1)
@@ -144,17 +147,17 @@ c
 * initialize timer
       call mtime(cpu0,ela0)
 
-      call openf(1,xnam1(1:lenx),'tu',0)
+      call openf(smt_unit,xnam1(1:lenx),'tu',0)
 c
 c.....open output file for differential cross sections
 c
 c     ifil=1
 20    call gennam(xnam2,fname1,ienerg,'dcs',lenx)
-      call openf(2,xnam2(1:lenx),'sf',0)
+      call openf(dcs_unit,xnam2(1:lenx),'sf',0)
 c.....open output file for final-m dependence of (m,m) and (m,m+2) density matrix
       if (mflag) then
          call gennam(xnam3,fname1,ienerg,'rho',lenx)
-         call openf(3,xnam3(1:lenx),'sf',0)
+         call openf(rho_unit,xnam3(1:lenx),'sf',0)
       endif
 * write a header (mha 10/22/08, don't write this for easier import into matlab)
 *      call version(2)
@@ -169,7 +172,7 @@ c.....open output file for final-m dependence of (m,m) and (m,m+2) density matri
 c
 c.....read header of s-matrix file
 c
-      call rdhead(1,cdate1,ered1,rmu1,csflg1,flghf1,
+      call rdhead(smt_unit,cdate1,ered1,rmu1,csflg1,flghf1,
      1   flgsu1,
      1   twomol,nucros,jfirst,jfinal,jtotd,numin,numax,nud,
      1   nlevel,nlevop,nnout,jlev,inlev,elev,jout1)
@@ -182,9 +185,9 @@ c
 c
 c.....print job information
 c
-      write(2,41) xnam1,cdate1,label,potnam,econv*ered1,xmconv*rmu1
+      write(dcs_unit, 41) xnam1,cdate1,label,potnam,econv*ered1,xmconv*rmu1
       if (mflag)
-     :     write(3,41) xnam1,cdate1,label,potnam,econv*ered1,xmconv*rmu1
+     :     write(rho_unit, 41) xnam1,cdate1,label,potnam,econv*ered1,xmconv*rmu1
       write(6,40) xnam1,cdate1,label,potnam,econv*ered1,xmconv*rmu1
 40    format('    S-MATRICES READ FROM FILE ',(a),/,
      : '      WRITTEN:   ',(a),/,
@@ -257,9 +260,9 @@ c added for negative nnout by moonbong yang 2-8-95
 c
 c.....print header
 c
-160   write(2,171) j1,in1,j2,in2,jtot1,jtot2,ca,1.8897*ca,
+160   write(dcs_unit, 171) j1,in1,j2,in2,jtot1,jtot2,ca,1.8897*ca,
      :             econv*ecol,econv*ecol/8.065465
-      if (mflag) write(3,171) j1,in1,j2,in2,jtot1,jtot2,ca,1.8897*ca,
+      if (mflag) write(rho_unit, 171) j1,in1,j2,in2,jtot1,jtot2,ca,1.8897*ca,
      :             econv*ecol,econv*ecol/8.065465
       write(6,170) j1,in1,j2,in2,jtot1,jtot2,ca,1.8897*ca,
      :             econv*ecol,econv*ecol/8.065465
@@ -445,7 +448,7 @@ c.....read next s-matrix
 c
 250   call sread (0,sreal1, simag1, jtot, jlpar, nu1,
      :                  jq, lq, inq, ipack1, jpack1, lpack1,
-     :                  1, mmax, nopen1, lengt1, ierr)
+     :                  smt_unit, mmax, nopen1, lengt1, ierr)
       if(ierr.eq.-1) then
          write(6,260) xnam1,jtlast,jplast
 260      format(' END OF FILE DETECTED READING FILE ',(a),
@@ -709,12 +712,12 @@ c      endif
      :        write(6,350)
      :        angle,s(i)*fak,sm(i)/s(i),sm6(i)/s(i),a22(i)/s(i),
      $           a21(i)/s(i),a11(i)/s(i)
-         write(2,350) angle,s(i)*fak,sm(i)/s(i),sm6(i)/s(i),a22(i)/s(i),
+         write(dcs_unit, 350) angle,s(i)*fak,sm(i)/s(i),sm6(i)/s(i),a22(i)/s(i),
      $        a21(i)/s(i),a11(i)/s(i)
 350      format(1x,f7.2,6g15.4)
          if (mflag) then
-            write(3,352) angle,(rho(ij,i)/s(i),ij=-j2p,j2)
-            write(3,352) angle,(rho2(ij,i)/s(i),ij=-j2p,j2)
+            write(rho_unit, 352) angle,(rho(ij,i)/s(i),ij=-j2p,j2)
+            write(rho_unit, 352) angle,(rho2(ij,i)/s(i),ij=-j2p,j2)
          endif
 351      angle=angle+dang
 352      format(f7.2,25g15.4)
@@ -725,7 +728,7 @@ c      endif
      :  ('    DEGENERACY AVERAGED STERIC DXSC''S: HEADS AND TAILS')
          do 370 i=1,nangle
          if (iprint) write(6,350) angle,0.5d0*s(i)*fak,0.5d0*sm(i)*fak
-         write(2,361) angle,0.5d0*s(i)*fak,0.5d0*sm(i)*fak
+         write(dcs_unit, 361) angle,0.5d0*s(i)*fak,0.5d0*sm(i)*fak
 361      format(1x,'%',f7.2,3g15.4)
 370      angle=angle+dang
       endif
@@ -746,7 +749,7 @@ c
 
       if (mflag) then
          write(6,375) ang0,dang,ang2
-         write(2,376) ang0,dang,ang2
+         write(dcs_unit, 376) ang0,dang,ang2
 375      format
      :   (/,'    M-DEPENDENT (COLLISION FRAME) INTEGRAL CROSS SECTIONS',
      :    /,9x,'ANGULAR RANGE:',f6.2,':',f5.2,':',f6.2,
@@ -838,13 +841,13 @@ c jk
 1400      continue
 1500    continue
 *
-        write(2,1348)
+        write(dcs_unit, 1348)
         if (iprint) write(6,1347)
 1347    format(/'   DEGENERACY AVERAGED DXSC (ANG^2/SR)')
 1348    format(/'%  DEGENERACY AVERAGED DXSC (ANG^2/SR)'/'dcs = [')
         angle = ang1
         do 1351 i = 1, nangle
-          write(2,1350) angle, s(i)*fak
+          write(dcs_unit, 1350) angle, s(i)*fak
           if (iprint) write(6,1350) angle, s(i)*fak
 1350      format(1x,f7.2,1g15.4)
           angle = angle + dang
@@ -882,13 +885,13 @@ c
 3400      continue
 3500    continue
 *
-        write(2,3348)
+        write(dcs_unit, 3348)
         if (iprint) write(6,3347)
 3347    format(/'   DEGENERACY AVERAGED DXSC (ANG^2/SR)')
 3348    format(/'%  DEGENERACY AVERAGED DXSC (ANG^2/SR)'/'dcs = [')
         angle = ang1
         do 3351 i = 1, nangle
-          write(2,3350) angle, s(i)*fak
+          write(dcs_unit, 3350) angle, s(i)*fak
           if (iprint) write(6,1350) angle, s(i)*fak
 3350      format(1x,f7.2,1g15.4)
           angle = angle + dang
@@ -918,18 +921,18 @@ c
       call gettim(cpu1,cpu)
       call gettim(ela1,elaps)
       write(6,720) elaps, cpu
-      write(2,721) elaps, cpu
+      write(dcs_unit, 721) elaps, cpu
 720   format(/,
      : ' ** DIFFERENTIAL CROSS SECTION CALCULATION FINISHED:',
      :       /,'    ELAPSED TIME:',(a),'  CPU TIME: ',(a))
 721   format(/,'];',/
      : '% ** DIFFERENTIAL CROSS SECTION CALCULATION FINISHED:',
      :       /,'%   ELAPSED TIME:',(a),'  CPU TIME: ',(a))
-      close(1)
-      close(2)
+      close(smt_unit)
+      close(dcs_unit)
       if (mflag) then
-         write(3,721) elaps, cpu
-         close(3)
+         write(rho_unit, 721) elaps, cpu
+         close(rho_unit)
       endif
       return
       end

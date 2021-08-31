@@ -1326,7 +1326,7 @@ c.....reserve space for restart information
       end
 c
 c     ------------------------------------------------------------
-      subroutine readrc(iadr, nfile, lrec, jtot, jlpar, nu, nopen,
+      subroutine readrc(iadr, smt_file_unit, lrec, jtot, jlpar, nu, nopen,
      $     length, nnout)
 c     author: h.j. werner
 c     revision: 14-jun-1990 by mha
@@ -1343,9 +1343,18 @@ c     lrec: on return contains the size in byte current s-matrix,
 c     or -1 on end of file
 c     Other parameters have their traditional meanings.
 c     ------------------------------------------------------------
-      implicit double precision (a-h, o-z)
-      if (iadr .eq. 0) inquire (nfile, pos=iadr)
-      read (nfile, pos=iadr, end=900, err=950)
+      implicit none
+      integer :: iadr
+      integer, intent(in) :: smt_file_unit
+      integer, intent(out) :: lrec
+      integer, intent(out) :: jtot
+      integer, intent(out) :: jlpar
+      integer, intent(out) :: nu
+      integer, intent(out) :: nopen
+      integer, intent(out) :: length
+      integer, intent(out) :: nnout
+      if (iadr .eq. 0) inquire (smt_file_unit, pos=iadr)
+      read (smt_file_unit, pos=iadr, end=900, err=950)
      $     lrec, jtot, jlpar, nu, nopen, length ,nnout
       return
 c
@@ -1357,44 +1366,53 @@ c
 c     ------------------------------------------------------------
 c
 c     ------------------------------------------------------------
-      subroutine rdhead(nfile,cdate,ered,rmu,csflag,flaghf,
-     :     flagsu,twomol,nucros,jfirst,jfinal,jtotd,numin,numax,nud,
-     :     nlevel,nlevop,nnout,jlev,inlev,elev,jout)
+      subroutine rdhead(smt_file_unit, cdate, ered, rmu, csflag, flaghf,
+     :     flagsu, twomol, nucros, jfirst, jfinal, jtotd, numin, numax, nud,
+     :     nlevel, nlevop, nnout, jlev, inlev, elev, jout)
 *
-*     subroutine to read header from file nfile
+*     subroutine to read header from file smt_file_unit
 *     authors: h.j. werner and b. follmeg
 *     revision: 27-oct-95
 c     major revision: 07-jan-2012 by q. ma
 c     ------------------------------------------------------------
       use mod_clseg, only: lseg
-      implicit double precision (a-h,o-z)
-      logical csflag, flaghf, flagsu, twomol, nucros
-      character*20 cdate
+      implicit none
+      integer, intent(in) :: smt_file_unit ! logical unit used to read smt file 
+      character*20, intent(out) :: cdate
+      double precision, intent(out) :: ered
+      double precision, intent(out) :: rmu
+      logical, intent(out) :: csflag, flaghf, flagsu, twomol, nucros
+      integer, intent(out) :: jfirst, jfinal, jtotd
+      integer, intent(out) :: numin, numax, nud
+      integer, intent(out) :: nlevel, nlevop, nnout
+      integer, dimension(1), intent(out) :: jlev  ! dimension(1:nlevel)
+      integer, dimension(1), intent(out) :: inlev ! dimension(1:nlevel)
+      double precision, dimension(1), intent(out) :: elev ! dimension(1:nlevel)
+      integer, dimension(1), intent(out) :: jout  ! dimension(1:iabs(nnout))
 #include "common/parpot"
-      common/cofil/ nfl,iofbuf,maxrec(60),iofrec(60),nwrec,lenbuf
-      common/cobuf/ lbuf,ibuf(1)
-      dimension idate(20),ilabel(48), ipotnm(48)
-      dimension jlev(1), inlev(1), elev(1), jout(1)
       character*8 csize8
       character*4 csize4
+      integer :: lenhd
+      integer :: ibasty
+      integer :: i
 
 c     Read the magic number (from the start of the file)
-      read (nfile, pos=1, end=900, err=950) csize8
+      read (smt_file_unit, pos=1, end=900, err=950) csize8
 *     first word on file contains the length of the header
-      read (nfile, end=900, err=950) lenhd
+      read (smt_file_unit, end=900, err=950) lenhd
 c
-      read (nfile, end=900, err=950) cdate, label, potnam
+      read (smt_file_unit, end=900, err=950) cdate, label, potnam
 c     Four bytes for alignment
-      read (nfile, end=900, err=950) csize4
+      read (smt_file_unit, end=900, err=950) csize4
 c
-      read (nfile, end=900, err=950) ered, rmu, csflag, flaghf, flagsu,
+      read (smt_file_unit, end=900, err=950) ered, rmu, csflag, flaghf, flagsu,
      $     twomol, nucros, jfirst, jfinal, jtotd, numin, numax,
      $     nud, nlevel, nlevop, nnout, ibasty
-      read (nfile, end=900, err=950) (jlev(i), i=1, nlevel),
+      read (smt_file_unit, end=900, err=950) (jlev(i), i=1, nlevel),
      $     (inlev(i), i=1, nlevel), (elev(i), i=1, nlevel)
-      read (nfile, end=900, err=950) (jout(i), i=1, iabs(nnout))
+      read (smt_file_unit, end=900, err=950) (jout(i), i=1, iabs(nnout))
 c
-      read (nfile, end=900, err=950) csize8
+      read (smt_file_unit, end=900, err=950) csize8
       if (csize8 .ne. 'ENDOFHDR') goto 950
       return
 c
@@ -1403,7 +1421,7 @@ c
       call exit
       end
 c     ------------------------------------------------------------------
-      subroutine sinqr(nfile, njtot, nchmx)
+      subroutine sinqr(smt_file_unit, njtot, nchmx)
 c
 c     Subroutine to scan an s-matrix file for the number of partial
 c     waves and the maximum number of channels.
@@ -1416,16 +1434,16 @@ c
 c     Author: Qianli Ma
 c     ------------------------------------------------------------------
       implicit none
-      integer nfile, njtot, nchmx, iaddr, lrec
+      integer smt_file_unit, njtot, nchmx, iaddr, lrec
       integer jtot, jlpar, nu, nopen, length, nnout
 c
 c     Read the length of the header
-      read (nfile, pos=9, end=900, err=950) iaddr
+      read (smt_file_unit, pos=9, end=900, err=950) iaddr
 c
       njtot = 0
       nchmx = 0
       iaddr = iaddr + 1
- 20   call readrc(iaddr, nfile, lrec, jtot, jlpar, nu, nopen, length,
+ 20   call readrc(iaddr, smt_file_unit, lrec, jtot, jlpar, nu, nopen, length,
      $     nnout)
       if (lrec .lt. 0) return
       njtot = njtot + 1
@@ -1538,7 +1556,7 @@ c
 c     ------------------------------------------------------------
       subroutine sread (iadr, sreal, simag, jtot, jlpar, nu,
      :                  jq, lq, inq, inpack, jpack, lpack,
-     :                  nfile, nmax, nopen, length, ierr)
+     :                  smt_file_unit, nmax, nopen, length, ierr)
 *     authors: h.j. werner and b. follmeg
 *     revision: 21-feb-2006 by mha
 *     major revision: 07-feb-2012 by q. ma
@@ -1554,6 +1572,7 @@ c     ------------------------------------------------------------
       use mod_coj12, only: j12
       use mod_coj12p, only: j12pk
       implicit double precision (a-h,o-z)
+      integer, intent(in) :: smt_file_unit
       logical triang
       logical is_j12
       dimension sreal(nmax,1), simag(nmax,1),
@@ -1579,13 +1598,13 @@ c
 c
 *     read next s-matrix header
       iaddr = iadr
-      call readrc(iaddr,nfile,lrec,jtot,jlpar,nu,nopen,length,nnout)
+      call readrc(iaddr,smt_file_unit,lrec,jtot,jlpar,nu,nopen,length,nnout)
       if (lrec .lt. 0) goto 900
 *
-      read (nfile, end=900, err=950) (jpack(i), i=1, length),
+      read (smt_file_unit, end=900, err=950) (jpack(i), i=1, length),
      $     (lpack(i), i=1, length), (inpack(i), i=1, length)
       if (is_j12(ibasty))
-     $     read (nfile, end=900, err=950) (j12pk(i), i=1, length)
+     $     read (smt_file_unit, end=900, err=950) (j12pk(i), i=1, length)
 
 
 
@@ -1607,7 +1626,7 @@ c
          if (triang) then
             ioff = 1
             do 70 irow = 1, length
-               read (nfile, end=900, err=950)
+               read (smt_file_unit, end=900, err=950)
      $              (sreal(ioff + i, 1), i=0, irow - 1),
      $              (simag(ioff + i, 1), i=0, irow - 1)
                ioff = ioff + irow
@@ -1616,7 +1635,7 @@ c
          end if
 *     read s-matrix
          do 80  icol = 1, length
-            read (nfile, end=900, err=950)
+            read (smt_file_unit, end=900, err=950)
      $           (sreal(i, icol), i=1, icol),
      $           (simag(i, icol), i=1, icol)
 80       continue
@@ -1630,20 +1649,20 @@ c
 c
       else if (nnout .le. 0) then
 *     here if you have written out columns of the s-matrix
-         read (nfile, end=900, err=950) (jq(i), i=1, nopen),
+         read (smt_file_unit, end=900, err=950) (jq(i), i=1, nopen),
      $        (lq(i), i=1, nopen), (inq(i), i=1, nopen)
-         if (is_j12(ibasty)) read (nfile, end=900, err=950)
+         if (is_j12(ibasty)) read (smt_file_unit, end=900, err=950)
      $        (j12(i), i=1, nopen)
 *     now read columns of the s-matrix
          do 140 icol = 1, length
-            read (nfile, end=900, err=950)
+            read (smt_file_unit, end=900, err=950)
      $           (sreal(i, icol), i=1, nopen),
      $           (simag(i, icol), i=1, nopen)
  140     continue
       end if
 c
 c     Read eight bytes "ENDOFSMT"
- 800  read (nfile, end=900, err=950) csize8
+ 800  read (smt_file_unit, end=900, err=950) csize8
       if (csize8 .ne. 'ENDOFSMT') goto 950
       return
 c
