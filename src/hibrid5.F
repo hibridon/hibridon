@@ -1566,10 +1566,10 @@ c
      :          ' JTOT-1=', i3,' JTOT-2=', i4,' JTOT-D=', i3,/)
       else
         write(ics_unit,21)
-     :     inerg,rmu*xmconv,ered*econv,jfirst+0.5,maxjt+0.5,jtotd
+     :     ien,rmu*xmconv,ered*econv,jfirst+0.5,maxjt+0.5,jtotd
         if(.not.batch)
      :  write(6,21)
-     :     inerg,rmu*xmconv,ered*econv,jfirst+0.5,maxjt+0.5,jtotd
+     :     ien,rmu*xmconv,ered*econv,jfirst+0.5,maxjt+0.5,jtotd
 21       format (' IEN=', i2,' RMU=', f9.4,' E=', f9.2,
      :          ' JTOT-1=', f5.1,' JTOT-2=', f6.1,' JTOT-D=', i3)
       endif
