@@ -1895,39 +1895,93 @@ c
       module mod_cdio
             implicit none
             save
+
             integer, dimension(:), allocatable, target :: memory_block
-            integer, dimension(:,:), pointer :: iadr
-            integer, dimension(:,:), pointer :: len
-            integer, dimension(:), pointer :: next
-            integer, dimension(:), pointer :: iun
-            integer, dimension(:), pointer :: iostat
-            integer, dimension(:), pointer :: last
-            integer, pointer :: lhea
-            integer, pointer :: junk
+            ! important note: the arrays contained in memory_block need to be contiguous
+            ! and in this order as they can be filled or read from disk as a bunch
+            integer, dimension(:,:), pointer :: iadr ! view of one section memory_block
+            integer, dimension(:,:), pointer :: len  ! view of one section memory_block
+            integer, dimension(:), pointer :: next   ! view of one section memory_block
+            integer, dimension(:), pointer :: iun    ! view of one section memory_block
+            integer, dimension(:), pointer :: iostat ! view of one section memory_block
+            integer, dimension(:), pointer :: last   ! view of one section memory_block
+            integer, pointer :: lhea                 ! view of one section memory_block
+            ! lhea : size of memory_block in integers
+            integer, pointer :: junk                 ! view of one section memory_block
+            ! note : junk is probably here to make memory_block a multiple of 8 bytes as some
+            ! copy functions that are involved transfer data with words of 8 bytes
             logical :: cdio_is_allocated = .FALSE.
             contains
             subroutine allocate_cdio(amaxrec, amaxun)
                use, intrinsic :: ISO_C_BINDING
                integer, intent(in) :: amaxrec
                integer, intent(in) :: amaxun
-               integer :: mem_cell_index
-               allocate(memory_block(amaxun*(2*amaxrec+4)+2))
-               mem_cell_index = 1
+               integer :: mem_cell_index ! number of integers from start of memory_block
+               integer :: mem_block_size ! size in integers
+               integer :: iadr_size ! size of iadr array in integers
+               integer :: len_size ! size of len array in integers
+               integer :: next_size ! size of next array in integers
+               integer :: iun_size ! size of iun array in integers
+               integer :: iostat_size ! size of iostat array in integers
+               integer :: last_size ! size of last array in integers
+               integer :: lhea_size ! size of lhea in integers
+               integer :: junk_size ! size of junk in integers
+               iadr_size = amaxrec * amaxun
+               len_size = amaxrec * amaxun
+               next_size = amaxun
+               iun_size = amaxun
+               iostat_size = amaxun
+               last_size = amaxun
+               lhea_size = 1
+               junk_size = 1
+
+               mem_block_size = 0
+               mem_block_size = mem_block_size + iadr_size
+               mem_block_size = mem_block_size + len_size
+               mem_block_size = mem_block_size + next_size
+               mem_block_size = mem_block_size + iun_size
+               mem_block_size = mem_block_size + iostat_size
+               mem_block_size = mem_block_size + last_size
+               mem_block_size = mem_block_size + lhea_size
+               mem_block_size = mem_block_size + junk_size
+
+               ! ASSERT(mem_block_size % 2 .eq. 0)
+
+               allocate(memory_block(mem_block_size))
+               mem_cell_index = 1  ! first cell of memory_block
+
+               ! iadr(amaxrec,amaxun) section of memory_block
                call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), iadr, [amaxrec, amaxun])
-               mem_cell_index = mem_cell_index + amaxrec * amaxun
+               mem_cell_index = mem_cell_index + iadr_size
+
+               ! len(amaxrec,amaxun) section of memory_block
                call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), len, [amaxrec, amaxun])
-               mem_cell_index = mem_cell_index + amaxrec * amaxun
+               mem_cell_index = mem_cell_index + len_size
+
+               ! next(amaxun) section of memory_block
                call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), next, [amaxun])
-               mem_cell_index = mem_cell_index + amaxun
+               mem_cell_index = mem_cell_index + next_size
+
+               ! iun(amaxun) section of memory_block
                call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), iun, [amaxun])
-               mem_cell_index = mem_cell_index + amaxun
+               mem_cell_index = mem_cell_index + iun_size
+
+               ! iostat(amaxun) section of memory_block
                call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), iostat, [amaxun])
-               mem_cell_index = mem_cell_index + amaxun
+               mem_cell_index = mem_cell_index + iostat_size
+
+               ! last(amaxun) section of memory_block
                call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), last, [amaxun])
-               mem_cell_index = mem_cell_index + amaxun
+               mem_cell_index = mem_cell_index + last_size
+
+               ! lhea section of memory_block
                call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), lhea)
-               mem_cell_index = mem_cell_index + 1
+               mem_cell_index = mem_cell_index + lhea_size
+
+               ! junk section of memory_block
                call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), junk)
+
+               lhea = mem_block_size ! size of cdio common block in integers
             end subroutine allocate_cdio            
       end module mod_cdio 
    
@@ -2097,8 +2151,6 @@ c
      :        /,'   I/O BUFFER LENGTH OF', i4, ' IN DREAD; ABORT')
         call exit
       endif
-      lhea=maxun*(2*maxrec+4)+2 ! size of cdio common block in integers
-      ! lhea=maxrec
       lnex=((lhea-1)/lbuf+1)*lbuf
       ! (lhea-1)/lbuf+1 : number of buffers of length lbuf to transfer lhea elements
       !  by chunks of lbuf
