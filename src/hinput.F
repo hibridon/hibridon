@@ -286,7 +286,7 @@ c    :                xsecwr, nucros, photof, wavefl, boundc
 2      format(' Hibridon> ')
 #endif
       call pcoder(lpar(28),pcod,icode)
-      read(5, 10, end=599) line
+      read(5, 10, end=599) line  ! read the next command
 10    format((a))
 11    if(line .eq. ' ') goto 1
       if (line(1:1) .eq. '?') then
