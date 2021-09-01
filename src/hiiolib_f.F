@@ -32,6 +32,7 @@ c     should be used for S-matrix file when calling openf.
 c     ------------------------------------------------------------------
 c
 *  NB cstart ultrix-dec for i/o with fortran instead of c routines
+#include "assert.h"
 * ---------------------------------------------------------------
       subroutine fimove (nxfile)
 * ---------------------------------------------------------------
@@ -1889,6 +1890,47 @@ c     On error:
       end
 c     ------------------------------------------------------------
 c
+! common /cdio/iadr(maxrec,maxun),len(maxrec,maxun),next(maxun),
+!     1             iun(maxun),iostat(maxun),last(maxun),lhea,junk
+      module mod_cdio
+            implicit none
+            save
+            integer, dimension(:), allocatable, target :: memory_block
+            integer, dimension(:,:), pointer :: iadr
+            integer, dimension(:,:), pointer :: len
+            integer, dimension(:), pointer :: next
+            integer, dimension(:), pointer :: iun
+            integer, dimension(:), pointer :: iostat
+            integer, dimension(:), pointer :: last
+            integer, pointer :: lhea
+            integer, pointer :: junk
+            logical :: cdio_is_allocated = .FALSE.
+            contains
+            subroutine allocate_cdio(amaxrec, amaxun)
+               use, intrinsic :: ISO_C_BINDING
+               integer, intent(in) :: amaxrec
+               integer, intent(in) :: amaxun
+               integer :: mem_cell_index
+               allocate(memory_block(amaxun*(2*amaxrec+4)+2))
+               mem_cell_index = 1
+               call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), iadr, [amaxrec, amaxun])
+               mem_cell_index = mem_cell_index + amaxrec * amaxun
+               call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), len, [amaxrec, amaxun])
+               mem_cell_index = mem_cell_index + amaxrec * amaxun
+               call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), next, [amaxun])
+               mem_cell_index = mem_cell_index + amaxun
+               call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), iun, [amaxun])
+               mem_cell_index = mem_cell_index + amaxun
+               call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), iostat, [amaxun])
+               mem_cell_index = mem_cell_index + amaxun
+               call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), last, [amaxun])
+               mem_cell_index = mem_cell_index + amaxun
+               call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), lhea)
+               mem_cell_index = mem_cell_index + 1
+               call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), junk)
+            end subroutine allocate_cdio            
+      end module mod_cdio 
+   
 * -------------------------------------------------------------------
       subroutine dread(ii,l,ifil,irec,iof)
 * --------------------------------------------------------------
@@ -1911,12 +1953,11 @@ c
 * --------------------------------------------------------------
       use mod_clseg, only: intrel
       use mod_cdbf, only: ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf,llbuf
+      use mod_cdio, only: allocate_cdio, cdio_is_allocated, iadr, len, next, iun, iostat, last, lhea, junk, memory_block
       implicit double precision (a-h,o-z)
       character*(*) name
       parameter (maxun=2, maxrec=5000)
       common /cobuf/ lbuf,ibuf(1)
-      common /cdio/iadr(maxrec,maxun),len(maxrec,maxun),next(maxun),
-     1             iun(maxun),iostat(maxun),last(maxun),lhea,junk
       common /cosize/ isize,isizes
       dimension ii(1)
       if(iun(ifil).eq.0) then
@@ -1978,6 +2019,7 @@ c
         iadr(irec,ifil)=next(ifil)
         next(ifil)=next(ifil)+((ll-1)/lbuf+1)*lbuf
         len(irec,ifil)=next(ifil)-iadr(irec,ifil)
+        ! write(6,*) 'graffy/dread : len(', irec, ',', ifil, ') has been set to ', len(irec,ifil)
       end if
       if(ll.gt.len(irec,ifil)) then
         write(6,50) ifil,irec,ll,len(irec,ifil)
@@ -2008,11 +2050,13 @@ c
         iadr(irec,ifil)=next(ifil)
         next(ifil)=next(ifil)+((l-1)/lbuf+1)*lbuf
         len(irec,ifil)=next(ifil)-iadr(irec,ifil)
+        ! write(6,*) 'graffy/dwrite : len(', irec, ',', ifil, ') has been set to ', len(irec,ifil)
       end if
       if(iof+l.gt.len(irec,ifil)) then
         if(irec.ge.last(ifil)) then
           next(ifil)=iadr(irec,ifil)+((iof+l-1)/lbuf+1)*lbuf
           len(irec,ifil)=next(ifil)-iadr(irec,ifil)
+          ! write(6,*) 'graffy/dwrite/2 : len(', irec, ',', ifil, ') has been set to ',len(irec,ifil)
         else
       write (6,*) 'ii,l,ifil,irec,iof', ii,l,ifil,irec,iof
           write(6,65) ifil,irec,iof+l,len(irec,ifil)
@@ -2037,6 +2081,12 @@ c
       return
 *
       entry dinit
+
+      if ( .NOT. cdio_is_allocated ) then
+            ! write(6,*) 'graffy/dinit : allocating cdio from dinit' 
+            call allocate_cdio(maxrec, maxun)
+            cdio_is_allocated = .TRUE.
+      end if
 c
 c.....initialize direct i/o. dinit must be called before any call to
 c.....another of these i/o routines
@@ -2047,14 +2097,18 @@ c
      :        /,'   I/O BUFFER LENGTH OF', i4, ' IN DREAD; ABORT')
         call exit
       endif
-      lhea=maxun*(2*maxrec+4)+2
+      lhea=maxun*(2*maxrec+4)+2 ! size of cdio common block in integers
+      ! lhea=maxrec
       lnex=((lhea-1)/lbuf+1)*lbuf
+      ! (lhea-1)/lbuf+1 : number of buffers of length lbuf to transfer lhea elements
+      !  by chunks of lbuf
       ibfil=0
       ibrec=0
       ibof=0
       ibstat=0
       libuf=lbuf
       ldbuf=lbuf/intrel
+      ! write(6,*) 'graffy/dinit setting len(:,:) to 0'
       do 70 if=1,maxun
       next(if)=lnex
       iun(if)=0
@@ -2069,6 +2123,12 @@ c
 c
 c.....open file "ifil" as unit "iunit" with filename "name"
 c
+      if ( .NOT. cdio_is_allocated ) then
+            ! write(6,*) 'graffy/dopen : allocating cdio from dopen' 
+            call allocate_cdio(maxrec, maxun)
+            cdio_is_allocated = .TRUE.
+      end if
+      ! write(6,*), 'graffy/dopen : ifil=', ifil, 'iunit=', iunit, 'name=', name
 #ifdef DEBUG_ISSUE35
       write(6, *) 'issue35/dopen : ifil=', ifil, 'iunit=', iunit, 'name=', name
 #endif
@@ -2101,10 +2161,12 @@ c
      1          ' UNIT NOT OPEN')
         call exit
       end if
-      iofh=0
-      do 86 ib=1,lhea,lbuf
-      lh=min(lhea-iofh,lbuf)
-      call imove(iadr(iofh+1,ifil),idbuf,lh)
+      ! copy iadr to idbuf by blocks of lbuf integers
+      iofh=0 ! number of integers moved
+      do 86 ib=1,lhea,lbuf  ! ib: block index
+      lh=min(lhea-iofh,lbuf)  ! number of integers to move for this block
+      ASSERT( ifil .eq. 1 ) ! unexpected case : graffy suspects the following imove to only work when ifil=1'
+      call imove(memory_block(iofh+1),idbuf,lh)  ! copy lh integers from iadr to idbuf
       call wrabsf(iun(ifil),idbuf,ldbuf,iofh/intrel)
       call fwait(iun(ifil))
 86    iofh=iofh+lbuf
@@ -2126,7 +2188,9 @@ c
       ll=min(lhea-iofh,lbuf)
       call rdabsf(iun(ifil),idbuf,ldbuf,iofh/intrel)
       call fwait(iun(ifil))
-      call imove(idbuf,iadr(iofh+1,ifil),ll)
+      ASSERT(ifil .eq. 1) ! unexpected case : graffy suspects the following imove to only work when ifil=1'
+      call imove(idbuf,memory_block(iofh+1),ll)
+
 91    iofh=iofh+lbuf
       iostat(ifil)=0
       return

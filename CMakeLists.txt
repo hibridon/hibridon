@@ -191,6 +191,7 @@ endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
 
 add_library(hib
+     src/assert.f90
      src/hiba13p.F
      src/hiba1d3p.F
      src/hiba1del.F
@@ -304,6 +305,10 @@ endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 # use large model to prevent linking errors (relocation truncated to fit: R_X86_64_PC32) because the common blocks are too big to fit in the default memory model
 if(UNIX AND NOT APPLE)
     list(APPEND HIBRIDON_COMPILE_OPTIONS "-mcmodel=large")
+endif()
+
+IF(CMAKE_BUILD_TYPE MATCHES Release)
+  target_compile_definitions(hib PUBLIC DISABLE_HIB_ASSERT=1)
 endif()
 
 #  -fbounds-check'
