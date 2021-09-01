@@ -15,6 +15,9 @@ set(ENABLE_CODE_COVERAGE "OFF" CACHE BOOL "to enable or disable code coverage an
 # 2. it makes code slower
 set(ENABLE_PROFILING "OFF" CACHE BOOL "to enable or disable performance profiling (mostly for developers)")
 
+set(ENABLE_ASSERTS "OFF" CACHE BOOL "to enable or disable assert checks for debug builds (mostly for developers). Asserts are disabled by default because they can cause the compilation to fail depending on the compiler (assert system needs to be made more robust)")
+
+
 set(ENABLE_ISSUE35_DEBUGGING "OFF" CACHE BOOL "enable traces to investigate issue #35")
 
 
@@ -307,8 +310,13 @@ if(UNIX AND NOT APPLE)
     list(APPEND HIBRIDON_COMPILE_OPTIONS "-mcmodel=large")
 endif()
 
-IF(CMAKE_BUILD_TYPE MATCHES Release)
+if(CMAKE_BUILD_TYPE MATCHES Release)
   target_compile_definitions(hib PUBLIC DISABLE_HIB_ASSERT=1)
+else()
+  # asserts can be activated on non-release builds (eg debug build)
+  if(NOT ENABLE_ASSERTS)
+    target_compile_definitions(hib PUBLIC DISABLE_HIB_ASSERT=1)
+  endif()
 endif()
 
 #  -fbounds-check'
