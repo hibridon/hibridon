@@ -433,7 +433,9 @@
       wrsmat = writs
       surffl = flagsu
 *  subroutine to open required i/o files
-      if (.not.bastst) call openfi (nerg)
+      if (.not.bastst) then
+            call openfi (nerg)
+      end if
       call version(9)
       call acknow(9,ipos)
       call dater(cdate)
