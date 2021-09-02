@@ -53,7 +53,23 @@ c
 * -------------------------------------------------------------------
        subroutine fimovs(nfile,jtot,jlpar,nu,ien,ierr)
        use mod_coener, only: energ
-       implicit double precision (a-h,o-z)
+       use mod_cofil, only: nfl, maxrec, iofrec
+       implicit none
+       integer, intent(in) :: nfile
+       integer, intent(in) :: jtot
+       integer, intent(in) :: jlpar
+       integer, intent(in) :: nu
+       integer, intent(in) :: ien
+       integer, intent(out) :: ierr
+       integer :: iaddr
+       integer :: lrec
+       integer :: jtot2
+       integer :: jlpar2
+       integer :: nu2
+       integer :: nopen
+       integer :: length
+       integer :: nnout
+
 *
 * subroutine to move s-matrix file to jtot,jlpar partial wave
 *
@@ -65,7 +81,6 @@ c
 * current revision date: 4-oct-87
 *
 * -------------------------------------------------------------------
-       common /cofil/ nfl,iofbuf,maxrec(60),iofrec(60),nwrec
        ierr=0
        iaddr=0
        maxrec(nfile)=0

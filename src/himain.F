@@ -1,6 +1,7 @@
       program logair
       use mod_clseg, only: allocate_clseg
       use mod_cobuf, only: allocate_cobuf
+      use mod_cofil, only: allocate_cofil
       use mod_cdbf, only: allocate_cdbf
       
       use mod_cosout, only: allocate_cosout
@@ -143,19 +144,14 @@
 *    nlam:      the total number of angular coupling terms used
 *    lamnum:    number of non-zero v2 matrix elements for each lambda
 *               lamnum is an array of dimension nlammx
-*  variables in common block /cofil/
-*     nfl:      logical unit number
-*     iofbuf:   buffer offset
-*     maxrec:   number of records on file associated with nfl
-*     iofrec:   offset in file
 *  ----------------------------------------------------------
       common /comom/  xmom(3), imom(13)
-      common /cofil/  nfl,iofbuf,maxrec(60),iofrec(60),nwrec
       common /conlam/ nlam, nlammx, lamnum(klammx)
 *   square matrices and vectors
       call allocate_coener(ken)
       call allocate_clseg()
       call allocate_cobuf()
+      call allocate_cofil()
       call allocate_cdbf()
       call allocate_coatpi(krotmx, 100)
       call allocate_coatpr(krotmx)

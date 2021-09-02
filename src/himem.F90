@@ -284,16 +284,21 @@ module mod_cobuf
    end subroutine allocate_cobuf
 end module mod_cobuf
 
-! module mod_cofil
-!    implicit none
-!    integer, dimension(:), allocatable :: maxrec, iofrec
-!    integer, allocatable               :: nfl, iofbuf, nwrec
-!    contains
-!    subroutine allocate_cofil()
-!       allocate(maxrec(60)) ; allocate(iofrec(60)) ;
-!       allocate(nfl)        ; allocate(iofbuf)      ; allocate(nwrec)
-!    end subroutine allocate_cofil
-! end module mod_cofil
+module mod_cofil
+   ! *  variables
+   ! *     nfl:      logical unit number
+   ! *     iofbuf:   buffer offset
+   ! *     maxrec:   number of records on file associated with nfl
+   ! *     iofrec:   offset in file
+   implicit none
+   integer, dimension(:), allocatable :: maxrec, iofrec
+   integer, allocatable               :: nfl, iofbuf, nwrec
+   contains
+   subroutine allocate_cofil()
+      allocate(maxrec(60)) ; allocate(iofrec(60)) ;
+      allocate(nfl)        ; allocate(iofbuf)      ; allocate(nwrec)
+   end subroutine allocate_cofil
+end module mod_cofil
 
 ! module mod_conlam
 !    implicit none
