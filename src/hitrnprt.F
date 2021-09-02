@@ -295,6 +295,7 @@
       use mod_coisc9, only: jslist => isc9 ! jslist(1)
       use mod_coisc10, only: inlist => isc10 ! inlist(1)
       use mod_coz, only: sreal => z_as_vec ! sreal(1)
+      use mod_cow, only: simag => w_as_vec ! simag(1)
       implicit double precision (a-h,o-z)
       complex*8 t, tp
       logical diag, diagj, diagin, diagp, diagjp, diagnp,
@@ -307,7 +308,6 @@
      :     nwaves, jfsts, jlparf, jlpars, njmax, jpmax
       common /coipar/ ipar(9),iprnt
 * common blocks for levels for which xs's to be computed
-      common /cow/ simag(1)
       common /coselb/ ibasty
 *
       dimension etrans(1)
@@ -620,6 +620,7 @@
       use mod_coisc9, only: jslist => isc9 ! jslist(1)
       use mod_coisc10, only: inlist => isc10 ! inlist(1)
       use mod_coz, only: sreal => z_as_vec ! sreal(1)
+      use mod_cow, only: simag => w_as_vec ! simag(1)
       implicit double precision (a-h,o-z)
       complex*8 t, tp
       logical diag, diagj, diagin, diagp, diagjp, diagnp,
@@ -633,7 +634,6 @@
      :     nwaves, jfsts, jlparf, jlpars, njmax, jpmax
       common /coipar/ ipar(9),iprnt
 * common blocks for levels for which xs's to be computed
-      common /cow/ simag(1)
       common /coselb/ ibasty
 *
       dimension etrans(1)

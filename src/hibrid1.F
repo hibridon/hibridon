@@ -873,6 +873,7 @@ c#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
       use mod_cosc4, only: lpack1 => sc4int ! lpack1(1)
       use mod_cosc5, only: lpack2 => sc5int ! lpack2(1)
       use mod_coz, only: sreal1 => z_as_vec ! sreal1(1)
+      use mod_cow, only: sreal2 => w_as_vec ! sreal2(1)
 
       implicit double precision (a-h,o-z)
       character*(*) fname1,fname2
@@ -883,7 +884,6 @@ c#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
       logical existf,csflg1,csflg2,flghf1,flghf2,flgsu1,flgsu2
       logical twoml1,twoml2,nucr1,nucr2
 #include "common/parpot"
-      common /cow/ sreal2(1)
       common /cozmat/ simag1(1)
 c
       zero=0

@@ -1069,7 +1069,7 @@ c
       use mod_cosc3, only: sc3 ! sc3(10)
       use mod_cosc4, only: sc4 ! sc4(10)
       use mod_cosc5, only: sc5 ! sc5(10)
-    
+      use mod_cow, only: w => w_as_vec ! w(25)
 
       implicit double precision (a-h,o-z)
       character*48 oldlab, oldpot
@@ -1086,7 +1086,6 @@ c
      :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
      :                xsecwr, nucros, photof, wavefl
       common /coered/ ered, rmu
-      common /cow/ w(25)
       common /cozmat/ zmat(25)
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
@@ -1403,6 +1402,7 @@ c
       use mod_cosc6, only: sc  => sc6   ! sc(100)
       use mod_cosc7, only: sc1  => sc7   ! sc1(100)
       use mod_coz, only: scmat => z_as_vec ! scmat(100)
+      use mod_cow, only: sr => w_as_vec ! sr(100)
 
 
       implicit double precision (a-h,o-z)
@@ -1418,7 +1418,6 @@ c
      $     inflev
       common /colpar/ lpar, batch,ldum,csflag,llpar,photof
       common /cotrans/ ttrans(36)
-      common /cow/    sr(100)
       common /cozmat/ si(100)
 * common for y1, y2, y4
       common /coered/ ered, rmu
@@ -2743,10 +2742,10 @@ c
       use mod_coisc2, only: nlist => isc2 ! nlist(6)
       use mod_cosc6, only: sc => sc6 ! sc(6)
       use mod_cosc7, only: sc1 => sc7 ! sc1(6)
+      use mod_cow, only: sr => w_as_vec ! sr(100)
       implicit double precision (a-h,o-z)
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
-      common /cow/    sr(100)
       common /cozmat/ si(100)
         irec=npts+4
         do 180 kstep=1, npts
@@ -2785,11 +2784,11 @@ c
       use mod_coisc2, only: nlist => isc2 ! nlist(6)
       use mod_cosc6, only: sc => sc6 ! sc(6)
       use mod_cosc7, only: sc1 => sc7 ! sc1(6)
+      use mod_cow, only: sr => w_as_vec ! sr(100)
       implicit double precision (a-h,o-z)
       logical renormf
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
-      common /cow/    sr(100)
       common /cozmat/ si(100)
       dimension scrvec(64)
       irec=npts+4

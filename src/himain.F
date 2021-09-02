@@ -21,7 +21,7 @@
       use mod_coatp2, only: allocate_coatp2
       use mod_coatp3, only: allocate_coatp3
       use mod_coz, only: allocate_coz, z
-      ! use mod_cow, only: allocate_cow, w
+      use mod_cow, only: allocate_cow, w
       ! use mod_cozmat, only: allocate_cozmat, zmat
       use mod_coamat, only: allocate_coamat, amat
       use mod_cobmat, only: allocate_cobmat, bmat
@@ -156,7 +156,6 @@
       common /cofil/  nfl,iofbuf,maxrec(60),iofrec(60),nwrec
       common /conlam/ nlam, nlammx, lamnum(klammx)
 *   square matrices and vectors
-      common /cow/ w(kmax,kmax)
       common /cozmat/ zmat(kmax,kmax)
       call allocate_coener(ken)
       call allocate_clseg()
@@ -168,7 +167,7 @@
       call allocate_coatp2(krotmx)
       call allocate_coatp3(krotmx)
       call allocate_coz(kmax)
-      ! call allocate_cow(kmax)
+      call allocate_cow(kmax)
       ! call allocate_cozmat(kmax)
       call allocate_coamat(kmax)
       call allocate_cobmat(kairy)

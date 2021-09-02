@@ -408,15 +408,19 @@ module mod_coz
    end subroutine allocate_coz
 end module mod_coz
 
-! module mod_cow
-!    implicit none
-!    real(8), dimension(:,:), allocatable :: w
-!    contains
-!    subroutine allocate_cow(n)
-!       integer, intent(in) :: n
-!       allocate(w(n,n))
-!    end subroutine allocate_cow
-! end module mod_cow
+module mod_cow
+   implicit none
+   real(8), dimension(:,:), allocatable, target :: w
+   real(8), dimension(:), pointer :: w_as_vec  ! w matrix viewed as a vector
+   contains
+   subroutine allocate_cow(n)
+      use, intrinsic :: ISO_C_BINDING
+      integer, intent(in) :: n
+      allocate(w(n,n))
+
+      call C_F_POINTER (C_LOC(w), w_as_vec, [n*n])
+   end subroutine allocate_cow
+end module mod_cow
 
 ! module mod_cozmat
 !    implicit none

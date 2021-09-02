@@ -48,6 +48,8 @@
       use mod_cosc4, only: ipack1 => sc4int ! ipack1(1)
       use mod_cov2, only: nv2max
       use mod_coz, only: sreal1 => z_as_vec ! sreal1(1)
+      use mod_cow, only: simag1 => w_as_vec ! simag1(1)
+
       implicit double precision (a-h,o-z)
       character*(*) fname1
       character*20 cdate1
@@ -66,7 +68,6 @@
       integer, parameter :: rho_unit = 3
 #include "common/parpot"
       common /coselb/ ibasty
-      common /cow/ simag1(1)
       real(8), dimension(:), allocatable :: s, sm, sm6
 * to store a22p,a21p and a11p amplitudes
       complex(8), dimension(:, :), allocatable :: fm1m2

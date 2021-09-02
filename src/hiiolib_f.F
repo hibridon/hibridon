@@ -1204,6 +1204,7 @@ c.....open direct access file for interpolation and restart
       use mod_coamat, only: q3 => amat ! q3(1)
       use mod_cobmat, only: q => bmat ! q(1)
       use mod_coener, only: energ
+      use mod_cow, only: q1 => w_as_vec ! q1(1)
       implicit double precision (a-h,o-z)
       logical writs,csflag,nucros, llpar, wrpart, wrxsec
       character*40 oldlab
@@ -1212,7 +1213,6 @@ c.....open direct access file for interpolation and restart
       integer, parameter :: bufsize = 32
 #include "common/parpot"
       common /cofile/ input,output,jobnam,savfil
-      common /cow/ q1(1)
       common /cozmat/ q2(1)
       common /colpar/ llpar(21),wrpart, wrxsec
       dimension word(bufsize),iword(bufsize),nlev(1)
