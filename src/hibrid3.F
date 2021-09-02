@@ -239,15 +239,10 @@
 *    nch:      actual size of matrix w
 *    nmax:     maximum row and column dimension of matrix w
 *   lamnum:     number of non-zero v2 matrix elements for each lambda
-*               lamnum is an array of dimension nlammx
+
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
-*  variable in common block /conlam/
-*    nlammx:    the maximum number of angular coupling terms allowed
-*    nlam:      the total number of angular coupling terms used
-*    lamnum:    number of non-zero v2 matrix elements for each lambda
-*               lamnum is an array of dimension nlammx
 *  variables in common block /copmat/
 *    rtmn,rtmx: minimum and maximum turning points (not used here)
 *    iflag:     variable used in determination of turning points (not used her
@@ -265,10 +260,10 @@
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_covvl, only: vvl
+      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision (a-h,o-z)
-      integer i, iflag, ilam, lamnum, nch, nlam, nlammx, nmax
+      integer i, iflag, ilam, nch, nmax
       common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
-      common /conlam/ nlam, nlammx, lamnum(1)
       common /copmat/ rtmn, rtmx, iflag
       common /coered/ ered, rmu
       common /coselb/ ibasty
@@ -432,6 +427,7 @@ cABER
 *  current revision date:  5-nov-2012 by p.j.dagdigian
 #include "common/parsys_mod.F"
       use mod_covvl, only: vvl
+      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision(a-h,o-z)
       logical ihomo
       common /coselb/ ibasty
@@ -439,7 +435,6 @@ cABER
 #include "common/parbas"
       common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
       common /cosysi/ nscode, isicod, ispar(maxpar)
-      common /conlam/ nlam, nlammx, lamnum(1)
       common /conlamp/ lamnump(50)
       equivalence(ispar(1),nterm),(ispar(2),nvibmn),(ispar(3),nvibmx)
 
@@ -527,6 +522,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *  current revision date:  8-apr-1997 by mha
 #include "common/parsys_mod.F"
       use mod_covvl, only: vvl
+      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision(a-h,o-z)
 
       logical ihomo
@@ -535,7 +531,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 #include "common/parbas"
       common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
       common /cosysi/ nscode, isicod, ispar(maxpar)
-      common /conlam/ nlam, nlammx, lamnum(1)
       dimension nvbmnr(4),nvbmxr(4),nvbmnc(4),nvbmxc(4)
       nstep=1
       if(ihomo) nstep=2
@@ -672,6 +667,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *  current revision date:  1-nov-2012 by lifang ms
 #include "common/parsys_mod.F"
       use mod_covvl, only: vvl
+      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision(a-h,o-z)
       logical ihomo
       common /coselb/ ibasty
@@ -679,7 +675,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 #include "common/parbas"
       common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
       common /cosysi/ nscode, isicod, ispar(maxpar)
-      common /conlam/ nlam, nlammx, lamnum(1)
       common /conlamp/ lamnump(7)
       equivalence(ispar(1),nterm),(ispar(2),nvibmn),(ispar(3),nvibmx)
 

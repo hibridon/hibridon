@@ -63,6 +63,7 @@ c     ------------------------------------------------------------------
       use mod_cocent, only: cchn => cent
       use mod_coeint, only: echn => eint
       use mod_coj12, only: j12chn => j12
+      use mod_conlam, only: nlam, nlammx, lamnum
       implicit none
 c
 c     The following arrays store the parameters of channels and levels.
@@ -87,8 +88,6 @@ c
       common /cosysr/ isrcod, junkr, brot, crot, delta, e1max, drot
       integer :: isrcod, junkr
       real(8) :: brot, crot, delta, e1max, drot
-      common /conlam/ nlam, nlammx, lamnum
-      integer :: nlam, nlammx, lamnum(1)
       common /coered/ ered, rmu
       real(8) :: ered, rmu
       common /coipar/ junkip, iprint

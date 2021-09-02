@@ -109,12 +109,8 @@ c      end module mod_1sg1sg
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units
 *               (mass of electron = 1)
-*  variable in common block /conlam/
-*    nlam:      the number of angular coupling terms actually used
+*  variable in module mod_conlam
 *               nlam is set equal to nterm; see above
-*    nlammx:    the maximum number of angular coupling terms
-*    lamnum:    number of non-zero v2 matrix elements for each lambda
-*               lamnum is an array of dimension nlammx
 *  variables in common block /coconv/
 *   econv:      conversion factor from cm-1 to hartree
 *   xmconv:     conversion factor from amu to atomic units
@@ -132,6 +128,7 @@ c      end module mod_1sg1sg
       use mod_coatpr, only: c
       use mod_coatp1, only: ctemp
       use mod_coatp2, only: chold
+      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -141,7 +138,6 @@ c      end module mod_1sg1sg
      :  ipotsy2
       common /cosysr/ isrcod, junkr, b1rot, d1rot, flmbda, gamma, b2rot
       common /coselb/ ibasty
-      common /conlam/ nlam, nlammx, lamnum(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       dimension j(1), l(1), is(1), jhold(1), ehold(1),

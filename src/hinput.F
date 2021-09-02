@@ -49,6 +49,7 @@
       use mod_codim, only: nmax => mmax
       use mod_coamat, only: scmat => toto ! scmat(1)
       use mod_coener, only: energ
+      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision (a-h,o-z)
 *  iicode is the number of integer pcod's
 *  ircode is the number of real pcod's
@@ -94,7 +95,6 @@
       common /coselb/ ibasty
       common /cobaco/ bascod
       common /coopti/ optifl
-      common /conlam/ nlam, nlammx, lamnum(1)
       common /cotwo/ numj,nj1j2(5)
 * when adding bases, change size of array basknd and size of
 * parameter kmxbas in himain.f

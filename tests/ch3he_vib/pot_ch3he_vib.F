@@ -84,7 +84,7 @@ c       Arguments are not refered to in this basis routine
 c
 c
 c   Hidden returned value:
-c       /conlam/ nlam
+c       mod_conlam: nlam
 c       /cosysi/ ipotsy
 c       /coptnm/ potnam
 c
@@ -441,7 +441,7 @@ c       jtemp, ktemp
 c
 c
 c   Hidden arguments:
-c       /conlam/ nlam, nlammx
+c       mod_conlam: nlam, nlammx
 c       /ch3he/ brot, crot, evib, lamsym, lamasy, musym, muasy
 c       /cosysi/ nscode, isicod, nterm, ipotsy, iop, jmax, vmax
 c       /cosysr/ isrcod, emax0, emax1, emax2, emax3
@@ -451,7 +451,7 @@ c       /coipar/ iprint
 c
 c
 c   Hidden returned value:
-c       /conlam/ lamnum
+c       mod_conlam: lamnum
 c       /cov2/ v2
 c       /coiv2/ iv2
 c       /cocent/ cent

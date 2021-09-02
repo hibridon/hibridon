@@ -9,6 +9,7 @@ c     This basis routine should have ibasty = 100, so hibridon will
 c     treat it as a mol-mol problem with j12.
 c
 c     DUMMY SUBROUTINES FOR ALL USER-DEFINED BASIS/POT.
+#include "assert.h"
 #include "common/ground"
 c
 c     ------------------------------------------------------------------
@@ -214,7 +215,7 @@ c     IV2, LAMNUM.
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_coj12, only: j12
-
+      use mod_conlam, only: nlam, nlammx, lamnum
 c
 #include "pot_ohh2_bausr_common.F"
       double precision rcut
@@ -236,8 +237,7 @@ c
       integer isrcod, junkr
       double precision brot, aso, p, q, drot
 C     
-      common /conlam/ nlam, nlammx, lamnum
-      integer nlam, nlammx, lamnum(MAX_NVB + MAX_NVF)
+      ASSERT(nlammx .ge. (MAX_NVB + MAX_NVF))  ! ensure lamnum array is big enough
       common /coered/ ered, rmu
       double precision ered, rmu
       common /coipar/ junkip, iprint

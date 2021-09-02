@@ -44,11 +44,11 @@
 * --------------------------------------------------------------------------
       subroutine loapot(iunit,filnam)
 * --------------------------------------------------------------------------
+      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision (a-h,o-z)
       character*(*) filnam
 #include "common/parbas"
 #include "common/parpot" 
-      common /conlam/ nlam, nlammx, lamnum(2)
       common /cosysi/ nscode, isicod, nterm
       potnam='HCO PES-Nijmegen-lmax=15'
       npot=1
@@ -82,9 +82,6 @@
 *  the coefficients for each angular term in the coupling potential
 *  [ vvl(i) for i = 1, nlam ] are returned in module mod_covvl
 
-*  variable in common block /conlam/
-*    nlammx:    the maximum number of anisotropic terms
-*    nlam:      the total number of angular coupling terms
 *  variable in module mod_covvl
 *    vvl        array to store r-dependence of each angular term in the
 *               potential

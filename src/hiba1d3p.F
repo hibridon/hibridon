@@ -87,7 +87,7 @@
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units
 *               (mass of electron = 1)
-*  variable in common block /conlam/
+*  variable in module mod_conlam
 *    nlam:      the number of case(a) interaction potentials actually used
 *               this is :  nlam = nlam0 + nlam1
 *               if only 1D channels, nlam = 3 (1Sigma+, 1Pi, 1Delta PE curves)
@@ -98,7 +98,6 @@
 *               2 spin-orbit 3P matrix elements, and 5 spin-orbit matrix
 *               elements describing 1D-3P coupling, and the R-inf values of
 *               7 spin-orbit matrix elements)
-*    nlammx:    the maximum number of angular coupling terms
 *  variable in common block /coconv/
 *     econv:    conversion factor from cm-1 to hartrees
 *     xmconv:   converson factor from amu to atomic units
@@ -112,6 +111,7 @@
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_covvl, only: vvl
+      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -119,7 +119,6 @@
 
       common /cosysi/ nscode, isicod, nterm, nstate
       common /cosysr/ isrcod, junkr, en1d
-      common /conlam/ nlam, nlammx, lamnum(12)
       common /coered/ ered, rmu
       common /coskip/ nskip, iskip
 *   econv is conversion factor from cm-1 to hartrees

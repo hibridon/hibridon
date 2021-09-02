@@ -107,12 +107,6 @@ c
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units
 *               (mass of electron = 1)
-*  variable in common block /conlam/
-*    nlam:      the number of angular coupling terms actually used
-*               nlam is set equal to nterm; see above
-*    nlammx:    the maximum number of angular coupling terms
-*    lamnum:    number of non-zero v2 matrix elements for each lambda
-*               lamnum is an array of dimension nlammx
 *  subroutines called:
 *   vlmlml:    returns molecule-molecule angular coupling coefficient for
 *              particular choice of channel index
@@ -123,6 +117,7 @@ c
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_coj12, only: j12
+      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -132,7 +127,6 @@ c
      :  ipotsy2
       common /cosysr/ isrcod, junkr, b1rot, d1rot, b2rot
       common /coselb/ ibasty
-      common /conlam/ nlam, nlammx, lamnum(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       dimension j(1), l(1), is(1), jhold(1), ehold(1),

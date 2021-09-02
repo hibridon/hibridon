@@ -28,15 +28,10 @@
 * --------------------------------------------------------------------------
       subroutine loapot(iunit,filnam)
 * --------------------------------------------------------------------------
+      use mod_conlam, only: nlam, nlammx, lamnum
       character*(*) filnam
       include "common/parbas"
       include "common/parpot"
-*  variable in common block /conlam/
-*    nlam:      the number of angular coupling terms actually used
-*    nlammx:    the maximum number of angular coupling terms
-*    lamnum:    number of non-zero v2 matrix elements for each lambda
-*               lamnum is an array of dimension nlammx
-      common /conlam/ nlam, nlammx, lamnum(2)
       potnam='KLOS-CHALASINSKI Ar-OH UMP4'
       lammin(1)=1
       lammax(1)=5

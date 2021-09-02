@@ -300,16 +300,23 @@ module mod_cofil
    end subroutine allocate_cofil
 end module mod_cofil
 
-! module mod_conlam
-!    implicit none
-!    integer, dimension(:), allocatable :: lamnum
-!    integer, allocatable               :: nlam, nlammx
-!    contains
-!    subroutine allocate_conlam(n)
-!       integer, intent(in) :: n
-!       allocate(lamnum(n)) ; allocate(nlam) ; allocate(nlammx)
-!    end subroutine allocate_conlam
-! end module mod_conlam
+module mod_conlam
+   ! *  variables
+   ! *    nlam:      the number of angular coupling terms actually used
+   ! *    nlammx:    the maximum number of angular coupling terms allowed
+   ! *    lamnum:    number of non-zero v2 matrix elements for each lambda
+   ! *               lamnum is an array of dimension nlammx
+   implicit none
+   integer, dimension(:), allocatable :: lamnum
+   integer, allocatable               :: nlam, nlammx
+   contains
+   subroutine allocate_conlam(n)
+      integer, intent(in) :: n
+      allocate(lamnum(n)) ; allocate(nlam) ; allocate(nlammx)
+      nlammx = n
+      nlam = 0
+   end subroutine allocate_conlam
+end module mod_conlam
 
 module mod_coatpi
 !  variables in this module

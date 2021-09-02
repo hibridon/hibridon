@@ -81,10 +81,9 @@
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units
 *               (mass of electron = 1)
-*  variable in common block /conlam/
+*  variable in module mod_conlam
 *    nlam:      the number of case(a) interaction potentials actually used
 *               this is 14 here
-*    nlammx:    the maximum number of angular coupling terms
 *  variable in common block /coconv/
 *     econv:    conversion factor from cm-1 to hartrees
 *     xmconv:   converson factor from amu to atomic units
@@ -96,6 +95,7 @@
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -103,7 +103,6 @@
       common /cosysr/ isrcod, junkr, aso
 
       common /cosysi/ nscode, isicod, nterm, nphoto
-      common /conlam/ nlam, nlammx, lamnum(1)
       common /coered/ ered, rmu
       common /coskip/ nskip, iskip
       common /coconv/ econv, xmconv

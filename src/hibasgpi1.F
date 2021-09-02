@@ -139,12 +139,6 @@
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units
 *               (mass of electron = 1)
-*  variable in common block /conlam/
-*    nlam:      the number of angular coupling terms actually used
-*    nlammx:    the maximum number of angular coupling terms
-*  variables in common block /cosgpi/
-*    lamnum:    number of non-zero v2 matrix elements for each lambda
-*               lamnum is an array of dimension nlammx
 *  variable in common block /coconv/
 *    econv:     conversion factor from cm-1 to hartrees
 *    xmconv:    converson factor from amu to atomic units
@@ -165,6 +159,7 @@
       use mod_coisc1, only: ivec => isc1 ! ivec(1)
       use mod_coisc2, only: nrot => isc2 ! nrot(1)
       use mod_coisc3, only: ifi => isc3 ! ifi(1)
+      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision (a-h,o-z)
       logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -173,7 +168,6 @@
      :  nmaxsg, nparsg, igupi, nparpi, numvpi, ispar(10)
       common /cosysr/ isrcod, junkr, esg, bsg, dsg, gsr, rspar(40)
       common /coipar/ iiipar(9), iprint
-      common /conlam/ nlam, nlammx, lamnum(1)
       common /covibp/ ivpi(5)
       common /covpot/ numvib,ivibpi(5)
       common /coered/ ered, rmu

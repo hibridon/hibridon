@@ -679,6 +679,7 @@
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
 #include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
       integer irpot
       logical readp, existf
@@ -693,7 +694,6 @@
       common /cosys/ scod(lencod)
       common /cosysi/ nscode,isicod,iscod(maxpar)
       common /cosysr/ isrcod, junkr, rcod(maxpar)
-      common /conlam/ nlam
 #include "common/parbas"
       common/covib/ nvib,ivib(maxvib)
       common /coskip/ nskip,iskip
@@ -834,6 +834,7 @@
 *  -----------------------------------------------------------------------
       subroutine sy2sg (irpot, readpt, iread)
 #include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
 *  subroutine to read in system dependent parameters for doublet-sigma
 *   + atom scattering
@@ -878,7 +879,6 @@
       common /cosysi/ nscode, isicod, nterm, nrmax, npar, isym, igu,
      :                isa
       common /cosysr/ isrcod, junkr, brot, gsr, drot, hrot
-      common /conlam/ nlam
       logical         airyfl, airypr, bastst, batch, chlist, csflag,
      :                flaghf, flagsu, ihomo,lpar
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
@@ -1028,6 +1028,7 @@
 *
 *  subroutines called: loapot(iunit,filnam)
 #include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       logical readpt, existf
@@ -1044,7 +1045,6 @@
      :                flaghf, flagsu, ihomo,lpar
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
      :                flaghf, flagsu, ihomo,lpar(18)
-      common /conlam/ nlam
       common /coskip/ nskip,iskip
       save potfil
 #include "common/comdot"
@@ -1153,6 +1153,7 @@
 *  variables in common/cobspt/ must be set in loapot!!
 *
 #include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       logical readpt, existf
@@ -1172,7 +1173,6 @@
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
      :                flaghf, flagsu, ihomo,lpar(18)
       common /coskip/ nskip,iskip
-      common /conlam/ nlam
       save potfil
 #include "common/comdot"
 *  set default values for 2pi-2sigma scattering
@@ -1553,6 +1553,7 @@
 *    islcod:   total number of logical system dependent variables
 * ----------------------------------------------------------------------
 #include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
       logical readpt, existf
       logical         airyfl, airypr, bastst, batch, chlist, csflag,
@@ -1570,7 +1571,6 @@
      :                npar, imult, nman
       common /cosysr/ isrcod, junkr, brot, aso, o, p, q, dmom, efield
       common /cosysl/ islcod
-      common /conlam/ nlam
       common /coskip/ nskip,iskip
       save potfil
 #include "common/comdot"
@@ -1742,6 +1742,7 @@
 *             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 *  -----------------------------------------------------------------------
       use mod_coiout, only: niout, indout
+      use mod_conlam, only: nlam
       logical readpt, existf
       double precision brot, crot, delta, emax
       integer numpot
@@ -1758,7 +1759,6 @@
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, jmax
       common /cosysr/ isrcod, junkr, brot, crot, delta, emax
-      common /conlam/ nlam
       save potfil
 *  number and names of system dependent parameters
 *  first all the system dependent integer variables
@@ -1923,6 +1923,7 @@
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
 #include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -1941,7 +1942,6 @@
       common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4),
      :                        rl(4), cl(4), cmix, alphg, rgaus,
      :                        agaus, demor, remor, bemor,dissmor
-      common /conlam/ nlam
 #include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
@@ -2108,7 +2108,7 @@
 *    nterm:    number of different lambda terms included in potential
 *              see below
 *    nsym:     interchange symmetry of included channels
-*  variable in common block /conlam/
+*  variable in module mod_conlam
 *    nlam:     the total number of angular coupling terms
 *              nlam is set equal to nterm; see above
 *     nterm = 1, include lam1=1  lam2=1  lam=2   dipole-dipole
@@ -2122,6 +2122,7 @@
 *    brot, drot, hrot:    rotational constants of the molecule in cm-1
 *  -----------------------------------------------------------------------
 #include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       logical readpt, existf
@@ -2133,7 +2134,6 @@
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, nsym
       common /cosysr/ isrcod, junkr, brot, drot, hrot
-      common /conlam/ nlam
       common /cotwo/ numj,nj1j2(3)
       save potfil
 #include "common/comdot"
@@ -2504,6 +2504,7 @@
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
 #include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -2520,7 +2521,6 @@
       common /cosysi/ nscode,isicod,iscod(maxpar)
       common /coipar/ jtot1,jtot2,jtotd,jlpar
       common /cosysr/ isrcod, junkr, rcod(maxpar)
-      common /conlam/ nlam
 #include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
@@ -2685,6 +2685,7 @@
 *
 *  subroutines called: loapot(iunit,filnam)
 #include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       logical readpt, existf
@@ -2701,7 +2702,6 @@
      :                flaghf, flagsu, ihomo,lpar
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
      :                flaghf, flagsu, ihomo,lpar(18)
-      common /conlam/ nlam
       common /coskip/ nskip,iskip
       save potfil
 #include "common/comdot"
@@ -3115,6 +3115,7 @@
 *
 *  subroutines called: loapot(iunit,filnam)
 #include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       logical readpt, existf
@@ -3131,7 +3132,6 @@
      :                flaghf, flagsu, ihomo,lpar
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
      :                flaghf, flagsu, ihomo,lpar(18)
-      common /conlam/ nlam
       common /coskip/ nskip,iskip
       save potfil
 #include "common/comdot"
@@ -3402,6 +3402,7 @@
 *             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 *  -----------------------------------------------------------------------
       use mod_coiout, only: niout, indout      
+      use mod_conlam, only: nlam
       logical readpt, existf
       double precision arot, brot, crot, emax
       integer numpot
@@ -3418,7 +3419,6 @@
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, jmax
       common /cosysr/ isrcod, junkr, arot, brot, crot, emax
-      common /conlam/ nlam
       save potfil
 *  number and names of system dependent parameters
 *  first all the system dependent integer variables
@@ -3611,6 +3611,7 @@
 *             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 *  -----------------------------------------------------------------------
       use mod_coiout, only: niout, indout
+      use mod_conlam, only: nlam
       logical readpt, existf
       double precision emax
       integer numpot
@@ -3628,7 +3629,6 @@
       common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop,
      :  ivbend, jmax
       common /cosysr/ isrcod, junkr, emax
-      common /conlam/ nlam
       save potfil
 *  number and names of system dependent parameters
 *  first all the system dependent integer variables
@@ -3802,6 +3802,7 @@
 *             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 *  -----------------------------------------------------------------------
       use mod_coiout, only: niout, indout
+      use mod_conlam, only: nlam
       logical readpt, existf
       double precision brot, crot, emax
       integer numpot
@@ -3818,7 +3819,6 @@
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, jmax
       common /cosysr/ isrcod, junkr, brot, crot, emax
-      common /conlam/ nlam
       save potfil
 *  number and names of system dependent parameters
 *  first all the system dependent integer variables
@@ -4010,6 +4010,7 @@
 *  variables in common/cobspt/ must be set in loapot!!
 *
 #include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       logical readpt, existf
@@ -4032,7 +4033,6 @@
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
      :                flaghf, flagsu, ihomo, lpar(18)
       common /coskip/ nskip,iskip
-      common /conlam/ nlam
       common /covibp/ ivpi(5)
       save potfil
 #include "common/comdot"
@@ -4318,6 +4318,7 @@ c     ------------------------------------------------------------------
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
 #include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -4334,7 +4335,6 @@ c     ------------------------------------------------------------------
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, nstate, ipol, npot
       common /cosysr/ isrcod, junkr, en1d
-      common /conlam/ nlam
 #include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
@@ -4446,6 +4446,7 @@ c     ------------------------------------------------------------------
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
 #include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -4462,7 +4463,6 @@ c     ------------------------------------------------------------------
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, nvib
       common /cosysr/ isrcod
-      common /conlam/ nlam
 #include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
@@ -4575,6 +4575,7 @@ c     ------------------------------------------------------------------
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
 #include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -4591,7 +4592,6 @@ c     ------------------------------------------------------------------
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, iop, jmax
       common /cosysr/ isrcod, junkr, brot, dj, dk
-      common /conlam/ nlam
 #include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
@@ -4719,6 +4719,7 @@ c     ------------------------------------------------------------------
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
 #include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -4735,7 +4736,6 @@ c     ------------------------------------------------------------------
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, j1max, j2min, j2max, ipotsy2, iop
       common /cosysr/ isrcod, junkr, b1rot, d1rot, b2rot
-      common /conlam/ nlam
 #include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
@@ -4849,6 +4849,7 @@ c  read the last few lines of the input file
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
 #include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -4865,7 +4866,6 @@ c  read the last few lines of the input file
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, n1max, j2min, j2max, ipotsy2
       common /cosysr/ isrcod, junkr, b1rot, d1rot, gamma, b2rot
-      common /conlam/ nlam
 #include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
@@ -4987,6 +4987,7 @@ c  read the last few lines of the input file
 *             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 *  -----------------------------------------------------------------------
       use mod_coiout, only: niout, indout
+      use mod_conlam, only: nlam
       logical readpt, existf
       double precision arot, brot, crot, emax
       integer numpot
@@ -5003,7 +5004,6 @@ c  read the last few lines of the input file
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, numpot, iop, jmax
       common /cosysr/ isrcod, junkr, arot, brot, crot, emax
-      common /conlam/ nlam
       save potfil
 *  number and names of system dependent parameters
 *  first all the system dependent integer variables
@@ -5172,6 +5172,7 @@ c  read the last few lines of the input file
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
 #include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -5187,7 +5188,6 @@ c  read the last few lines of the input file
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, j1max, j2min, j2max, ipotsy2
       common /cosysr/ isrcod, junkr, b1rot, d1rot, flmbda, gamma, b2rot
-      common /conlam/ nlam
 #include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
@@ -5300,6 +5300,7 @@ c  read the last few lines of the input file
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
 #include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -5315,7 +5316,6 @@ c  read the last few lines of the input file
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, numpot, jmax
       common /cosysr/ isrcod, junkr, arot, brot, crot, emax
-      common /conlam/ nlam
 #include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
@@ -5438,6 +5438,7 @@ c  read the last few lines of the input file
 *  subroutines called: loapot(iunit,filnam)
 *  -----------------------------------------------------------------------
 #include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -5454,7 +5455,6 @@ c  read the last few lines of the input file
       common /cosysi/ nscode, isicod, nterm, numpot, jmax, iop, 
      :  j2min, j2max, ipotsy2
       common /cosysr/ isrcod, junkr, arot, brot, crot, emax, b2rot
-      common /conlam/ nlam
 #include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,

@@ -47,11 +47,11 @@
       end
 * ------------------------------------------------------------------------
       subroutine loapot(iunit,filnam)
+      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision (a-h,o-z)
       character*(*) filnam
 #include "common/parbas"
 #include "common/parpot" 
-      common /conlam/ nlam, nlammx, lamnum(4)
       common /cosysi/ nscode, isicod, nterm
       potnam='Ar-CH4 Nijmegen 1997'
       ibasty = 24

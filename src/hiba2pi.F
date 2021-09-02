@@ -107,8 +107,6 @@
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units
 *               (mass of electron = 1)
-*  variable in common block /conlam/
-*    nlam:      the total number of angular coupling terms
 *  subroutines called:
 *   vlm2pi:    returns angular coupling coefficient for particular
 *              choice of channel index
@@ -117,6 +115,7 @@
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -124,7 +123,6 @@
       common /coipar/ iiipar(9), iprint
       common /cosysi/ nscode, isicod, nterm, jmax, igu, isa, npar
       common /cosysr/ isrcod, idum,brot, aso, p, q
-      common /conlam/ nlam, nlammx,lamnum(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       dimension j(2), l(1), jhold(1), ehold(1), is(2), ifi(1),

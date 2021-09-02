@@ -1,3 +1,4 @@
+#include "assert.h"
 c   cov2 module
 c       nv2max: maximum core memory allocated for the v2 matrix
 c       v2: lower triangle of nonzero angular coupling matrix elements stored in packed column form that is (1,1), (2,1), (3,1) ... (n,1), (2,2), (3,2) ... (n,2), etc.
@@ -26,6 +27,8 @@ c       <0|v_00|0>, <0|v_20|0>, ..., <0|v_99|0>, <0|v_10|1>, ...
 c   where v2 >= v2'
       use mod_covvl, only: vvl
 c     size of vvl : NVVL
+
+      use mod_conlam, only: nlam, nlammx, lamnum
 
       implicit double precision (a-h, o-z)
 c   Define the sizes of grids
@@ -112,13 +115,8 @@ c       emax0, emax1, emax2, emax3: maximum total energy of a level to be includ
       common /cosysr/ isrcod, junkr, emax0, emax1, emax2, emax3
       integer isrcod, junkr
       double precision emax0, emax1, emax2, emax3
-c
-c   conlam block
-c       nlam: the number of angular coupling terms actually used
-c       nlammx: the maximum number of angular coupling terms
-c       lamnum: number of non-zero v2 matrix elements for each lambda
-      common /conlam/ nlam, nlammx, lamnum
-      integer nlam, nlammx, lamnum(NVVL)
+
+      ASSERT(nlammx .ge. NVVL)  ! check that lamnum array is big enough
 c
 c   coered block
 c       ered: collision energy in atomic units (hartrees)

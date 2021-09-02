@@ -44,11 +44,11 @@
       end
 * ------------------------------------------------------------------------
       subroutine loapot(iunit,filnam)
+      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision (a-h,o-z)
       character*(*) filnam
 #include "common/parbas"
 #include "common/parpot" 
-      common /conlam/ nlam, nlammx, lamnum(2)
       potnam='MA CH2(X,030)-He PES'
 *
       nterm = 7

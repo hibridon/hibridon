@@ -2,6 +2,8 @@
       use mod_clseg, only: allocate_clseg
       use mod_cobuf, only: allocate_cobuf
       use mod_cofil, only: allocate_cofil
+      use mod_conlam, only: allocate_conlam
+
       use mod_cdbf, only: allocate_cdbf
       
       use mod_cosout, only: allocate_cosout
@@ -139,19 +141,14 @@
 * krotmx set the maximum size of the asym top e.fn expansion
 * increased factor multiplying kmax below and narray from 12 to 100 (pjd:  19-sep-2017)
       parameter (krotmx = 500 * kmax)
-*  variable in common block /conlam/
-*    nlammx:    the maximum number of angular coupling terms allowed
-*    nlam:      the total number of angular coupling terms used
-*    lamnum:    number of non-zero v2 matrix elements for each lambda
-*               lamnum is an array of dimension nlammx
 *  ----------------------------------------------------------
       common /comom/  xmom(3), imom(13)
-      common /conlam/ nlam, nlammx, lamnum(klammx)
 *   square matrices and vectors
       call allocate_coener(ken)
       call allocate_clseg()
       call allocate_cobuf()
       call allocate_cofil()
+      call allocate_conlam(klammx)
       call allocate_cdbf()
       call allocate_coatpi(krotmx, 100)
       call allocate_coatpr(krotmx)
@@ -231,7 +228,6 @@
       call allocate_comxm()
 *
       men = ken
-      nlammx = klammx
 *  calculate array containing logs of factorials for use in vector
 *  coupling coefficient routines:  factlg(i)=log(fact(i-1))
       call factlg(kfact)

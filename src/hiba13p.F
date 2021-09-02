@@ -94,15 +94,12 @@
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units
 *               (mass of electron = 1)
-*  variable in common block /conlam/
+*  variable in module mod_conlam
 *    nlam:      the number of case(a) interaction potentials actually used
 *               this is :  nlam = nlam0 + nlam1
 *               if only singlet channels or only triplet channels, nlam= 2
 *               if both singlet and triplet channels, nlam= 4
-*    nlammx:    the maximum number of angular coupling terms
 *  variables in common block /cosgpi/
-*    lamnum:    number of non-zero v2 matrix elements for each lambda
-*               lamnum is an array of dimension nlammx
 *    nlm(1):    the total number of terms in the expansion of the v-sig
 *               potential (nlamsg)
 *    nlm(2):    the total number of terms in the expansion of the v-pi
@@ -122,6 +119,7 @@
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
@@ -130,7 +128,6 @@
       common /cosysi/ nscode, isicod, nterm, nstate,ipol, npot
       common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4),
      :                        rl(4), cl(4), cmix
-      common /conlam/ nlam, nlammx, lamnum(1)
       common /coered/ ered, rmu
       common /coskip/ nskip, iskip
       common /coconv/ econv, xmconv

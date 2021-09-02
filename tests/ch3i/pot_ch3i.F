@@ -309,15 +309,12 @@
 *  vvl(6) contains the first anisotropic (2,2) potential
 *  vvl(7) contains the second anisotropic (2,2) potential
 *
-*  variable in common block /conlam/
-*    nlam:      the total number of angular coupling terms
-*    nlammx:    the maximum number of anisotropic terms
 *  variable in module mod_covvl
 *    vvl        array to store r-dependence of each angular term in the
 *               potential
       use mod_covvl, only: vvl
+      use mod_conlam, only: nlam
       implicit double precision (a-h, o-z)
-      common /conlam/ nlam, nlammx
       common /covib/ ie(50), ic(50)
 *  -----------------------------------------------------------------------
       data a11, b11, a12, b12, b13, y0, r0 / 51.53d0, 1.64d0, 25.15d0,
@@ -405,6 +402,7 @@
 *  -----------------------------------------------------------------------
 #include "common/parsys_mod.F"
       use mod_coqvec, only: mxphot, nphoto, q
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -421,7 +419,6 @@
       common /cosys/ scod(lencod)
       common /cosysi/ nscode,isicod,iscod(maxpar)
       common /cosysr/ isrcod, junkr, rcod(maxpar)
-      common /conlam/ nlam
 #include "common/parbas"
       common /cogrnd/ reg, caypot
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
@@ -677,16 +674,12 @@
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units
 *               (mass of electron = 1)
-*  variable in common block /conlam/
-*    nlam:      the number of angular coupling terms actually used
-*    nlammx:    the maximum number of angular coupling terms
-*    lamnum:    number of non-zero v2 matrix elements for each lambda
-*               lamnum is an array of dimension nlammx
 * --------------------------------------------------------------------
       use mod_cov2, only: nv2max, v2
       use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
+      use mod_conlam, only: nlam, nlammx, lamnum
 #include "common/parsys_mod.F"
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
@@ -699,7 +692,6 @@
       common /covib/ ie(50), iv(50)
       common /coicl/ clfl
       
-      common /conlam/  nlam, nlammx,lamnum(1)
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
       common /coiscl/ iscl(40)

@@ -42,11 +42,11 @@
 99    end
 * ------------------------------------------------------------------------
       subroutine loapot(iunit,filnam)
+      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision (a-h,o-z)
       character*(*) filnam
 #include "common/parbas"
 #include "common/parpot"
-      common /conlam/ nlam, nlammx, lamnum(2)
       common /coloapot/ s4pi
       common /cosysi/ nscode, isicod, nterm
       potnam='Patkowski et al. H2O-He SAPT PES'

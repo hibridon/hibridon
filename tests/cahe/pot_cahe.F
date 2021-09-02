@@ -76,7 +76,7 @@
 *  vv0        (not used)
 *  vvl(1,2)   contains the 3pi and 3sig potentials
 *  vvl(3,4)   contains the 1pi and 1sig potentials
-*  variable in common block /conlam/ used here
+*  variable in module mod_conlam used here
 *    nlam:    the number of angular coupling terms actually used
 *  variable in module mod_covvl
 *    vvl:     array to store r-dependence of each
@@ -96,8 +96,8 @@
 * latest revision date:  17-may-1994 by bp
 * ----------------------------------------------------------------------
       use mod_covvl, only: vvl
+      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
-      common /conlam/ nlam
       common /coconv/ econv
       common /cosysi/ nscode, isicod, nterm, nstate, ipol, npot
       common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4),

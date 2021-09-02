@@ -35,15 +35,15 @@ c     -----------------------------------------------------------------
       subroutine loapot (iunit, file_name)
       use mod_1sg1sg
       use mod_c2hh2
+      use mod_conlam, only: nlam
       implicit none
 C     common/parbas is replaced by module ba1sg1sg to allow more
 C     parameters be passed between the pot routine and the basis routine
       common /coptnm/ pot_name, pot_label
-      common /conlam/ nlam
       character(48) :: pot_name, pot_label
       character*(*) :: file_name
       character(255) :: file_path
-      integer :: iunit, ir, iv, nv, nlam, nlammx, lamnum
+      integer :: iunit, ir, iv, nv
 C     A call to this subroutine with a string containing a space will be
 C     made at the time hibridon loads. Input file is not available at
 C     the time.
@@ -94,11 +94,11 @@ C     Main program for makepot
       use mod_1sg1sg
       use mod_c2hh2
       use mod_covvl, only: vvl
+      use mod_conlam, only: nlam
       implicit none
-      common /conlam/ nlam
       character(40), parameter :: data_file_name='pot_c2hh2_12_6.dat'
       real(8) :: r, vv0
-      integer :: i, nv, nlam
+      integer :: i, nv
       call loapot(10, data_file_name)
  10   print *, 'R (bohr), Ctrl+D to exit:'
       read (5, *, end=99) r
@@ -121,11 +121,11 @@ C     ------------------------------------------------------------------
       use mod_1sg1sg
       use mod_c2hh2
       use mod_covvl, only: vvl
+      use mod_conlam, only: nlam
       implicit none
-      common /conlam/ nlam
       double precision vv0, r_inp, r
       double precision seval
-      integer iv, nlam
+      integer iv
       vv0 = 0.d0
       if (r_inp .lt. 4.25d0) then
          r = 4.25d0

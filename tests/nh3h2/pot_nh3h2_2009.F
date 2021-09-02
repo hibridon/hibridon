@@ -14,11 +14,11 @@
 * ------------------------------------------------------------------------
       subroutine driver
       use mod_covvl, only: vvl
+      use mod_conlam, only: nlam, nlammx
       implicit double precision (a-h,o-z)
       character*60 filnam
       common /fisurf/ conv,econv,lsurf,nv
       common /coloapot/ s4pi, nvv, ivv(300)
-      common /conlam/ nlam, nlammx, lamnum
 #include "common/parpot"
       potnam='RIST/VALIRON NH3-H2 2009'
       nlammx = 55
@@ -95,6 +95,7 @@
 *              here, lammin and lam2 are greater than m2proj .
  
 *  -----------------------------------------------------------------------
+      use mod_conlam, only: nlam, nlammx
       implicit double precision (a-h,o-z)
       logical readpt
 #include "common/parbas"
@@ -109,15 +110,7 @@
      :                jmax6, jmax7, jmax8, jmax9, jmax10, jmax11, 
      :                jmax12, ipotsy2, j2max, j2min
  
-*  variable in common block /conlam/
-*    nlammx:    the total number of angular coupling terms
-*    nlam:      the maximum number of angular coupling terms allowed
-*    lamnum:    number of non-zero v2 matrix elements for each lambda
-*               lamnum is an array of dimension nlammx (not used here)
-
-*      integer         nlam, nlammx, lamnum(1)
  
-      common /conlam/ nlam, nlammx, lamnum
 
 c  variables in common block /fisurf/
 c  ----------------------------------
@@ -422,12 +415,6 @@ c  display and list parameters
 *    ....
 *    vvl(lammax(1)+lammax(2) - 2) contains the [lammax(2),3,0,0]
 *    etc... [l2,m2] sorted as: [0,0],[2,0],[2,-+1],[2,-+2]
-*  variable in common block /conlam/
-*    nlammx:      the total number of angular coupling terms
-*    nlam:    the maximum number of angular coupling terms allowed
-*    lamnum:    number of non-zero v2 matrix elements for each lambda
-*               lamnum is an array of dimension nlammx (not used here)
- 
 *  variable in module mod_covvl
 *    vvl        array to store r-dependence of each angular term in the
 *               potential
@@ -445,13 +432,13 @@ c  display and list parameters
  
 *      implicit none
       use mod_covvl, only: vvl
+      use mod_conlam, only: nlam, nlammx
       implicit double precision (a-h,o-z)
-*      integer ivv, nvv, nlam, nlammx, kv, kvv, nvmx, lamnum
+*      integer ivv, nvv, nlam, nlammx, kv, kvv, nvmx
 #include "common/parpot"
 
 *      double precision  r, v, vv, vv0, vvl, s4pi
       double precision  r, v, vv, vv0, s4pi
-      common /conlam/ nlam, nlammx, lamnum(1)
       common /coloapot/ s4pi, nvv, ivv(300)
  
       if (nlam .ne. nvv) then
