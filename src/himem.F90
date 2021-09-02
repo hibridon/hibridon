@@ -265,15 +265,24 @@ module mod_clseg
    end subroutine allocate_clseg
 end module mod_clseg
 
-! module mod_cobuf
-!    implicit none
-!    integer, dimension(:), allocatable :: ibuf
-!    integer, allocatable               :: lbuf
-!    contains
-!    subroutine allocate_cobuf()
-!       allocate(ibuf(1024)) ; allocate(lbuf) ;
-!    end subroutine allocate_cobuf
-! end module mod_cobuf
+module mod_cobuf
+   ! *  variables 
+   ! *    lbuf:      length of i/o buffer (should be multiple of lseg)
+   ! *    ibuf:      buffer used in several i/o routines
+   implicit none
+   integer, allocatable               :: lbuf
+   integer, dimension(:), allocatable :: ibuf
+   contains
+   subroutine allocate_cobuf()
+      allocate(lbuf)
+#if defined(HIB_CRAY)
+   lbuf = 512
+#else
+   lbuf = 1024
+#endif
+      allocate(ibuf(lbuf))
+   end subroutine allocate_cobuf
+end module mod_cobuf
 
 ! module mod_cofil
 !    implicit none

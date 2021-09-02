@@ -719,27 +719,12 @@ c
 * ---------------------------------------------------------------
 *     revision date: 5-mar-2008
 *
-*  variables in common block /cobuf/
-*    lbuf:    length of i/o buffer
-*    ibuf:      i/o buffer
 *  variable in common block /cosize/
 *    isize:     size of files (only needed for univac, optional on vax)
 *    isizes:    size of s-matrix file (only needed for univac, optional
 *               on vax
 * -----------------------------------------------------
       common /cosize/ isize, isizes
-#if defined(HIB_UNIX_DARWIN64)
-      common/cobuf/ lbuf,ibuf(1024)
-      data lbuf /1024/
-#endif
-#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN)
-      common/cobuf/ lbuf,ibuf(1024)
-      data lbuf/1024/
-#endif
-#if defined(HIB_CRAY)
-      common/cobuf/ lbuf,ibuf(512)
-      data lbuf/512/
-#endif
       end
 c
 c     ------------------------------------------------------------
@@ -1998,9 +1983,6 @@ c
 c.....read "l" integer words from record "irec" on file "ifil"
 c.....with offset iof
 c
-*  variables in common block /cobuf/
-*    lbuf:    length of i/o buffer
-*    ibuf:      i/o buffer
 *  variable in common block /cosize/
 *    isize:     size of files (only needed for univac, optional on vax)
 *    isizes:    size of s-matrix file (only needed for univac, optional
@@ -2009,10 +1991,10 @@ c
       use mod_clseg, only: intrel
       use mod_cdbf, only: ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf,llbuf
       use mod_cdio, only: allocate_cdio, cdio_is_allocated, iadr, len, next, iun, iostat, last, lhea, junk, memory_block
+      use mod_cobuf, only: lbuf, ibuf
       implicit double precision (a-h,o-z)
       character*(*) name
       parameter (maxun=2, maxrec=5000)
-      common /cobuf/ lbuf,ibuf(1)
       common /cosize/ isize,isizes
       dimension ii(1)
       if(iun(ifil).eq.0) then
@@ -2505,9 +2487,9 @@ c.....checks status of unit
 * read of l double precision words into a. iword is zero adjusted adress
 * on file. l and iword should be multiple of lseg, otherwise unefficient
       use mod_clseg, only: lseg
+      use mod_cobuf, only: lbuf
       implicit double precision (a-h,o-z)
       character*14 nam
-      common /cobuf/ lbuf,ibuf(1)
       common/disc/ ipos(98),iun(98),iostat(98),icatf(98),nam(98)
       dimension a(1),buf(lbuf)
       if(lseg.gt.lbuf) stop 'lbuf too small in rdabsf'
