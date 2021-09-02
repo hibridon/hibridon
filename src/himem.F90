@@ -422,15 +422,19 @@ module mod_cow
    end subroutine allocate_cow
 end module mod_cow
 
-! module mod_cozmat
-!    implicit none
-!    real(8), dimension(:,:), allocatable :: zmat
-!    contains
-!    subroutine allocate_cozmat(n)
-!       integer, intent(in) :: n
-!       allocate(zmat(n,n))
-!    end subroutine allocate_cozmat
-! end module mod_cozmat
+module mod_cozmat
+   implicit none
+   real(8), dimension(:,:), allocatable, target :: zmat
+   real(8), dimension(:), pointer :: zmat_as_vec  ! zmat matrix viewed as a vector
+   contains
+   subroutine allocate_cozmat(n)
+      use, intrinsic :: ISO_C_BINDING
+
+      integer, intent(in) :: n
+      allocate(zmat(n,n))
+      call C_F_POINTER (C_LOC(zmat), zmat_as_vec, [n*n])
+   end subroutine allocate_cozmat
+end module mod_cozmat
 
 module mod_coamat
    implicit none

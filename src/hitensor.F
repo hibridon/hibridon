@@ -107,6 +107,7 @@
       use mod_cosc2, only: prefac => sc2 ! prefac(1)
       use mod_coz, only: sreal => z_as_vec ! sreal(1)
       use mod_cow, only: simag => w_as_vec ! simag(1)
+      use mod_cozmat, only: jtotpa => zmat_as_vec ! jtotpa(1)
       use tensor
       implicit double precision (a-h,o-z)
       character*(*) filnam
@@ -123,7 +124,6 @@
       common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot,
      :            nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 *
-      common /cozmat/ jtotpa(1)
       common /colnlb/ lenlab(MAX_NJTOT)
       common /ckli/  kplist(0:kmx)
       common /cf9a/ f9pha(kkmx)
@@ -683,6 +683,7 @@ c end of added/modified code (pjd)
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_coz, only: xm1lab => z_as_vec ! xm1lab(1)
       use mod_cow, only: xm2lab => w_as_vec ! xm2lab(1)
+      use mod_cozmat, only: sigma => zmat_as_vec ! sigma(1)
       implicit double precision(a-h,o-z)
       character*(*) filnam
       character*40  tcbfil, mcsfil
@@ -695,7 +696,6 @@ c end of added/modified code (pjd)
       common /coipar/ ipar(9),iprnt
       common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot,
      :             nwaves, jfsts, jlparf, jlpars, njmax
-      common /cozmat/ sigma(1)
       common /coconv/ econv, xmconv, ang2c
       data zero /0.d0/
 *
