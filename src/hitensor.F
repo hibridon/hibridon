@@ -105,6 +105,7 @@
       use mod_coisc10, only: inlist => isc10 ! inlist(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_cosc2, only: prefac => sc2 ! prefac(1)
+      use mod_coz, only: sreal => z_as_vec ! sreal(1)
       use tensor
       implicit double precision (a-h,o-z)
       character*(*) filnam
@@ -123,7 +124,6 @@
 *
       common /cozmat/ jtotpa(1)
       common /colnlb/ lenlab(MAX_NJTOT)
-      common /coz/    sreal(1)
       common /cow/    simag(1)
       common /ckli/  kplist(0:kmx)
       common /cf9a/ f9pha(kkmx)
@@ -681,6 +681,7 @@ c end of added/modified code (pjd)
       use mod_coisc2, only: inlev => isc2 ! inlev(1)
       use mod_coisc3, only: jlist => isc3 ! jlist(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
+      use mod_coz, only: xm1lab => z_as_vec ! xm1lab(1)
       implicit double precision(a-h,o-z)
       character*(*) filnam
       character*40  tcbfil, mcsfil
@@ -693,7 +694,6 @@ c end of added/modified code (pjd)
       common /coipar/ ipar(9),iprnt
       common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot,
      :             nwaves, jfsts, jlparf, jlpars, njmax
-      common /coz/    xm1lab(1)
       common /cow/    xm2lab(1)
       common /cozmat/ sigma(1)
       common /coconv/ econv, xmconv, ang2c
@@ -2319,6 +2319,7 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
       use mod_coisc9, only: jslist => isc9 ! jslist(1)
       use mod_coisc10, only: inlist => isc10 ! inlist(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
+      use mod_coz, only: sreal => z_as_vec ! sreal(1)
       implicit double precision (a-h,o-z)
 * size of q for j <= 5 and 0.5 deg angle increment
       complex*16 q(43681)
@@ -2335,7 +2336,6 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
      :                igjtp
       common /coipar/ ipar(9),iprnt
       common /coisc2 / jout1(1)
-      common /coz/ sreal(1)
       common /cow/ simag(1)
       common /coconv/ econv, xmconv, ang2c
       common /coang/ ang1, ang2, dang
@@ -2769,6 +2769,7 @@ c=============
       use mod_coisc9, only: jslist => isc9 ! jslist(1)
       use mod_coisc10, only: inlist => isc10 ! inlist(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
+      use mod_coz, only: sreal => z_as_vec ! sreal(1)
       implicit double precision (a-h,o-z)
 * size of q for j <= 5 and 0.5 deg angle increment
       complex*16 q(43681)
@@ -2785,7 +2786,6 @@ c=============
      :                igjtp
       common /coipar/ ipar(9),iprnt
       common /coisc2 / jout1(1)
-      common /coz/ sreal(1)
       common /cow/ simag(1)
       common /coconv/ econv, xmconv, ang2c
       common /coang/ ang1, ang2, dang

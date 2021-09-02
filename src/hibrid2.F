@@ -1032,6 +1032,7 @@ c
       use mod_coisc1, only: inlev => isc1 ! inlev(5)
       use mod_coisc2, only: jpoint => isc2 ! jpoint(5)
       use mod_cosc1, only: elev => sc1 ! elev(5)
+      use mod_coz, only: zmat => z_as_vec ! zmat(1)
       implicit double precision (a-h,o-z)
       character*(*) fname
       character*20 cdate
@@ -1049,7 +1050,6 @@ c
      :        jfirst, jj1, jj2, jlpar, jtemp, jtotd, lenx, n, nlevel,
      :        nlevop, nout, numax, numin, nud, iaver
 #include "common/parpot"
-      common /coz/ zmat(1)
       common /cow/ scmat(1)
       common /coselb/ ibasty
       dimension  a(3)
@@ -1542,6 +1542,7 @@ cmha
 cmha
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_coener, only: energ
+      use mod_coz, only: zmat => z_as_vec ! zmat(1)
       implicit double precision (a-h,o-z)
       character*(*) fname
       character*20 cdate
@@ -1557,7 +1558,6 @@ cmha
 #include "common/parpot"
       common /colpar/ airyfl, airypr, bastst, batch, chlist,
      :                csflag, flaghf, flagsu, ihomo, ipos,lpar
-      common /coz/ zmat(1)
       common /cow/ scmat(1)
       common /coselb/ ibasty
       dimension  a(4)

@@ -394,15 +394,19 @@ module mod_coatp2
    end subroutine allocate_coatp2
 end module mod_coatp2
 
-! module mod_coz
-!    implicit none
-!    real(8), dimension(:,:), allocatable :: z
-!    contains
-!    subroutine allocate_coz(n)
-!       integer, intent(in) :: n
-!       allocate(z(n,n))
-!    end subroutine allocate_coz
-! end module mod_coz
+module mod_coz
+   implicit none
+   real(8), dimension(:,:), allocatable, target :: z
+   real(8), dimension(:), pointer :: z_as_vec  ! z matrix viewed as a vector
+   contains
+   subroutine allocate_coz(n)
+      use, intrinsic :: ISO_C_BINDING
+      integer, intent(in) :: n
+      allocate(z(n,n))
+
+      call C_F_POINTER (C_LOC(z), z_as_vec, [n*n])
+   end subroutine allocate_coz
+end module mod_coz
 
 ! module mod_cow
 !    implicit none

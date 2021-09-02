@@ -43,6 +43,7 @@
       use mod_coisc3, only: lpack => isc3 ! lpack(1)
       use mod_coisc4, only: ipack => isc4 ! ipack(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
+      use mod_coz, only: sreal => z_as_vec ! sreal(1)
       implicit double precision (a-h,o-z)
       character*(*) fname
       character*20 cdate
@@ -51,7 +52,6 @@
       logical is_j12
       dimension ia(4)
 #include "common/parpot"
-      common /coz/ sreal(1)
       common /cozmat/ simag(1)
 
       common /coselb/ ibasty
@@ -1402,6 +1402,7 @@ c
       use mod_cosc5, only: fnp => sc5   ! fnp(10)
       use mod_cosc6, only: sc  => sc6   ! sc(100)
       use mod_cosc7, only: sc1  => sc7   ! sc1(100)
+      use mod_coz, only: scmat => z_as_vec ! scmat(100)
 
 
       implicit double precision (a-h,o-z)
@@ -1419,7 +1420,6 @@ c
       common /cotrans/ ttrans(36)
       common /cow/    sr(100)
       common /cozmat/ si(100)
-      common /coz/    scmat(100)
 * common for y1, y2, y4
       common /coered/ ered, rmu
       common /coselb/ ibasty
@@ -2353,13 +2353,13 @@ c
       use mod_cosc7, only: sc1 => sc7 ! sc1(6)
       use mod_cosc8, only: sc8
       use mod_cosc9, only: sc9
+      use mod_coz, only: scmat => z_as_vec ! scmat(100)
       implicit double precision (a-h,o-z)
       logical adiab, kill, photof, propf, sumf, coordf, ifull
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
       common /cozmat/ tcoord(100)
 * steve, you may need more space, but i doubt it since tcoord is dimensioned n
-      common /coz/    scmat(100)
       common /coered/ ered, rmu
       common /coground/ ifull
       common /cotrans/ ttrans(36)
@@ -2664,11 +2664,11 @@ c
       use mod_cosc6, only: sc => sc6 ! sc(6)
       use mod_cosc7, only: sc7  ! sc7(6)
       use mod_cosc8, only: sc8
+      use mod_coz, only: scmat => z_as_vec ! scmat(100)
       implicit double precision (a-h,o-z)
       common /coered/ ered, rmu
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
-      common /coz/    scmat(100)
 * common for y1, y2, y4
       data zero, one, onemin, two,   conv
      :    /0.d0, 1.d0, -1.d0, 2.d0, 219474.6d0/

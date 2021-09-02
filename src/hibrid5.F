@@ -1483,6 +1483,7 @@ c
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_cosc2, only: inlev => sc2int ! inlev(1)
       use mod_cosc3, only: jlev => sc3int ! jlev(1)
+      use mod_coz, only: sreal => z_as_vec ! sreal(1)
       implicit double precision (a-h,o-z)
       character*(*) filnam
       character*40  icsfil, smtfilnam, xname
@@ -1497,7 +1498,6 @@ c
      :        batch, nucros, notequ, lpar1, lpar2, ipos,lpar3
 #include "common/parpot"
       common /colpar/ lpar1(3), batch, lpar2(5), ipos, lpar3(17)
-      common /coz/    sreal(1)
       common /cow/    simag(1)
       common /cozmat/ sigma(1)
       !/ nnout, jout(21)
