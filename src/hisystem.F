@@ -1554,6 +1554,7 @@
 * ----------------------------------------------------------------------
 #include "common/parsys_mod.F"
       use mod_conlam, only: nlam
+      use mod_cosysl, only: islcod, lspar
       implicit double precision (a-h,o-z)
       logical readpt, existf
       logical         airyfl, airypr, bastst, batch, chlist, csflag,
@@ -1570,7 +1571,6 @@
       common /cosysi/ nscode, isicod, nterm, jmax, igu, isa,
      :                npar, imult, nman
       common /cosysr/ isrcod, junkr, brot, aso, o, p, q, dmom, efield
-      common /cosysl/ islcod
       common /coskip/ nskip,iskip
       save potfil
 #include "common/comdot"

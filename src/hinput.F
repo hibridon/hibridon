@@ -50,6 +50,8 @@
       use mod_coamat, only: scmat => toto ! scmat(1)
       use mod_coener, only: energ
       use mod_conlam, only: nlam, nlammx, lamnum
+      use mod_cosysl, only: islcod, lspar
+
       implicit double precision (a-h,o-z)
 *  iicode is the number of integer pcod's
 *  ircode is the number of real pcod's
@@ -73,7 +75,7 @@
       integer ipar
       integer ibasty
       integer nerg
-      logical existf, lspar, first, openfl, is_twomol
+      logical existf, first, openfl, is_twomol
       logical lpar, logp, opti, optifl, batch, jtrunc
       dimension a(15),ia(10), ihold(15), lhold(15),lindx(28)
 #include "common/parbas"
@@ -88,7 +90,6 @@
       common /copcod/ pcod
       common /cosysi/ nscode, isicod, ispar(100)
       common /cosysr/ isrcod, idum, rspar(100)
-      common /cosysl/ islcod, lspar(100)
       common /coipar/ ipar(10)
       common /corpar/ rpar(9)
       common /colpar/ lpar(28)

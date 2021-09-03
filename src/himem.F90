@@ -1119,3 +1119,18 @@ end module mod_comxm
     !!   common /codim/ mairy,mmax,mbig
     !!   common /comxbs/ maxbas
     !!   common /comxm/ ncache, mxmblk
+
+module mod_cosysl
+   implicit none
+   save
+   integer :: maxpar
+   integer :: islcod
+   integer, dimension(:), allocatable, target :: lspar
+   contains
+   subroutine allocate_cosysl(amaxpar)
+      integer, intent(in) :: amaxpar
+      maxpar = amaxpar
+      islcod = 0
+      allocate(lspar(amaxpar))
+   end subroutine allocate_cosysl
+end module mod_cosysl
