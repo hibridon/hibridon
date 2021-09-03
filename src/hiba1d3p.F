@@ -112,13 +112,13 @@
       use mod_coeint, only: eint
       use mod_covvl, only: vvl
       use mod_conlam, only: nlam, nlammx, lamnum
+      use mod_cosys, only: rspar
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
 #include "common/parbasl"
 
       common /cosysi/ nscode, isicod, nterm, nstate
-      common /cosysr/ isrcod, junkr, en1d
       common /coered/ ered, rmu
       common /coskip/ nskip, iskip
 *   econv is conversion factor from cm-1 to hartrees
@@ -129,6 +129,8 @@
      :          ishold(1), is(1), ieig(0:2)
 *  scratch arrays for computing asymmetric top energies and wave fns.
       dimension en0(4), en1(3), en2(2), vec(4,4), work(288)
+      real(8), pointer :: en1d
+      en1d => rspar(1)
       zero = 0.d0
       two = 2.d0
 *  check for consistency in the values of flaghf and csflag

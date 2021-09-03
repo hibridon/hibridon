@@ -548,36 +548,39 @@ endif()
 
 # declare the tests
 
+# set(tests_list 
+#   arch4
+#   arn2
+#   arn2_big
+#   arno
+#   arno_bound
+#   aroh
+#   boh2
+#   c2hh2
+#   cahe
+#   ch2he
+#   ch3he
+#   ch3he_ccsdt
+#   ch3he_vib
+#   ch3i
+#   cph2
+#   h2ohe
+#   h2ohe_orig
+#   h2ohe_prsbr
+#   hco_trnprt 
+#   hecn 
+#   heco
+#   heohx
+#   nh3h2
+#   nh3h2_qma
+#   ohh2_bausr
+#   ohh2_j1
+#   ohh2_j13
+#   stp1sg
+#   vfit)
+
 set(tests_list 
-  arch4
-  arn2
-  arn2_big
-  arno
-  arno_bound
-  aroh
-  boh2
-  c2hh2
-  cahe
-  ch2he
-  ch3he
-  ch3he_ccsdt
-  ch3he_vib
-  ch3i
-  cph2
-  h2ohe
-  h2ohe_orig
-  h2ohe_prsbr
-  hco_trnprt 
-  hecn 
-  heco
-  heohx
-  nh3h2
-  nh3h2_qma
-  ohh2_bausr
-  ohh2_j1
-  ohh2_j13
-  stp1sg
-  vfit)
+   cahe)
 
 foreach(test_id IN LISTS tests_list)
   include("tests/${test_id}/${test_id}.cmake")
@@ -585,202 +588,202 @@ endforeach()
 
 # declare the test suites
 
-set(original_testsuite
-  arn2
-  arn2_big
-  arno
-  aroh
-  boh2_b
-  ch3he_ccsdt
-  ch3i
-  h2ohe_orig
-  hecn 
-  heco
-  vfit)
+# set(original_testsuite
+#   arn2
+#   arn2_big
+#   arno
+#   aroh
+#   boh2_b
+#   ch3he_ccsdt
+#   ch3i
+#   h2ohe_orig
+#   hecn 
+#   heco
+#   vfit)
 
-add_hibridon_testsuite("original" "${original_testsuite}" "${tests_list}")
+# add_hibridon_testsuite("original" "${original_testsuite}" "${tests_list}")
 
-# test suite from autotest/testgroup_short
+# # test suite from autotest/testgroup_short
 
-set(short_testsuite 
-  arn2
-  arno)
+# set(short_testsuite 
+#   arn2
+#   arno)
 
-add_hibridon_testsuite("short" "${short_testsuite}" "${tests_list}")
+# add_hibridon_testsuite("short" "${short_testsuite}" "${tests_list}")
 
-# test suite from autotest/testgroup_regular
+# # test suite from autotest/testgroup_regular
 
-set(regular_testsuite
-  arn2
-  arno
-  boh2_b2
-  cahe
-  ch3he
-  cph2
-  h2ohe
-  hco_trnprt
-  hecn
-  nh3h2
-  ohh2_j1
-  vfit)
+# set(regular_testsuite
+#   arn2
+#   arno
+#   boh2_b2
+#   cahe
+#   ch3he
+#   cph2
+#   h2ohe
+#   hco_trnprt
+#   hecn
+#   nh3h2
+#   ohh2_j1
+#   vfit)
 
-add_hibridon_testsuite("regular" "${regular_testsuite}" "${tests_list}")
+# add_hibridon_testsuite("regular" "${regular_testsuite}" "${tests_list}")
 
-# test suite from autotest/testgroup_extended
+# # test suite from autotest/testgroup_extended
 
-set(extended_testsuite
-  arch4
-  arn2
-  arno
-  arno_bound
-  aroh
-  boh2_b2
-  c2hh2
-  cahe
-  ch2he_a
-  ch2he_x
-  ch2he_stmix
-  ch3he
-  ch3he_vib
-  ch3i
-  cph2
-  h2ohe
-  h2ohe_prsbr
-  hco_trnprt
-  hecn
-  heco
-  heohx
-  nh3h2
-  ohh2_bausr_heohx
-  ohh2_j1
-  ohh2_j13
-  stp1sg_ch3he
-  stp1sg_nh3h2
-  vfit)
+# set(extended_testsuite
+#   arch4
+#   arn2
+#   arno
+#   arno_bound
+#   aroh
+#   boh2_b2
+#   c2hh2
+#   cahe
+#   ch2he_a
+#   ch2he_x
+#   ch2he_stmix
+#   ch3he
+#   ch3he_vib
+#   ch3i
+#   cph2
+#   h2ohe
+#   h2ohe_prsbr
+#   hco_trnprt
+#   hecn
+#   heco
+#   heohx
+#   nh3h2
+#   ohh2_bausr_heohx
+#   ohh2_j1
+#   ohh2_j13
+#   stp1sg_ch3he
+#   stp1sg_nh3h2
+#   vfit)
 
-add_hibridon_testsuite("extended" "${extended_testsuite}" "${tests_list}")
+# add_hibridon_testsuite("extended" "${extended_testsuite}" "${tests_list}")
 
-# test suite from autotest/testgroup_full_qma
+# # test suite from autotest/testgroup_full_qma
 
-set(full_qma_testsuite
-  arn2
-  arno
-  arno_bound
-  aroh
-  boh2_b2
-  cahe
-  ch2he_a
-  ch2he_x
-  ch2he_stmix
-  ch3he
-  ch3he_vib
-  ch3i
-  h2ohe
-  h2ohe_prsbr
-  h2ohe_trnprt
-  hecn
-  heco
-  heohx
-  nh3h2
-  nh3h2_qma
-  ohh2_bausr_heohx
-  ohh2_bausr_j1
-  ohh2_j1
-  ohh2_j13
-  vfit)
+# set(full_qma_testsuite
+#   arn2
+#   arno
+#   arno_bound
+#   aroh
+#   boh2_b2
+#   cahe
+#   ch2he_a
+#   ch2he_x
+#   ch2he_stmix
+#   ch3he
+#   ch3he_vib
+#   ch3i
+#   h2ohe
+#   h2ohe_prsbr
+#   h2ohe_trnprt
+#   hecn
+#   heco
+#   heohx
+#   nh3h2
+#   nh3h2_qma
+#   ohh2_bausr_heohx
+#   ohh2_bausr_j1
+#   ohh2_j1
+#   ohh2_j13
+#   vfit)
 
-add_hibridon_testsuite("full_qma" "${full_qma_testsuite}" "${tests_list}")
+# add_hibridon_testsuite("full_qma" "${full_qma_testsuite}" "${tests_list}")
 
-# test suite from autotest/testgroup_all
+# # test suite from autotest/testgroup_all
 
-set(all_testsuite
-  arch4
-  arch4_quick
-  arn2
-  arn2_big
-  arno
-  arno_bound
-  aroh
-  boh2_b
-  boh2_b2
-  c2hh2
-  c2hh2_quick
-  cahe
-  ch2he_a
-  ch2he_x
-  ch2he_x_quick
-  ch2he_stmix
-  ch3he
-  ch3he_quick
-  ch3he_ccsdt
-  ch3he_ccsdt_quick
-  ch3he_vib
-  ch3i
-  cph2
-  h2ohe
-  h2ohe_orig
-  h2ohe_prsbr
-  h2ohe_prsbr_quick
-  h2ohe_trnprt
-  hco_trnprt
-  hco_trnprt_quick
-  hecn
-  heco
-  heohx
-  nh3h2
-  nh3h2_qma
-  ohh2_bausr_heohx
-  ohh2_bausr_j1
-  ohh2_j1
-  ohh2_j13
-  stp1sg_ch3he
-  stp1sg_nh3h2
-  vfit)
+# set(all_testsuite
+#   arch4
+#   arch4_quick
+#   arn2
+#   arn2_big
+#   arno
+#   arno_bound
+#   aroh
+#   boh2_b
+#   boh2_b2
+#   c2hh2
+#   c2hh2_quick
+#   cahe
+#   ch2he_a
+#   ch2he_x
+#   ch2he_x_quick
+#   ch2he_stmix
+#   ch3he
+#   ch3he_quick
+#   ch3he_ccsdt
+#   ch3he_ccsdt_quick
+#   ch3he_vib
+#   ch3i
+#   cph2
+#   h2ohe
+#   h2ohe_orig
+#   h2ohe_prsbr
+#   h2ohe_prsbr_quick
+#   h2ohe_trnprt
+#   hco_trnprt
+#   hco_trnprt_quick
+#   hecn
+#   heco
+#   heohx
+#   nh3h2
+#   nh3h2_qma
+#   ohh2_bausr_heohx
+#   ohh2_bausr_j1
+#   ohh2_j1
+#   ohh2_j13
+#   stp1sg_ch3he
+#   stp1sg_nh3h2
+#   vfit)
 
-add_hibridon_testsuite("all" "${all_testsuite}" "${tests_list}")
+# add_hibridon_testsuite("all" "${all_testsuite}" "${tests_list}")
 
-# a suite which goal is to cover as much as possible hibridon's code,
-# ignoring the meaningfulness of the tests
-# this test suite is the one to use to detect possible regressions after refactoring code
-set(coverage_testsuite
-  arch4_quick
-  arn2
-  arn2_big
-  arno
-  arno_bound
-  aroh
-  boh2_b
-  boh2_b2
-  c2hh2_quick
-  cahe
-  ch2he_a_quick
-  ch2he_x_quick
-  ch2he_stmix
-  ch3he_quick
-  ch3he_ccsdt_quick
-  ch3he_vib_quick
-  ch3i
-  cph2
-  h2ohe
-  h2ohe_orig
-  h2ohe_prsbr_quick
-  h2ohe_trnprt
-  hco_trnprt_quick
-  hecn_quick
-  heco
-  heohx_quick
-  nh3h2
-  nh3h2_qma
-  ohh2_bausr_heohx_quick
-  ohh2_bausr_j1_quick
-  ohh2_j1_quick
-  ohh2_j13_quick
-  stp1sg_ch3he_quick
-  stp1sg_nh3h2
-  vfit)
+# # a suite which goal is to cover as much as possible hibridon's code,
+# # ignoring the meaningfulness of the tests
+# # this test suite is the one to use to detect possible regressions after refactoring code
+# set(coverage_testsuite
+#   arch4_quick
+#   arn2
+#   arn2_big
+#   arno
+#   arno_bound
+#   aroh
+#   boh2_b
+#   boh2_b2
+#   c2hh2_quick
+#   cahe
+#   ch2he_a_quick
+#   ch2he_x_quick
+#   ch2he_stmix
+#   ch3he_quick
+#   ch3he_ccsdt_quick
+#   ch3he_vib_quick
+#   ch3i
+#   cph2
+#   h2ohe
+#   h2ohe_orig
+#   h2ohe_prsbr_quick
+#   h2ohe_trnprt
+#   hco_trnprt_quick
+#   hecn_quick
+#   heco
+#   heohx_quick
+#   nh3h2
+#   nh3h2_qma
+#   ohh2_bausr_heohx_quick
+#   ohh2_bausr_j1_quick
+#   ohh2_j1_quick
+#   ohh2_j13_quick
+#   stp1sg_ch3he_quick
+#   stp1sg_nh3h2
+#   vfit)
 
 
-add_hibridon_testsuite("coverage" "${coverage_testsuite}" "${tests_list}")
+# add_hibridon_testsuite("coverage" "${coverage_testsuite}" "${tests_list}")
 
 
 # The following is to build hibridon with an user-supplied potential

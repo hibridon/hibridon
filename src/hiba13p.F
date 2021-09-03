@@ -1,3 +1,61 @@
+      module par13p
+        use mod_cosys, only: rspar, count => isrcod
+        implicit none
+        save
+*  variables in common block /cosysr/
+*    isrcod:   number of real system dependent variables
+*    en(1):    asymptotic energy of j=0 fine-structure level of triplet
+*    en(2):    asymptotic energy of j=1 fine-structure level of triplet
+*    en(3):    asymptotic energy of j=2 fine-structure level of triplet
+*    en(4):    asymptotic energy of singlet state (cm-1)
+*    de(4):    morse De for 3Pi, 3Sig, 1Pi, 1Sig
+*    re(4):    morse re for 3Pi, 3Sig, 1Pi, 1Sig
+*    be(4):    morse beta for 3Pi, 3Sig, 1Pi, 1Sig
+*    rl(4):    msv RL for 3Pi, 3Sig, 1Pi, 1Sig
+*    cl(4):    msv C6 for 3Pi, 3Sig, 1Pi, 1Sig
+*    cmix:     mixing coefficient of J=1 singlet and triplet levels
+        integer, pointer :: isrcod => count
+        ! real(8), dimension(:), pointer :: en => rspar(1:4)
+        ! real(8), dimension(:), pointer :: de => rspar(5:8)
+        ! real(8), dimension(:), pointer :: re => rspar(9:12)
+        ! real(8), dimension(:), pointer :: be => rspar(13:16)
+        ! real(8), dimension(:), pointer :: rl => rspar(17:20)
+        ! real(8), dimension(:), pointer :: cl => rspar(21:24)
+
+        real(8), dimension(:), pointer :: en
+        real(8), dimension(:), pointer :: de
+        real(8), dimension(:), pointer :: re
+        real(8), dimension(:), pointer :: be
+        real(8), dimension(:), pointer :: rl
+        real(8), dimension(:), pointer :: cl
+
+        real(8), pointer :: cmix => rspar(25)
+        real(8), pointer :: alphg => rspar(26)
+        real(8), pointer :: rgaus => rspar(27)
+        real(8), pointer :: agaus => rspar(28)
+        real(8), pointer :: demor => rspar(29)
+        real(8), pointer :: remor => rspar(30)
+        real(8), pointer :: bemor => rspar(31)
+        real(8), pointer :: dissmor => rspar(32)
+        contains
+        subroutine init()
+          implicit none
+          en => rspar(1:4)
+          de => rspar(5:8)
+          re => rspar(9:12)
+          be => rspar(13:16)
+          rl => rspar(17:20)
+          cl => rspar(21:24)
+          ! cmix => rspar(25)
+          ! alphg => rspar(26)
+          ! rgaus => rspar(27)
+          ! agaus => rspar(28)
+          ! demor => rspar(29)
+          ! remor => rspar(30)
+          ! bemor => rspar(31)
+          ! dissmor => rspar(32)
+          end subroutine
+      end module par13p
 * --------------------------------------------------
       subroutine ba13p (j, l, is, jhold, ehold, ishold, nlevel, nlevop,
      :                  sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu,
@@ -66,18 +124,6 @@
 *    quantum numbers, the total angular momentum, and the coupled-states
 *    projection index are equal to the values stored in j, jtot, and nu
 *    plus 1/2
-*  variables in common block /cosysr/
-*    isrcod:   number of real system dependent variables
-*    en(1):    asymptotic energy of j=0 fine-structure level of triplet
-*    en(2):    asymptotic energy of j=1 fine-structure level of triplet
-*    en(3):    asymptotic energy of j=2 fine-structure level of triplet
-*    en(4):    asymptotic energy of singlet state (cm-1)
-*    de(4):    morse De for 3Pi, 3Sig, 1Pi, 1Sig
-*    re(4):    morse re for 3Pi, 3Sig, 1Pi, 1Sig
-*    be(4):    morse beta for 3Pi, 3Sig, 1Pi, 1Sig
-*    rl(4):    msv RL for 3Pi, 3Sig, 1Pi, 1Sig
-*    cl(4):    msv C6 for 3Pi, 3Sig, 1Pi, 1Sig
-*    cmix:     mixing coefficient of J=1 singlet and triplet levels
 *  variables in common block /cosysi/
 *    nscode:   total number of system dependent variables
 *    isicod:   total number of integer system dependent variables
@@ -120,14 +166,13 @@
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_conlam, only: nlam, nlammx, lamnum
+      use par13p, only: en, de, re, be, rl, cl, cmix
       implicit double precision (a-h,o-z)
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas"
 #include "common/parbasl"
 
       common /cosysi/ nscode, isicod, nterm, nstate,ipol, npot
-      common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4),
-     :                        rl(4), cl(4), cmix
       common /coered/ ered, rmu
       common /coskip/ nskip, iskip
       common /coconv/ econv, xmconv
@@ -510,10 +555,9 @@
 *   author:  thierry duhoo and millard alexander
 *   latest revision date:  30-dec-1995
 * -----------------------------------------
+      use par13p, only: en, de, re, be, rl, cl, cmix
       implicit double precision (a-h,o-z)
       common /cotrans/ ttrans
-      common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4),
-     :                        rl(4), cl(4), cmix
       dimension tatoe(6,6), cmat(6,6), ttrans(6,6)
       data zero, one,two ,three/0.d0, 1.d0, 2.d0, 3.d0/
       if (j .lt. 2) then

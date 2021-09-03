@@ -50,7 +50,7 @@
       use mod_coamat, only: scmat => toto ! scmat(1)
       use mod_coener, only: energ
       use mod_conlam, only: nlam, nlammx, lamnum
-      use mod_cosysl, only: islcod, lspar
+      use mod_cosys, only: islcod, lspar, isrcod, rspar
 
       implicit double precision (a-h,o-z)
 *  iicode is the number of integer pcod's
@@ -89,7 +89,6 @@
       common /cofcod/ fcod
       common /copcod/ pcod
       common /cosysi/ nscode, isicod, ispar(100)
-      common /cosysr/ isrcod, idum, rspar(100)
       common /coipar/ ipar(10)
       common /corpar/ rpar(9)
       common /colpar/ lpar(28)

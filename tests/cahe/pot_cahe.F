@@ -8,6 +8,9 @@
 * --------------------------------------------------------------------------
       subroutine loapot(iunit,filnam)
 * --------------------------------------------------------------------------
+      use par13p, only: isrcod, en, de, re, be,
+     :                  rl, cl, cmix, alphg, rgaus,
+     :                  agaus, demor, remor, bemor, dissmor
       character*(*) filnam
       common /coselb/ ibasty
 #include "common/parbas"
@@ -26,12 +29,27 @@
 * --------------------------------------------------------------------------
       subroutine driver
       use mod_covvl, only: vvl
+      use par13p, only: isrcod, en, de, re, be,
+     :                  rl, cl, cmix, alphg, rgaus,
+     :                  agaus, demor, remor, bemor, dissmor
       implicit double precision (a-h,o-z)
       common /cosysi/ junk(5), npot
-      common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4),
-     :                        rl(4), cl(4), cmix, alphg, rgaus,
-     :                        agaus, demor, remor, bemor, dissmor
 #include "common/parpot"
+      en = (/ 0.0,   7.076, 27.44, 183.9 /)
+      de = (/ 1.d-4, 8.d-6, 1.d-4, 8.d-6 /)
+      re = (/   9.0,  13.8,   9.0,  13.8 /)
+      be = (/    .4,   .47,    .4,   .45 /)
+      rl = (/  13.0,  18.0,  13.0,  18.0 /)
+      cl = (/  40.0,  50.0,  40.0,  50.0 /)
+      cmix = .9747
+      rgaus = 8.1
+      agaus = 1E-4
+      alphg = 7.5E-2
+      demor = 3.5E-3
+      remor = 6.5
+      bemor = .43
+      dissmor = 4.3E-3
+
       potnam='Ca(4s5p)-He'
       print *, potnam
       print *, 
@@ -49,20 +67,21 @@
       goto 1
 94    end
 * --------------------------------------------------------------------------
-      block data cahepot
-      implicit double precision (a-h,o-z)
-      common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4),
-     :                        rl(4), cl(4), cmix, alphg, rgaus,
-     :                        agaus, demor, remor, bemor, dissmor
-      data en /0,7.076,27.44,183.9 /
-      data de /1.d-4,8.d-6,1.d-4,8.d-6/
-      data re /9,13.8,9,13.8/
-      data be /.4,.47,.4,.45/
-      data rl /13,18,13,18/
-      data cl /40,50,40,50/
-      data cmix, rgaus, agaus, alphg, demor, remor, bemor, dissmor
-     :  / .9747,8.1,1E-4,7.5E-2,3.5E-3,6.5,.43,4.3E-3/
-      end
+!       block data cahepot
+!       use par13p, only: isrcod, en, de, re, be,
+!      :                  rl, cl, cmix, alphg, rgaus,
+!      :                  agaus, demor, remor, bemor, dissmor
+!       implicit double precision (a-h,o-z)
+
+!       data en /0,7.076,27.44,183.9 /
+!       data de /1.d-4,8.d-6,1.d-4,8.d-6/
+!       data re /9,13.8,9,13.8/
+!       data be /.4,.47,.4,.45/
+!       data rl /13,18,13,18/
+!       data cl /40,50,40,50/
+!       data cmix, rgaus, agaus, alphg, demor, remor, bemor, dissmor
+!      :  / .9747,8.1,1E-4,7.5E-2,3.5E-3,6.5,.43,4.3E-3/
+!       end
       
 * --------------------------------------------------------------------------
       subroutine pot (vv0, r)
@@ -97,12 +116,12 @@
 * ----------------------------------------------------------------------
       use mod_covvl, only: vvl
       use mod_conlam, only: nlam
+      use par13p, only: isrcod, en, de, re, be,
+     :                  rl, cl, cmix, alphg, rgaus,
+     :                  agaus, demor, remor, bemor, dissmor
       implicit double precision (a-h,o-z)
       common /coconv/ econv
       common /cosysi/ nscode, isicod, nterm, nstate, ipol, npot
-      common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4),
-     :                        rl(4), cl(4), cmix, alphg, rgaus,
-     :                        agaus, demor, remor, bemor, dissmor
       data onethr, fivthr /0.3333333333333333d0, 1.66666666666667d0/
       if (npot .lt. 1 .or. npot .gt. 3) then
         write (6, 5) npot
@@ -235,10 +254,10 @@ c
 * ---------------------------------------------------------------------
 * pot1.f
       subroutine pot1(r,vp1,vs1,vp3,vs3)
+      use par13p, only: isrcod, en, de, re, be,
+     :                  rl, cl, cmix, alphg, rgaus,
+     :                  agaus, demor, remor, bemor, dissmor
       implicit double precision (a-h,o-z)
-      common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4),
-     :                        rl(4), cl(4), cmix, alphg, rgaus,
-     :                        agaus, demor, remor, bemor, dissmor
       call potmsv(vp3,vs3,vp1,vs1,r)
       call potmorse (vs2, r)
  
@@ -258,9 +277,9 @@ c
       end
  
       subroutine potmsv(vp,vs,vp1,vs1,r)
+      use par13p, only: isrcod, en, de, re, be,
+     :                  rl, c => cl
       implicit double precision (a-h,o-z)
-      common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4),
-     :                        rl(4), c(4)
       dimension v(4)
       do 30 j=1,4
 c
@@ -314,10 +333,10 @@ c       v(r) = v(r) - delrsi
 c
 c -----------------------------------------------------------------------
 c
+      use par13p, only: isrcod, en, de, re, be,
+     :                  rl, cl, cmix, alphg, rgaus,
+     :                  agaus, demor, remor, bemor, dissmor
       implicit double precision (a-h,o-z)
-      common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4),
-     :                        rl(4), cl(4), cmix, alphg, rgaus,
-     :                        agaus, demor, remor, bemor, dissmor
 c
 c -----------------------------------------------------------------------
 c now determine potential

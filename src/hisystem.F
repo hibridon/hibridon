@@ -1554,7 +1554,7 @@
 * ----------------------------------------------------------------------
 #include "common/parsys_mod.F"
       use mod_conlam, only: nlam
-      use mod_cosysl, only: islcod, lspar
+      use mod_cosys, only: islcod, lspar
       implicit double precision (a-h,o-z)
       logical readpt, existf
       logical         airyfl, airypr, bastst, batch, chlist, csflag,
@@ -1888,6 +1888,7 @@
       write (8, 60) potfil
       return
       end
+
 * -----------------------------------------------------------------------
       subroutine sy13p (irpot, readp, iread)
 *  subroutine to read in system dependent parameters for collisions of
@@ -1896,14 +1897,6 @@
 *  if iread = 0 return after defining variable names
 *  current revision date: 17-jun-1992 by mha
 *  -----------------------------------------------------------------------
-*  variables in common /cosysr/
-*    isrcod:  number of real parameters
-*    en(1):    asymptotic energy of j=0 fine-structure level of triplet
-*    en(2):    asymptotic energy of j=1 fine-structure level of triplet
-*    en(3):    asymptotic energy of j=2 fine-structure level of triplet
-*    en(4):    asymptotic energy of singlet state (cm-1)
-*    cmix:     mixing coefficient of J=1 singlet and triplet levels
-*    de, re, be, rl, c:  msv parameters for 3Pi, 3Sig, 1Pi, 1Sig
 *  variable in common /cosysi/
 *    nscode:  total number of system dependent parameters
 *             nscode = isicod + isrcod +3
@@ -1924,6 +1917,9 @@
 *  -----------------------------------------------------------------------
 #include "common/parsys_mod.F"
       use mod_conlam, only: nlam
+      use par13p, only: par13p_init => init, isrcod, en, de, re, be,
+     +                          rl, cl, cmix, alphg, rgaus,
+     +                          agaus, demor, remor, bemor, dissmor
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       integer irpot
@@ -1939,9 +1935,6 @@
       character*60 filnam, line, potfil, filnm1
       common /cosys/ scod(lencod)
       common /cosysi/ nscode, isicod, nterm, nstate, ipol, npot
-      common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4),
-     :                        rl(4), cl(4), cmix, alphg, rgaus,
-     :                        agaus, demor, remor, bemor,dissmor
 #include "common/parbas"
       common /coskip/ nskip,iskip
       common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
@@ -1951,6 +1944,7 @@
      :                xsecwr,lpar(3)
 #include "common/comdot"
       save potfil
+      call par13p_init()
 *  number and names of system dependent parameters
 *  first all the system dependent integer variables
 *  in the same order as in the common block /cosysi/

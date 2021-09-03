@@ -1120,17 +1120,25 @@ end module mod_comxm
     !!   common /comxbs/ maxbas
     !!   common /comxm/ ncache, mxmblk
 
-module mod_cosysl
+
+
+module mod_cosys
+   ! module storing system dependent parameters
    implicit none
    save
-   integer :: maxpar
-   integer :: islcod
-   integer, dimension(:), allocatable, target :: lspar
+
+   integer, parameter :: maxpar = 150 ! maximum number of parameters of each type
+   integer, target :: isrcod  ! number of system dependent parameters of type real
+   integer, target :: islcod  ! number of system dependent parameters of type logical
+   logical, dimension(maxpar), target :: lspar  ! logical parameters
+   real(8), dimension(maxpar), target :: rspar  ! real parameters
+   ! note : the arrays can't be made allocatable :
+   ! /tmp/graffy/hibridon/src/hiba13p.F(5): error #8815: The target must not be allocatable.   [RSPAR]
+   !     real(8), dimension(:), pointer :: en => rspar(1:4)
+
    contains
-   subroutine allocate_cosysl(amaxpar)
-      integer, intent(in) :: amaxpar
-      maxpar = amaxpar
+   subroutine allocate_cosys()
+      isrcod = 0
       islcod = 0
-      allocate(lspar(amaxpar))
-   end subroutine allocate_cosysl
-end module mod_cosysl
+   end subroutine allocate_cosys
+end module mod_cosys
