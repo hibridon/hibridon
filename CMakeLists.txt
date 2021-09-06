@@ -195,37 +195,7 @@ endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
 add_library(hib
      src/assert.f90
-     src/hiba13p.F
-     src/hiba1d3p.F
-     src/hiba1del.F
-     src/hiba1sg1sg.F
-     src/hiba1sg.F
-     src/hiba22p.F
-     src/hiba2del.F
-     src/hiba2mol.F
-     src/hiba2pi1sg.F
-     src/hiba2pi.F
-     src/hiba2sg1sg.F
-     src/hiba2sg.F
-     src/hiba3p2s.F
-     src/hiba3sg1sg.F
-     src/hibaastp1.F
-     src/hibaastp2.F
-     src/hibaastp3.F
-     src/hibaastp.F
-     src/hibach2x.F
-     src/hibadiat2p.F
-     src/hibah2p.F
-     src/hibah3p.F
      src/hiamp.F
-     src/hibapi.F
-     src/hibasgpi1.F
-     src/hibasgpi.F
-     src/hibasphtp.F
-     src/hibastp1.F
-     src/hibastp1sg.F
-     src/hibastp.F
-     src/hibastpln.F
      src/hibound.F
      src/hibrid1.F
      src/hibrid2.F
@@ -247,7 +217,37 @@ add_library(hib
      src/hiutil.F
      src/hivector.F
      src/hipotutil.F
-     src/hiversion.F)
+     src/hiversion.F
+     src/bases/hiba01_1sg.F
+     src/bases/hiba02_2sg.F
+     src/bases/hiba03_2pi.F
+     src/bases/hiba04_sgpi.F
+     src/bases/hiba05_pi.F
+     src/bases/hiba06_stp.F
+     src/bases/hiba07_13p.F
+     src/bases/hiba08_2mol.F
+     src/bases/hiba09_stpln.F
+     src/bases/hiba10_22p.F
+     src/bases/hiba11_1del.F
+     src/bases/hiba12_h2p.F
+     src/bases/hiba13_h3p.F
+     src/bases/hiba14_2del.F
+     src/bases/hiba15_diat2p.F
+     src/bases/hiba16_astp.F
+     src/bases/hiba17_ch2x.F
+     src/bases/hiba18_stp1.F
+     src/bases/hiba19_sgpi1.F
+     src/bases/hiba20_2pi1sg.F
+     src/bases/hiba21_stp1sg.F
+     src/bases/hiba22_1d3p.F
+     src/bases/hiba23_3p2s.F
+     src/bases/hiba24_sphtp.F
+     src/bases/hiba25_1sg1sg.F
+     src/bases/hiba26_2sg1sg.F
+     src/bases/hiba27_astp1.F
+     src/bases/hiba28_3sg1sg.F
+     src/bases/hiba29_astp2.F
+     src/bases/hiba30_astp3.F)
 
 target_compile_definitions(hib PUBLIC MAX_NJTOT=1000)
 # The following is for preprocessing of hiversion.F
@@ -276,6 +276,8 @@ add_custom_command(
 
 
 set(HIBRIDON_COMPILE_OPTIONS  "")
+
+list(APPEND HIBRIDON_COMPILE_OPTIONS "-I${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 # allow for source code lines of up to 132 columns which is the maximum allowed in intel fortran compiler
 # (true, we are compiling with gfortran here, having the same restriction here will ease detecting lines that exceed 132 columns,
