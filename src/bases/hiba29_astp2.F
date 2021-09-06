@@ -1,3 +1,6 @@
+* syastp2 (savastp2/ptrastp2) defines, saves variables and reads         *
+*                  potential for chiral asymmetric top-atom scattering   *
+*                  (or molecule with no symmetry elements)               *
 * ----------------------------------------------------------------------
 *  subroutine to determine angular coupling potential for collision
 *  of an asymmetric top molecule having no symmetry elements, e.g. a chiral
@@ -553,8 +556,8 @@ c
       if (bastst) then
         write (6,310)
         write (9,310)
-310     format
-     :    (/,2x,'CC CHANNEL LIST SORTED BY ENERGY',/,
+310     format (
+     :    /,2x,'CC CHANNEL LIST SORTED BY ENERGY',/,
      :    '   N   J  IS   L   EINT(CM-1)   COEFFS')
         do 330  i = 1, n
           ecm = eint(i) * econv
@@ -854,4 +857,136 @@ c
 *
 *  author:  paul dagdigian
 *  current revision date:  16-aug-2009
+*  -----------------------------------------------------------------------
+      subroutine syastp2 (irpot, readp, iread)
+*  subroutine to read in system dependent parameters for chiral asymmetric top
+*      + atom scattering
+*
+*  current revision date: 18-jan-2019 by p. dagdigian
+*  -----------------------------------------------------------------------
+*  variables in common block /cosysr/
+*    isrcod:   total number of real system dependent variables
+*    arot:     A rotational constant
+*    brot:     B rotational constant
+*    crot:     C rotational constant
+*    emax:     the maximum rotational energy (in cm-1) for a channel to be
+*              included in the basis
+*  variables in common block /cosysi/
+*    nscode:   total number of variable names which are passed to HINPUT
+*              nscod must equal isrcod + isicod + 3
+*    isicod:   total number of integer system dependent variables
+*    nterm:    number of different associated legendre terms in
+*              expansion of potential
+*    numpot:   the number of the potential used, this variable is passed
+*              to the pot subroutine
+*    jmax:     the maximum rotational quantum number for the asymmetric top
+*  variable in common /cosys/
+*    scod:    character*8 array of dimension nscode, which contains names
+*             of all system dependent parameters
+*  line 16:
+*    filnam:  name of file containing potential parameters
+*
+*  subroutines called: loapot(iunit,filnam)
+*  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
+      implicit double precision (a-h,o-z)
+#include "common/parsys"
+      integer irpot
+      logical readp
+      logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
+     :        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf,
+     :        csflag, flagsu, rsflag, t2test, existf, logdfl, batch,
+     :        readpt, ihomo, bastst, twomol, lpar
+      character*1 dot
+      character*8 scod
+      character*(*) fname
+      character*60 filnam, line, potfil, filnm1
+      common /cosys/ scod(lencod)
+      common /cosysi/ nscode, isicod, nterm, numpot, jmax
+      common /cosysr/ isrcod, junkr, arot, brot, crot, emax
+#include "common/parbas"
+      common /coskip/ nskip,iskip
+      common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo, ipos, logdfl, logwr,
+     :                noprin, partw, readpt, rsflag, swrit,
+     :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
+     :                xsecwr,lpar(3)
+#include "common/comdot"
+      save potfil
+*  number and names of system dependent parameters
+*  first all the system dependent integer variables
+*  in the same order as in the common block /cosysi/
+*  variable names must be in uppercase of maximum length 6 characters
+      isicod = 3
+      scod(1) = 'NTERM'
+      scod(2) = 'NUMPOT'
+      scod(3) = 'JMAX'
+*  then all the system dependent real variables
+*  in the same order as in the common block /cosysr/
+      isrcod = 4
+      scod(4)='AROT'
+      scod(5)='BROT'
+      scod(6)='CROT'
+      scod(7)='EMAX'
+      nscode = isicod + isrcod + 3
+* read last few lines of the input file
+      if (iread .eq. 0) return
+      read (8, *, err=80) jmax, emax
+*  line 20
+      read (8, *, err=80) arot, brot, crot
+      read (8, *, err=80) potfil
+      call loapot(1,potfil)
+      close (8)
+      return
+* here if read error occurs
+80    write(6,90)
+90    format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+*  -----------------------------------------------------------------------
+      entry ptrastp2 (fname, readp)
+      line = fname
+      readp = .true.
+100   if (readp) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,102)
+102       format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+           call gennam(potfil,filnam,0,'BIN',lc)
+           filnam = potfil
+        end if
+        potfil=filnam
+        filnm1 = 'potdata/'//filnam
+        inquire(file=filnm1,exist=existf)
+        if(.not.existf) then
+          write(6,105) filnam(1:lc)
+105      format(' FILE ',(a),' NOT FOUND')
+         return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+      endif
+      close (8)
+      return
+*  -----------------------------------------------------------------------
+      entry savastp2 (readp)
+*  save input parameters for chiral asymmetric top + atom scattering
+*  the order of the write statements should be identical to the read statement
+*  above. for consistency with the data file written by gendat, format
+*  statements should reserve the first 30 spaces for data, spaces 31-33 should
+*  be left blank, and the names of the variables should be printed in spaces
+*  34-80
+      write (8, 230) jmax, emax
+230   format (i4, 3x, g12.5, 14x, 'jmax, emax')
+      write (8, 250) arot, brot, crot
+250   format(3f9.4, 6x, 'arot, brot, crot')
+      write (8, 60) potfil
+60    format (a)
+      return
+      end
+
 * ---------------------------------eof----------------------------------

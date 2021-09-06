@@ -1,3 +1,5 @@
+* syastp3 (savastp3/ptrastp3) defines, saves variables and reads         *
+*                  potential for C2v asym top - lin mo;ecule scattering  *
 * --------------------------------------------------------------------
 c     This module contains (explictly) the number of terms and their
 c     indices in the expansion of the PES.  Its contents should be
@@ -969,5 +971,147 @@ c
 *  author:  paul dagdigian
 *  current revision date:  16-aug-2009
 *  -----------------------------------------------------------------------
-
+*  -----------------------------------------------------------------------
+      subroutine syastp3 (irpot, readp, iread)
+*  subroutine to read in system dependent parameters for C2v asymmetric top
+*      + linear molecule scattering
+*
+*  current revision date: 20-jun-2019 by p. dagdigian
+*  -----------------------------------------------------------------------
+*  variables in common block /cosysr/
+*    isrcod:   total number of real system dependent variables
+*    arot:     A rotational constant
+*    brot:     B rotational constant
+*    crot:     C rotational constant
+*    b2rot:    Rotational constant for linear molecule
+*    emax:     the maximum rotational energy (in cm-1) for a channel to be
+*              included in the basis
+*  variables in common block /cosysi/
+*    nscode:   total number of variable names which are passed to HINPUT
+*              nscod must equal isrcod + isicod + 3
+*    isicod:   total number of integer system dependent variables
+*    nterm:    number of different associated legendre terms in
+*              expansion of potential
+*    numpot:   the number of the potential used, this variable is passed
+*              to the pot subroutine
+*    jmax:     the maximum rotational quantum number for the asymmetric top
+*    iop:      ortho/para label for asymmetric top states.  para states only
+*              included if iop=1, and only ortho states if iop=-1
+*    j2min:    minimum rotational angular momentum for molecule 2
+*    j2max:    maximum rotational angular momentum for molecule 2
+*    ipotsy2:  symmetry of potential.  set to 2 for homonuclear
+*              molecule 2, set to 1 for heteronuclear molecule 2
+*  variable in common /cosys/
+*    scod:    character*8 array of dimension nscode, which contains names
+*             of all system dependent parameters
+*  line 16:
+*    filnam:  name of file containing potential parameters
+*
+*  subroutines called: loapot(iunit,filnam)
+*  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
+      implicit double precision (a-h,o-z)
+#include "common/parsys"
+      integer irpot
+      logical readp
+      logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
+     :        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf,
+     :        csflag, flagsu, rsflag, t2test, existf, logdfl, batch,
+     :        readpt, ihomo, bastst, twomol, lpar
+      character*1 dot
+      character*8 scod
+      character*(*) fname
+      character*60 filnam, line, potfil, filnm1
+      common /cosys/ scod(lencod)
+      common /cosysi/ nscode, isicod, nterm, numpot, jmax, iop, 
+     :  j2min, j2max, ipotsy2
+      common /cosysr/ isrcod, junkr, arot, brot, crot, emax, b2rot
+#include "common/parbas"
+      common /coskip/ nskip,iskip
+      common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo, ipos, logdfl, logwr,
+     :                noprin, partw, readpt, rsflag, swrit,
+     :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
+     :                xsecwr,lpar(3)
+#include "common/comdot"
+      save potfil
+*  number and names of system dependent parameters
+*  first all the system dependent integer variables
+*  in the same order as in the common block /cosysi/
+*  variable names must be in uppercase of maximum length 6 characters
+      isicod = 7
+      scod(1) = 'NTERM'
+      scod(2) = 'NUMPOT'
+      scod(3) = 'JMAX'
+      scod(4) = 'IOP'
+      scod(5) = 'J2MIN'
+      scod(6) = 'J2MAX'
+      scod(7) = 'IPOTSY2'
+*  then all the system dependent real variables
+*  in the same order as in the common block /cosysr/
+      isrcod = 5
+      scod(8)='AROT'
+      scod(9)='BROT'
+      scod(10)='CROT'
+      scod(11)='EMAX'
+      scod(12)='B2ROT'
+      nscode = isicod + isrcod + 3
+* read last few lines of the input file
+      if (iread .eq. 0) return
+      read (8, *, err=80) jmax, iop, j2min, j2max, ipotsy2
+      read (8, *, err=80) arot, brot, crot, emax, b2rot
+      read (8, *, err=80) potfil
+      call loapot(1,potfil)
+      close (8)
+      return
+* here if read error occurs
+80    write(6,90)
+90    format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+*  -----------------------------------------------------------------------
+      entry ptrastp3 (fname, readp)
+      line = fname
+      readp = .true.
+100   if (readp) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,102)
+102       format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+           call gennam(potfil,filnam,0,'BIN',lc)
+           filnam = potfil
+        end if
+        potfil=filnam
+        filnm1 = 'potdata/'//filnam
+        inquire(file=filnm1,exist=existf)
+        if(.not.existf) then
+          write(6,105) filnam(1:lc)
+105      format(' FILE ',(a),' NOT FOUND')
+         return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+      endif
+      close (8)
+      return
+*  -----------------------------------------------------------------------
+      entry savastp3 (readp)
+*  save input parameters for chiral asymmetric top + atom scattering
+*  the order of the write statements should be identical to the read statement
+*  above. for consistency with the data file written by gendat, format
+*  statements should reserve the first 30 spaces for data, spaces 31-33 should
+*  be left blank, and the names of the variables should be printed in spaces
+*  34-80
+      write (8, 230) jmax, iop, j2min, j2max, ipotsy2
+230   format (5i4, 3x, 'jmax,iop,j2min,j2max,ipotsy2')
+      write (8, 250) arot, brot, crot, emax, b2rot
+250   format(5f9.4, 6x, 'arot,brot,crot,emax,b2rot')
+      write (8, 60) potfil
+60    format (a)
+      return
+      end
 * ---------------------------------eof----------------------------------

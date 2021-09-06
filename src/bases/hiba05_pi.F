@@ -1,3 +1,5 @@
+* sypi (savpi/ptrpi) defines, save variables and reads                   *
+*                  potential for general pi scattering                   *
 * ----------------------------------------------------------------------
       subroutine bapi  (j, l, is, jhold, ehold, ishold, nlevel,
      :                  nlevop, c0, c1, c2, cf, rcut, jtot,
@@ -170,8 +172,8 @@
       if (flagsu .and. .not. csflag) then
         write (6, 20)
         write (9, 20)
-20      format
-     :  (/' *** CSFLAG = .FALSE. FOR SURFACE CALCULATION; ABORT ***')
+20      format (/
+     :  ' *** CSFLAG = .FALSE. FOR SURFACE CALCULATION; ABORT ***')
         stop
       end if
 *  check for consistency in the values of nterm, lammin, lammax, mproj
@@ -186,8 +188,8 @@
         if (ihomo .and. lammin(i) .lt. 2) then
           write (9, 40) i, lammin(i)
           write (6, 40) i, lammin(i)
-40        format
-     :    (/' *** LAMMIN(', i2, ')=', i2, ' < 2 FOR IHOMO=T; ABORT ***')
+40        format (/
+     :    ' *** LAMMIN(', i2, ')=', i2, ' < 2 FOR IHOMO=T; ABORT ***')
           stop
         end if
         if (mproj(i) .gt. lammin(i)) then
@@ -942,5 +944,202 @@
      :      xf3j (xjp, xlb, xj, -xomegp, two, -xomeg)
       end if
       if (x .ne. zero) v = (-1)**iabs(iphase) * x * sqrt(xnorm)
+      return
+      end
+*  ---------------------------------------------------------------------
+      subroutine sypi (irpot, readpt, iread)
+*  subroutine to read in system dependent parameters for singlet,
+*  doublet or triplet pi molecule + atom or flat surface scattering
+*  if iread = 1 read data from input file
+*  if iread = 0 return after defining variable names
+*  author:  didier lemoine and millard alexander
+*  current revision date:  4-mar-1996 by mha
+*  ---------------------------------------------------------------------
+*  variable in common /cosys/
+*    scod:    character*8 array of dimension nscode, which contains
+*             names of all system dependent parameters. note that the
+*             ordering of the variable names in scod must correspond
+*             to the ordering of the variable names in cosysi, cosysr,
+*             cosysl and cobspt respectively
+*  variables in common block /cosysi/
+*    nscode:   total number of system dependent parameters
+*              nscode = isicod + isrcod + islcod + 3
+*    isicod:   total number of integer system dependent variables
+*    nterm:    number of different angular terms in potential
+*              NB for pi molecule, nterm should be 1 or 2
+*    jmax:     the maximum rotational angular momenta (-1/2 for 2pi) for
+*              each channel in each spin-orbit manifold with convention
+*              omega .le. j .le. jmax(+1/2 for 2pi)
+*    igu:      permutation inversion symmetry of electronic state
+*              igu=1 for gerade states, igu=-1 for ungerade states
+*              for heteronuclear molecules igu is not used
+*    isa:      s/a label for molecular states. if ihomo=.true.,
+*              then only s states will be included if isa=1 and
+*              only a states if isa=-1
+*    npar:     number of symmetry doublets included
+*              (npar=2 will ensure both lambda doublets)
+*    imult:    spin multiplicity of pi state (imult = 2*S+1)
+*    nman:     number of spin-orbit manifolds included
+*              for a 2pi state nman=1 selects the
+*              omega=1/2 manifold in a case (a) basis
+*              otherwise, nman is set = imult in subroutine bapi
+*  variables in common bloc /cosysr/
+*    isrcod:   total number of real system dependent variables
+*    brot:     rotational constant in cm-1
+*    aso:      spin-orbit constant in cm-1
+*    o, p, q:  lambda-doubling constants cm-1
+*    dmom:     dipole moment of molecule in Debye
+*    efield:   stark field in kV / cm
+*  variables in common bloc /cosysl/
+*    islcod:   total number of logical system dependent variables
+* ----------------------------------------------------------------------
+#include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
+      use mod_cosysl, only: islcod, lspar
+      implicit double precision (a-h,o-z)
+      logical readpt, existf
+      logical         airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo,lpar
+#include "common/parsys"
+      character*8 scod
+      character*(*) fname
+      character*60 filnam, line, potfil, filnm1
+      character*1 dot
+      common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo,lpar(18)
+#include "common/parbas"
+      common /cosys/ scod(lencod)
+      common /cosysi/ nscode, isicod, nterm, jmax, igu, isa,
+     :                npar, imult, nman
+      common /cosysr/ isrcod, junkr, brot, aso, o, p, q, dmom, efield
+      common /coskip/ nskip,iskip
+      save potfil
+#include "common/comdot"
+      potfil = ' '
+*  number and names of system dependent parameters
+*  first all the system dependent integer variables
+*  in the same order as in the common block /cosysi/
+*  variable names must be in uppercase of maximum length 6 characters
+      isicod = 7
+      scod(1) = 'NTERM'
+      scod(2) = 'JMAX'
+      scod(3) = 'IGU'
+      scod(4) = 'ISA'
+      scod(5) = 'NPAR'
+      scod(6) = 'IMULT'
+      scod(7) = 'NMAN'
+*  then all the system dependent real variables
+*  in the same order as in the common block /cosysr/
+      isrcod = 7
+      scod(8) = 'BROT'
+      scod(9) = 'ASO'
+      scod(10) = 'O'
+      scod(11) = 'P'
+      scod(12) = 'Q'
+      scod(13) = 'DMOM'
+      scod(14) = 'EFIELD'
+*  then all the system dependent logical variables
+*  in the same order as in the common block /cosysl/
+      islcod = 0
+      nscode = 14
+*  set default values for doublet pi scattering
+      nterm = 2
+      if (iread .eq. 0) then
+        jmax = 3
+        igu = 1
+        isa = 0
+        npar = 2
+        nman = 0
+        imult = 2
+        mproj(1) = 0
+        mproj(2) = 2
+        lammin(1)= 1
+        lammax(1) = 1
+        lammin(2) = 2
+        lammax(2) = 2
+        niout=4
+        indout(1)=-1
+        indout(2)=1
+        indout(3)=-2
+        indout(4)=2
+      endif
+      if (iread .eq. 0) return
+*  line 19
+*  line 20
+      read (8, *, err=888) jmax, igu, isa, npar, imult, nman
+*  line 21
+      read (8, *, err=888) brot, aso
+*  line 22
+      read (8, *, err=888) o, p, q
+*  line 23
+      read (8, *, err=888) dmom, efield
+*  line 16 name of file containing potential parameters
+      line=' '
+      if(.not.readpt.or.iread.eq.0) then
+        call loapot(1,' ')
+        return
+      endif
+      read (8, 285, end=286) line
+285   format (a)
+      goto 286
+* here if read error occurs
+888   write(6,1000)
+1000  format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+*
+      entry ptrpi (fname,readpt)
+      line = fname
+      readpt = .true.
+286   if (readpt) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,1020)
+1020      format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+          call gennam(potfil,filnam,0,'BIN',lc)
+          filnam = potfil
+        end if
+        potfil=filnam
+        filnm1 = 'potdata/'//filnam
+        inquire(file=filnm1,exist=existf)
+        if(.not.existf) then
+          write(6,1025) filnam(1:lc)
+1025      format(' FILE ',(a),' NOT FOUND')
+          return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+      end if
+      close (8)
+      irpot=1
+      return
+*
+      entry savpi (readpt)
+*  save input parameters for singlet, doublet or
+*  triplet-pi molecule + atom scattering
+*  the order of the write statements should be identical to the read
+*  statements above. for consistency with the data file written by
+*  gendat, format statements should reserve the first 30 spaces for
+*  data, spaces 31-33 should be left blank, and the names of the
+*  variables should be printed in spaces 34-80
+*  line 18:
+*  line 19
+*  line 20
+      write (8, 130) jmax, igu, isa, npar, imult, nman
+130   format (6i4, 6x, '   jmax, igu, isa, npar, imult, nman')
+*  line 21
+      write (8, 140) brot, aso
+140   format (f10.5,f10.4, 10x, '   brot, aso')
+*  line 22
+      write (8, 150) o, p, q
+150   format (3(1pg12.4), ' o, p, q')
+*  line 23
+      write(8, 160) dmom, efield
+160   format (2f10.5, 10x, '   dmom, efield')
+*  line 16
+      write (8, 285) potfil
       return
       end

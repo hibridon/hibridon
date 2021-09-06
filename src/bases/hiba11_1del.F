@@ -1,3 +1,5 @@
+* sy1del (sav1del/ptr1del) defines, saves variables and reads            *
+*                  potential for singlet delta scattering                *
 * --------------------------------------------------------------------
       subroutine ba1del (j, l, is, jhold, ehold, ishold, nlevel,
      :                  nlevop, ifi, c12, c32, sc4, rcut, jtot,
@@ -498,13 +500,13 @@
         if (.not.csflag) then
           if (bastst) write (6, 200)
           write (9,200)
-200       format
-     :     (/'   N  J  EPS    L    EINT(CM-1)')
+200       format (
+     :     /'   N  J  EPS    L    EINT(CM-1)')
         else
           if (bastst) write (6,210) nu
           write (9,210) nu
-210       format
-     :     (/'   N  J  EPS    L    EINT(CM-1)',
+210       format (
+     :     /'   N  J  EPS    L    EINT(CM-1)',
      :       '    **  NU=', i3/)
         end if
         do 230  i = 1, n
@@ -692,5 +694,157 @@
       end if
       iphase = (-1) ** iabs(iphase)
       v = iphase * x*ww * sqrt(xnorm)
+      return
+      end
+* --------------------------------------------------------------
+      subroutine sy1del (irpot, readpt, iread)
+*  subroutine to read in system dependent parameters for singlet-delta
+*   + atom scattering using werner-follmeg potential form
+*  if iread = 1 read data from input file
+*  if iread = 0 return after defining variable names
+*  current revision date: 20-sep-1993 by mha
+*  -----------------------------------------------------------------------
+*    nlam:      the total number of angular coupling terms
+*  variables in common bloc /cosysr/
+*    isrcod:   total number of real system dependent variables
+*    brot:     rotational constant in cm-1
+*    q:     lambda-doubling constant cm-1
+*  variables in common block /cosysi/
+*    nscode:  total number of system dependent parameters
+*             nscode = isicod + isrcod + 3
+*    isicod:   total number of integer system dependent variables
+*    nterm:   number of different angular terms in potential
+*              nb for singlet sigma molecule, nterm should be 1
+*    jmax:     the maximum rotational angular momenta for each channel
+*              in each spin-orbit manifold with convention
+*              omega .le. j .le. jmax+0.5
+*    igu:      permutation inversion symmetry of electronic state
+*              igu=1 for gerade states, igu=-1 for ungerade states
+*              for heteronuclear molecules igu should be +1
+*    isa:      s/a label for molecular states. if ihomo=.true. then only
+*              s states will be included if isa=1 and only a states if
+*              isa=-1
+*    npar:     number of symmetry doublets included (npar=2 will ensure
+*              both lambda doublets)
+*  variable in common /cosys/
+*    scod:    character*8 array of dimension nscode, which contains names
+*             of all system dependent parameters
+*  variable in common block /coskip/
+*   nskip  for a homonuclear molecule lamda is running in steps of nskip=2
+*          for a heteronuclear molecule nskip=1
+*
+*   skip   same as nskip, used for consistency check
+*
+*  subroutines called: loapot(iunit,filnam)
+#include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
+      implicit double precision (a-h,o-z)
+#include "common/parsys"
+      logical readpt, existf
+      integer irpot
+      character*1 dot
+      character*8 scod
+      character*(*) fname
+      character*60 filnam, line, potfil, filnm1
+#include "common/parbas"
+      common /cosys/ scod(lencod)
+      common /cosysi/ nscode, isicod, nterm, jmax, igu, isa, npar
+      common /cosysr/ isrcod, junkr, brot,  q
+      logical         airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo,lpar
+      common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo,lpar(18)
+      common /coskip/ nskip,iskip
+      save potfil
+#include "common/comdot"
+      isicod = 5
+      isrcod = 2
+      nscode = isicod+isrcod
+      scod(1) = 'NTERM'
+      scod(2) = 'JMAX'
+      scod(3) = 'IGU'
+      scod(4) = 'ISA'
+      scod(5) = 'NPAR'
+      scod(6) = 'BROT'
+      scod(7) = 'Q'
+      potfil = ' '
+*  set default values for singlet delta scattering
+      nterm = 2
+      mproj(2) = 4
+      if (iread .eq. 0) then
+        mproj(1) = 0
+        lammin(1)= 1
+        lammax(1) = 1
+        lammin(2) = 4
+        lammax(2) = 4
+        niout=4
+        indout(1)=-1
+        indout(2)=1
+        indout(3)=-2
+        indout(4)=2
+        npar=2
+        igu=1
+        isa=0
+        jmax=3
+      endif
+      if(iread.eq.0) return
+*  line 13
+      read (8, *, err=888) jmax, igu, isa, npar
+*  line 14
+      read (8, *, err=888) brot,  q
+*  line 15 name of file containing potential parameters
+      line=' '
+      if(.not.readpt.or.iread.eq.0) then
+        call loapot(1,' ')
+        return
+      endif
+      read (8, 285, end=286) line
+285   format (a)
+      goto 286
+* here if read error occurs
+888   write(6,1000)
+1000  format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+*
+      entry ptr1del (fname,readpt)
+      line = fname
+      readpt = .true.
+286   if (readpt) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,1020)
+1020      format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+          call gennam(potfil,filnam,0,'BIN',lc)
+          filnam = potfil
+        end if
+        potfil=filnam
+        filnm1 = 'potdata/'//filnam
+        inquire(file=filnm1,exist=existf)
+        if(.not.existf) then
+          write(6,1025) filnam(1:lc)
+1025      format(' FILE ',(a),' NOT FOUND')
+          return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+        end if
+      close (8)
+      irpot=1
+      return
+*
+      entry sav1del (readpt)
+*  save input parameters for singlet-delta + atom scattering
+*  line 13:
+      write (8, 315) jmax, igu, isa, npar
+315   format(4i4,18x,'jmax, igu, isa, npar')
+*  line 14
+      write (8, 320) brot,  q
+320   format(f10.5,f10.4,2(1pg11.3),' brot,  q')
+*  line 15
+      write (8, 285) potfil
       return
       end

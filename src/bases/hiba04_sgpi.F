@@ -1,3 +1,5 @@
+* sysgpi (savsgpi/ptrsgpi) defines, saves variables and reads            *
+*                  potential for doublet/pi sigma scattering             *
 * ----------------------------------------------------------------------
       subroutine basgpi (j, l, is, jhold, ehold, ishold, nlevel,
      :                  nlevop, iom, iohold, nvhold, nlv,
@@ -1361,3 +1363,367 @@ c
          end if
          return
          end
+* ----------------------------------------------------------------------
+      subroutine sysgpi (irpot, readpt, iread)
+* ----------------------------------------------------------------------
+*
+*  subroutine to read in system dependent parameters for 2pi-2sig
+*   + atom scattering using werner-follmeg potential form
+*  current revision date: 21-dec-1995 by pjd, mha, ade, ab
+*  latest revision:  24-feb-2004 by mha
+*
+*  variables in common/cobspt/ must be set in loapot!!
+*
+#include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
+      implicit double precision (a-h,o-z)
+#include "common/parsys"
+      logical readpt, existf
+      character*8 scod,rcod
+      character*8 char
+      character*(*) fname
+      character*1 dot
+      character*60 filnam, line, potfil, filnm1
+#include "common/parbas"
+      common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
+      common /cosys/ scod(lencod)
+      common /cosyr/ rcod(maxpar)
+      common /cosysi/ nscode, isicod, ispar(maxpar)
+      common /cosysr/ isrcod, junkr, rspar(maxpar)
+      logical         airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo,lpar
+      common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo,lpar(18)
+      common /coskip/ nskip,iskip
+      save potfil
+#include "common/comdot"
+*  set default values for 2pi-2sigma scattering
+      do 5 i=1,maxpar
+      rpar=0
+5     ispar(i)=0
+      potfil = ' '
+      isicod=0
+      isrcod=0
+      ispar(1)=4
+      if (iread .eq. 0) then
+        niout=4
+        nterm=4
+        indout(1)=-1
+        indout(2)=1
+        indout(3)=-2
+        indout(4)=2
+        ispar(2)=1
+        ispar(3)=1
+        ispar(4)=1
+        ispar(5)=0
+        ispar(6)=1
+        ispar(7)=2
+        ispar(8)=1
+        ispar(12)=3
+        ispar(13)=1
+        ispar(14)=2
+        ispar(18)=3
+        lammin(1)=0
+        lammin(2)=0
+        lammin(3)=1
+        lammin(4)=2
+        lammax(1)=-1
+        lammax(2)=-1
+        lammax(3)=-1
+        lammax(4)=-1
+        mproj(1)=0
+        mproj(2)=0
+        mproj(3)=1
+        mproj(4)=2
+        nvibs=1
+        nvibp=1
+        nskip=1
+      endif
+*  read parameters which determine type
+      scod(1)='NTERM'
+      scod(2)='ISG'
+      scod(3)='IPI'
+      scod(4)='ISGPI'
+      scod(5)='ISA'
+      if(iread.ne.0) read (8, *, err=800) (ispar(isicod+j),j=2,5)
+      nterm=ispar(1)
+      isg=ispar(2)
+      ipi=ispar(3)
+          isgpi=ispar(4)
+      if (isg .eq. 1 .and. ipi .eq. 0) then
+        nterm=1
+        if (isgpi .ne. 0) then
+          write (6, 6) isgpi
+6         format ('  ISGPI SET EQUAL TO 0 BECAUSE ONLY SIGMA STATE')
+          isgpi=0
+          ispar(4)=0
+        endif
+      endif
+      if (isg .eq. 0 .and. ipi .eq. 1) then
+        nterm=2
+        if (isgpi .ne. 0) then
+          write (6, 10) isgpi
+10        format ('  ISGPI SET EQUAL TO 0 BECAUSE ONLY PI STATE')
+          isgpi=0
+          ispar(4)=0
+        endif
+      endif
+      isicod=5
+      if(isg.eq.0.and.ipi.eq.0) then
+        isg=1
+        ipi=1
+      end if
+      ispar(1)=nterm
+      if(isg.ne.0) then
+*  read symmetry parameters for sigma state
+        if(iread.ne.0) read (8, *, err=800) (ispar(isicod+j),j=1,3)
+        scod(isicod+1)='IGUSG'
+        scod(isicod+2)='NPARSG'
+        scod(isicod+3)='ISYMSG'
+        isicod=isicod+3
+*  read number of vib states for sigma state
+        if(iread.ne.0) read (8, *, err=800) nvibs,
+     :      (ispar(isicod+j),j=1,2)
+        if(nvibs.gt.maxvib) stop 'nvibs'
+        nvmins=ispar(isicod+1)
+        nvmaxs=ispar(isicod+2)
+        scod(isicod+1)='VMINSG'
+        scod(isicod+2)='VMAXSG'
+        isicod=isicod+2
+        if(nvibs.le.0) nvibs=1
+*  read data for each vib state
+*  brot, drot, hrot are b, d, h
+*  gs is gamma, gsd is gamma(d), gsh is gamma(h)
+*  evibsg is E (see Kotlar et al., JMS 80, 86 (1980), Table II))
+        do 15 i=1,nvibs
+              if(isicod+2.gt.maxpar) stop 'isicod'
+              if(isrcod+7.gt.maxpar) stop 'isrcod'
+              if(iread.ne.0) then
+            read (8,*,err=800) ivs,(ispar(isicod+j),j=1,2)
+            ivibs(i)=ivs
+            read (8,*,err=800) (rspar(isrcod+j),j=1,3)
+            read (8,*,err=800) (rspar(isrcod+j),j=4,6)
+            read (8,*,err=800) rspar(isrcod+7)
+              end if
+              char=' '
+              if(nvibs.gt.1.or.ivs.ne.0) then
+            if(ivs.le.9) write(char,'(''('',i1,'')'')') ivs
+            if(ivs.gt.9) write(char,'(''('',i2,'')'')') ivs
+              end if
+          scod(isicod+1)='NMIN'//char
+          scod(isicod+2)='NMAX'//char
+          rcod(isrcod+1)='BSG'//char
+          rcod(isrcod+2)='DSG'//char
+          rcod(isrcod+3)='HSG'//char
+          rcod(isrcod+4)='GS'//char
+          rcod(isrcod+5)='GSD'//char
+          rcod(isrcod+6)='GSH'//char
+          rcod(isrcod+7)='ESG'//char
+          isicod=isicod+2
+          isrcod=isrcod+7
+15      continue
+      end if
+      if(ipi.ne.0) then
+*  read symmetry parameters for pi state
+        if(iread.ne.0) read (8, *, err=800) (ispar(isicod+j),j=1,2)
+        scod(isicod+1)='IGUPI'
+        scod(isicod+2)='NPARPI'
+        isicod=isicod+2
+*  read number of vib states for pi state
+        if(iread.ne.0) read (8,*,err=800) nvibp,
+     :           (ispar(isicod+i),i=1,2)
+        if(nvibp.gt.maxvib) stop 'nvibp'
+        nvminp=ispar(isicod+1)
+        nvmaxp=ispar(isicod+2)
+        scod(isicod+1)='VMINPI'
+        scod(isicod+2)='VMAXPI'
+        isicod=isicod+2
+*  read data for each vib state
+        if(nvibp.le.0) nvibp=1
+        do 20 i=1,nvibp
+          if(isicod+3.gt.maxpar) stop 'isicod'
+          if(isrcod+13.gt.maxpar) stop 'isrcod'
+          if(iread.ne.0) then
+            read (8,*,err=800) ivp,(ispar(isicod+j),j=1,2)
+            ivibp(i)=ivp
+            read (8,*,err=800) (rspar(isrcod+j),j=1,3)
+            read (8,*,err=800) (rspar(isrcod+j),j=4,6)
+            read (8,*,err=800) (rspar(isrcod+j),j=7,9)
+            read (8,*,err=800) (rspar(isrcod+j),j=10,12)
+          end if
+          char=' '
+          if(nvibp.gt.1.or.ivp.gt.0) then
+            if(ivp.le.9) write(char,'(''('',i1,'')'')') ivp
+            if(ivp.gt.9) write(char,'(''('',i2,'')'')') ivp
+          end if
+          scod(isicod+1)='JMIN'//char
+          scod(isicod+2)='JMAX'//char
+          scod(isicod+3)='IPT'//char
+          rcod(isrcod+1)='BPI'//char
+          rcod(isrcod+2)='DPI'//char
+          rcod(isrcod+3)='HPI'//char
+          rcod(isrcod+4)='ASO'//char
+          rcod(isrcod+5)='P'//char
+          rcod(isrcod+6)='PD'//char
+          rcod(isrcod+7)='Q'//char
+          rcod(isrcod+8)='QD'//char
+          rcod(isrcod+9)='QH'//char
+          rcod(isrcod+10)='EPI'//char
+          rcod(isrcod+11)='AD'//char
+          rcod(isrcod+12)='GPI'//char
+* check that ad and gpi are not both defined, this would not make any
+* sense, since they correspond to different hamiltonians
+          if (rspar(isrcod+11) .ne. 0.d0 .and.
+     :        rspar(isrcod+12) .ne. 0.d0) then
+            write (6, 16) isrcod+11, rspar(isrcod+11),
+     :                    isrcod+12, rspar(isrcod+12)
+16          format (' *** RSPAR(',i2,') =',1pg12.5,' AND RSPAR(',i2,
+     :              ') =',1pg12.5,' BOTH NOT ZERO; ABORT ***')
+            stop
+          endif
+          if(isgpi.ne.0) then
+            if(iread.ne.0) then
+              read (8,*,err=800) ispar(isicod+3),(rspar(isrcod+j),
+     >                           j=13,14)
+              ivs=ispar(isicod+3)
+            end if
+            if(ivs.le.9.and.ivp.le.9)
+     :        write(char,'(''('',i1,''/'',i1,'')'')') ivs,ivp
+            if(ivs.gt.9.and.ivp.le.9)
+     :        write(char,'(''('',i2,''/'',i1,'')'')') ivs,ivp
+            if(ivs.le.9.and.ivp.gt.9)
+     :        write(char,'(''('',i1,''/'',i2,'')'')') ivs,ivp
+            if(ivs.gt.9.and.ivp.gt.9)
+     :        write(char,'(''('',i2,''/'',i2,'')'')') ivs,ivp
+            rcod(isrcod+13)='A'//char
+            rcod(isrcod+14)='B'//char
+          endif
+          if (isgpi.eq.0 .and.ispar(isicod+3).ne.0) then
+            write (6, 19)
+19          format(' ONLY PI MANIFOLD; IPERT SET TO ZERO')
+            ispar(isicod+3) = 0
+          endif
+          isicod=isicod+3
+          if (isgpi .eq. 0) then
+            isrcod=isrcod+12
+          else if (isgpi .eq. 1) then
+            isrcod=isrcod+14
+          endif
+20      continue
+      end if
+      if(isicod+isrcod.gt.lencod) stop 'lencod'
+      do 30 i=1,isrcod
+30    scod(isicod+i)=rcod(i)
+      nscode = isicod+isrcod
+*  read file name containing potential parameters
+      if(.not.readpt.or.iread.eq.0) then
+        call loapot(1,' ')
+        return
+      endif
+      read (8, 50, end=1000) line
+50    format (a)
+      goto 1000
+* here if read error occurs
+800   write(6,900)
+900   format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+*
+      entry ptrsgpi (fname,readpt)
+      line = fname
+      readpt = .true.
+1000  if (readpt) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,1020)
+1020      format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+          call gennam(potfil,filnam,0,'BIN',lc)
+          filnam = potfil
+        end if
+        potfil=filnam
+        filnm1 = 'potdata/'//filnam
+        inquire(file=filnm1,exist=existf)
+        if(.not.existf) then
+          write(6,1025) filnam(1:lc)
+1025      format(' FILE ',(a),' NOT FOUND')
+          return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+      end if
+* check for consistency
+      close (8)
+      irpot=1
+      ihomo=nskip.eq.2
+      return
+*
+      entry savsgpi (readpt)
+      nterm=ispar(1)
+      isg=ispar(2)
+      ipi=ispar(3)
+      isicod=0
+      isrcod=0
+      write (8, 105) (ispar(isicod+j),j=2,5),'isg, ipi, isgpi, isa'
+      isicod=isicod+5
+      if(isg.ne.0) then
+*  save symmetry parameters for sigma state
+        write (8, 103) (ispar(isicod+j),j=1,3),
+     :          'igusg, nparsg, isymsg'
+        isicod=isicod+3
+*  save number of vib states for sigma state
+        write (8, 103) nvibs,(ispar(isicod+j),j=1,2)
+     :                ,'nvibs, vminsg, vmaxsg'
+        nvmins=ispar(isicod+1)
+        nvmaxs=ispar(isicod+2)
+        isicod=isicod+2
+*  save data for each vib state
+        do 100 i=1,nvibs
+          write (8,103) ivibs(i),(ispar(isicod+j),j=1,2),
+     :                  'ivs,  nmin,  nmax'
+          write (8,203) (rspar(isrcod+j),j=1,3),'bsg, dsg, hsg'
+          write (8,203) (rspar(isrcod+j),j=4,6),'gs, gsd, gsh'
+          write (8,201)  rspar(isrcod+7),'esg'
+          isicod=isicod+2
+          isrcod=isrcod+7
+100     continue
+      end if
+      if(ipi.ne.0) then
+        write (8, 102) (ispar(isicod+j),j=1,2),'igupi, nparpi'
+        isicod=isicod+2
+        write (8,103) nvibp,(ispar(isicod+j),j=1,2),
+     :                'nvibp, vminpi, vmaxpi'
+        nvminp=ispar(isicod+1)
+        nvmaxp=ispar(isicod+2)
+        isicod=isicod+2
+        do 101 i=1,nvibp
+          write (8,103) ivibp(i),(ispar(isicod+j),j=1,2),
+     :           'ivp, jmin, jmax'
+          write (8,203) (rspar(isrcod+j),j=1,3),'bpi, dpi, hpi'
+          write (8,203) (rspar(isrcod+j),j=4,6),'aso, p, pd'
+          write (8,203) (rspar(isrcod+j),j=7,9),'q, qd, qd'
+          write (8,202) (rspar(isrcod+j),j=10,12),'epi, adi, gpi'
+          if(ispar(4).ne.0) then
+            ivs=ispar(isicod+3)
+            write (8,204) ivs,(rspar(isrcod+k),k=13,14),
+     >                    'ipt, a, b'
+            isrcod=isrcod+14
+          else if(ispar(4).eq.0) then
+            isrcod=isrcod+12
+          end if
+          isicod=isicod+3
+101     continue
+      end if
+102   format(2i4,t50,a)
+103   format(3i4,t50,a)
+105   format(4i4,t50,a)
+201   format(g14.6,t50,a)
+202   format(g14.6,2g14.6,t50,a)
+203   format(3g14.6,t50,a)
+204   format(i4,2g14.6,t50,a)
+      write (8, 300) potfil
+300   format(a)
+      return
+      end

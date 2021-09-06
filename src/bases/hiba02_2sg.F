@@ -1,3 +1,5 @@
+* sy2sg (sav2sg/ptr2sg) defines, saves variables and reads          *
+*                  potential for doublet sigma scattering                *
 * --------------------------------------------------------------------
       subroutine ba2sg (j, l, is, jhold, ehold, ishold, nlevel,
      :                  nlevop, nrot, sc2, sc3, sc4, rcut, jtot,
@@ -496,8 +498,8 @@ c65    continue
         if (.not.csflag) then
           if (bastst) write (6, 200)
           write (9,200)
-200       format
-     :     (/'   N   J  EPS   N    L   EINT(CM-1)')
+200       format (
+     :     /'   N   J  EPS   N    L   EINT(CM-1)')
         else
           if (bastst) write (6, 210) xnu
           write (9,210) xnu
@@ -668,3 +670,158 @@ c65    continue
       return
       end
 *  -----------------------------------------------------------------------
+*  -----------------------------------------------------------------------
+      subroutine sy2sg (irpot, readpt, iread)
+#include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
+      implicit double precision (a-h,o-z)
+*  subroutine to read in system dependent parameters for doublet-sigma
+*   + atom scattering
+*  if iread = 1 read data from input file
+*  if iread = 0 return after defining variable names
+*  current revision date: 8-apr-1997 by mha
+*  -----------------------------------------------------------------------
+*  variables in common bloc /cosysr/
+*    isrcod:   total number of real system dependent variables
+*    brot:   rotational constant for 2sigma state in cm-1
+*    gsr:      2sigma state spin-rotation constant in cm-1
+*  variables in common block /cosysi/
+*    nscode:   total number of system dependent variables
+*    isicod:   total number of integer system dependent variables
+*    nterm:    number of different diabatic potentials, this is 1 here
+*    nrmax:    the maximum case (b) rotational angular momenta
+*    npar:     number of symmetry doublets included (npar=2 will ensure
+*              both spin doublets)
+*    isym:     if isym=+1, then the electronic symmetry is sigma-plus
+*              if isym=-1, then the electronic symmetry is sigma-minus
+*    igu:      if igu=+1, then the inversion symmetry is gerade
+*              if igu=-1, then the inversion symmetry is ungerade
+*    isa:      s/a symmetry index, if the molecule is homonuclear (ihomo=t)
+*              then, if isa=+1 then only the s-levels are included in the
+*              basis, if isa=-1, then only the a-levels are included
+*    interp:   parameter to control spline interpolation in subroutine pot;
+*              this should always be set equal to 1 for the first calculation
+*  variable in common /cosys/
+*    scod:    character*8 array of dimension nscode, which contains names
+*             of all system dependent parameters.  note that the ordering
+*             of the variable names in scod must correspond to the ordering
+*             of the variable names in cosysi followed by the ordering of
+*             variable names in cosysr followed by lammin, lammax, and mproj
+* ------------------------------------------------------------------------
+      logical readpt,existf
+      character*8 scod
+      character*(*) fname
+      character*60 line,filnam,potfil, filnm1
+#include "common/parsys"
+#include "common/parbas"
+      common /cosys/ scod(lencod)
+      common /cosysi/ nscode, isicod, nterm, nrmax, npar, isym, igu,
+     :                isa
+      common /cosysr/ isrcod, junkr, brot, gsr, drot, hrot
+      logical         airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo,lpar
+      common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo,lpar(18)
+      common /coskip/ nskip,iskip
+      character*1 dot
+      save potfil
+#include "common/comdot"
+      irpot = 1
+*     number and names of system dependent parameters
+      isicod = 6
+      isrcod = 4
+      nscode = isicod+isrcod
+*  first all the system dependent integer variables
+*  in the same order as in the common block /cosysi/
+*  variable names must be in uppercase of maximum length 6 characters
+      scod(1) = 'NTERM'
+      scod(2) = 'NRMAX'
+      scod(3) = 'NPAR'
+      scod(4) = 'ISYM'
+      scod(5) = 'IGU'
+      scod(6) = 'ISA'
+*  then all the system dependent real variables
+*  in the same order as in the common block /cosysr/
+      scod(7) = 'BROT'
+      scod(8) = 'GSR'
+      scod(9) = 'DROT'
+      scod(10) = 'HROT'
+*  set default values for doublet-sigma scattering
+      potfil=' '
+      nterm = 1
+      if (iread .eq. 0) then
+        nrmax = 3
+        mproj(1) = 0
+        lammin(1)= 1
+        lammax(1) = -1
+        isa=0
+        isym=1
+        npar=2
+        niout=2
+        indout(1)=-1
+        indout(2)=1
+      endif
+      if(iread.eq.0) return
+*  line 13
+      read (8, *,err=888) nrmax, npar, isym, igu, isa
+*  line 14
+      read (8, *,err=888) brot, gsr, drot, hrot
+*  line 16 name of file containing potential parameters
+      line=' '
+      if(.not.readpt.or.iread.eq.0) then
+        call loapot(1,' ')
+        return
+      endif
+      read (8, 285, end=286) line
+      potfil=line
+285   format (a)
+      goto 286
+* here if read error occurs
+888   write(6,1000)
+1000  format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+*
+      entry ptr2sg (fname,readpt)
+      line = fname
+      readpt = .true.
+286   if (readpt) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,1020)
+1020      format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+           call gennam(potfil,filnam,0,'BIN',lc)
+           filnam = potfil
+        end if
+        potfil=filnam
+        filnm1 = 'potdata/'//filnam
+        inquire(file=filnm1,exist=existf)
+        if(.not.existf) then
+          write(6,1025) filnam(1:lc)
+1025      format(' FILE ',(a),' NOT FOUND')
+          return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+      end if
+      close (8)
+      if(nskip.eq.2) ihomo=.true.
+      nlam=0
+      nlam=nlam+(lammax(1)-lammin(1))/nskip+1
+      irpot=1
+      return
+*
+      entry sav2sg (readpt)
+*  save input parameters for doublet-sigma + atom scattering
+*  line 13:
+      write (8, 220) nrmax, npar, isym, igu, isa
+220   format (5i4, t50, 'nrmax, npar, isym, igu, isa')
+      write (8, 320) brot, gsr, drot, hrot
+320   format (f12.6,3g12.4,t50,'brot, gsr, drot, hrot')
+      write (8,330) potfil
+330   format(a)
+      return
+      end

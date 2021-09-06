@@ -1,3 +1,5 @@
+* sy22p (sav22p/ptr22p) defines, save variables and reads                *
+*                  potential for 2S / 2P atom scattering                 *
 * --------------------------------------------------
       subroutine ba22p (j, l, is, jhold, ehold, ishold, nlevel, nlevop,
      :                  isc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu,
@@ -716,5 +718,173 @@
       fact=aso/econv
       call dscal(6,fact,eint,1)
 
+      return
+      end
+* -----------------------------------------------------------------------
+      subroutine sy22p (irpot, readp, iread)
+*  subroutine to read in system dependent parameters for collisions of
+* atom in doublet S state with atom in doublet P state
+*  if iread = 1 read data from input file
+*  if iread = 0 return after defining variable names
+*  current revision date: 14-mar-1997 by mha
+*  -----------------------------------------------------------------------
+*  variables in common /cosysr/
+*    isrcod:  number of real parameters
+*    aso:     spin-orbit constant in 2P atom (cm-1)
+*  variable in common /cosysi/
+*    nscode:  total number of system dependent parameters
+*             nscode = isicod + isrcod +3
+*    isicod:  number of integer system dependent parameters
+*    nterm:    number of different electronic coupling terms
+*              this should be 1 here
+*    nphoto:  this should be 1 here
+*    nvib:    vibrational quantum number of initial state (0-6)
+*  variable in common /cosys/
+*    scod:    character*8 array of dimension lcode, which contains names
+*             of all system dependent parameters
+*  line 16:
+*    filnam:  name of file containing potential parameters
+*
+*  subroutines called: loapot(iunit,filnam)
+*  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
+      implicit double precision (a-h,o-z)
+#include "common/parsys"
+      integer irpot
+      logical readp
+      logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
+     :        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf,
+     :        csflag, flagsu, rsflag, t2test, existf, logdfl, batch,
+     :        readpt, ihomo, bastst, twomol,lpar
+      character*1 dot
+      character*8 scod
+      character*(*) fname
+      character*60 filnam, line, potfil, filnm1
+      common /cosys/ scod(lencod)
+      common /cosysi/ nscode,isicod,iscod(maxpar)
+      common /coipar/ jtot1,jtot2,jtotd,jlpar
+      common /cosysr/ isrcod, junkr, rcod(maxpar)
+#include "common/parbas"
+      common /coskip/ nskip,iskip
+      common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo, ipos, logdfl, logwr,
+     :                noprin, partw, readpt, rsflag, swrit,
+     :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
+     :                xsecwr,lpar(3)
+#include "common/comdot"
+      save potfil
+*  number and names of system dependent parameters
+*  first all the system dependent integer variables
+*  in the same order as in the common block /cosysi/
+*  variable names must be in uppercase of maximum length 6 characters
+      isicod = 4
+      scod(1) = 'NTERM'
+      scod(2) = 'NPHOTO'
+      scod(3) = 'NVIB'
+      scod(4) = 'IBRAN'
+*  then all the system dependent real variables
+*  in the same order as in the common block /cosysr/
+      isrcod = 1
+      scod(5) = 'A-SO'
+      nscode = isicod + isrcod
+*  set default values for 2S + 2P atom scattering
+      nterm = 1
+      iscod(1)=1
+      iscod(2)=1
+      iscod(3)=0
+      iscod(4)=0
+      lammin(1)= 1
+      lammax(1) = 13
+      rcod(1)=881.
+      mproj(1)=0
+      niout=2
+      indout(1)=0
+      indout(2)=1
+      potfil = ' '
+      if(iread.eq.0) return
+      read (8, *, err=888) nphoto, nvib, ibran, aso
+      iscod(2)=nphoto
+      iscod(3)=nvib
+      iscod(4)=ibran
+      if (nvib .gt. 6) then
+        write (6, 280) nvib
+280     format ('*** NVIB = ',i2, '; SHOULD BE 0-6')
+        go to 888
+      endif
+      if (iabs(ibran) .gt. 1) then
+        write (6, 281) ibran
+281     format ('*** IBRAN = ',i2, '; SHOULD BE -1, 0, or 1')
+        go to 888
+      endif
+      if (jlpar .eq. -1) then
+        if (ibran .eq. 0) then
+          write (6, 282) jlpar, ibran
+282       format ('*** JLPAR = ',i2, '; IBRAN = ', i2,
+     :            'Q-BRANCH NOT ALLOWED')
+          goto 888
+        endif
+      else
+        if (ibran .ne. 0) then
+          write (6, 283) jlpar, ibran
+283       format ('*** JLPAR = ',i2, '; IBRAN = ', i2,
+     :            'P,R-BRANCH NOT ALLOWED')
+          goto 888
+        endif
+      endif
+      print *, ibran, jlpar
+      rcod(1)=aso
+      line=' '
+      if(.not.readp.or.iread.eq.0) then
+        call loapot(1,' ')
+        return
+      endif
+      read (8, 285, end=286) line
+285   format (a)
+      goto 286
+* here if read error occurs
+888   write(6,1000)
+1000  format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+* --------------------------------------------------------------
+      entry ptr22p (fname,readp)
+      line = fname
+      readp = .true.
+286   if (readp) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,1020)
+1020      format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+           call gennam(potfil,filnam,0,'BIN',lc)
+           filnam = potfil
+        end if
+        potfil=filnam
+        filnm1 = 'potdata/'//filnam
+        inquire(file=filnm1,exist=existf)
+        if(.not.existf) then
+          write(6,1025) filnam(1:lc)
+1025      format(' FILE ',(a),' NOT FOUND')
+          return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+      end if
+      close (8)
+      irpot=1
+      return
+*
+      entry sav22p (readp)
+*  save input parameters for singlet-sigma + atom scattering
+      nphoto=iscod(2)
+      nvib=iscod(3)
+      ibran=iscod(4)
+      aso=rcod(1)
+      write (8, 300) nphoto, nvib, ibran, aso
+300   format(i4,2(2x,i4),1pg12.5,3x,'  nphoto, nvib, ibran, a-so')
+      write (8, 285) potfil
       return
       end

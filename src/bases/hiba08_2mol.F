@@ -1,3 +1,5 @@
+* sy2mol (sav2mol/ptr2mol) defines, save variables and reads             *
+*                  potential for 2 singlet sigma molecule scattering     *
       subroutine ba2mol (j, l, is, jhold, ehold, ishold, nlevel, nlevop,
      :                  j1, j2, j12, sc4, rcut, jtot, flaghf, flagsu,
      :                  csflag, clist, bastst, ihomo, nu, numin, jlpar,
@@ -486,5 +488,177 @@ c expansion of the 9j symbol.
       sum=sum+(2*k+1)*b2*b3*b4
 10    continue
       f2mol=sum*b1*factor
+      return
+      end
+* --------------------------------------------------------------
+      subroutine sy2mol (irpot, readpt, iread)
+*  subroutine to read in system dependent parameters for hf-hf collisions
+*  if iread = 1 read data from input file
+*  if iread = 0 return after defining variable names
+*  authors:  millard alexander and peter vohralik
+*  current revision date: 19-aug-1991
+*  -----------------------------------------------------------------------
+*  variables in common block /cotwo/
+*    numj:     number of j1-j2 values
+*    nj1j2:    specific j1-j2 values (up to a maximum of 50)
+*              N.B. this dimension is set in hiba2mol
+*  variables in common block /cosysr/
+*    isrcod:   number of real system dependent variables
+*    brot:     rotational constant in cm-1
+*    drot:     centrifugal distortion constant in cm-1
+*    hrot:     next centrifugal distortion constant in cm-1
+*  variables in common block /cosysi/
+*    nscode:   total number of system dependent variables
+*              nscode = isicod + isrcod
+*    isicod:   numbr of integer system dependent variables
+*    nterm:    number of different lambda terms included in potential
+*              see below
+*    nsym:     interchange symmetry of included channels
+*  variable in module mod_conlam
+*    nlam:     the total number of angular coupling terms
+*              nlam is set equal to nterm; see above
+*     nterm = 1, include lam1=1  lam2=1  lam=2   dipole-dipole
+*     nterm = 2, include dipole-dipole and
+*                dipole-quadrupole (lam1=1  lam2=2  lam=3)
+*     nterm = 3, include dipole-dipole, dipole-quadrupole, and
+*                short-range term (lam1=0  lam2=1  lam=1)
+*  line 13:
+*    nterm:    total number of anistropic terms in potential
+*  line 14:
+*    brot, drot, hrot:    rotational constants of the molecule in cm-1
+*  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
+      implicit double precision (a-h,o-z)
+#include "common/parsys"
+      logical readpt, existf
+      integer irpot
+      character*1 dot
+      character*8 scod
+      character*(*) fname
+      character*60 filnam, line, potfil, filnm1
+      common /cosys/ scod(lencod)
+      common /cosysi/ nscode, isicod, nterm, nsym
+      common /cosysr/ isrcod, junkr, brot, drot, hrot
+      common /cotwo/ numj,nj1j2(3)
+      save potfil
+#include "common/comdot"
+      nscode = lencod
+*     number and names of system dependent parameters
+      isicod = 2
+      isrcod = 3
+      nscode=isicod+isrcod
+      scod(1) = 'NTERM'
+      scod(2) = 'NSYM'
+      scod(3) = 'BROT'
+      scod(4) = 'DROT'
+      scod(5) = 'HROT'
+*  set default values for hf-hf collisions
+      nterm = 1
+      nsym = 1
+      numj = 3
+      brot =  20.559741
+      drot = 2.1204498e-3
+      hrot = 0.168e-6
+      nj1j2(1) = 00
+      nj1j2(2) = 11
+      nj1j2(3) = 02
+      if(iread.eq.0) return
+*  line 1
+      iline=1
+      read (8, *, err=888) nterm, nsym, numj
+      nlam = nterm
+      if (numj .le. 0) then
+        write (6, 80) numj
+80      format(' ** NUMJ = ',i3,'; .LE. O IN SY2MOL; ABORT')
+        call exit
+      endif
+*  line 2
+      iline=2
+      read (8, *, err=888) brot, drot, hrot
+      if (numj .le. 20) then
+        iline=3
+        read (8, *, err=888) (nj1j2(i), i=1,numj)
+      else
+        ilow=1
+        ihigh=20
+        do  100 ij = 1, numj, 20
+          iline=iline+1
+          itop=min(ihigh,numj)
+          read (8, *, err=888) (nj1j2(i), i=ilow,itop)
+          ilow=itop+1
+          ihigh=ihigh+20
+100     continue
+      endif
+*  line 15 name of file containing potential parameters
+      iline=iline+1
+      line=' '
+      if(.not.readpt.or.iread.eq.0) then
+        call loapot(1,' ')
+        return
+      endif
+      read (8, 285, end=286) line
+285   format (a)
+      goto 286
+* here if read error occurs
+888   write(6,1000) iline
+1000  format(/'   *** ERROR DURING READ OF SY2MOL INPUT; LINE: ',i2)
+      return
+*
+      entry ptr2mol (fname,readpt)
+      line = fname
+      readpt = .true.
+286   if (readpt) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,1020)
+1020      format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+          call gennam(potfil,filnam,0,'BIN',lc)
+          filnam = potfil
+        end if
+        potfil=filnam
+        filnm1 = 'potdata/'//filnam
+        inquire(file=filnm1,exist=existf)
+        if(.not.existf) then
+          write(6,1025) filnam(1:lc)
+1025      format(' FILE ',(a),' NOT FOUND')
+          return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+        end if
+      close (8)
+      irpot=1
+      return
+*
+      entry sav2mol (readpt)
+*  save input parameters for hf-hf scattering
+*  line 13:
+      write (8, 300) nterm, nsym,numj
+300   format (3i4,18x,'   nterm, nsym, numj')
+*  line 14
+      write (8, 320) brot, drot, hrot
+320   format(f8.4, 2g11.4, '   brot, drot, hrot')
+*  line 15
+      if (numj .le. 20) then
+        iline=3
+        write (8, 330) (nj1j2(i)/10,mod(nj1j2(i),10), i=1,numj)
+330   format (1x,20(2i1,'  '),t65,'nj1j2')
+      else
+        ilow=1
+        ihigh=20
+        do  350 ij = 1, numj, 20
+          iline=iline+1
+          itop=min(ihigh,numj)
+          write (8, 330) (nj1j2(i)/10,mod(nj1j2(i),10),
+     :                    i=ilow,itop)
+          ilow=itop+1
+          ihigh=ihigh+20
+350     continue
+      endif
       return
       end

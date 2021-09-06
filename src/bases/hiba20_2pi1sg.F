@@ -1,3 +1,5 @@
+* sy2pi1sg (sav2pi1sg/ptr2pi1sg) defines, saves variables and            *
+*                  reads potential for doublet pi-singlet sigma* system  *
 c     Basis subroutine for the collision of a doublet-Pi molecule with
 c     a singlet-Sigma molecule.
 c
@@ -410,3 +412,65 @@ c
       return
       end
 c     ------------------------------------------------------------------
+*  ---------------------------------------------------------------------
+      subroutine sy2pi1sg(irpot, readpt, iread)
+      implicit none
+      integer irpot, iread
+      logical readpt
+      character*(*) fname
+c     NUMBER OF BASIS-SPECIFIC VARIABLES, MODIFY ACCORDINGLY.
+      integer icod, ircod, lencod
+      parameter (icod=5, ircod=5, lencod=icod+ircod)
+      common /cosys/ scod(lencod)
+      character*8 scod
+c     INTEGER VARIABLES.  LEAVE THE FIRST TWO AS IT IS.
+      common /cosysi/ nscode, isicod, j1max, npar, j2min, j2max, iptsy2
+      integer nscode, isicod, j1max, npar, j2min, j2max, iptsy2
+c     REAL VARIABLES.  LEAVE THE FIRST TWO AS IT IS.
+      common /cosysr/ isrcod, junkr, brot, aso, p, q, drot
+      integer isrcod, junkr
+      double precision brot, aso, p, q, drot
+      character*40 potfil
+      save potfil
+c     DEFINE THE NAMES HERE
+      scod(1)='J1MAX'
+      scod(2)='NPAR'
+      scod(3)='J2MIN'
+      scod(4)='J2MAX'
+      scod(5)='IPTSY2'
+      scod(6)='BROT'
+      scod(7)='ASO'
+      scod(8)='P'
+      scod(9)='Q'
+      scod(10)='DROT'
+      nscode = lencod
+      isicod = icod
+      isrcod = ircod
+c     KEEP THE FOLLOWING LINE
+      if (iread .eq. 0) return
+c     READ THE LAST FEW LINES OF THE INPUT FILE
+      read (8, *, err=80) j1max, npar
+      read (8, *, err=80) j2min, j2max, iptsy2
+      read (8, *, err=80) brot, aso, p, q
+      read (8, *, err=80) drot
+      read (8, *, err=80) potfil
+      call loapot(10, potfil)
+      close (8)
+      return
+ 80   call raise_2pi1sg('ERROR READING FROM INPUT FILE.')
+      return
+      entry ptr2pi1sg(fname, readpt)
+      return
+      entry sav2pi1sg(readpt)
+c     WRITE THE LAST FEW LINES OF THE INPUT FILE.
+      write (8, 230) j1max, npar
+ 230  format (2i4, 22x, '   j1max, npar')
+      write (8,231) j2min, j2max, iptsy2
+ 231  format (3i4, 18x,'   j2min, j2max, iptsy2')
+      write (8, 250) brot, aso, p, q
+ 250  format (4(f10.4, 1x), 'brot, aso, p, q' )
+      write (8, 251) drot
+ 251  format (f12.6, 18x,'   drot')
+      write (8, *) potfil
+      return
+      end

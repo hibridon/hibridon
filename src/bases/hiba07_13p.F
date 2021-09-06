@@ -1,3 +1,5 @@
+* sy13p (sav13p/ptr13p) defines, save variables and reads                *
+*                  potential for 1S / 3P atom scattering                 *
 * --------------------------------------------------
       subroutine ba13p (j, l, is, jhold, ehold, ishold, nlevel, nlevop,
      :                  sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu,
@@ -609,5 +611,201 @@
 *      call mxoutd(94, tatoe, 6,6,0,.false.)
 *      call mxoutd(94, ttrans, 6,6,0,.false.)
 *      call exit
+      return
+      end
+* -----------------------------------------------------------------------
+      subroutine sy13p (irpot, readp, iread)
+*  subroutine to read in system dependent parameters for collisions of
+* atom in singlet and/or triplet P electronic state with closed shell atom
+*  if iread = 1 read data from input file
+*  if iread = 0 return after defining variable names
+*  current revision date: 17-jun-1992 by mha
+*  -----------------------------------------------------------------------
+*  variables in common /cosysr/
+*    isrcod:  number of real parameters
+*    en(1):    asymptotic energy of j=0 fine-structure level of triplet
+*    en(2):    asymptotic energy of j=1 fine-structure level of triplet
+*    en(3):    asymptotic energy of j=2 fine-structure level of triplet
+*    en(4):    asymptotic energy of singlet state (cm-1)
+*    cmix:     mixing coefficient of J=1 singlet and triplet levels
+*    de, re, be, rl, c:  msv parameters for 3Pi, 3Sig, 1Pi, 1Sig
+*  variable in common /cosysi/
+*    nscode:  total number of system dependent parameters
+*             nscode = isicod + isrcod +3
+*    isicod:  number of integer system dependent parameters
+*    nterm:    number of different electronic coupling terms
+*              this should be 1 here
+*    nstate:   number of electronic states included
+*              nstate=0:   just singlet state
+*              nstate=1:   just triplet state
+*              nstate=2:   both singlet and triplet state
+*  variable in common /cosys/
+*    scod:    character*8 array of dimension lcode, which contains names
+*             of all system dependent parameters
+*  line 16:
+*    filnam:  name of file containing potential parameters
+*
+*  subroutines called: loapot(iunit,filnam)
+*  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
+      implicit double precision (a-h,o-z)
+#include "common/parsys"
+      integer irpot
+      logical readp
+      logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
+     :        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf,
+     :        csflag, flagsu, rsflag, t2test, existf, logdfl, batch,
+     :        readpt, ihomo, bastst, twomol, lpar
+
+      character*1 dot
+      character*8 scod
+      character*(*) fname
+      character*60 filnam, line, potfil, filnm1
+      common /cosys/ scod(lencod)
+      common /cosysi/ nscode, isicod, nterm, nstate, ipol, npot
+      common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4),
+     :                        rl(4), cl(4), cmix, alphg, rgaus,
+     :                        agaus, demor, remor, bemor,dissmor
+#include "common/parbas"
+      common /coskip/ nskip,iskip
+      common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo, ipos, logdfl, logwr,
+     :                noprin, partw, readpt, rsflag, swrit,
+     :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
+     :                xsecwr,lpar(3)
+#include "common/comdot"
+      save potfil
+*  number and names of system dependent parameters
+*  first all the system dependent integer variables
+*  in the same order as in the common block /cosysi/
+*  variable names must be in uppercase of maximum length 6 characters
+      isicod = 4
+      scod(1) = 'NTERM'
+      scod(2) = 'NSTATE'
+      scod(3) = 'IPOL'
+      scod(4) = 'NPOT'
+*  then all the system dependent real variables
+*  in the same order as in the common block /cosysr/
+      isrcod = 32
+      scod(5) = 'E-3P0'
+      scod(6) = 'E-3P1'
+      scod(7) = 'E-3P2'
+      scod(8) = 'E-1P1'
+      scod(9) = 'DE(3PI)'
+      scod(10) = 'DE(3SG)'
+      scod(11) = 'DE(1PI)'
+      scod(12) = 'DE(1SG)'
+      scod(13) = 'RE(3PI)'
+      scod(14) = 'RE(3SG)'
+      scod(15) = 'RE(1PI)'
+      scod(16) = 'RE(1SG)'
+      scod(17) = 'BE(3PI)'
+      scod(18) = 'BE(3SG)'
+      scod(19) = 'BE(1PI)'
+      scod(20) = 'BE(1SG)'
+      scod(21) = 'RL(3PI)'
+      scod(22) = 'RL(3SG)'
+      scod(23) = 'RL(1PI)'
+      scod(24) = 'RL(1SG)'
+      scod(25) = 'C(3PI)'
+      scod(26) = 'C(3SG)'
+      scod(27) = 'C(1PI)'
+      scod(28) = 'C(1SG)'
+      scod(29) = 'CMIX'
+      scod(30) = 'ALPHG'
+      scod(31) = 'RGAUS'
+      scod(32) = 'AGAUS'
+      scod(33) = 'DEMOR'
+      scod(34) = 'REMOR'
+      scod(35) = 'BEMOR'
+      scod(36) = 'DISSMOR'
+      nscode = isicod + isrcod
+*  set default values for 1/3 P atom scattering
+      nterm = 1
+      nstate = 2
+      ipol=1
+      lammin(1)= 1
+      lammax(1) = 4
+      mproj(1)=0
+      niout=2
+      indout(1)=0
+      indout(2)=1
+      potfil = ' '
+      if(iread.eq.0) return
+      read (8, *, err=888) nstate, ipol, npot
+      read (8, *, err=888) (en(i), i=1,3)
+      read (8, *, err=888) en(4), cmix
+      read (8, *, err=888)  de(1), re(1), be(1), rl(1), cl(1)
+      read (8, *, err=888)  de(2), re(2), be(2), rl(2), cl(2)
+      read (8, *, err=888)  de(3), re(3), be(3), rl(3), cl(3)
+      read (8, *, err=888)  de(4), re(4), be(4), rl(4), cl(4)
+      read (8, *, err=888)  demor, remor, bemor, dissmor
+      read (8, *, err=888)  rgaus, agaus, alphg
+      rms=0.d0
+      line=' '
+      if(.not.readp.or.iread.eq.0) then
+        call loapot(1,' ')
+        return
+      endif
+      read (8, 285, end=286) line
+285   format (a)
+      goto 286
+* here if read error occurs
+888   write(6,1000)
+1000  format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+* --------------------------------------------------------------
+      entry ptr13p (fname,readp)
+      line = fname
+      readp = .true.
+286   if (readp) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,1020)
+1020      format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+           call gennam(potfil,filnam,0,'BIN',lc)
+           filnam = potfil
+        end if
+        potfil=filnam
+        filnm1 = 'potdata/'//filnam
+        inquire(file=filnm1,exist=existf)
+        if(.not.existf) then
+          write(6,1025) filnam(1:lc)
+1025      format(' FILE ',(a),' NOT FOUND')
+          return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+      end if
+      close (8)
+      irpot=1
+      return
+*
+      entry sav13p (readp)
+*  save input parameters for singlet-sigma + atom scattering
+      write (8, 300) nstate, ipol, npot
+300   format(3i4, 18x,'   nstate, ipol, npot')
+      write (8, 310) (en(i), i=1,3)
+310   format(3(1pg12.4),4x,'   E-3P0, 3P1, 3P2')
+      write (8, 315) en(4), cmix
+315   format (2(1pg12.4),16x,'   E-1P1, CMIX')
+      write (8, 320) de(1), re(1), be(1), rl(1), cl(1)
+320   format (5(1pg12.4),' 3 Pi Parameters')
+      write (8, 325) de(2), re(2), be(2), rl(2), cl(2)
+325   format (5(1pg12.4),' 3 Sig Parameters')
+      write (8, 330) de(3), re(3), be(3), rl(3), cl(3)
+330   format (5(1pg12.4),' 1 Pi Parameters')
+      write (8, 335) de(4), re(4), be(4), rl(4), cl(4)
+335   format (5(1pg12.4),' 1 Sig Parameters')
+      write (8, 336) demor, remor, bemor, dissmor
+336   format(4(1pg12.4),12x,' 1 Sigma Morse')
+      write (8, 337) rgaus, agaus, alphg
+337   format (3(1pg12.4),24x,' Gaussian Coupling')
+      write (8, 285) potfil
       return
       end

@@ -1,3 +1,5 @@
+* sy1sg (sav1sg/ptr1sg) defines, saves variables and reads              *
+*                  potential for singlet sigma scattering               *
 *************************************************************************
 *                                                                       *
 *                            basis  library                             *
@@ -55,7 +57,7 @@
 *    22             ba1d3p            1D/3P atom + closed-shell atom
 *    23             ba3p2s            3P atom + 2S atom
 *    24             basphtp           spherical top + atom scattering
-*    25             ba1s1sg           1sigma + 1sigma (different molecules)
+*    25             ba1sg1sg           1sigma + 1sigma (different molecules)
 *    26             ba2sg1sg          2sigma + 1sigma molecules
 *    27             baastp1           C2v asymmetric top scattering, w body-frame
 *                                     quant axis along C2 axis (compatible w MOLSCAT)
@@ -296,13 +298,13 @@ c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
      :     nu, numin, jlpar, n, nmax, ntop)
       return
 *   1sigma + 1sigma basis (different molecules)
- 2500 call ba1s1sg (j, l, is, jhold, ehold, ishold, nlevel,
+ 2500 call ba1sg1sg (j, l, is, jhold, ehold, ishold, nlevel,
      :     nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
      :     flaghf, flagsu, csflag, clist, bastst, ihomo,
      :     nu, numin, jlpar, n, nmax, ntop)
       return
 *   2sigma + 1sigma basis
- 2600 call ba2s1sg (j, l, is, jhold, ehold, ishold, nlevel,
+ 2600 call ba2sg1sg (j, l, is, jhold, ehold, ishold, nlevel,
      :     nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
      :     flaghf, flagsu, csflag, clist, bastst, ihomo,
      :     nu, numin, jlpar, n, nmax, ntop)
@@ -314,7 +316,7 @@ c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
      :     nu, numin, jlpar, n, nmax, ntop)
       return
 *   3sigma + 1sigma basis
- 2800 call ba3s1sg (j, l, is, jhold, ehold, ishold, nlevel,
+ 2800 call ba3sg1sg (j, l, is, jhold, ehold, ishold, nlevel,
      :     nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
      :     flaghf, flagsu, csflag, clist, bastst, ihomo,
      :     nu, numin, jlpar, n, nmax, ntop)
@@ -537,8 +539,8 @@ c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
           if (jmin.lt.nu) then
              write(6, 7) jmin, nu
              write(9, 7) jmin, nu
-7            format
-     +    (/' JMIN = ',i2,', .LT. NU = ',i2,' IN BASIS; JMIN RESET')
+7            format(/
+     +    ' JMIN = ',i2,', .LT. NU = ',i2,' IN BASIS; JMIN RESET')
              jmin=nu
           endif
       endif
@@ -887,6 +889,194 @@ c    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
       end if
       return
       end
+*  -----------------------------------------------------------------------
+      subroutine sy1sg (irpot, readp, iread)
+*  subroutine to read in system dependent parameters for singlet-sigma
+*   + atom scattering using werner-follmeg potential form
+*  if iread = 1 read data from input file
+*  if iread = 0 return after defining variable names
+*  current revision date: 10-mar-1994 by mha
+*  -----------------------------------------------------------------------
+*  variables in common /cosysr/
+*    isrcod:  number of real parameters
+*    brot, drot, hrot
+*  variable in common /cosysi/
+*    nscode:  total number of system dependent parameters
+*             nscode = isicod + isrcod + 3
+*    isicod:  number of integer system dependent parameters
+*    nterm:   number of different angular terms in potential
+*              nb for singlet sigma molecule, nterm should be 1
+*    jmin, jmax (see below)
+*  variable in common /cosys/
+*    scod:    character*8 array of dimension lcode, which contains names
+*             of all system dependent parameters
+*  line 13:
+*    nlam:     total number of anistropic terms in potential
+*    jmin:     minimum molecular rotational angular momenta included in
+*              the channel basis
+*    jmax      maximum molecular rotational angular momenta inncluded in
+*              the channel basis
+*  line 14:
+*    brot:    rotational constant of the molecule in cm-1
+*  line 16:
+*    filnam:  name of file containing potential parameters
+*
+*  subroutines called: loapot(iunit,filnam)
+*  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
+      implicit double precision (a-h,o-z)
+      integer irpot
+      logical readp, existf
+      logical airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo,lpar
+      character*1 dot
+      character*4 char
+      character*8 scod
+      character*(*) fname
+      character*60 filnam, line, potfil, filnm1
+#include "common/parsys"
+      common /cosys/ scod(lencod)
+      common /cosysi/ nscode,isicod,iscod(maxpar)
+      common /cosysr/ isrcod, junkr, rcod(maxpar)
+#include "common/parbas"
+      common/covib/ nvib,ivib(maxvib)
+      common /coskip/ nskip,iskip
+      common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo,lpar(18)
+
+      common /coselb/ ibasty
+      save potfil
+      equivalence(iscod(1),nterm),(iscod(2),nvibmn),(iscod(3),nvibmx)
+#include "common/comdot"
+*     number and names of system dependent parameters
+*  set default values for singlet-sigma scattering
+      nterm = 1
+      if (iread .eq. 0) then
+        nvibmn = 0
+        nvibmx = 0
+        lammin(1)=0
+        lammax(1)=-1
+        mproj(1)=0
+        niout=1
+        indout(1)=0
+        nvib = 1
+      endif
+      if (.not.readp)irpot=1
+      if (iread .eq. 1) irpot=1
+      if (ihomo) nskip = 2
+      potfil = ' '
+*  read number of vib states
+      if(iread.ne.0) read (8, *, err=88) nvib, nvibmn,nvibmx
+      if(nvib.gt.nvibmx-nvibmn+1) then
+        write (6,40) nvib, nvibmn, nvibmx
+40      format(' ** PROBABLE VIBRATIONAL LEVEL NUMBERING ERROR:',/,
+     :         '   VMIN =',i2,', VMAX=',i3,', BUT NVIB =',i3)
+        return
+      endif
+      if(nvib.gt.maxvib) stop 'nvib'
+      if(nvib.le.0) nvib=1
+*  read data for each vib state
+*  brot, drot, hrot are bv, dv, hv (see huber herzberg, page x)
+      scod(1)='NTERM'
+      scod(2)='VMIN'
+      scod(3)='VMAX'
+      isrcod=0
+      isicod=3
+      iofr=2*nvib+4-1
+      do  71   i = 1,nvib
+      if(iread.ne.0) then
+        read (8, *, err=99) ivib(i),(iscod(isicod+j),j=1,2)
+        read (8, *, err=99) (rcod(isrcod+j),j=1,3)
+        read (8, *, err=99) rcod(isrcod+4)
+        end if
+        char=' '
+        if(nvib.gt.1.or.ivib(i).ne.0) then
+        if(ivib(i).le.9) write(char,'(''('',i1,'')'')') ivib(i)
+        if(ivib(i).gt.9) write(char,'(''('',i2,'')'')') ivib(i)
+        end if
+      scod(isicod+1)='JMIN'//char
+      scod(isicod+2)='JMAX'//char
+      scod(iofr+1)='BROT'//char
+      scod(iofr+2)='DROT'//char
+      scod(iofr+3)='HROT'//char
+      scod(iofr+4)='EVIB'//char
+      iofr=iofr+4
+      isicod=isicod+2
+71    isrcod=isrcod+4
+      if(isicod+isrcod+3.gt.lencod) stop 'lencod'
+      nscode=isicod+isrcod
+      line=' '
+      if(.not.readp.or.iread.eq.0) then
+        call loapot(1,' ')
+        close (8)
+        return
+      endif
+      read (8, 85, end=186) line
+85    format (a)
+      goto 186
+* here if read error occurs
+88    write(6,89)
+89    format(/' *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+99    write (6, 100) i
+100   format(/' ** ERROR DURING READ:',
+     :  ' PROBABLY NOT ENOUGH VIBRATIONAL LEVELS SUPPLIED')
+      return
+* --------------------------------------------------------------
+      entry ptr1sg (fname,readp)
+      line = fname
+      readp = .true.
+186   if (readp) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,190)
+190       format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+          call gennam(potfil,filnam,0,'BIN',lc)
+          filnam = potfil
+        end if
+        potfil=filnam
+        filnm1 = 'potdata/'//filnam
+        inquire(file=filnm1,exist=existf)
+        if(.not.existf) then
+          write(6,195) filnam(1:lc)
+195       format(' FILE ',(a),' NOT FOUND')
+          return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+      end if
+*      close (8)
+      irpot=1
+      return
+* --------------------------------------------------------------
+      entry sav1sg (readp)
+*  save input parameters for singlet-sigma + atom scattering
+      if (nvibmx .lt. nvibmn) then
+        write (6, 210) nvibmx, nvibmn
+210     format ('**  VMAX =',i3,' .LT. VMIN =',i3,' SET VMAX = VMIN')
+        nvibmx=nvibmn
+      endif
+      write (8, 220) nvib, nvibmn,nvibmx
+220   format(3i4, t34,'nvib, vmin,vmax')
+      iofi=3
+      iofr=0
+      do 301 i=1,nvib
+      write (8, 310) ivib(i),(iscod(iofi+j),j=1,2)
+310   format (3i4, t50,'iv,jmin,jmax')
+      write (8, 320) (rcod(iofr+j),j=1,4)
+      iofi=iofi+2
+      iofr=iofr+4
+320   format(3g14.6,t50,'brot,drot,hrot'/f15.8,t50,'evib')
+301   continue
+      write (8, 85) potfil
+      return
+      end
+
       end module mod_hiba1sg
 c     ------------------------------------------------------------------
       logical function is_twomol(ibasty)

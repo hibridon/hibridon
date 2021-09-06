@@ -1,3 +1,6 @@
+* sy1d3p (sav1d3p/ptr1d3p) defines, saves variables and reads            *
+*                  potentials for atom in 1D/3P states in collision      *
+*                  with an atom                                          *
 * --------------------------------------------------------------------
       subroutine ba1d3p (j, l, is, jhold, ehold, ishold, nlevel, nlevop,
      :                  rcut, jtot, flaghf, flagsu,
@@ -998,3 +1001,135 @@
 1000  return
       end
 * ------------------------------eof-----------------------------------
+* -----------------------------------------------------------------------
+      subroutine sy1d3p (irpot, readp, iread)
+*  subroutine to read in system dependent parameters for collisions of
+*  atom in 1D and/or 3P state with closed shell atom
+*  current revision date: 20-dec-2013 by p.dagdigian
+*  -----------------------------------------------------------------------
+*  variables in common /cosysr/
+*    isrcod:  number of real system dependent parameters
+*    en1d:     asymptotic energy of 1D state (cm-1) relative to center of
+*              gravity of 3P state
+*  variable in common /cosysi/
+*    nscode:   total number of system dependent parameters
+*              nscode = isicod + isrcod + 3
+*    isicod:   number of integer system dependent parameters
+*    nterm:    number of different electronic coupling terms
+*              this should be 1 here
+*    nstate:   number of electronic states included
+*              nstate=0:   just 1D state
+*              nstate=1:   just 3P state
+*              nstate=2:   both 1D and 3P state
+*  variable in common /cosys/
+*    scod:    character*8 array of dimension lcode, which contains names
+*             of all system dependent parameters
+*  line 16:
+*    filnam:  name of file containing potential parameters
+*
+*  subroutines called: loapot(iunit,filnam)
+*  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
+      implicit double precision (a-h,o-z)
+#include "common/parsys"
+      integer irpot
+      logical readp
+      logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
+     :        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf,
+     :        csflag, flagsu, rsflag, t2test, existf, logdfl, batch,
+     :        readpt, ihomo, bastst, twomol, lpar
+
+      character*1 dot
+      character*8 scod
+      character*(*) fname
+      character*60 filnam, line, potfil, filnm1
+      common /cosys/ scod(lencod)
+      common /cosysi/ nscode, isicod, nterm, nstate, ipol, npot
+      common /cosysr/ isrcod, junkr, en1d
+#include "common/parbas"
+      common /coskip/ nskip,iskip
+      common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo, ipos, logdfl, logwr,
+     :                noprin, partw, readpt, rsflag, swrit,
+     :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
+     :                xsecwr,lpar(3)
+#include "common/comdot"
+      save potfil
+*  number and names of system dependent parameters
+*  first all the system dependent integer variables
+*  in the same order as in the common block /cosysi/
+*  variable names must be in uppercase of maximum length 6 characters
+      isicod = 2
+      scod(1) = 'NTERM'
+      scod(2) = 'NSTATE'
+*  then all the system dependent real variables
+*  in the same order as in the common block /cosysr/
+      isrcod = 1
+      scod(3) = 'E-1D'
+      nscode = isicod + isrcod
+*  set default values for 1D/3P atom scattering
+      nterm = 1
+      nstate = 2
+      lammin(1)= 1
+      lammax(1) = 12
+      mproj(1)=0
+      niout=2
+      indout(1)=3
+      indout(2)=1
+      potfil = ' '
+      if(iread.eq.0) return
+      read (8, *, err=888) nstate
+      read (8, *, err=888) en1d
+      line=' '
+      if(.not.readp.or.iread.eq.0) then
+        call loapot(1,' ')
+        return
+      endif
+      read (8, 285, end=286) line
+285   format (a)
+      goto 286
+* here if read error occurs
+888   write(6,1000)
+1000  format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+* --------------------------------------------------------------
+      entry ptr1d3p (fname,readp)
+      line = fname
+      readp = .true.
+286   if (readp) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,1020)
+1020      format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+           call gennam(potfil,filnam,0,'BIN',lc)
+           filnam = potfil
+        end if
+        potfil=filnam
+        filnm1 = 'potdata/'//filnam
+        inquire(file=filnm1,exist=existf)
+        if(.not.existf) then
+          write(6,1025) filnam(1:lc)
+1025      format(' FILE ',(a),' NOT FOUND')
+          return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+      end if
+      close (8)
+      irpot=1
+      return
+* --------------------------------------------------------------
+      entry sav1d3p (readp)
+*  save input parameters for 1D/3P atom + atom scattering
+      write (8, 300) nstate
+300   format(i4, 29x,'nstate')
+      write (8, 310) en1d
+310   format((1pg12.4),21x,'E-1D')
+      write (8, 285) potfil
+      return
+      end

@@ -1,3 +1,5 @@
+* sy3p2s (sav3p2s/ptr3p2s) defines, saves variables and reads            *
+*                  potentials for 3P atom + 2S atom                      *
 * --------------------------------------------------------------------
       subroutine ba3p2s (j, l, is, jhold, ehold, ishold, nlevel,
      :     nlevop, rcut, jtot, flaghf, flagsu, csflag, clist,
@@ -600,3 +602,126 @@
 1000  return
       end
 * ------------------------------eof-----------------------------------
+* -----------------------------------------------------------------------
+      subroutine sy3p2s (irpot, readp, iread)
+*  subroutine to read in system dependent parameters for collisions of
+*  atom in 3P state with an atom in 2S state
+*  current revision date: 1-oct-2018 by p.dagdigian
+*  -----------------------------------------------------------------------
+*  NOTE:  no real variables for this basis type
+*  variables in common /cosysr/
+*    isrcod:  number of real system dependent parameters
+*  variable in common /cosysi/
+*    nscode:   total number of system dependent parameters
+*              nscode = isicod + isrcod + 3
+*    isicod:   number of integer system dependent parameters
+*    nterm:    number of different types of electronic coupling terms
+*              this should be 1 here
+*    nvib:     initial vibrational state of A state, in photodissociation calculation
+*  variable in common /cosys/
+*    scod:    character*8 array of dimension lcode, which contains names
+*             of all system dependent parameters
+*  line 16:
+*    filnam:  name of file containing potential parameters
+*
+*  subroutines called: loapot(iunit,filnam)
+*  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
+      implicit double precision (a-h,o-z)
+#include "common/parsys"
+      integer irpot
+      logical readp
+      logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
+     :        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf,
+     :        csflag, flagsu, rsflag, t2test, existf, logdfl, batch,
+     :        readpt, ihomo, bastst, twomol, lpar
+
+      character*1 dot
+      character*8 scod
+      character*(*) fname
+      character*60 filnam, line, potfil, filnm1
+      common /cosys/ scod(lencod)
+      common /cosysi/ nscode, isicod, nterm, nvib
+      common /cosysr/ isrcod
+#include "common/parbas"
+      common /coskip/ nskip,iskip
+      common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo, ipos, logdfl, logwr,
+     :                noprin, partw, readpt, rsflag, swrit,
+     :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
+     :                xsecwr,lpar(3)
+#include "common/comdot"
+      save potfil
+*  number and names of system dependent parameters
+*  first all the system dependent integer variables
+*  in the same order as in the common block /cosysi/
+*  variable names must be in uppercase of maximum length 6 characters
+      isicod = 2
+      scod(1) = 'NTERM'
+      scod(2) = 'NVIB'
+*  then all the system dependent real variables
+*  in the same order as in the common block /cosysr/
+      isrcod = 0
+      nscode = isicod + isrcod
+*  set default values for 3P + 2S atom scattering
+      nterm = 1
+      lammin(1)= 1
+      lammax(1) = 6
+      mproj(1)=0
+      nlam = 6
+      niout=1
+      indout(1)=3
+      potfil = ' '
+      if(iread.eq.0) return
+      read (8, *, err=888) nvib
+      line=' '
+      if(.not.readp.or.iread.eq.0) then
+        call loapot(1,' ')
+        return
+      endif
+      read (8, 285, end=286) line
+285   format (a)
+      goto 286
+* here if read error occurs
+888   write(6,1000)
+1000  format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+* --------------------------------------------------------------
+      entry ptr3p2s (fname,readp)
+      line = fname
+      readp = .true.
+286   if (readp) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,1020)
+1020      format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+           call gennam(potfil,filnam,0,'BIN',lc)
+           filnam = potfil
+        end if
+        potfil=filnam
+        filnm1 = 'potdata/'//filnam
+        inquire(file=filnm1,exist=existf)
+        if(.not.existf) then
+          write(6,1025) filnam(1:lc)
+1025      format(' FILE ',(a),' NOT FOUND')
+          return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+      end if
+      close (8)
+      irpot=1
+      return
+* --------------------------------------------------------------
+      entry sav3p2s (readp)
+*  save input parameters for 3P atom + 2S atom scattering
+      write (8, 1285) nvib
+1285  format(i4, 29x,'nvib')
+      write (8, 285) potfil
+      return
+      end

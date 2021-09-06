@@ -1,3 +1,5 @@
+* syh3p (savh3p/ptrh3p) defines, saves variables and reads               *
+*                  potential for homonuclear+3P atom scattering          *
 * --------------------------------------------------
       subroutine bah3p (j, l, is, jhold, ehold, ishold, nlevel, nlevop,
      :                  isc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu,
@@ -531,8 +533,8 @@
           else
             write (6, 225)
             write (9, 225)
-225         format
-     :       (/'   N   JA(IS) JMOL(J)  J12   L  CENT    EINT(CM-1)')
+225         format (
+     :       /'   N   JA(IS) JMOL(J)  J12   L  CENT    EINT(CM-1)')
             do 235  i = 1, n
               icent=cent(i)
               write (6, 230) i,is(i),j(i),j12(i),l(i),icent,
@@ -902,5 +904,144 @@
         t4=xf3j(one,xlama,one,-xomeg,-xmu,xomegp)
         vee=t1*t2*t3*t4*xnorm*iphase
       endif
+      return
+      end
+* -----------------------------------------------------------------------
+      subroutine syh3p (irpot, readpt, iread)
+*  subroutine to read in system dependent parameters for homonuclear
+*   + 3p atom scattering
+*  if iread = 1 read data from input file
+*  if iread = 0 return after defining variable names
+*  current revision date: 12-jun-1997 by mha
+* NOTE THAT THIS VERSION DOES NOT USE DATA FROM VFIT (FOLLMEG FORM)
+*  -----------------------------------------------------------------------
+*  variables in common bloc /cosysr/
+*    isrcod:   total number of real system dependent variables
+*    brot:     rotational constant of molecule
+*    aso1:      spin-orbit energy of j=1 state (relative to j=0)
+*    aso2:      spin-orbit energy of j=2 state (relative to j=0)
+*  variables in common block /cosysi/
+*    nscod:    total number of variable names which are passed to HINPUT
+*              nscod must equal isrcod + isicod + 3
+*    isicod:   total number of integer system dependent variables
+*    nterm:    number of different associated legendre terms in
+*              expansion of potential
+*    iop:      ortho/para label for molecular states. If ihomo=.true. then onl
+*              para states will be included if iop=1 and only ortho states if
+*              iop=-1
+*    jmax:     the maximum rotational angular momenta for the diatomic
+*  variable in common /cosys/
+*    scod:    character*8 array of dimension nscode, which contains names
+*             of all system dependent parameters.  Note that the ordering
+*             of the variable names in scod must correspond to the ordering
+*             of the variable names in cosysi followed by the ordering of
+*             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
+*  -----------------------------------------------------------------------
+      use mod_coiout, only: niout, indout
+      logical readpt, existf
+      double precision brot, aso1, aso2
+      character*1 dot
+      character*8 scod
+      character*(*) fname
+      character*60 line, filnam, potfil, filnm1
+      parameter (icod=3, ircod=3)
+      parameter (lencod = icod + ircod + 3)
+#include "common/parbas"
+      common /cosys/ scod(lencod)
+      common /cosysi/ nscode, isicod, nterm, iop, jmax
+      common /cosysr/ isrcod, junkr, brot, aso1, aso2
+      save potfil
+*  number and names of system dependent parameters
+*  first all the system dependent integer variables
+*  in the same order as in the common block /cosysi/
+*  variable names must be in uppercase of maximum length 6 characters
+*  NTERM must be the first variable
+*  followed by the system dependent real variables
+*  in the same order as in the common block /cosysr/
+*  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
+#include "common/comdot"
+      scod(1)='NTERM'
+      scod(2)='IOP'
+      scod(3)='JMAX'
+      scod(4)='BROT'
+      scod(5)='ASO1'
+      scod(6)='ASO2'
+      scod(7)='LAMMIN'
+      scod(8)='LAMMAX'
+      scod(9)='MPROJ'
+      nscode = lencod
+      isicod = icod
+      isrcod = ircod
+      irpot = 1
+*  set default values for homonuclear+3p atom
+        nterm = 1
+        mproj(1) = 0
+      if (iread .eq. 0) then
+        lammin(1)= 1
+        lammax(1) = 5
+        jmax = 0
+        iop = 1
+      endif
+      potfil=' '
+      if (iread .eq. 0) return
+*  line 18
+      read (8, *, err=80) iop, jmax
+*  line 21
+      read (8, *, err=80) brot, aso1, aso2
+      if(.not.readpt.or.iread.eq.0) then
+        call loapot(1,' ')
+        return
+      endif
+      read (8, 60, end=100) line
+60    format (a)
+      goto 100
+* here if read error occurs
+80    write(6,90)
+90    format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+*
+      entry ptrh3p (fname,readpt)
+      line = fname
+      readpt = .true.
+100   if (readpt) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,102)
+102       format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+           call gennam(potfil,filnam,0,'BIN',lc)
+           filnam = potfil
+        end if
+        potfil=filnam
+        filnm1 = 'potdata/'//filnam
+        inquire(file=filnm1,exist=existf)
+        if(.not.existf) then
+          write(6,105) filnam(1:lc)
+105      format(' FILE ',(a),' NOT FOUND')
+         return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+      endif
+      close (8)
+      return
+*
+      entry savh3p (readpt)
+*  save input parameters for symmetric top + atom scattering
+*  the order of the write statements should be identical to the read statement
+*  above. for consistency with the data file written by gendat, format
+*  statements should reserve the first 30 spaces for data, spaces 31-33 should
+*  be left blank, and the names of the variables should be printed in spaces
+*  34-80
+*  line 18:
+      write (8, 220) iop, jmax
+220   format (2i4, 14x,'   iop, jmax')
+*  line 21
+      write (8, 250) brot, aso1, aso2
+250   format(f12.4,2f14.4, 2x, '   brot, aso1, aso2')
+      write (8, 60) potfil
       return
       end

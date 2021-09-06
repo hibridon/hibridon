@@ -1,3 +1,5 @@
+* sys2sg1sg (sav2sg1sg/ptr2sg1sg) defines, saves variables and reads     *
+*                  potentials for 2sigma - 1sigma                        *
 * --------------------------------------------------------------------
 *  subroutine to determine angular coupling potential for collision
 *  of a 2sigma+ diatomic with a closed-shell (1sigma+) diatomic.
@@ -29,7 +31,7 @@ c
 c      type(lm_type), dimension(:), allocatable :: lms
 c      end module mod_1sg1sg
 * --------------------------------------------------------------------
-      subroutine ba2s1sg (j, l, is, jhold, ehold, ishold, nlevel,
+      subroutine ba2sg1sg (j, l, is, jhold, ehold, ishold, nlevel,
      :     nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
      :     flaghf, flagsu, csflag, clist, bastst, ihomo,
      :     nu, numin, jlpar, n, nmax, ntop)
@@ -530,5 +532,137 @@ c     :    - xlc - xlr - 0.5d0
       vee = phase * facj * cg1 * cg2 * cg3 * f6j * f9j / sq4pi3
       return
       end
+* -----------------------------------------------------------------------
+      subroutine sys2sg1sg (irpot, readp, iread)
+*  subroutine to read in system dependent parameters for collisions of
+*  2sigma + 1sigma linear molecules
+*  current revision date: 26-aug-2017 by p.dagdigian
+*  -----------------------------------------------------------------------
+*  variables in common /cosysr/
+*    isrcod:   number of real system dependent parameters
+*    b1rot:    rotational constant for molecule 1
+*    d1rot:    centrifugal distortion constant for molecule 1
+*    gamma:    spin-rotation constant for molecule1
+*    b2rot:    rotational constant for molecule 2
+*  variable in common /cosysi/
+*    nscode:   total number of system dependent parameters
+*              nscode = isicod + isrcod + 3
+*    isicod:   number of integer system dependent parameters
+*    nterm:    number of different electronic coupling terms
+*              this should be 1 here
+*    n1max:    maximum rotational angular momentum for molecule 1
+*    j2min:    minimum rotational angular momentum for molecule 2
+*    j2max:    maximum rotational angular momentum for molecule 2
+*    ipotsy2:  symmetry of potential.  set to 2 for homonuclear
+*              molecule 2, set to 1 for heteronuclear molecule 2
+*    iop:      ortho/para label for levele of molecule 2. If ihomo=.true.
+*              then only para states will be included if iop=1 and
+*              only ortho states if iop=-1
+*  variable in common /cosys/
+*    scod:    character*8 array of dimension lcode, which contains names
+*             of all system dependent parameters
+*  line 16:
+*    filnam:  name of file containing potential parameters
+*
+*  subroutines called: loapot(iunit,filnam)
+*  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
+      implicit double precision (a-h,o-z)
+#include "common/parsys"
+      integer irpot
+      logical readp
+      logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
+     :        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf,
+     :        csflag, flagsu, rsflag, t2test, existf, logdfl, batch,
+     :        readpt, ihomo, bastst, twomol, lpar
+
+      character*1 dot
+      character*8 scod
+      character*(*) fname
+      character*60 filnam, line, potfil, filnm1
+      common /cosys/ scod(lencod)
+      common /cosysi/ nscode, isicod, n1max, j2min, j2max, ipotsy2
+      common /cosysr/ isrcod, junkr, b1rot, d1rot, gamma, b2rot
+#include "common/parbas"
+      common /coskip/ nskip,iskip
+      common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo, ipos, logdfl, logwr,
+     :                noprin, partw, readpt, rsflag, swrit,
+     :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
+     :                xsecwr,lpar(3)
+#include "common/comdot"
+      save potfil
+*  number and names of system dependent parameters
+*  first all the system dependent integer variables
+*  in the same order as in the common block /cosysi/
+*  variable names must be in uppercase of maximum length 6 characters
+      isicod = 4
+      scod(1) = 'N1MAX'
+      scod(2) = 'J2MIN'
+      scod(3) = 'J2MAX'
+      scod(4) = 'IPOTSY2'
+*  then all the system dependent real variables
+*  in the same order as in the common block /cosysr/
+      isrcod = 4
+      scod(5) = 'B1ROT'
+      scod(6) = 'D1ROT'
+      scod(7) = 'GAMMA'
+      scod(8) = 'B2ROT'
+      nscode = isicod + isrcod + 3
+      if(iread.eq.0) return
+c  read the last few lines of the input file
+      read (8, *, err=888) n1max, j2min, j2max, ipotsy2
+      read (8, *, err=888) b1rot, d2rot, gamma, b2rot
+      read (8, *, err=888) potfil
+      call loapot(10, potfil)
+      close(8)
+      return
+* here if read error occurs
+888   write(6,1000)
+1000  format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+* --------------------------------------------------------------
+      entry ptr2sg1sg (fname,readp)
+      line = fname
+      readp = .true.
+286   if (readp) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,1020)
+1020      format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+           call gennam(potfil,filnam,0,'BIN',lc)
+           filnam = potfil
+        end if
+        potfil=filnam
+        filnm1 = 'potdata/'//filnam
+        inquire(file=filnm1,exist=existf)
+        if(.not.existf) then
+          write(6,1025) filnam(1:lc)
+1025      format(' FILE ',(a),' NOT FOUND')
+          return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+      end if
+      close (8)
+      irpot=1
+      return
+* --------------------------------------------------------------
+      entry sav2sg1sg (readp)
+*  save input parameters for 2sigma-1sigma molecule scattering
+      write (8, 310) n1max, j2min, j2max, ipotsy2, iop
+310   format(5i4,14x,'n1max, j2min, j2min, ipotsy2, iop')
+      write (8, 320) b1rot, d2rot, gamma, b2rot
+320   format(f10.7, e12.5, f10.7, '  b1rot, d1rot, gamma, b2rot')
+      write (8, 285) potfil
+285   format (a)
+      return
+      end
+
 * --------------------------------eof---------------------------------
 

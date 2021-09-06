@@ -1,3 +1,6 @@
+* sysgpi1 (savsgpi1/ptrsgpi1) defines, saves variables and reads         *
+*                  potential for 2sig-2pi + atom scattering (one 2sigma  *
+*                  and one or more 2pi levels (no perturbations)         *
 * ----------------------------------------------------------------------
       subroutine basgpi1(j, l, is, jhold, ehold, ishold, nlevel,
      :                  nlevop, ivhold, c12, c32, csig,
@@ -743,14 +746,14 @@
         if (.not.csflag) then
           if (bastst) write (6, 200)
           write (9,200)
-200       format
-     :     (/'   N   V   J    EPS   FI    L    EINT(CM-1)    C-1/2',
+200       format(
+     :     /'   N   V   J    EPS   FI    L    EINT(CM-1)    C-1/2',
      :        '      C-3/2      CSIG')
         else
           if (bastst) write (6,210) xnu
           write (9,210) xnu
-210       format
-     :     (/'   N   V   J    EPS   FI    L    EINT(CM-1)   C-1/2',
+210       format (
+     :     /'   N   V   J    EPS   FI    L    EINT(CM-1)   C-1/2',
      :       '      C-3/2      CSIG','  **  NU=', f4.1)
         end if
         do 230  i = 1, n
@@ -1058,3 +1061,279 @@
       return
       end
 * --------------------------------------------------------------------
+*  -----------------------------------------------------------------------
+      subroutine sysgpi1 (irpot, readpt, iread)
+* ----------------------------------------------------------------------
+*
+*  subroutine to read in system dependent parameters for 2sig-2pi
+*   + atom scattering (one 2sigma state and one or more 2pi
+*   vibrational levels, no sigma-pi spectroscopic perturbations)
+*  this differs from sysgpi, in that no perturbations included and
+*  more than one 2pi level can be included
+*  author:  p.j.dagdigian
+*  current revision date:  5-dec-2011 (p.j.dagdigian)
+*  -----------------------------------------------------------------------
+*  variables in common bloc /cosysr/
+*    isrcod:   total number of real system dependent variables
+*    esg:      energy of 2sigma level in cm-1
+*    bsg:      rotational constant for 2sigma state in cm-1
+*    dsg:      centrifugal distortion constant for 2sigma state in cm-1
+*    gsr:      2sigma state spin-rotation constant in cm-1
+*    epi:      array of energies of 2pi levels in cm=1
+*    bpi:      array of rotational constants for 2pi levels in cm-1
+*    dpi:      array of centrifugal distortion constants for 2pi levels in cm-1
+*    aso:      array if spin-orbit constants for 2pi levels in cm-1
+*    p, q:     array if lambda-doubling constants for 2pi levels in cm-1
+*  variables in common block /cosysi/
+*    nscode:   total number of system dependent variables
+*              nscode = isicod + isrcod + 3
+*    isicod:   total number of integer system dependent variables
+*    nterm:    number of different diabatic potentials, this is 4 for one 2pi level.
+*              7 for two 2pi levels, 10 for there 2pi levels, etc.
+*    nmax:     maximum case (b) rotational angular momenta for 2sigma state
+*    nparsg:   number of symmetry doublets included (npar=2 will ensure
+*              both spin doublets) for 2sigma state.  nparsg=1 for eps=+1 levels only.
+*    isym:     if isym=+1, then the electronic symmetry is sigma-plus
+*              if isym=-1, then the electronic symmetry is sigma-minus
+*    igusg:    if igu=+1, then the inversion symmetry is gerade
+*              if igu=-1, then the inversion symmetry is ungerade
+*    isasg:    s/a symmetry index, if the molecule is homonuclear (ihomo=t)
+*              then, if isa=+1 then only the s-levels are included in the
+*              basis, if isa=-1, then only the a-levels are included
+*    nvibpi:   number of 2pi vibrational levels (must be >= 1)
+*    igupi:    permutation inversion symmetry of 2pi state
+*              igu=1 for gerade states, igu=-1 for ungerade states
+*              for heteronuclear molecules igu should be +1
+*    isapi:    s/a label for 2pi state. if ihomo=.true. then only
+*              s states will be included if isa=1 and only a states if
+*              isa=-1
+*    nparpi:   number of 2pi symmetry doublets included (nparpi=2 will ensure
+*              both lambda doublets).  otherwise, set nparpi=+1 for e levels,
+*              nparpi=-1 for f levels only.
+*    ivibpi:   array of vibrational quantum numbers for 2pi levels
+*    jmax:     array of maximum rotational angular momenta for each 2pi level
+*              with convention omega .le. j .le. jmax+0.5
+*  variable in common /cosys/
+*    scod:    character*8 array of dimension nscode, which contains names
+*             of all system dependent parameters.  note that the ordering
+*             of the variable names in scod must correspond to the ordering
+*             of the variable names in cosysi followed by the ordering of
+*             variable names in cosysr followed by lammin, lammax, and mproj
+* ------------------------------------------------------------------------
+*
+*  variables in common/cobspt/ must be set in loapot!!
+*
+#include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
+      implicit double precision (a-h,o-z)
+#include "common/parsys"
+      logical readpt, existf
+      character*8 scod, rcod
+      character*8 char
+      character*(*) fname
+      character*1 dot
+      character*60 filnam, line, potfil, filnm1
+#include "common/parbas"
+      common /cosys/ scod(maxpar)
+      common /cosyr/ rcod(maxpar)
+      common /cosysi/ nscode, isicod, ispar(maxpar)
+      common /cosysr/ isrcod, junkr, rspar(maxpar)
+*  commented lines below list the parameters
+*      common /cosysi/ nscode, isicod, nterm, isym, isa, igusg,
+*     :  nmaxsg, nparsg, igupi, nparpi, numvpi, ispar(maxpar)
+*      common /cosysr/ isrcod, junkr, esg, bsg, dsg, gsr, rspar(maxpar)
+      logical         airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo,lpar
+      common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo, lpar(18)
+      common /coskip/ nskip,iskip
+      common /covibp/ ivpi(5)
+      save potfil
+#include "common/comdot"
+      irpot = 1
+*     number and names of system dependent parameters
+*  first all the system dependent integer variables
+*  in the same order as in the common block /cosysi/
+*  variable names must be in uppercase of maximum length 6 characters
+      scod(1) = 'NTERM'
+      scod(2) = 'ISYM'
+      scod(3) = 'ISA'
+      scod(4) = 'IGUSG'
+      scod(5) = 'NMAXSG'
+      scod(6) = 'NPARSG'
+      scod(7) = 'IGUPI'
+      scod(8) = 'NPARPI'
+      scod(9) = 'NUMVPI'
+      isicod = 0
+*  then all the system dependent real variables
+*  in the same order as in the common block /cosysr/
+      rcod(1) = 'ESIG'
+      rcod(2) = 'BSIG'
+      rcod(3) = 'DSIG'
+      rcod(4) = 'GSR'
+      isrcod = 0
+*  set default values for doublet-sigma scattering
+      potfil = ' '
+      ispar(1) = nterm
+      if (iread .eq. 0) then
+        nmax = 3
+        isa=0
+        isym=1
+        nparsg=2
+        niout=4
+        indout(1)=-1
+        indout(2)=1
+        indout(3)=-2
+        indout(4)=2
+*  default is 2sigma state and 2pi level:  Vsig, Vpi, V1, V2 below
+        mproj(1) = 0
+        mproj(2) = 0
+        mproj(3) = 1
+        mproj(4) = 2
+        lammin(1) = 1
+        lammin(2) = 0
+        lammin(3) = 1
+        lammin(4) = 2
+        lammax(1) = -1
+        lammax(2) = -1
+        lammax(3) = -1
+        lammax(4) = -1
+      end if
+      if(iread.eq.0) return
+*  first read 2sigma parameters
+*      read (8, *, err=888) isym, isa, igusg, nmaxsg, nparsg
+*      read (8, *, err=888) igupi, nparpi
+*      read (8, *, err=888) esg, bsg, dsg, gsr
+      read (8, *, err=888) (ispar(isicod+j),j=2,6)
+      read (8, *, err=888) (ispar(isicod+j),j=7,8)
+      read (8, *, err=888) (rspar(isrcod+j),j=1,4)
+      isicod = isicod + 8
+      isrcod = isrcod + 4
+*  read number of 2pi levels
+      read (8, *,err=888) numvpi
+      ispar(isicod+1)=numvpi
+      nterm = 4 + 3*(numvpi - 1)
+      ispar(1) = nterm
+      isicod = isicod + 1
+      if (numvpi.le.0 .or. numvpi.gt.10) then
+        write (6,1101) numvpi
+1101    format (' NVIBPI =',i3,'  MUST BE BETWEEN 1 AND 10.')
+        goto 888
+      end if
+*  read data for each 2pi vibrational level
+      do 15 iv=1,numvpi
+        if (isicod+2.gt.maxpar) stop 'isicod'
+        if (isrcod+6.gt.maxpar) stop 'isrcod'
+        if (iread.ne.0) then
+*          read(8, *, err=888) ivpi(iv), jmax(iv)
+*          read(8, *, err=888) epi(iv), bpi(iv), dpi(iv)
+*          read(8, *, err=888) aso(iv), p(iv), q(iv)
+          read(8, *, err=888) ivpi(iv),ispar(isicod+1)
+          read(8, *, err=888) (rspar(isrcod+j),j=1,3)
+          read(8, *, err=888) (rspar(isrcod+j),j=4,6)
+        end if
+        char = ' '
+        if (numvpi.gt.1 .or. ivpi(iv).ge.0) then
+          if(ivpi(iv).le.9) write(char,'(''('',i1,'')'')')
+     :      ivpi(iv)
+          if(ivpi(iv).gt.9) write(char,'(''('',i2,'')'')')
+     :      ivpi(iv)
+        end if
+        scod(isicod+1)='JMAX'//char
+        rcod(isrcod+1)='EPI'//char
+        rcod(isrcod+2)='BPI'//char
+        rcod(isrcod+3)='DPI'//char
+        rcod(isrcod+4)='ASO'//char
+        rcod(isrcod+5)='P'//char
+        rcod(isrcod+6)='Q'//char
+        isicod=isicod+1
+        isrcod=isrcod+6
+15    continue
+      do 16 is=1,isrcod
+        scod(isicod+is)=rcod(is)
+16    continue
+      nscode = isicod + isrcod + 3
+*  read name of file containing potential parameters
+      if(.not.readpt.or.iread.eq.0) then
+        call loapot(1,' ')
+        return
+      end if
+      read (8, 285, end=888) line
+      potfil=line
+285   format (a)
+      goto 1000
+* here if read error occurs
+888   write(6,900)
+900   format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+*
+      entry ptrsgpi1 (fname,readpt)
+      line = fname
+      readpt = .true.
+1000  if (readpt) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,1020)
+1020      format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+          call gennam(potfil,filnam,0,'BIN',lc)
+          filnam = potfil
+        end if
+        potfil=filnam
+        filnm1 = 'potdata/'//filnam
+        inquire(file=filnm1,exist=existf)
+        if(.not.existf) then
+          write(6,1025) filnam(1:lc)
+1025      format(' FILE ',(a),' NOT FOUND')
+          return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+      end if
+* check for consistency
+      close (8)
+      irpot=1
+      ihomo=nskip.eq.2
+      return
+*
+      entry savsgpi1 (readpt)
+*  save parameters for 2sigma and 2pi states
+*      write (8, 105) isym, isa, igusg, nmaxsg, nparsg,
+*     :  ' isym, isa, igusg, nmaxsg, nparsg'
+*      write (8, 203) igupi, nparpi, ' igupi, nparpi'
+*      write (8, 201) esg, bsg, dsg, gsr,
+*     :  'esg, bsg, dsg, gsr'
+      write (8, 105) (ispar(j),j=2,6),
+     :   ' isym, isa, igusg, nmaxsg, nparsg'
+      write (8, 201) (ispar(j),j=7,8),
+     :   ' igupi, nparpi'
+      write (8, 203) (rspar(j),j=1,4),
+     :   ' esg, bsg, dsg, gsr'
+*  save number of 2pi vibrational levels
+      write (8, 102) ispar(9), 'numvpi'
+*  save parameters for 2pi levels
+      isi = 9
+      isr = 4
+      do 101 iv=1,numvpi
+        write (8, 103) ivpi(iv),ispar(isi+1), 'ivpi, jmax'
+        write (8, 202) (rspar(isr+j),j=1,3), 'epi, bpi, dpi'
+        write (8, 202) (rspar(isr+j),j=4,6), 'aso, p, q'
+        isi = isi + 1
+        isr = isr + 6
+*        write (8, 103) ivpi(iv), jmax(iv), 'ivpi, jmax'
+*        write (8, 202) epi(iv), bpi(iv), dpi(iv), 'epi, bpi, dpi'
+*        write (8, 202) aso(iv), p(iv), q(iv), 'aso, p, q'
+101   continue
+102   format(i4,t55,a)
+103   format(2i4,t55,a)
+105   format(5i4,t55,a)
+201   format(2g14.6,t55,a)
+202   format(g14.6,2g14.6,t55,a)
+203   format(4g14.6,t55,a)
+      write (8, 300) potfil
+300   format(a)
+      return
+      end

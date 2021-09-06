@@ -1,3 +1,5 @@
+* systp1sg (savstp1sg/ptrstp1sg) defines, saves variables and reads      *
+*                  potential for symmetric top - singlet sigma system    *
 c     Basis subroutine for the collision of a symmetric top with
 c     a singlet-Sigma molecule
 c

@@ -1,4 +1,5 @@
-
+* sych2x (savch2x/ptrch2x) defines, saves variables and reads            *
+*                  potential for CH2(X 3B1 (0,v2,0)-atom scattering      *
 * ----------------------------------------------------------------------
       subroutine bach2x (j, l, is, jhold, ehold, ishold, nlevel, nlevop,
      :                  etemp, fjtemp, fktemp, fistmp,
@@ -791,14 +792,14 @@
         if (.not.csflag) then
           if (bastst .or. clist) write (6, 305)
           write (9,305)
-305       format
-     :    (/,2x,'CHANNEL LIST SORTED BY ENERGY',/,
+305       format (
+     :    /,2x,'CHANNEL LIST SORTED BY ENERGY',/,
      :     '   #   N  IS   L   EINT(CM-1)')
         else
           if (bastst .or. clist) write (6, 310) nu
           write (9,310) nu
-310       format
-     :     (/,2x,'CHANNEL LIST SORTED BY ENERGY',/,
+310       format (
+     :     /,2x,'CHANNEL LIST SORTED BY ENERGY',/,
      :     '   #   N  IS   L   EINT(CM-1) ** NU = ',i2)
         end if
         do 330  i = 1, n
@@ -993,4 +994,193 @@
       end if
       return
       end
-* ----------------------------------------------------------------------
+*  -----------------------------------------------------------------------
+      subroutine sych2x (irpot, readpt, iread)
+*  subroutine to read in system dependent parameters for CH2(X 3B1) (0,v2,0)
+*      bender + atom scattering
+*  if iread = 1 read data from input file
+*  if iread = 0 return after defining variable names
+*  NOTE THAT THIS VERSION DOES NOT USE DATA FROM VFIT (FOLLMEG FORM)
+*  modified from syatp subroutine
+*  current revision date: 04-jun-2010 by paul dagdigian
+*  -----------------------------------------------------------------------
+*  variables in common bloc /cosysr/
+*    isrcod:   total number of real system dependent variables
+*    emax:     the maximum rotational energy (in cm-1) for a channel to be
+*              included in the basis
+*  variables in common block /cosysi/
+*    nscode:   total number of variable names which are passed to HINPUT
+*              nscod must equal isrcod + isicod + 3
+*    isicod:   total number of integer system dependent variables
+*    nterm:    number of different associated legendre terms in
+*              expansion of potential
+*    numpot:   the number of the potential used, this variable is passed
+*              to the pot subroutine
+*    ipotsy:   cylindrical symmetry of potential.  Use this parm to
+*              distinguish between AB2 and ABC type molecules.  for the
+*              former, only even lambda allowed (set delta_lambda = ipotsy)
+*    iop:      ortho/para label for molecular states. If ihomo=.true. then onl
+*              para states will be included if iop=1 and only ortho states if
+*              iop=-1
+*    ivbend:   bend vibrational quantum number (can equal 0 to 3)
+*    jmax:     the maximum rotational quantum number for the molecule
+*  variable in common /cosys/
+*    scod:    character*8 array of dimension nscode, which contains names
+*             of all system dependent parameters.  Note that the ordering
+*             of the variable names in scod must correspond to the ordering
+*             of the variable names in cosysi followed by the ordering of
+*             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
+*  -----------------------------------------------------------------------
+      use mod_coiout, only: niout, indout
+      use mod_conlam, only: nlam
+      logical readpt, existf
+      double precision emax
+      integer numpot
+      integer icod, ircod, lencod
+      integer i, iop, iread, irpot, isicod, isrcod, ipotsy, jmax,
+     :        nscode, nterm, ivbend
+      character*8 scod
+      character*1 dot
+      character*(*) fname
+      character*60 line, filnam, potfil, filnm1
+      parameter (icod=6, ircod=1)
+      parameter (lencod = icod + ircod + 3)
+#include "common/parbas"
+      common /cosys/ scod(lencod)
+      common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop,
+     :  ivbend, jmax
+      common /cosysr/ isrcod, junkr, emax
+      save potfil
+*  number and names of system dependent parameters
+*  first all the system dependent integer variables
+*  in the same order as in the common block /cosysi/
+*  variable names must be in uppercase of maximum length 6 characters
+*  NTERM must be the first variable
+*  followed by the system dependent real variables
+*  in the same order as in the common block /cosysr/
+*  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
+#include "common/comdot"
+      scod(1)='NTERM'
+      scod(2)='NUMPOT'
+      scod(3)='IPOTSY'
+      scod(4)='IOP'
+      scod(5)='IVBEND'
+      scod(6)='JMAX'
+      scod(7)='EMAX'
+      scod(8)='LAMMIN'
+      scod(9)='LAMMAX'
+      scod(10)='MPROJ'
+      nscode = lencod
+      isicod = icod
+      isrcod = ircod
+      irpot = 1
+*  set default values for asymmetric top scattering
+*  (symmetric CH2 molecule)
+       nterm = 7
+      if (iread .eq. 0) then
+        mproj(1) = 0
+        mproj(2) = 1
+        mproj(3) = 2
+        mproj(4) = 3
+        mproj(5) = 4
+        mproj(6) = 5
+        mproj(7) = 6
+
+        lammin(1) = 2
+        lammin(2) = 1
+        lammin(3) = 2
+        lammin(4) = 3
+        lammin(5) = 4
+        lammin(6) = 5
+        lammin(7) = 6
+        lammax(1) = 6
+        lammax(2) = 5
+        lammax(3) = 6
+        lammax(4) = 7
+        lammax(5) = 8
+        lammax(6) = 7
+        lammax(7) = 8
+
+
+        ipotsy = 2
+        iop = 1
+        jmax = 3
+        niout=5
+*
+*  INDOUT VALUES TO BE SET ***
+        niout=11
+        indout(1)=0
+        indout(2)=1
+        indout(3)=-1
+        indout(4)=2
+        indout(5)=-2
+        indout(6)=3
+        indout(7)=-3
+        indout(8)=4
+        indout(9)=-4
+        indout(10)=5
+        indout(11)=-5
+      endif
+      potfil=' '
+      if (iread .eq. 0) return
+*  line 18
+      read (8, *, err=80) ipotsy, iop, ivbend
+*  line 19
+      read (8, *, err=80) jmax, emax
+      if(.not. readpt .or. iread .eq. 0) then
+        call loapot(1,' ')
+        return
+      endif
+      read (8, 60, end=100) line
+60    format (a)
+      goto 100
+* here if read error occurs
+80    write(6,90)
+90    format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+*
+      entry ptrch2x (fname, readpt)
+      line = fname
+      readpt = .true.
+100   if (readpt) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,102)
+102       format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+           call gennam(potfil,filnam,0,'BIN',lc)
+           filnam = potfil
+        end if
+        potfil=filnam
+        filnm1 = 'potdata/'//filnam
+        inquire(file=filnm1,exist=existf)
+        if(.not.existf) then
+          write(6,105) filnam(1:lc)
+105      format(' FILE ',(a),' NOT FOUND')
+         return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+      endif
+      close (8)
+      return
+*
+      entry savch2x (readpt)
+*  save input parameters for CH2(X 3B1) (0,v2,0) bender + atom scattering
+*  the order of the write statements should be identical to the read statement
+*  above. for consistency with the data file written by gendat, format
+*  statements should reserve the first 30 spaces for data, spaces 31-33 should
+*  be left blank, and the names of the variables should be printed in spaces
+*  34-80
+*  line 18:
+      write (8, 220) ipotsy, iop, ivbend
+220   format (3i4, 18x,'   ipotsy, iop, ivbend')
+*  line 20
+      write (8, 230) jmax, emax
+230   format (i4, g12.5,14x, '   jmax, emax')
+      write (8, 60) potfil
+      return
+      end

@@ -1,3 +1,5 @@
+* sysphtp (savsphtp/ptrsphtp) defines, saves variables and reads         *
+*                  potentials for spherical top + atom                   *
 * ----------------------------------------------------------------------
       subroutine basphtp (j, l, is, jhold, ehold, ishold, nlevel,
      :       nlevop, etemp, fjtemp, fitemp, fistmp, rcut, jtot,
@@ -678,14 +680,14 @@
         if (.not.csflag) then
           write (6,305)
           write (9,305)
-305       format
-     :    (/,2x,'CHANNEL LIST SORTED BY ENERGY',/,
+305       format (
+     :    /,2x,'CHANNEL LIST SORTED BY ENERGY',/,
      :     '   N   J  IS  EPS  L  EINT(CM-1)')
         else
           write (6,310) nu
           write (9,310) nu
-310       format
-     :     (/,2x,'CHANNEL LIST SORTED BY ENERGY',/,
+310       format (
+     :     /,2x,'CHANNEL LIST SORTED BY ENERGY',/,
      :     '   N   J  IS   L   EINT(CM-1) ** NU = ',i2)
         end if
         do 330  i = 1, n
@@ -1038,4 +1040,146 @@
       vprm = ( (-1.d0) ** iphase) * x * sqrt(xnorm)
       return
       end
+* -----------------------------------------------------------------------
+      subroutine sysphtp (irpot, readp, iread)
+*  subroutine to read in system dependent parameters for collisions of
+*  a spherical top with closed shell atom
+*  current revision date: 21-jul-2015 by p.dagdigian
+*  -----------------------------------------------------------------------
+*  variables in common /cosysr/
+*    isrcod:   number of real system dependent parameters
+*    brot:     rotational constant for the spherical top
+*    dj:       j centrifugal distortion constant
+*    dk:       k centrifugal distortion constant
+*  variable in common /cosysi/
+*    nscode:   total number of system dependent parameters
+*              nscode = isicod + isrcod + 3
+*    isicod:   number of integer system dependent parameters
+*    nterm:    number of different electronic coupling terms
+*              this should be 1 here
+*    iop:      nuclear spin modification for molecular states:
+*                = 1 for A levels (A1 or A2)
+*                = 2 for E levels
+*                = 3 for F levels
+*    jmax:     the maximum rotational angular momentum for the spherical top
+*  variable in common /cosys/
+*    scod:    character*8 array of dimension lcode, which contains names
+*             of all system dependent parameters
+*  line 16:
+*    filnam:  name of file containing potential parameters
+*
+*  subroutines called: loapot(iunit,filnam)
+*  -----------------------------------------------------------------------
+#include "common/parsys_mod.F"
+      use mod_conlam, only: nlam
+      implicit double precision (a-h,o-z)
+#include "common/parsys"
+      integer irpot
+      logical readp
+      logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart,
+     :        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf,
+     :        csflag, flagsu, rsflag, t2test, existf, logdfl, batch,
+     :        readpt, ihomo, bastst, twomol, lpar
+
+      character*1 dot
+      character*8 scod
+      character*(*) fname
+      character*60 filnam, line, potfil, filnm1
+      common /cosys/ scod(lencod)
+      common /cosysi/ nscode, isicod, nterm, iop, jmax
+      common /cosysr/ isrcod, junkr, brot, dj, dk
+#include "common/parbas"
+      common /coskip/ nskip,iskip
+      common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag,
+     :                flaghf, flagsu, ihomo, ipos, logdfl, logwr,
+     :                noprin, partw, readpt, rsflag, swrit,
+     :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
+     :                xsecwr,lpar(3)
+#include "common/comdot"
+      save potfil
+*  number and names of system dependent parameters
+*  first all the system dependent integer variables
+*  in the same order as in the common block /cosysi/
+*  variable names must be in uppercase of maximum length 6 characters
+      isicod = 3
+      scod(1) = 'NTERM'
+      scod(2) = 'IOP'
+      scod(3) = 'JMAX'
+*  then all the system dependent real variables
+*  in the same order as in the common block /cosysr/
+      isrcod = 3
+      scod(4) = 'BROT'
+      scod(5) = 'D-J'
+      scod(6) = 'D-K'
+      nscode = isicod + isrcod
+*  set default values for spherical top + atom scattering
+      nterm = 4
+      lammin(1) = 3
+      lammin(2) = 4
+      lammin(3) = 6
+      lammin(4) = 7
+      do i=1,nterm
+        mproj(i) = 0
+        lammax(i) = lammin(i)
+      enddo
+      niout=2
+      indout(1)=1
+      indout(2)=2
+      potfil = ' '
+      if(iread.eq.0) return
+      read (8, *, err=888) iop, jmax
+      read (8, *, err=888) brot, dj, dk
+      line=' '
+      if(.not.readp.or.iread.eq.0) then
+        call loapot(1,' ')
+        return
+      endif
+      read (8, 285, end=286) line
+285   format (a)
+      goto 286
+* here if read error occurs
+888   write(6,1000)
+1000  format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
+      return
+* --------------------------------------------------------------
+      entry ptrsphtp (fname,readp)
+      line = fname
+      readp = .true.
+286   if (readp) then
+        l=1
+        call parse(line,l,filnam,lc)
+        if(lc.eq.0) then
+          write(6,1020)
+1020      format(' FILENAME MISSING FOR POTENTIAL INPUT')
+        end if
+        j=index(filnam(1:lc),dot)
+        if(j.eq.0) then
+           call gennam(potfil,filnam,0,'BIN',lc)
+           filnam = potfil
+        end if
+        potfil=filnam
+        filnm1 = 'potdata/'//filnam
+        inquire(file=filnm1,exist=existf)
+        if(.not.existf) then
+          write(6,1025) filnam(1:lc)
+1025      format(' FILE ',(a),' NOT FOUND')
+          return
+        end if
+* now call loapot(iunit,filnam) routine to read potential parameters
+        call loapot(1,filnam)
+      end if
+      close (8)
+      irpot=1
+      return
+* --------------------------------------------------------------
+      entry savsphtp (readp)
+*  save input parameters for spherical top + atom scattering
+      write (8, 310) iop, jmax
+310   format(2i4,25x,'iop, jmax')
+      write (8, 320) brot, dj, dk
+320   format(f10.7, e12.5, e10.3, '   brot, dj,dk')
+      write (8, 285) potfil
+      return
+      end
+
 * -------------------------------eof------------------------------------
