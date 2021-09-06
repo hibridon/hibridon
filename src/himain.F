@@ -50,7 +50,7 @@
       use mod_coisc10, only: allocate_coisc10
       use mod_coisc11, only: allocate_coisc11
       use mod_coisc12, only: allocate_coisc12
-      use mod_colsc1, only: allocate_colsc1
+      use mod_colsc1, only: allocate_colsc1, lsc1
       use mod_cosc1, only: allocate_cosc1, sc1
       use mod_cosc2, only: allocate_cosc2, sc2
       use mod_cosc3, only: allocate_cosc3, sc3
@@ -93,7 +93,7 @@
 *  added common block from ba3p2s basis routine
 *  current revision date:  19-jun-2019 (p. dagdigian)
 *
-      implicit double precision (a-h, o-z)
+      implicit none
 #if defined(HIB_UNIX_IBM) || defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
       character *40 test
 #endif
@@ -110,41 +110,116 @@
 *     kout is number of different values of rotational quantum number
 *     for which s-matrix will be stored on disk
 
-*  change kmax below --  supposed to be set at compile time
 *  revised by p. dagdigian (13-dec-2019)
-      parameter (kmax=KMAX, kairy = kmax,ktri=kmax*(kmax+1)/2,kbig=10)
-#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
-* set size of scratch array for matrix factorization and generalized
+      integer :: kmax
+      integer :: kairy
+      integer :: ktri
+      integer, parameter :: kbig = 10
+
+* size of scratch array for matrix inversion
+      integer :: kaux
+
+* size of scratch array for matrix factorization and generalized
 *   eigenvalue determination
-      parameter (kaux3=max(66*kmax,2*kmax*kmax+1))
-#endif
-#if defined(HIB_UNIX_IBM)
-* set size of scratch array for matrix inversion
-      parameter (kaux=100*kmax)
-#endif
-#if defined(HIB_UNIX) && !defined(HIB_UNIX_IBM)
-* set size of scratch array for matrix inversion with lapack routines
-* warning, this assumes a blocksize of 64
-      parameter (kaux=128*kmax)
-#endif
+      integer :: kaux3 
+
+      integer :: kq2
+      integer :: kqmax
+
+* kv2max sets the maximum size of the v2 matrix
+      integer :: kv2max
+
+* krotmx set the maximum size of the asym top e.fn expansion
+      integer :: krotmx
+
 * modified klammx (pjd - 17-jan-2019)
 * increased kfact (pjd - 15-dec-2020)
-      parameter (klammx = 2000, kfact = 3500, kout = 50, ken = 25)
-      parameter (kmxpho = 3, knphot = 1)
-      parameter (kmxbas = 30)
-      parameter (kq2 = 2 * kmax, kqmax = kmxpho * kmax)
-* kv2max sets the maximum size of the v2 matrix, a reasonable size is
-* kmax**2
+      integer, parameter :: klammx = 2000
+      integer, parameter :: kfact = 3500
+      integer, parameter :: kout = 50
+      integer, parameter :: ken = 25
+
+      integer, parameter :: kmxpho = 3
+      integer, parameter :: knphot = 1
+      integer, parameter :: kmxbas = 30 ! number of base types
+      integer, parameter :: kmaxpar = 150 ! max number of base specific parameters
+      integer :: men
 *
-* increase kv2max from 2 * kmax * kmax to 20 * kmax * kmax (pjd - 13-dec-2019)
-*      parameter (kv2max = 2 * kmax * kmax)
-      parameter (kv2max = 50 * kmax * kmax)
-*
-* krotmx set the maximum size of the asym top e.fn expansion
-* increased factor multiplying kmax below and narray from 12 to 100 (pjd:  19-sep-2017)
-      parameter (krotmx = 500 * kmax)
 *  ----------------------------------------------------------
       common /comom/  xmom(3), imom(13)
+      real(8) :: xmom
+      integer :: imom
+
+      integer :: arg_index
+      integer :: stat
+      character(len=32) :: arg
+
+      kmax = 0
+
+      arg_index = 1
+      do while( arg_index <= command_argument_count() )
+            call get_command_argument(arg_index, arg)
+    
+            select case (arg)
+                case ('-k', '--kmax')
+                    arg_index = arg_index + 1
+                    if ( arg_index > command_argument_count() ) then
+                        print '(2a, /)', 'missing value for <max_num_channels> ', arg
+                        call print_help()
+                        stop 1
+                    end if
+                    call get_command_argument(arg_index, arg)
+                    read(arg,*,iostat=stat) kmax 
+
+                case ('-h', '--help')
+                    call print_help()
+                    stop 1
+    
+                case default
+                    print '(2a, /)', 'unrecognised command-line option: ', arg
+                    call print_help()
+                    stop 1
+            end select
+            arg_index = arg_index + 1
+      end do
+      if (kmax == 0) then
+            print '(a, /)', 'error : --kmax argument is mandatory.'
+            call print_help()
+            stop 1
+      end if
+
+      kairy = kmax
+      ktri = kmax * (kmax + 1) / 2
+      kq2 = 2 * kmax
+      kqmax = kmxpho * kmax
+* krotmx set the maximum size of the asym top e.fn expansion
+* increased factor multiplying kmax below and narray from 12 to 100 (pjd:  19-sep-2017)
+      krotmx = 500 * kmax
+
+* set size of scratch array for matrix inversion
+#if defined(HIB_UNIX_IBM)
+      kaux = 100 * kmax
+#elif defined(HIB_UNIX) && !defined(HIB_UNIX_IBM)
+* set size of scratch array for matrix inversion with lapack routines
+* warning, this assumes a blocksize of 64
+      kaux = 128 * kmax
+#else
+#error "hibridon doesn't know what value to choose for kaux on this architecture"
+#endif
+
+* set size of scratch array for matrix factorization and generalized
+*   eigenvalue determination
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
+      kaux3 = max( 66 * kmax, 2 * kmax * kmax + 1)
+#else
+      #error "hibridon doesn't know what value to choose for kaux on this architecture"
+#endif
+
+* kv2max sets the maximum size of the v2 matrix, a reasonable size is
+* kmax**2
+* increase kv2max from 2 * kmax * kmax to 20 * kmax * kmax (pjd - 13-dec-2019)
+      kv2max = 50 * kmax * kmax
+
 *   square matrices and vectors
       call allocate_coener(ken)
       call allocate_clseg()
@@ -242,6 +317,12 @@
      :           sc2, sc1, sc3, sc4, sc5,
      :           sc6, sc7, sc8, sc9, tq1, tq2, tq3, men, mmax, mairy)
       end
+contains
+      subroutine print_help()
+      print '(a, /)', 'command-line options:'
+      print '(a)',    '  -k, --kmax <max_num_channels>  defines the max number of channels'
+      print '(a, /)', '  -h, --help        print usage information and exit'
+      end subroutine print_help
 *  -------------------------------------------------------------
       subroutine flow (z, w, zmat, amat, bmat, jq, lq, inq, jlev,
      :            elev, inlev, isc1, isc2, isc3, isc4, lsc1,

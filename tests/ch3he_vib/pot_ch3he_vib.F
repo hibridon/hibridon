@@ -469,14 +469,15 @@ c
       integer i, vi, ki, ji, iep, i1, j1, njk, nn
       integer ilmmin, ilmmax, vibblk, ij
       double precision lvleng
-      integer vtemp(KMAX), ietemp(KMAX)
+      integer, dimension(nmax) :: vtemp
+      integer, dimension(nmax) :: ietemp
       double precision esave, etemp
       integer vsave, jsave, ksave, iesave
       integer lamsum
       double precision vee
       double precision emax(V2MAX+1), emin
       integer ipar, lpar, lmax, lmin, li, ilm, ilms, lambda, mu
-      integer v(KMAX)
+      integer v(nmax)
 c
 c
 c   Function called:

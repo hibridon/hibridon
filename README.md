@@ -49,19 +49,17 @@ mkdir /tmp/hib_build
 
 Create a new file with the `.user.cmake` extension at the root of the build directory (/tmp/hib_build) (e.g. `nh3h2.user.cmake`).
 
-Past the following content and edit to suit your needs:
+Paste the following content and edit to suit your needs:
 ```
 # NH3-H2 sample cmake script
 
 set(EXE_NAME "nh3h2.exe")
 set(POT_SRC_FILE "/home/NH3H2/pot_nh3h2_2009.F")
-set(p_KMAX "500")
 set(p_T_MATRIX_SIZE "500")
 ```
 where 
 * `EXE_NAME` will be the name of the hibridon executable
 * `POT_SRC_FILE` is the full path to your potential fortran source code*
-* `p_KMAX` is the KMAX parameter
 * `p_T_MATRIX_SIZE` is the T_MATRIX_SIZE parameter
 
 \*Simply the filename (e.g. `pot_nh3h2_2009.F` or `./pot_nh3h2_2009.F`) if your potential is located in the build directory.

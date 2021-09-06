@@ -377,7 +377,7 @@ endif()
 
 enable_testing()
 
-function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_COMMAND_FILE TEST_INPUT_FILES TEST_OUTPUT_FILES TEST_KMAX TEST_T_MATRIX_SIZE)
+function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_COMMAND_FILE TEST_INPUT_FILES TEST_OUTPUT_FILES TEST_T_MATRIX_SIZE)
   # message("for test ${TEST_ID}, CMAKE_CURRENT_LIST_DIR=${CMAKE_CURRENT_LIST_DIR}")
   get_filename_component(TEST_DIRNAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 
@@ -386,7 +386,6 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
   set(TEST_EXE ${TEST_ID})
 
   add_executable(${TEST_EXE} ${TEST_SRC_DIR}/${TEST_POT_SRC_FILE} src/himain.F)
-  target_compile_definitions(${TEST_EXE} PUBLIC KMAX=${TEST_KMAX})
   target_compile_definitions(${TEST_EXE} PUBLIC T_MATRIX_SIZE=${TEST_T_MATRIX_SIZE})
   target_link_libraries(${TEST_EXE} hib ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
   target_include_directories(${TEST_EXE} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -422,7 +421,7 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
   # endif()
 
   add_test(NAME ${TEST_ID}_test_run
-    COMMAND bash -c "${test_command_prefix} cat ./${TEST_COMMAND_FILE} | ${CMAKE_CURRENT_BINARY_DIR}/${TEST_EXE} | tee ./${TEST_ID}.stdout"
+    COMMAND bash -c "${test_command_prefix} cat ./${TEST_COMMAND_FILE} | ${CMAKE_CURRENT_BINARY_DIR}/${TEST_EXE} --kmax ${TEST_KMAX} | tee ./${TEST_ID}.stdout"
     WORKING_DIRECTORY "${TEST_BUILD_DIR}"
   )
 
@@ -787,13 +786,12 @@ add_hibridon_testsuite("coverage" "${coverage_testsuite}" "${tests_list}")
 
 # The following is to build hibridon with an user-supplied potential
 
-function(add_hibexe EXE_NAME POT_SRC_FILE p_KMAX p_T_MATRIX_SIZE)
+function(add_hibexe EXE_NAME POT_SRC_FILE p_T_MATRIX_SIZE)
   message("Adding executable ${EXE_NAME} using potential ${POT_SRC_FILE}")
  
 
 
   add_executable(${EXE_NAME} ${POT_SRC_FILE} src/himain.F)
-  target_compile_definitions(${EXE_NAME} PUBLIC KMAX=${p_KMAX})
   target_compile_definitions(${EXE_NAME} PUBLIC T_MATRIX_SIZE=${p_T_MATRIX_SIZE})
   target_link_libraries(${EXE_NAME} hib ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
   target_include_directories(${EXE_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -801,14 +799,13 @@ function(add_hibexe EXE_NAME POT_SRC_FILE p_KMAX p_T_MATRIX_SIZE)
 
 endfunction(add_hibexe)
 
-  file (GLOB userscripts ${CMAKE_CURRENT_BINARY_DIR}/*.user.cmake)
-   foreach(userscript IN LISTS userscripts)
+file (GLOB userscripts ${CMAKE_CURRENT_BINARY_DIR}/*.user.cmake)
+foreach(userscript IN LISTS userscripts)
    include (${userscript})
-   add_hibexe("${EXE_NAME}" "${POT_SRC_FILE}" "${p_KMAX}" "${p_T_MATRIX_SIZE}")
+   add_hibexe("${EXE_NAME}" "${POT_SRC_FILE}" "${p_T_MATRIX_SIZE}")
    message ("Added ${userscript} user executable")
    unset(EXE_NAME)
    unset(POT_SRC_FILE)
-   unset(p_KMAX)
    unset(p_T_MATRIX_SIZE)
-  endforeach()
+endforeach()
 

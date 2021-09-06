@@ -423,6 +423,7 @@
 1000    if (na(ji+1) .gt. 0) then
           do ia = 1, na(ji+1)
             nlist = nlist + 1
+            write(6, *) "graffy: nlist=", nlist
             etemp(nlist) = erot
             fjtemp(nlist) = ji
             fistmp(nlist) = ia
