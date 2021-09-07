@@ -53,7 +53,13 @@ pipeline {
                                 echo "testing for compiler ${COMPILER} and build type ${BUILD_TYPE}" &&
                                 cd ${HIBRIDON_BUILD_ROOT_PATH}/${COMPILER}/${BUILD_TYPE} &&
                                 echo "current directory : $(pwd)" &&
-                                make testsuite_coverage
+                                if [ "${COMPILER}" = 'ifort' ]
+                                then
+                                    . /etc/profile.d/modules.sh &&
+                                    module load compilers/ifort/latest &&
+                                    which ifort
+                                fi
+                                env CTEST_OUTPUT_ON_FAILURE=1 make testsuite_coverage
                                 '''
                         }
                     }
