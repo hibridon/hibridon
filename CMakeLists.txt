@@ -250,9 +250,17 @@ add_library(hib
      src/bases/hiba30_astp3.F)
 
 target_compile_definitions(hib PUBLIC MAX_NJTOT=1000)
+
+set(GIT_REVISION 'not-available')
+execute_process(COMMAND "git" "--git-dir=${CMAKE_CURRENT_SOURCE_DIR}/.git" "log" "--pretty=format:%h" "-n" "1"
+                OUTPUT_VARIABLE GIT_REVISION
+                ERROR_QUIET)
+                
+
 # The following is for preprocessing of hiversion.F
 target_compile_definitions(hib PUBLIC _BUILD_VERS_=${PROJECT_VERSION})
 target_compile_definitions(hib PUBLIC _BUILD_TYPE_="${CMAKE_BUILD_TYPE}")
+target_compile_definitions(hib PUBLIC _GIT_REVISION_="${GIT_REVISION}")
 target_compile_definitions(hib PUBLIC _BUILD_SYS1_="${CMAKE_HOST_SYSTEM_NAME}")
 target_compile_definitions(hib PUBLIC _BUILD_SYS2_="${CMAKE_HOST_SYSTEM_VERSION}")
 target_compile_definitions(hib PUBLIC _BUILD_PROC_="${CMAKE_HOST_SYSTEM_PROCESSOR}")
