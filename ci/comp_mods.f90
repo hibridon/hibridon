@@ -280,13 +280,14 @@ end
 module m_diff
     implicit none
     contains
-    function vectors_differ(va, vb, tolerance)
+    function vectors_differ(va, vb, tolerance, min_significant_value)
         use iso_fortran_env, only: Error_Unit, Output_Unit
         implicit none
         logical :: vectors_differ
         real(8), intent(in) :: va(:)
         real(8), intent(in) :: vb(:)
-        real(8) :: tolerance
+        real(8), intent(in) :: tolerance
+        real(8), intent(in) :: min_significant_value
         integer :: number_index
 
         if ( size(va) /= size(vb) ) then
@@ -297,13 +298,13 @@ module m_diff
         else
             number_index = 1
             do while(number_index <= size(va))
-                if(abs(va(number_index))>1e-30) then
-                if( abs(va(number_index) - vb(number_index))/max(abs(va(number_index)),1d-300) > tolerance ) then
-                    write(Error_Unit, *) "at number_index ", number_index, " : ", va(number_index), &
-                     " and ", vb(number_index), " differ for more than ", tolerance*100.0d0, " percent"
-                    vectors_differ = .TRUE.
-                    return
-                endif
+                if(abs(va(number_index)) > min_significant_value ) then
+                    if( abs(va(number_index) - vb(number_index))/max(abs(va(number_index)),1d-300) > tolerance ) then
+                        write(Error_Unit, *) "at number_index ", number_index, " : ", va(number_index), &
+                         " and ", vb(number_index), " differ for more than ", tolerance*100.0d0, " percent"
+                        vectors_differ = .TRUE.
+                        return
+                    endif
                 endif
                 number_index = number_index + 1
             enddo
@@ -312,14 +313,15 @@ module m_diff
         endif
         end function vectors_differ
 
-    function result_files_differ(results1_file_name, results2_file_name, num_header_lines, tolerance)
+    function result_files_differ(results1_file_name, results2_file_name, num_header_lines, tolerance, min_significant_value)
         use m_vector, only: t_vector
         ! use m_diff, only: vectors_differ
         implicit none
         character(len=200), intent(in) :: results1_file_name
         character(len=200), intent(in) :: results2_file_name
         integer, intent(in) :: num_header_lines(2)
-        real(8) :: tolerance
+        real(8), intent(in) :: tolerance
+        real(8), intent(in) :: min_significant_value
         logical :: result_files_differ
     
         type(t_vector) :: ref_numbers
@@ -337,7 +339,7 @@ module m_diff
     
         call get_file_numbers(results2_file_name, test_numbers, num_header_lines(2))
     
-        result_files_differ = vectors_differ(ref_numbers%array, test_numbers%array, tolerance)
+        result_files_differ = vectors_differ(ref_numbers%array, test_numbers%array, tolerance, min_significant_value)
     
         end function result_files_differ
         

@@ -9,6 +9,7 @@ program comp_tests
     character(len=200)  :: ref, test
     character(len=10)   :: ext
     real(8)             :: tolerance
+    real(8)             :: min_significant_value ! values below this are ignored in the comparison
     integer             :: num_header_lines(2)
     ! Get test and reference files paths from command arguments
     call get_command_argument(1,ref)
@@ -20,7 +21,9 @@ program comp_tests
     write(Output_Unit, *) 'comparing test file ', trim(test), ' to reference file ', trim(ref)
 
     ! Tolerance is set to 1%
-    tolerance=0.01d0 
+    tolerance=0.01d0
+
+    min_significant_value = 1e-30
 
     ! Set the number of header lines depending on the type of output file
     num_header_lines = 0
@@ -35,6 +38,9 @@ program comp_tests
     case ("flx") ! Header ends at first occurence of "R (BOHR) AND OUTGOING FLUXES"
         num_header_lines(1) = get_first_occ_of("R (BOHR) AND OUTGOING FLUXES",ref)
         num_header_lines(2) = get_first_occ_of("R (BOHR) AND OUTGOING FLUXES",test)
+        ! the values of the flx files can be highly sensitive to compilers (see doc/hib_html/tests.html and issue #37)
+        ! so we ignore more values
+        min_significant_value = 1e-10
     case("evl") ! Header ends at first occurence of "** EIGENVALUES"
         num_header_lines(1) = get_first_occ_of("** EIGENVALUES",ref)
         num_header_lines(2) = get_first_occ_of("** EIGENVALUES",test)
@@ -47,7 +53,7 @@ program comp_tests
     end select
 
     ! Compare numeric values between reference and test files
-    if(result_files_differ(ref, test, num_header_lines, tolerance)) stop 1
+    if(result_files_differ(ref, test, num_header_lines, tolerance, min_significant_value)) stop 1
 
 
 contains 
