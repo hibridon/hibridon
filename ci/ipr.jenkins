@@ -53,12 +53,7 @@ pipeline {
                                 echo "testing for compiler ${COMPILER} and build type ${BUILD_TYPE}" &&
                                 cd ${HIBRIDON_BUILD_ROOT_PATH}/${COMPILER}/${BUILD_TYPE} &&
                                 echo "current directory : $(pwd)" &&
-                                if [ "${COMPILER}" = 'ifort' ]
-                                then
-                                    echo "warning : testing of ifort configurations is disabled untils the ifort build is fixed to pass all tests (see issue https://github.com/hibridon/hibridon/issues/37)"
-                                else
-                                    make testsuite_coverage
-                                fi
+                                make testsuite_coverage
                                 '''
                         }
                     }
