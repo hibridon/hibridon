@@ -1403,8 +1403,8 @@ c
       use mod_coz, only: scmat => z_as_vec ! scmat(100)
       use mod_cow, only: sr => w_as_vec ! sr(100)
       use mod_cozmat, only: si => zmat_as_vec ! si(100)
-
-
+      use mod_version, only : version
+      
       implicit double precision (a-h,o-z)
       character*(*) filnam
       character*40  psifil, wavfil, amplfil, flxfil

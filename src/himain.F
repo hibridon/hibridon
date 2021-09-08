@@ -431,6 +431,7 @@ contains
       use mod_coeint, only: eint
       use mod_coener, only: energ
       use mod_hiba1sg, only : basis
+      use mod_version, only : version, acknow
       use constants
       implicit double precision (a-h,o-z)
       integer :: jtotmx

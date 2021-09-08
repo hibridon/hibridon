@@ -51,6 +51,7 @@
       use mod_coener, only: energ
       use mod_conlam, only: nlam, nlammx, lamnum
       use mod_cosysl, only: islcod, lspar
+      use mod_version, only : version
 
       implicit double precision (a-h,o-z)
 *  iicode is the number of integer pcod's

@@ -32,6 +32,7 @@ c     nch     Number of coupled equations
 c     nmax    Leading dimension of the w matrix used in Hibridon
 c     ------------------------------------------------------------------
       use mod_coiout, only: niout
+      use mod_version, only : version
       implicit none
       integer, intent(in) :: nch, nmax
 #include "common/parpot"

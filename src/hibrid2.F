@@ -1034,6 +1034,7 @@ c
       use mod_cosc1, only: elev => sc1 ! elev(5)
       use mod_coz, only: zmat => z_as_vec ! zmat(1)
       use mod_cow, only: scmat => w_as_vec ! scmat(1)
+      use mod_version, only : version
       implicit double precision (a-h,o-z)
       character*(*) fname
       character*20 cdate

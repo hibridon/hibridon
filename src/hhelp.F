@@ -131,7 +131,7 @@ c...    key not found in help. attempt to open alternate file.
 #if defined(HIB_UNIX)
           helpfile='ls '//helpdir//zalt(1:lenstr(zalt))//'*'//helptail
      >     //' >helphelphelphelp'
-          call system(helpfile)
+          call execute_command_line(helpfile)
           inquire (file='helphelphelphelp',exist=exist)
           if (.not.exist) goto 29
           open (ihlpalt,file='helphelphelphelp',status='old')

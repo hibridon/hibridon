@@ -1185,6 +1185,7 @@ cABER
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_cosc2, only: csum => sc2 ! csum(1)
       use mod_cosc3, only: tsum => sc3 ! tsum(1)
+      use mod_version, only : version
       implicit double precision (a-h,o-z)
       character*(*) fname
       character*20 cdate
