@@ -128,6 +128,7 @@
       vvl(3)=(2.d0*(evec(4)-evec(1)-evec(5))+evec(2)+evec(3))/9.d0
 * v222
       vvl(4)=(evec(3)-evec(2))/3.d0
+      vvl(5)=0.0d0 ! todo: check if zero is correct here as vvl(5) needs to be initialized because it's used later on by h2p base code
 * transform to space frame terms if CC or CS case 1C
       if (.not. csflag .or. (csflag .and. ihomo)) then
         call dcopy(4,vvl,1,vvll,1)
