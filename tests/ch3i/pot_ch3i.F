@@ -1,3 +1,4 @@
+#include <assert.h>
 * shapiro CH3I PES's modified by Guo and Schatz
 * References:  M. Shapiro, J. Phys. Chem. 90, 3644 (1986);
 *  H. Guo and G. C. Schatz, J. Chem. Phys. 93, 393 (1990);
@@ -124,10 +125,9 @@
       common /cosysr/ isrcod, junkr, rcod(maxpar)
       common /covib/ie(50), iv(50)
       common /coground/ ifull
-      data pi4, sq2 / 0.75112554446494d0, 1.41421356237310d0/
       data y0, reg, q / 0.619702d0, 4.16799,
      :                  7.830d0, -0.1762d0, 0.6183d0, 4.939d0/
-      data yymu, cf / 2.4d0, 0.036225d0/
+ 
       ymin=-2.d0
       dy=0.08
       ny=51
@@ -170,31 +170,7 @@
         ny=nny
       endif
 
-      ymu = yymu/xmconv
-      alpha = (ymu * cf)**0.25
-* en0 is the normalization factor for v=0
-* en1 is the normalization factor for v=1
-      en(1)=sqrt(alpha)*pi4
-      en(2)=en(1)/sq2
-      en(3)=en(1)/(2.d0*sq2)
-      en(4)=en(1)/sqrt(48.d0)
-      en(5)=en(1)/sqrt(384.d0)
-      en(6)=en(1)/sqrt(3840.d0)
-      en(7)=en(1)/sqrt(46080.d0)
-      en(8)=en(1)/sqrt(645120.d0)
-      en(9)=en(1)/sqrt(1.03219d+07)
-      en(10)=en(1)/sqrt(1.8579d+08)
-      en(11)=en(1)/sqrt(3.7159d+09)
-      en(12)=en(1)/sqrt(8.1750d+10)
-      en(13)=en(1)/sqrt(1.9620d+12)
-      en(14)=en(1)/sqrt(5.1012d+13)
-      en(15)=en(1)/sqrt(1.4283d+15)
-*      en(16)=en(1)/sqrt(4.2850d+16)
-*      en(17)=en(1)/sqrt(1.3712d+18)
-*      en(18)=en(1)/sqrt(4.6620d+19)
-*      en(19)=en(1)/sqrt(1.6782d+21)
-*      en(20)=en(1)/sqrt(6.3762d+22)
-*      en(21)=en(1)/sqrt(2.5493d+24)
+      call hof(ymin, dy, f, ny, xmconv, ngr, nymax)
 
       do i=1,ny
         y= ymin +(i-1)*dy
@@ -203,69 +179,8 @@
         psi(i)=exp(-0.5*(q1**2+q2**2))
 * normalise psi:
         psi(i)=psi(i)/sqrt(0.0810)
-* f(1) is the normalized h.o. function for v=0; f(2) for v=1
+      end do
 
-        xp=exp(- 0.5d0 * (alpha * y )**2)
-        x = alpha*(y)
-        f(1,i) = en(1) * xp
-        f(2,i) = en(2) * 2.d0 * x * xp
-        f(3,i) = en(3) * (4*x*x -2) * xp
-        f(4,i) = en(4) * (8*x*x -12)*x * xp
-        f(5,i) = en(5) * ((16*x*x -48)*x*x +12) * xp
-        f(6,i) = en(6) * ((32*x*x -160)*x*x +120)*x* xp
-        f(7,i) = en(7) * (((64*x*x -480)*x*x +720)*x*x-120) * xp
-        f(8,i) = en(8) * (((128*x*x-1344)*x*x+3360)*x*x-1680)*x*xp
-        f(9,i) = en(9) * ((((256*x*x  -3584)*x*x +13440)*x*x
-     :                -13440)*x*x+1680) * xp
-        f(10,i) = en(10)*((((512*x*x -9216)*x*x +48384)*x*x
-     :                -80640)*x*x +30240)*x*xp
-        f(11,i) = en(11)*(((((1024*x*x -23040)*x*x + 161280)*x*x
-     :                -403200)*x*x + 302400)*x*x - 30240)*xp
-        f(12,i) = en(12)*(((((2048*x*x - 56320)*x*x + 506880)*x*x
-     :                -1774080)*x*x +2217600)*x*x -665280)*x*xp
-        f(13,i) = en(13)*((((((4096*x*x - 135168)*x*x+1520640)*x*x
-     :                - 7096320)*x*x + 13305600)*x*x -7983360)*x*x
-     :                + 665280)*xp
-        f(14,i)=en(14)*x*(17297280+x*x*(-69189120 + x*x*(69189120+
-     :          x*x*(-26357760 + x*x*(4392960  +x*x*(- 319488
-     :          + 8192*x*x))))))*xp
-        f(15,i)=en(15)*( -17297280 + x*x*(242161920 +x*x*(-484323840+
-     :          x*x*(322882560+x*x*(-92252160  + x*x*(12300288
-     :          +x*x*(- 745472 + x*x*16384)))))))*xp
-        f(16,i)=en(1)*x*(-2.5068229d0 + x*x*(1.1698507d+01 +x*x*(-
-     :          1.4038208d+01 + x*x*(
-     :          6.6848611d0  +x*x*(-1.4855247d0 +
-     :          x*x*(1.6205724d-01+x*x*(
-     :          - 8.3106277d-03 + x*x*1.5829767d-04)))))))*xp
-        f(17,i)=en(1)*( 4.4314787d-01 +x*x*(- 7.0903660d0 +
-     :           x*x*(1.6544187d+01 +x*x*(- 1.3235350d+01
-     :          +x*x*(4.7269106d0 +x*x*(- 8.4033967d-01 +
-     :          x*x*(7.6394515d-02 +x*x*(- 3.3580007d-03
-     :           + x*x*5.5966678d-05))))))))*xp
-        f(18,i)=en(1)*x*(2.5839961d0 +x*x*(- 1.3781312d1 +
-     :          x*x*(1.9293837d1
-     :         +x*x*(- 1.1025050d1 + x*x*(3.0625139d0*x**9
-     :         +x*x*(- 4.4545657d-01
-     :         +x*x*( 3.4265890d-02 +x*x*(- 1.3053672d-03+
-     :           x*x*1.9196577d-05))))))))*xp
-        f(19,i)=en(1)*( -4.3068141d-01 + x*x*(7.7522654d0+ x*x*(-
-     :           2.0672708d1 +x*x*(
-     :           1.9294527d1 +x*x*(-8.2690831d0+x*x*(1.8375740d0
-     :           +x*x*(- 2.2273625d-01 + x*x*(1.4685906d-02 +x*x*(-
-     :           4.8953021d-04 + x*x*6.3990877d-06)))))))))*xp
-        f(20,i)=en(1)*x*(-2.6550984d+00 + x*x*(1.5930590d+01
-     :          +x*x*(- 2.5488944d1 +x*x*(1.6992630d+01
-     :          +x*x*(- 5.6642099d0 + x*x*(1.0298563d+00+
-     :          x*x*(- 1.0562629d-01 +x*x*(
-     :          6.0357881d-03 + x*x*(- 1.7752318d-04 +
-     :          x*x*2.0762945d-06)))))))))*xp
-        f(21,i)=en(1)*(4.1990506d-01 +x*x*(- 8.3981013d0
-     :          + x*x*(2.5194304d+01 +x*x*( -2.6873924d+01  +
-     :          x*x*( 1.3436962d+01  +x*x*(- 3.5831899d+00
-     :          + x*x*(5.4290756d-01 +x*x*(- 4.7728137d-02 +
-     :          x*x*( 2.3864068d-03 +x*x*(- 6.2389721d-05 +
-     :           6.5673391d-07*x*x))))))))))*xp
-      enddo
       if (ny .eq. 1) then
 * here just for determination of vibrational wavefunctions
         call dcopy(nvib,f,1,wf,1)
@@ -976,23 +891,43 @@
       return
       end
 
-
-      subroutine hof(y,f,ny)
 * returns the coupling matrix elements for lambda=il=4,5,6,7
 * ie. matrix elements of y, y**2, exp(b23*0.20218*y) and
 * exp(b24*0.2218*y).
 * between  states of vibrational quantum number ir-1 and ic-1.
-      implicit double precision (a-h,o-z)
+#define HOF_OPTIM_METHOD_A 1
+#define HOF_OPTIM_METHOD_B 2
+#define HOF_OPTIM_METHOD HOF_OPTIM_METHOD_A
+      subroutine hof(ymin, dy, f, ny, xmconv, ngr, nymx)
+      implicit none
+      real(8), intent(in) :: ymin
+      real(8), intent(in) :: dy
+      real(8), dimension(ngr,nymx), intent(out) :: f
+      integer, intent(in) :: ny
+      real(8), intent(in) :: xmconv
+      integer, intent(in) :: ngr
+      integer, intent(in) :: nymx
 
-      parameter (ngr=21, nymx=500)
-      dimension en(ngr), f(ngr, nymx), y(ny)
+      ASSERT(ny <= nymx)
 
-      common /coconv/ econv, xmconv
-      data pi4, sq2 / 0.75112554446494d0, 1.41421356237310d0/
-      data yymu, cf / 2.4d0, 0.036225d0/
-
+      real(8), dimension(ngr) :: en
+      real(8) :: alpha
+      real(8) :: xp
+      real(8), parameter :: pi4 = 0.75112554446494d0
+      real(8), parameter :: sq2 = 1.41421356237310d0
+      real(8), parameter :: yymu = 2.4d0
+      real(8), parameter :: cf = 0.036225d0
+      real(8) :: y
+      
+      real(8) :: x
+#if( HOF_OPTIM_METHOD == HOF_OPTIM_METHOD_B )
+      real(8) ::  x2,  x3,  x4,  x5,  x6,  x7,  x8,  x9, x10, x11, 
+      real(8) :: x12, x13, x14, x15, x16, x17, x18, x19, x20
+#endif
+      integer :: i
+      real(8) :: ymu
       ymu = yymu/xmconv
-      alpha = sqrt(sqrt((ymu * cf)))
+      alpha = (ymu * cf)**0.25
 * en0 is the normalization factor for v=0
 * en1 is the normalization factor for v=1
       en(1)=sqrt(alpha)*pi4
@@ -1005,13 +940,11 @@
       en(8)=en(1)/sqrt(645120.d0)
       en(9)=en(1)/sqrt(1.03219d+07)
       en(10)=en(1)/sqrt(1.8579d+08)
-      en(10)=en(1)/sqrt(1.8579d+08)
       en(11)=en(1)/sqrt(3.7159d+09)
       en(12)=en(1)/sqrt(8.1750d+10)
       en(13)=en(1)/sqrt(1.9620d+12)
       en(14)=en(1)/sqrt(5.1012d+13)
       en(15)=en(1)/sqrt(1.4283d+15)
-
 *      en(16)=en(1)/sqrt(4.2850d+16)
 *      en(17)=en(1)/sqrt(1.3712d+18)
 *      en(18)=en(1)/sqrt(4.6620d+19)
@@ -1021,8 +954,69 @@
 
       do i=1,ny
 * f(1) is the normalized h.o. function for v=0; f(2) for v=1
-        xp=exp(- 0.5d0 * (alpha * y(i) )**2)
-        x = alpha*(y(i))
+        y= ymin +(i-1)*dy
+        xp=exp(- 0.5d0 * (alpha * y )**2)
+        x = alpha*(y)
+#if( HOF_OPTIM_METHOD == HOF_OPTIM_METHOD_A )
+        f(1,i) = en(1) * xp
+        f(2,i) = en(2) * 2.d0 * x * xp
+        f(3,i) = en(3) * (4*x*x -2) * xp
+        f(4,i) = en(4) * (8*x*x -12)*x * xp
+        f(5,i) = en(5) * ((16*x*x -48)*x*x +12) * xp
+        f(6,i) = en(6) * ((32*x*x -160)*x*x +120)*x* xp
+        f(7,i) = en(7) * (((64*x*x -480)*x*x +720)*x*x-120) * xp
+        f(8,i) = en(8) * (((128*x*x-1344)*x*x+3360)*x*x-1680)*x*xp
+        f(9,i) = en(9) * ((((256*x*x  -3584)*x*x +13440)*x*x
+     :                -13440)*x*x+1680) * xp
+        f(10,i) = en(10)*((((512*x*x -9216)*x*x +48384)*x*x
+     :                -80640)*x*x +30240)*x*xp
+        f(11,i) = en(11)*(((((1024*x*x -23040)*x*x + 161280)*x*x
+     :                -403200)*x*x + 302400)*x*x - 30240)*xp
+        f(12,i) = en(12)*(((((2048*x*x - 56320)*x*x + 506880)*x*x
+     :                -1774080)*x*x +2217600)*x*x -665280)*x*xp
+        f(13,i) = en(13)*((((((4096*x*x - 135168)*x*x+1520640)*x*x
+     :                - 7096320)*x*x + 13305600)*x*x -7983360)*x*x
+     :                + 665280)*xp
+        f(14,i)=en(14)*x*(17297280+x*x*(-69189120 + x*x*(69189120+
+     :          x*x*(-26357760 + x*x*(4392960  +x*x*(- 319488
+     :          + 8192*x*x))))))*xp
+        f(15,i)=en(15)*( -17297280 + x*x*(242161920 +x*x*(-484323840+
+     :          x*x*(322882560+x*x*(-92252160  + x*x*(12300288
+     :          +x*x*(- 745472 + x*x*16384)))))))*xp
+        f(16,i)=en(1)*x*(-2.5068229d0 + x*x*(1.1698507d+01 +x*x*(-
+     :          1.4038208d+01 + x*x*(
+     :          6.6848611d0  +x*x*(-1.4855247d0 +
+     :          x*x*(1.6205724d-01+x*x*(
+     :          - 8.3106277d-03 + x*x*1.5829767d-04)))))))*xp
+        f(17,i)=en(1)*( 4.4314787d-01 +x*x*(- 7.0903660d0 +
+     :           x*x*(1.6544187d+01 +x*x*(- 1.3235350d+01
+     :          +x*x*(4.7269106d0 +x*x*(- 8.4033967d-01 +
+     :          x*x*(7.6394515d-02 +x*x*(- 3.3580007d-03
+     :           + x*x*5.5966678d-05))))))))*xp
+        f(18,i)=en(1)*x*(2.5839961d0 +x*x*(- 1.3781312d1 +
+     :          x*x*(1.9293837d1
+     :         +x*x*(- 1.1025050d1 + x*x*(3.0625139d0*x**9
+     :         +x*x*(- 4.4545657d-01
+     :         +x*x*( 3.4265890d-02 +x*x*(- 1.3053672d-03+
+     :           x*x*1.9196577d-05))))))))*xp
+        f(19,i)=en(1)*( -4.3068141d-01 + x*x*(7.7522654d0+ x*x*(-
+     :           2.0672708d1 +x*x*(
+     :           1.9294527d1 +x*x*(-8.2690831d0+x*x*(1.8375740d0
+     :           +x*x*(- 2.2273625d-01 + x*x*(1.4685906d-02 +x*x*(-
+     :           4.8953021d-04 + x*x*6.3990877d-06)))))))))*xp
+        f(20,i)=en(1)*x*(-2.6550984d+00 + x*x*(1.5930590d+01
+     :          +x*x*(- 2.5488944d1 +x*x*(1.6992630d+01
+     :          +x*x*(- 5.6642099d0 + x*x*(1.0298563d+00+
+     :          x*x*(- 1.0562629d-01 +x*x*(
+     :          6.0357881d-03 + x*x*(- 1.7752318d-04 +
+     :          x*x*2.0762945d-06)))))))))*xp
+        f(21,i)=en(1)*(4.1990506d-01 +x*x*(- 8.3981013d0
+     :          + x*x*(2.5194304d+01 +x*x*( -2.6873924d+01  +
+     :          x*x*( 1.3436962d+01  +x*x*(- 3.5831899d+00
+     :          + x*x*(5.4290756d-01 +x*x*(- 4.7728137d-02 +
+     :          x*x*( 2.3864068d-03 +x*x*(- 6.2389721d-05 +
+     :           6.5673391d-07*x*x))))))))))*xp
+#elif( HOF_OPTIM_METHOD == HOF_OPTIM_METHOD_B )
         x2=x*x
         x3=x2*x
         x4=x3*x
@@ -1103,27 +1097,45 @@
      :          + 5.4290756d-1*x12 - 4.7728137d-2*x14 +
      :           2.3864068d-3*x16 - 6.2389721d-5*x18 +
      :           6.5673391d-7*x20)*xp
-
-      enddo
-      return
-      end
+#endif
+      end do
+      end subroutine
 
       subroutine  ptmatrix(il,ir,ic,v,ii)
+      implicit none
+      integer, intent(in) :: il
+      integer, intent(in) :: ir
+      integer, intent(in) :: ic
+      real(8), intent(out) :: v
+      integer, intent(inout) :: ii
+      common /coconv/ econv, xmconv
+      real(8) :: econv, xmconv
+      integer, parameter :: ngr=21
+      integer, parameter :: nymx=500
+      real(8), dimension(ngr, nymx) :: f
+      real(8), dimension(nymx) :: y
 
-      implicit double precision (a-h,o-z)
-      parameter (ngr=21, nymx=500)
-      dimension f(ngr, nymx),y(nymx)
+      real(8), parameter :: b23 = 1.5d0
+      real(8), parameter :: b24 = 0.5d0
+      real(8), parameter :: ymin = -2.d0
+      real(8), parameter :: dy = 0.01d0
+      integer, parameter :: ny = 401
 
-      data b23, b24 / 1.5d0, 0.5d0/
-      data ymin, dy / -2.d0, 0.01d0/
-      data ny / 401/
-      save y, f
+      real(8) :: fint
+      real(8) :: fl
+      real(8) :: fu
+      real(8) :: yl
+      real(8) :: yu
+      integer :: i
+      save f, y
 
       if (ii .eq. 0) then
+        
         do i=1,ny
           y(i)= ymin +(i-1)*dy
         enddo
-        call hof(y,f,ny)
+
+        call hof(ymin, dy, f, ny, xmconv, ngr, nymx)
         ii=1
         return
       endif
