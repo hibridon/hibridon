@@ -370,7 +370,7 @@ c
       icol = 1
       do 20  ich = 1, nch
 #if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
-         call dscal (nch, zero, z(icol), nrow)
+         call dset (nch, zero, z(icol), nrow)
 #endif
          icol = icol + ncol
   20  continue
