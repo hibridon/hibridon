@@ -924,7 +924,9 @@ c.....assume that jlpar=1 is stored first
       liwork=10*nch
       abstol=1.e-16
       lsup=2*nch
-      call dsyevr('N','A','L',nch,w,nmax,vl,vu,il,iu,abstol,m,
+      vl = 0.0
+      vu = 0.0
+      call dsyevr_wrapper('N','A','L',nch,w,nmax,vl,vu,il,iu,abstol,m,
      :   eignow,vecnow,nmax,isuppz,work,lwork,iwork,liwork,ierr)
 
       if (ierr .ne. 0) then

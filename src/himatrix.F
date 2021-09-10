@@ -1360,7 +1360,7 @@ c
 
       call dgetrf (n,n,a,lda,ipiv,ierr)
       if (ierr .ne. 0) stop 'error in dgetrf'
-      call dgetri(n,a,lda,ipiv,work,lwork,ierr)
+      call dgetri_wrapper(n,a,lda,ipiv,work,lwork,ierr)
       if (ierr .ne. 0) stop 'error in dgetri'
       return
       end

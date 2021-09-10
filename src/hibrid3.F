@@ -206,7 +206,10 @@
       liwork=10*nch
       abstol=1.d-16
       lsup=2*nch
-      call dsyevr('V','A','L',nch,scmat,nmax,vl,vu,il,iu,abstol,m,
+      vl = 0.0
+      vu = 0.0
+
+      call dsyevr_wrapper('V','A','L',nch,scmat,nmax,vl,vu,il,iu,abstol,m,
      :   eignow,vecnow,nmax,isuppz,work,lwork,iwork,liwork,ierr)
 #endif
       if (ierr .ne. 0) then
