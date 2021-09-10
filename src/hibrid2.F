@@ -395,7 +395,7 @@ c
           write (6, 35) nsteps
 35        format (' *** WARNING: IN LODG PHOTOF=TRUE AND NSTEPS=',i3,
      :            ' SHOULD BE .GT. 0 ***')
-          return
+          goto 261
         endif
       endif
 #ifdef DEBUG_ISSUE35
@@ -787,7 +787,7 @@ c     nrlogd is the number of LOGD records - used to seek the wfu file
          call dscal (nch, fac, z(icol), nrow)
          icol = icol + ncol
  260  continue
-      call mtime(tl,tlw)
+261   call mtime(tl,tlw)
       tl = tl - tf - tp - twf
       tlw = tlw - tfw - tpw - twfw
       return
