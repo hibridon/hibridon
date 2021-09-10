@@ -315,6 +315,7 @@
       use mod_covvl, only: vvl
       use mod_conlam, only: nlam
       implicit double precision (a-h, o-z)
+      real(8), intent(out) :: vv0
       common /covib/ ie(50), ic(50)
 *  -----------------------------------------------------------------------
       data a11, b11, a12, b12, b13, y0, r0 / 51.53d0, 1.64d0, 25.15d0,
@@ -325,6 +326,7 @@
      :          0.38597d0,
      :          1.5d0, 4.5d0, 0.82978d0, 1.5d0, 0.048149d0, 0.5d0/
       data bb12, g12, r012 / 0.002226d0, 0.5d0, 4.2d0/
+      vv0 = 0.d0
       vvl(1) = a11*exp(-b11*r)+
      :       0.5*(cf+a12*exp(-b12*r))*y0**2*exp(-2*b13*(r-r0))
       vvl(4) = -(cf+a12*exp(-b12*r))*y0*exp(-b13*(r-r0))
@@ -1007,6 +1009,9 @@
       en(11)=en(1)/sqrt(3.7159d+09)
       en(12)=en(1)/sqrt(8.1750d+10)
       en(13)=en(1)/sqrt(1.9620d+12)
+      en(14)=en(1)/sqrt(5.1012d+13)
+      en(15)=en(1)/sqrt(1.4283d+15)
+
 *      en(16)=en(1)/sqrt(4.2850d+16)
 *      en(17)=en(1)/sqrt(1.3712d+18)
 *      en(18)=en(1)/sqrt(4.6620d+19)
