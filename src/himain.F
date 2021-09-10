@@ -483,6 +483,7 @@ contains
      :          sc5(1), sc6(1), sc7(1), sc8(1), sc9(1), tq1(1),
      :          tq2(1), tq3(1)
       data twojlp / .false. /
+      real(8), parameter :: mtime_granularity = 0.5d0
 *   to obtain timing information calls are made to system-specific
 *   time subroutine:  call mtime(cpu,wallt) where cpu is clock cpu
 *   time in seconds and wallt is wall clock time in seconds
@@ -1206,17 +1207,20 @@ c.....save restart information
 500      format(' **** END OF CALCULATION ****',/,
      :    '      MAXIMUM NUMBER OF CHANNELS USED WAS:  ',i4)
          if (nerg.eq.1) then
+            twallf = max(twallf, mtime_granularity)
             write (6,505) timew, time, 100d0*(tcpuf/twallf)
             write (9,505) timew, time, 100d0*(tcpuf/twallf)
 505         format('      TIMING:  ELAPSED',(a),'/ CPU',(a),
      :             '/ MP RATIO',f7.1,' %')
          endif
          if (nerg.gt.1) then
+            twall1 = max(twall1, mtime_granularity)
             write(6,510) timew1, time1, 100d0*(tcpu1/twall1)
             write(9,510) timew1, time1, 100d0*(tcpu1/twall1)
 510         format('      TIMING (FIRST ENERGY):  ELAPSED',(a),
      :            '/ CPU',(a),
      :           '/ MP RATIO',f7.1)
+            twall2 = max(twall2, mtime_granularity)
             write(6,515) timew2, time2, 100d0*(tcpu2/twall2)
             write(9,515) timew2, time2, 100d0*(tcpu2/twall2)
 515         format('      TIMING (SECOND ENERGY): ELAPSED',(a),
