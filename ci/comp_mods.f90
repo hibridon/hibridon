@@ -188,9 +188,13 @@ FUNCTION is_numeric(string)
     LOGICAL :: is_numeric
     REAL :: x
     INTEGER :: e
-    x = 0
-    READ(string,*,IOSTAT=e) x
-    is_numeric = ((e == 0) .and. (.NOT. ISNAN(X)))
+    if (string == 'INF') then ! INF happens to be the name of a column
+      is_numeric = .false.
+    else
+      x = 0
+      READ(string,*,IOSTAT=e) x
+      is_numeric = ((e == 0) .and. (.NOT. ISNAN(X)))
+    end if
     END FUNCTION is_numeric
 
 subroutine get_file_numbers(file_name, numbers, num_header_lines)
