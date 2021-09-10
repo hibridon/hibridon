@@ -3,7 +3,9 @@
 *  revised by Q.Ma for explicit type declaration - 16-nov-2011
 *  increased maxtrm from 12 to 18 (p.dagdigian, 17-nov-2011)
 *
-      parameter (maxtrm=18,maxvib=10,maxvb2=maxvib**2)
+      integer, parameter :: maxtrm=18
+      integer, parameter :: maxvib=10
+      integer, parameter :: maxvb2=maxvib**2
 *
 *  variables in common block /cobspt/
 *    lammin:   array containing minimum value of lambda for each term
@@ -26,5 +28,13 @@
 *
       common /cobsp2/ ntv(maxtrm),ivcol(maxvb2,maxtrm),
      :                ivrow(maxvb2,maxtrm)
+      integer :: nvt
+      integer :: ivcol
+      integer :: ivrow
       common /cobspt/ lammin(maxtrm), lammax(maxtrm), mproj(maxtrm)
+      integer :: lammin
+      integer :: lammax
+      integer :: mproj
       common /cobsptln/ lam2(maxtrm), m2proj(maxtrm)
+      integer :: lam2
+      integer :: m2proj
