@@ -17,6 +17,9 @@ set(ENABLE_PROFILING "OFF" CACHE BOOL "to enable or disable performance profilin
 
 set(ENABLE_ASSERTS "OFF" CACHE BOOL "to enable or disable assert checks for debug builds (mostly for developers). Asserts are disabled by default because they can cause the compilation to fail depending on the compiler (assert system needs to be made more robust)")
 
+# With gfortran, variables are initialized to 0 by default, but it's not the case with ifort compiler. Therefore, all variables need to be initialized to guarantee the program works in a deterministic way on every compiler.
+set(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR "OFF" CACHE BOOL "if set, causes the use of uninitilazed variables to trigger an exception, thus making the program stop. This is useful to detect uninitialized memory issues. Disabled by default while all such errors haven't been fixed.")
+
 
 set(ENABLE_ISSUE35_DEBUGGING "OFF" CACHE BOOL "enable traces to investigate issue #35")
 
@@ -94,8 +97,12 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # don't initialize local variables to zero : initialize them with dummy values to force failures which help detect uninitialized variables as -Wuninitialized doesn't detect everything (see issue #38 or https://stackoverflow.com/questions/39591300/gfortran-wuninitialized-flag-misses-variable-in-do-loop)
   # by default, gfortran initializes integers to 0, but not ifort : as a result, some bugs in the code are hidden with gfortran default options
   # set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -fno-init-local-zero")
-  # set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -finit-integer=333333333")
-  # set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -finit-real=snan")
+  if(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR)
+    # initialize variables to something else than 0 to force the programe to behave badly in case of unitialized variables
+    set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -finit-integer=333333333")
+    set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -finit-real=snan")
+    set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -ffpe-trap=invalid,zero,overflow")
+  endif()
 
   # todo: add -fbounds-check once all mismatched declarations of variables (eg in common blocks) have been fixed
   if(ENABLE_CODE_COVERAGE)
@@ -182,13 +189,25 @@ elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   set (warning_options "${warning_options} -diag-disable 8889")
   
 
-  # set (warning_options "") # activate all wanings
-  set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${warning_options}")
-  set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g -traceback -fp-stack-check ${warning_options}")
+  set (common_options "")
 
-  # check uses of uninitialized variables in run time
-  # this is very useful as these are always bugs that cause the program to behave randomly with ifort (gfortran initializes data with zero)
-  set (CMAKE_Fortran_FLAGS_DEBUG   "${CMAKE_Fortran_FLAGS_DEBUG} -check uninit")
+  # Force à NaN toutes les variables de type intrinsèque ainsi que les tableaux non initialisés. Cette option implique -fpe0. Pour éviter de récupérer des exceptions, qui ne soient pas relatives à des variables non-initialisées, nous recommandons de réduire le niveau d'optimisation à -O1 ou -O0 ou alors d'utiliser -fp-speculation=safe pour faire la détection de variables non-initialisés.
+  set (common_options "${common_options} -init=arrays,snan")
+
+  # Cette combinaison d'options stoppe l'exécution dès qu'une exception (overflow, underflow, division par zéro, opération invalide,…) se produit; elle indique à quel niveau du code elle s'est produite. Le contrôle s'opère dans chaque subroutine, contrairement à l'option -fpe0 qui agit uniquement sur le programme principal. 
+#  set (common_options "${common_options} -fpe-all=0 -no-ftz -traceback")
+
+  # set (warning_options "") # activate all wanings
+  set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_options} ${warning_options}")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g -traceback -fp-stack-check ${common_options} ${warning_options}")
+
+  if(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR)
+    # check uses of uninitialized variables in run time
+    # this is very useful as these are always bugs that cause the program to behave randomly with ifort (gfortran initializes data with zero)
+    set (CMAKE_Fortran_FLAGS_DEBUG   "${CMAKE_Fortran_FLAGS_DEBUG} -check uninit")
+  endif()
+
+
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
 
