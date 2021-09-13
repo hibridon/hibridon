@@ -316,8 +316,8 @@ c max_rr
 c max_par : maximum number of parameters which can be fitted
 cmax_theta
       integer*4 max_b,max_p,max_r,max_rr,max_par,max_theta
-      parameter (max_b=90,max_p=10,max_r=10,max_rr=70)
-      parameter (max_par=50,max_theta=20)
+      parameter (max_b=90,max_p=10,max_r=37,max_rr=70)
+      parameter (max_par=50,max_theta=13)
 
 c DEBUT TYPE POT
       integer*4 npa(max_p)
