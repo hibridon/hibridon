@@ -650,7 +650,7 @@ c      call helppr(line)
 240     format(1h ,30('='))
         write(9,710) 'Parameters:',(pcod(j),ipar(j),j = 1,iicode)
         write(9,720) (pcod(iicode+j),rpar(j),j = 1,ircode)
-        if (ibasty .ne. 99) then
+        if (ibasty .lt. 99) then
           length = index(basknd(ibasty),' ') - 1
           if (length .eq. -1) length=8
 #if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
