@@ -89,7 +89,7 @@ module mod_coiv2
 !    iv2:  matrix address of v2 matrix for each non-zero element
 !          row+column index of v2 matrix for each non-zero element
    implicit none
-   real(8), dimension(:), allocatable :: iv2
+   integer, dimension(:), allocatable :: iv2
    contains
    subroutine allocate_coiv2(av2max)
       integer, intent(in) :: av2max
