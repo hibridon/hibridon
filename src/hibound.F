@@ -202,7 +202,7 @@ c     Simpson's 3/8 rule integration
          else
             wt = hexac * 1.125d0
          end if
-         wr = wr * wt
+         wr(1:nch,1:nch) = wr(1:nch,1:nch) * wt
          do i = 1, vmax
             g(i) = dexp(-alph * (rnow - r1 - (i - 1) * del) ** 2)
          end do
@@ -477,7 +477,7 @@ c
             wr(i, j) = wr(j, i)
          end do
       end do
-      wr = wr * xirmu
+      wr(1:nch,1:nch) = wr(1:nch,1:nch) * xirmu
 c     Add back collision energy substracted in subroutine potmat
       do i = 1, nch
          wr(i, i) = wr(i, i) + ered
