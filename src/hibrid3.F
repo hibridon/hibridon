@@ -265,12 +265,18 @@
       use mod_covvl, only: vvl
       use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision (a-h,o-z)
-      integer i, iflag, ilam, nch, nmax
+
+      real(8), dimension(1), intent(out) :: w
+      real(8), intent(in) :: r
+      integer, intent(in) :: nch
+      integer, intent(in) :: nmax
+
+      integer i, iflag, ilam
+
       common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
       common /copmat/ rtmn, rtmx, iflag
       common /coered/ ered, rmu
       common /coselb/ ibasty
-      dimension w(100)
       zero = 0.d0
       one = 1.d0
       two = 2.d0
