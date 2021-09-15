@@ -1189,7 +1189,7 @@ c
                   a(l,j) = a(k,j)
                   a(k,j) = t
    20          continue
-             call daxpy(n-k,t,a(k+1,k),idummy,a(k+1,j),idummy)
+             call daxpy_wrapper(n-k,t,a(k+1,k),idummy,a(k+1,j),idummy)
    30       continue
          go to 50
    40    continue
@@ -1285,7 +1285,7 @@ c
                b(l) = b(k)
                b(k) = t
    10       continue
-            call daxpy(n-k,t,a(k+1,k),idummy,b(k+1),idummy)
+            call daxpy_wrapper(n-k,t,a(k+1,k),idummy,b(k+1),idummy)
    20    continue
    30    continue
 c
@@ -1295,7 +1295,7 @@ c
             k = n + 1 - kb
             b(k) = b(k)/a(k,k)
             t = -b(k)
-            call daxpy(k-1,t,a(1,k),idummy,b(1),idummy)
+            call daxpy_wrapper(k-1,t,a(1,k),idummy,b(1),idummy)
    40    continue
       go to 100
    50 continue

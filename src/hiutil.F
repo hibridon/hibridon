@@ -1783,6 +1783,30 @@ c     ------------------------------------------------------------------
       return
       end function tf9j
 c     ------------------------------------------------------------------
+      subroutine daxpy_wrapper(n, da, dx, incx, dy, incy)
+      implicit none
+      integer, intent(in)                       :: n
+      real(8), intent(in)                       :: da
+      real(8), intent(in), dimension(1+(n+1)*incx)    :: dx
+      integer, intent(in)                       :: incx
+      real(8), intent(inout), dimension(1+(n+1)*incx)    :: dy
+      integer, intent(in)                       :: incy
+
+      real(8) :: sum_for_nan_detection
+      integer :: i
+
+      ! write(6,*) 'graffy: n = ', n
+      sum_for_nan_detection = dx(1)
+      do i=1,n
+            !write(6,*) 'graffy: i = ', i
+            sum_for_nan_detection = sum_for_nan_detection + dx(1+((i-1)*incx))
+      end do
+      sum_for_nan_detection = dx(1)
+      sum_for_nan_detection = sum(dx(1:n:incx))
+
+      call daxpy(n, da, dx, incx, dy, incy)
+      end subroutine
+c     ------------------------------------------------------------------
       subroutine dgetri_wrapper(n, a, lda, ipiv, work, lwork, info)
       implicit none
       integer, intent(in)                       :: n

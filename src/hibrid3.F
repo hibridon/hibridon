@@ -173,8 +173,8 @@
 *  hp and scr are used as scratch vectors here
         nrow = nch - icol + 1
         call dcopy (nrow, scmat(ipt), 1, scr, 1)
-        call daxpy (nrow, one, w(ipt), 1, scmat(ipt), 1)
-        call daxpy (nrow, xmin1, w(ipt), 1, scr, 1)
+        call daxpy_wrapper (nrow, one, w(ipt), 1, scmat(ipt), 1)
+        call daxpy_wrapper (nrow, xmin1, w(ipt), 1, scr, 1)
         call dscal (nrow, half, scmat(ipt), 1)
         call dscal (nrow, fact, scr, 1)
         call dcopy (nrow, scr, 1, w(ipt), 1)
@@ -1817,7 +1817,7 @@ c
         call vsmul (tmod(1,icol), 1, twomin, si(1,icol), 1,
      :              nopen)
 80    continue
-      call daxpy (nopen, one, fpn, 1, sr(1,1), nmax + 1)
+      call daxpy_wrapper (nopen, one, fpn, 1, sr(1,1), nmax + 1)
 *  solve linear equations for s-imaginary
 *  see eq.(67) of r.g. gordon, meth. comp. phys. 10 (1971) 81
 *  fpj is used as scratch vector here
@@ -1843,10 +1843,10 @@ c
      :             nopen)
 *  scmat now contains s-imag **2
 *  now add s-imag**2 to (s-real - del)**2
-        call daxpy (nopen, one, scmat(1,icol), 1, tmod(1,icol), 1)
+        call daxpy_wrapper (nopen, one, scmat(1,icol), 1, tmod(1,icol), 1)
 90    continue
 *  now add 1 back to the diagonal elements of sr to get true s-real
-      call daxpy (nopen, one, fpn, 1, sr(1,1), nmax + 1)
+      call daxpy_wrapper (nopen, one, fpn, 1, sr(1,1), nmax + 1)
 * TO RENDER NEXT LOOP OPERATIVE, CHANGE .EQ.10 TO .EQ.1
       if (ibasty.eq.7 .and. jlpar.eq.-1 .and. ipol.eq.10) then
 * special for singlet-triplet mixing:

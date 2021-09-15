@@ -1354,7 +1354,7 @@ c
                if (p .lt. lp1) go to 170
                do 160 j = lp1, p
                   t = -ddot(n-l+1,x(l,l),1,x(l,j),1)/x(l,l)
-                  call daxpy(n-l+1,t,x(l,l),1,x(l,j),1)
+                  call daxpy_wrapper(n-l+1,t,x(l,l),1,x(l,j),1)
                   if (j .lt. pl .or. j .gt. pu) go to 150
                   if (qraux(j) .eq. 0.0d0) go to 150
                      tt = 1.0d0 - (dabs(x(l,j))/qraux(j))**2
@@ -1577,7 +1577,7 @@ c
                   temp = x(j,j)
                   x(j,j) = qraux(j)
                   t = -ddot(n-j+1,x(j,j),1,qy(j),1)/x(j,j)
-                  call daxpy(n-j+1,t,x(j,j),1,qy(j),1)
+                  call daxpy_wrapper(n-j+1,t,x(j,j),1,qy(j),1)
                   x(j,j) = temp
    50          continue
    60       continue
@@ -1591,7 +1591,7 @@ c
                   temp = x(j,j)
                   x(j,j) = qraux(j)
                   t = -ddot(n-j+1,x(j,j),1,qty(j),1)/x(j,j)
-                  call daxpy(n-j+1,t,x(j,j),1,qty(j),1)
+                  call daxpy_wrapper(n-j+1,t,x(j,j),1,qty(j),1)
                   x(j,j) = temp
    80          continue
    90       continue
@@ -1627,7 +1627,7 @@ c           ......exit
                b(j) = b(j)/x(j,j)
                if (j .eq. 1) go to 160
                   t = -b(j)
-                  call daxpy(j-1,t,x(1,j),1,b,1)
+                  call daxpy_wrapper(j-1,t,x(1,j),1,b,1)
   160          continue
   170       continue
   180       continue
@@ -1643,11 +1643,11 @@ c
                   x(j,j) = qraux(j)
                   if (.not.cr) go to 200
                      t = -ddot(n-j+1,x(j,j),1,rsd(j),1)/x(j,j)
-                     call daxpy(n-j+1,t,x(j,j),1,rsd(j),1)
+                     call daxpy_wrapper(n-j+1,t,x(j,j),1,rsd(j),1)
   200             continue
                   if (.not.cxb) go to 210
                      t = -ddot(n-j+1,x(j,j),1,xb(j),1)/x(j,j)
-                     call daxpy(n-j+1,t,x(j,j),1,xb(j),1)
+                     call daxpy_wrapper(n-j+1,t,x(j,j),1,xb(j),1)
   210             continue
                   x(j,j) = temp
   220          continue

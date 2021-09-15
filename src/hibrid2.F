@@ -428,7 +428,7 @@ c
          fac = d3
          icol = 1
          do  50 ich = 1, nch
-            call daxpy (nch, fac, w(icol), nrow, z(icol), nrow)
+            call daxpy_wrapper (nch, fac, w(icol), nrow, z(icol), nrow)
             icol = icol + ncol
   50     continue
 *     the reference potential for the sector is the diagonal
@@ -617,7 +617,7 @@ c
          write(6, *) 'issue35/logdb/2.02 : z(icol)=', z(icol)
 #endif
          do  160 ich = 1, nch
-            call daxpy (nch, fac, w(icol), nrow, z(icol), nrow)
+            call daxpy_wrapper (nch, fac, w(icol), nrow, z(icol), nrow)
             icol = icol + ncol
  160     continue
 #ifdef DEBUG_ISSUE35
@@ -710,7 +710,7 @@ c     nrlogd is the number of LOGD records - used to seek the wfu file
            endif
 *     add wt*psi(b)mu(b) to bmat and resave
            fac=one
-           call daxpy(nqmax, fac, bmat, 1, q, 1)
+           call daxpy_wrapper(nqmax, fac, bmat, 1, q, 1)
          endif
 *     now premultiply [z(c)+z1(c,b)]^-1 z2(c,b) by z2(c,b)
          irow=1
@@ -770,7 +770,7 @@ c     nrlogd is the number of LOGD records - used to seek the wfu file
          fac = d3
          icol = 1
          do 220  ich = 1, nch
-            call daxpy (nch, fac, w(icol), nrow, z(icol), nrow)
+            call daxpy_wrapper (nch, fac, w(icol), nrow, z(icol), nrow)
             icol = icol + ncol
  220     continue
 *     propagation loop ends here

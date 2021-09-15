@@ -1315,7 +1315,7 @@ c
 * first move Sreal into psii
         call matmov (sr, psii, nopen, nopen, nmax, nmax)
 * now subtract unit matrix
-        call daxpy (nopen, onemin, unit, 1, psii(1, 1), nmax + 1)
+        call daxpy_wrapper (nopen, onemin, unit, 1, psii(1, 1), nmax + 1)
 * now premultiply by diagonal matrix -yl(kr) for photodissociation or
 * +yl(kr) for scattering
         do 130 irow = 1, nopen
@@ -1331,7 +1331,7 @@ c
 140     continue
 * now evaluate +/- yl(kr) (Sr-1) + jl(kR) Si, save in psir
         do 150 icol = 1, nopen
-          call daxpy(nopen, one, psii(1, icol), 1, psir(1,icol), 1)
+          call daxpy_wrapper(nopen, one, psii(1, icol), 1, psir(1,icol), 1)
 150     continue
 * psir now contains real part of asymptotic scattering wavefunction
 * now compute imaginary part of asymptotic wavefunction
@@ -1340,7 +1340,7 @@ c
 * now move Sreal into psii
         call matmov (sr, psii, nopen, nopen, nmax, nmax)
 * now add unit matrix
-        call daxpy (nopen, one, unit, 1, psii(1, 1), nmax + 1)
+        call daxpy_wrapper (nopen, one, unit, 1, psii(1, 1), nmax + 1)
 * now premultiply by diagonal matrix -jl(kr)
         do 157 irow = 1, nopen
           fac=-fj(irow)
@@ -1357,7 +1357,7 @@ c
 159     continue
 * now evaluate - jl(kr) (1+Sr) +/- yl(kR) Si, save in psii
         do 161 icol = 1, nopen
-          call daxpy(nopen, one, si(1, icol), 1, psii(1,icol), 1)
+          call daxpy_wrapper(nopen, one, si(1, icol), 1, psii(1,icol), 1)
 161     continue
 * replace imaginary part of s matrix by imaginary part of
 * asymptotic wavefunction
@@ -2187,7 +2187,7 @@ c
             call dscal(nopen, fac2, psii(irow), nopen)
 430       continue
 * add together, resave in psir, this is real part of outgoing wave
-          call daxpy(nopsq, one, psii, 1, psir, 1)
+          call daxpy_wrapper(nopsq, one, psii, 1, psir, 1)
 * repeat for derivative of part of outgoing wave
           call matmov (sr, dpsir, nopen, nopen, nopen, nopen)
           call matmov (si, dpsii, nopen, nopen, nopen, nopen)
@@ -2200,7 +2200,7 @@ c
 440       continue
 * add together, resave in dpsir, this is derivative of
 * real part of outgoing wave
-          call daxpy(nopsq, one, dpsii, 1, dpsir, 1)
+          call daxpy_wrapper(nopsq, one, dpsii, 1, dpsir, 1)
 * repeat for imaginary part of outgoing wave
           call matmov (si, psii, nopen, nopen, nopen, nopen)
           call matmov (sr, scmat, nopen, nopen, nopen, nopen)
@@ -2212,7 +2212,7 @@ c
             call dscal(nopen, fac2, scmat(irow), nopen)
 450       continue
 * add together, resave in psii, this is imaginary part of outgoing wave
-          call daxpy(nopsq, one,scmat, 1, psii, 1)
+          call daxpy_wrapper(nopsq, one,scmat, 1, psii, 1)
 * repeat for derivative of imaginary part of outgoing wave
           call matmov (si, dpsii, nopen, nopen, nopen, nopen)
           call matmov (sr, scmat, nopen, nopen, nopen, nopen)
@@ -2225,7 +2225,7 @@ c
 460       continue
 * add together, resave in dpsii, this is imaginary part of derivative
 * of outgoing wave
-          call daxpy(nopsq, one,scmat, 1, dpsii, 1)
+          call daxpy_wrapper(nopsq, one,scmat, 1, dpsii, 1)
 * now expand psir, psii, dpsir, dpsii into nch x nch matrix, putting zeroz
 * as closed channel components
           if (nch .gt. nopen) then
@@ -2448,7 +2448,7 @@ c
             call vmul(sc1,1,psii(ipoint+nch),1,
      :                scmat2(ipoint+nch),1,nch)
 * 3rd and 4th columns of scmat2 now contain y2 Fb
-            call daxpy(2*nch,onemin,scmat2,1,scmat2(ipoint),1)
+            call daxpy_wrapper(2*nch,onemin,scmat2,1,scmat2(ipoint),1)
 * 3rd and 4th columns of scmat2 now contains (-y1 Fa + y2 Fb)
 * this is psip-tilde(a)  move to 2nd and 3rd columns of psir
             call dcopy(2*nch,scmat2(ipoint),1,psir(ipoint),1)
@@ -2471,7 +2471,7 @@ c
             call vmul(sc2,1,psii(ipoint),1,scmat2,1,nch)
             call vmul(sc2,1,psii(ipoint+nch),1,scmat2(1+nch),1,nch)
 * first and second columns of scmat2 now contain y4 Fb
-            call daxpy(2*nch,onemin,scmat2,1,scmat2(ipoint),1)
+            call daxpy_wrapper(2*nch,onemin,scmat2,1,scmat2(ipoint),1)
 * 3rd and 4th columns of scmat2 now contains (Fb' - y4 Fb)
 * if photodissociation, subtract off gamma2 from real part
             if (photof) call vadd(mone,scmat2(2*nch+1),1
@@ -2495,7 +2495,7 @@ c
             call vmul(pk,1,psii(1+nch),1,psii(ipoint+nch),1,nch)
 * 3rd and 4th columns of psii now contain -y1 Fa
 * add on y2 Fb and store in 3rd and 4th columns of psii
-            call daxpy(2*nch,one,scmat2,1,psii(ipoint),1)
+            call daxpy_wrapper(2*nch,one,scmat2,1,psii(ipoint),1)
 * if wavevector matrix positive (lambda negative) channel is closed
 * kill the corresponding components of psi and psi'
 * thresh is the threshold for killing closed channel components

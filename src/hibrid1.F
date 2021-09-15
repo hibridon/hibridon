@@ -222,7 +222,7 @@ c     dependent) built-in types
 *  set up matrix to be inverted
 *  nskip is spacing between diagonal elements of matrix stored column by colum
         nskip = nmax + 1
-        call daxpy (nch, one, y1, 1, z, nskip)
+        call daxpy_wrapper (nch, one, y1, 1, z, nskip)
 *  invert (y  +  z )
 *           1     n
 *  hp and cc are used as scratch arrays here
@@ -329,7 +329,7 @@ c
 *  add on  y
 *           4
       npt = 1
-      call daxpy (nch, one, y4, 1, z, nskip)
+      call daxpy_wrapper (nch, one, y4, 1, z, nskip)
 *  now fill in upper half of z matrix
       ipt = 2
       if (nch .gt. 1) then
@@ -549,8 +549,8 @@ c
       call ground(scr, ra, nch, nphoto, mxphot)
       call ground(q, rb, nch, nphoto, mxphot)
       call dcopy(nch,q,1,q(nch+1),1)
-      call daxpy(nch,one, scr,1,q,1)
-      call daxpy(nch,onemn, scr,1,q(nch+1),1)
+      call daxpy_wrapper(nch,one, scr,1,q,1)
+      call daxpy_wrapper(nch,onemn, scr,1,q(nch+1),1)
       call dscal(nch,half,q,1)
       call dscal(nch,fact,q(nch+1),1)
 *  activate the next statement to kill derivatives of ground state
