@@ -1801,7 +1801,7 @@ c     ------------------------------------------------------------------
       work = 0.0
 #endif       
       info = 0
-      sum_for_nan_detection = sum(a)
+      sum_for_nan_detection = sum(a(1:n,:))
       sum_for_nan_detection = sum(ipiv)
 
       call dgetri(n, a, lda, ipiv, work, lwork, info)
@@ -1882,8 +1882,7 @@ c     ------------------------------------------------------------------
       write(6, *) 'dsyevr_wrapper: a(1,1) = ', a(1,1)
 #endif
       !sum_for_nan_detection = a(1,1) + a(1,2)
-      !sum_for_nan_detection = sum(a(1:n,:))
-      sum_for_nan_detection = sum(a)
+      sum_for_nan_detection = sum(a(1:n,:))
       ! write(6, *) 'dsyevr_wrapper: eye = ', eye
       ! write(6, *) 'dsyevr_wrapper: a = ', a
 
