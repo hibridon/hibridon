@@ -156,7 +156,7 @@
       lsum=10
       ldif=8
       tol=1.d-10
-      call dscal(13,zero,vvl,1)
+      call dset(13,zero,vvl,1)
       call dcopy(100,d0,1,aa,1)
       call dqrank(aa,10,10,lsum,tol,kr,kpvt,qraux,work)
       call dqrlss(aa,10,10,lsum,kr,vsum,xsum,rsd,kpvt,qraux)

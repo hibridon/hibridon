@@ -534,7 +534,7 @@
 *
 * initialize matrix which transforms from case e to spin-orbit diagonalized
 * basis
-      call dscal(36,zero,cmat,1)
+      call dset(36,zero,cmat,1)
       xj=j
       if(jlpar.gt.0) then
 * here for f-labelled states
