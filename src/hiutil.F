@@ -1905,6 +1905,8 @@ c     ------------------------------------------------------------------
       dsyevx_lwork = size(dsyevx_work)
       dsyevx_work = 0.0
       dsyevx_iwork = 0
+      isuppz = 0 ! to remove warning #6843 because of unused out argument
+      iwork = 0 ! to remove warning #6843 because of unused out argument
 #ifdef DEBUG_DSYEV_WRAPPER
       write(6, *) 'dsyevr_wrapper: dsyevx_lwork = ', dsyevx_lwork
       write(6, *) 'dsyevr_wrapper: size(dsyevx_iwork) = ', size(dsyevx_iwork)
