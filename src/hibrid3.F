@@ -300,12 +300,24 @@ cABER
 *  now loop over angular coupling matrix to calculate the potential matrix
 *    w(ij) = 2 * rmu * vv0 + sum [ 2 * rmu * vvl(ilam) * v2(ij,ilam) ]
 *  first zero out lower triangle of potential matrix
+#if defined(ISSUE49_IS_FIXED)
       iwpt = 1
       do 20 icol = 1, nch
         ncol = nch - icol + 1
         call dset(ncol, zero, w(iwpt), 1)
         iwpt = iwpt + nmax + 1
-20    continue
+      20    continue
+#else
+      ! although w is a lower triangular matrix, initialize both upper and
+      ! lower part of it as some code is still treating it as full and therefore
+      ! reading uninitialized values
+      iwpt = 1
+      ncol = nch
+      do icol = 1, nch
+        call dset(ncol, zero, w(iwpt), 1)
+        iwpt = iwpt + nmax
+      end do
+#endif
       ioff = 0
 #ifdef DEBUG_ISSUE35
       write(6, *) 'issue35/potmat/3 : w(2)=', w(2)

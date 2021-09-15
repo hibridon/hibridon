@@ -425,6 +425,7 @@ c
 *     apply quadrature contribution at beginning of sector,
 *     r = a
 *     after this loop z contains z(a)+(h^2/3)w(a)
+*     todo : handle the case where w is lower triangular
          fac = d3
          icol = 1
          do  50 ich = 1, nch
