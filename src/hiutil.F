@@ -1812,7 +1812,8 @@ c     ------------------------------------------------------------------
       implicit none
 #ifdef FLOATING_POINT_ERRORS_CAUSE_EXCEPTIONS
       ! use dsyevx instead of dsyevr if floating point exceptions are on
-      ! because xxxevr routines may create NaNs according to (http://www.democritos.it/activities/IT-MC/ACML-4.0.1/LAPACK_002dIEEE.html)
+      ! because xxxevr routines may create NaNs according to 
+      ! http://www.democritos.it/activities/IT-MC/ACML-4.0.1/LAPACK_002dIEEE.html
       ! Also, we found that dsyevr triggers floating point exceptions
       ! in its call to ilaenv :
       ! http://www.netlib.org/lapack/explore-html/df/d3b/dsyevr_8f_source.html
