@@ -97,9 +97,39 @@
       use mod_coqvec, only: nphoto, q
       use mod_cosc10, only: sc10
       implicit double precision (a-h, o-z)
-      integer i, icol, iend, ierr, ipt, itwo, izero, kstep, maxstp,
-     :        nch, ncol, nmax, npt, nskip
-      logical iprint, twoen, noprin, photof, wavefn, boundf, wrsmat
+*  matrix dimensions (row dimension = nmax, matrices stored column by column)
+      real(8), dimension(nmax*nmax), intent(inout) :: z
+      real(8), dimension(nch*nch), intent(out) :: w
+      real(8), dimension(nch*nch), intent(out) :: tmat
+      real(8), dimension(nch*nch), intent(out) :: vecnow
+      real(8), dimension(nch*nch), intent(out) :: vecnew
+*  vectors dimensioned nch
+      real(8), dimension(nch), intent(out) :: eigold
+      real(8), dimension(nch), intent(out) :: eignow
+      real(8), dimension(nch), intent(out) :: hp
+      real(8), dimension(nch), intent(out) :: y1
+      real(8), dimension(nch), intent(out) :: y2
+      real(8), dimension(nch), intent(out) :: cc
+      real(8), dimension(nch), intent(out) :: y4
+      real(8), dimension(nch), intent(out) :: gam1
+      real(8), dimension(nch), intent(out) :: gam2
+      real(8), intent(inout) :: xf
+      real(8), intent(in) :: rend
+      real(8), intent(inout) :: drnow
+      real(8), intent(in) :: en
+      real(8), intent(in) :: tolai
+      real(8), intent(in) :: rincr
+      real(8), intent(in) :: eshift
+      integer, intent(in) :: nch
+      integer, intent(in) :: nmax
+      integer, intent(inout) :: itwo
+      logical, intent(in) :: iprint
+      logical, intent(in) :: twoen
+      logical, intent(in) :: noprin
+      integer i, icol, iend, ierr, ipt, izero, kstep, maxstp,
+     :        ncol, npt, nskip
+      logical photof, wavefn, boundf, wrsmat
+
       common /cophot/ photof, wavefn, boundf, wrsmat
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
@@ -109,11 +139,6 @@
 #if defined(HIB_UNIX_IBM)
       character*1 forma, formb
 #endif
-*  matrix dimensions (row dimension = nmax, matrices stored column by column)
-      dimension z(80), w(80), tmat(80), vecnow(80), vecnew(80)
-*  vectors dimensioned nch
-      dimension eigold(80),eignow(80),hp(80),y1(80),y2(80),cc(80),
-     :    y4(80),gam1(80), gam2(80)
       data izero, ione, zero, one /0, 1, 0.d0, 1.d0/
 *  powr is the power at which step sizes increase
 *  only for tolai < 1
