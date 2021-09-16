@@ -1708,12 +1708,30 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       use mod_cotq1, only: srsave => dpsir ! srsave(100)
       use mod_cotq2, only: sisave => tq2 ! sisave(100)
       implicit double precision (a-h,o-z)
-      integer isw, i, icol, l, lq, nmax, nopen
+      real(8), dimension(nmax, nmax), intent(inout) :: tmod
+      real(8), dimension(nmax, nmax), intent(out) :: sr
+      real(8), dimension(nmax, nmax), intent(out) :: si
+      real(8), dimension(nmax, nmax), intent(out) :: scmat
+      integer, dimension(nopen), intent(in) :: lq
+      real(8), dimension(nopen), intent(out) :: fj
+      real(8), dimension(nopen), intent(out) :: fn
+      real(8), dimension(nopen), intent(out) :: fpj
+      real(8), dimension(nopen), intent(out) :: fpn
+      real(8), dimension(nopen), intent(out) :: pk
+      real(8), dimension(nopen), intent(out) :: derj
+      real(8), dimension(nopen), intent(out) :: dern
+      real(8), intent(in) :: r
+      real(8), intent(in) :: prec
+      integer, intent(in) :: nopen
+      integer, intent(in) :: nmax
+      logical, intent(in) :: kwrit
+      logical, intent(in) :: ipos
+      integer isw, i, icol, l
 #if defined(HIB_UNIX_IBM)
       character*1 forma
       character*40 flxfil
 #endif
-      logical flagsu, photof, wavefn, kwrit, ipos, lpar, swrit, lpar2,
+      logical flagsu, photof, wavefn, lpar, swrit, lpar2,
      $     boundf, wrsmat
       common /coered/ ered, rmu
       common /cosurf/ flagsu
@@ -1730,11 +1748,6 @@ c     dependent) size of built-in types
       integer int_t
       double precision dble_t
       character char_t
-*  matrix dimensions
-      dimension tmod(nmax,nmax), sr(nmax,nmax), si(nmax,nmax),
-     :          scmat(nmax,nmax)
-      dimension lq(5), fj(2), fn(2), fpj(2), fpn(2), pk(2),
-     :          derj(2), dern(2)
       data isw / 0 /
       one = 1.0d0
       izero=0
