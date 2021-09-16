@@ -362,6 +362,7 @@
 * parameter to read lower triangle of open channel(s)
 * read s-matrix for present jtot, jlpar
       iaddr = 0
+      length(0,2) = 0  ! the s-matrix contains no partial wave for jtot = 0 and jlpar = -1
 20    nopen = -1
       call sread (iaddr, sreal, simag, jtot, jlpar,
      :   nu, jq, lq, inq, ipack, jpack, lpack,
@@ -371,6 +372,10 @@
 105     format(/' ** READ ERROR IN TRNPRT. ABORT **'/)
         goto 1000
       end if
+      ! | jlpar | jlp |
+      ! |-------|-----|
+      ! |     1 |   1 |
+      ! |    -1 |   2 |
       jlp = 1 - (jlpar - 1)/2
 *  copy s-matrix for this jtot1/jlpar1
       length(jtot,jlp) = lngth
@@ -396,7 +401,8 @@
       goto 20
 *
 * now sum over the jtot/jlpar pairs
-22    do jtot = jfirst, maxjt
+22    continue
+      do jtot = jfirst, maxjt
 *
         if (jtot.eq.0) write(6,*) '  '
         if (jtot.eq.10*(jtot/10) .and. jtot.ne.0) write(6,210) jtot
@@ -719,6 +725,7 @@
 * parameter to read lower triangle of open channel(s)
 * read s-matrix for present jtot, jlpar
       iaddr = 0
+      length(0,2) = 0  ! the s-matrix contains no partial wave for jtot = 0 and jlpar = -1
 20    nopen = -1
       call sread (iaddr, sreal, simag, jtot, jlpar,
      :   nu, jq, lq, inq, ipack, jpack, lpack,
@@ -728,6 +735,10 @@
 105     format(/' ** READ ERROR IN TRNPRT. ABORT **'/)
         goto 1000
       end if
+      ! | jlpar | jlp |
+      ! |-------|-----|
+      ! |     1 |   1 |
+      ! |    -1 |   2 |
       jlp = 1 - (jlpar - 1)/2
 *  copy s-matrix for this jtot1/jlpar1
       length(jtot,jlp) = lngth
