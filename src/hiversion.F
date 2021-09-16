@@ -17,6 +17,18 @@
 
       end subroutine
 
+      subroutine get_tmp_dir(tmp_dir)
+        character(len=256), intent(out) :: tmp_dir
+        integer :: get_env_status
+
+        call get_environment_variable("TMPDIR", tmp_dir, status=get_env_status)
+        if(get_env_status /= 0) then
+          tmp_dir = '.'
+          ! stop 'failed to get the value of TMPDIR environment variable'
+        end if
+
+      end subroutine
+
       subroutine get_command_stdout(command, stdout, default_stdout)
         character(*), intent(in) :: command
         character(*), intent(out) :: stdout
@@ -26,8 +38,12 @@
         integer :: iostat
         integer, parameter :: tmp_file_unit = 666
         character(len=256) :: cmd_msg
-        character(*), parameter :: tmp_file_path = '/tmp/hw.info'
+        character(len=256) :: tmp_dir
+        character(len=256) :: tmp_file_path
         character(*), parameter :: redirect_operator = ' > '
+
+        call get_tmp_dir(tmp_dir)
+        tmp_file_path = trim(tmp_dir) // '/hw.info'
 
         allocate(character(len=len(command) + len(redirect_operator) + len(tmp_file_path)) :: redirected_command)
         redirected_command = trim(command) // redirect_operator // tmp_file_path
@@ -48,6 +64,9 @@
         integer, intent(in) :: out_unit
         integer :: i
         character(len=100) :: txt
+        character(len=256) :: tmp_dir
+
+        call get_tmp_dir(tmp_dir)
 
         write(out_unit,10) _BUILD_VERS_
 10      format (/' ---------------------------------------------------',
@@ -85,8 +104,8 @@
         write(out_unit,*)
         if (_BUILD_SYS1_ == "Darwin") then
             call execute_command_line('system_profiler SPHardwareDataType 
-     :      | grep -E "Model|Processor|Cores|Cache|Hyper|Memory" >/tmp/hw.info')
-            open(unit=666, file="/tmp/hw.info", status="old")
+     :      | grep -E "Model|Processor|Cores|Cache|Hyper|Memory" > ' // trim(tmp_dir) // '/hw.info')
+            open(unit=666, file=(trim(tmp_dir) // "/hw.info"), status="old")
             do 
                 read(666,'(a)', iostat=i) txt
                 if(i.ne.0) exit
