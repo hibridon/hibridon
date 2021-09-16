@@ -138,7 +138,7 @@ module mod_coj12
    !               systems and open-shell atom - molecule systems
    
    implicit none
-   real(8), dimension(:), allocatable :: j12
+   integer, dimension(:), allocatable :: j12
    contains
    subroutine allocate_coj12(amax)
       integer, intent(in) :: amax
@@ -151,7 +151,7 @@ module mod_coj12p
    !    j12p:  arrays containing vector sum of j1 + j2 for molecule-molecule 
    !               systems and open-shell atom - molecule systems
    implicit none
-   real(8), dimension(:), allocatable :: j12pk
+   integer, dimension(:), allocatable :: j12pk
    contains
    subroutine allocate_coj12p(amax)
       integer, intent(in) :: amax
