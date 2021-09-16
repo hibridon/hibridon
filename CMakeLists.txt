@@ -179,9 +179,6 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   # ifort
 
-  # disable uninitialized variables detection for ifort build until all such errors are fixed so that all tests pass
-  set( ENABLE_UNINIT_VAR_RUNTIME_DETECTOR OFF) # todo: fix all uninitialized variables, then remove me
-
   set (warning_options "")
   # set (warning_options "-warn all") # activate all warnings
 
