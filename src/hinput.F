@@ -52,6 +52,7 @@
       use mod_conlam, only: nlam, nlammx, lamnum
       use mod_cosysl, only: islcod, lspar
       use mod_version, only : version
+      use mod_coj12, only: j12
 
       implicit double precision (a-h,o-z)
 *  iicode is the number of integer pcod's
@@ -1411,7 +1412,7 @@ c      call helppr(line)
            call parse(line,l,code,lc)
            call getval(code(1:lc),' ',0,j,a(i))
 2013    continue
-        call hypxsc(fnam1,a)
+        call hypxsc(fnam1,a,j12)
 *      else
 *        write (6, 2012)
 *2012    format(' Sorry, hyperfine cross sections not yet',

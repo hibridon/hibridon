@@ -1,5 +1,5 @@
 *     -------------------------------------------------------------
-      subroutine hypxsc(flname, a)
+      subroutine hypxsc(flname, a, j12q)
 *
 *     subroutine to compute hyperfine-resolved integral
 *     cross sections
@@ -29,7 +29,6 @@
 *     current revision:  8-jan-2018 by p. dagdigian
 *     -------------------------------------------------------------
       use mod_codim, only: mmax
-      use mod_coj12, only: j12q => j12
       use mod_cojq, only: jq ! jq(1)
       use mod_colq, only: lq ! lq(1)
       use mod_coinq, only: inq ! inq(1)
@@ -45,17 +44,19 @@
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_cosc3, only: elevh => sc3 ! elevh(1)
       implicit double precision (a-h,o-z)
-      complex(8) t, tf
       character*(*) flname
+      real(8), dimension(4), intent(in) :: a(4)
+      real(8), dimension(:), intent(in) :: j12q
+      complex(8) t, tf
       character*20 cdate
       character*40 smtfil, hfxfil
       character*10 elaps, cpu
       logical csflg, flaghf, flgsu, twmol, nucrs,
      :     batch, fast, lpar2, lpar, exstfl
+      logical :: is_j12
 #include "common/parpot"
       common /coconv/ econv, xmconv, ang2
       common /coselb/ ibasty
-      dimension a(4)
 *
 *     storage for S-matrix elements red from .smt file
       real(8), dimension(:), allocatable :: sreal, simag
@@ -286,8 +287,12 @@
          j(jtot,jlp,i) = jpack(i)
          in(jtot,jlp,i) = ipack(i)
          l(jtot,jlp,i) = lpack(i)
-         j12(jtot,jlp,i) = j12q(i)
       end do
+      if( is_j12(ibasty) ) then
+        do i = 1, lngth
+           j12(jtot,jlp,i) = j12q(i)
+        end do
+      end if
       do ii = 1, len2
          sr(jtot, jlp, ii) = sreal(ii)
          si(jtot, jlp, ii) = simag(ii)
