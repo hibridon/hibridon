@@ -125,20 +125,39 @@
 *    nmax:     maximum row dimension of matrices and maximum dimension of
 *              vectors
 * ----------------------------------------------------------------------
-      implicit double precision (a-h,o-z)
+      implicit none
+*  square matrices (of row dimension nmax)
+      real(8), dimension(nmax*nmax), intent(out) :: w
+      real(8), dimension(nmax*nmax), intent(out) :: vecnow
+      real(8), dimension(nmax*nmax), intent(out) :: scmat
+*  vectors dimensioned at least nch
+      real(8), dimension(nmax), intent(out) :: eignow
+      real(8), dimension(nmax), intent(out) :: hp
+      real(8), dimension(nmax), intent(out) :: scr
+      real(8), intent(in) :: rnow
+      real(8), intent(in) :: drnow
+      real(8), intent(in) :: en
+      real(8), intent(out) :: xlarge
+      integer, intent(in) :: nch
+      integer, intent(in) :: nmax
+      
 *      real eignow, hp, scmat, scr, vecnow, w
 *      real drnow, en, fact, half, one, ra, rb, rnow, sq3, xlarge, xmin1
-      integer icol, ierr, ione, ipt, nch, nmax, nmaxm1, nmaxp1, nrow
-*  square matrices (of row dimension nmax)
-      dimension w(49), vecnow(49), scmat(49)
+      integer icol, ierr, ipt, nrow
 *  local arrays (for lapack dsyevr)
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
-      dimension isuppz(2*nch),iwork(10*nch),work(57*nch)
+      integer, dimension(2*nch) :: isuppz
+      integer, dimension(10*nch) :: iwork
+      real(8), dimension(57*nch) :: work
 #endif
-*  vectors dimensioned at least nch
-      dimension eignow(7), hp(7), scr(7)
       data ione / 1 /
+      integer :: ione
       data one,xmin1,half,sq3 /1.d0,-1.d0,0.5d0,1.732050807568877d0/
+      real(8) :: one, xmin1, half, sq3
+      integer :: nmaxp1, nmaxm1
+      real(8) :: ra, rb
+      real(8) :: fact, abstol, vl, vu
+      integer :: lwork, liwork, lsup, il, iu, m, I
       nmaxp1 = nmax + 1
       nmaxm1 = nmax - 1
       ra = rnow - half * drnow / sq3
