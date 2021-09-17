@@ -654,6 +654,7 @@
       write(6,*) 'issue35/intpol tmp_file =', tmp_file
       write(6,*) 'issue35/intpol/-2 q(1,1) =', q(1,1)
 #endif
+      !write (6, *) 'issue50/intpol/-2 q(1,1) =', q(1,1)
       goto 5
 *
       entry intpl2(jlx,jl2x,jl3x,nmax,n,q,q2,q3,nucros)
@@ -695,6 +696,7 @@ c.....simply add for jd=1
 #ifdef DEBUG_ISSUE35
           write(6,*) 'issue35/intpol/-1 q(1,1) =', q(1,1)
 #endif
+          !write (6, *) 'issue50/intpol/-1 q(1,1) =', q(1,1)
           if(jp.eq.jpl.and.jl+1.ne.jl3) then
             write(6,15) jp,jl,jl3
 15          format(/' ERROR IN INTPOL: JP, JL, JL3:',3i4)
@@ -709,6 +711,7 @@ c.....simply add for jd=1
 #ifdef DEBUG_ISSUE35
             write(6,*) 'issue35/intpol/0 q(1,1) =', q(1,1)
 #endif
+          !write (6, *) 'issue50/intpol/0 q(1,1) =', q(1,1)
           jf=jl3
           call dbout(irec,jf,jp,1,q,nmax,n)
           call dbout(irec+1,jl,jpl,1,q2,nmax,n)
@@ -789,6 +792,7 @@ c       write(6,99) nuu,i,j,q(j,i),q1(j,i),q2(j,i),q3(j,i),f0,f1,f2
 #ifdef DEBUG_ISSUE35
       write(6,*) 'issue35/intpol/1 q(1,1) =', q(1,1)
 #endif
+      !write (6, *) 'issue50/intpol/10 q(1,1) =', q(1,1)
       end if
 c
       if(nowrit) return
@@ -816,7 +820,9 @@ c
         end do
 #ifdef DEBUG_ISSUE35
         write(6,*) 'issue35/intpol/2 q(1,1) =', q(1,1)
-#endif        
+#endif
+        !write (6, *) 'issue50/intpol/11 q(1,1) =', q(1,1)
+
       else
 c......here for sparse algorithm
         do 62 nu=jl+1,jf
@@ -839,12 +845,14 @@ c99      format(1x,3i4,4f10.4,3x,3f12.3)
 #ifdef DEBUG_ISSUE35
         write(6,*) 'issue35/intpol/3 q(1,1) =', q(1,1)
 #endif
+        !write (6, *) 'issue50/intpol/12 q(1,1) =', q(1,1)
 
 c......now all levels for j.ge.nu=jl3
       end if
 #ifdef DEBUG_ISSUE35
       write(6,*) 'issue35/intpol/4 q(1,1) =', q(1,1)
 #endif
+      !write (6, *) 'issue50/intpol/13 q(1,1) =', q(1,1)
 *
       if(nowrit) return
 *
@@ -854,6 +862,7 @@ c......now all levels for j.ge.nu=jl3
 #ifdef DEBUG_ISSUE35
       write(6,*) 'issue35/intpol/5 q(1,1) =', q(1,1)
 #endif
+      !write (6, *) 'issue50/intpol/14 q(1,1) =', q(1,1)
       return
       end
       subroutine nulist(nu,jf,jlev,list,nj,nleq,nlge)
@@ -1705,6 +1714,7 @@ c
       ncol=nj
       nrow=nj
       if(nnout.lt.0) nrow=nlevop
+      write (6, *) 'issue50/intcrs/1 sc1(1) = ', sc1(1)
       call mxoutr (ics_unit, sc1, nrow, ncol, mmax, 0, ipos)
 * use notequ as scratch variable (ipos = .false. for screen output)
       notequ = .false.
@@ -1755,21 +1765,37 @@ c
       use mod_cosc2, only: inlev => sc2int ! inlev(1)
       use mod_cosc3, only: jlev => sc3int ! jlev(1)
       implicit double precision (a-h,o-z)
-      logical twomol, flagsu, nucros
-      logical csflag, flaghf, lpar1, lpar2, batch, ipos, lpar3
+      logical, intent(in) :: csflag
+      logical, intent(in) :: flaghf
+      logical, intent(in) :: twomol
+      logical, intent(in) :: flagsu
+      logical, intent(in) :: nucros
+      integer, intent(in) :: numin
+      integer, intent(in) :: numax
+      integer, intent(in) :: nud
+      integer, intent(in) :: jfirst
+      integer, intent(in) :: jfinal
+      integer, intent(in) :: jtotd
+      integer, intent(in) :: maxjt
+      real(8), intent(out) :: sigma(nmax, nlevop)
+      real(8), intent(out) :: sreal(nmax, nlevop)
+      real(8), intent(out) :: simag(nmax, nlevop)
+      real(8), intent(out) :: sc1(nmax, nlevop)
+      real(8), intent(out) :: sc2(nmax, nlevop)
+      real(8), intent(out) :: scmat(nmax, nlevop)
+      real(8), intent(out) :: tsq(nmax, nlevop)
+      integer, intent(in) :: nlevop
+      integer, intent(in) :: nmax
+      integer, intent(in) :: tmp_file
+      logical lpar1, lpar2, batch, ipos, lpar3
       common /colpar/ lpar1(3), batch, lpar2(5), ipos, lpar3(17)
       common /coselb/ ibasty
-      dimension sigma(nmax,1),sreal(nmax,1), simag(nmax,1)
-      dimension sc1(nmax,1),sc2(nmax,1),scmat(nmax,1),tsq(nmax,1)
-      integer, intent(in) :: tmp_file
 * clear sigma array
       one=1.0d0
       zero=0.0d0
-      do 5 i = 1, nlevop
-      do 4 j = 1, nlevop
-      sigma(j,i) = 0.d0
-4     continue
-5     continue
+
+      sigma(1:nlevop, 1:nlevop) = 0.d0
+
       jlpold=0
       iaddr = 0
 c
@@ -1795,70 +1821,63 @@ c
 * reset iaddr to 0 to insure sequential read
 * print our message only for every 10th jtot
       if (jtot .eq. 10*(jtot/10)) then
-      if (csflag) then
-        write(2,25) jtot,nu
-        if (.not.batch) write(6,25) jtot,jlpar,nu
-25      format(' READ S-MATRIX FOR JTOT=',i3,' NU=',i3)
-      else
-        write(2,26) jtot,jlpar
-        if (.not. batch)write(6,26) jtot,jlpar
-26      format(' READ S-MATRIX FOR JTOT=',i3,'  JLPAR=',i2)
-      endif
+        if (csflag) then
+          write(2,25) jtot,nu
+          if (.not.batch) write(6,25) jtot,jlpar,nu
+25        format(' READ S-MATRIX FOR JTOT=',i3,' NU=',i3)
+        else
+          write(2,26) jtot,jlpar
+          if (.not. batch)write(6,26) jtot,jlpar
+26        format(' READ S-MATRIX FOR JTOT=',i3,'  JLPAR=',i2)
+        endif
       endif
       iaddr = 0
 * calculate squared t-matrix
       call tsqmat(tsq,sreal,simag,inq,jq,lq,
      1   inpack,jpack,lpack,nopen,length,nmax)
 * calculate partial cross sections
+      ! write (6, *) 'issue50/intcr/2/0 : sc1(1,1) = ', sc1(1,1)   ! graffy : enabling this line makes issue50 disappear
       call partcr(tsq,sc1,isc1,isc2,sc2,nopen,length,
      1            inq, jq, lq, inpack, jpack, lpack,
      2            inlev, jlev, elev, jtot, nu,
      3            csflag,flaghf,twomol,flagsu,
      4            nlevop,nmax)
+      write (6, *) 'issue50/intcr/2 : sc1(1,1) = ', sc1(1,1)
       if(.not.csflag.or.nucros.or.(csflag.and.nu.eq.numin)) then
 * sum up partial cross sections over nu
-        do 30 i=1,nlevop
-        do 30 j=1,nlevop
-30      scmat(j,i)=sc1(j,i)
+        scmat(1:nlevop, 1:nlevop) = sc1(1:nlevop, 1:nlevop)
       else if(nu.gt.numin) then
-        do 40 i=1,nlevop
-        do 40 j=1,nlevop
-40      scmat(j,i)=scmat(j,i)+sc1(j,i)
+        scmat(1:nlevop, 1:nlevop) = scmat(1:nlevop, 1:nlevop) + sc1(1:nlevop, 1:nlevop)
       end if
 * sum up partial cross sections to get integral cross sections
       if(csflag.and.nucros) then
         irec=2
-#ifdef DEBUG_ISSUE35
-        write (6, *) "issue35/intcr: intpol call 0"
-#endif
       call intpol(irec,jtot,jfirst,jfinal,jtotd,jlpar,jlpold,
      1              jlev,nmax,nlevop,tsq,sc1,sc2,scmat,nucros,tmp_file)
         if(jtot+jtotd.gt.jfinal) then
           irec=7
-#ifdef DEBUG_ISSUE35
-          write (6, *) "issue35/intcr: intpol call 1"
-#endif
           call intpol(irec,nu,numin,numax,nud,jlpar,jlpar,
      1                jlev,nmax,nlevop,sigma,sc1,sc2,tsq,nucros, tmp_file)
+          write (6, *) 'issue50/intcr/5 : sigma(1,1) = ', sigma(1,1)
+
         end if
       else
         if (.not. csflag .or. (csflag .and. (nu .eq. numax) ) ) then
           irec=2
-#ifdef DEBUG_ISSUE35
-          write (6, *) "issue35/intcr: intpol call 2"
-#endif
           call intpol(irec,jtot,jfirst,jfinal,jtotd,jlpar,jlpold,
      1               jlev,nmax,nlevop,sigma,sc1,sc2,scmat,nucros,tmp_file)
+          write (6, *) 'issue50/intcr/6 : sigma(1,1) = ', sigma(1,1)
         end if
       end if
 * loop back for next partial wave
       goto 10
 * make a compressed matrix of cross sections
 100   continue
-#ifdef DEBUG_ISSUE35
-      write (6, *) "issue35/intcr: sigma(1,1) = ", sigma(1,1)
-      write (6, *) "issue35/intcr: jlist(1) = ", jlist(1)
-#endif
+      write (6, *) 'issue50/intcr/8 : sc1(1,1) = ', sc1(1,1)
+      write (6, *) 'issue50/intcr/8 : jlist(1) = ', jlist(1)
+      write (6, *) 'issue50/intcr/8 : sigma(jlist(1),jlist(1)) = ', sigma(jlist(1),jlist(1))
+      write (6, *) 'issue50/intcr/8 : sigma(1,1) = ', sigma(1,1)
+
       if(nnout.gt.0) then
         do i=1,nj
           ii=jlist(i)
@@ -1874,9 +1893,8 @@ c
           end do
         end do
       end if
-#ifdef DEBUG_ISSUE35
-      write (6, *) "issue35 : sc1(1,1) = ", sc1(1,1)
-#endif
+      write (6, *) 'issue50/intcr/9 : sc1(1,1) = ', sc1(1,1)
+
       return
       end
 * ----------------------------------------------------------------------
@@ -1975,6 +1993,9 @@ c
 !      real(8), pointer :: tsq(:,:)
 !      tsq => tototsq(1::nmax,1::nmax)
       !write(6,*) 'graffy: len(tototsq)', size(tototsq)
+      !write (6, *) 'issue50/partcr/0 : nmax = ', nmax
+      !write (6, *) 'issue50/partcr/0 : nopen = ', nopen
+      !write (6, *) 'issue50/partcr/0 : ncol = ', ncol
 *
       xjtot = jtot
       if (flaghf .and. .not. csflag) xjtot = jtot + 0.5d0
@@ -1990,6 +2011,8 @@ c
 *  zero out scmat
       do 10 icol = 1,nlevop
 10    call dset(nlevop, 0.d0, scmat(1, icol), 1)
+      !write (6, *) 'issue50/partcr/1 : scmat(1,1) = ', scmat(1,1)
+
 * 10    call fzero (scmat(1, icol), nlevop)
 *  set pointer array for columns (final states)
       do 40 i = 1, ncol
@@ -2059,11 +2082,21 @@ c$$$               xjrow2 = xjrow2 + 0.5d0
 *  corresponding open level
 *  the array sc2 contains, for each open level, the normalization factor
 *  to convert from t**2 to partial cross sections
+      !write (6, *) 'issue50/partcr/9 : scmat(1,1) = ', scmat(1,1)
+      !write (6, *) 'issue50/partcr/9 :ncol = ', ncol
+      !write (6, *) 'issue50/partcr/9 :nopen = ', nopen
       do 190  i = 1, ncol
         icol = isc1(i)
         do 180  j = 1, nopen
           irow = isc2(j)
           scmat(irow,icol) = scmat(irow,icol)+tsq(j,i)*sc2(j)
+          if( irow == 1 .and. icol == 1 ) then
+            !write (6, *) 'issue50/partcr/10 : sc2(1) = ', sc2(1)
+            !write (6, *) 'issue50/partcr/10 : isc1(1) = ', isc1(1)
+            !write (6, *) 'issue50/partcr/10 : isc2(1) = ', isc2(1)
+            !write (6, *) 'issue50/partcr/10 : tsq(1,1) = ', tsq(1,1)
+            !write (6, *) 'issue50/partcr/10 : scmat(1,1) = ', scmat(1,1)
+          end if    
 180     continue
 190   continue
       return
