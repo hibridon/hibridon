@@ -1011,8 +1011,34 @@ c     write(6,*) 'prefac:',j1,j2,j3,x1,x3
 * ----------------------------------------------------------------------
       use constants
       implicit double precision (a-h,o-z)
-      logical csflag, flaghf, wrxsec, xsecwr, ipos, flagsu, twomol,
-     :        nucros, ihomo
+      real(8), intent(out) :: zmat(nmax, nmax)
+      real(8), intent(out) :: tq3(nmx, nmx)
+      integer, intent(in) :: jlev(nmx)
+      real(8), intent(in) :: elev(nmx)
+      integer, intent(in) :: inlev(nmx)
+      integer, intent(in) :: nerg
+      real(8), intent(in) :: energ(nerg)
+      integer, intent(in) :: jfirst
+      integer, intent(in) :: jfinal
+      integer, intent(in) :: jtotd
+      logical, intent(in) :: csflag
+      logical, intent(in) :: flaghf
+      logical, intent(in) :: wrxsec
+      logical, intent(in) :: xsecwr
+      logical, intent(in) :: ipos
+      logical, intent(in) :: twomol
+      logical, intent(in) :: nucros
+      integer, intent(in) :: nlevel
+      integer, intent(in) :: nlev(nerg)
+      integer, intent(in) :: numin
+      integer, intent(in) :: numax
+      integer, intent(in) :: nud
+      integer, intent(in) :: jlpar
+      integer, intent(in) :: nmax
+      integer, intent(in) :: nmx
+      logical, intent(in) :: ihomo
+
+      logical flagsu
       character*20 cdate
 #include "common/parpot"
       common /cojsav/ jsav1, jsav2
@@ -1021,8 +1047,6 @@ c     write(6,*) 'prefac:',j1,j2,j3,x1,x3
       common /cosysi/ nscode, isicod, ispar(5)
       common /coipar/ ipar(9), iprint
       common /coselb/ ibasty
-      dimension zmat(nmax,nmax),jlev(20),inlev(20),elev(20),energ(25)
-      dimension tq3(nmx,nmx), nlev(25)
       integer :: cs_file = 1
 *   econv is conversion factor from cm-1 to hartrees
 *   xmconv is converson factor from amu to atomic units
