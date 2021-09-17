@@ -1,0 +1,71 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2021-09-16 at 13:15
+CMAKE BUILD TYPE: Release
+CODE GIT REVISION: 362e083
+SYS: Linux 5.4.0-81-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                      Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                         3256.741
+Socket(s):                       1
+Core(s) per socket:              4
+L2 cache:                        1 MiB
+L3 cache:                        6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16272260 kB
+ --------------------------------------------------------------------------
+ Hibridon>  Hibridon>  Hibridon>  ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Sep 16 14:56:28 2021
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Sep 16 14:56:28 2021
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:01   DATE: Sep 16 14:56:29 2021
+ ** J =    0 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:01   DATE: Sep 16 14:56:29 2021
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Sep 16 14:56:29 2021
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:02   DATE: Sep 16 14:56:30 2021
+ ===============================================================================
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:    97
+      TIMING:  ELAPSED 00:00:02 / CPU 00:00:01 / MP RATIO   82.3 %
+      CURRENT DATE:  Sep 16 14:56:30 2021
+ ===============================================================================
+ Hibridon> 
+ INTEGRAL CROSS SECTIONS CALCULATED FROM S-MATRICES ON FILE C2hh2q1.smt                             
+ WRITTEN:   Sep 16 14:56:28 2021
+ LABEL:     C2H-H2 RCCSD(T) PES by P.Dagdigian              
+ JTOT_MAX:    2
+ IEN= 1 RMU=   1.8653 E=   130.00 JTOT-1=  0.5 JTOT-2=   2.5 JTOT-D=  1
+ READ S-MATRIX FOR JTOT=  0  JLPAR= 1
+ READ S-MATRIX FOR JTOT=  0  JLPAR=-1
+
+ LEVEL LIST FOR INTEGRAL CROSS SECTIONS              
+   N     J   INDEX  EINT(cm-1)
+   1   1.5     1    118.645
+   2   1.5    -1    121.558
+   3  11.5     1    121.558
+   4  11.5    -1    127.383
+   5  21.5     1    127.383
+
+ CC INTEGRAL CROSS SECTIONS
+
+ ** COLUMN HEADINGS ARE FINAL STATES, ROW HEADINGS ARE INITIAL STATES **
+
+          1           2           3           4           5
+   1   4.6750E+01  5.6055E-01  1.3940E+00  4.5827E+00  5.3658E+00
+   2   7.5396E-01  5.0690E+01  1.0692E+01  2.5894E+00  1.7664E+00
+   3   9.3749E-01  5.3461E+00  5.0556E+01  1.6957E+00  2.3990E+00
+   4   9.9405E+00  4.1760E+00  5.4695E+00  2.1602E+02  9.7011E+00
+   5   7.7595E+00  1.8992E+00  5.1585E+00  6.4674E+00  1.7651E+02
+
+ ** INTCRS FINISHED. ELAPSED TIME:  00:00:00   CPU TIME:  00:00:00  **
+ Hibridon> 
