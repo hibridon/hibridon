@@ -137,8 +137,8 @@
       use mod_coener, only: ener => energ
       implicit double precision (a-h,o-z)
       real(8), intent(inout) :: tsq(nmax,nmax)
-      real(8), intent(in) :: sr(nmax,nmax)
-      real(8), intent(in) :: si(nmax,nmax)
+      real(8), intent(inout) :: sr(nmax,nmax)
+      real(8), intent(inout) :: si(nmax,nmax)
       real(8), intent(out) :: scmat(nmax,nmax)
       integer, intent(in) :: lq(nopen)
       integer, intent(in) :: jq(nopen)
@@ -629,10 +629,24 @@
 * ----------------------------------------------------------------------
       use mod_coisc8, only: list => isc8 ! list(20)
       implicit double precision (a-h,o-z)
-      logical nowrit,nucros
-      dimension jlev(20)
-      dimension q(nmax,n),q1(nmax,n),q2(nmax,n),q3(nmax,n)
+      integer, intent(in) :: irec
+      integer, intent(in) :: jl3a
+      integer, intent(in) :: j1
+      integer, intent(in) :: j2
+      integer, intent(in) :: jd
+      integer, intent(in) :: jp
+      integer, intent(in) :: jpi
+      integer, intent(in) :: jlev(n)
+      integer, intent(in) :: nmax
+      integer, intent(in) :: n ! = nlevop
+      real(8), intent(out) :: q(nmax,n)
+      real(8), intent(out) :: q1(nmax,n)
+      real(8), intent(out) :: q2(nmax,n)
+      real(8), intent(out) :: q3(nmax,n)
+      logical, intent(in) :: nucros
       integer, intent(in) :: tmp_file
+
+      logical nowrit
 *
       jl3=jl3a
       nowrit=.false.
@@ -1916,6 +1930,7 @@ c
       use constants
       implicit double precision (a-h,o-z)
       real(8), dimension(nmax,nmax), intent(in) :: tsq
+!      real(8), dimension(:,:), intent(in), target :: tototsq
       real(8), dimension(nmax,nmax), intent(out) :: scmat
       integer, dimension(nmax), intent(out) :: isc1
       integer, dimension(nmax), intent(out) :: isc2
@@ -1933,6 +1948,9 @@ c
       logical is_j12
       common /coered/ ered, rmu
       common /coselb/ ibasty	
+!      real(8), pointer :: tsq(:,:)
+!      tsq => tototsq(1::nmax,1::nmax)
+      !write(6,*) 'graffy: len(tototsq)', size(tototsq)
 *
       xjtot = jtot
       if (flaghf .and. .not. csflag) xjtot = jtot + 0.5d0
