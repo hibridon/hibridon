@@ -1901,14 +1901,24 @@ c
 * ----------------------------------------------------------------------
       use constants
       implicit double precision (a-h,o-z)
+      real(8), dimension(nmax,nmax), intent(in) :: tsq
+      real(8), dimension(nmax,nmax), intent(out) :: scmat
+      integer, dimension(nmax), intent(out) :: isc1
+      integer, dimension(nmax), intent(out) :: isc2
+      real(8), dimension(nmax), intent(out) :: sc2
+      integer, dimension(nopen), intent(in) :: inrow
+      integer, dimension(nopen), intent(in) :: jrow
+      integer, dimension(nopen), intent(in) :: lrow
+      integer, dimension(ncol), intent(in) :: incol
+      integer, dimension(ncol), intent(in) :: jcol
+      integer, dimension(ncol), intent(in) :: lcol
+      integer, dimension(nlevop), intent(in) :: inlev
+      integer, dimension(nlevop), intent(in) :: jlev
+      real(8), dimension(nlevop), intent(in) :: elev
       logical csflag, flaghf, flagsu, twomol
       logical is_j12
       common /coered/ ered, rmu
       common /coselb/ ibasty	
-      dimension tsq(nmax,1), scmat(nmax,1)
-      dimension isc1(10),isc2(10),sc2(10)
-      dimension jlev(10),elev(10),inlev(10)
-      dimension inrow(10),jrow(10),lrow(10),incol(10),jcol(10),lcol(10)
 *
       xjtot = jtot
       if (flaghf .and. .not. csflag) xjtot = jtot + 0.5d0
