@@ -447,7 +447,8 @@ c
 c
 c.....read next s-matrix
 c
-250   call sread (0,sreal1, simag1, jtot, jlpar, nu1,
+250   nopen1 = 0
+      call sread (0,sreal1, simag1, jtot, jlpar, nu1,
      :                  jq, lq, inq, ipack1, jpack1, lpack1,
      :                  smt_unit, mmax, nopen1, lengt1, ierr)
       if(ierr.eq.-1) then

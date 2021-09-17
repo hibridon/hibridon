@@ -1585,15 +1585,6 @@ c     ------------------------------------------------------------
       common /coselb/ ibasty
       character*8 csize8
 c
-      write (6,*) '  issue50/sread/0 : nopen = ', nopen ! nopen is uninitialized
-      ! graffy: with gfortran :
-      !   54:    issue50/sread/0 : nopen =    333333333
-      !   54:    issue50/sread/2 : triang =  F
-      ! graffy: with ifort :
-      !   54:    issue50/sread/0 : nopen =    <random value that could be negative>
-      !   54:    issue50/sread/2 : triang =  T
-      
-
       ierr=0
       triang =.false.
       if (nopen .lt. 0) then
@@ -1611,10 +1602,6 @@ c
 *     read next s-matrix header
       iaddr = iadr
       call readrc(iaddr,smt_file_unit,lrec,jtot,jlpar,nu,nopen,length,nnout)
-      write (6,*) '  issue50/sread/2 : triang = ', triang
-      write (6,*) '  issue50/sread/2 : nopen = ', nopen
-      write (6,*) '  issue50/sread/2 : nnout = ', nnout
-      write (6,*) '  issue50/sread/2 : length = ', length
       if (lrec .lt. 0) goto 900
 *
       read (smt_file_unit, end=900, err=950) (jpack(i), i=1, length),
@@ -1650,18 +1637,12 @@ c
             goto 800
          end if
 *     read s-matrix
-         !write (6,*) '  issue50/sread/3 : i = ', i
          do 80  icol = 1, length
             read (smt_file_unit, end=900, err=950)
      $           (sreal(i, icol), i=1, icol)
             read (smt_file_unit, end=900, err=950)
      $           (simag(i, icol), i=1, icol)
-            !if (icol <= 2) then
-            !  write (6,*) '  issue50/sread/4 : sreal(1, icol) = ', sreal(1, icol)
-            !end if
 80       continue
-         !write (6,*) '  issue50/sread/5 : sreal(1, 1) = ', sreal(1, 1)
-         write (6,*) '  issue50/sread/5 : sreal(1, 2) = ', sreal(1, 2)
 *     fill lower triangle
          do icol=1,length
             do irow=1,icol
@@ -1669,7 +1650,6 @@ c
                simag(icol,irow)=simag(irow,icol)
             end do
          end do
-         ! write (6,*) '  issue50/sread/8 : sreal(1, 2) = ', sreal(1, 2)
 c
       else if (nnout .le. 0) then
 *     here if you have written out columns of the s-matrix
@@ -1688,14 +1668,12 @@ c
 c     Read eight bytes "ENDOFSMT"
  800  read (smt_file_unit, end=900, err=950) csize8
       if (csize8 .ne. 'ENDOFSMT') goto 950
-      write (6,*) '  issue50/sread/9 : sreal(1, 2) = ', sreal(1, 2)
       return
 c
 c     End-of-file
  900  continue
 c     Read error
  950  ierr = -1
-      write (6,*) '  issue50/sread/10 : sreal(1, 2) = ', sreal(1, 2)
       return
       end
 c     ------------------------------------------------------------

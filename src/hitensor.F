@@ -2402,7 +2402,8 @@ c
 *
 *.....read next s-matrix
 *
-250   call sread (0, sreal, simag, jtot, jlpar, nu,
+250   nopen = 0
+      call sread (0, sreal, simag, jtot, jlpar, nu,
      :            jq, lq, inq, ipack, jpack, lpack,
      :            1, mmax, nopen, length, ierr)
       if(ierr .eq. -1) then
@@ -2851,7 +2852,8 @@ c
 *
 *.....read next s-matrix
 *
-250   call sread (0, sreal, simag, jtot, jlpar, nu,
+250   nopen = 0
+      call sread (0, sreal, simag, jtot, jlpar, nu,
      :                  jq, lq, inq, ipack, jpack, lpack,
      :                  1, mmax, nopen, length, ierr)
       if(ierr .eq. -1) then

@@ -117,7 +117,8 @@ c.....ienerg: number of energy
       jtotb = min0(jtotb, jfinal)
 *
       iadr=0
-30    call sread (iadr, sreal, simag, jtot, jlpar, nu,
+30    nopen = 0
+      call sread (iadr, sreal, simag, jtot, jlpar, nu,
      :                  jq, lq, inq, ipack, jpack, lpack,
      :                   1, nmax, nopen, length, ierr)
       if(csflag) jlpar=0

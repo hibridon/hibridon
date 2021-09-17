@@ -976,7 +976,8 @@ c
       do 26 i=1,iabs(nnout1)
 26    if (jout1(i).ne.jout2(i)) idif=idif+1
 c
-30    call sread (0,sreal1, simag1, jtot1, jlpar1, nu1,
+30    nopen1 = 0
+      call sread (0,sreal1, simag1, jtot1, jlpar1, nu1,
      :                  jq, lq, inq, ipack1, jpack1, lpack1,
      :                  1, mmax, nopen1, lengt1, ierr)
       if(ierr.eq.-1) goto 200
@@ -985,6 +986,7 @@ c
 35      format(' ERROR READING FILE ',(a))
         goto 200
       end if
+      nopen2 = 0
       call sread (0,sreal2, simag2, jtot2, jlpar2, nu2,
      :                  jq, lq, inq, ipack2, jpack2, lpack2,
      :                  2, mmax, nopen2, lengt2, ierr)
