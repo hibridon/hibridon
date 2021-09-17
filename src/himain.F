@@ -432,6 +432,7 @@ contains
       use mod_coener, only: energ
       use mod_hiba1sg, only : basis
       use mod_version, only : version, acknow
+      use mod_hibrid5, only : soutpt, nusum, xwrite
       use constants
       implicit double precision (a-h,o-z)
       integer :: jtotmx
@@ -484,6 +485,7 @@ contains
      :          tq2(1), tq3(1)
       data twojlp / .false. /
       real(8), parameter :: mtime_granularity = 0.5d0
+      integer, parameter :: tmp_file = 1
 *   to obtain timing information calls are made to system-specific
 *   time subroutine:  call mtime(cpu,wallt) where cpu is clock cpu
 *   time in seconds and wallt is wall clock time in seconds
@@ -1099,7 +1101,7 @@ c.....next nu value if nu runs in outer loop
      :              jlev,elev, inlev, jtot, jfirst,
      :              jtop, jtotd, nu, nufirs, numax, nud, jlpar,
      :              nerg, ipos, csflag, flaghf, wrpart, partw,
-     :              twomol, nucros, nlevel, nlev, nopen, nmax)
+     :              twomol, nucros, nlevel, nlev, nopen, nmax, tmp_file)
 c.....save restart information
         if (wrxsec .or. xsecwr .or. partw .or. wrpart) then
           if (.not. wavefl .and. .not. photof) then

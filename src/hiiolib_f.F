@@ -1206,6 +1206,7 @@ c.....open direct access file for interpolation and restart
       use mod_coener, only: energ
       use mod_cow, only: q1 => w_as_vec ! q1(1)
       use mod_cozmat, only: q2 => zmat_as_vec ! q2(1)
+      use mod_hibrid5, only : intchk
 
       implicit double precision (a-h,o-z)
       logical writs,csflag,nucros, llpar, wrpart, wrxsec

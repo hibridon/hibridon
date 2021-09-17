@@ -53,6 +53,7 @@
       use mod_cosysl, only: islcod, lspar
       use mod_version, only : version
       use mod_coj12, only: j12
+      use mod_hibrid5, only : intcrs, readpc
 
       implicit double precision (a-h,o-z)
 *  iicode is the number of integer pcod's

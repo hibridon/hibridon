@@ -1,3 +1,5 @@
+      module mod_hibrid5
+      contains
 * ---------------------------------------------------------------------------
 * hibrid5 library
 *
@@ -134,6 +136,20 @@
       use mod_coj12, only: j12
       use mod_coener, only: ener => energ
       implicit double precision (a-h,o-z)
+      real(8), intent(inout) :: tsq(nmax,nmax)
+      real(8), intent(in) :: sr(nmax,nmax)
+      real(8), intent(in) :: si(nmax,nmax)
+      real(8), intent(out) :: scmat(nmax,nmax)
+      integer, intent(in) :: lq(nopen)
+      integer, intent(in) :: jq(nopen)
+      integer, intent(in) :: inq(nopen)
+      integer, intent(out) :: isc1(nopen)
+      integer, intent(out) :: isc2(nopen)
+      real(8), intent(out) :: sc1(nmax, nmax)
+      real(8), intent(out) :: sc2(nmax, nmax)
+      integer, intent(in) :: jlev(nlevop)
+      real(8), intent(in) :: elev(nlevop)
+      integer, intent(in) :: inlev(nlevop)
       logical ipos, csflag, swrit, t2writ, writs, wrpart, partw,
      :        wrxsec, xsecwr, flaghf, t2test, flagsu, firstj, twomol,
      :        nucros, photof, wavefn, faux, twojlp, boundf, wrsmat
@@ -145,10 +161,6 @@
       common /coered/ ered, rmu
       common /cojlpo/ jlpold
       common /cophot/ photof, wavefn, boundf, wrsmat
-      dimension tsq(nmax,nmax), scmat(nmax,nmax), sr(nmax,nmax),
-     :          si(nmax,nmax), sc1(nmax,nmax),sc2(nmax,nmax)
-      dimension isc1(1), isc2(1), jq(1), lq(1), inq(1),
-     :          jlev(1), elev(1), inlev(1)
 *
       data izero, ione /0, 1/
       xjtot = jtot
@@ -312,6 +324,10 @@
       use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(10)
       use constants
       implicit double precision (a-h,o-z)
+      real(8), intent(in) :: scmat(nmax, nlevop)
+      integer, intent(in) :: jlev(nlevop)
+      real(8), intent(in) :: elev(nlevop)
+      integer, intent(in) :: inlev(nlevop)
       character*20 cdate
       character*40 form
       logical ipos, csflag, wrpart, partw, flaghf, flagsu,twomol,nucros,
@@ -319,7 +335,6 @@
 #include "common/parpot"
       common /coered/ ered, rmu
       common /cosurf/ flagsu
-      dimension scmat(nmax,10),jlev(10),elev(10),inlev(10)
 *  write partial opacity to unit (24+ien) if desired
 *  in cs calculation this is only done if nu = numax, in which
 *  case the partial opacity has been summed over all projection indices
@@ -556,6 +571,7 @@
       common /coered/ ered, rmu
       dimension tsq(nmax,1),tq1(nmax,1),tq2(nmax,1),tq3(nmax,1),
      1          jlev(1),elev(1),inlev(1),nlev(1)
+      integer :: tmp_file
 *
       do 100 ien = 1,nerg
         ener = energ(ien)
@@ -914,14 +930,12 @@ c     write(6,*) 'prefac:',j1,j2,j3,x1,x3
       integer :: nmax, n
       real(8), dimension(nmax, n), intent(out) :: q
       integer :: i
-      integer :: ifile2 = 1
-      ifile2 = ifile
 #ifdef DEBUG_ISSUE35
       write(6,*) 'issue34/dbin : ifile = ', ifile
 #endif
-      call dbri(i1,1,ifile2,irec)
-      call dbri(i2,1,ifile2,0)
-      call dbri(i3,1,ifile2,0)
+      call dbri(i1,1,ifile,irec)
+      call dbri(i2,1,ifile,0)
+      call dbri(i3,1,ifile,0)
       do i=1,n
         call dbrr(q(1,i),n,ifile,0)
       end do
@@ -2012,3 +2026,4 @@ c$$$               xjrow2 = xjrow2 + 0.5d0
 190   continue
       return
       end
+      end module mod_hibrid5
