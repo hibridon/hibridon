@@ -1805,6 +1805,7 @@ c
 10    call sread ( iaddr, sreal, simag, jtot, jlpar, nu,
      :             jq, lq, inq, inpack, jpack, lpack,
      :             1, nmax, nopen, length, ierr)
+      write (6, *) 'issue50/intcr/1/0 : sreal(1,2) = ', sreal(1,2)
       if(jlpold.eq.0) jlpold=jlpar
       if(ierr.eq.-1) goto 100
       if (csflag .and. (jtot.gt.maxjt)) goto 100
@@ -1836,13 +1837,15 @@ c
       call tsqmat(tsq,sreal,simag,inq,jq,lq,
      1   inpack,jpack,lpack,nopen,length,nmax)
 * calculate partial cross sections
-      ! write (6, *) 'issue50/intcr/2/0 : sc1(1,1) = ', sc1(1,1)   ! graffy : enabling this line makes issue50 disappear
+      write (6, *) 'issue50/intcr/2/0 : tsq(1,2) = ', tsq(1,2)
+      write (6, *) 'issue50/intcr/2/0 : tsq(1,1) = ', tsq(1,1)
+      write (6, *) 'issue50/intcr/2/0 : sc1(1,1) = ', sc1(1,1)   ! graffy : enabling this line makes issue50 disappear
       call partcr(tsq,sc1,isc1,isc2,sc2,nopen,length,
      1            inq, jq, lq, inpack, jpack, lpack,
      2            inlev, jlev, elev, jtot, nu,
      3            csflag,flaghf,twomol,flagsu,
      4            nlevop,nmax)
-      write (6, *) 'issue50/intcr/2 : sc1(1,1) = ', sc1(1,1)
+      ! write (6, *) 'issue50/intcr/2 : sc1(1,1) = ', sc1(1,1)
       if(.not.csflag.or.nucros.or.(csflag.and.nu.eq.numin)) then
 * sum up partial cross sections over nu
         scmat(1:nlevop, 1:nlevop) = sc1(1:nlevop, 1:nlevop)
@@ -1852,7 +1855,7 @@ c
 * sum up partial cross sections to get integral cross sections
       if(csflag.and.nucros) then
         irec=2
-      call intpol(irec,jtot,jfirst,jfinal,jtotd,jlpar,jlpold,
+        call intpol(irec,jtot,jfirst,jfinal,jtotd,jlpar,jlpold,
      1              jlev,nmax,nlevop,tsq,sc1,sc2,scmat,nucros,tmp_file)
         if(jtot+jtotd.gt.jfinal) then
           irec=7
@@ -1873,10 +1876,10 @@ c
       goto 10
 * make a compressed matrix of cross sections
 100   continue
-      write (6, *) 'issue50/intcr/8 : sc1(1,1) = ', sc1(1,1)
-      write (6, *) 'issue50/intcr/8 : jlist(1) = ', jlist(1)
-      write (6, *) 'issue50/intcr/8 : sigma(jlist(1),jlist(1)) = ', sigma(jlist(1),jlist(1))
-      write (6, *) 'issue50/intcr/8 : sigma(1,1) = ', sigma(1,1)
+      !write (6, *) 'issue50/intcr/8 : sc1(1,1) = ', sc1(1,1)
+      !write (6, *) 'issue50/intcr/8 : jlist(1) = ', jlist(1)
+      !write (6, *) 'issue50/intcr/8 : sigma(jlist(1),jlist(1)) = ', sigma(jlist(1),jlist(1))
+      !write (6, *) 'issue50/intcr/8 : sigma(1,1) = ', sigma(1,1)
 
       if(nnout.gt.0) then
         do i=1,nj
@@ -1937,8 +1940,13 @@ c
             if (diag) t = t + cmplx(one,zero)
             t2 = real(t * conjg(t))
             tsq(irow,icol) = t2
+            if (irow == 1 .and. icol == 2) then
+              !write (6, *) '  issue50/tsqmat : sreal(1,2) = ', sreal(1,2)
+              !write (6, *) '  issue50/tsqmat : simag(1,2) = ', simag(1,2)
+            end if
 300      continue
 400   continue
+      !write (6, *) '  issue50/tsqmat : tsq(1,2) = ', tsq(1,2)
       return
       end
 * ----------------------------------------------------------------------
@@ -1996,6 +2004,7 @@ c
       !write (6, *) 'issue50/partcr/0 : nmax = ', nmax
       !write (6, *) 'issue50/partcr/0 : nopen = ', nopen
       !write (6, *) 'issue50/partcr/0 : ncol = ', ncol
+      write (6, *) 'issue50/partcr/9 : tsq(1,2) = ', tsq(1,2)
 *
       xjtot = jtot
       if (flaghf .and. .not. csflag) xjtot = jtot + 0.5d0
@@ -2089,13 +2098,19 @@ c$$$               xjrow2 = xjrow2 + 0.5d0
         icol = isc1(i)
         do 180  j = 1, nopen
           irow = isc2(j)
+          if( irow == 1 .and. icol == 1 ) then
+
+            !write (6, *) 'issue50/partcr/9 : j = ', j
+            !write (6, *) 'issue50/partcr/9 : i = ', i
+            !write (6, *) 'issue50/partcr/9 : tsq(j,i) = ', tsq(j,i)
+            !write (6, *) 'issue50/partcr/9 : tsq(j,i) = ', tsq(j,i)
+            !write (6, *) 'issue50/partcr/9 : scmat(1,1) = ', scmat(1,1)
+          end if    
           scmat(irow,icol) = scmat(irow,icol)+tsq(j,i)*sc2(j)
           if( irow == 1 .and. icol == 1 ) then
-            !write (6, *) 'issue50/partcr/10 : sc2(1) = ', sc2(1)
-            !write (6, *) 'issue50/partcr/10 : isc1(1) = ', isc1(1)
-            !write (6, *) 'issue50/partcr/10 : isc2(1) = ', isc2(1)
-            !write (6, *) 'issue50/partcr/10 : tsq(1,1) = ', tsq(1,1)
+            !write (6, *) 'issue50/partcr/10 : sc2(j) = ', sc2(j)
             !write (6, *) 'issue50/partcr/10 : scmat(1,1) = ', scmat(1,1)
+            ! write (6, *) ''
           end if    
 180     continue
 190   continue
