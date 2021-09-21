@@ -45,6 +45,7 @@
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_coz, only: sreal => z_as_vec ! sreal(1)
       use mod_cozmat, only: simag => zmat_as_vec ! simag(1)
+      use mod_hibrid5, only: sread
       implicit double precision (a-h,o-z)
       character*(*) fname
       character*20 cdate

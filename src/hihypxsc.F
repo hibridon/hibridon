@@ -43,6 +43,8 @@
       use mod_coisc12, only: lpack => isc12 ! lpack(1)
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_cosc3, only: elevh => sc3 ! elevh(1)
+      use mod_hibrid5, only: sread
+
       implicit double precision (a-h,o-z)
       character*(*) flname
       real(8), dimension(4), intent(in) :: a(4)

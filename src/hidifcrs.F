@@ -49,6 +49,7 @@
       use mod_cov2, only: nv2max
       use mod_coz, only: sreal1 => z_as_vec ! sreal1(1)
       use mod_cow, only: simag1 => w_as_vec ! simag1(1)
+      use mod_hibrid5, only: sread
 
       implicit double precision (a-h,o-z)
       character*(*) fname1

@@ -108,6 +108,7 @@
       use mod_coz, only: sreal => z_as_vec ! sreal(1)
       use mod_cow, only: simag => w_as_vec ! simag(1)
       use mod_cozmat, only: jtotpa => zmat_as_vec ! jtotpa(1)
+      use mod_hibrid5, only: sread
       use tensor
       implicit double precision (a-h,o-z)
       character*(*) filnam
@@ -533,6 +534,7 @@ c         fast = .false.
       use mod_coisc4, only: jpack => isc4 ! jpack(1)
       use mod_coisc5, only: lpack => isc5 ! lpack(1)
       use mod_coisc6, only: ipack => isc6 ! ipack(1)
+      use mod_hibrid5, only: sread
       implicit double precision (a-h,o-z)
       logical lpar, batch, lpar2, lprnt
       common /colpar/ lpar(3), batch, lpar2(23)
@@ -979,6 +981,7 @@ c end of added/modified code (pjd)
 * modules for levels for which xs's to be computed
       use mod_coisc9, only: jslist => isc9 ! jslist(1)
       use mod_coisc10, only: inlist => isc10 ! inlist(1)
+      use mod_hibrid5, only: sread
       implicit double precision (a-h,o-z)
       complex*8 t, tp
       logical diag, diagj, diagin, lpar1, lpar2, batch, ipos,
@@ -1429,6 +1432,7 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
 * added two common blocks - levels for which xs's to be computed (pjd)
       use mod_coisc9, only: jslist => isc9 ! jslist(1)
       use mod_coisc10, only: inlist => isc10 ! inlist(1)
+      use mod_hibrid5, only: sread
       implicit double precision (a-h,o-z)
       complex*8 t, tp, ai, cphase
       logical diag, diagj, diagin, lpar1, lpar2, batch, ipos,
@@ -1878,6 +1882,7 @@ c    1         jtot,jtotp,j1,l1,j2,l2,l1p,icolp,irowp
 * common blocks for levels for which xs's to be computed
       use mod_coisc9, only: jslist => isc9 ! jslist(1)
       use mod_coisc10, only: inlist => isc10 ! inlist(1)
+      use mod_hibrid5, only: sread
       implicit double precision (a-h,o-z)
       complex*8 t, tp
       logical diag, diagj, diagin, lpar1, lpar2, batch, ipos,
@@ -2321,6 +2326,7 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_coz, only: sreal => z_as_vec ! sreal(1)
       use mod_cow, only: simag => w_as_vec ! simag(1)
+      use mod_hibrid5, only: sread
       implicit double precision (a-h,o-z)
 * size of q for j <= 5 and 0.5 deg angle increment
       complex*16 q(43681)
@@ -2772,6 +2778,7 @@ c=============
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_coz, only: sreal => z_as_vec ! sreal(1)
       use mod_cow, only: simag => w_as_vec ! simag(1)
+      use mod_hibrid5, only: sread
       implicit double precision (a-h,o-z)
 * size of q for j <= 5 and 0.5 deg angle increment
       complex*16 q(43681)

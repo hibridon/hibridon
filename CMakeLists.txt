@@ -150,7 +150,6 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   set (warning_options "${warning_options} -Wno-intrinsic-shadow")
   set (warning_options "${warning_options} -Wno-character-truncation")
   
-  set (CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g  -fsanitize=address ${warning_options}")
 
   # don't initialize local variables to zero : initialize them with dummy values to force failures which help detect uninitialized variables as -Wuninitialized doesn't detect everything (see issue #38 or https://stackoverflow.com/questions/39591300/gfortran-wuninitialized-flag-misses-variable-in-do-loop)
   # by default, gfortran initializes integers to 0, but not ifort : as a result, some bugs in the code are hidden with gfortran default options
@@ -161,7 +160,13 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
     set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -finit-real=snan")
     set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -ffpe-trap=invalid,zero,overflow")
     target_compile_definitions(hib PUBLIC FLOATING_POINT_ERRORS_CAUSE_EXCEPTIONS=1)
+  else()
+    # from gfortran documentation :
+    # Finally, note that enabling any of the -finit-* options will silence warnings that would have been emitted by -Wuninitialized for the affected local variables.
+    set (warning_options "${warning_options} -Wuninitialized")
   endif()
+
+  set (CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g  -fsanitize=address ${warning_options}")
 
   # todo: add -fbounds-check once all mismatched declarations of variables (eg in common blocks) have been fixed
   if(ENABLE_CODE_COVERAGE)
@@ -259,7 +264,7 @@ elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   # Cette combinaison d'options stoppe l'exécution dès qu'une exception (overflow, underflow, division par zéro, opération invalide,…) se produit; elle indique à quel niveau du code elle s'est produite. Le contrôle s'opère dans chaque subroutine, contrairement à l'option -fpe0 qui agit uniquement sur le programme principal. 
 #  set (common_options "${common_options} -fpe-all=0 -no-ftz -traceback")
 
-  # set (warning_options "") # activate all wanings
+  # set (warning_options "") # activate all warnings
   set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_options} ${warning_options}")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g -traceback -fp-stack-check ${common_options} ${warning_options}")
 

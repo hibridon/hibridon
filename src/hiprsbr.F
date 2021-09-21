@@ -33,6 +33,7 @@
       use mod_cosc1, only: elev1 => sc1 ! elev1(1)
       use mod_cosc2, only: elev2 => sc2 ! elev2(1)
       use mod_cosc3, only: elevt => sc3 ! elevt(1)
+      use mod_hibrid5, only: sread
       implicit double precision (a-h, o-z)
       character*(*) flnam1, flnam2
       character*20  cdate1, cdate2

@@ -900,6 +900,7 @@ c#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
       use mod_coz, only: sreal1 => z_as_vec ! sreal1(1)
       use mod_cow, only: sreal2 => w_as_vec ! sreal2(1)
       use mod_cozmat, only: simag1 => zmat_as_vec ! simag1(1)
+      use mod_hibrid5, only: sread
 
       implicit double precision (a-h,o-z)
       character*(*) fname1,fname2

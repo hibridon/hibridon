@@ -296,6 +296,7 @@
       use mod_coisc10, only: inlist => isc10 ! inlist(1)
       use mod_coz, only: sreal => z_as_vec ! sreal(1)
       use mod_cow, only: simag => w_as_vec ! simag(1)
+      use mod_hibrid5, only: sread
       implicit double precision (a-h,o-z)
       complex*8 t, tp
       logical diag, diagj, diagin, diagp, diagjp, diagnp,
@@ -627,6 +628,7 @@
       use mod_coisc10, only: inlist => isc10 ! inlist(1)
       use mod_coz, only: sreal => z_as_vec ! sreal(1)
       use mod_cow, only: simag => w_as_vec ! simag(1)
+      use mod_hibrid5, only: sread
       implicit double precision (a-h,o-z)
       complex*8 t, tp
       logical diag, diagj, diagin, diagp, diagjp, diagnp,
