@@ -1349,9 +1349,6 @@ c
             a(i,j) = a(j,i)
          enddo
       enddo
-#ifdef DEBUG_ISSUE35
-!      write(6, *) 'issue35/syminv/1 : a=', a
-#endif
 
 
 *      write(6,444) lda,n

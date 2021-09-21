@@ -262,9 +262,6 @@
           call swrite (sr, si, jtot, jlpar, nu, jq, lq, inq, isc1,
      :                 isc2, jpack, lpack, sc2, nfile, nmax, nopen)
       end if
-#ifdef DEBUG_ISSUE35
-      write (6, *) "issue35/soutpt/1: tsq(1,1) = ", tsq(1,1)
-#endif
 
       if (.not. xsecwr .and. .not. wrxsec .and. .not.partw
      :    .and. .not.wrpart) return
@@ -305,10 +302,6 @@
       if (.not. csflag .or. (csflag .and. (nu .eq. numax) ) ) then
          irec=(ien-1)*5+2
          faux = .false.
-#ifdef DEBUG_ISSUE35
-      write (6, *) "issue35/soutpt: intpol call"
-      write (6, *) "issue35/soutpt: tsq(1,1) = ", tsq(1,1)
-#endif
          call intpol(irec,jtot,jfirst,jfinal,jtotd,jlpar,jlpold,
      1                jlev,nmax,nlevop,tsq,sr,si,scmat,faux,soutpt_sc_file)
       end if
@@ -596,9 +589,6 @@
 * sum up over nu
         irec=(nerg+ien-1)*5+2
         vrai=.true.
-#ifdef DEBUG_ISSUE35
-        write (6, *) "issue35/nusum: intpol call"
-#endif
         call intpol(irec,nu,numin,numax,nud,jlpar,jlpar,
      1              jlev, nmax,nlevop,tq1,tq2,tq3,tsq,vrai,tmp_file)
 100   continue
@@ -656,10 +646,6 @@
 *
       jl3=jl3a
       nowrit=.false.
-#ifdef DEBUG_ISSUE35
-      write(6,*) 'issue35/intpol tmp_file =', tmp_file
-      write(6,*) 'issue35/intpol/-2 q(1,1) =', q(1,1)
-#endif
       goto 5
 *
       entry intpl2(jlx,jl2x,jl3x,nmax,n,q,q2,q3,nucros)
@@ -698,9 +684,6 @@ c.....initialize at first j (or nu)
         else
 c.....simply add for jd=1
           call dbin(tmp_file, irec,jl,jpl,next,q,nmax,n)
-#ifdef DEBUG_ISSUE35
-          write(6,*) 'issue35/intpol/-1 q(1,1) =', q(1,1)
-#endif
           if(jp.eq.jpl.and.jl+1.ne.jl3) then
             write(6,15) jp,jl,jl3
 15          format(/' ERROR IN INTPOL: JP, JL, JL3:',3i4)
@@ -712,9 +695,6 @@ c.....simply add for jd=1
               q(j,i)=q(j,i)+q3(j,i)
             end do
           end do
-#ifdef DEBUG_ISSUE35
-            write(6,*) 'issue35/intpol/0 q(1,1) =', q(1,1)
-#endif
           jf=jl3
           call dbout(irec,jf,jp,1,q,nmax,n)
           call dbout(irec+1,jl,jpl,1,q2,nmax,n)
@@ -792,9 +772,6 @@ c       write(6,99) nuu,i,j,q(j,i),q1(j,i),q2(j,i),q3(j,i),f0,f1,f2
      >               +f1*(q2(j,i)-q3(j,i))
      >               +f2*(q1(j,i)-q2(j,i))
 42      continue
-#ifdef DEBUG_ISSUE35
-      write(6,*) 'issue35/intpol/1 q(1,1) =', q(1,1)
-#endif
       end if
 c
       if(nowrit) return
@@ -820,9 +797,6 @@ c
      >                   +f1*(q2(j,i)-q3(j,i))
           end do
         end do
-#ifdef DEBUG_ISSUE35
-        write(6,*) 'issue35/intpol/2 q(1,1) =', q(1,1)
-#endif
 
       else
 c......here for sparse algorithm
@@ -843,24 +817,15 @@ c99      format(1x,3i4,4f10.4,3x,3f12.3)
         q(j,i)=q(j,i)+f0*q2(j,i)
      >               +f1*(q2(j,i)-q3(j,i))
 62      continue
-#ifdef DEBUG_ISSUE35
-        write(6,*) 'issue35/intpol/3 q(1,1) =', q(1,1)
-#endif
 
 c......now all levels for j.ge.nu=jl3
       end if
-#ifdef DEBUG_ISSUE35
-      write(6,*) 'issue35/intpol/4 q(1,1) =', q(1,1)
-#endif
 *
       if(nowrit) return
 *
       call dbout(irec,jf,jp,2,q,nmax,n)
       call dbout(irec+2,jl3,jp,0,q3,nmax,n)
       call dbout(irec+3,jl2,jp2,0,q2,nmax,n)
-#ifdef DEBUG_ISSUE35
-      write(6,*) 'issue35/intpol/5 q(1,1) =', q(1,1)
-#endif
       return
       end
       subroutine nulist(nu,jf,jlev,list,nj,nleq,nlge)
@@ -951,18 +916,12 @@ c     write(6,*) 'prefac:',j1,j2,j3,x1,x3
       integer :: nmax, n
       real(8), dimension(nmax, n), intent(out) :: q
       integer :: i
-#ifdef DEBUG_ISSUE35
-      write(6,*) 'issue34/dbin : ifile = ', ifile
-#endif
       call dbri(i1,1,ifile,irec)
       call dbri(i2,1,ifile,0)
       call dbri(i3,1,ifile,0)
       do i=1,n
         call dbrr(q(1,i),n,ifile,0)
       end do
-#ifdef DEBUG_ISSUE35
-      write(6,*) 'issue35/dbin : q(1,1) = ', q(1,1)
-#endif
       return
       end
 * ----------------------------------------------------------------------
@@ -1969,9 +1928,6 @@ c.....reserve space for restart information
       call dbwr(word,20,1,0)
       call dbwc(1,1)
       call dclos(1)
-#ifdef DEBUG_ISSUE35
-      write(6, *) 'issue35/dres : savfil=', savfil
-#endif
       call dopen(1,3,savfil)
       return
       end

@@ -1054,9 +1054,6 @@ c.....open direct access file for interpolation and restart
              end if
            end if
            savfil=xname
-#ifdef DEBUG_ISSUE35
-           write(6, *) 'issue35/openfi : savfil=', savfil
-#endif
            call dopen(1,nfile,savfil)
            write (9, 180) xname(1:lenx)
 180        format (' ** RESTART INFORMATION SAVED IN FILE ',(a))
@@ -1715,9 +1712,6 @@ c
             cdio_is_allocated = .TRUE.
       end if
       ! write(6,*), 'graffy/dopen : ifil=', ifil, 'iunit=', iunit, 'name=', name
-#ifdef DEBUG_ISSUE35
-      write(6, *) 'issue35/dopen : ifil=', ifil, 'iunit=', iunit, 'name=', name
-#endif
       if(iun(ifil).eq.iunit) return
       if(iun(ifil).ne.0) then
         write(6,75) ifil,iunit,iun(ifil)
@@ -1785,10 +1779,6 @@ c
 c
 c.....save file information and close file "ifil"
 c
-#ifdef DEBUG_ISSUE35
-      write(6, *) 'issue35/dclos : ifil=', ifil
-#endif
-
       if(iun(ifil).eq.0) then
         write(6,95) ifil
 95      format(/' DIRECT CLOSE ERROR ON FILE',i2,

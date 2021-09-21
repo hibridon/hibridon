@@ -21,9 +21,6 @@ set(ENABLE_ASSERTS "OFF" CACHE BOOL "to enable or disable assert checks for debu
 set(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR "ON" CACHE BOOL "if set, causes the use of uninitilazed variables to trigger an exception, thus making the program stop. This is useful to detect uninitialized memory issues.")
 
 
-set(ENABLE_ISSUE35_DEBUGGING "OFF" CACHE BOOL "enable traces to investigate issue #35")
-
-
 if(ENABLE_CODE_COVERAGE)
   find_program(COVERAGE_LCOV_EXE lcov)
   if (NOT COVERAGE_LCOV_EXE)
@@ -303,11 +300,6 @@ string(TIMESTAMP TODAY "%Y-%m-%d at %H:%M")
 target_compile_definitions(hib PUBLIC _BUILD_DATE_="${TODAY}")
 # The ffollowing is for preprocessing of hhelp.F and hiutil.F
 target_compile_definitions(hib PUBLIC _HELPDIR_="${CMAKE_CURRENT_SOURCE_DIR}/doc/")
-
-if(ENABLE_ISSUE35_DEBUGGING)
-  target_compile_definitions(hib PUBLIC DEBUG_ISSUE35="dummy")
-endif()
-
 
 add_custom_command(
     OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/src/common
