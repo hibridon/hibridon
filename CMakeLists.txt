@@ -83,6 +83,7 @@ add_library(hib
      src/hibrid5.F
      src/hicommon.F
      src/hidifcrs.F
+     src/hiflow.F
      src/hihypxsc.F
      src/hiiolib_f.F
      src/himatrix.F
