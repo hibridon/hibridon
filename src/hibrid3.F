@@ -322,7 +322,13 @@ cABER
 *  now loop over angular coupling matrix to calculate the potential matrix
 *    w(ij) = 2 * rmu * vv0 + sum [ 2 * rmu * vvl(ilam) * v2(ij,ilam) ]
 *  first zero out lower triangle of potential matrix
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/potmat/2'
+#endif
 #if defined(ISSUE49_IS_FIXED)
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/potmat/2/1'
+#endif
       iwpt = 1
       do 20 icol = 1, nch
         ncol = nch - icol + 1
@@ -330,6 +336,9 @@ cABER
         iwpt = iwpt + nmax + 1
       20    continue
 #else
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/potmat/2/2'
+#endif
       ! although w is a lower triangular matrix, initialize both upper and
       ! lower part of it as some code is still treating it as full and therefore
       ! reading uninitialized values
@@ -339,6 +348,9 @@ cABER
         call dset(ncol, zero, w(iwpt), 1)
         iwpt = iwpt + nmax
       end do
+#endif
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/potmat/3'
 #endif
       ioff = 0
 
@@ -353,6 +365,9 @@ cABER
            ioff = ioff + lamnum(ilam)
 40      continue
       endif
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/potmat/4'
+#endif
 
 cABER
 c       call druckq(w,nmax,nch,'potential matrix',icount)
@@ -366,6 +381,9 @@ cABER
      :           + r2 * cent(i)
         ipt = ipt + nmax + 1
       end do
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/potmat/5'
+#endif
 
 cABER
 c       call druckq(w,nmax,nch,'potential matrix',icount)
@@ -397,11 +415,19 @@ cABER
 75    if (wmax .lt. zero) go to 90
       rtmx = r
 90    continue
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/potmat/6'
+#endif
+
       cpupot=cpupot+second()
 * here for 2s-2p scattering
 * fill in upper triangle of w matrix
 *  first fill in upper half of original matrix
       if (ibasty .eq. 10) then
+#if defined(DEBUGGING_ISSUE46)
+        write(7,*) 'issue46/potmat/6'
+#endif
+      
         nmaxp1 = nmax + 1
         icolpt = 2
         irowpt = nmaxp1
