@@ -318,7 +318,13 @@ c
          istep = 0
          r = rmin
          call mtime(t0,t0w)
+#if defined(DEBUGGING_ISSUE46)
+         write(6,*) 'issue46/logdb/1 : before potmat'
+#endif
          call potmat(w, r, nch, nmax)
+#if defined(DEBUGGING_ISSUE46)
+         write(6,*) 'issue46/logdb/1 : after potmat'
+#endif
          call mtime(t1,t1w)
          tp = tp + t1 - t0
          tpw = tpw + t1w - t0w
@@ -326,7 +332,14 @@ c
 *     first sector
          if (photof) then
            call mtime(t0,t0w)
+#if defined(DEBUGGING_ISSUE46)
+           write(6,*) 'issue46/logdb/1 : before ground'
+#endif
+  
            call ground(q, r, nch, nphoto, mxphot)
+#if defined(DEBUGGING_ISSUE46)
+           write(6,*) 'issue46/logdb/1 : after ground'
+#endif
 *     wt is weight for simpson's rule quadrature, isimp is alternator for
 *     simpson's rule quadrature
            wt = simpwt
