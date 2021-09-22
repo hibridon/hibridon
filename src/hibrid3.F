@@ -910,6 +910,10 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
      :          sc5(1), sc6(1), sc7(1), sc8(1), sc9(1)
 *  prec is precision of single precision floating pt number
       data prec / 1.d+11 /
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/propag: start'
+#endif
+
       call mtime(t11,t22)
       first = .true.
       r = rstart
@@ -931,6 +935,9 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 80      format (' *** NCH.LE.0 IN PROPAG, RETURN WITHOUT PROPAGATION')
         return
       end if
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/propag/2'
+#endif
 
       if (boundf) then
         call mtime(tb1,tbx)
@@ -944,6 +951,9 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 105     format (' *** CPU TIME FOR BOUND = ',a)
         return
       end if
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/propag/3'
+#endif
 
 *****************************************************************
 
@@ -956,6 +966,9 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
      :             r, rendld, spac, eshift, itwo, twoen,
      :             td, tdm, tp, tpm, twf, twfm, logwr, noprin,
      :             ipos, nch, nmax)
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/propag/3/1 : after runlog'
+#endif
 
 *  on return from runlog, z contains the log-derivative matrix at r = rendld
 *  branch to airy integration if desired. integrate coupled equations
@@ -975,10 +988,17 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
             call dcopy (nrow,z(icol+1,icol),1,z(icol,icol+1),nmax)
 110       continue
         endif
+#if defined(DEBUGGING_ISSUE46)
+        write(6,*) 'issue46/propag/4 : before airprp'
+#endif
+  
         call airprp (z, amat, bmat, w, zmat, sc1, sc2, sc3, sc4,
      :               sc5, sc6, sc7, sc8, sc9, r, rendai, drnow, en,
      :               tolhi, rincr, eshift, nch, nmax, itwo, airypr,
      :               twoen,noprin)
+#if defined(DEBUGGING_ISSUE46)
+        write(6,*) 'issue46/propag/5 : after airprp'
+#endif
 *  on return from airprp, z contains the log-derivative matrix at r = rendai
       end if
       call mtime(t11,t22)
@@ -994,10 +1014,17 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
         call mxoutd (9, z, nch, nmax, 0, ipos)
       end if
 *  now calculate s-matrix and t-matrix squared
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/propag : before smatrx'
+#endif
       call smatrx (z, w, zmat, amat, bmat,
      :             lq, jq, inq, isc1, sc1, sc2, sc3, sc4,
      :             sc5, sc6, sc7, r, prec, tw, twm, nopen, nch, nmax,
      :             logwr,ipos)
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/propag : after smatrx'
+#endif
+
 * convert to time string
         call mtime(t1,t2)
         cpusmt=cpusmt+t1-t11
@@ -1021,6 +1048,10 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
         write (9, 320) rtmn,rtmx
 320     format(' ** TURNING POINTS:  MIN=', f7.3,'  MAX=',f7.3,' BOHR')
       end if
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/propag : end'
+#endif
+
       return
       end
 * ------------------------------------------------------------------------
