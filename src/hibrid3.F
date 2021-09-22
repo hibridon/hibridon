@@ -1,3 +1,4 @@
+#include "assert.h"
 *************************************************************************
 *                         hibridon 3  library                           *
 *                                                                       *
@@ -364,6 +365,7 @@ cABER
             write(6,*) 'issue46/potmat/3/0: ioff = ', ioff
             write(6,*) 'issue46/potmat/3/0: lamnum(ilam) = ', lamnum(ilam)
 #endif
+            ASSERT(lamnum(ilam) >= 0)
             do  30 i = 1, lamnum(ilam)
 #if defined(DEBUGGING_ISSUE46)
                   write(6,*) 'issue46/potmat/3/1: i = ', i
