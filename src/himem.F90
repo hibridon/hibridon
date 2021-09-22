@@ -212,6 +212,7 @@ module mod_cdbf
    integer, allocatable :: ibstat
    integer, dimension(:), allocatable :: idbuf
    integer, allocatable :: llbuf
+   integer :: ibadr
    contains
    subroutine allocate_cdbf()
       allocate(llbuf)
@@ -231,6 +232,7 @@ module mod_cdbf
       allocate(ibof)
       allocate(ibstat)
       allocate(idbuf(llbuf))
+      ibadr = 0
    end subroutine allocate_cdbf
 end module mod_cdbf
 

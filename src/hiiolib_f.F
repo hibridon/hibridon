@@ -1862,6 +1862,8 @@ c
       return
       end
 c
+#define USE_DBWR_AS_SUBROUTINE
+#if defined(USE_DBWR_AS_SUBROUTINE)
       subroutine dbwr(buffer,l,ifil,irec)
 c
 c.....sequentially buffer out "l" real words to record "irec" on file "ifil"
@@ -1870,7 +1872,7 @@ c.....zero or negative record means start at present position
 c
       use mod_clseg, only: intrel
       implicit none
-      integer, dimension(l), intent(in) :: buffer
+      real(8), dimension(l), intent(in) :: buffer
       integer, intent(in) :: l
       integer, intent(in) :: ifil
       integer, intent(in) :: irec
@@ -1879,26 +1881,43 @@ c
       lre = l*intrel
       call dbwi(buffer,lre,ifil,irec)
       end subroutine
-      
+#endif
       subroutine dbwi(buffer,l,ifil,irec)
 c
 c.....sequentially buffer out "l" integer words to record "irec" on file "ifil
 c.....positive irec indicates start at beginning or record
 c.....zero or negative record means start at present position
 c
-      use mod_cdbf, only: libuf,ibfil,ibrec,ibof,ibstat,idbuf
+#if !defined(USE_DBWR_AS_SUBROUTINE)
+      use mod_clseg, only: intrel
+#endif
+      use mod_cdbf, only: libuf,ibfil,ibrec,ibof,ibstat,idbuf,ibadr
       implicit none
       integer, dimension(l), intent(in) :: buffer
       integer, intent(in) :: l
       integer, intent(in) :: ifil
       integer, intent(in) :: irec
 
-      integer :: i, iof, len, ibadr
+      integer :: i, iof, len
       integer :: lre
       lre = l
 
 c
+#if defined(USE_DBWR_AS_SUBROUTINE)
       if(irec.gt.0) then
+#else
+      goto 50
+c
+      entry dbwr(buffer,l,ifil,irec)
+c
+c.....sequentially buffer out "l" real words to record "irec" on file "ifil"
+c.....positive irec indicates start at beginning of record
+c.....zero or negative record means start at present position
+c
+      lre=l*intrel
+c
+50    if(irec.gt.0) then
+#endif
         if(ibstat.gt.0) call dwrite(idbuf,libuf,ibfil,ibrec,ibadr)
         ibof=0
         ibadr=0
