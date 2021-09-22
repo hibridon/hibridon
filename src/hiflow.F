@@ -310,9 +310,9 @@
         call restrt (jtot,jtopo,jtotd,jlpar,nu,nutop,nud,nerg,nlev,
      :         nchmax,rtmn1,rtmx1,dinsid,writs,csflag,nucros)
 #if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/flow : after call restrt'
+        write(6,*) 'issue46/flow : after call restrt'
 #endif
-     rtmnla=rtmn1
+        rtmnla=rtmn1
         jlpold = jlpar
 *  move s-matrix files to last partial wave done
         if(writs) then
