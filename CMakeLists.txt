@@ -428,6 +428,10 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
   target_link_libraries(${TEST_EXE} hib ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
   target_include_directories(${TEST_EXE} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
   target_compile_options(${TEST_EXE} PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
+  if(DEBUGGING_ISSUE46)
+    target_compile_definitions(${TEST_EXE} PUBLIC DEBUGGING_ISSUE46=1)
+  endif()
+
   if(ENABLE_CODE_COVERAGE)
     target_link_options(${TEST_EXE} PUBLIC ${GCC_COVERAGE_LINK_FLAGS})
   endif()

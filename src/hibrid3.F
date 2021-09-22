@@ -299,6 +299,9 @@
       zero = 0.d0
       one = 1.d0
       two = 2.d0
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/potmat/0 : start'
+#endif
 
 cABER only for testing potential-matrix
 c     if (r.le.3.41) icount=0
@@ -306,6 +309,10 @@ cABER
 *  calculate coefficients of each angular term
       cpupot=cpupot-second()
       call pot( vv0, r)
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/potmat/1 : after pot'
+#endif
+
 *  vv0 is the isotropic term in the potential
 *  the coefficients for each angular term in the coupling potential
 *  [ vvl(i) for i = 1, nlam ] are returned in common block vvlcontains
@@ -410,6 +417,10 @@ cABER
 *  transform w matrix into case e basis
         call trans22(w,nch, nmax)
       endif
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/potmat/10 : end'
+#endif
+
       return
       end
 * -------------------------------------------------------------------------
