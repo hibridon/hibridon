@@ -1862,8 +1862,6 @@ c
       return
       end
 c
-#define USE_DBWR_AS_SUBROUTINE
-#if defined(USE_DBWR_AS_SUBROUTINE)
       subroutine dbwr(buffer,l,ifil,irec)
 c
 c.....sequentially buffer out "l" real words to record "irec" on file "ifil"
@@ -1881,16 +1879,13 @@ c
       lre = l*intrel
       call dbwi(buffer,lre,ifil,irec)
       end subroutine
-#endif
       subroutine dbwi(buffer,l,ifil,irec)
 c
 c.....sequentially buffer out "l" integer words to record "irec" on file "ifil
 c.....positive irec indicates start at beginning or record
 c.....zero or negative record means start at present position
 c
-#if !defined(USE_DBWR_AS_SUBROUTINE)
       use mod_clseg, only: intrel
-#endif
       use mod_cdbf, only: libuf,ibfil,ibrec,ibof,ibstat,idbuf,ibadr
       implicit none
       integer, dimension(l), intent(in) :: buffer
@@ -1903,21 +1898,7 @@ c
       lre = l
 
 c
-#if defined(USE_DBWR_AS_SUBROUTINE)
       if(irec.gt.0) then
-#else
-      goto 50
-c
-      entry dbwr(buffer,l,ifil,irec)
-c
-c.....sequentially buffer out "l" real words to record "irec" on file "ifil"
-c.....positive irec indicates start at beginning of record
-c.....zero or negative record means start at present position
-c
-      lre=l*intrel
-c
-50    if(irec.gt.0) then
-#endif
         if(ibstat.gt.0) call dwrite(idbuf,libuf,ibfil,ibrec,ibadr)
         ibof=0
         ibadr=0
@@ -1927,8 +1908,9 @@ c
       end if
       iof=0
 70    len=min(lre,libuf-ibof)
-      do 80 i=1,len
-80    idbuf(ibof+i)=buffer(iof+i)
+      do i=1,len
+        idbuf(ibof+i)=buffer(iof+i)
+      end do
       iof=iof+len
       lre=lre-len
       ibof=ibof+len
