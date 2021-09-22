@@ -20,6 +20,7 @@ set(ENABLE_ASSERTS "OFF" CACHE BOOL "to enable or disable assert checks for debu
 # With gfortran, variables are initialized to 0 by default, but it's not the case with ifort compiler. Therefore, all variables need to be initialized to guarantee the program works in a deterministic way on every compiler.
 set(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR "ON" CACHE BOOL "if set, causes the use of uninitilazed variables to trigger an exception, thus making the program stop. This is useful to detect uninitialized memory issues.")
 
+set(DEBUGGING_ISSUE46 "ON" CACHE BOOL "if set, add debug traces to debug issue46 (cph2 test fails on jenkins with ifort build)")
 
 if(ENABLE_CODE_COVERAGE)
   find_program(COVERAGE_LCOV_EXE lcov)
@@ -352,6 +353,10 @@ else()
   if(NOT ENABLE_ASSERTS)
     target_compile_definitions(hib PUBLIC DISABLE_HIB_ASSERT=1)
   endif()
+endif()
+
+if(DEBUGGING_ISSUE46)
+  target_compile_definitions(hib PUBLIC DEBUGGING_ISSUE46=1)
 endif()
 
 #  -fbounds-check'

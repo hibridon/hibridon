@@ -394,6 +394,10 @@ c
       call openf(9, output, 'sf', 0)
 * ----------------------------------------------------------------
       entry genchk
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/gendat/0 : start of genchk entry'
+#endif
+
 * check that basistype is allowed
       call baschk(ibasty)
       if (.not. logdfl) then
@@ -574,12 +578,19 @@ c
           nucros = .false.
         endif
       endif
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/gendat/10 : returning with no error'
+#endif
       return
 * here if read error
 195   write(6,200) iline, input(1:length)
 200   format(/'   *** ERROR IN GENDAT READING LINE',i3,
      :        ' OF FILE ',(a),', ABORT ***')
       if(batch) call exit
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/gendat/11 : returning with error'
+#endif
+
       return
 * ----------------------------------------------------------------
       entry savdat(inew, filnam)
