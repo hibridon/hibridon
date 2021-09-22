@@ -108,10 +108,6 @@
       data two, three, four, five /2.d0,3.d0,4.d0,5.d0/
       data seven,eleven /7.d0,11.d0/
       data sq2 /1.414213562d0/
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/pot_cph2.F/pot/0 : start'
-#endif
-
 
       evec(1)=  fpot_per1(r)
       evec(2)=  fpot_per2(r)
@@ -153,10 +149,6 @@ c        vvl(4)=5d0*(vvll(4)-vvll(3))*sqrt(two/7.d0)
       call dscal(4,econv,vvl,1)
       vv0=vv0*econv
 c      write(*,*) vv0,vvl(1),vvl(2),vvl(3),vvl(4)
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/pot_cph2.F/pot/0 : end'
-#endif
-
       end
 
 c---------------------------------------------------------

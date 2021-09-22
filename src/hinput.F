@@ -390,8 +390,7 @@ c         call helppr(line)
         l = lhold(1)
         goto (40, 100, 200, 1400, 50), iskip
       end if
-40    write (6,*) 'issue46/hinput/0 : command = ', i
-      goto (2700,
+40    goto (2700,
      :      1800,1500,2000,300,600,
      :      75,
      :      900,2200,900,400,900,1700,
@@ -488,9 +487,6 @@ c      call helppr(line)
 * terminate the string with a semicolon if other parameters will follow
 * on the same card, e.g. energ=e1,e2,e3;jtot1=0,jtot2=2....
 300   i = 0
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/hinput/0 : setting energ'
-#endif
 310   if(l .eq. 0) goto 320
       if(line(l-1:l-1) .eq. ';') goto 320
       i = i+1
@@ -609,9 +605,6 @@ c      call helppr(line)
 *  numin and numax should be 0 if cc calculation, if not, then set them
 *  equal to zero
 500   continue
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/hinput/0 : starting run'
-#endif
       if (.not. lpar(6)) then
         if (ipar(6) .ne. 0) then
           write (6, 105)
@@ -812,18 +805,9 @@ c      call helppr(line)
       goto 15
 * read
 800   call pcoder(lpar(28),pcod,icode)
-#if defined(DEBUGGING_ISSUE46)
-      write (6,*) 'issue46/hinput/1 : before gendat'
-#endif
       call gendat
-#if defined(DEBUGGING_ISSUE46)
-      write (6,*) 'issue46/hinput/1 : after gendat'
-#endif
       ione=1
       call sysdat(irpot, lpar(15),ione)
-#if defined(DEBUGGING_ISSUE46)
-      write (6,*) 'issue46/hinput/1 : after sysdat'
-#endif
       irinp=1
       l1 = l
       if (batch) lpar(4) = .true.

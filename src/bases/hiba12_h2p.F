@@ -700,10 +700,6 @@
 311     format(/' ILAM.GT.NLAMMX IN BA22P')
         call exit
       end if
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/bah2p/1 : ilam = ', ilam
-      write(6,*) 'issue46/bah2p/1 : inum = ', inum
-#endif
 
       lamnum(ilam) = inum
       if (bastst .and. iprint .gt. 1) then

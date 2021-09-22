@@ -20,8 +20,6 @@ set(ENABLE_ASSERTS "OFF" CACHE BOOL "to enable or disable assert checks for debu
 # With gfortran, variables are initialized to 0 by default, but it's not the case with ifort compiler. Therefore, all variables need to be initialized to guarantee the program works in a deterministic way on every compiler.
 set(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR "ON" CACHE BOOL "if set, causes the use of uninitilazed variables to trigger an exception, thus making the program stop. This is useful to detect uninitialized memory issues.")
 
-set(DEBUGGING_ISSUE46 "OFF" CACHE BOOL "if set, add debug traces to debug issue46 (cph2 test fails on jenkins with ifort build)")
-
 if(ENABLE_CODE_COVERAGE)
   find_program(COVERAGE_LCOV_EXE lcov)
   if (NOT COVERAGE_LCOV_EXE)
@@ -355,10 +353,6 @@ else()
   endif()
 endif()
 
-if(DEBUGGING_ISSUE46)
-  target_compile_definitions(hib PUBLIC DEBUGGING_ISSUE46=1)
-endif()
-
 #  -fbounds-check'
 target_compile_options(hib PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
 
@@ -428,9 +422,6 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
   target_link_libraries(${TEST_EXE} hib ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
   target_include_directories(${TEST_EXE} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
   target_compile_options(${TEST_EXE} PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
-  if(DEBUGGING_ISSUE46)
-    target_compile_definitions(${TEST_EXE} PUBLIC DEBUGGING_ISSUE46=1)
-  endif()
 
   if(ENABLE_CODE_COVERAGE)
     target_link_options(${TEST_EXE} PUBLIC ${GCC_COVERAGE_LINK_FLAGS})
@@ -825,12 +816,6 @@ set(coverage_testsuite
 
 add_hibridon_testsuite("coverage" "${coverage_testsuite}" "${tests_list}")
 
-if(DEBUGGING_ISSUE46)
-  set(issue46_testsuite
-    cph2)
-
-  add_hibridon_testsuite("issue46" "${issue46_testsuite}" "${tests_list}")
-endif()
 
 # The following is to build hibridon with an user-supplied potential
 

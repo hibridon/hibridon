@@ -263,9 +263,6 @@ c     dependent) built-in types
       real(8) :: simpwt  ! simpson quadrature weight
       nqmax = 0
 c
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/logdb: start'
-#endif
 
 *     make sure that rmin, rmax and nsteps are the same if second
 *     energy calculation
@@ -287,9 +284,6 @@ c
 #endif
          end if 
       end if
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/logdb/1'
-#endif
 
 *     row, column and diagonal increments for matrices z and w
       nrow = 1
@@ -318,13 +312,7 @@ c
          istep = 0
          r = rmin
          call mtime(t0,t0w)
-#if defined(DEBUGGING_ISSUE46)
-         write(6,*) 'issue46/logdb/1 : before potmat'
-#endif
          call potmat(w, r, nch, nmax)
-#if defined(DEBUGGING_ISSUE46)
-         write(6,*) 'issue46/logdb/1 : after potmat'
-#endif
          call mtime(t1,t1w)
          tp = tp + t1 - t0
          tpw = tpw + t1w - t0w
@@ -332,14 +320,8 @@ c
 *     first sector
          if (photof) then
            call mtime(t0,t0w)
-#if defined(DEBUGGING_ISSUE46)
-           write(6,*) 'issue46/logdb/1 : before ground'
-#endif
   
            call ground(q, r, nch, nphoto, mxphot)
-#if defined(DEBUGGING_ISSUE46)
-           write(6,*) 'issue46/logdb/1 : after ground'
-#endif
 *     wt is weight for simpson's rule quadrature, isimp is alternator for
 *     simpson's rule quadrature
            wt = simpwt
@@ -362,9 +344,6 @@ c
             if (photof) write (11) (q(i), i=1, nqmax)
          endif
       endif
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/logdb/2'
-#endif
 
 *     use diagonal approximation to wkb initial value for log
 *     derivative matrix  (eqn 16)
@@ -378,9 +357,6 @@ c
 #endif
          icol = icol + ncol
   20  continue
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/logdb/3'
-#endif
 
       idiag = 1
       do  30 ich = 1, nch
@@ -396,10 +372,6 @@ c
          z(idiag) = sqrt(wdiag)
          idiag = idiag + ndiag
   30  continue
-
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/logdb/4'
-#endif
 
       if (nsteps .le. 0) then
         if (photof) then
@@ -424,9 +396,6 @@ c
          icol = icol + ncol
   40  continue
 
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/logdb/5 : nsteps=', nsteps
-#endif
 
 *     propagate z matrix from rmin to rmax
       do 250  kstep = 1, nsteps
@@ -435,9 +404,6 @@ c
 *     after this loop z contains z(a)+(h^2/3)w(a)
 *     todo : handle the case where w is lower triangular
 *     (uninitialized values in upper triangle), see issue 49
-#if defined(DEBUGGING_ISSUE46)
-         write(6,*) 'issue46/logdb/5/1 : kstep = ', kstep
-#endif
          fac = d3
          icol = 1
          do  50 ich = 1, nch
@@ -749,9 +715,6 @@ c     nrlogd is the number of LOGD records - used to seek the wfu file
 261   call mtime(tl,tlw)
       tl = tl - tf - tp - twf
       tlw = tlw - tfw - tpw - twfw
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/logdb: normal end'
-#endif
 
       return
 c

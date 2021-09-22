@@ -300,9 +300,6 @@
       zero = 0.d0
       one = 1.d0
       two = 2.d0
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/potmat/0 : start'
-#endif
 
 cABER only for testing potential-matrix
 c     if (r.le.3.41) icount=0
@@ -310,9 +307,6 @@ cABER
 *  calculate coefficients of each angular term
       cpupot=cpupot-second()
       call pot( vv0, r)
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/potmat/1 : after pot'
-#endif
 
 *  vv0 is the isotropic term in the potential
 *  the coefficients for each angular term in the coupling potential
@@ -323,13 +317,7 @@ cABER
 *  now loop over angular coupling matrix to calculate the potential matrix
 *    w(ij) = 2 * rmu * vv0 + sum [ 2 * rmu * vvl(ilam) * v2(ij,ilam) ]
 *  first zero out lower triangle of potential matrix
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/potmat/2'
-#endif
 #if defined(ISSUE49_IS_FIXED)
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/potmat/2/1'
-#endif
       iwpt = 1
       do 20 icol = 1, nch
         ncol = nch - icol + 1
@@ -337,9 +325,6 @@ cABER
         iwpt = iwpt + nmax + 1
       20    continue
 #else
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/potmat/2/2'
-#endif
       ! although w is a lower triangular matrix, initialize both upper and
       ! lower part of it as some code is still treating it as full and therefore
       ! reading uninitialized values
@@ -350,9 +335,6 @@ cABER
         iwpt = iwpt + nmax
       end do
 #endif
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/potmat/3: nlam = ', nlam
-#endif
       ioff = 0
 
 cABER
@@ -360,27 +342,13 @@ c       call druckq(w,nmax,nch,'potential matrix',icount)
 cABER
       if (nlam .gt. 0) then
         do  40  ilam = 1, nlam
-#if defined(DEBUGGING_ISSUE46)
-            write(6,*) 'issue46/potmat/3/0: ilam = ', ilam
-            write(6,*) 'issue46/potmat/3/0: ioff = ', ioff
-            write(6,*) 'issue46/potmat/3/0: lamnum(ilam) = ', lamnum(ilam)
-#endif
             ASSERT(lamnum(ilam) >= 0)
             do  30 i = 1, lamnum(ilam)
-#if defined(DEBUGGING_ISSUE46)
-                  write(6,*) 'issue46/potmat/3/1: i = ', i
-                  write(6,*) 'issue46/potmat/3/1: iv2(ioff+i) = ', iv2(ioff+i)
-                  write(6,*) 'issue46/potmat/3/1: v2(ioff+i) = ', v2(ioff+i)
-                  write(6,*) 'issue46/potmat/3/1: vvl(ilam) = ', vvl(ilam)
-#endif
                   w(iv2(ioff+i)) = w(iv2(ioff+i)) + v2(ioff+i) * vvl(ilam)
 30           continue
            ioff = ioff + lamnum(ilam)
 40      continue
       endif
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/potmat/4'
-#endif
 
 cABER
 c       call druckq(w,nmax,nch,'potential matrix',icount)
@@ -394,9 +362,6 @@ cABER
      :           + r2 * cent(i)
         ipt = ipt + nmax + 1
       end do
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/potmat/5'
-#endif
 
 cABER
 c       call druckq(w,nmax,nch,'potential matrix',icount)
@@ -428,18 +393,12 @@ cABER
 75    if (wmax .lt. zero) go to 90
       rtmx = r
 90    continue
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/potmat/6'
-#endif
 
       cpupot=cpupot+second()
 * here for 2s-2p scattering
 * fill in upper triangle of w matrix
 *  first fill in upper half of original matrix
       if (ibasty .eq. 10) then
-#if defined(DEBUGGING_ISSUE46)
-        write(7,*) 'issue46/potmat/6'
-#endif
       
         nmaxp1 = nmax + 1
         icolpt = 2
@@ -456,9 +415,6 @@ cABER
 *  transform w matrix into case e basis
         call trans22(w,nch, nmax)
       endif
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/potmat/10 : end'
-#endif
 
       return
       end
@@ -960,9 +916,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
      :          sc5(1), sc6(1), sc7(1), sc8(1), sc9(1)
 *  prec is precision of single precision floating pt number
       data prec / 1.d+11 /
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/propag: start'
-#endif
 
       call mtime(t11,t22)
       first = .true.
@@ -985,9 +938,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 80      format (' *** NCH.LE.0 IN PROPAG, RETURN WITHOUT PROPAGATION')
         return
       end if
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/propag/2'
-#endif
 
       if (boundf) then
         call mtime(tb1,tbx)
@@ -1001,9 +951,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 105     format (' *** CPU TIME FOR BOUND = ',a)
         return
       end if
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/propag/3'
-#endif
 
 *****************************************************************
 
@@ -1016,9 +963,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
      :             r, rendld, spac, eshift, itwo, twoen,
      :             td, tdm, tp, tpm, twf, twfm, logwr, noprin,
      :             ipos, nch, nmax)
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/propag/3/1 : after runlog'
-#endif
 
 *  on return from runlog, z contains the log-derivative matrix at r = rendld
 *  branch to airy integration if desired. integrate coupled equations
@@ -1028,9 +972,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       cpuld=cpuld+t1-t11-cpupot+cpup-twf
       cpup=cpupot
       cpupht=cpupht+twf
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/propag/3/2 : airyfl = ', airyfl
-#endif
       if (airyfl) then
         drnow = spac * fstfac
 *  symmetrize (fill in upper triangle) of logd matrix
@@ -1038,23 +979,14 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
           do 110 icol = 1, nch -1
 *  nrow is the number of subdiagonal elements in column icol
           nrow = nch - icol
-#if defined(DEBUGGING_ISSUE46)
-                write(6,*) 'issue46/propag/3/3 : nrow = ', nrow
-#endif
                 call dcopy (nrow,z(icol+1,icol),1,z(icol,icol+1),nmax)
 110       continue
         endif
-#if defined(DEBUGGING_ISSUE46)
-        write(6,*) 'issue46/propag/4 : before airprp'
-#endif
   
         call airprp (z, amat, bmat, w, zmat, sc1, sc2, sc3, sc4,
      :               sc5, sc6, sc7, sc8, sc9, r, rendai, drnow, en,
      :               tolhi, rincr, eshift, nch, nmax, itwo, airypr,
      :               twoen,noprin)
-#if defined(DEBUGGING_ISSUE46)
-        write(6,*) 'issue46/propag/5 : after airprp'
-#endif
 *  on return from airprp, z contains the log-derivative matrix at r = rendai
       end if
       call mtime(t11,t22)
@@ -1064,28 +996,16 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       tp=tp+cpupot-cpup
       tairy=tairy-cpupot+cpup
       cpuai=cpuai+tairy
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/propag/3/4: cpuai = ', cpuai
-#endif
       if (logwr .and. airyfl) then
-#if defined(DEBUGGING_ISSUE46)
-        write(6,*) 'issue46/propag/3/5: logwr = ', logwr
-#endif
         write (9, 260) r
 260     format(/' ** LOG-DERIVATIVE MATRIX AFTER AIRPRP; R = ', 1pe15.8)
         call mxoutd (9, z, nch, nmax, 0, ipos)
       end if
 *  now calculate s-matrix and t-matrix squared
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/propag : before smatrx'
-#endif
       call smatrx (z, w, zmat, amat, bmat,
      :             lq, jq, inq, isc1, sc1, sc2, sc3, sc4,
      :             sc5, sc6, sc7, r, prec, tw, twm, nopen, nch, nmax,
      :             logwr,ipos)
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/propag : after smatrx'
-#endif
 
 * convert to time string
         call mtime(t1,t2)
@@ -1110,9 +1030,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
         write (9, 320) rtmn,rtmx
 320     format(' ** TURNING POINTS:  MIN=', f7.3,'  MAX=',f7.3,' BOHR')
       end if
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/propag : end'
-#endif
 
       return
       end
@@ -1276,10 +1193,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       dimension z(1), w(1), amat(1), bmat(1)
       dimension wref(1), z1(1), z2(1), scr1(1), scr2(1)
 
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/runlog: start'
-#endif
-
       iwrite = twoen .and. (itwo.eq.0)
       iread =  twoen .and. (itwo.gt.0)
       print = .not. noprin
@@ -1307,16 +1220,10 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       endif
 *  logdb initialises the log-derivative matrix at r = rmin
 *  and propagates it from rmin to rmax
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/runlog: before logdb'
-#endif
       call logdb (z, w, amat, bmat,
      :            nmax, wref, z1, z2, scr1, scr2, nch,
      :            rmin, rmax, nsteps, eshift, iread, iwrite,
      :            tl, tp, twf)
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/runlog: after logdb'
-#endif
 
 *  on return: z(i,j) i=1,nch j=1,nch  now contains the log-derivative matrix
 *  at r = rmax (the final interparticle separation)
@@ -1324,9 +1231,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *  print out log-derivative matrix at end of logd integration
 *  ( if desired )
       if (logwr .and. print) then
-#if defined(DEBUGGING_ISSUE46)
-        write(6,*) 'issue46/runlog/3'
-#endif
       
         write (9, 40) r
   40    format(/' ** LOG-DERIVATIVE MATRIX AFTER LOGDB; R = ', 1pe15.8)
@@ -1340,9 +1244,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
           call mxoutr(9, q, nch, nphoto, nch, isym, ipos)
         endif
       end if
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/runlog: end'
-#endif
 
       return
       end

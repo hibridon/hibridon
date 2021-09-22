@@ -169,15 +169,9 @@
 *   user will have to change this subroutine for his own installation
 *  subroutine to get input data
       first=.true.
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/flow/0 : start'
-#endif
 *  get default data
       call default
 1     call hinput(first)
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/flow/1 : after hinput'
-#endif
       cpupt=0
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
       ttim(1)=0.d0
@@ -295,23 +289,14 @@
       nchmax = 0
 *  this is beginning of loop over total angular momentum
 *  (partial wave index)
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/flow/5 : before loop over angular momentum'
-#endif
       
 100   jtot = jtot1
 *  get restart parameters if run is to be restarted
       ready=.false.
       if (rsflag) then
 *  read in restart information
-#if defined(DEBUGGING_ISSUE46)
-        write(6,*) 'issue46/flow : before call restrt'
-#endif
         call restrt (jtot,jtopo,jtotd,jlpar,nu,nutop,nud,nerg,nlev,
      :         nchmax,rtmn1,rtmx1,dinsid,writs,csflag,nucros)
-#if defined(DEBUGGING_ISSUE46)
-        write(6,*) 'issue46/flow : after call restrt'
-#endif
         rtmnla=rtmn1
         jlpold = jlpar
 *  move s-matrix files to last partial wave done
@@ -460,17 +445,11 @@ c95    format (1h ,79('='))
 **        write(6,5554) nch, nmax, nchtop
 **5554    format('BEFORE BASIS:',3i6)
 
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/flow/6 : before calling basis'
-#endif
 
         call basis (jq, lq, inq, jlev, elev, inlev, nlevel, nlevop,
      :              sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu,
      :              csflag, clist, bastst, ihomo, nu, numin, jlpar,
      :              twomol, nch, nmax, nchtop)
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/flow/7 : after calling basis'
-#endif
 
 
 **        write(6,5556) nch, nmax, nchtop
@@ -652,9 +631,6 @@ cger (next 2 lines)
 *      endif
       ntop = nchtop
 *
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/flow/8 : before calling propag'
-#endif
 
       call propag (z, w, zmat, amat, bmat,
      :             jq, lq, inq, isc1, sc1, sc2, sc3, sc4, sc5, sc6, sc7,
@@ -663,9 +639,6 @@ cger (next 2 lines)
      :             tolhi, rendai, rincr, fstfac, tb, tbm,
      :             ipos, logwr, noprin, airyfl, airypr,
      :             nch, nopen, nairy, ntop)
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/flow/8 : after calling propag'
-#endif
 
 * if bound state calculation, end it now
       if (boundc) then
@@ -675,9 +648,6 @@ cger (next 2 lines)
       endif
 *  now print out s-matrix and t-matrix squared, and calculate partial
 *  cross sections and print them out, if desired
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/flow/9 : before calling soutpt'
-#endif
       call soutpt (z, w, zmat, amat,
      :             lq, jq, inq, isc1, isc2, bmat, tq1,
      :             jlev, elev, inlev, jtot, jfirst,
@@ -687,9 +657,6 @@ cger (next 2 lines)
      :             nucros, firstj, nlevel, nlevop, nopen, nchtop,
      :             twojlp)
       cpuout = cpuout + second() - t11
-#if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/flow/9 : after calling soutpt'
-#endif
       
 *  on return from soutpt:
 *     if wrxsec,xsecwr, wrpart, and partw are all .false., the upper-left

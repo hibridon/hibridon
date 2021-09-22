@@ -11,11 +11,11 @@ pipeline {
                 axes {
                     axis {
                         name 'COMPILER'
-                        values 'ifort' 
+                        values 'gfortran', 'ifort'
                     }                   
                     axis {
                         name 'BUILD_TYPE'
-                        values 'Debug'
+                        values 'Debug', 'Release'
                     }                   
                 }
                 stages {
@@ -38,7 +38,7 @@ pipeline {
                                     . /etc/profile.d/modules.sh &&
                                     module load compilers/ifort/latest &&
                                     which ifort
-                                    cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_Fortran_COMPILER=ifort -DBLA_VENDOR=Intel10_64lp -DDEBUGGING_ISSUE46=ON "$HIBRIDON_ROOT_PATH"
+                                    cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_Fortran_COMPILER=ifort -DBLA_VENDOR=Intel10_64lp "$HIBRIDON_ROOT_PATH"
                                 elif [ "${COMPILER}" = 'gfortran' ]
                                 then
                                     cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} "$HIBRIDON_ROOT_PATH"
@@ -59,7 +59,7 @@ pipeline {
                                     module load compilers/ifort/latest &&
                                     which ifort
                                 fi
-                                env CTEST_OUTPUT_ON_FAILURE=1 make testsuite_issue46
+                                env CTEST_OUTPUT_ON_FAILURE=1 make testsuite_coverage
                                 '''
                         }
                     }
