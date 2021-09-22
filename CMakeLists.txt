@@ -821,6 +821,12 @@ set(coverage_testsuite
 
 add_hibridon_testsuite("coverage" "${coverage_testsuite}" "${tests_list}")
 
+if(DEBUGGING_ISSUE46)
+  set(issue46_testsuite
+    cph2)
+
+  add_hibridon_testsuite("issue46" "${issue46_testsuite}" "${tests_list}")
+endif()
 
 # The following is to build hibridon with an user-supplied potential
 

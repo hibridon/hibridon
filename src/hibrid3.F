@@ -978,6 +978,9 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       cpuld=cpuld+t1-t11-cpupot+cpup-twf
       cpup=cpupot
       cpupht=cpupht+twf
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/propag/3/2 : airyfl = ', airyfl
+#endif
       if (airyfl) then
         drnow = spac * fstfac
 *  symmetrize (fill in upper triangle) of logd matrix
@@ -985,7 +988,10 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
           do 110 icol = 1, nch -1
 *  nrow is the number of subdiagonal elements in column icol
           nrow = nch - icol
-            call dcopy (nrow,z(icol+1,icol),1,z(icol,icol+1),nmax)
+#if defined(DEBUGGING_ISSUE46)
+                write(6,*) 'issue46/propag/3/3 : nrow = ', nrow
+#endif
+                call dcopy (nrow,z(icol+1,icol),1,z(icol,icol+1),nmax)
 110       continue
         endif
 #if defined(DEBUGGING_ISSUE46)
@@ -1008,7 +1014,13 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       tp=tp+cpupot-cpup
       tairy=tairy-cpupot+cpup
       cpuai=cpuai+tairy
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/propag/3/4: cpuai = ', cpuai
+#endif
       if (logwr .and. airyfl) then
+#if defined(DEBUGGING_ISSUE46)
+        write(6,*) 'issue46/propag/3/5: logwr = ', logwr
+#endif
         write (9, 260) r
 260     format(/' ** LOG-DERIVATIVE MATRIX AFTER AIRPRP; R = ', 1pe15.8)
         call mxoutd (9, z, nch, nmax, 0, ipos)
