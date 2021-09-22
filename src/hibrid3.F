@@ -350,7 +350,7 @@ cABER
       end do
 #endif
 #if defined(DEBUGGING_ISSUE46)
-      write(6,*) 'issue46/potmat/3'
+      write(6,*) 'issue46/potmat/3: nlam = ', nlam
 #endif
       ioff = 0
 
@@ -359,8 +359,19 @@ c       call druckq(w,nmax,nch,'potential matrix',icount)
 cABER
       if (nlam .gt. 0) then
         do  40  ilam = 1, nlam
-             do  30 i = 1, lamnum(ilam)
-               w(iv2(ioff+i)) = w(iv2(ioff+i)) + v2(ioff+i) * vvl(ilam)
+#if defined(DEBUGGING_ISSUE46)
+            write(6,*) 'issue46/potmat/3/0: ilam = ', ilam
+            write(6,*) 'issue46/potmat/3/0: ioff = ', ioff
+            write(6,*) 'issue46/potmat/3/0: lamnum(ilam) = ', lamnum(ilam)
+#endif
+            do  30 i = 1, lamnum(ilam)
+#if defined(DEBUGGING_ISSUE46)
+                  write(6,*) 'issue46/potmat/3/1: i = ', i
+                  write(6,*) 'issue46/potmat/3/1: iv2(ioff+i) = ', iv2(ioff+i)
+                  write(6,*) 'issue46/potmat/3/1: v2(ioff+i) = ', v2(ioff+i)
+                  write(6,*) 'issue46/potmat/3/1: vvl(ilam) = ', vvl(ilam)
+#endif
+                  w(iv2(ioff+i)) = w(iv2(ioff+i)) + v2(ioff+i) * vvl(ilam)
 30           continue
            ioff = ioff + lamnum(ilam)
 40      continue
