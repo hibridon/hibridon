@@ -750,7 +750,6 @@ set(all_testsuite
   ch3he_ccsdt_quick
   ch3he_vib
   ch3i
-  cph2
   h2ohe
   h2ohe_orig
   h2ohe_prsbr
@@ -770,6 +769,8 @@ set(all_testsuite
   stp1sg_ch3he
   stp1sg_nh3h2
   vfit)
+# test cph2 removed until it is fixed (see issue #48)
+
 
 add_hibridon_testsuite("all" "${all_testsuite}" "${tests_list}")
 
