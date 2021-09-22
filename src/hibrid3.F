@@ -1225,6 +1225,11 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *  z, w, amat, and bmat are stored column by column in one dimensional arrays
       dimension z(1), w(1), amat(1), bmat(1)
       dimension wref(1), z1(1), z2(1), scr1(1), scr2(1)
+
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/runlog: start'
+#endif
+
       iwrite = twoen .and. (itwo.eq.0)
       iread =  twoen .and. (itwo.gt.0)
       print = .not. noprin
@@ -1252,10 +1257,16 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       endif
 *  logdb initialises the log-derivative matrix at r = rmin
 *  and propagates it from rmin to rmax
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/runlog: before logdb'
+#endif
       call logdb (z, w, amat, bmat,
      :            nmax, wref, z1, z2, scr1, scr2, nch,
      :            rmin, rmax, nsteps, eshift, iread, iwrite,
      :            tl, tp, twf)
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/runlog: after logdb'
+#endif
 
 *  on return: z(i,j) i=1,nch j=1,nch  now contains the log-derivative matrix
 *  at r = rmax (the final interparticle separation)
@@ -1263,6 +1274,10 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *  print out log-derivative matrix at end of logd integration
 *  ( if desired )
       if (logwr .and. print) then
+#if defined(DEBUGGING_ISSUE46)
+        write(6,*) 'issue46/runlog/3'
+#endif
+      
         write (9, 40) r
   40    format(/' ** LOG-DERIVATIVE MATRIX AFTER LOGDB; R = ', 1pe15.8)
         call mxoutd (9, z, nch, nmax, 0, ipos)
@@ -1275,6 +1290,10 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
           call mxoutr(9, q, nch, nphoto, nch, isym, ipos)
         endif
       end if
+#if defined(DEBUGGING_ISSUE46)
+      write(6,*) 'issue46/runlog: end'
+#endif
+
       return
       end
 * -------------------------------------------------------------------------
