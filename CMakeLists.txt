@@ -307,7 +307,7 @@ add_custom_command(
 )
 
 
-set(HIBRIDON_COMPILE_OPTIONS  "")
+set(HIBRIDON_COMPILE_OPTIONS "")
 
 list(APPEND HIBRIDON_COMPILE_OPTIONS "-I${CMAKE_CURRENT_SOURCE_DIR}/src")
 
@@ -352,6 +352,20 @@ else()
     target_compile_definitions(hib PUBLIC DISABLE_HIB_ASSERT=1)
   endif()
 endif()
+
+set(HIBRIDON_LINK_LIBRARIES "")
+list(APPEND HIBRIDON_LINK_LIBRARIES "${LAPACK_LIBRARIES}")
+list(APPEND HIBRIDON_LINK_LIBRARIES "${BLAS_LIBRARIES}")
+
+# store variables that are used in functions (add_hibexe and add_hibridon_test) in the cache so that external cmake projects can use these functions (otherwise these variables would be empty when used from other cmake projects)
+
+set(HIBRIDON_COMPILE_OPTIONS "${HIBRIDON_COMPILE_OPTIONS}" CACHE LIST "compilation options for hibridon source code") 
+
+set(HIBRIDON_LINK_LIBRARIES "${HIBRIDON_LINK_LIBRARIES}" CACHE LIST "the libraries that need to be linked with hibridon") 
+
+set(GCC_COVERAGE_LINK_FLAGS "${GCC_COVERAGE_LINK_FLAGS}" CACHE STRING "the libraries that need to be linked with hibridon for code coverage") 
+
+
 
 #  -fbounds-check'
 target_compile_options(hib PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
@@ -413,14 +427,16 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
   # message("for test ${TEST_ID}, CMAKE_CURRENT_LIST_DIR=${CMAKE_CURRENT_LIST_DIR}")
   get_filename_component(TEST_DIRNAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 
-  set(TEST_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests/${TEST_DIRNAME})
+  set(TEST_SRC_DIR ${CMAKE_CURRENT_LIST_DIR})
   set(TEST_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests/${TEST_ID})
   set(TEST_EXE ${TEST_ID})
+  set(HIBRIDON_MODULES_DIR ${hibridon_BINARY_DIR}) # location where to find the module files (*.mod)
 
-  add_executable(${TEST_EXE} ${TEST_SRC_DIR}/${TEST_POT_SRC_FILE} src/himain.F)
+  add_executable(${TEST_EXE} ${TEST_SRC_DIR}/${TEST_POT_SRC_FILE} ${hibridon_SOURCE_DIR}/src/himain.F)
   target_compile_definitions(${TEST_EXE} PUBLIC T_MATRIX_SIZE=${TEST_T_MATRIX_SIZE})
-  target_link_libraries(${TEST_EXE} hib ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
-  target_include_directories(${TEST_EXE} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+  target_link_libraries(${TEST_EXE} hib ${HIBRIDON_LINK_LIBRARIES})
+  target_include_directories(${TEST_EXE} PUBLIC ${hibridon_SOURCE_DIR}/src)
+  target_include_directories(${TEST_EXE} PUBLIC ${HIBRIDON_MODULES_DIR}) 
   target_compile_options(${TEST_EXE} PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
 
   if(ENABLE_CODE_COVERAGE)
@@ -463,7 +479,7 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
       COMMAND bash -c "set -o errexit; \
                         for output_file in ${TEST_OUTPUT_FILES} ; \
                         do \
-                          ./check_outputs ${TEST_SRC_DIR}/$output_file ${TEST_BUILD_DIR}/$output_file ; 
+                          ${hibridon_BINARY_DIR}/check_outputs ${TEST_SRC_DIR}/$output_file ${TEST_BUILD_DIR}/$output_file ; 
                         done"
       WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
   )
@@ -822,15 +838,21 @@ add_hibridon_testsuite("coverage" "${coverage_testsuite}" "${tests_list}")
 
 function(add_hibexe EXE_NAME POT_SRC_FILE p_T_MATRIX_SIZE)
   message("Adding executable ${EXE_NAME} using potential ${POT_SRC_FILE}")
- 
+  set(TEST_SRC_DIR ${CMAKE_CURRENT_LIST_DIR})
+  set(TEST_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests/${TEST_ID})
+  set(TEST_EXE ${TEST_ID})
+  set(HIBRIDON_MODULES_DIR ${hibridon_BINARY_DIR}) # location where to find the module files (*.mod)
 
-
-  add_executable(${EXE_NAME} ${POT_SRC_FILE} src/himain.F)
+  add_executable(${EXE_NAME} ${POT_SRC_FILE} ${hibridon_SOURCE_DIR}/src/himain.F)
   target_compile_definitions(${EXE_NAME} PUBLIC T_MATRIX_SIZE=${p_T_MATRIX_SIZE})
-  target_link_libraries(${EXE_NAME} hib ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
-  target_include_directories(${EXE_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+  target_link_libraries(${EXE_NAME} hib ${HIBRIDON_LINK_LIBRARIES})
+  target_include_directories(${EXE_NAME} PUBLIC ${hibridon_SOURCE_DIR}/src)
+  target_include_directories(${EXE_NAME} PUBLIC ${HIBRIDON_MODULES_DIR})
   target_compile_options(${EXE_NAME} PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
 
+  if(ENABLE_CODE_COVERAGE)
+    target_link_options(${EXE_NAME} PUBLIC ${GCC_COVERAGE_LINK_FLAGS})
+  endif()
 endfunction(add_hibexe)
 
 file (GLOB userscripts ${CMAKE_CURRENT_BINARY_DIR}/*.user.cmake)
