@@ -558,7 +558,7 @@ function(add_hibridon_testsuite TESTSUITE_ID TESTSUITE_TESTS TESTS_LIST)
     foreach(test_regex ${tests_regex})
       string(APPEND testsuite_regex_tmp "${test_regex}|")
     endforeach()
-    string(REGEX REPLACE "\\|$" "" testsuite_regex ${testsuite_regex_tmp})
+    string(REGEX REPLACE "\\|$" "" testsuite_regex "${testsuite_regex_tmp}")
   else()
     # join does exactly what we need here, but required recent versions of cmake
     list(JOIN tests_regex "|" testsuite_regex)
@@ -833,6 +833,7 @@ set(coverage_testsuite
 
 add_hibridon_testsuite("coverage" "${coverage_testsuite}" "${tests_list}")
 
+# add_hibridon_testsuite("empty" "" "${tests_list}")
 
 # The following is to build hibridon with an user-supplied potential
 
