@@ -1,3 +1,5 @@
+      module mod_difcrs
+      contains
 *  -------------------------------------------------------------
       subroutine difcrs(fname1,a,ihomo,flaghf)
 *  -------------------------------------------------------------
@@ -753,8 +755,8 @@ c
       if (mflag) then
          write(6,375) ang0,dang,ang2
          write(dcs_unit, 376) ang0,dang,ang2
-375      format
-     :   (/,'    M-DEPENDENT (COLLISION FRAME) INTEGRAL CROSS SECTIONS',
+375      format (
+     :   /,'    M-DEPENDENT (COLLISION FRAME) INTEGRAL CROSS SECTIONS',
      :    /,9x,'ANGULAR RANGE:',f6.2,':',f5.2,':',f6.2,
      :   /,'       M    M''    XSC (ANG^2)')
 376      format
@@ -1236,8 +1238,17 @@ c    results in yr(l*incy+1) for given l
 c    for l values less than m zero is returned
 c
 c  -------------------------------------------------------------------
-      implicit double precision (a-h,o-z)
-      dimension yr(1)
+      implicit none
+      integer, intent(in) :: m
+      integer, intent(in) :: lmax
+      real(8), intent(in) :: theta
+      real(8), intent(out) :: yr(lmax*incy)
+      integer, intent(in) :: incy
+
+c     fpi = sqrt(1 / 4 * pi)
+      real(8), parameter :: fpi = 2.820947917738781d-01
+      real(8) :: a, fact
+      integer :: l, mm, ll
       mm = iabs(m)
 c  determine array of associated legendre polynomials
       call plm(mm,lmax,theta,yr,incy)
@@ -1245,22 +1256,23 @@ c
 c                      (l-mm)!  mm
 c  on return:  yr(j) = ------- p        [cos(theta)]
 c                      (l+mm)!  l=mm+j-1
-c     fpi = sqrt(1 / 4 * pi)
-      fpi = 2.820947917738781d-01
-      if (m .lt. 0) go to 5
+      if (m >= 0) then
 c  here for positive m
-      a = (( - 1.d0) ** m) * fpi
-      go to 10
+            a = (( - 1.d0) ** m) * fpi
+      else
 c  here for negative m
-5     a = fpi
-10    ll=1
-      do 11  l = 0, mm-1
-      yr(ll) = 0
-11    ll=ll+incy
-      do 15  l = mm, lmax
-      fact = sqrt(2.d0 * l + 1.d0)
-      yr(ll) = fact * yr(ll) * a
-15    ll = ll + incy
+            a = fpi
+      end if
+      ll=1
+      do l = 0, mm-1
+        yr(ll) = 0
+        ll=ll+incy
+      end do
+      do l = mm, lmax
+        fact = sqrt(2.d0 * l + 1.d0)
+        yr(ll) = fact * yr(ll) * a
+        ll = ll + incy
+      end do
       return
       end
 * -----------------------------------------------------------------------
@@ -1268,53 +1280,68 @@ c  here for negative m
 c
 c  generates alexander-legendre polynomials for m.le.l.le.lmax
 c
-      implicit double precision (a-h,o-z)
-      dimension p(1)
-      data zero, one,  two,        rad
-     :     /0.d0, 1.d0, 2.d0, 57.29577951308232d0/
+      implicit none
+      integer, intent(in) :: m
+      integer, intent(in) :: lmax
+      real(8), intent(in) :: theta
+      real(8), intent(out) :: p(lmax*incp)
+      integer, intent(in) :: incp
+
+      real(8), parameter :: zero = 0.d0
+      real(8), parameter :: one = 1.d0
+      real(8), parameter :: two = 2.d0
+      real(8), parameter :: rad = 57.29577951308232d0
+
+      real(8) :: x, y, pm1, pm2, pp, rat, ai, al, al2
+      integer :: i, imax, l, ll, low
       x=cos(theta/rad)
       ll = m*incp + 1
-      if (m.ge.0) go to 1
-      write (6,100)
-100   format('  NEGATIVE M IN LEGENDRE ROUTINE:  ABORT')
-      call exit
-1     if (m.gt.0) go to 5
+      if (m < 0) then
+        write (6,100)
+100     format('  NEGATIVE M IN LEGENDRE ROUTINE:  ABORT')
+        call exit
+      else if (m == 0) then
 c  here for regular legendre polynomials
-      p(ll)=one
-      ll=ll+incp
-      pm1=one
-      pm2=zero
-      do 2 l=1,lmax
-      pp=((two*l-one)*x*pm1-(l-one)*pm2)/dble(l)
-      p(ll)=pp
-      ll=ll+incp
-      pm2=pm1
-2     pm1=pp
-      return
+        p(ll)=one
+        ll=ll+incp
+        pm1=one
+        pm2=zero
+        do l=1,lmax
+          pp=((two*l-one)*x*pm1-(l-one)*pm2)/dble(l)
+          p(ll)=pp
+          ll=ll+incp
+          pm2=pm1
+          pm1=pp
+        end do
+      else
+        ! m > 0
 c
 c  here for alexander-legendre polynomials
 c
-5     imax=2*m
-      rat=one
-      do 6 i=2,imax,2
-      ai=i
-6     rat=rat*((ai-one)/ai)
-      y=sin(theta/rad)
-      pm1=sqrt(rat)*(y**m)
-      p(ll)=pm1
-      ll=ll+incp
-      pm2=zero
-      low=m+1
-      do 10 l=low,lmax
-      al=(l+m)*(l-m)
-      al=one/al
-      al2=((l+m-1)*(l-m-1))*al
-      al=sqrt(al)
-      al2=sqrt(al2)
-      pp=(two*l-one)*x*pm1*al-pm2*al2
-      p(ll)=pp
-      ll=ll+incp
-      pm2=pm1
-10    pm1=pp
-      return
+        imax=2*m
+        rat=one
+        do i=2,imax,2
+          ai=i
+          rat=rat*((ai-one)/ai)
+        end do
+        y=sin(theta/rad)
+        pm1=sqrt(rat)*(y**m)
+        p(ll)=pm1
+        ll=ll+incp
+        pm2=zero
+        low=m+1
+        do l=low,lmax
+          al=(l+m)*(l-m)
+          al=one/al
+          al2=((l+m-1)*(l-m-1))*al
+          al=sqrt(al)
+          al2=sqrt(al2)
+          pp=(two*l-one)*x*pm1*al-pm2*al2
+          p(ll)=pp
+          ll=ll+incp
+          pm2=pm1
+          pm1=pp
+        end do
+      end if
       end
+      end module mod_difcrs

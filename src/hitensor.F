@@ -2327,6 +2327,7 @@ c jlpar=-1:  skip backward to index for jtotp, jlpar=1
       use mod_coz, only: sreal => z_as_vec ! sreal(1)
       use mod_cow, only: simag => w_as_vec ! simag(1)
       use mod_hibrid5, only: sread
+      use mod_difcrs, only: sphn
       implicit double precision (a-h,o-z)
 * size of q for j <= 5 and 0.5 deg angle increment
       complex*16 q(43681)
@@ -2779,6 +2780,7 @@ c=============
       use mod_coz, only: sreal => z_as_vec ! sreal(1)
       use mod_cow, only: simag => w_as_vec ! simag(1)
       use mod_hibrid5, only: sread
+      use mod_difcrs, only: sphn
       implicit double precision (a-h,o-z)
 * size of q for j <= 5 and 0.5 deg angle increment
       complex*16 q(43681)

@@ -908,8 +908,6 @@
       integer, intent(in) :: ngr
       integer, intent(in) :: nymx
 
-      ASSERT(ny <= nymx)
-
       real(8), dimension(ngr) :: en
       real(8) :: alpha
       real(8) :: xp
@@ -926,6 +924,9 @@
 #endif
       integer :: i
       real(8) :: ymu
+
+      ASSERT(ny <= nymx)
+
       ymu = yymu/xmconv
       alpha = (ymu * cf)**0.25
 * en0 is the normalization factor for v=0
