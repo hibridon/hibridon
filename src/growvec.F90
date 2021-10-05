@@ -6,7 +6,7 @@ module mod_growvec
     real(8), pointer           :: p(:) => null()
   end type block
   type, public                 :: growvec
-    integer(8)                 :: num_elements = 0
+    integer*8                  :: num_elements = 0
     integer                    :: num_blocks = 0
     integer                    :: num_allocated_blocks = 0
     integer                    :: block_size = 0
@@ -14,6 +14,7 @@ module mod_growvec
   contains
     procedure                  :: set_element => growvec_set_element
     procedure                  :: get_element => growvec_get_element
+    procedure                  :: append => growvec_append
 
   end type growvec
 
@@ -58,7 +59,7 @@ contains
 
   subroutine growvec_set_element(this, el_index, el_value)
     class(growvec)             :: this
-    integer, intent(in)        :: el_index
+    integer*8, intent(in)      :: el_index
     real(8), intent(in)        :: el_value
 
     integer                    :: block_index
@@ -74,6 +75,7 @@ contains
     call growvec_ensure_block_is_available(this, block_index)
 
     this%blocks(block_index)%p(el_index_in_block) = el_value
+    this%num_elements = max(this%num_elements, el_index)
   end subroutine
 
   function growvec_get_element(this, el_index)
@@ -91,16 +93,25 @@ contains
     growvec_get_element = this%blocks(block_index)%p(el_index_in_block)
   end function
 
+  subroutine growvec_append(this, el_value)
+    class(growvec)             :: this
+    real(8), intent(in)        :: el_value
+
+    call this%set_element(this%num_elements+1, el_value)
+  end subroutine growvec_append
+
 end module mod_growvec
 
 program test_growvec
 use mod_growvec, only:growvec
 type(growvec) :: g1
 g1 = growvec(block_size=1024*1024, num_blocks=1024)
-call g1%set_element(1, 3.d0)
-call g1%set_element(1024, 1024.d0)
-call g1%set_element(1024*1024+1, 1025.d0)
+call g1%set_element(int(1, 8), 3.d0)
+call g1%append(4.d0)
+call g1%set_element(int(1024, 8), 1024.d0)
+call g1%set_element(int(1024*1024+1, 8), 1025.d0)
 write (6,*) 'g1(1)=', g1%get_element(1)
+write (6,*) 'g1(2)=', g1%get_element(2)
 write (6,*) 'g1(1024)=', g1%get_element(1024)
 write (6,*) 'g1(1024*1024+1)=', g1%get_element(1024*1024+1)
 end program test_growvec
