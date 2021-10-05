@@ -12,23 +12,33 @@ module mod_grovec
 #define GROVEC_CLASS_NAME dgrovec
 #define GROVEC_ELEMENT_TYPE real(8)
 #include "grovec_type.F90"
+#undef GROVEC_ELEMENT_TYPE
+#undef GROVEC_CLASS_NAME
 
 #define GROVEC_CLASS_NAME igrovec
 #define GROVEC_ELEMENT_TYPE integer
 #include "grovec_type.F90"
+#undef GROVEC_ELEMENT_TYPE
+#undef GROVEC_CLASS_NAME
 
 contains
 
 #define GROVEC_CLASS_NAME dgrovec
 #define GROVEC_ELEMENT_TYPE real(8)
 #include "grovec_imp.F90"
+#undef GROVEC_ELEMENT_TYPE
+#undef GROVEC_CLASS_NAME
 
 #define GROVEC_CLASS_NAME igrovec
 #define GROVEC_ELEMENT_TYPE integer
 #include "grovec_imp.F90"
+#undef GROVEC_ELEMENT_TYPE
+#undef GROVEC_CLASS_NAME
 
 end module mod_grovec
 
+#define TESTING_GROVEC
+#ifdef TESTING_GROVEC
 program test_grovec
 use mod_grovec, only: dgrovec, igrovec
 type(dgrovec) :: dg1
@@ -45,4 +55,8 @@ write (6,*) 'dg1(1024*1024+1)=', dg1%get_element(1024*1024+1)
 ig1 = igrovec(block_size=1024, num_blocks=16)
 call ig1%append(42)
 write (6,*) 'ig1(1)=', ig1%get_element(1)
+call ig1%empty()
+call ig1%append(666)
+write (6,*) 'ig1(1)=', ig1%get_element(1)
 end program test_grovec
+#endif

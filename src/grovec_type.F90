@@ -12,6 +12,7 @@
     procedure                  :: set_element => CONCATENATE(GROVEC_CLASS_NAME,_set_element)
     procedure                  :: get_element => CONCATENATE(GROVEC_CLASS_NAME,_get_element)
     procedure                  :: append => CONCATENATE(GROVEC_CLASS_NAME,_append)
+    procedure                  :: empty => CONCATENATE(GROVEC_CLASS_NAME,_empty)
 
   end type GROVEC_CLASS_NAME
 

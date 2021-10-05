@@ -72,4 +72,13 @@
 
     call this%set_element(this%num_elements+1, el_value)
   end subroutine CONCATENATE(GROVEC_CLASS_NAME,_append)
-  
+
+  subroutine CONCATENATE(GROVEC_CLASS_NAME,_empty)(this)
+    class(GROVEC_CLASS_NAME)             :: this
+    integer :: block_index = 0
+    do block_index = 0, this%num_allocated_blocks-1
+      deallocate(this%blocks(block_index)%p)
+    end do
+    this%num_elements = 0
+    this%num_allocated_blocks = 0
+  end subroutine CONCATENATE(GROVEC_CLASS_NAME,_empty)
