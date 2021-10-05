@@ -9,7 +9,7 @@ module mod_growvec
     integer(8)                 :: num_elements = 0
     integer                    :: num_blocks = 1000
     integer                    :: num_allocated_blocks = 0
-    integer                    :: block_size = 1000000
+    integer                    :: block_size = 0
     type(block), pointer       :: blocks(:) => null()
   contains
     procedure                  :: set_element => growvec_set_element
@@ -17,20 +17,22 @@ module mod_growvec
 
   end type growvec
 
+  ! interface to create an instance of growvec using a construct familiar to other languages:
+  ! g1 = growvec()
   interface growvec
     module procedure create_growvec
   end interface growvec
 
 
 contains
-  function create_growvec() Result(g)
-    !integer(8) :: block_size    
+  function create_growvec(block_size) Result(g)
+    integer, intent(in) :: block_size    
     type(growvec) :: g
     write (6,*) 'create_growvec'
     g%num_elements = 0
     g%num_blocks = 1024
     g%num_allocated_blocks = 0
-    g%block_size = 1024*1024
+    g%block_size = block_size
     allocate(g%blocks(0:g%num_blocks-1))
   end function create_growvec
 
@@ -41,11 +43,11 @@ contains
     write (6,*) 'growvec_ensure_block_is_available: block_index =', block_index
     do while (this%num_allocated_blocks <= block_index)
       write (6,*) 'allocating block', this%num_allocated_blocks
-      write (6,*) 'this%block_size = ', this%block_size
+      ! write (6,*) 'this%block_size = ', this%block_size
       allocate(this%blocks(this%num_allocated_blocks)%p(0:this%block_size-1))
-      write (6,*) 'block allocated'
+      ! write (6,*) 'block allocated'
       this%num_allocated_blocks = this%num_allocated_blocks + 1
-      write (6,*) 'coucou'
+      ! write (6,*) 'coucou'
     end do
   end subroutine
 
@@ -89,8 +91,7 @@ end module mod_growvec
 program test_growvec
 use mod_growvec, only:growvec
 type(growvec) :: g1
-g1 = growvec() ! (block_size=1024*1024)
-!g1 = create_growvec(block_size=1024*1024)
+g1 = growvec(block_size=1024*1024)
 call g1%set_element(1, 3.d0)
 call g1%set_element(1024, 1024.d0)
 call g1%set_element(1024*1024+1, 1025.d0)
