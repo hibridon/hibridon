@@ -2,12 +2,12 @@ module mod_growvec
   implicit none
   private
   type                         :: block
-    integer                    :: block_size = 1000000
+    integer                    :: block_size = 0
     real(8), pointer           :: p(:) => null()
   end type block
   type, public                 :: growvec
     integer(8)                 :: num_elements = 0
-    integer                    :: num_blocks = 1000
+    integer                    :: num_blocks = 0
     integer                    :: num_allocated_blocks = 0
     integer                    :: block_size = 0
     type(block), pointer       :: blocks(:) => null()
@@ -25,12 +25,13 @@ module mod_growvec
 
 
 contains
-  function create_growvec(block_size) Result(g)
-    integer, intent(in) :: block_size    
+  function create_growvec(block_size, num_blocks) Result(g)
+    integer, intent(in) :: block_size
+    integer, intent(in) :: num_blocks
     type(growvec) :: g
     write (6,*) 'create_growvec'
     g%num_elements = 0
-    g%num_blocks = 1024
+    g%num_blocks = num_blocks
     g%num_allocated_blocks = 0
     g%block_size = block_size
     allocate(g%blocks(0:g%num_blocks-1))
@@ -40,11 +41,15 @@ contains
     class(growvec)             :: this
     integer, intent(in)        :: block_index
 
+    if (block_index >= this%num_blocks) then
+      stop 'block_index exceeds the number of blocks'
+    end if
     write (6,*) 'growvec_ensure_block_is_available: block_index =', block_index
     do while (this%num_allocated_blocks <= block_index)
       write (6,*) 'allocating block', this%num_allocated_blocks
       ! write (6,*) 'this%block_size = ', this%block_size
       allocate(this%blocks(this%num_allocated_blocks)%p(0:this%block_size-1))
+      this%blocks(this%num_allocated_blocks)%block_size = this%block_size
       ! write (6,*) 'block allocated'
       this%num_allocated_blocks = this%num_allocated_blocks + 1
       ! write (6,*) 'coucou'
@@ -91,7 +96,7 @@ end module mod_growvec
 program test_growvec
 use mod_growvec, only:growvec
 type(growvec) :: g1
-g1 = growvec(block_size=1024*1024)
+g1 = growvec(block_size=1024*1024, num_blocks=1024)
 call g1%set_element(1, 3.d0)
 call g1%set_element(1024, 1024.d0)
 call g1%set_element(1024*1024+1, 1025.d0)
