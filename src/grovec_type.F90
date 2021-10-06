@@ -1,14 +1,17 @@
   type                         :: CONCATENATE(GROVEC_CLASS_NAME,_block)
     integer                    :: block_size = 0
-    GROVEC_ELEMENT_TYPE, pointer           :: p(:) => null()
+    GROVEC_ELEMENT_TYPE, allocatable           :: p(:)
+  contains
+    final                      :: CONCATENATE(GROVEC_CLASS_NAME,_block_destroy)
   end type CONCATENATE(GROVEC_CLASS_NAME,_block)
   type, public                 :: GROVEC_CLASS_NAME
     integer*8                  :: num_elements = 0
     integer                    :: num_blocks = 0
     integer                    :: num_allocated_blocks = 0
     integer                    :: block_size = 0
-    type(CONCATENATE(GROVEC_CLASS_NAME,_block)), pointer       :: blocks(:) => null()
+    type(CONCATENATE(GROVEC_CLASS_NAME,_block)), allocatable       :: blocks(:)
   contains
+    final                      :: CONCATENATE(GROVEC_CLASS_NAME,_destroy)
     procedure                  :: set_element => CONCATENATE(GROVEC_CLASS_NAME,_set_element)
     procedure                  :: get_element => CONCATENATE(GROVEC_CLASS_NAME,_get_element)
     procedure                  :: append => CONCATENATE(GROVEC_CLASS_NAME,_append)

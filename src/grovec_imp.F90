@@ -1,3 +1,10 @@
+  subroutine CONCATENATE(GROVEC_CLASS_NAME,_block_destroy)(this)
+    type(CONCATENATE(GROVEC_CLASS_NAME,_block))             :: this
+    if (allocated(this%p)) then
+      ! write (6,*) 'deallocating grovec_block%p'
+      deallocate(this%p)
+    end if
+  end subroutine
 
   function CONCATENATE(create_,GROVEC_CLASS_NAME)(block_size, num_blocks) Result(g)
     integer, intent(in) :: block_size
@@ -9,6 +16,14 @@
     g%block_size = block_size
     allocate(g%blocks(0:g%num_blocks-1))
   end function CONCATENATE(create_,GROVEC_CLASS_NAME)
+
+  subroutine CONCATENATE(GROVEC_CLASS_NAME,_destroy)(this)
+    type(GROVEC_CLASS_NAME)             :: this
+    if (allocated(this%blocks)) then
+      ! write (6,*) 'deallocating grovec%blocks'
+      deallocate(this%blocks)
+    end if
+  end subroutine
 
   subroutine CONCATENATE(GROVEC_CLASS_NAME,_ensure_block_is_available)(this, block_index)
     class(GROVEC_CLASS_NAME)             :: this
