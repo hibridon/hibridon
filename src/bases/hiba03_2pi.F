@@ -113,8 +113,8 @@
 *   vlm2pi:    returns angular coupling coefficient for particular
 *              choice of channel index
 * --------------------------------------------------------------------
-      use mod_cov2, only: nv2max, ndummy, v2
-      use mod_coiv2, only: iv2
+      use mod_cov2, only: nv2max, ndummy, v2d, v2i
+      ! use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_conlam, only: nlam, nlammx, lamnum
@@ -670,6 +670,8 @@
 *  inum counts v2 elements for given lambda
 *  ilam counts number of v2 matrices
 *  ij is address of given v2 element in present v2 matrix
+      call v2d%empty()
+      call v2i%empty()
       i = 0
       lamsum = 0
       istep = 1
@@ -682,6 +684,7 @@
 285     format (/' ILAM  LAMBDA      ICOL      IROW       I',
      :    '        IV2    VEE')
       end if
+
       do 400 ilam = 1, nlam
 *  ilam is the angular expansion label
 *  here for l=0 term in electrostatic potential
@@ -724,11 +727,11 @@
               i=i+1
               inum=inum+1
               if(i.gt.nv2max) goto 350
-                v2(i)=vee
-                iv2(i)=ij
+                call v2d%set_element(int(i, 8), vee)
+                call v2i%set_element(int(i, 8), ij)
                 if(.not.bastst .or. iprint .le. 1) goto 350
-                  write (6, 290) ilam, lb, icol, irow, i, iv2(i),vee
-                  write (9, 290) ilam, lb, icol, irow, i, iv2(i),vee
+                  write (6, 290) ilam, lb, icol, irow, i, v2i%get_element(int(i, 8)),vee
+                  write (9, 290) ilam, lb, icol, irow, i, v2i%get_element(int(i, 8)),vee
 290               format (i4, i7, 3i10, i10, g17.8)
 350       continue
 355     continue

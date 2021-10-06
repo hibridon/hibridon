@@ -108,8 +108,7 @@
 *   vlmh2p:    returns angular coupling coefficient for particular
 *              choice of channel index
 * ------------------------------------------------------------
-      use mod_cov2, only: nv2max, junkv => ndummy, v2
-      use mod_coiv2, only: iv2
+      use mod_cov2, only: nv2max, junkv => ndummy, v2d, v2i
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_coj12, only: j12
@@ -145,6 +144,7 @@
       data lamaold /2,2,0,2,2,0,2,2,2/
       data lam12old /0,2,2,2,4,4,2,4,6/
       data muold / 0,0,0,2,1,0,0,2,1/
+      integer(8) :: v2_index
 
 *   econv is conversion factor from cm-1 to hartrees
 *   xmconv is converson factor from amu to atomic units
@@ -620,11 +620,13 @@
 281       format (/' ILAM  LR LA MU   ICOL  IROW   I    IV2    VEE')
         endif
       end if
-* i counts v2 elements
+* v2_index counts v2 elements
 * inum counts v2 elements for given lambda
 * ilam counts number of v2 matrices
 * ij is address of given v2 element in present v2 matrix
-      i = 0
+      call v2d%empty()
+      call v2i%empty()
+      v2_index = 0
       ilam=0
       do 320 il = 1,lammax(1)
 *      do 320 il = 4,4
@@ -674,23 +676,23 @@
 *    : j(irow),j(icol),nu,ilamr,ilama,ilam12,vee
 291    format(14i3,g17.8)
             if (vee .eq. 0) goto 300
-              i = i + 1
+              v2_index = v2_index + 1
               inum = inum + 1
-              if (i .gt. nv2max) goto 300
-                v2(i) = vee
-                iv2(i) = ij
+              if (v2_index .gt. nv2max) goto 300
+                call v2d%set_element(v2_index, vee)
+                call v2i%set_element(v2_index, ij)
                 if (bastst .and. clist) then
                   if (.not. csflag .or. (csflag .and. ihomo)) then
                     write (6, 290) ilam, ilamr,ilama,ilam12, icol, irow,
-     :                           i, iv2(i), vee
+     :                           i, v2i%get_element(v2_index), vee
                     write (9, 290) ilam, ilamr,ilama,ilam12, icol, irow,
-     :                           i, iv2(i), vee
+     :                           i, v2i%get_element(v2_index), vee
 290                 format (i4, i5,2i3,i5, 2i6, i6, g17.8)
                   elseif (csflag .and. .not.ihomo) then
                     write (6, 290) ilam, ilamr,ilama,imu, icol, irow,
-     :                           i, iv2(i), vee
+     :                           i, v2i%get_element(v2_index), vee
                     write (9, 290) ilam, ilamr,ilama,imu, icol, irow,
-     :                           i, iv2(i), vee
+     :                           i, v2i%get_element(v2_index), vee
                   endif
                 endif
 300       continue
@@ -709,8 +711,8 @@
       end if
 320   continue
       if ( i.gt. nv2max) then
-        write (6, 350) i, nv2max
-        write (9, 350) i, nv2max
+        write (6, 350) v2_index, nv2max
+        write (9, 350) v2_index, nv2max
 350     format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6,
      :           ' .GT. NV2MAX=',i6,'; ABORT ***')
         if (bastst) then
@@ -720,8 +722,8 @@
         end if
       end if
       if (clist) then
-        write (6, 360) i
-        write (9, 360) i
+        write (6, 360) v2_index
+        write (9, 360) v2_index
 360     format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS',
      :           i6)
       end if

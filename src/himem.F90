@@ -72,8 +72,10 @@ module mod_cov2
    !                  (1,1), (2,1), (3,1) ... (n,1),
    !                         (2,2), (3,2) ... (n,2), etc.
    !               only nonzero elements are stored
-
+   use mod_grovec, only: dgrovec, igrovec
    implicit none
+   type(dgrovec)                      :: v2d
+   type(igrovec)                      :: v2i
    real(8), dimension(:), allocatable :: v2
    integer, allocatable               :: nv2max, ndummy
    contains
@@ -81,6 +83,8 @@ module mod_cov2
       integer, intent(in) :: av2max
       allocate(v2(av2max)) ; allocate(nv2max) ; allocate(ndummy)
       nv2max = av2max
+      v2d = dgrovec(block_size=1024*1024, num_blocks=1024)
+      v2i = igrovec(block_size=1024*1024, num_blocks=1024)
    end subroutine allocate_cov2
 end module mod_cov2
 

@@ -278,8 +278,7 @@
 *    vsmul:    multiplies vector by scalar and stores result in another
 *              vector
 *  -------------------------------------------------------------------
-      use mod_cov2, only: nv2max, junkv => ndummy, v2
-      use mod_coiv2, only: iv2
+      use mod_cov2, only: nv2max, junkv => ndummy, v2d, v2i
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_covvl, only: vvl
@@ -292,6 +291,7 @@
       integer, intent(in) :: nmax
 
       integer i, iflag, ilam
+      integer(8) :: ioff
 
       common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
       common /copmat/ rtmn, rtmx, iflag
@@ -344,7 +344,8 @@ cABER
         do  40  ilam = 1, nlam
             ASSERT(lamnum(ilam) >= 0)
             do  30 i = 1, lamnum(ilam)
-                  w(iv2(ioff+i)) = w(iv2(ioff+i)) + v2(ioff+i) * vvl(ilam)
+                  w(v2i%get_element(ioff+i)) = w(v2i%get_element(ioff+i))  
+     +            + v2d%get_element(ioff+i) * vvl(ilam)
 30           continue
            ioff = ioff + lamnum(ilam)
 40      continue

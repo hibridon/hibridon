@@ -118,8 +118,7 @@ c      end module mod_1sg1sg
 *              particular choice of channel index
 * --------------------------------------------------------------------
       use mod_1sg1sg
-      use mod_cov2, only: nv2max, junkv => ndummy, v2
-      use mod_coiv2, only: iv2
+      use mod_cov2, only: nv2max, junkv => ndummy, v2d, v2i
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_coj12, only: j12
@@ -128,6 +127,7 @@ c      end module mod_1sg1sg
       logical ihomo, flaghf, csflag, clist, flagsu, bastst
       integer :: ifs1
       integer :: nn
+      integer(8) :: v2_index
 #include "common/parbas"
 #include "common/parbasl"
       common /coipar/ iiipar(9), iprint
@@ -405,7 +405,9 @@ c     Calculate coupling matrix elements
 285     format (/' ILAM  L1   L2  LTOT   ICOL IROW      I',
      :    '      IV2         VEE')
       end if
-      i = 0
+      call v2d%empty()
+      call v2i%empty()
+      v2_index = 0
       lamsum = 0
       do 400 ilam = 1, nlam
 c     ilam denotes a particular L1,L2,L term
@@ -431,23 +433,23 @@ c     initialize potential to zero
             call v2sgsg(j1r,iepsr,j2r,j12r,lr,j1c,iepsc,
      :          j2c,j12c,lc,jtot,ll1,ll2,lltot,vee)
             if (vee .ne. zero) then
-              i = i + 1
+              v2_index = v2_index + 1
               if (i .le. nv2max) then
                 inum = inum + 1
-                v2(i) = vee
-                iv2(i) = ij
+                call v2d%set_element(v2_index, vee)
+                call v2i%set_element(v2_index, ij)
                 if (bastst .and. iprint.ge.2) then
                   write (6, 290) ilam, ll1, ll2, lltot,
-     :                icol, irow, i, iv2(i), vee
+     :                icol, irow, i, v2i%get_element(v2_index), vee
                   write (9, 290) ilam, ll1, ll2, lltot,
-     :                icol, irow, i, iv2(i), vee
+     :                icol, irow, i, v2i%get_element(v2_index), vee
 290               format (i4, 3i5, 2x, 2i5, 2i8, e20.7)
                 end if
               end if
             end if
 350       continue
 355     continue
-        if (i .le. nv2max) lamnum(ilam) = inum
+        if (v2_index .le. nv2max) lamnum(ilam) = inum
         if (bastst) then
           write (6, 370) ilam, lamnum(ilam)
           write (9, 370) ilam, lamnum(ilam)
@@ -455,9 +457,9 @@ c     initialize potential to zero
         end if
         lamsum = lamsum + lamnum(ilam)
 400   continue
-      if (i .gt. nv2max) then
-        write (6, 410) i, nv2max
-        write (6, 410) i, nv2max
+      if (v2_index .gt. nv2max) then
+        write (6, 410) v2_index, nv2max
+        write (6, 410) v2_index, nv2max
 410     format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6,
      :      ' .GT. NV2MAX=',i6,'; ABORT ***')
       end if

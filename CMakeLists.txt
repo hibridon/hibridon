@@ -70,6 +70,7 @@ message( STATUS BLAS found: ${LAPACK_LIBRARIES} )
 
 add_library(hib
      src/assert.f90
+     src/grovec.F90
      src/hiamp.F
      src/hibound.F
      src/hibrid1.F

@@ -37,7 +37,7 @@ contains
 
 end module mod_grovec
 
-#define TESTING_GROVEC
+!#define TESTING_GROVEC
 #ifdef TESTING_GROVEC
 program test_grovec
 use mod_grovec, only: dgrovec, igrovec
