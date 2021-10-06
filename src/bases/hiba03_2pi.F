@@ -113,7 +113,7 @@
 *   vlm2pi:    returns angular coupling coefficient for particular
 *              choice of channel index
 * --------------------------------------------------------------------
-      use mod_cov2, only: nv2max, ndummy, v2d, v2i
+      use mod_cov2, only: nv2max, ndummy, newv2, v2mat
       ! use mod_coiv2, only: iv2
       use mod_cocent, only: cent
       use mod_coeint, only: eint
@@ -670,8 +670,13 @@
 *  inum counts v2 elements for given lambda
 *  ilam counts number of v2 matrices
 *  ij is address of given v2 element in present v2 matrix
-      call v2d%empty()
-      call v2i%empty()
+      ! call newv2%empty()
+      if (allocated(newv2)) then
+        deallocate(newv2)
+      end if
+
+      allocate(newv2)
+      newv2 = v2mat(nlammx=nlammx, num_channels=ntop)
       i = 0
       lamsum = 0
       istep = 1
@@ -727,11 +732,10 @@
               i=i+1
               inum=inum+1
               if(i.gt.nv2max) goto 350
-                call v2d%set_element(int(i, 8), vee)
-                call v2i%set_element(int(i, 8), ij)
+                call newv2%set_element(ilam, irow, icol, vee)
                 if(.not.bastst .or. iprint .le. 1) goto 350
-                  write (6, 290) ilam, lb, icol, irow, i, v2i%get_element(int(i, 8)),vee
-                  write (9, 290) ilam, lb, icol, irow, i, v2i%get_element(int(i, 8)),vee
+                  write (6, 290) ilam, lb, icol, irow, i, ij, vee
+                  write (9, 290) ilam, lb, icol, irow, i, ij, vee
 290               format (i4, i7, 3i10, i10, g17.8)
 350       continue
 355     continue
@@ -783,6 +787,7 @@
      :            c12(i), c32(i)
           end if
 450   continue
+      ! call newv2%print_summary()
       return
       end
 * ----------------------------------------------------------------------

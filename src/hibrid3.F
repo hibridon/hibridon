@@ -278,7 +278,7 @@
 *    vsmul:    multiplies vector by scalar and stores result in another
 *              vector
 *  -------------------------------------------------------------------
-      use mod_cov2, only: nv2max, junkv => ndummy, v2d, v2i
+      use mod_cov2, only: nv2max, junkv => ndummy, newv2, lamv2t
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_covvl, only: vvl
@@ -291,7 +291,11 @@
       integer, intent(in) :: nmax
 
       integer i, iflag, ilam
-      integer(8) :: ioff
+      integer(8) :: iv2_element
+      integer :: ij
+      integer(8) :: num_nz_elements
+      real(8) :: vee
+      !type(lamv2t), pointer :: lamv2
 
       common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
       common /copmat/ rtmn, rtmx, iflag
@@ -335,22 +339,26 @@ cABER
         iwpt = iwpt + nmax
       end do
 #endif
-      ioff = 0
 
 cABER
 c       call druckq(w,nmax,nch,'potential matrix',icount)
 cABER
+      ! write (6,*) 'potmat:'
       if (nlam .gt. 0) then
-        do  40  ilam = 1, nlam
+        do ilam = 1, nlam
             ASSERT(lamnum(ilam) >= 0)
-            do  30 i = 1, lamnum(ilam)
-                  w(v2i%get_element(ioff+i)) = w(v2i%get_element(ioff+i))  
-     +            + v2d%get_element(ioff+i) * vvl(ilam)
-30           continue
-           ioff = ioff + lamnum(ilam)
-40      continue
+            ! write(6,*) 'ilam=', ilam, 'newv2%lamv2(ilam)%get_num_elements()=', newv2%lamv2(ilam)%get_num_elements()
+            !lamv2 => newv2%lamv2(ilam)
+            associate( lamv2 => newv2%lamv2(ilam) )
+            num_nz_elements = lamv2%get_num_elements()
+            do iv2_element = 1, num_nz_elements
+              call lamv2%get_element(iv2_element, ij, vee)
+              ! write(6,*) 'ilam=', ilam, 'iv2_element=', iv2_element,'ij : ', ij
+              w(ij) = w(ij) + vee * vvl(ilam)
+            end do
+            end associate
+        end do
       endif
-
 cABER
 c       call druckq(w,nmax,nch,'potential matrix',icount)
 cABER

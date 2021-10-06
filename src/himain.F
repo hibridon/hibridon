@@ -285,7 +285,7 @@
 *  parameter below sets maximum size of asymmetric top basis fn expansion
       call allocate_cosout(kout)
       call allocate_coiout(kout)
-      call allocate_cov2(kv2max)
+      call allocate_cov2(kv2max, klammx)
       call allocate_coiv2(kv2max)
       call allocate_cocent(kmax)
       call allocate_coeint(kmax)

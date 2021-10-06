@@ -63,6 +63,24 @@ module mod_coiout
    end subroutine allocate_coiout
 end module mod_coiout
 
+module mod_conlam
+   ! *  variables
+   ! *    nlam:      the number of angular coupling terms actually used
+   ! *    nlammx:    the maximum number of angular coupling terms allowed
+   ! *    lamnum:    number of non-zero v2 matrix elements for each lambda
+   ! *               lamnum is an array of dimension nlammx
+   implicit none
+   integer, dimension(:), allocatable :: lamnum
+   integer, allocatable               :: nlam, nlammx
+   contains
+   subroutine allocate_conlam(n)
+      integer, intent(in) :: n
+      allocate(lamnum(n)) ; allocate(nlam) ; allocate(nlammx)
+      nlammx = n
+      nlam = 0
+   end subroutine allocate_conlam
+end module mod_conlam
+
 module mod_cov2
    ! variables in this module
    !    nv2max:    maximum core memory allocated for the v2 matrix
@@ -72,20 +90,150 @@ module mod_cov2
    !                  (1,1), (2,1), (3,1) ... (n,1),
    !                         (2,2), (3,2) ... (n,2), etc.
    !               only nonzero elements are stored
+
+
    use mod_grovec, only: dgrovec, igrovec
    implicit none
+   type                         :: lamv2t
+     logical                    :: is_allocated = .false.
+     integer                    :: num_channels = 0
+     type(dgrovec), allocatable :: v2d
+     type(igrovec), allocatable :: v2i 
+     contains
+     
+     procedure                  :: get_num_elements => lamv2t_get_num_elements
+     procedure                  :: get_element => lamv2t_get_element
+   end type lamv2t
+
+   type, public                 :: v2mat
+     integer                    :: nlammx = 0
+     integer                    :: num_channels = 0
+     integer                    :: nlam = 0
+     type(lamv2t), allocatable  :: lamv2(:)
+     contains
+     final                      :: v2mat_destroy
+     procedure                  :: set_element => v2mat_set_element
+     procedure                  :: get_element => v2mat_get_element
+     procedure                  :: empty => v2mat_empty
+     procedure                  :: print_summary => v2mat_print_summary
+
+   end type v2mat
+
+   ! interface to create an instance of v2mat using a construct familiar to other languages:
+   ! g1 = v2mat()
+   interface v2mat
+     module procedure create_v2mat
+   end interface v2mat
+
+   type(v2mat), allocatable           :: newv2
    type(dgrovec)                      :: v2d
    type(igrovec)                      :: v2i
    real(8), dimension(:), allocatable :: v2
    integer, allocatable               :: nv2max, ndummy
    contains
-   subroutine allocate_cov2(av2max)
+
+   function lamv2t_get_num_elements(this) result(n)
+      class(lamv2t)        :: this
+      integer(8)           :: n
+      n = this%v2d%num_elements
+   end function 
+
+   subroutine lamv2t_get_element(this, ielement, ij, vee)
+      class(lamv2t)        :: this
+      integer(8), intent(in) :: ielement
+      integer, intent(out) :: ij
+      real(8), intent(out) :: vee
+      ij = this%v2i%get_element(ielement)
+      vee = this%v2d%get_element(ielement)
+   end subroutine 
+
+   function create_v2mat(nlammx, num_channels) result(v2)
+     integer, intent(in) :: nlammx
+     integer, intent(in) :: num_channels
+
+     type(v2mat)  :: v2
+     integer :: ilam
+
+     v2%nlammx = nlammx
+     v2%nlam = 0
+     v2%num_channels = num_channels
+     allocate(v2%lamv2(nlammx))
+     do ilam = 1, nlammx
+       v2%lamv2(ilam)%is_allocated = .false.
+     !  v2%lamv2(ilam)%num_channels = num_channels
+     !  v2%lamv2(ilam)%v2d = dgrovec(block_size=1024*4, num_blocks=1024*8)
+     !  v2%lamv2(ilam)%v2i = igrovec(block_size=1024*4, num_blocks=1024*8)
+     end do
+   end function
+
+   subroutine v2mat_destroy(this)
+      type(v2mat)        :: this
+      if (allocated(this%lamv2)) then
+         deallocate(this%lamv2)
+      end if
+   end subroutine
+
+   subroutine v2mat_set_element(this, ilam, irow, icol, vee)
+      class(v2mat)        :: this
+      integer, intent(in) :: ilam
+      integer, intent(in) :: irow
+      integer, intent(in) :: icol
+      real(8), intent(in) :: vee
+      integer :: ij
+      ij = this%num_channels * (icol - 1) +irow
+      if (.not. this%lamv2(ilam)%is_allocated) then
+        allocate(this%lamv2(ilam)%v2d)
+        allocate(this%lamv2(ilam)%v2i)
+        this%lamv2(ilam)%v2d = dgrovec(block_size=1024*4, num_blocks=1024*8)
+        this%lamv2(ilam)%v2i = igrovec(block_size=1024*4, num_blocks=1024*8)
+        this%lamv2(ilam)%num_channels = this%num_channels
+        this%lamv2(ilam)%is_allocated = .true.
+      end if
+      call this%lamv2(ilam)%v2d%append(vee)
+      call this%lamv2(ilam)%v2i%append(ij)
+   end subroutine 
+
+   subroutine v2mat_get_element(this, ilam, ielement, ij, vee)
+      class(v2mat)        :: this
+      integer, intent(in) :: ilam
+      integer(8), intent(in) :: ielement
+      integer, intent(out) :: ij
+      real(8), intent(out) :: vee
+      call this%lamv2(ilam)%get_element(ielement, ij, vee)
+   end subroutine 
+
+   subroutine v2mat_empty(this)
+      class(v2mat)        :: this
+      integer :: ilam
+      do ilam = 1, this%nlammx
+         call this%lamv2(ilam)%v2d%empty()
+         call this%lamv2(ilam)%v2i%empty()
+      end do
+   end subroutine 
+
+   subroutine v2mat_print_summary(this)
+      class(v2mat)        :: this
+      integer :: ilam, num_nz_elements, num_channels
+      do ilam = 1, this%nlammx
+         if (this%lamv2(ilam)%is_allocated) then
+            num_nz_elements = this%lamv2(ilam)%get_num_elements()
+            if (num_nz_elements > 0) then
+               num_channels = this%lamv2(ilam)%num_channels
+               write (6,*) 'ilam =', ilam, ' : ', num_nz_elements, '/', num_channels * num_channels ,' non zero elements '
+            end if
+         end if
+      end do
+   end subroutine 
+   
+   subroutine allocate_cov2(av2max, nlammx)
       integer, intent(in) :: av2max
+      integer, intent(in) :: nlammx
       allocate(v2(av2max)) ; allocate(nv2max) ; allocate(ndummy)
       nv2max = av2max
       v2d = dgrovec(block_size=1024*1024, num_blocks=1024)
       v2i = igrovec(block_size=1024*1024, num_blocks=1024)
    end subroutine allocate_cov2
+
 end module mod_cov2
 
 module mod_coiv2
@@ -306,23 +454,6 @@ module mod_cofil
    end subroutine allocate_cofil
 end module mod_cofil
 
-module mod_conlam
-   ! *  variables
-   ! *    nlam:      the number of angular coupling terms actually used
-   ! *    nlammx:    the maximum number of angular coupling terms allowed
-   ! *    lamnum:    number of non-zero v2 matrix elements for each lambda
-   ! *               lamnum is an array of dimension nlammx
-   implicit none
-   integer, dimension(:), allocatable :: lamnum
-   integer, allocatable               :: nlam, nlammx
-   contains
-   subroutine allocate_conlam(n)
-      integer, intent(in) :: n
-      allocate(lamnum(n)) ; allocate(nlam) ; allocate(nlammx)
-      nlammx = n
-      nlam = 0
-   end subroutine allocate_conlam
-end module mod_conlam
 
 module mod_coatpi
 !  variables in this module
