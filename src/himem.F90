@@ -188,6 +188,7 @@ module mod_cov2
         this%lamv2(ilam)%v2i = igrovec(block_size=1024*4, num_blocks=1024*8)
         this%lamv2(ilam)%num_channels = this%num_channels
         this%lamv2(ilam)%is_allocated = .true.
+        this%nlam = max(this%nlam, ilam)
       end if
       call this%lamv2(ilam)%v2d%append(vee)
       call this%lamv2(ilam)%v2i%append(ij)

@@ -160,7 +160,7 @@ c     The constants module should be used in new subroutines.
 * -------------------------------------------------------------------
       subroutine logdb (z, w, amat, bmat, nmax, wref, z1, z2,
      :                  scr1, scr2, nch, rmin, rmax, nsteps,
-     :                  eshift, iread, iwrite, tl, tp, twf)
+     :                  eshift, iread, iwrite, tl, tp, twf, v2)
 *     routine to initialise the log derivative matrix, y, at r = rmin,
 *     and propagate it from rmin to rmax using the method described in
 *     d.e.manolopoulos, j.chem.phys., 85, 6425 (1986)
@@ -233,7 +233,9 @@ c     The constants module should be used in new subroutines.
 *     and blas routines are not used for o(n) loops
 *  ------------------------------------------------------------------
       use mod_coqvec, only: mxphot, nphoto, q ! q is an output of this subroutine
+      use mod_cov2, only: v2mat
       implicit double precision (a-h,o-z)
+      type(v2mat), intent(in) :: v2
       integer ich, icode, icol, idiag, ierr, ij, irow, istep, kstep,
      :        nch, ncol, ndiag, nmax, nrow, nsteps
 *      real arg, d3, d6, eight, eshift, fac, h, half, hi, one, r, rmax,
@@ -312,7 +314,7 @@ c
          istep = 0
          r = rmin
          call mtime(t0,t0w)
-         call potmat(w, r, nch, nmax)
+         call potmat(w, r, nch, nmax, v2)
          call mtime(t1,t1w)
          tp = tp + t1 - t0
          tpw = tpw + t1w - t0w
@@ -423,7 +425,7 @@ c
             r = rmin + istep * h
             call mtime(t0,t0w)
    
-            call potmat(w, r, nch, nmax)
+            call potmat(w, r, nch, nmax, v2)
             call mtime(t1,t1w)
             tp = tp + t1 - t0
             tpw = tpw + t1w - t0w
@@ -683,7 +685,7 @@ c     nrlogd is the number of LOGD records - used to seek the wfu file
             istep = istep + 1
             r = rmin + istep * h
             call mtime(t0,t0w)
-            call potmat(w, r, nch, nmax)
+            call potmat(w, r, nch, nmax, v2)
             call mtime(t1,t1w)
             tp = tp + t1 - t0
             tpw = tpw + t1w - t0w

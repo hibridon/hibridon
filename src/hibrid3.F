@@ -90,7 +90,7 @@
       end
 * ----------------------------------------------------------------------
       subroutine potent (w, vecnow, scmat, eignow, hp, scr,
-     :   rnow, drnow, en, xlarge, nch, nmax)
+     :   rnow, drnow, en, xlarge, nch, nmax, v2)
 * ----------------------------------------------------------------------
 *  this subroutine first sets up the wave-vector matrices:
 *    w = w[rnow + 0.5 drnow/sqrt(3)] and w = w[rnow - 0.5 drnow/sqrt(3)]
@@ -126,6 +126,7 @@
 *    nmax:     maximum row dimension of matrices and maximum dimension of
 *              vectors
 * ----------------------------------------------------------------------
+      use mod_cov2, only: v2mat
       implicit none
 *  square matrices (of row dimension nmax)
       real(8), dimension(nmax*nmax), intent(out) :: w
@@ -141,6 +142,7 @@
       real(8), intent(out) :: xlarge
       integer, intent(in) :: nch
       integer, intent(in) :: nmax
+      type(v2mat), intent(in) :: v2
       
 *      real eignow, hp, scmat, scr, vecnow, w
 *      real drnow, en, fact, half, one, ra, rb, rnow, sq3, xlarge, xmin1
@@ -164,8 +166,8 @@
       ra = rnow - half * drnow / sq3
       rb = rnow + half * drnow / sq3
 *  scmat is used to store the wavevector matrix at rb
-      call potmat (w, ra, nch, nmax)
-      call potmat (scmat, rb, nch, nmax)
+      call potmat (w, ra, nch, nmax, v2)
+      call potmat (scmat, rb, nch, nmax, v2)
 *  since potmat returns negative of lower triangle of w(r) matrix (eq.(3) of
 *  m.h. alexander, "hybrid quantum scattering algorithms ..."),
 *  next loop changes its sign
@@ -248,7 +250,7 @@
       return
       end
 * ------------------------------------------------------------------------
-      subroutine potmat (w, r, nch, nmax)
+      subroutine potmat (w, r, nch, nmax, newv2)
 *  determine negative of lower triangle of w(r) matrix.  see eq. (3) of
 *  m.h. alexander, "hybrid quantum scattering algorithms ..."
 *  author:  millard alexander
@@ -261,8 +263,6 @@
 *              be evaluated
 *    nch:      actual size of matrix w
 *    nmax:     maximum row and column dimension of matrix w
-*   lamnum:     number of non-zero v2 matrix elements for each lambda
-
 *  variables in common block /coered/
 *    ered:      collision energy in atomic units (hartrees)
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
@@ -278,24 +278,22 @@
 *    vsmul:    multiplies vector by scalar and stores result in another
 *              vector
 *  -------------------------------------------------------------------
-      use mod_cov2, only: nv2max, junkv => ndummy, newv2, lamv2t
+      use mod_cov2, only: nv2max, v2mat
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_covvl, only: vvl
-      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision (a-h,o-z)
-
       real(8), dimension(1), intent(out) :: w
       real(8), intent(in) :: r
       integer, intent(in) :: nch
       integer, intent(in) :: nmax
+      type(v2mat), intent(in) :: newv2
 
       integer i, iflag, ilam
       integer(8) :: iv2_element
       integer :: ij
       integer(8) :: num_nz_elements
       real(8) :: vee
-      !type(lamv2t), pointer :: lamv2
 
       common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
       common /copmat/ rtmn, rtmx, iflag
@@ -317,7 +315,7 @@ cABER
 *  [ vvl(i) for i = 1, nlam ] are returned in common block vvlcontains
 *  multiply all vvl terms by twice the reduced mass
       twormu = two * rmu
-      call dscal(nlam, twormu, vvl, 1)
+      call dscal(newv2%nlam, twormu, vvl, 1)
 *  now loop over angular coupling matrix to calculate the potential matrix
 *    w(ij) = 2 * rmu * vv0 + sum [ 2 * rmu * vvl(ilam) * v2(ij,ilam) ]
 *  first zero out lower triangle of potential matrix
@@ -343,17 +341,15 @@ cABER
 cABER
 c       call druckq(w,nmax,nch,'potential matrix',icount)
 cABER
-      ! write (6,*) 'potmat:'
-      if (nlam .gt. 0) then
-        do ilam = 1, nlam
-            ASSERT(lamnum(ilam) >= 0)
+      if (newv2%nlam .gt. 0) then
+        do ilam = 1, newv2%nlam
             ! write(6,*) 'ilam=', ilam, 'newv2%lamv2(ilam)%get_num_elements()=', newv2%lamv2(ilam)%get_num_elements()
             !lamv2 => newv2%lamv2(ilam)
             associate( lamv2 => newv2%lamv2(ilam) )
             num_nz_elements = lamv2%get_num_elements()
+            ASSERT(num_nz_elements >= 0)
             do iv2_element = 1, num_nz_elements
               call lamv2%get_element(iv2_element, ij, vee)
-              ! write(6,*) 'ilam=', ilam, 'iv2_element=', iv2_element,'ij : ', ij
               w(ij) = w(ij) + vee * vvl(ilam)
             end do
             end associate
@@ -463,7 +459,6 @@ cABER
 *  current revision date:  5-nov-2012 by p.j.dagdigian
 #include "common/parsys_mod.F"
       use mod_covvl, only: vvl
-      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision(a-h,o-z)
       logical ihomo
       common /coselb/ ibasty
@@ -558,7 +553,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *  current revision date:  8-apr-1997 by mha
 #include "common/parsys_mod.F"
       use mod_covvl, only: vvl
-      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision(a-h,o-z)
 
       logical ihomo
@@ -703,7 +697,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *  current revision date:  1-nov-2012 by lifang ms
 #include "common/parsys_mod.F"
       use mod_covvl, only: vvl
-      use mod_conlam, only: nlam, nlammx, lamnum
       implicit double precision(a-h,o-z)
       logical ihomo
       common /coselb/ ibasty
@@ -827,7 +820,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
      :                   ien, nerg, en, eshift, rstart, rendld, spac,
      :                   tolhi, rendai, rincr, fstfac, tb, tbm,
      :                   ipos, logwr, noprin, airyfl, airypr,
-     :                   nch, nopen, nairy, nmax)
+     :                   nch, nopen, nairy, nmax, v2)
 * ------------------------------------------------------------------------
 *  subroutine to:
 *    1.  propagate the log-derivative matrix from rstart to rendld
@@ -907,7 +900,9 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *     wavefn        true if g(a,b) transformation matrices are saved
 *                   to be used later in computing the wavefunction
 *  ------------------------------------------------------------------
+      use mod_cov2, only: v2mat
       implicit double precision (a-h, o-z)
+      type(v2mat), intent(in) :: v2
       logical twoen, ipos, logwr, noprin, airyfl, airypr,
      :        photof, wavefn, boundf, wrsmat
       logical first
@@ -952,7 +947,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
         call mtime(tb1,tbx)
 * revise call to bound (28-jun-2013, p.dagdigian)
 *        call bound(z,w,zmat,amat,bmat,nch,nmax)
-        call bound(nch, nmax)
+        call bound(nch, nmax, v2)
 * return to flow after bound calculation
         call mtime(tb2,tbx)
         call gettim(tb2-tb1,time)
@@ -971,7 +966,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       call runlog (z, w, amat, bmat, sc1, sc2, sc3, sc4, sc5,
      :             r, rendld, spac, eshift, itwo, twoen,
      :             td, tdm, tp, tpm, twf, twfm, logwr, noprin,
-     :             ipos, nch, nmax)
+     :             ipos, nch, nmax, v2)
 
 *  on return from runlog, z contains the log-derivative matrix at r = rendld
 *  branch to airy integration if desired. integrate coupled equations
@@ -995,7 +990,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
         call airprp (z, amat, bmat, w, zmat, sc1, sc2, sc3, sc4,
      :               sc5, sc6, sc7, sc8, sc9, r, rendai, drnow, en,
      :               tolhi, rincr, eshift, nch, nmax, itwo, airypr,
-     :               twoen,noprin)
+     :               twoen,noprin, v2)
 *  on return from airprp, z contains the log-derivative matrix at r = rendai
       end if
       call mtime(t11,t22)
@@ -1133,7 +1128,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       subroutine runlog (z, w, amat, bmat,
      :                   wref, z1, z2, scr1, scr2, r, rend,
      :                   spac, eshift, itwo, twoen, tl, tlw, tp, tpw,
-     :                   twf, twfw, logwr, noprin, ipos, nch, nmax)
+     :                   twf, twfw, logwr, noprin, ipos, nch, nmax, v2)
 *     log-derivative propagator from r to r = rend
 *     the logd code is based on the improved log-derivative method
 *     for reference see  d.e.manolopoulos, j.chem.phys., 85, 6425 (1986)
@@ -1187,7 +1182,9 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *                   to be used later in computing the wavefunction
 *  ------------------------------------------------------------------
       use mod_coqvec, only: nphoto, q
+      use mod_cov2, only: v2mat
       implicit double precision (a-h, o-z)
+      type(v2mat), intent(in) :: v2
 *      real eshift, r, rend, rmax, rmin, spac, tl, tlw, tp, tpw
 *      real scr1, scr2, wref, z1, z2
 *      real w, z
@@ -1232,7 +1229,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       call logdb (z, w, amat, bmat,
      :            nmax, wref, z1, z2, scr1, scr2, nch,
      :            rmin, rmax, nsteps, eshift, iread, iwrite,
-     :            tl, tp, twf)
+     :            tl, tp, twf, v2)
 
 *  on return: z(i,j) i=1,nch j=1,nch  now contains the log-derivative matrix
 *  at r = rmax (the final interparticle separation)

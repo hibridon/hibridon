@@ -110,6 +110,7 @@
       use mod_hiba1sg, only : basis
       use mod_version, only : version, acknow
       use mod_hibrid5, only : soutpt, nusum, xwrite, wrhead, restrt, rsave
+      use mod_cov2, only: v2 => newv2
       use constants
       implicit double precision (a-h,o-z)
       integer :: jtotmx
@@ -638,7 +639,7 @@ cger (next 2 lines)
      :             ien, nerg, ered, eshift, rstart, rendld, spac,
      :             tolhi, rendai, rincr, fstfac, tb, tbm,
      :             ipos, logwr, noprin, airyfl, airypr,
-     :             nch, nopen, nairy, ntop)
+     :             nch, nopen, nairy, ntop, v2)
 
 * if bound state calculation, end it now
       if (boundc) then

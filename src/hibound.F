@@ -5,7 +5,7 @@ c     2. vmat_bound   Auxiliary subroutine for bound
 c     3. gauger       Nodes and weights for Gauss-Hermite quadrature
 c
 c     ------------------------------------------------------------------
-      subroutine bound(nch, nmax)
+      subroutine bound(nch, nmax, v2)
 c     Bound state program, to be called by propag in hibrid3.f
 c
 c     Author: Susan K Gregurick, 3-aug-92
@@ -33,8 +33,10 @@ c     nmax    Leading dimension of the w matrix used in Hibridon
 c     ------------------------------------------------------------------
       use mod_coiout, only: niout
       use mod_version, only : version
+      use mod_cov2, only: v2mat
       implicit none
       integer, intent(in) :: nch, nmax
+      type(v2mat), intent(in) :: v2
 #include "common/parpot"
       common /corpar/ r1, r2, c, spac, delr, hsimp, eigmin, tolai, xmu
       real(8) :: r1, r2, c, spac, delr, hsimp, eigmin, tolai, xmu
@@ -168,7 +170,7 @@ c     Gauss-Hermite quadrature integration
             rgh = xfact * xgh + xij
             do ir = 1, ngh
                rnow = rgh(ir)
-               call vmat_bound(wr, rnow, nch, nmax)
+               call vmat_bound(wr, rnow, nch, nmax, v2)
                wr = wr * wgh1(ir)
                h(irow1:irow2, icol1:icol2) = wr(:nch, :nch)
      $              + h(irow1:irow2, icol1:icol2)
@@ -460,18 +462,20 @@ c
       return
       end subroutine wpr_bound
 c     ------------------------------------------------------------------
-      subroutine vmat_bound(wr, r, nch, nmax)
+      subroutine vmat_bound(wr, r, nch, nmax, v2)
+      use mod_cov2, only: v2mat
       implicit none
       integer, intent(in) :: nch, nmax
       real(8), intent(in) :: r
       real(8), dimension(nmax, nmax), intent(out) :: wr
+      type(v2mat), intent(in) :: v2
       common /coered/ ered, rmu
       real(8) :: ered, rmu
       real(8) :: xirmu
       integer :: i, j, ig, jg, ilast, ntop
 c
       xirmu = 0.5d0 / rmu
-      call potmat(wr, r, nch, nmax)
+      call potmat(wr, r, nch, nmax, v2)
       do i = 1, nch
          do j = i + 1, nch
             wr(i, j) = wr(j, i)

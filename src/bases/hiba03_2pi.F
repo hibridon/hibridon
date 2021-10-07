@@ -113,11 +113,10 @@
 *   vlm2pi:    returns angular coupling coefficient for particular
 *              choice of channel index
 * --------------------------------------------------------------------
-      use mod_cov2, only: nv2max, ndummy, newv2, v2mat
-      ! use mod_coiv2, only: iv2
+      use mod_cov2, only: nv2max, newv2, v2mat
       use mod_cocent, only: cent
       use mod_coeint, only: eint
-      use mod_conlam, only: nlam, nlammx, lamnum
+      use mod_conlam, only: nlammx, nlam
       implicit double precision (a-h,o-z)
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas"
@@ -739,13 +738,12 @@
 290               format (i4, i7, 3i10, i10, g17.8)
 350       continue
 355     continue
-        if (i .le. nv2max) lamnum(ilam) = inum
         if (bastst) then
-          write (6, 360) ilam, lamnum(ilam)
-          write (9, 360) ilam, lamnum(ilam)
+          write (6, 360) ilam, newv2%lamv2(ilam)%get_num_elements()
+          write (9, 360) ilam, newv2%lamv2(ilam)%get_num_elements()
 360       format ('ILAM=', i3, ' LAMNUM(ILAM) =', i9)
         end if
-        lamsum = lamsum + lamnum(ilam)
+        lamsum = lamsum + newv2%lamv2(ilam)%get_num_elements()
 400   continue
       if(i.gt.nv2max) then
          write (6, 410) i, nv2max
@@ -918,7 +916,6 @@
 *
 *  subroutines called: loapot(iunit,filnam)
 #include "common/parsys_mod.F"
-      use mod_conlam, only: nlam
       implicit double precision (a-h,o-z)
 #include "common/parsys"
       logical readpt, existf

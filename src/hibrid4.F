@@ -856,7 +856,7 @@ c.....assume that jlpar=1 is stored first
       return
       end
 * -----------------------------------------------------------------------
-      subroutine wavevc (w, eignow, scr1, scr2, rnow, nch, nmax)
+      subroutine wavevc (w, eignow, scr1, scr2, rnow, nch, nmax, v2)
 *  this subroutine first sets up the wavevector matrix at rnow
 *  then diagonalizes this matrix
 *  written by:  millard alexander
@@ -878,7 +878,9 @@ c.....assume that jlpar=1 is stored first
 *     dsyevr:         latest lapack eigenvalue routine
 *     dscal, dcopy:   linpack blas routines
 * ----------------------------------------------------------------
+      use mod_cov2, only: v2mat
       implicit double precision (a-h,o-z)
+      type(v2mat), intent(in) :: v2
 *      real rnow, xmin1
 *      real eignow, scr1, scr2, w
       integer icol, ierr, ipt, nch, nmax, nmaxm1, nmaxp1, nrow
@@ -897,7 +899,7 @@ c.....assume that jlpar=1 is stored first
       data xmin1 / -1.d0/
       nmaxp1 = nmax + 1
       nmaxm1 = nmax - 1
-      call potmat (w, rnow, nch, nmax)
+      call potmat (w, rnow, nch, nmax, v2)
 *  since potmat returns negative of lower triangle of w(r) matrix (eq.(3) of
 *  m.h. alexander, "hybrid quantum scattering algorithms ..."),
 *  next loop changes its sign

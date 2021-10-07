@@ -28,7 +28,7 @@
       subroutine airprp (z, w, tmat, vecnow, vecnew,
      +   eigold, eignow, hp, y1, y2, cc, y4, gam1, gam2,
      +   xf, rend, drnow, en,
-     +   tolai, rincr, eshift, nch, nmax, itwo, iprint, twoen, noprin)
+     +   tolai, rincr, eshift, nch, nmax, itwo, iprint, twoen, noprin, v2)
 *  airy zeroth-order propagator from r=xf to r=rend
 *  for reference see m. alexander, "hybrid quantum scattering algorithms ...",
 *                    j. chem. phys. 81, 4510 (1984)
@@ -96,6 +96,7 @@
 * ----------------------------------------------------------------------------
       use mod_coqvec, only: nphoto, q
       use mod_cosc10, only: sc10
+      use mod_cov2, only: v2mat
       implicit double precision (a-h, o-z)
 *  matrix dimensions (row dimension = nmax, matrices stored column by column)
       real(8), dimension(nmax*nmax), intent(inout) :: z
@@ -126,6 +127,7 @@
       logical, intent(in) :: iprint
       logical, intent(in) :: twoen
       logical, intent(in) :: noprin
+      type(v2mat), intent(in) :: v2
       integer i, icol, iend, ierr, ipt, izero, kstep, maxstp,
      :        ncol, npt, nskip
       logical photof, wavefn, boundf, wrsmat
@@ -166,7 +168,7 @@ c     dependent) built-in types
       rmin = xf
 *  determine local wavevectors at rmin to use in estimating second derivatives
 *  hp and y1 are used as scratch vectors here
-      call wavevc (w, eigold, hp, y1, rmin, nch, nmax)
+      call wavevc (w, eigold, hp, y1, rmin, nch, nmax, v2)
 *  local wavevectors at rmin are returned in eigold
       drfir = drnow
       drmid = drnow * 0.5
@@ -177,7 +179,7 @@ c     dependent) built-in types
 *  define local basis at rnow and carry out transformations
 *  vecnew is used as scratch matrix and y1 is used as scratch vector here
       call potent (w, vecnow, vecnew, eignow, hp, y1,
-     +             rnow, drnow, en, xlarge, nch, nmax)
+     +             rnow, drnow, en, xlarge, nch, nmax, v2)
 *  vecnow is transformation from free basis into local basis
 *  in first interval
 *  e.g. p1=vecnow  ; see eq.(23) of
@@ -451,7 +453,7 @@ c
 *  define local basis at rnew and carry out transformations
 *  tmat is used as scratch matrix and y1 is used as scratch vector here
       call potent (w, vecnew, tmat, eignow, hp, y1,
-     +             rnew, drnow, en, xlarge, nch, nmax)
+     +             rnew, drnow, en, xlarge, nch, nmax, v2)
 *  determine matrix to transform log-deriv matrix into new interval
 *  see eq. (22) of m.h. alexander, "hybrid quantum scattering algorithms ..."
 *  on return from subroutine 'steppr':
