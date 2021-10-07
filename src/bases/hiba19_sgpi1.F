@@ -163,6 +163,7 @@
       use mod_coisc2, only: nrot => isc2 ! nrot(1)
       use mod_coisc3, only: ifi => isc3 ! ifi(1)
       use mod_conlam, only: nlam, nlammx, lamnum
+      use mod_hiba03_2pi, only: vlm2pi
       implicit double precision (a-h,o-z)
       logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbas"

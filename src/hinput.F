@@ -55,6 +55,7 @@
       use mod_coj12, only: j12
       use mod_hibrid5, only : intcrs, readpc
       use mod_difcrs, only: difcrs
+      use mod_hibasis, only: is_twomol
 
       implicit double precision (a-h,o-z)
 *  iicode is the number of integer pcod's
@@ -79,7 +80,7 @@
       integer ipar
       integer ibasty
       integer nerg
-      logical existf, first, openfl, is_twomol
+      logical existf, first, openfl
       logical lpar, logp, opti, optifl, batch, jtrunc
       dimension a(15),ia(10), ihold(15), lhold(15),lindx(28)
 #include "common/parbas"

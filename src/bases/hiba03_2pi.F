@@ -1,10 +1,13 @@
 * sy2pi (sav2pi/ptr2pi) defines, saves variables and reads               *
 *                  potential for doublet pi scattering                   *
 * --------------------------------------------------------------------
+      module mod_hiba03_2pi
+#include "assert.h"
+      contains
       subroutine ba2pi (j, l, is, jhold, ehold, ishold, nlevel,
-     :                  nlevop, ifi, c12, c32, sc4, rcut, jtot,
+     :                  nlevop, sc1, c12, c32, sc4, rcut, jtot,
      :                  flaghf, flagsu, csflag, clist, bastst,
-     :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+     :                  ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 * --------------------------------------------------------------------
 *  subroutine to determine angular coupling potential for collision
 *  of a 2pi molecule in an intermediate coupling basis with a
@@ -113,11 +116,12 @@
 *   vlm2pi:    returns angular coupling coefficient for particular
 *              choice of channel index
 * --------------------------------------------------------------------
-      use mod_cov2, only: nv2max, newv2, v2mat
+      use mod_cov2, only: nv2max, v2mat
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_conlam, only: nlammx, nlam
       implicit double precision (a-h,o-z)
+      type(v2mat), intent(out), allocatable :: v2
       logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas"
 #include "common/parbasl"
@@ -126,8 +130,9 @@
       common /cosysr/ isrcod, idum,brot, aso, p, q
       common /coered/ ered, rmu
       common /coconv/ econv, xmconv
-      dimension j(2), l(1), jhold(1), ehold(1), is(2), ifi(1),
-     :          c12(1), c32(1), ieps(2), ishold(1), sc4(1)
+      dimension j(2), l(1), jhold(1), ehold(1), is(2),
+     :          c12(1), c32(1), ieps(2), ishold(1), sc1(1), sc4(1)
+      integer, allocatable :: ifi(:)
 *   econv is conversion factor from cm-1 to hartrees
 *   xmconv is converson factor from amu to atomic units
       data ieps / -1, 1 / , izero, ione, min10 / 0, 1, -10 /
@@ -342,6 +347,7 @@
           end if
 45    continue
 *  now assign omega values and energies for case (a) levels
+      allocate(ifi(nmax))
       do 50 i = 1, n
 *  initialize the array ifi to be 1 (corresponding to F1)
         ifi(i) = 1
@@ -669,13 +675,8 @@
 *  inum counts v2 elements for given lambda
 *  ilam counts number of v2 matrices
 *  ij is address of given v2 element in present v2 matrix
-      ! call newv2%empty()
-      if (allocated(newv2)) then
-        deallocate(newv2)
-      end if
-
-      allocate(newv2)
-      newv2 = v2mat(nlammx=nlammx, num_channels=ntop)
+      ASSERT(.not. allocated(v2))
+      v2 = v2mat(nlammx=nlammx, num_channels=ntop)
       i = 0
       lamsum = 0
       istep = 1
@@ -731,7 +732,7 @@
               i=i+1
               inum=inum+1
               if(i.gt.nv2max) goto 350
-                call newv2%set_element(ilam, irow, icol, vee)
+                call v2%set_element(ilam, irow, icol, vee)
                 if(.not.bastst .or. iprint .le. 1) goto 350
                   write (6, 290) ilam, lb, icol, irow, i, ij, vee
                   write (9, 290) ilam, lb, icol, irow, i, ij, vee
@@ -739,11 +740,11 @@
 350       continue
 355     continue
         if (bastst) then
-          write (6, 360) ilam, newv2%lamv2(ilam)%get_num_elements()
-          write (9, 360) ilam, newv2%lamv2(ilam)%get_num_elements()
+          write (6, 360) ilam, v2%lamv2(ilam)%get_num_elements()
+          write (9, 360) ilam, v2%lamv2(ilam)%get_num_elements()
 360       format ('ILAM=', i3, ' LAMNUM(ILAM) =', i9)
         end if
-        lamsum = lamsum + newv2%lamv2(ilam)%get_num_elements()
+        lamsum = lamsum + v2%lamv2(ilam)%get_num_elements()
 400   continue
       if(i.gt.nv2max) then
          write (6, 410) i, nv2max
@@ -785,7 +786,9 @@
      :            c12(i), c32(i)
           end if
 450   continue
-      ! call newv2%print_summary()
+      deallocate(ifi)
+
+      ! call v2%print_summary()
       return
       end
 * ----------------------------------------------------------------------
@@ -1028,3 +1031,4 @@
       write (8, 285) potfil
       return
       end
+      end module mod_hiba03_2pi

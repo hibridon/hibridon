@@ -46,12 +46,12 @@
       use mod_coz, only: sreal => z_as_vec ! sreal(1)
       use mod_cozmat, only: simag => zmat_as_vec ! simag(1)
       use mod_hibrid5, only: sread
+      use mod_hibasis, only: is_j12
       implicit double precision (a-h,o-z)
       character*(*) fname
       character*20 cdate
       character*40 xname
       logical  existf, csflag, flaghf, flagsu, twomol, nucros
-      logical is_j12
       dimension ia(4)
 #include "common/parpot"
       common /coselb/ ibasty

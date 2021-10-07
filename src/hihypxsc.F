@@ -44,6 +44,7 @@
       use mod_cosc1, only: elev => sc1 ! elev(1)
       use mod_cosc3, only: elevh => sc3 ! elevh(1)
       use mod_hibrid5, only: sread
+      use mod_hibasis, only: is_j12
 
       implicit double precision (a-h,o-z)
       character*(*) flname
@@ -55,7 +56,6 @@
       character*10 elaps, cpu
       logical csflg, flaghf, flgsu, twmol, nucrs,
      :     batch, fast, lpar2, lpar, exstfl
-      logical :: is_j12
 #include "common/parpot"
       common /coconv/ econv, xmconv, ang2
       common /coselb/ ibasty

@@ -125,7 +125,6 @@ module mod_cov2
      module procedure create_v2mat
    end interface v2mat
 
-   type(v2mat), allocatable           :: newv2
    type(dgrovec)                      :: v2d
    type(igrovec)                      :: v2i
    real(8), dimension(:), allocatable :: v2

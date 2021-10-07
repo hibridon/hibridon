@@ -72,6 +72,7 @@ add_library(hib
      src/assert.f90
      src/grovec.F90
      src/hiamp.F
+     src/hibasis.F
      src/hibound.F
      src/hibrid1.F
      src/hibrid2.F

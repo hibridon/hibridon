@@ -166,6 +166,7 @@
 *  current revision date: 30-jul-2018 (p. dagdigian)
 *  -----------------------------------------------------------------------
       use mod_hiba1sg, only: sy1sg
+      use mod_hiba03_2pi, only: sy2pi
       integer ibasty, irpot, iread
       logical readpt
       common /coselb/ ibasty
@@ -318,6 +319,8 @@
 *  current revision date: 20-jun-2019 (p.dagdigian)
 *  -----------------------------------------------------------------------
       use mod_hiba1sg, only: sav1sg
+      use mod_hiba03_2pi, only: sav2pi
+
       integer ibasty
       logical readpt
       common /coselb/ ibasty
@@ -469,6 +472,7 @@
 *  current revision date: 20-jun-2019 (p.dagdigian)
 *  -----------------------------------------------------------------------
       use mod_hiba1sg, only: ptr1sg
+      use mod_hiba03_2pi, only: ptr2pi
       integer ibasty
       logical readpt
       character*(*) filnam

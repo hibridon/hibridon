@@ -250,7 +250,7 @@
       return
       end
 * ------------------------------------------------------------------------
-      subroutine potmat (w, r, nch, nmax, newv2)
+      subroutine potmat (w, r, nch, nmax, v2)
 *  determine negative of lower triangle of w(r) matrix.  see eq. (3) of
 *  m.h. alexander, "hybrid quantum scattering algorithms ..."
 *  author:  millard alexander
@@ -287,7 +287,7 @@
       real(8), intent(in) :: r
       integer, intent(in) :: nch
       integer, intent(in) :: nmax
-      type(v2mat), intent(in) :: newv2
+      type(v2mat), intent(in) :: v2
 
       integer i, iflag, ilam
       integer(8) :: iv2_element
@@ -315,7 +315,7 @@ cABER
 *  [ vvl(i) for i = 1, nlam ] are returned in common block vvlcontains
 *  multiply all vvl terms by twice the reduced mass
       twormu = two * rmu
-      call dscal(newv2%nlam, twormu, vvl, 1)
+      call dscal(v2%nlam, twormu, vvl, 1)
 *  now loop over angular coupling matrix to calculate the potential matrix
 *    w(ij) = 2 * rmu * vv0 + sum [ 2 * rmu * vvl(ilam) * v2(ij,ilam) ]
 *  first zero out lower triangle of potential matrix
@@ -341,11 +341,11 @@ cABER
 cABER
 c       call druckq(w,nmax,nch,'potential matrix',icount)
 cABER
-      if (newv2%nlam .gt. 0) then
-        do ilam = 1, newv2%nlam
-            ! write(6,*) 'ilam=', ilam, 'newv2%lamv2(ilam)%get_num_elements()=', newv2%lamv2(ilam)%get_num_elements()
-            !lamv2 => newv2%lamv2(ilam)
-            associate( lamv2 => newv2%lamv2(ilam) )
+      if (v2%nlam .gt. 0) then
+        do ilam = 1, v2%nlam
+            ! write(6,*) 'ilam=', ilam, 'v2%lamv2(ilam)%get_num_elements()=', v2%lamv2(ilam)%get_num_elements()
+            !lamv2 => v2%lamv2(ilam)
+            associate( lamv2 => v2%lamv2(ilam) )
             num_nz_elements = lamv2%get_num_elements()
             ASSERT(num_nz_elements >= 0)
             do iv2_element = 1, num_nz_elements

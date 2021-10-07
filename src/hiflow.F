@@ -107,12 +107,13 @@
       use mod_cocent, only: cent
       use mod_coeint, only: eint
       use mod_coener, only: energ
-      use mod_hiba1sg, only : basis
+      use mod_hibasis, only : basis
       use mod_version, only : version, acknow
       use mod_hibrid5, only : soutpt, nusum, xwrite, wrhead, restrt, rsave
-      use mod_cov2, only: v2 => newv2
+      use mod_cov2, only: v2mat
       use constants
       implicit double precision (a-h,o-z)
+      type(v2mat), allocatable :: v2
       integer :: jtotmx
       character*20 cdate
       character*10 time
@@ -450,7 +451,7 @@ c95    format (1h ,79('='))
         call basis (jq, lq, inq, jlev, elev, inlev, nlevel, nlevop,
      :              sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu,
      :              csflag, clist, bastst, ihomo, nu, numin, jlpar,
-     :              twomol, nch, nmax, nchtop)
+     :              twomol, nch, nmax, nchtop, v2)
 
 
 **        write(6,5556) nch, nmax, nchtop
