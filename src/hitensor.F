@@ -981,6 +981,7 @@ c end of added/modified code (pjd)
 * modules for levels for which xs's to be computed
       use mod_coisc9, only: jslist => isc9 ! jslist(1)
       use mod_coisc10, only: inlist => isc10 ! inlist(1)
+      use mod_hibrid2, only: mxoutd
       use mod_hibrid5, only: sread
       implicit double precision (a-h,o-z)
       complex*8 t, tp
@@ -1882,6 +1883,7 @@ c    1         jtot,jtotp,j1,l1,j2,l2,l1p,icolp,irowp
 * common blocks for levels for which xs's to be computed
       use mod_coisc9, only: jslist => isc9 ! jslist(1)
       use mod_coisc10, only: inlist => isc10 ! inlist(1)
+      use mod_hibrid2, only: mxoutd
       use mod_hibrid5, only: sread
       implicit double precision (a-h,o-z)
       complex*8 t, tp

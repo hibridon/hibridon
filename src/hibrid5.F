@@ -138,6 +138,7 @@
       use mod_coeint, only: eint
       use mod_coj12, only: j12
       use mod_coener, only: ener => energ
+      use mod_hibrid2, only: mxoutd, mxoutr
       implicit double precision (a-h,o-z)
       real(8), intent(inout) :: tsq(nmax,nmax)
       real(8), intent(inout) :: sr(nmax,nmax)
@@ -976,6 +977,7 @@ c     write(6,*) 'prefac:',j1,j2,j3,x1,x3
 *    rmu:       collision reduced mass in atomic units (mass of electron = 1)
 * ----------------------------------------------------------------------
       use constants
+      use mod_hibrid2, only: mxoutc
       implicit double precision (a-h,o-z)
       real(8), intent(out) :: zmat(nmax, nmax)
       real(8), intent(out) :: tq3(nmx, nmx)
@@ -1970,6 +1972,7 @@ c.....reserve space for restart information
       use mod_coz, only: sreal => z_as_vec ! sreal(1)
       use mod_cow, only: simag => w_as_vec ! simag(1)
       use mod_cozmat, only: sigma => zmat_as_vec ! sigma(1)
+      use mod_hibrid2, only: mxoutr
       implicit double precision (a-h,o-z)
       character*(*) filnam
       character*40  icsfil, smtfilnam, xname
