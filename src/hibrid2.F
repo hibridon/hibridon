@@ -158,7 +158,7 @@ c     The constants module should be used in new subroutines.
       return
       end
 * -------------------------------------------------------------------
-      subroutine logdb (z, w, amat, bmat, nmax, wref, z1, z2,
+      subroutine logdb (z, w, nmax, wref, z1, z2,
      :                  scr1, scr2, nch, rmin, rmax, nsteps,
      :                  eshift, iread, iwrite, tl, tp, twf)
 *     routine to initialise the log derivative matrix, y, at r = rmin,
@@ -185,8 +185,6 @@ c     The constants module should be used in new subroutines.
 *                   at r = rmax
 *     w             scratch array of dimension (nmax,nch)
 *                   used as workspace for the potential matrix
-*     amat,bmat     scratch matrices of dimension (nmax,nch)
-*                   used as workspace for the dissociation overlap
 *     nmax          leading dimension of arrays z and w
 *     wref          scratch array of dimension nch
 *                   used as workspace for the reference potential
@@ -244,8 +242,8 @@ c     The constants module should be used in new subroutines.
       logical iread, iwrite, photof, wavefn, boundf, wrsmat
       logical flagsu
 *      external mtime, potmat, daxpy, smxinv, dscal
-*     matrices z, w, amat, and bmat are stored column by column as one-dimensi
-      dimension z(1), w(1), amat(1), bmat(1)
+*     matrices z and w are stored column by column as one-dimensi
+      dimension z(1), w(1)
       dimension wref(1), z1(1), z2(1), scr1(1), scr2(1)
       common /cophot/ photof, wavefn, boundf, wrsmat
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
@@ -254,6 +252,11 @@ c     The constants module should be used in new subroutines.
       data zero,  one,  two, three,six,  eight
      :    / 0.d0, 1.d0, 2.d0, 3.d0, 6.d0, 8.d0 /
       data izero, ione /0, 1/
+*     amat,bmat     scratch matrices of dimension (nmax,nch)
+*                   used as workspace for the dissociation overlap
+*     amat and bmat are stored column by column as one-dimensi
+      real(8) :: amat(nmax*nch)
+      real(8) :: bmat(nmax*nch)
 c     The following variables are for size-determination of (machine
 c     dependent) built-in types
       integer int_t

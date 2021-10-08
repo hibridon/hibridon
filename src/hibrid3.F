@@ -959,7 +959,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       cpup=cpupot
 
       call mtime(ttx,tty)
-      call runlog (z, w, amat, bmat, sc1, sc2, sc3, sc4, sc5,
+      call runlog (z, sc4, sc5,
      :             r, rendld, spac, eshift, itwo, twoen,
      :             td, tdm, tp, tpm, twf, twfm, logwr, noprin,
      :             ipos, nch, nmax)
@@ -1121,8 +1121,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       return
       end
 * ----------------------------------------------------------------------
-      subroutine runlog (z, w, amat, bmat,
-     :                   wref, z1, z2, scr1, scr2, r, rend,
+      subroutine runlog (z,
+     :                   scr1, scr2, r, rend,
      :                   spac, eshift, itwo, twoen, tl, tlw, tp, tpw,
      :                   twf, twfw, logwr, noprin, ipos, nch, nmax)
 *     log-derivative propagator from r to r = rend
@@ -1134,7 +1134,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *     variables in call list:
 *     z             on return: contains the log-derivative matrix
 *                   at r = rend
-*     w,amat,bmat   scratch matrices of dimension at least nmax x nch
 *     wref,z1,z2    scratch vectors of length nch
 *     scr1, scr2,
 *     r             on entry: r = initial interparticle separation
@@ -1179,6 +1178,11 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *  ------------------------------------------------------------------
       use mod_coqvec, only: nphoto, q
       implicit double precision (a-h, o-z)
+      real(8) :: w(nmax*nch)
+      real(8) :: wref(nch)
+      real(8) :: z1(nch)
+      real(8) :: z2(nch)
+
 *      real eshift, r, rend, rmax, rmin, spac, tl, tlw, tp, tpw
 *      real scr1, scr2, wref, z1, z2
 *      real w, z
@@ -1190,8 +1194,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       common /constp/ nsteps, isteps
 
 *  z, w, amat, and bmat are stored column by column in one dimensional arrays
-      dimension z(1), w(1), amat(1), bmat(1)
-      dimension wref(1), z1(1), z2(1), scr1(1), scr2(1)
+      dimension z(1)
+      dimension scr1(1), scr2(1)
 
       iwrite = twoen .and. (itwo.eq.0)
       iread =  twoen .and. (itwo.gt.0)
@@ -1220,7 +1224,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       endif
 *  logdb initialises the log-derivative matrix at r = rmin
 *  and propagates it from rmin to rmax
-      call logdb (z, w, amat, bmat,
+      call logdb (z, w,
      :            nmax, wref, z1, z2, scr1, scr2, nch,
      :            rmin, rmax, nsteps, eshift, iread, iwrite,
      :            tl, tp, twf)
