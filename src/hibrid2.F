@@ -158,7 +158,7 @@ c     The constants module should be used in new subroutines.
       return
       end
 * -------------------------------------------------------------------
-      subroutine logdb (z, w, nmax, wref, z1, z2,
+      subroutine logdb (z, nmax, wref, z1, z2,
      :                  scr1, scr2, nch, rmin, rmax, nsteps,
      :                  eshift, iread, iwrite, tl, tp, twf)
 *     routine to initialise the log derivative matrix, y, at r = rmin,
@@ -183,8 +183,6 @@ c     The constants module should be used in new subroutines.
 *     z             array of dimension (nmax,nch)
 *                   on return z contains the log derivative matrix
 *                   at r = rmax
-*     w             scratch array of dimension (nmax,nch)
-*                   used as workspace for the potential matrix
 *     nmax          leading dimension of arrays z and w
 *     wref          scratch array of dimension nch
 *                   used as workspace for the reference potential
@@ -231,6 +229,7 @@ c     The constants module should be used in new subroutines.
 *     and blas routines are not used for o(n) loops
 *  ------------------------------------------------------------------
       use mod_coqvec, only: mxphot, nphoto, q ! q is an output of this subroutine
+      use mod_hibrid3, only: outmat, potent, potmat
       implicit double precision (a-h,o-z)
       integer ich, icode, icol, idiag, ierr, ij, irow, istep, kstep,
      :        nch, ncol, ndiag, nmax, nrow, nsteps
@@ -243,7 +242,7 @@ c     The constants module should be used in new subroutines.
       logical flagsu
 *      external mtime, potmat, daxpy, smxinv, dscal
 *     matrices z and w are stored column by column as one-dimensi
-      dimension z(1), w(1)
+      dimension z(1)
       dimension wref(1), z1(1), z2(1), scr1(1), scr2(1)
       common /cophot/ photof, wavefn, boundf, wrsmat
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
@@ -255,8 +254,13 @@ c     The constants module should be used in new subroutines.
 *     amat,bmat     scratch matrices of dimension (nmax,nch)
 *                   used as workspace for the dissociation overlap
 *     amat and bmat are stored column by column as one-dimensi
-      real(8) :: amat(nmax*nch)
-      real(8) :: bmat(nmax*nch)
+      real(8),allocatable :: amat(:)
+      real(8),allocatable :: bmat(:)
+
+*     w             scratch array of dimension (nmax,nch)
+*                   used as workspace for the potential matrix
+      real(8) :: w(nmax*nch)
+
 c     The following variables are for size-determination of (machine
 c     dependent) built-in types
       integer int_t
@@ -399,6 +403,8 @@ c
          icol = icol + ncol
   40  continue
 
+      allocate(amat(nmax*nch))
+      allocate(bmat(nmax*nch))
 
 *     propagate z matrix from rmin to rmax
       do 250  kstep = 1, nsteps
@@ -707,6 +713,9 @@ c     nrlogd is the number of LOGD records - used to seek the wfu file
  220     continue
 *     propagation loop ends here
  250  continue
+
+      deallocate(bmat)
+      deallocate(amat)
 
 *     recover the log derivative matrix, y, at r = rmax
       fac = hi

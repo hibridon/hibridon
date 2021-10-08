@@ -461,6 +461,7 @@ c
       end subroutine wpr_bound
 c     ------------------------------------------------------------------
       subroutine vmat_bound(wr, r, nch, nmax)
+      use mod_hibrid3, only: potmat
       implicit none
       integer, intent(in) :: nch, nmax
       real(8), intent(in) :: r

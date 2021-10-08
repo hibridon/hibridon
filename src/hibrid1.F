@@ -96,6 +96,7 @@
 * ----------------------------------------------------------------------------
       use mod_coqvec, only: nphoto, q
       use mod_cosc10, only: sc10
+      use mod_hibrid3, only: outmat, potent
       implicit double precision (a-h, o-z)
 *  matrix dimensions (row dimension = nmax, matrices stored column by column)
       real(8), dimension(nmax*nmax), intent(inout) :: z

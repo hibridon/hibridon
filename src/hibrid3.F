@@ -1,4 +1,6 @@
 #include "assert.h"
+      module mod_hibrid3
+      contains
 *************************************************************************
 *                         hibridon 3  library                           *
 *                                                                       *
@@ -1034,7 +1036,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       return
       end
 * ------------------------------------------------------------------------
-      subroutine rles (a, c, kpvt, n, m, nmax)
+      subroutine rles (a, c, n, m, nmax)
 *  subroutine to solve linear equations a * x = c
 *  written by:  millard alexander
 *  current revision date: 6-apr-2004
@@ -1055,8 +1057,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *  --------------------------------------------------------------------
       implicit double precision (a-h,o-z)
       integer icol, ierr, iptc, izero, m, n, nmax
-      integer kpvt
-      dimension a(1), c(1), kpvt(1)
+      integer :: kpvt(n)
+      dimension a(1), c(1)
       data izero /0/
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 *  factor the matrix
@@ -1224,7 +1226,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       endif
 *  logdb initialises the log-derivative matrix at r = rmin
 *  and propagates it from rmin to rmax
-      call logdb (z, w,
+      call logdb (z,
      :            nmax, wref, z1, z2, scr1, scr2, nch,
      :            rmin, rmax, nsteps, eshift, iread, iwrite,
      :            tl, tp, twf)
@@ -1817,7 +1819,7 @@ c
 *  tmod is equal to y(xn) j(xn) - j'(xn)
 *  solve linear equations for k-matrix (negative of r-matrix)
 *  fpj is used as scratch vector here
-      call rles (sr, tmod, fpj, nopen, nopen, nmax)
+      call rles (sr, tmod, nopen, nopen, nmax)
 *  since r-matrix is negative of k-matrix, r = -tmod at this point
       isym=1
       if (kwrit) then
@@ -1851,7 +1853,7 @@ c
 *  solve linear equations for s-imaginary
 *  see eq.(67) of r.g. gordon, meth. comp. phys. 10 (1971) 81
 *  fpj is used as scratch vector here
-      call rles (sr, si, fpj, nopen, nopen, nmax)
+      call rles (sr, si, nopen, nopen, nmax)
 *  determine real part of s-matrix
 *  see eq.(68) of r.g. gordon, meth. comp. phys. 10 (1971) 81
 #if defined(HIB_NONE)
@@ -1983,7 +1985,7 @@ c
 #endif
 * solve linear equations for real part of transition amplitudes
 * fpj is used as scratch here
-        call rles(sisave,q,fpj,nopen,nphoto,nmax)
+        call rles(sisave,q,nopen,nphoto,nmax)
         call dscal(nopen*nphoto,onemin,q,1)
 * q now contains real part of transition amplitudes
 * store real part of transition amplitudes in sr
@@ -2172,7 +2174,7 @@ c
       dimension z(nmax,nmax), amat(nmax,nmax), sr(nmax,nmax),
      :          si(nmax,nmax), bmat(nmax,nmax)
       dimension isc1(20), jq(1), lq(1), sc1(1), sc2(1), sc3(1),
-     :          sc4(1), sc5(1), inq(1)
+     :          sc4(1), sc5(1), sc6(1), sc7(1), inq(1)
       data izero /0/
 c     The following three variables are used to determine the (machine
 c     dependent) size of built-in types
@@ -2350,3 +2352,4 @@ c
       endif
       return
       end
+      end module mod_hibrid3
