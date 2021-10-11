@@ -33,6 +33,7 @@ program comp_tests
     case("hfx") ; num_header_lines = 6
     case("ppb") ; num_header_lines = 6
     case("pcs") ; num_header_lines = 6
+        min_significant_value = 1e-20
     case("trn") ; num_header_lines = 7
     case("xxsc"); num_header_lines = 3
     case ("flx") ! Header ends at first occurence of "R (BOHR) AND OUTGOING FLUXES"

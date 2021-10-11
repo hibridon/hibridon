@@ -1,0 +1,112 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2021-10-11 at 19:09
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: 2bb9ef1
+SYS: Linux 5.4.0-88-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                      Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                         3056.536
+Socket(s):                       1
+Core(s) per socket:              4
+L2 cache:                        1 MiB
+L3 cache:                        6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16272252 kB
+ --------------------------------------------------------------------------
+ Hibridon>  NOPRIN = .TRUE., SO IPRINT SET TO -1
+ Hibridon>  Hibridon>      *** Parameters (scattering):
+ JTOT1  =   0        JTOT2  =   5        JTOTD  =   1        JLPAR  =   0
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  46        IPRINT =   2
+ FSTFAC =  1.500     RINCR  =  1.000     RCUT   = -100.0     RENDAI =  80.00    
+ RENDLD =  25.00     RSTART =  3.000     SPAC   = 2.0000E-02 TOLAI  =  1.150    
+ XMU    =   1.79012
+ NOUT:  6; JOUT:  0   1   2   4   3   5
+ INDOUT:    0    1    2
+     *** HOMO+3P system parameters:
+ NTERM  =   1        IOP    =   0        JMAX   =   2
+ BROT   =  59.33     ASO1   = -68.71     ASO2   = -227.0    
+ LAMMIN:    1
+ LAMMAX:    9
+ MPROJ:     0
+     *** Flags:
+ AIRYFL= T    BASTST= F    BATCH = F    CHLIST= F    CSFLAG= F    FLAGHF= F
+ FLAGSU= F    IHOMO = T    IPOS  = F    LOGDFL= T    NOPRIN= T    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = T
+ PRXSEC= T    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= F    WAVEFL= F
+ WRPART= T    WRSMAT= T    WRXSEC= T    BOUNDC= F
+ ** Maximum Channels:   30; Maximum Anisotropic Terms:  2000
+ ** Energies:      250.000000
+ ** Label:      O(3P)-H2 scattering on Alexander PESs           
+ ** Pot name:      ALEXANDER SCALED (s=1.21) O(3P)H2 DUBERNET-HUTSO
+ ** Input File:  O3ph2q.inp
+ ** Output file: Outpt
+ ** Jobname:     Jobq
+ Hibridon>  NOPRIN = .TRUE., SO IPRINT SET TO -1
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 11 19:09:37 2021
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 11 19:09:37 2021
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:01   DATE: Oct 11 19:09:38 2021
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:01   DATE: Oct 11 19:09:38 2021
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 11 19:09:38 2021
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:02   DATE: Oct 11 19:09:39 2021
+ ** J =    0 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:02   DATE: Oct 11 19:09:39 2021
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:01   WALL: 00:00:02   DATE: Oct 11 19:09:39 2021
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:02   DATE: Oct 11 19:09:39 2021
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:02   DATE: Oct 11 19:09:39 2021
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:03   DATE: Oct 11 19:09:40 2021
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:03   DATE: Oct 11 19:09:40 2021
+ ===============================================================================
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:    28
+      TIMING:  ELAPSED 00:00:03 / CPU 00:00:02 / MP RATIO   94.4 %
+      CURRENT DATE:  Oct 11 19:09:40 2021
+ ===============================================================================
+ Hibridon> 
+ INTEGRAL CROSS SECTIONS READ FROM FILE Jobq1.ics                               
+ WRITTEN:   Oct 11 19:09:40 2021
+ LABEL:     O(3P)-H2 scattering on Alexander PESs           
+ POT NAME:  ALEXANDER SCALED (s=1.21) O(3P)H2 DUBERNET-HUTSO
+
+ ** INTEGRAL CROSS SECTIONS; IEN= 1 **
+    RMU=   1.7901  E=   250.00  JLPAR=-1  JTOT-1=  0  JTOT-2=   5  JTOT-D=  1
+ ** CC CALCULATION, JLPAR=-1 **
+
+ ** COLUMN HEADINGS ARE INITIAL STATES, ROW HEADINGS ARE FINAL STATES **
+
+            J=    0         0         0
+   J    I | I=    0         1         2
+ 
+    0    0   1.118E+02  1.783E-03  3.017E-01
+    0    1   2.132E-02  1.971E+01  8.097E-01
+    0    2   1.638E+01  3.678E+00  7.108E+00
+ Hibridon> 
+**  DIFFERENTIAL CROSS SECTION (ANG^2/SR)
+    TODAYS DATE:  Oct 11 19:09:40 2021
+    S-MATRICES READ FROM FILE Jobq1.smt                               
+      WRITTEN:   Oct 11 19:09:37 2021
+      LABEL:     O(3P)-H2 scattering on Alexander PESs           
+      POT NAME:  ALEXANDER SCALED (s=1.21) O(3P)H2 DUBERNET-HUTSO
+    E-TOT:      250.000;  REDUCED MASS:    1.790    
+    TRANSITION:  J1=   0 IN1=   0  ->  J2=   0 IN2=   1
+    SUMMING PARTIAL WAVES FROM JTOT = 0 TO   5
+    WAVE VECTOR IN INITIAL CHANNEL:      0.8274 Bohr^(-1);     1.5636 Angstroms^(-1)
+    COLLISION ENERGY:    23.0230 cm-1;     2.8545 meV
+    DIFFERENTIAL CROSS SECTIONS SAVED IN FILE: Jobq1.dcs
+
+ ** DIFFERENTIAL CROSS SECTION CALCULATION FINISHED:
+    ELAPSED TIME: 00:00:00   CPU TIME:  00:00:00 
+ Hibridon> 

@@ -624,6 +624,7 @@ set(tests_list
   nh3h2
   nh3h2_qma
   nh3he
+  o3ph2
   ohh2_bausr
   ohh2_j1
   ohh2_j13
@@ -780,6 +781,8 @@ set(all_testsuite
   heohx
   nh3h2
   nh3h2_qma
+  o3ph2
+  o3ph2_quick
   ohh2_bausr_heohx
   ohh2_bausr_j1
   ohh2_j1
@@ -823,6 +826,7 @@ set(coverage_testsuite
   nh3h2
   nh3h2_qma
   nh3he
+  o3ph2_quick
   ohh2_bausr_heohx_quick
   ohh2_bausr_j1_quick
   ohh2_j1_quick

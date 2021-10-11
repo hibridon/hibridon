@@ -191,8 +191,7 @@ c.....print job information
 c
       write(dcs_unit, 41) xnam1,cdate1,label,potnam,econv*ered1,xmconv*rmu1
       if (mflag)
-     :     write(rho_unit, 41) xnam1,cdate1,label,potnam,econv*ered1,xmconv*rmu1
-      write(6,40) xnam1,cdate1,label,potnam,econv*ered1,xmconv*rmu1
+     :     write(rho_unit, 41) ,econv*ered1,xmconv*rmu1
 40    format('    S-MATRICES READ FROM FILE ',(a),/,
      : '      WRITTEN:   ',(a),/,
      : '      LABEL:     ',(a)/,
@@ -203,6 +202,7 @@ c
      : '%     LABEL:     ',(a)/,
      : '%     POT NAME:  ',(a)/,
      : '%    E-TOT:   ',f10.3,';  REDUCED MASS:  ',1pg11.4)
+      write (6,*), 'graffy/0:'
       if(jtot2.eq.0) jtot2=jfinal
       jtot2=min0(jfinal,jtot2)
       if(jtotd.ne.1) then
@@ -248,10 +248,13 @@ c
 c.....ckeck whether second level exists
 c
 c added for negative nnout by moonbong yang 2-8-95
+      write(6, *), 'graffy/1'
+
 
 120   continue
       if(nnout.le.0) goto 160
 
+      write(6, *), 'graffy/2'
       do 130 j=1,nlevel
 130   if(jlev(j).eq.j2.and.inlev(j).eq.in2) goto 140
       write(6,70) 'j2=',j2,'in2=',in2
@@ -264,7 +267,9 @@ c added for negative nnout by moonbong yang 2-8-95
 c
 c.....print header
 c
-160   write(dcs_unit, 171) j1,in1,j2,in2,jtot1,jtot2,ca,1.8897*ca,
+160   continue
+      write(6, *), 'graffy/3'
+      write(dcs_unit, 171) j1,in1,j2,in2,jtot1,jtot2,ca,1.8897*ca,
      :             econv*ecol,econv*ecol/8.065465
       if (mflag) write(rho_unit, 171) j1,in1,j2,in2,jtot1,jtot2,ca,1.8897*ca,
      :             econv*ecol,econv*ecol/8.065465
@@ -280,10 +285,11 @@ c
 171   format('%   TRANSITION:  J1=',i4,' IN1=',i4,
      1        '  ->  J2=',i4,' IN2=',i4/
      1        '%   SUMMING PARTIAL WAVES FROM JTOT = ',i1,
-     :        ' TO',i4/
+     :        ' TO',i4, / 
      1        '%   WAVE VECTOR IN INITIAL CHANNEL:  ',f10.4,' Bohr^(-1)',
      :        '; ',f10.4,' Angstroms^(-1)',/
      :        '%   COLLISION ENERGY: ',f10.4,' cm-1; ',f10.4,' meV')
+      write(6, *), 'graffy/4'
       if (stflag) then
          write (6,173) msteric+0.5, alph1,alphm1
          write (2,172) msteric+0.5, alph1,alphm1
@@ -431,6 +437,7 @@ c
       if (allocated(y)) deallocate(y)
       allocate(y(0:iydim1, 0:iydim2, nangle))
 
+      write(6,*) 'graffy/4/0'
 c
 c.....precalculate all required spherical harmonics
       if (allocated(ytmp)) deallocate(ytmp)
@@ -469,7 +476,9 @@ c
 c
 c.....this assumes that jlpar=1 is stored first
 c
+      write(6,*) 'graffy/4/0/5'
       if(jtot.gt.jtot2) goto 300
+      write(6,*) 'graffy/4/0/6'
 c
 c.....copy row labels into column labels if s-matrices are stored
 c.....triangular
@@ -501,6 +510,7 @@ c
 c.....loop back to next jtot/jlpar
 c
 300   if(jtot.lt.jtot2.or.jlpar.eq.1) goto 250
+      write(6,*) 'graffy/4/0/7'
 c
 c.....print differential cross sections for this batch of angles
 c
@@ -590,6 +600,8 @@ c
            endif
 333        format((a),'=[')
          endif
+
+         write(6,*) 'graffy/4/1'
 * Comment(JK): Loop over DCS angular grid
          aangle=ang1
          ii = 0
@@ -611,6 +623,7 @@ c
          sn=sin(aangle*pi/180d0)
 * here for steric effect
          if (stflag) then
+            write(6,*) 'graffy/4/1/5 : stflag'
             stampl=alph1*q(mj1, mj2, i)
      $           + msign * alphm1 * qm(mj1, mj2, i)
             stamplm=alph1*q(mj1, mj2, i)
@@ -630,6 +643,8 @@ c
 *            xint=xint+sn*dreal(stampl*conjg(stampl))
 *            xintm=xintm+sn*dreal(stamplm*conjg(stamplm))
          else
+            write(6,*) 'graffy/4/1/5 : not stflag'
+
             ximdep(mj1, mj2) = ximdep(mj1, mj2)
      $           + sn * dreal(q(mj1, mj2, i) * conjg(q(mj1, mj2, i)))
             dsigterm = dreal(q(mj1, mj2, i) * conjg(q(mj1, mj2, i)))
@@ -646,6 +661,7 @@ c
          aangle=aangle+dang
 339      continue
 340   continue
+      write(6,*) 'graffy/4/2'
 c       print *, 'mj1 is:  ', mj1
 c      if (j2.ge.1) then
          do 342 mj2=-j2p,j2-2
@@ -725,8 +741,13 @@ c      endif
             write(rho_unit, 352) angle,(rho2(ij,i)/s(i),ij=-j2p,j2)
          endif
 351      angle=angle+dang
+      write(6,*) 'graffy/4/5'
 352      format(f7.2,25g15.4)
       else
+         write(6,*) 'graffy/4/6'
+         write(dcs_unit, *), 'graffy'
+         close(dcs_unit)
+         stop 1
          write (2,360)
          if (iprint) write (6,360)
 360      format
@@ -739,6 +760,9 @@ c      endif
       endif
 *      ang1=angle
       ang1=angle-dang
+
+      write(6,*) 'graffy/4/8 :'
+
 c
 c.....loop back if not all required angles are finished
 c
@@ -819,6 +843,8 @@ c     (3m^2-1)/(j*(j+1))
 *
 *  compute degeneracy averaged cross sections only
       elseif (is_twomol(ibasty)) then
+        write(6,*) 'graffy/4/9 : is twomol'
+
         ii = 0
         j1_i = j1/10
         j1_ip=j1_i
@@ -846,6 +872,7 @@ c jk
 1400      continue
 1500    continue
 *
+        write(6,*) 'graffy/5'
         write(dcs_unit, 1348)
         if (iprint) write(6,1347)
 1347    format(/'   DEGENERACY AVERAGED DXSC (ANG^2/SR)')
@@ -859,6 +886,8 @@ c jk
 1351    continue
 c
       else
+         write(6,*) 'graffy/4/10 : atom atom'
+
 c
 c  special atom-molecule cases
 *
@@ -890,6 +919,7 @@ c
 3400      continue
 3500    continue
 *
+      write(6,*) 'graffy/11'
         write(dcs_unit, 3348)
         if (iprint) write(6,3347)
 3347    format(/'   DEGENERACY AVERAGED DXSC (ANG^2/SR)')
@@ -902,6 +932,8 @@ c
           angle = angle + dang
 3351    continue
       end if
+
+      write(6,*) 'graffy/12'
 *
  500  if (allocated(y)) deallocate(y)
       if (allocated(s)) deallocate(s)
@@ -934,6 +966,7 @@ c
      : '% ** DIFFERENTIAL CROSS SECTION CALCULATION FINISHED:',
      :       /,'%   ELAPSED TIME:',(a),'  CPU TIME: ',(a))
       close(smt_unit)
+      flush(dcs_unit)
       close(dcs_unit)
       if (mflag) then
          write(rho_unit, 721) elaps, cpu
