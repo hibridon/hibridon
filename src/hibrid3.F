@@ -934,16 +934,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       integer, intent(in) :: nairy
       integer, intent(in) :: nmax
 
-      integer :: isc1(nch)
-      real(8) :: sc1(nch)
-      real(8) :: sc2(nch)
-      real(8) :: sc3(nch)
       real(8) :: sc4(nch)
       real(8) :: sc5(nch)
-      real(8) :: sc6(nch)
-      real(8) :: sc7(nch)
-      real(8) :: sc8(nch)
-      real(8) :: sc9(nch)
 
       logical :: twoen
       logical ::  first
