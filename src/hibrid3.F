@@ -902,24 +902,84 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *                   to be used later in computing the wavefunction
 *  ------------------------------------------------------------------
       use mod_hibrid2, only: mxoutd
-      implicit double precision (a-h, o-z)
-      logical twoen, ipos, logwr, noprin, airyfl, airypr,
-     :        photof, wavefn, boundf, wrsmat
-      logical first
-      character*10 tbs,tps,tds,tws,tairys, twfs
-      character*10 time
-      common /copmat/ rtmn, rtmx, iflag
-      common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
-      common /cophot/ photof, wavefn, boundf, wrsmat
+      implicit none
 *   square matrices
-      dimension z(nmax,nmax), w(nmax,nmax), zmat(nmax,nmax),
-     :          amat(nmax,nmax), bmat(nairy,nairy)
+      real(8), intent(out) :: z(nmax, nch)
+      real(8), intent(out) :: w(nmax, nch)
+      real(8), intent(out) :: zmat(nmax, nch)
+      real(8), intent(out) :: amat(nmax, nch)
+      real(8), intent(out) :: bmat(nairy, nairy)
+      integer, intent(inout) :: jq(nch)
+      integer, intent(inout) :: lq(nch)
+      integer, intent(inout) :: inq(nch)
+      integer, intent(out) :: isc1(nch)
+      real(8), intent(out) :: sc1(nch)
+      real(8), intent(out) :: sc2(nch)
+      real(8), intent(out) :: sc3(nch)
+      real(8), intent(out) :: sc4(nch)
+      real(8), intent(out) :: sc5(nch)
+      real(8), intent(out) :: sc6(nch)
+      real(8), intent(out) :: sc7(nch)
+      real(8), intent(out) :: sc8(nch)
+      real(8), intent(out) :: sc9(nch)
+      integer, intent(in) :: ien
+      integer, intent(in) :: nerg
+      real(8), intent(in) :: en
+      real(8), intent(in) :: eshift
+      real(8), intent(in) :: rstart
+      real(8), intent(in) :: rendld
+      real(8), intent(in) :: spac
+      real(8), intent(in) :: tolhi
+      real(8), intent(in) :: rendai
+      real(8), intent(in) :: rincr
+      real(8), intent(in) :: fstfac
+      real(8), intent(out) :: tb
+      real(8), intent(out) :: tbm
+      logical, intent(in) :: ipos
+      logical, intent(in) :: logwr
+      logical, intent(in) :: noprin
+      logical, intent(in) :: airyfl
+      logical, intent(in) :: airypr
+      integer, intent(in) :: nch
+      integer, intent(out) :: nopen
+      integer, intent(in) :: nairy
+      integer, intent(in) :: nmax
+      logical :: twoen
+      logical ::  first
+      character*10 :: tbs,tps,tds,tws,tairys, twfs
+      character*10 :: time
+      common /copmat/ rtmn, rtmx, iflag
+      real(8) :: rtmn
+      real(8) :: rtmx
+      integer :: iflag
+      common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
+      real(8) :: cpuld
+      real(8) :: cpuai
+      real(8) :: cpupot
+      real(8) :: cpusmt
+      real(8) :: cpupht
+      common /cophot/ photof, wavefn, boundf, wrsmat
+      logical :: photof
+      logical :: wavefn
+      logical :: boundf
+      logical :: wrsmat
+
+      real(8) :: r
+      real(8) :: t1, t2
+      real(8) :: t11, t22
+      real(8) :: tb1, tb2, tbx
+      real(8) :: ttx, tty
+      real(8) :: drnow
+      real(8) :: cpup
+      integer :: icol
+      integer :: itwo
+      integer :: nrow
+      real(8) :: tairy
+      real(8) :: td, tdm, tp, tpm, tw, twm, twf, twfm
+
 *  vectors
-      dimension jq(1), lq(1), inq(1), isc1(1),
-     :          sc1(1), sc2(1), sc3(1), sc4(1),
-     :          sc5(1), sc6(1), sc7(1), sc8(1), sc9(1)
 *  prec is precision of single precision floating pt number
-      data prec / 1.d+11 /
+      real(8), parameter :: prec = 1.d+11
 
       call mtime(t11,t22)
       first = .true.
