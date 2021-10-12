@@ -1249,19 +1249,35 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *  ------------------------------------------------------------------
       use mod_coqvec, only: mxphot, nphoto, q ! q is an output of this subroutine
       implicit double precision (a-h,o-z)
+      real(8), intent(out) :: z(nmax*nch)
+      integer, intent(in) :: nmax
+      real(8), intent(out) :: wref(nch)
+      real(8), intent(out) :: z1(nch)
+      real(8), intent(out) :: z2(nch)
+      real(8), intent(out) :: scr1(nch)
+      real(8), intent(out) :: scr2(nch)
+      integer, intent(in) :: nch
+      real(8), intent(inout) :: rmin
+      real(8), intent(inout) :: rmax
+      integer, intent(inout) :: nsteps
+      real(8), intent(in) :: eshift
+      logical, intent(in) :: iread
+      logical, intent(in) :: iwrite
+      real(8), intent(out) ::  tl
+      real(8), intent(out) ::  tp
+      real(8), intent(out) ::  twf
+
       integer ich, icode, icol, idiag, ierr, ij, irow, istep, kstep,
-     :        nch, ncol, ndiag, nmax, nrow, nsteps
+     :        ncol, ndiag, nrow
 *      real arg, d3, d6, eight, eshift, fac, h, half, hi, one, r, rmax,
 *     :     rmin, sqrt, tan, tanh, t0, t0w, t1, t1w, tf, tfw, th, tl,
 *     :     tn, tp,  zero, wdiag
 *      real w, z
 *      real scr1, scr2, wref, z1, z2
-      logical iread, iwrite, photof, wavefn, boundf, wrsmat
+      logical photof, wavefn, boundf, wrsmat
       logical flagsu
 *      external mtime, potmat, daxpy, smxinv, dscal
 *     matrices z and w are stored column by column as one-dimensi
-      dimension z(1)
-      dimension wref(1), z1(1), z2(1), scr1(1), scr2(1)
       common /cophot/ photof, wavefn, boundf, wrsmat
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
