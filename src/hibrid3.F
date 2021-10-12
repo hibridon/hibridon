@@ -1006,9 +1006,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
         call mxoutd (9, z, nch, nmax, 0, ipos)
       end if
 *  now calculate s-matrix and t-matrix squared
-      call smatrx (z, w, zmat, amat, bmat,
-     :             lq, jq, inq, isc1, sc1, sc2, sc3, sc4,
-     :             sc5, sc6, sc7, r, prec, tw, twm, nopen, nch, nmax,
+      call smatrx (z, w, zmat,
+     :             lq, jq, inq, r, prec, tw, twm, nopen, nch, nmax,
      :             logwr,ipos)
 
 * convert to time string
@@ -2698,9 +2697,8 @@ c
       call exit()
       end
 * -----------------------------------------------------------------------
-      subroutine smatrx (z, sr, si, amat, bmat,
-     :                   lq, jq, inq, isc1, sc1, sc2, sc3, sc4, sc5,
-     :                   sc6, sc7, r, prec, ts, tsw, nopen, nch, nmax,
+      subroutine smatrx (z, sr, si,
+     :                   lq, jq, inq, r, prec, ts, tsw, nopen, nch, nmax,
      :                   kwrit,ipos)
 * -----------------------------------------------------------------------
 *  subroutine to:
@@ -2751,15 +2749,38 @@ c
       use mod_coeint, only: eint
       use mod_hibrid2, only: mxoutd, mxoutr
       implicit double precision (a-h,o-z)
-      logical photof, wavefn, kwrit, ipos, boundf, wrsmat
+      real(8), intent(inout) :: z(nmax,nmax)
+      real(8), intent(out) :: sr(nmax,nmax)
+      real(8), intent(out) :: si(nmax,nmax)
+      integer, intent(inout) :: lq(nch)
+      integer, intent(inout) :: jq(nch)
+      integer, intent(inout) :: inq(nch)
+      real(8), intent(in) :: r
+      real(8), intent(in) :: prec
+      real(8), intent(out) :: ts
+      real(8), intent(out) :: tsw
+      integer, intent(out) :: nopen
+      integer, intent(in) :: nch
+      integer, intent(in) :: nmax
+      logical, intent(in) :: kwrit
+      logical, intent(in) :: ipos
+
+      
+      logical photof, wavefn, boundf, wrsmat
       common /coered/ ered, rmu
       common /cophot/ photof, wavefn, boundf, wrsmat
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
-      dimension z(nmax,nmax), amat(nmax,nmax), sr(nmax,nmax),
-     :          si(nmax,nmax), bmat(nmax,nmax)
-      dimension isc1(20), jq(1), lq(1), sc1(1), sc2(1), sc3(1),
-     :          sc4(1), sc5(1), sc6(1), sc7(1), inq(1)
+      real(8) :: amat(nmax,nmax), bmat(nmax,nmax)
+      integer :: isc1(nch)
+      real(8) :: sc1(nch)
+      real(8) :: sc2(nch)
+      real(8) :: sc3(nch)
+      real(8) :: sc4(nch)
+      real(8) :: sc5(nch)
+      real(8) :: sc6(nch)
+      real(8) :: sc7(nch)
+      
       data izero /0/
 c     The following three variables are used to determine the (machine
 c     dependent) size of built-in types
