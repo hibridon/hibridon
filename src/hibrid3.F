@@ -2195,8 +2195,7 @@ c
       return
       end
 * ----------------------------------------------------------------------
-      subroutine smatop (tmod, sr, si, scmat, lq, fj, fn, fpj,
-     :                   fpn, pk, derj, dern, r, prec,
+      subroutine smatop (tmod, sr, si, scmat, lq, r, prec,
      :                   nopen, nmax,kwrit,ipos)
 *  subroutine to compute s-matrix and, alternatively, the asymptotic
 *  scattering wavefunction
@@ -2284,19 +2283,21 @@ c
       real(8), dimension(nmax, nmax), intent(out) :: si
       real(8), dimension(nmax, nmax), intent(out) :: scmat
       integer, dimension(nopen), intent(in) :: lq
-      real(8), dimension(nopen), intent(out) :: fj
-      real(8), dimension(nopen), intent(out) :: fn
-      real(8), dimension(nopen), intent(out) :: fpj
-      real(8), dimension(nopen), intent(out) :: fpn
-      real(8), dimension(nopen), intent(out) :: pk
-      real(8), dimension(nopen), intent(out) :: derj
-      real(8), dimension(nopen), intent(out) :: dern
       real(8), intent(in) :: r
       real(8), intent(in) :: prec
       integer, intent(in) :: nopen
       integer, intent(in) :: nmax
       logical, intent(in) :: kwrit
       logical, intent(in) :: ipos
+
+      real(8), dimension(nopen) :: fj
+      real(8), dimension(nopen) :: fn
+      real(8), dimension(nopen) :: fpj
+      real(8), dimension(nopen) :: fpn
+      real(8), dimension(nopen) :: pk
+      real(8), dimension(nopen) :: derj
+      real(8), dimension(nopen) :: dern
+
       integer isw, i, icol, l
 #if defined(HIB_UNIX_IBM)
       character*1 forma
@@ -2773,13 +2774,6 @@ c
      $     inflev
       real(8) :: amat(nmax,nmax), bmat(nmax,nmax)
       integer :: isc1(nch)
-      real(8) :: sc1(nch)
-      real(8) :: sc2(nch)
-      real(8) :: sc3(nch)
-      real(8) :: sc4(nch)
-      real(8) :: sc5(nch)
-      real(8) :: sc6(nch)
-      real(8) :: sc7(nch)
       
       data izero /0/
 c     The following three variables are used to determine the (machine
@@ -2845,8 +2839,7 @@ c     dependent) size of built-in types
 *  isc1, sc1, sc2, sc3, and sc4 are all used as scratch arrays
 *  scmat is used as scratch matrix here
 *  this uses new smat routine involving just open channels
-      call smatop (z, sr, si, amat, lq, sc1, sc2, sc3, sc4, sc5,
-     :             sc6, sc7, r, prec, nopen, nmax, kwrit,ipos)
+      call smatop (z, sr, si, amat, lq, r, prec, nopen, nmax, kwrit,ipos)
       if (wavefn) then
 * if wavefunction desired, then
 * sr and si contain open channel portion of asymptotic wavefunction
