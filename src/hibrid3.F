@@ -1016,7 +1016,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       cpup=cpupot
 
       call mtime(ttx,tty)
-      call runlog (z, sc4, sc5,
+      call runlog (z,
      :             r, rendld, spac, eshift, itwo, twoen,
      :             td, tdm, tp, tpm, twf, twfm, logwr, noprin,
      :             ipos, nch, nmax)
@@ -1774,7 +1774,7 @@ c
       end
 * ----------------------------------------------------------------------
       subroutine runlog (z,
-     :                   scr1, scr2, r, rend,
+     :                   r, rend,
      :                   spac, eshift, itwo, twoen, tl, tlw, tp, tpw,
      :                   twf, twfw, logwr, noprin, ipos, nch, nmax)
 *     log-derivative propagator from r to r = rend
@@ -1832,8 +1832,6 @@ c
       use mod_hibrid2, only: mxoutd, mxoutr
       implicit double precision (a-h, o-z)
       real(8), intent(out) :: z(nmax*nch)
-      real(8), intent(out) :: scr1(nch)
-      real(8), intent(out) :: scr2(nch)
       real(8), intent(inout) :: r
       real(8), intent(in) :: rend
       real(8), intent(in) :: spac
@@ -1856,6 +1854,8 @@ c
       real(8) :: wref(nch)
       real(8) :: z1(nch)
       real(8) :: z2(nch)
+      real(8) :: scr1(nch)
+      real(8) :: scr2(nch)
 
 *      real eshift, r, rend, rmax, rmin, spac, tl, tlw, tp, tpw
 *      real scr1, scr2, wref, z1, z2
