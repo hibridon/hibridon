@@ -1177,8 +1177,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       return
       end
 * -------------------------------------------------------------------
-      subroutine logdb (z, nmax, wref, z1, z2,
-     :                  scr1, scr2, nch, rmin, rmax, nsteps,
+      subroutine logdb (z, nmax, nch, rmin, rmax, nsteps,
      :                  eshift, iread, iwrite, tl, tp, twf)
 *     routine to initialise the log derivative matrix, y, at r = rmin,
 *     and propagate it from rmin to rmax using the method described in
@@ -1251,11 +1250,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       implicit double precision (a-h,o-z)
       real(8), intent(out) :: z(nmax*nch)
       integer, intent(in) :: nmax
-      real(8), intent(out) :: wref(nch)
-      real(8), intent(out) :: z1(nch)
-      real(8), intent(out) :: z2(nch)
-      real(8), intent(out) :: scr1(nch)
-      real(8), intent(out) :: scr2(nch)
       integer, intent(in) :: nch
       real(8), intent(inout) :: rmin
       real(8), intent(inout) :: rmax
@@ -1266,6 +1260,12 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       real(8), intent(out) ::  tl
       real(8), intent(out) ::  tp
       real(8), intent(out) ::  twf
+
+      real(8) :: wref(nch)
+      real(8) :: z1(nch)
+      real(8) :: z2(nch)
+      real(8) :: scr1(nch)
+      real(8) :: scr2(nch)
 
       integer ich, icode, icol, idiag, ierr, ij, irow, istep, kstep,
      :        ncol, ndiag, nrow
@@ -1878,7 +1878,7 @@ c
 *  logdb initialises the log-derivative matrix at r = rmin
 *  and propagates it from rmin to rmax
       call logdb (z,
-     :            nmax, wref, z1, z2, scr1, scr2, nch,
+     :            nmax, nch,
      :            rmin, rmax, nsteps, eshift, iread, iwrite,
      :            tl, tp, twf)
 
