@@ -635,8 +635,7 @@ cger (next 2 lines)
 *
 
       call propag (z, w, zmat, amat, bmat,
-     :             jq, lq, inq, isc1, sc1, sc2, sc3, sc4, sc5, sc6, sc7,
-     :             sc8, sc9,
+     :             jq, lq, inq,
      :             ien, nerg, ered, eshift, rstart, rendld, spac,
      :             tolhi, rendai, rincr, fstfac, tb, tbm,
      :             ipos, logwr, noprin, airyfl, airypr,
