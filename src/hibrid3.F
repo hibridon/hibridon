@@ -1831,6 +1831,27 @@ c
       use mod_coqvec, only: nphoto, q
       use mod_hibrid2, only: mxoutd, mxoutr
       implicit double precision (a-h, o-z)
+      real(8), intent(out) :: z(nmax*nch)
+      real(8), intent(out) :: scr1(nch)
+      real(8), intent(out) :: scr2(nch)
+      real(8), intent(inout) :: r
+      real(8), intent(in) :: rend
+      real(8), intent(in) :: spac
+      real(8), intent(in) :: eshift
+      integer, intent(in) :: itwo
+      logical, intent(in) :: twoen
+      real(8), intent(out) :: tl
+      real(8), intent(out) :: tlw
+      real(8), intent(out) :: tp
+      real(8), intent(out) :: tpw
+      real(8), intent(out) :: twf
+      real(8), intent(out) :: twfw
+      logical, intent(in) :: logwr
+      logical, intent(in) :: noprin
+      logical, intent(in) :: ipos
+      integer, intent(in) :: nch
+      integer, intent(in) :: nmax
+
       real(8) :: w(nmax*nch)
       real(8) :: wref(nch)
       real(8) :: z1(nch)
@@ -1839,16 +1860,14 @@ c
 *      real eshift, r, rend, rmax, rmin, spac, tl, tlw, tp, tpw
 *      real scr1, scr2, wref, z1, z2
 *      real w, z
-      integer itwo, nch, nmax, nsteps
-      logical twoen, logwr, ipos, noprin, boundf, wrsmat
+      integer nsteps
+      logical boundf, wrsmat
 *  internal logical variables
       logical iread, iwrite, print, photof, wavefn
       common /cophot/ photof, wavefn, boundf, wrsmat
       common /constp/ nsteps, isteps
 
 *  z, w, amat, and bmat are stored column by column in one dimensional arrays
-      dimension z(1)
-      dimension scr1(1), scr2(1)
 
       iwrite = twoen .and. (itwo.eq.0)
       iread =  twoen .and. (itwo.gt.0)
