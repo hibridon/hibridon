@@ -1202,13 +1202,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *                   on return z contains the log derivative matrix
 *                   at r = rmax
 *     nmax          leading dimension of arrays z and w
-*     wref          scratch array of dimension nch
-*                   used as workspace for the reference potential
-*     z1,z2         scratch arrays of dimension nch
-*                   used as workspace for the homogeneous
-*                   half-sector propagators
-*     scr1,scr2     scratch arrays of dimension nch
-*                   used as workspace in calls to smxinv
 *     nch           number of coupled equations
 *                   = actual order of matrices z and w
 *     rmin,rmax     integration range limits
@@ -1261,6 +1254,13 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       real(8), intent(out) ::  tp
       real(8), intent(out) ::  twf
 
+*     wref          scratch array of dimension nch
+*                   used as workspace for the reference potential
+*     z1,z2         scratch arrays of dimension nch
+*                   used as workspace for the homogeneous
+*                   half-sector propagators
+*     scr1,scr2     scratch arrays of dimension nch
+*                   used as workspace in calls to smxinv
       real(8) :: wref(nch)
       real(8) :: z1(nch)
       real(8) :: z2(nch)
