@@ -25,8 +25,7 @@
 *************************************************************************
 * NB cstart aix-unix uses fortran rather than essl routines
 *************************************************************************
-      subroutine airprp (z, w, tmat, vecnow, vecnew,
-     +   eigold, eignow, hp, y1, y2, cc, y4, gam1, gam2,
+      subroutine airprp (z,
      +   xf, rend, drnow, en,
      +   tolai, rincr, eshift, nch, nmax, itwo, iprint, twoen, noprin)
 *  airy zeroth-order propagator from r=xf to r=rend
@@ -100,20 +99,7 @@
       implicit double precision (a-h, o-z)
 *  matrix dimensions (row dimension = nmax, matrices stored column by column)
       real(8), dimension(nmax*nmax), intent(inout) :: z
-      real(8), dimension(nch*nch), intent(out) :: w
-      real(8), dimension(nch*nch), intent(out) :: tmat
-      real(8), dimension(nch*nch), intent(out) :: vecnow
-      real(8), dimension(nch*nch), intent(out) :: vecnew
-*  vectors dimensioned nch
-      real(8), dimension(nch), intent(out) :: eigold
-      real(8), dimension(nch), intent(out) :: eignow
-      real(8), dimension(nch), intent(out) :: hp
-      real(8), dimension(nch), intent(out) :: y1
-      real(8), dimension(nch), intent(out) :: y2
-      real(8), dimension(nch), intent(out) :: cc
-      real(8), dimension(nch), intent(out) :: y4
-      real(8), dimension(nch), intent(out) :: gam1
-      real(8), dimension(nch), intent(out) :: gam2
+
       real(8), intent(inout) :: xf
       real(8), intent(in) :: rend
       real(8), intent(inout) :: drnow
@@ -150,6 +136,20 @@ c     dependent) built-in types
       integer int_t
       double precision dble_t
       character char_t
+      real(8) :: w(nmax*nch)
+      real(8), dimension(nmax*nch) :: tmat
+      real(8), dimension(nmax*nch) :: vecnow
+      real(8), dimension(nmax*nch) :: vecnew
+*  vectors dimensioned nch
+      real(8), dimension(nch) :: eigold
+      real(8), dimension(nch) :: eignow
+      real(8), dimension(nch) :: hp
+      real(8), dimension(nch) :: y1
+      real(8), dimension(nch) :: y2
+      real(8), dimension(nch) :: cc
+      real(8), dimension(nch) :: y4
+      real(8), dimension(nch) :: gam1
+      real(8), dimension(nch) :: gam2
 
 * ----------------------------------------------------------------------------
       if (.not.twoen) itwo = -1

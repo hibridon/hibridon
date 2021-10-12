@@ -987,8 +987,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 110       continue
         endif
   
-        call airprp (z, amat, bmat, w, zmat, sc1, sc2, sc3, sc4,
-     :               sc5, sc6, sc7, sc8, sc9, r, rendai, drnow, en,
+        call airprp (z,
+     :               r, rendai, drnow, en,
      :               tolhi, rincr, eshift, nch, nmax, itwo, airypr,
      :               twoen,noprin)
 *  on return from airprp, z contains the log-derivative matrix at r = rendai
