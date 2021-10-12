@@ -816,8 +816,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       end
 * -------------------------------------------------------------------------
       subroutine propag (z, w, zmat, amat, bmat,
-     :                   jq, lq, inq, isc1, sc1, sc2, sc3, sc4,
-     :                   sc5, sc6, sc7,sc8, sc9,
+     :                   jq, lq, inq,
      :                   ien, nerg, en, eshift, rstart, rendld, spac,
      :                   tolhi, rendai, rincr, fstfac, tb, tbm,
      :                   ipos, logwr, noprin, airyfl, airypr,
@@ -912,16 +911,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       integer, intent(inout) :: jq(nch)
       integer, intent(inout) :: lq(nch)
       integer, intent(inout) :: inq(nch)
-      integer, intent(out) :: isc1(nch)
-      real(8), intent(out) :: sc1(nch)
-      real(8), intent(out) :: sc2(nch)
-      real(8), intent(out) :: sc3(nch)
-      real(8), intent(out) :: sc4(nch)
-      real(8), intent(out) :: sc5(nch)
-      real(8), intent(out) :: sc6(nch)
-      real(8), intent(out) :: sc7(nch)
-      real(8), intent(out) :: sc8(nch)
-      real(8), intent(out) :: sc9(nch)
       integer, intent(in) :: ien
       integer, intent(in) :: nerg
       real(8), intent(in) :: en
@@ -944,6 +933,18 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       integer, intent(out) :: nopen
       integer, intent(in) :: nairy
       integer, intent(in) :: nmax
+
+      integer :: isc1(nch)
+      real(8) :: sc1(nch)
+      real(8) :: sc2(nch)
+      real(8) :: sc3(nch)
+      real(8) :: sc4(nch)
+      real(8) :: sc5(nch)
+      real(8) :: sc6(nch)
+      real(8) :: sc7(nch)
+      real(8) :: sc8(nch)
+      real(8) :: sc9(nch)
+
       logical :: twoen
       logical ::  first
       character*10 :: tbs,tps,tds,tws,tairys, twfs
