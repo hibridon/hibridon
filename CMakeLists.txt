@@ -598,7 +598,7 @@ endif()
 
 # declare the tests
 
-set(tests_list 
+set(test_dirs_list 
   arch4
   arn2
   arn2_big
@@ -631,7 +631,7 @@ set(tests_list
   stp1sg
   vfit)
 
-foreach(test_id IN LISTS tests_list)
+foreach(test_dir IN LISTS test_dirs_list)
   include("tests/${test_id}/${test_id}.cmake")
 endforeach()
 
@@ -650,7 +650,7 @@ set(original_testsuite
   heco
   vfit)
 
-add_hibridon_testsuite("original" "${original_testsuite}" "${tests_list}")
+add_hibridon_testsuite("original" "${original_testsuite}" "${test_dirs_list}")
 
 # test suite from autotest/testgroup_short
 
@@ -658,7 +658,7 @@ set(short_testsuite
   arn2
   arno)
 
-add_hibridon_testsuite("short" "${short_testsuite}" "${tests_list}")
+add_hibridon_testsuite("short" "${short_testsuite}" "${test_dirs_list}")
 
 # test suite from autotest/testgroup_regular
 
@@ -676,7 +676,7 @@ set(regular_testsuite
   ohh2_j1
   vfit)
 
-add_hibridon_testsuite("regular" "${regular_testsuite}" "${tests_list}")
+add_hibridon_testsuite("regular" "${regular_testsuite}" "${test_dirs_list}")
 
 # test suite from autotest/testgroup_extended
 
@@ -710,7 +710,7 @@ set(extended_testsuite
   stp1sg_nh3h2
   vfit)
 
-add_hibridon_testsuite("extended" "${extended_testsuite}" "${tests_list}")
+add_hibridon_testsuite("extended" "${extended_testsuite}" "${test_dirs_list}")
 
 # test suite from autotest/testgroup_full_qma
 
@@ -741,7 +741,7 @@ set(full_qma_testsuite
   ohh2_j13
   vfit)
 
-add_hibridon_testsuite("full_qma" "${full_qma_testsuite}" "${tests_list}")
+add_hibridon_testsuite("full_qma" "${full_qma_testsuite}" "${test_dirs_list}")
 
 # test suite from autotest/testgroup_all
 
@@ -792,7 +792,7 @@ set(all_testsuite
   vfit)
 
 
-add_hibridon_testsuite("all" "${all_testsuite}" "${tests_list}")
+add_hibridon_testsuite("all" "${all_testsuite}" "${test_dirs_list}")
 
 # a suite which goal is to cover as much as possible hibridon's code,
 # ignoring the meaningfulness of the tests
@@ -837,9 +837,9 @@ set(coverage_testsuite
 # test cph2 removed until it is fixed (see issue #48)
 
 
-add_hibridon_testsuite("coverage" "${coverage_testsuite}" "${tests_list}")
+add_hibridon_testsuite("coverage" "${coverage_testsuite}" "${test_dirs_list}")
 
-# add_hibridon_testsuite("empty" "" "${tests_list}")
+# add_hibridon_testsuite("empty" "" "${test_dirs_list}")
 
 # The following is to build hibridon with an user-supplied potential
 
