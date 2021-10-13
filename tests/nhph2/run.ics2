@@ -1,0 +1,5 @@
+inp=nh_ph2.inp
+show
+run
+printc
+

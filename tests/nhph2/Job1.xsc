@@ -1,0 +1,20 @@
+ --------------------------------------------------------------------------
+
+ INTEGRAL CROSS SECTIONS READ FROM FILE Job1.ics                                
+ WRITTEN:   Oct 12 10:23:18 2021
+ LABEL:     NH - H2 RCCSD(T)-F12a(T) AVTZ PES by Y.         
+ POT NAME:  Lique NH - H2 RCCSD(T) AVQZ PES                 
+
+ ** INTEGRAL CROSS SECTIONS; IEN= 1 **
+    RMU=   1.7770  E=    50.00  JLPAR=-1  JTOT-1=  0  JTOT-2=  10  JTOT-D=  1
+ ** CC CALCULATION, JLPAR=-1 **
+
+ ** COLUMN HEADINGS ARE INITIAL STATES, ROW HEADINGS ARE FINAL STATES **
+
+            J=    0        10        20        10
+   J    I | I=    1         1         1         2
+ 
+   10    1   7.827E-01  1.633E+02  5.154E-01  4.752E-01
+    0    1   1.882E+02  9.613E-02  1.192E+00  1.636E-02
+   20    1   5.658E+00  3.005E-01  1.585E+02  4.301E+00
+   10    2   4.433E-02  1.581E-01  2.455E+00  1.296E+02
