@@ -1,4 +1,4 @@
-inp=cnph2.inp
+inp=Cnph2.inp
 job=e10p
 ener=10
 jtot2=15

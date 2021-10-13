@@ -12,9 +12,9 @@ c     revised from pot_ohh2.f, written by qianli ma
 c     current revision:  8-jun-2017 (p. dagdigian)
 c     ------------------------------------------------------------------
 c     Dummy subroutines for user-defined bases.
-      include "common/syusr"
-      include "common/bausr"
-      include "common/ground"
+#include "common/syusr"
+#include "common/bausr"
+#include "common/ground"
 c     ----------------------------------------------------------------- 
 C     Module containing the shared arrays for this pot routine
 c
@@ -34,17 +34,16 @@ c     -----------------------------------------------------------------
       subroutine loapot (iunit, file_name)
       use mod_1sg1sg
       use mod_cnh2
+      use mod_covvl, only: vvl
+      use mod_conlam, only: nlam
       implicit none
 C     common/parbas is replaced by module ba1sg1sg to allow more
 C     parameters be passed between the pot routine and the basis routine
       common /coptnm/ pot_name, pot_label
-      common /conlam/ nlam
       character(48) :: pot_name, pot_label
       character*(*) :: file_name
       character(255) :: file_path
-      integer :: iunit, ir, iv, nv, ifrsts, junks, nlam, nlammx, lamnum
-      real(8), dimension(1) :: vvl
-      common /covvl/ ifrsts, junks, vvl
+      integer :: iunit, ir, iv, nv, nlammx, lamnum
 C     A call to this subroutine with a string containing a space will be
 C     made at the time hibridon loads. Input file is not available at
 C     the time.
@@ -90,13 +89,12 @@ C     Main program for makepot
       subroutine driver
       use mod_1sg1sg
       use mod_cnh2
+      use mod_conlam, only: nlam
+      use mod_covvl, only: vvl
       implicit none
-      common /conlam/ nlam
-      common /covvl/ vvl
-       real(8), dimension(1) :: vvl
       character(40), parameter :: data_file_name='pot_cnh2_lique.dat'
       real(8) :: r, vv0
-      integer :: i, nv, nlam
+      integer :: i, nv
       call loapot(10, data_file_name)
  10   print *, 'R (bohr), Ctrl+D to exit:'
       read (5, *, end=99) r
@@ -112,13 +110,12 @@ C     ------------------------------------------------------------------
       subroutine pot(vv0, r_inp)
       use mod_1sg1sg
       use mod_cnh2
+      use mod_conlam, only: nlam
+      use mod_covvl, only: vvl
       implicit none
-      common /conlam/ nlam
-      common /covvl/ vvl
-      real(8), dimension(1) :: vvl
       double precision vv0, r_inp, r
       double precision seval
-      integer iv, nlam
+      integer iv
       vv0 = 0.d0
       if (r_inp .lt. 4.5d0) then
          r = 4.5d0

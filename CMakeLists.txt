@@ -614,6 +614,7 @@ set(test_dirs_list
   ch3he_ccsdt
   ch3he_vib
   ch3i
+  cnph2
   cph2
   h2ohe
   h2ohe_orig
@@ -769,6 +770,7 @@ set(all_testsuite
   ch3he_ccsdt_quick
   ch3he_vib
   ch3i
+  cnph2
   cph2
   h2ohe
   h2ohe_orig
@@ -816,6 +818,7 @@ set(coverage_testsuite
   ch3he_ccsdt_quick
   ch3he_vib_quick
   ch3i
+  cnph2
   h2ohe
   h2ohe_orig
   h2ohe_prsbr_quick
