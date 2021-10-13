@@ -632,7 +632,7 @@ set(test_dirs_list
   vfit)
 
 foreach(test_dir IN LISTS test_dirs_list)
-  include("tests/${test_id}/${test_id}.cmake")
+  include("tests/${test_dir}/${test_dir}.cmake")
 endforeach()
 
 # declare the test suites
