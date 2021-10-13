@@ -20,6 +20,14 @@ set(ENABLE_ASSERTS "OFF" CACHE BOOL "to enable or disable assert checks for debu
 # With gfortran, variables are initialized to 0 by default, but it's not the case with ifort compiler. Therefore, all variables need to be initialized to guarantee the program works in a deterministic way on every compiler.
 set(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR "ON" CACHE BOOL "if set, causes the use of uninitilazed variables to trigger an exception, thus making the program stop. This is useful to detect uninitialized memory issues.")
 
+# store variables that are used in functions (add_hibexe and add_hibridon_test) in the cache so that external cmake projects can use these functions (otherwise these variables would be empty when used from other cmake projects)
+
+set(HIBRIDON_COMPILE_OPTIONS "" CACHE STRING "list of compilation options for hibridon source code") 
+
+set(HIBRIDON_LINK_LIBRARIES "" CACHE STRING "list of libraries that need to be linked with hibridon") 
+
+set(GCC_COVERAGE_LINK_FLAGS "" CACHE STRING "the libraries that need to be linked with hibridon for code coverage") 
+
 if(ENABLE_CODE_COVERAGE)
   find_program(COVERAGE_LCOV_EXE lcov)
   if (NOT COVERAGE_LCOV_EXE)
@@ -307,7 +315,7 @@ add_custom_command(
 )
 
 
-set(HIBRIDON_COMPILE_OPTIONS "")
+set(HIBRIDON_COMPILE_OPTIONS "") # intended to be a list, not a string
 
 list(APPEND HIBRIDON_COMPILE_OPTIONS "-I${CMAKE_CURRENT_SOURCE_DIR}/src")
 
@@ -357,13 +365,6 @@ set(HIBRIDON_LINK_LIBRARIES "")
 list(APPEND HIBRIDON_LINK_LIBRARIES "${LAPACK_LIBRARIES}")
 list(APPEND HIBRIDON_LINK_LIBRARIES "${BLAS_LIBRARIES}")
 
-# store variables that are used in functions (add_hibexe and add_hibridon_test) in the cache so that external cmake projects can use these functions (otherwise these variables would be empty when used from other cmake projects)
-
-set(HIBRIDON_COMPILE_OPTIONS "${HIBRIDON_COMPILE_OPTIONS}" CACHE LIST "compilation options for hibridon source code") 
-
-set(HIBRIDON_LINK_LIBRARIES "${HIBRIDON_LINK_LIBRARIES}" CACHE LIST "the libraries that need to be linked with hibridon") 
-
-set(GCC_COVERAGE_LINK_FLAGS "${GCC_COVERAGE_LINK_FLAGS}" CACHE STRING "the libraries that need to be linked with hibridon for code coverage") 
 
 
 
