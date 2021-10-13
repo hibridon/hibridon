@@ -934,9 +934,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       integer, intent(in) :: nairy
       integer, intent(in) :: nmax
 
-      real(8) :: sc4(nch)
-      real(8) :: sc5(nch)
-
       logical :: twoen
       logical ::  first
       character*10 :: tbs,tps,tds,tws,tairys, twfs
