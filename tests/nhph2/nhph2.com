@@ -1,4 +1,4 @@
-inp=nh_ph2.inp
+inp=Nhph2.inp
 show
 run
 printc

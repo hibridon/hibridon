@@ -1,0 +1,48 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2021-10-14 at 08:28
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: c5e68b5
+SYS: Linux 5.4.0-88-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                      Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                         2952.039
+Socket(s):                       1
+Core(s) per socket:              4
+L2 cache:                        1 MiB
+L3 cache:                        6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16272252 kB
+ --------------------------------------------------------------------------
+
+ INTEGRAL CROSS SECTIONS READ FROM FILE Jobq1.ics                               
+ WRITTEN:   Oct 14 08:32:14 2021
+ LABEL:     NH - H2 RCCSD(T)-F12a(T) AVTZ PES by Y.         
+ POT NAME:  NH - H2 PES                                     
+
+ ** INTEGRAL CROSS SECTIONS; IEN= 1 **
+    RMU=   1.7770  E=    50.00  JLPAR=-1  JTOT-1=  0  JTOT-2=   1  JTOT-D=  1
+ ** CC CALCULATION, JLPAR=-1 **
+
+ ** COLUMN HEADINGS ARE INITIAL STATES, ROW HEADINGS ARE FINAL STATES **
+
+            J=    0        10        20        10
+   J    I | I=    1         1         1         2
+ 
+   10    1   1.942E-03  4.501E+00  5.539E-03  3.596E-02
+    0    1   6.394E+00  2.386E-04  7.551E-02  4.090E-05
+   20    1   3.584E-01  3.229E-03  7.419E+00  3.462E-01
+   10    2   1.108E-04  1.197E-02  1.976E-01  1.277E+01

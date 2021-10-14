@@ -626,6 +626,7 @@ set(test_dirs_list
   nh3h2
   nh3h2_qma
   nh3he
+  nhph2
   o3ph2
   ohh2_bausr
   ohh2_j1
@@ -784,6 +785,8 @@ set(all_testsuite
   heohx
   nh3h2
   nh3h2_qma
+  nhph2
+  nhph2_quick
   o3ph2
   o3ph2_quick
   ohh2_bausr_heohx
@@ -830,6 +833,7 @@ set(coverage_testsuite
   nh3h2
   nh3h2_qma
   nh3he
+  nhph2_quick
   o3ph2_quick
   ohh2_bausr_heohx_quick
   ohh2_bausr_j1_quick
