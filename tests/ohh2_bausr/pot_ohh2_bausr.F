@@ -237,7 +237,6 @@ c
       integer isrcod, junkr
       double precision brot, aso, p, q, drot
 C     
-      ASSERT(nlammx .ge. (MAX_NVB + MAX_NVF))  ! ensure lamnum array is big enough
       common /coered/ ered, rmu
       double precision ered, rmu
       common /coipar/ junkip, iprint
@@ -252,6 +251,7 @@ c
       double precision x, o11, o12, o22, tho
       character(3) :: strfi
 c
+      ASSERT(nlammx .ge. (MAX_NVB + MAX_NVF))  ! ensure lamnum array is big enough
       if (.not. flaghf) call
      $     raise('FLAGHF = .FALSE. FOR DOUBLET SYSTEM')
       if (ihomo) call raise ('HOMONUCLEAR 2PI NOT IMPLEMENTED')
