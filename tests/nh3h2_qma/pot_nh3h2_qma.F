@@ -312,7 +312,7 @@ c
      $     irow, jc, jr, j2c, j2r, kc, kr, j12c, j12r, lc, lr, inum
       double precision roteng, esave, vee
 c
-      ASSERT(MAX_NV .ge. nlammx)
+      ASSERT(MAX_NV .le. nlammx)
       if (flaghf) call raise('FLAGHF = .TRUE. FOR SINGLET SYSTEM')
       if (flagsu) call raise('FLAGSU = .TRUE. FOR MOL-MOL COLLISION')
       if (csflag) call raise('CS calculation not implemented')
