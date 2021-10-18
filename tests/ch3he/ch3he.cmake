@@ -4,7 +4,7 @@
 #------------------------------------------------------------------------------
 
 set(TEST_ID ch3he)
-set(TEST_POT_SRC_FILE "pot_ch3he_ccsdt.F")
+set(TEST_POT_SRC_FILE "pot_ch3he_ccsdt.F90")
 set(TEST_POT_DATA_FILES "ch3he_pot.dat")
 set(TEST_COMMAND_FILE "ch3he_test.com")
 set(TEST_INPUT_FILES "Ch3he_test.inp")
@@ -21,7 +21,7 @@ add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "
 #------------------------------------------------------------------------------
 
 set(TEST_ID ch3he_quick)
-set(TEST_POT_SRC_FILE "pot_ch3he_ccsdt.F")
+set(TEST_POT_SRC_FILE "pot_ch3he_ccsdt.F90")
 set(TEST_POT_DATA_FILES "ch3he_pot.dat")
 set(TEST_COMMAND_FILE "ch3he_test_quick.com")
 set(TEST_INPUT_FILES "Ch3he_testq.inp")

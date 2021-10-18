@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 
 set(TEST_ID heohx)
-set(TEST_POT_SRC_FILE "pot_heohx_lmax10.F")
+set(TEST_POT_SRC_FILE "pot_heohx_lmax10.F90")
 set(TEST_POT_DATA_FILES "")
 set(TEST_COMMAND_FILE "heohx_test.com")
 set(TEST_INPUT_FILES "Heohx_test.inp")
@@ -19,7 +19,7 @@ add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "
 #------------------------------------------------------------------------------
 
 set(TEST_ID heohx_quick)
-set(TEST_POT_SRC_FILE "pot_heohx_lmax10.F")
+set(TEST_POT_SRC_FILE "pot_heohx_lmax10.F90")
 set(TEST_POT_DATA_FILES "")
 set(TEST_COMMAND_FILE "heohx_quick.com")
 set(TEST_INPUT_FILES "Heohx_quick.inp")

@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 
 set(TEST_ID hecn)
-set(TEST_POT_SRC_FILE "pot_hecn_dgels.F")
+set(TEST_POT_SRC_FILE "pot_hecn_dgels.F90")
 set(TEST_POT_DATA_FILES "hecn_fitmlv.dat")
 set(TEST_COMMAND_FILE "hecnx_hyp.com")
 set(TEST_INPUT_FILES "Hecnx.inp")
@@ -18,7 +18,7 @@ add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "
 #------------------------------------------------------------------------------
 
 set(TEST_ID hecn_quick)
-set(TEST_POT_SRC_FILE "pot_hecn_dgels.F")
+set(TEST_POT_SRC_FILE "pot_hecn_dgels.F90")
 set(TEST_POT_DATA_FILES "hecn_fitmlv.dat")
 set(TEST_COMMAND_FILE "hecn_quick.com")
 set(TEST_INPUT_FILES "Hecn_quick.inp")

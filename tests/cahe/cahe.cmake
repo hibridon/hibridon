@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 
 set(TEST_ID cahe)
-set(TEST_POT_SRC_FILE "pot_cahe.F")
+set(TEST_POT_SRC_FILE "pot_cahe.F90")
 set(TEST_POT_DATA_FILES "")
 set(TEST_COMMAND_FILE "cahe_test.com")
 set(TEST_INPUT_FILES "Cahe_test.inp")

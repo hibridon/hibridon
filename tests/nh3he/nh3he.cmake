@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 
 set(TEST_ID nh3he)
-set(TEST_POT_SRC_FILE "pot_nh3he_wheatley.F")
+set(TEST_POT_SRC_FILE "pot_nh3he_wheatley.F90")
 set(TEST_POT_DATA_FILES "pot_nh3he_wheatley_ylm.txt")
 set(TEST_COMMAND_FILE "nh3he.com")
 set(TEST_INPUT_FILES "Nh3he_para.inp")

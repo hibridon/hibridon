@@ -2,7 +2,7 @@
 # title = C+(2P) + H2
 
 set(TEST_ID cph2)
-set(TEST_POT_SRC_FILE "pot_cph2.F")
+set(TEST_POT_SRC_FILE "pot_cph2.F90")
 set(TEST_POT_DATA_FILES "")
 set(TEST_COMMAND_FILE "Cph2_test.com")
 set(TEST_INPUT_FILES "Cph2_test.inp")

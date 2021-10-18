@@ -4,7 +4,7 @@
 #------------------------------------------------------------------------------
 
 set(TEST_ID ohh2_j1)
-set(TEST_POT_SRC_FILE "pot_ohh2.F")
+set(TEST_POT_SRC_FILE "pot_ohh2.F90")
 set(TEST_POT_DATA_FILES "pot_ohh2_ccsdf12_avtzbf.dat")
 set(TEST_COMMAND_FILE "test_ohh2.com")
 set(TEST_INPUT_FILES "Ohh2.inp")
@@ -20,7 +20,7 @@ add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "
 #------------------------------------------------------------------------------
 
 set(TEST_ID ohh2_j1_quick)
-set(TEST_POT_SRC_FILE "pot_ohh2.F")
+set(TEST_POT_SRC_FILE "pot_ohh2.F90")
 set(TEST_POT_DATA_FILES "pot_ohh2_ccsdf12_avtzbf.dat")
 set(TEST_COMMAND_FILE "ohh2_j1_quick.com")
 set(TEST_INPUT_FILES "Ohh2_quick.inp")

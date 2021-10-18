@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 
 set(TEST_ID h2ohe_orig)
-set(TEST_POT_SRC_FILE "pot_h2ohe.F")
+set(TEST_POT_SRC_FILE "pot_h2ohe.F90")
 set(TEST_POT_DATA_FILES "h2o_coefd.dat h2o_params.dat")
 set(TEST_COMMAND_FILE "h2ohe_test.com")
 set(TEST_INPUT_FILES "H2ohe_test.inp")

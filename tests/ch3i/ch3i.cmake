@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 
 set(TEST_ID ch3i)
-set(TEST_POT_SRC_FILE "pot_ch3i.F")
+set(TEST_POT_SRC_FILE "pot_ch3i.F90")
 set(TEST_POT_DATA_FILES "")
 set(TEST_COMMAND_FILE "ch3i_test.com")
 set(TEST_INPUT_FILES "Ch3i.inp")

@@ -27,7 +27,7 @@ module mod_cosout
    ! *               if nnout is negative, then every column of the s-matrix for
    ! *               which the initial quantum numbers correspond to one of the
    ! *               values of jout(i) will be printed
-   ! from hiiolib_c.F
+   ! from hiiolib_c.F90
    ! *  variables in common block /cosout/
    ! *    nnout:     number of different rotational levels for which s-matrix
    ! *               elements are to be saved in files smat1, smat2, ...
@@ -1048,7 +1048,7 @@ end module mod_comxm
 
 
 
- ! all the commons blocks from hiiolib_f.F:
+ ! all the commons blocks from hiiolib_f.F90:
     !!   common/cdbf/ ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf(llbuf)
 
  ! all the commons blocks from himain.t:

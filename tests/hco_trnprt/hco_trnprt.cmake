@@ -1,7 +1,7 @@
 # CO--H Transport Cross Section
 
 set(TEST_ID hco_trnprt)
-set(TEST_POT_SRC_FILE "pot_hco.F")
+set(TEST_POT_SRC_FILE "pot_hco.F90")
 set(TEST_POT_DATA_FILES "")
 set(TEST_COMMAND_FILE "Hco_trnprt.com")
 set(TEST_INPUT_FILES "Hco_test.inp")
@@ -14,7 +14,7 @@ add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "
 # CO--H Transport Cross Section (QUICK)
 
 set(TEST_ID hco_trnprt_quick)
-set(TEST_POT_SRC_FILE "pot_hco.F")
+set(TEST_POT_SRC_FILE "pot_hco.F90")
 set(TEST_POT_DATA_FILES "")
 set(TEST_COMMAND_FILE "Hco_trnprt_quick.com")
 set(TEST_INPUT_FILES "Hco_testq.inp")
