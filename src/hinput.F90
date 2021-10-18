@@ -1359,7 +1359,7 @@ call readpc(fnam1, a, scmat, nmax)
 goto 1
 ! check if inconsistencies in input parameters
 2700 call genchk
-goto1
+goto 1
 !  psi(wavefunction calculation),jobfile,mchannel
 !  flux calculation,jobfile,mchannel,iflux,thresh,iprint
 2800 call parse(line,l,fnam1,lc)
