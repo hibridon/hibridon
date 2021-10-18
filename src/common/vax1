@@ -1,4 +1,4 @@
-*comdeck vax1
+!comdeck vax1
 #if defined(HIB_UNIX_SUN)
       integer shiftl,shiftr,popcnt,poppar,compl
       logical mnpar

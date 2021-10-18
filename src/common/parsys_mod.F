@@ -1,1 +1,1 @@
-      use mod_coiout, only: niout, indout
+use mod_coiout, only: niout, indout

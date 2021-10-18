@@ -1,4 +1,4 @@
-*comdeck vax2
+!comdeck vax2
 #if defined(HIB_UNIX_AIX) || defined(HIB_VAX) || defined(HIB_UNIX_CONVEX) || defined(HIB_UNIX_NEC) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_IBM) || defined(HIB_UNIX_DEC)
       xor(i,j)=ieor(i,j)
       or(i,j)=ior(i,j)
