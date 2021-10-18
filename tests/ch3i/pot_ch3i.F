@@ -170,7 +170,7 @@
         ny=nny
       endif
 
-      call hof(ymin, dy, f, ny, xmconv, ngr, nymax)
+      call hof(ymin, dy, f, ny, xmconv, ngr, nymx)
 
       do i=1,ny
         y= ymin +(i-1)*dy

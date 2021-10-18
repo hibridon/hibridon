@@ -56,6 +56,8 @@
       use mod_hibrid5, only : intcrs, readpc
       use mod_difcrs, only: difcrs
       use mod_hibasis, only: is_twomol
+      use mod_hibrid2, only: enord, prsg
+      use mod_hibrid3, only: testptn, testpt20, testpt, potmin
 
       implicit double precision (a-h,o-z)
 *  iicode is the number of integer pcod's

@@ -90,6 +90,7 @@ c     and zeta = 0
 *   where zeta = (2/3) * x ** (3/2)
 *
 * ----------------------------------------------------------------------------
+      use mod_hibrid3, only: scairy
       implicit double precision (a-h,o-z)
       data twoth/0.666666666666666667d0/
       data pib4 / 7.85398163397448310d-01 /

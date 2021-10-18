@@ -1,0 +1,35 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 4.4 BUILD DATE 09/14/21 17:23:38 CEST
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+SYS=OS X 10.15.7; MACH=unix-darwin unix-ifort unix-darwin64
+CC=; FC=/opt/intel/compilers_and_libraries_2018.1.126/mac/bin/intel64/ifort -O3 -save -i8
+
+
+
+ --------------------------------------------------------------------------
+
+ INTEGRAL CROSS SECTIONS READ FROM FILE Job1.ics                                
+ WRITTEN:   Sep 14 17:25:06 2021
+ LABEL:     O(3P)-H2 scattering on Alexander PESs           
+ POT NAME:  ALEXANDER SCALED (s=1.21) O(3P)H2 DUBERNET-HUTSO
+
+ ** INTEGRAL CROSS SECTIONS; IEN= 1 **
+    RMU=   1.7901  E=   250.00  JLPAR=-1  JTOT-1=  0  JTOT-2=  50  JTOT-D=  1
+ ** CC CALCULATION, JLPAR=-1 **
+
+ ** COLUMN HEADINGS ARE INITIAL STATES, ROW HEADINGS ARE FINAL STATES **
+
+            J=    0         0         0
+   J    I | I=    0         1         2
+ 
+    0    0   9.943E+03  1.927E-03  3.095E-01
+    0    1   2.304E-02  1.444E+02  2.951E+00
+    0    2   1.681E+01  1.340E+01  1.997E+02

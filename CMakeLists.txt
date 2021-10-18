@@ -20,6 +20,14 @@ set(ENABLE_ASSERTS "OFF" CACHE BOOL "to enable or disable assert checks for debu
 # With gfortran, variables are initialized to 0 by default, but it's not the case with ifort compiler. Therefore, all variables need to be initialized to guarantee the program works in a deterministic way on every compiler.
 set(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR "ON" CACHE BOOL "if set, causes the use of uninitilazed variables to trigger an exception, thus making the program stop. This is useful to detect uninitialized memory issues.")
 
+# store variables that are used in functions (add_hibexe and add_hibridon_test) in the cache so that external cmake projects can use these functions (otherwise these variables would be empty when used from other cmake projects)
+
+set(HIBRIDON_COMPILE_OPTIONS "" CACHE STRING "list of compilation options for hibridon source code") 
+
+set(HIBRIDON_LINK_LIBRARIES "" CACHE STRING "list of libraries that need to be linked with hibridon") 
+
+set(GCC_COVERAGE_LINK_FLAGS "" CACHE STRING "the libraries that need to be linked with hibridon for code coverage") 
+
 if(ENABLE_CODE_COVERAGE)
   find_program(COVERAGE_LCOV_EXE lcov)
   if (NOT COVERAGE_LCOV_EXE)
@@ -309,7 +317,7 @@ add_custom_command(
 )
 
 
-set(HIBRIDON_COMPILE_OPTIONS "")
+set(HIBRIDON_COMPILE_OPTIONS "") # intended to be a list, not a string
 
 list(APPEND HIBRIDON_COMPILE_OPTIONS "-I${CMAKE_CURRENT_SOURCE_DIR}/src")
 
@@ -359,13 +367,6 @@ set(HIBRIDON_LINK_LIBRARIES "")
 list(APPEND HIBRIDON_LINK_LIBRARIES "${LAPACK_LIBRARIES}")
 list(APPEND HIBRIDON_LINK_LIBRARIES "${BLAS_LIBRARIES}")
 
-# store variables that are used in functions (add_hibexe and add_hibridon_test) in the cache so that external cmake projects can use these functions (otherwise these variables would be empty when used from other cmake projects)
-
-set(HIBRIDON_COMPILE_OPTIONS "${HIBRIDON_COMPILE_OPTIONS}" CACHE LIST "compilation options for hibridon source code") 
-
-set(HIBRIDON_LINK_LIBRARIES "${HIBRIDON_LINK_LIBRARIES}" CACHE LIST "the libraries that need to be linked with hibridon") 
-
-set(GCC_COVERAGE_LINK_FLAGS "${GCC_COVERAGE_LINK_FLAGS}" CACHE STRING "the libraries that need to be linked with hibridon for code coverage") 
 
 
 
@@ -600,7 +601,7 @@ endif()
 
 # declare the tests
 
-set(tests_list 
+set(test_dirs_list 
   arch4
   arn2
   arn2_big
@@ -615,6 +616,7 @@ set(tests_list
   ch3he_ccsdt
   ch3he_vib
   ch3i
+  cnph2
   cph2
   h2ohe
   h2ohe_orig
@@ -625,14 +627,17 @@ set(tests_list
   heohx
   nh3h2
   nh3h2_qma
+  nh3he
+  nhph2
+  o3ph2
   ohh2_bausr
   ohh2_j1
   ohh2_j13
   stp1sg
   vfit)
 
-foreach(test_id IN LISTS tests_list)
-  include("tests/${test_id}/${test_id}.cmake")
+foreach(test_dir IN LISTS test_dirs_list)
+  include("tests/${test_dir}/${test_dir}.cmake")
 endforeach()
 
 # declare the test suites
@@ -650,7 +655,7 @@ set(original_testsuite
   heco
   vfit)
 
-add_hibridon_testsuite("original" "${original_testsuite}" "${tests_list}")
+add_hibridon_testsuite("original" "${original_testsuite}" "${test_dirs_list}")
 
 # test suite from autotest/testgroup_short
 
@@ -658,7 +663,7 @@ set(short_testsuite
   arn2
   arno)
 
-add_hibridon_testsuite("short" "${short_testsuite}" "${tests_list}")
+add_hibridon_testsuite("short" "${short_testsuite}" "${test_dirs_list}")
 
 # test suite from autotest/testgroup_regular
 
@@ -676,7 +681,7 @@ set(regular_testsuite
   ohh2_j1
   vfit)
 
-add_hibridon_testsuite("regular" "${regular_testsuite}" "${tests_list}")
+add_hibridon_testsuite("regular" "${regular_testsuite}" "${test_dirs_list}")
 
 # test suite from autotest/testgroup_extended
 
@@ -710,7 +715,7 @@ set(extended_testsuite
   stp1sg_nh3h2
   vfit)
 
-add_hibridon_testsuite("extended" "${extended_testsuite}" "${tests_list}")
+add_hibridon_testsuite("extended" "${extended_testsuite}" "${test_dirs_list}")
 
 # test suite from autotest/testgroup_full_qma
 
@@ -741,7 +746,7 @@ set(full_qma_testsuite
   ohh2_j13
   vfit)
 
-add_hibridon_testsuite("full_qma" "${full_qma_testsuite}" "${tests_list}")
+add_hibridon_testsuite("full_qma" "${full_qma_testsuite}" "${test_dirs_list}")
 
 # test suite from autotest/testgroup_all
 
@@ -768,6 +773,7 @@ set(all_testsuite
   ch3he_ccsdt_quick
   ch3he_vib
   ch3i
+  cnph2
   cph2
   h2ohe
   h2ohe_orig
@@ -781,6 +787,10 @@ set(all_testsuite
   heohx
   nh3h2
   nh3h2_qma
+  nhph2
+  nhph2_quick
+  o3ph2
+  o3ph2_quick
   ohh2_bausr_heohx
   ohh2_bausr_j1
   ohh2_j1
@@ -790,7 +800,7 @@ set(all_testsuite
   vfit)
 
 
-add_hibridon_testsuite("all" "${all_testsuite}" "${tests_list}")
+add_hibridon_testsuite("all" "${all_testsuite}" "${test_dirs_list}")
 
 # a suite which goal is to cover as much as possible hibridon's code,
 # ignoring the meaningfulness of the tests
@@ -813,6 +823,7 @@ set(coverage_testsuite
   ch3he_ccsdt_quick
   ch3he_vib_quick
   ch3i
+  cnph2
   h2ohe
   h2ohe_orig
   h2ohe_prsbr_quick
@@ -823,6 +834,9 @@ set(coverage_testsuite
   heohx_quick
   nh3h2
   nh3h2_qma
+  nh3he
+  nhph2_quick
+  o3ph2_quick
   ohh2_bausr_heohx_quick
   ohh2_bausr_j1_quick
   ohh2_j1_quick
@@ -833,9 +847,9 @@ set(coverage_testsuite
 # test cph2 removed until it is fixed (see issue #48)
 
 
-add_hibridon_testsuite("coverage" "${coverage_testsuite}" "${tests_list}")
+add_hibridon_testsuite("coverage" "${coverage_testsuite}" "${test_dirs_list}")
 
-# add_hibridon_testsuite("empty" "" "${tests_list}")
+# add_hibridon_testsuite("empty" "" "${test_dirs_list}")
 
 # The following is to build hibridon with an user-supplied potential
 

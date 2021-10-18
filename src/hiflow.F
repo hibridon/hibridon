@@ -112,6 +112,8 @@
       use mod_hibrid5, only : soutpt, nusum, xwrite, wrhead, restrt, rsave
       use mod_cov2, only: v2mat
       use constants
+      use mod_hibrid2, only: default
+      use mod_hibrid3, only: propag
       implicit double precision (a-h,o-z)
       type(v2mat), allocatable :: v2
       integer :: jtotmx
@@ -635,8 +637,7 @@ cger (next 2 lines)
 *
 
       call propag (z, w, zmat, amat, bmat,
-     :             jq, lq, inq, isc1, sc1, sc2, sc3, sc4, sc5, sc6, sc7,
-     :             sc8, sc9,
+     :             jq, lq, inq,
      :             ien, nerg, ered, eshift, rstart, rendld, spac,
      :             tolhi, rendai, rincr, fstfac, tb, tbm,
      :             ipos, logwr, noprin, airyfl, airypr,

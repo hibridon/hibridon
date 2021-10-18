@@ -167,7 +167,7 @@ c.....open output file for final-m dependence of (m,m) and (m,m+2) density matri
 * write a header (mha 10/22/08, don't write this for easier import into matlab)
 *      call version(2)
       call dater(cdate)
-      write (2,23) cdate
+      write (dcs_unit,23) cdate
       if (mflag) write (3,23) cdate
       write (6,22) cdate
 22    format (/,'**  DIFFERENTIAL CROSS SECTION (ANG^2/SR)',

@@ -32,6 +32,7 @@ c -------------------------------------------------------------------
       subroutine driver
 c
 #include "pot_ch3he_vib_common.f"
+
 c   Main function for `makepot', no arguments, print vvl's interactively
 c
       double precision r, vv0
@@ -39,6 +40,7 @@ c
 c   Temporary for print
       double precision vvltmp(NVLM)
 c
+      ASSERT(nlammx .ge. NVVL)  ! check that lamnum array is big enough
       print *, 'CH3-He vibrational relaxation'
    1  print *, 'Please input the maximum value of v2 (0--3):'
       read (5, *, end=99) vmax
@@ -97,6 +99,8 @@ c   where v2 >= v2'
 c
 c   vv0 will not be used (set to zero).
 c
+      ASSERT(nlammx .ge. NVVL)  ! check that lamnum array is big enough
+
 c   The dimension of vvl array:
       nlam = NVLM * (vmax + 1) * (vmax + 2) / 2
 c
@@ -169,6 +173,7 @@ c   Load Y_lm terms in the first call
       logical isfst
       data isfst /.true./
       character*255 datfl
+      ASSERT(nlammx .ge. NVVL)  ! check that lamnum array is big enough
       if (isfst) then
         call datfln('pot_ch3he_vib_ylmsym', datfl)
         open (unit=10, file=datfl)
@@ -264,6 +269,7 @@ c
       logical isfst
       data isfst /.true./
 c   In the first call, read data and determine fitted coefficients
+      ASSERT(nlammx .ge. NVVL)  ! check that lamnum array is big enough
       if (isfst) then
 c   Read data file
         call datfln('pot_ch3he_vib_data', datfl)
@@ -349,6 +355,8 @@ c   Set lengths of scod array
       isrcod = IRCOD
 c   Set default indout data
 c     This should not be done if an input file is read!
+      ASSERT(nlammx .ge. NVVL)  ! check that lamnum array is big enough
+
       if (niout .le. 0) then
          niout = CNIOUT
          do i = 1, CNIOUT
@@ -486,6 +494,8 @@ c
 c -------------------------------------------------------------------
 c
 c   Construct emax array from input parameters
+      ASSERT(nlammx .ge. NVVL)  ! check that lamnum array is big enough
+
       emax(1) = emax0
       emax(2) = emax1
       emax(3) = emax2

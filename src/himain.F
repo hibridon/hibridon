@@ -1,3 +1,4 @@
+#include "assert.h"
       program logair
       use mod_clseg, only: allocate_clseg
       use mod_cobuf, only: allocate_cobuf
@@ -128,7 +129,8 @@
       integer :: kqmax
 
 * kv2max sets the maximum size of the v2 matrix
-      integer :: kv2max
+      integer(8) :: kv2max
+      integer :: nv2max
 
 * krotmx set the maximum size of the asym top e.fn expansion
       integer :: krotmx
@@ -219,7 +221,9 @@
 * kv2max sets the maximum size of the v2 matrix, a reasonable size is
 * kmax**2
 * increase kv2max from 2 * kmax * kmax to 20 * kmax * kmax (pjd - 13-dec-2019)
-      kv2max = 50 * kmax * kmax
+      kv2max = int(50, 8) * kmax * kmax
+      ASSERT(kv2max <= int(2, 8)**31)
+      nv2max = kv2max
 
 *   square matrices and vectors
       call allocate_coener(ken)
@@ -285,8 +289,8 @@
 *  parameter below sets maximum size of asymmetric top basis fn expansion
       call allocate_cosout(kout)
       call allocate_coiout(kout)
-      call allocate_cov2(kv2max, klammx)
-      call allocate_coiv2(kv2max)
+      call allocate_cov2(nv2max, klammx)
+      call allocate_coiv2(nv2max)
       call allocate_cocent(kmax)
       call allocate_coeint(kmax)
       call allocate_coj12(kmax)

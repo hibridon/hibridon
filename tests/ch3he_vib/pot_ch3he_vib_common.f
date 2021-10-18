@@ -115,8 +115,6 @@ c       emax0, emax1, emax2, emax3: maximum total energy of a level to be includ
       common /cosysr/ isrcod, junkr, emax0, emax1, emax2, emax3
       integer isrcod, junkr
       double precision emax0, emax1, emax2, emax3
-
-      ASSERT(nlammx .ge. NVVL)  ! check that lamnum array is big enough
 c
 c   coered block
 c       ered: collision energy in atomic units (hartrees)

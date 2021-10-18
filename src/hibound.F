@@ -464,6 +464,7 @@ c
 c     ------------------------------------------------------------------
       subroutine vmat_bound(wr, r, nch, nmax, v2)
       use mod_cov2, only: v2mat
+      use mod_hibrid3, only: potmat
       implicit none
       integer, intent(in) :: nch, nmax
       real(8), intent(in) :: r

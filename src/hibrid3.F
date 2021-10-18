@@ -1,4 +1,6 @@
 #include "assert.h"
+      module mod_hibrid3
+      contains
 *************************************************************************
 *                         hibridon 3  library                           *
 *                                                                       *
@@ -14,6 +16,7 @@
 *   4c. testpt20  testpot for basistyp 20, added by L. Ma oct. 2012     *
 *   5. propag     controls propagation                                  *
 *   6. rles       solves a * x = c                                      *
+*      logdb      log derivativ propagator                             *
 *   7. runlog     log-derivative propagator from r to r = rend          *
 *   8. scairy     scaled airy functions and derivatives                 *
 *   9. smatop     subroutine  to compute s-matrix                       *
@@ -815,8 +818,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       end
 * -------------------------------------------------------------------------
       subroutine propag (z, w, zmat, amat, bmat,
-     :                   jq, lq, inq, isc1, sc1, sc2, sc3, sc4,
-     :                   sc5, sc6, sc7,sc8, sc9,
+     :                   jq, lq, inq,
      :                   ien, nerg, en, eshift, rstart, rendld, spac,
      :                   tolhi, rendai, rincr, fstfac, tb, tbm,
      :                   ipos, logwr, noprin, airyfl, airypr,
@@ -901,25 +903,77 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *                   to be used later in computing the wavefunction
 *  ------------------------------------------------------------------
       use mod_cov2, only: v2mat
-      implicit double precision (a-h, o-z)
-      type(v2mat), intent(in) :: v2
-      logical twoen, ipos, logwr, noprin, airyfl, airypr,
-     :        photof, wavefn, boundf, wrsmat
-      logical first
-      character*10 tbs,tps,tds,tws,tairys, twfs
-      character*10 time
-      common /copmat/ rtmn, rtmx, iflag
-      common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
-      common /cophot/ photof, wavefn, boundf, wrsmat
+      use mod_hibrid2, only: mxoutd
+      implicit none
 *   square matrices
-      dimension z(nmax,nmax), w(nmax,nmax), zmat(nmax,nmax),
-     :          amat(nmax,nmax), bmat(nairy,nairy)
+      real(8), intent(out) :: z(nmax, nch)
+      real(8), intent(out) :: w(nmax, nch)
+      real(8), intent(out) :: zmat(nmax, nch)
+      real(8), intent(out) :: amat(nmax, nch)
+      real(8), intent(out) :: bmat(nairy, nairy)
+      integer, intent(inout) :: jq(nch)
+      integer, intent(inout) :: lq(nch)
+      integer, intent(inout) :: inq(nch)
+      integer, intent(in) :: ien
+      integer, intent(in) :: nerg
+      real(8), intent(in) :: en
+      real(8), intent(in) :: eshift
+      real(8), intent(in) :: rstart
+      real(8), intent(in) :: rendld
+      real(8), intent(in) :: spac
+      real(8), intent(in) :: tolhi
+      real(8), intent(in) :: rendai
+      real(8), intent(in) :: rincr
+      real(8), intent(in) :: fstfac
+      real(8), intent(out) :: tb
+      real(8), intent(out) :: tbm
+      logical, intent(in) :: ipos
+      logical, intent(in) :: logwr
+      logical, intent(in) :: noprin
+      logical, intent(in) :: airyfl
+      logical, intent(in) :: airypr
+      integer, intent(in) :: nch
+      integer, intent(out) :: nopen
+      integer, intent(in) :: nairy
+      integer, intent(in) :: nmax
+      type(v2mat), intent(in) :: v2
+
+      logical :: twoen
+      logical ::  first
+      character*10 :: tbs,tps,tds,tws,tairys, twfs
+      character*10 :: time
+      common /copmat/ rtmn, rtmx, iflag
+      real(8) :: rtmn
+      real(8) :: rtmx
+      integer :: iflag
+      common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
+      real(8) :: cpuld
+      real(8) :: cpuai
+      real(8) :: cpupot
+      real(8) :: cpusmt
+      real(8) :: cpupht
+      common /cophot/ photof, wavefn, boundf, wrsmat
+      logical :: photof
+      logical :: wavefn
+      logical :: boundf
+      logical :: wrsmat
+
+      real(8) :: r
+      real(8) :: t1, t2
+      real(8) :: t11, t22
+      real(8) :: tb1, tb2, tbx
+      real(8) :: ttx, tty
+      real(8) :: drnow
+      real(8) :: cpup
+      integer :: icol
+      integer :: itwo
+      integer :: nrow
+      real(8) :: tairy
+      real(8) :: td, tdm, tp, tpm, tw, twm, twf, twfm
+
 *  vectors
-      dimension jq(1), lq(1), inq(1), isc1(1),
-     :          sc1(1), sc2(1), sc3(1), sc4(1),
-     :          sc5(1), sc6(1), sc7(1), sc8(1), sc9(1)
 *  prec is precision of single precision floating pt number
-      data prec / 1.d+11 /
+      real(8), parameter :: prec = 1.d+11
 
       call mtime(t11,t22)
       first = .true.
@@ -963,7 +1017,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       cpup=cpupot
 
       call mtime(ttx,tty)
-      call runlog (z, w, amat, bmat, sc1, sc2, sc3, sc4, sc5,
+      call runlog (z,
      :             r, rendld, spac, eshift, itwo, twoen,
      :             td, tdm, tp, tpm, twf, twfm, logwr, noprin,
      :             ipos, nch, nmax, v2)
@@ -987,8 +1041,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 110       continue
         endif
   
-        call airprp (z, amat, bmat, w, zmat, sc1, sc2, sc3, sc4,
-     :               sc5, sc6, sc7, sc8, sc9, r, rendai, drnow, en,
+        call airprp (z,
+     :               r, rendai, drnow, en,
      :               tolhi, rincr, eshift, nch, nmax, itwo, airypr,
      :               twoen,noprin, v2)
 *  on return from airprp, z contains the log-derivative matrix at r = rendai
@@ -1006,9 +1060,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
         call mxoutd (9, z, nch, nmax, 0, ipos)
       end if
 *  now calculate s-matrix and t-matrix squared
-      call smatrx (z, w, zmat, amat, bmat,
-     :             lq, jq, inq, isc1, sc1, sc2, sc3, sc4,
-     :             sc5, sc6, sc7, r, prec, tw, twm, nopen, nch, nmax,
+      call smatrx (z, w, zmat,
+     :             lq, jq, inq, r, prec, tw, twm, nopen, nch, nmax,
      :             logwr,ipos)
 
 * convert to time string
@@ -1038,7 +1091,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       return
       end
 * ------------------------------------------------------------------------
-      subroutine rles (a, c, kpvt, n, m, nmax)
+      subroutine rles (a, c, n, m, nmax)
 *  subroutine to solve linear equations a * x = c
 *  written by:  millard alexander
 *  current revision date: 6-apr-2004
@@ -1059,8 +1112,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *  --------------------------------------------------------------------
       implicit double precision (a-h,o-z)
       integer icol, ierr, iptc, izero, m, n, nmax
-      integer kpvt
-      dimension a(1), c(1), kpvt(1)
+      integer :: kpvt(n)
+      dimension a(1), c(1)
       data izero /0/
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 *  factor the matrix
@@ -1124,9 +1177,608 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 #endif
       return
       end
+* -------------------------------------------------------------------
+* -------------------------------------------------------------------
+      subroutine logdb (z, nmax, nch, rmin, rmax, nsteps,
+     :                  eshift, iread, iwrite, tl, tp, twf, v2)
+*     routine to initialise the log derivative matrix, y, at r = rmin,
+*     and propagate it from rmin to rmax using the method described in
+*     d.e.manolopoulos, j.chem.phys., 85, 6425 (1986)
+*     references to this paper appear below in comments
+*     author:  david manolopoulos and millard alexander
+*     current revision date (the propagator): 28-nov-2007
+*     revised on 30-mar-2012 by q. ma for stream I/O of wfu files
+*     current revision: 20-apr-2012 by q. ma
+***********************************************************************
+****   this integrator is not released for general public use      ****
+****   all use must be by specific prior arrangement with:         ****
+****     millard alexander, department of chemistry,               ****
+****     university of maryland, college park, md, 20742           ****
+****     tel: 1.301.405.1823; email: mha@umd.edu                   ****
+****   no part of this program may be copied or used for other     ****
+****   purposes without the author's permission.                   ****
+***********************************************************************
+*  ------------------------------------------------------------------
+*     variables in call list:
+*     z             array of dimension (nmax,nch)
+*                   on return z contains the log derivative matrix
+*                   at r = rmax
+*     nmax          leading dimension of arrays z and w
+*     nch           number of coupled equations
+*                   = actual order of matrices z and w
+*     rmin,rmax     integration range limits
+*                   rmin is assumed to lie inside the classically
+*                   forbidden region for all channels
+*     nsteps        number of sectors partitioning integration range
+*                   this version uses a constant step size throughout
+*                   the integration range, h = (rmax-rmin)/(2*nsteps)
+*           note:  if nsteps=0, then this routine only initializes the logd
+*                  matrix; no propagation is done
+*     eshift        energy shift for diagonal elements of the coupling
+*                   matrix at subsequent energies:
+*                   new energy = first energy + eshift
+*     iread,iwrite  logical variables for i/o of energy-independent
+*                   information from/to unit 11
+*     tl            elapsed time used in logd integration
+*                   exclusive of calls to potential and ground state
+*                   wavefunction (in photodissociation calculations)
+*     tp            elapsed time used in calls to potential
+*     twf           elapsed time used in determination of ground
+*                   state wavefunction (this should be zero for scattering)
+*                   exclusive of calls to potential
+*                   this timing information comes from repeated calls
+*                   of the form call mtime(elapsed) where "elapsed"
+*                   is the current elapsed time in seconds
+*     variables in common block /cophot/
+*     photof        true if photodissociation calculation
+*                   false if scattering calculation
+*     wavefn        true if g(a,b) transformation matrices are saved
+*                   to be used later in computing the wavefunction
+*     variable in common block /cowave/
+*     irec          record number of last written g(a,b) matrix
+*     ifil          local unit number for g(a,b) file
+*     blas routines daxpy and dscal are used in o(n*n) loops
+*     symmetry of the matrices z and w is not exploited in these loops,
+*     and blas routines are not used for o(n) loops
+*  ------------------------------------------------------------------
+      use mod_coqvec, only: mxphot, nphoto, q ! q is an output of this subroutine
+      use mod_cov2, only: v2mat
+      implicit double precision (a-h,o-z)
+      real(8), intent(out) :: z(nmax*nch)
+      integer, intent(in) :: nmax
+      integer, intent(in) :: nch
+      real(8), intent(inout) :: rmin
+      real(8), intent(inout) :: rmax
+      integer, intent(inout) :: nsteps
+      real(8), intent(in) :: eshift
+      logical, intent(in) :: iread
+      logical, intent(in) :: iwrite
+      real(8), intent(out) ::  tl
+      real(8), intent(out) ::  tp
+      real(8), intent(out) ::  twf
+      type(v2mat), intent(in) :: v2
+
+*     wref          scratch array of dimension nch
+*                   used as workspace for the reference potential
+*     z1,z2         scratch arrays of dimension nch
+*                   used as workspace for the homogeneous
+*                   half-sector propagators
+*     scr1,scr2     scratch arrays of dimension nch
+*                   used as workspace in calls to smxinv
+      real(8) :: wref(nch)
+      real(8) :: z1(nch)
+      real(8) :: z2(nch)
+      real(8) :: scr1(nch)
+      real(8) :: scr2(nch)
+
+      integer ich, icode, icol, idiag, ierr, ij, irow, istep, kstep,
+     :        ncol, ndiag, nrow
+*      real arg, d3, d6, eight, eshift, fac, h, half, hi, one, r, rmax,
+*     :     rmin, sqrt, tan, tanh, t0, t0w, t1, t1w, tf, tfw, th, tl,
+*     :     tn, tp,  zero, wdiag
+*      real w, z
+*      real scr1, scr2, wref, z1, z2
+      logical photof, wavefn, boundf, wrsmat
+      logical flagsu
+*      external mtime, potmat, daxpy, smxinv, dscal
+*     matrices z and w are stored column by column as one-dimensi
+      common /cophot/ photof, wavefn, boundf, wrsmat
+      common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
+     $     inflev
+      common /cosurf/ flagsu
+      data zero,  one,  two, three,six,  eight
+     :    / 0.d0, 1.d0, 2.d0, 3.d0, 6.d0, 8.d0 /
+      data izero, ione /0, 1/
+*     amat,bmat     scratch matrices of dimension (nmax,nch)
+*                   used as workspace for the dissociation overlap
+*     amat and bmat are stored column by column as one-dimensi
+      real(8),allocatable :: amat(:)
+      real(8),allocatable :: bmat(:)
+
+*     w             scratch array of dimension (nmax,nch)
+*                   used as workspace for the potential matrix
+      real(8) :: w(nmax*nch)
+
+c     The following variables are for size-determination of (machine
+c     dependent) built-in types
+      integer int_t
+      double precision dble_t
+      character char_t
+      integer :: nqmax
+      real(8) :: simpwt  ! simpson quadrature weight
+      nqmax = 0
+c
+
+*     make sure that rmin, rmax and nsteps are the same if second
+*     energy calculation
+      if (iwrite) write (11) rmin, rmax, nsteps
+      if (iread ) read  (11) rmin, rmax, nsteps
+      simpwt = 0.d0
+      if (nsteps .ne. 0) then
+        h = (rmax - rmin) / (2 * nsteps)
+        hi = one / h
+        simpwt= h/three
+        d3 = h * h / three
+        d6 = - h * h / six
+        half = h / two
+        if (photof) then
+           nqmax=nch*nphoto
+*          initialize q vector
+#if defined(HIB_UNIX) || defined(HIB_CRAY)
+           call dset(nqmax, zero, q, 1)
+#endif
+         end if 
+      end if
+
+*     row, column and diagonal increments for matrices z and w
+      nrow = 1
+      ncol = nmax
+      ndiag = nmax + 1
+*     obtain coupling matrix, w, at r = rmin
+*     diagonal elements must be shifted at subsequent energies
+      tp = zero
+      tpw = zero
+      twf = zero
+      twfw = zero
+      call mtime(tf,tfw)
+      if (iread) then
+         icol = 1
+         do 5  ich = 1, nch
+            read (11) (w(ij), ij = icol, icol + nch - 1)
+            icol = icol + ncol
+   5     continue
+         idiag = 1
+         do 10  ich = 1, nch
+            w(idiag) = w(idiag) - eshift
+            idiag = idiag + ndiag
+  10     continue
+      if (photof) read (11) (q(i), i=1, nqmax)
+      else
+         istep = 0
+         r = rmin
+         call mtime(t0,t0w)
+         call potmat(w, r, nch, nmax, v2)
+         call mtime(t1,t1w)
+         tp = tp + t1 - t0
+         tpw = tpw + t1w - t0w
+*     determine ground state wavefunction times dipole moment at beginning of
+*     first sector
+         if (photof) then
+           call mtime(t0,t0w)
+  
+           call ground(q, r, nch, nphoto, mxphot)
+*     wt is weight for simpson's rule quadrature, isimp is alternator for
+*     simpson's rule quadrature
+           wt = simpwt
+           isimp=1
+*     multiply psi(0) mu(0) by simpson's rule wt at first point
+#if defined(HIB_UNIX) || defined(HIB_CRAY)
+           call dscal (nqmax, wt, q, 1)
+#endif
+           call mtime(t1,t1w)
+           twf=twf+t1-t0
+           twfw=twfw+t1w-t0w
+         endif
+*
+         if (iwrite) then
+            icol = 1
+            do 15  ich = 1, nch
+               write (11) (w(ij), ij = icol,icol+nch-1)
+               icol = icol + ncol
+  15        continue
+            if (photof) write (11) (q(i), i=1, nqmax)
+         endif
+      endif
+
+*     use diagonal approximation to wkb initial value for log
+*     derivative matrix  (eqn 16)
+*     rmin is assumed to lie inside the classically forbidden
+*     region in all channels  (w(ii) > 0)
+*     first zero out z matrix
+      icol = 1
+      do 20  ich = 1, nch
+#if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
+         call dset (nch, zero, z(icol), nrow)
+#endif
+         icol = icol + ncol
+  20  continue
+
+      idiag = 1
+      do  30 ich = 1, nch
+         wdiag = w(idiag)
+         if (wdiag .le. 0) then
+           write (9, 25) ich, wdiag
+           write (6, 25) ich, wdiag
+25         format (' *** WAVEVECTOR > 0 IN CHANNEL', i5,
+     :        '     IN LOGD INITIALIZATION;  ABORT ***',
+     :       /'     V - E =',1pe15.7)
+           call exit
+         end if
+         z(idiag) = sqrt(wdiag)
+         idiag = idiag + ndiag
+  30  continue
+
+      if (nsteps .le. 0) then
+        if (photof) then
+          write (9, 35) nsteps
+          write (6, 35) nsteps
+35        format (' *** WARNING: IN LODG PHOTOF=TRUE AND NSTEPS=',i3,
+     :            ' SHOULD BE .GT. 0 ***')
+          goto 261
+        endif
+      endif
+
+*     with a constant step size it is convenient to propagate
+*     the matrix z = h*y rather than the log derivative matrix, y
+*     (eqns 10, 12, 13 and 14 are simply multiplied through by h)
+      fac = h
+      icol = 1
+      do 40  ich = 1, nch
+
+#if defined(HIB_UNIX) || defined(HIB_CRAY)
+         call dscal (nch, fac, z(icol), nrow)
+#endif
+         icol = icol + ncol
+  40  continue
+
+      allocate(amat(nmax*nch))
+      allocate(bmat(nmax*nch))
+
+*     propagate z matrix from rmin to rmax
+      do 250  kstep = 1, nsteps
+*     apply quadrature contribution at beginning of sector,
+*     r = a
+*     after this loop z contains z(a)+(h^2/3)w(a)
+*     todo : handle the case where w is lower triangular
+*     (uninitialized values in upper triangle), see issue 49
+         fac = d3
+         icol = 1
+         do  50 ich = 1, nch
+            call daxpy_wrapper (nch, fac, w(icol), nrow, z(icol), nrow)
+            icol = icol + ncol
+  50     continue
+*     the reference potential for the sector is the diagonal
+*     of the coupling matrix evaluated at the centre of the
+*     sector, r = c  (eqn 15)
+         if (iread) then
+            read (11) (wref(ich), ich = 1, nch)
+            do 60  ich = 1, nch
+               wref(ich) = wref(ich) - eshift
+  60        continue
+         else
+            istep = istep + 1
+            r = rmin + istep * h
+            call mtime(t0,t0w)
+   
+            call potmat(w, r, nch, nmax, v2)
+            call mtime(t1,t1w)
+            tp = tp + t1 - t0
+            tpw = tpw + t1w - t0w
+            idiag = 1
+            do 70  ich = 1, nch
+               wref(ich) = w(idiag)
+               idiag = idiag + ndiag
+  70        continue
+            if (iwrite) then
+               write (11) (wref(ich), ich = 1, nch)
+            endif
+         endif
+*     adjust quadrature contribution at r = a to account for
+*     sector reference potential  (eqn 11)
+*     after this loop z contains z(a)+(h^2/3)w1(a)
+         fac = - d3
+         idiag = 1
+         do  80 ich = 1, nch
+            z(idiag) = z(idiag) + fac * wref(ich)
+            idiag = idiag + ndiag
+  80     continue
+*     evaluate homogeneous half sector propagators  (eqn 10)
+*     z(i) = h * y(i), i=1,2,3,4
+         do 85  ich = 1, nch
+            arg = half * sqrt(abs(wref(ich)))
+               if (wref(ich) .lt. zero) then
+                  tn = tan(arg)
+                  z1(ich) = arg / tn - arg * tn
+                  z2(ich) = arg / tn + arg * tn
+               else
+                  th = tanh(arg)
+                  z1(ich) = arg / th + arg * th
+                  z2(ich) = arg / th - arg * th
+               endif
+*           z3(ich) = z2(ich)
+*           z4(ich) = z1(ich)
+  85     continue
+*     propagate z matrix across the first half sector
+*     from r = a to r = c  (eqn 14)
+         idiag = 1
+         do  90 ich = 1, nch
+            z(idiag) = z(idiag) + z1(ich)
+            idiag = idiag + ndiag
+  90     continue
+
+*     z now contains z(a)+z1(a,c)
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
+         call smxinv(z, nmax, nch, scr1, scr2, ierr)
+#endif
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
+        call syminv(z,nmax,nch,ierr)
+#endif
+         if (ierr .ne. 0) then
+            write (6, 9000) kstep, ierr
+            write (9, 9000) kstep, ierr
+            call exit
+         endif
+*     z now contains [z(a)+z1(a,c)]^-1
+         icol = 1
+         do  95 ich = 1, nch
+            fac = z2(ich)
+            call dscal (nch, fac, z(icol), nrow)
+            icol = icol + ncol
+  95     continue
+*     z now contains [z(a)+z1(a,c)]^-1 z2(a,c)
+*     if photodissociation calculation or wavefunction desired:
+*     save this matrix, which is hg(a,m), in amat
+         if (photof .or. wavefn)
+     :     call matmov(z, amat, nch, nch, nmax, nmax)
+         irow = 1
+         do  110 ich = 1, nch
+            fac = - z2(ich)
+            call dscal (nch, fac, z(irow), ncol)
+            irow = irow + nrow
+ 110     continue
+*     z now contains - z3(a,c) [z(a)+z1(a,c)]^-1 z2(a,c)
+         idiag = 1
+         do  120 ich = 1, nch
+            z(idiag) = z(idiag) + z1(ich)
+            idiag = idiag + ndiag
+ 120     continue
+
+*     evaluate quadrature contribution at sector mid-point,
+*     r = c  (eqn 12)     (first energy calculation only)
+         if (iread) then
+            icol = 1
+            do  125 ich = 1, nch
+               read (11) (w(ij), ij = icol,icol+nch-1)
+               icol = icol + ncol
+ 125        continue
+         else
+            fac = d6
+            icol = 1
+            do  130 ich = 1, nch
+               call dscal (nch, fac, w(icol), nrow)
+               icol = icol + ncol
+ 130        continue
+            idiag = 1
+            do  140 ich = 1, nch
+               w(idiag) = one
+               idiag = idiag + ndiag
+ 140        continue
+
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
+            call smxinv(w, nmax, nch, scr1, scr2, ierr)
+#endif
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
+            call syminv(w,nmax,nch,ierr)
+#endif
+            if (ierr .eq. 2) then
+               icode = 2
+               write (9,9000) kstep, icode
+               call exit
+            endif
+            idiag = 1
+   
+            do  150 ich = 1, nch
+               w(idiag) = w(idiag) - one
+               idiag = idiag + ndiag
+ 150        continue
+            if (iwrite) then
+               icol = 1
+               do  155 ich = 1, nch
+                  write (11) (w(ij), ij = icol,icol+nch-1)
+                  icol = icol + ncol
+ 155           continue
+            endif
+         endif
+*     apply quadrature contribution at sector mid-point
+*     corrections to z4(a,c) and z1(c,b) are applied
+*     simultaneously  (eqn 13)
+         fac = eight
+         icol = 1
+         do  160 ich = 1, nch
+            call daxpy_wrapper (nch, fac, w(icol), nrow, z(icol), nrow)
+            icol = icol + ncol
+ 160     continue
+
+*     propagate z matrix across the second half sector
+*     from r = c to r = b   (eqn 14)
+         idiag = 1
+         do  170 ich = 1, nch
+            z(idiag) = z(idiag) + z1(ich)
+            idiag = idiag + ndiag
+ 170     continue
+*     at this point z contains z(c) + z1(c,b)
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
+         call smxinv(z, nmax, nch, scr1, scr2, ierr)
+#endif
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
+         call syminv(z,nmax,nch,ierr)
+#endif
+         if (ierr .eq. 2) then
+            icode = 3
+            write (9,9000) kstep, icode
+            call exit
+         endif
+*     at this point z contains [z(c) + z1(c,b)]^-1
+         icol = 1
+         do 175 ich = 1, nch
+            fac = z2(ich)
+            call dscal (nch, fac, z(icol), nrow)
+            icol = icol + ncol
+ 175     continue
+*     z now contains [z(c)+z1(c,b)]^-1 z2(c,b)
+*     if photodissociation calculation or wavefunction desired:
+         if (photof .or. wavefn) then
+*     first save this matrix, which is g(c,b), in bmat
+           call matmov(z, bmat, nch, nch, nmax, nmax)
+*     use bmat and w as temporary storage here
+           call mxma (amat, 1, nmax, bmat, 1, nmax, w, 1, nmax,
+     :                nch, nch, nch)
+*     w now contains the matrix g(a,m)g(m,b)=g(a,b)
+*     if wavefunction desired, save this matrix
+          if (wavefn .and. wrsmat) then
+             irec = irec + 1
+c     nrlogd is the number of LOGD records - used to seek the wfu file
+             nrlogd = nrlogd + 1
+             write (ifil, err=950) r - h, r, (w(i), i=1, nch)
+             icol = 1
+             do ich = 1, nch
+                write (ifil, err=950) (w(icol - 1 + i), i=1, nch)
+                icol = icol + nmax
+             end do
+             write (ifil, err=950) 'ENDWFUR', char(mod(irec, 256))
+             lrlogd = (nchwfu ** 2 + nchwfu + 2) * sizeof(dble_t)
+     $            + 8 * sizeof(char_t)
+             iendwv = iendwv + lrlogd
+          endif
+        endif
+
+*     accumulate overlap matrix with ground state
+*     if photodissociation calculation
+        if (photof) then
+*     premultiply g(a,b) by wt psi(a) mu(a)
+*     use bmat as temporary storage here
+           call mxma(q,nch,1,w,1,nmax,bmat,nch,1,nphoto,nch,nch)
+*     bmat now contains [...+wt*psi(a)mu(a)] g(a,b)
+*       stored as successive columns with each initial
+*       state corresponding to a column
+*     now determine psi(b)mu(b), save this in q
+           rnew = rmin + (istep+1) * h
+           if (iread) then
+             read (11) (q(i), i=1, nqmax)
+           else
+             call mtime(t0,t0w)
+             call ground(q, rnew, nch, nphoto, mxphot)
+* recalculate simpson's rule wt for this point
+             wt=(3.d0+isimp)*simpwt
+             isimp=-isimp
+*     multiply psi(b) mu(b) by simpson's rule wt at r=rnew
+             call dscal (nqmax, wt, q, 1)
+             call mtime(t1,t1w)
+             twf=twf+t1-t0
+             twfw=twfw+t1w-t0w
+             if (iwrite) write (11) (q(i), i=1, nqmax)
+           endif
+*     add wt*psi(b)mu(b) to bmat and resave
+           fac=one
+           call daxpy_wrapper(nqmax, fac, bmat, 1, q, 1)
+         endif
+*     now premultiply [z(c)+z1(c,b)]^-1 z2(c,b) by z2(c,b)
+         irow=1
+         do  190 ich = 1, nch
+           fac = - z2(ich)
+           call dscal (nch, fac, z(irow), ncol)
+           irow = irow + nrow
+ 190     continue
+*      z now contains - z2(c,b) [z(c)+z1(c,b)]^-1 z2(c,b)
+         idiag = 1
+         do  195 ich = 1, nch
+            z(idiag) = z(idiag) + z1(ich)
+            idiag = idiag + ndiag
+ 195     continue
+*     apply reference potential adjustment to quadrature
+*     contribution at r = b  (eqn 11)
+         fac = - d3
+         idiag = 1
+
+         do  200 ich = 1, nch
+            z(idiag) = z(idiag) + fac * wref(ich)
+            idiag = idiag + ndiag
+  200    continue
+*     obtain coupling matrix, w, at end of sector
+         if (iread) then
+            icol = 1
+            do  205 ich = 1, nch
+               read (11) (w(ij), ij = icol, icol + nch - 1)
+               icol = icol + ncol
+ 205        continue
+            idiag = 1
+            do  210 ich = 1, nch
+               w(idiag) = w(idiag) - eshift
+               idiag = idiag + ndiag
+ 210        continue
+         else
+            istep = istep + 1
+            r = rmin + istep * h
+            call mtime(t0,t0w)
+            call potmat(w, r, nch, nmax, v2)
+            call mtime(t1,t1w)
+            tp = tp + t1 - t0
+            tpw = tpw + t1w - t0w
+            if (iwrite) then
+               icol = 1
+               do  215 ich = 1, nch
+                  write (11) (w(ij), ij = icol,icol+nch-1)
+                  icol = icol + ncol
+ 215           continue
+            endif
+         endif
+*     apply quadrature contribution at r = b  (eqn 12)
+         fac = d3
+         icol = 1
+         do 220  ich = 1, nch
+            call daxpy_wrapper (nch, fac, w(icol), nrow, z(icol), nrow)
+            icol = icol + ncol
+ 220     continue
+*     propagation loop ends here
+ 250  continue
+
+      deallocate(bmat)
+      deallocate(amat)
+
+*     recover the log derivative matrix, y, at r = rmax
+      fac = hi
+      icol = 1
+      do 260  ich = 1, nch
+         call dscal (nch, fac, z(icol), nrow)
+         icol = icol + ncol
+ 260  continue
+261   call mtime(tl,tlw)
+      tl = tl - tf - tp - twf
+      tlw = tlw - tfw - tpw - twfw
+
+      return
+c
+ 950  write (0, *) ' *** ERROR WRITING WFU FILE (LOGD). ABORT'
+      call exit()
+      return
+c
+9000  format(' *** MATRIX INVERSION ERROR IN LOGDB AT KSTEP =',
+     : i4,  /'            ERROR OCCURRED AT ROW =', i2,
+     : '; ABORT ***')
+      end
 * ----------------------------------------------------------------------
-      subroutine runlog (z, w, amat, bmat,
-     :                   wref, z1, z2, scr1, scr2, r, rend,
+      subroutine runlog (z,
+     :                   r, rend,
      :                   spac, eshift, itwo, twoen, tl, tlw, tp, tpw,
      :                   twf, twfw, logwr, noprin, ipos, nch, nmax, v2)
 *     log-derivative propagator from r to r = rend
@@ -1138,7 +1790,6 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *     variables in call list:
 *     z             on return: contains the log-derivative matrix
 *                   at r = rend
-*     w,amat,bmat   scratch matrices of dimension at least nmax x nch
 *     wref,z1,z2    scratch vectors of length nch
 *     scr1, scr2,
 *     r             on entry: r = initial interparticle separation
@@ -1183,21 +1834,46 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 *  ------------------------------------------------------------------
       use mod_coqvec, only: nphoto, q
       use mod_cov2, only: v2mat
+      use mod_hibrid2, only: mxoutd, mxoutr
       implicit double precision (a-h, o-z)
       type(v2mat), intent(in) :: v2
+      real(8), intent(out) :: z(nmax*nch)
+      real(8), intent(inout) :: r
+      real(8), intent(in) :: rend
+      real(8), intent(in) :: spac
+      real(8), intent(in) :: eshift
+      integer, intent(in) :: itwo
+      logical, intent(in) :: twoen
+      real(8), intent(out) :: tl
+      real(8), intent(out) :: tlw
+      real(8), intent(out) :: tp
+      real(8), intent(out) :: tpw
+      real(8), intent(out) :: twf
+      real(8), intent(out) :: twfw
+      logical, intent(in) :: logwr
+      logical, intent(in) :: noprin
+      logical, intent(in) :: ipos
+      integer, intent(in) :: nch
+      integer, intent(in) :: nmax
+
+      real(8) :: w(nmax*nch)
+      real(8) :: wref(nch)
+      real(8) :: z1(nch)
+      real(8) :: z2(nch)
+      real(8) :: scr1(nch)
+      real(8) :: scr2(nch)
+
 *      real eshift, r, rend, rmax, rmin, spac, tl, tlw, tp, tpw
 *      real scr1, scr2, wref, z1, z2
 *      real w, z
-      integer itwo, nch, nmax, nsteps
-      logical twoen, logwr, ipos, noprin, boundf, wrsmat
+      integer nsteps
+      logical boundf, wrsmat
 *  internal logical variables
       logical iread, iwrite, print, photof, wavefn
       common /cophot/ photof, wavefn, boundf, wrsmat
       common /constp/ nsteps, isteps
 
 *  z, w, amat, and bmat are stored column by column in one dimensional arrays
-      dimension z(1), w(1), amat(1), bmat(1)
-      dimension wref(1), z1(1), z2(1), scr1(1), scr2(1)
 
       iwrite = twoen .and. (itwo.eq.0)
       iread =  twoen .and. (itwo.gt.0)
@@ -1226,8 +1902,8 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       endif
 *  logdb initialises the log-derivative matrix at r = rmin
 *  and propagates it from rmin to rmax
-      call logdb (z, w, amat, bmat,
-     :            nmax, wref, z1, z2, scr1, scr2, nch,
+      call logdb (z,
+     :            nmax, nch,
      :            rmin, rmax, nsteps, eshift, iread, iwrite,
      :            tl, tp, twf, v2)
 
@@ -1613,8 +2289,7 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
       return
       end
 * ----------------------------------------------------------------------
-      subroutine smatop (tmod, sr, si, scmat, lq, fj, fn, fpj,
-     :                   fpn, pk, derj, dern, r, prec,
+      subroutine smatop (tmod, sr, si, scmat, lq, r, prec,
      :                   nopen, nmax,kwrit,ipos)
 *  subroutine to compute s-matrix and, alternatively, the asymptotic
 *  scattering wavefunction
@@ -1695,25 +2370,28 @@ c     :         g13.6,' cm-1; ', g13.6,' ev')
 * temporary storage for smatrices
       use mod_cotq1, only: srsave => dpsir ! srsave(100)
       use mod_cotq2, only: sisave => tq2 ! sisave(100)
+      use mod_hibrid2, only: mxoutd, mxoutr
       implicit double precision (a-h,o-z)
       real(8), dimension(nmax, nmax), intent(inout) :: tmod
       real(8), dimension(nmax, nmax), intent(out) :: sr
       real(8), dimension(nmax, nmax), intent(out) :: si
       real(8), dimension(nmax, nmax), intent(out) :: scmat
       integer, dimension(nopen), intent(in) :: lq
-      real(8), dimension(nopen), intent(out) :: fj
-      real(8), dimension(nopen), intent(out) :: fn
-      real(8), dimension(nopen), intent(out) :: fpj
-      real(8), dimension(nopen), intent(out) :: fpn
-      real(8), dimension(nopen), intent(out) :: pk
-      real(8), dimension(nopen), intent(out) :: derj
-      real(8), dimension(nopen), intent(out) :: dern
       real(8), intent(in) :: r
       real(8), intent(in) :: prec
       integer, intent(in) :: nopen
       integer, intent(in) :: nmax
       logical, intent(in) :: kwrit
       logical, intent(in) :: ipos
+
+      real(8), dimension(nopen) :: fj
+      real(8), dimension(nopen) :: fn
+      real(8), dimension(nopen) :: fpj
+      real(8), dimension(nopen) :: fpn
+      real(8), dimension(nopen) :: pk
+      real(8), dimension(nopen) :: derj
+      real(8), dimension(nopen) :: dern
+
       integer isw, i, icol, l
 #if defined(HIB_UNIX_IBM)
       character*1 forma
@@ -1819,7 +2497,7 @@ c
 *  tmod is equal to y(xn) j(xn) - j'(xn)
 *  solve linear equations for k-matrix (negative of r-matrix)
 *  fpj is used as scratch vector here
-      call rles (sr, tmod, fpj, nopen, nopen, nmax)
+      call rles (sr, tmod, nopen, nopen, nmax)
 *  since r-matrix is negative of k-matrix, r = -tmod at this point
       isym=1
       if (kwrit) then
@@ -1853,7 +2531,7 @@ c
 *  solve linear equations for s-imaginary
 *  see eq.(67) of r.g. gordon, meth. comp. phys. 10 (1971) 81
 *  fpj is used as scratch vector here
-      call rles (sr, si, fpj, nopen, nopen, nmax)
+      call rles (sr, si, nopen, nopen, nmax)
 *  determine real part of s-matrix
 *  see eq.(68) of r.g. gordon, meth. comp. phys. 10 (1971) 81
 #if defined(HIB_NONE)
@@ -1985,7 +2663,7 @@ c
 #endif
 * solve linear equations for real part of transition amplitudes
 * fpj is used as scratch here
-        call rles(sisave,q,fpj,nopen,nphoto,nmax)
+        call rles(sisave,q,nopen,nphoto,nmax)
         call dscal(nopen*nphoto,onemin,q,1)
 * q now contains real part of transition amplitudes
 * store real part of transition amplitudes in sr
@@ -2114,9 +2792,8 @@ c
       call exit()
       end
 * -----------------------------------------------------------------------
-      subroutine smatrx (z, sr, si, amat, bmat,
-     :                   lq, jq, inq, isc1, sc1, sc2, sc3, sc4, sc5,
-     :                   sc6, sc7, r, prec, ts, tsw, nopen, nch, nmax,
+      subroutine smatrx (z, sr, si,
+     :                   lq, jq, inq, r, prec, ts, tsw, nopen, nch, nmax,
      :                   kwrit,ipos)
 * -----------------------------------------------------------------------
 *  subroutine to:
@@ -2165,16 +2842,33 @@ c
 *  ---------------------------------------------------------------------------
       use mod_coqvec, only: nphoto, q
       use mod_coeint, only: eint
+      use mod_hibrid2, only: mxoutd, mxoutr
       implicit double precision (a-h,o-z)
-      logical photof, wavefn, kwrit, ipos, boundf, wrsmat
+      real(8), intent(inout) :: z(nmax,nmax)
+      real(8), intent(out) :: sr(nmax,nmax)
+      real(8), intent(out) :: si(nmax,nmax)
+      integer, intent(inout) :: lq(nch)
+      integer, intent(inout) :: jq(nch)
+      integer, intent(inout) :: inq(nch)
+      real(8), intent(in) :: r
+      real(8), intent(in) :: prec
+      real(8), intent(out) :: ts
+      real(8), intent(out) :: tsw
+      integer, intent(out) :: nopen
+      integer, intent(in) :: nch
+      integer, intent(in) :: nmax
+      logical, intent(in) :: kwrit
+      logical, intent(in) :: ipos
+
+      
+      logical photof, wavefn, boundf, wrsmat
       common /coered/ ered, rmu
       common /cophot/ photof, wavefn, boundf, wrsmat
       common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv,
      $     inflev
-      dimension z(nmax,nmax), amat(nmax,nmax), sr(nmax,nmax),
-     :          si(nmax,nmax), bmat(nmax,nmax)
-      dimension isc1(20), jq(1), lq(1), sc1(1), sc2(1), sc3(1),
-     :          sc4(1), sc5(1), inq(1)
+      real(8) :: amat(nmax,nmax), bmat(nmax,nmax)
+      integer :: isc1(nch)
+      
       data izero /0/
 c     The following three variables are used to determine the (machine
 c     dependent) size of built-in types
@@ -2239,8 +2933,7 @@ c     dependent) size of built-in types
 *  isc1, sc1, sc2, sc3, and sc4 are all used as scratch arrays
 *  scmat is used as scratch matrix here
 *  this uses new smat routine involving just open channels
-      call smatop (z, sr, si, amat, lq, sc1, sc2, sc3, sc4, sc5,
-     :             sc6, sc7, r, prec, nopen, nmax, kwrit,ipos)
+      call smatop (z, sr, si, amat, lq, r, prec, nopen, nmax, kwrit,ipos)
       if (wavefn) then
 * if wavefunction desired, then
 * sr and si contain open channel portion of asymptotic wavefunction
@@ -2352,3 +3045,4 @@ c
       endif
       return
       end
+      end module mod_hibrid3

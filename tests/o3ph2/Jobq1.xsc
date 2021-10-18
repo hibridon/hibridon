@@ -1,0 +1,47 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2021-10-11 at 19:09
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: 2bb9ef1
+SYS: Linux 5.4.0-88-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                      Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                         3157.292
+Socket(s):                       1
+Core(s) per socket:              4
+L2 cache:                        1 MiB
+L3 cache:                        6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16272252 kB
+ --------------------------------------------------------------------------
+
+ INTEGRAL CROSS SECTIONS READ FROM FILE Jobq1.ics                               
+ WRITTEN:   Oct 11 19:09:40 2021
+ LABEL:     O(3P)-H2 scattering on Alexander PESs           
+ POT NAME:  ALEXANDER SCALED (s=1.21) O(3P)H2 DUBERNET-HUTSO
+
+ ** INTEGRAL CROSS SECTIONS; IEN= 1 **
+    RMU=   1.7901  E=   250.00  JLPAR=-1  JTOT-1=  0  JTOT-2=   5  JTOT-D=  1
+ ** CC CALCULATION, JLPAR=-1 **
+
+ ** COLUMN HEADINGS ARE INITIAL STATES, ROW HEADINGS ARE FINAL STATES **
+
+            J=    0         0         0
+   J    I | I=    0         1         2
+ 
+    0    0   1.118E+02  1.783E-03  3.017E-01
+    0    1   2.132E-02  1.971E+01  8.097E-01
+    0    2   1.638E+01  3.678E+00  7.108E+00

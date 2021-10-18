@@ -879,12 +879,13 @@ c.....assume that jlpar=1 is stored first
 *     dscal, dcopy:   linpack blas routines
 * ----------------------------------------------------------------
       use mod_cov2, only: v2mat
+      use mod_hibrid3, only: potmat
       implicit double precision (a-h,o-z)
       type(v2mat), intent(in) :: v2
 *      real rnow, xmin1
 *      real eignow, scr1, scr2, w
       integer icol, ierr, ipt, nch, nmax, nmaxm1, nmaxp1, nrow
-      external dscal, dcopy, potmat
+      external dscal, dcopy
 *     external dscal, dcopy, potmat, tred1, tqlrat
 *  square matrix (of row dimension nmax)
       dimension w(1)
@@ -1410,6 +1411,7 @@ c
       use mod_cow, only: sr => w_as_vec ! sr(100)
       use mod_cozmat, only: si => zmat_as_vec ! si(100)
       use mod_version, only : version
+      use mod_hibrid3, only: expand
       
       implicit double precision (a-h,o-z)
       character*(*) filnam

@@ -1,0 +1,104 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2021-10-14 at 08:21
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: c5e68b5
+SYS: Linux 5.4.0-88-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                      Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                         3011.883
+Socket(s):                       1
+Core(s) per socket:              4
+L2 cache:                        1 MiB
+L3 cache:                        6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16272252 kB
+ --------------------------------------------------------------------------
+ Hibridon>  Hibridon>      *** Parameters (scattering):
+ JTOT1  =   0        JTOT2  =  10        JTOTD  =   1        JLPAR  =   0
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  80        IPRINT =  -1
+ FSTFAC =  1.500     RINCR  =  1.000     RCUT   = -100.0     RENDAI =  60.00    
+ RENDLD =  10.00     RSTART =  4.250     SPAC   = 0.1500     TOLAI  =  1.050    
+ XMU    =   1.77703
+ NOUT: 20; J1/J2-OUT: 00  10  20  30  40  50  60  70  80  90  01  11  21  31  41  51  61  71  81  91  
+ INDOUT:    1    2    3
+     *** 3SG-1SG system parameters:
+ J1MAX  =   4        J2MIN  =   0        J2MAX  =   2        IPOTSY2=   2
+ B1ROT  =  16.34     D1ROT  =  0.000     LAMBDA = 0.9199     GAMMA  =-5.4853E-02
+ B2ROT  =  59.32    
+ J1/J2: 
+     *** Flags:
+ AIRYFL= T    BASTST= F    BATCH = F    CHLIST= T    CSFLAG= F    FLAGHF= F
+ FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= T    NOPRIN= T    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= T    WAVEFL= F
+ WRPART= F    WRSMAT= T    WRXSEC= T    BOUNDC= F
+ ** Maximum Channels: 1000; Maximum Anisotropic Terms:  2000
+ ** Energies:       50.000000
+ ** Label:      NH - H2 RCCSD(T)-F12a(T) AVTZ PES by Y.         
+ ** Pot name:      NH - H2 PES                                     
+ ** Input File:  Nhph2.inp
+ ** Output file: Outpt
+ ** Jobname:     Job
+ Hibridon>  ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Oct 14 08:22:03 2021
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Oct 14 08:22:04 2021
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:03   WALL: 00:00:03   DATE: Oct 14 08:22:06 2021
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:06   WALL: 00:00:06   DATE: Oct 14 08:22:09 2021
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:10   WALL: 00:00:10   DATE: Oct 14 08:22:13 2021
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:15   WALL: 00:00:15   DATE: Oct 14 08:22:18 2021
+ ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:00:20   WALL: 00:00:20   DATE: Oct 14 08:22:23 2021
+ ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:00:25   WALL: 00:00:25   DATE: Oct 14 08:22:28 2021
+ ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:00:30   WALL: 00:00:30   DATE: Oct 14 08:22:33 2021
+ ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:00:35   WALL: 00:00:35   DATE: Oct 14 08:22:38 2021
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:40   WALL: 00:00:40   DATE: Oct 14 08:22:43 2021
+ ** J =    0 JLPAR =-1 FINISHED;  CPU: 00:00:40   WALL: 00:00:40   DATE: Oct 14 08:22:43 2021
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:40   WALL: 00:00:41   DATE: Oct 14 08:22:44 2021
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:00:42   WALL: 00:00:42   DATE: Oct 14 08:22:45 2021
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:00:45   WALL: 00:00:45   DATE: Oct 14 08:22:48 2021
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:00:49   WALL: 00:00:49   DATE: Oct 14 08:22:52 2021
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:00:53   WALL: 00:00:54   DATE: Oct 14 08:22:57 2021
+ ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:00:58   WALL: 00:00:58   DATE: Oct 14 08:23:01 2021
+ ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:01:02   WALL: 00:01:03   DATE: Oct 14 08:23:06 2021
+ ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:01:07   WALL: 00:01:07   DATE: Oct 14 08:23:10 2021
+ ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:01:12   WALL: 00:01:12   DATE: Oct 14 08:23:15 2021
+ ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:01:16   WALL: 00:01:16   DATE: Oct 14 08:23:19 2021
+ ===============================================================================
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:   214
+      TIMING:  ELAPSED 00:01:16 / CPU 00:01:16 / MP RATIO  100.9 %
+      CURRENT DATE:  Oct 14 08:23:19 2021
+ ===============================================================================
+ Hibridon> 
+ INTEGRAL CROSS SECTIONS READ FROM FILE Job1.ics                                
+ WRITTEN:   Oct 14 08:23:19 2021
+ LABEL:     NH - H2 RCCSD(T)-F12a(T) AVTZ PES by Y.         
+ POT NAME:  NH - H2 PES                                     
+
+ ** INTEGRAL CROSS SECTIONS; IEN= 1 **
+    RMU=   1.7770  E=    50.00  JLPAR=-1  JTOT-1=  0  JTOT-2=  10  JTOT-D=  1
+ ** CC CALCULATION, JLPAR=-1 **
+
+ ** COLUMN HEADINGS ARE INITIAL STATES, ROW HEADINGS ARE FINAL STATES **
+
+            J=    0        10        20        10
+   J    I | I=    1         1         1         2
+ 
+   10    1   7.826E-01  1.633E+02  5.154E-01  4.752E-01
+    0    1   1.882E+02  9.612E-02  1.192E+00  1.636E-02
+   20    1   5.657E+00  3.005E-01  1.585E+02  4.300E+00
+   10    2   4.432E-02  1.581E-01  2.455E+00  1.296E+02
+ Hibridon>  Hibridon> 
