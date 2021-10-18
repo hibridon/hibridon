@@ -219,7 +219,7 @@ do 80 i = 1, nlevel - 1
         jhold(ii) = ikeep
         ikeep = ishold(i)
         ishold(i) = ishold(ii)
-        ishold(ii) = ikepp
+        ishold(ii) = ikeep
         ekeep = ehold(i)
         ehold(i) = ehold(ii)
         ehold(ii) = ekeep
@@ -297,6 +297,7 @@ if (n .gt. 1) then
 end if
 !
 !  now check to see if any of the open channels are closed at r = rcut
+nn = 0
 if (rcut .gt. 0.d0 .and. .not.boundc) then
   emin = 1.e+7
   do 120 i = 1, n
@@ -313,7 +314,6 @@ if (rcut .gt. 0.d0 .and. .not.boundc) then
 !  now eliminate all channels with eint .gt. emin if any of the channels
 !  are open asymptoptically but closed at r  = rcut
   if (emin .lt. ered) then
-    nn = 0
     do 130 i = 1, n
       if (eint(i) .lt. emin) then
 !  here if this channel is to be included
