@@ -116,12 +116,13 @@ subroutine ba2pi (j, l, is, jhold, ehold, ishold, nlevel, &
 !   vlm2pi:    returns angular coupling coefficient for particular
 !              choice of channel index
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, v2mat
+use mod_cov2, only: nv2max, v2mat, lamv2t
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlammx, nlam
 implicit double precision (a-h,o-z)
 type(v2mat), intent(out), allocatable :: v2
+type(lamv2t), pointer :: lamv2
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
@@ -675,8 +676,6 @@ endif
 !  inum counts v2 elements for given lambda
 !  ilam counts number of v2 matrices
 !  ij is address of given v2 element in present v2 matrix
-ASSERT(.not. allocated(v2))
-v2 = v2mat(nlammx=nlammx, num_channels=ntop)
 i = 0
 lamsum = 0
 istep = 1
@@ -689,6 +688,8 @@ if (bastst .and. iprint .gt. 1) then
 285   format (/' ILAM  LAMBDA      ICOL      IROW       I', &
     '        IV2    VEE')
 end if
+ASSERT(.not. allocated(v2))
+v2 = v2mat(nlam=nlam, num_channels=ntop)
 do 400 ilam = 1, nlam
 !  ilam is the angular expansion label
 !  here for l=0 term in electrostatic potential
@@ -731,6 +732,7 @@ do 400 ilam = 1, nlam
         i=i+1
         inum=inum+1
         if(i.gt.nv2max) goto 350
+          write(6,*) 'graffy: ilam, irow, icol, nlam, nchan:',ilam, irow, icol, v2%nlam, v2%num_channels
           call v2%set_element(ilam, irow, icol, vee)
           if(.not.bastst .or. iprint .le. 1) goto 350
             write (6, 290) ilam, lb, icol, irow, i, ij, vee
@@ -738,12 +740,13 @@ do 400 ilam = 1, nlam
 290             format (i4, i7, 3i10, i10, g17.8)
 350     continue
 355   continue
+  lamv2 => v2%get_lamv2(ilam)
   if (bastst) then
-    write (6, 360) ilam, v2%lamv2(ilam)%get_num_elements()
-    write (9, 360) ilam, v2%lamv2(ilam)%get_num_elements()
+    write (6, 360) ilam, lamv2%get_num_elements()
+    write (9, 360) ilam, lamv2%get_num_elements()
 360     format ('ILAM=', i3, ' LAMNUM(ILAM) =', i9)
   end if
-  lamsum = lamsum + v2%lamv2(ilam)%get_num_elements()
+  lamsum = lamsum + lamv2%get_num_elements()
 400 continue
 if(i.gt.nv2max) then
    write (6, 410) i, nv2max

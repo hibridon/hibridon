@@ -106,14 +106,15 @@ module mod_cov2
    end type lamv2t
 
    type, public                 :: v2mat
-     integer                    :: nlammx = 0
-     integer                    :: num_channels = 0
      integer                    :: nlam = 0
+     integer                    :: num_channels = 0
      type(lamv2t), allocatable  :: lamv2(:)
      contains
      final                      :: v2mat_destroy
      procedure                  :: set_element => v2mat_set_element
      procedure                  :: get_element => v2mat_get_element
+     procedure                  :: get_lamv2 => v2mat_get_lamv2
+     procedure                  :: ensure_lamv2_is_allocated => v2mat_ensure_lamv2_is_allocated
      procedure                  :: empty => v2mat_empty
      procedure                  :: print_summary => v2mat_print_summary
 
@@ -146,18 +147,17 @@ module mod_cov2
       vee = this%v2d%get_element(ielement)
    end subroutine 
 
-   function create_v2mat(nlammx, num_channels) result(v2)
-     integer, intent(in) :: nlammx
+   function create_v2mat(nlam, num_channels) result(v2)
+     integer, intent(in) :: nlam
      integer, intent(in) :: num_channels
 
      type(v2mat)  :: v2
      integer :: ilam
 
-     v2%nlammx = nlammx
-     v2%nlam = 0
+     v2%nlam = nlam
      v2%num_channels = num_channels
-     allocate(v2%lamv2(nlammx))
-     do ilam = 1, nlammx
+     allocate(v2%lamv2(nlam))
+     do ilam = 1, nlam
        v2%lamv2(ilam)%is_allocated = .false.
      !  v2%lamv2(ilam)%num_channels = num_channels
      !  v2%lamv2(ilam)%v2d = dgrovec(block_size=1024*4, num_blocks=1024*8)
@@ -172,6 +172,27 @@ module mod_cov2
       end if
    end subroutine
 
+   function v2mat_get_lamv2(this, ilam) result(lamv2)
+      class(v2mat), target  :: this
+      integer, intent(in) :: ilam
+      type(lamv2t), pointer :: lamv2
+      call this%ensure_lamv2_is_allocated(ilam)
+      lamv2 => this%lamv2(ilam)
+   end function
+
+   subroutine v2mat_ensure_lamv2_is_allocated(this, ilam)
+      class(v2mat)        :: this
+      integer, intent(in) :: ilam
+      if (.not. this%lamv2(ilam)%is_allocated) then
+         allocate(this%lamv2(ilam)%v2d)
+         allocate(this%lamv2(ilam)%v2i)
+         this%lamv2(ilam)%v2d = dgrovec(block_size=1024*4, num_blocks=1024*8)
+         this%lamv2(ilam)%v2i = igrovec(block_size=1024*4, num_blocks=1024*8)
+         this%lamv2(ilam)%num_channels = this%num_channels
+         this%lamv2(ilam)%is_allocated = .true.
+      end if
+    end subroutine
+
    subroutine v2mat_set_element(this, ilam, irow, icol, vee)
       class(v2mat)        :: this
       integer, intent(in) :: ilam
@@ -180,15 +201,7 @@ module mod_cov2
       real(8), intent(in) :: vee
       integer :: ij
       ij = this%num_channels * (icol - 1) +irow
-      if (.not. this%lamv2(ilam)%is_allocated) then
-        allocate(this%lamv2(ilam)%v2d)
-        allocate(this%lamv2(ilam)%v2i)
-        this%lamv2(ilam)%v2d = dgrovec(block_size=1024*4, num_blocks=1024*8)
-        this%lamv2(ilam)%v2i = igrovec(block_size=1024*4, num_blocks=1024*8)
-        this%lamv2(ilam)%num_channels = this%num_channels
-        this%lamv2(ilam)%is_allocated = .true.
-        this%nlam = max(this%nlam, ilam)
-      end if
+      call this%ensure_lamv2_is_allocated(ilam)
       call this%lamv2(ilam)%v2d%append(vee)
       call this%lamv2(ilam)%v2i%append(ij)
    end subroutine 
@@ -199,13 +212,14 @@ module mod_cov2
       integer(8), intent(in) :: ielement
       integer, intent(out) :: ij
       real(8), intent(out) :: vee
+      
       call this%lamv2(ilam)%get_element(ielement, ij, vee)
    end subroutine 
 
    subroutine v2mat_empty(this)
       class(v2mat)        :: this
       integer :: ilam
-      do ilam = 1, this%nlammx
+      do ilam = 1, this%nlam
          call this%lamv2(ilam)%v2d%empty()
          call this%lamv2(ilam)%v2i%empty()
       end do
@@ -214,7 +228,7 @@ module mod_cov2
    subroutine v2mat_print_summary(this)
       class(v2mat)        :: this
       integer :: ilam, num_nz_elements, num_channels
-      do ilam = 1, this%nlammx
+      do ilam = 1, this%nlam
          if (this%lamv2(ilam)%is_allocated) then
             num_nz_elements = this%lamv2(ilam)%get_num_elements()
             if (num_nz_elements > 0) then

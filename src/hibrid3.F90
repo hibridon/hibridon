@@ -350,9 +350,9 @@ ioff = 0
 !ABER
 if (v2%nlam .gt. 0) then
   do ilam = 1, v2%nlam
-      ! write(6,*) 'ilam=', ilam, 'v2%lamv2(ilam)%get_num_elements()=', v2%lamv2(ilam)%get_num_elements()
+      ! write(6,*) 'ilam=', ilam, 'v2%get_lamv2(ilam)%get_num_elements()=', v2%get_lamv2(ilam)%get_num_elements()
       !lamv2 => v2%lamv2(ilam)
-      associate( lamv2 => v2%lamv2(ilam) )
+      associate( lamv2 => v2%get_lamv2(ilam) )
       num_nz_elements = lamv2%get_num_elements()
       ASSERT(num_nz_elements >= 0)
       do iv2_element = 1, num_nz_elements

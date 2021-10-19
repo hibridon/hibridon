@@ -807,44 +807,45 @@ add_hibridon_testsuite("all" "${all_testsuite}" "${test_dirs_list}")
 # ignoring the meaningfulness of the tests
 # this test suite is the one to use to detect possible regressions after refactoring code
 set(coverage_testsuite
-  arch4_quick
-  arn2
-  arn2_big
+  # arch4_quick
+  # arn2
+  # arn2_big
   arno
   arno_bound
   aroh
-  boh2_b
-  boh2_b2
-  c2hh2_quick
-  cahe
-  ch2he_a_quick
-  ch2he_x_quick
-  ch2he_stmix
-  ch3he_quick
-  ch3he_ccsdt_quick
-  ch3he_vib_quick
-  ch3i
-  cnph2
-  h2ohe
-  h2ohe_orig
-  h2ohe_prsbr_quick
-  h2ohe_trnprt
-  hco_trnprt_quick
-  hecn_quick
-  heco
+  # boh2_b
+  # boh2_b2
+  # c2hh2_quick
+  # cahe
+  # ch2he_a_quick
+  # ch2he_x_quick
+  # ch2he_stmix
+  # ch3he_quick
+  # ch3he_ccsdt_quick
+  # ch3he_vib_quick
+  # ch3i
+  # cnph2
+  # h2ohe
+  # h2ohe_orig
+  # h2ohe_prsbr_quick
+  # h2ohe_trnprt
+  # hco_trnprt_quick
+  # hecn_quick
+  # heco
   heohx_quick
-  nh3h2
-  nh3h2_qma
-  nh3he
-  nhph2_quick
-  o3ph2_quick
-  ohh2_bausr_heohx_quick
-  ohh2_bausr_j1_quick
-  ohh2_j1_quick
-  ohh2_j13_quick
-  stp1sg_ch3he_quick
-  stp1sg_nh3h2
-  vfit)
+  # nh3h2
+  # nh3h2_qma
+  # nh3he
+  # nhph2_quick
+  # o3ph2_quick
+  # ohh2_bausr_heohx_quick
+  # ohh2_bausr_j1_quick
+  # ohh2_j1_quick
+  # ohh2_j13_quick
+  # stp1sg_ch3he_quick
+  # stp1sg_nh3h2
+  # vfit
+  )
 # test cph2 removed until it is fixed (see issue #48)
 
 
