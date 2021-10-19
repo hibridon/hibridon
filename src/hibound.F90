@@ -196,7 +196,7 @@ write (9, 210) delr, hsimp, nr + 1, hexac
 allocate(g(vmax))
 do ir = 1, nr + 1
    rnow = (ir - 1) * hexac + r1 - delr
-   call vmat_bound(wr, rnow, nch, nmax)
+   call vmat_bound(wr, rnow, nch, nmax, v2)
    if (ir .eq. 1 .or. ir .eq. nr) then
       wt = hexac * 0.375d0
    else if (mod(ir, 3) .eq. 1) then
