@@ -48,7 +48,7 @@
     integer                    :: el_index_in_block
 
     block_index =  (el_index-1) / this%block_size
-    el_index_in_block = el_index - (block_index * this%block_size)
+    el_index_in_block = el_index - 1 - (block_index * this%block_size)
     
     call CONCATENATE(GROVEC_CLASS_NAME,_ensure_block_is_available)(this, block_index)
 
@@ -65,7 +65,7 @@
     integer                    :: el_index_in_block
 
     block_index =  (el_index-1) / this%block_size
-    el_index_in_block = el_index - (block_index * this%block_size)
+    el_index_in_block = el_index - 1 - (block_index * this%block_size)
     CONCATENATE(GROVEC_CLASS_NAME,_get_element) = this%blocks(block_index)%p(el_index_in_block)
   end function
 
