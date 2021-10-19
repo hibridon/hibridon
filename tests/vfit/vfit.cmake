@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 
 set(TEST_ID vfit)
-set(TEST_POT_SRC_FILE "pot_vfit.F")
+set(TEST_POT_SRC_FILE "pot_vfit.F90")
 set(TEST_POT_DATA_FILES "FOLLMEG.BIN")
 set(TEST_COMMAND_FILE "vfit_test.com")
 set(TEST_INPUT_FILES "N2phetest.inp")

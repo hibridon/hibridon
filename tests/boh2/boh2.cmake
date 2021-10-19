@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 
 set(TEST_ID boh2_b)
-set(TEST_POT_SRC_FILE "pot_boh2.F")
+set(TEST_POT_SRC_FILE "pot_boh2.F90")
 set(TEST_POT_DATA_FILES "")
 set(TEST_COMMAND_FILE "boh2_b.com")
 set(TEST_INPUT_FILES "Boh2_b.inp")
@@ -19,7 +19,7 @@ add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "
 #------------------------------------------------------------------------------
 
 set(TEST_ID boh2_b2)
-set(TEST_POT_SRC_FILE "pot_boh2.F")
+set(TEST_POT_SRC_FILE "pot_boh2.F90")
 set(TEST_POT_DATA_FILES "")
 set(TEST_COMMAND_FILE "boh2_b2.com")
 set(TEST_INPUT_FILES "Boh2_b2.inp")

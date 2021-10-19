@@ -5,7 +5,7 @@
 #------------------------------------------------------------------------------
 
 set(TEST_ID arno_bound)
-set(TEST_POT_SRC_FILE "pot_arno_ccsdt.F")
+set(TEST_POT_SRC_FILE "pot_arno_ccsdt.F90")
 set(TEST_POT_DATA_FILES "")
 set(TEST_COMMAND_FILE "arno_bound.com")
 set(TEST_INPUT_FILES "Arno.inp")

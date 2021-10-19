@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 
 set(TEST_ID ohh2_bausr_j1)
-set(TEST_POT_SRC_FILE "pot_ohh2_bausr.F")
+set(TEST_POT_SRC_FILE "pot_ohh2_bausr.F90")
 set(TEST_POT_DATA_FILES "pot_ohh2_bausr_b pot_ohh2_bausr_f")
 set(TEST_COMMAND_FILE "ohh2_bausr_j1.com")
 set(TEST_INPUT_FILES "Ohh2.inp")
@@ -18,7 +18,7 @@ add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "
 #------------------------------------------------------------------------------
 
 set(TEST_ID ohh2_bausr_j1_quick)
-set(TEST_POT_SRC_FILE "pot_ohh2_bausr.F")
+set(TEST_POT_SRC_FILE "pot_ohh2_bausr.F90")
 set(TEST_POT_DATA_FILES "pot_ohh2_bausr_b pot_ohh2_bausr_f")
 set(TEST_COMMAND_FILE "ohh2_bausr_j1_quick.com")
 set(TEST_INPUT_FILES "Ohh2_quick.inp")
@@ -33,7 +33,7 @@ add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "
 #------------------------------------------------------------------------------
 
 set(TEST_ID ohh2_bausr_heohx)
-set(TEST_POT_SRC_FILE "pot_ohh2_bausr.F")
+set(TEST_POT_SRC_FILE "pot_ohh2_bausr.F90")
 set(TEST_POT_DATA_FILES "pot_heohx_3d_b pot_heohx_3d_f")
 set(TEST_COMMAND_FILE "ohh2_bausr_heohx.com")
 set(TEST_INPUT_FILES "Testpisg.inp")
@@ -48,7 +48,7 @@ add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "
 #------------------------------------------------------------------------------
 
 set(TEST_ID ohh2_bausr_heohx_quick)
-set(TEST_POT_SRC_FILE "pot_ohh2_bausr.F")
+set(TEST_POT_SRC_FILE "pot_ohh2_bausr.F90")
 set(TEST_POT_DATA_FILES "pot_heohx_3d_b pot_heohx_3d_f")
 set(TEST_COMMAND_FILE "ohh2_bausr_heohx_quick.com")
 set(TEST_INPUT_FILES "Testpisg_quick.inp")

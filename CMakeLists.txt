@@ -15,7 +15,7 @@ set(ENABLE_CODE_COVERAGE "OFF" CACHE BOOL "to enable or disable code coverage an
 # 2. it makes code slower
 set(ENABLE_PROFILING "OFF" CACHE BOOL "to enable or disable performance profiling (mostly for developers)")
 
-set(ENABLE_ASSERTS "OFF" CACHE BOOL "to enable or disable assert checks for debug builds (mostly for developers). Asserts are disabled by default because they can cause the compilation to fail depending on the compiler (assert system needs to be made more robust)")
+set(ENABLE_ASSERTS "ON" CACHE BOOL "to enable or disable assert checks for debug builds (mostly for developers).")
 
 # With gfortran, variables are initialized to 0 by default, but it's not the case with ifort compiler. Therefore, all variables need to be initialized to guarantee the program works in a deterministic way on every compiler.
 set(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR "ON" CACHE BOOL "if set, causes the use of uninitilazed variables to trigger an exception, thus making the program stop. This is useful to detect uninitialized memory issues.")
@@ -79,61 +79,61 @@ message( STATUS BLAS found: ${LAPACK_LIBRARIES} )
 add_library(hib
      src/assert.f90
      src/grovec.F90
-     src/hiamp.F
-     src/hibasis.F
-     src/hibound.F
-     src/hibrid1.F
-     src/hibrid2.F
-     src/hibrid3.F
-     src/hibrid4.F
-     src/hibrid5.F
-     src/hicommon.F
-     src/hidifcrs.F
-     src/hiflow.F
-     src/hihypxsc.F
-     src/hiiolib_f.F
-     src/himatrix.F
+     src/hiamp.F90
+     src/hibasis.F90
+     src/hibound.F90
+     src/hibrid1.F90
+     src/hibrid2.F90
+     src/hibrid3.F90
+     src/hibrid4.F90
+     src/hibrid5.F90
+     src/hicommon.F90
+     src/hidifcrs.F90
+     src/hiflow.F90
+     src/hihypxsc.F90
+     src/hiiolib_f.F90
+     src/himatrix.F90
      src/himem.F90
-     src/hinput.F
-     src/hiprsbr.F
-     src/histmix.F
-     src/hisystem.F
-     src/hitensor.F
-     src/hitrnprt.F
-     src/hiutil.F
-     src/hivector.F
-     src/hipotutil.F
-     src/hiversion.F
-     src/bases/hiba01_1sg.F
-     src/bases/hiba02_2sg.F
-     src/bases/hiba03_2pi.F
-     src/bases/hiba04_sgpi.F
-     src/bases/hiba05_pi.F
-     src/bases/hiba06_stp.F
-     src/bases/hiba07_13p.F
-     src/bases/hiba08_2mol.F
-     src/bases/hiba09_stpln.F
-     src/bases/hiba10_22p.F
-     src/bases/hiba11_1del.F
-     src/bases/hiba12_h2p.F
-     src/bases/hiba13_h3p.F
-     src/bases/hiba14_2del.F
-     src/bases/hiba15_diat2p.F
-     src/bases/hiba16_astp.F
-     src/bases/hiba17_ch2x.F
-     src/bases/hiba18_stp1.F
-     src/bases/hiba19_sgpi1.F
-     src/bases/hiba20_2pi1sg.F
-     src/bases/hiba21_stp1sg.F
-     src/bases/hiba22_1d3p.F
-     src/bases/hiba23_3p2s.F
-     src/bases/hiba24_sphtp.F
-     src/bases/hiba25_1sg1sg.F
-     src/bases/hiba26_2sg1sg.F
-     src/bases/hiba27_astp1.F
-     src/bases/hiba28_3sg1sg.F
-     src/bases/hiba29_astp2.F
-     src/bases/hiba30_astp3.F)
+     src/hinput.F90
+     src/hiprsbr.F90
+     src/histmix.F90
+     src/hisystem.F90
+     src/hitensor.F90
+     src/hitrnprt.F90
+     src/hiutil.F90
+     src/hivector.F90
+     src/hipotutil.F90
+     src/hiversion.F90
+     src/bases/hiba01_1sg.F90
+     src/bases/hiba02_2sg.F90
+     src/bases/hiba03_2pi.F90
+     src/bases/hiba04_sgpi.F90
+     src/bases/hiba05_pi.F90
+     src/bases/hiba06_stp.F90
+     src/bases/hiba07_13p.F90
+     src/bases/hiba08_2mol.F90
+     src/bases/hiba09_stpln.F90
+     src/bases/hiba10_22p.F90
+     src/bases/hiba11_1del.F90
+     src/bases/hiba12_h2p.F90
+     src/bases/hiba13_h3p.F90
+     src/bases/hiba14_2del.F90
+     src/bases/hiba15_diat2p.F90
+     src/bases/hiba16_astp.F90
+     src/bases/hiba17_ch2x.F90
+     src/bases/hiba18_stp1.F90
+     src/bases/hiba19_sgpi1.F90
+     src/bases/hiba20_2pi1sg.F90
+     src/bases/hiba21_stp1sg.F90
+     src/bases/hiba22_1d3p.F90
+     src/bases/hiba23_3p2s.F90
+     src/bases/hiba24_sphtp.F90
+     src/bases/hiba25_1sg1sg.F90
+     src/bases/hiba26_2sg1sg.F90
+     src/bases/hiba27_astp1.F90
+     src/bases/hiba28_3sg1sg.F90
+     src/bases/hiba29_astp2.F90
+     src/bases/hiba30_astp3.F90)
 
 
 # FFLAGS depend on the compiler
@@ -296,7 +296,7 @@ execute_process(COMMAND "git" "--git-dir=${CMAKE_CURRENT_SOURCE_DIR}/.git" "log"
                 ERROR_QUIET)
                 
 
-# The following is for preprocessing of hiversion.F
+# The following is for preprocessing of hiversion.F90
 target_compile_definitions(hib PUBLIC _BUILD_VERS_=${PROJECT_VERSION})
 target_compile_definitions(hib PUBLIC _BUILD_TYPE_="${CMAKE_BUILD_TYPE}")
 target_compile_definitions(hib PUBLIC _GIT_REVISION_="${GIT_REVISION}")
@@ -307,7 +307,7 @@ target_compile_definitions(hib PUBLIC _BUILD_COMP_="${CMAKE_Fortran_COMPILER}")
 target_compile_definitions(hib PUBLIC _BUILD_FLAGS_="${HIBRIDON_COMPILE_OPTIONS}")
 string(TIMESTAMP TODAY "%Y-%m-%d at %H:%M")
 target_compile_definitions(hib PUBLIC _BUILD_DATE_="${TODAY}")
-# The ffollowing is for preprocessing of hhelp.F and hiutil.F
+# The ffollowing is for preprocessing of hhelp.F90 and hiutil.F90
 target_compile_definitions(hib PUBLIC _HELPDIR_="${CMAKE_CURRENT_SOURCE_DIR}/doc/")
 
 add_custom_command(
@@ -325,6 +325,7 @@ list(APPEND HIBRIDON_COMPILE_OPTIONS "-I${CMAKE_CURRENT_SOURCE_DIR}/src")
 # (true, we are compiling with gfortran here, having the same restriction here will ease detecting lines that exceed 132 columns,
 # they would break intel fortran's build)
 if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS "-ffree-line-length-none")
   list(APPEND HIBRIDON_COMPILE_OPTIONS "-ffixed-line-length-132")
 elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   list(APPEND HIBRIDON_COMPILE_OPTIONS "-extend-source" "132")
@@ -435,7 +436,7 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
   set(TEST_EXE ${TEST_ID})
   set(HIBRIDON_MODULES_DIR ${hibridon_BINARY_DIR}) # location where to find the module files (*.mod)
 
-  add_executable(${TEST_EXE} ${TEST_SRC_DIR}/${TEST_POT_SRC_FILE} ${hibridon_SOURCE_DIR}/src/himain.F)
+  add_executable(${TEST_EXE} ${TEST_SRC_DIR}/${TEST_POT_SRC_FILE} ${hibridon_SOURCE_DIR}/src/himain.F90)
   target_compile_definitions(${TEST_EXE} PUBLIC T_MATRIX_SIZE=${TEST_T_MATRIX_SIZE})
   target_link_libraries(${TEST_EXE} hib ${HIBRIDON_LINK_LIBRARIES})
   target_include_directories(${TEST_EXE} PUBLIC ${hibridon_SOURCE_DIR}/src)
@@ -860,7 +861,7 @@ function(add_hibexe EXE_NAME POT_SRC_FILE p_T_MATRIX_SIZE)
   set(TEST_EXE ${TEST_ID})
   set(HIBRIDON_MODULES_DIR ${hibridon_BINARY_DIR}) # location where to find the module files (*.mod)
 
-  add_executable(${EXE_NAME} ${POT_SRC_FILE} ${hibridon_SOURCE_DIR}/src/himain.F)
+  add_executable(${EXE_NAME} ${POT_SRC_FILE} ${hibridon_SOURCE_DIR}/src/himain.F90)
   target_compile_definitions(${EXE_NAME} PUBLIC T_MATRIX_SIZE=${p_T_MATRIX_SIZE})
   target_link_libraries(${EXE_NAME} hib ${HIBRIDON_LINK_LIBRARIES})
   target_include_directories(${EXE_NAME} PUBLIC ${hibridon_SOURCE_DIR}/src)

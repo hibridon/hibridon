@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 
 set(TEST_ID aroh)
-set(TEST_POT_SRC_FILE "pot_arohx_ump4.F")
+set(TEST_POT_SRC_FILE "pot_arohx_ump4.F90")
 set(TEST_POT_DATA_FILES "")
 set(TEST_COMMAND_FILE "aroh_jatest.com")
 set(TEST_INPUT_FILES "Aroh_jatest.inp")

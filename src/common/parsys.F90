@@ -1,0 +1,3 @@
+!comdeck parsys
+integer, parameter :: maxpar = 100
+integer, parameter :: lencod = 2*maxpar+3

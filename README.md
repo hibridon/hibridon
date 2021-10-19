@@ -54,7 +54,7 @@ Paste the following content and edit to suit your needs:
 # NH3-H2 sample cmake script
 
 set(EXE_NAME "nh3h2.exe")
-set(POT_SRC_FILE "/home/NH3H2/pot_nh3h2_2009.F")
+set(POT_SRC_FILE "/home/NH3H2/pot_nh3h2_2009.F90")
 set(p_T_MATRIX_SIZE "500")
 ```
 where 
@@ -62,7 +62,7 @@ where
 * `POT_SRC_FILE` is the full path to your potential fortran source code*
 * `p_T_MATRIX_SIZE` is the T_MATRIX_SIZE parameter
 
-\*Simply the filename (e.g. `pot_nh3h2_2009.F` or `./pot_nh3h2_2009.F`) if your potential is located in the build directory.
+\*Simply the filename (e.g. `pot_nh3h2_2009.F90` or `./pot_nh3h2_2009.F90`) if your potential is located in the build directory.
 
 
 ### 5. Configure hibridon's build

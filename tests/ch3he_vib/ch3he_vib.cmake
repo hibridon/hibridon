@@ -4,7 +4,7 @@
 #------------------------------------------------------------------------------
 
 set(TEST_ID ch3he_vib)
-set(TEST_POT_SRC_FILE "pot_ch3he_vib.F")
+set(TEST_POT_SRC_FILE "pot_ch3he_vib.F90")
 set(TEST_POT_DATA_FILES "pot_ch3he_vib_data pot_ch3he_vib_ylmasym pot_ch3he_vib_ylmsym")
 set(TEST_COMMAND_FILE "ch3he_vib_test.com")
 set(TEST_INPUT_FILES "Vises.inp")
@@ -20,7 +20,7 @@ add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "
 #------------------------------------------------------------------------------
 
 set(TEST_ID ch3he_vib_quick)
-set(TEST_POT_SRC_FILE "pot_ch3he_vib.F")
+set(TEST_POT_SRC_FILE "pot_ch3he_vib.F90")
 set(TEST_POT_DATA_FILES "pot_ch3he_vib_data pot_ch3he_vib_ylmasym pot_ch3he_vib_ylmsym")
 set(TEST_COMMAND_FILE "ch3he_vib_quick.com")
 set(TEST_INPUT_FILES "Ch3he_vib_quick.inp")

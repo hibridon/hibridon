@@ -1,3 +1,0 @@
-*comdeck rpar
-      common /corpar/ fstfac, rincr, rcut, rendai, rendld, rstart, spac,
-     :                tolai, xmu

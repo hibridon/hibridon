@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 
 set(TEST_ID cnph2)
-set(TEST_POT_SRC_FILE "pot_cnh2_lique.F")
+set(TEST_POT_SRC_FILE "pot_cnh2_lique.F90")
 set(TEST_POT_DATA_FILES "pot_cnh2_lique.dat")
 set(TEST_COMMAND_FILE "cnph2.com")
 set(TEST_INPUT_FILES "Cnph2.inp")

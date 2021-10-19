@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 
 set(TEST_ID stp1sg_ch3he)
-set(TEST_POT_SRC_FILE "pot_stp1sg_qma.F")
+set(TEST_POT_SRC_FILE "pot_stp1sg_qma.F90")
 set(TEST_POT_DATA_FILES "pot_ch3he_rigid_stp1sg.txt")
 set(TEST_COMMAND_FILE "stp1sg_och3he.com")
 set(TEST_INPUT_FILES "Stp_och3he.inp")
@@ -18,7 +18,7 @@ add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "
 #------------------------------------------------------------------------------
 
 set(TEST_ID stp1sg_ch3he_quick)
-set(TEST_POT_SRC_FILE "pot_stp1sg_qma.F")
+set(TEST_POT_SRC_FILE "pot_stp1sg_qma.F90")
 set(TEST_POT_DATA_FILES "pot_ch3he_rigid_stp1sg.txt")
 set(TEST_COMMAND_FILE "stp1sg_ch3he_quick.com")
 set(TEST_INPUT_FILES "Stp_ch3he_quick.inp")
@@ -33,7 +33,7 @@ add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "
 #------------------------------------------------------------------------------
 
 set(TEST_ID stp1sg_nh3h2)
-set(TEST_POT_SRC_FILE "pot_stp1sg_qma.F")
+set(TEST_POT_SRC_FILE "pot_stp1sg_qma.F90")
 set(TEST_POT_DATA_FILES "pot_nh3h2_cp.dat")
 set(TEST_COMMAND_FILE "stp1sg_pnh3ph2.com")
 set(TEST_INPUT_FILES "Stp_pnh3ph2.inp")

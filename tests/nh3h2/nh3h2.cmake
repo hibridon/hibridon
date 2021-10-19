@@ -4,7 +4,7 @@
 #------------------------------------------------------------------------------
 
 set(TEST_ID nh3h2)
-set(TEST_POT_SRC_FILE "pot_nh3h2_2009.F")
+set(TEST_POT_SRC_FILE "pot_nh3h2_2009.F90")
 set(TEST_POT_DATA_FILES "fitvij_bf_62.h2")
 set(TEST_COMMAND_FILE "nh3h2_test.com")
 set(TEST_INPUT_FILES "Nh3h2_po.inp")
