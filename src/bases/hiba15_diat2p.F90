@@ -101,6 +101,7 @@ use mod_coiv2, only: iv2
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_hiba12_h2p, only: vlmh2p, vlmh2pc
 implicit double precision (a-h,o-z)
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"

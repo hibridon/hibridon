@@ -103,7 +103,7 @@ module mod_cov2
      type(igrovec_type), allocatable :: v2i   ! the non-zero elements indices 
      contains
      
-     procedure                  :: get_num_elements => ancouma_type_get_num_elements
+     procedure                  :: get_num_nonzero_elements => ancouma_type_get_num_nonzero_elements
      procedure                  :: get_element => ancouma_type_get_element
      procedure                  :: set_element => ancouma_type_set_element
    end type ancouma_type
@@ -117,6 +117,7 @@ module mod_cov2
      final                      :: ancou_type_destroy
      procedure                  :: set_element => ancou_type_set_element
      procedure                  :: get_element => ancou_type_get_element
+     procedure                  :: get_num_nonzero_elements => ancou_type_get_num_nonzero_elements
      procedure                  :: get_angular_coupling_matrix => ancou_type_get_angular_coupling_matrix
      procedure                  :: ensure_ancouma_is_allocated => ancou_type_ensure_ancouma_is_allocated
      procedure                  :: empty => ancou_type_empty
@@ -136,7 +137,7 @@ module mod_cov2
    integer, allocatable               :: nv2max, ndummy
    contains
 
-   function ancouma_type_get_num_elements(this) result(n)
+   function ancouma_type_get_num_nonzero_elements(this) result(n)
       class(ancouma_type)        :: this
       integer(8)           :: n
       n = this%v2d%num_elements
@@ -186,6 +187,18 @@ module mod_cov2
          deallocate(this%ancouma)
       end if
    end subroutine
+
+   function ancou_type_get_num_nonzero_elements(this) result(num_nz_elements)
+      class(ancou_type), target  :: this
+      integer :: ilam
+      integer(8) :: lam_nz_els, num_nz_elements
+      type(ancouma_type), pointer :: ancouma 
+      do ilam = 1, this%nlam
+         ancouma => this%get_angular_coupling_matrix(ilam)
+         lam_nz_els = ancouma%get_num_nonzero_elements()
+         num_nz_elements = num_nz_elements + lam_nz_els
+      end do
+   end function
 
    function ancou_type_get_angular_coupling_matrix(this, ilam) result(ancouma)
       class(ancou_type), target  :: this
@@ -254,7 +267,7 @@ module mod_cov2
       integer :: ilam, num_nz_elements, num_channels
       do ilam = 1, this%nlam
          if (this%ancouma(ilam)%is_allocated) then
-            num_nz_elements = this%ancouma(ilam)%get_num_elements()
+            num_nz_elements = this%ancouma(ilam)%get_num_nonzero_elements()
             if (num_nz_elements > 0) then
                num_channels = this%ancouma(ilam)%num_channels
                write (6,*) 'ilam =', ilam, ' : ', num_nz_elements, '/', num_channels * num_channels ,' non zero elements '

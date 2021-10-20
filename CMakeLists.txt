@@ -813,8 +813,8 @@ set(coverage_testsuite
   arno
   arno_bound
   aroh
-  # boh2_b
-  # boh2_b2
+  boh2_b
+  boh2_b2
   # c2hh2_quick
   # cahe
   # ch2he_a_quick

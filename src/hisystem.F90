@@ -167,6 +167,7 @@ subroutine sysdat (irpot, readpt, iread)
 !  -----------------------------------------------------------------------
 use mod_hiba1sg, only: sy1sg
 use mod_hiba03_2pi, only: sy2pi
+use mod_hiba12_h2p, only: syh2p
 integer ibasty, irpot, iread
 logical readpt
 common /coselb/ ibasty
@@ -320,6 +321,7 @@ subroutine syssav (readpt)
 !  -----------------------------------------------------------------------
 use mod_hiba1sg, only: sav1sg
 use mod_hiba03_2pi, only: sav2pi
+use mod_hiba12_h2p, only: savh2p
 
 integer ibasty
 logical readpt
@@ -473,6 +475,7 @@ subroutine ptread (filnam, readpt)
 !  -----------------------------------------------------------------------
 use mod_hiba1sg, only: ptr1sg
 use mod_hiba03_2pi, only: ptr2pi
+use mod_hiba12_h2p, only: ptrh2p
 integer ibasty
 logical readpt
 character*(*) filnam

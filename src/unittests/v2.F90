@@ -33,14 +33,14 @@ program test_ancou_type
 
     sum = 0.d0
     do ilam = 1, v2%nlam
-       ! write(6,*) 'ilam=', ilam, 'v2%get_angular_coupling_matrix(ilam)%get_num_elements()=', v2%get_angular_coupling_matrix(ilam)%get_num_elements()
+       ! write(6,*) 'ilam=', ilam, 'v2%get_angular_coupling_matrix(ilam)%get_num_nonzero_elements()=', v2%get_angular_coupling_matrix(ilam)%get_num_nonzero_elements()
        !ancouma => v2%ancouma(ilam)
 #ifdef TEST_V2MAT_USE_ASSOCIATE
        associate( ancouma => v2%get_angular_coupling_matrix(ilam) )
 #else
        ancouma => v2%get_angular_coupling_matrix(ilam)
 #endif
-       num_nz_elements = ancouma%get_num_elements()
+       num_nz_elements = ancouma%get_num_nonzero_elements()
        ASSERT(num_nz_elements >= 0)
        do iv2_element = 1, num_nz_elements
          call ancouma%get_element(iv2_element, ij, vee)

@@ -125,6 +125,7 @@ subroutine basis (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 use mod_cov2, only: ancou_type
 use mod_hiba1sg, only: ba1sg
 use mod_hiba03_2pi, only: ba2pi
+use mod_hiba12_h2p, only: bah2p
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable :: v2
 integer :: j(:)
@@ -223,9 +224,9 @@ return
 return
 !  homonuclear + 2P atom basis
 1200  call bah2p (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+                  nlevop, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+                  ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 return
 !  homonuclear + 3P atom basis
 1300  call bah3p (j, l, is, jhold, ehold, ishold, nlevel, &
@@ -241,9 +242,9 @@ return
 return
 !  heteronuclear + 2P atom basis
 !1500  call bah2p (j, l, is, jhold, ehold, ishold, nlevel, &
-!    :                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!    :                  nlevop, sc2, sc3, sc4, rcut, jtot, &
 !    :                  flaghf, flagsu, csflag, clist, bastst, &
-!    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+!    :                  ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 1500  call badiat2p (j, l, is, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &

@@ -740,13 +740,12 @@ do 400 ilam = 1, nlam
 290             format (i4, i7, 3i10, i10, g17.8)
 350     continue
 355   continue
-  ancouma => v2%get_angular_coupling_matrix(ilam)
   if (bastst) then
-    write (6, 360) ilam, ancouma%get_num_elements()
-    write (9, 360) ilam, ancouma%get_num_elements()
+    write (6, 360) ilam, ancouma%get_num_nonzero_elements()
+    write (9, 360) ilam, ancouma%get_num_nonzero_elements()
 360     format ('ILAM=', i3, ' LAMNUM(ILAM) =', i9)
   end if
-  lamsum = lamsum + ancouma%get_num_elements()
+  lamsum = lamsum + ancouma%get_num_nonzero_elements()
 400 continue
 if(i.gt.nv2max) then
    write (6, 410) i, nv2max

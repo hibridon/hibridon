@@ -350,10 +350,10 @@ ioff = 0
 !ABER
 if (v2%nlam .gt. 0) then
   do ilam = 1, v2%nlam
-      ! write(6,*) 'ilam=', ilam, 'v2%get_angular_coupling_matrix(ilam)%get_num_elements()=', v2%get_angular_coupling_matrix(ilam)%get_num_elements()
+      ! write(6,*) 'ilam=', ilam, 'v2%get_angular_coupling_matrix(ilam)%get_num_nonzero_elements()=', v2%get_angular_coupling_matrix(ilam)%get_num_nonzero_elements()
       !ancouma => v2%ancouma(ilam)
       associate( ancouma => v2%get_angular_coupling_matrix(ilam) )
-      num_nz_elements = ancouma%get_num_elements()
+      num_nz_elements = ancouma%get_num_nonzero_elements()
       ASSERT(num_nz_elements >= 0)
       do iv2_element = 1, num_nz_elements
         call ancouma%get_element(iv2_element, ij, vee)
