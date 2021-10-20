@@ -1,7 +1,7 @@
 !#define TEST_V2MAT_USE_ASSOCIATE
 
-program test_v2mat
-    use mod_cov2, only: v2mat, lamv2t
+program test_ancou_type
+    use mod_cov2, only: ancou_type, ancouma_type
     implicit none
     integer :: nlam = 1000
     integer :: num_channels = 200
@@ -14,18 +14,18 @@ program test_v2mat
     real(8) :: vee
     real(8) :: sum
 #ifdef TEST_V2MAT_USE_ASSOCIATE
-    type(v2mat) :: v2
+    type(ancou_type) :: v2
 #else
-    type(v2mat) :: v2, target
-    type(lamv2t), pointer :: lamv2
+    type(ancou_type) :: v2, target
+    type(ancouma_type), pointer :: ancouma
 #endif
     do iloop = 1, nloops
-    v2 = v2mat(nlam = nlam, num_channels=num_channels)
+    v2 = ancou_type(nlam = nlam, num_channels=num_channels)
     do ilam = 1, v2%nlam
-       lamv2 => v2%get_lamv2(ilam)
+       ancouma => v2%get_angular_coupling_matrix(ilam)
        do irow = 1, num_channels
           do icol = 1, num_channels
-             call lamv2%set_element(irow=irow, icol=icol, vee=42.d0)
+             call ancouma%set_element(irow=irow, icol=icol, vee=42.d0)
              !call v2%set_element(ilam=ilam, irow=irow, icol=icol, vee=42.d0)
           end do
        end do
@@ -33,17 +33,17 @@ program test_v2mat
 
     sum = 0.d0
     do ilam = 1, v2%nlam
-       ! write(6,*) 'ilam=', ilam, 'v2%get_lamv2(ilam)%get_num_elements()=', v2%get_lamv2(ilam)%get_num_elements()
-       !lamv2 => v2%lamv2(ilam)
+       ! write(6,*) 'ilam=', ilam, 'v2%get_angular_coupling_matrix(ilam)%get_num_elements()=', v2%get_angular_coupling_matrix(ilam)%get_num_elements()
+       !ancouma => v2%ancouma(ilam)
 #ifdef TEST_V2MAT_USE_ASSOCIATE
-       associate( lamv2 => v2%get_lamv2(ilam) )
+       associate( ancouma => v2%get_angular_coupling_matrix(ilam) )
 #else
-       lamv2 => v2%get_lamv2(ilam)
+       ancouma => v2%get_angular_coupling_matrix(ilam)
 #endif
-       num_nz_elements = lamv2%get_num_elements()
+       num_nz_elements = ancouma%get_num_elements()
        ASSERT(num_nz_elements >= 0)
        do iv2_element = 1, num_nz_elements
-         call lamv2%get_element(iv2_element, ij, vee)
+         call ancouma%get_element(iv2_element, ij, vee)
          sum = sum + vee
        end do
 #ifdef TEST_V2MAT_USE_ASSOCIATE
@@ -51,4 +51,4 @@ program test_v2mat
 #endif       
    end do
    end do
-end program test_v2mat
+end program test_ancou_type

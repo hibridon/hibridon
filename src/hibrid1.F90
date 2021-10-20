@@ -95,7 +95,7 @@ subroutine airprp (z, &
 ! ----------------------------------------------------------------------------
 use mod_coqvec, only: nphoto, q
 use mod_cosc10, only: sc10
-use mod_cov2, only: v2mat
+use mod_cov2, only: ancou_type
 use mod_hibrid3, only: outmat, potent
 implicit double precision (a-h, o-z)
 !  matrix dimensions (row dimension = nmax, matrices stored column by column)
@@ -114,7 +114,7 @@ integer, intent(inout) :: itwo
 logical, intent(in) :: iprint
 logical, intent(in) :: twoen
 logical, intent(in) :: noprin
-type(v2mat), intent(in) :: v2
+type(ancou_type), intent(in) :: v2
 integer i, icol, iend, ierr, ipt, izero, kstep, maxstp, &
         ncol, npt, nskip
 logical photof, wavefn, boundf, wrsmat

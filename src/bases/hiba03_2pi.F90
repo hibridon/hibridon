@@ -116,13 +116,13 @@ subroutine ba2pi (j, l, is, jhold, ehold, ishold, nlevel, &
 !   vlm2pi:    returns angular coupling coefficient for particular
 !              choice of channel index
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, v2mat, lamv2t
+use mod_cov2, only: nv2max, ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlammx, nlam
 implicit double precision (a-h,o-z)
-type(v2mat), intent(out), allocatable :: v2
-type(lamv2t), pointer :: lamv2
+type(ancou_type), intent(out), allocatable :: v2
+type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
@@ -689,9 +689,9 @@ if (bastst .and. iprint .gt. 1) then
     '        IV2    VEE')
 end if
 ASSERT(.not. allocated(v2))
-v2 = v2mat(nlam=nlam, num_channels=ntop)
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 400 ilam = 1, nlam
-  lamv2 => v2%get_lamv2(ilam)
+  ancouma => v2%get_angular_coupling_matrix(ilam)
 !  ilam is the angular expansion label
 !  here for l=0 term in electrostatic potential
   if (ilam .le. nlam0) then
@@ -733,20 +733,20 @@ do 400 ilam = 1, nlam
         i=i+1
         inum=inum+1
         if(i.gt.nv2max) goto 350
-          call lamv2%set_element(irow, icol, vee)
+          call ancouma%set_element(irow, icol, vee)
           if(.not.bastst .or. iprint .le. 1) goto 350
             write (6, 290) ilam, lb, icol, irow, i, ij, vee
             write (9, 290) ilam, lb, icol, irow, i, ij, vee
 290             format (i4, i7, 3i10, i10, g17.8)
 350     continue
 355   continue
-  lamv2 => v2%get_lamv2(ilam)
+  ancouma => v2%get_angular_coupling_matrix(ilam)
   if (bastst) then
-    write (6, 360) ilam, lamv2%get_num_elements()
-    write (9, 360) ilam, lamv2%get_num_elements()
+    write (6, 360) ilam, ancouma%get_num_elements()
+    write (9, 360) ilam, ancouma%get_num_elements()
 360     format ('ILAM=', i3, ' LAMNUM(ILAM) =', i9)
   end if
-  lamsum = lamsum + lamv2%get_num_elements()
+  lamsum = lamsum + ancouma%get_num_elements()
 400 continue
 if(i.gt.nv2max) then
    write (6, 410) i, nv2max

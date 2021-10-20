@@ -86,46 +86,49 @@ module mod_cov2
    !    nv2max:    maximum core memory allocated for the v2 matrix
    !    ndummy:    dummy variable for alignment
    !    v2:        lower triangle of nonzero angular coupling matrix elements
-   !               stored in packed column form that is :
-   !                  (1,1), (2,1), (3,1) ... (n,1),
-   !                         (2,2), (3,2) ... (n,2), etc.
-   !               only nonzero elements are stored
 
 
    use mod_grovec, only: dgrovec, igrovec
    implicit none
-   type                         :: lamv2t
+   ! ancouma_type stores the angular coupling matrix related to a singe lambda
+   ! lower triangle of nonzero angular coupling matrix elements
+   ! stored in packed column form that is :
+   !      (1,1), (2,1), (3,1) ... (n,1),
+   !             (2,2), (3,2) ... (n,2), etc.
+   ! only nonzero elements are stored
+   type                         :: ancouma_type
      logical                    :: is_allocated = .false.
      integer                    :: num_channels = 0
-     type(dgrovec), allocatable :: v2d
-     type(igrovec), allocatable :: v2i 
+     type(dgrovec), allocatable :: v2d  ! the non zero element values
+     type(igrovec), allocatable :: v2i   ! the non-zero elements indices 
      contains
      
-     procedure                  :: get_num_elements => lamv2t_get_num_elements
-     procedure                  :: get_element => lamv2t_get_element
-     procedure                  :: set_element => lamv2t_set_element
-   end type lamv2t
+     procedure                  :: get_num_elements => ancouma_type_get_num_elements
+     procedure                  :: get_element => ancouma_type_get_element
+     procedure                  :: set_element => ancouma_type_set_element
+   end type ancouma_type
 
-   type, public                 :: v2mat
+   ! ancou_type stores the angular coupling matrix elements for all lamdbas
+   type, public                 :: ancou_type
      integer                    :: nlam = 0
      integer                    :: num_channels = 0
-     type(lamv2t), allocatable  :: lamv2(:)
+     type(ancouma_type), allocatable  :: ancouma(:)
      contains
-     final                      :: v2mat_destroy
-     procedure                  :: set_element => v2mat_set_element
-     procedure                  :: get_element => v2mat_get_element
-     procedure                  :: get_lamv2 => v2mat_get_lamv2
-     procedure                  :: ensure_lamv2_is_allocated => v2mat_ensure_lamv2_is_allocated
-     procedure                  :: empty => v2mat_empty
-     procedure                  :: print_summary => v2mat_print_summary
+     final                      :: ancou_type_destroy
+     procedure                  :: set_element => ancou_type_set_element
+     procedure                  :: get_element => ancou_type_get_element
+     procedure                  :: get_angular_coupling_matrix => ancou_type_get_angular_coupling_matrix
+     procedure                  :: ensure_ancouma_is_allocated => ancou_type_ensure_ancouma_is_allocated
+     procedure                  :: empty => ancou_type_empty
+     procedure                  :: print_summary => ancou_type_print_summary
 
-   end type v2mat
+   end type ancou_type
 
-   ! interface to create an instance of v2mat using a construct familiar to other languages:
-   ! g1 = v2mat()
-   interface v2mat
-     module procedure create_v2mat
-   end interface v2mat
+   ! interface to create an instance of ancou_type using a construct familiar to other languages:
+   ! g1 = ancou_type()
+   interface ancou_type
+     module procedure create_ancou_type
+   end interface ancou_type
 
    type(dgrovec)                      :: v2d
    type(igrovec)                      :: v2i
@@ -133,14 +136,14 @@ module mod_cov2
    integer, allocatable               :: nv2max, ndummy
    contains
 
-   function lamv2t_get_num_elements(this) result(n)
-      class(lamv2t)        :: this
+   function ancouma_type_get_num_elements(this) result(n)
+      class(ancouma_type)        :: this
       integer(8)           :: n
       n = this%v2d%num_elements
    end function 
 
-   subroutine lamv2t_get_element(this, ielement, ij, vee)
-      class(lamv2t)        :: this
+   subroutine ancouma_type_get_element(this, ielement, ij, vee)
+      class(ancouma_type)        :: this
       integer(8), intent(in) :: ielement
       integer, intent(out) :: ij
       real(8), intent(out) :: vee
@@ -148,8 +151,8 @@ module mod_cov2
       vee = this%v2d%get_element(ielement)
    end subroutine 
 
-   subroutine lamv2t_set_element(this, irow, icol, vee)
-      class(lamv2t)       :: this
+   subroutine ancouma_type_set_element(this, irow, icol, vee)
+      class(ancouma_type)       :: this
       integer, intent(in) :: irow
       integer, intent(in) :: icol
       real(8), intent(in) :: vee
@@ -159,41 +162,41 @@ module mod_cov2
       call this%v2i%append(ij)
    end subroutine
 
-   function create_v2mat(nlam, num_channels) result(v2)
+   function create_ancou_type(nlam, num_channels) result(v2)
      integer, intent(in) :: nlam
      integer, intent(in) :: num_channels
 
-     type(v2mat)  :: v2
+     type(ancou_type)  :: v2
      integer :: ilam
 
      v2%nlam = nlam
      v2%num_channels = num_channels
-     allocate(v2%lamv2(nlam))
+     allocate(v2%ancouma(nlam))
      do ilam = 1, nlam
-       v2%lamv2(ilam)%is_allocated = .false.
-     !  v2%lamv2(ilam)%num_channels = num_channels
-     !  v2%lamv2(ilam)%v2d = dgrovec(block_size=1024*4, num_blocks=1024*8)
-     !  v2%lamv2(ilam)%v2i = igrovec(block_size=1024*4, num_blocks=1024*8)
+       v2%ancouma(ilam)%is_allocated = .false.
+     !  v2%ancouma(ilam)%num_channels = num_channels
+     !  v2%ancouma(ilam)%v2d = dgrovec(block_size=1024*4, num_blocks=1024*8)
+     !  v2%ancouma(ilam)%v2i = igrovec(block_size=1024*4, num_blocks=1024*8)
      end do
    end function
 
-   subroutine v2mat_destroy(this)
-      type(v2mat)        :: this
-      if (allocated(this%lamv2)) then
-         deallocate(this%lamv2)
+   subroutine ancou_type_destroy(this)
+      type(ancou_type)        :: this
+      if (allocated(this%ancouma)) then
+         deallocate(this%ancouma)
       end if
    end subroutine
 
-   function v2mat_get_lamv2(this, ilam) result(lamv2)
-      class(v2mat), target  :: this
+   function ancou_type_get_angular_coupling_matrix(this, ilam) result(ancouma)
+      class(ancou_type), target  :: this
       integer, intent(in) :: ilam
-      type(lamv2t), pointer :: lamv2
-      call this%ensure_lamv2_is_allocated(ilam)
-      lamv2 => this%lamv2(ilam)
+      type(ancouma_type), pointer :: ancouma
+      call this%ensure_ancouma_is_allocated(ilam)
+      ancouma => this%ancouma(ilam)
    end function
 
-   subroutine v2mat_ensure_lamv2_is_allocated(this, ilam)
-      class(v2mat)        :: this
+   subroutine ancou_type_ensure_ancouma_is_allocated(this, ilam)
+      class(ancou_type)        :: this
       integer, intent(in) :: ilam
       integer :: block_size
       integer :: num_blocks
@@ -206,54 +209,54 @@ module mod_cov2
       ! optimize block size so that one block should be enough in most cases
       block_size = expected_num_elements
       num_blocks = (max_num_elements / block_size) + 1
-      if (.not. this%lamv2(ilam)%is_allocated) then
-         allocate(this%lamv2(ilam)%v2d)
-         allocate(this%lamv2(ilam)%v2i)
-         this%lamv2(ilam)%v2d = dgrovec(block_size=block_size, num_blocks=num_blocks)
-         this%lamv2(ilam)%v2i = igrovec(block_size=block_size, num_blocks=num_blocks)
-         this%lamv2(ilam)%num_channels = this%num_channels
-         this%lamv2(ilam)%is_allocated = .true.
+      if (.not. this%ancouma(ilam)%is_allocated) then
+         allocate(this%ancouma(ilam)%v2d)
+         allocate(this%ancouma(ilam)%v2i)
+         this%ancouma(ilam)%v2d = dgrovec(block_size=block_size, num_blocks=num_blocks)
+         this%ancouma(ilam)%v2i = igrovec(block_size=block_size, num_blocks=num_blocks)
+         this%ancouma(ilam)%num_channels = this%num_channels
+         this%ancouma(ilam)%is_allocated = .true.
       end if
     end subroutine
 
-   subroutine v2mat_set_element(this, ilam, irow, icol, vee)
-      class(v2mat), target :: this
+   subroutine ancou_type_set_element(this, ilam, irow, icol, vee)
+      class(ancou_type), target :: this
       integer, intent(in) :: ilam
       integer, intent(in) :: irow
       integer, intent(in) :: icol
       real(8), intent(in) :: vee
-      type(lamv2t), pointer :: lamv2
-      lamv2 => this%get_lamv2(ilam)
-      call lamv2%set_element(irow, icol, vee)
+      type(ancouma_type), pointer :: ancouma
+      ancouma => this%get_angular_coupling_matrix(ilam)
+      call ancouma%set_element(irow, icol, vee)
    end subroutine 
 
-   subroutine v2mat_get_element(this, ilam, ielement, ij, vee)
-      class(v2mat)        :: this
+   subroutine ancou_type_get_element(this, ilam, ielement, ij, vee)
+      class(ancou_type)        :: this
       integer, intent(in) :: ilam
       integer(8), intent(in) :: ielement
       integer, intent(out) :: ij
       real(8), intent(out) :: vee
 
-      call this%lamv2(ilam)%get_element(ielement, ij, vee)
+      call this%ancouma(ilam)%get_element(ielement, ij, vee)
    end subroutine 
 
-   subroutine v2mat_empty(this)
-      class(v2mat)        :: this
+   subroutine ancou_type_empty(this)
+      class(ancou_type)        :: this
       integer :: ilam
       do ilam = 1, this%nlam
-         call this%lamv2(ilam)%v2d%empty()
-         call this%lamv2(ilam)%v2i%empty()
+         call this%ancouma(ilam)%v2d%empty()
+         call this%ancouma(ilam)%v2i%empty()
       end do
    end subroutine 
 
-   subroutine v2mat_print_summary(this)
-      class(v2mat)        :: this
+   subroutine ancou_type_print_summary(this)
+      class(ancou_type)        :: this
       integer :: ilam, num_nz_elements, num_channels
       do ilam = 1, this%nlam
-         if (this%lamv2(ilam)%is_allocated) then
-            num_nz_elements = this%lamv2(ilam)%get_num_elements()
+         if (this%ancouma(ilam)%is_allocated) then
+            num_nz_elements = this%ancouma(ilam)%get_num_elements()
             if (num_nz_elements > 0) then
-               num_channels = this%lamv2(ilam)%num_channels
+               num_channels = this%ancouma(ilam)%num_channels
                write (6,*) 'ilam =', ilam, ' : ', num_nz_elements, '/', num_channels * num_channels ,' non zero elements '
             end if
          end if

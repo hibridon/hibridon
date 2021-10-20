@@ -129,7 +129,7 @@ subroutine potent (w, vecnow, scmat, eignow, hp, scr, &
 !    nmax:     maximum row dimension of matrices and maximum dimension of
 !              vectors
 ! ----------------------------------------------------------------------
-   use mod_cov2, only: v2mat
+   use mod_cov2, only: ancou_type
    implicit none
 !  square matrices (of row dimension nmax)
 real(8), dimension(nmax*nmax), intent(out) :: w
@@ -145,7 +145,7 @@ real(8), intent(in) :: en
 real(8), intent(out) :: xlarge
 integer, intent(in) :: nch
 integer, intent(in) :: nmax
-type(v2mat), intent(in) :: v2
+type(ancou_type), intent(in) :: v2
 
 !      real eignow, hp, scmat, scr, vecnow, w
 !      real drnow, en, fact, half, one, ra, rb, rnow, sq3, xlarge, xmin1
@@ -283,7 +283,7 @@ subroutine potmat (w, r, nch, nmax, v2)
 !    vsmul:    multiplies vector by scalar and stores result in another
 !              vector
 !  -------------------------------------------------------------------
-use mod_cov2, only: nv2max, v2mat
+use mod_cov2, only: nv2max, ancou_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_covvl, only: vvl
@@ -293,7 +293,7 @@ real(8), dimension(1), intent(out) :: w
 real(8), intent(in) :: r
 integer, intent(in) :: nch
 integer, intent(in) :: nmax
-type(v2mat), intent(in) :: v2
+type(ancou_type), intent(in) :: v2
 
 integer i, iflag, ilam
 integer(8) :: iv2_element
@@ -350,13 +350,13 @@ ioff = 0
 !ABER
 if (v2%nlam .gt. 0) then
   do ilam = 1, v2%nlam
-      ! write(6,*) 'ilam=', ilam, 'v2%get_lamv2(ilam)%get_num_elements()=', v2%get_lamv2(ilam)%get_num_elements()
-      !lamv2 => v2%lamv2(ilam)
-      associate( lamv2 => v2%get_lamv2(ilam) )
-      num_nz_elements = lamv2%get_num_elements()
+      ! write(6,*) 'ilam=', ilam, 'v2%get_angular_coupling_matrix(ilam)%get_num_elements()=', v2%get_angular_coupling_matrix(ilam)%get_num_elements()
+      !ancouma => v2%ancouma(ilam)
+      associate( ancouma => v2%get_angular_coupling_matrix(ilam) )
+      num_nz_elements = ancouma%get_num_elements()
       ASSERT(num_nz_elements >= 0)
       do iv2_element = 1, num_nz_elements
-        call lamv2%get_element(iv2_element, ij, vee)
+        call ancouma%get_element(iv2_element, ij, vee)
         w(ij) = w(ij) + vee * vvl(ilam)
       end do
       end associate
@@ -909,7 +909,7 @@ subroutine propag (z, w, zmat, amat, bmat, &
 !     wavefn        true if g(a,b) transformation matrices are saved
 !                   to be used later in computing the wavefunction
 !  ------------------------------------------------------------------
-use mod_cov2, only: v2mat
+use mod_cov2, only: ancou_type
 use mod_hibrid2, only: mxoutd
 implicit none
 !   square matrices
@@ -943,7 +943,7 @@ integer, intent(in) :: nch
 integer, intent(out) :: nopen
 integer, intent(in) :: nairy
 integer, intent(in) :: nmax
-type(v2mat), intent(in) :: v2
+type(ancou_type), intent(in) :: v2
 
 logical :: twoen
 logical ::  first
@@ -1249,7 +1249,7 @@ subroutine logdb (z, nmax, nch, rmin, rmax, nsteps, &
 !     and blas routines are not used for o(n) loops
 !  ------------------------------------------------------------------
 use mod_coqvec, only: mxphot, nphoto, q ! q is an output of this subroutine
-use mod_cov2, only: v2mat
+use mod_cov2, only: ancou_type
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: z(nmax*nch)
 integer, intent(in) :: nmax
@@ -1263,7 +1263,7 @@ logical, intent(in) :: iwrite
 real(8), intent(out) ::  tl
 real(8), intent(out) ::  tp
 real(8), intent(out) ::  twf
-type(v2mat), intent(in) :: v2
+type(ancou_type), intent(in) :: v2
 
 !     wref          scratch array of dimension nch
 !                   used as workspace for the reference potential
@@ -1840,10 +1840,10 @@ subroutine runlog (z, &
 !                   to be used later in computing the wavefunction
 !  ------------------------------------------------------------------
 use mod_coqvec, only: nphoto, q
-use mod_cov2, only: v2mat
+use mod_cov2, only: ancou_type
 use mod_hibrid2, only: mxoutd, mxoutr
 implicit double precision (a-h, o-z)
-type(v2mat), intent(in) :: v2
+type(ancou_type), intent(in) :: v2
 real(8), intent(out) :: z(nmax*nch)
 real(8), intent(inout) :: r
 real(8), intent(in) :: rend
