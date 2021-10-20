@@ -103,6 +103,7 @@ module mod_cov2
      
      procedure                  :: get_num_elements => lamv2t_get_num_elements
      procedure                  :: get_element => lamv2t_get_element
+     procedure                  :: set_element => lamv2t_set_element
    end type lamv2t
 
    type, public                 :: v2mat
@@ -147,6 +148,17 @@ module mod_cov2
       vee = this%v2d%get_element(ielement)
    end subroutine 
 
+   subroutine lamv2t_set_element(this, irow, icol, vee)
+      class(lamv2t)       :: this
+      integer, intent(in) :: irow
+      integer, intent(in) :: icol
+      real(8), intent(in) :: vee
+      integer :: ij
+      ij = this%num_channels * (icol - 1) +irow
+      call this%v2d%append(vee)
+      call this%v2i%append(ij)
+   end subroutine
+
    function create_v2mat(nlam, num_channels) result(v2)
      integer, intent(in) :: nlam
      integer, intent(in) :: num_channels
@@ -183,27 +195,36 @@ module mod_cov2
    subroutine v2mat_ensure_lamv2_is_allocated(this, ilam)
       class(v2mat)        :: this
       integer, intent(in) :: ilam
+      integer :: block_size
+      integer :: num_blocks
+      integer :: max_num_elements
+      real(8) :: expected_sparsity = 0.1
+      integer :: expected_num_elements
+      ! v2 matrix is triangular
+      max_num_elements = this%num_channels * (this%num_channels + 1)
+      expected_num_elements = expected_sparsity * max_num_elements
+      ! optimize block size so that one block should be enough in most cases
+      block_size = expected_num_elements
+      num_blocks = (max_num_elements / block_size) + 1
       if (.not. this%lamv2(ilam)%is_allocated) then
          allocate(this%lamv2(ilam)%v2d)
          allocate(this%lamv2(ilam)%v2i)
-         this%lamv2(ilam)%v2d = dgrovec(block_size=1024*4, num_blocks=1024*8)
-         this%lamv2(ilam)%v2i = igrovec(block_size=1024*4, num_blocks=1024*8)
+         this%lamv2(ilam)%v2d = dgrovec(block_size=block_size, num_blocks=num_blocks)
+         this%lamv2(ilam)%v2i = igrovec(block_size=block_size, num_blocks=num_blocks)
          this%lamv2(ilam)%num_channels = this%num_channels
          this%lamv2(ilam)%is_allocated = .true.
       end if
     end subroutine
 
    subroutine v2mat_set_element(this, ilam, irow, icol, vee)
-      class(v2mat)        :: this
+      class(v2mat), target :: this
       integer, intent(in) :: ilam
       integer, intent(in) :: irow
       integer, intent(in) :: icol
       real(8), intent(in) :: vee
-      integer :: ij
-      ij = this%num_channels * (icol - 1) +irow
-      call this%ensure_lamv2_is_allocated(ilam)
-      call this%lamv2(ilam)%v2d%append(vee)
-      call this%lamv2(ilam)%v2i%append(ij)
+      type(lamv2t), pointer :: lamv2
+      lamv2 => this%get_lamv2(ilam)
+      call lamv2%set_element(irow, icol, vee)
    end subroutine 
 
    subroutine v2mat_get_element(this, ilam, ielement, ij, vee)
@@ -212,7 +233,7 @@ module mod_cov2
       integer(8), intent(in) :: ielement
       integer, intent(out) :: ij
       real(8), intent(out) :: vee
-      
+
       call this%lamv2(ilam)%get_element(ielement, ij, vee)
    end subroutine 
 

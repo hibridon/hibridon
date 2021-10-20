@@ -691,6 +691,7 @@ end if
 ASSERT(.not. allocated(v2))
 v2 = v2mat(nlam=nlam, num_channels=ntop)
 do 400 ilam = 1, nlam
+  lamv2 => v2%get_lamv2(ilam)
 !  ilam is the angular expansion label
 !  here for l=0 term in electrostatic potential
   if (ilam .le. nlam0) then
@@ -732,8 +733,7 @@ do 400 ilam = 1, nlam
         i=i+1
         inum=inum+1
         if(i.gt.nv2max) goto 350
-          write(6,*) 'graffy: ilam, irow, icol, nlam, nchan:',ilam, irow, icol, v2%nlam, v2%num_channels
-          call v2%set_element(ilam, irow, icol, vee)
+          call lamv2%set_element(irow, icol, vee)
           if(.not.bastst .or. iprint .le. 1) goto 350
             write (6, 290) ilam, lb, icol, irow, i, ij, vee
             write (9, 290) ilam, lb, icol, irow, i, ij, vee
