@@ -88,7 +88,7 @@ module mod_cov2
    !    v2:        lower triangle of nonzero angular coupling matrix elements
 
 
-   use mod_grovec, only: dgrovec, igrovec
+   use mod_grovec, only: dgrovec_type, igrovec_type
    implicit none
    ! ancouma_type stores the angular coupling matrix related to a singe lambda
    ! lower triangle of nonzero angular coupling matrix elements
@@ -99,8 +99,8 @@ module mod_cov2
    type                         :: ancouma_type
      logical                    :: is_allocated = .false.
      integer                    :: num_channels = 0
-     type(dgrovec), allocatable :: v2d  ! the non zero element values
-     type(igrovec), allocatable :: v2i   ! the non-zero elements indices 
+     type(dgrovec_type), allocatable :: v2d  ! the non zero element values
+     type(igrovec_type), allocatable :: v2i   ! the non-zero elements indices 
      contains
      
      procedure                  :: get_num_elements => ancouma_type_get_num_elements
@@ -130,8 +130,8 @@ module mod_cov2
      module procedure create_ancou_type
    end interface ancou_type
 
-   type(dgrovec)                      :: v2d
-   type(igrovec)                      :: v2i
+   type(dgrovec_type)                      :: v2d
+   type(igrovec_type)                      :: v2i
    real(8), dimension(:), allocatable :: v2
    integer, allocatable               :: nv2max, ndummy
    contains
@@ -175,8 +175,8 @@ module mod_cov2
      do ilam = 1, nlam
        v2%ancouma(ilam)%is_allocated = .false.
      !  v2%ancouma(ilam)%num_channels = num_channels
-     !  v2%ancouma(ilam)%v2d = dgrovec(block_size=1024*4, num_blocks=1024*8)
-     !  v2%ancouma(ilam)%v2i = igrovec(block_size=1024*4, num_blocks=1024*8)
+     !  v2%ancouma(ilam)%v2d = dgrovec_type(block_size=1024*4, num_blocks=1024*8)
+     !  v2%ancouma(ilam)%v2i = igrovec_type(block_size=1024*4, num_blocks=1024*8)
      end do
    end function
 
@@ -212,8 +212,8 @@ module mod_cov2
       if (.not. this%ancouma(ilam)%is_allocated) then
          allocate(this%ancouma(ilam)%v2d)
          allocate(this%ancouma(ilam)%v2i)
-         this%ancouma(ilam)%v2d = dgrovec(block_size=block_size, num_blocks=num_blocks)
-         this%ancouma(ilam)%v2i = igrovec(block_size=block_size, num_blocks=num_blocks)
+         this%ancouma(ilam)%v2d = dgrovec_type(block_size=block_size, num_blocks=num_blocks)
+         this%ancouma(ilam)%v2i = igrovec_type(block_size=block_size, num_blocks=num_blocks)
          this%ancouma(ilam)%num_channels = this%num_channels
          this%ancouma(ilam)%is_allocated = .true.
       end if
@@ -268,8 +268,8 @@ module mod_cov2
       integer, intent(in) :: nlammx
       allocate(v2(av2max)) ; allocate(nv2max) ; allocate(ndummy)
       nv2max = av2max
-      v2d = dgrovec(block_size=1024*1024, num_blocks=1024)
-      v2i = igrovec(block_size=1024*1024, num_blocks=1024)
+      v2d = dgrovec_type(block_size=1024*1024, num_blocks=1024)
+      v2i = igrovec_type(block_size=1024*1024, num_blocks=1024)
    end subroutine allocate_cov2
 
 end module mod_cov2
