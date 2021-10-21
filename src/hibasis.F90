@@ -126,6 +126,8 @@ use mod_cov2, only: ancou_type
 use mod_hiba1sg, only: ba1sg
 use mod_hiba03_2pi, only: ba2pi
 use mod_hiba12_h2p, only: bah2p
+use mod_hiba26_2sg1sg, only: ba2sg1sg
+
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable :: v2
 integer :: j(:)
@@ -310,7 +312,7 @@ return
  2600 call ba2sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
      nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
      flaghf, flagsu, csflag, clist, bastst, ihomo, &
-     nu, numin, jlpar, n, nmax, ntop)
+     nu, numin, jlpar, n, nmax, ntop, v2)
 return
 !   C2v asymmetric top + atom scattering
  2700 call baastp1 (j, l, is, jhold, ehold, ishold, nlevel, &

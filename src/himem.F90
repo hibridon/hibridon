@@ -131,8 +131,6 @@ module mod_cov2
      module procedure create_ancou_type
    end interface ancou_type
 
-   type(dgrovec_type)                      :: v2d
-   type(igrovec_type)                      :: v2i
    real(8), dimension(:), allocatable :: v2
    integer, allocatable               :: nv2max, ndummy
    contains
@@ -281,8 +279,6 @@ module mod_cov2
       integer, intent(in) :: nlammx
       allocate(v2(av2max)) ; allocate(nv2max) ; allocate(ndummy)
       nv2max = av2max
-      v2d = dgrovec_type(block_size=1024*1024, num_blocks=1024)
-      v2i = igrovec_type(block_size=1024*1024, num_blocks=1024)
    end subroutine allocate_cov2
 
 end module mod_cov2
