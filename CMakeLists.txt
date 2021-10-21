@@ -28,6 +28,10 @@ set(HIBRIDON_LINK_LIBRARIES "" CACHE STRING "list of libraries that need to be l
 
 set(GCC_COVERAGE_LINK_FLAGS "" CACHE STRING "the libraries that need to be linked with hibridon for code coverage") 
 
+# see https://stackoverflow.com/questions/42386065/inlining-functions-in-fortran
+set(ENABLE_INLINING "OFF")
+set(ENABLE_LINK_TIME_OPTIMISATION "OFF")
+
 if(ENABLE_CODE_COVERAGE)
   find_program(COVERAGE_LCOV_EXE lcov)
   if (NOT COVERAGE_LCOV_EXE)
@@ -154,7 +158,8 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   set (warning_options "${warning_options} -Wno-compare-reals")
   set (warning_options "${warning_options} -Wno-intrinsic-shadow")
   set (warning_options "${warning_options} -Wno-character-truncation")
-  
+
+  set (CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g  -fsanitize=address ${warning_options}")
 
   # don't initialize local variables to zero : initialize them with dummy values to force failures which help detect uninitialized variables as -Wuninitialized doesn't detect everything (see issue #38 or https://stackoverflow.com/questions/39591300/gfortran-wuninitialized-flag-misses-variable-in-do-loop)
   # by default, gfortran initializes integers to 0, but not ifort : as a result, some bugs in the code are hidden with gfortran default options
@@ -171,7 +176,13 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
     set (warning_options "${warning_options} -Wuninitialized")
   endif()
 
-  set (CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g  -fsanitize=address ${warning_options}")
+  if(ENABLE_INLINING)
+    set (CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -Ofast")
+  endif()
+
+  if(ENABLE_LINK_TIME_OPTIMISATION)
+    set (CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -flto")
+  endif()
 
   # todo: add -fbounds-check once all mismatched declarations of variables (eg in common blocks) have been fixed
   if(ENABLE_CODE_COVERAGE)
@@ -272,6 +283,16 @@ elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   # set (warning_options "") # activate all warnings
   set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_options} ${warning_options}")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g -traceback -fp-stack-check ${common_options} ${warning_options}")
+
+  if(ENABLE_INLINING)
+    set (CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -fast")
+  endif()
+
+  if(ENABLE_LINK_TIME_OPTIMISATION)
+    set (CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -ipo")
+  endif()
+
+
 
   if(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR)
     # check uses of uninitialized variables in run time
