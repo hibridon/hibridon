@@ -252,6 +252,17 @@ call transp (vecnow, nch, nmax)
 call dtrans (w, vecnow, scmat, hp, xlarge, nch, nmax, ione)
 return
 end
+
+! #define GROVEC_GET_ELEMENT(grovec, element_index, result) \
+! block_index =  (el_index-1) / grovec%block_size ; \
+! el_index_in_block = el_index - 1 - (block_index * grovec%block_size) ; \
+! result = grovec%blocks(block_index)%p(el_index_in_block)
+
+#define ANCOUMA_GET_ELEMENT(ancouma, element_index, ij, vee) \
+ij = ancouma%v2i%get_element(iv2_element) ; \
+vee = ancouma%v2d%get_element(iv2_element)
+
+
 ! ------------------------------------------------------------------------
 subroutine potmat (w, r, nch, nmax, v2)
 !  determine negative of lower triangle of w(r) matrix.  see eq. (3) of
@@ -283,7 +294,7 @@ subroutine potmat (w, r, nch, nmax, v2)
 !    vsmul:    multiplies vector by scalar and stores result in another
 !              vector
 !  -------------------------------------------------------------------
-use mod_cov2, only: nv2max, ancou_type
+use mod_cov2, only: nv2max, ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_covvl, only: vvl
@@ -300,6 +311,12 @@ integer :: iv2_element
 integer :: ij
 integer :: num_nz_elements
 real(8) :: vee
+
+integer :: block_index
+integer :: block_size
+integer :: el_index_in_block
+
+type(ancouma_type), pointer :: ancouma
 
 common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
 common /copmat/ rtmn, rtmx, iflag
@@ -352,14 +369,48 @@ if (v2%nlam .gt. 0) then
   do ilam = 1, v2%nlam
       ! write(6,*) 'ilam=', ilam, 'v2%get_angular_coupling_matrix(ilam)%get_num_nonzero_elements()=', v2%get_angular_coupling_matrix(ilam)%get_num_nonzero_elements()
       !ancouma => v2%ancouma(ilam)
-      associate( ancouma => v2%get_angular_coupling_matrix(ilam) )
+      ancouma => v2%get_angular_coupling_matrix(ilam)
+      block_size = ancouma%v2i%block_size
       num_nz_elements = ancouma%get_num_nonzero_elements()
       ASSERT(num_nz_elements >= 0)
+
+      !1023 -> 0
+      !1024 -> 1
+      !1025 -> 1 
+      ! num_full_blocks = ((num_nz_elements - 1) / block_size)
+      ! iv2_element = 0
+      ! do block_index = 0, num_full_blocks-1
+      !   blocki => ancouma%v2i%blocks(block_index)
+      !   blockd => ancouma%v2d%blocks(block_index)
+      !   do el_index_in_block = 0, block_size-1
+      !     ij = blocki(el_index_in_block)
+      !     vee = blockd(el_index_in_block)
+      !     iv2_element = iv2_element + 1
+      !     w(ij) = w(ij) + vee * vvl(ilam)
+      !   end do
+      ! end do
+      ! num_remaining_nz_elements = num_nz_elements - iv2_element
+      ! if (num_remaining_nz_elements > 0) then
+      !   blocki => ancouma%v2i%blocks(num_full_blocks)
+      !   blockd => ancouma%v2d%blocks(num_full_blocks)
+      !   do el_index_in_block = 0, num_remaining_nz_elements-1
+      !     ij = blocki(el_index_in_block)
+      !     vee = blockd(el_index_in_block)
+      !     iv2_element = iv2_element + 1
+      !     w(ij) = w(ij) + vee * vvl(ilam)
+      !   end do
+      ! end if
+
       do iv2_element = 1, num_nz_elements
-        call ancouma%get_element(iv2_element, ij, vee)
+        block_index =  (iv2_element-1) / block_size
+        el_index_in_block = iv2_element - 1 - (block_index * block_size)
+        ij = ancouma%v2i%blocks(block_index)%p(el_index_in_block)
+        vee = ancouma%v2d%blocks(block_index)%p(el_index_in_block)
+
+        ! ANCOUMA_GET_ELEMENT(ancouma, iv2_element, ij, vee)
+        ! call ancouma%get_element(iv2_element, ij, vee)  
         w(ij) = w(ij) + vee * vvl(ilam)
       end do
-      end associate
   end do
 endif
 !ABER
