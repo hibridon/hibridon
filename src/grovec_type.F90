@@ -1,4 +1,4 @@
-  type                         :: CONCATENATE(GROVEC_CLASS_NAME,_block)
+  type, public                  :: CONCATENATE(GROVEC_CLASS_NAME,_block)
     integer                    :: block_size = 0
     GROVEC_ELEMENT_TYPE, allocatable           :: p(:)
   contains
