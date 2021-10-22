@@ -564,10 +564,9 @@ add_test(NAME check_outputs_build
 
 # function to declare a test suite (group of tests)
 # once a test suite has beed added, the user can lanch it using : make <TESTSUITE_ID>
-function(add_hibridon_testsuite TESTSUITE_ID TESTSUITE_TESTS TESTS_LIST)
+function(add_hibridon_testsuite TESTSUITE_ID TESTSUITE_TESTS)
   # TESTSUITE_ID : eg 'short'
   # TESTSUITE_TESTS : list of tests to include in this test suite. eg 'arn2;arno'
-  # TESTS_LIST : list of declared tests (used to check if tests in testsuite have been declared)
   set(tests_regex "")
   foreach (test_id IN LISTS TESTSUITE_TESTS)
     if(TARGET "${test_id}")
@@ -595,6 +594,9 @@ function(add_hibridon_testsuite TESTSUITE_ID TESTSUITE_TESTS TESTS_LIST)
   add_custom_target(testsuite_${TESTSUITE_ID} COMMAND bash -c "${CMAKE_CTEST_COMMAND} -L '(${testsuite_regex})'" VERBATIM)
   add_dependencies(testsuite_${TESTSUITE_ID} check_outputs hib) # note: adding hib as a dependency is not mandatory, but it makes the build process of hib library more visible (warnings are visible)
 endfunction()
+
+
+
 
 if(ENABLE_CODE_COVERAGE)
   # build 
@@ -677,7 +679,7 @@ set(original_testsuite
   heco
   vfit)
 
-add_hibridon_testsuite("original" "${original_testsuite}" "${test_dirs_list}")
+add_hibridon_testsuite("original" "${original_testsuite}")
 
 # test suite from autotest/testgroup_short
 
@@ -685,7 +687,7 @@ set(short_testsuite
   arn2
   arno)
 
-add_hibridon_testsuite("short" "${short_testsuite}" "${test_dirs_list}")
+add_hibridon_testsuite("short" "${short_testsuite}")
 
 # test suite from autotest/testgroup_regular
 
@@ -703,7 +705,7 @@ set(regular_testsuite
   ohh2_j1
   vfit)
 
-add_hibridon_testsuite("regular" "${regular_testsuite}" "${test_dirs_list}")
+add_hibridon_testsuite("regular" "${regular_testsuite}")
 
 # test suite from autotest/testgroup_extended
 
@@ -737,7 +739,7 @@ set(extended_testsuite
   stp1sg_nh3h2
   vfit)
 
-add_hibridon_testsuite("extended" "${extended_testsuite}" "${test_dirs_list}")
+add_hibridon_testsuite("extended" "${extended_testsuite}")
 
 # test suite from autotest/testgroup_full_qma
 
@@ -768,7 +770,7 @@ set(full_qma_testsuite
   ohh2_j13
   vfit)
 
-add_hibridon_testsuite("full_qma" "${full_qma_testsuite}" "${test_dirs_list}")
+add_hibridon_testsuite("full_qma" "${full_qma_testsuite}")
 
 # test suite from autotest/testgroup_all
 
@@ -822,7 +824,7 @@ set(all_testsuite
   vfit)
 
 
-add_hibridon_testsuite("all" "${all_testsuite}" "${test_dirs_list}")
+add_hibridon_testsuite("all" "${all_testsuite}")
 
 # a suite which goal is to cover as much as possible hibridon's code,
 # ignoring the meaningfulness of the tests
@@ -870,9 +872,35 @@ set(coverage_testsuite
 # test cph2 removed until it is fixed (see issue #48)
 
 
-add_hibridon_testsuite("coverage" "${coverage_testsuite}" "${test_dirs_list}")
+add_hibridon_testsuite("coverage" "${coverage_testsuite}")
 
 # add_hibridon_testsuite("empty" "" "${test_dirs_list}")
+
+# unit tests
+
+file (GLOB unit_test_sources ${hibridon_SOURCE_DIR}/src/unittests/*.F90)
+message ("unit_test_sources = ${unit_test_sources}")
+#set (unit_tests_list "")
+foreach(unit_test_source_file IN LISTS unit_test_sources)
+   get_filename_component(unit_test_name ${unit_test_source_file} NAME_WE)
+   message ("Adding ${unit_test_name} unit test")
+   set(unit_test_exe_name "unit_${unit_test_name}")
+   add_executable(${unit_test_exe_name} ${unit_test_source_file})
+   target_compile_definitions(${unit_test_exe_name} PUBLIC T_MATRIX_SIZE=${TEST_T_MATRIX_SIZE})
+   target_link_libraries(${unit_test_exe_name} hib ${HIBRIDON_LINK_LIBRARIES})
+   target_include_directories(${unit_test_exe_name} PUBLIC ${hibridon_SOURCE_DIR}/src)
+   target_include_directories(${unit_test_exe_name} PUBLIC ${HIBRIDON_MODULES_DIR}) 
+   target_compile_options(${unit_test_exe_name} PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
+   add_test(unit_${unit_test_name}_build
+         "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target ${unit_test_exe_name})
+   add_test(NAME unit_${unit_test_name} COMMAND ${unit_test_exe_name})
+   SET_TESTS_PROPERTIES(unit_${unit_test_name} PROPERTIES DEPENDS unit_${unit_test_name}_build)
+   #list(APPEND unit_tests_list unit_${unit_test_name})
+endforeach()
+
+
+
+
 
 # The following is to build hibridon with an user-supplied potential
 

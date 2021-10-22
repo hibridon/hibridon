@@ -1,3 +1,4 @@
+#include "assert.h"
 !#define TEST_V2MAT_USE_ASSOCIATE
 
 program test_ancou_type
