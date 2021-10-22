@@ -90,6 +90,12 @@ module mod_cov2
 
    use mod_grovec, only: dgrovec_type, igrovec_type
    implicit none
+   integer, public, protected :: g_num_ancou_set_calls = 0
+   integer, public, protected :: g_num_ancou_get_calls = 0
+   integer, public, protected :: g_num_ancouma_set_calls = 0
+   integer, public, protected :: g_num_ancouma_get_calls = 0
+   integer, public, protected :: g_num_ancou_instances = 0
+   integer, public, protected :: g_num_ancouma_instances = 0
    ! ancouma_type stores the angular coupling matrix related to a singe lambda
    ! lower triangle of nonzero angular coupling matrix elements
    ! stored in packed column form that is :
@@ -148,6 +154,7 @@ module mod_cov2
       real(8), intent(out) :: vee
       ij = this%v2i%get_element(ielement)
       vee = this%v2d%get_element(ielement)
+      g_num_ancouma_get_calls = g_num_ancouma_get_calls + 1
    end subroutine 
 
    subroutine ancouma_type_set_element(this, irow, icol, vee)
@@ -159,6 +166,7 @@ module mod_cov2
       ij = this%num_channels * (icol - 1) +irow
       call this%v2d%append(vee)
       call this%v2i%append(ij)
+      g_num_ancouma_set_calls = g_num_ancouma_set_calls + 1
    end subroutine
 
    function create_ancou_type(nlam, num_channels) result(v2)
@@ -177,6 +185,7 @@ module mod_cov2
      !  v2%ancouma(ilam)%v2d = dgrovec_type(block_size=1024*4, num_blocks=1024*8)
      !  v2%ancouma(ilam)%v2i = igrovec_type(block_size=1024*4, num_blocks=1024*8)
      end do
+     g_num_ancou_instances = g_num_ancou_instances + 1
    end function
 
    subroutine ancou_type_destroy(this)
@@ -227,10 +236,12 @@ module mod_cov2
          this%ancouma(ilam)%v2i = igrovec_type(block_size=block_size, num_blocks=num_blocks)
          this%ancouma(ilam)%num_channels = this%num_channels
          this%ancouma(ilam)%is_allocated = .true.
+         g_num_ancouma_instances = g_num_ancouma_instances + 1
       end if
     end subroutine
 
    subroutine ancou_type_set_element(this, ilam, irow, icol, vee)
+      implicit none
       class(ancou_type), target :: this
       integer, intent(in) :: ilam
       integer, intent(in) :: irow
@@ -239,9 +250,11 @@ module mod_cov2
       type(ancouma_type), pointer :: ancouma
       ancouma => this%get_angular_coupling_matrix(ilam)
       call ancouma%set_element(irow, icol, vee)
+      g_num_ancou_set_calls = g_num_ancou_set_calls + 1
    end subroutine 
 
    subroutine ancou_type_get_element(this, ilam, ielement, ij, vee)
+      implicit none
       class(ancou_type)        :: this
       integer, intent(in) :: ilam
       integer(8), intent(in) :: ielement
@@ -249,6 +262,7 @@ module mod_cov2
       real(8), intent(out) :: vee
 
       call this%ancouma(ilam)%get_element(ielement, ij, vee)
+      g_num_ancou_get_calls = g_num_ancou_get_calls + 1
    end subroutine 
 
    subroutine ancou_type_empty(this)
@@ -262,18 +276,35 @@ module mod_cov2
 
    subroutine ancou_type_print_summary(this)
       class(ancou_type)        :: this
-      integer :: ilam, num_nz_elements, num_channels
+      integer :: ilam, num_lam_nz_elements, num_channels, lam_num_elements
+      integer(8) :: num_nz_elements, num_elements
+      num_nz_elements = int(0, 8)
+      num_elements = int(0, 8)
       do ilam = 1, this%nlam
          if (this%ancouma(ilam)%is_allocated) then
-            num_nz_elements = this%ancouma(ilam)%get_num_nonzero_elements()
-            if (num_nz_elements > 0) then
-               num_channels = this%ancouma(ilam)%num_channels
-               write (6,*) 'ilam =', ilam, ' : ', num_nz_elements, '/', num_channels * num_channels ,' non zero elements '
+            num_channels = this%ancouma(ilam)%num_channels
+            lam_num_elements = num_channels * num_channels
+            num_lam_nz_elements = this%ancouma(ilam)%get_num_nonzero_elements()
+            if (num_lam_nz_elements > 0) then
+               write (6,'(A, I3, A, I10, A, I10, A, F6.2, A)') 'ilam = ', ilam, ' : ', num_lam_nz_elements, '/', lam_num_elements ,' non zero elements (', real(num_lam_nz_elements, 8) / lam_num_elements * 100.d0, '%)'
+               num_nz_elements = num_nz_elements + num_lam_nz_elements
             end if
+            num_elements = num_elements + lam_num_elements
          end if
       end do
+      write (6,'(A, I10, A, I10, A, F6.2, A)') 'total : ', num_nz_elements, '/', num_elements ,' non zero elements (', real(num_nz_elements, 8) / num_elements * 100.d0, '%)'
    end subroutine 
-   
+
+   subroutine print_ancou_stats()
+      implicit none
+      write(6,*) "number of calls to ancou_type%set_element : ", g_num_ancou_set_calls
+      write(6,*) "number of calls to ancou_type%get_element : ", g_num_ancou_get_calls
+      write(6,*) "number of calls to ancouma_type%set_element : ", g_num_ancouma_set_calls
+      write(6,*) "number of calls to ancouma_type%get_element : ", g_num_ancouma_get_calls
+      write(6,*) "number of ancou_type instances created : ", g_num_ancou_instances
+      write(6,*) "number of ancouma_type instances created : ", g_num_ancouma_instances
+   end subroutine
+
    subroutine allocate_cov2(av2max, nlammx)
       integer, intent(in) :: av2max
       integer, intent(in) :: nlammx

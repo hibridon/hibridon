@@ -10,6 +10,8 @@
 module mod_grovec
   implicit none
   private
+  integer, public, protected :: g_num_allocated_blocks = 0
+  public :: print_grovec_stats
 
 #define GROVEC_CLASS_NAME dgrovec_type
 #define GROVEC_ELEMENT_TYPE real(8)
@@ -36,5 +38,11 @@ contains
 #include "grovec_imp.F90"
 #undef GROVEC_ELEMENT_TYPE
 #undef GROVEC_CLASS_NAME
+
+subroutine print_grovec_stats()
+  write(6, *) 'number of allocated grovec blocks: ', g_num_allocated_blocks
+end subroutine
+
+
 
 end module mod_grovec

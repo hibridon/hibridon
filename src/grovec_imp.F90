@@ -36,6 +36,7 @@
       allocate(this%blocks(this%num_allocated_blocks)%p(0:this%block_size-1))
       this%blocks(this%num_allocated_blocks)%block_size = this%block_size
       this%num_allocated_blocks = this%num_allocated_blocks + 1
+      g_num_allocated_blocks = g_num_allocated_blocks + 1
     end do
   end subroutine
 
