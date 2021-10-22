@@ -705,9 +705,11 @@ else
 510   format(' Potential not yet defined!')
   goto 1
 end if
-! exit
+! no more commands
 599 write (6, *)
-600 call exit
+! exit
+600 continue
+call exit
 ! show all parameters and flags
 ! show
 700 l1 = l
