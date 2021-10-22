@@ -5,7 +5,7 @@
     final                      :: CONCATENATE(GROVEC_CLASS_NAME,_block_destroy)
   end type CONCATENATE(GROVEC_CLASS_NAME,_block)
   type, public                 :: GROVEC_CLASS_NAME
-    integer*8                  :: num_elements = 0
+    integer                    :: num_elements = 0
     integer                    :: num_blocks = 0
     integer                    :: num_allocated_blocks = 0
     integer                    :: block_size = 0

@@ -296,9 +296,9 @@ integer, intent(in) :: nmax
 type(ancou_type), intent(in) :: v2
 
 integer i, iflag, ilam
-integer(8) :: iv2_element
+integer :: iv2_element
 integer :: ij
-integer(8) :: num_nz_elements
+integer :: num_nz_elements
 real(8) :: vee
 
 common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht

@@ -12,8 +12,8 @@ program test_ancou_type
     integer :: nloops = 6
     integer :: nread_loops = 200
     integer :: iloop, iread_loop
-    integer(8) :: iv2_element, num_nz_elements
-    integer(8) :: num_elements
+    integer :: iv2_element, num_nz_elements
+    integer :: num_elements
     integer :: ij
     real(8) :: vee
     real(8) :: sum

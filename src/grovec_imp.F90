@@ -42,7 +42,7 @@
 
   subroutine CONCATENATE(GROVEC_CLASS_NAME,_set_element)(this, el_index, el_value)
     class(GROVEC_CLASS_NAME)             :: this
-    integer(8), intent(in)      :: el_index
+    integer, intent(in)      :: el_index
     GROVEC_ELEMENT_TYPE, intent(in)        :: el_value
 
     integer                    :: block_index
@@ -59,7 +59,7 @@
 
   function CONCATENATE(GROVEC_CLASS_NAME,_get_element)(this, el_index)
     class(GROVEC_CLASS_NAME)             :: this
-    integer(8), intent(in)        :: el_index
+    integer, intent(in)        :: el_index
     GROVEC_ELEMENT_TYPE                    :: CONCATENATE(GROVEC_CLASS_NAME,_get_element)
 
     integer                    :: block_index

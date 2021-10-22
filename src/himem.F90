@@ -143,13 +143,13 @@ module mod_cov2
 
    function ancouma_type_get_num_nonzero_elements(this) result(n)
       class(ancouma_type)        :: this
-      integer(8)           :: n
+      integer           :: n
       n = this%v2d%num_elements
    end function 
 
    subroutine ancouma_type_get_element(this, ielement, ij, vee)
       class(ancouma_type)        :: this
-      integer(8), intent(in) :: ielement
+      integer, intent(in) :: ielement
       integer, intent(out) :: ij
       real(8), intent(out) :: vee
       ij = this%v2i%get_element(ielement)
@@ -198,7 +198,7 @@ module mod_cov2
    function ancou_type_get_num_nonzero_elements(this) result(num_nz_elements)
       class(ancou_type), target  :: this
       integer :: ilam
-      integer(8) :: lam_nz_els, num_nz_elements
+      integer :: lam_nz_els, num_nz_elements
       type(ancouma_type), pointer :: ancouma 
       do ilam = 1, this%nlam
          ancouma => this%get_angular_coupling_matrix(ilam)
@@ -257,7 +257,7 @@ module mod_cov2
       implicit none
       class(ancou_type)        :: this
       integer, intent(in) :: ilam
-      integer(8), intent(in) :: ielement
+      integer, intent(in) :: ielement
       integer, intent(out) :: ij
       real(8), intent(out) :: vee
 
@@ -277,7 +277,7 @@ module mod_cov2
    subroutine ancou_type_print_summary(this)
       class(ancou_type)        :: this
       integer :: ilam, num_lam_nz_elements, num_channels, lam_num_elements
-      integer(8) :: num_nz_elements, num_elements
+      integer :: num_nz_elements, num_elements
       num_nz_elements = int(0, 8)
       num_elements = int(0, 8)
       do ilam = 1, this%nlam
