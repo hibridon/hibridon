@@ -38,6 +38,7 @@
 !
 ! NB cstart ultrix for fortran rather than c utilities
 !*********************************************************************
+#include "assert.h"
 #if defined(HIB_UNIX_XLF)
 @proc ss fixed(132)
 #endif
@@ -1942,4 +1943,62 @@ call dsyevx(jobz, range, uplo, n, a, lda, vl, vu, &
 call dsyevr(jobz, range, uplo, n, a, lda, vl, vu, &
       il, iu, abstol, m, w, z, ldz, isuppz, work, lwork, iwork, liwork, info)
 #endif
+end subroutine
+
+!#define DEBUG_DSYEV_WRAPPER
+subroutine dsyev_wrapper(jobz, uplo, n, a, lda, w, work, lwork, info)
+implicit none
+character, intent(in) :: jobz
+character, intent(in) :: uplo
+integer, intent(in) :: n
+real(8), dimension(lda, n), intent(inout) :: a
+integer, intent(in) :: lda
+real(8), dimension(n), intent(out) :: w
+real(8), dimension(lwork), intent(out) :: work
+integer, intent(in) :: lwork
+integer, intent(out) :: info
+
+! real(8), dimension(lda, n) :: eye
+real(8) :: sum_for_nan_detection
+! real(8) :: dummy
+integer :: i
+
+! eye = a(1:n,:)
+! eye = 0
+! do i = 1, n
+!       eye(i,i) = 1.0
+! end do
+! dummy = 1.0 / sum_for_nan_detection
+! eye = 0.0
+#ifdef DEBUG_DSYEV_WRAPPER
+write(6, *) 'dsyev_wrapper: jobz = ', jobz
+write(6, *) 'dsyev_wrapper: uplo = ', uplo
+write(6, *) 'dsyev_wrapper: n = ', n
+write(6, *) 'dsyev_wrapper: lda = ', lda
+write(6, *) 'dsyev_wrapper: lwork = ', lwork
+write(6, *) 'dsyev_wrapper: a(1,1) = ', a(1,1)
+#endif
+!sum_for_nan_detection = a(1,1) + a(1,2)
+sum_for_nan_detection = sum(a(1:n,:))
+! write(6, *) 'dsyevr_wrapper: eye = ', eye
+! write(6, *) 'dsyevr_wrapper: a = ', a
+
+! m = 0
+! w = 0.0
+! if ( jobz == 'V' ) then
+!      z = 0.0
+! end if
+! isuppz = 0
+! straing: it seems necessay to initialize work, otherwise
+! floating point exceptions can happen (at least on gfortran
+! debug build with fpe on)
+work = 0
+!iwork = 0
+!info = 0
+
+call dsyev(jobz, uplo, n, a, lda, w, work, lwork, info)
+if (info /= 0) then
+  stop 43
+end if
+ASSERT(info == 0)
 end subroutine

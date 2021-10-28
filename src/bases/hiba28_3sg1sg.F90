@@ -151,6 +151,8 @@ data zero, one, two, three, twthr, sq2 / 0.d0, 1.d0, 2.d0, 3.d0, &
   0.666666666666667d0,  1.414213562373095/
 data spin, ss1 / 1.d0, 2.d0 /
 data uu / 1, 1, 0, 1, -1, 0, 0, 0, 1.414213562373095 /
+integer, parameter :: lwork = 144
+real(8) :: work(lwork)
 !  check for consistency in the values of flaghf and csflag
 if (flaghf) then
   write (9, 5)
@@ -266,7 +268,6 @@ do jj1 = 1, j1max
   call dgemm ('n','n',3,3,3,1.d0,u,3,ham,3,0.d0,wsig,3)
   call dgemm ('n','n',3,3,3,1.d0,wsig,3,u,3,0.d0,ham,3)
 !  diagonalize hamiltonian
-  lwork = 144
   call dsyev('V','L',3,ham,3,eig,work,lwork,ierr)
   n1 = n1 + 1
   e1(n1) = eig(1)
