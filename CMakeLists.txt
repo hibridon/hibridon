@@ -5,6 +5,10 @@ cmake_minimum_required (VERSION 3.3)
 project (hibridon VERSION 5.0)
 enable_language (Fortran)
 
+# Add our local modules to the module path
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
+include(${CMAKE_MODULE_PATH}/SetCompileFlag.cmake)
+
 # code coverage is disabled by default because:
 # 1. most users won't need it: this is targetted to developers, not users
 # 2. code coverage requires extra programs, and this would make hibridon's build process more complicate than needed for normal users
@@ -135,110 +139,83 @@ add_library(hib
      src/bases/hiba30_astp3.F90)
 
 
-# FFLAGS depend on the compiler
+# get the name of the compiler
 get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 
-list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-O0")
-list(APPEND HIBRIDON_COMPILE_OPTIONS_RELEASE "-O3")
-list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-g")
-
-list(APPEND warning_options "-Wall") # activate all warnings
+# optimization
+set_compile_flag(HIBRIDON_COMPILE_OPTIONS_DEBUG "${HIBRIDON_COMPILE_OPTIONS_DEBUG}"
+  Fortran REQUIRED "-O0" # All compilers not on Windows
+                   "/Od" # Intel Windows
+  )
+set_compile_flag(HIBRIDON_COMPILE_OPTIONS_RELEASE "${HIBRIDON_COMPILE_OPTIONS_RELEASE}"
+  Fortran REQUIRED "-O3" # All compilers not on Windows
+                   "/O3" # Intel Windows
+  )
 
 if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
-
   # gfortran
   list(APPEND HIBRIDON_COMPILE_OPTIONS "-fno-f2c")
-  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-fsanitize=address")
-  target_link_options(hib PUBLIC "$<$<CONFIG:Debug>:-fsanitize=address>") # https://stackoverflow.com/questions/37970758/how-to-use-addresssanitizer-with-gcc/40215639#40215639
-  list(APPEND HIBRIDON_COMPILE_OPTIONS_RELEASE "-funroll-all-loops")
-  list(APPEND HIBRIDON_COMPILE_OPTIONS_RELEASE "-march=native")
+endif()
 
-  set (warning_options "") 
+# Optimize for the host's architecture
+# There is some bug where -march=native doesn't work on Mac
+if(APPLE)
+    SET(GNUNATIVE "-mtune=native")
+else()
+    SET(GNUNATIVE "-march=native")
+endif()
+set_compile_flag(HIBRIDON_COMPILE_OPTIONS "${HIBRIDON_COMPILE_OPTIONS}"
+  Fortran REQUIRED "-xHost"        # Intel
+          "/QxHost"       # Intel Windows
+          ${GNUNATIVE}    # GNU
+          "-ta=host"      # Portland Group
+  )
 
-  list(APPEND warning_options "-Wall") # activate all warnings
-  list(APPEND warning_options "-Wextra")
-  list(APPEND warning_options "-Wno-do-subscript")
-  list(APPEND warning_options "-Wno-unused-dummy-argument")
-  list(APPEND warning_options "-Wno-unused-variable")
-  list(APPEND warning_options "-Wno-unused-parameter")
-  list(APPEND warning_options "-Wno-conversion")
-  list(APPEND warning_options "-Wno-argument-mismatch")
-  list(APPEND warning_options "-Wno-unused-label")
-  list(APPEND warning_options "-Wno-tabs")
-  list(APPEND warning_options "-Wno-compare-reals")
-  list(APPEND warning_options "-Wno-intrinsic-shadow")
-  list(APPEND warning_options "-Wno-character-truncation")
-
-
-  # don't initialize local variables to zero : initialize them with dummy values to force failures which help detect uninitialized variables as -Wuninitialized doesn't detect everything (see issue #38 or https://stackoverflow.com/questions/39591300/gfortran-wuninitialized-flag-misses-variable-in-do-loop)
-  # by default, gfortran initializes integers to 0, but not ifort : as a result, some bugs in the code are hidden with gfortran default options
-  # set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -fno-init-local-zero")
-  if(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR)
-    # initialize variables to something else than 0 to force the programe to behave badly in case of unitialized variables
-    list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-finit-integer=333333333")
-    list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-finit-real=snan")
-    list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-ffpe-trap=invalid,zero,overflow")
-    target_compile_definitions(hib PUBLIC "FLOATING_POINT_ERRORS_CAUSE_EXCEPTIONS=1")
-  else()
-    # from gfortran documentation :
-    # Finally, note that enabling any of the -finit-* options will silence warnings that would have been emitted by -Wuninitialized for the affected local variables.
-    list(APPEND warning_options "-Wuninitialized")
-  endif()
-
-  if(ENABLE_INLINING)
-    list(APPEND HIBRIDON_COMPILE_OPTIONS_RELEASE "-Ofast")
-  endif()
-
-  if(ENABLE_LINK_TIME_OPTIMISATION)
-    list(APPEND HIBRIDON_COMPILE_OPTIONS_RELEASE "-flto")
-  endif()
-
-  # todo: add -fbounds-check once all mismatched declarations of variables (eg in common blocks) have been fixed
-  if(ENABLE_CODE_COVERAGE)
-    set(GCC_COVERAGE_COMPILE_FLAGS "-fprofile-arcs;-ftest-coverage;--coverage")
-    set(GCC_COVERAGE_LINK_FLAGS "-lgcov")
-    foreach(compile_option ${GCC_COVERAGE_COMPILE_FLAGS})
-      list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "${compile_option}")
-    endforeach()
-    target_link_options(hib PUBLIC "$<$<CONFIG:Debug>:${GCC_COVERAGE_LINK_FLAGS}>")
-  endif()
-  if(ENABLE_PROFILING)
-    list(APPEND HIBRIDON_COMPILE_OPTIONS "-pg")
-    target_link_options(hib PUBLIC "-pg")
-  endif()
-
-
+# warnings
+# Turn on all warnings 
+set_compile_flag(HIBRIDON_COMPILE_OPTIONS_DEBUG "${HIBRIDON_COMPILE_OPTIONS_DEBUG}"
+  Fortran REQUIRED "-warn all" # Intel
+          "/warn:all" # Intel Windows
+          "-Wall"     # GNU
+                      # Portland Group (on by default)
+  )
+if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-Wextra")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-Wno-do-subscript")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-Wno-unused-dummy-argument")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-Wno-unused-variable")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-Wno-unused-parameter")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-Wno-conversion")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-Wno-argument-mismatch")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-Wno-unused-label")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-Wno-tabs")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-Wno-compare-reals")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-Wno-intrinsic-shadow")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-Wno-character-truncation")
 elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
-  # ifort
-  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-traceback")
-  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-fp-stack-check")
-
-  set (warning_options "")
-  # set (warning_options "-warn all") # activate all warnings
-
   # [no]alignments
   #     Determines whether warnings occur for data that is not naturally aligned. 
-  list(APPEND warning_options "-warn alignments")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-warn alignments")
 
   # [no]declarations
   #     Determines whether warnings occur for any undeclared names. 
-  list(APPEND warning_options "-warn declarations")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-warn declarations")
 
   # [no]errors
   #     Determines whether warnings are changed to errors. 
-  # list(APPEND warning_options "-warn noerrors")
+  # list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-warn noerrors")
 
   # [no]externals
   #     Determines whether warnings occur for any dummy procedures or procedure calls that have no explicit interface or have not been declared external. 
-  list(APPEND warning_options "-warn externals")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-warn externals")
 
   # [no]general
   #     Determines whether warning messages and informational messages are issued by the compiler. 
-  list(APPEND warning_options "-warn general")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-warn general")
 
   # [no]ignore_loc
   #     Determines whether warnings occur when %LOC is stripped from an actual argument. 
-  list(APPEND warning_options "-warn ignore_loc")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-warn ignore_loc")
 
   # [no]interfaces
   #     Determines whether the compiler checks the interfaces of all SUBROUTINEs called and FUNCTIONs invoked in your compilation against an external set of interface blocks.
@@ -246,77 +223,181 @@ elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   # error #6633: The type of the actual argument differs from the type of the dummy argument.
   # error #6634: The shape matching rules of actual arguments and dummy arguments have been violated.
   # error #7983: The storage extent of the dummy argument exceeds that of the actual argument.
-  # list(APPEND warning_options "-warn interfaces")
+  # list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-warn interfaces")
 
 
   # [no]shape
   #     Determines whether array conformance violations are diagnosed with errors or warnings when used with the check shape
   #     option. 
-  list(APPEND warning_options "-warn shape")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-warn shape")
 
   # [no]stderrors
   #     Determines whether warnings about Fortran standard violations are changed to errors.
 
   # [no]truncated_source
   #     Determines whether warnings occur when source exceeds the maximum column width in fixed-format files. 
-  list(APPEND warning_options "-warn truncated_source")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-warn truncated_source")
 
   # [no]uncalled
   #     Determines whether warnings occur when a statement function is never called 
-  list(APPEND warning_options "-warn uncalled")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-warn uncalled")
 
   # [no]unused
   #     Determines whether warnings occur for declared variables that are never used. 
-  list(APPEND warning_options "-warn unused")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-warn unused")
 
   # [no]usage
   #     Determines whether warnings occur for questionable programming practices. 
-  list(APPEND warning_options "-warn usage")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-warn usage")
 
   # disable warning #6717: This name has not been given an explicit type
-  list(APPEND warning_options "-diag-disable 6717")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-diag-disable 6717")
 
   # disable remark #7712: This variable has not been used.
-  list(APPEND warning_options "-diag-disable 7712")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-diag-disable 7712")
 
   # disable warning #8889: Explicit declaration of the EXTERNAL attribute is required.
-  list(APPEND warning_options "-diag-disable 8889")
-  
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-diag-disable 8889")
+endif()
 
-  if(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR)
+# include symbols in executables
+list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-g")
+
+if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+  # activate address sanitizer to detect reads of write to unauthorized memory locations
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-fsanitize=address")
+  target_link_options(hib PUBLIC "$<$<CONFIG:Debug>:-fsanitize=address>") # https://stackoverflow.com/questions/37970758/how-to-use-addresssanitizer-with-gcc/40215639#40215639
+endif()
+
+if(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR)
+  if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+    # don't initialize local variables to zero : initialize them with dummy values to force failures which help detect uninitialized variables as -Wuninitialized doesn't detect everything (see issue #38 or https://stackoverflow.com/questions/39591300/gfortran-wuninitialized-flag-misses-variable-in-do-loop)
+    # by default, gfortran initializes integers to 0, but not ifort : as a result, some bugs in the code are hidden with gfortran default options
+    # set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -fno-init-local-zero")
+    # initialize variables to something else than 0 to force the programe to behave badly in case of unitialized variables
+    list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-finit-integer=333333333")
+    list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-finit-real=snan")
+    list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-ffpe-trap=invalid,zero,overflow")
+    target_compile_definitions(hib PUBLIC "FLOATING_POINT_ERRORS_CAUSE_EXCEPTIONS=1")
+  elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
     # Force à NaN toutes les variables de type intrinsèque ainsi que les tableaux non initialisés. Cette option implique -fpe0. Pour éviter de récupérer des exceptions, qui ne soient pas relatives à des variables non-initialisées, nous recommandons de réduire le niveau d'optimisation à -O1 ou -O0 ou alors d'utiliser -fp-speculation=safe pour faire la détection de variables non-initialisés.
     list(APPEND HIBRIDON_COMPILE_OPTIONS "-init=arrays,snan")
-  endif()
 
-  # Cette combinaison d'options stoppe l'exécution dès qu'une exception (overflow, underflow, division par zéro, opération invalide,…) se produit; elle indique à quel niveau du code elle s'est produite. Le contrôle s'opère dans chaque subroutine, contrairement à l'option -fpe0 qui agit uniquement sur le programme principal. 
-  #list(APPEND HIBRIDON_COMPILE_OPTIONS "-fpe-all=0")
-  #list(APPEND HIBRIDON_COMPILE_OPTIONS "-no-ftz")
-  #list(APPEND HIBRIDON_COMPILE_OPTIONS "-traceback")
-
-  # set (warning_options "") # activate all warnings
-
-  if(ENABLE_INLINING)
-    list(APPEND HIBRIDON_COMPILE_OPTIONS_RELEASE "-fast")
-  endif()
-
-  if(ENABLE_LINK_TIME_OPTIMISATION)
-    list(APPEND HIBRIDON_COMPILE_OPTIONS_RELEASE "-ipo")
-  endif()
-
-  if(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR)
     # check uses of uninitialized variables in run time
     # this is very useful as these are always bugs that cause the program to behave randomly with ifort (gfortran initializes data with zero)
     list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-check uninit")
     target_compile_definitions(hib PUBLIC "FLOATING_POINT_ERRORS_CAUSE_EXCEPTIONS=1")
+
+    # Cette combinaison d'options stoppe l'exécution dès qu'une exception (overflow, underflow, division par zéro, opération invalide,…) se produit; elle indique à quel niveau du code elle s'est produite. Le contrôle s'opère dans chaque subroutine, contrairement à l'option -fpe0 qui agit uniquement sur le programme principal. 
+    #list(APPEND HIBRIDON_COMPILE_OPTIONS "-fpe-all=0")
+    #list(APPEND HIBRIDON_COMPILE_OPTIONS "-no-ftz")
+    #list(APPEND HIBRIDON_COMPILE_OPTIONS "-traceback")
   endif()
+else()
+  if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+    # from gfortran documentation :
+    # Finally, note that enabling any of the -finit-* options will silence warnings that would have been emitted by -Wuninitialized for the affected local variables.
+    list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-Wuninitialized")
+  endif()
+endif()
 
-endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+# Check array bounds
+# todo: add -fbounds-check once all mismatched declarations of variables (eg in common blocks) have been fixed
+# set_compile_flag(HIBRIDON_COMPILE_OPTIONS_DEBUG "${HIBRIDON_COMPILE_OPTIONS_DEBUG}"
+#   Fortran REQUIRED "-check bounds"  # Intel
+#           "/check:bounds"  # Intel Windows
+#           "-fcheck=bounds" # GNU (New style)
+#           "-fbounds-check" # GNU (Old style)
+#           "-Mbounds"       # Portland Group
+#   )
 
-foreach (warning_option ${warning_options})
-  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "${warning_option}")
-endforeach()
+if (Fortran_COMPILER_NAME MATCHES "ifort.*")
+  # Tell the compiler to generate extra code after every function call to ensure that the floating-point stack is in the expected state
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-fp-stack-check")  
+endif ()
+
+# Traceback
+set_compile_flag(HIBRIDON_COMPILE_OPTIONS_DEBUG "${HIBRIDON_COMPILE_OPTIONS_DEBUG}"
+  Fortran REQUIRED "-traceback"   # Intel/Portland Group
+          "/traceback"   # Intel Windows
+          "-fbacktrace"  # GNU (gfortran)
+          "-ftrace=full" # GNU (g95)
+  )
+
+# Unroll loops
+set_compile_flag(HIBRIDON_COMPILE_OPTIONS_RELEASE "${HIBRIDON_COMPILE_OPTIONS_RELEASE}"
+  Fortran REQUIRED "-funroll-loops" # GNU 
+          "-unroll"        # Intel
+          "/unroll"        # Intel Windows
+          "-Munroll"       # Portland Group
+  )
+
+# Inline functions
+if(ENABLE_INLINING)
+  set_compile_flag(HIBRIDON_COMPILE_OPTIONS_RELEASE "${HIBRIDON_COMPILE_OPTIONS_RELEASE}"
+    Fortran REQUIRED "-inline"            # Intel
+            "/Qinline"           # Intel Windows
+            "-finline-functions" # GNU
+            "-Minline"           # Portland Group
+    )
+endif()
+
+# Interprocedural (link-time) optimizations
+if(ENABLE_LINK_TIME_OPTIMISATION)
+  set_compile_flag(HIBRIDON_COMPILE_OPTIONS_RELEASE "${HIBRIDON_COMPILE_OPTIONS_RELEASE}"
+    Fortran REQUIRED "-ipo"     # Intel
+            "/Qipo"    # Intel Windows
+            "-flto"    # GNU
+            "-Mipa"    # Portland Group
+    )
+endif()
+
+# Single-file optimizations
+set_compile_flag(HIBRIDON_COMPILE_OPTIONS_RELEASE "${HIBRIDON_COMPILE_OPTIONS_RELEASE}"
+  Fortran "-ip"  # Intel
+          "/Qip" # Intel Windows
+  )
+
+# Vectorize code
+set_compile_flag(HIBRIDON_COMPILE_OPTIONS_RELEASE "${HIBRIDON_COMPILE_OPTIONS_RELEASE}"
+  Fortran "-vec-report0"  # Intel
+          "/Qvec-report0" # Intel Windows
+          "-Mvect"        # Portland Group
+  )
 
 
+# optimize for speed (macro options)
+# https://www.intel.com/content/www/us/en/develop/documentation/fortran-compiler-oneapi-dev-guide-and-reference/top/compiler-reference/compiler-options/compiler-option-details/optimization-options/fast.html
+# On Linux* systems: -ipo, -O3, -no-prec-div,-static, -fp-model fast=2, and -xHost
+# https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
+# -Ofast
+
+#     Disregard strict standards compliance. -Ofast enables all -O3 optimizations. It also enables optimizations that are not valid for all standard-compliant programs. It turns on -ffast-math, -fallow-store-data-races and the Fortran-specific -fstack-arrays, unless -fmax-stack-var-size is specified, and -fno-protect-parens.
+# set_compile_flag(HIBRIDON_COMPILE_OPTIONS_RELEASE "${HIBRIDON_COMPILE_OPTIONS_RELEASE}"
+#   Fortran REQUIRED "-fast"              # Intel
+#           "-Ofast"             # GNU
+#   )
+
+if(ENABLE_PROFILING)
+  # The profiler requires both the debug and profile directives (-g and -p)
+  list(APPEND HIBRIDON_COMPILE_OPTIONS "-g")  
+  list(APPEND HIBRIDON_COMPILE_OPTIONS "-p")
+  target_link_options(hib PUBLIC "-p")
+  target_link_options(hib PUBLIC "-g")
+endif()
+
+if(ENABLE_CODE_COVERAGE)
+  if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+    set(GCC_COVERAGE_COMPILE_FLAGS "-fprofile-arcs;-ftest-coverage;--coverage")
+    set(GCC_COVERAGE_LINK_FLAGS "-lgcov")
+    foreach(compile_option ${GCC_COVERAGE_COMPILE_FLAGS})
+      list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "${compile_option}")
+    endforeach()
+    target_link_options(hib PUBLIC "$<$<CONFIG:Debug>:${GCC_COVERAGE_LINK_FLAGS}>")
+  else()
+    message(FATAL_ERROR "ENABLE_CODE_COVERAGE is not yet supported with compiler ${Fortran_COMPILER_NAME}")
+  endif()
+endif()
 
 set(GIT_REVISION 'not-available')
 execute_process(COMMAND "git" "--git-dir=${CMAKE_CURRENT_SOURCE_DIR}/.git" "log" "--pretty=format:%h" "-n" "1"
@@ -392,6 +473,7 @@ target_compile_definitions(hib PUBLIC _BUILD_PROC_="${CMAKE_HOST_SYSTEM_PROCESSO
 target_compile_definitions(hib PUBLIC _BUILD_COMP_="${CMAKE_Fortran_COMPILER}")
 
 set(hib_compile_options "${HIBRIDON_COMPILE_OPTIONS};$<$<CONFIG:Debug>:${HIBRIDON_COMPILE_OPTIONS_DEBUG}>;$<$<CONFIG:Release>:${HIBRIDON_COMPILE_OPTIONS_RELEASE}>")
+message(STATUS "hib_compile_options : ${hib_compile_options}")
 # replace list separator ';' with a space because semicolons confuse the make generator 
 string(REGEX REPLACE ";" " " hib_compile_options "${hib_compile_options}")
 target_compile_definitions(hib PUBLIC _BUILD_FLAGS_="${hib_compile_options}")

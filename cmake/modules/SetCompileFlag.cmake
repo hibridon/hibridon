@@ -23,12 +23,13 @@
 # as the value in quotes) is because of the way CMAKE handles the passing
 # of variables in functions; it is difficult to extract a variable's
 # contents and assign new values to it from within a function.
+# original code : https://github.com/SethMMorton/cmake_fortran_template/blob/master/cmake/Modules/SetCompileFlag.cmake
 #############################################################################
 
 INCLUDE(${CMAKE_ROOT}/Modules/CheckCCompilerFlag.cmake)
 INCLUDE(${CMAKE_ROOT}/Modules/CheckCXXCompilerFlag.cmake)
 
-FUNCTION(SET_COMPILE_FLAG FLAGVAR FLAGVAL LANG)
+FUNCTION(set_compile_flag FLAGVAR FLAGVAL LANG)
 
     # Do some up front setup if Fortran
     IF(LANG STREQUAL "Fortran")
@@ -96,8 +97,7 @@ end program dummyprog
         # If this worked, use these flags, otherwise use other flags
         IF(FLAG_WORKS)
             # Append this flag to the end of the list that already exists
-            SET(${FLAGVAR} "${FLAGVAL} ${flag}" CACHE STRING
-                 "Set the ${FLAGVAR} flags" FORCE)
+            SET(${FLAGVAR} "${FLAGVAL};${flag}" PARENT_SCOPE)
             SET(FLAG_FOUND TRUE)
             BREAK() # We found something that works, so exit
         ENDIF(FLAG_WORKS)
