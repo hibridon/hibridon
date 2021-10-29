@@ -144,6 +144,8 @@ subroutine split(input_line,array,delimiters,order,nulls)
             ii=ii+iiii
         endif
     enddo
+    deallocate(iterm)
+    deallocate(ibegin)
 end subroutine split
 end module m_stringsplitter
 
