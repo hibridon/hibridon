@@ -39,37 +39,47 @@ cd /tmp/hib_src
 git clone https://github.com/hibridon/hibridon.git
 ```
 This will create a directory /tmp/hib_src/hibridon, which is a clone of https://github.com/hibridon/hibridon.git 
+
 ### 3. Create a directory to store hibridon's build
 
 ```bash
 mkdir /tmp/hib_build
 ```
 
-### 4. Create a configuration file for your potential energy surface
+### 4. Create a configuration file for your potential energy surfaces
 
-Create a new file with the `.user.cmake` extension at the root of the build directory (/tmp/hib_build) (e.g. `nh3h2.user.cmake`).
+In this section we assume that you only have one hibridon potential energy surface code, which is located in `~/hibridon/my_pots/pot_nh3h2.F90`. Please note that a ready-to-use sample is available in https://github.com/hibridon/hibridon.git/doc/samples/arno.
 
-Paste the following content and edit to suit your needs:
+Create a `CMake` project file `~/hibridon/my_pots/CMakeLists.txt` that will describe the way to build `nh3h2.exe` from `~/hibridon/my_pots/pot_nh3h2.F90` and hibridon source code. Here's an example of `~/hibridon/my_pots/CMakeLists.txt`'s contents:
+
+```cmake
+# this is a minimal cmake example for creating a hibridon executable with a user-defined potential
+cmake_minimum_required (VERSION 3.3)
+project (my_pots)
+enable_language (Fortran)
+
+# add hibridon library
+add_subdirectory("/tmp/hib_src" hibridon)
+
+# declare a new executable using hibridon's add_hibexe cmake function, where:
+# - the 1st argument (here nh3h2.exe) is the name of the resulting executable
+# - the 2nd argument (here "pot_nh3h2.F90") is the file path of the user provided potential file
+# - the 3rd argument (here "kmax") is the size of the t matrix
+#    - kmax : for normal cases
+#    - kbig : for special cases (only arn2_big test uses it)
+add_hibexe(nh3h2.exe "pot_nh3h2.F90" "kmax")
 ```
-# NH3-H2 sample cmake script
 
-set(EXE_NAME "nh3h2.exe")
-set(POT_SRC_FILE "/home/NH3H2/pot_nh3h2_2009.F90")
-set(p_T_MATRIX_SIZE "500")
-```
-where 
-* `EXE_NAME` will be the name of the hibridon executable
-* `POT_SRC_FILE` is the full path to your potential fortran source code*
-* `p_T_MATRIX_SIZE` is the T_MATRIX_SIZE parameter
+Please note that this project `my_pots` only describes how to build one hibridon executable (`nh3h2.exe`). However, more potential executables can be added in the same project: to do that, just add more `add_hibexe` statements.
 
-\*Simply the filename (e.g. `pot_nh3h2_2009.F90` or `./pot_nh3h2_2009.F90`) if your potential is located in the build directory.
+Also please note that this project includes `hibridon` through the use of `add_subdirectory` statement. This means that building your project will build `hibridon`.
 
-
-### 5. Configure hibridon's build
+### 5. Configure your project's build
 
 ```bash
-cd /tmp/hib_build
-cmake /tmp/hib_src/hibridon
+mkdir -p /tmp/my_pots_build
+cd /tmp/my_pots_build
+cmake ~/hibridon/my_pots
 ```
 This will automatically find the required libraries and create a Makefile to build hibridon. 
 
@@ -82,8 +92,8 @@ make sure your environment variable `MKL_ROOT` is set to use the mkl lbrary you 
 Once `MKL_ROOT` is set properly, you just have to tell cmake that you want to use mkl (see [https://cmake.org/cmake/help/v3.14/module/FindBLAS.html]):
 
 ```bash
-cd /tmp/hib_build
-cmake -DBLA_VENDOR=Intel10_64lp /tmp/hib_src
+cd /tmp/my_pots_build
+cmake -DBLA_VENDOR=Intel10_64lp ~/hibridon/my_pots
 ```
 
 #### to configure the build with intel fortran...
@@ -95,8 +105,8 @@ make sure you have set the environment variables such that the `ifort` command w
 Once `ifort` is in your path, you just have to tell cmake that you want to use ifort as the fortran compiler using the option `-DCMAKE_Fortran_COMPILER=ifort`, eg:
 
 ```bash
-cd /tmp/hib_build
-cmake -DCMAKE_Fortran_COMPILER=ifort /tmp/hib_src
+cd /tmp/my_pots_build
+cmake -DCMAKE_Fortran_COMPILER=ifort ~/hibridon/my_pots
 ```
 
 ### 6. Test hibridon (OPTIONAL)
@@ -104,31 +114,35 @@ cmake -DCMAKE_Fortran_COMPILER=ifort /tmp/hib_src
 The following command will run all hibridon's tests:
 
 ```bash
+cd /tmp/my_pots_build
 make test
 ```
 
 You can also run a test suite (a group of tests). For example, the following command will run the test suite `short`:
 
 ```bash
+cd /tmp/my_pots_build
 make testsuite_short
 ```
 
 You can also run a single test. For example, the following command will run the test `arn2`:
 
 ```bash
+cd /tmp/my_pots_build
 ctest -L '^arn2$'
 ```
 
-### 7. Build hibridon
+### 7. Build your potential executables
 
 ```bash
-make <EXEC_NAME>
+cd /tmp/my_pots_build
+make nh3h2.exe
 ```
-where `EXEC_NAME` is the executable name defined in your `.user.cmake` file.
+This should create the file `/tmp/my_pots_build/nh3h2.exe`
 
 ### 8. one liner example
 
-This one line command configures, builds and tests hibridon from a directory containing the source code.
+This one line command configures, builds and tests hibridon from a directory `/home/graffy/work/hibridon` containing the source code (please note that this only builds and tests hibridon library; it doesn't build any user-provided potential energy surface).
 
 ```
 graffy@graffy-ws2:/tmp/hibridon.build$ rm -R ./* ; script -q /dev/null --command  "cmake -DCMAKE_BUILD_TYPE=Debug /home/graffy/work/hibridon" && script -q /dev/null --command "make 2>&1" | tee "/home/graffy/work/hibridon/refactor_notes/make_$(date).stdout" && ctest
