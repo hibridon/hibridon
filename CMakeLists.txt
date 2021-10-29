@@ -20,13 +20,10 @@ set(ENABLE_ASSERTS "ON" CACHE BOOL "to enable or disable assert checks for debug
 # With gfortran, variables are initialized to 0 by default, but it's not the case with ifort compiler. Therefore, all variables need to be initialized to guarantee the program works in a deterministic way on every compiler.
 set(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR "ON" CACHE BOOL "if set, causes the use of uninitilazed variables to trigger an exception, thus making the program stop. This is useful to detect uninitialized memory issues.")
 
-# store variables that are used in functions (add_hibexe and add_hibridon_test) in the cache so that external cmake projects can use these functions (otherwise these variables would be empty when used from other cmake projects)
-
-set(HIBRIDON_COMPILE_OPTIONS "" CACHE STRING "list of compilation options for hibridon source code") 
-
-set(HIBRIDON_LINK_LIBRARIES "" CACHE STRING "list of libraries that need to be linked with hibridon") 
-
-set(GCC_COVERAGE_LINK_FLAGS "" CACHE STRING "the libraries that need to be linked with hibridon for code coverage") 
+# store compile options in lists to later generate a string of compilation options that gets included in hibridon's header
+set(HIBRIDON_COMPILE_OPTIONS "") # intended to be a list, not a string
+set(HIBRIDON_COMPILE_OPTIONS_DEBUG "") # intended to be a list, not a string
+set(HIBRIDON_COMPILE_OPTIONS_RELEASE "") # intended to be a list, not a string
 
 # see https://stackoverflow.com/questions/42386065/inlining-functions-in-fortran
 set(ENABLE_INLINING "OFF")
@@ -141,91 +138,107 @@ add_library(hib
 # FFLAGS depend on the compiler
 get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 
+list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-O0")
+list(APPEND HIBRIDON_COMPILE_OPTIONS_RELEASE "-O3")
+list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-g")
+
+list(APPEND warning_options "-Wall") # activate all warnings
+
 if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
   # gfortran
-  set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 -march=native")
-  set (warning_options "-Wall -Wextra") # activate all wanings
+  list(APPEND HIBRIDON_COMPILE_OPTIONS "-fno-f2c")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-fsanitize=address")
+  target_link_options(hib PUBLIC "$<$<CONFIG:Debug>:-fsanitize=address>") # https://stackoverflow.com/questions/37970758/how-to-use-addresssanitizer-with-gcc/40215639#40215639
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_RELEASE "-funroll-all-loops")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_RELEASE "-march=native")
 
-  set (warning_options "${warning_options} -Wno-do-subscript")
-  set (warning_options "${warning_options} -Wno-unused-dummy-argument")
-  set (warning_options "${warning_options} -Wno-unused-variable")
-  set (warning_options "${warning_options} -Wno-unused-parameter")
-  set (warning_options "${warning_options} -Wno-conversion")
-  set (warning_options "${warning_options} -Wno-argument-mismatch")
-  set (warning_options "${warning_options} -Wno-unused-label")
-  set (warning_options "${warning_options} -Wno-tabs")
-  set (warning_options "${warning_options} -Wno-compare-reals")
-  set (warning_options "${warning_options} -Wno-intrinsic-shadow")
-  set (warning_options "${warning_options} -Wno-character-truncation")
+  set (warning_options "") 
 
-  set (CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g  -fsanitize=address ${warning_options}")
+  list(APPEND warning_options "-Wall") # activate all warnings
+  list(APPEND warning_options "-Wextra")
+  list(APPEND warning_options "-Wno-do-subscript")
+  list(APPEND warning_options "-Wno-unused-dummy-argument")
+  list(APPEND warning_options "-Wno-unused-variable")
+  list(APPEND warning_options "-Wno-unused-parameter")
+  list(APPEND warning_options "-Wno-conversion")
+  list(APPEND warning_options "-Wno-argument-mismatch")
+  list(APPEND warning_options "-Wno-unused-label")
+  list(APPEND warning_options "-Wno-tabs")
+  list(APPEND warning_options "-Wno-compare-reals")
+  list(APPEND warning_options "-Wno-intrinsic-shadow")
+  list(APPEND warning_options "-Wno-character-truncation")
+
 
   # don't initialize local variables to zero : initialize them with dummy values to force failures which help detect uninitialized variables as -Wuninitialized doesn't detect everything (see issue #38 or https://stackoverflow.com/questions/39591300/gfortran-wuninitialized-flag-misses-variable-in-do-loop)
   # by default, gfortran initializes integers to 0, but not ifort : as a result, some bugs in the code are hidden with gfortran default options
   # set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -fno-init-local-zero")
   if(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR)
     # initialize variables to something else than 0 to force the programe to behave badly in case of unitialized variables
-    set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -finit-integer=333333333")
-    set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -finit-real=snan")
-    set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -ffpe-trap=invalid,zero,overflow")
-    target_compile_definitions(hib PUBLIC FLOATING_POINT_ERRORS_CAUSE_EXCEPTIONS=1)
+    list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-finit-integer=333333333")
+    list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-finit-real=snan")
+    list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-ffpe-trap=invalid,zero,overflow")
+    target_compile_definitions(hib PUBLIC "FLOATING_POINT_ERRORS_CAUSE_EXCEPTIONS=1")
   else()
     # from gfortran documentation :
     # Finally, note that enabling any of the -finit-* options will silence warnings that would have been emitted by -Wuninitialized for the affected local variables.
-    set (warning_options "${warning_options} -Wuninitialized")
+    list(APPEND warning_options "-Wuninitialized")
   endif()
 
   if(ENABLE_INLINING)
-    set (CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -Ofast")
+    list(APPEND HIBRIDON_COMPILE_OPTIONS_RELEASE "-Ofast")
   endif()
 
   if(ENABLE_LINK_TIME_OPTIMISATION)
-    set (CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -flto")
+    list(APPEND HIBRIDON_COMPILE_OPTIONS_RELEASE "-flto")
   endif()
 
   # todo: add -fbounds-check once all mismatched declarations of variables (eg in common blocks) have been fixed
   if(ENABLE_CODE_COVERAGE)
-    set(GCC_COVERAGE_COMPILE_FLAGS "-fprofile-arcs -ftest-coverage --coverage")
+    set(GCC_COVERAGE_COMPILE_FLAGS "-fprofile-arcs;-ftest-coverage;--coverage")
     set(GCC_COVERAGE_LINK_FLAGS "-lgcov")
-    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} ${GCC_COVERAGE_COMPILE_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${GCC_COVERAGE_LINK_FLAGS}")
+    foreach(compile_option ${GCC_COVERAGE_COMPILE_FLAGS})
+      list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "${compile_option}")
+    endforeach()
+    target_link_options(hib PUBLIC "$<$<CONFIG:Debug>:${GCC_COVERAGE_LINK_FLAGS}>")
   endif()
   if(ENABLE_PROFILING)
-    set(GCC_PROFILING_COMPILE_FLAGS "-pg")
-    set(GCC_PROFILING_LINK_FLAGS "-pg")
-    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} ${GCC_PROFILING_COMPILE_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${GCC_PROFILING_LINK_FLAGS}")
+    list(APPEND HIBRIDON_COMPILE_OPTIONS "-pg")
+    target_link_options(hib PUBLIC "-pg")
   endif()
+
+
 elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   # ifort
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-traceback")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-fp-stack-check")
 
   set (warning_options "")
   # set (warning_options "-warn all") # activate all warnings
 
   # [no]alignments
   #     Determines whether warnings occur for data that is not naturally aligned. 
-  set (warning_options "${warning_options} -warn alignments")
+  list(APPEND warning_options "-warn alignments")
 
   # [no]declarations
   #     Determines whether warnings occur for any undeclared names. 
-  set (warning_options "${warning_options} -warn declarations")
+  list(APPEND warning_options "-warn declarations")
 
   # [no]errors
   #     Determines whether warnings are changed to errors. 
-  # set (warning_options "${warning_options} -warn noerrors")
+  # list(APPEND warning_options "-warn noerrors")
 
   # [no]externals
   #     Determines whether warnings occur for any dummy procedures or procedure calls that have no explicit interface or have not been declared external. 
-  set (warning_options "${warning_options} -warn externals")
+  list(APPEND warning_options "-warn externals")
 
   # [no]general
   #     Determines whether warning messages and informational messages are issued by the compiler. 
-  set (warning_options "${warning_options} -warn general")
+  list(APPEND warning_options "-warn general")
 
   # [no]ignore_loc
   #     Determines whether warnings occur when %LOC is stripped from an actual argument. 
-  set (warning_options "${warning_options} -warn ignore_loc")
+  list(APPEND warning_options "-warn ignore_loc")
 
   # [no]interfaces
   #     Determines whether the compiler checks the interfaces of all SUBROUTINEs called and FUNCTIONs invoked in your compilation against an external set of interface blocks.
@@ -233,81 +246,77 @@ elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   # error #6633: The type of the actual argument differs from the type of the dummy argument.
   # error #6634: The shape matching rules of actual arguments and dummy arguments have been violated.
   # error #7983: The storage extent of the dummy argument exceeds that of the actual argument.
-  # set (warning_options "${warning_options} -warn interfaces")
+  # list(APPEND warning_options "-warn interfaces")
 
 
   # [no]shape
   #     Determines whether array conformance violations are diagnosed with errors or warnings when used with the check shape
   #     option. 
-  set (warning_options "${warning_options} -warn shape")
+  list(APPEND warning_options "-warn shape")
 
   # [no]stderrors
   #     Determines whether warnings about Fortran standard violations are changed to errors.
 
   # [no]truncated_source
   #     Determines whether warnings occur when source exceeds the maximum column width in fixed-format files. 
-  set (warning_options "${warning_options} -warn truncated_source")
+  list(APPEND warning_options "-warn truncated_source")
 
   # [no]uncalled
   #     Determines whether warnings occur when a statement function is never called 
-  set (warning_options "${warning_options} -warn uncalled")
+  list(APPEND warning_options "-warn uncalled")
 
   # [no]unused
   #     Determines whether warnings occur for declared variables that are never used. 
-  set (warning_options "${warning_options} -warn unused")
+  list(APPEND warning_options "-warn unused")
 
   # [no]usage
   #     Determines whether warnings occur for questionable programming practices. 
-  set (warning_options "${warning_options} -warn usage")
+  list(APPEND warning_options "-warn usage")
 
   # disable warning #6717: This name has not been given an explicit type
-  set (warning_options "${warning_options} -diag-disable 6717")
+  list(APPEND warning_options "-diag-disable 6717")
 
   # disable remark #7712: This variable has not been used.
-  set (warning_options "${warning_options} -diag-disable 7712")
+  list(APPEND warning_options "-diag-disable 7712")
 
   # disable warning #8889: Explicit declaration of the EXTERNAL attribute is required.
-  set (warning_options "${warning_options} -diag-disable 8889")
+  list(APPEND warning_options "-diag-disable 8889")
   
-
-  set (common_options "")
 
   if(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR)
     # Force à NaN toutes les variables de type intrinsèque ainsi que les tableaux non initialisés. Cette option implique -fpe0. Pour éviter de récupérer des exceptions, qui ne soient pas relatives à des variables non-initialisées, nous recommandons de réduire le niveau d'optimisation à -O1 ou -O0 ou alors d'utiliser -fp-speculation=safe pour faire la détection de variables non-initialisés.
-    set (common_options "${common_options} -init=arrays,snan")
+    list(APPEND HIBRIDON_COMPILE_OPTIONS "-init=arrays,snan")
   endif()
 
   # Cette combinaison d'options stoppe l'exécution dès qu'une exception (overflow, underflow, division par zéro, opération invalide,…) se produit; elle indique à quel niveau du code elle s'est produite. Le contrôle s'opère dans chaque subroutine, contrairement à l'option -fpe0 qui agit uniquement sur le programme principal. 
-#  set (common_options "${common_options} -fpe-all=0 -no-ftz -traceback")
+  #list(APPEND HIBRIDON_COMPILE_OPTIONS "-fpe-all=0")
+  #list(APPEND HIBRIDON_COMPILE_OPTIONS "-no-ftz")
+  #list(APPEND HIBRIDON_COMPILE_OPTIONS "-traceback")
 
   # set (warning_options "") # activate all warnings
-  set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_options} ${warning_options}")
-  set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g -traceback -fp-stack-check ${common_options} ${warning_options}")
 
   if(ENABLE_INLINING)
-    set (CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -fast")
+    list(APPEND HIBRIDON_COMPILE_OPTIONS_RELEASE "-fast")
   endif()
 
   if(ENABLE_LINK_TIME_OPTIMISATION)
-    set (CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -ipo")
+    list(APPEND HIBRIDON_COMPILE_OPTIONS_RELEASE "-ipo")
   endif()
-
-
 
   if(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR)
     # check uses of uninitialized variables in run time
     # this is very useful as these are always bugs that cause the program to behave randomly with ifort (gfortran initializes data with zero)
-    set (CMAKE_Fortran_FLAGS_DEBUG   "${CMAKE_Fortran_FLAGS_DEBUG} -check uninit")
-    target_compile_definitions(hib PUBLIC FLOATING_POINT_ERRORS_CAUSE_EXCEPTIONS=1)
+    list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "-check uninit")
+    target_compile_definitions(hib PUBLIC "FLOATING_POINT_ERRORS_CAUSE_EXCEPTIONS=1")
   endif()
-
 
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
+foreach (warning_option ${warning_options})
+  list(APPEND HIBRIDON_COMPILE_OPTIONS_DEBUG "${warning_option}")
+endforeach()
 
 
-
-target_compile_definitions(hib PUBLIC MAX_NJTOT=1000)
 
 set(GIT_REVISION 'not-available')
 execute_process(COMMAND "git" "--git-dir=${CMAKE_CURRENT_SOURCE_DIR}/.git" "log" "--pretty=format:%h" "-n" "1"
@@ -315,19 +324,6 @@ execute_process(COMMAND "git" "--git-dir=${CMAKE_CURRENT_SOURCE_DIR}/.git" "log"
                 ERROR_QUIET)
                 
 
-# The following is for preprocessing of hiversion.F90
-target_compile_definitions(hib PUBLIC _BUILD_VERS_=${PROJECT_VERSION})
-target_compile_definitions(hib PUBLIC _BUILD_TYPE_="${CMAKE_BUILD_TYPE}")
-target_compile_definitions(hib PUBLIC _GIT_REVISION_="${GIT_REVISION}")
-target_compile_definitions(hib PUBLIC _BUILD_SYS1_="${CMAKE_HOST_SYSTEM_NAME}")
-target_compile_definitions(hib PUBLIC _BUILD_SYS2_="${CMAKE_HOST_SYSTEM_VERSION}")
-target_compile_definitions(hib PUBLIC _BUILD_PROC_="${CMAKE_HOST_SYSTEM_PROCESSOR}")
-target_compile_definitions(hib PUBLIC _BUILD_COMP_="${CMAKE_Fortran_COMPILER}")
-target_compile_definitions(hib PUBLIC _BUILD_FLAGS_="${HIBRIDON_COMPILE_OPTIONS}")
-string(TIMESTAMP TODAY "%Y-%m-%d at %H:%M")
-target_compile_definitions(hib PUBLIC _BUILD_DATE_="${TODAY}")
-# The ffollowing is for preprocessing of hhelp.F90 and hiutil.F90
-target_compile_definitions(hib PUBLIC _HELPDIR_="${CMAKE_CURRENT_SOURCE_DIR}/doc/")
 
 add_custom_command(
     OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/src/common
@@ -335,8 +331,6 @@ add_custom_command(
     COMMENT "making directory ${CMAKE_CURRENT_BINARY_DIR}/src/common"
 )
 
-
-set(HIBRIDON_COMPILE_OPTIONS "") # intended to be a list, not a string
 
 list(APPEND HIBRIDON_COMPILE_OPTIONS "-I${CMAKE_CURRENT_SOURCE_DIR}/src")
 
@@ -347,7 +341,7 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   list(APPEND HIBRIDON_COMPILE_OPTIONS "-ffree-line-length-none")
   list(APPEND HIBRIDON_COMPILE_OPTIONS "-ffixed-line-length-132")
 elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
-  list(APPEND HIBRIDON_COMPILE_OPTIONS "-extend-source" "132")
+  list(APPEND HIBRIDON_COMPILE_OPTIONS "-extend-source 132")
   # source code lines can be of any length, as compilation options are included as source code strings (see bug #5)
   list(APPEND HIBRIDON_COMPILE_OPTIONS "-no-wrap-margin")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
@@ -374,24 +368,39 @@ if(UNIX AND NOT APPLE)
     list(APPEND HIBRIDON_COMPILE_OPTIONS "-mcmodel=large")
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES Release)
-  target_compile_definitions(hib PUBLIC DISABLE_HIB_ASSERT=1)
-else()
-  # asserts can be activated on non-release builds (eg debug build)
-  if(NOT ENABLE_ASSERTS)
-    target_compile_definitions(hib PUBLIC DISABLE_HIB_ASSERT=1)
-  endif()
-endif()
-
-set(HIBRIDON_LINK_LIBRARIES "")
-list(APPEND HIBRIDON_LINK_LIBRARIES "${LAPACK_LIBRARIES}")
-list(APPEND HIBRIDON_LINK_LIBRARIES "${BLAS_LIBRARIES}")
-
-
 
 
 #  -fbounds-check'
-target_compile_options(hib PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
+
+foreach(HIBRIDON_COMPILE_OPTION ${HIBRIDON_COMPILE_OPTIONS})
+  target_compile_options(hib PUBLIC "${HIBRIDON_COMPILE_OPTION}")
+endforeach()
+foreach(HIBRIDON_COMPILE_OPTION ${HIBRIDON_COMPILE_OPTIONS_DEBUG})
+  target_compile_options(hib PUBLIC "$<$<CONFIG:Debug>:${HIBRIDON_COMPILE_OPTION}>")
+endforeach()
+foreach(HIBRIDON_COMPILE_OPTION ${HIBRIDON_COMPILE_OPTIONS_RELEASE})
+  target_compile_options(hib PUBLIC "$<$<CONFIG:Release>:${HIBRIDON_COMPILE_OPTION}>")
+endforeach()
+
+# The following is for preprocessing of hiversion.F90
+target_compile_definitions(hib PUBLIC _BUILD_VERS_=${PROJECT_VERSION})
+target_compile_definitions(hib PUBLIC _BUILD_TYPE_="${CMAKE_BUILD_TYPE}")
+target_compile_definitions(hib PUBLIC _GIT_REVISION_="${GIT_REVISION}")
+target_compile_definitions(hib PUBLIC _BUILD_SYS1_="${CMAKE_HOST_SYSTEM_NAME}")
+target_compile_definitions(hib PUBLIC _BUILD_SYS2_="${CMAKE_HOST_SYSTEM_VERSION}")
+target_compile_definitions(hib PUBLIC _BUILD_PROC_="${CMAKE_HOST_SYSTEM_PROCESSOR}")
+target_compile_definitions(hib PUBLIC _BUILD_COMP_="${CMAKE_Fortran_COMPILER}")
+
+set(hib_compile_options "${HIBRIDON_COMPILE_OPTIONS};$<$<CONFIG:Debug>:${HIBRIDON_COMPILE_OPTIONS_DEBUG}>;$<$<CONFIG:Release>:${HIBRIDON_COMPILE_OPTIONS_RELEASE}>")
+# replace list separator ';' with a space because semicolons confuse the make generator 
+string(REGEX REPLACE ";" " " hib_compile_options "${hib_compile_options}")
+target_compile_definitions(hib PUBLIC _BUILD_FLAGS_="${hib_compile_options}")
+string(TIMESTAMP TODAY "%Y-%m-%d at %H:%M")
+target_compile_definitions(hib PUBLIC _BUILD_DATE_="${TODAY}")
+# The ffollowing is for preprocessing of hhelp.F90 and hiutil.F90
+target_compile_definitions(hib PUBLIC _HELPDIR_="${CMAKE_CURRENT_SOURCE_DIR}/doc/")
+
+target_compile_definitions(hib PUBLIC MAX_NJTOT=1000)
 
 if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   target_compile_definitions(hib PUBLIC HIB_UNIX_X86=1)
@@ -403,6 +412,16 @@ elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   target_compile_definitions(hib PUBLIC HIB_UNIX_IFORT=1)
 endif()
 
+target_compile_definitions(hib PUBLIC "$<$<CONFIG:Release>:DISABLE_HIB_ASSERT=1>")
+# asserts can be activated on non-release builds (eg debug build)
+if(NOT ENABLE_ASSERTS)
+  target_compile_definitions(hib PUBLIC "$<$<CONFIG:Debug>:DISABLE_HIB_ASSERT=1>")
+endif()
+target_link_libraries(hib INTERFACE "${LAPACK_LIBRARIES}")
+target_link_libraries(hib INTERFACE "${BLAS_LIBRARIES}")
+if(ENABLE_CODE_COVERAGE)
+  target_link_options(hib PUBLIC "$<$<CONFIG:Debug>:${GCC_COVERAGE_LINK_FLAGS}>")
+endif()
 
 # list of various architectures encountered when converting cstart/cend with fpp directives
 # BATCH
@@ -457,15 +476,9 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
 
   add_executable(${TEST_EXE} ${TEST_SRC_DIR}/${TEST_POT_SRC_FILE} ${hibridon_SOURCE_DIR}/src/himain.F90)
   target_compile_definitions(${TEST_EXE} PUBLIC T_MATRIX_SIZE=${TEST_T_MATRIX_SIZE})
-  target_link_libraries(${TEST_EXE} hib ${HIBRIDON_LINK_LIBRARIES})
+  target_link_libraries(${TEST_EXE} hib)
   target_include_directories(${TEST_EXE} PUBLIC ${hibridon_SOURCE_DIR}/src)
   target_include_directories(${TEST_EXE} PUBLIC ${HIBRIDON_MODULES_DIR}) 
-  target_compile_options(${TEST_EXE} PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
-
-  if(ENABLE_CODE_COVERAGE)
-    target_link_options(${TEST_EXE} PUBLIC ${GCC_COVERAGE_LINK_FLAGS})
-  endif()
-
 
   add_test(NAME ${TEST_ID}_test_setup
       COMMAND bash -c "mkdir -p ${TEST_BUILD_DIR}/potdata && \
@@ -657,7 +670,7 @@ set(test_dirs_list
   vfit)
 
 foreach(test_dir IN LISTS test_dirs_list)
-  include("tests/${test_dir}/${test_dir}.cmake")
+  include("${hibridon_SOURCE_DIR}/tests/${test_dir}/${test_dir}.cmake")
 endforeach()
 
 # declare the test suites
@@ -872,24 +885,20 @@ add_hibridon_testsuite("coverage" "${coverage_testsuite}" "${test_dirs_list}")
 # add_hibridon_testsuite("empty" "" "${test_dirs_list}")
 
 # The following is to build hibridon with an user-supplied potential
-
+# - EXE_NAME : the name of the resulting executable (eg mypot.exe)
+# - POT_SRC_FILE : the name of the user provided potential file (eg mypot.F90)
+# - p_T_MATRIX_SIZE : the size of the t matrix (eg kmax)
+#    - kmax : for normal cases
+#    - kbig : for special cases (only arn2_big test uses it)
 function(add_hibexe EXE_NAME POT_SRC_FILE p_T_MATRIX_SIZE)
   message("Adding executable ${EXE_NAME} using potential ${POT_SRC_FILE}")
-  set(TEST_SRC_DIR ${CMAKE_CURRENT_LIST_DIR})
-  set(TEST_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests/${TEST_ID})
-  set(TEST_EXE ${TEST_ID})
   set(HIBRIDON_MODULES_DIR ${hibridon_BINARY_DIR}) # location where to find the module files (*.mod)
 
   add_executable(${EXE_NAME} ${POT_SRC_FILE} ${hibridon_SOURCE_DIR}/src/himain.F90)
-  target_compile_definitions(${EXE_NAME} PUBLIC T_MATRIX_SIZE=${p_T_MATRIX_SIZE})
-  target_link_libraries(${EXE_NAME} hib ${HIBRIDON_LINK_LIBRARIES})
-  target_include_directories(${EXE_NAME} PUBLIC ${hibridon_SOURCE_DIR}/src)
-  target_include_directories(${EXE_NAME} PUBLIC ${HIBRIDON_MODULES_DIR})
-  target_compile_options(${EXE_NAME} PRIVATE ${HIBRIDON_COMPILE_OPTIONS})
-
-  if(ENABLE_CODE_COVERAGE)
-    target_link_options(${EXE_NAME} PUBLIC ${GCC_COVERAGE_LINK_FLAGS})
-  endif()
+  target_compile_definitions(${EXE_NAME} PRIVATE T_MATRIX_SIZE=${p_T_MATRIX_SIZE})
+  target_include_directories(${EXE_NAME} PRIVATE ${hibridon_SOURCE_DIR}/src) # to find the included common files
+  target_include_directories(${EXE_NAME} PRIVATE ${HIBRIDON_MODULES_DIR})
+  target_link_libraries(${EXE_NAME} hib)
 endfunction(add_hibexe)
 
 file (GLOB userscripts ${CMAKE_CURRENT_BINARY_DIR}/*.user.cmake)
