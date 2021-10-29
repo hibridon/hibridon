@@ -103,7 +103,7 @@ character *40 test
 !  in the following parameter statements:
 !     kmxbas is maximum number of included basis routines, this should
 !     be updatated as basis routines are added
-!     kmax is maximum number of channels set at compile time
+!     kmax is maximum number of channels set at run time
 !     klammx is maximum number of anisotropic terms in potential
 !     kfact is maximum value for which log(n!) is computed
 !     ken is number of total energies allowed
