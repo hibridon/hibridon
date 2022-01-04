@@ -412,7 +412,7 @@ save fac1,fac2
 data first/.true./
 !
 if (first) then
-firs  = .false.
+first  = .false.
   fac1 = 4.d0 / ((mq2m+1.d0)*(mq2m+2.d0))
   fac2 = (mq2m+1.d0) / (mq2m+3.d0)
 end if
