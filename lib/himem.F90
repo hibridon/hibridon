@@ -1,3 +1,9 @@
+module mod_com
+   implicit none
+   character(len=300) :: com_file 
+   logical :: com = .false.
+end module mod_com
+
 module mod_cosout
    !  variables in common block /cosout/
    !    nnout:     number of different rotational levels for which s-matrix

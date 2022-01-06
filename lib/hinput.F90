@@ -4,6 +4,7 @@
 #if defined(HIB_UNIX_HP)
 !$hp$optimize off
 #endif
+
 subroutine hinput(first)
 !  subroutine to redefine system independent input parameters for
 !  hibridon code
@@ -44,6 +45,7 @@ subroutine hinput(first)
 !
 !  current revision: 16-jan-2019 by q. dagdigian
 ! ---------------------------------------------------------------------
+use mod_com, only: com_file, com
 use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
 use mod_codim, only: nmax => mmax
@@ -261,6 +263,9 @@ irpar=ircode
 nncode=ncode
 llcode=lcode
 ijcode=icode
+! Open command file given by user
+if(com) open(unit=1312, status='old', file=trim(com_file))
+
 !   define system dependent parameter codes
 if(first) then
    islcod=0
@@ -293,7 +298,12 @@ optifl = .false.
 2  format(' Hibridon> ')
 #endif
 call pcoder(lpar(28),pcod,icode)
-read(5, 10, end=599) line  ! read the next command
+
+if(com) then  
+  read(1312, 10, end=599) line  ! read the next command
+else
+  read(5, 10, end=599) line  ! read the next command
+endif
 10 format((a))
 11 if(line .eq. ' ') goto 1
 if (line(1:1) .eq. '?') then

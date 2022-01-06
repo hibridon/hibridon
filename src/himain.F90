@@ -1,5 +1,6 @@
 #include "assert.h"
 program logair
+use mod_com, only: com_file, com
 use mod_clseg, only: allocate_clseg
 use mod_cobuf, only: allocate_cobuf
 use mod_cofil, only: allocate_cofil
@@ -157,6 +158,7 @@ integer :: arg_index
 integer :: stat
 character(len=32) :: arg
 
+
 kmax = 0
 
 arg_index = 1
@@ -177,6 +179,16 @@ do while( arg_index <= command_argument_count() )
           case ('-h', '--help')
               call print_help()
               stop 1
+
+          case ('-c', '--com')
+            arg_index = arg_index + 1
+            if ( arg_index > command_argument_count() ) then
+                print '(2a, /)', 'missing value for <command_file> ', arg
+                call print_help()
+                stop 1
+            end if
+            call get_command_argument(arg_index, com_file)
+            com = .true.
 
           case default
               print '(2a, /)', 'unrecognised command-line option: ', arg
@@ -326,5 +338,6 @@ end
 subroutine print_help()
 print '(a, /)', 'command-line options:'
 print '(a)',    '  -k, --kmax <max_num_channels>  defines the max number of channels'
+print '(a)',    '  -c, --com <command_file>  specifies a command file instead of input redirection'
 print '(a, /)', '  -h, --help        print usage information and exit'
 end subroutine print_help
