@@ -1,1 +1,0 @@
-list(APPEND HIBRIDON_COMPILE_OPTIONS "-std=legacy")
