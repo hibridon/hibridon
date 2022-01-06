@@ -16,7 +16,7 @@ env:
   HOMEBREW_NO_GITHUB_API: "ON"
   HOMEBREW_NO_INSTALL_CLEANUP: "ON"
 jobs:
-  build:
+  build_and_test:
     runs-on:  ${{ matrix.os }}
     strategy:
       fail-fast: false
