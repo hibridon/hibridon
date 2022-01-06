@@ -79,7 +79,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     PUBLIC
     -std=legacy
     -fmax-stack-var-size=1
-    $<$<NOT:APPLE>: -mcmodel=large>
+    $<$<PLATFORM_ID:Linux>:-mcmodel=large>
     $<$<CONFIG:RELEASE>:-finit-local-zero> # Initializes variables and arrays to 0
     $<$<CONFIG:RELEASE>:-O0>
     $<$<CONFIG:DEBUG>:-Og>
