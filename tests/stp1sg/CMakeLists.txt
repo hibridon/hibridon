@@ -10,6 +10,8 @@ set(TEST_INPUT_FILES "Stp_och3he.inp")
 set(TEST_OUTPUT_FILES "Stp_och3he1.dcs Stp_och3he1.ics Stp_och3he1.pcs Stp_och3he1.xxsc")
 set(TEST_KMAX 1000)
 set(TEST_T_MATRIX_SIZE kmax)
+set(TEST_LABELS "")
+
 
 add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")
 
@@ -25,6 +27,8 @@ set(TEST_INPUT_FILES "Stp_ch3he_quick.inp")
 set(TEST_OUTPUT_FILES "Ch3heq1.dcs Ch3heq1.ics Ch3heq1.pcs Ch3heq1.xxsc")
 set(TEST_KMAX 1000)
 set(TEST_T_MATRIX_SIZE kmax)
+set(TEST_LABELS "coverage")
+
 
 add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")
 
@@ -40,5 +44,7 @@ set(TEST_INPUT_FILES "Stp_pnh3ph2.inp")
 set(TEST_OUTPUT_FILES "Stp_pnh3ph21.xxsc Stp_pnh3ph21.ics")
 set(TEST_KMAX 1000)
 set(TEST_T_MATRIX_SIZE kmax)
+set(TEST_LABELS "coverage")
+
 
 add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")

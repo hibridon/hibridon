@@ -10,6 +10,8 @@ set(TEST_INPUT_FILES "Ohh2.inp")
 set(TEST_OUTPUT_FILES "Job1.ics Job1.pcs Job1.xxsc")
 set(TEST_KMAX 500)
 set(TEST_T_MATRIX_SIZE kmax)
+set(TEST_LABELS "")
+
 
 add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")
 
@@ -25,6 +27,8 @@ set(TEST_INPUT_FILES "Ohh2_quick.inp")
 set(TEST_OUTPUT_FILES "Quick1.ics Quick1.pcs Quick1.xxsc")
 set(TEST_KMAX 500)
 set(TEST_T_MATRIX_SIZE kmax)
+set(TEST_LABELS "coverage")
+
 
 add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")
 
@@ -40,6 +44,8 @@ set(TEST_INPUT_FILES "Testpisg.inp")
 set(TEST_OUTPUT_FILES "Heohx1.ics Heohx1.pcs Heohx1.xxsc")
 set(TEST_KMAX 150)
 set(TEST_T_MATRIX_SIZE kmax)
+set(TEST_LABELS "")
+
 
 add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")
 
@@ -55,5 +61,7 @@ set(TEST_INPUT_FILES "Testpisg_quick.inp")
 set(TEST_OUTPUT_FILES "Heohxq1.ics Heohxq1.pcs Heohxq1.xxsc")
 set(TEST_KMAX 150)
 set(TEST_T_MATRIX_SIZE kmax)
+set(TEST_LABELS "coverage")
+
 
 add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")

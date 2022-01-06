@@ -10,6 +10,8 @@ set(TEST_INPUT_FILES "Boh2_b.inp")
 set(TEST_OUTPUT_FILES "Boh2_b.evl")
 set(TEST_KMAX 120)
 set(TEST_T_MATRIX_SIZE kmax)
+set(TEST_LABELS "coverage")
+
 
 add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")
 
@@ -26,5 +28,7 @@ set(TEST_INPUT_FILES "Boh2_b2.inp")
 set(TEST_OUTPUT_FILES "Boh2_b2a.evl Boh2_b2b.evl")
 set(TEST_KMAX 5)
 set(TEST_T_MATRIX_SIZE kmax)
+set(TEST_LABELS "coverage")
+
 
 add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")
