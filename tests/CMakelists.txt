@@ -1,6 +1,7 @@
 # Add the executable that will compare output files
 add_executable(check_outputs comp_mods.f90 comp_tests.f90)
 
+# Add all test subdirectories
 add_subdirectory(arch4)
 add_subdirectory(arn2)
 add_subdirectory(arn2_big)

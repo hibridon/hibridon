@@ -63,7 +63,7 @@ add_library(hib
     bases/hiba30_astp3.F90
     )
 
-# This for includes from the subdir bases to work
+# This for preprocessed includes from the subdirectory bases to work
 target_include_directories(hib PRIVATE ./)
 
 
@@ -118,7 +118,7 @@ target_compile_definitions(hib PUBLIC _BUILD_COMP_="${CMAKE_Fortran_COMPILER}")
 
 # The ffollowing is for preprocessing of hhelp.F90 and hiutil.F90
 target_compile_definitions(hib PUBLIC _HELPDIR_="${CMAKE_CURRENT_SOURCE_DIR}/doc/")
-target_compile_definitions(hib PUBLIC _BUILD_FLAGS_="${HIBRIDON_COMPILE_OPTIONS}")
+target_compile_definitions(hib PUBLIC _BUILD_FLAGS_="")#"${HIBRIDON_COMPILE_OPTIONS}")
 string(TIMESTAMP TODAY "%Y-%m-%d at %H:%M")
 target_compile_definitions(hib PUBLIC _BUILD_DATE_="${TODAY}")
 # The ffollowing is for preprocessing of hhelp.F90 and hiutil.F90
