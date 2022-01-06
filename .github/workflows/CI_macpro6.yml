@@ -20,6 +20,7 @@ jobs:
     runs-on: [self-hosted, macOS, x64]
     strategy:
       fail-fast: false
+      matrix:
         gcc_v: [9, 10, 11]
     env:
       FC: gfortran-${{ matrix.gcc_v }}
