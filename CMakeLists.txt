@@ -16,3 +16,7 @@ include(cmake/modules/add_hibridon_test.cmake)
 # Add the hibridon library
 add_subdirectory(lib)
 
+# Add the tests
+enable_testing()
+add_subdirectory(tests)
+
