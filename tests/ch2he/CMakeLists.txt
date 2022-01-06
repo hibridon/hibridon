@@ -11,7 +11,7 @@ set(TEST_OUTPUT_FILES "Ch2_p1.ics Ch2_p1.xsc")
 set(TEST_KMAX 1451)
 set(TEST_T_MATRIX_SIZE kmax)
 
-add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_KMAX}" "${TEST_T_MATRIX_SIZE}")
+add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")
 
 #------------------------------------------------------------------------------
 # CH2(a)--He (quick version for test coverage)
@@ -26,7 +26,7 @@ set(TEST_OUTPUT_FILES "Ch2_pq1.ics Ch2_pq1.xsc")
 set(TEST_KMAX 1451)
 set(TEST_T_MATRIX_SIZE kmax)
 
-add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_KMAX}" "${TEST_T_MATRIX_SIZE}")
+add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")
 
 #------------------------------------------------------------------------------
 # CH2(X)--He and spin-resolved cross sections
@@ -42,7 +42,7 @@ set(TEST_OUTPUT_FILES "Ch2x_p1.xsc Ch2x_p1.ics Ch2x_p1.hfx ch2he_x.stdout")
 set(TEST_KMAX 1451)
 set(TEST_T_MATRIX_SIZE kmax)
 
-add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_KMAX}" "${TEST_T_MATRIX_SIZE}")
+add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")
 
 #------------------------------------------------------------------------------
 # CH2(X)--He and spin-resolved cross sections (quick version for test coverage)
@@ -58,7 +58,7 @@ set(TEST_OUTPUT_FILES "Ch2x_pq1.xsc Ch2x_pq1.ics Ch2x_pq1.hfx ch2he_x_quick.stdo
 set(TEST_KMAX 1451)
 set(TEST_T_MATRIX_SIZE kmax)
 
-add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_KMAX}" "${TEST_T_MATRIX_SIZE}")
+add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")
 
 #------------------------------------------------------------------------------
 # CH2(X,a) singlet-triplet mixing
@@ -73,4 +73,4 @@ set(TEST_OUTPUT_FILES "ch2he_stmix.stdout")
 set(TEST_KMAX 1451)
 set(TEST_T_MATRIX_SIZE kmax)
 
-add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_KMAX}" "${TEST_T_MATRIX_SIZE}")
+add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")

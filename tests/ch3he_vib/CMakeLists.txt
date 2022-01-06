@@ -12,7 +12,7 @@ set(TEST_OUTPUT_FILES "Job1.ics Job1.xxsc")
 set(TEST_KMAX 1000)
 set(TEST_T_MATRIX_SIZE kmax)
 
-add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_KMAX}" "${TEST_T_MATRIX_SIZE}")
+add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")
 
 #------------------------------------------------------------------------------
 # CH3(X)--He Vibrational Relaxation (quick version for code coverage)
@@ -28,4 +28,4 @@ set(TEST_OUTPUT_FILES "Vibq1.ics Vibq1.xxsc")
 set(TEST_KMAX 1000)
 set(TEST_T_MATRIX_SIZE kmax)
 
-add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_KMAX}" "${TEST_T_MATRIX_SIZE}")
+add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")

@@ -32,6 +32,7 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
   separate_arguments(TEST_OUTPUT_FILES)
   foreach(OUTPUT_FILE ${TEST_OUTPUT_FILES})
     add_test(NAME ${TEST_ID}_test_check_${OUTPUT_FILE} COMMAND check_outputs ${TEST_SRC_DIR}/${OUTPUT_FILE} ${TEST_BUILD_DIR}/${OUTPUT_FILE})
+    message("LABELS:" ${TEST_LABELS})
     set_property(TEST ${TEST_ID}_test_check_${OUTPUT_FILE} PROPERTY LABELS ${TEST_ID} ${TEST_LABELS})
   endforeach()
 
