@@ -84,10 +84,7 @@ integer, dimension(:, :, :), allocatable :: j, in, l, j12
 integer, dimension(:, :), allocatable :: length
 !     for positive (p) and (n) negative parity
 logical, dimension(:), allocatable :: exsmtp, exsmtn
-!     
-integer :: jlevh2(5000), inlevh1(5000), inlevh2(5000)
-real(8) :: flevh1(5000), flevh2(5000), elevh2(5000)
-
+!
 !     initialize timer and arrays
 call mtime(cpu0, ela0)
 !
