@@ -45,5 +45,5 @@ jobs:
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      run: ctest --parallel --output-on-failure -L coverage
+      run: make testsuite_coverage
       
