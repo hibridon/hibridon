@@ -81,7 +81,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     -fmax-stack-var-size=1
     $<$<PLATFORM_ID:Linux>:-mcmodel=large>
     $<$<CONFIG:RELEASE>:-finit-local-zero> # Initializes variables and arrays to 0
-    $<$<CONFIG:RELEASE>:-O0>
+    $<$<CONFIG:RELEASE>:-O3>
     $<$<CONFIG:DEBUG>:-Og>
     $<$<CONFIG:DEBUG>:-Wall>
     $<$<CONFIG:DEBUG>:-Wextra>

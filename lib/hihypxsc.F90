@@ -26,11 +26,7 @@ subroutine hypxsc(flname, a, j12q)
 !
 !     modified to deal with cases for which jtot=0 has only one parity
 !
-!     modified to treat atom-molecule collisions with two nuclear spins
-!     see Lara-Moreno, Stoecklin, and Halvick, MNRAS 507, 4086 (2021).
-!     In this case, nucspin = 100*2*I1 + 2*i2
-!
-!     current revision:  22-dec-2021 by p. dagdigian
+!     current revision:  8-jan-2018 by p. dagdigian
 !     -------------------------------------------------------------
 use mod_codim, only: mmax
 use mod_cojq, only: jq ! jq(1)
@@ -84,10 +80,7 @@ integer, dimension(:, :, :), allocatable :: j, in, l, j12
 integer, dimension(:, :), allocatable :: length
 !     for positive (p) and (n) negative parity
 logical, dimension(:), allocatable :: exsmtp, exsmtn
-!     
-integer :: jlevh2(5000), inlevh1(5000), inlevh2(5000)
-real(8) :: flevh1(5000), flevh2(5000), elevh2(5000)
-
+!
 !     initialize timer and arrays
 call mtime(cpu0, ela0)
 !
@@ -192,19 +185,11 @@ write (11, 22) label, potnam, smtfil, cdate
      '%      POT NAME:  ',(a)/ &
      '%      S-MATRICES READ FROM FILE ',(a),/, &
      '%      WRITTEN:   ',(a))
-if(itwospn .eq. 0) then
-  write (6,24) jfinl, ee, finuc
-  write (11,24) jfinl, ee, finuc
-else
-  write (6,224) jfinl, ee, finuc, f2nuc
-  write (11,224) jfinl, ee, finuc, f2nuc
-end if
+write (6,24) jfinl, ee, finuc
+write (11,24) jfinl, ee, finuc
 24 format('%      JTOT2:     ',i10/ &
      '%      ETOT:      ',f10.3,' CM(-1)' &
      //'% NUCLEAR SPIN = ',f4.1/)
-224 format('%      JTOT2:     ',i10/ &
-     '%      ETOT:      ',f10.3,' CM(-1)' &
-     //'% NUCLEAR SPINS = ',2f6.1/)
 !
 !     set up list of hyperfine levels for which cross sections
 !     to be calculated
@@ -215,7 +200,8 @@ do 60 i=1, nlevel
    else
      ij1 = jlev(i)
    endif
-   if (ij1.lt.j1min .or. ij1.gt.j2max) goto 60
+   if (ij1.lt.j1min .or. ij1.gt.j2max) &
+        goto 60
 !     check that level energetically allowed
    if (elev(i).gt.ered) goto 60
    fj = ij1 + fspin
@@ -303,8 +289,12 @@ do i = 1, lngth
    j(jtot,jlp,i) = jpack(i)
    in(jtot,jlp,i) = ipack(i)
    l(jtot,jlp,i) = lpack(i)
-   j12(jtot,jlp,i) = j12q(i)
 end do
+if( is_j12(ibasty) ) then
+  do i = 1, lngth
+     j12(jtot,jlp,i) = j12q(i)
+  end do
+end if
 do ii = 1, len2
    sr(jtot, jlp, ii) = sreal(ii)
    si(jtot, jlp, ii) = simag(ii)
@@ -321,11 +311,7 @@ if (.not. twmol) then
 !
 !     this option for atom - molecule collisions
 !
-if (itwospn .eq. 0) then
-!
-!     here for coupling one nuclear spin
-!  
-  fhspin = 0.d0
+fhspin = 0.d0
 if (flaghf .and. nucspin.eq.2*(nucspin/2) .or. &
      .not.flaghf .and. nucspin.ne.2*(nucspin/2)) &
      fhspin = 0.5d0
@@ -451,294 +437,17 @@ do iftot = iftmn, iftmx
         if (i.ne.ii) then
           sigma(ii,i) = sigma(ii,i) + t2sum &
               * (2.d0 * xftot + 1.d0)
-end if
-end do
-end do
-end do
+        end if
+      end do
+    end do
+  end do
 end do
 deallocate(tmatr)
 deallocate(tmati)
-else
-!
-!  here for atom-molecule system with coupling of two nuclear spins
-!  formalism taken from Lara-Moreno et al., MNRAS (2021)
-!
-        fhspin = 0.d0
-        nuc1 = 2 * finuc
-        if (flaghf .and. nuc1.eq.2*(nuc1/2) .or. &
-            .not.flaghf .and. nuc1.ne.2*(nuc1/2)) &
-            fhspin = 0.5d0
-        fhspin2 = 0.d0
-        if (mod(f2nuc,1.d0) .ne. 0.d0) fhspin2 = 0.5d0
-        nlevlh2 = 0
-        do 160 i=1, nlevelh
-  !  check that level is energetically allowed
-          if (elevh(i).gt.ered) go to 160
-          f1 = iflevh(i) + fhspin
-          fnmin = abs(f1 - f2nuc)
-          fnmax = f1 + f2nuc
-          nhyp2 = fnmax - fnmin + 1
-          do iff = 1,  nhyp2
-            nlevlh2 = nlevlh2 + 1
-            jlevh2(nlevlh2) = jlevh(i)
-            inlevh2(nlevlh2) = inlevh(i)
-            flevh1(nlevlh2) = f1
-!  iflevh2 is an integer which equals F2 if F2 is an integer
-!  equals F2 - 0.5 if F2 is half-integer
-            f2 = fnmin + (iff - 1)
-            flevh2(nlevlh2) = f2
-            elevh2(nlevlh2) = elevh(i)
-  
-  
-          write(6,877) nlevlh2,jlevh2(nlevlh2),inlevh2(nlevlh2), &
-           flevh1(nlevlh2),flevh2(nlevlh2),elevh2(nlevlh2) * econv
-877     format('  nlevlh2=',3i5,2f5.1,f10.3)
-  
-  
-          end do
-160   continue
-!
-        iftmn = jfrst + fspin - finuc - f2nuc
-        iftmn = max(0,iftmn)
-        iftmx = jfinl + fspin + finuc  + f2nuc
-        dspin = 0.d0
-        if ((fspin + finuc  + f2nuc) .ne. &
-           (2.d0 * nint(fspin + finuc + f2nuc)/2)) dspin = 0.5d0
-!
-        jmx = 0
-        do i = 1, nlevel
-          jmx = max(jmx, jlev(i))
-        end do
-        lmax = iftmx + jmx + 1
-        jrmx = lmax + jmx + 1
-        idimr = jrmx + 1
-        idim = idimr * (lmax + 1)
-        allocate(tmatr(idim, idim), stat=ialloc)
-        if (ialloc .ne. 0) goto 4011
-        allocate(tmati(idim, idim), stat=ialloc)
-        if (ialloc .ne. 0) goto 4011
-!     clear T-matrix array
-        tmatr = 0.d0
-        tmati = 0.d0
-  
-!  NOTE:  xftot is called K in Lara-Moreno et al.
-        do iftot = iftmn, iftmx
-          xftot = float(iftot) + dspin
-          do jlp = 1, 2
-            jlpar = 1 - (jlp -1)*2
-            write(6,1334) xftot,jlpar
-1334      format(' Computing partial wave K_tot =',f5.1, &
-               ', jlpar=',i4)
-            do i=1, nlevlh2
-              xj = jlevh2(i) + fspin
-              xf = flevh1(i)
-              xf2 = flevh2(i)
-              do ii=1, nlevlh2
-                xjp = jlevh2(ii) + fspin
-                xfp = flevh1(ii)
-                xf2p = flevh2(ii)
-  
-  
-        write(6,3322) xj,xf,xf2,xjp,xfp,xf2p
-3322  format('***   j=',f5.1,' F1=',f5.1,' F2=',f5.1, &
-         3x,'jp=',f5.1,' F1P=',f5.1,' F2p=',f5.1)
-  
-  
-                fffp = sqrt((2.d0*xf+1.d0)*(2.d0*xfp+1.d0) &
-                 * (2.d0*xf2+1.d0)*(2.d0*xf2p+1.d0))
-                iph = xf - xfp - xf2 + xf2p
-                phase = (-1.d0)**iph
-!     sum over R = K - I2 consistent with vector addition
-!     ftot = jtot + nucspin
-                rmin = abs(xftot - f2nuc)
-                rmax = xftot + f2nuc
-                irmin = rmin
-                irmax = rmax
-                do ir = irmin, irmax
-                  r  = ir + fhspin2
-                 write(6,432) r,rmin,rmax
-432             format('     Computing K_tot - I2 =',f5.1, &
-                    '  ('2f6.1,')')
-                  qmin = abs(r - finuc)
-                  qmax = r + finuc
-                  iqmin = qmin
-                  iqmax = qnmax
-                  do jtot = iqmin, iqmax
-                    xjtot = jtot + fhspin
-                    fjtot = 2.d0 * xjtot + 1.d0
-!     total parity must be the same for all T-matrix elements
-!     in sum over jtot (for the same parity, jlparf
-!     changes sign for each increase in jtot by 1)
-                    jlparf = jlpar*(-1)**(iftot - jtot)
-                    jlpt = 1 + (1 - jlparf)/2
-                    if (length(jtot,jlpt) .gt. 0) then
-                    do irow=1,length(jtot,jlpt)
-!     flag to make sure initial level is the bra, final level the ket
-                      iflag = 0
-                      if (j(jtot,jlpt,irow).eq.jlevh2(i) .and. &
-                         in(jtot,jlpt,irow).eq.inlevh2(i)) then
-                        iflag = 1
-                      end if
-                      do icol=1,irow
-                        if (j(jtot,jlpt,irow).eq.jlevh2(i) .and. &
-                           in(jtot,jlpt,irow).eq.inlevh2(i) .and. &
-                           j(jtot,jlpt,icol).eq.jlevh2(ii) .and. &
-                           in(jtot,jlpt,icol).eq.inlevh2(ii) .or. &
-                           j(jtot,jlpt,icol).eq.jlevh2(i) .and. &
-                           in(jtot,jlpt,icol).eq.inlevh2(i) .and. &
-                           j(jtot,jlpt,irow).eq.jlevh2(ii) .and. &
-                           in(jtot,jlpt,irow).eq.inlevh2(ii)) then
-                          is = (irow*(irow - 1))/2 + icol
-                          if (iflag.ne.1) then
-                            xl = l(jtot,jlpt,icol)
-                            xlp = l(jtot,jlpt,irow)
-                          else
-                            xl = l(jtot,jlpt,irow)
-                            xlp = l(jtot,jlpt,icol)
-                          end if
-!     convert S-matrix element to T-matrix element
-  
-  
-           write(6,878) i,ii,irow,icol,xl,xlp,sr(jtot,jlpt,is),si(jtot,jlpt,is)
-878      format(2i3,2x,2i3,2x,'  L=',f5.1,' LP=',f5.1,4x,2f12.6)
-  
-  
-                          t = -cmplx(sr(jtot,jlpt,is), &
-                             si(jtot,jlpt,is))
-!     next statement for diagonal T-matrix element
-                          if (irow.eq.icol) then
-                            t = t + cmplx(1.d0, 0.d0)
-                          end if
-  
-  
-        write(6,4322) xj,xf,xf2,xl,xjp,xfp,xf2p,xlp,xjtot,xftot
-4322  format('      ',4f5.1,3x,4f5.1,2x,'  jtot=',f5.1, &
-         '  ftot=',f5.1)
-  
-  
-  
-                            rsum = (2.d0*r + 1.d0) &
-                            * xf6j(f2nuc,xf,xf2,xl,xftot,r) &
-                            * xf6j(f2nuc,xfp,xf2p,xlp,xftot,r) &
-                            * xf6j(finuc,xj,xf,xl,r,xjtot) &
-                            * xf6j(finuc,xjp,xfp,xlp,r,xjtot) 
-  
-  
-  
-         iskip2=0
-         if (iskip2 .ne. 1) then
-         write(6,442) f2nuc,xf,xf2,xl,xftot,r, &
-                xf6j(f2nuc,xf,xf2,xl,xftot,r), &
-             f2nuc,xfp,xf2p,xlp,xftot,r, &
-        xf6j(f2nuc,xfp,xf2p,xlp,xftot,r), &
-             finuc,xj,xf,xl,r,xjtot, &
-        xf6j(finuc,xj,xf,xl,r,xjtot), &
-             finuc,xjp,xfp,xlp,r,xjtot, &
-        xf6j(finuc,xjp,xfp,xlp,r,xjtot)
-  
-442      format(3f4.1' /',3f4.1,f8.4/3f4.1,' /',3f4.1, &
-           f8.4/3f4.1,' /',3f4.1,f8.4/3f4.1,' /',3f4.1,f8.4/)
-         end if
-  
-  
-          pause
-  
-  
-                          t = t * phase * fffp * (2.d0*xjtot + 1.d0) &
-                           * rsum
-                          ll = xl
-                          lp = xlp
-                          tmatr(ll+1,lp+1) = &
-                             tmatr(ll+1,lp+1) + real(t)
-                          tmati(ll+1,lp+1) = &
-                             tmati(ll+1,lp+1) + aimag(t)
-!     for initial level = final level, but l.ne.lp, need to include
-!     both T(l,lp) and T(lp,l)
-                          if (jlevh2(i).eq.jlevh2(ii) .and. &
-                             inlevh2(i).eq.inlevh2(ii) .and. &
-                             xl.ne.xlp) then
-!     note that T(l,lp) = T(lp,l)* (Hermitean matrix)
-                            tmatr(lp+1,ll+1) = &
-                               tmatr(lp+1,ll+1) + real(t)
-                            tmati(lp+1,ll+1) = &
-                               tmati(lp+1,ll+1) - aimag(t)
-                          end if
-!     if statement below is end of tests for triangle relations
-                        end if
-                      end do
-                    end do
-!     end of if statement checking in length
-                  end if
-                 end do
-                end do
-                t2sum = 0.d0
-                do i1=1,idim
-                  do i2=1,idim
-                    t2sum = t2sum + tmatr(i1,i2)**2 &
-                       + tmati(i1,i2)**2
-                  end do
-                end do
-                sigma(i,ii) = sigma(i,ii) + t2sum &
-                   * (2.d0 * xftot + 1.d0)
-!              if (i.ne.ii) then
-!                sigma(ii,i) = sigma(ii,i) + t2sum
-!     :              * (2.d0 * xftot + 1.d0)
-!              end if
-              end do
-            end do
-          end do
-        end do
-        deallocate(tmatr)
-        deallocate(tmati)
-  !
-  !  compute cross sections for atom-molecule collisions with two nuclear spins
-  !
-        fak = acos(-1.d0) * ang2 / (2.0d0 * rmu)
-        do i=1,nlevelh
-           denrow = (2.d0 * flevh2(i) + 1.d0) &
-               * (ered - elevh2(i))
-           do ii=i,nlevelh
-              dencol = (2.d0 * flevh2(ii) + 1.d0) &
-                  * (ered - elevh2(ii))
-              sigma(i,ii) = sigma(i,ii) * fak / denrow
-              if (i.ne.ii) then
-                 sigma(ii,i) = sigma(ii,i) * fak / dencol
-              end if
-           end do
-        end do
-!
-!     print out cross sections for atom-molecule collisions with two nuclear spins
-!
-        write(6,1005)
-        write(11,1005)
-1005  format('%',5x,'E(CM-1)',3x,'JI',2x,'INI',2x,'F1I',3x,'F2I',5x,'JF',&
-         2x,'INF',2x,'F1F',3x,'F2F',2x,'CROSS SECTION (ANG^2)')
-        ee = ered * econv
-        do 190 i=1,nlevlh2
-          do 185 ii=1,nlevlh2
-            xj = jlevh(i) + fspin
-            xf = flevh1(i)
-            xf2 = flevh2(i)
-            xjp = jlevh(ii) + fspin
-            xfp = flevh1(ii)
-            xf2p = flevh2(ii)
-             if (sigma(i,ii).ne.0.d0) then
-              write(6,1006) ee,xj,inlevh(i),xf,xf2,&
-                xjp,inlevh(ii),xfp,xf2p,sigma(i,ii)
-              write(11,1006) ee,xj,inlevh(i),xf,xf2,&
-                xjp,inlevh(ii),xfp,xf2p,sigma(i,ii)
-1006       format(f12.3,f6.1,i4,f6.1,f6.1,f7.1,i4,&
-                f6.1,f6.1,2x,1pe15.4)
-             endif
-185     continue
-190   continue
-!
-        goto 4021
-        end if
 !
 !  end of atom-molecule section
 !
-!     option below is for molecule - molecule collisions
+!     this option for molecule - molecule collisions
 !
 else
 !
