@@ -17,7 +17,7 @@ env:
   HOMEBREW_NO_INSTALL_CLEANUP: "ON"
 jobs:
   build_and_test:
-    runs-on: [self-hosted, macOS, x64]
+    runs-on: [self-hosted, macOS, X64]
     strategy:
       fail-fast: false
       matrix:
