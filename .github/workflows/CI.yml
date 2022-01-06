@@ -7,7 +7,7 @@ on:
     branches: [ simplifying_cmake ]
 env:
   BUILD_TYPE: Release
-  CMAKE_BUILD_PARALLEL_LEVEL: "2" # 2 cores on each GHA VM, enable parallel builds
+  CMAKE_BUILD_PARALLEL_LEVEL: "1" # disable parallel builds
   CTEST_OUTPUT_ON_FAILURE: "ON" # This way we don't need a flag to ctest
   CTEST_PARALLEL_LEVEL: "2"
   HOMEBREW_NO_ANALYTICS: "ON" # Make Homebrew installation a little quicker
@@ -52,7 +52,7 @@ jobs:
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - name: catch build fail
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --verbose --parallel 1
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --verbose
       if: failure()
 
     - name: Test
