@@ -22,6 +22,7 @@
 !     NOTE THAT VVL IS IN HARTREES.
 subroutine driver
 use mod_covvl, only: vvl
+use constants, only: econv, xmconv
 implicit none
 !
 integer MAX_NR, MAX_NV
@@ -38,10 +39,10 @@ double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV), &
      spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV), &
      spl_d(MAX_NR, MAX_NV)
       
-common /coconv/ econv, xmconv
-double precision econv, xmconv
-data econv /219474.6315343234d0/
-data xmconv /0.0005485799094979479d0/
+! common /coconv/ econv, xmconv
+! double precision econv, xmconv
+! data econv /219474.6315343234d0/
+! data xmconv /0.0005485799094979479d0/
 character*40 filenm
 double precision r, vv0
 integer i
