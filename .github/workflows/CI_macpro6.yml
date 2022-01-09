@@ -1,4 +1,4 @@
-ame: CI_macpro6
+name: CI_macpro6
 
 on:
   push:
