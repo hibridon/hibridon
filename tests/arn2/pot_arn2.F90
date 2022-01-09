@@ -53,7 +53,6 @@ subroutine pot (vv0, r)
 !  -----------------------------------------------------------------------
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
-use mod_conlam, only: nlam
 implicit double precision (a-h,o-z)
 
 #include "common/parbas.F90"
