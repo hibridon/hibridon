@@ -1,0 +1,48 @@
+ame: CI_macpro6
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+env:
+  BUILD_TYPE: Release
+  CMAKE_BUILD_PARALLEL_LEVEL: "1" # disable parallel builds
+  CTEST_OUTPUT_ON_FAILURE: "ON" # This way we don't need a flag to ctest
+  CTEST_PARALLEL_LEVEL: "2"
+  HOMEBREW_NO_ANALYTICS: "ON" # Make Homebrew installation a little quicker
+  HOMEBREW_NO_AUTO_UPDATE: "ON"
+  HOMEBREW_NO_BOTTLE_SOURCE_FALLBACK: "ON"
+  HOMEBREW_NO_GITHUB_API: "ON"
+  HOMEBREW_NO_INSTALL_CLEANUP: "ON"
+jobs:
+  build_and_test:
+    runs-on: [self-hosted, macOS, X64]
+    strategy:
+      fail-fast: false
+      matrix:
+        gcc_v: [9, 10, 11]
+    env:
+      FC: gfortran-${{ matrix.gcc_v }}
+      GCC_V: ${{ matrix.gcc_v }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install GFortran macOS
+      run: brew install gcc@${GCC_V} || brew upgrade gcc@${GCC_V} || true
+
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build 
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build
+
+    - name: catch build fail
+      run: cmake --build ${{github.workspace}}/build --verbose
+      if: failure()
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      run: make testsuite_coverage
