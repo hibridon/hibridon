@@ -65,8 +65,7 @@ add_library(hib
 
 # This for preprocessed includes from the subdirectory bases to work
 target_include_directories(hib PRIVATE ./)
-
-
+target_link_options(hib PUBLIC -fsanitize=address -Og -fbacktrace)
 ################################################################################
 #
 #    COMPILE OPTIONS
@@ -76,35 +75,47 @@ target_include_directories(hib PRIVATE ./)
 # GNU (gfortran)
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     target_compile_options(hib
-    PUBLIC
-    # Non-specific options
-    -std=legacy                               # Allow pre-Fortran 77 syntax (e.g. arbitrary length arrays)
-    -fmax-stack-var-size=1                    # Put everything on the heap
-    $<$<PLATFORM_ID:Linux>:-march=native>     # Tune generated code for host's micro-architecture
-    $<$<PLATFORM_ID:Darwin>:-mtune=native>    # Tune generated code for host's micro-architecture (march not working on Darwin)
-    $<$<PLATFORM_ID:Linux>:-mcmodel=large>    # Required on Linux
-    # Config-specific options: RELEASE
-    $<$<CONFIG:RELEASE>:-finit-local-zero>    # Initializes variables and arrays to 0
-    $<$<CONFIG:RELEASE>:-O3>                  # Optimization level at 3 for Release
-    # Config-specific options: DEBUG
-    $<$<CONFIG:DEBUG>:-O0>                    # Optimization level at 0 for Debug
-    $<$<CONFIG:DEBUG>:-g>                     # Enable debugging symbols
-    $<$<CONFIG:DEBUG>:-Wall>                  # Enable all warnings
-    $<$<CONFIG:DEBUG>:-Wextra>                # Enable extra warnings
-    $<$<CONFIG:DEBUG>:-ffpe-trap=invalid,zero,overflow> # Stop execution on case of Floating Point Error
-    $<$<CONFIG:DEBUG>:-Wuninitialized>        # Emit warnings for uninitialized variables 
-    #$<$<CONFIG:DEBUG>:-finit-integer=333333333> # Initialize integers to dummy value to help detect unintialized variables
-    #$<$<CONFIG:DEBUG>:-finit-real=snan>       # Initialize reals to NaNs to help detect unintialized variables
-    #$<$<CONFIG:DEBUG>:-init=arrays,snan>      # Initialize arrays to NaNs to help detect unintialized variables
+      PUBLIC
+      # Non-specific options
+      -std=legacy                               # Allow pre-Fortran 77 syntax (e.g. arbitrary length arrays)
+      -fno-automatic                            # Put everything on the heap
+      -ffixed-line-length-132                   # Limit lines length up to 132 columns
+      $<$<PLATFORM_ID:Linux>:-march=native>     # Tune generated code for host's micro-architecture
+      $<$<PLATFORM_ID:Darwin>:-mtune=native>    # Tune generated code for host's micro-architecture (march not working on Darwin)
+      $<$<PLATFORM_ID:Linux>:-mcmodel=large>    # Required on Linux
+      # Config-specific options: RELEASE
+      $<$<CONFIG:RELEASE>:-O3>                  # Optimization level at 3 for Release
+      $<$<CONFIG:RELEASE>:-finit-local-zero>    # Init variables to zero/false/null
+      # Config-specific options: DEBUG
+      $<$<CONFIG:DEBUG>:-Og>                    # Optimization level at 0 for Debug
+      $<$<CONFIG:DEBUG>:-fbacktrace>            #
+      $<$<CONFIG:DEBUG>:-Wall>                  # Enable all warnings
+      $<$<CONFIG:DEBUG>:-Wextra>                # Enable extra warnings
+      $<$<CONFIG:DEBUG>:-fsanitize=address>     # Address sanitizer
+      #$<$<CONFIG:DEBUG>:-ffpe-trap=invalid,zero,overflow> # Stop execution on case of Floating Point Error
+      $<$<CONFIG:DEBUG>:-Wuninitialized>        # Emit warnings for uninitialized variables 
+      #$<$<CONFIG:DEBUG>:-finit-integer=333333333> # Initialize integers to dummy value to help detect unintialized variables
+      #$<$<CONFIG:DEBUG>:-finit-real=snan>       # Initialize reals to NaNs to help detect unintialized variables
     )
 # Intel (ifort)
 elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
-    #PUBLIC # (TODO)
-    # Non-specific options
-    # Config-specific options: RELEASE
-    # Config-specific options: DEBUG
 endif()
 
+################################################################################
+#
+#    LINK OPTIONS
+#
+################################################################################
+
+# GNU (gfortran)
+if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+    target_link_options(hib
+      PUBLIC
+      $<$<CONFIG:DEBUG>:-fsanitize=address> 
+    )
+# Intel (ifort)
+elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
+endif()
 
 
 ################################################################################
