@@ -45,6 +45,7 @@ use mod_coisc12, only: lpack => isc12 ! lpack(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc3, only: elevh => sc3 ! elevh(1)
 use mod_hibrid5, only: sread
+use constants, only: econv, xmconv, ang2 => ang2c
 
 implicit double precision (a-h,o-z)
 character*(*) flname
@@ -57,7 +58,6 @@ logical csflg, flaghf, flgsu, twmol, nucrs, &
      batch, fast, lpar2, lpar, exstfl
 
 #include "common/parpot.F90"
-common /coconv/ econv, xmconv, ang2
 common /codim/ nairy
 common /coselb/ ibasty
 !

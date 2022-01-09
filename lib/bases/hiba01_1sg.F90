@@ -433,6 +433,7 @@ use mod_coiv2, only: iv2
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
+use constants, only: econv, xmconv, ang2c
 implicit double precision (a-h,o-z)
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
@@ -444,7 +445,6 @@ common /cosysi/ nscode, isicod, nterm, nvmin, nvmax, &
 common /cosysr/ isrcod, junkr, rpar(4,maxvib)
 common /coered/ ered, rmu
 common /coskip/ nskip, iskip
-common /coconv/ econv, xmconv
 integer :: j(:)
 integer :: l(:)
 integer :: is(:)

@@ -163,6 +163,7 @@ use mod_coisc1, only: ivec => isc1 ! ivec(1)
 use mod_coisc2, only: nrot => isc2 ! nrot(1)
 use mod_coisc3, only: ifi => isc3 ! ifi(1)
 use mod_conlam, only: nlam, nlammx, lamnum
+use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbas.F90"
@@ -174,7 +175,6 @@ common /coipar/ iiipar(9), iprint
 common /covibp/ ivpi(5)
 common /covpot/ numvib,ivibpi(5)
 common /coered/ ered, rmu
-common /coconv/ econv, xmconv
 dimension j(1), l(1), is(1), jhold(1), ehold(1), ishold(1), &
   ivhold(1), c12(1), c32(1), csig(1), ieps(2), &
   epi(maxvib), bpi(maxvib), dpi(maxvib), aso(maxvib), p(maxvib), &

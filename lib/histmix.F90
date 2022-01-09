@@ -36,6 +36,7 @@ use mod_cosc1, only: elev1 => sc1 ! elev1(1)
 use mod_cosc2, only: elev2 => sc2 ! elev2(1)
 use mod_cosc3, only: elevt => sc3 ! elevt(1)
 use mod_hibrid5, only: sread
+use constants, only: econv, xmconv, ang2 => ang2c
 
 implicit double precision (a-h, o-z)
 character*(*) flnam1, flnam2
@@ -47,7 +48,6 @@ logical csflg1, flghf1, flgsu1, twmol1, nucrs1, &
      csflg2, flghf2, flgsu2, twmol2, nucrs2, &
      batch, fast, lpar2, lpar, exstfl, sngsmt, trpsmt
 #include "common/parpot.F90"
-common /coconv/ econv, xmconv, ang2
 dimension a(8)
 dimension epert(2), cpert(2,2)
 !     scratch arrays for diagonalization subroutine
@@ -702,11 +702,12 @@ use mod_coisc9, only: inlevt => isc9 ! inlevt(1)
 use mod_cosc1, only: elev1 => sc1 ! elev1(1)
 use mod_cosc2, only: elev2 => sc2 ! elev2(1)
 use mod_cosc3, only: elevt => sc3 ! elevt(1)
+use constants, only: econv, xmconv, ang2 => ang2c
+
 implicit double precision (a-h, o-z)
 logical sngsmt, trpsmt
 complex*8 t
 #include "common/parpot.F90"
-common /coconv/ econv, xmconv, ang2
 double precision sigma(nlevels + nlevelt, 4)
 dimension cpert(2,2), iptsng(1), ipttrp(1)
 ! storage for s-matrix elements:

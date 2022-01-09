@@ -235,13 +235,12 @@ end subroutine genchn_stp1sg
 !     ------------------------------------------------------------------
 subroutine sortlev_stp1sg()
 use mod_stp1sg
+use constants, only: econv
 implicit none
 type(lev_type) :: temp
 type(lev_type), dimension(:), allocatable :: levs1
 integer :: i, j
 real(8) :: esave
-common /coconv/ econv
-real(8) :: econv
 do i = 1, size(levs) - 1
    esave = levs(i)%e
    do j = i + 1, size(levs)
@@ -259,13 +258,12 @@ end subroutine sortlev_stp1sg
 subroutine genlev_stp1sg(ipotsy, iop, ipotsy2, j1max, j2min, &
      j2max, brot, crot, delta, drot, e1max)
 use mod_stp1sg
+use constants, only: econv
 implicit none
 integer, intent(in) :: ipotsy, iop, ipotsy2, j1max, j2min, j2max
 real(8), intent(in) :: brot, crot, delta, drot, e1max
 integer :: j1, k1, eps1, j2, ilev, nlev, igroup
 real(8) :: roteng
-common /coconv/ econv
-real(8) :: econv
 !
 !     Only C3v/D3h symmetric top implemented
 if (ipotsy .ne. 3) call raise_2pi1sg('ONLY C3v/D3h SYMMETRIC ' &
@@ -338,10 +336,9 @@ end subroutine genlev_stp1sg
 !     ------------------------------------------------------------------
 subroutine prtlev_stp1sg()
 use mod_stp1sg
+use constants, only: econv
 implicit none
 integer :: i
-common /coconv/ econv
-real(8) :: econv
 write (6, 10)
 10 format (/' ** CC SYMMETRIC TOP-LINEAR MOLECULE' &
    //10x, 'SORTED LEVEL LIST'/ &
@@ -356,10 +353,9 @@ end subroutine prtlev_stp1sg
 !     ------------------------------------------------------------------
 subroutine prtchn_stp1sg()
 use mod_stp1sg
+use constants, only: econv, xmconv
 implicit none
 integer :: i, ilev
-common /coconv/ econv
-real(8) :: econv
 write (6, 10)
 10 format (/, ' ** CHANNEL LIST')
 do i = 1, size(chns)

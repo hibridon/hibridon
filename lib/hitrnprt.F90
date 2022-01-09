@@ -50,6 +50,8 @@ use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc2, only: prefac => sc2 ! prefac(1)
 use mod_cosc3, only: etrans => sc3 ! etrans(1)
 use mod_cozmat, only: jtotpa => zmat_as_vec ! jtotpa(1)
+use constants, only: econv, xmconv, ang2c
+
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  trnfil, smtfil
@@ -65,7 +67,6 @@ common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
                 igjtp
 common /cotrn/  spin, maxjt, &
      nwaves, jfsts, jlparf, jlpars, njmax, jpmax
-common /coconv/ econv, xmconv, ang2c
 common /coselb/ ibasty
 save nout
 dimension a(6)

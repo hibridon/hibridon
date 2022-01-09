@@ -120,6 +120,7 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_conlam, only: nlam, nlammx, lamnum
+use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
@@ -130,7 +131,6 @@ common /cosysi/ nscode, isicod, j1max, j2min, j2max, &
 common /cosysr/ isrcod, junkr, b1rot, d1rot, b2rot
 common /coselb/ ibasty
 common /coered/ ered, rmu
-common /coconv/ econv, xmconv
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
     sc1(1), sc2(1), sc3(1), sc4(1), ishold(1)
 data zero, ione, itwo, ithree / 0.d0, 1, 2, 3 /

@@ -128,6 +128,7 @@ use mod_coiv2, only: iv2
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
+use constants, only: econv, xmconv, ang2c
 implicit double precision (a-h,o-z)
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*80 string
@@ -141,7 +142,6 @@ common /cosysi/ nscode, isicod, nterm, jmax, igu, isa, &
                 npar, imult, nman
 common /cosysr/ isrcod, junkr, brot, aso, o, p, q, dmom, efield
 common /coered/ ered, rmu
-common /coconv/ econv, xmconv
 dimension j(1), is(1), l(1), jhold(1), ishold(1), ieps(2)
 dimension c0(1), c1(1), c2(1), cf(1), ehold(1)
 dimension e(3,3), eig(3), sc1(3), sc2(3), vec(3,3), vii(0:2)

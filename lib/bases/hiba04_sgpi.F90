@@ -182,6 +182,7 @@ use mod_coisc2, only: ivhold => isc2 ! ivhold(1)
 use mod_coisc3, only: nlvp => isc3 ! nlvp(1)
 use mod_coisc4, only: nvphol => isc4 ! nvphol(1)
 use mod_conlam, only: nlam, nlammx, lamnum
+use constants, only: econv, xmconv, ang2c
 implicit double precision (a-h,o-z)
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbas.F90"
@@ -192,7 +193,6 @@ common /cosysi/ nscode, isicod, ispar(10)
 !  these parameters must be the same as in hisysgpi
 common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
 common /coered/ ered, rmu
-common /coconv/ econv, xmconv
 dimension e(3,3), ieps(2), iepp(2), iomc(4), iomr(4), eig(3)
 dimension jhold(1), ishold(1), iohold(1), nvhold(1), ehold(1), &
           j(1), is(1), iom(1), nlv(1), l(1)

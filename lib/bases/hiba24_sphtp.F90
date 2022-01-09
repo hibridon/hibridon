@@ -113,6 +113,7 @@ use mod_coatpr, only: c
 use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_conlam, only: nlam, nlammx, lamnum
+use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
@@ -121,7 +122,6 @@ common /cosysi/ nscode, isicod, nterm, iop, jmax
 common /coipar/ iiipar(9), iprint
 common /cosysr/ isrcod, junkr, brot
 common /coered/ ered, rmu
-common /coconv/ econv, xmconv
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fitemp(1), &
           fistmp(1)

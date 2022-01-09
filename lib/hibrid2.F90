@@ -22,6 +22,7 @@ use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
 use mod_coener, only: energ
 use mod_cosysl, only: islcod
+use constants, only: econv, xmconv, ang2c
 implicit double precision (a-h,o-z)
 character*40 jobnam,input,output,savfil
 logical logwr, swrit, t2writ, wrpart, partw, airyfl, airypr, &
@@ -47,10 +48,6 @@ common /colpar/ airyfl, airypr, bastst, batch, chlist, &
                 t2test, t2writ, twomol, writs, wrpart, wrxsec, &
                 xsecwr, nucros, photof, wavefl, boundc
 !  this sets the maximum number of energies
-!     This common block is kept in this subroutine for backward
-!     compatibility.
-!     The constants module should be used in new subroutines.
-common /coconv/ econv, xmconv, ang2c
 !
 jtot1=20
 jtot2=20
@@ -84,9 +81,6 @@ xmu=16.47d0
 ! ang2c is bohr^2 in angstroms^2
 ! default basis type is 1 (singlet sigma)
 ibasty=1
-econv=219474.6d0
-xmconv=5.485930d-4
-ang2c=0.280002846d0
 airyfl=.true.
 airypr=.false.
 batch=.false.

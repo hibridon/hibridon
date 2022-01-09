@@ -16,15 +16,14 @@
 !  vvl(7) contains the second anisotropic (2,2) potential
 subroutine driver
 use mod_covvl, only: vvl
+use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical ifull
 dimension wf(16)
 common /coered/ ered, rmu
 common /coground/ ifull
 common /covib/ie(50), iv(50)
-common /coconv/ econv, xmconv
 common /cosysi/ nscode,isicod,iscod(3)
-xmconv=5.485930d-4
 iscod(3)=1
 nch=16
 rmu=13.42/xmconv
@@ -112,6 +111,7 @@ end
 
 !  -------------------------------------------------------
 #include "common/parsys_mod.F90"
+use constants, only: econv, xmconv
 implicit double precision (a-h, o-z)
 parameter (ngr=21, nymx=500)
 logical ifull
@@ -119,7 +119,6 @@ dimension wf(nch),en(ngr),f(ngr,nymx),psi(nymx),gr(ngr), &
           dmu(2),q(4)
 #include "common/parsys.F90"
 #include "common/parbas.F90"
-common /coconv/ econv, xmconv
 common /coered/ ered, rmu
 common /cosysi/ nscode,isicod,iscod(maxpar)
 common /cosysr/ isrcod, junkr, rcod(maxpar)
@@ -597,6 +596,7 @@ use mod_coiv2, only: iv2
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
+use constants, only: econv, xmconv
 #include "common/parsys_mod.F90"
 implicit double precision (a-h,o-z)
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
@@ -610,13 +610,10 @@ common /covib/ ie(50), iv(50)
 common /coicl/ clfl
 
 common /coered/ ered, rmu
-common /coconv/ econv, xmconv
 common /coiscl/ iscl(40)
 dimension j(1), l(1), jhold(1), ehold(1), &
           sc1(1), sc2(1), sc3(1), &
           sc4(1), ishold(1), is(1)
-!   econv is conversion factor from cm-1 to hartrees
-!   xmconv is conversion factor from amu to atomic units
 zero = 0.d0
 one = 1.d0
 two = 2.d0
@@ -1103,14 +1100,13 @@ end do
 end subroutine
 
 subroutine  ptmatrix(il,ir,ic,v,ii)
+use constants, only: econv, xmconv
 implicit none
 integer, intent(in) :: il
 integer, intent(in) :: ir
 integer, intent(in) :: ic
 real(8), intent(out) :: v
 integer, intent(inout) :: ii
-common /coconv/ econv, xmconv
-real(8) :: econv, xmconv
 integer, parameter :: ngr=21
 integer, parameter :: nymx=500
 real(8), dimension(ngr, nymx) :: f

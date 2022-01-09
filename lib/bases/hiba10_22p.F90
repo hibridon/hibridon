@@ -98,6 +98,7 @@ use mod_coiv2, only: iv2
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
+use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
@@ -107,7 +108,6 @@ common /cosysr/ isrcod, junkr, aso
 common /cosysi/ nscode, isicod, nterm, nphoto
 common /coered/ ered, rmu
 common /coskip/ nskip, iskip
-common /coconv/ econv, xmconv
 common /cojtot/ jjtot,jjlpar
 dimension j(9), l(9), jhold(9), ehold(9), isc1(9), sc2(9), sc3(9), &
           sc4(9), ishold(9), is(9)
@@ -677,12 +677,12 @@ subroutine trans22(w,n,nmax)
 !  latest revision date:  4-oct-1992
 !  --------------------------------------------
 use mod_coeint, only: eint
+use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 #if defined(HIB_UNIX_IBM)
 character*1 forma, formb
 #endif
 common /cosysr/ isrcod, junkr, aso
-common /coconv/ econv, xmconv
 common /cotrans/ t(6,6)
 common /cojtot/ j,jlpar
 dimension w(42), sc(49)

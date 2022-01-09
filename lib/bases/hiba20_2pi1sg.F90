@@ -232,13 +232,12 @@ end subroutine sortlev_2pi1sg
 subroutine genlev_2pi1sg(tj1max, tj2min, tj2max, tipotsy2, npar, &
      brot, aso, p, q, drot)
 use mod_2pi1sg
+use constants, only: econv
 implicit none
 integer, intent(in) :: tj1max, tj2min, tj2max, tipotsy2, npar
 real(8), intent(in) :: brot, aso, p, q, drot
 integer :: tj1, tj2, eps1, fi1, ilev, nlev
 real(8) :: x, o11, o22, o12, tho, roteng
-common /coconv/ econv
-real(8) :: econv
 !
 nlev = 2 * tj1max * ((tj2max - tj2min) / tipotsy2 + 1)
 if (iabs(npar) .eq. 1) nlev = nlev / 2
@@ -298,10 +297,9 @@ end subroutine genlev_2pi1sg
 !     ------------------------------------------------------------------
 subroutine prtlev_2pi1sg()
 use mod_2pi1sg
+use constants, only: econv
 implicit none
 integer :: i
-common /coconv/ econv
-real(8) :: econv
 write (6, 10)
 10 format (/, ' ** LEVEL LIST')
 do i = 1, size(levs)
@@ -316,11 +314,10 @@ end subroutine prtlev_2pi1sg
 !     ------------------------------------------------------------------
 subroutine prtchn_2pi1sg()
 use mod_2pi1sg
+use constants, only: econv
 implicit none
 integer :: i, ilev
 character :: ifchar
-common /coconv/ econv
-real(8) :: econv
 write (6, 10)
 10 format (/, ' ** CHANNEL LIST')
 do i = 1, size(chns)

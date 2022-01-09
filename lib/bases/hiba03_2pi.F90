@@ -118,6 +118,7 @@ use mod_coiv2, only: iv2
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
+use constants, only: econv, xmconv, ang2c
 implicit double precision (a-h,o-z)
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
@@ -126,7 +127,6 @@ common /coipar/ iiipar(9), iprint
 common /cosysi/ nscode, isicod, nterm, jmax, igu, isa, npar
 common /cosysr/ isrcod, idum,brot, aso, p, q
 common /coered/ ered, rmu
-common /coconv/ econv, xmconv
 dimension j(2), l(1), jhold(1), ehold(1), is(2), ifi(1), &
           c12(1), c32(1), ieps(2), ishold(1), sc4(1)
 !   econv is conversion factor from cm-1 to hartrees

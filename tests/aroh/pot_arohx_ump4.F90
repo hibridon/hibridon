@@ -6,12 +6,11 @@
 
 subroutine driver
 use mod_covvl, only: vvl
+use constants, only: econv
 implicit double precision (a-h,o-z)
 common /cosysr/ xjunk(2),rshift,xfact
-common /coconv/ econv
 #include "common/parpot.F90"
 potnam='KLOS-CHALASINSKI Ar-OH UMP4'
-econv=219474.6d0
 1  print *, ' r (bohr)'
 rshift=0.5
 xfact=0.8
