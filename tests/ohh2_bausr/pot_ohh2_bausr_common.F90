@@ -1,4 +1,5 @@
 use mod_covvl, only: vvl
+use constants, only: econv, xmconv
 !     size of vvl : MAX_NVB+MAX_NVF
 implicit none
 !     Maximum number of R's, terms of B's and F's
@@ -23,9 +24,9 @@ double precision splb_b(MAX_NR, MAX_NVB), splb_c(MAX_NR, MAX_NVB), &
      splb_d(MAX_NR, MAX_NVB), splf_b(MAX_NR, MAX_NVF), &
      splf_c(MAX_NR, MAX_NVF), splf_d(MAX_NR, MAX_NVF)
 !
-common /coconv/ econv, xmconv
-double precision econv, xmconv
-data econv /219474.6315343234d0/
-data xmconv /0.0005485799094979479d0/
+!common /coconv/ econv, xmconv
+!double precision econv, xmconv
+!data econv /219474.6315343234d0/
+!data xmconv /0.0005485799094979479d0/
 !     Machine epsilon
 real(8), parameter :: machep=epsilon(0d0)
