@@ -28,6 +28,7 @@ subroutine hypxsc(flname, a)
 !
 !     current revision:  8-jan-2018 by p. dagdigian
 !     -------------------------------------------------------------
+use mod_coj12, only: j12q => j12
 use mod_codim, only: mmax
 use mod_cojq, only: jq ! jq(1)
 use mod_colq, only: lq ! lq(1)
@@ -56,7 +57,6 @@ logical csflg, flaghf, flgsu, twmol, nucrs, &
      batch, fast, lpar2, lpar, exstfl
 
 #include "common/parpot.F90"
-common /coj12/ j12q(1)
 common /coconv/ econv, xmconv, ang2
 common /codim/ nairy
 common /coselb/ ibasty
