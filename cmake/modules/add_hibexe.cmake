@@ -7,10 +7,24 @@ function(add_hibexe EXE_NAME POT_SRC_FILE p_T_MATRIX_SIZE)
   add_executable(${EXE_NAME} ${POT_SRC_FILE} ${hibridon_SOURCE_DIR}/src/himain.F90)
   
   target_link_libraries(${EXE_NAME} hib)
-
+  
   target_compile_definitions(${EXE_NAME} PRIVATE T_MATRIX_SIZE=${p_T_MATRIX_SIZE})
 
   target_include_directories(${EXE_NAME} PRIVATE ${hibridon_SOURCE_DIR}/lib) # to find the included common files
   target_include_directories(${EXE_NAME} PRIVATE ${hibridon_BINARY_DIR}/lib) # to find the .mod files
 
+
+  # Compile options
+  target_compile_options(${EXE_NAME}
+    PUBLIC
+    $<$<CONFIG:DEBUG>:-Og>
+    $<$<CONFIG:DEBUG>:-fsanitize=address>
+  )
+
+  # Link options
+  target_link_options(${EXE_NAME}
+    PUBLIC
+    $<$<CONFIG:DEBUG>:-Og>
+    $<$<CONFIG:DEBUG>:-fsanitize=address>
+  )
 endfunction(add_hibexe)
