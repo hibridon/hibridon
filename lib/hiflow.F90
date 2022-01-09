@@ -751,7 +751,7 @@ if(.not.nucros) then
      ' CPU:',a,'  WALL:',a,'  DATE: ',a)
   endif
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_HP)
-  call flush6
+  call flush(6)
 #endif
   cpubas=0
   cpuout=0
@@ -818,7 +818,7 @@ if (nucros .and. .not. wavefl .and. .not. photof) then
       ' CPU:',a,'  ELAPSED:',a,'  CURRENT DATE: ',a)
   endif
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_HP)
-  call flush6
+  call flush(6)
 #endif
   cpubas=0
   cpuld=0
@@ -912,7 +912,7 @@ if (.not. optifl) then
    write (6, 350)
    write (9, 350)
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_HP)
-   call flush6
+   call flush(6)
 #endif
 end if
 close (23)
