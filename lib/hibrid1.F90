@@ -136,10 +136,10 @@ data powr /3.d0/
 integer int_t
 double precision dble_t
 character char_t
-real(8) :: w(nmax*nch)
-real(8), dimension(nmax*nch) :: tmat
-real(8), dimension(nmax*nch) :: vecnow
-real(8), dimension(nmax*nch) :: vecnew
+real(8) :: w(nmax*nmax)
+real(8), dimension(nmax*nmax) :: tmat
+real(8), dimension(nmax*nmax) :: vecnow
+real(8), dimension(nmax*nmax) :: vecnew
 !  vectors dimensioned nch
 real(8), dimension(nch) :: eigold
 real(8), dimension(nch) :: eignow
@@ -150,7 +150,6 @@ real(8), dimension(nch) :: cc
 real(8), dimension(nch) :: y4
 real(8), dimension(nch) :: gam1
 real(8), dimension(nch) :: gam2
-
 ! ----------------------------------------------------------------------------
 if (.not.twoen) itwo = -1
 if (itwo .gt. 0) go to 60
