@@ -1417,7 +1417,7 @@ goto 1
      call parse(line,l,code,lc)
      call getval(code(1:lc),' ',0,j,a(i))
 2013   continue
-  call hypxsc(fnam1,a,j12)
+  call hypxsc(fnam1,a)
 !      else
 !        write (6, 2012)
 !2012    format(' Sorry, hyperfine cross sections not yet',
