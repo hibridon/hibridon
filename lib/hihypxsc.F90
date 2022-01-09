@@ -316,12 +316,8 @@ do i = 1, lngth
    j(jtot,jlp,i) = jpack(i)
    in(jtot,jlp,i) = ipack(i)
    l(jtot,jlp,i) = lpack(i)
+   j12(jtot,jlp,i) = j12q(i)
 end do
-if( is_j12(ibasty) ) then
-  do i = 1, lngth
-     j12(jtot,jlp,i) = j12q(i)
-  end do
-end if
 do ii = 1, len2
    sr(jtot, jlp, ii) = sreal(ii)
    si(jtot, jlp, ii) = simag(ii)
