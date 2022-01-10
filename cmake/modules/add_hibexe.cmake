@@ -29,4 +29,9 @@ function(add_hibexe EXE_NAME POT_SRC_FILE p_T_MATRIX_SIZE)
     $<$<CONFIG:DEBUG>:-fsanitize=address>          # Address sanitizer
     $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage>  # Code coverage (same as -lgcov at link time)
   )
+
+  list(GET BLAS_LIBRARIES 0 _BLAS_FIRSTLIB)
+  get_filename_component(_BLAS_LIBDIR "${_BLAS_FIRSTLIB}" DIRECTORY
+  set_target_properties(${EXE_NAME} PROPERTIES BUILD_RPATH "${_BLAS_LIBDIR}")
+
 endfunction(add_hibexe)
