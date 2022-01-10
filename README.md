@@ -118,11 +118,11 @@ cd /tmp/my_pots_build
 make test
 ```
 
-You can also run a test suite (a group of tests). For example, the following command will run the test suite `short`:
+You can also run a test suite (a group of tests). For example, the following command will run the test suite `coverage` that covers most of the source code:
 
 ```bash
 cd /tmp/my_pots_build
-make testsuite_short
+ctest -L coverage 
 ```
 
 You can also run a single test. For example, the following command will run the test `arn2`:
@@ -147,7 +147,7 @@ This one line command configures, builds and tests hibridon from a directory `/h
 ```
 graffy@graffy-ws2:/tmp/hibridon.build$ rm -R ./* ; script -q /dev/null --command  "cmake -DCMAKE_BUILD_TYPE=Debug /home/graffy/work/hibridon" && script -q /dev/null --command "make 2>&1" | tee "/home/graffy/work/hibridon/refactor_notes/make_$(date).stdout" && ctest
 ```
-
+<!---
 ## For code contributors
 
 ### Code coverage
@@ -163,3 +163,4 @@ Then, `make html_coverages`, will convert these coverage files into html reports
 ### Performance profiling
 
 To activate profiling, add `-DENABLE_PROFILING=ON` to the cmake command. This will build and run hibridon with profiling option. When run, each test will additionnaly create a `call_graph.pdf` file which shows where time was spent during the test.
+-->
