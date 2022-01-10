@@ -22,6 +22,7 @@
 !     NOTE THAT VVL IS IN HARTREES.
 subroutine driver
 use mod_covvl, only: vvl
+use constants, only: econv, xmconv
 implicit none
 !
 integer MAX_NR, MAX_NV
@@ -37,11 +38,7 @@ integer lb1(MAX_NV), mu1(MAX_NV), lb2(MAX_NV), mu2(MAX_NV)
 double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV), &
      spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV), &
      spl_d(MAX_NR, MAX_NV)
-      
-common /coconv/ econv, xmconv
-double precision econv, xmconv
-data econv /219474.6315343234d0/
-data xmconv /0.0005485799094979479d0/
+
 character*40 filenm
 double precision r, vv0
 integer i
@@ -59,6 +56,7 @@ goto 10
 !     ------------------------------------------------------------------
 !     DATA FILE, IF REQUIRED, CAN BE LOADED WITH THIS SOUBROUTINE.
 subroutine loapot(iunit, filnam)
+use constants, only: econv, xmconv
 implicit none
 !
 integer MAX_NR, MAX_NV
@@ -74,11 +72,6 @@ integer lb1(MAX_NV), mu1(MAX_NV), lb2(MAX_NV), mu2(MAX_NV)
 double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV), &
      spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV), &
      spl_d(MAX_NR, MAX_NV)
-
-common /coconv/ econv, xmconv
-double precision econv, xmconv
-data econv /219474.6315343234d0/
-data xmconv /0.0005485799094979479d0/
 
 #include "common/parpot.F90"
 !
@@ -123,6 +116,7 @@ end
 !     VVL SHOULD BE IN HARTREES.
 subroutine pot(vv0, r)
 use mod_covvl, only: vvl
+use constants, only: econv, xmconv
 implicit none
 !
 integer MAX_NR, MAX_NV
@@ -139,10 +133,6 @@ double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV), &
      spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV), &
      spl_d(MAX_NR, MAX_NV)
 
-common /coconv/ econv, xmconv
-double precision econv, xmconv
-data econv /219474.6315343234d0/
-data xmconv /0.0005485799094979479d0/
 
 double precision vv0, r
 double precision seval
@@ -159,6 +149,7 @@ end
 !     THIS SUBROUTINE GOVERNS THE INPUT/OUTPUT OF THE BASIS ROUTINE.
 !     ONLY IREAD IS USED: RETURN DIRECTLY IF ZERO.
 subroutine syusr(irpot, readpt, iread)
+use constants, only: econv, xmconv
 implicit none
 !
 integer MAX_NR, MAX_NV
@@ -174,11 +165,6 @@ integer lb1(MAX_NV), mu1(MAX_NV), lb2(MAX_NV), mu2(MAX_NV)
 double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV), &
      spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV), &
      spl_d(MAX_NR, MAX_NV)
-
-common /coconv/ econv, xmconv
-double precision econv, xmconv
-data econv /219474.6315343234d0/
-data xmconv /0.0005485799094979479d0/
 
 integer irpot, iread
 logical readpt
@@ -265,7 +251,7 @@ use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_coamat, only: ietmp ! ietmp(1)
 use mod_conlam, only: nlam, nlammx, lamnum
-
+use constants, only: econv, xmconv
 implicit none
 !
 integer MAX_NR, MAX_NV
@@ -281,11 +267,6 @@ integer lb1(MAX_NV), mu1(MAX_NV), lb2(MAX_NV), mu2(MAX_NV)
 double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV), &
      spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV), &
      spl_d(MAX_NR, MAX_NV)
-
-common /coconv/ econv, xmconv
-double precision econv, xmconv
-data econv /219474.6315343234d0/
-data xmconv /0.0005485799094979479d0/
 
 double precision rcut
 integer jtot, nu, numin, jlpar, nmax

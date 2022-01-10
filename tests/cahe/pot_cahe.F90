@@ -97,8 +97,8 @@ subroutine pot (vv0, r)
 ! ----------------------------------------------------------------------
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
+use constants, only: econv
 implicit double precision (a-h,o-z)
-common /coconv/ econv
 common /cosysi/ nscode, isicod, nterm, nstate, ipol, npot
 common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4), &
                         rl(4), cl(4), cmix, alphg, rgaus, &

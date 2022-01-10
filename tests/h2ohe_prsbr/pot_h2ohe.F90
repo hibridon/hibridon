@@ -873,7 +873,7 @@ end
   subroutine dispind(rpt,eld,eli)
   implicit real*8 (a-h,o-z)
   parameter (maxc=5000)
-  dimension rr(20),oa(3),ob(3),oc(2), rpt(6), eld(2), eli(20)
+  dimension rr(20),oa(3),ob(3),oc(2), rpt(6), eld(20), eli(20)
   complex*16 a, alm
 !--- common/dind/ contains dispersion and induction coefs.
   common/dind/ cd(maxc),ci(maxc),ld(6,maxc),li(6,maxc), &

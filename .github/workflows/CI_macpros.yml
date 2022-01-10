@@ -35,16 +35,15 @@ jobs:
       run: brew install gcc@${GCC_V} || brew upgrade gcc@${GCC_V} || true
 
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build 
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_TESTING=ON -DBLA_VENDOR=Apple
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - name: catch build fail
-      run: cmake --build ${{github.workspace}}/build --verbose
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --verbose
       if: failure()
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      run: make testsuite_coverage
-
+      run: ctest --parallel --output-on-failure -L coverage
