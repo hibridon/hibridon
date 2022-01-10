@@ -56,7 +56,7 @@ subroutine get_command_stdout(command, stdout, default_stdout)
   else
       stdout = default_stdout
   end if
-
+  deallocate(redirected_command)
 end subroutine
 
 subroutine version(out_unit)
