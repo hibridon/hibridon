@@ -17,10 +17,11 @@ env:
   HOMEBREW_NO_INSTALL_CLEANUP: "ON"
 jobs:
   build_and_test:
-    runs-on: [self-hosted, macOS, X64]
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [macos-11.2, macos-10.13]
         gcc_v: [9, 10, 11]
     env:
       FC: gfortran-${{ matrix.gcc_v }}
