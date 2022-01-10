@@ -95,6 +95,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<CONFIG:DEBUG>:-Wuninitialized>        # Emit warnings for uninitialized variables 
       #$<$<CONFIG:DEBUG>:-finit-integer=333333333> # Initialize integers to dummy value to help detect unintialized variables
       #$<$<CONFIG:DEBUG>:-finit-real=snan>       # Initialize reals to NaNs to help detect unintialized variables
+      $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -fprofile-arcs -ftest-coverage at compile time)
     )
 # Intel (ifort)
 elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
@@ -110,7 +111,8 @@ endif()
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     target_link_options(hib
       PUBLIC
-      $<$<CONFIG:DEBUG>:-fsanitize=address> 
+      $<$<CONFIG:DEBUG>:-fsanitize=address>         # Address sanitizer
+      $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -lgcov at link time)
     )
 # Intel (ifort)
 elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")

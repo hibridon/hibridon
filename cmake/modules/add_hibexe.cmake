@@ -18,13 +18,15 @@ function(add_hibexe EXE_NAME POT_SRC_FILE p_T_MATRIX_SIZE)
   target_compile_options(${EXE_NAME}
     PUBLIC
     $<$<CONFIG:DEBUG>:-Og>
-    $<$<CONFIG:DEBUG>:-fsanitize=address>
+    $<$<CONFIG:DEBUG>:-fsanitize=address>         # Address sanitizer
+    $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -fprofile-arcs -ftest-coverage at compile time)
   )
 
   # Link options
   target_link_options(${EXE_NAME}
     PUBLIC
     $<$<CONFIG:DEBUG>:-Og>
-    $<$<CONFIG:DEBUG>:-fsanitize=address>
+    $<$<CONFIG:DEBUG>:-fsanitize=address>          # Address sanitizer
+    $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage>  # Code coverage (same as -lgcov at link time)
   )
 endfunction(add_hibexe)
