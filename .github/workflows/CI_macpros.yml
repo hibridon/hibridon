@@ -23,11 +23,6 @@ jobs:
       matrix:
         os: [macos-11.2, macos-10.13]
         gcc_v: [9, 10, 11]
-        include:
-          - os: macos-10.13
-            env:
-              MKLROOT: "/opt/intel/compilers_and_libraries/mac/mkl/"
-              LIBRARY_PATH: "/opt/intel/compilers_and_libraries/mac/mkl/lib/"
     env:
       FC: gfortran-${{ matrix.gcc_v }}
       GCC_V: ${{ matrix.gcc_v }}
@@ -39,6 +34,10 @@ jobs:
     - name: Install GFortran macOS
       run: brew install gcc@${GCC_V} || brew upgrade gcc@${GCC_V} || true
 
+    if: runner.os == 'macos-10.13'
+      - name: Source intel compilers and libraries
+        run: source /opt/intel/compilers_and_libraries/mac/bin/compilervars.sh intel64
+        
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_TESTING=ON
 
