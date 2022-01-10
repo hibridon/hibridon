@@ -9,7 +9,7 @@ env:
   BUILD_TYPE: Release
   CMAKE_BUILD_PARALLEL_LEVEL: "1" # disable parallel builds
   CTEST_OUTPUT_ON_FAILURE: "ON" # This way we don't need a flag to ctest
-  CTEST_PARALLEL_LEVEL: "2"
+  CTEST_PARALLEL_LEVEL: "1"
   HOMEBREW_NO_ANALYTICS: "ON" # Make Homebrew installation a little quicker
   HOMEBREW_NO_AUTO_UPDATE: "ON"
   HOMEBREW_NO_BOTTLE_SOURCE_FALLBACK: "ON"
