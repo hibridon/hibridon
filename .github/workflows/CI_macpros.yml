@@ -25,8 +25,8 @@ jobs:
         gcc_v: [9, 10, 11]
         include:
           - os: macos-10.13
-              env:
-                MKLROOT: "/opt/intel/compilers_and_libraries/mac/mkl/"
+            env:
+              MKLROOT: "/opt/intel/compilers_and_libraries/mac/mkl/"
     env:
       FC: gfortran-${{ matrix.gcc_v }}
       GCC_V: ${{ matrix.gcc_v }}
