@@ -1,4 +1,4 @@
-name: CI_macpro6
+name: CI_MacPros
 
 on:
   push:
@@ -17,7 +17,7 @@ env:
   HOMEBREW_NO_INSTALL_CLEANUP: "ON"
 jobs:
   build_and_test:
-    runs-on: [self-hosted, macOS, X64]
+    runs-on: [self-hosted, mac-11.2, mac-10.13]
     strategy:
       fail-fast: false
       matrix:
