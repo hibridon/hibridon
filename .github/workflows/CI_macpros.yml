@@ -34,9 +34,10 @@ jobs:
     - name: Install GFortran macOS
       run: brew install gcc@${GCC_V} || brew upgrade gcc@${GCC_V} || true
       
-    - name: Configure CMake
-      if: runner.os == 'macos-10.13'
+    if: runner.os == 'macos-10.13'
+      -name: Source intel
         run: source /opt/intel/compilers_and_libraries/mac/bin/compilervars.sh intel64  
+    - name: Configure CMake
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_TESTING=ON
 
     - name: Build
