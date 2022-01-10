@@ -22,13 +22,3 @@ if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
-# Add the user-supplied potentials
-file (GLOB userscripts ${CMAKE_CURRENT_BINARY_DIR}/*.user.cmake)
-foreach(userscript IN LISTS userscripts)
-   include (${userscript})
-   add_hibexe("${EXE_NAME}" "${POT_SRC_FILE}" "${p_T_MATRIX_SIZE}")
-   message ("Added ${userscript} user executable")
-   unset(EXE_NAME)
-   unset(POT_SRC_FILE)
-   unset(p_T_MATRIX_SIZE)
-endforeach()
