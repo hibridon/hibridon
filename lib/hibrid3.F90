@@ -74,7 +74,7 @@ if (itwo .gt. 0) isecnd = .true.
 !  read/write rnow, drnow, diagonal elements of transformed dw/dr matrix,
 !  and diagonal elements of transformed w matrix
 #if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
-nsq = nmax * nmax
+nsq = n * nmax
 if (isecnd) then
   read (10) rnow, drnow, (hp(i) , i = 1, n), &
         (eigold(i) , i = 1, n), (tmat(i), i=1, nsq)

@@ -136,10 +136,10 @@ data powr /3.d0/
 integer int_t
 double precision dble_t
 character char_t
-real(8) :: w(nmax*nmax)
-real(8), dimension(nmax*nmax) :: tmat
-real(8), dimension(nmax*nmax) :: vecnow
-real(8), dimension(nmax*nmax) :: vecnew
+real(8) :: w(nch*nmax)
+real(8), dimension(nch*nmax) :: tmat
+real(8), dimension(nch*nmax) :: vecnow
+real(8), dimension(nch*nmax) :: vecnew
 !  vectors dimensioned nch
 real(8), dimension(nch) :: eigold
 real(8), dimension(nch) :: eignow
