@@ -36,7 +36,7 @@ jobs:
       
     -name: Source intel vars
       run: source /opt/intel/compilers_and_libraries/mac/bin/compilervars.sh intel64 
-      if: matrix.os == 'macos-10.13' 
+      #if: matrix.os == 'macos-10.13' 
 
     - name: Configure CMake
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_TESTING=ON
