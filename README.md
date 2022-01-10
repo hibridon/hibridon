@@ -1,6 +1,6 @@
 # Hibridon v5.0 alpha
 
-[![macOS Big Sur (11.2.3)](https://github.com/hibridon/hibridon/actions/workflows/CI_macpro6.yml/badge.svg?branch=master)](https://github.com/hibridon/hibridon/actions/workflows/CI_macpro6.yml)
+[![CI_MacPros](https://github.com/hibridon/hibridon/actions/workflows/CI_macpros.yml/badge.svg?branch=master)](https://github.com/hibridon/hibridon/actions/workflows/CI_macpros.yml)
 
 Computer Software for
 Molecular Inelastic Scattering and Photodissociation
