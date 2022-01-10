@@ -1,6 +1,6 @@
 # Hibridon v5.0 alpha
 
-[![Build Status](https://jenkins.ipr.univ-rennes1.fr/buildStatus/icon?job=hibridon-build)](https://jenkins.ipr.univ-rennes1.fr/job/hibridon-build/)
+[![CI_macpro6](https://github.com/hibridon/hibridon/actions/workflows/CI_macpro6.yml/badge.svg?branch=master)](https://github.com/hibridon/hibridon/actions/workflows/CI_macpro6.yml)
 
 Computer Software for
 Molecular Inelastic Scattering and Photodissociation
