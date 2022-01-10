@@ -10,6 +10,7 @@ env:
   CMAKE_BUILD_PARALLEL_LEVEL: "1" # disable parallel builds
   CTEST_OUTPUT_ON_FAILURE: "ON" # This way we don't need a flag to ctest
   CTEST_PARALLEL_LEVEL: "1"
+  ASAN_OPTIONS: "detect_leaks=0" # Disable Linux default memory leak detection
 jobs:
   build_and_test:
     runs-on: ${{ matrix.os }}
