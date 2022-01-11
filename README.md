@@ -1,7 +1,10 @@
 # Hibridon v5.0 alpha
 
-[![CI_MacPros](https://github.com/hibridon/hibridon/actions/workflows/CI_macpros.yml/badge.svg?branch=master)](https://github.com/hibridon/hibridon/actions/workflows/CI_macpros.yml)
-[![CI_DebianVM](https://github.com/hibridon/hibridon/actions/workflows/CI_DebianVM.yml/badge.svg?branch=master)](https://github.com/hibridon/hibridon/actions/workflows/CI_DebianVM.yml)
+[![macOS-10.13](https://github.com/hibridon/hibridon/actions/workflows/macOS-10.13.yml/badge.svg?branch=master)](https://github.com/hibridon/hibridon/actions/workflows/macOS-10.13.yml)
+[![macOS-11.2](https://github.com/hibridon/hibridon/actions/workflows/macOS-11.2.yml/badge.svg?branch=master)](https://github.com/hibridon/hibridon/actions/workflows/macOS-11.2.yml)
+
+[![Debian-10.6](https://github.com/hibridon/hibridon/actions/workflows/Debian-10.6.yml/badge.svg?branch=master)](https://github.com/hibridon/hibridon/actions/workflows/Debian-10.6.yml)
+[![Debian-11.2](https://github.com/hibridon/hibridon/actions/workflows/Debian-11.2.yml/badge.svg?branch=master)](https://github.com/hibridon/hibridon/actions/workflows/Debian-11.2.yml)
 
 Computer Software for
 Molecular Inelastic Scattering and Photodissociation
