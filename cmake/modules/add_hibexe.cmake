@@ -22,7 +22,7 @@ function(add_hibexe EXE_NAME POT_SRC_FILE p_T_MATRIX_SIZE)
 
 # GNU (gfortran)
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(hib
+    target_compile_options(${EXE_NAME}
       PUBLIC
       # Non-specific options
       -std=legacy                               # Allow pre-Fortran 77 syntax (e.g. arbitrary length arrays)
@@ -44,7 +44,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     )
 # Intel (ifort)
 elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
-    target_compile_options(hib
+    target_compile_options(${EXE_NAME}
       PUBLIC
       # Non-specific options
       -heap-arrays                                # Put everything on the heap
@@ -69,7 +69,7 @@ endif()
 
 # GNU (gfortran)
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
-    target_link_options(hib
+    target_link_options(${EXE_NAME}
       PUBLIC
       $<$<CONFIG:DEBUG>:-fsanitize=address>         # Address sanitizer
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -lgcov at link time)
