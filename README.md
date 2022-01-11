@@ -18,7 +18,7 @@ Changes:
 ## Build instructions
 
 Required tools:
-* CMake >= 3.3
+* CMake >= 3.13
 * Git (optional)
 * Fortran compiler with support for fortran 90 and fpp preprocessing (eg: gfortran or ifort).
 
