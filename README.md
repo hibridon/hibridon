@@ -2,7 +2,6 @@
 
 [![macOS-10.13](https://github.com/hibridon/hibridon/actions/workflows/macOS-10.13.yml/badge.svg?branch=master)](https://github.com/hibridon/hibridon/actions/workflows/macOS-10.13.yml)
 [![macOS-11.2](https://github.com/hibridon/hibridon/actions/workflows/macOS-11.2.yml/badge.svg?branch=master)](https://github.com/hibridon/hibridon/actions/workflows/macOS-11.2.yml)
-
 [![Debian-10.6](https://github.com/hibridon/hibridon/actions/workflows/Debian-10.6.yml/badge.svg?branch=master)](https://github.com/hibridon/hibridon/actions/workflows/Debian-10.6.yml)
 [![Debian-11.2](https://github.com/hibridon/hibridon/actions/workflows/Debian-11.2.yml/badge.svg?branch=master)](https://github.com/hibridon/hibridon/actions/workflows/Debian-11.2.yml)
 
@@ -10,14 +9,11 @@ Computer Software for
 Molecular Inelastic Scattering and Photodissociation
 
 Documentation is available on
-- [http://www2.chem.umd.edu/groups/alexander/hibridon]
+- [http://www2.chem.umd.edu/groups/alexander/hibridon](http://www2.chem.umd.edu/groups/alexander/hibridon)
 - [<hibridon_root_path>/doc](doc)
 
 Changes:
-- [ReleaseNotes](ReleaseNotes)
-- [README_4.2.1](README_4.2.1) : changes from `hibridon` 4.1.5 to 4.2.1
-- [README_4.3](README_4.3) : changes from `hibridon` 4.2.1 to 4.3 
-- [README_4.4](README_4.4) : changes since `hibridon` 4.3
+- [CHANGELOG](CHANGELOG.md)
 
 ## Build instructions
 
