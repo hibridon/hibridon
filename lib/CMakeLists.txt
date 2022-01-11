@@ -65,6 +65,11 @@ add_library(hib
 
 # This for preprocessed includes from the subdirectory bases to work
 target_include_directories(hib PRIVATE ./)
+
+# Link Blas and Lapack libraries
+target_link_libraries(hib INTERFACE "${BLAS_LIBRARIES}")
+target_link_libraries(hib INTERFACE "${LAPACK_LIBRARIES}")
+
 ################################################################################
 #
 #    COMPILE OPTIONS
@@ -78,6 +83,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       # Non-specific options
       -std=legacy                               # Allow pre-Fortran 77 syntax (e.g. arbitrary length arrays)
       -fno-automatic                            # Put everything on the heap
+      -mcmodel=medium
       $<$<PLATFORM_ID:Linux>:-march=native>     # Tune generated code for host's micro-architecture
       $<$<PLATFORM_ID:Darwin>:-mtune=native>    # Tune generated code for host's micro-architecture (march not working on Darwin)
       $<$<PLATFORM_ID:Linux>:-mcmodel=large>    # Required on Linux
@@ -165,8 +171,6 @@ target_compile_definitions(hib PUBLIC MAX_NJTOT=1000)
 target_compile_definitions(hib PUBLIC DISABLE_HIB_ASSERT=1)
 
 
-# Link Blas and Lapack libraries
-target_link_libraries(hib INTERFACE "${BLAS_LIBRARIES}")
-target_link_libraries(hib INTERFACE "${LAPACK_LIBRARIES}")
+
 
 
