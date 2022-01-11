@@ -65,7 +65,6 @@ add_library(hib
 
 # This for preprocessed includes from the subdirectory bases to work
 target_include_directories(hib PRIVATE ./)
-target_link_options(hib PUBLIC -fsanitize=address -Og -fbacktrace)
 ################################################################################
 #
 #    COMPILE OPTIONS
@@ -86,19 +85,31 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<CONFIG:RELEASE>:-O3>                  # Optimization level at 3 for Release
       $<$<CONFIG:RELEASE>:-finit-local-zero>    # Init variables to zero/false/null
       # Config-specific options: DEBUG
-      $<$<CONFIG:DEBUG>:-Og>                    # Optimization level at 0 for Debug
-      $<$<CONFIG:DEBUG>:-fbacktrace>            #
+      $<$<CONFIG:DEBUG>:-Og>                    # Optimization level at 0 and generates complete debugging information
+      $<$<CONFIG:DEBUG>:-fbacktrace>            # Generates extra information in the object file to provide source file traceback information when a severe error occurs at run time
       $<$<CONFIG:DEBUG>:-Wall>                  # Enable all warnings
       $<$<CONFIG:DEBUG>:-Wextra>                # Enable extra warnings
       $<$<CONFIG:DEBUG>:-fsanitize=address>     # Address sanitizer
-      #$<$<CONFIG:DEBUG>:-ffpe-trap=invalid,zero,overflow> # Stop execution on case of Floating Point Error
       $<$<CONFIG:DEBUG>:-Wuninitialized>        # Emit warnings for uninitialized variables 
-      #$<$<CONFIG:DEBUG>:-finit-integer=333333333> # Initialize integers to dummy value to help detect unintialized variables
-      #$<$<CONFIG:DEBUG>:-finit-real=snan>       # Initialize reals to NaNs to help detect unintialized variables
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -fprofile-arcs -ftest-coverage at compile time)
     )
 # Intel (ifort)
-elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
+elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
+    target_compile_options(hib
+      PUBLIC
+      # Non-specific options
+      -heap-arrays                                # Put everything on the heap
+      -no-wrap-margin                             # Don't wrap output files
+      # Config-specific options: RELEASE
+      $<$<CONFIG:RELEASE>:-O3>                    # Optimization level at 3 for Release
+      $<$<CONFIG:RELEASE>:-xHost>                 # Generate instructions for the highest instruction set available on the compilation host processor
+      $<$<CONFIG:RELEASE>:-init=zero>             # Init variables to zero/false/null
+      # Config-specific options: DEBUG
+      $<$<CONFIG:DEBUG>:-Od>                      # Disable all optimizations
+      $<$<CONFIG:DEBUG>:-debug>                   # Generates complete debugging information
+      $<$<CONFIG:DEBUG>:-traceback>               # Generates extra information in the object file to provide source file traceback information when a severe error occurs at run time
+      $<$<CONFIG:DEBUG>:-warn all>                # Enable all warnings
+    )
 endif()
 
 ################################################################################
@@ -115,7 +126,6 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -lgcov at link time)
     )
 # Intel (ifort)
-elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
 endif()
 
 
@@ -130,7 +140,7 @@ target_compile_definitions(hib PUBLIC HIB_UNIX_X86=1)
 target_compile_definitions(hib PUBLIC HIB_UNIX=1)
 if (CMake_Fortran_COMPILER_ID STREQUAL "GNU")
   target_compile_definitions(hib PUBLIC HIB_UNIX_GFORTRAN=1)
-elseif (CMake_Fortran_COMPILER_ID STREQUAL "Intel")
+elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
   target_compile_definitions(hib PUBLIC HIB_UNIX_IFORT=1)
 endif()
 

@@ -8,6 +8,10 @@ enable_language (Fortran)
 find_package( BLAS REQUIRED )
 find_package( LAPACK REQUIRED )
 
+# get the name of the compiler
+get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
+message("Fortran compiler: ${Fortran_COMPILER_NAME}")
+
 # Include useful functions
 include(cmake/modules/add_hibexe.cmake)
 include(cmake/modules/add_hibridon_test.cmake)
