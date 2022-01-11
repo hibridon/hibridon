@@ -1,4 +1,4 @@
-name: CI_DebianVM
+name: Debian-10.6
 
 on:
   push:
@@ -17,8 +17,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [debian-11.2]
-        gcc_v: [9, 10]
+        os: [debian-10.6]
+        gcc_v: [7, 8]
     env:
       FC: gfortran-${{ matrix.gcc_v }}
       GCC_V: ${{ matrix.gcc_v }}
