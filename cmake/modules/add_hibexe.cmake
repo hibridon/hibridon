@@ -23,7 +23,7 @@ function(add_hibexe EXE_NAME POT_SRC_FILE p_T_MATRIX_SIZE)
   )
 
   # Link options
-  target_link_options(${EXE_NAME}
+  target_link_libraries()(${EXE_NAME}
     PUBLIC
     $<$<CONFIG:DEBUG>:-Og>
     $<$<CONFIG:DEBUG>:-fsanitize=address>          # Address sanitizer
