@@ -65,7 +65,7 @@ add_library(hib
 
 # This for preprocessed includes from the subdirectory bases to work
 target_include_directories(hib PRIVATE ./)
-target_link_options(hib PUBLIC -fsanitize=address -Og -fbacktrace)
+
 ################################################################################
 #
 #    COMPILE OPTIONS
@@ -109,7 +109,7 @@ endif()
 
 # GNU (gfortran)
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
-    target_link_options(hib
+    target_link_libraries(hib
       PUBLIC
       $<$<CONFIG:DEBUG>:-fsanitize=address>         # Address sanitizer
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -lgcov at link time)
