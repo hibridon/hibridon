@@ -1,9 +1,14 @@
 # CMake project file for hibridon
 
 # cmake version >= 3.13 is required for IN_LIST
-cmake_minimum_required (VERSION 3.13)
+cmake_minimum_required (VERSION 3.3)
 project (hibridon VERSION 5.0)
 enable_language (Fortran)
+
+# Default build type as Release
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
 
 find_package( BLAS REQUIRED )
 find_package( LAPACK REQUIRED )

@@ -6,7 +6,7 @@ function(add_hibexe EXE_NAME POT_SRC_FILE p_T_MATRIX_SIZE)
 
   add_executable(${EXE_NAME} ${POT_SRC_FILE} ${hibridon_SOURCE_DIR}/src/himain.F90)
   
-  target_link_libraries(${EXE_NAME} hib)
+  target_link_libraries(${EXE_NAME} PUBLIC hib)
   
   target_compile_definitions(${EXE_NAME} PRIVATE T_MATRIX_SIZE=${p_T_MATRIX_SIZE})
 

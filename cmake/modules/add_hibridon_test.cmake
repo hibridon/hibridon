@@ -23,7 +23,6 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
     configure_file(${TEST_SRC_DIR}/${POT_DATA_FILE} ${TEST_BUILD_DIR}/potdata/${POT_DATA_FILE} COPYONLY)
   endforeach()
 
-
   # Create a test that runs the executable using the provided com files
   add_test(NAME ${TEST_ID}_test_run COMMAND ${TEST_EXE} --kmax ${TEST_KMAX} --com ${TEST_COMMAND_FILE} )
   set_property(TEST ${TEST_ID}_test_run PROPERTY LABELS ${TEST_ID} ${TEST_LABELS})

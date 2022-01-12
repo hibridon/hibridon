@@ -126,7 +126,7 @@ endif()
 
 # GNU (gfortran)
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
-    target_link_options(hib
+    target_link_libraries(hib
       PUBLIC
       $<$<CONFIG:DEBUG>:-fsanitize=address>         # Address sanitizer
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -lgcov at link time)
