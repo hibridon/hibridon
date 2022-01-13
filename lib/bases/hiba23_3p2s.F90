@@ -619,7 +619,7 @@ subroutine sy3p2s (irpot, readp, iread)
 !    nterm:    number of different types of electronic coupling terms
 !              this should be 1 here
 !    nvib:     initial vibrational state of A state, in photodissociation calculation
-!  variable in common /cosys/
+!  variable in common  /cosys/
 !    scod:    character*8 array of dimension lcode, which contains names
 !             of all system dependent parameters
 !  line 16:
@@ -627,12 +627,12 @@ subroutine sy3p2s (irpot, readp, iread)
 !
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
+use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod
 implicit double precision (a-h,o-z)
-#include "common/parsys.F90"
 integer irpot
 logical readp
 logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
@@ -641,10 +641,8 @@ logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
         readpt, ihomo, bastst, twomol, lpar
 
 character*1 dot
-character*8 scod
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-common /cosys/ scod(lencod)
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &

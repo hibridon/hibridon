@@ -455,14 +455,13 @@ subroutine testpt(ihomo)
 !
 !  added common block /conlamp/ for lamnump array
 !  current revision date:  5-nov-2012 by p.j.dagdigian
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 implicit double precision(a-h,o-z)
 logical ihomo
 common /coselb/ ibasty
-#include "common/parsys.F90"
 #include "common/parbas.F90"
 common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
 common /conlamp/ lamnump(50)
@@ -552,7 +551,7 @@ end
 ! -------------------------------------------------------------------------
 subroutine testptn(ihomo)
 !  current revision date:  8-apr-1997 by mha
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
@@ -560,7 +559,6 @@ implicit double precision(a-h,o-z)
 
 logical ihomo
 common /coselb/ ibasty
-#include "common/parsys.F90"
 #include "common/parbas.F90"
 common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
 dimension nvbmnr(4),nvbmxr(4),nvbmnc(4),nvbmxc(4)
@@ -697,14 +695,13 @@ subroutine testpt20(ihomo)
 !
 !  testpot for ibasty = 20 (ch2xhe v=3 - v=2)
 !  current revision date:  1-nov-2012 by lifang ms
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 implicit double precision(a-h,o-z)
 logical ihomo
 common /coselb/ ibasty
-#include "common/parsys.F90"
 #include "common/parbas.F90"
 common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
 common /conlamp/ lamnump(7)

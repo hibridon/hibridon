@@ -1052,6 +1052,32 @@ module mod_comxm
    end subroutine allocate_comxm
 end module mod_comxm
 
+module mod_cosys
+   implicit none
+   save
+   integer :: lencod
+   character(len=8), dimension(:), allocatable :: scod
+   contains
+   subroutine allocate_cosys(alencod)
+      integer, intent(in) :: alencod
+      lencod = alencod
+      allocate(scod(lencod))
+   end subroutine allocate_cosys
+end module mod_cosys
+
+module mod_cosyr
+   implicit none
+   save
+   integer :: maxpar
+   character(len=8), dimension(:), allocatable :: rcod
+   contains
+   subroutine allocate_cosyr(amaxpar)
+      integer, intent(in) :: amaxpar
+      maxpar = amaxpar
+      allocate(rcod(maxpar))
+   end subroutine allocate_cosyr
+end module mod_cosyr
+
 module mod_cosysi
    implicit none
    save

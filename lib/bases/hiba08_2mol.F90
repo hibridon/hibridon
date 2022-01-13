@@ -533,19 +533,17 @@ subroutine sy2mol (irpot, readpt, iread)
 !  line 14:
 !    brot, drot, hrot:    rotational constants of the molecule in cm-1
 !  -----------------------------------------------------------------------
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
+use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
-#include "common/parsys.F90"
 logical readpt, existf
 integer irpot
 character*1 dot
-character*8 scod
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-common /cosys/ scod(lencod)
 common /cotwo/ numj,nj1j2(3)
 save potfil
 #include "common/comdot.F90"
@@ -555,7 +553,6 @@ real(8), pointer :: brot, drot, hrot
 nterm=>ispar(1); nsym=>ispar(2)
 brot=>rspar(1); drot=>rspar(2); hrot=>rspar(3)
 
-nscode = lencod
 !     number and names of system dependent parameters
 isicod = 2
 isrcod = 3

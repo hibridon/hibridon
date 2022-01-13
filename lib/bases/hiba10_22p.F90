@@ -743,7 +743,7 @@ subroutine sy22p (irpot, readp, iread)
 !              this should be 1 here
 !    nphoto:  this should be 1 here
 !    nvib:    vibrational quantum number of initial state (0-6)
-!  variable in common /cosys/
+!  variable in common /cosys
 !    scod:    character*8 array of dimension lcode, which contains names
 !             of all system dependent parameters
 !  line 16:
@@ -751,12 +751,12 @@ subroutine sy22p (irpot, readp, iread)
 !
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
+use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 implicit double precision (a-h,o-z)
-#include "common/parsys.F90"
 integer irpot
 logical readp
 logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
@@ -764,10 +764,8 @@ logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
         csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
         readpt, ihomo, bastst, twomol,lpar
 character*1 dot
-character*8 scod
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-common /cosys/ scod(lencod)
 common /coipar/ jtot1,jtot2,jtotd,jlpar
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip

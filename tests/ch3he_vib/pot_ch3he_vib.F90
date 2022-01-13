@@ -364,7 +364,7 @@ scod(10) = 'LAMMIN'
 scod(11) = 'LAMMAX'
 scod(12) = 'MPROJ'
 !   Set lengths of scod array
-nscode = LENCOD
+nscode = ICOD+IRCOD+3
 isicod = ICOD
 isrcod = IRCOD
 !   Set default indout data

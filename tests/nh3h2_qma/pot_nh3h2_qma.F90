@@ -149,6 +149,7 @@ end
 !     THIS SUBROUTINE GOVERNS THE INPUT/OUTPUT OF THE BASIS ROUTINE.
 !     ONLY IREAD IS USED: RETURN DIRECTLY IF ZERO.
 subroutine syusr(irpot, readpt, iread)
+use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
@@ -172,10 +173,8 @@ integer irpot, iread
 logical readpt
 character*(*) fname
 !     NUMBER OF BASIS-SPECIFIC VARIABLES, MODIFY ACCORDINGLY.
-integer icod, ircod, lencod
-parameter (icod=5, ircod=5, lencod=icod+ircod+3)
-common /cosys/ scod(lencod)
-character*8 scod
+integer icod, ircod
+parameter (icod=5, ircod=5)
 
 
 character*40 potfil
@@ -200,7 +199,7 @@ scod(10)='CROT'
 scod(11)='DELTA'
 scod(12)='EMAX'
 scod(13)='DROT'
-nscode = lencod
+nscode = icod+ircod+3
 isicod = icod
 isrcod = ircod
 !     KEEP THE FOLLOWING LINE

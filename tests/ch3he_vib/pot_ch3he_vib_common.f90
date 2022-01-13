@@ -29,6 +29,7 @@ use mod_covvl, only: vvl
 !     size of vvl : NVVL
 
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosys, only: scod
 use mod_cosysr, only: isrcod, junkr, rspar
 use mod_cosysi, only: nscode, isicod, ispar
 implicit double precision (a-h, o-z)
@@ -57,9 +58,9 @@ parameter (ECONV=219474.6d0, XMCONV=1822.88848477d0)
 !      parameter (KMAX=10000)
 !
 !   Lengths of cod array, 
-!       ICOD, IRCOD, LENCOD: lenghts of cod array
-integer ICOD, IRCOD, LENCOD
-parameter (ICOD=5, IRCOD=4, LENCOD=ICOD+IRCOD+3)
+!       ICOD, IRCOD: lenghts of cod array
+integer ICOD, IRCOD
+parameter (ICOD=5, IRCOD=4)
 !
 !   ch3he block: data used only by this pot/basis combination
 !       brot, crot: rotational constants of CH3 for each vibrational level
@@ -101,10 +102,7 @@ data muasy /0, 0, 0, 0, 0, 3, 3, 3, 3, 6, 6, 9/
 !       ipotsy: cylindrical symmetry of potential. Should be set to 3 for CH3.
 !       iop: ortho/para label for molecular states. Only para states are included if iop=1 and only ortho states if iop=-1.
 !
-!   cosys block
-!       scod: contains names of all system dependent parameters
-common /cosys/ scod
-character*8 scod(LENCOD)
+
 !
 !   cosysr block
 !       isrcod: total number of real system dependent variables

@@ -959,7 +959,7 @@ subroutine sypi (irpot, readpt, iread)
 !  author:  didier lemoine and millard alexander
 !  current revision date:  4-mar-1996 by mha
 !  ---------------------------------------------------------------------
-!  variable in common /cosys/
+!  variable in common /cosys
 !    scod:    character*8 array of dimension nscode, which contains
 !             names of all system dependent parameters. note that the
 !             ordering of the variable names in scod must correspond
@@ -997,8 +997,9 @@ subroutine sypi (irpot, readpt, iread)
 !  variables in common bloc /cosysl/
 !    islcod:   total number of logical system dependent variables
 ! ----------------------------------------------------------------------
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
+use mod_cosys, only: scod
 use mod_cosysl, only: islcod, lspar
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
@@ -1006,15 +1007,12 @@ implicit double precision (a-h,o-z)
 logical readpt, existf
 logical         airyfl, airypr, bastst, batch, chlist, csflag, &
                 flaghf, flagsu, ihomo,lpar
-#include "common/parsys.F90"
-character*8 scod
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 character*1 dot
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
                 flaghf, flagsu, ihomo,lpar(18)
 #include "common/parbas.F90"
-common /cosys/ scod(lencod)
 common /coskip/ nskip,iskip
 save potfil
 #include "common/comdot.F90"

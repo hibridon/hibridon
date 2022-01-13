@@ -76,6 +76,8 @@ use mod_codim, only: allocate_codim, mairy, mmax
 use mod_comxbs, only: allocate_comxbs
 use mod_comxm, only: allocate_comxm
 
+use mod_cosyr, only: allocate_cosyr
+use mod_cosys, only: allocate_cosys
 use mod_cosysl, only: allocate_cosysl
 use mod_cosysi, only: allocate_cosysi
 use mod_cosysr, only: allocate_cosysr
@@ -326,6 +328,8 @@ call allocate_comxm()
 call allocate_cosysi(kmaxpar)
 call allocate_cosysl(kmaxpar)
 call allocate_cosysr(kmaxpar)
+call allocate_cosyr(kmaxpar)
+call allocate_cosys(2*kmaxpar+3)
 !
 men = ken
 !  calculate array containing logs of factorials for use in vector

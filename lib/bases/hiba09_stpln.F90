@@ -913,7 +913,7 @@ subroutine systpln (irpot, readpt, iread)
 !              molecule
 !    j2min:    the minimum rotational angular momentum for linear
 !              molecule
-!  variable in common /cosys/
+!  variable in common /cosys
 !    scod:    character*8 array of dimension nscode, which contains names
 !             of all system dependent parameters.  Note that the ordering
 !             of the variable names in scod must correspond to the ordering
@@ -922,20 +922,18 @@ subroutine systpln (irpot, readpt, iread)
 !             LAM2 and MPROJ2.
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
+use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 logical readpt, existf, twomol
-integer icod, ircod, lencod
+integer icod, ircod
 integer i, iread, irpot
-character*8 scod
 character*1 dot
 character*(*) fname
 character*60 line, filnam, potfil, filnm1
 parameter (icod=9, ircod=5)
-parameter (lencod = icod + ircod + 5)
 #include "common/parbas.F90"
-common /cosys/ scod(lencod)
 common /co2mol/ twomol
 #include "common/comdot.F90"
 save potfil
@@ -975,7 +973,7 @@ scod(16)='LAMMAX'
 scod(17)='MPROJ'
 scod(18)='LAM2'
 scod(19)='M2PROJ'
-nscode = lencod
+nscode = icod + ircod + 5
 isicod = icod
 isrcod = ircod
 irpot = 1

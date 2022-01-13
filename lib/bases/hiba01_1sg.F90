@@ -903,7 +903,7 @@ subroutine sy1sg (irpot, readp, iread)
 !  if iread = 0 return after defining variable names
 !  current revision date: 10-mar-1994 by mha
 !  -----------------------------------------------------------------------
-!  variable in common /cosys/
+!  variable in common /cosys
 !    scod:    character*8 array of dimension lcode, which contains names
 !             of all system dependent parameters
 !  line 13:
@@ -919,8 +919,9 @@ subroutine sy1sg (irpot, readp, iread)
 !
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
+use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod => rspar
 implicit double precision (a-h,o-z)
@@ -930,11 +931,8 @@ logical airyfl, airypr, bastst, batch, chlist, csflag, &
                 flaghf, flagsu, ihomo,lpar
 character*1 dot
 character*4 char
-character*8 scod
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-#include "common/parsys.F90"
-common /cosys/ scod(lencod)
 #include "common/parbas.F90"
 common/covib/ nvib,ivib(maxvib)
 common /coskip/ nskip,iskip
@@ -1003,7 +1001,7 @@ scod(iofr+4)='EVIB'//char
 iofr=iofr+4
 isicod=isicod+2
 71 isrcod=isrcod+4
-if(isicod+isrcod+3.gt.lencod) stop 'lencod'
+if(isicod+isrcod+3.gt.size(scod,1)) stop 'lencod'
 nscode=isicod+isrcod
 line=' '
 if(.not.readp.or.iread.eq.0) then
