@@ -116,19 +116,24 @@ use mod_coiv2, only: iv2
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv, ang2c
+
 implicit double precision (a-h,o-z)
 logical clist, csflag, flaghf, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
-common /cosysr/ isrcod, junkr, brotsg, gsr, drotsg, hrotsg
-common /cosysi/ nscode, isicod, nterm, nrmax, npar, isym, igu, &
-                isa
 common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 dimension j(1), l(1), jhold(1), ehold(1), is(1), nrot(1), &
           ieps(2), ishold(1), sc2(1)
 data ieps / -1, 1 /
+integer, pointer :: nterm, nrmax, npar, isym, igu, isa
+real(8), pointer :: brotsg, gsr, drotsg, hrotsg
+nterm=>ispar(1); nrmax=>ispar(2); npar=>ispar(3); isym=>ispar(4); igu=>ispar(5); isa=>ispar(6)
+brotsg=>rspar(1); gsr=>rspar(2); drotsg=>rspar(3); hrotsg=>rspar(4)
+
 half = 0.5d0
 zero = 0.d0
 xjtot = jtot + half
@@ -674,6 +679,8 @@ end
 subroutine sy2sg (irpot, readpt, iread)
 #include "common/parsys_mod.F90"
 use mod_conlam, only: nlam
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 !  subroutine to read in system dependent parameters for doublet-sigma
 !   + atom scattering
@@ -715,9 +722,6 @@ character*60 line,filnam,potfil, filnm1
 #include "common/parsys.F90"
 #include "common/parbas.F90"
 common /cosys/ scod(lencod)
-common /cosysi/ nscode, isicod, nterm, nrmax, npar, isym, igu, &
-                isa
-common /cosysr/ isrcod, junkr, brot, gsr, drot, hrot
 logical         airyfl, airypr, bastst, batch, chlist, csflag, &
                 flaghf, flagsu, ihomo,lpar
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
@@ -726,6 +730,11 @@ common /coskip/ nskip,iskip
 character*1 dot
 save potfil
 #include "common/comdot.F90"
+integer, pointer :: nterm, nrmax, npar, isym, igu, isa
+real(8), pointer :: brot, gsr, drot, hrot
+brot=>rspar(1); gsr=>rspar(2); drot=>rspar(3); hrot=>rspar(4)
+nterm=>ispar(1); nrmax=>ispar(2); npar=>ispar(3); isym=>ispar(4); igu=>ispar(5); isa=>ispar(6)
+
 irpot = 1
 !     number and names of system dependent parameters
 isicod = 6

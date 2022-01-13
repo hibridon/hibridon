@@ -39,11 +39,13 @@ end
 ! ------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
 implicit double precision (a-h,o-z)
 character*(*) filnam
 #include "common/parbas.F90"
-#include "common/parpot.F90" 
-common /cosysi/ nscode, isicod, nterm
+#include "common/parpot.F90"
+integer, pointer :: nterm
+nterm=>ispar(1) 
 potnam='MA CH2(a)-He PES'
 !
 nterm = 7

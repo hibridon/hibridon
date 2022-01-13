@@ -458,15 +458,17 @@ subroutine testpt(ihomo)
 #include "common/parsys_mod.F90"
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
 implicit double precision(a-h,o-z)
 logical ihomo
 common /coselb/ ibasty
 #include "common/parsys.F90"
 #include "common/parbas.F90"
 common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
-common /cosysi/ nscode, isicod, ispar(maxpar)
 common /conlamp/ lamnump(50)
-equivalence(ispar(1),nterm),(ispar(2),nvibmn),(ispar(3),nvibmx)
+integer, pointer :: nterm, nvibmn, nvibmx
+nterm=>ispar(1); nvibmn=>ispar(2); nvibmx=>ispar(3)
+!equivalence(ispar(1),nterm),(ispar(2),nvibmn),(ispar(3),nvibmx)
 
 10 write (6, 15)
 15 format (/,'  Potential calculation; Enter 1 for V(R,theta)', &
@@ -553,6 +555,7 @@ subroutine testptn(ihomo)
 #include "common/parsys_mod.F90"
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
 implicit double precision(a-h,o-z)
 
 logical ihomo
@@ -560,7 +563,6 @@ common /coselb/ ibasty
 #include "common/parsys.F90"
 #include "common/parbas.F90"
 common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
-common /cosysi/ nscode, isicod, ispar(maxpar)
 dimension nvbmnr(4),nvbmxr(4),nvbmnc(4),nvbmxc(4)
 nstep=1
 if(ihomo) nstep=2
@@ -698,15 +700,17 @@ subroutine testpt20(ihomo)
 #include "common/parsys_mod.F90"
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
 implicit double precision(a-h,o-z)
 logical ihomo
 common /coselb/ ibasty
 #include "common/parsys.F90"
 #include "common/parbas.F90"
 common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
-common /cosysi/ nscode, isicod, ispar(maxpar)
 common /conlamp/ lamnump(7)
-equivalence(ispar(1),nterm),(ispar(2),nvibmn),(ispar(3),nvibmx)
+integer, pointer :: nterm, nvibmn, nvibmx
+nterm=>ispar(1); nvibmn=>ispar(2); nvibmx=>ispar(3)
+!equivalence(ispar(1),nterm),(ispar(2),nvibmn),(ispar(3),nvibmx)
 
 10 write (6, 15)
 15 format (/,'  Potential calculation; Enter 1 for V(R,theta)', &
@@ -2358,6 +2362,7 @@ subroutine smatop (tmod, sr, si, scmat, lq, r, prec, &
 use mod_coqvec, only: nphoto, q
 use mod_cocent, only: cent
 use mod_coeint, only: eint
+use mod_cosysi, only: ispar
 ! temporary storage for smatrices
 use mod_cotq1, only: srsave => dpsir ! srsave(100)
 use mod_cotq2, only: sisave => tq2 ! sisave(100)
@@ -2398,7 +2403,6 @@ common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
 common /coipar/ ipar(3),jlpar
 common /corpar/ rpar(6), spac
 common /colpar/ lpar(16),swrit,lpar2(10)
-common /cosysi/ ispar(4),ipol
 common /coselb/ ibasty
 !     The following three variables are used to determine the (machine
 !     dependent) size of built-in types
@@ -2406,6 +2410,8 @@ integer int_t
 double precision dble_t
 character char_t
 data isw / 0 /
+integer, pointer :: ipol
+ipol=>ispar(3)
 one = 1.0d0
 izero=0
 onemin = -1.d0

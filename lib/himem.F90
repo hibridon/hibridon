@@ -1052,6 +1052,73 @@ module mod_comxm
    end subroutine allocate_comxm
 end module mod_comxm
 
+module mod_cosysi
+   implicit none
+   save
+   integer :: maxpar
+   integer :: nscode
+   integer :: isicod
+   integer, dimension(:), allocatable, target :: ispar
+   contains
+   subroutine allocate_cosysi(amaxpar)
+      integer, intent(in) :: amaxpar
+      maxpar = amaxpar
+      allocate(ispar(amaxpar))
+   end subroutine allocate_cosysi
+   subroutine convert_ispar_to_mat(nlines,ncols,istart,new)
+      integer, intent(in) :: nlines, ncols, istart
+      integer, dimension(nlines,ncols) :: new
+      integer i, j
+      do i=1,nlines
+         do j=1,ncols
+           new(i,j) = ispar(istart-1+i+(j-1)*nlines)
+         enddo
+      enddo
+   end subroutine convert_ispar_to_mat
+end module mod_cosysi
+
+
+module mod_cosysl
+   implicit none
+   save
+   integer :: maxpar
+   integer :: islcod
+   integer, dimension(:), allocatable, target :: lspar
+   contains
+   subroutine allocate_cosysl(amaxpar)
+      integer, intent(in) :: amaxpar
+      maxpar = amaxpar
+      islcod = 0
+      allocate(lspar(amaxpar))
+   end subroutine allocate_cosysl
+end module mod_cosysl
+
+module mod_cosysr
+   implicit none
+   save
+   integer :: maxpar
+   integer :: isrcod
+   integer :: junkr
+   real(8), dimension(:), allocatable, target :: rspar
+   contains
+   subroutine allocate_cosysr(amaxpar)
+      integer, intent(in) :: amaxpar
+      maxpar = amaxpar
+      allocate(rspar(maxpar))
+   end subroutine allocate_cosysr
+   subroutine convert_rspar_to_mat(nlines,ncols,new)
+      integer, intent(in) :: nlines, ncols
+      real(8), dimension(nlines,ncols) :: new
+      integer i, j
+      do i=1,nlines
+         do j=1,ncols
+           new(i,j) = rspar(i+(j-1)*nlines)
+         enddo
+      enddo
+   end subroutine convert_rspar_to_mat
+end module mod_cosysr
+
+
 
 
  ! all the commons blocks from hiiolib_f.F90:
@@ -1127,18 +1194,3 @@ end module mod_comxm
     !!   common /codim/ mairy,mmax,mbig
     !!   common /comxbs/ maxbas
     !!   common /comxm/ ncache, mxmblk
-
-module mod_cosysl
-   implicit none
-   save
-   integer :: maxpar
-   integer :: islcod
-   integer, dimension(:), allocatable, target :: lspar
-   contains
-   subroutine allocate_cosysl(amaxpar)
-      integer, intent(in) :: amaxpar
-      maxpar = amaxpar
-      islcod = 0
-      allocate(lspar(amaxpar))
-   end subroutine allocate_cosysl
-end module mod_cosysl

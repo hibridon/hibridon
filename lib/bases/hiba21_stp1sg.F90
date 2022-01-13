@@ -66,6 +66,8 @@ use mod_cocent, only: cchn => cent
 use mod_coeint, only: echn => eint
 use mod_coj12, only: j12chn => j12
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit none
 !
 !     The following arrays store the parameters of channels and levels.
@@ -83,13 +85,6 @@ integer :: nmax, ntop
 !
 real(8) :: rcut
 !
-common /cosysi/ nscode, isicod, ipotsy, iop, ipotsy2, j1max, &
-     j2min, j2max
-integer :: nscode, isicod, ipotsy, iop, ipotsy2, j1max, &
-     j2min, j2max
-common /cosysr/ isrcod, junkr, brot, crot, delta, e1max, drot
-integer :: isrcod, junkr
-real(8) :: brot, crot, delta, e1max, drot
 common /coered/ ered, rmu
 real(8) :: ered, rmu
 common /coipar/ junkip, iprint
@@ -100,6 +95,11 @@ integer :: i, ilev, iv, irow, icol, inum, i1, i2, lamsum
 real(8) :: vee, vstp1sg
 real(8), parameter :: machep=epsilon(0d0)
 !
+integer, pointer :: ipotsy, iop, ipotsy2, j1max, j2min, j2max
+real(8), pointer :: brot, crot, delta, e1max, drot
+ipotsy=>ispar(1); iop=>ispar(2); ipotsy2=>ispar(3); j1max=>ispar(4); j2min=>ispar(5); j2max=>ispar(6)
+brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); e1max=>rspar(4); drot=>rspar(5); 
+
 if (flaghf) &
      call raise_2pi1sg('FLAGHF = .TRUE. FOR SINGLET SYSTEM')
 if (ihomo) call raise_2pi1sg('IHOMO NOT USED IN THIS BASIS,' &
@@ -433,6 +433,8 @@ end function vstp1sg
 !     THIS SUBROUTINE GOVERNS THE INPUT/OUTPUT OF THE BASIS ROUTINE.
 !     ONLY IREAD IS USED: RETURN DIRECTLY IF ZERO.
 subroutine systp1sg(irpot, readpt, iread)
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit none
 !
 integer irpot, iread
@@ -443,17 +445,14 @@ integer icod, ircod, lencod
 parameter (icod=6, ircod=5, lencod=icod+ircod)
 common /cosys/ scod(lencod)
 character*8 scod
-!     INTEGER VARIABLES.  LEAVE THE FIRST TWO AS IT IS.
-common /cosysi/ nscode, isicod, ipotsy, iop, ipotsy2, j1max, &
-     j2min, j2max
-integer :: nscode, isicod, ipotsy, iop, ipotsy2, j1max, &
-     j2min, j2max
-!     REAL VARIABLES.  LEAVE THE FIRST TWO AS IT IS.
-common /cosysr/ isrcod, junkr, brot, crot, delta, e1max, drot
-integer :: isrcod, junkr
-real(8) :: brot, crot, delta, e1max, drot
 character*40 potfil
 save potfil
+
+integer, pointer :: ipotsy, iop, ipotsy2, j1max, j2min, j2max
+real(8), pointer :: brot, crot, delta, e1max, drot
+ipotsy=>ispar(1); iop=>ispar(2); ipotsy2=>ispar(3); j1max=>ispar(4); j2min=>ispar(5); j2max=>ispar(6)
+brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); e1max=>rspar(4); drot=>rspar(5); 
+
 !     DEFINE THE NAMES HERE
 scod(1)='IPOTSY'
 scod(2)='IOP'

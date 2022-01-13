@@ -1405,6 +1405,7 @@ use mod_cosc4, only: fn  => sc4   ! fn(10)
 use mod_cosc5, only: fnp => sc5   ! fnp(10)
 use mod_cosc6, only: sc  => sc6   ! sc(100)
 use mod_cosc7, only: sc1  => sc7   ! sc1(100)
+use mod_cosysi, only: ispar
 use mod_coz, only: scmat => z_as_vec ! scmat(100)
 use mod_cow, only: sr => w_as_vec ! sr(100)
 use mod_cozmat, only: si => zmat_as_vec ! si(100)
@@ -1427,11 +1428,14 @@ common /cotrans/ ttrans(36)
 ! common for y1, y2, y4
 common /coered/ ered, rmu
 common /coselb/ ibasty
-common /cosysi/ ispar(4), ipol
 dimension a(7), sx(3)
 data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f', &
            '3SG1e','3PI0e','3PI1e','3PI2e','1SG0e','1PI1e'/
 !
+
+integer, pointer :: ipol
+ipol=>ispar(3)
+
 one=1.d0
 onemin=-1.d0
 zero=0.d0

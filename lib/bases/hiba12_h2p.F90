@@ -114,13 +114,13 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
-common /cosysr/ isrcod, junkr, brot,aso
-common /cosysi/ nscode, isicod, nterm, iop,jmax
 common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 common /coskip/ nskip, iskip
@@ -145,6 +145,10 @@ data lamrold /2,0,2,2,2,4,4,4,4/
 data lamaold /2,2,0,2,2,0,2,2,2/
 data lam12old /0,2,2,2,4,4,2,4,6/
 data muold / 0,0,0,2,1,0,0,2,1/
+integer, pointer :: nterm, iop, jmax
+real(8), pointer :: brot, aso
+nterm=>ispar(1); iop=>ispar(2); jmax=>ispar(3)
+brot=>rspar(1); aso=>rspar(2)
 
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
@@ -970,8 +974,9 @@ subroutine syh2p (irpot, readpt, iread)
 !             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 logical readpt, existf
-double precision brot, aso
 character*1 dot
 character*8 scod
 character*(*) fname
@@ -980,8 +985,6 @@ parameter (icod=3, ircod=2)
 parameter (lencod = icod + ircod + 3)
 #include "common/parbas.F90"
 common /cosys/ scod(lencod)
-common /cosysi/ nscode, isicod, nterm, iop, jmax
-common /cosysr/ isrcod, junkr, brot, aso
 save potfil
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
@@ -992,6 +995,12 @@ save potfil
 !  in the same order as in the common block /cosysr/
 !  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
 #include "common/comdot.F90"
+
+integer, pointer :: nterm, iop, jmax
+real(8), pointer :: brot, aso
+nterm=>ispar(1); iop=>ispar(2); jmax=>ispar(3)
+brot=>rspar(1); aso=>rspar(2)
+
 scod(1)='NTERM'
 scod(2)='IOP'
 scod(3)='JMAX'

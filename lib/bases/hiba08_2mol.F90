@@ -103,20 +103,26 @@ use mod_coiv2, only: iv2
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+
 implicit double precision (a-h,o-z)
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
 common /cotwo/ numj,nj1j2(50)
 common /coipar/ iiipar(9), iprint
-common /cosysi/ nscode, isicod, nterm, nsym
-common /cosysr/ isrcod, junkr, brot, drot, hrot
 common /coselb/ ibasty
 common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), j12(1), j1(1), &
           j2(1), sc4(1), ishold(1)
 data ione, itwo, ithree / 1, 2, 3 /
+integer, pointer :: nterm, nsym
+real(8), pointer :: brot, drot, hrot
+nterm=>ispar(1); nsym=>ispar(2)
+brot=>rspar(1); drot=>rspar(2); hrot=>rspar(3)
+
 !  check for consistency in the values of flaghf and csflag
 if (flaghf) then
   write (9, 5)
@@ -529,6 +535,8 @@ subroutine sy2mol (irpot, readpt, iread)
 !  -----------------------------------------------------------------------
 #include "common/parsys_mod.F90"
 use mod_conlam, only: nlam
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 #include "common/parsys.F90"
 logical readpt, existf
@@ -538,11 +546,15 @@ character*8 scod
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 common /cosys/ scod(lencod)
-common /cosysi/ nscode, isicod, nterm, nsym
-common /cosysr/ isrcod, junkr, brot, drot, hrot
 common /cotwo/ numj,nj1j2(3)
 save potfil
 #include "common/comdot.F90"
+
+integer, pointer :: nterm, nsym
+real(8), pointer :: brot, drot, hrot
+nterm=>ispar(1); nsym=>ispar(2)
+brot=>rspar(1); drot=>rspar(2); hrot=>rspar(3)
+
 nscode = lencod
 !     number and names of system dependent parameters
 isicod = 2

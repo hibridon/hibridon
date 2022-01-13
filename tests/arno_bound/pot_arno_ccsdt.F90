@@ -5,10 +5,12 @@
 
 subroutine driver
 use mod_covvl, only: vvl
+use mod_cosysr, only: rspar
 use constants, only: econv
 implicit double precision (a-h,o-z)
-common /cosysr/ xjunk(2),rshift,xfact
 #include "common/parpot.F90"
+real(8), pointer :: rshift, xfact
+rshift=>rspar(1); xfact=>rspar(2)
 potnam='ALEXANDER Ar-NO CCSDT'
 1  print *, ' r (bohr)'
 rshift=0.5

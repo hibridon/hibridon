@@ -43,6 +43,8 @@ use mod_cocent, only: cchn => cent
 use mod_coeint, only: echn => eint
 use mod_coj12, only: j12chn => j12
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar 
 implicit none
 !
 !     The following arrays store the parameters of channels and levels.
@@ -59,11 +61,6 @@ integer :: nmax, ntop
 !
 real(8) :: rcut
 !
-common /cosysi/ nscode, isicod, j1max, npar, j2min, j2max, iptsy2
-integer :: nscode, isicod, j1max, npar, j2min, j2max, iptsy2
-common /cosysr/ isrcod, junkr, brot, aso, p, q, drot
-integer :: isrcod, junkr
-real(8) :: brot, aso, p, q, drot
 common /coered/ ered, rmu
 real(8) :: ered, rmu
 common /coipar/ junkip, iprint
@@ -74,6 +71,11 @@ integer :: i, ilev, iv, irow, icol, inum, i1, i2, lamsum
 real(8) :: vee, v2pi1sg
 real(8), parameter :: machep=epsilon(0d0)
 !
+integer, pointer :: j1max, npar, j2min, j2max, iptsy2
+real(8), pointer :: brot, aso, p, q, drot
+j1max=>ispar(1); npar=>ispar(2); j2min=>ispar(3); j2max=>ispar(4); iptsy2=>ispar(5)
+brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
+
 if (.not. flaghf) &
      call raise_2pi1sg('FLAGHF = .FALSE. FOR DOUBLET SYSTEM')
 if (ihomo) call raise_2pi1sg('HOMONUCLEAR 2PI NOT IMPLEMENTED')
@@ -411,6 +413,8 @@ end
 !     ------------------------------------------------------------------
 !  ---------------------------------------------------------------------
 subroutine sy2pi1sg(irpot, readpt, iread)
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit none
 integer irpot, iread
 logical readpt
@@ -420,15 +424,15 @@ integer icod, ircod, lencod
 parameter (icod=5, ircod=5, lencod=icod+ircod)
 common /cosys/ scod(lencod)
 character*8 scod
-!     INTEGER VARIABLES.  LEAVE THE FIRST TWO AS IT IS.
-common /cosysi/ nscode, isicod, j1max, npar, j2min, j2max, iptsy2
-integer nscode, isicod, j1max, npar, j2min, j2max, iptsy2
-!     REAL VARIABLES.  LEAVE THE FIRST TWO AS IT IS.
-common /cosysr/ isrcod, junkr, brot, aso, p, q, drot
-integer isrcod, junkr
-double precision brot, aso, p, q, drot
+
 character*40 potfil
 save potfil
+
+integer, pointer :: j1max, npar, j2min, j2max, iptsy2
+real(8), pointer :: brot, aso, p, q, drot
+j1max=>ispar(1); npar=>ispar(2); j2min=>ispar(3); j2max=>ispar(4); iptsy2=>ispar(5)
+brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
+
 !     DEFINE THE NAMES HERE
 scod(1)='J1MAX'
 scod(2)='NPAR'

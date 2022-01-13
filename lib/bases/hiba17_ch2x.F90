@@ -136,16 +136,15 @@ use mod_coiv2, only: iv2
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*1 slab
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
-common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, &
-  ivbend, jmax
 common /coipar/ iiipar(9), iprint
-common /cosysr/ isrcod, junkr, emax
 common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
@@ -464,6 +463,10 @@ data ch2x_e / &
   24, 5,  5867.994d0,  6293.625d0,  6863.072d0,  7281.255d0, &
   25, 5,  6263.123d0,  6688.521d0,  7258.438d0,  7673.403d0  /
 !
+integer, pointer :: nterm, numpot, ipotsy, iop, ivbend, jmax
+real(8), pointer :: emax
+nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=>ispar(4); ivbend=>ispar(5); jmax=>ispar(6); 
+emax=>rspar(1)
 zero = 0.d0
 two = 2.d0
 !  check for consistency in the values of flaghf and csflag
@@ -1033,12 +1036,11 @@ subroutine sych2x (irpot, readpt, iread)
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 logical readpt, existf
-double precision emax
-integer numpot
 integer icod, ircod, lencod
-integer i, iop, iread, irpot, isicod, isrcod, ipotsy, jmax, &
-        nscode, nterm, ivbend
+integer i, iread, irpot
 character*8 scod
 character*1 dot
 character*(*) fname
@@ -1047,9 +1049,6 @@ parameter (icod=6, ircod=1)
 parameter (lencod = icod + ircod + 3)
 #include "common/parbas.F90"
 common /cosys/ scod(lencod)
-common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, &
-  ivbend, jmax
-common /cosysr/ isrcod, junkr, emax
 save potfil
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
@@ -1060,6 +1059,12 @@ save potfil
 !  in the same order as in the common block /cosysr/
 !  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
 #include "common/comdot.F90"
+
+integer, pointer :: nterm, numpot, ipotsy, iop, ivbend, jmax
+real(8), pointer :: emax
+nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=>ispar(4); ivbend=>ispar(5); jmax=>ispar(6);
+emax=>rspar(1)
+
 scod(1)='NTERM'
 scod(2)='NUMPOT'
 scod(3)='IPOTSY'
