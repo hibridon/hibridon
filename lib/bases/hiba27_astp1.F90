@@ -125,13 +125,13 @@ use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_coatp3, only: isizh
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
-common /cosysi/ nscode, isicod, nterm, numpot, iop, jmax
 common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
@@ -141,8 +141,9 @@ dimension j(1), l(1), is(1), jhold(1), ehold(1), &
 dimension e(narray,narray), eig(narray), vec(narray,narray), &
   sc1(narray), sc2(narray), work(1000)
 !
-
+integer, pointer :: nterm, numpot, iop, jmax
 real(8), pointer :: arot, brot, crot, emax
+nterm=>ispar(1); numpot=>ispar(2); iop=>ispar(3); jmax=>ispar(4)
 arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4)
 
 zero = 0.d0
@@ -1108,12 +1109,11 @@ subroutine syastp1 (irpot, readpt, iread)
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
+use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 logical readpt, existf
-integer numpot
 integer icod, ircod, lencod
-integer i, iop, iread, irpot, isicod, ipotsy, jmax, &
-        nscode, nterm
+integer i, iread, irpot
 character*8 scod
 character*1 dot
 character*(*) fname
@@ -1122,7 +1122,6 @@ parameter (icod=4, ircod=4)
 parameter (lencod = icod + ircod + 3)
 #include "common/parbas.F90"
 common /cosys/ scod(lencod)
-common /cosysi/ nscode, isicod, nterm, numpot, iop, jmax
 save potfil
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
@@ -1134,7 +1133,9 @@ save potfil
 !  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
 #include "common/comdot.F90"
 
+integer, pointer :: nterm, numpot, iop, jmax
 real(8), pointer :: arot, brot, crot, emax
+nterm=>ispar(1); numpot=>ispar(2); iop=>ispar(3); jmax=>ispar(4)
 arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4)
 
 scod(1)='NTERM'

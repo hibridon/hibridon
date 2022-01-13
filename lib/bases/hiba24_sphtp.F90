@@ -113,13 +113,13 @@ use mod_coatpr, only: c
 use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
-common /cosysi/ nscode, isicod, nterm, iop, jmax
 common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
@@ -313,8 +313,9 @@ data (uf(29,ii), ii=1,11) /0.d0, -.707107d0, 7*0.d0, &                  !  ! j=1
 data (uf(30,ii), ii=1,11) /.707107d0, 9*0.d0, .707107d0/                !  ! j=10 F2
 !
 !  check for consistency in the values of flaghf and csflag
-
+integer, pointer :: nterm, iop, jmax
 real(8), pointer :: brot
+nterm=>ispar(1); iop=>ispar(2); jmax=>ispar(3)
 brot=>rspar(1)
 
 if (flaghf) then
@@ -992,7 +993,7 @@ subroutine sysphtp (irpot, readp, iread)
 !  a spherical top with closed shell atom
 !  current revision date: 21-jul-2015 by p.dagdigian
 !  -----------------------------------------------------------------------
-!  variable in common /cosysi/
+!  variable in common cosysi
 !    nscode:   total number of system dependent parameters
 !              nscode = isicod + isrcod + 3
 !    isicod:   number of integer system dependent parameters
@@ -1013,6 +1014,7 @@ subroutine sysphtp (irpot, readp, iread)
 !  -----------------------------------------------------------------------
 #include "common/parsys_mod.F90"
 use mod_conlam, only: nlam
+use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 #include "common/parsys.F90"
@@ -1028,7 +1030,6 @@ character*8 scod
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 common /cosys/ scod(lencod)
-common /cosysi/ nscode, isicod, nterm, iop, jmax
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
@@ -1038,8 +1039,9 @@ common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
                 xsecwr,lpar(3)
 #include "common/comdot.F90"
 save potfil
-
+integer, pointer :: nterm, iop, jmax
 real(8), pointer :: brot, dj, dk
+nterm=>ispar(1); iop=>ispar(2); jmax=>ispar(3)
 brot=>rspar(1) ; dj=>rspar(2); dk=>rspar(3)
 
 !  number and names of system dependent parameters

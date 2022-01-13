@@ -52,6 +52,7 @@ use mod_codim, only: nmax => mmax
 use mod_coamat, only: scmat => toto ! scmat(1)
 use mod_coener, only: energ
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysl, only: islcod, lspar
 use mod_cosysr, only: isrcod, idum=>junkr, rspar
 use mod_version, only : version
@@ -97,7 +98,6 @@ common /cokeyl/ nncode, llcode, ijcode
 common /cobcod/ bcod
 common /cofcod/ fcod
 common /copcod/ pcod
-common /cosysi/ nscode, isicod, ispar(100)
 common /coipar/ ipar(10)
 common /corpar/ rpar(9)
 common /colpar/ lpar(28)

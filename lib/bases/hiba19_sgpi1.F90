@@ -67,7 +67,7 @@ subroutine basgpi1(j, l, is, jhold, ehold, ishold, nlevel, &
 !              to basis
 !    ihomo:    if .true., then homonuclear molecule
 !              only the s or a levels will be included depending on the
-!              value of the parameter isa in common /cosysi/ (see below)
+!              value of the parameter isa in common cosysi/ (see below)
 !    nu:       coupled-states projection index
 !    numin:    minimum coupled states projection index
 !              for cc calculations nu and numin are both set = 0 by calling
@@ -163,14 +163,13 @@ use mod_coisc1, only: ivec => isc1 ! ivec(1)
 use mod_coisc2, only: nrot => isc2 ! nrot(1)
 use mod_coisc3, only: ifi => isc3 ! ifi(1)
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
-common /cosysi/ nscode, isicod, nterm, isym, isa, igusg, &
-  nmaxsg, nparsg, igupi, nparpi, numvpi, ispar(10)
 common /coipar/ iiipar(9), iprint
 common /covibp/ ivpi(5)
 common /covpot/ numvib,ivibpi(5)
@@ -183,8 +182,10 @@ parameter (nvmax=10)
 ! this determines which eps level is first in channel list (arbitrary)
 data ieps / -1, 1 /
 data izero, ione, itwo / 0,     1,    2 /
-
+integer, pointer :: nterm, isym, isa, igusg, nmaxsg, nparsg, igupi, nparpi, numvpi, isparr(:)
 real(8), pointer :: esg, bsg, dsg, gsr, rpar(:)
+nterm=>ispar(1); isym=>ispar(2); isa=>ispar(3); igusg=>ispar(4); nmaxsg=>ispar(5)
+nparsg=>ispar(6); igupi=>ispar(7); nparpi=>ispar(8); numvpi=>ispar(9); isparr=>ispar(10:ubound(ispar, 1))
 esg=>rspar(1); bsg=>rspar(2); dsg=>rspar(3); gsr=>rspar(4); rpar=>rspar(5:44)
 
 pi2 = 1.570796326794897d0
@@ -234,7 +235,7 @@ do 6  i = 1, nterm
 iicod = 0
 ircod = 0
 do 8 iv=1,numvpi
-  jmax(iv) = ispar(iicod+1)
+  jmax(iv) = isparr(iicod+1)
   iicod = iicod + 1
   epi(iv) = rpar(ircod+1)
   bpi(iv) = rpar(ircod+2)
@@ -1129,6 +1130,7 @@ subroutine sysgpi1 (irpot, readpt, iread)
 !
 #include "common/parsys_mod.F90"
 use mod_conlam, only: nlam
+use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 #include "common/parsys.F90"
@@ -1141,9 +1143,8 @@ character*60 filnam, line, potfil, filnm1
 #include "common/parbas.F90"
 common /cosys/ scod(maxpar)
 common /cosyr/ rcod(maxpar)
-common /cosysi/ nscode, isicod, ispar(maxpar)
 !  commented lines below list the parameters
-!      common /cosysi/ nscode, isicod, nterm, isym, isa, igusg,
+!      common /cosysi nscode, isicod, nterm, isym, isa, igusg,
 !     :  nmaxsg, nparsg, igupi, nparpi, numvpi, ispar(maxpar)
 !      common cosysr/ isrcod, junkr, esg, bsg, dsg, gsr, rspar(maxpar)
 logical         airyfl, airypr, bastst, batch, chlist, csflag, &

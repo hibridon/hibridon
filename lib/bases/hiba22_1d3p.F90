@@ -115,6 +115,7 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
@@ -122,7 +123,6 @@ logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
 
-common /cosysi/ nscode, isicod, nterm, nstate
 common /coered/ ered, rmu
 common /coskip/ nskip, iskip
 !   eigenvectors for the atomic Hamiltonian
@@ -130,8 +130,9 @@ dimension j(1), l(1), jhold(1), ehold(1), &
           ishold(1), is(1), ieig(0:2)
 !  scratch arrays for computing asymmetric top energies and wave fns.
 dimension en0(4), en1(3), en2(2), vec(4,4), work(288)
-
+integer, pointer :: nterm, nstate
 real(8), pointer :: en1d
+nterm=>ispar(1); nstate=>ispar(2)
 en1d=>rspar(1)
 
 zero = 0.d0
@@ -1009,7 +1010,7 @@ subroutine sy1d3p (irpot, readp, iread)
 !  atom in 1D and/or 3P state with closed shell atom
 !  current revision date: 20-dec-2013 by p.dagdigian
 !  -----------------------------------------------------------------------
-!  variable in common /cosysi/
+!  variable in common /cosysi
 !    nscode:   total number of system dependent parameters
 !              nscode = isicod + isrcod + 3
 !    isicod:   number of integer system dependent parameters
@@ -1029,6 +1030,7 @@ subroutine sy1d3p (irpot, readp, iread)
 !  -----------------------------------------------------------------------
 #include "common/parsys_mod.F90"
 use mod_conlam, only: nlam
+use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 #include "common/parsys.F90"
@@ -1044,7 +1046,6 @@ character*8 scod
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 common /cosys/ scod(lencod)
-common /cosysi/ nscode, isicod, nterm, nstate, ipol, npot
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
@@ -1054,7 +1055,9 @@ common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
                 xsecwr,lpar(3)
 #include "common/comdot.F90"
 save potfil
+integer, pointer :: nterm, nstate, ipol, npot
 real(8), pointer :: en1d
+nterm=>ispar(1); nstate=>ispar(2); ipol=>ispar(3); npot=>ispar(4)
 en1d=>rspar(1)
 
 !  number and names of system dependent parameters

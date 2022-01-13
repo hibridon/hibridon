@@ -26,13 +26,14 @@ end
 ! --------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl
+use mod_cosysi, only: ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
-common /cosysi/ junk(5), npot
 #include "common/parpot.F90"
-
+integer, pointer :: npot
 real(8), dimension(:), pointer :: en, de, re, be, rl, cl
 real(8), pointer :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor
+npot=>ispar(4)
 en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
 rl=>rspar(17:20); cl=>rspar(21:24); cmix=>rspar(25); alphg=>rspar(26)
 rgaus=>rspar(27); agaus=>rspar(28); demor=>rspar(29); remor=>rspar(30)
@@ -112,13 +113,14 @@ subroutine pot (vv0, r)
 ! ----------------------------------------------------------------------
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
+use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv
 implicit double precision (a-h,o-z)
-common /cosysi/ nscode, isicod, nterm, nstate, ipol, npot
-
+integer, pointer :: nterm, nstate, ipol, npot
 real(8), dimension(:), pointer :: en, de, re, be, rl, cl
 real(8), pointer :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor
+nterm=>ispar(1); nstate=>ispar(1); ipol=>ispar(3); npot=>ispar(4)
 en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
 rl=>rspar(17:20); cl=>rspar(21:24); cmix=>rspar(25); alphg=>rspar(26)
 rgaus=>rspar(27); agaus=>rspar(28); demor=>rspar(29); remor=>rspar(30)

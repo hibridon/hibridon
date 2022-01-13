@@ -55,12 +55,14 @@ end
 ! ------------------------------------------------------------------------
 !
 subroutine loapot(iunit,filnam)
+use mod_cosysi, only: nscode, isicod, ispar
 use mod_conlam, only: nlam, nlammx, lamnum
 implicit double precision (a-h,o-z)
 character*(*) filnam
 #include "common/parbas.F90"
 #include "common/parpot.F90" 
-common /cosysi/ nscode, isicod, nterm
+integer, pointer :: nterm
+nterm=>ispar(1)
 potnam='Wheatley/Hodges NH3-He PES'
 !
 nterm = 4

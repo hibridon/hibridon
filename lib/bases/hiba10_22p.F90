@@ -98,6 +98,7 @@ use mod_coiv2, only: iv2
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
@@ -105,13 +106,14 @@ logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
 
-common /cosysi/ nscode, isicod, nterm, nphoto
 common /coered/ ered, rmu
 common /coskip/ nskip, iskip
 common /cojtot/ jjtot,jjlpar
 dimension j(9), l(9), jhold(9), ehold(9), isc1(9), sc2(9), sc3(9), &
           sc4(9), ishold(9), is(9)
+integer, pointer :: nterm, nphoto
 real(8), pointer :: aso
+nterm=>ispar(1); nphoto=>ispar(2)
 aso=>rspar(1)
 
 zero = 0.d0
@@ -733,7 +735,7 @@ subroutine sy22p (irpot, readp, iread)
 !  if iread = 0 return after defining variable names
 !  current revision date: 14-mar-1997 by mha
 !  -----------------------------------------------------------------------
-!  variable in common /cosysi/
+!  variable in common cosysi
 !    nscode:  total number of system dependent parameters
 !             nscode = isicod + isrcod +3
 !    isicod:  number of integer system dependent parameters
@@ -751,6 +753,7 @@ subroutine sy22p (irpot, readp, iread)
 !  -----------------------------------------------------------------------
 #include "common/parsys_mod.F90"
 use mod_conlam, only: nlam
+use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 implicit double precision (a-h,o-z)
 #include "common/parsys.F90"
@@ -765,7 +768,6 @@ character*8 scod
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 common /cosys/ scod(lencod)
-common /cosysi/ nscode,isicod,iscod(maxpar)
 common /coipar/ jtot1,jtot2,jtotd,jlpar
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip

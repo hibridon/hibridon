@@ -978,6 +978,7 @@ subroutine xwrite (zmat, tq3, jlev, elev, inlev, nerg, energ, &
 ! ----------------------------------------------------------------------
 use constants
 use mod_hibrid2, only: mxoutc
+use mod_cosysi, only: ispar
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: zmat(nmax, nmax)
 real(8), intent(out) :: tq3(nmx, nmx)
@@ -1012,7 +1013,6 @@ character*20 cdate
 common /cojsav/ jsav1, jsav2
 common /coered/ ered, rmu
 common /cosurf/ flagsu
-common /cosysi/ nscode, isicod, ispar(5)
 common /coipar/ ipar(9), iprint
 common /coselb/ ibasty
 integer :: cs_file = 1

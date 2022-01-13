@@ -84,7 +84,7 @@ subroutine bastpln(j, l, is, jhold, ehold, ishold, nlevel, &
 !              symmetry (e.g. NH3),
 !              so that only the ortho or para levels will be
 !              included depending on the value of parameters iop
-!              in common /cosysi/ (see below)
+!              in common cosysi/ (see below)
 !    nu:       coupled-states projection index
 !    numin:    minimum coupled states projection index
 !              for cc calculations nu and numin are both set = 0 by calling
@@ -156,6 +156,7 @@ use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_coamat, only: ietmp ! ietmp(1)
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
@@ -163,8 +164,6 @@ logical ihomo, flaghf, csflag, clist, flagsu, bastst, twomol
 character*40 fname
 #include "common/parbas.F90"
 common /coipar/ iiipar(9), iprint
-common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, ninv, &
-                jmax, ipotsy2, j2max, j2min
 common /coered/ ered, rmu
 common /co2mol/ twomol
 dimension j(1), l(1), jhold(1), ehold(1), is(1), &
@@ -172,8 +171,10 @@ dimension j(1), l(1), jhold(1), ehold(1), is(1), &
 dimension ieps(1), ktemp(1), jtemp(1), isc1(1)
 data ione, itwo, ithree / 1, 2, 3 /
 data one, zero, two / 1.0d0, 0.0d0, 2.d0 /
-
+integer, pointer :: nterm, numpot, ipotsy, iop, ninv, jmax, ipotsy2, j2max, j2min
 real(8), pointer :: brot, crot, delta, emax, drot
+nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=> ispar(4); ninv=>ispar(5)
+jmax=>ispar(6); ipotsy2=>ispar(7); j2max=>ispar(8); j2min=>ispar(9)
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)
 
 twomol=.true.
@@ -921,13 +922,12 @@ subroutine systpln (irpot, readpt, iread)
 !             LAM2 and MPROJ2.
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
+use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 logical readpt, existf, twomol
-integer numpot
 integer icod, ircod, lencod
-integer i, iop, iread, irpot, isicod, ipotsy, &
-        ninv, jmax, nscode, nterm
+integer i, iread, irpot
 character*8 scod
 character*1 dot
 character*(*) fname
@@ -936,13 +936,14 @@ parameter (icod=9, ircod=5)
 parameter (lencod = icod + ircod + 5)
 #include "common/parbas.F90"
 common /cosys/ scod(lencod)
-common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, ninv, &
-                jmax, ipotsy2, j2max, j2min
 common /co2mol/ twomol
 #include "common/comdot.F90"
 save potfil
 
+integer, pointer :: nterm, numpot, ipotsy, iop, ninv, jmax, ipotsy2, j2max, j2min
 real(8), pointer :: brot, crot, delta, emax, drot
+nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=> ispar(4); ninv=>ispar(5)
+jmax=>ispar(6); ipotsy2=>ispar(7); j2max=>ispar(8); j2min=>ispar(9)
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)
 
 

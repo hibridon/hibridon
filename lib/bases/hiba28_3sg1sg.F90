@@ -131,6 +131,7 @@ use mod_coatpr, only: c
 use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
@@ -138,8 +139,6 @@ logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
 common /coipar/ iiipar(9), iprint
-common /cosysi/ nscode, isicod, j1max, j2min, j2max, &
-  ipotsy2
 common /coselb/ ibasty
 common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
@@ -154,8 +153,9 @@ data uu / 1, 1, 0, 1, -1, 0, 0, 0, 1.414213562373095 /
 integer, parameter :: lwork = 144
 real(8) :: work(lwork)
 
-
+integer, pointer :: j1max, j2min, j2max, ipotsy2
 real(8), pointer :: b1rot, d1rot, flmbda, gamma, b2rot
+j1max=>ispar(1); j2min=>ispar(2); j2max=>ispar(3); ipotsy2=>ispar(4)
 b1rot=>rspar(1); d1rot=>rspar(2); flmbda=>rspar(3); gamma=>rspar(4); b2rot=>rspar(5)
 
 !  check for consistency in the values of flaghf and csflag
@@ -684,6 +684,7 @@ subroutine sys3sg1sg (irpot, readp, iread)
 !  -----------------------------------------------------------------------
 #include "common/parsys_mod.F90"
 use mod_conlam, only: nlam
+use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 #include "common/parsys.F90"
@@ -698,7 +699,6 @@ character*8 scod
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 common /cosys/ scod(lencod)
-common /cosysi/ nscode, isicod, j1max, j2min, j2max, ipotsy2
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
@@ -710,7 +710,9 @@ common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
 save potfil
 
 
+integer, pointer :: j1max, j2min, j2max, ipotsy2
 real(8), pointer :: b1rot, d1rot, flmbda, gamma, b2rot
+j1max=>ispar(1); j2min=>ispar(2); j2max=>ispar(3); ipotsy2=>ispar(4)
 b1rot=>rspar(1); d1rot=>rspar(2); flmbda=>rspar(3); gamma=>rspar(4); b2rot=>rspar(5)
 
 !  number and names of system dependent parameters

@@ -16,6 +16,7 @@
 !  vvl(7) contains the second anisotropic (2,2) potential
 subroutine driver
 use mod_covvl, only: vvl
+use mod_cosysi, only: nscode, isicod, ispar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical ifull
@@ -23,8 +24,7 @@ dimension wf(16)
 common /coered/ ered, rmu
 common /coground/ ifull
 common /covib/ie(50), iv(50)
-common /cosysi/ nscode,isicod,iscod(3)
-iscod(3)=1
+ispar(3)=1
 nch=16
 rmu=13.42/xmconv
 1  print *, ' r (bohr)'
@@ -83,7 +83,7 @@ end
 !  variables in common block /coconv/
 !    econv:       conversion factor from cm-1 to hartree
 !    xmconv:      conversion factor from amu to atomic units
-!  variable in common /cosysi/
+!  variable in common cosysi
 !    nscode:  total number of system dependent parameters
 !             nscode = isicod + isrcod +3
 !    isicod:  number of integer system dependent parameters
@@ -103,6 +103,7 @@ end
 
 !  -------------------------------------------------------
 #include "common/parsys_mod.F90"
+use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h, o-z)
@@ -113,7 +114,6 @@ dimension wf(nch),en(ngr),f(ngr,nymx),psi(nymx),gr(ngr), &
 #include "common/parsys.F90"
 #include "common/parbas.F90"
 common /coered/ ered, rmu
-common /cosysi/ nscode,isicod,iscod(maxpar)
 common /covib/ie(50), iv(50)
 common /coground/ ifull
 data y0, reg, q / 0.619702d0, 4.16799, &
@@ -265,7 +265,7 @@ subroutine syusr (irpot, readp, iread)
 !              each term range from lammin to lammax in steps of 2
 !              the length of each of these arrays is limited to nterm
 !              terms where nterm is defined in the common block /cosysi/
-!  variable in common /cosysi/
+!  variable in common cosysi
 !    nscode:  total number of system dependent parameters
 !             nscode = isicod + isrcod +3
 !    isicod:  number of integer system dependent parameters
@@ -303,6 +303,7 @@ subroutine syusr (irpot, readp, iread)
 #include "common/parsys_mod.F90"
 use mod_coqvec, only: mxphot, nphoto, q
 use mod_conlam, only: nlam
+use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 implicit double precision (a-h,o-z)
 #include "common/parsys.F90"
@@ -318,7 +319,6 @@ character*8 scod
 character*(*) fname
 character*40 filnam, line, potfil
 common /cosys/ scod(lencod)
-common /cosysi/ nscode,isicod,iscod(maxpar)
 #include "common/parbas.F90"
 common /cogrnd/ reg, caypot
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
@@ -328,7 +328,6 @@ common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
                 xsecwr
 save potfil
 #include "common/comdot.F90"
-equivalence(iscod(1),nterm)
 
 !     default number and names of system dependent parameters
 isicod = 7
@@ -342,7 +341,6 @@ scod(3) = 'NDIP'
 ! typical values from Guo and Schatz (1990) 93,393, including 10
 ! vibrational levels for CH3.
 iscod(1)=1
-nterm = iscod(1)
 lammin(1) = 1
 lammax(1) = 7
 mproj(1) = 0
@@ -580,6 +578,7 @@ use mod_coiv2, only: iv2
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 use constants, only: econv, xmconv
 #include "common/parsys_mod.F90"
@@ -589,7 +588,6 @@ logical clfl
 #include "common/parbas.F90"
 #include "common/parsys.F90"
 common /coipar/ iiipar(9), iprint
-common /cosysi/ nscode,isicod,iscod(maxpar)
 common /covib/ ie(50), iv(50)
 common /coicl/ clfl
 

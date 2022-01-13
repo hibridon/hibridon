@@ -70,7 +70,7 @@ subroutine basgpi (j, l, is, jhold, ehold, ishold, nlevel, &
 !              to basis
 !    ihomo:    if .true., then homonuclear molecule
 !              only the s or a levels will be included depending on the
-!              value of the parameter isa in common /cosysi/ (see below)
+!              value of the parameter isa in common cosysi (see below)
 !    nu:       coupled-states projection index
 !    numin:    minimum coupled states projection index
 !              for cc calculations nu and numin are both set = 0 by calling
@@ -182,14 +182,15 @@ use mod_coisc2, only: ivhold => isc2 ! ivhold(1)
 use mod_coisc3, only: nlvp => isc3 ! nlvp(1)
 use mod_coisc4, only: nvphol => isc4 ! nvphol(1)
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rpar=>rspar
 use constants, only: econv, xmconv, ang2c
-use mod_cosysr, only: isrcod, junkr, rspar
+
 implicit double precision (a-h,o-z)
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
 common /coipar/ iiipar(9), iprint
-common /cosysi/ nscode, isicod, ispar(10)
 !  these parameters must be the same as in hisysgpi
 common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
 common /coered/ ered, rmu
@@ -208,8 +209,6 @@ data izero, ione, itwo &
 ! nprsg is number of real parameters per vib state for sigma state
 ! nprpi is number of real parameters per vib state for pi state
 data nprsg,nprpi/7,14/
-real(8), dimension(:), pointer :: rpar
-rpar=>rspar(1:10)
 
 ! recover system parameters
 nterm=ispar(1)
@@ -1379,6 +1378,7 @@ subroutine sysgpi (irpot, readpt, iread)
 !
 #include "common/parsys_mod.F90"
 use mod_conlam, only: nlam
+use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 #include "common/parsys.F90"
@@ -1392,7 +1392,6 @@ character*60 filnam, line, potfil, filnm1
 common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
 common /cosys/ scod(lencod)
 common /cosyr/ rcod(maxpar)
-common /cosysi/ nscode, isicod, ispar(maxpar)
 logical         airyfl, airypr, bastst, batch, chlist, csflag, &
                 flaghf, flagsu, ihomo,lpar
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
