@@ -98,12 +98,12 @@ use mod_coiv2, only: iv2
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
-common /cosysr/ isrcod, junkr, aso
 
 common /cosysi/ nscode, isicod, nterm, nphoto
 common /coered/ ered, rmu
@@ -111,8 +111,9 @@ common /coskip/ nskip, iskip
 common /cojtot/ jjtot,jjlpar
 dimension j(9), l(9), jhold(9), ehold(9), isc1(9), sc2(9), sc3(9), &
           sc4(9), ishold(9), is(9)
-!   econv is conversion factor from cm-1 to hartrees
-!   xmconv is converson factor from amu to atomic units
+real(8), pointer :: aso
+aso=>rspar(1)
+
 zero = 0.d0
 half=0.5d0
 two = 2.d0
@@ -677,17 +678,21 @@ subroutine trans22(w,n,nmax)
 !  latest revision date:  4-oct-1992
 !  --------------------------------------------
 use mod_coeint, only: eint
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 #if defined(HIB_UNIX_IBM)
 character*1 forma, formb
 #endif
-common /cosysr/ isrcod, junkr, aso
 common /cotrans/ t(6,6)
 common /cojtot/ j,jlpar
 dimension w(42), sc(49)
 data one,half /1.d0,0.5d0/
 data nnmax /6/
+
+real(8), pointer :: aso
+aso=>rspar(1)
+
 call tcasea22(j,jlpar)
 if (n .ne. 6) then
   write (6, 10) n
@@ -728,9 +733,6 @@ subroutine sy22p (irpot, readp, iread)
 !  if iread = 0 return after defining variable names
 !  current revision date: 14-mar-1997 by mha
 !  -----------------------------------------------------------------------
-!  variables in common /cosysr/
-!    isrcod:  number of real parameters
-!    aso:     spin-orbit constant in 2P atom (cm-1)
 !  variable in common /cosysi/
 !    nscode:  total number of system dependent parameters
 !             nscode = isicod + isrcod +3
@@ -749,6 +751,7 @@ subroutine sy22p (irpot, readp, iread)
 !  -----------------------------------------------------------------------
 #include "common/parsys_mod.F90"
 use mod_conlam, only: nlam
+use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 implicit double precision (a-h,o-z)
 #include "common/parsys.F90"
 integer irpot
@@ -764,7 +767,6 @@ character*60 filnam, line, potfil, filnm1
 common /cosys/ scod(lencod)
 common /cosysi/ nscode,isicod,iscod(maxpar)
 common /coipar/ jtot1,jtot2,jtotd,jlpar
-common /cosysr/ isrcod, junkr, rcod(maxpar)
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &

@@ -149,6 +149,7 @@ end
 !     THIS SUBROUTINE GOVERNS THE INPUT/OUTPUT OF THE BASIS ROUTINE.
 !     ONLY IREAD IS USED: RETURN DIRECTLY IF ZERO.
 subroutine syusr(irpot, readpt, iread)
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit none
 !
@@ -180,11 +181,10 @@ common /cosysi/ nscode, isicod, nterm, ipotsy, iop, ninv, jmax, &
 integer nscode, isicod, nterm, ipotsy, iop, ninv, jmax, ipotsy2, &
      j2max, j2min
 !     REAL VARIABLES.  LEAVE THE FIRST TWO AS IT IS.
-common /cosysr/ isrcod, junkr, brot, crot, delta, emax, drot
-integer isrcod, junkr
-double precision brot, crot, delta, emax, drot
 character*40 potfil
 save potfil
+real(8), pointer :: brot, crot, delta, emax, drot
+brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)
 !     DEFINE THE NAMES HERE
 scod(1)='NTERM'
 scod(2)='IPOTSY'
@@ -251,6 +251,7 @@ use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_coamat, only: ietmp ! ietmp(1)
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit none
 !
@@ -279,9 +280,6 @@ common /cosysi/ nscode, isicod, nterm, ipotsy, iop, ninv, jmax, &
      ipotsy2, j2max, j2min
 integer nscode, isicod, nterm, ipotsy, iop, ninv, jmax, ipotsy2, &
      j2max, j2min
-common /cosysr/ isrcod, junkr, brot, crot, delta, emax, drot
-integer isrcod, junkr
-double precision brot, crot, delta, emax, drot
 common /coered/ ered, rmu
 double precision ered, rmu
 common /coipar/ junkip, iprint
@@ -293,6 +291,9 @@ integer nlist, ki, ji, numeps, iep, iepsil, isym, ji2, i1, i2, &
      irow, jc, jr, j2c, j2r, kc, kr, j12c, j12r, lc, lr, inum
 double precision roteng, esave, vee
 !
+real(8), pointer :: brot, crot, delta, emax, drot
+brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)
+
 ASSERT(MAX_NV .le. nlammx)
 if (flaghf) call raise('FLAGHF = .TRUE. FOR SINGLET SYSTEM')
 if (flagsu) call raise('FLAGSU = .TRUE. FOR MOL-MOL COLLISION')

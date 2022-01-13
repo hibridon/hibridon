@@ -156,6 +156,7 @@ use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_coamat, only: ietmp ! ietmp(1)
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical ihomo, flaghf, csflag, clist, flagsu, bastst, twomol
@@ -164,7 +165,6 @@ character*40 fname
 common /coipar/ iiipar(9), iprint
 common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, ninv, &
                 jmax, ipotsy2, j2max, j2min
-common /cosysr/ isrcod, junkr, brot, crot, delta, emax, drot
 common /coered/ ered, rmu
 common /co2mol/ twomol
 dimension j(1), l(1), jhold(1), ehold(1), is(1), &
@@ -172,6 +172,10 @@ dimension j(1), l(1), jhold(1), ehold(1), is(1), &
 dimension ieps(1), ktemp(1), jtemp(1), isc1(1)
 data ione, itwo, ithree / 1, 2, 3 /
 data one, zero, two / 1.0d0, 0.0d0, 2.d0 /
+
+real(8), pointer :: brot, crot, delta, emax, drot
+brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)
+
 twomol=.true.
 !  check for consistency in the values of flaghf and csflag
 if (flaghf) then
@@ -917,12 +921,12 @@ subroutine systpln (irpot, readpt, iread)
 !             LAM2 and MPROJ2.
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 logical readpt, existf, twomol
-double precision brot, crot
 integer numpot
 integer icod, ircod, lencod
-integer i, iop, iread, irpot, isicod, isrcod, ipotsy, &
+integer i, iop, iread, irpot, isicod, ipotsy, &
         ninv, jmax, nscode, nterm
 character*8 scod
 character*1 dot
@@ -935,9 +939,13 @@ common /cosys/ scod(lencod)
 common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, ninv, &
                 jmax, ipotsy2, j2max, j2min
 common /co2mol/ twomol
-common /cosysr/ isrcod, junkr, brot, crot, delta, emax, drot
 #include "common/comdot.F90"
 save potfil
+
+real(8), pointer :: brot, crot, delta, emax, drot
+brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)
+
+
 twomol = .true.
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables

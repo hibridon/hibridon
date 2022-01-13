@@ -131,6 +131,7 @@ use mod_coatpr, only: c
 use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
@@ -139,7 +140,6 @@ logical ihomo, flaghf, csflag, clist, flagsu, bastst
 common /coipar/ iiipar(9), iprint
 common /cosysi/ nscode, isicod, j1max, j2min, j2max, &
   ipotsy2
-common /cosysr/ isrcod, junkr, b1rot, d1rot, flmbda, gamma, b2rot
 common /coselb/ ibasty
 common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
@@ -153,6 +153,11 @@ data spin, ss1 / 1.d0, 2.d0 /
 data uu / 1, 1, 0, 1, -1, 0, 0, 0, 1.414213562373095 /
 integer, parameter :: lwork = 144
 real(8) :: work(lwork)
+
+
+real(8), pointer :: b1rot, d1rot, flmbda, gamma, b2rot
+b1rot=>rspar(1); d1rot=>rspar(2); flmbda=>rspar(3); gamma=>rspar(4); b2rot=>rspar(5)
+
 !  check for consistency in the values of flaghf and csflag
 if (flaghf) then
   write (9, 5)
@@ -679,6 +684,7 @@ subroutine sys3sg1sg (irpot, readp, iread)
 !  -----------------------------------------------------------------------
 #include "common/parsys_mod.F90"
 use mod_conlam, only: nlam
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 #include "common/parsys.F90"
 integer irpot
@@ -693,7 +699,6 @@ character*(*) fname
 character*60 filnam, line, potfil, filnm1
 common /cosys/ scod(lencod)
 common /cosysi/ nscode, isicod, j1max, j2min, j2max, ipotsy2
-common /cosysr/ isrcod, junkr, b1rot, d1rot, flmbda, gamma, b2rot
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
@@ -703,6 +708,11 @@ common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
                 xsecwr,lpar(3)
 #include "common/comdot.F90"
 save potfil
+
+
+real(8), pointer :: b1rot, d1rot, flmbda, gamma, b2rot
+b1rot=>rspar(1); d1rot=>rspar(2); flmbda=>rspar(3); gamma=>rspar(4); b2rot=>rspar(5)
+
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
 !  in the same order as in the common block /cosysi/

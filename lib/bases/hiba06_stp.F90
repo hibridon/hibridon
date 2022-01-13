@@ -143,16 +143,19 @@ use mod_coeint, only: eint
 use mod_coamat, only: ietmp ! ietmp(1)
 use mod_conlam, only: nlam, nlammx, lamnum
 use constants, only: econv, xmconv, ang2c
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
 common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, jmax
 common /coipar/ iiipar(9), iprint
-common /cosysr/ isrcod, junkr, brot, crot, delta, emax
 common /coered/ ered, rmu
 dimension j(1), l(1), jhold(1), ehold(1), is(1), k(1), &
           ieps(1), jtemp(1), ishold(1), ktemp(1)
+real(8), pointer :: brot, crot, delta, emax
+brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4)
+
 zero = 0.d0
 two = 2.d0
 !  check for consistency in the values of flaghf and csflag
@@ -794,11 +797,11 @@ subroutine systp (irpot, readpt, iread)
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
+use mod_cosysr, only: isrcod, junkr, rspar
 logical readpt, existf
-double precision brot, crot, delta, emax
 integer numpot
 integer icod, ircod, lencod
-integer i, iop, iread, irpot, isicod, isrcod, ipotsy, jmax, &
+integer i, iop, iread, irpot, isicod, ipotsy, jmax, &
         nscode, nterm
 character*8 scod
 character*1 dot
@@ -809,7 +812,6 @@ parameter (lencod = icod + ircod + 3)
 #include "common/parbas.F90"
 common /cosys/ scod(lencod)
 common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, jmax
-common /cosysr/ isrcod, junkr, brot, crot, delta, emax
 save potfil
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
@@ -820,6 +822,9 @@ save potfil
 !  in the same order as in the common block /cosysr/
 !  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
 #include "common/comdot.F90"
+real(8), pointer :: brot, crot, delta, emax
+brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4)
+
 scod(1)='NTERM'
 scod(2)='NUMPOT'
 scod(3)='IPOTSY'

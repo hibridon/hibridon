@@ -163,6 +163,7 @@ use mod_coisc1, only: ivec => isc1 ! ivec(1)
 use mod_coisc2, only: nrot => isc2 ! nrot(1)
 use mod_coisc3, only: ifi => isc3 ! ifi(1)
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
@@ -170,7 +171,6 @@ logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbasl.F90"
 common /cosysi/ nscode, isicod, nterm, isym, isa, igusg, &
   nmaxsg, nparsg, igupi, nparpi, numvpi, ispar(10)
-common /cosysr/ isrcod, junkr, esg, bsg, dsg, gsr, rspar(40)
 common /coipar/ iiipar(9), iprint
 common /covibp/ ivpi(5)
 common /covpot/ numvib,ivibpi(5)
@@ -183,6 +183,10 @@ parameter (nvmax=10)
 ! this determines which eps level is first in channel list (arbitrary)
 data ieps / -1, 1 /
 data izero, ione, itwo / 0,     1,    2 /
+
+real(8), pointer :: esg, bsg, dsg, gsr, rpar(:)
+esg=>rspar(1); bsg=>rspar(2); dsg=>rspar(3); gsr=>rspar(4); rpar=>rspar(5:44)
+
 pi2 = 1.570796326794897d0
 zero = 0.d0
 tzero=1.d-12
@@ -232,12 +236,12 @@ ircod = 0
 do 8 iv=1,numvpi
   jmax(iv) = ispar(iicod+1)
   iicod = iicod + 1
-  epi(iv) = rspar(ircod+1)
-  bpi(iv) = rspar(ircod+2)
-  dpi(iv) = rspar(ircod+3)
-  aso(iv) = rspar(ircod+4)
-  p(iv) = rspar(ircod+5)
-  q(iv) = rspar(ircod+6)
+  epi(iv) = rpar(ircod+1)
+  bpi(iv) = rpar(ircod+2)
+  dpi(iv) = rpar(ircod+3)
+  aso(iv) = rpar(ircod+4)
+  p(iv) = rpar(ircod+5)
+  q(iv) = rpar(ircod+6)
   ircod = ircod+6
 8 continue
 if (clist) then
@@ -1125,6 +1129,7 @@ subroutine sysgpi1 (irpot, readpt, iread)
 !
 #include "common/parsys_mod.F90"
 use mod_conlam, only: nlam
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 #include "common/parsys.F90"
 logical readpt, existf
@@ -1137,11 +1142,10 @@ character*60 filnam, line, potfil, filnm1
 common /cosys/ scod(maxpar)
 common /cosyr/ rcod(maxpar)
 common /cosysi/ nscode, isicod, ispar(maxpar)
-common /cosysr/ isrcod, junkr, rspar(maxpar)
 !  commented lines below list the parameters
 !      common /cosysi/ nscode, isicod, nterm, isym, isa, igusg,
 !     :  nmaxsg, nparsg, igupi, nparpi, numvpi, ispar(maxpar)
-!      common /cosysr/ isrcod, junkr, esg, bsg, dsg, gsr, rspar(maxpar)
+!      common cosysr/ isrcod, junkr, esg, bsg, dsg, gsr, rspar(maxpar)
 logical         airyfl, airypr, bastst, batch, chlist, csflag, &
                 flaghf, flagsu, ihomo,lpar
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &

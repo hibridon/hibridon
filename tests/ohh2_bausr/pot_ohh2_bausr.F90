@@ -138,6 +138,7 @@ end
 !     THIS SUBROUTINE GOVERNS THE INPUT/OUTPUT OF THE BASIS ROUTINE.
 !     ONLY IREAD IS USED: RETURN DIRECTLY IF ZERO.
 subroutine syusr(irpot, readpt, iread)
+use mod_cosysr, only : isrcod, junkr, rspar
 !
 #include "pot_ohh2_bausr_common.F90"
 integer irpot, iread
@@ -152,11 +153,11 @@ character*8 scod
 common /cosysi/ nscode, isicod, j1max, npar, j2min, j2max, iptsy2
 integer nscode, isicod, j1max, npar, j2min, j2max, iptsy2
 !     REAL VARIABLES.  LEAVE THE FIRST TWO AS IT IS.
-common /cosysr/ isrcod, junkr, brot, aso, p, q, drot
-integer isrcod, junkr
-double precision brot, aso, p, q, drot
+
 character*40 potfil
 save potfil
+real(8), pointer :: brot, aso, p, q, drot
+brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
 !     DEFINE THE NAMES HERE
 scod(1)='J1MAX'
 scod(2)='NPAR'
@@ -216,6 +217,7 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysr, only: isrcod, junkr, rspar
 !
 #include "pot_ohh2_bausr_common.F90"
 double precision rcut
@@ -233,9 +235,6 @@ double precision sc1(*), sc2(*), sc3(*), sc4(*)
 !
 common /cosysi/ nscode, isicod, j1max, npar, j2min, j2max, iptsy2
 integer nscode, isicod, j1max, npar, j2min, j2max, iptsy2
-common /cosysr/ isrcod, junkr, brot, aso, p, q, drot
-integer isrcod, junkr
-double precision brot, aso, p, q, drot
 !     
 common /coered/ ered, rmu
 double precision ered, rmu
@@ -250,6 +249,9 @@ double precision roteng, esave, vee, s1save, c12p, c32p, c12, c32
 double precision v2pisg
 double precision x, o11, o12, o22, tho
 character(3) :: strfi
+
+real(8), pointer :: brot, aso, p, q, drot
+brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
 !
 ASSERT(nlammx .ge. (MAX_NVB + MAX_NVF))  ! ensure lamnum array is big enough
 if (.not. flaghf) call &

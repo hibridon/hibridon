@@ -434,6 +434,7 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
 use constants, only: econv, xmconv, ang2c
+use mod_cosysr, only: isrcod, junkr, rspar, convert_rspar_to_mat
 implicit double precision (a-h,o-z)
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
@@ -442,7 +443,6 @@ common /covib/ nvib,ivib(maxvib)
 common /coipar/ iiipar(9), iprint
 common /cosysi/ nscode, isicod, nterm, nvmin, nvmax, &
                 iscod(2,maxvib)
-common /cosysr/ isrcod, junkr, rpar(4,maxvib)
 common /coered/ ered, rmu
 common /coskip/ nskip, iskip
 integer :: j(:)
@@ -452,6 +452,8 @@ dimension jhold(5), ehold(5), sc1(5), sc2(5), sc3(5), &
           sc4(5), ishold(5)
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
+real(8), dimension(4, maxvib) :: rpar
+call convert_rspar_to_mat(4,maxvib, rpar)
 zero = 0.d0
 two = 2.d0
 !  check for consistency in the values of flaghf and csflag
@@ -897,9 +899,6 @@ subroutine sy1sg (irpot, readp, iread)
 !  if iread = 0 return after defining variable names
 !  current revision date: 10-mar-1994 by mha
 !  -----------------------------------------------------------------------
-!  variables in common /cosysr/
-!    isrcod:  number of real parameters
-!    brot, drot, hrot
 !  variable in common /cosysi/
 !    nscode:  total number of system dependent parameters
 !             nscode = isicod + isrcod + 3
@@ -925,6 +924,7 @@ subroutine sy1sg (irpot, readp, iread)
 !  -----------------------------------------------------------------------
 #include "common/parsys_mod.F90"
 use mod_conlam, only: nlam
+use mod_cosysr, only: isrcod, junkr, rcod => rspar
 implicit double precision (a-h,o-z)
 integer irpot
 logical readp, existf
@@ -938,7 +938,6 @@ character*60 filnam, line, potfil, filnm1
 #include "common/parsys.F90"
 common /cosys/ scod(lencod)
 common /cosysi/ nscode,isicod,iscod(maxpar)
-common /cosysr/ isrcod, junkr, rcod(maxpar)
 #include "common/parbas.F90"
 common/covib/ nvib,ivib(maxvib)
 common /coskip/ nskip,iskip

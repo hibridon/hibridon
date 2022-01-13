@@ -120,6 +120,7 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
@@ -128,12 +129,14 @@ logical ihomo, flaghf, csflag, clist, flagsu, bastst
 common /coipar/ iiipar(9), iprint
 common /cosysi/ nscode, isicod, j1max, j2min, j2max, &
   ipotsy2
-common /cosysr/ isrcod, junkr, b1rot, d1rot, b2rot
 common /coselb/ ibasty
 common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
     sc1(1), sc2(1), sc3(1), sc4(1), ishold(1)
 data zero, ione, itwo, ithree / 0.d0, 1, 2, 3 /
+
+real(8), pointer :: b1rot, d1rot, b2rot
+b1rot=>rspar(1); d1rot=>rspar(2); b2rot=>rspar(3)
 !  check for consistency in the values of flaghf and csflag
 if (flaghf) then
   write (9, 5)
@@ -495,11 +498,6 @@ subroutine sy1sg1sg (irpot, readp, iread)
 !  two different 1sigma linear molecules
 !  current revision date: 23-may-2017 by p.dagdigian
 !  -----------------------------------------------------------------------
-!  variables in common /cosysr/
-!    isrcod:   number of real system dependent parameters
-!    b1rot:    rotational constant for molecule 1
-!    d1rot:    centrifugal distortion constant for molecule 1
-!    b2rot:    rotational constant for molecule 2
 !  variable in common /cosysi/
 !    nscode:   total number of system dependent parameters
 !              nscode = isicod + isrcod + 3
@@ -524,6 +522,7 @@ subroutine sy1sg1sg (irpot, readp, iread)
 !  -----------------------------------------------------------------------
 #include "common/parsys_mod.F90"
 use mod_conlam, only: nlam
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 #include "common/parsys.F90"
 integer irpot
@@ -539,7 +538,6 @@ character*(*) fname
 character*60 filnam, line, potfil, filnm1
 common /cosys/ scod(lencod)
 common /cosysi/ nscode, isicod, j1max, j2min, j2max, ipotsy2, iop
-common /cosysr/ isrcod, junkr, b1rot, d1rot, b2rot
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
@@ -549,6 +547,10 @@ common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
                 xsecwr,lpar(3)
 #include "common/comdot.F90"
 save potfil
+
+real(8), pointer :: b1rot, d1rot, b2rot
+b1rot=>rspar(1); d1rot=>rspar(2); b2rot=>rspar(3)
+
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
 !  in the same order as in the common block /cosysi/

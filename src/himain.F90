@@ -77,6 +77,7 @@ use mod_comxbs, only: allocate_comxbs
 use mod_comxm, only: allocate_comxm
 
 use mod_cosysl, only: allocate_cosysl
+use mod_cosysr, only: allocate_cosysr
 use mod_flow, only: flow
 !**********************************************************************
 !***   this code is not released for general public use            ****
@@ -322,6 +323,7 @@ call allocate_comxbs(kmxbas)
 call allocate_comxm()
 
 call allocate_cosysl(kmaxpar)
+call allocate_cosysr(kmaxpar)
 !
 men = ken
 !  calculate array containing logs of factorials for use in vector

@@ -123,20 +123,24 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
 use constants, only: econv, xmconv
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
 
 common /cosysi/ nscode, isicod, nterm, nstate,ipol, npot
-common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4), &
-                        rl(4), cl(4), cmix
 common /coered/ ered, rmu
 common /coskip/ nskip, iskip
 dimension j(1), l(1), jhold(1), ehold(1), sc1(1), sc2(1), sc3(1), &
           sc4(1), ishold(1), is(1)
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
+real(8), dimension(:), pointer :: en, de, re, be, rl, cl
+real(8), pointer :: cmix
+en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
+rl=>rspar(17:20); cl=> rspar(21:24); cmix=>rspar(25)
+
 zero = 0.d0
 two = 2.d0
 !  check for consistency in the values of flaghf and csflag
@@ -512,12 +516,16 @@ subroutine tcasea(j,jlpar)
 !   author:  thierry duhoo and millard alexander
 !   latest revision date:  30-dec-1995
 ! -----------------------------------------
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 common /cotrans/ ttrans
-common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4), &
-                        rl(4), cl(4), cmix
 dimension tatoe(6,6), cmat(6,6), ttrans(6,6)
 data zero, one,two ,three/0.d0, 1.d0, 2.d0, 3.d0/
+real(8), dimension(:), pointer :: en, de, re, be, rl, cl
+real(8), pointer :: cmix
+en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
+rl=>rspar(17:20); cl=> rspar(21:24); cmix=>rspar(25)
+
 if (j .lt. 2) then
 ! error if jtot is less than 2
   write (6, 5) jtot
@@ -621,14 +629,6 @@ subroutine sy13p (irpot, readp, iread)
 !  if iread = 0 return after defining variable names
 !  current revision date: 17-jun-1992 by mha
 !  -----------------------------------------------------------------------
-!  variables in common /cosysr/
-!    isrcod:  number of real parameters
-!    en(1):    asymptotic energy of j=0 fine-structure level of triplet
-!    en(2):    asymptotic energy of j=1 fine-structure level of triplet
-!    en(3):    asymptotic energy of j=2 fine-structure level of triplet
-!    en(4):    asymptotic energy of singlet state (cm-1)
-!    cmix:     mixing coefficient of J=1 singlet and triplet levels
-!    de, re, be, rl, c:  msv parameters for 3Pi, 3Sig, 1Pi, 1Sig
 !  variable in common /cosysi/
 !    nscode:  total number of system dependent parameters
 !             nscode = isicod + isrcod +3
@@ -649,6 +649,7 @@ subroutine sy13p (irpot, readp, iread)
 !  -----------------------------------------------------------------------
 #include "common/parsys_mod.F90"
 use mod_conlam, only: nlam
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 #include "common/parsys.F90"
 integer irpot
@@ -664,9 +665,6 @@ character*(*) fname
 character*60 filnam, line, potfil, filnm1
 common /cosys/ scod(lencod)
 common /cosysi/ nscode, isicod, nterm, nstate, ipol, npot
-common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4), &
-                        rl(4), cl(4), cmix, alphg, rgaus, &
-                        agaus, demor, remor, bemor,dissmor
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
@@ -676,6 +674,14 @@ common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
                 xsecwr,lpar(3)
 #include "common/comdot.F90"
 save potfil
+
+real(8), dimension(:), pointer :: en, de, re, be, rl, cl
+real(8), pointer :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor
+en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
+rl=>rspar(17:20); cl=>rspar(21:24); cmix=>rspar(25); alphg=>rspar(26)
+rgaus=>rspar(27); agaus=>rspar(28); demor=>rspar(29); remor=>rspar(30)
+bemor=>rspar(31); dissmor=>rspar(32) 
+
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
 !  in the same order as in the common block /cosysi/

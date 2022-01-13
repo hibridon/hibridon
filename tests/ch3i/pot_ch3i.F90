@@ -83,14 +83,6 @@ end
 !  variables in common block /coconv/
 !    econv:       conversion factor from cm-1 to hartree
 !    xmconv:      conversion factor from amu to atomic units
-!  variables in common /cosysr/
-!    isrcod:  number of real parameters
-!    junkr:   dummy variable for alignment
-!    rshift:  shift of scattering potentials from nominal value
-!    eel:     asymptotic electronic energy in au with respect to the
-!             ground state.
-!    evib:    asymptotic vibrational energy in each electronic channel (in
-!             au)
 !  variable in common /cosysi/
 !    nscode:  total number of system dependent parameters
 !             nscode = isicod + isrcod +3
@@ -111,6 +103,7 @@ end
 
 !  -------------------------------------------------------
 #include "common/parsys_mod.F90"
+use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h, o-z)
 parameter (ngr=21, nymx=500)
@@ -121,7 +114,6 @@ dimension wf(nch),en(ngr),f(ngr,nymx),psi(nymx),gr(ngr), &
 #include "common/parbas.F90"
 common /coered/ ered, rmu
 common /cosysi/ nscode,isicod,iscod(maxpar)
-common /cosysr/ isrcod, junkr, rcod(maxpar)
 common /covib/ie(50), iv(50)
 common /coground/ ifull
 data y0, reg, q / 0.619702d0, 4.16799, &
@@ -273,14 +265,6 @@ subroutine syusr (irpot, readp, iread)
 !              each term range from lammin to lammax in steps of 2
 !              the length of each of these arrays is limited to nterm
 !              terms where nterm is defined in the common block /cosysi/
-!  variables in common /cosysr/
-!    isrcod:  number of real parameters
-!    junkr:   dummy variable for alignment
-!    rshift:  shift of scattering potentials from nominal value
-!    eel:     asymptotic electronic energy in au with respect to the
-!             ground state.
-!    evib:    asymptotic vibrational energy in each electronic channel
-!             in au)
 !  variable in common /cosysi/
 !    nscode:  total number of system dependent parameters
 !             nscode = isicod + isrcod +3
@@ -319,6 +303,7 @@ subroutine syusr (irpot, readp, iread)
 #include "common/parsys_mod.F90"
 use mod_coqvec, only: mxphot, nphoto, q
 use mod_conlam, only: nlam
+use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 implicit double precision (a-h,o-z)
 #include "common/parsys.F90"
 integer irpot
@@ -334,7 +319,6 @@ character*(*) fname
 character*40 filnam, line, potfil
 common /cosys/ scod(lencod)
 common /cosysi/ nscode,isicod,iscod(maxpar)
-common /cosysr/ isrcod, junkr, rcod(maxpar)
 #include "common/parbas.F90"
 common /cogrnd/ reg, caypot
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
@@ -596,6 +580,7 @@ use mod_coiv2, only: iv2
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 use constants, only: econv, xmconv
 #include "common/parsys_mod.F90"
 implicit double precision (a-h,o-z)
@@ -605,7 +590,6 @@ logical clfl
 #include "common/parsys.F90"
 common /coipar/ iiipar(9), iprint
 common /cosysi/ nscode,isicod,iscod(maxpar)
-common /cosysr/ isrcod, junkr, rcod(maxpar)
 common /covib/ ie(50), iv(50)
 common /coicl/ clfl
 

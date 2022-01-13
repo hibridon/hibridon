@@ -53,6 +53,7 @@ use mod_coamat, only: scmat => toto ! scmat(1)
 use mod_coener, only: energ
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysl, only: islcod, lspar
+use mod_cosysr, only: isrcod, idum=>junkr, rspar
 use mod_version, only : version
 use mod_coj12, only: j12
 use mod_hibrid5, only : intcrs, readpc
@@ -97,7 +98,6 @@ common /cobcod/ bcod
 common /cofcod/ fcod
 common /copcod/ pcod
 common /cosysi/ nscode, isicod, ispar(100)
-common /cosysr/ isrcod, idum, rspar(100)
 common /coipar/ ipar(10)
 common /corpar/ rpar(9)
 common /colpar/ lpar(28)

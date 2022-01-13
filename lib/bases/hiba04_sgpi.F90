@@ -183,11 +183,11 @@ use mod_coisc3, only: nlvp => isc3 ! nlvp(1)
 use mod_coisc4, only: nvphol => isc4 ! nvphol(1)
 use mod_conlam, only: nlam, nlammx, lamnum
 use constants, only: econv, xmconv, ang2c
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
-common /cosysr/ isrcod, junkr, rpar(10)
 common /coipar/ iiipar(9), iprint
 common /cosysi/ nscode, isicod, ispar(10)
 !  these parameters must be the same as in hisysgpi
@@ -208,6 +208,9 @@ data izero, ione, itwo &
 ! nprsg is number of real parameters per vib state for sigma state
 ! nprpi is number of real parameters per vib state for pi state
 data nprsg,nprpi/7,14/
+real(8), dimension(:), pointer :: rpar
+rpar=>rspar(1:10)
+
 ! recover system parameters
 nterm=ispar(1)
 isg=ispar(2)
@@ -1376,6 +1379,7 @@ subroutine sysgpi (irpot, readpt, iread)
 !
 #include "common/parsys_mod.F90"
 use mod_conlam, only: nlam
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 #include "common/parsys.F90"
 logical readpt, existf
@@ -1389,7 +1393,6 @@ common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
 common /cosys/ scod(lencod)
 common /cosyr/ rcod(maxpar)
 common /cosysi/ nscode, isicod, ispar(maxpar)
-common /cosysr/ isrcod, junkr, rspar(maxpar)
 logical         airyfl, airypr, bastst, batch, chlist, csflag, &
                 flaghf, flagsu, ihomo,lpar
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &

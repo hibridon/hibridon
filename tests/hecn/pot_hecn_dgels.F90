@@ -10,9 +10,11 @@
 !
 subroutine driver
 use mod_covvl, only: vvl
+use mod_cosysr, only: rspar
 implicit double precision (a-h,o-z)
-common /cosysr/ xjunk(2),rshift,xfact
 #include "common/parpot.F90"
+real(8), pointer :: rshift, xfact
+rshift=>rspar(1); xfact=>rspar(2)
 econv=219474.6d0
 potnam='He-CN(2Sigma) CCSDT PES'
 print *, potnam

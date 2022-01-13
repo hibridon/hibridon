@@ -40,6 +40,7 @@ integer i, j, k, iblock
 !   Temporary for print
 double precision vvltmp(NVLM)
 !
+emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
 ASSERT(nlammx .ge. NVVL)  ! check that lamnum array is big enough
 print *, 'CH3-He vibrational relaxation'
 1 print *, 'Please input the maximum value of v2 (0--3):'
@@ -91,6 +92,8 @@ integer iunit
 !       /coptnm/ potnam
 !
 !
+emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
+
 potnam = 'CH3-He vibrational relaxation'
 !   vvl now represent <v_2'|v_{\lambda\mu}(Q_2, R)|v_2> in the
 !   following order:
@@ -173,6 +176,9 @@ double precision YLMCS(NANGLE, NVLM), YLMCA(NANGLE, NVLM)
 logical isfst
 data isfst /.true./
 character*255 datfl
+
+emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
+
 ASSERT(nlammx .ge. NVVL)  ! check that lamnum array is big enough
 if (isfst) then
   call datfln('pot_ch3he_vib_ylmsym', datfl)
@@ -269,6 +275,9 @@ character*255 datfl
 logical isfst
 data isfst /.true./
 !   In the first call, read data and determine fitted coefficients
+
+emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
+
 ASSERT(nlammx .ge. NVVL)  ! check that lamnum array is big enough
 if (isfst) then
 !   Read data file
@@ -336,6 +345,9 @@ integer i
 character*(*) fname
 !
 !
+
+emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
+
 !   Set system dependent parameters
 scod(1) = 'NTERM'
 scod(2) = 'IPOTSY'
@@ -495,6 +507,8 @@ integer gblkid
 !
 !   Construct emax array from input parameters
 ASSERT(nlammx .ge. NVVL)  ! check that lamnum array is big enough
+
+emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
 
 emax(1) = emax0
 emax(2) = emax1

@@ -129,6 +129,7 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
 use constants, only: econv, xmconv, ang2c
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*80 string
@@ -140,7 +141,6 @@ common /coipar/ iiipar(9), iprint
 common /corpar/ xjunk(3), rendai
 common /cosysi/ nscode, isicod, nterm, jmax, igu, isa, &
                 npar, imult, nman
-common /cosysr/ isrcod, junkr, brot, aso, o, p, q, dmom, efield
 common /coered/ ered, rmu
 dimension j(1), is(1), l(1), jhold(1), ishold(1), ieps(2)
 dimension c0(1), c1(1), c2(1), cf(1), ehold(1)
@@ -151,6 +151,9 @@ dimension e(3,3), eig(3), sc1(3), sc2(3), vec(3,3), vii(0:2)
 dimension work(9)
 #endif
 data cvtown / 0.0167917d0/, ieps / -1, 1/
+real(8), pointer :: brot, aso, o, p, q, dmom, efield
+brot=>rspar(1); aso=>rspar(2); o=>rspar(3); p=>rspar(4); q=>rspar(5); dmom=>rspar(6); efield=>rspar(7)
+
 zero = 0.d0
 one = 1.d0
 two = 2.d0
@@ -996,6 +999,7 @@ subroutine sypi (irpot, readpt, iread)
 #include "common/parsys_mod.F90"
 use mod_conlam, only: nlam
 use mod_cosysl, only: islcod, lspar
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 logical readpt, existf
 logical         airyfl, airypr, bastst, batch, chlist, csflag, &
@@ -1011,10 +1015,12 @@ common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
 common /cosys/ scod(lencod)
 common /cosysi/ nscode, isicod, nterm, jmax, igu, isa, &
                 npar, imult, nman
-common /cosysr/ isrcod, junkr, brot, aso, o, p, q, dmom, efield
 common /coskip/ nskip,iskip
 save potfil
 #include "common/comdot.F90"
+real(8), pointer :: brot, aso, o, p, q, dmom, efield
+brot=>rspar(1); aso=>rspar(2); o=>rspar(3); p=>rspar(4); q=>rspar(5); dmom=>rspar(6); efield=>rspar(7)
+
 potfil = ' '
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables

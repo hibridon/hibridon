@@ -117,6 +117,7 @@ use mod_coiv2, only: iv2
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysr, only: isrcod, idum=>junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
@@ -124,13 +125,16 @@ logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbasl.F90"
 common /coipar/ iiipar(9), iprint
 common /cosysi/ nscode, isicod, nterm, jmax, igu, isa, npar
-common /cosysr/ isrcod, idum,brot, aso, p, q
 common /coered/ ered, rmu
 dimension j(2), l(1), jhold(1), ehold(1), is(2), ifi(1), &
           c32(1), c52(1), ieps(2), ishold(1), sc4(1)
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
 data ieps / -1, 1 / , ione, itwo, min10 / 1, 2, -10 /
+
+real(8), pointer :: brot, aso, p, q
+brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4)
+
 pi2 = 1.570796327d0
 zero = 0.d0
 one = 1.d0
@@ -894,6 +898,7 @@ subroutine sy2del (irpot, readpt, iread)
 !  subroutines called: loapot(iunit,filnam)
 #include "common/parsys_mod.F90"
 use mod_conlam, only: nlam
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 #include "common/parsys.F90"
 logical readpt, existf
@@ -905,7 +910,6 @@ character*60 filnam, line, potfil, filnm1
 #include "common/parbas.F90"
 common /cosys/ scod(lencod)
 common /cosysi/ nscode, isicod, nterm, jmax, igu, isa, npar
-common /cosysr/ isrcod, junkr, brot, aso, p, q
 logical         airyfl, airypr, bastst, batch, chlist, csflag, &
                 flaghf, flagsu, ihomo,lpar
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
@@ -913,6 +917,10 @@ common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
 common /coskip/ nskip,iskip
 save potfil
 #include "common/comdot.F90"
+
+real(8), pointer :: brot, aso, p, q
+brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4)
+
 isicod = 5
 isrcod = 4
 nscode = isicod+isrcod

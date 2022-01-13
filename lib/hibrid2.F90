@@ -22,6 +22,7 @@ use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
 use mod_coener, only: energ
 use mod_cosysl, only: islcod
+use mod_cosysr, only: isrcod, junkr
 use constants, only: econv, xmconv, ang2c
 implicit double precision (a-h,o-z)
 character*40 jobnam,input,output,savfil
@@ -34,7 +35,6 @@ parameter (maxpar=150)
 #include "common/parpot.F90"
 common /cofile/ input, output, jobnam, savfil
 common /cosysi/ nscode, isicod, ispar(maxpar)
-common /cosysr/ isrcod, junkr, rspar(maxpar)
 common /cosys/ scod(maxpar*2+3)
 ! nb if the nextcommon is changed, it should be also changed in common/parsys
 common /coselb/ ibasty
