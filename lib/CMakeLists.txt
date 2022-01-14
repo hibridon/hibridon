@@ -83,7 +83,6 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       # Non-specific options
       -std=legacy                               # Allow pre-Fortran 77 syntax (e.g. arbitrary length arrays)
       -fno-automatic                            # Put everything on the heap
-      -mcmodel=medium
       $<$<PLATFORM_ID:Linux>:-march=native>     # Tune generated code for host's micro-architecture
       $<$<PLATFORM_ID:Darwin>:-mtune=native>    # Tune generated code for host's micro-architecture (march not working on Darwin)
       $<$<PLATFORM_ID:Linux>:-mcmodel=large>    # Required on Linux
