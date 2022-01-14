@@ -677,8 +677,9 @@ end
 !  -----------------------------------------------------------------------
 !  -----------------------------------------------------------------------
 subroutine sy2sg (irpot, readpt, iread)
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
+use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
@@ -708,7 +709,7 @@ implicit double precision (a-h,o-z)
 !              basis, if isa=-1, then only the a-levels are included
 !    interp:   parameter to control spline interpolation in subroutine pot;
 !              this should always be set equal to 1 for the first calculation
-!  variable in common /cosys/
+!  variable in common /cosys
 !    scod:    character*8 array of dimension nscode, which contains names
 !             of all system dependent parameters.  note that the ordering
 !             of the variable names in scod must correspond to the ordering
@@ -716,12 +717,9 @@ implicit double precision (a-h,o-z)
 !             variable names in cosysr followed by lammin, lammax, and mproj
 ! ------------------------------------------------------------------------
 logical readpt,existf
-character*8 scod
 character*(*) fname
 character*60 line,filnam,potfil, filnm1
-#include "common/parsys.F90"
 #include "common/parbas.F90"
-common /cosys/ scod(lencod)
 logical         airyfl, airypr, bastst, batch, chlist, csflag, &
                 flaghf, flagsu, ihomo,lpar
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &

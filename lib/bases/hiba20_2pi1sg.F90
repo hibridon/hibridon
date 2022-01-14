@@ -413,6 +413,7 @@ end
 !     ------------------------------------------------------------------
 !  ---------------------------------------------------------------------
 subroutine sy2pi1sg(irpot, readpt, iread)
+use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 implicit none
@@ -420,10 +421,8 @@ integer irpot, iread
 logical readpt
 character*(*) fname
 !     NUMBER OF BASIS-SPECIFIC VARIABLES, MODIFY ACCORDINGLY.
-integer icod, ircod, lencod
-parameter (icod=5, ircod=5, lencod=icod+ircod)
-common /cosys/ scod(lencod)
-character*8 scod
+integer icod, ircod
+parameter (icod=5, ircod=5)
 
 character*40 potfil
 save potfil
@@ -444,7 +443,7 @@ scod(7)='ASO'
 scod(8)='P'
 scod(9)='Q'
 scod(10)='DROT'
-nscode = lencod
+nscode = icod+ircod
 isicod = icod
 isrcod = ircod
 !     KEEP THE FOLLOWING LINE

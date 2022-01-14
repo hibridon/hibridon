@@ -1376,22 +1376,20 @@ subroutine sysgpi (irpot, readpt, iread)
 !
 !  variables in common/cobspt/ must be set in loapot!!
 !
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
+use mod_cosys, only: scod
+use mod_cosyr, only: rcod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
-#include "common/parsys.F90"
 logical readpt, existf
-character*8 scod,rcod
 character*8 char
 character*(*) fname
 character*1 dot
 character*60 filnam, line, potfil, filnm1
 #include "common/parbas.F90"
 common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
-common /cosys/ scod(lencod)
-common /cosyr/ rcod(maxpar)
 logical         airyfl, airypr, bastst, batch, chlist, csflag, &
                 flaghf, flagsu, ihomo,lpar
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
@@ -1400,9 +1398,8 @@ common /coskip/ nskip,iskip
 save potfil
 #include "common/comdot.F90"
 !  set default values for 2pi-2sigma scattering
-do 5 i=1,maxpar
 rpar=0
-5 ispar(i)=0
+ispar=0
 potfil = ' '
 isicod=0
 isrcod=0
@@ -1498,8 +1495,8 @@ if(isg.ne.0) then
 !  gs is gamma, gsd is gamma(d), gsh is gamma(h)
 !  evibsg is E (see Kotlar et al., JMS 80, 86 (1980), Table II))
   do 15 i=1,nvibs
-        if(isicod+2.gt.maxpar) stop 'isicod'
-        if(isrcod+7.gt.maxpar) stop 'isrcod'
+        if(isicod+2.gt.size(ispar,1)) stop 'isicod'
+        if(isrcod+7.gt.size(ispar,1)) stop 'isrcod'
         if(iread.ne.0) then
       read (8,*,err=800) ivs,(ispar(isicod+j),j=1,2)
       ivibs(i)=ivs
@@ -1543,8 +1540,8 @@ if(ipi.ne.0) then
 !  read data for each vib state
   if(nvibp.le.0) nvibp=1
   do 20 i=1,nvibp
-    if(isicod+3.gt.maxpar) stop 'isicod'
-    if(isrcod+13.gt.maxpar) stop 'isrcod'
+    if(isicod+3.gt.size(ispar,1)) stop 'isicod'
+    if(isrcod+13.gt.size(ispar,1)) stop 'isrcod'
     if(iread.ne.0) then
       read (8,*,err=800) ivp,(ispar(isicod+j),j=1,2)
       ivibp(i)=ivp
@@ -1613,7 +1610,7 @@ if(ipi.ne.0) then
     endif
 20   continue
 end if
-if(isicod+isrcod.gt.lencod) stop 'lencod'
+if(isicod+isrcod.gt.size(scod,1)) stop 'lencod'
 do 30 i=1,isrcod
 30 scod(isicod+i)=rcod(i)
 nscode = isicod+isrcod

@@ -1118,7 +1118,7 @@ subroutine sysgpi1 (irpot, readpt, iread)
 !    ivibpi:   array of vibrational quantum numbers for 2pi levels
 !    jmax:     array of maximum rotational angular momenta for each 2pi level
 !              with convention omega .le. j .le. jmax+0.5
-!  variable in common /cosys/
+!  variable in common bloc /cosys/
 !    scod:    character*8 array of dimension nscode, which contains names
 !             of all system dependent parameters.  note that the ordering
 !             of the variable names in scod must correspond to the ordering
@@ -1128,25 +1128,19 @@ subroutine sysgpi1 (irpot, readpt, iread)
 !
 !  variables in common/cobspt/ must be set in loapot!!
 !
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
+use mod_cosyr, only: rcod
+use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
-#include "common/parsys.F90"
 logical readpt, existf
-character*8 scod, rcod
 character*8 char
 character*(*) fname
 character*1 dot
 character*60 filnam, line, potfil, filnm1
 #include "common/parbas.F90"
-common /cosys/ scod(maxpar)
-common /cosyr/ rcod(maxpar)
-!  commented lines below list the parameters
-!      common /cosysi nscode, isicod, nterm, isym, isa, igusg,
-!     :  nmaxsg, nparsg, igupi, nparpi, numvpi, ispar(maxpar)
-!      common cosysr/ isrcod, junkr, esg, bsg, dsg, gsr, rspar(maxpar)
 logical         airyfl, airypr, bastst, batch, chlist, csflag, &
                 flaghf, flagsu, ihomo,lpar
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
@@ -1227,8 +1221,8 @@ if (numvpi.le.0 .or. numvpi.gt.10) then
 end if
 !  read data for each 2pi vibrational level
 do 15 iv=1,numvpi
-  if (isicod+2.gt.maxpar) stop 'isicod'
-  if (isrcod+6.gt.maxpar) stop 'isrcod'
+  if (isicod+2.gt.size(ispar,1)) stop 'isicod'
+  if (isrcod+6.gt.size(ispar,1)) stop 'isrcod'
   if (iread.ne.0) then
 !          read(8, *, err=888) ivpi(iv), jmax(iv)
 !          read(8, *, err=888) epi(iv), bpi(iv), dpi(iv)

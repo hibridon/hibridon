@@ -102,7 +102,7 @@ end
 !    rmu:       collision reduced mass in atomic units (mass of electron = 1)
 
 !  -------------------------------------------------------
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 use constants, only: econv, xmconv
@@ -111,7 +111,6 @@ parameter (ngr=21, nymx=500)
 logical ifull
 dimension wf(nch),en(ngr),f(ngr,nymx),psi(nymx),gr(ngr), &
           dmu(2),q(4)
-#include "common/parsys.F90"
 #include "common/parbas.F90"
 common /coered/ ered, rmu
 common /covib/ie(50), iv(50)
@@ -276,7 +275,7 @@ subroutine syusr (irpot, readp, iread)
 !             coupling terms)
 !    nvmin    minimum vibrationnal state in each electronic state
 !    nvmax    maximum vibrationnal state in each electronic state
-!  variable in common /cosys/
+!  variable in common  /cosys/
 !    scod:    character*8 array of dimension lcode, which contains names
 !             of all system dependent parameters.
 !             note that the ordering of the variable names in scod must
@@ -300,13 +299,13 @@ subroutine syusr (irpot, readp, iread)
 !             state .
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 use mod_coqvec, only: mxphot, nphoto, q
 use mod_conlam, only: nlam
+use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 implicit double precision (a-h,o-z)
-#include "common/parsys.F90"
 integer irpot
 logical readp
 logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
@@ -315,10 +314,8 @@ logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
         readpt, ihomo, bastst, twomol
 character*1 dot
 character*4 char
-character*8 scod
 character*(*) fname
 character*40 filnam, line, potfil
-common /cosys/ scod(lencod)
 #include "common/parbas.F90"
 common /cogrnd/ reg, caypot
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
@@ -418,7 +415,7 @@ enddo
 if (iread .ne. 0) then
   read(8, *, err=888) rcod(1)
 endif
-if(isicod+isrcod+3.gt.lencod) stop 'lencod'
+if(isicod+isrcod+3.gt.size(scod,1)) stop 'lencod'
 nscode=isicod+isrcod
 goto 286
 ! here if read error occurs
@@ -581,12 +578,11 @@ use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 use constants, only: econv, xmconv
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 implicit double precision (a-h,o-z)
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 logical clfl
 #include "common/parbas.F90"
-#include "common/parsys.F90"
 common /coipar/ iiipar(9), iprint
 common /covib/ ie(50), iv(50)
 common /coicl/ clfl

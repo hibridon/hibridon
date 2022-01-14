@@ -887,7 +887,7 @@ subroutine sy2del (irpot, readpt, iread)
 !              isa=-1
 !    npar:     number of symmetry doublets included (npar=2 will ensure
 !              both lambda doublets)
-!  variable in common /cosys/
+!  variable in common bloc /cosys/
 !    scod:    character*8 array of dimension nscode, which contains names
 !             of all system dependent parameters
 !  variable in common block /coskip/
@@ -897,20 +897,18 @@ subroutine sy2del (irpot, readpt, iread)
 !   skip   same as nskip, used for consistency check
 !
 !  subroutines called: loapot(iunit,filnam)
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
+use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
-#include "common/parsys.F90"
 logical readpt, existf
 integer irpot
 character*1 dot
-character*8 scod
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 #include "common/parbas.F90"
-common /cosys/ scod(lencod)
 logical         airyfl, airypr, bastst, batch, chlist, csflag, &
                 flaghf, flagsu, ihomo,lpar
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &

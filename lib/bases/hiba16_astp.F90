@@ -1117,7 +1117,7 @@ subroutine syastp (irpot, readpt, iread)
 !              para states will be included if iop=1 and only ortho states if
 !              iop=-1
 !    jmax:     the maximum rotational quantum number for the asymmetric top
-!  variable in common /cosys/
+!  variable in common bloc /cosys/
 !    scod:    character*8 array of dimension nscode, which contains names
 !             of all system dependent parameters.  Note that the ordering
 !             of the variable names in scod must correspond to the ordering
@@ -1126,19 +1126,17 @@ subroutine syastp (irpot, readpt, iread)
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout      
 use mod_conlam, only: nlam
+use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 logical readpt, existf
-integer icod, ircod, lencod
+integer icod, ircod
 integer i, iread, irpot
-character*8 scod
 character*1 dot
 character*(*) fname
 character*60 line, filnam, potfil, filnm1
 parameter (icod=5, ircod=4)
-parameter (lencod = icod + ircod + 3)
 #include "common/parbas.F90"
-common /cosys/ scod(lencod)
 save potfil
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
@@ -1167,7 +1165,7 @@ scod(9)='EMAX'
 scod(10)='LAMMIN'
 scod(11)='LAMMAX'
 scod(12)='MPROJ'
-nscode = lencod
+nscode = icod + ircod + 3
 isicod = icod
 isrcod = ircod
 irpot = 1

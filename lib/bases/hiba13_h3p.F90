@@ -935,7 +935,7 @@ subroutine syh3p (irpot, readpt, iread)
 !              para states will be included if iop=1 and only ortho states if
 !              iop=-1
 !    jmax:     the maximum rotational angular momenta for the diatomic
-!  variable in common /cosys/
+!  variable in common bloc /cosys/
 !    scod:    character*8 array of dimension nscode, which contains names
 !             of all system dependent parameters.  Note that the ordering
 !             of the variable names in scod must correspond to the ordering
@@ -943,17 +943,15 @@ subroutine syh3p (irpot, readpt, iread)
 !             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
+use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 logical readpt, existf
 character*1 dot
-character*8 scod
 character*(*) fname
 character*60 line, filnam, potfil, filnm1
 parameter (icod=3, ircod=3)
-parameter (lencod = icod + ircod + 3)
 #include "common/parbas.F90"
-common /cosys/ scod(lencod)
 save potfil
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
@@ -979,7 +977,7 @@ scod(6)='ASO2'
 scod(7)='LAMMIN'
 scod(8)='LAMMAX'
 scod(9)='MPROJ'
-nscode = lencod
+nscode = icod + ircod + 3
 isicod = icod
 isrcod = ircod
 irpot = 1
