@@ -128,15 +128,15 @@ use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_coatp3, only: isizh
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*1 slab
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
-common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, jmax
 common /coipar/ iiipar(9), iprint
-common /cosysr/ isrcod, junkr, arot, brot, crot, emax
 common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
@@ -145,6 +145,11 @@ dimension j(1), l(1), is(1), jhold(1), ehold(1), &
 dimension e(narray,narray), eig(narray), vec(narray,narray), &
   sc1(narray), sc2(narray), work(288)
 !
+integer, pointer :: nterm, numpot, ipotsy, iop, jmax
+real(8), pointer :: arot, brot, crot, emax
+nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=>ispar(4); jmax=>ispar(5)
+arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4)
+
 zero = 0.d0
 two = 2.d0
 !  check for consistency in the values of flaghf and csflag
@@ -1050,8 +1055,11 @@ double precision function rotham(ji, ki, jf, kf)
 !  author:  paul dagdigian
 !  current revision date:  16-aug-2009
 !  -----------------------------------------------------------------------
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
-common /cosysr/ isrcod, junkr, arot, brot, crot, emax
+real(8), pointer :: arot, brot, crot, emax
+arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4)
+
 bpc = (brot + crot)*0.5d0
 bmc = (brot - crot)*0.25d0
 if (ji .ne. jf) goto 900
@@ -1109,7 +1117,7 @@ subroutine syastp (irpot, readpt, iread)
 !              para states will be included if iop=1 and only ortho states if
 !              iop=-1
 !    jmax:     the maximum rotational quantum number for the asymmetric top
-!  variable in common /cosys/
+!  variable in common bloc /cosys/
 !    scod:    character*8 array of dimension nscode, which contains names
 !             of all system dependent parameters.  Note that the ordering
 !             of the variable names in scod must correspond to the ordering
@@ -1118,22 +1126,17 @@ subroutine syastp (irpot, readpt, iread)
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout      
 use mod_conlam, only: nlam
+use mod_cosys, only: scod
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 logical readpt, existf
-double precision arot, brot, crot, emax
-integer numpot
-integer icod, ircod, lencod
-integer i, iop, iread, irpot, isicod, isrcod, ipotsy, jmax, &
-        nscode, nterm
-character*8 scod
+integer icod, ircod
+integer i, iread, irpot
 character*1 dot
 character*(*) fname
 character*60 line, filnam, potfil, filnm1
 parameter (icod=5, ircod=4)
-parameter (lencod = icod + ircod + 3)
 #include "common/parbas.F90"
-common /cosys/ scod(lencod)
-common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, jmax
-common /cosysr/ isrcod, junkr, arot, brot, crot, emax
 save potfil
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
@@ -1144,6 +1147,12 @@ save potfil
 !  in the same order as in the common block /cosysr/
 !  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
 #include "common/comdot.F90"
+
+integer, pointer :: nterm, numpot, ipotsy, iop, jmax
+real(8), pointer :: arot, brot, crot, emax
+nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=>ispar(4); jmax=>ispar(5)
+arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4)
+
 scod(1)='NTERM'
 scod(2)='NUMPOT'
 scod(3)='IPOTSY'
@@ -1156,7 +1165,7 @@ scod(9)='EMAX'
 scod(10)='LAMMIN'
 scod(11)='LAMMAX'
 scod(12)='MPROJ'
-nscode = lencod
+nscode = icod + ircod + 3
 isicod = icod
 isrcod = ircod
 irpot = 1

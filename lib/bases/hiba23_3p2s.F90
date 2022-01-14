@@ -119,13 +119,13 @@ use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
-common /cosysi/ nscode, isicod, nterm, nstate
-common /cosysr/ isrcod, junkr, en1d
 !  common blocks cojtot, coja, and coel used to transmit to ground subroutine
 common /cojtot/ jjtot, jjlpar
 common /coja/  jja(9)
@@ -155,6 +155,11 @@ data flam12 /-1.d0, 1.d0, 0.d0, 1.d0, 0.d0/, &
   stot12 /1.5d0, 1.5d0, 1.5d0, 0.5d0, 0.5d0/
 !  scratch arrays for computing asymmetric top energies and wave fns.
 dimension en0(4), en12(5), en32(3), vec(5,5), work(288)
+integer, pointer :: nterm, nstate
+real(8), pointer :: en1d
+nterm=>ispar(1); nstate=>ispar(2)
+en1d=>rspar(1)
+
 zero = 0.d0
 two = 2.d0
 !  check for consistency in the values of flaghf and csflag
@@ -607,16 +612,14 @@ subroutine sy3p2s (irpot, readp, iread)
 !  current revision date: 1-oct-2018 by p.dagdigian
 !  -----------------------------------------------------------------------
 !  NOTE:  no real variables for this basis type
-!  variables in common /cosysr/
-!    isrcod:  number of real system dependent parameters
-!  variable in common /cosysi/
+!  variable in common cosysi/
 !    nscode:   total number of system dependent parameters
 !              nscode = isicod + isrcod + 3
 !    isicod:   number of integer system dependent parameters
 !    nterm:    number of different types of electronic coupling terms
 !              this should be 1 here
 !    nvib:     initial vibrational state of A state, in photodissociation calculation
-!  variable in common /cosys/
+!  variable in common  /cosys/
 !    scod:    character*8 array of dimension lcode, which contains names
 !             of all system dependent parameters
 !  line 16:
@@ -624,10 +627,12 @@ subroutine sy3p2s (irpot, readp, iread)
 !
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
+use mod_cosys, only: scod
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod
 implicit double precision (a-h,o-z)
-#include "common/parsys.F90"
 integer irpot
 logical readp
 logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
@@ -636,12 +641,8 @@ logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
         readpt, ihomo, bastst, twomol, lpar
 
 character*1 dot
-character*8 scod
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-common /cosys/ scod(lencod)
-common /cosysi/ nscode, isicod, nterm, nvib
-common /cosysr/ isrcod
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
@@ -651,6 +652,8 @@ common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
                 xsecwr,lpar(3)
 #include "common/comdot.F90"
 save potfil
+integer, pointer :: nterm, nvib
+nterm=>ispar(1); nvib=>ispar(2)
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
 !  in the same order as in the common block /cosysi/

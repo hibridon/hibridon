@@ -164,14 +164,14 @@ use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_coatp3, only: isizh
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
-common /cosysi/ nscode, isicod, nterm, numpot, jmax, iop, &
-  j2min, j2max, ipotsy2
-common /cosysr/ isrcod, junkr, arot, brot, crot, emax, b2rot
+
 common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
@@ -182,6 +182,12 @@ dimension e(narray,narray), eig(narray), vec(narray,narray), &
   sc1(narray), sc2(narray), work(1000), kp(1000), ko(1000), &
   j2rot(1000), e2rot(1000)
 !
+integer, pointer :: nterm, numpot, jmax, iop, j2min, j2max, ipotsy2
+real(8), pointer :: arot, brot, crot, emax, b2rot
+nterm=>ispar(1); numpot=>ispar(2); jmax=>ispar(3); iop=>ispar(4); j2min=>ispar(5); j2max=>ispar(6); ipotsy2=>ispar(7)
+arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4); b2rot=>rspar(5)
+  
+
 zero = 0.d0
 two = 2.d0
 !  check for consistency in the values of flaghf and csflag
@@ -1001,7 +1007,7 @@ subroutine syastp3 (irpot, readp, iread)
 !    j2max:    maximum rotational angular momentum for molecule 2
 !    ipotsy2:  symmetry of potential.  set to 2 for homonuclear
 !              molecule 2, set to 1 for heteronuclear molecule 2
-!  variable in common /cosys/
+!  variable in common  /cosys/
 !    scod:    character*8 array of dimension nscode, which contains names
 !             of all system dependent parameters
 !  line 16:
@@ -1009,10 +1015,12 @@ subroutine syastp3 (irpot, readp, iread)
 !
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
+use mod_cosys, only: scod
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
-#include "common/parsys.F90"
 integer irpot
 logical readp
 logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
@@ -1020,13 +1028,8 @@ logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
         csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
         readpt, ihomo, bastst, twomol, lpar
 character*1 dot
-character*8 scod
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-common /cosys/ scod(lencod)
-common /cosysi/ nscode, isicod, nterm, numpot, jmax, iop, &
-  j2min, j2max, ipotsy2
-common /cosysr/ isrcod, junkr, arot, brot, crot, emax, b2rot
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
@@ -1036,6 +1039,12 @@ common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
                 xsecwr,lpar(3)
 #include "common/comdot.F90"
 save potfil
+
+integer, pointer :: nterm, numpot, jmax, iop, j2min, j2max, ipotsy2
+real(8), pointer :: arot, brot, crot, emax, b2rot
+nterm=>ispar(1); numpot=>ispar(2); jmax=>ispar(3); iop=>ispar(4); j2min=>ispar(5); j2max=>ispar(6); ipotsy2=>ispar(7)
+arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4); b2rot=>rspar(5)
+
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
 !  in the same order as in the common block /cosysi/

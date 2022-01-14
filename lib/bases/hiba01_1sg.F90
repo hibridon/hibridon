@@ -433,16 +433,16 @@ use mod_coiv2, only: iv2
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar, convert_ispar_to_mat
+use mod_cosysr, only: isrcod, junkr, rspar, convert_rspar_to_mat
 use constants, only: econv, xmconv, ang2c
+
 implicit double precision (a-h,o-z)
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
 common /covib/ nvib,ivib(maxvib)
 common /coipar/ iiipar(9), iprint
-common /cosysi/ nscode, isicod, nterm, nvmin, nvmax, &
-                iscod(2,maxvib)
-common /cosysr/ isrcod, junkr, rpar(4,maxvib)
 common /coered/ ered, rmu
 common /coskip/ nskip, iskip
 integer :: j(:)
@@ -452,6 +452,12 @@ dimension jhold(5), ehold(5), sc1(5), sc2(5), sc3(5), &
           sc4(5), ishold(5)
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
+real(8), dimension(4, maxvib) :: rpar
+integer, dimension(2, maxvib) :: iscod
+integer, pointer :: nterm, nvmin, nvmax
+nterm=>ispar(1); nvmin=>ispar(2); nvmax=>ispar(3)
+call convert_rspar_to_mat(4,maxvib, rpar)
+call convert_ispar_to_mat(2, maxvib, 4, iscod)
 zero = 0.d0
 two = 2.d0
 !  check for consistency in the values of flaghf and csflag
@@ -897,17 +903,7 @@ subroutine sy1sg (irpot, readp, iread)
 !  if iread = 0 return after defining variable names
 !  current revision date: 10-mar-1994 by mha
 !  -----------------------------------------------------------------------
-!  variables in common /cosysr/
-!    isrcod:  number of real parameters
-!    brot, drot, hrot
-!  variable in common /cosysi/
-!    nscode:  total number of system dependent parameters
-!             nscode = isicod + isrcod + 3
-!    isicod:  number of integer system dependent parameters
-!    nterm:   number of different angular terms in potential
-!              nb for singlet sigma molecule, nterm should be 1
-!    jmin, jmax (see below)
-!  variable in common /cosys/
+!  variable in common /cosys
 !    scod:    character*8 array of dimension lcode, which contains names
 !             of all system dependent parameters
 !  line 13:
@@ -923,8 +919,11 @@ subroutine sy1sg (irpot, readp, iread)
 !
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
+use mod_cosys, only: scod
+use mod_cosysi, only: nscode, isicod, iscod=>ispar
+use mod_cosysr, only: isrcod, junkr, rcod => rspar
 implicit double precision (a-h,o-z)
 integer irpot
 logical readp, existf
@@ -932,13 +931,8 @@ logical airyfl, airypr, bastst, batch, chlist, csflag, &
                 flaghf, flagsu, ihomo,lpar
 character*1 dot
 character*4 char
-character*8 scod
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-#include "common/parsys.F90"
-common /cosys/ scod(lencod)
-common /cosysi/ nscode,isicod,iscod(maxpar)
-common /cosysr/ isrcod, junkr, rcod(maxpar)
 #include "common/parbas.F90"
 common/covib/ nvib,ivib(maxvib)
 common /coskip/ nskip,iskip
@@ -947,14 +941,17 @@ common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
 
 common /coselb/ ibasty
 save potfil
-equivalence(iscod(1),nterm),(iscod(2),nvibmn),(iscod(3),nvibmx)
+!equivalence(iscod(1),nterm),(iscod(2),nvibmn),(iscod(3),nvibmx)
 #include "common/comdot.F90"
+
+
 !     number and names of system dependent parameters
 !  set default values for singlet-sigma scattering
-nterm = 1
+
+iscod(1) = 1
 if (iread .eq. 0) then
-  nvibmn = 0
-  nvibmx = 0
+  iscod(2) = 0
+  iscod(3) = 0
   lammin(1)=0
   lammax(1)=-1
   mproj(1)=0
@@ -967,9 +964,9 @@ if (iread .eq. 1) irpot=1
 if (ihomo) nskip = 2
 potfil = ' '
 !  read number of vib states
-if(iread.ne.0) read (8, *, err=88) nvib, nvibmn,nvibmx
-if(nvib.gt.nvibmx-nvibmn+1) then
-  write (6,40) nvib, nvibmn, nvibmx
+if(iread.ne.0) read (8, *, err=88) nvib, iscod(2),iscod(3)
+if(nvib.gt.iscod(3)-iscod(2)+1) then
+  write (6,40) nvib, iscod(2), iscod(3)
 40   format(' ** PROBABLE VIBRATIONAL LEVEL NUMBERING ERROR:',/, &
          '   VMIN =',i2,', VMAX=',i3,', BUT NVIB =',i3)
   return
@@ -1004,7 +1001,7 @@ scod(iofr+4)='EVIB'//char
 iofr=iofr+4
 isicod=isicod+2
 71 isrcod=isrcod+4
-if(isicod+isrcod+3.gt.lencod) stop 'lencod'
+if(isicod+isrcod+3.gt.size(scod,1)) stop 'lencod'
 nscode=isicod+isrcod
 line=' '
 if(.not.readp.or.iread.eq.0) then
@@ -1056,12 +1053,12 @@ return
 ! --------------------------------------------------------------
 entry sav1sg (readp)
 !  save input parameters for singlet-sigma + atom scattering
-if (nvibmx .lt. nvibmn) then
-  write (6, 210) nvibmx, nvibmn
+if (iscod(3) .lt. iscod(2)) then
+  write (6, 210) iscod(3), iscod(2)
 210   format ('**  VMAX =',i3,' .LT. VMIN =',i3,' SET VMAX = VMIN')
-  nvibmx=nvibmn
+iscod(3)=iscod(2)
 endif
-write (8, 220) nvib, nvibmn,nvibmx
+write (8, 220) nvib, iscod(2),iscod(3)
 220 format(3i4, t34,'nvib, vmin,vmax')
 iofi=3
 iofr=0

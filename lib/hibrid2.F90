@@ -21,7 +21,10 @@ subroutine default
 use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
 use mod_coener, only: energ
+use mod_cosys, only: scod
+use mod_cosysi, only: nscode, isicod
 use mod_cosysl, only: islcod
+use mod_cosysr, only: isrcod
 use constants, only: econv, xmconv, ang2c
 implicit double precision (a-h,o-z)
 character*40 jobnam,input,output,savfil
@@ -30,12 +33,8 @@ logical logwr, swrit, t2writ, wrpart, partw, airyfl, airypr, &
         flaghf, rsflag, t2test, logdfl, flagsu, batch, &
         readpt, ihomo, bastst, twomol, nucros, photof, wavefl, &
         boundc
-parameter (maxpar=150)
 #include "common/parpot.F90"
 common /cofile/ input, output, jobnam, savfil
-common /cosysi/ nscode, isicod, ispar(maxpar)
-common /cosysr/ isrcod, junkr, rspar(maxpar)
-common /cosys/ scod(maxpar*2+3)
 ! nb if the nextcommon is changed, it should be also changed in common/parsys
 common /coselb/ ibasty
 common /coipar/ jtot1,jtot2,jtotd,jlpar,nerg,numax,numin,nud, &

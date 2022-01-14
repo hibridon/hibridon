@@ -62,7 +62,7 @@ subroutine ba2pi (j, l, is, jhold, ehold, ishold, nlevel, &
 !              to basis
 !    ihomo:    if .true., then homonuclear molecule
 !              only the s or a levels will be included depending on the
-!              value of the parameter isa in common /cosysi/ (see below)
+!              value of the parameter isa in common cosysi (see below)
 !    nu:       coupled-states projection index
 !    numin:    minimum coupled states projection index
 !              for cc calculations nu and numin are both set = 0 by calling
@@ -119,19 +119,24 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
 use constants, only: econv, xmconv, ang2c
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, idum=>junkr, rspar
 implicit double precision (a-h,o-z)
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
 common /coipar/ iiipar(9), iprint
-common /cosysi/ nscode, isicod, nterm, jmax, igu, isa, npar
-common /cosysr/ isrcod, idum,brot, aso, p, q
 common /coered/ ered, rmu
 dimension j(2), l(1), jhold(1), ehold(1), is(2), ifi(1), &
           c12(1), c32(1), ieps(2), ishold(1), sc4(1)
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
 data ieps / -1, 1 / , izero, ione, min10 / 0, 1, -10 /
+integer, pointer :: nterm, jmax, igu, isa, npar
+real(8), pointer :: brot, aso, p, q
+nterm=>ispar(1); jmax=>ispar(2); igu=>ispar(3); isa=>ispar(4); npar=>ispar(5) 
+brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4)
+
 pi2 = 1.570796327d0
 zero = 0.d0
 one = 1.d0
@@ -899,7 +904,7 @@ subroutine sy2pi (irpot, readpt, iread)
 !              isa=-1
 !    npar:     number of symmetry doublets included (npar=2 will ensure
 !              both lambda doublets)
-!  variable in common /cosys/
+!  variable in common /cosys
 !    scod:    character*8 array of dimension nscode, which contains names
 !             of all system dependent parameters
 !  variable in common block /coskip/
@@ -909,20 +914,18 @@ subroutine sy2pi (irpot, readpt, iread)
 !   skip   same as nskip, used for consistency check
 !
 !  subroutines called: loapot(iunit,filnam)
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
+use mod_cosys, only: scod
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
-#include "common/parsys.F90"
 logical readpt, existf
 integer irpot
 character*1 dot
-character*8 scod
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 #include "common/parbas.F90"
-common /cosys/ scod(lencod)
-common /cosysi/ nscode, isicod, nterm, jmax, igu, isa, npar
-common /cosysr/ isrcod, junkr, brot, aso, p, q
 logical         airyfl, airypr, bastst, batch, chlist, csflag, &
                 flaghf, flagsu, ihomo,lpar
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
@@ -930,6 +933,10 @@ common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
 common /coskip/ nskip,iskip
 save potfil
 #include "common/comdot.F90"
+integer, pointer :: nterm, jmax, igu, isa, npar
+real(8), pointer :: brot, aso, p, q
+nterm=>ispar(1); jmax=>ispar(2); igu=>ispar(3); isa=>ispar(4); npar=>ispar(5) 
+brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4)
 isicod = 5
 isrcod = 4
 nscode = isicod+isrcod

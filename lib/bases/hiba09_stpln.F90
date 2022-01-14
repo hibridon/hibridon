@@ -84,7 +84,7 @@ subroutine bastpln(j, l, is, jhold, ehold, ishold, nlevel, &
 !              symmetry (e.g. NH3),
 !              so that only the ortho or para levels will be
 !              included depending on the value of parameters iop
-!              in common /cosysi/ (see below)
+!              in common cosysi/ (see below)
 !    nu:       coupled-states projection index
 !    numin:    minimum coupled states projection index
 !              for cc calculations nu and numin are both set = 0 by calling
@@ -156,15 +156,14 @@ use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_coamat, only: ietmp ! ietmp(1)
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical ihomo, flaghf, csflag, clist, flagsu, bastst, twomol
 character*40 fname
 #include "common/parbas.F90"
 common /coipar/ iiipar(9), iprint
-common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, ninv, &
-                jmax, ipotsy2, j2max, j2min
-common /cosysr/ isrcod, junkr, brot, crot, delta, emax, drot
 common /coered/ ered, rmu
 common /co2mol/ twomol
 dimension j(1), l(1), jhold(1), ehold(1), is(1), &
@@ -172,6 +171,12 @@ dimension j(1), l(1), jhold(1), ehold(1), is(1), &
 dimension ieps(1), ktemp(1), jtemp(1), isc1(1)
 data ione, itwo, ithree / 1, 2, 3 /
 data one, zero, two / 1.0d0, 0.0d0, 2.d0 /
+integer, pointer :: nterm, numpot, ipotsy, iop, ninv, jmax, ipotsy2, j2max, j2min
+real(8), pointer :: brot, crot, delta, emax, drot
+nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=> ispar(4); ninv=>ispar(5)
+jmax=>ispar(6); ipotsy2=>ispar(7); j2max=>ispar(8); j2min=>ispar(9)
+brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)
+
 twomol=.true.
 !  check for consistency in the values of flaghf and csflag
 if (flaghf) then
@@ -908,7 +913,7 @@ subroutine systpln (irpot, readpt, iread)
 !              molecule
 !    j2min:    the minimum rotational angular momentum for linear
 !              molecule
-!  variable in common /cosys/
+!  variable in common /cosys
 !    scod:    character*8 array of dimension nscode, which contains names
 !             of all system dependent parameters.  Note that the ordering
 !             of the variable names in scod must correspond to the ordering
@@ -917,27 +922,29 @@ subroutine systpln (irpot, readpt, iread)
 !             LAM2 and MPROJ2.
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
+use mod_cosys, only: scod
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 logical readpt, existf, twomol
-double precision brot, crot
-integer numpot
-integer icod, ircod, lencod
-integer i, iop, iread, irpot, isicod, isrcod, ipotsy, &
-        ninv, jmax, nscode, nterm
-character*8 scod
+integer icod, ircod
+integer i, iread, irpot
 character*1 dot
 character*(*) fname
 character*60 line, filnam, potfil, filnm1
 parameter (icod=9, ircod=5)
-parameter (lencod = icod + ircod + 5)
 #include "common/parbas.F90"
-common /cosys/ scod(lencod)
-common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, ninv, &
-                jmax, ipotsy2, j2max, j2min
 common /co2mol/ twomol
-common /cosysr/ isrcod, junkr, brot, crot, delta, emax, drot
 #include "common/comdot.F90"
 save potfil
+
+integer, pointer :: nterm, numpot, ipotsy, iop, ninv, jmax, ipotsy2, j2max, j2min
+real(8), pointer :: brot, crot, delta, emax, drot
+nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=> ispar(4); ninv=>ispar(5)
+jmax=>ispar(6); ipotsy2=>ispar(7); j2max=>ispar(8); j2min=>ispar(9)
+brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)
+
+
 twomol = .true.
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
@@ -966,7 +973,7 @@ scod(16)='LAMMAX'
 scod(17)='MPROJ'
 scod(18)='LAM2'
 scod(19)='M2PROJ'
-nscode = lencod
+nscode = icod + ircod + 5
 isicod = icod
 isrcod = ircod
 irpot = 1

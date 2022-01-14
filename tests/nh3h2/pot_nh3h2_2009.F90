@@ -96,19 +96,11 @@ goto 1
 
 !  -----------------------------------------------------------------------
 use mod_conlam, only: nlam, nlammx
+use mod_cosysi, only: nscode, isicod, ispar
 implicit double precision (a-h,o-z)
 logical readpt
 #include "common/parbas.F90"
 
-integer         nscode, isicod, nterm, numpot, ipotsy, iop, ninv, &
-                kmax, jmax0, jmax1, jmax2, jmax3, jmax4, jmax5, &
-                jmax6, jmax7, jmax8, jmax9, jmax10, jmax11, &
-                jmax12, ipotsy2, j2max, j2min
-
-common /cosysi/ nscode, isicod, nterm, numpot, ipotsy, iop, ninv, &
-                kmax, jmax0, jmax1, jmax2, jmax3, jmax4, jmax5, &
-                jmax6, jmax7, jmax8, jmax9, jmax10, jmax11, &
-                jmax12, ipotsy2, j2max, j2min
 
 
 
@@ -154,6 +146,14 @@ integer   ivij(nvmx), jvij(nvmx), i2vij(nvmx), j2vij(nvmx), &
 !      common /coloapot/ s4pi, ivv(nvmx), nvv
 common /coloapot/ s4pi, nvv, ivv(300)
 logical is_wop
+
+integer, pointer :: nterm, numpot, ipotsy, iop, ninv, kmax, jmax0, jmax1, jmax2, jmax3, jmax4, jmax5, &
+jmax6, jmax7, jmax8, jmax9, jmax10, jmax11, jmax12, ipotsy2, j2max, j2min
+
+nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=>ispar(4); ninv=>ispar(5); kmax=>ispar(6)
+jmax0=>ispar(7); jmax1=>ispar(8); jmax2=>ispar(9); jmax3=>ispar(10); jmax4=>ispar(11); jmax5=>ispar(12); 
+jmax6=>ispar(13); jmax7=>ispar(14); jmax8=>ispar(15); jmax9=>ispar(16); jmax10=>ispar(17); jmax11=>ispar(18);
+jmax12=>ispar(19); ipotsy2=>ispar(20); j2max=>ispar(21); j2min=>ispar(22)
 
 potnam='RIST/VALIRON NH3-H2 2009'
 

@@ -149,6 +149,9 @@ end
 !     THIS SUBROUTINE GOVERNS THE INPUT/OUTPUT OF THE BASIS ROUTINE.
 !     ONLY IREAD IS USED: RETURN DIRECTLY IF ZERO.
 subroutine syusr(irpot, readpt, iread)
+use mod_cosys, only: scod
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit none
 !
@@ -170,21 +173,18 @@ integer irpot, iread
 logical readpt
 character*(*) fname
 !     NUMBER OF BASIS-SPECIFIC VARIABLES, MODIFY ACCORDINGLY.
-integer icod, ircod, lencod
-parameter (icod=5, ircod=5, lencod=icod+ircod+3)
-common /cosys/ scod(lencod)
-character*8 scod
-!     INTEGER VARIABLES.  LEAVE THE FIRST TWO AS IT IS.
-common /cosysi/ nscode, isicod, nterm, ipotsy, iop, ninv, jmax, &
-     ipotsy2, j2max, j2min
-integer nscode, isicod, nterm, ipotsy, iop, ninv, jmax, ipotsy2, &
-     j2max, j2min
-!     REAL VARIABLES.  LEAVE THE FIRST TWO AS IT IS.
-common /cosysr/ isrcod, junkr, brot, crot, delta, emax, drot
-integer isrcod, junkr
-double precision brot, crot, delta, emax, drot
+integer icod, ircod
+parameter (icod=5, ircod=5)
+
+
 character*40 potfil
 save potfil
+integer, pointer :: nterm, ipotsy, iop, ninv, jmax, ipotsy2, j2max, j2min
+real(8), pointer :: brot, crot, delta, emax, drot
+nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); ninv=>ispar(4); jmax=>ispar(5); ipotsy2=>ispar(6)
+j2max=>ispar(7); j2min=>ispar(8)
+
+brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)
 !     DEFINE THE NAMES HERE
 scod(1)='NTERM'
 scod(2)='IPOTSY'
@@ -199,7 +199,7 @@ scod(10)='CROT'
 scod(11)='DELTA'
 scod(12)='EMAX'
 scod(13)='DROT'
-nscode = lencod
+nscode = icod+ircod+3
 isicod = icod
 isrcod = ircod
 !     KEEP THE FOLLOWING LINE
@@ -251,6 +251,8 @@ use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_coamat, only: ietmp ! ietmp(1)
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit none
 !
@@ -275,13 +277,6 @@ integer j(*), k(*), l(*), is(*), ieps(*), jhold(*), ishold(*)
 double precision ehold(*)
 integer nlevel, nlevop, n, ntop, jtemp(*), ktemp(*)
 !
-common /cosysi/ nscode, isicod, nterm, ipotsy, iop, ninv, jmax, &
-     ipotsy2, j2max, j2min
-integer nscode, isicod, nterm, ipotsy, iop, ninv, jmax, ipotsy2, &
-     j2max, j2min
-common /cosysr/ isrcod, junkr, brot, crot, delta, emax, drot
-integer isrcod, junkr
-double precision brot, crot, delta, emax, drot
 common /coered/ ered, rmu
 double precision ered, rmu
 common /coipar/ junkip, iprint
@@ -293,6 +288,12 @@ integer nlist, ki, ji, numeps, iep, iepsil, isym, ji2, i1, i2, &
      irow, jc, jr, j2c, j2r, kc, kr, j12c, j12r, lc, lr, inum
 double precision roteng, esave, vee
 !
+integer, pointer :: nterm, ipotsy, iop, ninv, jmax, ipotsy2, j2max, j2min
+real(8), pointer :: brot, crot, delta, emax, drot
+nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); ninv=>ispar(4); jmax=>ispar(5); ipotsy2=>ispar(6)
+j2max=>ispar(7); j2min=>ispar(8)
+brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)
+
 ASSERT(MAX_NV .le. nlammx)
 if (flaghf) call raise('FLAGHF = .TRUE. FOR SINGLET SYSTEM')
 if (flagsu) call raise('FLAGSU = .TRUE. FOR MOL-MOL COLLISION')

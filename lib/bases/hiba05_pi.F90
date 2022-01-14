@@ -60,7 +60,7 @@ subroutine bapi  (j, l, is, jhold, ehold, ishold, nlevel, &
 !              to basis
 !    ihomo:    if .true., then homonuclear molecule
 !              only the s or a levels will be included depending on the
-!              value of the parameter isa in common /cosysi/ (see below)
+!              value of the parameter isa in common cosysi/ (see below)
 !    nu:       coupled-states projection index
 !    numin:    minimum coupled states projection index
 !              for cc calculations nu and numin are both set = 0
@@ -129,6 +129,8 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
 use constants, only: econv, xmconv, ang2c
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*80 string
@@ -138,9 +140,6 @@ character*2 chf
 #include "common/parbasl.F90"
 common /coipar/ iiipar(9), iprint
 common /corpar/ xjunk(3), rendai
-common /cosysi/ nscode, isicod, nterm, jmax, igu, isa, &
-                npar, imult, nman
-common /cosysr/ isrcod, junkr, brot, aso, o, p, q, dmom, efield
 common /coered/ ered, rmu
 dimension j(1), is(1), l(1), jhold(1), ishold(1), ieps(2)
 dimension c0(1), c1(1), c2(1), cf(1), ehold(1)
@@ -151,6 +150,11 @@ dimension e(3,3), eig(3), sc1(3), sc2(3), vec(3,3), vii(0:2)
 dimension work(9)
 #endif
 data cvtown / 0.0167917d0/, ieps / -1, 1/
+integer, pointer :: nterm, jmax, igu, isa, npar, imult, nman
+real(8), pointer :: brot, aso, o, p, q, dmom, efield
+nterm=>ispar(1); jmax=>ispar(2); igu=>ispar(3); isa=>ispar(4); npar=>ispar(5); imult=>ispar(6); nman=>ispar(7)
+brot=>rspar(1); aso=>rspar(2); o=>rspar(3); p=>rspar(4); q=>rspar(5); dmom=>rspar(6); efield=>rspar(7)
+
 zero = 0.d0
 one = 1.d0
 two = 2.d0
@@ -955,7 +959,7 @@ subroutine sypi (irpot, readpt, iread)
 !  author:  didier lemoine and millard alexander
 !  current revision date:  4-mar-1996 by mha
 !  ---------------------------------------------------------------------
-!  variable in common /cosys/
+!  variable in common /cosys
 !    scod:    character*8 array of dimension nscode, which contains
 !             names of all system dependent parameters. note that the
 !             ordering of the variable names in scod must correspond
@@ -993,28 +997,30 @@ subroutine sypi (irpot, readpt, iread)
 !  variables in common bloc /cosysl/
 !    islcod:   total number of logical system dependent variables
 ! ----------------------------------------------------------------------
-#include "common/parsys_mod.F90"
+use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
+use mod_cosys, only: scod
 use mod_cosysl, only: islcod, lspar
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 logical readpt, existf
 logical         airyfl, airypr, bastst, batch, chlist, csflag, &
                 flaghf, flagsu, ihomo,lpar
-#include "common/parsys.F90"
-character*8 scod
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 character*1 dot
 common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
                 flaghf, flagsu, ihomo,lpar(18)
 #include "common/parbas.F90"
-common /cosys/ scod(lencod)
-common /cosysi/ nscode, isicod, nterm, jmax, igu, isa, &
-                npar, imult, nman
-common /cosysr/ isrcod, junkr, brot, aso, o, p, q, dmom, efield
 common /coskip/ nskip,iskip
 save potfil
 #include "common/comdot.F90"
+integer, pointer :: nterm, jmax, igu, isa, npar, imult, nman
+real(8), pointer :: brot, aso, o, p, q, dmom, efield
+nterm=>ispar(1); jmax=>ispar(2); igu=>ispar(3); isa=>ispar(4); npar=>ispar(5); imult=>ispar(6); nman=>ispar(7)
+brot=>rspar(1); aso=>rspar(2); o=>rspar(3); p=>rspar(4); q=>rspar(5); dmom=>rspar(6); efield=>rspar(7)
+
 potfil = ' '
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables

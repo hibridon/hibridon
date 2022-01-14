@@ -52,7 +52,10 @@ use mod_codim, only: nmax => mmax
 use mod_coamat, only: scmat => toto ! scmat(1)
 use mod_coener, only: energ
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosys, only: scod
+use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysl, only: islcod, lspar
+use mod_cosysr, only: isrcod, idum=>junkr, rspar
 use mod_version, only : version
 use mod_coj12, only: j12
 use mod_hibrid5, only : intcrs, readpc
@@ -72,7 +75,7 @@ character*80 line
 character*40 fnam1,fnam2,jobnam,input,output,savfil, &
              code
 character*8 bcod(ncode)
-character*8 fcod(lcode),pcod(icode),scod,bascod
+character*8 fcod(lcode),pcod(icode),bascod
 character*9 basknd(30)
 ! dimension of codex, ihold, lhold, should be equal to largest number
 ! of identical strings of 1:nnn characters in names of all variables
@@ -91,13 +94,10 @@ dimension a(15),ia(10), ihold(15), lhold(15),lindx(28)
 common /cosavi/ iipar, ixpar(iicode)
 common /cosavr/ irpar, junks, rxpar(ircode)
 common /cofile/ input, output, jobnam, savfil
-common /cosys/  scod(100)
 common /cokeyl/ nncode, llcode, ijcode
 common /cobcod/ bcod
 common /cofcod/ fcod
 common /copcod/ pcod
-common /cosysi/ nscode, isicod, ispar(100)
-common /cosysr/ isrcod, idum, rspar(100)
 common /coipar/ ipar(10)
 common /corpar/ rpar(9)
 common /colpar/ lpar(28)
