@@ -110,10 +110,10 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
       $<$<CONFIG:RELEASE>:-xHost>                 # Generate instructions for the highest instruction set available on the compilation host processor
       $<$<CONFIG:RELEASE>:-init=zero>             # Init variables to zero/false/null
       # Config-specific options: DEBUG
-      $<$<CONFIG:DEBUG>:-Od>                      # Disable all optimizations
-      $<$<CONFIG:DEBUG>:-debug>                   # Generates complete debugging information
+      $<$<CONFIG:DEBUG>:-O0>                      # Disable all optimizations
+      $<$<CONFIG:DEBUG>:-g>                   # Generates complete debugging information
       $<$<CONFIG:DEBUG>:-traceback>               # Generates extra information in the object file to provide source file traceback information when a severe error occurs at run time
-      $<$<CONFIG:DEBUG>:-warn all>                # Enable all warnings
+      #$<$<CONFIG:DEBUG>:-warn all>                # Enable all warnings
     )
 endif()
 
