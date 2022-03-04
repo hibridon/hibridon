@@ -224,19 +224,19 @@ ldif=9
 !      ldif=7
 tol=1.d-10
 call dset(19,zero,vvl,1)
-call dcopy(121,d0,1,aa,1)
-call dqrank(aa,11,11,lsum,tol,kr,kpvt,qraux,work)
-call dqrlss(aa,11,11,lsum,kr,vsum,xsum,rsd,kpvt,qraux)
+call dcopy(lsum*lsum,d0,1,aa,1)
+call dqrank(aa,lsum,lsum,lsum,tol,kr,kpvt,qraux,work)
+call dqrlss(aa,lsum,lsum,lsum,kr,vsum,xsum,rsd,kpvt,qraux)
 ! remove terms less than 0.2 cm-1 in size
-do 110 i=1,11
+do 110 i=1,lsum
   if (abs(xsum(i)) .lt. 0.2d0) xsum(i)=zero
 110 continue
 vv0=xsum(1)/econv
 call dcopy(lsum-1,xsum(2),1,vvl,1)
-call dcopy(81,d2,1,aa,1)
-call dqrank(aa,9,9,ldif,tol,kr,kpvt,qraux,work)
-call dqrlss(aa,9,9,ldif,kr,vdif,xdif,rsd,kpvt,qraux)
-do 120 i=1,9
+call dcopy(ldif*ldif,d2,1,aa,1)
+call dqrank(aa,ldif,ldif,ldif,tol,kr,kpvt,qraux,work)
+call dqrlss(aa,ldif,ldif,ldif,kr,vdif,xdif,rsd,kpvt,qraux)
+do 120 i=1,ldif
   if (abs(xdif(i)) .lt. 0.2d0) xdif(i)=zero
 120 continue
 call dcopy(ldif,xdif,1,vvl(11),1)
