@@ -8,10 +8,12 @@
 !
 subroutine driver
 use mod_covvl, only: vvl
+use mod_cosysr, only: rspar
 implicit double precision (a-h,o-z)
 dimension thta(11),cthta(11),vap(11),va2p(11)
-common /cosysr/ xjunk(2),rshift,xfact
 #include "common/parpot.F90"
+real(8), pointer :: rshift, xfact
+rshift=>rspar(1); xfact=>rspar(2)
 potnam='Cybulski et al He-OH(X) RCCSDT PES'
 thta(1)=0.D0
 thta(2)=20.D0

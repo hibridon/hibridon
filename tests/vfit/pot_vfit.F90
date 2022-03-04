@@ -64,6 +64,7 @@ subroutine loapot(iunit,filnam)
 !  the common block /cofit/ is used to pass arguments
 !
 ! --------------------------------------------------------------------------
+use mod_cosysi, only: nscode, isicod, ispar
 implicit double precision(a-h,o-z)
 character*(*) filnam
 character*80 potlab, filnm1
@@ -74,7 +75,6 @@ common /coptx/ nblkx,maxpwx,minmpx,maxmpx,mpsstx,junk, &
   art(250),are(250)
 #include "common/parbas.F90"
 #include "common/parvfit.F90"
-common /cosysi/ nscode, isicod, nterm
 common /copot/ nc(maxtrm),a(20,50,maxtrm),maxpw(maxtrm), &
                minms(maxtrm),maxms(maxtrm),msstp(maxtrm), &
                mdimp(maxtrm),pinv(maxang,maxang,maxtrm), &
@@ -85,6 +85,8 @@ common /core/  re
 common /coskip/ nskip,iskip
 common /colpar/ lpar(14), readpt
 common /coselb/ ibasty
+integer, pointer :: nterm
+nterm=>ispar(1)
 potnam='WERNER-FOLLMEG VFIT'
 ! default data
 lammin(1)=2
@@ -204,8 +206,8 @@ subroutine pot(vv0,r)
 !  current revision date: 18-aug-1998 by mha
 ! -------------------------------------------------------------------
 use mod_covvl, only: vvl
+use mod_cosysi, only: nscode, isicod, ispar
 implicit double precision(a-h,o-z)
-common /cosysi/ nscode, isicod, nterm
 #include "common/parbas.F90"
 #include "common/parvfit.F90"
 common /copot/ nc(maxtrm),a(20,50,maxtrm),maxpw(maxtrm), &
@@ -220,6 +222,8 @@ common /coptx/ nblkx,maxpwx,minmpx,maxmpx,mpsstx,junk, &
 common /core/  re
 common /coskip/ nskip,iskip
 common /coselb/ ibasty
+integer, pointer :: nterm
+nterm=>ispar(1)
 rr = r
 vv0 = 0.d0
 jj = 0

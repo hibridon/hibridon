@@ -43,12 +43,14 @@ goto 1
 ! ------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_cosysi, only: nscode, isicod, ispar
 implicit double precision (a-h,o-z)
 character*(*) filnam
 #include "common/parbas.F90"
 #include "common/parpot.F90"
 common /coloapot/ s4pi
-common /cosysi/ nscode, isicod, nterm
+integer, pointer :: nterm
+nterm=>ispar(1)
 potnam='Patkowski et al. H2O-He SAPT PES'
 !
 !  s4pi is factor to normalize isotropic term
@@ -873,7 +875,7 @@ end
   subroutine dispind(rpt,eld,eli)
   implicit real*8 (a-h,o-z)
   parameter (maxc=5000)
-  dimension rr(20),oa(3),ob(3),oc(2), rpt(6), eld(2), eli(20)
+  dimension rr(20),oa(3),ob(3),oc(2), rpt(6), eld(20), eli(20)
   complex*16 a, alm
 !--- common/dind/ contains dispersion and induction coefs.
   common/dind/ cd(maxc),ci(maxc),ld(6,maxc),li(6,maxc), &

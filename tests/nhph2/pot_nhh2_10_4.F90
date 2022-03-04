@@ -94,7 +94,7 @@ end subroutine loapot
 !     Main program for makepot
 subroutine driver
 use mod_1sg1sg
-use mod_c2hh2
+use mod_nhh2
 use mod_conlam, only: nlam
 use mod_covvl, only: vvl
 implicit none

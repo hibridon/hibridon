@@ -1,5 +1,6 @@
 #include "assert.h"
 program logair
+use mod_com, only: com_file, com
 use mod_clseg, only: allocate_clseg
 use mod_cobuf, only: allocate_cobuf
 use mod_cofil, only: allocate_cofil
@@ -75,7 +76,11 @@ use mod_codim, only: allocate_codim, mairy, mmax
 use mod_comxbs, only: allocate_comxbs
 use mod_comxm, only: allocate_comxm
 
+use mod_cosyr, only: allocate_cosyr
+use mod_cosys, only: allocate_cosys
 use mod_cosysl, only: allocate_cosysl
+use mod_cosysi, only: allocate_cosysi
+use mod_cosysr, only: allocate_cosysr
 use mod_flow, only: flow
 !**********************************************************************
 !***   this code is not released for general public use            ****
@@ -157,6 +162,7 @@ integer :: arg_index
 integer :: stat
 character(len=32) :: arg
 
+
 kmax = 0
 
 arg_index = 1
@@ -177,6 +183,16 @@ do while( arg_index <= command_argument_count() )
           case ('-h', '--help')
               call print_help()
               stop 1
+
+          case ('-c', '--com')
+            arg_index = arg_index + 1
+            if ( arg_index > command_argument_count() ) then
+                print '(2a, /)', 'missing value for <command_file> ', arg
+                call print_help()
+                stop 1
+            end if
+            call get_command_argument(arg_index, com_file)
+            com = .true.
 
           case default
               print '(2a, /)', 'unrecognised command-line option: ', arg
@@ -309,7 +325,11 @@ call allocate_codim(kairy, kmax, kbig)
 call allocate_comxbs(kmxbas)
 call allocate_comxm()
 
+call allocate_cosysi(kmaxpar)
 call allocate_cosysl(kmaxpar)
+call allocate_cosysr(kmaxpar)
+call allocate_cosyr(kmaxpar)
+call allocate_cosys(2*kmaxpar+3)
 !
 men = ken
 !  calculate array containing logs of factorials for use in vector
@@ -326,5 +346,6 @@ end
 subroutine print_help()
 print '(a, /)', 'command-line options:'
 print '(a)',    '  -k, --kmax <max_num_channels>  defines the max number of channels'
+print '(a)',    '  -c, --com <command_file>  specifies a command file instead of input redirection'
 print '(a, /)', '  -h, --help        print usage information and exit'
 end subroutine print_help
