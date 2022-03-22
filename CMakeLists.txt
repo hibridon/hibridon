@@ -1,6 +1,5 @@
 # CMake project file for hibridon
 
-# cmake version >= 3.13 is required for IN_LIST
 cmake_minimum_required (VERSION 3.3)
 project (hibridon VERSION 5.0)
 enable_language (Fortran)
