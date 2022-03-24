@@ -107,7 +107,6 @@ use mod_cosout, only: nnout, jout
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coener, only: energ
-use mod_basis,  only : basis
 use mod_version, only : version, acknow
 use mod_hibrid5, only : soutpt, nusum, xwrite, wrhead, restrt, rsave
 use constants
