@@ -141,197 +141,197 @@ integer ibasty
 common /coselb/ ibasty
 !
 !  select basis routine according to value of ibasty
-if (ibasty .ge. 99) then
-!  user supplied routine
-  call bausr(j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
-                  sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
-                  csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-                  n, nmax, ntop)
-  return
-endif
-goto (100,200,300,400,500,600,700,800,900,1000,1100,1200,1300, &
-      1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400, &
-      2500,2600,2700,2800,2900,3000) &
-      ibasty
-!  singlet sigma basis
-100 call ba1sg (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
-                  sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
-                  csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-                  n, nmax, ntop)
-return
-!  doublet sigma basis
-200 call ba2sg (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  doublet pi basis
-300 call ba2pi (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  sigma/pi basis
-400 call basgpi (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!   general pi basis
-500  call bapi (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  symmetric top basis, with inversion doubling
-600 call bastp (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  1/3 P atom basis
-700 call ba13p (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-! 1sigma + 1sigma basis
-800 call ba2mol (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-! symmetric top + 1 sigma basis
-900 call bastpln (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-! 2/2 P atom basis
-1000  call ba22p (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  singlet delta basis
-1100 call ba1del (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  homonuclear + 2P atom basis
-1200 call bah2p (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  homonuclear + 3P atom basis
-1300 call bah3p (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  doublet delta basis
-1400 call ba2del (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  heteronuclear + 2P atom basis
-!1500  call bah2p (j, l, is, jhold, ehold, ishold, nlevel,
-!    :                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
-!    :                  flaghf, flagsu, csflag, clist, bastst,
-!    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-1500 call badiat2p (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-!  asymmetric top basis
-1600  call baastp (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  CH2(X 3B1) (0,v2,0) bender levels
-1700  call bach2x (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  symmetric top basis, with no inversion doubling
-1800  call bastp1 (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  2sig-2pi + atom scattering (one 2sigma state and one or more 2pi
-!   vibrational levels, no sigma-pi spectroscopic perturbations)
-1900  call basgpi1 (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  2pi + 1sigma molecules
-2000 call ba2pi1sg(j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, &
-     bastst, ihomo, nu, numin, jlpar, twomol, n, nmax, ntop)
-return
-!  symmetric top + 1sigma molecules
-2100 call bastp1sg(j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, &
-     bastst, ihomo, nu, numin, jlpar, twomol, n, nmax, ntop)
-return
-!  1D/3P atom + closed-shell atom
-2200 call ba1d3p(j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, &
-     bastst, ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!   3P atom + 2S atom
-2300 call ba3p2s (j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, &
-     bastst, ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!   spherical top + atom
-2400 call basphtp (j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-     flaghf, flagsu, csflag, clist, bastst, ihomo, &
-     nu, numin, jlpar, n, nmax, ntop)
-return
-!   1sigma + 1sigma basis (different molecules)
-2500 call ba1sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-     flaghf, flagsu, csflag, clist, bastst, ihomo, &
-     nu, numin, jlpar, n, nmax, ntop)
-return
-!   2sigma + 1sigma basis
-2600 call ba2sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-     flaghf, flagsu, csflag, clist, bastst, ihomo, &
-     nu, numin, jlpar, n, nmax, ntop)
-return
-!   C2v asymmetric top + atom scattering
-2700 call baastp1 (j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-     flaghf, flagsu, csflag, clist, bastst, ihomo, &
-     nu, numin, jlpar, n, nmax, ntop)
-return
-!   3sigma + 1sigma basis
-2800 call ba3sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-     flaghf, flagsu, csflag, clist, bastst, ihomo, &
-     nu, numin, jlpar, n, nmax, ntop)
-return
-!   chiral asymmetric top + atom scattering
-2900 call baastp2 (j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-     flaghf, flagsu, csflag, clist, bastst, ihomo, &
-     nu, numin, jlpar, n, nmax, ntop)
-return
-!   C2v asymmetric top + linear molecule scattering
-3000 call baastp3 (j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-     flaghf, flagsu, csflag, clist, bastst, ihomo, &
-     nu, numin, jlpar, n, nmax, ntop)
+! if (ibasty .ge. 99) then
+! !  user supplied routine
+!   call bausr(j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
+!                   sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
+!                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
+!                   n, nmax, ntop)
+!   return
+! endif
+! goto (100,200,300,400,500,600,700,800,900,1000,1100,1200,1300, &
+!       1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400, &
+!       2500,2600,2700,2800,2900,3000) &
+!       ibasty
+! !  singlet sigma basis
+! 100 call ba1sg (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
+!                   sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
+!                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
+!                   n, nmax, ntop)
+! return
+! !  doublet sigma basis
+! 200 call ba2sg (j, l, is, jhold, ehold, ishold, nlevel, &
+!                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!                   flaghf, flagsu, csflag, clist, bastst, &
+!                   ihomo, nu, numin, jlpar, n, nmax, ntop)
+! return
+! !  doublet pi basis
+! 300 call ba2pi (j, l, is, jhold, ehold, ishold, nlevel, &
+!                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!                   flaghf, flagsu, csflag, clist, bastst, &
+!                   ihomo, nu, numin, jlpar, n, nmax, ntop)
+! return
+! !  sigma/pi basis
+! 400 call basgpi (j, l, is, jhold, ehold, ishold, nlevel, &
+!                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!                   flaghf, flagsu, csflag, clist, bastst, &
+!                   ihomo, nu, numin, jlpar, n, nmax, ntop)
+! return
+! !   general pi basis
+! 500  call bapi (j, l, is, jhold, ehold, ishold, nlevel, &
+!                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!                   flaghf, flagsu, csflag, clist, bastst, &
+!                   ihomo, nu, numin, jlpar, n, nmax, ntop)
+! return
+! !  symmetric top basis, with inversion doubling
+! 600 call bastp (j, l, is, jhold, ehold, ishold, nlevel, &
+!                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!                   flaghf, flagsu, csflag, clist, bastst, &
+!                   ihomo, nu, numin, jlpar, n, nmax, ntop)
+! return
+! !  1/3 P atom basis
+! 700 call ba13p (j, l, is, jhold, ehold, ishold, nlevel, &
+!                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!                   flaghf, flagsu, csflag, clist, bastst, &
+!                   ihomo, nu, numin, jlpar, n, nmax, ntop)
+! return
+! ! 1sigma + 1sigma basis
+! 800 call ba2mol (j, l, is, jhold, ehold, ishold, nlevel, &
+!                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!                   flaghf, flagsu, csflag, clist, bastst, &
+!                   ihomo, nu, numin, jlpar, n, nmax, ntop)
+! return
+! ! symmetric top + 1 sigma basis
+! 900 call bastpln (j, l, is, jhold, ehold, ishold, nlevel, &
+!                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!                   flaghf, flagsu, csflag, clist, bastst, &
+!                   ihomo, nu, numin, jlpar, n, nmax, ntop)
+! return
+! ! 2/2 P atom basis
+! 1000  call ba22p (j, l, is, jhold, ehold, ishold, nlevel, &
+!                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!                   flaghf, flagsu, csflag, clist, bastst, &
+!                   ihomo, nu, numin, jlpar, n, nmax, ntop)
+! return
+! !  singlet delta basis
+! 1100 call ba1del (j, l, is, jhold, ehold, ishold, nlevel, &
+!                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!                   flaghf, flagsu, csflag, clist, bastst, &
+!                   ihomo, nu, numin, jlpar, n, nmax, ntop)
+! return
+! !  homonuclear + 2P atom basis
+! 1200 call bah2p (j, l, is, jhold, ehold, ishold, nlevel, &
+!                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!                   flaghf, flagsu, csflag, clist, bastst, &
+!                   ihomo, nu, numin, jlpar, n, nmax, ntop)
+! return
+! !  homonuclear + 3P atom basis
+! 1300 call bah3p (j, l, is, jhold, ehold, ishold, nlevel, &
+!                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!                   flaghf, flagsu, csflag, clist, bastst, &
+!                   ihomo, nu, numin, jlpar, n, nmax, ntop)
+! return
+! !  doublet delta basis
+! 1400 call ba2del (j, l, is, jhold, ehold, ishold, nlevel, &
+!                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!                   flaghf, flagsu, csflag, clist, bastst, &
+!                   ihomo, nu, numin, jlpar, n, nmax, ntop)
+! return
+! !  heteronuclear + 2P atom basis
+! !1500  call bah2p (j, l, is, jhold, ehold, ishold, nlevel,
+! !    :                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
+! !    :                  flaghf, flagsu, csflag, clist, bastst,
+! !    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+! 1500 call badiat2p (j, l, is, jhold, ehold, ishold, nlevel, &
+!                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!                   flaghf, flagsu, csflag, clist, bastst, &
+!                   ihomo, nu, numin, jlpar, n, nmax, ntop)
+! !  asymmetric top basis
+! 1600  call baastp (j, l, is, jhold, ehold, ishold, nlevel, &
+!                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!                   flaghf, flagsu, csflag, clist, bastst, &
+!                   ihomo, nu, numin, jlpar, n, nmax, ntop)
+! return
+! !  CH2(X 3B1) (0,v2,0) bender levels
+! 1700  call bach2x (j, l, is, jhold, ehold, ishold, nlevel, &
+!                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!                   flaghf, flagsu, csflag, clist, bastst, &
+!                   ihomo, nu, numin, jlpar, n, nmax, ntop)
+! return
+! !  symmetric top basis, with no inversion doubling
+! 1800  call bastp1 (j, l, is, jhold, ehold, ishold, nlevel, &
+!                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!                   flaghf, flagsu, csflag, clist, bastst, &
+!                   ihomo, nu, numin, jlpar, n, nmax, ntop)
+! return
+! !  2sig-2pi + atom scattering (one 2sigma state and one or more 2pi
+! !   vibrational levels, no sigma-pi spectroscopic perturbations)
+! 1900  call basgpi1 (j, l, is, jhold, ehold, ishold, nlevel, &
+!                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!                   flaghf, flagsu, csflag, clist, bastst, &
+!                   ihomo, nu, numin, jlpar, n, nmax, ntop)
+! return
+! !  2pi + 1sigma molecules
+! 2000 call ba2pi1sg(j, l, is, jhold, ehold, ishold, nlevel, &
+!      nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, &
+!      bastst, ihomo, nu, numin, jlpar, twomol, n, nmax, ntop)
+! return
+! !  symmetric top + 1sigma molecules
+! 2100 call bastp1sg(j, l, is, jhold, ehold, ishold, nlevel, &
+!      nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, &
+!      bastst, ihomo, nu, numin, jlpar, twomol, n, nmax, ntop)
+! return
+! !  1D/3P atom + closed-shell atom
+! 2200 call ba1d3p(j, l, is, jhold, ehold, ishold, nlevel, &
+!      nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, &
+!      bastst, ihomo, nu, numin, jlpar, n, nmax, ntop)
+! return
+! !   3P atom + 2S atom
+! 2300 call ba3p2s (j, l, is, jhold, ehold, ishold, nlevel, &
+!      nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, &
+!      bastst, ihomo, nu, numin, jlpar, n, nmax, ntop)
+! return
+! !   spherical top + atom
+! 2400 call basphtp (j, l, is, jhold, ehold, ishold, nlevel, &
+!      nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!      flaghf, flagsu, csflag, clist, bastst, ihomo, &
+!      nu, numin, jlpar, n, nmax, ntop)
+! return
+! !   1sigma + 1sigma basis (different molecules)
+! 2500 call ba1sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
+!      nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!      flaghf, flagsu, csflag, clist, bastst, ihomo, &
+!      nu, numin, jlpar, n, nmax, ntop)
+! return
+! !   2sigma + 1sigma basis
+! 2600 call ba2sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
+!      nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!      flaghf, flagsu, csflag, clist, bastst, ihomo, &
+!      nu, numin, jlpar, n, nmax, ntop)
+! return
+! !   C2v asymmetric top + atom scattering
+! 2700 call baastp1 (j, l, is, jhold, ehold, ishold, nlevel, &
+!      nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!      flaghf, flagsu, csflag, clist, bastst, ihomo, &
+!      nu, numin, jlpar, n, nmax, ntop)
+! return
+! !   3sigma + 1sigma basis
+! 2800 call ba3sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
+!      nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!      flaghf, flagsu, csflag, clist, bastst, ihomo, &
+!      nu, numin, jlpar, n, nmax, ntop)
+! return
+! !   chiral asymmetric top + atom scattering
+! 2900 call baastp2 (j, l, is, jhold, ehold, ishold, nlevel, &
+!      nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!      flaghf, flagsu, csflag, clist, bastst, ihomo, &
+!      nu, numin, jlpar, n, nmax, ntop)
+! return
+! !   C2v asymmetric top + linear molecule scattering
+! 3000 call baastp3 (j, l, is, jhold, ehold, ishold, nlevel, &
+!      nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
+!      flaghf, flagsu, csflag, clist, bastst, ihomo, &
+!      nu, numin, jlpar, n, nmax, ntop)
 return
 end
 !--------------------------------------------------------------------
