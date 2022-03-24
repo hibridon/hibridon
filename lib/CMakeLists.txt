@@ -31,36 +31,36 @@ add_library(hib
     hivector.F90
     hipotutil.F90
     hiversion.F90
-    bases/hiba01_1sg.F90
-    bases/hiba02_2sg.F90
-    bases/hiba03_2pi.F90
-    bases/hiba04_sgpi.F90
-    bases/hiba05_pi.F90
-    bases/hiba06_stp.F90
-    bases/hiba07_13p.F90
-    bases/hiba08_2mol.F90
-    bases/hiba09_stpln.F90
-    bases/hiba10_22p.F90
-    bases/hiba11_1del.F90
-    bases/hiba12_h2p.F90
-    bases/hiba13_h3p.F90
-    bases/hiba14_2del.F90
-    bases/hiba15_diat2p.F90
-    bases/hiba16_astp.F90
-    bases/hiba17_ch2x.F90
-    bases/hiba18_stp1.F90
-    bases/hiba19_sgpi1.F90
-    bases/hiba20_2pi1sg.F90
-    bases/hiba21_stp1sg.F90
-    bases/hiba22_1d3p.F90
-    bases/hiba23_3p2s.F90
-    bases/hiba24_sphtp.F90
-    bases/hiba25_1sg1sg.F90
-    bases/hiba26_2sg1sg.F90
-    bases/hiba27_astp1.F90
-    bases/hiba28_3sg1sg.F90
-    bases/hiba29_astp2.F90
-    bases/hiba30_astp3.F90
+    # bases/hiba01_1sg.F90
+    # bases/hiba02_2sg.F90
+    # bases/hiba03_2pi.F90
+    # bases/hiba04_sgpi.F90
+    # bases/hiba05_pi.F90
+    # bases/hiba06_stp.F90
+    # bases/hiba07_13p.F90
+    # bases/hiba08_2mol.F90
+    # bases/hiba09_stpln.F90
+    # bases/hiba10_22p.F90
+    # bases/hiba11_1del.F90
+    # bases/hiba12_h2p.F90
+    # bases/hiba13_h3p.F90
+    # bases/hiba14_2del.F90
+    # bases/hiba15_diat2p.F90
+    # bases/hiba16_astp.F90
+    # bases/hiba17_ch2x.F90
+    # bases/hiba18_stp1.F90
+    # bases/hiba19_sgpi1.F90
+    # bases/hiba20_2pi1sg.F90
+    # bases/hiba21_stp1sg.F90
+    # bases/hiba22_1d3p.F90
+    # bases/hiba23_3p2s.F90
+    # bases/hiba24_sphtp.F90
+    # bases/hiba25_1sg1sg.F90
+    # bases/hiba26_2sg1sg.F90
+    # bases/hiba27_astp1.F90
+    # bases/hiba28_3sg1sg.F90
+    # bases/hiba29_astp2.F90
+    # bases/hiba30_astp3.F90
     )
 
 # This for preprocessed includes from the subdirectory bases to work
