@@ -165,7 +165,6 @@ subroutine sysdat (irpot, readpt, iread)
 !  author: b. follmeg
 !  current revision date: 30-jul-2018 (p. dagdigian)
 !  -----------------------------------------------------------------------
-use mod_hiba1sg, only: sy1sg
 integer ibasty, irpot, iread
 logical readpt
 common /coselb/ ibasty
@@ -175,105 +174,105 @@ do 10 it=1,maxtrm
 ivrow(1,it)=0
 ivcol(1,it)=0
 10 ntv(it)=1
-if (ibasty .ge. 99) then
-!  user supplied routine
-  call syusr(irpot, readpt, iread)
-  return
-endif
-goto (100,200,300,400,500,600,700,800,900,1000,1100,1200, &
-      1300,1400,1500,1600,1700,1800,1900,2000,2100,2200, &
-      2300,2400,2500,2600,2700,2800,2900,3000) &
-     ibasty
-!  singlet sigma variables
-100 call sy1sg(irpot, readpt, iread)
-return
-!  doublet sigma variables
-200 call sy2sg(irpot, readpt, iread)
-return
-!  doublet pi variables
-300 call sy2pi(irpot, readpt, iread)
-return
-!  sigma/pi variables
-400 call sysgpi(irpot, readpt, iread)
-return
-!  general pi variables
-500 call sypi(irpot, readpt, iread)
-return
-!  symmetric top variables - w. inversion doubling
-600 call systp(irpot, readpt, iread)
-return
-!  1/3 P atom variables
-700 call sy13p(irpot, readpt, iread)
-return
-! two 1 sigma molecules
-800 call sy2mol(irpot, readpt, iread)
-return
-! symmetric top + 1 sigma molecule
-900 call systpln(irpot, readpt, iread)
-return
-! 2S atom + 2P atom
-1000 call sy22p(irpot, readpt, iread)
-return
-! singlet delta variables
-1100 call sy1del(irpot, readpt, iread)
-return
-! homonuclear + 2P atom variables
-1200 call syh2p(irpot, readpt, iread)
-return
-! homonuclear + 3P atom variables
-1300 call syh3p(irpot, readpt, iread)
-return
-! doublet delta variable
-1400 call sy2del(irpot, readpt, iread)
-return
-! heteronuclear + 2P atom variables
-1500 call sydiat2p(irpot, readpt, iread)
-return
-! asymmetric top variables
-1600 call syastp(irpot, readpt, iread)
-return
-! CH2(X 3B1) (0,v2,0) bender level variables
-1700 call sych2x(irpot, readpt, iread)
-return
-! symmetric top variables - no inversion doubling
-1800  call systp1(irpot, readpt, iread)
-return
-! 2sigma | 2pi + atom (no perturbations)
-1900 call sysgpi1(irpot, readpt, iread)
-return
-! 2Pi + 1Sigma
-2000 call sy2pi1sg(irpot, readpt, iread)
-return
-! Symmetric top + 1Sigma
-2100 call systp1sg(irpot, readpt, iread)
-return
-! 1D/3P atom + closed-shell atom
-2200 call sy1d3p(irpot, readpt, iread)
-return
-!  3P atom + 2S atom
-2300 call sy3p2s(irpot, readpt, iread)
-return
-!  spherical top + atom
-2400 call sysphtp(irpot, readpt, iread)
-return
-! two different 1sigma molecules
-2500 call sy1sg1sg(irpot, readpt, iread)
-return
-! 2sigma + 1sigma molecules
-2600 call sys2sg1sg(irpot, readpt, iread)
-return
-! C2v asymmetric top variables
-2700 call syastp1(irpot, readpt, iread)
-return
-! 3sigma + 1sigma molecules
-2800 call sys3sg1sg(irpot, readpt, iread)
-return
-! chiral asymmetric top variables
-2900 call syastp2(irpot, readpt, iread)
-return
-! C2v asymmetric top +linear molecule variables
-3000 call syastp3(irpot, readpt, iread)
-return
+! if (ibasty .ge. 99) then
+! !  user supplied routine
+!   call syusr(irpot, readpt, iread)
+!   return
+! endif
+! goto (100,200,300,400,500,600,700,800,900,1000,1100,1200, &
+!       1300,1400,1500,1600,1700,1800,1900,2000,2100,2200, &
+!       2300,2400,2500,2600,2700,2800,2900,3000) &
+!      ibasty
+! !  singlet sigma variables
+! 100 call sy1sg(irpot, readpt, iread)
+! return
+! !  doublet sigma variables
+! 200 call sy2sg(irpot, readpt, iread)
+! return
+! !  doublet pi variables
+! 300 call sy2pi(irpot, readpt, iread)
+! return
+! !  sigma/pi variables
+! 400 call sysgpi(irpot, readpt, iread)
+! return
+! !  general pi variables
+! 500 call sypi(irpot, readpt, iread)
+! return
+! !  symmetric top variables - w. inversion doubling
+! 600 call systp(irpot, readpt, iread)
+! return
+! !  1/3 P atom variables
+! 700 call sy13p(irpot, readpt, iread)
+! return
+! ! two 1 sigma molecules
+! 800 call sy2mol(irpot, readpt, iread)
+! return
+! ! symmetric top + 1 sigma molecule
+! 900 call systpln(irpot, readpt, iread)
+! return
+! ! 2S atom + 2P atom
+! 1000 call sy22p(irpot, readpt, iread)
+! return
+! ! singlet delta variables
+! 1100 call sy1del(irpot, readpt, iread)
+! return
+! ! homonuclear + 2P atom variables
+! 1200 call syh2p(irpot, readpt, iread)
+! return
+! ! homonuclear + 3P atom variables
+! 1300 call syh3p(irpot, readpt, iread)
+! return
+! ! doublet delta variable
+! 1400 call sy2del(irpot, readpt, iread)
+! return
+! ! heteronuclear + 2P atom variables
+! 1500 call sydiat2p(irpot, readpt, iread)
+! return
+! ! asymmetric top variables
+! 1600 call syastp(irpot, readpt, iread)
+! return
+! ! CH2(X 3B1) (0,v2,0) bender level variables
+! 1700 call sych2x(irpot, readpt, iread)
+! return
+! ! symmetric top variables - no inversion doubling
+! 1800  call systp1(irpot, readpt, iread)
+! return
+! ! 2sigma | 2pi + atom (no perturbations)
+! 1900 call sysgpi1(irpot, readpt, iread)
+! return
+! ! 2Pi + 1Sigma
+! 2000 call sy2pi1sg(irpot, readpt, iread)
+! return
+! ! Symmetric top + 1Sigma
+! 2100 call systp1sg(irpot, readpt, iread)
+! return
+! ! 1D/3P atom + closed-shell atom
+! 2200 call sy1d3p(irpot, readpt, iread)
+! return
+! !  3P atom + 2S atom
+! 2300 call sy3p2s(irpot, readpt, iread)
+! return
+! !  spherical top + atom
+! 2400 call sysphtp(irpot, readpt, iread)
+! return
+! ! two different 1sigma molecules
+! 2500 call sy1sg1sg(irpot, readpt, iread)
+! return
+! ! 2sigma + 1sigma molecules
+! 2600 call sys2sg1sg(irpot, readpt, iread)
+! return
+! ! C2v asymmetric top variables
+! 2700 call syastp1(irpot, readpt, iread)
+! return
+! ! 3sigma + 1sigma molecules
+! 2800 call sys3sg1sg(irpot, readpt, iread)
+! return
+! ! chiral asymmetric top variables
+! 2900 call syastp2(irpot, readpt, iread)
+! return
+! ! C2v asymmetric top +linear molecule variables
+! 3000 call syastp3(irpot, readpt, iread)
+! return
 end
 ! -----------------------------------------------------------------------
 subroutine syssav (readpt)
@@ -317,114 +316,113 @@ subroutine syssav (readpt)
 !  author: b. follmeg
 !  current revision date: 20-jun-2019 (p.dagdigian)
 !  -----------------------------------------------------------------------
-use mod_hiba1sg, only: sav1sg
 integer ibasty
 logical readpt
 common /coselb/ ibasty
-if (ibasty .ge. 99) then
-!  user supplied routine
-   call savusr(readpt)
-   return
-endif
-goto (100,200,300,400,500,600,700,800,900,1000,1100,1200, &
-      1300,1400,1500,1600,1700,1800,1900,2000,2100,2200, &
-      2300,2400,2500,2600,2700,2800,2900,3000) &
-     ibasty
+! if (ibasty .ge. 99) then
+! !  user supplied routine
+!    call savusr(readpt)
+!    return
+! endif
+!goto (100,200,300,400,500,600,700,800,900,1000,1100,1200, &
+!      1300,1400,1500,1600,1700,1800,1900,2000,2100,2200, &
+!      2300,2400,2500,2600,2700,2800,2900,3000) &
+!     ibasty
 !  singlet sigma variables
-100 call sav1sg(readpt)
-return
-!  doublet sigma variables
-200 call sav2sg(readpt)
-return
-!  doublet pi variables
-300 call sav2pi(readpt)
-return
-!  sigma/pi variables
-400 call savsgpi(readpt)
-return
-!  general pi variables
-500 call savpi(readpt)
-return
-!  symmetric top variables - w. inversion doubling
-600 call savstp(readpt)
-return
-!  1/3 P atom variables
-700 call sav13p(readpt)
-return
-!  1sigma+1sigma variables
-800 call sav2mol(readpt)
-return
-!  symmetric top + 1 sigma molecule
-!900   call savstpln(irpot, readpt, iread) -- change call (pjd)
-900 call savstpln(readpt)
-return
-!  2/2 P atom variables
-1000 call sav22p(readpt)
-return
-!  singlet delta variables
-1100 call sav1del(readpt)
-return
-!  homonuclear + 2P atom variables
-!1200  call savh2p(irpot, readpt, iread) -- change call (pjd)
-1200 call savh2p(readpt)
-return
-!  homonuclear + 3P atom variables
-!1300  call savh3p(irpot, readpt, iread) -- change call (pjd)
-1300 call savh3p(readpt)
-return
-!  doublet-delta + atom variables
-!1400  call sav2del(irpot, readpt, iread) -- change call (pjd)
-1400 call sav2del(readpt)
-return
-!  heteronuclear + 2P atom variables
-!1500  call savdiat2p(irpot, readpt, iread) -- change call (pjd)
-1500 call savdiat2p(readpt)
-return
-!  asymmetric top variables
-1600 call savastp(readpt)
-return
-!  CH2(X 3B1) (0,v2,0) bender level variables
-1700 call savch2x(readpt)
-return
-!  symmetric top variables - w/o. inversion doubling
-1800 call savstp1(readpt)
-return
-!  2sigma | 2pi + atom (no perturbations)
-1900 call savsgpi1(readpt)
-return
-!  2Pi + 1Sigma
-2000 call sav2pi1sg(readpt)
-return
-!  Symmetric top + 1Sigma
-2100 call savstp1sg(readpt)
-return
-!  1D/3P atom + closed-shell atom
-2200 call sav1d3p(readpt)
-return
-!  3P atom + 2S atom
-2300 call sav3p2s(readpt)
-return
-!  spherical top + atom
-2400 call savsphtp(reapt)
-return
-!  two different 1sigma molecules
-2500 call sav1sg1sg(readpt)
-return
-!  2sigma + 1sigma molecules
-2600 call sav2sg1sg(readpt)
-return
-!  C2v asymmetric top variables
-2700 call savastp1(readpt)
-return
-!  3sigma + 1sigma molecules
-2800 call sav3sg1sg(readpt)
-return
-!  chiral asymmetric top variables
-2900 call savastp2(readpt)
-return
-!  C2v asymmetric top + linear molecule variables
-3000 call savastp3(readpt)
-return
+!100 call sav1sg(readpt)
+!return
+! !  doublet sigma variables
+! 200 call sav2sg(readpt)
+! return
+! !  doublet pi variables
+! 300 call sav2pi(readpt)
+! return
+! !  sigma/pi variables
+! 400 call savsgpi(readpt)
+! return
+! !  general pi variables
+! 500 call savpi(readpt)
+! return
+! !  symmetric top variables - w. inversion doubling
+! 600 call savstp(readpt)
+! return
+! !  1/3 P atom variables
+! 700 call sav13p(readpt)
+! return
+! !  1sigma+1sigma variables
+! 800 call sav2mol(readpt)
+! return
+! !  symmetric top + 1 sigma molecule
+! !900   call savstpln(irpot, readpt, iread) -- change call (pjd)
+! 900 call savstpln(readpt)
+! return
+! !  2/2 P atom variables
+! 1000 call sav22p(readpt)
+! return
+! !  singlet delta variables
+! 1100 call sav1del(readpt)
+! return
+! !  homonuclear + 2P atom variables
+! !1200  call savh2p(irpot, readpt, iread) -- change call (pjd)
+! 1200 call savh2p(readpt)
+! return
+! !  homonuclear + 3P atom variables
+! !1300  call savh3p(irpot, readpt, iread) -- change call (pjd)
+! 1300 call savh3p(readpt)
+! return
+! !  doublet-delta + atom variables
+! !1400  call sav2del(irpot, readpt, iread) -- change call (pjd)
+! 1400 call sav2del(readpt)
+! return
+! !  heteronuclear + 2P atom variables
+! !1500  call savdiat2p(irpot, readpt, iread) -- change call (pjd)
+! 1500 call savdiat2p(readpt)
+! return
+! !  asymmetric top variables
+! 1600 call savastp(readpt)
+! return
+! !  CH2(X 3B1) (0,v2,0) bender level variables
+! 1700 call savch2x(readpt)
+! return
+! !  symmetric top variables - w/o. inversion doubling
+! 1800 call savstp1(readpt)
+! return
+! !  2sigma | 2pi + atom (no perturbations)
+! 1900 call savsgpi1(readpt)
+! return
+! !  2Pi + 1Sigma
+! 2000 call sav2pi1sg(readpt)
+! return
+! !  Symmetric top + 1Sigma
+! 2100 call savstp1sg(readpt)
+! return
+! !  1D/3P atom + closed-shell atom
+! 2200 call sav1d3p(readpt)
+! return
+! !  3P atom + 2S atom
+! 2300 call sav3p2s(readpt)
+! return
+! !  spherical top + atom
+! 2400 call savsphtp(reapt)
+! return
+! !  two different 1sigma molecules
+! 2500 call sav1sg1sg(readpt)
+! return
+! !  2sigma + 1sigma molecules
+! 2600 call sav2sg1sg(readpt)
+! return
+! !  C2v asymmetric top variables
+! 2700 call savastp1(readpt)
+! return
+! !  3sigma + 1sigma molecules
+! 2800 call sav3sg1sg(readpt)
+! return
+! !  chiral asymmetric top variables
+! 2900 call savastp2(readpt)
+! return
+! !  C2v asymmetric top + linear molecule variables
+! 3000 call savastp3(readpt)
+! return
 end
 ! -----------------------------------------------------------------------
 subroutine ptread (filnam, readpt)
@@ -468,114 +466,113 @@ subroutine ptread (filnam, readpt)
 !  author: b. follmeg
 !  current revision date: 20-jun-2019 (p.dagdigian)
 !  -----------------------------------------------------------------------
-use mod_hiba1sg, only: ptr1sg
 integer ibasty
 logical readpt
 character*(*) filnam
 common /coselb/ ibasty
-if (ibasty .ge. 99) then
-!  user supplied routine
-   call ptrusr(filnam,readpt)
-   return
-endif
-goto (100,200,300,400,500,600,700,800,900,1000,1100,1200, &
-      1300,1400,1500,1600,1700,1800,1900,2000,2100,2200, &
-      2300,2400,2500,2600,2700,2800,2900,3000) &
-     ibasty
-!  singlet sigma potential
-100 call ptr1sg(filnam,readpt)
-return
-!  doublet sigma potential
-200 call ptr2sg(filnam,readpt)
-return
-!  doublet pi potential
-300 call ptr2pi(filnam,readpt)
-return
-!  sigma/pi potential
-400 call ptrsgpi(filnam,readpt)
-return
-!  general pi variables
-500 call ptrpi(filnam,readpt)
-return
-!  symmetric top variables
-600 call ptrstp(filnam,readpt)
-return
-!  1/3 P atom variables
-700 call ptr13p(filnam,readpt)
-return
-!  1sigma+1sigma variables
-800 call ptr2mol(filnam,readpt)
-return
-! symmetric top + 1 sigma molecule
-!900   call ptrstpln(irpot, readpt, iread) -- change call (pjd)
-900 call ptrstpln(filnam,readpt)
-return
-!  2/2 P atom variables
-1000 call ptr22p(filnam,readpt)
-return
-!  singlet delta variables
-1100 call ptr1del(filnam,readpt)
-return
-! homonuclear + 2P atom variables
-!1200  call ptrh2p(irpot, readpt, iread) -- change call (pjd)
-1200 call ptrh2p(filnam,readpt)
-return
-! homonuclear + 3P atom variables
-!1300  call ptrh3p(irpot, readpt, iread) -- change call (pjd)
-1300 call ptrh3p(filnam,readpt)
-return
-! doublet delta + atom variables
-!1400  call ptr2del(irpot, readpt, iread) -- change call (pjd)
-1400 call ptr2del(filnam,readpt)
-return
-! heteronuclear + 2P atom variables
-!1500  call ptrdiat2p(irpot, readpt, iread) -- change call (pjd)
-1500 call ptrdiat2p(filnam,readpt)
-return
-! asymmetric top variables
-1600 call ptrastp(filnam, readpt)
-return
-! CH2(X 3B1) (0,v2,0) bender level variables
-1700 call ptrch2x(filnam, readpt)
-return
-!  symmetric top variables
-1800 call ptrstp1(filnam,readpt)
-return
-!  2sigma | 2pi + atom (no perturbations) variables
-1900 call ptrsgpi1(filnam,readpt)
-return
-!  2Pi + 1Sigma
-2000 call ptr2pi1sg(filnam, readpt)
-return
-!  Symmetric top + 1Sigma
-2100 call ptrstp1sg(filnam, readpt)
-return
-!  1D/3P atom + closed-shell atom
-2200 call ptr1d3p(filnam, readpt)
-return
-!  3P atom + 2S atom
-2300 call ptr3p2s(filnam, readpt)
-return
-!  spherical top + atom
-2400 call ptrsphtp(filnam, readpt)
-return
-!  two different 1sigma molecules
-2500 call ptr1sg1sg(filnam, readpt)
-return
-!  2sigma + 1sigma molecules
-2600 call ptr2sg1sg(filnam, readpt)
-return
-! C2v asymmetric top variables
-2700 call ptrastp1(filnam, readpt)
-return
-!  3sigma + 1sigma molecules
-2800 call ptr3sg1sg(filnam, readpt)
-return
-! C2v asymmetric top variables
-2900 call ptrastp2(filnam, readpt)
-return
-! C2v asymmetric top + linear molecule variables
-3000 call ptrastp3(filnam, readpt)
-return
+! if (ibasty .ge. 99) then
+! !  user supplied routine
+!    call ptrusr(filnam,readpt)
+!    return
+! endif
+! goto (100,200,300,400,500,600,700,800,900,1000,1100,1200, &
+!       1300,1400,1500,1600,1700,1800,1900,2000,2100,2200, &
+!       2300,2400,2500,2600,2700,2800,2900,3000) &
+!      ibasty
+! !  singlet sigma potential
+! 100 call ptr1sg(filnam,readpt)
+! return
+! !  doublet sigma potential
+! 200 call ptr2sg(filnam,readpt)
+! return
+! !  doublet pi potential
+! 300 call ptr2pi(filnam,readpt)
+! return
+! !  sigma/pi potential
+! 400 call ptrsgpi(filnam,readpt)
+! return
+! !  general pi variables
+! 500 call ptrpi(filnam,readpt)
+! return
+! !  symmetric top variables
+! 600 call ptrstp(filnam,readpt)
+! return
+! !  1/3 P atom variables
+! 700 call ptr13p(filnam,readpt)
+! return
+! !  1sigma+1sigma variables
+! 800 call ptr2mol(filnam,readpt)
+! return
+! ! symmetric top + 1 sigma molecule
+! !900   call ptrstpln(irpot, readpt, iread) -- change call (pjd)
+! 900 call ptrstpln(filnam,readpt)
+! return
+! !  2/2 P atom variables
+! 1000 call ptr22p(filnam,readpt)
+! return
+! !  singlet delta variables
+! 1100 call ptr1del(filnam,readpt)
+! return
+! ! homonuclear + 2P atom variables
+! !1200  call ptrh2p(irpot, readpt, iread) -- change call (pjd)
+! 1200 call ptrh2p(filnam,readpt)
+! return
+! ! homonuclear + 3P atom variables
+! !1300  call ptrh3p(irpot, readpt, iread) -- change call (pjd)
+! 1300 call ptrh3p(filnam,readpt)
+! return
+! ! doublet delta + atom variables
+! !1400  call ptr2del(irpot, readpt, iread) -- change call (pjd)
+! 1400 call ptr2del(filnam,readpt)
+! return
+! ! heteronuclear + 2P atom variables
+! !1500  call ptrdiat2p(irpot, readpt, iread) -- change call (pjd)
+! 1500 call ptrdiat2p(filnam,readpt)
+! return
+! ! asymmetric top variables
+! 1600 call ptrastp(filnam, readpt)
+! return
+! ! CH2(X 3B1) (0,v2,0) bender level variables
+! 1700 call ptrch2x(filnam, readpt)
+! return
+! !  symmetric top variables
+! 1800 call ptrstp1(filnam,readpt)
+! return
+! !  2sigma | 2pi + atom (no perturbations) variables
+! 1900 call ptrsgpi1(filnam,readpt)
+! return
+! !  2Pi + 1Sigma
+! 2000 call ptr2pi1sg(filnam, readpt)
+! return
+! !  Symmetric top + 1Sigma
+! 2100 call ptrstp1sg(filnam, readpt)
+! return
+! !  1D/3P atom + closed-shell atom
+! 2200 call ptr1d3p(filnam, readpt)
+! return
+! !  3P atom + 2S atom
+! 2300 call ptr3p2s(filnam, readpt)
+! return
+! !  spherical top + atom
+! 2400 call ptrsphtp(filnam, readpt)
+! return
+! !  two different 1sigma molecules
+! 2500 call ptr1sg1sg(filnam, readpt)
+! return
+! !  2sigma + 1sigma molecules
+! 2600 call ptr2sg1sg(filnam, readpt)
+! return
+! ! C2v asymmetric top variables
+! 2700 call ptrastp1(filnam, readpt)
+! return
+! !  3sigma + 1sigma molecules
+! 2800 call ptr3sg1sg(filnam, readpt)
+! return
+! ! C2v asymmetric top variables
+! 2900 call ptrastp2(filnam, readpt)
+! return
+! ! C2v asymmetric top + linear molecule variables
+! 3000 call ptrastp3(filnam, readpt)
+! return
 end
 ! ---------------------------eof--------------------------------
