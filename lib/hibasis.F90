@@ -146,16 +146,16 @@ module mod_basis
     !                   n, nmax, ntop)
     !   return
     ! endif
-    goto (100) ibasty !,200,300,400,500,600,700,800,900,1000,1100,1200,1300, &
+    !goto (100) ibasty !,200,300,400,500,600,700,800,900,1000,1100,1200,1300, &
     !       1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400, &
     !       2500,2600,2700,2800,2900,3000) &
     !       ibasty
     ! !  singlet sigma basis
-     100 call ba1sg (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
-                       sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
-                       csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-                       n, nmax, ntop)
-     return
+    ! 100 call ba1sg (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
+    !                   sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
+    !                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
+    !                   n, nmax, ntop)
+    ! return
     ! !  doublet sigma basis
     ! 200 call ba2sg (j, l, is, jhold, ehold, ishold, nlevel, &
     !                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
