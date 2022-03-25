@@ -16,6 +16,11 @@ module mod_basis
       procedure(read_sys_dep_params), deferred, nopass :: read_sys_dep_params
       procedure(save), deferred, nopass :: save
       procedure(read_pot), deferred, nopass :: read_pot
+
+      procedure, public :: is_twomol => basis_is_twomol
+      procedure, public :: uses_j12 => basis_uses_j12
+      ! procedure(init_spin_interface), deferred, nopass :: basis_init_spin
+      procedure, public :: init_spin => basis_init_spin
    end type ab_basis
 
    interface
@@ -44,6 +49,17 @@ module mod_basis
          character*(*) fname
          logical :: readpt
       end subroutine read_pot
+
+      ! subroutine init_spin_interface(this, flaghf, spnj2, spnj12, spntot, spin)
+      !    import
+      !    class(ab_basis), intent(in) :: this
+      !    logical, intent(in) :: flaghf
+      !    real(8), intent(out) :: spnj2
+      !    real(8), intent(out) :: spnj12
+      !    real(8), intent(out) :: spntot
+      !    real(8), intent(inout) :: spin
+      ! end subroutine init_spin_interface
+
    end interface
 contains
    subroutine init_vib_qnumbers
@@ -55,5 +71,96 @@ contains
          ntv(it)=1
       end do
    end subroutine init_vib_qnumbers
+
+   logical function basis_is_twomol(this)
+      implicit none
+      class(ab_basis), intent(in) :: this
+      integer :: ibasty
+      ibasty = this%id
+      basis_is_twomol = is_twomol(ibasty)
+   end function basis_is_twomol
+
+   logical function basis_uses_j12(this)
+      implicit none
+      class(ab_basis), intent(in) :: this
+      integer :: ibasty
+      ibasty = this%id
+      basis_uses_j12 = is_j12(ibasty)
+   end function basis_uses_j12
+
+   subroutine basis_init_spin(this, flaghf, spnj2, spnj12, spntot, spin)
+      implicit none
+      class(ab_basis), intent(in) :: this
+      logical, intent(in) :: flaghf
+      real(8), intent(out) :: spnj2
+      real(8), intent(out) :: spnj12
+      real(8), intent(out) :: spntot
+      real(8), intent(inout) :: spin
+      integer :: ibasty
+      ibasty = this%id
+      spnj2 = 0.d0
+      spnj12 = 0.d0
+      spntot = 0.d0
+      if (flaghf) then
+        spnj12 = 0.5d0
+        spntot = 0.5d0
+        if (ibasty.eq.12 .or. ibasty.eq.15) then
+          spin = 0.d0
+          spnj2 = 0.5d0
+        endif
+      endif
+      if (ibasty.eq.23) then
+        spnj2 = 0.5d0
+        spnj12 = 0.5d0
+        spntot = 0.5d0
+      endif
+   end subroutine basis_init_spin
+
+
+!  ------------------------------------------------------------------
+   logical function is_twomol(ibasty)
+   !     ------------------------------------------------------------------
+   !
+   !     checks if a basis is for molecule-molecule collision (j=10j1+j2)
+   !
+   !     written by q. ma
+   !     current revision:  24-jul-2019 (p.dagdigian)
+   !     ------------------------------------------------------------------
+   implicit none
+   integer, intent(in) :: ibasty
+   if ((ibasty .eq. 9) .or. (ibasty .eq. 20) .or. (ibasty .eq. 21) &
+   .or. (ibasty .eq. 25) .or. (ibasty .eq. 26) &
+   .or. (ibasty .eq. 28) .or. (ibasty .eq. 30) &
+   .or. (ibasty .eq. 100)) &
+   then
+   is_twomol = .true.
+   else
+   is_twomol = .false.
+   end if
+   return
+   end function is_twomol
+   !     ------------------------------------------------------------------
+   logical function is_j12(ibasty)
+   !     ------------------------------------------------------------------
+   !
+   !     checks if j12 is used in a basis
+   !
+   !     written by q. ma
+   !     current revision:  17-oct-2018 (p.dagdigian)
+   !     ------------------------------------------------------------------
+   implicit none
+   integer, intent(in) :: ibasty
+   if (is_twomol(ibasty) .or. (ibasty .eq. 12) &
+   .or. (ibasty .eq. 13) .or. (ibasty .eq. 15) &
+   .or. (ibasty .eq. 23)) then
+   is_j12 = .true.
+   else
+   is_j12 = .false.
+   end if
+   return
+   end function is_j12
+   
 end module mod_basis
+
+
     

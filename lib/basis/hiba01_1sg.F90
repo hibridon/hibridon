@@ -1,5 +1,5 @@
 module mod_ba1sg
-    use mod_basis, only: ab_basis, init_vib_qnumbers
+    use mod_basis, only: ab_basis, init_vib_qnumbers, basis_init_spin
 
 
     type, extends(ab_basis) :: basis_1sg
@@ -9,6 +9,8 @@ module mod_ba1sg
     procedure, nopass :: read_sys_dep_params
     procedure, nopass :: save
     procedure, nopass :: read_pot
+
+    ! generic :: init_spin => basis_init_spin
 
     end type basis_1sg
 

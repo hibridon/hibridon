@@ -64,6 +64,7 @@ use mod_hibrid5, only : intcrs, readpc
 use mod_difcrs, only: difcrs
 use mod_hibrid2, only: enord, prsg
 use mod_hibrid3, only: testptn, testpt20, testpt, potmin
+use mod_trnprt, only: trnprt
 
 implicit double precision (a-h,o-z)
 type(params_type), intent(inout) :: params
@@ -431,7 +432,7 @@ ibasty=int(val)
 call baschk(ibasty)
 call create_basis(ibasty, params%basis)
 ! set twomolecule true
-if (is_twomol(ibasty)) then
+if (params%basis%is_twomol()) then
   lpar(20)=.true.
 else
   lpar(20)=.false.
@@ -1093,7 +1094,7 @@ goto 1
 !
 !  differential cross sections computed for atom-molecule
 !  collisions or symmetric top-linear molecule collisions
-2000 if (.not. lpar(20) .or. is_twomol(ibasty)) then
+2000 if (.not. lpar(20) .or. params%basis%is_twomol()) then
   call parse(line,l,fnam1,lc)
   if(fnam1 .eq. ' ') fnam1 = jobnam
   call lower(fnam1)
@@ -1481,7 +1482,7 @@ call parse(line,l,code,lc)
 call getval(code(1:lc),' ',0,j,a(1))
 ! get in1, in2, jtotmx, join, jmax
 3105 continue
-call trnprt(fnam1,a)
+call trnprt(fnam1,a,params%basis)
 goto 1
 ! pressure broadening cross sections - added by p. dagdigian
 3200 call parse(line,l,fnam1,lc)

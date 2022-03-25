@@ -1,5 +1,8 @@
-! ------------------------------------------------------------------
-subroutine trnprt(filnam,a)
+module mod_trnprt
+
+contains
+  ! ------------------------------------------------------------------
+subroutine trnprt(filnam,a,basis)
 !
 ! subroutine to calculate effective cross sections for transport
 ! from s-matrix elements
@@ -51,9 +54,11 @@ use mod_cosc2, only: prefac => sc2 ! prefac(1)
 use mod_cosc3, only: etrans => sc3 ! etrans(1)
 use mod_cozmat, only: jtotpa => zmat_as_vec ! jtotpa(1)
 use constants, only: econv, xmconv, ang2c
+use mod_basis, only: ab_basis
 
 implicit double precision (a-h,o-z)
 character*(*) filnam
+class(ab_basis), intent(in) :: basis
 character*40  trnfil, smtfil
 character*20  cdate
 character*10  elaps, cpu
@@ -232,18 +237,18 @@ do 68 i = 1, nj
 68 continue
 !
 ! now compute transport cross sections
-if (is_twomol(ibasty) .or. is_j12(ibasty)) then
+if (basis%is_twomol() .or. basis%uses_j12()) then
   call sigkp1(1,m1jtot,m1chmx, &
    nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
    lpack,ipack,jttble,prefac, &
    etrans,labadr, &
-   jtotpa,jlpmin,jlpmax,flaghf,ierr)
+   jlpmin,jlpmax,flaghf,ierr,basis)
 else
   call sigkap(1,m1jtot,m1chmx, &
    nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
    lpack,ipack,jttble,prefac, &
    etrans,labadr, &
-   jtotpa,jlpmin,jlpmax,ierr)
+   jlpmin,jlpmax,ierr)
 endif
 goto 300
 300 close (1)
@@ -266,7 +271,7 @@ subroutine sigkap(iunit,mjtot,mchmx, &
                 nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
                 lpack,ipack,jttble,prefac, &
                 etrans,labadr, &
-                jtotpa,jlpmin,jlpmax,ierr)
+                jlpmin,jlpmax,ierr)
 !
 ! subroutine to calculate Q(n) effective cross sections
 !
@@ -315,7 +320,7 @@ common /coselb/ ibasty
 !
 dimension etrans(1)
 dimension jpack(1),ipack(1),lpack(1)
-dimension prefac(1), labadr(1), jtotpa(1)
+dimension prefac(1), labadr(1)
 dimension jttble(1)
 dimension f36j(0:2)
 !
@@ -597,7 +602,7 @@ subroutine sigkp1(iunit,mjtot,mchmx, &
                 nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
                 lpack,ipack,jttble,prefac, &
                 etrans,labadr, &
-                jtotpa,jlpmin,jlpmax,flaghf,ierr)
+                jlpmin,jlpmax,flaghf,ierr,basis)
 !
 ! subroutine to calculate Q(n) effective cross sections
 !
@@ -632,7 +637,9 @@ use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cow, only: simag => w_as_vec ! simag(1)
 use mod_hibrid2, only: mxoutd
 use mod_hibrid5, only: sread
+use mod_basis, only: ab_basis
 implicit double precision (a-h,o-z)
+class(ab_basis), intent(in) :: basis
 complex*8 t, tp
 logical diag, diagj, diagin, diagp, diagjp, diagnp, &
   lpar1, lpar2, batch, ipos, flaghf
@@ -649,7 +656,7 @@ common /coselb/ ibasty
 !
 dimension etrans(1)
 dimension jpack(1),ipack(1),lpack(1)
-dimension prefac(1), labadr(1), jtotpa(1)
+dimension prefac(1), labadr(1)
 dimension jttble(1)
 dimension f36j(0:2)
 !
@@ -670,22 +677,7 @@ double precision, dimension(:, :), allocatable :: length
 onesix = 1.d0/6.d0
 twothr = 2.d0/3.d0
 !
-spnj2 = 0.d0
-spnj12 = 0.d0
-spntot = 0.d0
-if (flaghf) then
-  spnj12 = 0.5d0
-  spntot = 0.5d0
-  if (ibasty.eq.12 .or. ibasty.eq.15) then
-    spin = 0.d0
-    spnj2 = 0.5d0
-  endif
-endif
-if (ibasty.eq.23) then
-  spnj2 = 0.5d0
-  spnj12 = 0.5d0
-  spntot = 0.5d0
-endif
+call basis%init_spin(flaghf, spnj2, spnj12, spntot, spin)
 !
 ! initialize timer
 call mtime(cpu0,ela0)
@@ -792,11 +784,11 @@ goto 20
 !
 ! sum over row index for jtot
         do 400 irow = 1, length(jtot,jlp)
-          if (is_twomol(ibasty)) then
+          if (basis%is_twomol()) then
             j1_i = j(jtot,jlp,irow)/10
             j2_i = mod(j(jtot,jlp,irow),10.d0)
           end if
-          if (.not. is_twomol(ibasty) .and. is_j12(ibasty)) then
+          if (.not. basis%is_twomol() .and. basis%uses_j12()) then
             j1_i = j(jtot,jlp,irow)
             if (ibasty.eq.23) then
               j2_i = 0
@@ -988,4 +980,5 @@ if (ialloc .ne. 0) write (6, 4100)
 4100 format (' *** INSUFFICIENT MEMORY. ***')
 return
 end
-!=====eof=====
+end module mod_trnprt
+  !=====eof=====

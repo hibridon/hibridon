@@ -916,47 +916,4 @@ end
 ! ---------------------------eof--------------------------------
 
 
-!  ------------------------------------------------------------------
-logical function is_twomol(ibasty)
-!     ------------------------------------------------------------------
-!
-!     checks if a basis is for molecule-molecule collision (j=10j1+j2)
-!
-!     written by q. ma
-!     current revision:  24-jul-2019 (p.dagdigian)
-!     ------------------------------------------------------------------
-implicit none
-integer, intent(in) :: ibasty
-if ((ibasty .eq. 9) .or. (ibasty .eq. 20) .or. (ibasty .eq. 21) &
-.or. (ibasty .eq. 25) .or. (ibasty .eq. 26) &
-.or. (ibasty .eq. 28) .or. (ibasty .eq. 30) &
-.or. (ibasty .eq. 100)) &
-then
-is_twomol = .true.
-else
-is_twomol = .false.
-end if
-return
-end function is_twomol
-!     ------------------------------------------------------------------
-logical function is_j12(ibasty)
-!     ------------------------------------------------------------------
-!
-!     checks if j12 is used in a basis
-!
-!     written by q. ma
-!     current revision:  17-oct-2018 (p.dagdigian)
-!     ------------------------------------------------------------------
-implicit none
-integer, intent(in) :: ibasty
-logical :: is_twomol
-if (is_twomol(ibasty) .or. (ibasty .eq. 12) &
-.or. (ibasty .eq. 13) .or. (ibasty .eq. 15) &
-.or. (ibasty .eq. 23)) then
-is_j12 = .true.
-else
-is_j12 = .false.
-end if
-return
-end function is_j12
 
