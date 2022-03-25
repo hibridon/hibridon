@@ -88,7 +88,8 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<CONFIG:RELEASE>:-O3>                  # Optimization level at 3 for Release
       $<$<CONFIG:RELEASE>:-finit-local-zero>    # Init variables to zero/false/null
       # Config-specific options: DEBUG
-      $<$<CONFIG:DEBUG>:-Og>                    # Optimization level at 0 for Debug
+      $<$<CONFIG:DEBUG>:-g>                     # include symbols in the exe
+      $<$<CONFIG:DEBUG>:-O0>                    # Optimization level at 0 for Debug
       $<$<CONFIG:DEBUG>:-fbacktrace>            #
       $<$<CONFIG:DEBUG>:-Wall>                  # Enable all warnings
       $<$<CONFIG:DEBUG>:-Wextra>                # Enable extra warnings
