@@ -9,6 +9,7 @@ add_library(hib
     assert.f90
     hiamp.F90
     hibound.F90
+    hibridon.F90
     hibrid1.F90
     hibrid2.F90
     hibrid3.F90
@@ -32,7 +33,7 @@ add_library(hib
     hipotutil.F90
     hiversion.F90
     hibasis.F90
-    basis/hiba00_dummy.F90
+    basis/hiba01_1sg.F90
     # bases/hiba01_1sg.F90
     # bases/hiba02_2sg.F90
     # bases/hiba03_2pi.F90

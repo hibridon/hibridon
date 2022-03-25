@@ -103,6 +103,7 @@ subroutine flow (z, w, zmat, amat, bmat, jq, lq, inq, jlev, &
 !  variable in common block /coopti/
 !    optifl:      flag, signals if the calculation is an optimization
 !
+use mod_hibridon, only: params_type
 use mod_cosout, only: nnout, jout
 use mod_cocent, only: cent
 use mod_coeint, only: eint
@@ -113,6 +114,7 @@ use constants
 use mod_hibrid2, only: default
 use mod_hibrid3, only: propag
 implicit double precision (a-h,o-z)
+type(params_type) :: params
 integer :: jtotmx
 character*20 cdate
 character*10 time
@@ -148,7 +150,6 @@ common /colpar/ airyfl, airypr, bastst, batch, chlist, &
                 xsecwr, nucros, photof, wavefl, boundc
 common /cophot/ photfl, wavefn, boundf, wrsmat
 common /cosurf/ surffl
-common /coselb/ ibasty
 common /cojlpo/ jlpold
 common /coopti/ optifl
 common /constp/ nsteps, isteps
@@ -172,7 +173,7 @@ integer, parameter :: tmp_file = 1
 first=.true.
 !  get default data
 call default
-1 call hinput(first)
+1 call hinput(first, params)
 cpupt=0
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
 ttim(1)=0.d0
@@ -447,7 +448,7 @@ if (ien .eq. 1) then
 !*5554    format('BEFORE BASIS:',3i6)
 
 
-  call basis (jq, lq, inq, jlev, elev, inlev, nlevel, nlevop, &
+  call params%basis%compute_angular_coupling(jq, lq, inq, jlev, elev, inlev, nlevel, nlevop, &
               sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
               csflag, clist, bastst, ihomo, nu, numin, jlpar, &
               twomol, nch, nmax, nchtop)

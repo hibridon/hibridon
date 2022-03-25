@@ -126,6 +126,24 @@ return
 end
 
 
+subroutine create_basis(ibasty, basis)
+  use mod_ba1sg, only: basis_1sg
+  use mod_basis, only: ab_basis
+  integer :: ibasty
+  class(ab_basis), allocatable :: basis
+  if(allocated(basis)) then
+    deallocate(basis)
+  endif
+  select case(ibasty)
+  case(1)
+    allocate(basis, source=basis_1sg(1, 'SINGLET SIGMA + ATOM'))  ! todo: let the constructor of basis_1sg define these arguments
+  case default
+    stop
+  end select
+end subroutine create_basis
+
+
+
 subroutine basis (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
   sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
@@ -487,13 +505,13 @@ subroutine sysdat (irpot, readpt, iread)
 !  -----------------------------------------------------------------------
 integer ibasty, irpot, iread
 logical readpt
-common /coselb/ ibasty
-#include "common/parbas.F90"
-! set default for vibrational quantum numbers to zero for each term
-do 10 it=1,maxtrm
-ivrow(1,it)=0
-ivcol(1,it)=0
-10 ntv(it)=1
+! common /coselb/ ibasty
+! #include "common/parbas.F90"
+! ! set default for vibrational quantum numbers to zero for each term
+! do 10 it=1,maxtrm
+! ivrow(1,it)=0
+! ivcol(1,it)=0
+! 10 ntv(it)=1
 ! if (ibasty .ge. 99) then
 ! !  user supplied routine
 !   call syusr(irpot, readpt, iread)
