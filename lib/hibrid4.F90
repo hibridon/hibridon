@@ -1956,7 +1956,9 @@ if (ibasty .eq.7 .and. jlpar.eq.-1 .and. ipol.eq.1) then
    call waverot(jtot,nch)
  endif
 ! if 13p  or 2s-2p scattering, determine the matrix for case (a) -> case (e)
+#ifdef BASIS_10_IS_INCLUDED
 if (ibasty .eq.7) call tcasea(jtot,jlpar)
+#endif
 if (jflux .eq. 0) then
 ! here if wavefunction calculation
   if (.not.photof) then

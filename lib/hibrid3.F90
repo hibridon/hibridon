@@ -401,6 +401,8 @@ cpupot=cpupot+second()
 ! here for 2s-2p scattering
 ! fill in upper triangle of w matrix
 !  first fill in upper half of original matrix
+#ifdef BASIS_10_IS_INCLUDED
+
 if (ibasty .eq. 10) then
 
   nmaxp1 = nmax + 1
@@ -418,7 +420,7 @@ if (ibasty .eq. 10) then
 !  transform w matrix into case e basis
   call trans22(w,nch, nmax)
 endif
-
+#endif
 return
 end
 ! -------------------------------------------------------------------------

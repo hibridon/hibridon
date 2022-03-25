@@ -511,7 +511,9 @@ if (photof) then
 endif
 call dtrans (z, vecnow, w, hp, xlarge, nch, nmax, izero)
 ! if 2s-2p collisions, restore asymptotic case (e) energies
+#ifdef BASIS_10_IS_INCLUDED
 if (ibasty .eq. 10) call energ22
+#endif
 if (noprin) go to 320
 if (itwo .lt. 0) write (9,280)
 if (itwo .eq. 0) write (9,290)

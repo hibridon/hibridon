@@ -5,7 +5,7 @@
 !$hp$optimize off
 #endif
 
-subroutine hinput(first)
+subroutine hinput(first, params)
 !  subroutine to redefine system independent input parameters for
 !  hibridon code
 !  author:  h.-j. werner
@@ -45,6 +45,8 @@ subroutine hinput(first)
 !
 !  current revision: 16-jan-2019 by q. dagdigian
 ! ---------------------------------------------------------------------
+use mod_hibridon, only: params_type
+use mod_basis, only: init_vib_qnumbers
 use mod_com, only: com_file, com
 use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
@@ -64,6 +66,7 @@ use mod_hibrid2, only: enord, prsg
 use mod_hibrid3, only: testptn, testpt20, testpt, potmin
 
 implicit double precision (a-h,o-z)
+type(params_type), intent(inout) :: params
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
 !  ncode is the number of bcod's
@@ -127,6 +130,9 @@ data irpot, irinp /0, 0/
 data batch /.false./
 save ipr, opti, a, a1, acc, acclas, optval, optacc, istep, inam, &
      fnam1, fnam2, code, lc, jtot2x, irpot, irinp
+if (.not. allocated(params%basis)) then
+  call create_basis(ibasty, params%basis)
+endif
 nerg = 0
 bascod='BASISTYP'
 pcod(1)='JTOT1'
@@ -272,7 +278,7 @@ if(first) then
    isrcod=0
    isicod=0
    izero=0
-   call sysdat(irpot, lpar(15), izero)
+   call init_vib_qnumbers()
    first = .false.
    call version(6)
 !  in this next statement the $ sign implies no line feed
@@ -423,13 +429,14 @@ if(j .eq. 0) goto 15
 if(j .lt. 0) goto 1
 ibasty=int(val)
 call baschk(ibasty)
+call create_basis(ibasty, params%basis)
 ! set twomolecule true
 if (is_twomol(ibasty)) then
   lpar(20)=.true.
 else
   lpar(20)=.false.
 endif
-call sysdat(irpot, lpar(15), izero)
+call params%basis%read_sys_dep_params(irpot, lpar(15), izero)
 l1=l
 goto 15
 !  request help
@@ -820,7 +827,7 @@ goto 15
 800 call pcoder(lpar(28),pcod,icode)
 call gendat
 ione=1
-call sysdat(irpot, lpar(15),ione)
+call params%basis%read_sys_dep_params(irpot, lpar(15), ione)
 irinp=1
 l1 = l
 if (batch) lpar(4) = .true.
@@ -877,7 +884,7 @@ goto 15
 ! read parameters for potential
 !     pot=potfile
 1000 call parse(line,l,code,lc)
-call ptread(code(1:lc),lpar(15))
+call params%basis%read_pot(code(1:lc),lpar(15))
 l1 = l
 goto 15
 ! test potential
@@ -910,7 +917,7 @@ else
   code = input
 end if
 call savdat(inew,code)
-call syssav(lpar(15))
+call params%basis%save(lpar(15))
 close(8)
 l1 = l
 irinp = 1
