@@ -49,17 +49,6 @@ module mod_basis
          character*(*) fname
          logical :: readpt
       end subroutine read_pot
-
-      ! subroutine init_spin_interface(this, flaghf, spnj2, spnj12, spntot, spin)
-      !    import
-      !    class(ab_basis), intent(in) :: this
-      !    logical, intent(in) :: flaghf
-      !    real(8), intent(out) :: spnj2
-      !    real(8), intent(out) :: spnj12
-      !    real(8), intent(out) :: spntot
-      !    real(8), intent(inout) :: spin
-      ! end subroutine init_spin_interface
-
    end interface
 contains
    subroutine init_vib_qnumbers
