@@ -65,6 +65,7 @@ use mod_difcrs, only: difcrs
 use mod_hibrid2, only: enord, prsg
 use mod_hibrid3, only: testptn, testpt20, testpt, potmin
 use mod_trnprt, only: trnprt
+use tensor, only: tenopa
 
 implicit double precision (a-h,o-z)
 type(params_type), intent(inout) :: params
@@ -1105,7 +1106,7 @@ goto 1
      call parse(line,l,code,lc)
      call getval(code(1:lc),' ',0,j,a(i))
 2010   continue
-  call difcrs(fnam1,a,lpar(9),lpar(7))
+  call difcrs(fnam1,a,lpar(9),lpar(7), params%basis)
 else
   write (6, 2011)
 2011   format(' Sorry, differential cross sections not yet', &
@@ -1310,7 +1311,7 @@ write(6,2320)
 2320 format(' Sorry, tensor cross sections not yet implemented')
 #endif
 #if defined(HIB_UNIX)
-call tenopa(fnam1,a)
+call tenopa(fnam1, a, params%basis)
 #endif
 goto 1
 !....nnout must be preceded by jout

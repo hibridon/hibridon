@@ -1,7 +1,7 @@
 module mod_difcrs
 contains
 !  -------------------------------------------------------------
-subroutine difcrs(fname1,a,ihomo,flaghf)
+subroutine difcrs(fname1,a,ihomo,flaghf,basis)
 !  -------------------------------------------------------------
 !  calculates differential cross sections
 !  author h.-j. werner
@@ -52,10 +52,11 @@ use mod_cov2, only: nv2max
 use mod_coz, only: sreal1 => z_as_vec ! sreal1(1)
 use mod_cow, only: simag1 => w_as_vec ! simag1(1)
 use mod_hibrid5, only: sread
-use mod_basis, only: is_twomol, is_j12
+use mod_basis, only: ab_basis
 
 implicit double precision (a-h,o-z)
 character*(*) fname1
+class(ab_basis), intent(in) :: basis 
 character*20 cdate1
 character*20  cdate
 character*10  elaps, cpu
@@ -310,8 +311,8 @@ if (.not.iprint.and.mflag) write (6, 176) xnam3(1:lenx)
    ideg2=2*j2+1
    j1p=j1
    j2p=j2
-   if (is_j12(ibasty)) then
-     if (is_twomol(ibasty)) then
+   if (basis%uses_j12()) then
+     if (basis%is_twomol()) then
 !  molecule-molecule case
        l2max = jtot2 + j1/10 + mod(j1, 10) &
          + j2/10 + mod(j2, 10) + 1
@@ -348,8 +349,8 @@ ximdep = 0
 !     Allocate and zero out amplitudes
 if (allocated(q)) deallocate(q)
 
-if (is_j12(ibasty)) then
-  if (is_twomol(ibasty)) then
+if (basis%uses_j12()) then
+  if (basis%is_twomol()) then
 !  molecule-molecule case
     iq1min = 1
     iq1max = (2 * j1 / 10 + 1) * (2 * mod(j1, 10) + 1) &
@@ -491,13 +492,13 @@ end if
 !
 call ampli(j1,in1,j2,in2,jtot,sreal1,simag1,mmax,jpack1,lpack1, &
      ipack1,lengt1,jq,lq,inq,nopen1,y,q,l2max,nangle,ihomo,flaghf, &
-     iydim1,iydim2,iq1min,iq1max,iq2min,iq2max,iq3)
+     iydim1,iydim2,iq1min,iq1max,iq2min,iq2max,iq3,basis)
 !.... calculate contributions for negative initial index
 if (stflag) &
      call ampli(j1,-in1,j2,in2,jtot,sreal1,simag1,mmax, &
      jpack1,lpack1,ipack1,lengt1,jq,lq,inq,nopen1,y,qm, &
      l2max,nangle,ihomo,flaghf,iydim1,iydim2,iq1min,iq1max, &
-     iq2min,iq2max,iq3)
+     iq2min,iq2max,iq3,basis)
 !
 !.....loop back to next jtot/jlpar
 !
@@ -510,7 +511,7 @@ fak=ang2c/(ideg1*ca**2)
 faksq=sqrt(fak)
 !
 !  atom-molecule case
-if (.not. is_j12(ibasty)) then
+if (.not. basis%uses_j12()) then
   do 343 mj1=-j1p,j1
   do 340 mj2=-j2p,j2
     if (flaghf) then
@@ -819,7 +820,7 @@ endif
 !  molecule-molecule collisions
 !
 !  compute degeneracy averaged cross sections only
-elseif (is_twomol(ibasty)) then
+elseif (basis%is_twomol()) then
   ii = 0
   j1_i = j1/10
   j1_ip=j1_i
@@ -945,7 +946,7 @@ end
 ! -----------------------------------------------------------------------
 subroutine ampli(j1,in1,j2,in2,jtot,sreal,simag,mmax,jpack,lpack, &
      ipack,length,jq,lq,inq,nopen,y,q,maxl2,nangle,ihomo,flaghf, &
-     iydim1,iydim2,iq1min,iq1max,iq2min,iq2max,iq3)
+     iydim1,iydim2,iq1min,iq1max,iq2min,iq2max,iq3,basis)
 !subr  calculates scattering amplitudes for given jtot and set
 !subr  of angles
 !
@@ -964,12 +965,12 @@ subroutine ampli(j1,in1,j2,in2,jtot,sreal,simag,mmax,jpack,lpack, &
 !
 use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
-use mod_basis, only: is_twomol, is_j12
+use mod_basis, only: ab_basis
 implicit double precision (a-h,o-z)
+class(ab_basis), intent(in) :: basis 
 complex*16 ai,yy,tmat
 parameter (zero=0.0d0, one=1.0d0, two=2.0d0)
 logical ihomo,flaghf,elastc
-common /coselb/ ibasty
 dimension jpack(1),lpack(1),ipack(1),jq(1),lq(1),inq(1)
 dimension sreal(mmax,1),simag(mmax,1)
 integer, dimension(:), allocatable :: ilab1
@@ -985,13 +986,13 @@ elastc=j1.eq.j2 .and. in1.eq.in2
 if(flaghf) then
 !.....here for half-integer spin
   spin=0.5d0
-  if (.not. is_j12(ibasty)) then
+  if (.not. basis%uses_j12()) then
     fakj=sqpi*(two*dble(jtot) + two)*(-1)**(j1+j2+1)
     j1p=j1 + 1
     j1_i=j1
     j2p=j2 + 1
     j2_i=j2
-  elseif (is_twomol(ibasty)) then
+  elseif (basis%is_twomol()) then
 !  molecule-molecule cases
     j1_i = j1/10
     j1_ip = j1_i + 1
@@ -1016,13 +1017,13 @@ if(flaghf) then
 else
 !.....here for integer spin
   spin=0.0d0
-  if (.not. is_j12(ibasty)) then
+  if (.not. basis%uses_j12()) then
     fakj=sqpi*(two*dble(jtot) + one)*(-1)**(j1+j2)
     j1p=j1
     j1_i=j1
     j2p=j2
     j2i=j2
-  elseif (is_twomol(ibasty)) then
+  elseif (basis%is_twomol()) then
 !  molecule-molecule cases
     j1_i = j1/10
     j1_ip=j1_i
@@ -1046,10 +1047,10 @@ else
   end if
 end if
 xjtot=dble(jtot) + spin
-if (.not. is_j12(ibasty)) then
+if (.not. basis%uses_j12()) then
   xj1=dble(j1) + spin
   xj2=dble(j2) + spin
-elseif (is_twomol(ibasty)) then
+elseif (basis%is_twomol()) then
   xj1_i = dble(j1_i) + spin
   xj2_i = dble(j2_i)
   xj1_f = dble(j1_f) + spin
@@ -1084,20 +1085,20 @@ do 500 jlab=1,nopen
 if(jq(jlab).ne.j2.or.inq(jlab).ne.in2) goto 500
 l2=lq(jlab)
 xl2=l2
-if (is_j12(ibasty)) then
+if (basis%uses_j12()) then
   j12_f = j12(jlab)
   xj12_f = j12_f + spin
 end if
 do 60 ll=1,llmax
 ilab=ilab1(ll)
 l1=lpack(ilab)
-if (is_j12(ibasty)) then
+if (basis%uses_j12()) then
   j12_i = j12pk(ilab)
   xj12_i = j12_i + spin
 end if
 !.....convert to t-matrix
 tmat=-cmplx(sreal(jlab,ilab),simag(jlab,ilab))
-if (is_j12(ibasty)) then
+if (basis%uses_j12()) then
   if (elastc .and. l1.eq.l2 .and. j12_i.eq.j12_f) &
      tmat=tmat+1.0d0
 else
@@ -1107,7 +1108,7 @@ fak2(ll)=cmplx(fak1(ll)*(-1)**(l1+l2),zero)*(ai**(l1-l2))*tmat
 60 continue
 !
 !  summation over magnetic quantum numbers
-if (.not. is_j12(ibasty)) then
+if (.not. basis%uses_j12()) then
 !  atom-molecule case here
   do 400 mj1=-j1p,j1
   xmj1=dble(mj1)+spin
@@ -1131,7 +1132,7 @@ if (.not. is_j12(ibasty)) then
 400   continue ! mj1 (jk)
 !
 !  molecule-molecule systems
-elseif (is_twomol(ibasty)) then
+elseif (basis%is_twomol()) then
   ii = 0
   do 1400 mj1_i = -j1_ip, j1_i
   do 1400 mj2_i = -j2_i, j2_i

@@ -37,9 +37,8 @@ if (allocated(ipackp)) deallocate(ipackp)
 if (allocated(jpackp)) deallocate(jpackp)
 if (allocated(lpackp)) deallocate(lpackp)
 end subroutine tensor_free
-end module tensor
 ! ------------------------------------------------------------------
-subroutine tenopa(filnam,a)
+subroutine tenopa(filnam,a,basis)
 !
 ! subroutine to calculate tensor opacities from s-matrix elements
 
@@ -109,16 +108,22 @@ use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cow, only: simag => w_as_vec ! simag(1)
 use mod_cozmat, only: jtotpa => zmat_as_vec ! jtotpa(1)
 use mod_hibrid5, only: sread
-use tensor
 use constants, only: econv, xmconv, ang2c
-
+use mod_basis, only: ab_basis
 implicit double precision (a-h,o-z)
 character*(*) filnam
+class(ab_basis), intent(in) :: basis
 character*40  tcsfil, smtfil, tcbfil, dchfil
 character*20  cdate
 character*10  elaps, cpu
 logical csflag, flaghf, flagsu, twomol, exstfl, lpar, &
         batch, fast, nucros,lpar2
+integer :: i, iaddr, iener, ierr, ifr, iframe, igjtp, ihibuf, ii, in, in1, in2, inlevel
+integer :: j, j1, j2, j1min, j2max, jfinal, jfirst, jfsts, jj, jlevel, jlp, jlpar, jlparf, jlpars, jmax, jo, jtot, jtotd
+integer :: k, kp, kplist
+integer :: lenfb, lenfs, lenft, length, lenlab, lnbufl, lnbufs
+integer :: matjot, maxjot, maxjt, maxk, maxllb, maxlsp, maxn, minn
+integer :: n, nbuf, nbuf1, nbuf2, nj, njmax, nk, nlevel, nlevop, nopen, nout, nstep, nu, nud, numax, numin, nwaves
 !
 #include "common/parpot.F90"
 common /colpar/ lpar(3), batch, lpar2(23)
@@ -521,6 +526,8 @@ close (4)
 4000 call tensor_free()
 return
 end
+end module tensor
+
 ! ------------------------------------------------------------------
 subroutine addsp(jtmin,jtmax,jlp, &
                  labadr,lenlab,jtotpa,jttble)
@@ -2307,7 +2314,7 @@ end
 !-------------------------------------------------------------------------
 subroutine dsigh(maxk,nnout,jfirst,jfinal,jtotd,jpack, &
                 lpack,ipack,jlevel,inlevel,elevel,flaghf, &
-                iframe,ierr)
+                iframe,ierr,basis)
 !
 ! subroutine to calculate m-resolved differential cross sections
 ! for the elastic (j1,in1) -> (j1,in1) transition in the
@@ -2332,9 +2339,11 @@ use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cow, only: simag => w_as_vec ! simag(1)
 use mod_hibrid5, only: sread
 use mod_difcrs, only: sphn
+use mod_basis, only: ab_basis
 use constants, only: econv, xmconv, ang2c
 implicit double precision (a-h,o-z)
 ! size of q for j <= 5 and 0.5 deg angle increment
+class(ab_basis), intent(in) :: basis
 complex*16 q(43681)
 logical diag, diagj, diagin, lpar1, lpar2, batch, ipos, &
         twopar, fast, lpar3, flaghf
@@ -2455,7 +2464,7 @@ end if
 !
 call amplih(jlevel,inlevel,jlevel,inlevel,jtot,mmax, &
   jpack,lpack,ipack,length,jq,lq,inq,nopen, &
-  l2max,ihfst,nangle,flaghf,sreal,simag,y,q)
+  l2max,ihfst,nangle,flaghf,sreal,simag,y,q,basis)
 !
 !.....loop back to next jtot/jlpar
 !
