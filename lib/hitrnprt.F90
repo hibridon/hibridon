@@ -64,7 +64,6 @@ character*20  cdate
 character*10  elaps, cpu
 logical csflag, flaghf, flagsu, twomol, exstfl, lpar, &
         batch, nucros,lpar2
-logical is_j12, is_twomol
 !
 #include "common/parpot.F90"
 common /colpar/ lpar(3), batch, lpar2(23)
@@ -643,7 +642,6 @@ class(ab_basis), intent(in) :: basis
 complex*8 t, tp
 logical diag, diagj, diagin, diagp, diagjp, diagnp, &
   lpar1, lpar2, batch, ipos, flaghf
-logical is_twomol, is_j12
 character*10 elaps, cpu
 common /colpar/ lpar1(3), batch, lpar2(5), ipos, slpar3(17)
 common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &

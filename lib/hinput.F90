@@ -91,7 +91,7 @@ integer ixpar
 integer ipar
 integer ibasty
 integer nerg
-logical existf, first, openfl, is_twomol
+logical existf, first, openfl
 logical lpar, logp, opti, optifl, batch, jtrunc
 dimension a(15),ia(10), ihold(15), lhold(15),lindx(28)
 #include "common/parbas.F90"
