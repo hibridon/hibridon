@@ -29,7 +29,7 @@ subroutine soutpt (tsq, sr, si, scmat, &
                    ipos, csflag, flaghf, swrit, t2writ, t2test, &
                    writs, wrpart, partw, wrxsec, xsecwr, twomol, &
                    nucros, firstj,nlevel, nlevop, nopen, nmax, &
-                   twojlp)
+                   twojlp, basis)
 ! ---------------------------------------------------------------------------
 !  subroutine to:
 !                1. write out the elements of the s-matrix and modulus squared
@@ -139,7 +139,9 @@ use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_coener, only: ener => energ
 use mod_hibrid2, only: mxoutd, mxoutr
+use mod_basis, only: ab_basis
 implicit double precision (a-h,o-z)
+class(ab_basis), intent(in) :: basis
 real(8), intent(inout) :: tsq(nmax,nmax)
 real(8), intent(inout) :: sr(nmax,nmax)
 real(8), intent(inout) :: si(nmax,nmax)
@@ -261,7 +263,7 @@ if (writs .and. nopen .gt. 0) then
                 jlev, inlev, elev, jout)
     end if
     call swrite (sr, si, jtot, jlpar, nu, jq, lq, inq, isc1, &
-                 isc2, jpack, lpack, sc2, nfile, nmax, nopen)
+                 isc2, jpack, lpack, sc2, nfile, nmax, nopen, basis)
 end if
 
 if (.not. xsecwr .and. .not. wrxsec .and. .not.partw &
@@ -1486,7 +1488,7 @@ subroutine sread (iadr, sreal, simag, jtot, jlpar, nu, &
 !     ------------------------------------------------------------
 use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
-use mod_basis, only: is_j12, ab_basis
+use mod_basis, only: ab_basis
 implicit double precision (a-h,o-z)
 class(ab_basis), intent(in) :: basis
 integer, intent(inout) :: nopen
@@ -1592,7 +1594,7 @@ end
 !     ------------------------------------------------------------
 subroutine swrite (sreal, simag, jtot, jlpar, nu, &
                    jq, lq, inq, iorder, inpack, jpack, lpack, &
-                   epack, nfile, nmax, nopen)
+                   epack, nfile, nmax, nopen, basis)
 !  subroutine to write selected elements of s-matrix to file nfile
 !  author:  millard alexander
 !  modified by  h.j. werner and b. follmeg
@@ -1632,15 +1634,15 @@ use mod_cosout, only: nnout, jout
 use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
-use mod_basis, only: is_j12
+use mod_basis, only: ab_basis
 implicit double precision (a-h,o-z)
+class(ab_basis), intent(in) :: basis
 integer ic, icol, ii, ir, irow, jtot, jlpar, length, nmax, &
         nopen, nfile, nu, mmout
 integer jq, jpack, lq, lpack, inq, inpack, nchnid
 common /coered/ ered, rmu
 !  variable in common block /coselb/
 !     ibasty    basistype
-common /coselb/ ibasty
 dimension sreal(nmax,nmax), simag(nmax,nmax), &
           jq(1), lq(1), inq(1), jpack(1), lpack(1), &
           epack(1), inpack(1), iorder(1)
@@ -1648,7 +1650,7 @@ integer int_t
 double precision dble_t
 !
 
-if (is_j12(ibasty)) then
+if (basis%uses_j12()) then
 !     some basis have an additional channel parameter j12
    nchnid = 4
 else
@@ -1682,7 +1684,7 @@ do 30 icol = 1, nopen
          lpack(length) = lq(icol)
          epack(length) = eint(icol)
          inpack(length) = inq(icol)
-         if (is_j12(ibasty)) j12pk(length) = j12(icol)
+         if (basis%uses_j12()) j12pk(length) = j12(icol)
          iorder(length) = icol
          go to 30
       end if
@@ -1703,7 +1705,7 @@ write (nfile, err=950) nrecw, jtot, jlpar, nu, nopen, &
 write (nfile, err=950) (jpack(i), i=1, length)
 write (nfile, err=950) (lpack(i), i=1, length)
 write (nfile, err=950) (inpack(i), i=1, length)
-if (is_j12(ibasty)) write (nfile, err=950) (j12pk(i), i=1, length)
+if (basis%uses_j12()) write (nfile, err=950) (j12pk(i), i=1, length)
 !     here we pack the s-matrix and print out just those elements for
 !     which the initial and final rotational quantum numbers correspond
 !     to an element in the array jout
@@ -1728,7 +1730,7 @@ else if (nnout .le. 0) then
    write (nfile, err=950) (jq(i), i=1, nopen)
    write (nfile, err=950) (lq(i), i=1, nopen)
    write (nfile, err=950) (inq(i), i=1, nopen)
-   if (is_j12(ibasty)) write (nfile, err=950) (j12(i), i=1, nopen)
+   if (basis%uses_j12()) write (nfile, err=950) (j12(i), i=1, nopen)
 !     now write out columns of the s-matrix into buffer length is the
 !     number of columns of the s-matrix to save
    do 140  ii = 1, length

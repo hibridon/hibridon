@@ -656,7 +656,7 @@ call soutpt (z, w, zmat, amat, &
              ipos, csflag, flaghf, swrit, t2writ, t2test, &
              writs, wrpart, partw, wrxsec, xsecwr, twomol, &
              nucros, firstj, nlevel, nlevop, nopen, nchtop, &
-             twojlp)
+             twojlp, params%basis)
 cpuout = cpuout + second() - t11
 
 !  on return from soutpt:
