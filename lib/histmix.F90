@@ -1,5 +1,5 @@
 ! -------------------------------------------------------------------------
-subroutine stmix(flnam1, flnam2, a)
+subroutine stmix(flnam1, flnam2, a, basis)
 !
 !  subroutine to compute cross sections for mixed singlet-triplet states
 !    e.g. CH3 X3B1 - a1A1 collisions involving perturbed levels
@@ -36,9 +36,11 @@ use mod_cosc1, only: elev1 => sc1 ! elev1(1)
 use mod_cosc2, only: elev2 => sc2 ! elev2(1)
 use mod_cosc3, only: elevt => sc3 ! elevt(1)
 use mod_hibrid5, only: sread
+use mod_basis, only: ab_basis
 use constants, only: econv, xmconv, ang2 => ang2c
 
 implicit double precision (a-h, o-z)
+class(ab_basis), intent(in) :: basis
 character*(*) flnam1, flnam2
 character*20  cdate1, cdate2
 character*40  smtfil1, smtfil2
@@ -449,7 +451,7 @@ lngtht = 0
    nopen = -1
    call sread (0, sreal, simag, jtot1, jlpar1, &
         nu1, jq, lq, inq, ipack, jpack, lpack, &
-        1, mmax, nopen, lngth1, ierr)
+        1, mmax, nopen, lngth1, ierr, basis)
    if (ierr .lt. -1) then
       write(6,102)
 102       format(/' ** READ ERROR IN STMIX. ABORT **'/)
@@ -492,7 +494,7 @@ if (irdtrp.eq.1) then
    nopen = -1
    call sread (0, sreal, simag, jtot2, jlpar2, &
         nu2, jq, lq, inq, ipack, jpack, lpack, &
-        11, mmax, nopen, lngth2, ierr)
+        11, mmax, nopen, lngth2, ierr, basis)
    if (ierr .lt. -1) then
       write(6,102)
       goto 1000

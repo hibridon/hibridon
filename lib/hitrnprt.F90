@@ -247,7 +247,7 @@ else
    nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
    lpack,ipack,jttble,prefac, &
    etrans,labadr, &
-   jlpmin,jlpmax,ierr)
+   jlpmin,jlpmax,ierr, basis)
 endif
 goto 300
 300 close (1)
@@ -270,7 +270,7 @@ subroutine sigkap(iunit,mjtot,mchmx, &
                 nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
                 lpack,ipack,jttble,prefac, &
                 etrans,labadr, &
-                jlpmin,jlpmax,ierr)
+                jlpmin,jlpmax,ierr,basis)
 !
 ! subroutine to calculate Q(n) effective cross sections
 !
@@ -303,7 +303,9 @@ use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cow, only: simag => w_as_vec ! simag(1)
 use mod_hibrid2, only: mxoutd
 use mod_hibrid5, only: sread
+use mod_basis, only: ab_basis
 implicit double precision (a-h,o-z)
+class(ab_basis), intent(in) :: basis
 complex*8 t, tp
 logical diag, diagj, diagin, diagp, diagjp, diagnp, &
   lpar1, lpar2, batch, ipos
@@ -373,7 +375,7 @@ length(0,2) = 0  ! the s-matrix contains no partial wave for jtot = 0 and jlpar 
 20 nopen = -1
 call sread (iaddr, sreal, simag, jtot, jlpar, &
    nu, jq, lq, inq, ipack, jpack, lpack, &
-   iunit, mmax, nopen, lngth, ierr)
+   iunit, mmax, nopen, lngth, ierr, basis)
 if (ierr .lt. -1) then
   write(6,105)
 105   format(/' ** READ ERROR IN TRNPRT. ABORT **'/)
@@ -724,7 +726,7 @@ length(0,2) = 0  ! the s-matrix contains no partial wave for jtot = 0 and jlpar 
 20 nopen = -1
 call sread (iaddr, sreal, simag, jtot, jlpar, &
    nu, jq, lq, inq, ipack, jpack, lpack, &
-   iunit, mmax, nopen, lngth, ierr)
+   iunit, mmax, nopen, lngth, ierr, basis)
 if (ierr .lt. -1) then
   write(6,105)
 105   format(/' ** READ ERROR IN TRNPRT. ABORT **'/)

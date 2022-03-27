@@ -22,7 +22,7 @@
 !  12. transmt        print out transformation matrix at rout
 !************************************************************************
 ! ----------------------------------------------------------------------
-subroutine sprint (fname, ia)
+subroutine sprint (fname, ia, basis)
 !   reads and prints s-matrices
 !   author: h.-j. werner
 !   now print out j12 for molecule-molecule systems
@@ -46,8 +46,9 @@ use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cozmat, only: simag => zmat_as_vec ! simag(1)
 use mod_hibrid5, only: sread
-use mod_basis, only: is_j12
+use mod_basis, only: is_j12, ab_basis
 implicit double precision (a-h,o-z)
+class(ab_basis), intent(in) :: basis
 character*(*) fname
 character*20 cdate
 character*40 xname
@@ -121,7 +122,7 @@ iadr=0
 30 nopen = 0
 call sread (iadr, sreal, simag, jtot, jlpar, nu, &
                   jq, lq, inq, ipack, jpack, lpack, &
-                   1, nmax, nopen, length, ierr)
+                   1, nmax, nopen, length, ierr, basis)
 if(csflag) jlpar=0
 if(ierr.eq.-1) goto 400
 if(ierr.lt.-1) then

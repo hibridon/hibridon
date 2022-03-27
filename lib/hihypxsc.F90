@@ -1,5 +1,5 @@
 !     -------------------------------------------------------------
-subroutine hypxsc(flname, a)
+subroutine hypxsc(flname, a, basis)
 !
 !     subroutine to compute hyperfine-resolved integral
 !     cross sections
@@ -45,9 +45,11 @@ use mod_coisc12, only: lpack => isc12 ! lpack(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc3, only: elevh => sc3 ! elevh(1)
 use mod_hibrid5, only: sread
+use mod_basis, only: ab_basis
 use constants, only: econv, xmconv, ang2 => ang2c
 
 implicit double precision (a-h,o-z)
+class(ab_basis), intent(in) :: basis
 character*(*) flname
 real(8), dimension(4), intent(in) :: a(4)
 complex(8) t, tf
@@ -295,7 +297,7 @@ end do
 100 nopen = -1
 call sread (0, sreal, simag, jtot, jlpar, &
      nu, jq, lq, inq, ipack, jpack, lpack, &
-     1, mmax, nopen, lngth, ierr)
+     1, mmax, nopen, lngth, ierr, basis)
 if (ierr .lt. -1) then
    write(6,102)
 102    format(/' ** READ ERROR IN HYPXSC. ABORT **'/)

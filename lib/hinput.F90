@@ -985,7 +985,7 @@ if(l.ne.0) then
   call getval(code(1:lc),' ',0,j,val)
   thrs = val
 end if
-call difs(fnam1,fnam2,ienerg,iprint,acc,accmx,thrs,imx,jmx,ityp)
+call difs(fnam1,fnam2,ienerg,iprint,acc,accmx,thrs,imx,jmx,ityp,params%basis)
 code = '?'
 lc = 1
 if (thrs .lt. 0.) then
@@ -1088,7 +1088,7 @@ if(ia(3).eq.0) ia(3)=ipar(3)
 if(ia(4).eq.0) ia(4)=ipar(4)
 call lower(fnam1)
 call upper(fnam1(1:1))
-call sprint(fnam1,ia)
+call sprint(fnam1,ia, params%basis)
 goto 1
 !.....differential cross sections:
 !  diffc,jobfile,j1,in1,j2,in2,ang1,ang2,dang,ienerg,jtotend
@@ -1213,7 +1213,7 @@ write(6,255) pcod(ipr)(1:lc),a(1)
 255 format(1x,(a),' = ',f7.3)
 goto 500
 2160 if(istep.ge.2) then
-  call difs(fnam1,fnam2,1,0,acc,accmx,thrs,im,jm,ityp)
+  call difs(fnam1,fnam2,1,0,acc,accmx,thrs,im,jm,ityp, params%basis)
   code = '?'
   lcc = 1
   if(ityp .eq. 1) code = 'S real'
@@ -1291,7 +1291,7 @@ if(l .eq. 0) goto 2210
 call parse(line,l,code,lc)
 call getval(code(1:lc),' ',0,j,a(i))
 2210 continue
-call intcrs(fnam1,a)
+call intcrs(fnam1,a, params%basis)
 goto 1
 !.....tensor cross sections
 !  tenxsc,jobfile,maxn,iframe,in1,in2,ienerg,jtotend,minj,maxj
@@ -1436,7 +1436,7 @@ goto 1
      call parse(line,l,code,lc)
      call getval(code(1:lc),' ',0,j,a(i))
 2013   continue
-  call hypxsc(fnam1,a)
+  call hypxsc(fnam1,a, params%basis)
 !      else
 !        write (6, 2012)
 !2012    format(' Sorry, hyperfine cross sections not yet',
@@ -1469,7 +1469,7 @@ call getval(code(1:lc),' ',0,j,a(2))
   call parse(line,l,code,lc)
   call getval(code(1:lc),' ',0,j,a(i))
 3020 continue
-call stmix(fnam1,fnam2,a)
+call stmix(fnam1,fnam2,a,params%basis)
 goto 1
 ! transport cross sections - added by p. dagdigian
 3100 call parse(line,l,fnam1,lc)
@@ -1511,7 +1511,7 @@ call getval(code(1:lc),' ',0,j,a(2))
   call parse(line,l,code,lc)
   call getval(code(1:lc),' ',0,j,a(i))
 3220 continue
-call prsbr(fnam1,fnam2,a)
+call prsbr(fnam1,fnam2,a, params%basis)
 goto 1
 end
 subroutine pcoder(boundc,pcod,icode)

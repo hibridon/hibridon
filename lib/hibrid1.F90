@@ -873,7 +873,7 @@ return
 end
 !  -------------------------------------------------------------
 subroutine difs(fname1,fname2,ienerg,iprint,acc,accmx,thrs, &
-  imx,jmx,ityp)
+  imx,jmx,ityp, basis)
 !  -------------------------------------------------------------
 !   reads and compares two s-matrix files
 !   fname1,fname: job names
@@ -903,8 +903,10 @@ use mod_coz, only: sreal1 => z_as_vec ! sreal1(1)
 use mod_cow, only: sreal2 => w_as_vec ! sreal2(1)
 use mod_cozmat, only: simag1 => zmat_as_vec ! simag1(1)
 use mod_hibrid5, only: sread
+use mod_basis, only: ab_basis
 
 implicit double precision (a-h,o-z)
+class(ab_basis), intent(in) :: basis
 character*(*) fname1,fname2
 character*20 cdate1,cdate2
 character*40 xnam1,xnam2
@@ -982,7 +984,7 @@ do 26 i=1,iabs(nnout1)
 30 nopen1 = 0
 call sread (0,sreal1, simag1, jtot1, jlpar1, nu1, &
                   jq, lq, inq, ipack1, jpack1, lpack1, &
-                  1, mmax, nopen1, lengt1, ierr)
+                  1, mmax, nopen1, lengt1, ierr, basis)
 if(ierr.eq.-1) goto 200
 if(ierr.lt.-1) then
   write(6,35) xnam1
@@ -992,7 +994,7 @@ end if
 nopen2 = 0
 call sread (0,sreal2, simag2, jtot2, jlpar2, nu2, &
                   jq, lq, inq, ipack2, jpack2, lpack2, &
-                  2, mmax, nopen2, lengt2, ierr)
+                  2, mmax, nopen2, lengt2, ierr, basis)
 if(ierr.eq.-1) goto 200
 if(ierr.lt.-1) then
   write(6,35) xnam2

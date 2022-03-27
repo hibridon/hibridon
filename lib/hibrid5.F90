@@ -1471,7 +1471,7 @@ end
 
 subroutine sread (iadr, sreal, simag, jtot, jlpar, nu, &
                   jq, lq, inq, inpack, jpack, lpack, &
-                  smt_file_unit, nmax, nopen, length, ierr)
+                  smt_file_unit, nmax, nopen, length, ierr, basis)
 !     authors: h.j. werner and b. follmeg
 !     revision: 21-feb-2006 by mha
 !     major revision: 07-feb-2012 by q. ma
@@ -1486,16 +1486,14 @@ subroutine sread (iadr, sreal, simag, jtot, jlpar, nu, &
 !     ------------------------------------------------------------
 use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
-use mod_basis, only: is_j12
+use mod_basis, only: is_j12, ab_basis
 implicit double precision (a-h,o-z)
+class(ab_basis), intent(in) :: basis
 integer, intent(inout) :: nopen
 integer, intent(in) :: smt_file_unit
 logical triang
 dimension sreal(nmax,1), simag(nmax,1), &
      jpack(1), lpack(1),inpack(1),jq(1),lq(1),inq(1)
-!     variable in common block /coselb/
-!     ibasty    basistype
-common /coselb/ ibasty
 character*8 csize8
 !
 ierr=0
@@ -1519,7 +1517,7 @@ if (lrec .lt. 0) goto 900
 !
 read (smt_file_unit, end=900, err=950) (jpack(i), i=1, length), &
      (lpack(i), i=1, length), (inpack(i), i=1, length)
-if (is_j12(ibasty)) &
+if (basis%uses_j12()) &
      read (smt_file_unit, end=900, err=950) (j12pk(i), i=1, length)
 
 
@@ -1536,7 +1534,7 @@ if (nnout .gt. 0) then
       jq(i) = jpack(i)
       lq(i) = lpack(i)
       inq(i)= inpack(i)
-      if (is_j12(ibasty)) j12(i) = j12pk(i)
+      if (basis%uses_j12()) j12(i) = j12pk(i)
 50    continue
    nopen = length
    if (triang) then
@@ -1568,7 +1566,7 @@ else if (nnout .le. 0) then
 !     here if you have written out columns of the s-matrix
    read (smt_file_unit, end=900, err=950) (jq(i), i=1, nopen), &
         (lq(i), i=1, nopen), (inq(i), i=1, nopen)
-   if (is_j12(ibasty)) read (smt_file_unit, end=900, err=950) &
+   if (basis%uses_j12()) read (smt_file_unit, end=900, err=950) &
         (j12(i), i=1, nopen)
 !     now read columns of the s-matrix
    do 140 icol = 1, length
@@ -1934,7 +1932,7 @@ call dopen(1,3,savfil)
 return
 end
 ! ------------------------------------------------------------------
-subroutine intcrs(filnam,a)
+subroutine intcrs(filnam,a, basis)
 !
 ! driver subroutine to calculate integral cross sections
 ! from s-matrix elements
@@ -1973,7 +1971,9 @@ use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cow, only: simag => w_as_vec ! simag(1)
 use mod_cozmat, only: sigma => zmat_as_vec ! sigma(1)
 use mod_hibrid2, only: mxoutr
+use mod_basis, only: ab_basis
 implicit double precision (a-h,o-z)
+class(ab_basis), intent(in) :: basis
 character*(*) filnam
 character*40  icsfil, smtfilnam, xname
 integer :: smt_unit = 1
@@ -2082,7 +2082,7 @@ end if
 ! now compute cross sections
 call intcr(csflag,flaghf,twomol,flagsu,nucros, &
             numin,numax,nud,jfirst,jfinal,jtotd,maxjt, &
-            sigma,sreal,simag,sc1,sc2,sc3,sc4,nlevop,mmax,tmp_file)
+            sigma,sreal,simag,sc1,sc2,sc3,sc4,nlevop,mmax,tmp_file, basis)
 string=' '
 if(nnout.lt.0) string='(COLUMNS)'
 write (ics_unit, 210) string
@@ -2163,7 +2163,7 @@ end
 ! ----------------------------------------------------------------------
 subroutine intcr(csflag,flaghf,twomol,flagsu,nucros, &
            numin,numax,nud,jfirst,jfinal,jtotd,maxjt, &
-           sigma,sreal,simag,sc1,sc2,scmat,tsq,nlevop,nmax,tmp_file)
+           sigma,sreal,simag,sc1,sc2,scmat,tsq,nlevop,nmax,tmp_file, basis)
 !
 ! subroutine to calculate integral cross sections from s-matrix
 ! elements
@@ -2188,8 +2188,10 @@ use mod_coisc7, only: isc2 => isc7 ! isc2(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc2, only: inlev => sc2int ! inlev(1)
 use mod_cosc3, only: jlev => sc3int ! jlev(1)
+use mod_basis, only: ab_basis
 
 implicit double precision (a-h,o-z)
+class(ab_basis), intent(in) :: basis
 logical, intent(in) :: csflag
 logical, intent(in) :: flaghf
 logical, intent(in) :: twomol
@@ -2230,7 +2232,7 @@ iaddr = 0
 10 nopen = 0
 call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
              jq, lq, inq, inpack, jpack, lpack, &
-             1, nmax, nopen, length, ierr)
+             1, nmax, nopen, length, ierr, basis)
 if(jlpold.eq.0) jlpold=jlpar
 if(ierr.eq.-1) goto 100
 if (csflag .and. (jtot.gt.maxjt)) goto 100

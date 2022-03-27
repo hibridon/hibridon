@@ -1,5 +1,5 @@
 ! -------------------------------------------------------------------------
-subroutine prsbr(flnam1, flnam2, a)
+subroutine prsbr(flnam1, flnam2, a, basis)
 !
 !  subroutine to compute pressure broadening cross sections
 !
@@ -33,8 +33,10 @@ use mod_coisc12, only: lpack => isc12 ! lpack(1)
 use mod_cosc1, only: elev1 => sc1 ! elev1(1)
 use mod_cosc2, only: elev2 => sc2 ! elev2(1)
 use mod_cosc3, only: elevt => sc3 ! elevt(1)
+use mod_basis, only: ab_basis
 use mod_hibrid5, only: sread
 implicit double precision (a-h, o-z)
+class(ab_basis), intent(in) :: basis
 character*(*) flnam1, flnam2
 character*20  cdate1, cdate2
 character*40  smtfil1, smtfil2, prtfil
@@ -423,7 +425,7 @@ iaddr = 0
 20 nopen = -1
 call sread (iaddr, sreal, simag, jtot1, jlpar1, &
    nu1, jq, lq, inq, ipack, jpack, lpack, &
-   1, mmax, nopen, lngth1, ierr)
+   1, mmax, nopen, lngth1, ierr, basis)
 if (ierr .lt. -1) then
   write(6,105)
 105   format(/' ** READ ERROR IN PRSBR - INITIAL ', &
@@ -467,7 +469,7 @@ goto 20
 1020 nopen = -1
 call sread (iaddr, sreal, simag, jtot2, jlpar2, &
    nu2, jq, lq, inq, ipack, jpack, lpack, &
-   11, mmax, nopen, lngth2, ierr)
+   11, mmax, nopen, lngth2, ierr, basis)
 if (ierr .lt. -1) then
   write(6,1105)
 1105   format(/' ** READ ERROR IN PRSBR - FINAL ', &

@@ -455,7 +455,7 @@ jplast=0
 250 nopen1 = 0
 call sread (0,sreal1, simag1, jtot, jlpar, nu1, &
                   jq, lq, inq, ipack1, jpack1, lpack1, &
-                  smt_unit, mmax, nopen1, lengt1, ierr)
+                  smt_unit, mmax, nopen1, lengt1, ierr, basis)
 if(ierr.eq.-1) then
    write(6,260) xnam1,jtlast,jplast
 260    format(' END OF FILE DETECTED READING FILE ',(a), &

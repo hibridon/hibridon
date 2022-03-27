@@ -374,7 +374,7 @@ iaddr = jttble(jj)
 nopen = -1
 call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
             jq, lq, inq, ipack, jpack, lpack, &
-             1, mmax, nopen, length, ierr)
+             1, mmax, nopen, length, ierr, basis)
 maxlsp = (length*(length+1))/2
 maxllb = length
 nbuf1 = lnbufs/maxlsp
@@ -444,14 +444,14 @@ n = minn
        call sigk(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
              lpack,ipack,jttble,prefac,sigma, &
              sreal,simag,matel,lenlab,labadr, &
-             jtotpa,fast,ierr)
+             jtotpa,fast,ierr,basis)
        if(ierr.ne.0) goto 4000
        goto 300
 ! iframe = 1
 172        call sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
              lpack,ipack,jttble,prefac, &
              sreal,simag,matel,lenlab,labadr, &
-             jtotpa,fast,ierr)
+             jtotpa,fast,ierr,basis)
        if(ierr.ne.0) goto 4000
        goto 300
 ! iframe = 2
@@ -467,7 +467,7 @@ n = minn
        inlevel = inlev(jlist(1))
        call dsigga(maxk,nnout,jfirst,jfinal,jtotd,jpack,lpack, &
              ipack,jlevel,inlevel,elev(jlist(1)),flaghf, &
-             iframe,ierr)
+             iframe,ierr, basis)
        if(ierr.ne.0) goto 4000
 else
 ! here for n > 0
@@ -495,7 +495,7 @@ else
    call sigkkp(n,maxk,nk,nnout,jfirst,jfinal,jtotd,nj,mmax, &
         jpack,lpack,ipack,jttble,prefac,sigma, &
         sreal,simag,matel,lenlab,labadr, &
-        jtotpa,kplist,f9pha,fast,ierr)
+        jtotpa,kplist,f9pha,fast,ierr,basis)
    if(ierr.ne.0) goto 4000
 end if
 ! next n
@@ -526,16 +526,14 @@ close (4)
 4000 call tensor_free()
 return
 end
-end module tensor
 
 ! ------------------------------------------------------------------
 subroutine addsp(jtmin,jtmax,jlp, &
-                 labadr,lenlab,jtotpa,jttble)
+                 labadr,lenlab,jtotpa,jttble,basis)
 !
 ! current revision date: 12-nov-2008 by pj dagdigian
 !
 use ISO_FORTRAN_ENV, only : ERROR_UNIT
-use tensor
 use mod_cojq, only: jqp => jq ! jqp(1)
 use mod_colq, only: lqp => lq ! lqp(1)
 use mod_coinq, only: inqp => inq ! inqp(1)
@@ -543,7 +541,14 @@ use mod_coisc4, only: jpack => isc4 ! jpack(1)
 use mod_coisc5, only: lpack => isc5 ! lpack(1)
 use mod_coisc6, only: ipack => isc6 ! ipack(1)
 use mod_hibrid5, only: sread
+use mod_basis, only: ab_basis
 implicit double precision (a-h,o-z)
+class(ab_basis), intent(in) :: basis
+integer :: iaddrp, ibuf, ierr, igjtp, ihibuf, in1, in2, ioff, ioffs, ipar, iprnt
+integer :: jtmin, jtmax, jlp, jtotpa, jttble, j1, j2, j1p, jjp, jfsts, jlparf, jlparp, jlpars, jtotp, jtp, jtpmin, jtpmax
+integer :: labadr, lenlab, lengtp, lnbufl, lnbufs
+integer :: maxjtot, maxjt, maxllb, maxlsp, maxjot
+integer :: nbuf, njmax, nopenp, nu, nwaves
 logical lpar, batch, lpar2, lprnt
 common /colpar/ lpar(3), batch, lpar2(23)
 common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
@@ -616,7 +621,7 @@ do 100 jtp=jtpmin,jtpmax
    call sread ( iaddrp, srealp(ioffs), simagp(ioffs), jtotp, &
                 jlparp, nu, jqp, lqp, inqp, ipackp(ioff), &
                 jpackp(ioff), lpackp(ioff), &
-                1, maxlsp, nopenp, lengtp, ierr)
+                1, maxlsp, nopenp, lengtp, ierr, basis)
    if(ierr.eq.-1) goto 999
    if(ierr.lt.-1) then
       write(2,20)
@@ -651,6 +656,7 @@ ihibuf = ibuf
 !
 999 return
 end
+end module tensor
 ! ------------------------------------------------------------------
 subroutine mrcrs(filnam,a)
 !
@@ -965,7 +971,7 @@ end
 subroutine sigk(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
                 lpack,ipack,jttble,prefac,sigma, &
                 sreal,simag,matel,lenlab,labadr, &
-                jtotpa,fast,ierr)
+                jtotpa,fast,ierr,basis)
 !
 ! subroutine to calculate sigma(k,j1,j2) cross sections:
 ! ( see also " m.h. alexander and s.l. davis, jcp 78(11),6748(1983)"
@@ -992,7 +998,9 @@ use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid2, only: mxoutd
 use mod_hibrid5, only: sread
+use mod_basis, only: ab_basis
 implicit double precision (a-h,o-z)
+class(ab_basis), intent(in) :: basis
 complex*8 t, tp
 logical diag, diagj, diagin, lpar1, lpar2, batch, ipos, &
         twopar, fast,lpar3
@@ -1079,7 +1087,7 @@ if(iaddr .lt. 0) goto 700
 nopen = -1
 call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
             jq, lq, inq, ipack, jpack, lpack, &
-             1, mmax, nopen, length, ierr)
+             1, mmax, nopen, length, ierr, basis)
 if(ierr.eq.-1) goto 999
 if(ierr.lt.-1) then
   write(2,20)
@@ -1099,7 +1107,7 @@ jlparp = jlpar
 ! fill buffer with required s' matrices
 ! parity for each jtot' needs to be kept track of in addsp
 call addsp(jtpmin,jtpmax,jlp, &
-           labadr,lenlab,jtotpa,jttble)
+           labadr,lenlab,jtotpa,jttble,basis)
 if (srealp(lbufs) .ne. 0.d0) print *, 'srealp error in sigk'
 if (simagp(lbufs) .ne. 0.d0) print *, 'simagp error in sigk'
 if (ipackp(lbuflb) .ne. 0) print *, 'ipackp error in sigk'
@@ -1419,7 +1427,7 @@ end
 subroutine sigkkp(n,maxk,nk,nnout,jfirst,jfinal,jtotd,nj,mmax, &
          jpack,lpack,ipack,jttble,prefac,sigma, &
          sreal,simag,matel,lenlab,labadr, &
-         jtotpa,kplist,f9pha,fast,ierr)
+         jtotpa,kplist,f9pha,fast,ierr,basis)
 !
 ! subroutine to calculate sigma(lambda; j1, j2, ki, kf) cross section
 ! defined by follmeg et al., jcp 93(7), 4687 (1990).
@@ -1443,7 +1451,9 @@ use mod_coinq, only: inq ! inq(1)
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid5, only: sread
+use mod_basis, only: ab_basis
 implicit double precision (a-h,o-z)
+class(ab_basis), intent(in) :: basis
 complex*8 t, tp, ai, cphase
 logical diag, diagj, diagin, lpar1, lpar2, batch, ipos, &
         twopar, fast,lpar3
@@ -1554,7 +1564,7 @@ if(iaddr .lt. 0) goto 700
 nopen = -1
 call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
             jq, lq, inq, ipack, jpack, lpack, &
-             1, mmax, nopen, length, ierr)
+             1, mmax, nopen, length, ierr, basis)
 if(ierr.eq.-1) goto 999
 if(ierr.lt.-1) then
   write(2,20)
@@ -1570,7 +1580,7 @@ jtpmin = jtot
 jtpmax = min((jtot + maxk), jfinal)
 ! fill buffer with required s' matrices
 call addsp(jtpmin,jtpmax,jlp, &
-           labadr,lenlab,jtotpa,jttble)
+           labadr,lenlab,jtotpa,jttble,basis)
 !
 ! prepare for sum over jtot'
 jtotp = jtpmin
@@ -1874,7 +1884,7 @@ end
 subroutine sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
                 lpack,ipack,jttble,prefac, &
                 sreal,simag,matel,lenlab,labadr, &
-                jtotpa,fast,ierr)
+                jtotpa,fast,ierr,basis)
 !
 ! subroutine to calculate tensor cross sections with the
 ! quantization axis along the initial relative velocity vector
@@ -1894,7 +1904,9 @@ use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid2, only: mxoutd
 use mod_hibrid5, only: sread
+use mod_basis, only: ab_basis
 implicit double precision (a-h,o-z)
+class(ab_basis), intent(in) :: basis
 complex*8 t, tp
 logical diag, diagj, diagin, lpar1, lpar2, batch, ipos, &
         twopar, fast,lpar3
@@ -1982,7 +1994,7 @@ if(iaddr .lt. 0) goto 700
 nopen = -1
 call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
             jq, lq, inq, ipack, jpack, lpack, &
-             1, mmax, nopen, length, ierr)
+             1, mmax, nopen, length, ierr, basis)
 if(ierr.eq.-1) goto 999
 if(ierr.lt.-1) then
   write(2,20)
@@ -2002,7 +2014,7 @@ jlparp = jlpar
 ! fill buffer with required s' matrices
 ! parity for each jtot' needs to be kept track of in addsp
 call addsp(jtpmin,jtpmax,jlp, &
-           labadr,lenlab,jtotpa,jttble)
+           labadr,lenlab,jtotpa,jttble, basis)
 if (srealp(lbufs) .ne. 0.d0) print *, 'srealp error in sigkc'
 if (simagp(lbufs) .ne. 0.d0) print *, 'simagp error in sigkc'
 if (ipackp(lbuflb) .ne. 0) print *, 'ipackp error in sigkc'
@@ -2425,7 +2437,7 @@ call rdhead(1,cdate1,ered1,rmu1,csflg1,flghf1,flgsu1, &
 250 nopen = 0
 call sread (0, sreal, simag, jtot, jlpar, nu, &
             jq, lq, inq, ipack, jpack, lpack, &
-            1, mmax, nopen, length, ierr)
+            1, mmax, nopen, length, ierr, basis)
 if(ierr .eq. -1) then
    write(6,260) xnam1,jtlast,jplast
 260    format(' END OF FILE DETECTED READING FILE ',(a), &
@@ -2769,7 +2781,7 @@ end
 !=============
 subroutine dsigga(maxk,nnout,jfirst,jfinal,jtotd,jpack, &
                 lpack,ipack,jlevel,inlevel,elevel,flaghf, &
-                iframe,ierr)
+                iframe,ierr, basis)
 !
 ! subroutine to calculate m-resolved differential cross sections
 ! for the elastic (j1,in1) -> (j1,in1) transition in the
@@ -2794,9 +2806,11 @@ use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cow, only: simag => w_as_vec ! simag(1)
 use mod_hibrid5, only: sread
 use mod_difcrs, only: sphn
+use mod_basis, only: ab_basis
 use constants, only: econv, xmconv, ang2c
 
 implicit double precision (a-h,o-z)
+class(ab_basis), intent(in) :: basis
 ! size of q for j <= 5 and 0.5 deg angle increment
 complex*16 q(43681)
 logical diag, diagj, diagin, lpar1, lpar2, batch, ipos, &
@@ -2878,7 +2892,7 @@ call rdhead(1,cdate1,ered1,rmu1,csflg1,flghf1,flgsu1, &
 250 nopen = 0
 call sread (0, sreal, simag, jtot, jlpar, nu, &
                   jq, lq, inq, ipack, jpack, lpack, &
-                  1, mmax, nopen, length, ierr)
+                  1, mmax, nopen, length, ierr, basis)
 if(ierr .eq. -1) then
    write(6,260) xnam1,jtlast,jplast
 260    format(' END OF FILE DETECTED READING FILE ',(a), &
