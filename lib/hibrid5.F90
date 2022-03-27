@@ -272,7 +272,7 @@ call  partcr (tsq,  scmat, isc1, isc2, sc1, nopen, nopen, &
                    inq, jq, lq, inq, jq, lq, &
                    inlev, jlev, elev, jtot, nu, &
                    csflag, flaghf,twomol,flagsu, &
-                   nlevop,nmax)
+                   nlevop,nmax,basis)
 !  here if coupled-states calculation
 if (csflag.and..not.nucros) then
 !  here if partial cross sections are desired
@@ -2264,13 +2264,13 @@ endif
 iaddr = 0
 ! calculate squared t-matrix
 call tsqmat(tsq,sreal,simag,inq,jq,lq, &
-   inpack,jpack,lpack,nopen,length,nmax)
+   inpack,jpack,lpack,nopen,length,nmax,basis)
 ! calculate partial cross sections
 call partcr(tsq,sc1,isc1,isc2,sc2,nopen,length, &
             inq, jq, lq, inpack, jpack, lpack, &
             inlev, jlev, elev, jtot, nu, &
             csflag,flaghf,twomol,flagsu, &
-            nlevop,nmax)
+            nlevop,nmax,basis)
 if(.not.csflag.or.nucros.or.(csflag.and.nu.eq.numin)) then
 ! sum up partial cross sections over nu
   scmat(1:nlevop, 1:nlevop) = sc1(1:nlevop, 1:nlevop)
@@ -2320,7 +2320,7 @@ return
 end
 ! ----------------------------------------------------------------------
 subroutine tsqmat(tsq,sreal,simag,inrow,jrow,lrow, &
-          incol,jcol,lcol,nopen,ncol,nmax)
+          incol,jcol,lcol,nopen,ncol,nmax, basis)
 ! ----------------------------------------------------------------------
 !
 !  routine to compute modulus squared t-matrix from given s-matrix
@@ -2329,8 +2329,9 @@ subroutine tsqmat(tsq,sreal,simag,inrow,jrow,lrow, &
 ! ----------------------------------------------------------------------
 use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
-use mod_basis, only: is_j12
+use mod_basis, only: ab_basis
 implicit double precision (a-h,o-z)
+class(ab_basis), intent(in) :: basis
 complex*8 t
 logical diag
 common /coselb/ ibasty
@@ -2343,14 +2344,14 @@ do 400 icol = 1, ncol
    in1 = incol(icol)
    j1 = jcol(icol)
    l1 = lcol(icol)
-   if (is_j12(ibasty)) j121 = j12(icol)
+   if (basis%uses_j12()) j121 = j12(icol)
    do 300 irow = 1, nopen
       in2 = inrow(irow)
       j2 = jrow(irow)
       l2 = lrow(irow)
-      if (is_j12(ibasty)) j122 = j12pk(irow)
+      if (basis%uses_j12()) j122 = j12pk(irow)
       diag = j1.eq.j2 .and. in1.eq.in2 .and. l1.eq.l2
-      if (is_j12(ibasty)) diag = diag .and. j121.eq.j122
+      if (basis%uses_j12()) diag = diag .and. j121.eq.j122
 !
 ! convert s-matrix to t-matrix: t(j,j1,in1,l1 ; j2,in2,l2) =
 !     delta(j1,in1,l1 ; j2,in2,l2) - s(j,j1,in1,l1 ; j2,in2,l2)
@@ -2368,7 +2369,7 @@ subroutine partcr (tsq,  scmat, isc1, isc2, sc2, nopen, ncol, &
                    inrow, jrow, lrow, incol, jcol, lcol, &
                    inlev, jlev, elev, jtot, nu, &
                    csflag, flaghf,twomol,flagsu, &
-                   nlevop,nmax)
+                   nlevop,nmax,basis)
 ! ----------------------------------------------------------------------
 !  this routine computes partial cross sections from squared t matrix
 !  inrow, jrow, lrow: row indices of t-matrix (nopen values)
@@ -2392,8 +2393,9 @@ subroutine partcr (tsq,  scmat, isc1, isc2, sc2, nopen, ncol, &
 !
 ! ----------------------------------------------------------------------
 use constants
-use mod_basis, only: is_j12
+use mod_basis, only: ab_basis
 implicit double precision (a-h,o-z)
+class(ab_basis), intent(in) :: basis
 real(8), dimension(nmax,nmax), intent(in) :: tsq
 !      real(8), dimension(:,:), intent(in), target :: tototsq
 real(8), dimension(nmax,nmax), intent(out) :: scmat
@@ -2435,7 +2437,7 @@ do 10 icol = 1,nlevop
 !  set pointer array for columns (final states)
 do 40 i = 1, ncol
   do 20 icol = 1, nlevop
-    if (is_j12(ibasty) .and. incol(i) .ne. inlev(icol)) &
+    if (basis%uses_j12() .and. incol(i) .ne. inlev(icol)) &
           go to 20
     if (.not. twomol .and. incol(i).ne.inlev(icol)) go to 20
     if (jcol(i) .ne. jlev(icol)) goto 20
@@ -2451,7 +2453,7 @@ do 40 i = 1, ncol
 ! set pointer array and degeneracy factors for rows (initial states)
 do 140 j = 1, nopen
   do 120 irow = 1, nlevop
-     if (is_j12(ibasty) .and. inrow(j).ne.inlev(irow)) &
+     if (basis%uses_j12() .and. inrow(j).ne.inlev(irow)) &
           go to 120
      if (.not. twomol.and.inrow(j).ne.inlev(irow)) go to 120
      if (jrow(j) .ne. jlev(irow)) goto 120

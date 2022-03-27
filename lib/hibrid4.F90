@@ -46,7 +46,7 @@ use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cozmat, only: simag => zmat_as_vec ! simag(1)
 use mod_hibrid5, only: sread
-use mod_basis, only: is_j12, ab_basis
+use mod_basis, only: ab_basis
 implicit double precision (a-h,o-z)
 class(ab_basis), intent(in) :: basis
 character*(*) fname
@@ -168,7 +168,7 @@ end if
   write (6, 280)
 280   format(/' ROW INDICES:')
   write (6, 290) 'N    ', (j, j=1, length)
-  if (.not. is_j12(ibasty)) then
+  if (.not. basis%uses_j12()) then
     if (flaghf) then
       write (6, 260) 'J    ', (jpack(j)+0.5d0, j=1, length)
     else
