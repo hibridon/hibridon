@@ -2218,7 +2218,6 @@ integer, intent(in) :: nmax
 integer, intent(in) :: tmp_file
 logical lpar1, lpar2, batch, ipos, lpar3
 common /colpar/ lpar1(3), batch, lpar2(5), ipos, lpar3(17)
-common /coselb/ ibasty
 ! clear sigma array
 one=1.0d0
 zero=0.0d0
