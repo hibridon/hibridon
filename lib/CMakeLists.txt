@@ -4,6 +4,8 @@
 #
 ################################################################################
 
+set(ENABLE_ASSERTS "ON" CACHE BOOL "to enable or disable assert checks for debug builds (mostly for developers).")
+
 
 add_library(hib
     assert.f90
@@ -82,6 +84,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       PUBLIC
       # Non-specific options
       -std=legacy                               # Allow pre-Fortran 77 syntax (e.g. arbitrary length arrays)
+      -ffree-line-length-none                   # Allow arbitrary long lines. Needed as preprocessing could generate long line lengths.
       -fno-automatic                            # Put everything on the heap
       $<$<PLATFORM_ID:Linux>:-march=native>     # Tune generated code for host's micro-architecture
       $<$<PLATFORM_ID:Darwin>:-mtune=native>    # Tune generated code for host's micro-architecture (march not working on Darwin)
@@ -173,7 +176,11 @@ target_compile_definitions(hib PUBLIC _BUILD_DATE_="${TODAY}")
 target_compile_definitions(hib PUBLIC _HELPDIR_="${CMAKE_CURRENT_SOURCE_DIR}/doc/")
 # The following is to limit the max jtot number
 target_compile_definitions(hib PUBLIC MAX_NJTOT=1000)
-target_compile_definitions(hib PUBLIC DISABLE_HIB_ASSERT=1)
+target_compile_definitions(hib PUBLIC "$<$<CONFIG:Release>:DISABLE_HIB_ASSERT=1>")
+# asserts can be activated on non-release builds (eg debug build)
+if(NOT ENABLE_ASSERTS)
+  target_compile_definitions(hib PUBLIC "$<$<CONFIG:Debug>:DISABLE_HIB_ASSERT=1>")
+endif()
 
 
 
