@@ -1118,6 +1118,10 @@ irpot=1
 return
 ! --------------------------------------------------------------
 entry savsphtp (readp)
+iop=>ispar(2); jmax=>ispar(3)
+brot=>rspar(1) ; dj=>rspar(2); dk=>rspar(3)
+ASSERT(iop .eq. ispar(2))
+ASSERT(jmax .eq. ispar(3))
 !  save input parameters for spherical top + atom scattering
 write (8, 310) iop, jmax
 310 format(2i4,25x,'iop, jmax')
