@@ -4,6 +4,8 @@
 #
 ################################################################################
 
+set(ENABLE_ASSERTS "ON" CACHE BOOL "to enable or disable assert checks for debug builds (mostly for developers).")
+
 
 add_library(hib
     assert.f90
@@ -66,6 +68,10 @@ add_library(hib
 # This for preprocessed includes from the subdirectory bases to work
 target_include_directories(hib PRIVATE ./)
 
+# Link Blas and Lapack libraries
+target_link_libraries(hib INTERFACE "${BLAS_LIBRARIES}")
+target_link_libraries(hib INTERFACE "${LAPACK_LIBRARIES}")
+
 ################################################################################
 #
 #    COMPILE OPTIONS
@@ -78,6 +84,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       PUBLIC
       # Non-specific options
       -std=legacy                               # Allow pre-Fortran 77 syntax (e.g. arbitrary length arrays)
+      -ffree-line-length-none                   # Allow arbitrary long lines. Needed as preprocessing could generate long line lengths.
       -fno-automatic                            # Put everything on the heap
       $<$<PLATFORM_ID:Linux>:-march=native>     # Tune generated code for host's micro-architecture
       $<$<PLATFORM_ID:Darwin>:-mtune=native>    # Tune generated code for host's micro-architecture (march not working on Darwin)
@@ -86,19 +93,37 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<CONFIG:RELEASE>:-O3>                  # Optimization level at 3 for Release
       $<$<CONFIG:RELEASE>:-finit-local-zero>    # Init variables to zero/false/null
       # Config-specific options: DEBUG
-      $<$<CONFIG:DEBUG>:-Og>                    # Optimization level at 0 for Debug
-      $<$<CONFIG:DEBUG>:-fbacktrace>            #
+      $<$<CONFIG:DEBUG>:-Og>                    # Optimization level at 0 and generates complete debugging information
+      $<$<CONFIG:DEBUG>:-fbacktrace>            # Generates extra information in the object file to provide source file traceback information when a severe error occurs at run time
       $<$<CONFIG:DEBUG>:-Wall>                  # Enable all warnings
       $<$<CONFIG:DEBUG>:-Wextra>                # Enable extra warnings
       $<$<CONFIG:DEBUG>:-fsanitize=address>     # Address sanitizer
-      #$<$<CONFIG:DEBUG>:-ffpe-trap=invalid,zero,overflow> # Stop execution on case of Floating Point Error
       $<$<CONFIG:DEBUG>:-Wuninitialized>        # Emit warnings for uninitialized variables 
-      #$<$<CONFIG:DEBUG>:-finit-integer=333333333> # Initialize integers to dummy value to help detect unintialized variables
-      #$<$<CONFIG:DEBUG>:-finit-real=snan>       # Initialize reals to NaNs to help detect unintialized variables
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -fprofile-arcs -ftest-coverage at compile time)
     )
 # Intel (ifort)
-elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
+elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
+    target_compile_options(hib
+      PUBLIC
+      # Non-specific options
+      # force arrays to be allocated on the heap instead of the stack, this removes segmentation faults crash, not sure why
+      # the following option means : automatic arrays and arrays created for temporary computations are allocated on the stack if their size can be determined at compile time and if it doesn't exceed 10kb.
+      # this option seems necessary for big values of kmax (eg kmax=5000), according to bdesrousseaux, otherwise the user will experience a segmentation fault. I guess that without this option, the stack becomes too small to contain such big arrays...
+      "-heap-arrays 10"                           # Put everything bigger than 10 bytes on the heap
+      # "-extend-source 132"                        # Allow arbitrary long lines (132 seems the longest allowed with ifort). Needed as preprocessing could generate long lines.
+      -no-wrap-margin                             # Don't wrap output files
+      $<$<PLATFORM_ID:Linux>:-mcmodel=large>      # Required on Linux
+      # Config-specific options: RELEASE
+      $<$<CONFIG:RELEASE>:-O3>                    # Optimization level at 3 for Release
+      $<$<CONFIG:RELEASE>:-xHost>                 # Generate instructions for the highest instruction set available on the compilation host processor
+      $<$<CONFIG:RELEASE>:-init=zero>             # Init variables to zero/false/null
+      # Config-specific options: DEBUG
+      $<$<CONFIG:DEBUG>:-O0>                      # Disable all optimizations
+      $<$<CONFIG:DEBUG>:-g>                   # Generates complete debugging information
+      $<$<CONFIG:DEBUG>:-traceback>               # Generates extra information in the object file to provide source file traceback information when a severe error occurs at run time
+      $<$<CONFIG:DEBUG>:-fp-stack-check>          # Tell the compiler to generate extra code after every function call to ensure that the floating-point stack is in the expected state
+      #$<$<CONFIG:DEBUG>:-warn all>                # Enable all warnings
+    )
 endif()
 
 ################################################################################
@@ -115,7 +140,6 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -lgcov at link time)
     )
 # Intel (ifort)
-elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
 endif()
 
 
@@ -130,7 +154,7 @@ target_compile_definitions(hib PUBLIC HIB_UNIX_X86=1)
 target_compile_definitions(hib PUBLIC HIB_UNIX=1)
 if (CMake_Fortran_COMPILER_ID STREQUAL "GNU")
   target_compile_definitions(hib PUBLIC HIB_UNIX_GFORTRAN=1)
-elseif (CMake_Fortran_COMPILER_ID STREQUAL "Intel")
+elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
   target_compile_definitions(hib PUBLIC HIB_UNIX_IFORT=1)
 endif()
 
@@ -152,11 +176,13 @@ target_compile_definitions(hib PUBLIC _BUILD_DATE_="${TODAY}")
 target_compile_definitions(hib PUBLIC _HELPDIR_="${CMAKE_CURRENT_SOURCE_DIR}/doc/")
 # The following is to limit the max jtot number
 target_compile_definitions(hib PUBLIC MAX_NJTOT=1000)
-target_compile_definitions(hib PUBLIC DISABLE_HIB_ASSERT=1)
+target_compile_definitions(hib PUBLIC "$<$<CONFIG:Release>:DISABLE_HIB_ASSERT=1>")
+# asserts can be activated on non-release builds (eg debug build)
+if(NOT ENABLE_ASSERTS)
+  target_compile_definitions(hib PUBLIC "$<$<CONFIG:Debug>:DISABLE_HIB_ASSERT=1>")
+endif()
 
 
-# Link Blas and Lapack libraries
-target_link_libraries(hib INTERFACE "${BLAS_LIBRARIES}")
-target_link_libraries(hib INTERFACE "${LAPACK_LIBRARIES}")
+
 
 

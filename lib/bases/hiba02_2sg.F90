@@ -1,3 +1,4 @@
+#include "assert.h"
 ! sy2sg (sav2sg/ptr2sg) defines, saves variables and reads          *
 !                  potential for doublet sigma scattering                *
 ! --------------------------------------------------------------------
@@ -822,6 +823,15 @@ irpot=1
 return
 !
 entry sav2sg (readpt)
+ASSERT(nrmax .eq. ispar(2))
+ASSERT(npar .eq. ispar(3))
+ASSERT(isym .eq. ispar(4))
+ASSERT(igu .eq. ispar(5))
+ASSERT(isa .eq. ispar(6))
+
+ASSERT(brot .eq. rspar(1))
+ASSERT(gsr .eq. rspar(2))
+
 !  save input parameters for doublet-sigma + atom scattering
 !  line 13:
 write (8, 220) nrmax, npar, isym, igu, isa

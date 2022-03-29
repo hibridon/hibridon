@@ -1,3 +1,4 @@
+#include "assert.h"
 ! sysphtp (savsphtp/ptrsphtp) defines, saves variables and reads         *
 !                  potentials for spherical top + atom                   *
 ! ----------------------------------------------------------------------
