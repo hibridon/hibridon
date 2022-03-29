@@ -103,8 +103,13 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
     target_compile_options(hib
       PUBLIC
       # Non-specific options
-      -heap-arrays                                # Put everything on the heap
+      # force arrays to be allocated on the heap instead of the stack, this removes segmentation faults crash, not sure why
+      # the following option means : automatic arrays and arrays created for temporary computations are allocated on the stack if their size can be determined at compile time and if it doesn't exceed 10kb.
+      # this option seems necessary for big values of kmax (eg kmax=5000), according to bdesrousseaux, otherwise the user will experience a segmentation fault. I guess that without this option, the stack becomes too small to contain such big arrays...
+      "-heap-arrays 10"                           # Put everything bigger than 10 bytes on the heap
+      # "-extend-source 132"                        # Allow arbitrary long lines (132 seems the longest allowed with ifort). Needed as preprocessing could generate long lines.
       -no-wrap-margin                             # Don't wrap output files
+      $<$<PLATFORM_ID:Linux>:-mcmodel=large>      # Required on Linux
       # Config-specific options: RELEASE
       $<$<CONFIG:RELEASE>:-O3>                    # Optimization level at 3 for Release
       $<$<CONFIG:RELEASE>:-xHost>                 # Generate instructions for the highest instruction set available on the compilation host processor
@@ -113,6 +118,7 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
       $<$<CONFIG:DEBUG>:-O0>                      # Disable all optimizations
       $<$<CONFIG:DEBUG>:-g>                   # Generates complete debugging information
       $<$<CONFIG:DEBUG>:-traceback>               # Generates extra information in the object file to provide source file traceback information when a severe error occurs at run time
+      $<$<CONFIG:DEBUG>:-fp-stack-check>          # Tell the compiler to generate extra code after every function call to ensure that the floating-point stack is in the expected state
       #$<$<CONFIG:DEBUG>:-warn all>                # Enable all warnings
     )
 endif()
