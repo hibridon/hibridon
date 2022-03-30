@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ master ]
 env:
-  BUILD_TYPE: Release
+  BUILD_TYPE: "Debug"
   CMAKE_BUILD_PARALLEL_LEVEL: "1" # disable parallel builds
   CTEST_OUTPUT_ON_FAILURE: "ON" # This way we don't need a flag to ctest
   CTEST_PARALLEL_LEVEL: "1"
