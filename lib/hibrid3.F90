@@ -1884,8 +1884,8 @@ else
   if (print) then
      write (9, 10) rmin, rmax, spac, nsteps, nch
 10      format(/' ** LOGD PROPAGATION:', /, &
-           '         RSTART =', f7.3,'  REND =', f7.3, &
-       '  SPAC =', f7.4,'  NSTEP =', i5, '  NCH =', i3)
+           '         RSTART =', f8.3,'  REND =', f8.3, &
+       '  SPAC =', f8.4,'  NSTEP =', i5, '  NCH =', i5)
      write (6, 20) rmin, rmax, spac, nsteps
 20      format (' ** LOGD:  RSTART =',f7.3, &
              '   REND =', f7.3,'   SPAC = ', f7.3, &

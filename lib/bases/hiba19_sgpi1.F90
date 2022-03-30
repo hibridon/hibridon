@@ -293,7 +293,7 @@ if (clist) then
   end if
   if (.not. flagsu) write (9, 392) rcut
 392   format (/' OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=', &
-         f6.2)
+         f8.2)
 end if
 !
 !    every vibrational energy level is referred to the lowest

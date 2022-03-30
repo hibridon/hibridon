@@ -220,7 +220,7 @@ if (clist) then
   end if
   if (.not. flagsu) write (9,30) rcut
 30   format (/' OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=', &
-          f6.2)
+          f8.2)
 endif
 !  assign quantum numbers and energies
 n=0

@@ -302,7 +302,7 @@ if (clist) then
   end if
   if (.not. flagsu) write (9,90) rcut
 90   format (/' OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=', &
-          f6.2)
+          f8.2)
 end if
 !
 !  set up rotational basis
