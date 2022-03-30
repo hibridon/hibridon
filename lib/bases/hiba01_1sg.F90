@@ -526,7 +526,7 @@ if (clist) then
   end if
   if (.not. flagsu) write (9,30) rcut
 30   format (/' OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=', &
-          f6.2)
+          f8.2)
 !  assign quantum numbers and energies for rotational levels
   write(6,31) ' State    B(v)',' D(v)','H(v)','E(v)'
   write(9,31) ' State    B(v)',' D(v)','H(v)','E(v)'

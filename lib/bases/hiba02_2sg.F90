@@ -282,7 +282,7 @@ if (clist) then
   end if
   if (.not. flagsu) write (9,35) rcut
 35   format (/' OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=', &
-          f6.2)
+          f8.2)
 end if
 !  first set up list of all case (a) levels
 n = 0

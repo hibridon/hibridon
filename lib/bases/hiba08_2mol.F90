@@ -183,7 +183,7 @@ write (9,  90) ered*econv, jtot, nsym, jlpar, nlam
    '  SYM=', i2, '  PAR=', i2, '  N-LAM=', i2)
 write (9, 95) rcut
 95   format (/' OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=', &
-          f7.2)
+          f8.2)
 nlam = nterm
 !  assign quantum numbers and energies for rotational levels
 nlevop = 0
