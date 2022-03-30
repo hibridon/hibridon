@@ -193,11 +193,11 @@ allocate(vec(narray,narray))
 allocate(sc1(narray))
 allocate(sc2(narray))
 
-allocate(work(max(1000,nmax)))
-allocate(kp(max(1000,nmax)))
-allocate(ko(max(1000,nmax)))
-allocate(j2rot(max(1000,nmax)))
-allocate(e2rot(max(1000,nmax)))
+allocate(work(min(1000,nmax)))
+allocate(kp(min(1000,nmax)))
+allocate(ko(min(1000,nmax)))
+allocate(j2rot(min(1000,nmax)))
+allocate(e2rot(min(1000,nmax)))
 
 zero = 0.d0
 two = 2.d0
