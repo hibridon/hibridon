@@ -1,3 +1,4 @@
+#include "assert.h"
 ! sysphtp (savsphtp/ptrsphtp) defines, saves variables and reads         *
 !                  potentials for spherical top + atom                   *
 ! ----------------------------------------------------------------------
@@ -1118,6 +1119,8 @@ irpot=1
 return
 ! --------------------------------------------------------------
 entry savsphtp (readp)
+ASSERT(iop .eq. ispar(2))
+ASSERT(jmax .eq. ispar(3))
 !  save input parameters for spherical top + atom scattering
 write (8, 310) iop, jmax
 310 format(2i4,25x,'iop, jmax')

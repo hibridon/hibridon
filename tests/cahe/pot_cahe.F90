@@ -134,7 +134,7 @@ if (npot .lt. 1 .or. npot .gt. 3) then
 endif
 if (npot .eq. 1) then
 ! here for original msv potentials
-  call potmsv1(r,vp,vs,re(1),de(1),be(1),rl(1),cl(1))
+  call potmsv1(r,vp,vs,re(1:2),de(1:2),be(1:2),rl(1:2),cl(1:2))
   vv0=0.d0;
 ! Commented ou by J. Klos 2012.11.22
 !        vvl(1)=vp
