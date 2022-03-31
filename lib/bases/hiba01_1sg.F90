@@ -964,7 +964,7 @@ if (iread .eq. 1) irpot=1
 if (ihomo) nskip = 2
 potfil = ' '
 !  read number of vib states
-if(iread.ne.0) read (8, *, err=88) nvib, iscod(2),iscod(3)
+if(iread.ne.0) read (8, *, err=88) nvib, iscod(2),iscod(3) ! nvib, vmin, vmax
 if(nvib.gt.iscod(3)-iscod(2)+1) then
   write (6,40) nvib, iscod(2), iscod(3)
 40   format(' ** PROBABLE VIBRATIONAL LEVEL NUMBERING ERROR:',/, &
@@ -981,26 +981,27 @@ scod(3)='VMAX'
 isrcod=0
 isicod=3
 iofr=2*nvib+4-1
-do  71   i = 1,nvib
-if(iread.ne.0) then
-  read (8, *, err=99) ivib(i),(iscod(isicod+j),j=1,2)
-  read (8, *, err=99) (rcod(isrcod+j),j=1,3)
-  read (8, *, err=99) rcod(isrcod+4)
+do i = 1,nvib
+  if(iread.ne.0) then
+    read (8, *, err=99) ivib(i),(iscod(isicod+j),j=1,2) ! iv, jmin, jmax
+    read (8, *, err=99) (rcod(isrcod+j),j=1,3) ! brot, drot, hrot
+    read (8, *, err=99) rcod(isrcod+4) ! evib
   end if
   char=' '
   if(nvib.gt.1.or.ivib(i).ne.0) then
-  if(ivib(i).le.9) write(char,'(''('',i1,'')'')') ivib(i)
-  if(ivib(i).gt.9) write(char,'(''('',i2,'')'')') ivib(i)
+    if(ivib(i).le.9) write(char,'(''('',i1,'')'')') ivib(i)
+    if(ivib(i).gt.9) write(char,'(''('',i2,'')'')') ivib(i)
   end if
-scod(isicod+1)='JMIN'//char
-scod(isicod+2)='JMAX'//char
-scod(iofr+1)='BROT'//char
-scod(iofr+2)='DROT'//char
-scod(iofr+3)='HROT'//char
-scod(iofr+4)='EVIB'//char
-iofr=iofr+4
-isicod=isicod+2
-71 isrcod=isrcod+4
+  scod(isicod+1)='JMIN'//char
+  scod(isicod+2)='JMAX'//char
+  scod(iofr+1)='BROT'//char
+  scod(iofr+2)='DROT'//char
+  scod(iofr+3)='HROT'//char
+  scod(iofr+4)='EVIB'//char
+  iofr=iofr+4
+  isicod=isicod+2
+  isrcod=isrcod+4
+end do
 if(isicod+isrcod+3.gt.size(scod,1)) stop 'lencod'
 nscode=isicod+isrcod
 line=' '
