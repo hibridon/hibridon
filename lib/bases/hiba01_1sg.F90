@@ -1,3 +1,4 @@
+#include "assert.h"
 ! sy1sg (sav1sg/ptr1sg) defines, saves variables and reads              *
 !                  potential for singlet sigma scattering               *
 !************************************************************************
@@ -1119,3 +1120,73 @@ else
 end if
 return
 end function is_j12
+
+module mod_basis
+implicit none
+contains
+
+  logical function basis_exists(ibasty)
+!     ------------------------------------------------------------------
+  !
+  !  returns true if the given base type exists
+  !
+  !  ibasty:    one of the supported basis types
+  !
+  !     ------------------------------------------------------------------
+  use mod_comxbs, only: maxbas
+  implicit none
+  integer, intent(in) :: ibasty
+
+  if ((ibasty >= 1) .and. (ibasty <= maxbas)) then
+    basis_exists = .true.
+  else
+    if ((ibasty == 99) .or. (ibasty == 100)) then
+      !  99 is for user defined base not for molecule-molecule collision
+      ! 100 is for user defined base for molecule-molecule collision
+      basis_exists = .true.
+    else
+      basis_exists = .false.
+    end if
+  end if
+  end function
+
+  logical function basis_get_isa(ibasty, ispar)
+  !     ------------------------------------------------------------------
+  !
+  !     returns the value of the isa parameter if the base has an isa parameter. returns zero otherwise
+  !
+  !  ibasty:    one of the supported basis types
+  ! 
+  !  isparam:   the array containing the values of the integer typed base 
+  !              specific parameters
+  !
+  !     ------------------------------------------------------------------
+  implicit none
+  integer, intent(in) :: ibasty
+  integer, intent(in), dimension(:) :: ispar
+  integer :: isa
+  ASSERT( basis_exists(ibasty) )
+
+  select case (ibasty)
+  case (2)
+    isa = ispar(6)
+  case (3)
+    isa = ispar(4)
+  case (4)
+    isa = ispar(5)
+  case (5)
+    isa = ispar(4)
+  case (11)
+    isa = ispar(4)
+  case (14)
+    isa = ispar(4)
+  case (19)
+    isa = ispar(3)
+  case default
+    isa = 0
+  end select
+  basis_get_isa = isa
+
+  end function
+end module mod_basis
+
