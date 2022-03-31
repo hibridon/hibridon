@@ -1,3 +1,4 @@
+#include "assert.h"
 ! sy1sg (sav1sg/ptr1sg) defines, saves variables and reads              *
 !                  potential for singlet sigma scattering               *
 !************************************************************************
@@ -964,7 +965,7 @@ if (iread .eq. 1) irpot=1
 if (ihomo) nskip = 2
 potfil = ' '
 !  read number of vib states
-if(iread.ne.0) read (8, *, err=88) nvib, iscod(2),iscod(3)
+if(iread.ne.0) read (8, *, err=88) nvib, iscod(2),iscod(3) ! nvib, vmin, vmax
 if(nvib.gt.iscod(3)-iscod(2)+1) then
   write (6,40) nvib, iscod(2), iscod(3)
 40   format(' ** PROBABLE VIBRATIONAL LEVEL NUMBERING ERROR:',/, &
@@ -981,26 +982,27 @@ scod(3)='VMAX'
 isrcod=0
 isicod=3
 iofr=2*nvib+4-1
-do  71   i = 1,nvib
-if(iread.ne.0) then
-  read (8, *, err=99) ivib(i),(iscod(isicod+j),j=1,2)
-  read (8, *, err=99) (rcod(isrcod+j),j=1,3)
-  read (8, *, err=99) rcod(isrcod+4)
+do i = 1,nvib
+  if(iread.ne.0) then
+    read (8, *, err=99) ivib(i),(iscod(isicod+j),j=1,2) ! iv, jmin, jmax
+    read (8, *, err=99) (rcod(isrcod+j),j=1,3) ! brot, drot, hrot
+    read (8, *, err=99) rcod(isrcod+4) ! evib
   end if
   char=' '
   if(nvib.gt.1.or.ivib(i).ne.0) then
-  if(ivib(i).le.9) write(char,'(''('',i1,'')'')') ivib(i)
-  if(ivib(i).gt.9) write(char,'(''('',i2,'')'')') ivib(i)
+    if(ivib(i).le.9) write(char,'(''('',i1,'')'')') ivib(i)
+    if(ivib(i).gt.9) write(char,'(''('',i2,'')'')') ivib(i)
   end if
-scod(isicod+1)='JMIN'//char
-scod(isicod+2)='JMAX'//char
-scod(iofr+1)='BROT'//char
-scod(iofr+2)='DROT'//char
-scod(iofr+3)='HROT'//char
-scod(iofr+4)='EVIB'//char
-iofr=iofr+4
-isicod=isicod+2
-71 isrcod=isrcod+4
+  scod(isicod+1)='JMIN'//char
+  scod(isicod+2)='JMAX'//char
+  scod(iofr+1)='BROT'//char
+  scod(iofr+2)='DROT'//char
+  scod(iofr+3)='HROT'//char
+  scod(iofr+4)='EVIB'//char
+  iofr=iofr+4
+  isicod=isicod+2
+  isrcod=isrcod+4
+end do
 if(isicod+isrcod+3.gt.size(scod,1)) stop 'lencod'
 nscode=isicod+isrcod
 line=' '
@@ -1118,3 +1120,73 @@ else
 end if
 return
 end function is_j12
+
+module mod_basis
+implicit none
+contains
+
+  logical function basis_exists(ibasty)
+!     ------------------------------------------------------------------
+  !
+  !  returns true if the given base type exists
+  !
+  !  ibasty:    one of the supported basis types
+  !
+  !     ------------------------------------------------------------------
+  use mod_comxbs, only: maxbas
+  implicit none
+  integer, intent(in) :: ibasty
+
+  if ((ibasty >= 1) .and. (ibasty <= maxbas)) then
+    basis_exists = .true.
+  else
+    if ((ibasty == 99) .or. (ibasty == 100)) then
+      !  99 is for user defined base not for molecule-molecule collision
+      ! 100 is for user defined base for molecule-molecule collision
+      basis_exists = .true.
+    else
+      basis_exists = .false.
+    end if
+  end if
+  end function
+
+  logical function basis_get_isa(ibasty, ispar)
+  !     ------------------------------------------------------------------
+  !
+  !     returns the value of the isa parameter if the base has an isa parameter. returns zero otherwise
+  !
+  !  ibasty:    one of the supported basis types
+  ! 
+  !  isparam:   the array containing the values of the integer typed base 
+  !              specific parameters
+  !
+  !     ------------------------------------------------------------------
+  implicit none
+  integer, intent(in) :: ibasty
+  integer, intent(in), dimension(:) :: ispar
+  integer :: isa
+  ASSERT( basis_exists(ibasty) )
+
+  select case (ibasty)
+  case (2)
+    isa = ispar(6)
+  case (3)
+    isa = ispar(4)
+  case (4)
+    isa = ispar(5)
+  case (5)
+    isa = ispar(4)
+  case (11)
+    isa = ispar(4)
+  case (14)
+    isa = ispar(4)
+  case (19)
+    isa = ispar(3)
+  case default
+    isa = 0
+  end select
+  basis_get_isa = isa
+
+  end function
+end module mod_basis
+

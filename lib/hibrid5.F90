@@ -1,3 +1,4 @@
+#include "assert.h"
 module mod_hibrid5
 contains
 ! ---------------------------------------------------------------------------
@@ -979,6 +980,7 @@ subroutine xwrite (zmat, tq3, jlev, elev, inlev, nerg, energ, &
 use constants
 use mod_hibrid2, only: mxoutc
 use mod_cosysi, only: ispar
+use mod_basis, only: basis_get_isa
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: zmat(nmax, nmax)
 real(8), intent(out) :: tq3(nmx, nmx)
@@ -1142,7 +1144,7 @@ if (wrxsec) then
 !ABER additional information : IHOMO , ISA
     write (nxfile, 235) csflag, flaghf, flagsu, twomol, ihomo
 235     format (5l3)
-    isa=ispar(5)
+    isa = basis_get_isa(ibasty, ispar)
     write (nxfile, 240) jfirst, jfinal, jtotd, numin, numax, &
                         nud, jlpar, isa
 240     format (24i5)
