@@ -296,6 +296,8 @@ module m_diff
         real(8), intent(in) :: min_significant_value
         integer :: number_index
 
+        vectors_differ = .FALSE.
+
         if ( size(va) /= size(vb) ) then
             write(Error_Unit, *) "different number of numbers found in results files : ", &
                 & size(va), ' <> ', size(vb)
@@ -307,16 +309,15 @@ module m_diff
                 if(abs(va(number_index)) > min_significant_value ) then
                     if( abs(va(number_index) - vb(number_index))/max(abs(va(number_index)),1d-300) > tolerance ) then
                         write(Error_Unit, *) "at number_index ", number_index, " : ", va(number_index), &
-                         " and ", vb(number_index), " differ for more than ", tolerance*100.0d0, " percent"
+                         " and ", vb(number_index), " differ by more than ", tolerance*100.0d0, " percent"
                         vectors_differ = .TRUE.
-                        return
+                        !return
                     endif
                 endif
                 number_index = number_index + 1
             enddo
-            vectors_differ = .FALSE.
-            return
         endif
+        return
         end function vectors_differ
 
     function result_files_differ(results1_file_name, results2_file_name, num_header_lines, tolerance, min_significant_value)

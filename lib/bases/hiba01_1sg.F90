@@ -1150,7 +1150,7 @@ contains
   end if
   end function
 
-  logical function basis_get_isa(ibasty, ispar)
+  integer function basis_get_isa(ibasty, ispar)
   !     ------------------------------------------------------------------
   !
   !     returns the value of the isa parameter if the base has an isa parameter. returns zero otherwise

@@ -335,17 +335,17 @@ men = ken
 !  calculate array containing logs of factorials for use in vector
 !  coupling coefficient routines:  factlg(i)=log(fact(i-1))
 call factlg(kfact)
-call finit
 ! start scattering calculation
 call flow (z, w, zmat, amat, bmat, jq, lq, inq, jhold, ehold, &
            inhold, isc1, isc2, isc3, isc4, lsc1, &
            sc2, sc1, sc3, sc4, sc5, &
            sc6, sc7, sc8, sc9, tq1, tq2, tq3, men, mmax, mairy)
-end
-!ontains
+call finit ! Closes all I/O units
+contains
 subroutine print_help()
 print '(a, /)', 'command-line options:'
 print '(a)',    '  -k, --kmax <max_num_channels>  defines the max number of channels'
 print '(a)',    '  -c, --com <command_file>  specifies a command file instead of input redirection'
 print '(a, /)', '  -h, --help        print usage information and exit'
 end subroutine print_help
+end
