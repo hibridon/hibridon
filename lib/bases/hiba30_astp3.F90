@@ -166,7 +166,6 @@ use mod_coatp3, only: isizh
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
@@ -179,25 +178,15 @@ dimension j(1), l(1), is(1), jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
           fistmp(1)
 !  scratch arrays for computing asymmetric top energies and wave fns.
-real(8), allocatable :: e(:,:), eig(:), vec(:,:), sc1(:), sc2(:)
-real(8), allocatable :: work(:), e2rot(:)
-integer, allocatable :: ko(:), kp(:), j2rot(:)
-
+dimension e(narray,narray), eig(narray), vec(narray,narray), &
+  sc1(narray), sc2(narray), work(1000), kp(1000), ko(1000), &
+  j2rot(1000), e2rot(1000)
+!
 integer, pointer :: nterm, numpot, jmax, iop, j2min, j2max, ipotsy2
 real(8), pointer :: arot, brot, crot, emax, b2rot
 nterm=>ispar(1); numpot=>ispar(2); jmax=>ispar(3); iop=>ispar(4); j2min=>ispar(5); j2max=>ispar(6); ipotsy2=>ispar(7)
 arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4); b2rot=>rspar(5)
-allocate(e(narray,narray))
-allocate(eig(narray))
-allocate(vec(narray,narray))
-allocate(sc1(narray))
-allocate(sc2(narray))
-
-allocate(work(max(1000,nmax)))
-allocate(kp(max(1000,nmax)))
-allocate(ko(max(1000,nmax)))
-allocate(j2rot(max(1000,nmax)))
-allocate(e2rot(max(1000,nmax)))
+  
 
 zero = 0.d0
 two = 2.d0
@@ -810,9 +799,6 @@ if (bastst) then
 420   format (' *** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', &
       i10)
 end if
-
-
-
 return
 end
 ! --------------------------------------------------------------------
