@@ -408,7 +408,7 @@ if (bastst) then
   end if
   if (.not. flagsu) write (9,90) rcut
 90   format (/' OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=', &
-          f6.2)
+          f8.2)
 end if
 !
 !  first set up list of all rotational levels included in basis
@@ -1119,6 +1119,8 @@ irpot=1
 return
 ! --------------------------------------------------------------
 entry savsphtp (readp)
+iop=>ispar(2); jmax=>ispar(3)
+brot=>rspar(1) ; dj=>rspar(2); dk=>rspar(3)
 ASSERT(iop .eq. ispar(2))
 ASSERT(jmax .eq. ispar(3))
 !  save input parameters for spherical top + atom scattering

@@ -324,7 +324,7 @@ if (clist) then
 end if
 if (.not. flagsu) write (9,90) rcut
 90   format (/' OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=', &
-          f6.2)
+          f8.2)
 !
 !  first set up list of all j,k j2 states included in basis
 nlist = 0

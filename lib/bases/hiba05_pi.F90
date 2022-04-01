@@ -271,7 +271,7 @@ if (clist) then
   end if
   if (.not. flagsu) write (9, 140) rcut
 140   format (/' OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=', &
-          f6.2)
+          f8.2)
 end if
 !  calculation of the mixing of the rotational basis by a stark field is
 !  only valid for a molecule-surface calculation because the presence of

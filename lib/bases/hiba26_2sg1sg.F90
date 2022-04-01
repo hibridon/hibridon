@@ -198,7 +198,7 @@ if (bastst) then
 end if
 write (9, 95) rcut
 95 format (/' OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=', &
-          f7.2)
+          f8.2)
 !  assign quantum numbers and energies for rotational levels
 nlevel = 0
 do n1 = 0, n1max
