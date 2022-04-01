@@ -4,6 +4,7 @@ pipeline {
     environment {
         HIBRIDON_ROOT_PATH = "${WORKSPACE}"
         HIBRIDON_BUILD_ROOT_PATH = "${WORKSPACE}/build"
+        PATH = "/opt/cmake/cmake-3.23.0/bin:${env.PATH}"
     }
     stages {
         stage('Build and test hibridon...') {
