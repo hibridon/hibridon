@@ -439,18 +439,38 @@ use mod_cosysr, only: isrcod, junkr, rspar, convert_rspar_to_mat
 use constants, only: econv, xmconv, ang2c
 
 implicit double precision (a-h,o-z)
-logical ihomo, flaghf, csflag, clist, flagsu, bastst
+integer, intent(out) :: j(:)
+integer, intent(out) :: l(:)
+integer, intent(out) :: is(:)
+integer, intent(out), dimension(:) :: jhold
+real(8), intent(out), dimension(:) :: ehold
+integer, intent(out), dimension(:) :: ishold
+integer, intent(out) :: nlevel
+integer, intent(out) :: nlevop
+real(8), intent(out), dimension(:) :: sc1
+real(8), intent(out), dimension(:) :: sc2
+real(8), intent(out), dimension(:) :: sc3
+real(8), intent(out), dimension(:) :: sc4
+real(8), intent(in) :: rcut
+integer, intent(in) :: jtot
+logical, intent(in) :: flaghf
+logical, intent(in) :: flagsu
+logical, intent(in) :: csflag
+logical, intent(in) :: clist
+logical, intent(in) :: bastst
+logical, intent(in) :: ihomo
+integer, intent(in) :: nu
+integer, intent(in) :: numin
+integer, intent(in) :: jlpar
+integer, intent(out) :: n
+integer, intent(in) :: nmax
+integer, intent(out) :: ntop
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
 common /covib/ nvib,ivib(maxvib)
 common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 common /coskip/ nskip, iskip
-integer :: j(:)
-integer :: l(:)
-integer :: is(:)
-dimension jhold(5), ehold(5), sc1(5), sc2(5), sc3(5), &
-          sc4(5), ishold(5)
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
 real(8), dimension(4, maxvib) :: rpar
@@ -667,21 +687,22 @@ nlevop = 0
 !  form list of all energetically open rotational levels included in the
 !  calculations and their energies
 !  if homonuclear diatomic, skip space is two
-do 200 iv=iva,ive
-jmin=iscod(1,iv)
-jmax=iscod(2,iv)
-brot=rpar(1,iv)/econv
-drot=rpar(2,iv)/econv
-hrot=rpar(3,iv)/econv
-evib=rpar(4,iv)/econv
-do 200  ji = jmin, jmax, nskip
-  jj1=ji*(ji+1)
-  ee=brot*jj1 - drot*jj1**2 + hrot*jj1**3 + evib
-  nlevel = nlevel + 1
-  ehold(nlevel) = ee
-  jhold(nlevel) = ji
-  ishold(nlevel) = ivib(iv)
-200 continue
+do iv=iva,ive
+  jmin=iscod(1,iv)
+  jmax=iscod(2,iv)
+  brot=rpar(1,iv)/econv
+  drot=rpar(2,iv)/econv
+  hrot=rpar(3,iv)/econv
+  evib=rpar(4,iv)/econv
+  do ji = jmin, jmax, nskip
+    jj1=ji*(ji+1)
+    ee=brot*jj1 - drot*jj1**2 + hrot*jj1**3 + evib
+    nlevel = nlevel + 1
+    ehold(nlevel) = ee
+    jhold(nlevel) = ji
+    ishold(nlevel) = ivib(iv)
+  end do
+end do
 !  now sort this list to put closed levels at end
 !  also determine number of levels which are open
 nlevop = 0
@@ -690,7 +711,7 @@ if (nlevel .gt. 1) then
     if (ehold(i) .le. ered) then
        nlevop = nlevop + 1
     else
-      do 75 ii = i + 1, nlevel
+      do ii = i + 1, nlevel
         if (ehold(ii) .le. ered) then
           nlevop = nlevop + 1
           ikeep = jhold(i)
@@ -704,7 +725,7 @@ if (nlevel .gt. 1) then
           ehold(ii) = ekeep
           go to 80
         end if
-75       continue
+      end do
     end if
 80   continue
 else
