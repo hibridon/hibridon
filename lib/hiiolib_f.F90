@@ -796,14 +796,7 @@ if (mode .eq. 'TW') then
    if (openfl) then
       print *, '*** WARNING:  ', filnam, ' NOT CLOSED'
    end if
-#if defined(__GFORTRAN__)
-   open (unit=iunit, file=filnam, access='STREAM', &
-        status='REPLACE', err=999, iostat=ierr)
-#else
-   open (unit=iunit, file=filnam, access='STREAM', &
-        status='REPLACE', err=999, iostat=ierr, &
-        buffered='YES')
-#endif
+   open (unit=iunit, file=filnam, access='STREAM', status='REPLACE', err=999, iostat=ierr)
    return
 end if
 !
@@ -817,13 +810,7 @@ if (mode .eq. 'TU') then
    if (openfl) then
       print *, '*** WARNING: ', filnam, 'NOT CLOSED'
    end if
-#if defined(__GFORTRAN__)
    open (unit=iunit, file=filnam, access='STREAM', status='OLD', err=999, iostat=ierr)
-#else
-   open (unit=iunit, file=filnam, access='STREAM', &
-        status='OLD', err=999, iostat=ierr, &
-        buffered='YES')
-#endif
    return
 end if
 !
@@ -841,43 +828,29 @@ else
    write(6,10) mode
    stop
 end if
+
 ! inquire file specifications
 inquire(file=filnam, exist=exstfl, opened=openfl)
 accs='sequential'
 if (exstfl) then
   if (openfl) return
   stat='old'
-! make sure sequential formatted files are appended not overwritten
-#if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_PGI)
-  accs='append'
-#endif
-#if defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
-  accs='append'
-#endif
+  accs='append' ! make sure sequential formatted files are appended not overwritten
 else
   stat='new'
-end if
+endif
+
 if (tmpfil) then
-#if defined(HIB_UNIX) || defined(HIB_MAC)
   stat = 'scratch'
-#endif
-#if defined(HIB_CRAY)
-stat = 'unknown'
-#endif
-#if defined(HIB_UNIX_DARWIN)
   inquire(unit=iunit,opened=od)
-! if temporary file is already opened, close it
-  if (od) close(unit=iunit)
-#endif
-#if defined(HIB_UNIX) || defined(HIB_MAC) || defined(HIB_CRAY)
-  open(unit=iunit,  access='sequential', &
-          form=fmt, status=stat, err=999, iostat=ierr)
-#endif
+  if (od) close(unit=iunit) ! if temporary file is already opened, close it
+  open(unit=iunit, access=accs, form=fmt, status=stat, err=999, iostat=ierr)
 else
-!       print *,stat
-  open(unit=iunit, file=filnam, access=accs, &
-          form=fmt, status=stat, err=999, iostat=ierr)
+  inquire(unit=iunit,opened=od)
+  if (od) close(unit=iunit) ! if temporary file is already opened, close it
+  open(unit=iunit, file=filnam, access=accs, form=fmt, status=stat, err=999, iostat=ierr)
 end if
+
 return
 10 format(' *** ERROR IN OPEN, UNKNOWN MODE=',a,' VALID MODES ARE', &
        ' SF,SU,DU *** ABORT')
@@ -2004,8 +1977,8 @@ return
 !
 entry finit
 !.....closes all files
-la=1
-le=30
+la=-30
+le=70
 goto 43
 !
 entry closf(luni)
