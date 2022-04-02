@@ -337,56 +337,80 @@ code=line(k1:k2)
 return
 end
 ! ----------------------------------------------------------------
-subroutine getval(code,clist,nlist,i,val)
+subroutine getval(var_assignment, var_list, nlist, var_index, val)
 !   current revision date: 23-sept-87
-!   searches strings in clist to match code
-!   returns associated value in val and position in clist in i
-!   values may be specified as integers or reals
+!   searches strings in var_list to match var_assignment
+!   returns associated value in val and position in var_list in var_index
+!   values may be specified as integers or reals or logicals (T or F)
 !   if(code=t(rue)  is specified, val=1 is returned
 !   if(code=f(alse) is specified, val=0 is returned
-!   delimiter between code and value is equal sign or blank
-implicit double precision (a-h,o-z)
-character*(*) code,clist(1)
-character*80 line
-l=-1
+!   delimiter between code and value is equal sign
+!   var_assignment : a string containing the assignment of a variable (eg 'JTOT2=4')
+!   var_list : array of nlist strings; each of them containing a variable name (eg 'JTOT2')
+implicit none
+character*(*), intent(in) :: var_assignment
+character*(*), intent(in) :: var_list(1)
+integer, intent(in) :: nlist
+integer, intent(out) :: var_index
+real(8), intent(out) :: val
+
+character*80 :: var_assignment_copy
+integer :: j, l
+integer :: assignment_len
+integer :: value_start_index
+integer :: dot_index
+l = -1
 if(nlist.eq.0) goto 30
-l=index(code,'=')
-l=l-1
-if(l.le.0) then
+l = index(var_assignment,'=')
+l = l - 1
+if (l <= 0) then
   write(6,5)
 5   format(' equal sign missing in specification')
-  i=-1
+  var_index = -1
   return
 end if
-do 10 i=1,nlist
-10 if(code(1:l).eq.clist(i)(1:l)) goto 30
-i=0
+do var_index = 1, nlist
+  if(var_assignment(1:l) == var_list(var_index)(1:l)) goto 30
+end do
+var_index = 0
 return
-30 l1=l+2
-l2=len(code)
+
+! the variable name has bee nfound in var_list
+30 value_start_index= l + 2 
+! value_start_index is the index of the 1st character of the value
+assignment_len=len(var_assignment)
 val=0
-if(l2.lt.l1) return
-do 40 j=l1,l2
-40 if(code(j:j).ne.' ') goto 50
-val=0
+if ( assignment_len < value_start_index ) return  ! this means the that the value is missing (eg if var_assignment='JTOT2=')
+do j = value_start_index, assignment_len
+  if (var_assignment(j:j) /= ' ') goto 50
+end do
+val = 0.0
 return
-50 if(code(j:j).eq.'T') then
-  val=1.0
+
+! handling non space character
+! first handle boolean values
+50 if (var_assignment(j:j) == 'T') then
+  val = 1.0
   return
 end if
-if(code(j:j).eq.'F') then
-  val=0.0
+if (var_assignment(j:j) == 'F') then
+  val = 0.0
   return
 end if
-k=index(code(j:l2),'.')
-line=code
-if(k.eq.0) then
-  do 60 l=l2,j,-1
-60   if(line(l:l).ne.' ') goto 70
-70   line(l+1:)='.'
+
+! handle integer and real values
+dot_index = index( var_assignment(j:assignment_len), '.')
+var_assignment_copy = var_assignment
+if ( dot_index == 0 ) then
+  ! no dot character has been found, therefore we assume that the value is an integer
+  ! in this case, we append a dot chatacter at the end of the integer to convert it into a real number
+  do l = assignment_len, j, -1
+    if ( var_assignment_copy(l:l) /= ' ') goto 70
+  end do
+70   var_assignment_copy(l+1:) = '.'
 end if
-read(line(j:),80) val
-80 format(f40.5)
+
+read(var_assignment_copy(j:), fmt='(f40.5)') val
 return
 end
 ! ----------------------------------------------------------------
