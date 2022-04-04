@@ -336,8 +336,11 @@ return
 code=line(k1:k2)
 return
 end
+module mod_hiutil
+implicit none
+contains
 ! ----------------------------------------------------------------
-subroutine getval(var_assignment, var_list, nlist, var_index, val)
+subroutine getval(var_assignment, var_list, var_index, val)
 !   current revision date: 23-sept-87
 !   searches strings in var_list to match var_assignment
 !   returns associated value in val and position in var_list in var_index
@@ -346,11 +349,11 @@ subroutine getval(var_assignment, var_list, nlist, var_index, val)
 !   if(code=f(alse) is specified, val=0 is returned
 !   delimiter between code and value is equal sign
 !   var_assignment : a string containing the assignment of a variable (eg 'JTOT2=4')
-!   var_list : array of nlist strings; each of them containing a variable name (eg 'JTOT2')
+!   var_list : array of nlist strings; each of them containing a variable name (eg 'JTOT2').
+!              If this array is empty, the returns var_index is 0
 implicit none
 character*(*), intent(in) :: var_assignment
-character*(*), intent(in) :: var_list(1)
-integer, intent(in) :: nlist
+character (len=*), intent(in), dimension(:) :: var_list
 integer, intent(out) :: var_index
 real(8), intent(out) :: val
 
@@ -359,7 +362,9 @@ integer :: j, l
 integer :: assignment_len
 integer :: value_start_index
 integer :: dot_index
+integer :: nlist
 l = -1
+nlist = size(var_list)
 if(nlist.eq.0) goto 30
 l = index(var_assignment,'=')
 l = l - 1
@@ -375,7 +380,7 @@ end do
 var_index = 0
 return
 
-! the variable name has bee nfound in var_list
+! the variable name has been found in var_list
 30 value_start_index= l + 2 
 ! value_start_index is the index of the 1st character of the value
 assignment_len=len(var_assignment)
@@ -413,6 +418,8 @@ end if
 read(var_assignment_copy(j:), fmt='(f40.5)') val
 return
 end
+
+end module
 ! ----------------------------------------------------------------
 subroutine upper(line)
 character*(*) line
