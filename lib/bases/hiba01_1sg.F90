@@ -506,10 +506,10 @@ end if
 ! check that jmin .ge. nu for bound state calculations (this shouldn't be a bu
 ! but is?)
 nsum = 0
-  iva=0
-  ive=0
+iva=0
+ive=0
 !  check that requested vib levels have been defined
-  do 10 i=1,nvib
+do i=1,nvib
   if(ivib(i).ne.ivib(1)+i-1) then
     write(6,5) (ivib(k),k=1,nvib)
 5     format(/' INPUT ERROR: NON-SEQUENTIAL VIBRATIONAL', &
@@ -518,13 +518,13 @@ nsum = 0
   end if
   if(ivib(i).eq.nvmin) iva=i
   if(ivib(i).eq.nvmax) ive=i
-10   continue
-  if(iva.eq.0.or.ive.eq.0) then
-    write(6,15) nvmin,nvmax,(ivib(i),i=1,nvib)
+end do
+if(iva.eq.0.or.ive.eq.0) then
+  write(6,15) nvmin,nvmax,(ivib(i),i=1,nvib)
 15     format(/' PARAMETERS UNDEFINED FOR VIBRATIONAL STATE'/ &
-    1x,' REQUESTED STATES:',i3,'-',i2,' DEFINED STATES:',10i5)
-    call exit
-  end if
+  1x,' REQUESTED STATES:',i3,'-',i2,' DEFINED STATES:',10i5)
+  call exit
+end if
 
 if (clist) then
   if (flagsu) then
@@ -552,68 +552,69 @@ if (clist) then
   write(6,31) ' State    B(v)',' D(v)','H(v)','E(v)'
   write(9,31) ' State    B(v)',' D(v)','H(v)','E(v)'
 31   format(/2(a,8x),a,10x,a)
-  do 40 iv=iva,ive
-  write(6,35) ivib(iv),(rpar(jj,iv),jj=1,4)
-40   write(9,35) ivib(iv),(rpar(jj,iv),jj=1,4)
+  do iv=iva,ive
+    write(6,35) ivib(iv),(rpar(jj,iv),jj=1,4)
+    write(9,35) ivib(iv),(rpar(jj,iv),jj=1,4)
+  end do
 35   format(1x,i3,2x,3g12.5,f15.8)
 end if
 n=0
 nskip = 1
 if (ihomo) nskip = 2
 do 120 iv=iva,ive
-jmin=iscod(1,iv)
-if (boundc.and.csflag) then
-    if (jmin.lt.nu) then
-       write(6, 7) jmin, nu
-       write(9, 7) jmin, nu
+  jmin=iscod(1,iv)
+  if (boundc.and.csflag) then
+      if (jmin.lt.nu) then
+         write(6, 7) jmin, nu
+         write(9, 7) jmin, nu
 7        format(/ &
-    ' JMIN = ',i2,', .LT. NU = ',i2,' IN BASIS; JMIN RESET')
-       jmin=nu
-    endif
-endif
-jmax=iscod(2,iv)
-brot=rpar(1,iv)/econv
-drot=rpar(2,iv)/econv
-hrot=rpar(3,iv)/econv
-evib=rpar(4,iv)/econv
-do 120  ji = jmin, jmax, nskip
-  jj1=ji*(ji+1)
-  ee=brot*jj1 - drot*jj1**2 + hrot*jj1**3 + evib
-  if (.not. csflag) then
-!  here for cc calculations
-  lmax = jtot + ji
-  lmin = iabs (jtot - ji)
-  do 110  li = lmin, lmax
-    ix = (-1) ** (ji + li - jtot)
-    if (ix .eq. jlpar) then
-!  here for correct combination of j and l
+      ' JMIN = ',i2,', .LT. NU = ',i2,' IN BASIS; JMIN RESET')
+         jmin=nu
+      endif
+  endif
+  jmax=iscod(2,iv)
+  brot=rpar(1,iv)/econv
+  drot=rpar(2,iv)/econv
+  hrot=rpar(3,iv)/econv
+  evib=rpar(4,iv)/econv
+  do 120  ji = jmin, jmax, nskip
+    jj1=ji*(ji+1)
+    ee=brot*jj1 - drot*jj1**2 + hrot*jj1**3 + evib
+    if (.not. csflag) then
+    !  here for cc calculations
+      lmax = jtot + ji
+      lmin = iabs (jtot - ji)
+      do li = lmin, lmax
+        ix = (-1) ** (ji + li - jtot)
+        if (ix .eq. jlpar) then
+    !  here for correct combination of j and l
+          n = n + 1
+          if (n .gt. nmax) go to 130
+          l(n) = li
+          cent(n) = li * (li + 1.)
+          is(n) = ivib(iv)
+          j(n) = ji
+          eint(n) = ee
+        end if
+      end do
+    else
+  !  here for cs calculations
+      if (ji .lt. nu) go to 120
       n = n + 1
       if (n .gt. nmax) go to 130
-      l(n) = li
-      cent(n) = li * (li + 1.)
+      l(n) = jtot
+      if (.not.boundc) then
+        cent(n) = jtot * (jtot + 1)
+      else
+        xjtot=jtot
+        xj=j(n)
+        xnu=nu
+        cent(n)=xjtot*(xjtot+1)+xj*(xj+1)-2*xnu*xnu
+      endif
       is(n) = ivib(iv)
       j(n) = ji
       eint(n) = ee
     end if
-110   continue
-  else
-!  here for cs calculations
-    if (ji .lt. nu) go to 120
-    n = n + 1
-    if (n .gt. nmax) go to 130
-    l(n) = jtot
-    if (.not.boundc) then
-      cent(n) = jtot * (jtot + 1)
-    else
-      xjtot=jtot
-      xj=j(n)
-      xnu=nu
-      cent(n)=xjtot*(xjtot+1)+xj*(xj+1)-2*xnu*xnu
-    endif
-    is(n) = ivib(iv)
-    j(n) = ji
-    eint(n) = ee
-  end if
 120 continue
 130 if (n .gt. nmax) then
   write (9, 140) n, nmax
@@ -631,7 +632,7 @@ end if
 !  and for bound state calculations
 if (.not.flagsu .and. rcut .gt. 0.d0 .and. .not.boundc) then
   emin = 1.e+7
-  do 145  i = 1, n
+  do i = 1, n
     if (eint(i) .le. ered) then
 !  here if channel is
       if ( jtot * (jtot + 1) / (2. * rmu * rcut * rcut) &
@@ -642,13 +643,13 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and. .not.boundc) then
 !  condition is met
       end if
     end if
-145   continue
+  end do
 !  now eliminate all channels with eint .ge. emin if any of the channels
 !  are open asymptotically but closed at r = rcut
   if (emin.lt.ered) then
     nn=n
     n = 0
-    do 150 i = 1, nn
+    do i = 1, nn
       if (eint(i) .lt. emin) then
 !  here if this channel is to be included
         n = n + 1
@@ -658,7 +659,7 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and. .not.boundc) then
         cent(n) = cent(i)
         l(n) = l(i)
       end if
-150     continue
+    end do
 !  reset number of channels
   end if
 end if
