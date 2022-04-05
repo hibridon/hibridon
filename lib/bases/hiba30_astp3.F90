@@ -195,7 +195,7 @@ if(.not.allocated(sc1)) allocate(sc1(narray))
 if(.not.allocated(sc2)) allocate(sc2(narray))
 
 if(.not.allocated(work)) allocate(work(max(1000,nmax)))
-if(.not.allocated(kp))) allocate(kp(max(1000,nmax)))
+if(.not.allocated(kp)) allocate(kp(max(1000,nmax)))
 if(.not.allocated(ko)) allocate(ko(max(1000,nmax)))
 if(.not.allocated(j2rot)) allocate(j2rot(max(1000,nmax)))
 if(.not.allocated(e2rot)) allocate(e2rot(max(1000,nmax)))
