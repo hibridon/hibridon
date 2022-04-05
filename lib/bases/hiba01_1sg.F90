@@ -439,18 +439,38 @@ use mod_cosysr, only: isrcod, junkr, rspar, convert_rspar_to_mat
 use constants, only: econv, xmconv, ang2c
 
 implicit double precision (a-h,o-z)
-logical ihomo, flaghf, csflag, clist, flagsu, bastst
+integer, intent(out) :: j(:)
+integer, intent(out) :: l(:)
+integer, intent(out) :: is(:)
+integer, intent(out), dimension(:) :: jhold
+real(8), intent(out), dimension(:) :: ehold
+integer, intent(out), dimension(:) :: ishold
+integer, intent(out) :: nlevel
+integer, intent(out) :: nlevop
+real(8), intent(out), dimension(:) :: sc1
+real(8), intent(out), dimension(:) :: sc2
+real(8), intent(out), dimension(:) :: sc3
+real(8), intent(out), dimension(:) :: sc4
+real(8), intent(in) :: rcut
+integer, intent(in) :: jtot
+logical, intent(in) :: flaghf
+logical, intent(in) :: flagsu
+logical, intent(in) :: csflag
+logical, intent(in) :: clist
+logical, intent(in) :: bastst
+logical, intent(in) :: ihomo
+integer, intent(in) :: nu
+integer, intent(in) :: numin
+integer, intent(in) :: jlpar
+integer, intent(out) :: n
+integer, intent(in) :: nmax
+integer, intent(out) :: ntop
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
 common /covib/ nvib,ivib(maxvib)
 common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 common /coskip/ nskip, iskip
-integer :: j(:)
-integer :: l(:)
-integer :: is(:)
-dimension jhold(5), ehold(5), sc1(5), sc2(5), sc3(5), &
-          sc4(5), ishold(5)
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
 real(8), dimension(4, maxvib) :: rpar
@@ -486,10 +506,10 @@ end if
 ! check that jmin .ge. nu for bound state calculations (this shouldn't be a bu
 ! but is?)
 nsum = 0
-  iva=0
-  ive=0
+iva=0
+ive=0
 !  check that requested vib levels have been defined
-  do 10 i=1,nvib
+do i=1,nvib
   if(ivib(i).ne.ivib(1)+i-1) then
     write(6,5) (ivib(k),k=1,nvib)
 5     format(/' INPUT ERROR: NON-SEQUENTIAL VIBRATIONAL', &
@@ -498,13 +518,13 @@ nsum = 0
   end if
   if(ivib(i).eq.nvmin) iva=i
   if(ivib(i).eq.nvmax) ive=i
-10   continue
-  if(iva.eq.0.or.ive.eq.0) then
-    write(6,15) nvmin,nvmax,(ivib(i),i=1,nvib)
+end do
+if(iva.eq.0.or.ive.eq.0) then
+  write(6,15) nvmin,nvmax,(ivib(i),i=1,nvib)
 15     format(/' PARAMETERS UNDEFINED FOR VIBRATIONAL STATE'/ &
-    1x,' REQUESTED STATES:',i3,'-',i2,' DEFINED STATES:',10i5)
-    call exit
-  end if
+  1x,' REQUESTED STATES:',i3,'-',i2,' DEFINED STATES:',10i5)
+  call exit
+end if
 
 if (clist) then
   if (flagsu) then
@@ -532,68 +552,69 @@ if (clist) then
   write(6,31) ' State    B(v)',' D(v)','H(v)','E(v)'
   write(9,31) ' State    B(v)',' D(v)','H(v)','E(v)'
 31   format(/2(a,8x),a,10x,a)
-  do 40 iv=iva,ive
-  write(6,35) ivib(iv),(rpar(jj,iv),jj=1,4)
-40   write(9,35) ivib(iv),(rpar(jj,iv),jj=1,4)
+  do iv=iva,ive
+    write(6,35) ivib(iv),(rpar(jj,iv),jj=1,4)
+    write(9,35) ivib(iv),(rpar(jj,iv),jj=1,4)
+  end do
 35   format(1x,i3,2x,3g12.5,f15.8)
 end if
 n=0
 nskip = 1
 if (ihomo) nskip = 2
 do 120 iv=iva,ive
-jmin=iscod(1,iv)
-if (boundc.and.csflag) then
-    if (jmin.lt.nu) then
-       write(6, 7) jmin, nu
-       write(9, 7) jmin, nu
+  jmin=iscod(1,iv)
+  if (boundc.and.csflag) then
+      if (jmin.lt.nu) then
+         write(6, 7) jmin, nu
+         write(9, 7) jmin, nu
 7        format(/ &
-    ' JMIN = ',i2,', .LT. NU = ',i2,' IN BASIS; JMIN RESET')
-       jmin=nu
-    endif
-endif
-jmax=iscod(2,iv)
-brot=rpar(1,iv)/econv
-drot=rpar(2,iv)/econv
-hrot=rpar(3,iv)/econv
-evib=rpar(4,iv)/econv
-do 120  ji = jmin, jmax, nskip
-  jj1=ji*(ji+1)
-  ee=brot*jj1 - drot*jj1**2 + hrot*jj1**3 + evib
-  if (.not. csflag) then
-!  here for cc calculations
-  lmax = jtot + ji
-  lmin = iabs (jtot - ji)
-  do 110  li = lmin, lmax
-    ix = (-1) ** (ji + li - jtot)
-    if (ix .eq. jlpar) then
-!  here for correct combination of j and l
+      ' JMIN = ',i2,', .LT. NU = ',i2,' IN BASIS; JMIN RESET')
+         jmin=nu
+      endif
+  endif
+  jmax=iscod(2,iv)
+  brot=rpar(1,iv)/econv
+  drot=rpar(2,iv)/econv
+  hrot=rpar(3,iv)/econv
+  evib=rpar(4,iv)/econv
+  do 120  ji = jmin, jmax, nskip
+    jj1=ji*(ji+1)
+    ee=brot*jj1 - drot*jj1**2 + hrot*jj1**3 + evib
+    if (.not. csflag) then
+    !  here for cc calculations
+      lmax = jtot + ji
+      lmin = iabs (jtot - ji)
+      do li = lmin, lmax
+        ix = (-1) ** (ji + li - jtot)
+        if (ix .eq. jlpar) then
+    !  here for correct combination of j and l
+          n = n + 1
+          if (n .gt. nmax) go to 130
+          l(n) = li
+          cent(n) = li * (li + 1.)
+          is(n) = ivib(iv)
+          j(n) = ji
+          eint(n) = ee
+        end if
+      end do
+    else
+  !  here for cs calculations
+      if (ji .lt. nu) go to 120
       n = n + 1
       if (n .gt. nmax) go to 130
-      l(n) = li
-      cent(n) = li * (li + 1.)
+      l(n) = jtot
+      if (.not.boundc) then
+        cent(n) = jtot * (jtot + 1)
+      else
+        xjtot=jtot
+        xj=j(n)
+        xnu=nu
+        cent(n)=xjtot*(xjtot+1)+xj*(xj+1)-2*xnu*xnu
+      endif
       is(n) = ivib(iv)
       j(n) = ji
       eint(n) = ee
     end if
-110   continue
-  else
-!  here for cs calculations
-    if (ji .lt. nu) go to 120
-    n = n + 1
-    if (n .gt. nmax) go to 130
-    l(n) = jtot
-    if (.not.boundc) then
-      cent(n) = jtot * (jtot + 1)
-    else
-      xjtot=jtot
-      xj=j(n)
-      xnu=nu
-      cent(n)=xjtot*(xjtot+1)+xj*(xj+1)-2*xnu*xnu
-    endif
-    is(n) = ivib(iv)
-    j(n) = ji
-    eint(n) = ee
-  end if
 120 continue
 130 if (n .gt. nmax) then
   write (9, 140) n, nmax
@@ -611,7 +632,7 @@ end if
 !  and for bound state calculations
 if (.not.flagsu .and. rcut .gt. 0.d0 .and. .not.boundc) then
   emin = 1.e+7
-  do 145  i = 1, n
+  do i = 1, n
     if (eint(i) .le. ered) then
 !  here if channel is
       if ( jtot * (jtot + 1) / (2. * rmu * rcut * rcut) &
@@ -622,13 +643,13 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and. .not.boundc) then
 !  condition is met
       end if
     end if
-145   continue
+  end do
 !  now eliminate all channels with eint .ge. emin if any of the channels
 !  are open asymptotically but closed at r = rcut
   if (emin.lt.ered) then
     nn=n
     n = 0
-    do 150 i = 1, nn
+    do i = 1, nn
       if (eint(i) .lt. emin) then
 !  here if this channel is to be included
         n = n + 1
@@ -638,7 +659,7 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and. .not.boundc) then
         cent(n) = cent(i)
         l(n) = l(i)
       end if
-150     continue
+    end do
 !  reset number of channels
   end if
 end if
@@ -667,21 +688,22 @@ nlevop = 0
 !  form list of all energetically open rotational levels included in the
 !  calculations and their energies
 !  if homonuclear diatomic, skip space is two
-do 200 iv=iva,ive
-jmin=iscod(1,iv)
-jmax=iscod(2,iv)
-brot=rpar(1,iv)/econv
-drot=rpar(2,iv)/econv
-hrot=rpar(3,iv)/econv
-evib=rpar(4,iv)/econv
-do 200  ji = jmin, jmax, nskip
-  jj1=ji*(ji+1)
-  ee=brot*jj1 - drot*jj1**2 + hrot*jj1**3 + evib
-  nlevel = nlevel + 1
-  ehold(nlevel) = ee
-  jhold(nlevel) = ji
-  ishold(nlevel) = ivib(iv)
-200 continue
+do iv=iva,ive
+  jmin=iscod(1,iv)
+  jmax=iscod(2,iv)
+  brot=rpar(1,iv)/econv
+  drot=rpar(2,iv)/econv
+  hrot=rpar(3,iv)/econv
+  evib=rpar(4,iv)/econv
+  do ji = jmin, jmax, nskip
+    jj1=ji*(ji+1)
+    ee=brot*jj1 - drot*jj1**2 + hrot*jj1**3 + evib
+    nlevel = nlevel + 1
+    ehold(nlevel) = ee
+    jhold(nlevel) = ji
+    ishold(nlevel) = ivib(iv)
+  end do
+end do
 !  now sort this list to put closed levels at end
 !  also determine number of levels which are open
 nlevop = 0
@@ -690,7 +712,7 @@ if (nlevel .gt. 1) then
     if (ehold(i) .le. ered) then
        nlevop = nlevop + 1
     else
-      do 75 ii = i + 1, nlevel
+      do ii = i + 1, nlevel
         if (ehold(ii) .le. ered) then
           nlevop = nlevop + 1
           ikeep = jhold(i)
@@ -704,7 +726,7 @@ if (nlevel .gt. 1) then
           ehold(ii) = ekeep
           go to 80
         end if
-75       continue
+      end do
     end if
 80   continue
 else
@@ -1188,5 +1210,25 @@ contains
   basis_get_isa = isa
 
   end function
+  logical function basis_is_singlet(ibasty)
+  !     ------------------------------------------------------------------
+  !
+  !     checks if a basis is for a singlet system
+  !
+  !     ------------------------------------------------------------------
+  implicit none
+  integer, intent(in) :: ibasty
+  integer, parameter :: singlet_base_types(*) = [1, 6, 8, 9, 11, 16, 17, 18, 21, 24, 25, 27, 29, 30]
+  integer :: i
+  do i = 1, size(singlet_base_types)
+    if ( singlet_base_types(i) == ibasty ) then
+      basis_is_singlet = .true.
+      return
+    end if
+  end do
+  basis_is_singlet = .false.
+
+  end function basis_is_singlet
+
 end module mod_basis
 
