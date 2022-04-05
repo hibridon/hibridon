@@ -568,38 +568,41 @@ aucm=219474.6d0
 auev=27.211652d0
 nterm=ispar(1)
 if (ibasty.eq.1) then
-  nvbmnr(1)=ispar(2)
-  nvbmxr(1)=ispar(3)
+  nvbmnr(1)=ispar(2)  ! VMIN
+  nvbmxr(1)=ispar(3)  ! VMAX
   nvbmnc(1)=nvbmnr(1)
   nvbmxc(1)=nvbmxr(1)
 else if (ibasty.eq.4) then
   if (nterm.eq.1) then
-    nvbmnr(1)=ispar(9)
-    nvbmxr(1)=ispar(10)
+    nvbmnr(1)=ispar(9)   ! VMINSG
+    nvbmxr(1)=ispar(10)  ! VMAXSG
     nvbmnc(1)=nvbmnr(1)
     nvbmxc(1)=nvbmxr(1)
   elseif (nterm.eq.2) then
-    nvbmnr(1)=ispar(8)
-    nvbmxr(1)=ispar(9)
+    nvbmnr(1)=ispar(8)   ! ISYMSG (shouldn't this be VMINSG ?)
+    nvbmxr(1)=ispar(9)   ! VMINSG (shouldn't this be VMAXSG ?)
     nvbmnc(1)=nvbmnr(1)
     nvbmxc(1)=nvbmxr(1)
     nvbmnr(2)=ispar(8)
-    nvbmxr(2)=ispar(9)
+    nvbmxr(2)=ispar(9)   ! VMINSG ! is this right ?
     nvbmnc(2)=nvbmnr(2)
     nvbmxc(2)=nvbmxr(2)
   else if (nterm.eq.4) then
-    nvbmnr(1)=ispar(9)
-    nvbmxr(1)=ispar(10)
+    nvbmnr(1)=ispar(9)   ! VMINSG
+    nvbmxr(1)=ispar(10)  ! VMAXSG
     nvbmnc(1)=nvbmnr(1)
     nvbmxc(1)=nvbmxr(1)
+
     nvbmnr(2)=ispar(10+nvibs*2+3)
     nvbmxr(2)=ispar(10+nvibs*2+4)
     nvbmnc(2)=nvbmnr(2)
     nvbmxc(2)=nvbmxr(2)
-    nvbmnr(3)=ispar(9)
-    nvbmxr(3)=ispar(10)
+
+    nvbmnr(3)=ispar(9)   ! VMINSG
+    nvbmxr(3)=ispar(10)  ! VMAXSG
     nvbmnc(3)=ispar(10+nvibs*2+3)
     nvbmxc(3)=ispar(10+nvibs*2+4)
+
     nvbmnr(4)=ispar(10+nvibs*2+3)
     nvbmxr(4)=ispar(10+nvibs*2+4)
     nvbmnc(4)=nvbmnr(4)
