@@ -1218,17 +1218,17 @@ contains
   !     ------------------------------------------------------------------
   implicit none
   integer, intent(in) :: ibasty
-  integer, parameter :: singlet_base_types(:) = [1, 6, 8, 9, 11, 16, 17, 18, 21, 24, 25, 27, 29, 30]
+  integer, parameter :: singlet_base_types(*) = [1, 6, 8, 9, 11, 16, 17, 18, 21, 24, 25, 27, 29, 30]
   integer :: i
   do i = 1, size(singlet_base_types)
     if ( singlet_base_types(i) == ibasty ) then
-      is_singlet = .true.
+      basis_is_singlet = .true.
       return
     end if
   end do
-  is_singlet = .false.
+  basis_is_singlet = .false.
 
-  end function is_singlet
+  end function basis_is_singlet
 
 end module mod_basis
 
