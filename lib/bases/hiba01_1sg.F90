@@ -924,7 +924,7 @@ use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
-use mod_cosysr, only: isrcod, junkr, rcod => rspar
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 integer irpot
 logical readp, existf
@@ -985,8 +985,8 @@ iofr=2*nvib+4-1
 do i = 1,nvib
   if(iread.ne.0) then
     read (8, *, err=99) ivib(i),(iscod(isicod+j),j=1,2) ! iv, jmin, jmax
-    read (8, *, err=99) (rcod(isrcod+j),j=1,3) ! brot, drot, hrot
-    read (8, *, err=99) rcod(isrcod+4) ! evib
+    read (8, *, err=99) (rspar(isrcod+j),j=1,3) ! brot, drot, hrot
+    read (8, *, err=99) rspar(isrcod+4) ! evib
   end if
   char=' '
   if(nvib.gt.1.or.ivib(i).ne.0) then
@@ -1067,7 +1067,7 @@ iofr=0
 do 301 i=1,nvib
 write (8, 310) ivib(i),(iscod(iofi+j),j=1,2)
 310 format (3i4, t50,'iv,jmin,jmax')
-write (8, 320) (rcod(iofr+j),j=1,4)
+write (8, 320) (rspar(iofr+j),j=1,4)
 iofi=iofi+2
 iofr=iofr+4
 320 format(3g14.6,t50,'brot,drot,hrot'/f15.8,t50,'evib')
