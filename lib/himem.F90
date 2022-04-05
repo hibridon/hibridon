@@ -1079,6 +1079,10 @@ module mod_cosyr
 end module mod_cosyr
 
 module mod_cosysi
+   !  variables in common block /cosysi/
+   !    nscode:   total number of system dependent parameters
+   !              nscode = isicod + isrcod + islcod + 3
+   !    isicod:   total number of integer system dependent variables
    implicit none
    save
    integer :: maxpar
@@ -1120,6 +1124,8 @@ module mod_cosysl
 end module mod_cosysl
 
 module mod_cosysr
+   !  variables in common bloc /cosysr/
+   !    isrcod:   total number of real system dependent variables
    implicit none
    save
    integer :: maxpar
