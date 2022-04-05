@@ -187,17 +187,18 @@ integer, pointer :: nterm, numpot, jmax, iop, j2min, j2max, ipotsy2
 real(8), pointer :: arot, brot, crot, emax, b2rot
 nterm=>ispar(1); numpot=>ispar(2); jmax=>ispar(3); iop=>ispar(4); j2min=>ispar(5); j2max=>ispar(6); ipotsy2=>ispar(7)
 arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4); b2rot=>rspar(5)
-allocate(e(narray,narray))
-allocate(eig(narray))
-allocate(vec(narray,narray))
-allocate(sc1(narray))
-allocate(sc2(narray))
 
-allocate(work(max(1000,nmax)))
-allocate(kp(max(1000,nmax)))
-allocate(ko(max(1000,nmax)))
-allocate(j2rot(max(1000,nmax)))
-allocate(e2rot(max(1000,nmax)))
+if(.not.allocated(e)) allocate(e(narray,narray))
+if(.not.allocated(eig)) allocate(eig(narray))
+if(.not.allocated(vec)) allocate(vec(narray,narray))
+if(.not.allocated(sc1)) allocate(sc1(narray))
+if(.not.allocated(sc2)) allocate(sc2(narray))
+
+if(.not.allocated(work)) allocate(work(max(1000,nmax)))
+if(.not.allocated(kp))) allocate(kp(max(1000,nmax)))
+if(.not.allocated(ko)) allocate(ko(max(1000,nmax)))
+if(.not.allocated(j2rot)) allocate(j2rot(max(1000,nmax)))
+if(.not.allocated(e2rot)) allocate(e2rot(max(1000,nmax)))
 
 zero = 0.d0
 two = 2.d0
