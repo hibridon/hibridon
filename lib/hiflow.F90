@@ -446,13 +446,33 @@ if (ien .eq. 1) then
 
 !*        write(6,5554) nch, nmax, nchtop
 !*5554    format('BEFORE BASIS:',3i6)
+#ifdef DEBUG
+#define ENSURE_BASIS_SCRATCHS_ARE_REAL_SCRATCHS
+#endif
 
+#ifdef ENSURE_BASIS_SCRATCHS_ARE_REAL_SCRATCHS
+#define DUMMY_REAL_VALUE 42.0
+  do i = 1, nmax
+    sc1(i) = DUMMY_VALUE
+    sc2(i) = DUMMY_VALUE
+    sc3(i) = DUMMY_VALUE
+    sc4(i) = DUMMY_VALUE
+  end do
+#endif
 
   call basis (jq, lq, inq, jlev, elev, inlev, nlevel, nlevop, &
               sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
               csflag, clist, bastst, ihomo, nu, numin, jlpar, &
               twomol, nch, nmax, nchtop)
 
+#ifdef ENSURE_BASIS_SCRATCHS_ARE_REAL_SCRATCHS
+  do i = 1, nmax
+    sc1(i) = DUMMY_VALUE
+    sc2(i) = DUMMY_VALUE
+    sc3(i) = DUMMY_VALUE
+    sc4(i) = DUMMY_VALUE
+  end do
+#endif
 
 !*        write(6,5556) nch, nmax, nchtop
 !*5556    format('AFTER BASIS: ',3i6)

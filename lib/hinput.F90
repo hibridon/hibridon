@@ -62,20 +62,24 @@ use mod_hibrid5, only : intcrs, readpc
 use mod_difcrs, only: difcrs
 use mod_hibrid2, only: enord, prsg
 use mod_hibrid3, only: testptn, testpt20, testpt, potmin
+use mod_hiutil, only: getval
 
 implicit double precision (a-h,o-z)
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
 !  ncode is the number of bcod's
 !  bcod stores hibridon's commands
-!  fcod stores logical flags
+!  fcod stores logical flags (length = lcode)
 parameter (ncode = 39, lcode = 28, iicode = 10, ircode = 9, &
            icode = iicode+ircode)
 character*80 line
 character*40 fnam1,fnam2,jobnam,input,output,savfil, &
              code
 character*8 bcod(ncode)
-character*8 fcod(lcode),pcod(icode),bascod
+character*8, dimension(lcode) :: fcod
+character*8 pcod(icode)
+character*8 bascod(1)
+character*8 empty_var_list(0)
 character*9 basknd(30)
 ! dimension of codex, ihold, lhold, should be equal to largest number
 ! of identical strings of 1:nnn characters in names of all variables
@@ -115,9 +119,9 @@ data basknd /'1-SIGMA', '2-SIGMA', '2-PI', 'SIGMA|PI', &
               'SYMT|1SG','1D-3P-AT','3P-2S-AT', 'SPH-TOP', &
               '1SG-1SG', '2SG-1SG', 'C2v-ASTP','3SG-1SG', &
               'CASYMTOP', 'ASYM-DIAT' /
-!  lindx is pointer from fcod order to order in common colpar
+!  lindx is pointer from fcod order to order in common block colpar
 data lindx/1,3,4,5,6,7,8,9,10,11,13,25,26,2,12,14,17,19,24, &
-           15,16,18,20,27,22,21,23,28/
+           15,16,18,20,27,22,21,23,28/   ! graffy: colpar and fcod both contain the 28 logical parameters but in a different order, thus requiring a remapping through lindx. Why not simply having the same order, by making fcod match colpar?
 !     common /colpar/ airyfl, airypr, bastst, batch, chlist,
 !    :                csflag, flaghf, flagsu, ihomo, ipos, logdfl,
 !    :                logwr, noprin, partw, readpt, rsflag, swrit,
@@ -128,7 +132,7 @@ data batch /.false./
 save ipr, opti, a, a1, acc, acclas, optval, optacc, istep, inam, &
      fnam1, fnam2, code, lc, jtot2x, irpot, irinp
 nerg = 0
-bascod='BASISTYP'
+bascod(1)='BASISTYP'
 pcod(1)='JTOT1'
 pcod(2)='JTOT2'
 pcod(3)='JTOTD'
@@ -375,13 +379,13 @@ if(scod(i)(1:lc) .eq. code(1:lc)) then
 end if
 23 continue
 len = 8
-if(bascod(1:lc) .eq. code(1:lc)) then
+if(bascod(1)(1:lc) .eq. code(1:lc)) then
   if (lc .eq. len) go to 50
   match = match + 1
   lhold(match) = l
   iskip = 5
   ihold(match) = i
-  codex(match) = bascod
+  codex(match) = bascod(1)
 end if
 if (match .eq. 0) then
   write(6, 27) code(1:lc),(bcod(j),j = 1,ncode)
@@ -418,7 +422,7 @@ end if
 50 if(l.eq.0) goto 1
 l1 = l
 call parse(line,l,code,lc)
-call getval(code(1:lc),bascod,icode,j,val)
+call getval(code(1:lc),bascod,j,val)
 if(j .eq. 0) goto 15
 if(j .lt. 0) goto 1
 ibasty=int(val)
@@ -443,7 +447,7 @@ goto 1
 call pcoder(lpar(28),pcod,icode)
 l1 = l
 call parse(line,l,code,lc)
-call getval(code(1:lc),pcod,icode,j,val)
+call getval(code(1:lc),pcod,j,val)
 if(j .eq. 0) goto 15
 if(j .lt. 0) goto 1
 if (j .eq. 5) then
@@ -481,7 +485,7 @@ goto 100
 200 if(l .eq. 0) goto 1
 l1 = l
 call parse(line,l,code,lc)
-call getval(code(1:lc),fcod,lcode,j,val)
+call getval(code(1:lc),fcod,j,val)
 if(j .eq. 0) goto 15
 if(j .lt.0) goto 1
 logp = .false.
@@ -504,7 +508,7 @@ goto 200
 if(line(l-1:l-1) .eq. ';') goto 320
 i = i+1
 call parse(line,l,code,lc)
-call getval(code(1:lc),' ',0,j,energ(i))
+call getval(code(1:lc),empty_var_list,j,energ(i))
 goto 310
 320 if (energ(1) .gt. 0) then
    if (i .ne. nerg) then
@@ -548,13 +552,13 @@ goto 15
 ! on the same card, e.g. jout,-3,0,2,4;energ=e1,e2,e3;jtot1=0,jtot2=2....
 400 i = 0
 call parse(line,l,code,lc)
-call getval(code(1:lc),' ',0,j,val)
+call getval(code(1:lc),empty_var_list,j,val)
 l1 = l
 nnout=val
 410 if(l .eq. 0) goto 420
 if(line(l-1:l-1) .eq. ';') goto 420
 call parse(line,l,code,lc)
-call getval(code(1:lc),' ',0,j,val)
+call getval(code(1:lc),empty_var_list,j,val)
 i = i+1
 jout(i) = val
 goto 410
@@ -569,14 +573,14 @@ goto 15
 ! on the same card, e.g. indout,2,1,-1;energ=e1,e2,e3;jtot1=0,jtot2=2....
 430 i = 0
 call parse(line,l,code,lc)
-call getval(code(1:lc),' ',0,j,val)
+call getval(code(1:lc),empty_var_list,j,val)
 l1 = l
 niout=val
 if(niout.eq.0) goto 15
 440 if(l .eq. 0) goto 450
 if(line(l-1:l-1) .eq. ';') goto 450
 call parse(line,l,code,lc)
-call getval(code(1:lc),' ',0,j,val)
+call getval(code(1:lc),empty_var_list,j,val)
 i = i+1
 indout(i) = val
 goto 440
@@ -595,14 +599,14 @@ goto 15
 endif
 i = 0
 call parse(line,l,code,lc)
-call getval(code(1:lc),' ',0,j,val)
+call getval(code(1:lc),empty_var_list,j,val)
 l1 = l
 numj=val
 if(niout.eq.0) goto 15
 470 if(l .eq. 0) goto 480
 if(line(l-1:l-1) .eq. ';') goto 480
 call parse(line,l,code,lc)
-call getval(code(1:lc),' ',0,j,val)
+call getval(code(1:lc),empty_var_list,j,val)
 i = i+1
 nj1j2(i) = val
 goto 470
@@ -921,7 +925,7 @@ goto 15
 1400 if(l.eq.0) goto 1
 l1=l
 call parse(line,l,code,lc)
-call getval(code(1:lc),scod,nscode,j,val)
+call getval(code(1:lc),scod,j,val)
 if(j .eq. 0) goto 15
 if(j .lt. 0) goto 1
 if(j.eq.1 .and. .not.lpar(20)) then
@@ -962,18 +966,18 @@ ienerg = 1
 thrs = 1.e-5
 if(l.ne.0) then
   call parse(line,l,code,lc)
-  call getval(code(1:lc),' ',0,j,val)
+  call getval(code(1:lc),empty_var_list,j,val)
   iprint = val
 end if
 if(l.ne.0) then
   call parse(line,l,code,lc)
-  call getval(code(1:lc),' ',0,j,val)
+  call getval(code(1:lc),empty_var_list,j,val)
   ienerg = val
   ienerg = max0(1,ienerg)
 end if
 if(l.ne.0) then
   call parse(line,l,code,lc)
-  call getval(code(1:lc),' ',0,j,val)
+  call getval(code(1:lc),empty_var_list,j,val)
   thrs = val
 end if
 call difs(fnam1,fnam2,ienerg,iprint,acc,accmx,thrs,imx,jmx,ityp)
@@ -1070,7 +1074,7 @@ do 1910 i = 1,5
 ia(i) = 0
 if(l .eq. 0) goto 1910
 call parse(line,l,code,lc)
-call getval(code(1:lc),' ',0,j,a(i))
+call getval(code(1:lc),empty_var_list,j,a(i))
 ia(i)=a(i)
 1910 continue
 if(ia(1).eq.0) ia(1)=ipar(1)
@@ -1095,7 +1099,7 @@ goto 1
      a(i) = 0.d0
      if(l .eq. 0) goto 2010
      call parse(line,l,code,lc)
-     call getval(code(1:lc),' ',0,j,a(i))
+     call getval(code(1:lc),empty_var_list,j,a(i))
 2010   continue
   call difcrs(fnam1,a,lpar(9),lpar(7))
 else
@@ -1136,7 +1140,7 @@ goto 1
 a(i) = 0.d0
 if(l .eq. 0) goto 2130
 call parse(line,l,code,ld)
-call getval(code(1:ld),' ',0,j,a(i))
+call getval(code(1:ld),empty_var_list,j,a(i))
 2130 continue
 if(a(1) .eq. 0.or.a(2) .eq. 0) then
   write(6,2140)
@@ -1280,7 +1284,7 @@ do 2210 i = 1,4
 a(i) = 0
 if(l .eq. 0) goto 2210
 call parse(line,l,code,lc)
-call getval(code(1:lc),' ',0,j,a(i))
+call getval(code(1:lc),empty_var_list,j,a(i))
 2210 continue
 call intcrs(fnam1,a)
 goto 1
@@ -1294,7 +1298,7 @@ do 2310 i = 1,9
 a(i) = 0.d0
 if(l .eq. 0) goto 2310
 call parse(line,l,code,lc)
-call getval(code(1:lc),' ',0,j,a(i))
+call getval(code(1:lc),empty_var_list,j,a(i))
 2310 continue
 #if defined(HIB_MAC)
 call exit
@@ -1320,7 +1324,7 @@ do 2510 i = 1,1
 a(i) = 0
 if(l .eq. 0) goto 2510
 call parse(line,l,code,lc)
-call getval(code(1:lc),' ',0,j,a(i))
+call getval(code(1:lc),empty_var_list,j,a(i))
 2510 continue
 #if defined(HIB_MAC)
 call exit
@@ -1340,7 +1344,7 @@ do 2610 i = 1,8
 a(i) = 0
 if(l .eq. 0) goto 2610
 call parse(line,l,code,lc)
-call getval(code(1:lc),' ',0,j,a(i))
+call getval(code(1:lc),empty_var_list,j,a(i))
 2610 continue
 if(ibasty.eq. 5) write (6, 2611)
 2611 format &
@@ -1363,7 +1367,7 @@ do 2660 i = 1,8
 a(i) = 0
 if(l .eq. 0) goto 2660
 call parse(line,l,code,lc)
-call getval(code(1:lc),' ',0,j,a(i))
+call getval(code(1:lc),empty_var_list,j,a(i))
 2660 continue
 call readpc(fnam1, a, scmat, nmax)
 goto 1
@@ -1380,7 +1384,7 @@ do 2810 i = 1,10
 a(i) = 0
 if(l .eq. 0) goto 2810
 call parse(line,l,code,lc)
-call getval(code(1:lc),' ',0,j,a(i))
+call getval(code(1:lc),empty_var_list,j,a(i))
 2810 continue
 iflux=a(1)
 if (a(2) .eq. 0.d0) iflux=2
@@ -1425,7 +1429,7 @@ goto 1
      a(i) = 0.d0
      if(l .eq. 0) goto 2013
      call parse(line,l,code,lc)
-     call getval(code(1:lc),' ',0,j,a(i))
+     call getval(code(1:lc),empty_var_list,j,a(i))
 2013   continue
   call hypxsc(fnam1,a)
 !      else
@@ -1443,7 +1447,7 @@ call upper(fnam1(1:1))
 a(1) = 0.d0
 if(l .eq. 0) goto 3005
 call parse(line,l,code,lc)
-call getval(code(1:lc),' ',0,j,a(1))
+call getval(code(1:lc),empty_var_list,j,a(1))
 3005 call parse(line,l,fnam2,lc)
 if(fnam2 .eq. ' ') fnam2 = jobnam
 call lower(fnam2)
@@ -1452,13 +1456,13 @@ call upper(fnam2(1:1))
 a(2) = 0.d0
 if(l .eq. 0) goto 3010
 call parse(line,l,code,lc)
-call getval(code(1:lc),' ',0,j,a(2))
+call getval(code(1:lc),empty_var_list,j,a(2))
 ! get dele, emax, istata, istatx, hso
 3010 do 3020 i = 3, 7
   a(i) = 0.d0
   if(l .eq. 0) goto 3020
   call parse(line,l,code,lc)
-  call getval(code(1:lc),' ',0,j,a(i))
+  call getval(code(1:lc),empty_var_list,j,a(i))
 3020 continue
 call stmix(fnam1,fnam2,a)
 goto 1
@@ -1471,7 +1475,7 @@ call upper(fnam1(1:1))
 a(1) = 0.d0
 if(l .eq. 0) goto 3105
 call parse(line,l,code,lc)
-call getval(code(1:lc),' ',0,j,a(1))
+call getval(code(1:lc),empty_var_list,j,a(1))
 ! get in1, in2, jtotmx, join, jmax
 3105 continue
 call trnprt(fnam1,a)
@@ -1485,7 +1489,7 @@ call upper(fnam1(1:1))
 a(1) = 0.d0
 if(l .eq. 0) goto 3205
 call parse(line,l,code,lc)
-call getval(code(1:lc),' ',0,j,a(1))
+call getval(code(1:lc),empty_var_list,j,a(1))
 3205 call parse(line,l,fnam2,lc)
 if(fnam2 .eq. ' ') fnam2 = jobnam
 call lower(fnam2)
@@ -1494,13 +1498,13 @@ call upper(fnam2(1:1))
 a(2) = 0.d0
 if(l .eq. 0) goto 3210
 call parse(line,l,code,lc)
-call getval(code(1:lc),' ',0,j,a(2))
+call getval(code(1:lc),empty_var_list,j,a(2))
 ! get k, j1, in1, j2, in2, diag, j1p, in1p, j2p, in2p
 3210 do 3220 i = 3, 12
   a(i) = 0.d0
   if(l .eq. 0) goto 3220
   call parse(line,l,code,lc)
-  call getval(code(1:lc),' ',0,j,a(i))
+  call getval(code(1:lc),empty_var_list,j,a(i))
 3220 continue
 call prsbr(fnam1,fnam2,a)
 goto 1
