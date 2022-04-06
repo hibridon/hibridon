@@ -1,3 +1,4 @@
+#include "assert.h"
 !  -------------------------------------------------------------
 module mod_flow
 contains
@@ -466,6 +467,8 @@ if (ien .eq. 1) then
               sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
               csflag, clist, bastst, ihomo, nu, numin, jlpar, &
               twomol, nch, nmax, nchtop, v2)
+
+  ASSERT(allocated(v2))  ! if this fails, this means that the used base doesn't yet support v2 as growable array
 
 #ifdef ENSURE_BASIS_SCRATCHS_ARE_REAL_SCRATCHS
   do i = 1, nmax
