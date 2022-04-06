@@ -1,0 +1,49 @@
+name: macOS-10.13
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+env:
+  BUILD_TYPE: "Debug"
+  CMAKE_BUILD_PARALLEL_LEVEL: "1" # disable parallel builds
+  CTEST_OUTPUT_ON_FAILURE: "ON" # This way we don't need a flag to ctest
+  CTEST_PARALLEL_LEVEL: "1"
+  HOMEBREW_NO_ANALYTICS: "ON" # Make Homebrew installation a little quicker
+  HOMEBREW_NO_AUTO_UPDATE: "ON"
+  HOMEBREW_NO_BOTTLE_SOURCE_FALLBACK: "ON"
+  HOMEBREW_NO_GITHUB_API: "ON"
+  HOMEBREW_NO_INSTALL_CLEANUP: "ON"
+jobs:
+  build_and_test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-10.13]
+        gcc_v: [9, 10, 11]
+    env:
+      FC: gfortran-${{ matrix.gcc_v }}
+      GCC_V: ${{ matrix.gcc_v }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install GFortran macOS
+      run: brew install gcc@${GCC_V} || brew upgrade gcc@${GCC_V} || true
+
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_TESTING=ON -DBLA_VENDOR=Apple
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: catch build fail
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --verbose
+      if: failure()
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      run: ctest --parallel --output-on-failure -L coverage

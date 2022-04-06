@@ -1,139 +1,181 @@
 # Hibridon v5.0 alpha
 
-[![Build Status](https://jenkins.ipr.univ-rennes1.fr/buildStatus/icon?job=hibridon-build)](https://jenkins.ipr.univ-rennes1.fr/job/hibridon-build/)
+[![macOS-11.2](https://github.com/hibridon/hibridon/actions/workflows/macOS-11.2.yml/badge.svg?branch=master)](https://github.com/hibridon/hibridon/actions/workflows/macOS-11.2.yml)
+[![Debian-10.6](https://github.com/hibridon/hibridon/actions/workflows/Debian-10.6.yml/badge.svg?branch=master)](https://github.com/hibridon/hibridon/actions/workflows/Debian-10.6.yml)
 
 Computer Software for
 Molecular Inelastic Scattering and Photodissociation
 
 Documentation is available on
-- [http://www2.chem.umd.edu/groups/alexander/hibridon]
+- [http://www2.chem.umd.edu/groups/alexander/hibridon](http://www2.chem.umd.edu/groups/alexander/hibridon)
 - [<hibridon_root_path>/doc](doc)
 
 Changes:
-- [ReleaseNotes](ReleaseNotes)
-- [README_4.2.1](README_4.2.1) : changes from `hibridon` 4.1.5 to 4.2.1
-- [README_4.3](README_4.3) : changes from `hibridon` 4.2.1 to 4.3 
-- [README_4.4](README_4.4) : changes since `hibridon` 4.3
+- [CHANGELOG](CHANGELOG.md)
 
-## Build instructions
+#  Prerequisites
 
-Required tools:
-* CMake >= 3.3
-* Git (optional)
-* Fortran compiler with support for fortran 90 and fpp preprocessing (eg: gfortran or ifort).
+## Required tools:
+* [CMake](https://cmake.org/install/) >= 3.3
+* Fortran compiler with support for fortran 90 and fpp preprocessing (e.g. [GNU Fortran](https://fortran-lang.org/learn/os_setup/install_gfortran)).
+* [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) (optional)
 
-Required libraries:
 
-* Blas compatible library (eg Intel's Math Kernel Library)
-* Lapack compatible library (eg Intel's Math Kernel Library)
+## Required libraries:
 
-### 1. Create a directory to store hibridon source
+* BLAS compatible library (e.g. [Netlib BLAS](http://www.netlib.org/blas/))
+* LAPACK compatible library (e.g. [Netlib LAPACK](http://www.netlib.org/lapack/))
+  
+# Build instructions
 
-```bash
-mkdir -p /tmp/hib_src
-```
-### 2. Get hibridon source code
+## 1. Get Hibridon source code
+### Using GIT
 
 ```bash
-cd /tmp/hib_src
-git clone https://github.com/hibridon/hibridon.git
+git clone https://github.com/hibridon/hibridon.git ~/hib_src
 ```
-This will create a directory /tmp/hib_src/hibridon, which is a clone of https://github.com/hibridon/hibridon.git 
-### 3. Create a directory to store hibridon's build
+This will create a directory `~/hib_src/` which is a clone of https://github.com/hibridon/hibridon.git 
+
+### Without GIT
+- Download Hibridon source code as a zip archive: [hibridon-master.zip](https://github.com/hibridon/hibridon/archive/refs/heads/master.zip)
+
+- Extract the content of the archive into `~/hib_src/` 
+
+## 2. Create a configuration file for your potential energy surfaces (PESs)
+
+Create the directories that will contain Hibridon build files and store your project configuration file:
+```bash
+mkdir -p ~/hib_build/project/
+```
+
+Create a `CMake` project configuration file:
+```bash
+touch ~/hib_build/project/CMakeLists.txt
+```
+
+Copy and past the following example into your `CMake` project configuration file:
+
+```cmake
+# this is a minimal cmake example for creating a hibridon executable with an user-supplied PES
+cmake_minimum_required (VERSION 3.3)
+project (my_pots)
+enable_language (Fortran)
+
+# add hibridon library
+add_subdirectory("~/hib_src/" hibridon)
+
+# declare new executables using hibridon's add_hibexe cmake function, where:
+#  - the 1st argument is the name of the resulting executable
+#  - the 2nd argument is the file path of the user provided potential file
+#  - the 3rd argument is the size of the t matrix:
+#    - "kmax": for normal cases
+#    - "kbig": for special cases (only arn2_big test uses it)
+
+add_hibexe(NH3-H2.exe "~/my_pots/pot_nh3h2.F90" "kmax") # NH3-H2
+
+# You can add as many executables as you want by using the add_hibexe function:
+#add_hibexe(OH-H2.exe "~/my_pots/pot_ohh2.F90" "kmax") # OH-H2
+#add_hibexe(He-CO.exe "~/my_pots/pot_heco.F90" "kmax") # He-CO
+```
+
+Adapt this example to suit your needs.
+
+
+
+## 3. Configure your project's build
 
 ```bash
-mkdir /tmp/hib_build
+cd ~/hib_build
+cmake ./project/
 ```
-
-### 4. Create a configuration file for your potential energy surface
-
-Create a new file with the `.user.cmake` extension at the root of the build directory (/tmp/hib_build) (e.g. `nh3h2.user.cmake`).
-
-Paste the following content and edit to suit your needs:
-```
-# NH3-H2 sample cmake script
-
-set(EXE_NAME "nh3h2.exe")
-set(POT_SRC_FILE "/home/NH3H2/pot_nh3h2_2009.F90")
-set(p_T_MATRIX_SIZE "500")
-```
-where 
-* `EXE_NAME` will be the name of the hibridon executable
-* `POT_SRC_FILE` is the full path to your potential fortran source code*
-* `p_T_MATRIX_SIZE` is the T_MATRIX_SIZE parameter
-
-\*Simply the filename (e.g. `pot_nh3h2_2009.F90` or `./pot_nh3h2_2009.F90`) if your potential is located in the build directory.
+This will automatically find the required libraries and compiler and create a Makefile to build Hibridon. 
 
 
-### 5. Configure hibridon's build
+### Useful CMake options and special cases:
+
+- **Use a specific compiler**
+- 
+    ```bash
+    cd ~/hib_build
+    cmake ./project/ -DCMAKE_Fortran_COMPILER=<compiler>
+    ```
+    Where `<compiler>` is your compiler executable e.g.:
+    - `gfortran`
+    - `gfortran-8`
+    - `ifort` 
+
+- **Use a specific BLAS/LAPACK library**
+- 
+    ```bash
+    cd ~/hib_build
+    cmake ./project/ DBLA_VENDOR=<BLAS_LIB> 
+    ```
+    Where `<BLAS_LIB>` is your BLAS library e.g.:
+    - `OpenBLAS`
+    - `Intel10_64lp`
+  
+    see [CMake BLAS/LAPACK VENDORS](https://cmake.org/cmake/help/latest/module/FindBLAS.html#blas-lapack-vendors) for a full list of supported libraries
+
+
+- **Enable Hibridon testing**
+ 
+    ```bash
+    cd ~/hib_build
+    cmake ./project/ -DBUILD_TESTING=ON
+    ```
+
+
+
+## 4. Make your project
+- **Make all executables**
+    ```bash
+    make
+    ```
+The executable files will be put in the current directory (`~/hib_build`).
+- **Make a specific executable** 
+  ```bash
+    make <executable>
+  ```
+  Where `<executable>` is one of the executable you defined in the CMakeLists.txt configuration file, e.g.: `NH3-H2.exe`.
+
+## 5. Test Hibridon (Optional)
+Hibridon testing must be activated (see previous section).
+
+- **Run all tests**
+    ```bash
+    ctest
+    ```
+- **Run a test suite (group of tests)** 
+    ```bash
+    ctest -L <testsuite>
+    ```
+    Where testsuite is the name of the test suite among:
+    - `coverage` (covers most of the source code)
+    - `quick` (runs only quick tests)
+    
+- **Run tests for only one PES** 
+    ```bash
+    ctest -L <label>
+    ```
+
+    Where `<label>` is the name of a group of tests associated to one PES.
+    
+    The full list of avaible labels can be printed using: 
+    ```bash
+    ctest --print-labels
+    ```
+
+### 6. One liner example
+
+This one line command configures, builds and tests Hibridon from a directory `~/hib_build` containing the source code. Build files are placed in the current directory.
 
 ```bash
-cd /tmp/hib_build
-cmake /tmp/hib_src/hibridon
-```
-This will automatically find the required libraries and create a Makefile to build hibridon. 
-
-#### to use mkl
-
-make sure your environment variable `MKL_ROOT` is set to use the mkl lbrary you want. Depending on the system you are using, This can be achieved with one of the following methods:
-- `source <intel_mkl_root_dir>/bin/mklvars.sh`
-- `module load mkl/latest`
-
-Once `MKL_ROOT` is set properly, you just have to tell cmake that you want to use mkl (see [https://cmake.org/cmake/help/v3.14/module/FindBLAS.html]):
-
-```bash
-cd /tmp/hib_build
-cmake -DBLA_VENDOR=Intel10_64lp /tmp/hib_src
+ git clone https://github.com/hibridon/hibridon.git ~/hib_src && mkdir -p ~/hib_build && cmake -DCMAKE_Fortran_COMPILER=gfortran -DBUILD_TESTING=ON -S ~/hib_src/ -B ~/hib_build && cd ~/hib_build/ && make && ctest -L coverage
 ```
 
-#### to configure the build with intel fortran...
+Please note that this only builds and tests Hibridon library; it doesn't build any user-provided PES.
 
-make sure you have set the environment variables such that the `ifort` command works. Depending on the system you are using, This can be achieved with one of the following methods:
-- `source <intel_mkl_root_dir>/bin/compilervars.sh`
-- `module load mkl/latest`
-
-Once `ifort` is in your path, you just have to tell cmake that you want to use ifort as the fortran compiler using the option `-DCMAKE_Fortran_COMPILER=ifort`, eg:
-
-```bash
-cd /tmp/hib_build
-cmake -DCMAKE_Fortran_COMPILER=ifort /tmp/hib_src
-```
-
-### 6. Test hibridon (OPTIONAL)
-
-The following command will run all hibridon's tests:
-
-```bash
-make test
-```
-
-You can also run a test suite (a group of tests). For example, the following command will run the test suite `short`:
-
-```bash
-make testsuite_short
-```
-
-You can also run a single test. For example, the following command will run the test `arn2`:
-
-```bash
-ctest -L '^arn2$'
-```
-
-### 7. Build hibridon
-
-```bash
-make <EXEC_NAME>
-```
-where `EXEC_NAME` is the executable name defined in your `.user.cmake` file.
-
-### 8. one liner example
-
-This one line command configures, builds and tests hibridon from a directory containing the source code.
-
-```
-graffy@graffy-ws2:/tmp/hibridon.build$ rm -R ./* ; script -q /dev/null --command  "cmake -DCMAKE_BUILD_TYPE=Debug /home/graffy/work/hibridon" && script -q /dev/null --command "make 2>&1" | tee "/home/graffy/work/hibridon/refactor_notes/make_$(date).stdout" && ctest
-```
-
+<!---
 ## For code contributors
 
 ### Code coverage
@@ -149,3 +191,4 @@ Then, `make html_coverages`, will convert these coverage files into html reports
 ### Performance profiling
 
 To activate profiling, add `-DENABLE_PROFILING=ON` to the cmake command. This will build and run hibridon with profiling option. When run, each test will additionnaly create a `call_graph.pdf` file which shows where time was spent during the test.
+-->

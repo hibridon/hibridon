@@ -5,12 +5,13 @@
 
 subroutine driver
 use mod_covvl, only: vvl
+use mod_cosysr, only: rspar
+use constants, only: econv
 implicit double precision (a-h,o-z)
-common /cosysr/ xjunk(2),rshift,xfact
-common /coconv/ econv
 #include "common/parpot.F90"
+real(8), pointer :: rshift, xfact
+rshift=>rspar(1); xfact=>rspar(2)
 potnam='ALEXANDER Ar-NO CCSDT'
-econv=219474.6d0
 1  print *, ' r (bohr)'
 rshift=0.5
 xfact=0.8
@@ -66,6 +67,7 @@ subroutine pot (vv0, r)
 ! ----------------------------------------------------------------------
 
 use mod_covvl, only: vvl
+use constants, only: econv
 implicit double precision (a-h,o-z)
 dimension xlam1(17),xlam2(17),r0(17),c1(17),c2(17),c3(17), &
           clr(17),vsum(9),xsum(9),vdif(9),xdif(9), &
@@ -73,7 +75,6 @@ dimension xlam1(17),xlam2(17),r0(17),c1(17),c2(17),c3(17), &
           d0(81),d2(49),aa(121)
 dimension kpvt(9),qraux(9),work(55),rsd(9)
 
-common /coconv/ econv
 
 data half, zero, one, alph /0.5d0, 0.d0, 1.d0, 1.2d0/
 ! for distances beyond rmax difference potential is damped

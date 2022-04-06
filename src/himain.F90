@@ -1,5 +1,6 @@
 #include "assert.h"
 program logair
+use mod_com, only: com_file, com
 use mod_clseg, only: allocate_clseg
 use mod_cobuf, only: allocate_cobuf
 use mod_cofil, only: allocate_cofil
@@ -75,7 +76,11 @@ use mod_codim, only: allocate_codim, mairy, mmax
 use mod_comxbs, only: allocate_comxbs
 use mod_comxm, only: allocate_comxm
 
+use mod_cosyr, only: allocate_cosyr
+use mod_cosys, only: allocate_cosys
 use mod_cosysl, only: allocate_cosysl
+use mod_cosysi, only: allocate_cosysi
+use mod_cosysr, only: allocate_cosysr
 use mod_flow, only: flow
 !**********************************************************************
 !***   this code is not released for general public use            ****
@@ -103,7 +108,7 @@ character *40 test
 !  in the following parameter statements:
 !     kmxbas is maximum number of included basis routines, this should
 !     be updatated as basis routines are added
-!     kmax is maximum number of channels set at compile time
+!     kmax is maximum number of channels set at run time
 !     klammx is maximum number of anisotropic terms in potential
 !     kfact is maximum value for which log(n!) is computed
 !     ken is number of total energies allowed
@@ -157,6 +162,7 @@ integer :: arg_index
 integer :: stat
 character(len=32) :: arg
 
+
 kmax = 0
 
 arg_index = 1
@@ -177,6 +183,16 @@ do while( arg_index <= command_argument_count() )
           case ('-h', '--help')
               call print_help()
               stop 1
+
+          case ('-c', '--com')
+            arg_index = arg_index + 1
+            if ( arg_index > command_argument_count() ) then
+                print '(2a, /)', 'missing value for <command_file> ', arg
+                call print_help()
+                stop 1
+            end if
+            call get_command_argument(arg_index, com_file)
+            com = .true.
 
           case default
               print '(2a, /)', 'unrecognised command-line option: ', arg
@@ -309,22 +325,27 @@ call allocate_codim(kairy, kmax, kbig)
 call allocate_comxbs(kmxbas)
 call allocate_comxm()
 
+call allocate_cosysi(kmaxpar)
 call allocate_cosysl(kmaxpar)
+call allocate_cosysr(kmaxpar)
+call allocate_cosyr(kmaxpar)
+call allocate_cosys(2*kmaxpar+3)
 !
 men = ken
 !  calculate array containing logs of factorials for use in vector
 !  coupling coefficient routines:  factlg(i)=log(fact(i-1))
 call factlg(kfact)
-call finit
 ! start scattering calculation
 call flow (z, w, zmat, amat, bmat, jq, lq, inq, jhold, ehold, &
            inhold, isc1, isc2, isc3, isc4, lsc1, &
            sc2, sc1, sc3, sc4, sc5, &
            sc6, sc7, sc8, sc9, tq1, tq2, tq3, men, mmax, mairy)
-end
-!ontains
+call finit ! Closes all I/O units
+contains
 subroutine print_help()
 print '(a, /)', 'command-line options:'
 print '(a)',    '  -k, --kmax <max_num_channels>  defines the max number of channels'
+print '(a)',    '  -c, --com <command_file>  specifies a command file instead of input redirection'
 print '(a, /)', '  -h, --help        print usage information and exit'
 end subroutine print_help
+end

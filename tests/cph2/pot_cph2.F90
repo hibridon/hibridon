@@ -411,24 +411,24 @@ logical first
 save fac1,fac2
 data first/.true./
 !
-if (first) then &
-firs  = .false.
+if (first) then
+first  = .false.
   fac1 = 4.d0 / ((mq2m+1.d0)*(mq2m+2.d0))
   fac2 = (mq2m+1.d0) / (mq2m+3.d0)
 end if
 !
 sum = 0.d0
-do 30 i=1,nx
+do i=1,nx
   if (xgr(i).gt.y) then
     xsup = xgr(i)
     xinf = y
-  else &
-xs p = y &
-xi f = xgr(i)
+  else
+	  xsup = y
+	  xinf = xgr(i)
   end if
-  q2m = fac1*xsup**(-mq2m-1) * (1.d0 - fac2*xinf/xsup)  
-  sum = sum + coef(i)*q2m
-30 continue
+    q2m = fac1*xsup**(-mq2m-1) * (1.d0 - fac2*xinf/xsup)  
+    sum = sum + coef(i)*q2m
+enddo
 frecip = sum
 !
 return

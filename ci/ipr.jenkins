@@ -4,6 +4,7 @@ pipeline {
     environment {
         HIBRIDON_ROOT_PATH = "${WORKSPACE}"
         HIBRIDON_BUILD_ROOT_PATH = "${WORKSPACE}/build"
+        PATH = "/opt/cmake/cmake-3.23.0/bin:${env.PATH}"
     }
     stages {
         stage('Build and test hibridon...') {
@@ -38,12 +39,12 @@ pipeline {
                                     . /etc/profile.d/modules.sh &&
                                     module load compilers/ifort/latest &&
                                     which ifort
-                                    cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_Fortran_COMPILER=ifort -DBLA_VENDOR=Intel10_64lp "$HIBRIDON_ROOT_PATH"
+                                    cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBUILD_TESTING=ON -DCMAKE_Fortran_COMPILER=ifort -DBLA_VENDOR=Intel10_64lp "$HIBRIDON_ROOT_PATH"
                                 elif [ "${COMPILER}" = 'gfortran' ]
                                 then
-                                    cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} "$HIBRIDON_ROOT_PATH"
+                                    cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBUILD_TESTING=ON "$HIBRIDON_ROOT_PATH"
                                 fi &&
-                                make hib
+                                make
                                 '''
                         }
                     }
@@ -59,7 +60,7 @@ pipeline {
                                     module load compilers/ifort/latest &&
                                     which ifort
                                 fi
-                                env CTEST_OUTPUT_ON_FAILURE=1 make testsuite_coverage
+                                ctest --output-on-failure  -L coverage
                                 '''
                         }
                     }

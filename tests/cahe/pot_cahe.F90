@@ -26,12 +26,30 @@ end
 ! --------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl
+use mod_cosysi, only: ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
-common /cosysi/ junk(5), npot
-common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4), &
-                        rl(4), cl(4), cmix, alphg, rgaus, &
-                        agaus, demor, remor, bemor, dissmor
 #include "common/parpot.F90"
+integer, pointer :: npot
+real(8), dimension(:), pointer :: en, de, re, be, rl, cl
+real(8), pointer :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor
+npot=>ispar(4)
+en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
+rl=>rspar(17:20); cl=>rspar(21:24); cmix=>rspar(25); alphg=>rspar(26)
+rgaus=>rspar(27); agaus=>rspar(28); demor=>rspar(29); remor=>rspar(30)
+bemor=>rspar(31); dissmor=>rspar(32) 
+
+! This replaces the block data cahepot
+en = (/0d0, 7.076d0, 27.44d0, 183.9d0/)
+de = (/1.d-4, 8.d-6, 1.d-4, 8.d-6/)
+re = (/9d0,13.8d0,9d0,13.8d0/)
+be = (/0.4d0, 0.47d0, 0.4d0, 0.45d0/)
+rl = (/13d0,18d0,13d0,18d0/)
+cl = (/40d0,50d0,40d0,50d0/)
+cmix = 0.9747d0; rgaus = 8.1d0; agaus = 1d-4; alphg = 7.5d-2
+demor = 3.5d-3; remor = 6.5d0; bemor = 0.43d0; dissmor= 4.3d-3
+
+
 potnam='Ca(4s5p)-He'
 print *, potnam
 print *, &
@@ -49,20 +67,26 @@ write (6, 100) vvl
 goto 1
 94 end
 ! --------------------------------------------------------------------------
-block data cahepot
-implicit double precision (a-h,o-z)
-common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4), &
-                        rl(4), cl(4), cmix, alphg, rgaus, &
-                        agaus, demor, remor, bemor, dissmor
-data en /0,7.076,27.44,183.9 /
-data de /1.d-4,8.d-6,1.d-4,8.d-6/
-data re /9,13.8,9,13.8/
-data be /.4,.47,.4,.45/
-data rl /13,18,13,18/
-data cl /40,50,40,50/
-data cmix, rgaus, agaus, alphg, demor, remor, bemor, dissmor &
-  / .9747,8.1,1E-4,7.5E-2,3.5E-3,6.5,.43,4.3E-3/
-end
+! block data cahepot
+! !use mod_cosysr, only: rspar
+! implicit double precision (a-h,o-z)
+
+! ! real(8), dimension(:), pointer :: en, de, re, be, rl, cl
+! ! real(8), pointer :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor
+! ! en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
+! ! rl=>rspar(17:20); cl=>rspar(21:24); cmix=>rspar(25); alphg=>rspar(26)
+! ! rgaus=>rspar(27); agaus=>rspar(28); demor=>rspar(29); remor=>rspar(30)
+! ! bemor=>rspar(31); dissmor=>rspar(32) 
+
+! data en /0,7.076,27.44,183.9 /
+! data de /1.d-4,8.d-6,1.d-4,8.d-6/
+! data re /9,13.8,9,13.8/
+! data be /.4,.47,.4,.45/
+! data rl /13,18,13,18/
+! data cl /40,50,40,50/
+! data cmix, rgaus, agaus, alphg, demor, remor, bemor, dissmor &
+!   / .9747,8.1,1E-4,7.5E-2,3.5E-3,6.5,.43,4.3E-3/
+! end
 
 ! --------------------------------------------------------------------------
 subroutine pot (vv0, r)
@@ -83,26 +107,25 @@ subroutine pot (vv0, r)
 !             angular term in the potential
 !  variable in common block /coconv/
 !   econv:     conversion factor from cm-1 to hartrees
-!  variables in common /cosysr/
-!    isrcod:  number of real parameters
-!    en(1):    asymptotic energy of j=0 fine-structure level of triplet
-!    en(2):    asymptotic energy of j=1 fine-structure level of triplet
-!    en(3):    asymptotic energy of j=2 fine-structure level of triplet
-!    en(4):    asymptotic energy of singlet state (cm-1)
-!    cmix:     mixing coefficient of j=1 singlet and triplet levels
-!    de, re, be, rl, c:  msv parameters for 3pi, 3sig, 1pi, 1sig
 
 ! author:  millard alexander and brigitte pouilly
 ! latest revision date:  17-may-1994 by bp
 ! ----------------------------------------------------------------------
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
+use constants, only: econv
 implicit double precision (a-h,o-z)
-common /coconv/ econv
-common /cosysi/ nscode, isicod, nterm, nstate, ipol, npot
-common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4), &
-                        rl(4), cl(4), cmix, alphg, rgaus, &
-                        agaus, demor, remor, bemor, dissmor
+integer, pointer :: nterm, nstate, ipol, npot
+real(8), dimension(:), pointer :: en, de, re, be, rl, cl
+real(8), pointer :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor
+nterm=>ispar(1); nstate=>ispar(1); ipol=>ispar(3); npot=>ispar(4)
+en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
+rl=>rspar(17:20); cl=>rspar(21:24); cmix=>rspar(25); alphg=>rspar(26)
+rgaus=>rspar(27); agaus=>rspar(28); demor=>rspar(29); remor=>rspar(30)
+bemor=>rspar(31); dissmor=>rspar(32) 
+
 data onethr, fivthr /0.3333333333333333d0, 1.66666666666667d0/
 if (npot .lt. 1 .or. npot .gt. 3) then
   write (6, 5) npot
@@ -111,7 +134,7 @@ if (npot .lt. 1 .or. npot .gt. 3) then
 endif
 if (npot .eq. 1) then
 ! here for original msv potentials
-  call potmsv1(r,vp,vs,re(1),de(1),be(1),rl(1),cl(1))
+  call potmsv1(r,vp,vs,re(1:2),de(1:2),be(1:2),rl(1:2),cl(1:2))
   vv0=0.d0;
 ! Commented ou by J. Klos 2012.11.22
 !        vvl(1)=vp
@@ -235,10 +258,16 @@ end if
 ! ---------------------------------------------------------------------
 ! pot1.f
 subroutine pot1(r,vp1,vs1,vp3,vs3)
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
-common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4), &
-                        rl(4), cl(4), cmix, alphg, rgaus, &
-                        agaus, demor, remor, bemor, dissmor
+
+real(8), dimension(:), pointer :: en, de, re, be, rl, cl
+real(8), pointer :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor
+en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
+rl=>rspar(17:20); cl=>rspar(21:24); cmix=>rspar(25); alphg=>rspar(26)
+rgaus=>rspar(27); agaus=>rspar(28); demor=>rspar(29); remor=>rspar(30)
+bemor=>rspar(31); dissmor=>rspar(32) 
+
 call potmsv(vp3,vs3,vp1,vs1,r)
 call potmorse (vs2, r)
 
@@ -258,10 +287,13 @@ return
 end
 
 subroutine potmsv(vp,vs,vp1,vs1,r)
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
-common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4), &
-                        rl(4), c(4)
 dimension v(4)
+real(8), dimension(:), pointer :: en, de, re, be, rl, cl, c
+en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
+rl=>rspar(17:20); cl=>rspar(21:24); c=>rspar(25:28)
+
 do 30 j=1,4
 !
 !     j=1 for triplet pi
@@ -314,10 +346,15 @@ subroutine potmorse ( vs, r)
 !
 ! -----------------------------------------------------------------------
 !
+use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
-common /cosysr/ isrcod, junkr, en(4), de(4), re(4), be(4), &
-                        rl(4), cl(4), cmix, alphg, rgaus, &
-                        agaus, demor, remor, bemor, dissmor
+
+real(8), dimension(:), pointer :: en, de, re, be, rl, cl
+real(8), pointer :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor
+en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
+rl=>rspar(17:20); cl=>rspar(21:24); cmix=>rspar(25); alphg=>rspar(26)
+rgaus=>rspar(27); agaus=>rspar(28); demor=>rspar(29); remor=>rspar(30)
+bemor=>rspar(31); dissmor=>rspar(32)  
 !
 ! -----------------------------------------------------------------------
 ! now determine potential

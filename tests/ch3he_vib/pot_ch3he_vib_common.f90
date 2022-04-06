@@ -29,7 +29,9 @@ use mod_covvl, only: vvl
 !     size of vvl : NVVL
 
 use mod_conlam, only: nlam, nlammx, lamnum
-
+use mod_cosys, only: scod
+use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysi, only: nscode, isicod, ispar
 implicit double precision (a-h, o-z)
 !   Define the sizes of grids
 !       V2MAX: maximum value of v2 included in the pot file
@@ -56,9 +58,9 @@ parameter (ECONV=219474.6d0, XMCONV=1822.88848477d0)
 !      parameter (KMAX=10000)
 !
 !   Lengths of cod array, 
-!       ICOD, IRCOD, LENCOD: lenghts of cod array
-integer ICOD, IRCOD, LENCOD
-parameter (ICOD=5, IRCOD=4, LENCOD=ICOD+IRCOD+3)
+!       ICOD, IRCOD: lenghts of cod array
+integer ICOD, IRCOD
+parameter (ICOD=5, IRCOD=4)
 !
 !   ch3he block: data used only by this pot/basis combination
 !       brot, crot: rotational constants of CH3 for each vibrational level
@@ -99,22 +101,15 @@ data muasy /0, 0, 0, 0, 0, 3, 3, 3, 3, 6, 6, 9/
 !       numpot: the number of the potential used, this variable is passed to the pot subroutine
 !       ipotsy: cylindrical symmetry of potential. Should be set to 3 for CH3.
 !       iop: ortho/para label for molecular states. Only para states are included if iop=1 and only ortho states if iop=-1.
-common /cosysi/ nscode, isicod, nterm, ipotsy, iop, jmax, vmax
-integer nscode, isicod, nterm, ipotsy, iop, jmax, vmax
 !
-!   cosys block
-!       scod: contains names of all system dependent parameters
-common /cosys/ scod
-character*8 scod(LENCOD)
+
 !
 !   cosysr block
 !       isrcod: total number of real system dependent variables
 !       junkr: junk variable (required by hibridon)
 !       vmax: maximum value of v2 (starts from zero) included in the calculation
 !       emax0, emax1, emax2, emax3: maximum total energy of a level to be included in the channel basis, for four vibrational levels
-common /cosysr/ isrcod, junkr, emax0, emax1, emax2, emax3
-integer isrcod, junkr
-double precision emax0, emax1, emax2, emax3
+
 !
 !   coered block
 !       ered: collision energy in atomic units (hartrees)
@@ -128,3 +123,5 @@ double precision ered, rmu
 !       iprint: level of printing in calculation
 common /coipar/ junkip, iprint
 integer junkip(9), iprint
+real(8), pointer :: emax0, emax1, emax2, emax3
+integer, pointer :: nterm, ipotsy, iop, jmax, vmax
