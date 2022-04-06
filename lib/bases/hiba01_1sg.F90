@@ -474,11 +474,11 @@ common /coskip/ nskip, iskip
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
 real(8), dimension(4, maxvib) :: rpar
-integer, dimension(2, maxvib) :: iscod
+integer, dimension(2, maxvib) :: jranges
 integer, pointer :: nterm, nvmin, nvmax
 nterm=>ispar(1); nvmin=>ispar(2); nvmax=>ispar(3)
 call convert_rspar_to_mat(4,maxvib, rpar)
-call convert_ispar_to_mat(2, maxvib, 4, iscod)
+call convert_ispar_to_mat(2, maxvib, 4, jranges)
 zero = 0.d0
 two = 2.d0
 !  check for consistency in the values of flaghf and csflag
@@ -562,7 +562,7 @@ n=0
 nskip = 1
 if (ihomo) nskip = 2
 do 120 iv=iva,ive
-  jmin=iscod(1,iv)
+  jmin=jranges(1,iv)
   if (boundc.and.csflag) then
       if (jmin.lt.nu) then
          write(6, 7) jmin, nu
@@ -572,7 +572,7 @@ do 120 iv=iva,ive
          jmin=nu
       endif
   endif
-  jmax=iscod(2,iv)
+  jmax=jranges(2,iv)
   brot=rpar(1,iv)/econv
   drot=rpar(2,iv)/econv
   hrot=rpar(3,iv)/econv
@@ -689,8 +689,8 @@ nlevop = 0
 !  calculations and their energies
 !  if homonuclear diatomic, skip space is two
 do iv=iva,ive
-  jmin=iscod(1,iv)
-  jmax=iscod(2,iv)
+  jmin=jranges(1,iv)
+  jmax=jranges(2,iv)
   brot=rpar(1,iv)/econv
   drot=rpar(2,iv)/econv
   hrot=rpar(3,iv)/econv
@@ -945,7 +945,7 @@ subroutine sy1sg (irpot, readp, iread)
 use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
 use mod_cosys, only: scod
-use mod_cosysi, only: nscode, isicod, iscod=>ispar
+use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
 integer irpot
@@ -964,17 +964,17 @@ common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
 
 common /coselb/ ibasty
 save potfil
-!equivalence(iscod(1),nterm),(iscod(2),nvibmn),(iscod(3),nvibmx)
+!equivalence(ispar(1),nterm),(ispar(2),nvibmn),(ispar(3),nvibmx)
 #include "common/comdot.F90"
 
 
 !     number and names of system dependent parameters
 !  set default values for singlet-sigma scattering
 
-iscod(1) = 1
+ispar(1) = 1
 if (iread .eq. 0) then
-  iscod(2) = 0
-  iscod(3) = 0
+  ispar(2) = 0
+  ispar(3) = 0
   lammin(1)=0
   lammax(1)=-1
   mproj(1)=0
@@ -987,9 +987,9 @@ if (iread .eq. 1) irpot=1
 if (ihomo) nskip = 2
 potfil = ' '
 !  read number of vib states
-if(iread.ne.0) read (8, *, err=88) nvib, iscod(2),iscod(3) ! nvib, vmin, vmax
-if(nvib.gt.iscod(3)-iscod(2)+1) then
-  write (6,40) nvib, iscod(2), iscod(3)
+if(iread.ne.0) read (8, *, err=88) nvib, ispar(2),ispar(3) ! nvib, vmin, vmax
+if(nvib.gt.ispar(3)-ispar(2)+1) then
+  write (6,40) nvib, ispar(2), ispar(3)
 40   format(' ** PROBABLE VIBRATIONAL LEVEL NUMBERING ERROR:',/, &
          '   VMIN =',i2,', VMAX=',i3,', BUT NVIB =',i3)
   return
@@ -1006,7 +1006,7 @@ isicod=3
 iofr=2*nvib+4-1
 do i = 1,nvib
   if(iread.ne.0) then
-    read (8, *, err=99) ivib(i),(iscod(isicod+j),j=1,2) ! iv, jmin, jmax
+    read (8, *, err=99) ivib(i),(ispar(isicod+j),j=1,2) ! iv, jmin, jmax
     read (8, *, err=99) (rspar(isrcod+j),j=1,3) ! brot, drot, hrot
     read (8, *, err=99) rspar(isrcod+4) ! evib
   end if
@@ -1077,17 +1077,17 @@ return
 ! --------------------------------------------------------------
 entry sav1sg (readp)
 !  save input parameters for singlet-sigma + atom scattering
-if (iscod(3) .lt. iscod(2)) then
-  write (6, 210) iscod(3), iscod(2)
+if (ispar(3) .lt. ispar(2)) then
+  write (6, 210) ispar(3), ispar(2)
 210   format ('**  VMAX =',i3,' .LT. VMIN =',i3,' SET VMAX = VMIN')
-iscod(3)=iscod(2)
+ispar(3)=ispar(2)
 endif
-write (8, 220) nvib, iscod(2),iscod(3)
+write (8, 220) nvib, ispar(2),ispar(3)
 220 format(3i4, t34,'nvib, vmin,vmax')
 iofi=3
 iofr=0
 do 301 i=1,nvib
-write (8, 310) ivib(i),(iscod(iofi+j),j=1,2)
+write (8, 310) ivib(i),(ispar(iofi+j),j=1,2)
 310 format (3i4, t50,'iv,jmin,jmax')
 write (8, 320) (rspar(iofr+j),j=1,4)
 iofi=iofi+2
