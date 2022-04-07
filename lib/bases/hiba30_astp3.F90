@@ -179,8 +179,8 @@ dimension j(1), l(1), is(1), jhold(1), ehold(1), &
           fistmp(1)
 !  scratch arrays for computing asymmetric top energies and wave fns.
 dimension e(narray,narray), eig(narray), vec(narray,narray), &
-  sc1(narray), sc2(narray), work(1000), kp(1000), ko(1000), &
-  j2rot(1000), e2rot(1000)
+  sc1(narray), sc2(narray), work(nmax), kp(nmax), ko(nmax), &
+  j2rot(nmax), e2rot(nmax)
 !
 integer, pointer :: nterm, numpot, jmax, iop, j2min, j2max, ipotsy2
 real(8), pointer :: arot, brot, crot, emax, b2rot
@@ -536,6 +536,7 @@ do i2 = 1, i2num
     end if
 !
     nlevel = nlevel + 1
+    if ( nlevel > nmax ) stop 'kmax is too small'
     ehold(nlevel) = (etemp(i1) + e2rot(i2)) / econv
     jhold(nlevel) = 10 * ji + j2rot(i2)
     ishold(nlevel) = isi * ki
