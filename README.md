@@ -152,6 +152,7 @@ Hibridon testing must be activated (see previous section).
     Where testsuite is the name of the test suite among:
     - `coverage` (covers most of the source code)
     - `quick` (runs only quick tests)
+    - `benchmark` (runs long tests for the purpose of measuring `hibridon`'s performance)
     
 - **Run tests for only one PES** 
     ```bash
