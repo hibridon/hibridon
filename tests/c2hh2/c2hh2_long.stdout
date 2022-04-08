@@ -1,0 +1,1638 @@
+ C2H-H2 RCCSD(T) PES by P.Dagdigian              
+ DAGDIGIAN C2H-H2 RCCSD(T) PES                   
+ ==============================
+     *** Parameters:
+ JTOT1  =   0        JTOT2  =  10        JTOTD  =   1        JLPAR  =   0
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  80        IPRINT =  -1
+ FSTFAC =  1.500     RINCR  =  1.000     RCUT   = -100.0     RENDAI =  60.00    
+ RENDLD =  10.00     RSTART =  4.250     SPAC   = 0.1500     TOLAI  =  1.050    
+ XMU    =  1.865    
+     *** 2SG-1SG system parameters:
+ N1MAX  =   6        J2MIN  =   1        J2MAX  =   1        IPOTSY2=   2
+ B1ROT  =  1.456     D1ROT  =  0.000     GAMMA  =-2.0869E-03 B2ROT  =  59.32    
+ J1/J2: 
+     *** Flags:
+ AIRYFL= T    BASTST= F    BATCH = F    CHLIST= F    CSFLAG= F    FLAGHF= T
+ FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= T    NOPRIN= T    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= T    WAVEFL= F
+ WRPART= F    WRSMAT= T    WRXSEC= T    BOUNDC= F
+ ** Energies:      130.000000
+ NOUT: 20; J1/J2-OUT: 00  10  20  30  40  50  60  70  80  90  01  11  21  31  41  51  61  71  81  91  
+ INDOUT:   -2   2  -1   1
+ ==============================
+ ** INTEGRAL CROSS SECTIONS SAVED IN FILE C2hoh2_long1.ics
+ ** RESTART INFORMATION SAVED IN FILE C2hoh2_l.sav
+ ** SELECTED S-MATRIX ELEMENTS SAVED IN FILE C2hoh2_long1.smt
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2022-04-07 at 19:05
+CMAKE BUILD TYPE: Release
+CODE GIT REVISION: 
+SYS: Linux 5.4.0-107-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                      Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                         3587.268
+Socket(s):                       1
+Core(s) per socket:              4
+L2 cache:                        1 MiB
+L3 cache:                        6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16267612 kB
+ --------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ All publications resulting from use of the integrators included in the
+ Hibridon code must include the following reference:
+
+ D. E. Manolopoulos, J. Chem. Phys. 85, 6425 (1986); M. H. Alexander and D. E.
+ Manolopoulos, J. Chem. Phys. 80, 2044 (1987).
+
+ All publications involving the determination ofphotodissociation cross sections
+ must also include the following reference:
+
+ M. H. Alexander, Comput. Phys. Commun, 75, 87 (1993).
+
+ All publications investigating flux redistribution must include the following references:
+
+ M. H. Alexander, J. Chem. Phys. 95, 8931 (1991); D. E. Manolopoulos and
+ M. H. Alexander, J. Chem. Phys.  97, 2527 (1992).
+
+ All publications resulting from use of the Hibridon package must include
+ the following reference:
+
+ HIBRIDON is a package of programs for the time-independent quantum treatment
+ of inelastic collisions and photodissociation written by M. H. Alexander,
+ D. E.  Manolopoulos, H.-J. Werner, and B. Follmeg, with contributions by
+ P. F. Vohralik, D. Lemoine, G. Corey, B. Johnson, T. Orlikowski, A. Berning,
+ A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly, G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J. Klos, and F. Lique
+ -----------------------------------------------------------------------------
+
+ ** LABEL:     C2H-H2 RCCSD(T) PES by P.Dagdigian              
+ ** POT NAME:  DAGDIGIAN C2H-H2 RCCSD(T) PES                   
+ ** DATE:      Apr  7 19:07:59 2022
+ ** NMAX= 500  NAIRY= 500
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    0 JLPAR = 1 STARTED
+
+ ** INTEGRATION WILL START 2.359 BOHR INSIDE INNER TURNING POINT
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Apr  7 19:07:59 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    1 JLPAR = 1 STARTED
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:04   WALL: 00:00:01   DATE: Apr  7 19:08:00 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    2 JLPAR = 1 STARTED
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:08   WALL: 00:00:01   DATE: Apr  7 19:08:00 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    3 JLPAR = 1 STARTED
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:14   WALL: 00:00:02   DATE: Apr  7 19:08:01 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    4 JLPAR = 1 STARTED
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:20   WALL: 00:00:03   DATE: Apr  7 19:08:02 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    5 JLPAR = 1 STARTED
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:27   WALL: 00:00:04   DATE: Apr  7 19:08:03 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    6 JLPAR = 1 STARTED
+ ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:00:39   WALL: 00:00:06   DATE: Apr  7 19:08:05 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    7 JLPAR = 1 STARTED
+ ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:00:56   WALL: 00:00:09   DATE: Apr  7 19:08:08 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    8 JLPAR = 1 STARTED
+ ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:01:04   WALL: 00:00:11   DATE: Apr  7 19:08:10 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    9 JLPAR = 1 STARTED
+ ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:01:11   WALL: 00:00:12   DATE: Apr  7 19:08:11 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   10 JLPAR = 1 STARTED
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:01:18   WALL: 00:00:13   DATE: Apr  7 19:08:12 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    0 JLPAR =-1 STARTED
+
+ ** INTEGRATION WILL START 2.403 BOHR INSIDE INNER TURNING POINT
+ ** J =    0 JLPAR =-1 FINISHED;  CPU: 00:01:19   WALL: 00:00:13   DATE: Apr  7 19:08:12 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    1 JLPAR =-1 STARTED
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:01:22   WALL: 00:00:14   DATE: Apr  7 19:08:13 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    2 JLPAR =-1 STARTED
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:01:26   WALL: 00:00:14   DATE: Apr  7 19:08:13 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    3 JLPAR =-1 STARTED
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:01:32   WALL: 00:00:15   DATE: Apr  7 19:08:14 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    4 JLPAR =-1 STARTED
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:01:38   WALL: 00:00:16   DATE: Apr  7 19:08:15 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    5 JLPAR =-1 STARTED
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:01:46   WALL: 00:00:18   DATE: Apr  7 19:08:17 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    6 JLPAR =-1 STARTED
+ ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:01:53   WALL: 00:00:19   DATE: Apr  7 19:08:18 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    7 JLPAR =-1 STARTED
+ ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:02:00   WALL: 00:00:20   DATE: Apr  7 19:08:19 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    8 JLPAR =-1 STARTED
+ ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:02:08   WALL: 00:00:22   DATE: Apr  7 19:08:21 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    9 JLPAR =-1 STARTED
+ ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:02:17   WALL: 00:00:23   DATE: Apr  7 19:08:22 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   10 JLPAR =-1 STARTED
+ ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:02:27   WALL: 00:00:25   DATE: Apr  7 19:08:24 2022
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:   147
+      TIMING:  ELAPSED 00:00:25 / CPU 00:02:27 / MP RATIO  589.4 %
+      CURRENT DATE:  Apr  7 19:08:24 2022
+ ===============================================================================
+ C2H-H2 RCCSD(T) PES by P.Dagdigian              
+ DAGDIGIAN C2H-H2 RCCSD(T) PES                   
+ ==============================
+     *** Parameters:
+ JTOT1  =   0        JTOT2  =  10        JTOTD  =   1        JLPAR  =   0
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  80        IPRINT =  -1
+ FSTFAC =  1.500     RINCR  =  1.000     RCUT   = -100.0     RENDAI =  60.00    
+ RENDLD =  10.00     RSTART =  4.250     SPAC   = 0.1500     TOLAI  =  1.050    
+ XMU    =  1.865    
+     *** 2SG-1SG system parameters:
+ N1MAX  =   6        J2MIN  =   1        J2MAX  =   2        IPOTSY2=   2
+ B1ROT  =  1.456     D1ROT  =  0.000     GAMMA  =-2.0869E-03 B2ROT  =  59.32    
+ J1/J2: 
+     *** Flags:
+ AIRYFL= T    BASTST= F    BATCH = F    CHLIST= F    CSFLAG= F    FLAGHF= T
+ FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= T    NOPRIN= T    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= T    WAVEFL= F
+ WRPART= F    WRSMAT= T    WRXSEC= T    BOUNDC= F
+ ** Energies:      130.000000
+ NOUT: 20; J1/J2-OUT: 00  10  20  30  40  50  60  70  80  90  01  11  21  31  41  51  61  71  81  91  
+ INDOUT:   -2   2  -1   1
+ ==============================
+ ** INTEGRAL CROSS SECTIONS SAVED IN FILE C2hoh2_long1.ics
+ ** RESTART INFORMATION SAVED IN FILE C2hoh2_l.sav
+ ** SELECTED S-MATRIX ELEMENTS SAVED IN FILE C2hoh2_long1.smt
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2022-04-07 at 19:05
+CMAKE BUILD TYPE: Release
+CODE GIT REVISION: 
+SYS: Linux 5.4.0-107-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                      Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                         3566.262
+Socket(s):                       1
+Core(s) per socket:              4
+L2 cache:                        1 MiB
+L3 cache:                        6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16267612 kB
+ --------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ All publications resulting from use of the integrators included in the
+ Hibridon code must include the following reference:
+
+ D. E. Manolopoulos, J. Chem. Phys. 85, 6425 (1986); M. H. Alexander and D. E.
+ Manolopoulos, J. Chem. Phys. 80, 2044 (1987).
+
+ All publications involving the determination ofphotodissociation cross sections
+ must also include the following reference:
+
+ M. H. Alexander, Comput. Phys. Commun, 75, 87 (1993).
+
+ All publications investigating flux redistribution must include the following references:
+
+ M. H. Alexander, J. Chem. Phys. 95, 8931 (1991); D. E. Manolopoulos and
+ M. H. Alexander, J. Chem. Phys.  97, 2527 (1992).
+
+ All publications resulting from use of the Hibridon package must include
+ the following reference:
+
+ HIBRIDON is a package of programs for the time-independent quantum treatment
+ of inelastic collisions and photodissociation written by M. H. Alexander,
+ D. E.  Manolopoulos, H.-J. Werner, and B. Follmeg, with contributions by
+ P. F. Vohralik, D. Lemoine, G. Corey, B. Johnson, T. Orlikowski, A. Berning,
+ A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly, G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J. Klos, and F. Lique
+ -----------------------------------------------------------------------------
+
+ ** LABEL:     C2H-H2 RCCSD(T) PES by P.Dagdigian              
+ ** POT NAME:  DAGDIGIAN C2H-H2 RCCSD(T) PES                   
+ ** DATE:      Apr  7 19:11:40 2022
+ ** NMAX= 500  NAIRY= 500
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    0 JLPAR = 1 STARTED
+
+ ** INTEGRATION WILL START 2.359 BOHR INSIDE INNER TURNING POINT
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Apr  7 19:11:40 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    1 JLPAR = 1 STARTED
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Apr  7 19:11:41 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    2 JLPAR = 1 STARTED
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:07   WALL: 00:00:01   DATE: Apr  7 19:11:41 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    3 JLPAR = 1 STARTED
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:12   WALL: 00:00:02   DATE: Apr  7 19:11:42 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    4 JLPAR = 1 STARTED
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:17   WALL: 00:00:03   DATE: Apr  7 19:11:43 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    5 JLPAR = 1 STARTED
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:23   WALL: 00:00:04   DATE: Apr  7 19:11:44 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    6 JLPAR = 1 STARTED
+ ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:00:30   WALL: 00:00:05   DATE: Apr  7 19:11:45 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    7 JLPAR = 1 STARTED
+ ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:00:37   WALL: 00:00:06   DATE: Apr  7 19:11:46 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    8 JLPAR = 1 STARTED
+ ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:00:46   WALL: 00:00:08   DATE: Apr  7 19:11:48 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    9 JLPAR = 1 STARTED
+ ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:00:57   WALL: 00:00:10   DATE: Apr  7 19:11:50 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   10 JLPAR = 1 STARTED
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:01:04   WALL: 00:00:11   DATE: Apr  7 19:11:51 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    0 JLPAR =-1 STARTED
+
+ ** INTEGRATION WILL START 2.403 BOHR INSIDE INNER TURNING POINT
+ ** J =    0 JLPAR =-1 FINISHED;  CPU: 00:01:06   WALL: 00:00:11   DATE: Apr  7 19:11:51 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    1 JLPAR =-1 STARTED
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:01:08   WALL: 00:00:11   DATE: Apr  7 19:11:51 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    2 JLPAR =-1 STARTED
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:01:12   WALL: 00:00:12   DATE: Apr  7 19:11:52 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    3 JLPAR =-1 STARTED
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:01:17   WALL: 00:00:13   DATE: Apr  7 19:11:53 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    4 JLPAR =-1 STARTED
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:01:24   WALL: 00:00:14   DATE: Apr  7 19:11:54 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    5 JLPAR =-1 STARTED
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:01:31   WALL: 00:00:15   DATE: Apr  7 19:11:55 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    6 JLPAR =-1 STARTED
+ ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:01:38   WALL: 00:00:16   DATE: Apr  7 19:11:56 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    7 JLPAR =-1 STARTED
+ ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:01:45   WALL: 00:00:18   DATE: Apr  7 19:11:58 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    8 JLPAR =-1 STARTED
+ ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:01:52   WALL: 00:00:19   DATE: Apr  7 19:11:59 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    9 JLPAR =-1 STARTED
+ ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:02:01   WALL: 00:00:20   DATE: Apr  7 19:12:00 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   10 JLPAR =-1 STARTED
+ ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:02:09   WALL: 00:00:22   DATE: Apr  7 19:12:02 2022
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:   147
+      TIMING:  ELAPSED 00:00:22 / CPU 00:02:09 / MP RATIO  587.7 %
+      CURRENT DATE:  Apr  7 19:12:02 2022
+ ===============================================================================
+ C2H-H2 RCCSD(T) PES by P.Dagdigian              
+ DAGDIGIAN C2H-H2 RCCSD(T) PES                   
+ ==============================
+     *** Parameters:
+ JTOT1  =   0        JTOT2  =  10        JTOTD  =   1        JLPAR  =   0
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  80        IPRINT =  -1
+ FSTFAC =  1.500     RINCR  =  1.000     RCUT   = -100.0     RENDAI =  60.00    
+ RENDLD =  10.00     RSTART =  4.250     SPAC   = 0.1500     TOLAI  =  1.050    
+ XMU    =  1.865    
+     *** 2SG-1SG system parameters:
+ N1MAX  =   6        J2MIN  =   1        J2MAX  =   2        IPOTSY2=   2
+ B1ROT  =  1.456     D1ROT  =  0.000     GAMMA  =-2.0869E-03 B2ROT  =  59.32    
+ J1/J2: 
+     *** Flags:
+ AIRYFL= T    BASTST= F    BATCH = F    CHLIST= F    CSFLAG= F    FLAGHF= T
+ FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= T    NOPRIN= T    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= T    WAVEFL= F
+ WRPART= F    WRSMAT= T    WRXSEC= T    BOUNDC= F
+ ** Energies:      130.000000
+ NOUT: 20; J1/J2-OUT: 00  10  20  30  40  50  60  70  80  90  01  11  21  31  41  51  61  71  81  91  
+ INDOUT:   -2   2  -1   1
+ ==============================
+ ** INTEGRAL CROSS SECTIONS SAVED IN FILE C2hoh2_long1.ics
+ ** RESTART INFORMATION SAVED IN FILE C2hoh2_l.sav
+ ** SELECTED S-MATRIX ELEMENTS SAVED IN FILE C2hoh2_long1.smt
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2022-04-07 at 19:05
+CMAKE BUILD TYPE: Release
+CODE GIT REVISION: 
+SYS: Linux 5.4.0-107-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                      Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                         3586.736
+Socket(s):                       1
+Core(s) per socket:              4
+L2 cache:                        1 MiB
+L3 cache:                        6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16267612 kB
+ --------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ All publications resulting from use of the integrators included in the
+ Hibridon code must include the following reference:
+
+ D. E. Manolopoulos, J. Chem. Phys. 85, 6425 (1986); M. H. Alexander and D. E.
+ Manolopoulos, J. Chem. Phys. 80, 2044 (1987).
+
+ All publications involving the determination ofphotodissociation cross sections
+ must also include the following reference:
+
+ M. H. Alexander, Comput. Phys. Commun, 75, 87 (1993).
+
+ All publications investigating flux redistribution must include the following references:
+
+ M. H. Alexander, J. Chem. Phys. 95, 8931 (1991); D. E. Manolopoulos and
+ M. H. Alexander, J. Chem. Phys.  97, 2527 (1992).
+
+ All publications resulting from use of the Hibridon package must include
+ the following reference:
+
+ HIBRIDON is a package of programs for the time-independent quantum treatment
+ of inelastic collisions and photodissociation written by M. H. Alexander,
+ D. E.  Manolopoulos, H.-J. Werner, and B. Follmeg, with contributions by
+ P. F. Vohralik, D. Lemoine, G. Corey, B. Johnson, T. Orlikowski, A. Berning,
+ A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly, G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J. Klos, and F. Lique
+ -----------------------------------------------------------------------------
+
+ ** LABEL:     C2H-H2 RCCSD(T) PES by P.Dagdigian              
+ ** POT NAME:  DAGDIGIAN C2H-H2 RCCSD(T) PES                   
+ ** DATE:      Apr  7 19:13:42 2022
+ ** NMAX= 500  NAIRY= 500
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    0 JLPAR = 1 STARTED
+
+ ** INTEGRATION WILL START 2.359 BOHR INSIDE INNER TURNING POINT
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Apr  7 19:13:42 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    1 JLPAR = 1 STARTED
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:03   WALL: 00:00:00   DATE: Apr  7 19:13:42 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    2 JLPAR = 1 STARTED
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:07   WALL: 00:00:01   DATE: Apr  7 19:13:43 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    3 JLPAR = 1 STARTED
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:12   WALL: 00:00:01   DATE: Apr  7 19:13:43 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    4 JLPAR = 1 STARTED
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:18   WALL: 00:00:02   DATE: Apr  7 19:13:44 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    5 JLPAR = 1 STARTED
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:24   WALL: 00:00:03   DATE: Apr  7 19:13:45 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    6 JLPAR = 1 STARTED
+ ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:00:31   WALL: 00:00:05   DATE: Apr  7 19:13:47 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    7 JLPAR = 1 STARTED
+ ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:00:37   WALL: 00:00:06   DATE: Apr  7 19:13:48 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    8 JLPAR = 1 STARTED
+ ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:00:46   WALL: 00:00:07   DATE: Apr  7 19:13:49 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    9 JLPAR = 1 STARTED
+ ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:00:58   WALL: 00:00:09   DATE: Apr  7 19:13:51 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   10 JLPAR = 1 STARTED
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:01:05   WALL: 00:00:11   DATE: Apr  7 19:13:53 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    0 JLPAR =-1 STARTED
+
+ ** INTEGRATION WILL START 2.403 BOHR INSIDE INNER TURNING POINT
+ ** J =    0 JLPAR =-1 FINISHED;  CPU: 00:01:06   WALL: 00:00:11   DATE: Apr  7 19:13:53 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    1 JLPAR =-1 STARTED
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:01:09   WALL: 00:00:11   DATE: Apr  7 19:13:53 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    2 JLPAR =-1 STARTED
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:01:13   WALL: 00:00:12   DATE: Apr  7 19:13:54 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    3 JLPAR =-1 STARTED
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:01:19   WALL: 00:00:13   DATE: Apr  7 19:13:55 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    4 JLPAR =-1 STARTED
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:01:25   WALL: 00:00:14   DATE: Apr  7 19:13:56 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    5 JLPAR =-1 STARTED
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:01:33   WALL: 00:00:15   DATE: Apr  7 19:13:57 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    6 JLPAR =-1 STARTED
+ ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:01:40   WALL: 00:00:16   DATE: Apr  7 19:13:58 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    7 JLPAR =-1 STARTED
+ ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:01:49   WALL: 00:00:18   DATE: Apr  7 19:14:00 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    8 JLPAR =-1 STARTED
+ ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:01:57   WALL: 00:00:19   DATE: Apr  7 19:14:01 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    9 JLPAR =-1 STARTED
+ ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:02:05   WALL: 00:00:21   DATE: Apr  7 19:14:03 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   10 JLPAR =-1 STARTED
+ ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:02:12   WALL: 00:00:22   DATE: Apr  7 19:14:04 2022
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:   147
+      TIMING:  ELAPSED 00:00:22 / CPU 00:02:12 / MP RATIO  601.0 %
+      CURRENT DATE:  Apr  7 19:14:04 2022
+ ===============================================================================
+ C2H-H2 RCCSD(T) PES by P.Dagdigian              
+ DAGDIGIAN C2H-H2 RCCSD(T) PES                   
+ ==============================
+     *** Parameters:
+ JTOT1  =   0        JTOT2  =  10        JTOTD  =   1        JLPAR  =   0
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  80        IPRINT =  -1
+ FSTFAC =  1.500     RINCR  =  1.000     RCUT   = -100.0     RENDAI =  60.00    
+ RENDLD =  10.00     RSTART =  4.250     SPAC   = 0.1500     TOLAI  =  1.050    
+ XMU    =  1.865    
+     *** 2SG-1SG system parameters:
+ N1MAX  =   8        J2MIN  =   1        J2MAX  =   2        IPOTSY2=   2
+ B1ROT  =  1.456     D1ROT  =  0.000     GAMMA  =-2.0869E-03 B2ROT  =  59.32    
+ J1/J2: 
+     *** Flags:
+ AIRYFL= T    BASTST= F    BATCH = F    CHLIST= F    CSFLAG= F    FLAGHF= T
+ FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= T    NOPRIN= T    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= T    WAVEFL= F
+ WRPART= F    WRSMAT= T    WRXSEC= T    BOUNDC= F
+ ** Energies:      130.000000
+ NOUT: 20; J1/J2-OUT: 00  10  20  30  40  50  60  70  80  90  01  11  21  31  41  51  61  71  81  91  
+ INDOUT:   -2   2  -1   1
+ ==============================
+ ** INTEGRAL CROSS SECTIONS SAVED IN FILE C2hoh2_long1.ics
+ ** RESTART INFORMATION SAVED IN FILE C2hoh2_l.sav
+ ** SELECTED S-MATRIX ELEMENTS SAVED IN FILE C2hoh2_long1.smt
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2022-04-07 at 19:05
+CMAKE BUILD TYPE: Release
+CODE GIT REVISION: 
+SYS: Linux 5.4.0-107-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                      Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                         3600.066
+Socket(s):                       1
+Core(s) per socket:              4
+L2 cache:                        1 MiB
+L3 cache:                        6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16267612 kB
+ --------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ All publications resulting from use of the integrators included in the
+ Hibridon code must include the following reference:
+
+ D. E. Manolopoulos, J. Chem. Phys. 85, 6425 (1986); M. H. Alexander and D. E.
+ Manolopoulos, J. Chem. Phys. 80, 2044 (1987).
+
+ All publications involving the determination ofphotodissociation cross sections
+ must also include the following reference:
+
+ M. H. Alexander, Comput. Phys. Commun, 75, 87 (1993).
+
+ All publications investigating flux redistribution must include the following references:
+
+ M. H. Alexander, J. Chem. Phys. 95, 8931 (1991); D. E. Manolopoulos and
+ M. H. Alexander, J. Chem. Phys.  97, 2527 (1992).
+
+ All publications resulting from use of the Hibridon package must include
+ the following reference:
+
+ HIBRIDON is a package of programs for the time-independent quantum treatment
+ of inelastic collisions and photodissociation written by M. H. Alexander,
+ D. E.  Manolopoulos, H.-J. Werner, and B. Follmeg, with contributions by
+ P. F. Vohralik, D. Lemoine, G. Corey, B. Johnson, T. Orlikowski, A. Berning,
+ A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly, G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J. Klos, and F. Lique
+ -----------------------------------------------------------------------------
+
+ ** LABEL:     C2H-H2 RCCSD(T) PES by P.Dagdigian              
+ ** POT NAME:  DAGDIGIAN C2H-H2 RCCSD(T) PES                   
+ ** DATE:      Apr  7 19:14:57 2022
+ ** NMAX= 500  NAIRY= 500
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    0 JLPAR = 1 STARTED
+
+ ** INTEGRATION WILL START 2.359 BOHR INSIDE INNER TURNING POINT
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:01   DATE: Apr  7 19:14:58 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    1 JLPAR = 1 STARTED
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:05   WALL: 00:00:01   DATE: Apr  7 19:14:58 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    2 JLPAR = 1 STARTED
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:11   WALL: 00:00:02   DATE: Apr  7 19:14:59 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    3 JLPAR = 1 STARTED
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:18   WALL: 00:00:04   DATE: Apr  7 19:15:01 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    4 JLPAR = 1 STARTED
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:30   WALL: 00:00:06   DATE: Apr  7 19:15:03 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    5 JLPAR = 1 STARTED
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:44   WALL: 00:00:08   DATE: Apr  7 19:15:05 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    6 JLPAR = 1 STARTED
+ ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:01:01   WALL: 00:00:11   DATE: Apr  7 19:15:08 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    7 JLPAR = 1 STARTED
+ ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:01:17   WALL: 00:00:14   DATE: Apr  7 19:15:11 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    8 JLPAR = 1 STARTED
+ ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:01:34   WALL: 00:00:17   DATE: Apr  7 19:15:14 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    9 JLPAR = 1 STARTED
+ ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:01:51   WALL: 00:00:21   DATE: Apr  7 19:15:18 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   10 JLPAR = 1 STARTED
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:02:08   WALL: 00:00:24   DATE: Apr  7 19:15:21 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    0 JLPAR =-1 STARTED
+
+ ** INTEGRATION WILL START 2.403 BOHR INSIDE INNER TURNING POINT
+ ** J =    0 JLPAR =-1 FINISHED;  CPU: 00:02:10   WALL: 00:00:24   DATE: Apr  7 19:15:21 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    1 JLPAR =-1 STARTED
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:02:15   WALL: 00:00:25   DATE: Apr  7 19:15:22 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    2 JLPAR =-1 STARTED
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:02:22   WALL: 00:00:26   DATE: Apr  7 19:15:23 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    3 JLPAR =-1 STARTED
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:02:31   WALL: 00:00:28   DATE: Apr  7 19:15:25 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    4 JLPAR =-1 STARTED
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:02:42   WALL: 00:00:30   DATE: Apr  7 19:15:27 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    5 JLPAR =-1 STARTED
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:02:55   WALL: 00:00:32   DATE: Apr  7 19:15:29 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    6 JLPAR =-1 STARTED
+ ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:03:13   WALL: 00:00:35   DATE: Apr  7 19:15:32 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    7 JLPAR =-1 STARTED
+ ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:03:29   WALL: 00:00:38   DATE: Apr  7 19:15:35 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    8 JLPAR =-1 STARTED
+ ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:03:47   WALL: 00:00:42   DATE: Apr  7 19:15:39 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    9 JLPAR =-1 STARTED
+ ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:04:04   WALL: 00:00:45   DATE: Apr  7 19:15:42 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   10 JLPAR =-1 STARTED
+ ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:04:24   WALL: 00:00:49   DATE: Apr  7 19:15:46 2022
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:   243
+      TIMING:  ELAPSED 00:00:49 / CPU 00:04:24 / MP RATIO  539.9 %
+      CURRENT DATE:  Apr  7 19:15:46 2022
+ ===============================================================================
+ C2H-H2 RCCSD(T) PES by P.Dagdigian              
+ DAGDIGIAN C2H-H2 RCCSD(T) PES                   
+ ==============================
+     *** Parameters:
+ JTOT1  =   0        JTOT2  =  12        JTOTD  =   1        JLPAR  =   0
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  80        IPRINT =  -1
+ FSTFAC =  1.500     RINCR  =  1.000     RCUT   = -100.0     RENDAI =  60.00    
+ RENDLD =  10.00     RSTART =  4.250     SPAC   = 0.1500     TOLAI  =  1.050    
+ XMU    =  1.865    
+     *** 2SG-1SG system parameters:
+ N1MAX  =   8        J2MIN  =   1        J2MAX  =   2        IPOTSY2=   2
+ B1ROT  =  1.456     D1ROT  =  0.000     GAMMA  =-2.0869E-03 B2ROT  =  59.32    
+ J1/J2: 
+     *** Flags:
+ AIRYFL= T    BASTST= F    BATCH = F    CHLIST= F    CSFLAG= F    FLAGHF= T
+ FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= T    NOPRIN= T    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= T    WAVEFL= F
+ WRPART= F    WRSMAT= T    WRXSEC= T    BOUNDC= F
+ ** Energies:      130.000000
+ NOUT: 20; J1/J2-OUT: 00  10  20  30  40  50  60  70  80  90  01  11  21  31  41  51  61  71  81  91  
+ INDOUT:   -2   2  -1   1
+ ==============================
+ ** INTEGRAL CROSS SECTIONS SAVED IN FILE C2hoh2_long1.ics
+ ** RESTART INFORMATION SAVED IN FILE C2hoh2_l.sav
+ ** SELECTED S-MATRIX ELEMENTS SAVED IN FILE C2hoh2_long1.smt
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2022-04-07 at 19:05
+CMAKE BUILD TYPE: Release
+CODE GIT REVISION: 
+SYS: Linux 5.4.0-107-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                      Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                         3600.000
+Socket(s):                       1
+Core(s) per socket:              4
+L2 cache:                        1 MiB
+L3 cache:                        6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16267612 kB
+ --------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ All publications resulting from use of the integrators included in the
+ Hibridon code must include the following reference:
+
+ D. E. Manolopoulos, J. Chem. Phys. 85, 6425 (1986); M. H. Alexander and D. E.
+ Manolopoulos, J. Chem. Phys. 80, 2044 (1987).
+
+ All publications involving the determination ofphotodissociation cross sections
+ must also include the following reference:
+
+ M. H. Alexander, Comput. Phys. Commun, 75, 87 (1993).
+
+ All publications investigating flux redistribution must include the following references:
+
+ M. H. Alexander, J. Chem. Phys. 95, 8931 (1991); D. E. Manolopoulos and
+ M. H. Alexander, J. Chem. Phys.  97, 2527 (1992).
+
+ All publications resulting from use of the Hibridon package must include
+ the following reference:
+
+ HIBRIDON is a package of programs for the time-independent quantum treatment
+ of inelastic collisions and photodissociation written by M. H. Alexander,
+ D. E.  Manolopoulos, H.-J. Werner, and B. Follmeg, with contributions by
+ P. F. Vohralik, D. Lemoine, G. Corey, B. Johnson, T. Orlikowski, A. Berning,
+ A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly, G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J. Klos, and F. Lique
+ -----------------------------------------------------------------------------
+
+ ** LABEL:     C2H-H2 RCCSD(T) PES by P.Dagdigian              
+ ** POT NAME:  DAGDIGIAN C2H-H2 RCCSD(T) PES                   
+ ** DATE:      Apr  7 19:16:41 2022
+ ** NMAX= 500  NAIRY= 500
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    0 JLPAR = 1 STARTED
+
+ ** INTEGRATION WILL START 2.359 BOHR INSIDE INNER TURNING POINT
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Apr  7 19:16:41 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    1 JLPAR = 1 STARTED
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:04   WALL: 00:00:01   DATE: Apr  7 19:16:42 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    2 JLPAR = 1 STARTED
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:09   WALL: 00:00:01   DATE: Apr  7 19:16:42 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    3 JLPAR = 1 STARTED
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:18   WALL: 00:00:03   DATE: Apr  7 19:16:44 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    4 JLPAR = 1 STARTED
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:37   WALL: 00:00:06   DATE: Apr  7 19:16:47 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    5 JLPAR = 1 STARTED
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:52   WALL: 00:00:09   DATE: Apr  7 19:16:50 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    6 JLPAR = 1 STARTED
+ ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:01:14   WALL: 00:00:13   DATE: Apr  7 19:16:54 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    7 JLPAR = 1 STARTED
+ ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:01:30   WALL: 00:00:16   DATE: Apr  7 19:16:57 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    8 JLPAR = 1 STARTED
+ ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:01:48   WALL: 00:00:19   DATE: Apr  7 19:17:00 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    9 JLPAR = 1 STARTED
+ ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:02:07   WALL: 00:00:23   DATE: Apr  7 19:17:04 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   10 JLPAR = 1 STARTED
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:02:22   WALL: 00:00:26   DATE: Apr  7 19:17:07 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   11 JLPAR = 1 STARTED
+ ** J =   11 JLPAR = 1 FINISHED;  CPU: 00:02:42   WALL: 00:00:29   DATE: Apr  7 19:17:10 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   12 JLPAR = 1 STARTED
+ ** J =   12 JLPAR = 1 FINISHED;  CPU: 00:02:58   WALL: 00:00:32   DATE: Apr  7 19:17:13 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    0 JLPAR =-1 STARTED
+
+ ** INTEGRATION WILL START 2.384 BOHR INSIDE INNER TURNING POINT
+ ** J =    0 JLPAR =-1 FINISHED;  CPU: 00:03:00   WALL: 00:00:33   DATE: Apr  7 19:17:14 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    1 JLPAR =-1 STARTED
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:03:04   WALL: 00:00:33   DATE: Apr  7 19:17:14 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    2 JLPAR =-1 STARTED
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:03:10   WALL: 00:00:34   DATE: Apr  7 19:17:15 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    3 JLPAR =-1 STARTED
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:03:19   WALL: 00:00:36   DATE: Apr  7 19:17:17 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    4 JLPAR =-1 STARTED
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:03:31   WALL: 00:00:38   DATE: Apr  7 19:17:19 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    5 JLPAR =-1 STARTED
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:03:43   WALL: 00:00:40   DATE: Apr  7 19:17:21 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    6 JLPAR =-1 STARTED
+ ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:04:00   WALL: 00:00:43   DATE: Apr  7 19:17:24 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    7 JLPAR =-1 STARTED
+ ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:04:17   WALL: 00:00:46   DATE: Apr  7 19:17:27 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    8 JLPAR =-1 STARTED
+ ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:04:33   WALL: 00:00:50   DATE: Apr  7 19:17:31 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    9 JLPAR =-1 STARTED
+ ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:04:51   WALL: 00:00:53   DATE: Apr  7 19:17:34 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   10 JLPAR =-1 STARTED
+ ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:05:08   WALL: 00:00:56   DATE: Apr  7 19:17:37 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   11 JLPAR =-1 STARTED
+ ** J =   11 JLPAR =-1 FINISHED;  CPU: 00:05:27   WALL: 00:01:00   DATE: Apr  7 19:17:41 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   12 JLPAR =-1 STARTED
+ ** J =   12 JLPAR =-1 FINISHED;  CPU: 00:05:44   WALL: 00:01:03   DATE: Apr  7 19:17:44 2022
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:   243
+      TIMING:  ELAPSED 00:01:03 / CPU 00:05:44 / MP RATIO  547.1 %
+      CURRENT DATE:  Apr  7 19:17:44 2022
+ ===============================================================================
+ C2H-H2 RCCSD(T) PES by P.Dagdigian              
+ DAGDIGIAN C2H-H2 RCCSD(T) PES                   
+ ==============================
+     *** Parameters:
+ JTOT1  =   0        JTOT2  =  12        JTOTD  =   1        JLPAR  =   0
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  80        IPRINT =  -1
+ FSTFAC =  1.500     RINCR  =  1.000     RCUT   = -100.0     RENDAI =  60.00    
+ RENDLD =  10.00     RSTART =  4.250     SPAC   = 0.1500     TOLAI  =  1.050    
+ XMU    =  1.865    
+     *** 2SG-1SG system parameters:
+ N1MAX  =  10        J2MIN  =   1        J2MAX  =   2        IPOTSY2=   2
+ B1ROT  =  1.456     D1ROT  =  0.000     GAMMA  =-2.0869E-03 B2ROT  =  59.32    
+ J1/J2: 
+     *** Flags:
+ AIRYFL= T    BASTST= F    BATCH = F    CHLIST= F    CSFLAG= F    FLAGHF= T
+ FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= T    NOPRIN= T    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= T    WAVEFL= F
+ WRPART= F    WRSMAT= T    WRXSEC= T    BOUNDC= F
+ ** Energies:      130.000000
+ NOUT: 20; J1/J2-OUT: 00  10  20  30  40  50  60  70  80  90  01  11  21  31  41  51  61  71  81  91  
+ INDOUT:   -2   2  -1   1
+ ==============================
+ ** INTEGRAL CROSS SECTIONS SAVED IN FILE C2hoh2_long1.ics
+ ** RESTART INFORMATION SAVED IN FILE C2hoh2_l.sav
+ ** SELECTED S-MATRIX ELEMENTS SAVED IN FILE C2hoh2_long1.smt
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2022-04-07 at 19:05
+CMAKE BUILD TYPE: Release
+CODE GIT REVISION: 
+SYS: Linux 5.4.0-107-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                      Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                         3598.331
+Socket(s):                       1
+Core(s) per socket:              4
+L2 cache:                        1 MiB
+L3 cache:                        6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16267612 kB
+ --------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ All publications resulting from use of the integrators included in the
+ Hibridon code must include the following reference:
+
+ D. E. Manolopoulos, J. Chem. Phys. 85, 6425 (1986); M. H. Alexander and D. E.
+ Manolopoulos, J. Chem. Phys. 80, 2044 (1987).
+
+ All publications involving the determination ofphotodissociation cross sections
+ must also include the following reference:
+
+ M. H. Alexander, Comput. Phys. Commun, 75, 87 (1993).
+
+ All publications investigating flux redistribution must include the following references:
+
+ M. H. Alexander, J. Chem. Phys. 95, 8931 (1991); D. E. Manolopoulos and
+ M. H. Alexander, J. Chem. Phys.  97, 2527 (1992).
+
+ All publications resulting from use of the Hibridon package must include
+ the following reference:
+
+ HIBRIDON is a package of programs for the time-independent quantum treatment
+ of inelastic collisions and photodissociation written by M. H. Alexander,
+ D. E.  Manolopoulos, H.-J. Werner, and B. Follmeg, with contributions by
+ P. F. Vohralik, D. Lemoine, G. Corey, B. Johnson, T. Orlikowski, A. Berning,
+ A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly, G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J. Klos, and F. Lique
+ -----------------------------------------------------------------------------
+
+ ** LABEL:     C2H-H2 RCCSD(T) PES by P.Dagdigian              
+ ** POT NAME:  DAGDIGIAN C2H-H2 RCCSD(T) PES                   
+ ** DATE:      Apr  7 19:18:43 2022
+ ** NMAX= 500  NAIRY= 500
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    0 JLPAR = 1 STARTED
+
+ ** INTEGRATION WILL START 2.359 BOHR INSIDE INNER TURNING POINT
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Apr  7 19:18:43 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    1 JLPAR = 1 STARTED
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:06   WALL: 00:00:01   DATE: Apr  7 19:18:44 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    2 JLPAR = 1 STARTED
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:15   WALL: 00:00:03   DATE: Apr  7 19:18:46 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    3 JLPAR = 1 STARTED
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:29   WALL: 00:00:05   DATE: Apr  7 19:18:48 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    4 JLPAR = 1 STARTED
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:45   WALL: 00:00:08   DATE: Apr  7 19:18:51 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    5 JLPAR = 1 STARTED
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:01:17   WALL: 00:00:14   DATE: Apr  7 19:18:57 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    6 JLPAR = 1 STARTED
+ ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:01:45   WALL: 00:00:19   DATE: Apr  7 19:19:02 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    7 JLPAR = 1 STARTED
+ ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:02:20   WALL: 00:00:26   DATE: Apr  7 19:19:09 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    8 JLPAR = 1 STARTED
+ ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:02:54   WALL: 00:00:32   DATE: Apr  7 19:19:15 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    9 JLPAR = 1 STARTED
+ ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:03:31   WALL: 00:00:39   DATE: Apr  7 19:19:22 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   10 JLPAR = 1 STARTED
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:04:08   WALL: 00:00:46   DATE: Apr  7 19:19:29 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   11 JLPAR = 1 STARTED
+ ** J =   11 JLPAR = 1 FINISHED;  CPU: 00:04:49   WALL: 00:00:54   DATE: Apr  7 19:19:37 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   12 JLPAR = 1 STARTED
+ ** J =   12 JLPAR = 1 FINISHED;  CPU: 00:05:30   WALL: 00:01:02   DATE: Apr  7 19:19:45 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    0 JLPAR =-1 STARTED
+
+ ** INTEGRATION WILL START 2.384 BOHR INSIDE INNER TURNING POINT
+ ** J =    0 JLPAR =-1 FINISHED;  CPU: 00:05:32   WALL: 00:01:03   DATE: Apr  7 19:19:46 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    1 JLPAR =-1 STARTED
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:05:38   WALL: 00:01:04   DATE: Apr  7 19:19:47 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    2 JLPAR =-1 STARTED
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:05:49   WALL: 00:01:06   DATE: Apr  7 19:19:49 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    3 JLPAR =-1 STARTED
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:06:03   WALL: 00:01:08   DATE: Apr  7 19:19:51 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    4 JLPAR =-1 STARTED
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:06:29   WALL: 00:01:13   DATE: Apr  7 19:19:56 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    5 JLPAR =-1 STARTED
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:06:56   WALL: 00:01:18   DATE: Apr  7 19:20:01 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    6 JLPAR =-1 STARTED
+ ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:07:29   WALL: 00:01:24   DATE: Apr  7 19:20:07 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    7 JLPAR =-1 STARTED
+ ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:08:05   WALL: 00:01:31   DATE: Apr  7 19:20:14 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    8 JLPAR =-1 STARTED
+ ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:08:40   WALL: 00:01:37   DATE: Apr  7 19:20:20 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    9 JLPAR =-1 STARTED
+ ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:09:23   WALL: 00:01:45   DATE: Apr  7 19:20:28 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   10 JLPAR =-1 STARTED
+ ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:10:05   WALL: 00:01:53   DATE: Apr  7 19:20:36 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   11 JLPAR =-1 STARTED
+ ** J =   11 JLPAR =-1 FINISHED;  CPU: 00:10:45   WALL: 00:02:01   DATE: Apr  7 19:20:44 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   12 JLPAR =-1 STARTED
+ ** J =   12 JLPAR =-1 FINISHED;  CPU: 00:11:23   WALL: 00:02:08   DATE: Apr  7 19:20:51 2022
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:   363
+      TIMING:  ELAPSED 00:02:08 / CPU 00:11:23 / MP RATIO  533.6 %
+      CURRENT DATE:  Apr  7 19:20:51 2022
+ ===============================================================================
+ C2H-H2 RCCSD(T) PES by P.Dagdigian              
+ DAGDIGIAN C2H-H2 RCCSD(T) PES                   
+ ==============================
+     *** Parameters:
+ JTOT1  =   0        JTOT2  =  12        JTOTD  =   1        JLPAR  =   0
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  80        IPRINT =  -1
+ FSTFAC =  1.500     RINCR  =  1.000     RCUT   = -100.0     RENDAI =  60.00    
+ RENDLD =  10.00     RSTART =  4.250     SPAC   = 0.1500     TOLAI  =  1.050    
+ XMU    =  1.865    
+     *** 2SG-1SG system parameters:
+ N1MAX  =  14        J2MIN  =   1        J2MAX  =   2        IPOTSY2=   2
+ B1ROT  =  1.456     D1ROT  =  0.000     GAMMA  =-2.0869E-03 B2ROT  =  59.32    
+ J1/J2: 
+     *** Flags:
+ AIRYFL= T    BASTST= F    BATCH = F    CHLIST= F    CSFLAG= F    FLAGHF= T
+ FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= T    NOPRIN= T    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= T    WAVEFL= F
+ WRPART= F    WRSMAT= T    WRXSEC= T    BOUNDC= F
+ ** Energies:      130.000000
+ NOUT: 20; J1/J2-OUT: 00  10  20  30  40  50  60  70  80  90  01  11  21  31  41  51  61  71  81  91  
+ INDOUT:   -2   2  -1   1
+ ==============================
+ ** INTEGRAL CROSS SECTIONS SAVED IN FILE C2hoh2_long1.ics
+ ** RESTART INFORMATION SAVED IN FILE C2hoh2_l.sav
+ ** SELECTED S-MATRIX ELEMENTS SAVED IN FILE C2hoh2_long1.smt
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2022-04-07 at 19:05
+CMAKE BUILD TYPE: Release
+CODE GIT REVISION: 
+SYS: Linux 5.4.0-107-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                      Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                         3582.358
+Socket(s):                       1
+Core(s) per socket:              4
+L2 cache:                        1 MiB
+L3 cache:                        6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16267612 kB
+ --------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ All publications resulting from use of the integrators included in the
+ Hibridon code must include the following reference:
+
+ D. E. Manolopoulos, J. Chem. Phys. 85, 6425 (1986); M. H. Alexander and D. E.
+ Manolopoulos, J. Chem. Phys. 80, 2044 (1987).
+
+ All publications involving the determination ofphotodissociation cross sections
+ must also include the following reference:
+
+ M. H. Alexander, Comput. Phys. Commun, 75, 87 (1993).
+
+ All publications investigating flux redistribution must include the following references:
+
+ M. H. Alexander, J. Chem. Phys. 95, 8931 (1991); D. E. Manolopoulos and
+ M. H. Alexander, J. Chem. Phys.  97, 2527 (1992).
+
+ All publications resulting from use of the Hibridon package must include
+ the following reference:
+
+ HIBRIDON is a package of programs for the time-independent quantum treatment
+ of inelastic collisions and photodissociation written by M. H. Alexander,
+ D. E.  Manolopoulos, H.-J. Werner, and B. Follmeg, with contributions by
+ P. F. Vohralik, D. Lemoine, G. Corey, B. Johnson, T. Orlikowski, A. Berning,
+ A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly, G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J. Klos, and F. Lique
+ -----------------------------------------------------------------------------
+
+ ** LABEL:     C2H-H2 RCCSD(T) PES by P.Dagdigian              
+ ** POT NAME:  DAGDIGIAN C2H-H2 RCCSD(T) PES                   
+ ** DATE:      Apr  7 19:22:29 2022
+ ** NMAX= 500  NAIRY= 500
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    0 JLPAR = 1 STARTED
+
+ ** INTEGRATION WILL START 2.359 BOHR INSIDE INNER TURNING POINT
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Apr  7 19:22:29 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    1 JLPAR = 1 STARTED
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:11   WALL: 00:00:02   DATE: Apr  7 19:22:31 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    2 JLPAR = 1 STARTED
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:26   WALL: 00:00:05   DATE: Apr  7 19:22:34 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    3 JLPAR = 1 STARTED
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:52   WALL: 00:00:10   DATE: Apr  7 19:22:39 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    4 JLPAR = 1 STARTED
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:01:29   WALL: 00:00:17   DATE: Apr  7 19:22:46 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    5 JLPAR = 1 STARTED
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:02:22   WALL: 00:00:27   DATE: Apr  7 19:22:56 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    6 JLPAR = 1 STARTED
+ ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:03:27   WALL: 00:00:39   DATE: Apr  7 19:23:08 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ *** NCHANNELS=  501 .GT. MAX DIMENSION OF   500; ABORT
+ C2H-H2 RCCSD(T) PES by P.Dagdigian              
+ DAGDIGIAN C2H-H2 RCCSD(T) PES                   
+ ==============================
+     *** Parameters:
+ JTOT1  =   0        JTOT2  =  12        JTOTD  =   1        JLPAR  =   0
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  80        IPRINT =  -1
+ FSTFAC =  1.500     RINCR  =  1.000     RCUT   = -100.0     RENDAI =  60.00    
+ RENDLD =  10.00     RSTART =  4.250     SPAC   = 0.1500     TOLAI  =  1.050    
+ XMU    =  1.865    
+     *** 2SG-1SG system parameters:
+ N1MAX  =  14        J2MIN  =   1        J2MAX  =   2        IPOTSY2=   2
+ B1ROT  =  1.456     D1ROT  =  0.000     GAMMA  =-2.0869E-03 B2ROT  =  59.32    
+ J1/J2: 
+     *** Flags:
+ AIRYFL= T    BASTST= F    BATCH = F    CHLIST= F    CSFLAG= F    FLAGHF= T
+ FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= T    NOPRIN= T    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= T    WAVEFL= F
+ WRPART= F    WRSMAT= T    WRXSEC= T    BOUNDC= F
+ ** Energies:      130.000000
+ NOUT: 20; J1/J2-OUT: 00  10  20  30  40  50  60  70  80  90  01  11  21  31  41  51  61  71  81  91  
+ INDOUT:   -2   2  -1   1
+ ==============================
+ ** INTEGRAL CROSS SECTIONS SAVED IN FILE C2hoh2_long1.ics
+ ** RESTART INFORMATION SAVED IN FILE C2hoh2_l.sav
+ ** SELECTED S-MATRIX ELEMENTS SAVED IN FILE C2hoh2_long1.smt
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2022-04-07 at 19:05
+CMAKE BUILD TYPE: Release
+CODE GIT REVISION: 
+SYS: Linux 5.4.0-107-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                      Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                         3590.084
+Socket(s):                       1
+Core(s) per socket:              4
+L2 cache:                        1 MiB
+L3 cache:                        6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16267612 kB
+ --------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ All publications resulting from use of the integrators included in the
+ Hibridon code must include the following reference:
+
+ D. E. Manolopoulos, J. Chem. Phys. 85, 6425 (1986); M. H. Alexander and D. E.
+ Manolopoulos, J. Chem. Phys. 80, 2044 (1987).
+
+ All publications involving the determination ofphotodissociation cross sections
+ must also include the following reference:
+
+ M. H. Alexander, Comput. Phys. Commun, 75, 87 (1993).
+
+ All publications investigating flux redistribution must include the following references:
+
+ M. H. Alexander, J. Chem. Phys. 95, 8931 (1991); D. E. Manolopoulos and
+ M. H. Alexander, J. Chem. Phys.  97, 2527 (1992).
+
+ All publications resulting from use of the Hibridon package must include
+ the following reference:
+
+ HIBRIDON is a package of programs for the time-independent quantum treatment
+ of inelastic collisions and photodissociation written by M. H. Alexander,
+ D. E.  Manolopoulos, H.-J. Werner, and B. Follmeg, with contributions by
+ P. F. Vohralik, D. Lemoine, G. Corey, B. Johnson, T. Orlikowski, A. Berning,
+ A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly, G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J. Klos, and F. Lique
+ -----------------------------------------------------------------------------
+
+ ** LABEL:     C2H-H2 RCCSD(T) PES by P.Dagdigian              
+ ** POT NAME:  DAGDIGIAN C2H-H2 RCCSD(T) PES                   
+ ** DATE:      Apr  7 19:23:33 2022
+ ** NMAX=3000  NAIRY=3000
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    0 JLPAR = 1 STARTED
+
+ ** INTEGRATION WILL START 2.359 BOHR INSIDE INNER TURNING POINT
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Apr  7 19:23:34 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    1 JLPAR = 1 STARTED
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:18   WALL: 00:00:03   DATE: Apr  7 19:23:36 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    2 JLPAR = 1 STARTED
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:35   WALL: 00:00:06   DATE: Apr  7 19:23:39 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    3 JLPAR = 1 STARTED
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:01:00   WALL: 00:00:11   DATE: Apr  7 19:23:44 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    4 JLPAR = 1 STARTED
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:01:41   WALL: 00:00:19   DATE: Apr  7 19:23:52 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    5 JLPAR = 1 STARTED
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:02:38   WALL: 00:00:30   DATE: Apr  7 19:24:03 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    6 JLPAR = 1 STARTED
+ ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:03:44   WALL: 00:00:42   DATE: Apr  7 19:24:15 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    7 JLPAR = 1 STARTED
+ ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:05:05   WALL: 00:00:57   DATE: Apr  7 19:24:30 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    8 JLPAR = 1 STARTED
+ ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:06:36   WALL: 00:01:14   DATE: Apr  7 19:24:47 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    9 JLPAR = 1 STARTED
+ ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:08:23   WALL: 00:01:34   DATE: Apr  7 19:25:07 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   10 JLPAR = 1 STARTED
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:10:19   WALL: 00:01:55   DATE: Apr  7 19:25:28 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   11 JLPAR = 1 STARTED
+ ** J =   11 JLPAR = 1 FINISHED;  CPU: 00:12:15   WALL: 00:02:16   DATE: Apr  7 19:25:49 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   12 JLPAR = 1 STARTED
+ ** J =   12 JLPAR = 1 FINISHED;  CPU: 00:14:25   WALL: 00:02:40   DATE: Apr  7 19:26:13 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    0 JLPAR =-1 STARTED
+
+ ** INTEGRATION WILL START 2.384 BOHR INSIDE INNER TURNING POINT
+ ** J =    0 JLPAR =-1 FINISHED;  CPU: 00:14:28   WALL: 00:02:41   DATE: Apr  7 19:26:14 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    1 JLPAR =-1 STARTED
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:14:38   WALL: 00:02:43   DATE: Apr  7 19:26:16 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    2 JLPAR =-1 STARTED
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:14:59   WALL: 00:02:46   DATE: Apr  7 19:26:19 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    3 JLPAR =-1 STARTED
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:15:28   WALL: 00:02:52   DATE: Apr  7 19:26:25 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    4 JLPAR =-1 STARTED
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:16:10   WALL: 00:03:00   DATE: Apr  7 19:26:33 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    5 JLPAR =-1 STARTED
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:17:01   WALL: 00:03:09   DATE: Apr  7 19:26:42 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    6 JLPAR =-1 STARTED
+ ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:18:08   WALL: 00:03:22   DATE: Apr  7 19:26:55 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    7 JLPAR =-1 STARTED
+ ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:19:35   WALL: 00:03:38   DATE: Apr  7 19:27:11 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    8 JLPAR =-1 STARTED
+ ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:21:14   WALL: 00:03:56   DATE: Apr  7 19:27:29 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =    9 JLPAR =-1 STARTED
+ ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:22:58   WALL: 00:04:15   DATE: Apr  7 19:27:48 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   10 JLPAR =-1 STARTED
+ ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:24:56   WALL: 00:04:37   DATE: Apr  7 19:28:10 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   11 JLPAR =-1 STARTED
+ ** J =   11 JLPAR =-1 FINISHED;  CPU: 00:27:00   WALL: 00:05:00   DATE: Apr  7 19:28:33 2022
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R= -100.00
+
+ ** J =   12 JLPAR =-1 STARTED
+ ** J =   12 JLPAR =-1 FINISHED;  CPU: 00:29:04   WALL: 00:05:23   DATE: Apr  7 19:28:56 2022
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:   661
+      TIMING:  ELAPSED 00:05:23 / CPU 00:29:04 / MP RATIO  540.1 %
+      CURRENT DATE:  Apr  7 19:28:56 2022
+ ===============================================================================
