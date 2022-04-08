@@ -45,7 +45,7 @@ set(TEST_INPUT_FILES "C2hoh2_long.inp")
 set(TEST_OUTPUT_FILES "C2hoh2_long1.ics C2hoh2_long1.xxsc")
 set(TEST_KMAX 3000)
 set(TEST_T_MATRIX_SIZE kmax)
-set(TEST_LABELS "")
+set(TEST_LABELS "benchmark")
 
 
 add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")
