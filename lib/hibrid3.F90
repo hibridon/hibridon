@@ -302,7 +302,7 @@ subroutine potmat (w, r, nch, nmax, v2)
 !    vsmul:    multiplies vector by scalar and stores result in another
 !              vector
 !  -------------------------------------------------------------------
-use mod_cov2, only: nv2max, ancou_type, ancouma_type
+use mod_cov2, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_covvl, only: vvl
