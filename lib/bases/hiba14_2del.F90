@@ -1,10 +1,13 @@
+#include "assert.h"
+module mod_hiba14_2del
+contains
 ! sy2del (sav2de/ptr2de) defines, saves variables and reads              *
 !                  potential for doublet-delta scattering                *
 ! --------------------------------------------------------------------
 subroutine ba2del (j, l, is, jhold, ehold, ishold, nlevel, &
                   nlevop, ifi, c32, c52, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+                  ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision
 !  of a 2delta molecule in an intermediate coupling basis with a
@@ -112,15 +115,16 @@ subroutine ba2del (j, l, is, jhold, ehold, ishold, nlevel, &
 !   vlm2del:    returns angular coupling coefficient for particular
 !              choice of channel index
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, ndummy, v2
-use mod_coiv2, only: iv2
+use mod_cov2, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, idum=>junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
@@ -242,11 +246,6 @@ if (nlam .ne. nsum) then
 14   format (' ** NLAM=',i2, ' RESET TO NLAM=',i2, &
           '    IN BASIS')
   nlam = nsum
-  if (nlam .gt. nlammx) then
-    write (6, 15) nlam
-15     format(/' NLAM = ',i3,' .GT. NLAMMX IN BA2DEL; ABORT')
-    call exit
-  endif
 end if
 if (clist) then
   if (flagsu) then
@@ -663,7 +662,6 @@ endif
 !  ilam counts number of v2 matrices
 !  ij is address of given v2 element in present v2 matrix
 i = 0
-lamsum = 0
 istep = 1
 if (ihomo) istep = 2
 nlam2 = (lammax(2) - lammin(2))/istep + 1
@@ -673,9 +671,12 @@ if (bastst .and. iprint .gt. 1) then
   write (9, 285)
 285   format (/' ILAM  LAMBDA  ICOL  IROW   I    IV2    VEE')
 end if
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 400 ilam = 1, nlam
-!  ilam is the angular expansion label
-!  here for l=0 term in electrostatic potential
+  ancouma => v2%get_angular_coupling_matrix(ilam)
+  ! ilam is the angular expansion label
+  ! here for l=0 term in electrostatic potential
   if (ilam .le. nlam0) then
     lb = lammin(1) + (ilam - 1) * istep
   else
@@ -684,13 +685,13 @@ do 400 ilam = 1, nlam
 !  lb is the actual value of lambda
   ij=0
   inum=0
-  do 355  icol = 1, n
-    do 350  irow = icol, n
+  do icol = 1, n
+    do  irow = icol, n
       ij = ntop * (icol - 1) +irow
       vee=0
       lrow = l(irow)
       if (csflag) lrow = nu
-!  here for l=0 terms in potential (average potential)
+      ! here for l=0 terms in potential (average potential)
       if (ilam .le. nlam0) then
         call vlm2del (j(irow), lrow, j(icol), l(icol), jtot, &
                      ione, ione, lb, is(irow), is(icol), &
@@ -701,7 +702,7 @@ do 400 ilam = 1, nlam
         vee = c32(irow) * c32(icol) * v3232 &
             + c52(irow) * c52(icol) * v5252
       else
-!  here for l=4 terms in potential (difference potential)
+        ! here for l=4 terms in potential (difference potential)
         call vlm2del (j(irow), lrow, j(icol), l(icol), jtot, &
                      ione, itwo, lb, is(irow), is(icol), &
                      v3252, csflag)
@@ -711,36 +712,27 @@ do 400 ilam = 1, nlam
         vee = c32(irow) * c52(icol) * v3252 &
             + c52(irow) * c32(icol) * v5232
       end if
-      if(vee.eq.zero) goto 350
+      if(vee .ne. zero) then
         i=i+1
         inum=inum+1
-        if(i.gt.nv2max) goto 350
-          v2(i)=vee
-          iv2(i)=ij
-          if(.not.bastst .or. iprint .le. 1) goto 350
-            write (6, 290) ilam, lb, icol, irow, i, iv2(i),vee
-            write (9, 290) ilam, lb, icol, irow, i, iv2(i),vee
-290             format (i4, 2i7, 2i6, i6, g17.8)
-350     continue
-355   continue
-  if (i .le. nv2max) lamnum(ilam) = inum
+        call ancouma%set_element(irow=irow, icol=icol, vee=vee)
+        if(bastst .and. iprint .gt. 1) then
+          write (6, 290) ilam, lb, icol, irow, i, vee
+          write (9, 290) ilam, lb, icol, irow, i, vee
+290             format (i4, 2i7, 2i6, g17.8)
+        end if
+      end if
+    end do
+  end do
   if (bastst) then
-    write (6, 360) ilam, lamnum(ilam)
-    write (9, 360) ilam, lamnum(ilam)
+    write (6, 360) ilam, ancouma%get_num_nonzero_elements()
+    write (9, 360) ilam, ancouma%get_num_nonzero_elements()
 360     format ('ILAM=', i3, ' LAMNUM(ILAM) =', i6)
   end if
-  lamsum = lamsum + lamnum(ilam)
 400 continue
-if(i.gt.nv2max) then
-   write (6, 410) i, nv2max
-   write (9, 410) i, nv2max
-410    format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-   call exit
-end if
 if (clist .and. bastst) then
-  write (6, 430) lamsum
-  write (9, 430) lamsum
+  write (6, 430) v2%get_num_nonzero_elements()
+  write (9, 430) v2%get_num_nonzero_elements()
 430   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', i4)
 end if
 ! now multiply is array by ifi array, so that index will equal +/- 1 for
@@ -1015,3 +1007,4 @@ write (8, 320) brot, aso, p, q
 write (8, 285) potfil
 return
 end
+end module mod_hiba14_2del

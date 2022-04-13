@@ -1,3 +1,4 @@
+#include "assert.h"
 ! sy2pi (sav2pi/ptr2pi) defines, saves variables and reads               *
 !                  potential for doublet pi scattering                   *
 ! --------------------------------------------------------------------
@@ -116,10 +117,10 @@ subroutine ba2pi (j, l, is, jhold, ehold, ishold, nlevel, &
 !   vlm2pi:    returns angular coupling coefficient for particular
 !              choice of channel index
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, ancou_type, ancouma_type
+use mod_cov2, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use constants, only: econv, xmconv, ang2c
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, idum=>junkr, rspar
@@ -249,11 +250,6 @@ if (nlam .ne. nsum) then
 14   format (' ** NLAM=',i2, ' RESET TO NLAM=',i2, &
           '    IN BASIS')
   nlam = nsum
-  if (nlam .gt. nlammx) then
-    write (6, 15) nlam
-15     format(/' NLAM = ',i3,' .GT. NLAMMX IN BA2PI; ABORT')
-    call exit
-  endif
 end if
 if (clist) then
   if (flagsu) then
@@ -681,7 +677,6 @@ endif
 !  i counts v2 elements
 !  inum counts v2 elements for given lambda
 !  ilam counts number of v2 matrices
-!  ij is address of given v2 element in present v2 matrix
 i = 0
 lamsum = 0
 istep = 1
@@ -706,11 +701,9 @@ do 400 ilam = 1, nlam
     lb = lammin(2) + (ilam - nlam0 - 1) * istep
   end if
 !  lb is the actual value of lambda
-  ij=0
   inum=0
   do 355  icol = 1, n
     do 350  irow = icol, n
-      ij = ntop * (icol - 1) +irow
       vee=0
       lrow = l(irow)
       if (csflag) lrow = nu
@@ -738,12 +731,12 @@ do 400 ilam = 1, nlam
       if(vee.eq.zero) goto 350
         i=i+1
         inum=inum+1
-        if(i.gt.nv2max) goto 350
-          call ancouma%set_element(irow, icol, vee)
-          if(.not.bastst .or. iprint .le. 1) goto 350
-            write (6, 290) ilam, lb, icol, irow, i, ij, vee
-            write (9, 290) ilam, lb, icol, irow, i, ij, vee
-290             format (i4, i7, 3i10, i10, g17.8)
+        call ancouma%set_element(irow, icol, vee)
+        if(bastst .and. iprint .gt. 1) then
+          write (6, 290) ilam, lb, icol, irow, i, vee
+          write (9, 290) ilam, lb, icol, irow, i, vee
+290             format (i4, i7, 3i10, g17.8)
+        end if
 350     continue
 355   continue
   if (bastst) then
@@ -753,16 +746,9 @@ do 400 ilam = 1, nlam
   end if
   lamsum = lamsum + ancouma%get_num_nonzero_elements()
 400 continue
-if(i.gt.nv2max) then
-   write (6, 410) i, nv2max
-   write (9, 410) i, nv2max
-410    format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-   call exit
-end if
 if (clist .and. bastst) then
-  write (6, 430) lamsum
-  write (9, 430) lamsum
+  write (6, 430) v2%get_num_nonzero_elements()
+  write (9, 430) v2%get_num_nonzero_elements()
 430   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', &
     i10)
 end if
@@ -795,7 +781,7 @@ do 450 i = 1, nn
 450 continue
 deallocate(ifi)
 
-! call v2%print_summary()
+! call v2%print_summary(unit=6)
 return
 end
 ! ----------------------------------------------------------------------

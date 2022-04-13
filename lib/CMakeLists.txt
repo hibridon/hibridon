@@ -12,6 +12,7 @@ add_library(hib
     grovec.F90
     hiamp.F90
     hibasis.F90
+    hibasutil.F90
     hibound.F90
     hibrid1.F90
     hibrid2.F90

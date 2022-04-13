@@ -45,7 +45,7 @@ common /coptnm/ pot_name, pot_label
 character(48) :: pot_name, pot_label
 character*(*) :: file_name
 character(255) :: file_path
-integer :: iunit, ir, iv, nv, nlammx, lamnum
+integer :: iunit, ir, iv, nv, nlammx
 !     A call to this subroutine with a string containing a space will be
 !     made at the time hibridon loads. Input file is not available at
 !     the time.

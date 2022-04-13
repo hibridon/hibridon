@@ -1,3 +1,5 @@
+#include "assert.h"
+
 ! syastp3 (savastp3/ptrastp3) defines, saves variables and reads         *
 !                  potential for C2v asym top - lin mo;ecule scattering  *
 ! --------------------------------------------------------------------
@@ -16,12 +18,16 @@ end type lm_type
 !
 type(lm_type), dimension(:), allocatable :: lms
 end module mod_asymln
-! ----------------------------------------------------------------------
+
+
+module mod_hiba30_astp3
+contains
+  ! ----------------------------------------------------------------------
 subroutine baastp3 (j, l, is, jhold, ehold, ishold, nlevel, &
                   nlevop, etemp, fjtemp, fktemp, fistmp, &
                   rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, &
-                  jlpar, n, nmax, ntop)
+                  jlpar, n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision
 !  of an asymmetric top molecule of C2v or Cs symmetry with a linear molecule
@@ -153,8 +159,7 @@ subroutine baastp3 (j, l, is, jhold, ehold, ishold, nlevel, &
 !               molecules with Cs symmetry.  (set iop equal to zero in this case)
 ! --------------------------------------------------------------------
 use mod_asymln
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_cov2, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coj12, only: j12
@@ -163,11 +168,14 @@ use mod_coatpr, only: c
 use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_coatp3, only: isizh
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use mod_hibasutil, only: rotham, rotham1
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
@@ -184,6 +192,7 @@ dimension e(narray,narray), eig(narray), vec(narray,narray), &
 !
 integer, pointer :: nterm, numpot, jmax, iop, j2min, j2max, ipotsy2
 real(8), pointer :: arot, brot, crot, emax, b2rot
+integer(8) :: v2_index
 nterm=>ispar(1); numpot=>ispar(2); jmax=>ispar(3); iop=>ispar(4); j2min=>ispar(5); j2max=>ispar(6); ipotsy2=>ispar(7)
 arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4); b2rot=>rspar(5)
   
@@ -731,9 +740,10 @@ end if
 !  i counts v2 elements
 !  inum counts v2 elements for given lambda
 !  ilam counts number of v2 matrices
-!  ij is address of given v2 element in present v2 matrix
 i = 0
 lamsum = 0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 if (bastst) then
   write (6, 340)
   write (9, 340) 
@@ -748,13 +758,13 @@ do 400 ilam = 1, nlam
   ll2 = lms(ilam)%l2
   lltot = lms(ilam)%ltot
   inum = 0
+  ancouma => v2%get_angular_coupling_matrix(ilam)
   do 355 icol = 1, n
     j1c = j(icol)/10
     j2c = mod(j(icol),10)
     j12c = j12(icol)
     lc = l(icol)
     do 350 irow = icol, n
-      ij = ntop * (icol - 1) + irow
       j1r = j(irow)/10
       j2r = mod(j(irow),10)
       j12r = j12(irow)
@@ -764,38 +774,28 @@ do 400 ilam = 1, nlam
           ll1,mm1,ll2,lltot,vee)
       if (abs(vee) .gt. 1.d-10) then
         i = i + 1
-        if (i .le. nv2max) then
-          inum = inum + 1
-          v2(i) = vee
-          iv2(i) = ij
-          if (bastst) then
-            write (6, 290) ilam, ll1, mm1, ll2, lltot, &
-              icol, irow, i, iv2(i), vee
-            write (9, 290) ilam, ll1, mm1, ll2, lltot, &
-              icol, irow, i, iv2(i), vee
+        inum = inum + 1
+        call ancouma%set_element(irow=irow, icol=icol, vee=vee)
+        if (bastst) then
+          write (6, 290) ilam, ll1, mm1, ll2, lltot, &
+            icol, irow, i, vee
+          write (9, 290) ilam, ll1, mm1, ll2, lltot, &
+            icol, irow, i, vee
 290             format (i4, 4i5, 2x, 2i6, i10, i9, e20.7)
-          end if
         end if
       end if
 350     continue
 355   continue
-  if (i .le. nv2max) lamnum(ilam) = inum
   if (bastst) then
-    write (6, 370) ilam, lamnum(ilam)
-    write (9, 370) ilam, lamnum(ilam)
+    write (6, 370) ilam, ancouma%get_num_nonzero_elements()
+    write (9, 370) ilam, ancouma%get_num_nonzero_elements()
 370     format ('ILAM=',i4,' LAMNUM(ILAM) = ',i7)
   end if
-  lamsum = lamsum + lamnum(ilam)
+  lamsum = lamsum + ancouma%get_num_nonzero_elements()
 400 continue
-if (i .gt. nv2max) then
-  write (6, 410) i, nv2max
-  write (6, 410) i, nv2max
-410   format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i10, &
-      ' .GT. NV2MAX=',i10,'; ABORT ***')
-end if
 if (bastst) then
-  write (6, 420) lamsum
-  write (9, 420) lamsum
+  write (6, 420) v2%get_num_nonzero_elements()
+  write (9, 420) v2%get_num_nonzero_elements()
 420   format (' *** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', &
       i10)
 end if
@@ -1124,3 +1124,4 @@ write (8, 60) potfil
 return
 end
 ! ---------------------------------eof----------------------------------
+end module mod_hiba30_astp3

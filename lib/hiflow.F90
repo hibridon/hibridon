@@ -468,7 +468,10 @@ if (ien .eq. 1) then
               csflag, clist, bastst, ihomo, nu, numin, jlpar, &
               twomol, nch, nmax, nchtop, v2)
 
-  ASSERT(allocated(v2))  ! if this fails, this means that the used base doesn't yet support v2 as growable array
+  ! if nch == 0, then v2 is usually not allocated at all
+  if ( nch > 0 ) then
+    ASSERT(allocated(v2))  ! if this fails, this means that the used base doesn't yet support v2 as growable array
+  end if
 
 #ifdef ENSURE_BASIS_SCRATCHS_ARE_REAL_SCRATCHS
   do i = 1, nmax

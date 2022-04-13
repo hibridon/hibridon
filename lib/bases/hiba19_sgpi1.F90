@@ -1,3 +1,6 @@
+#include "assert.h"
+module mod_hiba19_sgpi1
+contains
 ! sysgpi1 (savsgpi1/ptrsgpi1) defines, saves variables and reads         *
 !                  potential for 2sig-2pi + atom scattering (one 2sigma  *
 !                  and one or more 2pi levels (no perturbations)         *
@@ -5,7 +8,7 @@
 subroutine basgpi1(j, l, is, jhold, ehold, ishold, nlevel, &
                   nlevop, ivhold, c12, c32, csig, &
                   rcut, jtot,flaghf, flagsu, csflag, clist, &
-                  bastst, ihomo, nu, numin, jlpar, n, nmax, ntop)
+                  bastst, ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 ! ----------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collisional
 !  transfer between a 2sigma state and one or more vibrational levels
@@ -154,20 +157,22 @@ subroutine basgpi1(j, l, is, jhold, ehold, ishold, nlevel, &
 !   vlm2pi:     computes coupling matrix elements between case a 2pi levels
 !               (in hiba2pi.f)
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_cov2, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_cotq1, only: vec => tq1 ! vec(3,3)
 use mod_coisc1, only: ivec => isc1 ! ivec(1)
 use mod_coisc2, only: nrot => isc2 ! nrot(1)
 use mod_coisc3, only: ifi => isc3 ! ifi(1)
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_hiba03_2pi, only: vlm2pi
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use mod_hibasutil, only: vlm2sg, iswap, rswap
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
@@ -812,14 +817,18 @@ end if
 !  i counts v2 elements
 !  ilam counts number of v2 matrices
 !  inum counts v2 elements for given ilam
-!  ij is address of given v2 element in present v2 matrix
 !  nlam is the total number of anisotropic terms
 nlam = 0
 i = 0
-lamsum = 0
 istep = 1
 if (ihomo) istep = 2
 ilam = 0
+do iterm = 1, nterm
+  nlami = (lammax(iterm) - lammin(iterm))/istep + 1
+  nlam = nlam + nlami
+end do
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 600 iterm=1,nterm
 !  below for 2sigma potential Vsig
   if (iterm.eq.1) then
@@ -834,114 +843,99 @@ do 600 iterm=1,nterm
   if (mod(iterm,3).eq.1 .and. iterm.ne.1) ipot = 4
 499   nlami = (lammax(iterm) - lammin(iterm))/istep + 1
   do 500 il=1,nlami
-    nlam = nlam + 1
+    ancouma => v2%get_angular_coupling_matrix(ilam)
     lb = lammin(iterm) + (il - 1) * istep
     mu = mproj(iterm)
     inum = 0
-    do 450 icol = 1, n
-    do 450 irow = icol, n
-      ij = ntop * (icol - 1) + irow
-      vee = zero
-      isignr = sign(ione,is(irow))
-      isignc = sign(ione,is(icol))
-      iomr = abs(is(irow))/100
-      iomc = abs(is(icol))/100
-      lrow = l(irow)
-      lcol = l(icol)
-      ivibr = mod(abs(is(irow)),100)/10
-      ivibc = mod(abs(is(icol)),100)/10
-      if (csflag) then
-        lrow = nu
-        lcol = nu
-      end if
-      goto (460, 470, 480, 490), ipot
-!  Vsig
-460       if (iomr.eq.3 .and. iomc.eq.3) then
-        call vlm2sg(j(irow), lrow, j(icol), lcol, &
-          jtot, lb, isignr, isignc, vee, csflag)
-      end if
-      goto 440
-!  Vpi
-470       if (iomr.lt.3 .and. iomc.lt.3 .and. &
-          ivibr.eq.ivibc .and. ivibr.eq.(iterm-2)/3) then
-        call vlm2pi(j(irow), lrow, j(icol), lcol, &
-          jtot, izero, izero, lb, isignr, isignc, &
-          v1212, csflag)
-        call vlm2pi(j(irow), lrow, j(icol), lcol, &
-          jtot, ione, ione, lb, isignr, isignc, &
-          v3232, csflag)
-        vee = c12(irow) * c12(icol) * v1212 &
-          + c32(irow) * c32(icol) * v3232
-      end if
-      goto 440
-!  V2
-480       if (iomr.lt.3 .and. iomc.lt.3 .and. &
-          ivibr.eq.ivibc .and. ivibr.eq.(iterm-3)/3) then
-        call vlm2pi(j(irow), lrow, j(icol), lcol, &
-          jtot, izero, ione, lb, isignr, isignc, &
-          v1212, csflag)
-        call vlm2pi(j(irow), lrow, j(icol), lcol, &
-          jtot, ione, izero, lb, isignr, isignc, &
-          v3232, csflag)
-        vee = c12(irow) * c32(icol) * v1212 &
-          + c32(irow) * c12(icol) * v3232
-      end if
-      goto 440
-!  V1
-490       if (iomr.eq.3 .and. iomc.lt.3 .and. &
-          ivibc.eq.(iterm-4)/3) then
-        call vlmsp1 (j(irow), lrow, j(icol), &
-          lcol, jtot, lb, izero, &
-          isignr, isignc, v12, csflag)
-        call vlmsp1 (j(irow), lrow, j(icol), &
-          lrow, jtot, lb, ione, &
-          isignr, isignc, v32, csflag)
-        vee = c12(icol) * v12 + c32(icol) * v32
-      end if
-      if (iomc.eq.3 .and. iomr.lt.3 .and. &
-          ivibr.eq.(iterm-4)/3) then
-        call vlmsp1 (j(icol), lcol, j(irow), &
-          lrow, jtot, lb, izero, &
-          isignc, isignr, v12, csflag)
-        call vlmsp1 (j(icol), lcol, j(irow), &
-          lrow, jtot, lb, ione, &
-          isignc, isignr, v32, csflag)
-        vee = c12(irow) * v12 + c32(irow) * v32
-      end if
-440       if (abs(vee).lt.1.d-15) goto 450
-      i = i + 1
-      inum = inum + 1
-      if (i.gt.nv2max) goto 450
-      v2(i) = vee
-      iv2(i) = ij
-      if (.not.bastst .or. iprint.le.1) goto 450
-      write (6,495) nlam, lb, mu, i, icol, irow, iv2(i), vee
-      write (9,495) nlam, lb, mu, i, icol, irow, iv2(i), vee
-495       format (i4, 3i7, 2i6, i6, g17.8)
-450     continue
-    if (i.le.nv2max) lamnum(nlam) = inum
+    do icol = 1, n
+      do irow = icol, n
+        vee = zero
+        isignr = sign(ione,is(irow))
+        isignc = sign(ione,is(icol))
+        iomr = abs(is(irow))/100
+        iomc = abs(is(icol))/100
+        lrow = l(irow)
+        lcol = l(icol)
+        ivibr = mod(abs(is(irow)),100)/10
+        ivibc = mod(abs(is(icol)),100)/10
+        if (csflag) then
+          lrow = nu
+          lcol = nu
+        end if
+        goto (460, 470, 480, 490), ipot
+  !  Vsig
+  460       if (iomr.eq.3 .and. iomc.eq.3) then
+          call vlm2sg(j(irow), lrow, j(icol), lcol, &
+            jtot, lb, isignr, isignc, vee, csflag)
+        end if
+        goto 440
+  !  Vpi
+  470       if (iomr.lt.3 .and. iomc.lt.3 .and. &
+            ivibr.eq.ivibc .and. ivibr.eq.(iterm-2)/3) then
+          call vlm2pi(j(irow), lrow, j(icol), lcol, &
+            jtot, izero, izero, lb, isignr, isignc, &
+            v1212, csflag)
+          call vlm2pi(j(irow), lrow, j(icol), lcol, &
+            jtot, ione, ione, lb, isignr, isignc, &
+            v3232, csflag)
+          vee = c12(irow) * c12(icol) * v1212 &
+            + c32(irow) * c32(icol) * v3232
+        end if
+        goto 440
+  !  V2
+  480       if (iomr.lt.3 .and. iomc.lt.3 .and. &
+            ivibr.eq.ivibc .and. ivibr.eq.(iterm-3)/3) then
+          call vlm2pi(j(irow), lrow, j(icol), lcol, &
+            jtot, izero, ione, lb, isignr, isignc, &
+            v1212, csflag)
+          call vlm2pi(j(irow), lrow, j(icol), lcol, &
+            jtot, ione, izero, lb, isignr, isignc, &
+            v3232, csflag)
+          vee = c12(irow) * c32(icol) * v1212 &
+            + c32(irow) * c12(icol) * v3232
+        end if
+        goto 440
+  !  V1
+  490       if (iomr.eq.3 .and. iomc.lt.3 .and. &
+            ivibc.eq.(iterm-4)/3) then
+          call vlmsp1 (j(irow), lrow, j(icol), &
+            lcol, jtot, lb, izero, &
+            isignr, isignc, v12, csflag)
+          call vlmsp1 (j(irow), lrow, j(icol), &
+            lrow, jtot, lb, ione, &
+            isignr, isignc, v32, csflag)
+          vee = c12(icol) * v12 + c32(icol) * v32
+        end if
+        if (iomc.eq.3 .and. iomr.lt.3 .and. &
+            ivibr.eq.(iterm-4)/3) then
+          call vlmsp1 (j(icol), lcol, j(irow), &
+            lrow, jtot, lb, izero, &
+            isignc, isignr, v12, csflag)
+          call vlmsp1 (j(icol), lcol, j(irow), &
+            lrow, jtot, lb, ione, &
+            isignc, isignr, v32, csflag)
+          vee = c12(irow) * v12 + c32(irow) * v32
+        end if
+440     if (abs(vee) .ge. 1.d-15) then
+          i = i + 1
+          inum = inum + 1
+          call ancouma%set_element(irow=irow, icol=icol, vee=vee)      
+          if (bastst .and. iprint .gt. 1) then
+            write (6,495) nlam, lb, mu, i, icol, irow, vee
+            write (9,495) nlam, lb, mu, i, icol, irow, vee
+495         format (i4, 3i7, 2i6, g17.8)
+          end if
+        end if
+      end do
+    end do
     if (bastst) then
-      write (6, 360) iterm, nlam, lb, mu, lamnum(nlam)
-      write (9, 360) iterm, nlam, lb, mu, lamnum(nlam)
+      write (6, 360) iterm, nlam, lb, mu, ancouma%get_num_nonzero_elements()
+      write (9, 360) iterm, nlam, lb, mu, ancouma%get_num_nonzero_elements()
 360       format ('ITERM=',i3,' ILAM=', i3,' LAMBDA=',i3, &
         ' MU=',i3,' LAMNUM(ILAM)=',i8)
     end if
-    lamsum = lamsum + lamnum(il)
 500   continue
 600 continue
-if (nlam.gt.nlammx) then
-  write(6,610) nlam,nlammx
-  write(9,610) nlam,nlammx
-610   format (' *** NLAM = ',i6,' .GT. NLAMMX=',i6,'; ABORT ***')
-  call exit
-end if
-if (i.gt.nv2max) then
-  write (6, 620) i, nv2max
-  write (9, 620) i, nv2max
-620   format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-  call exit
-end if
 if (clist) then
   write (6, 630) i
   write (9, 630) i
@@ -1337,3 +1331,4 @@ write (8, 300) potfil
 300 format(a)
 return
 end
+end module mod_hiba19_sgpi1

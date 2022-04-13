@@ -56,7 +56,7 @@ end
 !
 subroutine loapot(iunit,filnam)
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam, nlammx
 implicit double precision (a-h,o-z)
 character*(*) filnam
 #include "common/parbas.F90"

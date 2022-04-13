@@ -19,13 +19,13 @@
 !     current revision:  24-jul-2019 (p.dagdigian)                       *
 !                                                                       *
 !************************************************************************
-module mod_hiba1sg
+module mod_hiba01_1sg
 contains
 ! --------------------------------------------------------------------
 subroutine ba1sg (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
                   sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-                  n, nmax, ntop)
+                  n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential
 !  for collision of singlet-sigma molecule with a structureless atom
@@ -115,11 +115,10 @@ subroutine ba1sg (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !              particular choice of initial and final channel quantum numbers
 !
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_cov2, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar, convert_ispar_to_mat
 use mod_cosysr, only: isrcod, junkr, rspar, convert_rspar_to_mat
 use constants, only: econv, xmconv, ang2c
@@ -151,6 +150,8 @@ integer, intent(in) :: jlpar
 integer, intent(out) :: n
 integer, intent(in) :: nmax
 integer, intent(out) :: ntop
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
 common /covib/ nvib,ivib(maxvib)
@@ -488,6 +489,12 @@ call exit
 ! ij is address of given v2 element in present v2 matrix
 i = 0
 ilam=0
+ASSERT(.not. allocated(v2))
+num_lam = 0
+do il = lammin(1), lammax(1), nskip
+  num_lam = num_lam + ntv(1)
+end do
+v2 = ancou_type(nlam=num_lam, num_channels=ntop)
 do 320 iv=1,ntv(1)
     ivr=ivrow(iv,1)
     ivc=ivcol(iv,1)
@@ -495,11 +502,10 @@ do 320 il = lammin(1), lammax(1), nskip
   lb=il
   ilam=ilam+1
   inum = 0
-  ij=0
+  ancouma => v2%get_angular_coupling_matrix(ilam)
   do 310  icol= 1, n
     do 300  irow = icol, n
       if(is(irow).ne.ivr.or.is(icol).ne.ivc) goto 300
-      ij = ntop * (icol - 1) +irow
 !  here for coupling between molecular rotational levels
       call vlm1sg (j(irow), l(irow), j(icol), l(icol), jtot, &
                    nu, lb, vee, csflag)
@@ -507,24 +513,13 @@ do 320 il = lammin(1), lammax(1), nskip
         i = i + 1
         inum = inum + 1
          if (bastst .and. iprint.gt.1) then
-           write (6, 340) ivr,ivc,il,ilam,i,irow,icol, &
-                          ij,vee
-           write (9, 340) ivr,ivc,il,ilam,i,irow,icol, &
-                          ij,vee
-340            format (1x,2i3,6i6, g17.8)
+           write (6, 340) ivr,ivc,il,ilam,i,irow,icol, vee
+           write (9, 340) ivr,ivc,il,ilam,i,irow,icol, vee
+340            format (1x,2i3,5i6, g17.8)
          end if
-        if (i .le. nv2max) then
-          v2(i) = vee
-          iv2(i) = ij
-        end if
+         call ancouma%set_element(irow=irow, icol=icol, vee=vee)
 300     continue
 310   continue
-  if(ilam.gt.nlammx) then
-    write(6,311) ilam, nlammx
-311     format(/' ILAM =',i3,' .GT. NLAMMX =',i3,' IN BA1SG; ABORT')
-    call exit
-  end if
-  lamnum(ilam) = inum
   if (bastst .and. iprint.ge.1) then
     write (6, 420) ivr,ivc,il,inum
     write (9, 420) ivr,ivc,il,inum
@@ -533,17 +528,6 @@ do 320 il = lammin(1), lammax(1), nskip
   end if
   if(inum.ne.0) nlam=ilam
 320 continue
-if ( i.gt. nv2max) then
-  write (6, 350) i, nv2max
-  write (9, 350) i, nv2max
-350   format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-  if (bastst) then
-    return
-  else
-    call exit
-  end if
-end if
 if (clist) then
   write (6, 360) i
   write (9, 360) i
@@ -784,7 +768,7 @@ write (8, 85) potfil
 return
 end
 
-end module mod_hiba1sg
+end module mod_hiba01_1sg
 !     ------------------------------------------------------------------
 logical function is_twomol(ibasty)
 !     ------------------------------------------------------------------

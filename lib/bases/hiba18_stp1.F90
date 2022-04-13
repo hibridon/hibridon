@@ -1,3 +1,6 @@
+#include "assert.h"
+module mod_hiba18_stp1
+contains
 ! systp1 (savstp1/ptrstp1) defines, saves variables and reads            *
 !                  potential for symmetric top/atom scattering           *
 !                  this routine for sym top with no inversion doubling   *
@@ -5,7 +8,7 @@
 subroutine bastp1(j, l, is, jhold, ehold, ishold, nlevel, &
                   nlevop, k, ieps, jtemp, ktemp, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+                  ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision
 !  of a symmetric top molecule having no inversion douling with a
@@ -145,16 +148,18 @@ subroutine bastp1(j, l, is, jhold, ehold, ishold, nlevel, &
 !   vlmstp:    returns angular coupling coefficient for particular
 !              choice of channel index (this subroutine is in file hibastp.f
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_cov2, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coamat, only: ietmp ! ietmp(1)
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use mod_hibasutil, only: vlmstp
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
@@ -206,13 +211,6 @@ do 35  i = 1, nterm
   if (ihomo) idl = 2
   nsum = nsum + (lammax(i) - lammin(i)) / idl + 1
 35 continue
-if (nlammx .lt. nsum) then
-  write (6, 40) nsum, nlammx
-  write (9, 40) nsum, nlammx
-40   format (' ** TOTAL NUMBER OF ANISOTROPIC TERMS=', i2, &
-          ' .GT. NLAMMX=', i2,'; ABORT')
-  stop
-end if
 if (nsum .ne. nlam) then
   write (6, 45) nsum, nlam
   write (9, 45) nsum, nlam
@@ -540,15 +538,15 @@ if (ihomo) idell = 2
 !  i counts v2 elements
 !  inum counts v2 elements for given lambda
 !  ilam counts numver of v2 matrices
-!  ij is address of given v2 element in present v2 matrix
 i = 0
 if (bastst.and. iprint.ge. 2) then
   write (6, 340)
   write (9, 340)
 340   format (/' ILAM  LAMBDA  ICOL  IROW   I    IV2    VEE')
 end if
-lamsum = 0
 ilam = 0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 400 iterm = 1, nterm
   lbmin = lammin(iterm)
 !  if bastst = .true., then get the matrix elements of the lb=0 term
@@ -558,12 +556,11 @@ do 400 iterm = 1, nterm
 !  ilam is the index for the next term in the potential matrix
 !  lb is the actual value of lambda
     ilam = ilam + 1
+    ancouma => v2%get_angular_coupling_matrix(ilam)
     mu = mproj(iterm)
     inum = 0
-    ij = 0
-    do 355  icol = 1, n
-      do 350  irow = icol, n
-        ij = ntop * (icol - 1) +irow
+    do icol = 1, n
+      do irow = icol, n
         lrow = l(irow)
         if (csflag) lrow = nu
         call vlmstp (j(irow), lrow, j(icol), l(icol), jtot, &
@@ -571,47 +568,32 @@ do 400 iterm = 1, nterm
                      ieps(icol), vee, csflag)
         if (vee .ne. zero) then
           i = i + 1
-          if (i .le. nv2max) then
-            inum = inum + 1
-            v2(i) = vee
-            iv2(i) = ij
-            if (bastst.and. iprint.ge.2) then
-              write (6, 345) ilam, lb, icol, irow, i, iv2(i), &
-                             vee
-              write (9, 345) ilam, lb, icol, irow, i, iv2(i), &
-                             vee
-345               format (i4, 2i7, 2i6, i6, g17.8)
-            end if
+          inum = inum + 1
+          call ancouma%set_element(irow=irow, icol=icol, vee=vee)
+          if (bastst.and. iprint.ge.2) then
+            write (6, 345) ilam, lb, icol, irow, i, vee
+            write (9, 345) ilam, lb, icol, irow, i, vee
+345               format (i4, 2i7, 2i6, g17.8)
           end if
         end if
-350       continue
-355     continue
-    if (i .le. nv2max) lamnum(ilam) = inum
+      end do
+    end do
     if (bastst) then
-      write (6, 370) ilam, lb, mu, lamnum(ilam)
-      write (9, 370) ilam, lb, mu, lamnum(ilam)
+      write (6, 370) ilam, lb, mu, ancouma%get_num_nonzero_elements()
+      write (9, 370) ilam, lb, mu, ancouma%get_num_nonzero_elements()
 370       format ('ILAM=',i3,' LAM=',i3,' MU=',i3, &
          ' LAMNUM(ILAM) = ',i6)
     end if
-    lamsum = lamsum + lamnum(ilam)
 390   continue
 400 continue
-if ( i.gt. nv2max) then
-   write (6, 450) i, nv2max
-   write (9, 450) i, nv2max
-450    format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-   stop
-end if
 if (clist .and. bastst) then
-  write (6, 460) lamsum
-  write (9, 460) lamsum
+  write (6, 460) v2%get_num_nonzero_elements()
+  write (9, 460) v2%get_num_nonzero_elements()
 460   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', &
            i6)
 end if
 
 
-!      write(6,*) (lamnum(i),i=1,nlam)
 
 
 
@@ -802,3 +784,4 @@ write (8, 250) arot, brot, crot
 write (8, 60) potfil
 return
 end
+end module mod_hiba18_stp1

@@ -42,7 +42,7 @@ goto 1
 99 end
 ! ------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: nscode, isicod, ispar
 implicit double precision (a-h,o-z)
 character*(*) filnam

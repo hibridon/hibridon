@@ -1,10 +1,13 @@
+#include "assert.h"
+module mod_hiba11_1del
+contains
 ! sy1del (sav1del/ptr1del) defines, saves variables and reads            *
 !                  potential for singlet delta scattering                *
 ! --------------------------------------------------------------------
 subroutine ba1del (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, ifi, c12, c32, sc4, rcut, jtot, &
+                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+                  ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision
 !  of a 1del molecule in an intermediate coupling basis with a
@@ -100,22 +103,27 @@ subroutine ba1del (j, l, is, jhold, ehold, ishold, nlevel, &
 !   vlm1del:    returns angular coupling coefficient for particular
 !              choice of channel index
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, ndummy, v2
-use mod_coiv2, only: iv2
+use mod_cov2, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, idum=>junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
+real(8), intent(out), dimension(:) :: sc1
+real(8), intent(out), dimension(:) :: sc2
+real(8), intent(out), dimension(:) :: sc3
+real(8), intent(out), dimension(:) :: sc4
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
 common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 dimension j(2), l(1), jhold(1), ehold(1), is(2), &
-           ieps(2), ishold(1), sc4(1)
+           ieps(2), ishold(1)
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
 data ieps / -1, 1 / , izero, itwo, min10 / 0, 2, -10 /
@@ -230,11 +238,6 @@ if (nlam .ne. nsum) then
 14   format (' ** NLAM=',i2, ' RESET TO NLAM=',i2, &
           '    IN BASIS')
   nlam = nsum
-  if (nlam .gt. nlammx) then
-    write (6, 15) nlam
-15     format(/' NLAM = ',i3,' .GT. NLAMMX IN BA1DEL; ABORT')
-    call exit
-  endif
 end if
 if (clist) then
   if (flagsu) then
@@ -526,9 +529,7 @@ endif
 !  i counts v2 elements
 !  inum counts v2 elements for given lambda
 !  ilam counts number of v2 matrices
-!  ij is address of given v2 element in present v2 matrix
 i = 0
-lamsum = 0
 istep = 1
 if (ihomo) istep = 2
 nlam2 = (lammax(2) - lammin(2))/istep + 1
@@ -538,64 +539,56 @@ if (bastst .and. iprint .gt. 1) then
   write (9, 285)
 285   format (/' ILAM  LAMBDA  ICOL  IROW   I    IV2    VEE')
 end if
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 400 ilam = 1, nlam
-!  ilam is the angular expansion label
-!  here for l=0 term in electrostatic potential
+  !  ilam is the angular expansion label
+  !  here for l=0 term in electrostatic potential
+  ancouma => v2%get_angular_coupling_matrix(ilam)
   if (ilam .le. nlam0) then
     lb = lammin(1) + (ilam - 1) * istep
   else
     lb = lammin(2) + (ilam - nlam0 - 1) * istep
   end if
-!  lb is the actual value of lambda
-  ij=0
+  ! lb is the actual value of lambda
   inum=0
-  do 355  icol = 1, n
-    do 350  irow = icol, n
-      ij = ntop * (icol - 1) +irow
+  do icol = 1, n
+    do irow = icol, n
       vee=0
       lrow = l(irow)
       if (csflag) lrow = nu
-!  here for l=0 terms in potential (average potential)
+      ! here for l=0 terms in potential (average potential)
       if (ilam .le. nlam0) then
         call vlm1del (j(irow), lrow, j(icol), l(icol), jtot, &
                      izero, izero, lb, is(irow), is(icol), &
                      vee, csflag)
       else
-!  here for l=4 terms in potential (difference potential)
+        ! here for l=4 terms in potential (difference potential)
         call vlm1del (j(irow), lrow, j(icol), l(icol), jtot, &
                      izero, itwo, lb, is(irow), is(icol), &
                      vee, csflag)
       end if
-      if(vee.eq.zero) goto 350
+      if(vee .ne. zero) then
         i=i+1
         inum=inum+1
-        if(i.gt.nv2max) goto 350
-          v2(i)=vee
-          iv2(i)=ij
-          if(.not.bastst .or. iprint .le. 1) goto 350
-            write (6, 290) ilam, lb, icol, irow, i, iv2(i),vee
-            write (9, 290) ilam, lb, icol, irow, i, iv2(i),vee
-290             format (i4, 2i7, 2i6, i6, g17.8)
-350     continue
-355   continue
-  if (i .le. nv2max) lamnum(ilam) = inum
+        call ancouma%set_element(irow=irow, icol=icol, vee=vee)
+        if (bastst .and. iprint .gt. 1) then
+          write (6, 290) ilam, lb, icol, irow, i, vee
+          write (9, 290) ilam, lb, icol, irow, i, vee
+290             format (i4, 2i7, 2i6, g17.8)
+        end if
+      end if
+    end do
+  end do
   if (bastst) then
-    write (6, 360) ilam, lamnum(ilam)
-    write (9, 360) ilam, lamnum(ilam)
+    write (6, 360) ilam, ancouma%get_num_nonzero_elements()
+    write (9, 360) ilam, ancouma%get_num_nonzero_elements()
 360     format ('ILAM=', i3, ' LAMNUM(ILAM) =', i6)
   end if
-  lamsum = lamsum + lamnum(ilam)
 400 continue
-if(i.gt.nv2max) then
-   write (6, 410) i, nv2max
-   write (9, 410) i, nv2max
-410    format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-   call exit
-end if
 if (clist .and. bastst) then
-  write (6, 430) lamsum
-  write (9, 430) lamsum
+  write (6, 430) v2%get_num_nonzero_elements()
+  write (9, 430) v2%get_num_nonzero_elements()
 430   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', i4)
 end if
 ! now multiply is array by ifi array, so that index will equal +/- 1 for
@@ -856,3 +849,4 @@ write (8, 320) brot,  q
 write (8, 285) potfil
 return
 end
+end module mod_hiba11_1del

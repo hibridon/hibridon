@@ -1,9 +1,12 @@
+#include "assert.h"
+module mod_hiba23_3p2s
+contains
 ! sy3p2s (sav3p2s/ptr3p2s) defines, saves variables and reads            *
 !                  potentials for 3P atom + 2S atom                      *
 ! --------------------------------------------------------------------
 subroutine ba3p2s (j, l, is, jhold, ehold, ishold, nlevel, &
      nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, &
-     bastst, ihomo, nu, numin, jlpar, n, nmax, ntop)
+     bastst, ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine coupling potential (electrostatic + spin-orbit)
 !  for collision involving the 3P state of atom in a p^4 electronic
@@ -112,17 +115,18 @@ subroutine ba3p2s (j, l, is, jhold, ehold, ishold, nlevel, &
 !  xf9j:     evaluates 9j symbol
 ! ------------------------------------------------------------
 use mod_coeig2, only: t12, t32
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_cov2, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_covvl, only: vvl
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
@@ -382,55 +386,36 @@ enddo
 !  i counts v2 elements
 !  inum counts v2 elements for given lambda
 !  ilam counts number of v2 matrices
-!  ij is address of given v2 element in present v2 matrix
 i = 0
 ilam=0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 320 lb = 1, nlam
   ilam = ilam + 1
+  ancouma => v2%get_angular_coupling_matrix(ilam)
   inum = 0
-  do 310  icol= 1, n
-    do 300  irow = icol, n
-      ij = ntop * (icol - 1) +irow
+  do icol= 1, n
+    do irow = icol, n
       call vlm3p2s (j(irow), j12(irow), l(irow), &
         j(icol), j12(icol), l(icol), jtot, lb, vee)
-      if (vee .eq. 0) goto 300
+      if (vee .ne. 0) then
         i = i + 1
         inum = inum + 1
-        if (i .gt. nv2max) goto 300
-          v2(i) = vee
-          iv2(i) = ij
-          if (bastst) then
-            write (6, 290) ilam, lb, icol, irow, i, iv2(i), &
-                           vee
-            write (9, 290) ilam, lb, icol, irow, i, iv2(i), &
-                           vee
-290             format (i4, 2i7, 2i6, i6, g17.8)
-          endif
-300     continue
-310   continue
-410 if(ilam.gt.nlammx) then
-  write(6,311) ilam
-311   format(/' ILAM.GT.NLAMMX IN BA3P2S')
-  call exit
-end if
-lamnum(ilam) = inum
+        call ancouma%set_element(irow=irow, icol=icol, vee=vee)
+        if (bastst) then
+          write (6, 290) ilam, lb, icol, irow, i, vee
+          write (6, 290) ilam, lb, icol, irow, i, vee
+290             format (i4, 2i7, 2i6, g17.8)
+        endif
+      end if
+    end do
+  end do
 if (bastst) then
-  write (6, 315) ilam, lamnum(ilam)
-  write (9, 315) ilam, lamnum(ilam)
+  write (6, 315) ilam, ancouma%get_num_nonzero_elements()
+  write (9, 315) ilam, ancouma%get_num_nonzero_elements()
 315   format ('ILAM=',i3,' LAMNUM(ILAM) = ',i6)
 end if
 320 continue
-if (i .gt. nv2max) then
-  write (6, 350) i, nv2max
-  write (9, 350) i, nv2max
-350   format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-  if (bastst) then
-    return
-  else
-    call exit
-  end if
-end if
 if (bastst) then
   write (6, 360) i
   write (9, 360) i
@@ -726,3 +711,4 @@ write (8, 1285) nvib
 write (8, 285) potfil
 return
 end
+end module mod_hiba23_3p2s

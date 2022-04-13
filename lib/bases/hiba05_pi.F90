@@ -1,10 +1,13 @@
+#include "assert.h"
+module mod_hiba05_pi
+contains
 ! sypi (savpi/ptrpi) defines, save variables and reads                   *
 !                  potential for general pi scattering                   *
 ! ----------------------------------------------------------------------
 subroutine bapi  (j, l, is, jhold, ehold, ishold, nlevel, &
                   nlevop, c0, c1, c2, cf, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+                  ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 ! ----------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision
 !  of a 1pi in a case (a) basis, or of a 2pi or 3pi molecule in an
@@ -123,15 +126,16 @@ subroutine bapi  (j, l, is, jhold, ehold, ishold, nlevel, &
 !   vlmpi:     returns angular coupling coefficient for
 !              particular choice of channel index
 ! ----------------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_cov2, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use constants, only: econv, xmconv, ang2c
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*80 string
 character*27 case
@@ -222,13 +226,6 @@ if (.not. (imult .eq. 2 .and. nman .eq. 1)) nman = imult
 if (nman .ne. imult) nterm = 1
 if (nterm .eq. 2) &
     nlam = nlam0 + (lammax(2) - lammin(2)) / istep + 1
-if (nlammx .lt. nlam) then
-  write (6, 80) nlam, nlammx
-  write (9, 80) nlam, nlammx
-80   format (/' ** TOTAL NUMBER OF ANISOTROPIC TERMS=', &
-          i2, ' > NLAMMX=', i2,'; ABORT')
-  stop
-end if
 if (clist) then
   if (bastst) write (6, 90) nlam
   write (9, 90) nlam
@@ -737,15 +734,17 @@ if (bastst.and. iprint.ge. 2) then
 380   format (/' ILAM  LAMBDA  ICOL  IROW    I   IV2      VLAM')
 end if
 i = 0
-lamsum = 0
 if (csflag) lcol = nu
 vii(0) = zero
 vii(1) = zero
 vii(2) = zero
 v11 = zero
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 450 ilam = 1, nlam
 !  ilam is the angular expansion label
   inum = 0
+  ancouma => v2%get_angular_coupling_matrix(ilam)
   do 430 icol = 1, n
     if (efield .eq. zero) then
       iepsc = isign(1,is(icol))
@@ -822,37 +821,25 @@ do 450 ilam = 1, nlam
       end if
       if (vlam .ne. zero) then
         i = i + 1
-        if (i .le. nv2max) then
-          inum = inum + 1
-          v2(i) = vlam
-          iv2(i) = ntop * (icol - 1) + irow
-          if (bastst.and. iprint .ge. 2) then
-            write (6, 410) ilam, lb, icol, irow, i, iv2(i), vlam
-            write (9, 410) ilam, lb, icol, irow, i, iv2(i), vlam
-410             format (i4, 2i7, 3i6, g17.8)
-          end if
+        inum = inum + 1
+        call ancouma%set_element(irow=irow, icol=icol, vee=vlam)
+        if (bastst.and. iprint .ge. 2) then
+          write (6, 410) ilam, lb, icol, irow, i, vlam
+          write (9, 410) ilam, lb, icol, irow, i, vlam
+410             format (i4, 2i7, 2i6, g17.8)
         end if
       end if
 420     continue
 430   continue
-  if (i .le. nv2max) lamnum(ilam) = inum
   if (bastst) then
-    write (6, 440) ilam, lamnum(ilam)
-    write (9, 440) ilam, lamnum(ilam)
+    write (6, 440) ilam, ancouma%get_num_nonzero_elements()
+    write (9, 440) ilam, ancouma%get_num_nonzero_elements()
 440     format ('ILAM=', i3, ' LAMNUM(ILAM) =', i6)
   end if
-  lamsum = lamsum + lamnum(ilam)
 450 continue
-if (i .gt. nv2max) then
-  write (6, 460) i, nv2max
-  write (9, 460) i, nv2max
-460   format (' *** NUMBER OF NONZERO V2 ELEMENTS = ', i6, &
-          ' > NV2MAX=', i6, '; ABORT ***')
-  stop
-end if
 if (clist .and. bastst) then
-  write (6, 470) lamsum
-  write (9, 470) lamsum
+  write (6, 470) v2%get_num_nonzero_elements()
+  write (9, 470) v2%get_num_nonzero_elements()
 470   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', i6)
 end if
 return
@@ -1149,3 +1136,4 @@ write(8, 160) dmom, efield
 write (8, 285) potfil
 return
 end
+end module mod_hiba05_pi

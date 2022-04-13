@@ -307,6 +307,7 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_covvl, only: vvl
 use mod_grovec, only: igrovec_type_block, dgrovec_type_block
+use mod_hiba10_22p, only: trans22
 implicit none
 
 real(8), dimension(1), intent(out) :: w

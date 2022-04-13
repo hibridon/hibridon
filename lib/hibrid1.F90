@@ -97,6 +97,7 @@ use mod_coqvec, only: nphoto, q
 use mod_cosc10, only: sc10
 use mod_cov2, only: ancou_type
 use mod_hibrid3, only: outmat, potent
+use mod_hiba10_22p, only: energ22
 implicit double precision (a-h, o-z)
 !  matrix dimensions (row dimension = nmax, matrices stored column by column)
 real(8), dimension(nmax*nmax), intent(inout) :: z

@@ -1,4 +1,7 @@
-! sys2sg1sg (sav2sg1sg/ptr2sg1sg) defines, saves variables and reads     *
+#include "assert.h"
+module mod_hiba26_2sg1sg
+contains
+! sy2sg1sg (sav2sg1sg/ptr2sg1sg) defines, saves variables and reads     *
 !                  potentials for 2sigma - 1sigma                        *
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision
@@ -31,9 +34,6 @@
 !      type(lm_type), dimension(:), allocatable :: lms
 !      end module mod_1sg1sg
 ! --------------------------------------------------------------------
-#include "assert.h"
-module mod_hiba26_2sg1sg
-contains
 subroutine ba2sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
      nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
      flaghf, flagsu, csflag, clist, bastst, ihomo, &
@@ -122,11 +122,10 @@ subroutine ba2sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
 ! --------------------------------------------------------------------
 use mod_1sg1sg
 use mod_cov2, only: ancou_type, ancouma_type
-use mod_coiv2, only: iv2
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coj12, only: j12
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
@@ -431,7 +430,6 @@ do 400 ilam = 1, nlam
     j12c = j12(icol)
     lc = l(icol)
     do 350 irow = icol, n
-      ij = ntop * (icol - 1) + irow
       j1r = j(irow)/10
       iepsr = is(irow)
       j2r = mod(j(irow),10)
@@ -446,10 +444,10 @@ do 400 ilam = 1, nlam
         call ancouma%set_element(irow=irow, icol=icol, vee=vee)
         if (bastst .and. iprint.ge.2) then
           write (6, 290) ilam, ll1, ll2, lltot, &
-              icol, irow, i, ij, vee
+              icol, irow, i, vee
           write (9, 290) ilam, ll1, ll2, lltot, &
-              icol, irow, i, ij, vee
-290             format (i4, 3i5, 2x, 2i5, 2i8, e20.7)
+              icol, irow, i, vee
+290             format (i4, 3i5, 2x, 2i5, i8, e20.7)
         end if
       end if
 350     continue
@@ -462,8 +460,8 @@ do 400 ilam = 1, nlam
   lamsum = lamsum + ancouma%get_num_nonzero_elements()
 400 continue
 if (clist .and. bastst) then
-  write (6, 420) lamsum
-  write (9, 420) lamsum
+  write (6, 420) v2%get_num_nonzero_elements()
+  write (9, 420) v2%get_num_nonzero_elements()
 420   format (' *** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', &
       i8)
 end if
@@ -533,7 +531,7 @@ vee = phase * facj * cg1 * cg2 * cg3 * f6j * f9j / sq4pi3
 return
 end
 ! -----------------------------------------------------------------------
-subroutine sys2sg1sg (irpot, readp, iread)
+subroutine sy2sg1sg (irpot, readp, iread)
 !  subroutine to read in system dependent parameters for collisions of
 !  2sigma + 1sigma linear molecules
 !  current revision date: 26-aug-2017 by p.dagdigian

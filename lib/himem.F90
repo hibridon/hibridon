@@ -1,3 +1,4 @@
+#include "assert.h"
 module mod_com
    implicit none
    character(len=300) :: com_file 
@@ -133,6 +134,7 @@ module mod_cov2
      procedure                  :: get_angular_coupling_matrix => ancou_type_get_angular_coupling_matrix
      procedure                  :: ensure_ancouma_is_allocated => ancou_type_ensure_ancouma_is_allocated
      procedure                  :: empty => ancou_type_empty
+     procedure                  :: print => ancou_type_print
      procedure                  :: print_summary => ancou_type_print_summary
 
    end type ancou_type
@@ -229,6 +231,8 @@ module mod_cov2
       integer :: max_num_elements
       real(8) :: expected_sparsity = 0.1
       integer :: expected_num_elements
+      ASSERT(ilam > 0)
+      ASSERT(ilam <= this%nlam)
       ! v2 matrix is triangular
       max_num_elements = this%num_channels * (this%num_channels + 1)
       expected_num_elements = expected_sparsity * max_num_elements
@@ -280,8 +284,39 @@ module mod_cov2
       end do
    end subroutine 
 
-   subroutine ancou_type_print_summary(this)
-      class(ancou_type)        :: this
+   subroutine ancou_type_print(this, unit)
+      class(ancou_type), intent(in)    :: this
+      integer, intent(in) :: unit
+      integer :: ilam, num_lam_nz_elements, num_channels, lam_num_elements
+      integer :: num_nz_elements, num_elements, nz_el_index, irow, icol
+      integer :: ij
+      real(8) :: vee
+      num_nz_elements = int(0, 8)
+      num_elements = int(0, 8)
+      do ilam = 1, this%nlam
+         if (this%ancouma(ilam)%is_allocated) then
+            num_channels = this%ancouma(ilam)%num_channels
+            lam_num_elements = num_channels * num_channels
+            num_lam_nz_elements = this%ancouma(ilam)%get_num_nonzero_elements()
+            if (num_lam_nz_elements > 0) then
+               write (unit,'(A, I3, A, I10, A, I10, A, F6.2, A)') 'ilam = ', ilam, ' : ', num_lam_nz_elements, '/', lam_num_elements ,' non zero elements (', real(num_lam_nz_elements, 8) / lam_num_elements * 100.d0, '%)'
+               num_nz_elements = num_nz_elements + num_lam_nz_elements
+            end if
+            do nz_el_index = 1, num_lam_nz_elements
+               call this%ancouma(ilam)%get_element(nz_el_index, ij, vee)
+               icol = ij / num_channels
+               irow = modulo(ij, num_channels)
+               write(unit, fmt='(A, I4, A, I4, A, F6.2, A)') '(', irow, ', ', icol, ')=', vee, ' '
+            end do
+            num_elements = num_elements + lam_num_elements
+         end if
+      end do
+      write (unit,'(A, I10, A, I10, A, F6.2, A)') 'total : ', num_nz_elements, '/', num_elements ,' non zero elements (', real(num_nz_elements, 8) / num_elements * 100.d0, '%)'
+   end subroutine 
+
+   subroutine ancou_type_print_summary(this, unit)
+      class(ancou_type), intent(in)    :: this
+      integer, intent(in) :: unit
       integer :: ilam, num_lam_nz_elements, num_channels, lam_num_elements
       integer :: num_nz_elements, num_elements
       num_nz_elements = int(0, 8)
@@ -292,13 +327,13 @@ module mod_cov2
             lam_num_elements = num_channels * num_channels
             num_lam_nz_elements = this%ancouma(ilam)%get_num_nonzero_elements()
             if (num_lam_nz_elements > 0) then
-               write (6,'(A, I3, A, I10, A, I10, A, F6.2, A)') 'ilam = ', ilam, ' : ', num_lam_nz_elements, '/', lam_num_elements ,' non zero elements (', real(num_lam_nz_elements, 8) / lam_num_elements * 100.d0, '%)'
+               write (unit,'(A, I3, A, I10, A, I10, A, F6.2, A)') 'ilam = ', ilam, ' : ', num_lam_nz_elements, '/', lam_num_elements ,' non zero elements (', real(num_lam_nz_elements, 8) / lam_num_elements * 100.d0, '%)'
                num_nz_elements = num_nz_elements + num_lam_nz_elements
             end if
             num_elements = num_elements + lam_num_elements
          end if
       end do
-      write (6,'(A, I10, A, I10, A, F6.2, A)') 'total : ', num_nz_elements, '/', num_elements ,' non zero elements (', real(num_nz_elements, 8) / num_elements * 100.d0, '%)'
+      write (unit,'(A, I10, A, I10, A, F6.2, A)') 'total : ', num_nz_elements, '/', num_elements ,' non zero elements (', real(num_nz_elements, 8) / num_elements * 100.d0, '%)'
    end subroutine 
 
    subroutine print_ancou_stats()
