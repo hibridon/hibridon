@@ -140,6 +140,7 @@ The executable files will be put in the current directory (`~/hib_build`).
 
 ## 5. Test Hibridon (Optional)
 Hibridon testing must be activated (see previous section).
+The following commands need to be executed within the hibridon build directory (e.g. ~/hib_build/project/hibridon/).
 
 - **Run all tests**
     ```bash
@@ -152,6 +153,7 @@ Hibridon testing must be activated (see previous section).
     Where testsuite is the name of the test suite among:
     - `coverage` (covers most of the source code)
     - `quick` (runs only quick tests)
+    - `benchmark` (runs long tests for the purpose of measuring `hibridon`'s performance)
     
 - **Run tests for only one PES** 
     ```bash
