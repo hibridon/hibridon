@@ -2773,7 +2773,6 @@ subroutine dsigga(maxk,nnout,jfirst,jfinal,jtotd,jpack, &
 ! current revision date: 7-oct-2011 by pj dagdigian
 !------------------------------------------------------------------------
 use mod_codim, only: mmax
-use mod_cov2, only: ndummy
 use mod_cojq, only: jq ! jq(1)
 use mod_colq, only: lq ! lq(1)
 use mod_coinq, only: inq ! inq(1)

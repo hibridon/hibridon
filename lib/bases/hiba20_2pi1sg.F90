@@ -107,7 +107,6 @@ subroutine ba2pi1sg(jchn, lchn, ischn, jlev, elev, islev, nlev, &
      ihomo, nu, numin, jlpar, twomol, nchn, nmax, ntop, v2)
 use mod_2pi1sg
 use mod_cov2, only: ancou_type, ancouma_type
-use mod_coiv2, only: iv2
 use mod_cocent, only: cchn => cent
 use mod_coeint, only: echn => eint
 use mod_coj12, only: j12chn => j12

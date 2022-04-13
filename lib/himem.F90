@@ -89,11 +89,6 @@ module mod_conlam
 end module mod_conlam
 
 module mod_cov2
-   ! variables in this module
-   !    nv2max:    maximum core memory allocated for the v2 matrix
-   !    ndummy:    dummy variable for alignment
-   !    v2:        lower triangle of nonzero angular coupling matrix elements
-
 
    use mod_grovec, only: dgrovec_type, igrovec_type
    implicit none
@@ -145,8 +140,6 @@ module mod_cov2
      module procedure create_ancou_type
    end interface ancou_type
 
-   real(8), dimension(:), allocatable :: v2
-   integer, allocatable               :: nv2max, ndummy
    contains
 
    function ancouma_type_get_num_nonzero_elements(this) result(n)
@@ -346,27 +339,7 @@ module mod_cov2
       write(6,*) "number of ancouma_type instances created : ", g_num_ancouma_instances
    end subroutine
 
-   subroutine allocate_cov2(av2max, nlammx)
-      integer, intent(in) :: av2max
-      integer, intent(in) :: nlammx
-      allocate(v2(av2max)) ; allocate(nv2max) ; allocate(ndummy)
-      nv2max = av2max
-   end subroutine allocate_cov2
-
 end module mod_cov2
-
-module mod_coiv2
-! variables in this module:
-!    iv2:  matrix address of v2 matrix for each non-zero element
-!          row+column index of v2 matrix for each non-zero element
-   implicit none
-   integer, dimension(:), allocatable :: iv2
-   contains
-   subroutine allocate_coiv2(av2max)
-      integer, intent(in) :: av2max
-      allocate(iv2(av2max)) ;
-   end subroutine allocate_coiv2
-end module mod_coiv2
 
 module mod_cocent
    ! variables in this module
@@ -1402,8 +1375,6 @@ end module mod_cosysr
     !!   common /comom/  xmom(3), imom(13)
     !!   common /cosout/ nnout, jout(kout)
     !!   common /coiout/ niout, indout(kout)
-    !!   common /cov2/ nv2max, ndummy, v2(kv2max)
-    !!   common /coiv2/ iv2(kv2max)
     !!   common /cocent/ cent(kmax)
     !!   common /coeint/ eint(kmax)
     !!   common /coj12/ j12(kmax)
