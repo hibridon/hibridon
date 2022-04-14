@@ -42,7 +42,7 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
 
   if(GENERATE_PROFILING_PDF)
     add_test(NAME ${TEST_ID}_build_profiling_pdf
-      COMMAND  bash -c "${PROFILING_GPROF_EXE} ${CMAKE_CURRENT_BINARY_DIR}/${TEST_EXE}  | ${PROFILING_GPROF2DOT_EXE} | ${PROFILING_DOT_EXE} -Tpdf -o call_graph.pdf"
+      COMMAND  bash -c "${PROFILING_GPROF_EXE} ${CMAKE_CURRENT_BINARY_DIR}/${TEST_EXE} > ${TEST_ID}_gprofout.txt && cat ${TEST_ID}_gprofout.txt | ${PROFILING_GPROF2DOT_EXE} | ${PROFILING_DOT_EXE} -Tpdf -o ${TEST_ID}_call_graph.pdf"
       WORKING_DIRECTORY "${TEST_BUILD_DIR}")
     set_property(TEST ${TEST_ID}_build_profiling_pdf PROPERTY LABELS ${TEST_ID} ${TEST_LABELS})
   endif()
