@@ -6,7 +6,6 @@
 
 set(ENABLE_ASSERTS "ON" CACHE BOOL "to enable or disable assert checks for debug builds (mostly for developers).")
 
-
 add_library(hib
     assert.f90
     grovec.F90
@@ -107,6 +106,8 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<CONFIG:DEBUG>:-fsanitize=address>     # Address sanitizer
       $<$<CONFIG:DEBUG>:-Wuninitialized>        # Emit warnings for uninitialized variables 
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -fprofile-arcs -ftest-coverage at compile time)
+      $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
+      $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
     )
 # Intel (ifort)
 elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
@@ -130,6 +131,8 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
       $<$<CONFIG:DEBUG>:-traceback>               # Generates extra information in the object file to provide source file traceback information when a severe error occurs at run time
       $<$<CONFIG:DEBUG>:-fp-stack-check>          # Tell the compiler to generate extra code after every function call to ensure that the floating-point stack is in the expected state
       #$<$<CONFIG:DEBUG>:-warn all>                # Enable all warnings
+      $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
+      $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
     )
 endif()
 
@@ -145,8 +148,16 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       PUBLIC
       $<$<CONFIG:DEBUG>:-fsanitize=address>         # Address sanitizer
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -lgcov at link time)
+      $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
+      $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
     )
 # Intel (ifort)
+elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
+    target_link_libraries(hib
+      PUBLIC
+      $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
+      $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
+    )
 endif()
 
 
