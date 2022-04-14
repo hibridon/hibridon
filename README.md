@@ -177,9 +177,9 @@ This one line command configures, builds and tests Hibridon from a directory `~/
 
 Please note that this only builds and tests Hibridon library; it doesn't build any user-provided PES.
 
-<!---
 ## For code contributors
 
+<!---
 ### Code coverage
 
 Code coverage option `ENABLE_CODE_COVERAGE` allows the delvelopers to identify the portions of hibridon source code that are not yet covered by the tests.
@@ -189,8 +189,8 @@ To activate code coverage, add `-DENABLE_CODE_COVERAGE=ON` to the cmake command.
 Then, `make html_coverages`, will convert these coverage files into html reports:
 - `<hibridon_build_dir>/coverage/<test_id>/index.html`: a report that shows the code covered by the test `<test_id>`
 - `<hibridon_build_dir>/coverage/total/index.html`: a report that shows the code covered by all tests
+-->
 
 ### Performance profiling
 
 To activate profiling, add `-DENABLE_PROFILING=ON` to the cmake command. This will build and run hibridon with profiling option. When run, each test will additionnaly create a `call_graph.pdf` file which shows where time was spent during the test.
--->
