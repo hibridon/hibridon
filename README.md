@@ -193,4 +193,4 @@ Then, `make html_coverages`, will convert these coverage files into html reports
 
 ### Performance profiling
 
-To activate profiling, add `-DENABLE_PROFILING=ON` to the cmake command. This will build and run hibridon with profiling option. When run, each test will additionnaly create a `call_graph.pdf` file which shows where time was spent during the test.
+To activate profiling, add `-DENABLE_PROFILING=ON` to the cmake command. This will build and run hibridon with profiling option. When run, each test will additionnaly create a `<test_id>_call_graph.pdf` file which shows where time was spent during the test.
