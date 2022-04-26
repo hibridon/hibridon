@@ -3,11 +3,12 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
 
   set(TEST_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})
   set(TEST_SRC_DIR ${CMAKE_CURRENT_LIST_DIR})
-  set(TEST_EXE ${TEST_ID})
-
-
+  get_filename_component(TEST_EXE ${TEST_POT_SRC_FILE} NAME_WE)
+  
   # Create an executable for that test
-  add_hibexe(${TEST_EXE} ${TEST_SRC_DIR}/${TEST_POT_SRC_FILE} ${TEST_T_MATRIX_SIZE})
+  if (NOT TARGET ${TEST_EXE})
+    add_hibexe(${TEST_EXE} ${TEST_SRC_DIR}/${TEST_POT_SRC_FILE} ${TEST_T_MATRIX_SIZE})
+  endif()
 
   file(MAKE_DIRECTORY ${TEST_BUILD_DIR}/potdata)
   separate_arguments(TEST_COMMAND_FILE)
