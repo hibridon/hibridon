@@ -1496,7 +1496,7 @@ if(isg.ne.0) then
 !  evibsg is E (see Kotlar et al., JMS 80, 86 (1980), Table II))
   do 15 i=1,nvibs
         if(isicod+2.gt.size(ispar,1)) stop 'isicod'
-        if(isrcod+7.gt.size(ispar,1)) stop 'isrcod'
+        if(isrcod+7.gt.size(rspar,1)) stop 'isrcod'
         if(iread.ne.0) then
       read (8,*,err=800) ivs,(ispar(isicod+j),j=1,2)
       ivibs(i)=ivs
