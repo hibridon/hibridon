@@ -512,14 +512,12 @@ module mod_cotq1
    ! (they used to be a different view of the same area in memory
    ! when this module was a common block)
    real(8), dimension(:,:), allocatable :: tq1
-   real(8), dimension(:,:,:), allocatable :: vec
    real(8), dimension(:), allocatable :: dpsir
    real(8), dimension(:), allocatable :: scmat
    contains
    subroutine allocate_cotq1(n)
       integer, intent(in) :: n
       allocate(tq1(n,n))
-      allocate(vec(3,3,1))
       allocate(dpsir(n*n))  ! note : the size has been found by trial and error (with all tests passing)
       allocate(scmat(n*n))  ! note : the size has been found by trial and error (with all tests passing)
    end subroutine allocate_cotq1

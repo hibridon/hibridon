@@ -176,7 +176,6 @@ use mod_cov2, only: nv2max, junkv => ndummy, v2
 use mod_coiv2, only: iv2
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_cotq1, only: vec ! vec(3,3,1)
 use mod_coisc1, only: ivec => isc1 ! ivec(1)
 use mod_coisc2, only: ivhold => isc2 ! ivhold(1)
 use mod_coisc3, only: nlvp => isc3 ! nlvp(1)
@@ -199,6 +198,7 @@ dimension jhold(1), ishold(1), iohold(1), nvhold(1), ehold(1), &
           j(1), is(1), iom(1), nlv(1), l(1)
 parameter (nvmax=20)
 dimension ipvs(0:nvmax),ipvp(0:nvmax)
+real(8), dimension(3, 3, nmax) :: vec
 data iomc/2,1,1,1/
 data iomr/2,1,2,1/
 ! this determines which eps level is first in channel list (arbitrary)
