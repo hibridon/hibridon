@@ -1702,7 +1702,7 @@ if(ipi.ne.0) then
            'ivp, jmin, jmax'
     write (8,203) (rspar(isrcod+j),j=1,3),'bpi, dpi, hpi'
     write (8,203) (rspar(isrcod+j),j=4,6),'aso, p, pd'
-    write (8,203) (rspar(isrcod+j),j=7,9),'q, qd, qd'
+    write (8,203) (rspar(isrcod+j),j=7,9),'q, qd, qh'
     write (8,202) (rspar(isrcod+j),j=10,12),'epi, adi, gpi'
     if(ispar(4).ne.0) then
       ivs=ispar(isicod+3)
