@@ -1453,7 +1453,7 @@ if (isg .eq. 1 .and. ipi .eq. 0) then
   nterm=1
   if (isgpi .ne. 0) then
     write (6, 6) isgpi
-6     format ('  ISGPI SET EQUAL TO 0 BECAUSE ONLY SIGMA STATE')
+6     format ('  ISGPI SET EQUAL TO 0 INSTEAD OF ', i2, ' BECAUSE ONLY SIGMA STATE')
     isgpi=0
     ispar(4)=0
   endif
@@ -1462,7 +1462,7 @@ if (isg .eq. 0 .and. ipi .eq. 1) then
   nterm=2
   if (isgpi .ne. 0) then
     write (6, 10) isgpi
-10     format ('  ISGPI SET EQUAL TO 0 BECAUSE ONLY PI STATE')
+10     format ('  ISGPI SET EQUAL TO 0 INSTEAD OF ', i2, ' BECAUSE ONLY PI STATE')
     isgpi=0
     ispar(4)=0
   endif
