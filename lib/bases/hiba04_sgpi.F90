@@ -214,6 +214,9 @@ data nprsg,nprpi/7,14/
 nterm=ispar(1)
 isg=ispar(2)
 ipi=ispar(3)
+if ((isg == 0) .and. (ipi == 0)) then
+  stop 'at least one of isg and ipi is expected to be non zero'
+end if
 if(nterm.eq.1) then
   isg=1
   ipi=0
@@ -630,6 +633,9 @@ if(isg.ne.0) then
       eint(n)=e(3,3)
 100     continue
 110   continue
+end if
+if (n < 1) then
+  stop 'the total number of distinct levels is expected to be greater than 0'
 end if
 nlevel = n
 !  nlevel now contains the total number of distinct levels
