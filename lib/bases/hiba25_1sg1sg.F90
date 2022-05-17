@@ -201,9 +201,10 @@ do j1 = 0, j1max
     ishold(nlevel) = 0
     jj1 = j1 * (j1 + 1.d0)
 !
-!  DON'T subtract energy of lowest H2 level
+!  subtract energy of lowest H2 level (13-jan-2022)
+    ezero = b2rot * j2min * (j2min + 1d0)
     ehold(nlevel) = (b1rot * jj1 - d1rot * jj1**2 &
-      + b2rot * (j2 * (j2 + 1.d0))) / econv
+      + b2rot * j2 * (j2 + 1.d0) - ezero) / econv
   end do
 end do
 !
