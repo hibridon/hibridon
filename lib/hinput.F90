@@ -70,7 +70,7 @@ implicit double precision (a-h,o-z)
 !  ncode is the number of bcod's
 !  bcod stores hibridon's commands
 !  fcod stores logical flags (length = lcode)
-parameter (ncode = 39, lcode = 28, iicode = 10, ircode = 9, &
+parameter (ncode = 40, lcode = 28, iicode = 10, ircode = 9, &
            icode = iicode+ircode)
 character*80 line
 character*40 fnam1,fnam2,jobnam,input,output,savfil, &
@@ -220,6 +220,7 @@ fcod(28)='BOUNDC'
 ! stmix:  3000
 ! trnprt:  3100
 ! prsbr:   3200
+! showpot:  3300
 ! nb after changing the following list, check that all the variables "incode"
 ! that follow after address 900 are changed accordingly
 bcod(1)='CHECK'
@@ -261,6 +262,7 @@ bcod(36)='HYPXSC'
 bcod(37)='STMIX'
 bcod(38)='TRNPRT'
 bcod(39)='PRSBR'
+bcod(40)='SHOWPOT'
 !
 iipar=iicode
 irpar=ircode
@@ -417,7 +419,7 @@ end if
       800,500,1300,700,2300, &
       1200,1600,430,2650,2800, &
       460,2850,2900,2950,3000, &
-      3100,3200),i
+      3100,3200,3300),i
 ! basis type and kind of calculation
 50 if(l.eq.0) goto 1
 l1 = l
@@ -1479,6 +1481,13 @@ call getval(code(1:lc),empty_var_list,j,a(1))
 ! get in1, in2, jtotmx, join, jmax
 3105 continue
 call trnprt(fnam1,a)
+goto 1
+3300 continue
+write(6,*) "************************************************************"
+write(6,*) "Entering the DRIVER subroutine of the potential"
+write(6,*) "Press Ctrl+D to go back to Hibridon's console"
+write(6,*) "************************************************************"
+call driver
 goto 1
 ! pressure broadening cross sections - added by p. dagdigian
 3200 call parse(line,l,fnam1,lc)
