@@ -1,0 +1,61 @@
+name: basic_ci  # this basic continuous integration is expected to perform the quick main tests, es explained in https://github.com/hibridon/hibridon/issues/102 (it should cover main risks for main platform types) and its runners are expected to be always available to ensure pull requests and pushes are always validated in time.
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+env:
+  BUILD_TYPE: "Debug"
+  CMAKE_BUILD_PARALLEL_LEVEL: "1" # disable parallel builds
+  CTEST_OUTPUT_ON_FAILURE: "ON" # This way we don't need a flag to ctest
+  CTEST_PARALLEL_LEVEL: "1"
+jobs:
+  build_and_test:
+    runs-on: debian-9
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Debug, Release]
+        compiler: [gfortran, ifort]
+    env:
+      ASAN_OPTIONS: "detect_leaks=${{ matrix.build_type == 'Release' && '0' || '1' }}" # Disable address sanitizer's memory leak detection in release builds
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Configure CMake
+      run: |
+        if [ "${{matrix.compiler}}" == 'ifort' ]
+        then
+          module load compilers/ifort/latest && \
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_TESTING=ON -DCMAKE_Fortran_COMPILER=ifort -DBLA_VENDOR=Intel10_64lp
+        else
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_TESTING=ON
+        fi
+
+    - name: Build
+      run: |
+        if [ "${{matrix.compiler}}" == 'ifort' ]
+        then
+          module load compilers/ifort/latest
+        fi
+        cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
+
+    - name: catch build fail
+      run: |
+        if [ "${{matrix.compiler}}" == 'ifort' ]
+        then
+          module load compilers/ifort/latest
+        fi
+        cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --verbose
+      if: failure()
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      run: |
+        if [ "${{matrix.compiler}}" == 'ifort' ]
+        then
+          module load compilers/ifort/latest
+        fi
+        ctest --parallel --output-on-failure -L coverage
