@@ -18,7 +18,7 @@ jobs:
       matrix:
         os: [macos-11.2]
         build_type: [Debug, Release]
-        compiler: [gfortran-9, gfortran-10, gfortran-11, ifort]
+        compiler: [gfortran-11, ifort]
         library: [Apple, Intel10_64lp]
     env:
       FC: ${{ matrix.compiler }}
