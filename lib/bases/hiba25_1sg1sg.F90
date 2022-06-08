@@ -12,7 +12,7 @@
 !  in the appendix of green, jcp 62, 2271 (1975)
 !
 !  author:  paul dagdigian
-!  current revision date:  15-jun-2017 by pjd
+!  current revision date:  19-may-2022 by pjd
 ! --------------------------------------------------------------------
 !     This module contains (explictly) the number of terms and their
 !     indices in the expansion of the PES.  Its contents should be
