@@ -108,7 +108,7 @@ This will automatically find the required libraries and compiler and create a Ma
 - 
     ```bash
     cd ~/hib_build
-    cmake ./project/ DBLA_VENDOR=<BLAS_LIB> 
+    cmake ./project/ -DBLA_VENDOR=<BLAS_LIB> 
     ```
     Where `<BLAS_LIB>` is your BLAS library e.g.:
     - `OpenBLAS`
