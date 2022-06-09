@@ -161,7 +161,7 @@ nsum=nlam
 if (bastst) write (6, 14) nsum
 write (9, 14) nsum
 14 format (' ** TOTAL NUMBER OF ANISOTROPIC TERMS=', i2)
-nlam = nsum
+!nlam = nsum
 if (bastst) then
   if (flagsu) then
     write (6,16) rmu * xmconv, ered * econv, jtot, jlpar
