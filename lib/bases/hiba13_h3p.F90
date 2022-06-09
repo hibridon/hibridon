@@ -160,11 +160,11 @@ if(nterm.ne.1) then
 9   format(' *** NTERM = ',i3,' .NE. 1 FOR MOL + 3P ATOM; ABORT')
   call exit
 end if
-nsum=5
+nsum=nlam
 if (bastst) write (6, 14) nsum
 write (9, 14) nsum
 14 format (' ** TOTAL NUMBER OF ANISOTROPIC TERMS=', i2)
-nlam = nsum
+!nlam = nsum
 if (bastst) then
   if (flagsu) then
     write (6,16) rmu * xmconv, ered * econv, jtot, jlpar

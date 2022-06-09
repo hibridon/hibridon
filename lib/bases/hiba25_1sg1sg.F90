@@ -13,7 +13,7 @@
 !  in the appendix of green, jcp 62, 2271 (1975)
 !
 !  author:  paul dagdigian
-!  current revision date:  15-jun-2017 by pjd
+!  current revision date:  19-may-2022 by pjd
 ! --------------------------------------------------------------------
 !     This module contains (explictly) the number of terms and their
 !     indices in the expansion of the PES.  Its contents should be
@@ -206,9 +206,10 @@ do j1 = 0, j1max
     ishold(nlevel) = 0
     jj1 = j1 * (j1 + 1.d0)
 !
-!  DON'T subtract energy of lowest H2 level
+!  subtract energy of lowest H2 level (13-jan-2022)
+    ezero = b2rot * j2min * (j2min + 1d0)
     ehold(nlevel) = (b1rot * jj1 - d1rot * jj1**2 &
-      + b2rot * (j2 * (j2 + 1.d0))) / econv
+      + b2rot * j2 * (j2 + 1.d0) - ezero) / econv
   end do
 end do
 !

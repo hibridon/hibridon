@@ -1,7 +1,11 @@
-# Hibridon v5.0 alpha
 
-[![macOS-11.2](https://github.com/hibridon/hibridon/actions/workflows/macOS-11.2.yml/badge.svg?branch=master)](https://github.com/hibridon/hibridon/actions/workflows/macOS-11.2.yml)
-[![Debian-10.6](https://github.com/hibridon/hibridon/actions/workflows/Debian-10.6.yml/badge.svg?branch=master)](https://github.com/hibridon/hibridon/actions/workflows/Debian-10.6.yml)
+[![Full CI on macOS-11.2](https://github.com/hibridon/hibridon/actions/workflows/full_macOS-11.2.yml/badge.svg)](https://github.com/hibridon/hibridon/actions/workflows/full_macOS-11.2.yml)
+[![Full CI on Debian 9](https://github.com/hibridon/hibridon/actions/workflows/full_Debian-9.yml/badge.svg)](https://github.com/hibridon/hibridon/actions/workflows/full_Debian-9.yml)
+
+[what does that mean ?](link_to_wiki_page)
+
+---
+# Hibridon v5.0 alpha
 
 Computer Software for
 Molecular Inelastic Scattering and Photodissociation
@@ -108,7 +112,7 @@ This will automatically find the required libraries and compiler and create a Ma
 - 
     ```bash
     cd ~/hib_build
-    cmake ./project/ DBLA_VENDOR=<BLAS_LIB> 
+    cmake ./project/ -DBLA_VENDOR=<BLAS_LIB> 
     ```
     Where `<BLAS_LIB>` is your BLAS library e.g.:
     - `OpenBLAS`

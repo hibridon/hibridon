@@ -13,6 +13,7 @@
 #include "common/ground.F90"
 #include "common/bausr.F90"
 subroutine loapot(iunit,filnam)
+use mod_conlam, only: nlam, nlammx, lamnum
 ! --------------------------------------------------------------------------
 character*(*) filnam
 #include "common/parbas.F90"
@@ -26,6 +27,7 @@ mproj(1)=0
 ntv(1)=1
 ivcol(1,1)=0
 ivrow(1,1)=0
+nlam=9 ; nlammx=9 ; lamnum(1)=9
 return
 end
 ! --------------------------------------------------------------------------
