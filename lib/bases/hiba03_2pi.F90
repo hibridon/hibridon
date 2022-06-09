@@ -132,7 +132,6 @@ logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbasl.F90"
 common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
-common /coconv/ econv, xmconv
 dimension j(2), l(1), jhold(1), ehold(1), is(2), &
           c12(1), c32(1), ieps(2), ishold(1), sc1(1), sc4(1)
 integer, allocatable :: ifi(:)

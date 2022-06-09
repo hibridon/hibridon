@@ -309,8 +309,8 @@ use mod_covvl, only: vvl
 use mod_grovec, only: igrovec_type_block, dgrovec_type_block
 use mod_hiba10_22p, only: trans22
 implicit none
-
-real(8), dimension(1), intent(out) :: w
+real(8) :: second
+real(8), dimension(*), intent(out) :: w
 real(8), intent(in) :: r
 integer, intent(in) :: nch
 integer, intent(in) :: nmax
