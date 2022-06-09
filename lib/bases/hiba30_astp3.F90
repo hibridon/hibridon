@@ -537,7 +537,7 @@ do i2 = 1, i2num
 !
     nlevel = nlevel + 1
     ehold(nlevel) = (etemp(i1) + e2rot(i2)) / econv
-    jhold(nlevel) = 10 * ji + j2rot(i2)
+    jhold(nlevel) = 100 * ji + j2rot(i2)
     ishold(nlevel) = isi * ki
     kp(nlevel) = kp1
     ko(nlevel) = ko1
@@ -611,8 +611,8 @@ if (bastst) then
     '   #  J1  IS  KP  KO  J2  Eint(cm-1)  Coeffs'/1x,65('-'))
   do i = 1, nlevel
     ecm = ehold(i) * econv
-    j1 = jhold(i)/10
-    j2 = mod(jhold(i),10)
+    j1 = jhold(i)/100
+    j2 = mod(jhold(i),100)
     write (6, 135) i, j1, ishold(i), kp(i), ko(i), j2, ecm, &
       (chold(nn),nn=(i - 1)*narray + 1, &
       (i - 1)*narray + isizh(i))
@@ -636,8 +636,8 @@ do 250  i = 1, nlevel
 !  Microwave Spectroscopy, Eq. (3-27), p. 64.].
 n = 0
 do i = 1, nlevel
-  j1 = jhold(i)/10
-  j2 = mod(jhold(i),10)
+  j1 = jhold(i)/100
+  j2 = mod(jhold(i),100)
   ki = abs(ishold(i))
   iss = sign(1, ishold(i))
   ipar = iss * (-1) ** (j1 + j2 + ki)
@@ -703,8 +703,8 @@ if (bastst) then
     '   #  J1  IS  J2  J12  L     EINT(CM-1)'/1x,50('-'))
   do 330  i = 1, n
     ecm = eint(i) * econv
-    j1 = j(i)/10
-    j2 = mod(j(i),10)
+    j1 = j(i)/100
+    j2 = mod(j(i),100)
     if (bastst) then
       isize = isiz(i)
       isub = (i - 1)*narray
@@ -749,14 +749,14 @@ do 400 ilam = 1, nlam
   lltot = lms(ilam)%ltot
   inum = 0
   do 355 icol = 1, n
-    j1c = j(icol)/10
-    j2c = mod(j(icol),10)
+    j1c = j(icol)/100
+    j2c = mod(j(icol),100)
     j12c = j12(icol)
     lc = l(icol)
     do 350 irow = icol, n
       ij = ntop * (icol - 1) + irow
-      j1r = j(irow)/10
-      j2r = mod(j(irow),10)
+      j1r = j(irow)/100
+      j2r = mod(j(irow),100)
       j12r = j12(irow)
       lr = l(irow)
       call vastp3(j1r,j2r,j12r,lr,j1c,j2c,j12c,lc, &
