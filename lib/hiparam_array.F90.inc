@@ -17,6 +17,8 @@ module MODULE_NAME
   procedure, public :: set_value => param_set_value
   procedure, public :: get_name => param_get_name
   procedure, public :: set_name => param_set_name
+  procedure, public :: get_vref => param_get_vref
+
   end type
 
   type :: roparam_type
@@ -46,6 +48,7 @@ module MODULE_NAME
   end type
 
 contains
+  ! param methods
   function param_get_value(this)
     class(param_type), intent(in) :: this
     TT :: param_get_value
@@ -70,6 +73,15 @@ contains
     this%name = name
   end subroutine param_set_name
 
+  function param_get_vref(this)
+    class(param_type), intent(inout) :: this
+    TT, pointer :: param_get_vref
+    param_get_vref = this%value
+  end function
+
+
+  ! roparam methods
+
   function roparam_get_value(this)
     class(roparam_type), intent(in) :: this
     TT :: roparam_get_value
@@ -82,6 +94,7 @@ contains
     roparam_get_name = this%name
   end function roparam_get_name
 
+  ! param_array methods
 
   subroutine param_array_append(this, param_name)
     class(param_array_type), intent(inout) :: this

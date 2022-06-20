@@ -39,6 +39,8 @@ module mod_param_group
 
   contains 
     procedure, public :: create_iparam => param_group_create_iparam
+    procedure, public :: create_rparam => param_group_create_rparam
+    procedure, public :: create_lparam => param_group_create_lparam
     procedure, public :: get_ivalue => param_group_get_ivalue
     procedure, public :: get_iparam => param_group_get_iparam
     procedure, public :: get_iroparam => param_group_get_iroparam
@@ -54,6 +56,22 @@ contains
     type(iparam_type) :: param_group_create_iparam
 
     param_group_create_iparam = this%iparams%create_param(param_name)
+  end function
+
+  function param_group_create_rparam(this, param_name)
+    class(param_group_type), intent(inout) :: this
+    character(len=*), intent(in) :: param_name
+    type(rparam_type) :: param_group_create_rparam
+
+    param_group_create_rparam = this%rparams%create_param(param_name)
+  end function
+
+  function param_group_create_lparam(this, param_name)
+    class(param_group_type), intent(inout) :: this
+    character(len=*), intent(in) :: param_name
+    type(lparam_type) :: param_group_create_lparam
+
+    param_group_create_lparam = this%lparams%create_param(param_name)
   end function
 
   function param_group_get_ivalue(this, param_name)

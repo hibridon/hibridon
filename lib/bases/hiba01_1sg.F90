@@ -434,10 +434,10 @@ use mod_coiv2, only: iv2
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
-use mod_cosysi, only: nscode, isicod, ispar, convert_ispar_to_mat
-use mod_cosysr, only: isrcod, junkr, rspar, convert_rspar_to_mat
+!use mod_cosysi, only: nscode, isicod, ispar, convert_ispar_to_mat
+!use mod_cosysr, only: isrcod, junkr, rspar, convert_rspar_to_mat
 use constants, only: econv, xmconv, ang2c
-
+use mod_param_group, only: basis_params
 implicit double precision (a-h,o-z)
 integer, intent(out) :: j(:)
 integer, intent(out) :: l(:)
@@ -475,8 +475,10 @@ common /coskip/ nskip, iskip
 !   xmconv is converson factor from amu to atomic units
 real(8), dimension(4, maxvib) :: rpar
 integer, dimension(2, maxvib) :: jranges
-integer, pointer :: nterm, nvmin, nvmax
-nterm=>ispar(1); nvmin=>ispar(2); nvmax=>ispar(3)
+integer :: nterm, nvmin, nvmax
+nterm = basis_params%get_ivalue('NTERM')
+nvmin = basis_params%get_ivalue('VMIN')
+nvmax = basis_params%get_ivalue('VAX')
 call convert_rspar_to_mat(4,maxvib, rpar)
 call convert_ispar_to_mat(2, maxvib, 4, jranges)
 zero = 0.d0
@@ -919,7 +921,7 @@ end if
 return
 end
 !  -----------------------------------------------------------------------
-subroutine sy1sg (irpot, readp, iread)
+subroutine sy1sg (irpot, readp, iread, basis_params)
 !  subroutine to read in system dependent parameters for singlet-sigma
 !   + atom scattering using werner-follmeg potential form
 !  if iread = 1 read data from input file
@@ -937,25 +939,25 @@ subroutine sy1sg (irpot, readp, iread)
 !              the channel basis
 !  line 14:
 !    brot:    rotational constant of the molecule in cm-1
-!  line 16:
-!    filnam:  name of file containing potential parameters
 !
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
-use mod_cosys, only: scod
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
+!use mod_cosys, only: scod
+!use mod_cosysi, only: nscode, isicod, iscod=>ispar
+!use mod_cosysr, only: isrcod, junkr, rspar
+use mod_param_group, only: param_group_type, iparam_type, rparam_type
+implicit none
+logical, intent(in) :: readp
+type(param_group_type), intent(out), allocatable :: basis_params
 integer irpot
-logical readp, existf
+logical existf
 logical airyfl, airypr, bastst, batch, chlist, csflag, &
                 flaghf, flagsu, ihomo,lpar
 character*1 dot
 character*4 char
-character*(*) fname
-character*60 filnam, line, potfil, filnm1
+character*60 line, potfil, filnm1
 #include "common/parbas.F90"
 common/covib/ nvib,ivib(maxvib)
 common /coskip/ nskip,iskip
@@ -963,6 +965,15 @@ common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
                 flaghf, flagsu, ihomo,lpar(18)
 
 common /coselb/ ibasty
+type(iparam_type) :: par_nterm
+type(iparam_type) :: par_vmin
+type(iparam_type) :: par_vmax
+type(iparam_type), dimension(:), allocatable :: par_jmin
+type(iparam_type), dimension(:), allocatable :: par_jmax
+type(rparam_type), dimension(:), allocatable :: par_brot
+type(rparam_type), dimension(:), allocatable :: par_drot
+type(rparam_type), dimension(:), allocatable :: par_hrot
+type(iparam_type), dimension(:), allocatable :: par_evib
 save potfil
 !equivalence(ispar(1),nterm),(ispar(2),nvibmn),(ispar(3),nvibmx)
 #include "common/comdot.F90"
@@ -970,11 +981,15 @@ save potfil
 
 !     number and names of system dependent parameters
 !  set default values for singlet-sigma scattering
+allocate(basis_params)
+par_nterm = basis_params%create_iparam('NTERM')
+par_vmin = basis_params%create_iparam('VMIN')
+par_vmax = basis_params%create_iparam('VMAX')
 
-ispar(1) = 1
+call par_nterm%set_value(1)
 if (iread .eq. 0) then
-  ispar(2) = 0
-  ispar(3) = 0
+  call par_vmin%set_value(0)
+  call par_vmax%set_value(0)
   lammin(1)=0
   lammax(1)=-1
   mproj(1)=0
@@ -987,9 +1002,9 @@ if (iread .eq. 1) irpot=1
 if (ihomo) nskip = 2
 potfil = ' '
 !  read number of vib states
-if(iread.ne.0) read (8, *, err=88) nvib, ispar(2),ispar(3) ! nvib, vmin, vmax
-if(nvib.gt.ispar(3)-ispar(2)+1) then
-  write (6,40) nvib, ispar(2), ispar(3)
+if(iread.ne.0) read (8, *, err=88) nvib, par_vmin%get_vref(), par_vmax%get_vref()
+if(nvib > par_vmax%get_value()-par_vmin%get_value()+1) then
+  write (6,40) nvib, par_vmin%get_value(), par_vmax%get_value()
 40   format(' ** PROBABLE VIBRATIONAL LEVEL NUMBERING ERROR:',/, &
          '   VMIN =',i2,', VMAX=',i3,', BUT NVIB =',i3)
   return
@@ -998,44 +1013,47 @@ if(nvib.gt.maxvib) stop 'nvib'
 if(nvib.le.0) nvib=1
 !  read data for each vib state
 !  brot, drot, hrot are bv, dv, hv (see huber herzberg, page x)
-scod(1)='NTERM'
-scod(2)='VMIN'
-scod(3)='VMAX'
-isrcod=0
-isicod=3
-iofr=2*nvib+4-1
+allocate(par_jmin(nvib))
+allocate(par_jmax(nvib))
+allocate(par_brot(nvib))
+allocate(par_drot(nvib))
+allocate(par_hrot(nvib))
+allocate(par_evib(nvib))
 do i = 1,nvib
+  par_jmin(i) = basis_params%create_iparam('NOTYET')
+  par_jmax(i) = basis_params%create_iparam('NOTYET')
+  par_brot(i) = basis_params%create_rparam('NOTYET')
+  par_drot(i) = basis_params%create_rparam('NOTYET')
+  par_hrot(i) = basis_params%create_rparam('NOTYET')
+  par_evib(i) = basis_params%create_iparam('NOTYET')
   if(iread.ne.0) then
-    read (8, *, err=99) ivib(i),(ispar(isicod+j),j=1,2) ! iv, jmin, jmax
-    read (8, *, err=99) (rspar(isrcod+j),j=1,3) ! brot, drot, hrot
-    read (8, *, err=99) rspar(isrcod+4) ! evib
+    read (8, *, err=99) ivib(i), par_jmin%get_vref(), par_jmax%get_vref()
+    read (8, *, err=99) par_brot%get_vref(), par_drot%get_vref(), par_hrot%get_vref()
+    read (8, *, err=99) par_evib%get_vref()
   end if
   char=' '
   if(nvib.gt.1.or.ivib(i).ne.0) then
     if(ivib(i).le.9) write(char,'(''('',i1,'')'')') ivib(i)
     if(ivib(i).gt.9) write(char,'(''('',i2,'')'')') ivib(i)
   end if
-  scod(isicod+1)='JMIN'//char
-  scod(isicod+2)='JMAX'//char
-  scod(iofr+1)='BROT'//char
-  scod(iofr+2)='DROT'//char
-  scod(iofr+3)='HROT'//char
-  scod(iofr+4)='EVIB'//char
-  iofr=iofr+4
-  isicod=isicod+2
-  isrcod=isrcod+4
+  call par_jmin%set_name('JMIN'//char)
+  call par_jmax%set_name('JMAX'//char)
+  call par_brot%set_name('BROT'//char)
+  call par_drot%set_name('DROT'//char)
+  call par_hrot%set_name('HROT'//char)
+  call par_evib%set_name('EVIB'//char)
 end do
-if(isicod+isrcod+3.gt.size(scod,1)) stop 'lencod'
-nscode=isicod+isrcod
+
 line=' '
 if(.not.readp.or.iread.eq.0) then
   call loapot(1,' ')
   close (8)
   return
 endif
-read (8, 85, end=186) line
+read (8, 85, end=87) line
 85 format (a)
-goto 186
+87 call ptr1sg(line, readp=.true.)
+return
 ! here if read error occurs
 88 write(6,89)
 89 format(/' *** ERROR DURING READ FROM INPUT FILE ***')
@@ -1044,11 +1062,15 @@ return
 100 format(/' ** ERROR DURING READ:', &
   ' PROBABLY NOT ENOUGH VIBRATIONAL LEVELS SUPPLIED')
 return
+end subroutine
 ! --------------------------------------------------------------
-entry ptr1sg (fname,readp)
-line = fname
-readp = .true.
-186 if (readp) then
+subroutine ptr1sg (line, readp)
+implicit none
+character*(*), intent(in) :: line
+logical, intent(in) :: readp
+character*60 filnam  ! name of file containing potential parameters
+
+if (readp) then
   l=1
   call parse(line,l,filnam,lc)
   if(lc.eq.0) then
@@ -1074,8 +1096,12 @@ end if
 !      close (8)
 irpot=1
 return
+end subroutine
 ! --------------------------------------------------------------
-entry sav1sg (readp)
+subroutine sav1sg (readp)
+implicit none
+logical, intent(in) :: readp
+
 !  save input parameters for singlet-sigma + atom scattering
 if (ispar(3) .lt. ispar(2)) then
   write (6, 210) ispar(3), ispar(2)
@@ -1086,17 +1112,17 @@ write (8, 220) nvib, ispar(2),ispar(3)
 220 format(3i4, t34,'nvib, vmin,vmax')
 iofi=3
 iofr=0
-do 301 i=1,nvib
-write (8, 310) ivib(i),(ispar(iofi+j),j=1,2)
-310 format (3i4, t50,'iv,jmin,jmax')
-write (8, 320) (rspar(iofr+j),j=1,4)
-iofi=iofi+2
-iofr=iofr+4
-320 format(3g14.6,t50,'brot,drot,hrot'/f15.8,t50,'evib')
-301 continue
+do i=1,nvib
+  write (8, 310) ivib(i),(ispar(iofi+j),j=1,2)
+  310 format (3i4, t50,'iv,jmin,jmax')
+  write (8, 320) (rspar(iofr+j),j=1,4)
+  iofi=iofi+2
+  iofr=iofr+4
+  320 format(3g14.6,t50,'brot,drot,hrot'/f15.8,t50,'evib')
+end do
 write (8, 85) potfil
 return
-end
+end subroutine
 
 end module mod_hiba1sg
 !     ------------------------------------------------------------------
