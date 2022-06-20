@@ -168,6 +168,7 @@ subroutine sysdat (irpot, readpt, iread)
 use mod_hiba1sg, only: sy1sg
 use mod_param_group, only: basis_params
 integer ibasty, irpot, iread
+! irpot = 1 if Potential is defined
 logical readpt
 common /coselb/ ibasty
 #include "common/parbas.F90"
