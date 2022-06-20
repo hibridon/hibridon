@@ -166,6 +166,7 @@ subroutine sysdat (irpot, readpt, iread)
 !  current revision date: 30-jul-2018 (p. dagdigian)
 !  -----------------------------------------------------------------------
 use mod_hiba1sg, only: sy1sg
+use mod_param_group, only: basis_params
 integer ibasty, irpot, iread
 logical readpt
 common /coselb/ ibasty
@@ -185,7 +186,7 @@ goto (100,200,300,400,500,600,700,800,900,1000,1100,1200, &
       2300,2400,2500,2600,2700,2800,2900,3000) &
      ibasty
 !  singlet sigma variables
-100 call sy1sg(irpot, readpt, iread)
+100 call sy1sg(irpot, readpt, iread, basis_params)
 return
 !  doublet sigma variables
 200 call sy2sg(irpot, readpt, iread)
