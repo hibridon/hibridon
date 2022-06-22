@@ -181,12 +181,12 @@ target_compile_definitions(hib PUBLIC _BUILD_PROC_="${CMAKE_HOST_SYSTEM_PROCESSO
 target_compile_definitions(hib PUBLIC _BUILD_COMP_="${CMAKE_Fortran_COMPILER}")
 
 # The following is for preprocessing of hiutil.F90
-target_compile_definitions(hib PUBLIC _HELPDIR_="${CMAKE_CURRENT_SOURCE_DIR}/doc/")
+target_compile_definitions(hib PUBLIC _HELPDIR_="${CMAKE_CURRENT_SOURCE_DIR}/../doc/")
 target_compile_definitions(hib PUBLIC _BUILD_FLAGS_="")#"${HIBRIDON_COMPILE_OPTIONS}")
 string(TIMESTAMP TODAY "%Y-%m-%d at %H:%M")
 target_compile_definitions(hib PUBLIC _BUILD_DATE_="${TODAY}")
 # The following is for preprocessing of hiutil.F90
-target_compile_definitions(hib PUBLIC _HELPDIR_="${CMAKE_CURRENT_SOURCE_DIR}/doc/")
+target_compile_definitions(hib PUBLIC _HELPDIR_="${CMAKE_CURRENT_SOURCE_DIR}/../doc/")
 # The following is to limit the max jtot number
 target_compile_definitions(hib PUBLIC MAX_NJTOT=1000)
 target_compile_definitions(hib PUBLIC "$<$<CONFIG:Release>:DISABLE_HIB_ASSERT=1>")
