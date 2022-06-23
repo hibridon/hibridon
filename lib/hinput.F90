@@ -64,6 +64,7 @@ use mod_hibasis, only: is_twomol
 use mod_hibrid2, only: enord, prsg
 use mod_hibrid3, only: testptn, testpt20, testpt, potmin
 use mod_hiutil, only: getval
+use mod_hiparcst
 
 implicit double precision (a-h,o-z)
 !  iicode is the number of integer pcod's
@@ -93,7 +94,7 @@ integer ibasty
 integer nerg
 logical existf, first, openfl
 logical lpar, logp, opti, optifl, batch, jtrunc
-dimension a(15),ia(10), ihold(15), lhold(15),lindx(28)
+dimension a(15),ia(10), ihold(15), lhold(15)
 #include "common/parbas.F90"
 #include "common/parpot.F90"
 common /cosavi/ iipar, ixpar(iicode)
@@ -103,9 +104,9 @@ common /cokeyl/ nncode, llcode, ijcode
 common /cobcod/ bcod
 common /cofcod/ fcod
 common /copcod/ pcod
-common /coipar/ ipar(10)
-common /corpar/ rpar(9)
-common /colpar/ lpar(28)
+common /coipar/ ipar(IPAR_COUNT)
+common /corpar/ rpar(RPAR_COUNT)
+common /colpar/ lpar(LPAR_COUNT)
 common /coselb/ ibasty
 common /cobaco/ bascod
 common /coopti/ optifl
@@ -121,8 +122,10 @@ data basknd /'1-SIGMA', '2-SIGMA', '2-PI', 'SIGMA|PI', &
               '1SG-1SG', '2SG-1SG', 'C2v-ASTP','3SG-1SG', &
               'CASYMTOP', 'ASYM-DIAT' /
 !  lindx is pointer from fcod order to order in common block colpar
-data lindx/1,3,4,5,6,7,8,9,10,11,13,25,26,2,12,14,17,19,24, &
-           15,16,18,20,27,22,21,23,28/   ! graffy: colpar and fcod both contain the 28 logical parameters but in a different order, thus requiring a remapping through lindx. Why not simply having the same order, by making fcod match colpar?
+! data lindx/1,3,4,5,6,7,8,9,10,11,13,25,26,2,12,14,17,19,24, &
+!            15,16,18,20,27,22,21,23,28/   ! graffy: colpar and fcod both contain the 28 logical parameters but in a different order, thus requiring a remapping through lindx. Why not simply having the same order, by making fcod match colpar?
+integer :: lindx(LPAR_COUNT)
+
 !     common /colpar/ airyfl, airypr, bastst, batch, chlist,
 !    :                csflag, flaghf, flagsu, ihomo, ipos, logdfl,
 !    :                logwr, noprin, partw, readpt, rsflag, swrit,
@@ -133,6 +136,35 @@ data batch /.false./
 save ipr, opti, a, a1, acc, acclas, optval, optacc, istep, inam, &
      fnam1, fnam2, code, lc, jtot2x, irpot, irinp
 nerg = 0
+lindx(FCOD_AIRYFL) = LPAR_AIRYFL
+lindx(FCOD_BASTST) = LPAR_BASTST
+lindx(FCOD_BATCH) = LPAR_BATCH
+lindx(FCOD_CHLIST) = LPAR_CHLIST
+lindx(FCOD_CSFLAG) = LPAR_CSFLAG
+lindx(FCOD_FLAGHF) = LPAR_FLAGHF
+lindx(FCOD_FLAGSU) = LPAR_FLAGSU
+lindx(FCOD_IHOMO) = LPAR_IHOMO
+lindx(FCOD_IPOS) = LPAR_IPOS
+lindx(FCOD_LOGDFL) = LPAR_LOGDFL
+lindx(FCOD_NOPRIN) = LPAR_NOPRIN
+lindx(FCOD_NUCROS) = LPAR_NUCROS
+lindx(FCOD_PHOTOF) = LPAR_PHOTOF
+lindx(FCOD_PRAIRY) = LPAR_PRAIRY
+lindx(FCOD_PRLOGD) = LPAR_PRLOGD
+lindx(FCOD_PRPART) = LPAR_PRPART
+lindx(FCOD_PRSMAT) = LPAR_PRSMAT
+lindx(FCOD_PRT2) = LPAR_PRT2
+lindx(FCOD_PRXSEC) = LPAR_PRXSEC
+lindx(FCOD_READPT) = LPAR_READPT
+lindx(FCOD_RSFLAG) = LPAR_RSFLAG
+lindx(FCOD_T2TEST) = LPAR_T2TEST
+lindx(FCOD_TWOMOL) = LPAR_TWOMOL
+lindx(FCOD_WAVEFL) = LPAR_WAVEFL
+lindx(FCOD_WRPART) = LPAR_WRPART
+lindx(FCOD_WRSMAT) = LPAR_WRSMAT
+lindx(FCOD_WRXSEC) = LPAR_WRXSEC
+lindx(FCOD_BOUNDC) = LPAR_BOUNDC
+
 bascod(1)='BASISTYP'
 pcod(1)='JTOT1'
 pcod(2)='JTOT2'
@@ -153,34 +185,34 @@ pcod(16)='RSTART'
 pcod(17)='SPAC'
 pcod(18)='TOLAI'
 pcod(19)='XMU'
-fcod(1)='AIRYFL'
-fcod(2)='BASTST'
-fcod(3)='BATCH'
-fcod(4)='CHLIST'
-fcod(5)='CSFLAG'
-fcod(6)='FLAGHF'
-fcod(7)='FLAGSU'
-fcod(8)='IHOMO'
-fcod(9)='IPOS'
-fcod(10)='LOGDFL'
-fcod(11)='NOPRIN'
-fcod(12)='NUCROS'
-fcod(13)='PHOTOF'
-fcod(14)='PRAIRY'
-fcod(15)='PRLOGD'
-fcod(16)='PRPART'
-fcod(17)='PRSMAT'
-fcod(18)='PRT2'
-fcod(19)='PRXSEC'
-fcod(20)='READPT'
-fcod(21)='RSFLAG'
-fcod(22)='T2TEST'
-fcod(23)='TWOMOL'
-fcod(24)='WAVEFL'
-fcod(25)='WRPART'
-fcod(26)='WRSMAT'
-fcod(27)='WRXSEC'
-fcod(28)='BOUNDC'
+fcod(FCOD_AIRYFL)='AIRYFL'
+fcod(FCOD_BASTST)='BASTST'
+fcod(FCOD_BATCH)='BATCH'
+fcod(FCOD_CHLIST)='CHLIST'
+fcod(FCOD_CSFLAG)='CSFLAG'
+fcod(FCOD_FLAGHF)='FLAGHF'
+fcod(FCOD_FLAGSU)='FLAGSU'
+fcod(FCOD_IHOMO)='IHOMO'
+fcod(FCOD_IPOS)='IPOS'
+fcod(FCOD_LOGDFL)='LOGDFL'
+fcod(FCOD_NOPRIN)='NOPRIN'
+fcod(FCOD_NUCROS)='NUCROS'
+fcod(FCOD_PHOTOF)='PHOTOF'
+fcod(FCOD_PRAIRY)='PRAIRY'
+fcod(FCOD_PRLOGD)='PRLOGD'
+fcod(FCOD_PRPART)='PRPART'
+fcod(FCOD_PRSMAT)='PRSMAT'
+fcod(FCOD_PRT2)='PRT2'
+fcod(FCOD_PRXSEC)='PRXSEC'
+fcod(FCOD_READPT)='READPT'
+fcod(FCOD_RSFLAG)='RSFLAG'
+fcod(FCOD_T2TEST)='T2TEST'
+fcod(FCOD_TWOMOL)='TWOMOL'
+fcod(FCOD_WAVEFL)='WAVEFL'
+fcod(FCOD_WRPART)='WRPART'
+fcod(FCOD_WRSMAT)='WRSMAT'
+fcod(FCOD_WRXSEC)='WRXSEC'
+fcod(FCOD_BOUNDC)='BOUNDC'
 ! addresses for commands
 ! check: 2700
 ! debrogli: 1800

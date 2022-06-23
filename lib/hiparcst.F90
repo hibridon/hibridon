@@ -1,0 +1,75 @@
+! hibridon parameter constants
+module mod_hiparcst
+
+integer, parameter :: IPAR_COUNT = 10
+integer, parameter :: RPAR_COUNT = 9
+integer, parameter :: LPAR_COUNT = 28
+
+enum, bind( C )
+   ! fcod parameters
+   enumerator ::  &
+      FCOD_AIRYFL = 1, &
+      FCOD_BASTST = 2, &
+      FCOD_BATCH = 3, &
+      FCOD_CHLIST = 4, &
+      FCOD_CSFLAG = 5, &
+      FCOD_FLAGHF = 6, &
+      FCOD_FLAGSU = 7, &
+      FCOD_IHOMO = 8, &
+      FCOD_IPOS = 9, &
+      FCOD_LOGDFL = 10, &
+      FCOD_NOPRIN = 11, &
+      FCOD_NUCROS = 12, &
+      FCOD_PHOTOF = 13, &
+      FCOD_PRAIRY = 14, &
+      FCOD_PRLOGD = 15, &
+      FCOD_PRPART = 16, &
+      FCOD_PRSMAT = 17, &
+      FCOD_PRT2 = 18, &
+      FCOD_PRXSEC = 19, &
+      FCOD_READPT = 20, &
+      FCOD_RSFLAG = 21, &
+      FCOD_T2TEST = 22, &
+      FCOD_TWOMOL = 23, &
+      FCOD_WAVEFL = 24, &
+      FCOD_WRPART = 25, &
+      FCOD_WRSMAT = 26, &
+      FCOD_WRXSEC = 27, &
+      FCOD_BOUNDC = 28
+end enum
+! data lindx/1,3,4,5,6,7,8,9,10,11,13,25,26,2,12,14,17,19,24, &
+!           15,16,18,20,27,22,21,23,28/   ! graffy: colpar and fcod both contain the 28 logical parameters but in a different order, thus requiring a remapping through lindx. Why not 
+enum, bind( C )
+   ! lpar parameters
+   enumerator ::  &
+      LPAR_AIRYFL = 1, &
+      LPAR_BASTST = 3, &
+      LPAR_BATCH = 4, &
+      LPAR_CHLIST = 5, &
+      LPAR_CSFLAG = 6, &
+      LPAR_FLAGHF = 7, &
+      LPAR_FLAGSU = 8, &
+      LPAR_IHOMO = 9, &
+      LPAR_IPOS = 10, &
+      LPAR_LOGDFL = 11, &
+      LPAR_NOPRIN = 13, &
+      LPAR_NUCROS = 25, &
+      LPAR_PHOTOF = 26, &
+      LPAR_PRAIRY = 2, &
+      LPAR_PRLOGD = 12, &
+      LPAR_PRPART = 14, &
+      LPAR_PRSMAT = 17, &
+      LPAR_PRT2 = 19, &
+      LPAR_PRXSEC = 24, &
+      LPAR_READPT = 15, &
+      LPAR_RSFLAG = 16, &
+      LPAR_T2TEST = 18, &
+      LPAR_TWOMOL = 20, &
+      LPAR_WAVEFL = 27, &
+      LPAR_WRPART = 22, &
+      LPAR_WRSMAT = 21, &
+      LPAR_WRXSEC = 23, &
+      LPAR_BOUNDC = 28
+end enum
+
+end module mod_hiparcst

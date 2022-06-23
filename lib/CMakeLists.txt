@@ -29,6 +29,7 @@ add_library(hib
     himatrix.F90
     himem.F90
     hinput.F90
+    hiparcst.F90
     hiprsbr.F90
     histmix.F90
     hisystem.F90
