@@ -1424,7 +1424,9 @@ data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f', &
 !
 
 integer, pointer :: ipol
+integer, parameter :: psifil_unit = 2
 ipol=>ispar(3)
+
 
 one=1.d0
 onemin=-1.d0
@@ -1500,15 +1502,15 @@ call dater(cdate)
 ! open file to save generated wavefunction
 if (jflux .eq. 0) then
   call gennam(psifil,filnam,ien,'psi',lenft)
-  call openf(2,psifil,'sf',0)
+  call openf(psifil_unit, psifil,'sf',0)
 ! write a header
   call version(2)
   write(2,11)
   write(6,11)
 11   format(/' ** WAVEFUNCTION DETERMINATION ***',/)
-  write (2, 12) wavfil
+  write (psifil_unit, 12) wavfil
 12   format('    INFORMATION FROM FILE: ',(a))
-  write (2,13) cdate
+  write (psifil_unit,13) cdate
 13 format('    THIS CALCULATION ON: ',(a))
 endif
 if (jflux .ne. 0) then
@@ -1553,18 +1555,18 @@ if (inflev .ne. 0) then
 end if
 if (photof) then
   write (6, 19)
-  if (jflux .eq. 0) write (2, 19)
+  if (jflux .eq. 0) write(psifil_unit, 19)
   if (jflux .ne. 0) write (3, 19)
 19   format('    PHOTODISSOCIATION BOUNDARY CONDITIONS')
 else
   write (6, 20)
-  if (jflux .eq. 0) write (2, 20)
+  if (jflux .eq. 0) write(psifil_unit, 20)
   if (jflux .ne. 0) write (3, 20)
 20   format('    SCATTERING BOUNDARY CONDITIONS')
   photof=.false.
 endif
 if (adiab) then
-  if (jflux .eq. 0)  write (2,21)
+  if (jflux .eq. 0)  write(psifil_unit,21)
   if (jflux .ne. 0)  write (3,21)
   write (6,21)
 21   format ('    ADIABATIC BASIS')
@@ -1572,12 +1574,12 @@ endif
 if (.not.adiab .and. .not. sumf) then
   if (.not. coordf) then
     if (ibasty .ne. 7) then
-      if (jflux .eq. 0) write (2,22)
+      if (jflux .eq. 0) write(psifil_unit,22)
       if (jflux .ne. 0)  write (3,22)
       write (6,22)
 22       format ('    DIABATIC (ASYMPTOTIC) BASIS')
     else
-      if (jflux .eq. 0) write (2,23)
+      if (jflux .eq. 0) write(psifil_unit,23)
       if (jflux .ne. 0)  write (3,23)
 !  print flux even inside of closed region in molecular basis
       kill = .false.
@@ -1586,13 +1588,13 @@ if (.not.adiab .and. .not. sumf) then
     endif
   else
     if (ny .gt. 0) then
-      if (jflux .eq. 0) write (2,24)
+      if (jflux .eq. 0) write(psifil_unit,24)
       if (jflux .ne. 0) write (3,24)
       write (6,24)
 24       format &
        ('    COORDINATE SPACE FLUX; POSITIVE INDEX CHOSEN')
     else
-      if (jflux .eq. 0) write (2,25)
+      if (jflux .eq. 0) write(psifil_unit,25)
       if (jflux .ne. 0) write (3,25)
       write (6,25)
 25       format &
@@ -1601,7 +1603,7 @@ if (.not.adiab .and. .not. sumf) then
   endif
 endif
 if (sumf) then
-      if (jflux .eq. 0) write (2,26)
+      if (jflux .eq. 0) write(psifil_unit,26)
       if (jflux .ne. 0) write (3,26)
       write (6,26)
 26       format &
@@ -1967,14 +1969,14 @@ if (jflux .eq. 0) then
     write(2, 150)
 150     format(/' R (BOHR) AND REAL PART OF WAVEFUNCTION', &
           ' (R < 0 INDICATES AIRY PROPAGATION)',/)
-    call psicalc(npts,nch,nchsq,nj)
+    call psicalc(npts, nch, nchsq, nj, psifil_unit)
 ! copy imaginary part of asymptotic wavefunction into first column of psir
 ! so we can use same loop as above
     call dcopy(nch,psir(nch+1),1,psir,1)
     write(2, 185)
 185     format(/' R (BOHR) AND IMAGINARY PART OF WAVEFUNCTION', &
           '(R < 0 INDICATES AIRY PROPAGATION)',/)
-    call psicalc(npts,nch,nchsq,nj)
+    call psicalc(npts,nch,nchsq,nj, psifil_unit)
   else
 ! here for photdissociation, in which case outgoing wavefunction is a
 ! given column of chi
@@ -2000,7 +2002,7 @@ if (jflux .eq. 0) then
     iwf = 1
     propf=.true.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,inch,iwf,coordf,ny,ymin,dy)
+            photof,propf,sumf,inch,iwf,coordf,ny,ymin,dy,psifil_unit)
     write(2, 210)
 210     format(/' R (BOHR) AND IMAGINARY PART OF CHI')
 ! reread asymptotic information
@@ -2022,7 +2024,7 @@ if (jflux .eq. 0) then
     iwf = -1
     irec=npts+4
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,inch,iwf,coordf,ny,ymin,dy)
+            photof,propf,sumf,inch,iwf,coordf,ny,ymin,dy,psifil_unit)
   endif
 else if (jflux .eq. 2) then
   write(3, 300)
@@ -2104,7 +2106,7 @@ else if (jflux .eq. 1) then
 ! plot out all fluxes for total flux which is numerically well behaved
     tthresh=-1.e9
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,.false., &
-            photof,propf,sumf,inch,iwf,coordf,ny,ymin,dy)
+            photof,propf,sumf,inch,iwf,coordf,ny,ymin,dy,psifil_unit)
   endif
   if (.not. photof) then
 ! now for incoming flux (only for scattering)
@@ -2170,7 +2172,7 @@ else if (jflux .eq. 1) then
     iwf = 0
     propf=.false.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,inch,iwf,coordf,ny,ymin,dy)
+            photof,propf,sumf,inch,iwf,coordf,ny,ymin,dy,psifil_unit)
   endif
 ! now for outgoing flux
   if (.not.photof) then
@@ -2305,9 +2307,9 @@ else if (jflux .eq. 1) then
   if (photof) propf=.true.
   if (.not. photof) propf=.false.
   call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,inch,iwf,coordf,ny,ymin,dy)
+            photof,propf,sumf,inch,iwf,coordf,ny,ymin,dy,psifil_unit)
 endif
-700 if (photof .or. jflux .eq. 0) close (2)
+700 if (photof .or. jflux .eq. 0) close (psifil_unit)
 if (jflux .ne. 0) close (3)
 close (22)
 call mtime(cpu1,ela1)
@@ -2327,7 +2329,7 @@ return
 end
 ! ------------------------------------------------------------------
 subroutine flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-                photof, propf, sumf,inch,iwf,coordf,nny,ymin,dy)
+                photof, propf, sumf,inch,iwf,coordf,nny,ymin,dy,psifil_unit)
 !
 ! subroutine to calculate fluxes
 !
@@ -2366,6 +2368,7 @@ common /coselb/ ibasty
 dimension scc(100)
 data zero, one, onemin /0.d0, 1.d0, -1.d0/
 data ione, mone /1,-1/
+integer :: psifil_unit
 ! if propf = true then true back-subsititution for flux
 ! if propf = false then inward propagation
 ! noffset is start of 5th column of psir
@@ -2622,7 +2625,7 @@ data ione, mone /1,-1/
       endif
     endif
     if (iwf .ne. 0) &
-      write (2, 400) -r, (pk(i), i=1,nj)
+      write(psifil_unit, 400) -r, (pk(i), i=1,nj)
     if (iwf .eq. 0) then
       if (photof) then
 ! for photodissociation, so, steve, you'll need to scale sc9 also
@@ -2729,7 +2732,7 @@ call drot(nch,dpsii(jpoint),1,dpsii(jpoint+nch),1,cs,sn)
 return
 end
 ! ------------------------------------------------------------------
-subroutine psicalc(npts,nch,nchsq,nj)
+subroutine psicalc(npts, nch, nchsq, nj, psifil_unit)
 !
 ! subroutine to propagate wavefunctions inward
 !
@@ -2746,6 +2749,7 @@ use mod_cow, only: sr => w_as_vec ! sr(100)
 use mod_cozmat, only: si => zmat_as_vec ! si(100)
 
 implicit double precision (a-h,o-z)
+integer :: psifil_unit
 common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
      inflev
   irec=npts+4
@@ -2762,7 +2766,7 @@ common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
       sc(i)=si(nlist(i))
 160     continue
     call dcopy(nch,si,1,psir,1)
-    write (2, 170) r, (sc(i), i=1,nj)
+    write(psifil_unit, 170) r, (sc(i), i=1,nj)
 170     format(f10.4,12(1pe10.2))
 180   continue
 return
@@ -2924,6 +2928,7 @@ common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
      inflev
 !
 double precision dble_t
+integer, parameter :: eadfil_unit = 2
 !
 if (nchmax .ne. 0 .and. nchmax .lt. nchmin) goto 990
 ien = 0
@@ -2940,7 +2945,7 @@ call openf(22, wavfil, 'TU', 0)
 
 eadfil = filnam // '.eadiab'
 call gennam(eadfil, filnam, ien, 'eadiab', lenft)
-call openf(2, eadfil, 'sf', 0)
+call openf(eadfil_unit, eadfil, 'sf', 0)
 write (6, 15) eadfil(1:lenft)
 15 format (' ** WRITING ADIABATIC ENERGIES TO ', (a))
 !
@@ -2951,27 +2956,27 @@ if (nchmax .eq. 0 .or. nchmax .gt. nch) nchmax = nch
 nchpr = nchmax - nchmin + 1
 noffst = (nch - nchmax + 2) * sizeof(dble_t)
 !
-write (2, 17) nchmin, nchmax
+write(eadfil_unit, 17) nchmin, nchmax
 17 format (' ** ADIABATIC ENERGIES FROM NO.', i5, ' TO NO.', &
      i5, ' REQUESTED')
 do i = 4 + nrlogd, npts + 3
    read (ifil, end=900, err=950, pos=iwavsk(i)) r, drnow
    read (ifil, end=900, err=950, pos=iwavsk(i)+noffst) &
         (sc8(j), j=1, nchpr)
-   write (2, 20) -r + 0.5 * drnow
+   write(eadfil_unit, 20) -r + 0.5 * drnow
 20    format (f10.5, 1x, $)
    do j = nchpr, 1, -1
-      write (2, 30) -econv * (sc8(j) / (2d0 * rmu) - ered)
+      write(eadfil_unit, 30) -econv * (sc8(j) / (2d0 * rmu) - ered)
    end do
 30    format (f13.5, 1x, $)
-   write (2, 20)
+   write(eadfil_unit, 20)
 end do
-write (2, 20)
+write (eadfil_unit, 20)
 goto 990
 !
 900 continue
 950 write (0, *) '*** ERROR READING WFU FILE'
 990 close(ifil)
-close(3)
+close(eadfil_unit)
 return
 end
