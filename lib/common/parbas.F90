@@ -28,7 +28,7 @@ integer, parameter :: maxvb2=maxvib**2
 !
 common /cobsp2/ ntv(maxtrm),ivcol(maxvb2,maxtrm), &
                 ivrow(maxvb2,maxtrm)
-integer :: nvt
+integer :: ntv
 integer :: ivcol
 integer :: ivrow
 common /cobspt/ lammin(maxtrm), lammax(maxtrm), mproj(maxtrm)
