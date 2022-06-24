@@ -45,6 +45,7 @@ use mod_coj12, only: j12chn => j12
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar 
+use mod_par, only: iprint
 implicit none
 !
 !     The following arrays store the parameters of channels and levels.
@@ -63,9 +64,6 @@ real(8) :: rcut
 !
 common /coered/ ered, rmu
 real(8) :: ered, rmu
-common /coipar/ junkip, iprint
-integer, dimension(9) :: junkip
-integer :: iprint
 !
 integer :: i, ilev, iv, irow, icol, inum, i1, i2, lamsum
 real(8) :: vee, v2pi1sg

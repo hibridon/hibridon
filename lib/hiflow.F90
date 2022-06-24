@@ -53,56 +53,102 @@ use mod_hiba1sg, only : basis
 use mod_version, only : version, acknow
 use mod_hibrid5, only : soutpt, nusum, xwrite, wrhead, restrt, rsave
 use constants
-use mod_hibrid2, only: default
+use mod_hibrid2, only: set_default_params
 use mod_hibrid3, only: propag
 use mod_par, only: airyfl, prairy, bastst, chlist, &
                 csflag, flaghf, flagsu, ihomo, ipos, logdfl, &
                 prlogd, noprin, prpart, rsflag, prsmat, &
                 t2test, prt2, twomol, wrsmat, wrpart, wrxsec, &
-                prxsec, nucros, photof, wavefl, boundc
-implicit double precision (a-h,o-z)
-integer :: jtotmx
-character*20 cdate
-character*10 time
-character*10 timew,cpubaw,cpuptw,cpuaiw,cpuldw,cpusmw,cpuouw, &
-             cpuphw,timew1,timew2,time1,time2
-logical clist, &
-        twojlp, firstj, &
-        surffl, ready, photfl, &
-        wavefn, boundf, writs
-!  -------------------------------------------------------------
-logical optifl, first
-logical lsc1
+                prxsec, nucros, photof, wavefl, boundc, &
+                jtot1, jtot2, jtotd, jlpar, nerg, numax, numin, nud, &
+                lscreen, iprint
+implicit none
+real(8), intent(out) :: z(nmax,nmax)
+real(8), intent(out) :: w(nmax,nmax)
+real(8), intent(out) :: zmat(nmax,nmax)
+real(8), intent(out) :: amat(nmax,nmax)
+real(8), intent(out) :: bmat(nairy,nairy)
+integer, intent(out) :: jq(10)
+integer, intent(out) :: lq(10)
+integer, intent(out) :: inq(10)
+integer, intent(out) :: jlev(1)
+real(8), intent(out) :: elev(1)
+integer, intent(out) :: inlev(1)
+integer, intent(out) :: isc1(9)
+integer, intent(out) :: isc2(1)
+integer, intent(out) :: isc3(1)
+integer, intent(out) :: isc4(1)
+logical, intent(out) :: lsc1(5)
+real(8), intent(out) :: sc2(1)
+real(8), intent(out) :: sc1(2)
+real(8), intent(out) :: sc3(1)
+real(8), intent(out) :: sc4(1)
+real(8), intent(out) :: sc5(1)
+real(8), intent(out) :: sc6(1)
+real(8), intent(out) :: sc7(1)
+real(8), intent(out) :: sc8(1)
+real(8), intent(out) :: sc9(1)
+real(8), intent(out) :: tq1(1)
+real(8), intent(out) :: tq2(1)
+real(8), intent(out) :: tq3(1)
+integer, intent(in) :: men
+integer, intent(in) :: nmax
+integer, intent(in) :: nairy
+
+
 #include "common/parpot.F90"
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
-real secnds
+real(8) secnds
 common /codec/ ttim(2)
+real(8) :: ttim
 #endif
+
 common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
+real(8) :: cpuld, cpuai, cpupot, cpusmt, cpupht
 common /cosavi/ iipar, ixpar(8)
+integer :: iipar, ixpar
 common /cosavr/ irpar(2), rxpar(9)
+integer :: irpar
+real(8) :: rxpar
 common /copmat/ rtmn, rtmx, iflag
+real(8) :: rtmn, rtmx
+integer :: iflag
 common /coered/ ered, rmu
-common /coipar/ jtot1, jtot2, jtotd, jlpar, nerg,numax,numin,nud, &
-                lscreen, iprint
-common /corpar/ fstfac, rincr, rcut, rendai, rendld, rstart, spac, &
-                tolhi, xmu
-common /cophot/ photfl, wavefn, boundf, writs
-common /cosurf/ surffl
+real(8) :: ered, rmu
+common /corpar/ fstfac, rincr, rcut, rendai, rendld, rstart, spac, tolhi, xmu
+real(8) :: fstfac, rincr, rcut, rendai, rendld, rstart, spac, tolhi, xmu
+common /cophot/ phot_photof, wavefn, boundf, writs
+logical :: phot_photof, wavefn, boundf, writs
+
+common /cosurf/ surf_flagsu
+logical :: surf_flagsu
+
 common /coselb/ ibasty
+integer :: ibasty
+
 common /cojlpo/ jlpold
+integer :: jlpold
+
 common /coopti/ optifl
+logical :: optifl
+
 common /constp/ nsteps, isteps
-!   square matrices
-dimension z(nmax,nmax), w(nmax,nmax), zmat(nmax,nmax), &
-          amat(nmax,nmax), bmat(nairy,nairy)
-!  vectors
-dimension jq(10), lq(10), inq(10), jlev (1), isc1(9), isc2(1), &
-          isc3(1), isc4(1), lsc1(5), inlev(1), &
-          elev(1), sc1(2), sc2(1), sc3(1), sc4(1), nlev(25), &
-          sc5(1), sc6(1), sc7(1), sc8(1), sc9(1), tq1(1), &
-          tq2(1), tq3(1)
+integer :: nsteps, isteps
+
+integer :: nlev(25)
+
+integer :: jtotmx
+character*20 :: cdate
+character*10 :: time
+character*10 :: timew, cpubaw, cpuptw, cpuaiw, cpuldw, cpusmw, cpuouw, &
+             cpuphw, timew1, timew2, time1, time2
+logical :: clist, firstj, ready
+!  -------------------------------------------------------------
+logical :: first
+
+logical :: twojlp
 data twojlp / .false. /
+
 real(8), parameter :: mtime_granularity = 0.5d0
 integer, parameter :: tmp_file = 1
 !   to obtain timing information calls are made to system-specific
@@ -110,9 +156,18 @@ integer, parameter :: tmp_file = 1
 !   time in seconds and wallt is wall clock time in seconds
 !   user will have to change this subroutine for his own installation
 !  subroutine to get input data
+
+real(8) :: cpubas, cpuout, cpupt, dinsid, dlogd, ener, eshift
+integer :: i, ien, ierr, ifile, ii, irec
+integer :: jfirst, jfrest, jj, jlprsv, jtop, jtopo, jtot, jtoto
+integer :: nch, nchmax, nchop, nchtop, nfile, nlevel, nlevop, nopen, ntop, nu, nufirs, nulast, numj, nutop
+real(8) :: rstrt0, rtmn1, rtmnla, rtmx1, rtmxla
+real(8) :: t1, t11, t2, t22, tb, tbm, tcpu0, tcpu1, tcpu2, tcpuf, twall0, twall1, twall2, twallf
+real(8) :: xjtot
+
 first=.true.
 !  get default data
-call default
+call set_default_params
 1 call hinput(first)
 cpupt=0
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
@@ -120,11 +175,11 @@ ttim(1)=0.d0
 ttim(2)=secnds(0.0)
 #endif
 call mtime (tcpu0, twall0)
-photfl = photof
+phot_photof = photof
 wavefn = wavefl
 boundf = boundc
 writs = wrsmat
-surffl = flagsu
+surf_flagsu = flagsu
 !  subroutine to open required i/o files
 if (.not.bastst) then
       call openfi (nerg)

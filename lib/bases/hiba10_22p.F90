@@ -757,17 +757,17 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
+use mod_par, only:  jtot1,jtot2,jtotd,jlpar
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 real(8) :: aso
-integer :: ibran, j, jlpar, jtot1, jtot2, jtotd, l, lc, nphoto, nterm, nvib
+integer :: ibran, j, l, lc, nphoto, nterm, nvib
 logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-common /coipar/ jtot1,jtot2,jtotd,jlpar
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
 integer :: nskip, iskip

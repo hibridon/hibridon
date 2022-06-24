@@ -166,11 +166,11 @@ use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+use mod_par, only: iprint
 #include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbas.F90"
-common /coipar/ iiipar(9), iprint
 common /covibp/ ivpi(5)
 common /covpot/ numvib,ivibpi(5)
 common /coered/ ered, rmu

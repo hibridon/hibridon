@@ -185,12 +185,12 @@ use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rpar=>rspar
 use constants, only: econv, xmconv, ang2c
+use mod_par, only: iprint
 #include "common/parbasl.F90"
 
 implicit double precision (a-h,o-z)
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbas.F90"
-common /coipar/ iiipar(9), iprint
 !  these parameters must be the same as in hisysgpi
 common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
 common /coered/ ered, rmu

@@ -255,6 +255,7 @@ use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+use mod_par, only: iprint
 implicit none
 !
 integer MAX_NR, MAX_NV
@@ -280,8 +281,6 @@ integer nlevel, nlevop, n, ntop, jtemp(*), ktemp(*)
 !
 common /coered/ ered, rmu
 double precision ered, rmu
-common /coipar/ junkip, iprint
-integer junkip(9), iprint
 !
 integer nlist, ki, ji, numeps, iep, iepsil, isym, ji2, i1, i2, &
      jsave, ksave, isave, njk, ipar, j12max, j12min, ji12, &

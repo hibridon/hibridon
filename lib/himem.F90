@@ -1324,11 +1324,35 @@ module mod_par
    !              is implemented
    logical, pointer :: boundc
 
+   ! ipar (integer parameters)
+
+   integer, dimension(:), allocatable, target :: ipar
+
+
+   integer, pointer :: jtot1
+   integer, pointer :: jtot2
+   integer, pointer :: jtotd
+   integer, pointer :: jlpar
+   integer, pointer :: nerg
+   integer, pointer :: numax
+   integer, pointer :: numin
+   integer, pointer :: nud
+   
+   ! lscreen is the number of lines available on your terminal screen
+   integer, pointer :: lscreen
+
+   ! iprint controls degree of print output in some routines
+   !     iprint=-1 (no print); iprint=0 (min print); iprint=1 some print, etc
+   integer, pointer :: iprint
+
    contains
    subroutine allocate_par()
-      use mod_hiparcst, only: LPAR_COUNT
+      use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT
       use lpar_enum
+      use ipar_enum
       integer :: num_lpar = LPAR_COUNT
+      integer :: num_ipar = IPAR_COUNT
+
       allocate(lpar(num_lpar))
 
       airyfl => lpar(LPAR_AIRYFL)
@@ -1359,6 +1383,20 @@ module mod_par
       photof => lpar(LPAR_PHOTOF)
       wavefl => lpar(LPAR_WAVEFL)
       boundc => lpar(LPAR_BOUNDC)
+
+      allocate(ipar(num_ipar))
+
+      jtot1 => ipar(IPAR_JTOT1)
+      jtot2 => ipar(IPAR_JTOT2)
+      jtotd => ipar(IPAR_JTOTD)
+      jlpar => ipar(IPAR_JLPAR)
+      nerg => ipar(IPAR_NERG)
+      numax => ipar(IPAR_NUMAX)
+      numin => ipar(IPAR_NUMIN)
+      nud => ipar(IPAR_NUD)
+      lscreen => ipar(IPAR_LSCREEN)
+      iprint => ipar(IPAR_IPRINT)
+
    end subroutine allocate_par
 
 end module mod_par

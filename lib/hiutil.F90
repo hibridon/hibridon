@@ -47,10 +47,9 @@ subroutine vaxhlp(line1)
 !dec$ fixedformlinesize:132
 #endif
 ! latest revision 24-feb-2004
+use mod_par, only: lscreen
 implicit character*10(z)
 character*(*) line1
-common /coipar/ jtot1, jtot2, jtotd, jlpar, nerg,numax,numin,nud, &
-                lscreen, iprint
 #if defined(HIB_CRAY)
 ! return for these machines
   write (6,2)

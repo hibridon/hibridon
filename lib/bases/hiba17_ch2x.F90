@@ -139,12 +139,12 @@ use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+use mod_par, only: iprint
 #include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*1 slab
 #include "common/parbas.F90"
-common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &

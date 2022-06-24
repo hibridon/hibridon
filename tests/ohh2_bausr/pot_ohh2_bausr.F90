@@ -219,6 +219,7 @@ use mod_coj12, only: j12
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use mod_par, only: iprint
 !
 #include "pot_ohh2_bausr_common.F90"
 double precision rcut
@@ -237,8 +238,6 @@ double precision sc1(*), sc2(*), sc3(*), sc4(*)
 !     
 common /coered/ ered, rmu
 double precision ered, rmu
-common /coipar/ junkip, iprint
-integer junkip(9), iprint
 !
 integer nlist, ji1, eps1, fi1, ji2, li, ji1p, eps1p, fi1p, &
      ji2p, lip, jsave, isave, ipar, j12min, ji12, ji12p, &
