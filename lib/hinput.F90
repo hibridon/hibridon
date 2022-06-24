@@ -485,25 +485,25 @@ if (j .eq. 5) then
 end if
 if(j.le.iicode) then
   ipar(j) = val
-  if(ipar(8).ne.1) lpar(LPAR_NUCROS)=.true.
+  if(ipar(IPAR_NUD).ne.1) lpar(LPAR_NUCROS)=.true.
 else
   rpar(j-iicode) = val
 end if
-call enord(energ,ipar(5))
+call enord(energ,ipar(IPAR_NERG))
 !  numin and numax should be 0 if cc calculation, if not, then set them
 !  equal to zero
 ! NB this is disabled for basisknd=12 (2P atom + homonuclear)
 if (.not. lpar(LPAR_CSFLAG)) then
   lpar(LPAR_NUCROS)=.false.
-  if (ipar(6) .ne. 0) then
+  if (ipar(IPAR_NUMAX) .ne. 0) then
     write (6, 105)
 105     format ('  CC calculation, numax set to zero')
-    ipar(6) = 0
+    ipar(IPAR_NUMAX) = 0
   end if
-  if (ipar(7) .ne. 0..and.ibasty.ne.12) then
+  if (ipar(IPAR_NUMIN) .ne. 0..and.ibasty.ne.12) then
     write (6, 106)
 106     format ('  CC calculation, numin set to zero')
-    ipar(7) = 0
+    ipar(IPAR_NUMIN) = 0
   end if
 end if
 goto 100
@@ -570,7 +570,7 @@ elseif (energ(1) .lt. 0) then
 endif
 
 call enord(energ,nerg)
-ipar(5) = nerg
+ipar(IPAR_NERG) = nerg
 l1 = l
 goto 15
 ! jout values
@@ -651,19 +651,19 @@ goto 15
 !  equal to zero
 500 continue
 if (.not. lpar(LPAR_CSFLAG)) then
-  if (ipar(6) .ne. 0) then
+  if (ipar(IPAR_NUMAX) .ne. 0) then
     write (6, 105)
-    ipar(6) = 0
+    ipar(IPAR_NUMAX) = 0
   end if
 ! NB this is disabled currently for 2P atom + homonuclear
-  if (ipar(7) .ne. 0.and.ibasty.ne.12) then
+  if (ipar(IPAR_NUMIN) .ne. 0.and.ibasty.ne.12) then
     write (6, 106)
-    ipar(7) = 0
+    ipar(IPAR_NUMIN) = 0
   end if
 end if
 call pcoder(lpar(LPAR_BOUNDC),pcod,icode)
-if (lpar(LPAR_CSFLAG).and.ipar(8).ne.1) lpar(LPAR_NUCROS)=.true.
-nerg=ipar(5)
+if (lpar(LPAR_CSFLAG).and.ipar(IPAR_NUD).ne.1) lpar(LPAR_NUCROS)=.true.
+nerg=ipar(IPAR_NERG)
 ! check to see if flags are ok if wavefunction desired or
 ! photodissociation calculation
 call genchk
@@ -726,8 +726,8 @@ if(irpot.ne.0.or..not.lpar(LPAR_READPT)) then
 738   format (1x,(a),1x,20(2i1,'  ') )
 739   format (1x,(a),i2,(a),20(2i1,'  ') )
   write(9,730) 'Flags:',(fcod(j),lpar(lindx(j)),j = 1,lcode)
-  call enord(energ,ipar(5))
-  if(ipar(5).gt.0) write(9,740) (energ(j),j = 1,ipar(5))
+  call enord(energ,ipar(IPAR_NERG))
+  if(ipar(IPAR_NERG).gt.0) write(9,740) (energ(j),j = 1,ipar(IPAR_NERG))
   if(nnout.ne.0) then
     if (.not.lpar(LPAR_TWOMOL) ) then
       write (9,737) 'NOUT: ',nnout, &
@@ -799,9 +799,8 @@ else if (lpar(LPAR_TWOMOL)) then
                     j=1,numj)
 end if
 write(6,730) 'Flags:',(fcod(j),lpar(lindx(j)),j = 1,lcode)
-! in the next line ipar(9) is lscreen
 write(6,731)  nmax, nlammx
-if (ipar(9) .le. 24 .and. .not. batch) then
+if (ipar(IPAR_LSCREEN) .le. 24 .and. .not. batch) then
   write (6, 703)
 703   format (6x,'enter <return> to continue,', &
              ' <q> for prompt, or new data')
@@ -812,8 +811,8 @@ if (ipar(9) .le. 24 .and. .not. batch) then
     go to 11
   end if
 end if
-call enord(energ,ipar(5))
-if(ipar(5).gt.0) write(6,740) (energ(j),j = 1,ipar(5))
+call enord(energ,ipar(IPAR_NERG))
+if(ipar(IPAR_NERG).gt.0) write(6,740) (energ(j),j = 1,ipar(IPAR_NERG))
 710 format(5x,'*** ',(a)/(4(1x,a7,'=',i4,7x)))
 720 format(4(1x,a7,'=',1pg11.4))
 1720 format(1x,a7,'=',f10.5)
@@ -1038,7 +1037,7 @@ goto 1
   goto 1
 end if
 e = 0
-do 1605 i = 1,ipar(5)
+do 1605 i = 1,ipar(IPAR_NERG)
 1605 e = max(e,energ(i))
 if(e .eq. 0) then
   write(6,1610)
@@ -1065,7 +1064,7 @@ goto 15
 !  calculate de broglie wavelength in bohr (defined as 2pi/k)
 !  debrogli
 1800 e = 0
-do 1810 i = 1,ipar(5)
+do 1810 i = 1,ipar(IPAR_NERG)
 1810 e = max(e,energ(i))
 if(e .eq. 0) then
   write(6,1610)
@@ -1105,10 +1104,10 @@ call parse(line,l,code,lc)
 call getval(code(1:lc),empty_var_list,j,a(i))
 ia(i)=a(i)
 1910 continue
-if(ia(1).eq.0) ia(1)=ipar(1)
-if(ia(2).eq.0) ia(2)=ipar(2)
-if(ia(3).eq.0) ia(3)=ipar(3)
-if(ia(4).eq.0) ia(4)=ipar(4)
+if(ia(1).eq.0) ia(1)=ipar(IPAR_JTOT1)
+if(ia(2).eq.0) ia(2)=ipar(IPAR_JTOT2)
+if(ia(3).eq.0) ia(3)=ipar(IPAR_JTOTD)
+if(ia(4).eq.0) ia(4)=ipar(IPAR_JLPAR)
 call lower(fnam1)
 call upper(fnam1(1:1))
 call sprint(fnam1,ia)
@@ -1153,11 +1152,11 @@ goto 1
 !  thrs:  threshold for check for s-matrix elements. all s-matrix
 !  elements which are smaller than thrs are not compared
 !  comparison is of s modulus if thrs .ge. 0, otherwise of s matrix
-2100 if (ipar(5) .gt. 1) then
+2100 if (ipar(IPAR_NERG) .gt. 1) then
 ! no optimization if more than one energy requested
   write (6, 2101)
 2101   format(' ** NERG SET EQUAL TO 1 FOR OPTIMIZATION')
-  ipar(5)=1
+  ipar(IPAR_NERG)=1
 endif
 call parse(line,l,code,lc)
 do 2110 ipr = iicode+1,icode
@@ -1213,8 +1212,8 @@ if(a(1).lt.a(2).and.(a(1)*a(3)+a(4).lt.a(1)).or. &
 2150    format(' Invalid step parameters for OPTIMIZE')
    goto 1
 end if
-jtot2x = ipar(2)
-write(6,2151) pcod(ipr)(1:lc),ipar(1),(a(i),i = 1,6), &
+jtot2x = ipar(IPAR_JTOT2)
+write(6,2151) pcod(ipr)(1:lc),ipar(IPAR_JTOT1),(a(i),i = 1,6), &
               abs(thrs)
 2151 format(' Optimization of ',(a),' for Jtot = ',i3,/, &
   ' Start:',f7.3,'  End:',f7.3,'  Factor:',f5.2, &
@@ -1222,7 +1221,7 @@ write(6,2151) pcod(ipr)(1:lc),ipar(1),(a(i),i = 1,6), &
   ' Average error limit:',f4.1,'%',/, &
   ' Maximum error limit:',f4.1,'%',/, &
   ' Threshold for S-matrix elements:',e10.2)
-ipar(2) = ipar(1)
+ipar(IPAR_JTOT2) = ipar(IPAR_JTOT1)
 fnam1 = 'Joba'
 fnam2 = 'Jobb'
 ! avoid too long filenames on cray (cos)
@@ -1289,7 +1288,7 @@ if((acclas.lt.a(5).and.accmx.lt.a(6)) &
      f10.2,'%',/, &
      ' in (i = ',i2,' j = ',i2,') element of ',(a))
    opti = .false.
-   ipar(2) = jtot2x
+   ipar(IPAR_JTOT2) = jtot2x
    goto 1
 end if
 rpar(ipr-iicode) = a(1)
