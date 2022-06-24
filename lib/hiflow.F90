@@ -64,6 +64,7 @@ use mod_par, only: airyfl, prairy, bastst, chlist, &
                 prxsec, nucros, photof, wavefl, boundc, &
                 jtot1, jtot2, jtotd, jlpar, nerg, numax, numin, nud, &
                 lscreen, iprint
+use funit
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
@@ -869,14 +870,14 @@ endif
 if (.not. bastst .and. &
    prxsec .or. wrxsec .or. wrpart .or. prpart) then
   do 400 ien = 1, nerg
-    nfile = 70 + ien
+    nfile = FUNIT_ICS_START + ien - 1
     close (nfile)
     if (wrpart) then
-      nfile = 24 + ien
+      nfile = FUNIT_PCS_START + ien - 1
       close (nfile)
       if (csflag .and. &
           (wrpart .or. prpart .or. wrxsec .or. prxsec)) then
-        nfile = 34 + ien
+        nfile = FUNIT_APCS_START + ien - 1
         close (nfile)
       end if
     end if
@@ -888,17 +889,17 @@ if (.not. bastst .and. &
     call dclos(1)
    endif
 endif
-if (wavefl .and. .not. boundc) close(22)
+if (wavefl .and. .not. boundc) close(FUNIT_WFU)
 if (wrsmat) then
   do 410 ien = 1, nerg
-  nfile = 44 + ien
+  nfile = FUNIT_SMT_START + ien - 1
   call closf (nfile)
   close (nfile)
 410   continue
 end if
 if (nerg .gt. 1) then
-  if (airyfl) close (10)
-  close (11)
+  if (airyfl) close (FUNIT_CHANNEL_PARAMS)
+  close (FUNIT_TRANS_MAT)
 end if
 420 call dater (cdate)
 if (.not. optifl) then

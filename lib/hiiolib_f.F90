@@ -901,14 +901,14 @@ subroutine openfi (nerg)
 !                           at each cs projection index
 !    wrxsec, prxsec:
 !                if either of these variables is .true., then unit=70 to
-!                           unit=(69+nerg) are opened for storage of some
+!                           unit=(FUNIT_ICS_START+nerg-1) are opened for storage of some
 !                           input data and degeneracy averaged integral
 !                           cross sections
-!                if wrxsec = .true., then unit=70 to unit=(69+nerg) are opened
+!                if wrxsec = .true., then unit=70 to unit=(FUNIT_ICS_START+nerg-1) are opened
 !                                    as permanent files with filenames
 !                                    xsec1, xsec2, xsec3, ... , xsecn
 !                                    where n = nerg
-!                          = .false., then unit=70 to unit=(69+nerg) are opene
+!                          = .false., then unit=70 to unit=(FUNIT_ICS_START+nerg-1) are opene
 !                                     as files tmpx1, tmpx2, ... tmpxn
 !    rsflag:     if .true., then calculation is being restarted
 !                abort will occur unless all requested i/o files already exist
@@ -932,6 +932,7 @@ use mod_cosc2, only: rsc2 => sc2 ! rsc2(1)
 use mod_par, only: airyfl, csflag, flaghf, flagsu, ipos, &
                 prpart, readpt, rsflag, twomol, wrsmat, &
                 wrpart, wrxsec, prxsec, nucros, photof, wavefl, boundc
+use funit
 implicit double precision (a-h,o-z)
 integer ifile, nerg, nfile, lenx, isize, isizes
 logical existf
@@ -946,7 +947,7 @@ common /coselb/ ibasty
 if (nerg .gt. 1) then
 !  check to see if nerg .le. 25
   if (nerg .gt. 25) then
-    write (9, 10) nerg
+    write (FUNIT_OUT, 10) nerg
     write (6, 10) nerg
 10     format (/' *** NERG =', i2,' > 25; ABORT ***')
     call exit
@@ -955,21 +956,21 @@ if (nerg .gt. 1) then
 !  and quadrature matrices if more than one energy desired
 #if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
   if (airyfl) then
-    call tmpnm (10, xname)
+    call tmpnm (FUNIT_CHANNEL_PARAMS, xname)
 ! open scratch file (unit is therefore negativ here, see open)
 ! isize is only needed on a univac
-    call openf(-10, xname, 'su', isize)
+    call openf(-FUNIT_CHANNEL_PARAMS, xname, 'su', isize)
   endif
 #endif
-  call tmpnm (11, xname)
-  call openf(-11, xname, 'su', isize)
-  call tmpnm (12, xname)
-  call openf(-12, xname, 'sf', 0)
+  call tmpnm (FUNIT_TRANS_MAT, xname)
+  call openf(-FUNIT_TRANS_MAT, xname, 'su', isize)
+  call tmpnm (FUNIT_QUAD_MAT, xname)
+  call openf(-FUNIT_QUAD_MAT, xname, 'sf', 0)
 end if
 !   open files for storage of integral cross sections
 if (wrxsec .or. prxsec) then
   do 60  ifile = 1, nerg
-    nfile = 69 + ifile
+    nfile = FUNIT_ICS_START - 1 + ifile
     if (wrxsec) then
        call gennam (xname, jobnam, ifile, 'ics', lenx)
        if(ifile.eq.1) xnam1=xname
@@ -986,10 +987,10 @@ if (wrxsec .or. prxsec) then
 60   continue
   if(wrxsec) then
     if (nerg .eq. 1) then
-      write (9, 110) xnam1(1:lenx)
+      write (FUNIT_OUT, 110) xnam1(1:lenx)
 110       format (' ** INTEGRAL CROSS SECTIONS SAVED IN FILE ',(a))
     else
-      write (9, 115) xnam1(1:lenx),xname(1:lenx)
+      write (FUNIT_OUT, 115) xnam1(1:lenx),xname(1:lenx)
 115       format &
     (' ** INTEGRAL CROSS SECTIONS SAVED IN FILES ',(a), &
      ' THROUGH ',(a))
@@ -1002,7 +1003,7 @@ end if
 if (wrxsec .or. prxsec .or. prpart .or. wrpart) then
   if (.not. wavefl .and. .not. photof) then
      call dinit
-     nfile = 3
+     nfile = FUNIT_SAV
      lenj=index(jobnam,' ')-1
      if (lenj .eq. 0) lenj=40
      if (lenj .gt. 8) then
@@ -1027,7 +1028,7 @@ endif
 ! open direct access file for storage of wavefunction
 if (wavefl.and. .not. boundc) then
   call dinit
-  nfile = 22
+  nfile = FUNIT_WFU
   lenj=index(jobnam,' ')-1
   if (lenj .eq. 0) lenj=40
   if (lenj .gt. 8) then
@@ -1042,9 +1043,9 @@ if (wavefl.and. .not. boundc) then
         write (6, 300) xname(1:lenx)
         call exit
      end if
-     call openf(22, xname, 'TU', 0)
+     call openf(FUNIT_WFU, xname, 'TU', 0)
   else
-     call openf(22, xname, 'TW', 0)
+     call openf(FUNIT_WFU, xname, 'TW', 0)
   end if
   write (6, 210) xname(1:lenx)
   write (9, 210) xname(1:lenx)
@@ -1053,7 +1054,7 @@ endif
 !   open files for storage of partial cross sections
 if (wrpart) then
   do 230  ifile = 1, nerg
-    nfile = 24 + ifile
+    nfile = FUNIT_PCS_START + ifile - 1
     call gennam (xname, jobnam, ifile, 'pcs',lenx)
     if(ifile.eq.1) xnam1=xname
     inquire (file=xname, exist=existf)
@@ -1090,7 +1091,7 @@ end if
 !   projection index
 if (csflag) then
   do 280  ifile = 1, nerg
-    nfile = 34 + ifile
+    nfile = FUNIT_APCS_START + ifile - 1
     call tmpnm (nfile, xname)
     nnfile=-nfile
     call openf(nnfile, xname, 'su', 0)
@@ -1099,7 +1100,7 @@ end if
 !  open files smatn for storage of selected s-matrix elements
 if (wrsmat .and. .not. photof .and. .not. wavefl) then
   do 330  ifile = 1, nerg
-  nfile = ifile + 44
+  nfile = FUNIT_SMT_START + ifile - 1
     call gennam(xname, jobnam, ifile, 'smt', lenx)
     if(ifile.eq.1) xnam1=xname
     if (rsflag) then
