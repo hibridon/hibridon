@@ -140,6 +140,7 @@ use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_coener, only: ener => energ
 use mod_hibrid2, only: mxoutd, mxoutr
+use funit
 implicit double precision (a-h,o-z)
 real(8), intent(inout) :: tsq(nmax,nmax)
 real(8), intent(inout) :: sr(nmax,nmax)
@@ -251,8 +252,8 @@ end if
 if (photof .or. wavefn) return
 if (writs .and. nopen .gt. 0) then
 !  here if real and imaginary parts of s-matrix for selected transitions
-!  are to be written out to unit (44+ien)
-    nfile = 44 + ien
+!  are to be written out to unit (FUNIT_SMT_START+ien-1)
+    nfile = FUNIT_SMT_START + ien - 1
     if (firstj) then
        call dater (cdate)
        call wrhead(nfile, cdate, &
@@ -276,9 +277,9 @@ call  partcr (tsq,  scmat, isc1, isc2, sc1, nopen, nopen, &
 if (csflag.and..not.nucros) then
 !  here if partial cross sections are desired
 !  if first value of projection index, then initialize matrix of
-!  partial cross sections which will be stored on unit (34+ien)
+!  partial cross sections which will be stored on unit (FUNIT_APCS_START+ien-1)
 !  tsq is used as scratch matrix here
-  nfile = 34 + ien
+  nfile = FUNIT_APCS_START + ien - 1 
   if(nu.gt.numin) then
     rewind nfile
     read(nfile) ((sc1(j,i),j=1,nlevop),i=1,nlevop)
