@@ -405,7 +405,7 @@ return
 2300 call sav3p2s(readpt)
 return
 !  spherical top + atom
-2400 call savsphtp(reapt)
+2400 call savsphtp(readpt)
 return
 !  two different 1sigma molecules
 2500 call sav1sg1sg(readpt)
