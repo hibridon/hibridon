@@ -104,13 +104,14 @@ use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+#include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
 common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 common /coskip/ nskip, iskip
+integer :: nskip, iskip
 common /cojtot/ jjtot,jjlpar
 dimension j(40), l(40), jhold(40), ehold(40), isc1(40), &
           sc2(40), sc3(40), &
@@ -748,7 +749,12 @@ use mod_coiout, only: niout, indout
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-logical readpt, existf
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: icod, ircod, j, l, lc
+logical existf
 character*1 dot
 character*(*) fname
 character*60 line, filnam, potfil, filnm1

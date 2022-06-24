@@ -1145,6 +1145,223 @@ module mod_cosysr
 end module mod_cosysr
 
 
+module mod_par
+   implicit none
+   save
+   logical, dimension(:), allocatable, target :: lpar
+   !  variables in common block /colpar/
+   !    airyfl:      if .true., then airy propagation will take place
+   !    prairy:      if .true., then step-by-step information is printed out in
+   !                 airy propagation
+   !    bastst:      if .true., then execution terminates after the first call
+   !                 to basis
+   !    batch:       if .true., then the job is run as a batch job
+   !                 if .false., then the job is assumed to be interactive
+   !    chlist:      if .true., then the channel quantum numbers and energies are
+   !                 printed out at at each total-j
+   !                 if .false., then  this is done only at first total-j
+   !    csflag:      if .true., then coupled-states calculation is desired
+   !                 if .false., then close-coupled calculation is desired
+   !    flaghf:      if .true., then the system has even multiplicity
+   !                 (half-integer total angular momentum)
+   !    flagsu:      if .true., then the problem is assumed to a molecule
+   !                 scattering off a surface, in which case the diagonal
+   !                 elements of the transition probabilities are equal to the
+   !                 modulus squared of the s-matrix (not t-matrix elements)
+   !    ihomo:       if .true., then the molecule is assumed to be homonuclear
+   !    ipos:        if .true., then printout is suited for a 132-position printe
+   !                 if .false., then printout is suited for a  80 -position
+   !                 printer
+   !    logdfl:      if .true., then logd propagation will take place
+   !    prlogd:       if .true., then the lower triangle of log-derivative matrix
+   !                 is printed at the end of the logd and the end of the airy
+   !                 integrations
+   !    noprin:      if .true., then most printing is suppressed
+   !    prpart:       if .true, then the full matrix of partial cross sections
+   !                 (summed over m-states) is printed
+   !    readpt:      if .true., then potential parameters are expected
+   !    rsflag:      if .true., then calculation is to be restarted
+   !                 a check will be made to see if all required files
+   !                 are present:  these may include
+   !                    trstrt, tmp10, tmp11, xsecn (or tmpxn), smatn,
+   !                    psecn, tmp35, ...
+   !    prsmat:       if .true., then the upper triangle of real and imaginary
+   !                 parts of s-matrix are printed
+   !    t2test:      if .true., then the first two columns of the square modulus
+   !                 of the t-matrix are printed
+   !    prt2:      if .true., then the upper triangle of square modulus of
+   !                 t-matrix is printed
+   !    twomol:      .true. if molecule-molecule collision
+   !    wrsmat:       if .true., and nnout is > 0, then those s-matrix elements
+   !                 for which both the initial and final rotational quantum
+   !                 numbers are in the array jout (input line 12) are written to
+   !                 files smat1, smat2, ...
+   !                 if nnout < 0, then each column of the s-matrix whose initial
+   !                 index is in the array jout is written to files smat1, smat2,
+   !    wrpart:      if .true., then input data and the matrix of partial cross
+   !                 sections (summed over m-states) is written to file pxsec
+   !    wrxsec:      if .true., then some input data and the full matrix of
+   !                 integral cross sections ((summed over m-states and summed
+   !                 from jtot1 to jtot2) is written to file xsec1, xsec2, ....
+   !    prxsec:      if .true., then the full matrix of integral cross sections
+   !                 ((summed over m-states and summed from jtot1 to jtot2) is
+   !                 printed
+   !
+
+
+   !    airyfl:      if .true., then airy propagation will take place
+   logical, pointer :: airyfl
+
+   !    prairy:      if .true., then step-by-step information is printed out in
+   !                 airy propagation
+   logical, pointer :: prairy
+
+   !    bastst:      if .true., then execution terminates after the first call
+   !                 to basis
+   logical, pointer :: bastst
+
+   logical, pointer :: batch
+
+   !     chlist:  if .true., then the channel quantum numbers and energies are
+   !              printed out at at each total-j
+   !              if .false., then  this is done only at first total-j
+   logical, pointer :: chlist
+
+   !    csflag:   if .true., then coupled-states calculation is desired
+   !              if .false., then close-coupled calculation is desired
+   logical, pointer :: csflag
+
+   !    flaghf:   if .true., then the system has even multiplicity (half-integer
+   !              total angular momentum)
+   logical, pointer :: flaghf
+
+   !    flagsu:   if .true., then the problem is assumed to a molecule scattering
+   !              of a surface, in which case the diagonal elements of the
+   !              transition probabilities are equal to the modulus squared of
+   !              the s-matrix (not t-matrix elements)
+   logical, pointer :: flagsu
+
+   !    ihomo:    if .true., then the molecule is assumed to be homonuclear
+   logical, pointer :: ihomo
+
+   !     ipos:    if .true., then printout is suited for a 132-position printer
+   !              if .false., then printout is suited for a  80 -position printer
+   logical, pointer :: ipos
+
+   !    logdfl:      if .true., then logd propagation will take place
+   logical, pointer :: logdfl
+
+   !     prlogd:  if .true., then the lower triangle of log-derivative matrix
+   !              is printed at the end of the logd and the end of the airy
+   !              integrations
+   logical, pointer :: prlogd
+
+   !     noprin:  if .true., then most printing is suppressed
+   logical, pointer :: noprin
+
+   !     prpart:  if .true, then the full matrix of partial cross sections (summe
+   !              over m-states) is printed
+   logical, pointer :: prpart
+
+   !    readpt:      if .true., then potential parameters are expected
+   logical, pointer :: readpt
+
+   !    rsflag:      if .true., then calculation is to be restarted
+   !                 a check will be made to see if all required files
+   !                 are present:  these may include
+   !                    trstrt, tmp10, tmp11, xsecn (or tmpxn), smatn,
+   !                    psecn, tmp35, ...  
+   logical, pointer :: rsflag
+
+   !     prsmat:  if .true., then the upper triangle of real and imaginary parts
+   !              of s-matrix are printed
+   logical, pointer :: prsmat
+
+   !     t2test:  if .true., then the first two columns of the square modulus of
+   !              the t-matrix are printed
+   logical, pointer :: t2test
+
+   !     prt2:    if .true., then the upper triangle of square modulus of t-matri
+   !              is printed
+   logical, pointer :: prt2
+
+   !    twomol:   if .true., then molecule-molecule collision is assumed
+   logical, pointer :: twomol
+
+   !     wrsmat:  if .true., and nnout is > 0, then those s-matrix elements
+   !              for which both the initial and final rotational quantum
+   !              numbers are in the array jout (input line 12) are written to
+   !              files smat1, smat2, ...
+   !              if nnout < 0, then each column of the s-matrix whose initial
+   !              index is in the array jout is written to files smat1, smat2, ..
+   logical, pointer :: wrsmat
+
+   !     wrpart:  if .true., then input data and the matrix of partial cross
+   !              sections (summed over m-states) is written to file pxsec
+   logical, pointer :: wrpart
+
+   !     wrxsec:  if .true., then some input data and the full matrix of integral
+   !              cross sections ((summed over m-states and summed from
+   !              jtot1 to jtot2) is written to file xsec1, xsec2, ....
+   logical, pointer :: wrxsec
+
+   !     prxsec:  if .true., then the full matrix of integral cross sections
+   !              ((summed over m-states and summed from jtot1 to jtot2) is print
+   logical, pointer :: prxsec
+
+   !     nucros:  parameter to control how CS integral cross sections are
+   !              computed
+   logical, pointer :: nucros
+
+   !     photof:  if .true. then photodissociation calculation
+   logical, pointer :: photof
+
+   !     wavefl:  if .true. then information is written to calculate,
+   !              subsequently, wavefunctions, fluxes, and adiabatic energies
+   logical, pointer :: wavefl
+
+   !     boundc:  if .true. then susan gregurick's bound state calculation
+   !              is implemented
+   logical, pointer :: boundc
+
+   contains
+   subroutine allocate_par()
+      use mod_hiparcst
+      integer :: num_lpar = LPAR_COUNT
+      allocate(lpar(num_lpar))
+
+      airyfl => lpar(LPAR_AIRYFL)
+      prairy => lpar(LPAR_PRAIRY)
+      bastst => lpar(LPAR_BASTST)
+      batch => lpar(LPAR_BATCH)
+      chlist => lpar(LPAR_CHLIST)
+      csflag => lpar(LPAR_CSFLAG)
+      flaghf => lpar(LPAR_FLAGHF)
+      flagsu => lpar(LPAR_FLAGSU)
+      ihomo => lpar(LPAR_IHOMO)
+      ipos => lpar(LPAR_IPOS)
+      logdfl => lpar(LPAR_LOGDFL)
+      prlogd => lpar(LPAR_PRLOGD)
+      noprin => lpar(LPAR_NOPRIN)
+      prpart => lpar(LPAR_PRPART)
+      readpt => lpar(LPAR_READPT)
+      rsflag => lpar(LPAR_RSFLAG)
+      prsmat => lpar(LPAR_PRSMAT)
+      t2test => lpar(LPAR_T2TEST)
+      prt2 => lpar(LPAR_PRT2)
+      twomol => lpar(LPAR_TWOMOL)
+      wrsmat => lpar(LPAR_WRSMAT)
+      wrpart => lpar(LPAR_WRPART)
+      wrxsec => lpar(LPAR_WRXSEC)
+      prxsec => lpar(LPAR_PRXSEC)
+      nucros => lpar(LPAR_NUCROS)
+      photof => lpar(LPAR_PHOTOF)
+      wavefl => lpar(LPAR_WAVEFL)
+      boundc => lpar(LPAR_BOUNDC)
+   end subroutine allocate_par
+
+end module mod_par
+
 
 
  ! all the commons blocks from hiiolib_f.F90:

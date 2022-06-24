@@ -925,10 +925,13 @@ use mod_coiout, only: niout, indout
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-logical readpt, existf, twomol
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+logical existf, twomol
 integer icod, ircod
-integer i, iread, irpot
+integer i, j, k, l, lc
 character*1 dot
 character*(*) fname
 character*60 line, filnam, potfil, filnm1

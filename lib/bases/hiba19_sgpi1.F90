@@ -166,10 +166,10 @@ use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+#include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
 common /coipar/ iiipar(9), iprint
 common /covibp/ ivpi(5)
 common /covpot/ numvib,ivibpi(5)
@@ -1134,18 +1134,21 @@ use mod_cosyr, only: rcod
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-logical readpt, existf
+use mod_par, only: ihomo
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: is, isa, isi, isr, isym, iv, ivpi
+integer :: j, l, lc, nmax, nparsg, nterm, numvpi
+logical existf
 character*8 char
 character*(*) fname
 character*1 dot
 character*60 filnam, line, potfil, filnm1
 #include "common/parbas.F90"
-logical         airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo, lpar(18)
 common /coskip/ nskip,iskip
+integer :: nskip, iskip
 common /covibp/ ivpi(5)
 save potfil
 #include "common/comdot.F90"

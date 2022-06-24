@@ -1,6 +1,6 @@
 !comdeck logdef
-logical airyfl, airypr, bastst, batch, chlist, &
+logical airyfl, prairy, bastst, batch, chlist, &
                 csflag, flaghf, flagsu, ihomo, ipos, logdfl, &
-                logwr, noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr, nucros, photof, wavefl, boundc
+                prlogd, noprin, prpart, readpt, rsflag, prsmat, &
+                t2test, prt2, twomol, wrsmat, wrpart, wrxsec, &
+                prxsec, nucros, photof, wavefl, boundc

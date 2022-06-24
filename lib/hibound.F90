@@ -33,7 +33,8 @@ subroutine bound(nch, nmax)
 !     ------------------------------------------------------------------
 use mod_coiout, only: niout
 use mod_version, only: version
-use constants, only: econv, xmconv 
+use constants, only: econv, xmconv
+use mod_par, only: wavefl
 implicit none
 integer, intent(in) :: nch, nmax
 #include "common/parpot.F90"
@@ -41,8 +42,6 @@ common /corpar/ r1, r2, c, spac, delr, hsimp, eigmin, tolai, xmu
 real(8) :: r1, r2, c, spac, delr, hsimp, eigmin, tolai, xmu
 common /cofile/ input, output, jobnam, savfil
 character(40) :: jobnam, input, output, savfil
-common /colpar/ lpar(26), wavefl
-logical :: lpar, wavefl
 common /coered/ ered, rmu
 real(8) :: ered, rmu
 

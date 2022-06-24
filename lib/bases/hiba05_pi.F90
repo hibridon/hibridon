@@ -131,13 +131,13 @@ use mod_conlam, only: nlam, nlammx, lamnum
 use constants, only: econv, xmconv, ang2c
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+#include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*80 string
 character*27 case
 character*2 chf
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
 common /coipar/ iiipar(9), iprint
 common /corpar/ xjunk(3), rendai
 common /coered/ ered, rmu
@@ -1003,17 +1003,18 @@ use mod_cosys, only: scod
 use mod_cosysl, only: islcod, lspar
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-logical readpt, existf
-logical         airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: j, l, lc
+logical existf
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 character*1 dot
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar(18)
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
+integer :: nskip, iskip
 save potfil
 #include "common/comdot.F90"
 integer, pointer :: nterm, jmax, igu, isa, npar, imult, nman

@@ -823,7 +823,7 @@ subroutine propag (z, w, zmat, amat, bmat, &
                    jq, lq, inq, &
                    ien, nerg, en, eshift, rstart, rendld, spac, &
                    tolhi, rendai, rincr, fstfac, tb, tbm, &
-                   ipos, logwr, noprin, airyfl, airypr, &
+                   ipos, prlogd, noprin, airyfl, prairy, &
                    nch, nopen, nairy, nmax)
 ! ------------------------------------------------------------------------
 !  subroutine to:
@@ -874,14 +874,14 @@ subroutine propag (z, w, zmat, amat, bmat, &
 !  logical variables:
 !    ipos         if .true., then 132 column printer
 !                 if .false., then 80 column printer
-!    logwr        if .true., then lower triangle of the log-derivative matrix
+!    prlogd        if .true., then lower triangle of the log-derivative matrix
 !                 is printed out at end of logd and airy integration
 !    noprin       if .true., then all printing is suppressed
 !    iprint:      if .true., then print out of step-by-step information
 !    airyfl:      if .true., then airy propagation will occur
 !                 if .false., then no airy propagation will occur, the
 !                 integration will stop at r=renld
-!    airypr:      if .true., then interval size, interval midpoint, and maximu
+!    prairy:      if .true., then interval size, interval midpoint, and maximu
 !                 estimated diagonal and off-diagonal corrections are printed
 !                 out in airy propagation
 !    nopen        on return:  number of energetically open channels
@@ -929,10 +929,10 @@ real(8), intent(in) :: fstfac
 real(8), intent(out) :: tb
 real(8), intent(out) :: tbm
 logical, intent(in) :: ipos
-logical, intent(in) :: logwr
+logical, intent(in) :: prlogd
 logical, intent(in) :: noprin
 logical, intent(in) :: airyfl
-logical, intent(in) :: airypr
+logical, intent(in) :: prairy
 integer, intent(in) :: nch
 integer, intent(out) :: nopen
 integer, intent(in) :: nairy
@@ -952,11 +952,11 @@ real(8) :: cpuai
 real(8) :: cpupot
 real(8) :: cpusmt
 real(8) :: cpupht
-common /cophot/ photof, wavefn, boundf, wrsmat
+common /cophot/ photof, wavefn, boundf, writs
 logical :: photof
 logical :: wavefn
 logical :: boundf
-logical :: wrsmat
+logical :: writs
 
 real(8) :: r
 real(8) :: t1, t2
@@ -1019,7 +1019,7 @@ cpup=cpupot
 call mtime(ttx,tty)
 call runlog (z, &
              r, rendld, spac, eshift, itwo, twoen, &
-             td, tdm, tp, tpm, twf, twfm, logwr, noprin, &
+             td, tdm, tp, tpm, twf, twfm, prlogd, noprin, &
              ipos, nch, nmax)
 
 !  on return from runlog, z contains the log-derivative matrix at r = rendld
@@ -1043,7 +1043,7 @@ if (airyfl) then
 
   call airprp (z, &
                r, rendai, drnow, en, &
-               tolhi, rincr, eshift, nch, nmax, itwo, airypr, &
+               tolhi, rincr, eshift, nch, nmax, itwo, prairy, &
                twoen,noprin)
 !  on return from airprp, z contains the log-derivative matrix at r = rendai
 end if
@@ -1054,7 +1054,7 @@ tairy = t11 - t1
 tp=tp+cpupot-cpup
 tairy=tairy-cpupot+cpup
 cpuai=cpuai+tairy
-if (logwr .and. airyfl) then
+if (prlogd .and. airyfl) then
   write (9, 260) r
 260   format(/' ** LOG-DERIVATIVE MATRIX AFTER AIRPRP; R = ', 1pe15.8)
   call mxoutd (9, z, nch, nmax, 0, ipos)
@@ -1062,7 +1062,7 @@ end if
 !  now calculate s-matrix and t-matrix squared
 call smatrx (z, w, zmat, &
              lq, jq, inq, r, prec, tw, twm, nopen, nch, nmax, &
-             logwr,ipos)
+             prlogd,ipos)
 
 ! convert to time string
   call mtime(t1,t2)
@@ -1275,11 +1275,11 @@ integer ich, icode, icol, idiag, ierr, ij, irow, istep, kstep, &
 !     :     tn, tp,  zero, wdiag
 !      real w, z
 !      real scr1, scr2, wref, z1, z2
-logical photof, wavefn, boundf, wrsmat
+logical photof, wavefn, boundf, writs
 logical flagsu
 !      external mtime, potmat, daxpy, smxinv, dscal
 !     matrices z and w are stored column by column as one-dimensi
-common /cophot/ photof, wavefn, boundf, wrsmat
+common /cophot/ photof, wavefn, boundf, writs
 common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
      inflev
 common /cosurf/ flagsu
@@ -1338,6 +1338,7 @@ tpw = zero
 twf = zero
 twfw = zero
 call mtime(tf,tfw)
+write(6,*) "iread=", iread
 if (iread) then
    icol = 1
    do 5  ich = 1, nch
@@ -1386,7 +1387,7 @@ else
       if (photof) write (11) (q(i), i=1, nqmax)
    endif
 endif
-
+write(6,*) 'w(1) = ', w(1)
 !     use diagonal approximation to wkb initial value for log
 !     derivative matrix  (eqn 16)
 !     rmin is assumed to lie inside the classically forbidden
@@ -1403,6 +1404,7 @@ do 20  ich = 1, nch
 idiag = 1
 do  30 ich = 1, nch
    wdiag = w(idiag)
+   write (6, *) 'idiag = ', idiag, 'wdiag = ', wdiag
    if (wdiag .le. 0) then
      write (9, 25) ich, wdiag
      write (6, 25) ich, wdiag
@@ -1642,7 +1644,7 @@ do 250  kstep = 1, nsteps
                 nch, nch, nch)
 !     w now contains the matrix g(a,m)g(m,b)=g(a,b)
 !     if wavefunction desired, save this matrix
-    if (wavefn .and. wrsmat) then
+    if (wavefn .and. writs) then
        irec = irec + 1
 !     nrlogd is the number of LOGD records - used to seek the wfu file
        nrlogd = nrlogd + 1
@@ -1777,7 +1779,7 @@ end
 subroutine runlog (z, &
                    r, rend, &
                    spac, eshift, itwo, twoen, tl, tlw, tp, tpw, &
-                   twf, twfw, logwr, noprin, ipos, nch, nmax)
+                   twf, twfw, prlogd, noprin, ipos, nch, nmax)
 !     log-derivative propagator from r to r = rend
 !     the logd code is based on the improved log-derivative method
 !     for reference see  d.e.manolopoulos, j.chem.phys., 85, 6425 (1986)
@@ -1815,7 +1817,7 @@ subroutine runlog (z, &
 !                   calls of the form call mtime(cpu,wall), where cpu
 !                   and wall refer to the current cpu and wall clock
 !                   times in seconds
-!     logwr         if .true., then lower triangle of the z
+!     prlogd         if .true., then lower triangle of the z
 !                   matrix is printed out at end of log-derivative
 !                   integration
 !     noprin        if .true., then all printing is suppressed
@@ -1845,7 +1847,7 @@ real(8), intent(out) :: tp
 real(8), intent(out) :: tpw
 real(8), intent(out) :: twf
 real(8), intent(out) :: twfw
-logical, intent(in) :: logwr
+logical, intent(in) :: prlogd
 logical, intent(in) :: noprin
 logical, intent(in) :: ipos
 integer, intent(in) :: nch
@@ -1862,10 +1864,10 @@ real(8) :: scr2(nch)
 !      real scr1, scr2, wref, z1, z2
 !      real w, z
 integer nsteps
-logical boundf, wrsmat
+logical boundf, writs
 !  internal logical variables
 logical iread, iwrite, print, photof, wavefn
-common /cophot/ photof, wavefn, boundf, wrsmat
+common /cophot/ photof, wavefn, boundf, writs
 common /constp/ nsteps, isteps
 
 !  z, w, amat, and bmat are stored column by column in one dimensional arrays
@@ -1907,7 +1909,7 @@ call logdb (z, &
 r = rmax
 !  print out log-derivative matrix at end of logd integration
 !  ( if desired )
-if (logwr .and. print) then
+if (prlogd .and. print) then
 
   write (9, 40) r
 40   format(/' ** LOG-DERIVATIVE MATRIX AFTER LOGDB; R = ', 1pe15.8)
@@ -2367,6 +2369,7 @@ use mod_cosysi, only: ispar
 use mod_cotq1, only: srsave => dpsir ! srsave(100)
 use mod_cotq2, only: sisave => tq2 ! sisave(100)
 use mod_hibrid2, only: mxoutd, mxoutr
+use mod_par, only: prsmat
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax, nmax), intent(inout) :: tmod
 real(8), dimension(nmax, nmax), intent(out) :: sr
@@ -2393,16 +2396,15 @@ integer isw, i, icol, l
 character*1 forma
 character*40 flxfil
 #endif
-logical flagsu, photof, wavefn, lpar, swrit, lpar2, &
-     boundf, wrsmat
+logical flagsu, photof, wavefn, &
+     boundf, writs
 common /coered/ ered, rmu
 common /cosurf/ flagsu
-common /cophot/ photof, wavefn, boundf, wrsmat
+common /cophot/ photof, wavefn, boundf, writs
 common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
      inflev
 common /coipar/ ipar(3),jlpar
 common /corpar/ rpar(6), spac
-common /colpar/ lpar(16),swrit,lpar2(10)
 common /coselb/ ibasty
 !     The following three variables are used to determine the (machine
 !     dependent) size of built-in types
@@ -2768,7 +2770,7 @@ if (photof) then
 ! determine real and imaginary parts of chi (save these in sr and si)
 ! determine real and imaginary parts of derivatives (save these in tmod
 ! and scmat
-  if (wavefn.or.swrit) then
+  if (wavefn.or.prsmat) then
 ! retranspose transition amplitudes
   call transp(sr, nopen, nmax)
   call transp(si,nopen,nmax)
@@ -2858,9 +2860,9 @@ logical, intent(in) :: kwrit
 logical, intent(in) :: ipos
 
 
-logical photof, wavefn, boundf, wrsmat
+logical photof, wavefn, boundf, writs
 common /coered/ ered, rmu
-common /cophot/ photof, wavefn, boundf, wrsmat
+common /cophot/ photof, wavefn, boundf, writs
 common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
      inflev
 real(8) :: amat(nmax,nmax), bmat(nmax,nmax)
@@ -2872,7 +2874,7 @@ data izero /0/
 integer int_t
 double precision dble_t
 character char_t
-!  if kwrit (logwr) = .true. and photodissociation calculation, print out
+!  if kwrit (prlogd) = .true. and photodissociation calculation, print out
 !  <psi|mu matrix at end of airprp
 if (kwrit .and. photof) then
     write (9, 20)
@@ -2990,9 +2992,8 @@ subroutine expand(ncol,nopen,nch,nmax,ipack,sr,si,bmat)
 !           on return: imaginary part of nch x nch s matrix
 ! bmat      scratch matrix
 !  ---------------------------------------------------------------------------
+use mod_par, only: photof
 implicit double precision (a-h,o-z)
-logical ldum, photof
-common /colpar/ ldum(25),photof
 dimension sr(nopen,nopen),si(nopen,nopen), &
           bmat(nmax,nmax),ipack(15)
 zero=0.d0

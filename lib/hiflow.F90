@@ -21,64 +21,6 @@ subroutine flow (z, w, zmat, amat, bmat, jq, lq, inq, jlev, &
 !           iflag = 0 if all channels are in classically forbidden region
 !           iflag = 1 if some channels are open
 !           iflag = 2 if all asymptotically open channels are open at r
-!  variables in common block /colpar/
-!    airyfl:      if .true., then airy propagation will take place
-!    airypr:      if .true., then step-by-step information is printed out in
-!                 airy propagation
-!    bastst:      if .true., then execution terminates after the first call
-!                 to basis
-!    batch:       if .true., then the job is run as a batch job
-!                 if .false., then the job is assumed to be interactive
-!    chlist:      if .true., then the channel quantum numbers and energies are
-!                 printed out at at each total-j
-!                 if .false., then  this is done only at first total-j
-!    csflag:      if .true., then coupled-states calculation is desired
-!                 if .false., then close-coupled calculation is desired
-!    flaghf:      if .true., then the system has even multiplicity
-!                 (half-integer total angular momentum)
-!    flagsu:      if .true., then the problem is assumed to a molecule
-!                 scattering off a surface, in which case the diagonal
-!                 elements of the transition probabilities are equal to the
-!                 modulus squared of the s-matrix (not t-matrix elements)
-!    ihomo:       if .true., then the molecule is assumed to be homonuclear
-!    ipos:        if .true., then printout is suited for a 132-position printe
-!                 if .false., then printout is suited for a  80 -position
-!                 printer
-!    logdfl:      if .true., then logd propagation will take place
-!    logwr:       if .true., then the lower triangle of log-derivative matrix
-!                 is printed at the end of the logd and the end of the airy
-!                 integrations
-!    noprin:      if .true., then most printing is suppressed
-!    partw:       if .true, then the full matrix of partial cross sections
-!                 (summed over m-states) is printed
-!    readpt:      if .true., then potential parameters are expected
-!    rsflag:      if .true., then calculation is to be restarted
-!                 a check will be made to see if all required files
-!                 are present:  these may include
-!                    trstrt, tmp10, tmp11, xsecn (or tmpxn), smatn,
-!                    psecn, tmp35, ...
-!    swrit:       if .true., then the upper triangle of real and imaginary
-!                 parts of s-matrix are printed
-!    t2test:      if .true., then the first two columns of the square modulus
-!                 of the t-matrix are printed
-!    t2writ:      if .true., then the upper triangle of square modulus of
-!                 t-matrix is printed
-!    twomol:      .true. if molecule-molecule collision
-!    writs:       if .true., and nnout is > 0, then those s-matrix elements
-!                 for which both the initial and final rotational quantum
-!                 numbers are in the array jout (input line 12) are written to
-!                 files smat1, smat2, ...
-!                 if nnout < 0, then each column of the s-matrix whose initial
-!                 index is in the array jout is written to files smat1, smat2,
-!    wrpart:      if .true., then input data and the matrix of partial cross
-!                 sections (summed over m-states) is written to file pxsec
-!    wrxsec:      if .true., then some input data and the full matrix of
-!                 integral cross sections ((summed over m-states and summed
-!                 from jtot1 to jtot2) is written to file xsec1, xsec2, ....
-!    xsecwr:      if .true., then the full matrix of integral cross sections
-!                 ((summed over m-states and summed from jtot1 to jtot2) is
-!                 printed
-!
 !  variable in common block /cosurf/
 !    surffl:      this variable is set equal to flagsu, it is held in a
 !                 separate common block for compatability with subroutines
@@ -113,18 +55,21 @@ use mod_hibrid5, only : soutpt, nusum, xwrite, wrhead, restrt, rsave
 use constants
 use mod_hibrid2, only: default
 use mod_hibrid3, only: propag
+use mod_par, only: airyfl, prairy, bastst, chlist, &
+                csflag, flaghf, flagsu, ihomo, ipos, logdfl, &
+                prlogd, noprin, prpart, rsflag, prsmat, &
+                t2test, prt2, twomol, wrsmat, wrpart, wrxsec, &
+                prxsec, nucros, photof, wavefl, boundc
 implicit double precision (a-h,o-z)
 integer :: jtotmx
 character*20 cdate
 character*10 time
 character*10 timew,cpubaw,cpuptw,cpuaiw,cpuldw,cpusmw,cpuouw, &
              cpuphw,timew1,timew2,time1,time2
-logical logwr, swrit, t2writ, wrpart, partw, airyfl, airypr, &
-        ipos, noprin, chlist, wrxsec, xsecwr, writs, csflag, &
-        flaghf, clist, rsflag, t2test, logdfl, flagsu, &
-        batch, readpt, ihomo, bastst, twojlp, firstj, &
-        twomol, surffl, nucros, ready, photof, photfl, wavefl, &
-        wavefn, boundc, boundf, wrsmat
+logical clist, &
+        twojlp, firstj, &
+        surffl, ready, photfl, &
+        wavefn, boundf, writs
 !  -------------------------------------------------------------
 logical optifl, first
 logical lsc1
@@ -142,12 +87,7 @@ common /coipar/ jtot1, jtot2, jtotd, jlpar, nerg,numax,numin,nud, &
                 lscreen, iprint
 common /corpar/ fstfac, rincr, rcut, rendai, rendld, rstart, spac, &
                 tolhi, xmu
-common /colpar/ airyfl, airypr, bastst, batch, chlist, &
-                csflag, flaghf, flagsu, ihomo, ipos, logdfl, &
-                logwr, noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr, nucros, photof, wavefl, boundc
-common /cophot/ photfl, wavefn, boundf, wrsmat
+common /cophot/ photfl, wavefn, boundf, writs
 common /cosurf/ surffl
 common /coselb/ ibasty
 common /cojlpo/ jlpold
@@ -183,7 +123,7 @@ call mtime (tcpu0, twall0)
 photfl = photof
 wavefn = wavefl
 boundf = boundc
-wrsmat = writs
+writs = wrsmat
 surffl = flagsu
 !  subroutine to open required i/o files
 if (.not.bastst) then
@@ -216,7 +156,7 @@ if (nerg .gt. men) then
   call exit
 end if
 if (nerg.gt.19) then
-   if (writs.and.(xsecwr.or.wrxsec))  then
+   if (wrsmat.and.(prxsec.or.wrxsec))  then
       write (6,55) nerg
 55       format( &
     /' NERG = ',i2,' > 19', &
@@ -298,11 +238,11 @@ ready=.false.
 if (rsflag) then
 !  read in restart information
   call restrt (jtot,jtopo,jtotd,jlpar,nu,nutop,nud,nerg,nlev, &
-         nchmax,rtmn1,rtmx1,dinsid,writs,csflag,nucros)
+         nchmax,rtmn1,rtmx1,dinsid,wrsmat,csflag,nucros)
   rtmnla=rtmn1
   jlpold = jlpar
 !  move s-matrix files to last partial wave done
-  if(writs) then
+  if(wrsmat) then
      do 88 ifile=1,nerg
         nfile=44+ifile
         ered = energ(ifile)/econv
@@ -399,14 +339,14 @@ ered = ener/econv
 if(.not.ready) then
 if (csflag) then
   if (.not. flaghf) then
-    if(partw.and..not.noprin) then
+    if(prpart.and..not.noprin) then
       write (9, 120) jtot, nu, ien, ener
       write (6, 120) jtot, nu, ien, ener
 120       format (/' ** LBAR=',i4,'  NU=',i2,'  IEN =',i3, &
              '  ENERGY (CM-1) =', f11.4)
     endif
   else
-    if(partw.and..not.noprin) then
+    if(prpart.and..not.noprin) then
       write (9, 125) jtot,nu+0.5d0, &
               ien,ener
       write (6, 125) jtot, nu+0.5d0, ien, ener
@@ -416,14 +356,14 @@ if (csflag) then
   end if
 else
   if (.not. flaghf) then
-    if(partw.and..not.noprin) then
+    if(prpart.and..not.noprin) then
       write (9, 130) jtot,jlpar,ien,ener
       write (6, 130) jtot, jlpar, ien, ener
 130       format (/' ** JTOT =',i4,'  JLPAR =', i2,'  IEN =',i3, &
              '  ENERGY (cm-1) =', f11.4)
     endif
   else
-    if(partw.and..not.noprin) then
+    if(prpart.and..not.noprin) then
       write (9, 135) jtot+0.5d0, &
       jlpar, ien, ener
       write (6, 135) jtot+0.5d0, jlpar, ien, ener
@@ -594,7 +534,7 @@ if (ien .gt. 1) then
     call exit
   endif
 endif
-if (wrxsec .or. xsecwr .or. partw .or. wrpart) then
+if (wrxsec .or. prxsec .or. prpart .or. wrpart) then
   if (.not. wavefl .and. .not. photof) then
     call dres(nlevop**2+4,1,irec)
     call dres(nlevop**2+4,1,irec+1)
@@ -658,7 +598,7 @@ call propag (z, w, zmat, amat, bmat, &
              jq, lq, inq, &
              ien, nerg, ered, eshift, rstart, rendld, spac, &
              tolhi, rendai, rincr, fstfac, tb, tbm, &
-             ipos, logwr, noprin, airyfl, airypr, &
+             ipos, prlogd, noprin, airyfl, prairy, &
              nch, nopen, nairy, ntop)
 
 ! if bound state calculation, end it now
@@ -673,14 +613,14 @@ call soutpt (z, w, zmat, amat, &
              lq, jq, inq, isc1, isc2, bmat, tq1, &
              jlev, elev, inlev, jtot, jfirst, &
              jtot2, jtotd, nu, numin, nulast, nud, jlpar, ien, &
-             ipos, csflag, flaghf, swrit, t2writ, t2test, &
-             writs, wrpart, partw, wrxsec, xsecwr, twomol, &
+             ipos, csflag, flaghf, prsmat, prt2, t2test, &
+             wrsmat, wrpart, prpart, wrxsec, prxsec, twomol, &
              nucros, firstj, nlevel, nlevop, nopen, nchtop, &
              twojlp)
 cpuout = cpuout + second() - t11
 
 !  on return from soutpt:
-!     if wrxsec,xsecwr, wrpart, and partw are all .false., the upper-left
+!     if wrxsec,prxsec, wrpart, and prpart are all .false., the upper-left
 !     nopen x nopen block of z contains the modulus squared of the t-matrix
 !     otherwise, the upper nlevop x nlevop block of z contains the partial
 !     cross sections
@@ -719,14 +659,14 @@ end if
 !  save last min and max turning points for next partial wave
 rtmnla = rtmn1
 rtmxla = rtmx1
-if(partw.and..not.nucros) write (9, 350)
+if(prpart.and..not.nucros) write (9, 350)
 350 format (1h ,79('='))
 if(.not.nucros) then
 !.....save restart information
-  if (wrxsec .or. xsecwr .or. partw .or. wrpart) then
+  if (wrxsec .or. prxsec .or. prpart .or. wrpart) then
     if (.not. wavefl .and. .not. photof) then
      call rsave (jtot,jtop,jtotd,jlpar,nu,nutop,nud,nerg,nlev, &
-                  nchmax,rtmn1,rtmx1,dinsid,writs,csflag, &
+                  nchmax,rtmn1,rtmx1,dinsid,wrsmat,csflag, &
                   nucros)
     endif
   endif
@@ -797,13 +737,13 @@ if (nucros .and. .not. wavefl .and. .not. photof) then
   call nusum (z, tq1, tq2, tq3, &
               jlev,elev, inlev, jtot, jfirst, &
               jtop, jtotd, nu, nufirs, numax, nud, jlpar, &
-              nerg, ipos, csflag, flaghf, wrpart, partw, &
+              nerg, ipos, csflag, flaghf, wrpart, prpart, &
               twomol, nucros, nlevel, nlev, nopen, nmax, tmp_file)
 !.....save restart information
-  if (wrxsec .or. xsecwr .or. partw .or. wrpart) then
+  if (wrxsec .or. prxsec .or. prpart .or. wrpart) then
     if (.not. wavefl .and. .not. photof) then
       call rsave (jtot,jtop,jtotd,jlpar,nu,nutop,nud,nerg,nlev, &
-                  nchmax,rtmn1,rtmx1,dinsid,writs,csflag, &
+                  nchmax,rtmn1,rtmx1,dinsid,wrsmat,csflag, &
                   nucros)
     endif
   endif
@@ -855,17 +795,17 @@ end if
 !  calculation has now been done at all partial waves and, if
 !  desired, at both values of jlpar
 !  write out integral cross sections if desired
-370 if (xsecwr .or. wrxsec) then
+370 if (prxsec .or. wrxsec) then
   if(.not.bastst) &
   call xwrite (amat, tq3, jlev, elev, inlev, nerg, energ, &
              jfirst, jtot2, jtotd, csflag, flaghf, &
-             wrxsec, xsecwr, ipos, twomol, nucros, nlevel, &
+             wrxsec, prxsec, ipos, twomol, nucros, nlevel, &
              nlev, nufirs, nulast, nud, jlpar, nchtop, nmax, &
              ihomo)
  
 endif
 if (.not. bastst .and. &
-   xsecwr .or. wrxsec .or. wrpart .or. partw) then
+   prxsec .or. wrxsec .or. wrpart .or. prpart) then
   do 400 ien = 1, nerg
     nfile = 70 + ien
     close (nfile)
@@ -873,7 +813,7 @@ if (.not. bastst .and. &
       nfile = 24 + ien
       close (nfile)
       if (csflag .and. &
-          (wrpart .or. partw .or. wrxsec .or. xsecwr)) then
+          (wrpart .or. prpart .or. wrxsec .or. prxsec)) then
         nfile = 34 + ien
         close (nfile)
       end if
@@ -881,13 +821,13 @@ if (.not. bastst .and. &
 400   continue
 end if
 if (.not. bastst .and. &
-   xsecwr .or. wrxsec .or. wrpart .or. partw) then
+   prxsec .or. wrxsec .or. wrpart .or. prpart) then
   if (.not. wavefl .and. .not. photof) then
     call dclos(1)
    endif
 endif
 if (wavefl .and. .not. boundc) close(22)
-if (writs) then
+if (wrsmat) then
   do 410 ien = 1, nerg
   nfile = 44 + ien
   call closf (nfile)

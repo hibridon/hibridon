@@ -7,7 +7,7 @@ contains
 ! subroutines included:
 !
 !   soutpt   driver to sum up partial cross sections and to write out s-matric
-!   partwr   writes out partial cross sections
+!   prpartr   writes out partial cross sections
 !   nusum    sums up partial cross sections over nu in case nucros=true
 !   intpol   interpolates and sums up partial cross sections
 !   dbout    buffers out partial cross sections and their labels
@@ -27,8 +27,8 @@ subroutine soutpt (tsq, sr, si, scmat, &
                    lq, jq, inq, isc1, isc2, sc1, sc2, &
                    jlev, elev, inlev, jtot, jfirst, &
                    jfinal, jtotd, nu, numin, numax, nud,jlpar,ien, &
-                   ipos, csflag, flaghf, swrit, t2writ, t2test, &
-                   writs, wrpart, partw, wrxsec, xsecwr, twomol, &
+                   ipos, csflag, flaghf, prsmat, prt2, t2test, &
+                   writs, wrpart, prpart, wrxsec, prxsec, twomol, &
                    nucros, firstj,nlevel, nlevop, nopen, nmax, &
                    twojlp)
 ! ---------------------------------------------------------------------------
@@ -95,16 +95,16 @@ subroutine soutpt (tsq, sr, si, scmat, &
 !             if .false., close-coupled calculation
 !    flaghf:  if .true., then system with half-integer spin
 !             if .false., then system with integer spin
-!    swrit    if .true., real and imaginary parts of s-matrix are printed
+!    prsmat    if .true., real and imaginary parts of s-matrix are printed
 !                        to file 9
-!    t2writ   if .true., modulus squared of t-matrix is printed to file 9
+!    prt2   if .true., modulus squared of t-matrix is printed to file 9
 !    t2test   if .true., first two columns of modulus squared of t-matrix are
 !                        printed to file 9
 !    writs    if .true., real and imaginary parts of selected s-matrix element
 !                        are saved in files 45,46,47 ...
-!    partw    if .true., partial cross sections are printed to file 9
+!    prpart    if .true., partial cross sections are printed to file 9
 !    wrpart   if .true., partial cross sections are save in files 25,26,27,...
-!    xsecwr   if .true., integral cross sections are printed to file 9
+!    prxsec   if .true., integral cross sections are printed to file 9
 !    wrxsec   if .true., integral cross sections are save in files 15,16,17 ..
 !    twomol   if .true., then molecule-molecule cross section
 !    nlevel   number of energetically distinct levels included in channel basi
@@ -155,9 +155,9 @@ real(8), intent(out) :: sc2(nmax, nmax)
 integer, intent(in) :: jlev(nlevop)
 real(8), intent(in) :: elev(nlevop)
 integer, intent(in) :: inlev(nlevop)
-logical ipos, csflag, swrit, t2writ, writs, wrpart, partw, &
-        wrxsec, xsecwr, flaghf, t2test, flagsu, firstj, twomol, &
-        nucros, photof, wavefn, faux, twojlp, boundf, wrsmat
+logical ipos, csflag, prsmat, prt2, writs, wrpart, prpart, &
+        wrxsec, prxsec, flaghf, t2test, flagsu, firstj, twomol, &
+        nucros, photof, wavefn, faux, twojlp, boundf, writs_unused
 integer :: jpack(nmax*nmax)
 integer :: lpack(nmax*nmax)
 
@@ -168,13 +168,13 @@ common /cojsav/ jsav1, jsav2
 common /cosurf/ flagsu
 common /coered/ ered, rmu
 common /cojlpo/ jlpold
-common /cophot/ photof, wavefn, boundf, wrsmat
+common /cophot/ photof, wavefn, boundf, writs_unused
 !
 data izero, ione /0, 1/
 xjtot = jtot
 if (flaghf .and. .not. csflag) xjtot = jtot + 0.5d0
 !     print the s-matrix
-if (swrit .and. nopen .gt. 0) then
+if (prsmat .and. nopen .gt. 0) then
   if (photof) then
     call transp(sr, nopen, nmax)
     call transp(si,nopen,nmax)
@@ -214,7 +214,7 @@ if (swrit .and. nopen .gt. 0) then
     call mxoutd (9, si, nopen, nmax, 0, ipos)
   endif
 end if
-if (t2writ) then
+if (prt2) then
   if (.not. photof) then
     write (9,120) ener(ien)
 120     format(1h /' ** MODULUS SQUARED T-MATRIX; ENERGY =', &
@@ -265,7 +265,7 @@ if (writs .and. nopen .gt. 0) then
                  isc2, jpack, lpack, sc2, nfile, nmax, nopen)
 end if
 
-if (.not. xsecwr .and. .not. wrxsec .and. .not.partw &
+if (.not. prxsec .and. .not. wrxsec .and. .not.prpart &
     .and. .not.wrpart) return
 call  partcr (tsq,  scmat, isc1, isc2, sc1, nopen, nopen, &
                    inq, jq, lq, inq, jq, lq, &
@@ -291,12 +291,12 @@ if (csflag.and..not.nucros) then
     write(nfile) ((scmat(j,i),j=1,nlevop),i=1,nlevop)
   end if
 end if
-if((partw .or. wrpart) .and. .not. nucros .and. &
+if((prpart .or. wrpart) .and. .not. nucros .and. &
           (.not.csflag.or.nu.eq.numax)) then
 ! write out partial cross sections
-   call partwr (scmat,jlev, elev, inlev, jtot, jfirst, &
+   call prpartr (scmat,jlev, elev, inlev, jtot, jfirst, &
                jfinal, jtotd, nu, numin, numax, nud, jlpar, ien, &
-               ipos, csflag, flaghf, wrpart, partw, twomol, &
+               ipos, csflag, flaghf, wrpart, prpart, twomol, &
                twojlp, &
                nucros,nlevel, nlevop, nopen, nmax)
 end if
@@ -310,9 +310,9 @@ end if
 return
 end
 ! ---------------------------------------------------------------------------
-subroutine partwr(scmat,jlev, elev, inlev, jtot, jfirst, &
+subroutine prpartr(scmat,jlev, elev, inlev, jtot, jfirst, &
                   jfinal, jtotd, nu, numin, numax, nud, jlpar,ien, &
-                  ipos, csflag, flaghf, wrpart, partw, twomol, &
+                  ipos, csflag, flaghf, wrpart, prpart, twomol, &
                   twojlp,nucros,nlevel, nlevop, nopen, nmax)
 ! ---------------------------------------------------------------------------
 !
@@ -331,7 +331,7 @@ real(8), intent(in) :: elev(nlevop)
 integer, intent(in) :: inlev(nlevop)
 character*20 cdate
 character*40 form
-logical ipos, csflag, wrpart, partw, flaghf, flagsu,twomol,nucros, &
+logical ipos, csflag, wrpart, prpart, flaghf, flagsu,twomol,nucros, &
         twojlp,headf
 #include "common/parpot.F90"
 common /coered/ ered, rmu
@@ -413,7 +413,7 @@ if (wrpart) then
 end if
 ! if cs calculation, write out partial cross sections summed over
 ! projection index
-if (partw) then
+if (prpart) then
   if (jtot .eq. jfirst.or.(nucros.and.nu.eq.numin))  then
 !  here if output of partial cross sections requested
     if( .not. twomol) then
@@ -557,7 +557,7 @@ end
 subroutine nusum (tsq, tq1, tq2, tq3, &
                  jlev,elev, inlev, jtot, jfirst, &
                  jfinal, jtotd, nu, numin, numax, nud, jlpar, &
-                 nerg, ipos, csflag, flaghf, wrpart, partw, &
+                 nerg, ipos, csflag, flaghf, wrpart, prpart, &
                  twomol, nucros, nlevel, nlev, nopen, nmax, tmp_file)
 ! ---------------------------------------------------------------------------
 !
@@ -568,7 +568,7 @@ subroutine nusum (tsq, tq1, tq2, tq3, &
 use constants
 use mod_coener, only: energ
 implicit double precision (a-h,o-z)
-logical ipos, csflag, wrpart, partw, flaghf, twomol, nucros,vrai
+logical ipos, csflag, wrpart, prpart, flaghf, twomol, nucros,vrai
 common /coered/ ered, rmu
 dimension tsq(nmax,1),tq1(nmax,1),tq2(nmax,1),tq3(nmax,1), &
           jlev(1),elev(1),inlev(1),nlev(1)
@@ -581,11 +581,11 @@ do 100 ien = 1,nerg
   nlevop=nlev(ien)
   call dbin(tmp_file,irec,jl,jlp,nn,tsq,nmax,nlevop)
 ! print partial cross sections, summed over lbar, for given nu
-  if(partw.or.wrpart) then
+  if(prpart.or.wrpart) then
     vrai=.false.
-    call partwr (tsq,jlev, elev, inlev, jtot, jfirst, &
+    call prpartr (tsq,jlev, elev, inlev, jtot, jfirst, &
                jfinal, jtotd, nu, numin, nu, nud, jlpar, ien, &
-               ipos, csflag, flaghf, wrpart, partw, twomol, &
+               ipos, csflag, flaghf, wrpart, prpart, twomol, &
                vrai,nucros,nlevel, nlevop, nopen, nmax)
     endif
 ! sum up over nu
@@ -929,7 +929,7 @@ end
 ! ----------------------------------------------------------------------
 subroutine xwrite (zmat, tq3, jlev, elev, inlev, nerg, energ, &
                    jfirst, jfinal, jtotd, csflag, flaghf, &
-                   wrxsec, xsecwr, ipos, twomol, nucros,nlevel, &
+                   wrxsec, prxsec, ipos, twomol, nucros,nlevel, &
                    nlev, numin, numax, nud, jlpar, nmax, nmx, &
                    ihomo)
 ! ---------------------------------------------------------------------------
@@ -954,7 +954,7 @@ subroutine xwrite (zmat, tq3, jlev, elev, inlev, nerg, energ, &
 !             if .false., close-coupled calculation
 !    flaghf:  if .true., then system with half-integer spin
 !             if .false., then system with integer spin
-!    xsecwr:  if .true., integral cross sections are printed to file 9
+!    prxsec:  if .true., integral cross sections are printed to file 9
 !    wrxsec:  if .true., integral cross sections are save in files 15,16,17 ..
 !    twomol:  if .true., then molecule-molecule collision
 !             if .false., then atom-molecule or molecule-surface collision
@@ -995,7 +995,7 @@ integer, intent(in) :: jtotd
 logical, intent(in) :: csflag
 logical, intent(in) :: flaghf
 logical, intent(in) :: wrxsec
-logical, intent(in) :: xsecwr
+logical, intent(in) :: prxsec
 logical, intent(in) :: ipos
 logical, intent(in) :: twomol
 logical, intent(in) :: nucros
@@ -1023,7 +1023,7 @@ integer :: cs_file = 1
 nlevmx=0
 do 10 ien=1,nerg
 10 nlevmx=max(nlevmx,nlev(ien))
-if (xsecwr) then
+if (prxsec) then
   if (.not. twomol) then
     if (.not. flagsu) then
       write (9, 100)
@@ -1818,16 +1818,15 @@ use mod_cobmat, only: q => bmat ! q(1)
 use mod_coener, only: energ
 use mod_cow, only: q1 => w_as_vec ! q1(1)
 use mod_cozmat, only: q2 => zmat_as_vec ! q2(1)
-
+use mod_par, only: wrpart, wrxsec
 implicit double precision (a-h,o-z)
-logical writs,csflag,nucros, llpar, wrpart, wrxsec
+logical writs,csflag,nucros
 character*40 oldlab
 integer jtot, nchmax
 character*40 input,output,jobnam,savfil
 integer, parameter :: bufsize = 32
 #include "common/parpot.F90"
 common /cofile/ input,output,jobnam,savfil
-common /colpar/ llpar(21),wrpart, wrxsec
 dimension word(bufsize),iword(bufsize),nlev(1)
 if (.not. wrpart .and. .not. wrxsec) then
   write (6, 5)
@@ -1975,6 +1974,7 @@ use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cow, only: simag => w_as_vec ! simag(1)
 use mod_cozmat, only: sigma => zmat_as_vec ! sigma(1)
 use mod_hibrid2, only: mxoutr
+use mod_par, only: batch, ipos
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  icsfil, smtfilnam, xname
@@ -1986,9 +1986,8 @@ character*20  cdate
 character*10  elaps, cpu
 character*13  string
 logical csflag, flaghf, flagsu, twomol, exstfl, &
-        batch, nucros, notequ, lpar1, lpar2, ipos,lpar3
+        nucros, notequ
 #include "common/parpot.F90"
-common /colpar/ lpar1(3), batch, lpar2(5), ipos, lpar3(17)
 !/ nnout, jout(21)
 common /coered/ ered, rmu
 common /coselb/ ibasty
@@ -2190,7 +2189,7 @@ use mod_coisc7, only: isc2 => isc7 ! isc2(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc2, only: inlev => sc2int ! inlev(1)
 use mod_cosc3, only: jlev => sc3int ! jlev(1)
-
+use mod_par, only: batch, ipos
 implicit double precision (a-h,o-z)
 logical, intent(in) :: csflag
 logical, intent(in) :: flaghf
@@ -2214,8 +2213,6 @@ real(8), intent(out) :: tsq(nmax, nlevop)
 integer, intent(in) :: nlevop
 integer, intent(in) :: nmax
 integer, intent(in) :: tmp_file
-logical lpar1, lpar2, batch, ipos, lpar3
-common /colpar/ lpar1(3), batch, lpar2(5), ipos, lpar3(17)
 common /coselb/ ibasty
 ! clear sigma array
 one=1.0d0

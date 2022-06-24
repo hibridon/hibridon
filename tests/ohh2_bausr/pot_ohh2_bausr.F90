@@ -143,8 +143,9 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only : isrcod, junkr, rspar
 !
 #include "pot_ohh2_bausr_common.F90"
-integer irpot, iread
-logical readpt
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
 character*(*) fname
 !     NUMBER OF BASIS-SPECIFIC VARIABLES, MODIFY ACCORDINGLY.
 integer icod, ircod

@@ -101,13 +101,14 @@ use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+#include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
 
 common /coered/ ered, rmu
 common /coskip/ nskip, iskip
+integer :: nskip, iskip
 common /cojtot/ jjtot,jjlpar
 dimension j(9), l(9), jhold(9), ehold(9), isc1(9), sc2(9), sc3(9), &
           sc4(9), ishold(9), is(9)
@@ -728,7 +729,7 @@ call dscal(6,fact,eint,1)
 return
 end
 ! -----------------------------------------------------------------------
-subroutine sy22p (irpot, readp, iread)
+subroutine sy22p (irpot, readpt, iread)
 !  subroutine to read in system dependent parameters for collisions of
 ! atom in doublet S state with atom in doublet P state
 !  if iread = 1 read data from input file
@@ -756,24 +757,20 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
-implicit double precision (a-h,o-z)
-integer irpot
-logical readp
-logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
-        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf, &
-        csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
-        readpt, ihomo, bastst, twomol,lpar
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+real(8) :: aso
+integer :: ibran, j, jlpar, jtot1, jtot2, jtotd, l, lc, nphoto, nterm, nvib
+logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 common /coipar/ jtot1,jtot2,jtotd,jlpar
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-                noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr,lpar(3)
+integer :: nskip, iskip
 #include "common/comdot.F90"
 save potfil
 !  number and names of system dependent parameters
@@ -837,7 +834,7 @@ endif
 print *, ibran, jlpar
 rcod(1)=aso
 line=' '
-if(.not.readp.or.iread.eq.0) then
+if(.not.readpt.or.iread.eq.0) then
   call loapot(1,' ')
   return
 endif
@@ -849,10 +846,10 @@ goto 286
 1000 format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
 return
 ! --------------------------------------------------------------
-entry ptr22p (fname,readp)
+entry ptr22p (fname,readpt)
 line = fname
-readp = .true.
-286 if (readp) then
+readpt = .true.
+286 if (readpt) then
   l=1
   call parse(line,l,filnam,lc)
   if(lc.eq.0) then
@@ -879,7 +876,7 @@ close (8)
 irpot=1
 return
 !
-entry sav22p (readp)
+entry sav22p (readpt)
 !  save input parameters for singlet-sigma + atom scattering
 nphoto=iscod(2)
 nvib=iscod(3)

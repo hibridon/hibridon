@@ -547,8 +547,8 @@ double precision a, b, bfact, cs, cs1, cs2, csh, dalph2, dalpha, &
 double precision eignow, gam1, gam2, hp, y1, y2, y4
 double precision xinpt, fprop
 integer i, nch, mxphot, nphoto
-logical photof, wavefn, boundf, wrsmat
-common /cophot/ photof, wavefn, boundf, wrsmat
+logical photof, wavefn, boundf, writs
+common /cophot/ photof, wavefn, boundf, writs
 dimension eignow(1), hp(1), y1(1), y2(1), y4(1), gam1(1), gam2(1)
 data     doneth,        dhalf &
   / 0.333333333333333d0, 0.5d0 /
@@ -1075,21 +1075,12 @@ use mod_cosc4, only: sc4 ! sc4(10)
 use mod_cosc5, only: sc5 ! sc5(10)
 use mod_cow, only: w => w_as_vec ! w(25)
 use mod_cozmat, only: zmat => zmat_as_vec ! zmat(25)
+use mod_par, only: csflag, flaghf, wrsmat, photof
 
 implicit double precision (a-h,o-z)
 character*48 oldlab, oldpot
 character*20 cdate, olddat
-logical         airyfl, airypr, bastst, batch, chlist, &
-                csflag, flaghf, flagsu, ihomo, ipos, logdfl, &
-                logwr, noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr, nucros, photof, wavefl
 #include "common/parpot.F90"
-common /colpar/ airyfl, airypr, bastst, batch, chlist, &
-                csflag, flaghf, flagsu, ihomo, ipos, logdfl, &
-                logwr, noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr, nucros, photof, wavefl
 common /coered/ ered, rmu
 common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
      inflev
@@ -1131,7 +1122,7 @@ nrlogd = 0
 iendwv = 1
 !     Write magic number
 write (ifil, err=950) char(128), 'WFU'
-if (writs) then
+if (wrsmat) then
    write (ifil, err=950) char(0), char(2), char(0), char(0)
 else
    write (ifil, err=950) char(1), char(2), char(0), char(0)
@@ -1302,8 +1293,8 @@ subroutine psiasy(fj,fn,unit,sr,si,psir,psii,nopen,nmax)
 !                   to be used later in computing the wavefunction
 ! ----------------------------------------------------------------------------
 implicit double precision (a-h,o-z)
-logical photof, wavefn, boundf, wrsmat
-common /cophot/ photof, wavefn, boundf, wrsmat
+logical photof, wavefn, boundf, writs
+common /cophot/ photof, wavefn, boundf, writs
 dimension fj(1), fn(1), unit(1), sr(nmax,nmax), si(nmax,nmax), &
           psii(nmax,nmax), psir(nmax,nmax)
 one=1.d0
@@ -1411,19 +1402,18 @@ use mod_cow, only: sr => w_as_vec ! sr(100)
 use mod_cozmat, only: si => zmat_as_vec ! si(100)
 use mod_version, only : version
 use mod_hibrid3, only: expand
-
+use mod_par, only: batch, csflag, photof
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  psifil, wavfil, amplfil, flxfil
 character*20  cdate
 character*10  elaps, cpu
 character*5   s13p(12)
-logical exstfl, batch, lpar(3), photof, wavefn, adiab, &
-                ldum, csflag,kill,llpar(19),propf, sumf, &
+logical exstfl, wavefn, adiab, &
+                kill,propf, sumf, &
                 coordf
 common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
      inflev
-common /colpar/ lpar, batch,ldum,csflag,llpar,photof
 common /cotrans/ ttrans(36)
 ! common for y1, y2, y4
 common /coered/ ered, rmu

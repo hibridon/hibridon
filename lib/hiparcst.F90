@@ -37,12 +37,12 @@ enum, bind( C )
       FCOD_WRXSEC = 27, &
       FCOD_BOUNDC = 28
 end enum
-! data lindx/1,3,4,5,6,7,8,9,10,11,13,25,26,2,12,14,17,19,24, &
-!           15,16,18,20,27,22,21,23,28/   ! graffy: colpar and fcod both contain the 28 logical parameters but in a different order, thus requiring a remapping through lindx. Why not 
+
 enum, bind( C )
    ! lpar parameters
    enumerator ::  &
       LPAR_AIRYFL = 1, &
+      LPAR_PRAIRY = 2, &
       LPAR_BASTST = 3, &
       LPAR_BATCH = 4, &
       LPAR_CHLIST = 5, &
@@ -52,23 +52,22 @@ enum, bind( C )
       LPAR_IHOMO = 9, &
       LPAR_IPOS = 10, &
       LPAR_LOGDFL = 11, &
-      LPAR_NOPRIN = 13, &
-      LPAR_NUCROS = 25, &
-      LPAR_PHOTOF = 26, &
-      LPAR_PRAIRY = 2, &
       LPAR_PRLOGD = 12, &
+      LPAR_NOPRIN = 13, &
       LPAR_PRPART = 14, &
-      LPAR_PRSMAT = 17, &
-      LPAR_PRT2 = 19, &
-      LPAR_PRXSEC = 24, &
       LPAR_READPT = 15, &
       LPAR_RSFLAG = 16, &
+      LPAR_PRSMAT = 17, &
       LPAR_T2TEST = 18, &
+      LPAR_PRT2 = 19, &
       LPAR_TWOMOL = 20, &
-      LPAR_WAVEFL = 27, &
-      LPAR_WRPART = 22, &
       LPAR_WRSMAT = 21, &
+      LPAR_WRPART = 22, &
       LPAR_WRXSEC = 23, &
+      LPAR_PRXSEC = 24, &
+      LPAR_NUCROS = 25, &
+      LPAR_PHOTOF = 26, &
+      LPAR_WAVEFL = 27, &
       LPAR_BOUNDC = 28
 end enum
 
