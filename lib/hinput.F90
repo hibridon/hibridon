@@ -63,7 +63,9 @@ use mod_difcrs, only: difcrs
 use mod_hibrid2, only: enord, prsg
 use mod_hibrid3, only: testptn, testpt20, testpt, potmin
 use mod_hiutil, only: getval
-use mod_hiparcst
+use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT, RPAR_COUNT
+use fcod_enum
+use lpar_enum
 use mod_par, only: lpar
 implicit double precision (a-h,o-z)
 !  iicode is the number of integer pcod's
@@ -303,7 +305,7 @@ if(first) then
    isrcod=0
    isicod=0
    izero=0
-   call sysdat(irpot, lpar(15), izero)
+   call sysdat(irpot, lpar(LPAR_READPT), izero)
    first = .false.
    call version(6)
 !  in this next statement the $ sign implies no line feed
@@ -317,7 +319,7 @@ else
 4   ipar(i) = ixpar(i)
   if(opti) goto 2160
 end if
-1 if (.not. lpar(4) .and. .not. batch) write (6, 2)
+1 if (.not. lpar(LPAR_BATCH) .and. .not. batch) write (6, 2)
 optifl = .false.
 !  in this next statement the $ sign implies no line feed
 !  replace this with an equivalent formatting character if your system
@@ -328,7 +330,7 @@ optifl = .false.
 #if defined(HIB_CRAY)
 2  format(' Hibridon> ')
 #endif
-call pcoder(lpar(28),pcod,icode)
+call pcoder(lpar(LPAR_BOUNDC),pcod,icode)
 
 if(com) then  
   read(1312, 10, end=599) line  ! read the next command
@@ -349,7 +351,7 @@ else if (line (1:4).eq.'help' .or. line (1:4).eq.'HELP') then
     goto 1
 else if (line(1:3) .eq.'BAT' .or. line(1:3) .eq. 'bat' .or. &
          line(1:4) .eq.' BAT' .or. line(1:4) .eq.' bat') then
-    lpar(4)=.true.
+    lpar(LPAR_BATCH)=.true.
     batch = .true.
     go to 1
 end if
@@ -456,11 +458,11 @@ ibasty=int(val)
 call baschk(ibasty)
 ! set twomolecule true
 if (is_twomol(ibasty)) then
-  lpar(20)=.true.
+  lpar(LPAR_TWOMOL)=.true.
 else
-  lpar(20)=.false.
+  lpar(LPAR_TWOMOL)=.false.
 endif
-call sysdat(irpot, lpar(15), izero)
+call sysdat(irpot, lpar(LPAR_READPT), izero)
 l1=l
 goto 15
 !  request help
@@ -471,7 +473,7 @@ goto 1
 !  parameters
 !  specify parameters in the form cod1=val1, cod2=val2, etc.
 100 if(l .eq. 0) goto 1
-call pcoder(lpar(28),pcod,icode)
+call pcoder(lpar(LPAR_BOUNDC),pcod,icode)
 l1 = l
 call parse(line,l,code,lc)
 call getval(code(1:lc),pcod,j,val)
@@ -484,7 +486,7 @@ if (j .eq. 5) then
 end if
 if(j.le.iicode) then
   ipar(j) = val
-  if(ipar(8).ne.1) lpar(25)=.true.
+  if(ipar(8).ne.1) lpar(LPAR_NUCROS)=.true.
 else
   rpar(j-iicode) = val
 end if
@@ -492,8 +494,8 @@ call enord(energ,ipar(5))
 !  numin and numax should be 0 if cc calculation, if not, then set them
 !  equal to zero
 ! NB this is disabled for basisknd=12 (2P atom + homonuclear)
-if (.not. lpar(6)) then
-  lpar(25)=.false.
+if (.not. lpar(LPAR_CSFLAG)) then
+  lpar(LPAR_NUCROS)=.false.
   if (ipar(6) .ne. 0) then
     write (6, 105)
 105     format ('  CC calculation, numax set to zero')
@@ -520,7 +522,7 @@ if(val .eq. 1) logp = .true.
 if (j .eq. 3) then
   write (6, 201)
 201   format (' ** BATCH FLAG CAN NOT BE SET INTERACTIVELY!')
-  lpar(4) = batch
+  lpar(LPAR_BATCH) = batch
   go to 1
 end if
 lpar(lindx(j)) = logp
@@ -619,7 +621,7 @@ goto 15
 ! j1j2,numj,j1j2(1),...,j1j2(numj)
 ! terminate the string with a semicolon if other parameters will follow
 ! on the same card, e.g. j1j2,2,00,10;energ=e1,e2,e3;jtot1=0,jtot2=2....
-460 if (.not.lpar(20)) then
+460 if (.not.lpar(LPAR_TWOMOL)) then
   write (6, 465)
 465   format(' ** NUMJ CAN ONLY BE DEFINED IF TWOMOL = .TRUE.')
   goto 15
@@ -649,7 +651,7 @@ goto 15
 !  numin and numax should be 0 if cc calculation, if not, then set them
 !  equal to zero
 500 continue
-if (.not. lpar(6)) then
+if (.not. lpar(LPAR_CSFLAG)) then
   if (ipar(6) .ne. 0) then
     write (6, 105)
     ipar(6) = 0
@@ -660,8 +662,8 @@ if (.not. lpar(6)) then
     ipar(7) = 0
   end if
 end if
-call pcoder(lpar(28),pcod,icode)
-if (lpar(6).and.ipar(8).ne.1) lpar(25)=.true.
+call pcoder(lpar(LPAR_BOUNDC),pcod,icode)
+if (lpar(LPAR_CSFLAG).and.ipar(8).ne.1) lpar(LPAR_NUCROS)=.true.
 nerg=ipar(5)
 ! check to see if flags are ok if wavefunction desired or
 ! photodissociation calculation
@@ -675,7 +677,7 @@ if(irinp.eq.0) then
   write(6,505)
 505   format (/,' ** SAVE DEFAULT VARIABLES OR SPECIFY INPUT', &
           ' FILE WITH INP = filename')
-  if(lpar(4)) call exit
+  if(lpar(LPAR_BATCH)) call exit
   goto 1
 end if
 if(rpar(8).eq.0) then
@@ -683,7 +685,7 @@ if(rpar(8).eq.0) then
 507   format(/,' ** SPECIFY COLLISION REDUCED MASS WITH XMU = mass')
   goto 1
 end if
-if(irpot.ne.0.or..not.lpar(15)) then
+if(irpot.ne.0.or..not.lpar(LPAR_READPT)) then
 ! open output file
 ! first make sure it is lower case
   call lower(output)
@@ -712,11 +714,11 @@ if(irpot.ne.0.or..not.lpar(15)) then
     write(9,720) (scod(isicod+j),rspar(j),j = 1,isrcod)
   if(islcod.gt.0) &
     write(9,735) (scod(isicod+isrcod+j),lspar(j),j = 1,islcod)
-  if (.not. lpar(20) ) then
+  if (.not. lpar(LPAR_TWOMOL) ) then
      write(9,736) 'LAMMIN: ',(lammin(j),j=1,ispar(1))
      write(9,736) 'LAMMAX: ',(lammax(j),j=1,ispar(1))
      write(9,736) 'MPROJ:  ',(mproj(j),j=1,ispar(1))
-  else if (lpar(20)) then
+  else if (lpar(LPAR_TWOMOL)) then
      write (9, 738)'J1/J2: ',(nj1j2(j)/10,mod(nj1j2(j),10), &
                     j=1,numj)
   endif
@@ -728,7 +730,7 @@ if(irpot.ne.0.or..not.lpar(15)) then
   call enord(energ,ipar(5))
   if(ipar(5).gt.0) write(9,740) (energ(j),j = 1,ipar(5))
   if(nnout.ne.0) then
-    if (.not.lpar(20) ) then
+    if (.not.lpar(LPAR_TWOMOL) ) then
       write (9,737) 'NOUT: ',nnout, &
            '; JOUT:',(jout(j), j=1,iabs(nnout) )
     else
@@ -751,9 +753,9 @@ end if
 ! show all parameters and flags
 ! show
 700 l1 = l
-call pcoder(lpar(28),pcod,icode)
+call pcoder(lpar(LPAR_BOUNDC),pcod,icode)
 call parse(line,l,code,lc)
-if (.not.lpar(28)) then
+if (.not.lpar(LPAR_BOUNDC)) then
   write(6,710) &
    'Parameters (scattering):',(pcod(j),ipar(j),j = 1,iicode)
 else
@@ -763,7 +765,7 @@ endif
 write(6,720)   (pcod(iicode+j),rpar(j),j = 1,ircode-1)
 write(6,1720)  pcod(iicode+ircode), rpar(ircode)
 if(nnout.ne.0) then
-  if (.not.lpar(20) ) then
+  if (.not.lpar(LPAR_TWOMOL) ) then
     write (6,737) 'NOUT: ',nnout, &
            '; JOUT:',(jout(j), j=1,iabs(nnout) )
   else
@@ -789,11 +791,11 @@ if(isrcod.gt.0) &
   write(6,720) (scod(isicod+j),rspar(j),j = 1,isrcod)
 if(islcod.gt.0) &
   write(6,735) (scod(isicod+isrcod+j),lspar(j),j = 1,islcod)
-if (.not. lpar(20) ) then
+if (.not. lpar(LPAR_TWOMOL) ) then
   write(6,736) 'LAMMIN: ',(lammin(j),j=1,ispar(1))
   write(6,736) 'LAMMAX: ',(lammax(j),j=1,ispar(1))
   write(6,736) 'MPROJ:  ',(mproj(j),j=1,ispar(1))
-else if (lpar(20)) then
+else if (lpar(LPAR_TWOMOL)) then
   write (6, 738)'J1/J2: ',(nj1j2(j)/10,mod(nj1j2(j),10), &
                     j=1,numj)
 end if
@@ -848,13 +850,13 @@ endif
 l1 = l
 goto 15
 ! read
-800 call pcoder(lpar(28),pcod,icode)
+800 call pcoder(lpar(LPAR_BOUNDC),pcod,icode)
 call gendat
 ione=1
-call sysdat(irpot, lpar(15),ione)
+call sysdat(irpot, lpar(LPAR_READPT),ione)
 irinp=1
 l1 = l
-if (batch) lpar(4) = .true.
+if (batch) lpar(LPAR_BATCH) = .true.
 goto 15
 ! input, output, label and job file names
 ! input=infile, output=outfile, job=jobfile
@@ -908,25 +910,25 @@ goto 15
 ! read parameters for potential
 !     pot=potfile
 1000 call parse(line,l,code,lc)
-call ptread(code(1:lc),lpar(15))
+call ptread(code(1:lc),lpar(LPAR_READPT))
 l1 = l
 goto 15
 ! test potential
 ! testpot
 ! you will be prompted for r and theta. to exit, specify r=0
 1200 if (ibasty .eq. 1 .or. ibasty .eq. 4) then
-  call testptn(lpar(9))
+  call testptn(lpar(LPAR_IHOMO))
 else if (ibasty .eq. 20) then
-  call testpt20(lpar(9))
+  call testpt20(lpar(LPAR_IHOMO))
 else
-  call testpt(lpar(9))
+  call testpt(lpar(LPAR_IHOMO))
 end if
 goto 1
 ! save input parameters
 !     save=filename
 !     if filename is not specified, the inputfile is overwritten
 1300 inew=0
-call pcoder(lpar(28),pcod,icode)
+call pcoder(lpar(LPAR_BOUNDC),pcod,icode)
 if(l.ne.0) then
   call parse(line,l,code,lc)
   if(lc .eq. 0) then
@@ -941,7 +943,7 @@ else
   code = input
 end if
 call savdat(inew,code)
-call syssav(lpar(15))
+call syssav(lpar(LPAR_READPT))
 close(8)
 l1 = l
 irinp = 1
@@ -955,7 +957,7 @@ call parse(line,l,code,lc)
 call getval(code(1:lc),scod,j,val)
 if(j .eq. 0) goto 15
 if(j .lt. 0) goto 1
-if(j.eq.1 .and. .not.lpar(20)) then
+if(j.eq.1 .and. .not.lpar(LPAR_TWOMOL)) then
   write(6,1401) scod(j)
 1401   format(1x,a,'CAN NOT BE MODIFIED')
   goto 1400
@@ -1117,7 +1119,7 @@ goto 1
 !
 !  differential cross sections computed for atom-molecule
 !  collisions or symmetric top-linear molecule collisions
-2000 if (.not. lpar(20) .or. is_twomol(ibasty)) then
+2000 if (.not. lpar(LPAR_TWOMOL) .or. is_twomol(ibasty)) then
   call parse(line,l,fnam1,lc)
   if(fnam1 .eq. ' ') fnam1 = jobnam
   call lower(fnam1)
@@ -1129,7 +1131,7 @@ goto 1
      call getval(code(1:lc),empty_var_list,j,a(i))
 2010   continue
   write (6,*) 'hinput : lpar = ' 
-  call difcrs(fnam1,a,lpar(9),lpar(7))
+  call difcrs(fnam1,a,lpar(LPAR_IHOMO),lpar(LPAR_FLAGHF))
 else
   write (6, 2011)
 2011   format(' Sorry, differential cross sections not yet', &
@@ -1176,10 +1178,10 @@ if(a(1) .eq. 0.or.a(2) .eq. 0) then
          ' has not been defined')
   goto 1
 end if
-if (.not.lpar(21)) then
+if (.not.lpar(LPAR_WRSMAT)) then
   write (6,2141)
 2141   format (' Flag WRSMAT set to .TRUE. for optimization')
-  lpar(21) = .true.
+  lpar(LPAR_WRSMAT) = .true.
 end if
 if (nnout .lt. 0) then
   write (6, 2142)
@@ -1190,10 +1192,10 @@ else if (nnout .eq. 0) then
 2143   format (' NNOUT=0; optimization not possible; reset NNOUT')
   go to 1
 end if
-if (.not.lpar(13)) then
+if (.not.lpar(LPAR_NOPRIN)) then
    write (6,2144)
 2144    format(' Flag NOPRIN set to .TRUE. for optimization')
-   lpar(13)=.true.
+   lpar(LPAR_NOPRIN)=.true.
 endif
 !
 if(a(3) .eq. 0.and.a(4) .eq. 0.and.a(2).gt.a(1)) a(3) = 2.0d0
@@ -1448,7 +1450,7 @@ goto 1
 !  rewritten by p.j. dagdigian
 !  hypxsc,jobfile, ienerg ,nucspin, j1, j2
 2950 continue
-!     if (.not. lpar(20)) then
+!     if (.not. lpar(LPAR_TWOMOL)) then
   call parse(line,l,fnam1,lc)
   if(fnam1 .eq. ' ') fnam1 = jobnam
   call lower(fnam1)

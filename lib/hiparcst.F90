@@ -5,8 +5,12 @@ integer, parameter :: IPAR_COUNT = 10
 integer, parameter :: RPAR_COUNT = 9
 integer, parameter :: LPAR_COUNT = 28
 
+end module mod_hiparcst
+
+! fcod parameters
+! note: we use a specific module for each enum because it's not practical for the user to use the recommanded keyword only for these enum (the user would have to list them all in some cases, which makes code maintaining tedious)
+module fcod_enum
 enum, bind( C )
-   ! fcod parameters
    enumerator ::  &
       FCOD_AIRYFL = 1, &
       FCOD_BASTST = 2, &
@@ -37,9 +41,12 @@ enum, bind( C )
       FCOD_WRXSEC = 27, &
       FCOD_BOUNDC = 28
 end enum
+end module fcod_enum
 
+! lpar parameters
+! note: we use a specific module for each enum because it's not practical for the user to use the recommanded keyword only for these enum (the user would have to list them all in some cases, which makes code maintaining tedious)
+module lpar_enum
 enum, bind( C )
-   ! lpar parameters
    enumerator ::  &
       LPAR_AIRYFL = 1, &
       LPAR_PRAIRY = 2, &
@@ -70,5 +77,5 @@ enum, bind( C )
       LPAR_WAVEFL = 27, &
       LPAR_BOUNDC = 28
 end enum
+end module lpar_enum
 
-end module mod_hiparcst

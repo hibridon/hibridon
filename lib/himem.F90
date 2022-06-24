@@ -1326,7 +1326,8 @@ module mod_par
 
    contains
    subroutine allocate_par()
-      use mod_hiparcst
+      use mod_hiparcst, only: LPAR_COUNT
+      use lpar_enum
       integer :: num_lpar = LPAR_COUNT
       allocate(lpar(num_lpar))
 
