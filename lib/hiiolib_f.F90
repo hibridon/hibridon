@@ -189,9 +189,9 @@ subroutine gendat
 !    nud:       step size for nu (nu=numin:nud:numax)
 !  line 12:
 !    nnout:     the values of the channel rotational quantum numbers for which
-!               the s-matrix elements will be printed to file 14 (if writs = t
+!               the s-matrix elements will be printed to file 14 (if wrsmat = t
 !    niout:     the values of the additional channel index for which
-!               the s-matrix elements will be printed to file 14 (if writs = t
+!               the s-matrix elements will be printed to file 14 (if wrsmat = t
 !  line 13:
 !    jout:      an array containing these values of the rotational angular
 !               momenta
@@ -269,14 +269,15 @@ use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
 use constants
 use mod_coener, only: energ
+use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, &
+                flaghf, flagsu, ihomo, ipos, logdfl, prlogd, &
+                noprin, prpart, readpt, rsflag, prsmat, &
+                t2test, prt2, twomol, wrsmat, wrpart, wrxsec, &
+                prxsec, nucros, photof, wavefl, boundc
 implicit double precision (a-h,o-z)
 integer i, jlpar, jtot1, jtot2, jtotd, length, nerg, &
         numax, numin, ibasty
-logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
-        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf, &
-        csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
-        readpt, ihomo, bastst, twomol, nucros, photof, wavefl, &
-        boundc
+logical existf
 character*40 input, jobnam, output, savfil
 character*(*) filnam
 #include "common/parpot.F90"
@@ -287,12 +288,8 @@ common /corpar/ fstfac, rincr, rcut, rendai, rendld, rstart, spac, &
                 tolai, xmu
 ! NB if boundc = .true. then these variables are:
 !      common /corpar/ r1,r2,c,spac,delr,hsimp,eigmin,tolai,xmu
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-                noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr, nucros, photof, wavefl, boundc
 common /coskip/ nskip,iskip
+integer :: nskip, iskip
 common /cofile/ input, output, jobnam, savfil
 common /coered/ ered, rmu
 
@@ -332,14 +329,14 @@ if (.not. logdfl) then
   rendld = rstart
 end if
 !  line 4
-  read (8, 50, err=195) airypr
+  read (8, 50, err=195) prairy
 iline = iline + 1
 !  line 5
   read (8, *, err=195) tolai, rincr, rendai, fstfac
 iline = iline + 1
 if (.not. airyfl) then
 !  give dummy values to airy parameters if airyfl = .false.
-  airypr = .false.
+  prairy = .false.
   tolai = 1.
   rincr = 1.
   rendai = rendld
@@ -375,10 +372,10 @@ if(niout.gt.0) then
   iline = iline + 1
 end if
 !  line 14
-read (8, 50, err=195) logwr, swrit, t2writ, t2test, writs
+read (8, 50, err=195) prlogd, prsmat, prt2, t2test, wrsmat
 iline = iline + 1
 !  line 15
-read (8, 50, err=195) wrpart, partw, xsecwr, wrxsec, wavefl
+read (8, 50, err=195) wrpart, prpart, prxsec, wrxsec, wavefl
 iline = iline + 1
 !  line 16
 read (8, 50 ,err=195) noprin, chlist, ipos, nucros, photof
@@ -481,8 +478,8 @@ end if
    if (batch) call exit
    return
  end if
-!   if writs = .true., then warning unless jtotd = 1
-if (writs .and. jtotd .ne. 1) then
+!   if wrsmat = .true., then warning unless jtotd = 1
+if (wrsmat .and. jtotd .ne. 1) then
   write (6, 170) jtotd
 170   format &
    (' WARNING *** WRSMAT = .TRUE. BUT JTOTD=',i3,' .NE. 1 ')
@@ -490,10 +487,10 @@ end if
 ! here if photodissociation calculation or wavefunction desired
 ! reset all flags accordingly
 if (photof .or. wavefl) then
-   if (t2writ) then
+   if (prt2) then
     write (6, 171)
 171     format (' PRT2 SET .FALSE., SINCE PHOTOF OR WAVEFN .TRUE.')
-    t2writ = .false.
+    prt2 = .false.
   endif
   if (t2test) then
     write (6, 172)
@@ -505,19 +502,19 @@ if (photof .or. wavefl) then
 175     format (' WRPART SET .FALSE., SINCE PHOTOF OR WAVEFN .TRUE.')
     wrpart = .false.
   endif
-  if (partw) then
+  if (prpart) then
     write (6, 176)
 176     format (' PRPART SET .FALSE., SINCE PHOTFL OR WAVEFN .TRUE.')
-    partw = .false.
+    prpart = .false.
   endif
-  if (.not. writs) then
+  if (.not. wrsmat) then
     if (wavefl) write (6, 178)
 178     format (' WRSMAT IS .FALSE., ONLY ADIABATIC ENERGIES SAVED')
   endif
-  if (xsecwr) then
+  if (prxsec) then
     write (6, 179)
 179     format (' PRXSEC SET .FALSE., SINCE PHOTOF OR WAVEFN .TRUE.')
-    xsecwr = .false.
+    prxsec = .false.
   endif
   if (wrxsec) then
     write (6, 180)
@@ -567,7 +564,7 @@ if (jtotd .eq. 0) then
   jtotd=1
 endif
 if (nucros) then
-  if (.not.wrxsec .and. .not.xsecwr .and. .not.partw &
+  if (.not.wrxsec .and. .not.prxsec .and. .not.prpart &
                   .and. .not.wrpart) then
     write (6, 192)
 192     format(' NUCROSS SET .FALSE. BECAUSE PRPART, PRXSEC,', &
@@ -640,7 +637,7 @@ else
 endif
 !  line 4
 nline=nline+1
-write (8, 240, err=999) airypr
+write (8, 240, err=999) prairy
 240 format (l3, 27x,'   prairy')
 !  line 5
 nline=nline+1
@@ -698,11 +695,11 @@ if(niout.gt.0) then
 endif
 !  line 14
   nline=nline+1
-write (8, 330, err=999) logwr, swrit, t2writ, t2test, writs
+write (8, 330, err=999) prlogd, prsmat, prt2, t2test, wrsmat
 330 format (5l3,15x,'   prlogd, prsmat, prt2, t2test, wrsmat')
 !  line 15
   nline=nline+1
-write (8, 340, err=999) wrpart, partw, xsecwr, wrxsec, wavefl
+write (8, 340, err=999) wrpart, prpart, prxsec, wrxsec, wavefl
 340 format (5l3,15x,'   wrpart, prpart, prxsec, wrxsec, wavefl')
 !  line 16
   nline=nline+1
@@ -888,7 +885,7 @@ subroutine openfi (nerg)
 !  variables in common block /colpar/  (see further description in subroutine
 !                                       flow)
 !    airyfl:     note, unit=10 is opened only if airyfl = .true.
-!    writs:      if .true., then unit=45 to unit=(44+nerg) are opened as files
+!    wrsmat:      if .true., then unit=45 to unit=(44+nerg) are opened as files
 !                           smat1, smat2, ... smatnerg for
 !                           storage of real and imaginary parts of
 !                           selected elements of s-matrix
@@ -896,12 +893,12 @@ subroutine openfi (nerg)
 !                           psec1, psec2,... psecnerg for
 !                           storage of of some input date and degeneracy
 !                           averaged partial cross sections
-!    csflag:     if .true., and partw or or wrpart or xsecwr or wrxsec = .true
+!    csflag:     if .true., and prpart or or wrpart or prxsec or wrxsec = .true
 !                           then unit=35 to unit=(34+nerg)
 !                           are opened as files tmp35, tmp36, ... etc.
 !                           for accumulation of partial cross sections
 !                           at each cs projection index
-!    wrxsec, xsecwr:
+!    wrxsec, prxsec:
 !                if either of these variables is .true., then unit=70 to
 !                           unit=(69+nerg) are opened for storage of some
 !                           input data and degeneracy averaged integral
@@ -931,14 +928,12 @@ use mod_coisc3, only: isc3 ! isc3(3)
 use mod_coisc4, only: isc4 ! isc4(1)
 use mod_cosc1, only: rsc1 => sc1 ! rsc1(2)
 use mod_cosc2, only: rsc2 => sc2 ! rsc2(1)
-
+use mod_par, only: airyfl, csflag, flaghf, flagsu, ipos, &
+                prpart, readpt, rsflag, twomol, wrsmat, &
+                wrpart, wrxsec, prxsec, nucros, photof, wavefl, boundc
 implicit double precision (a-h,o-z)
 integer ifile, nerg, nfile, lenx, isize, isizes
-logical airyfl, airypr, bastst, batch, chlist, csflag, existf, &
-        flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-        noprin, partw, readpt, rsflag, swrit, &
-        t2test, t2writ, writs, wrpart, wrxsec, &
-        xsecwr, twomol, nucros, photof, wavefl, boundc
+logical existf
 character*40  oldlab,newlab
 #include "common/parpot.F90"
 character*40 xname,xnam1
@@ -946,12 +941,6 @@ character*20 cdate
 character*40 input,output,jobnam,savfil
 common /cofile/ input,output,jobnam,savfil
 common /cosize/ isize, isizes
-common /colpar/ airyfl, airypr, bastst, batch, chlist, &
-                csflag, flaghf, flagsu, ihomo, ipos, &
-                logdfl, logwr, noprin, partw, readpt, &
-                rsflag, swrit, t2test, t2writ, twomol, writs, &
-                wrpart, wrxsec, xsecwr, nucros, photof, wavefl, &
-                boundc
 common /coselb/ ibasty
 if (nerg .gt. 1) then
 !  check to see if nerg .le. 25
@@ -977,7 +966,7 @@ if (nerg .gt. 1) then
   call openf(-12, xname, 'sf', 0)
 end if
 !   open files for storage of integral cross sections
-if (wrxsec .or. xsecwr) then
+if (wrxsec .or. prxsec) then
   do 60  ifile = 1, nerg
     nfile = 69 + ifile
     if (wrxsec) then
@@ -1009,7 +998,7 @@ end if
 !.....open direct access file for interpolation and restart
 !     only if partial or total cross sections desired, never if
 !     photodissociation calculation or wavefunction calculation
-if (wrxsec .or. xsecwr .or. partw .or. wrpart) then
+if (wrxsec .or. prxsec .or. prpart .or. wrpart) then
   if (.not. wavefl .and. .not. photof) then
      call dinit
      nfile = 3
@@ -1107,7 +1096,7 @@ if (csflag) then
 280   continue
 end if
 !  open files smatn for storage of selected s-matrix elements
-if (writs .and. .not. photof .and. .not. wavefl) then
+if (wrsmat .and. .not. photof .and. .not. wavefl) then
   do 330  ifile = 1, nerg
   nfile = ifile + 44
     call gennam(xname, jobnam, ifile, 'smt', lenx)
@@ -1147,7 +1136,7 @@ if (writs .and. .not. photof .and. .not. wavefl) then
       end if
     end if
 330    continue
-if (writs) then
+if (wrsmat) then
   if (nerg .eq. 1) then
     write (9, 340) xnam1(1:lenx)
 340     format (' ** SELECTED S-MATRIX ELEMENTS SAVED IN FILE ',(a))

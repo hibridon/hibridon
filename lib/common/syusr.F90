@@ -1,14 +1,14 @@
 !comdeck syusr
-subroutine syusr (irpot, readp, iread)
+subroutine syusr (irpot, readpt, iread)
 !  dummy syusr subroutine
-logical readp
+logical readpt
 character*(*)fname
-if(.not.readp.or.iread.eq.0) then
+if(.not.readpt.or.iread.eq.0) then
   call loapot(1,' ')
   return
 endif
 entry ptrusr (fname)
-entry savusr (readp)
+entry savusr (readpt)
 entry chkusr
 return
 end

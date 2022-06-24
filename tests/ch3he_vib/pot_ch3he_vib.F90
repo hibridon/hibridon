@@ -319,8 +319,9 @@ subroutine syusr(irpot, readpt, iread)
 !   Parameters:
 !       iread: 1 to read data from input file, 0 to set default
 !       irpot, readpt: not refered to in this basis
-integer irpot, iread
-logical readpt
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
 !
 !
 !   Hidden returned value:

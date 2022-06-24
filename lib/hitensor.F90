@@ -111,17 +111,16 @@ use mod_cozmat, only: jtotpa => zmat_as_vec ! jtotpa(1)
 use mod_hibrid5, only: sread
 use tensor
 use constants, only: econv, xmconv, ang2c
-
+use mod_par, only: batch
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  tcsfil, smtfil, tcbfil, dchfil
 character*20  cdate
 character*10  elaps, cpu
-logical csflag, flaghf, flagsu, twomol, exstfl, lpar, &
-        batch, fast, nucros,lpar2
+logical csflag, flaghf, flagsu, twomol, exstfl, &
+        fast, nucros
 !
 #include "common/parpot.F90"
-common /colpar/ lpar(3), batch, lpar2(23)
 common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
                 igjtp
 common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
@@ -536,9 +535,9 @@ use mod_coisc4, only: jpack => isc4 ! jpack(1)
 use mod_coisc5, only: lpack => isc5 ! lpack(1)
 use mod_coisc6, only: ipack => isc6 ! ipack(1)
 use mod_hibrid5, only: sread
+use mod_par, only: batch
 implicit double precision (a-h,o-z)
-logical lpar, batch, lpar2, lprnt
-common /colpar/ lpar(3), batch, lpar2(23)
+logical lprnt
 common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
              nwaves, jfsts, jlparf, jlpars, njmax
 common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
@@ -688,16 +687,14 @@ use mod_coz, only: xm1lab => z_as_vec ! xm1lab(1)
 use mod_cow, only: xm2lab => w_as_vec ! xm2lab(1)
 use mod_cozmat, only: sigma => zmat_as_vec ! sigma(1)
 use constants, only: econv, xmconv, ang2c
-
+use mod_par, only: batch
 implicit double precision(a-h,o-z)
 character*(*) filnam
 character*40  tcbfil, mcsfil
 character*20  cdate
 character*10  elaps, cpu
-logical flaghf, exstfl, lpar, &
-        batch,lpar2
+logical flaghf, exstfl
 #include "common/parpot.F90"
-common /colpar/ lpar(3), batch,lpar2(23)
 common /coipar/ ipar(9),iprnt
 common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
              nwaves, jfsts, jlparf, jlpars, njmax
@@ -814,12 +811,11 @@ use mod_coisc5, only: isc2 => isc5 ! isc2(1)
 use mod_coisc6, only: isc3 => isc6 ! isc3(1)
 use mod_coisc7, only: isc4 => isc7 ! isc4(1)
 use mod_cosc2, only: sc1 => sc2 ! sc1(1)
+use mod_par, only: batch, flaghf
 implicit double precision(a-h,o-z)
-logical lpar, batch, flaghf, lpar2
 character*20  cdate
 !
 #include "common/parpot.F90"
-common /colpar/ lpar(3), batch,lpar2(23)
 common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
              nwaves, jfsts, jlparf, jlpars, njmax
 dimension xm1lab(1),xm2lab(1),sigmak(mmax,1),sigmam(mmax,1)
@@ -985,16 +981,16 @@ use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid2, only: mxoutd
 use mod_hibrid5, only: sread
+use mod_par, only: batch, ipos
 implicit double precision (a-h,o-z)
 complex*8 t, tp
-logical diag, diagj, diagin, lpar1, lpar2, batch, ipos, &
-        twopar, fast,lpar3
+logical diag, diagj, diagin, &
+        twopar, fast
 
 !* flags for diagnostic printing
 logical lprnt,lprntf
 
 character*10 elaps, cpu
-common /colpar/ lpar1(3), batch, lpar2(5), ipos,lpar3(17)
 common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
             nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
@@ -1436,16 +1432,16 @@ use mod_coinq, only: inq ! inq(1)
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid5, only: sread
+use mod_par, only: batch, ipos
 implicit double precision (a-h,o-z)
 complex*8 t, tp, ai, cphase
-logical diag, diagj, diagin, lpar1, lpar2, batch, ipos, &
-        twopar, fast,lpar3
+logical diag, diagj, diagin, &
+        twopar, fast
 
 !* flag for diagnostic printing
 logical lprnt2
 
 character*10 elaps, cpu
-common /colpar/ lpar1(3), batch, lpar2(5), ipos,lpar3(17)
 common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
             nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 common /cospbf/ lnbufs, lnbufl, nbuf, ihibuf,  maxlsp, maxllb, &
@@ -1887,16 +1883,16 @@ use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid2, only: mxoutd
 use mod_hibrid5, only: sread
+use mod_par, only: batch, ipos
 implicit double precision (a-h,o-z)
 complex*8 t, tp
-logical diag, diagj, diagin, lpar1, lpar2, batch, ipos, &
-        twopar, fast,lpar3
+logical diag, diagj, diagin, &
+        twopar, fast
 
 !* flags for diagnostic printing
 logical lprnt,lprntf
 
 character*10 elaps, cpu
-common /colpar/ lpar1(3), batch, lpar2(5), ipos,lpar3(17)
 common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
             nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 
@@ -2332,17 +2328,17 @@ use mod_cow, only: simag => w_as_vec ! simag(1)
 use mod_hibrid5, only: sread
 use mod_difcrs, only: sphn
 use constants, only: econv, xmconv, ang2c
+use mod_par, only: batch, ipos
 implicit double precision (a-h,o-z)
 real(8), dimension(:), allocatable :: y
 ! size of q for j <= 5 and 0.5 deg angle increment
 complex*16 q(43681)
-logical diag, diagj, diagin, lpar1, lpar2, batch, ipos, &
-        twopar, fast, lpar3, flaghf
+logical diag, diagj, diagin, &
+        twopar, fast, flaghf
 logical existf,csflg1,flghf1,flgsu1,twomol, &
         nucros, iprint
 character*10 elaps, cpu
 character*20 cdate1
-common /colpar/ lpar1(3), batch, lpar2(5), ipos,lpar3(17)
 common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
             nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
@@ -2787,18 +2783,18 @@ use mod_cow, only: simag => w_as_vec ! simag(1)
 use mod_hibrid5, only: sread
 use mod_difcrs, only: sphn
 use constants, only: econv, xmconv, ang2c
+use mod_par, only: batch, ipos
 
 implicit double precision (a-h,o-z)
 real(8), dimension(:), allocatable :: y
 ! size of q for j <= 5 and 0.5 deg angle increment
 complex*16 q(43681)
-logical diag, diagj, diagin, lpar1, lpar2, batch, ipos, &
-        twopar, fast, lpar3, flaghf
+logical diag, diagj, diagin, &
+        twopar, fast, flaghf
 logical existf,csflg1,flghf1,flgsu1,twomol, &
         nucros, iprint
 character*10 elaps, cpu
 character*20 cdate1
-common /colpar/ lpar1(3), batch, lpar2(5), ipos,lpar3(17)
 common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
             nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &

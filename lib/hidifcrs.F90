@@ -1,3 +1,4 @@
+#include "assert.h"
 module mod_difcrs
 contains
 !  -------------------------------------------------------------
@@ -967,7 +968,8 @@ complex*16 ai,yy,tmat
 parameter (zero=0.0d0, one=1.0d0, two=2.0d0)
 logical ihomo,flaghf,elastc
 common /coselb/ ibasty
-dimension jpack(1),lpack(1),ipack(1),jq(1),lq(1),inq(1)
+dimension jpack(1),lpack(1),ipack(1),jq(1),inq(1)
+integer, intent(in) :: lq(1)
 dimension sreal(mmax,1),simag(mmax,1)
 integer, dimension(:), allocatable :: ilab1
 real(8), dimension(:), allocatable :: fak1
@@ -1122,6 +1124,10 @@ if (.not. is_j12(ibasty)) then
   fak=xf3j(xj2,xl2,xjtot,xmj2,xml2,-xmj1)
   if(ml2.gt.0) fak=fak*(-1)**ml2
 !
+  ASSERT(l2 .ge. 0)
+  ASSERT(l2 .le. iydim1)
+  ASSERT(iabs(ml2) .ge. 0)
+  ASSERT(iabs(ml2) .le. iydim2)
   q(mj1, mj2, :) = q(mj1, mj2, :) + sum(fak3) &
        * fak * y(l2, iabs(ml2), :)
 300   continue ! mj2 (jk)

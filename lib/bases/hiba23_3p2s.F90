@@ -124,18 +124,19 @@ use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+#include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
 !  common blocks cojtot, coja, and coel used to transmit to ground subroutine
 common /cojtot/ jjtot, jjlpar
 common /coja/  jja(9)
 common /coel/  ll(9)
 common /coered/ ered, rmu
 common /coskip/ nskip, iskip
+integer :: nskip, iskip
 !  arrays in argument list
 dimension j(1), l(1), is(1),jhold(1),ehold(1),ishold(1)
 !  matrices for transformation between atomic and molecular BF functions
@@ -591,7 +592,7 @@ goto 1000
 end
 ! ------------------------------eof-----------------------------------
 ! -----------------------------------------------------------------------
-subroutine sy3p2s (irpot, readp, iread)
+subroutine sy3p2s (irpot, readpt, iread)
 !  subroutine to read in system dependent parameters for collisions of
 !  atom in 3P state with an atom in 2S state
 !  current revision date: 1-oct-2018 by p.dagdigian
@@ -617,24 +618,18 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod
-implicit double precision (a-h,o-z)
-integer irpot
-logical readp
-logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
-        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf, &
-        csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
-        readpt, ihomo, bastst, twomol, lpar
-
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: i, j, l, lc
+logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-                noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr,lpar(3)
+integer :: nskip, iskip
 #include "common/comdot.F90"
 save potfil
 integer, pointer :: nterm, nvib
@@ -662,7 +657,7 @@ potfil = ' '
 if(iread.eq.0) return
 read (8, *, err=888) nvib
 line=' '
-if(.not.readp.or.iread.eq.0) then
+if(.not.readpt.or.iread.eq.0) then
   call loapot(1,' ')
   return
 endif
@@ -674,10 +669,10 @@ goto 286
 1000 format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
 return
 ! --------------------------------------------------------------
-entry ptr3p2s (fname,readp)
+entry ptr3p2s (fname,readpt)
 line = fname
-readp = .true.
-286 if (readp) then
+readpt = .true.
+286 if (readpt) then
   l=1
   call parse(line,l,filnam,lc)
   if(lc.eq.0) then
@@ -704,7 +699,7 @@ close (8)
 irpot=1
 return
 ! --------------------------------------------------------------
-entry sav3p2s (readp)
+entry sav3p2s (readpt)
 !  save input parameters for 3P atom + 2S atom scattering
 write (8, 1285) nvib
 1285 format(i4, 29x,'nvib')

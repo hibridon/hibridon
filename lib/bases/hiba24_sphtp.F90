@@ -118,12 +118,12 @@ use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+#include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
 common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
@@ -981,7 +981,7 @@ vprm = ( (-1.d0) ** iphase) * x * sqrt(xnorm)
 return
 end
 ! -----------------------------------------------------------------------
-subroutine sysphtp (irpot, readp, iread)
+subroutine sysphtp (irpot, readpt, iread)
 !  subroutine to read in system dependent parameters for collisions of
 !  a spherical top with closed shell atom
 !  current revision date: 21-jul-2015 by p.dagdigian
@@ -1010,24 +1010,18 @@ use mod_conlam, only: nlam
 use mod_cosys,  only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-integer irpot
-logical readp
-logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
-        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf, &
-        csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
-        readpt, ihomo, bastst, twomol, lpar
-
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: i, j, l, lc
+logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-                noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr,lpar(3)
+integer :: nskip, iskip
 #include "common/comdot.F90"
 save potfil
 integer, pointer :: nterm, iop, jmax
@@ -1068,7 +1062,7 @@ if(iread.eq.0) return
 read (8, *, err=888) iop, jmax
 read (8, *, err=888) brot, dj, dk
 line=' '
-if(.not.readp.or.iread.eq.0) then
+if(.not.readpt.or.iread.eq.0) then
   call loapot(1,' ')
   return
 endif
@@ -1080,10 +1074,10 @@ goto 286
 1000 format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
 return
 ! --------------------------------------------------------------
-entry ptrsphtp (fname,readp)
+entry ptrsphtp (fname,readpt)
 line = fname
-readp = .true.
-286 if (readp) then
+readpt = .true.
+286 if (readpt) then
   l=1
   call parse(line,l,filnam,lc)
   if(lc.eq.0) then
@@ -1110,7 +1104,7 @@ close (8)
 irpot=1
 return
 ! --------------------------------------------------------------
-entry savsphtp (readp)
+entry savsphtp (readpt)
 iop=>ispar(2); jmax=>ispar(3)
 brot=>rspar(1) ; dj=>rspar(2); dk=>rspar(3)
 ASSERT(iop .eq. ispar(2))

@@ -122,6 +122,7 @@ use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar, convert_ispar_to_mat
 use mod_cosysr, only: isrcod, junkr, rspar, convert_rspar_to_mat
 use constants, only: econv, xmconv, ang2c
+#include "common/parbasl.F90"
 
 implicit double precision (a-h,o-z)
 integer, intent(out) :: j(:)
@@ -153,7 +154,6 @@ integer, intent(out) :: ntop
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
 common /covib/ nvib,ivib(maxvib)
 common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
@@ -589,7 +589,7 @@ end if
 return
 end
 !  -----------------------------------------------------------------------
-subroutine sy1sg (irpot, readp, iread)
+subroutine sy1sg (irpot, readpt, iread)
 !  subroutine to read in system dependent parameters for singlet-sigma
 !   + atom scattering using werner-follmeg potential form
 !  if iread = 1 read data from input file
@@ -617,11 +617,14 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod => rspar
-implicit double precision (a-h,o-z)
-integer irpot
-logical readp, existf
-logical airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar
+use mod_par, only: ihomo
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: i, ibasty, iofi, iofr, ivib
+integer :: j, l, lc, nvib
+logical existf
 character*1 dot
 character*4 char
 character*(*) fname
@@ -629,8 +632,7 @@ character*60 filnam, line, potfil, filnm1
 #include "common/parbas.F90"
 common/covib/ nvib,ivib(maxvib)
 common /coskip/ nskip,iskip
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar(18)
+integer :: nskip, iskip
 
 common /coselb/ ibasty
 save potfil
@@ -652,7 +654,7 @@ if (iread .eq. 0) then
   indout(1)=0
   nvib = 1
 endif
-if (.not.readp)irpot=1
+if (.not.readpt)irpot=1
 if (iread .eq. 1) irpot=1
 if (ihomo) nskip = 2
 potfil = ' '
@@ -698,7 +700,7 @@ end do
 if(isicod+isrcod+3.gt.size(scod,1)) stop 'lencod'
 nscode=isicod+isrcod
 line=' '
-if(.not.readp.or.iread.eq.0) then
+if(.not.readpt.or.iread.eq.0) then
   call loapot(1,' ')
   close (8)
   return
@@ -715,10 +717,10 @@ return
   ' PROBABLY NOT ENOUGH VIBRATIONAL LEVELS SUPPLIED')
 return
 ! --------------------------------------------------------------
-entry ptr1sg (fname,readp)
+entry ptr1sg (fname,readpt)
 line = fname
-readp = .true.
-186 if (readp) then
+readpt = .true.
+186 if (readpt) then
   l=1
   call parse(line,l,filnam,lc)
   if(lc.eq.0) then
@@ -745,7 +747,7 @@ end if
 irpot=1
 return
 ! --------------------------------------------------------------
-entry sav1sg (readp)
+entry sav1sg (readpt)
 !  save input parameters for singlet-sigma + atom scattering
 if (iscod(3) .lt. iscod(2)) then
   write (6, 210) iscod(3), iscod(2)

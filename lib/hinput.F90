@@ -65,7 +65,7 @@ use mod_hibrid2, only: enord, prsg
 use mod_hibrid3, only: testptn, testpt20, testpt, potmin
 use mod_hiutil, only: getval
 use mod_hiparcst
-
+use mod_par, only: lpar
 implicit double precision (a-h,o-z)
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
@@ -93,7 +93,7 @@ integer ipar
 integer ibasty
 integer nerg
 logical existf, first, openfl
-logical lpar, logp, opti, optifl, batch, jtrunc
+logical logp, opti, optifl, batch, jtrunc
 dimension a(15),ia(10), ihold(15), lhold(15)
 #include "common/parbas.F90"
 #include "common/parpot.F90"
@@ -106,7 +106,6 @@ common /cofcod/ fcod
 common /copcod/ pcod
 common /coipar/ ipar(IPAR_COUNT)
 common /corpar/ rpar(RPAR_COUNT)
-common /colpar/ lpar(LPAR_COUNT)
 common /coselb/ ibasty
 common /cobaco/ bascod
 common /coopti/ optifl
@@ -122,15 +121,9 @@ data basknd /'1-SIGMA', '2-SIGMA', '2-PI', 'SIGMA|PI', &
               '1SG-1SG', '2SG-1SG', 'C2v-ASTP','3SG-1SG', &
               'CASYMTOP', 'ASYM-DIAT' /
 !  lindx is pointer from fcod order to order in common block colpar
-! data lindx/1,3,4,5,6,7,8,9,10,11,13,25,26,2,12,14,17,19,24, &
-!            15,16,18,20,27,22,21,23,28/   ! graffy: colpar and fcod both contain the 28 logical parameters but in a different order, thus requiring a remapping through lindx. Why not simply having the same order, by making fcod match colpar?
+! graffy: colpar and fcod both contain the 28 logical parameters but in a different order, thus requiring a remapping through lindx. Why not simply having the same order, by making fcod match colpar?
 integer :: lindx(LPAR_COUNT)
 
-!     common /colpar/ airyfl, airypr, bastst, batch, chlist,
-!    :                csflag, flaghf, flagsu, ihomo, ipos, logdfl,
-!    :                logwr, noprin, partw, readpt, rsflag, swrit,
-!    :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
-!    :                xsecwr, nucros, photof, wavefl, boundc
 data irpot, irinp /0, 0/
 data batch /.false./
 save ipr, opti, a, a1, acc, acclas, optval, optacc, istep, inam, &
@@ -1138,6 +1131,7 @@ goto 1
      call parse(line,l,code,lc)
      call getval(code(1:lc),empty_var_list,j,a(i))
 2010   continue
+  write (6,*) 'hinput : lpar = ' 
   call difcrs(fnam1,a,lpar(9),lpar(7))
 else
   write (6, 2011)

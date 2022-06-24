@@ -140,7 +140,7 @@ subroutine basgpi (j, l, is, jhold, ehold, ishold, nlevel, &
 !    ipi:      if ipi=1 and isg=0 then 2pi + atom scattering
 !              if isg=1 and ipi=1 then 2pi-2sig + atom scattering
 !  variables in common block /cobsp2/
-!    nvt:      Number of vibrational blocks for each term. All of these
+!    ntv:      Number of vibrational blocks for each term. All of these
 !              use same lammin, lammax, mproj. These numbers as well
 !              as the corresponding ivcol, ivrow (see below) should be
 !              set in loapot and must be consistent with the pot routine
@@ -183,6 +183,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rpar=>rspar
 use mod_hibasutil, only: iswap, rswap
 use constants, only: econv, xmconv, ang2c
+#include "common/parbasl.F90"
 
 implicit double precision (a-h,o-z)
 real(8), intent(out), dimension(:) :: sc1
@@ -193,7 +194,6 @@ type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
 common /coipar/ iiipar(9), iprint
 !  these parameters must be the same as in hisysgpi
 common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
@@ -1363,23 +1363,24 @@ use mod_cosys, only: scod
 use mod_cosyr, only: rcod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-logical readpt, existf
+use mod_par, only: ihomo
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: i, ipi, isg, isgpi, ivibp, ivibs, ivp, ivs, j, k, l, lc, nterm, nvibp, nvibs, nvmaxp, nvmaxs, nvminp, nvmins
+logical existf
 character*8 char
 character*(*) fname
 character*1 dot
 character*60 filnam, line, potfil, filnm1
 #include "common/parbas.F90"
 common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
-logical         airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar(18)
 common /coskip/ nskip,iskip
+integer :: nskip, iskip
 save potfil
 #include "common/comdot.F90"
 !  set default values for 2pi-2sigma scattering
-rpar=0
 ispar=0
 potfil = ' '
 isicod=0

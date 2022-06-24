@@ -118,9 +118,9 @@ logical, intent(in) :: noprin
 type(ancou_type), intent(in) :: v2
 integer i, icol, iend, ierr, ipt, izero, kstep, maxstp, &
         ncol, npt, nskip
-logical photof, wavefn, boundf, wrsmat
+logical photof, wavefn, boundf, writs
 
-common /cophot/ photof, wavefn, boundf, wrsmat
+common /cophot/ photof, wavefn, boundf, writs
 common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
      inflev
 common /coered/ ered, rmu
@@ -324,8 +324,8 @@ if (wavefn) then
    write (ifil, err=950) -rlast, drnow
 !     Adiabatic energies
    write (ifil, err=950) (eigold(i), i=1, nch)
-!     The following information will not be written if wrsmat set to F
-   if (wrsmat) then
+!     The following information will not be written if writs set to F
+   if (writs) then
       icol = 1
       do ich = 1, nch
          write (ifil, err=950) (z(icol - 1 + i), i=1, nch)

@@ -1,4 +1,1 @@
-!comdeck parbasl
-!  revised 13-may-1997 by mha
-logical llpar,lllpar,boundc,readpt
-common /colpar/ llpar(14), readpt, lllpar(12),boundc
+use mod_par, only: readpt, boundc

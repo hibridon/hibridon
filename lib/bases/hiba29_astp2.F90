@@ -148,13 +148,13 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use mod_hibasutil, only: rotham
 use constants, only: econv, xmconv
+#include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*1 slab
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
 common /coipar/ iiipar(9), iprint
 common /coselb/ ibasty
 common /coered/ ered, rmu
@@ -856,7 +856,7 @@ end
 !  author:  paul dagdigian
 !  current revision date:  16-aug-2009
 !  -----------------------------------------------------------------------
-subroutine syastp2 (irpot, readp, iread)
+subroutine syastp2 (irpot, readpt, iread)
 !  subroutine to read in system dependent parameters for chiral asymmetric top
 !      + atom scattering
 !
@@ -891,23 +891,16 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-integer irpot
-logical readp
-logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
-        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf, &
-        csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
-        readpt, ihomo, bastst, twomol, lpar
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: j, l, lc
+logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 #include "common/parbas.F90"
-common /coskip/ nskip,iskip
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-                noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr,lpar(3)
 #include "common/comdot.F90"
 save potfil
 
@@ -947,10 +940,10 @@ return
 90 format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
 return
 !  -----------------------------------------------------------------------
-entry ptrastp2 (fname, readp)
+entry ptrastp2 (fname, readpt)
 line = fname
-readp = .true.
-100 if (readp) then
+readpt = .true.
+100 if (readpt) then
   l=1
   call parse(line,l,filnam,lc)
   if(lc.eq.0) then
@@ -976,7 +969,7 @@ endif
 close (8)
 return
 !  -----------------------------------------------------------------------
-entry savastp2 (readp)
+entry savastp2 (readpt)
 !  save input parameters for chiral asymmetric top + atom scattering
 !  the order of the write statements should be identical to the read statement
 !  above. for consistency with the data file written by gendat, format
