@@ -124,13 +124,13 @@ use mod_conlam, only: nlam
 use constants, only: econv, xmconv, ang2c
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, idum=>junkr, rspar
+use mod_par, only: iprint
 #include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable :: v2
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
-common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 dimension j(2), l(1), jhold(1), ehold(1), is(2), &
           c12(1), c32(1), ieps(2), ishold(1), sc1(1), sc4(1)

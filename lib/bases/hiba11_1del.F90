@@ -110,6 +110,7 @@ use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, idum=>junkr, rspar
 use constants, only: econv, xmconv
+use mod_par, only: iprint
 #include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 real(8), intent(out), dimension(:) :: sc1
@@ -120,7 +121,6 @@ type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
-common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 dimension j(2), l(1), jhold(1), ehold(1), is(2), &
            ieps(2), ishold(1)

@@ -273,17 +273,18 @@ use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, &
                 flaghf, flagsu, ihomo, ipos, logdfl, prlogd, &
                 noprin, prpart, readpt, rsflag, prsmat, &
                 t2test, prt2, twomol, wrsmat, wrpart, wrxsec, &
-                prxsec, nucros, photof, wavefl, boundc
+                prxsec, nucros, photof, wavefl, boundc, &
+                jtot1, jtot2, jtotd, jlpar, nerg, numax, numin, nud, &
+                lscreen, iprint
 implicit double precision (a-h,o-z)
-integer i, jlpar, jtot1, jtot2, jtotd, length, nerg, &
-        numax, numin, ibasty
+integer i, length
 logical existf
 character*40 input, jobnam, output, savfil
 character*(*) filnam
 #include "common/parpot.F90"
 common /coselb/ ibasty
-common /coipar/ jtot1, jtot2, jtotd,jlpar,nerg,numax, numin, nud, &
-                lscreen, iprint
+integer :: ibasty
+
 common /corpar/ fstfac, rincr, rcut, rendai, rendld, rstart, spac, &
                 tolai, xmu
 ! NB if boundc = .true. then these variables are:

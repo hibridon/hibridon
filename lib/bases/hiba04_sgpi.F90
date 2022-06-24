@@ -183,6 +183,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rpar=>rspar
 use mod_hibasutil, only: iswap, rswap
 use constants, only: econv, xmconv, ang2c
+use mod_par, only: iprint
 #include "common/parbasl.F90"
 
 implicit double precision (a-h,o-z)
@@ -194,7 +195,6 @@ type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbas.F90"
-common /coipar/ iiipar(9), iprint
 !  these parameters must be the same as in hisysgpi
 common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
 common /coered/ ered, rmu

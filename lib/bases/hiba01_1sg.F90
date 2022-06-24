@@ -122,6 +122,7 @@ use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar, convert_ispar_to_mat
 use mod_cosysr, only: isrcod, junkr, rspar, convert_rspar_to_mat
 use constants, only: econv, xmconv, ang2c
+use mod_par, only: iprint
 #include "common/parbasl.F90"
 
 implicit double precision (a-h,o-z)
@@ -155,7 +156,6 @@ type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 #include "common/parbas.F90"
 common /covib/ nvib,ivib(maxvib)
-common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 common /coskip/ nskip, iskip
 !   econv is conversion factor from cm-1 to hartrees

@@ -7,7 +7,7 @@
 !                                                                       *
 !   1. hiblk       block data, default settings                         *
 !   2. hinput      input driver                                         *
-!   4. mxoutd (mxoutr) mxoutc      matrix print utility
+!   4. mxoutd (mxoutr) print_integral_cross_sections      matrix print utility
 !   5. prsg/aver1/xscpr1  integral cross section print
 !   6. prsgpi/aver2/xscpr2 integral cross section print for sigma/pi
 !                                                                       *
@@ -15,7 +15,7 @@
 module mod_hibrid2
 contains
 ! ------------------------------------------------------------------
-subroutine default
+subroutine set_default_params
 !  current revision date:  22-jan-2008 by mha
 ! ------------------------------------------------------------------
 use mod_cosout, only: nnout, jout
@@ -30,15 +30,14 @@ use mod_par, only: airyfl, prairy, bastst, batch, chlist, &
                 csflag, flaghf, flagsu, ihomo, ipos, logdfl, &
                 prlogd, noprin, prpart, readpt, rsflag, prsmat, &
                 t2test, prt2, twomol, wrsmat, wrpart, wrxsec, &
-                prxsec, nucros, photof, wavefl, boundc
+                prxsec, nucros, photof, wavefl, boundc, &
+                jtot1, jtot2, jtotd, jlpar, nerg, numax, numin, nud, lscreen, iprint
 implicit double precision (a-h,o-z)
 character*40 jobnam,input,output,savfil
 #include "common/parpot.F90"
 common /cofile/ input, output, jobnam, savfil
 ! nb if the nextcommon is changed, it should be also changed in common/parsys
 common /coselb/ ibasty
-common /coipar/ jtot1,jtot2,jtotd,jlpar,nerg,numax,numin,nud, &
-                lscreen, iprint
 common /corpar/ fstfac, rincr, rcut, rendai, rendld, rstart, spac, &
                 tolai, xmu
 !  this sets the maximum number of energies
@@ -51,10 +50,7 @@ nerg=1
 numax=0
 numin=0
 nud=1
-! lscreen is the number of lines available on your terminal screen
 lscreen=48
-! iprint controls degree of print output in some routines
-!     iprint=-1 (no print); iprint=0 (min print); iprint=1 some print, etc
 iprint=0
 energ(1)=208.509d0
 do i=2,25
@@ -232,17 +228,28 @@ do  50   j = 1, jmax
 60 return
 end
 ! --------------------------------------------
-subroutine mxoutc (ifile,zmat,nlevop,nmax,ipos,csflag,flaghf, &
-                   twomol,numax,jlev,inlev)
+! routine to print integral cross sections
+subroutine print_integral_cross_sections(ifile, zmat, nlevop, nmax, ipos, csflag, flaghf, twomol, numax, jlev, inlev)
 use constants
 use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
-implicit double precision (a-h,o-z)
-logical csflag,flaghf,twomol,ipos, csff
+use mod_par, only: iprint
+implicit none
+integer, intent(in) :: ifile  ! the output file's unit (expected to be open)
+real(8), intent(in) :: zmat(nmax, nlevop)
+integer, intent(in) :: nlevop
+integer, intent(in) :: nmax
+logical, intent(in) :: ipos
+logical, intent(in) :: csflag
+logical, intent(in) :: flaghf
+logical, intent(in) :: twomol
+integer, intent(in) :: numax
+integer, intent(in) :: inlev(nlevop)
+integer, intent(in) :: jlev(nlevop)
+
+integer :: i, ii, j, j1, j2
+real(8) :: spin
+logical csff
 character*40 form
-common /coipar/ ipar(9), iprint
-dimension zmat(nmax,nlevop),inlev(1),jlev(1)
-! routine to print integral cross sections
-!  latest revision date:  24-jun-1991
 spin=0
 csff=csflag
 if (csflag .and. iprint .ge. 2) then

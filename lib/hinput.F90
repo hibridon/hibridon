@@ -67,7 +67,8 @@ use mod_hiutil, only: getval
 use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT, RPAR_COUNT
 use fcod_enum
 use lpar_enum
-use mod_par, only: lpar
+use ipar_enum
+use mod_par, only: lpar, ipar
 implicit double precision (a-h,o-z)
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
@@ -91,7 +92,6 @@ character*9 basknd(30)
 !  pcod, fcod, and bcod)
 character*8 codex(15)
 integer ixpar
-integer ipar
 integer ibasty
 integer nerg
 logical existf, first, openfl
@@ -106,7 +106,6 @@ common /cokeyl/ nncode, llcode, ijcode
 common /cobcod/ bcod
 common /cofcod/ fcod
 common /copcod/ pcod
-common /coipar/ ipar(IPAR_COUNT)
 common /corpar/ rpar(RPAR_COUNT)
 common /coselb/ ibasty
 common /cobaco/ bascod
@@ -160,17 +159,17 @@ lindx(FCOD_WRSMAT) = LPAR_WRSMAT
 lindx(FCOD_WRXSEC) = LPAR_WRXSEC
 lindx(FCOD_BOUNDC) = LPAR_BOUNDC
 
-bascod(1)='BASISTYP'
-pcod(1)='JTOT1'
-pcod(2)='JTOT2'
-pcod(3)='JTOTD'
-pcod(4)='JLPAR'
-pcod(5)='NERG'
-pcod(6)='NUMAX'
-pcod(7)='NUMIN'
-pcod(8)='NUD'
-pcod(9)='LSCREEN'
-pcod(10)='IPRINT'
+pcod(IPAR_JTOT1)   = 'JTOT1'
+pcod(IPAR_JTOT2)   = 'JTOT2'
+pcod(IPAR_JTOTD)   = 'JTOTD'
+pcod(IPAR_JLPAR)   = 'JLPAR'
+pcod(IPAR_NERG)    = 'NERG'
+pcod(IPAR_NUMAX)   = 'NUMAX'
+pcod(IPAR_NUMIN)   = 'NUMIN'
+pcod(IPAR_NUD)     = 'NUD'
+pcod(IPAR_LSCREEN) = 'LSCREEN'
+pcod(IPAR_IPRINT)  = 'IPRINT'
+
 pcod(11)='FSTFAC'
 pcod(12)='RINCR'
 pcod(13)='RCUT'

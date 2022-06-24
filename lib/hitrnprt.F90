@@ -307,7 +307,6 @@ common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
                 igjtp
 common /cotrn/  spin, maxjt, &
      nwaves, jfsts, jlparf, jlpars, njmax, jpmax
-common /coipar/ ipar(9),iprnt
 ! common blocks for levels for which xs's to be computed
 common /coselb/ ibasty
 !
@@ -641,7 +640,6 @@ common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
                 igjtp
 common /cotrn/  spin, maxjt, &
      nwaves, jfsts, jlparf, jlpars, njmax, jpmax
-common /coipar/ ipar(9),iprnt
 ! common blocks for levels for which xs's to be computed
 common /coselb/ ibasty
 !

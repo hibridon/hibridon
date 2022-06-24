@@ -79,3 +79,20 @@ enum, bind( C )
 end enum
 end module lpar_enum
 
+! ipar parameters
+! note: we use a specific module for each enum because it's not practical for the user to use the recommanded keyword only for these enum (the user would have to list them all in some cases, which makes code maintaining tedious)
+module ipar_enum
+   enum, bind( C )
+   enumerator ::  &
+      IPAR_JTOT1   = 1, &
+      IPAR_JTOT2   = 2, &
+      IPAR_JTOTD   = 3, &
+      IPAR_JLPAR   = 4, &
+      IPAR_NERG    = 5, &
+      IPAR_NUMAX   = 6, &
+      IPAR_NUMIN   = 7, &
+      IPAR_NUD     = 8, &
+      IPAR_LSCREEN = 9, &
+      IPAR_IPRINT  = 10
+   end enum
+end module ipar_enum

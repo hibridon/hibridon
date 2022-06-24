@@ -98,6 +98,7 @@ use mod_cosc10, only: sc10
 use mod_ancou, only: ancou_type
 use mod_hibrid3, only: outmat, potent
 use mod_hiba10_22p, only: energ22
+use mod_par, only: par_iprint=>iprint
 implicit double precision (a-h, o-z)
 !  matrix dimensions (row dimension = nmax, matrices stored column by column)
 real(8), dimension(nmax*nmax), intent(inout) :: z
@@ -124,7 +125,6 @@ common /cophot/ photof, wavefn, boundf, writs
 common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
      inflev
 common /coered/ ered, rmu
-common /coipar/ ipar(9),jprint
 common /coselb/ ibasty
 #if defined(HIB_UNIX_IBM)
 character*1 forma, formb
@@ -198,7 +198,7 @@ if (iprint) then
 40   format(/' ** AIRY PROPAGATION (NO DERIVATIVES):')
   write (9, 50)
 50   format('   STEP   RNOW', 5x, 5hdrnow, 5x, 5hcdiag, 6x, 4hcoff)
-  if (jprint .ge. 2) write (9, 55)
+  if (par_iprint .ge. 2) write (9, 55)
 55   format ('   ALSO ADIABATIC ENERGIES (HARTREE)')
 end if
 60 iend = 0

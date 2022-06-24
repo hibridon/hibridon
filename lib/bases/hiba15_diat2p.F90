@@ -107,13 +107,13 @@ use mod_hiba12_h2p, only: vlmh2p, vlmh2pc
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+use mod_par, only: iprint
 #include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
-common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 common /coskip/ nskip, iskip
 integer :: nskip, iskip

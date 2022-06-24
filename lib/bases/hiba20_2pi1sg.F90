@@ -112,8 +112,9 @@ use mod_coeint, only: echn => eint
 use mod_coj12, only: j12chn => j12
 use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, junkr, rspar 
 use mod_hibasutil, only: raise
+use mod_par, only: iprint
 implicit none
 !
 !     The following arrays store the parameters of channels and levels.
@@ -134,9 +135,6 @@ type(ancouma_type), pointer :: ancouma
 !
 common /coered/ ered, rmu
 real(8) :: ered, rmu
-common /coipar/ junkip, iprint
-integer, dimension(9) :: junkip
-integer :: iprint
 !
 integer :: i, ilev, iv, irow, icol, inum, i1, i2
 real(8) :: vee

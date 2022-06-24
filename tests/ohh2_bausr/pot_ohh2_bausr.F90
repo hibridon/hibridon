@@ -221,6 +221,7 @@ use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use mod_hibasutil, only: raise
+use mod_par, only: iprint
 !
 #include "pot_ohh2_bausr_common.F90"
 integer, intent(out) :: j(:)
@@ -258,8 +259,6 @@ type(ancouma_type), pointer :: ancouma
 !     states, respectively, for each channel.
 common /coered/ ered, rmu
 double precision ered, rmu
-common /coipar/ junkip, iprint
-integer junkip(9), iprint
 !
 integer nlist, ji1, eps1, fi1, ji2, li, ji1p, eps1p, fi1p, &
      ji2p, lip, jsave, isave, ipar, j12min, ji12, ji12p, &

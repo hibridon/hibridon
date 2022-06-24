@@ -580,6 +580,7 @@ use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 use constants, only: econv, xmconv
 use mod_coiout, only: niout, indout
+use mod_par, only: iprint
 implicit double precision (a-h,o-z)
 integer, intent(out) :: j(:)
 integer, intent(out) :: l(:)
@@ -611,7 +612,6 @@ type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical clfl
 #include "common/parbas.F90"
-common /coipar/ iiipar(9), iprint
 common /covib/ ie(50), iv(50)
 common /coicl/ clfl
 

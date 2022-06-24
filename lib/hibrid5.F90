@@ -906,8 +906,8 @@ end
 
 ! ----------------------------------------------------------------------
 !
-!  subroutine to buffer out cross sections matrices together
-!  with their labels
+!  subroutine to read cross sections matrices together
+!  with their labels from the given file unit
 !
 ! ---------------------------------------------------------------------------
 subroutine dbin(ifile,irec,i1,i2,i3,q,nmax,n)
@@ -978,10 +978,12 @@ subroutine xwrite (zmat, tq3, jlev, elev, inlev, nerg, energ, &
 !    rmu:       collision reduced mass in atomic units (mass of electron = 1)
 ! ----------------------------------------------------------------------
 use constants
-use mod_hibrid2, only: mxoutc
+use mod_hibrid2, only: print_integral_cross_sections
 use mod_cosysi, only: ispar
 use mod_basis, only: basis_get_isa
-implicit double precision (a-h,o-z)
+use mod_par, only: iprint
+use funit
+implicit none
 real(8), intent(out) :: zmat(nmax, nmax)
 real(8), intent(out) :: tq3(nmx, nmx)
 integer, intent(in) :: jlev(nmx)
@@ -1009,15 +1011,19 @@ integer, intent(in) :: nmax
 integer, intent(in) :: nmx
 logical, intent(in) :: ihomo
 
-logical flagsu
+real(8) :: ener
+integer :: i, ien, irec, isa, j, jhold, jj1, jj2, jmin, jphold, nlevmx, nlevop, nn, nxfile
 character*20 cdate
 #include "common/parpot.F90"
 common /cojsav/ jsav1, jsav2
+integer :: jsav1, jsav2
 common /coered/ ered, rmu
+real(8) :: ered, rmu
 common /cosurf/ flagsu
-common /coipar/ ipar(9), iprint
+logical :: flagsu
 common /coselb/ ibasty
-integer :: cs_file = 1
+integer :: ibasty
+integer :: cs_file = FUNIT_CS  ! cross secton input file unit
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
 nlevmx=0
@@ -1114,7 +1120,7 @@ if (prxsec) then
     if ((jmin .le. numax .or. iprint.ge.2) .or. .not.csflag) &
         then
       call dbin(cs_file, irec,jhold,jphold,nn,zmat,nmax,nlevop)
-      call mxoutc (9,zmat,nlevop,nmax,ipos,csflag,flaghf,twomol, &
+      call print_integral_cross_sections(9,zmat,nlevop,nmax,ipos,csflag,flaghf,twomol, &
                  numax,jlev,inlev)
     else
       write (6, 195) jmin, numax
@@ -1128,7 +1134,7 @@ if (prxsec) then
 end if
 if (wrxsec) then
   do 300  ien = 1, nerg
-    nxfile = ien + 69
+    nxfile = FUNIT_ICS_START + ien - 1
 !         rewind nxfile
     irec=(ien-1)*5+2
     if(nucros) irec=irec+nerg*5

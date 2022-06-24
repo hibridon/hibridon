@@ -259,6 +259,7 @@ use mod_cosysr, only: isrcod, junkr, rspar
 use mod_hibasutil, only: vlmstpln, raise
 use constants, only: econv, xmconv
 use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
+use mod_par, only: iprint
 implicit none
 integer, intent(out) :: j(:)
 integer, intent(out) :: l(:)
@@ -307,8 +308,6 @@ double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV), &
 !
 common /coered/ ered, rmu
 double precision ered, rmu
-common /coipar/ junkip, iprint
-integer junkip(9), iprint
 !
 integer nlist, ki, ji, numeps, iep, iepsil, isym, ji2, i1, i2, &
      jsave, ksave, isave, njk, ipar, j12max, j12min, ji12, &

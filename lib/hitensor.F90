@@ -535,14 +535,13 @@ use mod_coisc4, only: jpack => isc4 ! jpack(1)
 use mod_coisc5, only: lpack => isc5 ! lpack(1)
 use mod_coisc6, only: ipack => isc6 ! ipack(1)
 use mod_hibrid5, only: sread
-use mod_par, only: batch
+use mod_par, only: batch, iprnt=>iprint
 implicit double precision (a-h,o-z)
 logical lprnt
 common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
              nwaves, jfsts, jlparf, jlpars, njmax
 common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
                 igjtp
-common /coipar/ ipar(9), iprnt
 ! add these three common blocks (mha 9/30/08)
 dimension labadr(1),lenlab(1),jtotpa(1),jttble(1)
 !
@@ -695,7 +694,6 @@ character*20  cdate
 character*10  elaps, cpu
 logical flaghf, exstfl
 #include "common/parpot.F90"
-common /coipar/ ipar(9),iprnt
 common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
              nwaves, jfsts, jlparf, jlpars, njmax
 data zero /0.d0/
@@ -981,7 +979,7 @@ use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid2, only: mxoutd
 use mod_hibrid5, only: sread
-use mod_par, only: batch, ipos
+use mod_par, only: batch, ipos, iprnt=>iprint
 implicit double precision (a-h,o-z)
 complex*8 t, tp
 logical diag, diagj, diagin, &
@@ -995,7 +993,6 @@ common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
             nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
                 igjtp
-common /coipar/ ipar(9),iprnt
 common /coselb/ ibasty
 ! 3rd subscript is for state index (subscript = 5 + IN)
 ! states with up to 9 state indices allowed
@@ -1432,7 +1429,7 @@ use mod_coinq, only: inq ! inq(1)
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid5, only: sread
-use mod_par, only: batch, ipos
+use mod_par, only: batch, ipos, iprnt=>iprint
 implicit double precision (a-h,o-z)
 complex*8 t, tp, ai, cphase
 logical diag, diagj, diagin, &
@@ -1446,7 +1443,6 @@ common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
             nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 common /cospbf/ lnbufs, lnbufl, nbuf, ihibuf,  maxlsp, maxllb, &
                igjtp
-common /coipar/ ipar(9),iprnt
 common/cccpu/ tchi,tlog,tsetup,tdelt,lenk,max1,max2,max3,maxkk
 ! add 3rd subscript for state index (subscript = 5 - IN) (pjd)
 ! states with up to 9 state indices allowed
@@ -1883,7 +1879,7 @@ use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid2, only: mxoutd
 use mod_hibrid5, only: sread
-use mod_par, only: batch, ipos
+use mod_par, only: batch, ipos, iprnt=>iprint
 implicit double precision (a-h,o-z)
 complex*8 t, tp
 logical diag, diagj, diagin, &
@@ -1898,7 +1894,6 @@ common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
 
 common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
                 igjtp
-common /coipar/ ipar(9),iprnt
 ! add 3rd subscript for state index (subscript = 5 + IN)
 ! states with up to 9 state indices allowed
 common/cadr/ iadr(0:jmx,lmx,9)
@@ -2343,7 +2338,6 @@ common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
             nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
                 igjtp
-common /coipar/ ipar(9),iprnt
 common /coisc2 / jout1(1)
 common /coang/ ang1, ang2, dang
 !
@@ -2784,7 +2778,6 @@ use mod_hibrid5, only: sread
 use mod_difcrs, only: sphn
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch, ipos
-
 implicit double precision (a-h,o-z)
 real(8), dimension(:), allocatable :: y
 ! size of q for j <= 5 and 0.5 deg angle increment
@@ -2799,7 +2792,6 @@ common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
             nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
                 igjtp
-common /coipar/ ipar(9),iprnt
 common /coisc2 / jout1(1)
 common /coang/ ang1, ang2, dang
 !
