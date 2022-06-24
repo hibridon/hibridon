@@ -797,8 +797,8 @@ write (8, 220) ipotsy, iop
 write (8, 230) jmax, emax
 230 format (i4, g12.5,14x, '  jmax, emax')
 !  line 21
-write (8, 250) arot, brot, crot
-250 format(3f9.4, 3x, 'arot, brot, crot')
+write (8, 250) brot, crot
+250 format(3f9.4, 2x, 'brot, crot')
 write (8, 60) potfil
 return
 end
