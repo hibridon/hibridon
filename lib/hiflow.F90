@@ -66,6 +66,8 @@ use mod_par, only: airyfl, prairy, bastst, chlist, &
                 lscreen, iprint, &
                 fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, tolhi=>scat_tolai, xmu
 use funit
+use ipar_enum
+use rpar_enum
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
@@ -251,38 +253,38 @@ cpuld=0
 cpupot=0
 cpupht=0
 cpusmt=0
-jtotd=ixpar(3)
-jlpar=ixpar(4)
-nerg =ixpar(5)
-numax=ixpar(6)
-numin=ixpar(7)
-nud=  ixpar(8)
+jtotd=ixpar(IPAR_JTOTD)
+jlpar=ixpar(IPAR_JLPAR)
+nerg =ixpar(IPAR_NERG)
+numax=ixpar(IPAR_NUMAX)
+numin=ixpar(IPAR_NUMIN)
+nud=  ixpar(IPAR_NUD)
 nufirs=numin
 nulast=numax
 nutop=numax
 jlprsv=jlpar
-fstfac=rxpar(1)
-rincr=  rxpar(2)
-rcut=  rxpar(3)
-rendai=rxpar(4)
-rendld=rxpar(5)
-rstrt0=rxpar(6)
-spac=  rxpar(7)
-tolhi= rxpar(8)
+fstfac=rxpar(RPAR_SCAT_FSTFAC)
+rincr= rxpar(RPAR_SCAT_RINCR)
+rcut=  rxpar(RPAR_SCAT_RCUT)
+rendai=rxpar(RPAR_SCAT_RENDAI)
+rendld=rxpar(RPAR_SCAT_RENDLD)
+rstrt0=rxpar(RPAR_SCAT_RSTART)
+spac=  rxpar(RPAR_SCAT_SPAC)
+tolhi= rxpar(RPAR_SCAT_TOLAI)
 isteps=0
 dlogd = rendld - rstart
-xmu=rxpar(9)
+xmu=rxpar(RPAR_XMU)
 rtmnla=rstrt0
 dinsid=0
 twojlp=jlpar.eq.0.and..not.csflag
 if (twojlp) jlpar = 1
 jlpold = jlpar
 jfrest=0
-74 jfirst=ixpar(1)
+74 jfirst=ixpar(IPAR_JTOT1)
 if(jfrest.gt.0) jfirst=jfrest
 jtotmx=jtop
 if(nucros) nulast=numin
-if (jtot1.eq.jfirst .or. jtot1.eq.jfirst+1) rstart=rxpar(6)
+if (jtot1.eq.jfirst .or. jtot1.eq.jfirst+1) rstart=rxpar(RPAR_SCAT_RSTART)
 80 jtot1 = jfirst
 if (.not.boundc) jtot2 = jtotmx
 nchmax = 0
@@ -301,7 +303,7 @@ if (rsflag) then
 !  move s-matrix files to last partial wave done
   if(wrsmat) then
      do 88 ifile=1,nerg
-        nfile=44+ifile
+        nfile = FUNIT_SMT_START + ifile - 1
         ered = energ(ifile)/econv
         nlevop=nlev(ifile)
         call wrhead(nfile, cdate, &
@@ -334,7 +336,7 @@ if (rsflag) then
         goto 105
       end if
       jlpar=-1
-      jtot=ixpar(1)
+      jtot=ixpar(IPAR_JTOT1)
     else if(jlprsv.eq.0.and.jlpold.eq.-1.and.jtoto.eq.jtopo) then
       twojlp=.true.
       jlpar=1
@@ -360,7 +362,7 @@ if (rsflag) then
 92       format(/' ** CONTINUE CS CALCULATION AT NU=',i5)
       goto 74
     else
-      nu=ixpar(7)
+      nu=ixpar(IPAR_NUMIN)
       jtot=jtot+jtotd
       if(jtot.gt.jtot2) then
         write(6,89)
@@ -788,7 +790,7 @@ jtot1 = jtot + jtotd
 if (jtot1 .le. jtot2) go to 100
 if (twojlp .and. jlpar .gt. 0) then
   jlpar = -1
-  rstrt0=rxpar(6)
+  rstrt0=rxpar(RPAR_SCAT_RSTART)
   rstart=rstrt0
   rtmnla=rstrt0
   dinsid=0
