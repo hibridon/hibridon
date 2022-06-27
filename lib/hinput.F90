@@ -681,7 +681,7 @@ if(irinp.eq.0) then
   if(lpar(LPAR_BATCH)) call exit
   goto 1
 end if
-if(rpar(8).eq.0) then
+if(rpar(RPAR_SCAT_TOLAI).eq.0) then  ! graffy: todo : shouldn't it be RPAR_XMU instead of RPAR_SCAT_TOLAI here ?
   write(6,507)
 507   format(/,' ** SPECIFY COLLISION REDUCED MASS WITH XMU = mass')
   goto 1
@@ -1072,7 +1072,7 @@ if(e .eq. 0) then
   write(6,1610)
   goto 1
 end if
-xmu = rpar(9)
+xmu = rpar(RPAR_XMU)
 if(xmu .eq. 0) then
   write(6,1820)
 1820   format(' Collision reduced mass has not been given a value !')

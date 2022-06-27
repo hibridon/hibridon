@@ -871,41 +871,41 @@ subroutine openfi (nerg)
 !    nerg:       number of different total energies at which scattering
 !                calculation is to be done
 !                if nerg.gt.1, then three files are opened:
-!                              unit=10 (filename tmp10) for storage of
+!                              unit=FUNIT_CHANNEL_PARAMS (filename tmp10) for storage of
 !                                      transformation matrices in airy
 !                                      propagation
-!                              unit=11 (filename tmp11) for storage of
+!                              unit=FUNIT_TRANS_MAT (filename tmp11) for storage of
 !                                      quadrature matrices in logd propagation
-!                              unit=12 (filename tmp12) for storage of
+!                              unit=FUNIT_QUAD_MAT (filename tmp12) for storage of
 !                                      rotational angular momenta, orbital
 !                                      angular momenta, extra quantum index,
 !                                      and internal energies for all channels
 !  variables in common block /colpar/  (see further description in subroutine
 !                                       flow)
-!    airyfl:     note, unit=10 is opened only if airyfl = .true.
-!    wrsmat:      if .true., then unit=45 to unit=(44+nerg) are opened as files
+!    airyfl:     note, unit=FUNIT_CHANNEL_PARAMS is opened only if airyfl = .true.
+!    wrsmat:      if .true., then unit=FUNIT_SMT_START to unit=(FUNIT_SMT_START+nerg-1) are opened as files
 !                           smat1, smat2, ... smatnerg for
 !                           storage of real and imaginary parts of
 !                           selected elements of s-matrix
-!    wrpart:     if .true., then unit=25 to unit=(24+nerg) are opened as files
+!    wrpart:     if .true., then unit=FUNIT_PCS_START to unit=(FUNIT_PCS_START+nerg-1) are opened as files
 !                           psec1, psec2,... psecnerg for
 !                           storage of of some input date and degeneracy
 !                           averaged partial cross sections
 !    csflag:     if .true., and prpart or or wrpart or prxsec or wrxsec = .true
-!                           then unit=35 to unit=(34+nerg)
+!                           then unit=FUNIT_APCS_START to unit=(FUNIT_APCS_START+nerg-1)
 !                           are opened as files tmp35, tmp36, ... etc.
 !                           for accumulation of partial cross sections
 !                           at each cs projection index
 !    wrxsec, prxsec:
-!                if either of these variables is .true., then unit=70 to
+!                if either of these variables is .true., then unit=FUNIT_ICS_START to
 !                           unit=(FUNIT_ICS_START+nerg-1) are opened for storage of some
 !                           input data and degeneracy averaged integral
 !                           cross sections
-!                if wrxsec = .true., then unit=70 to unit=(FUNIT_ICS_START+nerg-1) are opened
+!                if wrxsec = .true., then unit=FUNIT_ICS_START to unit=(FUNIT_ICS_START+nerg-1) are opened
 !                                    as permanent files with filenames
 !                                    xsec1, xsec2, xsec3, ... , xsecn
 !                                    where n = nerg
-!                          = .false., then unit=70 to unit=(FUNIT_ICS_START+nerg-1) are opene
+!                          = .false., then unit=FUNIT_ICS_START to unit=(FUNIT_ICS_START+nerg-1) are opene
 !                                     as files tmpx1, tmpx2, ... tmpxn
 !    rsflag:     if .true., then calculation is being restarted
 !                abort will occur unless all requested i/o files already exist
