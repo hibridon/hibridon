@@ -31,15 +31,15 @@ use mod_par, only: airyfl, prairy, bastst, batch, chlist, &
                 prlogd, noprin, prpart, readpt, rsflag, prsmat, &
                 t2test, prt2, twomol, wrsmat, wrpart, wrxsec, &
                 prxsec, nucros, photof, wavefl, boundc, &
-                jtot1, jtot2, jtotd, jlpar, nerg, numax, numin, nud, lscreen, iprint
+                jtot1, jtot2, jtotd, jlpar, nerg, numax, numin, nud, lscreen, iprint, &
+                fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, &
+                tolaifstfac=>scat_tolai, xmu
 implicit double precision (a-h,o-z)
 character*40 jobnam,input,output,savfil
 #include "common/parpot.F90"
 common /cofile/ input, output, jobnam, savfil
 ! nb if the nextcommon is changed, it should be also changed in common/parsys
 common /coselb/ ibasty
-common /corpar/ fstfac, rincr, rcut, rendai, rendld, rstart, spac, &
-                tolai, xmu
 !  this sets the maximum number of energies
 !
 jtot1=20

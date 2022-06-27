@@ -67,7 +67,9 @@ use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT, RPAR_COUNT
 use fcod_enum
 use lpar_enum
 use ipar_enum
-use mod_par, only: lpar, ipar
+use rpar_enum
+use mod_par, only: lpar, ipar, rpar
+
 implicit double precision (a-h,o-z)
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
@@ -105,7 +107,6 @@ common /cokeyl/ nncode, llcode, ijcode
 common /cobcod/ bcod
 common /cofcod/ fcod
 common /copcod/ pcod
-common /corpar/ rpar(RPAR_COUNT)
 common /coselb/ ibasty
 common /cobaco/ bascod
 common /coopti/ optifl
@@ -169,15 +170,16 @@ pcod(IPAR_NUD)     = 'NUD'
 pcod(IPAR_LSCREEN) = 'LSCREEN'
 pcod(IPAR_IPRINT)  = 'IPRINT'
 
-pcod(11)='FSTFAC'
-pcod(12)='RINCR'
-pcod(13)='RCUT'
-pcod(14)='RENDAI'
-pcod(15)='RENDLD'
-pcod(16)='RSTART'
-pcod(17)='SPAC'
-pcod(18)='TOLAI'
-pcod(19)='XMU'
+pcod(IPAR_COUNT + RPAR_FSTFAC)  = 'FSTFAC'
+pcod(IPAR_COUNT + RPAR_RINCR)   = 'RINCR'
+pcod(IPAR_COUNT + RPAR_RCUT)    = 'RCUT'
+pcod(IPAR_COUNT + RPAR_RENDAI)  = 'RENDAI'
+pcod(IPAR_COUNT + RPAR_RENDLD)  = 'RENDLD'
+pcod(IPAR_COUNT + RPAR_RSTART)  = 'RSTART'
+pcod(IPAR_COUNT + RPAR_SPAC)    = 'SPAC'
+pcod(IPAR_COUNT + RPAR_TOLAI)   = 'TOLAI'
+pcod(IPAR_COUNT + RPAR_XMU)     = 'XMU'
+
 fcod(FCOD_AIRYFL)='AIRYFL'
 fcod(FCOD_BASTST)='BASTST'
 fcod(FCOD_BATCH)='BATCH'
@@ -329,7 +331,7 @@ optifl = .false.
 #if defined(HIB_CRAY)
 2  format(' Hibridon> ')
 #endif
-call pcoder(lpar(LPAR_BOUNDC),pcod,icode)
+call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
 
 if(com) then  
   read(1312, 10, end=599) line  ! read the next command
@@ -472,7 +474,7 @@ goto 1
 !  parameters
 !  specify parameters in the form cod1=val1, cod2=val2, etc.
 100 if(l .eq. 0) goto 1
-call pcoder(lpar(LPAR_BOUNDC),pcod,icode)
+call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
 l1 = l
 call parse(line,l,code,lc)
 call getval(code(1:lc),pcod,j,val)
@@ -661,7 +663,7 @@ if (.not. lpar(LPAR_CSFLAG)) then
     ipar(IPAR_NUMIN) = 0
   end if
 end if
-call pcoder(lpar(LPAR_BOUNDC),pcod,icode)
+call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
 if (lpar(LPAR_CSFLAG).and.ipar(IPAR_NUD).ne.1) lpar(LPAR_NUCROS)=.true.
 nerg=ipar(IPAR_NERG)
 ! check to see if flags are ok if wavefunction desired or
@@ -752,7 +754,7 @@ end if
 ! show all parameters and flags
 ! show
 700 l1 = l
-call pcoder(lpar(LPAR_BOUNDC),pcod,icode)
+call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
 call parse(line,l,code,lc)
 if (.not.lpar(LPAR_BOUNDC)) then
   write(6,710) &
@@ -848,7 +850,7 @@ endif
 l1 = l
 goto 15
 ! read
-800 call pcoder(lpar(LPAR_BOUNDC),pcod,icode)
+800 call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
 call gendat
 ione=1
 call sysdat(irpot, lpar(LPAR_READPT),ione)
@@ -926,7 +928,7 @@ goto 1
 !     save=filename
 !     if filename is not specified, the inputfile is overwritten
 1300 inew=0
-call pcoder(lpar(LPAR_BOUNDC),pcod,icode)
+call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
 if(l.ne.0) then
   call parse(line,l,code,lc)
   if(lc .eq. 0) then
@@ -1544,28 +1546,32 @@ call getval(code(1:lc),empty_var_list,j,a(2))
 call prsbr(fnam1,fnam2,a)
 goto 1
 end
-subroutine pcoder(boundc,pcod,icode)
-!  subroutine to change pcod's for bound state or scattering
-logical boundc
-character*8 pcod(icode)
+subroutine set_param_names(boundc, param_names, param_names_size)
+!  subroutine to change param_names's for bound state or scattering
+use mod_hiparcst, only: IPAR_COUNT
+use rpar_enum
+implicit none
+logical, intent(in) :: boundc
+character*8, intent(out) :: param_names(param_names_size)  ! array containing the name of each parameter (old name: pcod)
+integer, intent(in) :: param_names_size  ! size of param_names array
 if (boundc) then
-  pcod(11)='R1'
-  pcod(12)='R2'
-  pcod(13)='C'
-  pcod(14)='SPAC'
-  pcod(15)='DELR'
-  pcod(16)='HSIMP'
-  pcod(17)='EIGMIN'
-  pcod(18)='TOLAI'
+  param_names(IPAR_COUNT + RPAR_BOUND_R1)      = 'R1'
+  param_names(IPAR_COUNT + RPAR_BOUND_R2)      = 'R2'
+  param_names(IPAR_COUNT + RPAR_BOUND_C)       = 'C' 
+  param_names(IPAR_COUNT + RPAR_BOUND_SPAC)    = 'SPAC' 
+  param_names(IPAR_COUNT + RPAR_BOUND_DELR)    = 'DELR' 
+  param_names(IPAR_COUNT + RPAR_BOUND_HSIMP)   = 'HSIMP' 
+  param_names(IPAR_COUNT + RPAR_BOUND_EIGMIN)  = 'EIGMIN' 
+  param_names(IPAR_COUNT + RPAR_BOUND_TOLAI)   = 'TOLAI' 
 else
-  pcod(11)='FSTFAC'
-  pcod(12)='RINCR'
-  pcod(13)='RCUT'
-  pcod(14)='RENDAI'
-  pcod(15)='RENDLD'
-  pcod(16)='RSTART'
-  pcod(17)='SPAC'
-  pcod(18)='TOLAI'
+  param_names(IPAR_COUNT + RPAR_SCAT_FSTFAC)  = 'FSTFAC'
+  param_names(IPAR_COUNT + RPAR_SCAT_RINCR)   = 'RINCR'
+  param_names(IPAR_COUNT + RPAR_SCAT_RCUT)    = 'RCUT'
+  param_names(IPAR_COUNT + RPAR_SCAT_RENDAI)  = 'RENDAI'
+  param_names(IPAR_COUNT + RPAR_SCAT_RENDLD)  = 'RENDLD'
+  param_names(IPAR_COUNT + RPAR_SCAT_RSTART)  = 'RSTART'
+  param_names(IPAR_COUNT + RPAR_SCAT_SPAC)    = 'SPAC'
+  param_names(IPAR_COUNT + RPAR_SCAT_TOLAI)   = 'TOLAI'
 endif
 return
 end

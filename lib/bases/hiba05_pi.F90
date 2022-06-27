@@ -131,7 +131,7 @@ use mod_conlam, only: nlam, nlammx, lamnum
 use constants, only: econv, xmconv, ang2c
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-use mod_par, only: iprint
+use mod_par, only: iprint, rendai=>scat_rendai
 #include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
@@ -139,7 +139,6 @@ character*80 string
 character*27 case
 character*2 chf
 #include "common/parbas.F90"
-common /corpar/ xjunk(3), rendai
 common /coered/ ered, rmu
 dimension j(1), is(1), l(1), jhold(1), ishold(1), ieps(2)
 dimension c0(1), c1(1), c2(1), cf(1), ehold(1)

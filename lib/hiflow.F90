@@ -61,7 +61,8 @@ use mod_par, only: airyfl, prairy, bastst, chlist, &
                 t2test, prt2, twomol, wrsmat, wrpart, wrxsec, &
                 prxsec, nucros, photof, wavefl, boundc, &
                 jtot1, jtot2, jtotd, jlpar, nerg, numax, numin, nud, &
-                lscreen, iprint
+                lscreen, iprint, &
+                fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, tolhi=>scat_tolai, xmu
 use funit
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
@@ -116,8 +117,6 @@ real(8) :: rtmn, rtmx
 integer :: iflag
 common /coered/ ered, rmu
 real(8) :: ered, rmu
-common /corpar/ fstfac, rincr, rcut, rendai, rendld, rstart, spac, tolhi, xmu
-real(8) :: fstfac, rincr, rcut, rendai, rendld, rstart, spac, tolhi, xmu
 common /cophot/ phot_photof, wavefn, boundf, writs
 logical :: phot_photof, wavefn, boundf, writs
 
