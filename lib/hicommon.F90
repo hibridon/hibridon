@@ -33,9 +33,9 @@ implicit none
       FUNIT_SAV            =  3, &   ! <job-name>.sav
       FUNIT_STDOUT         =  6, &   ! standard output
       FUNIT_OUT            =  9, &   ! output file (*.out)
-      FUNIT_CHANNEL_PARAMS = 10, &   ! temporary storage for channel parameters (t<unit><pid>.tmp)
-      FUNIT_TRANS_MAT      = 11, &   ! temporary storage for transformation matrices (t<unit><pid>.tmp)
-      FUNIT_QUAD_MAT       = 12, &   ! temporary storage for quadrature matrices (t<unit><pid>.tmp)
+      FUNIT_TRANS_MAT      = 10, &   ! temporary storage for transformation matrices (t<unit><pid>.tmp)
+      FUNIT_QUAD_MAT       = 11, &   ! temporary storage for quadrature matrices (t<unit><pid>.tmp)
+      FUNIT_CHANNEL_PARAMS = 12, &   ! temporary storage for channel parameters (t<unit><pid>.tmp)
       FUNIT_WFU            = 22, &   ! <job-name>.wfu
       FUNIT_PCS_START      = 25, &   ! <job-name><energy_index>.pcs files (partial cross sections; one for each energy)
       FUNIT_APCS_START     = 35, &   ! accumulation of cs partial cross sections at each projection index; one for each energy. (t<unit><pid>.tmp)
