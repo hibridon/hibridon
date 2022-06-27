@@ -899,8 +899,8 @@ if (wrsmat) then
 410   continue
 end if
 if (nerg .gt. 1) then
-  if (airyfl) close (FUNIT_CHANNEL_PARAMS)
-  close (FUNIT_TRANS_MAT)
+  if (airyfl) close (FUNIT_TRANS_MAT)
+  close (FUNIT_QUAD_MAT)
 end if
 420 call dater (cdate)
 if (.not. optifl) then

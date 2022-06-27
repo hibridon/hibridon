@@ -871,18 +871,18 @@ subroutine openfi (nerg)
 !    nerg:       number of different total energies at which scattering
 !                calculation is to be done
 !                if nerg.gt.1, then three files are opened:
-!                              unit=FUNIT_CHANNEL_PARAMS (filename tmp10) for storage of
+!                              unit=FUNIT_TRANS_MAT (filename tmp10) for storage of
 !                                      transformation matrices in airy
 !                                      propagation
-!                              unit=FUNIT_TRANS_MAT (filename tmp11) for storage of
+!                              unit=FUNIT_QUAD_MAT (filename tmp11) for storage of
 !                                      quadrature matrices in logd propagation
-!                              unit=FUNIT_QUAD_MAT (filename tmp12) for storage of
+!                              unit=FUNIT_CHANNEL_PARAMS (filename tmp12) for storage of
 !                                      rotational angular momenta, orbital
 !                                      angular momenta, extra quantum index,
 !                                      and internal energies for all channels
 !  variables in common block /colpar/  (see further description in subroutine
 !                                       flow)
-!    airyfl:     note, unit=FUNIT_CHANNEL_PARAMS is opened only if airyfl = .true.
+!    airyfl:     note, unit=FUNIT_TRANS_MAT is opened only if airyfl = .true.
 !    wrsmat:      if .true., then unit=FUNIT_SMT_START to unit=(FUNIT_SMT_START+nerg-1) are opened as files
 !                           smat1, smat2, ... smatnerg for
 !                           storage of real and imaginary parts of
@@ -953,16 +953,16 @@ if (nerg .gt. 1) then
 !  and quadrature matrices if more than one energy desired
 #if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
   if (airyfl) then
-    call tmpnm (FUNIT_CHANNEL_PARAMS, xname)
+    call tmpnm (FUNIT_TRANS_MAT, xname)
 ! open scratch file (unit is therefore negativ here, see open)
 ! isize is only needed on a univac
-    call openf(-FUNIT_CHANNEL_PARAMS, xname, 'su', isize)
+    call openf(-FUNIT_TRANS_MAT, xname, 'su', isize)
   endif
 #endif
-  call tmpnm (FUNIT_TRANS_MAT, xname)
-  call openf(-FUNIT_TRANS_MAT, xname, 'su', isize)
   call tmpnm (FUNIT_QUAD_MAT, xname)
-  call openf(-FUNIT_QUAD_MAT, xname, 'sf', 0)
+  call openf(-FUNIT_QUAD_MAT, xname, 'su', isize)
+  call tmpnm (FUNIT_CHANNEL_PARAMS, xname)
+  call openf(-FUNIT_CHANNEL_PARAMS, xname, 'sf', 0)
 end if
 !   open files for storage of integral cross sections
 if (wrxsec .or. prxsec) then
