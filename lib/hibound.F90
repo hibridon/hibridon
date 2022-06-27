@@ -35,13 +35,11 @@ use mod_coiout, only: niout
 use mod_version, only: version
 use constants, only: econv, xmconv
 use mod_ancou, only: ancou_type
-use mod_par, only: wavefl
+use mod_par, only: wavefl, r1=>bound_r1, r2=>bound_r2, c=>bound_c, spac=>bound_spac, delr=>bound_delr, hsimp=>bound_hsimp, eigmin=>bound_eigmin, tolai=>bound_tolai, xmu
 implicit none
 integer, intent(in) :: nch, nmax
 type(ancou_type), intent(in) :: v2
 #include "common/parpot.F90"
-common /corpar/ r1, r2, c, spac, delr, hsimp, eigmin, tolai, xmu
-real(8) :: r1, r2, c, spac, delr, hsimp, eigmin, tolai, xmu
 common /cofile/ input, output, jobnam, savfil
 character(40) :: jobnam, input, output, savfil
 common /coered/ ered, rmu

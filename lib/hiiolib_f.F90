@@ -275,7 +275,8 @@ use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, &
                 t2test, prt2, twomol, wrsmat, wrpart, wrxsec, &
                 prxsec, nucros, photof, wavefl, boundc, &
                 jtot1, jtot2, jtotd, jlpar, nerg, numax, numin, nud, &
-                lscreen, iprint
+                lscreen, iprint, &
+                fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, tolai=>scat_tolai, xmu ! NB if boundc = .true. then these parameters are: r1,r2,c,spac,delr,hsimp,eigmin,tolai,xmu
 implicit double precision (a-h,o-z)
 integer i, length
 logical existf
@@ -285,10 +286,6 @@ character*(*) filnam
 common /coselb/ ibasty
 integer :: ibasty
 
-common /corpar/ fstfac, rincr, rcut, rendai, rendld, rstart, spac, &
-                tolai, xmu
-! NB if boundc = .true. then these variables are:
-!      common /corpar/ r1,r2,c,spac,delr,hsimp,eigmin,tolai,xmu
 common /coskip/ nskip,iskip
 integer :: nskip, iskip
 common /cofile/ input, output, jobnam, savfil

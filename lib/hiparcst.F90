@@ -96,3 +96,35 @@ module ipar_enum
       IPAR_IPRINT  = 10
    end enum
 end module ipar_enum
+
+! rpar parameters
+! note: we use a specific module for each enum because it's not practical for the user to use the recommanded keyword only for these enum (the user would have to list them all in some cases, which makes code maintaining tedious)
+module rpar_enum
+   enum, bind( C )
+   enumerator ::  &
+
+      ! scattering mode parameters
+      RPAR_SCAT_FSTFAC  = 1, &
+      RPAR_SCAT_RINCR   = 2, &
+      RPAR_SCAT_RCUT    = 3, &
+      RPAR_SCAT_RENDAI  = 4, &
+      RPAR_SCAT_RENDLD  = 5, &
+      RPAR_SCAT_RSTART  = 6, &
+      RPAR_SCAT_SPAC    = 7, &
+      RPAR_SCAT_TOLAI   = 8, &
+
+      ! bound state mode parameters
+      RPAR_BOUND_R1      = 1, &
+      RPAR_BOUND_R2      = 2, &
+      RPAR_BOUND_C       = 3, &
+      RPAR_BOUND_SPAC    = 4, &
+      RPAR_BOUND_DELR    = 5, &
+      RPAR_BOUND_HSIMP   = 6, &
+      RPAR_BOUND_EIGMIN  = 7, &
+      RPAR_BOUND_TOLAI   = 8, &
+
+      ! parameters common to scattering and bound state mode
+      RPAR_XMU     = 9
+
+   end enum
+end module rpar_enum

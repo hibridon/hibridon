@@ -1313,13 +1313,43 @@ module mod_par
    !     iprint=-1 (no print); iprint=0 (min print); iprint=1 some print, etc
    integer, pointer :: iprint
 
+   ! rpar (real number parameters)
+
+   real(8), dimension(:), allocatable, target :: rpar
+
+   ! parameters for scattering mode
+   real(8), pointer :: scat_fstfac
+   real(8), pointer :: scat_rincr
+   real(8), pointer :: scat_rcut
+   real(8), pointer :: scat_rendai
+   real(8), pointer :: scat_rendld
+   real(8), pointer :: scat_rstart
+   real(8), pointer :: scat_spac
+   real(8), pointer :: scat_tolai
+
+   ! parameters for bound state mode
+   real(8), pointer :: bound_r1
+   real(8), pointer :: bound_r2
+   real(8), pointer :: bound_c
+   real(8), pointer :: bound_spac
+   real(8), pointer :: bound_delr
+   real(8), pointer :: bound_hsimp
+   real(8), pointer :: bound_eigmin
+   real(8), pointer :: bound_tolai
+
+   ! parameters common to scattering mode and bound state mode
+   real(8), pointer :: xmu
+
    contains
    subroutine allocate_par()
-      use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT
+      use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT, RPAR_COUNT
       use lpar_enum
       use ipar_enum
+      use rpar_enum
+      implicit none
       integer :: num_lpar = LPAR_COUNT
       integer :: num_ipar = IPAR_COUNT
+      integer :: num_rpar = RPAR_COUNT
 
       allocate(lpar(num_lpar))
 
@@ -1364,6 +1394,29 @@ module mod_par
       nud => ipar(IPAR_NUD)
       lscreen => ipar(IPAR_LSCREEN)
       iprint => ipar(IPAR_IPRINT)
+
+      allocate(rpar(num_rpar))
+
+      scat_fstfac => rpar(RPAR_SCAT_FSTFAC)
+      scat_rincr => rpar(RPAR_SCAT_RINCR)
+      scat_rcut => rpar(RPAR_SCAT_RCUT)
+      scat_rendai => rpar(RPAR_SCAT_RENDAI)
+      scat_rendld => rpar(RPAR_SCAT_RENDLD)
+      scat_rstart => rpar(RPAR_SCAT_RSTART)
+      scat_spac => rpar(RPAR_SCAT_SPAC)
+      scat_tolai => rpar(RPAR_SCAT_TOLAI)
+
+      bound_r1 => rpar(RPAR_BOUND_R1)
+      bound_r2 => rpar(RPAR_BOUND_R2)
+      bound_c => rpar(RPAR_BOUND_C)
+      bound_spac => rpar(RPAR_BOUND_SPAC)
+      bound_delr => rpar(RPAR_BOUND_DELR)
+      bound_hsimp => rpar(RPAR_BOUND_HSIMP)
+      bound_eigmin => rpar(RPAR_BOUND_EIGMIN)
+      bound_tolai => rpar(RPAR_BOUND_TOLAI)
+
+
+      xmu => rpar(RPAR_XMU)
 
    end subroutine allocate_par
 

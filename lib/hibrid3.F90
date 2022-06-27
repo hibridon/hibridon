@@ -2490,7 +2490,7 @@ use mod_cosysi, only: ispar
 use mod_cotq1, only: srsave => dpsir ! srsave(100)
 use mod_cotq2, only: sisave => tq2 ! sisave(100)
 use mod_hibrid2, only: mxoutd, mxoutr
-use mod_par, only: prsmat, jlpar
+use mod_par, only: prsmat, jlpar, spac=>scat_spac
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax, nmax), intent(inout) :: tmod
 real(8), dimension(nmax, nmax), intent(out) :: sr
@@ -2524,7 +2524,6 @@ common /cosurf/ flagsu
 common /cophot/ photof, wavefn, boundf, writs
 common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
      inflev
-common /corpar/ rpar(6), spac
 common /coselb/ ibasty
 !     The following three variables are used to determine the (machine
 !     dependent) size of built-in types
