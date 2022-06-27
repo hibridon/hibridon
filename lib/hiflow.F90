@@ -562,26 +562,26 @@ if (ien .eq. 1) then
       end if
     end if
   end if
-!  store channel parameters on unit 12 if this calculation is to be
+!  store channel parameters on unit FUNIT_CHANNEL_PARAMS if this calculation is to be
 !  performed at a second energy
   if (nerg .gt. 1) then
 ! open file for storage of transformation matrices
-    rewind (12)
-    write (12, 170) nch
+    rewind (FUNIT_CHANNEL_PARAMS)
+    write (FUNIT_CHANNEL_PARAMS, 170) nch
 170     format (i4)
     if (nch .gt. 0) then
       do 180  i = 1, nch
-        write (12, 175) jq(i), lq(i), inq(i), cent(i), eint(i)
+        write (FUNIT_CHANNEL_PARAMS, 175) jq(i), lq(i), inq(i), cent(i), eint(i)
 175         format (3i6, 2e25.15)
 180       continue
     end if
   end if
 else if(ien.gt.1) then
-  rewind (12)
-  read (12, 170) nch
+  rewind (FUNIT_CHANNEL_PARAMS)
+  read (FUNIT_CHANNEL_PARAMS, 170) nch
   if (nch .gt. 0) then
     do 250  i = 1, nch
-      read (12, 175) jq(i), lq(i), inq(i), cent(i), eint(i)
+      read (FUNIT_CHANNEL_PARAMS, 175) jq(i), lq(i), inq(i), cent(i), eint(i)
 250     continue
   end if
 end if
