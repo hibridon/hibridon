@@ -56,7 +56,7 @@ character*40 smtfil, hfxfil
 character*10 elaps, cpu
 logical csflg, flaghf, flgsu, twmol, nucrs, &
      batch, fast, lpar2, lpar, exstfl
-
+integer, parameter :: hfxfil_unit = 11
 #include "common/parpot.F90"
 common /codim/ nairy
 common /coselb/ ibasty
@@ -194,11 +194,11 @@ end if
 !
 !     generate output file name
 call gennam(hfxfil,flname,iener,'hfx',lendh)
-call openf(11, hfxfil(1:lendh),'sf',0)
+call openf(hfxfil_unit, hfxfil(1:lendh),'sf',0)
 !
 ee = ered * econv
 write (6, 22) label, potnam, smtfil, cdate
-write (11, 22) label, potnam, smtfil, cdate
+write (hfxfil_unit, 22) label, potnam, smtfil, cdate
 22 format(/'% HYPERFINE-RESOLVED CROSS SECTIONS'/ &
      '%      LABEL:     ',(a)/ &
      '%      POT NAME:  ',(a)/ &
@@ -206,13 +206,13 @@ write (11, 22) label, potnam, smtfil, cdate
      '%      WRITTEN:   ',(a))
 if (itwospn .eq. 0) then
   write (6,24) jfinl, ee, finuc
-  write (11,24) jfinl, ee, finuc
+  write (hfxfil_unit,24) jfinl, ee, finuc
 24 format('%      JTOT2:     ',i10/ &
      '%      ETOT:      ',f10.3,' CM(-1)' &
      //'% NUCLEAR SPIN = ',f4.1/)
 else
   write (6,224) jfinl, ee, finuc, f2nuc
-  write (11,224) jfinl, ee, finuc, f2nuc
+  write (hfxfil_unit,224) jfinl, ee, finuc, f2nuc
 224    format('%      JTOT2:     ',i10/ &
      '%      ETOT:      ',f10.3,' CM(-1)' &
      //'% NUCLEAR SPINS = ',2f6.1/)
@@ -672,7 +672,7 @@ end do
 !     print out cross sections for atom-molecule collisions with two nuclear spins
 !
 write(6,1005)
-write(11,1005)
+write(hfxfil_unit,1005)
 1005  format('%',5x,'E(CM-1)',3x,'JI',2x,'INI',2x,'F1I',3x,'F2I',5x,'JF', &
   2x,'INF',2x,'F1F',3x,'F2F',2x,'CROSS SECTION (ANG^2)')
 ee = ered * econv
@@ -687,7 +687,7 @@ do 190 i=1,nlevlh2
     if (sigma(i,ii).ne.0.d0) then
       write(6,1006) ee,xj,inlevh2(i),xf,xf2, &
          xjp,inlevh2(ii),xfp,xf2p,sigma(i,ii)
-      write(11,1006) ee,xj,inlevh2(i),xf,xf2, &
+      write(hfxfil_unit,1006) ee,xj,inlevh2(i),xf,xf2, &
          xjp,inlevh2(ii),xfp,xf2p,sigma(i,ii)
 1006       format(f12.3,f6.1,i4,f6.1,f6.1,f7.1,i4, &
          f6.1,f6.1,2x,1pe15.4)
@@ -913,12 +913,12 @@ end do
 !
 if (.not. twmol) then
   write(6,1001)
-  write(11,1001)
+  write(hfxfil_unit,1001)
 1001   format('%',5x,'E(CM-1)',5x,'JI',5x,'INI',3x,'FI',6x,'JF',5x, &
        'INF',3x,'FF',6x,'CROSS SECTION (ANG^2)')
 else
   write(6,2001)
-  write(11,2001)
+  write(hfxfil_unit,2001)
 2001   format(/'%',4x,'E(CM-1)',5x,'JI',5x,'INI',3x,'FI',4x,'J2',6x, &
        'JF',5x,'INF', &
        3x,'FF',4x,'J2P',6x,'CROSS SECTION (ANG^2)')
@@ -934,7 +934,7 @@ do 90 i=1,nlevelh
       if (sigma(i,ii).ne.0.d0) then
         write(6,1002) ee,xj,inlevh(i),xf, &
              xjp,inlevh(ii),xfp,sigma(i,ii)
-          write(11,1002) ee,xj,inlevh(i),xf, &
+          write(hfxfil_unit,1002) ee,xj,inlevh(i),xf, &
            xjp,inlevh(ii),xfp,sigma(i,ii)
 1002         format(f12.3,f8.1,i6,f6.1,3x,f6.1,i6,f6.1, &
              5x,1pe15.4)
@@ -949,7 +949,7 @@ do 90 i=1,nlevelh
       if (sigma(i,ii).ne.0.d0) then
         write(6,2002) ee,xj,inlevh(i),xf,ij2, &
              xjp,inlevh(ii),xfp,ij2p,sigma(i,ii)
-        write(11,2002) ee,xj,inlevh(i),xf,ij2, &
+        write(hfxfil_unit,2002) ee,xj,inlevh(i),xf,ij2, &
              xjp,inlevh(ii),xfp,ij2p,sigma(i,ii)
 2002         format(f12.3,f8.1,i6,f6.1,i6,3x,f6.1,i6,f6.1, &
              i6,5x,1pe15.4)
@@ -976,7 +976,7 @@ do 90 i=1,nlevelh
 4002 deallocate(length)
 4001 deallocate(sigma)
 4000 close(1)
-close(11)
+close(hfxfil_unit)
 if (ialloc .ne. 0) write (6, 4100)
 4100 format (' *** INSUFFICIENT MEMORY OR SMT FILE CORRUPTED. ***')
 return

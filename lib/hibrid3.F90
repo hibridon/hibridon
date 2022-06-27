@@ -57,6 +57,7 @@ subroutine outmat (tmat, eigold, hp, eshift, drnow, rnow, &
 !              energy calculation, so transformation matrix and relevant
 !              information will be read
 !  ------------------------------------------------------------------------
+use funit
 implicit double precision (a-h,o-z)
 integer i, itwo, n, nmax
 logical isecnd
@@ -65,7 +66,7 @@ dimension eigold(1), hp(1)
 dimension tmat(1)
 #endif
 isecnd = .false.
-lunit=10
+lunit=FUNIT_TRANS_MAT
 if (itwo .gt. 0) isecnd = .true.
 !  if first energy calculation, isecnd = .false.
 !    in which case logical unit 10 will be written
@@ -76,10 +77,10 @@ if (itwo .gt. 0) isecnd = .true.
 #if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
 nsq = n * nmax
 if (isecnd) then
-  read (10) rnow, drnow, (hp(i) , i = 1, n), &
+  read (FUNIT_TRANS_MAT) rnow, drnow, (hp(i) , i = 1, n), &
         (eigold(i) , i = 1, n), (tmat(i), i=1, nsq)
 else
-  write (10) rnow, drnow, (hp(i) , i = 1, n), &
+  write (FUNIT_TRANS_MAT) rnow, drnow, (hp(i) , i = 1, n), &
         (eigold(i) , i = 1, n), (tmat(i), i=1, nsq)
 endif
 #endif
@@ -1241,6 +1242,7 @@ subroutine logdb (z, nmax, nch, rmin, rmax, nsteps, &
 !     and blas routines are not used for o(n) loops
 !  ------------------------------------------------------------------
 use mod_coqvec, only: mxphot, nphoto, q ! q is an output of this subroutine
+use funit
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: z(nmax*nch)
 integer, intent(in) :: nmax
@@ -1308,8 +1310,8 @@ nqmax = 0
 
 !     make sure that rmin, rmax and nsteps are the same if second
 !     energy calculation
-if (iwrite) write (11) rmin, rmax, nsteps
-if (iread ) read  (11) rmin, rmax, nsteps
+if (iwrite) write (FUNIT_QUAD_MAT) rmin, rmax, nsteps
+if (iread ) read  (FUNIT_QUAD_MAT) rmin, rmax, nsteps
 simpwt = 0.d0
 if (nsteps .ne. 0) then
   h = (rmax - rmin) / (2 * nsteps)
@@ -1342,7 +1344,7 @@ write(6,*) "iread=", iread
 if (iread) then
    icol = 1
    do 5  ich = 1, nch
-      read (11) (w(ij), ij = icol, icol + nch - 1)
+      read (FUNIT_QUAD_MAT) (w(ij), ij = icol, icol + nch - 1)
       icol = icol + ncol
 5    continue
    idiag = 1
@@ -1350,7 +1352,7 @@ if (iread) then
       w(idiag) = w(idiag) - eshift
       idiag = idiag + ndiag
 10    continue
-if (photof) read (11) (q(i), i=1, nqmax)
+if (photof) read (FUNIT_QUAD_MAT) (q(i), i=1, nqmax)
 else
    istep = 0
    r = rmin
@@ -1381,10 +1383,10 @@ else
    if (iwrite) then
       icol = 1
       do 15  ich = 1, nch
-         write (11) (w(ij), ij = icol,icol+nch-1)
+         write (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
          icol = icol + ncol
 15       continue
-      if (photof) write (11) (q(i), i=1, nqmax)
+      if (photof) write (FUNIT_QUAD_MAT) (q(i), i=1, nqmax)
    endif
 endif
 write(6,*) 'w(1) = ', w(1)
@@ -1460,7 +1462,7 @@ do 250  kstep = 1, nsteps
 !     of the coupling matrix evaluated at the centre of the
 !     sector, r = c  (eqn 15)
    if (iread) then
-      read (11) (wref(ich), ich = 1, nch)
+      read (FUNIT_QUAD_MAT) (wref(ich), ich = 1, nch)
       do 60  ich = 1, nch
          wref(ich) = wref(ich) - eshift
 60       continue
@@ -1479,7 +1481,7 @@ do 250  kstep = 1, nsteps
          idiag = idiag + ndiag
 70       continue
       if (iwrite) then
-         write (11) (wref(ich), ich = 1, nch)
+         write (FUNIT_QUAD_MAT) (wref(ich), ich = 1, nch)
       endif
    endif
 !     adjust quadrature contribution at r = a to account for
@@ -1557,7 +1559,7 @@ do 250  kstep = 1, nsteps
    if (iread) then
       icol = 1
       do  125 ich = 1, nch
-         read (11) (w(ij), ij = icol,icol+nch-1)
+         read (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
          icol = icol + ncol
 125       continue
    else
@@ -1593,7 +1595,7 @@ do 250  kstep = 1, nsteps
       if (iwrite) then
          icol = 1
          do  155 ich = 1, nch
-            write (11) (w(ij), ij = icol,icol+nch-1)
+            write (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
             icol = icol + ncol
 155          continue
       endif
@@ -1673,7 +1675,7 @@ do 250  kstep = 1, nsteps
 !     now determine psi(b)mu(b), save this in q
      rnew = rmin + (istep+1) * h
      if (iread) then
-       read (11) (q(i), i=1, nqmax)
+       read (FUNIT_QUAD_MAT) (q(i), i=1, nqmax)
      else
        call mtime(t0,t0w)
        call ground(q, rnew, nch, nphoto, mxphot)
@@ -1685,7 +1687,7 @@ do 250  kstep = 1, nsteps
        call mtime(t1,t1w)
        twf=twf+t1-t0
        twfw=twfw+t1w-t0w
-       if (iwrite) write (11) (q(i), i=1, nqmax)
+       if (iwrite) write (FUNIT_QUAD_MAT) (q(i), i=1, nqmax)
      endif
 !     add wt*psi(b)mu(b) to bmat and resave
      fac=one
@@ -1717,7 +1719,7 @@ do 250  kstep = 1, nsteps
    if (iread) then
       icol = 1
       do  205 ich = 1, nch
-         read (11) (w(ij), ij = icol, icol + nch - 1)
+         read (FUNIT_QUAD_MAT) (w(ij), ij = icol, icol + nch - 1)
          icol = icol + ncol
 205       continue
       idiag = 1
@@ -1736,7 +1738,7 @@ do 250  kstep = 1, nsteps
       if (iwrite) then
          icol = 1
          do  215 ich = 1, nch
-            write (11) (w(ij), ij = icol,icol+nch-1)
+            write (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
             icol = icol + ncol
 215          continue
       endif
