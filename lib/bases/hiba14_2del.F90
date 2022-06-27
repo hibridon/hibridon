@@ -894,6 +894,7 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use funit, only: FUNIT_INP
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -998,13 +999,13 @@ return
 entry sav2del (readpt)
 !  save input parameters for doublet-delta + atom scattering
 !  line 13:
-write (8, 315) jmax, igu, isa, npar
+write (FUNIT_INP, 315) jmax, igu, isa, npar
 315 format(4i4,18x,'jmax, igu, isa, npar')
 !  line 14
-write (8, 320) brot, aso, p, q
+write (FUNIT_INP, 320) brot, aso, p, q
 320 format(f10.5,f10.4,2(1pg11.3),' brot, aso, p, q')
 !  line 15
-write (8, 285) potfil
+write (FUNIT_INP, 285) potfil
 return
 end
 end module mod_hiba14_2del

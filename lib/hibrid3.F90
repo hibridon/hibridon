@@ -32,7 +32,7 @@ contains
 subroutine outmat (tmat, eigold, hp, eshift, drnow, rnow, &
                    n, nmax, itwo)
 !  subroutine to either write or read transformation matrix and
-!  relevant information from file 10
+!  relevant information from file FUNIT_TRANS_MAT
 !  called from spropn
 !  author:  millard alexander
 !  current revision date: 14-feb-91
@@ -57,24 +57,31 @@ subroutine outmat (tmat, eigold, hp, eshift, drnow, rnow, &
 !              energy calculation, so transformation matrix and relevant
 !              information will be read
 !  ------------------------------------------------------------------------
-use funit
-implicit double precision (a-h,o-z)
-integer i, itwo, n, nmax
-logical isecnd
-dimension eigold(1), hp(1)
-#if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
-dimension tmat(1)
-#endif
+use funit, only: FUNIT_TRANS_MAT
+implicit none
+real(8), intent(inout) :: tmat(nmax*n)
+real(8), intent(inout) :: eigold(n)
+real(8), intent(inout) :: hp(:)
+real(8), intent(in) :: eshift
+real(8), intent(inout) :: drnow
+real(8), intent(inout) :: rnow
+integer, intent(in) :: n
+integer, intent(in) :: nmax
+integer, intent(in) :: itwo
+
+integer :: i
+logical :: isecnd
+integer, parameter :: lunit = FUNIT_TRANS_MAT
+integer :: nsq 
+
 isecnd = .false.
-lunit=FUNIT_TRANS_MAT
 if (itwo .gt. 0) isecnd = .true.
 !  if first energy calculation, isecnd = .false.
-!    in which case logical unit 10 will be written
+!    in which case logical unit lunit will be written
 !  if subsequent energy calculation, isecnd = .true.
-!    in which case logical unit 10 will be written
+!    in which case logical unit lunit will be written
 !  read/write rnow, drnow, diagonal elements of transformed dw/dr matrix,
 !  and diagonal elements of transformed w matrix
-#if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
 nsq = n * nmax
 if (isecnd) then
   read (FUNIT_TRANS_MAT) rnow, drnow, (hp(i) , i = 1, n), &
@@ -83,12 +90,11 @@ else
   write (FUNIT_TRANS_MAT) rnow, drnow, (hp(i) , i = 1, n), &
         (eigold(i) , i = 1, n), (tmat(i), i=1, nsq)
 endif
-#endif
 !  now shift energies (if subsequent energy)
 if (isecnd) then
-  do  30   i = 1, n
+  do  i = 1, n
     eigold(i) = eigold(i) + eshift
-30   continue
+  end do
 end if
 return
 end
@@ -1021,6 +1027,7 @@ subroutine propag (z, w, zmat, amat, bmat, &
 !  ------------------------------------------------------------------
 use mod_ancou, only: ancou_type
 use mod_hibrid2, only: mxoutd
+use funit, only: FUNIT_TRANS_MAT, FUNIT_QUAD_MAT
 implicit none
 !   square matrices
 real(8), intent(out) :: z(nmax, nch)
@@ -1099,8 +1106,8 @@ iflag = 0
 if (nerg .gt. 1) then
   twoen = .true.
   itwo = ien - 1
-  rewind 10
-  rewind 11
+  rewind FUNIT_TRANS_MAT
+  rewind FUNIT_QUAD_MAT
 else
   twoen = .false.
   itwo = -1

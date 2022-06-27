@@ -1364,6 +1364,7 @@ use mod_cosyr, only: rcod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use mod_par, only: ihomo
+use funit, only: FUNIT_INP
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -1647,48 +1648,48 @@ isg=ispar(2)
 ipi=ispar(3)
 isicod=0
 isrcod=0
-write (8, 105) (ispar(isicod+j),j=2,5),'isg, ipi, isgpi, isa'
+write (FUNIT_INP, 105) (ispar(isicod+j),j=2,5),'isg, ipi, isgpi, isa'
 isicod=isicod+5
 if(isg.ne.0) then
 !  save symmetry parameters for sigma state
-  write (8, 103) (ispar(isicod+j),j=1,3), &
+  write (FUNIT_INP, 103) (ispar(isicod+j),j=1,3), &
           'igusg, nparsg, isymsg'
   isicod=isicod+3
 !  save number of vib states for sigma state
-  write (8, 103) nvibs,(ispar(isicod+j),j=1,2) &
+  write (FUNIT_INP, 103) nvibs,(ispar(isicod+j),j=1,2) &
                 ,'nvibs, vminsg, vmaxsg'
   nvmins=ispar(isicod+1)
   nvmaxs=ispar(isicod+2)
   isicod=isicod+2
 !  save data for each vib state
   do 100 i=1,nvibs
-    write (8,103) ivibs(i),(ispar(isicod+j),j=1,2), &
+    write (FUNIT_INP,103) ivibs(i),(ispar(isicod+j),j=1,2), &
                   'ivs,  nmin,  nmax'
-    write (8,203) (rspar(isrcod+j),j=1,3),'bsg, dsg, hsg'
-    write (8,203) (rspar(isrcod+j),j=4,6),'gs, gsd, gsh'
-    write (8,201)  rspar(isrcod+7),'esg'
+    write (FUNIT_INP,203) (rspar(isrcod+j),j=1,3),'bsg, dsg, hsg'
+    write (FUNIT_INP,203) (rspar(isrcod+j),j=4,6),'gs, gsd, gsh'
+    write (FUNIT_INP,201)  rspar(isrcod+7),'esg'
     isicod=isicod+2
     isrcod=isrcod+7
 100   continue
 end if
 if(ipi.ne.0) then
-  write (8, 102) (ispar(isicod+j),j=1,2),'igupi, nparpi'
+  write (FUNIT_INP, 102) (ispar(isicod+j),j=1,2),'igupi, nparpi'
   isicod=isicod+2
-  write (8,103) nvibp,(ispar(isicod+j),j=1,2), &
+  write (FUNIT_INP,103) nvibp,(ispar(isicod+j),j=1,2), &
                 'nvibp, vminpi, vmaxpi'
   nvminp=ispar(isicod+1)
   nvmaxp=ispar(isicod+2)
   isicod=isicod+2
   do 101 i=1,nvibp
-    write (8,103) ivibp(i),(ispar(isicod+j),j=1,2), &
+    write (FUNIT_INP,103) ivibp(i),(ispar(isicod+j),j=1,2), &
            'ivp, jmin, jmax'
-    write (8,203) (rspar(isrcod+j),j=1,3),'bpi, dpi, hpi'
-    write (8,203) (rspar(isrcod+j),j=4,6),'aso, p, pd'
-    write (8,203) (rspar(isrcod+j),j=7,9),'q, qd, qd'
-    write (8,202) (rspar(isrcod+j),j=10,12),'epi, adi, gpi'
+    write (FUNIT_INP,203) (rspar(isrcod+j),j=1,3),'bpi, dpi, hpi'
+    write (FUNIT_INP,203) (rspar(isrcod+j),j=4,6),'aso, p, pd'
+    write (FUNIT_INP,203) (rspar(isrcod+j),j=7,9),'q, qd, qd'
+    write (FUNIT_INP,202) (rspar(isrcod+j),j=10,12),'epi, adi, gpi'
     if(ispar(4).ne.0) then
       ivs=ispar(isicod+3)
-      write (8,204) ivs,(rspar(isrcod+k),k=13,14), &
+      write (FUNIT_INP,204) ivs,(rspar(isrcod+k),k=13,14), &
                     'ipt, a, b'
       isrcod=isrcod+14
     else if(ispar(4).eq.0) then
@@ -1704,7 +1705,7 @@ end if
 202 format(g14.6,2g14.6,t50,a)
 203 format(3g14.6,t50,a)
 204 format(i4,2g14.6,t50,a)
-write (8, 300) potfil
+write (FUNIT_INP, 300) potfil
 300 format(a)
 return
 end

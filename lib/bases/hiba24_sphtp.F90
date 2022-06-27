@@ -1010,6 +1010,7 @@ use mod_conlam, only: nlam
 use mod_cosys,  only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use funit, only: FUNIT_INP
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -1110,11 +1111,11 @@ brot=>rspar(1) ; dj=>rspar(2); dk=>rspar(3)
 ASSERT(iop .eq. ispar(2))
 ASSERT(jmax .eq. ispar(3))
 !  save input parameters for spherical top + atom scattering
-write (8, 310) iop, jmax
+write (FUNIT_INP, 310) iop, jmax
 310 format(2i4,25x,'iop, jmax')
-write (8, 320) brot, dj, dk
+write (FUNIT_INP, 320) brot, dj, dk
 320 format(f10.7, e12.5, e10.3, '   brot, dj,dk')
-write (8, 285) potfil
+write (FUNIT_INP, 285) potfil
 return
 end
 

@@ -989,6 +989,7 @@ use mod_cosys, only: scod
 use mod_cosysl, only: islcod, lspar
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use funit, only: FUNIT_INP
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -1121,19 +1122,19 @@ entry savpi (readpt)
 !  line 18:
 !  line 19
 !  line 20
-write (8, 130) jmax, igu, isa, npar, imult, nman
+write (FUNIT_INP, 130) jmax, igu, isa, npar, imult, nman
 130 format (6i4, 6x, '   jmax, igu, isa, npar, imult, nman')
 !  line 21
-write (8, 140) brot, aso
+write (FUNIT_INP, 140) brot, aso
 140 format (f10.5,f10.4, 10x, '   brot, aso')
 !  line 22
-write (8, 150) o, p, q
+write (FUNIT_INP, 150) o, p, q
 150 format (3(1pg12.4), ' o, p, q')
 !  line 23
-write(8, 160) dmom, efield
+write (FUNIT_INP, 160) dmom, efield
 160 format (2f10.5, 10x, '   dmom, efield')
 !  line 16
-write (8, 285) potfil
+write (FUNIT_INP, 285) potfil
 return
 end
 end module mod_hiba05_pi

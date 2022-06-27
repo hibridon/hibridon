@@ -1024,6 +1024,7 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use funit, only: FUNIT_INP
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -1168,12 +1169,12 @@ entry savch2x (readpt)
 !  be left blank, and the names of the variables should be printed in spaces
 !  34-80
 !  line 18:
-write (8, 220) ipotsy, iop, ivbend
+write (FUNIT_INP, 220) ipotsy, iop, ivbend
 220 format (3i4, 18x,'   ipotsy, iop, ivbend')
 !  line 20
-write (8, 230) jmax, emax
+write (FUNIT_INP, 230) jmax, emax
 230 format (i4, g12.5,14x, '   jmax, emax')
-write (8, 60) potfil
+write (FUNIT_INP, 60) potfil
 return
 end
 end module mod_hiba17_ch2x

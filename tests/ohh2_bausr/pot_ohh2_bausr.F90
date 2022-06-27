@@ -143,6 +143,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only : isrcod, junkr, rspar
 use mod_hibasutil, only: raise
+use funit, only: FUNIT_INP
 !
 #include "pot_ohh2_bausr_common.F90"
 integer, intent(out) :: irpot
@@ -193,15 +194,15 @@ return
 !     ------------------------------------------------------------------
 entry savusr(readpt)
 !     WRITE THE LAST FEW LINES OF THE INPUT FILE.
-write (8, 230) j1max, npar
+write (FUNIT_INP, 230) j1max, npar
 230 format (2i4, 22x, '   j1max, npar')
-write (8,231) j2min, j2max, iptsy2
+write (FUNIT_INP,231) j2min, j2max, iptsy2
 231 format (3i4, 18x,'   j2min, j2max, iptsy2')
-write (8, 250) brot, aso, p, q
+write (FUNIT_INP, 250) brot, aso, p, q
 250 format (4(f10.4, 1x), 'brot, aso, p, q' )
-write (8, 251) drot
+write (FUNIT_INP, 251) drot
 251 format (f12.6, 18x,'   drot')
-write (8, *) potfil
+write (FUNIT_INP, *) potfil
 return
 end
 !     ------------------------------------------------------------------

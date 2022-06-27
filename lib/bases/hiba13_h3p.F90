@@ -926,6 +926,7 @@ use mod_coiout, only: niout, indout
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use funit, only: FUNIT_INP
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -1030,12 +1031,12 @@ entry savh3p (readpt)
 !  be left blank, and the names of the variables should be printed in spaces
 !  34-80
 !  line 18:
-write (8, 220) iop, jmax
+write (FUNIT_INP, 220) iop, jmax
 220 format (2i4, 14x,'   iop, jmax')
 !  line 21
-write (8, 250) brot, aso1, aso2
+write (FUNIT_INP, 250) brot, aso1, aso2
 250 format(f12.4,2f14.4, 2x, '   brot, aso1, aso2')
-write (8, 60) potfil
+write (FUNIT_INP, 60) potfil
 return
 end
 end module mod_hiba13_h3p

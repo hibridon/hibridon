@@ -1020,6 +1020,7 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use funit, only: FUNIT_INP
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -1109,11 +1110,11 @@ return
 ! --------------------------------------------------------------
 entry sav1d3p (readpt)
 !  save input parameters for 1D/3P atom + atom scattering
-write (8, 300) nstate
+write (FUNIT_INP, 300) nstate
 300 format(i4, 29x,'nstate')
-write (8, 310) en1d
+write (FUNIT_INP, 310) en1d
 310 format((1pg12.4),21x,'E-1D')
-write (8, 285) potfil
+write (FUNIT_INP, 285) potfil
 return
 end
 end module mod_hiba22_1d3p
