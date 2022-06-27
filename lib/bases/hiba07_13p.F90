@@ -656,6 +656,7 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use funit, only: FUNIT_INP
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -793,24 +794,24 @@ return
 !
 entry sav13p (readpt)
 !  save input parameters for singlet-sigma + atom scattering
-write (8, 300) nstate, ipol, npot
+write (FUNIT_INP, 300) nstate, ipol, npot
 300 format(3i4, 18x,'   nstate, ipol, npot')
-write (8, 310) (en(i), i=1,3)
+write (FUNIT_INP, 310) (en(i), i=1,3)
 310 format(3(1pg12.4),4x,'   E-3P0, 3P1, 3P2')
-write (8, 315) en(4), cmix
+write (FUNIT_INP, 315) en(4), cmix
 315 format (2(1pg12.4),16x,'   E-1P1, CMIX')
-write (8, 320) de(1), re(1), be(1), rl(1), cl(1)
+write (FUNIT_INP, 320) de(1), re(1), be(1), rl(1), cl(1)
 320 format (5(1pg12.4),' 3 Pi Parameters')
-write (8, 325) de(2), re(2), be(2), rl(2), cl(2)
+write (FUNIT_INP, 325) de(2), re(2), be(2), rl(2), cl(2)
 325 format (5(1pg12.4),' 3 Sig Parameters')
-write (8, 330) de(3), re(3), be(3), rl(3), cl(3)
+write (FUNIT_INP, 330) de(3), re(3), be(3), rl(3), cl(3)
 330 format (5(1pg12.4),' 1 Pi Parameters')
-write (8, 335) de(4), re(4), be(4), rl(4), cl(4)
+write (FUNIT_INP, 335) de(4), re(4), be(4), rl(4), cl(4)
 335 format (5(1pg12.4),' 1 Sig Parameters')
-write (8, 336) demor, remor, bemor, dissmor
+write (FUNIT_INP, 336) demor, remor, bemor, dissmor
 336 format(4(1pg12.4),12x,' 1 Sigma Morse')
-write (8, 337) rgaus, agaus, alphg
+write (FUNIT_INP, 337) rgaus, agaus, alphg
 337 format (3(1pg12.4),24x,' Gaussian Coupling')
-write (8, 285) potfil
+write (FUNIT_INP, 285) potfil
 return
 end

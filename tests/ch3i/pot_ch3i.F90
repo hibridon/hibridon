@@ -313,6 +313,7 @@ use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 use mod_grnd, only: reg, caypot
 use mod_par, only: par_readpt=>readpt
+use funit, only: FUNIT_INP
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -439,20 +440,20 @@ return
 ! --------------------------------------------------------------
 entry savusr (readpt)
 !  save input parameters for model dissociation problem
-write (8, 290) iscod(2), iscod(3)
+write (FUNIT_INP, 290) iscod(2), iscod(3)
 290 format(2i4,24x,' nphoto, ndip')
 iofi = 3
 iofr = 1
 nel = 2
 do i= 1, nel
-  write (8, 295)i,(iscod(iofi+j),j=1,2)
+  write (FUNIT_INP, 295)i,(iscod(iofi+j),j=1,2)
 295   format (3i4, t50,'iel, vmin, vmax')
-  write (8, 296) (rcod(iofr+j),j=1,2)
+  write (FUNIT_INP, 296) (rcod(iofr+j),j=1,2)
 296   format(2f15.8,t50,'eel, evib')
   iofi=iofi+2
   iofr=iofr+2
 enddo
-write (8, 300) rcod(1)
+write (FUNIT_INP, 300) rcod(1)
 300 format(f11.5, t50,'rshift')
 return
 end

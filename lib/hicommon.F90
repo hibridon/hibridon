@@ -32,6 +32,7 @@ implicit none
       FUNIT_CS             =  1, &   ! cross sections
       FUNIT_SAV            =  3, &   ! <job-name>.sav
       FUNIT_STDOUT         =  6, &   ! standard output
+      FUNIT_INP            =  8, &   ! input file (*.inp)
       FUNIT_OUT            =  9, &   ! output file (*.out)
       FUNIT_TRANS_MAT      = 10, &   ! temporary storage for transformation matrices (t<unit><pid>.tmp)
       FUNIT_QUAD_MAT       = 11, &   ! temporary storage for quadrature matrices (t<unit><pid>.tmp)

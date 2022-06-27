@@ -758,6 +758,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 use mod_par, only:  jtot1,jtot2,jtotd,jlpar
+use funit, only: FUNIT_INP
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -882,8 +883,8 @@ nphoto=iscod(2)
 nvib=iscod(3)
 ibran=iscod(4)
 aso=rcod(1)
-write (8, 300) nphoto, nvib, ibran, aso
+write (FUNIT_INP, 300) nphoto, nvib, ibran, aso
 300 format(i4,2(2x,i4),1pg12.5,3x,'  nphoto, nvib, ibran, a-so')
-write (8, 285) potfil
+write (FUNIT_INP, 285) potfil
 return
 end

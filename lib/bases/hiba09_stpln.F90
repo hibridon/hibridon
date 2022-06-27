@@ -925,6 +925,7 @@ use mod_coiout, only: niout, indout
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use funit, only: FUNIT_INP
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -1075,18 +1076,18 @@ entry savstpln (readpt)
 !  be left blank, and the names of the variables should be printed in spaces
 !  34-80
 !  line 18:
-write (8, 220) ipotsy, iop, ninv, ipotsy2
+write (FUNIT_INP, 220) ipotsy, iop, ninv, ipotsy2
 220 format (4i4, 14x,'   ipotsy, iop, ninv, ipotsy2')
 !  line 20
-write (8, 230) jmax
+write (FUNIT_INP, 230) jmax
 230 format (i4, 26x, '   jmax')
 !  line 21
-write(8,231) j2min, j2max
+write (FUNIT_INP,231) j2min, j2max
 231 format (2i4, 22x,'   j2min, j2max')
-write (8, 250) brot, crot, delta, emax
+write (FUNIT_INP, 250) brot, crot, delta, emax
 250 format(3f8.4, f8.2, ' brot, crot, delta, emax' )
-write(8, 251) drot
+write (FUNIT_INP, 251) drot
 251 format(f12.6, 18x,'   drot')
-write (8, 60) potfil
+write (FUNIT_INP, 60) potfil
 return
 end

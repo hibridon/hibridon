@@ -434,6 +434,7 @@ subroutine systp1sg(irpot, readpt, iread)
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use funit, only: FUNIT_INP
 implicit none
 !
 integer, intent(out) :: irpot
@@ -486,17 +487,17 @@ return
 !     ------------------------------------------------------------------
 entry savstp1sg(readpt)
 !     WRITE THE LAST FEW LINES OF THE INPUT FILE.
-write (8, 220) ipotsy, iop
+write (FUNIT_INP, 220) ipotsy, iop
 220 format (2i4, 25x,'ipotsy, iop')
-write (8, 230) j1max, e1max
+write (FUNIT_INP, 230) j1max, e1max
 230 format (i4, f8.2, 21x, 'j1max, e1max')
-write (8, 231) j2min, j2max, ipotsy2
+write (FUNIT_INP, 231) j2min, j2max, ipotsy2
 231 format (3i4, 21x,'j2min, j2max, ipotsy2')
-write (8, 250) brot, crot, delta
+write (FUNIT_INP, 250) brot, crot, delta
 250 format (3f10.4, 3x, 'brot, crot, delta, emax' )
-write (8, 251) drot
+write (FUNIT_INP, 251) drot
 251 format (f10.4, 23x,'drot')
-write (8, *) potfil
+write (FUNIT_INP, *) potfil
 return
 end
 !     ------------------------------------------------------------------

@@ -121,6 +121,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: iprint
+use funit, only: FUNIT_INP
 #include "common/parbasl.F90"
 
 implicit double precision (a-h,o-z)
@@ -148,7 +149,7 @@ if (.not. flaghf) then
 end if
 if (flagsu .and. .not. csflag) then
   write (6, 8)
-  write (8, 8)
+  write (FUNIT_INP, 8)
 8   format &
    ('  *** CSFLAG = .FALSE. FOR SURFACE CALCULATION; ABORT ***')
   stop
@@ -684,6 +685,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use mod_par, only: ihomo
+use funit, only: FUNIT_INP
 implicit none
 !  subroutine to read in system dependent parameters for doublet-sigma
 !   + atom scattering
@@ -836,11 +838,11 @@ ASSERT(gsr .eq. rspar(2))
 
 !  save input parameters for doublet-sigma + atom scattering
 !  line 13:
-write (8, 220) nrmax, npar, isym, igu, isa
+write (FUNIT_INP, 220) nrmax, npar, isym, igu, isa
 220 format (5i4, t50, 'nrmax, npar, isym, igu, isa')
-write (8, 320) brot, gsr, drot, hrot
+write (FUNIT_INP, 320) brot, gsr, drot, hrot
 320 format (f12.6,3g12.4,t50,'brot, gsr, drot, hrot')
-write (8,330) potfil
+write (FUNIT_INP,330) potfil
 330 format(a)
 return
 end

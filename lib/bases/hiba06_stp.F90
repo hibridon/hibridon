@@ -802,6 +802,7 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use funit, only: FUNIT_INP
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -938,14 +939,14 @@ entry savstp (readpt)
 !  be left blank, and the names of the variables should be printed in spaces
 !  34-80
 !  line 18:
-write (8, 220) ipotsy, iop
+write (FUNIT_INP, 220) ipotsy, iop
 220 format (2i4, 22x,'   ipotsy, iop')
 !  line 20
-write (8, 230) jmax, emax
+write (FUNIT_INP, 230) jmax, emax
 230 format (i4, f12.5,14x, '   jmax, emax')
 !  line 21
-write (8, 250) brot, crot, delta
+write (FUNIT_INP, 250) brot, crot, delta
 250 format(3f9.4, 6x, 'brot, crot, delta')
-write (8, 60) potfil
+write (FUNIT_INP, 60) potfil
 return
 end

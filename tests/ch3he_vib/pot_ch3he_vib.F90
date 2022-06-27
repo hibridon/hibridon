@@ -316,6 +316,8 @@ end
 !   User defined basis
 ! -------------------------------------------------------------------
 subroutine syusr(irpot, readpt, iread)
+use funit, only: FUNIT_INP
+
 !
 #include "pot_ch3he_vib_common.f90"
 !   Subroutine to read parameters for CH3 v2 vibrational relaxation
@@ -400,9 +402,9 @@ return
 ! -------------------------------------------------------------------
 entry savusr(readpt)
 !   Save parameters
-write (8, 201) ipotsy, iop
-write (8, 202) jmax, vmax
-write (8, 203) emax0, emax1, emax2, emax3
+write (FUNIT_INP, 201) ipotsy, iop
+write (FUNIT_INP, 202) jmax, vmax
+write (FUNIT_INP, 203) emax0, emax1, emax2, emax3
 201 format (i4, 4x, i4, 21x, 'ipotsy, iop')
 202 format (i4, 4x, i4, 21x, 'jmax, vmax')
 203 format (4(f7.2, 1x), 1x, 'emax0, emax1, emax2, emax3')

@@ -526,6 +526,7 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use funit, only: FUNIT_INP
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -607,11 +608,11 @@ return
 ! --------------------------------------------------------------
 entry sav1sg1sg (readpt)
 !  save input parameters for two unlike 1sigma molecule scattering
-write (8, 310) j1max, j2min, j2max, ipotsy2
+write (FUNIT_INP, 310) j1max, j2min, j2max, ipotsy2
 310 format(5i4,15x,'j1max, j2min, j2min, ipotsy2')
-write (8, 320) b1rot, d1rot, b2rot
+write (FUNIT_INP, 320) b1rot, d1rot, b2rot
 320 format(f10.7, e12.5, f10.7, '   b1rot, d1rot, b2rot')
-write (8, 285) potfil
+write (FUNIT_INP, 285) potfil
 285 format (a)
 return
 end

@@ -948,6 +948,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod => rspar
 use mod_par, only: ihomo
+use funit, only: FUNIT_INP
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -1084,19 +1085,19 @@ if (iscod(3) .lt. iscod(2)) then
 210   format ('**  VMAX =',i3,' .LT. VMIN =',i3,' SET VMAX = VMIN')
 iscod(3)=iscod(2)
 endif
-write (8, 220) nvib, iscod(2),iscod(3)
+write (FUNIT_INP, 220) nvib, iscod(2),iscod(3)
 220 format(3i4, t34,'nvib, vmin,vmax')
 iofi=3
 iofr=0
 do 301 i=1,nvib
-write (8, 310) ivib(i),(iscod(iofi+j),j=1,2)
+write (FUNIT_INP, 310) ivib(i),(iscod(iofi+j),j=1,2)
 310 format (3i4, t50,'iv,jmin,jmax')
-write (8, 320) (rcod(iofr+j),j=1,4)
+write (FUNIT_INP, 320) (rcod(iofr+j),j=1,4)
 iofi=iofi+2
 iofr=iofr+4
 320 format(3g14.6,t50,'brot,drot,hrot'/f15.8,t50,'evib')
 301 continue
-write (8, 85) potfil
+write (FUNIT_INP, 85) potfil
 return
 end
 

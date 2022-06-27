@@ -900,6 +900,7 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use funit, only: FUNIT_INP
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -985,11 +986,11 @@ entry savastp2 (readpt)
 !  statements should reserve the first 30 spaces for data, spaces 31-33 should
 !  be left blank, and the names of the variables should be printed in spaces
 !  34-80
-write (8, 230) jmax, emax
+write (FUNIT_INP, 230) jmax, emax
 230 format (i4, 3x, g12.5, 14x, 'jmax, emax')
-write (8, 250) arot, brot, crot
+write (FUNIT_INP, 250) arot, brot, crot
 250 format(3f9.4, 6x, 'arot, brot, crot')
-write (8, 60) potfil
+write (FUNIT_INP, 60) potfil
 60 format (a)
 return
 end

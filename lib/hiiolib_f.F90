@@ -277,6 +277,7 @@ use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, &
                 jtot1, jtot2, jtotd, jlpar, nerg, numax, numin, nud, &
                 lscreen, iprint, &
                 fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, tolai=>scat_tolai, xmu ! NB if boundc = .true. then these parameters are: r1,r2,c,spac,delr,hsimp,eigmin,tolai,xmu
+use funit, only: FUNIT_INP
 implicit double precision (a-h,o-z)
 integer i, length
 logical existf
@@ -305,7 +306,7 @@ end if
 ! open sequential/formatted (mode='sf') file
 call openf(8, input, 'sf', 0)
 ! ----------------------------------------------------------------
-rewind 8
+rewind FUNIT_INP
 iline=1
 !  read in input data
 !  line 1
@@ -605,111 +606,111 @@ else
   endif
 endif
 if (inew .eq. 0) then
-   call openf(8, input, 'sf', 0)
+   call openf(FUNIT_INP, input, 'sf', 0)
 else
-   close (8)
-   call openf(8, filnam, 'sf', 0)
+   close (FUNIT_INP)
+   call openf(FUNIT_INP, filnam, 'sf', 0)
 endif
-rewind (8)
+rewind (FUNIT_INP)
 nline=0
 !  line 1
 nline=nline+1
-write (8, 210, err=999) label
+write (FUNIT_INP, 210, err=999) label
 210 format ((a))
 !  line 1a
 nline=nline+1
-write (8, 215, err=999) ibasty
+write (FUNIT_INP, 215, err=999) ibasty
 215 format(i4,25x,'    ibasty')
 !  line 2
 nline=nline+1
-write (8, 220, err=999) logdfl, airyfl, readpt, bastst
+write (FUNIT_INP, 220, err=999) logdfl, airyfl, readpt, bastst
 220 format (4l3,18x, '   logdfl, airyfl, readpt, bastst')
 !  line 3
 nline=nline+1
 if (.not.boundc) then
-  write (8, 230, err=999) rstart, rendld, spac
+  write (FUNIT_INP, 230, err=999) rstart, rendld, spac
 230   format (3f10.4, '   rstart, rendld, spac')
 else
-  write (8, 232, err=999) rstart, rendld, spac
+  write (FUNIT_INP, 232, err=999) rstart, rendld, spac
 232   format (2f10.4,g11.4, '  hsimp, delr, eigmin')
 endif
 !  line 4
 nline=nline+1
-write (8, 240, err=999) prairy
+write (FUNIT_INP, 240, err=999) prairy
 240 format (l3, 27x,'   prairy')
 !  line 5
 nline=nline+1
 if (.not.boundc) then
-  write (8, 250, err=999) tolai, rincr, rendai, fstfac
+  write (FUNIT_INP, 250, err=999) tolai, rincr, rendai, fstfac
 250   format (g11.4, f6.2, f8.1, f6.2, &
         '  tolai, rincr, rendai, fstfac')
 else
-  write (8, 252, err=999) tolai, rincr, rendai, fstfac
+  write (FUNIT_INP, 252, err=999) tolai, rincr, rendai, fstfac
 252   format (g11.4, f6.2, f8.4, f6.3, &
         '  tolai, r2, spac, r1')
 endif
 !  line 6
 nline=nline+1
-write (8, 260, err=999) nerg
+write (FUNIT_INP, 260, err=999) nerg
 260 format (i4,26x, '   nerg')
 !  line 7
 nline=nline+1
-write (8, 270, err=999) (energ(i), i = 1, nerg)
+write (FUNIT_INP, 270, err=999) (energ(i), i = 1, nerg)
 270 format (10f11.4)
 !  line 8
 nline=nline+1
-write (8, 280, err=999) xmu
+write (FUNIT_INP, 280, err=999) xmu
 280 format (f11.5, 19x, '   xmu')
 !  line 9
 nline=nline+1
 if (.not. boundc) then
-  write (8, 290, err=999) rcut
+  write (FUNIT_INP, 290, err=999) rcut
 290   format (f10.4, 20x,'   rcut')
 else
-  write (8, 292, err=999) rcut
+  write (FUNIT_INP, 292, err=999) rcut
 292   format (f10.4, 20x,'   c')
 endif
 !  line 10
 nline=nline+1
-write (8, 300, err=999) jtot1, jtot2, jtotd, jlpar, numin, &
+write (FUNIT_INP, 300, err=999) jtot1, jtot2, jtotd, jlpar, numin, &
                         numax, nud
 300 format (3i4,4i4,2x,'   jtot1,jtot2,jtotd,jlpar,numin,numax,', &
                        'nud')
 nline=nline+1
-write (8, 301, err=999) lscreen, iprint
+write (FUNIT_INP, 301, err=999) lscreen, iprint
 301 format(2i4,23x,'  lscreen, iprint')
 !  line 11
 nline=nline+1
-write (8, 305, err=999) nnout, niout
+write (FUNIT_INP, 305, err=999) nnout, niout
 305 format (2i5,20x,'   nnout,niout')
 !  line 12
 nline=nline+1
-write (8, 315, err=999) (jout(i), i=1, iabs(nnout))
+write (FUNIT_INP, 315, err=999) (jout(i), i=1, iabs(nnout))
 315 format (20(i4, 1x))
 !  line 13
 if(niout.gt.0) then
   nline=nline+1
-  write (8, 315, err=999) (indout(i), i=1, niout)
+  write (FUNIT_INP, 315, err=999) (indout(i), i=1, niout)
 endif
 !  line 14
   nline=nline+1
-write (8, 330, err=999) prlogd, prsmat, prt2, t2test, wrsmat
+write (FUNIT_INP, 330, err=999) prlogd, prsmat, prt2, t2test, wrsmat
 330 format (5l3,15x,'   prlogd, prsmat, prt2, t2test, wrsmat')
 !  line 15
   nline=nline+1
-write (8, 340, err=999) wrpart, prpart, prxsec, wrxsec, wavefl
+write (FUNIT_INP, 340, err=999) wrpart, prpart, prxsec, wrxsec, wavefl
 340 format (5l3,15x,'   wrpart, prpart, prxsec, wrxsec, wavefl')
 !  line 16
   nline=nline+1
-write (8, 350, err=999) noprin, chlist, ipos, nucros, photof
+write (FUNIT_INP, 350, err=999) noprin, chlist, ipos, nucros, photof
 350 format (5l3,15x,'   noprin, chlist, ipos, nucros, photof')
 !  line 17
   nline=nline+1
-write (8, 360, err=999) flaghf, csflag, flagsu, ihomo, twomol
+write (FUNIT_INP, 360, err=999) flaghf, csflag, flagsu, ihomo, twomol
 360 format (5l3,15x,'   flaghf, csflag, flagsu, ihomo, twomol')
 !  line 18
   nline=nline+1
-write (8, 370, err=999) rsflag, boundc
+write (FUNIT_INP, 370, err=999) rsflag, boundc
 370 format (2l3,24x, '   rsflag, boundc')
 return
 ! here if write error

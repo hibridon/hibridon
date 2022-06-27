@@ -1135,6 +1135,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use mod_par, only: ihomo
+use funit, only: FUNIT_INP
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -1303,31 +1304,31 @@ return
 !
 entry savsgpi1 (readpt)
 !  save parameters for 2sigma and 2pi states
-!      write (8, 105) isym, isa, igusg, nmaxsg, nparsg,
+!      write (FUNIT_INP, 105) isym, isa, igusg, nmaxsg, nparsg,
 !     :  ' isym, isa, igusg, nmaxsg, nparsg'
-!      write (8, 203) igupi, nparpi, ' igupi, nparpi'
-!      write (8, 201) esg, bsg, dsg, gsr,
+!      write (FUNIT_INP, 203) igupi, nparpi, ' igupi, nparpi'
+!      write (FUNIT_INP, 201) esg, bsg, dsg, gsr,
 !     :  'esg, bsg, dsg, gsr'
-write (8, 105) (ispar(j),j=2,6), &
+write (FUNIT_INP, 105) (ispar(j),j=2,6), &
    ' isym, isa, igusg, nmaxsg, nparsg'
-write (8, 201) (ispar(j),j=7,8), &
+write (FUNIT_INP, 201) (ispar(j),j=7,8), &
    ' igupi, nparpi'
-write (8, 203) (rspar(j),j=1,4), &
+write (FUNIT_INP, 203) (rspar(j),j=1,4), &
    ' esg, bsg, dsg, gsr'
 !  save number of 2pi vibrational levels
-write (8, 102) ispar(9), 'numvpi'
+write (FUNIT_INP, 102) ispar(9), 'numvpi'
 !  save parameters for 2pi levels
 isi = 9
 isr = 4
 do 101 iv=1,numvpi
-  write (8, 103) ivpi(iv),ispar(isi+1), 'ivpi, jmax'
-  write (8, 202) (rspar(isr+j),j=1,3), 'epi, bpi, dpi'
-  write (8, 202) (rspar(isr+j),j=4,6), 'aso, p, q'
+  write (FUNIT_INP, 103) ivpi(iv),ispar(isi+1), 'ivpi, jmax'
+  write (FUNIT_INP, 202) (rspar(isr+j),j=1,3), 'epi, bpi, dpi'
+  write (FUNIT_INP, 202) (rspar(isr+j),j=4,6), 'aso, p, q'
   isi = isi + 1
   isr = isr + 6
-!        write (8, 103) ivpi(iv), jmax(iv), 'ivpi, jmax'
-!        write (8, 202) epi(iv), bpi(iv), dpi(iv), 'epi, bpi, dpi'
-!        write (8, 202) aso(iv), p(iv), q(iv), 'aso, p, q'
+!        write (FUNIT_INP, 103) ivpi(iv), jmax(iv), 'ivpi, jmax'
+!        write (FUNIT_INP, 202) epi(iv), bpi(iv), dpi(iv), 'epi, bpi, dpi'
+!        write (FUNIT_INP, 202) aso(iv), p(iv), q(iv), 'aso, p, q'
 101 continue
 102 format(i4,t55,a)
 103 format(2i4,t55,a)
@@ -1335,7 +1336,7 @@ do 101 iv=1,numvpi
 201 format(2g14.6,t55,a)
 202 format(g14.6,2g14.6,t55,a)
 203 format(4g14.6,t55,a)
-write (8, 300) potfil
+write (FUNIT_INP, 300) potfil
 300 format(a)
 return
 end

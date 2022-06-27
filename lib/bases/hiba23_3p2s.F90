@@ -633,6 +633,7 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod
+use funit, only: FUNIT_INP
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -716,8 +717,8 @@ return
 ! --------------------------------------------------------------
 entry sav3p2s (readpt)
 !  save input parameters for 3P atom + 2S atom scattering
-write (8, 1285) nvib
+write (FUNIT_INP, 1285) nvib
 1285 format(i4, 29x,'nvib')
-write (8, 285) potfil
+write (FUNIT_INP, 285) potfil
 return
 end
