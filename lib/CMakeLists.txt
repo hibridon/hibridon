@@ -101,6 +101,8 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<CONFIG:DEBUG>:-Wextra>                # Enable extra warnings
       $<$<CONFIG:DEBUG>:-fsanitize=address>     # Address sanitizer
       $<$<CONFIG:DEBUG>:-Wuninitialized>        # Emit warnings for uninitialized variables 
+      $<$<CONFIG:DEBUG>:-finit-integer=333333333> # initialize variables to non zero values to ease detection of uninitialized variables (some compilers simply don't initialize variables)
+      $<$<CONFIG:DEBUG>:-finit-real=snan> # initialize variables to non zero values to ease detection of uninitialized variables (some compilers simply don't initialize variables)
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -fprofile-arcs -ftest-coverage at compile time)
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
       $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
@@ -126,6 +128,9 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
       $<$<CONFIG:DEBUG>:-g>                   # Generates complete debugging information
       $<$<CONFIG:DEBUG>:-traceback>               # Generates extra information in the object file to provide source file traceback information when a severe error occurs at run time
       $<$<CONFIG:DEBUG>:-fp-stack-check>          # Tell the compiler to generate extra code after every function call to ensure that the floating-point stack is in the expected state
+      $<$<CONFIG:DEBUG>:-init=zero>             # Init integer and logical variables to zero/false/null instead of random to avoid random bugs
+      $<$<CONFIG:DEBUG>:-init=snan>             # Init real variables to signaling nans to detect uninitialized variables
+      $<$<CONFIG:DEBUG>:-init=array>            # also initialize arrays to avoid random behaviours caused by use of uninitialized variables
       #$<$<CONFIG:DEBUG>:-warn all>                # Enable all warnings
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
       $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
