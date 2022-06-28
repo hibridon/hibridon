@@ -7,10 +7,10 @@
 
 #if defined(SYSTEM_MEM_USAGE_WORKS)
 subroutine system_mem_usage(valueRSS)
-implicit none
 #if defined(HIB_UNIX_IFORT)
 use ifport ! needed to use getpid on ifort compiler
 #endif 
+implicit none
 integer, intent(out) :: valueRSS
 
 character(len=200):: filename=' '
