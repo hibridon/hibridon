@@ -108,12 +108,13 @@ module mod_cov2
      logical                    :: is_allocated = .false.
      integer                    :: num_channels = 0
      type(dgrovec_type), allocatable :: v2d  ! the non zero element values
-     type(igrovec_type), allocatable :: v2i   ! the non-zero elements indices 
+     type(igrovec_type), allocatable :: v2i  ! the non-zero elements indices 
      contains
      
      procedure                  :: get_num_nonzero_elements => ancouma_type_get_num_nonzero_elements
      procedure                  :: get_element => ancouma_type_get_element
      procedure                  :: set_element => ancouma_type_set_element
+     procedure                  :: get_used_mem => ancouma_type_get_used_mem
    end type ancouma_type
 
    ! ancou_type stores the angular coupling matrix elements for all lamdbas
@@ -142,6 +143,10 @@ module mod_cov2
 
    contains
 
+   !
+   ! ancouma_type implementation
+   !
+
    function ancouma_type_get_num_nonzero_elements(this) result(n)
       class(ancouma_type)        :: this
       integer           :: n
@@ -169,6 +174,21 @@ module mod_cov2
       call this%v2i%append(ij)
       g_num_ancouma_set_calls = g_num_ancouma_set_calls + 1
    end subroutine
+
+   ! returns the memory used by this instance of ancouma_type
+   function ancouma_type_get_used_mem(this) result(num_bytes)
+      class(ancouma_type) :: this
+      integer             :: num_bytes
+
+      integer, parameter :: size_of_int = 4
+      integer, parameter :: size_of_double = 8
+      num_bytes = this%v2d%num_allocated_blocks * this%v2d%block_size * size_of_double & 
+                + this%v2i%num_allocated_blocks * this%v2i%block_size * size_of_int
+   end function
+
+   !
+   ! ancou_type implementation
+   !
 
    function create_ancou_type(nlam, num_channels) result(v2)
      integer, intent(in) :: nlam
@@ -277,6 +297,7 @@ module mod_cov2
       end do
    end subroutine 
 
+   ! prints the contents of this ancou_type
    subroutine ancou_type_print(this, unit)
       class(ancou_type), intent(in)    :: this
       integer, intent(in) :: unit
@@ -307,15 +328,19 @@ module mod_cov2
       write (unit,'(A, I10, A, I10, A, F6.2, A)') 'total : ', num_nz_elements, '/', num_elements ,' non zero elements (', real(num_nz_elements, 8) / num_elements * 100.d0, '%)'
    end subroutine 
 
+   ! prints a summary of this instance of ancou_type
    subroutine ancou_type_print_summary(this, unit)
       class(ancou_type), intent(in)    :: this
       integer, intent(in) :: unit
       integer :: ilam, num_lam_nz_elements, num_channels, lam_num_elements
       integer :: num_nz_elements, num_elements
+      integer(8) :: used_memory  ! in bytes
+      used_memory = 0
       num_nz_elements = int(0, 8)
       num_elements = int(0, 8)
       do ilam = 1, this%nlam
          if (this%ancouma(ilam)%is_allocated) then
+            used_memory = used_memory + this%ancouma(ilam)%get_used_mem()
             num_channels = this%ancouma(ilam)%num_channels
             lam_num_elements = num_channels * num_channels
             num_lam_nz_elements = this%ancouma(ilam)%get_num_nonzero_elements()
@@ -327,7 +352,10 @@ module mod_cov2
          end if
       end do
       write (unit,'(A, I10, A, I10, A, F6.2, A)') 'total : ', num_nz_elements, '/', num_elements ,' non zero elements (', real(num_nz_elements, 8) / num_elements * 100.d0, '%)'
+      write (unit,'(A, I20, A)') 'memory used : ', used_memory, ' bytes'
    end subroutine 
+
+   ! end of ancou_type implmentation
 
    subroutine print_ancou_stats()
       implicit none

@@ -103,7 +103,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<CONFIG:DEBUG>:-fbacktrace>            # Generates extra information in the object file to provide source file traceback information when a severe error occurs at run time
       $<$<CONFIG:DEBUG>:-Wall>                  # Enable all warnings
       $<$<CONFIG:DEBUG>:-Wextra>                # Enable extra warnings
-      $<$<CONFIG:DEBUG>:-fsanitize=address>     # Address sanitizer
+      $<$<CONFIG:DEBUG>:-fsanitize=address>     # Address sanitizer (beware: tests showed that with -fsanitize=address memory is not actually released when deallocate is called. Is this a true momory leak in address sanitizer?)
       $<$<CONFIG:DEBUG>:-Wuninitialized>        # Emit warnings for uninitialized variables 
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -fprofile-arcs -ftest-coverage at compile time)
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
@@ -146,7 +146,7 @@ endif()
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     target_link_libraries(hib
       PUBLIC
-      $<$<CONFIG:DEBUG>:-fsanitize=address>         # Address sanitizer
+      $<$<CONFIG:DEBUG>:-fsanitize=address>         # Address sanitizer (beware: tests showed that with -fsanitize=address memory is not actually released when deallocate is called. Is this a true momory leak in address sanitizer?)
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -lgcov at link time)
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
       $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)

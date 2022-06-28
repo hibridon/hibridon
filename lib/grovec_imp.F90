@@ -6,6 +6,7 @@
     end if
   end subroutine
 
+  ! create_<GROVEC_CLASS_NAME> : creates a grovec instance
   function CONCATENATE(create_,GROVEC_CLASS_NAME)(block_size, num_blocks) Result(g)
     integer, intent(in) :: block_size
     integer, intent(in) :: num_blocks
