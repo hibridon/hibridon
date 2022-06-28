@@ -1,14 +1,16 @@
 #include "assert.h"
 !#define TEST_V2MAT_USE_ASSOCIATE
 
-#if defined(HIB_UNIX_X86)
+#if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_X86)
 #define SYSTEM_MEM_USAGE_WORKS
 #endif
 
 #if defined(SYSTEM_MEM_USAGE_WORKS)
 subroutine system_mem_usage(valueRSS)
 implicit none
-!use ifport !if on intel compiler
+#if defined(HIB_UNIX_IFORT)
+use ifport ! needed to use getpid on ifort compiler
+#endif 
 integer, intent(out) :: valueRSS
 
 character(len=200):: filename=' '
