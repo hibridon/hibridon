@@ -1347,7 +1347,6 @@ tpw = zero
 twf = zero
 twfw = zero
 call mtime(tf,tfw)
-write(6,*) "iread=", iread
 if (iread) then
    icol = 1
    do 5  ich = 1, nch
@@ -1396,7 +1395,6 @@ else
       if (photof) write (FUNIT_QUAD_MAT) (q(i), i=1, nqmax)
    endif
 endif
-write(6,*) 'w(1) = ', w(1)
 !     use diagonal approximation to wkb initial value for log
 !     derivative matrix  (eqn 16)
 !     rmin is assumed to lie inside the classically forbidden
@@ -1413,7 +1411,6 @@ do 20  ich = 1, nch
 idiag = 1
 do  30 ich = 1, nch
    wdiag = w(idiag)
-   write (6, *) 'idiag = ', idiag, 'wdiag = ', wdiag
    if (wdiag .le. 0) then
      write (9, 25) ich, wdiag
      write (6, 25) ich, wdiag
