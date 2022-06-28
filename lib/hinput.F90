@@ -71,49 +71,84 @@ use ipar_enum
 use rpar_enum
 use mod_par, only: lpar, ipar, rpar
 
-implicit double precision (a-h,o-z)
+implicit none
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
 !  ncode is the number of bcod's
 !  bcod stores hibridon's commands
 !  fcod stores logical flags (length = lcode)
-parameter (ncode = 40, lcode = 28, iicode = 10, ircode = 9, &
-           icode = iicode+ircode)
+integer, parameter :: ncode = 40
+integer, parameter :: lcode = 28
+integer, parameter :: iicode = 10
+integer, parameter :: ircode = 9
+integer, parameter :: icode = iicode+ircode
 character*80 line
-character*40 fnam1,fnam2,jobnam,input,output,savfil, &
-             code
-character*8 bcod(ncode)
-character*8, dimension(lcode) :: fcod
-character*8 pcod(icode)
-character*8 bascod(1)
+character*40 :: fnam1
+character*40 :: fnam2
+character*40 :: code
 character*8 empty_var_list(0)
-character*9 basknd(30)
 ! dimension of codex, ihold, lhold, should be equal to largest number
 ! of identical strings of 1:nnn characters in names of all variables
 ! (probably 'p' is the most recurring string:  12 times in
 !  pcod, fcod, and bcod)
 character*8 codex(15)
-integer ixpar
-integer ibasty
 integer nerg
 logical existf, first, openfl
-logical logp, opti, optifl, batch, jtrunc
-dimension a(15),ia(10), ihold(15), lhold(15)
+integer :: lenstr
+real(8) :: turn
+logical logp, opti, jtrunc
+real(8) :: a(15)
+integer :: ia(10)
+integer :: ihold(15)
+integer :: lhold(15)
 #include "common/parbas.F90"
 #include "common/parpot.F90"
 common /cosavi/ iipar, ixpar(iicode)
+integer :: iipar
+integer :: ixpar
+
 common /cosavr/ irpar, junks, rxpar(ircode)
+integer :: irpar
+integer :: junks
+real(8) :: rxpar
+
 common /cofile/ input, output, jobnam, savfil
+character*40 :: input
+character*40 :: output
+character*40 :: jobnam
+character*40 :: savfil
+
 common /cokeyl/ nncode, llcode, ijcode
+integer :: nncode
+integer :: llcode
+integer :: ijcode
+
 common /cobcod/ bcod
+character*8 :: bcod(ncode)
+
 common /cofcod/ fcod
+character*8 :: fcod(lcode)
+
 common /copcod/ pcod
+character*8 :: pcod(icode)
+
 common /coselb/ ibasty
+integer ibasty
+
+
 common /cobaco/ bascod
+character*8 :: bascod(1)
+
 common /coopti/ optifl
+logical :: optifl
+
 common /cotwo/ numj,nj1j2(5)
+integer :: numj
+integer :: nj1j2
+
 ! when adding bases, change size of array basknd and size of
 ! parameter kmxbas in himain.f
+character*9 :: basknd(30)
 data basknd /'1-SIGMA', '2-SIGMA', '2-PI', 'SIGMA|PI', &
               'GEN-PI', 'SYM-TOP-I', '1/3-P-AT', '1SIG+1SIG', &
               'SYMT-LIN',' 2/2-P-AT', '1-DELTA', 'HOMO+2P', &
@@ -126,8 +161,18 @@ data basknd /'1-SIGMA', '2-SIGMA', '2-PI', 'SIGMA|PI', &
 ! graffy: colpar and fcod both contain the 28 logical parameters but in a different order, thus requiring a remapping through lindx. Why not simply having the same order, by making fcod match colpar?
 integer :: lindx(LPAR_COUNT)
 
+integer :: irpot
+integer :: irinp
 data irpot, irinp /0, 0/
+
+logical :: batch
 data batch /.false./
+
+integer :: ipr, istep, inam, i, ienerg, iflux, ii, im, imx, incode, inew, ione, iprint, iskip, itx, ityp, izero
+integer :: j, jm, jmx, jtot2x, l, l1, l2, lc, lcc, ld, len, lend, length, leninp, lenjob, lenout, low
+integer :: match, nde
+real(8) :: optacm, r, thrs, val, waveve, xmu
+real(8) :: a1, acc, acclas, optval, optacc, accmx, delt_e, e, e1
 save ipr, opti, a, a1, acc, acclas, optval, optacc, istep, inam, &
      fnam1, fnam2, code, lc, jtot2x, irpot, irinp
 nerg = 0
@@ -171,14 +216,14 @@ pcod(IPAR_NUD)     = 'NUD'
 pcod(IPAR_LSCREEN) = 'LSCREEN'
 pcod(IPAR_IPRINT)  = 'IPRINT'
 
-pcod(IPAR_COUNT + RPAR_FSTFAC)  = 'FSTFAC'
-pcod(IPAR_COUNT + RPAR_RINCR)   = 'RINCR'
-pcod(IPAR_COUNT + RPAR_RCUT)    = 'RCUT'
-pcod(IPAR_COUNT + RPAR_RENDAI)  = 'RENDAI'
-pcod(IPAR_COUNT + RPAR_RENDLD)  = 'RENDLD'
-pcod(IPAR_COUNT + RPAR_RSTART)  = 'RSTART'
-pcod(IPAR_COUNT + RPAR_SPAC)    = 'SPAC'
-pcod(IPAR_COUNT + RPAR_TOLAI)   = 'TOLAI'
+pcod(IPAR_COUNT + RPAR_SCAT_FSTFAC)  = 'FSTFAC'
+pcod(IPAR_COUNT + RPAR_SCAT_RINCR)   = 'RINCR'
+pcod(IPAR_COUNT + RPAR_SCAT_RCUT)    = 'RCUT'
+pcod(IPAR_COUNT + RPAR_SCAT_RENDAI)  = 'RENDAI'
+pcod(IPAR_COUNT + RPAR_SCAT_RENDLD)  = 'RENDLD'
+pcod(IPAR_COUNT + RPAR_SCAT_RSTART)  = 'RSTART'
+pcod(IPAR_COUNT + RPAR_SCAT_SPAC)    = 'SPAC'
+pcod(IPAR_COUNT + RPAR_SCAT_TOLAI)   = 'TOLAI'
 pcod(IPAR_COUNT + RPAR_XMU)     = 'XMU'
 
 fcod(FCOD_AIRYFL)='AIRYFL'
