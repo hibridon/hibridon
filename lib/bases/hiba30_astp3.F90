@@ -239,7 +239,7 @@ if (ihomo) then
   if ( .not. (iop.eq.1 .or. iop.eq.-1) ) then
     write(6,29) 
     write(9,29)
-29     format(' *** IOP .ne. 1 .or. -1 with IHOMO = true:' &
+29     format(' *** IOP .ne. 1 .or. -1 with IHOMO = true:', &
       '   ABORT ***')  
     if (bastst) then
       return
@@ -747,7 +747,7 @@ v2 = ancou_type(nlam=nlam, num_channels=ntop)
 if (bastst) then
   write (6, 340)
   write (9, 340) 
-340   format (/' ILAM  L1   M1   L2  LTOT    ICOL  IROW       I' &
+340   format (/' ILAM  L1   M1   L2  LTOT    ICOL  IROW       I', &
     '       IV2       VEE')
 end if
 i = 0
