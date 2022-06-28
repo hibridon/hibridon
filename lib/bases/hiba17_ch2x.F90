@@ -134,7 +134,7 @@ subroutine bach2x (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !               choice of channel index
 !               NOTE:  this subroutine is in hibastp.f
 ! --------------------------------------------------------------------
-use mod_cov2, only: ancou_type, ancouma_type
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam

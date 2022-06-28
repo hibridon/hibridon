@@ -878,7 +878,7 @@ subroutine wavevc (w, eignow, scr1, scr2, rnow, nch, nmax, v2)
 !     dsyevr:         latest lapack eigenvalue routine
 !     dscal, dcopy:   linpack blas routines
 ! ----------------------------------------------------------------
-use mod_cov2, only: ancou_type
+use mod_ancou, only: ancou_type
 use mod_hibrid3, only: potmat
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(in) :: v2

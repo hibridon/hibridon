@@ -3,7 +3,7 @@ interface
         sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
         csflag, clist, bastst, ihomo, nu, numin, jlpar, &
         n, nmax, ntop, v2)
-        !use mod_cov2, only: ancou_type
+        !use mod_ancou, only: ancou_type
         import :: ancou_type
 
         integer, intent(out) :: j(:)

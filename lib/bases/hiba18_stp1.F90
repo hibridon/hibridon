@@ -148,7 +148,7 @@ subroutine bastp1(j, l, is, jhold, ehold, ishold, nlevel, &
 !   vlmstp:    returns angular coupling coefficient for particular
 !              choice of channel index (this subroutine is in file hibastp.f
 ! --------------------------------------------------------------------
-use mod_cov2, only: ancou_type, ancouma_type
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coamat, only: ietmp ! ietmp(1)

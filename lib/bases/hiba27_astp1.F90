@@ -118,7 +118,7 @@ subroutine baastp1 (j, l, is, jhold, ehold, ishold, nlevel, &
 !               between symmetric top basis fns.
 !   rotham:     computes matrix elements of asymmetric top hamiltonian
 ! --------------------------------------------------------------------
-use mod_cov2, only: ancou_type, ancouma_type
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coatpi, only: narray, isiz

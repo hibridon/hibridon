@@ -7,6 +7,7 @@
 set(ENABLE_ASSERTS "ON" CACHE BOOL "to enable or disable assert checks for debug builds (mostly for developers).")
 
 add_library(hib
+    ancou.F90
     assert.f90
     grovec.F90
     hiamp.F90

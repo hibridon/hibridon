@@ -122,7 +122,7 @@ subroutine basis (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !    quantum numbers, the total angular momentum, and the coupled-states
 !    projection index are equal to the values stored in j, jtot, and nu
 !    plus 1/2
-use mod_cov2, only: ancou_type
+use mod_ancou, only: ancou_type
 use mod_hiba01_1sg, only: ba1sg
 use mod_hiba02_2sg, only: ba2sg
 use mod_hiba03_2pi, only: ba2pi

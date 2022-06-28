@@ -129,7 +129,7 @@ subroutine potent (w, vecnow, scmat, eignow, hp, scr, &
 !    nmax:     maximum row dimension of matrices and maximum dimension of
 !              vectors
 ! ----------------------------------------------------------------------
-   use mod_cov2, only: ancou_type
+   use mod_ancou, only: ancou_type
    implicit none
 !  square matrices (of row dimension nmax)
 real(8), dimension(nmax*nmax), intent(out) :: w
@@ -302,7 +302,7 @@ subroutine potmat (w, r, nch, nmax, v2)
 !    vsmul:    multiplies vector by scalar and stores result in another
 !              vector
 !  -------------------------------------------------------------------
-use mod_cov2, only: ancou_type, ancouma_type
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_covvl, only: vvl
@@ -1018,7 +1018,7 @@ subroutine propag (z, w, zmat, amat, bmat, &
 !     wavefn        true if g(a,b) transformation matrices are saved
 !                   to be used later in computing the wavefunction
 !  ------------------------------------------------------------------
-use mod_cov2, only: ancou_type
+use mod_ancou, only: ancou_type
 use mod_hibrid2, only: mxoutd
 implicit none
 !   square matrices
@@ -1358,7 +1358,7 @@ subroutine logdb (z, nmax, nch, rmin, rmax, nsteps, &
 !     and blas routines are not used for o(n) loops
 !  ------------------------------------------------------------------
 use mod_coqvec, only: mxphot, nphoto, q ! q is an output of this subroutine
-use mod_cov2, only: ancou_type
+use mod_ancou, only: ancou_type
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: z(nmax*nch)
 integer, intent(in) :: nmax
@@ -1949,7 +1949,7 @@ subroutine runlog (z, &
 !                   to be used later in computing the wavefunction
 !  ------------------------------------------------------------------
 use mod_coqvec, only: nphoto, q
-use mod_cov2, only: ancou_type
+use mod_ancou, only: ancou_type
 use mod_hibrid2, only: mxoutd, mxoutr
 implicit double precision (a-h, o-z)
 type(ancou_type), intent(in) :: v2

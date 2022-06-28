@@ -111,7 +111,7 @@ use mod_coener, only: energ
 use mod_hibasis, only : basis
 use mod_version, only : version, acknow
 use mod_hibrid5, only : soutpt, nusum, xwrite, wrhead, restrt, rsave
-use mod_cov2, only: ancou_type
+use mod_ancou, only: ancou_type
 use constants
 use mod_hibrid2, only: default
 use mod_hibrid3, only: propag

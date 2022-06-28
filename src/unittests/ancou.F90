@@ -85,7 +85,7 @@ subroutine test_alloc_simpler
 end subroutine test_alloc_simpler
 
 program test_ancou_type
-    use mod_cov2, only: ancou_type, ancouma_type, print_ancou_stats
+    use mod_ancou, only: ancou_type, ancouma_type, print_ancou_stats
     use mod_grovec, only: print_grovec_stats
     implicit none
     integer :: nlam = 80

@@ -107,7 +107,7 @@ subroutine basphtp (j, l, is, jhold, ehold, ishold, nlevel, &
 !   prmats:     computes primitive cc and cs v-lambda matrix elements
 !               between signed-k symmetric top basis fns.
 ! --------------------------------------------------------------------
-use mod_cov2, only: ancou_type, ancouma_type
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coatpi, only: narray

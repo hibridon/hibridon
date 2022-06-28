@@ -123,7 +123,7 @@ subroutine bastp1sg(jchn, lchn, ischn, jlev, elev, islev, nlev, &
      nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, bastst, &
      ihomo, nu, numin, jlpar, twomol, nchn, nmax, ntop, v2)
 use mod_stp1sg
-use mod_cov2, only: ancou_type, ancouma_type
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cchn => cent
 use mod_coeint, only: echn => eint
 use mod_coj12, only: j12chn => j12

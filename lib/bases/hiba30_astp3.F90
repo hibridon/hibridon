@@ -159,7 +159,7 @@ subroutine baastp3 (j, l, is, jhold, ehold, ishold, nlevel, &
 !               molecules with Cs symmetry.  (set iop equal to zero in this case)
 ! --------------------------------------------------------------------
 use mod_asymln
-use mod_cov2, only: ancou_type, ancouma_type
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coj12, only: j12

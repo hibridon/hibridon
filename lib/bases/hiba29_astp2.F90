@@ -135,7 +135,7 @@ subroutine baastp2(j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !   rotham:     computes matrix elements of asymmetric top hamiltonian
 ! --------------------------------------------------------------------
 use mod_chiral
-use mod_cov2, only: ancou_type, ancouma_type
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coatpi, only: narray, isiz

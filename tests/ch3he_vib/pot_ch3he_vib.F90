@@ -416,7 +416,7 @@ subroutine bausr(j, l, is, jhold, ehold, ishold, nlevel, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 !
 use mod_hibasutil, only: vlmstp, iswap
-use mod_cov2, only: ancou_type, ancouma_type
+use mod_ancou, only: ancou_type, ancouma_type
 use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
 #include "pot_ch3he_vib_common.f90"
 integer, intent(out) :: j(:)

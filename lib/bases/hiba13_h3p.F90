@@ -102,7 +102,7 @@ subroutine bah3p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !   vlmh3p:    returns angular coupling coefficient for particular
 !              choice of channel index
 ! ------------------------------------------------------------
-use mod_cov2, only: ancou_type, ancouma_type
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coj12, only: j12

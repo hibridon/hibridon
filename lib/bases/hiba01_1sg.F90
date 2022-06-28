@@ -115,7 +115,7 @@ subroutine ba1sg (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !              particular choice of initial and final channel quantum numbers
 !
 ! --------------------------------------------------------------------
-use mod_cov2, only: ancou_type, ancouma_type
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam

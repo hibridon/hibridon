@@ -157,7 +157,7 @@ subroutine basgpi1(j, l, is, jhold, ehold, ishold, nlevel, &
 !   vlm2pi:     computes coupling matrix elements between case a 2pi levels
 !               (in hiba2pi.f)
 ! --------------------------------------------------------------------
-use mod_cov2, only: ancou_type, ancouma_type
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_cotq1, only: vec => tq1 ! vec(3,3)

@@ -34,7 +34,7 @@ subroutine bound(nch, nmax, v2)
 use mod_coiout, only: niout
 use mod_version, only : version
 use constants, only: econv, xmconv 
-use mod_cov2, only: ancou_type
+use mod_ancou, only: ancou_type
 
 implicit none
 integer, intent(in) :: nch, nmax
@@ -464,7 +464,7 @@ return
 end subroutine wpr_bound
 !     ------------------------------------------------------------------
 subroutine vmat_bound(wr, r, nch, nmax, v2)
-use mod_cov2, only: ancou_type
+use mod_ancou, only: ancou_type
 use mod_hibrid3, only: potmat
 implicit none
 integer, intent(in) :: nch, nmax

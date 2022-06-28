@@ -118,7 +118,7 @@ subroutine ba1sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
 !              particular choice of channel index
 ! --------------------------------------------------------------------
 use mod_1sg1sg
-use mod_cov2, only: ancou_type, ancouma_type
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coj12, only: j12
