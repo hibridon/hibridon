@@ -1514,7 +1514,7 @@ write (9,35) profile
 #endif
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 write (6,40)
-write (8,40)
+write (9,40)
 40 format('*** COMMAND SYSCONF NOT IMPLEMENTED FOR CURRENT O/S')
 #endif
 return
