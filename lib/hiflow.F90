@@ -169,6 +169,9 @@ real(8) :: rstrt0, rtmn1, rtmnla, rtmx1, rtmxla
 real(8) :: t1, t11, t2, t22, tb, tbm, tcpu0, tcpu1, tcpu2, tcpuf, twall0, twall1, twall2, twallf
 real(8) :: xjtot
 
+real(8) :: second
+
+
 first=.true.
 !  get default data
 call set_default_params

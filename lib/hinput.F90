@@ -1555,8 +1555,8 @@ use mod_hiparcst, only: IPAR_COUNT
 use rpar_enum
 implicit none
 logical, intent(in) :: boundc
-character*8, intent(out) :: param_names(param_names_size)  ! array containing the name of each parameter (old name: pcod)
 integer, intent(in) :: param_names_size  ! size of param_names array
+character*8, intent(out) :: param_names(param_names_size)  ! array containing the name of each parameter (old name: pcod)
 if (boundc) then
   param_names(IPAR_COUNT + RPAR_BOUND_R1)      = 'R1'
   param_names(IPAR_COUNT + RPAR_BOUND_R2)      = 'R2'
