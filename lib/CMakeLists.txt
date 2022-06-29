@@ -6,6 +6,9 @@
 
 set(ENABLE_ASSERTS "ON" CACHE BOOL "to enable or disable assert checks for debug builds (mostly for developers).")
 
+# With gfortran, variables are initialized to 0 by default, but it's not the case with ifort compiler. Therefore, all variables need to be initialized to guarantee the program works in a deterministic way on every compiler.
+set(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR "ON" CACHE BOOL "if set, causes the use of uninitilazed variables to trigger an exception on debug builds, thus making the program stop. This is useful to detect uninitialized memory issues.")
+
 add_library(hib
     assert.f90
     hiamp.F90
@@ -100,9 +103,19 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<CONFIG:DEBUG>:-Wall>                  # Enable all warnings
       $<$<CONFIG:DEBUG>:-Wextra>                # Enable extra warnings
       $<$<CONFIG:DEBUG>:-fsanitize=address>     # Address sanitizer
-      $<$<CONFIG:DEBUG>:-Wuninitialized>        # Emit warnings for uninitialized variables 
-      $<$<CONFIG:DEBUG>:-finit-integer=333333333> # initialize variables to non zero values to ease detection of uninitialized variables (some compilers simply don't initialize variables)
-      $<$<CONFIG:DEBUG>:-finit-real=snan> # initialize variables to non zero values to ease detection of uninitialized variables (some compilers simply don't initialize variables)
+      $<$<AND:$<NOT:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>>,$<CONFIG:DEBUG>>:-Wuninitialized>        # Emit warnings for uninitialized variables. Disable -Wuninitialized when ENABLE_UNINIT_VAR_RUNTIME_DETECTOR is on because the the -finit-* options then used make -Wuninitialized have no effect, see gfortran documentation :
+      # Finally, note that enabling any of the -finit-* options will silence warnings that would have been emitted by -Wuninitialized for the affected local variables.
+
+      # handle ENABLE_UNINIT_VAR_RUNTIME_DETECTOR
+      # don't initialize local variables to zero : initialize them with dummy values to force failures which help detect uninitialized variables as -Wuninitialized doesn't detect everything (see issue #38 or https://stackoverflow.com/questions/39591300/gfortran-wuninitialized-flag-misses-variable-in-do-loop)
+      # by default, gfortran initializes integers to 0, but not ifort : as a result, some bugs in the code are hidden with gfortran default options
+      # set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -fno-init-local-zero")
+      # initialize variables to something else than 0 to force the programe to behave badly in case of unitialized variables
+      $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-finit-integer=333333333>
+      $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-finit-real=snan>
+      $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-ffpe-trap=invalid,zero,overflow>
+
+
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -fprofile-arcs -ftest-coverage at compile time)
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
       $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
@@ -128,10 +141,23 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
       $<$<CONFIG:DEBUG>:-g>                   # Generates complete debugging information
       $<$<CONFIG:DEBUG>:-traceback>               # Generates extra information in the object file to provide source file traceback information when a severe error occurs at run time
       $<$<CONFIG:DEBUG>:-fp-stack-check>          # Tell the compiler to generate extra code after every function call to ensure that the floating-point stack is in the expected state
-      $<$<CONFIG:DEBUG>:-init=zero>             # Init integer and logical variables to zero/false/null instead of random to avoid random bugs
-      $<$<CONFIG:DEBUG>:-init=snan>             # Init real variables to signaling nans to detect uninitialized variables
-      $<$<CONFIG:DEBUG>:-init=array>            # also initialize arrays to avoid random behaviours caused by use of uninitialized variables
       #$<$<CONFIG:DEBUG>:-warn all>                # Enable all warnings
+
+      # handle ENABLE_UNINIT_VAR_RUNTIME_DETECTOR
+      # Force à NaN toutes les variables de type intrinsèque ainsi que les tableaux non initialisés. Cette option implique -fpe0. Pour éviter de récupérer des exceptions, qui ne soient pas relatives à des variables non-initialisées, nous recommandons de réduire le niveau d'optimisation à -O1 ou -O0 ou alors d'utiliser -fp-speculation=safe pour faire la détection de variables non-initialisés.
+      $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-init=zero>   # Init integer and logical variables to zero/false/null instead of random to avoid random bugs
+      $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-init=snan>    # Init real variables to signaling nans to detect uninitialized variables
+      $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-init=arrays>    # also initialize arrays to avoid random behaviours caused by use of uninitialized variables
+
+      # check uses of uninitialized variables in run time
+      # this is very useful as these are always bugs that cause the program to behave randomly with ifort (gfortran initializes data with zero)
+      $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-check uninits>
+
+      # Cette combinaison d'options stoppe l'exécution dès qu'une exception (overflow, underflow, division par zéro, opération invalide,…) se produit; elle indique à quel niveau du code elle s'est produite. Le contrôle s'opère dans chaque subroutine, contrairement à l'option -fpe0 qui agit uniquement sur le programme principal. 
+      # $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-fpe-all=0>
+      # $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-no-ftz=0>
+      # $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-traceback=0>
+
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
       $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
     )
@@ -176,6 +202,9 @@ if (CMake_Fortran_COMPILER_ID STREQUAL "GNU")
 elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
   target_compile_definitions(hib PUBLIC HIB_UNIX_IFORT=1)
 endif()
+
+# make the code aware that ENABLE_UNINIT_VAR_RUNTIME_DETECTOR is on, to allow the code to use workarounds to prevent the code from stopping because of use on unintialized variables in some libraries we have no control (eg mkl's dsyevr function uses uninitialized variables) 
+target_compile_definitions(hib PUBLIC $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:FLOATING_POINT_ERRORS_CAUSE_EXCEPTIONS=1>)
 
 # The following is for preprocessing of hiversion.F90
 target_compile_definitions(hib PUBLIC _BUILD_VERS_=${PROJECT_VERSION})
