@@ -96,6 +96,8 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<PLATFORM_ID:Linux>:-mcmodel=large>    # Required on Linux
       # Config-specific options: RELEASE
       $<$<CONFIG:RELEASE>:-O3>                  # Optimization level at 3 for Release
+      $<$<CONFIG:RELEASE>:-flto>                # Activate link time optimizations so that gfortran can inline some function calls
+      $<$<CONFIG:RELEASE>:-fopt-info>           # You can get some information from gfortran with the flag -fopt-info that will tell you about optimizations missed or performed by the compiler
       $<$<CONFIG:RELEASE>:-finit-local-zero>    # Init variables to zero/false/null
       # Config-specific options: DEBUG
       $<$<CONFIG:DEBUG>:-O0>                    # Optimization level at 0
@@ -109,11 +111,6 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -fprofile-arcs -ftest-coverage at compile time)
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
       $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
-
-      -flto                                     # Activate link time optimizations so that gfortran can inline some function calls
-      # -fwhole-program
-      #-fuse-linker-plugin
-      #-fopt-info                                # You can get some information from gfortran with the flag -fopt-info that will tell you about optimizations missed or performed by the compiler
     )
 # Intel (ifort)
 elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
@@ -156,10 +153,8 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -lgcov at link time)
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
       $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
-      -flto                                     # Activate link time optimizations so that gfortran can inline some function calls
-      #-fuse-linker-plugin
-      #-fwhole-program
-      #-fopt-info                                # You can get some information from gfortran with the flag -fopt-info that will tell you about optimizations missed or performed by the compiler
+      $<$<CONFIG:RELEASE>:-flto>                # Activate link time optimizations so that gfortran can inline some function calls
+      $<$<CONFIG:RELEASE>:-fopt-info>           # You can get some information from gfortran with the flag -fopt-info that will tell you about optimizations missed or performed by the compiler
     )
 # Intel (ifort)
 elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
