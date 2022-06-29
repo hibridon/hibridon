@@ -4,10 +4,10 @@ module mod_ancou
 
    use mod_grovec, only: dgrovec_type, igrovec_type
    implicit none
-   integer, public, protected :: g_num_ancou_set_calls = 0
-   integer, public, protected :: g_num_ancou_get_calls = 0
-   integer, public, protected :: g_num_ancouma_set_calls = 0
-   integer, public, protected :: g_num_ancouma_get_calls = 0
+   integer(8), public, protected :: g_num_ancou_set_calls = 0
+   integer(8), public, protected :: g_num_ancou_get_calls = 0
+   integer(8), public, protected :: g_num_ancouma_set_calls = 0
+   integer(8), public, protected :: g_num_ancouma_get_calls = 0
    integer, public, protected :: g_num_ancou_instances = 0
    integer, public, protected :: g_num_ancouma_instances = 0
    ! ancouma_type stores the angular coupling matrix related to a singe lambda
@@ -26,6 +26,7 @@ module mod_ancou
      procedure                  :: get_num_nonzero_elements => ancouma_type_get_num_nonzero_elements
      procedure                  :: get_element => ancouma_type_get_element
      procedure                  :: set_element => ancouma_type_set_element
+     procedure                  :: get_allocated_mem => ancouma_type_get_allocated_mem
      procedure                  :: get_used_mem => ancouma_type_get_used_mem
    end type ancouma_type
 
@@ -87,8 +88,8 @@ module mod_ancou
       g_num_ancouma_set_calls = g_num_ancouma_set_calls + 1
    end subroutine
 
-   ! returns the memory used by this instance of ancouma_type
-   function ancouma_type_get_used_mem(this) result(num_bytes)
+   ! returns the memory allocated by this instance of ancouma_type
+   function ancouma_type_get_allocated_mem(this) result(num_bytes)
       class(ancouma_type) :: this
       integer             :: num_bytes
 
@@ -96,6 +97,16 @@ module mod_ancou
       integer, parameter :: size_of_double = 8
       num_bytes = this%v2d%num_allocated_blocks * this%v2d%block_size * size_of_double & 
                 + this%v2i%num_allocated_blocks * this%v2i%block_size * size_of_int
+   end function
+
+   ! returns the memory used by this instance of ancouma_type
+   function ancouma_type_get_used_mem(this) result(num_bytes)
+      class(ancouma_type) :: this
+      integer             :: num_bytes
+
+      integer, parameter :: size_of_int = 4
+      integer, parameter :: size_of_double = 8
+      num_bytes = this%get_num_nonzero_elements() * (size_of_int + size_of_double)
    end function
 
    !
@@ -246,37 +257,42 @@ module mod_ancou
       integer, intent(in) :: unit
       integer :: ilam, num_lam_nz_elements, num_channels, lam_num_elements
       integer :: num_nz_elements, num_elements
+      integer(8) :: allocated_memory  ! in bytes
       integer(8) :: used_memory  ! in bytes
+      allocated_memory = 0
       used_memory = 0
       num_nz_elements = int(0, 8)
       num_elements = int(0, 8)
       do ilam = 1, this%nlam
          if (this%ancouma(ilam)%is_allocated) then
+            allocated_memory = allocated_memory + this%ancouma(ilam)%get_allocated_mem()
             used_memory = used_memory + this%ancouma(ilam)%get_used_mem()
             num_channels = this%ancouma(ilam)%num_channels
             lam_num_elements = num_channels * num_channels
             num_lam_nz_elements = this%ancouma(ilam)%get_num_nonzero_elements()
             if (num_lam_nz_elements > 0) then
-               write (unit,'(A, I3, A, I10, A, I10, A, F6.2, A)') 'ilam = ', ilam, ' : ', num_lam_nz_elements, '/', lam_num_elements ,' non zero elements (', real(num_lam_nz_elements, 8) / lam_num_elements * 100.d0, '%)'
+               write (unit,'(A, I3, A, I10, A, I10, A, F6.2, A)') 'ilam = ', ilam, ' : ', num_lam_nz_elements, '/', lam_num_elements ,' non zero elements (sparsity: ', real(num_lam_nz_elements, 8) / lam_num_elements * 100.d0, '%)'
                num_nz_elements = num_nz_elements + num_lam_nz_elements
             end if
             num_elements = num_elements + lam_num_elements
          end if
       end do
-      write (unit,'(A, I10, A, I10, A, F6.2, A)') 'total : ', num_nz_elements, '/', num_elements ,' non zero elements (', real(num_nz_elements, 8) / num_elements * 100.d0, '%)'
-      write (unit,'(A, I20, A)') 'memory used : ', used_memory, ' bytes'
+      write (unit,'(A, I10, A, I10, A, F6.2, A)') 'total : ', num_nz_elements, '/', num_elements ,' non zero elements (sparsity :', real(num_nz_elements, 8) / num_elements * 100.d0, '%)'
+      write (unit,'(A, F6.2, A, I15, A, I15, A)') 'storage efficiency : ', real(used_memory, 8) / real(allocated_memory, 8) * 100.d0,'% (', used_memory,' used bytes / ', allocated_memory,' allocated bytes)'
+      
    end subroutine 
 
    ! end of ancou_type implmentation
 
-   subroutine print_ancou_stats()
+   subroutine print_ancou_stats(unit)
       implicit none
-      write(6,*) "number of calls to ancou_type%set_element : ", g_num_ancou_set_calls
-      write(6,*) "number of calls to ancou_type%get_element : ", g_num_ancou_get_calls
-      write(6,*) "number of calls to ancouma_type%set_element : ", g_num_ancouma_set_calls
-      write(6,*) "number of calls to ancouma_type%get_element : ", g_num_ancouma_get_calls
-      write(6,*) "number of ancou_type instances created : ", g_num_ancou_instances
-      write(6,*) "number of ancouma_type instances created : ", g_num_ancouma_instances
+      integer, intent(in) :: unit
+      write(unit,*) "number of calls to ancou_type%set_element : ", g_num_ancou_set_calls
+      write(unit,*) "number of calls to ancou_type%get_element : ", g_num_ancou_get_calls
+      write(unit,*) "number of calls to ancouma_type%set_element : ", g_num_ancouma_set_calls
+      write(unit,*) "number of calls to ancouma_type%get_element : ", g_num_ancouma_get_calls
+      write(unit,*) "number of ancou_type instances created : ", g_num_ancou_instances
+      write(unit,*) "number of ancouma_type instances created : ", g_num_ancouma_instances
    end subroutine
 
 end module mod_ancou

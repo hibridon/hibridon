@@ -39,8 +39,9 @@ contains
 #undef GROVEC_ELEMENT_TYPE
 #undef GROVEC_CLASS_NAME
 
-subroutine print_grovec_stats()
-  write(6, *) 'number of allocated grovec blocks: ', g_num_allocated_blocks
+subroutine print_grovec_stats(unit)
+  integer, intent(in) :: unit
+  write(unit, *) 'number of allocated grovec blocks: ', g_num_allocated_blocks
 end subroutine
 
 

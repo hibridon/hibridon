@@ -109,6 +109,11 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -fprofile-arcs -ftest-coverage at compile time)
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
       $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
+
+      -flto                                     # Activate link time optimizations so that gfortran can inline some function calls
+      # -fwhole-program
+      #-fuse-linker-plugin
+      #-fopt-info                                # You can get some information from gfortran with the flag -fopt-info that will tell you about optimizations missed or performed by the compiler
     )
 # Intel (ifort)
 elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
@@ -151,6 +156,10 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -lgcov at link time)
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
       $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
+      -flto                                     # Activate link time optimizations so that gfortran can inline some function calls
+      #-fuse-linker-plugin
+      #-fwhole-program
+      #-fopt-info                                # You can get some information from gfortran with the flag -fopt-info that will tell you about optimizations missed or performed by the compiler
     )
 # Intel (ifort)
 elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
