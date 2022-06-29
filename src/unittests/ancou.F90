@@ -51,6 +51,23 @@ end subroutine system_mem_usage
 #endif
 
 
+#define ANCOUMA_READ_METHOD_NORMAL 0
+#define ANCOUMA_READ_METHOD_INLINE_LEVEL1 1
+#define ANCOUMA_READ_METHOD_INLINE_LEVEL2 2
+#define ANCOUMA_READ_METHOD_INLINE_LEVEL3 3
+
+#define ANCOUMA_READ_METHOD ANCOUMA_READ_METHOD_NORMAL
+
+
+#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL1)
+
+#define ANCOUMA_GET_ELEMENT(ancouma, element_index, ij, vee) \
+ij = ancouma%v2i%get_element(iv2_element) ; \
+vee = ancouma%v2d%get_element(iv2_element)
+
+#endif
+
+
 subroutine test_alloc_simpler
    implicit none
    integer :: i, block_size
@@ -84,16 +101,27 @@ subroutine test_alloc_simpler
    end do
 end subroutine test_alloc_simpler
 
+! ancou statistics from test nh3h2_qma_long
+!  total :   24452296/ 834406375 non zero elements (sparsity :  2.93%)
+!  storage efficiency :  29.30% (      293427552 used bytes /      1001544720 allocated bytes)
+!   number of calls to ancou_type%set_element :                     0
+!   number of calls to ancou_type%get_element :                     0
+!   number of calls to ancouma_type%set_element :              24452296
+!   number of calls to ancouma_type%get_element :                     0
+!   number of ancou_type instances created :            1
+!   number of ancouma_type instances created :           55
+
 program test_ancou_type
     use mod_ancou, only: ancou_type, ancouma_type, print_ancou_stats
-    use mod_grovec, only: print_grovec_stats
+    use mod_grovec, only: print_grovec_stats, igrovec_type_block, dgrovec_type_block
+
     implicit none
-    integer :: nlam = 80
-    integer :: num_channels = 70
+    integer :: nlam = 55  ! same as nh3h2_qma_long test
+    integer :: num_channels = 3895  ! same as nh3h2_qma_long test
     integer :: ilam
     integer :: irow, icol
-    integer :: nloops = 6
-    integer :: nread_loops = 200
+    integer :: nloops = 1
+    integer :: nread_loops = 120  ! generates roughly the same number of calls to  ancouma_type%get_element (3003864600) than nh3h2_qma_long test (3032084704)
     integer :: iloop, iread_loop
     integer :: iv2_element, num_nz_elements
     integer :: num_elements
@@ -103,14 +131,25 @@ program test_ancou_type
 #endif
     real(8) :: vee
     real(8) :: sum
-    real(8) :: fill_ratio = 0.18
+    real(8) :: fill_ratio = 0.03  ! roughly the same as nh3h2_qma_long test (2.93%)
 #ifdef TEST_V2MAT_USE_ASSOCIATE
     type(ancou_type) :: v2
 #else
     type(ancou_type) :: v2, target
     type(ancouma_type), pointer :: ancouma
 #endif
+#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL2) || (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL3)
+integer :: block_size
+integer :: block_index
+integer :: el_index_in_block
+#endif
 
+#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL3)
+integer :: num_full_blocks
+integer :: num_remaining_nz_elements
+type(igrovec_type_block), pointer :: blocki
+type(dgrovec_type_block), pointer :: blockd
+#endif
    !call test_alloc_simpler()
    !stop
 
@@ -148,10 +187,59 @@ program test_ancou_type
 #endif
              num_nz_elements = ancouma%get_num_nonzero_elements()
              ASSERT(num_nz_elements >= 0)
+
+#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_NORMAL )
              do iv2_element = 1, num_nz_elements
-               call ancouma%get_element(iv2_element, ij, vee)
+               call ancouma%get_element(iv2_element, ij, vee)  
                sum = sum + vee
              end do
+#endif
+
+#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL1)
+             do iv2_element = 1, num_nz_elements
+               ANCOUMA_GET_ELEMENT(ancouma, iv2_element, ij, vee)
+               sum = sum + vee
+             end do
+#endif
+
+#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL2)
+             block_size = ancouma%v2i%block_size
+             do iv2_element = 1, num_nz_elements
+               block_index =  (iv2_element-1) / block_size
+               el_index_in_block = iv2_element - 1 - (block_index * block_size)
+               ij = ancouma%v2i%blocks(block_index)%p(el_index_in_block)
+               vee = ancouma%v2d%blocks(block_index)%p(el_index_in_block)
+               sum = sum + vee
+             end do
+#endif
+
+#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL3)
+             block_size = ancouma%v2i%block_size
+             num_full_blocks = ((num_nz_elements - 1) / block_size)
+             iv2_element = 0
+             do block_index = 0, num_full_blocks-1
+               blocki => ancouma%v2i%blocks(block_index)
+               blockd => ancouma%v2d%blocks(block_index)
+               do el_index_in_block = 0, block_size-1
+                 ij = blocki%p(el_index_in_block)
+                 vee = blockd%p(el_index_in_block)
+                 iv2_element = iv2_element + 1
+                 sum = sum + vee
+               end do
+             end do
+             num_remaining_nz_elements = num_nz_elements - iv2_element
+             if (num_remaining_nz_elements > 0) then
+               blocki => ancouma%v2i%blocks(num_full_blocks)
+               blockd => ancouma%v2d%blocks(num_full_blocks)
+               do el_index_in_block = 0, num_remaining_nz_elements-1
+                 ij = blocki%p(el_index_in_block)
+                 vee = blockd%p(el_index_in_block)
+                 iv2_element = iv2_element + 1
+                 sum = sum + vee
+               end do
+             end if
+#endif
+
 #ifdef TEST_V2MAT_USE_ASSOCIATE
              end associate
 #endif
@@ -163,6 +251,6 @@ program test_ancou_type
       write (6,*) 'mem used by this process : ', mem_used_by_this_process, ' kbytes'
 #endif      
    end do
-   call print_grovec_stats()
-   call print_ancou_stats()
+   call print_grovec_stats(unit=6)
+   call print_ancou_stats(unit=6)
 end program test_ancou_type
