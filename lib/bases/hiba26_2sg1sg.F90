@@ -1,4 +1,7 @@
-! sys2sg1sg (sav2sg1sg/ptr2sg1sg) defines, saves variables and reads     *
+#include "assert.h"
+module mod_hiba26_2sg1sg
+contains
+! sy2sg1sg (sav2sg1sg/ptr2sg1sg) defines, saves variables and reads     *
 !                  potentials for 2sigma - 1sigma                        *
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision
@@ -34,7 +37,7 @@
 subroutine ba2sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
      nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
      flaghf, flagsu, csflag, clist, bastst, ihomo, &
-     nu, numin, jlpar, n, nmax, ntop)
+     nu, numin, jlpar, n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  variables in call list:
 !    j:        on return contains combined rotational quantum numbers for each
@@ -118,16 +121,18 @@ subroutine ba2sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
 !              particular choice of channel index
 ! --------------------------------------------------------------------
 use mod_1sg1sg
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coj12, only: j12
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
+
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 integer :: ifs1
 integer :: nn
@@ -408,14 +413,16 @@ if (bastst .and. iprint.eq.2) then
 285   format (/' ILAM  L1   L2  LTOT   ICOL IROW      I', &
     '      IV2         VEE')
 end if
-i = 0
 lamsum = 0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 400 ilam = 1, nlam
 !     ilam denotes a particular L1,L2,L term
   ll1 = lms(ilam)%l1
   ll2 = lms(ilam)%l2
   lltot = lms(ilam)%ltot
   inum = 0
+  ancouma => v2%get_angular_coupling_matrix(ilam)
   do 355 icol = 1, n
     j1c = j(icol)/10
     iepsc = is(icol)
@@ -423,7 +430,6 @@ do 400 ilam = 1, nlam
     j12c = j12(icol)
     lc = l(icol)
     do 350 irow = icol, n
-      ij = ntop * (icol - 1) + irow
       j1r = j(irow)/10
       iepsr = is(irow)
       j2r = mod(j(irow),10)
@@ -434,39 +440,28 @@ do 400 ilam = 1, nlam
       call v2sgsg(j1r,iepsr,j2r,j12r,lr,j1c,iepsc, &
           j2c,j12c,lc,jtot,ll1,ll2,lltot,vee)
       if (vee .ne. zero) then
-        i = i + 1
-        if (i .le. nv2max) then
-          inum = inum + 1
-          v2(i) = vee
-          iv2(i) = ij
-          if (bastst .and. iprint.ge.2) then
-            write (6, 290) ilam, ll1, ll2, lltot, &
-                icol, irow, i, iv2(i), vee
-            write (9, 290) ilam, ll1, ll2, lltot, &
-                icol, irow, i, iv2(i), vee
-290             format (i4, 3i5, 2x, 2i5, 2i8, e20.7)
-          end if
+        inum = inum + 1
+        call ancouma%set_element(irow=irow, icol=icol, vee=vee)
+        if (bastst .and. iprint.ge.2) then
+          write (6, 290) ilam, ll1, ll2, lltot, &
+              icol, irow, i, vee
+          write (9, 290) ilam, ll1, ll2, lltot, &
+              icol, irow, i, vee
+290             format (i4, 3i5, 2x, 2i5, i8, e20.7)
         end if
       end if
 350     continue
 355   continue
-  if (i .le. nv2max) lamnum(ilam) = inum
   if (bastst) then
-    write (6, 370) ilam, lamnum(ilam)
-    write (9, 370) ilam, lamnum(ilam)
+    write (6, 370) ilam, ancouma%get_num_nonzero_elements()
+    write (9, 370) ilam, ancouma%get_num_nonzero_elements()
 370     format ('ILAM=',i4,' LAMNUM(ILAM) = ',i7)
   end if
-  lamsum = lamsum + lamnum(ilam)
+  lamsum = lamsum + ancouma%get_num_nonzero_elements()
 400 continue
-if (i .gt. nv2max) then
-  write (6, 410) i, nv2max
-  write (6, 410) i, nv2max
-410   format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-      ' .GT. NV2MAX=',i6,'; ABORT ***')
-end if
 if (clist .and. bastst) then
-  write (6, 420) lamsum
-  write (9, 420) lamsum
+  write (6, 420) v2%get_num_nonzero_elements()
+  write (9, 420) v2%get_num_nonzero_elements()
 420   format (' *** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', &
       i8)
 end if
@@ -536,7 +531,7 @@ vee = phase * facj * cg1 * cg2 * cg3 * f6j * f9j / sq4pi3
 return
 end
 ! -----------------------------------------------------------------------
-subroutine sys2sg1sg (irpot, readp, iread)
+subroutine sy2sg1sg (irpot, readp, iread)
 !  subroutine to read in system dependent parameters for collisions of
 !  2sigma + 1sigma linear molecules
 !  current revision date: 26-aug-2017 by p.dagdigian
@@ -666,3 +661,4 @@ end
 
 ! --------------------------------eof---------------------------------
 
+end module mod_hiba26_2sg1sg

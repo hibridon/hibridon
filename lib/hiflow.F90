@@ -1,3 +1,4 @@
+#include "assert.h"
 !  -------------------------------------------------------------
 module mod_flow
 contains
@@ -107,13 +108,15 @@ use mod_cosout, only: nnout, jout
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coener, only: energ
-use mod_hiba1sg, only : basis
+use mod_hibasis, only : basis
 use mod_version, only : version, acknow
 use mod_hibrid5, only : soutpt, nusum, xwrite, wrhead, restrt, rsave
+use mod_ancou, only: ancou_type
 use constants
 use mod_hibrid2, only: default
 use mod_hibrid3, only: propag
 implicit double precision (a-h,o-z)
+type(ancou_type), allocatable :: v2
 integer :: jtotmx
 character*20 cdate
 character*10 time
@@ -463,7 +466,12 @@ if (ien .eq. 1) then
   call basis (jq, lq, inq, jlev, elev, inlev, nlevel, nlevop, &
               sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
               csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-              twomol, nch, nmax, nchtop)
+              twomol, nch, nmax, nchtop, v2)
+
+  ! if nch == 0, then v2 is usually not allocated at all
+  if ( nch > 0 ) then
+    ASSERT(allocated(v2))  ! if this fails, this means that the used base doesn't yet support v2 as growable array
+  end if
 
 #ifdef ENSURE_BASIS_SCRATCHS_ARE_REAL_SCRATCHS
   do i = 1, nmax
@@ -659,7 +667,7 @@ call propag (z, w, zmat, amat, bmat, &
              ien, nerg, ered, eshift, rstart, rendld, spac, &
              tolhi, rendai, rincr, fstfac, tb, tbm, &
              ipos, logwr, noprin, airyfl, airypr, &
-             nch, nopen, nairy, ntop)
+             nch, nopen, nairy, ntop, v2)
 
 ! if bound state calculation, end it now
 if (boundc) then

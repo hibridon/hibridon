@@ -1,17 +1,17 @@
 ! syh2p (savh2p/ptrh2p) defines, saves variables and reads               *
 !                  potential for homonuclear+2P atom scattering          *
 ! --------------------------------------------------
+#include "assert.h"
+module mod_hiba12_h2p
+contains
 subroutine bah2p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
-                  isc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
+                  sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-                  n, nmax, ntop)
+                  n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential
 !  for collision of a doublet atom in a P state and a homonuclear molecule
 !  authors:  millard alexander
-!
-!  moved j12 (renamed isc1 array) to common block /coj12/ to pass array
-!  to other subrs (p.dagdigian)
 !
 !  revised routine so that CC scattering calculations work.  it appears that
 !  this routine had previously been used only for bound-state calculations
@@ -40,7 +40,7 @@ subroutine bah2p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !    nlevop:   on return contains number of energetically distinct
 !              levels used in channel basis which are open
 !              asymptotically
-!    isc1,sc2: scratch vectors of length at least nmax
+!    sc1,sc2: scratch vectors of length at least nmax
 !    sc3,sc4:  scratch vectors of length at least nmax
 !    rcut:     cut-off point for keeping higher energy channels
 !              if any open channel is still closed at r=rcut, then
@@ -100,7 +100,6 @@ subroutine bah2p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !    nlam:     the number of case(a) interaction potentials actually used
 !              if this has not been set in the pot subroutine, it it
 !              here set to 5
-!    nlammx:   the maximum number of angular coupling terms
 !  variable in common block /coconv/
 !     econv:   conversion factor from cm-1 to hartrees
 !     xmconv:  converson factor from amu to atomic units
@@ -108,16 +107,17 @@ subroutine bah2p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !   vlmh2p:    returns angular coupling coefficient for particular
 !              choice of channel index
 ! ------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coj12, only: j12
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable :: v2
+type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
@@ -125,7 +125,7 @@ common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 common /coskip/ nskip, iskip
 common /cojtot/ jjtot,jjlpar
-dimension j(9), l(9), jhold(9), ehold(9), isc1(9), sc2(9), sc3(9), &
+dimension j(9), l(9), jhold(9), ehold(9), sc2(9), sc3(9), &
           sc4(9), ishold(9), is(9), isc8(9)
 dimension lamr(13),lama(13),lam12(13), mu(13)
 dimension lamrold(9),lamaold(9),lam12old(9), muold(9)
@@ -628,11 +628,13 @@ end if
 ! inum counts v2 elements for given lambda
 ! ilam counts number of v2 matrices
 ! ij is address of given v2 element in present v2 matrix
-i = 0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=lammax(1), num_channels=ntop)
 ilam=0
 do 320 il = 1,lammax(1)
 !      do 320 il = 4,4
   ilam=ilam+1
+  ancouma => v2%get_angular_coupling_matrix(il)
   inum = 0
   ij=0
   if (lammax(1) .eq. 13) then
@@ -678,54 +680,34 @@ do 320 il = 1,lammax(1)
 !    : j(irow),j(icol),nu,ilamr,ilama,ilam12,vee
 291  format(14i3,g17.8)
       if (vee .eq. 0) goto 300
-        i = i + 1
         inum = inum + 1
-        if (i .gt. nv2max) goto 300
-          v2(i) = vee
-          iv2(i) = ij
+          call ancouma%set_element(irow, icol, vee)
           if (bastst .and. clist) then
             if (.not. csflag .or. (csflag .and. ihomo)) then
               write (6, 290) ilam, ilamr,ilama,ilam12, icol, irow, &
-                           i, iv2(i), vee
+                           i, ij, vee
               write (9, 290) ilam, ilamr,ilama,ilam12, icol, irow, &
-                           i, iv2(i), vee
+                           i, ij, vee
 290               format (i4, i5,2i3,i5, 2i6, i6, g17.8)
             elseif (csflag .and. .not.ihomo) then
               write (6, 290) ilam, ilamr,ilama,imu, icol, irow, &
-                           i, iv2(i), vee
+                           i, ij, vee
               write (9, 290) ilam, ilamr,ilama,imu, icol, irow, &
-                           i, iv2(i), vee
+                           i, ij, vee
             endif
           endif
 300     continue
 310   continue
-if(ilam.gt.nlammx) then
-  write(6,311) ilam
-311   format(/' ILAM.GT.NLAMMX IN BA22P')
-  call exit
-end if
 
-lamnum(ilam) = inum
 if (bastst .and. iprint .gt. 1) then
-  write (6, 315) ilam, lamnum(ilam)
-  write (9, 315) ilam, lamnum(ilam)
+  write (6, 315) ilam, ancouma%get_num_nonzero_elements()
+  write (9, 315) ilam, ancouma%get_num_nonzero_elements()
 315   format ('ILAM=',i3,' LAMNUM(ILAM) = ',i6)
 end if
 320 continue
-if ( i.gt. nv2max) then
-  write (6, 350) i, nv2max
-  write (9, 350) i, nv2max
-350   format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-  if (bastst) then
-    return
-  else
-    call exit
-  end if
-end if
 if (clist) then
-  write (6, 360) i
-  write (9, 360) i
+  write (6, 360) v2%get_num_nonzero_elements()
+  write (9, 360) v2%get_num_nonzero_elements()
 360   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', &
            i6)
 end if
@@ -1083,3 +1065,4 @@ write (8, 250) brot, aso
 write (8, 60) potfil
 return
 end
+end module mod_hiba12_h2p

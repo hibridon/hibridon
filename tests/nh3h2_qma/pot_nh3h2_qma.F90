@@ -22,6 +22,7 @@
 !     NOTE THAT VVL IS IN HARTREES.
 subroutine driver
 use mod_covvl, only: vvl
+use mod_hibasutil, only: raise
 use constants, only: econv, xmconv
 implicit none
 !
@@ -56,6 +57,7 @@ goto 10
 !     ------------------------------------------------------------------
 !     DATA FILE, IF REQUIRED, CAN BE LOADED WITH THIS SOUBROUTINE.
 subroutine loapot(iunit, filnam)
+use mod_hibasutil, only: raise
 use constants, only: econv, xmconv
 implicit none
 !
@@ -152,6 +154,7 @@ subroutine syusr(irpot, readpt, iread)
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use mod_hibasutil, only: raise
 use constants, only: econv, xmconv
 implicit none
 !
@@ -242,23 +245,54 @@ end
 !     ALSO CALCULATE NON-ZERO COUPLING MATRIX ELEMENTS AND RETURN IN V2,
 !     IV2, LAMNUM.
 subroutine bausr(j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
-     k, ieps, jtemp, ktemp, rcut, jtot, flaghf, flagsu, csflag, &
-     clist, bastst, ihomo, nu, numin, jlpar, n, nmax, ntop)
-use mod_cov2, only: nv2max, v2
-use mod_coiv2, only: iv2
+     sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, csflag, &
+     clist, bastst, ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_coamat, only: ietmp ! ietmp(1)
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use mod_hibasutil, only: vlmstpln, raise
 use constants, only: econv, xmconv
+use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
 implicit none
-!
+integer, intent(out) :: j(:)
+integer, intent(out) :: l(:)
+integer, intent(out) :: is(:)
+integer, intent(out), dimension(:) :: jhold
+real(8), intent(out), dimension(:) :: ehold
+integer, intent(out), dimension(:) :: ishold
+integer, intent(out) :: nlevel
+integer, intent(out) :: nlevop
+real(8), intent(out), dimension(:), target :: sc1  ! k
+real(8), intent(out), dimension(:), target :: sc2  ! ieps
+real(8), intent(out), dimension(:), target :: sc3  ! jtemp
+real(8), intent(out), dimension(:), target :: sc4  ! ktemp
+real(8), intent(in) :: rcut
+integer, intent(in) :: jtot
+logical, intent(in) :: flaghf
+logical, intent(in) :: flagsu
+logical, intent(in) :: csflag
+logical, intent(in) :: clist
+logical, intent(in) :: bastst
+logical, intent(in) :: ihomo
+integer, intent(in) :: nu
+integer, intent(in) :: numin
+integer, intent(in) :: jlpar
+integer, intent(out) :: n
+integer, intent(in) :: nmax
+integer, intent(out) :: ntop
+type(ancou_type), intent(out), allocatable, target :: v2
+integer, dimension(:), pointer :: k
+integer, dimension(:), pointer :: ieps
+integer, dimension(:), pointer :: jtemp
+integer, dimension(:), pointer :: ktemp
+type(ancouma_type), pointer :: ancouma
 integer MAX_NR, MAX_NV
 parameter (MAX_NR=300, MAX_NV=300)
-
 common /stpln1/ nr, nv, rr, v_pot
 common /stpln2/ lb1, mu1, lb2, mu2
 common /stplnb/ spl_b
@@ -269,13 +303,6 @@ integer lb1(MAX_NV), mu1(MAX_NV), lb2(MAX_NV), mu2(MAX_NV)
 double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV), &
      spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV), &
      spl_d(MAX_NR, MAX_NV)
-
-double precision rcut
-integer jtot, nu, numin, jlpar, nmax
-logical flaghf, flagsu, csflag, clist, bastst, ihomo
-integer j(*), k(*), l(*), is(*), ieps(*), jhold(*), ishold(*)
-double precision ehold(*)
-integer nlevel, nlevop, n, ntop, jtemp(*), ktemp(*)
 !
 common /coered/ ered, rmu
 double precision ered, rmu
@@ -284,7 +311,7 @@ integer junkip(9), iprint
 !
 integer nlist, ki, ji, numeps, iep, iepsil, isym, ji2, i1, i2, &
      jsave, ksave, isave, njk, ipar, j12max, j12min, ji12, &
-     lmax, lmin, li, lpar, j2par, i, lamsum, ilam, iv, icol, &
+     lmax, lmin, li, lpar, j2par, i, ilam, iv, icol, &
      irow, jc, jr, j2c, j2r, kc, kr, j12c, j12r, lc, lr, inum
 double precision roteng, esave, vee
 !
@@ -294,7 +321,11 @@ nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); ninv=>ispar(4); jmax=>ispar(5)
 j2max=>ispar(7); j2min=>ispar(8)
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)
 
-ASSERT(MAX_NV .le. nlammx)
+call C_F_POINTER (C_LOC(sc1), k, [nmax])
+call C_F_POINTER (C_LOC(sc2), ieps, [nmax])
+call C_F_POINTER (C_LOC(sc3), jtemp, [nmax])
+call C_F_POINTER (C_LOC(sc4), ktemp, [nmax])
+
 if (flaghf) call raise('FLAGHF = .TRUE. FOR SINGLET SYSTEM')
 if (flagsu) call raise('FLAGSU = .TRUE. FOR MOL-MOL COLLISION')
 if (csflag) call raise('CS calculation not implemented')
@@ -399,10 +430,12 @@ end if
 !     Calculate coupling matrix elements
 nlam = nv
 i = 0
-lamsum = 0
 ilam = 0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do iv = 1, nv
    ilam = ilam + 1
+   ancouma => v2%get_angular_coupling_matrix(ilam)
    inum = 0
    do icol = 1, n
       do irow = icol, n
@@ -420,32 +453,21 @@ do iv = 1, nv
               jtot, kr, kc, lb1(iv), mu1(iv), lb2(iv), mu2(iv), &
               ieps(irow), ieps(icol), vee, csflag)
          if (vee .eq. 0d0) cycle
-         if (i .eq. nv2max) call raise( &
-              'too many non-zero V-matrix terms.')
          i = i + 1
          inum = inum + 1
-         v2(i) = vee
-         iv2(i) = ntop * (icol - 1) + irow
+         call ancouma%set_element(irow=irow, icol=icol, vee=vee)
          if (bastst .and. iprint .ge. 2) &
-              write (6, 345) ilam, lb1(iv), icol, irow, i, &
-              iv2(i), vee
-345          format (i4, 2i7, 2i6, i6, f17.10)
+              write (6, 345) ilam, lb1(iv), icol, irow, i, vee
+345          format (i4, 2i7, 2i6, f17.10)
       end do
    end do
-   lamnum(ilam) = inum
-   lamsum = lamsum + inum
    if (bastst) write (6, 347) ilam, lb1(iv), mu1(iv), lb2(iv), &
-         mu2(iv), lamnum(ilam)
+         mu2(iv), ancouma%get_num_nonzero_elements()
 347    format ('ILAM=', i3, ' LAM=', i3, ' MU=', i3, &
         ' LAM2=', i3, ' MU2=', i3, ' LAMNUM(ILAM) = ', i6)
 end do
 if (bastst .and. iprint .ge. 2) then
-   write (6, 350) i
-350    format ('number of non-zero terms: ', i6)
-   write (6, 351) (v2(i1), i1=1, i)
-351    format (10(f7.2), 1x)
-   write (6, 352) (iv2(i1), i1=1, i)
-352    format (10(i7), 1x)
+   call v2%print(unit=6)
 end if
 return
 end
@@ -471,13 +493,6 @@ do i = 1, n
 126    format (6i4, f10.3)
 end do
 return
-end
-!     ------------------------------------------------------------------
-subroutine raise(mesg)
-implicit none
-character*(*) mesg
-write (0, *) 'hibridon: error: ', mesg
-stop
 end
 
 subroutine datfln(filenm, fullnm)

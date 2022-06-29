@@ -1,10 +1,14 @@
+#include "assert.h"
 ! sy2pi (sav2pi/ptr2pi) defines, saves variables and reads               *
 !                  potential for doublet pi scattering                   *
 ! --------------------------------------------------------------------
+module mod_hiba03_2pi
+#include "assert.h"
+contains
 subroutine ba2pi (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, ifi, c12, c32, sc4, rcut, jtot, &
+                  nlevop, sc1, c12, c32, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+                  ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision
 !  of a 2pi molecule in an intermediate coupling basis with a
@@ -113,22 +117,24 @@ subroutine ba2pi (j, l, is, jhold, ehold, ishold, nlevel, &
 !   vlm2pi:    returns angular coupling coefficient for particular
 !              choice of channel index
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use constants, only: econv, xmconv, ang2c
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, idum=>junkr, rspar
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable :: v2
+type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
 common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
-dimension j(2), l(1), jhold(1), ehold(1), is(2), ifi(1), &
-          c12(1), c32(1), ieps(2), ishold(1), sc4(1)
+dimension j(2), l(1), jhold(1), ehold(1), is(2), &
+          c12(1), c32(1), ieps(2), ishold(1), sc1(1), sc4(1)
+integer, allocatable :: ifi(:)
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
 data ieps / -1, 1 / , izero, ione, min10 / 0, 1, -10 /
@@ -243,11 +249,6 @@ if (nlam .ne. nsum) then
 14   format (' ** NLAM=',i2, ' RESET TO NLAM=',i2, &
           '    IN BASIS')
   nlam = nsum
-  if (nlam .gt. nlammx) then
-    write (6, 15) nlam
-15     format(/' NLAM = ',i3,' .GT. NLAMMX IN BA2PI; ABORT')
-    call exit
-  endif
 end if
 if (clist) then
   if (flagsu) then
@@ -348,6 +349,7 @@ do 45 ji = 0, jmax
     end if
 45 continue
 !  now assign omega values and energies for case (a) levels
+allocate(ifi(nmax))
 do 50 i = 1, n
 !  initialize the array ifi to be 1 (corresponding to F1)
   ifi(i) = 1
@@ -674,7 +676,6 @@ endif
 !  i counts v2 elements
 !  inum counts v2 elements for given lambda
 !  ilam counts number of v2 matrices
-!  ij is address of given v2 element in present v2 matrix
 i = 0
 lamsum = 0
 istep = 1
@@ -687,7 +688,10 @@ if (bastst .and. iprint .gt. 1) then
 285   format (/' ILAM  LAMBDA      ICOL      IROW       I', &
     '        IV2    VEE')
 end if
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 400 ilam = 1, nlam
+  ancouma => v2%get_angular_coupling_matrix(ilam)
 !  ilam is the angular expansion label
 !  here for l=0 term in electrostatic potential
   if (ilam .le. nlam0) then
@@ -696,11 +700,9 @@ do 400 ilam = 1, nlam
     lb = lammin(2) + (ilam - nlam0 - 1) * istep
   end if
 !  lb is the actual value of lambda
-  ij=0
   inum=0
   do 355  icol = 1, n
     do 350  irow = icol, n
-      ij = ntop * (icol - 1) +irow
       vee=0
       lrow = l(irow)
       if (csflag) lrow = nu
@@ -728,33 +730,24 @@ do 400 ilam = 1, nlam
       if(vee.eq.zero) goto 350
         i=i+1
         inum=inum+1
-        if(i.gt.nv2max) goto 350
-          v2(i)=vee
-          iv2(i)=ij
-          if(.not.bastst .or. iprint .le. 1) goto 350
-            write (6, 290) ilam, lb, icol, irow, i, iv2(i),vee
-            write (9, 290) ilam, lb, icol, irow, i, iv2(i),vee
-290             format (i4, i7, 3i10, i10, g17.8)
+        call ancouma%set_element(irow, icol, vee)
+        if(bastst .and. iprint .gt. 1) then
+          write (6, 290) ilam, lb, icol, irow, i, vee
+          write (9, 290) ilam, lb, icol, irow, i, vee
+290             format (i4, i7, 3i10, g17.8)
+        end if
 350     continue
 355   continue
-  if (i .le. nv2max) lamnum(ilam) = inum
   if (bastst) then
-    write (6, 360) ilam, lamnum(ilam)
-    write (9, 360) ilam, lamnum(ilam)
+    write (6, 360) ilam, ancouma%get_num_nonzero_elements()
+    write (9, 360) ilam, ancouma%get_num_nonzero_elements()
 360     format ('ILAM=', i3, ' LAMNUM(ILAM) =', i9)
   end if
-  lamsum = lamsum + lamnum(ilam)
+  lamsum = lamsum + ancouma%get_num_nonzero_elements()
 400 continue
-if(i.gt.nv2max) then
-   write (6, 410) i, nv2max
-   write (9, 410) i, nv2max
-410    format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-   call exit
-end if
 if (clist .and. bastst) then
-  write (6, 430) lamsum
-  write (9, 430) lamsum
+  write (6, 430) v2%get_num_nonzero_elements()
+  write (9, 430) v2%get_num_nonzero_elements()
 430   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', &
     i10)
 end if
@@ -785,6 +778,9 @@ do 450 i = 1, nn
             c12(i), c32(i)
     end if
 450 continue
+deallocate(ifi)
+
+! call v2%print_summary(unit=6)
 return
 end
 ! ----------------------------------------------------------------------
@@ -1030,3 +1026,4 @@ write (8, 320) brot, aso, p, q
 write (8, 285) potfil
 return
 end
+end module mod_hiba03_2pi

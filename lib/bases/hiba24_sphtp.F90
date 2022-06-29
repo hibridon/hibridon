@@ -1,11 +1,13 @@
 #include "assert.h"
+module mod_hiba24_sphtp
+contains
 ! sysphtp (savsphtp/ptrsphtp) defines, saves variables and reads         *
 !                  potentials for spherical top + atom                   *
 ! ----------------------------------------------------------------------
 subroutine basphtp (j, l, is, jhold, ehold, ishold, nlevel, &
        nlevop, etemp, fjtemp, fitemp, fistmp, rcut, jtot, &
        flaghf, flagsu, csflag, clist, bastst, ihomo, &
-       nu, numin, jlpar, n, nmax, ntop)
+       nu, numin, jlpar, n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision
 !  of an spherical top molecule with a structureless atom or with an
@@ -105,19 +107,20 @@ subroutine basphtp (j, l, is, jhold, ehold, ishold, nlevel, &
 !   prmats:     computes primitive cc and cs v-lambda matrix elements
 !               between signed-k symmetric top basis fns.
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coatpi, only: narray
 use mod_coatpr, only: c
 use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
@@ -713,8 +716,9 @@ end if
 !  i counts v2 elements
 !  inum counts v2 elements for given lambda
 !  ilam counts number of v2 matrices
-!  ij is address of given v2 element in present v2 matrix
 i = 0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 if (bastst.and. iprint.ge. 2) then
   write (6, 340)
   write (9, 340)
@@ -730,10 +734,9 @@ do 400 iterm = 1, nterm
     mu = 0
     ilam = ilam + 1
     inum = 0
-    ij = 0
+    ancouma => v2%get_angular_coupling_matrix(ilam)
     do 355  icol = 1, n
       do 350  irow = icol, n
-        ij = ntop * (icol - 1) + irow
         lrow = l(irow)
         if (csflag) lrow = nu
         call vlmats (j(irow), lrow, j(icol), l(icol), jtot, &
@@ -742,39 +745,28 @@ do 400 iterm = 1, nterm
 !  check for nonzero v2 matrix element
         if (abs(vee) .gt. 1.d-15) then
             i = i + 1
-          if (i .le. nv2max) then
             inum = inum + 1
-            v2(i) = vee            
-            iv2(i) = ij
+            call ancouma%set_element(irow=irow, icol=icol, vee=vee)
             if (bastst.and. iprint.ge.2) then
-              write (6, 345) ilam, lb, icol, irow, i, iv2(i), &
+              write (6, 345) ilam, lb, icol, irow, i, &
                              vee
-              write (9, 345) ilam, lb, icol, irow, i, iv2(i), &
+              write (9, 345) ilam, lb, icol, irow, i, &
                              vee
-345               format (i4, 2i7, 2i6, i6, g17.8)
+345               format (i4, 2i7, 2i6, g17.8)
             end if
-          end if
         end if
 350       continue
 355     continue
-    if (i .le. nv2max) lamnum(ilam) = inum
     if (bastst) then
-      write (6, 370) ilam, lamnum(ilam)
-      write (9, 370) ilam, lamnum(ilam)
+      write (6, 370) ilam, ancouma%get_num_nonzero_elements()
+      write (9, 370) ilam, ancouma%get_num_nonzero_elements()
 370       format ('ILAM=',i3,' LAMNUM(ILAM) = ',i6)
     end if
-    lamsum = lamsum + lamnum(ilam)
+    lamsum = lamsum + ancouma%get_num_nonzero_elements()
 400 continue
-if (i.gt. nv2max) then
-   write (6, 450) i, nv2max
-   write (9, 450) i, nv2max
-450    format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-   stop
-end if
 if (bastst) then
-  write (6, 460) lamsum
-  write (9, 460) lamsum
+  write (6, 460) v2%get_num_nonzero_elements()
+  write (9, 460) v2%get_num_nonzero_elements()
 460   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS ', &
            i5)
 end if
@@ -1131,5 +1123,7 @@ write (8, 320) brot, dj, dk
 write (8, 285) potfil
 return
 end
+
+end module mod_hiba24_sphtp
 
 ! -------------------------------eof------------------------------------

@@ -60,6 +60,7 @@ use mod_version, only : version
 use mod_coj12, only: j12
 use mod_hibrid5, only : intcrs, readpc
 use mod_difcrs, only: difcrs
+use mod_hibasis, only: is_twomol
 use mod_hibrid2, only: enord, prsg
 use mod_hibrid3, only: testptn, testpt20, testpt, potmin
 use mod_hiutil, only: getval
@@ -90,7 +91,7 @@ integer ixpar
 integer ipar
 integer ibasty
 integer nerg
-logical existf, first, openfl, is_twomol
+logical existf, first, openfl
 logical lpar, logp, opti, optifl, batch, jtrunc
 dimension a(15),ia(10), ihold(15), lhold(15),lindx(28)
 #include "common/parbas.F90"
@@ -720,9 +721,11 @@ else
 510   format(' Potential not yet defined!')
   goto 1
 end if
-! exit
+! no more commands
 599 write (6, *)
-600 call exit
+! exit
+600 continue
+call exit
 ! show all parameters and flags
 ! show
 700 l1 = l

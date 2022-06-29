@@ -1,3 +1,6 @@
+#include "assert.h"
+module mod_hiba16_astp
+contains
 ! syastp (savastp/ptrastp) defines, saves variables and reads            *
 !                  potential for asymmetric top-atom scattering          *
 ! ----------------------------------------------------------------------
@@ -5,7 +8,7 @@ subroutine baastp (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
                   etemp, fjtemp, fktemp, fistmp, &
                   rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-                  n, nmax, ntop)
+                  n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision
 !  of an asymmetric top molecule with a structureless atom or with an
@@ -118,8 +121,7 @@ subroutine baastp (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !               between symmetric top basis fns.
 !   rotham:     computes matrix elements of asymmetric top hamiltonian
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coatpi, only: narray, isiz
@@ -127,11 +129,14 @@ use mod_coatpr, only: c
 use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_coatp3, only: isizh
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use mod_hibasutil, only: rotham
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*1 slab
 #include "common/parbas.F90"
@@ -185,13 +190,6 @@ do 35  i = 1, nterm
   end if
   nsum = nsum + (lammax(i) - lammin(i)) / ipotsy + 1
 35 continue
-if (nlammx .lt. nsum) then
-  write (6, 40) nsum, nlammx
-  write (9, 40) nsum, nlammx
-40   format (' ** TOTAL NUMBER OF ANISOTROPIC TERMS=', i2, &
-          ' .GT. NLAMMX=', i2,'; ABORT')
-  stop
-end if
 if (nsum .ne. nlam) then
   write (6, 45) nsum, nlam
   write (9, 45) nsum, nlam
@@ -755,8 +753,9 @@ if (bastst.and. iprint.ge. 2) then
   write (9, 340)
 340   format (/' ILAM  LAMBDA   MU    ICOL  IROW    I    IV2    VEE')
 end if
-lamsum = 0
 ilam = 0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 400 iterm = 1, nterm
   lbmin = lammin(iterm)
 !  if bastst = .true., then get the matrix elements of the lb=0 term
@@ -766,11 +765,12 @@ do 400 iterm = 1, nterm
 !  ilam is the index for the next term in the potential matrix
 !  lb is the actual value of lambda
     ilam = ilam + 1
+    ancouma => v2%get_angular_coupling_matrix(ilam)
     mu = mproj(iterm)
     inum = 0
     ij = 0
-    do 355  icol = 1, n
-      do 350  irow = icol, n
+    do icol = 1, n
+      do irow = icol, n
         ij = ntop * (icol - 1) + irow
         lrow = l(irow)
         if (csflag) lrow = nu
@@ -783,40 +783,26 @@ do 400 iterm = 1, nterm
         if (abs(vee) .gt. 1.d-15) then
 
           i = i + 1
-          if (i .le. nv2max) then
-            inum = inum + 1
-            v2(i) = vee
-            iv2(i) = ij
-            if (bastst.and. iprint.ge.2) then
-              write (6, 345) ilam, lb, mu, icol, irow, i, iv2(i), &
-                             vee
-              write (9, 345) ilam, lb, mu, icol, irow, i, iv2(i), &
-                             vee
-345               format (i4, 3i7, 2i6, i6, g17.8)
-            end if
+          inum = inum + 1
+          call ancouma%set_element(irow=irow, icol=icol, vee=vee)
+          if (bastst.and. iprint.ge.2) then
+            write (6, 345) ilam, lb, mu, icol, irow, i, vee
+            write (9, 345) ilam, lb, mu, icol, irow, i, vee
+345               format (i4, 3i7, 2i6, g17.8)
           end if
         end if
-350       continue
-355     continue
-    if (i .le. nv2max) lamnum(ilam) = inum
+      end do
+    end do
     if (bastst) then
-      write (6, 370) ilam, lamnum(ilam)
-      write (9, 370) ilam, lamnum(ilam)
+      write (6, 370) ilam, ancouma%get_num_nonzero_elements()
+      write (9, 370) ilam, ancouma%get_num_nonzero_elements()
 370       format ('ILAM=',i3,' LAMNUM(ILAM) = ',i6)
     end if
-    lamsum = lamsum + lamnum(ilam)
 390   continue
 400 continue
-if ( i.gt. nv2max) then
-   write (6, 450) i, nv2max
-   write (9, 450) i, nv2max
-450    format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-   stop
-end if
 if (clist .and. bastst) then
-  write (6, 460) lamsum
-  write (9, 460) lamsum
+  write (6, 460) v2%get_num_nonzero_elements()
+  write (9, 460) v2%get_num_nonzero_elements()
 460   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS ', &
            i5)
 end if
@@ -868,6 +854,7 @@ subroutine vlmatp (jp, lp, j, l, jtot, isp, is, lambda, mu, &
 !  -----------------------------------------------------------------------
 use mod_coatpi, only: narray
 use mod_coatpr, only: c
+use mod_hibasutil, only: prmatp
 implicit double precision (a-h,o-z)
 logical csflag
 !
@@ -965,125 +952,8 @@ do 100 nn = 1,isizp
 100 continue
 return
 end
-! ----------------------------------------------------------------------
-subroutine prmatp (jp, lp, j, l, jtot, kp, k, lambda, mu, &
-                   vprm, csflag)
-!  subroutine to calculate primitive v-lambda matrix elements for close-coupled
-!  treatment of collisions of a symmetric top with an atom
-!  the primitive cc and cs matrix elements are given in eqs. (26) and (32),
-!  respectively, of s. green, j. chem. phys. 64, 3463 (1976)
-!  note, that in this article the bra indices are unprimed and the ket indices
-!  primed, while in the conventions of the present subroutine the bra indices
-!  are primed and the ket indices, unprimed.
-!
-!  duplicate of prmstp
-!  author:  millard alexander
-!  current revision date:  27-mar-90
-!  -----------------------------------------------------------------------
-!  variables in call list:
-!    jp:       rotational quantum number of left side of matrix element (bra)
-!    lp:       orbital angular momentum of left side of matrix element (bra)
-!    j:        rotational quantum number of right side of matrix element (ket)
-!    l:        orbital angular momentum of right side of matrix element (ket)
-!    jtot:     total angular momentum
-!    kp:       k quantum number of bra
-!    k:        k quantum number of ket
-!    lambda:   order of legendre term in expansion of potential
-!    mu:       index of legendre term in expansion of potential
-!    vrpm:     on return, contains primitive matrix element
-!    csflag:   if .true., then cs calculation; in this case:
-!                jtot in call list is cs lbar
-!                lp is nu (cs projection index)
-!                l is not used
-!              if .false., then cc calculation; in this case:
-!                jtot is total angular momentum
-!  subroutines called:
-!     xf3j, xf6j
-!  -----------------------------------------------------------------------
-implicit double precision (a-h,o-z)
-logical csflag
-data half, one, two, zero, four / 0.5d0, 1.d0, 2.d0, 0.d0, 4.d0/
-data pi /3.1415926536d0 /
-vprm = zero
-xjp = jp
-xj = j
-xkp = kp
-xk = k
-xjtot = jtot
-if (csflag) then
-  nu = lp
-  xnu = nu
-end if
-xlp = float(lp)
-xl = float(l)
-xlamda = float(lambda)
-xmu = float(mu)
-xnorm = (two * xjp + one) * (two * xj + one) * &
-        (two * lambda + one) / (four * pi)
-!  special normalization for k and/or kp = 0
-!  see Eq. (46) of S. Green, j. chem. phys. 64, 3463 (1976)
-if (k .eq. 0) xnorm = xnorm * half
-if (kp .eq. 0) xnorm = xnorm * half
-!  the desired matrix element is constructed in x
-if (.not. csflag) then
-!  here for cc matrix elements
-  x = xf3j (xlp, xlamda, xl, zero, zero, zero)
-  if (x .eq. zero) return
-  x = x * xf3j (xjp, xj, xlamda, xkp, - xk, xmu)
-  if (x .eq. zero) return
-  x = x * xf6j (xj, xl, xjtot, xlp, xjp, xlamda)
-  if (x .eq. zero) return
-  iphase = jp + j + kp - jtot
-  xnorm = xnorm * (two * lp + one) * (two * l + one)
-else if (csflag) then
-!  here for cs matrix elements
-  iphase = - k - nu
-  x = xf3j (xjp, xlamda, xj, -xnu, zero, xnu)
-  if (x .eq. zero) return
-  x = x * xf3j (xjp, xlamda, xj, -xkp, xmu, xk)
-end if
-vprm = ( (-1) ** iphase) * x * sqrt(xnorm)
-return
-end
-! ----------------------------------------------------------------------
-double precision function rotham(ji, ki, jf, kf)
-!
-!  subroutine to compute matrix elements of the asymmmetric top hamiltionian
-!  in a prolate (case Ia) basis between unsymmetrized basis functions
-!  (ji,ki) and (jf,kf)
-!
-!  author:  paul dagdigian
-!  current revision date:  16-aug-2009
-!  -----------------------------------------------------------------------
-use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-real(8), pointer :: arot, brot, crot, emax
-arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4)
 
-bpc = (brot + crot)*0.5d0
-bmc = (brot - crot)*0.25d0
-if (ji .ne. jf) goto 900
-fjj1 = ji*(ji + 1.d0)
-fk = ki
-if (ki .ne. kf) goto 10
-!
-!     diagonal term
-rotham = bpc*(fjj1 - fk**2) + arot*fk**2
-goto 1000
-!
-!     off-diagonal terms
-10 if (kf .ne. (ki + 2)) goto 20
-rotham = bmc*sqrt((fjj1 - fk*(fk + 1.d0)) &
-  *(fjj1 - (fk + 1.d0)*(fk + 2.d0)))
-goto 1000
-20 if (kf .ne. (ki - 2)) goto 900
-rotham = bmc*sqrt((fjj1 - fk*(fk - 1.d0)) &
-  *(fjj1 - (fk - 1.d0)*(fk - 2.d0)))
-goto 1000
-900 rotham = 0.d0
-1000 continue
-return
-end
+
 ! ----------------------------------------------------------------------
 !  -----------------------------------------------------------------------
 subroutine syastp (irpot, readpt, iread)
@@ -1297,3 +1167,4 @@ write (8, 250) arot, brot, crot
 write (8, 60) potfil
 return
 end
+end module mod_hiba16_astp

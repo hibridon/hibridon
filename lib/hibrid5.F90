@@ -1488,11 +1488,11 @@ subroutine sread (iadr, sreal, simag, jtot, jlpar, nu, &
 !     ------------------------------------------------------------
 use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
+use mod_hibasis, only: is_j12
 implicit double precision (a-h,o-z)
 integer, intent(inout) :: nopen
 integer, intent(in) :: smt_file_unit
 logical triang
-logical is_j12
 dimension sreal(nmax,1), simag(nmax,1), &
      jpack(1), lpack(1),inpack(1),jq(1),lq(1),inq(1)
 !     variable in common block /coselb/
@@ -1636,11 +1636,11 @@ use mod_cosout, only: nnout, jout
 use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
+use mod_hibasis, only: is_j12
 implicit double precision (a-h,o-z)
 integer ic, icol, ii, ir, irow, jtot, jlpar, length, nmax, &
         nopen, nfile, nu, mmout
 integer jq, jpack, lq, lpack, inq, inpack, nchnid
-logical is_j12
 common /coered/ ered, rmu
 !  variable in common block /coselb/
 !     ibasty    basistype
@@ -2327,9 +2327,10 @@ subroutine tsqmat(tsq,sreal,simag,inrow,jrow,lrow, &
 ! ----------------------------------------------------------------------
 use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
+use mod_hibasis, only: is_j12
 implicit double precision (a-h,o-z)
 complex*8 t
-logical diag, is_j12
+logical diag
 common /coselb/ ibasty
 dimension sreal(nmax,1), simag(nmax,1), tsq(nmax,1)
 dimension inrow(1),jrow(1),lrow(1),incol(1),jcol(1),lcol(1)
@@ -2389,6 +2390,7 @@ subroutine partcr (tsq,  scmat, isc1, isc2, sc2, nopen, ncol, &
 !
 ! ----------------------------------------------------------------------
 use constants
+use mod_hibasis, only: is_j12
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax,nmax), intent(in) :: tsq
 !      real(8), dimension(:,:), intent(in), target :: tototsq
@@ -2406,7 +2408,6 @@ integer, dimension(nlevop), intent(in) :: inlev
 integer, dimension(nlevop), intent(in) :: jlev
 real(8), dimension(nlevop), intent(in) :: elev
 logical csflag, flaghf, flagsu, twomol
-logical is_j12
 common /coered/ ered, rmu
 common /coselb/ ibasty	
 !      real(8), pointer :: tsq(:,:)

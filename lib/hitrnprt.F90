@@ -50,6 +50,7 @@ use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc2, only: prefac => sc2 ! prefac(1)
 use mod_cosc3, only: etrans => sc3 ! etrans(1)
 use mod_cozmat, only: jtotpa => zmat_as_vec ! jtotpa(1)
+use mod_hibasis, only: is_j12, is_twomol
 use constants, only: econv, xmconv, ang2c
 
 implicit double precision (a-h,o-z)
@@ -59,7 +60,6 @@ character*20  cdate
 character*10  elaps, cpu
 logical csflag, flaghf, flagsu, twomol, exstfl, lpar, &
         batch, nucros,lpar2
-logical is_j12, is_twomol
 !
 #include "common/parpot.F90"
 common /colpar/ lpar(3), batch, lpar2(23)
@@ -632,11 +632,11 @@ use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cow, only: simag => w_as_vec ! simag(1)
 use mod_hibrid2, only: mxoutd
 use mod_hibrid5, only: sread
+use mod_hibasis, only: is_j12, is_twomol
 implicit double precision (a-h,o-z)
 complex*8 t, tp
 logical diag, diagj, diagin, diagp, diagjp, diagnp, &
   lpar1, lpar2, batch, ipos, flaghf
-logical is_twomol, is_j12
 character*10 elaps, cpu
 common /colpar/ lpar1(3), batch, lpar2(5), ipos, slpar3(17)
 common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &

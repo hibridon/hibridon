@@ -6,9 +6,15 @@
 
 set(ENABLE_ASSERTS "ON" CACHE BOOL "to enable or disable assert checks for debug builds (mostly for developers).")
 
+set(LINK_TIME_OPTIMIZATION "ON" CACHE BOOL "to enable or disable link time optimizations on release builds for compilers that support it (slightly improves performance but greatly slows down link time)")
+
 add_library(hib
+    ancou.F90
     assert.f90
+    grovec.F90
     hiamp.F90
+    hibasis.F90
+    hibasutil.F90
     hibound.F90
     hibrid1.F90
     hibrid2.F90
@@ -85,11 +91,15 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       -std=legacy                               # Allow pre-Fortran 77 syntax (e.g. arbitrary length arrays)
       -ffree-line-length-none                   # Allow arbitrary long lines. Needed as preprocessing could generate long line lengths.
       -fno-automatic                            # Put everything on the heap
+#      -fdefault-integer-8
+#      -finteger-4-integer-8
       $<$<PLATFORM_ID:Linux>:-march=native>     # Tune generated code for host's micro-architecture
       $<$<PLATFORM_ID:Darwin>:-mtune=native>    # Tune generated code for host's micro-architecture (march not working on Darwin)
       $<$<PLATFORM_ID:Linux>:-mcmodel=large>    # Required on Linux
       # Config-specific options: RELEASE
       $<$<CONFIG:RELEASE>:-O3>                  # Optimization level at 3 for Release
+      $<$<AND:$<BOOL:${LINK_TIME_OPTIMIZATION}>,$<CONFIG:RELEASE>>:-flto>  # Activate link time optimizations so that gfortran can inline some function calls
+      #$<$<CONFIG:RELEASE>:-fopt-info>           # You can get some information from gfortran with the flag -fopt-info that will tell you about optimizations missed or performed by the compiler
       $<$<CONFIG:RELEASE>:-finit-local-zero>    # Init variables to zero/false/null
       # Config-specific options: DEBUG
       $<$<CONFIG:DEBUG>:-O0>                    # Optimization level at 0
@@ -98,7 +108,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<CONFIG:DEBUG>:-fbacktrace>            # Generates extra information in the object file to provide source file traceback information when a severe error occurs at run time
       $<$<CONFIG:DEBUG>:-Wall>                  # Enable all warnings
       $<$<CONFIG:DEBUG>:-Wextra>                # Enable extra warnings
-      $<$<CONFIG:DEBUG>:-fsanitize=address>     # Address sanitizer
+      $<$<CONFIG:DEBUG>:-fsanitize=address>     # Address sanitizer (beware: tests showed that with -fsanitize=address memory is not actually released when deallocate is called. Is this a true momory leak in address sanitizer?)
       $<$<CONFIG:DEBUG>:-Wuninitialized>        # Emit warnings for uninitialized variables 
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -fprofile-arcs -ftest-coverage at compile time)
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
@@ -119,6 +129,7 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
       # Config-specific options: RELEASE
       $<$<CONFIG:RELEASE>:-O3>                    # Optimization level at 3 for Release
       $<$<CONFIG:RELEASE>:-xHost>                 # Generate instructions for the highest instruction set available on the compilation host processor
+      $<$<AND:$<BOOL:${LINK_TIME_OPTIMIZATION}>,$<CONFIG:RELEASE>>:-ipo>  # activate interprocediral optimization (aka link time optimization)
       $<$<CONFIG:RELEASE>:-init=zero>             # Init variables to zero/false/null
       # Config-specific options: DEBUG
       $<$<CONFIG:DEBUG>:-O0>                      # Disable all optimizations
@@ -141,10 +152,12 @@ endif()
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     target_link_libraries(hib
       PUBLIC
-      $<$<CONFIG:DEBUG>:-fsanitize=address>         # Address sanitizer
+      $<$<CONFIG:DEBUG>:-fsanitize=address>         # Address sanitizer (beware: tests showed that with -fsanitize=address memory is not actually released when deallocate is called. Is this a true momory leak in address sanitizer?)
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -lgcov at link time)
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
       $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
+      $<$<AND:$<BOOL:${LINK_TIME_OPTIMIZATION}>,$<CONFIG:RELEASE>>:-flto>  # Activate link time optimizations so that gfortran can inline some function calls
+      #$<$<CONFIG:RELEASE>:-fopt-info>           # You can get some information from gfortran with the flag -fopt-info that will tell you about optimizations missed or performed by the compiler
     )
 # Intel (ifort)
 elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
@@ -152,6 +165,7 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
       PUBLIC
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
       $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
+      $<$<AND:$<BOOL:${LINK_TIME_OPTIMIZATION}>,$<CONFIG:RELEASE>>:-ipo>  # activate interprocediral optimization (aka link time optimization)
     )
 endif()
 

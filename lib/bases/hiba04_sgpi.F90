@@ -1,10 +1,13 @@
+#include "assert.h"
+module mod_hiba04_sgpi
+contains
 ! sysgpi (savsgpi/ptrsgpi) defines, saves variables and reads            *
 !                  potential for doublet/pi sigma scattering             *
 ! ----------------------------------------------------------------------
 subroutine basgpi (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, iom, iohold, nvhold, nlv, &
+                  nlevop, sc1, sc2, sc3, sc4, &
                   rcut, jtot, flaghf, flagsu, csflag, clist, &
-                  bastst, ihomo, nu, numin, jlpar, n, nmax, ntop)
+                  bastst, ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 ! ----------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision of a
 !  molecule in either a 2pi electronic state in an intermediate coupling
@@ -40,17 +43,12 @@ subroutine basgpi (j, l, is, jhold, ehold, ishold, nlevel, &
 !              level
 !    ishold:   on return contains symmetry index of each energetically
 !              distinct level, similar to is
-!    iohold:   on return, contains nominal omega values for each level
-!    nvhold:   on return, contains vibr. quantum numbers for each level
-!    nlv:      on return, contains vibr. quantum numbers for each chan.
 !    nlvp:     scratch array which holds perturbing vibrational levels
 !    nlevel:   on return contains number of energetically distinct
 !              rotational levels used in channel basis
 !    nlevop:   on return contains number of energetically distinct
 !              rotational levels used in channel basis which are open
 !              asymptotically
-!    iom:      on return contains nominal omega values for each channel
-!              for 2sigma states iom is assigned the value of 2
 !    rcut:     cut-off point for keeping higher energy channels
 !              if any open channel is still closed at r=rcut, then
 !              all closed channels as well any open channels which are
@@ -172,8 +170,7 @@ subroutine basgpi (j, l, is, jhold, ehold, ishold, nlevel, &
 !   vlsgpi:    returns angular coupling coefficient for particular
 !              choice of channel index
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_cotq1, only: vec ! vec(3,3,1)
@@ -181,12 +178,19 @@ use mod_coisc1, only: ivec => isc1 ! ivec(1)
 use mod_coisc2, only: ivhold => isc2 ! ivhold(1)
 use mod_coisc3, only: nlvp => isc3 ! nlvp(1)
 use mod_coisc4, only: nvphol => isc4 ! nvphol(1)
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rpar=>rspar
+use mod_hibasutil, only: iswap, rswap
 use constants, only: econv, xmconv, ang2c
 
 implicit double precision (a-h,o-z)
+real(8), intent(out), dimension(:) :: sc1
+real(8), intent(out), dimension(:) :: sc2
+real(8), intent(out), dimension(:) :: sc3
+real(8), intent(out), dimension(:) :: sc4
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 #include "common/parbasl.F90"
@@ -195,10 +199,16 @@ common /coipar/ iiipar(9), iprint
 common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
 common /coered/ ered, rmu
 dimension e(3,3), ieps(2), iepp(2), iomc(4), iomr(4), eig(3)
-dimension jhold(1), ishold(1), iohold(1), nvhold(1), ehold(1), &
-          j(1), is(1), iom(1), nlv(1), l(1)
+dimension jhold(1), ishold(1), ehold(1), &
+          j(1), is(1), l(1)
 parameter (nvmax=20)
 dimension ipvs(0:nvmax),ipvp(0:nvmax)
+integer, dimension(nmax) :: iom    ! on return contains nominal omega values for each channel
+                                   ! for 2sigma states iom is assigned the value of 2
+integer, dimension(nmax) :: iohold ! on return contains nominal omega values for each level
+integer, dimension(nmax) :: nvhold ! on return contains vibr. quantum numbers for each level
+integer, dimension(nmax) :: nlv    ! on return contains vibr. quantum numbers for each chan.
+
 data iomc/2,1,1,1/
 data iomr/2,1,2,1/
 ! this determines which eps level is first in channel list (arbitrary)
@@ -865,9 +875,16 @@ i=0
 !  i counts v2 elements
 !  ilam counts number of v2 matrices
 !  inum counts v2 elements for given ilam
-!  ij is address of given v2 element in present v2 matrix
 !
 ilam=0
+nlam=0
+do it = 1, nterm
+  do il = lammin(it), lammax(it), istep
+    nlam = nlam + 1
+  end do
+end do
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 600 it=1,nterm
   iterm=it
 !  formally reassign iterm if no sigma state present
@@ -885,6 +902,7 @@ do 600 it=1,nterm
     ivr=ivrow(iv,it)
     do 450 il=lammin(it),lammax(it),istep
       ilam=ilam+1
+      ancouma => v2%get_angular_coupling_matrix(ilam)
       inum = 0
       do 400  icol = 1, n
       if(max(1,iom(icol)).ne.ioc) then
@@ -900,7 +918,6 @@ do 600 it=1,nterm
       else
         if(nlv(irow).ne.ivr) goto 350
       end if
-      ij = ntop * (icol - 1) +irow
       lrow = l(irow)
       if (csflag) lrow = nu
 !  always initialize potential to zero
@@ -959,44 +976,24 @@ do 600 it=1,nterm
          i = i + 1
          inum = inum + 1
          if (bastst .and. iprint.gt.1) then
-           write (6, 340) it,ivr,ivc,il,ilam,i,icol,irow, &
-                          ij,vee
-           write (9, 340) it,ivr,ivc,il,ilam,i,icol,irow, &
-                          ij,vee
+           write (6, 340) it,ivr,ivc,il,ilam,i,icol,irow, vee
+           write (9, 340) it,ivr,ivc,il,ilam,i,icol,irow, vee
 340            format (1x,3i3,6i6, g17.8)
          end if
-         if (i .le. nv2max) then
-           v2(i) = vee
-           iv2(i) = ij
-         end if
+         call ancouma%set_element(irow=irow, icol=icol, vee=vee)
        end if
 350      continue
 400      continue
-     if(ilam.le.nlammx) lamnum(ilam) = inum
      if (bastst .and.iprint.ge.1) then
        write (6, 420) it,ivr,ivc,il,inum
        write (9, 420) it,ivr,ivc,il,inum
 420        format(' ITERM=',i1,'  IVR=',i2,'  IVC=',i2,'  LAMBDA=',i2, &
               ' NUMBER OF NONZERO MATRIX ELEMENTS',i8)
      end if
-     if(inum.ne.0) nlam=ilam
 450    continue
 500  continue
 continue
 600 continue
-if (nlam.gt.nlammx) then
-  write(6,610) nlam,nlammx
-  write(9,610) nlam,nlammx
-610   format (' *** NLAM = ',i6,' .GT. NLAMMX=',i6,'; ABORT ***')
-  call exit
-end if
-if (i.gt.nv2max) then
-  write (6, 620) i, nv2max
-  write (9, 620) i, nv2max
-620   format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-  call exit
-end if
 if (clist) then
   write (6, 630) i
   write (9, 630) i
@@ -1217,22 +1214,6 @@ end
   if (th.gt.thmin) goto 30
   return
   end
-! ----------------------------------------------------------------------
-subroutine iswap(ia,ib)
-implicit integer (a-z)
-ii=ia
-ia=ib
-ib=ii
-return
-end
-! ----------------------------------------------------------------------
-subroutine rswap(a,b)
-implicit double precision (a-h,o-z)
-c=a
-a=b
-b=c
-return
-end
 ! ----------------------------------------------------------------------
 subroutine hsgpi(ji,ise,e,rp1,rp2,iflag,iperpi)
 ! ----------------------------------------------------------------------
@@ -1726,3 +1707,4 @@ write (8, 300) potfil
 300 format(a)
 return
 end
+end module mod_hiba04_sgpi

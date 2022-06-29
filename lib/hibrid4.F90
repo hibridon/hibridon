@@ -46,12 +46,12 @@ use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cozmat, only: simag => zmat_as_vec ! simag(1)
 use mod_hibrid5, only: sread
+use mod_hibasis, only: is_j12
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
 character*40 xname
 logical  existf, csflag, flaghf, flagsu, twomol, nucros
-logical is_j12
 dimension ia(4)
 #include "common/parpot.F90"
 common /coselb/ ibasty
@@ -856,7 +856,7 @@ if(abs(dr).gt.0.01d0) goto 10
 return
 end
 ! -----------------------------------------------------------------------
-subroutine wavevc (w, eignow, scr1, scr2, rnow, nch, nmax)
+subroutine wavevc (w, eignow, scr1, scr2, rnow, nch, nmax, v2)
 !  this subroutine first sets up the wavevector matrix at rnow
 !  then diagonalizes this matrix
 !  written by:  millard alexander
@@ -878,8 +878,10 @@ subroutine wavevc (w, eignow, scr1, scr2, rnow, nch, nmax)
 !     dsyevr:         latest lapack eigenvalue routine
 !     dscal, dcopy:   linpack blas routines
 ! ----------------------------------------------------------------
+use mod_ancou, only: ancou_type
 use mod_hibrid3, only: potmat
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(in) :: v2
 !      real rnow, xmin1
 !      real eignow, scr1, scr2, w
 integer icol, ierr, ipt, nch, nmax, nmaxm1, nmaxp1, nrow
@@ -898,7 +900,7 @@ dimension isuppz(2*nch),iwork(10*nch),work(57*nch)
 data xmin1 / -1.d0/
 nmaxp1 = nmax + 1
 nmaxm1 = nmax - 1
-call potmat (w, rnow, nch, nmax)
+call potmat (w, rnow, nch, nmax, v2)
 !  since potmat returns negative of lower triangle of w(r) matrix (eq.(3) of
 !  m.h. alexander, "hybrid quantum scattering algorithms ..."),
 !  next loop changes its sign
@@ -1411,6 +1413,7 @@ use mod_cow, only: sr => w_as_vec ! sr(100)
 use mod_cozmat, only: si => zmat_as_vec ! si(100)
 use mod_version, only : version
 use mod_hibrid3, only: expand
+use mod_hiba07_13p, only: tcasea
 
 implicit double precision (a-h,o-z)
 character*(*) filnam

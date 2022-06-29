@@ -2318,7 +2318,6 @@ subroutine dsigh(maxk,nnout,jfirst,jfinal,jtotd,jpack, &
 ! current revision date: 7-oct-2011 by pj dagdigian
 !------------------------------------------------------------------------
 use mod_codim, only: mmax
-use mod_cov2, only: nv2max, ndummy, y => v2
 use mod_cojq, only: jq ! jq(1)
 use mod_colq, only: lq ! lq(1)
 use mod_coinq, only: inq ! inq(1)
@@ -2334,6 +2333,7 @@ use mod_hibrid5, only: sread
 use mod_difcrs, only: sphn
 use constants, only: econv, xmconv, ang2c
 implicit double precision (a-h,o-z)
+real(8), dimension(:), allocatable :: y
 ! size of q for j <= 5 and 0.5 deg angle increment
 complex*16 q(43681)
 logical diag, diagj, diagin, lpar1, lpar2, batch, ipos, &
@@ -2362,7 +2362,6 @@ data rad/57.295779513082323d0/
 data ang1, ang2, dang /0.d0, 180.d0, 0.5d0/
 !
 maxq = mmax*mmax/2
-maxy = nv2max
 !
 ! print out m-resolved differential cross sections? (immprt = 1)
 immprt = 0
@@ -2383,7 +2382,6 @@ if (flaghf) then
   mlmax = mlmax + 1
 end if
 nangle = nint((ang2 - ang1)/dang) + 1
-mx = maxy/(l2max*mlmax)
 jlevlp = jlevel
 ! below for half-integer spin
 if (flaghf) jlevlp = jlevel + 1
@@ -2391,17 +2389,19 @@ if (flaghf) jlevlp = jlevel + 1
 do 210 ii = 1, 43681
   q(ii) = cmplx(0.d0, 0.d0)
 210 continue
+
+allocate(y(mlmax*l2max*nangle))
 !
 ! precalculate all required spherical harmonics
 ii = 0
-do 230 ml = 0, mlmax-1
+do ml = 0, mlmax-1
   angle = ang1
-  do 220 i = 1, nangle
+  do i = 1, nangle
     call sphn(ml, l2max-1, angle, y(ii+i), nangle)
     angle = angle + dang
-220   continue
+  end do
   ii = ii + l2max*nangle
-230 continue
+end do
 jtlast = -1
 jplast = 0
 !
@@ -2461,6 +2461,7 @@ call amplih(jlevel,inlevel,jlevel,inlevel,jtot,mmax, &
 !
 300 if(jtot.lt.jfinal .or. jlpar.eq.1) goto 250
 !
+deallocate(y)
 !.....ca is wavevector for initial state, ecol is collision energy
 ecol = ered1 - elevel
 ca=sqrt(2.d0*rmu1*ecol)
@@ -2626,12 +2627,13 @@ subroutine amplih(j1,inlev1,j2,inlev2,jtot,mmax,jpack, &
 !.....jpack,lpack,ipack: labels for rows
 !.....jq,lq,inq:         labels for columns
 implicit double precision (a-h,o-z)
+real(8), dimension(1), intent(in) :: y
 complex*16 q,ai,fak2,fak3,yy,tmat
 parameter (zero=0.0d0,one=1.0d0)
 logical flaghf,elastc
 common /coang/ ang1, ang2, dang
 dimension jpack(1),lpack(1),ipack(1),jq(1),lq(1),inq(1),q(1)
-dimension sreal(mmax,1),simag(mmax,1),y(1)
+dimension sreal(mmax,1),simag(mmax,1)
 dimension fak1(400),fak2(400),fak3(400),ilab1(400)
 sqpi=1.772453850905516d0
 rad=57.295779513082323d0
@@ -2771,7 +2773,6 @@ subroutine dsigga(maxk,nnout,jfirst,jfinal,jtotd,jpack, &
 ! current revision date: 7-oct-2011 by pj dagdigian
 !------------------------------------------------------------------------
 use mod_codim, only: mmax
-use mod_cov2, only: nv2max, ndummy, y => v2
 use mod_cojq, only: jq ! jq(1)
 use mod_colq, only: lq ! lq(1)
 use mod_coinq, only: inq ! inq(1)
@@ -2788,6 +2789,7 @@ use mod_difcrs, only: sphn
 use constants, only: econv, xmconv, ang2c
 
 implicit double precision (a-h,o-z)
+real(8), dimension(:), allocatable :: y
 ! size of q for j <= 5 and 0.5 deg angle increment
 complex*16 q(43681)
 logical diag, diagj, diagin, lpar1, lpar2, batch, ipos, &
@@ -2816,7 +2818,6 @@ data rad/57.295779513082323d0/
 data ang1, ang2, dang /0.d0, 180.d0, 0.5d0/
 !
 maxq = mmax*mmax/2
-maxy = nv2max
 !
 ! print out m-resolved differential cross sections (iframe < 0)? (immprt = 1)
 immprt = 0
@@ -2836,7 +2837,6 @@ if (flaghf) then
   mlmax = mlmax + 1
 end if
 nangle = nint((ang2 - ang1)/dang) + 1
-mx = maxy/(l2max*mlmax)
 jlevlp = jlevel
 ! below for half-integer spin
 if (flaghf) jlevlp = jlevel + 1
@@ -2845,6 +2845,7 @@ do 210 ii = 1, 43681
   q(ii) = cmplx(0.d0, 0.d0)
 210 continue
 !
+allocate(y(mlmax*l2max*nangle))
 ! precalculate all required spherical harmonics
 ii = 0
 do 230 ml = 0, mlmax-1
@@ -2913,6 +2914,7 @@ call amplga(jlevel,inlevel,jlevel,inlevel,jtot,mmax, &
 !.....loop back to next jtot/jlpar
 !
 300 if(jtot.lt.jfinal .or. jlpar.eq.1) goto 250
+deallocate(y)
 !
 !.....ca is wavevector for initial state, ecol is collision energy
 ecol = ered1 - elevel

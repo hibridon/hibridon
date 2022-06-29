@@ -1,3 +1,4 @@
+#include "assert.h"
 ! systp1sg (savstp1sg/ptrstp1sg) defines, saves variables and reads      *
 !                  potential for symmetric top - singlet sigma system    *
 !     Basis subroutine for the collision of a symmetric top with
@@ -56,18 +57,80 @@ type(lev_type), dimension(:), allocatable :: levs
 type(chn_type), dimension(:), allocatable :: chns
 end module mod_stp1sg
 !     ------------------------------------------------------------------
+module mod_hiba21_stp1sg
+   contains
+!     ------------------------------------------------------------------
+   real(8) function vstp1sg(j1p, lp, j1, l, j2p, j2, j12p, j12, &
+   jtot, kp, k, lam1, mu1, lam2, lam, epsp, eps)
+implicit none
+integer :: j1p, kp, epsp, j2p, j12p, lp, j1, k, eps, j2, j12, l, &
+   jtot, lam1, mu1, lam2, lam
+integer :: iphase, tj1p, tj1, tlam1, tkp, tmu1, tk
+real(8) :: pref, threej, sixj, ninej, tf3jm0, tf3j, f6j, f9j
+real(8), parameter :: machep = epsilon(0d0)
+!
+vstp1sg = 0d0
+iphase = epsp * eps * (-1) ** (j1p + j1 + lam2 + lam + mu1)
+if (iphase .eq. -1) return
+threej = tf3jm0(2 * j2p, 2 * lam2, 2 * j2)
+if (dabs(threej) .lt. machep) return
+threej = threej * tf3jm0(2 * lp, 2 * lam, 2 * l)
+if (dabs(threej) .lt. machep) return
+!
+tj1p = 2 * j1p
+tlam1 = 2 * lam1
+tj1 = 2 * j1
+tkp = 2 * kp
+tmu1 = 2 * mu1
+tk = 2 * k
+threej = threej * (tf3j(tj1p, tlam1, tj1, -tkp, tmu1, tk) &
+   + epsp * eps * tf3j(tj1p, tlam1, tj1, tkp, tmu1, -tk) &
+   + epsp * tf3j(tj1p, tlam1, tj1, tkp, tmu1, tk) &
+   + eps * tf3j(tj1p, tlam1, tj1, -tkp, tmu1, -tk))
+if (dabs(threej) .lt. machep) return
+!
+sixj = f6j(j12, l, jtot, lp, j12p, lam)
+if (dabs(sixj) .lt. machep) return
+ninej = f9j(j1, j2, j12, j1p, j2p, j12p, lam1, lam2, lam)
+if (dabs(ninej) .lt. machep) return
+!
+iphase = (-1) ** (jtot + lam1 - lam2 + j1 - j2 + j12p - l - lp + k &
+   + mu1)
+if (mu1 .eq. 0) then
+ pref = 0.5d0
+else
+ pref = 1d0
+end if
+if (kp .eq. 0) pref = pref * dsqrt(0.5d0)
+if (k .eq. 0) pref = pref * dsqrt(0.5d0)
+pref = pref * dsqrt( &
+     dble((tj1p + 1)) &
+   * dble((2 * j2p + 1)) &
+   * dble((2 * j12p + 1) &
+   * dble((2 * lp + 1)) &
+   * dble((tj1 + 1)) &
+   * dble((2 * j2 + 1)) &
+   * dble((2 * j12 + 1)) &
+   * (dble(2 * l + 1)) &
+   * dble((2 * lam + 1))) &
+)
+!
+vstp1sg = pref * dble(iphase) * threej * sixj * ninej
+return
+end function vstp1sg
+ 
 subroutine bastp1sg(jchn, lchn, ischn, jlev, elev, islev, nlev, &
      nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, bastst, &
-     ihomo, nu, numin, jlpar, twomol, nchn, nmax, ntop)
+     ihomo, nu, numin, jlpar, twomol, nchn, nmax, ntop, v2)
 use mod_stp1sg
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cchn => cent
 use mod_coeint, only: echn => eint
 use mod_coj12, only: j12chn => j12
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use mod_hibasutil, only: raise
 implicit none
 !
 !     The following arrays store the parameters of channels and levels.
@@ -84,6 +147,9 @@ logical :: flaghf, flagsu, csflag, clist, bastst, ihomo, twomol
 integer :: nmax, ntop
 !
 real(8) :: rcut
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
+
 !
 common /coered/ ered, rmu
 real(8) :: ered, rmu
@@ -91,8 +157,8 @@ common /coipar/ junkip, iprint
 integer, dimension(9) :: junkip
 integer :: iprint
 !
-integer :: i, ilev, iv, irow, icol, inum, i1, i2, lamsum
-real(8) :: vee, vstp1sg
+integer :: i, ilev, iv, irow, icol, inum, i1, i2
+real(8) :: vee
 real(8), parameter :: machep=epsilon(0d0)
 !
 integer, pointer :: ipotsy, iop, ipotsy2, j1max, j2min, j2max
@@ -101,20 +167,18 @@ ipotsy=>ispar(1); iop=>ispar(2); ipotsy2=>ispar(3); j1max=>ispar(4); j2min=>ispa
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); e1max=>rspar(4); drot=>rspar(5); 
 
 if (flaghf) &
-     call raise_2pi1sg('FLAGHF = .TRUE. FOR SINGLET SYSTEM')
-if (ihomo) call raise_2pi1sg('IHOMO NOT USED IN THIS BASIS,' &
+     call raise('FLAGHF = .TRUE. FOR SINGLET SYSTEM')
+if (ihomo) call raise('IHOMO NOT USED IN THIS BASIS,' &
      //' PLEASE SET IT FALSE')
 if (flagsu) &
-     call raise_2pi1sg('FLAGSU = .TRUE. FOR MOL-MOL COLLISION')
+     call raise('FLAGSU = .TRUE. FOR MOL-MOL COLLISION')
 if (csflag) &
-     call raise_2pi1sg('CS CALCULATION NOT IMPLEMENTED')
-if (nv .gt. nlammx) &
-     call raise_2pi1sg('NLAMMX TOO SMALL FOR THE POTENTIAL.')
+     call raise('CS CALCULATION NOT IMPLEMENTED')
 !$$$      if (rcut .ge. 0d0 .and. .not. bastst)
-!$$$     $     call raise_2pi1sg('RCUT NOT IMPLEMENTED, PLEASE SET IT '
+!$$$     $     call raise('RCUT NOT IMPLEMENTED, PLEASE SET IT '
 !$$$     $     // 'NEGATIVE.')
 if (.not. twomol) &
-     call raise_2pi1sg('TWOMOL IS FALSE FOR MOL-MOL COLLISION.')
+     call raise('TWOMOL IS FALSE FOR MOL-MOL COLLISION.')
 !
 call genlev_stp1sg(ipotsy, iop, ipotsy2, j1max, j2min, j2max, &
      brot, crot, delta, drot, e1max)
@@ -128,7 +192,7 @@ nlev = size(levs)
 nchn = size(chns)
 ntop = max(nchn, nlev)
 if (nchn .gt. nmax) &
-     call raise_2pi1sg('TOO MANY CHANNELS.')
+     call raise('TOO MANY CHANNELS.')
 if (nchn .eq. 0) return
 do ilev = 1, nlev
    jlev(ilev) = levs(ilev)%j1 * 10 + levs(ilev)%j2
@@ -158,8 +222,10 @@ end do
 !     Calculate coupling matrix elements
 nlam = nv
 i = 0
-lamsum = 0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do iv = 1, nv
+   ancouma => v2%get_angular_coupling_matrix(iv)
    inum = 0
    do icol = 1, nchn
       i1 = chns(icol)%ilev
@@ -171,22 +237,17 @@ do iv = 1, nv
               levs(i1)%k1, levs(i2)%k1, lms(iv)%l1, lms(iv)%mu1, &
               lms(iv)%l2, lms(iv)%l, levs(i1)%eps1, levs(i2)%eps1)
          if (dabs(vee) .lt. machep) cycle
-         if (i .eq. nv2max) call raise_2pi1sg( &
-              'TOO MANY NON-ZERO V-MATRIX TERMS.')
          i = i + 1
          inum = inum + 1
-         v2(i) = vee
-         iv2(i) = ntop * (icol - 1) + irow
+         call ancouma%set_element(irow=irow, icol=icol, vee=vee)
          if (bastst .and. iprint .ge. 2) write (6, 346) iv, &
               lms(iv)%l1, lms(iv)%l2, lms(iv)%l, lms(iv)%mu1, &
-              icol, irow, i, iv2(i), vee
-346          format(i4, 4i3, 2i4, 2i5, f17.10)
+              icol, irow, i, vee
+346          format(i4, 4i3, 2i4, i5, f17.10)
       end do
    end do
-   lamnum(iv) = inum
-   lamsum = lamsum + inum
    if (bastst) write (6, 347) iv, lms(iv)%l1, lms(iv)%l2, &
-        lms(iv)%l, lms(iv)%mu1, lamnum(iv)
+        lms(iv)%l, lms(iv)%mu1, ancouma%get_num_nonzero_elements()
 347    format (' ILAM=', i3, '  L1=', i3, '  L2=', i3, &
         '  L=', i3, '  MU=', i3, '  LAMNUM(ILAM) = ', i6)
 end do
@@ -258,6 +319,7 @@ end subroutine sortlev_stp1sg
 subroutine genlev_stp1sg(ipotsy, iop, ipotsy2, j1max, j2min, &
      j2max, brot, crot, delta, drot, e1max)
 use mod_stp1sg
+use mod_hibasutil, only: raise
 use constants, only: econv
 implicit none
 integer, intent(in) :: ipotsy, iop, ipotsy2, j1max, j2min, j2max
@@ -266,7 +328,7 @@ integer :: j1, k1, eps1, j2, ilev, nlev, igroup
 real(8) :: roteng
 !
 !     Only C3v/D3h symmetric top implemented
-if (ipotsy .ne. 3) call raise_2pi1sg('ONLY C3v/D3h SYMMETRIC ' &
+if (ipotsy .ne. 3) call raise('ONLY C3v/D3h SYMMETRIC ' &
      //'TOP IMPLEMENTED')
 !     First pass (nlev .eq. -1): Count the number of levels
 !     Second pass (nlev is the number of channels): Save level info
@@ -371,71 +433,13 @@ write (6, *)
 return
 end subroutine prtchn_stp1sg
 !     ------------------------------------------------------------------
-real(8) function vstp1sg(j1p, lp, j1, l, j2p, j2, j12p, j12, &
-     jtot, kp, k, lam1, mu1, lam2, lam, epsp, eps)
-implicit none
-integer :: j1p, kp, epsp, j2p, j12p, lp, j1, k, eps, j2, j12, l, &
-     jtot, lam1, mu1, lam2, lam
-integer :: iphase, tj1p, tj1, tlam1, tkp, tmu1, tk
-real(8) :: pref, threej, sixj, ninej, tf3jm0, tf3j, f6j, f9j
-real(8), parameter :: machep = epsilon(0d0)
-!
-vstp1sg = 0d0
-iphase = epsp * eps * (-1) ** (j1p + j1 + lam2 + lam + mu1)
-if (iphase .eq. -1) return
-threej = tf3jm0(2 * j2p, 2 * lam2, 2 * j2)
-if (dabs(threej) .lt. machep) return
-threej = threej * tf3jm0(2 * lp, 2 * lam, 2 * l)
-if (dabs(threej) .lt. machep) return
-!
-tj1p = 2 * j1p
-tlam1 = 2 * lam1
-tj1 = 2 * j1
-tkp = 2 * kp
-tmu1 = 2 * mu1
-tk = 2 * k
-threej = threej * (tf3j(tj1p, tlam1, tj1, -tkp, tmu1, tk) &
-     + epsp * eps * tf3j(tj1p, tlam1, tj1, tkp, tmu1, -tk) &
-     + epsp * tf3j(tj1p, tlam1, tj1, tkp, tmu1, tk) &
-     + eps * tf3j(tj1p, tlam1, tj1, -tkp, tmu1, -tk))
-if (dabs(threej) .lt. machep) return
-!
-sixj = f6j(j12, l, jtot, lp, j12p, lam)
-if (dabs(sixj) .lt. machep) return
-ninej = f9j(j1, j2, j12, j1p, j2p, j12p, lam1, lam2, lam)
-if (dabs(ninej) .lt. machep) return
-!
-iphase = (-1) ** (jtot + lam1 - lam2 + j1 - j2 + j12p - l - lp + k &
-     + mu1)
-if (mu1 .eq. 0) then
-   pref = 0.5d0
-else
-   pref = 1d0
-end if
-if (kp .eq. 0) pref = pref * dsqrt(0.5d0)
-if (k .eq. 0) pref = pref * dsqrt(0.5d0)
- pref = pref * dsqrt( &
-       dble((tj1p + 1)) &
-     * dble((2 * j2p + 1)) &
-     * dble((2 * j12p + 1) &
-     * dble((2 * lp + 1)) &
-     * dble((tj1 + 1)) &
-     * dble((2 * j2 + 1)) &
-     * dble((2 * j12 + 1)) &
-     * (dble(2 * l + 1)) &
-     * dble((2 * lam + 1))) &
- )
-!
-vstp1sg = pref * dble(iphase) * threej * sixj * ninej
-return
-end function vstp1sg
-!     ------------------------------------------------------------------
 !     THIS SUBROUTINE GOVERNS THE INPUT/OUTPUT OF THE BASIS ROUTINE.
 !     ONLY IREAD IS USED: RETURN DIRECTLY IF ZERO.
 subroutine systp1sg(irpot, readpt, iread)
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use mod_hibasutil, only: raise
 implicit none
 !
 integer irpot, iread
@@ -479,7 +483,7 @@ read (8, *, err=80) potfil
 call loapot(10, potfil)
 close (8)
 return
-80 call raise_2pi1sg('error read from input file.')
+80 call raise('error read from input file.')
 return
 !     ------------------------------------------------------------------
 entry ptrstp1sg(fname, readpt)
@@ -501,3 +505,4 @@ write (8, *) potfil
 return
 end
 !     ------------------------------------------------------------------
+end module mod_hiba21_stp1sg

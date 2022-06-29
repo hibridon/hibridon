@@ -23,6 +23,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Configure CMake
+      # LINK_TIME_OPTIMIZATION not operational on debian9 gfortran (gfortran is too old : /usr/bin/ar: CMakeFiles/hib.dir/ancou.F90.o: plugin needed to handle lto object)
       run: |
         mkdir -p ${{github.workspace}}/build && \
         if [ "${{matrix.compiler}}" == 'ifort' ]
@@ -30,7 +31,7 @@ jobs:
           module load compilers/ifort/latest && \
           /opt/cmake/cmake-3.23.0/bin/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_TESTING=ON -DCMAKE_Fortran_COMPILER=ifort -DBLA_VENDOR=Intel10_64lp
         else
-          /opt/cmake/cmake-3.23.0/bin/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_TESTING=ON
+          /opt/cmake/cmake-3.23.0/bin/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_TESTING=ON -DLINK_TIME_OPTIMIZATION=OFF
         fi
 
     - name: Build

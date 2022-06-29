@@ -61,5 +61,6 @@ add_subdirectory(lib)
 if(BUILD_TESTING)
   enable_testing()
   add_subdirectory(tests)
-endif()
+  add_subdirectory(src/unittests)
+  endif()
 

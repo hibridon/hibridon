@@ -1,3 +1,4 @@
+#include "assert.h"
 ! syastp2 (savastp2/ptrastp2) defines, saves variables and reads         *
 !                  potential for chiral asymmetric top-atom scattering   *
 !                  (or molecule with no symmetry elements)               *
@@ -33,11 +34,13 @@ end type lm_type
 type(lm_type), dimension(:), allocatable :: lms
 end module mod_chiral
 ! --------------------------------------------------------------------
+module mod_hiba29_astp2
+  contains  
 subroutine baastp2(j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
                   etemp, fjtemp, fktemp, fistmp, &
                   rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-                  n, nmax, ntop)
+                  n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  variables in call list:
 !    j:        on return contains rotational quantum number for each
@@ -132,8 +135,7 @@ subroutine baastp2(j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !   rotham:     computes matrix elements of asymmetric top hamiltonian
 ! --------------------------------------------------------------------
 use mod_chiral
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coatpi, only: narray, isiz
@@ -141,11 +143,14 @@ use mod_coatpr, only: c
 use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_coatp3, only: isizh
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use mod_hibasutil, only: rotham
 use constants, only: econv, xmconv
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*1 slab
 #include "common/parbas.F90"
@@ -601,7 +606,6 @@ end if
 !  i counts v2 elements
 !  inum counts v2 elements for given lambda
 !  ilam counts number of v2 matrices
-!  ij is address of given v2 element in present v2 matrix
 if (bastst) then
   write (6, 340)
   write (9, 340)
@@ -609,10 +613,12 @@ if (bastst) then
     '        VEE')
  end if
 i = 0
-lamsum = 0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 !  ilam denotes a particular lambda,mu term
 do 400 ilam = 1, nlam
 !     ilam denotes a particular LAMBDA,MU term
+  ancouma => v2%get_angular_coupling_matrix(ilam)
   lam = lms(ilam)%l1
   mu = lms(ilam)%m1
 !
@@ -621,9 +627,8 @@ do 400 ilam = 1, nlam
   if (mu .lt. 0) goto 400
 !
   inum = 0
-  do 355 icol = 1, n
-    do 350 irow = icol, n
-      ij = ntop * (icol - 1) + irow
+  do icol = 1, n
+    do irow = icol, n
 !     initialize potential to zero
       vee = 0.d0
       call vchirl(j(irow), l(irow), j(icol), l(icol), &
@@ -632,44 +637,30 @@ do 400 ilam = 1, nlam
 !     check for nonzro matrix element
       if (abs(vee) .gt. 1.d-10) then
         i = i + 1
-        if (i .le. nv2max) then
-          inum = inum + 1
-          v2(i) = vee
-          iv2(i) = ij
-          if (bastst .and. iprint.ge.2) then
-            write (6, 390) ilam, lam, mu, &
-                icol, irow, i, iv2(i), vee
-            write (9, 390) ilam, lam,mu, &
-                icol, irow, i, iv2(i), vee
-390             format (i6, 2i5, 2x, 2i5, 2i8, e20.7)
-          end if
-        else
-          write (6, 410) i, nv2max
-          write (9, 410) i, nv2max
-410           format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i16, &
-            ' .GT. NV2MAX=',i16,'; ABORT ***')
-          stop
+        inum = inum + 1
+        call ancouma%set_element(irow=irow, icol=icol, vee=vee)
+        if (bastst .and. iprint.ge.2) then
+          write (6, 390) ilam, lam, mu, &
+              icol, irow, i, vee
+          write (9, 390) ilam, lam,mu, &
+              icol, irow, i, vee
+390             format (i6, 2i5, 2x, 2i5, i8, e20.7)
         end if
       end if
-350     continue
-355   continue
-  if (i .le. nv2max) lamnum(ilam) = inum
+    end do
+  end do
   if (bastst) then
-    write (6, 370) ilam, lam, mu, lamnum(ilam)
-    write (9, 370) ilam, lam, mu, lamnum(ilam)
+    write (6, 370) ilam, lam, mu, ancouma%get_num_nonzero_elements()
+    write (9, 370) ilam, lam, mu, ancouma%get_num_nonzero_elements()
 370     format ('ILAM=',i4,'  L1=',i3,' M1=',i3, &
       '  LAMNUM(ILAM) = ',i7)
   end if
-  lamsum = lamsum + lamnum(ilam)
 400 continue
 if (bastst) then
-  write (6, 420) lamsum
-  write (9, 420) lamsum,nv2max
+  write (6, 420) v2%get_num_nonzero_elements()
+  write (9, 420) v2%get_num_nonzero_elements()
 420   format (' *** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS ', &
       i16)
-  write (6, 441) nv2max
-  write (9, 441) nv2max
-441   format('     MAXIMUM ALLOWED NUMBER IS',i16)
 end if
 return
 end
@@ -1002,3 +993,4 @@ return
 end
 
 ! ---------------------------------eof----------------------------------
+end module mod_hiba29_astp2

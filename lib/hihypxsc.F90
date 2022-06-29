@@ -45,6 +45,7 @@ use mod_coisc12, only: lpack => isc12 ! lpack(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc3, only: elevh => sc3 ! elevh(1)
 use mod_hibrid5, only: sread
+use mod_hibasis, only: is_j12
 use constants, only: econv, xmconv, ang2 => ang2c
 
 implicit double precision (a-h,o-z)
@@ -56,7 +57,6 @@ character*40 smtfil, hfxfil
 character*10 elaps, cpu
 logical csflg, flaghf, flgsu, twmol, nucrs, &
      batch, fast, lpar2, lpar, exstfl
-
 #include "common/parpot.F90"
 common /codim/ nairy
 common /coselb/ ibasty

@@ -1,3 +1,4 @@
+#include "assert.h"
 module mod_com
    implicit none
    character(len=300) :: com_file 
@@ -69,39 +70,23 @@ module mod_coiout
    end subroutine allocate_coiout
 end module mod_coiout
 
-module mod_cov2
-   ! variables in this module
-   !    nv2max:    maximum core memory allocated for the v2 matrix
-   !    ndummy:    dummy variable for alignment
-   !    v2:        lower triangle of nonzero angular coupling matrix elements
-   !               stored in packed column form that is :
-   !                  (1,1), (2,1), (3,1) ... (n,1),
-   !                         (2,2), (3,2) ... (n,2), etc.
-   !               only nonzero elements are stored
-
+module mod_conlam
+   ! *  variables
+   ! *    nlam:      the number of angular coupling terms actually used
+   ! *    nlammx:    the maximum number of angular coupling terms allowed
+   ! *    lamnum:    number of non-zero v2 matrix elements for each lambda
+   ! *               lamnum is an array of dimension nlammx
    implicit none
-   real(8), dimension(:), allocatable :: v2
-   integer, allocatable               :: nv2max, ndummy
+   integer, dimension(:), allocatable :: lamnum
+   integer, allocatable               :: nlam, nlammx
    contains
-   subroutine allocate_cov2(av2max)
-      integer, intent(in) :: av2max
-      allocate(v2(av2max)) ; allocate(nv2max) ; allocate(ndummy)
-      nv2max = av2max
-   end subroutine allocate_cov2
-end module mod_cov2
-
-module mod_coiv2
-! variables in this module:
-!    iv2:  matrix address of v2 matrix for each non-zero element
-!          row+column index of v2 matrix for each non-zero element
-   implicit none
-   integer, dimension(:), allocatable :: iv2
-   contains
-   subroutine allocate_coiv2(av2max)
-      integer, intent(in) :: av2max
-      allocate(iv2(av2max)) ;
-   end subroutine allocate_coiv2
-end module mod_coiv2
+   subroutine allocate_conlam(n)
+      integer, intent(in) :: n
+      allocate(lamnum(n)) ; allocate(nlam) ; allocate(nlammx)
+      nlammx = n
+      nlam = 0
+   end subroutine allocate_conlam
+end module mod_conlam
 
 module mod_cocent
    ! variables in this module
@@ -308,23 +293,6 @@ module mod_cofil
    end subroutine allocate_cofil
 end module mod_cofil
 
-module mod_conlam
-   ! *  variables
-   ! *    nlam:      the number of angular coupling terms actually used
-   ! *    nlammx:    the maximum number of angular coupling terms allowed
-   ! *    lamnum:    number of non-zero v2 matrix elements for each lambda
-   ! *               lamnum is an array of dimension nlammx
-   implicit none
-   integer, dimension(:), allocatable :: lamnum
-   integer, allocatable               :: nlam, nlammx
-   contains
-   subroutine allocate_conlam(n)
-      integer, intent(in) :: n
-      allocate(lamnum(n)) ; allocate(nlam) ; allocate(nlammx)
-      nlammx = n
-      nlam = 0
-   end subroutine allocate_conlam
-end module mod_conlam
 
 module mod_coatpi
 !  variables in this module
@@ -1154,8 +1122,6 @@ end module mod_cosysr
     !!   common /comom/  xmom(3), imom(13)
     !!   common /cosout/ nnout, jout(kout)
     !!   common /coiout/ niout, indout(kout)
-    !!   common /cov2/ nv2max, ndummy, v2(kv2max)
-    !!   common /coiv2/ iv2(kv2max)
     !!   common /cocent/ cent(kmax)
     !!   common /coeint/ eint(kmax)
     !!   common /coj12/ j12(kmax)

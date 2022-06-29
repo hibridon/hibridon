@@ -165,7 +165,36 @@ subroutine sysdat (irpot, readpt, iread)
 !  author: b. follmeg
 !  current revision date: 30-jul-2018 (p. dagdigian)
 !  -----------------------------------------------------------------------
-use mod_hiba1sg, only: sy1sg
+use mod_hiba01_1sg, only: sy1sg
+use mod_hiba02_2sg, only: sy2sg
+use mod_hiba03_2pi, only: sy2pi
+use mod_hiba04_sgpi, only: sysgpi
+use mod_hiba05_pi, only: sypi
+use mod_hiba06_stp, only: systp
+use mod_hiba07_13p, only: sy13p
+use mod_hiba08_2mol, only: sy2mol
+use mod_hiba09_stpln, only: systpln
+use mod_hiba10_22p, only: sy22p
+use mod_hiba11_1del, only: sy1del
+use mod_hiba12_h2p, only: syh2p
+use mod_hiba13_h3p, only: syh3p
+use mod_hiba14_2del, only: sy2del
+use mod_hiba15_diat2p, only: sydiat2p
+use mod_hiba16_astp, only: syastp
+use mod_hiba17_ch2x, only: sych2x
+use mod_hiba18_stp1, only: systp1
+use mod_hiba19_sgpi1, only: sysgpi1
+use mod_hiba20_2pi1sg, only: sy2pi1sg
+use mod_hiba21_stp1sg, only: systp1sg
+use mod_hiba22_1d3p, only: sy1d3p
+use mod_hiba23_3p2s, only: sy3p2s
+use mod_hiba24_sphtp, only: sysphtp
+use mod_hiba25_1sg1sg, only: sy1sg1sg
+use mod_hiba26_2sg1sg, only: sy2sg1sg
+use mod_hiba27_astp1, only: syastp1
+use mod_hiba28_3sg1sg, only: sy3sg1sg
+use mod_hiba29_astp2, only: syastp2
+use mod_hiba30_astp3, only: syastp3
 integer ibasty, irpot, iread
 logical readpt
 common /coselb/ ibasty
@@ -260,13 +289,13 @@ return
 2500 call sy1sg1sg(irpot, readpt, iread)
 return
 ! 2sigma + 1sigma molecules
-2600 call sys2sg1sg(irpot, readpt, iread)
+2600 call sy2sg1sg(irpot, readpt, iread)
 return
 ! C2v asymmetric top variables
 2700 call syastp1(irpot, readpt, iread)
 return
 ! 3sigma + 1sigma molecules
-2800 call sys3sg1sg(irpot, readpt, iread)
+2800 call sy3sg1sg(irpot, readpt, iread)
 return
 ! chiral asymmetric top variables
 2900 call syastp2(irpot, readpt, iread)
@@ -317,7 +346,38 @@ subroutine syssav (readpt)
 !  author: b. follmeg
 !  current revision date: 20-jun-2019 (p.dagdigian)
 !  -----------------------------------------------------------------------
-use mod_hiba1sg, only: sav1sg
+use mod_hiba01_1sg, only: sav1sg
+use mod_hiba02_2sg, only: sav2sg
+use mod_hiba03_2pi, only: sav2pi
+use mod_hiba04_sgpi, only: savsgpi
+use mod_hiba05_pi, only: savpi
+use mod_hiba06_stp, only: savstp
+use mod_hiba07_13p, only: sav13p
+use mod_hiba08_2mol, only: sav2mol
+use mod_hiba09_stpln, only: savstpln
+use mod_hiba10_22p, only: sav22p
+use mod_hiba11_1del, only: sav1del
+use mod_hiba12_h2p, only: savh2p
+use mod_hiba13_h3p, only: savh3p
+use mod_hiba14_2del, only: sav2del
+use mod_hiba15_diat2p, only: savdiat2p
+use mod_hiba16_astp, only: savastp
+use mod_hiba17_ch2x, only: savch2x
+use mod_hiba18_stp1, only: savstp1
+use mod_hiba19_sgpi1, only: savsgpi1
+use mod_hiba20_2pi1sg, only: sav2pi1sg
+use mod_hiba21_stp1sg, only: savstp1sg
+use mod_hiba22_1d3p, only: sav1d3p
+use mod_hiba23_3p2s, only: sav3p2s
+use mod_hiba24_sphtp, only: savsphtp
+use mod_hiba25_1sg1sg, only: sav1sg1sg
+use mod_hiba26_2sg1sg, only: sav2sg1sg
+use mod_hiba27_astp1, only: savastp1
+use mod_hiba28_3sg1sg, only: sav3sg1sg
+use mod_hiba29_astp2, only: savastp2
+use mod_hiba30_astp3, only: savastp3
+
+
 integer ibasty
 logical readpt
 common /coselb/ ibasty
@@ -405,7 +465,7 @@ return
 2300 call sav3p2s(readpt)
 return
 !  spherical top + atom
-2400 call savsphtp(reapt)
+2400 call savsphtp(readpt)
 return
 !  two different 1sigma molecules
 2500 call sav1sg1sg(readpt)
@@ -468,7 +528,37 @@ subroutine ptread (filnam, readpt)
 !  author: b. follmeg
 !  current revision date: 20-jun-2019 (p.dagdigian)
 !  -----------------------------------------------------------------------
-use mod_hiba1sg, only: ptr1sg
+use mod_hiba01_1sg, only: ptr1sg
+use mod_hiba02_2sg, only: ptr2sg
+use mod_hiba03_2pi, only: ptr2pi
+use mod_hiba04_sgpi, only: ptrsgpi
+use mod_hiba05_pi, only: ptrpi
+use mod_hiba06_stp, only: ptrstp
+use mod_hiba07_13p, only: ptr13p
+use mod_hiba08_2mol, only: ptr2mol
+use mod_hiba09_stpln, only: ptrstpln
+use mod_hiba10_22p, only: ptr22p
+use mod_hiba11_1del, only: ptr1del
+use mod_hiba12_h2p, only: ptrh2p
+use mod_hiba13_h3p, only: ptrh3p
+use mod_hiba14_2del, only: ptr2del
+use mod_hiba15_diat2p, only: ptrdiat2p
+use mod_hiba16_astp, only: ptrastp
+use mod_hiba17_ch2x, only: ptrch2x
+use mod_hiba18_stp1, only: ptrstp1
+use mod_hiba19_sgpi1, only: ptrsgpi1
+use mod_hiba20_2pi1sg, only: ptr2pi1sg
+use mod_hiba21_stp1sg, only: ptrstp1sg
+use mod_hiba22_1d3p, only: ptr1d3p
+use mod_hiba23_3p2s, only: ptr3p2s
+use mod_hiba24_sphtp, only: ptrsphtp
+use mod_hiba25_1sg1sg, only: ptr1sg1sg
+use mod_hiba26_2sg1sg, only: ptr2sg1sg
+use mod_hiba27_astp1, only: ptrastp1
+use mod_hiba28_3sg1sg, only: ptr3sg1sg
+use mod_hiba29_astp2, only: ptrastp2
+use mod_hiba30_astp3, only: ptrastp3
+
 integer ibasty
 logical readpt
 character*(*) filnam
