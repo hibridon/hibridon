@@ -44,6 +44,19 @@
 !   - COMMA instead of ',' makes also format harder to read
 !   - a bit less generic regarding units : needs one macro for each length of unit array
 !
+! solution4
+!
+!   solution similar to solution2 that doesn't make use of fortran preprocessor
+!   Uses the special dt formatter mechanism inspired by https://stackoverflow.com/questions/19906446/how-to-wrap-the-fortran-write-statement
+!   but this mechanism doesn't bring much benefit (we could have a similar simpler solution without it)
+!
+!   benefits:
+!   - (1) removes the labels, thus making code easier to read
+!   - (3) the values are only evaluated once (increase performance over the existing code)
+!   - (4) 2 lines of source code instead of 3
+!   inconvenients:
+!   - need to declare a message variable in each subroutine
+!
 #define COMMA ,
 #define __NL__  NEWLINE
 #define MYWRITE1(UNIT, FMT, X) write(UNIT,FMT) X
@@ -93,6 +106,65 @@ module mod_write
   end subroutine
 end module mod_write
 
+module logger4_mod
+
+  integer, parameter :: max_lines = 10
+
+  type message_t
+    character(len=2048) :: lines(max_lines)
+  contains
+    procedure message_write
+    generic :: write(formatted) => message_write
+  end type message_t
+
+  logical :: debug_verbose = .true.
+
+contains
+
+  subroutine log(units, message)
+    implicit none
+    integer, intent(in) :: units(2)
+    class(message_t) :: message
+    integer :: iunit
+    do iunit = 1, size(units)
+      ! write(6,*) 'writing to unit', units(iunit)
+      write(unit=units(iunit), fmt='(dt)') message
+    end do
+    message%lines(:)(1:1) = char(0) ! empty all lines in the message because the next write into it might leave old trailing lines
+  end subroutine
+
+  subroutine message_write(message, unit, iotype, v_list, iostat, iomsg)
+    implicit none
+    class(message_t), intent(in)  :: message
+    integer, intent(in)  :: unit
+    character(len=*), intent(in)  :: iotype
+    integer, intent(in), dimension(:)  :: v_list
+    integer, intent(out)  :: iostat
+    character(len=*), intent(inout)  :: iomsg
+    integer :: char
+
+    integer :: iline, num_lines
+
+    if (debug_verbose) then
+      num_lines = 0
+      do iline = 1, max_lines
+        char = iachar(message%lines(iline)(1:1))
+        ! write(6,'(i3)') char 
+        if (char /= 0) then
+          num_lines = num_lines + 1
+        end if
+      end do
+
+      do iline = 1, num_lines
+        write(unit,'(a,/)', iostat=iostat, iomsg=iomsg, advance='yes') trim(message%lines(iline))  ! graffy: no idea why I need to add a newline here '/'
+      end do
+    else
+      write(unit, '()', advance='no')
+    end if
+
+  end subroutine message_write
+
+end module logger4_mod
 
 subroutine test1_original()
   real(8) :: rmu, xmconv, ered, econv
@@ -156,6 +228,25 @@ subroutine test1_solution3()
 
 end subroutine test1_solution3
 
+subroutine test1_solution4()
+  use logger4_mod, only : message_t, log
+  implicit none
+  type(message_t) message
+  real(8) :: rmu, xmconv, ered, econv
+  integer :: jtot, jlpar
+  rmu = 2.0
+  xmconv = 3.0
+  ered = 4.0
+  econv = 5.5
+  jtot = 13
+  jlpar = 14
+
+  write(message%lines, '(/," **  2/2 ATOM ON UNCORRUGATED SURFACE ** RMU=",f9.4,"             E=",f9.2,/," JTOT=",i5,2x," JLPAR=",i2)') rmu * xmconv, ered * econv, jtot, jlpar 
+  call log((/6, 9/), message)
+
+end subroutine test1_solution4
+
+
 program test_write
 use mod_write, only: init
 implicit none
@@ -167,6 +258,7 @@ call test1_original()
 call test1_solution1()
 call test1_solution2()
 call test1_solution3()
+call test1_solution4()
 
 close(9)
 
