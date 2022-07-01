@@ -140,7 +140,7 @@ subroutine basgpi (j, l, is, jhold, ehold, ishold, nlevel, &
 !    ipi:      if ipi=1 and isg=0 then 2pi + atom scattering
 !              if isg=1 and ipi=1 then 2pi-2sig + atom scattering
 !  variables in common block /cobsp2/
-!    nvt:      Number of vibrational blocks for each term. All of these
+!    ntv:      Number of vibrational blocks for each term. All of these
 !              use same lammin, lammax, mproj. These numbers as well
 !              as the corresponding ivcol, ivrow (see below) should be
 !              set in loapot and must be consistent with the pot routine
@@ -183,6 +183,8 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rpar=>rspar
 use mod_hibasutil, only: iswap, rswap
 use constants, only: econv, xmconv, ang2c
+use mod_par, only: iprint
+#include "common/parbasl.F90"
 
 implicit double precision (a-h,o-z)
 real(8), intent(out), dimension(:) :: sc1
@@ -193,8 +195,6 @@ type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
-common /coipar/ iiipar(9), iprint
 !  these parameters must be the same as in hisysgpi
 common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
 common /coered/ ered, rmu
@@ -1363,23 +1363,25 @@ use mod_cosys, only: scod
 use mod_cosyr, only: rcod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-logical readpt, existf
+use mod_par, only: ihomo
+use funit, only: FUNIT_INP
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: i, ipi, isg, isgpi, ivibp, ivibs, ivp, ivs, j, k, l, lc, nterm, nvibp, nvibs, nvmaxp, nvmaxs, nvminp, nvmins
+logical existf
 character*8 char
 character*(*) fname
 character*1 dot
 character*60 filnam, line, potfil, filnm1
 #include "common/parbas.F90"
 common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
-logical         airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar(18)
 common /coskip/ nskip,iskip
+integer :: nskip, iskip
 save potfil
 #include "common/comdot.F90"
 !  set default values for 2pi-2sigma scattering
-rpar=0
 ispar=0
 potfil = ' '
 isicod=0
@@ -1646,48 +1648,48 @@ isg=ispar(2)
 ipi=ispar(3)
 isicod=0
 isrcod=0
-write (8, 105) (ispar(isicod+j),j=2,5),'isg, ipi, isgpi, isa'
+write (FUNIT_INP, 105) (ispar(isicod+j),j=2,5),'isg, ipi, isgpi, isa'
 isicod=isicod+5
 if(isg.ne.0) then
 !  save symmetry parameters for sigma state
-  write (8, 103) (ispar(isicod+j),j=1,3), &
+  write (FUNIT_INP, 103) (ispar(isicod+j),j=1,3), &
           'igusg, nparsg, isymsg'
   isicod=isicod+3
 !  save number of vib states for sigma state
-  write (8, 103) nvibs,(ispar(isicod+j),j=1,2) &
+  write (FUNIT_INP, 103) nvibs,(ispar(isicod+j),j=1,2) &
                 ,'nvibs, vminsg, vmaxsg'
   nvmins=ispar(isicod+1)
   nvmaxs=ispar(isicod+2)
   isicod=isicod+2
 !  save data for each vib state
   do 100 i=1,nvibs
-    write (8,103) ivibs(i),(ispar(isicod+j),j=1,2), &
+    write (FUNIT_INP,103) ivibs(i),(ispar(isicod+j),j=1,2), &
                   'ivs,  nmin,  nmax'
-    write (8,203) (rspar(isrcod+j),j=1,3),'bsg, dsg, hsg'
-    write (8,203) (rspar(isrcod+j),j=4,6),'gs, gsd, gsh'
-    write (8,201)  rspar(isrcod+7),'esg'
+    write (FUNIT_INP,203) (rspar(isrcod+j),j=1,3),'bsg, dsg, hsg'
+    write (FUNIT_INP,203) (rspar(isrcod+j),j=4,6),'gs, gsd, gsh'
+    write (FUNIT_INP,201)  rspar(isrcod+7),'esg'
     isicod=isicod+2
     isrcod=isrcod+7
 100   continue
 end if
 if(ipi.ne.0) then
-  write (8, 102) (ispar(isicod+j),j=1,2),'igupi, nparpi'
+  write (FUNIT_INP, 102) (ispar(isicod+j),j=1,2),'igupi, nparpi'
   isicod=isicod+2
-  write (8,103) nvibp,(ispar(isicod+j),j=1,2), &
+  write (FUNIT_INP,103) nvibp,(ispar(isicod+j),j=1,2), &
                 'nvibp, vminpi, vmaxpi'
   nvminp=ispar(isicod+1)
   nvmaxp=ispar(isicod+2)
   isicod=isicod+2
   do 101 i=1,nvibp
-    write (8,103) ivibp(i),(ispar(isicod+j),j=1,2), &
+    write (FUNIT_INP,103) ivibp(i),(ispar(isicod+j),j=1,2), &
            'ivp, jmin, jmax'
-    write (8,203) (rspar(isrcod+j),j=1,3),'bpi, dpi, hpi'
-    write (8,203) (rspar(isrcod+j),j=4,6),'aso, p, pd'
-    write (8,203) (rspar(isrcod+j),j=7,9),'q, qd, qd'
-    write (8,202) (rspar(isrcod+j),j=10,12),'epi, adi, gpi'
+    write (FUNIT_INP,203) (rspar(isrcod+j),j=1,3),'bpi, dpi, hpi'
+    write (FUNIT_INP,203) (rspar(isrcod+j),j=4,6),'aso, p, pd'
+    write (FUNIT_INP,203) (rspar(isrcod+j),j=7,9),'q, qd, qd'
+    write (FUNIT_INP,202) (rspar(isrcod+j),j=10,12),'epi, adi, gpi'
     if(ispar(4).ne.0) then
       ivs=ispar(isicod+3)
-      write (8,204) ivs,(rspar(isrcod+k),k=13,14), &
+      write (FUNIT_INP,204) ivs,(rspar(isrcod+k),k=13,14), &
                     'ipt, a, b'
       isrcod=isrcod+14
     else if(ispar(4).eq.0) then
@@ -1703,7 +1705,7 @@ end if
 202 format(g14.6,2g14.6,t50,a)
 203 format(3g14.6,t50,a)
 204 format(i4,2g14.6,t50,a)
-write (8, 300) potfil
+write (FUNIT_INP, 300) potfil
 300 format(a)
 return
 end

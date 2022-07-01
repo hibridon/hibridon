@@ -129,6 +129,8 @@ use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+use mod_par, only: iprint
+#include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
@@ -137,8 +139,6 @@ logical ihomo, flaghf, csflag, clist, flagsu, bastst
 integer :: ifs1
 integer :: nn
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
-common /coipar/ iiipar(9), iprint
 common /coselb/ ibasty
 common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
@@ -531,7 +531,7 @@ vee = phase * facj * cg1 * cg2 * cg3 * f6j * f9j / sq4pi3
 return
 end
 ! -----------------------------------------------------------------------
-subroutine sy2sg1sg (irpot, readp, iread)
+subroutine sy2sg1sg (irpot, readpt, iread)
 !  subroutine to read in system dependent parameters for collisions of
 !  2sigma + 1sigma linear molecules
 !  current revision date: 26-aug-2017 by p.dagdigian
@@ -563,24 +563,19 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-integer irpot
-logical readp
-logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
-        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf, &
-        csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
-        readpt, ihomo, bastst, twomol, lpar
-
+use funit, only: FUNIT_INP
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: iop, j, l, lc
+logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-                noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr,lpar(3)
+integer :: nskip, iskip
 #include "common/comdot.F90"
 save potfil
 integer, pointer :: n1max, j2min, j2max, ipotsy2
@@ -608,7 +603,7 @@ nscode = isicod + isrcod + 3
 if(iread.eq.0) return
 !  read the last few lines of the input file
 read (8, *, err=888) n1max, j2min, j2max, ipotsy2
-read (8, *, err=888) b1rot, d2rot, gamma, b2rot
+read (8, *, err=888) b1rot, d1rot, gamma, b2rot
 read (8, *, err=888) potfil
 call loapot(10, potfil)
 close(8)
@@ -618,10 +613,10 @@ return
 1000 format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
 return
 ! --------------------------------------------------------------
-entry ptr2sg1sg (fname,readp)
+entry ptr2sg1sg (fname,readpt)
 line = fname
-readp = .true.
-286 if (readp) then
+readpt = .true.
+286 if (readpt) then
   l=1
   call parse(line,l,filnam,lc)
   if(lc.eq.0) then
@@ -648,13 +643,13 @@ close (8)
 irpot=1
 return
 ! --------------------------------------------------------------
-entry sav2sg1sg (readp)
+entry sav2sg1sg (readpt)
 !  save input parameters for 2sigma-1sigma molecule scattering
-write (8, 310) n1max, j2min, j2max, ipotsy2, iop
+write (FUNIT_INP, 310) n1max, j2min, j2max, ipotsy2, iop
 310 format(5i4,14x,'n1max, j2min, j2min, ipotsy2, iop')
-write (8, 320) b1rot, d2rot, gamma, b2rot
+write (FUNIT_INP, 320) b1rot, d1rot, gamma, b2rot
 320 format(f10.7, e12.5, f10.7, '  b1rot, d1rot, gamma, b2rot')
-write (8, 285) potfil
+write (FUNIT_INP, 285) potfil
 285 format (a)
 return
 end

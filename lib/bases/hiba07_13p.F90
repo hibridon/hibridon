@@ -127,16 +127,17 @@ use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+#include "common/parbasl.F90"
 
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
 
 common /coered/ ered, rmu
 common /coskip/ nskip, iskip
+integer :: nskip, iskip
 dimension j(1), l(1), jhold(1), ehold(1), sc1(1), sc2(1), sc3(1), &
           sc4(1), ishold(1), is(1)
 !   econv is conversion factor from cm-1 to hartrees
@@ -613,7 +614,7 @@ call mxma(cmat,1,6,tatoe,1,6,ttrans,1,6,6,6,6)
 return
 end
 ! -----------------------------------------------------------------------
-subroutine sy13p (irpot, readp, iread)
+subroutine sy13p (irpot, readpt, iread)
 !  subroutine to read in system dependent parameters for collisions of
 ! atom in singlet and/or triplet P electronic state with closed shell atom
 !  if iread = 1 read data from input file
@@ -643,24 +644,21 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-integer irpot
-logical readp
-logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
-        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf, &
-        csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
-        readpt, ihomo, bastst, twomol, lpar
+use funit, only: FUNIT_INP
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: i, j, l, lc
+real(8) :: rms
+logical existf
 
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-                noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr,lpar(3)
+integer :: nskip, iskip
 #include "common/comdot.F90"
 save potfil
 integer, pointer :: nterm, nstate, ipol, npot
@@ -740,7 +738,7 @@ read (8, *, err=888)  demor, remor, bemor, dissmor
 read (8, *, err=888)  rgaus, agaus, alphg
 rms=0.d0
 line=' '
-if(.not.readp.or.iread.eq.0) then
+if(.not.readpt.or.iread.eq.0) then
   call loapot(1,' ')
   return
 endif
@@ -752,10 +750,10 @@ goto 286
 1000 format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
 return
 ! --------------------------------------------------------------
-entry ptr13p (fname,readp)
+entry ptr13p (fname,readpt)
 line = fname
-readp = .true.
-286 if (readp) then
+readpt = .true.
+286 if (readpt) then
   l=1
   call parse(line,l,filnam,lc)
   if(lc.eq.0) then
@@ -782,27 +780,27 @@ close (8)
 irpot=1
 return
 !
-entry sav13p (readp)
+entry sav13p (readpt)
 !  save input parameters for singlet-sigma + atom scattering
-write (8, 300) nstate, ipol, npot
+write (FUNIT_INP, 300) nstate, ipol, npot
 300 format(3i4, 18x,'   nstate, ipol, npot')
-write (8, 310) (en(i), i=1,3)
+write (FUNIT_INP, 310) (en(i), i=1,3)
 310 format(3(1pg12.4),4x,'   E-3P0, 3P1, 3P2')
-write (8, 315) en(4), cmix
+write (FUNIT_INP, 315) en(4), cmix
 315 format (2(1pg12.4),16x,'   E-1P1, CMIX')
-write (8, 320) de(1), re(1), be(1), rl(1), cl(1)
+write (FUNIT_INP, 320) de(1), re(1), be(1), rl(1), cl(1)
 320 format (5(1pg12.4),' 3 Pi Parameters')
-write (8, 325) de(2), re(2), be(2), rl(2), cl(2)
+write (FUNIT_INP, 325) de(2), re(2), be(2), rl(2), cl(2)
 325 format (5(1pg12.4),' 3 Sig Parameters')
-write (8, 330) de(3), re(3), be(3), rl(3), cl(3)
+write (FUNIT_INP, 330) de(3), re(3), be(3), rl(3), cl(3)
 330 format (5(1pg12.4),' 1 Pi Parameters')
-write (8, 335) de(4), re(4), be(4), rl(4), cl(4)
+write (FUNIT_INP, 335) de(4), re(4), be(4), rl(4), cl(4)
 335 format (5(1pg12.4),' 1 Sig Parameters')
-write (8, 336) demor, remor, bemor, dissmor
+write (FUNIT_INP, 336) demor, remor, bemor, dissmor
 336 format(4(1pg12.4),12x,' 1 Sigma Morse')
-write (8, 337) rgaus, agaus, alphg
+write (FUNIT_INP, 337) rgaus, agaus, alphg
 337 format (3(1pg12.4),24x,' Gaussian Coupling')
-write (8, 285) potfil
+write (FUNIT_INP, 285) potfil
 return
 end
 end module mod_hiba07_13p

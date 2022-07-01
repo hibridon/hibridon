@@ -23,6 +23,11 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Configure CMake
+      # LINK_TIME_OPTIMIZATION not operational on debian9 gfortran (gfortran is too old : /usr/bin/ar: CMakeFiles/hib.dir/ancou.F90.o: plugin needed to handle lto object)
+      # ENABLE_UNINIT_VAR_RUNTIME_DETECTOR works on ubuntu 20.04 but causes some tests to fail on debian 9:
+      # AddressSanitizer: FPE on unknown address 0x7f329c9bc3f8 (pc 0x7f329c9bc3f8 bp 0x6290000baf00 sp 0x7ffc8d5cf650 T0)
+      # 0 0x7f329c9bc3f7 in ATL_dtrsmKR_rk4 (/usr/lib/libatlas.so.3+0x10a3f7))
+      # As this seems to be a debian 9 only problem, we prefer to leave ENABLE_UNINIT_VAR_RUNTIME_DETECTOR on by default and turn if off only for this debian 9 configuration
       run: |
         mkdir -p ${{github.workspace}}/build && \
         if [ "${{matrix.compiler}}" == 'ifort' ]
@@ -30,7 +35,7 @@ jobs:
           module load compilers/ifort/latest && \
           /opt/cmake/cmake-3.23.0/bin/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_TESTING=ON -DCMAKE_Fortran_COMPILER=ifort -DBLA_VENDOR=Intel10_64lp
         else
-          /opt/cmake/cmake-3.23.0/bin/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_TESTING=ON
+          /opt/cmake/cmake-3.23.0/bin/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_TESTING=ON -DLINK_TIME_OPTIMIZATION=OFF -DENABLE_UNINIT_VAR_RUNTIME_DETECTOR=OFF
         fi
 
     - name: Build

@@ -156,6 +156,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use mod_hibasutil, only: raise
 use constants, only: econv, xmconv
+use funit, only: FUNIT_INP
 implicit none
 !
 integer MAX_NR, MAX_NV
@@ -172,8 +173,9 @@ double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV), &
      spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV), &
      spl_d(MAX_NR, MAX_NV)
 
-integer irpot, iread
-logical readpt
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
 character*(*) fname
 !     NUMBER OF BASIS-SPECIFIC VARIABLES, MODIFY ACCORDINGLY.
 integer icod, ircod
@@ -225,17 +227,17 @@ return
 !     ------------------------------------------------------------------
 entry savusr(readpt)
 !     WRITE THE LAST FEW LINES OF THE INPUT FILE.
-write (8, 220) ipotsy, iop, ninv, ipotsy2
+write (FUNIT_INP, 220) ipotsy, iop, ninv, ipotsy2
 220 format (4i4, 14x,'   ipotsy, iop, ninv, ipotsy2')
-write (8, 230) jmax
+write (FUNIT_INP, 230) jmax
 230 format (i4, 26x, '   jmax')
-write (8,231) j2min, j2max
+write (FUNIT_INP,231) j2min, j2max
 231 format (2i4, 22x,'   j2min, j2max')
-write (8, 250) brot, crot, delta, emax
+write (FUNIT_INP, 250) brot, crot, delta, emax
 250 format (3f8.4, f8.2, ' brot, crot, delta, emax' )
-write (8, 251) drot
+write (FUNIT_INP, 251) drot
 251 format (f12.6, 18x,'   drot')
-write (8, *) potfil
+write (FUNIT_INP, *) potfil
 return
 end
 !     ------------------------------------------------------------------
@@ -258,6 +260,7 @@ use mod_cosysr, only: isrcod, junkr, rspar
 use mod_hibasutil, only: vlmstpln, raise
 use constants, only: econv, xmconv
 use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
+use mod_par, only: iprint
 implicit none
 integer, intent(out) :: j(:)
 integer, intent(out) :: l(:)
@@ -306,8 +309,6 @@ double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV), &
 !
 common /coered/ ered, rmu
 double precision ered, rmu
-common /coipar/ junkip, iprint
-integer junkip(9), iprint
 !
 integer nlist, ki, ji, numeps, iep, iepsil, isym, ji2, i1, i2, &
      jsave, ksave, isave, njk, ipar, j12max, j12min, ji12, &

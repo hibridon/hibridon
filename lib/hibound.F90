@@ -32,20 +32,16 @@ subroutine bound(nch, nmax, v2)
 !     nmax    Leading dimension of the w matrix used in Hibridon
 !     ------------------------------------------------------------------
 use mod_coiout, only: niout
-use mod_version, only : version
-use constants, only: econv, xmconv 
+use mod_version, only: version
+use constants, only: econv, xmconv
 use mod_ancou, only: ancou_type
-
+use mod_par, only: wavefl, r1=>bound_r1, r2=>bound_r2, c=>bound_c, spac=>bound_spac, delr=>bound_delr, hsimp=>bound_hsimp, eigmin=>bound_eigmin, tolai=>bound_tolai, xmu
 implicit none
 integer, intent(in) :: nch, nmax
 type(ancou_type), intent(in) :: v2
 #include "common/parpot.F90"
-common /corpar/ r1, r2, c, spac, delr, hsimp, eigmin, tolai, xmu
-real(8) :: r1, r2, c, spac, delr, hsimp, eigmin, tolai, xmu
 common /cofile/ input, output, jobnam, savfil
 character(40) :: jobnam, input, output, savfil
-common /colpar/ lpar(26), wavefl
-logical :: lpar, wavefl
 common /coered/ ered, rmu
 real(8) :: ered, rmu
 

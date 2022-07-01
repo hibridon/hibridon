@@ -33,11 +33,10 @@ end
 ! --------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl ! vvl(9)
+use mod_par, only: csflag, ihomo
 implicit double precision (a-h,o-z)
 character *48 potnam
 character *2 frame
-logical csflag, ljunk, ihomo, lljunk
-common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
 potnam='ALEXANDER SCALED (s=1.21) O(3P)H2 DUBERNET-HUTSON'
 print *, potnam
 print *
@@ -119,10 +118,9 @@ subroutine pot (vv0, r)
 ! ----------------------------------------------------------------------
 
 use mod_covvl, only: vvl ! vvl(9)
+use mod_par, only: csflag, ihomo
 
 implicit double precision (a-h,o-z)
-logical ljunk, ihomo, csflag, lljunk
-common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
 dimension vxxl1(9), vxxl2(9), vxxr0(9), vxxc1(9), vxxc2(9), &
   vxxc3(9), vxxcl(9)
 dimension vyyl1(9), vyyl2(9), vyyr0(9), vyyc1(9), vyyc2(9), &

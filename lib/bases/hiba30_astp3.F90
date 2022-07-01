@@ -173,14 +173,14 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use mod_hibasutil, only: rotham, rotham1
 use constants, only: econv, xmconv
+use mod_par, only: iprint
+#include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
 
-common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
@@ -239,7 +239,7 @@ if (ihomo) then
   if ( .not. (iop.eq.1 .or. iop.eq.-1) ) then
     write(6,29) 
     write(9,29)
-29     format(' *** IOP .ne. 1 .or. -1 with IHOMO = true:' &
+29     format(' *** IOP .ne. 1 .or. -1 with IHOMO = true:', &
       '   ABORT ***')  
     if (bastst) then
       return
@@ -747,7 +747,7 @@ v2 = ancou_type(nlam=nlam, num_channels=ntop)
 if (bastst) then
   write (6, 340)
   write (9, 340) 
-340   format (/' ILAM  L1   M1   L2  LTOT    ICOL  IROW       I' &
+340   format (/' ILAM  L1   M1   L2  LTOT    ICOL  IROW       I', &
     '       IV2       VEE')
 end if
 i = 0
@@ -978,7 +978,7 @@ end
 !  current revision date:  16-aug-2009
 !  -----------------------------------------------------------------------
 !  -----------------------------------------------------------------------
-subroutine syastp3 (irpot, readp, iread)
+subroutine syastp3 (irpot, readpt, iread)
 !  subroutine to read in system dependent parameters for C2v asymmetric top
 !      + linear molecule scattering
 !
@@ -1020,23 +1020,17 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-integer irpot
-logical readp
-logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
-        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf, &
-        csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
-        readpt, ihomo, bastst, twomol, lpar
+use funit, only: FUNIT_INP
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: j, l, lc
+logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 #include "common/parbas.F90"
-common /coskip/ nskip,iskip
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-                noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr,lpar(3)
 #include "common/comdot.F90"
 save potfil
 
@@ -1079,10 +1073,10 @@ return
 90 format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
 return
 !  -----------------------------------------------------------------------
-entry ptrastp3 (fname, readp)
+entry ptrastp3 (fname, readpt)
 line = fname
-readp = .true.
-100 if (readp) then
+readpt = .true.
+100 if (readpt) then
   l=1
   call parse(line,l,filnam,lc)
   if(lc.eq.0) then
@@ -1108,18 +1102,18 @@ endif
 close (8)
 return
 !  -----------------------------------------------------------------------
-entry savastp3 (readp)
+entry savastp3 (readpt)
 !  save input parameters for chiral asymmetric top + atom scattering
 !  the order of the write statements should be identical to the read statement
 !  above. for consistency with the data file written by gendat, format
 !  statements should reserve the first 30 spaces for data, spaces 31-33 should
 !  be left blank, and the names of the variables should be printed in spaces
 !  34-80
-write (8, 230) jmax, iop, j2min, j2max, ipotsy2
+write (FUNIT_INP, 230) jmax, iop, j2min, j2max, ipotsy2
 230 format (5i4, 3x, 'jmax,iop,j2min,j2max,ipotsy2')
-write (8, 250) arot, brot, crot, emax, b2rot
+write (FUNIT_INP, 250) arot, brot, crot, emax, b2rot
 250 format(5f9.4, 6x, 'arot,brot,crot,emax,b2rot')
-write (8, 60) potfil
+write (FUNIT_INP, 60) potfil
 60 format (a)
 return
 end

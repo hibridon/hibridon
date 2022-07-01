@@ -133,6 +133,8 @@ use mod_conlam, only: nlam
 use constants, only: econv, xmconv, ang2c
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use mod_par, only: iprint, rendai=>scat_rendai
+#include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
@@ -141,9 +143,6 @@ character*80 string
 character*27 case
 character*2 chf
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
-common /coipar/ iiipar(9), iprint
-common /corpar/ xjunk(3), rendai
 common /coered/ ered, rmu
 dimension j(1), is(1), l(1), jhold(1), ishold(1), ieps(2)
 dimension c0(1), c1(1), c2(1), cf(1), ehold(1)
@@ -990,17 +989,19 @@ use mod_cosys, only: scod
 use mod_cosysl, only: islcod, lspar
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-logical readpt, existf
-logical         airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar
+use funit, only: FUNIT_INP
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: j, l, lc
+logical existf
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 character*1 dot
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar(18)
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
+integer :: nskip, iskip
 save potfil
 #include "common/comdot.F90"
 integer, pointer :: nterm, jmax, igu, isa, npar, imult, nman
@@ -1121,19 +1122,19 @@ entry savpi (readpt)
 !  line 18:
 !  line 19
 !  line 20
-write (8, 130) jmax, igu, isa, npar, imult, nman
+write (FUNIT_INP, 130) jmax, igu, isa, npar, imult, nman
 130 format (6i4, 6x, '   jmax, igu, isa, npar, imult, nman')
 !  line 21
-write (8, 140) brot, aso
+write (FUNIT_INP, 140) brot, aso
 140 format (f10.5,f10.4, 10x, '   brot, aso')
 !  line 22
-write (8, 150) o, p, q
+write (FUNIT_INP, 150) o, p, q
 150 format (3(1pg12.4), ' o, p, q')
 !  line 23
-write(8, 160) dmom, efield
+write (FUNIT_INP, 160) dmom, efield
 160 format (2f10.5, 10x, '   dmom, efield')
 !  line 16
-write (8, 285) potfil
+write (FUNIT_INP, 285) potfil
 return
 end
 end module mod_hiba05_pi

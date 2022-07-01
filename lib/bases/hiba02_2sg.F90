@@ -122,6 +122,9 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use mod_hibasutil, only: vlm2sg
 use constants, only: econv, xmconv, ang2c
+use mod_par, only: iprint
+use funit, only: FUNIT_INP
+#include "common/parbasl.F90"
 
 implicit double precision (a-h,o-z)
 integer, intent(out), dimension(:) :: nrot
@@ -132,8 +135,6 @@ type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical clist, csflag, flaghf, flagsu, ihomo, bastst
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
-common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 dimension j(1), l(1), jhold(1), ehold(1), is(1), &
           ieps(2), ishold(1)
@@ -156,7 +157,7 @@ if (.not. flaghf) then
 end if
 if (flagsu .and. .not. csflag) then
   write (6, 8)
-  write (8, 8)
+  write (FUNIT_INP, 8)
 8   format &
    ('  *** CSFLAG = .FALSE. FOR SURFACE CALCULATION; ABORT ***')
   stop
@@ -587,7 +588,9 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
+use mod_par, only: ihomo
+use funit, only: FUNIT_INP
+implicit none
 !  subroutine to read in system dependent parameters for doublet-sigma
 !   + atom scattering
 !  if iread = 1 read data from input file
@@ -621,15 +624,16 @@ implicit double precision (a-h,o-z)
 !             of the variable names in cosysi followed by the ordering of
 !             variable names in cosysr followed by lammin, lammax, and mproj
 ! ------------------------------------------------------------------------
-logical readpt,existf
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: j, l, lc
+logical existf
 character*(*) fname
 character*60 line,filnam,potfil, filnm1
 #include "common/parbas.F90"
-logical         airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar(18)
 common /coskip/ nskip,iskip
+integer :: nskip, iskip
 character*1 dot
 save potfil
 #include "common/comdot.F90"
@@ -738,11 +742,11 @@ ASSERT(gsr .eq. rspar(2))
 
 !  save input parameters for doublet-sigma + atom scattering
 !  line 13:
-write (8, 220) nrmax, npar, isym, igu, isa
+write (FUNIT_INP, 220) nrmax, npar, isym, igu, isa
 220 format (5i4, t50, 'nrmax, npar, isym, igu, isa')
-write (8, 320) brot, gsr, drot, hrot
+write (FUNIT_INP, 320) brot, gsr, drot, hrot
 320 format (f12.6,3g12.4,t50,'brot, gsr, drot, hrot')
-write (8,330) potfil
+write (FUNIT_INP,330) potfil
 330 format(a)
 return
 end

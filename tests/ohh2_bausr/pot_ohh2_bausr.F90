@@ -143,10 +143,12 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only : isrcod, junkr, rspar
 use mod_hibasutil, only: raise
+use funit, only: FUNIT_INP
 !
 #include "pot_ohh2_bausr_common.F90"
-integer irpot, iread
-logical readpt
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
 character*(*) fname
 !     NUMBER OF BASIS-SPECIFIC VARIABLES, MODIFY ACCORDINGLY.
 integer icod, ircod
@@ -192,15 +194,15 @@ return
 !     ------------------------------------------------------------------
 entry savusr(readpt)
 !     WRITE THE LAST FEW LINES OF THE INPUT FILE.
-write (8, 230) j1max, npar
+write (FUNIT_INP, 230) j1max, npar
 230 format (2i4, 22x, '   j1max, npar')
-write (8,231) j2min, j2max, iptsy2
+write (FUNIT_INP,231) j2min, j2max, iptsy2
 231 format (3i4, 18x,'   j2min, j2max, iptsy2')
-write (8, 250) brot, aso, p, q
+write (FUNIT_INP, 250) brot, aso, p, q
 250 format (4(f10.4, 1x), 'brot, aso, p, q' )
-write (8, 251) drot
+write (FUNIT_INP, 251) drot
 251 format (f12.6, 18x,'   drot')
-write (8, *) potfil
+write (FUNIT_INP, *) potfil
 return
 end
 !     ------------------------------------------------------------------
@@ -220,6 +222,7 @@ use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use mod_hibasutil, only: raise
+use mod_par, only: iprint
 !
 #include "pot_ohh2_bausr_common.F90"
 integer, intent(out) :: j(:)
@@ -257,8 +260,6 @@ type(ancouma_type), pointer :: ancouma
 !     states, respectively, for each channel.
 common /coered/ ered, rmu
 double precision ered, rmu
-common /coipar/ junkip, iprint
-integer junkip(9), iprint
 !
 integer nlist, ji1, eps1, fi1, ji2, li, ji1p, eps1p, fi1p, &
      ji2p, lip, jsave, isave, ipar, j12min, ji12, ji12p, &

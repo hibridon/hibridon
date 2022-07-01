@@ -108,15 +108,15 @@ use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+use mod_par, only: iprint
+#include "common/parbasl.F90"
 
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
 common /cotwo/ numj,nj1j2(50)
-common /coipar/ iiipar(9), iprint
 common /coselb/ ibasty
 common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), j12(1), j1(1), &
@@ -530,9 +530,13 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-logical readpt, existf
-integer irpot
+use funit, only: FUNIT_INP
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: i, ihigh, ij, iline, ilow, itop, j, l, lc, nj1j2, numj
+logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
@@ -639,15 +643,15 @@ return
 entry sav2mol (readpt)
 !  save input parameters for hf-hf scattering
 !  line 13:
-write (8, 300) nterm, nsym,numj
+write (FUNIT_INP, 300) nterm, nsym,numj
 300 format (3i4,18x,'   nterm, nsym, numj')
 !  line 14
-write (8, 320) brot, drot, hrot
+write (FUNIT_INP, 320) brot, drot, hrot
 320 format(f8.4, 2g11.4, '   brot, drot, hrot')
 !  line 15
 if (numj .le. 20) then
   iline=3
-  write (8, 330) (nj1j2(i)/10,mod(nj1j2(i),10), i=1,numj)
+  write (FUNIT_INP, 330) (nj1j2(i)/10,mod(nj1j2(i),10), i=1,numj)
 330 format (1x,20(2i1,'  '),t65,'nj1j2')
 else
   ilow=1
@@ -655,7 +659,7 @@ else
   do  350 ij = 1, numj, 20
     iline=iline+1
     itop=min(ihigh,numj)
-    write (8, 330) (nj1j2(i)/10,mod(nj1j2(i),10), &
+    write (FUNIT_INP, 330) (nj1j2(i)/10,mod(nj1j2(i),10), &
                     i=ilow,itop)
     ilow=itop+1
     ihigh=ihigh+20

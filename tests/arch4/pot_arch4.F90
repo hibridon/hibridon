@@ -101,13 +101,12 @@ subroutine pot (vv0, r)
 ! R = [3:0.5:10 11 12 13 15 20]
 !
 use mod_covvl, only: vvl
+use mod_par, only: csflag, ihomo
 implicit double precision (a-h,o-z)
-logical ljunk, ihomo, csflag, lljunk
 #include "common/parbas.F90"
 dimension v(5)
 dimension csplin(69,5)
 dimension rr(69), vl(345),vec(69)
-common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
 ! here are the 69 values of R
 data rr/ &
   3.000,  3.250,  3.500,  3.750,  4.000, &

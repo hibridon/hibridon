@@ -1,4 +1,10 @@
 #include "assert.h"
+
+module mod_grnd
+real(8) :: reg
+real(8) :: caypot
+end module mod_grnd
+
 ! shapiro CH3I PES's modified by Guo and Schatz
 ! References:  M. Shapiro, J. Phys. Chem. 90, 3644 (1986);
 !  H. Guo and G. C. Schatz, J. Chem. Phys. 93, 393 (1990);
@@ -248,7 +254,7 @@ vvl(3) = bb12*exp(-g12*(r-r012))
 return
 end
 !  -----------------------------------------------------------------------
-subroutine syusr (irpot, readp, iread)
+subroutine syusr (irpot, readpt, iread)
 !  subroutine to read in system dependent parameters for
 !  model photodissociation calculation
 !  if iread = 1 read data from input file
@@ -305,31 +311,28 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
-implicit double precision (a-h,o-z)
-integer irpot
-logical readp
-logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
-        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf, &
-        csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
-        readpt, ihomo, bastst, twomol
+use mod_grnd, only: reg, caypot
+use mod_par, only: par_readpt=>readpt
+use funit, only: FUNIT_INP
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: i, j, iel, iofi, iofr, ndip, nel
+real(8) :: rshift, rsm
+logical existf
 character*1 dot
 character*4 char
 character*(*) fname
 character*40 filnam, line, potfil
 #include "common/parbas.F90"
-common /cogrnd/ reg, caypot
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-                noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr
 save potfil
 #include "common/comdot.F90"
 
 !     default number and names of system dependent parameters
 isicod = 7
 isrcod = 5
-readpt=.false.
+par_readpt=.false.
 nscode = isicod + isrcod
 scod(1) = 'NTERM'
 scod(2) = 'NPHOTO'
@@ -423,9 +426,9 @@ goto 286
 1000 format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
 return
 ! --------------------------------------------------------------
-entry ptrusr (fname,readp)
-readp = .true.
-186 if (readp) then
+entry ptrusr (fname,readpt)
+readpt = .true.
+186 if (readpt) then
 ! now call loapot(iunit,filnam) routine to read potential parameters
   filnam = ' '
   call loapot(1,filnam)
@@ -435,22 +438,22 @@ rsm = 0
 irpot=1
 return
 ! --------------------------------------------------------------
-entry savusr (readp)
+entry savusr (readpt)
 !  save input parameters for model dissociation problem
-write (8, 290) iscod(2), iscod(3)
+write (FUNIT_INP, 290) iscod(2), iscod(3)
 290 format(2i4,24x,' nphoto, ndip')
 iofi = 3
 iofr = 1
 nel = 2
 do i= 1, nel
-  write (8, 295)i,(iscod(iofi+j),j=1,2)
+  write (FUNIT_INP, 295)i,(iscod(iofi+j),j=1,2)
 295   format (3i4, t50,'iel, vmin, vmax')
-  write (8, 296) (rcod(iofr+j),j=1,2)
+  write (FUNIT_INP, 296) (rcod(iofr+j),j=1,2)
 296   format(2f15.8,t50,'eel, evib')
   iofi=iofi+2
   iofr=iofr+2
 enddo
-write (8, 300) rcod(1)
+write (FUNIT_INP, 300) rcod(1)
 300 format(f11.5, t50,'rshift')
 return
 end
@@ -578,6 +581,7 @@ use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 use constants, only: econv, xmconv
 use mod_coiout, only: niout, indout
+use mod_par, only: iprint
 implicit double precision (a-h,o-z)
 integer, intent(out) :: j(:)
 integer, intent(out) :: l(:)
@@ -609,7 +613,6 @@ type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical clfl
 #include "common/parbas.F90"
-common /coipar/ iiipar(9), iprint
 common /covib/ ie(50), iv(50)
 common /coicl/ clfl
 

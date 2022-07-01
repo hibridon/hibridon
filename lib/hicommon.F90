@@ -22,3 +22,27 @@ real(8), parameter :: econv=219474.6d0, xmconv=5.485930d-4, &
 !     The value of ang2 is (10^10 Bohr Radius)^2
 !$$$      real(8), parameter :: ang2c=0.52917721092d0**2
 end module constants
+
+! file units used in hibridon
+module funit
+implicit none
+
+   enum, bind( C )
+   enumerator ::  &
+      FUNIT_CS             =  1, &   ! cross sections
+      FUNIT_SAV            =  3, &   ! <job-name>.sav
+      FUNIT_STDOUT         =  6, &   ! standard output
+      FUNIT_INP            =  8, &   ! input file (*.inp)
+      FUNIT_OUT            =  9, &   ! output file (*.out)
+      FUNIT_TRANS_MAT      = 10, &   ! temporary storage for transformation matrices (t<unit><pid>.tmp)
+      FUNIT_QUAD_MAT       = 11, &   ! temporary storage for quadrature matrices (t<unit><pid>.tmp)
+      FUNIT_CHANNEL_PARAMS = 12, &   ! temporary storage for channel parameters (t<unit><pid>.tmp)
+      FUNIT_WFU            = 22, &   ! <job-name>.wfu
+      FUNIT_PCS_START      = 25, &   ! <job-name><energy_index>.pcs files (partial cross sections; one for each energy)
+      FUNIT_APCS_START     = 35, &   ! accumulation of cs partial cross sections at each projection index; one for each energy. (t<unit><pid>.tmp)
+      FUNIT_SMT_START      = 45, &   ! <job-name><energy_index>.smt storage of selected s-matrix elements; one for each energy
+      FUNIT_ICS_START      = 70      ! <job-name><energy_index>.ics files (integral cross sections; one for each energy)
+   end enum
+
+
+end module funit

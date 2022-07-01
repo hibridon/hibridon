@@ -131,6 +131,7 @@ use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use mod_hibasutil, only: raise
+use mod_par, only: iprint
 implicit none
 !
 !     The following arrays store the parameters of channels and levels.
@@ -153,9 +154,6 @@ type(ancouma_type), pointer :: ancouma
 !
 common /coered/ ered, rmu
 real(8) :: ered, rmu
-common /coipar/ junkip, iprint
-integer, dimension(9) :: junkip
-integer :: iprint
 !
 integer :: i, ilev, iv, irow, icol, inum, i1, i2
 real(8) :: vee
@@ -440,10 +438,12 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use mod_hibasutil, only: raise
+use funit, only: FUNIT_INP
 implicit none
 !
-integer irpot, iread
-logical readpt
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
 character*(*) fname
 !     NUMBER OF BASIS-SPECIFIC VARIABLES, MODIFY ACCORDINGLY.
 integer icod, ircod
@@ -491,17 +491,17 @@ return
 !     ------------------------------------------------------------------
 entry savstp1sg(readpt)
 !     WRITE THE LAST FEW LINES OF THE INPUT FILE.
-write (8, 220) ipotsy, iop
+write (FUNIT_INP, 220) ipotsy, iop
 220 format (2i4, 25x,'ipotsy, iop')
-write (8, 230) j1max, e1max
+write (FUNIT_INP, 230) j1max, e1max
 230 format (i4, f8.2, 21x, 'j1max, e1max')
-write (8, 231) j2min, j2max, ipotsy2
+write (FUNIT_INP, 231) j2min, j2max, ipotsy2
 231 format (3i4, 21x,'j2min, j2max, ipotsy2')
-write (8, 250) brot, crot, delta
+write (FUNIT_INP, 250) brot, crot, delta
 250 format (3f10.4, 3x, 'brot, crot, delta, emax' )
-write (8, 251) drot
+write (FUNIT_INP, 251) drot
 251 format (f10.4, 23x,'drot')
-write (8, *) potfil
+write (FUNIT_INP, *) potfil
 return
 end
 !     ------------------------------------------------------------------

@@ -131,13 +131,13 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 use mod_hibasutil, only: rotham1
+use mod_par, only: iprint
+#include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
-common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
@@ -1048,9 +1048,14 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-logical readpt, existf
+use funit, only: FUNIT_INP
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: i, j, l, lc
+logical existf
 integer icod, ircod
-integer i, iread, irpot
 character*1 dot
 character*(*) fname
 character*60 line, filnam, potfil, filnm1
@@ -1182,15 +1187,15 @@ entry savastp1 (readpt)
 !  be left blank, and the names of the variables should be printed in spaces
 !  34-80
 !  line 18:
-write (8, 220) iop
+write (FUNIT_INP, 220) iop
 220 format (i4, 26x,'   iop')
 !  line 20
-write (8, 230) jmax, emax
+write (FUNIT_INP, 230) jmax, emax
 230 format (i4, 3x, g12.5, 14x, 'jmax, emax')
 !  line 21
-write (8, 250) arot, brot, crot
+write (FUNIT_INP, 250) arot, brot, crot
 250 format(3f9.4, 6x, 'arot, brot, crot')
-write (8, 60) potfil
+write (FUNIT_INP, 60) potfil
 return
 end
 ! -----------------------------------eof--------------------------------

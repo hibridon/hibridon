@@ -7,7 +7,7 @@
 !                                                                       *
 !   1. hiblk       block data, default settings                         *
 !   2. hinput      input driver                                         *
-!   4. mxoutd (mxoutr) mxoutc      matrix print utility
+!   4. mxoutd (mxoutr) print_integral_cross_sections      matrix print utility
 !   5. prsg/aver1/xscpr1  integral cross section print
 !   6. prsgpi/aver2/xscpr2 integral cross section print for sigma/pi
 !                                                                       *
@@ -15,7 +15,7 @@
 module mod_hibrid2
 contains
 ! ------------------------------------------------------------------
-subroutine default
+subroutine set_default_params
 !  current revision date:  22-jan-2008 by mha
 ! ------------------------------------------------------------------
 use mod_cosout, only: nnout, jout
@@ -26,26 +26,20 @@ use mod_cosysi, only: nscode, isicod
 use mod_cosysl, only: islcod
 use mod_cosysr, only: isrcod
 use constants, only: econv, xmconv, ang2c
+use mod_par, only: airyfl, prairy, bastst, batch, chlist, &
+                csflag, flaghf, flagsu, ihomo, ipos, logdfl, &
+                prlogd, noprin, prpart, readpt, rsflag, prsmat, &
+                t2test, prt2, twomol, wrsmat, wrpart, wrxsec, &
+                prxsec, nucros, photof, wavefl, boundc, &
+                jtot1, jtot2, jtotd, jlpar, nerg, numax, numin, nud, lscreen, iprint, &
+                fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, &
+                tolaifstfac=>scat_tolai, xmu
 implicit double precision (a-h,o-z)
 character*40 jobnam,input,output,savfil
-logical logwr, swrit, t2writ, wrpart, partw, airyfl, airypr, &
-        ipos, noprin, chlist, wrxsec, xsecwr, writs, csflag, &
-        flaghf, rsflag, t2test, logdfl, flagsu, batch, &
-        readpt, ihomo, bastst, twomol, nucros, photof, wavefl, &
-        boundc
 #include "common/parpot.F90"
 common /cofile/ input, output, jobnam, savfil
 ! nb if the nextcommon is changed, it should be also changed in common/parsys
 common /coselb/ ibasty
-common /coipar/ jtot1,jtot2,jtotd,jlpar,nerg,numax,numin,nud, &
-                lscreen, iprint
-common /corpar/ fstfac, rincr, rcut, rendai, rendld, rstart, spac, &
-                tolai, xmu
-common /colpar/ airyfl, airypr, bastst, batch, chlist, &
-                csflag, flaghf, flagsu, ihomo, ipos, logdfl, &
-                logwr, noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr, nucros, photof, wavefl, boundc
 !  this sets the maximum number of energies
 !
 jtot1=20
@@ -56,10 +50,7 @@ nerg=1
 numax=0
 numin=0
 nud=1
-! lscreen is the number of lines available on your terminal screen
 lscreen=48
-! iprint controls degree of print output in some routines
-!     iprint=-1 (no print); iprint=0 (min print); iprint=1 some print, etc
 iprint=0
 energ(1)=208.509d0
 do i=2,25
@@ -81,7 +72,7 @@ xmu=16.47d0
 ! default basis type is 1 (singlet sigma)
 ibasty=1
 airyfl=.true.
-airypr=.false.
+prairy=.false.
 batch=.false.
 chlist=.true.
 csflag=.false.
@@ -90,19 +81,19 @@ flagsu=.false.
 ihomo=.true.
 ipos=.false.
 logdfl=.true.
-logwr=.false.
+prlogd=.false.
 noprin=.false.
-partw=.false.
+prpart=.false.
 readpt=.false.
 rsflag=.false.
-swrit=.false.
+prsmat=.false.
 t2test=.false.
-t2writ=.true.
-writs=.true.
+prt2=.true.
+wrsmat=.true.
 wrpart=.false.
 wrxsec=.false.
 nucros=.false.
-xsecwr=.true.
+prxsec=.true.
 bastst=.false.
 photof=.false.
 wavefl=.false.
@@ -237,17 +228,28 @@ do  50   j = 1, jmax
 60 return
 end
 ! --------------------------------------------
-subroutine mxoutc (ifile,zmat,nlevop,nmax,ipos,csflag,flaghf, &
-                   twomol,numax,jlev,inlev)
+! routine to print integral cross sections
+subroutine print_integral_cross_sections(ifile, zmat, nlevop, nmax, ipos, csflag, flaghf, twomol, numax, jlev, inlev)
 use constants
 use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
-implicit double precision (a-h,o-z)
-logical csflag,flaghf,twomol,ipos, csff
+use mod_par, only: iprint
+implicit none
+integer, intent(in) :: ifile  ! the output file's unit (expected to be open)
+real(8), intent(in) :: zmat(nmax, nlevop)
+integer, intent(in) :: nlevop
+integer, intent(in) :: nmax
+logical, intent(in) :: ipos
+logical, intent(in) :: csflag
+logical, intent(in) :: flaghf
+logical, intent(in) :: twomol
+integer, intent(in) :: numax
+integer, intent(in) :: inlev(nlevop)
+integer, intent(in) :: jlev(nlevop)
+
+integer :: i, ii, j, j1, j2
+real(8) :: spin
+logical csff
 character*40 form
-common /coipar/ ipar(9), iprint
-dimension zmat(nmax,nlevop),inlev(1),jlev(1)
-! routine to print integral cross sections
-!  latest revision date:  24-jun-1991
 spin=0
 csff=csflag
 if (csflag .and. iprint .ge. 2) then
@@ -386,17 +388,14 @@ use mod_cosc1, only: elev => sc1 ! elev(5)
 use mod_coz, only: zmat => z_as_vec ! zmat(1)
 use mod_cow, only: scmat => w_as_vec ! scmat(1)
 use mod_version, only : version
+use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, flaghf, flagsu, ihomo, ipos
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
 character*3 stat
 character*12 accs
 character*40 xnam1, xnam2
-logical csflag, flaghf, iprint, ipos, flagsu, twomol, existf, &
-        openfl,lpar(17), &
-        airyfl,airypr,bastst,batch,chlist,ihomo, eprint
-common /colpar/ airyfl, airypr, bastst, batch, chlist, &
-                csflag, flaghf, flagsu, ihomo, ipos,lpar
+logical iprint, twomol, existf, openfl, eprint
 !     real econv, ener, xmu
 !     real a, elev, scmat, zmat
 integer i, ienerg, iout, isize, j, jbegin, jend, jfinal, &
@@ -896,6 +895,7 @@ use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_coener, only: energ
 use mod_coz, only: zmat => z_as_vec ! zmat(1)
 use mod_cow, only: scmat => w_as_vec ! scmat(1)
+use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, flaghf, flagsu, ihomo, ipos
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
@@ -905,12 +905,9 @@ character*80 line
 character*3 stat
 character*12 accs
 !mha
-logical csflag, flaghf, iprint, ipos, flagsu, twomol, existf, &
-        openfl,lpar(17), &
-        airyfl, airypr, bastst, batch, chlist, ihomo, eprint
+logical iprint, twomol, existf, &
+        openfl, eprint
 #include "common/parpot.F90"
-common /colpar/ airyfl, airypr, bastst, batch, chlist, &
-                csflag, flaghf, flagsu, ihomo, ipos,lpar
 common /coselb/ ibasty
 dimension  a(4)
 !  input parameters
@@ -1304,6 +1301,7 @@ use mod_colq, only: ipoint => lq ! ipoint(1)
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
+use mod_par, only: flaghf, ihomo, ipos
 implicit double precision (a-h,o-z)
 
 !  current revision date:  10-oct-2001 by ab
@@ -1312,11 +1310,8 @@ implicit double precision (a-h,o-z)
 integer i, isize, iskip, j, jcol, jhigh, jj, jlow, jmax, &
         jrow, ncol, nlevop, iaver
 integer ind, isa
-logical airyfl, airypr, bastst, batch, chlist, csflag, flaghf, &
-                flagsu, ihomo, ipos, iprint,lpar(17)
+logical iprint
 dimension zmat(nlevop,nlevop), ind(50)
-common /colpar/ airyfl, airypr, bastst, batch, chlist, &
-                csflag, flaghf, flagsu, ihomo, ipos,lpar
 !  first transpose cross section matrix so that initial states are
 !  columns and final states are rows
 call transp (zmat, nlevop, nlevop)
