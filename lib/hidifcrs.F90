@@ -1,3 +1,4 @@
+#include "assert.h"
 module mod_difcrs
 contains
 !  -------------------------------------------------------------
@@ -48,10 +49,10 @@ use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc2, only: jpack1 => sc2int ! jpack1(1)
 use mod_cosc3, only: lpack1 => sc3int ! lpack1(1)
 use mod_cosc4, only: ipack1 => sc4int ! ipack1(1)
-use mod_cov2, only: nv2max
 use mod_coz, only: sreal1 => z_as_vec ! sreal1(1)
 use mod_cow, only: simag1 => w_as_vec ! simag1(1)
 use mod_hibrid5, only: sread
+use mod_hibasis, only: is_j12, is_twomol
 
 implicit double precision (a-h,o-z)
 character*(*) fname1
@@ -64,7 +65,7 @@ character*8 amplstring
 
 complex(8) :: stampl, stamplm
 logical existf,csflg1,flghf1,flgsu1,ihomo,flaghf,twomol, &
-        nucros,iprint,mflag,stflag,is_twomol,is_j12
+        nucros,iprint,mflag,stflag
 integer :: ii
 integer, parameter :: smt_unit = 1
 integer, parameter :: dcs_unit = 2
@@ -87,7 +88,6 @@ real(8), dimension(:, :, :), allocatable :: y
 dimension a(15)
 !
 maxq=mmax*mmax/2
-maxy=nv2max
 !
 !.....input parameters
 !
@@ -334,9 +334,8 @@ if (.not.iprint.and.mflag) write (6, 176) xnam3(1:lenx)
    ideg=ideg1*ideg2
 179    nangle=(ang2-ang1)/dang+1.4d0
    if(nangle.eq.0) then
-      write(6,180) maxq,maxy
-180       format(' *** NOT ENOUGH CORE IN DIFCRS. MAXQ=',i6, &
-           ' MAXY=',i6)
+      write(6,180) maxq
+180       format(' *** NOT ENOUGH CORE IN DIFCRS. MAXQ=',i6)
       return
    end if
 !
@@ -699,7 +698,7 @@ write (2,346)
 if (mflag) write (3,346)
 346 format('  ')
 if (.not.stflag) then
-   write (2,348)
+   write (dcs_unit,348)
    if (iprint) write (6,347)
 347    format &
   ('    DEGENERACY AVERAGED DXSC (ANG^2/SR) AND ', &
@@ -963,12 +962,14 @@ subroutine ampli(j1,in1,j2,in2,jtot,sreal,simag,mmax,jpack,lpack, &
 !
 use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
+use mod_hibasis, only: is_j12, is_twomol
 implicit double precision (a-h,o-z)
 complex*16 ai,yy,tmat
 parameter (zero=0.0d0, one=1.0d0, two=2.0d0)
-logical ihomo,flaghf,elastc,is_twomol,is_j12
+logical ihomo,flaghf,elastc
 common /coselb/ ibasty
-dimension jpack(1),lpack(1),ipack(1),jq(1),lq(1),inq(1)
+dimension jpack(1),lpack(1),ipack(1),jq(1),inq(1)
+integer, intent(in) :: lq(1)
 dimension sreal(mmax,1),simag(mmax,1)
 integer, dimension(:), allocatable :: ilab1
 real(8), dimension(:), allocatable :: fak1
@@ -1123,6 +1124,10 @@ if (.not. is_j12(ibasty)) then
   fak=xf3j(xj2,xl2,xjtot,xmj2,xml2,-xmj1)
   if(ml2.gt.0) fak=fak*(-1)**ml2
 !
+  ASSERT(l2 .ge. 0)
+  ASSERT(l2 .le. iydim1)
+  ASSERT(iabs(ml2) .ge. 0)
+  ASSERT(iabs(ml2) .le. iydim2)
   q(mj1, mj2, :) = q(mj1, mj2, :) + sum(fak3) &
        * fak * y(l2, iabs(ml2), :)
 300   continue ! mj2 (jk)

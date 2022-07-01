@@ -1,4 +1,10 @@
-#include <assert.h>
+#include "assert.h"
+
+module mod_grnd
+real(8) :: reg
+real(8) :: caypot
+end module mod_grnd
+
 ! shapiro CH3I PES's modified by Guo and Schatz
 ! References:  M. Shapiro, J. Phys. Chem. 90, 3644 (1986);
 !  H. Guo and G. C. Schatz, J. Chem. Phys. 93, 393 (1990);
@@ -248,7 +254,7 @@ vvl(3) = bb12*exp(-g12*(r-r012))
 return
 end
 !  -----------------------------------------------------------------------
-subroutine syusr (irpot, readp, iread)
+subroutine syusr (irpot, readpt, iread)
 !  subroutine to read in system dependent parameters for
 !  model photodissociation calculation
 !  if iread = 1 read data from input file
@@ -305,31 +311,28 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-integer irpot
-logical readp
-logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
-        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf, &
-        csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
-        readpt, ihomo, bastst, twomol
+use mod_grnd, only: reg, caypot
+use mod_par, only: par_readpt=>readpt
+use funit, only: FUNIT_INP
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: i, j, iel, iofi, iofr, ndip, nel
+real(8) :: rshift, rsm
+logical existf
 character*1 dot
 character*4 char
 character*(*) fname
 character*40 filnam, line, potfil
 #include "common/parbas.F90"
-common /cogrnd/ reg, caypot
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-                noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr
 save potfil
 #include "common/comdot.F90"
 
 !     default number and names of system dependent parameters
 isicod = 7
 isrcod = 5
-readpt=.false.
+par_readpt=.false.
 nscode = isicod + isrcod
 scod(1) = 'NTERM'
 scod(2) = 'NPHOTO'
@@ -423,9 +426,9 @@ goto 286
 1000 format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
 return
 ! --------------------------------------------------------------
-entry ptrusr (fname,readp)
-readp = .true.
-186 if (readp) then
+entry ptrusr (fname,readpt)
+readpt = .true.
+186 if (readpt) then
 ! now call loapot(iunit,filnam) routine to read potential parameters
   filnam = ' '
   call loapot(1,filnam)
@@ -435,22 +438,22 @@ rsm = 0
 irpot=1
 return
 ! --------------------------------------------------------------
-entry savusr (readp)
+entry savusr (readpt)
 !  save input parameters for model dissociation problem
-write (8, 290) ispar(2), ispar(3)
+write (FUNIT_INP, 290) ispar(2), ispar(3)
 290 format(2i4,24x,' nphoto, ndip')
 iofi = 3
 iofr = 1
 nel = 2
 do i= 1, nel
-  write (8, 295)i,(ispar(iofi+j),j=1,2)
+  write (FUNIT_INP, 295)i,(ispar(iofi+j),j=1,2)
 295   format (3i4, t50,'iel, vmin, vmax')
-  write (8, 296) (rspar(iofr+j),j=1,2)
+  write (FUNIT_INP, 296) (rspar(iofr+j),j=1,2)
 296   format(2f15.8,t50,'eel, evib')
   iofi=iofi+2
   iofr=iofr+2
 enddo
-write (8, 300) rspar(1)
+write (FUNIT_INP, 300) rspar(1)
 300 format(f11.5, t50,'rshift')
 return
 end
@@ -459,7 +462,7 @@ end
 subroutine bausr (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
                   sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-                  n, nmax, ntop)
+                  n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential
 !  for model photodissociation problem
@@ -570,28 +573,51 @@ subroutine bausr (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !    rmu:       collision reduced mass in atomic units
 !               (mass of electron = 1)
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 use mod_coiout, only: niout, indout
+use mod_par, only: iprint
 implicit double precision (a-h,o-z)
-logical ihomo, flaghf, csflag, clist, flagsu, bastst
+integer, intent(out) :: j(:)
+integer, intent(out) :: l(:)
+integer, intent(out) :: is(:)
+integer, intent(out), dimension(:) :: jhold
+real(8), intent(out), dimension(:) :: ehold
+integer, intent(out), dimension(:) :: ishold
+integer, intent(out) :: nlevel
+integer, intent(out) :: nlevop
+real(8), intent(out), dimension(:) :: sc1
+real(8), intent(out), dimension(:) :: sc2
+real(8), intent(out), dimension(:) :: sc3
+real(8), intent(out), dimension(:) :: sc4
+real(8), intent(in) :: rcut
+integer, intent(in) :: jtot
+logical, intent(in) :: flaghf
+logical, intent(in) :: flagsu
+logical, intent(in) :: csflag
+logical, intent(in) :: clist
+logical, intent(in) :: bastst
+logical, intent(in) :: ihomo
+integer, intent(in) :: nu
+integer, intent(in) :: numin
+integer, intent(in) :: jlpar
+integer, intent(out) :: n
+integer, intent(in) :: nmax
+integer, intent(out) :: ntop
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical clfl
 #include "common/parbas.F90"
-common /coipar/ iiipar(9), iprint
 common /covib/ ie(50), iv(50)
 common /coicl/ clfl
 
 common /coered/ ered, rmu
 common /coiscl/ iscl(40)
-dimension j(1), l(1), jhold(1), ehold(1), &
-          sc1(1), sc2(1), sc3(1), &
-          sc4(1), ishold(1), is(1)
 zero = 0.d0
 one = 1.d0
 two = 2.d0
@@ -762,24 +788,21 @@ end if
 ! i counts v2 elements
 ! inum counts v2 elements for given lambda
 ! ilam counts numver of v2 matrices
-! ij is address of given v2 element in present v2 matrix
 ii=0
 call ptmatrix(0,0,0,vee,ii)
 ii=1
 i = 0
 ilam=0
+ASSERT(nlam == (lammax(1)-lammin(1)+1))
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 320 il = lammin(1), lammax(1), 1
   inum = 0
   ilam=ilam+1
+  ancouma => v2%get_angular_coupling_matrix(ilam)
   lb=il
-  if(ilam.gt.nlammx) then
-    write(6,311) ilam
-311     format(/' ILAM.GT.NLAMMX IN BAUSR')
-    call exit
-  end if
-  do 310  icol= 1, n
-    do 300  irow = icol, n
-      ij = ntop * (icol - 1) +irow
+  do icol= 1, n
+    do irow = icol, n
       vee=zero
       ier=ie(irow)
       iec=ie(icol)
@@ -824,39 +847,24 @@ do 320 il = lammin(1), lammax(1), 1
         write(6,289) il
 289         format('LAMBDA.GT.',i2,' UNDEFINED')
       endif
-      if (vee .eq. zero) goto 300
+      if (vee .ne. zero) then
         i = i + 1
         inum = inum + 1
-        if (i .gt. nv2max) goto 325
-          v2(i) = vee
-          iv2(i) = ij
-          if (bastst .and. (iprint .gt. 1)) then
-            write (6, 290) ilam, lb, icol, irow, i, iv2(i), &
-                           vee
-            write (9, 290) ilam, lb, icol, irow, i, iv2(i), &
-                           vee
-290             format (i4, 2i7, 2i6, i6, g17.8)
-          endif
-300     continue
-310   continue
-  lamnum(ilam) = inum
+        call ancouma%set_element(irow=irow, icol=icol, vee=vee)
+        if (bastst .and. (iprint .gt. 1)) then
+          write (6, 290) ilam, lb, icol, irow, i, vee
+          write (6, 290) ilam, lb, icol, irow, i, vee
+290             format (i4, 2i7, 2i6, g17.8)
+        endif
+      end if
+    end do
+  end do
   if (bastst) then
-    write (6, 315) ilam, lamnum(ilam)
-    write (9, 315) ilam, lamnum(ilam)
+    write (6, 315) ilam, ancouma%get_num_nonzero_elements()
+    write (9, 315) ilam, ancouma%get_num_nonzero_elements()
 315     format ('ILAM=',i3,' LAMNUM(ILAM) = ',i3)
   end if
 320 continue
-325 if ( i.gt. nv2max) then
-  write (6, 350) i, nv2max
-  write (9, 350) i, nv2max
-350   format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-  if (bastst) then
-    return
-  else
-    call exit
-  end if
-end if
 if (clist .or. bastst .and. (iprint .ge. 0)) then
   write (6, 360) i
   write (9, 360) i

@@ -189,9 +189,9 @@ subroutine gendat
 !    nud:       step size for nu (nu=numin:nud:numax)
 !  line 12:
 !    nnout:     the values of the channel rotational quantum numbers for which
-!               the s-matrix elements will be printed to file 14 (if writs = t
+!               the s-matrix elements will be printed to file 14 (if wrsmat = t
 !    niout:     the values of the additional channel index for which
-!               the s-matrix elements will be printed to file 14 (if writs = t
+!               the s-matrix elements will be printed to file 14 (if wrsmat = t
 !  line 13:
 !    jout:      an array containing these values of the rotational angular
 !               momenta
@@ -269,30 +269,26 @@ use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
 use constants
 use mod_coener, only: energ
+use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, &
+                flaghf, flagsu, ihomo, ipos, logdfl, prlogd, &
+                noprin, prpart, readpt, rsflag, prsmat, &
+                t2test, prt2, twomol, wrsmat, wrpart, wrxsec, &
+                prxsec, nucros, photof, wavefl, boundc, &
+                jtot1, jtot2, jtotd, jlpar, nerg, numax, numin, nud, &
+                lscreen, iprint, &
+                fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, tolai=>scat_tolai, xmu ! NB if boundc = .true. then these parameters are: r1,r2,c,spac,delr,hsimp,eigmin,tolai,xmu
+use funit, only: FUNIT_INP
 implicit double precision (a-h,o-z)
-integer i, jlpar, jtot1, jtot2, jtotd, length, nerg, &
-        numax, numin, ibasty
-logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
-        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf, &
-        csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
-        readpt, ihomo, bastst, twomol, nucros, photof, wavefl, &
-        boundc
+integer i, length
+logical existf
 character*40 input, jobnam, output, savfil
 character*(*) filnam
 #include "common/parpot.F90"
 common /coselb/ ibasty
-common /coipar/ jtot1, jtot2, jtotd,jlpar,nerg,numax, numin, nud, &
-                lscreen, iprint
-common /corpar/ fstfac, rincr, rcut, rendai, rendld, rstart, spac, &
-                tolai, xmu
-! NB if boundc = .true. then these variables are:
-!      common /corpar/ r1,r2,c,spac,delr,hsimp,eigmin,tolai,xmu
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-                noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr, nucros, photof, wavefl, boundc
+integer :: ibasty
+
 common /coskip/ nskip,iskip
+integer :: nskip, iskip
 common /cofile/ input, output, jobnam, savfil
 common /coered/ ered, rmu
 
@@ -310,7 +306,7 @@ end if
 ! open sequential/formatted (mode='sf') file
 call openf(8, input, 'sf', 0)
 ! ----------------------------------------------------------------
-rewind 8
+rewind FUNIT_INP
 iline=1
 !  read in input data
 !  line 1
@@ -332,14 +328,14 @@ if (.not. logdfl) then
   rendld = rstart
 end if
 !  line 4
-  read (8, 50, err=195) airypr
+  read (8, 50, err=195) prairy
 iline = iline + 1
 !  line 5
   read (8, *, err=195) tolai, rincr, rendai, fstfac
 iline = iline + 1
 if (.not. airyfl) then
 !  give dummy values to airy parameters if airyfl = .false.
-  airypr = .false.
+  prairy = .false.
   tolai = 1.
   rincr = 1.
   rendai = rendld
@@ -375,10 +371,10 @@ if(niout.gt.0) then
   iline = iline + 1
 end if
 !  line 14
-read (8, 50, err=195) logwr, swrit, t2writ, t2test, writs
+read (8, 50, err=195) prlogd, prsmat, prt2, t2test, wrsmat
 iline = iline + 1
 !  line 15
-read (8, 50, err=195) wrpart, partw, xsecwr, wrxsec, wavefl
+read (8, 50, err=195) wrpart, prpart, prxsec, wrxsec, wavefl
 iline = iline + 1
 !  line 16
 read (8, 50 ,err=195) noprin, chlist, ipos, nucros, photof
@@ -481,8 +477,8 @@ end if
    if (batch) call exit
    return
  end if
-!   if writs = .true., then warning unless jtotd = 1
-if (writs .and. jtotd .ne. 1) then
+!   if wrsmat = .true., then warning unless jtotd = 1
+if (wrsmat .and. jtotd .ne. 1) then
   write (6, 170) jtotd
 170   format &
    (' WARNING *** WRSMAT = .TRUE. BUT JTOTD=',i3,' .NE. 1 ')
@@ -490,10 +486,10 @@ end if
 ! here if photodissociation calculation or wavefunction desired
 ! reset all flags accordingly
 if (photof .or. wavefl) then
-   if (t2writ) then
+   if (prt2) then
     write (6, 171)
 171     format (' PRT2 SET .FALSE., SINCE PHOTOF OR WAVEFN .TRUE.')
-    t2writ = .false.
+    prt2 = .false.
   endif
   if (t2test) then
     write (6, 172)
@@ -505,19 +501,19 @@ if (photof .or. wavefl) then
 175     format (' WRPART SET .FALSE., SINCE PHOTOF OR WAVEFN .TRUE.')
     wrpart = .false.
   endif
-  if (partw) then
+  if (prpart) then
     write (6, 176)
 176     format (' PRPART SET .FALSE., SINCE PHOTFL OR WAVEFN .TRUE.')
-    partw = .false.
+    prpart = .false.
   endif
-  if (.not. writs) then
+  if (.not. wrsmat) then
     if (wavefl) write (6, 178)
 178     format (' WRSMAT IS .FALSE., ONLY ADIABATIC ENERGIES SAVED')
   endif
-  if (xsecwr) then
+  if (prxsec) then
     write (6, 179)
 179     format (' PRXSEC SET .FALSE., SINCE PHOTOF OR WAVEFN .TRUE.')
-    xsecwr = .false.
+    prxsec = .false.
   endif
   if (wrxsec) then
     write (6, 180)
@@ -567,7 +563,7 @@ if (jtotd .eq. 0) then
   jtotd=1
 endif
 if (nucros) then
-  if (.not.wrxsec .and. .not.xsecwr .and. .not.partw &
+  if (.not.wrxsec .and. .not.prxsec .and. .not.prpart &
                   .and. .not.wrpart) then
     write (6, 192)
 192     format(' NUCROSS SET .FALSE. BECAUSE PRPART, PRXSEC,', &
@@ -610,111 +606,111 @@ else
   endif
 endif
 if (inew .eq. 0) then
-   call openf(8, input, 'sf', 0)
+   call openf(FUNIT_INP, input, 'sf', 0)
 else
-   close (8)
-   call openf(8, filnam, 'sf', 0)
+   close (FUNIT_INP)
+   call openf(FUNIT_INP, filnam, 'sf', 0)
 endif
-rewind (8)
+rewind (FUNIT_INP)
 nline=0
 !  line 1
 nline=nline+1
-write (8, 210, err=999) label
+write (FUNIT_INP, 210, err=999) label
 210 format ((a))
 !  line 1a
 nline=nline+1
-write (8, 215, err=999) ibasty
+write (FUNIT_INP, 215, err=999) ibasty
 215 format(i4,25x,'    ibasty')
 !  line 2
 nline=nline+1
-write (8, 220, err=999) logdfl, airyfl, readpt, bastst
+write (FUNIT_INP, 220, err=999) logdfl, airyfl, readpt, bastst
 220 format (4l3,18x, '   logdfl, airyfl, readpt, bastst')
 !  line 3
 nline=nline+1
 if (.not.boundc) then
-  write (8, 230, err=999) rstart, rendld, spac
+  write (FUNIT_INP, 230, err=999) rstart, rendld, spac
 230   format (3f10.4, '   rstart, rendld, spac')
 else
-  write (8, 232, err=999) rstart, rendld, spac
+  write (FUNIT_INP, 232, err=999) rstart, rendld, spac
 232   format (2f10.4,g11.4, '  hsimp, delr, eigmin')
 endif
 !  line 4
 nline=nline+1
-write (8, 240, err=999) airypr
+write (FUNIT_INP, 240, err=999) prairy
 240 format (l3, 27x,'   prairy')
 !  line 5
 nline=nline+1
 if (.not.boundc) then
-  write (8, 250, err=999) tolai, rincr, rendai, fstfac
+  write (FUNIT_INP, 250, err=999) tolai, rincr, rendai, fstfac
 250   format (g11.4, f6.2, f8.1, f6.2, &
         '  tolai, rincr, rendai, fstfac')
 else
-  write (8, 252, err=999) tolai, rincr, rendai, fstfac
+  write (FUNIT_INP, 252, err=999) tolai, rincr, rendai, fstfac
 252   format (g11.4, f6.2, f8.4, f6.3, &
         '  tolai, r2, spac, r1')
 endif
 !  line 6
 nline=nline+1
-write (8, 260, err=999) nerg
+write (FUNIT_INP, 260, err=999) nerg
 260 format (i4,26x, '   nerg')
 !  line 7
 nline=nline+1
-write (8, 270, err=999) (energ(i), i = 1, nerg)
+write (FUNIT_INP, 270, err=999) (energ(i), i = 1, nerg)
 270 format (10f11.4)
 !  line 8
 nline=nline+1
-write (8, 280, err=999) xmu
+write (FUNIT_INP, 280, err=999) xmu
 280 format (f11.5, 19x, '   xmu')
 !  line 9
 nline=nline+1
 if (.not. boundc) then
-  write (8, 290, err=999) rcut
+  write (FUNIT_INP, 290, err=999) rcut
 290   format (f10.4, 20x,'   rcut')
 else
-  write (8, 292, err=999) rcut
+  write (FUNIT_INP, 292, err=999) rcut
 292   format (f10.4, 20x,'   c')
 endif
 !  line 10
 nline=nline+1
-write (8, 300, err=999) jtot1, jtot2, jtotd, jlpar, numin, &
+write (FUNIT_INP, 300, err=999) jtot1, jtot2, jtotd, jlpar, numin, &
                         numax, nud
 300 format (3i4,4i4,2x,'   jtot1,jtot2,jtotd,jlpar,numin,numax,', &
                        'nud')
 nline=nline+1
-write (8, 301, err=999) lscreen, iprint
+write (FUNIT_INP, 301, err=999) lscreen, iprint
 301 format(2i4,23x,'  lscreen, iprint')
 !  line 11
 nline=nline+1
-write (8, 305, err=999) nnout, niout
+write (FUNIT_INP, 305, err=999) nnout, niout
 305 format (2i5,20x,'   nnout,niout')
 !  line 12
 nline=nline+1
-write (8, 315, err=999) (jout(i), i=1, iabs(nnout))
+write (FUNIT_INP, 315, err=999) (jout(i), i=1, iabs(nnout))
 315 format (20(i4, 1x))
 !  line 13
 if(niout.gt.0) then
   nline=nline+1
-  write (8, 315, err=999) (indout(i), i=1, niout)
+  write (FUNIT_INP, 315, err=999) (indout(i), i=1, niout)
 endif
 !  line 14
   nline=nline+1
-write (8, 330, err=999) logwr, swrit, t2writ, t2test, writs
+write (FUNIT_INP, 330, err=999) prlogd, prsmat, prt2, t2test, wrsmat
 330 format (5l3,15x,'   prlogd, prsmat, prt2, t2test, wrsmat')
 !  line 15
   nline=nline+1
-write (8, 340, err=999) wrpart, partw, xsecwr, wrxsec, wavefl
+write (FUNIT_INP, 340, err=999) wrpart, prpart, prxsec, wrxsec, wavefl
 340 format (5l3,15x,'   wrpart, prpart, prxsec, wrxsec, wavefl')
 !  line 16
   nline=nline+1
-write (8, 350, err=999) noprin, chlist, ipos, nucros, photof
+write (FUNIT_INP, 350, err=999) noprin, chlist, ipos, nucros, photof
 350 format (5l3,15x,'   noprin, chlist, ipos, nucros, photof')
 !  line 17
   nline=nline+1
-write (8, 360, err=999) flaghf, csflag, flagsu, ihomo, twomol
+write (FUNIT_INP, 360, err=999) flaghf, csflag, flagsu, ihomo, twomol
 360 format (5l3,15x,'   flaghf, csflag, flagsu, ihomo, twomol')
 !  line 18
   nline=nline+1
-write (8, 370, err=999) rsflag, boundc
+write (FUNIT_INP, 370, err=999) rsflag, boundc
 370 format (2l3,24x, '   rsflag, boundc')
 return
 ! here if write error
@@ -876,41 +872,41 @@ subroutine openfi (nerg)
 !    nerg:       number of different total energies at which scattering
 !                calculation is to be done
 !                if nerg.gt.1, then three files are opened:
-!                              unit=10 (filename tmp10) for storage of
+!                              unit=FUNIT_TRANS_MAT (filename tmp10) for storage of
 !                                      transformation matrices in airy
 !                                      propagation
-!                              unit=11 (filename tmp11) for storage of
+!                              unit=FUNIT_QUAD_MAT (filename tmp11) for storage of
 !                                      quadrature matrices in logd propagation
-!                              unit=12 (filename tmp12) for storage of
+!                              unit=FUNIT_CHANNEL_PARAMS (filename tmp12) for storage of
 !                                      rotational angular momenta, orbital
 !                                      angular momenta, extra quantum index,
 !                                      and internal energies for all channels
 !  variables in common block /colpar/  (see further description in subroutine
 !                                       flow)
-!    airyfl:     note, unit=10 is opened only if airyfl = .true.
-!    writs:      if .true., then unit=45 to unit=(44+nerg) are opened as files
+!    airyfl:     note, unit=FUNIT_TRANS_MAT is opened only if airyfl = .true.
+!    wrsmat:      if .true., then unit=FUNIT_SMT_START to unit=(FUNIT_SMT_START+nerg-1) are opened as files
 !                           smat1, smat2, ... smatnerg for
 !                           storage of real and imaginary parts of
 !                           selected elements of s-matrix
-!    wrpart:     if .true., then unit=25 to unit=(24+nerg) are opened as files
+!    wrpart:     if .true., then unit=FUNIT_PCS_START to unit=(FUNIT_PCS_START+nerg-1) are opened as files
 !                           psec1, psec2,... psecnerg for
 !                           storage of of some input date and degeneracy
 !                           averaged partial cross sections
-!    csflag:     if .true., and partw or or wrpart or xsecwr or wrxsec = .true
-!                           then unit=35 to unit=(34+nerg)
+!    csflag:     if .true., and prpart or or wrpart or prxsec or wrxsec = .true
+!                           then unit=FUNIT_APCS_START to unit=(FUNIT_APCS_START+nerg-1)
 !                           are opened as files tmp35, tmp36, ... etc.
 !                           for accumulation of partial cross sections
 !                           at each cs projection index
-!    wrxsec, xsecwr:
-!                if either of these variables is .true., then unit=70 to
-!                           unit=(69+nerg) are opened for storage of some
+!    wrxsec, prxsec:
+!                if either of these variables is .true., then unit=FUNIT_ICS_START to
+!                           unit=(FUNIT_ICS_START+nerg-1) are opened for storage of some
 !                           input data and degeneracy averaged integral
 !                           cross sections
-!                if wrxsec = .true., then unit=70 to unit=(69+nerg) are opened
+!                if wrxsec = .true., then unit=FUNIT_ICS_START to unit=(FUNIT_ICS_START+nerg-1) are opened
 !                                    as permanent files with filenames
 !                                    xsec1, xsec2, xsec3, ... , xsecn
 !                                    where n = nerg
-!                          = .false., then unit=70 to unit=(69+nerg) are opene
+!                          = .false., then unit=FUNIT_ICS_START to unit=(FUNIT_ICS_START+nerg-1) are opene
 !                                     as files tmpx1, tmpx2, ... tmpxn
 !    rsflag:     if .true., then calculation is being restarted
 !                abort will occur unless all requested i/o files already exist
@@ -931,14 +927,13 @@ use mod_coisc3, only: isc3 ! isc3(3)
 use mod_coisc4, only: isc4 ! isc4(1)
 use mod_cosc1, only: rsc1 => sc1 ! rsc1(2)
 use mod_cosc2, only: rsc2 => sc2 ! rsc2(1)
-
+use mod_par, only: airyfl, csflag, flaghf, flagsu, ipos, &
+                prpart, readpt, rsflag, twomol, wrsmat, &
+                wrpart, wrxsec, prxsec, nucros, photof, wavefl, boundc
+use funit
 implicit double precision (a-h,o-z)
 integer ifile, nerg, nfile, lenx, isize, isizes
-logical airyfl, airypr, bastst, batch, chlist, csflag, existf, &
-        flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-        noprin, partw, readpt, rsflag, swrit, &
-        t2test, t2writ, writs, wrpart, wrxsec, &
-        xsecwr, twomol, nucros, photof, wavefl, boundc
+logical existf
 character*40  oldlab,newlab
 #include "common/parpot.F90"
 character*40 xname,xnam1
@@ -946,17 +941,11 @@ character*20 cdate
 character*40 input,output,jobnam,savfil
 common /cofile/ input,output,jobnam,savfil
 common /cosize/ isize, isizes
-common /colpar/ airyfl, airypr, bastst, batch, chlist, &
-                csflag, flaghf, flagsu, ihomo, ipos, &
-                logdfl, logwr, noprin, partw, readpt, &
-                rsflag, swrit, t2test, t2writ, twomol, writs, &
-                wrpart, wrxsec, xsecwr, nucros, photof, wavefl, &
-                boundc
 common /coselb/ ibasty
 if (nerg .gt. 1) then
 !  check to see if nerg .le. 25
   if (nerg .gt. 25) then
-    write (9, 10) nerg
+    write (FUNIT_OUT, 10) nerg
     write (6, 10) nerg
 10     format (/' *** NERG =', i2,' > 25; ABORT ***')
     call exit
@@ -965,21 +954,21 @@ if (nerg .gt. 1) then
 !  and quadrature matrices if more than one energy desired
 #if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
   if (airyfl) then
-    call tmpnm (10, xname)
+    call tmpnm (FUNIT_TRANS_MAT, xname)
 ! open scratch file (unit is therefore negativ here, see open)
 ! isize is only needed on a univac
-    call openf(-10, xname, 'su', isize)
+    call openf(-FUNIT_TRANS_MAT, xname, 'su', isize)
   endif
 #endif
-  call tmpnm (11, xname)
-  call openf(-11, xname, 'su', isize)
-  call tmpnm (12, xname)
-  call openf(-12, xname, 'sf', 0)
+  call tmpnm (FUNIT_QUAD_MAT, xname)
+  call openf(-FUNIT_QUAD_MAT, xname, 'su', isize)
+  call tmpnm (FUNIT_CHANNEL_PARAMS, xname)
+  call openf(-FUNIT_CHANNEL_PARAMS, xname, 'sf', 0)
 end if
 !   open files for storage of integral cross sections
-if (wrxsec .or. xsecwr) then
+if (wrxsec .or. prxsec) then
   do 60  ifile = 1, nerg
-    nfile = 69 + ifile
+    nfile = FUNIT_ICS_START - 1 + ifile
     if (wrxsec) then
        call gennam (xname, jobnam, ifile, 'ics', lenx)
        if(ifile.eq.1) xnam1=xname
@@ -996,10 +985,10 @@ if (wrxsec .or. xsecwr) then
 60   continue
   if(wrxsec) then
     if (nerg .eq. 1) then
-      write (9, 110) xnam1(1:lenx)
+      write (FUNIT_OUT, 110) xnam1(1:lenx)
 110       format (' ** INTEGRAL CROSS SECTIONS SAVED IN FILE ',(a))
     else
-      write (9, 115) xnam1(1:lenx),xname(1:lenx)
+      write (FUNIT_OUT, 115) xnam1(1:lenx),xname(1:lenx)
 115       format &
     (' ** INTEGRAL CROSS SECTIONS SAVED IN FILES ',(a), &
      ' THROUGH ',(a))
@@ -1009,10 +998,10 @@ end if
 !.....open direct access file for interpolation and restart
 !     only if partial or total cross sections desired, never if
 !     photodissociation calculation or wavefunction calculation
-if (wrxsec .or. xsecwr .or. partw .or. wrpart) then
+if (wrxsec .or. prxsec .or. prpart .or. wrpart) then
   if (.not. wavefl .and. .not. photof) then
      call dinit
-     nfile = 3
+     nfile = FUNIT_SAV
      lenj=index(jobnam,' ')-1
      if (lenj .eq. 0) lenj=40
      if (lenj .gt. 8) then
@@ -1037,7 +1026,7 @@ endif
 ! open direct access file for storage of wavefunction
 if (wavefl.and. .not. boundc) then
   call dinit
-  nfile = 22
+  nfile = FUNIT_WFU
   lenj=index(jobnam,' ')-1
   if (lenj .eq. 0) lenj=40
   if (lenj .gt. 8) then
@@ -1052,9 +1041,9 @@ if (wavefl.and. .not. boundc) then
         write (6, 300) xname(1:lenx)
         call exit
      end if
-     call openf(22, xname, 'TU', 0)
+     call openf(FUNIT_WFU, xname, 'TU', 0)
   else
-     call openf(22, xname, 'TW', 0)
+     call openf(FUNIT_WFU, xname, 'TW', 0)
   end if
   write (6, 210) xname(1:lenx)
   write (9, 210) xname(1:lenx)
@@ -1063,7 +1052,7 @@ endif
 !   open files for storage of partial cross sections
 if (wrpart) then
   do 230  ifile = 1, nerg
-    nfile = 24 + ifile
+    nfile = FUNIT_PCS_START + ifile - 1
     call gennam (xname, jobnam, ifile, 'pcs',lenx)
     if(ifile.eq.1) xnam1=xname
     inquire (file=xname, exist=existf)
@@ -1100,16 +1089,16 @@ end if
 !   projection index
 if (csflag) then
   do 280  ifile = 1, nerg
-    nfile = 34 + ifile
+    nfile = FUNIT_APCS_START + ifile - 1
     call tmpnm (nfile, xname)
     nnfile=-nfile
     call openf(nnfile, xname, 'su', 0)
 280   continue
 end if
 !  open files smatn for storage of selected s-matrix elements
-if (writs .and. .not. photof .and. .not. wavefl) then
+if (wrsmat .and. .not. photof .and. .not. wavefl) then
   do 330  ifile = 1, nerg
-  nfile = ifile + 44
+  nfile = FUNIT_SMT_START + ifile - 1
     call gennam(xname, jobnam, ifile, 'smt', lenx)
     if(ifile.eq.1) xnam1=xname
     if (rsflag) then
@@ -1147,7 +1136,7 @@ if (writs .and. .not. photof .and. .not. wavefl) then
       end if
     end if
 330    continue
-if (writs) then
+if (wrsmat) then
   if (nerg .eq. 1) then
     write (9, 340) xnam1(1:lenx)
 340     format (' ** SELECTED S-MATRIX ELEMENTS SAVED IN FILE ',(a))

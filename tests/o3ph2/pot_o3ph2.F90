@@ -13,6 +13,7 @@
 #include "common/ground.F90"
 #include "common/bausr.F90"
 subroutine loapot(iunit,filnam)
+use mod_conlam, only: nlam, nlammx, lamnum
 ! --------------------------------------------------------------------------
 character*(*) filnam
 #include "common/parbas.F90"
@@ -26,16 +27,16 @@ mproj(1)=0
 ntv(1)=1
 ivcol(1,1)=0
 ivrow(1,1)=0
+nlam=9 ; nlammx=9 ; lamnum(1)=9
 return
 end
 ! --------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl ! vvl(9)
+use mod_par, only: csflag, ihomo
 implicit double precision (a-h,o-z)
 character *48 potnam
 character *2 frame
-logical csflag, ljunk, ihomo, lljunk
-common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
 potnam='ALEXANDER SCALED (s=1.21) O(3P)H2 DUBERNET-HUTSON'
 print *, potnam
 print *
@@ -117,10 +118,9 @@ subroutine pot (vv0, r)
 ! ----------------------------------------------------------------------
 
 use mod_covvl, only: vvl ! vvl(9)
+use mod_par, only: csflag, ihomo
 
 implicit double precision (a-h,o-z)
-logical ljunk, ihomo, csflag, lljunk
-common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
 dimension vxxl1(9), vxxl2(9), vxxr0(9), vxxc1(9), vxxc2(9), &
   vxxc3(9), vxxcl(9)
 dimension vyyl1(9), vyyl2(9), vyyr0(9), vyyc1(9), vyyc2(9), &

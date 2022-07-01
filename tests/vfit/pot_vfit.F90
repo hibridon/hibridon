@@ -65,11 +65,11 @@ subroutine loapot(iunit,filnam)
 !
 ! --------------------------------------------------------------------------
 use mod_cosysi, only: nscode, isicod, ispar
+use mod_par, only: readpt
 implicit double precision(a-h,o-z)
 character*(*) filnam
 character*80 potlab, filnm1
 #include "common/parpot.F90"
-logical readpt, lpar
 common /coptx/ nblkx,maxpwx,minmpx,maxmpx,mpsstx,junk, &
   rex(20),rin(20),tanhy(250),fex(250),a1(250),ah(250), &
   art(250),are(250)
@@ -83,7 +83,7 @@ common /copot/ nc(maxtrm),a(20,50,maxtrm),maxpw(maxtrm), &
 common /cofit/ npa,maxpws,minmps,maxmps,mpsstp,idimp,idimr
 common /core/  re
 common /coskip/ nskip,iskip
-common /colpar/ lpar(14), readpt
+integer :: nskip, iskip
 common /coselb/ ibasty
 integer, pointer :: nterm
 nterm=>ispar(1)
@@ -167,12 +167,11 @@ end
 
 subroutine driver
 use mod_covvl, only: vvl
+use mod_par, only: readpt
 implicit double precision (a-h,o-z)
 character *48 potnam
 character *40 filnam
 character *2 frame
-logical lpar,readpt
-common /colpar/ lpar(14), readpt
 readpt=.true.
 potnam='WERNER-FOLLMEG VFIT'
 print *, 'potential subroutine:  ',potnam
@@ -221,6 +220,7 @@ common /coptx/ nblkx,maxpwx,minmpx,maxmpx,mpsstx,junk, &
   art(250),are(250)
 common /core/  re
 common /coskip/ nskip,iskip
+integer :: nskip, iskip
 common /coselb/ ibasty
 integer, pointer :: nterm
 nterm=>ispar(1)

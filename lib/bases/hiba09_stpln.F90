@@ -1,3 +1,6 @@
+#include "assert.h"
+module mod_hiba09_stpln
+contains
 ! systpln (savstpln/ptrstpln) defines, save variables and reads          *
 !                  potential for symmetric top and singlet sigma molecule*
 !                  scattering                                            *
@@ -5,7 +8,7 @@ subroutine bastpln(j, l, is, jhold, ehold, ishold, nlevel, &
                   nlevop, ktemp, jtemp, &
                   ieps, isc1, rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, &
-                  jlpar, n, nmax, ntop)
+                  jlpar, n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision
 !  of a rigid symmetric top with a rigid diatomic molecule (basis type = 9)
@@ -149,21 +152,23 @@ subroutine bastpln(j, l, is, jhold, ehold, ishold, nlevel, &
 !   twomol     if .true. collision between symmetric top and linear
 !              molecule, if .false. collision symmetric top-atom.
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_coamat, only: ietmp ! ietmp(1)
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use mod_hibasutil, only: vlmstp, vlmstpln
 use constants, only: econv, xmconv
+use mod_par, only: iprint
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst, twomol
 character*40 fname
 #include "common/parbas.F90"
-common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 common /co2mol/ twomol
 dimension j(1), l(1), jhold(1), ehold(1), is(1), &
@@ -258,13 +263,6 @@ do 35  i = 1, nterm
   if(lammax(i) .lt. 0) goto 35
   nsum = nsum + lammax(i) - lammin(i) + 1
 35 continue
-if (nlammx .lt. nsum) then
-  write (6, 40) nsum, nlammx
-  write (9, 40) nsum, nlammx
-40   format (' ** TOTAL NUMBER OF ANISOTROPIC TERMS=', i2, &
-          ' .GT. NLAMMX=', i2,'; ABORT')
-  stop
-end if
 if (nsum .ne. nlam) then
   write (6, 45) nsum, nlam
   write (9, 45) nsum, nlam
@@ -550,7 +548,6 @@ end if
 !  i counts v2 elements
 !  inum counts v2 elements for given lambda
 !  ilam counts number of v2 matrices
-!  ij is address of given v2 element in present v2 matrix
 i = 0
 if (bastst.and. iprint.ge. 2) then
   write (6, 340)
@@ -560,6 +557,8 @@ if (bastst.and. iprint.ge. 2) then
 end if
 lamsum = 0
 ilam = 0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 400 iterm = 1, nterm
   lbmin = lammin(iterm)
 !  if bastst = .true., then get the matrix elements of the lb=0 term
@@ -569,16 +568,15 @@ do 400 iterm = 1, nterm
 !  ilam is the index for the next term in the potential matrix
 !  lb is the actual value of lambda
     ilam = ilam + 1
+    ancouma => v2%get_angular_coupling_matrix(ilam)
     mu = mproj(iterm)
     if (twomol) then
       lb2 = lam2(iterm)
       mu2 = m2proj( iterm)
     endif
     inum = 0
-    ij = 0
     do 355  icol = 1, n
       do 350  irow = icol, n
-        ij = ntop * (icol - 1) +irow
         lr = l(irow)
         lc = l(icol)
         kc = iabs (is(icol))
@@ -609,262 +607,34 @@ do 400 iterm = 1, nterm
         endif
         if (vee .ne. zero) then
           i = i + 1
-          if (i .le. nv2max) then
-            inum = inum + 1
-            v2(i) = vee
-            iv2(i) = ij
-            if (bastst.and. iprint.ge.2) then
-              write (6, 345) ilam, lb, icol, irow, i, iv2(i), &
-                             vee
-!                    write (76, 345) ilam, lb, icol, irow, i, iv2(i),
-!     :                             vee
-              write (9, 345) ilam, lb, icol, irow, i, iv2(i), &
-                             vee
+          inum = inum + 1
+          call ancouma%set_element(irow=irow, icol=icol, vee=vee)
+          if (bastst.and. iprint.ge.2) then
+            write (6, 345) ilam, lb, icol, irow, i, vee
+            write (9, 345) ilam, lb, icol, irow, i, vee
 345               format (i4, 2i7, 2i6, i6, f17.10)
-            end if
           end if
         end if
 350       continue
 355     continue
-    if (i .le. nv2max) lamnum(ilam) = inum
-    lamsum = lamsum + lamnum(ilam)
     if (bastst) then
-      write (6, 370) ilam, lb, mu, lb2, mu2, lamnum(ilam)
-      write (9, 370) ilam, lb, mu, lb2, mu2, lamnum(ilam)
+      write (6, 370) ilam, lb, mu, lb2, mu2, ancouma%get_num_nonzero_elements()
+      write (9, 370) ilam, lb, mu, lb2, mu2, ancouma%get_num_nonzero_elements()
 370       format ('ILAM=',i3,' LAM=',i3,' MU=',i3, &
         ' LAM2=',i3,' MU2=',i3,' LAMNUM(ILAM) = ',i6)
     end if
 390   continue
 400 continue
-if ( i.gt. nv2max) then
-   write (6, 450) i, nv2max
-!         write(76, 450) i, nv2max
-   write (9, 450) i, nv2max
-450    format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-   stop
-end if
 if (clist .and. bastst) then
-  write (6, 460) lamsum
+  write (6, 460) v2%get_num_nonzero_elements()
 !        write(76, 460) lamsum
-  write (9, 460) lamsum
+  write (9, 460) v2%get_num_nonzero_elements()
 460   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', &
            i8)
 end if
 return
 end
 
-! --------------------------------------------------------------------
-subroutine vlmstpln (jp, lp, j, l, j2p, j2, &
-                     j12p, j12, jtot, kp, k, lambda, mu, &
-                     lambda2, mu2, &
-                     iepsp, ieps, v, csflag)
-
-!  subroutine to calculate v-lambda matrices for close-coupled or
-!  coupled-state treatment of collisions of a symmetric top with an atom
-!  the primitive cc  elements are given in claire's thesis
-!  note, that in this article the bra indices (left side of matrix
-!  elements) u
-!  are primed, while in the conventions of the present subroutine the
-!  bra indices are primed and the ket indices (righ side of matrix
-!  elements), unprimed.
-!
-!  author: claire rist
-!  current revision date: 17-jan-1992
-!
-! -----------------------------------------------------------------------
-!  variables in call list:
-!    jp:       rotational quantum number of left side of matrix element
-!              (bra) for symmetric top
-!    lp:       orbital angular momentum of left side of matrix element
-!              (bra)
-!    j:        rotational quantum number of right side of matrix element
-!              (ket) for symmetric top
-!    l:        orbital angular momentum of right side of matrix element
-!              (ket)
-!    j2p:      rotational quantum number of left side of matrix element
-!              (bra) for linear molecule
-!    j2:       rotational quantum number of left side of matrix element
-!              (ket) for linear molecule
-!    j12p:     rotational quantum number of left side of matrix element
-!              (bra) j12p = jp + j2p
-!    j12:      rotational quantum number of left side of matrix element
-!              (ket) j12 = j + j2
-!    jtot:     total angular momentum
-!    kp:       k quantum number of bra
-!    k:        k quantum number of ket
-!    iepsp:    symmetry index of bra
-!    ieps:     symmetry index of ket
-!    lambda:   order of rotation matrix term in expansion of potential
-!    mu:       absolute value of index of rotation matrix term in expansion of
-!              expansion of potential
-!    lambda2:  order of rotation matrix term in expansion of potential
-!    mu2:      absolute value of index of rotation matrix term in
-!              expansion of potential
-!    v:        on return, contains desired matrix element
-!    csflag:   if .true., then cs calculation; in this case:
-!                jtot in call list is cs lbar
-!                lp is nu (cs projection index)
-!                l is not used
-!              if .false., then cc calculation; in this case:
-!                jtot is total angular momentum and l and lp correspond
-!                to the orbital angular momenta
-!  subroutines called:
-!     xf3j, xf6j, xf9j, prmstp
-!     f9j (Claire's routine)
-!
-! -----------------------------------------------------------------------
-implicit double precision (a-h,o-z)
-logical csflag
-data one, zero, two  / 1.0d0, 0.0d0, 2.0d0 /
-v = zero
-iphase = ieps * iepsp * (-1) ** (jp + j + lambda + mu)
-if (iphase .eq. -1) return
-kdif = k - kp
-if (iabs(kdif) .eq. mu) then
-  omeg = one
-!  the signed value of mu in the cc matrix elements is given by the
-!  3j symbol (j' lambda j/ k' mu -k) so that mu = k - k'= kdif
-  musign = kdif
-  if (kdif .lt. 0)  omeg =  (-1) ** mu
-!  contribution from these 3j coeff (j' lambda j/k' mu -k)...
-  call prmstpln (jp, lp, j2p, j12p, j, l, j2, j12, &
-               jtot, kp, k, lambda, musign, lambda2, mu2, &
-               vprm, csflag)
-  v = v + omeg * vprm
-end if
-if ((k + kp) .eq. mu) then
-!  n.b. for k = 0 and/or kp = 0, we recompute the same primitive matrix
-!  element
-!  cc contribution from  3j coeff (j' lambda j/ -k' mu, -k)
-  call prmstpln (jp, lp, j2p, j12p, j, l, j2, j12, &
-               jtot, -kp, k, lambda, mu, lambda2, mu2, &
-                 vprm, csflag)
-  v = v + vprm * iepsp
-end if
-s4pir8 = sqrt ( 4.d0 * acos(-1.d0) )
-s4pi = s4pir8
-return
-end
-! ----------------------------------------------------------------------
-subroutine prmstpln (jp, lp, j2p, j12p, j, l, j2, j12, &
-               jtot, kp, k, lambda1, mu1,lambda2, mu2, &
-                   vprm, csflag)
-!  subroutine to calculate primitive v-lambda matrix elements for
-!  close-couple
-!  treatment of collisions of a symmetric top with a linear molecule
-!  author: claire rist
-!  current revision date:  17-jan-1992
-!
-! -----------------------------------------------------------------------
-!  variables in call list:
-!    jp:       rotational quantum number of left side of matrix element
-!              (bra) for symmetric top
-!    lp:       orbital angular momentum of left side of matrix element
-!              (bra)
-!    j2p:      rotational quantum number of left side of matrix element
-!              (bra) for linear molecule
-!    j12p:     total molecular rotational quantum number of left side of
-!              matrix element (bra)
-!    j:        rotational quantum number of right side of matrix element
-!              (ket) for symmetric top
-!    l:        orbital angular momentum of right side of matrix element
-!              (ket)
-!    j2:       rotational quantum number of right side of matrix element
-!              (ket) for linear molecule
-!    j12:      total molecular rotational quantum number of right side
-!              of matrix element
-!    jtot:     total angular momentum
-!    kp:       k quantum number of bra
-!    k:        k quantum number of ket
-!    lambda1:  order of rotation matrix term in expansion of potential
-!    mu1:      index of rotation matrix term in expansion of potential
-!    lambda2:  order of rotation matrix term in expansion of potential
-!    mu2:      index of rotation matrix term in expansion of potential
-!    vrpmstp:  on return, contains primitive matrix element
-!    csflag:   if .true., then cs calculation; in this case:
-!                jtot in call list is cs lbar
-!                lp is nu (cs projection index)
-!                l is not used
-!              if .false., then cc calculation; in this case:
-!                jtot is total angular momentum
-!  subroutines called:
-!     xf3j, xf6j, xf9j
-!     f9j (Claire's routines)
-!
-! -----------------------------------------------------------------------
-implicit double precision (a-h,o-z)
-logical csflag
-data half, one, two, zero, four / 0.5d0, 1.d0, 2.d0, 0.d0, 4.d0/
-data pi /3.1415926536d0 /
-vprm = zero
-xjp = dble(jp)
-xj = dble(j)
-xkp = dble(kp)
-xk = dble(k)
-xj2p = dble(j2p)
-xj2 = dble(j2)
-xj12p = dble(j12p)
-xj12 = dble(j12)
-xjtot = dble(jtot)
-xlp = dble(lp)
-xl = dble(l)
-xlambda1 = dble(lambda1)
-xmu1 = dble(mu1)
-xlambda2 = dble(lambda2)
-xmu2 = dble(mu2)
-! Last term in j12 added by Claire to reproduce the isotropic
-! matrix elements
-xnorm = (two * xjp + one) * (two * xj + one) * &
-        (two * xj2p + one) * (two * xj2 + one) * &
-        (two * xlp + one) * (two * xl + one)* &
-        (two * j12p + one) * (two * j12 + one)
-!  special normalization for k and/or kp = 0
-if (k .eq. 0) xnorm = xnorm * half
-if (kp .eq. 0) xnorm = xnorm * half
-!  special normalization for mu1 and/or mu2 = 0
-!      if (mu1 .eq. 0) xnorm = xnorm * half * half
-if (mu2 .eq. 0) xnorm = xnorm * half * half
-!  the desired matrix element is constructed in x
-!  here for cc matrix elements
-x = xf3j (xjp, xlambda1, xj, xkp, xmu1, - xk)
-x2 = xf3j (xj2p, xlambda2, xj2, zero, zero, zero)
-x = x * xf3j (xj2p, xlambda2, xj2, zero, zero, zero)
-if (x .eq. zero) return
-lmin = max(iabs(lambda1-lambda2), iabs(l-lp))
-lmax = min(lambda1+lambda2, l+lp)
-sum = zero
-do 500 lambda = lmin, lmax
-  xlambda = dble(lambda)
-  xs = xf3j (xlp, xlambda, xl, zero, zero, zero)
-  if (xs .eq. zero) go to 500
-  xs = xs * xf3j (xlambda1,xlambda2,xlambda,xmu2,-xmu2,zero)
-  if (xs .eq. zero) go to 500
-  xs = xs * xf6j (xj12, xl, xjtot, xlp, xj12p, xlambda)
-  if (xs .eq. zero) go to 500
-!        xs4 = 1/sqrt((2*xjp+1)*(2*xj+1)*(2*xlambda+1))
-!        xs = xs * xs4
-  xs = xs * f9j(lambda1, j, jp, lambda2, j2, j2p, &
-       lambda, j12, j12p)
-  if (xs .eq. zero) go to 500
-  xs = xs * (two * xlambda + one)
-!        write(6,*)'lambda,  xs', lambda, xs
-  sum = sum + xs
-500 continue
-x = x * sum
-!      iphase = jtot+k+mu2
-iphase = jtot + k + mu2 + jp + j2p + j12p
-vprm = ( (-1) ** iphase) * x * sqrt(xnorm)
-! Claire factor ( 1+ eps*epsp*(-1)**(j+jp+lambda1+mu1))=2
-vprm = two * vprm
-!     provisoire: check with nh3h2(j=0) calculations
-!     multiplicationfactor:
-!      s4pir8 = sqrt ( 4.d0 * acos(-1.d0) )
-!      s4pi = s4pir8
-!      vprm = vprm *sqrt(2*xlambda1+1) /s4pi
-!      cnorm= two*sqrt(2*xlambda1+1)*sqrt(xnorm)/s4pi
-return
-end
 !  -----------------------------------------------------------------------
 subroutine systpln (irpot, readpt, iread)
 !  subroutine to read in system dependent parameters for symmetric top
@@ -925,10 +695,14 @@ use mod_coiout, only: niout, indout
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-logical readpt, existf, twomol
+use funit, only: FUNIT_INP
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+logical existf, twomol
 integer icod, ircod
-integer i, iread, irpot
+integer i, j, k, l, lc
 character*1 dot
 character*(*) fname
 character*60 line, filnam, potfil, filnm1
@@ -1072,18 +846,19 @@ entry savstpln (readpt)
 !  be left blank, and the names of the variables should be printed in spaces
 !  34-80
 !  line 18:
-write (8, 220) ipotsy, iop, ninv, ipotsy2
+write (FUNIT_INP, 220) ipotsy, iop, ninv, ipotsy2
 220 format (4i4, 14x,'   ipotsy, iop, ninv, ipotsy2')
 !  line 20
-write (8, 230) jmax
+write (FUNIT_INP, 230) jmax
 230 format (i4, 26x, '   jmax')
 !  line 21
-write(8,231) j2min, j2max
+write (FUNIT_INP,231) j2min, j2max
 231 format (2i4, 22x,'   j2min, j2max')
-write (8, 250) brot, crot, delta, emax
+write (FUNIT_INP, 250) brot, crot, delta, emax
 250 format(3f8.4, f8.2, ' brot, crot, delta, emax' )
-write(8, 251) drot
+write (FUNIT_INP, 251) drot
 251 format(f12.6, 18x,'   drot')
-write (8, 60) potfil
+write (FUNIT_INP, 60) potfil
 return
 end
+end module mod_hiba09_stpln

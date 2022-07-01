@@ -1,7 +1,11 @@
-# Hibridon v5.0 alpha
 
-[![macOS-11.2](https://github.com/hibridon/hibridon/actions/workflows/macOS-11.2.yml/badge.svg?branch=master)](https://github.com/hibridon/hibridon/actions/workflows/macOS-11.2.yml)
-[![Debian-10.6](https://github.com/hibridon/hibridon/actions/workflows/Debian-10.6.yml/badge.svg?branch=master)](https://github.com/hibridon/hibridon/actions/workflows/Debian-10.6.yml)
+[![Full CI on macOS-11.2](https://github.com/hibridon/hibridon/actions/workflows/full_macOS-11.2.yml/badge.svg)](https://github.com/hibridon/hibridon/actions/workflows/full_macOS-11.2.yml)
+[![Full CI on Debian 9](https://github.com/hibridon/hibridon/actions/workflows/full_Debian-9.yml/badge.svg)](https://github.com/hibridon/hibridon/actions/workflows/full_Debian-9.yml)
+
+[what does that mean ?](link_to_wiki_page)
+
+---
+# Hibridon v5.0 alpha
 
 Computer Software for
 Molecular Inelastic Scattering and Photodissociation
@@ -108,7 +112,7 @@ This will automatically find the required libraries and compiler and create a Ma
 - 
     ```bash
     cd ~/hib_build
-    cmake ./project/ DBLA_VENDOR=<BLAS_LIB> 
+    cmake ./project/ -DBLA_VENDOR=<BLAS_LIB> 
     ```
     Where `<BLAS_LIB>` is your BLAS library e.g.:
     - `OpenBLAS`
@@ -140,6 +144,7 @@ The executable files will be put in the current directory (`~/hib_build`).
 
 ## 5. Test Hibridon (Optional)
 Hibridon testing must be activated (see previous section).
+The following commands need to be executed within the hibridon build directory (e.g. ~/hib_build/project/hibridon/).
 
 - **Run all tests**
     ```bash
@@ -152,6 +157,7 @@ Hibridon testing must be activated (see previous section).
     Where testsuite is the name of the test suite among:
     - `coverage` (covers most of the source code)
     - `quick` (runs only quick tests)
+    - `benchmark` (runs long tests for the purpose of measuring `hibridon`'s performance)
     
 - **Run tests for only one PES** 
     ```bash
@@ -175,9 +181,9 @@ This one line command configures, builds and tests Hibridon from a directory `~/
 
 Please note that this only builds and tests Hibridon library; it doesn't build any user-provided PES.
 
-<!---
 ## For code contributors
 
+<!---
 ### Code coverage
 
 Code coverage option `ENABLE_CODE_COVERAGE` allows the delvelopers to identify the portions of hibridon source code that are not yet covered by the tests.
@@ -187,8 +193,8 @@ To activate code coverage, add `-DENABLE_CODE_COVERAGE=ON` to the cmake command.
 Then, `make html_coverages`, will convert these coverage files into html reports:
 - `<hibridon_build_dir>/coverage/<test_id>/index.html`: a report that shows the code covered by the test `<test_id>`
 - `<hibridon_build_dir>/coverage/total/index.html`: a report that shows the code covered by all tests
+-->
 
 ### Performance profiling
 
-To activate profiling, add `-DENABLE_PROFILING=ON` to the cmake command. This will build and run hibridon with profiling option. When run, each test will additionnaly create a `call_graph.pdf` file which shows where time was spent during the test.
--->
+To activate profiling, add `-DENABLE_PROFILING=ON` to the cmake command. This will build and run hibridon with profiling option. When run, each test will additionnaly create a `<test_id>_call_graph.pdf` file which shows where time was spent during the test.

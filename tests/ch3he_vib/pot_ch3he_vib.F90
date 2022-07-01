@@ -42,7 +42,6 @@ double precision vvltmp(NVLM)
 !
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
 emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
-ASSERT(nlammx .ge. NVVL)  ! check that lamnum array is big enough
 print *, 'CH3-He vibrational relaxation'
 1 print *, 'Please input the maximum value of v2 (0--3):'
 read (5, *, end=99) vmax
@@ -104,7 +103,6 @@ potnam = 'CH3-He vibrational relaxation'
 !
 !   vv0 will not be used (set to zero).
 !
-ASSERT(nlammx .ge. NVVL)  ! check that lamnum array is big enough
 
 !   The dimension of vvl array:
 nlam = NVLM * (vmax + 1) * (vmax + 2) / 2
@@ -181,7 +179,6 @@ character*255 datfl
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
 emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
 
-ASSERT(nlammx .ge. NVVL)  ! check that lamnum array is big enough
 if (isfst) then
   call datfln('pot_ch3he_vib_ylmsym', datfl)
   open (unit=10, file=datfl)
@@ -280,7 +277,6 @@ data isfst /.true./
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
 emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
 
-ASSERT(nlammx .ge. NVVL)  ! check that lamnum array is big enough
 if (isfst) then
 !   Read data file
   call datfln('pot_ch3he_vib_data', datfl)
@@ -316,6 +312,8 @@ end
 !   User defined basis
 ! -------------------------------------------------------------------
 subroutine syusr(irpot, readpt, iread)
+use funit, only: FUNIT_INP
+
 !
 #include "pot_ch3he_vib_common.f90"
 !   Subroutine to read parameters for CH3 v2 vibrational relaxation
@@ -323,8 +321,9 @@ subroutine syusr(irpot, readpt, iread)
 !   Parameters:
 !       iread: 1 to read data from input file, 0 to set default
 !       irpot, readpt: not refered to in this basis
-integer irpot, iread
-logical readpt
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
 !
 !
 !   Hidden returned value:
@@ -369,7 +368,6 @@ isicod = ICOD
 isrcod = IRCOD
 !   Set default indout data
 !     This should not be done if an input file is read!
-ASSERT(nlammx .ge. NVVL)  ! check that lamnum array is big enough
 
 if (niout .le. 0) then
    niout = CNIOUT
@@ -399,9 +397,9 @@ return
 ! -------------------------------------------------------------------
 entry savusr(readpt)
 !   Save parameters
-write (8, 201) ipotsy, iop
-write (8, 202) jmax, vmax
-write (8, 203) emax0, emax1, emax2, emax3
+write (FUNIT_INP, 201) ipotsy, iop
+write (FUNIT_INP, 202) jmax, vmax
+write (FUNIT_INP, 203) emax0, emax1, emax2, emax3
 201 format (i4, 4x, i4, 21x, 'ipotsy, iop')
 202 format (i4, 4x, i4, 21x, 'jmax, vmax')
 203 format (4(f7.2, 1x), 1x, 'emax0, emax1, emax2, emax3')
@@ -409,33 +407,66 @@ return
 end
 !
 !
+!#include "hibuser.inc.F90"
 !
 !
 !   The `regular' basis routine
 ! -------------------------------------------------------------------
+!module mod_bausr
 subroutine bausr(j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, k, ieps, jtemp, ktemp, rcut, jtot, &
+                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+                  ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 !
+use mod_hibasutil, only: vlmstp, iswap
+use mod_ancou, only: ancou_type, ancouma_type
+use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
 #include "pot_ch3he_vib_common.f90"
-!
+integer, intent(out) :: j(:)
+integer, intent(out) :: l(:)
+integer, intent(out) :: is(:)
+integer, intent(out), dimension(:) :: jhold
+real(8), intent(out), dimension(:) :: ehold
+integer, intent(out), dimension(:) :: ishold
+integer, intent(out) :: nlevel
+integer, intent(out) :: nlevop
+real(8), intent(out), dimension(:), target :: sc1  ! k
+real(8), intent(out), dimension(:), target :: sc2  ! ieps
+real(8), intent(out), dimension(:), target :: sc3  ! jtemp
+real(8), intent(out), dimension(:), target :: sc4  ! ktemp
+real(8), intent(in) :: rcut
+integer, intent(in) :: jtot
+logical, intent(in) :: flaghf
+logical, intent(in) :: flagsu
+logical, intent(in) :: csflag
+logical, intent(in) :: clist
+logical, intent(in) :: bastst
+logical, intent(in) :: ihomo
+integer, intent(in) :: nu
+integer, intent(in) :: numin
+integer, intent(in) :: jlpar
+integer, intent(out) :: n
+integer, intent(in) :: nmax
+integer, intent(out) :: ntop
+type(ancou_type), intent(out), allocatable, target :: v2
+integer, dimension(:), pointer :: k
+integer, dimension(:), pointer :: ieps
+integer, dimension(:), pointer :: jtemp
+integer, dimension(:), pointer :: ktemp
+type(ancouma_type), pointer :: ancouma
 !   Arguments (13):
 !       rcut: cut-off point for keeping higher energy channels
-double precision rcut
 !       jtot: total angular momentum
 !       nu: not refered to
 !       numin: not refered to
 !       jlpar: total parity of included channels in cc calculation
 !       nmax: maximum number of channels
-integer jtot, nu, numin, jlpar, nmax
 !       flaghf: should be true as the system has integer spin
 !       flagsu: should be false for atom-molecule collision
 !       csflag: should be false for CC calculations
 !       clist: if true,quantum numbers and energies listed for each channel (unable to set in hibridon?)
 !       bastst: if true, execution terminates after the first call to basis and show channel list
 !       ihomo: not used
-logical flaghf, flagsu, csflag, clist, bastst, ihomo
 !
 !
 !   Returned value (11):
@@ -444,38 +475,29 @@ logical flaghf, flagsu, csflag, clist, bastst, ihomo
 !       l: orbital angular momentum for each channel
 !       is: index [eps * (100 * v2 + k)] for each channel
 !       ieps: epsilon label for each channel
-integer j(*), k(*), l(*), is(*), ieps(*)
 !       jhold: rotational quantum numbers for each rotational level
 !       ishold: symmetry index of each rotational level
-integer jhold(*), ishold(*)
 !       ehold: energy in hartrees of each rotational level
-double precision ehold(*)
 !       nlevel: number of rotational levels used in channel basis
 !       nlevop: number of rotational levels used in channel basis which are open asymptotically
 !       n: number of channels
 !       ntop: n or n+1 (must be odd)
-integer nlevel, nlevop, n, ntop
 !
 !
 !   Workspace as arguments (2):
 !       jtemp, ktemp
-integer jtemp(*), ktemp(*)
 !
 !
 !   Hidden arguments:
-!       mod_conlam: nlam, nlammx
+!       mod_conlam: nlam
 !       /ch3he/ brot, crot, evib, lamsym, lamasy, musym, muasy
 !       /cosysi/ nscode, isicod, nterm, ipotsy, iop, jmax, vmax
 !       /cosysr/ isrcod, emax0, emax1, emax2, emax3
 !       /coered/ ered, rmu
-!       /cov2/ nv2max
 !       /coipar/ iprint
 !
 !
 !   Hidden returned value:
-!       mod_conlam: lamnum
-!       /cov2/ v2
-!       /coiv2/ iv2
 !       /cocent/ cent
 !       /coeint/ eint
 !
@@ -489,13 +511,12 @@ parameter (EPS=1.12d-16)
 !
 integer nlist
 integer i, vi, ki, ji, iep, i1, j1, njk, nn
-integer ilmmin, ilmmax, vibblk, ij
+integer ilmmin, ilmmax, vibblk
 double precision lvleng
 integer, dimension(nmax) :: vtemp
 integer, dimension(nmax) :: ietemp
 double precision esave, etemp
 integer vsave, jsave, ksave, iesave
-integer lamsum
 double precision vee
 double precision emax(V2MAX+1), emin
 integer ipar, lpar, lmax, lmin, li, ilm, ilms, lambda, mu
@@ -506,9 +527,13 @@ integer v(nmax)
 integer gblkid
 !
 ! -------------------------------------------------------------------
+
+call C_F_POINTER (C_LOC(sc1), k, [nmax])
+call C_F_POINTER (C_LOC(sc2), ieps, [nmax])
+call C_F_POINTER (C_LOC(sc3), jtemp, [nmax])
+call C_F_POINTER (C_LOC(sc4), ktemp, [nmax])
 !
 !   Construct emax array from input parameters
-ASSERT(nlammx .ge. NVVL)  ! check that lamnum array is big enough
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
 emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
 
@@ -531,13 +556,6 @@ if (flaghf) then
   write (6, 6)
   write (9, 6)
 6   format (' *** FLAGHF = .TRUE. FOR SINGLET SYSTEM; ABORT ***')
-  stop
-endif
-!   Check if numbers of V_lm terms exceeds limit
-if (nlammx .lt. nlam) then
-  write (6, 7) nlam, nlammx
-  write (9, 7) nlam, nlammx
-7   format (' *** NLAMMX NOT BIG ENOUGH; ABORT ***', i3, i3)
   stop
 endif
 !
@@ -749,16 +767,15 @@ endif
 !
 !   Calculate coupling matrix
 !
-!   Reset the lamnum array
-do i = 1, nlam
-  lamnum(i) = 0
-enddo
-lamsum = 0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
+
 !   v2 matrix is to be expanded as
 !       (lam1, ij1), (lam1, ij2), ..., (lam1, ijn), (lam2, ij1), ...
 !   non-zero elements are not stored at all
 i = 0
 do 160 ilm = 1, nlam
+  ancouma => v2%get_angular_coupling_matrix(ilm)
   do 160 i1 = 1, n
     do 160 j1 = i1, n
       vibblk = gblkid(v(i1), v(j1), vmax)
@@ -766,7 +783,6 @@ do 160 ilm = 1, nlam
       ilmmax = NVLM * vibblk
       if (ilm .gt. ilmmax .or. ilm .lt. ilmmin) goto 160
       ilms = ilm - ilmmin + 1
-      ij = ntop * (i1 - 1) + j1
 !   Calculate and write non-zero v2 elements
       if (mod(v(i1) + v(j1), 2) .eq. 0) then
 !   Symmetric vibrational coupling potential
@@ -783,12 +799,9 @@ do 160 ilm = 1, nlam
       if (dabs(vee) .gt. EPS) then
         i = i + 1
 !   Protect from segmentation fault
-        if (i .ge. nv2max) goto 450
+        
 !   Save the non-zero v2 element
-        v2(i) = vee
-        iv2(i) = ij
-        lamnum(ilm) = lamnum(ilm) + 1
-        lamsum = lamsum + 1
+        call ancouma%set_element(irow=j1, icol=i1, vee=vee)
 !   Print non-zero v2 element if requested
           if (bastst .and. iprint .ge. 2) then
             print 431, lambda, mu, i1, j1, vee
@@ -801,14 +814,15 @@ do 160 ilm = 1, nlam
 !
 !
 if (bastst) then
-  write (6, 430) lamsum
-  write (9, 430) lamsum
+  write (6, 430) v2%get_num_nonzero_elements()
+  write (9, 430) v2%get_num_nonzero_elements()
 430   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', &
           1x, i8)
-!   Print lamnum array (non-zero elements only)
+!   Print number of non-zero elements for each lambda
   if (iprint .ge. 1) then
     do i = 1, nlam
-      if (lamnum(i) .gt. 0) then
+      ancouma => v2%get_angular_coupling_matrix(i)
+      if (ancouma%get_num_nonzero_elements() .gt. 0) then
         ilm = mod((i - 1) / 12, 2)
         if (ilm .eq. 0) then
           lambda = lamsym(mod(i - 1, 12) + 1)
@@ -817,7 +831,7 @@ if (bastst) then
           lambda = lamasy(mod(i - 1, 12) + 1)
           mu = muasy(mod(i - 1, 12) + 1)
         endif
-        print 170, i, lambda, mu, lamnum(i)
+        print 170, i, lambda, mu, ancouma%get_num_nonzero_elements()
       endif
     enddo
     print *
@@ -828,13 +842,8 @@ endif
 !
 return
 !
-!   Error: the number of non-zero v2 elements exceeds limit
-450 write (6, 451)
-write (9, 451)
-451 format (' *** TO MANY NON-ZERO V2 ELEMENTS; ABORT ***')
-stop
-!
 end
+!end module mod_bausr
 !   end subroutine bastpv
 !
 !

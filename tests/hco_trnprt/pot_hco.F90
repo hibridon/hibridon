@@ -44,7 +44,7 @@ end
 ! --------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: nscode, isicod, ispar
 implicit double precision (a-h,o-z)
 character*(*) filnam
@@ -92,13 +92,12 @@ subroutine pot (vv0, r)
 ! latest revision date:  21-jan-2015
 ! ----------------------------------------------------------------------
 use mod_covvl, only: vvl
+use mod_par, only: csflag, ihomo
 implicit double precision (a-h,o-z)
-logical ljunk, ihomo, csflag, lljunk
 #include "common/parbas.F90"
 dimension v(16)
 dimension csplin(47,16)
 dimension rr(47), vl(752),vec(47)
-common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
 !
 !  47 values or R
 data rr / &

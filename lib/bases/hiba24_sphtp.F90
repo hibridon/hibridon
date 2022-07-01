@@ -1,11 +1,13 @@
 #include "assert.h"
+module mod_hiba24_sphtp
+contains
 ! sysphtp (savsphtp/ptrsphtp) defines, saves variables and reads         *
 !                  potentials for spherical top + atom                   *
 ! ----------------------------------------------------------------------
 subroutine basphtp (j, l, is, jhold, ehold, ishold, nlevel, &
        nlevop, etemp, fjtemp, fitemp, fistmp, rcut, jtot, &
        flaghf, flagsu, csflag, clist, bastst, ihomo, &
-       nu, numin, jlpar, n, nmax, ntop)
+       nu, numin, jlpar, n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision
 !  of an spherical top molecule with a structureless atom or with an
@@ -105,23 +107,24 @@ subroutine basphtp (j, l, is, jhold, ehold, ishold, nlevel, &
 !   prmats:     computes primitive cc and cs v-lambda matrix elements
 !               between signed-k symmetric top basis fns.
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coatpi, only: narray
 use mod_coatpr, only: c
 use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+use mod_par, only: iprint
+#include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
-common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fitemp(1), &
@@ -713,8 +716,9 @@ end if
 !  i counts v2 elements
 !  inum counts v2 elements for given lambda
 !  ilam counts number of v2 matrices
-!  ij is address of given v2 element in present v2 matrix
 i = 0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 if (bastst.and. iprint.ge. 2) then
   write (6, 340)
   write (9, 340)
@@ -730,10 +734,9 @@ do 400 iterm = 1, nterm
     mu = 0
     ilam = ilam + 1
     inum = 0
-    ij = 0
+    ancouma => v2%get_angular_coupling_matrix(ilam)
     do 355  icol = 1, n
       do 350  irow = icol, n
-        ij = ntop * (icol - 1) + irow
         lrow = l(irow)
         if (csflag) lrow = nu
         call vlmats (j(irow), lrow, j(icol), l(icol), jtot, &
@@ -742,39 +745,28 @@ do 400 iterm = 1, nterm
 !  check for nonzero v2 matrix element
         if (abs(vee) .gt. 1.d-15) then
             i = i + 1
-          if (i .le. nv2max) then
             inum = inum + 1
-            v2(i) = vee            
-            iv2(i) = ij
+            call ancouma%set_element(irow=irow, icol=icol, vee=vee)
             if (bastst.and. iprint.ge.2) then
-              write (6, 345) ilam, lb, icol, irow, i, iv2(i), &
+              write (6, 345) ilam, lb, icol, irow, i, &
                              vee
-              write (9, 345) ilam, lb, icol, irow, i, iv2(i), &
+              write (9, 345) ilam, lb, icol, irow, i, &
                              vee
-345               format (i4, 2i7, 2i6, i6, g17.8)
+345               format (i4, 2i7, 2i6, g17.8)
             end if
-          end if
         end if
 350       continue
 355     continue
-    if (i .le. nv2max) lamnum(ilam) = inum
     if (bastst) then
-      write (6, 370) ilam, lamnum(ilam)
-      write (9, 370) ilam, lamnum(ilam)
+      write (6, 370) ilam, ancouma%get_num_nonzero_elements()
+      write (9, 370) ilam, ancouma%get_num_nonzero_elements()
 370       format ('ILAM=',i3,' LAMNUM(ILAM) = ',i6)
     end if
-    lamsum = lamsum + lamnum(ilam)
+    lamsum = lamsum + ancouma%get_num_nonzero_elements()
 400 continue
-if (i.gt. nv2max) then
-   write (6, 450) i, nv2max
-   write (9, 450) i, nv2max
-450    format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-   stop
-end if
 if (bastst) then
-  write (6, 460) lamsum
-  write (9, 460) lamsum
+  write (6, 460) v2%get_num_nonzero_elements()
+  write (9, 460) v2%get_num_nonzero_elements()
 460   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS ', &
            i5)
 end if
@@ -989,7 +981,7 @@ vprm = ( (-1.d0) ** iphase) * x * sqrt(xnorm)
 return
 end
 ! -----------------------------------------------------------------------
-subroutine sysphtp (irpot, readp, iread)
+subroutine sysphtp (irpot, readpt, iread)
 !  subroutine to read in system dependent parameters for collisions of
 !  a spherical top with closed shell atom
 !  current revision date: 21-jul-2015 by p.dagdigian
@@ -1018,24 +1010,19 @@ use mod_conlam, only: nlam
 use mod_cosys,  only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-integer irpot
-logical readp
-logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
-        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf, &
-        csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
-        readpt, ihomo, bastst, twomol, lpar
-
+use funit, only: FUNIT_INP
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: i, j, l, lc
+logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-                noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr,lpar(3)
+integer :: nskip, iskip
 #include "common/comdot.F90"
 save potfil
 integer, pointer :: nterm, iop, jmax
@@ -1076,7 +1063,7 @@ if(iread.eq.0) return
 read (8, *, err=888) iop, jmax
 read (8, *, err=888) brot, dj, dk
 line=' '
-if(.not.readp.or.iread.eq.0) then
+if(.not.readpt.or.iread.eq.0) then
   call loapot(1,' ')
   return
 endif
@@ -1088,10 +1075,10 @@ goto 286
 1000 format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
 return
 ! --------------------------------------------------------------
-entry ptrsphtp (fname,readp)
+entry ptrsphtp (fname,readpt)
 line = fname
-readp = .true.
-286 if (readp) then
+readpt = .true.
+286 if (readpt) then
   l=1
   call parse(line,l,filnam,lc)
   if(lc.eq.0) then
@@ -1118,18 +1105,20 @@ close (8)
 irpot=1
 return
 ! --------------------------------------------------------------
-entry savsphtp (readp)
+entry savsphtp (readpt)
 iop=>ispar(2); jmax=>ispar(3)
 brot=>rspar(1) ; dj=>rspar(2); dk=>rspar(3)
 ASSERT(iop .eq. ispar(2))
 ASSERT(jmax .eq. ispar(3))
 !  save input parameters for spherical top + atom scattering
-write (8, 310) iop, jmax
+write (FUNIT_INP, 310) iop, jmax
 310 format(2i4,25x,'iop, jmax')
-write (8, 320) brot, dj, dk
+write (FUNIT_INP, 320) brot, dj, dk
 320 format(f10.7, e12.5, e10.3, '   brot, dj,dk')
-write (8, 285) potfil
+write (FUNIT_INP, 285) potfil
 return
 end
+
+end module mod_hiba24_sphtp
 
 ! -------------------------------eof------------------------------------

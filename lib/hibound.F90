@@ -5,7 +5,7 @@
 !     3. gauger       Nodes and weights for Gauss-Hermite quadrature
 !
 !     ------------------------------------------------------------------
-subroutine bound(nch, nmax)
+subroutine bound(nch, nmax, v2)
 !     Bound state program, to be called by propag in hibrid3.f
 !
 !     Author: Susan K Gregurick, 3-aug-92
@@ -33,16 +33,15 @@ subroutine bound(nch, nmax)
 !     ------------------------------------------------------------------
 use mod_coiout, only: niout
 use mod_version, only: version
-use constants, only: econv, xmconv 
+use constants, only: econv, xmconv
+use mod_ancou, only: ancou_type
+use mod_par, only: wavefl, r1=>bound_r1, r2=>bound_r2, c=>bound_c, spac=>bound_spac, delr=>bound_delr, hsimp=>bound_hsimp, eigmin=>bound_eigmin, tolai=>bound_tolai, xmu
 implicit none
 integer, intent(in) :: nch, nmax
+type(ancou_type), intent(in) :: v2
 #include "common/parpot.F90"
-common /corpar/ r1, r2, c, spac, delr, hsimp, eigmin, tolai, xmu
-real(8) :: r1, r2, c, spac, delr, hsimp, eigmin, tolai, xmu
 common /cofile/ input, output, jobnam, savfil
 character(40) :: jobnam, input, output, savfil
-common /colpar/ lpar(26), wavefl
-logical :: lpar, wavefl
 common /coered/ ered, rmu
 real(8) :: ered, rmu
 
@@ -168,7 +167,7 @@ do i = 1, vmax
       rgh = xfact * xgh + xij
       do ir = 1, ngh
          rnow = rgh(ir)
-         call vmat_bound(wr, rnow, nch, nmax)
+         call vmat_bound(wr, rnow, nch, nmax, v2)
          wr = wr * wgh1(ir)
          h(irow1:irow2, icol1:icol2) = wr(:nch, :nch) &
               + h(irow1:irow2, icol1:icol2)
@@ -194,7 +193,7 @@ write (9, 210) delr, hsimp, nr + 1, hexac
 allocate(g(vmax))
 do ir = 1, nr + 1
    rnow = (ir - 1) * hexac + r1 - delr
-   call vmat_bound(wr, rnow, nch, nmax)
+   call vmat_bound(wr, rnow, nch, nmax, v2)
    if (ir .eq. 1 .or. ir .eq. nr) then
       wt = hexac * 0.375d0
    else if (mod(ir, 3) .eq. 1) then
@@ -460,19 +459,21 @@ deallocate(w)
 return
 end subroutine wpr_bound
 !     ------------------------------------------------------------------
-subroutine vmat_bound(wr, r, nch, nmax)
+subroutine vmat_bound(wr, r, nch, nmax, v2)
+use mod_ancou, only: ancou_type
 use mod_hibrid3, only: potmat
 implicit none
 integer, intent(in) :: nch, nmax
 real(8), intent(in) :: r
 real(8), dimension(nmax, nmax), intent(out) :: wr
+type(ancou_type), intent(in) :: v2
 common /coered/ ered, rmu
 real(8) :: ered, rmu
 real(8) :: xirmu
 integer :: i, j, ig, jg, ilast, ntop
 !
 xirmu = 0.5d0 / rmu
-call potmat(wr, r, nch, nmax)
+call potmat(wr, r, nch, nmax, v2)
 do i = 1, nch
    do j = i + 1, nch
       wr(i, j) = wr(j, i)

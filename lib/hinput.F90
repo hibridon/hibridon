@@ -60,57 +60,95 @@ use mod_version, only : version
 use mod_coj12, only: j12
 use mod_hibrid5, only : intcrs, readpc
 use mod_difcrs, only: difcrs
+use mod_hibasis, only: is_twomol
 use mod_hibrid2, only: enord, prsg
 use mod_hibrid3, only: testptn, testpt20, testpt, potmin
 use mod_hiutil, only: getval
+use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT, RPAR_COUNT
+use fcod_enum
+use lpar_enum
+use ipar_enum
+use rpar_enum
+use mod_par, only: lpar, ipar, rpar
 
-implicit double precision (a-h,o-z)
+implicit none
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
 !  ncode is the number of bcod's
 !  bcod stores hibridon's commands
 !  fcod stores logical flags (length = lcode)
-parameter (ncode = 39, lcode = 28, iicode = 10, ircode = 9, &
-           icode = iicode+ircode)
+integer, parameter :: ncode = 40
+integer, parameter :: lcode = 28
+integer, parameter :: iicode = 10
+integer, parameter :: ircode = 9
+integer, parameter :: icode = iicode+ircode
 character*80 line
-character*40 fnam1,fnam2,jobnam,input,output,savfil, &
-             code
-character*8 bcod(ncode)
-character*8, dimension(lcode) :: fcod
-character*8 pcod(icode)
-character*8 bascod(1)
+character*40 :: fnam1
+character*40 :: fnam2
+character*40 :: code
 character*8 empty_var_list(0)
-character*9 basknd(30)
 ! dimension of codex, ihold, lhold, should be equal to largest number
 ! of identical strings of 1:nnn characters in names of all variables
 ! (probably 'p' is the most recurring string:  12 times in
 !  pcod, fcod, and bcod)
 character*8 codex(15)
-integer ixpar
-integer ipar
-integer ibasty
 integer nerg
-logical existf, first, openfl, is_twomol
-logical lpar, logp, opti, optifl, batch, jtrunc
-dimension a(15),ia(10), ihold(15), lhold(15),lindx(28)
+logical existf, first, openfl
+integer :: lenstr
+real(8) :: turn
+logical logp, opti, jtrunc
+real(8) :: a(15)
+integer :: ia(10)
+integer :: ihold(15)
+integer :: lhold(15)
 #include "common/parbas.F90"
 #include "common/parpot.F90"
 common /cosavi/ iipar, ixpar(iicode)
+integer :: iipar
+integer :: ixpar
+
 common /cosavr/ irpar, junks, rxpar(ircode)
+integer :: irpar
+integer :: junks
+real(8) :: rxpar
+
 common /cofile/ input, output, jobnam, savfil
+character*40 :: input
+character*40 :: output
+character*40 :: jobnam
+character*40 :: savfil
+
 common /cokeyl/ nncode, llcode, ijcode
+integer :: nncode
+integer :: llcode
+integer :: ijcode
+
 common /cobcod/ bcod
+character*8 :: bcod(ncode)
+
 common /cofcod/ fcod
+character*8 :: fcod(lcode)
+
 common /copcod/ pcod
-common /coipar/ ipar(10)
-common /corpar/ rpar(9)
-common /colpar/ lpar(28)
+character*8 :: pcod(icode)
+
 common /coselb/ ibasty
+integer ibasty
+
+
 common /cobaco/ bascod
+character*8 :: bascod(1)
+
 common /coopti/ optifl
+logical :: optifl
+
 common /cotwo/ numj,nj1j2(5)
+integer :: numj
+integer :: nj1j2
+
 ! when adding bases, change size of array basknd and size of
 ! parameter kmxbas in himain.f
+character*9 :: basknd(30)
 data basknd /'1-SIGMA', '2-SIGMA', '2-PI', 'SIGMA|PI', &
               'GEN-PI', 'SYM-TOP-I', '1/3-P-AT', '1SIG+1SIG', &
               'SYMT-LIN',' 2/2-P-AT', '1-DELTA', 'HOMO+2P', &
@@ -120,66 +158,102 @@ data basknd /'1-SIGMA', '2-SIGMA', '2-PI', 'SIGMA|PI', &
               '1SG-1SG', '2SG-1SG', 'C2v-ASTP','3SG-1SG', &
               'CASYMTOP', 'ASYM-DIAT' /
 !  lindx is pointer from fcod order to order in common block colpar
-data lindx/1,3,4,5,6,7,8,9,10,11,13,25,26,2,12,14,17,19,24, &
-           15,16,18,20,27,22,21,23,28/   ! graffy: colpar and fcod both contain the 28 logical parameters but in a different order, thus requiring a remapping through lindx. Why not simply having the same order, by making fcod match colpar?
-!     common /colpar/ airyfl, airypr, bastst, batch, chlist,
-!    :                csflag, flaghf, flagsu, ihomo, ipos, logdfl,
-!    :                logwr, noprin, partw, readpt, rsflag, swrit,
-!    :                t2test, t2writ, twomol, writs, wrpart, wrxsec,
-!    :                xsecwr, nucros, photof, wavefl, boundc
+! graffy: colpar and fcod both contain the 28 logical parameters but in a different order, thus requiring a remapping through lindx. Why not simply having the same order, by making fcod match colpar?
+integer :: lindx(LPAR_COUNT)
+
+integer :: irpot
+integer :: irinp
 data irpot, irinp /0, 0/
+
+logical :: batch
 data batch /.false./
+
+integer :: ipr, istep, inam, i, ienerg, iflux, ii, im, imx, incode, inew, ione, iprint, iskip, itx, ityp, izero
+integer :: j, jm, jmx, jtot2x, l, l1, l2, lc, lcc, ld, len, lend, length, leninp, lenjob, lenout, low
+integer :: match, nde
+real(8) :: optacm, r, thrs, val, waveve, xmu
+real(8) :: a1, acc, acclas, optval, optacc, accmx, delt_e, e, e1
 save ipr, opti, a, a1, acc, acclas, optval, optacc, istep, inam, &
      fnam1, fnam2, code, lc, jtot2x, irpot, irinp
 nerg = 0
-bascod(1)='BASISTYP'
-pcod(1)='JTOT1'
-pcod(2)='JTOT2'
-pcod(3)='JTOTD'
-pcod(4)='JLPAR'
-pcod(5)='NERG'
-pcod(6)='NUMAX'
-pcod(7)='NUMIN'
-pcod(8)='NUD'
-pcod(9)='LSCREEN'
-pcod(10)='IPRINT'
-pcod(11)='FSTFAC'
-pcod(12)='RINCR'
-pcod(13)='RCUT'
-pcod(14)='RENDAI'
-pcod(15)='RENDLD'
-pcod(16)='RSTART'
-pcod(17)='SPAC'
-pcod(18)='TOLAI'
-pcod(19)='XMU'
-fcod(1)='AIRYFL'
-fcod(2)='BASTST'
-fcod(3)='BATCH'
-fcod(4)='CHLIST'
-fcod(5)='CSFLAG'
-fcod(6)='FLAGHF'
-fcod(7)='FLAGSU'
-fcod(8)='IHOMO'
-fcod(9)='IPOS'
-fcod(10)='LOGDFL'
-fcod(11)='NOPRIN'
-fcod(12)='NUCROS'
-fcod(13)='PHOTOF'
-fcod(14)='PRAIRY'
-fcod(15)='PRLOGD'
-fcod(16)='PRPART'
-fcod(17)='PRSMAT'
-fcod(18)='PRT2'
-fcod(19)='PRXSEC'
-fcod(20)='READPT'
-fcod(21)='RSFLAG'
-fcod(22)='T2TEST'
-fcod(23)='TWOMOL'
-fcod(24)='WAVEFL'
-fcod(25)='WRPART'
-fcod(26)='WRSMAT'
-fcod(27)='WRXSEC'
-fcod(28)='BOUNDC'
+lindx(FCOD_AIRYFL) = LPAR_AIRYFL
+lindx(FCOD_BASTST) = LPAR_BASTST
+lindx(FCOD_BATCH) = LPAR_BATCH
+lindx(FCOD_CHLIST) = LPAR_CHLIST
+lindx(FCOD_CSFLAG) = LPAR_CSFLAG
+lindx(FCOD_FLAGHF) = LPAR_FLAGHF
+lindx(FCOD_FLAGSU) = LPAR_FLAGSU
+lindx(FCOD_IHOMO) = LPAR_IHOMO
+lindx(FCOD_IPOS) = LPAR_IPOS
+lindx(FCOD_LOGDFL) = LPAR_LOGDFL
+lindx(FCOD_NOPRIN) = LPAR_NOPRIN
+lindx(FCOD_NUCROS) = LPAR_NUCROS
+lindx(FCOD_PHOTOF) = LPAR_PHOTOF
+lindx(FCOD_PRAIRY) = LPAR_PRAIRY
+lindx(FCOD_PRLOGD) = LPAR_PRLOGD
+lindx(FCOD_PRPART) = LPAR_PRPART
+lindx(FCOD_PRSMAT) = LPAR_PRSMAT
+lindx(FCOD_PRT2) = LPAR_PRT2
+lindx(FCOD_PRXSEC) = LPAR_PRXSEC
+lindx(FCOD_READPT) = LPAR_READPT
+lindx(FCOD_RSFLAG) = LPAR_RSFLAG
+lindx(FCOD_T2TEST) = LPAR_T2TEST
+lindx(FCOD_TWOMOL) = LPAR_TWOMOL
+lindx(FCOD_WAVEFL) = LPAR_WAVEFL
+lindx(FCOD_WRPART) = LPAR_WRPART
+lindx(FCOD_WRSMAT) = LPAR_WRSMAT
+lindx(FCOD_WRXSEC) = LPAR_WRXSEC
+lindx(FCOD_BOUNDC) = LPAR_BOUNDC
+
+pcod(IPAR_JTOT1)   = 'JTOT1'
+pcod(IPAR_JTOT2)   = 'JTOT2'
+pcod(IPAR_JTOTD)   = 'JTOTD'
+pcod(IPAR_JLPAR)   = 'JLPAR'
+pcod(IPAR_NERG)    = 'NERG'
+pcod(IPAR_NUMAX)   = 'NUMAX'
+pcod(IPAR_NUMIN)   = 'NUMIN'
+pcod(IPAR_NUD)     = 'NUD'
+pcod(IPAR_LSCREEN) = 'LSCREEN'
+pcod(IPAR_IPRINT)  = 'IPRINT'
+
+pcod(IPAR_COUNT + RPAR_SCAT_FSTFAC)  = 'FSTFAC'
+pcod(IPAR_COUNT + RPAR_SCAT_RINCR)   = 'RINCR'
+pcod(IPAR_COUNT + RPAR_SCAT_RCUT)    = 'RCUT'
+pcod(IPAR_COUNT + RPAR_SCAT_RENDAI)  = 'RENDAI'
+pcod(IPAR_COUNT + RPAR_SCAT_RENDLD)  = 'RENDLD'
+pcod(IPAR_COUNT + RPAR_SCAT_RSTART)  = 'RSTART'
+pcod(IPAR_COUNT + RPAR_SCAT_SPAC)    = 'SPAC'
+pcod(IPAR_COUNT + RPAR_SCAT_TOLAI)   = 'TOLAI'
+pcod(IPAR_COUNT + RPAR_XMU)     = 'XMU'
+
+fcod(FCOD_AIRYFL)='AIRYFL'
+fcod(FCOD_BASTST)='BASTST'
+fcod(FCOD_BATCH)='BATCH'
+fcod(FCOD_CHLIST)='CHLIST'
+fcod(FCOD_CSFLAG)='CSFLAG'
+fcod(FCOD_FLAGHF)='FLAGHF'
+fcod(FCOD_FLAGSU)='FLAGSU'
+fcod(FCOD_IHOMO)='IHOMO'
+fcod(FCOD_IPOS)='IPOS'
+fcod(FCOD_LOGDFL)='LOGDFL'
+fcod(FCOD_NOPRIN)='NOPRIN'
+fcod(FCOD_NUCROS)='NUCROS'
+fcod(FCOD_PHOTOF)='PHOTOF'
+fcod(FCOD_PRAIRY)='PRAIRY'
+fcod(FCOD_PRLOGD)='PRLOGD'
+fcod(FCOD_PRPART)='PRPART'
+fcod(FCOD_PRSMAT)='PRSMAT'
+fcod(FCOD_PRT2)='PRT2'
+fcod(FCOD_PRXSEC)='PRXSEC'
+fcod(FCOD_READPT)='READPT'
+fcod(FCOD_RSFLAG)='RSFLAG'
+fcod(FCOD_T2TEST)='T2TEST'
+fcod(FCOD_TWOMOL)='TWOMOL'
+fcod(FCOD_WAVEFL)='WAVEFL'
+fcod(FCOD_WRPART)='WRPART'
+fcod(FCOD_WRSMAT)='WRSMAT'
+fcod(FCOD_WRXSEC)='WRXSEC'
+fcod(FCOD_BOUNDC)='BOUNDC'
 ! addresses for commands
 ! check: 2700
 ! debrogli: 1800
@@ -220,6 +294,7 @@ fcod(28)='BOUNDC'
 ! stmix:  3000
 ! trnprt:  3100
 ! prsbr:   3200
+! showpot:  3300
 ! nb after changing the following list, check that all the variables "incode"
 ! that follow after address 900 are changed accordingly
 bcod(1)='CHECK'
@@ -261,6 +336,7 @@ bcod(36)='HYPXSC'
 bcod(37)='STMIX'
 bcod(38)='TRNPRT'
 bcod(39)='PRSBR'
+bcod(40)='SHOWPOT'
 !
 iipar=iicode
 irpar=ircode
@@ -276,7 +352,7 @@ if(first) then
    isrcod=0
    isicod=0
    izero=0
-   call sysdat(irpot, lpar(15), izero)
+   call sysdat(irpot, lpar(LPAR_READPT), izero)
    first = .false.
    call version(6)
 !  in this next statement the $ sign implies no line feed
@@ -290,7 +366,7 @@ else
 4   ipar(i) = ixpar(i)
   if(opti) goto 2160
 end if
-1 if (.not. lpar(4) .and. .not. batch) write (6, 2)
+1 if (.not. lpar(LPAR_BATCH) .and. .not. batch) write (6, 2)
 optifl = .false.
 !  in this next statement the $ sign implies no line feed
 !  replace this with an equivalent formatting character if your system
@@ -301,7 +377,7 @@ optifl = .false.
 #if defined(HIB_CRAY)
 2  format(' Hibridon> ')
 #endif
-call pcoder(lpar(28),pcod,icode)
+call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
 
 if(com) then  
   read(1312, 10, end=599) line  ! read the next command
@@ -322,7 +398,7 @@ else if (line (1:4).eq.'help' .or. line (1:4).eq.'HELP') then
     goto 1
 else if (line(1:3) .eq.'BAT' .or. line(1:3) .eq. 'bat' .or. &
          line(1:4) .eq.' BAT' .or. line(1:4) .eq.' bat') then
-    lpar(4)=.true.
+    lpar(LPAR_BATCH)=.true.
     batch = .true.
     go to 1
 end if
@@ -417,7 +493,7 @@ end if
       800,500,1300,700,2300, &
       1200,1600,430,2650,2800, &
       460,2850,2900,2950,3000, &
-      3100,3200),i
+      3100,3200,3300),i
 ! basis type and kind of calculation
 50 if(l.eq.0) goto 1
 l1 = l
@@ -429,11 +505,11 @@ ibasty=int(val)
 call baschk(ibasty)
 ! set twomolecule true
 if (is_twomol(ibasty)) then
-  lpar(20)=.true.
+  lpar(LPAR_TWOMOL)=.true.
 else
-  lpar(20)=.false.
+  lpar(LPAR_TWOMOL)=.false.
 endif
-call sysdat(irpot, lpar(15), izero)
+call sysdat(irpot, lpar(LPAR_READPT), izero)
 l1=l
 goto 15
 !  request help
@@ -444,7 +520,7 @@ goto 1
 !  parameters
 !  specify parameters in the form cod1=val1, cod2=val2, etc.
 100 if(l .eq. 0) goto 1
-call pcoder(lpar(28),pcod,icode)
+call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
 l1 = l
 call parse(line,l,code,lc)
 call getval(code(1:lc),pcod,j,val)
@@ -457,25 +533,25 @@ if (j .eq. 5) then
 end if
 if(j.le.iicode) then
   ipar(j) = val
-  if(ipar(8).ne.1) lpar(25)=.true.
+  if(ipar(IPAR_NUD).ne.1) lpar(LPAR_NUCROS)=.true.
 else
   rpar(j-iicode) = val
 end if
-call enord(energ,ipar(5))
+call enord(energ,ipar(IPAR_NERG))
 !  numin and numax should be 0 if cc calculation, if not, then set them
 !  equal to zero
 ! NB this is disabled for basisknd=12 (2P atom + homonuclear)
-if (.not. lpar(6)) then
-  lpar(25)=.false.
-  if (ipar(6) .ne. 0) then
+if (.not. lpar(LPAR_CSFLAG)) then
+  lpar(LPAR_NUCROS)=.false.
+  if (ipar(IPAR_NUMAX) .ne. 0) then
     write (6, 105)
 105     format ('  CC calculation, numax set to zero')
-    ipar(6) = 0
+    ipar(IPAR_NUMAX) = 0
   end if
-  if (ipar(7) .ne. 0..and.ibasty.ne.12) then
+  if (ipar(IPAR_NUMIN) .ne. 0..and.ibasty.ne.12) then
     write (6, 106)
 106     format ('  CC calculation, numin set to zero')
-    ipar(7) = 0
+    ipar(IPAR_NUMIN) = 0
   end if
 end if
 goto 100
@@ -493,7 +569,7 @@ if(val .eq. 1) logp = .true.
 if (j .eq. 3) then
   write (6, 201)
 201   format (' ** BATCH FLAG CAN NOT BE SET INTERACTIVELY!')
-  lpar(4) = batch
+  lpar(LPAR_BATCH) = batch
   go to 1
 end if
 lpar(lindx(j)) = logp
@@ -542,7 +618,7 @@ elseif (energ(1) .lt. 0) then
 endif
 
 call enord(energ,nerg)
-ipar(5) = nerg
+ipar(IPAR_NERG) = nerg
 l1 = l
 goto 15
 ! jout values
@@ -592,7 +668,7 @@ goto 15
 ! j1j2,numj,j1j2(1),...,j1j2(numj)
 ! terminate the string with a semicolon if other parameters will follow
 ! on the same card, e.g. j1j2,2,00,10;energ=e1,e2,e3;jtot1=0,jtot2=2....
-460 if (.not.lpar(20)) then
+460 if (.not.lpar(LPAR_TWOMOL)) then
   write (6, 465)
 465   format(' ** NUMJ CAN ONLY BE DEFINED IF TWOMOL = .TRUE.')
   goto 15
@@ -622,20 +698,20 @@ goto 15
 !  numin and numax should be 0 if cc calculation, if not, then set them
 !  equal to zero
 500 continue
-if (.not. lpar(6)) then
-  if (ipar(6) .ne. 0) then
+if (.not. lpar(LPAR_CSFLAG)) then
+  if (ipar(IPAR_NUMAX) .ne. 0) then
     write (6, 105)
-    ipar(6) = 0
+    ipar(IPAR_NUMAX) = 0
   end if
 ! NB this is disabled currently for 2P atom + homonuclear
-  if (ipar(7) .ne. 0.and.ibasty.ne.12) then
+  if (ipar(IPAR_NUMIN) .ne. 0.and.ibasty.ne.12) then
     write (6, 106)
-    ipar(7) = 0
+    ipar(IPAR_NUMIN) = 0
   end if
 end if
-call pcoder(lpar(28),pcod,icode)
-if (lpar(6).and.ipar(8).ne.1) lpar(25)=.true.
-nerg=ipar(5)
+call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
+if (lpar(LPAR_CSFLAG).and.ipar(IPAR_NUD).ne.1) lpar(LPAR_NUCROS)=.true.
+nerg=ipar(IPAR_NERG)
 ! check to see if flags are ok if wavefunction desired or
 ! photodissociation calculation
 call genchk
@@ -648,15 +724,15 @@ if(irinp.eq.0) then
   write(6,505)
 505   format (/,' ** SAVE DEFAULT VARIABLES OR SPECIFY INPUT', &
           ' FILE WITH INP = filename')
-  if(lpar(4)) call exit
+  if(lpar(LPAR_BATCH)) call exit
   goto 1
 end if
-if(rpar(8).eq.0) then
+if(rpar(RPAR_SCAT_TOLAI).eq.0) then  ! graffy: todo : shouldn't it be RPAR_XMU instead of RPAR_SCAT_TOLAI here ?
   write(6,507)
 507   format(/,' ** SPECIFY COLLISION REDUCED MASS WITH XMU = mass')
   goto 1
 end if
-if(irpot.ne.0.or..not.lpar(15)) then
+if(irpot.ne.0.or..not.lpar(LPAR_READPT)) then
 ! open output file
 ! first make sure it is lower case
   call lower(output)
@@ -685,11 +761,11 @@ if(irpot.ne.0.or..not.lpar(15)) then
     write(9,720) (scod(isicod+j),rspar(j),j = 1,isrcod)
   if(islcod.gt.0) &
     write(9,735) (scod(isicod+isrcod+j),lspar(j),j = 1,islcod)
-  if (.not. lpar(20) ) then
+  if (.not. lpar(LPAR_TWOMOL) ) then
      write(9,736) 'LAMMIN: ',(lammin(j),j=1,ispar(1))
      write(9,736) 'LAMMAX: ',(lammax(j),j=1,ispar(1))
      write(9,736) 'MPROJ:  ',(mproj(j),j=1,ispar(1))
-  else if (lpar(20)) then
+  else if (lpar(LPAR_TWOMOL)) then
      write (9, 738)'J1/J2: ',(nj1j2(j)/10,mod(nj1j2(j),10), &
                     j=1,numj)
   endif
@@ -698,10 +774,10 @@ if(irpot.ne.0.or..not.lpar(15)) then
 738   format (1x,(a),1x,20(2i1,'  ') )
 739   format (1x,(a),i2,(a),20(2i1,'  ') )
   write(9,730) 'Flags:',(fcod(j),lpar(lindx(j)),j = 1,lcode)
-  call enord(energ,ipar(5))
-  if(ipar(5).gt.0) write(9,740) (energ(j),j = 1,ipar(5))
+  call enord(energ,ipar(IPAR_NERG))
+  if(ipar(IPAR_NERG).gt.0) write(9,740) (energ(j),j = 1,ipar(IPAR_NERG))
   if(nnout.ne.0) then
-    if (.not.lpar(20) ) then
+    if (.not.lpar(LPAR_TWOMOL) ) then
       write (9,737) 'NOUT: ',nnout, &
            '; JOUT:',(jout(j), j=1,iabs(nnout) )
     else
@@ -718,15 +794,17 @@ else
 510   format(' Potential not yet defined!')
   goto 1
 end if
-! exit
+! no more commands
 599 write (6, *)
-600 call exit
+! exit
+600 continue
+call exit
 ! show all parameters and flags
 ! show
 700 l1 = l
-call pcoder(lpar(28),pcod,icode)
+call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
 call parse(line,l,code,lc)
-if (.not.lpar(28)) then
+if (.not.lpar(LPAR_BOUNDC)) then
   write(6,710) &
    'Parameters (scattering):',(pcod(j),ipar(j),j = 1,iicode)
 else
@@ -736,7 +814,7 @@ endif
 write(6,720)   (pcod(iicode+j),rpar(j),j = 1,ircode-1)
 write(6,1720)  pcod(iicode+ircode), rpar(ircode)
 if(nnout.ne.0) then
-  if (.not.lpar(20) ) then
+  if (.not.lpar(LPAR_TWOMOL) ) then
     write (6,737) 'NOUT: ',nnout, &
            '; JOUT:',(jout(j), j=1,iabs(nnout) )
   else
@@ -762,18 +840,17 @@ if(isrcod.gt.0) &
   write(6,720) (scod(isicod+j),rspar(j),j = 1,isrcod)
 if(islcod.gt.0) &
   write(6,735) (scod(isicod+isrcod+j),lspar(j),j = 1,islcod)
-if (.not. lpar(20) ) then
+if (.not. lpar(LPAR_TWOMOL) ) then
   write(6,736) 'LAMMIN: ',(lammin(j),j=1,ispar(1))
   write(6,736) 'LAMMAX: ',(lammax(j),j=1,ispar(1))
   write(6,736) 'MPROJ:  ',(mproj(j),j=1,ispar(1))
-else if (lpar(20)) then
+else if (lpar(LPAR_TWOMOL)) then
   write (6, 738)'J1/J2: ',(nj1j2(j)/10,mod(nj1j2(j),10), &
                     j=1,numj)
 end if
 write(6,730) 'Flags:',(fcod(j),lpar(lindx(j)),j = 1,lcode)
-! in the next line ipar(9) is lscreen
 write(6,731)  nmax, nlammx
-if (ipar(9) .le. 24 .and. .not. batch) then
+if (ipar(IPAR_LSCREEN) .le. 24 .and. .not. batch) then
   write (6, 703)
 703   format (6x,'enter <return> to continue,', &
              ' <q> for prompt, or new data')
@@ -784,8 +861,8 @@ if (ipar(9) .le. 24 .and. .not. batch) then
     go to 11
   end if
 end if
-call enord(energ,ipar(5))
-if(ipar(5).gt.0) write(6,740) (energ(j),j = 1,ipar(5))
+call enord(energ,ipar(IPAR_NERG))
+if(ipar(IPAR_NERG).gt.0) write(6,740) (energ(j),j = 1,ipar(IPAR_NERG))
 710 format(5x,'*** ',(a)/(4(1x,a7,'=',i4,7x)))
 720 format(4(1x,a7,'=',1pg11.4))
 1720 format(1x,a7,'=',f10.5)
@@ -821,13 +898,13 @@ endif
 l1 = l
 goto 15
 ! read
-800 call pcoder(lpar(28),pcod,icode)
+800 call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
 call gendat
 ione=1
-call sysdat(irpot, lpar(15),ione)
+call sysdat(irpot, lpar(LPAR_READPT),ione)
 irinp=1
 l1 = l
-if (batch) lpar(4) = .true.
+if (batch) lpar(LPAR_BATCH) = .true.
 goto 15
 ! input, output, label and job file names
 ! input=infile, output=outfile, job=jobfile
@@ -881,25 +958,25 @@ goto 15
 ! read parameters for potential
 !     pot=potfile
 1000 call parse(line,l,code,lc)
-call ptread(code(1:lc),lpar(15))
+call ptread(code(1:lc),lpar(LPAR_READPT))
 l1 = l
 goto 15
 ! test potential
 ! testpot
 ! you will be prompted for r and theta. to exit, specify r=0
 1200 if (ibasty .eq. 1 .or. ibasty .eq. 4) then
-  call testptn(lpar(9))
+  call testptn(lpar(LPAR_IHOMO))
 else if (ibasty .eq. 20) then
-  call testpt20(lpar(9))
+  call testpt20(lpar(LPAR_IHOMO))
 else
-  call testpt(lpar(9))
+  call testpt(lpar(LPAR_IHOMO))
 end if
 goto 1
 ! save input parameters
 !     save=filename
 !     if filename is not specified, the inputfile is overwritten
 1300 inew=0
-call pcoder(lpar(28),pcod,icode)
+call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
 if(l.ne.0) then
   call parse(line,l,code,lc)
   if(lc .eq. 0) then
@@ -914,7 +991,7 @@ else
   code = input
 end if
 call savdat(inew,code)
-call syssav(lpar(15))
+call syssav(lpar(LPAR_READPT))
 close(8)
 l1 = l
 irinp = 1
@@ -928,7 +1005,7 @@ call parse(line,l,code,lc)
 call getval(code(1:lc),scod,j,val)
 if(j .eq. 0) goto 15
 if(j .lt. 0) goto 1
-if(j.eq.1 .and. .not.lpar(20)) then
+if(j.eq.1 .and. .not.lpar(LPAR_TWOMOL)) then
   write(6,1401) scod(j)
 1401   format(1x,a,'CAN NOT BE MODIFIED')
   goto 1400
@@ -1010,7 +1087,7 @@ goto 1
   goto 1
 end if
 e = 0
-do 1605 i = 1,ipar(5)
+do 1605 i = 1,ipar(IPAR_NERG)
 1605 e = max(e,energ(i))
 if(e .eq. 0) then
   write(6,1610)
@@ -1037,13 +1114,13 @@ goto 15
 !  calculate de broglie wavelength in bohr (defined as 2pi/k)
 !  debrogli
 1800 e = 0
-do 1810 i = 1,ipar(5)
+do 1810 i = 1,ipar(IPAR_NERG)
 1810 e = max(e,energ(i))
 if(e .eq. 0) then
   write(6,1610)
   goto 1
 end if
-xmu = rpar(9)
+xmu = rpar(RPAR_XMU)
 if(xmu .eq. 0) then
   write(6,1820)
 1820   format(' Collision reduced mass has not been given a value !')
@@ -1077,10 +1154,10 @@ call parse(line,l,code,lc)
 call getval(code(1:lc),empty_var_list,j,a(i))
 ia(i)=a(i)
 1910 continue
-if(ia(1).eq.0) ia(1)=ipar(1)
-if(ia(2).eq.0) ia(2)=ipar(2)
-if(ia(3).eq.0) ia(3)=ipar(3)
-if(ia(4).eq.0) ia(4)=ipar(4)
+if(ia(1).eq.0) ia(1)=ipar(IPAR_JTOT1)
+if(ia(2).eq.0) ia(2)=ipar(IPAR_JTOT2)
+if(ia(3).eq.0) ia(3)=ipar(IPAR_JTOTD)
+if(ia(4).eq.0) ia(4)=ipar(IPAR_JLPAR)
 call lower(fnam1)
 call upper(fnam1(1:1))
 call sprint(fnam1,ia)
@@ -1090,7 +1167,7 @@ goto 1
 !
 !  differential cross sections computed for atom-molecule
 !  collisions or symmetric top-linear molecule collisions
-2000 if (.not. lpar(20) .or. is_twomol(ibasty)) then
+2000 if (.not. lpar(LPAR_TWOMOL) .or. is_twomol(ibasty)) then
   call parse(line,l,fnam1,lc)
   if(fnam1 .eq. ' ') fnam1 = jobnam
   call lower(fnam1)
@@ -1101,7 +1178,8 @@ goto 1
      call parse(line,l,code,lc)
      call getval(code(1:lc),empty_var_list,j,a(i))
 2010   continue
-  call difcrs(fnam1,a,lpar(9),lpar(7))
+  write (6,*) 'hinput : lpar = ' 
+  call difcrs(fnam1,a,lpar(LPAR_IHOMO),lpar(LPAR_FLAGHF))
 else
   write (6, 2011)
 2011   format(' Sorry, differential cross sections not yet', &
@@ -1124,11 +1202,11 @@ goto 1
 !  thrs:  threshold for check for s-matrix elements. all s-matrix
 !  elements which are smaller than thrs are not compared
 !  comparison is of s modulus if thrs .ge. 0, otherwise of s matrix
-2100 if (ipar(5) .gt. 1) then
+2100 if (ipar(IPAR_NERG) .gt. 1) then
 ! no optimization if more than one energy requested
   write (6, 2101)
 2101   format(' ** NERG SET EQUAL TO 1 FOR OPTIMIZATION')
-  ipar(5)=1
+  ipar(IPAR_NERG)=1
 endif
 call parse(line,l,code,lc)
 do 2110 ipr = iicode+1,icode
@@ -1148,10 +1226,10 @@ if(a(1) .eq. 0.or.a(2) .eq. 0) then
          ' has not been defined')
   goto 1
 end if
-if (.not.lpar(21)) then
+if (.not.lpar(LPAR_WRSMAT)) then
   write (6,2141)
 2141   format (' Flag WRSMAT set to .TRUE. for optimization')
-  lpar(21) = .true.
+  lpar(LPAR_WRSMAT) = .true.
 end if
 if (nnout .lt. 0) then
   write (6, 2142)
@@ -1162,10 +1240,10 @@ else if (nnout .eq. 0) then
 2143   format (' NNOUT=0; optimization not possible; reset NNOUT')
   go to 1
 end if
-if (.not.lpar(13)) then
+if (.not.lpar(LPAR_NOPRIN)) then
    write (6,2144)
 2144    format(' Flag NOPRIN set to .TRUE. for optimization')
-   lpar(13)=.true.
+   lpar(LPAR_NOPRIN)=.true.
 endif
 !
 if(a(3) .eq. 0.and.a(4) .eq. 0.and.a(2).gt.a(1)) a(3) = 2.0d0
@@ -1184,8 +1262,8 @@ if(a(1).lt.a(2).and.(a(1)*a(3)+a(4).lt.a(1)).or. &
 2150    format(' Invalid step parameters for OPTIMIZE')
    goto 1
 end if
-jtot2x = ipar(2)
-write(6,2151) pcod(ipr)(1:lc),ipar(1),(a(i),i = 1,6), &
+jtot2x = ipar(IPAR_JTOT2)
+write(6,2151) pcod(ipr)(1:lc),ipar(IPAR_JTOT1),(a(i),i = 1,6), &
               abs(thrs)
 2151 format(' Optimization of ',(a),' for Jtot = ',i3,/, &
   ' Start:',f7.3,'  End:',f7.3,'  Factor:',f5.2, &
@@ -1193,7 +1271,7 @@ write(6,2151) pcod(ipr)(1:lc),ipar(1),(a(i),i = 1,6), &
   ' Average error limit:',f4.1,'%',/, &
   ' Maximum error limit:',f4.1,'%',/, &
   ' Threshold for S-matrix elements:',e10.2)
-ipar(2) = ipar(1)
+ipar(IPAR_JTOT2) = ipar(IPAR_JTOT1)
 fnam1 = 'Joba'
 fnam2 = 'Jobb'
 ! avoid too long filenames on cray (cos)
@@ -1260,7 +1338,7 @@ if((acclas.lt.a(5).and.accmx.lt.a(6)) &
      f10.2,'%',/, &
      ' in (i = ',i2,' j = ',i2,') element of ',(a))
    opti = .false.
-   ipar(2) = jtot2x
+   ipar(IPAR_JTOT2) = jtot2x
    goto 1
 end if
 rpar(ipr-iicode) = a(1)
@@ -1420,7 +1498,7 @@ goto 1
 !  rewritten by p.j. dagdigian
 !  hypxsc,jobfile, ienerg ,nucspin, j1, j2
 2950 continue
-!     if (.not. lpar(20)) then
+!     if (.not. lpar(LPAR_TWOMOL)) then
   call parse(line,l,fnam1,lc)
   if(fnam1 .eq. ' ') fnam1 = jobnam
   call lower(fnam1)
@@ -1480,6 +1558,13 @@ call getval(code(1:lc),empty_var_list,j,a(1))
 3105 continue
 call trnprt(fnam1,a)
 goto 1
+3300 continue
+write(6,*) "************************************************************"
+write(6,*) "Entering the DRIVER subroutine of the potential"
+write(6,*) "Press Ctrl+D to go back to Hibridon's console"
+write(6,*) "************************************************************"
+call driver
+goto 1
 ! pressure broadening cross sections - added by p. dagdigian
 3200 call parse(line,l,fnam1,lc)
 if(fnam1 .eq. ' ') fnam1 = jobnam
@@ -1509,28 +1594,32 @@ call getval(code(1:lc),empty_var_list,j,a(2))
 call prsbr(fnam1,fnam2,a)
 goto 1
 end
-subroutine pcoder(boundc,pcod,icode)
-!  subroutine to change pcod's for bound state or scattering
-logical boundc
-character*8 pcod(icode)
+subroutine set_param_names(boundc, param_names, param_names_size)
+!  subroutine to change param_names's for bound state or scattering
+use mod_hiparcst, only: IPAR_COUNT
+use rpar_enum
+implicit none
+logical, intent(in) :: boundc
+integer, intent(in) :: param_names_size  ! size of param_names array
+character*8, intent(out) :: param_names(param_names_size)  ! array containing the name of each parameter (old name: pcod)
 if (boundc) then
-  pcod(11)='R1'
-  pcod(12)='R2'
-  pcod(13)='C'
-  pcod(14)='SPAC'
-  pcod(15)='DELR'
-  pcod(16)='HSIMP'
-  pcod(17)='EIGMIN'
-  pcod(18)='TOLAI'
+  param_names(IPAR_COUNT + RPAR_BOUND_R1)      = 'R1'
+  param_names(IPAR_COUNT + RPAR_BOUND_R2)      = 'R2'
+  param_names(IPAR_COUNT + RPAR_BOUND_C)       = 'C' 
+  param_names(IPAR_COUNT + RPAR_BOUND_SPAC)    = 'SPAC' 
+  param_names(IPAR_COUNT + RPAR_BOUND_DELR)    = 'DELR' 
+  param_names(IPAR_COUNT + RPAR_BOUND_HSIMP)   = 'HSIMP' 
+  param_names(IPAR_COUNT + RPAR_BOUND_EIGMIN)  = 'EIGMIN' 
+  param_names(IPAR_COUNT + RPAR_BOUND_TOLAI)   = 'TOLAI' 
 else
-  pcod(11)='FSTFAC'
-  pcod(12)='RINCR'
-  pcod(13)='RCUT'
-  pcod(14)='RENDAI'
-  pcod(15)='RENDLD'
-  pcod(16)='RSTART'
-  pcod(17)='SPAC'
-  pcod(18)='TOLAI'
+  param_names(IPAR_COUNT + RPAR_SCAT_FSTFAC)  = 'FSTFAC'
+  param_names(IPAR_COUNT + RPAR_SCAT_RINCR)   = 'RINCR'
+  param_names(IPAR_COUNT + RPAR_SCAT_RCUT)    = 'RCUT'
+  param_names(IPAR_COUNT + RPAR_SCAT_RENDAI)  = 'RENDAI'
+  param_names(IPAR_COUNT + RPAR_SCAT_RENDLD)  = 'RENDLD'
+  param_names(IPAR_COUNT + RPAR_SCAT_RSTART)  = 'RSTART'
+  param_names(IPAR_COUNT + RPAR_SCAT_SPAC)    = 'SPAC'
+  param_names(IPAR_COUNT + RPAR_SCAT_TOLAI)   = 'TOLAI'
 endif
 return
 end

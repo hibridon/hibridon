@@ -47,10 +47,9 @@ subroutine vaxhlp(line1)
 !dec$ fixedformlinesize:132
 #endif
 ! latest revision 24-feb-2004
+use mod_par, only: lscreen
 implicit character*10(z)
 character*(*) line1
-common /coipar/ jtot1, jtot2, jtotd, jlpar, nerg,numax,numin,nud, &
-                lscreen, iprint
 #if defined(HIB_CRAY)
 ! return for these machines
   write (6,2)
@@ -1515,7 +1514,7 @@ write (9,35) profile
 #endif
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 write (6,40)
-write (8,40)
+write (9,40)
 40 format('*** COMMAND SYSCONF NOT IMPLEMENTED FOR CURRENT O/S')
 #endif
 return

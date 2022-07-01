@@ -27,7 +27,7 @@
 !************************************************************************
 subroutine airprp (z, &
    xf, rend, drnow, en, &
-   tolai, rincr, eshift, nch, nmax, itwo, iprint, twoen, noprin)
+   tolai, rincr, eshift, nch, nmax, itwo, iprint, twoen, noprin, v2)
 !  airy zeroth-order propagator from r=xf to r=rend
 !  for reference see m. alexander, "hybrid quantum scattering algorithms ...",
 !                    j. chem. phys. 81, 4510 (1984)
@@ -95,7 +95,10 @@ subroutine airprp (z, &
 ! ----------------------------------------------------------------------------
 use mod_coqvec, only: nphoto, q
 use mod_cosc10, only: sc10
+use mod_ancou, only: ancou_type
 use mod_hibrid3, only: outmat, potent
+use mod_hiba10_22p, only: energ22
+use mod_par, only: par_iprint=>iprint
 implicit double precision (a-h, o-z)
 !  matrix dimensions (row dimension = nmax, matrices stored column by column)
 real(8), dimension(nmax*nmax), intent(inout) :: z
@@ -113,15 +116,16 @@ integer, intent(inout) :: itwo
 logical, intent(in) :: iprint
 logical, intent(in) :: twoen
 logical, intent(in) :: noprin
-integer i, icol, iend, ierr, ipt, izero, kstep, maxstp, &
+type(ancou_type), intent(in) :: v2
+logical :: airy_prop_completed
+integer i, icol, ierr, ipt, izero, kstep, maxstp, &
         ncol, npt, nskip
-logical photof, wavefn, boundf, wrsmat
+logical photof, wavefn, boundf, writs
 
-common /cophot/ photof, wavefn, boundf, wrsmat
+common /cophot/ photof, wavefn, boundf, writs
 common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
      inflev
 common /coered/ ered, rmu
-common /coipar/ ipar(9),jprint
 common /coselb/ ibasty
 #if defined(HIB_UNIX_IBM)
 character*1 forma, formb
@@ -152,66 +156,68 @@ real(8), dimension(nch) :: gam1
 real(8), dimension(nch) :: gam2
 ! ----------------------------------------------------------------------------
 if (.not.twoen) itwo = -1
-if (itwo .gt. 0) go to 60
-if (photof) then
-  nqmat=nphoto*nch
+if (itwo .le. 0) then
+  if (photof) then
+    nqmat=nphoto*nch
 
-  write (6, 20)
-  write (9, 20)
-20   format (' GAMMA2 INITIALIZED AT BEGINNING OF AIRPRP')
-  call dset(nqmat,zero,q,1)
-endif
-spcmx = zero
-spcmn = rend - xf
-rmin = xf
-!  determine local wavevectors at rmin to use in estimating second derivatives
-!  hp and y1 are used as scratch vectors here
-call wavevc (w, eigold, hp, y1, rmin, nch, nmax)
-!  local wavevectors at rmin are returned in eigold
-drfir = drnow
-drmid = drnow * 0.5
-rlast = xf
-rold = xf
-rnow = rlast + drmid
-rnext = rlast + drnow
-!  define local basis at rnow and carry out transformations
-!  vecnew is used as scratch matrix and y1 is used as scratch vector here
-call potent (w, vecnow, vecnew, eignow, hp, y1, &
-             rnow, drnow, en, xlarge, nch, nmax)
-!  vecnow is transformation from free basis into local basis
-!  in first interval
-!  e.g. p1=vecnow  ; see eq.(23) of
-!  m.h. alexander, "hybrid quantum scattering algorithms ..."
-!  store vecnow in tmat
-call matmov (vecnow, tmat, nch, nch, nmax, nmax)
-!  determine approximate values for diagonal and off-diagonal
-!  correction terms
-call corr (eignow, eigold, hp, drnow, drmid, xlarge, cdiag, &
-           coff, nch)
-maxstp = ( (rend-xf) / drnow ) * 5
-xf = rend
-if (iprint) then
-  write (9, 40)
-40   format(/' ** AIRY PROPAGATION (NO DERIVATIVES):')
-  write (9, 50)
-50   format('   STEP   RNOW', 5x, 5hdrnow, 5x, 5hcdiag, 6x, 4hcoff)
-  if (jprint .ge. 2) write (9, 55)
-55   format ('   ALSO ADIABATIC ENERGIES (HARTREE)')
+    write (6, 20)
+    write (9, 20)
+  20   format (' GAMMA2 INITIALIZED AT BEGINNING OF AIRPRP')
+    call dset(nqmat,zero,q,1)
+  endif
+  spcmx = zero
+  spcmn = rend - xf
+  rmin = xf
+  !  determine local wavevectors at rmin to use in estimating second derivatives
+  !  hp and y1 are used as scratch vectors here
+  call wavevc (w, eigold, hp, y1, rmin, nch, nmax, v2)
+  !  local wavevectors at rmin are returned in eigold
+  drfir = drnow
+  drmid = drnow * 0.5
+  rlast = xf
+  rold = xf
+  rnow = rlast + drmid
+  rnext = rlast + drnow
+  !  define local basis at rnow and carry out transformations
+  !  vecnew is used as scratch matrix and y1 is used as scratch vector here
+  call potent (w, vecnow, vecnew, eignow, hp, y1, &
+               rnow, drnow, en, xlarge, nch, nmax, v2)
+  !  vecnow is transformation from free basis into local basis
+  !  in first interval
+  !  e.g. p1=vecnow  ; see eq.(23) of
+  !  m.h. alexander, "hybrid quantum scattering algorithms ..."
+  !  store vecnow in tmat
+  call matmov (vecnow, tmat, nch, nch, nmax, nmax)
+  !  determine approximate values for diagonal and off-diagonal
+  !  correction terms
+  call corr (eignow, eigold, hp, drnow, drmid, xlarge, cdiag, &
+             coff, nch)
+  maxstp = ( (rend-xf) / drnow ) * 5
+  xf = rend
+  if (iprint) then
+    write (9, 40)
+  40   format(/' ** AIRY PROPAGATION (NO DERIVATIVES):')
+    write (9, 50)
+  50   format('   STEP   RNOW', 5x, 5hdrnow, 5x, 5hcdiag, 6x, 4hcoff)
+    if (par_iprint .ge. 2) write (9, 55)
+  55   format ('   ALSO ADIABATIC ENERGIES (HARTREE)')
+  end if
 end if
-60 iend = 0
-if (itwo .lt. 0) go to 70
-!  write or read relevant information
-call outmat (tmat, eigold, hp, eshift, drnow, rnow, &
-             nch, nmax, itwo)
+airy_prop_completed = .false.
+if (itwo .ge. 0) then
+  !  write or read relevant information
+  call outmat (tmat, eigold, hp, eshift, drnow, rnow, &
+               nch, nmax, itwo)
+end if
 !  start airy propagation
 ! ----------------------------------------------------------------------------
-70 do 200  kstep = 1, maxstp
-!  transform log-deriv matrix from local basis in last interval to
-!  local basis in present interval.  see eq.(23) of
-!  m.h. alexander, "hybrid quantum scattering algorithms ..."
-!  w is used as scratch matrix here, and y1 is scratch array
-!  if photodissociation calculation, transform gamma2 into local
-!  interval
+do kstep = 1, maxstp
+  !  transform log-deriv matrix from local basis in last interval to
+  !  local basis in present interval.  see eq.(23) of
+  !  m.h. alexander, "hybrid quantum scattering algorithms ..."
+  !  w is used as scratch matrix here, and y1 is scratch array
+  !  if photodissociation calculation, transform gamma2 into local
+  !  interval
   if (photof) then
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
     call mxma(tmat,1,nmax,q,1,nphoto,w,1,nmax,nch,nch,nphoto)
@@ -221,36 +227,36 @@ call outmat (tmat, eigold, hp, eshift, drnow, rnow, &
     call dgemul(tmat,nmax,forma,q,nmax,forma, &
                 w,nmax,nch,nch,nphoto)
 #endif
-  call dcopy(nqmat,w,1,q,1)
+    call dcopy(nqmat,w,1,q,1)
   endif
-!  determine ground state wavefunction and derivative and then
-!  transform these into local basis (photodissociation)
-!  y1 and y4 are used as scratch vectors here
-if (photof) call gndloc(vecnow,w,rnow,drnow,nch,nmax)
-!  transform logderivative matrix into current interval
-call dtrans ( z, tmat, w, y1, xlarge, nch, nmax, izero)
-!  tmat is no longer needed
-!  solve for log-derivative matrix at right-hand side of
-!  present interval.  this uses new algorithm of manalopoulos and alexander
-!  namely
-!               (n)    (n)      -1   (n)      (n)
-!     z    = - y    [ y    + z ]    y     +  y
-!      n+1      2      1      n      2        4
-!  where y  , y  , and y   are the (diagonal) elements of log-derivative
-!         1    2        4
-!  propagator defined in alexander and manolopoulos
-!  determine these diagonal matrices
-!  eqs. (38)-(44) of m. alexander and d. manolopoulos, "a stable linear
-!                    reference potential algorithm for solution ..."
+  !  determine ground state wavefunction and derivative and then
+  !  transform these into local basis (photodissociation)
+  !  y1 and y4 are used as scratch vectors here
+  if (photof) call gndloc(vecnow,w,rnow,drnow,nch,nmax)
+  !  transform logderivative matrix into current interval
+  call dtrans ( z, tmat, w, y1, xlarge, nch, nmax, izero)
+  !  tmat is no longer needed
+  !  solve for log-derivative matrix at right-hand side of
+  !  present interval.  this uses new algorithm of manalopoulos and alexander
+  !  namely
+  !               (n)    (n)      -1   (n)      (n)
+  !     z    = - y    [ y    + z ]    y     +  y
+  !      n+1      2      1      n      2        4
+  !  where y  , y  , and y   are the (diagonal) elements of log-derivative
+  !         1    2        4
+  !  propagator defined in alexander and manolopoulos
+  !  determine these diagonal matrices
+  !  eqs. (38)-(44) of m. alexander and d. manolopoulos, "a stable linear
+  !                    reference potential algorithm for solution ..."
   call spropn ( rnow, drnow, eigold, hp, y1, y4, y2, &
                    gam1, gam2, nch)
-!  set up matrix to be inverted
-!  nskip is spacing between diagonal elements of matrix stored column by colum
+  !  set up matrix to be inverted
+  !  nskip is spacing between diagonal elements of matrix stored column by colum
   nskip = nmax + 1
   call daxpy_wrapper (nch, one, y1, 1, z, nskip)
-!  invert (y  +  z )
-!           1     n
-!  hp and cc are used as scratch arrays here
+  !  invert (y  +  z )
+  !           1     n
+  !  hp and cc are used as scratch arrays here
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
   call smxinv (z, nmax, nch, hp, cc, ierr)
 #endif
@@ -264,12 +270,12 @@ call dtrans ( z, tmat, w, y1, xlarge, nch, nmax, izero)
           ' ABORT ***')
     call exit
   end if
-!  z now contains Z(0,rlast,rnext) in DEM's notation
-!  if photodissociation calculation,
+  !  z now contains Z(0,rlast,rnext) in DEM's notation
+  !  if photodissociation calculation,
   if (photof) then
-!  add gamma1(rlast,rnext) to gamma2(0,rlast) to form zeta(0,rlast,nrext)
+  !  add gamma1(rlast,rnext) to gamma2(0,rlast) to form zeta(0,rlast,nrext)
     call vadd(1,q,1,gam1,1,nqmat)
-!  then premultiply by Z(0,rlast,rnext)
+    !  then premultiply by Z(0,rlast,rnext)
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
     call mxma(z,1,nmax,q,1,nphoto,tmat,1,nmax,nch,nch,nphoto)
 #endif
@@ -278,51 +284,51 @@ call dtrans ( z, tmat, w, y1, xlarge, nch, nmax, izero)
     call dgemul(z,nmax,forma,q,nmax,forma, &
                 tmat,nmax,nch,nch,nphoto)
 #endif
-! if wavefunction desired, temporarily save local mu(a,b) propagator
-! this is now in the first column of tmat
-  if (wavefn) call dcopy(nch,tmat,1,sc10,1)
-!  premultiply by y3 and add to existing q
-!  cc is used as scratch array here
+    ! if wavefunction desired, temporarily save local mu(a,b) propagator
+    ! this is now in the first column of tmat
+    if (wavefn) call dcopy(nch,tmat,1,sc10,1)
+    !  premultiply by y3 and add to existing q
+    !  cc is used as scratch array here
     ind=1
     jnd=1
-    do 85  i = 1, nphoto
+    do i = 1, nphoto
       call vmul(y2,1,tmat(jnd),1,cc,1,nch)
       call vadd(1,gam2(ind),1,cc,1,nch)
       call dcopy(nch,gam2(ind),1,q(ind),1)
       ind=ind+nch
       jnd=jnd+nmax
-85     continue
-! q now contains gamma2(0,rnext) in local basis
+    end do
+    ! q now contains gamma2(0,rnext) in local basis
   endif
 
-!                            -1
-!  evaluate  - y  ( y  + z )    y
-!               2    1    n      2
-!  in the next loop evaluate the full, rather than lower triangle
-!  changed for photodissociation calculation, old commands kept with
-!  c in first column
-npt = 1
-do 90  i = 1, nch
-  ncol = nch
-!        ncol = nch - i + 1
-  fact = y2(i)
-  call dscal (ncol, fact, z(npt), 1)
-  npt = npt + nmax
-!        npt = npt + nskip
-90 continue
-!                            -1
-!  z now contains  ( y  + z )    y  , this is G(n-1,n) in the local basis
-!                     1    n      2
-if (wavefn) then
-! save this matrix as well as transformation matrix
-! into local interval and local propagators
-!
-   irec = irec + 1
-   write (ifil, err=950) -rlast, drnow
-!     Adiabatic energies
-   write (ifil, err=950) (eigold(i), i=1, nch)
-!     The following information will not be written if wrsmat set to F
-   if (wrsmat) then
+  !                            -1
+  !  evaluate  - y  ( y  + z )    y
+  !               2    1    n      2
+  !  in the next loop evaluate the full, rather than lower triangle
+  !  changed for photodissociation calculation, old commands kept with
+  !  c in first column
+  npt = 1
+  do i = 1, nch
+    ncol = nch
+    !        ncol = nch - i + 1
+    fact = y2(i)
+    call dscal (ncol, fact, z(npt), 1)
+    npt = npt + nmax
+    !        npt = npt + nskip
+  end do
+  !                            -1
+  !  z now contains  ( y  + z )    y  , this is G(n-1,n) in the local basis
+  !                     1    n      2
+  if (wavefn) then
+    ! save this matrix as well as transformation matrix
+    ! into local interval and local propagators
+    !
+    irec = irec + 1
+    write (ifil, err=950) -rlast, drnow
+    !     Adiabatic energies
+    write (ifil, err=950) (eigold(i), i=1, nch)
+    !     The following information will not be written if writs set to F
+    if (writs) then
       icol = 1
       do ich = 1, nch
          write (ifil, err=950) (z(icol - 1 + i), i=1, nch)
@@ -333,206 +339,222 @@ if (wavefn) then
          write (ifil, err=950) (vecnow(icol - 1 + i), i=1, nch)
          icol = icol + nmax
       end do
-!
+      !
       write (ifil, err=950) (y1(i), i=1, nch), (y2(i), i=1, nch), &
            (y4(i), i=1, nch), (gam1(i), i=1, nch), &
            (sc10(i), i=1, nch)
       lrairy = (2 * nchwfu ** 2 + 6 * nchwfu + 2) &
            * sizeof(dble_t) + 8 * sizeof(char_t)
-   else
-      lrairy = (nchwfu + 2) * sizeof(dble_t) + 8 * sizeof(char_t)
-   end if
-!
-   write (ifil, err=950) 'ENDWFUR', char(mod(irec, 256))
-   iendwv = iendwv + lrairy
-end if
-!
-do 110  i = 1, nch
-  fact = - y2(i)
-  call dscal (i, fact, z(i), nmax)
-110 continue
-!  add on  y
-!           4
-npt = 1
-call daxpy_wrapper (nch, one, y4, 1, z, nskip)
-!  now fill in upper half of z matrix
-ipt = 2
-if (nch .gt. 1) then
-  do  120  icol = 1, nch - 1
-!       ncol is number of subdiagonal elements in column icol
-!       ipt points to the first subdiagonal element in column icol
-!       (ipt + nmax - 1) points to the first superdiagonal element in row icol
-    ncol = nch - icol
-    call dcopy (ncol, z(ipt), 1, z(ipt + nmax -1), nmax)
-    ipt = ipt + nskip
-120   continue
-end if
-if (itwo .gt. 0) go to 160
-!  obligatory write of step information if deviations from linear
-!  potential are unusually large
-!  this is only done if tolai .lt. 1, in which case the largest correction
-!  is used to estimate the next step
-if (tolai .lt. 1.d0) then
-  cmax = max (cdiag, coff)
-  if (cmax .gt. (5.d0* tolai)) then
-    write (9,125)
-    write (6,125)
-125     format &
-    (' ** ESTIMATED CORRECTIONS LARGER THAN 5*TOLAI IN AIRPRP')
-    if (kstep .eq. 1) then
-      write (9, 130)
-      write (6, 130)
-130       format ('    THE INITIAL VALUE OF DRNOW (SPAC*FSTFAC) IS', &
-              ' PROBABLY TOO LARGE')
     else
-      write (9, 140)
-      write (6, 140)
-140       format &
-      ('   CHECK FOR DISCONTINUITIES OR UNPHYSICAL OSCILLATIONS', &
-     /,'   IN YOUR POTENTIAL')
+      lrairy = (nchwfu + 2) * sizeof(dble_t) + 8 * sizeof(char_t)
     end if
-    if (.not. iprint) then
-      write (9, 50)
+    !
+    write (ifil, err=950) 'ENDWFUR', char(mod(irec, 256))
+    iendwv = iendwv + lrairy
+  end if
+  !
+  do i = 1, nch
+    fact = - y2(i)
+    call dscal (i, fact, z(i), nmax)
+  end do
+  !  add on  y
+  !           4
+  npt = 1
+  call daxpy_wrapper (nch, one, y4, 1, z, nskip)
+  !  now fill in upper half of z matrix
+  ipt = 2
+  if (nch .gt. 1) then
+    do icol = 1, nch - 1
+      !       ncol is number of subdiagonal elements in column icol
+      !       ipt points to the first subdiagonal element in column icol
+      !       (ipt + nmax - 1) points to the first superdiagonal element in row icol
+      ncol = nch - icol
+      call dcopy (ncol, z(ipt), 1, z(ipt + nmax -1), nmax)
+      ipt = ipt + nskip
+    end do
+  end if
+  if (itwo .le. 0) then
+    !  obligatory write of step information if deviations from linear
+    !  potential are unusually large
+    !  this is only done if tolai .lt. 1, in which case the largest correction
+    !  is used to estimate the next step
+    if (tolai .lt. 1.d0) then
+      cmax = max (cdiag, coff)
+      if (cmax .gt. (5.d0* tolai)) then
+        write (9,125)
+        write (6,125)
+125       format &
+        (' ** ESTIMATED CORRECTIONS LARGER THAN 5*TOLAI IN AIRPRP')
+        if (kstep .eq. 1) then
+          write (9, 130)
+          write (6, 130)
+130         format ('    THE INITIAL VALUE OF DRNOW (SPAC*FSTFAC) IS', &
+                  ' PROBABLY TOO LARGE')
+        else
+          write (9, 140)
+          write (6, 140)
+140         format &
+          ('   CHECK FOR DISCONTINUITIES OR UNPHYSICAL OSCILLATIONS', &
+         /,'   IN YOUR POTENTIAL')
+        end if
+        if (.not. iprint) then
+          write (9, 50)
+          write (9,150) kstep, rnow, drnow, cdiag, coff
+        end if
+      end if
+    end if
+    !     write out information about step just completed
+    if (iprint) then
       write (9,150) kstep, rnow, drnow, cdiag, coff
+150     format (i6, 4e10.3)
     end if
   end if
-end if
-!     write out information about step just completed
-if (iprint) then
-  write (9,150) kstep, rnow, drnow, cdiag, coff
-150   format (i6, 4e10.3)
-end if
-!     get set for next step
-160 if (iend .eq. 1) go to 250
-if (itwo .gt. 0) go to 180
-!  if tolai .lt. 1, predict next step size from largest correction
-if (tolai .lt. 1.) then
-!  note that the following statement is slightly different from  eq. (30)
-!  of m.h. alexander, "hybrid quantum scattering algorithms ...  and that
-!  the step-size algorithm is only approximately  related to any real
-!  estimate of the error coff and cdiag should be approximately tolai, so
-!  from eq. (27):
-!  drnow(at n+1) = (12 tolai/kbar(n+1)w(n+1)-tilda')**(1/3)
-!  which is approximately = (12 tolai/kbar(n)w(n)-tilda')**(1/3)
-!                         = ((12 coff/kbar w-tilda') (tolai/coff))**(1/3)
-!                         = drnow(at n) (tolai/coff)**(1/3)
-!  or from eq. (29):
-!                   drnow = drnow (tolai/cdiag)**(1/3)
-!  then, using the larger error and allowing pow to vary:
-! (note 1/23/92 powr fixed at 3 in data statement)
-!  step size increase occurs only if rnext > rincr
-    if (rnext .gt. rincr) &
-            drnow = drnow * (tolai/cmax) ** (1.d0 / powr)
+  !     get set for next step
+  if (airy_prop_completed) then
+    exit
   else
-!  if tolai .ge. 1, then
-!  minimum step size is first interval width
-    if (kstep .eq. 1) spcmn = drnow
-!  and next step size is tolai * present step size
-! only if rnext > powr
-    if (rnext .gt. rincr) drnow = tolai * drnow
-  end if
-!  drnow is step size in next interval
-rlast = rnext
-rnext = rnext + drnow
-if (rnext .lt. rend) go to 170
-iend = 1
-rnext = rend
-drnow = rnext - rlast
-170 rnew = rlast + 0.5d0 * drnow
-if (kstep .gt. 1 .and. iend .ne. 1) then
-  if (tolai .lt. 1) then
-    if (drnow .lt. spcmn) spcmn = drnow
-  end if
-  if (drnow .gt. spcmx) spcmx = drnow
+    if (itwo .le. 0) then
+      !  if tolai .lt. 1, predict next step size from largest correction
+      if (tolai .lt. 1.) then
+        !  note that the following statement is slightly different from  eq. (30)
+        !  of m.h. alexander, "hybrid quantum scattering algorithms ...  and that
+        !  the step-size algorithm is only approximately  related to any real
+        !  estimate of the error coff and cdiag should be approximately tolai, so
+        !  from eq. (27):
+        !  drnow(at n+1) = (12 tolai/kbar(n+1)w(n+1)-tilda')**(1/3)
+        !  which is approximately = (12 tolai/kbar(n)w(n)-tilda')**(1/3)
+        !                         = ((12 coff/kbar w-tilda') (tolai/coff))**(1/3)
+        !                         = drnow(at n) (tolai/coff)**(1/3)
+        !  or from eq. (29):
+        !                   drnow = drnow (tolai/cdiag)**(1/3)
+        !  then, using the larger error and allowing pow to vary:
+        ! (note 1/23/92 powr fixed at 3 in data statement)
+        !  step size increase occurs only if rnext > rincr
+        if (rnext .gt. rincr) &
+                drnow = drnow * (tolai/cmax) ** (1.d0 / powr)
+      else ! (tolai .lt. 1.)
+        !  if tolai .ge. 1, then
+        !  minimum step size is first interval width
+        if (kstep .eq. 1) spcmn = drnow
+        !  and next step size is tolai * present step size
+        ! only if rnext > powr
+        if (rnext .gt. rincr) drnow = tolai * drnow
+      end if ! (tolai .lt. 1.)
+      !  drnow is step size in next interval
+      rlast = rnext
+      rnext = rnext + drnow
+      if (rnext .ge. rend) then
+        airy_prop_completed = .true.
+        rnext = rend
+        drnow = rnext - rlast
+      end if
+      rnew = rlast + 0.5d0 * drnow
+      if (kstep .gt. 1 .and. .not. airy_prop_completed) then
+        if (tolai .lt. 1) then
+          if (drnow .lt. spcmn) spcmn = drnow
+        end if
+        if (drnow .gt. spcmx) spcmx = drnow
+      end if
+      drmid = rnew - rnow
+      !  restore eigenvalues
+      call dcopy (nch, eignow, 1, eigold, 1)
+      !  define local basis at rnew and carry out transformations
+      !  tmat is used as scratch matrix and y1 is used as scratch vector here
+      call potent (w, vecnew, tmat, eignow, hp, y1, &
+                   rnew, drnow, en, xlarge, nch, nmax, v2)
+      !  determine matrix to transform log-deriv matrix into new interval
+      !  see eq. (22) of m.h. alexander, "hybrid quantum scattering algorithms ..."
+      !  on return from subroutine 'steppr':
+      !    the matrix pn [eq.(22)] is stored in
+      !    and vecnew has been transfered to vecnow; i.e. vecnow contains
+      !    the matrix tn [eq.(22)]
+      call steppr (vecnow, vecnew, tmat, nmax, nch)
+      !  restore radius values
+      rnow = rnew
+      !  determine approximate values for diagonal and off-diagonal
+      !  correction terms
+      call corr (eignow, eigold, hp, drnow, drmid, xlarge, cdiag, &
+                 coff, nch)
+      if (itwo .lt. 0) then
+        cycle ! next kstep
+      end if
+      if (airy_prop_completed) rnow = - rnow
+    end if  ! (itwo .le. 0)
+    ! 180
+    !  write or read relevant information
+    call outmat (tmat, eigold, hp, eshift, drnow, rnow, &
+                 nch, nmax, itwo)
+    if (itwo .ne. 0) then
+      !  negative rnow is cue for last step in second energy calculation
+      if (rnow .le. 0.d0) then
+        rnow = - rnow
+        airy_prop_completed = .true.
+      end if
+    end if
+  end if  !  (airy_prop_completed)
+  !     go back to start new step
+end do
+if (.not. airy_prop_completed) then
+  !  the following statement is reached only if the integration has
+  !  not reached the asymptotic region in maxstp steps
+  write (9,210) maxstp, rnext
+  210 format (' *** AIRY PROPAGATION NOT FINISHED IN', i4, &
+          ' STEPS:  R-FIN SET TO', f8.4,' ***',/)
+  xf = rnext
 end if
-drmid = rnew - rnow
-!  restore eigenvalues
-call dcopy (nch, eignow, 1, eigold, 1)
-!  define local basis at rnew and carry out transformations
-!  tmat is used as scratch matrix and y1 is used as scratch vector here
-call potent (w, vecnew, tmat, eignow, hp, y1, &
-             rnew, drnow, en, xlarge, nch, nmax)
-!  determine matrix to transform log-deriv matrix into new interval
-!  see eq. (22) of m.h. alexander, "hybrid quantum scattering algorithms ..."
-!  on return from subroutine 'steppr':
-!    the matrix pn [eq.(22)] is stored in
-!    and vecnew has been transfered to vecnow; i.e. vecnow contains
-!    the matrix tn [eq.(22)]
-call steppr (vecnow, vecnew, tmat, nmax, nch)
-!  restore radius values
-rnow = rnew
-!  determine approximate values for diagonal and off-diagonal
-!  correction terms
-call corr (eignow, eigold, hp, drnow, drmid, xlarge, cdiag, &
-           coff, nch)
-if (itwo .lt. 0) go to 200
-if (iend .eq. 1) rnow = - rnow
-!  write or read relevant information
-180 call outmat (tmat, eigold, hp, eshift, drnow, rnow, &
-             nch, nmax, itwo)
-if (itwo .eq. 0) go to 200
-!  negative rnow is cue for last step in second energy calculation
-if (rnow .gt. 0.d0) go to 200
-rnow = - rnow
-iend = 1
-!     go back to start new step
-200 continue
-!  the following statement is reached only if the integration has
-!  not reached the asymptotic region in maxstp steps
-write (9,210) maxstp, rnext
-210 format (' *** AIRY PROPAGATION NOT FINISHED IN', i4, &
-        ' STEPS:  R-FIN SET TO', f8.4,' ***',/)
-xf = rnext
-250 continue
-if (itwo .lt. 0) go to 260
-call outmat (vecnow, eigold, hp, eshift, drnow, xf, nch, &
-             nmax, itwo)
+if (itwo .ge. 0) then
+  call outmat (vecnow, eigold, hp, eshift, drnow, xf, nch, &
+               nmax, itwo)
+end if
 !  transform log-deriv matrix into free basis.  transformation matrix is
 !  just vecnow-transpose; see eq.(24) of m.h. alexander, "hybrid quantum
 !  scattering algorithms ..."
-260 call transp (vecnow, nch, nmax)
+call transp (vecnow, nch, nmax)
 ! if photodissociation calculation, also transform gamma2 to free basis
 if (photof) then
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
-    call mxma(vecnow,1,nmax,q,1,nphoto,w,1,nmax,nch,nch,nphoto)
+  call mxma(vecnow,1,nmax,q,1,nphoto,w,1,nmax,nch,nch,nphoto)
 #endif
 #if defined(HIB_UNIX_IBM)
-    forma='N'
-    call dgemul(vecnow,nmax,forma,q,nmax,forma, &
+  forma='N'
+  call dgemul(vecnow,nmax,forma,q,nmax,forma, &
                 w,nmax,nch,nch,nphoto)
 #endif
   ind=1
   jnd=1
-  do 265 i=1,nphoto
+  do i=1,nphoto
     call dcopy(nch,w(jnd),1,q(ind),1)
     ind=ind+nch
     jnd=jnd+nmax
-265   continue
+  end do
 endif
 call dtrans (z, vecnow, w, hp, xlarge, nch, nmax, izero)
+
 ! if 2s-2p collisions, restore asymptotic case (e) energies
 if (ibasty .eq. 10) call energ22
-if (noprin) go to 320
-if (itwo .lt. 0) write (9,280)
-if (itwo .eq. 0) write (9,290)
-if (itwo .gt. 0) write (9,300)
-280 format (' ** AIRY PROPAGATION - FIRST ENERGY;', &
-        ' TRANSFORMATION MATRICES NOT WRITTEN')
-290 format (' ** AIRY PROPAGATION - FIRST ENERGY;', &
-        ' TRANSFORMATION MATRICES WRITTEN')
-300 format (' ** AIRY PROPAGATION - SECOND ENERGY;', &
-        ' TRANSFORMATION MATRICES READ')
-write (9,305) rmin, rend, tolai, kstep
-write (9,310) spcmn, spcmx, rincr
-305 format ('         RBEGIN =', f7.3, '  REND =', f7.3, &
-        '     TOLAI =', 1pe8.1, '  NINTERVAL =', i3)
-310 format ('         DR-MIN =', f7.3, '  DR-MAX =', f8.3, &
-        '  R-INCR =', f7.3)
-write (6, 315) rmin, rend, rincr, spcmn, spcmx, kstep
-315 format (' ** AIRY:  RSTART =' ,f7.3,'  REND =',f7.3, &
-        '   RINCR =',f7.3, &
-        '   DRMIN =',f7.3, '   DRMAX =',f7.3,'   NSTEP =', i4)
-320 continue
+
+if (.not. noprin) then
+  if (itwo .lt. 0) write (9,280)
+  if (itwo .eq. 0) write (9,290)
+  if (itwo .gt. 0) write (9,300)
+  280 format (' ** AIRY PROPAGATION - FIRST ENERGY;', &
+          ' TRANSFORMATION MATRICES NOT WRITTEN')
+  290 format (' ** AIRY PROPAGATION - FIRST ENERGY;', &
+          ' TRANSFORMATION MATRICES WRITTEN')
+  300 format (' ** AIRY PROPAGATION - SECOND ENERGY;', &
+          ' TRANSFORMATION MATRICES READ')
+  write (9,305) rmin, rend, tolai, kstep
+  write (9,310) spcmn, spcmx, rincr
+  305 format ('         RBEGIN =', f7.3, '  REND =', f7.3, &
+          '     TOLAI =', 1pe8.1, '  NINTERVAL =', i3)
+  310 format ('         DR-MIN =', f7.3, '  DR-MAX =', f8.3, &
+          '  R-INCR =', f7.3)
+  write (6, 315) rmin, rend, rincr, spcmn, spcmx, kstep
+  315 format (' ** AIRY:  RSTART =' ,f7.3,'  REND =',f7.3, &
+          '   RINCR =',f7.3, &
+          '   DRMIN =',f7.3, '   DRMAX =',f7.3,'   NSTEP =', i4)
+end if
+
 return
 !
 950 write (0, *) ' *** ERROR WRITING WFU FILE (AIRY). ABORT.'

@@ -1,3 +1,4 @@
+#include "assert.h"
 module mod_com
    implicit none
    character(len=300) :: com_file 
@@ -69,39 +70,23 @@ module mod_coiout
    end subroutine allocate_coiout
 end module mod_coiout
 
-module mod_cov2
-   ! variables in this module
-   !    nv2max:    maximum core memory allocated for the v2 matrix
-   !    ndummy:    dummy variable for alignment
-   !    v2:        lower triangle of nonzero angular coupling matrix elements
-   !               stored in packed column form that is :
-   !                  (1,1), (2,1), (3,1) ... (n,1),
-   !                         (2,2), (3,2) ... (n,2), etc.
-   !               only nonzero elements are stored
-
+module mod_conlam
+   ! *  variables
+   ! *    nlam:      the number of angular coupling terms actually used
+   ! *    nlammx:    the maximum number of angular coupling terms allowed
+   ! *    lamnum:    number of non-zero v2 matrix elements for each lambda
+   ! *               lamnum is an array of dimension nlammx
    implicit none
-   real(8), dimension(:), allocatable :: v2
-   integer, allocatable               :: nv2max, ndummy
+   integer, dimension(:), allocatable :: lamnum
+   integer, allocatable               :: nlam, nlammx
    contains
-   subroutine allocate_cov2(av2max)
-      integer, intent(in) :: av2max
-      allocate(v2(av2max)) ; allocate(nv2max) ; allocate(ndummy)
-      nv2max = av2max
-   end subroutine allocate_cov2
-end module mod_cov2
-
-module mod_coiv2
-! variables in this module:
-!    iv2:  matrix address of v2 matrix for each non-zero element
-!          row+column index of v2 matrix for each non-zero element
-   implicit none
-   integer, dimension(:), allocatable :: iv2
-   contains
-   subroutine allocate_coiv2(av2max)
-      integer, intent(in) :: av2max
-      allocate(iv2(av2max)) ;
-   end subroutine allocate_coiv2
-end module mod_coiv2
+   subroutine allocate_conlam(n)
+      integer, intent(in) :: n
+      allocate(lamnum(n)) ; allocate(nlam) ; allocate(nlammx)
+      nlammx = n
+      nlam = 0
+   end subroutine allocate_conlam
+end module mod_conlam
 
 module mod_cocent
    ! variables in this module
@@ -308,23 +293,6 @@ module mod_cofil
    end subroutine allocate_cofil
 end module mod_cofil
 
-module mod_conlam
-   ! *  variables
-   ! *    nlam:      the number of angular coupling terms actually used
-   ! *    nlammx:    the maximum number of angular coupling terms allowed
-   ! *    lamnum:    number of non-zero v2 matrix elements for each lambda
-   ! *               lamnum is an array of dimension nlammx
-   implicit none
-   integer, dimension(:), allocatable :: lamnum
-   integer, allocatable               :: nlam, nlammx
-   contains
-   subroutine allocate_conlam(n)
-      integer, intent(in) :: n
-      allocate(lamnum(n)) ; allocate(nlam) ; allocate(nlammx)
-      nlammx = n
-      nlam = 0
-   end subroutine allocate_conlam
-end module mod_conlam
 
 module mod_coatpi
 !  variables in this module
@@ -1151,6 +1119,315 @@ module mod_cosysr
 end module mod_cosysr
 
 
+module mod_par
+   implicit none
+   save
+   logical, dimension(:), allocatable, target :: lpar
+   !  variables in common block /colpar/
+   !    airyfl:      if .true., then airy propagation will take place
+   !    prairy:      if .true., then step-by-step information is printed out in
+   !                 airy propagation
+   !    bastst:      if .true., then execution terminates after the first call
+   !                 to basis
+   !    batch:       if .true., then the job is run as a batch job
+   !                 if .false., then the job is assumed to be interactive
+   !    chlist:      if .true., then the channel quantum numbers and energies are
+   !                 printed out at at each total-j
+   !                 if .false., then  this is done only at first total-j
+   !    csflag:      if .true., then coupled-states calculation is desired
+   !                 if .false., then close-coupled calculation is desired
+   !    flaghf:      if .true., then the system has even multiplicity
+   !                 (half-integer total angular momentum)
+   !    flagsu:      if .true., then the problem is assumed to a molecule
+   !                 scattering off a surface, in which case the diagonal
+   !                 elements of the transition probabilities are equal to the
+   !                 modulus squared of the s-matrix (not t-matrix elements)
+   !    ihomo:       if .true., then the molecule is assumed to be homonuclear
+   !    ipos:        if .true., then printout is suited for a 132-position printe
+   !                 if .false., then printout is suited for a  80 -position
+   !                 printer
+   !    logdfl:      if .true., then logd propagation will take place
+   !    prlogd:       if .true., then the lower triangle of log-derivative matrix
+   !                 is printed at the end of the logd and the end of the airy
+   !                 integrations
+   !    noprin:      if .true., then most printing is suppressed
+   !    prpart:       if .true, then the full matrix of partial cross sections
+   !                 (summed over m-states) is printed
+   !    readpt:      if .true., then potential parameters are expected
+   !    rsflag:      if .true., then calculation is to be restarted
+   !                 a check will be made to see if all required files
+   !                 are present:  these may include
+   !                    trstrt, tmp10, tmp11, xsecn (or tmpxn), smatn,
+   !                    psecn, tmp35, ...
+   !    prsmat:       if .true., then the upper triangle of real and imaginary
+   !                 parts of s-matrix are printed
+   !    t2test:      if .true., then the first two columns of the square modulus
+   !                 of the t-matrix are printed
+   !    prt2:      if .true., then the upper triangle of square modulus of
+   !                 t-matrix is printed
+   !    twomol:      .true. if molecule-molecule collision
+   !    wrsmat:       if .true., and nnout is > 0, then those s-matrix elements
+   !                 for which both the initial and final rotational quantum
+   !                 numbers are in the array jout (input line 12) are written to
+   !                 files smat1, smat2, ...
+   !                 if nnout < 0, then each column of the s-matrix whose initial
+   !                 index is in the array jout is written to files smat1, smat2,
+   !    wrpart:      if .true., then input data and the matrix of partial cross
+   !                 sections (summed over m-states) is written to file pxsec
+   !    wrxsec:      if .true., then some input data and the full matrix of
+   !                 integral cross sections ((summed over m-states and summed
+   !                 from jtot1 to jtot2) is written to file xsec1, xsec2, ....
+   !    prxsec:      if .true., then the full matrix of integral cross sections
+   !                 ((summed over m-states and summed from jtot1 to jtot2) is
+   !                 printed
+   !
+
+
+   !    airyfl:      if .true., then airy propagation will take place
+   logical, pointer :: airyfl
+
+   !    prairy:      if .true., then step-by-step information is printed out in
+   !                 airy propagation
+   logical, pointer :: prairy
+
+   !    bastst:      if .true., then execution terminates after the first call
+   !                 to basis
+   logical, pointer :: bastst
+
+   logical, pointer :: batch
+
+   !     chlist:  if .true., then the channel quantum numbers and energies are
+   !              printed out at at each total-j
+   !              if .false., then  this is done only at first total-j
+   logical, pointer :: chlist
+
+   !    csflag:   if .true., then coupled-states calculation is desired
+   !              if .false., then close-coupled calculation is desired
+   logical, pointer :: csflag
+
+   !    flaghf:   if .true., then the system has even multiplicity (half-integer
+   !              total angular momentum)
+   logical, pointer :: flaghf
+
+   !    flagsu:   if .true., then the problem is assumed to a molecule scattering
+   !              of a surface, in which case the diagonal elements of the
+   !              transition probabilities are equal to the modulus squared of
+   !              the s-matrix (not t-matrix elements)
+   logical, pointer :: flagsu
+
+   !    ihomo:    if .true., then the molecule is assumed to be homonuclear
+   logical, pointer :: ihomo
+
+   !     ipos:    if .true., then printout is suited for a 132-position printer
+   !              if .false., then printout is suited for a  80 -position printer
+   logical, pointer :: ipos
+
+   !    logdfl:      if .true., then logd propagation will take place
+   logical, pointer :: logdfl
+
+   !     prlogd:  if .true., then the lower triangle of log-derivative matrix
+   !              is printed at the end of the logd and the end of the airy
+   !              integrations
+   logical, pointer :: prlogd
+
+   !     noprin:  if .true., then most printing is suppressed
+   logical, pointer :: noprin
+
+   !     prpart:  if .true, then the full matrix of partial cross sections (summe
+   !              over m-states) is printed
+   logical, pointer :: prpart
+
+   !    readpt:      if .true., then potential parameters are expected
+   logical, pointer :: readpt
+
+   !    rsflag:      if .true., then calculation is to be restarted
+   !                 a check will be made to see if all required files
+   !                 are present:  these may include
+   !                    trstrt, tmp10, tmp11, xsecn (or tmpxn), smatn,
+   !                    psecn, tmp35, ...  
+   logical, pointer :: rsflag
+
+   !     prsmat:  if .true., then the upper triangle of real and imaginary parts
+   !              of s-matrix are printed
+   logical, pointer :: prsmat
+
+   !     t2test:  if .true., then the first two columns of the square modulus of
+   !              the t-matrix are printed
+   logical, pointer :: t2test
+
+   !     prt2:    if .true., then the upper triangle of square modulus of t-matri
+   !              is printed
+   logical, pointer :: prt2
+
+   !    twomol:   if .true., then molecule-molecule collision is assumed
+   logical, pointer :: twomol
+
+   !     wrsmat:  if .true., and nnout is > 0, then those s-matrix elements
+   !              for which both the initial and final rotational quantum
+   !              numbers are in the array jout (input line 12) are written to
+   !              files smat1, smat2, ...
+   !              if nnout < 0, then each column of the s-matrix whose initial
+   !              index is in the array jout is written to files smat1, smat2, ..
+   logical, pointer :: wrsmat
+
+   !     wrpart:  if .true., then input data and the matrix of partial cross
+   !              sections (summed over m-states) is written to file pxsec
+   logical, pointer :: wrpart
+
+   !     wrxsec:  if .true., then some input data and the full matrix of integral
+   !              cross sections ((summed over m-states and summed from
+   !              jtot1 to jtot2) is written to file xsec1, xsec2, ....
+   logical, pointer :: wrxsec
+
+   !     prxsec:  if .true., then the full matrix of integral cross sections
+   !              ((summed over m-states and summed from jtot1 to jtot2) is print
+   logical, pointer :: prxsec
+
+   !     nucros:  parameter to control how CS integral cross sections are
+   !              computed
+   logical, pointer :: nucros
+
+   !     photof:  if .true. then photodissociation calculation
+   logical, pointer :: photof
+
+   !     wavefl:  if .true. then information is written to calculate,
+   !              subsequently, wavefunctions, fluxes, and adiabatic energies
+   logical, pointer :: wavefl
+
+   !     boundc:  if .true. then susan gregurick's bound state calculation
+   !              is implemented
+   logical, pointer :: boundc
+
+   ! ipar (integer parameters)
+
+   integer, dimension(:), allocatable, target :: ipar
+
+
+   integer, pointer :: jtot1
+   integer, pointer :: jtot2
+   integer, pointer :: jtotd
+   integer, pointer :: jlpar
+   integer, pointer :: nerg
+   integer, pointer :: numax
+   integer, pointer :: numin
+   integer, pointer :: nud
+   
+   ! lscreen is the number of lines available on your terminal screen
+   integer, pointer :: lscreen
+
+   ! iprint controls degree of print output in some routines
+   !     iprint=-1 (no print); iprint=0 (min print); iprint=1 some print, etc
+   integer, pointer :: iprint
+
+   ! rpar (real number parameters)
+
+   real(8), dimension(:), allocatable, target :: rpar
+
+   ! parameters for scattering mode
+   real(8), pointer :: scat_fstfac
+   real(8), pointer :: scat_rincr
+   real(8), pointer :: scat_rcut
+   real(8), pointer :: scat_rendai
+   real(8), pointer :: scat_rendld
+   real(8), pointer :: scat_rstart
+   real(8), pointer :: scat_spac
+   real(8), pointer :: scat_tolai
+
+   ! parameters for bound state mode
+   real(8), pointer :: bound_r1
+   real(8), pointer :: bound_r2
+   real(8), pointer :: bound_c
+   real(8), pointer :: bound_spac
+   real(8), pointer :: bound_delr
+   real(8), pointer :: bound_hsimp
+   real(8), pointer :: bound_eigmin
+   real(8), pointer :: bound_tolai
+
+   ! parameters common to scattering mode and bound state mode
+   real(8), pointer :: xmu
+
+   contains
+   subroutine allocate_par()
+      use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT, RPAR_COUNT
+      use lpar_enum
+      use ipar_enum
+      use rpar_enum
+      implicit none
+      integer :: num_lpar = LPAR_COUNT
+      integer :: num_ipar = IPAR_COUNT
+      integer :: num_rpar = RPAR_COUNT
+
+      allocate(lpar(num_lpar))
+
+      airyfl => lpar(LPAR_AIRYFL)
+      prairy => lpar(LPAR_PRAIRY)
+      bastst => lpar(LPAR_BASTST)
+      batch => lpar(LPAR_BATCH)
+      chlist => lpar(LPAR_CHLIST)
+      csflag => lpar(LPAR_CSFLAG)
+      flaghf => lpar(LPAR_FLAGHF)
+      flagsu => lpar(LPAR_FLAGSU)
+      ihomo => lpar(LPAR_IHOMO)
+      ipos => lpar(LPAR_IPOS)
+      logdfl => lpar(LPAR_LOGDFL)
+      prlogd => lpar(LPAR_PRLOGD)
+      noprin => lpar(LPAR_NOPRIN)
+      prpart => lpar(LPAR_PRPART)
+      readpt => lpar(LPAR_READPT)
+      rsflag => lpar(LPAR_RSFLAG)
+      prsmat => lpar(LPAR_PRSMAT)
+      t2test => lpar(LPAR_T2TEST)
+      prt2 => lpar(LPAR_PRT2)
+      twomol => lpar(LPAR_TWOMOL)
+      wrsmat => lpar(LPAR_WRSMAT)
+      wrpart => lpar(LPAR_WRPART)
+      wrxsec => lpar(LPAR_WRXSEC)
+      prxsec => lpar(LPAR_PRXSEC)
+      nucros => lpar(LPAR_NUCROS)
+      photof => lpar(LPAR_PHOTOF)
+      wavefl => lpar(LPAR_WAVEFL)
+      boundc => lpar(LPAR_BOUNDC)
+
+      allocate(ipar(num_ipar))
+
+      jtot1 => ipar(IPAR_JTOT1)
+      jtot2 => ipar(IPAR_JTOT2)
+      jtotd => ipar(IPAR_JTOTD)
+      jlpar => ipar(IPAR_JLPAR)
+      nerg => ipar(IPAR_NERG)
+      numax => ipar(IPAR_NUMAX)
+      numin => ipar(IPAR_NUMIN)
+      nud => ipar(IPAR_NUD)
+      lscreen => ipar(IPAR_LSCREEN)
+      iprint => ipar(IPAR_IPRINT)
+
+      allocate(rpar(num_rpar))
+
+      scat_fstfac => rpar(RPAR_SCAT_FSTFAC)
+      scat_rincr => rpar(RPAR_SCAT_RINCR)
+      scat_rcut => rpar(RPAR_SCAT_RCUT)
+      scat_rendai => rpar(RPAR_SCAT_RENDAI)
+      scat_rendld => rpar(RPAR_SCAT_RENDLD)
+      scat_rstart => rpar(RPAR_SCAT_RSTART)
+      scat_spac => rpar(RPAR_SCAT_SPAC)
+      scat_tolai => rpar(RPAR_SCAT_TOLAI)
+
+      bound_r1 => rpar(RPAR_BOUND_R1)
+      bound_r2 => rpar(RPAR_BOUND_R2)
+      bound_c => rpar(RPAR_BOUND_C)
+      bound_spac => rpar(RPAR_BOUND_SPAC)
+      bound_delr => rpar(RPAR_BOUND_DELR)
+      bound_hsimp => rpar(RPAR_BOUND_HSIMP)
+      bound_eigmin => rpar(RPAR_BOUND_EIGMIN)
+      bound_tolai => rpar(RPAR_BOUND_TOLAI)
+
+
+      xmu => rpar(RPAR_XMU)
+
+   end subroutine allocate_par
+
+end module mod_par
+
 
 
  ! all the commons blocks from hiiolib_f.F90:
@@ -1160,8 +1437,6 @@ end module mod_cosysr
     !!   common /comom/  xmom(3), imom(13)
     !!   common /cosout/ nnout, jout(kout)
     !!   common /coiout/ niout, indout(kout)
-    !!   common /cov2/ nv2max, ndummy, v2(kv2max)
-    !!   common /coiv2/ iv2(kv2max)
     !!   common /cocent/ cent(kmax)
     !!   common /coeint/ eint(kmax)
     !!   common /coj12/ j12(kmax)

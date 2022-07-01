@@ -1,11 +1,13 @@
 #include "assert.h"
+module mod_hiba02_2sg
+contains
 ! sy2sg (sav2sg/ptr2sg) defines, saves variables and reads          *
 !                  potential for doublet sigma scattering                *
 ! --------------------------------------------------------------------
 subroutine ba2sg (j, l, is, jhold, ehold, ishold, nlevel, &
                   nlevop, nrot, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+                  ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision
 !  of a 2sigma molecule in a hund's case(a) basis with a
@@ -112,23 +114,30 @@ subroutine ba2sg (j, l, is, jhold, ehold, ishold, nlevel, &
 !   vlm2sg:    returns angular coupling coefficient for particular
 !              choice of channel index
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use mod_hibasutil, only: vlm2sg
 use constants, only: econv, xmconv, ang2c
+use mod_par, only: iprint
+use funit, only: FUNIT_INP
+#include "common/parbasl.F90"
 
 implicit double precision (a-h,o-z)
+integer, intent(out), dimension(:) :: nrot
+real(8), intent(out), dimension(:) :: sc2
+real(8), intent(out), dimension(:) :: sc3
+real(8), intent(out), dimension(:) :: sc4
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical clist, csflag, flaghf, flagsu, ihomo, bastst
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
-common /coipar/ iiipar(9), iprint
 common /coered/ ered, rmu
-dimension j(1), l(1), jhold(1), ehold(1), is(1), nrot(1), &
-          ieps(2), ishold(1), sc2(1)
+dimension j(1), l(1), jhold(1), ehold(1), is(1), &
+          ieps(2), ishold(1)
 data ieps / -1, 1 /
 integer, pointer :: nterm, nrmax, npar, isym, igu, isa
 real(8), pointer :: brotsg, gsr, drotsg, hrotsg
@@ -148,7 +157,7 @@ if (.not. flaghf) then
 end if
 if (flagsu .and. .not. csflag) then
   write (6, 8)
-  write (8, 8)
+  write (FUNIT_INP, 8)
 8   format &
    ('  *** CSFLAG = .FALSE. FOR SURFACE CALCULATION; ABORT ***')
   stop
@@ -191,13 +200,6 @@ do 13  i = 1, nterm
     nsum = nsum + lammax(i) - lammin(i)+1
   end if
 13 continue
-if (nlammx .lt. nsum) then
-  write (6, 14) nsum, nlammx
-  write (9, 14) nsum, nlammx
-14   format (' ** TOTAL NUMBER OF ANISOTROPIC TERMS=', i2, &
-          ' .GT. NLAMMX=', i2,'; ABORT')
-  stop
-end if
 if (bastst) write (6, 15) nsum
 if (bastst) write (9, 15) nsum
 if (nsum.ne.nlam) write (6, 16) nsum, nlam
@@ -526,7 +528,6 @@ end if
 !  i counts v2 elements
 !  inum counts v2 elements for given lambda
 !  ilam counts numver of v2 matrices
-!  ij is address of given v2 element in present v2 matrix
 i = 0
 if (bastst.and.iprint.ge.2) then
   write (6, 285)
@@ -534,145 +535,49 @@ if (bastst.and.iprint.ge.2) then
 285   format (/' ILAM  LAMBDA  ICOL  IROW   I    IV2    VEE')
 end if
 lamsum = 0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 400 ilam = 1, nlam
 !  ilam is the angular expansion label
   lb = ilam
   inum = 0
-  do 355  icol = 1, n
-    do 350  irow = icol, n
-      ij = ntop * (icol - 1) +irow
+  ancouma => v2%get_angular_coupling_matrix(ilam)
+  do icol = 1, n
+    do irow = icol, n
       lrow = l(irow)
       if (csflag) lrow = nu
-!  always initialize potential to zero
+      !  always initialize potential to zero
       vee = zero
       call vlm2sg (j(irow), lrow, j(icol), l(icol), jtot, &
                    lb, is(irow), is(icol), vee, csflag)
       if (vee .ne. zero) then
         i = i + 1
-        if (i .le. nv2max) then
-          inum = inum + 1
-          v2(i) = vee
-          iv2(i) = ij
-          if (bastst.and.iprint.ge.2) then
-            write (6, 290) ilam, lb, icol, irow, i, iv2(i), &
-                           vee
-            write (9, 290) ilam, lb, icol, irow, i, iv2(i), &
-                           vee
-290             format (i4, 2i7, 2i6, i6, g17.8)
-          end if
+        inum = inum + 1
+        call ancouma%set_element(irow=irow, icol=icol, vee=vee)
+        if (bastst.and.iprint.ge.2) then
+          write (6, 290) ilam, lb, icol, irow, i, &
+                         vee
+          write (9, 290) ilam, lb, icol, irow, i, &
+                         vee
+290             format (i4, 2i7, 2i6, g17.8)
         end if
       end if
-350     continue
-355   continue
-  if (i .le. nv2max) lamnum(ilam) = inum
+    end do  ! row
+  end do  ! col
   if (bastst) then
-    write (6, 370) ilam, lamnum(ilam)
-    write (9, 370) ilam, lamnum(ilam)
+    write (6, 370) ilam, ancouma%get_num_nonzero_elements()
+    write (9, 370) ilam, ancouma%get_num_nonzero_elements()
 370   format ('ILAM=',i3,' LAMNUM(ILAM) = ',i6)
   end if
-  lamsum = lamsum + lamnum(ilam)
+  lamsum = lamsum + ancouma%get_num_nonzero_elements()
 400 continue
-if ( i.gt. nv2max) then
-   write (6, 410) i, nv2max
-   write (9, 410) i, nv2max
-410    format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-   stop
-end if
 if (clist .and. bastst) then
-  write (6, 420) lamsum
-  write (9, 420) lamsum
+  write (6, 420) v2%get_num_nonzero_elements()
+  write (9, 420) v2%get_num_nonzero_elements()
 420   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', &
            i4)
 end if
-if(bastst) write (9, 600) nlam, nlammx, (lamnum(i), i=1,nlam)
-600 format (' nlam, nlammx, lamnum', 10i4)
-return
-end
-!  -----------------------------------------------------------------------
-subroutine vlm2sg (jp, lp, j, l, jtot, lambda, iepsp, ieps, &
-                   v, csflag)
-!  subroutine to calculate v-lambda matrices for close-coupled and
-!  coupled-states treatments of collisions of a molecule in a 2sigma
-!  electronic state
-!  latest revision date:  21-feb-89
-!  the cc matrix elements are given in eq. (15) of m.h. alexander,
-!  j. chem. phys. 76, 3637 (1982)
-!  the cs matrix elements are given in eq. (24) of m.h. alexander,
-!  j. chem. phys. 76, 3637 (1982), with corrections corresponding
-!  to eq. 14 of t. orlikowski and m.h. alexander, j. chem. phys. 79, 6006
-!  (1983)
-!  note that for cc collisions of a 2sigma molecule with a flat surface, the
-!  coupling matrix elements are assumed to be identical to the cs matrix
-!  elements here
-!  -----------------------------------------------------------------------
-!  variables in call list:
-!    jp:       rotational quantum number of left side of matrix element (bra)
-!              minus 1/2
-!    lp:       orbital angular momentum of left side of matrix element (bra)
-!    j:        rotational quantum number of right side of matrix element (ket)
-!              minus 1/2
-!    l:        orbital angular momentum of right side of matrix element (ket)
-!    jtot:     total angular momentum
-!    lambda:   order of legendre term in expansion of potential
-!    iepsp:    symmetry index of bra
-!    ieps:     symmetry index of ket
-!    v:        on return, contains matrix element
-!    csflag:   if .true., then cs calculation; in this case:
-!                jtot in call list is cs lbar
-!                lp is nu (cs projection index) minus 1/2
-!                l is not used
-!              if .false., then cc calculation; in this case:
-!                jtot is total angular momentum minus 1/2
-!    for collisions of a 2sigma molecule with a surface, nu is equivalent
-!    to m (the projection of j along the surface normal) minus 1/2
-!  subroutines called:
-!     xf3j, xf6j
-!  -----------------------------------------------------------------------
-implicit double precision (a-h,o-z)
-integer jp, j, jtot, lp, l, lambda, iepsp, ieps, nu, iphase
-logical csflag
-half = 0.5d0
-zero = 0.d0
-one = 1.d0
-two = 2.d0
-v = zero
-xjp = jp + half
-xj = j + half
-xjtot = jtot + half
-if (csflag) then
-  nu = lp
-  xnu = nu + half
-end if
-xlp = float(lp)
-xl = float(l)
-xlamda = float(lambda)
-iphase = ieps * iepsp * ((-1) ** (jp + j + lambda + 1))
-if (iphase .eq. 1) return
-if (csflag) then
-!  note true phase factor is nu - omega, where nu is a half/integer and
-!  omega=1/2.  here, however nu is nu-true + 1/2, so nu-true - omega = nu
-  iphase = nu
-  xnorm = (two * xjp + one) * (two * xj + one)
-  xnu = nu + half
-  xnum = - xnu
-!  indices in denominator of 3j correspond
-!  to eq. 14 of t. orlikowski and m.h. alexander, j. chem. phys. 79, 6006
-!  (1983) rather than eq. (24) of m.h. alexander,
-!  j. chem. phys. 76, 3637 (1982)
-  x = xf3j (xjp, xlamda, xj, xnum, zero, xnu)
-else
-  iphase = jp + j + 1 + jtot
-  xnorm = (two * xjp + one) * (two * xj + one) * (two * lp + one) &
-        * (two * l + one)
-  x = xf3j (xlp, xlamda, xl, zero, zero, zero)
-  if  (x .eq. zero) return
-  x = x * xf6j (xjp, xlp, xjtot, xl, xj, xlamda)
-end if
-if (x .eq. zero) return
-x = x * xf3j (xjp, xlamda, xj, -half, zero, half)
-iphase = (-1) ** iabs(iphase)
-v = iphase * x * sqrt(xnorm)
+if(bastst) call v2%print_summary(unit=9)
 return
 end
 !  -----------------------------------------------------------------------
@@ -683,7 +588,9 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
+use mod_par, only: ihomo
+use funit, only: FUNIT_INP
+implicit none
 !  subroutine to read in system dependent parameters for doublet-sigma
 !   + atom scattering
 !  if iread = 1 read data from input file
@@ -717,15 +624,16 @@ implicit double precision (a-h,o-z)
 !             of the variable names in cosysi followed by the ordering of
 !             variable names in cosysr followed by lammin, lammax, and mproj
 ! ------------------------------------------------------------------------
-logical readpt,existf
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: j, l, lc
+logical existf
 character*(*) fname
 character*60 line,filnam,potfil, filnm1
 #include "common/parbas.F90"
-logical         airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar(18)
 common /coskip/ nskip,iskip
+integer :: nskip, iskip
 character*1 dot
 save potfil
 #include "common/comdot.F90"
@@ -834,11 +742,12 @@ ASSERT(gsr .eq. rspar(2))
 
 !  save input parameters for doublet-sigma + atom scattering
 !  line 13:
-write (8, 220) nrmax, npar, isym, igu, isa
+write (FUNIT_INP, 220) nrmax, npar, isym, igu, isa
 220 format (5i4, t50, 'nrmax, npar, isym, igu, isa')
-write (8, 320) brot, gsr, drot, hrot
+write (FUNIT_INP, 320) brot, gsr, drot, hrot
 320 format (f12.6,3g12.4,t50,'brot, gsr, drot, hrot')
-write (8,330) potfil
+write (FUNIT_INP,330) potfil
 330 format(a)
 return
 end
+end module mod_hiba02_2sg

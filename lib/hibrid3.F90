@@ -32,7 +32,7 @@ contains
 subroutine outmat (tmat, eigold, hp, eshift, drnow, rnow, &
                    n, nmax, itwo)
 !  subroutine to either write or read transformation matrix and
-!  relevant information from file 10
+!  relevant information from file FUNIT_TRANS_MAT
 !  called from spropn
 !  author:  millard alexander
 !  current revision date: 14-feb-91
@@ -57,43 +57,50 @@ subroutine outmat (tmat, eigold, hp, eshift, drnow, rnow, &
 !              energy calculation, so transformation matrix and relevant
 !              information will be read
 !  ------------------------------------------------------------------------
-implicit double precision (a-h,o-z)
-integer i, itwo, n, nmax
-logical isecnd
-dimension eigold(1), hp(1)
-#if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
-dimension tmat(1)
-#endif
+use funit, only: FUNIT_TRANS_MAT
+implicit none
+real(8), intent(inout) :: tmat(nmax*n)
+real(8), intent(inout) :: eigold(n)
+real(8), intent(inout) :: hp(:)
+real(8), intent(in) :: eshift
+real(8), intent(inout) :: drnow
+real(8), intent(inout) :: rnow
+integer, intent(in) :: n
+integer, intent(in) :: nmax
+integer, intent(in) :: itwo
+
+integer :: i
+logical :: isecnd
+integer, parameter :: lunit = FUNIT_TRANS_MAT
+integer :: nsq 
+
 isecnd = .false.
-lunit=10
 if (itwo .gt. 0) isecnd = .true.
 !  if first energy calculation, isecnd = .false.
-!    in which case logical unit 10 will be written
+!    in which case logical unit lunit will be written
 !  if subsequent energy calculation, isecnd = .true.
-!    in which case logical unit 10 will be written
+!    in which case logical unit lunit will be written
 !  read/write rnow, drnow, diagonal elements of transformed dw/dr matrix,
 !  and diagonal elements of transformed w matrix
-#if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
 nsq = n * nmax
 if (isecnd) then
-  read (10) rnow, drnow, (hp(i) , i = 1, n), &
+  read (FUNIT_TRANS_MAT) rnow, drnow, (hp(i) , i = 1, n), &
         (eigold(i) , i = 1, n), (tmat(i), i=1, nsq)
 else
-  write (10) rnow, drnow, (hp(i) , i = 1, n), &
+  write (FUNIT_TRANS_MAT) rnow, drnow, (hp(i) , i = 1, n), &
         (eigold(i) , i = 1, n), (tmat(i), i=1, nsq)
 endif
-#endif
 !  now shift energies (if subsequent energy)
 if (isecnd) then
-  do  30   i = 1, n
+  do  i = 1, n
     eigold(i) = eigold(i) + eshift
-30   continue
+  end do
 end if
 return
 end
 ! ----------------------------------------------------------------------
 subroutine potent (w, vecnow, scmat, eignow, hp, scr, &
-   rnow, drnow, en, xlarge, nch, nmax)
+   rnow, drnow, en, xlarge, nch, nmax, v2)
 ! ----------------------------------------------------------------------
 !  this subroutine first sets up the wave-vector matrices:
 !    w = w[rnow + 0.5 drnow/sqrt(3)] and w = w[rnow - 0.5 drnow/sqrt(3)]
@@ -129,7 +136,8 @@ subroutine potent (w, vecnow, scmat, eignow, hp, scr, &
 !    nmax:     maximum row dimension of matrices and maximum dimension of
 !              vectors
 ! ----------------------------------------------------------------------
-implicit none
+   use mod_ancou, only: ancou_type
+   implicit none
 !  square matrices (of row dimension nmax)
 real(8), dimension(nmax*nmax), intent(out) :: w
 real(8), dimension(nmax*nmax), intent(out) :: vecnow
@@ -144,6 +152,7 @@ real(8), intent(in) :: en
 real(8), intent(out) :: xlarge
 integer, intent(in) :: nch
 integer, intent(in) :: nmax
+type(ancou_type), intent(in) :: v2
 
 !      real eignow, hp, scmat, scr, vecnow, w
 !      real drnow, en, fact, half, one, ra, rb, rnow, sq3, xlarge, xmin1
@@ -167,8 +176,8 @@ nmaxm1 = nmax - 1
 ra = rnow - half * drnow / sq3
 rb = rnow + half * drnow / sq3
 !  scmat is used to store the wavevector matrix at rb
-call potmat (w, ra, nch, nmax)
-call potmat (scmat, rb, nch, nmax)
+call potmat (w, ra, nch, nmax, v2)
+call potmat (scmat, rb, nch, nmax, v2)
 !  since potmat returns negative of lower triangle of w(r) matrix (eq.(3) of
 !  m.h. alexander, "hybrid quantum scattering algorithms ..."),
 !  next loop changes its sign
@@ -250,8 +259,27 @@ call transp (vecnow, nch, nmax)
 call dtrans (w, vecnow, scmat, hp, xlarge, nch, nmax, ione)
 return
 end
+
+!#define ANCOUMA_READ_USE_ASSOCIATE
+
+#define ANCOUMA_READ_METHOD_NORMAL 0
+#define ANCOUMA_READ_METHOD_INLINE_LEVEL1 1
+#define ANCOUMA_READ_METHOD_INLINE_LEVEL2 2
+#define ANCOUMA_READ_METHOD_INLINE_LEVEL3 3
+
+#define ANCOUMA_READ_METHOD ANCOUMA_READ_METHOD_INLINE_LEVEL3
+
+
+#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL1)
+
+#define ANCOUMA_GET_ELEMENT(ancouma, element_index, ij, vee) \
+ij = ancouma%v2i%get_element(iv2_element) ; \
+vee = ancouma%v2d%get_element(iv2_element)
+
+#endif
+
 ! ------------------------------------------------------------------------
-subroutine potmat (w, r, nch, nmax)
+subroutine potmat (w, r, nch, nmax, v2)
 !  determine negative of lower triangle of w(r) matrix.  see eq. (3) of
 !  m.h. alexander, "hybrid quantum scattering algorithms ..."
 !  author:  millard alexander
@@ -281,28 +309,57 @@ subroutine potmat (w, r, nch, nmax)
 !    vsmul:    multiplies vector by scalar and stores result in another
 !              vector
 !  -------------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_covvl, only: vvl
-use mod_conlam, only: nlam, nlammx, lamnum
-implicit double precision (a-h,o-z)
-
-real(8), dimension(1), intent(out) :: w
+use mod_grovec, only: igrovec_type_block, dgrovec_type_block
+use mod_hiba10_22p, only: trans22
+implicit none
+real(8) :: second
+real(8), dimension(*), intent(out) :: w
 real(8), intent(in) :: r
 integer, intent(in) :: nch
 integer, intent(in) :: nmax
+type(ancou_type), intent(in) :: v2
 
-integer i, iflag, ilam
+integer i, ilam
+integer :: iv2_element
+integer :: ij
+integer :: num_nz_elements
+real(8) :: vee
+
+type(ancouma_type), pointer :: ancouma
+
+#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL2) || (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL3)
+integer :: block_size
+integer :: block_index
+integer :: el_index_in_block
+#endif
+
+#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL3)
+integer :: num_full_blocks
+integer :: num_remaining_nz_elements
+type(igrovec_type_block), pointer :: blocki
+type(dgrovec_type_block), pointer :: blockd
+#endif
 
 common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
+real(8) :: cpuld, cpuai, cpupot, cpusmt, cpupht
 common /copmat/ rtmn, rtmx, iflag
+real(8) :: rtmn, rtmx
+integer :: iflag
 common /coered/ ered, rmu
+real(8) :: ered, rmu
 common /coselb/ ibasty
-zero = 0.d0
-one = 1.d0
-two = 2.d0
+integer :: ibasty
+real(8), parameter :: zero = 0.d0
+real(8), parameter :: one = 1.d0
+real(8), parameter :: two = 2.d0
+
+integer :: icol, icolpt, ioff, ipt, irowpt, iwpt, ncol, nmaxp1
+real(8) :: r2, twormu, vv0, wmax, wmin
+
 
 !ABER only for testing potential-matrix
 !     if (r.le.3.41) icount=0
@@ -316,7 +373,7 @@ call pot( vv0, r)
 !  [ vvl(i) for i = 1, nlam ] are returned in common block vvlcontains
 !  multiply all vvl terms by twice the reduced mass
 twormu = two * rmu
-call dscal(nlam, twormu, vvl, 1)
+call dscal(v2%nlam, twormu, vvl, 1)
 !  now loop over angular coupling matrix to calculate the potential matrix
 !    w(ij) = 2 * rmu * vv0 + sum [ 2 * rmu * vvl(ilam) * v2(ij,ilam) ]
 !  first zero out lower triangle of potential matrix
@@ -343,16 +400,80 @@ ioff = 0
 !ABER
 !       call druckq(w,nmax,nch,'potential matrix',icount)
 !ABER
-if (nlam .gt. 0) then
-  do  40  ilam = 1, nlam
-      ASSERT(lamnum(ilam) >= 0)
-      do  30 i = 1, lamnum(ilam)
-            w(iv2(ioff+i)) = w(iv2(ioff+i)) + v2(ioff+i) * vvl(ilam)
-30        continue
-     ioff = ioff + lamnum(ilam)
-40   continue
-endif
+if (v2%nlam .gt. 0) then
+  do ilam = 1, v2%nlam
+      ! write(6,*) 'ilam=', ilam, 'v2%get_angular_coupling_matrix(ilam)%get_num_nonzero_elements()=', v2%get_angular_coupling_matrix(ilam)%get_num_nonzero_elements()
+      !ancouma => v2%ancouma(ilam)
+#if defined(ANCOUMA_READ_USE_ASSOCIATE)
+      associate( ancouma => v2%get_angular_coupling_matrix(ilam) )
+#else
+      ancouma => v2%get_angular_coupling_matrix(ilam)
+#endif
+      num_nz_elements = ancouma%get_num_nonzero_elements()
+      ASSERT(num_nz_elements >= 0)
 
+#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_NORMAL )
+      do iv2_element = 1, num_nz_elements
+        call ancouma%get_element(iv2_element, ij, vee)  
+        w(ij) = w(ij) + vee * vvl(ilam)
+      end do
+#endif
+
+#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL1)
+      do iv2_element = 1, num_nz_elements
+        ANCOUMA_GET_ELEMENT(ancouma, iv2_element, ij, vee)
+        w(ij) = w(ij) + vee * vvl(ilam)
+      end do
+#endif
+
+#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL2)
+      block_size = ancouma%v2i%block_size
+      do iv2_element = 1, num_nz_elements
+        block_index =  (iv2_element-1) / block_size
+        el_index_in_block = iv2_element - 1 - (block_index * block_size)
+        ij = ancouma%v2i%blocks(block_index)%p(el_index_in_block)
+        vee = ancouma%v2d%blocks(block_index)%p(el_index_in_block)
+
+        w(ij) = w(ij) + vee * vvl(ilam)
+      end do
+#endif
+
+#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL3)
+      !1023 -> 0
+      !1024 -> 1
+      !1025 -> 1 
+      block_size = ancouma%v2i%block_size
+      num_full_blocks = ((num_nz_elements - 1) / block_size)
+      iv2_element = 0
+      do block_index = 0, num_full_blocks-1
+        blocki => ancouma%v2i%blocks(block_index)
+        blockd => ancouma%v2d%blocks(block_index)
+        do el_index_in_block = 0, block_size-1
+          ij = blocki%p(el_index_in_block)
+          vee = blockd%p(el_index_in_block)
+          iv2_element = iv2_element + 1
+          w(ij) = w(ij) + vee * vvl(ilam)
+        end do
+      end do
+      num_remaining_nz_elements = num_nz_elements - iv2_element
+      if (num_remaining_nz_elements > 0) then
+        blocki => ancouma%v2i%blocks(num_full_blocks)
+        blockd => ancouma%v2d%blocks(num_full_blocks)
+        do el_index_in_block = 0, num_remaining_nz_elements-1
+          ij = blocki%p(el_index_in_block)
+          vee = blockd%p(el_index_in_block)
+          iv2_element = iv2_element + 1
+          w(ij) = w(ij) + vee * vvl(ilam)
+        end do
+      end if
+#endif
+
+#if defined(ANCOUMA_READ_USE_ASSOCIATE)
+      end associate
+#endif
+
+  end do
+endif
 !ABER
 !       call druckq(w,nmax,nch,'potential matrix',icount)
 !ABER
@@ -823,8 +944,8 @@ subroutine propag (z, w, zmat, amat, bmat, &
                    jq, lq, inq, &
                    ien, nerg, en, eshift, rstart, rendld, spac, &
                    tolhi, rendai, rincr, fstfac, tb, tbm, &
-                   ipos, logwr, noprin, airyfl, airypr, &
-                   nch, nopen, nairy, nmax)
+                   ipos, prlogd, noprin, airyfl, prairy, &
+                   nch, nopen, nairy, nmax, v2)
 ! ------------------------------------------------------------------------
 !  subroutine to:
 !    1.  propagate the log-derivative matrix from rstart to rendld
@@ -874,14 +995,14 @@ subroutine propag (z, w, zmat, amat, bmat, &
 !  logical variables:
 !    ipos         if .true., then 132 column printer
 !                 if .false., then 80 column printer
-!    logwr        if .true., then lower triangle of the log-derivative matrix
+!    prlogd        if .true., then lower triangle of the log-derivative matrix
 !                 is printed out at end of logd and airy integration
 !    noprin       if .true., then all printing is suppressed
 !    iprint:      if .true., then print out of step-by-step information
 !    airyfl:      if .true., then airy propagation will occur
 !                 if .false., then no airy propagation will occur, the
 !                 integration will stop at r=renld
-!    airypr:      if .true., then interval size, interval midpoint, and maximu
+!    prairy:      if .true., then interval size, interval midpoint, and maximu
 !                 estimated diagonal and off-diagonal corrections are printed
 !                 out in airy propagation
 !    nopen        on return:  number of energetically open channels
@@ -904,7 +1025,9 @@ subroutine propag (z, w, zmat, amat, bmat, &
 !     wavefn        true if g(a,b) transformation matrices are saved
 !                   to be used later in computing the wavefunction
 !  ------------------------------------------------------------------
+use mod_ancou, only: ancou_type
 use mod_hibrid2, only: mxoutd
+use funit, only: FUNIT_TRANS_MAT, FUNIT_QUAD_MAT
 implicit none
 !   square matrices
 real(8), intent(out) :: z(nmax, nch)
@@ -929,14 +1052,15 @@ real(8), intent(in) :: fstfac
 real(8), intent(out) :: tb
 real(8), intent(out) :: tbm
 logical, intent(in) :: ipos
-logical, intent(in) :: logwr
+logical, intent(in) :: prlogd
 logical, intent(in) :: noprin
 logical, intent(in) :: airyfl
-logical, intent(in) :: airypr
+logical, intent(in) :: prairy
 integer, intent(in) :: nch
 integer, intent(out) :: nopen
 integer, intent(in) :: nairy
 integer, intent(in) :: nmax
+type(ancou_type), intent(in) :: v2
 
 logical :: twoen
 logical ::  first
@@ -952,11 +1076,11 @@ real(8) :: cpuai
 real(8) :: cpupot
 real(8) :: cpusmt
 real(8) :: cpupht
-common /cophot/ photof, wavefn, boundf, wrsmat
+common /cophot/ photof, wavefn, boundf, writs
 logical :: photof
 logical :: wavefn
 logical :: boundf
-logical :: wrsmat
+logical :: writs
 
 real(8) :: r
 real(8) :: t1, t2
@@ -982,8 +1106,8 @@ iflag = 0
 if (nerg .gt. 1) then
   twoen = .true.
   itwo = ien - 1
-  rewind 10
-  rewind 11
+  rewind FUNIT_TRANS_MAT
+  rewind FUNIT_QUAD_MAT
 else
   twoen = .false.
   itwo = -1
@@ -1001,7 +1125,7 @@ if (boundf) then
   call mtime(tb1,tbx)
 ! revise call to bound (28-jun-2013, p.dagdigian)
 !        call bound(z,w,zmat,amat,bmat,nch,nmax)
-  call bound(nch, nmax)
+  call bound(nch, nmax, v2)
 ! return to flow after bound calculation
   call mtime(tb2,tbx)
   call gettim(tb2-tb1,time)
@@ -1019,8 +1143,8 @@ cpup=cpupot
 call mtime(ttx,tty)
 call runlog (z, &
              r, rendld, spac, eshift, itwo, twoen, &
-             td, tdm, tp, tpm, twf, twfm, logwr, noprin, &
-             ipos, nch, nmax)
+             td, tdm, tp, tpm, twf, twfm, prlogd, noprin, &
+             ipos, nch, nmax, v2)
 
 !  on return from runlog, z contains the log-derivative matrix at r = rendld
 !  branch to airy integration if desired. integrate coupled equations
@@ -1043,8 +1167,8 @@ if (airyfl) then
 
   call airprp (z, &
                r, rendai, drnow, en, &
-               tolhi, rincr, eshift, nch, nmax, itwo, airypr, &
-               twoen,noprin)
+               tolhi, rincr, eshift, nch, nmax, itwo, prairy, &
+               twoen,noprin, v2)
 !  on return from airprp, z contains the log-derivative matrix at r = rendai
 end if
 call mtime(t11,t22)
@@ -1054,7 +1178,7 @@ tairy = t11 - t1
 tp=tp+cpupot-cpup
 tairy=tairy-cpupot+cpup
 cpuai=cpuai+tairy
-if (logwr .and. airyfl) then
+if (prlogd .and. airyfl) then
   write (9, 260) r
 260   format(/' ** LOG-DERIVATIVE MATRIX AFTER AIRPRP; R = ', 1pe15.8)
   call mxoutd (9, z, nch, nmax, 0, ipos)
@@ -1062,7 +1186,7 @@ end if
 !  now calculate s-matrix and t-matrix squared
 call smatrx (z, w, zmat, &
              lq, jq, inq, r, prec, tw, twm, nopen, nch, nmax, &
-             logwr,ipos)
+             prlogd,ipos)
 
 ! convert to time string
   call mtime(t1,t2)
@@ -1178,8 +1302,9 @@ endif
 return
 end
 ! -------------------------------------------------------------------
+! -------------------------------------------------------------------
 subroutine logdb (z, nmax, nch, rmin, rmax, nsteps, &
-                  eshift, iread, iwrite, tl, tp, twf)
+                  eshift, iread, iwrite, tl, tp, twf, v2)
 !     routine to initialise the log derivative matrix, y, at r = rmin,
 !     and propagate it from rmin to rmax using the method described in
 !     d.e.manolopoulos, j.chem.phys., 85, 6425 (1986)
@@ -1241,6 +1366,8 @@ subroutine logdb (z, nmax, nch, rmin, rmax, nsteps, &
 !     and blas routines are not used for o(n) loops
 !  ------------------------------------------------------------------
 use mod_coqvec, only: mxphot, nphoto, q ! q is an output of this subroutine
+use mod_ancou, only: ancou_type
+use funit
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: z(nmax*nch)
 integer, intent(in) :: nmax
@@ -1254,6 +1381,7 @@ logical, intent(in) :: iwrite
 real(8), intent(out) ::  tl
 real(8), intent(out) ::  tp
 real(8), intent(out) ::  twf
+type(ancou_type), intent(in) :: v2
 
 !     wref          scratch array of dimension nch
 !                   used as workspace for the reference potential
@@ -1275,11 +1403,11 @@ integer ich, icode, icol, idiag, ierr, ij, irow, istep, kstep, &
 !     :     tn, tp,  zero, wdiag
 !      real w, z
 !      real scr1, scr2, wref, z1, z2
-logical photof, wavefn, boundf, wrsmat
+logical photof, wavefn, boundf, writs
 logical flagsu
 !      external mtime, potmat, daxpy, smxinv, dscal
 !     matrices z and w are stored column by column as one-dimensi
-common /cophot/ photof, wavefn, boundf, wrsmat
+common /cophot/ photof, wavefn, boundf, writs
 common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
      inflev
 common /cosurf/ flagsu
@@ -1308,8 +1436,8 @@ nqmax = 0
 
 !     make sure that rmin, rmax and nsteps are the same if second
 !     energy calculation
-if (iwrite) write (11) rmin, rmax, nsteps
-if (iread ) read  (11) rmin, rmax, nsteps
+if (iwrite) write (FUNIT_QUAD_MAT) rmin, rmax, nsteps
+if (iread ) read  (FUNIT_QUAD_MAT) rmin, rmax, nsteps
 simpwt = 0.d0
 if (nsteps .ne. 0) then
   h = (rmax - rmin) / (2 * nsteps)
@@ -1341,7 +1469,7 @@ call mtime(tf,tfw)
 if (iread) then
    icol = 1
    do 5  ich = 1, nch
-      read (11) (w(ij), ij = icol, icol + nch - 1)
+      read (FUNIT_QUAD_MAT) (w(ij), ij = icol, icol + nch - 1)
       icol = icol + ncol
 5    continue
    idiag = 1
@@ -1349,12 +1477,12 @@ if (iread) then
       w(idiag) = w(idiag) - eshift
       idiag = idiag + ndiag
 10    continue
-if (photof) read (11) (q(i), i=1, nqmax)
+if (photof) read (FUNIT_QUAD_MAT) (q(i), i=1, nqmax)
 else
    istep = 0
    r = rmin
    call mtime(t0,t0w)
-   call potmat(w, r, nch, nmax)
+   call potmat(w, r, nch, nmax, v2)
    call mtime(t1,t1w)
    tp = tp + t1 - t0
    tpw = tpw + t1w - t0w
@@ -1380,13 +1508,12 @@ else
    if (iwrite) then
       icol = 1
       do 15  ich = 1, nch
-         write (11) (w(ij), ij = icol,icol+nch-1)
+         write (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
          icol = icol + ncol
 15       continue
-      if (photof) write (11) (q(i), i=1, nqmax)
+      if (photof) write (FUNIT_QUAD_MAT) (q(i), i=1, nqmax)
    endif
 endif
-
 !     use diagonal approximation to wkb initial value for log
 !     derivative matrix  (eqn 16)
 !     rmin is assumed to lie inside the classically forbidden
@@ -1458,7 +1585,7 @@ do 250  kstep = 1, nsteps
 !     of the coupling matrix evaluated at the centre of the
 !     sector, r = c  (eqn 15)
    if (iread) then
-      read (11) (wref(ich), ich = 1, nch)
+      read (FUNIT_QUAD_MAT) (wref(ich), ich = 1, nch)
       do 60  ich = 1, nch
          wref(ich) = wref(ich) - eshift
 60       continue
@@ -1467,7 +1594,7 @@ do 250  kstep = 1, nsteps
       r = rmin + istep * h
       call mtime(t0,t0w)
 
-      call potmat(w, r, nch, nmax)
+      call potmat(w, r, nch, nmax, v2)
       call mtime(t1,t1w)
       tp = tp + t1 - t0
       tpw = tpw + t1w - t0w
@@ -1477,7 +1604,7 @@ do 250  kstep = 1, nsteps
          idiag = idiag + ndiag
 70       continue
       if (iwrite) then
-         write (11) (wref(ich), ich = 1, nch)
+         write (FUNIT_QUAD_MAT) (wref(ich), ich = 1, nch)
       endif
    endif
 !     adjust quadrature contribution at r = a to account for
@@ -1555,7 +1682,7 @@ do 250  kstep = 1, nsteps
    if (iread) then
       icol = 1
       do  125 ich = 1, nch
-         read (11) (w(ij), ij = icol,icol+nch-1)
+         read (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
          icol = icol + ncol
 125       continue
    else
@@ -1591,7 +1718,7 @@ do 250  kstep = 1, nsteps
       if (iwrite) then
          icol = 1
          do  155 ich = 1, nch
-            write (11) (w(ij), ij = icol,icol+nch-1)
+            write (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
             icol = icol + ncol
 155          continue
       endif
@@ -1642,7 +1769,7 @@ do 250  kstep = 1, nsteps
                 nch, nch, nch)
 !     w now contains the matrix g(a,m)g(m,b)=g(a,b)
 !     if wavefunction desired, save this matrix
-    if (wavefn .and. wrsmat) then
+    if (wavefn .and. writs) then
        irec = irec + 1
 !     nrlogd is the number of LOGD records - used to seek the wfu file
        nrlogd = nrlogd + 1
@@ -1671,7 +1798,7 @@ do 250  kstep = 1, nsteps
 !     now determine psi(b)mu(b), save this in q
      rnew = rmin + (istep+1) * h
      if (iread) then
-       read (11) (q(i), i=1, nqmax)
+       read (FUNIT_QUAD_MAT) (q(i), i=1, nqmax)
      else
        call mtime(t0,t0w)
        call ground(q, rnew, nch, nphoto, mxphot)
@@ -1683,7 +1810,7 @@ do 250  kstep = 1, nsteps
        call mtime(t1,t1w)
        twf=twf+t1-t0
        twfw=twfw+t1w-t0w
-       if (iwrite) write (11) (q(i), i=1, nqmax)
+       if (iwrite) write (FUNIT_QUAD_MAT) (q(i), i=1, nqmax)
      endif
 !     add wt*psi(b)mu(b) to bmat and resave
      fac=one
@@ -1715,7 +1842,7 @@ do 250  kstep = 1, nsteps
    if (iread) then
       icol = 1
       do  205 ich = 1, nch
-         read (11) (w(ij), ij = icol, icol + nch - 1)
+         read (FUNIT_QUAD_MAT) (w(ij), ij = icol, icol + nch - 1)
          icol = icol + ncol
 205       continue
       idiag = 1
@@ -1727,14 +1854,14 @@ do 250  kstep = 1, nsteps
       istep = istep + 1
       r = rmin + istep * h
       call mtime(t0,t0w)
-      call potmat(w, r, nch, nmax)
+      call potmat(w, r, nch, nmax, v2)
       call mtime(t1,t1w)
       tp = tp + t1 - t0
       tpw = tpw + t1w - t0w
       if (iwrite) then
          icol = 1
          do  215 ich = 1, nch
-            write (11) (w(ij), ij = icol,icol+nch-1)
+            write (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
             icol = icol + ncol
 215          continue
       endif
@@ -1777,7 +1904,7 @@ end
 subroutine runlog (z, &
                    r, rend, &
                    spac, eshift, itwo, twoen, tl, tlw, tp, tpw, &
-                   twf, twfw, logwr, noprin, ipos, nch, nmax)
+                   twf, twfw, prlogd, noprin, ipos, nch, nmax, v2)
 !     log-derivative propagator from r to r = rend
 !     the logd code is based on the improved log-derivative method
 !     for reference see  d.e.manolopoulos, j.chem.phys., 85, 6425 (1986)
@@ -1815,7 +1942,7 @@ subroutine runlog (z, &
 !                   calls of the form call mtime(cpu,wall), where cpu
 !                   and wall refer to the current cpu and wall clock
 !                   times in seconds
-!     logwr         if .true., then lower triangle of the z
+!     prlogd         if .true., then lower triangle of the z
 !                   matrix is printed out at end of log-derivative
 !                   integration
 !     noprin        if .true., then all printing is suppressed
@@ -1830,8 +1957,10 @@ subroutine runlog (z, &
 !                   to be used later in computing the wavefunction
 !  ------------------------------------------------------------------
 use mod_coqvec, only: nphoto, q
+use mod_ancou, only: ancou_type
 use mod_hibrid2, only: mxoutd, mxoutr
 implicit double precision (a-h, o-z)
+type(ancou_type), intent(in) :: v2
 real(8), intent(out) :: z(nmax*nch)
 real(8), intent(inout) :: r
 real(8), intent(in) :: rend
@@ -1845,7 +1974,7 @@ real(8), intent(out) :: tp
 real(8), intent(out) :: tpw
 real(8), intent(out) :: twf
 real(8), intent(out) :: twfw
-logical, intent(in) :: logwr
+logical, intent(in) :: prlogd
 logical, intent(in) :: noprin
 logical, intent(in) :: ipos
 integer, intent(in) :: nch
@@ -1862,10 +1991,10 @@ real(8) :: scr2(nch)
 !      real scr1, scr2, wref, z1, z2
 !      real w, z
 integer nsteps
-logical boundf, wrsmat
+logical boundf, writs
 !  internal logical variables
 logical iread, iwrite, print, photof, wavefn
-common /cophot/ photof, wavefn, boundf, wrsmat
+common /cophot/ photof, wavefn, boundf, writs
 common /constp/ nsteps, isteps
 
 !  z, w, amat, and bmat are stored column by column in one dimensional arrays
@@ -1900,14 +2029,14 @@ endif
 call logdb (z, &
             nmax, nch, &
             rmin, rmax, nsteps, eshift, iread, iwrite, &
-            tl, tp, twf)
+            tl, tp, twf, v2)
 
 !  on return: z(i,j) i=1,nch j=1,nch  now contains the log-derivative matrix
 !  at r = rmax (the final interparticle separation)
 r = rmax
 !  print out log-derivative matrix at end of logd integration
 !  ( if desired )
-if (logwr .and. print) then
+if (prlogd .and. print) then
 
   write (9, 40) r
 40   format(/' ** LOG-DERIVATIVE MATRIX AFTER LOGDB; R = ', 1pe15.8)
@@ -2367,6 +2496,7 @@ use mod_cosysi, only: ispar
 use mod_cotq1, only: srsave => dpsir ! srsave(100)
 use mod_cotq2, only: sisave => tq2 ! sisave(100)
 use mod_hibrid2, only: mxoutd, mxoutr
+use mod_par, only: prsmat, jlpar, spac=>scat_spac
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax, nmax), intent(inout) :: tmod
 real(8), dimension(nmax, nmax), intent(out) :: sr
@@ -2393,16 +2523,13 @@ integer isw, i, icol, l
 character*1 forma
 character*40 flxfil
 #endif
-logical flagsu, photof, wavefn, lpar, swrit, lpar2, &
-     boundf, wrsmat
+logical flagsu, photof, wavefn, &
+     boundf, writs
 common /coered/ ered, rmu
 common /cosurf/ flagsu
-common /cophot/ photof, wavefn, boundf, wrsmat
+common /cophot/ photof, wavefn, boundf, writs
 common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
      inflev
-common /coipar/ ipar(3),jlpar
-common /corpar/ rpar(6), spac
-common /colpar/ lpar(16),swrit,lpar2(10)
 common /coselb/ ibasty
 !     The following three variables are used to determine the (machine
 !     dependent) size of built-in types
@@ -2768,7 +2895,7 @@ if (photof) then
 ! determine real and imaginary parts of chi (save these in sr and si)
 ! determine real and imaginary parts of derivatives (save these in tmod
 ! and scmat
-  if (wavefn.or.swrit) then
+  if (wavefn.or.prsmat) then
 ! retranspose transition amplitudes
   call transp(sr, nopen, nmax)
   call transp(si,nopen,nmax)
@@ -2858,9 +2985,9 @@ logical, intent(in) :: kwrit
 logical, intent(in) :: ipos
 
 
-logical photof, wavefn, boundf, wrsmat
+logical photof, wavefn, boundf, writs
 common /coered/ ered, rmu
-common /cophot/ photof, wavefn, boundf, wrsmat
+common /cophot/ photof, wavefn, boundf, writs
 common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
      inflev
 real(8) :: amat(nmax,nmax), bmat(nmax,nmax)
@@ -2872,7 +2999,7 @@ data izero /0/
 integer int_t
 double precision dble_t
 character char_t
-!  if kwrit (logwr) = .true. and photodissociation calculation, print out
+!  if kwrit (prlogd) = .true. and photodissociation calculation, print out
 !  <psi|mu matrix at end of airprp
 if (kwrit .and. photof) then
     write (9, 20)
@@ -2990,9 +3117,8 @@ subroutine expand(ncol,nopen,nch,nmax,ipack,sr,si,bmat)
 !           on return: imaginary part of nch x nch s matrix
 ! bmat      scratch matrix
 !  ---------------------------------------------------------------------------
+use mod_par, only: photof
 implicit double precision (a-h,o-z)
-logical ldum, photof
-common /colpar/ ldum(25),photof
 dimension sr(nopen,nopen),si(nopen,nopen), &
           bmat(nmax,nmax),ipack(15)
 zero=0.d0

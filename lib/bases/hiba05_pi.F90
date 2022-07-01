@@ -1,10 +1,13 @@
+#include "assert.h"
+module mod_hiba05_pi
+contains
 ! sypi (savpi/ptrpi) defines, save variables and reads                   *
 !                  potential for general pi scattering                   *
 ! ----------------------------------------------------------------------
 subroutine bapi  (j, l, is, jhold, ehold, ishold, nlevel, &
                   nlevop, c0, c1, c2, cf, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+                  ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 ! ----------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision
 !  of a 1pi in a case (a) basis, or of a 2pi or 3pi molecule in an
@@ -123,23 +126,23 @@ subroutine bapi  (j, l, is, jhold, ehold, ishold, nlevel, &
 !   vlmpi:     returns angular coupling coefficient for
 !              particular choice of channel index
 ! ----------------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use constants, only: econv, xmconv, ang2c
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use mod_par, only: iprint, rendai=>scat_rendai
+#include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*80 string
 character*27 case
 character*2 chf
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
-common /coipar/ iiipar(9), iprint
-common /corpar/ xjunk(3), rendai
 common /coered/ ered, rmu
 dimension j(1), is(1), l(1), jhold(1), ishold(1), ieps(2)
 dimension c0(1), c1(1), c2(1), cf(1), ehold(1)
@@ -222,13 +225,6 @@ if (.not. (imult .eq. 2 .and. nman .eq. 1)) nman = imult
 if (nman .ne. imult) nterm = 1
 if (nterm .eq. 2) &
     nlam = nlam0 + (lammax(2) - lammin(2)) / istep + 1
-if (nlammx .lt. nlam) then
-  write (6, 80) nlam, nlammx
-  write (9, 80) nlam, nlammx
-80   format (/' ** TOTAL NUMBER OF ANISOTROPIC TERMS=', &
-          i2, ' > NLAMMX=', i2,'; ABORT')
-  stop
-end if
 if (clist) then
   if (bastst) write (6, 90) nlam
   write (9, 90) nlam
@@ -737,15 +733,17 @@ if (bastst.and. iprint.ge. 2) then
 380   format (/' ILAM  LAMBDA  ICOL  IROW    I   IV2      VLAM')
 end if
 i = 0
-lamsum = 0
 if (csflag) lcol = nu
 vii(0) = zero
 vii(1) = zero
 vii(2) = zero
 v11 = zero
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 450 ilam = 1, nlam
 !  ilam is the angular expansion label
   inum = 0
+  ancouma => v2%get_angular_coupling_matrix(ilam)
   do 430 icol = 1, n
     if (efield .eq. zero) then
       iepsc = isign(1,is(icol))
@@ -822,37 +820,25 @@ do 450 ilam = 1, nlam
       end if
       if (vlam .ne. zero) then
         i = i + 1
-        if (i .le. nv2max) then
-          inum = inum + 1
-          v2(i) = vlam
-          iv2(i) = ntop * (icol - 1) + irow
-          if (bastst.and. iprint .ge. 2) then
-            write (6, 410) ilam, lb, icol, irow, i, iv2(i), vlam
-            write (9, 410) ilam, lb, icol, irow, i, iv2(i), vlam
-410             format (i4, 2i7, 3i6, g17.8)
-          end if
+        inum = inum + 1
+        call ancouma%set_element(irow=irow, icol=icol, vee=vlam)
+        if (bastst.and. iprint .ge. 2) then
+          write (6, 410) ilam, lb, icol, irow, i, vlam
+          write (9, 410) ilam, lb, icol, irow, i, vlam
+410             format (i4, 2i7, 2i6, g17.8)
         end if
       end if
 420     continue
 430   continue
-  if (i .le. nv2max) lamnum(ilam) = inum
   if (bastst) then
-    write (6, 440) ilam, lamnum(ilam)
-    write (9, 440) ilam, lamnum(ilam)
+    write (6, 440) ilam, ancouma%get_num_nonzero_elements()
+    write (9, 440) ilam, ancouma%get_num_nonzero_elements()
 440     format ('ILAM=', i3, ' LAMNUM(ILAM) =', i6)
   end if
-  lamsum = lamsum + lamnum(ilam)
 450 continue
-if (i .gt. nv2max) then
-  write (6, 460) i, nv2max
-  write (9, 460) i, nv2max
-460   format (' *** NUMBER OF NONZERO V2 ELEMENTS = ', i6, &
-          ' > NV2MAX=', i6, '; ABORT ***')
-  stop
-end if
 if (clist .and. bastst) then
-  write (6, 470) lamsum
-  write (9, 470) lamsum
+  write (6, 470) v2%get_num_nonzero_elements()
+  write (9, 470) v2%get_num_nonzero_elements()
 470   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', i6)
 end if
 return
@@ -997,17 +983,19 @@ use mod_cosys, only: scod
 use mod_cosysl, only: islcod, lspar
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-logical readpt, existf
-logical         airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar
+use funit, only: FUNIT_INP
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: j, l, lc
+logical existf
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 character*1 dot
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar(18)
 #include "common/parbas.F90"
 common /coskip/ nskip,iskip
+integer :: nskip, iskip
 save potfil
 #include "common/comdot.F90"
 integer, pointer :: nterm, jmax, igu, isa, npar, imult, nman
@@ -1128,18 +1116,19 @@ entry savpi (readpt)
 !  line 18:
 !  line 19
 !  line 20
-write (8, 130) jmax, igu, isa, npar, imult, nman
+write (FUNIT_INP, 130) jmax, igu, isa, npar, imult, nman
 130 format (6i4, 6x, '   jmax, igu, isa, npar, imult, nman')
 !  line 21
-write (8, 140) brot, aso
+write (FUNIT_INP, 140) brot, aso
 140 format (f10.5,f10.4, 10x, '   brot, aso')
 !  line 22
-write (8, 150) o, p, q
+write (FUNIT_INP, 150) o, p, q
 150 format (3(1pg12.4), ' o, p, q')
 !  line 23
-write(8, 160) dmom, efield
+write (FUNIT_INP, 160) dmom, efield
 160 format (2f10.5, 10x, '   dmom, efield')
 !  line 16
-write (8, 285) potfil
+write (FUNIT_INP, 285) potfil
 return
 end
+end module mod_hiba05_pi

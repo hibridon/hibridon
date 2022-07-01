@@ -98,7 +98,6 @@ goto 1
 use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: nscode, isicod, ispar
 implicit double precision (a-h,o-z)
-logical readpt
 #include "common/parbas.F90"
 
 

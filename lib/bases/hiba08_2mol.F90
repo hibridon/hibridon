@@ -1,9 +1,12 @@
+#include "assert.h"
+module mod_hiba08_2mol
+contains
 ! sy2mol (sav2mol/ptr2mol) defines, save variables and reads             *
 !                  potential for 2 singlet sigma molecule scattering     *
 subroutine ba2mol (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
                   j1, j2, j12, sc4, rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-                  nch, nmax, ntop)
+                  nch, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision
 !  of two rigid heternuclear diatomic molecules
@@ -98,21 +101,22 @@ subroutine ba2mol (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !   vlmlml:    returns molecule-molecule angular coupling coefficient for
 !              particular choice of channel index
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+use mod_par, only: iprint
+#include "common/parbasl.F90"
 
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 #include "common/parbas.F90"
-#include "common/parbasl.F90"
 common /cotwo/ numj,nj1j2(50)
-common /coipar/ iiipar(9), iprint
 common /coselb/ ibasty
 common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), j12(1), j1(1), &
@@ -337,7 +341,10 @@ nlevel = numj
 ! ilam counts number of v2 matrices
 ! ij is address of given v2 element in present v2 matrix
 i  =  0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 360  ilam = 1, nterm
+  ancouma => v2%get_angular_coupling_matrix(ilam)
   if (bastst) write (6, 315) ilam
 315   format (' *** ILAM =', i2)
   if (bastst .and. iprint.gt.1) then
@@ -348,51 +355,36 @@ do 360  ilam = 1, nterm
       ' J1CL J2CL J12C LCOL JTOT    VEE')
   endif
   inum = 0
-  ij=0
-  do 350 icol  =  1, nch
-    do 340 irow  =  icol,  nch
-      ij = ntop * (icol - 1) +irow
-!  determine and store angular coupling matrix elements
+  do icol  =  1, nch
+    do irow  =  icol,  nch
+      !  determine and store angular coupling matrix elements
       call vlmtwo (ilam, jlpar, nsym, j1(irow), j2(irow), &
                    j12(irow), l(irow), j1(icol), j2(icol), &
                    j12(icol), l(icol), jtot, vee)
-      if (vee .eq. 0) goto 340
+      if (vee .ne. 0) then
         i = i + 1
         inum = inum + 1
         if (bastst .and. iprint.gt.1) then
           write (6, 320) irow, icol, &
-                   i, ij, j1(irow), &
+                   i, j1(irow), &
                    j2(irow), j12(irow), l(irow), j1(icol), &
                    j2(icol), j12(icol), l(icol), jtot, vee
           write (9, 320) irow, icol, &
-                   i, ij, j1(irow), &
+                   i, j1(irow), &
                    j2(irow), j12(irow), l(irow), j1(icol), &
                    j2(icol), j12(icol), l(icol), jtot, vee
-320           format (i4, 12i5,1pe16.7)
+320           format (i4, 11i5,1pe16.7)
         endif
-        if (i .le. nv2max) then
-          v2(i) = vee
-          iv2(i) = ij
-        elseif ( i.gt. nv2max) then
-          write (6, 330) i, nv2max
-          write (9, 330) i, nv2max
-330           format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-                  ' .GT. NV2MAX=',i6,'; ABORT ***')
-          if (bastst) then
-             return
-          else
-            call exit
-          end if
-        endif
-340     continue
-350   continue
+        call ancouma%set_element(irow=irow, icol=icol, vee=vee)
+      end if
+    end do
+  end do
   if (bastst .and. iprint.ge.1) then
     write (6, 355) ilam,inum
     write (9, 355) ilam,inum
 355     format(' LAMBDA=',i2, &
            ', NUMBER OF NONZERO MATRIX ELEMENTS = ',i5)
   end if
-  lamnum(ilam) = inum
 360 continue
 if (clist) then
   if (bastst) write(6, 380)
@@ -538,9 +530,13 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-logical readpt, existf
-integer irpot
+use funit, only: FUNIT_INP
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: i, ihigh, ij, iline, ilow, itop, j, l, lc, nj1j2, numj
+logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
@@ -647,15 +643,15 @@ return
 entry sav2mol (readpt)
 !  save input parameters for hf-hf scattering
 !  line 13:
-write (8, 300) nterm, nsym,numj
+write (FUNIT_INP, 300) nterm, nsym,numj
 300 format (3i4,18x,'   nterm, nsym, numj')
 !  line 14
-write (8, 320) brot, drot, hrot
+write (FUNIT_INP, 320) brot, drot, hrot
 320 format(f8.4, 2g11.4, '   brot, drot, hrot')
 !  line 15
 if (numj .le. 20) then
   iline=3
-  write (8, 330) (nj1j2(i)/10,mod(nj1j2(i),10), i=1,numj)
+  write (FUNIT_INP, 330) (nj1j2(i)/10,mod(nj1j2(i),10), i=1,numj)
 330 format (1x,20(2i1,'  '),t65,'nj1j2')
 else
   ilow=1
@@ -663,7 +659,7 @@ else
   do  350 ij = 1, numj, 20
     iline=iline+1
     itop=min(ihigh,numj)
-    write (8, 330) (nj1j2(i)/10,mod(nj1j2(i),10), &
+    write (FUNIT_INP, 330) (nj1j2(i)/10,mod(nj1j2(i),10), &
                     i=ilow,itop)
     ilow=itop+1
     ihigh=ihigh+20
@@ -671,3 +667,4 @@ else
 endif
 return
 end
+end module mod_hiba08_2mol
