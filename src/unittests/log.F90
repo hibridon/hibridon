@@ -19,6 +19,7 @@
 !   - COMMA instead of ',' makes argument list harder to read
 !   - duplicates the format in memory
 !   - duplicates the format and arg list in source code, making it harder to maintain
+!   - requires fortran preprocessing
 !
 ! solution2
 !
@@ -31,6 +32,7 @@
 !   inconvenients:
 !   - COMMA instead of ',' makes argument list harder to read
 !   - need to declare USE_LOG2 in each subroutine
+!   - requires fortran preprocessing
 !
 ! solution3
 !
@@ -43,12 +45,26 @@
 !   - COMMA instead of ',' makes argument list harder to read
 !   - COMMA instead of ',' makes also format harder to read
 !   - a bit less generic regarding units : needs one macro for each length of unit array
+!   - requires fortran preprocessing
 !
 ! solution4
 !
 !   solution similar to solution2 that doesn't make use of fortran preprocessor
 !   Uses the special dt formatter mechanism inspired by https://stackoverflow.com/questions/19906446/how-to-wrap-the-fortran-write-statement
 !   but this mechanism doesn't bring much benefit (we could have a similar simpler solution without it)
+!
+!   benefits:
+!   - (1) removes the labels, thus making code easier to read
+!   - (3) the values are only evaluated once (increase performance over the existing code)
+!   - (4) 2 lines of source code instead of 3
+!   inconvenients:
+!   - need to declare a message variable in each subroutine
+!
+! solution5
+!
+!   simplification of solution4:
+!   - no need of special dt formatter and message_t type
+!   - a global variable in the module removes the need to declare a message variable in each subroutine
 !
 !   benefits:
 !   - (1) removes the labels, thus making code easier to read
@@ -106,7 +122,7 @@ module mod_write
   end subroutine
 end module mod_write
 
-module logger4_mod
+module mod_logger4
 
   integer, parameter :: max_lines = 10
 
@@ -164,7 +180,39 @@ contains
 
   end subroutine message_write
 
-end module logger4_mod
+end module mod_logger4
+
+module mod_logger5
+
+  integer, parameter :: max_lines = 10
+  character(len=2048) :: message(max_lines)
+
+contains
+
+  subroutine log(units, message1)
+    implicit none
+    integer, intent(in) :: units(2)
+    character(len=2048) :: message1(max_lines)
+    integer :: iunit
+    integer :: iline, num_lines
+    integer :: c
+    num_lines = 0
+    do iline = 1, max_lines
+      c = iachar(message1(iline)(1:1))
+      if (c /= 0) then
+        num_lines = num_lines + 1
+      end if
+    end do
+
+    do iunit = 1, size(units)
+      do iline = 1, num_lines
+        write(units(iunit),'(a)') trim(message1(iline))
+      end do
+    end do
+    message1(:)(1:1) = char(0) ! empty all lines in the message because the next write into it might leave old trailing lines
+  end subroutine
+
+end module mod_logger5
 
 subroutine test1_original()
   real(8) :: rmu, xmconv, ered, econv
@@ -229,7 +277,7 @@ subroutine test1_solution3()
 end subroutine test1_solution3
 
 subroutine test1_solution4()
-  use logger4_mod, only : message_t, log
+  use mod_logger4, only : message_t, log
   implicit none
   type(message_t) message
   real(8) :: rmu, xmconv, ered, econv
@@ -247,6 +295,24 @@ subroutine test1_solution4()
 end subroutine test1_solution4
 
 
+subroutine test1_solution5()
+  use mod_logger5, only : message, log
+  implicit none
+  real(8) :: rmu, xmconv, ered, econv
+  integer :: jtot, jlpar
+  rmu = 2.0
+  xmconv = 3.0
+  ered = 4.0
+  econv = 5.5
+  jtot = 13
+  jlpar = 14
+
+  write(message, '(/," **  2/2 ATOM ON UNCORRUGATED SURFACE ** RMU=",f9.4,"             E=",f9.2,/," JTOT=",i5,2x," JLPAR=",i2)') rmu * xmconv, ered * econv, jtot, jlpar 
+  call log((/6, 9/), message)
+
+end subroutine test1_solution5
+
+
 program test_write
 use mod_write, only: init
 implicit none
@@ -258,7 +324,8 @@ call test1_original()
 call test1_solution1()
 call test1_solution2()
 call test1_solution3()
-call test1_solution4()
+! call test1_solution4() ! warning solution4 currently has a bug that adds an extra newline
+call test1_solution5()
 
 close(9)
 
