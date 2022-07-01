@@ -32,12 +32,26 @@
 !   - COMMA instead of ',' makes argument list harder to read
 !   - need to declare USE_LOG2 in each subroutine
 !
+! solution3
+!
+!   simply embeds the original log messages into a preprocessing macro which just hides the label
+!
+!   benefits:
+!   - (1) removes the labels from the view (they still exist), thus making code easier to read
+!   - (4) 1 lines of source code instead of 3
+!   inconvenients:
+!   - COMMA instead of ',' makes argument list harder to read
+!   - COMMA instead of ',' makes also format harder to read
+!   - a bit less generic regarding units : needs one macro for each length of unit array
+!
 #define COMMA ,
 #define __NL__  NEWLINE
 #define MYWRITE1(UNIT, FMT, X) write(UNIT,FMT) X
 
 #define USE_LOG2 use mod_write, only: tmp_message, log, std_log_units
 #define LOG2(UNITS, FMT, X) tmp_message(:)(1:1) = char(0); write(tmp_message,FMT) X ; call log(UNITS, tmp_message)
+#define LOG3_1(UNIT1, FMT, X) __LINE__ format(FMT); write(UNIT1,__LINE__) X
+#define LOG3_2(UNIT1, UNIT2, FMT, X) __LINE__ format(FMT); write(UNIT1,__LINE__) X; write(UNIT2,__LINE__) X
 
 module mod_write
   integer, allocatable :: std_log_units(:)
@@ -128,6 +142,20 @@ subroutine test1_solution2()
 
 end subroutine test1_solution2
 
+subroutine test1_solution3()
+  real(8) :: rmu, xmconv, ered, econv
+  integer :: jtot, jlpar
+  rmu = 2.0
+  xmconv = 3.0
+  ered = 4.0
+  econv = 5.5
+  jtot = 13
+  jlpar = 14
+
+  LOG3_2(6, 9, / COMMA ' **  2/2 ATOM ON UNCORRUGATED SURFACE ** RMU=' COMMA f9.4 COMMA '             E=' COMMA  f9.2 COMMA  / COMMA  ' JTOT=' COMMA  i5 COMMA  2x COMMA ' JLPAR=' COMMA i2, rmu * xmconv COMMA ered * econv COMMA jtot COMMA jlpar)
+
+end subroutine test1_solution3
+
 program test_write
 use mod_write, only: init
 implicit none
@@ -138,6 +166,7 @@ open(unit=9, file='/tmp/toto.txt', access='append')
 call test1_original()
 call test1_solution1()
 call test1_solution2()
+call test1_solution3()
 
 close(9)
 
