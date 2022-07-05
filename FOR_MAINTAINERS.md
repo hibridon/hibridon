@@ -34,7 +34,7 @@ Fortran 2008 (maximum)
 - Add a space after a comma
 
   
-## Remove obsolete constructs
+## REMOVE OBSOLETE CONSTRUCTS
 - Gotos should be removed
 - Variable declaration using double colons and following:
   ```fortran
