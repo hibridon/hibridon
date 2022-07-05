@@ -18,9 +18,9 @@ Fortran 2008 (maximum)
   e.g.:
   ```fortran
   enum, bind(c) :: color
-    enumerator  :: color_red = 4
-    enumerator  :: color_blue = 9
-    enumerator  :: color_yellow = 12
+    enumerator :: color_red = 4
+    enumerator :: color_blue = 9
+    enumerator :: color_yellow = 12
   end enum
   
   type(color) :: mycolor = color_blue
