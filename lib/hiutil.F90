@@ -292,54 +292,91 @@ crd = line(i1:i2-1)
 return
 end
 ! ----------------------------------------------------------------
-subroutine parse(line,i,code,lcod)
+subroutine get_token(line,i,token,token_length)
+!   parse the line to get the token before the next delimiter
+
 !   current revision date: 9-apr-90
-!   returns string between delimiters "," or ";" in code(1:lcod)
+!   returns string between delimiters "," or ";" in token(1:token_length)
 !   on input, iabs(i) points to first character to be searched in line
 !   on output, i points to first character after next delimiter
 !   if remainder of line is blank, i=0 is returned
 !   if i.lt.0 on entry, first delimiter may also be '='
 !   if i.eq.0 on entry, blank is returned and i unchanged
-character*(*) line,code
-code=' '
-lcod=0
-if(i.eq.0) return
-i1=iabs(i)
-k1=index(line(i1:),',')
-k2=index(line(i1:),';')
-k3=index(line(i1:),'=')
-k=k1
-if(k1.eq.0.or.(k2.ne.0.and.k2.lt.k1)) k=k2
-if(i.lt.0.and.k3.ne.0.and.(k3.lt.k.or.k.eq.0)) k=k3
-i=i1+k
-if(k.eq.0) then
-  i=0
-!       k=index(line(i1:),';')
-  if(k.eq.0) k=len(line)-i1+2
+! examples:
+!   if line == ' JTOT = 5 , BROT=3.14;' and i==-1, token='JTOT'
+!   if line == ' JTOT = 5 , BROT=3.14;' and i==1, token='JTOT = 5'
+
+implicit none
+character*(*), intent(in) :: line
+integer, intent(inout) :: i
+character*(*), intent(out) :: token
+integer, intent(out) :: token_length
+
+logical :: consider_equal_as_delimiter
+integer :: istart, iend
+integer :: k, k1, k2, k3
+integer :: token_start, token_end
+consider_equal_as_delimiter = (i < 0)
+istart = iabs(i)
+token=' '
+token_length = 0
+if ( i == 0 ) return
+k1 = index(line(istart:),',')
+k2 = index(line(istart:),';')
+k3 = index(line(istart:),'=')
+k = k1
+if (k1 == 0) then
+  k = k2
 end if
-lcod=k-1
-if(lcod.le.0) then
-  code=' '
-  lcod=0
+if (k2 /= 0 .and. k2 < k1) then
+  k = k2
+end if
+if (consider_equal_as_delimiter) then
+  if (k3 /= 0) then
+    if (k3 < k .or. k == 0) k = k3
+  endif
+end if
+! at this point, k contains the index of the next delimiter, relative to istart (0 if no delimiter has been found)
+i = istart + k
+! at this point, i contains the index of the next delimiter
+if (k == 0) then
+  i = 0
+  ! k=index(line(istart:),';')
+  k = len(line) - istart + 2
+end if
+token_length = k - 1
+if (token_length < 0) then
+  token = ' '
+  token_length = 0
+  ASSERT(i >= 0)  ! i is never suppsed to be negative on output
   return
 end if
-i2=i1+lcod-1
-do 10 k1=i1,i2
-10 if(line(k1:k1).ne.' ') goto 20
-code=' '
-lcod=0
-return
-20 do 30 k2=i2,k1,-1
-30 if(line(k2:k2).ne.' ') goto 40
-40 lcod=k2-k1+1
-code=line(k1:k2)
+iend = istart + token_length - 1
+! find the start of the token (non spaced character)
+do token_start = istart, iend
+  if (line(token_start:token_start) /= ' ') exit
+  if (token_start == iend) then
+    ! the start of the token hasn't been found because the string before delimiter only contains spaces
+    token=' '
+    token_length=0
+    ASSERT(i >= 0)  ! i is never suppsed to be negative on output
+    return
+  end if
+end do
+
+do token_end = iend, token_start, -1
+  if (line(token_end:token_end) /= ' ') exit
+end do
+token_length = token_end - token_start + 1
+token = line(token_start:token_end)
+ASSERT(i >= 0)  ! i is never suppsed to be negative on output
 return
 end
 module mod_hiutil
 implicit none
 contains
 ! ----------------------------------------------------------------
-subroutine getval(var_assignment, var_list, var_index, val)
+subroutine assignment_parse(var_assignment, var_list, var_index, val)
 !   current revision date: 23-sept-87
 !   searches strings in var_list to match var_assignment
 !   returns associated value in val and position in var_list in var_index

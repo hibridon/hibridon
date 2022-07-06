@@ -1,3 +1,4 @@
+#include "assert.h"
 #if defined(HIB_UNIX_IBM) || defined(HIB_UNIX_AIX)
 @proc ss noopt
 #endif
@@ -5,6 +6,16 @@
 !$hp$optimize off
 #endif
 
+module mod_hinput
+  enum, bind( C )
+  enumerator :: &
+    k_keyword_execute_command     =  1, &   !   40 label:execute_command(i)
+    k_keyword_set_si_ir_param     =  2, &   !  100 label:set_si_ir_param(line, l)
+    k_keyword_set_si_l_param      =  3, &   !  200 label:set_si_l_param(line, l)
+    k_keyword_set_sd_param        =  4, &   ! 1400 label:set_sd_param(line, l)
+    k_keyword_set_ibasty          =  5      !   50 label:set_ibasty(line,l)
+  end enum
+contains
 subroutine hinput(first)
 !  subroutine to redefine system independent input parameters for
 !  hibridon code
@@ -63,7 +74,7 @@ use mod_difcrs, only: difcrs
 use mod_hibasis, only: is_twomol
 use mod_hibrid2, only: enord, prsg
 use mod_hibrid3, only: testptn, testpt20, testpt, potmin
-use mod_hiutil, only: getval
+use mod_hiutil, only: assignment_parse
 use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT, RPAR_COUNT
 use fcod_enum
 use lpar_enum
@@ -126,9 +137,11 @@ integer :: ijcode
 common /cobcod/ bcod
 character*8 :: bcod(ncode)
 
+! fcod = Flags CODes : stores the name of system independent parameters of type logical
 common /cofcod/ fcod
 character*8 :: fcod(lcode)
 
+! pcod = Parameters CODes : stores the name of system independent parameters of type integer and real
 common /copcod/ pcod
 character*8 :: pcod(icode)
 
@@ -175,6 +188,7 @@ real(8) :: optacm, r, thrs, val, waveve, xmu
 real(8) :: a1, acc, acclas, optval, optacc, accmx, delt_e, e, e1
 save ipr, opti, a, a1, acc, acclas, optval, optacc, istep, inam, &
      fnam1, fnam2, code, lc, jtot2x, irpot, irinp
+
 nerg = 0
 lindx(FCOD_AIRYFL) = LPAR_AIRYFL
 lindx(FCOD_BASTST) = LPAR_BASTST
@@ -359,7 +373,7 @@ if(first) then
 !  in this next statement the $ sign implies no line feed
 !  replace this with an equivalent formatting character if your system
 !  doesn't accept this extension
-   go to 1
+   goto 1  ! label:read_next_command
 else
   do 3 i = 1, ircode
 3   rpar(i) = rxpar(i)
@@ -367,6 +381,7 @@ else
 4   ipar(i) = ixpar(i)
   if(opti) goto 2160
 end if
+! label:read_next_command
 1 if (.not. lpar(LPAR_BATCH) .and. .not. batch) write (6, 2)
 optifl = .false.
 !  in this next statement the $ sign implies no line feed
@@ -386,85 +401,107 @@ else
   read(5, 10, end=599) line  ! read the next command
 endif
 10 format((a))
-11 if(line .eq. ' ') goto 1
+11 if(line .eq. ' ') goto 1  ! label:read_next_command
 if (line(1:1) .eq. '?') then
     code='help '//line(2:)
     call vaxhlp(code)
 !         call helppr(line)
-    goto 1
+    goto 1  ! label:read_next_command
 else if (line (1:4).eq.'help' .or. line (1:4).eq.'HELP') then
     call vaxhlp(line)
 !         line = '?intro'
 !         call helppr(line)
-    goto 1
+    goto 1  ! label:read_next_command
 else if (line(1:3) .eq.'BAT' .or. line(1:3) .eq. 'bat' .or. &
          line(1:4) .eq.' BAT' .or. line(1:4) .eq.' bat') then
     lpar(LPAR_BATCH)=.true.
     batch = .true.
-    go to 1
+    goto 1  ! label:read_next_command
 end if
 call upper(line)
 l1 = 1
-15 if(l1 .eq. 0) goto 1
-l = -iabs(l1)
-call parse(line,l,code,lc)
-if(lc .eq. 0) goto 1
+!
+! label:interpret_statement(line, l1)
+!
+! interpret the statement starting at index l1 of line
+! examples of statements:
+!  - 'VMAX(1)=4'
+!  - 'RUN'
+! warning! line can contain multiple statements separated with comma or semicolon (eg 'VMAX(1)=4;VMAX(2)=4')
+15 continue
+if(l1 .eq. 0) goto 1  ! label:read_next_command
+ASSERT(l1 >= 0)  ! graffy: I suspect that l1 can never be negative
+! read the next token, which is expected to be either a command or a parameter
+l = -iabs(l1) ! consider '=' as a token delimiter
+ASSERT(l <= 0)
+call get_token(line, l, code, lc)
+ASSERT(l >= 0)
+if(lc .eq. 0) goto 1  ! label:read_next_command
 match = 0
-do 20 i = 1,ncode
-len = lenstr(bcod(i))
-if(bcod(i)(1:lc) .eq. code(1:lc)) then
-  if (lc .eq. len) go to 40
-  match = match + 1
-  lhold(match) = l
-  iskip = 1
-  ihold(match) = i
-  codex(match) = bcod(i)
-end if
-20 continue
-l = iabs(l1)
-do 21 i = 1,icode
-len = index(pcod(i),' ') - 1
-if(pcod(i)(1:lc) .eq. code(1:lc)) then
-  if (lc .eq. len) go to 100
-  match = match + 1
-  lhold(match) = l
-  iskip = 2
-  ihold(match) = i
-  codex(match) = pcod(i)
-end if
-21 continue
-do 22 i = 1,lcode
+! search in commands
+do i = 1,ncode
+  len = lenstr(bcod(i))
+  if(bcod(i)(1:lc) .eq. code(1:lc)) then
+    if (lc .eq. len) goto 40  ! label:execute_command(i)
+    match = match + 1
+    lhold(match) = l
+    iskip = k_keyword_execute_command
+    ihold(match) = i
+    codex(match) = bcod(i)
+  end if
+end do
+ASSERT(l1 >= 0) ! graffy: I suspect that l1 can never be negative
+l = iabs(l1)  ! reset l at the start of a statement because the different keyword handling entry points will expect it to be pointing to the beginning of the statement
+ASSERT(l >= 0)  ! make sure l is positive (even if one day we remove the suspected unneeded iabs above)
+! search in system independent parameters of type integer and real
+do i = 1,icode
+  len = index(pcod(i),' ') - 1
+  if(pcod(i)(1:lc) .eq. code(1:lc)) then
+    if (lc .eq. len) goto 100  ! label:set_si_ir_param(line, l)
+    match = match + 1
+    lhold(match) = l
+    iskip = k_keyword_set_si_ir_param
+    ihold(match) = i
+    codex(match) = pcod(i)
+  end if
+end do
+! search in system independent parameters of type logical
+do i = 1,lcode
 len=lenstr(fcod(i))
-if(fcod(i)(1:lc) .eq. code(1:lc)) then
-  if (lc .eq. len) go to 200
-  match = match + 1
-  lhold(match) = l
-  iskip = 3
-  ihold(match) = i
-  codex(match) = fcod(i)
-end if
-22 continue
-do 23 i = 1,nscode
-len = index(scod(i),' ') - 1
-if(scod(i)(1:lc) .eq. code(1:lc)) then
-  if (lc .eq. len) go to 1400
-  match = match + 1
-  lhold(match) = l
-  iskip = 4
-  ihold(match) = i
-  codex(match) = scod(i)
-end if
-23 continue
+  if(fcod(i)(1:lc) .eq. code(1:lc)) then
+    if (lc .eq. len) goto 200  ! label:set_si_l_param(line, l)
+    match = match + 1
+    lhold(match) = l
+    iskip = k_keyword_set_si_l_param
+    ihold(match) = i
+    codex(match) = fcod(i)
+  end if
+end do
+! search in legacy base parameters (system dependent parameters)
+do i = 1,nscode
+  len = index(scod(i),' ') - 1
+  if(scod(i)(1:lc) .eq. code(1:lc)) then
+    if (lc .eq. len) goto 1400  ! label:set_sd_param(line, l)
+
+    match = match + 1
+    lhold(match) = l
+    iskip = k_keyword_set_sd_param
+    ihold(match) = i
+    codex(match) = scod(i)
+  end if
+end do
+! search in bascod parameters (only contains BASISTYP at the moment)
 len = 8
 if(bascod(1)(1:lc) .eq. code(1:lc)) then
-  if (lc .eq. len) go to 50
+  if (lc .eq. len) goto 50  ! label:set_ibasty(line,l)
   match = match + 1
   lhold(match) = l
-  iskip = 5
+  iskip = k_keyword_set_ibasty
   ihold(match) = i
   codex(match) = bascod(1)
 end if
 if (match .eq. 0) then
+  ! the input string matched none of the parameters
   write(6, 27) code(1:lc),(bcod(j),j = 1,ncode)
 27   format( &
     /' *** invalid keyword "',(a),'"; valid request keys are:'// &
@@ -473,17 +510,25 @@ if (match .eq. 0) then
 31   format (/(1x,6(a8,5x)))
   write(6,31) (fcod(j),j = 1,lcode)
   write(6,31) (scod(j),j = 1,nscode)
-  goto 1
+  goto 1  ! label:read_next_command
 else if (match .gt. 1) then
+  ! more than one parameter matched the input string : we can't decide which one to choose
   write (6, 28) code(1:lc), (codex(i), i = 1, match)
 28   format (' *** ambiguity between input string ',(a), &
            ' and request keys:',/,7(a10) )
-  goto 1
+  goto 1  ! label:read_next_command
 else
+  ! exactly one parameter matched the input string, even if the input string was shorter than the parameter
+  ! the input string is then considered a valid (ie non ambiguous) shortcut for the parameter
+  ! set the parameter accordingly
   i = ihold(1)
   l = lhold(1)
+!  goto (40, 100, 200, 1400, 50, 1410, 1420, 1430), iskip
   goto (40, 100, 200, 1400, 50), iskip
 end if
+!
+! label:execute_command(i)
+!
 40 goto (2700, &
       1800,1500,2000,300,600, &
       75, &
@@ -495,13 +540,16 @@ end if
       1200,1600,430,2650,2800, &
       460,2850,2900,2950,3000, &
       3100,3200,3300),i
+!
+! label:set_ibasty(line,l)
 ! basis type and kind of calculation
-50 if(l.eq.0) goto 1
+! 
+50 if(l.eq.0) goto 1  ! label:read_next_command
 l1 = l
-call parse(line,l,code,lc)
-call getval(code(1:lc),bascod,j,val)
-if(j .eq. 0) goto 15
-if(j .lt. 0) goto 1
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),bascod,j,val)
+if(j .eq. 0) goto 15  ! label:interpret_statement(line, l1)
+if(j .lt. 0) goto 1  ! label:read_next_command
 ibasty=int(val)
 call baschk(ibasty)
 ! set twomolecule true
@@ -511,22 +559,26 @@ else
   lpar(LPAR_TWOMOL)=.false.
 endif
 call sysdat(irpot, lpar(LPAR_READPT), izero)
-l1=l
-goto 15
+l1 = l
+goto 15  ! label:interpret_statement(line, l1)
 !  request help
 !75    line = '?intro'
 !      call helppr(line)
 75 call vaxhlp(line)
-goto 1
-!  parameters
+goto 1  ! label:read_next_command
+!
+! label:set_si_ir_param(line, l)
+!
+! set system independent parameters (integer and real)
 !  specify parameters in the form cod1=val1, cod2=val2, etc.
-100 if(l .eq. 0) goto 1
+100 if(l .eq. 0) goto 1  ! label:read_next_command
+ASSERT(l > 0)
 call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
 l1 = l
-call parse(line,l,code,lc)
-call getval(code(1:lc),pcod,j,val)
-if(j .eq. 0) goto 15
-if(j .lt. 0) goto 1
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),pcod,j,val)
+if(j .eq. 0) goto 15  ! label:interpret_statement(line, l1)
+if(j .lt. 0) goto 1  ! label:read_next_command
 if (j .eq. 5) then
   if (ipar(j) .lt. val) write (6, 101)
 101   format &
@@ -555,26 +607,29 @@ if (.not. lpar(LPAR_CSFLAG)) then
     ipar(IPAR_NUMIN) = 0
   end if
 end if
-goto 100
-! flags
+goto 100  ! label:set_si_ir_param(line, l)
+!
+! label:set_si_l_param(line, l)
+!
+! set system independent parameters (flags)
 ! specify flags in the form cod1=val1,cod2=val2, etc
 ! where val(i) must be either "t(rue)" or "f(alse)"
-200 if(l .eq. 0) goto 1
+200 if(l .eq. 0) goto 1  ! label:read_next_command
 l1 = l
-call parse(line,l,code,lc)
-call getval(code(1:lc),fcod,j,val)
-if(j .eq. 0) goto 15
-if(j .lt.0) goto 1
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),fcod,j,val)
+if(j .eq. 0) goto 15  ! label:interpret_statement(line, l1)
+if(j .lt.0) goto 1  ! label:read_next_command
 logp = .false.
 if(val .eq. 1) logp = .true.
 if (j .eq. 3) then
   write (6, 201)
 201   format (' ** BATCH FLAG CAN NOT BE SET INTERACTIVELY!')
   lpar(LPAR_BATCH) = batch
-  go to 1
+  goto 1  ! label:read_next_command
 end if
 lpar(lindx(j)) = logp
-goto 200
+goto 200  ! label:set_si_l_param(line, l)
 ! energies
 ! specify energies in the form
 ! energ=e1,e2,e3...
@@ -584,8 +639,8 @@ goto 200
 310 if(l .eq. 0) goto 320
 if(line(l-1:l-1) .eq. ';') goto 320
 i = i+1
-call parse(line,l,code,lc)
-call getval(code(1:lc),empty_var_list,j,energ(i))
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,energ(i))
 goto 310
 320 if (energ(1) .gt. 0) then
    if (i .ne. nerg) then
@@ -621,49 +676,49 @@ endif
 call enord(energ,nerg)
 ipar(IPAR_NERG) = nerg
 l1 = l
-goto 15
+goto 15  ! label:interpret_statement(line, l1)
 ! jout values
 ! specify jout values in the form
 ! jout,nnout,jout(1),...,jout(iabs(nnout))
 ! terminate the string with a semicolon if other parameters will follow
 ! on the same card, e.g. jout,-3,0,2,4;energ=e1,e2,e3;jtot1=0,jtot2=2....
 400 i = 0
-call parse(line,l,code,lc)
-call getval(code(1:lc),empty_var_list,j,val)
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,val)
 l1 = l
 nnout=val
 410 if(l .eq. 0) goto 420
 if(line(l-1:l-1) .eq. ';') goto 420
-call parse(line,l,code,lc)
-call getval(code(1:lc),empty_var_list,j,val)
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,val)
 i = i+1
 jout(i) = val
 goto 410
 420 if(nnout.ge.0) nnout = i
 if(nnout.lt.0) nnout = -i
 l1 = l
-goto 15
+goto 15  ! label:interpret_statement(line, l1)
 ! indout values
 ! specify indout values in the form
 ! indout,niout,indout(1),...,indout(niout)
 ! terminate the string with a semicolon if other parameters will follow
 ! on the same card, e.g. indout,2,1,-1;energ=e1,e2,e3;jtot1=0,jtot2=2....
 430 i = 0
-call parse(line,l,code,lc)
-call getval(code(1:lc),empty_var_list,j,val)
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,val)
 l1 = l
 niout=val
-if(niout.eq.0) goto 15
+if(niout.eq.0) goto 15  ! label:interpret_statement(line, l1)
 440 if(l .eq. 0) goto 450
 if(line(l-1:l-1) .eq. ';') goto 450
-call parse(line,l,code,lc)
-call getval(code(1:lc),empty_var_list,j,val)
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,val)
 i = i+1
 indout(i) = val
 goto 440
 450 if(niout.ge.0) niout = i
 l1 = l
-goto 15
+goto 15  ! label:interpret_statement(line, l1)
 ! j1j2 values
 ! specify j1j2 values in the form
 ! j1j2,numj,j1j2(1),...,j1j2(numj)
@@ -672,18 +727,18 @@ goto 15
 460 if (.not.lpar(LPAR_TWOMOL)) then
   write (6, 465)
 465   format(' ** NUMJ CAN ONLY BE DEFINED IF TWOMOL = .TRUE.')
-  goto 15
+  goto 15  ! label:interpret_statement(line, l1)
 endif
 i = 0
-call parse(line,l,code,lc)
-call getval(code(1:lc),empty_var_list,j,val)
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,val)
 l1 = l
 numj=val
-if(niout.eq.0) goto 15
+if(niout.eq.0) goto 15  ! label:interpret_statement(line, l1)
 470 if(l .eq. 0) goto 480
 if(line(l-1:l-1) .eq. ';') goto 480
-call parse(line,l,code,lc)
-call getval(code(1:lc),empty_var_list,j,val)
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,val)
 i = i+1
 nj1j2(i) = val
 goto 470
@@ -694,7 +749,10 @@ else
 485   format(' ** YOU MUST SPECIFY A VALUE OF NUMJ')
 endif
 l1 = l
-goto 15
+goto 15  ! label:interpret_statement(line, l1)
+!
+! label:execute_run
+!
 ! start execution,run
 !  numin and numax should be 0 if cc calculation, if not, then set them
 !  equal to zero
@@ -726,12 +784,12 @@ if(irinp.eq.0) then
 505   format (/,' ** SAVE DEFAULT VARIABLES OR SPECIFY INPUT', &
           ' FILE WITH INP = filename')
   if(lpar(LPAR_BATCH)) call exit
-  goto 1
+  goto 1  ! label:read_next_command
 end if
 if(rpar(RPAR_SCAT_TOLAI).eq.0) then  ! graffy: todo : shouldn't it be RPAR_XMU instead of RPAR_SCAT_TOLAI here ?
   write(6,507)
 507   format(/,' ** SPECIFY COLLISION REDUCED MASS WITH XMU = mass')
-  goto 1
+  goto 1  ! label:read_next_command
 end if
 if(irpot.ne.0.or..not.lpar(LPAR_READPT)) then
 ! open output file
@@ -793,7 +851,7 @@ if(irpot.ne.0.or..not.lpar(LPAR_READPT)) then
 else
   write(6,510)
 510   format(' Potential not yet defined!')
-  goto 1
+  goto 1  ! label:read_next_command
 end if
 ! no more commands
 599 write (6, *)
@@ -804,7 +862,7 @@ call exit
 ! show
 700 l1 = l
 call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
-call parse(line,l,code,lc)
+call get_token(line,l,code,lc)
 if (.not.lpar(LPAR_BOUNDC)) then
   write(6,710) &
    'Parameters (scattering):',(pcod(j),ipar(j),j = 1,iicode)
@@ -857,9 +915,9 @@ if (ipar(IPAR_LSCREEN) .le. 24 .and. .not. batch) then
              ' <q> for prompt, or new data')
   read (5, 10) line
   if (line(1:1) .eq. 'q' .or. line(1:1) .eq. 'q') then
-    go to 1
+    goto 1  ! label:read_next_command
   else if (line(1:1) .ne. ' ') then
-    go to 11
+    goto 11
   end if
 end if
 call enord(energ,ipar(IPAR_NERG))
@@ -897,7 +955,7 @@ else
        ' (** TRUNCATED TO 8 CHARACTERS **)')
 endif
 l1 = l
-goto 15
+goto 15  ! label:interpret_statement(line, l1)
 ! read
 800 call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
 call gendat
@@ -906,11 +964,11 @@ call sysdat(irpot, lpar(LPAR_READPT),ione)
 irinp=1
 l1 = l
 if (batch) lpar(LPAR_BATCH) = .true.
-goto 15
+goto 15  ! label:interpret_statement(line, l1)
 ! input, output, label and job file names
 ! input=infile, output=outfile, job=jobfile
 ! input, output, and label are now lower case:  mha 6.6.91
-900 call parse(line,l,code,lc)
+900 call get_token(line,l,code,lc)
 ! incode is index of command input in list bcod
 incode=8
 if(i .eq. 8) then
@@ -923,7 +981,7 @@ if(i .eq. 8) then
     write (6, 901) input(1:len)
 901     format (' *** INPUT FILE ',(a),' DOES NOT EXIST')
     if(batch) call exit
-    go to 1
+    goto 1  ! label:read_next_command
   end if
   goto 800
 ! incode 10 is index of command job in list bcod
@@ -955,13 +1013,13 @@ else if(i .eq. 17) then
   call openf(9, output, 'sf', 0)
 end if
 l1 = l
-goto 15
+goto 15  ! label:interpret_statement(line, l1)
 ! read parameters for potential
 !     pot=potfile
-1000 call parse(line,l,code,lc)
+1000 call get_token(line,l,code,lc)
 call ptread(code(1:lc),lpar(LPAR_READPT))
 l1 = l
-goto 15
+goto 15  ! label:interpret_statement(line, l1)
 ! test potential
 ! testpot
 ! you will be prompted for r and theta. to exit, specify r=0
@@ -972,14 +1030,14 @@ else if (ibasty .eq. 20) then
 else
   call testpt(lpar(LPAR_IHOMO))
 end if
-goto 1
+goto 1  ! label:read_next_command
 ! save input parameters
 !     save=filename
 !     if filename is not specified, the inputfile is overwritten
 1300 inew=0
 call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
 if(l.ne.0) then
-  call parse(line,l,code,lc)
+  call get_token(line,l,code,lc)
   if(lc .eq. 0) then
     code = input
   else
@@ -988,6 +1046,7 @@ if(l.ne.0) then
     call lower(code)
     call upper(code(1:1))
   endif
+  
 else
   code = input
 end if
@@ -996,20 +1055,33 @@ call syssav(lpar(LPAR_READPT))
 close(8)
 l1 = l
 irinp = 1
-goto 15
+goto 15  ! label:interpret_statement(line, l1)
+!
+! label:set_sd_param(line, l)
+
+!
 ! redefine system dependent parameters
 ! specify in the same way as other parameters, e.g.
 !     jmin=0,jmax=4,brot=2.2...
-1400 if(l.eq.0) goto 1
+1400 continue
+ASSERT(l >= 0)
+if(l.eq.0) goto 1  ! label:read_next_command
 l1=l
-call parse(line,l,code,lc)
-call getval(code(1:lc),scod,j,val)
-if(j .eq. 0) goto 15
-if(j .lt. 0) goto 1
+! read the next token, which is expected to be an assignment (eg 'VMAX(1)=4' if line(l:)=='VMAX(1)=4;VMAX(2)=4') 
+call get_token(line,l,code,lc)
+! at this point, l points to the beginning of the next statement
+call assignment_parse(code(1:lc),scod,j,val)
+if(j .eq. 0) then
+  ! parameter not found
+  goto 15  ! label:interpret_statement(line, l1)
+end if
+if(j .lt. 0) then
+  ! malformed assignment (eg 'JTOT;')
+  goto 1  ! label:read_next_command
+end if
 if(j.eq.1 .and. .not.lpar(LPAR_TWOMOL)) then
-  write(6,1401) scod(j)
-1401   format(1x,a,'CAN NOT BE MODIFIED')
-  goto 1400
+  write(6,'(1x,a,"CAN NOT BE MODIFIED")') scod(j)
+  goto 1400  ! label:set_sd_param(line, l)
 end if
 if(j.le.isicod) then
   ispar(j) = val
@@ -1022,7 +1094,36 @@ else
     lspar(j-isrcod-isicod) = .false.
   end if
 end if
-goto 1400
+goto 1400  ! label:set_sd_param(line, l)
+! !
+! ! label:set_sd_i_param(l)
+! ! 
+! ! set system dependent integer parameter
+! 1410 if(l.eq.0) goto 1  ! label:read_next_command
+! l1=l
+! ! l is expected to point at the beginning of a 'JTOT=42' assignment inside the line string
+! call get_token(line,l,code,lc)
+! ! code(1:lc) is expected to contain the param name eg 'JTOT'
+! ! l is now expected to point on the character after the equal sign eg in 'JTOT=42'
+! call assignment_parse(code(1:lc),scod,j,val)
+! if(j .eq. 0) goto 15  ! label:interpret_statement(line, l1)
+! if(j .lt. 0) goto 1  ! label:read_next_command
+! if(j.eq.1 .and. .not.lpar(LPAR_TWOMOL)) then
+!   write(6,'(1x,a,"CAN NOT BE MODIFIED")') scod(j)
+!   goto 1410  ! label:set_sd_i_param()
+! end if
+! if(j.le.isicod) then
+!   ispar(j) = val
+! else if(j.le.isrcod+isicod) then
+!   rspar(j-isicod) = val
+! else
+!   if(val .eq. 1) then
+!     lspar(j-isrcod-isicod) = .true.
+!   else
+!     lspar(j-isrcod-isicod) = .false.
+!   end if
+! end if
+! goto 1410  ! label:set_sd_i_param()
 !.....differences of s-matrices
 !  dif,jobfile1,jobfile2,iprint,ienerg,thrs
 !  this compares s-matrices in the files jobfile1.smt and jobfile2.smt
@@ -1030,32 +1131,32 @@ goto 1400
 !  if iprint.eq.1 these values are given for all individual s-matrices
 !  if iprint.ge.2 s-matrices are printed
 !  thrs: threshold for neglect of small s-matrix elements in comparison
-1500 call parse(line,l,code,lc)
+1500 call get_token(line,l,code,lc)
 if(code.ne.' ') fnam1 = code
 call lower(fnam1)
 call upper(fnam1(1:1))
-call parse(line,l,code,lc)
+call get_token(line,l,code,lc)
 if(code.ne.' ') fnam2 = code
 call lower(fnam2)
 call upper(fnam2(1:1))
-if(fnam1 .eq. ' '.or.fnam2 .eq. ' ') goto 1
+if(fnam1 .eq. ' '.or.fnam2 .eq. ' ') goto 1  ! label:read_next_command
 iprint = 0
 ienerg = 1
 thrs = 1.e-5
 if(l.ne.0) then
-  call parse(line,l,code,lc)
-  call getval(code(1:lc),empty_var_list,j,val)
+  call get_token(line,l,code,lc)
+  call assignment_parse(code(1:lc),empty_var_list,j,val)
   iprint = val
 end if
 if(l.ne.0) then
-  call parse(line,l,code,lc)
-  call getval(code(1:lc),empty_var_list,j,val)
+  call get_token(line,l,code,lc)
+  call assignment_parse(code(1:lc),empty_var_list,j,val)
   ienerg = val
   ienerg = max0(1,ienerg)
 end if
 if(l.ne.0) then
-  call parse(line,l,code,lc)
-  call getval(code(1:lc),empty_var_list,j,val)
+  call get_token(line,l,code,lc)
+  call assignment_parse(code(1:lc),empty_var_list,j,val)
   thrs = val
 end if
 call difs(fnam1,fnam2,ienerg,iprint,acc,accmx,thrs,imx,jmx,ityp)
@@ -1080,12 +1181,12 @@ if(iprint .eq. 0) write(6,1510) acc,accmx,imx,jmx,code(1:lc), &
        ' Largest relative difference:',f10.2,'%'/ &
  ' (i = ',i2,'  j = ',i2,') element of ',(a)/ &
  ' Inspection threshold is ',1pg8.1)
-goto 1
+goto 1  ! label:read_next_command
 !.....determine turning point from isotropic potential
 !     turn
 1600 if(irpot .eq. 0) then
   write(6,510)
-  goto 1
+  goto 1  ! label:read_next_command
 end if
 e = 0
 do 1605 i = 1,ipar(IPAR_NERG)
@@ -1093,25 +1194,25 @@ do 1605 i = 1,ipar(IPAR_NERG)
 if(e .eq. 0) then
   write(6,1610)
 1610   format(' Total energy has not been given a value !')
-  goto 1
+  goto 1  ! label:read_next_command
 end if
 r = turn(e)
 write(6,1620) r
 1620 format(' Turning point for isotropic potential at R = ', &
          f5.2, ' bohr')
 l1 = l
-goto 15
+goto 15  ! label:interpret_statement(line, l1)
 !  determine minimum of isotropic potential
 !  minpot
 1700 if(irpot .eq. 0) then
   write(6,510)
-  goto 1
+  goto 1  ! label:read_next_command
 end if
 r = potmin()
 write(6,1710) r
 1710 format(' Minimum of isotropic potential at r = ',f5.2, ' bohr')
 l1 = l
-goto 15
+goto 15  ! label:interpret_statement(line, l1)
 !  calculate de broglie wavelength in bohr (defined as 2pi/k)
 !  debrogli
 1800 e = 0
@@ -1119,13 +1220,13 @@ do 1810 i = 1,ipar(IPAR_NERG)
 1810 e = max(e,energ(i))
 if(e .eq. 0) then
   write(6,1610)
-  goto 1
+  goto 1  ! label:read_next_command
 end if
 xmu = rpar(RPAR_XMU)
 if(xmu .eq. 0) then
   write(6,1820)
 1820   format(' Collision reduced mass has not been given a value !')
-  goto 1
+  goto 1  ! label:read_next_command
 end if
 r = 48.75/sqrt(xmu*e)
 write(6,1830) r,0.2*r
@@ -1135,7 +1236,7 @@ write (6, 1831) waveve, 1.8897*waveve
 1831 format ('   wavevector =', g12.5,' Bohr^-1 = ', &
    g12.5,' Angstroms^-1')
 l1 = l
-goto 15
+goto 15  ! label:interpret_statement(line, l1)
 !.....print s-matrices:
 !  print,jobfile,j1,j2,jd,jlp,ienerg
 !  first matrix printed is for jtot=j1
@@ -1144,15 +1245,15 @@ goto 15
 !  default values are:
 !  j1 = jtot1, j2=jtot1, jd=jtotd, jlp=jlpar,ienerg=1
 !  jlp: parity; zero means both values
-1900 call parse(line,l,fnam1,lc)
+1900 call get_token(line,l,fnam1,lc)
 if(fnam1 .eq. ' ') fnam1 = jobnam
 call lower(fnam1)
 call upper(fnam1(1:1))
 do 1910 i = 1,5
 ia(i) = 0
 if(l .eq. 0) goto 1910
-call parse(line,l,code,lc)
-call getval(code(1:lc),empty_var_list,j,a(i))
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,a(i))
 ia(i)=a(i)
 1910 continue
 if(ia(1).eq.0) ia(1)=ipar(IPAR_JTOT1)
@@ -1162,22 +1263,22 @@ if(ia(4).eq.0) ia(4)=ipar(IPAR_JLPAR)
 call lower(fnam1)
 call upper(fnam1(1:1))
 call sprint(fnam1,ia)
-goto 1
+goto 1  ! label:read_next_command
 !.....differential cross sections:
 !  diffc,jobfile,j1,in1,j2,in2,ang1,ang2,dang,ienerg,jtotend
 !
 !  differential cross sections computed for atom-molecule
 !  collisions or symmetric top-linear molecule collisions
 2000 if (.not. lpar(LPAR_TWOMOL) .or. is_twomol(ibasty)) then
-  call parse(line,l,fnam1,lc)
+  call get_token(line,l,fnam1,lc)
   if(fnam1 .eq. ' ') fnam1 = jobnam
   call lower(fnam1)
   call upper(fnam1(1:1))
   do 2010 i = 1,15
      a(i) = 0.d0
      if(l .eq. 0) goto 2010
-     call parse(line,l,code,lc)
-     call getval(code(1:lc),empty_var_list,j,a(i))
+     call get_token(line,l,code,lc)
+     call assignment_parse(code(1:lc),empty_var_list,j,a(i))
 2010   continue
   write (6,*) 'hinput : lpar = ' 
   call difcrs(fnam1,a,lpar(LPAR_IHOMO),lpar(LPAR_FLAGHF))
@@ -1187,7 +1288,7 @@ else
          /,'  implemented for most molecule-molecule ', &
          'collisions')
 end if
-goto 1
+goto 1  ! label:read_next_command
 !.....optimize
 !  opt,code,start,end,fak,add,accav,accmx,thrs
 !  code is name of variable to be optimized
@@ -1209,23 +1310,23 @@ goto 1
 2101   format(' ** NERG SET EQUAL TO 1 FOR OPTIMIZATION')
   ipar(IPAR_NERG)=1
 endif
-call parse(line,l,code,lc)
+call get_token(line,l,code,lc)
 do 2110 ipr = iicode+1,icode
 2110 if(code(1:lc) .eq. pcod(ipr)(1:lc)) goto 2120
 write(6,2115) code(1:lc)
 2115 format(' Invalid parameter: "',(a),'"')
-goto 1
+goto 1  ! label:read_next_command
 2120 do 2130 i = 1,7
 a(i) = 0.d0
 if(l .eq. 0) goto 2130
-call parse(line,l,code,ld)
-call getval(code(1:ld),empty_var_list,j,a(i))
+call get_token(line,l,code,ld)
+call assignment_parse(code(1:ld),empty_var_list,j,a(i))
 2130 continue
 if(a(1) .eq. 0.or.a(2) .eq. 0) then
   write(6,2140)
 2140   format(' Initial or final value of parameter to optimize', &
          ' has not been defined')
-  goto 1
+  goto 1  ! label:read_next_command
 end if
 if (.not.lpar(LPAR_WRSMAT)) then
   write (6,2141)
@@ -1239,7 +1340,7 @@ if (nnout .lt. 0) then
 else if (nnout .eq. 0) then
   write (6, 2143)
 2143   format (' NNOUT=0; optimization not possible; reset NNOUT')
-  go to 1
+  goto 1  ! label:read_next_command
 end if
 if (.not.lpar(LPAR_NOPRIN)) then
    write (6,2144)
@@ -1261,7 +1362,7 @@ if(a(1).lt.a(2).and.(a(1)*a(3)+a(4).lt.a(1)).or. &
    a(1) .eq. a(2)) then
    write(6,2150)
 2150    format(' Invalid step parameters for OPTIMIZE')
-   goto 1
+   goto 1  ! label:read_next_command
 end if
 jtot2x = ipar(IPAR_JTOT2)
 write(6,2151) pcod(ipr)(1:lc),ipar(IPAR_JTOT1),(a(i),i = 1,6), &
@@ -1340,7 +1441,7 @@ if((acclas.lt.a(5).and.accmx.lt.a(6)) &
      ' in (i = ',i2,' j = ',i2,') element of ',(a))
    opti = .false.
    ipar(IPAR_JTOT2) = jtot2x
-   goto 1
+   goto 1  ! label:read_next_command
 end if
 rpar(ipr-iicode) = a(1)
 if(inam .eq. 1) then
@@ -1355,29 +1456,29 @@ write(6,255) pcod(ipr)(1:lc),a(1)
 goto 500
 !.....integral cross sections
 !  intcrs,jobfile,in1,in2,ienerg,maxjtot
-2200 call parse(line,l,fnam1,lc)
+2200 call get_token(line,l,fnam1,lc)
 if(fnam1 .eq. ' ') fnam1 = jobnam
 call lower(fnam1)
 call upper(fnam1(1:1))
 do 2210 i = 1,4
 a(i) = 0
 if(l .eq. 0) goto 2210
-call parse(line,l,code,lc)
-call getval(code(1:lc),empty_var_list,j,a(i))
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,a(i))
 2210 continue
 call intcrs(fnam1,a)
-goto 1
+goto 1  ! label:read_next_command
 !.....tensor cross sections
 !  tenxsc,jobfile,maxn,iframe,in1,in2,ienerg,jtotend,minj,maxj
-2300 call parse(line,l,fnam1,lc)
+2300 call get_token(line,l,fnam1,lc)
 if(fnam1 .eq. ' ') fnam1 = jobnam
 call lower(fnam1)
 call upper(fnam1(1:1))
 do 2310 i = 1,9
 a(i) = 0.d0
 if(l .eq. 0) goto 2310
-call parse(line,l,code,lc)
-call getval(code(1:lc),empty_var_list,j,a(i))
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,a(i))
 2310 continue
 #if defined(HIB_MAC)
 call exit
@@ -1387,23 +1488,23 @@ write(6,2320)
 #if defined(HIB_UNIX)
 call tenopa(fnam1,a)
 #endif
-goto 1
+goto 1  ! label:read_next_command
 !....nnout must be preceded by jout
 2400 write (6, 2410)
 2410 format(' To change NNOUT, enter the command line',/, &
   '    jout,nnout,jout(1),...,jout(iabs(nnout))' )
-goto 1
+goto 1  ! label:read_next_command
 !.....m-resolved cross sections
 !  mrcrs,jobfile,ienerg
-2500 call parse(line,l,fnam1,lc)
+2500 call get_token(line,l,fnam1,lc)
 if(fnam1 .eq. ' ') fnam1 = jobnam
 call lower(fnam1)
 call upper(fnam1(1:1))
 do 2510 i = 1,1
 a(i) = 0
 if(l .eq. 0) goto 2510
-call parse(line,l,code,lc)
-call getval(code(1:lc),empty_var_list,j,a(i))
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,a(i))
 2510 continue
 #if defined(HIB_MAC)
 call exit
@@ -1413,17 +1514,17 @@ write(6,2520)
 #if defined(HIB_UNIX) || defined(HIB_CRAY)
 call mrcrs(fnam1,a)
 #endif
-goto 1
+goto 1  ! label:read_next_command
 ! printc : print selected integral cross sections from ics file
-2600 call parse(line,l,fnam1,lc)
+2600 call get_token(line,l,fnam1,lc)
 if(fnam1 .eq. ' ') fnam1 = jobnam
 call lower(fnam1)
 call upper(fnam1(1:1))
 do 2610 i = 1,8
 a(i) = 0
 if(l .eq. 0) goto 2610
-call parse(line,l,code,lc)
-call getval(code(1:lc),empty_var_list,j,a(i))
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,a(i))
 2610 continue
 if(ibasty.eq. 5) write (6, 2611)
 2611 format &
@@ -1436,51 +1537,51 @@ if(ibasty.eq. 6) write (6, 2612)
 call prsg(fnam1,a)
 !      if(ibasty.ne.4) call prsg(fnam1,a)
 !      if(ibasty.eq.4) call prsgpi(fnam1,a)
-goto 1
+goto 1  ! label:read_next_command
 ! print selected partial cross sections from pcs file
-2650 call parse(line,l,fnam1,lc)
+2650 call get_token(line,l,fnam1,lc)
 if(fnam1 .eq. ' ') fnam1 = jobnam
 call lower(fnam1)
 call upper(fnam1(1:1))
 do 2660 i = 1,8
 a(i) = 0
 if(l .eq. 0) goto 2660
-call parse(line,l,code,lc)
-call getval(code(1:lc),empty_var_list,j,a(i))
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,a(i))
 2660 continue
 call readpc(fnam1, a, scmat, nmax)
-goto 1
+goto 1  ! label:read_next_command
 ! check if inconsistencies in input parameters
 2700 call genchk
-goto 1
+goto 1  ! label:read_next_command
 !  psi(wavefunction calculation),jobfile,mchannel
 !  flux calculation,jobfile,mchannel,iflux,thresh,iprint
-2800 call parse(line,l,fnam1,lc)
+2800 call get_token(line,l,fnam1,lc)
 call lower(fnam1)
 call upper(fnam1(1:1))
 if(fnam1 .eq. ' ') fnam1 = jobnam
 do 2810 i = 1,10
 a(i) = 0
 if(l .eq. 0) goto 2810
-call parse(line,l,code,lc)
-call getval(code(1:lc),empty_var_list,j,a(i))
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,a(i))
 2810 continue
 iflux=a(1)
 if (a(2) .eq. 0.d0) iflux=2
 call psi(fnam1,a)
-goto 1
+goto 1  ! label:read_next_command
 ! adiabatic energy calculation, jobfile
-2850 call parse(line,l,fnam1,lc)
+2850 call get_token(line,l,fnam1,lc)
 call lower(fnam1)
 call upper(fnam1(1:1))
 if(fnam1 .eq. ' ') fnam1 = jobnam
-call parse(line,l,code,lc)
+call get_token(line,l,code,lc)
 if (code .eq. ' ') then
    l1 = 1
    l2 = 10
 else
    read (code, *, err=2860, end=2860) l2
-   call parse(line,l,code,lc)
+   call get_token(line,l,code,lc)
    if (code .eq. ' ') then
       l1 = 1
    else
@@ -1489,26 +1590,26 @@ else
    end if
 end if
 call eadiab1(fnam1,l1,l2)
-goto 1
+goto 1  ! label:read_next_command
 2860 write (6, *) 'Parameters to EADIAB cannot be recognized'
-goto 1
+goto 1  ! label:read_next_command
 !  print out system parameters
 2900 call sys_conf
-goto 1
+goto 1  ! label:read_next_command
 !  hyperfine xcs routine (originally written by j. klos,
 !  rewritten by p.j. dagdigian
 !  hypxsc,jobfile, ienerg ,nucspin, j1, j2
 2950 continue
 !     if (.not. lpar(LPAR_TWOMOL)) then
-  call parse(line,l,fnam1,lc)
+  call get_token(line,l,fnam1,lc)
   if(fnam1 .eq. ' ') fnam1 = jobnam
   call lower(fnam1)
   call upper(fnam1(1:1))
   do 2013 i = 1,4
      a(i) = 0.d0
      if(l .eq. 0) goto 2013
-     call parse(line,l,code,lc)
-     call getval(code(1:lc),empty_var_list,j,a(i))
+     call get_token(line,l,code,lc)
+     call assignment_parse(code(1:lc),empty_var_list,j,a(i))
 2013   continue
   call hypxsc(fnam1,a)
 !      else
@@ -1516,84 +1617,84 @@ goto 1
 !2012    format(' Sorry, hyperfine cross sections not yet',
 !     :         /,'  implemented for molecule-molecule collisions')
 !      end if
-goto 1
+goto 1  ! label:read_next_command
 ! singlet-triplet collisional mixing - added by p. dagdigian
-3000 call parse(line,l,fnam1,lc)
+3000 call get_token(line,l,fnam1,lc)
 if(fnam1 .eq. ' ') fnam1 = jobnam
 call lower(fnam1)
 call upper(fnam1(1:1))
 ! get iener for 1st smt file
 a(1) = 0.d0
 if(l .eq. 0) goto 3005
-call parse(line,l,code,lc)
-call getval(code(1:lc),empty_var_list,j,a(1))
-3005 call parse(line,l,fnam2,lc)
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,a(1))
+3005 call get_token(line,l,fnam2,lc)
 if(fnam2 .eq. ' ') fnam2 = jobnam
 call lower(fnam2)
 call upper(fnam2(1:1))
 ! get iener for 2nd smt file
 a(2) = 0.d0
 if(l .eq. 0) goto 3010
-call parse(line,l,code,lc)
-call getval(code(1:lc),empty_var_list,j,a(2))
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,a(2))
 ! get dele, emax, istata, istatx, hso
 3010 do 3020 i = 3, 7
   a(i) = 0.d0
   if(l .eq. 0) goto 3020
-  call parse(line,l,code,lc)
-  call getval(code(1:lc),empty_var_list,j,a(i))
+  call get_token(line,l,code,lc)
+  call assignment_parse(code(1:lc),empty_var_list,j,a(i))
 3020 continue
 call stmix(fnam1,fnam2,a)
-goto 1
+goto 1  ! label:read_next_command
 ! transport cross sections - added by p. dagdigian
-3100 call parse(line,l,fnam1,lc)
+3100 call get_token(line,l,fnam1,lc)
 if(fnam1 .eq. ' ') fnam1 = jobnam
 call lower(fnam1)
 call upper(fnam1(1:1))
 ! get iener for 1st smt file
 a(1) = 0.d0
 if(l .eq. 0) goto 3105
-call parse(line,l,code,lc)
-call getval(code(1:lc),empty_var_list,j,a(1))
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,a(1))
 ! get in1, in2, jtotmx, join, jmax
 3105 continue
 call trnprt(fnam1,a)
-goto 1
+goto 1  ! label:read_next_command
 3300 continue
 write(6,*) "************************************************************"
 write(6,*) "Entering the DRIVER subroutine of the potential"
 write(6,*) "Press Ctrl+D to go back to Hibridon's console"
 write(6,*) "************************************************************"
 call driver
-goto 1
+goto 1  ! label:read_next_command
 ! pressure broadening cross sections - added by p. dagdigian
-3200 call parse(line,l,fnam1,lc)
+3200 call get_token(line,l,fnam1,lc)
 if(fnam1 .eq. ' ') fnam1 = jobnam
 call lower(fnam1)
 call upper(fnam1(1:1))
 ! get iener for 1st smt file
 a(1) = 0.d0
 if(l .eq. 0) goto 3205
-call parse(line,l,code,lc)
-call getval(code(1:lc),empty_var_list,j,a(1))
-3205 call parse(line,l,fnam2,lc)
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,a(1))
+3205 call get_token(line,l,fnam2,lc)
 if(fnam2 .eq. ' ') fnam2 = jobnam
 call lower(fnam2)
 call upper(fnam2(1:1))
 ! get iener for 2nd smt file
 a(2) = 0.d0
 if(l .eq. 0) goto 3210
-call parse(line,l,code,lc)
-call getval(code(1:lc),empty_var_list,j,a(2))
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,a(2))
 ! get k, j1, in1, j2, in2, diag, j1p, in1p, j2p, in2p
 3210 do 3220 i = 3, 12
   a(i) = 0.d0
   if(l .eq. 0) goto 3220
-  call parse(line,l,code,lc)
-  call getval(code(1:lc),empty_var_list,j,a(i))
+  call get_token(line,l,code,lc)
+  call assignment_parse(code(1:lc),empty_var_list,j,a(i))
 3220 continue
 call prsbr(fnam1,fnam2,a)
-goto 1
+goto 1  ! label:read_next_command
 end
 subroutine set_param_names(boundc, param_names, param_names_size)
 !  subroutine to change param_names's for bound state or scattering
@@ -1624,3 +1725,5 @@ else
 endif
 return
 end
+
+end module mod_hinput

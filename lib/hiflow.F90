@@ -68,6 +68,7 @@ use mod_par, only: airyfl, prairy, bastst, chlist, &
 use funit
 use ipar_enum
 use rpar_enum
+use mod_hinput, only:hinput
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)

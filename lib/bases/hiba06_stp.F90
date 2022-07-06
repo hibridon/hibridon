@@ -731,7 +731,7 @@ line = fname
 readpt = .true.
 100 if (readpt) then
   l=1
-  call parse(line,l,filnam,lc)
+  call get_token(line,l,filnam,lc)
   if(lc.eq.0) then
     write(6,102)
 102     format(' FILENAME MISSING FOR POTENTIAL INPUT')
