@@ -6,7 +6,104 @@
 !$hp$optimize off
 #endif
 
+
+module mod_candidates
+
+  ! dimension of codex, ihold, lhold, should be equal to largest number
+  ! of identical strings of 1:nnn characters in names of all variables
+  ! (probably 'p' is the most recurring string:  12 times in
+  !  pcod, fcod, and bcod)
+  integer, parameter :: k_max_candidates = 15
+
+  type candidates_type
+  ! this class represents a list of candidate codexes that match the shortcut codex the user has inputed.
+  
+  ! For example, if the user inputs the statement 'PR=T', then the candidates would be any codex that starts with 'PR'
+  ! - system independent flags:
+  !   - 'PRAIRY'
+  !   - 'PRLOGD'
+  !   - 'PRPART'
+  !   - 'PRSMAT'
+  !   - 'PRT2'
+  !   - 'PRXSEC'
+  ! - commands:
+  !   - 'PRINTC'
+  !   - 'PRINTS'
+  !   - 'PRSBR'
+  private
+    character(len=8) codex(k_max_candidates)
+    integer :: ihold(k_max_candidates)
+    integer :: lhold(k_max_candidates)
+    integer :: num_candidates = 0
+  contains
+    procedure, public :: add_candidate => candidates_add_candidate
+    procedure, public :: get_num_candidates => candidates_get_num_candidates
+    procedure, public :: get_codex => candidates_get_codex
+    procedure, public :: get_codex_index => candidates_get_codex_index
+    procedure, public :: get_bost => candidates_get_bost
+    procedure, public :: empty => candidates_empty
+  end type candidates_type
+
+contains
+
+!
+! candidates_type implementation
+!
+
+subroutine candidates_add_candidate(this, codex, codex_index, bost)
+  class(candidates_type), intent(inout) :: this
+  character(len=8), intent(in) :: codex
+  integer, intent(in) :: codex_index
+  integer, intent(in) :: bost  ! index of line that ponts to the beginnning of the statement (eg 'JTOT=42')
+
+  this%num_candidates = this%num_candidates + 1
+  if (this%num_candidates > k_max_candidates) then
+    stop 'error : k_max_candidates is too small'
+  end if
+  this%lhold(this%num_candidates) = bost
+  this%ihold(this%num_candidates) = codex_index
+  this%codex(this%num_candidates) = codex
+end subroutine candidates_add_candidate
+
+function candidates_get_num_candidates(this) result(num_candidates)
+  class(candidates_type), intent(in) :: this
+  integer :: num_candidates
+  num_candidates = this%num_candidates
+end function candidates_get_num_candidates
+
+function candidates_get_codex(this, candidate_index) result(codex)
+  class(candidates_type), intent(in) :: this
+  integer, intent(in) :: candidate_index
+  character(len=8) :: codex
+  ASSERT(candidate_index <= this%num_candidates)
+  codex = this%codex(candidate_index)
+end function candidates_get_codex
+
+function candidates_get_codex_index(this, candidate_index) result(codex_index)
+  class(candidates_type), intent(in) :: this
+  integer, intent(in) :: candidate_index
+  integer :: codex_index
+  ASSERT(candidate_index <= this%num_candidates)
+  codex_index = this%ihold(candidate_index)
+end function candidates_get_codex_index
+
+function candidates_get_bost(this, candidate_index) result(bost)
+  class(candidates_type), intent(in) :: this
+  integer, intent(in) :: candidate_index
+  integer :: bost
+  ASSERT(candidate_index <= this%num_candidates)
+  bost = this%lhold(candidate_index)
+end function candidates_get_bost
+
+subroutine candidates_empty(this)
+  class(candidates_type), intent(inout) :: this
+  this%num_candidates = 0
+end subroutine candidates_empty
+
+end module mod_candidates
+
 module mod_hinput
+  implicit none
   enum, bind( C )
   enumerator :: &
     k_keyword_execute_command     =  1, &   !   40 label:execute_command(i)
@@ -15,7 +112,9 @@ module mod_hinput
     k_keyword_set_sd_param        =  4, &   ! 1400 label:set_sd_param(line, l)
     k_keyword_set_ibasty          =  5      !   50 label:set_ibasty(line,l)
   end enum
+
 contains
+
 subroutine hinput(first)
 !  subroutine to redefine system independent input parameters for
 !  hibridon code
@@ -81,7 +180,7 @@ use lpar_enum
 use ipar_enum
 use rpar_enum
 use mod_par, only: lpar, ipar, rpar
-
+use mod_candidates, only: candidates_type
 implicit none
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
@@ -98,11 +197,6 @@ character*40 :: fnam1
 character*40 :: fnam2
 character*40 :: code
 character*8 empty_var_list(0)
-! dimension of codex, ihold, lhold, should be equal to largest number
-! of identical strings of 1:nnn characters in names of all variables
-! (probably 'p' is the most recurring string:  12 times in
-!  pcod, fcod, and bcod)
-character*8 codex(15)
 integer nerg
 logical existf, first, openfl
 integer :: lenstr
@@ -110,8 +204,6 @@ real(8) :: turn
 logical logp, opti, jtrunc
 real(8) :: a(15)
 integer :: ia(10)
-integer :: ihold(15)
-integer :: lhold(15)
 #include "common/parbas.F90"
 #include "common/parpot.F90"
 common /cosavi/ iipar, ixpar(iicode)
@@ -183,9 +275,10 @@ data batch /.false./
 
 integer :: ipr, istep, inam, i, ienerg, iflux, ii, im, imx, incode, inew, ione, iprint, iskip, itx, ityp, izero
 integer :: j, jm, jmx, jtot2x, l, l1, l2, lc, lcc, ld, len, lend, length, leninp, lenjob, lenout, low
-integer :: match, nde
+integer :: nde
 real(8) :: optacm, r, thrs, val, waveve, xmu
 real(8) :: a1, acc, acclas, optval, optacc, accmx, delt_e, e, e1
+type(candidates_type) :: candidates
 save ipr, opti, a, a1, acc, acclas, optval, optacc, istep, inam, &
      fnam1, fnam2, code, lc, jtot2x, irpot, irinp
 
@@ -437,17 +530,14 @@ ASSERT(l <= 0)
 call get_token(line, l, code, lc)
 ASSERT(l >= 0)
 if(lc .eq. 0) goto 1  ! label:read_next_command
-match = 0
+call candidates%empty()
 ! search in commands
 do i = 1,ncode
   len = lenstr(bcod(i))
   if(bcod(i)(1:lc) .eq. code(1:lc)) then
     if (lc .eq. len) goto 40  ! label:execute_command(i)
-    match = match + 1
-    lhold(match) = l
+    call candidates%add_candidate(codex=bcod(i), codex_index=i, bost=l)
     iskip = k_keyword_execute_command
-    ihold(match) = i
-    codex(match) = bcod(i)
   end if
 end do
 ASSERT(l1 >= 0) ! graffy: I suspect that l1 can never be negative
@@ -458,11 +548,9 @@ do i = 1,icode
   len = index(pcod(i),' ') - 1
   if(pcod(i)(1:lc) .eq. code(1:lc)) then
     if (lc .eq. len) goto 100  ! label:set_si_ir_param(line, l)
-    match = match + 1
-    lhold(match) = l
+    call candidates%add_candidate(codex=pcod(i), codex_index=i, bost=l)
+
     iskip = k_keyword_set_si_ir_param
-    ihold(match) = i
-    codex(match) = pcod(i)
   end if
 end do
 ! search in system independent parameters of type logical
@@ -470,11 +558,8 @@ do i = 1,lcode
 len=lenstr(fcod(i))
   if(fcod(i)(1:lc) .eq. code(1:lc)) then
     if (lc .eq. len) goto 200  ! label:set_si_l_param(line, l)
-    match = match + 1
-    lhold(match) = l
+    call candidates%add_candidate(codex=fcod(i), codex_index=i, bost=l)
     iskip = k_keyword_set_si_l_param
-    ihold(match) = i
-    codex(match) = fcod(i)
   end if
 end do
 ! search in legacy base parameters (system dependent parameters)
@@ -483,24 +568,18 @@ do i = 1,nscode
   if(scod(i)(1:lc) .eq. code(1:lc)) then
     if (lc .eq. len) goto 1400  ! label:set_sd_param(line, l)
 
-    match = match + 1
-    lhold(match) = l
+    call candidates%add_candidate(codex=scod(i), codex_index=i, bost=l)
     iskip = k_keyword_set_sd_param
-    ihold(match) = i
-    codex(match) = scod(i)
   end if
 end do
 ! search in bascod parameters (only contains BASISTYP at the moment)
 len = 8
 if(bascod(1)(1:lc) .eq. code(1:lc)) then
   if (lc .eq. len) goto 50  ! label:set_ibasty(line,l)
-  match = match + 1
-  lhold(match) = l
+  call candidates%add_candidate(codex=bascod(1), codex_index=1, bost=l)
   iskip = k_keyword_set_ibasty
-  ihold(match) = i
-  codex(match) = bascod(1)
 end if
-if (match .eq. 0) then
+if (candidates%get_num_candidates() == 0) then
   ! the input string matched none of the parameters
   write(6, 27) code(1:lc),(bcod(j),j = 1,ncode)
 27   format( &
@@ -511,9 +590,9 @@ if (match .eq. 0) then
   write(6,31) (fcod(j),j = 1,lcode)
   write(6,31) (scod(j),j = 1,nscode)
   goto 1  ! label:read_next_command
-else if (match .gt. 1) then
+else if (candidates%get_num_candidates() > 1) then
   ! more than one parameter matched the input string : we can't decide which one to choose
-  write (6, 28) code(1:lc), (codex(i), i = 1, match)
+  write (6, 28) code(1:lc), (candidates%get_codex(i), i = 1, candidates%get_num_candidates())
 28   format (' *** ambiguity between input string ',(a), &
            ' and request keys:',/,7(a10) )
   goto 1  ! label:read_next_command
@@ -521,8 +600,8 @@ else
   ! exactly one parameter matched the input string, even if the input string was shorter than the parameter
   ! the input string is then considered a valid (ie non ambiguous) shortcut for the parameter
   ! set the parameter accordingly
-  i = ihold(1)
-  l = lhold(1)
+  i = candidates%get_codex_index(1)
+  l = candidates%get_bost(1)
 !  goto (40, 100, 200, 1400, 50, 1410, 1420, 1430), iskip
   goto (40, 100, 200, 1400, 50), iskip
 end if
