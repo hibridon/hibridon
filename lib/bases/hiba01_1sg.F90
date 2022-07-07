@@ -723,7 +723,7 @@ line = fname
 readpt = .true.
 186 if (readpt) then
   l=1
-  call parse(line,l,filnam,lc)
+  call get_token(line,l,filnam,lc)
   if(lc.eq.0) then
     write(6,190)
 190     format(' FILENAME MISSING FOR POTENTIAL INPUT')
