@@ -5,6 +5,8 @@ subroutine driver()
 write (6,*) 'coucou : executing subroutine driver'
 end subroutine driver
 
+! code inspired from https://stackoverflow.com/questions/58749579/what-is-the-canonical-way-to-allocate-and-construct-polymorphic-objects-in-fortr
+
 module mod_command
   implicit none
 
@@ -76,27 +78,13 @@ implicit none
     procedure :: execute => showpot_execute
   end type showpot_command_type
 
-  interface showpot_command_type
-    module procedure :: showpot_command_constructor
-  end interface showpot_command_type
-
   ! dummyc1
   type, extends(command_type) :: dummyc1_command_type
   contains
     procedure :: execute => dummyc1_execute
   end type dummyc1_command_type
 
-  interface dummyc1_command_type
-    module procedure :: dummyc1_command_constructor
-  end interface dummyc1_command_type
-
 contains
-
-  function showpot_command_constructor()
-    type(showpot_command_type) :: showpot_command_constructor
-    write(6,*) 'showpot_command_constructor'
-  end function showpot_command_constructor
-
 
   subroutine showpot_execute(this, user_input_line, boca)
     class(showpot_command_type) :: this
@@ -108,12 +96,6 @@ contains
     write(6,*) "************************************************************"
     call driver
   end subroutine
-
-  function dummyc1_command_constructor()
-    type(dummyc1_command_type) :: dummyc1_command_constructor
-    write(6,*) 'dummyc1_command_constructor'
-  end function dummyc1_command_constructor
-
 
   subroutine dummyc1_execute(this, user_input_line, boca)
     class(dummyc1_command_type) :: this
