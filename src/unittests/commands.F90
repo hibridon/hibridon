@@ -11,7 +11,6 @@ module mod_command
   integer, parameter :: k_max_num_commands = 100
 
   type, abstract :: command_type
-    character(len=8) :: codex
   contains
     procedure(command_execute_interface), deferred :: execute
   end type command_type
@@ -26,6 +25,7 @@ module mod_command
   end interface
 
   type command_item_type
+    character(len=8) :: codex
     class(command_type), allocatable :: item
   end type command_item_type
 
@@ -39,25 +39,29 @@ module mod_command
   ! interface to create an instance of command_mgr_type using a construct familiar to other languages:
   ! g1 = command_mgr_type()
   interface command_mgr_type
-    module procedure create_command_mgr_type
+    module procedure command_mgr_ctor
   end interface command_mgr_type
 
 contains
 
-  subroutine commands_register_command(this, command)
+  subroutine commands_register_command(this, codex, command)
     class(command_mgr_type), intent(inout) :: this
+    character(len=*), intent(in) :: codex
     class(command_type), intent(in), allocatable :: command
     this%num_commands = this%num_commands + 1
+    ! allocate(this%commands(this%num_commands))
+    write(6,*) 'commands_register_command: codex = ', codex
+    this%commands(this%num_commands)%codex = codex
     this%commands(this%num_commands)%item = command
   end subroutine commands_register_command
 
-  function create_command_mgr_type() result(command_mgr)
+  function command_mgr_ctor() result(command_mgr)
     class(command_mgr_type), pointer :: command_mgr
     class(command_mgr_type), allocatable, target :: mgr
     command_mgr => mgr
 
-    write (6,*) 'coucou'
-  end function create_command_mgr_type
+    write (6,*) 'end of command_mgr_ctor'
+  end function command_mgr_ctor
 
 end module mod_command
 
@@ -91,7 +95,6 @@ contains
   function showpot_command_constructor()
     type(showpot_command_type) :: showpot_command_constructor
     write(6,*) 'showpot_command_constructor'
-    showpot_command_constructor%codex='SHOWPOT'
   end function showpot_command_constructor
 
 
@@ -109,7 +112,6 @@ contains
   function dummyc1_command_constructor()
     type(dummyc1_command_type) :: dummyc1_command_constructor
     write(6,*) 'dummyc1_command_constructor'
-    dummyc1_command_constructor%codex='DUMMYC1'
   end function dummyc1_command_constructor
 
 
@@ -128,14 +130,14 @@ contains
       write (6,*)  'coucou init: manager has been allocated'
     end if
     com = showpot_command_type()
-    call command_mgr%register_command(com)
+    call command_mgr%register_command('SHOWPOT', com)
 
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free
     com = dummyc1_command_type()
-    call command_mgr%register_command(com)
+    call command_mgr%register_command('DUMMYC1', com)
 
     write(6,*) 'after register num_commands=', command_mgr%num_commands
-    write(6,*) 'after register, 1st codex is ', command_mgr%commands(1)%item%codex
+    write(6,*) 'after register, 1st codex is ', command_mgr%commands(1)%codex
     ASSERT(associated(command_mgr))
   end subroutine init
 
@@ -147,8 +149,8 @@ subroutine test_commands()
   call init()
 
 
-  write (6, *) 'after init, 1st codex is ', command_mgr%commands(1)%item%codex
-  write (6, *) 'after init, 2nd codex is ', command_mgr%commands(2)%item%codex
+  write (6, *) 'after init, 1st codex is ', command_mgr%commands(1)%codex
+  write (6, *) 'after init, 2nd codex is ', command_mgr%commands(2)%codex
   call command_mgr%commands(1)%item%execute(user_input_line=line, boca=1)
   call command_mgr%commands(2)%item%execute(user_input_line=line, boca=1)
 end subroutine test_commands
