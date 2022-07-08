@@ -47,19 +47,8 @@ contains
   subroutine commands_register_command(this, command)
     class(command_mgr_type), intent(inout) :: this
     class(command_type), intent(in), allocatable :: command
-  !   ! class(command_type), pointer :: command_ptr
-  !   integer :: num_commands
     this%num_commands = this%num_commands + 1
     this%commands(this%num_commands)%item = command
-  !   ASSERT( this%num_commands <= k_max_num_commands )
-  !   !this%toto => command
-  !   num_commands = this%num_commands
-  !   ! command_ptr => this%commands(num_commands)%
-  !   write(6,*) 'command codex : ',command%codex
-  !   ! allocate(this%toto)
-  !   ! this%toto%p => command
-  !   !allocate(this%commands(num_commands))
-  !   !this%commands(num_commands) = command
   end subroutine commands_register_command
 
   function create_command_mgr_type() result(command_mgr)
@@ -133,19 +122,18 @@ contains
 
   subroutine init()
     class(command_type), allocatable :: com
-    class(command_type), allocatable :: com1
     if (.not. associated(command_mgr)) then
       allocate(command_mgr)
       command_mgr%num_commands = 0
       write (6,*)  'coucou init: manager has been allocated'
     end if
     com = showpot_command_type()
-    !allocate(showpot_command_type :: command_mgr%commands(1))
     call command_mgr%register_command(com)
-    com1 = dummyc1_command_type()
-    call command_mgr%register_command(com1)
-    !command_mgr%commands(1)%item = showpot_command_type()
-    ! call command_mgr%register_command( command )
+
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free
+    com = dummyc1_command_type()
+    call command_mgr%register_command(com)
+
     write(6,*) 'after register num_commands=', command_mgr%num_commands
     write(6,*) 'after register, 1st codex is ', command_mgr%commands(1)%item%codex
     ASSERT(associated(command_mgr))
