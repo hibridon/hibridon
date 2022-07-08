@@ -36,6 +36,7 @@ module mod_command
     type(command_item_type) :: commands(3)
   contains
     procedure :: register_command => commands_register_command
+    procedure :: execute_command => commands_execute_command
   end type command_mgr_type
 
   ! interface to create an instance of command_mgr_type using a construct familiar to other languages:
@@ -56,6 +57,20 @@ contains
     this%commands(this%num_commands)%codex = codex
     this%commands(this%num_commands)%item = command
   end subroutine commands_register_command
+
+  subroutine commands_execute_command(this, command_statement)
+    class(command_mgr_type), intent(inout) :: this
+    character(len=*), intent(in) :: command_statement
+    integer :: i
+    character(len=K_MAX_USER_LINE_LENGTH) :: line 
+    integer :: boca = 1
+    write (6,*) 'commands_execute_command : executing command ', trim(command_statement)
+    do i=1, this%num_commands
+      if (this%commands(i)%codex == command_statement) then
+        call this%commands(i)%item%execute(user_input_line=line, boca=boca)
+      end if
+    end do
+  end subroutine commands_execute_command
 
   function command_mgr_ctor() result(command_mgr)
     class(command_mgr_type), pointer :: command_mgr
@@ -135,6 +150,9 @@ subroutine test_commands()
   write (6, *) 'after init, 2nd codex is ', command_mgr%commands(2)%codex
   call command_mgr%commands(1)%item%execute(user_input_line=line, boca=1)
   call command_mgr%commands(2)%item%execute(user_input_line=line, boca=1)
+
+  call command_mgr%execute_command('DUMMYC1')
+  call command_mgr%execute_command('SHOWPOT')
 end subroutine test_commands
 
 program unittest_commands
