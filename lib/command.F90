@@ -8,17 +8,23 @@ module mod_command
 
   integer, parameter :: k_max_num_commands = 100
 
+  ! post_actions indicate what should be done after a command has been executed
+  integer, parameter :: k_post_action_read_new_line = 1  ! ask the user a new statements line then interpret it
+  integer, parameter :: k_post_action_interpret_next_statement = 2  ! interprets the next statement in statments line
+
   type, abstract :: command_type
   contains
     procedure(command_execute_interface), deferred :: execute
   end type command_type
 
   abstract interface
-    subroutine command_execute_interface(this, user_input_line, boca)
+    subroutine command_execute_interface(this, statements, bofargs, next_statement, post_action)
     import command_type
       class(command_type) :: this
-      character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: user_input_line  ! the string containing one line of a user input eg 'jtot=42;run;prints,myjob,1,3,2,4,7'
-      integer, intent(in) :: boca  ! beginning of command argument (index inuser_input_line  of the first character of the first argument of the current command)
+      character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements  ! the string containing one line of a user input eg 'jtot=42;run;prints,myjob,1,3,2,4,7'
+      integer, intent(in) :: bofargs  ! beginning of command argument (index in statements  of the first character of the first argument of the current command)
+      integer, intent(out) :: next_statement  ! index in statements of the beginning of next statement, in case post_action == k_post_action_interpret_next_statement
+      integer, intent(out) :: post_action  ! indicates what the caller is expected to do once the command has been executed
     end subroutine
   end interface
 
@@ -58,10 +64,12 @@ contains
     character(len=*), intent(in) :: command_statement
     integer :: i
     character(len=K_MAX_USER_LINE_LENGTH) :: line 
-    integer :: boca = 1
+    integer :: bofargs = 1
+    integer :: next_statement
+    integer :: post_action
     do i=1, this%num_commands
       if (this%commands(i)%codex == command_statement) then
-        call this%commands(i)%item%execute(user_input_line=line, boca=boca)
+        call this%commands(i)%item%execute(statements=line, bofargs=bofargs, next_statement=next_statement, post_action=post_action)
       end if
     end do
   end subroutine commands_execute_command

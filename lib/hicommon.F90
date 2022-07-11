@@ -46,3 +46,61 @@ implicit none
 
 
 end module funit
+
+! system independent parameters
+module mod_si_params
+  !  ncode is the number of bcod's
+  !  bcod stores hibridon's commands
+  !  fcod stores logical flags (length = lcode)
+  integer, parameter :: ncode = 38
+  integer, parameter :: lcode = 28
+  !  iicode is the number of integer pcod's
+  !  ircode is the number of real pcod's
+  integer, parameter :: iicode = 10
+  integer, parameter :: ircode = 9
+  integer, parameter :: icode = iicode+ircode
+
+contains
+  subroutine set_param_names(boundc, param_names, param_names_size)
+    !  subroutine to change param_names's for bound state or scattering
+    use mod_hiparcst, only: IPAR_COUNT
+    use rpar_enum
+    implicit none
+    logical, intent(in) :: boundc
+    integer, intent(in) :: param_names_size  ! size of param_names array
+    character*8, intent(out) :: param_names(param_names_size)  ! array containing the name of each parameter (old name: pcod)
+    if (boundc) then
+      param_names(IPAR_COUNT + RPAR_BOUND_R1)      = 'R1'
+      param_names(IPAR_COUNT + RPAR_BOUND_R2)      = 'R2'
+      param_names(IPAR_COUNT + RPAR_BOUND_C)       = 'C' 
+      param_names(IPAR_COUNT + RPAR_BOUND_SPAC)    = 'SPAC' 
+      param_names(IPAR_COUNT + RPAR_BOUND_DELR)    = 'DELR' 
+      param_names(IPAR_COUNT + RPAR_BOUND_HSIMP)   = 'HSIMP' 
+      param_names(IPAR_COUNT + RPAR_BOUND_EIGMIN)  = 'EIGMIN' 
+      param_names(IPAR_COUNT + RPAR_BOUND_TOLAI)   = 'TOLAI' 
+    else
+      param_names(IPAR_COUNT + RPAR_SCAT_FSTFAC)  = 'FSTFAC'
+      param_names(IPAR_COUNT + RPAR_SCAT_RINCR)   = 'RINCR'
+      param_names(IPAR_COUNT + RPAR_SCAT_RCUT)    = 'RCUT'
+      param_names(IPAR_COUNT + RPAR_SCAT_RENDAI)  = 'RENDAI'
+      param_names(IPAR_COUNT + RPAR_SCAT_RENDLD)  = 'RENDLD'
+      param_names(IPAR_COUNT + RPAR_SCAT_RSTART)  = 'RSTART'
+      param_names(IPAR_COUNT + RPAR_SCAT_SPAC)    = 'SPAC'
+      param_names(IPAR_COUNT + RPAR_SCAT_TOLAI)   = 'TOLAI'
+    endif
+    return
+  end
+
+end module mod_si_params
+
+module mod_hinput_state
+  use mod_hiparcst, only: LPAR_COUNT
+
+  logical :: batch
+  data batch /.false./
+
+  !  lindx is pointer from fcod order to order in common block colpar
+  ! graffy: colpar and fcod both contain the 28 logical parameters but in a different order, thus requiring a remapping through lindx. Why not simply having the same order, by making fcod match colpar?
+  integer :: lindx(LPAR_COUNT)
+
+end module mod_hinput_state

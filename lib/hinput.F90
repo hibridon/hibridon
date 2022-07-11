@@ -103,7 +103,6 @@ end subroutine candidates_empty
 
 end module mod_candidates
 
-
 module mod_hinput
   implicit none
   enum, bind( C )
@@ -164,7 +163,7 @@ use mod_coiout, only: niout, indout
 use mod_codim, only: nmax => mmax
 use mod_coamat, only: scmat => toto ! scmat(1)
 use mod_coener, only: energ
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam, lamnum
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysl, only: islcod, lspar
@@ -173,7 +172,7 @@ use mod_version, only : version
 use mod_coj12, only: j12
 use mod_hibrid5, only : intcrs, readpc
 use mod_difcrs, only: difcrs
-use mod_hibasis, only: is_twomol
+use mod_hibasis, only: is_twomol, basknd
 use mod_hibrid2, only: enord, prsg
 use mod_hibrid3, only: testptn, testpt20, testpt, potmin
 use mod_hiutil, only: assignment_parse
@@ -185,17 +184,11 @@ use rpar_enum
 use mod_par, only: lpar, ipar, rpar
 use mod_candidates, only: candidates_type
 use mod_hicommands, only: command_init => init, command_mgr, command_type
+use mod_hinput_state, only: batch
+use mod_si_params, only: iicode, ircode, icode, ncode, lcode, set_param_names
+use mod_hinput_state, only: lindx
+use mod_command, only: k_post_action_interpret_next_statement, k_post_action_read_new_line
 implicit none
-!  iicode is the number of integer pcod's
-!  ircode is the number of real pcod's
-!  ncode is the number of bcod's
-!  bcod stores hibridon's commands
-!  fcod stores logical flags (length = lcode)
-integer, parameter :: ncode = 38
-integer, parameter :: lcode = 28
-integer, parameter :: iicode = 10
-integer, parameter :: ircode = 9
-integer, parameter :: icode = iicode+ircode
 character(len=K_MAX_USER_LINE_LENGTH) line
 character*40 :: fnam1
 character*40 :: fnam2
@@ -205,7 +198,7 @@ integer nerg
 logical existf, first, openfl
 integer :: lenstr
 real(8) :: turn
-logical logp, opti, jtrunc
+logical logp, opti
 real(8) :: a(15)  ! real arguments
 integer :: ia(10)  ! integer arguments of commands
 #include "common/parbas.F90"
@@ -255,35 +248,19 @@ common /cotwo/ numj,nj1j2(5)
 integer :: numj
 integer :: nj1j2
 
-! when adding bases, change size of array basknd and size of
-! parameter kmxbas in himain.f
-character*9 :: basknd(30)
-data basknd /'1-SIGMA', '2-SIGMA', '2-PI', 'SIGMA|PI', &
-              'GEN-PI', 'SYM-TOP-I', '1/3-P-AT', '1SIG+1SIG', &
-              'SYMT-LIN',' 2/2-P-AT', '1-DELTA', 'HOMO+2P', &
-              'HOMO+3P', '2-DELTA', '2P-DIAT', 'ASYM-TOP', &
-              'CH2X', 'SYM-TOP-N', '2SG|2PI_N', '2PI|1SG', &
-              'SYMT|1SG','1D-3P-AT','3P-2S-AT', 'SPH-TOP', &
-              '1SG-1SG', '2SG-1SG', 'C2v-ASTP','3SG-1SG', &
-              'CASYMTOP', 'ASYM-DIAT' /
-!  lindx is pointer from fcod order to order in common block colpar
-! graffy: colpar and fcod both contain the 28 logical parameters but in a different order, thus requiring a remapping through lindx. Why not simply having the same order, by making fcod match colpar?
-integer :: lindx(LPAR_COUNT)
-
 integer :: irpot
 integer :: irinp
 data irpot, irinp /0, 0/
 
-logical :: batch
-data batch /.false./
-
 integer :: ipr, istep, inam, i, ienerg, iflux, ii, im, imx, incode, inew, ione, iprint, iskip, itx, ityp, izero
-integer :: j, jm, jmx, jtot2x, l, l1, l2, lc, lcc, ld, len, lend, length, leninp, lenjob, lenout, low
+integer :: j, jm, jmx, jtot2x, l, l1, l2, lc, lcc, ld, len, lend, length, low
 integer :: nde
 real(8) :: optacm, r, thrs, val, waveve, xmu
 real(8) :: a1, acc, acclas, optval, optacc, accmx, delt_e, e, e1
 type(candidates_type) :: candidates
 class(command_type), pointer :: command
+integer :: post_action
+integer :: next_statement
 save ipr, opti, a, a1, acc, acclas, optval, optacc, istep, inam, &
      fnam1, fnam2, code, lc, jtot2x, irpot, irinp
 
@@ -398,7 +375,6 @@ fcod(FCOD_BOUNDC)='BOUNDC'
 ! read: 800
 ! run: 500
 ! save: 1300
-! show: 700
 ! tenxsc: 2300
 ! testpot: 1200
 ! turn: 1600
@@ -438,19 +414,18 @@ bcod(22)='QUIT'
 bcod(23)='READ'
 bcod(24)='RUN'
 bcod(25)='SAVE'
-bcod(26)='SHOW'
-bcod(27)='TENXSC'
-bcod(28)='TESTPOT'
-bcod(29)='TURN'
-bcod(30)='INDOUT'
-bcod(31)='PARTC'
-bcod(32)='FLUX'
-bcod(33)='J1J2'
-bcod(34)='EADIAB'
-bcod(35)='SYSCONF'
-bcod(36)='HYPXSC'
-bcod(37)='STMIX'
-bcod(38)='TRNPRT'
+bcod(26)='TENXSC'
+bcod(27)='TESTPOT'
+bcod(28)='TURN'
+bcod(29)='INDOUT'
+bcod(30)='PARTC'
+bcod(31)='FLUX'
+bcod(32)='J1J2'
+bcod(33)='EADIAB'
+bcod(34)='SYSCONF'
+bcod(35)='HYPXSC'
+bcod(36)='STMIX'
+bcod(37)='TRNPRT'
 !
 iipar=iicode
 irpar=ircode
@@ -631,7 +606,7 @@ end if
       2500, &
       2400,2100,900,1000,2600, &
       1900,2800,600, &
-      800,500,1300,700,2300, &
+      800,500,1300,2300, &
       1200,1600,430,2650,2800, &
       460,2850,2900,2950,3000, &
       3100),i
@@ -639,8 +614,15 @@ end if
 ! label:execute_command_mgr_command(i)
 !
 45 continue
-   call command_mgr%commands(i)%item%execute(user_input_line=line, boca=l)
-   goto 1  ! label:read_next_command
+  call command_mgr%commands(i)%item%execute(statements=line, bofargs=l, next_statement=next_statement, post_action=post_action)
+  if (post_action == k_post_action_read_new_line) then
+    goto 1  ! label:read_next_command
+  else if (post_action == k_post_action_interpret_next_statement) then
+    l1 = next_statement
+    goto 15  ! label:interpret_statement(line, l1)
+  else
+    ASSERT( .false. )  ! unexpected value for post_action
+  end if 
 !
 ! label:set_ibasty(line,l)
 ! basis type and kind of calculation
@@ -959,104 +941,11 @@ end if
 ! exit
 600 continue
 call exit
-! show all parameters and flags
-! show
-700 l1 = l
-call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
-call get_token(line,l,code,lc)
-if (.not.lpar(LPAR_BOUNDC)) then
-  write(6,710) &
-   'Parameters (scattering):',(pcod(j),ipar(j),j = 1,iicode)
-else
-  write(6,710) &
-   'Parameters (bound-state):',(pcod(j),ipar(j),j = 1,iicode)
-endif
-write(6,720)   (pcod(iicode+j),rpar(j),j = 1,ircode-1)
-write(6,1720)  pcod(iicode+ircode), rpar(ircode)
-if(nnout.ne.0) then
-  if (.not.lpar(LPAR_TWOMOL) ) then
-    write (6,737) 'NOUT: ',nnout, &
-           '; JOUT:',(jout(j), j=1,iabs(nnout) )
-  else
-    write (6,739) 'NOUT: ',nnout, &
-         '; J1/J2-OUT: ', &
-        (jout(j)/10, mod (jout(j),10), j = 1,iabs(nnout))
-  end if
-end if
-if(niout.ne.0) write (6,701) 'INDOUT:',(indout(j), j=1,niout)
-701   format(1x,(a),10i5,/,8x,10i5,/,5x,10i5)
-if (ibasty .lt. 99) then
-  length = index(basknd(ibasty),' ') - 1
-  if (length .eq. -1) length=9
-#if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
-    write(6,710) basknd(ibasty)(1:length)//' system parameters:', &
-             (scod(j),ispar(j),j = 1,isicod)
-#endif
-else
-  write(6,710) 'user defined system parameters:', &
-               (scod(j),ispar(j),j = 1,isicod)
-endif
-if(isrcod.gt.0) &
-  write(6,720) (scod(isicod+j),rspar(j),j = 1,isrcod)
-if(islcod.gt.0) &
-  write(6,735) (scod(isicod+isrcod+j),lspar(j),j = 1,islcod)
-if (.not. lpar(LPAR_TWOMOL) ) then
-  write(6,736) 'LAMMIN: ',(lammin(j),j=1,ispar(1))
-  write(6,736) 'LAMMAX: ',(lammax(j),j=1,ispar(1))
-  write(6,736) 'MPROJ:  ',(mproj(j),j=1,ispar(1))
-else if (lpar(LPAR_TWOMOL)) then
-  write (6, 738)'J1/J2: ',(nj1j2(j)/10,mod(nj1j2(j),10), &
-                    j=1,numj)
-end if
-write(6,730) 'Flags:',(fcod(j),lpar(lindx(j)),j = 1,lcode)
-write(6,731)  nmax, nlammx
-if (ipar(IPAR_LSCREEN) .le. 24 .and. .not. batch) then
-  write (6, 703)
-703   format (6x,'enter <return> to continue,', &
-             ' <q> for prompt, or new data')
-  read (5, 10) line
-  if (line(1:1) .eq. 'q' .or. line(1:1) .eq. 'q') then
-    goto 1  ! label:read_next_command
-  else if (line(1:1) .ne. ' ') then
-    goto 11
-  end if
-end if
-call enord(energ,ipar(IPAR_NERG))
-if(ipar(IPAR_NERG).gt.0) write(6,740) (energ(j),j = 1,ipar(IPAR_NERG))
 710 format(5x,'*** ',(a)/(4(1x,a7,'=',i4,7x)))
 720 format(4(1x,a7,'=',1pg11.4))
-1720 format(1x,a7,'=',f10.5)
 730 format(5x,'*** ',(a)/(6(1x,a6,'=',l2,3x)))
-731 format(1x,'** Maximum Channels: ', i4, '; ', &
-  'Maximum Anisotropic Terms: ',i5)
 735 format(3(1x,a7,'=',l2,9x))
 740 format(1x,'** Energies:',(t15,5f15.6))
-lenout = index(output,' ')-1
-lenjob = index(jobnam,' ')-1
-jtrunc = .false.
-if (lenjob.gt.8) then
-   jobnam=jobnam(1:8)
-   jtrunc = .true.
-endif
-leninp=index(input,' ')-1
-write (6, 751) label
-751 format (1x,'** Label:      ',(a))
-write (6, 752) potnam
-752 format (1x,'** Pot name:      ',(a))
-if (.not. jtrunc) then
-   write (6, 753) input(1:leninp), &
-     output(1:lenout), jobnam(1:lenjob)
-753 format(1x,'** Input File:  ',(a),/ &
-       1x,'** Output file: ',(a),/,1x,'** Jobname:     ',(a))
-else
-   write (6, 754) input(1:leninp), &
-     output(1:lenout), jobnam(1:lenjob)
-754 format(1x,'** Input File:  ',(a),/ &
-       1x,'** Output file: ',(a),/,1x,'** Jobname:     ',(a), &
-       ' (** TRUNCATED TO 8 CHARACTERS **)')
-endif
-l1 = l
-goto 15  ! label:interpret_statement(line, l1)
 ! read
 800 call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
 call gendat
@@ -1768,35 +1657,6 @@ call assignment_parse(code(1:lc),empty_var_list,j,a(1))
 3105 continue
 call trnprt(fnam1,a)
 goto 1  ! label:read_next_command
-end
-subroutine set_param_names(boundc, param_names, param_names_size)
-!  subroutine to change param_names's for bound state or scattering
-use mod_hiparcst, only: IPAR_COUNT
-use rpar_enum
-implicit none
-logical, intent(in) :: boundc
-integer, intent(in) :: param_names_size  ! size of param_names array
-character*8, intent(out) :: param_names(param_names_size)  ! array containing the name of each parameter (old name: pcod)
-if (boundc) then
-  param_names(IPAR_COUNT + RPAR_BOUND_R1)      = 'R1'
-  param_names(IPAR_COUNT + RPAR_BOUND_R2)      = 'R2'
-  param_names(IPAR_COUNT + RPAR_BOUND_C)       = 'C' 
-  param_names(IPAR_COUNT + RPAR_BOUND_SPAC)    = 'SPAC' 
-  param_names(IPAR_COUNT + RPAR_BOUND_DELR)    = 'DELR' 
-  param_names(IPAR_COUNT + RPAR_BOUND_HSIMP)   = 'HSIMP' 
-  param_names(IPAR_COUNT + RPAR_BOUND_EIGMIN)  = 'EIGMIN' 
-  param_names(IPAR_COUNT + RPAR_BOUND_TOLAI)   = 'TOLAI' 
-else
-  param_names(IPAR_COUNT + RPAR_SCAT_FSTFAC)  = 'FSTFAC'
-  param_names(IPAR_COUNT + RPAR_SCAT_RINCR)   = 'RINCR'
-  param_names(IPAR_COUNT + RPAR_SCAT_RCUT)    = 'RCUT'
-  param_names(IPAR_COUNT + RPAR_SCAT_RENDAI)  = 'RENDAI'
-  param_names(IPAR_COUNT + RPAR_SCAT_RENDLD)  = 'RENDLD'
-  param_names(IPAR_COUNT + RPAR_SCAT_RSTART)  = 'RSTART'
-  param_names(IPAR_COUNT + RPAR_SCAT_SPAC)    = 'SPAC'
-  param_names(IPAR_COUNT + RPAR_SCAT_TOLAI)   = 'TOLAI'
-endif
-return
 end
 
 end module mod_hinput
