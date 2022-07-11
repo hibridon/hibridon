@@ -14,6 +14,7 @@ set(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR "ON" CACHE BOOL "if set, causes the use o
 add_library(hib
     ancou.F90
     assert.f90
+    command.F90
     grovec.F90
     hiamp.F90
     hibasis.F90
@@ -24,6 +25,7 @@ add_library(hib
     hibrid3.F90
     hibrid4.F90
     hibrid5.F90
+    hicommands.F90
     hicommon.F90
     hidifcrs.F90
     hiflow.F90
@@ -94,7 +96,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       # Non-specific options
       -std=legacy                               # Allow pre-Fortran 77 syntax (e.g. arbitrary length arrays)
       -ffree-line-length-none                   # Allow arbitrary long lines. Needed as preprocessing could generate long line lengths.
-      -fno-automatic                            # Put everything on the heap
+#      -fno-automatic                            # Put everything on the heap
 #      -fdefault-integer-8
 #      -finteger-4-integer-8
       $<$<PLATFORM_ID:Linux>:-march=native>     # Tune generated code for host's micro-architecture

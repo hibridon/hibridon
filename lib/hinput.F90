@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "command.inc.F90"
 #if defined(HIB_UNIX_IBM) || defined(HIB_UNIX_AIX)
 @proc ss noopt
 #endif
@@ -54,7 +55,7 @@ subroutine candidates_add_candidate(this, codex, codex_index, bost)
   class(candidates_type), intent(inout) :: this
   character(len=8), intent(in) :: codex
   integer, intent(in) :: codex_index
-  integer, intent(in) :: bost  ! index of line that ponts to the beginnning of the statement (eg 'JTOT=42')
+  integer, intent(in) :: bost  ! index of line that points to the beginnning of the statement (eg 'JTOT=42')
 
   this%num_candidates = this%num_candidates + 1
   if (this%num_candidates > k_max_candidates) then
@@ -102,6 +103,7 @@ end subroutine candidates_empty
 
 end module mod_candidates
 
+
 module mod_hinput
   implicit none
   enum, bind( C )
@@ -110,7 +112,8 @@ module mod_hinput
     k_keyword_set_si_ir_param     =  2, &   !  100 label:set_si_ir_param(line, l)
     k_keyword_set_si_l_param      =  3, &   !  200 label:set_si_l_param(line, l)
     k_keyword_set_sd_param        =  4, &   ! 1400 label:set_sd_param(line, l)
-    k_keyword_set_ibasty          =  5      !   50 label:set_ibasty(line,l)
+    k_keyword_set_ibasty          =  5, &   !   50 label:set_ibasty(line,l)
+    k_keyword_execute_command_mgr_command     =  6   !   45 label:execute_command_mgr_command(i)
   end enum
 
 contains
@@ -181,18 +184,19 @@ use ipar_enum
 use rpar_enum
 use mod_par, only: lpar, ipar, rpar
 use mod_candidates, only: candidates_type
+use mod_hicommands, only: command_init => init, command_mgr, command_type
 implicit none
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
 !  ncode is the number of bcod's
 !  bcod stores hibridon's commands
 !  fcod stores logical flags (length = lcode)
-integer, parameter :: ncode = 40
+integer, parameter :: ncode = 39
 integer, parameter :: lcode = 28
 integer, parameter :: iicode = 10
 integer, parameter :: ircode = 9
 integer, parameter :: icode = iicode+ircode
-character*80 line
+character(len=K_MAX_USER_LINE_LENGTH) line
 character*40 :: fnam1
 character*40 :: fnam2
 character*40 :: code
@@ -202,8 +206,8 @@ logical existf, first, openfl
 integer :: lenstr
 real(8) :: turn
 logical logp, opti, jtrunc
-real(8) :: a(15)
-integer :: ia(10)
+real(8) :: a(15)  ! real arguments
+integer :: ia(10)  ! integer arguments of commands
 #include "common/parbas.F90"
 #include "common/parpot.F90"
 common /cosavi/ iipar, ixpar(iicode)
@@ -279,8 +283,14 @@ integer :: nde
 real(8) :: optacm, r, thrs, val, waveve, xmu
 real(8) :: a1, acc, acclas, optval, optacc, accmx, delt_e, e, e1
 type(candidates_type) :: candidates
+class(command_type), pointer :: command
 save ipr, opti, a, a1, acc, acclas, optval, optacc, istep, inam, &
      fnam1, fnam2, code, lc, jtot2x, irpot, irinp
+
+if (first) then
+  call command_init()
+end if
+ASSERT(associated(command_mgr))
 
 nerg = 0
 lindx(FCOD_AIRYFL) = LPAR_AIRYFL
@@ -402,7 +412,6 @@ fcod(FCOD_BOUNDC)='BOUNDC'
 ! stmix:  3000
 ! trnprt:  3100
 ! prsbr:   3200
-! showpot:  3300
 ! nb after changing the following list, check that all the variables "incode"
 ! that follow after address 900 are changed accordingly
 bcod(1)='CHECK'
@@ -444,7 +453,6 @@ bcod(36)='HYPXSC'
 bcod(37)='STMIX'
 bcod(38)='TRNPRT'
 bcod(39)='PRSBR'
-bcod(40)='SHOWPOT'
 !
 iipar=iicode
 irpar=ircode
@@ -540,6 +548,16 @@ do i = 1,ncode
     iskip = k_keyword_execute_command
   end if
 end do
+! search in command_mgr
+do i = 1, command_mgr%num_commands
+  len = lenstr(command_mgr%commands(i)%codex)
+  if(command_mgr%commands(i)%codex(1:lc) .eq. code(1:lc)) then
+    if (lc .eq. len) goto 45  ! label:execute_command_mgr_command(i)
+    call candidates%add_candidate(codex=bcod(i), codex_index=i, bost=l)
+    iskip = k_keyword_execute_command_mgr_command
+  end if
+end do
+
 ASSERT(l1 >= 0) ! graffy: I suspect that l1 can never be negative
 l = iabs(l1)  ! reset l at the start of a statement because the different keyword handling entry points will expect it to be pointing to the beginning of the statement
 ASSERT(l >= 0)  ! make sure l is positive (even if one day we remove the suspected unneeded iabs above)
@@ -603,7 +621,7 @@ else
   i = candidates%get_codex_index(1)
   l = candidates%get_bost(1)
 !  goto (40, 100, 200, 1400, 50, 1410, 1420, 1430), iskip
-  goto (40, 100, 200, 1400, 50), iskip
+  goto (40, 100, 200, 1400, 50, 45), iskip
 end if
 !
 ! label:execute_command(i)
@@ -618,7 +636,13 @@ end if
       800,500,1300,700,2300, &
       1200,1600,430,2650,2800, &
       460,2850,2900,2950,3000, &
-      3100,3200,3300),i
+      3100,3200),i
+!
+! label:execute_command_mgr_command(i)
+!
+45 continue
+   call command_mgr%commands(i)%item%execute(user_input_line=line, boca=l)
+   goto 1  ! label:read_next_command
 !
 ! label:set_ibasty(line,l)
 ! basis type and kind of calculation
@@ -1316,25 +1340,32 @@ write (6, 1831) waveve, 1.8897*waveve
    g12.5,' Angstroms^-1')
 l1 = l
 goto 15  ! label:interpret_statement(line, l1)
+!
+! label:execute_command_prints(line, l)
+!
 !.....print s-matrices:
-!  print,jobfile,j1,j2,jd,jlp,ienerg
+!  prints,jobfile,j1,j2,jd,jlp,ienerg
 !  first matrix printed is for jtot=j1
 !  last matrix printed is for jtot=j2
 !  increment of jtot is jd
 !  default values are:
 !  j1 = jtot1, j2=jtot1, jd=jtotd, jlp=jlpar,ienerg=1
 !  jlp: parity; zero means both values
-1900 call get_token(line,l,fnam1,lc)
+1900 continue
+ASSERT(l >= 0)  ! verify that '=' is not treated as a delimiter in get_token
+! read the job file name
+call get_token(line,l,fnam1,lc)
 if(fnam1 .eq. ' ') fnam1 = jobnam
 call lower(fnam1)
 call upper(fnam1(1:1))
-do 1910 i = 1,5
-ia(i) = 0
-if(l .eq. 0) goto 1910
-call get_token(line,l,code,lc)
-call assignment_parse(code(1:lc),empty_var_list,j,a(i))
-ia(i)=a(i)
-1910 continue
+! read the remaining arguments
+do i = 1,5
+  ia(i) = 0
+  if(l .eq. 0) exit
+  call get_token(line,l,code,lc)
+  call assignment_parse(code(1:lc),empty_var_list,j,a(i))
+  ia(i)=a(i)
+end do
 if(ia(1).eq.0) ia(1)=ipar(IPAR_JTOT1)
 if(ia(2).eq.0) ia(2)=ipar(IPAR_JTOT2)
 if(ia(3).eq.0) ia(3)=ipar(IPAR_JTOTD)
@@ -1738,13 +1769,6 @@ call assignment_parse(code(1:lc),empty_var_list,j,a(1))
 ! get in1, in2, jtotmx, join, jmax
 3105 continue
 call trnprt(fnam1,a)
-goto 1  ! label:read_next_command
-3300 continue
-write(6,*) "************************************************************"
-write(6,*) "Entering the DRIVER subroutine of the potential"
-write(6,*) "Press Ctrl+D to go back to Hibridon's console"
-write(6,*) "************************************************************"
-call driver
 goto 1  ! label:read_next_command
 ! pressure broadening cross sections - added by p. dagdigian
 3200 call get_token(line,l,fnam1,lc)
