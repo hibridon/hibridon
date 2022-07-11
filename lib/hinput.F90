@@ -191,7 +191,7 @@ implicit none
 !  ncode is the number of bcod's
 !  bcod stores hibridon's commands
 !  fcod stores logical flags (length = lcode)
-integer, parameter :: ncode = 39
+integer, parameter :: ncode = 38
 integer, parameter :: lcode = 28
 integer, parameter :: iicode = 10
 integer, parameter :: ircode = 9
@@ -411,7 +411,6 @@ fcod(FCOD_BOUNDC)='BOUNDC'
 ! hypxsc: 2950
 ! stmix:  3000
 ! trnprt:  3100
-! prsbr:   3200
 ! nb after changing the following list, check that all the variables "incode"
 ! that follow after address 900 are changed accordingly
 bcod(1)='CHECK'
@@ -452,7 +451,6 @@ bcod(35)='SYSCONF'
 bcod(36)='HYPXSC'
 bcod(37)='STMIX'
 bcod(38)='TRNPRT'
-bcod(39)='PRSBR'
 !
 iipar=iicode
 irpar=ircode
@@ -636,7 +634,7 @@ end if
       800,500,1300,700,2300, &
       1200,1600,430,2650,2800, &
       460,2850,2900,2950,3000, &
-      3100,3200),i
+      3100),i
 !
 ! label:execute_command_mgr_command(i)
 !
@@ -1769,34 +1767,6 @@ call assignment_parse(code(1:lc),empty_var_list,j,a(1))
 ! get in1, in2, jtotmx, join, jmax
 3105 continue
 call trnprt(fnam1,a)
-goto 1  ! label:read_next_command
-! pressure broadening cross sections - added by p. dagdigian
-3200 call get_token(line,l,fnam1,lc)
-if(fnam1 .eq. ' ') fnam1 = jobnam
-call lower(fnam1)
-call upper(fnam1(1:1))
-! get iener for 1st smt file
-a(1) = 0.d0
-if(l .eq. 0) goto 3205
-call get_token(line,l,code,lc)
-call assignment_parse(code(1:lc),empty_var_list,j,a(1))
-3205 call get_token(line,l,fnam2,lc)
-if(fnam2 .eq. ' ') fnam2 = jobnam
-call lower(fnam2)
-call upper(fnam2(1:1))
-! get iener for 2nd smt file
-a(2) = 0.d0
-if(l .eq. 0) goto 3210
-call get_token(line,l,code,lc)
-call assignment_parse(code(1:lc),empty_var_list,j,a(2))
-! get k, j1, in1, j2, in2, diag, j1p, in1p, j2p, in2p
-3210 do 3220 i = 3, 12
-  a(i) = 0.d0
-  if(l .eq. 0) goto 3220
-  call get_token(line,l,code,lc)
-  call assignment_parse(code(1:lc),empty_var_list,j,a(i))
-3220 continue
-call prsbr(fnam1,fnam2,a)
 goto 1  ! label:read_next_command
 end
 subroutine set_param_names(boundc, param_names, param_names_size)
