@@ -132,7 +132,6 @@ contains
     !  intcrs,jobfile,in1,in2,ienerg,maxjtot
     use mod_hiutil, only: assignment_parse
     use mod_command, only: k_post_action_read_new_line
-    use mod_hinput_state, only: fnam1
     implicit none
     class(intcrs_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
@@ -147,7 +146,7 @@ contains
     character*40 :: jobnam
     character*40 :: savfil
 
-    ! character(len=40) :: fnam1
+    character(len=40) :: fnam1
 
     integer :: i, j, l, lc
     integer, parameter :: k_num_args = 4
@@ -453,7 +452,6 @@ contains
     ! pressure broadening cross sections - added by p. dagdigian
     use mod_hiutil, only: assignment_parse
     use mod_command, only: k_post_action_read_new_line
-    use mod_hinput_state, only: fnam1, fnam2
     class(prsbr_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
     integer, intent(in) :: bofargs
@@ -462,8 +460,8 @@ contains
     integer :: l
     character*8 empty_var_list(0)
     character*40 :: code
-    ! character(len=40) :: fnam1
-    ! character(len=40) :: fnam2
+    character(len=40) :: fnam1
+    character(len=40) :: fnam2
 
     integer :: i, j, lc
     integer, parameter :: k_num_args = 12

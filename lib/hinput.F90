@@ -186,7 +186,7 @@ use mod_candidates, only: candidates_type
 use mod_hicommands, only: command_init => init, command_mgr, command_type, update_nu_params
 use mod_hinput_state, only: batch
 use mod_si_params, only: iicode, ircode, icode, ncode, lcode, set_param_names
-use mod_hinput_state, only: lindx, irpot, irinp, fnam1, fnam2
+use mod_hinput_state, only: lindx, irpot, irinp
 use mod_command, only: k_post_action_interpret_next_statement, k_post_action_read_new_line, k_post_action_exit_hibridon, k_post_action_exit_hinput, k_post_action_write_cr_and_exit
 implicit none
 character(len=K_MAX_USER_LINE_LENGTH) line
@@ -215,6 +215,10 @@ character*40 :: input
 character*40 :: output
 character*40 :: jobnam
 character*40 :: savfil
+
+character(len=40) :: fnam1
+character(len=40) :: fnam2
+
 
 common /cokeyl/ nncode, llcode, ijcode
 integer :: nncode
