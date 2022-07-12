@@ -248,7 +248,7 @@ common /cotwo/ numj,nj1j2(5)
 integer :: numj
 integer :: nj1j2
 
-integer :: ipr, istep, inam, i, ienerg, iflux, ii, im, imx, incode, inew, ione, iprint, iskip, itx, ityp, izero
+integer :: ipr, istep, inam, i, ienerg, iflux, ii, im, imx, inew, ione, iprint, iskip, itx, ityp, izero
 integer :: j, jm, jmx, jtot2x, l, l1, l2, lc, lcc, ld, len, lend, low
 integer :: nde
 real(8) :: optacm, r, thrs, val, waveve, xmu
@@ -856,9 +856,7 @@ goto 15  ! label:interpret_next_statement(line, l1)
 ! input=infile, output=outfile, job=jobfile
 ! input, output, and label are now lower case:  mha 6.6.91
 900 call get_token(line,l,code,lc)
-! incode is index of command input in list bcod
-incode=8
-if(i .eq. 8) then
+if(trim(bcod(i)) == 'INPUT') then
   input = code(1:lc)
   call lower(input)
   call upper(input(1:1))
@@ -871,13 +869,11 @@ if(i .eq. 8) then
     goto 1  ! label:read_new_line
   end if
   goto 800
-! incode 10 is index of command job in list bcod
-else if(i .eq. 10) then
+else if(trim(bcod(i)) == 'JOB') then
   jobnam = code(1:lc)
   call lower(jobnam)
   call upper(jobnam(1:1))
-! incode 12 is index of command label in list bcod
-else if(i .eq. 12) then
+else if(trim(bcod(i)) == 'LABEL') then
   low = index (line, '=') + 1
   lend = index (line, ';') - 1
   if(lend.lt.0) then
@@ -887,8 +883,7 @@ else if(i .eq. 12) then
     l=lend+2
   end if
   label = line(low:lend)
-! incode 17 is index of command output in list bcod
-else if(i .eq. 17) then
+else if(trim(bcod(i)) == 'OUTPUT') then
   output = code(1:lc)
   call lower(output)
   call upper(output(1:1))
