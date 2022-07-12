@@ -186,12 +186,10 @@ use mod_candidates, only: candidates_type
 use mod_hicommands, only: command_init => init, command_mgr, command_type, update_nu_params
 use mod_hinput_state, only: batch
 use mod_si_params, only: iicode, ircode, icode, ncode, lcode, set_param_names
-use mod_hinput_state, only: lindx, irpot, irinp
+use mod_hinput_state, only: lindx, irpot, irinp, fnam1, fnam2
 use mod_command, only: k_post_action_interpret_next_statement, k_post_action_read_new_line, k_post_action_exit_hibridon, k_post_action_exit_hinput, k_post_action_write_cr_and_exit
 implicit none
 character(len=K_MAX_USER_LINE_LENGTH) line
-character*40 :: fnam1
-character*40 :: fnam2
 character*40 :: code
 character*8 empty_var_list(0)
 integer nerg
@@ -258,7 +256,7 @@ class(command_type), pointer :: command
 integer :: post_action
 integer :: next_statement
 save ipr, opti, a, a1, acc, acclas, optval, optacc, istep, inam, &
-     fnam1, fnam2, code, lc, jtot2x
+     code, lc, jtot2x
 
 if (first) then
   call command_init()
@@ -354,7 +352,6 @@ fcod(FCOD_BOUNDC)='BOUNDC'
 ! exit: 600
 ! help: 75
 ! input: 900
-! intcrs: 2200
 ! job: 900
 ! jout: 400
 ! label: 900
@@ -392,34 +389,33 @@ bcod(5)='ENERGY'
 bcod(6)='EXIT'
 bcod(7)='HELP'
 bcod(8)='INPUT'
-bcod(9)='INTCRS'
-bcod(10)='JOB'
-bcod(11)='JOUT'
-bcod(12)='LABEL'
-bcod(13)='MINPOT'
-bcod(14)='MRCRS'
-bcod(15)='NNOUT'
-bcod(16)='OPTIMIZE'
-bcod(17)='OUTPUT'
-bcod(18)='POT'
-bcod(19)='PRINTC'
-bcod(20)='PRINTS'
-bcod(21)='PSI'
-bcod(22)='QUIT'
-bcod(23)='READ'
-bcod(24)='SAVE'
-bcod(25)='TENXSC'
-bcod(26)='TESTPOT'
-bcod(27)='TURN'
-bcod(28)='INDOUT'
-bcod(29)='PARTC'
-bcod(30)='FLUX'
-bcod(31)='J1J2'
-bcod(32)='EADIAB'
-bcod(33)='SYSCONF'
-bcod(34)='HYPXSC'
-bcod(35)='STMIX'
-bcod(36)='TRNPRT'
+bcod(9)='JOB'
+bcod(10)='JOUT'
+bcod(11)='LABEL'
+bcod(12)='MINPOT'
+bcod(13)='MRCRS'
+bcod(14)='NNOUT'
+bcod(15)='OPTIMIZE'
+bcod(16)='OUTPUT'
+bcod(17)='POT'
+bcod(18)='PRINTC'
+bcod(19)='PRINTS'
+bcod(20)='PSI'
+bcod(21)='QUIT'
+bcod(22)='READ'
+bcod(23)='SAVE'
+bcod(24)='TENXSC'
+bcod(25)='TESTPOT'
+bcod(26)='TURN'
+bcod(27)='INDOUT'
+bcod(28)='PARTC'
+bcod(29)='FLUX'
+bcod(30)='J1J2'
+bcod(31)='EADIAB'
+bcod(32)='SYSCONF'
+bcod(33)='HYPXSC'
+bcod(34)='STMIX'
+bcod(35)='TRNPRT'
 !
 iipar=iicode
 irpar=ircode
@@ -597,7 +593,7 @@ end if
 40 goto (2700, &
       1800,1500,2000,300,600, &
       75, &
-      900,2200,900,400,900,1700, &
+      900,900,400,900,1700, &
       2500, &
       2400,2100,900,1000,2600, &
       1900,2800,600, &
@@ -1343,20 +1339,6 @@ end if
 istep = istep+1
 write(6,255) pcod(ipr)(1:lc),a(1)
 goto 500
-!.....integral cross sections
-!  intcrs,jobfile,in1,in2,ienerg,maxjtot
-2200 call get_token(line,l,fnam1,lc)
-if(fnam1 .eq. ' ') fnam1 = jobnam
-call lower(fnam1)
-call upper(fnam1(1:1))
-do 2210 i = 1,4
-a(i) = 0
-if(l .eq. 0) goto 2210
-call get_token(line,l,code,lc)
-call assignment_parse(code(1:lc),empty_var_list,j,a(i))
-2210 continue
-call intcrs(fnam1,a)
-goto 1  ! label:read_new_line
 !.....tensor cross sections
 !  tenxsc,jobfile,maxn,iframe,in1,in2,ienerg,jtotend,minj,maxj
 2300 call get_token(line,l,fnam1,lc)

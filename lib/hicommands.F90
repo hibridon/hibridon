@@ -6,6 +6,12 @@ use mod_command, only: command_type, command_mgr_type
 implicit none
   class(command_mgr_type), pointer :: command_mgr  ! singleton
 
+  ! intcrs
+  type, extends(command_type) :: intcrs_command_type
+  contains
+    procedure :: execute => intcrs_execute
+  end type intcrs_command_type
+
   ! run
   type, extends(command_type) :: run_command_type
   contains
@@ -119,6 +125,49 @@ contains
     738   format (1x,(a),1x,20(2i1,'  ') )
 
   end subroutine print_main_params
+
+  subroutine intcrs_execute(this, statements, bofargs, next_statement, post_action)
+    use mod_hibrid5, only :intcrs
+    !.....integral cross sections
+    !  intcrs,jobfile,in1,in2,ienerg,maxjtot
+    use mod_hiutil, only: assignment_parse
+    use mod_command, only: k_post_action_read_new_line
+    use mod_hinput_state, only: fnam1
+    implicit none
+    class(intcrs_command_type) :: this
+    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
+    integer, intent(in) :: bofargs
+    integer, intent(out) :: next_statement
+    integer, intent(out) :: post_action
+    character(len=8) :: code
+
+    common /cofile/ input, output, jobnam, savfil
+    character*40 :: input
+    character*40 :: output
+    character*40 :: jobnam
+    character*40 :: savfil
+
+    ! character(len=40) :: fnam1
+
+    integer :: i, j, l, lc
+    integer, parameter :: k_num_args = 4
+    real(8) :: a(k_num_args)  ! in1,in2,ienerg,maxjtot
+    character*8 empty_var_list(0)
+
+    l = bofargs
+    call get_token(statements,l,fnam1,lc)
+    if(fnam1 .eq. ' ') fnam1 = jobnam
+    call lower(fnam1)
+    call upper(fnam1(1:1))
+    do i = 1, k_num_args
+      a(i) = 0
+      if(l .eq. 0) cycle
+      call get_token(statements,l,code,lc)
+      call assignment_parse(code(1:lc),empty_var_list,j,a(i))
+    end do
+    call intcrs(fnam1,a)
+    post_action = k_post_action_read_new_line
+  end subroutine intcrs_execute
 
   subroutine run_execute(this, statements, bofargs, next_statement, post_action)
     use mod_par, only: ipar, lpar, rpar
@@ -404,15 +453,18 @@ contains
     ! pressure broadening cross sections - added by p. dagdigian
     use mod_hiutil, only: assignment_parse
     use mod_command, only: k_post_action_read_new_line
+    use mod_hinput_state, only: fnam1, fnam2
     class(prsbr_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
     integer, intent(in) :: bofargs
     integer, intent(out) :: next_statement
     integer, intent(out) :: post_action
     integer :: l
-    character(len=40) :: fnam1, fnam2
     character*8 empty_var_list(0)
     character*40 :: code
+    ! character(len=40) :: fnam1
+    ! character(len=40) :: fnam2
+
     integer :: i, j, lc
     integer, parameter :: k_num_args = 12
     real(8) :: a(k_num_args)
@@ -463,6 +515,10 @@ contains
       allocate(command_mgr)
       command_mgr%num_commands = 0
     end if
+
+    com = intcrs_command_type()
+    call command_mgr%register_command('INTCRS', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
     com = run_command_type()
     call command_mgr%register_command('RUN', com)
