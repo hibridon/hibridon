@@ -12,6 +12,12 @@ implicit none
     procedure :: execute => intcrs_execute
   end type intcrs_command_type
 
+  ! prsbr
+  type, extends(command_type) :: prsbr_command_type
+  contains
+    procedure :: execute => prsbr_execute
+  end type prsbr_command_type
+
   ! run
   type, extends(command_type) :: run_command_type
   contains
@@ -29,12 +35,6 @@ implicit none
   contains
     procedure :: execute => show_execute
   end type show_command_type
-
-  ! prsbr
-  type, extends(command_type) :: prsbr_command_type
-  contains
-    procedure :: execute => prsbr_execute
-  end type prsbr_command_type
 
 contains
 
@@ -167,6 +167,63 @@ contains
     call intcrs(fnam1,a)
     post_action = k_post_action_read_new_line
   end subroutine intcrs_execute
+
+  subroutine prsbr_execute(this, statements, bofargs, next_statement, post_action)
+    ! pressure broadening cross sections - added by p. dagdigian
+    use mod_hiutil, only: assignment_parse
+    use mod_command, only: k_post_action_read_new_line
+    class(prsbr_command_type) :: this
+    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
+    integer, intent(in) :: bofargs
+    integer, intent(out) :: next_statement
+    integer, intent(out) :: post_action
+    integer :: l
+    character*8 empty_var_list(0)
+    character*40 :: code
+    character(len=40) :: fnam1
+    character(len=40) :: fnam2
+
+    integer :: i, j, lc
+    integer, parameter :: k_num_args = 12
+    real(8) :: a(k_num_args)
+
+    common /cofile/ input, output, jobnam, savfil
+    character*40 :: input
+    character*40 :: output
+    character*40 :: jobnam
+    character*40 :: savfil
+
+
+    l = bofargs
+
+    call get_token(statements,l,fnam1,lc)
+    if(fnam1 .eq. ' ') fnam1 = jobnam
+    call lower(fnam1)
+    call upper(fnam1(1:1))
+    ! get iener for 1st smt file
+    a(1) = 0.d0
+    if(l .eq. 0) goto 3205
+    call get_token(statements,l,code,lc)
+    call assignment_parse(code(1:lc),empty_var_list,j,a(1))
+    3205 call get_token(statements,l,fnam2,lc)
+    if(fnam2 .eq. ' ') fnam2 = jobnam
+    call lower(fnam2)
+    call upper(fnam2(1:1))
+    ! get iener for 2nd smt file
+    a(2) = 0.d0
+    if(l .eq. 0) goto 3210
+    call get_token(statements,l,code,lc)
+    call assignment_parse(code(1:lc),empty_var_list,j,a(2))
+    ! get k, j1, in1, j2, in2, diag, j1p, in1p, j2p, in2p
+    3210 do 3220 i = 3, 12
+      a(i) = 0.d0
+      if(l .eq. 0) goto 3220
+      call get_token(statements,l,code,lc)
+      call assignment_parse(code(1:lc),empty_var_list,j,a(i))
+    3220 continue
+    call prsbr(fnam1,fnam2,a)
+    post_action = k_post_action_read_new_line
+  end subroutine prsbr_execute
 
   subroutine run_execute(this, statements, bofargs, next_statement, post_action)
     use mod_par, only: ipar, lpar, rpar
@@ -448,62 +505,6 @@ contains
   end subroutine show_execute
 
 
-  subroutine prsbr_execute(this, statements, bofargs, next_statement, post_action)
-    ! pressure broadening cross sections - added by p. dagdigian
-    use mod_hiutil, only: assignment_parse
-    use mod_command, only: k_post_action_read_new_line
-    class(prsbr_command_type) :: this
-    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
-    integer, intent(in) :: bofargs
-    integer, intent(out) :: next_statement
-    integer, intent(out) :: post_action
-    integer :: l
-    character*8 empty_var_list(0)
-    character*40 :: code
-    character(len=40) :: fnam1
-    character(len=40) :: fnam2
-
-    integer :: i, j, lc
-    integer, parameter :: k_num_args = 12
-    real(8) :: a(k_num_args)
-
-    common /cofile/ input, output, jobnam, savfil
-    character*40 :: input
-    character*40 :: output
-    character*40 :: jobnam
-    character*40 :: savfil
-
-
-    l = bofargs
-
-    call get_token(statements,l,fnam1,lc)
-    if(fnam1 .eq. ' ') fnam1 = jobnam
-    call lower(fnam1)
-    call upper(fnam1(1:1))
-    ! get iener for 1st smt file
-    a(1) = 0.d0
-    if(l .eq. 0) goto 3205
-    call get_token(statements,l,code,lc)
-    call assignment_parse(code(1:lc),empty_var_list,j,a(1))
-    3205 call get_token(statements,l,fnam2,lc)
-    if(fnam2 .eq. ' ') fnam2 = jobnam
-    call lower(fnam2)
-    call upper(fnam2(1:1))
-    ! get iener for 2nd smt file
-    a(2) = 0.d0
-    if(l .eq. 0) goto 3210
-    call get_token(statements,l,code,lc)
-    call assignment_parse(code(1:lc),empty_var_list,j,a(2))
-    ! get k, j1, in1, j2, in2, diag, j1p, in1p, j2p, in2p
-    3210 do 3220 i = 3, 12
-      a(i) = 0.d0
-      if(l .eq. 0) goto 3220
-      call get_token(statements,l,code,lc)
-      call assignment_parse(code(1:lc),empty_var_list,j,a(i))
-    3220 continue
-    call prsbr(fnam1,fnam2,a)
-    post_action = k_post_action_read_new_line
-  end subroutine prsbr_execute
 
 
 
@@ -513,6 +514,10 @@ contains
       allocate(command_mgr)
       command_mgr%num_commands = 0
     end if
+
+    com = prsbr_command_type()
+    call command_mgr%register_command('PRSBR', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
     com = intcrs_command_type()
     call command_mgr%register_command('INTCRS', com)
@@ -528,10 +533,6 @@ contains
 
     com = show_command_type()
     call command_mgr%register_command('SHOW', com)
-    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
-
-    com = prsbr_command_type()
-    call command_mgr%register_command('PRSBR', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
     ASSERT(associated(command_mgr))
