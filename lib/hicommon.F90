@@ -52,7 +52,7 @@ module mod_si_params
   !  ncode is the number of bcod's
   !  bcod stores hibridon's commands
   !  fcod stores logical flags (length = lcode)
-  integer, parameter :: ncode = 38
+  integer, parameter :: ncode = 36
   integer, parameter :: lcode = 28
   !  iicode is the number of integer pcod's
   !  ircode is the number of real pcod's
@@ -98,6 +98,10 @@ module mod_hinput_state
 
   logical :: batch
   data batch /.false./
+
+  integer :: irpot
+  integer :: irinp
+  data irpot, irinp /0, 0/
 
   !  lindx is pointer from fcod order to order in common block colpar
   ! graffy: colpar and fcod both contain the 28 logical parameters but in a different order, thus requiring a remapping through lindx. Why not simply having the same order, by making fcod match colpar?

@@ -11,7 +11,11 @@ module mod_command
   ! post_actions indicate what should be done after a command has been executed
   integer, parameter :: k_post_action_read_new_line = 1  ! ask the user a new statements line then interpret it
   integer, parameter :: k_post_action_interpret_next_statement = 2  ! interprets the next statement in statments line
-
+  integer, parameter :: k_post_action_write_cr_and_exit = 3  ! write carriage return and exit hinput function
+  integer, parameter :: k_post_action_exit_hinput = 4  ! exit hinput function
+  integer, parameter :: k_post_action_exit_hibridon = 5  ! terminate hibridon program
+  
+  
   type, abstract :: command_type
   contains
     procedure(command_execute_interface), deferred :: execute
@@ -34,8 +38,9 @@ module mod_command
   end type command_item_type
 
   type command_mgr_type
+    integer :: k_max_num_commands = 100
     integer :: num_commands
-    type(command_item_type) :: commands(3)
+    type(command_item_type) :: commands(k_max_num_commands)
   contains
     procedure :: register_command => commands_register_command
     procedure :: execute_command => commands_execute_command
@@ -54,22 +59,24 @@ contains
     character(len=*), intent(in) :: codex
     class(command_type), intent(in), allocatable :: command
     this%num_commands = this%num_commands + 1
+    ASSERT(this%num_commands <= this%k_max_num_commands)
     ! allocate(this%commands(this%num_commands))
    this%commands(this%num_commands)%codex = codex
     this%commands(this%num_commands)%item = command
   end subroutine commands_register_command
 
-  subroutine commands_execute_command(this, command_statement)
+  subroutine commands_execute_command(this, command_statement, post_action)
     class(command_mgr_type), intent(inout) :: this
     character(len=*), intent(in) :: command_statement
+    integer, intent(out) :: post_action
     integer :: i
     character(len=K_MAX_USER_LINE_LENGTH) :: line 
     integer :: bofargs = 1
     integer :: next_statement
-    integer :: post_action
     do i=1, this%num_commands
       if (this%commands(i)%codex == command_statement) then
         call this%commands(i)%item%execute(statements=line, bofargs=bofargs, next_statement=next_statement, post_action=post_action)
+        return
       end if
     end do
   end subroutine commands_execute_command

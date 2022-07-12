@@ -6,6 +6,12 @@ use mod_command, only: command_type, command_mgr_type
 implicit none
   class(command_mgr_type), pointer :: command_mgr  ! singleton
 
+  ! run
+  type, extends(command_type) :: run_command_type
+  contains
+    procedure :: execute => run_execute
+  end type run_command_type
+
   ! showpot
   type, extends(command_type) :: showpot_command_type
   contains
@@ -26,6 +32,227 @@ implicit none
 
 contains
 
+  subroutine update_nu_params()
+    !  numin and numax should be 0 if cc calculation, if not, then set them
+    !  equal to zero
+    use mod_par, only: lpar, ipar
+    use ipar_enum
+    use lpar_enum
+
+    common /coselb/ ibasty
+    integer ibasty
+
+    if (.not. lpar(LPAR_CSFLAG)) then
+      lpar(LPAR_NUCROS)=.false.
+      if (ipar(IPAR_NUMAX) .ne. 0) then
+        write (6, 105)
+        105     format ('  CC calculation, numax set to zero')
+        ipar(IPAR_NUMAX) = 0
+      end if
+      ! NB this is disabled currently for 2P atom + homonuclear
+      if (ipar(IPAR_NUMIN) .ne. 0.and.ibasty.ne.12) then
+        write (6, 106)
+        106     format ('  CC calculation, numin set to zero')
+        ipar(IPAR_NUMIN) = 0
+      end if
+    end if
+  end subroutine update_nu_params
+
+  subroutine print_main_params(out_unit)
+    use mod_hibasis, only: basknd
+    use mod_cosys, only: scod
+    use mod_cosysl, only: islcod, lspar
+    use mod_cosysi, only: nscode, isicod, ispar
+    use mod_cosysr, only: isrcod, rspar
+    use mod_hinput_state, only: lindx
+    use mod_si_params, only: lcode
+    use mod_par, only: lpar
+    use lpar_enum
+    implicit none
+    integer, intent(in) :: out_unit
+
+#include "common/parbas.F90"
+
+    common /coselb/ ibasty
+    integer ibasty
+
+    common /cotwo/ numj,nj1j2(5)
+    integer :: numj
+    integer :: nj1j2
+
+    ! fcod = Flags CODes : stores the name of system independent parameters of type logical
+    common /cofcod/ fcod
+    character*8 :: fcod(lcode)
+
+    integer :: j
+    integer :: length
+
+    if (ibasty .lt. 99) then
+      length = index(basknd(ibasty),' ') - 1
+      if (length .eq. -1) length=9
+#if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
+      write(out_unit,710) basknd(ibasty)(1:length)//' system parameters:', &
+                 (scod(j),ispar(j),j = 1,isicod)
+#endif
+    else
+      write(out_unit,710) 'user defined system parameters:', &
+                   (scod(j),ispar(j),j = 1,isicod)
+    endif
+    if(isrcod.gt.0) &
+      write(out_unit,720) (scod(isicod+j),rspar(j),j = 1,isrcod)
+    if(islcod.gt.0) &
+      write(out_unit,735) (scod(isicod+isrcod+j),lspar(j),j = 1,islcod)
+    if (.not. lpar(LPAR_TWOMOL) ) then
+      write(out_unit,736) 'LAMMIN: ',(lammin(j),j=1,ispar(1))
+      write(out_unit,736) 'LAMMAX: ',(lammax(j),j=1,ispar(1))
+      write(out_unit,736) 'MPROJ:  ',(mproj(j),j=1,ispar(1))
+    else if (lpar(LPAR_TWOMOL)) then
+      write (out_unit, 738)'J1/J2: ',(nj1j2(j)/10,mod(nj1j2(j),10), &
+                        j=1,numj)
+    end if
+    write(out_unit,730) 'Flags:',(fcod(j),lpar(lindx(j)),j = 1,lcode)
+    710 format(5x,'*** ',(a)/(4(1x,a7,'=',i4,7x)))
+    720 format(4(1x,a7,'=',1pg11.4))
+    730 format(5x,'*** ',(a)/(6(1x,a6,'=',l2,3x)))
+    735 format(3(1x,a7,'=',l2,9x))
+    736   format(1x,(a),10i4,/,9x,10i4)
+    738   format (1x,(a),1x,20(2i1,'  ') )
+
+  end subroutine print_main_params
+
+  subroutine run_execute(this, statements, bofargs, next_statement, post_action)
+    use mod_par, only: ipar, lpar, rpar
+    use mod_si_params, only: iicode, ircode, icode, lcode, set_param_names
+    use ipar_enum
+    use lpar_enum
+    use mod_coiout, only: niout, indout
+    use mod_cosout, only: nnout, jout
+    use mod_coener, only: energ
+    use mod_command, only: k_post_action_interpret_next_statement, k_post_action_read_new_line
+    use mod_hibrid2, only: enord
+    use mod_hinput_state, only: lindx, irpot, irinp
+    use mod_command, only: k_post_action_write_cr_and_exit, k_post_action_exit_hinput, k_post_action_exit_hibridon
+    use rpar_enum
+    !
+    ! label:execute_run
+    !
+    ! start execution,run
+    use mod_command, only: k_post_action_read_new_line
+    implicit none
+    class(run_command_type) :: this
+    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
+    integer, intent(in) :: bofargs
+    integer, intent(out) :: next_statement
+    integer, intent(out) :: post_action
+
+#include "common/parpot.F90"
+
+    common /cofile/ input, output, jobnam, savfil
+    character*40 :: input
+    character*40 :: output
+    character*40 :: jobnam
+    character*40 :: savfil
+
+    common /coselb/ ibasty
+    integer ibasty
+
+    ! pcod = Parameters CODes : stores the name of system independent parameters of type integer and real
+    common /copcod/ pcod
+    character*8 :: pcod(icode)
+
+    common /cosavi/ iipar, ixpar(iicode)
+    integer :: iipar
+    integer :: ixpar
+
+    common /cosavr/ irpar, junks, rxpar(ircode)
+    integer :: irpar
+    integer :: junks
+    real(8) :: rxpar
+
+    integer :: i, j
+    integer :: nerg
+
+    call update_nu_params()
+    call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
+    if (lpar(LPAR_CSFLAG).and.ipar(IPAR_NUD).ne.1) lpar(LPAR_NUCROS)=.true.
+    nerg=ipar(IPAR_NERG)
+    ! check to see if flags are ok if wavefunction desired or
+    ! photodissociation calculation
+    call genchk
+    call enord(energ,nerg)
+    do i = 1,ircode
+      rxpar(i) = rpar(i)
+    end do
+    do i = 1,iicode
+      ixpar(i) = ipar(i)
+    end do
+    if(irinp.eq.0) then
+      write(6,505)
+      505 format (/,' ** SAVE DEFAULT VARIABLES OR SPECIFY INPUT', &
+              ' FILE WITH INP = filename')
+      if(lpar(LPAR_BATCH)) then
+        post_action = k_post_action_exit_hibridon
+        return
+      else
+        post_action = k_post_action_read_new_line
+        return
+      end if
+    end if
+    if(rpar(RPAR_SCAT_TOLAI).eq.0) then  ! graffy: todo : shouldn't it be RPAR_XMU instead of RPAR_SCAT_TOLAI here ?
+      write(6,507)
+      507   format(/,' ** SPECIFY COLLISION REDUCED MASS WITH XMU = mass')
+      post_action = k_post_action_read_new_line
+      return
+    end if
+    if(irpot.ne.0.or..not.lpar(LPAR_READPT)) then
+    ! open output file
+    ! first make sure it is lower case
+      call lower(output)
+      call upper(output(1:1))
+      call openf(9,output,'sf',0)
+    !     write input data to file outpt
+      write (9, 508) label
+      508   format (1x,a)
+      write (9, 508) potnam
+      write (9, 240)
+      240   format(1h ,30('='))
+      write(9,710) 'Parameters:',(pcod(j),ipar(j),j = 1,iicode)
+      write(9,720) (pcod(iicode+j),rpar(j),j = 1,ircode)
+      call print_main_params(out_unit=9)
+      710 format(5x,'*** ',(a)/(4(1x,a7,'=',i4,7x)))
+      720 format(4(1x,a7,'=',1pg11.4))
+
+      736   format(1x,(a),10i4,/,9x,10i4)
+      737   format(1x,(a),i2,(a),20(i3,1x))
+      739   format (1x,(a),i2,(a),20(2i1,'  ') )
+      call enord(energ,ipar(IPAR_NERG))
+      if(ipar(IPAR_NERG).gt.0) write(9,740) (energ(j),j = 1,ipar(IPAR_NERG))
+      740 format(1x,'** Energies:',(t15,5f15.6))
+      if(nnout.ne.0) then
+        if (.not.lpar(LPAR_TWOMOL) ) then
+          write (9,737) 'NOUT: ',nnout, &
+               '; JOUT:',(jout(j), j=1,iabs(nnout) )
+        else
+          write (9,739) 'NOUT: ',nnout, &
+             '; J1/J2-OUT: ', &
+            (jout(j)/10, mod (jout(j),10), j = 1,iabs(nnout))
+        end if
+      end if
+      if(niout.ne.0) write (9,736) 'INDOUT: ',(indout(j), j=1,niout)
+      write (9, 240)
+      post_action = k_post_action_exit_hinput
+      return
+    else
+      write(6,510)
+    510   format(' Potential not yet defined!')
+      post_action = k_post_action_read_new_line
+      return
+    end if
+
+    post_action = k_post_action_write_cr_and_exit
+  end subroutine run_execute
+
+
   subroutine showpot_execute(this, statements, bofargs, next_statement, post_action)
     use mod_command, only: k_post_action_read_new_line
     class(showpot_command_type) :: this
@@ -42,13 +269,8 @@ contains
   end subroutine
 
   subroutine show_execute(this, statements, bofargs, next_statement, post_action)
-    use mod_hibasis, only: basknd
     use mod_par, only: ipar, lpar, rpar
     use mod_hinput_state, only: batch
-    use mod_cosys, only: scod
-    use mod_cosysi, only: nscode, isicod, ispar
-    use mod_cosysl, only: islcod, lspar
-    use mod_cosysr, only: isrcod, rspar
     use mod_si_params, only: iicode, ircode, icode, lcode, set_param_names
     use ipar_enum
     use lpar_enum
@@ -57,7 +279,6 @@ contains
     use mod_codim, only: nmax => mmax
     use mod_cosout, only: nnout, jout
     use mod_coener, only: energ
-    use mod_hinput_state, only: lindx
     use mod_command, only: k_post_action_interpret_next_statement, k_post_action_read_new_line
     use mod_hibrid2, only: enord
 
@@ -128,30 +349,7 @@ contains
     if(niout.ne.0) write (6,701) 'INDOUT:',(indout(j), j=1,niout)
     10 format((a))
     701   format(1x,(a),10i5,/,8x,10i5,/,5x,10i5)
-    if (ibasty .lt. 99) then
-      length = index(basknd(ibasty),' ') - 1
-      if (length .eq. -1) length=9
-#if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
-      write(6,710) basknd(ibasty)(1:length)//' system parameters:', &
-                 (scod(j),ispar(j),j = 1,isicod)
-#endif
-    else
-      write(6,710) 'user defined system parameters:', &
-                   (scod(j),ispar(j),j = 1,isicod)
-    endif
-    if(isrcod.gt.0) &
-      write(6,720) (scod(isicod+j),rspar(j),j = 1,isrcod)
-    if(islcod.gt.0) &
-      write(6,735) (scod(isicod+isrcod+j),lspar(j),j = 1,islcod)
-    if (.not. lpar(LPAR_TWOMOL) ) then
-      write(6,736) 'LAMMIN: ',(lammin(j),j=1,ispar(1))
-      write(6,736) 'LAMMAX: ',(lammax(j),j=1,ispar(1))
-      write(6,736) 'MPROJ:  ',(mproj(j),j=1,ispar(1))
-    else if (lpar(LPAR_TWOMOL)) then
-      write (6, 738)'J1/J2: ',(nj1j2(j)/10,mod(nj1j2(j),10), &
-                        j=1,numj)
-    end if
-    write(6,730) 'Flags:',(fcod(j),lpar(lindx(j)),j = 1,lcode)
+    call print_main_params(out_unit=6)
     write(6,731)  nmax, nlammx
     if (ipar(IPAR_LSCREEN) .le. 24 .and. .not. batch) then
       write (6, 703)
@@ -168,13 +366,9 @@ contains
     710 format(5x,'*** ',(a)/(4(1x,a7,'=',i4,7x)))
     720 format(4(1x,a7,'=',1pg11.4))
     1720 format(1x,a7,'=',f10.5)
-    730 format(5x,'*** ',(a)/(6(1x,a6,'=',l2,3x)))
     731 format(1x,'** Maximum Channels: ', i4, '; ', &
       'Maximum Anisotropic Terms: ',i5)
-    735 format(3(1x,a7,'=',l2,9x))
-    736   format(1x,(a),10i4,/,9x,10i4)
     737   format(1x,(a),i2,(a),20(i3,1x))
-    738   format (1x,(a),1x,20(2i1,'  ') )
     739   format (1x,(a),i2,(a),20(2i1,'  ') )
     740 format(1x,'** Energies:',(t15,5f15.6))
     lenout = index(output,' ')-1
@@ -269,6 +463,10 @@ contains
       allocate(command_mgr)
       command_mgr%num_commands = 0
     end if
+
+    com = run_command_type()
+    call command_mgr%register_command('RUN', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
     com = showpot_command_type()
     call command_mgr%register_command('SHOWPOT', com)

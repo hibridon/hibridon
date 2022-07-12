@@ -66,8 +66,9 @@ subroutine test_commands()
   call command_mgr%commands(1)%item%execute(statements=line, bofargs=1, next_statement=next_statement, post_action=post_action)
   call command_mgr%commands(2)%item%execute(statements=line, bofargs=1, next_statement=next_statement, post_action=post_action)
 
-  call command_mgr%execute_command('DUMMYC1')
-  call command_mgr%execute_command('DUMMYC2')
+
+  call command_mgr%execute_command('DUMMYC1', post_action)
+  call command_mgr%execute_command('DUMMYC2', post_action)
 end subroutine test_commands
 
 program unittest_commands
