@@ -193,7 +193,7 @@ character(len=K_MAX_USER_LINE_LENGTH) line
 character*40 :: code
 character*8 empty_var_list(0)
 integer nerg
-logical existf, first, openfl
+logical first
 integer :: lenstr
 real(8) :: turn
 logical logp, opti
@@ -250,7 +250,7 @@ common /cotwo/ numj,nj1j2(5)
 integer :: numj
 integer :: nj1j2
 
-integer :: ipr, istep, inam, i, ienerg, iflux, ii, im, imx, inew, ione, iprint, iskip, itx, ityp, izero
+integer :: ipr, istep, inam, i, ienerg, iflux, ii, im, imx, inew, iprint, iskip, itx, ityp, izero
 integer :: j, jm, jmx, jtot2x, l, l1, l2, lc, lcc, ld, len, lend, low
 integer :: nde
 real(8) :: optacm, r, thrs, val, waveve, xmu
@@ -355,21 +355,16 @@ fcod(FCOD_BOUNDC)='BOUNDC'
 ! energy: 300
 ! exit: 600
 ! help: 75
-! input: 900
-! job: 900
 ! jout: 400
-! label: 900
 ! minpot: 1700
 ! mrcrs: 2500
 ! nnout: 2400
 ! optimimize: 2100
-! output: 900
 ! pot: 1000
 ! printc: 2600
 ! prints: 1900
 ! psi: 2800
 ! quit: 600
-! read: 800
 ! save: 1300
 ! tenxsc: 2300
 ! testpot: 1200
@@ -383,8 +378,6 @@ fcod(FCOD_BOUNDC)='BOUNDC'
 ! hypxsc: 2950
 ! stmix:  3000
 ! trnprt:  3100
-! nb after changing the following list, check that all the variables "incode"
-! that follow after address 900 are changed accordingly
 bcod(1)='CHECK'
 bcod(2)='DEBROGLI'
 bcod(3)='DIFFER'
@@ -392,34 +385,29 @@ bcod(4)='DIFCRS'
 bcod(5)='ENERGY'
 bcod(6)='EXIT'
 bcod(7)='HELP'
-bcod(8)='INPUT'
-bcod(9)='JOB'
-bcod(10)='JOUT'
-bcod(11)='LABEL'
-bcod(12)='MINPOT'
-bcod(13)='MRCRS'
-bcod(14)='NNOUT'
-bcod(15)='OPTIMIZE'
-bcod(16)='OUTPUT'
-bcod(17)='POT'
-bcod(18)='PRINTC'
-bcod(19)='PRINTS'
-bcod(20)='PSI'
-bcod(21)='QUIT'
-bcod(22)='READ'
-bcod(23)='SAVE'
-bcod(24)='TENXSC'
-bcod(25)='TESTPOT'
-bcod(26)='TURN'
-bcod(27)='INDOUT'
-bcod(28)='PARTC'
-bcod(29)='FLUX'
-bcod(30)='J1J2'
-bcod(31)='EADIAB'
-bcod(32)='SYSCONF'
-bcod(33)='HYPXSC'
-bcod(34)='STMIX'
-bcod(35)='TRNPRT'
+bcod(8)='JOUT'
+bcod(9)='MINPOT'
+bcod(10)='MRCRS'
+bcod(11)='NNOUT'
+bcod(12)='OPTIMIZE'
+bcod(13)='POT'
+bcod(14)='PRINTC'
+bcod(15)='PRINTS'
+bcod(16)='PSI'
+bcod(17)='QUIT'
+bcod(18)='SAVE'
+bcod(19)='TENXSC'
+bcod(20)='TESTPOT'
+bcod(21)='TURN'
+bcod(22)='INDOUT'
+bcod(23)='PARTC'
+bcod(24)='FLUX'
+bcod(25)='J1J2'
+bcod(26)='EADIAB'
+bcod(27)='SYSCONF'
+bcod(28)='HYPXSC'
+bcod(29)='STMIX'
+bcod(30)='TRNPRT'
 !
 iipar=iicode
 irpar=ircode
@@ -597,11 +585,11 @@ end if
 40 goto (2700, &
       1800,1500,2000,300,600, &
       75, &
-      900,900,400,900,1700, &
+      400,1700, &
       2500, &
-      2400,2100,900,1000,2600, &
+      2400,2100,1000,2600, &
       1900,2800,600, &
-      800,1300,2300, &
+      1300,2300, &
       1200,1600,430,2650,2800, &
       460,2850,2900,2950,3000, &
       3100),i
@@ -843,59 +831,6 @@ goto 47 ! label:on_execute_command_completion(post_action)
 ! exit
 600 continue
 call exit
-! read
-800 call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
-call gendat
-ione=1
-call sysdat(irpot, lpar(LPAR_READPT),ione)
-irinp=1
-l1 = l
-if (batch) lpar(LPAR_BATCH) = .true.
-goto 15  ! label:interpret_next_statement(line, l1)
-! input, output, label and job file names
-! input=infile, output=outfile, job=jobfile
-! input, output, and label are now lower case:  mha 6.6.91
-900 call get_token(line,l,code,lc)
-if(trim(bcod(i)) == 'INPUT') then
-  input = code(1:lc)
-  call lower(input)
-  call upper(input(1:1))
-  inquire (file=input, exist=existf)
-  if (.not. existf) then
-    len = index (input,' ')
-    write (6, 901) input(1:len)
-901     format (' *** INPUT FILE ',(a),' DOES NOT EXIST')
-    if(batch) call exit
-    goto 1  ! label:read_new_line
-  end if
-  goto 800
-else if(trim(bcod(i)) == 'JOB') then
-  jobnam = code(1:lc)
-  call lower(jobnam)
-  call upper(jobnam(1:1))
-else if(trim(bcod(i)) == 'LABEL') then
-  low = index (line, '=') + 1
-  lend = index (line, ';') - 1
-  if(lend.lt.0) then
-    lend=lenstr(line)
-    l=0
-  else
-    l=lend+2
-  end if
-  label = line(low:lend)
-else if(trim(bcod(i)) == 'OUTPUT') then
-  output = code(1:lc)
-  call lower(output)
-  call upper(output(1:1))
-  inquire(9,opened=openfl)
-  if(openfl) then
-    endfile(9)
-    close(9)
-  end if
-  call openf(9, output, 'sf', 0)
-end if
-l1 = l
-goto 15  ! label:interpret_next_statement(line, l1)
 ! read parameters for potential
 !     pot=potfile
 1000 call get_token(line,l,code,lc)

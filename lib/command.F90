@@ -44,6 +44,7 @@ module mod_command
   contains
     procedure :: register_command => commands_register_command
     procedure :: execute_command => commands_execute_command
+    procedure :: get_command => commands_get_command
   end type command_mgr_type
 
   ! interface to create an instance of command_mgr_type using a construct familiar to other languages:
@@ -61,7 +62,7 @@ contains
     this%num_commands = this%num_commands + 1
     ASSERT(this%num_commands <= this%k_max_num_commands)
     ! allocate(this%commands(this%num_commands))
-   this%commands(this%num_commands)%codex = codex
+    this%commands(this%num_commands)%codex = codex
     this%commands(this%num_commands)%item = command
   end subroutine commands_register_command
 
@@ -80,6 +81,21 @@ contains
       end if
     end do
   end subroutine commands_execute_command
+
+  function commands_get_command(this, command_name) result(command)
+    class(command_mgr_type), intent(inout), target :: this
+    character(len=*), intent(in) :: command_name
+    class(command_type), pointer :: command
+    integer :: i
+    do i=1, this%num_commands
+      if (this%commands(i)%codex == command_name) then
+        command => this%commands(i)%item
+        return
+      end if
+    end do
+    ASSERT(.false.)  ! unable to find the given command
+    command => null()
+  end function commands_get_command
 
   function command_mgr_ctor() result(command_mgr)
     class(command_mgr_type), pointer :: command_mgr

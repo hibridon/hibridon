@@ -6,17 +6,47 @@ use mod_command, only: command_type, command_mgr_type
 implicit none
   class(command_mgr_type), pointer :: command_mgr  ! singleton
 
+  ! input
+  type, extends(command_type) :: input_command_type
+  contains
+    procedure :: execute => input_execute
+  end type input_command_type
+
   ! intcrs
   type, extends(command_type) :: intcrs_command_type
   contains
     procedure :: execute => intcrs_execute
   end type intcrs_command_type
 
+  ! job
+  type, extends(command_type) :: job_command_type
+  contains
+    procedure :: execute => job_execute
+  end type job_command_type
+
+  ! label
+  type, extends(command_type) :: label_command_type
+  contains
+    procedure :: execute => label_execute
+  end type label_command_type
+
+  ! output
+  type, extends(command_type) :: output_command_type
+  contains
+    procedure :: execute => output_execute
+  end type output_command_type
+
   ! prsbr
   type, extends(command_type) :: prsbr_command_type
   contains
     procedure :: execute => prsbr_execute
   end type prsbr_command_type
+
+  ! read
+  type, extends(command_type) :: read_command_type
+  contains
+    procedure :: execute => read_execute
+  end type read_command_type
 
   ! run
   type, extends(command_type) :: run_command_type
@@ -126,6 +156,79 @@ contains
 
   end subroutine print_main_params
 
+
+  ! input, output, label and job file names
+  ! input=infile, output=outfile, job=jobfile
+  ! input, output, and label are now lower case:  mha 6.6.91
+  subroutine input_execute(this, statements, bofargs, next_statement, post_action)
+    use mod_command, only: k_post_action_exit_hibridon, k_post_action_read_new_line
+    use mod_hinput_state, only: batch
+    class(input_command_type) :: this
+    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
+    integer, intent(in) :: bofargs
+    integer, intent(out) :: next_statement
+    integer, intent(out) :: post_action
+
+    common /cofile/ input, output, jobnam, savfil
+    character*40 :: input
+    character*40 :: output
+    character*40 :: jobnam
+    character*40 :: savfil
+
+    character(len=40) :: argument
+    integer :: l, lc, len
+    class(command_type), pointer :: command
+    logical :: existf
+
+    l = bofargs
+    call get_token(statements,l,argument,lc)
+    input = argument(1:lc)
+    call lower(input)
+    call upper(input(1:1))
+    inquire (file=input, exist=existf)
+    if (.not. existf) then
+      len = index (input,' ')
+      write (6, 901) input(1:len)
+  901     format (' *** INPUT FILE ',(a),' DOES NOT EXIST')
+      if(batch) then
+        post_action = k_post_action_exit_hibridon
+      else
+        post_action = k_post_action_read_new_line
+      end if
+    end if
+    command => command_mgr%get_command('READ')
+    call command%execute(statements, l, next_statement, post_action)
+  end subroutine input_execute
+
+  ! input, output, label and job file names
+  ! input=infile, output=outfile, job=jobfile
+  ! input, output, and label are now lower case:  mha 6.6.91
+  subroutine job_execute(this, statements, bofargs, next_statement, post_action)
+    use mod_command, only: k_post_action_interpret_next_statement
+    class(job_command_type) :: this
+    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
+    integer, intent(in) :: bofargs
+    integer, intent(out) :: next_statement
+    integer, intent(out) :: post_action
+
+    character(len=40) :: code
+    integer :: l, lc
+
+    common /cofile/ input, output, jobnam, savfil
+    character*40 :: input
+    character*40 :: output
+    character*40 :: jobnam
+    character*40 :: savfil
+
+    l = bofargs
+    call get_token(statements, l, code, lc)
+    jobnam = code(1:lc)
+    call lower(jobnam)
+    call upper(jobnam(1:1))
+    next_statement = l
+    post_action = k_post_action_interpret_next_statement
+  end subroutine job_execute
+
   subroutine intcrs_execute(this, statements, bofargs, next_statement, post_action)
     use mod_hibrid5, only :intcrs
     !.....integral cross sections
@@ -138,7 +241,7 @@ contains
     integer, intent(in) :: bofargs
     integer, intent(out) :: next_statement
     integer, intent(out) :: post_action
-    character(len=8) :: code
+    character(len=40) :: code
 
     common /cofile/ input, output, jobnam, savfil
     character*40 :: input
@@ -168,6 +271,83 @@ contains
     post_action = k_post_action_read_new_line
   end subroutine intcrs_execute
 
+  ! input, output, label and job file names
+  ! input=infile, output=outfile, job=jobfile
+  ! input, output, and label are now lower case:  mha 6.6.91
+  subroutine label_execute(this, statements, bofargs, next_statement, post_action)
+    use mod_command, only: k_post_action_interpret_next_statement
+    class(label_command_type) :: this
+    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
+    integer, intent(in) :: bofargs
+    integer, intent(out) :: next_statement
+    integer, intent(out) :: post_action
+
+    integer :: l
+
+    common /cofile/ input, output, jobnam, savfil
+    character*40 :: input
+    character*40 :: output
+    character*40 :: jobnam
+    character*40 :: savfil
+
+    integer :: low, lend
+    integer :: lenstr
+
+    ! parpot.F90 defines label
+#include "common/parpot.F90"
+
+    low = index (statements, '=') + 1
+    lend = index (statements, ';') - 1
+    if(lend.lt.0) then
+      lend=lenstr(statements)
+      l=0
+    else
+      l=lend+2
+    end if
+    label = statements(low:lend)
+
+    next_statement = l
+    post_action = k_post_action_interpret_next_statement
+  end subroutine label_execute
+
+  ! input, output, label and job file names
+  ! input=infile, output=outfile, job=jobfile
+  ! input, output, and label are now lower case:  mha 6.6.91
+  subroutine output_execute(this, statements, bofargs, next_statement, post_action)
+    use mod_command, only: k_post_action_interpret_next_statement
+    use funit
+    class(output_command_type) :: this
+    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
+    integer, intent(in) :: bofargs
+    integer, intent(out) :: next_statement
+    integer, intent(out) :: post_action
+
+    character(len=40) :: argument
+    integer :: l, lc
+
+    common /cofile/ input, output, jobnam, savfil
+    character*40 :: input
+    character*40 :: output
+    character*40 :: jobnam
+    character*40 :: savfil
+
+    logical :: openfl
+
+    l = bofargs
+    call get_token(statements,l,argument,lc)
+    output = argument(1:lc)
+    call lower(output)
+    call upper(output(1:1))
+    inquire(FUNIT_OUT, opened=openfl)
+    if(openfl) then
+      endfile(FUNIT_OUT)
+      close(FUNIT_OUT)
+    end if
+    call openf(FUNIT_OUT, output, 'sf', 0)
+    next_statement = l
+    post_action = k_post_action_interpret_next_statement
+  end subroutine output_execute
+
   subroutine prsbr_execute(this, statements, bofargs, next_statement, post_action)
     ! pressure broadening cross sections - added by p. dagdigian
     use mod_hiutil, only: assignment_parse
@@ -192,7 +372,6 @@ contains
     character*40 :: output
     character*40 :: jobnam
     character*40 :: savfil
-
 
     l = bofargs
 
@@ -224,6 +403,36 @@ contains
     call prsbr(fnam1,fnam2,a)
     post_action = k_post_action_read_new_line
   end subroutine prsbr_execute
+
+  subroutine read_execute(this, statements, bofargs, next_statement, post_action)
+    use mod_hinput_state, only: batch
+    use mod_par, only: lpar
+    use mod_si_params, only: icode, set_param_names
+    use mod_hinput_state, only: irpot, irinp
+    use mod_command, only: k_post_action_interpret_next_statement
+    use lpar_enum
+    class(read_command_type) :: this
+    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
+    integer, intent(in) :: bofargs
+    integer, intent(out) :: next_statement
+    integer, intent(out) :: post_action
+
+    ! pcod = Parameters CODes : stores the name of system independent parameters of type integer and real
+    common /copcod/ pcod
+    character*8 :: pcod(icode)
+
+    integer :: ione
+
+    ! read
+    call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
+    call gendat
+    ione = 1
+    call sysdat(irpot, lpar(LPAR_READPT),ione)
+    irinp = 1
+    if (batch) lpar(LPAR_BATCH) = .true.
+    next_statement = bofargs
+    post_action = k_post_action_interpret_next_statement
+  end subroutine read_execute
 
   subroutine run_execute(this, statements, bofargs, next_statement, post_action)
     use mod_par, only: ipar, lpar, rpar
@@ -515,12 +724,32 @@ contains
       command_mgr%num_commands = 0
     end if
 
+    com = input_command_type()
+    call command_mgr%register_command('INPUT', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
+
+    com = job_command_type()
+    call command_mgr%register_command('JOB', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
+
     com = prsbr_command_type()
     call command_mgr%register_command('PRSBR', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
     com = intcrs_command_type()
     call command_mgr%register_command('INTCRS', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
+
+    com = label_command_type()
+    call command_mgr%register_command('LABEL', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
+
+    com = output_command_type()
+    call command_mgr%register_command('OUTPUT', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
+
+    com = read_command_type()
+    call command_mgr%register_command('READ', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
     com = run_command_type()
@@ -534,6 +763,8 @@ contains
     com = show_command_type()
     call command_mgr%register_command('SHOW', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
+
+
 
     ASSERT(associated(command_mgr))
   end subroutine init

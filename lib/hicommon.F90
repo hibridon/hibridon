@@ -52,7 +52,7 @@ module mod_si_params
   !  ncode is the number of bcod's
   !  bcod stores hibridon's commands
   !  fcod stores logical flags (length = lcode)
-  integer, parameter :: ncode = 35
+  integer, parameter :: ncode = 30
   integer, parameter :: lcode = 28
   !  iicode is the number of integer pcod's
   !  ircode is the number of real pcod's
