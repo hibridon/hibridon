@@ -170,7 +170,7 @@ use mod_cosysl, only: islcod, lspar
 use mod_cosysr, only: isrcod, idum=>junkr, rspar
 use mod_version, only : version
 use mod_coj12, only: j12
-use mod_hibrid5, only : intcrs, readpc
+use mod_hibrid5, only : readpc
 use mod_difcrs, only: difcrs
 use mod_hibasis, only: is_twomol, basknd
 use mod_hibrid2, only: enord, prsg
