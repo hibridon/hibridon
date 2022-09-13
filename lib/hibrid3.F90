@@ -1553,338 +1553,343 @@ if (nsteps .le. 0) then
   endif
 endif
 
-!     with a constant step size it is convenient to propagate
-!     the matrix z = h*y rather than the log derivative matrix, y
-!     (eqns 10, 12, 13 and 14 are simply multiplied through by h)
-fac = h
-icol = 1
-do ich = 1, nch
+if (nsteps /= 0) then
+  !     propagate z matrix from rmin to rmax
+
+  !     with a constant step size it is convenient to propagate
+  !     the matrix z = h*y rather than the log derivative matrix, y
+  !     (eqns 10, 12, 13 and 14 are simply multiplied through by h)
+  fac = h
+  icol = 1
+  do ich = 1, nch
 
 #if defined(HIB_UNIX) || defined(HIB_CRAY)
-   call dscal (nch, fac, z(icol), nrow)
+     call dscal (nch, fac, z(icol), nrow)
 #endif
-   icol = icol + ncol
-end do
+     icol = icol + ncol
+  end do
 
-allocate(amat(nmax*nch))
-allocate(bmat(nmax*nch))
+  allocate(amat(nmax*nch))
+  allocate(bmat(nmax*nch))
 
-!     propagate z matrix from rmin to rmax
-do 250  kstep = 1, nsteps
-!     apply quadrature contribution at beginning of sector,
-!     r = a
-!     after this loop z contains z(a)+(h^2/3)w(a)
-!     todo : handle the case where w is lower triangular
-!     (uninitialized values in upper triangle), see issue 49
-   fac = d3
-   icol = 1
-   do  50 ich = 1, nch
-      call daxpy_wrapper (nch, fac, w(icol), nrow, z(icol), nrow)
-      icol = icol + ncol
-50    continue
-!     the reference potential for the sector is the diagonal
-!     of the coupling matrix evaluated at the centre of the
-!     sector, r = c  (eqn 15)
-   if (iread) then
-      read (FUNIT_QUAD_MAT) (wref(ich), ich = 1, nch)
-      do 60  ich = 1, nch
-         wref(ich) = wref(ich) - eshift
-60       continue
-   else
-      istep = istep + 1
-      r = rmin + istep * h
-      call mtime(t0,t0w)
-
-      call potmat(w, r, nch, nmax, v2)
-      call mtime(t1,t1w)
-      tp = tp + t1 - t0
-      tpw = tpw + t1w - t0w
-      idiag = 1
-      do 70  ich = 1, nch
-         wref(ich) = w(idiag)
-         idiag = idiag + ndiag
-70       continue
-      if (iwrite) then
-         write (FUNIT_QUAD_MAT) (wref(ich), ich = 1, nch)
-      endif
-   endif
-!     adjust quadrature contribution at r = a to account for
-!     sector reference potential  (eqn 11)
-!     after this loop z contains z(a)+(h^2/3)w1(a)
-   fac = - d3
-   idiag = 1
-   do  80 ich = 1, nch
-      z(idiag) = z(idiag) + fac * wref(ich)
-      idiag = idiag + ndiag
-80    continue
-!     evaluate homogeneous half sector propagators  (eqn 10)
-!     z(i) = h * y(i), i=1,2,3,4
-   do 85  ich = 1, nch
-      arg = half * sqrt(abs(wref(ich)))
-         if (wref(ich) .lt. zero) then
-            tn = tan(arg)
-            z1(ich) = arg / tn - arg * tn
-            z2(ich) = arg / tn + arg * tn
-         else
-            th = tanh(arg)
-            z1(ich) = arg / th + arg * th
-            z2(ich) = arg / th - arg * th
-         endif
-!           z3(ich) = z2(ich)
-!           z4(ich) = z1(ich)
-85    continue
-!     propagate z matrix across the first half sector
-!     from r = a to r = c  (eqn 14)
-   idiag = 1
-   do  90 ich = 1, nch
-      z(idiag) = z(idiag) + z1(ich)
-      idiag = idiag + ndiag
-90    continue
-
-!     z now contains z(a)+z1(a,c)
-#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-   call smxinv(z, nmax, nch, scr1, scr2, ierr)
-#endif
-#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
-  call syminv(z,nmax,nch,ierr)
-#endif
-   if (ierr .ne. 0) then
-      write (6, 9000) kstep, ierr
-      write (9, 9000) kstep, ierr
-      call exit
-   endif
-!     z now contains [z(a)+z1(a,c)]^-1
-   icol = 1
-   do  95 ich = 1, nch
-      fac = z2(ich)
-      call dscal (nch, fac, z(icol), nrow)
-      icol = icol + ncol
-95    continue
-!     z now contains [z(a)+z1(a,c)]^-1 z2(a,c)
-!     if photodissociation calculation or wavefunction desired:
-!     save this matrix, which is hg(a,m), in amat
-   if (photof .or. wavefn) &
-     call matmov(z, amat, nch, nch, nmax, nmax)
-   irow = 1
-   do  110 ich = 1, nch
-      fac = - z2(ich)
-      call dscal (nch, fac, z(irow), ncol)
-      irow = irow + nrow
-110    continue
-!     z now contains - z3(a,c) [z(a)+z1(a,c)]^-1 z2(a,c)
-   idiag = 1
-   do  120 ich = 1, nch
-      z(idiag) = z(idiag) + z1(ich)
-      idiag = idiag + ndiag
-120    continue
-
-!     evaluate quadrature contribution at sector mid-point,
-!     r = c  (eqn 12)     (first energy calculation only)
-   if (iread) then
-      icol = 1
-      do  125 ich = 1, nch
-         read (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
-         icol = icol + ncol
-125       continue
-   else
-      fac = d6
-      icol = 1
-      do  130 ich = 1, nch
-         call dscal (nch, fac, w(icol), nrow)
-         icol = icol + ncol
-130       continue
-      idiag = 1
-      do  140 ich = 1, nch
-         w(idiag) = one
-         idiag = idiag + ndiag
-140       continue
-
-#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-      call smxinv(w, nmax, nch, scr1, scr2, ierr)
-#endif
-#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
-      call syminv(w,nmax,nch,ierr)
-#endif
-      if (ierr .eq. 2) then
-         icode = 2
-         write (9,9000) kstep, icode
-         call exit
-      endif
-      idiag = 1
-
-      do  150 ich = 1, nch
-         w(idiag) = w(idiag) - one
-         idiag = idiag + ndiag
-150       continue
-      if (iwrite) then
-         icol = 1
-         do  155 ich = 1, nch
-            write (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
-            icol = icol + ncol
-155          continue
-      endif
-   endif
-!     apply quadrature contribution at sector mid-point
-!     corrections to z4(a,c) and z1(c,b) are applied
-!     simultaneously  (eqn 13)
-   fac = eight
-   icol = 1
-   do  160 ich = 1, nch
-      call daxpy_wrapper (nch, fac, w(icol), nrow, z(icol), nrow)
-      icol = icol + ncol
-160    continue
-
-!     propagate z matrix across the second half sector
-!     from r = c to r = b   (eqn 14)
-   idiag = 1
-   do  170 ich = 1, nch
-      z(idiag) = z(idiag) + z1(ich)
-      idiag = idiag + ndiag
-170    continue
-!     at this point z contains z(c) + z1(c,b)
-#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-   call smxinv(z, nmax, nch, scr1, scr2, ierr)
-#endif
-#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
-   call syminv(z,nmax,nch,ierr)
-#endif
-   if (ierr .eq. 2) then
-      icode = 3
-      write (9,9000) kstep, icode
-      call exit
-   endif
-!     at this point z contains [z(c) + z1(c,b)]^-1
-   icol = 1
-   do 175 ich = 1, nch
-      fac = z2(ich)
-      call dscal (nch, fac, z(icol), nrow)
-      icol = icol + ncol
-175    continue
-!     z now contains [z(c)+z1(c,b)]^-1 z2(c,b)
-!     if photodissociation calculation or wavefunction desired:
-   if (photof .or. wavefn) then
-!     first save this matrix, which is g(c,b), in bmat
-     call matmov(z, bmat, nch, nch, nmax, nmax)
-!     use bmat and w as temporary storage here
-     call mxma (amat, 1, nmax, bmat, 1, nmax, w, 1, nmax, &
-                nch, nch, nch)
-!     w now contains the matrix g(a,m)g(m,b)=g(a,b)
-!     if wavefunction desired, save this matrix
-    if (wavefn .and. writs) then
-       irec = irec + 1
-!     nrlogd is the number of LOGD records - used to seek the wfu file
-       nrlogd = nrlogd + 1
-       write (ifil, err=950) r - h, r, (w(i), i=1, nch)
-       icol = 1
-       do ich = 1, nch
-          write (ifil, err=950) (w(icol - 1 + i), i=1, nch)
-          icol = icol + nmax
-       end do
-       write (ifil, err=950) 'ENDWFUR', char(mod(irec, 256))
-       iendwv = iendwv + get_wfu_logd_rec_length(nchwfu, 0)
-    endif
-  endif
-
-!     accumulate overlap matrix with ground state
-!     if photodissociation calculation
-  if (photof) then
-!     premultiply g(a,b) by wt psi(a) mu(a)
-!     use bmat as temporary storage here
-     call mxma(q,nch,1,w,1,nmax,bmat,nch,1,nphoto,nch,nch)
-!     bmat now contains [...+wt*psi(a)mu(a)] g(a,b)
-!       stored as successive columns with each initial
-!       state corresponding to a column
-!     now determine psi(b)mu(b), save this in q
-     rnew = rmin + (istep+1) * h
+  do 250  kstep = 1, nsteps
+  !     apply quadrature contribution at beginning of sector,
+  !     r = a
+  !     after this loop z contains z(a)+(h^2/3)w(a)
+  !     todo : handle the case where w is lower triangular
+  !     (uninitialized values in upper triangle), see issue 49
+     fac = d3
+     icol = 1
+     do  50 ich = 1, nch
+        call daxpy_wrapper (nch, fac, w(icol), nrow, z(icol), nrow)
+        icol = icol + ncol
+  50    continue
+  !     the reference potential for the sector is the diagonal
+  !     of the coupling matrix evaluated at the centre of the
+  !     sector, r = c  (eqn 15)
      if (iread) then
-       read (FUNIT_QUAD_MAT) (q(i), i=1, nqmax)
+        read (FUNIT_QUAD_MAT) (wref(ich), ich = 1, nch)
+        do 60  ich = 1, nch
+           wref(ich) = wref(ich) - eshift
+  60       continue
      else
-       call mtime(t0,t0w)
-       call ground(q, rnew, nch, nphoto, mxphot)
-! recalculate simpson's rule wt for this point
-       wt=(3.d0+isimp)*simpwt
-       isimp=-isimp
-!     multiply psi(b) mu(b) by simpson's rule wt at r=rnew
-       call dscal (nqmax, wt, q, 1)
-       call mtime(t1,t1w)
-       twf=twf+t1-t0
-       twfw=twfw+t1w-t0w
-       if (iwrite) write (FUNIT_QUAD_MAT) (q(i), i=1, nqmax)
+        istep = istep + 1
+        r = rmin + istep * h
+        call mtime(t0,t0w)
+
+        call potmat(w, r, nch, nmax, v2)
+        call mtime(t1,t1w)
+        tp = tp + t1 - t0
+        tpw = tpw + t1w - t0w
+        idiag = 1
+        do 70  ich = 1, nch
+           wref(ich) = w(idiag)
+           idiag = idiag + ndiag
+  70       continue
+        if (iwrite) then
+           write (FUNIT_QUAD_MAT) (wref(ich), ich = 1, nch)
+        endif
      endif
-!     add wt*psi(b)mu(b) to bmat and resave
-     fac=one
-     call daxpy_wrapper(nqmax, fac, bmat, 1, q, 1)
-   endif
-!     now premultiply [z(c)+z1(c,b)]^-1 z2(c,b) by z2(c,b)
-   irow=1
-   do  190 ich = 1, nch
-     fac = - z2(ich)
-     call dscal (nch, fac, z(irow), ncol)
-     irow = irow + nrow
-190    continue
-!      z now contains - z2(c,b) [z(c)+z1(c,b)]^-1 z2(c,b)
-   idiag = 1
-   do  195 ich = 1, nch
-      z(idiag) = z(idiag) + z1(ich)
-      idiag = idiag + ndiag
-195    continue
-!     apply reference potential adjustment to quadrature
-!     contribution at r = b  (eqn 11)
-   fac = - d3
-   idiag = 1
+  !     adjust quadrature contribution at r = a to account for
+  !     sector reference potential  (eqn 11)
+  !     after this loop z contains z(a)+(h^2/3)w1(a)
+     fac = - d3
+     idiag = 1
+     do  80 ich = 1, nch
+        z(idiag) = z(idiag) + fac * wref(ich)
+        idiag = idiag + ndiag
+  80    continue
+  !     evaluate homogeneous half sector propagators  (eqn 10)
+  !     z(i) = h * y(i), i=1,2,3,4
+     do 85  ich = 1, nch
+        arg = half * sqrt(abs(wref(ich)))
+           if (wref(ich) .lt. zero) then
+              tn = tan(arg)
+              z1(ich) = arg / tn - arg * tn
+              z2(ich) = arg / tn + arg * tn
+           else
+              th = tanh(arg)
+              z1(ich) = arg / th + arg * th
+              z2(ich) = arg / th - arg * th
+           endif
+  !           z3(ich) = z2(ich)
+  !           z4(ich) = z1(ich)
+  85    continue
+  !     propagate z matrix across the first half sector
+  !     from r = a to r = c  (eqn 14)
+     idiag = 1
+     do  90 ich = 1, nch
+        z(idiag) = z(idiag) + z1(ich)
+        idiag = idiag + ndiag
+  90    continue
 
-   do  200 ich = 1, nch
-      z(idiag) = z(idiag) + fac * wref(ich)
-      idiag = idiag + ndiag
-200    continue
-!     obtain coupling matrix, w, at end of sector
-   if (iread) then
-      icol = 1
-      do  205 ich = 1, nch
-         read (FUNIT_QUAD_MAT) (w(ij), ij = icol, icol + nch - 1)
-         icol = icol + ncol
-205       continue
-      idiag = 1
-      do  210 ich = 1, nch
-         w(idiag) = w(idiag) - eshift
-         idiag = idiag + ndiag
-210       continue
-   else
-      istep = istep + 1
-      r = rmin + istep * h
-      call mtime(t0,t0w)
-      call potmat(w, r, nch, nmax, v2)
-      call mtime(t1,t1w)
-      tp = tp + t1 - t0
-      tpw = tpw + t1w - t0w
-      if (iwrite) then
+  !     z now contains z(a)+z1(a,c)
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
+     call smxinv(z, nmax, nch, scr1, scr2, ierr)
+#endif
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
+    call syminv(z,nmax,nch,ierr)
+#endif
+     if (ierr .ne. 0) then
+        write (6, 9000) kstep, ierr
+        write (9, 9000) kstep, ierr
+        call exit
+     endif
+  !     z now contains [z(a)+z1(a,c)]^-1
+     icol = 1
+     do  95 ich = 1, nch
+        fac = z2(ich)
+        call dscal (nch, fac, z(icol), nrow)
+        icol = icol + ncol
+  95    continue
+  !     z now contains [z(a)+z1(a,c)]^-1 z2(a,c)
+  !     if photodissociation calculation or wavefunction desired:
+  !     save this matrix, which is hg(a,m), in amat
+     if (photof .or. wavefn) &
+       call matmov(z, amat, nch, nch, nmax, nmax)
+     irow = 1
+     do  110 ich = 1, nch
+        fac = - z2(ich)
+        call dscal (nch, fac, z(irow), ncol)
+        irow = irow + nrow
+  110    continue
+  !     z now contains - z3(a,c) [z(a)+z1(a,c)]^-1 z2(a,c)
+     idiag = 1
+     do  120 ich = 1, nch
+        z(idiag) = z(idiag) + z1(ich)
+        idiag = idiag + ndiag
+  120    continue
+
+  !     evaluate quadrature contribution at sector mid-point,
+  !     r = c  (eqn 12)     (first energy calculation only)
+     if (iread) then
+        icol = 1
+        do  125 ich = 1, nch
+           read (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
+           icol = icol + ncol
+  125       continue
+     else
+        fac = d6
+        icol = 1
+        do  130 ich = 1, nch
+           call dscal (nch, fac, w(icol), nrow)
+           icol = icol + ncol
+  130       continue
+        idiag = 1
+        do  140 ich = 1, nch
+           w(idiag) = one
+           idiag = idiag + ndiag
+  140       continue
+
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
+        call smxinv(w, nmax, nch, scr1, scr2, ierr)
+#endif
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
+        call syminv(w,nmax,nch,ierr)
+#endif
+        if (ierr .eq. 2) then
+           icode = 2
+           write (9,9000) kstep, icode
+           call exit
+        endif
+        idiag = 1
+
+        do  150 ich = 1, nch
+           w(idiag) = w(idiag) - one
+           idiag = idiag + ndiag
+  150       continue
+        if (iwrite) then
+           icol = 1
+           do  155 ich = 1, nch
+              write (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
+              icol = icol + ncol
+  155          continue
+        endif
+     endif
+  !     apply quadrature contribution at sector mid-point
+  !     corrections to z4(a,c) and z1(c,b) are applied
+  !     simultaneously  (eqn 13)
+     fac = eight
+     icol = 1
+     do  160 ich = 1, nch
+        call daxpy_wrapper (nch, fac, w(icol), nrow, z(icol), nrow)
+        icol = icol + ncol
+  160    continue
+
+  !     propagate z matrix across the second half sector
+  !     from r = c to r = b   (eqn 14)
+     idiag = 1
+     do  170 ich = 1, nch
+        z(idiag) = z(idiag) + z1(ich)
+        idiag = idiag + ndiag
+  170    continue
+  !     at this point z contains z(c) + z1(c,b)
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
+     call smxinv(z, nmax, nch, scr1, scr2, ierr)
+#endif
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
+     call syminv(z,nmax,nch,ierr)
+#endif
+     if (ierr .eq. 2) then
+        icode = 3
+        write (9,9000) kstep, icode
+        call exit
+     endif
+  !     at this point z contains [z(c) + z1(c,b)]^-1
+     icol = 1
+     do 175 ich = 1, nch
+        fac = z2(ich)
+        call dscal (nch, fac, z(icol), nrow)
+        icol = icol + ncol
+  175    continue
+  !     z now contains [z(c)+z1(c,b)]^-1 z2(c,b)
+  !     if photodissociation calculation or wavefunction desired:
+     if (photof .or. wavefn) then
+  !     first save this matrix, which is g(c,b), in bmat
+       call matmov(z, bmat, nch, nch, nmax, nmax)
+  !     use bmat and w as temporary storage here
+       call mxma (amat, 1, nmax, bmat, 1, nmax, w, 1, nmax, &
+                  nch, nch, nch)
+  !     w now contains the matrix g(a,m)g(m,b)=g(a,b)
+  !     if wavefunction desired, save this matrix
+      if (wavefn .and. writs) then
+         irec = irec + 1
+  !     nrlogd is the number of LOGD records - used to seek the wfu file
+         nrlogd = nrlogd + 1
+         write (ifil, err=950) r - h, r, (w(i), i=1, nch)
          icol = 1
-         do  215 ich = 1, nch
-            write (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
-            icol = icol + ncol
-215          continue
+         do ich = 1, nch
+            write (ifil, err=950) (w(icol - 1 + i), i=1, nch)
+            icol = icol + nmax
+         end do
+         write (ifil, err=950) 'ENDWFUR', char(mod(irec, 256))
+         iendwv = iendwv + get_wfu_logd_rec_length(nchwfu, 0)
       endif
-   endif
-!     apply quadrature contribution at r = b  (eqn 12)
-   fac = d3
-   icol = 1
-   do 220  ich = 1, nch
-      call daxpy_wrapper (nch, fac, w(icol), nrow, z(icol), nrow)
-      icol = icol + ncol
-220    continue
-!     propagation loop ends here
-250 continue
+    endif
 
-deallocate(bmat)
-deallocate(amat)
+  !     accumulate overlap matrix with ground state
+  !     if photodissociation calculation
+    if (photof) then
+  !     premultiply g(a,b) by wt psi(a) mu(a)
+  !     use bmat as temporary storage here
+       call mxma(q,nch,1,w,1,nmax,bmat,nch,1,nphoto,nch,nch)
+  !     bmat now contains [...+wt*psi(a)mu(a)] g(a,b)
+  !       stored as successive columns with each initial
+  !       state corresponding to a column
+  !     now determine psi(b)mu(b), save this in q
+       rnew = rmin + (istep+1) * h
+       if (iread) then
+         read (FUNIT_QUAD_MAT) (q(i), i=1, nqmax)
+       else
+         call mtime(t0,t0w)
+         call ground(q, rnew, nch, nphoto, mxphot)
+  ! recalculate simpson's rule wt for this point
+         wt=(3.d0+isimp)*simpwt
+         isimp=-isimp
+  !     multiply psi(b) mu(b) by simpson's rule wt at r=rnew
+         call dscal (nqmax, wt, q, 1)
+         call mtime(t1,t1w)
+         twf=twf+t1-t0
+         twfw=twfw+t1w-t0w
+         if (iwrite) write (FUNIT_QUAD_MAT) (q(i), i=1, nqmax)
+       endif
+  !     add wt*psi(b)mu(b) to bmat and resave
+       fac=one
+       call daxpy_wrapper(nqmax, fac, bmat, 1, q, 1)
+     endif
+  !     now premultiply [z(c)+z1(c,b)]^-1 z2(c,b) by z2(c,b)
+     irow=1
+     do  190 ich = 1, nch
+       fac = - z2(ich)
+       call dscal (nch, fac, z(irow), ncol)
+       irow = irow + nrow
+  190    continue
+  !      z now contains - z2(c,b) [z(c)+z1(c,b)]^-1 z2(c,b)
+     idiag = 1
+     do  195 ich = 1, nch
+        z(idiag) = z(idiag) + z1(ich)
+        idiag = idiag + ndiag
+  195    continue
+  !     apply reference potential adjustment to quadrature
+  !     contribution at r = b  (eqn 11)
+     fac = - d3
+     idiag = 1
 
-!     recover the log derivative matrix, y, at r = rmax
-fac = hi
-icol = 1
-do ich = 1, nch
-   call dscal (nch, fac, z(icol), nrow)
-   icol = icol + ncol
-end do
+     do  200 ich = 1, nch
+        z(idiag) = z(idiag) + fac * wref(ich)
+        idiag = idiag + ndiag
+  200    continue
+  !     obtain coupling matrix, w, at end of sector
+     if (iread) then
+        icol = 1
+        do  205 ich = 1, nch
+           read (FUNIT_QUAD_MAT) (w(ij), ij = icol, icol + nch - 1)
+           icol = icol + ncol
+  205       continue
+        idiag = 1
+        do  210 ich = 1, nch
+           w(idiag) = w(idiag) - eshift
+           idiag = idiag + ndiag
+  210       continue
+     else
+        istep = istep + 1
+        r = rmin + istep * h
+        call mtime(t0,t0w)
+        call potmat(w, r, nch, nmax, v2)
+        call mtime(t1,t1w)
+        tp = tp + t1 - t0
+        tpw = tpw + t1w - t0w
+        if (iwrite) then
+           icol = 1
+           do  215 ich = 1, nch
+              write (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
+              icol = icol + ncol
+  215          continue
+        endif
+     endif
+  !     apply quadrature contribution at r = b  (eqn 12)
+     fac = d3
+     icol = 1
+     do 220  ich = 1, nch
+        call daxpy_wrapper (nch, fac, w(icol), nrow, z(icol), nrow)
+        icol = icol + ncol
+  220    continue
+  !     propagation loop ends here
+  250 continue
+
+  deallocate(bmat)
+  deallocate(amat)
+
+  !     recover the log derivative matrix, y, at r = rmax
+  fac = hi
+  icol = 1
+  do ich = 1, nch
+     call dscal (nch, fac, z(icol), nrow)
+     icol = icol + ncol
+  end do
+
+end if
+
 261 call mtime(tl,tlw)
 tl = tl - tf - tp - twf
 tlw = tlw - tfw - tpw - twfw
