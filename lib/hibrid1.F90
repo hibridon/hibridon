@@ -77,9 +77,6 @@ subroutine airprp (z, &
 !                   false if scattering calculation
 !     wavefn        true if G(a,b) transformation matrices are saved
 !                   to be used later in computing the wavefunction
-!  variable in common block /cowave/
-!     irec          record number of last written G(a,b) matrix
-!     ifil          local unit number for G(a,b) file
 !  variables in common block /coered/
 !    ered:      collision energy in atomic units (hartrees)
 !    rmu:       collision reduced mass in atomic units (mass of electron = 1)
@@ -99,6 +96,7 @@ use mod_ancou, only: ancou_type
 use mod_hibrid3, only: outmat, potent
 use mod_hiba10_22p, only: energ22
 use mod_par, only: par_iprint=>iprint
+use mod_wave, only: irec, ifil, nchwfu, iendwv, get_wfu_airy_rec_length
 implicit double precision (a-h, o-z)
 !  matrix dimensions (row dimension = nmax, matrices stored column by column)
 real(8), dimension(nmax*nmax), intent(inout) :: z
@@ -123,8 +121,6 @@ integer i, icol, ierr, ipt, izero, kstep, maxstp, &
 logical photof, wavefn, boundf, writs
 
 common /cophot/ photof, wavefn, boundf, writs
-common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
-     inflev
 common /coered/ ered, rmu
 common /coselb/ ibasty
 #if defined(HIB_UNIX_IBM)
@@ -137,7 +133,6 @@ data izero, ione, zero, one /0, 1, 0.d0, 1.d0/
 data powr /3.d0/
 !     The following variables are for size-determination of (machine
 !     dependent) built-in types
-integer int_t
 double precision dble_t
 character char_t
 real(8) :: w(nch*nmax)
@@ -154,6 +149,7 @@ real(8), dimension(nch) :: cc
 real(8), dimension(nch) :: y4
 real(8), dimension(nch) :: gam1
 real(8), dimension(nch) :: gam2
+integer(8) :: lrairy ! length of an airy record in bytes
 ! ----------------------------------------------------------------------------
 if (.not.twoen) itwo = -1
 if (itwo .le. 0) then
@@ -170,7 +166,7 @@ if (itwo .le. 0) then
   rmin = xf
   !  determine local wavevectors at rmin to use in estimating second derivatives
   !  hp and y1 are used as scratch vectors here
-  call wavevc (w, eigold, hp, y1, rmin, nch, nmax, v2)
+  call wavevc (w, eigold, rmin, nch, nmax, v2)
   !  local wavevectors at rmin are returned in eigold
   drfir = drnow
   drmid = drnow * 0.5
@@ -343,14 +339,14 @@ do kstep = 1, maxstp
       write (ifil, err=950) (y1(i), i=1, nch), (y2(i), i=1, nch), &
            (y4(i), i=1, nch), (gam1(i), i=1, nch), &
            (sc10(i), i=1, nch)
-      lrairy = (2 * nchwfu ** 2 + 6 * nchwfu + 2) &
-           * sizeof(dble_t) + 8 * sizeof(char_t)
+      lrairy = get_wfu_airy_rec_length(nchwfu, 0)
     else
-      lrairy = (nchwfu + 2) * sizeof(dble_t) + 8 * sizeof(char_t)
+      lrairy = get_wfu_airy_rec_length(nchwfu, 1)
     end if
     !
     write (ifil, err=950) 'ENDWFUR', char(mod(irec, 256))
     iendwv = iendwv + lrairy
+
   end if
   !
   do i = 1, nch

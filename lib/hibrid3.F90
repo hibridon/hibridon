@@ -819,10 +819,8 @@ subroutine testpt20(ihomo)
 !
 !  testpot for ibasty = 20 (ch2xhe v=3 - v=2)
 !  current revision date:  1-nov-2012 by lifang ms
-use mod_coiout, only: niout, indout
 use mod_covvl, only: vvl
-use mod_conlam, only: nlam, nlammx, lamnum
-use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysi, only: nscode, ispar
 implicit double precision(a-h,o-z)
 logical ihomo
 common /coselb/ ibasty
@@ -1235,7 +1233,10 @@ subroutine rles (a, c, n, m, nmax)
 !                   from call to sgesl
 !  --------------------------------------------------------------------
 implicit double precision (a-h,o-z)
-integer icol, ierr, iptc, izero, m, n, nmax
+integer ierr, izero, m, n, nmax
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
+integer :: icol, iptc
+#endif
 integer :: kpvt(n)
 dimension a(1), c(1)
 data izero /0/
@@ -1358,15 +1359,14 @@ subroutine logdb (z, nmax, nch, rmin, rmax, nsteps, &
 !                   false if scattering calculation
 !     wavefn        true if g(a,b) transformation matrices are saved
 !                   to be used later in computing the wavefunction
-!     variable in common block /cowave/
-!     irec          record number of last written g(a,b) matrix
-!     ifil          local unit number for g(a,b) file
 !     blas routines daxpy and dscal are used in o(n*n) loops
 !     symmetry of the matrices z and w is not exploited in these loops,
 !     and blas routines are not used for o(n) loops
 !  ------------------------------------------------------------------
 use mod_coqvec, only: mxphot, nphoto, q ! q is an output of this subroutine
 use mod_ancou, only: ancou_type
+use mod_wave, only: irec, ifil, nchwfu, nrlogd, iendwv, get_wfu_logd_rec_length
+
 use funit
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: z(nmax*nch)
@@ -1393,8 +1393,11 @@ type(ancou_type), intent(in) :: v2
 real(8) :: wref(nch)
 real(8) :: z1(nch)
 real(8) :: z2(nch)
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 real(8) :: scr1(nch)
 real(8) :: scr2(nch)
+#endif
+
 
 integer ich, icode, icol, idiag, ierr, ij, irow, istep, kstep, &
         ncol, ndiag, nrow
@@ -1408,8 +1411,6 @@ logical flagsu
 !      external mtime, potmat, daxpy, smxinv, dscal
 !     matrices z and w are stored column by column as one-dimensi
 common /cophot/ photof, wavefn, boundf, writs
-common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
-     inflev
 common /cosurf/ flagsu
 data zero,  one,  two, three,six,  eight &
     / 0.d0, 1.d0, 2.d0, 3.d0, 6.d0, 8.d0 /
@@ -1782,9 +1783,7 @@ if (nsteps /= 0) then
             icol = icol + nmax
          end do
          write (ifil, err=950) 'ENDWFUR', char(mod(irec, 256))
-         lrlogd = (nchwfu ** 2 + nchwfu + 2) * sizeof(dble_t) &
-              + 8 * sizeof(char_t)
-         iendwv = iendwv + lrlogd
+         iendwv = iendwv + get_wfu_logd_rec_length(nchwfu, 0)
       endif
     endif
 
@@ -1985,16 +1984,8 @@ logical, intent(in) :: ipos
 integer, intent(in) :: nch
 integer, intent(in) :: nmax
 
-real(8) :: w(nmax*nch)
-real(8) :: wref(nch)
-real(8) :: z1(nch)
-real(8) :: z2(nch)
-real(8) :: scr1(nch)
-real(8) :: scr2(nch)
-
 !      real eshift, r, rend, rmax, rmin, spac, tl, tlw, tp, tpw
-!      real scr1, scr2, wref, z1, z2
-!      real w, z
+!      real z
 integer nsteps
 logical boundf, writs
 !  internal logical variables
@@ -2482,9 +2473,6 @@ subroutine smatop (tmod, sr, si, scmat, lq, r, prec, &
 !                   false if scattering calculation
 !     wavefn        true if g(a,b) transformation matrices are saved
 !                   to be used later in computing the wavefunction
-!  variables in common block /cowave/
-!     irec          record number of last written g(a,b) matrix
-!     ifil          local unit number for g(a,b) file
 !  subroutines called:
 !    vsmul:     scalar times a vector
 !    cbesn,cbesj  ricatti-bessel functions (from b.r. johnson)
@@ -2494,14 +2482,15 @@ subroutine smatop (tmod, sr, si, scmat, lq, r, prec, &
 !    vmul:      vector times a vector
 ! --------------------------------------------------------------------
 use mod_coqvec, only: nphoto, q
-use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_cosysi, only: ispar
 ! temporary storage for smatrices
 use mod_cotq1, only: srsave => dpsir ! srsave(100)
 use mod_cotq2, only: sisave => tq2 ! sisave(100)
 use mod_hibrid2, only: mxoutd, mxoutr
-use mod_par, only: prsmat, jlpar, spac=>scat_spac
+use mod_par, only: prsmat, jlpar! spac=>scat_spac
+use mod_wave, only: irec, ifil, ipos2, ipos3, nrlogd, iendwv, ipos2_location
+
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax, nmax), intent(inout) :: tmod
 real(8), dimension(nmax, nmax), intent(out) :: sr
@@ -2533,8 +2522,6 @@ logical flagsu, photof, wavefn, &
 common /coered/ ered, rmu
 common /cosurf/ flagsu
 common /cophot/ photof, wavefn, boundf, writs
-common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
-     inflev
 common /coselb/ ibasty
 !     The following three variables are used to determine the (machine
 !     dependent) size of built-in types
@@ -2601,13 +2588,13 @@ if (wavefn) then
 !$$$         inquire (ifil, pos=ipos2)
 !
    ipos2 = iendwv
-   write (ifil, err=950, pos=9) ipos2, ipos3, nrlogd
+   write (ifil, err=950, pos=ipos2_location) ipos2, ipos3, nrlogd
    write (ifil, err=950, pos=ipos2) irec, nopen, nphoto, &
         r, (pk(i), i=1, nopen), (fj(i), i=1, nopen), &
         (fpj(i), i=1, nopen), (fn(i), i=1, nopen), &
         (fpn(i), i=1, nopen)
-   iendwv = iendwv + 3 * sizeof(int_t) + &
-        (5 * nopen + 1) * sizeof(dble_t)
+   iendwv = iendwv + 3 * int(sizeof(int_t), kind(int_t)) + &
+        (5 * nopen + 1) * int(sizeof(dble_t), kind(int_t))
 endif
 ! save derivatives
 call dcopy(nopen,fpj,1,derj,1)
@@ -2729,6 +2716,7 @@ end if
 if (.not. wavefn) return
 ! if wavefunction desired, then save
 ! real and imaginary part of s-matrix in record 2 of direct access file
+
 do icol=1, nopen
    write (ifil, err=950) (sr(i, icol), i=1, nopen)
 end do
@@ -2824,6 +2812,7 @@ if (photof) then
   endif
 ! save transition amplitudes
   if (wavefn) then
+
 !          call dbwi(nphoto,1,ifil,izero)
      do jrow = 1, nphoto
         write (ifil, err=950) (sr(jrow, jcol), jcol=1, nopen)
@@ -2832,6 +2821,7 @@ if (photof) then
      do jrow = 1, nphoto
         write (ifil, err=950) (si(jrow, jcol), jcol=1, nopen)
      end do
+
      write (ifil, err=950) 'ENDWFUR', char(2)
      iendwv = iendwv + 8 * sizeof(char_t) &
           + (2 * nopen ** 2) * sizeof(dble_t)
@@ -2848,7 +2838,6 @@ if (photof) then
   write (9, 371)
 371   format (/,'** SUM OF PHOTOFRAGMENT FLUXES (AU)')
   isym=0
-372   format (f10.4,f12.2)
   call mxoutr(9, dern, 1, nphoto, 1, isym, ipos)
   do 380 nst = 1, nphoto
     fac=one/rmu
@@ -2883,7 +2872,7 @@ if (photof) then
   call mxoutr(9, scmat, nphoto, nopen, nmax, isym, ipos)
 ! diagnostic for two state problem; leave in for now 1/21/92
 !        write (23,400) spac, scmat(1,1), scmat(1,2)
-400   format (f19.11,2(f25.12))
+! 400   format (f19.11,2(f25.12))
   do 410 nst = 1, nphoto
     fac=one/(rmu*dern(nst))
     do 405 ncol = 1, nopen
@@ -2965,13 +2954,12 @@ subroutine smatrx (z, sr, si, &
 !                   false if scattering calculation
 !     wavefn        true if g(a,b) transformation matrices are saved
 !                   to be used later in computing the wavefunction
-!  variables in common block /cowave/
-!     irec          record number of last written g(a,b) matrix
-!     ifil          local unit number for g(a,b) file
 !  ---------------------------------------------------------------------------
 use mod_coqvec, only: nphoto, q
 use mod_coeint, only: eint
 use mod_hibrid2, only: mxoutd, mxoutr
+use mod_wave, only: ifil, ipos2, ipos3, nrlogd, iendwv, ipos2_location
+
 implicit double precision (a-h,o-z)
 real(8), intent(inout) :: z(nmax,nmax)
 real(8), intent(out) :: sr(nmax,nmax)
@@ -2993,15 +2981,12 @@ logical, intent(in) :: ipos
 logical photof, wavefn, boundf, writs
 common /coered/ ered, rmu
 common /cophot/ photof, wavefn, boundf, writs
-common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
-     inflev
-real(8) :: amat(nmax,nmax), bmat(nmax,nmax)
+real(8) :: amat(nmax,nmax)
 integer :: isc1(nch)
 
 data izero /0/
-!     The following three variables are used to determine the (machine
+!     The following variables are used to determine the (machine
 !     dependent) size of built-in types
-integer int_t
 double precision dble_t
 character char_t
 !  if kwrit (prlogd) = .true. and photodissociation calculation, print out
@@ -3075,7 +3060,7 @@ if (wavefn) then
 !     following commented statement
 !$$$         inquire (ifil, pos=ipos3)
    ipos3 = iendwv
-   write (ifil, pos=9) ipos2, ipos3, nrlogd
+   write (ifil, pos=ipos2_location) ipos2, ipos3, nrlogd
    write (ifil, err=950, pos=ipos3) (isc1(i), i=1, nopen)
    do icol = 1, nopen
       write (ifil, err=950) (sr(i, icol), i=1, nopen)
