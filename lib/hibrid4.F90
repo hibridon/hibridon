@@ -1,3 +1,4 @@
+#include "assert.h"
 !***********************************************************************
 !                                                                       *
 !                         hibridon 4  library                           *
@@ -30,7 +31,6 @@ subroutine sprint (fname, ia)
 !   current revision date: 19-jun-2015 by p.dagdigian
 ! ----------------------------------------------------------------------
 use mod_cosout, only : nnout, jout
-use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
 use constants
 use mod_codim, only: nmax => mmax
@@ -545,8 +545,7 @@ double precision a, b, bfact, cs, cs1, cs2, csh, dalph2, dalpha, &
     sn, sn1, sn2, snh, tnhfac, width, x1, x2, xairy1, xairy2, &
     xbiry1, xbiry2, zero
 double precision eignow, gam1, gam2, hp, y1, y2, y4
-double precision xinpt, fprop
-integer i, nch, mxphot, nphoto
+integer i, nch
 logical photof, wavefn, boundf, writs
 common /cophot/ photof, wavefn, boundf, writs
 dimension eignow(1), hp(1), y1(1), y2(1), y4(1), gam1(1), gam2(1)
@@ -856,7 +855,7 @@ if(abs(dr).gt.0.01d0) goto 10
 return
 end
 ! -----------------------------------------------------------------------
-subroutine wavevc (w, eignow, scr1, scr2, rnow, nch, nmax, v2)
+subroutine wavevc (w, eignow, rnow, nch, nmax, v2)
 !  this subroutine first sets up the wavevector matrix at rnow
 !  then diagonalizes this matrix
 !  written by:  millard alexander
@@ -883,14 +882,18 @@ use mod_hibrid3, only: potmat
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(in) :: v2
 !      real rnow, xmin1
-!      real eignow, scr1, scr2, w
+!      real eignow, w
 integer icol, ierr, ipt, nch, nmax, nmaxm1, nmaxp1, nrow
 external dscal, dcopy
 !     external dscal, dcopy, potmat, tred1, tqlrat
 !  square matrix (of row dimension nmax)
 dimension w(1)
 !  vectors dimensioned at least nch
-dimension eignow(1), scr1(1), scr2(1)
+dimension eignow(1)
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
+real(8) :: scr1(nch)
+real(8) :: scr2(nch)
+#endif
 !  local arrays (for lapack dsyevr)
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 dimension isuppz(2*nch),iwork(10*nch),work(57*nch)
@@ -968,21 +971,29 @@ function iwavsk(irecr)
 !     Written by: Qianli Ma
 !     Latest revision: 20-apr-2012
 !
-!     This function needs nchwfu, ipos2 and ipos3 from the cowave common
-!     blocks.  These variables are set by waverd.
+!     This function needs nchwfu, ipos2 and ipos3 from the mod_wave
+!     module.  These variables are set by waverd.
 !
 !     The stream IO counterpart for `dbrr(,,,irec)` is `read
 !     (,pos=wavesk(irec))...
 !     ------------------------------------------------------------------
-implicit double precision (a-h, o-z)
-integer iwavsk
-common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
-     inflev
+use mod_wave, only: nchwfu, ipos2, ipos3, nrlogd, inflev, get_wfu_rec1_length, get_wfu_logd_rec_length, get_wfu_airy_rec_length
+implicit none
+integer, intent(in) :: irecr
+integer(8) :: iwavsk
+
 !     The following variables are for size-determination of (machine
 !     dependent) built-in types
 integer int_t
 double precision dble_t
 character char_t
+
+integer :: lr1  ! length of record 1 in bytes
+integer :: lrlogd  ! length of a logd record
+integer :: lrairy  ! length of an airy record
+integer, parameter :: char_size = int(sizeof(char_t), kind(int_t))
+integer, parameter :: int_size = int(sizeof(int_t), kind(int_t))
+integer, parameter :: dbl_size = int(sizeof(dble_t), kind(int_t))
 !
 if (irecr .le. 0) then
    iwavsk = -1
@@ -1001,18 +1012,10 @@ if (irecr .eq. 3) then
    goto 100
 end if
 !     Length for record 1 (at the beginning of the file)
-lr1 = 136 * sizeof(char_t) + (10 + 3 * nchwfu) * sizeof(int_t) &
-     + (4 + nchwfu) * sizeof(dble_t)
+lr1 = get_wfu_rec1_length(nchwfu)
 !     Length for each block written by the Airy and LOGDpropagator
-if (inflev .eq. 0) then
-   lrairy = (2 * nchwfu ** 2 + 6 * nchwfu + 2) &
-        * sizeof(dble_t) + 8 * sizeof(char_t)
-   lrlogd = (nchwfu ** 2 + nchwfu + 2) * sizeof(dble_t) &
-        + 8 * sizeof(char_t)
-else if (inflev .eq. 1) then
-   lrairy = (nchwfu + 2) * sizeof(dble_t) + 8 * sizeof(char_t)
-   lrlogd = 0
-end if
+lrairy = get_wfu_airy_rec_length(nchwfu, inflev)
+lrlogd = get_wfu_logd_rec_length(nchwfu, inflev)
 !
 if ((irecr - 3) .le. nrlogd) then
 !     within the logd range of the file
@@ -1031,7 +1034,7 @@ call exit()
 end
 !
 ! -------------------------------------------------------------------------
-subroutine wavewr(jtot,jlpar,nu,nch,nchtop,rstart,rendld)
+subroutine wavewr(jtot,jlpar,nu,nch,rstart,rendld)
 ! -------------------------------------------------------
 !  subroutine to write initial header information on wavefunction file
 !  (file jobname.WFU, logical unit 22), unit is opened in subroutine openfi
@@ -1040,7 +1043,6 @@ subroutine wavewr(jtot,jlpar,nu,nch,nchtop,rstart,rendld)
 !     common blocks amat and bmat are used to store real and
 !     imaginary parts of asymptotic wavefunction (only used in
 !     read of wavefunction from saved file)
-!     increased nchtop to 1000
 !
 !     Major revision: 16-mar-2012 by Q. Ma
 !     Use stream I/O for smaller file size and better compatibility
@@ -1052,6 +1054,92 @@ subroutine wavewr(jtot,jlpar,nu,nch,nchtop,rstart,rendld)
 #define AMAT_AS_VEC_METHOD_POINTER 2
 #define AMAT_AS_VEC_METHOD_NOVEC 3
 #define AMAT_AS_VEC_METHOD AMAT_AS_VEC_METHOD_DISTINCT
+use mod_coeint, only: eint
+#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_POINTER)
+use, intrinsic :: ISO_C_BINDING
+use mod_coamat, only: amat ! amat(25)
+#endif
+#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_NOVEC)
+use mod_coamat, only: amat ! amat(25)
+#endif
+use mod_cojq, only: jq ! jq(1)
+use mod_colq, only: lq ! lq(1)
+use mod_coinq, only: inq ! inq(1)
+use mod_par, only: csflag, flaghf, wrsmat, photof
+use funit
+use mod_wave, only: irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, get_wfu_rec1_length, wfu_format_version
+implicit none
+integer, intent(in) :: jtot
+integer, intent(in) :: jlpar
+integer, intent(in) :: nu
+integer, intent(in) :: nch
+real(8), intent(in) :: rstart
+real(8), intent(in) :: rendld
+
+character*20 :: cdate
+#include "common/parpot.F90"
+
+common /coered/ ered, rmu
+real(8) :: ered
+real(8) :: rmu
+integer :: i
+integer(8) :: end_of_rec1_pos
+!
+#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_POINTER)
+real, pointer :: amat_as_vec(:)
+#endif
+
+ifil = FUNIT_WFU
+
+nchwfu = nch
+ipos2 = -1
+ipos3 = -1
+nrlogd = 0
+!     Mark the position of the EOF of the WFU file in order to by pass
+!     (likely) a bug in the intel compiler that INQUIRE does not return
+!     the proper offset
+iendwv = 1
+!     Write magic number
+write (ifil, err=950) char(128), 'WFU'
+
+if (wrsmat) then
+   write (ifil, err=950) char(0), wfu_format_version, char(0), char(0)
+else
+   write (ifil, err=950) char(1), wfu_format_version, char(0), char(0)
+end if
+!
+write (ifil, err=950) ipos2, ipos3, nrlogd
+call dater(cdate)
+write (ifil, err=950) cdate, label, potnam
+!     Four zero-bytes for alignment / C struct compatibility
+write (ifil, err=950) char(0), char(0), char(0), char(0)
+!
+write (ifil, err=950) jtot, jlpar, nu, nch, csflag, flaghf, photof
+write (ifil, err=950) ered, rmu, rstart, rendld
+!
+write (ifil, err=950) (jq(i), i=1, nch), (lq(i), i=1, nch), &
+     (inq(i), i=1, nch)
+write (ifil, err=950) (eint(i), i=1, nch)
+!
+write (ifil, err=950) 'ENDWFUR', char(1)
+inquire(ifil, pos=end_of_rec1_pos)
+ASSERT(end_of_rec1_pos == (get_wfu_rec1_length(nchwfu) + 1))
+!
+iendwv = iendwv + get_wfu_rec1_length(nchwfu)
+irec=3  ! irec=2 and irec=3 are reserved and their position in the file are stored in ipos2 and ipos3
+return
+
+950 write (0, *) '*** ERROR WRITING WFU FILE. ABORT.'
+call exit
+return
+
+end subroutine wavewr
+!
+!     ------------------------------------------------------------------
+!     reads header file for wavefunction (wfu file)
+subroutine waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto,jflux, &
+     rstart,rendld,rinf)
+use mod_wave, only: irec, ifil, nchwfu, ipos2, ipos3, nrlogd, inflev, get_wfu_rec1_length, wfu_format_version
 use mod_coeint, only: eint
 #if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_DISTINCT)
 use mod_coamat, only: amat => psir ! amat(25) psir(nopen, nopen)
@@ -1077,89 +1165,47 @@ use mod_cosc4, only: sc4 ! sc4(10)
 use mod_cosc5, only: sc5 ! sc5(10)
 use mod_cow, only: w => w_as_vec ! w(25)
 use mod_cozmat, only: zmat => zmat_as_vec ! zmat(25)
-use mod_par, only: csflag, flaghf, wrsmat, photof
+use mod_par, only: csflag, flaghf, photof
+use funit
+implicit none
+integer, intent(out) :: jtot
+integer, intent(out) :: jlpar
+integer, intent(out) :: nu
+integer, intent(out) :: nch
+integer, intent(out) :: npts
+integer, intent(out) :: nopen
+integer, intent(out) :: nphoto
+integer, intent(out) :: jflux
+real(8), intent(out) :: rstart
+real(8), intent(out) :: rendld
+real(8), intent(out) :: rinf
 
-implicit double precision (a-h,o-z)
-character*48 oldlab, oldpot
-character*20 cdate, olddat
+integer(8) :: iwavsk
+
+character*48 :: oldlab, oldpot
+character*20 :: olddat
 #include "common/parpot.F90"
+
 common /coered/ ered, rmu
-common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
-     inflev
-dimension iword(32), word(4)
-character csize8(8), csize4(4)
-!     The three variables below are used to determine the (machine
-!     dependent) size of the built-in types
-character char_t
-integer int_t
-double precision dble_t
-!
-#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_POINTER)
-real, pointer :: amat_as_vec(:)
-#endif
+real(8) :: ered
+real(8) :: rmu
 
+character :: csize8(8), csize4(4)
+integer :: i
+integer :: nopsq
+integer :: nrecs
+real(8), parameter :: zero=0.d0
+! integer, parameter :: izero=0
 
-ifil=22
-zero=0.d0
-izero=0
-!     Size limit of wfu file is not necessary when stream I/O is used.
-!     However, if 32-bit integer is used, files exceeding 2GB cannot be
-!     seeked properly.  With ifort, '-i8' option will force using 64-bit
-!     integers.
 !
-!$$$      if (nchtop .gt. 1000) then
-!$$$         write (6, 60) nchtop
-!$$$ 60      format(/' *** NCHTOP=',i3,
-!$$$     :        ' EXCEEDS MAX FOR STORAGE OF WAVEFUNCTION; ABORT ***')
-!$$$         call exit
-!$$$      endif
-!
-nchwfu = nch
-ipos2 = -1
-ipos3 = -1
-nrlogd = 0
-!     Mark the position of the EOF of the WFU file in order to by pass
-!     (likely) a bug in the intel compiler that INQUIRE does not return
-!     the proper offset
-iendwv = 1
-!     Write magic number
-write (ifil, err=950) char(128), 'WFU'
-if (wrsmat) then
-   write (ifil, err=950) char(0), char(2), char(0), char(0)
-else
-   write (ifil, err=950) char(1), char(2), char(0), char(0)
-end if
-!
-write (ifil, err=950) ipos2, ipos3, nrlogd
-call dater(cdate)
-write (ifil, err=950) cdate, label, potnam
-!     Four zero-bytes for alignment / C struct compatibility
-write (ifil, err=950) char(0), char(0), char(0), char(0)
-!
-write (ifil, err=950) jtot, jlpar, nu, nch, csflag, flaghf, photof
-write (ifil, err=950) ered, rmu, rstart, rendld
-!
-write (ifil, err=950) (jq(i), i=1, nch), (lq(i), i=1, nch), &
-     (inq(i), i=1, nch)
-write (ifil, err=950) (eint(i), i=1, nch)
-!
-write (ifil, err=950) 'ENDWFUR', char(1)
-!
-lr1 = 136 * sizeof(char_t) + (10 + 3 * nchwfu) * sizeof(int_t) &
-     + (4 + nchwfu) * sizeof(dble_t)
-iendwv = iendwv + lr1
-irec=3
-return
-!
-!     ------------------------------------------------------------------
-!     reads header file for wavefunction (wfu file)
-entry waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto,jflux, &
-     rstart,rendld,rinf)
-!
-ifil = 22 ! the wfu file is expected to be open using this unit
+ifil = FUNIT_WFU ! the wfu file is expected to be open using this unit
 !     Read the magic number (from the start of the file)
 read (ifil, pos=1, end=900, err=950) csize8
 inflev = ichar(csize8(5))
+if (csize8(6) /= wfu_format_version) then
+  write (0,'(a,i3,a,i3,a)') '*** UNHANDLED VERSION OF WFU FORMAT : ', ichar(csize8(6)), ' (THIS VERSION OF HIBRIDON ONLY HANDLES WFU FORMAT VERSION ',  ichar(wfu_format_version),'). ABORT.'
+  call exit()
+end if
 !
 read (ifil, end=900, err=950) ipos2, ipos3, nrlogd
 !
@@ -1247,7 +1293,7 @@ irec = 3
 return
 !
 900 continue
-950 write (0, *) '*** ERROR READING/WRITING WFU FILE. ABORT.'
+950 write (0, *) '*** ERROR READING WFU FILE. ABORT.'
 call exit
 return
 !
@@ -1378,7 +1424,6 @@ use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
 use constants
 use mod_coqvec, only: nphoto
-use mod_cocent, only: sc2 => cent
 use mod_coeint, only: eint
 use mod_coamat, only: psir ! psir(100) psir(nopen,nopen)
 use mod_cobmat, only: psii ! psii(100) 
@@ -1391,7 +1436,6 @@ use mod_coisc1, only: ipack => isc1 ! ipack(10)
 use mod_coisc2, only: nlist => isc2 ! nlist(50)
 use mod_coisc3, only: nalist => isc3 ! nalist(60)
 use mod_coisc5, only: nblist  => isc5   ! nblist(60)
-use mod_cosc1, only: pk  => sc1   ! pk(100)
 use mod_cosc2, only: fj  => sc2   ! fj(10)
 use mod_cosc3, only: fjp => sc3   ! fjp(10)
 use mod_cosc4, only: fn  => sc4   ! fn(10)
@@ -1406,22 +1450,22 @@ use mod_version, only : version
 use mod_hibrid3, only: expand
 use mod_hiba07_13p, only: tcasea
 use mod_par, only: batch, csflag, photof
+use mod_wave, only: irec, inflev
+use funit
 implicit double precision (a-h,o-z)
 character*(*) filnam
-character*40  psifil, wavfil, amplfil, flxfil
+character*40  psifil, wavfil, flxfil
 character*20  cdate
 character*10  elaps, cpu
 character*5   s13p(12)
-logical exstfl, wavefn, adiab, &
+logical exstfl, adiab, &
                 kill,propf, sumf, &
                 coordf
-common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
-     inflev
 common /cotrans/ ttrans(36)
 ! common for y1, y2, y4
 common /coered/ ered, rmu
 common /coselb/ ibasty
-dimension a(7), sx(3)
+dimension a(7)
 data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f', &
            '3SG1e','3PI0e','3PI1e','3PI2e','1SG0e','1PI1e'/
 !
@@ -2005,7 +2049,7 @@ if (jflux .eq. 0) then
     iwf = 1
     propf=.true.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,inch,iwf,coordf,ny,ymin,dy,psifil_unit)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit)
     write(2, 210)
 210     format(/' R (BOHR) AND IMAGINARY PART OF CHI')
 ! reread asymptotic information
@@ -2027,13 +2071,13 @@ if (jflux .eq. 0) then
     iwf = -1
     irec=npts+4
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,inch,iwf,coordf,ny,ymin,dy,psifil_unit)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit)
   endif
 else if (jflux .eq. 2) then
   write(3, 300)
 300   format(/' R (BOHR) AND ADIABATIC ENERGIES (CM-1)',/)
   irec=npts+4
-  call eadiab(npts,nch,nchsq,nj)
+  call eadiab(npts,nch,nj)
 else if (jflux .eq. 4) then
   call transmt(npts,nch,nchsq,rout)
 else if (jflux .eq. 1) then
@@ -2109,7 +2153,7 @@ else if (jflux .eq. 1) then
 ! plot out all fluxes for total flux which is numerically well behaved
     tthresh=-1.e9
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,.false., &
-            photof,propf,sumf,inch,iwf,coordf,ny,ymin,dy,psifil_unit)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit)
   endif
   if (.not. photof) then
 ! now for incoming flux (only for scattering)
@@ -2175,7 +2219,7 @@ else if (jflux .eq. 1) then
     iwf = 0
     propf=.false.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,inch,iwf,coordf,ny,ymin,dy,psifil_unit)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit)
   endif
 ! now for outgoing flux
   if (.not.photof) then
@@ -2310,11 +2354,11 @@ else if (jflux .eq. 1) then
   if (photof) propf=.true.
   if (.not. photof) propf=.false.
   call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,inch,iwf,coordf,ny,ymin,dy,psifil_unit)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit)
 endif
 700 if (photof .or. jflux .eq. 0) close (psifil_unit)
 if (jflux .ne. 0) close (3)
-close (22)
+close (FUNIT_WFU)
 call mtime(cpu1,ela1)
 cpu1 = cpu1 - cpu0
 ela1 = ela1 - ela0
@@ -2332,7 +2376,7 @@ return
 end
 ! ------------------------------------------------------------------
 subroutine flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-                photof, propf, sumf,inch,iwf,coordf,nny,ymin,dy,psifil_unit)
+                photof, propf, sumf,iwf,coordf,nny,ymin,dy,psifil_unit)
 !
 ! subroutine to calculate fluxes
 !
@@ -2358,11 +2402,10 @@ use mod_cosc8, only: sc8
 use mod_cosc9, only: sc9
 use mod_coz, only: scmat => z_as_vec ! scmat(100)
 use mod_cozmat, only: tcoord => zmat_as_vec ! tcoord(100)
+use mod_wave, only: irec, ifil, nrlogd
 ! steve, you may need more space, but i doubt it since tcoord is dimensioned n
 implicit double precision (a-h,o-z)
 logical adiab, kill, photof, propf, sumf, coordf, ifull
-common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
-     inflev
 
 common /coered/ ered, rmu
 common /coground/ ifull
@@ -2372,6 +2415,7 @@ dimension scc(100)
 data zero, one, onemin /0.d0, 1.d0, -1.d0/
 data ione, mone /1,-1/
 integer :: psifil_unit
+integer(8) :: iwavsk
 ! if propf = true then true back-subsititution for flux
 ! if propf = false then inward propagation
 ! noffset is start of 5th column of psir
@@ -2425,7 +2469,7 @@ integer :: psifil_unit
 !     :      (pk(ii),ii=1,2),(sc1(ii),ii=1,2),
 !     :      (sc2(ii),ii=1,2),(sc9(ii),ii=1,2),(psir(noffset+ii),ii=0,1)
 
-299     format (2f16.12,14(1pe22.12e3))
+! 299     format (2f16.12,14(1pe22.12e3))
 ! transform wave function into local basis
     if (propf) then
 ! scmat2(nch, 2) = scmat(nch, nch) * psir(nch, 2)
@@ -2655,7 +2699,7 @@ integer :: psifil_unit
   call exit()
   end
 ! ------------------------------------------------------------------
-subroutine eadiab(npts,nch,nchsq,nj)
+subroutine eadiab(npts,nch,nj)
 !
 ! subroutine to readin and print out adiabatic energies
 !
@@ -2664,19 +2708,25 @@ subroutine eadiab(npts,nch,nchsq,nj)
 ! revised on 30-mar-2012 by q. ma for stream I/O of wfu files
 !
 ! ------------------------------------------------------------------
-use mod_cocent, only: sc2 => cent
 use mod_coisc3, only: nalist => isc3 ! nalist(10)
 use mod_cosc6, only: sc => sc6 ! sc(6)
-use mod_cosc7, only: sc7  ! sc7(6)
 use mod_cosc8, only: sc8
-use mod_coz, only: scmat => z_as_vec ! scmat(100)
-implicit double precision (a-h,o-z)
+use mod_wave, only: irec, ifil
+implicit none
+integer, intent(in) :: npts
+integer, intent(in) :: nch
+integer, intent(in) :: nj
+integer(8) :: iwavsk 
+integer :: i, nni
+integer :: kstep
+real(8) :: r
+real(8) :: drnow
 common /coered/ ered, rmu
-common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
-     inflev
+real(8) :: ered
+real(8) :: rmu
 ! common for y1, y2, y4
-data zero, one, onemin, two,   conv &
-    /0.d0, 1.d0, -1.d0, 2.d0, 219474.6d0/
+real(8), parameter :: two = 2.d0
+real(8), parameter :: conv = 219474.6d0
   do 420 kstep=1, npts
     irec=irec-1
     read (ifil, end=900, err=950, pos=iwavsk(irec)) r
@@ -2750,11 +2800,16 @@ use mod_cosc6, only: sc => sc6 ! sc(6)
 use mod_cosc7, only: sc1 => sc7 ! sc1(6)
 use mod_cow, only: sr => w_as_vec ! sr(100)
 use mod_cozmat, only: si => zmat_as_vec ! si(100)
-
-implicit double precision (a-h,o-z)
-integer :: psifil_unit
-common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
-     inflev
+use mod_wave, only: irec, ifil
+implicit none
+integer, intent(in) :: npts
+integer, intent(in) :: nch
+integer, intent(in) :: nchsq
+integer, intent(in) :: nj
+integer, intent(in) :: psifil_unit
+integer(8) :: iwavsk
+integer :: i, kstep
+real(8) :: drnow, r
   irec=npts+4
   do 180 kstep=1, npts
     irec=irec-1
@@ -2789,15 +2844,13 @@ subroutine transmt(npts,nch,nchsq,rout)
 ! current revision: 20-apr-2012 by q. ma
 !
 ! ------------------------------------------------------------------
-use mod_coisc2, only: nlist => isc2 ! nlist(6)
-use mod_cosc6, only: sc => sc6 ! sc(6)
 use mod_cosc7, only: sc1 => sc7 ! sc1(6)
 use mod_cow, only: sr => w_as_vec ! sr(100)
 use mod_cozmat, only: si => zmat_as_vec ! si(100)
+use mod_wave, only: irec, ifil
 implicit double precision (a-h,o-z)
+integer(8) :: iwavsk
 logical renormf
-common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
-     inflev
 dimension scrvec(64)
 irec=npts+4
 delold=1.d+18
@@ -2921,20 +2974,32 @@ subroutine eadiab1(filnam, nchmin, nchmax)
 !     ------------------------------------------------------------------
 use constants
 use mod_cosc8, only: sc8
-implicit double precision (a-h, o-z)
-character*(*) filnam
-logical exstfl
-character*40 wavfil, eadfil
+use mod_wave, only: ifil, nrlogd
+use funit
+implicit none
+character*(*), intent(in) :: filnam
+integer, intent(in) :: nchmin
+integer, intent(inout) :: nchmax
+
+integer(8) :: iwavsk
+integer :: i, j
+integer :: jtot, jlpar, nu, nch, npts, nopen, nphoto
+integer(8) :: noffst
+integer :: lenfs, lenft, jflux
+integer :: nchpr
+real(8) :: drnow, rstart, rendld, rinf, r
+logical :: exstfl
+character*40 :: wavfil, eadfil
 !
 common /coered/ ered, rmu
-common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
-     inflev
+real(8) :: ered
+real(8) :: rmu
 !
-double precision dble_t
-integer, parameter :: eadfil_unit = 2
+double precision :: dble_t
+integer, parameter :: eadfil_unit = FUNIT_EADIAB
+integer, parameter :: ien = 0
 !
 if (nchmax .ne. 0 .and. nchmax .lt. nchmin) goto 990
-ien = 0
 wavfil = filnam // '.wfu'
 call gennam(wavfil, filnam, ien, 'wfu', lenfs)
 inquire (file=wavfil, exist=exstfl)
@@ -2944,7 +3009,7 @@ if (.not. exstfl) then
         ' NOT FOUND **')
    return
 end if
-call openf(22, wavfil, 'TU', 0)
+call openf(FUNIT_WFU, wavfil, 'TU', 0)
 
 eadfil = filnam // '.eadiab'
 call gennam(eadfil, filnam, ien, 'eadiab', lenft)
@@ -2953,7 +3018,7 @@ write (6, 15) eadfil(1:lenft)
 15 format (' ** WRITING ADIABATIC ENERGIES TO ', (a))
 !
 call waverd(jtot, jlpar, nu, nch, npts, nopen, nphoto, &
-     0, rstart, rendld, rinf)
+     jflux, rstart, rendld, rinf)
 if (nchmin .gt. nch) goto 990
 if (nchmax .eq. 0 .or. nchmax .gt. nch) nchmax = nch
 nchpr = nchmax - nchmin + 1

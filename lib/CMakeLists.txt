@@ -42,6 +42,7 @@ add_library(hib
     hivector.F90
     hipotutil.F90
     hiversion.F90
+    hiwav.F90
     bases/hiba01_1sg.F90
     bases/hiba02_2sg.F90
     bases/hiba03_2pi.F90
