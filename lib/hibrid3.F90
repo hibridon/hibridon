@@ -682,7 +682,8 @@ logical ihomo
 common /coselb/ ibasty
 #include "common/parbas.F90"
 common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
-dimension nvbmnr(4),nvbmxr(4),nvbmnc(4),nvbmxc(4)
+integer, parameter :: max_nterm = 4
+dimension nvbmnr(max_nterm),nvbmxr(max_nterm),nvbmnc(max_nterm),nvbmxc(max_nterm)
 nstep=1
 if(ihomo) nstep=2
 aucm=219474.6d0
