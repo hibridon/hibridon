@@ -951,10 +951,6 @@ subroutine sypi (irpot, readpt, iread)
 !             ordering of the variable names in scod must correspond
 !             to the ordering of the variable names in cosysi, cosysr,
 !             cosysl and cobspt respectively
-!  variables in common block /cosysi/
-!    nscode:   total number of system dependent parameters
-!              nscode = isicod + isrcod + islcod + 3
-!    isicod:   total number of integer system dependent variables
 !    nterm:    number of different angular terms in potential
 !              NB for pi molecule, nterm should be 1 or 2
 !    jmax:     the maximum rotational angular momenta (-1/2 for 2pi) for
@@ -973,8 +969,6 @@ subroutine sypi (irpot, readpt, iread)
 !              for a 2pi state nman=1 selects the
 !              omega=1/2 manifold in a case (a) basis
 !              otherwise, nman is set = imult in subroutine bapi
-!  variables in common bloc /cosysr/
-!    isrcod:   total number of real system dependent variables
 !    brot:     rotational constant in cm-1
 !    aso:      spin-orbit constant in cm-1
 !    o, p, q:  lambda-doubling constants cm-1

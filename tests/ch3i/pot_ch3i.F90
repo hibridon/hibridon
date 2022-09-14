@@ -109,8 +109,8 @@ end
 
 !  -------------------------------------------------------
 use mod_coiout, only: niout, indout
-use mod_cosysi, only: nscode, isicod, iscod=>ispar
-use mod_cosysr, only: isrcod, junkr, rcod=>rspar
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 implicit double precision (a-h, o-z)
 parameter (ngr=21, nymx=500)
@@ -139,10 +139,10 @@ ny=51
 !        stop
 !      endif
 ! shift ground state wavefunction
-rshift=rcod(1)
+rshift=rspar(1)
 r=rr-rshift
 ! define dipole moment as a function of intermolecular distance.
-ndip=iscod(3)
+ndip=ispar(3)
 dmu(1)=1.0/(1+exp(2.0*(r-9.8)))
 dmu(1)=2.d0*rmu/(1+exp(2.0*(r-9.8)))
 if (ndip .eq. 1) then
@@ -309,8 +309,8 @@ use mod_coiout, only: niout, indout
 use mod_coqvec, only: mxphot, nphoto, q
 use mod_conlam, only: nlam
 use mod_cosys, only: scod
-use mod_cosysi, only: nscode, isicod, iscod=>ispar
-use mod_cosysr, only: isrcod, junkr, rcod=>rspar
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 use mod_grnd, only: reg, caypot
 use mod_par, only: par_readpt=>readpt
 use funit, only: FUNIT_INP
@@ -340,7 +340,7 @@ scod(3) = 'NDIP'
 !  set default values for model dissociation problem
 ! typical values from Guo and Schatz (1990) 93,393, including 10
 ! vibrational levels for CH3.
-iscod(1)=1
+ispar(1)=1
 lammin(1) = 1
 lammax(1) = 7
 mproj(1) = 0
@@ -353,18 +353,18 @@ do i=1,niout
      indout(i)=-(i-10)
    endif
 enddo
-iscod(2)=1
-nphoto=iscod(2)
-iscod(3)=2
-ndip=iscod(3)
-rcod(1) = 0.d0
-rshift= rcod(1)
+ispar(2)=1
+nphoto=ispar(2)
+ispar(3)=2
+ndip=ispar(3)
+rspar(1) = 0.d0
+rshift= rspar(1)
 nel=2
 do i=1, nel
-  iscod(3+i)=0
-  iscod(4+i)=9
-  rcod(2*i) = (2-i)*0.034642d0
-  rcod(2*i+1) = 0.0028776d0
+  ispar(3+i)=0
+  ispar(4+i)=9
+  rspar(2*i) = (2-i)*0.034642d0
+  rspar(2*i+1) = 0.0028776d0
   char=' '
   if(nel.gt.1) then
     if(i.le.9) write(char,'(''('',i1,'')'')') i
@@ -385,8 +385,8 @@ if(iread.eq.0) return
 if(iread .ne. 0) then
   read (8, *, err=888) nphoto, ndip
 endif
-iscod(2)=nphoto
-iscod(3)=ndip
+ispar(2)=nphoto
+ispar(3)=ndip
 scod(1)='NTERM'
 scod(2)='NPHOTO'
 scod(3)='NDIP'
@@ -399,8 +399,8 @@ iofr = iofr+1
 isrcod = 1
 do i=1, nel
   if(iread.ne.0) then
-    read (8, *, err=888)iel, (iscod(isicod+j),j=1,2)
-    read (8, *, err=888) ( rcod(isrcod+j),j=1,2)
+    read (8, *, err=888)iel, (ispar(isicod+j),j=1,2)
+    read (8, *, err=888) ( rspar(isrcod+j),j=1,2)
   endif
   char=' '
   if(nel.gt.1) then
@@ -416,7 +416,7 @@ do i=1, nel
   isrcod=isrcod+2
 enddo
 if (iread .ne. 0) then
-  read(8, *, err=888) rcod(1)
+  read(8, *, err=888) rspar(1)
 endif
 if(isicod+isrcod+3.gt.size(scod,1)) stop 'lencod'
 nscode=isicod+isrcod
@@ -440,20 +440,20 @@ return
 ! --------------------------------------------------------------
 entry savusr (readpt)
 !  save input parameters for model dissociation problem
-write (FUNIT_INP, 290) iscod(2), iscod(3)
+write (FUNIT_INP, 290) ispar(2), ispar(3)
 290 format(2i4,24x,' nphoto, ndip')
 iofi = 3
 iofr = 1
 nel = 2
 do i= 1, nel
-  write (FUNIT_INP, 295)i,(iscod(iofi+j),j=1,2)
+  write (FUNIT_INP, 295)i,(ispar(iofi+j),j=1,2)
 295   format (3i4, t50,'iel, vmin, vmax')
-  write (FUNIT_INP, 296) (rcod(iofr+j),j=1,2)
+  write (FUNIT_INP, 296) (rspar(iofr+j),j=1,2)
 296   format(2f15.8,t50,'eel, evib')
   iofi=iofi+2
   iofr=iofr+2
 enddo
-write (FUNIT_INP, 300) rcod(1)
+write (FUNIT_INP, 300) rspar(1)
 300 format(f11.5, t50,'rshift')
 return
 end
@@ -577,8 +577,8 @@ use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, iscod=>ispar
-use mod_cosysr, only: isrcod, junkr, rcod=>rspar
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 use mod_coiout, only: niout, indout
 use mod_par, only: iprint
@@ -626,8 +626,8 @@ nel= 2
 n=0
 nlevel=0
 do i=1, nel
-  nvmin=iscod(2+2*i)
-  nvmax=iscod(3+2*i)
+  nvmin=ispar(2+2*i)
+  nvmax=ispar(3+2*i)
   nvib=nvmax-nvmin+1
   do k=1, nvib
     n=n+1
@@ -640,8 +640,8 @@ do i=1, nel
     l(n)=0
     is(n)=(3-2*i)*(iv(n)+1)
     ishold(n)=is(n)
-    eel=rcod(2*i)
-    evib=rcod(2*i+1)
+    eel=rspar(2*i)
+    evib=rspar(2*i+1)
     eint(n)=eel + (iv(n)+0.5d0)*evib
     ehold(n)=eint(n)
   enddo

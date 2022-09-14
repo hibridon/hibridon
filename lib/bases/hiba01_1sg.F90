@@ -20,6 +20,31 @@
 !                                                                       *
 !************************************************************************
 module mod_hiba01_1sg
+use mod_param_group, only: iparam_type, rparam_type
+character*60 potfil  !this used to be preserved (save) between different entries of sy1sg
+integer :: irpot ! shared between different entries of sy1sg
+
+  enum, bind( C )
+  enumerator ::  &
+    RPAR_BROT             =  1, &   !
+    RPAR_DROT             =  2, &   !
+    RPAR_HROT             =  3, &   !
+    RPAR_EVIB             =  4, &   !
+    RPAR_COUNT            =  4
+  end enum
+
+  enum, bind( C )
+  enumerator ::  &
+    IPAR_JMIN             =  1, &   !
+    IPAR_JMAX             =  2, &   !
+    IPAR_COUNT            =  2
+  end enum
+
+#include "common/parbas.F90"
+type(rparam_type), dimension(RPAR_COUNT, maxvib) :: rpar
+type(iparam_type), dimension(IPAR_COUNT, maxvib) :: jranges
+
+
 contains
 ! --------------------------------------------------------------------
 subroutine ba1sg (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
@@ -119,10 +144,11 @@ use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar, convert_ispar_to_mat
-use mod_cosysr, only: isrcod, junkr, rspar, convert_rspar_to_mat
+!use mod_cosysi, only: nscode, isicod, ispar
+!use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: iprint
+use mod_param_group, only: basis_params
 #include "common/parbasl.F90"
 
 implicit double precision (a-h,o-z)
@@ -160,12 +186,10 @@ common /coered/ ered, rmu
 common /coskip/ nskip, iskip
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
-real(8), dimension(4, maxvib) :: rpar
-integer, dimension(2, maxvib) :: iscod
-integer, pointer :: nterm, nvmin, nvmax
-nterm=>ispar(1); nvmin=>ispar(2); nvmax=>ispar(3)
-call convert_rspar_to_mat(4,maxvib, rpar)
-call convert_ispar_to_mat(2, maxvib, 4, iscod)
+integer :: nterm, nvmin, nvmax
+nterm = basis_params%get_ivalue('NTERM')
+nvmin = basis_params%get_ivalue('VMIN')
+nvmax = basis_params%get_ivalue('VMAX')
 zero = 0.d0
 two = 2.d0
 !  check for consistency in the values of flaghf and csflag
@@ -240,8 +264,8 @@ if (clist) then
   write(9,31) ' State    B(v)',' D(v)','H(v)','E(v)'
 31   format(/2(a,8x),a,10x,a)
   do iv=iva,ive
-    write(6,35) ivib(iv),(rpar(jj,iv),jj=1,4)
-    write(9,35) ivib(iv),(rpar(jj,iv),jj=1,4)
+    write(6,35) ivib(iv),(rpar(jj,iv)%get_value(),jj=1,RPAR_COUNT)
+    write(9,35) ivib(iv),(rpar(jj,iv)%get_value(),jj=1,RPAR_COUNT)
   end do
 35   format(1x,i3,2x,3g12.5,f15.8)
 end if
@@ -249,7 +273,7 @@ n=0
 nskip = 1
 if (ihomo) nskip = 2
 do 120 iv=iva,ive
-  jmin=iscod(1,iv)
+  jmin=jranges(IPAR_JMIN,iv)%get_value()
   if (boundc.and.csflag) then
       if (jmin.lt.nu) then
          write(6, 7) jmin, nu
@@ -259,11 +283,11 @@ do 120 iv=iva,ive
          jmin=nu
       endif
   endif
-  jmax=iscod(2,iv)
-  brot=rpar(1,iv)/econv
-  drot=rpar(2,iv)/econv
-  hrot=rpar(3,iv)/econv
-  evib=rpar(4,iv)/econv
+  jmax=jranges(IPAR_JMAX,iv)%get_value()
+  brot = rpar(RPAR_BROT,iv)%get_value() / econv
+  drot = rpar(RPAR_DROT,iv)%get_value() / econv
+  hrot = rpar(RPAR_HROT,iv)%get_value() / econv
+  evib = rpar(RPAR_EVIB,iv)%get_value() / econv
   do 120  ji = jmin, jmax, nskip
     jj1=ji*(ji+1)
     ee=brot*jj1 - drot*jj1**2 + hrot*jj1**3 + evib
@@ -376,12 +400,12 @@ nlevop = 0
 !  calculations and their energies
 !  if homonuclear diatomic, skip space is two
 do iv=iva,ive
-  jmin=iscod(1,iv)
-  jmax=iscod(2,iv)
-  brot=rpar(1,iv)/econv
-  drot=rpar(2,iv)/econv
-  hrot=rpar(3,iv)/econv
-  evib=rpar(4,iv)/econv
+  jmin = jranges(IPAR_JMIN, iv)%get_value()
+  jmax = jranges(IPAR_JMAX, iv)%get_value()
+  brot = rpar(RPAR_BROT, iv)%get_value()/econv
+  drot = rpar(RPAR_DROT, iv)%get_value()/econv
+  hrot = rpar(RPAR_HROT, iv)%get_value()/econv
+  evib = rpar(RPAR_EVIB, iv)%get_value()/econv
   do ji = jmin, jmax, nskip
     jj1=ji*(ji+1)
     ee=brot*jj1 - drot*jj1**2 + hrot*jj1**3 + evib
@@ -589,7 +613,7 @@ end if
 return
 end
 !  -----------------------------------------------------------------------
-subroutine sy1sg (irpot, readpt, iread)
+subroutine sy1sg (irpot, readpt, iread,  basis_params)
 !  subroutine to read in system dependent parameters for singlet-sigma
 !   + atom scattering using werner-follmeg potential form
 !  if iread = 1 read data from input file
@@ -607,47 +631,60 @@ subroutine sy1sg (irpot, readpt, iread)
 !              the channel basis
 !  line 14:
 !    brot:    rotational constant of the molecule in cm-1
-!  line 16:
-!    filnam:  name of file containing potential parameters
 !
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
-use mod_cosys, only: scod
-use mod_cosysi, only: nscode, isicod, iscod=>ispar
-use mod_cosysr, only: isrcod, junkr, rcod => rspar
+!use mod_cosys, only: scod
+!use mod_cosysi, only: nscode, isicod, iscod=>ispar
+!use mod_cosysr, only: isrcod, junkr, rcod => rspar
+use mod_param_group, only: param_group_type, iparam_type, rparam_type
 use mod_par, only: ihomo
 use funit, only: FUNIT_INP
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-integer :: i, ibasty, iofi, iofr, ivib
-integer :: j, l, lc, nvib
+type(param_group_type), intent(out), allocatable :: basis_params
+integer :: i, ibasty, iofi, iofr
+integer :: j, l, lc
 logical existf
 character*1 dot
 character*4 char
-character*(*) fname
-character*60 filnam, line, potfil, filnm1
+character*60 line, filnm1
 #include "common/parbas.F90"
 common/covib/ nvib,ivib(maxvib)
+integer :: nvib, ivib
+
 common /coskip/ nskip,iskip
 integer :: nskip, iskip
 
 common /coselb/ ibasty
-save potfil
-!equivalence(iscod(1),nterm),(iscod(2),nvibmn),(iscod(3),nvibmx)
+type(iparam_type) :: par_nterm
+type(iparam_type) :: par_vmin
+type(iparam_type) :: par_vmax
+type(iparam_type), dimension(:), allocatable :: par_jmin
+type(iparam_type), dimension(:), allocatable :: par_jmax
+type(rparam_type), dimension(:), allocatable :: par_brot
+type(rparam_type), dimension(:), allocatable :: par_drot
+type(rparam_type), dimension(:), allocatable :: par_hrot
+type(iparam_type), dimension(:), allocatable :: par_evib
+!equivalence(ispar(1),nterm),(ispar(2),nvibmn),(ispar(3),nvibmx)
 #include "common/comdot.F90"
 
 
 !     number and names of system dependent parameters
 !  set default values for singlet-sigma scattering
+allocate(basis_params)
+par_nterm = basis_params%create_iparam('NTERM')
+par_vmin = basis_params%create_iparam('VMIN')
+par_vmax = basis_params%create_iparam('VMAX')
 
-iscod(1) = 1
+call par_nterm%set_value(1)
 if (iread .eq. 0) then
-  iscod(2) = 0
-  iscod(3) = 0
+  call par_vmin%set_value(0)
+  call par_vmax%set_value(0)
   lammin(1)=0
   lammax(1)=-1
   mproj(1)=0
@@ -660,9 +697,9 @@ if (iread .eq. 1) irpot=1
 if (ihomo) nskip = 2
 potfil = ' '
 !  read number of vib states
-if(iread.ne.0) read (8, *, err=88) nvib, iscod(2),iscod(3) ! nvib, vmin, vmax
-if(nvib.gt.iscod(3)-iscod(2)+1) then
-  write (6,40) nvib, iscod(2), iscod(3)
+if(iread.ne.0) read (8, *, err=88) nvib, par_vmin%get_vref(), par_vmax%get_vref()
+if(nvib > par_vmax%get_value()-par_vmin%get_value()+1) then
+  write (6,40) nvib, par_vmin%get_value(), par_vmax%get_value()
 40   format(' ** PROBABLE VIBRATIONAL LEVEL NUMBERING ERROR:',/, &
          '   VMIN =',i2,', VMAX=',i3,', BUT NVIB =',i3)
   return
@@ -671,44 +708,41 @@ if(nvib.gt.maxvib) stop 'nvib'
 if(nvib.le.0) nvib=1
 !  read data for each vib state
 !  brot, drot, hrot are bv, dv, hv (see huber herzberg, page x)
-scod(1)='NTERM'
-scod(2)='VMIN'
-scod(3)='VMAX'
-isrcod=0
-isicod=3
-iofr=2*nvib+4-1
 do i = 1,nvib
+  jranges(IPAR_JMIN, i) = basis_params%create_iparam('NOTYET')
+  jranges(IPAR_JMAX, i) = basis_params%create_iparam('NOTYET')
+  rpar(RPAR_BROT, i) = basis_params%create_rparam('NOTYET')
+  rpar(RPAR_DROT, i) = basis_params%create_rparam('NOTYET')
+  rpar(RPAR_HROT, i) = basis_params%create_rparam('NOTYET')
+  rpar(RPAR_EVIB, i) = basis_params%create_rparam('NOTYET')
   if(iread.ne.0) then
-    read (8, *, err=99) ivib(i),(iscod(isicod+j),j=1,2) ! iv, jmin, jmax
-    read (8, *, err=99) (rcod(isrcod+j),j=1,3) ! brot, drot, hrot
-    read (8, *, err=99) rcod(isrcod+4) ! evib
+    read (8, *, err=99) ivib(i), jranges(IPAR_JMIN, i)%get_vref(), jranges(IPAR_JMAX, i)%get_vref()
+    read (8, *, err=99) rpar(RPAR_BROT, i)%get_vref(), rpar(RPAR_DROT, i)%get_vref(), rpar(RPAR_HROT, i)%get_vref()
+    read (8, *, err=99) rpar(RPAR_EVIB, i)%get_vref()
   end if
   char=' '
   if(nvib.gt.1.or.ivib(i).ne.0) then
     if(ivib(i).le.9) write(char,'(''('',i1,'')'')') ivib(i)
     if(ivib(i).gt.9) write(char,'(''('',i2,'')'')') ivib(i)
   end if
-  scod(isicod+1)='JMIN'//char
-  scod(isicod+2)='JMAX'//char
-  scod(iofr+1)='BROT'//char
-  scod(iofr+2)='DROT'//char
-  scod(iofr+3)='HROT'//char
-  scod(iofr+4)='EVIB'//char
-  iofr=iofr+4
-  isicod=isicod+2
-  isrcod=isrcod+4
+  call jranges(IPAR_JMIN, i)%set_name('JMIN'//char)
+  call jranges(IPAR_JMAX, i)%set_name('JMAX'//char)
+  call rpar(RPAR_BROT, i)%set_name('BROT'//char)
+  call rpar(RPAR_DROT, i)%set_name('DROT'//char)
+  call rpar(RPAR_HROT, i)%set_name('HROT'//char)
+  call rpar(RPAR_EVIB, i)%set_name('EVIB'//char)
 end do
-if(isicod+isrcod+3.gt.size(scod,1)) stop 'lencod'
-nscode=isicod+isrcod
+
 line=' '
 if(.not.readpt.or.iread.eq.0) then
   call loapot(1,' ')
   close (8)
   return
 endif
-read (8, 85, end=186) line
+read (8, 85, end=87) line
 85 format (a)
-goto 186
+87 call ptr1sg(line, readpt)
+return
 ! here if read error occurs
 88 write(6,89)
 89 format(/' *** ERROR DURING READ FROM INPUT FILE ***')
@@ -717,9 +751,19 @@ return
 100 format(/' ** ERROR DURING READ:', &
   ' PROBABLY NOT ENOUGH VIBRATIONAL LEVELS SUPPLIED')
 return
+end subroutine
 ! --------------------------------------------------------------
-entry ptr1sg (fname,readpt)
-line = fname
+subroutine ptr1sg (line, readpt)
+implicit none
+character*(*), intent(in) :: line
+logical :: readpt
+character*60 filnam  ! name of file containing potential parameters
+character*1 dot
+logical :: existf
+character*60 :: filnm1
+integer :: j, l, lc
+#include "common/comdot.F90"
+write (*,*) 'coucou ptr1sg : readpt=', readpt
 readpt = .true.
 186 if (readpt) then
   l=1
@@ -747,29 +791,48 @@ end if
 !      close (8)
 irpot=1
 return
+end subroutine
 ! --------------------------------------------------------------
-entry sav1sg (readpt)
+subroutine sav1sg (readpt, basis_params)
+use mod_param_group, only: param_group_type, iparam_type, rparam_type
+use funit
+implicit none
+logical, intent(in) :: readpt
+type(param_group_type), intent(inout), allocatable :: basis_params
+#include "common/parbas.F90"
+common /covib/ nvib,ivib(maxvib)
+integer :: nvib
+integer :: ivib
+
+integer :: vmax
+integer :: i
+character*4 :: char
+type(iparam_type) :: vmax_param
+vmax_param = basis_params%get_iparam('VMAX')
 !  save input parameters for singlet-sigma + atom scattering
-if (iscod(3) .lt. iscod(2)) then
-  write (6, 210) iscod(3), iscod(2)
+if (basis_params%get_ivalue('VMAX') .lt. basis_params%get_ivalue('VMIN')) then
+  write (6, 210) basis_params%get_ivalue('VMAX'), basis_params%get_ivalue('VMIN')
 210   format ('**  VMAX =',i3,' .LT. VMIN =',i3,' SET VMAX = VMIN')
-iscod(3)=iscod(2)
+  call vmax_param%set_value(basis_params%get_ivalue('VMIN'))
 endif
-write (FUNIT_INP, 220) nvib, iscod(2),iscod(3)
+write (FUNIT_INP, 220) nvib, basis_params%get_ivalue('VMIN'),basis_params%get_ivalue('VMAX')
 220 format(3i4, t34,'nvib, vmin,vmax')
-iofi=3
-iofr=0
-do 301 i=1,nvib
-write (FUNIT_INP, 310) ivib(i),(iscod(iofi+j),j=1,2)
+do i=1,nvib
+
+  char=' '
+  if(nvib.gt.1.or.ivib(i).ne.0) then
+    if(ivib(i).le.9) write(char,'(''('',i1,'')'')') ivib(i)
+    if(ivib(i).gt.9) write(char,'(''('',i2,'')'')') ivib(i)
+  end if
+
+  write (FUNIT_INP, 310) ivib(i), basis_params%get_ivalue('JMIN'//char), basis_params%get_ivalue('JMAX'//char)
 310 format (3i4, t50,'iv,jmin,jmax')
-write (FUNIT_INP, 320) (rcod(iofr+j),j=1,4)
-iofi=iofi+2
-iofr=iofr+4
+  write (FUNIT_INP, 320) basis_params%get_rvalue('BROT'//char), basis_params%get_rvalue('DROT'//char), basis_params%get_rvalue('HROT'//char), basis_params%get_rvalue('EVIB'//char)
 320 format(3g14.6,t50,'brot,drot,hrot'/f15.8,t50,'evib')
-301 continue
-write (FUNIT_INP, 85) potfil
+end do
+write (FUNIT_INP, '(a)') potfil
 return
-end
+end subroutine
 
 end module mod_hiba01_1sg
 !     ------------------------------------------------------------------

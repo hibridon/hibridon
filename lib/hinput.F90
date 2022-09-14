@@ -10,10 +10,13 @@ module mod_hinput
   enum, bind( C )
   enumerator :: &
     k_keyword_execute_command     =  1, &   !   40 label:execute_command(i)
-    k_keyword_set_si_ir_param     =  2, &   !  100 label:set_si_ir_param(line, l)
-    k_keyword_set_si_l_param      =  3, &   !  200 label:set_si_l_param(line, l)
-    k_keyword_set_sd_param        =  4, &   ! 1400 label:set_sd_param(line, l)
-    k_keyword_set_ibasty          =  5      !   50 label:set_ibasty(line,l)
+    k_keyword_set_si_ir_param     =  2, &   !  100 label:set_si_ir_param()
+    k_keyword_set_si_l_param      =  3, &   !  200 label:set_si_l_param()
+    k_keyword_set_legacy_sd_param =  4, &   ! 1400 label:set_legacy_sd_param()
+    k_keyword_set_ibasty          =  5, &   !   50 label:set_ibasty(line,l)
+    k_keyword_set_sd_i_param      =  6, &   ! 1410 label:set_sd_i_param()
+    k_keyword_set_sd_r_param      =  7, &   ! 1420 label:set_sd_r_param()
+    k_keyword_set_sd_l_param      =  8      ! 1430 label:set_sd_l_param()
   end enum
 contains
 subroutine hinput(first)
@@ -81,6 +84,10 @@ use lpar_enum
 use ipar_enum
 use rpar_enum
 use mod_par, only: lpar, ipar, rpar
+use mod_param_group, only: basis_params
+use mod_param_array_type_i, iparam_type => param_type, iroparam_type => roparam_type
+use mod_param_array_type_r, rparam_type => param_type, rroparam_type => roparam_type
+use mod_param_array_type_l, lparam_type => param_type, lroparam_type => roparam_type
 
 implicit none
 !  iicode is the number of integer pcod's
@@ -188,6 +195,10 @@ real(8) :: optacm, r, thrs, val, waveve, xmu
 real(8) :: a1, acc, acclas, optval, optacc, accmx, delt_e, e, e1
 save ipr, opti, a, a1, acc, acclas, optval, optacc, istep, inam, &
      fnam1, fnam2, code, lc, jtot2x, irpot, irinp
+character(len=:), pointer :: param_name
+type(iparam_type) :: iparam
+type(rparam_type) :: rparam
+type(lparam_type) :: lparam
 
 nerg = 0
 lindx(FCOD_AIRYFL) = LPAR_AIRYFL
@@ -481,11 +492,10 @@ end do
 do i = 1,nscode
   len = index(scod(i),' ') - 1
   if(scod(i)(1:lc) .eq. code(1:lc)) then
-    if (lc .eq. len) goto 1400  ! label:set_sd_param(line, l)
-
+    if (lc .eq. len) goto 1400  ! label:set_legacy_sd_param(line, l)
     match = match + 1
     lhold(match) = l
-    iskip = k_keyword_set_sd_param
+    iskip = k_keyword_set_legacy_sd_param
     ihold(match) = i
     codex(match) = scod(i)
   end if
@@ -500,6 +510,53 @@ if(bascod(1)(1:lc) .eq. code(1:lc)) then
   ihold(match) = i
   codex(match) = bascod(1)
 end if
+! ! search in integer base parameters (system dependent parameters)
+! if (param_group_contains_param(basis_params, ihold))
+! do i = 1, basis_params%iparams%num_params
+!   !iparam = basis_params%iparams%get_param(i)
+!   !param_name = iparam%get_name()
+!   param_name = basis_params%iparams%names(i)
+!   len = index(param_name,' ') - 1
+!   if(param_name(1:lc) .eq. code(1:lc)) then
+!     if (lc .eq. len) goto 1410
+!     match = match + 1
+!     lhold(match) = l
+!     iskip = k_keyword_set_sd_i_param
+!     ihold(match) = i
+!     codex(match) = param_name
+!   end if
+! end do
+! ! search in real base parameters (system dependent parameters)
+! do i = 1, basis_params%rparams%num_params
+!   !rparam = basis_params%rparams%get_param(i)
+!   !param_name => rparam%get_name()
+!   param_name = basis_params%rparams%names(i)
+!   len = index(param_name,' ') - 1
+!   if(param_name(1:lc) .eq. code(1:lc)) then
+!     if (lc .eq. len) goto 1420
+!     match = match + 1
+!     lhold(match) = l
+!     iskip = k_keyword_set_sd_r_param
+!     ihold(match) = i
+!     codex(match) = param_name
+!   end if
+! end do
+! ! search in logical base parameters (system dependent parameters)
+! do i = 1, basis_params%lparams%num_params
+!   !lparam = basis_params%lparams%get_param(i)
+!   !param_name => lparam%get_name()
+
+!   param_name = basis_params%lparams%names(i)
+!   len = index(param_name,' ') - 1
+!   if(param_name(1:lc) .eq. code(1:lc)) then
+!     if (lc .eq. len) goto 1430
+!     match = match + 1
+!     lhold(match) = l
+!     iskip = k_keyword_set_sd_l_param
+!     ihold(match) = i
+!     codex(match) = param_name
+!   end if
+! end do
 if (match .eq. 0) then
   ! the input string matched none of the parameters
   write(6, 27) code(1:lc),(bcod(j),j = 1,ncode)
@@ -1094,7 +1151,7 @@ else
     lspar(j-isrcod-isicod) = .false.
   end if
 end if
-goto 1400  ! label:set_sd_param(line, l)
+goto 1400  ! label:set_legacy_sd_param(line, l)
 ! !
 ! ! label:set_sd_i_param(l)
 ! ! 

@@ -739,8 +739,8 @@ subroutine sy22p (irpot, readpt, iread)
 use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
 use mod_cosys, only: scod
-use mod_cosysi, only: nscode, isicod, iscod=>ispar
-use mod_cosysr, only: isrcod, junkr, rcod=>rspar
+use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysr, only: isrcod, junkr, rspar
 use mod_par, only:  jtot1,jtot2,jtotd,jlpar
 use funit, only: FUNIT_INP
 implicit none
@@ -774,13 +774,13 @@ scod(5) = 'A-SO'
 nscode = isicod + isrcod
 !  set default values for 2S + 2P atom scattering
 nterm = 1
-iscod(1)=1
-iscod(2)=1
-iscod(3)=0
-iscod(4)=0
+ispar(1)=1
+ispar(2)=1
+ispar(3)=0
+ispar(4)=0
 lammin(1)= 1
 lammax(1) = 13
-rcod(1)=881.
+rspar(1)=881.
 mproj(1)=0
 niout=2
 indout(1)=0
@@ -788,9 +788,9 @@ indout(2)=1
 potfil = ' '
 if(iread.eq.0) return
 read (8, *, err=888) nphoto, nvib, ibran, aso
-iscod(2)=nphoto
-iscod(3)=nvib
-iscod(4)=ibran
+ispar(2)=nphoto
+ispar(3)=nvib
+ispar(4)=ibran
 if (nvib .gt. 6) then
   write (6, 280) nvib
 280   format ('*** NVIB = ',i2, '; SHOULD BE 0-6')
@@ -817,7 +817,7 @@ else
   endif
 endif
 print *, ibran, jlpar
-rcod(1)=aso
+rspar(1)=aso
 line=' '
 if(.not.readpt.or.iread.eq.0) then
   call loapot(1,' ')
@@ -863,10 +863,10 @@ return
 !
 entry sav22p (readpt)
 !  save input parameters for singlet-sigma + atom scattering
-nphoto=iscod(2)
-nvib=iscod(3)
-ibran=iscod(4)
-aso=rcod(1)
+nphoto=ispar(2)
+nvib=ispar(3)
+ibran=ispar(4)
+aso=rspar(1)
 write (FUNIT_INP, 300) nphoto, nvib, ibran, aso
 300 format(i4,2(2x,i4),1pg12.5,3x,'  nphoto, nvib, ibran, a-so')
 write (FUNIT_INP, 285) potfil

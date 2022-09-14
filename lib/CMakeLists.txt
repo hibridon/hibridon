@@ -35,6 +35,7 @@ add_library(hib
     hiparcst.F90
     hiprsbr.F90
     histmix.F90
+    hiparams.F90
     hisystem.F90
     hitensor.F90
     hitrnprt.F90
