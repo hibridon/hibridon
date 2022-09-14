@@ -189,7 +189,7 @@ common /coskip/ nskip, iskip
 integer :: nterm, nvmin, nvmax
 nterm = basis_params%get_ivalue('NTERM')
 nvmin = basis_params%get_ivalue('VMIN')
-nvmax = basis_params%get_ivalue('VAX')
+nvmax = basis_params%get_ivalue('VMAX')
 zero = 0.d0
 two = 2.d0
 !  check for consistency in the values of flaghf and csflag
