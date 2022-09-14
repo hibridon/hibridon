@@ -20,6 +20,31 @@
 !                                                                       *
 !************************************************************************
 module mod_hiba01_1sg
+use mod_param_group, only: iparam_type, rparam_type
+character*60 potfil  !this used to be preserved (save) between different entries of sy1sg
+integer :: irpot ! shared between different entries of sy1sg
+
+  enum, bind( C )
+  enumerator ::  &
+    RPAR_BROT             =  1, &   !
+    RPAR_DROT             =  2, &   !
+    RPAR_HROT             =  3, &   !
+    RPAR_EVIB             =  4, &   !
+    RPAR_COUNT            =  4
+  end enum
+
+  enum, bind( C )
+  enumerator ::  &
+    IPAR_JMIN             =  1, &   !
+    IPAR_JMAX             =  2, &   !
+    IPAR_COUNT            =  2
+  end enum
+
+#include "common/parbas.F90"
+type(rparam_type), dimension(RPAR_COUNT, maxvib) :: rpar
+type(iparam_type), dimension(IPAR_COUNT, maxvib) :: jranges
+
+
 contains
 ! --------------------------------------------------------------------
 subroutine ba1sg (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
@@ -119,8 +144,8 @@ use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
-!use mod_cosysi, only: nscode, isicod, ispar, convert_ispar_to_mat
-!use mod_cosysr, only: isrcod, junkr, rspar, convert_rspar_to_mat
+!use mod_cosysi, only: nscode, isicod, ispar
+!use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: iprint
 use mod_param_group, only: basis_params
@@ -161,14 +186,10 @@ common /coered/ ered, rmu
 common /coskip/ nskip, iskip
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
-real(8), dimension(4, maxvib) :: rpar
-integer, dimension(2, maxvib) :: jranges
 integer :: nterm, nvmin, nvmax
 nterm = basis_params%get_ivalue('NTERM')
 nvmin = basis_params%get_ivalue('VMIN')
 nvmax = basis_params%get_ivalue('VAX')
-call convert_rspar_to_mat(4,maxvib, rpar)
-call convert_ispar_to_mat(2, maxvib, 4, jranges)
 zero = 0.d0
 two = 2.d0
 !  check for consistency in the values of flaghf and csflag
@@ -243,8 +264,8 @@ if (clist) then
   write(9,31) ' State    B(v)',' D(v)','H(v)','E(v)'
 31   format(/2(a,8x),a,10x,a)
   do iv=iva,ive
-    write(6,35) ivib(iv),(rpar(jj,iv),jj=1,4)
-    write(9,35) ivib(iv),(rpar(jj,iv),jj=1,4)
+    write(6,35) ivib(iv),(rpar(jj,iv)%get_value(),jj=1,RPAR_COUNT)
+    write(9,35) ivib(iv),(rpar(jj,iv)%get_value(),jj=1,RPAR_COUNT)
   end do
 35   format(1x,i3,2x,3g12.5,f15.8)
 end if
@@ -252,7 +273,7 @@ n=0
 nskip = 1
 if (ihomo) nskip = 2
 do 120 iv=iva,ive
-  jmin=jranges(1,iv)
+  jmin=jranges(IPAR_JMIN,iv)%get_value()
   if (boundc.and.csflag) then
       if (jmin.lt.nu) then
          write(6, 7) jmin, nu
@@ -262,11 +283,11 @@ do 120 iv=iva,ive
          jmin=nu
       endif
   endif
-  jmax=jranges(2,iv)
-  brot=rpar(1,iv)/econv
-  drot=rpar(2,iv)/econv
-  hrot=rpar(3,iv)/econv
-  evib=rpar(4,iv)/econv
+  jmax=jranges(IPAR_JMAX,iv)%get_value()
+  brot = rpar(RPAR_BROT,iv)%get_value() / econv
+  drot = rpar(RPAR_DROT,iv)%get_value() / econv
+  hrot = rpar(RPAR_HROT,iv)%get_value() / econv
+  evib = rpar(RPAR_EVIB,iv)%get_value() / econv
   do 120  ji = jmin, jmax, nskip
     jj1=ji*(ji+1)
     ee=brot*jj1 - drot*jj1**2 + hrot*jj1**3 + evib
@@ -379,12 +400,12 @@ nlevop = 0
 !  calculations and their energies
 !  if homonuclear diatomic, skip space is two
 do iv=iva,ive
-  jmin=jranges(1,iv)
-  jmax=jranges(2,iv)
-  brot=rpar(1,iv)/econv
-  drot=rpar(2,iv)/econv
-  hrot=rpar(3,iv)/econv
-  evib=rpar(4,iv)/econv
+  jmin = jranges(IPAR_JMIN, iv)%get_value()
+  jmax = jranges(IPAR_JMAX, iv)%get_value()
+  brot = rpar(RPAR_BROT, iv)%get_value()/econv
+  drot = rpar(RPAR_DROT, iv)%get_value()/econv
+  hrot = rpar(RPAR_HROT, iv)%get_value()/econv
+  evib = rpar(RPAR_EVIB, iv)%get_value()/econv
   do ji = jmin, jmax, nskip
     jj1=ji*(ji+1)
     ee=brot*jj1 - drot*jj1**2 + hrot*jj1**3 + evib
@@ -625,8 +646,9 @@ implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-integer :: i, ibasty, iofi, iofr, ivib
-integer :: j, l, lc, nvib
+type(param_group_type), intent(out), allocatable :: basis_params
+integer :: i, ibasty, iofi, iofr
+integer :: j, l, lc
 logical existf
 character*1 dot
 character*4 char
@@ -685,35 +707,29 @@ if(nvib.gt.maxvib) stop 'nvib'
 if(nvib.le.0) nvib=1
 !  read data for each vib state
 !  brot, drot, hrot are bv, dv, hv (see huber herzberg, page x)
-allocate(par_jmin(nvib))
-allocate(par_jmax(nvib))
-allocate(par_brot(nvib))
-allocate(par_drot(nvib))
-allocate(par_hrot(nvib))
-allocate(par_evib(nvib))
 do i = 1,nvib
-  par_jmin(i) = basis_params%create_iparam('NOTYET')
-  par_jmax(i) = basis_params%create_iparam('NOTYET')
-  par_brot(i) = basis_params%create_rparam('NOTYET')
-  par_drot(i) = basis_params%create_rparam('NOTYET')
-  par_hrot(i) = basis_params%create_rparam('NOTYET')
-  par_evib(i) = basis_params%create_iparam('NOTYET')
+  jranges(IPAR_JMIN, i) = basis_params%create_iparam('NOTYET')
+  jranges(IPAR_JMAX, i) = basis_params%create_iparam('NOTYET')
+  rpar(RPAR_BROT, i) = basis_params%create_rparam('NOTYET')
+  rpar(RPAR_DROT, i) = basis_params%create_rparam('NOTYET')
+  rpar(RPAR_HROT, i) = basis_params%create_rparam('NOTYET')
+  rpar(RPAR_EVIB, i) = basis_params%create_rparam('NOTYET')
   if(iread.ne.0) then
-    read (8, *, err=99) ivib(i), par_jmin%get_vref(), par_jmax%get_vref()
-    read (8, *, err=99) par_brot%get_vref(), par_drot%get_vref(), par_hrot%get_vref()
-    read (8, *, err=99) par_evib%get_vref()
+    read (8, *, err=99) ivib(i), jranges(IPAR_JMIN, i)%get_vref(), jranges(IPAR_JMAX, i)%get_vref()
+    read (8, *, err=99) rpar(RPAR_BROT, i)%get_vref(), rpar(RPAR_DROT, i)%get_vref(), rpar(RPAR_HROT, i)%get_vref()
+    read (8, *, err=99) rpar(RPAR_EVIB, i)%get_vref()
   end if
   char=' '
   if(nvib.gt.1.or.ivib(i).ne.0) then
     if(ivib(i).le.9) write(char,'(''('',i1,'')'')') ivib(i)
     if(ivib(i).gt.9) write(char,'(''('',i2,'')'')') ivib(i)
   end if
-  call par_jmin%set_name('JMIN'//char)
-  call par_jmax%set_name('JMAX'//char)
-  call par_brot%set_name('BROT'//char)
-  call par_drot%set_name('DROT'//char)
-  call par_hrot%set_name('HROT'//char)
-  call par_evib%set_name('EVIB'//char)
+  call jranges(IPAR_JMIN, i)%set_name('JMIN'//char)
+  call jranges(IPAR_JMAX, i)%set_name('JMAX'//char)
+  call rpar(RPAR_BROT, i)%set_name('BROT'//char)
+  call rpar(RPAR_DROT, i)%set_name('DROT'//char)
+  call rpar(RPAR_HROT, i)%set_name('HROT'//char)
+  call rpar(RPAR_EVIB, i)%set_name('EVIB'//char)
 end do
 
 line=' '

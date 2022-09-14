@@ -4,14 +4,16 @@
 #define CONCAT(X, Y)     CONCATHELP(X,Y)
 
 !#define PARAM_ARRAY_TYPE      CONCAT(param_array_type,T)
+! workaround to cmake bug : use a variable for the keyword 'module' (otherwise cmake wrongly thinks that there's a module named MODULE_NAME)
+#define MODULE_KEYWORD module
 #define MODULE_NAME           CONCAT(mod_param_array_type,T)
 #define MAX_PARAMS 10
-module MODULE_NAME
+MODULE_KEYWORD MODULE_NAME
 
   type :: param_type
   private
     character(len=8), pointer :: name
-    TT, pointer :: value
+    TT, pointer :: value  ! pointer because the actual value is stored in an array
   contains
   procedure, public :: get_value => param_get_value
   procedure, public :: set_value => param_set_value
@@ -24,7 +26,7 @@ module MODULE_NAME
   type :: roparam_type
   private
     character(len=8), pointer :: name
-    TT, pointer :: value
+    TT, pointer :: value  ! pointer because the actual value is stored in an array
   contains
   procedure, public :: get_value => roparam_get_value
   procedure, public :: get_name => roparam_get_name
@@ -76,7 +78,8 @@ contains
   function param_get_vref(this)
     class(param_type), intent(inout) :: this
     TT, pointer :: param_get_vref
-    param_get_vref = this%value
+    nullify(param_get_vref)
+    param_get_vref => this%value
   end function
 
 
@@ -200,6 +203,7 @@ contains
         return
       end if
     end do
+    write(*,*) 'failed to find parameter named ', param_name
     ASSERT( .false. )
   end function
 

@@ -1063,16 +1063,6 @@ module mod_cosysi
       maxpar = amaxpar
       allocate(ispar(amaxpar))
    end subroutine allocate_cosysi
-   subroutine convert_ispar_to_mat(nlines,ncols,istart,new)
-      integer, intent(in) :: nlines, ncols, istart
-      integer, dimension(nlines,ncols) :: new
-      integer i, j
-      do i=1,nlines
-         do j=1,ncols
-           new(i,j) = ispar(istart-1+i+(j-1)*nlines)
-         enddo
-      enddo
-   end subroutine convert_ispar_to_mat
 end module mod_cosysi
 
 
@@ -1106,16 +1096,6 @@ module mod_cosysr
       maxpar = amaxpar
       allocate(rspar(maxpar))
    end subroutine allocate_cosysr
-   subroutine convert_rspar_to_mat(nlines,ncols,new)
-      integer, intent(in) :: nlines, ncols
-      real(8), dimension(nlines,ncols) :: new
-      integer i, j
-      do i=1,nlines
-         do j=1,ncols
-           new(i,j) = rspar(i+(j-1)*nlines)
-         enddo
-      enddo
-   end subroutine convert_rspar_to_mat
 end module mod_cosysr
 
 
