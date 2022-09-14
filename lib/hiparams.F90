@@ -42,11 +42,13 @@ module mod_param_group
     procedure, public :: create_rparam => param_group_create_rparam
     procedure, public :: create_lparam => param_group_create_lparam
     procedure, public :: get_ivalue => param_group_get_ivalue
+    procedure, public :: get_rvalue => param_group_get_rvalue
+    procedure, public :: get_lvalue => param_group_get_lvalue
     procedure, public :: get_iparam => param_group_get_iparam
     procedure, public :: get_iroparam => param_group_get_iroparam
   end type param_group_type
 
-  type(param_group_type) :: basis_params
+  type(param_group_type), allocatable :: basis_params
  
 contains
 
@@ -82,6 +84,24 @@ contains
     toto = this%iparams%get_roparam(param_name)
     param_group_get_ivalue = toto%get_value()
   end function param_group_get_ivalue
+
+  function param_group_get_rvalue(this, param_name)
+    class(param_group_type), intent(in) :: this
+    character(len=*), intent(in) :: param_name
+    integer :: param_group_get_rvalue
+    type(rroparam_type) :: toto
+    toto = this%rparams%get_roparam(param_name)
+    param_group_get_rvalue = toto%get_value()
+  end function param_group_get_rvalue
+
+  function param_group_get_lvalue(this, param_name)
+    class(param_group_type), intent(in) :: this
+    character(len=*), intent(in) :: param_name
+    integer :: param_group_get_lvalue
+    type(lroparam_type) :: toto
+    toto = this%lparams%get_roparam(param_name)
+    param_group_get_lvalue = toto%get_value()
+  end function param_group_get_lvalue
 
   function param_group_get_iparam(this, param_name)
     class(param_group_type), intent(inout) :: this

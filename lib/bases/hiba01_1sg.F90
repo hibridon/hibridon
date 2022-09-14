@@ -652,9 +652,11 @@ integer :: j, l, lc
 logical existf
 character*1 dot
 character*4 char
-character*60 line, potfil, filnm1
+character*60 line, filnm1
 #include "common/parbas.F90"
 common/covib/ nvib,ivib(maxvib)
+integer :: nvib, ivib
+
 common /coskip/ nskip,iskip
 integer :: nskip, iskip
 
@@ -668,7 +670,6 @@ type(rparam_type), dimension(:), allocatable :: par_brot
 type(rparam_type), dimension(:), allocatable :: par_drot
 type(rparam_type), dimension(:), allocatable :: par_hrot
 type(iparam_type), dimension(:), allocatable :: par_evib
-save potfil
 !equivalence(ispar(1),nterm),(ispar(2),nvibmn),(ispar(3),nvibmx)
 #include "common/comdot.F90"
 
@@ -740,7 +741,7 @@ if(.not.readpt.or.iread.eq.0) then
 endif
 read (8, 85, end=87) line
 85 format (a)
-87 call ptr1sg(line, readp=.true.)
+87 call ptr1sg(line, readpt)
 return
 ! here if read error occurs
 88 write(6,89)
@@ -755,8 +756,14 @@ end subroutine
 subroutine ptr1sg (line, readpt)
 implicit none
 character*(*), intent(in) :: line
-logical, intent(in) :: readpt
+logical :: readpt
 character*60 filnam  ! name of file containing potential parameters
+character*1 dot
+logical :: existf
+character*60 :: filnm1
+integer :: j, l, lc
+#include "common/comdot.F90"
+write (*,*) 'coucou ptr1sg : readpt=', readpt
 readpt = .true.
 186 if (readpt) then
   l=1
@@ -786,28 +793,44 @@ irpot=1
 return
 end subroutine
 ! --------------------------------------------------------------
-subroutine sav1sg (readpt)
+subroutine sav1sg (readpt, basis_params)
+use mod_param_group, only: param_group_type, iparam_type, rparam_type
+use funit
 implicit none
 logical, intent(in) :: readpt
+type(param_group_type), intent(inout), allocatable :: basis_params
+#include "common/parbas.F90"
+common /covib/ nvib,ivib(maxvib)
+integer :: nvib
+integer :: ivib
+
+integer :: vmax
+integer :: i
+character*4 :: char
+type(iparam_type) :: vmax_param
+vmax_param = basis_params%get_iparam('VMAX')
 !  save input parameters for singlet-sigma + atom scattering
-if (ispar(3) .lt. ispar(2)) then
-  write (6, 210) ispar(3), ispar(2)
+if (basis_params%get_ivalue('VMAX') .lt. basis_params%get_ivalue('VMIN')) then
+  write (6, 210) basis_params%get_ivalue('VMAX'), basis_params%get_ivalue('VMIN')
 210   format ('**  VMAX =',i3,' .LT. VMIN =',i3,' SET VMAX = VMIN')
-ispar(3)=ispar(2)
+  call vmax_param%set_value(basis_params%get_ivalue('VMIN'))
 endif
-write (FUNIT_INP, 220) nvib, ispar(2),ispar(3)
+write (FUNIT_INP, 220) nvib, basis_params%get_ivalue('VMIN'),basis_params%get_ivalue('VMAX')
 220 format(3i4, t34,'nvib, vmin,vmax')
-iofi=3
-iofr=0
-do 301 i=1,nvib
-write (FUNIT_INP, 310) ivib(i),(ispar(iofi+j),j=1,2)
+do i=1,nvib
+
+  char=' '
+  if(nvib.gt.1.or.ivib(i).ne.0) then
+    if(ivib(i).le.9) write(char,'(''('',i1,'')'')') ivib(i)
+    if(ivib(i).gt.9) write(char,'(''('',i2,'')'')') ivib(i)
+  end if
+
+  write (FUNIT_INP, 310) ivib(i), basis_params%get_ivalue('JMIN'//char), basis_params%get_ivalue('JMAX'//char)
 310 format (3i4, t50,'iv,jmin,jmax')
-write (FUNIT_INP, 320) (rspar(iofr+j),j=1,4)
-iofi=iofi+2
-iofr=iofr+4
+  write (FUNIT_INP, 320) basis_params%get_rvalue('BROT'//char), basis_params%get_rvalue('DROT'//char), basis_params%get_rvalue('HROT'//char), basis_params%get_rvalue('EVIB'//char)
 320 format(3g14.6,t50,'brot,drot,hrot'/f15.8,t50,'evib')
-301 continue
-write (FUNIT_INP, 85) potfil
+end do
+write (FUNIT_INP, '(a)') potfil
 return
 end subroutine
 

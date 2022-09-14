@@ -378,8 +378,7 @@ use mod_hiba27_astp1, only: savastp1
 use mod_hiba28_3sg1sg, only: sav3sg1sg
 use mod_hiba29_astp2, only: savastp2
 use mod_hiba30_astp3, only: savastp3
-
-
+use mod_param_group, only: basis_params
 integer ibasty
 logical readpt
 common /coselb/ ibasty
@@ -393,7 +392,7 @@ goto (100,200,300,400,500,600,700,800,900,1000,1100,1200, &
       2300,2400,2500,2600,2700,2800,2900,3000) &
      ibasty
 !  singlet sigma variables
-100 call sav1sg(readpt)
+100 call sav1sg(readpt, basis_params)
 return
 !  doublet sigma variables
 200 call sav2sg(readpt)
