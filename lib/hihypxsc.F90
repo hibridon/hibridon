@@ -254,7 +254,7 @@ if (ialloc .ne. 0) goto 4000
 sigma = 0d0
 !
 !     clear length array, in case minimum jtot > 0
-allocate(length(0:jfinl, 2), stat=ialloc)
+allocate(length(0:jfinl+1, 2), stat=ialloc)
 if (ialloc .ne. 0) goto 4001
 length = 0d0
 !
@@ -482,7 +482,7 @@ nuc1 = 2 * finuc
 if (flaghf .and. nuc1.eq.2*(nuc1/2) .or. &
      .not.flaghf .and. nuc1.ne.2*(nuc1/2)) &
      fhspin = 0.5d0
-nlevelh2 = 0
+nlevlh2 = 0
 do 160 i=1, nlevelh
 !  check that level is energetically allowed
   if (elevh(i).gt.ered) go to 160
