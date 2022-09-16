@@ -254,7 +254,7 @@ if (ialloc .ne. 0) goto 4000
 sigma = 0d0
 !
 !     clear length array, in case minimum jtot > 0
-allocate(length(0:jfinl, 2), stat=ialloc)
+allocate(length(0:jfinl+1, 2), stat=ialloc)
 if (ialloc .ne. 0) goto 4001
 length = 0d0
 !
