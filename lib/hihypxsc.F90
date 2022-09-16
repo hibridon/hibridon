@@ -482,7 +482,7 @@ nuc1 = 2 * finuc
 if (flaghf .and. nuc1.eq.2*(nuc1/2) .or. &
      .not.flaghf .and. nuc1.ne.2*(nuc1/2)) &
      fhspin = 0.5d0
-nlevelh2 = 0
+nlevlh2 = 0
 do 160 i=1, nlevelh
 !  check that level is energetically allowed
   if (elevh(i).gt.ered) go to 160
@@ -490,7 +490,6 @@ do 160 i=1, nlevelh
   fnmin = abs(f1 - f2nuc)
   fnmax = f1 + f2nuc
   nhyp2 = fnmax - fnmin + 1
-  nlevlh2 = 0
   do iff = 1,  nhyp2
     nlevlh2 = nlevlh2 + 1
     jlevh2(nlevlh2) = jlevh(i)
