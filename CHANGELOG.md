@@ -1,7 +1,30 @@
 # Hibridon ChangeLog
 
-- 31/03/2022 Fixed a bug that caused the `isa` parameter written in the `ics` file to be wrong in most cases
 
+## The following major changes have been made in bringing Hibridon 4.4 to release level 5.0
+
+- Hibridon 5.0 is under the `GPLv3` licence
+
+- Version control using `GIT`, source code hosted on [GitHub](www.github.com/hibridon/hibridon)
+
+- Continuous integration (MacOS and Linux, gfortran and ifort) on:
+  - New pull request -> quick tests
+  - Merge into the `master` branch -> full tests
+
+- Previous custom preprocessing (`ftconv`) system replaced with `ffp`
+
+- Free source form instead of fixed source form
+
+- Most common blocks have been converted into modules
+
+- The `kmax` parameter is now set at execution time
+
+- Replaced previous build system with cmake
+
+- New interactive command `showpot` replaces the `testpot` program
+
+- See [GitHub closed issues](https://github.com/hibridon/hibridon/issues?q=is%3Aclosed+) to get a detailed list and informations about bugs fixed in this version
+  
 ## The following changes have been made in bringing hibridon 4.3 to release level 4.4
 
 - 11/13     Added routines ofr collision of 1D/3P atom with atom
