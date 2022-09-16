@@ -490,6 +490,7 @@ do 160 i=1, nlevelh
   fnmin = abs(f1 - f2nuc)
   fnmax = f1 + f2nuc
   nhyp2 = fnmax - fnmin + 1
+  nlevlh2 = 0
   do iff = 1,  nhyp2
     nlevlh2 = nlevlh2 + 1
     jlevh2(nlevlh2) = jlevh(i)
