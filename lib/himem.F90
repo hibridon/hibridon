@@ -506,7 +506,7 @@ module mod_cotq2
    subroutine allocate_cotq2(n)
       integer, intent(in) :: n
       allocate(tq2(n,n))
-      allocate(dpsii(n))  ! note : the size has been found by trial and error (with all tests passing)
+      allocate(dpsii(n*n))  ! note : the size has been found by trial and error (with all tests passing)
       allocate(scmat(n*n))  ! note : the size has been found by trial and error (with all tests passing)
    end subroutine allocate_cotq2
 end module mod_cotq2
