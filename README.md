@@ -21,7 +21,7 @@ Changes:
 
 ## Required tools:
 * [CMake](https://cmake.org/install/) >= 3.3
-* Fortran compiler with support for fortran 90 and fpp preprocessing (e.g. [GNU Fortran](https://fortran-lang.org/learn/os_setup/install_gfortran)).
+* Fortran compiler with support for fortran 2008 and fpp preprocessing (e.g. [GNU Fortran](https://fortran-lang.org/learn/os_setup/install_gfortran)).
 * [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) (optional)
 
 
