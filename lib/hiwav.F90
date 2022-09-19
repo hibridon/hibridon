@@ -14,7 +14,7 @@ module mod_wave  ! mod_wav is a modern replacement of common block cowave
   contains
 function get_wfu_rec1_length(nchwfu)
   integer, intent(in) :: nchwfu  ! number of channels in wfu file
-  integer :: get_wfu_rec1_length
+  integer(8) :: get_wfu_rec1_length
   !     The three variables below are used to determine the (machine
   !     dependent) size of the built-in types
   character :: char_t

@@ -988,9 +988,9 @@ integer int_t
 double precision dble_t
 character char_t
 
-integer :: lr1  ! length of record 1 in bytes
-integer :: lrlogd  ! length of a logd record
-integer :: lrairy  ! length of an airy record
+integer(8) :: lr1  ! length of record 1 in bytes
+integer(8) :: lrlogd  ! length of a logd record
+integer(8) :: lrairy  ! length of an airy record
 integer, parameter :: char_size = int(sizeof(char_t), kind(int_t))
 integer, parameter :: int_size = int(sizeof(int_t), kind(int_t))
 integer, parameter :: dbl_size = int(sizeof(dble_t), kind(int_t))
@@ -1031,6 +1031,7 @@ end if
 write (0, *) '*** OOPS! ERROR SEEKING WFU FILE. ABORT.'
 call exit()
 100 continue
+ASSERT(iwavsk > 0)
 end
 !
 ! -------------------------------------------------------------------------
@@ -2994,6 +2995,7 @@ character*40 :: wavfil, eadfil
 common /coered/ ered, rmu
 real(8) :: ered
 real(8) :: rmu
+integer(8) :: seek_pos
 !
 double precision :: dble_t
 integer, parameter :: eadfil_unit = FUNIT_EADIAB
@@ -3028,8 +3030,9 @@ write(eadfil_unit, 17) nchmin, nchmax
 17 format (' ** ADIABATIC ENERGIES FROM NO.', i5, ' TO NO.', &
      i5, ' REQUESTED')
 do i = 4 + nrlogd, npts + 3
-   read (ifil, end=900, err=950, pos=iwavsk(i)) r, drnow
-   read (ifil, end=900, err=950, pos=iwavsk(i)+noffst) &
+   seek_pos = iwavsk(i)
+   read (ifil, end=900, err=950, pos=seek_pos) r, drnow
+   read (ifil, end=900, err=950, pos=seek_pos+noffst) &
         (sc8(j), j=1, nchpr)
    write(eadfil_unit, 20) -r + 0.5 * drnow
 20    format (f10.5, 1x, $)
