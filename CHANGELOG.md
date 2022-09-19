@@ -15,6 +15,8 @@
 
 - Changed from fixed source form to free source form
 
+- Code is now using fortran features up to the 2008 standard
+
 - Updated most common blocks into modules
 
 - Replaced custom build system with `CMake`
