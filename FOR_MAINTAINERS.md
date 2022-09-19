@@ -12,7 +12,7 @@ Fortran 2008 (maximum)
   end subroutine toto
   ```
 - Lowercase for everything except for preprocessing which would be uppercase
-- Extended types are suffixed by `_type' (e.g.: `grovec_type`)
+- Extended types are suffixed by `_type` (e.g.: `grovec_type`)
 - Constants (declared as parameter) prefixed with `k_`
 - Enums are prefixed with the name of the enum
   e.g.:
