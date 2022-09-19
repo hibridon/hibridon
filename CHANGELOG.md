@@ -3,27 +3,34 @@
 
 ## The following major changes have been made in bringing Hibridon 4.4 to release level 5.0
 
-- Hibridon 5.0 is under the `GPLv3` licence
+- Modified licence for Hibridon 5.0: [`GPLv3`](https://www.gnu.org/licenses/gpl-3.0.en.html) licence
 
-- Version control using `GIT`, source code hosted on [GitHub](www.github.com/hibridon/hibridon)
+- Added version control using [`GIT`](https://git-scm.com), source code hosted on [GitHub](www.github.com/hibridon/hibridon)
 
-- Continuous integration (MacOS and Linux, gfortran and ifort) on:
-  - New pull request -> quick tests
-  - Merge into the `master` branch -> full tests
+- Added continuous integration - This validates the code for MacOS and Linux using either gfortran or ifort
 
-- Previous custom preprocessing (`ftconv`) system replaced with `ffp`
+- Added automatic testing of Hibridon
 
-- Free source form instead of fixed source form
+- Removed previous custom preprocessing (`ftconv`) system and replaced with `fpp` (Fortran PreProcessor)
 
-- Most common blocks have been converted into modules
+- Changed from fixed source form to free source form
 
-- The `kmax` parameter is now set at execution time
+- Updated most common blocks into modules
 
-- Replaced previous build system with cmake
+- Replaced custom build system with `CMake`
 
-- New interactive command `showpot` replaces the `testpot` program
+- Added interactive command `showpot` that replaces the `testpot` program
 
-- See [GitHub closed issues](https://github.com/hibridon/hibridon/issues?q=is%3Aclosed+) to get a detailed list and informations about bugs fixed in this version
+- Made the `v2` array (angular coupling matrices) growable to replace its arbitrary hardcoded size - This reduces Hibridon memory footprint
+
+- Replaced hardcoded `kmax` value with a runtime argument (`-k <KMAX>`) - This allows to control Hibridon memory footprint without recompiling
+
+- Added the `-c <COMFILE>` runtime argument to specify a command file
+
+- Changed informations displayed in headers of the log files
+
+- Fixed bugs (see [GitHub closed issues](https://github.com/hibridon/hibridon/issues?q=is%3Aclosed+) for details):
+  - Fixed bug to allow proper handling of the `WFU` files bigger than 2GB (!!! WFU file format has changed !!!)
   
 ## The following changes have been made in bringing hibridon 4.3 to release level 4.4
 
