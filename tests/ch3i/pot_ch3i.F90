@@ -69,7 +69,7 @@ ivrow(1,1)=0
 return
 end
 ! --------------------------------------------------------------------------
-      subroutine ground(wf, rr, nch, nphoto, mxphot)
+      subroutine ground(wf, r, nch, nphoto, mxphot)
 
 !  author: c. rist and m. alexander
 !  test routine for photodissociation calculations
@@ -112,21 +112,49 @@ use mod_coiout, only: niout, indout
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 use constants, only: econv, xmconv
-implicit double precision (a-h, o-z)
-parameter (ngr=21, nymx=500)
-logical ifull
-dimension wf(nch),en(ngr),f(ngr,nymx),psi(nymx),gr(ngr), &
-          dmu(2),q(4)
+implicit none
+
+real(8), intent(out) :: wf(nch*nphoto) ! array of dimension nch*nphoto, containing, on return,
+! ground state wavefunction in each of nch components
+! nphoto is number of difference ground state wavefunctions
+real(8), intent(out) :: r  ! value of separation coordinate
+integer, intent(in) :: nch  ! total number of channels (row dimension of q)
+integer, intent(in) :: nphoto ! number of different wavefunctions calculated
+! column index of q vector
+integer, intent(in) :: mxphot  ! maximum size of q vector (mxphot .ge. nch*nphoto)
+
+real(8), intent(in) :: yymin
+integer, intent(in) :: nny
+
+integer, parameter :: ngr=21
+integer, parameter :: nymx=500
+logical :: ifull
+real(8) :: en(ngr)
+real(8) :: f(ngr, nymx)
+real(8) :: psi(nymx)
+real(8) :: gr(ngr)
+real(8) :: dmu(2)
+real(8), parameter :: q(4) = [7.830d0, -0.1762d0, 0.6183d0, 4.939d0]
 #include "common/parbas.F90"
 common /coered/ ered, rmu
-common /covib/ie(50), iv(50)
+real(8) ered
+real(8) rmu
+
+common /covib/ ie, iv
+integer :: ie(50)
+integer :: iv(50)
+
 common /coground/ ifull
-data y0, reg, q / 0.619702d0, 4.16799, &
-                  7.830d0, -0.1762d0, 0.6183d0, 4.939d0/
+
+real(8), parameter :: y0 = 0.619702d0
+real(8), parameter :: reg = 4.16799
+
+real(8), parameter :: dy = 0.08
+integer :: i, iel, ivb, j, ndip, nvib
+real(8) :: q1, q2, rrr, rshift, u, wt, y, ymin
+integer :: ny = 51
 
 ymin=-2.d0
-dy=0.08
-ny=51
 !     separate the variables into CH3 umbrella motion and C-I stretch
 !     for each value of CH3--I distance, the component of the ground
 !     state on the asymptotic vibrationnal basis must be determined.
@@ -140,15 +168,15 @@ ny=51
 !      endif
 ! shift ground state wavefunction
 rshift=rcod(1)
-r=rr-rshift
+rrr=r-rshift
 ! define dipole moment as a function of intermolecular distance.
 ndip=iscod(3)
-dmu(1)=1.0/(1+exp(2.0*(r-9.8)))
-dmu(1)=2.d0*rmu/(1+exp(2.0*(r-9.8)))
+dmu(1)=1.0/(1+exp(2.0*(rrr-9.8)))
+dmu(1)=2.d0*rmu/(1+exp(2.0*(rrr-9.8)))
 if (ndip .eq. 1) then
   dmu(2)=0.d0
 else
-  dmu(2)=0.48304*rmu/(1+exp(2.0*(r-9.8)))
+  dmu(2)=0.48304*rmu/(1+exp(2.0*(rrr-9.8)))
 endif
 
 ! Ground state wave-function is defined in Guo and Schatz (1990),93,393
@@ -159,6 +187,7 @@ endif
 ifull=.true.
 !      entry wfintern(wf,yymin,nnvib,nny) ! original Rist statement
 entry wfintern(wf,yymin,nch,nny)
+
 if (.not.ifull) then
   ymin=yymin
 !       nvib=nnvib/2 ! original Rist statement
@@ -170,8 +199,8 @@ call hof(ymin, dy, f, ny, xmconv, ngr, nymx)
 
 do i=1,ny
   y= ymin +(i-1)*dy
-  q1=q(1)*(r-reg) + q(2)*(y-y0)
-  q2=q(3)*(r-reg) + q(4)*(y-y0)
+  q1=q(1)*(rrr-reg) + q(2)*(y-y0)
+  q2=q(3)*(rrr-reg) + q(4)*(y-y0)
   psi(i)=exp(-0.5*(q1**2+q2**2))
 ! normalise psi:
   psi(i)=psi(i)/sqrt(0.0810)
