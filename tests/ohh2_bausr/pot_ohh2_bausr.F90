@@ -57,7 +57,7 @@ end module
 subroutine driver
 !
 use mod_covvl, only: vvl
-use constants, only: econv, xmconv
+use constants, only: econv
 !     size of vvl : MAX_NVB+MAX_NVF
 use mod_pot_ohh2_bausr, only: lam1b, lam2b, lamb, lam1f, lam2f, lamf, nvb, nvf
 implicit none
@@ -85,10 +85,7 @@ goto 10
 subroutine loapot(iunit, filnam)
 use mod_hibasutil, only: raise
 !
-use mod_covvl, only: vvl
-use constants, only: econv, xmconv
-!     size of vvl : MAX_NVB+MAX_NVF
-
+use constants, only: econv
 use mod_pot_ohh2_bausr, only: rr, lam1b, lam2b, lamb, lam1f, lam2f, lamf, bcoef, fcoef, MAX_NR, MAX_NVB, MAX_NVF, nr, nvb, nvf, splb_b, splb_c, splb_d, splf_b, splf_c, splf_d
 implicit none
 #include "common/parpot.F90"
@@ -162,7 +159,6 @@ end
 subroutine pot(vv0, r_raw)
 !
 use mod_covvl, only: vvl
-use constants, only: econv, xmconv
 !     size of vvl : MAX_NVB+MAX_NVF
 use mod_pot_ohh2_bausr, only: nr, nvb, nvf, rr, &
   splb_b, splb_c, splb_d, &
@@ -196,13 +192,10 @@ end
 subroutine syusr(irpot, readpt, iread)
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only : isrcod, junkr, rspar
+use mod_cosysr, only : isrcod, rspar
 use mod_hibasutil, only: raise
 use funit, only: FUNIT_INP
 !
-use mod_covvl, only: vvl
-use constants, only: econv, xmconv
-!     size of vvl : MAX_NVB+MAX_NVF
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -217,6 +210,7 @@ save potfil
 
 integer, pointer :: j1max, npar, j2min, j2max, iptsy2
 real(8), pointer :: brot, aso, p, q, drot
+
 j1max=>ispar(1); npar=>ispar(2); j2min=>ispar(3); j2max=>ispar(4); iptsy2=>ispar(5)
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
 !     DEFINE THE NAMES HERE
@@ -248,6 +242,8 @@ return
 return
 !     ------------------------------------------------------------------
 entry ptrusr(fname, readpt)
+UNUSED(fname)
+UNUSED(readpt)
 return
 !     ------------------------------------------------------------------
 entry savusr(readpt)
@@ -277,14 +273,12 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use mod_hibasutil, only: raise
 use mod_par, only: iprint
 !
-use mod_covvl, only: vvl
-use constants, only: econv, xmconv
-!     size of vvl : MAX_NVB+MAX_NVF
+use constants, only: econv
 use mod_pot_ohh2_bausr, only: machep, &
    nvb, nvf, &
    lam1b, lam2b, lamb, &
