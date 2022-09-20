@@ -178,24 +178,36 @@ use mod_par, only: iprint
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
-logical flaghf, csflag, clist, flagsu, ihomo, bastst
+logical :: flaghf, csflag, clist, flagsu, ihomo, bastst
 #include "common/parbas.F90"
 
 common /coered/ ered, rmu
-dimension j(1), l(1), is(1), jhold(1), ehold(1), &
-          ishold(1), etemp(1), fjtemp(1), fktemp(1), &
-          fistmp(1)
+
+integer :: j(1), l(1), is(1), jhold(1), ishold(1)
+real(8) :: ehold(1), etemp(1), fjtemp(1), fktemp(1), fistmp(1)
+
 !  scratch arrays for computing asymmetric top energies and wave fns.
-dimension e(narray,narray), eig(narray), vec(narray,narray), &
-  sc1(narray), sc2(narray), work(1000), kp(1000), ko(1000), &
-  j2rot(1000), e2rot(1000)
+real(8), allocatable :: e(:,:), eig(:), work(:), e2rot(:)
+integer, allocatable :: kp(:), ko(:), j2rot(:)
 !
+
 integer, pointer :: nterm, numpot, jmax, iop, j2min, j2max, ipotsy2
 real(8), pointer :: arot, brot, crot, emax, b2rot
 integer(8) :: v2_index
 nterm=>ispar(1); numpot=>ispar(2); jmax=>ispar(3); iop=>ispar(4); j2min=>ispar(5); j2max=>ispar(6); ipotsy2=>ispar(7)
 arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4); b2rot=>rspar(5)
   
+! Allocate scratch arrays
+allocate(e(max(jmax,j2max), max(jmax,j2max)))  
+allocate(eig(max(jmax,j2max))
+allocate(work(144)) ! (lwork is hardcoded to be 144)
+allocate(j2rot(j2max))
+allocate(e2rot(j2max))
+allocate(kp(narray))
+allocate(ko(narray))
+
+
+
 
 zero = 0.d0
 two = 2.d0
