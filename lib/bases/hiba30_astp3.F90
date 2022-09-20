@@ -199,7 +199,7 @@ arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4); b2rot=>rspar(5)
   
 ! Allocate scratch arrays
 allocate(e(max(jmax,j2max), max(jmax,j2max)))  
-allocate(eig(max(jmax,j2max))
+allocate(eig(max(jmax,j2max)))
 allocate(work(144)) ! (lwork is hardcoded to be 144)
 allocate(j2rot(j2max))
 allocate(e2rot(j2max))
