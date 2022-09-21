@@ -124,7 +124,7 @@ use mod_cosysr, only: isrcod, junkr, rspar, convert_rspar_to_mat
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-#include "common/parbasl.F90"
+use mod_par, only: readpt, boundc
 
 implicit double precision (a-h,o-z)
 integer, intent(out) :: j(:)

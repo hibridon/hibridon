@@ -125,7 +125,7 @@ use constants, only: econv, xmconv, ang2c
 use mod_par, only: iprint
 use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-#include "common/parbasl.F90"
+use mod_par, only: readpt, boundc
 
 implicit double precision (a-h,o-z)
 integer, intent(out), dimension(:) :: nrot
