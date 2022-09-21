@@ -18,10 +18,10 @@
 ! ------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 dimension xxl(15)
 common /coloapot/ s4pi
-#include "common/parpot.F90"
 s4pi = sqrt ( 4.d0 * acos(-1.d0) )
 potnam='Patkowski et al. H2O-He SAPT PES'
 print *, potnam
@@ -45,9 +45,9 @@ subroutine loapot(iunit,filnam)
 use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 character*(*) filnam
-#include "common/parpot.F90"
 common /coloapot/ s4pi
 integer, pointer :: nterm
 nterm=>ispar(1)

@@ -11,8 +11,8 @@
 subroutine driver
 use mod_covvl, only: vvl
 use mod_cosysr, only: rspar
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
-#include "common/parpot.F90"
 real(8), pointer :: rshift, xfact
 rshift=>rspar(1); xfact=>rspar(2)
 econv=219474.6d0
@@ -54,8 +54,8 @@ close(22)
 ! ----------------------------------------------------------------
 subroutine loapot(iunit,filnam)
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 character*(*) filnam
-#include "common/parpot.F90"
 potnam='He-CN(2Sigma) CCSDT PES'
 lammin(1)=1
 lammax(1)=12

@@ -19,11 +19,11 @@
 ! ------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 !      common /vspline/ vsp_jacek(52)
 common /coloapot/ s4pi
 common /copotvec/ vec(40,21)
-#include "common/parpot.F90"
 s4pi = sqrt ( 4.d0 * acos(-1.d0) )
 rr=3.5d0
 dr=0.5d0
@@ -46,9 +46,9 @@ end
 subroutine loapot(iunit,filnam)
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 character*(*) filnam
-#include "common/parpot.F90" 
 potnam='MA CH2(X,030)-He PES'
 !
 nterm = 7

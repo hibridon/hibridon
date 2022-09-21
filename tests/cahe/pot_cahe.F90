@@ -9,9 +9,9 @@
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 character*(*) filnam
 common /coselb/ ibasty
-#include "common/parpot.F90"
 potnam='Ca(4s5p)-He'
 ibasty=7
 lammin(1)=1
@@ -28,8 +28,8 @@ subroutine driver
 use mod_covvl, only: vvl
 use mod_cosysi, only: ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
-#include "common/parpot.F90"
 integer, pointer :: npot
 real(8), dimension(:), pointer :: en, de, re, be, rl, cl
 real(8), pointer :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor

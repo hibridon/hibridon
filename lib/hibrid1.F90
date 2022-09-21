@@ -919,7 +919,7 @@ use mod_coz, only: sreal1 => z_as_vec ! sreal1(1)
 use mod_cow, only: sreal2 => w_as_vec ! sreal2(1)
 use mod_cozmat, only: simag1 => zmat_as_vec ! simag1(1)
 use mod_hibrid5, only: sread
-
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 character*(*) fname1,fname2
 character*20 cdate1,cdate2
@@ -928,7 +928,6 @@ character*48 potnam1,potnam2,label1,label2
 
 logical existf,csflg1,csflg2,flghf1,flghf2,flgsu1,flgsu2
 logical twoml1,twoml2,nucr1,nucr2
-#include "common/parpot.F90"
 !
 zero=0
 acc=0

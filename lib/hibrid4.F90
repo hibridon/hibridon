@@ -47,13 +47,13 @@ use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cozmat, only: simag => zmat_as_vec ! simag(1)
 use mod_hibrid5, only: sread
 use mod_hibasis, only: is_j12
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
 character*40 xname
 logical  existf, csflag, flaghf, flagsu, twomol, nucros
 dimension ia(4)
-#include "common/parpot.F90"
 common /coselb/ ibasty
 
 !
@@ -1069,6 +1069,7 @@ use mod_coinq, only: inq ! inq(1)
 use mod_par, only: csflag, flaghf, wrsmat, photof
 use funit
 use mod_wave, only: irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, get_wfu_rec1_length, wfu_format_version
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit none
 integer, intent(in) :: jtot
 integer, intent(in) :: jlpar
@@ -1078,7 +1079,6 @@ real(8), intent(in) :: rstart
 real(8), intent(in) :: rendld
 
 character*20 :: cdate
-#include "common/parpot.F90"
 
 common /coered/ ered, rmu
 real(8) :: ered
@@ -1168,6 +1168,7 @@ use mod_cow, only: w => w_as_vec ! w(25)
 use mod_cozmat, only: zmat => zmat_as_vec ! zmat(25)
 use mod_par, only: csflag, flaghf, photof
 use funit
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit none
 integer, intent(out) :: jtot
 integer, intent(out) :: jlpar
@@ -1185,7 +1186,6 @@ integer(8) :: iwavsk
 
 character*48 :: oldlab, oldpot
 character*20 :: olddat
-#include "common/parpot.F90"
 
 common /coered/ ered, rmu
 real(8) :: ered

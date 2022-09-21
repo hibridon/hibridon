@@ -15,11 +15,11 @@
 subroutine driver
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 character*60 filnam
 common /fisurf/ conv,econv,lsurf,nv
 common /coloapot/ s4pi, nvv, ivv(300)
-#include "common/parpot.F90"
 potnam='RIST/VALIRON NH3-H2 2009'
 nlammx = 55
 nlam = 55
@@ -98,6 +98,7 @@ goto 1
 use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 
 
@@ -136,7 +137,6 @@ common /fisurf/ conv, econv, lsurf
 
 common /fiunit/ iwrite,ifile
 character*(*) filnam
-#include "common/parpot.F90"
 parameter (nvmx = 300)
 integer   ivij(nvmx), jvij(nvmx), i2vij(nvmx), j2vij(nvmx), &
           lambda(nvmx), mu(nvmx), &
@@ -432,9 +432,9 @@ subroutine pot(vv0, r)
 !      implicit none
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 !      integer ivv, nvv, nlam, nlammx, kv, kvv, nvmx
-#include "common/parpot.F90"
 
 !      double precision  r, v, vv, vv0, vvl, s4pi
 double precision  r, v, vv, vv0, s4pi
@@ -534,9 +534,10 @@ end
 !       parameter nvmx          max number of vij terms
 
 !        implicit none
+  use mod_parpot, only: potnam=>pot_name, label=>pot_label
+
   implicit double precision (a-h,o-z)
 !        integer nddmx, nvmx
-#include "common/parpot.F90"
 !        parameter (nvmx = 45)
   parameter (nddmx=250)
   double precision r, v, dd, y, y1, y2, y3, yref, h, conv, econv

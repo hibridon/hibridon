@@ -53,6 +53,7 @@ use mod_cozmat, only: jtotpa => zmat_as_vec ! jtotpa(1)
 use mod_hibasis, only: is_j12, is_twomol
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  trnfil, smtfil
@@ -61,7 +62,6 @@ character*10  elaps, cpu
 logical csflag, flaghf, flagsu, twomol, exstfl, &
         nucros
 !
-#include "common/parpot.F90"
 common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
                 igjtp
 common /cotrn/  spin, maxjt, &

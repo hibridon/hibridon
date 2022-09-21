@@ -141,6 +141,7 @@ use mod_coj12, only: j12
 use mod_coener, only: ener => energ
 use mod_hibrid2, only: mxoutd, mxoutr
 use funit
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 real(8), intent(inout) :: tsq(nmax,nmax)
 real(8), intent(inout) :: sr(nmax,nmax)
@@ -164,7 +165,6 @@ integer :: lpack(nmax*nmax)
 
 character*20 cdate
 integer :: soutpt_sc_file = 1
-#include "common/parpot.F90"
 common /cojsav/ jsav1, jsav2
 common /cosurf/ flagsu
 common /coered/ ered, rmu
@@ -325,6 +325,7 @@ use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
 use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(10)
 use constants
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 real(8), intent(in) :: scmat(nmax, nlevop)
 integer, intent(in) :: jlev(nlevop)
@@ -334,7 +335,6 @@ character*20 cdate
 character*40 form
 logical ipos, csflag, wrpart, prpart, flaghf, flagsu,twomol,nucros, &
         twojlp,headf
-#include "common/parpot.F90"
 common /coered/ ered, rmu
 common /cosurf/ flagsu
 !  write partial opacity to unit (24+ien) if desired
@@ -984,6 +984,7 @@ use mod_cosysi, only: ispar
 use mod_basis, only: basis_get_isa
 use mod_par, only: iprint
 use funit
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit none
 real(8), intent(out) :: zmat(nmax, nmax)
 real(8), intent(out) :: tq3(nmx, nmx)
@@ -1015,7 +1016,6 @@ logical, intent(in) :: ihomo
 real(8) :: ener
 integer :: i, ien, irec, isa, j, jhold, jj1, jj2, jmin, jphold, nlevmx, nlevop, nn, nxfile
 character*20 cdate
-#include "common/parpot.F90"
 common /cojsav/ jsav1, jsav2
 integer :: jsav1, jsav2
 common /coered/ ered, rmu
@@ -1215,13 +1215,13 @@ use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc2, only: csum => sc2 ! csum(1)
 use mod_cosc3, only: tsum => sc3 ! tsum(1)
 use mod_version, only : version
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
 character*40 xnam1, xnam2
 character*80 line
 logical csflag, flaghf, iprint, flagsu, twomol, existf, nucros
-#include "common/parpot.F90"
 common /coselb/ ibasty
 dimension  a(4),scmat(nmax,1)
 
@@ -1770,10 +1770,10 @@ subroutine wrhead(nfile,cdate, &
 !     revision: 27-oct-1995 by mha
 !     major revision: 07-jan-2012 by q.ma (stream I/O, write ibasty)
 !     ------------------------------------------------------------
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 logical csflag, flaghf, flagsu, twomol, nucros
 character*20 cdate
-#include "common/parpot.F90"
 common /coselb/ ibasty
 dimension jlev(1),inlev(1),elev(1),jout(1)
 integer int_t
@@ -1826,13 +1826,13 @@ use mod_coener, only: energ
 use mod_cow, only: q1 => w_as_vec ! q1(1)
 use mod_cozmat, only: q2 => zmat_as_vec ! q2(1)
 use mod_par, only: wrpart, wrxsec
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 logical writs,csflag,nucros
 character*40 oldlab
 integer jtot, nchmax
 character*40 input,output,jobnam,savfil
 integer, parameter :: bufsize = 32
-#include "common/parpot.F90"
 common /cofile/ input,output,jobnam,savfil
 dimension word(bufsize),iword(bufsize),nlev(1)
 if (.not. wrpart .and. .not. wrxsec) then
@@ -1982,6 +1982,7 @@ use mod_cow, only: simag => w_as_vec ! simag(1)
 use mod_cozmat, only: sigma => zmat_as_vec ! sigma(1)
 use mod_hibrid2, only: mxoutr
 use mod_par, only: batch, ipos
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  icsfil, smtfilnam, xname
@@ -1994,7 +1995,6 @@ character*10  elaps, cpu
 character*13  string
 logical csflag, flaghf, flagsu, twomol, exstfl, &
         nucros, notequ
-#include "common/parpot.F90"
 !/ nnout, jout(21)
 common /coered/ ered, rmu
 common /coselb/ ibasty

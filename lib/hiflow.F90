@@ -69,6 +69,7 @@ use funit
 use ipar_enum
 use rpar_enum
 use mod_hinput, only:hinput
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
@@ -103,7 +104,6 @@ integer, intent(in) :: nmax
 integer, intent(in) :: nairy
 
 type(ancou_type), allocatable :: v2
-#include "common/parpot.F90"
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
 real(8) secnds
 common /codec/ ttim(2)

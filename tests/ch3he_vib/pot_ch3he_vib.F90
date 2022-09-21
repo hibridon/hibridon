@@ -76,8 +76,8 @@ goto 10
 ! -------------------------------------------------------------------
 subroutine loapot(iunit, filnam)
 !
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 #include "pot_ch3he_vib_common.f90"
-#include "common/parpot.F90"
 !   Initialize parameters for the potential
 !
 !   Arguments:
@@ -89,7 +89,7 @@ integer iunit
 !   Hidden returned value:
 !       mod_conlam: nlam
 !       /cosysi/ ipotsy
-!       /coptnm/ potnam
+!       mod_parpot::pot_name
 !
 !
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)

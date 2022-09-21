@@ -82,7 +82,7 @@ use lpar_enum
 use ipar_enum
 use rpar_enum
 use mod_par, only: lpar, ipar, rpar
-
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit none
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
@@ -113,7 +113,6 @@ real(8) :: a(15)
 integer :: ia(10)
 integer :: ihold(15)
 integer :: lhold(15)
-#include "common/parpot.F90"
 common /cosavi/ iipar, ixpar(iicode)
 integer :: iipar
 integer :: ixpar

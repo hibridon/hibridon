@@ -87,8 +87,8 @@ use mod_hibasutil, only: raise
 !
 use constants, only: econv
 use mod_pot_ohh2_bausr, only: rr, lam1b, lam2b, lamb, lam1f, lam2f, lamf, bcoef, fcoef, MAX_NR, MAX_NVB, MAX_NVF, nr, nvb, nvf, splb_b, splb_c, splb_d, splf_b, splf_c, splf_d
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit none
-#include "common/parpot.F90"
 !
 character*(*) filnam
 integer iunit, ir, iv

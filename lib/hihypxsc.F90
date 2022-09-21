@@ -47,7 +47,7 @@ use mod_cosc3, only: elevh => sc3 ! elevh(1)
 use mod_hibrid5, only: sread
 use mod_hibasis, only: is_j12
 use constants, only: econv, xmconv, ang2 => ang2c
-
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 character*(*) flname
 real(8), dimension(4), intent(in) :: a(4)
@@ -58,7 +58,6 @@ character*10 elaps, cpu
 logical csflg, flaghf, flgsu, twmol, nucrs, &
      batch, fast, lpar2, lpar, exstfl
 integer, parameter :: hfxfil_unit = 11
-#include "common/parpot.F90"
 common /codim/ nairy
 common /coselb/ ibasty
 !

@@ -67,10 +67,10 @@ subroutine loapot(iunit,filnam)
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_par, only: readpt
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision(a-h,o-z)
 character*(*) filnam
 character*80 potlab, filnm1
-#include "common/parpot.F90"
 common /coptx/ nblkx,maxpwx,minmpx,maxmpx,mpsstx,junk, &
   rex(20),rin(20),tanhy(250),fex(250),a1(250),ah(250), &
   art(250),are(250)

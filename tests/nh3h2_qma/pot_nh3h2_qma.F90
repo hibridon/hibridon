@@ -59,6 +59,7 @@ goto 10
 subroutine loapot(iunit, filnam)
 use mod_hibasutil, only: raise
 use constants, only: econv, xmconv
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit none
 !
 integer MAX_NR, MAX_NV
@@ -74,8 +75,6 @@ integer lb1(MAX_NV), mu1(MAX_NV), lb2(MAX_NV), mu2(MAX_NV)
 double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV), &
      spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV), &
      spl_d(MAX_NR, MAX_NV)
-
-#include "common/parpot.F90"
 !
 character*(*) filnam
 integer iunit, ir, iv

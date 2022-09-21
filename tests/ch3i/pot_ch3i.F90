@@ -55,8 +55,8 @@ subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
 !  dummy loapot subroutine
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
  character*(*) filnam
-#include "common/parpot.F90"
 common /coselb/ ibasty
 potnam='SHAPIRO-GUO-SCHATZ 2D CH3I'
 ibasty=99
