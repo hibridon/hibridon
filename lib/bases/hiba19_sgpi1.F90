@@ -171,12 +171,12 @@ use mod_cosysr, only: isrcod, junkr, rspar
 use mod_hibasutil, only: vlm2sg, iswap, rswap
 use constants, only: econv, xmconv
 use mod_par, only: iprint
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 #include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
-#include "common/parbas.F90"
 common /covibp/ ivpi(5)
 common /covpot/ numvib,ivibpi(5)
 common /coered/ ered, rmu
@@ -1131,6 +1131,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use mod_par, only: ihomo
 use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -1142,7 +1143,6 @@ character*8 char
 character*(*) fname
 character*1 dot
 character*60 filnam, line, potfil, filnm1
-#include "common/parbas.F90"
 common /coskip/ nskip,iskip
 integer :: nskip, iskip
 common /covibp/ ivpi(5)

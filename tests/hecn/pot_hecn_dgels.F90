@@ -53,8 +53,8 @@ close(22)
 #include "common/ground.F90"
 ! ----------------------------------------------------------------
 subroutine loapot(iunit,filnam)
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 character*(*) filnam
-#include "common/parbas.F90"
 #include "common/parpot.F90"
 potnam='He-CN(2Sigma) CCSDT PES'
 lammin(1)=1

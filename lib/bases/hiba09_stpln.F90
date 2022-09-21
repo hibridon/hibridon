@@ -163,12 +163,12 @@ use mod_cosysr, only: isrcod, junkr, rspar
 use mod_hibasutil, only: vlmstp, vlmstpln
 use constants, only: econv, xmconv
 use mod_par, only: iprint
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst, twomol
 character*40 fname
-#include "common/parbas.F90"
 common /coered/ ered, rmu
 common /co2mol/ twomol
 dimension j(1), l(1), jhold(1), ehold(1), is(1), &
@@ -696,6 +696,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -707,7 +708,6 @@ character*1 dot
 character*(*) fname
 character*60 line, filnam, potfil, filnm1
 parameter (icod=9, ircod=5)
-#include "common/parbas.F90"
 common /co2mol/ twomol
 #include "common/comdot.F90"
 save potfil

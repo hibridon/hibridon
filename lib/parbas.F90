@@ -1,4 +1,5 @@
 !comdeck parbas
+module mod_parbas
 !  revised march 1992, c.r. 13-may-1997 by mha
 !  revised by Q.Ma for explicit type declaration - 16-nov-2011
 !  increased maxtrm from 12 to 18 (p.dagdigian, 17-nov-2011)
@@ -6,8 +7,13 @@
 integer, parameter :: maxtrm=18
 integer, parameter :: maxvib=10
 integer, parameter :: maxvb2=maxvib**2
-!
-!  variables in common block /cobspt/
+
+! cobsp2 parameters
+integer :: ntv(maxtrm)
+integer :: ivcol(maxvb2,maxtrm)
+integer :: ivrow(maxvb2,maxtrm)
+
+! cobspt parameters
 !    lammin:   array containing minimum value of lambda for each term
 !    lammax:   array containing maximum value of lambda for each term
 !    mproj:    array containing the order of the reduced rotation matrix
@@ -15,7 +21,11 @@ integer, parameter :: maxvb2=maxvib**2
 !              for homonuclear molecules, the allowed values of lambda for
 !              each term range from lammin to lammax in steps of 2
 !
-!  variables in common block /cobsptln/
+integer :: lammin(maxtrm)
+integer :: lammax(maxtrm)
+integer :: mproj(maxtrm)
+
+! cobsptln
 !              Order of reduced rotation matrix d(theta2) as defined in 
 !              eq (21) of reference J. Chem Phys. 98 (6), 1993 with
 !              (lam2, m2proj) = (l2, m2).      
@@ -26,15 +36,6 @@ integer, parameter :: maxvb2=maxvib**2
 !              matrix elements for each term.
 !              here, lammin and lam2 are greater than m2proj .
 !
-common /cobsp2/ ntv(maxtrm),ivcol(maxvb2,maxtrm), &
-                ivrow(maxvb2,maxtrm)
-integer :: ntv
-integer :: ivcol
-integer :: ivrow
-common /cobspt/ lammin(maxtrm), lammax(maxtrm), mproj(maxtrm)
-integer :: lammin
-integer :: lammax
-integer :: mproj
-common /cobsptln/ lam2(maxtrm), m2proj(maxtrm)
-integer :: lam2
-integer :: m2proj
+integer :: lam2(maxtrm)
+integer :: m2proj(maxtrm)
+end module

@@ -145,6 +145,7 @@ use mod_cosysr, only: isrcod, junkr, rspar
 use mod_hibasutil, only: vlmstp
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: iprint
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 #include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 real(8), intent(out), dimension(:) :: sc1
@@ -154,7 +155,6 @@ real(8), intent(out), dimension(:) :: sc4
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
-#include "common/parbas.F90"
 common /coered/ ered, rmu
 dimension j(1), l(1), jhold(1), ehold(1), is(1), &
           ishold(1)
@@ -627,6 +627,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -639,7 +640,6 @@ character*1 dot
 character*(*) fname
 character*60 line, filnam, potfil, filnm1
 parameter (icod = 5, ircod = 4)
-#include "common/parbas.F90"
 save potfil
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables

@@ -580,10 +580,9 @@ use mod_coiout, only: niout, indout
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
-implicit double precision(a-h,o-z)
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 logical ihomo
 common /coselb/ ibasty
-#include "common/parbas.F90"
 common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
 common /conlamp/ lamnump(50)
 integer, pointer :: nterm, nvibmn, nvibmx
@@ -676,11 +675,11 @@ use mod_coiout, only: niout, indout
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit double precision(a-h,o-z)
 
 logical ihomo
 common /coselb/ ibasty
-#include "common/parbas.F90"
 common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
 dimension nvbmnr(4),nvbmxr(4),nvbmnc(4),nvbmxc(4)
 nstep=1
@@ -821,10 +820,11 @@ subroutine testpt20(ihomo)
 !  current revision date:  1-nov-2012 by lifang ms
 use mod_covvl, only: vvl
 use mod_cosysi, only: nscode, ispar
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+
 implicit double precision(a-h,o-z)
 logical ihomo
 common /coselb/ ibasty
-#include "common/parbas.F90"
 common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
 common /conlamp/ lamnump(7)
 integer, pointer :: nterm, nvibmn, nvibmx

@@ -26,9 +26,9 @@ goto 1
 #include "common/ground.F90"
 ! --------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 ! --------------------------------------------------------------------------
 character*(*) filnam
-#include "common/parbas.F90"
 #include "common/parpot.F90"
 potnam='ALEXANDER Ar-NO CEPA'
 lammin(1)=1

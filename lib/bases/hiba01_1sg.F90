@@ -123,6 +123,7 @@ use mod_cosysi, only: nscode, isicod, ispar, convert_ispar_to_mat
 use mod_cosysr, only: isrcod, junkr, rspar, convert_rspar_to_mat
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: iprint
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 #include "common/parbasl.F90"
 
 implicit double precision (a-h,o-z)
@@ -154,7 +155,6 @@ integer, intent(in) :: nmax
 integer, intent(out) :: ntop
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
-#include "common/parbas.F90"
 common /covib/ nvib,ivib(maxvib)
 common /coered/ ered, rmu
 common /coskip/ nskip, iskip
@@ -619,6 +619,7 @@ use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod => rspar
 use mod_par, only: ihomo
 use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -630,7 +631,6 @@ character*1 dot
 character*4 char
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-#include "common/parbas.F90"
 common/covib/ nvib,ivib(maxvib)
 common /coskip/ nskip,iskip
 integer :: nskip, iskip

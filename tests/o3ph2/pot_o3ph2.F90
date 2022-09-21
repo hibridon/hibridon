@@ -14,9 +14,9 @@
 #include "common/bausr.F90"
 subroutine loapot(iunit,filnam)
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 ! --------------------------------------------------------------------------
 character*(*) filnam
-#include "common/parbas.F90"
 #include "common/parpot.F90"
 common /coselb/ ibasty
 potnam='ALEXANDER SCALED (s=1.21) O(3P)H2 DUBERNET-HUTSON'

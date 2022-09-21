@@ -54,9 +54,9 @@ goto 1
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
 !  dummy loapot subroutine
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
  character*(*) filnam
 #include "common/parpot.F90"
-#include "common/parbas.F90"
 common /coselb/ ibasty
 potnam='SHAPIRO-GUO-SCHATZ 2D CH3I'
 ibasty=99
@@ -112,6 +112,7 @@ use mod_coiout, only: niout, indout
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 use constants, only: econv, xmconv
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit none
 
 real(8), intent(out) :: wf(nch*nphoto) ! array of dimension nch*nphoto, containing, on return,
@@ -135,7 +136,6 @@ real(8) :: psi(nymx)
 real(8) :: gr(ngr)
 real(8) :: dmu(2)
 real(8), parameter :: q(4) = [7.830d0, -0.1762d0, 0.6183d0, 4.939d0]
-#include "common/parbas.F90"
 common /coered/ ered, rmu
 real(8) ered
 real(8) rmu
@@ -343,6 +343,7 @@ use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 use mod_grnd, only: reg, caypot
 use mod_par, only: par_readpt=>readpt
 use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -354,7 +355,6 @@ character*1 dot
 character*4 char
 character*(*) fname
 character*40 filnam, line, potfil
-#include "common/parbas.F90"
 save potfil
 #include "common/comdot.F90"
 
@@ -611,6 +611,7 @@ use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 use constants, only: econv, xmconv
 use mod_coiout, only: niout, indout
 use mod_par, only: iprint
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit double precision (a-h,o-z)
 integer, intent(out) :: j(:)
 integer, intent(out) :: l(:)
@@ -641,7 +642,6 @@ integer, intent(out) :: ntop
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical clfl
-#include "common/parbas.F90"
 common /covib/ ie(50), iv(50)
 common /coicl/ clfl
 

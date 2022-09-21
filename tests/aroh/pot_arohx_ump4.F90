@@ -30,8 +30,8 @@ goto 1
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 character*(*) filnam
-include "common/parbas.F90"
 include "common/parpot.F90"
 potnam='KLOS-CHALASINSKI Ar-OH UMP4'
 lammin(1)=1

@@ -184,6 +184,7 @@ use mod_cosysr, only: isrcod, junkr, rpar=>rspar
 use mod_hibasutil, only: iswap, rswap
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: iprint
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 #include "common/parbasl.F90"
 
 implicit double precision (a-h,o-z)
@@ -194,7 +195,6 @@ real(8), intent(out), dimension(:) :: sc4
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
-#include "common/parbas.F90"
 !  these parameters must be the same as in hisysgpi
 common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
 common /coered/ ered, rmu
@@ -1365,6 +1365,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use mod_par, only: ihomo
 use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -1375,7 +1376,6 @@ character*8 char
 character*(*) fname
 character*1 dot
 character*60 filnam, line, potfil, filnm1
-#include "common/parbas.F90"
 common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
 common /coskip/ nskip,iskip
 integer :: nskip, iskip

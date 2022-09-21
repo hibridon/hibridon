@@ -46,9 +46,9 @@ subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
 use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: nscode, isicod, ispar
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit double precision (a-h,o-z)
 character*(*) filnam
-#include "common/parbas.F90"
 #include "common/parpot.F90" 
 integer, pointer :: nterm
 nterm=>ispar(1)
@@ -93,8 +93,8 @@ subroutine pot (vv0, r)
 ! ----------------------------------------------------------------------
 use mod_covvl, only: vvl
 use mod_par, only: csflag, ihomo
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit double precision (a-h,o-z)
-#include "common/parbas.F90"
 dimension v(16)
 dimension csplin(47,16)
 dimension rr(47), vl(752),vec(47)

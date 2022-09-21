@@ -149,13 +149,13 @@ use mod_cosysr, only: isrcod, junkr, rspar
 use mod_hibasutil, only: rotham
 use constants, only: econv, xmconv
 use mod_par, only: iprint
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 #include "common/parbasl.F90"
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*1 slab
-#include "common/parbas.F90"
 common /coselb/ ibasty
 common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
@@ -892,6 +892,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -901,7 +902,6 @@ logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-#include "common/parbas.F90"
 #include "common/comdot.F90"
 save potfil
 

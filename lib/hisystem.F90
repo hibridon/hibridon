@@ -195,10 +195,10 @@ use mod_hiba27_astp1, only: syastp1
 use mod_hiba28_3sg1sg, only: sy3sg1sg
 use mod_hiba29_astp2, only: syastp2
 use mod_hiba30_astp3, only: syastp3
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 integer ibasty, irpot, iread
 logical readpt
 common /coselb/ ibasty
-#include "common/parbas.F90"
 ! set default for vibrational quantum numbers to zero for each term
 do 10 it=1,maxtrm
 ivrow(1,it)=0
