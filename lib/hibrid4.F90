@@ -1466,7 +1466,7 @@ common /cotrans/ ttrans(36)
 ! common for y1, y2, y4
 common /coered/ ered, rmu
 common /coselb/ ibasty
-dimension a(7)
+dimension a(7)  ! arguments
 data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f', &
            '3SG1e','3PI0e','3PI1e','3PI2e','1SG0e','1PI1e'/
 !
@@ -2404,6 +2404,7 @@ use mod_cosc9, only: sc9
 use mod_coz, only: scmat => z_as_vec ! scmat(100)
 use mod_cozmat, only: tcoord => zmat_as_vec ! tcoord(100)
 use mod_wave, only: irec, ifil, nrlogd
+use mod_coqvec, only: nphoto
 ! steve, you may need more space, but i doubt it since tcoord is dimensioned n
 implicit double precision (a-h,o-z)
 logical adiab, kill, photof, propf, sumf, coordf, ifull
@@ -2435,7 +2436,7 @@ integer(8) :: iwavsk
     do 100 iy = 1, ny
       y=ymin+(iy-1)*dy
       ifull=.false.
-      call wfintern(scmat,y,nch,1)
+      call wfintern(scmat, y, nch, nphoto, 1)
 ! steve, you'll need to modify wfintern so that scmat returns both function an
 ! scmat is a vector of length nch containing the nch internal states
 ! evaluated at internal coordinate y

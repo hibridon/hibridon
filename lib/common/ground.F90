@@ -20,7 +20,7 @@ UNUSED(nch)
 UNUSED(nphoto)
 UNUSED(mxphot)
 
-entry wfintern(wf,yymin,nch,nny)
+entry wfintern(wf, yymin, nch, nphoto, nny)
 
 UNUSED(wf)
 UNUSED(yymin)

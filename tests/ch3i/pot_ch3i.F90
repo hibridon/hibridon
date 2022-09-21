@@ -186,7 +186,7 @@ endif
 
 ifull=.true.
 !      entry wfintern(wf,yymin,nnvib,nny) ! original Rist statement
-entry wfintern(wf,yymin,nch,nny)
+entry wfintern(wf, yymin, nch, nphoto, nny)
 
 if (.not.ifull) then
   ymin=yymin
