@@ -48,13 +48,13 @@ use mod_cozmat, only: simag => zmat_as_vec ! simag(1)
 use mod_hibrid5, only: sread
 use mod_hibasis, only: is_j12
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
 character*40 xname
 logical  existf, csflag, flaghf, flagsu, twomol, nucros
 dimension ia(4)
-common /coselb/ ibasty
 
 !
 !.....jtota: first jtot to be printed
@@ -1453,6 +1453,7 @@ use mod_hiba07_13p, only: tcasea
 use mod_par, only: batch, csflag, photof
 use mod_wave, only: irec, inflev
 use funit
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  psifil, wavfil, flxfil
@@ -1465,7 +1466,6 @@ logical exstfl, adiab, &
 common /cotrans/ ttrans(36)
 ! common for y1, y2, y4
 common /coered/ ered, rmu
-common /coselb/ ibasty
 dimension a(7)  ! arguments
 data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f', &
            '3SG1e','3PI0e','3PI1e','3PI2e','1SG0e','1PI1e'/
@@ -2405,6 +2405,7 @@ use mod_coz, only: scmat => z_as_vec ! scmat(100)
 use mod_cozmat, only: tcoord => zmat_as_vec ! tcoord(100)
 use mod_wave, only: irec, ifil, nrlogd
 use mod_coqvec, only: nphoto
+use mod_selb, only: ibasty
 ! steve, you may need more space, but i doubt it since tcoord is dimensioned n
 implicit double precision (a-h,o-z)
 logical adiab, kill, photof, propf, sumf, coordf, ifull
@@ -2412,7 +2413,6 @@ logical adiab, kill, photof, propf, sumf, coordf, ifull
 common /coered/ ered, rmu
 common /coground/ ifull
 common /cotrans/ ttrans(36)
-common /coselb/ ibasty
 dimension scc(100)
 data zero, one, onemin /0.d0, 1.d0, -1.d0/
 data ione, mone /1,-1/

@@ -279,13 +279,12 @@ use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, &
                 fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, tolai=>scat_tolai, xmu ! NB if boundc = .true. then these parameters are: r1,r2,c,spac,delr,hsimp,eigmin,tolai,xmu
 use funit, only: FUNIT_INP
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 integer i, length
 logical existf
 character*40 input, jobnam, output, savfil
 character*(*) filnam
-common /coselb/ ibasty
-integer :: ibasty
 
 common /coskip/ nskip,iskip
 integer :: nskip, iskip
@@ -932,6 +931,7 @@ use mod_par, only: airyfl, csflag, flaghf, flagsu, ipos, &
                 wrpart, wrxsec, prxsec, nucros, photof, wavefl, boundc
 use funit
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 integer ifile, nerg, nfile, lenx, isize, isizes
 logical existf
@@ -941,7 +941,6 @@ character*20 cdate
 character*40 input,output,jobnam,savfil
 common /cofile/ input,output,jobnam,savfil
 common /cosize/ isize, isizes
-common /coselb/ ibasty
 if (nerg .gt. 1) then
 !  check to see if nerg .le. 25
   if (nerg .gt. 25) then

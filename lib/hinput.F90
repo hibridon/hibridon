@@ -83,6 +83,7 @@ use ipar_enum
 use rpar_enum
 use mod_par, only: lpar, ipar, rpar
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit none
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
@@ -143,10 +144,6 @@ character*8 :: fcod(lcode)
 ! pcod = Parameters CODes : stores the name of system independent parameters of type integer and real
 common /copcod/ pcod
 character*8 :: pcod(icode)
-
-common /coselb/ ibasty
-integer ibasty
-
 
 common /cobaco/ bascod
 character*8 :: bascod(1)

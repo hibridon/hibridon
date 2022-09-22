@@ -56,8 +56,8 @@ subroutine loapot(iunit,filnam)
 !  dummy loapot subroutine
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
  character*(*) filnam
-common /coselb/ ibasty
 potnam='SHAPIRO-GUO-SCHATZ 2D CH3I'
 ibasty=99
 lammin(1)=1
@@ -290,15 +290,6 @@ subroutine syusr (irpot, readpt, iread)
 !  if iread = 0 return after defining variable names
 !  current revision date: 1-may-90
 !  -----------------------------------------------------------------------
-!  variables in common block /cobspt/
-!    lammin:   array containing minimum value of lambda for each term
-!    lammax:   array containing maximum value of lambda for each term
-!    mproj:    array containing the order of the reduced rotation matrix
-!              elements for each term.  lammin can not be less than mproj.
-!              for homonuclear molecules, the allowed values of lambda for
-!              each term range from lammin to lammax in steps of 2
-!              the length of each of these arrays is limited to nterm
-!              terms where nterm is defined in the common block /cosysi/
 !  variable in common cosysi
 !    nscode:  total number of system dependent parameters
 !             nscode = isicod + isrcod +3
@@ -590,13 +581,6 @@ subroutine bausr (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !    iv:      on return, contains vibr.channel for each
 !             electronic channel
 !    ie:      on return contains electronic channel
-!  variables in common block /cobspt/
-!    lammin:   array containing minimum value of lambda for each term
-!    lammax:   array containing maximum value of lambda for each term
-!    mproj:    array containing the order of the reduced rotation matrix
-!              elements for each term.  lammin can not be less than mproj.
-!              for homonuclear molecules, the allowed values of lambda for
-!              each term range from lammin to lammax in steps of 2
 !  variables in common block /coered/
 !    ered:      collision energy in atomic units (hartrees)
 !    rmu:       collision reduced mass in atomic units

@@ -139,21 +139,6 @@ subroutine basgpi (j, l, is, jhold, ehold, ishold, nlevel, &
 !    isg:      if isg=1 and ipi=0 then 2sig + atom scattering
 !    ipi:      if ipi=1 and isg=0 then 2pi + atom scattering
 !              if isg=1 and ipi=1 then 2pi-2sig + atom scattering
-!  variables in common block /cobsp2/
-!    ntv:      Number of vibrational blocks for each term. All of these
-!              use same lammin, lammax, mproj. These numbers as well
-!              as the corresponding ivcol, ivrow (see below) should be
-!              set in loapot and must be consistent with the pot routine
-!              Otherwise unrecognized chaos!!!
-!              Each block corresponds to a pair of vibrational quantum
-!              numbers (ivrow,ivcol), which must correspond to lower triangle
-!              of potential matrix (i.e., ivrow.ge.ivcol for
-!              iterm=1 (Vsig), iterm=2 (Vpi), iterm=4 (V2) and
-!              for iterm=3 (V1) ivrow=ivs, ivcol=ivp)
-!    ivrow(ivb,iterm): row vibrational state for vibrational block ivb
-!                      in term iterm
-!    ivcol(ivb,iterm): column vibrational state for vibrational block ivb
-!                      in term iterm
 !  variables in common block /cosgpi/
 !    nvibs:    number of vibrational terms for sigma state in input file
 !    ivibs:    vibrational quantum number for each of these
@@ -1355,7 +1340,6 @@ subroutine sysgpi (irpot, readpt, iread)
 !  current revision date: 21-dec-1995 by pjd, mha, ade, ab
 !  latest revision:  24-feb-2004 by mha
 !
-!  variables in common/cobspt/ must be set in loapot!!
 !
 use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam

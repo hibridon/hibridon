@@ -315,6 +315,7 @@ use mod_coeint, only: eint
 use mod_covvl, only: vvl
 use mod_grovec, only: igrovec_type_block, dgrovec_type_block
 use mod_hiba10_22p, only: trans22
+use mod_selb, only: ibasty
 implicit none
 real(8) :: second
 real(8), dimension(*), intent(out) :: w
@@ -351,8 +352,6 @@ real(8) :: rtmn, rtmx
 integer :: iflag
 common /coered/ ered, rmu
 real(8) :: ered, rmu
-common /coselb/ ibasty
-integer :: ibasty
 real(8), parameter :: zero = 0.d0
 real(8), parameter :: one = 1.d0
 real(8), parameter :: two = 2.d0
@@ -581,8 +580,8 @@ use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_selb, only: ibasty
 logical ihomo
-common /coselb/ ibasty
 common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
 common /conlamp/ lamnump(50)
 integer, pointer :: nterm, nvibmn, nvibmx
@@ -676,10 +675,10 @@ use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_selb, only: ibasty
 implicit double precision(a-h,o-z)
 
 logical ihomo
-common /coselb/ ibasty
 common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
 dimension nvbmnr(4),nvbmxr(4),nvbmnc(4),nvbmxc(4)
 nstep=1
@@ -821,10 +820,10 @@ subroutine testpt20(ihomo)
 use mod_covvl, only: vvl
 use mod_cosysi, only: nscode, ispar
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_selb, only: ibasty
 
 implicit double precision(a-h,o-z)
 logical ihomo
-common /coselb/ ibasty
 common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
 common /conlamp/ lamnump(7)
 integer, pointer :: nterm, nvibmn, nvibmx
@@ -2490,6 +2489,7 @@ use mod_cotq2, only: sisave => tq2 ! sisave(100)
 use mod_hibrid2, only: mxoutd, mxoutr
 use mod_par, only: prsmat, jlpar! spac=>scat_spac
 use mod_wave, only: irec, ifil, ipos2, ipos3, nrlogd, iendwv, ipos2_location
+use mod_selb, only: ibasty
 
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax, nmax), intent(inout) :: tmod
@@ -2522,7 +2522,6 @@ logical flagsu, photof, wavefn, &
 common /coered/ ered, rmu
 common /cosurf/ flagsu
 common /cophot/ photof, wavefn, boundf, writs
-common /coselb/ ibasty
 !     The following three variables are used to determine the (machine
 !     dependent) size of built-in types
 integer int_t

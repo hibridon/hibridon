@@ -68,6 +68,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_par, only: readpt
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit double precision(a-h,o-z)
 character*(*) filnam
 character*80 potlab, filnm1
@@ -84,7 +85,6 @@ common /cofit/ npa,maxpws,minmps,maxmps,mpsstp,idimp,idimr
 common /core/  re
 common /coskip/ nskip,iskip
 integer :: nskip, iskip
-common /coselb/ ibasty
 integer, pointer :: nterm
 nterm=>ispar(1)
 potnam='WERNER-FOLLMEG VFIT'
@@ -207,6 +207,7 @@ subroutine pot(vv0,r)
 use mod_covvl, only: vvl
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_selb, only: ibasty
 implicit double precision(a-h,o-z)
 #include "common/parvfit.F90"
 common /copot/ nc(maxtrm),a(20,50,maxtrm),maxpw(maxtrm), &
@@ -221,7 +222,6 @@ common /coptx/ nblkx,maxpwx,minmpx,maxmpx,mpsstx,junk, &
 common /core/  re
 common /coskip/ nskip,iskip
 integer :: nskip, iskip
-common /coselb/ ibasty
 integer, pointer :: nterm
 nterm=>ispar(1)
 rr = r

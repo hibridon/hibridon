@@ -70,6 +70,7 @@ use ipar_enum
 use rpar_enum
 use mod_hinput, only:hinput
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
@@ -127,9 +128,6 @@ logical :: phot_photof, wavefn, boundf, writs
 
 common /cosurf/ surf_flagsu
 logical :: surf_flagsu
-
-common /coselb/ ibasty
-integer :: ibasty
 
 common /cojlpo/ jlpold
 integer :: jlpold

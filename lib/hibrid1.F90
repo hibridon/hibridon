@@ -97,6 +97,7 @@ use mod_hibrid3, only: outmat, potent
 use mod_hiba10_22p, only: energ22
 use mod_par, only: par_iprint=>iprint
 use mod_wave, only: irec, ifil, nchwfu, iendwv, get_wfu_airy_rec_length
+use mod_selb, only: ibasty
 implicit double precision (a-h, o-z)
 !  matrix dimensions (row dimension = nmax, matrices stored column by column)
 real(8), dimension(nmax*nmax), intent(inout) :: z
@@ -122,7 +123,6 @@ logical photof, wavefn, boundf, writs
 
 common /cophot/ photof, wavefn, boundf, writs
 common /coered/ ered, rmu
-common /coselb/ ibasty
 #if defined(HIB_UNIX_IBM)
 character*1 forma, formb
 #endif

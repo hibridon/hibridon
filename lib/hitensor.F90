@@ -1790,6 +1790,7 @@ use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid2, only: mxoutd
 use mod_hibrid5, only: sread
 use mod_par, only: batch, ipos, iprnt=>iprint
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 complex*8 t, tp
 logical diag, diagj, diagin, &
@@ -1803,7 +1804,6 @@ common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
             nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
                 igjtp
-common /coselb/ ibasty
 ! 3rd subscript is for state index (subscript = 5 + IN)
 ! states with up to 9 state indices allowed
 common/cadr/ iadr(0:2*jmx,lmx,9)

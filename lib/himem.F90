@@ -1423,6 +1423,10 @@ module mod_par
 end module mod_par
 
 
+! used to be common block coselb
+module mod_selb
+   integer :: ibasty  ! base type
+end module mod_selb
 
  ! all the commons blocks from hiiolib_f.F90:
     !!   common/cdbf/ ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf(llbuf)

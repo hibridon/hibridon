@@ -54,6 +54,7 @@ use mod_hibasis, only: is_j12, is_twomol
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  trnfil, smtfil
@@ -66,7 +67,6 @@ common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
                 igjtp
 common /cotrn/  spin, maxjt, &
      nwaves, jfsts, jlparf, jlpars, njmax, jpmax
-common /coselb/ ibasty
 save nout
 dimension a(6)
 data  tol,   zero,   nstep &
@@ -299,6 +299,7 @@ use mod_cow, only: simag => w_as_vec ! simag(1)
 use mod_hibrid2, only: mxoutd
 use mod_hibrid5, only: sread
 use mod_par, only: batch, ipos
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 complex*8 t, tp
 logical diag, diagj, diagin, diagp, diagjp, diagnp
@@ -308,7 +309,6 @@ common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
 common /cotrn/  spin, maxjt, &
      nwaves, jfsts, jlparf, jlpars, njmax, jpmax
 ! common blocks for levels for which xs's to be computed
-common /coselb/ ibasty
 !
 dimension etrans(1)
 dimension jpack(1),ipack(1),lpack(1)
@@ -631,6 +631,7 @@ use mod_hibrid2, only: mxoutd
 use mod_hibrid5, only: sread
 use mod_hibasis, only: is_j12, is_twomol
 use mod_par, only: batch, ipos
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 complex*8 t, tp
 logical diag, diagj, diagin, diagp, diagjp, diagnp, &
@@ -641,7 +642,6 @@ common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
 common /cotrn/  spin, maxjt, &
      nwaves, jfsts, jlparf, jlpars, njmax, jpmax
 ! common blocks for levels for which xs's to be computed
-common /coselb/ ibasty
 !
 dimension etrans(1)
 dimension jpack(1),ipack(1),lpack(1)

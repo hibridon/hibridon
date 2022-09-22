@@ -16,9 +16,9 @@ subroutine loapot(iunit,filnam)
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 ! --------------------------------------------------------------------------
 character*(*) filnam
-common /coselb/ ibasty
 potnam='ALEXANDER SCALED (s=1.21) O(3P)H2 DUBERNET-HUTSON'
 ibasty=13
 lammin(1)=1

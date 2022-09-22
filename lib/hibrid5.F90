@@ -985,6 +985,7 @@ use mod_basis, only: basis_get_isa
 use mod_par, only: iprint
 use funit
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit none
 real(8), intent(out) :: zmat(nmax, nmax)
 real(8), intent(out) :: tq3(nmx, nmx)
@@ -1022,8 +1023,6 @@ common /coered/ ered, rmu
 real(8) :: ered, rmu
 common /cosurf/ flagsu
 logical :: flagsu
-common /coselb/ ibasty
-integer :: ibasty
 integer :: cs_file = FUNIT_CS  ! cross secton input file unit
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
@@ -1216,13 +1215,13 @@ use mod_cosc2, only: csum => sc2 ! csum(1)
 use mod_cosc3, only: tsum => sc3 ! tsum(1)
 use mod_version, only : version
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
 character*40 xnam1, xnam2
 character*80 line
 logical csflag, flaghf, iprint, flagsu, twomol, existf, nucros
-common /coselb/ ibasty
 dimension  a(4),scmat(nmax,1)
 
 !  input parameters
@@ -1496,15 +1495,13 @@ subroutine sread (iadr, sreal, simag, jtot, jlpar, nu, &
 use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 integer, intent(inout) :: nopen
 integer, intent(in) :: smt_file_unit
 logical triang
 dimension sreal(nmax,1), simag(nmax,1), &
      jpack(1), lpack(1),inpack(1),jq(1),lq(1),inq(1)
-!     variable in common block /coselb/
-!     ibasty    basistype
-common /coselb/ ibasty
 character*8 csize8
 !
 ierr=0
@@ -1644,6 +1641,7 @@ use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 integer ic, icol, ii, ir, irow, jtot, jlpar, length, nmax, &
         nopen, nfile, nu, mmout
@@ -1651,7 +1649,6 @@ integer jq, jpack, lq, lpack, inq, inpack, nchnid
 common /coered/ ered, rmu
 !  variable in common block /coselb/
 !     ibasty    basistype
-common /coselb/ ibasty
 dimension sreal(nmax,nmax), simag(nmax,nmax), &
           jq(1), lq(1), inq(1), jpack(1), lpack(1), &
           epack(1), inpack(1), iorder(1)
@@ -1771,10 +1768,10 @@ subroutine wrhead(nfile,cdate, &
 !     major revision: 07-jan-2012 by q.ma (stream I/O, write ibasty)
 !     ------------------------------------------------------------
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 logical csflag, flaghf, flagsu, twomol, nucros
 character*20 cdate
-common /coselb/ ibasty
 dimension jlev(1),inlev(1),elev(1),jout(1)
 integer int_t
 double precision double_t
@@ -1983,6 +1980,7 @@ use mod_cozmat, only: sigma => zmat_as_vec ! sigma(1)
 use mod_hibrid2, only: mxoutr
 use mod_par, only: batch, ipos
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  icsfil, smtfilnam, xname
@@ -1997,7 +1995,6 @@ logical csflag, flaghf, flagsu, twomol, exstfl, &
         nucros, notequ
 !/ nnout, jout(21)
 common /coered/ ered, rmu
-common /coselb/ ibasty
 dimension a(3)
 !
 ! initialize timer
@@ -2197,6 +2194,7 @@ use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc2, only: inlev => sc2int ! inlev(1)
 use mod_cosc3, only: jlev => sc3int ! jlev(1)
 use mod_par, only: batch, ipos
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 logical, intent(in) :: csflag
 logical, intent(in) :: flaghf
@@ -2220,7 +2218,6 @@ real(8), intent(out) :: tsq(nmax, nlevop)
 integer, intent(in) :: nlevop
 integer, intent(in) :: nmax
 integer, intent(in) :: tmp_file
-common /coselb/ ibasty
 ! clear sigma array
 one=1.0d0
 zero=0.0d0
@@ -2332,10 +2329,10 @@ subroutine tsqmat(tsq,sreal,simag,inrow,jrow,lrow, &
 use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 complex*8 t
 logical diag
-common /coselb/ ibasty
 dimension sreal(nmax,1), simag(nmax,1), tsq(nmax,1)
 dimension inrow(1),jrow(1),lrow(1),incol(1),jcol(1),lcol(1)
 !
@@ -2395,6 +2392,7 @@ subroutine partcr (tsq,  scmat, isc1, isc2, sc2, nopen, ncol, &
 ! ----------------------------------------------------------------------
 use constants
 use mod_hibasis, only: is_j12
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax,nmax), intent(in) :: tsq
 !      real(8), dimension(:,:), intent(in), target :: tototsq
@@ -2413,7 +2411,6 @@ integer, dimension(nlevop), intent(in) :: jlev
 real(8), dimension(nlevop), intent(in) :: elev
 logical csflag, flaghf, flagsu, twomol
 common /coered/ ered, rmu
-common /coselb/ ibasty	
 !      real(8), pointer :: tsq(:,:)
 !      tsq => tototsq(1::nmax,1::nmax)
 !write(6,*) 'graffy: len(tototsq)', size(tototsq)

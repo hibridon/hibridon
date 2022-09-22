@@ -74,26 +74,6 @@ goto 1
 !              molecule
 !    j2min:    the minimum rotational angular momentum for linear
 !              molecule
-
-!  variables in common block /cobspt/
-!              Order of reduced rotation matrix d(theta1) as defined in 
-!              eq (21) of reference J. Chem Phys. 98 (6), 1993 with    
-!              (lambda, mproj) = (l1, m1).   
-!    lammin:   array containing minimum value of lambda for each term
-!    lammax:   array containing maximum value of lambda for each term
-!    mproj:    array containing the order of the reduced rotation matrix
-!              elements for each term. here, lammin is greater to mproj.
-!  variables in common block /cobsptln/
-!              Order of reduced rotation matrix d(theta2) as defined in 
-!              eq (21) of reference J. Chem Phys. 98 (6), 1993 with
-!              (lam2, m2proj) = (l2, m2).      
-!    lam2:     array containing the order of the reduced rotation matrix
-!              elements for each term. in case of homonuclear molecule
-!              is even.
-!    m2proj:   array containing the order of the reduced rotation
-!              matrix elements for each term.
-!              here, lammin and lam2 are greater than m2proj .
-
 !  -----------------------------------------------------------------------
 use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: nscode, isicod, ispar

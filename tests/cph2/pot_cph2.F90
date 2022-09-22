@@ -11,8 +11,8 @@ subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 character*(*) filnam
-common /coselb/ ibasty
 potnam='HALVICK Cp(2P)-H2 PES'
 ibasty=12
 lammin(1)=1

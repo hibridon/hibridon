@@ -1121,8 +1121,6 @@ subroutine sysgpi1 (irpot, readpt, iread)
 !             variable names in cosysr followed by lammin, lammax, and mproj
 ! ------------------------------------------------------------------------
 !
-!  variables in common/cobspt/ must be set in loapot!!
-!
 use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
 use mod_cosyr, only: rcod

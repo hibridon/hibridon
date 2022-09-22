@@ -950,7 +950,7 @@ subroutine sypi (irpot, readpt, iread)
 !             names of all system dependent parameters. note that the
 !             ordering of the variable names in scod must correspond
 !             to the ordering of the variable names in cosysi, cosysr,
-!             cosysl and cobspt respectively
+!             and cosysl respectively
 !  variables in common block /cosysi/
 !    nscode:   total number of system dependent parameters
 !              nscode = isicod + isrcod + islcod + 3

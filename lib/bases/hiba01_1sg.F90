@@ -620,11 +620,12 @@ use mod_cosysr, only: isrcod, junkr, rcod => rspar
 use mod_par, only: ihomo
 use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_selb, only: ibasty
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-integer :: i, ibasty, iofi, iofr, ivib
+integer :: i, iofi, iofr, ivib
 integer :: j, l, lc, nvib
 logical existf
 character*1 dot
@@ -635,7 +636,6 @@ common/covib/ nvib,ivib(maxvib)
 common /coskip/ nskip,iskip
 integer :: nskip, iskip
 
-common /coselb/ ibasty
 save potfil
 !equivalence(iscod(1),nterm),(iscod(2),nvibmn),(iscod(3),nvibmx)
 #include "common/comdot.F90"
