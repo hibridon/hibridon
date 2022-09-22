@@ -100,10 +100,6 @@ subroutine ba1sg (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !              expansion of potential
 !    jmin:     the minimum rotational angular momenta
 !    jmax:     the maximum rotational angular momenta
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  variable in common block /coskip/
 !   nskip  for a homonuclear molecule lamda is running in steps of nskip=2
 !          for a heteronuclear molecule nskip=1
@@ -125,6 +121,7 @@ use constants, only: econv, xmconv, ang2c
 use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
 
 implicit double precision (a-h,o-z)
 integer, intent(out) :: j(:)
@@ -156,7 +153,6 @@ integer, intent(out) :: ntop
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 common /covib/ nvib,ivib(maxvib)
-common /coered/ ered, rmu
 common /coskip/ nskip, iskip
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units

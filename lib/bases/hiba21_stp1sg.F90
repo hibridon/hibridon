@@ -132,6 +132,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use mod_hibasutil, only: raise
 use mod_par, only: iprint
+use mod_ered, only: ered, rmu
 implicit none
 !
 !     The following arrays store the parameters of channels and levels.
@@ -151,9 +152,6 @@ real(8) :: rcut
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 
-!
-common /coered/ ered, rmu
-real(8) :: ered, rmu
 !
 integer :: i, ilev, iv, irow, icol, inum, i1, i2
 real(8) :: vee

@@ -109,10 +109,6 @@ subroutine ba2pi (j, l, is, jhold, ehold, ishold, nlevel, &
 !    npar:     number of symmetry doublets included (npar=2 will ensure
 !              both lambda doublets; npar=1, just eps=1 levels, npar=-1,
 !              just eps=-1 levels
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  subroutines called:
 !   vlm2pi:    returns angular coupling coefficient for particular
 !              choice of channel index
@@ -127,11 +123,11 @@ use mod_cosysr, only: isrcod, idum=>junkr, rspar
 use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable :: v2
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
-common /coered/ ered, rmu
 dimension j(2), l(1), jhold(1), ehold(1), is(2), &
           c12(1), c32(1), ieps(2), ishold(1), sc1(1), sc4(1)
 integer, allocatable :: ifi(:)

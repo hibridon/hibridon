@@ -1428,6 +1428,15 @@ module mod_selb
    integer :: ibasty  ! base type
 end module mod_selb
 
+
+! used to be common block coered
+!    ered:      collision energy in atomic units (hartrees)
+!    rmu:       collision reduced mass in atomic units (mass of electron = 1)
+module mod_ered
+real(8) :: ered
+real(8) :: rmu
+end module mod_ered
+
  ! all the commons blocks from hiiolib_f.F90:
     !!   common/cdbf/ ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf(llbuf)
 

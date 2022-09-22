@@ -141,10 +141,6 @@ subroutine bastpln(j, l, is, jhold, ehold, ishold, nlevel, &
 !              molecule
 !    j2min:    the minimum rotational angular momentum for linear
 !              molecule
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  subroutines called:
 !   vlmstpln:  returns molecule-molecule angular coupling coefficient for
 !              particular choice of channel index
@@ -164,12 +160,12 @@ use mod_hibasutil, only: vlmstp, vlmstpln
 use constants, only: econv, xmconv
 use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst, twomol
 character*40 fname
-common /coered/ ered, rmu
 common /co2mol/ twomol
 dimension j(1), l(1), jhold(1), ehold(1), is(1), &
           ishold(1)

@@ -294,9 +294,6 @@ subroutine potmat (w, r, nch, nmax, v2)
 !    nmax:     maximum row and column dimension of matrix w
 !   lamnum:     number of non-zero v2 matrix elements for each lambda
 
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units (mass of electron = 1)
 !  variables in common block /copmat/
 !    rtmn,rtmx: minimum and maximum turning points (not used here)
 !    iflag:     variable used in determination of turning points (not used her
@@ -316,6 +313,7 @@ use mod_covvl, only: vvl
 use mod_grovec, only: igrovec_type_block, dgrovec_type_block
 use mod_hiba10_22p, only: trans22
 use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
 implicit none
 real(8) :: second
 real(8), dimension(*), intent(out) :: w
@@ -350,8 +348,6 @@ real(8) :: cpuld, cpuai, cpupot, cpusmt, cpupht
 common /copmat/ rtmn, rtmx, iflag
 real(8) :: rtmn, rtmx
 integer :: iflag
-common /coered/ ered, rmu
-real(8) :: ered, rmu
 real(8), parameter :: zero = 0.d0
 real(8), parameter :: one = 1.d0
 real(8), parameter :: two = 2.d0
@@ -1007,9 +1003,7 @@ subroutine propag (z, w, zmat, amat, bmat, &
 !    nairy        leading dimension of matrix bmat
 !    nmax         leading dimension of matrices z, w, zmat, and amat as well a
 !                 all vectors
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units (mass of electron = 1)
+
 !  variables in common block /copmat/
 !    rtmn,rtmx: minimum and maximum turning points
 !    iflag:     variable used in determination of turning points (not used her
@@ -2462,9 +2456,7 @@ subroutine smatop (tmod, sr, si, scmat, lq, r, prec, &
 !    nmax:    maximum row dimensions of matrices
 !    kwrit:   if true, k matrix is printed out
 !    ipos:    if true, 132 line printer
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units (mass of electron = 1)
+
 !  variable in common block /cosurf/
 !    flagsu:    if .true., then molecule-surface collisons
 !  variables in common block /cophot/
@@ -2490,6 +2482,7 @@ use mod_hibrid2, only: mxoutd, mxoutr
 use mod_par, only: prsmat, jlpar! spac=>scat_spac
 use mod_wave, only: irec, ifil, ipos2, ipos3, nrlogd, iendwv, ipos2_location
 use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
 
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax, nmax), intent(inout) :: tmod
@@ -2519,7 +2512,6 @@ character*40 flxfil
 #endif
 logical flagsu, photof, wavefn, &
      boundf, writs
-common /coered/ ered, rmu
 common /cosurf/ flagsu
 common /cophot/ photof, wavefn, boundf, writs
 !     The following three variables are used to determine the (machine
@@ -2945,9 +2937,7 @@ subroutine smatrx (z, sr, si, &
 !    nch      on entry:  number of channels
 !    nmax     on entry:  maximum row dimension of matrices
 !    kwrit    if true, k matrix is printed out
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units (mass of electron = 1)
+
 !  variables in common block /cophot/
 !     photof        true if photodissociation calculation
 !                   false if scattering calculation
@@ -2958,6 +2948,7 @@ use mod_coqvec, only: nphoto, q
 use mod_coeint, only: eint
 use mod_hibrid2, only: mxoutd, mxoutr
 use mod_wave, only: ifil, ipos2, ipos3, nrlogd, iendwv, ipos2_location
+use mod_ered, only: ered, rmu
 
 implicit double precision (a-h,o-z)
 real(8), intent(inout) :: z(nmax,nmax)
@@ -2978,7 +2969,6 @@ logical, intent(in) :: ipos
 
 
 logical photof, wavefn, boundf, writs
-common /coered/ ered, rmu
 common /cophot/ photof, wavefn, boundf, writs
 real(8) :: amat(nmax,nmax)
 integer :: isc1(nch)

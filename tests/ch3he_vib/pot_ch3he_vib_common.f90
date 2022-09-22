@@ -24,6 +24,7 @@ use mod_conlam, only: nlam, nlammx
 use mod_cosys, only: scod
 use mod_cosysr, only: isrcod, junkr, rspar
 use mod_cosysi, only: nscode, isicod, ispar
+use mod_ered, only: ered, rmu
 implicit double precision (a-h, o-z)
 !   Define the sizes of grids
 !       V2MAX: maximum value of v2 included in the pot file
@@ -102,13 +103,6 @@ data muasy /0, 0, 0, 0, 0, 3, 3, 3, 3, 6, 6, 9/
 !       vmax: maximum value of v2 (starts from zero) included in the calculation
 !       emax0, emax1, emax2, emax3: maximum total energy of a level to be included in the channel basis, for four vibrational levels
 
-!
-!   coered block
-!       ered: collision energy in atomic units (hartrees)
-!       rmu: collision reduced mass in atomic units
-common /coered/ ered, rmu
-double precision ered, rmu
-!
 !
 !   coipar block
 !       junkip: not refered to

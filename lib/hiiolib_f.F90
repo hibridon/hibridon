@@ -280,6 +280,7 @@ use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, &
 use funit, only: FUNIT_INP
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 integer i, length
 logical existf
@@ -289,7 +290,6 @@ character*(*) filnam
 common /coskip/ nskip,iskip
 integer :: nskip, iskip
 common /cofile/ input, output, jobnam, savfil
-common /coered/ ered, rmu
 
 ! ----------------------------------------------------------------
 !  open unit 8 for standard input
@@ -347,7 +347,7 @@ read (8, *, err=195) (energ(i), i = 1, nerg)
 iline = iline + 1
 !  line 8
 read (8, *, err=195) xmu
-! convert to atomic units of mass and store in /coered/
+! convert to atomic units of mass and store in mod_ered
 rmu=xmu/xmconv
 iline = iline + 1
 !  line 9

@@ -87,10 +87,6 @@ subroutine ba3p2s (j, l, is, jhold, ehold, ishold, nlevel, &
 !    isicod:   total number of integer system dependent variables
 !    nterm:    number of different types of electronic coupling terms
 !              this should be 1 here
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  variable in module mod_conlam
 !    nlam:      the number of case(a) interaction potentials actually used
 !               this is :  nlam = nlam0 + nlam1
@@ -126,6 +122,7 @@ use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
@@ -134,7 +131,6 @@ logical ihomo, flaghf, csflag, clist, flagsu, bastst
 common /cojtot/ jjtot, jjlpar
 common /coja/  jja(9)
 common /coel/  ll(9)
-common /coered/ ered, rmu
 common /coskip/ nskip, iskip
 integer :: nskip, iskip
 !  arrays in argument list

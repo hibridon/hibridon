@@ -493,7 +493,7 @@ type(ancouma_type), pointer :: ancouma
 !       /ch3he/ brot, crot, evib, lamsym, lamasy, musym, muasy
 !       /cosysi/ nscode, isicod, nterm, ipotsy, iop, jmax, vmax
 !       /cosysr/ isrcod, emax0, emax1, emax2, emax3
-!       /coered/ ered, rmu
+!       mod_ered: ered, rmu
 !       /coipar/ iprint
 !
 !

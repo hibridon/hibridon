@@ -144,10 +144,6 @@ subroutine basgpi (j, l, is, jhold, ehold, ishold, nlevel, &
 !    ivibs:    vibrational quantum number for each of these
 !    nvibp:    number of vibrational terms for pi state in input file
 !    ivibp:    vibrational quantum number for each of these
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  variable in common block /coconv/
 !     econv:    conversion factor from cm-1 to hartrees
 !     xmconv:   converson factor from amu to atomic units
@@ -171,6 +167,7 @@ use constants, only: econv, xmconv, ang2c
 use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
 
 implicit double precision (a-h,o-z)
 real(8), intent(out), dimension(:) :: sc1
@@ -182,7 +179,6 @@ type(ancouma_type), pointer :: ancouma
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
 !  these parameters must be the same as in hisysgpi
 common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
-common /coered/ ered, rmu
 dimension e(3,3), ieps(2), iepp(2), iomc(4), iomr(4), eig(3)
 dimension jhold(1), ishold(1), ehold(1), &
           j(1), is(1), l(1)

@@ -122,10 +122,6 @@ subroutine bach2x (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !              iop=-1
 !    ivbend:   bend vibrational quantum number (can equal 0 to 3)
 !    jmax:     the maximum rotational angular momentum for the asymmetric top
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  variables in common block /coconv/
 !   econv:      conversion factor from cm-1 to hartrees
 !   xmconv:     converson factor from amu to atomic units
@@ -144,12 +140,12 @@ use constants, only: econv, xmconv
 use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*1 slab
-common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
           fistmp(1)

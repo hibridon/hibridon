@@ -37,13 +37,12 @@ use constants, only: econv, xmconv
 use mod_ancou, only: ancou_type
 use mod_par, only: wavefl, r1=>bound_r1, r2=>bound_r2, c=>bound_c, spac=>bound_spac, delr=>bound_delr, hsimp=>bound_hsimp, eigmin=>bound_eigmin, tolai=>bound_tolai, xmu
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_ered, only: ered, rmu
 implicit none
 integer, intent(in) :: nch, nmax
 type(ancou_type), intent(in) :: v2
 common /cofile/ input, output, jobnam, savfil
 character(40) :: jobnam, input, output, savfil
-common /coered/ ered, rmu
-real(8) :: ered, rmu
 
 !
 real(8), parameter :: pi=dacos(-1d0)
@@ -462,13 +461,12 @@ end subroutine wpr_bound
 subroutine vmat_bound(wr, r, nch, nmax, v2)
 use mod_ancou, only: ancou_type
 use mod_hibrid3, only: potmat
+use mod_ered, only: ered, rmu
 implicit none
 integer, intent(in) :: nch, nmax
 real(8), intent(in) :: r
 real(8), dimension(nmax, nmax), intent(out) :: wr
 type(ancou_type), intent(in) :: v2
-common /coered/ ered, rmu
-real(8) :: ered, rmu
 real(8) :: xirmu
 integer :: i, j, ig, jg, ilast, ntop
 !

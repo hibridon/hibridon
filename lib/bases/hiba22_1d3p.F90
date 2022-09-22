@@ -89,10 +89,6 @@ subroutine ba1d3p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !              nstate=0:   just 1D state
 !              nstate=1:   just 3P state
 !              nstate=2:   both 1D and 3P states
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  variable in module mod_conlam
 !    nlam:      the number of case(a) interaction potentials actually used
 !               this is :  nlam = nlam0 + nlam1
@@ -122,12 +118,12 @@ use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 
-common /coered/ ered, rmu
 common /coskip/ nskip, iskip
 integer :: nskip, iskip
 !   eigenvectors for the atomic Hamiltonian

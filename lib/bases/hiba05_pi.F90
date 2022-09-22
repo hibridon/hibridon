@@ -113,10 +113,6 @@ subroutine bapi  (j, l, is, jhold, ehold, ishold, nlevel, &
 !    dmom:     dipole moment of molecule in Debye
 !    efield:   stark field in kV / cm
 !    eint:     array containing channel energies (in hartree)
-!  variables in common block /coered/
-!    ered:     collision energy in atomic units (hartrees)
-!    rmu:      collision reduced mass in atomic units
-!              (mass of electron = 1)
 !  variable in common block /coconv/
 !   econv:     conversion factor from cm-1 to hartrees
 !   xmconv:    conversion factor from amu to atomic units
@@ -136,6 +132,7 @@ use mod_cosysr, only: isrcod, junkr, rspar
 use mod_par, only: iprint, rendai=>scat_rendai
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
@@ -143,7 +140,6 @@ logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*80 string
 character*27 case
 character*2 chf
-common /coered/ ered, rmu
 dimension j(1), is(1), l(1), jhold(1), ishold(1), ieps(2)
 dimension c0(1), c1(1), c2(1), cf(1), ehold(1)
 dimension e(3,3), eig(3), sc1(3), sc2(3), vec(3,3), vii(0:2)

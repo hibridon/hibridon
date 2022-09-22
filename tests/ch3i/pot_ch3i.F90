@@ -24,10 +24,10 @@ subroutine driver
 use mod_covvl, only: vvl
 use mod_cosysi, only: nscode, isicod, ispar
 use constants, only: econv, xmconv
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 logical ifull
 dimension wf(16)
-common /coered/ ered, rmu
 common /coground/ ifull
 common /covib/ie(50), iv(50)
 ispar(3)=1
@@ -103,9 +103,7 @@ end
 !  variables in common block /covib/
 !    iv       vibrational quantum number for each asymptotic channel
 !    ie       electronic quantum number for each channel
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units (mass of electron = 1)
+
 
 !  -------------------------------------------------------
 use mod_coiout, only: niout, indout
@@ -113,6 +111,7 @@ use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 use constants, only: econv, xmconv
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_ered, only: ered, rmu
 implicit none
 
 real(8), intent(out) :: wf(nch*nphoto) ! array of dimension nch*nphoto, containing, on return,
@@ -136,9 +135,6 @@ real(8) :: psi(nymx)
 real(8) :: gr(ngr)
 real(8) :: dmu(2)
 real(8), parameter :: q(4) = [7.830d0, -0.1762d0, 0.6183d0, 4.939d0]
-common /coered/ ered, rmu
-real(8) ered
-real(8) rmu
 
 common /covib/ ie, iv
 integer :: ie(50)
@@ -581,10 +577,6 @@ subroutine bausr (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !    iv:      on return, contains vibr.channel for each
 !             electronic channel
 !    ie:      on return contains electronic channel
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 ! --------------------------------------------------------------------
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
@@ -596,6 +588,7 @@ use constants, only: econv, xmconv
 use mod_coiout, only: niout, indout
 use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 integer, intent(out) :: j(:)
 integer, intent(out) :: l(:)
@@ -629,7 +622,6 @@ logical clfl
 common /covib/ ie(50), iv(50)
 common /coicl/ clfl
 
-common /coered/ ered, rmu
 common /coiscl/ iscl(40)
 zero = 0.d0
 one = 1.d0

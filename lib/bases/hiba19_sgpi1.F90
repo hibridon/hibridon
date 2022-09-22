@@ -141,10 +141,6 @@ subroutine basgpi1(j, l, is, jhold, ehold, ishold, nlevel, &
 !              can provide Vpi, V1, V2 for coupling with the 2sigma state
 !    ivibpi:   array of the vibrational quantum numbers of 2pi levels for
 !              which the pot routine can provide the potentials
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  variable in common block /coconv/
 !    econv:     conversion factor from cm-1 to hartrees
 !    xmconv:    converson factor from amu to atomic units
@@ -173,13 +169,13 @@ use constants, only: econv, xmconv
 use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
 common /covibp/ ivpi(5)
 common /covpot/ numvib,ivibpi(5)
-common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), ishold(1), &
   ivhold(1), c12(1), c32(1), csig(1), ieps(2), &
   epi(maxvib), bpi(maxvib), dpi(maxvib), aso(maxvib), p(maxvib), &

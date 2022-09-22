@@ -283,7 +283,7 @@ use mod_pot_ohh2_bausr, only: machep, &
    nvb, nvf, &
    lam1b, lam2b, lamb, &
    lam1f, lam2f, lamf
-
+use mod_ered, only: ered, rmu
 implicit none
 integer, intent(out) :: j(:)
 integer, intent(out) :: l(:)
@@ -318,9 +318,6 @@ type(ancouma_type), pointer :: ancouma
 !     omega=1/2 states for each level; sc2 is that mixing angle for each
 !     channel; sc3 and sc4 are coefficients for omega=3/2 and omega=1/2
 !     states, respectively, for each channel.
-common /coered/ ered, rmu
-double precision ered, rmu
-!
 integer nlist, ji1, eps1, fi1, ji2, li, ji1p, eps1p, fi1p, &
      ji2p, lip, jsave, isave, ipar, j12min, ji12, ji12p, &
      lpar, i, ilam, ivx, iv, icol, irow, inum, &

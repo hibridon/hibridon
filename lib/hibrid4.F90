@@ -1070,6 +1070,7 @@ use mod_par, only: csflag, flaghf, wrsmat, photof
 use funit
 use mod_wave, only: irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, get_wfu_rec1_length, wfu_format_version
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_ered, only: ered, rmu
 implicit none
 integer, intent(in) :: jtot
 integer, intent(in) :: jlpar
@@ -1080,9 +1081,6 @@ real(8), intent(in) :: rendld
 
 character*20 :: cdate
 
-common /coered/ ered, rmu
-real(8) :: ered
-real(8) :: rmu
 integer :: i
 integer(8) :: end_of_rec1_pos
 !
@@ -1169,6 +1167,7 @@ use mod_cozmat, only: zmat => zmat_as_vec ! zmat(25)
 use mod_par, only: csflag, flaghf, photof
 use funit
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_ered, only: ered, rmu
 implicit none
 integer, intent(out) :: jtot
 integer, intent(out) :: jlpar
@@ -1186,10 +1185,6 @@ integer(8) :: iwavsk
 
 character*48 :: oldlab, oldpot
 character*20 :: olddat
-
-common /coered/ ered, rmu
-real(8) :: ered
-real(8) :: rmu
 
 character :: csize8(8), csize4(4)
 integer :: i
@@ -1454,6 +1449,7 @@ use mod_par, only: batch, csflag, photof
 use mod_wave, only: irec, inflev
 use funit
 use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  psifil, wavfil, flxfil
@@ -1465,7 +1461,6 @@ logical exstfl, adiab, &
                 coordf
 common /cotrans/ ttrans(36)
 ! common for y1, y2, y4
-common /coered/ ered, rmu
 dimension a(7)  ! arguments
 data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f', &
            '3SG1e','3PI0e','3PI1e','3PI2e','1SG0e','1PI1e'/
@@ -2406,11 +2401,11 @@ use mod_cozmat, only: tcoord => zmat_as_vec ! tcoord(100)
 use mod_wave, only: irec, ifil, nrlogd
 use mod_coqvec, only: nphoto
 use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
 ! steve, you may need more space, but i doubt it since tcoord is dimensioned n
 implicit double precision (a-h,o-z)
 logical adiab, kill, photof, propf, sumf, coordf, ifull
 
-common /coered/ ered, rmu
 common /coground/ ifull
 common /cotrans/ ttrans(36)
 dimension scc(100)
@@ -2714,6 +2709,7 @@ use mod_coisc3, only: nalist => isc3 ! nalist(10)
 use mod_cosc6, only: sc => sc6 ! sc(6)
 use mod_cosc8, only: sc8
 use mod_wave, only: irec, ifil
+use mod_ered, only: ered, rmu
 implicit none
 integer, intent(in) :: npts
 integer, intent(in) :: nch
@@ -2723,9 +2719,6 @@ integer :: i, nni
 integer :: kstep
 real(8) :: r
 real(8) :: drnow
-common /coered/ ered, rmu
-real(8) :: ered
-real(8) :: rmu
 ! common for y1, y2, y4
 real(8), parameter :: two = 2.d0
 real(8), parameter :: conv = 219474.6d0
@@ -2978,6 +2971,7 @@ use constants
 use mod_cosc8, only: sc8
 use mod_wave, only: ifil, nrlogd
 use funit
+use mod_ered, only: ered, rmu
 implicit none
 character*(*), intent(in) :: filnam
 integer, intent(in) :: nchmin
@@ -2993,9 +2987,6 @@ real(8) :: drnow, rstart, rendld, rinf, r
 logical :: exstfl
 character*40 :: wavfil, eadfil
 !
-common /coered/ ered, rmu
-real(8) :: ered
-real(8) :: rmu
 integer(8) :: seek_pos
 !
 double precision :: dble_t
