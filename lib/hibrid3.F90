@@ -577,8 +577,8 @@ use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_selb, only: ibasty
+use mod_vib, only: nvibs, ivibs, nvibp, ivibp
 logical ihomo
-common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
 common /conlamp/ lamnump(50)
 integer, pointer :: nterm, nvibmn, nvibmx
 nterm=>ispar(1); nvibmn=>ispar(2); nvibmx=>ispar(3)
@@ -672,10 +672,10 @@ use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_selb, only: ibasty
+use mod_vib, only: nvibs, ivibs, nvibp, ivibp
 implicit double precision(a-h,o-z)
 
 logical ihomo
-common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
 dimension nvbmnr(4),nvbmxr(4),nvbmnc(4),nvbmxc(4)
 nstep=1
 if(ihomo) nstep=2
@@ -817,10 +817,10 @@ use mod_covvl, only: vvl
 use mod_cosysi, only: nscode, ispar
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_selb, only: ibasty
+use mod_vib, only: nvibs, ivibs, nvibp, ivibp
 
 implicit double precision(a-h,o-z)
 logical ihomo
-common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
 common /conlamp/ lamnump(7)
 integer, pointer :: nterm, nvibmn, nvibmx
 nterm=>ispar(1); nvibmn=>ispar(2); nvibmx=>ispar(3)

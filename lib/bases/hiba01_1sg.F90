@@ -117,6 +117,7 @@ use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax,
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_skip, only: nskip, iskip
+use mod_vib, only: nvib=>nvibs, ivib=>ivibs
 
 implicit double precision (a-h,o-z)
 integer, intent(out) :: j(:)
@@ -147,7 +148,6 @@ integer, intent(in) :: nmax
 integer, intent(out) :: ntop
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
-common /covib/ nvib,ivib(maxvib)
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
 real(8), dimension(4, maxvib) :: rpar

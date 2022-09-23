@@ -5,6 +5,16 @@ real(8) :: reg
 real(8) :: caypot
 end module mod_grnd
 
+module mod_ch3i
+
+  type                         :: vib_type
+   integer :: ie(50)  ! electronic quantum number for each channel
+   integer :: iv(50)  ! contains vibr.channel for each
+!             electronic channel. vibrational quantum number for each asymptotic channel
+  end type vib_type
+  type(vib_type) :: vib
+
+end module mod_ch3i
 ! shapiro CH3I PES's modified by Guo and Schatz
 ! References:  M. Shapiro, J. Phys. Chem. 90, 3644 (1986);
 !  H. Guo and G. C. Schatz, J. Chem. Phys. 93, 393 (1990);
@@ -25,11 +35,11 @@ use mod_covvl, only: vvl
 use mod_cosysi, only: nscode, isicod, ispar
 use constants, only: econv, xmconv
 use mod_ered, only: ered, rmu
+use mod_ch3i, only: vib
 implicit double precision (a-h,o-z)
 logical ifull
 dimension wf(16)
 common /coground/ ifull
-common /covib/ie(50), iv(50)
 ispar(3)=1
 nch=16
 rmu=13.42/xmconv
@@ -37,10 +47,10 @@ rmu=13.42/xmconv
 rshift=0.5
 xfact=0.8
 do i=1,8
-  ie(i)=1
-  iv(i)=i-1
-  iv(i+8)=i-1
-  ie(i+8)=2
+  vib%ie(i)=1
+  vib%iv(i)=i-1
+  vib%iv(i+8)=i-1
+  vib%ie(i+8)=2
 enddo
 read (5, *, end=99) r
 call pot(vv0,r)
@@ -100,9 +110,6 @@ end
 !             coupling terms)
 !    nvmin    minimum vibrationnal state in each electronic state
 !    nvmax    maximum vibrationnal state in each electronic state
-!  variables in common block /covib/
-!    iv       vibrational quantum number for each asymptotic channel
-!    ie       electronic quantum number for each channel
 
 
 !  -------------------------------------------------------
@@ -112,6 +119,7 @@ use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 use constants, only: econv, xmconv
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_ered, only: ered, rmu
+use mod_ch3i, only: vib
 implicit none
 
 real(8), intent(out) :: wf(nch*nphoto) ! array of dimension nch*nphoto, containing, on return,
@@ -135,10 +143,6 @@ real(8) :: psi(nymx)
 real(8) :: gr(ngr)
 real(8) :: dmu(2)
 real(8), parameter :: q(4) = [7.830d0, -0.1762d0, 0.6183d0, 4.939d0]
-
-common /covib/ ie, iv
-integer :: ie(50)
-integer :: iv(50)
 
 common /coground/ ifull
 
@@ -222,8 +226,8 @@ do j=1,ngr
 enddo
 ! channels correspond to electronic-vibrational states of CH3I
 do 30 i=1,nch
-  iel=ie(i)
-  ivb=iv(i)+1
+  iel=vib%ie(i)
+  ivb=vib%iv(i)+1
   wf(i)= dmu(iel)*gr(ivb)
 30 continue
 return
@@ -250,9 +254,9 @@ subroutine pot (vv0, r)
 !               potential
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
+use mod_ch3i, only: vib
 implicit double precision (a-h, o-z)
 real(8), intent(out) :: vv0
-common /covib/ ie(50), ic(50)
 !  -----------------------------------------------------------------------
 data a11, b11, a12, b12, b13, y0, r0 / 51.53d0, 1.64d0, 25.15d0, &
           1.3d0, &
@@ -573,10 +577,6 @@ subroutine bausr (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !             state )
 !    evib:    asymptotic vibrational energy in each electronic channel
 !             (in au)
-!  variables in common block /covib/
-!    iv:      on return, contains vibr.channel for each
-!             electronic channel
-!    ie:      on return contains electronic channel
 ! --------------------------------------------------------------------
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
@@ -589,6 +589,7 @@ use mod_coiout, only: niout, indout
 use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_ered, only: ered, rmu
+use mod_ch3i, only: vib
 implicit double precision (a-h,o-z)
 integer, intent(out) :: j(:)
 integer, intent(out) :: l(:)
@@ -619,7 +620,6 @@ integer, intent(out) :: ntop
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical clfl
-common /covib/ ie(50), iv(50)
 common /coicl/ clfl
 
 common /coiscl/ iscl(40)
@@ -637,17 +637,17 @@ do i=1, nel
   do k=1, nvib
     n=n+1
     nlevel=nlevel+1
-    ie(n)=i
-    iv(n)=nvmin+k-1
+    vib%ie(n)=i
+    vib%iv(n)=nvmin+k-1
     cent(n)=0.d0
     j(n)=0
     jhold(n)=j(n)
     l(n)=0
-    is(n)=(3-2*i)*(iv(n)+1)
+    is(n)=(3-2*i)*(vib%iv(n)+1)
     ishold(n)=is(n)
     eel=rcod(2*i)
     evib=rcod(2*i+1)
-    eint(n)=eel + (iv(n)+0.5d0)*evib
+    eint(n)=eel + (vib%iv(n)+0.5d0)*evib
     ehold(n)=eint(n)
   enddo
 enddo
@@ -668,9 +668,9 @@ if (n .eq. 0) return
 if (n .gt. 1) then
   do 144 i1 = 1, n - 1
     esave = ehold(i1)
-    iel = ie(i1)
+    iel = vib%ie(i1)
     do i2 = i1 + 1, n
-      if (iel .ne. ie(i2)) go to 144
+      if (iel .ne. vib%ie(i2)) go to 144
       if (ehold(i2) .lt. esave) then
 !  state i2 has a lower energy than state i1, switch them
         esave = ehold(i2)
@@ -697,12 +697,12 @@ if (n .gt. 1) then
         issave = ishold(i2)
         ishold(i2) = ishold(i1)
         ishold(i1) = issave
-        iesave = ie(i2)
-        ie(i2) = ie(i1)
-        ie(i1) = iesave
-        ivsave = iv(i2)
-        iv(i2) = iv(i1)
-        iv(i1) = ivsave
+        iesave = vib%ie(i2)
+        vib%ie(i2) = vib%ie(i1)
+        vib%ie(i1) = iesave
+        ivsave = vib%iv(i2)
+        vib%iv(i2) = vib%iv(i1)
+        vib%iv(i1) = ivsave
      end if
     enddo
 144   continue
@@ -809,10 +809,10 @@ do 320 il = lammin(1), lammax(1), 1
   do icol= 1, n
     do irow = icol, n
       vee=zero
-      ier=ie(irow)
-      iec=ie(icol)
-      ivr=iv(irow) +1
-      ivc=iv(icol) +1
+      ier=vib%ie(irow)
+      iec=vib%ie(icol)
+      ivr=vib%iv(irow) +1
+      ivc=vib%iv(icol) +1
       if (il .eq. 1) then
         if (ier .eq. 1 .and. iec .eq. 1) then
           if(ivr.eq.ivc) vee=1.d0

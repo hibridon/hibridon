@@ -1447,6 +1447,15 @@ integer :: nskip
 integer :: iskip
 end module mod_skip
 
+! used to be common block covib
+module mod_vib
+use mod_parbas, only: maxvib
+integer :: nvibs = -1
+integer :: ivibs(maxvib) = -1
+integer :: nvibp = -1
+integer :: ivibp(maxvib) = -1
+end module mod_vib
+
  ! all the commons blocks from hiiolib_f.F90:
     !!   common/cdbf/ ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf(llbuf)
 
