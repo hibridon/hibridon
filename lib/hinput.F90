@@ -76,12 +76,14 @@ use mod_hibrid2, only: enord, prsg
 use mod_hibrid3, only: testptn, testpt20, testpt, potmin
 use mod_hiutil, only: assignment_parse
 use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT, RPAR_COUNT
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use fcod_enum
 use lpar_enum
 use ipar_enum
 use rpar_enum
 use mod_par, only: lpar, ipar, rpar
-
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit none
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
@@ -112,8 +114,6 @@ real(8) :: a(15)
 integer :: ia(10)
 integer :: ihold(15)
 integer :: lhold(15)
-#include "common/parbas.F90"
-#include "common/parpot.F90"
 common /cosavi/ iipar, ixpar(iicode)
 integer :: iipar
 integer :: ixpar
@@ -144,10 +144,6 @@ character*8 :: fcod(lcode)
 ! pcod = Parameters CODes : stores the name of system independent parameters of type integer and real
 common /copcod/ pcod
 character*8 :: pcod(icode)
-
-common /coselb/ ibasty
-integer ibasty
-
 
 common /cobaco/ bascod
 character*8 :: bascod(1)

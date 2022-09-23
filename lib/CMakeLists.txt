@@ -43,6 +43,8 @@ add_library(hib
     hipotutil.F90
     hiversion.F90
     hiwav.F90
+    parbas.F90
+    parpot.F90
     bases/hiba01_1sg.F90
     bases/hiba02_2sg.F90
     bases/hiba03_2pi.F90

@@ -34,12 +34,12 @@ use mod_par, only: airyfl, prairy, bastst, batch, chlist, &
                 jtot1, jtot2, jtotd, jlpar, nerg, numax, numin, nud, lscreen, iprint, &
                 fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, &
                 tolaifstfac=>scat_tolai, xmu
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 character*40 jobnam,input,output,savfil
-#include "common/parpot.F90"
 common /cofile/ input, output, jobnam, savfil
 ! nb if the nextcommon is changed, it should be also changed in common/parsys
-common /coselb/ ibasty
 !  this sets the maximum number of energies
 !
 jtot1=20
@@ -389,6 +389,8 @@ use mod_coz, only: zmat => z_as_vec ! zmat(1)
 use mod_cow, only: scmat => w_as_vec ! scmat(1)
 use mod_version, only : version
 use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, flaghf, flagsu, ihomo, ipos
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
@@ -401,8 +403,6 @@ logical iprint, twomol, existf, openfl, eprint
 integer i, ienerg, iout, isize, j, jbegin, jend, jfinal, &
         jfirst, jj1, jj2, jlpar, jtemp, jtotd, lenx, n, nlevel, &
         nlevop, nout, numax, numin, nud, iaver
-#include "common/parpot.F90"
-common /coselb/ ibasty
 dimension  a(3)
 data econv / 219474.6d0/
 !  input parameters
@@ -722,6 +722,7 @@ use mod_colq, only: ipoint => lq ! ipoint(4)
 use mod_cojhld, only: jlev => jhold ! jlev(4)
 use mod_cosc1, only: elev => sc1 ! elev(4)
 use mod_coisc1, only: inlev => isc1 ! inlev(4)
+use mod_selb, only: ibasty
 
 implicit double precision (a-h,o-z)
 !      current revision date: 16-dec-2007
@@ -733,7 +734,6 @@ integer ind
 !     real elev, zmat
 logical ipos, iprint, flaghf
 dimension zmat(nlevop,nlevop), ind(50)
-common /coselb/ ibasty
 !     first transpose the cross section matrix so that initial
 !     states are columns and final states are rows
 call transp (zmat, nlevop, nlevop)
@@ -896,6 +896,8 @@ use mod_coener, only: energ
 use mod_coz, only: zmat => z_as_vec ! zmat(1)
 use mod_cow, only: scmat => w_as_vec ! scmat(1)
 use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, flaghf, flagsu, ihomo, ipos
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
@@ -907,8 +909,6 @@ character*12 accs
 !mha
 logical iprint, twomol, existf, &
         openfl, eprint
-#include "common/parpot.F90"
-common /coselb/ ibasty
 dimension  a(4)
 !  input parameters
 !mha

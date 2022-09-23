@@ -156,6 +156,7 @@ use mod_hiba30_astp3, only: baastp3
 !use mod_bausr, only: bausr
 !use mod_hibuser, only: bausr
 use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
+use mod_selb, only: ibasty
 
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable :: v2
@@ -170,10 +171,8 @@ integer nlevel, nlevop, jtot, nu, &
         jlpar, n, nmax
 !      real ehold, sc1, sc2, sc3, sc4, rcut
 logical flaghf, flagsu, csflag, clist, bastst, ihomo, twomol
-integer ibasty
 integer, pointer :: sc1_as_int(:), sc2_as_int(:), sc3_as_int(:), sc4_as_int(:)
 #include "hibuser.inc.F90"
-common /coselb/ ibasty
 !
 ASSERT(.not. allocated(v2))
 

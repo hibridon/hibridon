@@ -36,11 +36,10 @@ use mod_1sg1sg
 use mod_cnh2
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
+use mod_parpot, only: pot_name, pot_label
 implicit none
 !     common/parbas is replaced by module ba1sg1sg to allow more
 !     parameters be passed between the pot routine and the basis routine
-common /coptnm/ pot_name, pot_label
-character(48) :: pot_name, pot_label
 character*(*) :: file_name
 character(255) :: file_path
 integer :: iunit, ir, iv, nv, nlammx

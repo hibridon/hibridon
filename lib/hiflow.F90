@@ -13,9 +13,7 @@ subroutine flow (z, w, zmat, amat, bmat, jq, lq, inq, jlev, &
 !  additions by: b. follmeg, h-j werner
 !  current revision date:  1-oct-2001 by mha
 !  -------------------------------------------------------------
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units (mass of electron = 1)
+
 !  variables in common block /copmat/
 !    rtmn,rtmx: minimum and maximum turning points
 !    iflag:     variable used in determination of turning points (not used her
@@ -69,6 +67,9 @@ use funit
 use ipar_enum
 use rpar_enum
 use mod_hinput, only:hinput
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
@@ -103,7 +104,6 @@ integer, intent(in) :: nmax
 integer, intent(in) :: nairy
 
 type(ancou_type), allocatable :: v2
-#include "common/parpot.F90"
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
 real(8) secnds
 common /codec/ ttim(2)
@@ -120,16 +120,11 @@ real(8) :: rxpar
 common /copmat/ rtmn, rtmx, iflag
 real(8) :: rtmn, rtmx
 integer :: iflag
-common /coered/ ered, rmu
-real(8) :: ered, rmu
 common /cophot/ phot_photof, wavefn, boundf, writs
 logical :: phot_photof, wavefn, boundf, writs
 
 common /cosurf/ surf_flagsu
 logical :: surf_flagsu
-
-common /coselb/ ibasty
-integer :: ibasty
 
 common /cojlpo/ jlpold
 integer :: jlpold

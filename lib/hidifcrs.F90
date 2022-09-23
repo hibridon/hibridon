@@ -53,7 +53,8 @@ use mod_coz, only: sreal1 => z_as_vec ! sreal1(1)
 use mod_cow, only: simag1 => w_as_vec ! simag1(1)
 use mod_hibrid5, only: sread
 use mod_hibasis, only: is_j12, is_twomol
-
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 character*(*) fname1
 character*20 cdate1
@@ -70,8 +71,6 @@ integer :: ii
 integer, parameter :: smt_unit = 1
 integer, parameter :: dcs_unit = 2
 integer, parameter :: rho_unit = 3
-#include "common/parpot.F90"
-common /coselb/ ibasty
 real(8), dimension(:), allocatable :: s, sm, sm6
 ! to store a22p,a21p and a11p amplitudes
 complex(8), dimension(:, :), allocatable :: fm1m2
@@ -963,11 +962,11 @@ subroutine ampli(j1,in1,j2,in2,jtot,sreal,simag,mmax,jpack,lpack, &
 use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12, is_twomol
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 complex*16 ai,yy,tmat
 parameter (zero=0.0d0, one=1.0d0, two=2.0d0)
 logical ihomo,flaghf,elastc
-common /coselb/ ibasty
 dimension jpack(1),lpack(1),ipack(1),jq(1),inq(1)
 integer, intent(in) :: lq(1)
 dimension sreal(mmax,1),simag(mmax,1)

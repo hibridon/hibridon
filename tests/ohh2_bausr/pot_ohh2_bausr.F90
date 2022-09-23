@@ -10,14 +10,57 @@
 !
 !     DUMMY SUBROUTINES FOR ALL USER-DEFINED BASIS/POT.
 #include "assert.h"
+#include "hiutil.inc.F90"
 #include "common/ground.F90"
 !
+module mod_pot_ohh2_bausr
+implicit none
+!     Maximum number of R's, terms of B's and F's
+!     The R grid does not need to be evenly spaced
+integer, parameter :: MAX_NR = 400
+integer, parameter :: MAX_NVB = 100
+integer, parameter :: MAX_NVF = 70
+!     
+!     Actual number of R's, terms of B's and F's, R, B, F
+
+! pisg1
+integer :: nr, nvb, nvf
+
+! pisg2
+real(8) :: rr(MAX_NR)
+real(8) :: bcoef(MAX_NR, MAX_NVB)
+real(8) :: fcoef(MAX_NR, MAX_NVF)
+
+! pisg3
+!     Arrays listing l1, l2, and l
+integer :: lam1b(MAX_NVB), lam2b(MAX_NVB), lamb(MAX_NVB)
+integer :: lam1f(MAX_NVF), lam2f(MAX_NVF), lamf(MAX_NVF)
+
+!     Arrays storing information for cubic spline evaluation
+! pisgb
+real(8) :: splb_b(MAX_NR, MAX_NVB)
+real(8) :: splb_c(MAX_NR, MAX_NVB)
+real(8) :: splb_d(MAX_NR, MAX_NVB)
+
+! pisgf
+real(8) :: splf_b(MAX_NR, MAX_NVF)
+real(8) :: splf_c(MAX_NR, MAX_NVF)
+real(8) :: splf_d(MAX_NR, MAX_NVF)
+
+!     Machine epsilon
+real(8), parameter :: machep=epsilon(0d0)
+
+end module
 !     ------------------------------------------------------------------
 !     THE FOLLOWING SOUBROUTINE WILL BE THE MAIN FUNCTION FOR MAKEPOT.
 !     NOTE THAT VVL IS IN HARTREES.
 subroutine driver
 !
-#include "pot_ohh2_bausr_common.F90"
+use mod_covvl, only: vvl
+use constants, only: econv
+!     size of vvl : MAX_NVB+MAX_NVF
+use mod_pot_ohh2_bausr, only: lam1b, lam2b, lamb, lam1f, lam2f, lamf, nvb, nvf
+implicit none
 character*40 filenm
 double precision r, vv0
 integer i
@@ -42,8 +85,10 @@ goto 10
 subroutine loapot(iunit, filnam)
 use mod_hibasutil, only: raise
 !
-#include "pot_ohh2_bausr_common.F90"
-#include "common/parpot.F90"
+use constants, only: econv
+use mod_pot_ohh2_bausr, only: rr, lam1b, lam2b, lamb, lam1f, lam2f, lamf, bcoef, fcoef, MAX_NR, MAX_NVB, MAX_NVF, nr, nvb, nvf, splb_b, splb_c, splb_d, splf_b, splf_c, splf_d
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+implicit none
 !
 character*(*) filnam
 integer iunit, ir, iv
@@ -113,7 +158,13 @@ end
 !     VVL SHOULD BE IN HARTREES.
 subroutine pot(vv0, r_raw)
 !
-#include "pot_ohh2_bausr_common.F90"
+use mod_covvl, only: vvl
+!     size of vvl : MAX_NVB+MAX_NVF
+use mod_pot_ohh2_bausr, only: nr, nvb, nvf, rr, &
+  splb_b, splb_c, splb_d, &
+  splf_b, splf_c, splf_d, &
+  bcoef, fcoef
+implicit none
 real(8), intent(in) :: r_raw
 real(8), intent(out) :: vv0
 real(8) seval, r
@@ -141,11 +192,11 @@ end
 subroutine syusr(irpot, readpt, iread)
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only : isrcod, junkr, rspar
+use mod_cosysr, only : isrcod, rspar
 use mod_hibasutil, only: raise
 use funit, only: FUNIT_INP
 !
-#include "pot_ohh2_bausr_common.F90"
+implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
@@ -159,6 +210,7 @@ save potfil
 
 integer, pointer :: j1max, npar, j2min, j2max, iptsy2
 real(8), pointer :: brot, aso, p, q, drot
+
 j1max=>ispar(1); npar=>ispar(2); j2min=>ispar(3); j2max=>ispar(4); iptsy2=>ispar(5)
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
 !     DEFINE THE NAMES HERE
@@ -190,6 +242,8 @@ return
 return
 !     ------------------------------------------------------------------
 entry ptrusr(fname, readpt)
+UNUSED(fname)
+UNUSED(readpt)
 return
 !     ------------------------------------------------------------------
 entry savusr(readpt)
@@ -219,12 +273,18 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use mod_hibasutil, only: raise
 use mod_par, only: iprint
 !
-#include "pot_ohh2_bausr_common.F90"
+use constants, only: econv
+use mod_pot_ohh2_bausr, only: machep, &
+   nvb, nvf, &
+   lam1b, lam2b, lamb, &
+   lam1f, lam2f, lamf
+use mod_ered, only: ered, rmu
+implicit none
 integer, intent(out) :: j(:)
 integer, intent(out) :: l(:)
 integer, intent(out) :: is(:)
@@ -258,9 +318,6 @@ type(ancouma_type), pointer :: ancouma
 !     omega=1/2 states for each level; sc2 is that mixing angle for each
 !     channel; sc3 and sc4 are coefficients for omega=3/2 and omega=1/2
 !     states, respectively, for each channel.
-common /coered/ ered, rmu
-double precision ered, rmu
-!
 integer nlist, ji1, eps1, fi1, ji2, li, ji1p, eps1p, fi1p, &
      ji2p, lip, jsave, isave, ipar, j12min, ji12, ji12p, &
      lpar, i, ilam, ivx, iv, icol, irow, inum, &
@@ -271,6 +328,8 @@ double precision x, o11, o12, o22, tho
 character(3) :: strfi
 integer, pointer :: j1max, npar, j2min, j2max, iptsy2
 real(8), pointer :: brot, aso, p, q, drot
+UNUSED(rcut)
+UNUSED(clist)
 j1max=>ispar(1); npar=>ispar(2); j2min=>ispar(3); j2max=>ispar(4); iptsy2=>ispar(5)
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
 !
@@ -303,7 +362,6 @@ do ji1 = 0, j1max
            - 0.5d0 * (1d0 - eps1 * x) * dsqrt(x ** 2 - 1d0) * q
 !     tho is the mixing angle between omega=3/2 and omega=1/2 states
       tho = 0.5d0 * datan(2 * o12 / (o11 - o22))
-291       format (2i4, 4f10.3)
       do fi1 = 1, 2
          if (ji1 .eq. 0 .and. fi1 .eq. 1) cycle
          if (fi1 .eq. 1) then

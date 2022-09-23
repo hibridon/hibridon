@@ -109,10 +109,6 @@ subroutine ba2pi (j, l, is, jhold, ehold, ishold, nlevel, &
 !    npar:     number of symmetry doublets included (npar=2 will ensure
 !              both lambda doublets; npar=1, just eps=1 levels, npar=-1,
 !              just eps=-1 levels
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  subroutines called:
 !   vlm2pi:    returns angular coupling coefficient for particular
 !              choice of channel index
@@ -125,13 +121,13 @@ use constants, only: econv, xmconv, ang2c
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, idum=>junkr, rspar
 use mod_par, only: iprint
-#include "common/parbasl.F90"
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable :: v2
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
-#include "common/parbas.F90"
-common /coered/ ered, rmu
 dimension j(2), l(1), jhold(1), ehold(1), is(2), &
           c12(1), c32(1), ieps(2), ishold(1), sc1(1), sc4(1)
 integer, allocatable :: ifi(:)
@@ -916,6 +912,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -925,7 +922,6 @@ logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-#include "common/parbas.F90"
 common /coskip/ nskip,iskip
 integer :: nskip, iskip
 save potfil
