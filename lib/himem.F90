@@ -1437,6 +1437,16 @@ real(8) :: ered
 real(8) :: rmu
 end module mod_ered
 
+! used to be common block coskip
+!   nskip  for a homonuclear molecule lamda is running in steps of nskip=2
+!          for a heteronuclear molecule nskip=1
+!
+!   iskip   same as nskip, used for consistency check
+module mod_skip
+integer :: nskip
+integer :: iskip
+end module mod_skip
+
  ! all the commons blocks from hiiolib_f.F90:
     !!   common/cdbf/ ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf(llbuf)
 

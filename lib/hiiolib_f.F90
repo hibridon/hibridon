@@ -281,14 +281,13 @@ use funit, only: FUNIT_INP
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
+use mod_skip, only: nskip, iskip
 implicit double precision (a-h,o-z)
 integer i, length
 logical existf
 character*40 input, jobnam, output, savfil
 character*(*) filnam
 
-common /coskip/ nskip,iskip
-integer :: nskip, iskip
 common /cofile/ input, output, jobnam, savfil
 
 ! ----------------------------------------------------------------

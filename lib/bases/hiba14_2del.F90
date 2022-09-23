@@ -878,12 +878,6 @@ subroutine sy2del (irpot, readpt, iread)
 !  variable in common bloc /cosys/
 !    scod:    character*8 array of dimension nscode, which contains names
 !             of all system dependent parameters
-!  variable in common block /coskip/
-!   nskip  for a homonuclear molecule lamda is running in steps of nskip=2
-!          for a heteronuclear molecule nskip=1
-!
-!   skip   same as nskip, used for consistency check
-!
 !  subroutines called: loapot(iunit,filnam)
 use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
@@ -892,6 +886,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_skip, only: nskip, iskip
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -901,8 +896,6 @@ logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-common /coskip/ nskip,iskip
-integer :: nskip, iskip
 save potfil
 #include "common/comdot.F90"
 

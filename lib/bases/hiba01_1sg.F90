@@ -100,12 +100,6 @@ subroutine ba1sg (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !              expansion of potential
 !    jmin:     the minimum rotational angular momenta
 !    jmax:     the maximum rotational angular momenta
-!  variable in common block /coskip/
-!   nskip  for a homonuclear molecule lamda is running in steps of nskip=2
-!          for a heteronuclear molecule nskip=1
-!
-!   iskip   same as nskip, used for consistency check
-!
 !  subroutines called:
 !   vlm1sg:    returns singlet-sigma angular coupling coefficient for
 !              particular choice of initial and final channel quantum numbers
@@ -122,6 +116,7 @@ use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
+use mod_skip, only: nskip, iskip
 
 implicit double precision (a-h,o-z)
 integer, intent(out) :: j(:)
@@ -153,7 +148,6 @@ integer, intent(out) :: ntop
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 common /covib/ nvib,ivib(maxvib)
-common /coskip/ nskip, iskip
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
 real(8), dimension(4, maxvib) :: rpar
@@ -617,6 +611,7 @@ use mod_par, only: ihomo
 use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_selb, only: ibasty
+use mod_skip, only: nskip, iskip
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -629,8 +624,6 @@ character*4 char
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 common/covib/ nvib,ivib(maxvib)
-common /coskip/ nskip,iskip
-integer :: nskip, iskip
 
 save potfil
 !equivalence(iscod(1),nterm),(iscod(2),nvibmn),(iscod(3),nvibmx)

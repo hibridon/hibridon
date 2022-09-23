@@ -1346,6 +1346,7 @@ use mod_cosysr, only: isrcod, junkr, rspar
 use mod_par, only: ihomo
 use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_skip, only: nskip, iskip
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -1357,8 +1358,6 @@ character*(*) fname
 character*1 dot
 character*60 filnam, line, potfil, filnm1
 common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
-common /coskip/ nskip,iskip
-integer :: nskip, iskip
 save potfil
 #include "common/comdot.F90"
 !  set default values for 2pi-2sigma scattering
