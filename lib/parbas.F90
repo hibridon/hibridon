@@ -23,9 +23,9 @@ integer, parameter :: maxvb2=maxvib**2
 !                      in term iterm
 !    ivcol(ivb,iterm): column vibrational state for vibrational block ivb
 !                      in term iterm
-integer :: ntv(maxtrm)
-integer :: ivcol(maxvb2,maxtrm)
-integer :: ivrow(maxvb2,maxtrm)
+integer :: ntv(maxtrm) = -1
+integer :: ivcol(maxvb2,maxtrm) = -1
+integer :: ivrow(maxvb2,maxtrm) = -1
 
 ! cobspt parameters
 !  variables in obspt must be set in loapot!!
@@ -42,9 +42,9 @@ integer :: ivrow(maxvb2,maxtrm)
 !              the length of each of these arrays is limited to nterm
 !              terms where nterm is defined in the common block /cosysi/
 
-integer :: lammin(maxtrm)
-integer :: lammax(maxtrm)
-integer :: mproj(maxtrm)
+integer :: lammin(maxtrm) = -1
+integer :: lammax(maxtrm) = -1
+integer :: mproj(maxtrm) = -1
 
 ! cobsptln parameters
 !              Order of reduced rotation matrix d(theta2) as defined in 
@@ -57,6 +57,6 @@ integer :: mproj(maxtrm)
 !              matrix elements for each term.
 !              here, lammin and lam2 are greater than m2proj .
 !
-integer :: lam2(maxtrm)
-integer :: m2proj(maxtrm)
+integer :: lam2(maxtrm) = -1
+integer :: m2proj(maxtrm) = -1
 end module
