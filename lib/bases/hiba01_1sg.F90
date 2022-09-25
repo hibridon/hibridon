@@ -612,18 +612,18 @@ use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_selb, only: ibasty
 use mod_skip, only: nskip, iskip
+use mod_vib, only: nvib => nvibs, ivib => ivibs 
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-integer :: i, iofi, iofr, ivib
-integer :: j, l, lc, nvib
+integer :: i, iofi, iofr
+integer :: j, l, lc
 logical existf
 character*1 dot
 character*4 char
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-common/covib/ nvib,ivib(maxvib)
 
 save potfil
 !equivalence(iscod(1),nterm),(iscod(2),nvibmn),(iscod(3),nvibmx)
