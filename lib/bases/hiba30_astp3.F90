@@ -197,15 +197,15 @@ nterm=>ispar(1); numpot=>ispar(2); jmax=>ispar(3); iop=>ispar(4); j2min=>ispar(5
 arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4); b2rot=>rspar(5)
   
 ! Allocate scratch arrays
-allocate(e(max(jmax,j2max), max(jmax,j2max)))  
-allocate(eig(max(jmax,j2max)))
+allocate(e(max(jmax,j2max)+1, max(jmax,j2max)+1))  
+allocate(eig(max(jmax,j2max)+1))
 allocate(work(144)) ! (lwork is hardcoded to be 144)
-allocate(j2rot(j2max))
-allocate(e2rot(j2max))
+allocate(j2rot(j2max+1))
+allocate(e2rot(j2max+1))
 allocate(kp(narray))
 allocate(ko(narray))
 
-
+narray = max(jmax,j2max)+1
 
 
 zero = 0.d0
