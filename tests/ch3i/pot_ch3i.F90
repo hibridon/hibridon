@@ -171,7 +171,7 @@ endif
 ! for each CH3-I distance we define the components of the ground state
 ! wave function in  asymptotic vibrationnal basis:
 
-call wfintern(wf, 0, nch, nphoto, 0, .true.)
+call wfintern(wf, 0.d0, nch, nphoto, 0, .true.)
 
 end subroutine ground
 !      entry wfintern(wf,yymin,nnvib,nny) ! original Rist statement
