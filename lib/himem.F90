@@ -1456,6 +1456,19 @@ integer :: nvibp = -1
 integer :: ivibp(maxvib) = -1
 end module mod_vib
 
+! used to be common block cophot
+!     photof        true if photodissociation calculation
+!                   false if scattering calculation
+!     wavefn        true if G(a,b) transformation matrices are saved
+!                   to be used later in computing the wavefunction
+module mod_phot
+logical :: photof
+logical :: wavefn
+logical :: boundf
+logical :: writs
+end module mod_phot
+
+
  ! all the commons blocks from hiiolib_f.F90:
     !!   common/cdbf/ ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf(llbuf)
 

@@ -533,6 +533,7 @@ subroutine spropn (rnow, width, eignow, hp, y1, y4, y2, &
 !  current revision date (algorithm):  30-dec-1994
 !-----------------------------------------------------------------------------
 use mod_coqvec2, only: q => q2
+use mod_phot, only: photof, wavefn, boundf, writs
 
 implicit double precision (a-h,o-z)
 !      implicit none
@@ -546,8 +547,6 @@ double precision a, b, bfact, cs, cs1, cs2, csh, dalph2, dalpha, &
     xbiry1, xbiry2, zero
 double precision eignow, gam1, gam2, hp, y1, y2, y4
 integer i, nch
-logical photof, wavefn, boundf, writs
-common /cophot/ photof, wavefn, boundf, writs
 dimension eignow(1), hp(1), y1(1), y2(1), y4(1), gam1(1), gam2(1)
 data     doneth,        dhalf &
   / 0.333333333333333d0, 0.5d0 /
@@ -1330,15 +1329,9 @@ subroutine psiasy(fj,fn,unit,sr,si,psir,psii,nopen,nmax)
 !
 !    nopen          number of open channels
 !    nmax           row dimension of matrices
-!  variables in common block /cophot/
-!     photof        true if photodissociation calculation
-!                   false if scattering calculation
-!     wavefn        true if G(a,b) transformation matrices are saved
-!                   to be used later in computing the wavefunction
 ! ----------------------------------------------------------------------------
+use mod_phot, only: photof, wavefn, boundf, writs
 implicit double precision (a-h,o-z)
-logical photof, wavefn, boundf, writs
-common /cophot/ photof, wavefn, boundf, writs
 dimension fj(1), fn(1), unit(1), sr(nmax,nmax), si(nmax,nmax), &
           psii(nmax,nmax), psir(nmax,nmax)
 one=1.d0

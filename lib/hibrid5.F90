@@ -124,11 +124,6 @@ subroutine soutpt (tsq, sr, si, scmat, &
 !    econv:    conversion factor from cm-1 to hartrees
 !    xmconv:   converson factor from amu to atomic units
 !    ang2c:     conversion factor from square bohr to square angstroms
-!  variables in common block /cophot/
-!    photof    true if photodissociation calculation
-!              false if scattering calculation
-!    wavefn    true if g(a,b) transformation matrices are saved
-!              to be used later in computing the wavefunction
 !  ---------------------------------------------------------------------------
 use mod_cosout
 use constants
@@ -141,6 +136,7 @@ use mod_hibrid2, only: mxoutd, mxoutr
 use funit
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
+use mod_phot, only: photof, wavefn, boundf
 implicit double precision (a-h,o-z)
 real(8), intent(inout) :: tsq(nmax,nmax)
 real(8), intent(inout) :: sr(nmax,nmax)
@@ -158,7 +154,7 @@ real(8), intent(in) :: elev(nlevop)
 integer, intent(in) :: inlev(nlevop)
 logical ipos, csflag, prsmat, prt2, writs, wrpart, prpart, &
         wrxsec, prxsec, flaghf, t2test, flagsu, firstj, twomol, &
-        nucros, photof, wavefn, faux, twojlp, boundf, writs_unused
+        nucros, faux, twojlp
 integer :: jpack(nmax*nmax)
 integer :: lpack(nmax*nmax)
 
@@ -167,7 +163,6 @@ integer :: soutpt_sc_file = 1
 common /cojsav/ jsav1, jsav2
 common /cosurf/ flagsu
 common /cojlpo/ jlpold
-common /cophot/ photof, wavefn, boundf, writs_unused
 !
 data izero, ione /0, 1/
 xjtot = jtot

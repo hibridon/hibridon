@@ -32,11 +32,6 @@ subroutine flow (z, w, zmat, amat, bmat, jq, lq, inq, jlev, &
 !    jlpold:      parity used in xwrite subroutine to insure correct
 !                 accumulation of partial waves in cases where jlpar=0
 !
-!  variables in common block /cophot/
-!     photof        true if photodissociation calculation
-!                   false if scattering calculation
-!     wavefn        true if g(a,b) transformation matrices are saved
-!                   to be used later in computing the wavefunction
 !  variables in module constants
 !    econv:       conversion factor from cm-1 to hartree
 !    xmconv:      conversion factor from amu to atomic units
@@ -70,6 +65,7 @@ use mod_hinput, only:hinput
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
+use mod_phot, only: phot_photof => photof, wavefn, boundf, writs
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
@@ -120,8 +116,6 @@ real(8) :: rxpar
 common /copmat/ rtmn, rtmx, iflag
 real(8) :: rtmn, rtmx
 integer :: iflag
-common /cophot/ phot_photof, wavefn, boundf, writs
-logical :: phot_photof, wavefn, boundf, writs
 
 common /cosurf/ surf_flagsu
 logical :: surf_flagsu
