@@ -77,9 +77,6 @@ subroutine airprp (z, &
 !                   false if scattering calculation
 !     wavefn        true if G(a,b) transformation matrices are saved
 !                   to be used later in computing the wavefunction
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units (mass of electron = 1)
 !  logical variables:
 !     iprint:       if .true., then print out of step-by-step information
 !     twoen:        if .true., then
@@ -97,6 +94,8 @@ use mod_hibrid3, only: outmat, potent
 use mod_hiba10_22p, only: energ22
 use mod_par, only: par_iprint=>iprint
 use mod_wave, only: irec, ifil, nchwfu, iendwv, get_wfu_airy_rec_length
+use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
 implicit double precision (a-h, o-z)
 !  matrix dimensions (row dimension = nmax, matrices stored column by column)
 real(8), dimension(nmax*nmax), intent(inout) :: z
@@ -121,8 +120,6 @@ integer i, icol, ierr, ipt, izero, kstep, maxstp, &
 logical photof, wavefn, boundf, writs
 
 common /cophot/ photof, wavefn, boundf, writs
-common /coered/ ered, rmu
-common /coselb/ ibasty
 #if defined(HIB_UNIX_IBM)
 character*1 forma, formb
 #endif
@@ -919,7 +916,7 @@ use mod_coz, only: sreal1 => z_as_vec ! sreal1(1)
 use mod_cow, only: sreal2 => w_as_vec ! sreal2(1)
 use mod_cozmat, only: simag1 => zmat_as_vec ! simag1(1)
 use mod_hibrid5, only: sread
-
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 character*(*) fname1,fname2
 character*20 cdate1,cdate2
@@ -928,7 +925,6 @@ character*48 potnam1,potnam2,label1,label2
 
 logical existf,csflg1,csflg2,flghf1,flghf2,flgsu1,flgsu2
 logical twoml1,twoml2,nucr1,nucr2
-#include "common/parpot.F90"
 !
 zero=0
 acc=0

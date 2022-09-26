@@ -9,9 +9,9 @@
 subroutine driver
 use mod_covvl, only: vvl
 use mod_cosysr, only: rspar
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 dimension thta(11),cthta(11),vap(11),va2p(11)
-#include "common/parpot.F90"
 real(8), pointer :: rshift, xfact
 rshift=>rspar(1); xfact=>rspar(2)
 potnam='Cybulski et al He-OH(X) RCCSDT PES'
@@ -73,9 +73,9 @@ end
 subroutine loapot(iunit,filnam)
 ! ------------------------------------------------------------------------
 use mod_conlam, only: nlam, nlammx, lamnum
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 character*(*) filnam
-#include "common/parbas.F90"
-#include "common/parpot.F90"
 potnam='Cybulski et al He-OH(X) RCCSDT PES'
 lammin(1)=1
 lammax(1)=10

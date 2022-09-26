@@ -82,10 +82,6 @@ subroutine ba22p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !              this should be 1 here
 !               in case (a) basis
 !
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  variable in module mod_conlam
 !    nlam:      the number of case(a) interaction potentials actually used
 !               this is 14 here
@@ -103,14 +99,14 @@ use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
-#include "common/parbasl.F90"
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-#include "common/parbas.F90"
 
-common /coered/ ered, rmu
 common /coskip/ nskip, iskip
 integer :: nskip, iskip
 common /cojtot/ jjtot,jjlpar
@@ -743,6 +739,7 @@ use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 use mod_par, only:  jtot1,jtot2,jtotd,jlpar
 use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -753,7 +750,6 @@ logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-#include "common/parbas.F90"
 common /coskip/ nskip,iskip
 integer :: nskip, iskip
 #include "common/comdot.F90"

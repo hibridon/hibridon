@@ -15,11 +15,11 @@
 subroutine driver
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 character*60 filnam
 common /fisurf/ conv,econv,lsurf,nv
 common /coloapot/ s4pi, nvv, ivv(300)
-#include "common/parpot.F90"
 potnam='RIST/VALIRON NH3-H2 2009'
 nlammx = 55
 nlam = 55
@@ -74,31 +74,12 @@ goto 1
 !              molecule
 !    j2min:    the minimum rotational angular momentum for linear
 !              molecule
-
-!  variables in common block /cobspt/
-!              Order of reduced rotation matrix d(theta1) as defined in 
-!              eq (21) of reference J. Chem Phys. 98 (6), 1993 with    
-!              (lambda, mproj) = (l1, m1).   
-!    lammin:   array containing minimum value of lambda for each term
-!    lammax:   array containing maximum value of lambda for each term
-!    mproj:    array containing the order of the reduced rotation matrix
-!              elements for each term. here, lammin is greater to mproj.
-!  variables in common block /cobsptln/
-!              Order of reduced rotation matrix d(theta2) as defined in 
-!              eq (21) of reference J. Chem Phys. 98 (6), 1993 with
-!              (lam2, m2proj) = (l2, m2).      
-!    lam2:     array containing the order of the reduced rotation matrix
-!              elements for each term. in case of homonuclear molecule
-!              is even.
-!    m2proj:   array containing the order of the reduced rotation
-!              matrix elements for each term.
-!              here, lammin and lam2 are greater than m2proj .
-
 !  -----------------------------------------------------------------------
 use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: nscode, isicod, ispar
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
-#include "common/parbas.F90"
 
 
 
@@ -136,7 +117,6 @@ common /fisurf/ conv, econv, lsurf
 
 common /fiunit/ iwrite,ifile
 character*(*) filnam
-#include "common/parpot.F90"
 parameter (nvmx = 300)
 integer   ivij(nvmx), jvij(nvmx), i2vij(nvmx), j2vij(nvmx), &
           lambda(nvmx), mu(nvmx), &
@@ -432,9 +412,9 @@ subroutine pot(vv0, r)
 !      implicit none
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 !      integer ivv, nvv, nlam, nlammx, kv, kvv, nvmx
-#include "common/parpot.F90"
 
 !      double precision  r, v, vv, vv0, vvl, s4pi
 double precision  r, v, vv, vv0, s4pi
@@ -534,9 +514,10 @@ end
 !       parameter nvmx          max number of vij terms
 
 !        implicit none
+  use mod_parpot, only: potnam=>pot_name, label=>pot_label
+
   implicit double precision (a-h,o-z)
 !        integer nddmx, nvmx
-#include "common/parpot.F90"
 !        parameter (nvmx = 45)
   parameter (nddmx=250)
   double precision r, v, dd, y, y1, y2, y3, yref, h, conv, econv

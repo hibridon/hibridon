@@ -91,10 +91,6 @@ subroutine ba2mol (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !    numj:     number of j1-j2 values
 !    nj1j2:    specific j1-j2 values (up to a maximum of 50)
 !              N.B. this dimension is set here
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  variable in module mod_conlam
 !               nlam is set equal to nterm; see above
 !  subroutines called:
@@ -109,16 +105,16 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-#include "common/parbasl.F90"
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_par, only: readpt, boundc
+use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
 
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-#include "common/parbas.F90"
 common /cotwo/ numj,nj1j2(50)
-common /coselb/ ibasty
-common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), j12(1), j1(1), &
           j2(1), sc4(1), ishold(1)
 data ione, itwo, ithree / 1, 2, 3 /

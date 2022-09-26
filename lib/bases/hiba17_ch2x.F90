@@ -122,10 +122,6 @@ subroutine bach2x (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !              iop=-1
 !    ivbend:   bend vibrational quantum number (can equal 0 to 3)
 !    jmax:     the maximum rotational angular momentum for the asymmetric top
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  variables in common block /coconv/
 !   econv:      conversion factor from cm-1 to hartrees
 !   xmconv:     converson factor from amu to atomic units
@@ -142,14 +138,14 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-#include "common/parbasl.F90"
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*1 slab
-#include "common/parbas.F90"
-common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
           fistmp(1)
@@ -1025,6 +1021,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -1036,7 +1033,6 @@ character*1 dot
 character*(*) fname
 character*60 line, filnam, potfil, filnm1
 parameter (icod=6, ircod=1)
-#include "common/parbas.F90"
 save potfil
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables

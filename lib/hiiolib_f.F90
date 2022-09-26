@@ -278,19 +278,18 @@ use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, &
                 lscreen, iprint, &
                 fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, tolai=>scat_tolai, xmu ! NB if boundc = .true. then these parameters are: r1,r2,c,spac,delr,hsimp,eigmin,tolai,xmu
 use funit, only: FUNIT_INP
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 integer i, length
 logical existf
 character*40 input, jobnam, output, savfil
 character*(*) filnam
-#include "common/parpot.F90"
-common /coselb/ ibasty
-integer :: ibasty
 
 common /coskip/ nskip,iskip
 integer :: nskip, iskip
 common /cofile/ input, output, jobnam, savfil
-common /coered/ ered, rmu
 
 ! ----------------------------------------------------------------
 !  open unit 8 for standard input
@@ -348,7 +347,7 @@ read (8, *, err=195) (energ(i), i = 1, nerg)
 iline = iline + 1
 !  line 8
 read (8, *, err=195) xmu
-! convert to atomic units of mass and store in /coered/
+! convert to atomic units of mass and store in mod_ered
 rmu=xmu/xmconv
 iline = iline + 1
 !  line 9
@@ -931,17 +930,17 @@ use mod_par, only: airyfl, csflag, flaghf, flagsu, ipos, &
                 prpart, readpt, rsflag, twomol, wrsmat, &
                 wrpart, wrxsec, prxsec, nucros, photof, wavefl, boundc
 use funit
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 integer ifile, nerg, nfile, lenx, isize, isizes
 logical existf
 character*40  oldlab,newlab
-#include "common/parpot.F90"
 character*40 xname,xnam1
 character*20 cdate
 character*40 input,output,jobnam,savfil
 common /cofile/ input,output,jobnam,savfil
 common /cosize/ isize, isizes
-common /coselb/ ibasty
 if (nerg .gt. 1) then
 !  check to see if nerg .le. 25
   if (nerg .gt. 25) then
@@ -1205,6 +1204,7 @@ subroutine rdhead(smt_file_unit, cdate, ered, rmu, csflag, flaghf, &
 !     major revision: 07-jan-2012 by q. ma
 !     ------------------------------------------------------------
 use mod_clseg, only: lseg
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit none
 integer, intent(in) :: smt_file_unit ! logical unit used to read smt file 
 character*20, intent(out) :: cdate
@@ -1218,7 +1218,6 @@ integer, dimension(1), intent(out) :: jlev  ! dimension(1:nlevel)
 integer, dimension(1), intent(out) :: inlev ! dimension(1:nlevel)
 double precision, dimension(1), intent(out) :: elev ! dimension(1:nlevel)
 integer, dimension(1), intent(out) :: jout  ! dimension(1:iabs(nnout))
-#include "common/parpot.F90"
 character*8 csize8
 character*4 csize4
 integer :: lenhd
