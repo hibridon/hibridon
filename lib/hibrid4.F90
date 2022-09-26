@@ -2404,9 +2404,8 @@ use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 ! steve, you may need more space, but i doubt it since tcoord is dimensioned n
 implicit double precision (a-h,o-z)
-logical adiab, kill, photof, propf, sumf, coordf, ifull
+logical adiab, kill, photof, propf, sumf, coordf
 
-common /coground/ ifull
 common /cotrans/ ttrans(36)
 dimension scc(100)
 data zero, one, onemin /0.d0, 1.d0, -1.d0/
@@ -2430,8 +2429,7 @@ integer(8) :: iwavsk
 ! sc is now mask for those states for which index is desired
     do 100 iy = 1, ny
       y=ymin+(iy-1)*dy
-      ifull=.false.
-      call wfintern(scmat, y, nch, nphoto, 1)
+      call wfintern(scmat, y, nch, nphoto, 1, .false.)
 ! steve, you'll need to modify wfintern so that scmat returns both function an
 ! scmat is a vector of length nch containing the nch internal states
 ! evaluated at internal coordinate y
