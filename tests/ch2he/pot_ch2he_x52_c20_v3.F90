@@ -20,11 +20,10 @@
 subroutine driver
 use mod_covvl, only: vvl
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use constants, only: s4pi
 implicit double precision (a-h,o-z)
 !      common /vspline/ vsp_jacek(52)
-common /coloapot/ s4pi
 common /copotvec/ vec(40,21)
-s4pi = sqrt ( 4.d0 * acos(-1.d0) )
 rr=3.5d0
 dr=0.5d0
 potnam='MA CH2(X,030)-He PES'
@@ -111,15 +110,13 @@ subroutine pot (vv0, r)
 !    vvl(13-15): expansion coefficients in [Yl4 + Y(l,-4)] (l=4:8:2) of v(lam,4)
 !    vvl(16-17): expansion coefficients in [Yl5 + Y(l,-5)] (l=5:7:2) of v(lam,5)
 !    vvl(18-19): expansion coefficients in [Yl6 + Y(l,-6)] (l=6:8:2) of v(lam,6)
-!  variable in common block /coloapot/
-!    s4pi:       normalization factor for isotropic potential
-!
 !  uses linear least squares routines from lapack
 !
 ! author:  lifang ma and paul dagdigian
 ! latest revision date:  march-29-2011
 !
 use mod_covvl, only: vvl
+use constants, only: s4pi
 implicit double precision (a-h,o-z)
 dimension iwork(3000),ylm(52,20)
 dimension swork(20), work(3624)
@@ -129,7 +126,6 @@ dimension y60(52),y62(52),y44(52),y55(52),y64(52)
 dimension y66(52),y73(52),y75(52),y84(52),y86(52)
 !
 !
-common /coloapot/ s4pi
 common /vspline/ vsp_jacek(52)
 common /vvalue/  vv(988),v(19,52), vvec(19)
 data c6 /8.424960d6/
@@ -579,7 +575,6 @@ call dcopy(19,vsp_jacek(2),1,vvl,1)
 ! at r=15.5, merge spherical potential to long-range behaviour and damp
 ! all the anisotropic terms 
 fact=0.5d0*(tanh((r-15.5d0))+1d0)
-s4pi = sqrt ( 4.d0 * acos(-1.d0) )
 vv0=vsp_jacek(1)*(1d0-fact)-fact*c6/r**6
 vv0=vv0*tohat/s4pi
 call dscal(19,(1d0-fact),vvl,1)

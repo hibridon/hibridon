@@ -19,7 +19,6 @@ subroutine driver
 use mod_covvl, only: vvl
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
-s4pi = sqrt ( 4.d0 * acos(-1.d0) )
 econv=219474.6d0
 potnam='Ar-CH4 Nijmegen 1997'
 print *, potnam
@@ -89,9 +88,6 @@ subroutine pot (vv0, r)
 !  variable in module mod_covvl
 !    vvl:        vector of length 4 to store r-dependence of each term
 !                in potential expansion
-!  variable in common block /coloapot/
-!    s4pi:       normalization factor for isotropic potential
-!
 !  uses linear least squares routines from lapack
 !
 ! author:  paul dagdigian

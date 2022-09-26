@@ -5,6 +5,7 @@
 module constants
 implicit none
 real(8), parameter :: pi=dacos(-1d0)
+real(8), parameter :: s4pi = sqrt( 4.d0 * pi )  ! normalization factor for isotropic potential
 !     Below are constants used in Hibridon 4.4
 real(8), parameter :: econv=219474.6d0, xmconv=5.485930d-4, &
      ang2c=0.280002846d0

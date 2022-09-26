@@ -108,8 +108,6 @@ subroutine pot (vv0, r)
 !  variable in common block /covvl/
 !    vvl:        vector of length 21 to store r-dependence of each term
 !                in potential expansion
-!  variable in common block /coloapot/
-!    s4pi:       normalization factor for isotropic potential
 !
 !  uses linear least squares routines from lapack
 !
