@@ -59,6 +59,8 @@ module mod_hinput
     'PRSBR   ', &
     'SHOWPOT ']
 
+  character(len=8), parameter :: bascod(1) = ['BASISTYP']
+
 contains
 subroutine hinput(first)
 !  subroutine to redefine system independent input parameters for
@@ -161,8 +163,6 @@ integer :: nncode
 integer :: llcode
 integer :: ijcode
 
-common /cobaco/ bascod
-character*8 :: bascod(1)
 
 common /coopti/ optifl
 logical :: optifl
@@ -230,8 +230,6 @@ lindx(FCOD_WRPART) = LPAR_WRPART
 lindx(FCOD_WRSMAT) = LPAR_WRSMAT
 lindx(FCOD_WRXSEC) = LPAR_WRXSEC
 lindx(FCOD_BOUNDC) = LPAR_BOUNDC
-
-bascod(1)='BASISTYP'
 
 ! addresses for commands
 ! check: 2700
