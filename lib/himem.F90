@@ -1658,6 +1658,14 @@ module mod_pmat
   integer :: iflag
 end module mod_pmat
 
+! used to be common block cputim
+module mod_cputim
+  real(8) :: cpuld
+  real(8) :: cpuai
+  real(8) :: cpupot
+  real(8) :: cpusmt
+  real(8) :: cpupht
+end module mod_cputim
 
  ! all the commons blocks from hiiolib_f.F90:
     !!   common/cdbf/ ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf(llbuf)

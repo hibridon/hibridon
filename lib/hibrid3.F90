@@ -315,6 +315,7 @@ use mod_hiba10_22p, only: trans22
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_pmat, only: rtmn, rtmx, iflag
+use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
 implicit none
 real(8) :: second
 real(8), dimension(*), intent(out) :: w
@@ -344,8 +345,6 @@ type(igrovec_type_block), pointer :: blocki
 type(dgrovec_type_block), pointer :: blockd
 #endif
 
-common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
-real(8) :: cpuld, cpuai, cpupot, cpusmt, cpupht
 real(8), parameter :: zero = 0.d0
 real(8), parameter :: one = 1.d0
 real(8), parameter :: two = 2.d0
@@ -1014,6 +1013,7 @@ use mod_hibrid2, only: mxoutd
 use funit, only: FUNIT_TRANS_MAT, FUNIT_QUAD_MAT
 use mod_phot, only: photof, wavefn, boundf, writs
 use mod_pmat, only: rtmn, rtmx, iflag
+use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
 implicit none
 !   square matrices
 real(8), intent(out) :: z(nmax, nch)
@@ -1052,12 +1052,6 @@ logical :: twoen
 logical ::  first
 character*10 :: tbs,tps,tds,tws,tairys, twfs
 character*10 :: time
-common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
-real(8) :: cpuld
-real(8) :: cpuai
-real(8) :: cpupot
-real(8) :: cpusmt
-real(8) :: cpupht
 
 real(8) :: r
 real(8) :: t1, t2

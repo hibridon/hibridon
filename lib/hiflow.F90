@@ -61,6 +61,7 @@ use mod_phot, only: phot_photof => photof, wavefn, boundf, writs
 use mod_surf, only: surf_flagsu => flagsu
 use mod_sav, only: iipar, ixpar, irpar, rxpar
 use mod_pmat, only: rtmn, rtmx, iflag
+use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
@@ -100,9 +101,6 @@ real(8) secnds
 common /codec/ ttim(2)
 real(8) :: ttim
 #endif
-
-common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
-real(8) :: cpuld, cpuai, cpupot, cpusmt, cpupht
 
 common /cojlpo/ jlpold
 integer :: jlpold
