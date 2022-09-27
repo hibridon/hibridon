@@ -15,6 +15,50 @@ module mod_hinput
     k_keyword_set_sd_param        =  4, &   ! 1400 label:set_sd_param(line, l)
     k_keyword_set_ibasty          =  5      !   50 label:set_ibasty(line,l)
   end enum
+
+  integer, parameter :: ncode = 40  !  ncode is the number of bcod's
+  character(len=8), parameter :: bcod(ncode) = [ &  ! bcod stores hibridon's commands
+    'CHECK   ', &
+    'DEBROGLI', &
+    'DIFFER  ', &
+    'DIFCRS  ', &
+    'ENERGY  ', &
+    'EXIT    ', &
+    'HELP    ', &
+    'INPUT   ', &
+    'INTCRS  ', &
+    'JOB     ', &
+    'JOUT    ', &
+    'LABEL   ', &
+    'MINPOT  ', &
+    'MRCRS   ', &
+    'NNOUT   ', &
+    'OPTIMIZE', &
+    'OUTPUT  ', &
+    'POT     ', &
+    'PRINTC  ', &
+    'PRINTS  ', &
+    'PSI     ', &
+    'QUIT    ', &
+    'READ    ', &
+    'RUN     ', &
+    'SAVE    ', &
+    'SHOW    ', &
+    'TENXSC  ', &
+    'TESTPOT ', &
+    'TURN    ', &
+    'INDOUT  ', &
+    'PARTC   ', &
+    'FLUX    ', &
+    'J1J2    ', &
+    'EADIAB  ', &
+    'SYSCONF ', &
+    'HYPXSC  ', &
+    'STMIX   ', &
+    'TRNPRT  ', &
+    'PRSBR   ', &
+    'SHOWPOT ']
+
 contains
 subroutine hinput(first)
 !  subroutine to redefine system independent input parameters for
@@ -89,10 +133,6 @@ use mod_sav, only: iipar, ixpar, irpar, rxpar
 implicit none
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
-!  ncode is the number of bcod's
-!  bcod stores hibridon's commands
-!  fcod stores logical flags (length = lcode)
-integer, parameter :: ncode = 40
 integer, parameter :: lcode = LPAR_COUNT
 integer, parameter :: iicode = IPAR_COUNT
 integer, parameter :: ircode = RPAR_COUNT
@@ -120,9 +160,6 @@ common /cokeyl/ nncode, llcode, ijcode
 integer :: nncode
 integer :: llcode
 integer :: ijcode
-
-common /cobcod/ bcod
-character*8 :: bcod(ncode)
 
 common /cobaco/ bascod
 character*8 :: bascod(1)
@@ -239,46 +276,6 @@ bascod(1)='BASISTYP'
 ! showpot:  3300
 ! nb after changing the following list, check that all the variables "incode"
 ! that follow after address 900 are changed accordingly
-bcod(1)='CHECK'
-bcod(2)='DEBROGLI'
-bcod(3)='DIFFER'
-bcod(4)='DIFCRS'
-bcod(5)='ENERGY'
-bcod(6)='EXIT'
-bcod(7)='HELP'
-bcod(8)='INPUT'
-bcod(9)='INTCRS'
-bcod(10)='JOB'
-bcod(11)='JOUT'
-bcod(12)='LABEL'
-bcod(13)='MINPOT'
-bcod(14)='MRCRS'
-bcod(15)='NNOUT'
-bcod(16)='OPTIMIZE'
-bcod(17)='OUTPUT'
-bcod(18)='POT'
-bcod(19)='PRINTC'
-bcod(20)='PRINTS'
-bcod(21)='PSI'
-bcod(22)='QUIT'
-bcod(23)='READ'
-bcod(24)='RUN'
-bcod(25)='SAVE'
-bcod(26)='SHOW'
-bcod(27)='TENXSC'
-bcod(28)='TESTPOT'
-bcod(29)='TURN'
-bcod(30)='INDOUT'
-bcod(31)='PARTC'
-bcod(32)='FLUX'
-bcod(33)='J1J2'
-bcod(34)='EADIAB'
-bcod(35)='SYSCONF'
-bcod(36)='HYPXSC'
-bcod(37)='STMIX'
-bcod(38)='TRNPRT'
-bcod(39)='PRSBR'
-bcod(40)='SHOWPOT'
 !
 iipar=iicode
 irpar=ircode
