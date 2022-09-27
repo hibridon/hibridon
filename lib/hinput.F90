@@ -81,7 +81,7 @@ use fcod_enum
 use lpar_enum
 use ipar_enum
 use rpar_enum
-use mod_par, only: lpar, ipar, rpar
+use mod_par, only: lpar, ipar, rpar, set_param_names, fcod, pcod
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_file, only: input, output, jobnam, savfil
@@ -123,14 +123,6 @@ integer :: ijcode
 
 common /cobcod/ bcod
 character*8 :: bcod(ncode)
-
-! fcod = Flags CODes : stores the name of system independent parameters of type logical
-common /cofcod/ fcod
-character*8 :: fcod(lcode)
-
-! pcod = Parameters CODes : stores the name of system independent parameters of type integer and real
-common /copcod/ pcod
-character*8 :: pcod(icode)
 
 common /cobaco/ bascod
 character*8 :: bascod(1)
@@ -203,55 +195,7 @@ lindx(FCOD_WRXSEC) = LPAR_WRXSEC
 lindx(FCOD_BOUNDC) = LPAR_BOUNDC
 
 bascod(1)='BASISTYP'
-pcod(IPAR_JTOT1)   = 'JTOT1'
-pcod(IPAR_JTOT2)   = 'JTOT2'
-pcod(IPAR_JTOTD)   = 'JTOTD'
-pcod(IPAR_JLPAR)   = 'JLPAR'
-pcod(IPAR_NERG)    = 'NERG'
-pcod(IPAR_NUMAX)   = 'NUMAX'
-pcod(IPAR_NUMIN)   = 'NUMIN'
-pcod(IPAR_NUD)     = 'NUD'
-pcod(IPAR_LSCREEN) = 'LSCREEN'
-pcod(IPAR_IPRINT)  = 'IPRINT'
 
-pcod(IPAR_COUNT + RPAR_SCAT_FSTFAC)  = 'FSTFAC'
-pcod(IPAR_COUNT + RPAR_SCAT_RINCR)   = 'RINCR'
-pcod(IPAR_COUNT + RPAR_SCAT_RCUT)    = 'RCUT'
-pcod(IPAR_COUNT + RPAR_SCAT_RENDAI)  = 'RENDAI'
-pcod(IPAR_COUNT + RPAR_SCAT_RENDLD)  = 'RENDLD'
-pcod(IPAR_COUNT + RPAR_SCAT_RSTART)  = 'RSTART'
-pcod(IPAR_COUNT + RPAR_SCAT_SPAC)    = 'SPAC'
-pcod(IPAR_COUNT + RPAR_SCAT_TOLAI)   = 'TOLAI'
-pcod(IPAR_COUNT + RPAR_XMU)     = 'XMU'
-
-fcod(FCOD_AIRYFL)='AIRYFL'
-fcod(FCOD_BASTST)='BASTST'
-fcod(FCOD_BATCH)='BATCH'
-fcod(FCOD_CHLIST)='CHLIST'
-fcod(FCOD_CSFLAG)='CSFLAG'
-fcod(FCOD_FLAGHF)='FLAGHF'
-fcod(FCOD_FLAGSU)='FLAGSU'
-fcod(FCOD_IHOMO)='IHOMO'
-fcod(FCOD_IPOS)='IPOS'
-fcod(FCOD_LOGDFL)='LOGDFL'
-fcod(FCOD_NOPRIN)='NOPRIN'
-fcod(FCOD_NUCROS)='NUCROS'
-fcod(FCOD_PHOTOF)='PHOTOF'
-fcod(FCOD_PRAIRY)='PRAIRY'
-fcod(FCOD_PRLOGD)='PRLOGD'
-fcod(FCOD_PRPART)='PRPART'
-fcod(FCOD_PRSMAT)='PRSMAT'
-fcod(FCOD_PRT2)='PRT2'
-fcod(FCOD_PRXSEC)='PRXSEC'
-fcod(FCOD_READPT)='READPT'
-fcod(FCOD_RSFLAG)='RSFLAG'
-fcod(FCOD_T2TEST)='T2TEST'
-fcod(FCOD_TWOMOL)='TWOMOL'
-fcod(FCOD_WAVEFL)='WAVEFL'
-fcod(FCOD_WRPART)='WRPART'
-fcod(FCOD_WRSMAT)='WRSMAT'
-fcod(FCOD_WRXSEC)='WRXSEC'
-fcod(FCOD_BOUNDC)='BOUNDC'
 ! addresses for commands
 ! check: 2700
 ! debrogli: 1800
@@ -1678,35 +1622,6 @@ call assignment_parse(code(1:lc),empty_var_list,j,a(2))
 3220 continue
 call prsbr(fnam1,fnam2,a)
 goto 1  ! label:read_next_command
-end
-subroutine set_param_names(boundc, param_names, param_names_size)
-!  subroutine to change param_names's for bound state or scattering
-use mod_hiparcst, only: IPAR_COUNT
-use rpar_enum
-implicit none
-logical, intent(in) :: boundc
-integer, intent(in) :: param_names_size  ! size of param_names array
-character*8, intent(out) :: param_names(param_names_size)  ! array containing the name of each parameter (old name: pcod)
-if (boundc) then
-  param_names(IPAR_COUNT + RPAR_BOUND_R1)      = 'R1'
-  param_names(IPAR_COUNT + RPAR_BOUND_R2)      = 'R2'
-  param_names(IPAR_COUNT + RPAR_BOUND_C)       = 'C' 
-  param_names(IPAR_COUNT + RPAR_BOUND_SPAC)    = 'SPAC' 
-  param_names(IPAR_COUNT + RPAR_BOUND_DELR)    = 'DELR' 
-  param_names(IPAR_COUNT + RPAR_BOUND_HSIMP)   = 'HSIMP' 
-  param_names(IPAR_COUNT + RPAR_BOUND_EIGMIN)  = 'EIGMIN' 
-  param_names(IPAR_COUNT + RPAR_BOUND_TOLAI)   = 'TOLAI' 
-else
-  param_names(IPAR_COUNT + RPAR_SCAT_FSTFAC)  = 'FSTFAC'
-  param_names(IPAR_COUNT + RPAR_SCAT_RINCR)   = 'RINCR'
-  param_names(IPAR_COUNT + RPAR_SCAT_RCUT)    = 'RCUT'
-  param_names(IPAR_COUNT + RPAR_SCAT_RENDAI)  = 'RENDAI'
-  param_names(IPAR_COUNT + RPAR_SCAT_RENDLD)  = 'RENDLD'
-  param_names(IPAR_COUNT + RPAR_SCAT_RSTART)  = 'RSTART'
-  param_names(IPAR_COUNT + RPAR_SCAT_SPAC)    = 'SPAC'
-  param_names(IPAR_COUNT + RPAR_SCAT_TOLAI)   = 'TOLAI'
-endif
-return
 end
 
 end module mod_hinput
