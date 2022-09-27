@@ -1550,6 +1550,16 @@ module mod_trn
   integer :: jpmax
 end module mod_trn
 
+! used to be common block cosavi and cosavr
+module mod_sav
+  use mod_hiparcst, only: IPAR_COUNT, RPAR_COUNT
+
+  integer :: iipar
+  integer :: ixpar(IPAR_COUNT)
+
+  integer :: irpar
+  real(8) :: rxpar(RPAR_COUNT)
+end module mod_sav
 
  ! all the commons blocks from hiiolib_f.F90:
     !!   common/cdbf/ ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf(llbuf)

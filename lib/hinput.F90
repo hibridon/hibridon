@@ -85,6 +85,7 @@ use mod_par, only: lpar, ipar, rpar
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_file, only: input, output, jobnam, savfil
+use mod_sav, only: iipar, ixpar, irpar, rxpar
 implicit none
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
@@ -92,9 +93,9 @@ implicit none
 !  bcod stores hibridon's commands
 !  fcod stores logical flags (length = lcode)
 integer, parameter :: ncode = 40
-integer, parameter :: lcode = 28
-integer, parameter :: iicode = 10
-integer, parameter :: ircode = 9
+integer, parameter :: lcode = LPAR_COUNT
+integer, parameter :: iicode = IPAR_COUNT
+integer, parameter :: ircode = RPAR_COUNT
 integer, parameter :: icode = iicode+ircode
 character*80 line
 character*40 :: fnam1
@@ -115,15 +116,6 @@ real(8) :: a(15)
 integer :: ia(10)
 integer :: ihold(15)
 integer :: lhold(15)
-common /cosavi/ iipar, ixpar(iicode)
-integer :: iipar
-integer :: ixpar
-
-common /cosavr/ irpar, junks, rxpar(ircode)
-integer :: irpar
-integer :: junks
-real(8) :: rxpar
-
 common /cokeyl/ nncode, llcode, ijcode
 integer :: nncode
 integer :: llcode
