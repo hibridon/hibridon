@@ -1521,6 +1521,23 @@ module mod_surf
   logical :: flagsu
 end module mod_surf
 
+
+! used to be common block cojtot
+module mod_jtot
+  integer :: jjtot
+  integer :: jjlpar
+end module mod_jtot
+
+! used to be common block coja
+module mod_ja
+  integer :: jja(9)
+end module mod_ja
+
+! used to be common block coel
+module mod_el
+  integer :: ll(9)
+end module mod_el
+
  ! all the commons blocks from hiiolib_f.F90:
     !!   common/cdbf/ ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf(llbuf)
 

@@ -108,11 +108,11 @@ use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax,
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_skip, only: nskip, iskip
+use mod_jtot, only: jjtot, jjlpar
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-common /cojtot/ jjtot,jjlpar
 dimension j(40), l(40), jhold(40), ehold(40), isc1(40), &
           sc2(40), sc3(40), &
           sc4(40), ishold(40), is(40)

@@ -103,12 +103,12 @@ use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax,
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_skip, only: nskip, iskip
+use mod_jtot, only: jjtot, jjlpar
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 
-common /cojtot/ jjtot,jjlpar
 dimension j(9), l(9), jhold(9), ehold(9), isc1(9), sc2(9), sc3(9), &
           sc4(9), ishold(9), is(9)
 integer, pointer :: nterm, nphoto
@@ -662,12 +662,12 @@ subroutine trans22(w,n,nmax)
 use mod_coeint, only: eint
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+use mod_jtot, only: j => jjtot, jlpar => jjlpar
 implicit double precision (a-h,o-z)
 #if defined(HIB_UNIX_IBM)
 character*1 forma, formb
 #endif
 common /cotrans/ t(6,6)
-common /cojtot/ j,jlpar
 dimension w(42), sc(49)
 data one,half /1.d0,0.5d0/
 data nnmax /6/
