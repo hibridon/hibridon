@@ -1468,6 +1468,16 @@ logical :: boundf
 logical :: writs
 end module mod_phot
 
+! used to be common block cospbf
+module mod_spbf
+   integer :: lnbufs
+   integer :: lnbufl
+   integer :: nbuf
+   integer :: maxlsp
+   integer :: maxllb
+   integer :: ihibuf
+   integer :: igjtp
+end module mod_spbf
 
  ! all the commons blocks from hiiolib_f.F90:
     !!   common/cdbf/ ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf(llbuf)

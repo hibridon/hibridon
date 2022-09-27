@@ -451,6 +451,8 @@ use mod_hibrid5, only: sread
 use mod_difcrs, only: sphn
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch, ipos
+use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
+
 implicit double precision (a-h,o-z)
 integer, intent(in) :: maxk
 integer :: nnout
@@ -481,9 +483,6 @@ common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
             nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 real(8) :: spin, xj1, xj2
 integer :: j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
-
-common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
-integer :: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 
 common /coisc2 / jout1(1)
 integer :: jout1
@@ -923,6 +922,7 @@ use tensor
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  tcsfil, smtfil, tcbfil, dchfil
@@ -931,8 +931,6 @@ character*10  elaps, cpu
 logical csflag, flaghf, flagsu, twomol, exstfl, &
         fast, nucros
 !
-common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
-                igjtp
 common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
             nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 !
@@ -1346,12 +1344,11 @@ use mod_coisc5, only: lpack => isc5 ! lpack(1)
 use mod_coisc6, only: ipack => isc6 ! ipack(1)
 use mod_hibrid5, only: sread
 use mod_par, only: batch, iprnt=>iprint
+use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 implicit double precision (a-h,o-z)
 logical lprnt
 common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
              nwaves, jfsts, jlparf, jlpars, njmax
-common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
-                igjtp
 ! add these three common blocks (mha 9/30/08)
 dimension labadr(1),lenlab(1),jtotpa(1),jttble(1)
 !
@@ -1791,6 +1788,7 @@ use mod_hibrid2, only: mxoutd
 use mod_hibrid5, only: sread
 use mod_par, only: batch, ipos, iprnt=>iprint
 use mod_selb, only: ibasty
+use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 implicit double precision (a-h,o-z)
 complex*8 t, tp
 logical diag, diagj, diagin, &
@@ -1802,8 +1800,6 @@ logical lprnt,lprntf
 character*10 elaps, cpu
 common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
             nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
-common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
-                igjtp
 ! 3rd subscript is for state index (subscript = 5 + IN)
 ! states with up to 9 state indices allowed
 common/cadr/ iadr(0:2*jmx,lmx,9)
@@ -2240,6 +2236,7 @@ use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid5, only: sread
 use mod_par, only: batch, ipos, iprnt=>iprint
+use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 implicit double precision (a-h,o-z)
 complex*8 t, tp, ai, cphase
 logical diag, diagj, diagin, &
@@ -2251,8 +2248,6 @@ logical lprnt2
 character*10 elaps, cpu
 common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
             nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
-common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
-               igjtp
 common/cccpu/ tchi,tlog,tsetup,tdelt,lenk,max1,max2,max3,maxkk
 ! add 3rd subscript for state index (subscript = 5 - IN) (pjd)
 ! states with up to 9 state indices allowed
@@ -2690,6 +2685,7 @@ use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid2, only: mxoutd
 use mod_hibrid5, only: sread
 use mod_par, only: batch, ipos, iprnt=>iprint
+use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 implicit double precision (a-h,o-z)
 complex*8 t, tp
 logical diag, diagj, diagin, &
@@ -2702,8 +2698,6 @@ character*10 elaps, cpu
 common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
             nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 
-common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
-                igjtp
 ! add 3rd subscript for state index (subscript = 5 + IN)
 ! states with up to 9 state indices allowed
 common/cadr/ iadr(0:jmx,lmx,9)
