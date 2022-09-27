@@ -452,6 +452,7 @@ use mod_difcrs, only: sphn
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch, ipos
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
+use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 
 implicit double precision (a-h,o-z)
 integer, intent(in) :: maxk
@@ -479,10 +480,6 @@ logical existf,csflg1,flghf1,flgsu1,twomol, &
 character*10 elaps, cpu
 character*20 cdate1
 
-common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
-            nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
-real(8) :: spin, xj1, xj2
-integer :: j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 
 common /coisc2 / jout1(1)
 integer :: jout1
@@ -923,6 +920,7 @@ use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
+use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  tcsfil, smtfil, tcbfil, dchfil
@@ -931,8 +929,6 @@ character*10  elaps, cpu
 logical csflag, flaghf, flagsu, twomol, exstfl, &
         fast, nucros
 !
-common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
-            nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 !
 common /colnlb/ lenlab(MAX_NJTOT)
 common /ckli/  kplist(0:kmx)
@@ -1345,10 +1341,9 @@ use mod_coisc6, only: ipack => isc6 ! ipack(1)
 use mod_hibrid5, only: sread
 use mod_par, only: batch, iprnt=>iprint
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
+use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 implicit double precision (a-h,o-z)
 logical lprnt
-common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
-             nwaves, jfsts, jlparf, jlpars, njmax
 ! add these three common blocks (mha 9/30/08)
 dimension labadr(1),lenlab(1),jtotpa(1),jttble(1)
 !
@@ -1495,14 +1490,13 @@ use mod_cozmat, only: sigma => zmat_as_vec ! sigma(1)
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 implicit double precision(a-h,o-z)
 character*(*) filnam
 character*40  tcbfil, mcsfil
 character*20  cdate
 character*10  elaps, cpu
 logical flaghf, exstfl
-common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
-             nwaves, jfsts, jlparf, jlpars, njmax
 data zero /0.d0/
 !
 dimension a(1)
@@ -1618,11 +1612,10 @@ use mod_coisc7, only: isc4 => isc7 ! isc4(1)
 use mod_cosc2, only: sc1 => sc2 ! sc1(1)
 use mod_par, only: batch, flaghf
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 implicit double precision(a-h,o-z)
 character*20  cdate
 !
-common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
-             nwaves, jfsts, jlparf, jlpars, njmax
 dimension xm1lab(1),xm2lab(1),sigmak(mmax,1),sigmam(mmax,1)
 data tol /1.0d-10/
 data zero /0.0d0/
@@ -1789,6 +1782,7 @@ use mod_hibrid5, only: sread
 use mod_par, only: batch, ipos, iprnt=>iprint
 use mod_selb, only: ibasty
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
+use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 implicit double precision (a-h,o-z)
 complex*8 t, tp
 logical diag, diagj, diagin, &
@@ -1798,8 +1792,6 @@ logical diag, diagj, diagin, &
 logical lprnt,lprntf
 
 character*10 elaps, cpu
-common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
-            nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 ! 3rd subscript is for state index (subscript = 5 + IN)
 ! states with up to 9 state indices allowed
 common/cadr/ iadr(0:2*jmx,lmx,9)
@@ -2237,6 +2229,7 @@ use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid5, only: sread
 use mod_par, only: batch, ipos, iprnt=>iprint
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
+use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 implicit double precision (a-h,o-z)
 complex*8 t, tp, ai, cphase
 logical diag, diagj, diagin, &
@@ -2246,8 +2239,6 @@ logical diag, diagj, diagin, &
 logical lprnt2
 
 character*10 elaps, cpu
-common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
-            nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 common/cccpu/ tchi,tlog,tsetup,tdelt,lenk,max1,max2,max3,maxkk
 ! add 3rd subscript for state index (subscript = 5 - IN) (pjd)
 ! states with up to 9 state indices allowed
@@ -2686,6 +2677,7 @@ use mod_hibrid2, only: mxoutd
 use mod_hibrid5, only: sread
 use mod_par, only: batch, ipos, iprnt=>iprint
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
+use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 implicit double precision (a-h,o-z)
 complex*8 t, tp
 logical diag, diagj, diagin, &
@@ -2695,8 +2687,6 @@ logical diag, diagj, diagin, &
 logical lprnt,lprntf
 
 character*10 elaps, cpu
-common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
-            nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 
 ! add 3rd subscript for state index (subscript = 5 + IN)
 ! states with up to 9 state indices allowed

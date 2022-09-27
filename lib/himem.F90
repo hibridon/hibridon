@@ -1479,6 +1479,26 @@ module mod_spbf
    integer :: igjtp
 end module mod_spbf
 
+! used to be common block comom
+module mod_mom
+  real(8) :: spin
+  real(8) :: xj1
+  real(8) :: xj2
+  integer :: j1
+  integer :: in1
+  integer :: j2
+  integer :: in2
+  integer :: maxjt
+  integer :: maxjot
+  integer :: nwaves
+  integer :: jfsts
+  integer :: jlparf
+  integer :: jlpars
+  integer :: njmax
+  integer :: j1min
+  integer :: j2max
+end module mod_mom
+
  ! all the commons blocks from hiiolib_f.F90:
     !!   common/cdbf/ ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf(llbuf)
 
