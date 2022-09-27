@@ -2251,7 +2251,7 @@ logical lprnt2
 character*10 elaps, cpu
 common /comom/  spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, &
             nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
-common /cospbf/ lnbufs, lnbufl, nbuf, ihibuf,  maxlsp, maxllb, &
+common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
                igjtp
 common/cccpu/ tchi,tlog,tsetup,tdelt,lenk,max1,max2,max3,maxkk
 ! add 3rd subscript for state index (subscript = 5 - IN) (pjd)
