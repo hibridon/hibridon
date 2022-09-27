@@ -84,6 +84,7 @@ use rpar_enum
 use mod_par, only: lpar, ipar, rpar
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
+use mod_file, only: input, output, jobnam, savfil
 implicit none
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
@@ -122,12 +123,6 @@ common /cosavr/ irpar, junks, rxpar(ircode)
 integer :: irpar
 integer :: junks
 real(8) :: rxpar
-
-common /cofile/ input, output, jobnam, savfil
-character*40 :: input
-character*40 :: output
-character*40 :: jobnam
-character*40 :: savfil
 
 common /cokeyl/ nncode, llcode, ijcode
 integer :: nncode

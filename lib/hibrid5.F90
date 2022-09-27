@@ -1810,13 +1810,12 @@ use mod_cow, only: q1 => w_as_vec ! q1(1)
 use mod_cozmat, only: q2 => zmat_as_vec ! q2(1)
 use mod_par, only: wrpart, wrxsec
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_file, only: input, output, jobnam, savfil
 implicit double precision (a-h,o-z)
 logical writs,csflag,nucros
 character*40 oldlab
 integer jtot, nchmax
-character*40 input,output,jobnam,savfil
 integer, parameter :: bufsize = 32
-common /cofile/ input,output,jobnam,savfil
 dimension word(bufsize),iword(bufsize),nlev(1)
 if (.not. wrpart .and. .not. wrxsec) then
   write (6, 5)

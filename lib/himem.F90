@@ -1499,6 +1499,16 @@ module mod_mom
   integer :: j2max
 end module mod_mom
 
+! used to be common block cofile
+module mod_file
+  character(40) :: input
+  character(40) :: output
+  character(40) :: jobnam
+  character(40) :: savfil
+end module mod_file
+
+
+
  ! all the commons blocks from hiiolib_f.F90:
     !!   common/cdbf/ ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf(llbuf)
 

@@ -38,11 +38,10 @@ use mod_ancou, only: ancou_type
 use mod_par, only: wavefl, r1=>bound_r1, r2=>bound_r2, c=>bound_c, spac=>bound_spac, delr=>bound_delr, hsimp=>bound_hsimp, eigmin=>bound_eigmin, tolai=>bound_tolai, xmu
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
+use mod_file, only: input, output, jobnam, savfil
 implicit none
 integer, intent(in) :: nch, nmax
 type(ancou_type), intent(in) :: v2
-common /cofile/ input, output, jobnam, savfil
-character(40) :: jobnam, input, output, savfil
 
 !
 real(8), parameter :: pi=dacos(-1d0)

@@ -36,9 +36,8 @@ use mod_par, only: airyfl, prairy, bastst, batch, chlist, &
                 tolaifstfac=>scat_tolai, xmu
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
+use mod_file, only: input, output, jobnam, savfil
 implicit double precision (a-h,o-z)
-character*40 jobnam,input,output,savfil
-common /cofile/ input, output, jobnam, savfil
 ! nb if the nextcommon is changed, it should be also changed in common/parsys
 !  this sets the maximum number of energies
 !
