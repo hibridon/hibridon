@@ -1348,6 +1348,7 @@ use mod_wave, only: irec, ifil, nchwfu, nrlogd, iendwv, get_wfu_logd_rec_length
 
 use funit
 use mod_phot, only: photof, wavefn, boundf, writs
+use mod_surf, only: flagsu
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: z(nmax*nch)
 integer, intent(in) :: nmax
@@ -1386,10 +1387,8 @@ integer ich, icode, icol, idiag, ierr, ij, irow, istep, kstep, &
 !     :     tn, tp,  zero, wdiag
 !      real w, z
 !      real scr1, scr2, wref, z1, z2
-logical flagsu
 !      external mtime, potmat, daxpy, smxinv, dscal
 !     matrices z and w are stored column by column as one-dimensi
-common /cosurf/ flagsu
 data zero,  one,  two, three,six,  eight &
     / 0.d0, 1.d0, 2.d0, 3.d0, 6.d0, 8.d0 /
 data izero, ione /0, 1/
@@ -2404,8 +2403,8 @@ subroutine smatop (tmod, sr, si, scmat, lq, r, prec, &
 !             contains the open-open block of the log-derivative matrix,
 !             packed into the lower nopen x nopen submatrix
 !             on return:  tmod contains the modulus squared of the t-matrix
-!               if the logical variable flagsu, contained in common /cosurf/ i
-!               .true., then the calculation is assumed to be that of a molecu
+!               if the logical variable flagsu, contained in modurle mod_surf is
+!               .true., then the calculation is assumed to be that of a molecule
 !               colliding with a surface, in which case tmod contains the
 !               modulus squared of the s-matrix
 !             if the flag photof=.true., then tmod contains the photodissociat
@@ -2436,8 +2435,6 @@ subroutine smatop (tmod, sr, si, scmat, lq, r, prec, &
 !    kwrit:   if true, k matrix is printed out
 !    ipos:    if true, 132 line printer
 
-!  variable in common block /cosurf/
-!    flagsu:    if .true., then molecule-surface collisons
 !  subroutines called:
 !    vsmul:     scalar times a vector
 !    cbesn,cbesj  ricatti-bessel functions (from b.r. johnson)
@@ -2458,6 +2455,7 @@ use mod_wave, only: irec, ifil, ipos2, ipos3, nrlogd, iendwv, ipos2_location
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_phot, only: photof, wavefn, boundf, writs
+use mod_surf, only: flagsu
 
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax, nmax), intent(inout) :: tmod
@@ -2485,8 +2483,6 @@ integer isw, i, icol, l
 character*1 forma
 character*40 flxfil
 #endif
-logical flagsu
-common /cosurf/ flagsu
 !     The following three variables are used to determine the (machine
 !     dependent) size of built-in types
 integer int_t

@@ -20,14 +20,6 @@ subroutine flow (z, w, zmat, amat, bmat, jq, lq, inq, jlev, &
 !           iflag = 0 if all channels are in classically forbidden region
 !           iflag = 1 if some channels are open
 !           iflag = 2 if all asymptotically open channels are open at r
-!  variable in common block /cosurf/
-!    surffl:      this variable is set equal to flagsu, it is held in a
-!                 separate common block for compatability with subroutines
-!                 smatop, soutpt, and xwrite
-!                 if .true., then the problem is assumed to a molecule
-!                 scattering off a surface, in which case the diagonal
-!                 elements of the transition probabilities are equal to the
-!                 modulus squared of the s-matrix (not t-matrix elements)
 !  variable in common block /cojlpo/
 !    jlpold:      parity used in xwrite subroutine to insure correct
 !                 accumulation of partial waves in cases where jlpar=0
@@ -66,6 +58,7 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_phot, only: phot_photof => photof, wavefn, boundf, writs
+use mod_surf, only: surf_flagsu => flagsu
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
@@ -116,9 +109,6 @@ real(8) :: rxpar
 common /copmat/ rtmn, rtmx, iflag
 real(8) :: rtmn, rtmx
 integer :: iflag
-
-common /cosurf/ surf_flagsu
-logical :: surf_flagsu
 
 common /cojlpo/ jlpold
 integer :: jlpold

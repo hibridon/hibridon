@@ -1507,7 +1507,19 @@ module mod_file
   character(40) :: savfil
 end module mod_file
 
+! used to be common block cosurf
+!    flagsu:    if .true., then molecule-surface collisons
+!                 this variable is set equal to flagsu, it is held in a
+!                 separate common block for compatability with subroutines
+!                 smatop, soutpt, and xwrite
+!                 if .true., then the problem is assumed to a molecule
+!                 scattering off a surface, in which case the diagonal
+!                 elements of the transition probabilities are equal to the
+!                 modulus squared of the s-matrix (not t-matrix elements)
 
+module mod_surf
+  logical :: flagsu
+end module mod_surf
 
  ! all the commons blocks from hiiolib_f.F90:
     !!   common/cdbf/ ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf(llbuf)
