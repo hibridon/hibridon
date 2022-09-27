@@ -1651,6 +1651,14 @@ module mod_sav
   real(8) :: rxpar(RPAR_COUNT)
 end module mod_sav
 
+! used to be common block copmat
+module mod_pmat
+  real(8) :: rtmn
+  real(8) :: rtmx
+  integer :: iflag
+end module mod_pmat
+
+
  ! all the commons blocks from hiiolib_f.F90:
     !!   common/cdbf/ ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf(llbuf)
 

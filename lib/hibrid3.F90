@@ -314,6 +314,7 @@ use mod_grovec, only: igrovec_type_block, dgrovec_type_block
 use mod_hiba10_22p, only: trans22
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
+use mod_pmat, only: rtmn, rtmx, iflag
 implicit none
 real(8) :: second
 real(8), dimension(*), intent(out) :: w
@@ -345,9 +346,6 @@ type(dgrovec_type_block), pointer :: blockd
 
 common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
 real(8) :: cpuld, cpuai, cpupot, cpusmt, cpupht
-common /copmat/ rtmn, rtmx, iflag
-real(8) :: rtmn, rtmx
-integer :: iflag
 real(8), parameter :: zero = 0.d0
 real(8), parameter :: one = 1.d0
 real(8), parameter :: two = 2.d0
@@ -1015,6 +1013,7 @@ use mod_ancou, only: ancou_type
 use mod_hibrid2, only: mxoutd
 use funit, only: FUNIT_TRANS_MAT, FUNIT_QUAD_MAT
 use mod_phot, only: photof, wavefn, boundf, writs
+use mod_pmat, only: rtmn, rtmx, iflag
 implicit none
 !   square matrices
 real(8), intent(out) :: z(nmax, nch)
@@ -1053,10 +1052,6 @@ logical :: twoen
 logical ::  first
 character*10 :: tbs,tps,tds,tws,tairys, twfs
 character*10 :: time
-common /copmat/ rtmn, rtmx, iflag
-real(8) :: rtmn
-real(8) :: rtmx
-integer :: iflag
 common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
 real(8) :: cpuld
 real(8) :: cpuai

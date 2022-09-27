@@ -60,6 +60,7 @@ use mod_ered, only: ered, rmu
 use mod_phot, only: phot_photof => photof, wavefn, boundf, writs
 use mod_surf, only: surf_flagsu => flagsu
 use mod_sav, only: iipar, ixpar, irpar, rxpar
+use mod_pmat, only: rtmn, rtmx, iflag
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
@@ -102,9 +103,6 @@ real(8) :: ttim
 
 common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
 real(8) :: cpuld, cpuai, cpupot, cpusmt, cpupht
-common /copmat/ rtmn, rtmx, iflag
-real(8) :: rtmn, rtmx
-integer :: iflag
 
 common /cojlpo/ jlpold
 integer :: jlpold
