@@ -1118,6 +1118,7 @@ module mod_par
    implicit none
    save
 
+   !  fcod stores logical flags (length = lcode)
    ! fcod = Flags CODes : stores the name of system independent parameters of type logical
    character(len=8), parameter :: fcod(LPAR_COUNT) = [ &
       'AIRYFL', &
