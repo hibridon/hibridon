@@ -1,21 +1,34 @@
 
  --------------------------------------------------------------------------
-           HIBRIDON SCATTERING CODE V 4.3.7 BUILD DATE 09/28/22 17:13:27 CEST
+           HIBRIDON SCATTERING CODE V 5.00
 
-     AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG, P. DAGDIGIAN
- CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI
-               A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, G. VAN DER SANDEN,
-               M. YANG, F. DE WEERD, S. GREGURICK, J. KLOS, F. LIQUE
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
  --------------------------------------------------------------------------
            BUILD CONFIGURATION:
-SYS=OS 11.2.3; MACH=unix-darwin unix-ifort
-FC=/opt/intel/oneapi/compiler/2022.1.0/mac/bin/intel64/ifort -O3 -save
-LIB_ROOT=/
-LIBRARIES:  -lblas /
-  -llapack
+CMAKE BUILD DATE: 2022-09-28 at 07:50
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: 
+SYS: Linux 5.4.0-124-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                      Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                         1800.000
+Socket(s):                       1
+Core(s) per socket:              4
+L2 cache:                        1 MiB
+L3 cache:                        6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16267636 kB
  --------------------------------------------------------------------------
  Hibridon> 
- POTENTIAL LOADED FROM FILE FOLLMEG.BIN                             
+ POTENTIAL LOADED FROM FILE FOLLMEG.BIN                                                 
 
  LABEL:  mha's 16-apr-1997 fit to follmeg's points                              
  Molecule is homonuclear                                                 
@@ -23,46 +36,48 @@ LIBRARIES:  -lblas /
 
   NTRM    LMMIN    LMMAX    MLD    NVBLOCKS
     1       2        4       0      1
- Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00.003  WALL: 00:00:00.003  DATE: Sep 28 18:00:00 2022
- ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:00.004  WALL: 00:00:00.005  DATE: Sep 28 18:00:00 2022
- ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:00.007  WALL: 00:00:00.007  DATE: Sep 28 18:00:00 2022
- ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:00.009  WALL: 00:00:00.009  DATE: Sep 28 18:00:00 2022
- ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:00.012  WALL: 00:00:00.012  DATE: Sep 28 18:00:00 2022
- ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00.016  WALL: 00:00:00.016  DATE: Sep 28 18:00:00 2022
- ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:00:00.019  WALL: 00:00:00.020  DATE: Sep 28 18:00:00 2022
- ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:00:00.023  WALL: 00:00:00.023  DATE: Sep 28 18:00:00 2022
- ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:00:00.027  WALL: 00:00:00.027  DATE: Sep 28 18:00:00 2022
- ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:00:00.031  WALL: 00:00:00.031  DATE: Sep 28 18:00:00 2022
- ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:00.035  WALL: 00:00:00.035  DATE: Sep 28 18:00:00 2022
+ Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
+ ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
+ ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
+ ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
+ ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
 
  ** NCH = 0, MOVE ON TO NEXT PARTIAL WAVE
- ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:00.036  WALL: 00:00:00.037  DATE: Sep 28 18:00:00 2022
- ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:00:00.038  WALL: 00:00:00.038  DATE: Sep 28 18:00:00 2022
- ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:00:00.040  WALL: 00:00:00.040  DATE: Sep 28 18:00:00 2022
- ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:00:00.042  WALL: 00:00:00.043  DATE: Sep 28 18:00:00 2022
- ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:00:00.045  WALL: 00:00:00.045  DATE: Sep 28 18:00:00 2022
- ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:00:00.048  WALL: 00:00:00.048  DATE: Sep 28 18:00:00 2022
- ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:00:00.051  WALL: 00:00:00.051  DATE: Sep 28 18:00:00 2022
- ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:00:00.054  WALL: 00:00:00.054  DATE: Sep 28 18:00:00 2022
- ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:00:00.057  WALL: 00:00:00.057  DATE: Sep 28 18:00:00 2022
- ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:00:00.060  WALL: 00:00:00.061  DATE: Sep 28 18:00:00 2022
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
+ ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
+ ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
+ ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
+ ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
+ ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:00:04   WALL: 00:00:00   DATE: Sep 28 19:12:24 2022
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:    20
-      TIMING:  ELAPSED 00:00:00.061/ CPU 00:00:00.060/ MP RATIO   99.8 %
-      CURRENT DATE:  Sep 28 18:00:00 202
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:04 / MP RATIO  834.0 %
+      CURRENT DATE:  Sep 28 19:12:24 2022
  ===============================================================================
  Hibridon> 
  CLOSE COUPLED TENSOR OPACITIES
  S-MATRICES READ FROM FILE Vfit_tenf01.smt                         
-      WRITTEN:   Sep 28 18:00:00 2022
+      WRITTEN:   Sep 28 19:12:24 2022
       LABEL:     Test of N2+_He using Follmeg-Rosmus PES         
       POT NAME:  WERNER-FOLLMEG VFIT                             
- DATE:    Sep 28 18:00:00 2022
+ DATE:    Sep 28 19:12:24 2022
+ MAX(JTOT) RESET TO JFINAL =   20 IN TENOPA
+ MAX(JTOT) RESET TO JFINAL =   10 IN TENOPA
 
  ENERGY:     150.000 cm(-1)    MASS:       3.502
  SUMMING PARTIAL WAVES FROM JTOT=  0 TO JTOT= 10
- MAX(KI,KF) =  12;  0 .LE. LAMDA .LE.  0; MAXIMUM NUMBER OF BUFFERS =  180
+ MAX(KI,KF) =  12;  0 .LE. LAMDA .LE.  0; MAXIMUM NUMBER OF BUFFERS =  360
 
  LEVEL LIST FOR TENSOR OPACITIES (OPEN CHANNELS)
    N     J   INDEX  EINT(cm-1)
@@ -177,8 +192,8 @@ LIBRARIES:  -lblas /
    3   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
    4   0.0000E+00  0.0000E+00  0.0000E+00  1.3347E+01
 
- ** N = 0 COMPLETED, TIMING ELAPSED:  00:00:00.004 CPU:  00:00:00.004
+ ** N = 0 COMPLETED, TIMING ELAPSED:  00:00:00  CPU:  00:00:00 
 
 
- ** TENXSC FINAL TIMING, ELAPSED:  00:00:00.006  CPU:  00:00:00.006 **
+ ** TENXSC FINAL TIMING, ELAPSED:  00:00:00   CPU:  00:00:00  **
  Hibridon> 
