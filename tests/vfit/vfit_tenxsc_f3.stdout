@@ -1,0 +1,77 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 4.3.7 BUILD DATE 09/28/22 17:13:27 CEST
+
+     AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG, P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI
+               A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, G. VAN DER SANDEN,
+               M. YANG, F. DE WEERD, S. GREGURICK, J. KLOS, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+SYS=OS 11.2.3; MACH=unix-darwin unix-ifort
+FC=/opt/intel/oneapi/compiler/2022.1.0/mac/bin/intel64/ifort -O3 -save
+LIB_ROOT=/
+LIBRARIES:  -lblas /
+  -llapack
+ --------------------------------------------------------------------------
+ Hibridon> 
+ POTENTIAL LOADED FROM FILE FOLLMEG.BIN                             
+
+ LABEL:  mha's 16-apr-1997 fit to follmeg's points                              
+ Molecule is homonuclear                                                 
+ NUMBER OF TERMS (NTRM) READ IN:  1
+
+  NTRM    LMMIN    LMMAX    MLD    NVBLOCKS
+    1       2        4       0      1
+ Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00.003  WALL: 00:00:00.003  DATE: Sep 28 18:00:26 2022
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:00.004  WALL: 00:00:00.004  DATE: Sep 28 18:00:26 2022
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:00.006  WALL: 00:00:00.007  DATE: Sep 28 18:00:26 2022
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:00.009  WALL: 00:00:00.009  DATE: Sep 28 18:00:26 2022
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:00.012  WALL: 00:00:00.012  DATE: Sep 28 18:00:26 2022
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00.015  WALL: 00:00:00.016  DATE: Sep 28 18:00:26 2022
+ ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:00:00.019  WALL: 00:00:00.019  DATE: Sep 28 18:00:26 2022
+ ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:00:00.022  WALL: 00:00:00.023  DATE: Sep 28 18:00:26 2022
+ ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:00:00.026  WALL: 00:00:00.027  DATE: Sep 28 18:00:26 2022
+ ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:00:00.030  WALL: 00:00:00.031  DATE: Sep 28 18:00:26 2022
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:00.034  WALL: 00:00:00.035  DATE: Sep 28 18:00:26 2022
+
+ ** NCH = 0, MOVE ON TO NEXT PARTIAL WAVE
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:00.036  WALL: 00:00:00.036  DATE: Sep 28 18:00:26 2022
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:00:00.037  WALL: 00:00:00.038  DATE: Sep 28 18:00:26 2022
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:00:00.039  WALL: 00:00:00.040  DATE: Sep 28 18:00:26 2022
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:00:00.041  WALL: 00:00:00.042  DATE: Sep 28 18:00:26 2022
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:00:00.044  WALL: 00:00:00.045  DATE: Sep 28 18:00:26 2022
+ ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:00:00.046  WALL: 00:00:00.047  DATE: Sep 28 18:00:26 2022
+ ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:00:00.049  WALL: 00:00:00.050  DATE: Sep 28 18:00:26 2022
+ ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:00:00.052  WALL: 00:00:00.053  DATE: Sep 28 18:00:26 2022
+ ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:00:00.055  WALL: 00:00:00.056  DATE: Sep 28 18:00:26 2022
+ ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:00:00.058  WALL: 00:00:00.060  DATE: Sep 28 18:00:26 2022
+ ===============================================================================
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:    20
+      TIMING:  ELAPSED 00:00:00.060/ CPU 00:00:00.058/ MP RATIO   98.0 %
+      CURRENT DATE:  Sep 28 18:00:26 202
+ ===============================================================================
+ Hibridon> 
+ CLOSE COUPLED TENSOR OPACITIES
+ S-MATRICES READ FROM FILE Vfit_tenf31.smt                         
+      WRITTEN:   Sep 28 18:00:26 2022
+      LABEL:     Test of N2+_He using Follmeg-Rosmus PES         
+      POT NAME:  WERNER-FOLLMEG VFIT                             
+ DATE:    Sep 28 18:00:26 2022
+
+ ENERGY:     150.000 cm(-1)    MASS:       3.502
+ SUMMING PARTIAL WAVES FROM JTOT=  0 TO JTOT= 10
+ MAX(KI,KF) =  12;  0 .LE. LAMDA .LE.  0; MAXIMUM NUMBER OF BUFFERS =  180
+
+ LEVEL LIST FOR TENSOR OPACITIES (OPEN CHANNELS)
+   N     J   INDEX  EINT(cm-1)
+   1     0     0      0.000
+   2     2     0     11.647
+   3     4     0     38.824
+   4     6     0     81.530
+
+ IFRAME =  3 NOT IMPLEMENTED.  ABORT  ***
+
+ ** TENXSC FINAL TIMING, ELAPSED:  00:00:00.001  CPU:  00:00:00.001 **
+ Hibridon> 

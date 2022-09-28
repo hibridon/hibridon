@@ -1,0 +1,11 @@
+inp=n2phetest.inp
+job=vfit_tenf3
+jout,6,0,2,4,6,8
+indout,1,0
+noprin=t
+jmax=8
+jtot2=10
+chlist=f
+run
+tenxsc,,,3,0,12,0,0,20,0,6
+exit
