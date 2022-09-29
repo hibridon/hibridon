@@ -1,5 +1,6 @@
 #include "assert.h"
 module mod_hiba07_13p
+real(8) :: ttrans(6,6)
 contains
 ! sy13p (sav13p/ptr13p) defines, save variables and reads                *
 !                  potential for 1S / 3P atom scattering                 *
@@ -505,8 +506,7 @@ subroutine tcasea(j,jlpar)
 ! -----------------------------------------
 use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
-common /cotrans/ ttrans
-dimension tatoe(6,6), cmat(6,6), ttrans(6,6)
+dimension tatoe(6,6), cmat(6,6)
 data zero, one,two ,three/0.d0, 1.d0, 2.d0, 3.d0/
 real(8), dimension(:), pointer :: en, de, re, be, rl, cl
 real(8), pointer :: cmix

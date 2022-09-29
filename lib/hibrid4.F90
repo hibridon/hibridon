@@ -1452,7 +1452,6 @@ character*5   s13p(12)
 logical exstfl, adiab, &
                 kill,propf, sumf, &
                 coordf
-common /cotrans/ ttrans(36)
 ! common for y1, y2, y4
 dimension a(7)  ! arguments
 data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f', &
@@ -2395,11 +2394,11 @@ use mod_wave, only: irec, ifil, nrlogd
 use mod_coqvec, only: nphoto
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
+use mod_hiba07_13p, only: ttrans
 ! steve, you may need more space, but i doubt it since tcoord is dimensioned n
 implicit double precision (a-h,o-z)
 logical adiab, kill, photof, propf, sumf, coordf
 
-common /cotrans/ ttrans(36)
 dimension scc(100)
 data zero, one, onemin /0.d0, 1.d0, -1.d0/
 data ione, mone /1,-1/
