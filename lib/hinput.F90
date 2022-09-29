@@ -132,6 +132,7 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_file, only: input, output, jobnam, savfil
 use mod_sav, only: iipar, ixpar, irpar, rxpar
+use mod_tensor, only: tenopa, mrcrs
 implicit none
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's

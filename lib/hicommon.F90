@@ -32,7 +32,10 @@ implicit none
    enumerator ::  &
       FUNIT_CS             =  1, &   ! cross sections
       FUNIT_EADIAB         =  2, &   ! <job-name>.eadiab
+      FUNIT_TENS_OUTPUT    =  2, &   ! <job-name>.tcs or <job-name>.dch or <job-name>.dcga
+      FUNIT_MCS            =  2, &   ! <job-name>.mcs
       FUNIT_SAV            =  3, &   ! <job-name>.sav
+      FUNIT_TCB            =  4, &   ! <job-name>.tcb (result of tenxsc)
       FUNIT_STDOUT         =  6, &   ! standard output
       FUNIT_INP            =  8, &   ! input file (*.inp)
       FUNIT_OUT            =  9, &   ! output file (*.out)
