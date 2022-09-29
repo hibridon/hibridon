@@ -6,6 +6,13 @@
 !
 !  revision:  6-jun-2013 (q. ma)
 ! ------------------------------------------------------------------
+
+module mod_tensor_ang
+  real(8), parameter :: ang1 =   0.d0
+  real(8), parameter :: ang2 = 180.d0
+  real(8), parameter :: dang =   0.5d0
+end module mod_tensor_ang
+
 module tensor_util
 implicit none
 integer :: jmx, kmx, lmx, kkmx, lbufs, lbuflb
@@ -234,6 +241,7 @@ subroutine helicity_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax,j
 !
 !.....jpack,lpack,ipack: labels for rows
 !.....jq,lq,inq:         labels for columns
+  use mod_tensor_ang, only: ang1, ang2, dang
   class(helicity_frame_type) :: this
   integer :: j1
   integer :: inlev1
@@ -266,8 +274,6 @@ complex(8) :: tmat
 integer :: ilab1(400)
 real(8) :: zero=0.0d0, one=1.0d0
 logical elastc
-common /coang/ ang1, ang2, dang
-real(8) :: ang1, ang2, dang
 
 real(8) :: sqpi=1.772453850905516d0
 real(8) :: rad=57.295779513082323d0
@@ -424,6 +430,7 @@ subroutine geom_apse_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax,
 !
 !.....jpack,lpack,ipack: labels for rows
 !.....jq,lq,inq:         labels for columns
+  use mod_tensor_ang, only: ang1, ang2, dang
 implicit none
   class(geom_apse_frame_type) :: this
   integer :: j1
@@ -456,8 +463,6 @@ integer :: ilab1(400)
 complex(8) :: yy,tmat
 real(8), parameter :: zero=0.0d0, one=1.0d0
 logical elastc
-common /coang/ ang1, ang2, dang
-real(8) :: ang1, ang2, dang
 
 integer :: iang, ilab, ii, iyof, j1p, j2p, jlab, l1, l2, ll, llmax, mj1, mj1p, mj2, mj2p, ml2p
 real(8) :: angle, betaga, fakj, fakp, piov2, rad, spin, sqpi, xj1, xj2, xjtot, xl1, xl2, xmj1, xmj1p, xmj2, xmj2p, xml2p
@@ -590,7 +595,7 @@ use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch, ipos
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
-
+use mod_tensor_ang, only: ang1, ang2, dang
 implicit double precision (a-h,o-z)
 integer, intent(in) :: maxk
 integer :: nnout
@@ -619,9 +624,6 @@ character*10 elaps, cpu
 character*20 cdate1
 
 integer :: jout1(mmax)
-common /coang/ ang1, ang2, dang
-real(8) :: ang1, ang2, dang
-data ang1, ang2, dang /0.d0, 180.d0, 0.5d0/
 !
 ! size of arrays in 2 dimension statements below are for j.le.5
 dimension sigkto(21),sigk(21)
@@ -1072,9 +1074,9 @@ logical csflag, flaghf, flagsu, twomol, exstfl, &
         fast, nucros
 !
 !
-common /colnlb/ lenlab(MAX_NJTOT)
-common /ckli/  kplist(0:kmx)
-common /cf9a/ f9pha(kkmx)
+integer :: lenlab(MAX_NJTOT)
+integer :: kplist(0:kmx)
+real(8) :: f9pha(kkmx)
 save nout
 dimension a(9)
 data  tol,   zero,   nstep &
@@ -1941,8 +1943,8 @@ logical lprnt,lprntf
 character*10 elaps, cpu
 ! 3rd subscript is for state index (subscript = 5 + IN)
 ! states with up to 9 state indices allowed
-common/cadr/ iadr(0:2*jmx,lmx,9)
-common/c6jt/ f6a(kmx,0:2*jmx,lmx),f6p(kmx)
+integer :: iadr(0:2*jmx,lmx,9)
+real(8) :: f6a(kmx,0:2*jmx,lmx),f6p(kmx)  ! 6jt
 !
 dimension jpack(1),ipack(1),lpack(1)
 dimension sreal(1), simag(1)
@@ -2388,12 +2390,11 @@ logical diag, diagj, diagin, &
 logical lprnt2
 
 character*10 elaps, cpu
-common/cccpu/ tchi,tlog,tsetup,tdelt,lenk,max1,max2,max3,maxkk
 ! add 3rd subscript for state index (subscript = 5 - IN) (pjd)
 ! states with up to 9 state indices allowed
-common/cadr/ iadr(0:2*jmx,lmx,9)
+integer :: iadr(0:2*jmx,lmx,9)
 !      common/cadr/ iadr(0:jmx,lmx)
-common/c6jt/ f6a(kmx,0:2*jmx,lmx),f9a(3*kmx,lmx)
+real(8) :: f6a(kmx,0:2*jmx,lmx),f9a(3*kmx,lmx)  ! 6jt
 
 dimension jpack(1),ipack(1),lpack(1)
 dimension sreal(1), simag(1)
@@ -2784,20 +2785,6 @@ cpu1 = cpu1 - cpu0
 ela1 = ela1 - ela0
 call gettim(ela1,elaps)
 call gettim(cpu1,cpu)
-!	      write(tcs_out_unit, 1200) n,elaps, cpu
-!      if(.not. batch) write(6,1200) n,elaps, cpu
-!1200  format(/' ** N =',i2,' COMPLETED, TIMING ELAPSED: ',a,
-!     :        ' CPU: ',a)
-!	      write(tcs_out_unit, 1200) n,elaps, cpu,t6j,t9j,
-!     :      lenk,max1,max2,max3,maxkk,tsetup,tdelt,tchi,tlog
-!      if(.not. batch) write(6,1200) n,elaps, cpu,t6j,t9j,
-!     :      lenk,max1,max2,max3,maxkk,tsetup,tdelt,tchi,tlog
-!1200  format(/' ** N =',i2,' COMPLETED, TIMING ELAPSED: ',a,
-!     :        ' CPU: ',a/
-!     :        ' 6J Symbols:',f10.2,'  9J Symbols:',f10.2/
-!     : ' LK=',i4,'  L1=',i4,'  L2=',i4,'  L3=',i4,'  LKK',i4/
-!     : '  SETUP:',f10.2,'  TDELT:',f10.2,'  TCHI:',f10.2,
-!     : '  TLOG:',f10.2)
 return
 end
 !-------------------------------------------------------------------------
@@ -2841,9 +2828,9 @@ character*10 elaps, cpu
 
 ! add 3rd subscript for state index (subscript = 5 + IN)
 ! states with up to 9 state indices allowed
-common/cadr/ iadr(0:jmx,lmx,9)
+integer :: iadr(0:jmx,lmx,9)
 !      common/cadr/ iadr(0:jmx,lmx)
-common/c6jt/ f6a(kmx,0:jmx,lmx),f6p(kmx)
+real(8) :: f6a(kmx,0:jmx,lmx),f6p(kmx)  ! 6jt
 !
 dimension jpack(1),ipack(1),lpack(1)
 dimension sreal(1), simag(1)
