@@ -6,7 +6,7 @@
 !
 !  revision:  6-jun-2013 (q. ma)
 ! ------------------------------------------------------------------
-module tensor
+module tensor_util
 implicit none
 integer :: jmx, kmx, lmx, kkmx, lbufs, lbuflb
 parameter (jmx=90, kmx=2*jmx+1, lmx=kmx, kkmx=3*kmx)
@@ -71,7 +71,144 @@ integer :: ialloc
   end type geom_apse_frame_type
 
 !
+public :: pjacob, redrot
+
 contains
+
+function pjacob (n,a,b,x)
+implicit none
+integer, intent(in) :: n
+real(8), intent(in) :: a, b, x
+!
+!     -----------------------------------------------------------------
+!     Jacobi polynomial p(n,a,b;x)
+!     Abramowitz and Stegun eq. (22.7.1)
+!     -----------------------------------------------------------------
+!
+real(8), parameter :: zero = 0.0d0
+real(8), parameter :: half = 0.5d0
+real(8), parameter :: one  = 1.0d0
+real(8), parameter :: two  = 2.0d0
+real(8) :: pjacob
+
+integer :: k
+real(8) :: apa, apb, amb, apbamb, apbp1, apbp2, onek, twok, f, fm, fp, a1, a2, a3, a4
+!
+if (n .eq. 0) then
+  fp = one
+else
+  f = one
+  apa = a+a
+  apb = a+b
+  amb = a-b
+  apbamb = apb*amb
+  apbp1 = apb+one
+  apbp2 = apb+two
+  onek = zero
+  twok = zero
+  fp = half*(amb+apbp2*x)
+  do k = 1,n-1
+    onek = onek+one
+    twok = twok+two
+    a1 = (twok+two)*(onek+apbp1)*(twok+apb)
+    a2 = (twok+apbp1)*apbamb
+    a3 = (twok+apb)*(twok+apbp1)*(twok+apbp2)
+    a4 = (twok+apa)*(onek+b)*(twok+apbp2)
+    fm = f
+    f = fp
+    fp = ((a2+a3*x)*f-a4*fm)/a1
+  enddo
+endif
+pjacob = fp
+return
+end function pjacob
+
+function redrot (rj,rk,rm,beta)
+!
+!     -----------------------------------------------------------------
+!     This function uses eq. (4.1.23) of Edmonds
+!     to calculate the reduced rotation matrix element
+!     d(j,k,m;beta) = <jk|exp(+i*beta*Jy/hbar)|jm>.
+!
+!     The angle beta is in radians
+!     -----------------------------------------------------------------
+!
+real(8), intent(in) :: rj
+real(8), intent(in) :: rk
+real(8), intent(in) :: rm
+real(8), intent(in) :: beta
+real(8) :: redrot
+real(8), parameter :: zero = 0.0d0
+real(8), parameter :: half = 0.5d0
+real(8), parameter :: one  = 1.0d0
+real(8), parameter :: two  = 2.0d0
+!
+!     half integer angular momenta
+!
+integer :: i, ia, ib, isign, n
+real(8) :: sj, sk, sm
+real(8) :: a, b, d1, d2, d3, d4, beta2, cosb, cosb2, sinb2, ti, tm, tk
+sj = half*nint(two*rj)
+sk = half*nint(two*rk)
+sm = half*nint(two*rm)
+!
+!     projection ranges
+!
+redrot = zero
+if (sk.gt.sj .or. sk.lt.-sj)  return
+if (sm.gt.sj .or. sm.lt.-sj)  return
+if (mod(sj-sk,one) .ne. zero) return
+if (mod(sj-sm,one) .ne. zero) return
+!
+!     reflection symmetries
+!
+if (sk+sm .ge. zero) then
+  if (sk-sm .ge. zero) then
+    tk = sk
+    tm = sm
+    isign = 0
+  else
+    tk = sm
+    tm = sk
+    isign = sk-sm
+  endif
+else
+  if (sk-sm .ge. zero) then
+    tk = -sm
+    tm = -sk
+    isign = 0
+  else
+    tk = -sk
+    tm = -sm
+    isign = sk-sm
+  endif
+endif
+!
+!     evaluation
+!
+n = sj-tk
+ia = tk-tm
+ib = tk+tm
+a = ia
+b = ib
+beta2 = half*beta
+cosb2 = cos(beta2)
+sinb2 = sin(beta2)
+cosb = (cosb2-sinb2)*(cosb2+sinb2)
+d1 = pjacob(n,a,b,cosb)
+d2 = cosb2**ib*sinb2**ia
+d3 = d1*d2
+d4 = d3*d3
+ti = tm
+do i = 1,ia
+   ti = ti+one
+   d4 = d4*(sj+ti)/(sj-ti+one)
+enddo
+d4 = sqrt(d4)
+redrot = sign(d4,d3)
+if (mod(isign,2) .ne. 0) redrot = -redrot
+return
+end function redrot
 
 ! helicity_frame implementation
 
@@ -136,7 +273,7 @@ real(8) :: sqpi=1.772453850905516d0
 real(8) :: rad=57.295779513082323d0
 real(8) :: angle, beta, fak, fakj, fakp, spin, xj1, xj2, xjtot, xl1, xl2, xmj1, xmj2, xmj2p, xml2, xml2p
 integer :: iang, ihel, ii, ilab, iyof, j1p, j2p, jlab, l1, l2, ll, llmax, mj1, mj2, mj2p, ml2, ml2p
-real(8) :: xf3j, redrot
+real(8) :: xf3j
 !
 !.....ai is sqrt(-1)
 ai=cmplx(zero, one)
@@ -324,7 +461,7 @@ real(8) :: ang1, ang2, dang
 
 integer :: iang, ilab, ii, iyof, j1p, j2p, jlab, l1, l2, ll, llmax, mj1, mj1p, mj2, mj2p, ml2p
 real(8) :: angle, betaga, fakj, fakp, piov2, rad, spin, sqpi, xj1, xj2, xjtot, xl1, xl2, xmj1, xmj1p, xmj2, xmj2p, xml2p
-real(8) :: xf3j, redrot
+real(8) :: xf3j
 sqpi = 1.772453850905516d0
 rad = 57.295779513082323d0
 piov2 = 1.570796326794897d0
@@ -425,7 +562,7 @@ end
 
 subroutine dsig(maxk,nnout,jfirst,jfinal,jtotd,jpack, &
                 lpack,ipack,jlevel,inlevel,elevel,flaghf, &
-                iframe,ierr, frame)
+                iframe,ierr, frame, tens_out_unit)
 !
 ! subroutine to calculate m-resolved differential cross sections
 ! for the elastic (j1,in1) -> (j1,in1) transition in the
@@ -470,6 +607,7 @@ logical :: flaghf
 integer :: iframe
 integer :: ierr
 class(frame_type) :: frame
+integer, intent(in) :: tens_out_unit  ! unit of tenxsc output file (tcs, dgh or dcga file)
 real(8), dimension(:), allocatable :: y
 ! size of q for j <= 5 and 0.5 deg angle increment
 complex*16 q(43681)
@@ -611,7 +749,7 @@ numjm = jlevlp + jlevel + 1
 !
 !     SUPPRESS PRINTING OF M-RESOLVED CROSS SECTIONS IN PRODUCTION RUNS (immprt = 0)
 if (immprt .ne. 0) then
-write(2,302) label
+write(tens_out_unit, 302) label
 302 format(/'%   M-DEPENDENT ', (a), ' FRAME ELASTIC', &
   ' DIFFERENTIAL CROSS SECTIONS (ANG^2/STR)'/)
 write(6,304) label
@@ -633,7 +771,7 @@ do 308 mj2 = -jlevlp, jlevel
 308 continue
 !
 if (flaghf) then
-  write(2,312) ((fmivals(i1,i2), &
+  write(tens_out_unit, 312) ((fmivals(i1,i2), &
     fmfvals(i1,i2),i2 = 1,numjm), &
     i1 = 1,numjm)
 312   format('%   ANGLE',20x,'(M -> M'')'/ &
@@ -644,7 +782,7 @@ if (flaghf) then
 313   format('    ANGLE',20x,'(M -> M'')'/ &
     10x,121(1x,f4.1,'->',f4.1,2x))
 else
-  write(2,314) ((mivals(i1,i2), &
+  write(tens_out_unit, 314) ((mivals(i1,i2), &
     mfvals(i1,i2),i2 = 1,numjm), &
     i1 = 1,numjm)
 314   format('%   ANGLE',20x,'(M -> M'')'/ &
@@ -655,7 +793,7 @@ else
 315   format('    ANGLE',20x,'(M -> M'')'/ &
     9x,121(4x,i2,'->',i2,4x))
 end if
-write(2,303)
+write(tens_out_unit, 303)
 303 format (' sigmmp_hel=[')
 end if
 !     END OF SUPPRESSED PRINTING
@@ -673,7 +811,7 @@ do 350 iang=1,nangle
 320   continue
 !     SUPPRESS THIS PRINTING
   if (immprt .ne. 0) then
-  write(2,355) angle,((sigmmp(iang,i1,i2), &
+  write(tens_out_unit, 355) angle,((sigmmp(iang,i1,i2), &
     i2 = 1,numjm), i1 = 1,numjm)
   write(6,355) angle,((sigmmp(iang,i1,i2), &
     i2 = 1,numjm), i1 = 1,numjm)
@@ -681,13 +819,13 @@ do 350 iang=1,nangle
   end if
   angle = angle + dang
 350 continue
-if (immprt .ne. 0) write(2,352)
+if (immprt .ne. 0) write(tens_out_unit, 352)
 352 format(' ];')
 !     END OF SUPPRESSED PRINTING OF CROSS SECTION VALUES
 !
 ! now compute differential tensor cross sections
 !
-write(2,362) label, (k,k=0,maxk)
+write(tens_out_unit, 362) label, (k,k=0,maxk)
 362 format(/'%  ', (a), ' FRAME ELASTIC DIFFERENTIAL', &
   ' TENSOR CROSS SECTIONS (ANG^2/STR)'//'%   ANGLE', &
    12x,'TENSOR RANK K'/ &
@@ -697,7 +835,7 @@ write(6,364) label, (k,k=0,maxk)
   ' TENSOR CROSS SECTIONS (ANG^2/STR)'//'    ANGLE', &
    12x,'TENSOR RANK K'/ &
   ' ',6x,21(6x,i3,4x))
-write(2,363)
+write(tens_out_unit, 363)
 363 format (' sigk_hel = [')
 ! zero integral tensor cross sections
 maxk1 = maxk+1
@@ -729,15 +867,15 @@ do 400 iang=1,nangle
 380     continue
     sigkto(k1) = sigkto(k1) + sn*sigk(k1)
 390   continue
-  write(2,355) angle,(sigk(i),i=1,maxk1)
+  write(tens_out_unit, 355) angle,(sigk(i),i=1,maxk1)
   write(6,355) angle,(sigk(i),i=1,maxk1)
   angle = angle + dang
 400 continue
 do 401 k1=1,maxk1
   sigkto(k1) = sigkto(k1)*(dang/rad)*2.d0*pi
 401 continue
-write(2,352)
-write(2,405) (k, sigkto(k+1),k=0, maxk)
+write(tens_out_unit, 352)
+write(tens_out_unit, 405) (k, sigkto(k+1),k=0, maxk)
 write(6,406) (k, sigkto(k+1),k=0, maxk)
 405 format(/,'%  INTEGRAL TENSOR CROSS SECTIONS'/ &
   '%     RANK  XS:  ',11(i6,1pe14.5))
@@ -751,7 +889,7 @@ end
 
 subroutine dsigh(maxk, nnout, jfirst, jfinal, jtotd, jpack, &
                 lpack, ipack, jlevel, inlevel, elevel, flaghf, &
-                iframe, ierr)
+                iframe, ierr, tens_out_unit)
 !
 ! subroutine to calculate m-resolved differential cross sections
 ! for the elastic (j1,in1) -> (j1,in1) transition in the
@@ -776,6 +914,7 @@ real(8) :: elevel
 logical :: flaghf
 integer :: iframe
 integer :: ierr
+integer, intent(in) :: tens_out_unit  ! unit of tenxsc output file (tcs, dgh or dcga file)
 
 class(helicity_frame_type), allocatable :: helicity_frame
 
@@ -783,12 +922,12 @@ allocate(helicity_frame)
 
 call dsig(maxk, nnout, jfirst, jfinal, jtotd, jpack, &
         lpack, ipack, jlevel, inlevel, elevel, flaghf, &
-        iframe, ierr, helicity_frame)
+        iframe, ierr, helicity_frame, tens_out_unit)
 end
 
 subroutine dsigga(maxk, nnout, jfirst, jfinal, jtotd, jpack, &
                 lpack, ipack, jlevel, inlevel, elevel, flaghf, &
-                iframe, ierr)
+                iframe, ierr, tens_out_unit)
 !
 ! subroutine to calculate m-resolved differential cross sections
 ! for the elastic (j1,in1) -> (j1,in1) transition in the
@@ -813,6 +952,7 @@ real(8) :: elevel
 logical :: flaghf
 integer :: iframe
 integer :: ierr
+integer, intent(in) :: tens_out_unit  ! unit of tenxsc output file (tcs, dgh or dcga file)
 
 class(geom_apse_frame_type), allocatable :: geometric_apse_frame
 
@@ -820,8 +960,9 @@ allocate(geometric_apse_frame)
 
 call dsig(maxk, nnout, jfirst, jfinal, jtotd, jpack, &
         lpack, ipack, jlevel, inlevel, elevel, flaghf, &
-        iframe, ierr, geometric_apse_frame)
+        iframe, ierr, geometric_apse_frame, tens_out_unit)
 end
+
 
 subroutine tensor_allocate()
 allocate(srealp(lbufs), stat=ialloc)
@@ -843,7 +984,10 @@ if (allocated(ipackp)) deallocate(ipackp)
 if (allocated(jpackp)) deallocate(jpackp)
 if (allocated(lpackp)) deallocate(lpackp)
 end subroutine tensor_free
-end module tensor
+end module tensor_util
+
+module mod_tensor
+contains
 ! ------------------------------------------------------------------
 subroutine tenopa(filnam,a)
 !
@@ -913,15 +1057,16 @@ use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc2, only: prefac => sc2 ! prefac(1)
 use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cow, only: simag => w_as_vec ! simag(1)
-use mod_cozmat, only: jtotpa => zmat_as_vec ! jtotpa(1)
 use mod_hibrid5, only: sread
-use tensor
+use tensor_util
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
+use funit, only: FUNIT_TCB, FUNIT_TENS_OUTPUT
 implicit double precision (a-h,o-z)
+integer :: jtotpa(MAX_NJTOT)
 character*(*) filnam
 character*40  tcsfil, smtfil, tcbfil, dchfil
 character*20  cdate
@@ -1010,20 +1155,20 @@ call openf(1,smtfil,'tu',0)
 if (abs(iframe) .le. 1) then
 ! for iframe = 0 and 1, open file for tensor opacities
   call gennam(tcsfil,filnam,iener,'tcs',lenft)
-  call openf(2,tcsfil,'sf',0)
+  call openf(FUNIT_TENS_OUTPUT,tcsfil,'sf',0)
   call gennam(tcbfil,filnam,iener,'tcb',lenfb)
 ! open and rewind .tcb file
-  open(form='formatted',unit=4,file=tcbfil)
-  rewind (4)
+  open(form='formatted',unit=FUNIT_TCB,file=tcbfil)
+  rewind (FUNIT_TENS_OUTPUT)
 ! for iframe = 2 or 3, instead open file for differential cross sections
 else
   if (abs(iframe).eq.2) then
     call gennam(dchfil,filnam,iener,'dch',lenft)
-    call openf(2,dchfil,'sf',0)
+    call openf(FUNIT_TENS_OUTPUT,dchfil,'sf',0)
   end if
   if (abs(iframe).eq.3) then
     call gennam(dchfil,filnam,iener,'dcga',lenft)
-    call openf(2,dchfil,'sf',0)
+    call openf(FUNIT_TENS_OUTPUT,dchfil,'sf',0)
   end if
 end if
 !
@@ -1036,7 +1181,7 @@ call rdhead(1,cdate,ered,rmu,csflag,flaghf,flagsu,twomol, &
 ! we need the s-matrices as lower triangles, so nnout  m u s t  be > 0
 !
 if (nnout.lt.0) then
-   write(2,11)
+   write(FUNIT_TENS_OUTPUT, 11)
    if(.not.batch) write(6,11)
 11    format(' ** NNOUT < 0, ABORT **')
    goto 4000
@@ -1046,21 +1191,21 @@ nout = nnout
 !  molecule-molecule cross sections not yet implemented
 !
 if (twomol) then
-   write(2,12)
+   write(FUNIT_TENS_OUTPUT, 12)
    if (.not. batch) write(6,12)
 12    format(' *** TENSOR OPACITIES FOR MOLECULE -', &
           ' MOLECULE COLLISIONS NOT YET IMPLEMENTED ***')
    goto 300
 end if
 if (flagsu) then
-   write(2,14)
+   write(FUNIT_TENS_OUTPUT, 14)
    if(.not. batch) write(6,14)
 14    format(' *** TENSOR OPACITIES FOR SURFACE -', &
           ' COLLISIONS NOT YET IMPLEMENTED ***')
    goto 300
 end if
 if (csflag) then
-   write(2,16)
+   write(FUNIT_TENS_OUTPUT, 16)
    if(.not. batch) write(6,16)
 16    format(' *** CS TENSOR OPACITIES', &
           ' NOT YET IMPLEMENTED ***')
@@ -1076,7 +1221,7 @@ if(flaghf) then
 !         fast = .false.
 end if
 !
-write (2, 20) smtfil, cdate, label, potnam
+write (FUNIT_TENS_OUTPUT, 20) smtfil, cdate, label, potnam
 if(.not. batch) write (6, 20) smtfil, cdate, label,potnam
 20 format(/' CLOSE COUPLED TENSOR OPACITIES',/, &
         ' S-MATRICES READ FROM FILE ',(a),/, &
@@ -1087,14 +1232,14 @@ if(.not. batch) write (6, 20) smtfil, cdate, label,potnam
 ! obtain new date
 !
 call dater(cdate)
-write(2, 22) cdate
+write(FUNIT_TENS_OUTPUT, 22) cdate
 if(.not. batch) write(6, 22) cdate
 22 format(' DATE:    ',(a))
 ! reset maxjt to jfinal if necessary
 if (maxjot.eq.0) maxjot = jfinal
 maxjt = min0(jfinal,maxjot)
 if (maxjt .lt. maxjot) then
-  write (2, 23) maxjot, jfinal
+  write (FUNIT_TENS_OUTPUT, 23) maxjot, jfinal
   if (.not. batch) write (6, 23) maxjot, jfinal
 23   format (' MAX(JTOT) RESET TO JFINAL = ',i4, ' IN TENOPA')
 endif
@@ -1147,7 +1292,7 @@ do 40 i=1, iabs(nout)
 40 continue
 ! check if there had been any match
 45 if(nj.eq.0) then
-   write(2,50)
+   write(FUNIT_TENS_OUTPUT, 50)
    if(.not. batch) write(6,50)
 50    format(' *** NO TRANSITIONS FOUND, ABORT ***')
    goto 300
@@ -1184,17 +1329,17 @@ nbuf = min(nbuf1,nbuf2)
 if (abs(iframe) .le. 1) then
 ! write *.tcb as formatted file
 ! output label and cdate in separate write statements
-  write(4, *, err=999) label
-  write(4, *, err=999) cdate
-  write(4, *, err=999) ered, rmu, flaghf, nlevel, &
+  write(FUNIT_TCB, *, err=999) label
+  write(FUNIT_TCB, *, err=999) cdate
+  write(FUNIT_TCB, *, err=999) ered, rmu, flaghf, nlevel, &
                   nlevop, njmax, minn, maxn, nstep, maxk
-  write(4, *, err=999) (jlev(i),i=1, nlevel)
-  write(4, *, err=999) (inlev(i),i=1, nlevel)
-  write(4, *, err=999) (elev(i),i=1, nlevel)
-  write(4, *, err=999) (jlist(i),i=1, njmax)
+  write(FUNIT_TCB, *, err=999) (jlev(i),i=1, nlevel)
+  write(FUNIT_TCB, *, err=999) (inlev(i),i=1, nlevel)
+  write(FUNIT_TCB, *, err=999) (elev(i),i=1, nlevel)
+  write(FUNIT_TCB, *, err=999) (jlist(i),i=1, njmax)
 end if
 ! write header
-write(2,60) ered*econv,rmu*xmconv,jfirst,maxjt,maxk,minn,maxn,nbuf
+write(FUNIT_TENS_OUTPUT, 60) ered*econv,rmu*xmconv,jfirst,maxjt,maxk,minn,maxn,nbuf
 if(.not.batch) write(6,60) &
   ered*econv,rmu*xmconv,jfirst,maxjt,maxk,minn,maxn,nbuf
 60 format(/,' ENERGY: ',f11.3,' cm(-1)    MASS: ',f11.3,/, &
@@ -1203,7 +1348,7 @@ if(.not.batch) write(6,60) &
      '; MAXIMUM NUMBER OF BUFFERS =',i5)
 !
 ! write level list
-write(2,65)
+write(FUNIT_TENS_OUTPUT, 65)
 if(.not. batch) write(6,65)
 if (abs(iframe) .le. 1)  write(6,64)
 64 format(/,' COLUMNS ARE INITIAL STATES; ROWS ARE FINAL STATES')
@@ -1214,12 +1359,12 @@ if (abs(iframe) .le. 1)  write(6,64)
 do 68 i = 1, nj
    ii=jlist(i)
    if (.not. flaghf) then
-     write(2,66) i,jlev(ii),inlev(ii),elev(ii)*econv
+     write(FUNIT_TENS_OUTPUT, 66) i,jlev(ii),inlev(ii),elev(ii)*econv
      if(.not.batch) write(6,66) i,jlev(ii),inlev(ii), &
                                 elev(ii)*econv
 66      format (i4, 1x, i5, i6, f11.3)
    else
-     write(2,67) i,jlev(ii)+spin,inlev(ii),elev(ii)*econv
+     write(FUNIT_TENS_OUTPUT, 67) i,jlev(ii)+spin,inlev(ii),elev(ii)*econv
      if(.not.batch) write(6,67) i,jlev(ii)+spin,inlev(ii), &
                                 elev(ii)*econv
 67      format (i4, 1x, f5.1, i6, f11.3)
@@ -1227,7 +1372,7 @@ do 68 i = 1, nj
 
 68 continue
 
-if (abs(iframe) .le. 1) write(2,64)
+if (abs(iframe) .le. 1) write(FUNIT_TENS_OUTPUT, 64)
 ! loop over n
 n = minn
 ! fast algorithm if n = 0
@@ -1242,14 +1387,14 @@ n = minn
        call sigk(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
              lpack,ipack,jttble,prefac,sigma, &
              sreal,simag,matel,lenlab,labadr, &
-             jtotpa,fast,ierr)
+             jtotpa,fast,ierr, FUNIT_TENS_OUTPUT, FUNIT_TCB)
        if(ierr.ne.0) goto 4000
        goto 300
 ! iframe = 1
 172        call sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
              lpack,ipack,jttble,prefac, &
              sreal,simag,matel,lenlab,labadr, &
-             jtotpa,fast,ierr)
+             jtotpa,fast,ierr, FUNIT_TENS_OUTPUT, FUNIT_TCB)
        if(ierr.ne.0) goto 4000
        goto 300
 ! iframe = 2
@@ -1257,7 +1402,7 @@ n = minn
        inlevel = inlev(jlist(1))
        call dsigh(maxk,nnout,jfirst,jfinal,jtotd,jpack,lpack, &
              ipack,jlevel,inlevel,elev(jlist(1)),flaghf, &
-             iframe,ierr)
+             iframe,ierr, FUNIT_TENS_OUTPUT)
        if(ierr.ne.0) goto 4000
        goto 300
 ! iframe = 3
@@ -1265,7 +1410,7 @@ n = minn
        inlevel = inlev(jlist(1))
        call dsigga(maxk,nnout,jfirst,jfinal,jtotd,jpack,lpack, &
              ipack,jlevel,inlevel,elev(jlist(1)),flaghf, &
-             iframe,ierr)
+             iframe,ierr, FUNIT_TENS_OUTPUT)
        if(ierr.ne.0) goto 4000
 else
 ! here for n > 0
@@ -1293,7 +1438,7 @@ else
    call sigkkp(n,maxk,nk,nnout,jfirst,jfinal,jtotd,nj,mmax, &
         jpack,lpack,ipack,jttble,prefac,sigma, &
         sreal,simag,matel,lenlab,labadr, &
-        jtotpa,kplist,f9pha,fast,ierr)
+        jtotpa,kplist,f9pha,fast,ierr, FUNIT_TENS_OUTPUT, FUNIT_TCB)
    if(ierr.ne.0) goto 4000
 end if
 ! next n
@@ -1304,34 +1449,34 @@ ela1 = ela1 - ela0
 cpu1 = cpu1 - cpu0
 call gettim(ela1,elaps)
 call gettim(cpu1,cpu)
-write(2,400) elaps, cpu
+write(FUNIT_TENS_OUTPUT, 400) elaps, cpu
 if(.not. batch) write(6,400) elaps, cpu
 400 format(/,' ** TENXSC FINAL TIMING, ELAPSED: ',a,'  CPU: ',a,' **')
 close (1)
-close (2)
+close (FUNIT_TENS_OUTPUT)
 close (3)
-close (4)
+close (FUNIT_TCB)
 call tensor_free()
 return
-999 write(2,1000)
+999 write(FUNIT_TENS_OUTPUT, 1000)
 if(.not.batch) write(6,1000)
 1000 format(' *** I/O ERROR IN TENOPA; ABORT')
 close (1)
-close (2)
+close (FUNIT_TENS_OUTPUT)
 close (3)
-rewind (4)
-close (4)
+rewind (FUNIT_TCB)
+close (FUNIT_TCB)
 4000 call tensor_free()
 return
 end
 ! ------------------------------------------------------------------
 subroutine addsp(jtmin,jtmax,jlp, &
-                 labadr,lenlab,jtotpa,jttble)
+                 labadr,lenlab,jtotpa,jttble, tens_out_unit)
 !
 ! current revision date: 12-nov-2008 by pj dagdigian
 !
 use ISO_FORTRAN_ENV, only : ERROR_UNIT
-use tensor
+use tensor_util
 use mod_cojq, only: jqp => jq ! jqp(1)
 use mod_colq, only: lqp => lq ! lqp(1)
 use mod_coinq, only: inqp => inq ! inqp(1)
@@ -1343,6 +1488,7 @@ use mod_par, only: batch, iprnt=>iprint
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 implicit double precision (a-h,o-z)
+integer, intent(in) :: tens_out_unit  ! unit of tenxsc output file (tcs, dgh or dcga file)
 logical lprnt
 ! add these three common blocks (mha 9/30/08)
 dimension labadr(1),lenlab(1),jtotpa(1),jttble(1)
@@ -1412,7 +1558,7 @@ do 100 jtp=jtpmin,jtpmax
                 1, maxlsp, nopenp, lengtp, ierr)
    if(ierr.eq.-1) goto 999
    if(ierr.lt.-1) then
-      write(2,20)
+      write(tens_out_unit, 20)
       if(.not.batch) write(6,20)
 20       format(' ** READ ERROR IN ADDSP, ABORT **')
       return
@@ -1476,7 +1622,7 @@ subroutine mrcrs(filnam,a)
 !                            m1,m2
 !
 ! ------------------------------------------------------------------
-use tensor
+use tensor_util
 use mod_codim, only: mmax
 use mod_coamat, only: sigmam => toto ! sigmam(1)
 use mod_cobmat, only: sigmak => bmat ! sigmak(1)
@@ -1491,6 +1637,7 @@ use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
+use funit, only: FUNIT_TCB, FUNIT_MCS
 implicit double precision(a-h,o-z)
 character*(*) filnam
 character*40  tcbfil, mcsfil
@@ -1520,37 +1667,37 @@ end if
 ! converted *.tcb to formatted file (pjd)
 !      call openf(1,tcbfil,'su',0)
 !      call openf(1,tcbfil,'sf',0)
-open(form='formatted',unit=4,file=tcbfil)
+open(form='formatted',unit=FUNIT_TCB,file=tcbfil)
 print *, 'tcbfil:  ', tcbfil
 call gennam(mcsfil,filnam,iener,'mcs',lenm)
 print *, 'mcsfil:  ', mcsfil
-call openf(2,mcsfil,'sf',0)
+call openf(FUNIT_MCS,mcsfil,'sf',0)
 ! converted *.tcb to formatted file and use unit=4 (pjd)
 !      read(4, err=999) label, cdate, ered, rmu, flaghf, nlevel,
 !     :                 nlevop, njmax, minn, maxn, nstep, maxk
 ! read label and cdate in separate statements (pjd)
-read(4, 12, err=999) label
+read(FUNIT_TCB, 12, err=999) label
 12 format(a40)
-read(4, 13, err=999) cdate
+read(FUNIT_TCB, 13, err=999) cdate
 13 format(a21)
 !      read(1, *, err=999) label, cdate, ered, rmu, flaghf, nlevel,
 !     :                 nlevop, njmax, minn, maxn, nstep, maxk
-read(4, *, err=999) ered, rmu, flaghf, nlevel, &
+read(FUNIT_TCB, *, err=999) ered, rmu, flaghf, nlevel, &
                  nlevop, njmax, minn, maxn, nstep, maxk
 ! converted *.tcb to formatted file (pjd)
 !      read(1 ,err=999) (jlev(i),i=1, nlevel)
 !      read(1 ,err=999) (inlev(i),i=1, nlevel)
 !      read(1 ,err=999) (elev(i),i=1, nlevel)
 !      read(4, err=999) (jlist(i),i=1, njmax)
-read(4, * ,err=999) (jlev(i),i=1, nlevel)
-read(4, * ,err=999) (inlev(i),i=1, nlevel)
-read(4, * ,err=999) (elev(i),i=1, nlevel)
-read(4, *, err=999) (jlist(i),i=1, njmax)
+read(FUNIT_TCB, * ,err=999) (jlev(i),i=1, nlevel)
+read(FUNIT_TCB, * ,err=999) (inlev(i),i=1, nlevel)
+read(FUNIT_TCB, * ,err=999) (elev(i),i=1, nlevel)
+read(FUNIT_TCB, *, err=999) (jlist(i),i=1, njmax)
 !
 spin = 0.
 if(flaghf) spin = 0.5
 !
-write (2, 20) tcbfil, cdate, label, maxk, maxk
+write (FUNIT_MCS, 20) tcbfil, cdate, label, maxk, maxk
 if(.not. batch) write (6, 20) tcbfil, cdate, label, maxk, maxk
 20 format(/' CLOSE COUPLED M-RESOLVED CROSS SECTIONS',/, &
         ' K K''-MATRICES READ FROM FILE ',(a),/, &
@@ -1576,7 +1723,7 @@ if(.not. batch) write (6, 20) tcbfil, cdate, label, maxk, maxk
          m2comp = nint(2.d0*xj2 + 1.d0)
          in2 = inlev(jj)
          call sigms(numk,i,j,m1comp,m2comp,minn,maxn, &
-                nstep,xm1lab,xm2lab,sigmak,sigmam,mmax,ierr)
+                nstep,xm1lab,xm2lab,sigmak,sigmam,mmax,ierr, FUNIT_MCS)
          if (ierr .ne. 0) return
 300       continue
 400     continue
@@ -1586,22 +1733,22 @@ cpu1 = cpu1 - cpu0
 ela1 = ela1 - ela0
 call gettim(ela1,elaps)
 call gettim(cpu1,cpu)
-write(2,600) elaps, cpu
+write(FUNIT_MCS, 600) elaps, cpu
 if(.not. batch) write(6,600) elaps, cpu
 600 format(/,' ** MRCRS FINAL TIMING ELAPSED: ', &
          (a),' CPU: ',(a),/)
-close(4)
-close(2)
+close(FUNIT_TCB)
+close(FUNIT_MCS)
 return
-999 write(2,1000)
+999 write(FUNIT_MCS,1000)
 write(6,1000)
 1000 format(' ** READ ERROR IN MRCRS, ABORT')
-close(4)
+close(FUNIT_TCB)
 return
 end
 ! -------------------------------------------------------------------
 subroutine sigms(numk,ii,jj,m1comp,m2comp,minn,maxn,nstep, &
-                 xm1lab,xm2lab,sigmak,sigmam,mmax,ierr)
+                 xm1lab,xm2lab,sigmak,sigmam,mmax,ierr, mcs_out_unit)
 ! ------------------
 ! current revision date: 9-oct-1997 by pjd
 ! ------------------
@@ -1614,6 +1761,7 @@ use mod_par, only: batch, flaghf
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 implicit double precision(a-h,o-z)
+integer, intent(in) :: mcs_out_unit  ! unit of mcs output file
 character*20  cdate
 !
 dimension xm1lab(1),xm2lab(1),sigmak(mmax,1),sigmam(mmax,1)
@@ -1680,14 +1828,14 @@ do 300 kk = 1, numk
 ! print out results
 400 continue
 if (flaghf) then
-   write(2, 410) xj1, in1, xj2, in2, n, sigmat/(2.d0*xj1+1.d0)
+   write(mcs_out_unit, 410) xj1, in1, xj2, in2, n, sigmat/(2.d0*xj1+1.d0)
    if (.not. batch) &
     write(6, 410) xj1, in1, xj2, in2, n, sigmat/(2.d0*xj1+1.d0)
 410     format &
       (/' TRANSITION J1 = ',f4.1,i3,' -> J2 = ',f4.1,i3, &
       ', LAM = ',i2,', TOTAL CROSS SECTION = ',1pe10.3,/)
 else
-   write(2, 415) nint(xj1), nint(xj2),n, sigmat/(2.d0*xj1+1.d0)
+   write(mcs_out_unit, 415) nint(xj1), nint(xj2),n, sigmat/(2.d0*xj1+1.d0)
    if (.not. batch) &
    write(6, 415) nint(xj1), nint(xj2),n, sigmat/(2.d0*xj1+1.d0)
 415    format &
@@ -1699,11 +1847,11 @@ lmax = 0
 lmax = lmax + 9
 lmax = min0(lmax,m2comp)
 if (flaghf) then
-  write(2,430) (xm2lab(l),l=lmin,lmax)
+  write(mcs_out_unit, 430) (xm2lab(l),l=lmin,lmax)
   if(.not. batch) write(6,430) (xm2lab(l),l=lmin,lmax)
 430   format(10x,9(f5.1,6x))
 else
-  write(2,435) (nint(xm2lab(l)),l=lmin,lmax)
+  write(mcs_out_unit, 435) (nint(xm2lab(l)),l=lmin,lmax)
   if(.not. batch) write(6,435) (nint(xm2lab(l)),l=lmin,lmax)
 435   format(8x,9(i5,6x))
 endif
@@ -1711,14 +1859,14 @@ do 500 m1 = 1, m1comp
     xm1 = xm1lab(m1)
     if (lmax .eq. m2comp) then
        if (flaghf) then
-         write(2,440) xm1,(sigmam(m1,l),l=lmin,lmax), &
+         write(mcs_out_unit, 440) xm1,(sigmam(m1,l),l=lmin,lmax), &
                          sigmam(m1,m2comp+1)
          if (.not. batch) write(6,440) &
                         xm1,(sigmam(m1,l),l=lmin,lmax), &
                          sigmam(m1,m2comp+1)
 440          format(1x,f4.1,12(1pe11.3))
        else
-         write(2,445) nint(xm1),(sigmam(m1,l),l=lmin,lmax), &
+         write(mcs_out_unit, 445) nint(xm1),(sigmam(m1,l),l=lmin,lmax), &
                          sigmam(m1,m2comp+1)
          if (.not. batch) write(6,445) &
                         nint(xm1),(sigmam(m1,l),l=lmin,lmax), &
@@ -1727,22 +1875,22 @@ do 500 m1 = 1, m1comp
        endif
     else
        if (flaghf) then
-         write(2,440) xm1,(sigmam(m1,l),l=lmin,lmax)
+         write(mcs_out_unit, 440) xm1,(sigmam(m1,l),l=lmin,lmax)
          if (.not. batch) write(6,440) &
                     xm1,(sigmam(m1,l),l=lmin,lmax)
        else
-         write(2,445) nint(xm1),(sigmam(m1,l),l=lmin,lmax)
+         write(mcs_out_unit, 445) nint(xm1),(sigmam(m1,l),l=lmin,lmax)
          if (.not. batch) write(6,445) &
                     nint(xm1),(sigmam(m1,l),l=lmin,lmax)
        endif
     end if
 500  continue
- write(2,'(a)') ' '
+ write(mcs_out_unit, '(a)') ' '
  if(.not. batch) write(6,'(a)') ' '
  if((m2comp-lmax)) 600,600,420
 600  continue
  return
-999 write(2,1000)
+999 write(mcs_out_unit, 1000)
 write(6,1000)
 1000 format(' ** READ ERROR IN SIGMS, ABORT')
 ierr = 1
@@ -1752,7 +1900,7 @@ end
 subroutine sigk(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
                 lpack,ipack,jttble,prefac,sigma, &
                 sreal,simag,matel,lenlab,labadr, &
-                jtotpa,fast,ierr)
+                jtotpa,fast,ierr, tcs_out_unit, tcb_out_unit)
 !
 ! subroutine to calculate sigma(k,j1,j2) cross sections:
 ! ( see also " m.h. alexander and s.l. davis, jcp 78(11),6748(1983)"
@@ -1770,7 +1918,7 @@ subroutine sigk(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
 ! current revision date: 5-oct-2012 by pj dagdigian
 !
 !------------------------------------------------------------------------
-use tensor
+use tensor_util
 use mod_cojq, only: jq ! jq(1)
 use mod_colq, only: lq ! lq(1)
 use mod_coinq, only: inq ! inq(1)
@@ -1784,6 +1932,8 @@ use mod_selb, only: ibasty
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 implicit double precision (a-h,o-z)
+integer, intent(in) :: tcs_out_unit  ! unit of tcs output file
+integer, intent(in) :: tcb_out_unit  ! unit of tcb output file
 complex*8 t, tp
 logical diag, diagj, diagin, &
         twopar, fast
@@ -1866,7 +2016,7 @@ call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
              1, mmax, nopen, length, ierr)
 if(ierr.eq.-1) goto 999
 if(ierr.lt.-1) then
-  write(2,20)
+  write(tcs_out_unit, 20)
   if(.not.batch) write(6,20)
 20   format(' *** READ ERROR, ABORT')
   return
@@ -1883,7 +2033,7 @@ jlparp = jlpar
 ! fill buffer with required s' matrices
 ! parity for each jtot' needs to be kept track of in addsp
 call addsp(jtpmin,jtpmax,jlp, &
-           labadr,lenlab,jtotpa,jttble)
+           labadr,lenlab,jtotpa,jttble, tcs_out_unit)
 if (srealp(lbufs) .ne. 0.d0) print *, 'srealp error in sigk'
 if (simagp(lbufs) .ne. 0.d0) print *, 'simagp error in sigk'
 if (ipackp(lbuflb) .ne. 0) print *, 'ipackp error in sigk'
@@ -2158,15 +2308,15 @@ if (twopar) then
 end if
 ! here if calculation has been done
 ! write *.tcb as formatted file
-999 write(4, *) maxk + 1
+999 write(tcb_out_unit, *) maxk + 1
 do 1100 k = 0, maxk
-  write(4, *) k,k
-  write(2,800) k
+  write(tcb_out_unit, *) k,k
+  write(tcs_out_unit, 800) k
   if(.not.batch) write(6,800) k
 800   format(/' TENSOR RANK K =',i3)
   do 1000 i = 1, njmax
 ! write *.tcb as formattted file (pjd)
-    write(4, *) (sigma(i,j,k+1),j=1,njmax)
+    write(tcb_out_unit, *) (sigma(i,j,k+1),j=1,njmax)
 1000   continue
   call mxoutd (2, sigma(1,1,k+1), njmax, njmax, 0, ipos)
 ! use diag as scratch variable (ipos = .false. for screen output)
@@ -2193,7 +2343,7 @@ cpu1 = cpu1 - cpu0
 ela1 = ela1 - ela0
 call gettim(ela1,elaps)
 call gettim(cpu1,cpu)
-write(2,1200) elaps, cpu
+write(tcs_out_unit, 1200) elaps, cpu
 if(.not. batch) write(6,1200) elaps, cpu
 1200 format(/' ** N = 0 COMPLETED, TIMING ELAPSED: ',a, &
         ' CPU: ',a,/)
@@ -2203,7 +2353,7 @@ end
 subroutine sigkkp(n,maxk,nk,nnout,jfirst,jfinal,jtotd,nj,mmax, &
          jpack,lpack,ipack,jttble,prefac,sigma, &
          sreal,simag,matel,lenlab,labadr, &
-         jtotpa,kplist,f9pha,fast,ierr)
+         jtotpa,kplist,f9pha,fast,ierr, tcs_out_unit, tcb_out_unit)
 !
 ! subroutine to calculate sigma(lambda; j1, j2, ki, kf) cross section
 ! defined by follmeg et al., jcp 93(7), 4687 (1990).
@@ -2219,7 +2369,7 @@ subroutine sigkkp(n,maxk,nk,nnout,jfirst,jfinal,jtotd,nj,mmax, &
 !** REVISIONS NOT COMPLETED (pjd)
 !
 !------------------------------------------------------------------------
-use tensor
+use tensor_util
 use mod_cojq, only: jq ! jq(1)
 use mod_colq, only: lq ! lq(1)
 use mod_coinq, only: inq ! inq(1)
@@ -2231,6 +2381,8 @@ use mod_par, only: batch, ipos, iprnt=>iprint
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 implicit double precision (a-h,o-z)
+integer, intent(in) :: tcs_out_unit  ! unit of tenxsc output file (tcs, dgh or dcga file)
+integer, intent(in) :: tcb_out_unit  ! unit of tcb output file
 complex*8 t, tp, ai, cphase
 logical diag, diagj, diagin, &
         twopar, fast
@@ -2338,7 +2490,7 @@ call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
              1, mmax, nopen, length, ierr)
 if(ierr.eq.-1) goto 999
 if(ierr.lt.-1) then
-  write(2,20)
+  write(tcs_out_unit, 20)
   if(.not.batch) write(6,20)
 20   format(' *** READ ERROR IN SIGKKP, ABORT')
   return
@@ -2351,7 +2503,7 @@ jtpmin = jtot
 jtpmax = min((jtot + maxk), jfinal)
 ! fill buffer with required s' matrices
 call addsp(jtpmin,jtpmax,jlp, &
-           labadr,lenlab,jtotpa,jttble)
+           labadr,lenlab,jtotpa,jttble,tcs_out_unit)
 !
 ! prepare for sum over jtot'
 jtotp = jtpmin
@@ -2609,24 +2761,24 @@ if (twopar) then
 end if
 ! here if calculation has been done
 ! write *.tcb as formattted file (pjd)
-!999   write(4) nk
-999 write(4, *) nk
+!999   write(tcb_out_unit) nk
+999 write(tcb_out_unit, *) nk
 ikk=0
 do 1000 kp= 0, maxk
 do 1000 k = abs(kp-n),min(maxk,kp+n),n
 ikk=ikk+1
 ! write *.tcb as formattted file (pjd)
-!      write(4) k,kp
-write(4, *) k,kp
-write(2,800) n,k,kp
+!      write(tcb_out_unit) k,kp
+write(tcb_out_unit, *) k,kp
+write(tcs_out_unit, 800) n,k,kp
 if(.not.batch) write(6,800) n,k,kp
 800 format(/' LAMBDA =',i2,'; TENSOR RANK KI =',i3,' KF =',i3/)
 do 1000 i = 1, njmax
-write(2,1010) (sigma(ikk,i,j),j=1,njmax)
+write(tcs_out_unit, 1010) (sigma(ikk,i,j),j=1,njmax)
 if(.not. batch) write(6,1010) (sigma(ikk,i,j),j=1,njmax)
 ! write *.tcb as formattted file (pjd)
-!1000  write(4) (sigma(ikk,i,j),j=1,njmax)
-1000 write(4, *) (sigma(ikk,i,j),j=1,njmax)
+!1000  write(tcb_out_unit) (sigma(ikk,i,j),j=1,njmax)
+1000 write(tcb_out_unit, *) (sigma(ikk,i,j),j=1,njmax)
 1010 format(1x,10(1pd12.4))
 ! use diag as scratch variable (ipos = .false. for screen output)
 diag = .false.
@@ -2635,11 +2787,11 @@ cpu1 = cpu1 - cpu0
 ela1 = ela1 - ela0
 call gettim(ela1,elaps)
 call gettim(cpu1,cpu)
-!	      write(2,1200) n,elaps, cpu
+!	      write(tcs_out_unit, 1200) n,elaps, cpu
 !      if(.not. batch) write(6,1200) n,elaps, cpu
 !1200  format(/' ** N =',i2,' COMPLETED, TIMING ELAPSED: ',a,
 !     :        ' CPU: ',a)
-!	      write(2,1200) n,elaps, cpu,t6j,t9j,
+!	      write(tcs_out_unit, 1200) n,elaps, cpu,t6j,t9j,
 !     :      lenk,max1,max2,max3,maxkk,tsetup,tdelt,tchi,tlog
 !      if(.not. batch) write(6,1200) n,elaps, cpu,t6j,t9j,
 !     :      lenk,max1,max2,max3,maxkk,tsetup,tdelt,tchi,tlog
@@ -2655,7 +2807,7 @@ end
 subroutine sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
                 lpack,ipack,jttble,prefac, &
                 sreal,simag,matel,lenlab,labadr, &
-                jtotpa,fast,ierr)
+                jtotpa,fast,ierr, tcs_out_unit, tcb_out_unit)
 !
 ! subroutine to calculate tensor cross sections with the
 ! quantization axis along the initial relative velocity vector
@@ -2666,7 +2818,7 @@ subroutine sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
 ! author: pj dagdigian
 ! current revision date: 5-mar-2010 by pj dagdigian
 !------------------------------------------------------------------------
-use tensor
+use tensor_util
 use mod_cojq, only: jq ! jq(1)
 use mod_colq, only: lq ! lq(1)
 use mod_coinq, only: inq ! inq(1)
@@ -2679,6 +2831,8 @@ use mod_par, only: batch, ipos, iprnt=>iprint
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 implicit double precision (a-h,o-z)
+integer, intent(in) :: tcs_out_unit  ! unit of tcs output file
+integer, intent(in) :: tcb_out_unit  ! unit of tcb output file
 complex*8 t, tp
 logical diag, diagj, diagin, &
         twopar, fast
@@ -2763,7 +2917,7 @@ call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
              1, mmax, nopen, length, ierr)
 if(ierr.eq.-1) goto 999
 if(ierr.lt.-1) then
-  write(2,20)
+  write(tcs_out_unit, 20)
   if(.not.batch) write(6,20)
 20   format(' *** READ ERROR, ABORT')
   return
@@ -2780,7 +2934,7 @@ jlparp = jlpar
 ! fill buffer with required s' matrices
 ! parity for each jtot' needs to be kept track of in addsp
 call addsp(jtpmin,jtpmax,jlp, &
-           labadr,lenlab,jtotpa,jttble)
+           labadr,lenlab,jtotpa,jttble, tcs_out_unit)
 if (srealp(lbufs) .ne. 0.d0) print *, 'srealp error in sigkc'
 if (simagp(lbufs) .ne. 0.d0) print *, 'simagp error in sigkc'
 if (ipackp(lbuflb) .ne. 0) print *, 'ipackp error in sigkc'
@@ -3043,20 +3197,20 @@ end if
 ! here if calculation has been done
 !
 ! write *.tcb as formatted file
-999 write(4,798)
+999 write(tcb_out_unit,798)
 798 format('cross sections in the collision frame')
-write(4, *) maxk + 1
-write (2,799)
+write(tcb_out_unit, *) maxk + 1
+write(tcb_out_unit,799)
 if(.not.batch) write(6,799)
 799 format(/' CROSS SECTIONS IN THE COLLISION FRAME')
 do 1100 k = 0, maxk
-  write(4, *) k,k
-  write(2,800) k
+  write(tcb_out_unit, *) k,k
+  write(tcs_out_unit, 800) k
   if(.not.batch) write(6,800) k
 800   format(/' TENSOR RANK K =',i3)
   do 1000 i = 1, njmax
 ! write *.tcb as formattted file (pjd)
-    write(4, *) (sigma(i,j,k+1),j=1,njmax)
+    write(tcb_out_unit, *) (sigma(i,j,k+1),j=1,njmax)
 1000   continue
   call mxoutd (2, sigma(1,1,k+1), njmax, njmax, 0, ipos)
 ! use diag as scratch variable (ipos = .false. for screen output)
@@ -3083,134 +3237,11 @@ cpu1 = cpu1 - cpu0
 ela1 = ela1 - ela0
 call gettim(ela1,elaps)
 call gettim(cpu1,cpu)
-write(2,1200) elaps, cpu
+write(tcs_out_unit, 1200) elaps, cpu
 if(.not. batch) write(6,1200) elaps, cpu
 1200 format(/' ** N = 0 COMPLETED, TIMING ELAPSED: ',a, &
         ' CPU: ',a,/)
 return
 end
-!-------------------------------------------------------------------------
 
-!=============
-function redrot (rj,rk,rm,beta)
-implicit double precision (a-h,o-z)
-!
-!     -----------------------------------------------------------------
-!     This function uses eq. (4.1.23) of Edmonds
-!     to calculate the reduced rotation matrix element
-!     d(j,k,m;beta) = <jk|exp(+i*beta*Jy/hbar)|jm>.
-!
-!     The angle beta is in radians
-!     -----------------------------------------------------------------
-!
-parameter (zero = 0.0d0)
-parameter (half = 0.5d0)
-parameter (one  = 1.0d0)
-parameter (two  = 2.0d0)
-!
-!     half integer angular momenta
-!
-sj = half*nint(two*rj)
-sk = half*nint(two*rk)
-sm = half*nint(two*rm)
-!
-!     projection ranges
-!
-redrot = zero
-if (sk.gt.sj .or. sk.lt.-sj)  return
-if (sm.gt.sj .or. sm.lt.-sj)  return
-if (mod(sj-sk,one) .ne. zero) return
-if (mod(sj-sm,one) .ne. zero) return
-!
-!     reflection symmetries
-!
-if (sk+sm .ge. zero) then
-  if (sk-sm .ge. zero) then
-    tk = sk
-    tm = sm
-    isign = 0
-  else
-    tk = sm
-    tm = sk
-    isign = sk-sm
-  endif
-else
-  if (sk-sm .ge. zero) then
-    tk = -sm
-    tm = -sk
-    isign = 0
-  else
-    tk = -sk
-    tm = -sm
-    isign = sk-sm
-  endif
-endif
-!
-!     evaluation
-!
-n = sj-tk
-ia = tk-tm
-ib = tk+tm
-a = ia
-b = ib
-beta2 = half*beta
-cosb2 = cos(beta2)
-sinb2 = sin(beta2)
-cosb = (cosb2-sinb2)*(cosb2+sinb2)
-d1 = pjacob(n,a,b,cosb)
-d2 = cosb2**ib*sinb2**ia
-d3 = d1*d2
-d4 = d3*d3
-ti = tm
-do i = 1,ia
-   ti = ti+one
-   d4 = d4*(sj+ti)/(sj-ti+one)
-enddo
-d4 = sqrt(d4)
-redrot = sign(d4,d3)
-if (mod(isign,2) .ne. 0) redrot = -redrot
-return
-end
-!=============
-function pjacob (n,a,b,x)
-implicit double precision (a-h,o-z)
-!
-!     -----------------------------------------------------------------
-!     Jacobi polynomial p(n,a,b;x)
-!     Abramowitz and Stegun eq. (22.7.1)
-!     -----------------------------------------------------------------
-!
-parameter (zero = 0.0d0)
-parameter (half = 0.5d0)
-parameter (one  = 1.0d0)
-parameter (two  = 2.0d0)
-!
-if (n .eq. 0) then
-  fp = one
-else
-  f = one
-  apa = a+a
-  apb = a+b
-  amb = a-b
-  apbamb = apb*amb
-  apbp1 = apb+one
-  apbp2 = apb+two
-  onek = zero
-  twok = zero
-  fp = half*(amb+apbp2*x)
-  do k = 1,n-1
-    onek = onek+one
-    twok = twok+two
-    a1 = (twok+two)*(onek+apbp1)*(twok+apb)
-    a2 = (twok+apbp1)*apbamb
-    a3 = (twok+apb)*(twok+apbp1)*(twok+apbp2)
-    a4 = (twok+apa)*(onek+b)*(twok+apbp2)
-    fm = f
-    f = fp
-    fp = ((a2+a3*x)*f-a4*fm)/a1
-  enddo
-endif
-pjacob = fp
-return
-end
-!=====eof=====
+end module mod_tensor
