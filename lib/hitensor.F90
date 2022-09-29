@@ -618,10 +618,7 @@ logical existf,csflg1,flghf1,flgsu1,twomol, &
 character*10 elaps, cpu
 character*20 cdate1
 
-
-common /coisc2 / jout1(1)
-integer :: jout1
-
+integer :: jout1(mmax)
 common /coang/ ang1, ang2, dang
 real(8) :: ang1, ang2, dang
 data ang1, ang2, dang /0.d0, 180.d0, 0.5d0/
