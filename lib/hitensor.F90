@@ -1093,7 +1093,7 @@ if(.not. batch) write(6, 22) cdate
 ! reset maxjt to jfinal if necessary
 if (maxjot.eq.0) maxjot = jfinal
 maxjt = min0(jfinal,maxjot)
-if (maxjt .lt. matjot) then
+if (maxjt .lt. maxjot) then
   write (2, 23) maxjot, jfinal
   if (.not. batch) write (6, 23) maxjot, jfinal
 23   format (' MAX(JTOT) RESET TO JFINAL = ',i4, ' IN TENOPA')
