@@ -5,6 +5,7 @@
 module constants
 implicit none
 real(8), parameter :: pi=dacos(-1d0)
+real(8), parameter :: s4pi = sqrt( 4.d0 * pi )  ! normalization factor for isotropic potential
 !     Below are constants used in Hibridon 4.4
 real(8), parameter :: econv=219474.6d0, xmconv=5.485930d-4, &
      ang2c=0.280002846d0
@@ -31,7 +32,10 @@ implicit none
    enumerator ::  &
       FUNIT_CS             =  1, &   ! cross sections
       FUNIT_EADIAB         =  2, &   ! <job-name>.eadiab
+      FUNIT_TENS_OUTPUT    =  2, &   ! <job-name>.tcs or <job-name>.dch or <job-name>.dcga
+      FUNIT_MCS            =  2, &   ! <job-name>.mcs
       FUNIT_SAV            =  3, &   ! <job-name>.sav
+      FUNIT_TCB            =  4, &   ! <job-name>.tcb (result of tenxsc)
       FUNIT_STDOUT         =  6, &   ! standard output
       FUNIT_INP            =  8, &   ! input file (*.inp)
       FUNIT_OUT            =  9, &   ! output file (*.out)

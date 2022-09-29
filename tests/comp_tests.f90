@@ -36,6 +36,7 @@ program comp_tests
         min_significant_value = 1e-20
     case("trn") ; num_header_lines = 7
     case("xxsc"); num_header_lines = 3
+    case("tcb"); num_header_lines = 2
     case ("flx") ! Header ends at first occurence of "R (BOHR) AND OUTGOING FLUXES"
         num_header_lines(1) = get_first_occ_of("R (BOHR) AND OUTGOING FLUXES",ref)
         num_header_lines(2) = get_first_occ_of("R (BOHR) AND OUTGOING FLUXES",test)

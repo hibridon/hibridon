@@ -20,23 +20,10 @@ subroutine flow (z, w, zmat, amat, bmat, jq, lq, inq, jlev, &
 !           iflag = 0 if all channels are in classically forbidden region
 !           iflag = 1 if some channels are open
 !           iflag = 2 if all asymptotically open channels are open at r
-!  variable in common block /cosurf/
-!    surffl:      this variable is set equal to flagsu, it is held in a
-!                 separate common block for compatability with subroutines
-!                 smatop, soutpt, and xwrite
-!                 if .true., then the problem is assumed to a molecule
-!                 scattering off a surface, in which case the diagonal
-!                 elements of the transition probabilities are equal to the
-!                 modulus squared of the s-matrix (not t-matrix elements)
 !  variable in common block /cojlpo/
 !    jlpold:      parity used in xwrite subroutine to insure correct
 !                 accumulation of partial waves in cases where jlpar=0
 !
-!  variables in common block /cophot/
-!     photof        true if photodissociation calculation
-!                   false if scattering calculation
-!     wavefn        true if g(a,b) transformation matrices are saved
-!                   to be used later in computing the wavefunction
 !  variables in module constants
 !    econv:       conversion factor from cm-1 to hartree
 !    xmconv:      conversion factor from amu to atomic units
@@ -70,6 +57,11 @@ use mod_hinput, only:hinput
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
+use mod_phot, only: phot_photof => photof, wavefn, boundf, writs
+use mod_surf, only: surf_flagsu => flagsu
+use mod_sav, only: iipar, ixpar, irpar, rxpar
+use mod_pmat, only: rtmn, rtmx, iflag
+use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
@@ -109,22 +101,6 @@ real(8) secnds
 common /codec/ ttim(2)
 real(8) :: ttim
 #endif
-
-common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
-real(8) :: cpuld, cpuai, cpupot, cpusmt, cpupht
-common /cosavi/ iipar, ixpar(8)
-integer :: iipar, ixpar
-common /cosavr/ irpar(2), rxpar(9)
-integer :: irpar
-real(8) :: rxpar
-common /copmat/ rtmn, rtmx, iflag
-real(8) :: rtmn, rtmx
-integer :: iflag
-common /cophot/ phot_photof, wavefn, boundf, writs
-logical :: phot_photof, wavefn, boundf, writs
-
-common /cosurf/ surf_flagsu
-logical :: surf_flagsu
 
 common /cojlpo/ jlpold
 integer :: jlpold

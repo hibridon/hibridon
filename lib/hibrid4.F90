@@ -533,6 +533,7 @@ subroutine spropn (rnow, width, eignow, hp, y1, y4, y2, &
 !  current revision date (algorithm):  30-dec-1994
 !-----------------------------------------------------------------------------
 use mod_coqvec2, only: q => q2
+use mod_phot, only: photof, wavefn, boundf, writs
 
 implicit double precision (a-h,o-z)
 !      implicit none
@@ -546,8 +547,6 @@ double precision a, b, bfact, cs, cs1, cs2, csh, dalph2, dalpha, &
     xbiry1, xbiry2, zero
 double precision eignow, gam1, gam2, hp, y1, y2, y4
 integer i, nch
-logical photof, wavefn, boundf, writs
-common /cophot/ photof, wavefn, boundf, writs
 dimension eignow(1), hp(1), y1(1), y2(1), y4(1), gam1(1), gam2(1)
 data     doneth,        dhalf &
   / 0.333333333333333d0, 0.5d0 /
@@ -1330,15 +1329,9 @@ subroutine psiasy(fj,fn,unit,sr,si,psir,psii,nopen,nmax)
 !
 !    nopen          number of open channels
 !    nmax           row dimension of matrices
-!  variables in common block /cophot/
-!     photof        true if photodissociation calculation
-!                   false if scattering calculation
-!     wavefn        true if G(a,b) transformation matrices are saved
-!                   to be used later in computing the wavefunction
 ! ----------------------------------------------------------------------------
+use mod_phot, only: photof, wavefn, boundf, writs
 implicit double precision (a-h,o-z)
-logical photof, wavefn, boundf, writs
-common /cophot/ photof, wavefn, boundf, writs
 dimension fj(1), fn(1), unit(1), sr(nmax,nmax), si(nmax,nmax), &
           psii(nmax,nmax), psir(nmax,nmax)
 one=1.d0
@@ -1459,7 +1452,6 @@ character*5   s13p(12)
 logical exstfl, adiab, &
                 kill,propf, sumf, &
                 coordf
-common /cotrans/ ttrans(36)
 ! common for y1, y2, y4
 dimension a(7)  ! arguments
 data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f', &
@@ -2402,12 +2394,11 @@ use mod_wave, only: irec, ifil, nrlogd
 use mod_coqvec, only: nphoto
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
+use mod_hiba07_13p, only: ttrans
 ! steve, you may need more space, but i doubt it since tcoord is dimensioned n
 implicit double precision (a-h,o-z)
-logical adiab, kill, photof, propf, sumf, coordf, ifull
+logical adiab, kill, photof, propf, sumf, coordf
 
-common /coground/ ifull
-common /cotrans/ ttrans(36)
 dimension scc(100)
 data zero, one, onemin /0.d0, 1.d0, -1.d0/
 data ione, mone /1,-1/
@@ -2430,8 +2421,7 @@ integer(8) :: iwavsk
 ! sc is now mask for those states for which index is desired
     do 100 iy = 1, ny
       y=ymin+(iy-1)*dy
-      ifull=.false.
-      call wfintern(scmat, y, nch, nphoto, 1)
+      call wfintern(scmat, y, nch, nphoto, 1, .false.)
 ! steve, you'll need to modify wfintern so that scmat returns both function an
 ! scmat is a vector of length nch containing the nch internal states
 ! evaluated at internal coordinate y

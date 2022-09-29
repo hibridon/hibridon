@@ -1,5 +1,6 @@
 #include "assert.h"
 module mod_hiba07_13p
+real(8) :: ttrans(6,6)
 contains
 ! sy13p (sav13p/ptr13p) defines, save variables and reads                *
 !                  potential for 1S / 3P atom scattering                 *
@@ -126,14 +127,13 @@ use constants, only: econv, xmconv
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
+use mod_skip, only: nskip, iskip
 
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 
-common /coskip/ nskip, iskip
-integer :: nskip, iskip
 dimension j(1), l(1), jhold(1), ehold(1), sc1(1), sc2(1), sc3(1), &
           sc4(1), ishold(1), is(1)
 !   econv is conversion factor from cm-1 to hartrees
@@ -506,8 +506,7 @@ subroutine tcasea(j,jlpar)
 ! -----------------------------------------
 use mod_cosysr, only: isrcod, junkr, rspar
 implicit double precision (a-h,o-z)
-common /cotrans/ ttrans
-dimension tatoe(6,6), cmat(6,6), ttrans(6,6)
+dimension tatoe(6,6), cmat(6,6)
 data zero, one,two ,three/0.d0, 1.d0, 2.d0, 3.d0/
 real(8), dimension(:), pointer :: en, de, re, be, rl, cl
 real(8), pointer :: cmix
@@ -642,6 +641,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_skip, only: nskip, iskip
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -653,8 +653,6 @@ logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-common /coskip/ nskip,iskip
-integer :: nskip, iskip
 #include "common/comdot.F90"
 save potfil
 integer, pointer :: nterm, nstate, ipol, npot

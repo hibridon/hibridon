@@ -1114,8 +1114,67 @@ end module mod_cosysr
 
 
 module mod_par
+   use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT, RPAR_COUNT
    implicit none
    save
+
+   !  fcod stores logical flags (length = lcode)
+   ! fcod = Flags CODes : stores the name of system independent parameters of type logical
+   character(len=8), parameter :: fcod(LPAR_COUNT) = [ &
+      'AIRYFL', &
+      'BASTST', &
+      'BATCH ', &
+      'CHLIST', &
+      'CSFLAG', &
+      'FLAGHF', &
+      'FLAGSU', &
+      'IHOMO ', &
+      'IPOS  ', &
+      'LOGDFL', &
+      'NOPRIN', &
+      'NUCROS', &
+      'PHOTOF', &
+      'PRAIRY', &
+      'PRLOGD', &
+      'PRPART', &
+      'PRSMAT', &
+      'PRT2  ', &
+      'PRXSEC', &
+      'READPT', &
+      'RSFLAG', &
+      'T2TEST', &
+      'TWOMOL', &
+      'WAVEFL', &
+      'WRPART', &
+      'WRSMAT', &
+      'WRXSEC', &
+      'BOUNDC']
+
+   ! pcod = Parameters CODes : stores the name of system independent parameters of type integer and real
+   character(len=8) :: pcod(IPAR_COUNT+RPAR_COUNT) = [ &
+      ! parameters of type integer
+      'JTOT1   ', &  
+      'JTOT2   ', &
+      'JTOTD   ', &
+      'JLPAR   ', &
+      'NERG    ', &
+      'NUMAX   ', &
+      'NUMIN   ', &
+      'NUD     ', &
+      'LSCREEN ', &
+      'IPRINT  ', &
+      ! parameters of type real
+      'FSTFAC  ', &  
+      'RINCR   ', &
+      'RCUT    ', &
+      'RENDAI  ', &
+      'RENDLD  ', &
+      'RSTART  ', &
+      'SPAC    ', &
+      'TOLAI   ', &
+      'XMU     ']
+
+
    logical, dimension(:), allocatable, target :: lpar
    !  variables in common block /colpar/
    !    airyfl:      if .true., then airy propagation will take place
@@ -1420,6 +1479,37 @@ module mod_par
 
    end subroutine allocate_par
 
+   subroutine set_param_names(boundc, param_names, param_names_size)
+      !  subroutine to change param_names's for bound state or scattering
+      use mod_hiparcst, only: IPAR_COUNT
+      use rpar_enum
+      implicit none
+      logical, intent(in) :: boundc
+      integer, intent(in) :: param_names_size  ! size of param_names array
+      character*8, intent(out) :: param_names(param_names_size)  ! array containing the name of each parameter (old name: pcod)
+      if (boundc) then
+        param_names(IPAR_COUNT + RPAR_BOUND_R1)      = 'R1'
+        param_names(IPAR_COUNT + RPAR_BOUND_R2)      = 'R2'
+        param_names(IPAR_COUNT + RPAR_BOUND_C)       = 'C' 
+        param_names(IPAR_COUNT + RPAR_BOUND_SPAC)    = 'SPAC' 
+        param_names(IPAR_COUNT + RPAR_BOUND_DELR)    = 'DELR' 
+        param_names(IPAR_COUNT + RPAR_BOUND_HSIMP)   = 'HSIMP' 
+        param_names(IPAR_COUNT + RPAR_BOUND_EIGMIN)  = 'EIGMIN' 
+        param_names(IPAR_COUNT + RPAR_BOUND_TOLAI)   = 'TOLAI' 
+      else
+        param_names(IPAR_COUNT + RPAR_SCAT_FSTFAC)  = 'FSTFAC'
+        param_names(IPAR_COUNT + RPAR_SCAT_RINCR)   = 'RINCR'
+        param_names(IPAR_COUNT + RPAR_SCAT_RCUT)    = 'RCUT'
+        param_names(IPAR_COUNT + RPAR_SCAT_RENDAI)  = 'RENDAI'
+        param_names(IPAR_COUNT + RPAR_SCAT_RENDLD)  = 'RENDLD'
+        param_names(IPAR_COUNT + RPAR_SCAT_RSTART)  = 'RSTART'
+        param_names(IPAR_COUNT + RPAR_SCAT_SPAC)    = 'SPAC'
+        param_names(IPAR_COUNT + RPAR_SCAT_TOLAI)   = 'TOLAI'
+      endif
+      return
+   end
+
+
 end module mod_par
 
 
@@ -1436,6 +1526,146 @@ module mod_ered
 real(8) :: ered
 real(8) :: rmu
 end module mod_ered
+
+! used to be common block coskip
+!   nskip  for a homonuclear molecule lamda is running in steps of nskip=2
+!          for a heteronuclear molecule nskip=1
+!
+!   iskip   same as nskip, used for consistency check
+module mod_skip
+integer :: nskip
+integer :: iskip
+end module mod_skip
+
+! used to be common block covib
+module mod_vib
+use mod_parbas, only: maxvib
+integer :: nvibs = -1
+integer :: ivibs(maxvib) = -1
+integer :: nvibp = -1
+integer :: ivibp(maxvib) = -1
+end module mod_vib
+
+! used to be common block cophot
+!     photof        true if photodissociation calculation
+!                   false if scattering calculation
+!     wavefn        true if G(a,b) transformation matrices are saved
+!                   to be used later in computing the wavefunction
+module mod_phot
+logical :: photof
+logical :: wavefn
+logical :: boundf
+logical :: writs
+end module mod_phot
+
+! used to be common block cospbf
+module mod_spbf
+   integer :: lnbufs
+   integer :: lnbufl
+   integer :: nbuf
+   integer :: maxlsp
+   integer :: maxllb
+   integer :: ihibuf
+   integer :: igjtp
+end module mod_spbf
+
+! used to be common block comom
+module mod_mom
+  real(8) :: spin
+  real(8) :: xj1
+  real(8) :: xj2
+  integer :: j1
+  integer :: in1
+  integer :: j2
+  integer :: in2
+  integer :: maxjt
+  integer :: maxjot
+  integer :: nwaves
+  integer :: jfsts
+  integer :: jlparf
+  integer :: jlpars
+  integer :: njmax
+  integer :: j1min
+  integer :: j2max
+end module mod_mom
+
+! used to be common block cofile
+module mod_file
+  character(40) :: input
+  character(40) :: output
+  character(40) :: jobnam
+  character(40) :: savfil
+end module mod_file
+
+! used to be common block cosurf
+!    flagsu:    if .true., then molecule-surface collisons
+!                 this variable is set equal to flagsu, it is held in a
+!                 separate common block for compatability with subroutines
+!                 smatop, soutpt, and xwrite
+!                 if .true., then the problem is assumed to a molecule
+!                 scattering off a surface, in which case the diagonal
+!                 elements of the transition probabilities are equal to the
+!                 modulus squared of the s-matrix (not t-matrix elements)
+
+module mod_surf
+  logical :: flagsu
+end module mod_surf
+
+
+! used to be common block cojtot
+module mod_jtot
+  integer :: jjtot
+  integer :: jjlpar
+end module mod_jtot
+
+! used to be common block coja
+module mod_ja
+  integer :: jja(9)
+end module mod_ja
+
+! used to be common block coel
+module mod_el
+  integer :: ll(9)
+end module mod_el
+
+! used to be common block cotrn
+module mod_trn
+  real(8) :: spin
+  integer :: maxjt
+  integer :: nwaves
+  integer :: jfsts
+  integer :: jlparf
+  integer :: jlpars
+  integer :: njmax
+  integer :: jpmax
+end module mod_trn
+
+! used to be common block cosavi and cosavr
+module mod_sav
+  use mod_hiparcst, only: IPAR_COUNT, RPAR_COUNT
+
+  integer :: iipar
+  integer :: ixpar(IPAR_COUNT)
+
+  integer :: irpar
+  real(8) :: rxpar(RPAR_COUNT)
+end module mod_sav
+
+! used to be common block copmat
+module mod_pmat
+  real(8) :: rtmn
+  real(8) :: rtmx
+  integer :: iflag
+end module mod_pmat
+
+! used to be common block cputim
+module mod_cputim
+  real(8) :: cpuld
+  real(8) :: cpuai
+  real(8) :: cpupot
+  real(8) :: cpusmt
+  real(8) :: cpupht
+end module mod_cputim
 
  ! all the commons blocks from hiiolib_f.F90:
     !!   common/cdbf/ ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf(llbuf)

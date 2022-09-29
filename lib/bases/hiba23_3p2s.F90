@@ -123,16 +123,15 @@ use constants, only: econv, xmconv
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
+use mod_skip, only: nskip, iskip
+!  modules mod_jtot, mod_ja, and mod_el used to transmit to ground subroutine
+use mod_jtot, only: jjtot, jjlpar
+use mod_ja, only: jja
+use mod_el, only: ll
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-!  common blocks cojtot, coja, and coel used to transmit to ground subroutine
-common /cojtot/ jjtot, jjlpar
-common /coja/  jja(9)
-common /coel/  ll(9)
-common /coskip/ nskip, iskip
-integer :: nskip, iskip
 !  arrays in argument list
 dimension j(1), l(1), is(1),jhold(1),ehold(1),ishold(1)
 !  matrices for transformation between atomic and molecular BF functions
@@ -616,6 +615,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod
 use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_skip, only: nskip, iskip
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -625,8 +625,6 @@ logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-common /coskip/ nskip,iskip
-integer :: nskip, iskip
 #include "common/comdot.F90"
 save potfil
 integer, pointer :: nterm, nvib

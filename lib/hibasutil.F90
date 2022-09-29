@@ -296,8 +296,7 @@ vprm = ( (-1) ** iphase) * x * sqrt(xnorm)
 vprm = two * vprm
 !     provisoire: check with nh3h2(j=0) calculations
 !     multiplicationfactor:
-!      s4pir8 = sqrt ( 4.d0 * acos(-1.d0) )
-!      s4pi = s4pir8
+!      s4pi = sqrt ( 4.d0 * acos(-1.d0) )
 !      vprm = vprm *sqrt(2*xlambda1+1) /s4pi
 !      cnorm= two*sqrt(2*xlambda1+1)*sqrt(xnorm)/s4pi
 return
@@ -656,8 +655,6 @@ jtot, -kp, k, lambda, mu, lambda2, mu2, &
 vprm, csflag)
 v = v + vprm * iepsp
 end if
-s4pir8 = sqrt ( 4.d0 * acos(-1.d0) )
-s4pi = s4pir8
 return
 end
 end module mod_hibasutil

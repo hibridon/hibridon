@@ -168,6 +168,7 @@ use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
+use mod_vib, only: nvibs, ivibs, nvibp, ivibp
 
 implicit double precision (a-h,o-z)
 real(8), intent(out), dimension(:) :: sc1
@@ -178,7 +179,6 @@ type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
 !  these parameters must be the same as in hisysgpi
-common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
 dimension e(3,3), ieps(2), iepp(2), iomc(4), iomr(4), eig(3)
 dimension jhold(1), ishold(1), ehold(1), &
           j(1), is(1), l(1)
@@ -1346,19 +1346,18 @@ use mod_cosysr, only: isrcod, junkr, rspar
 use mod_par, only: ihomo
 use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_skip, only: nskip, iskip
+use mod_vib, only: nvibs, ivibs, nvibp, ivibp
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-integer :: i, ipi, isg, isgpi, ivibp, ivibs, ivp, ivs, j, k, l, lc, nterm, nvibp, nvibs, nvmaxp, nvmaxs, nvminp, nvmins
+integer :: i, ipi, isg, isgpi, ivp, ivs, j, k, l, lc, nterm, nvmaxp, nvmaxs, nvminp, nvmins
 logical existf
 character*8 char
 character*(*) fname
 character*1 dot
 character*60 filnam, line, potfil, filnm1
-common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
-common /coskip/ nskip,iskip
-integer :: nskip, iskip
 save potfil
 #include "common/comdot.F90"
 !  set default values for 2pi-2sigma scattering

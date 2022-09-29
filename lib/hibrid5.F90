@@ -115,8 +115,6 @@ subroutine soutpt (tsq, sr, si, scmat, &
 !    firstj   if .true. on entry, header is written to s-matrix file
 
 !    nlevel   number of energetically distinct levels included in channel basi
-!  variable in common block /cosurf/
-!    flagsu:    if .true., then molecule-surface collisons
 !  variable in common block /cojlpo/
 !    jlpold:    old value of parity, used to insure correct accumulation
 !               of all partial waves in cases where jlpar=0 .
@@ -124,11 +122,6 @@ subroutine soutpt (tsq, sr, si, scmat, &
 !    econv:    conversion factor from cm-1 to hartrees
 !    xmconv:   converson factor from amu to atomic units
 !    ang2c:     conversion factor from square bohr to square angstroms
-!  variables in common block /cophot/
-!    photof    true if photodissociation calculation
-!              false if scattering calculation
-!    wavefn    true if g(a,b) transformation matrices are saved
-!              to be used later in computing the wavefunction
 !  ---------------------------------------------------------------------------
 use mod_cosout
 use constants
@@ -141,6 +134,8 @@ use mod_hibrid2, only: mxoutd, mxoutr
 use funit
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
+use mod_phot, only: photof, wavefn, boundf
+use mod_surf, only: flagsu
 implicit double precision (a-h,o-z)
 real(8), intent(inout) :: tsq(nmax,nmax)
 real(8), intent(inout) :: sr(nmax,nmax)
@@ -157,17 +152,15 @@ integer, intent(in) :: jlev(nlevop)
 real(8), intent(in) :: elev(nlevop)
 integer, intent(in) :: inlev(nlevop)
 logical ipos, csflag, prsmat, prt2, writs, wrpart, prpart, &
-        wrxsec, prxsec, flaghf, t2test, flagsu, firstj, twomol, &
-        nucros, photof, wavefn, faux, twojlp, boundf, writs_unused
+        wrxsec, prxsec, flaghf, t2test, firstj, twomol, &
+        nucros, faux, twojlp
 integer :: jpack(nmax*nmax)
 integer :: lpack(nmax*nmax)
 
 character*20 cdate
 integer :: soutpt_sc_file = 1
 common /cojsav/ jsav1, jsav2
-common /cosurf/ flagsu
 common /cojlpo/ jlpold
-common /cophot/ photof, wavefn, boundf, writs_unused
 !
 data izero, ione /0, 1/
 xjtot = jtot
@@ -325,6 +318,7 @@ use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(10)
 use constants
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
+use mod_surf, only: flagsu
 implicit double precision (a-h,o-z)
 real(8), intent(in) :: scmat(nmax, nlevop)
 integer, intent(in) :: jlev(nlevop)
@@ -332,9 +326,8 @@ real(8), intent(in) :: elev(nlevop)
 integer, intent(in) :: inlev(nlevop)
 character*20 cdate
 character*40 form
-logical ipos, csflag, wrpart, prpart, flaghf, flagsu,twomol,nucros, &
-        twojlp,headf
-common /cosurf/ flagsu
+logical ipos, csflag, wrpart, prpart, flaghf, twomol, nucros, &
+        twojlp, headf
 !  write partial opacity to unit (24+ien) if desired
 !  in cs calculation this is only done if nu = numax, in which
 !  case the partial opacity has been summed over all projection indices
@@ -970,8 +963,6 @@ subroutine xwrite (zmat, tq3, jlev, elev, inlev, nerg, energ, &
 !    of the rotational quantum numbers, the total angular momentum,
 !    and the coupled-states projection index are equal to the values
 !    stored in jlev, jtot, jfirst, jfinal, nu, numin, and numax plus 1/2
-!  variable in common block /cosurf/
-!    flagsu:    if .true., then molecule-surface collisons
 
 ! ----------------------------------------------------------------------
 use constants
@@ -983,6 +974,7 @@ use funit
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
+use mod_surf, only: flagsu
 implicit none
 real(8), intent(out) :: zmat(nmax, nmax)
 real(8), intent(out) :: tq3(nmx, nmx)
@@ -1016,8 +1008,6 @@ integer :: i, ien, irec, isa, j, jhold, jj1, jj2, jmin, jphold, nlevmx, nlevop, 
 character*20 cdate
 common /cojsav/ jsav1, jsav2
 integer :: jsav1, jsav2
-common /cosurf/ flagsu
-logical :: flagsu
 integer :: cs_file = FUNIT_CS  ! cross secton input file unit
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
@@ -1815,13 +1805,12 @@ use mod_cow, only: q1 => w_as_vec ! q1(1)
 use mod_cozmat, only: q2 => zmat_as_vec ! q2(1)
 use mod_par, only: wrpart, wrxsec
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_file, only: input, output, jobnam, savfil
 implicit double precision (a-h,o-z)
 logical writs,csflag,nucros
 character*40 oldlab
 integer jtot, nchmax
-character*40 input,output,jobnam,savfil
 integer, parameter :: bufsize = 32
-common /cofile/ input,output,jobnam,savfil
 dimension word(bufsize),iword(bufsize),nlev(1)
 if (.not. wrpart .and. .not. wrxsec) then
   write (6, 5)

@@ -59,7 +59,6 @@ character*10 elaps, cpu
 logical csflg, flaghf, flgsu, twmol, nucrs, &
      batch, fast, lpar2, lpar, exstfl
 integer, parameter :: hfxfil_unit = 11
-common /codim/ nairy
 !
 !     storage for S-matrix elements red from .smt file
 real(8), dimension(:), allocatable :: sreal, simag

@@ -314,6 +314,8 @@ use mod_grovec, only: igrovec_type_block, dgrovec_type_block
 use mod_hiba10_22p, only: trans22
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
+use mod_pmat, only: rtmn, rtmx, iflag
+use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
 implicit none
 real(8) :: second
 real(8), dimension(*), intent(out) :: w
@@ -343,11 +345,6 @@ type(igrovec_type_block), pointer :: blocki
 type(dgrovec_type_block), pointer :: blockd
 #endif
 
-common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
-real(8) :: cpuld, cpuai, cpupot, cpusmt, cpupht
-common /copmat/ rtmn, rtmx, iflag
-real(8) :: rtmn, rtmx
-integer :: iflag
 real(8), parameter :: zero = 0.d0
 real(8), parameter :: one = 1.d0
 real(8), parameter :: two = 2.d0
@@ -577,8 +574,8 @@ use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_selb, only: ibasty
+use mod_vib, only: nvibs, ivibs, nvibp, ivibp
 logical ihomo
-common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
 common /conlamp/ lamnump(50)
 integer, pointer :: nterm, nvibmn, nvibmx
 nterm=>ispar(1); nvibmn=>ispar(2); nvibmx=>ispar(3)
@@ -672,10 +669,10 @@ use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_selb, only: ibasty
+use mod_vib, only: nvibs, ivibs, nvibp, ivibp
 implicit double precision(a-h,o-z)
 
 logical ihomo
-common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
 dimension nvbmnr(4),nvbmxr(4),nvbmnc(4),nvbmxc(4)
 nstep=1
 if(ihomo) nstep=2
@@ -817,10 +814,10 @@ use mod_covvl, only: vvl
 use mod_cosysi, only: nscode, ispar
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_selb, only: ibasty
+use mod_vib, only: nvibs, ivibs, nvibp, ivibp
 
 implicit double precision(a-h,o-z)
 logical ihomo
-common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
 common /conlamp/ lamnump(7)
 integer, pointer :: nterm, nvibmn, nvibmx
 nterm=>ispar(1); nvibmn=>ispar(2); nvibmx=>ispar(3)
@@ -1010,15 +1007,13 @@ subroutine propag (z, w, zmat, amat, bmat, &
 !           iflag = 0 if all channels are in classically forbidden region
 !           iflag = 1 if some channels are open
 !           iflag = 2 if all asymptotically open channels are open at r
-!  variables in common block /cophot/
-!     photof        true if photodissociation calculation
-!                   false if scattering calculation
-!     wavefn        true if g(a,b) transformation matrices are saved
-!                   to be used later in computing the wavefunction
 !  ------------------------------------------------------------------
 use mod_ancou, only: ancou_type
 use mod_hibrid2, only: mxoutd
 use funit, only: FUNIT_TRANS_MAT, FUNIT_QUAD_MAT
+use mod_phot, only: photof, wavefn, boundf, writs
+use mod_pmat, only: rtmn, rtmx, iflag
+use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
 implicit none
 !   square matrices
 real(8), intent(out) :: z(nmax, nch)
@@ -1057,21 +1052,6 @@ logical :: twoen
 logical ::  first
 character*10 :: tbs,tps,tds,tws,tairys, twfs
 character*10 :: time
-common /copmat/ rtmn, rtmx, iflag
-real(8) :: rtmn
-real(8) :: rtmx
-integer :: iflag
-common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
-real(8) :: cpuld
-real(8) :: cpuai
-real(8) :: cpupot
-real(8) :: cpusmt
-real(8) :: cpupht
-common /cophot/ photof, wavefn, boundf, writs
-logical :: photof
-logical :: wavefn
-logical :: boundf
-logical :: writs
 
 real(8) :: r
 real(8) :: t1, t2
@@ -1347,11 +1327,6 @@ subroutine logdb (z, nmax, nch, rmin, rmax, nsteps, &
 !                   this timing information comes from repeated calls
 !                   of the form call mtime(elapsed) where "elapsed"
 !                   is the current elapsed time in seconds
-!     variables in common block /cophot/
-!     photof        true if photodissociation calculation
-!                   false if scattering calculation
-!     wavefn        true if g(a,b) transformation matrices are saved
-!                   to be used later in computing the wavefunction
 !     blas routines daxpy and dscal are used in o(n*n) loops
 !     symmetry of the matrices z and w is not exploited in these loops,
 !     and blas routines are not used for o(n) loops
@@ -1361,6 +1336,8 @@ use mod_ancou, only: ancou_type
 use mod_wave, only: irec, ifil, nchwfu, nrlogd, iendwv, get_wfu_logd_rec_length
 
 use funit
+use mod_phot, only: photof, wavefn, boundf, writs
+use mod_surf, only: flagsu
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: z(nmax*nch)
 integer, intent(in) :: nmax
@@ -1399,12 +1376,8 @@ integer ich, icode, icol, idiag, ierr, ij, irow, istep, kstep, &
 !     :     tn, tp,  zero, wdiag
 !      real w, z
 !      real scr1, scr2, wref, z1, z2
-logical photof, wavefn, boundf, writs
-logical flagsu
 !      external mtime, potmat, daxpy, smxinv, dscal
 !     matrices z and w are stored column by column as one-dimensi
-common /cophot/ photof, wavefn, boundf, writs
-common /cosurf/ flagsu
 data zero,  one,  two, three,six,  eight &
     / 0.d0, 1.d0, 2.d0, 3.d0, 6.d0, 8.d0 /
 data izero, ione /0, 1/
@@ -1947,15 +1920,11 @@ subroutine runlog (z, &
 !                   if .false., then 80 column printer
 !     nch           number of coupled equations
 !     nmax          leading dimension of arrays z and w
-!     variables in common block /cophot/
-!     photof        true if photodissociation calculation
-!                   false if scattering calculation
-!     wavefn        true if g(a,b) transformation matrices are saved
-!                   to be used later in computing the wavefunction
 !  ------------------------------------------------------------------
 use mod_coqvec, only: nphoto, q
 use mod_ancou, only: ancou_type
 use mod_hibrid2, only: mxoutd, mxoutr
+use mod_phot, only: photof, wavefn, boundf, writs
 implicit double precision (a-h, o-z)
 type(ancou_type), intent(in) :: v2
 real(8), intent(out) :: z(nmax*nch)
@@ -1980,10 +1949,8 @@ integer, intent(in) :: nmax
 !      real eshift, r, rend, rmax, rmin, spac, tl, tlw, tp, tpw
 !      real z
 integer nsteps
-logical boundf, writs
 !  internal logical variables
-logical iread, iwrite, print, photof, wavefn
-common /cophot/ photof, wavefn, boundf, writs
+logical iread, iwrite, print
 common /constp/ nsteps, isteps
 
 !  z, w, amat, and bmat are stored column by column in one dimensional arrays
@@ -2425,8 +2392,8 @@ subroutine smatop (tmod, sr, si, scmat, lq, r, prec, &
 !             contains the open-open block of the log-derivative matrix,
 !             packed into the lower nopen x nopen submatrix
 !             on return:  tmod contains the modulus squared of the t-matrix
-!               if the logical variable flagsu, contained in common /cosurf/ i
-!               .true., then the calculation is assumed to be that of a molecu
+!               if the logical variable flagsu, contained in modurle mod_surf is
+!               .true., then the calculation is assumed to be that of a molecule
 !               colliding with a surface, in which case tmod contains the
 !               modulus squared of the s-matrix
 !             if the flag photof=.true., then tmod contains the photodissociat
@@ -2457,13 +2424,6 @@ subroutine smatop (tmod, sr, si, scmat, lq, r, prec, &
 !    kwrit:   if true, k matrix is printed out
 !    ipos:    if true, 132 line printer
 
-!  variable in common block /cosurf/
-!    flagsu:    if .true., then molecule-surface collisons
-!  variables in common block /cophot/
-!     photof        true if photodissociation calculation
-!                   false if scattering calculation
-!     wavefn        true if g(a,b) transformation matrices are saved
-!                   to be used later in computing the wavefunction
 !  subroutines called:
 !    vsmul:     scalar times a vector
 !    cbesn,cbesj  ricatti-bessel functions (from b.r. johnson)
@@ -2483,6 +2443,8 @@ use mod_par, only: prsmat, jlpar! spac=>scat_spac
 use mod_wave, only: irec, ifil, ipos2, ipos3, nrlogd, iendwv, ipos2_location
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
+use mod_phot, only: photof, wavefn, boundf, writs
+use mod_surf, only: flagsu
 
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax, nmax), intent(inout) :: tmod
@@ -2510,10 +2472,6 @@ integer isw, i, icol, l
 character*1 forma
 character*40 flxfil
 #endif
-logical flagsu, photof, wavefn, &
-     boundf, writs
-common /cosurf/ flagsu
-common /cophot/ photof, wavefn, boundf, writs
 !     The following three variables are used to determine the (machine
 !     dependent) size of built-in types
 integer int_t
@@ -2938,17 +2896,14 @@ subroutine smatrx (z, sr, si, &
 !    nmax     on entry:  maximum row dimension of matrices
 !    kwrit    if true, k matrix is printed out
 
-!  variables in common block /cophot/
-!     photof        true if photodissociation calculation
-!                   false if scattering calculation
-!     wavefn        true if g(a,b) transformation matrices are saved
-!                   to be used later in computing the wavefunction
+
 !  ---------------------------------------------------------------------------
 use mod_coqvec, only: nphoto, q
 use mod_coeint, only: eint
 use mod_hibrid2, only: mxoutd, mxoutr
 use mod_wave, only: ifil, ipos2, ipos3, nrlogd, iendwv, ipos2_location
 use mod_ered, only: ered, rmu
+use mod_phot, only: photof, wavefn, boundf, writs
 
 implicit double precision (a-h,o-z)
 real(8), intent(inout) :: z(nmax,nmax)
@@ -2968,8 +2923,6 @@ logical, intent(in) :: kwrit
 logical, intent(in) :: ipos
 
 
-logical photof, wavefn, boundf, writs
-common /cophot/ photof, wavefn, boundf, writs
 real(8) :: amat(nmax,nmax)
 integer :: isc1(nch)
 

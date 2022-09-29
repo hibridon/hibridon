@@ -55,6 +55,8 @@ use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
+use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
+use mod_trn, only: spin, maxjt, nwaves, jfsts, jlparf, jlpars, njmax, jpmax
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  trnfil, smtfil
@@ -63,10 +65,6 @@ character*10  elaps, cpu
 logical csflag, flaghf, flagsu, twomol, exstfl, &
         nucros
 !
-common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
-                igjtp
-common /cotrn/  spin, maxjt, &
-     nwaves, jfsts, jlparf, jlpars, njmax, jpmax
 save nout
 dimension a(6)
 data  tol,   zero,   nstep &
@@ -300,14 +298,12 @@ use mod_hibrid2, only: mxoutd
 use mod_hibrid5, only: sread
 use mod_par, only: batch, ipos
 use mod_selb, only: ibasty
+use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
+use mod_trn, only: spin, maxjt, nwaves, jfsts, jlparf, jlpars, njmax, jpmax
 implicit double precision (a-h,o-z)
 complex*8 t, tp
 logical diag, diagj, diagin, diagp, diagjp, diagnp
 character*10 elaps, cpu
-common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
-                igjtp
-common /cotrn/  spin, maxjt, &
-     nwaves, jfsts, jlparf, jlpars, njmax, jpmax
 ! common blocks for levels for which xs's to be computed
 !
 dimension etrans(1)
@@ -632,15 +628,13 @@ use mod_hibrid5, only: sread
 use mod_hibasis, only: is_j12, is_twomol
 use mod_par, only: batch, ipos
 use mod_selb, only: ibasty
+use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
+use mod_trn, only: spin, maxjt, nwaves, jfsts, jlparf, jlpars, njmax, jpmax
 implicit double precision (a-h,o-z)
 complex*8 t, tp
 logical diag, diagj, diagin, diagp, diagjp, diagnp, &
   flaghf
 character*10 elaps, cpu
-common /cospbf/ lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, &
-                igjtp
-common /cotrn/  spin, maxjt, &
-     nwaves, jfsts, jlparf, jlpars, njmax, jpmax
 ! common blocks for levels for which xs's to be computed
 !
 dimension etrans(1)

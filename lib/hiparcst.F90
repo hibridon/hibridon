@@ -1,9 +1,9 @@
 ! hibridon parameter constants
 module mod_hiparcst
 
-integer, parameter :: IPAR_COUNT = 10
-integer, parameter :: RPAR_COUNT = 9
-integer, parameter :: LPAR_COUNT = 28
+   integer, parameter :: IPAR_COUNT = 10  ! number of system independent parameters of type integer
+   integer, parameter :: RPAR_COUNT = 9   ! number of system independent parameters of type real
+   integer, parameter :: LPAR_COUNT = 28  ! number of system independent parameters of type logical
 
 end module mod_hiparcst
 

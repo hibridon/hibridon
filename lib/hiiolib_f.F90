@@ -30,6 +30,15 @@
 !
 !  NB cstart ultrix-dec for i/o with fortran instead of c routines
 #include "assert.h"
+
+module mod_disc
+  integer :: ipos(98)
+  integer :: iun(98)
+  integer :: iostat(98)
+  integer :: icatf(98)
+  character(len=14) :: nam(98)
+end module mod_disc
+
 ! ---------------------------------------------------------------
 subroutine fimove (nxfile)
 ! ---------------------------------------------------------------
@@ -281,15 +290,13 @@ use funit, only: FUNIT_INP
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
+use mod_skip, only: nskip, iskip
+use mod_file, only: input, output, jobnam, savfil
 implicit double precision (a-h,o-z)
 integer i, length
 logical existf
-character*40 input, jobnam, output, savfil
 character*(*) filnam
 
-common /coskip/ nskip,iskip
-integer :: nskip, iskip
-common /cofile/ input, output, jobnam, savfil
 
 ! ----------------------------------------------------------------
 !  open unit 8 for standard input
@@ -932,14 +939,13 @@ use mod_par, only: airyfl, csflag, flaghf, flagsu, ipos, &
 use funit
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
+use mod_file, only: input, output, jobnam, savfil
 implicit double precision (a-h,o-z)
 integer ifile, nerg, nfile, lenx, isize, isizes
 logical existf
 character*40  oldlab,newlab
 character*40 xname,xnam1
 character*20 cdate
-character*40 input,output,jobnam,savfil
-common /cofile/ input,output,jobnam,savfil
 common /cosize/ isize, isizes
 if (nerg .gt. 1) then
 !  check to see if nerg .le. 25
@@ -1922,11 +1928,10 @@ subroutine assgn(luni,filnam,isize,icat)
 !  icat:  if icat=0, scratch
 !         if icat>0, permanent
 use mod_clseg, only: lseg
+use mod_disc, only: ipos, iun, iostat, icatf, nam
 character*(*) filnam
-character*14 nam
 character*12 stat
 character*(*) name
-common/disc/ ipos(98),iun(98),iostat(98),icatf(98),nam(98)
 logical openfl,exstfl
 !
 isize=0
@@ -2001,9 +2006,8 @@ subroutine rdabsf(luni,a,l,iword)
 ! on file. l and iword should be multiple of lseg, otherwise unefficient
 use mod_clseg, only: lseg
 use mod_cobuf, only: lbuf
+use mod_disc, only: ipos, iun, iostat, icatf, nam
 implicit double precision (a-h,o-z)
-character*14 nam
-common/disc/ ipos(98),iun(98),iostat(98),icatf(98),nam(98)
 dimension a(1),buf(lbuf)
 if(lseg.gt.lbuf) stop 'lbuf too small in rdabsf'
 ibl=iword/lseg+1
@@ -2112,9 +2116,8 @@ end
 subroutine assgn(luni,name,lenn,icat)
 implicit double precision (a-h,o-z)
 character*(*) name
-character*14 nam,blank
+character*14 blank
 character*15 namx
-common/disc/ ipos(98),iun(98),iostat(98),icatf(98),nam(98)
 data lendef/2000/,blank/'              '/
 if (iun(luni).ne.0) return
 if(name.eq.blank) call tmpnm(luni,name)

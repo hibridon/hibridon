@@ -72,11 +72,6 @@ subroutine airprp (z, &
 !                    if tolai .ge. 1, then step sizes are controlled by the
 !                    algorithm:  drnext = tolai * drnow
 !  rincr:            step size increase will occur only if rnext > rincr
-!  variables in common block /cophot/
-!     photof        true if photodissociation calculation
-!                   false if scattering calculation
-!     wavefn        true if G(a,b) transformation matrices are saved
-!                   to be used later in computing the wavefunction
 !  logical variables:
 !     iprint:       if .true., then print out of step-by-step information
 !     twoen:        if .true., then
@@ -96,6 +91,7 @@ use mod_par, only: par_iprint=>iprint
 use mod_wave, only: irec, ifil, nchwfu, iendwv, get_wfu_airy_rec_length
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
+use mod_phot, only: photof, wavefn, boundf, writs
 implicit double precision (a-h, o-z)
 !  matrix dimensions (row dimension = nmax, matrices stored column by column)
 real(8), dimension(nmax*nmax), intent(inout) :: z
@@ -117,9 +113,7 @@ type(ancou_type), intent(in) :: v2
 logical :: airy_prop_completed
 integer i, icol, ierr, ipt, izero, kstep, maxstp, &
         ncol, npt, nskip
-logical photof, wavefn, boundf, writs
 
-common /cophot/ photof, wavefn, boundf, writs
 #if defined(HIB_UNIX_IBM)
 character*1 forma, formb
 #endif
