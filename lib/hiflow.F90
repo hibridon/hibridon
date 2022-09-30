@@ -140,6 +140,7 @@ real(8) :: t1, t11, t2, t22, tb, tbm, tcpu0, tcpu1, tcpu2, tcpuf, twall0, twall1
 real(8) :: xjtot
 
 real(8) :: second
+integer :: isteps
 
 
 first=.true.
@@ -244,6 +245,7 @@ rendld=rxpar(RPAR_SCAT_RENDLD)
 rstrt0=rxpar(RPAR_SCAT_RSTART)
 spac=  rxpar(RPAR_SCAT_SPAC)
 tolhi= rxpar(RPAR_SCAT_TOLAI)
+isteps=0
 dlogd = rendld - rstart
 xmu=rxpar(RPAR_XMU)
 rtmnla=rstrt0
@@ -635,7 +637,7 @@ call propag (z, w, zmat, amat, bmat, &
              ien, nerg, ered, eshift, rstart, rendld, spac, &
              tolhi, rendai, rincr, fstfac, tb, tbm, &
              ipos, prlogd, noprin, airyfl, prairy, &
-             nch, nopen, nairy, ntop, v2)
+             nch, nopen, nairy, ntop, v2, isteps)
 
 ! if bound state calculation, end it now
 if (boundc) then

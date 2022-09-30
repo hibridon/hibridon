@@ -935,7 +935,7 @@ subroutine propag (z, w, zmat, amat, bmat, &
                    ien, nerg, en, eshift, rstart, rendld, spac, &
                    tolhi, rendai, rincr, fstfac, tb, tbm, &
                    ipos, prlogd, noprin, airyfl, prairy, &
-                   nch, nopen, nairy, nmax, v2)
+                   nch, nopen, nairy, nmax, v2, isteps)
 ! ------------------------------------------------------------------------
 !  subroutine to:
 !    1.  propagate the log-derivative matrix from rstart to rendld
@@ -1047,6 +1047,7 @@ integer, intent(out) :: nopen
 integer, intent(in) :: nairy
 integer, intent(in) :: nmax
 type(ancou_type), intent(in) :: v2
+integer, intent(inout) :: isteps
 
 logical :: twoen
 logical ::  first
@@ -1115,7 +1116,7 @@ call mtime(ttx,tty)
 call runlog (z, &
              r, rendld, spac, eshift, itwo, twoen, &
              td, tdm, tp, tpm, twf, twfm, prlogd, noprin, &
-             ipos, nch, nmax, v2)
+             ipos, nch, nmax, v2, isteps)
 
 !  on return from runlog, z contains the log-derivative matrix at r = rendld
 !  branch to airy integration if desired. integrate coupled equations
@@ -1874,7 +1875,7 @@ end
 subroutine runlog (z, &
                    r, rend, &
                    spac, eshift, itwo, twoen, tl, tlw, tp, tpw, &
-                   twf, twfw, prlogd, noprin, ipos, nch, nmax, v2)
+                   twf, twfw, prlogd, noprin, ipos, nch, nmax, v2, isteps)
 !     log-derivative propagator from r to r = rend
 !     the logd code is based on the improved log-derivative method
 !     for reference see  d.e.manolopoulos, j.chem.phys., 85, 6425 (1986)
@@ -1945,6 +1946,7 @@ logical, intent(in) :: noprin
 logical, intent(in) :: ipos
 integer, intent(in) :: nch
 integer, intent(in) :: nmax
+integer, intent(inout) :: isteps
 
 !      real eshift, r, rend, rmax, rmin, spac, tl, tlw, tp, tpw
 !      real z
@@ -1964,7 +1966,10 @@ if (rmax .eq. rmin) then
 !  here if no logd propagation, just initialization of matrix
   nsteps = 0
 else
-  nsteps = int ((rmax - rmin) / spac) + 1
+  if (isteps .eq. 0) then
+    nsteps = int ((rmax - rmin) / spac) + 1
+    isteps=1
+  endif
   if (print) then
      write (9, 10) rmin, rmax, spac, nsteps, nch
 10      format(/' ** LOGD PROPAGATION:', /, &
