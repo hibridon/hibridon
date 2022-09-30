@@ -31,6 +31,17 @@
 !  NB cstart ultrix-dec for i/o with fortran instead of c routines
 #include "assert.h"
 
+! block data io
+! cosize
+!    isize:     size of files (only needed for univac, optional on vax)
+!    isizes:    size of s-matrix file (only needed for univac, optional
+!               on vax
+module mod_file_size
+  integer :: isize
+  integer :: isizes
+end module mod_file_size
+
+
 module mod_disc
   integer :: ipos(98)
   integer :: iun(98)
@@ -731,17 +742,6 @@ endif
 if(batch) call exit
 end
 ! ---------------------------------------------------------------
-block data io
-! ---------------------------------------------------------------
-!     revision date: 5-mar-2008
-!
-!  variable in common block /cosize/
-!    isize:     size of files (only needed for univac, optional on vax)
-!    isizes:    size of s-matrix file (only needed for univac, optional
-!               on vax
-! -----------------------------------------------------
-common /cosize/ isize, isizes
-end
 !
 !     ------------------------------------------------------------
 subroutine openf(lunit,filnam,lmode,isize)
@@ -919,10 +919,6 @@ subroutine openfi (nerg)
 !                if .false, then initial calculation
 !                in any case unit=13 (filename trstrt) is opened to hold
 !                temporary information in case of restart
-!  variable in common block /cosize/
-!    isize:     size of files (only needed for univac, optional on vax)
-!    isizes:    size of s-matrix file (only needed for univac, optional
-!               on vax
 !
 !  subroutines called: open
 !  --------------------------------------------------------------------
@@ -940,13 +936,13 @@ use funit
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_file, only: input, output, jobnam, savfil
+use mod_file_size, only : isize, isizes
 implicit double precision (a-h,o-z)
-integer ifile, nerg, nfile, lenx, isize, isizes
+integer ifile, nerg, nfile, lenx
 logical existf
 character*40  oldlab,newlab
 character*40 xname,xnam1
 character*20 cdate
-common /cosize/ isize, isizes
 if (nerg .gt. 1) then
 !  check to see if nerg .le. 25
   if (nerg .gt. 25) then
@@ -1499,20 +1495,15 @@ subroutine dread(ii,l,ifil,irec,iof)
 !
 !.....read "l" integer words from record "irec" on file "ifil"
 !.....with offset iof
-!
-!  variable in common block /cosize/
-!    isize:     size of files (only needed for univac, optional on vax)
-!    isizes:    size of s-matrix file (only needed for univac, optional
-!               on vax
 ! --------------------------------------------------------------
 use mod_clseg, only: intrel
 use mod_cdbf, only: ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf,llbuf
 use mod_cdio, only: allocate_cdio, cdio_is_allocated, iadr, len, next, iun, iostat, last, lhea, junk, memory_block
 use mod_cobuf, only: lbuf, ibuf
+use mod_file_size, only : isize, isizes
 implicit double precision (a-h,o-z)
 character*(*) name
 parameter (maxun=2, maxrec=5000)
-common /cosize/ isize,isizes
 dimension ii(1)
 if(iun(ifil).eq.0) then
   write(6,10) ifil,irec
