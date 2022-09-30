@@ -159,8 +159,9 @@ real(8) :: a(15)
 integer :: ia(10)
 integer :: ihold(15)
 integer :: lhold(15)
-common /cokeyl/ nncode, llcode, ijcode
-integer :: nncode
+
+! these were members of cokeyl common block
+integer :: nncode  
 integer :: llcode
 integer :: ijcode
 
