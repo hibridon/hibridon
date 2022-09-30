@@ -159,7 +159,6 @@ integer :: lpack(nmax*nmax)
 
 character*20 cdate
 integer :: soutpt_sc_file = 1
-common /cojsav/ jsav1, jsav2
 common /cojlpo/ jlpold
 !
 data izero, ione /0, 1/
@@ -1006,8 +1005,6 @@ logical, intent(in) :: ihomo
 real(8) :: ener
 integer :: i, ien, irec, isa, j, jhold, jj1, jj2, jmin, jphold, nlevmx, nlevop, nn, nxfile
 character*20 cdate
-common /cojsav/ jsav1, jsav2
-integer :: jsav1, jsav2
 integer :: cs_file = FUNIT_CS  ! cross secton input file unit
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
