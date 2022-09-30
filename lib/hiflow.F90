@@ -141,6 +141,7 @@ real(8) :: xjtot
 
 real(8) :: second
 integer :: isteps
+integer :: nsteps
 
 
 first=.true.
@@ -637,7 +638,7 @@ call propag (z, w, zmat, amat, bmat, &
              ien, nerg, ered, eshift, rstart, rendld, spac, &
              tolhi, rendai, rincr, fstfac, tb, tbm, &
              ipos, prlogd, noprin, airyfl, prairy, &
-             nch, nopen, nairy, ntop, v2, isteps)
+             nch, nopen, nairy, ntop, v2, isteps, nsteps)
 
 ! if bound state calculation, end it now
 if (boundc) then
