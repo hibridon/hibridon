@@ -28,8 +28,6 @@ subroutine flow (z, w, zmat, amat, bmat, jq, lq, inq, jlev, &
 !    econv:       conversion factor from cm-1 to hartree
 !    xmconv:      conversion factor from amu to atomic units
 !
-!  variable in common block /coopti/
-!    optifl:      flag, signals if the calculation is an optimization
 !
 use mod_cosout, only: nnout, jout
 use mod_cocent, only: cent
@@ -65,6 +63,7 @@ use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
 #if defined(HIB_ULTRIX_DEC)
   use mod_dec_timer, only: ttim
 #endif
+use mod_opti, only: optifl
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
@@ -105,9 +104,6 @@ real(8) secnds
 
 common /cojlpo/ jlpold
 integer :: jlpold
-
-common /coopti/ optifl
-logical :: optifl
 
 integer :: nlev(25)
 

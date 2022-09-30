@@ -1001,6 +1001,12 @@ module mod_two
    integer :: nj1j2(50)
 end module mod_two
 
+! coopti
+!    optifl:      flag, signals if the calculation is an optimization
+module mod_opti
+   logical :: optifl
+end module mod_opti
+
 module mod_comxbs
    implicit none
    save
