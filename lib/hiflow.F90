@@ -62,6 +62,9 @@ use mod_surf, only: surf_flagsu => flagsu
 use mod_sav, only: iipar, ixpar, irpar, rxpar
 use mod_pmat, only: rtmn, rtmx, iflag
 use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
+#if defined(HIB_ULTRIX_DEC)
+  use mod_dec_timer, only: ttim
+#endif
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
@@ -98,8 +101,6 @@ integer, intent(in) :: nairy
 type(ancou_type), allocatable :: v2
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
 real(8) secnds
-common /codec/ ttim(2)
-real(8) :: ttim
 #endif
 
 common /cojlpo/ jlpold
