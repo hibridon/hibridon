@@ -1948,10 +1948,9 @@ integer, intent(in) :: nmax
 
 !      real eshift, r, rend, rmax, rmin, spac, tl, tlw, tp, tpw
 !      real z
-integer nsteps
+integer :: nsteps
 !  internal logical variables
 logical iread, iwrite, print
-common /constp/ nsteps, isteps
 
 !  z, w, amat, and bmat are stored column by column in one dimensional arrays
 
@@ -1965,10 +1964,7 @@ if (rmax .eq. rmin) then
 !  here if no logd propagation, just initialization of matrix
   nsteps = 0
 else
-  if (isteps .eq. 0) then
-    nsteps = int ((rmax - rmin) / spac) + 1
-    isteps=1
-  endif
+  nsteps = int ((rmax - rmin) / spac) + 1
   if (print) then
      write (9, 10) rmin, rmax, spac, nsteps, nch
 10      format(/' ** LOGD PROPAGATION:', /, &

@@ -108,9 +108,6 @@ integer :: jlpold
 common /coopti/ optifl
 logical :: optifl
 
-common /constp/ nsteps, isteps
-integer :: nsteps, isteps
-
 integer :: nlev(25)
 
 integer :: jtotmx
@@ -246,7 +243,6 @@ rendld=rxpar(RPAR_SCAT_RENDLD)
 rstrt0=rxpar(RPAR_SCAT_RSTART)
 spac=  rxpar(RPAR_SCAT_SPAC)
 tolhi= rxpar(RPAR_SCAT_TOLAI)
-isteps=0
 dlogd = rendld - rstart
 xmu=rxpar(RPAR_XMU)
 rtmnla=rstrt0
