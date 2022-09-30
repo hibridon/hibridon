@@ -991,6 +991,16 @@ module mod_codim
    end subroutine allocate_codim
 end module mod_codim
 
+! cotwo
+! stores data related to systems with 2 molecules
+!    numj:     number of j1-j2 values
+!    nj1j2:    specific j1-j2 values (up to a maximum of 50)
+!              N.B. this dimension is set here
+module mod_two
+   integer :: numj
+   integer :: nj1j2(50)
+end module mod_two
+
 module mod_comxbs
    implicit none
    save
