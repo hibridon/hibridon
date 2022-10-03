@@ -30,7 +30,7 @@ subroutine soutpt (tsq, sr, si, scmat, &
                    ipos, csflag, flaghf, prsmat, prt2, t2test, &
                    writs, wrpart, prpart, wrxsec, prxsec, twomol, &
                    nucros, firstj,nlevel, nlevop, nopen, nmax, &
-                   twojlp)
+                   twojlp, jlpold)
 ! ---------------------------------------------------------------------------
 !  subroutine to:
 !                1. write out the elements of the s-matrix and modulus squared
@@ -113,24 +113,12 @@ subroutine soutpt (tsq, sr, si, scmat, &
 !    nopen    on entry:  number of open channels
 !    nmax     on entry:  maximum row dimension of matrices
 !    firstj   if .true. on entry, header is written to s-matrix file
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units (mass of electron = 1)
+
 !    nlevel   number of energetically distinct levels included in channel basi
-!  variable in common block /cosurf/
-!    flagsu:    if .true., then molecule-surface collisons
-!  variable in common block /cojlpo/
-!    jlpold:    old value of parity, used to insure correct accumulation
-!               of all partial waves in cases where jlpar=0 .
 !    variables in module constants
 !    econv:    conversion factor from cm-1 to hartrees
 !    xmconv:   converson factor from amu to atomic units
 !    ang2c:     conversion factor from square bohr to square angstroms
-!  variables in common block /cophot/
-!    photof    true if photodissociation calculation
-!              false if scattering calculation
-!    wavefn    true if g(a,b) transformation matrices are saved
-!              to be used later in computing the wavefunction
 !  ---------------------------------------------------------------------------
 use mod_cosout
 use constants
@@ -141,6 +129,10 @@ use mod_coj12, only: j12
 use mod_coener, only: ener => energ
 use mod_hibrid2, only: mxoutd, mxoutr
 use funit
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_ered, only: ered, rmu
+use mod_phot, only: photof, wavefn, boundf
+use mod_surf, only: flagsu
 implicit double precision (a-h,o-z)
 real(8), intent(inout) :: tsq(nmax,nmax)
 real(8), intent(inout) :: sr(nmax,nmax)
@@ -156,20 +148,17 @@ real(8), intent(out) :: sc2(nmax, nmax)
 integer, intent(in) :: jlev(nlevop)
 real(8), intent(in) :: elev(nlevop)
 integer, intent(in) :: inlev(nlevop)
+integer, intent(in) :: jlpold ! old value of parity, used to insure correct accumulation
+                              ! of all partial waves in cases where jlpar=0 .
+
 logical ipos, csflag, prsmat, prt2, writs, wrpart, prpart, &
-        wrxsec, prxsec, flaghf, t2test, flagsu, firstj, twomol, &
-        nucros, photof, wavefn, faux, twojlp, boundf, writs_unused
+        wrxsec, prxsec, flaghf, t2test, firstj, twomol, &
+        nucros, faux, twojlp
 integer :: jpack(nmax*nmax)
 integer :: lpack(nmax*nmax)
 
 character*20 cdate
 integer :: soutpt_sc_file = 1
-#include "common/parpot.F90"
-common /cojsav/ jsav1, jsav2
-common /cosurf/ flagsu
-common /coered/ ered, rmu
-common /cojlpo/ jlpold
-common /cophot/ photof, wavefn, boundf, writs_unused
 !
 data izero, ione /0, 1/
 xjtot = jtot
@@ -325,6 +314,9 @@ use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
 use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(10)
 use constants
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_ered, only: ered, rmu
+use mod_surf, only: flagsu
 implicit double precision (a-h,o-z)
 real(8), intent(in) :: scmat(nmax, nlevop)
 integer, intent(in) :: jlev(nlevop)
@@ -332,11 +324,8 @@ real(8), intent(in) :: elev(nlevop)
 integer, intent(in) :: inlev(nlevop)
 character*20 cdate
 character*40 form
-logical ipos, csflag, wrpart, prpart, flaghf, flagsu,twomol,nucros, &
-        twojlp,headf
-#include "common/parpot.F90"
-common /coered/ ered, rmu
-common /cosurf/ flagsu
+logical ipos, csflag, wrpart, prpart, flaghf, twomol, nucros, &
+        twojlp, headf
 !  write partial opacity to unit (24+ien) if desired
 !  in cs calculation this is only done if nu = numax, in which
 !  case the partial opacity has been summed over all projection indices
@@ -568,9 +557,9 @@ subroutine nusum (tsq, tq1, tq2, tq3, &
 ! ---------------------------------------------------------------------------
 use constants
 use mod_coener, only: energ
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 logical ipos, csflag, wrpart, prpart, flaghf, twomol, nucros,vrai
-common /coered/ ered, rmu
 dimension tsq(nmax,1),tq1(nmax,1),tq2(nmax,1),tq3(nmax,1), &
           jlev(1),elev(1),inlev(1),nlev(1)
 integer :: tmp_file
@@ -972,11 +961,7 @@ subroutine xwrite (zmat, tq3, jlev, elev, inlev, nerg, energ, &
 !    of the rotational quantum numbers, the total angular momentum,
 !    and the coupled-states projection index are equal to the values
 !    stored in jlev, jtot, jfirst, jfinal, nu, numin, and numax plus 1/2
-!  variable in common block /cosurf/
-!    flagsu:    if .true., then molecule-surface collisons
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units (mass of electron = 1)
+
 ! ----------------------------------------------------------------------
 use constants
 use mod_hibrid2, only: print_integral_cross_sections
@@ -984,6 +969,10 @@ use mod_cosysi, only: ispar
 use mod_basis, only: basis_get_isa
 use mod_par, only: iprint
 use funit
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
+use mod_surf, only: flagsu
 implicit none
 real(8), intent(out) :: zmat(nmax, nmax)
 real(8), intent(out) :: tq3(nmx, nmx)
@@ -1015,15 +1004,6 @@ logical, intent(in) :: ihomo
 real(8) :: ener
 integer :: i, ien, irec, isa, j, jhold, jj1, jj2, jmin, jphold, nlevmx, nlevop, nn, nxfile
 character*20 cdate
-#include "common/parpot.F90"
-common /cojsav/ jsav1, jsav2
-integer :: jsav1, jsav2
-common /coered/ ered, rmu
-real(8) :: ered, rmu
-common /cosurf/ flagsu
-logical :: flagsu
-common /coselb/ ibasty
-integer :: ibasty
 integer :: cs_file = FUNIT_CS  ! cross secton input file unit
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
@@ -1215,14 +1195,14 @@ use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc2, only: csum => sc2 ! csum(1)
 use mod_cosc3, only: tsum => sc3 ! tsum(1)
 use mod_version, only : version
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
 character*40 xnam1, xnam2
 character*80 line
 logical csflag, flaghf, iprint, flagsu, twomol, existf, nucros
-#include "common/parpot.F90"
-common /coselb/ ibasty
 dimension  a(4),scmat(nmax,1)
 
 !  input parameters
@@ -1496,15 +1476,13 @@ subroutine sread (iadr, sreal, simag, jtot, jlpar, nu, &
 use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 integer, intent(inout) :: nopen
 integer, intent(in) :: smt_file_unit
 logical triang
 dimension sreal(nmax,1), simag(nmax,1), &
      jpack(1), lpack(1),inpack(1),jq(1),lq(1),inq(1)
-!     variable in common block /coselb/
-!     ibasty    basistype
-common /coselb/ ibasty
 character*8 csize8
 !
 ierr=0
@@ -1635,23 +1613,19 @@ subroutine swrite (sreal, simag, jtot, jlpar, nu, &
 !    nfile:     logical unit for output of s-matrices
 !    nmax:      maximum row dimension of matrices
 !    nopen:     number of channels
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units (mass of electron = 1)
+
 !  ------------------------------------------------------------------
 use mod_cosout, only: nnout, jout
 use mod_coeint, only: eint
 use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12
+use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 integer ic, icol, ii, ir, irow, jtot, jlpar, length, nmax, &
         nopen, nfile, nu, mmout
 integer jq, jpack, lq, lpack, inq, inpack, nchnid
-common /coered/ ered, rmu
-!  variable in common block /coselb/
-!     ibasty    basistype
-common /coselb/ ibasty
 dimension sreal(nmax,nmax), simag(nmax,nmax), &
           jq(1), lq(1), inq(1), jpack(1), lpack(1), &
           epack(1), inpack(1), iorder(1)
@@ -1770,11 +1744,11 @@ subroutine wrhead(nfile,cdate, &
 !     revision: 27-oct-1995 by mha
 !     major revision: 07-jan-2012 by q.ma (stream I/O, write ibasty)
 !     ------------------------------------------------------------
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 logical csflag, flaghf, flagsu, twomol, nucros
 character*20 cdate
-#include "common/parpot.F90"
-common /coselb/ ibasty
 dimension jlev(1),inlev(1),elev(1),jout(1)
 integer int_t
 double precision double_t
@@ -1826,14 +1800,13 @@ use mod_coener, only: energ
 use mod_cow, only: q1 => w_as_vec ! q1(1)
 use mod_cozmat, only: q2 => zmat_as_vec ! q2(1)
 use mod_par, only: wrpart, wrxsec
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_file, only: input, output, jobnam, savfil
 implicit double precision (a-h,o-z)
 logical writs,csflag,nucros
 character*40 oldlab
 integer jtot, nchmax
-character*40 input,output,jobnam,savfil
 integer, parameter :: bufsize = 32
-#include "common/parpot.F90"
-common /cofile/ input,output,jobnam,savfil
 dimension word(bufsize),iword(bufsize),nlev(1)
 if (.not. wrpart .and. .not. wrxsec) then
   write (6, 5)
@@ -1982,6 +1955,9 @@ use mod_cow, only: simag => w_as_vec ! simag(1)
 use mod_cozmat, only: sigma => zmat_as_vec ! sigma(1)
 use mod_hibrid2, only: mxoutr
 use mod_par, only: batch, ipos
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  icsfil, smtfilnam, xname
@@ -1994,10 +1970,7 @@ character*10  elaps, cpu
 character*13  string
 logical csflag, flaghf, flagsu, twomol, exstfl, &
         nucros, notequ
-#include "common/parpot.F90"
 !/ nnout, jout(21)
-common /coered/ ered, rmu
-common /coselb/ ibasty
 dimension a(3)
 !
 ! initialize timer
@@ -2197,6 +2170,7 @@ use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc2, only: inlev => sc2int ! inlev(1)
 use mod_cosc3, only: jlev => sc3int ! jlev(1)
 use mod_par, only: batch, ipos
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 logical, intent(in) :: csflag
 logical, intent(in) :: flaghf
@@ -2220,7 +2194,6 @@ real(8), intent(out) :: tsq(nmax, nlevop)
 integer, intent(in) :: nlevop
 integer, intent(in) :: nmax
 integer, intent(in) :: tmp_file
-common /coselb/ ibasty
 ! clear sigma array
 one=1.0d0
 zero=0.0d0
@@ -2332,10 +2305,10 @@ subroutine tsqmat(tsq,sreal,simag,inrow,jrow,lrow, &
 use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 complex*8 t
 logical diag
-common /coselb/ ibasty
 dimension sreal(nmax,1), simag(nmax,1), tsq(nmax,1)
 dimension inrow(1),jrow(1),lrow(1),incol(1),jcol(1),lcol(1)
 !
@@ -2395,6 +2368,8 @@ subroutine partcr (tsq,  scmat, isc1, isc2, sc2, nopen, ncol, &
 ! ----------------------------------------------------------------------
 use constants
 use mod_hibasis, only: is_j12
+use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax,nmax), intent(in) :: tsq
 !      real(8), dimension(:,:), intent(in), target :: tototsq
@@ -2412,8 +2387,6 @@ integer, dimension(nlevop), intent(in) :: inlev
 integer, dimension(nlevop), intent(in) :: jlev
 real(8), dimension(nlevop), intent(in) :: elev
 logical csflag, flaghf, flagsu, twomol
-common /coered/ ered, rmu
-common /coselb/ ibasty	
 !      real(8), pointer :: tsq(:,:)
 !      tsq => tototsq(1::nmax,1::nmax)
 !write(6,*) 'graffy: len(tototsq)', size(tototsq)

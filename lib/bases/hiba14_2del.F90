@@ -107,10 +107,6 @@ subroutine ba2del (j, l, is, jhold, ehold, ishold, nlevel, &
 !    npar:     number of symmetry doublets included (npar=2 will ensure
 !              both lambda doublets; npar=1, just eps=1 levels, npar=-1,
 !              just eps=-1 levels
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  subroutines called:
 !   vlm2del:    returns angular coupling coefficient for particular
 !              choice of channel index
@@ -123,13 +119,13 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, idum=>junkr, rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-#include "common/parbasl.F90"
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
-#include "common/parbas.F90"
-common /coered/ ered, rmu
 dimension j(2), l(1), jhold(1), ehold(1), is(2), ifi(1), &
           c32(1), c52(1), ieps(2), ishold(1), sc4(1)
 !   econv is conversion factor from cm-1 to hartrees
@@ -882,12 +878,6 @@ subroutine sy2del (irpot, readpt, iread)
 !  variable in common bloc /cosys/
 !    scod:    character*8 array of dimension nscode, which contains names
 !             of all system dependent parameters
-!  variable in common block /coskip/
-!   nskip  for a homonuclear molecule lamda is running in steps of nskip=2
-!          for a heteronuclear molecule nskip=1
-!
-!   skip   same as nskip, used for consistency check
-!
 !  subroutines called: loapot(iunit,filnam)
 use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
@@ -895,6 +885,8 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_skip, only: nskip, iskip
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -904,9 +896,6 @@ logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-#include "common/parbas.F90"
-common /coskip/ nskip,iskip
-integer :: nskip, iskip
 save potfil
 #include "common/comdot.F90"
 

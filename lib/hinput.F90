@@ -115,6 +115,42 @@ module mod_hinput
     k_keyword_execute_command_mgr_command     =  6   !   45 label:execute_command_mgr_command(i)
   end enum
 
+  integer, parameter :: ncode = 40  !  ncode is the number of bcod's
+  character(len=8), parameter :: bcod(ncode) = [ &  ! bcod stores hibridon's commands
+    'CHECK   ', &
+    'DEBROGLI', &
+    'DIFFER  ', &
+    'DIFCRS  ', &
+    'ENERGY  ', &
+    'EXIT    ', &
+    'HELP    ', &
+    'JOUT    ', &
+    'MINPOT  ', &
+    'MRCRS   ', &
+    'NNOUT   ', &
+    'OPTIMIZE', &
+    'POT     ', &
+    'PRINTC  ', &
+    'PRINTS  ', &
+    'PSI     ', &
+    'QUIT    ', &
+    'SAVE    ', &
+    'TENXSC  ', &
+    'TESTPOT ', &
+    'TURN    ', &
+    'INDOUT  ', &
+    'PARTC   ', &
+    'FLUX    ', &
+    'J1J2    ', &
+    'EADIAB  ', &
+    'SYSCONF ', &
+    'HYPXSC  ', &
+    'STMIX   ', &
+    'TRNPRT  ', &
+    'SHOWPOT ']
+
+  character(len=8), parameter :: bascod(1) = ['BASISTYP']
+
 contains
 
 subroutine hinput(first)
@@ -177,19 +213,36 @@ use mod_hibrid2, only: enord, prsg
 use mod_hibrid3, only: testptn, testpt20, testpt, potmin
 use mod_hiutil, only: assignment_parse
 use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT, RPAR_COUNT
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use fcod_enum
 use lpar_enum
 use ipar_enum
 use rpar_enum
-use mod_par, only: lpar, ipar, rpar
+use mod_par, only: lpar, ipar, rpar, fcod, pcod
 use mod_candidates, only: candidates_type
 use mod_hicommands, only: command_init => init, command_mgr, command_type, update_nu_params
 use mod_hinput_state, only: batch
 use mod_si_params, only: iicode, ircode, icode, ncode, lcode, set_param_names
 use mod_hinput_state, only: lindx, irpot, irinp
 use mod_command, only: k_post_action_interpret_next_statement, k_post_action_read_new_line, k_post_action_exit_hibridon, k_post_action_exit_hinput, k_post_action_write_cr_and_exit
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
+use mod_file, only: input, output, jobnam, savfil
+use mod_sav, only: iipar, ixpar, irpar, rxpar
+use mod_tensor, only: tenopa, mrcrs
+use mod_two, only: numj, nj1j2
+use mod_opti, only: optifl
+
 implicit none
+!  iicode is the number of integer pcod's
+!  ircode is the number of real pcod's
+integer, parameter :: lcode = LPAR_COUNT
+integer, parameter :: iicode = IPAR_COUNT
+integer, parameter :: ircode = RPAR_COUNT
+integer, parameter :: icode = iicode+ircode
 character(len=K_MAX_USER_LINE_LENGTH) line
+character(len=40) :: fnam1
+character(len=40) :: fnam2
 character*40 :: code
 character*8 empty_var_list(0)
 integer nerg
@@ -199,56 +252,14 @@ real(8) :: turn
 logical logp, opti
 real(8) :: a(15)  ! real arguments
 integer :: ia(10)  ! integer arguments of commands
-#include "common/parbas.F90"
-#include "common/parpot.F90"
-common /cosavi/ iipar, ixpar(iicode)
-integer :: iipar
-integer :: ixpar
+integer :: ihold(15)
+integer :: lhold(15)
 
-common /cosavr/ irpar, junks, rxpar(ircode)
-integer :: irpar
-integer :: junks
-real(8) :: rxpar
-
-common /cofile/ input, output, jobnam, savfil
-character*40 :: input
-character*40 :: output
-character*40 :: jobnam
-character*40 :: savfil
-
-character(len=40) :: fnam1
-character(len=40) :: fnam2
-
-
-common /cokeyl/ nncode, llcode, ijcode
-integer :: nncode
+! these were members of cokeyl common block
+integer :: nncode  
 integer :: llcode
 integer :: ijcode
 
-common /cobcod/ bcod
-character*8 :: bcod(ncode)
-
-! fcod = Flags CODes : stores the name of system independent parameters of type logical
-common /cofcod/ fcod
-character*8 :: fcod(lcode)
-
-! pcod = Parameters CODes : stores the name of system independent parameters of type integer and real
-common /copcod/ pcod
-character*8 :: pcod(icode)
-
-common /coselb/ ibasty
-integer ibasty
-
-
-common /cobaco/ bascod
-character*8 :: bascod(1)
-
-common /coopti/ optifl
-logical :: optifl
-
-common /cotwo/ numj,nj1j2(5)
-integer :: numj
-integer :: nj1j2
 
 integer :: ipr, istep, inam, i, ienerg, iflux, ii, im, imx, inew, iprint, iskip, itx, ityp, izero
 integer :: j, jm, jmx, jtot2x, l, l1, l2, lc, lcc, ld, len, lend, low
@@ -297,56 +308,6 @@ lindx(FCOD_WRSMAT) = LPAR_WRSMAT
 lindx(FCOD_WRXSEC) = LPAR_WRXSEC
 lindx(FCOD_BOUNDC) = LPAR_BOUNDC
 
-bascod(1)='BASISTYP'
-pcod(IPAR_JTOT1)   = 'JTOT1'
-pcod(IPAR_JTOT2)   = 'JTOT2'
-pcod(IPAR_JTOTD)   = 'JTOTD'
-pcod(IPAR_JLPAR)   = 'JLPAR'
-pcod(IPAR_NERG)    = 'NERG'
-pcod(IPAR_NUMAX)   = 'NUMAX'
-pcod(IPAR_NUMIN)   = 'NUMIN'
-pcod(IPAR_NUD)     = 'NUD'
-pcod(IPAR_LSCREEN) = 'LSCREEN'
-pcod(IPAR_IPRINT)  = 'IPRINT'
-
-pcod(IPAR_COUNT + RPAR_SCAT_FSTFAC)  = 'FSTFAC'
-pcod(IPAR_COUNT + RPAR_SCAT_RINCR)   = 'RINCR'
-pcod(IPAR_COUNT + RPAR_SCAT_RCUT)    = 'RCUT'
-pcod(IPAR_COUNT + RPAR_SCAT_RENDAI)  = 'RENDAI'
-pcod(IPAR_COUNT + RPAR_SCAT_RENDLD)  = 'RENDLD'
-pcod(IPAR_COUNT + RPAR_SCAT_RSTART)  = 'RSTART'
-pcod(IPAR_COUNT + RPAR_SCAT_SPAC)    = 'SPAC'
-pcod(IPAR_COUNT + RPAR_SCAT_TOLAI)   = 'TOLAI'
-pcod(IPAR_COUNT + RPAR_XMU)     = 'XMU'
-
-fcod(FCOD_AIRYFL)='AIRYFL'
-fcod(FCOD_BASTST)='BASTST'
-fcod(FCOD_BATCH)='BATCH'
-fcod(FCOD_CHLIST)='CHLIST'
-fcod(FCOD_CSFLAG)='CSFLAG'
-fcod(FCOD_FLAGHF)='FLAGHF'
-fcod(FCOD_FLAGSU)='FLAGSU'
-fcod(FCOD_IHOMO)='IHOMO'
-fcod(FCOD_IPOS)='IPOS'
-fcod(FCOD_LOGDFL)='LOGDFL'
-fcod(FCOD_NOPRIN)='NOPRIN'
-fcod(FCOD_NUCROS)='NUCROS'
-fcod(FCOD_PHOTOF)='PHOTOF'
-fcod(FCOD_PRAIRY)='PRAIRY'
-fcod(FCOD_PRLOGD)='PRLOGD'
-fcod(FCOD_PRPART)='PRPART'
-fcod(FCOD_PRSMAT)='PRSMAT'
-fcod(FCOD_PRT2)='PRT2'
-fcod(FCOD_PRXSEC)='PRXSEC'
-fcod(FCOD_READPT)='READPT'
-fcod(FCOD_RSFLAG)='RSFLAG'
-fcod(FCOD_T2TEST)='T2TEST'
-fcod(FCOD_TWOMOL)='TWOMOL'
-fcod(FCOD_WAVEFL)='WAVEFL'
-fcod(FCOD_WRPART)='WRPART'
-fcod(FCOD_WRSMAT)='WRSMAT'
-fcod(FCOD_WRXSEC)='WRXSEC'
-fcod(FCOD_BOUNDC)='BOUNDC'
 ! addresses for commands
 ! check: 2700
 ! debrogli: 1800
@@ -378,36 +339,10 @@ fcod(FCOD_BOUNDC)='BOUNDC'
 ! hypxsc: 2950
 ! stmix:  3000
 ! trnprt:  3100
-bcod(1)='CHECK'
-bcod(2)='DEBROGLI'
-bcod(3)='DIFFER'
-bcod(4)='DIFCRS'
-bcod(5)='ENERGY'
-bcod(6)='EXIT'
-bcod(7)='HELP'
-bcod(8)='JOUT'
-bcod(9)='MINPOT'
-bcod(10)='MRCRS'
-bcod(11)='NNOUT'
-bcod(12)='OPTIMIZE'
-bcod(13)='POT'
-bcod(14)='PRINTC'
-bcod(15)='PRINTS'
-bcod(16)='PSI'
-bcod(17)='QUIT'
-bcod(18)='SAVE'
-bcod(19)='TENXSC'
-bcod(20)='TESTPOT'
-bcod(21)='TURN'
-bcod(22)='INDOUT'
-bcod(23)='PARTC'
-bcod(24)='FLUX'
-bcod(25)='J1J2'
-bcod(26)='EADIAB'
-bcod(27)='SYSCONF'
-bcod(28)='HYPXSC'
-bcod(29)='STMIX'
-bcod(30)='TRNPRT'
+! prsbr:   3200
+! showpot:  3300
+! nb after changing the following list, check that all the variables "incode"
+! that follow after address 900 are changed accordingly
 !
 iipar=iicode
 irpar=ircode
@@ -1469,6 +1404,41 @@ call assignment_parse(code(1:lc),empty_var_list,j,a(1))
 ! get in1, in2, jtotmx, join, jmax
 3105 continue
 call trnprt(fnam1,a)
+goto 1  ! label:read_new_line
+3300 continue
+write(6,*) "************************************************************"
+write(6,*) "Entering the DRIVER subroutine of the potential"
+write(6,*) "Press Ctrl+D to go back to Hibridon's console"
+write(6,*) "************************************************************"
+call driver
+goto 1  ! label:read_new_line
+! pressure broadening cross sections - added by p. dagdigian
+3200 call get_token(line,l,fnam1,lc)
+if(fnam1 .eq. ' ') fnam1 = jobnam
+call lower(fnam1)
+call upper(fnam1(1:1))
+! get iener for 1st smt file
+a(1) = 0.d0
+if(l .eq. 0) goto 3205
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,a(1))
+3205 call get_token(line,l,fnam2,lc)
+if(fnam2 .eq. ' ') fnam2 = jobnam
+call lower(fnam2)
+call upper(fnam2(1:1))
+! get iener for 2nd smt file
+a(2) = 0.d0
+if(l .eq. 0) goto 3210
+call get_token(line,l,code,lc)
+call assignment_parse(code(1:lc),empty_var_list,j,a(2))
+! get k, j1, in1, j2, in2, diag, j1p, in1p, j2p, in2p
+3210 do 3220 i = 3, 12
+  a(i) = 0.d0
+  if(l .eq. 0) goto 3220
+  call get_token(line,l,code,lc)
+  call assignment_parse(code(1:lc),empty_var_list,j,a(i))
+3220 continue
+call prsbr(fnam1,fnam2,a)
 goto 1  ! label:read_new_line
 end
 

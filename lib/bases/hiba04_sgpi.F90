@@ -139,30 +139,11 @@ subroutine basgpi (j, l, is, jhold, ehold, ishold, nlevel, &
 !    isg:      if isg=1 and ipi=0 then 2sig + atom scattering
 !    ipi:      if ipi=1 and isg=0 then 2pi + atom scattering
 !              if isg=1 and ipi=1 then 2pi-2sig + atom scattering
-!  variables in common block /cobsp2/
-!    ntv:      Number of vibrational blocks for each term. All of these
-!              use same lammin, lammax, mproj. These numbers as well
-!              as the corresponding ivcol, ivrow (see below) should be
-!              set in loapot and must be consistent with the pot routine
-!              Otherwise unrecognized chaos!!!
-!              Each block corresponds to a pair of vibrational quantum
-!              numbers (ivrow,ivcol), which must correspond to lower triangle
-!              of potential matrix (i.e., ivrow.ge.ivcol for
-!              iterm=1 (Vsig), iterm=2 (Vpi), iterm=4 (V2) and
-!              for iterm=3 (V1) ivrow=ivs, ivcol=ivp)
-!    ivrow(ivb,iterm): row vibrational state for vibrational block ivb
-!                      in term iterm
-!    ivcol(ivb,iterm): column vibrational state for vibrational block ivb
-!                      in term iterm
 !  variables in common block /cosgpi/
 !    nvibs:    number of vibrational terms for sigma state in input file
 !    ivibs:    vibrational quantum number for each of these
 !    nvibp:    number of vibrational terms for pi state in input file
 !    ivibp:    vibrational quantum number for each of these
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  variable in common block /coconv/
 !     econv:    conversion factor from cm-1 to hartrees
 !     xmconv:   converson factor from amu to atomic units
@@ -184,7 +165,10 @@ use mod_cosysr, only: isrcod, junkr, rpar=>rspar
 use mod_hibasutil, only: iswap, rswap
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: iprint
-#include "common/parbasl.F90"
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
+use mod_vib, only: nvibs, ivibs, nvibp, ivibp
 
 implicit double precision (a-h,o-z)
 real(8), intent(out), dimension(:) :: sc1
@@ -194,10 +178,7 @@ real(8), intent(out), dimension(:) :: sc4
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
-#include "common/parbas.F90"
 !  these parameters must be the same as in hisysgpi
-common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
-common /coered/ ered, rmu
 dimension e(3,3), ieps(2), iepp(2), iomc(4), iomr(4), eig(3)
 dimension jhold(1), ishold(1), ehold(1), &
           j(1), is(1), l(1)
@@ -1355,7 +1336,6 @@ subroutine sysgpi (irpot, readpt, iread)
 !  current revision date: 21-dec-1995 by pjd, mha, ade, ab
 !  latest revision:  24-feb-2004 by mha
 !
-!  variables in common/cobspt/ must be set in loapot!!
 !
 use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
@@ -1365,20 +1345,19 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use mod_par, only: ihomo
 use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_skip, only: nskip, iskip
+use mod_vib, only: nvibs, ivibs, nvibp, ivibp
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-integer :: i, ipi, isg, isgpi, ivibp, ivibs, ivp, ivs, j, k, l, lc, nterm, nvibp, nvibs, nvmaxp, nvmaxs, nvminp, nvmins
+integer :: i, ipi, isg, isgpi, ivp, ivs, j, k, l, lc, nterm, nvmaxp, nvmaxs, nvminp, nvmins
 logical existf
 character*8 char
 character*(*) fname
 character*1 dot
 character*60 filnam, line, potfil, filnm1
-#include "common/parbas.F90"
-common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
-common /coskip/ nskip,iskip
-integer :: nskip, iskip
 save potfil
 #include "common/comdot.F90"
 !  set default values for 2pi-2sigma scattering

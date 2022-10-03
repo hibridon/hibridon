@@ -47,7 +47,8 @@ use mod_cosc3, only: elevh => sc3 ! elevh(1)
 use mod_hibrid5, only: sread
 use mod_hibasis, only: is_j12
 use constants, only: econv, xmconv, ang2 => ang2c
-
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 character*(*) flname
 real(8), dimension(4), intent(in) :: a(4)
@@ -58,9 +59,6 @@ character*10 elaps, cpu
 logical csflg, flaghf, flgsu, twmol, nucrs, &
      batch, fast, lpar2, lpar, exstfl
 integer, parameter :: hfxfil_unit = 11
-#include "common/parpot.F90"
-common /codim/ nairy
-common /coselb/ ibasty
 !
 !     storage for S-matrix elements red from .smt file
 real(8), dimension(:), allocatable :: sreal, simag
@@ -254,7 +252,7 @@ if (ialloc .ne. 0) goto 4000
 sigma = 0d0
 !
 !     clear length array, in case minimum jtot > 0
-allocate(length(0:jfinl, 2), stat=ialloc)
+allocate(length(0:jfinl+1, 2), stat=ialloc)
 if (ialloc .ne. 0) goto 4001
 length = 0d0
 !
@@ -482,7 +480,7 @@ nuc1 = 2 * finuc
 if (flaghf .and. nuc1.eq.2*(nuc1/2) .or. &
      .not.flaghf .and. nuc1.ne.2*(nuc1/2)) &
      fhspin = 0.5d0
-nlevelh2 = 0
+nlevlh2 = 0
 do 160 i=1, nlevelh
 !  check that level is energetically allowed
   if (elevh(i).gt.ered) go to 160

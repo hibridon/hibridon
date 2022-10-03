@@ -110,10 +110,6 @@ subroutine ba2sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
 !    j2max:    maximum rotational angular momentum of molecule 2
 !    ipotsy2:  symmetry of potential.  set to 2 for homonuclear
 !              molecule 2, set to 1 for heteronuclear molecule 2
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  variable in module mod_conlam
 !               nlam is set equal to nterm; see above
 !  subroutines called:
@@ -130,7 +126,10 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-#include "common/parbasl.F90"
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_par, only: readpt, boundc
+use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
@@ -138,9 +137,6 @@ type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 integer :: ifs1
 integer :: nn
-#include "common/parbas.F90"
-common /coselb/ ibasty
-common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
     sc1(1), sc2(1), sc3(1), sc4(1), ishold(1)
 data zero, ione, itwo, ithree / 0.d0, 1, 2, 3 /
@@ -564,6 +560,8 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_skip, only: nskip, iskip
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -573,9 +571,6 @@ logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-#include "common/parbas.F90"
-common /coskip/ nskip,iskip
-integer :: nskip, iskip
 #include "common/comdot.F90"
 save potfil
 integer, pointer :: n1max, j2min, j2max, ipotsy2

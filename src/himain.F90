@@ -149,9 +149,6 @@ integer, parameter :: kmaxpar = 150 ! max number of base specific parameters
 integer :: men
 !
 !  ----------------------------------------------------------
-common /comom/  xmom(3), imom(13)
-real(8) :: xmom
-integer :: imom
 
 integer :: arg_index
 integer :: stat

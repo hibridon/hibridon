@@ -34,6 +34,7 @@ use mod_cosc1, only: elev1 => sc1 ! elev1(1)
 use mod_cosc2, only: elev2 => sc2 ! elev2(1)
 use mod_cosc3, only: elevt => sc3 ! elevt(1)
 use mod_hibrid5, only: sread
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h, o-z)
 character*(*) flnam1, flnam2
 character*20  cdate1, cdate2
@@ -46,7 +47,6 @@ logical csflg1, flghf1, flgsu1, twmol1, nucrs1, &
         batch, fast, lpar2, lpar, exstfl, diagst, &
         diagj, diagin, &
         diagjp, daginp, diag, diagp
-#include "common/parpot.F90"
 
 dimension a(12)
 !

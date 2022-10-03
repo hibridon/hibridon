@@ -1,0 +1,201 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2022-09-28 at 07:50
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: 
+SYS: Linux 5.4.0-124-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                      Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                         3205.164
+Socket(s):                       1
+Core(s) per socket:              4
+L2 cache:                        1 MiB
+L3 cache:                        6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16267636 kB
+ --------------------------------------------------------------------------
+ Hibridon> 
+ POTENTIAL LOADED FROM FILE FOLLMEG.BIN                                                 
+
+ LABEL:  mha's 16-apr-1997 fit to follmeg's points                              
+ Molecule is homonuclear                                                 
+ NUMBER OF TERMS (NTRM) READ IN:  1
+
+  NTRM    LMMIN    LMMAX    MLD    NVBLOCKS
+    1       2        4       0      1
+ Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  Hibridon>  ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Sep 28 19:12:38 2022
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Sep 28 19:12:38 2022
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Sep 28 19:12:38 2022
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Sep 28 19:12:38 2022
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Sep 28 19:12:38 2022
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Sep 28 19:12:39 2022
+ ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Sep 28 19:12:39 2022
+ ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Sep 28 19:12:39 2022
+ ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Sep 28 19:12:39 2022
+ ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Sep 28 19:12:39 2022
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Sep 28 19:12:39 2022
+
+ ** NCH = 0, MOVE ON TO NEXT PARTIAL WAVE
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Sep 28 19:12:39 2022
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Sep 28 19:12:39 2022
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Sep 28 19:12:39 2022
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Sep 28 19:12:39 2022
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Sep 28 19:12:39 2022
+ ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Sep 28 19:12:39 2022
+ ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Sep 28 19:12:39 2022
+ ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Sep 28 19:12:39 2022
+ ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:00:04   WALL: 00:00:01   DATE: Sep 28 19:12:39 2022
+ ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:00:04   WALL: 00:00:01   DATE: Sep 28 19:12:39 2022
+ ===============================================================================
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:    20
+      TIMING:  ELAPSED 00:00:01 / CPU 00:00:04 / MP RATIO  441.7 %
+      CURRENT DATE:  Sep 28 19:12:39 2022
+ ===============================================================================
+ Hibridon> 
+ CLOSE COUPLED TENSOR OPACITIES
+ S-MATRICES READ FROM FILE Vfit_tenf11.smt                         
+      WRITTEN:   Sep 28 19:12:38 2022
+      LABEL:     Test of N2+_He using Follmeg-Rosmus PES         
+      POT NAME:  WERNER-FOLLMEG VFIT                             
+ DATE:    Sep 28 19:12:39 2022
+ MAX(JTOT) RESET TO JFINAL =   20 IN TENOPA
+ MAX(JTOT) RESET TO JFINAL =   10 IN TENOPA
+
+ ENERGY:     150.000 cm(-1)    MASS:       3.502
+ SUMMING PARTIAL WAVES FROM JTOT=  0 TO JTOT= 10
+ MAX(KI,KF) =  12;  0 .LE. LAMDA .LE.  0; MAXIMUM NUMBER OF BUFFERS =  360
+
+ LEVEL LIST FOR TENSOR OPACITIES (OPEN CHANNELS)
+   N     J   INDEX  EINT(cm-1)
+
+ COLUMNS ARE INITIAL STATES; ROWS ARE FINAL STATES
+   1     0     0      0.000
+   2     2     0     11.647
+   3     4     0     38.824
+   4     6     0     81.530
+
+ CROSS SECTIONS IN THE COLLISION FRAME
+
+ TENSOR RANK K =  0
+
+          1           2           3           4
+   1   1.6398E+01  6.6518E+00  1.9861E+00  6.4845E-01
+   2   6.1353E+00  1.7831E+01  8.4178E+00  3.4784E+00
+   3   1.4720E+00  6.7643E+00  2.2030E+01  1.3887E+01
+   4   2.9599E-01  1.7214E+00  8.5524E+00  3.3659E+01
+
+ TENSOR RANK K =  1
+
+          1           2           3           4
+   1   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   2   0.0000E+00  1.7961E+01  4.7352E+00  1.5792E+00
+   3   0.0000E+00  3.8051E+00  2.1098E+01  8.8073E+00
+   4   0.0000E+00  7.8152E-01  5.4242E+00  2.8462E+01
+
+ TENSOR RANK K =  2
+
+          1           2           3           4
+   1   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   2   0.0000E+00  1.4535E+01  3.1057E+00  1.1528E+00
+   3   0.0000E+00  2.4956E+00  1.8389E+01  7.6625E+00
+   4   0.0000E+00  5.7051E-01  4.7191E+00  2.7369E+01
+
+ TENSOR RANK K =  3
+
+          1           2           3           4
+   1   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   2   0.0000E+00  1.1568E+01  1.9117E+00  7.3575E-01
+   3   0.0000E+00  1.5362E+00  1.6623E+01  6.1784E+00
+   4   0.0000E+00  3.6412E-01  3.8051E+00  2.4862E+01
+
+ TENSOR RANK K =  4
+
+          1           2           3           4
+   1   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   2   0.0000E+00  1.0475E+01  9.3285E-01  2.7250E-01
+   3   0.0000E+00  7.4961E-01  1.4687E+01  4.6149E+00
+   4   0.0000E+00  1.3486E-01  2.8421E+00  2.2010E+01
+
+ TENSOR RANK K =  5
+
+          1           2           3           4
+   1   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   2   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   3   0.0000E+00  0.0000E+00  1.2851E+01  3.2362E+00
+   4   0.0000E+00  0.0000E+00  1.9930E+00  1.9571E+01
+
+ TENSOR RANK K =  6
+
+          1           2           3           4
+   1   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   2   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   3   0.0000E+00  0.0000E+00  1.1019E+01  2.1114E+00
+   4   0.0000E+00  0.0000E+00  1.3004E+00  1.7381E+01
+
+ TENSOR RANK K =  7
+
+          1           2           3           4
+   1   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   2   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   3   0.0000E+00  0.0000E+00  9.8203E+00  1.1984E+00
+   4   0.0000E+00  0.0000E+00  7.3803E-01  1.5256E+01
+
+ TENSOR RANK K =  8
+
+          1           2           3           4
+   1   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   2   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   3   0.0000E+00  0.0000E+00  8.9558E+00  5.3544E-01
+   4   0.0000E+00  0.0000E+00  3.2976E-01  1.4024E+01
+
+ TENSOR RANK K =  9
+
+          1           2           3           4
+   1   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   2   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   3   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   4   0.0000E+00  0.0000E+00  0.0000E+00  1.2669E+01
+
+ TENSOR RANK K = 10
+
+          1           2           3           4
+   1   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   2   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   3   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   4   0.0000E+00  0.0000E+00  0.0000E+00  1.1474E+01
+
+ TENSOR RANK K = 11
+
+          1           2           3           4
+   1   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   2   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   3   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   4   0.0000E+00  0.0000E+00  0.0000E+00  1.0196E+01
+
+ TENSOR RANK K = 12
+
+          1           2           3           4
+   1   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   2   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   3   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   4   0.0000E+00  0.0000E+00  0.0000E+00  9.1905E+00
+
+ ** N = 0 COMPLETED, TIMING ELAPSED:  00:00:03  CPU:  00:00:03 
+
+
+ ** TENXSC FINAL TIMING, ELAPSED:  00:00:03   CPU:  00:00:03  **
+ Hibridon> 

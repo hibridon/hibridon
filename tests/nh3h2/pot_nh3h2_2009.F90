@@ -8,25 +8,38 @@
 !  Note:  this pot routine requires a data file to be in hibxx/bin/progs/potdata:
 !         fitvij_bf_62.h2
 !
+module mod_nh3h2
+!  ivv contains the index of the vij coefficients
+!    ivv(1) corresponds to the [1,0,0,0] term
+!    ivv(2) corresponds to the [2,0,0,0] term
+!    ivv(3) corresponds to the [3,0,0,0] term
+!    ivv(4) corresponds to the [3,3,0,0] term
+!    [4,0,0,0],[4,3,0,0]...[6,6,0,0],[0,0,2,0]...[6,6,2,0],[1,0,2,1],...
+!    [6,6,2,-1],[6,6,2,1],[2,0,2,2]...[6,6,2,-2],[6,6,2,2].
+!    ivv(kv) correspond to the order in which the potential terms are read
+!  nvv is the total number of angular coupling terms
+  integer :: nvv
+  integer :: ivv(300)
+end module mod_nh3h2
 #include "common/syusr.F90"
 #include "common/ground.F90"
 #include "common/bausr.F90"
+
 ! ------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use constants, only: s4pi
 implicit double precision (a-h,o-z)
 character*60 filnam
 common /fisurf/ conv,econv,lsurf,nv
-common /coloapot/ s4pi, nvv, ivv(300)
-#include "common/parpot.F90"
 potnam='RIST/VALIRON NH3-H2 2009'
 nlammx = 55
 nlam = 55
 call loapot(iunit, filnam)
 econv=219474.6d0
 conv=1.d0
-s4pi = sqrt ( 4.d0 * acos(-1.d0) )
 print *, potnam
 1 print *, ' R (bohr)'
 read (5, *, end=99) r
@@ -74,31 +87,14 @@ goto 1
 !              molecule
 !    j2min:    the minimum rotational angular momentum for linear
 !              molecule
-
-!  variables in common block /cobspt/
-!              Order of reduced rotation matrix d(theta1) as defined in 
-!              eq (21) of reference J. Chem Phys. 98 (6), 1993 with    
-!              (lambda, mproj) = (l1, m1).   
-!    lammin:   array containing minimum value of lambda for each term
-!    lammax:   array containing maximum value of lambda for each term
-!    mproj:    array containing the order of the reduced rotation matrix
-!              elements for each term. here, lammin is greater to mproj.
-!  variables in common block /cobsptln/
-!              Order of reduced rotation matrix d(theta2) as defined in 
-!              eq (21) of reference J. Chem Phys. 98 (6), 1993 with
-!              (lam2, m2proj) = (l2, m2).      
-!    lam2:     array containing the order of the reduced rotation matrix
-!              elements for each term. in case of homonuclear molecule
-!              is even.
-!    m2proj:   array containing the order of the reduced rotation
-!              matrix elements for each term.
-!              here, lammin and lam2 are greater than m2proj .
-
 !  -----------------------------------------------------------------------
 use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: nscode, isicod, ispar
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use constants, only: s4pi
+use mod_nh3h2, only: nvv, ivv
 implicit double precision (a-h,o-z)
-#include "common/parbas.F90"
 
 
 
@@ -136,14 +132,11 @@ common /fisurf/ conv, econv, lsurf
 
 common /fiunit/ iwrite,ifile
 character*(*) filnam
-#include "common/parpot.F90"
 parameter (nvmx = 300)
 integer   ivij(nvmx), jvij(nvmx), i2vij(nvmx), j2vij(nvmx), &
           lambda(nvmx), mu(nvmx), &
           lambda2(nvmx), mu2(nvmx)
 
-!      common /coloapot/ s4pi, ivv(nvmx), nvv
-common /coloapot/ s4pi, nvv, ivv(300)
 logical is_wop
 
 integer, pointer :: nterm, numpot, ipotsy, iop, ninv, kmax, jmax0, jmax1, jmax2, jmax3, jmax4, jmax5, &
@@ -377,8 +370,6 @@ write(6,250) (kvv, lambda(kvv), mu(kvv), lambda2(kvv), &
               i2vij(ivv(kvv)), j2vij(ivv(kvv)), kvv=1, nvv)
 250 format(1x, i6, '   vvl',4i2, '   as  ', i3, '  ( v',4i2,' )' )
 
-s4pir8 = sqrt ( 4.d0 * acos(-1.d0) )
-s4pi = s4pir8
 !
 !  potential has been defined : force irpot=1
 irpot = 1
@@ -418,27 +409,17 @@ subroutine pot(vv0, r)
 !    vvl        array to store r-dependence of each angular term in the
 !               potential
 
-!  variable in common block /coloapot/
-!  s4pi : facteur de normalisation du potentiel isotrope
-!  ivv(1) corresponds to the [1,0,0,0] term
-!  ivv(2) corresponds to the [2,0,0,0] term
-!  ivv(3) corresponds to the [3,0,0,0] term
-!  ivv(4) corresponds to the [3,3,0,0] term
-!  [4,0,0,0],[4,3,0,0]...[6,6,0,0],[0,0,2,0]...[6,6,2,0],[1,0,2,1],...
-!  [6,6,2,-1],[6,6,2,1],[2,0,2,2]...[6,6,2,-2],[6,6,2,2].
-!  ivv(kv) correspond to the order in which the potential terms are read
-!  nvv is the total number of angular coupling terms
 
 !      implicit none
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use constants, only: s4pi
+use mod_nh3h2, only: nvv, ivv
 implicit double precision (a-h,o-z)
 !      integer ivv, nvv, nlam, nlammx, kv, kvv, nvmx
-#include "common/parpot.F90"
 
-!      double precision  r, v, vv, vv0, vvl, s4pi
-double precision  r, v, vv, vv0, s4pi
-common /coloapot/ s4pi, nvv, ivv(300)
+double precision  r, v, vv, vv0
 
 if (nlam .ne. nvv) then
   write(6,*) ' entry pot --', nvv, nlam,'   nvv, expected nlam'
@@ -534,9 +515,10 @@ end
 !       parameter nvmx          max number of vij terms
 
 !        implicit none
+  use mod_parpot, only: potnam=>pot_name, label=>pot_label
+
   implicit double precision (a-h,o-z)
 !        integer nddmx, nvmx
-#include "common/parpot.F90"
 !        parameter (nvmx = 45)
   parameter (nddmx=250)
   double precision r, v, dd, y, y1, y2, y3, yref, h, conv, econv

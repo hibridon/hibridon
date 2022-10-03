@@ -294,9 +294,6 @@ subroutine potmat (w, r, nch, nmax, v2)
 !    nmax:     maximum row and column dimension of matrix w
 !   lamnum:     number of non-zero v2 matrix elements for each lambda
 
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units (mass of electron = 1)
 !  variables in common block /copmat/
 !    rtmn,rtmx: minimum and maximum turning points (not used here)
 !    iflag:     variable used in determination of turning points (not used her
@@ -315,6 +312,10 @@ use mod_coeint, only: eint
 use mod_covvl, only: vvl
 use mod_grovec, only: igrovec_type_block, dgrovec_type_block
 use mod_hiba10_22p, only: trans22
+use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
+use mod_pmat, only: rtmn, rtmx, iflag
+use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
 implicit none
 real(8) :: second
 real(8), dimension(*), intent(out) :: w
@@ -344,15 +345,6 @@ type(igrovec_type_block), pointer :: blocki
 type(dgrovec_type_block), pointer :: blockd
 #endif
 
-common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
-real(8) :: cpuld, cpuai, cpupot, cpusmt, cpupht
-common /copmat/ rtmn, rtmx, iflag
-real(8) :: rtmn, rtmx
-integer :: iflag
-common /coered/ ered, rmu
-real(8) :: ered, rmu
-common /coselb/ ibasty
-integer :: ibasty
 real(8), parameter :: zero = 0.d0
 real(8), parameter :: one = 1.d0
 real(8), parameter :: two = 2.d0
@@ -580,11 +572,10 @@ use mod_coiout, only: niout, indout
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
-implicit double precision(a-h,o-z)
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_selb, only: ibasty
+use mod_vib, only: nvibs, ivibs, nvibp, ivibp
 logical ihomo
-common /coselb/ ibasty
-#include "common/parbas.F90"
-common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
 common /conlamp/ lamnump(50)
 integer, pointer :: nterm, nvibmn, nvibmx
 nterm=>ispar(1); nvibmn=>ispar(2); nvibmx=>ispar(3)
@@ -676,12 +667,12 @@ use mod_coiout, only: niout, indout
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_selb, only: ibasty
+use mod_vib, only: nvibs, ivibs, nvibp, ivibp
 implicit double precision(a-h,o-z)
 
 logical ihomo
-common /coselb/ ibasty
-#include "common/parbas.F90"
-common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
 dimension nvbmnr(4),nvbmxr(4),nvbmnc(4),nvbmxc(4)
 nstep=1
 if(ihomo) nstep=2
@@ -819,15 +810,14 @@ subroutine testpt20(ihomo)
 !
 !  testpot for ibasty = 20 (ch2xhe v=3 - v=2)
 !  current revision date:  1-nov-2012 by lifang ms
-use mod_coiout, only: niout, indout
 use mod_covvl, only: vvl
-use mod_conlam, only: nlam, nlammx, lamnum
-use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysi, only: nscode, ispar
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_selb, only: ibasty
+use mod_vib, only: nvibs, ivibs, nvibp, ivibp
+
 implicit double precision(a-h,o-z)
 logical ihomo
-common /coselb/ ibasty
-#include "common/parbas.F90"
-common /covib/ nvibs, ivibs(maxvib), nvibp, ivibp(maxvib)
 common /conlamp/ lamnump(7)
 integer, pointer :: nterm, nvibmn, nvibmx
 nterm=>ispar(1); nvibmn=>ispar(2); nvibmx=>ispar(3)
@@ -945,7 +935,7 @@ subroutine propag (z, w, zmat, amat, bmat, &
                    ien, nerg, en, eshift, rstart, rendld, spac, &
                    tolhi, rendai, rincr, fstfac, tb, tbm, &
                    ipos, prlogd, noprin, airyfl, prairy, &
-                   nch, nopen, nairy, nmax, v2)
+                   nch, nopen, nairy, nmax, v2, isteps, nsteps)
 ! ------------------------------------------------------------------------
 !  subroutine to:
 !    1.  propagate the log-derivative matrix from rstart to rendld
@@ -1010,24 +1000,20 @@ subroutine propag (z, w, zmat, amat, bmat, &
 !    nairy        leading dimension of matrix bmat
 !    nmax         leading dimension of matrices z, w, zmat, and amat as well a
 !                 all vectors
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units (mass of electron = 1)
+
 !  variables in common block /copmat/
 !    rtmn,rtmx: minimum and maximum turning points
 !    iflag:     variable used in determination of turning points (not used her
 !           iflag = 0 if all channels are in classically forbidden region
 !           iflag = 1 if some channels are open
 !           iflag = 2 if all asymptotically open channels are open at r
-!  variables in common block /cophot/
-!     photof        true if photodissociation calculation
-!                   false if scattering calculation
-!     wavefn        true if g(a,b) transformation matrices are saved
-!                   to be used later in computing the wavefunction
 !  ------------------------------------------------------------------
 use mod_ancou, only: ancou_type
 use mod_hibrid2, only: mxoutd
 use funit, only: FUNIT_TRANS_MAT, FUNIT_QUAD_MAT
+use mod_phot, only: photof, wavefn, boundf, writs
+use mod_pmat, only: rtmn, rtmx, iflag
+use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
 implicit none
 !   square matrices
 real(8), intent(out) :: z(nmax, nch)
@@ -1043,7 +1029,7 @@ integer, intent(in) :: nerg
 real(8), intent(in) :: en
 real(8), intent(in) :: eshift
 real(8), intent(in) :: rstart
-real(8), intent(in) :: rendld
+real(8), intent(in) :: rendld  ! end radius for log derivative method
 real(8), intent(in) :: spac
 real(8), intent(in) :: tolhi
 real(8), intent(in) :: rendai
@@ -1061,26 +1047,13 @@ integer, intent(out) :: nopen
 integer, intent(in) :: nairy
 integer, intent(in) :: nmax
 type(ancou_type), intent(in) :: v2
+integer, intent(inout) :: isteps
+integer, intent(inout) :: nsteps
 
 logical :: twoen
 logical ::  first
 character*10 :: tbs,tps,tds,tws,tairys, twfs
 character*10 :: time
-common /copmat/ rtmn, rtmx, iflag
-real(8) :: rtmn
-real(8) :: rtmx
-integer :: iflag
-common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
-real(8) :: cpuld
-real(8) :: cpuai
-real(8) :: cpupot
-real(8) :: cpusmt
-real(8) :: cpupht
-common /cophot/ photof, wavefn, boundf, writs
-logical :: photof
-logical :: wavefn
-logical :: boundf
-logical :: writs
 
 real(8) :: r
 real(8) :: t1, t2
@@ -1144,7 +1117,7 @@ call mtime(ttx,tty)
 call runlog (z, &
              r, rendld, spac, eshift, itwo, twoen, &
              td, tdm, tp, tpm, twf, twfm, prlogd, noprin, &
-             ipos, nch, nmax, v2)
+             ipos, nch, nmax, v2, isteps, nsteps)
 
 !  on return from runlog, z contains the log-derivative matrix at r = rendld
 !  branch to airy integration if desired. integrate coupled equations
@@ -1235,7 +1208,10 @@ subroutine rles (a, c, n, m, nmax)
 !                   from call to sgesl
 !  --------------------------------------------------------------------
 implicit double precision (a-h,o-z)
-integer icol, ierr, iptc, izero, m, n, nmax
+integer ierr, izero, m, n, nmax
+#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
+integer :: icol, iptc
+#endif
 integer :: kpvt(n)
 dimension a(1), c(1)
 data izero /0/
@@ -1353,21 +1329,17 @@ subroutine logdb (z, nmax, nch, rmin, rmax, nsteps, &
 !                   this timing information comes from repeated calls
 !                   of the form call mtime(elapsed) where "elapsed"
 !                   is the current elapsed time in seconds
-!     variables in common block /cophot/
-!     photof        true if photodissociation calculation
-!                   false if scattering calculation
-!     wavefn        true if g(a,b) transformation matrices are saved
-!                   to be used later in computing the wavefunction
-!     variable in common block /cowave/
-!     irec          record number of last written g(a,b) matrix
-!     ifil          local unit number for g(a,b) file
 !     blas routines daxpy and dscal are used in o(n*n) loops
 !     symmetry of the matrices z and w is not exploited in these loops,
 !     and blas routines are not used for o(n) loops
 !  ------------------------------------------------------------------
 use mod_coqvec, only: mxphot, nphoto, q ! q is an output of this subroutine
 use mod_ancou, only: ancou_type
+use mod_wave, only: irec, ifil, nchwfu, nrlogd, iendwv, get_wfu_logd_rec_length
+
 use funit
+use mod_phot, only: photof, wavefn, boundf, writs
+use mod_surf, only: flagsu
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: z(nmax*nch)
 integer, intent(in) :: nmax
@@ -1393,8 +1365,11 @@ type(ancou_type), intent(in) :: v2
 real(8) :: wref(nch)
 real(8) :: z1(nch)
 real(8) :: z2(nch)
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 real(8) :: scr1(nch)
 real(8) :: scr2(nch)
+#endif
+
 
 integer ich, icode, icol, idiag, ierr, ij, irow, istep, kstep, &
         ncol, ndiag, nrow
@@ -1403,14 +1378,8 @@ integer ich, icode, icol, idiag, ierr, ij, irow, istep, kstep, &
 !     :     tn, tp,  zero, wdiag
 !      real w, z
 !      real scr1, scr2, wref, z1, z2
-logical photof, wavefn, boundf, writs
-logical flagsu
 !      external mtime, potmat, daxpy, smxinv, dscal
 !     matrices z and w are stored column by column as one-dimensi
-common /cophot/ photof, wavefn, boundf, writs
-common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
-     inflev
-common /cosurf/ flagsu
 data zero,  one,  two, three,six,  eight &
     / 0.d0, 1.d0, 2.d0, 3.d0, 6.d0, 8.d0 /
 data izero, ione /0, 1/
@@ -1552,340 +1521,343 @@ if (nsteps .le. 0) then
   endif
 endif
 
-!     with a constant step size it is convenient to propagate
-!     the matrix z = h*y rather than the log derivative matrix, y
-!     (eqns 10, 12, 13 and 14 are simply multiplied through by h)
-fac = h
-icol = 1
-do 40  ich = 1, nch
+if (nsteps /= 0) then
+  !     propagate z matrix from rmin to rmax
+
+  !     with a constant step size it is convenient to propagate
+  !     the matrix z = h*y rather than the log derivative matrix, y
+  !     (eqns 10, 12, 13 and 14 are simply multiplied through by h)
+  fac = h
+  icol = 1
+  do ich = 1, nch
 
 #if defined(HIB_UNIX) || defined(HIB_CRAY)
-   call dscal (nch, fac, z(icol), nrow)
+     call dscal (nch, fac, z(icol), nrow)
 #endif
-   icol = icol + ncol
-40 continue
+     icol = icol + ncol
+  end do
 
-allocate(amat(nmax*nch))
-allocate(bmat(nmax*nch))
+  allocate(amat(nmax*nch))
+  allocate(bmat(nmax*nch))
 
-!     propagate z matrix from rmin to rmax
-do 250  kstep = 1, nsteps
-!     apply quadrature contribution at beginning of sector,
-!     r = a
-!     after this loop z contains z(a)+(h^2/3)w(a)
-!     todo : handle the case where w is lower triangular
-!     (uninitialized values in upper triangle), see issue 49
-   fac = d3
-   icol = 1
-   do  50 ich = 1, nch
-      call daxpy_wrapper (nch, fac, w(icol), nrow, z(icol), nrow)
-      icol = icol + ncol
-50    continue
-!     the reference potential for the sector is the diagonal
-!     of the coupling matrix evaluated at the centre of the
-!     sector, r = c  (eqn 15)
-   if (iread) then
-      read (FUNIT_QUAD_MAT) (wref(ich), ich = 1, nch)
-      do 60  ich = 1, nch
-         wref(ich) = wref(ich) - eshift
-60       continue
-   else
-      istep = istep + 1
-      r = rmin + istep * h
-      call mtime(t0,t0w)
-
-      call potmat(w, r, nch, nmax, v2)
-      call mtime(t1,t1w)
-      tp = tp + t1 - t0
-      tpw = tpw + t1w - t0w
-      idiag = 1
-      do 70  ich = 1, nch
-         wref(ich) = w(idiag)
-         idiag = idiag + ndiag
-70       continue
-      if (iwrite) then
-         write (FUNIT_QUAD_MAT) (wref(ich), ich = 1, nch)
-      endif
-   endif
-!     adjust quadrature contribution at r = a to account for
-!     sector reference potential  (eqn 11)
-!     after this loop z contains z(a)+(h^2/3)w1(a)
-   fac = - d3
-   idiag = 1
-   do  80 ich = 1, nch
-      z(idiag) = z(idiag) + fac * wref(ich)
-      idiag = idiag + ndiag
-80    continue
-!     evaluate homogeneous half sector propagators  (eqn 10)
-!     z(i) = h * y(i), i=1,2,3,4
-   do 85  ich = 1, nch
-      arg = half * sqrt(abs(wref(ich)))
-         if (wref(ich) .lt. zero) then
-            tn = tan(arg)
-            z1(ich) = arg / tn - arg * tn
-            z2(ich) = arg / tn + arg * tn
-         else
-            th = tanh(arg)
-            z1(ich) = arg / th + arg * th
-            z2(ich) = arg / th - arg * th
-         endif
-!           z3(ich) = z2(ich)
-!           z4(ich) = z1(ich)
-85    continue
-!     propagate z matrix across the first half sector
-!     from r = a to r = c  (eqn 14)
-   idiag = 1
-   do  90 ich = 1, nch
-      z(idiag) = z(idiag) + z1(ich)
-      idiag = idiag + ndiag
-90    continue
-
-!     z now contains z(a)+z1(a,c)
-#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-   call smxinv(z, nmax, nch, scr1, scr2, ierr)
-#endif
-#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
-  call syminv(z,nmax,nch,ierr)
-#endif
-   if (ierr .ne. 0) then
-      write (6, 9000) kstep, ierr
-      write (9, 9000) kstep, ierr
-      call exit
-   endif
-!     z now contains [z(a)+z1(a,c)]^-1
-   icol = 1
-   do  95 ich = 1, nch
-      fac = z2(ich)
-      call dscal (nch, fac, z(icol), nrow)
-      icol = icol + ncol
-95    continue
-!     z now contains [z(a)+z1(a,c)]^-1 z2(a,c)
-!     if photodissociation calculation or wavefunction desired:
-!     save this matrix, which is hg(a,m), in amat
-   if (photof .or. wavefn) &
-     call matmov(z, amat, nch, nch, nmax, nmax)
-   irow = 1
-   do  110 ich = 1, nch
-      fac = - z2(ich)
-      call dscal (nch, fac, z(irow), ncol)
-      irow = irow + nrow
-110    continue
-!     z now contains - z3(a,c) [z(a)+z1(a,c)]^-1 z2(a,c)
-   idiag = 1
-   do  120 ich = 1, nch
-      z(idiag) = z(idiag) + z1(ich)
-      idiag = idiag + ndiag
-120    continue
-
-!     evaluate quadrature contribution at sector mid-point,
-!     r = c  (eqn 12)     (first energy calculation only)
-   if (iread) then
-      icol = 1
-      do  125 ich = 1, nch
-         read (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
-         icol = icol + ncol
-125       continue
-   else
-      fac = d6
-      icol = 1
-      do  130 ich = 1, nch
-         call dscal (nch, fac, w(icol), nrow)
-         icol = icol + ncol
-130       continue
-      idiag = 1
-      do  140 ich = 1, nch
-         w(idiag) = one
-         idiag = idiag + ndiag
-140       continue
-
-#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-      call smxinv(w, nmax, nch, scr1, scr2, ierr)
-#endif
-#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
-      call syminv(w,nmax,nch,ierr)
-#endif
-      if (ierr .eq. 2) then
-         icode = 2
-         write (9,9000) kstep, icode
-         call exit
-      endif
-      idiag = 1
-
-      do  150 ich = 1, nch
-         w(idiag) = w(idiag) - one
-         idiag = idiag + ndiag
-150       continue
-      if (iwrite) then
-         icol = 1
-         do  155 ich = 1, nch
-            write (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
-            icol = icol + ncol
-155          continue
-      endif
-   endif
-!     apply quadrature contribution at sector mid-point
-!     corrections to z4(a,c) and z1(c,b) are applied
-!     simultaneously  (eqn 13)
-   fac = eight
-   icol = 1
-   do  160 ich = 1, nch
-      call daxpy_wrapper (nch, fac, w(icol), nrow, z(icol), nrow)
-      icol = icol + ncol
-160    continue
-
-!     propagate z matrix across the second half sector
-!     from r = c to r = b   (eqn 14)
-   idiag = 1
-   do  170 ich = 1, nch
-      z(idiag) = z(idiag) + z1(ich)
-      idiag = idiag + ndiag
-170    continue
-!     at this point z contains z(c) + z1(c,b)
-#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-   call smxinv(z, nmax, nch, scr1, scr2, ierr)
-#endif
-#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
-   call syminv(z,nmax,nch,ierr)
-#endif
-   if (ierr .eq. 2) then
-      icode = 3
-      write (9,9000) kstep, icode
-      call exit
-   endif
-!     at this point z contains [z(c) + z1(c,b)]^-1
-   icol = 1
-   do 175 ich = 1, nch
-      fac = z2(ich)
-      call dscal (nch, fac, z(icol), nrow)
-      icol = icol + ncol
-175    continue
-!     z now contains [z(c)+z1(c,b)]^-1 z2(c,b)
-!     if photodissociation calculation or wavefunction desired:
-   if (photof .or. wavefn) then
-!     first save this matrix, which is g(c,b), in bmat
-     call matmov(z, bmat, nch, nch, nmax, nmax)
-!     use bmat and w as temporary storage here
-     call mxma (amat, 1, nmax, bmat, 1, nmax, w, 1, nmax, &
-                nch, nch, nch)
-!     w now contains the matrix g(a,m)g(m,b)=g(a,b)
-!     if wavefunction desired, save this matrix
-    if (wavefn .and. writs) then
-       irec = irec + 1
-!     nrlogd is the number of LOGD records - used to seek the wfu file
-       nrlogd = nrlogd + 1
-       write (ifil, err=950) r - h, r, (w(i), i=1, nch)
-       icol = 1
-       do ich = 1, nch
-          write (ifil, err=950) (w(icol - 1 + i), i=1, nch)
-          icol = icol + nmax
-       end do
-       write (ifil, err=950) 'ENDWFUR', char(mod(irec, 256))
-       lrlogd = (nchwfu ** 2 + nchwfu + 2) * sizeof(dble_t) &
-            + 8 * sizeof(char_t)
-       iendwv = iendwv + lrlogd
-    endif
-  endif
-
-!     accumulate overlap matrix with ground state
-!     if photodissociation calculation
-  if (photof) then
-!     premultiply g(a,b) by wt psi(a) mu(a)
-!     use bmat as temporary storage here
-     call mxma(q,nch,1,w,1,nmax,bmat,nch,1,nphoto,nch,nch)
-!     bmat now contains [...+wt*psi(a)mu(a)] g(a,b)
-!       stored as successive columns with each initial
-!       state corresponding to a column
-!     now determine psi(b)mu(b), save this in q
-     rnew = rmin + (istep+1) * h
+  do 250  kstep = 1, nsteps
+  !     apply quadrature contribution at beginning of sector,
+  !     r = a
+  !     after this loop z contains z(a)+(h^2/3)w(a)
+  !     todo : handle the case where w is lower triangular
+  !     (uninitialized values in upper triangle), see issue 49
+     fac = d3
+     icol = 1
+     do  50 ich = 1, nch
+        call daxpy_wrapper (nch, fac, w(icol), nrow, z(icol), nrow)
+        icol = icol + ncol
+  50    continue
+  !     the reference potential for the sector is the diagonal
+  !     of the coupling matrix evaluated at the centre of the
+  !     sector, r = c  (eqn 15)
      if (iread) then
-       read (FUNIT_QUAD_MAT) (q(i), i=1, nqmax)
+        read (FUNIT_QUAD_MAT) (wref(ich), ich = 1, nch)
+        do 60  ich = 1, nch
+           wref(ich) = wref(ich) - eshift
+  60       continue
      else
-       call mtime(t0,t0w)
-       call ground(q, rnew, nch, nphoto, mxphot)
-! recalculate simpson's rule wt for this point
-       wt=(3.d0+isimp)*simpwt
-       isimp=-isimp
-!     multiply psi(b) mu(b) by simpson's rule wt at r=rnew
-       call dscal (nqmax, wt, q, 1)
-       call mtime(t1,t1w)
-       twf=twf+t1-t0
-       twfw=twfw+t1w-t0w
-       if (iwrite) write (FUNIT_QUAD_MAT) (q(i), i=1, nqmax)
+        istep = istep + 1
+        r = rmin + istep * h
+        call mtime(t0,t0w)
+
+        call potmat(w, r, nch, nmax, v2)
+        call mtime(t1,t1w)
+        tp = tp + t1 - t0
+        tpw = tpw + t1w - t0w
+        idiag = 1
+        do 70  ich = 1, nch
+           wref(ich) = w(idiag)
+           idiag = idiag + ndiag
+  70       continue
+        if (iwrite) then
+           write (FUNIT_QUAD_MAT) (wref(ich), ich = 1, nch)
+        endif
      endif
-!     add wt*psi(b)mu(b) to bmat and resave
-     fac=one
-     call daxpy_wrapper(nqmax, fac, bmat, 1, q, 1)
-   endif
-!     now premultiply [z(c)+z1(c,b)]^-1 z2(c,b) by z2(c,b)
-   irow=1
-   do  190 ich = 1, nch
-     fac = - z2(ich)
-     call dscal (nch, fac, z(irow), ncol)
-     irow = irow + nrow
-190    continue
-!      z now contains - z2(c,b) [z(c)+z1(c,b)]^-1 z2(c,b)
-   idiag = 1
-   do  195 ich = 1, nch
-      z(idiag) = z(idiag) + z1(ich)
-      idiag = idiag + ndiag
-195    continue
-!     apply reference potential adjustment to quadrature
-!     contribution at r = b  (eqn 11)
-   fac = - d3
-   idiag = 1
+  !     adjust quadrature contribution at r = a to account for
+  !     sector reference potential  (eqn 11)
+  !     after this loop z contains z(a)+(h^2/3)w1(a)
+     fac = - d3
+     idiag = 1
+     do  80 ich = 1, nch
+        z(idiag) = z(idiag) + fac * wref(ich)
+        idiag = idiag + ndiag
+  80    continue
+  !     evaluate homogeneous half sector propagators  (eqn 10)
+  !     z(i) = h * y(i), i=1,2,3,4
+     do 85  ich = 1, nch
+        arg = half * sqrt(abs(wref(ich)))
+           if (wref(ich) .lt. zero) then
+              tn = tan(arg)
+              z1(ich) = arg / tn - arg * tn
+              z2(ich) = arg / tn + arg * tn
+           else
+              th = tanh(arg)
+              z1(ich) = arg / th + arg * th
+              z2(ich) = arg / th - arg * th
+           endif
+  !           z3(ich) = z2(ich)
+  !           z4(ich) = z1(ich)
+  85    continue
+  !     propagate z matrix across the first half sector
+  !     from r = a to r = c  (eqn 14)
+     idiag = 1
+     do  90 ich = 1, nch
+        z(idiag) = z(idiag) + z1(ich)
+        idiag = idiag + ndiag
+  90    continue
 
-   do  200 ich = 1, nch
-      z(idiag) = z(idiag) + fac * wref(ich)
-      idiag = idiag + ndiag
-200    continue
-!     obtain coupling matrix, w, at end of sector
-   if (iread) then
-      icol = 1
-      do  205 ich = 1, nch
-         read (FUNIT_QUAD_MAT) (w(ij), ij = icol, icol + nch - 1)
-         icol = icol + ncol
-205       continue
-      idiag = 1
-      do  210 ich = 1, nch
-         w(idiag) = w(idiag) - eshift
-         idiag = idiag + ndiag
-210       continue
-   else
-      istep = istep + 1
-      r = rmin + istep * h
-      call mtime(t0,t0w)
-      call potmat(w, r, nch, nmax, v2)
-      call mtime(t1,t1w)
-      tp = tp + t1 - t0
-      tpw = tpw + t1w - t0w
-      if (iwrite) then
+  !     z now contains z(a)+z1(a,c)
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
+     call smxinv(z, nmax, nch, scr1, scr2, ierr)
+#endif
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
+    call syminv(z,nmax,nch,ierr)
+#endif
+     if (ierr .ne. 0) then
+        write (6, 9000) kstep, ierr
+        write (9, 9000) kstep, ierr
+        call exit
+     endif
+  !     z now contains [z(a)+z1(a,c)]^-1
+     icol = 1
+     do  95 ich = 1, nch
+        fac = z2(ich)
+        call dscal (nch, fac, z(icol), nrow)
+        icol = icol + ncol
+  95    continue
+  !     z now contains [z(a)+z1(a,c)]^-1 z2(a,c)
+  !     if photodissociation calculation or wavefunction desired:
+  !     save this matrix, which is hg(a,m), in amat
+     if (photof .or. wavefn) &
+       call matmov(z, amat, nch, nch, nmax, nmax)
+     irow = 1
+     do  110 ich = 1, nch
+        fac = - z2(ich)
+        call dscal (nch, fac, z(irow), ncol)
+        irow = irow + nrow
+  110    continue
+  !     z now contains - z3(a,c) [z(a)+z1(a,c)]^-1 z2(a,c)
+     idiag = 1
+     do  120 ich = 1, nch
+        z(idiag) = z(idiag) + z1(ich)
+        idiag = idiag + ndiag
+  120    continue
+
+  !     evaluate quadrature contribution at sector mid-point,
+  !     r = c  (eqn 12)     (first energy calculation only)
+     if (iread) then
+        icol = 1
+        do  125 ich = 1, nch
+           read (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
+           icol = icol + ncol
+  125       continue
+     else
+        fac = d6
+        icol = 1
+        do  130 ich = 1, nch
+           call dscal (nch, fac, w(icol), nrow)
+           icol = icol + ncol
+  130       continue
+        idiag = 1
+        do  140 ich = 1, nch
+           w(idiag) = one
+           idiag = idiag + ndiag
+  140       continue
+
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
+        call smxinv(w, nmax, nch, scr1, scr2, ierr)
+#endif
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
+        call syminv(w,nmax,nch,ierr)
+#endif
+        if (ierr .eq. 2) then
+           icode = 2
+           write (9,9000) kstep, icode
+           call exit
+        endif
+        idiag = 1
+
+        do  150 ich = 1, nch
+           w(idiag) = w(idiag) - one
+           idiag = idiag + ndiag
+  150       continue
+        if (iwrite) then
+           icol = 1
+           do  155 ich = 1, nch
+              write (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
+              icol = icol + ncol
+  155          continue
+        endif
+     endif
+  !     apply quadrature contribution at sector mid-point
+  !     corrections to z4(a,c) and z1(c,b) are applied
+  !     simultaneously  (eqn 13)
+     fac = eight
+     icol = 1
+     do  160 ich = 1, nch
+        call daxpy_wrapper (nch, fac, w(icol), nrow, z(icol), nrow)
+        icol = icol + ncol
+  160    continue
+
+  !     propagate z matrix across the second half sector
+  !     from r = c to r = b   (eqn 14)
+     idiag = 1
+     do  170 ich = 1, nch
+        z(idiag) = z(idiag) + z1(ich)
+        idiag = idiag + ndiag
+  170    continue
+  !     at this point z contains z(c) + z1(c,b)
+#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
+     call smxinv(z, nmax, nch, scr1, scr2, ierr)
+#endif
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
+     call syminv(z,nmax,nch,ierr)
+#endif
+     if (ierr .eq. 2) then
+        icode = 3
+        write (9,9000) kstep, icode
+        call exit
+     endif
+  !     at this point z contains [z(c) + z1(c,b)]^-1
+     icol = 1
+     do 175 ich = 1, nch
+        fac = z2(ich)
+        call dscal (nch, fac, z(icol), nrow)
+        icol = icol + ncol
+  175    continue
+  !     z now contains [z(c)+z1(c,b)]^-1 z2(c,b)
+  !     if photodissociation calculation or wavefunction desired:
+     if (photof .or. wavefn) then
+  !     first save this matrix, which is g(c,b), in bmat
+       call matmov(z, bmat, nch, nch, nmax, nmax)
+  !     use bmat and w as temporary storage here
+       call mxma (amat, 1, nmax, bmat, 1, nmax, w, 1, nmax, &
+                  nch, nch, nch)
+  !     w now contains the matrix g(a,m)g(m,b)=g(a,b)
+  !     if wavefunction desired, save this matrix
+      if (wavefn .and. writs) then
+         irec = irec + 1
+  !     nrlogd is the number of LOGD records - used to seek the wfu file
+         nrlogd = nrlogd + 1
+         write (ifil, err=950) r - h, r, (w(i), i=1, nch)
          icol = 1
-         do  215 ich = 1, nch
-            write (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
-            icol = icol + ncol
-215          continue
+         do ich = 1, nch
+            write (ifil, err=950) (w(icol - 1 + i), i=1, nch)
+            icol = icol + nmax
+         end do
+         write (ifil, err=950) 'ENDWFUR', char(mod(irec, 256))
+         iendwv = iendwv + get_wfu_logd_rec_length(nchwfu, 0)
       endif
-   endif
-!     apply quadrature contribution at r = b  (eqn 12)
-   fac = d3
-   icol = 1
-   do 220  ich = 1, nch
-      call daxpy_wrapper (nch, fac, w(icol), nrow, z(icol), nrow)
-      icol = icol + ncol
-220    continue
-!     propagation loop ends here
-250 continue
+    endif
 
-deallocate(bmat)
-deallocate(amat)
+  !     accumulate overlap matrix with ground state
+  !     if photodissociation calculation
+    if (photof) then
+  !     premultiply g(a,b) by wt psi(a) mu(a)
+  !     use bmat as temporary storage here
+       call mxma(q,nch,1,w,1,nmax,bmat,nch,1,nphoto,nch,nch)
+  !     bmat now contains [...+wt*psi(a)mu(a)] g(a,b)
+  !       stored as successive columns with each initial
+  !       state corresponding to a column
+  !     now determine psi(b)mu(b), save this in q
+       rnew = rmin + (istep+1) * h
+       if (iread) then
+         read (FUNIT_QUAD_MAT) (q(i), i=1, nqmax)
+       else
+         call mtime(t0,t0w)
+         call ground(q, rnew, nch, nphoto, mxphot)
+  ! recalculate simpson's rule wt for this point
+         wt=(3.d0+isimp)*simpwt
+         isimp=-isimp
+  !     multiply psi(b) mu(b) by simpson's rule wt at r=rnew
+         call dscal (nqmax, wt, q, 1)
+         call mtime(t1,t1w)
+         twf=twf+t1-t0
+         twfw=twfw+t1w-t0w
+         if (iwrite) write (FUNIT_QUAD_MAT) (q(i), i=1, nqmax)
+       endif
+  !     add wt*psi(b)mu(b) to bmat and resave
+       fac=one
+       call daxpy_wrapper(nqmax, fac, bmat, 1, q, 1)
+     endif
+  !     now premultiply [z(c)+z1(c,b)]^-1 z2(c,b) by z2(c,b)
+     irow=1
+     do  190 ich = 1, nch
+       fac = - z2(ich)
+       call dscal (nch, fac, z(irow), ncol)
+       irow = irow + nrow
+  190    continue
+  !      z now contains - z2(c,b) [z(c)+z1(c,b)]^-1 z2(c,b)
+     idiag = 1
+     do  195 ich = 1, nch
+        z(idiag) = z(idiag) + z1(ich)
+        idiag = idiag + ndiag
+  195    continue
+  !     apply reference potential adjustment to quadrature
+  !     contribution at r = b  (eqn 11)
+     fac = - d3
+     idiag = 1
 
-!     recover the log derivative matrix, y, at r = rmax
-fac = hi
-icol = 1
-do 260  ich = 1, nch
-   call dscal (nch, fac, z(icol), nrow)
-   icol = icol + ncol
-260 continue
+     do  200 ich = 1, nch
+        z(idiag) = z(idiag) + fac * wref(ich)
+        idiag = idiag + ndiag
+  200    continue
+  !     obtain coupling matrix, w, at end of sector
+     if (iread) then
+        icol = 1
+        do  205 ich = 1, nch
+           read (FUNIT_QUAD_MAT) (w(ij), ij = icol, icol + nch - 1)
+           icol = icol + ncol
+  205       continue
+        idiag = 1
+        do  210 ich = 1, nch
+           w(idiag) = w(idiag) - eshift
+           idiag = idiag + ndiag
+  210       continue
+     else
+        istep = istep + 1
+        r = rmin + istep * h
+        call mtime(t0,t0w)
+        call potmat(w, r, nch, nmax, v2)
+        call mtime(t1,t1w)
+        tp = tp + t1 - t0
+        tpw = tpw + t1w - t0w
+        if (iwrite) then
+           icol = 1
+           do  215 ich = 1, nch
+              write (FUNIT_QUAD_MAT) (w(ij), ij = icol,icol+nch-1)
+              icol = icol + ncol
+  215          continue
+        endif
+     endif
+  !     apply quadrature contribution at r = b  (eqn 12)
+     fac = d3
+     icol = 1
+     do 220  ich = 1, nch
+        call daxpy_wrapper (nch, fac, w(icol), nrow, z(icol), nrow)
+        icol = icol + ncol
+  220    continue
+  !     propagation loop ends here
+  250 continue
+
+  deallocate(bmat)
+  deallocate(amat)
+
+  !     recover the log derivative matrix, y, at r = rmax
+  fac = hi
+  icol = 1
+  do ich = 1, nch
+     call dscal (nch, fac, z(icol), nrow)
+     icol = icol + ncol
+  end do
+
+end if
+
 261 call mtime(tl,tlw)
 tl = tl - tf - tp - twf
 tlw = tlw - tfw - tpw - twfw
@@ -1904,7 +1876,7 @@ end
 subroutine runlog (z, &
                    r, rend, &
                    spac, eshift, itwo, twoen, tl, tlw, tp, tpw, &
-                   twf, twfw, prlogd, noprin, ipos, nch, nmax, v2)
+                   twf, twfw, prlogd, noprin, ipos, nch, nmax, v2, isteps, nsteps)
 !     log-derivative propagator from r to r = rend
 !     the logd code is based on the improved log-derivative method
 !     for reference see  d.e.manolopoulos, j.chem.phys., 85, 6425 (1986)
@@ -1950,15 +1922,11 @@ subroutine runlog (z, &
 !                   if .false., then 80 column printer
 !     nch           number of coupled equations
 !     nmax          leading dimension of arrays z and w
-!     variables in common block /cophot/
-!     photof        true if photodissociation calculation
-!                   false if scattering calculation
-!     wavefn        true if g(a,b) transformation matrices are saved
-!                   to be used later in computing the wavefunction
 !  ------------------------------------------------------------------
 use mod_coqvec, only: nphoto, q
 use mod_ancou, only: ancou_type
 use mod_hibrid2, only: mxoutd, mxoutr
+use mod_phot, only: photof, wavefn, boundf, writs
 implicit double precision (a-h, o-z)
 type(ancou_type), intent(in) :: v2
 real(8), intent(out) :: z(nmax*nch)
@@ -1979,23 +1947,13 @@ logical, intent(in) :: noprin
 logical, intent(in) :: ipos
 integer, intent(in) :: nch
 integer, intent(in) :: nmax
-
-real(8) :: w(nmax*nch)
-real(8) :: wref(nch)
-real(8) :: z1(nch)
-real(8) :: z2(nch)
-real(8) :: scr1(nch)
-real(8) :: scr2(nch)
+integer, intent(inout) :: isteps
+integer, intent(inout) :: nsteps
 
 !      real eshift, r, rend, rmax, rmin, spac, tl, tlw, tp, tpw
-!      real scr1, scr2, wref, z1, z2
-!      real w, z
-integer nsteps
-logical boundf, writs
+!      real z
 !  internal logical variables
-logical iread, iwrite, print, photof, wavefn
-common /cophot/ photof, wavefn, boundf, writs
-common /constp/ nsteps, isteps
+logical iread, iwrite, print
 
 !  z, w, amat, and bmat are stored column by column in one dimensional arrays
 
@@ -2436,8 +2394,8 @@ subroutine smatop (tmod, sr, si, scmat, lq, r, prec, &
 !             contains the open-open block of the log-derivative matrix,
 !             packed into the lower nopen x nopen submatrix
 !             on return:  tmod contains the modulus squared of the t-matrix
-!               if the logical variable flagsu, contained in common /cosurf/ i
-!               .true., then the calculation is assumed to be that of a molecu
+!               if the logical variable flagsu, contained in modurle mod_surf is
+!               .true., then the calculation is assumed to be that of a molecule
 !               colliding with a surface, in which case tmod contains the
 !               modulus squared of the s-matrix
 !             if the flag photof=.true., then tmod contains the photodissociat
@@ -2467,19 +2425,7 @@ subroutine smatop (tmod, sr, si, scmat, lq, r, prec, &
 !    nmax:    maximum row dimensions of matrices
 !    kwrit:   if true, k matrix is printed out
 !    ipos:    if true, 132 line printer
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units (mass of electron = 1)
-!  variable in common block /cosurf/
-!    flagsu:    if .true., then molecule-surface collisons
-!  variables in common block /cophot/
-!     photof        true if photodissociation calculation
-!                   false if scattering calculation
-!     wavefn        true if g(a,b) transformation matrices are saved
-!                   to be used later in computing the wavefunction
-!  variables in common block /cowave/
-!     irec          record number of last written g(a,b) matrix
-!     ifil          local unit number for g(a,b) file
+
 !  subroutines called:
 !    vsmul:     scalar times a vector
 !    cbesn,cbesj  ricatti-bessel functions (from b.r. johnson)
@@ -2489,14 +2435,19 @@ subroutine smatop (tmod, sr, si, scmat, lq, r, prec, &
 !    vmul:      vector times a vector
 ! --------------------------------------------------------------------
 use mod_coqvec, only: nphoto, q
-use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_cosysi, only: ispar
 ! temporary storage for smatrices
 use mod_cotq1, only: srsave => dpsir ! srsave(100)
 use mod_cotq2, only: sisave => tq2 ! sisave(100)
 use mod_hibrid2, only: mxoutd, mxoutr
-use mod_par, only: prsmat, jlpar, spac=>scat_spac
+use mod_par, only: prsmat, jlpar! spac=>scat_spac
+use mod_wave, only: irec, ifil, ipos2, ipos3, nrlogd, iendwv, ipos2_location
+use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
+use mod_phot, only: photof, wavefn, boundf, writs
+use mod_surf, only: flagsu
+
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax, nmax), intent(inout) :: tmod
 real(8), dimension(nmax, nmax), intent(out) :: sr
@@ -2523,14 +2474,6 @@ integer isw, i, icol, l
 character*1 forma
 character*40 flxfil
 #endif
-logical flagsu, photof, wavefn, &
-     boundf, writs
-common /coered/ ered, rmu
-common /cosurf/ flagsu
-common /cophot/ photof, wavefn, boundf, writs
-common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
-     inflev
-common /coselb/ ibasty
 !     The following three variables are used to determine the (machine
 !     dependent) size of built-in types
 integer int_t
@@ -2596,13 +2539,13 @@ if (wavefn) then
 !$$$         inquire (ifil, pos=ipos2)
 !
    ipos2 = iendwv
-   write (ifil, err=950, pos=9) ipos2, ipos3, nrlogd
+   write (ifil, err=950, pos=ipos2_location) ipos2, ipos3, nrlogd
    write (ifil, err=950, pos=ipos2) irec, nopen, nphoto, &
         r, (pk(i), i=1, nopen), (fj(i), i=1, nopen), &
         (fpj(i), i=1, nopen), (fn(i), i=1, nopen), &
         (fpn(i), i=1, nopen)
-   iendwv = iendwv + 3 * sizeof(int_t) + &
-        (5 * nopen + 1) * sizeof(dble_t)
+   iendwv = iendwv + 3 * int(sizeof(int_t), kind(int_t)) + &
+        (5 * nopen + 1) * int(sizeof(dble_t), kind(int_t))
 endif
 ! save derivatives
 call dcopy(nopen,fpj,1,derj,1)
@@ -2724,6 +2667,7 @@ end if
 if (.not. wavefn) return
 ! if wavefunction desired, then save
 ! real and imaginary part of s-matrix in record 2 of direct access file
+
 do icol=1, nopen
    write (ifil, err=950) (sr(i, icol), i=1, nopen)
 end do
@@ -2819,6 +2763,7 @@ if (photof) then
   endif
 ! save transition amplitudes
   if (wavefn) then
+
 !          call dbwi(nphoto,1,ifil,izero)
      do jrow = 1, nphoto
         write (ifil, err=950) (sr(jrow, jcol), jcol=1, nopen)
@@ -2827,6 +2772,7 @@ if (photof) then
      do jrow = 1, nphoto
         write (ifil, err=950) (si(jrow, jcol), jcol=1, nopen)
      end do
+
      write (ifil, err=950) 'ENDWFUR', char(2)
      iendwv = iendwv + 8 * sizeof(char_t) &
           + (2 * nopen ** 2) * sizeof(dble_t)
@@ -2843,7 +2789,6 @@ if (photof) then
   write (9, 371)
 371   format (/,'** SUM OF PHOTOFRAGMENT FLUXES (AU)')
   isym=0
-372   format (f10.4,f12.2)
   call mxoutr(9, dern, 1, nphoto, 1, isym, ipos)
   do 380 nst = 1, nphoto
     fac=one/rmu
@@ -2878,7 +2823,7 @@ if (photof) then
   call mxoutr(9, scmat, nphoto, nopen, nmax, isym, ipos)
 ! diagnostic for two state problem; leave in for now 1/21/92
 !        write (23,400) spac, scmat(1,1), scmat(1,2)
-400   format (f19.11,2(f25.12))
+! 400   format (f19.11,2(f25.12))
   do 410 nst = 1, nphoto
     fac=one/(rmu*dern(nst))
     do 405 ncol = 1, nopen
@@ -2952,21 +2897,16 @@ subroutine smatrx (z, sr, si, &
 !    nch      on entry:  number of channels
 !    nmax     on entry:  maximum row dimension of matrices
 !    kwrit    if true, k matrix is printed out
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units (mass of electron = 1)
-!  variables in common block /cophot/
-!     photof        true if photodissociation calculation
-!                   false if scattering calculation
-!     wavefn        true if g(a,b) transformation matrices are saved
-!                   to be used later in computing the wavefunction
-!  variables in common block /cowave/
-!     irec          record number of last written g(a,b) matrix
-!     ifil          local unit number for g(a,b) file
+
+
 !  ---------------------------------------------------------------------------
 use mod_coqvec, only: nphoto, q
 use mod_coeint, only: eint
 use mod_hibrid2, only: mxoutd, mxoutr
+use mod_wave, only: ifil, ipos2, ipos3, nrlogd, iendwv, ipos2_location
+use mod_ered, only: ered, rmu
+use mod_phot, only: photof, wavefn, boundf, writs
+
 implicit double precision (a-h,o-z)
 real(8), intent(inout) :: z(nmax,nmax)
 real(8), intent(out) :: sr(nmax,nmax)
@@ -2985,18 +2925,12 @@ logical, intent(in) :: kwrit
 logical, intent(in) :: ipos
 
 
-logical photof, wavefn, boundf, writs
-common /coered/ ered, rmu
-common /cophot/ photof, wavefn, boundf, writs
-common /cowave/ irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, &
-     inflev
-real(8) :: amat(nmax,nmax), bmat(nmax,nmax)
+real(8) :: amat(nmax,nmax)
 integer :: isc1(nch)
 
 data izero /0/
-!     The following three variables are used to determine the (machine
+!     The following variables are used to determine the (machine
 !     dependent) size of built-in types
-integer int_t
 double precision dble_t
 character char_t
 !  if kwrit (prlogd) = .true. and photodissociation calculation, print out
@@ -3070,7 +3004,7 @@ if (wavefn) then
 !     following commented statement
 !$$$         inquire (ifil, pos=ipos3)
    ipos3 = iendwv
-   write (ifil, pos=9) ipos2, ipos3, nrlogd
+   write (ifil, pos=ipos2_location) ipos2, ipos3, nrlogd
    write (ifil, err=950, pos=ipos3) (isc1(i), i=1, nopen)
    do icol = 1, nopen
       write (ifil, err=950) (sr(i, icol), i=1, nopen)

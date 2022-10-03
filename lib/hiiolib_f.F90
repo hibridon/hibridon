@@ -30,6 +30,26 @@
 !
 !  NB cstart ultrix-dec for i/o with fortran instead of c routines
 #include "assert.h"
+
+! block data io
+! cosize
+!    isize:     size of files (only needed for univac, optional on vax)
+!    isizes:    size of s-matrix file (only needed for univac, optional
+!               on vax
+module mod_file_size
+  integer :: isize
+  integer :: isizes
+end module mod_file_size
+
+
+module mod_disc
+  integer :: ipos(98)
+  integer :: iun(98)
+  integer :: iostat(98)
+  integer :: icatf(98)
+  character(len=14) :: nam(98)
+end module mod_disc
+
 ! ---------------------------------------------------------------
 subroutine fimove (nxfile)
 ! ---------------------------------------------------------------
@@ -278,19 +298,16 @@ use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, &
                 lscreen, iprint, &
                 fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, tolai=>scat_tolai, xmu ! NB if boundc = .true. then these parameters are: r1,r2,c,spac,delr,hsimp,eigmin,tolai,xmu
 use funit, only: FUNIT_INP
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
+use mod_skip, only: nskip, iskip
+use mod_file, only: input, output, jobnam, savfil
 implicit double precision (a-h,o-z)
 integer i, length
 logical existf
-character*40 input, jobnam, output, savfil
 character*(*) filnam
-#include "common/parpot.F90"
-common /coselb/ ibasty
-integer :: ibasty
 
-common /coskip/ nskip,iskip
-integer :: nskip, iskip
-common /cofile/ input, output, jobnam, savfil
-common /coered/ ered, rmu
 
 ! ----------------------------------------------------------------
 !  open unit 8 for standard input
@@ -348,7 +365,7 @@ read (8, *, err=195) (energ(i), i = 1, nerg)
 iline = iline + 1
 !  line 8
 read (8, *, err=195) xmu
-! convert to atomic units of mass and store in /coered/
+! convert to atomic units of mass and store in mod_ered
 rmu=xmu/xmconv
 iline = iline + 1
 !  line 9
@@ -725,17 +742,6 @@ endif
 if(batch) call exit
 end
 ! ---------------------------------------------------------------
-block data io
-! ---------------------------------------------------------------
-!     revision date: 5-mar-2008
-!
-!  variable in common block /cosize/
-!    isize:     size of files (only needed for univac, optional on vax)
-!    isizes:    size of s-matrix file (only needed for univac, optional
-!               on vax
-! -----------------------------------------------------
-common /cosize/ isize, isizes
-end
 !
 !     ------------------------------------------------------------
 subroutine openf(lunit,filnam,lmode,isize)
@@ -913,10 +919,6 @@ subroutine openfi (nerg)
 !                if .false, then initial calculation
 !                in any case unit=13 (filename trstrt) is opened to hold
 !                temporary information in case of restart
-!  variable in common block /cosize/
-!    isize:     size of files (only needed for univac, optional on vax)
-!    isizes:    size of s-matrix file (only needed for univac, optional
-!               on vax
 !
 !  subroutines called: open
 !  --------------------------------------------------------------------
@@ -931,17 +933,16 @@ use mod_par, only: airyfl, csflag, flaghf, flagsu, ipos, &
                 prpart, readpt, rsflag, twomol, wrsmat, &
                 wrpart, wrxsec, prxsec, nucros, photof, wavefl, boundc
 use funit
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
+use mod_file, only: input, output, jobnam, savfil
+use mod_file_size, only : isize, isizes
 implicit double precision (a-h,o-z)
-integer ifile, nerg, nfile, lenx, isize, isizes
+integer ifile, nerg, nfile, lenx
 logical existf
 character*40  oldlab,newlab
-#include "common/parpot.F90"
 character*40 xname,xnam1
 character*20 cdate
-character*40 input,output,jobnam,savfil
-common /cofile/ input,output,jobnam,savfil
-common /cosize/ isize, isizes
-common /coselb/ ibasty
 if (nerg .gt. 1) then
 !  check to see if nerg .le. 25
   if (nerg .gt. 25) then
@@ -1205,6 +1206,7 @@ subroutine rdhead(smt_file_unit, cdate, ered, rmu, csflag, flaghf, &
 !     major revision: 07-jan-2012 by q. ma
 !     ------------------------------------------------------------
 use mod_clseg, only: lseg
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit none
 integer, intent(in) :: smt_file_unit ! logical unit used to read smt file 
 character*20, intent(out) :: cdate
@@ -1218,7 +1220,6 @@ integer, dimension(1), intent(out) :: jlev  ! dimension(1:nlevel)
 integer, dimension(1), intent(out) :: inlev ! dimension(1:nlevel)
 double precision, dimension(1), intent(out) :: elev ! dimension(1:nlevel)
 integer, dimension(1), intent(out) :: jout  ! dimension(1:iabs(nnout))
-#include "common/parpot.F90"
 character*8 csize8
 character*4 csize4
 integer :: lenhd
@@ -1494,20 +1495,15 @@ subroutine dread(ii,l,ifil,irec,iof)
 !
 !.....read "l" integer words from record "irec" on file "ifil"
 !.....with offset iof
-!
-!  variable in common block /cosize/
-!    isize:     size of files (only needed for univac, optional on vax)
-!    isizes:    size of s-matrix file (only needed for univac, optional
-!               on vax
 ! --------------------------------------------------------------
 use mod_clseg, only: intrel
 use mod_cdbf, only: ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf,llbuf
 use mod_cdio, only: allocate_cdio, cdio_is_allocated, iadr, len, next, iun, iostat, last, lhea, junk, memory_block
 use mod_cobuf, only: lbuf, ibuf
+use mod_file_size, only : isize, isizes
 implicit double precision (a-h,o-z)
 character*(*) name
 parameter (maxun=2, maxrec=5000)
-common /cosize/ isize,isizes
 dimension ii(1)
 if(iun(ifil).eq.0) then
   write(6,10) ifil,irec
@@ -1923,11 +1919,10 @@ subroutine assgn(luni,filnam,isize,icat)
 !  icat:  if icat=0, scratch
 !         if icat>0, permanent
 use mod_clseg, only: lseg
+use mod_disc, only: ipos, iun, iostat, icatf, nam
 character*(*) filnam
-character*14 nam
 character*12 stat
 character*(*) name
-common/disc/ ipos(98),iun(98),iostat(98),icatf(98),nam(98)
 logical openfl,exstfl
 !
 isize=0
@@ -2002,9 +1997,8 @@ subroutine rdabsf(luni,a,l,iword)
 ! on file. l and iword should be multiple of lseg, otherwise unefficient
 use mod_clseg, only: lseg
 use mod_cobuf, only: lbuf
+use mod_disc, only: ipos, iun, iostat, icatf, nam
 implicit double precision (a-h,o-z)
-character*14 nam
-common/disc/ ipos(98),iun(98),iostat(98),icatf(98),nam(98)
 dimension a(1),buf(lbuf)
 if(lseg.gt.lbuf) stop 'lbuf too small in rdabsf'
 ibl=iword/lseg+1
@@ -2113,9 +2107,8 @@ end
 subroutine assgn(luni,name,lenn,icat)
 implicit double precision (a-h,o-z)
 character*(*) name
-character*14 nam,blank
+character*14 blank
 character*15 namx
-common/disc/ ipos(98),iun(98),iostat(98),icatf(98),nam(98)
 data lendef/2000/,blank/'              '/
 if (iun(luni).ne.0) return
 if(name.eq.blank) call tmpnm(luni,name)

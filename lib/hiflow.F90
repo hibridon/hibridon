@@ -13,38 +13,18 @@ subroutine flow (z, w, zmat, amat, bmat, jq, lq, inq, jlev, &
 !  additions by: b. follmeg, h-j werner
 !  current revision date:  1-oct-2001 by mha
 !  -------------------------------------------------------------
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units (mass of electron = 1)
+
 !  variables in common block /copmat/
 !    rtmn,rtmx: minimum and maximum turning points
 !    iflag:     variable used in determination of turning points (not used her
 !           iflag = 0 if all channels are in classically forbidden region
 !           iflag = 1 if some channels are open
 !           iflag = 2 if all asymptotically open channels are open at r
-!  variable in common block /cosurf/
-!    surffl:      this variable is set equal to flagsu, it is held in a
-!                 separate common block for compatability with subroutines
-!                 smatop, soutpt, and xwrite
-!                 if .true., then the problem is assumed to a molecule
-!                 scattering off a surface, in which case the diagonal
-!                 elements of the transition probabilities are equal to the
-!                 modulus squared of the s-matrix (not t-matrix elements)
-!  variable in common block /cojlpo/
-!    jlpold:      parity used in xwrite subroutine to insure correct
-!                 accumulation of partial waves in cases where jlpar=0
 !
-!  variables in common block /cophot/
-!     photof        true if photodissociation calculation
-!                   false if scattering calculation
-!     wavefn        true if g(a,b) transformation matrices are saved
-!                   to be used later in computing the wavefunction
 !  variables in module constants
 !    econv:       conversion factor from cm-1 to hartree
 !    xmconv:      conversion factor from amu to atomic units
 !
-!  variable in common block /coopti/
-!    optifl:      flag, signals if the calculation is an optimization
 !
 use mod_cosout, only: nnout, jout
 use mod_cocent, only: cent
@@ -69,6 +49,18 @@ use funit
 use ipar_enum
 use rpar_enum
 use mod_hinput, only:hinput
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
+use mod_phot, only: phot_photof => photof, wavefn, boundf, writs
+use mod_surf, only: surf_flagsu => flagsu
+use mod_sav, only: iipar, ixpar, irpar, rxpar
+use mod_pmat, only: rtmn, rtmx, iflag
+use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
+#if defined(HIB_ULTRIX_DEC)
+  use mod_dec_timer, only: ttim
+#endif
+use mod_opti, only: optifl
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
@@ -103,42 +95,13 @@ integer, intent(in) :: nmax
 integer, intent(in) :: nairy
 
 type(ancou_type), allocatable :: v2
-#include "common/parpot.F90"
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
 real(8) secnds
-common /codec/ ttim(2)
-real(8) :: ttim
 #endif
 
-common /cputim/ cpuld,cpuai,cpupot,cpusmt,cpupht
-real(8) :: cpuld, cpuai, cpupot, cpusmt, cpupht
-common /cosavi/ iipar, ixpar(8)
-integer :: iipar, ixpar
-common /cosavr/ irpar(2), rxpar(9)
-integer :: irpar
-real(8) :: rxpar
-common /copmat/ rtmn, rtmx, iflag
-real(8) :: rtmn, rtmx
-integer :: iflag
-common /coered/ ered, rmu
-real(8) :: ered, rmu
-common /cophot/ phot_photof, wavefn, boundf, writs
-logical :: phot_photof, wavefn, boundf, writs
-
-common /cosurf/ surf_flagsu
-logical :: surf_flagsu
-
-common /coselb/ ibasty
-integer :: ibasty
-
-common /cojlpo/ jlpold
-integer :: jlpold
-
-common /coopti/ optifl
-logical :: optifl
-
-common /constp/ nsteps, isteps
-integer :: nsteps, isteps
+! parity used in xwrite subroutine to insure correct
+! accumulation of partial waves in cases where jlpar=0
+integer :: jlpold  
 
 integer :: nlev(25)
 
@@ -171,6 +134,8 @@ real(8) :: t1, t11, t2, t22, tb, tbm, tcpu0, tcpu1, tcpu2, tcpuf, twall0, twall1
 real(8) :: xjtot
 
 real(8) :: second
+integer :: isteps
+integer :: nsteps
 
 
 first=.true.
@@ -623,7 +588,7 @@ endif
 ! store header and reserve space on direct access file 2 if wavefunction
 ! is desired (not if bound state calculation)
 if (wavefl .and. .not.boundc) &
-  call wavewr(jtot,jlpar,nu,nch,nchtop,rstart,rendld)
+  call wavewr(jtot,jlpar,nu,nch,rstart,rendld)
 call mtime (t11, t22)
 tb =  t11 - t1
 tbm = t22 - t2
@@ -667,7 +632,7 @@ call propag (z, w, zmat, amat, bmat, &
              ien, nerg, ered, eshift, rstart, rendld, spac, &
              tolhi, rendai, rincr, fstfac, tb, tbm, &
              ipos, prlogd, noprin, airyfl, prairy, &
-             nch, nopen, nairy, ntop, v2)
+             nch, nopen, nairy, ntop, v2, isteps, nsteps)
 
 ! if bound state calculation, end it now
 if (boundc) then
@@ -684,7 +649,7 @@ call soutpt (z, w, zmat, amat, &
              ipos, csflag, flaghf, prsmat, prt2, t2test, &
              wrsmat, wrpart, prpart, wrxsec, prxsec, twomol, &
              nucros, firstj, nlevel, nlevop, nopen, nchtop, &
-             twojlp)
+             twojlp, jlpold)
 cpuout = cpuout + second() - t11
 
 !  on return from soutpt:

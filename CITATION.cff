@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Alexander"
+  given-names: "Millard Henry"
+  orcid: "https://orcid.org/0000-0002-4348-5111"
+- family-names: "Dagdigian"
+  given-names: "Paul J."
+  orcid: "https://orcid.org/0000-0002-6378-221X"
+- family-names: "Werner"
+  given-names: "Hans Joachim"
+  orcid: "https://orcid.org/0000-0002-0435-539X"
+- family-names: "Manolopoulos"
+  given-names: "David Eusthatios"
+  orcid: "https://orcid.org/0000-0002-7111-0763"
+- family-names: "Desrousseaux"
+  given-names: "Benjamin"
+  orcid: "https://orcid.org/0000-0001-8578-3590"
+- family-names: "Raffy"
+  given-names: "Guillaume"
+- family-names: "Lique"
+  given-names: "François"
+  orcid: "https://orcid.org/0000-0002-0664-2536"
+title: "Hibridon"
+version: 5.0.0
+doi: 10.5281/zenodo.1234
+date-released: 2022-08-24
+url: "https://github.com/hibridon/hibridon"

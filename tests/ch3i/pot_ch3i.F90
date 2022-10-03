@@ -5,6 +5,28 @@ real(8) :: reg
 real(8) :: caypot
 end module mod_grnd
 
+module mod_ch3i
+
+  type                         :: vib_type
+   integer :: ie(50)  ! electronic quantum number for each channel
+   integer :: iv(50)  ! contains vibr.channel for each
+!             electronic channel. vibrational quantum number for each asymptotic channel
+  end type vib_type
+  type(vib_type) :: vib
+
+  ! ground state wave function data
+  type                         :: gswf_data_type
+    integer :: ngr=21
+    ! real(8) :: en(ngr)
+    real(8) :: dmu(2)
+
+    real(8) :: reg = 4.16799
+
+    real(8) :: rrr
+  end type gswf_data_type
+  type(gswf_data_type) :: gswf_data
+
+end module mod_ch3i
 ! shapiro CH3I PES's modified by Guo and Schatz
 ! References:  M. Shapiro, J. Phys. Chem. 90, 3644 (1986);
 !  H. Guo and G. C. Schatz, J. Chem. Phys. 93, 393 (1990);
@@ -24,12 +46,10 @@ subroutine driver
 use mod_covvl, only: vvl
 use mod_cosysi, only: nscode, isicod, ispar
 use constants, only: econv, xmconv
+use mod_ered, only: ered, rmu
+use mod_ch3i, only: vib
 implicit double precision (a-h,o-z)
-logical ifull
 dimension wf(16)
-common /coered/ ered, rmu
-common /coground/ ifull
-common /covib/ie(50), iv(50)
 ispar(3)=1
 nch=16
 rmu=13.42/xmconv
@@ -37,16 +57,15 @@ rmu=13.42/xmconv
 rshift=0.5
 xfact=0.8
 do i=1,8
-  ie(i)=1
-  iv(i)=i-1
-  iv(i+8)=i-1
-  ie(i+8)=2
+  vib%ie(i)=1
+  vib%iv(i)=i-1
+  vib%iv(i+8)=i-1
+  vib%ie(i+8)=2
 enddo
 read (5, *, end=99) r
 call pot(vv0,r)
 write (6, 100) vv0,vvl
 100 format(' vvl',/,7(1pe16.8))
-ifull=.false.
 call ground(wf,r,nch,1,1)
 print *, wf
 goto 1
@@ -54,10 +73,10 @@ goto 1
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
 !  dummy loapot subroutine
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
  character*(*) filnam
-#include "common/parpot.F90"
-#include "common/parbas.F90"
-common /coselb/ ibasty
 potnam='SHAPIRO-GUO-SCHATZ 2D CH3I'
 ibasty=99
 lammin(1)=1
@@ -69,7 +88,7 @@ ivrow(1,1)=0
 return
 end
 ! --------------------------------------------------------------------------
-      subroutine ground(wf, rr, nch, nphoto, mxphot)
+subroutine ground(wf, r, nch, nphoto, mxphot)
 
 !  author: c. rist and m. alexander
 !  test routine for photodissociation calculations
@@ -100,33 +119,29 @@ end
 !             coupling terms)
 !    nvmin    minimum vibrationnal state in each electronic state
 !    nvmax    maximum vibrationnal state in each electronic state
-!  variables in common block /covib/
-!    iv       vibrational quantum number for each asymptotic channel
-!    ie       electronic quantum number for each channel
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units (mass of electron = 1)
+
 
 !  -------------------------------------------------------
 use mod_coiout, only: niout, indout
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
-use constants, only: econv, xmconv
-implicit double precision (a-h, o-z)
-parameter (ngr=21, nymx=500)
-logical ifull
-dimension wf(nch),en(ngr),f(ngr,nymx),psi(nymx),gr(ngr), &
-          dmu(2),q(4)
-#include "common/parbas.F90"
-common /coered/ ered, rmu
-common /covib/ie(50), iv(50)
-common /coground/ ifull
-data y0, reg, q / 0.619702d0, 4.16799, &
-                  7.830d0, -0.1762d0, 0.6183d0, 4.939d0/
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_ered, only: ered, rmu
+use mod_ch3i, only: vib, gswf_data
+implicit none
 
-ymin=-2.d0
-dy=0.08
-ny=51
+real(8), intent(out) :: wf(nch*nphoto) ! array of dimension nch*nphoto, containing, on return,
+! ground state wavefunction in each of nch components
+! nphoto is number of difference ground state wavefunctions
+real(8), intent(out) :: r  ! value of separation coordinate
+integer, intent(in) :: nch  ! total number of channels (row dimension of q)
+integer, intent(in) :: nphoto ! number of different wavefunctions calculated
+! column index of q vector
+integer, intent(in) :: mxphot  ! maximum size of q vector (mxphot .ge. nch*nphoto)
+
+integer :: ndip
+real(8) :: rshift
+
 !     separate the variables into CH3 umbrella motion and C-I stretch
 !     for each value of CH3--I distance, the component of the ground
 !     state on the asymptotic vibrationnal basis must be determined.
@@ -140,15 +155,15 @@ ny=51
 !      endif
 ! shift ground state wavefunction
 rshift=rcod(1)
-r=rr-rshift
+gswf_data%rrr=r-rshift
 ! define dipole moment as a function of intermolecular distance.
 ndip=iscod(3)
-dmu(1)=1.0/(1+exp(2.0*(r-9.8)))
-dmu(1)=2.d0*rmu/(1+exp(2.0*(r-9.8)))
+gswf_data%dmu(1)=1.0/(1+exp(2.0*(gswf_data%rrr-9.8)))
+gswf_data%dmu(1)=2.d0*rmu/(1+exp(2.0*(gswf_data%rrr-9.8)))
 if (ndip .eq. 1) then
-  dmu(2)=0.d0
+  gswf_data%dmu(2)=0.d0
 else
-  dmu(2)=0.48304*rmu/(1+exp(2.0*(r-9.8)))
+  gswf_data%dmu(2)=0.48304*rmu/(1+exp(2.0*(gswf_data%rrr-9.8)))
 endif
 
 ! Ground state wave-function is defined in Guo and Schatz (1990),93,393
@@ -156,9 +171,37 @@ endif
 ! for each CH3-I distance we define the components of the ground state
 ! wave function in  asymptotic vibrationnal basis:
 
-ifull=.true.
+call wfintern(wf, 0.d0, nch, nphoto, 0, .true.)
+
+end subroutine ground
 !      entry wfintern(wf,yymin,nnvib,nny) ! original Rist statement
-entry wfintern(wf,yymin,nch,nny)
+subroutine wfintern(wf, yymin, nch, nphoto, nny, ifull)
+use constants, only: econv, xmconv
+use mod_ch3i, only: vib, gswf_data
+implicit none
+real(8), intent(out) :: wf(nch*nphoto) ! array of dimension nch*nphoto, containing, on return,
+! ground state wavefunction in each of nch components
+! nphoto is number of difference ground state wavefunctions
+real(8), intent(in) :: yymin
+integer, intent(in) :: nch  ! total number of channels (row dimension of q)
+integer, intent(in) :: nphoto ! number of different wavefunctions calculated
+! column index of q vector
+integer, intent(in) :: nny
+logical, intent(in) :: ifull
+
+integer :: ny = 51
+integer, parameter :: nymx=500
+real(8) :: ymin=-2.d0
+integer :: nvib, i, j, iel, ivb
+real(8) :: q1, q2, u, wt, y
+
+real(8), parameter :: q(4) = [7.830d0, -0.1762d0, 0.6183d0, 4.939d0]
+real(8), parameter :: dy = 0.08
+real(8) :: psi(nymx)
+real(8) :: f(gswf_data%ngr, nymx)
+real(8) :: gr(gswf_data%ngr)
+real(8), parameter :: y0 = 0.619702d0
+
 if (.not.ifull) then
   ymin=yymin
 !       nvib=nnvib/2 ! original Rist statement
@@ -166,12 +209,12 @@ if (.not.ifull) then
   ny=nny
 endif
 
-call hof(ymin, dy, f, ny, xmconv, ngr, nymx)
+call hof(ymin, dy, f, ny, xmconv, gswf_data%ngr, nymx)
 
 do i=1,ny
   y= ymin +(i-1)*dy
-  q1=q(1)*(r-reg) + q(2)*(y-y0)
-  q2=q(3)*(r-reg) + q(4)*(y-y0)
+  q1=q(1)*(gswf_data%rrr-gswf_data%reg) + q(2)*(y-y0)
+  q2=q(3)*(gswf_data%rrr-gswf_data%reg) + q(4)*(y-y0)
   psi(i)=exp(-0.5*(q1**2+q2**2))
 ! normalise psi:
   psi(i)=psi(i)/sqrt(0.0810)
@@ -184,7 +227,7 @@ if (ny .eq. 1) then
   return
 endif
 
-do j=1,ngr
+do j=1,gswf_data%ngr
   gr(j)=0.d0
   u=1.d0
   do i=1, ny
@@ -197,9 +240,9 @@ do j=1,ngr
 enddo
 ! channels correspond to electronic-vibrational states of CH3I
 do 30 i=1,nch
-  iel=ie(i)
-  ivb=iv(i)+1
-  wf(i)= dmu(iel)*gr(ivb)
+  iel=vib%ie(i)
+  ivb=vib%iv(i)+1
+  wf(i)= gswf_data%dmu(iel)*gr(ivb)
 30 continue
 return
 end
@@ -225,9 +268,9 @@ subroutine pot (vv0, r)
 !               potential
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
+use mod_ch3i, only: vib
 implicit double precision (a-h, o-z)
 real(8), intent(out) :: vv0
-common /covib/ ie(50), ic(50)
 !  -----------------------------------------------------------------------
 data a11, b11, a12, b12, b13, y0, r0 / 51.53d0, 1.64d0, 25.15d0, &
           1.3d0, &
@@ -261,15 +304,6 @@ subroutine syusr (irpot, readpt, iread)
 !  if iread = 0 return after defining variable names
 !  current revision date: 1-may-90
 !  -----------------------------------------------------------------------
-!  variables in common block /cobspt/
-!    lammin:   array containing minimum value of lambda for each term
-!    lammax:   array containing maximum value of lambda for each term
-!    mproj:    array containing the order of the reduced rotation matrix
-!              elements for each term.  lammin can not be less than mproj.
-!              for homonuclear molecules, the allowed values of lambda for
-!              each term range from lammin to lammax in steps of 2
-!              the length of each of these arrays is limited to nterm
-!              terms where nterm is defined in the common block /cosysi/
 !  variable in common cosysi
 !    nscode:  total number of system dependent parameters
 !             nscode = isicod + isrcod +3
@@ -314,6 +348,7 @@ use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 use mod_grnd, only: reg, caypot
 use mod_par, only: par_readpt=>readpt
 use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -325,7 +360,6 @@ character*1 dot
 character*4 char
 character*(*) fname
 character*40 filnam, line, potfil
-#include "common/parbas.F90"
 save potfil
 #include "common/comdot.F90"
 
@@ -557,21 +591,6 @@ subroutine bausr (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !             state )
 !    evib:    asymptotic vibrational energy in each electronic channel
 !             (in au)
-!  variables in common block /covib/
-!    iv:      on return, contains vibr.channel for each
-!             electronic channel
-!    ie:      on return contains electronic channel
-!  variables in common block /cobspt/
-!    lammin:   array containing minimum value of lambda for each term
-!    lammax:   array containing maximum value of lambda for each term
-!    mproj:    array containing the order of the reduced rotation matrix
-!              elements for each term.  lammin can not be less than mproj.
-!              for homonuclear molecules, the allowed values of lambda for
-!              each term range from lammin to lammax in steps of 2
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 ! --------------------------------------------------------------------
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
@@ -582,6 +601,9 @@ use mod_cosysr, only: isrcod, junkr, rcod=>rspar
 use constants, only: econv, xmconv
 use mod_coiout, only: niout, indout
 use mod_par, only: iprint
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_ered, only: ered, rmu
+use mod_ch3i, only: vib
 implicit double precision (a-h,o-z)
 integer, intent(out) :: j(:)
 integer, intent(out) :: l(:)
@@ -612,11 +634,8 @@ integer, intent(out) :: ntop
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical clfl
-#include "common/parbas.F90"
-common /covib/ ie(50), iv(50)
 common /coicl/ clfl
 
-common /coered/ ered, rmu
 common /coiscl/ iscl(40)
 zero = 0.d0
 one = 1.d0
@@ -632,17 +651,17 @@ do i=1, nel
   do k=1, nvib
     n=n+1
     nlevel=nlevel+1
-    ie(n)=i
-    iv(n)=nvmin+k-1
+    vib%ie(n)=i
+    vib%iv(n)=nvmin+k-1
     cent(n)=0.d0
     j(n)=0
     jhold(n)=j(n)
     l(n)=0
-    is(n)=(3-2*i)*(iv(n)+1)
+    is(n)=(3-2*i)*(vib%iv(n)+1)
     ishold(n)=is(n)
     eel=rcod(2*i)
     evib=rcod(2*i+1)
-    eint(n)=eel + (iv(n)+0.5d0)*evib
+    eint(n)=eel + (vib%iv(n)+0.5d0)*evib
     ehold(n)=eint(n)
   enddo
 enddo
@@ -663,9 +682,9 @@ if (n .eq. 0) return
 if (n .gt. 1) then
   do 144 i1 = 1, n - 1
     esave = ehold(i1)
-    iel = ie(i1)
+    iel = vib%ie(i1)
     do i2 = i1 + 1, n
-      if (iel .ne. ie(i2)) go to 144
+      if (iel .ne. vib%ie(i2)) go to 144
       if (ehold(i2) .lt. esave) then
 !  state i2 has a lower energy than state i1, switch them
         esave = ehold(i2)
@@ -692,12 +711,12 @@ if (n .gt. 1) then
         issave = ishold(i2)
         ishold(i2) = ishold(i1)
         ishold(i1) = issave
-        iesave = ie(i2)
-        ie(i2) = ie(i1)
-        ie(i1) = iesave
-        ivsave = iv(i2)
-        iv(i2) = iv(i1)
-        iv(i1) = ivsave
+        iesave = vib%ie(i2)
+        vib%ie(i2) = vib%ie(i1)
+        vib%ie(i1) = iesave
+        ivsave = vib%iv(i2)
+        vib%iv(i2) = vib%iv(i1)
+        vib%iv(i1) = ivsave
      end if
     enddo
 144   continue
@@ -804,10 +823,10 @@ do 320 il = lammin(1), lammax(1), 1
   do icol= 1, n
     do irow = icol, n
       vee=zero
-      ier=ie(irow)
-      iec=ie(icol)
-      ivr=iv(irow) +1
-      ivc=iv(icol) +1
+      ier=vib%ie(irow)
+      iec=vib%ie(icol)
+      ivr=vib%iv(irow) +1
+      ivc=vib%iv(icol) +1
       if (il .eq. 1) then
         if (ier .eq. 1 .and. iec .eq. 1) then
           if(ivr.eq.ivc) vee=1.d0

@@ -4,8 +4,8 @@
 #include "common/syusr.F90"
 subroutine driver
 use mod_covvl, only: vvl
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
-#include "common/parpot.F90"
 potnam='PATTENGILL-LABUDDE-BERNSTEIN AR-N2'
 print *, potnam
 1  print *, ' r (bohr)'
@@ -19,10 +19,10 @@ goto 1
 #include "common/ground.F90"
 ! --------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 ! --------------------------------------------------------------------------
 character*(*) filnam
-#include "common/parpot.F90"
-#include "common/parbas.F90"
 potnam='PATTENGILL-LABUDDE-BERNSTEIN AR-N2'
 lammin(1)=2
 lammax(1)=2
@@ -53,9 +53,9 @@ subroutine pot (vv0, r)
 !  -----------------------------------------------------------------------
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit double precision (a-h,o-z)
 
-#include "common/parbas.F90"
 
 
 !  pattengill ar-n2 potential [m.d. pattengill, r. a. labudde, r.b. bernstein,

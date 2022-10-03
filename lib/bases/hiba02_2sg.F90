@@ -103,10 +103,6 @@ subroutine ba2sg (j, l, is, jhold, ehold, ishold, nlevel, &
 !              then, if isa=+1 then only the s-levels are included in the
 !              basis, if isa=-1, then only the a-levels are included
 !               zero of energy is taken to be n=0
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  variable in common block /coconv/
 !   econv:        conversion factor from cm-1 to hartrees
 !   xmconv:       converson factor from amu to atomic units
@@ -124,7 +120,9 @@ use mod_hibasutil, only: vlm2sg
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: iprint
 use funit, only: FUNIT_INP
-#include "common/parbasl.F90"
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
 
 implicit double precision (a-h,o-z)
 integer, intent(out), dimension(:) :: nrot
@@ -134,8 +132,6 @@ real(8), intent(out), dimension(:) :: sc4
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical clist, csflag, flaghf, flagsu, ihomo, bastst
-#include "common/parbas.F90"
-common /coered/ ered, rmu
 dimension j(1), l(1), jhold(1), ehold(1), is(1), &
           ieps(2), ishold(1)
 data ieps / -1, 1 /
@@ -590,6 +586,8 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use mod_par, only: ihomo
 use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_skip, only: nskip, iskip
 implicit none
 !  subroutine to read in system dependent parameters for doublet-sigma
 !   + atom scattering
@@ -631,9 +629,6 @@ integer :: j, l, lc
 logical existf
 character*(*) fname
 character*60 line,filnam,potfil, filnm1
-#include "common/parbas.F90"
-common /coskip/ nskip,iskip
-integer :: nskip, iskip
 character*1 dot
 save potfil
 #include "common/comdot.F90"
