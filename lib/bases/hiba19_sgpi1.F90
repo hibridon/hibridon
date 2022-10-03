@@ -1,5 +1,19 @@
 #include "assert.h"
 module mod_hiba19_sgpi1
+!    ivpi:     array of vibrational quantum numbers of the 2pi state to be
+!              included in the calculation.  must be consistent with order of
+!              levels listed in common block cvibp, from pot routine.
+integer :: ivpi(5)
+
+!  covpot
+!    numvib:   number of 2pi vibrational levels for which  the pot routine
+!              can provide Vpi, V1, V2 for coupling with the 2sigma state
+!    ivibpi:   array of the vibrational quantum numbers of 2pi levels for
+!              which the pot routine can provide the potentials
+
+integer :: numvib
+integer :: ivibpi(5)
+
 contains
 ! sysgpi1 (savsgpi1/ptrsgpi1) defines, saves variables and reads         *
 !                  potential for 2sig-2pi + atom scattering (one 2sigma  *
@@ -132,15 +146,6 @@ subroutine basgpi1(j, l, is, jhold, ehold, ishold, nlevel, &
 !    numvpi:   number of 2pi vibrational levels (must be >= 1) (place holder)
 !    jmax:     array of maximum rotational angular momenta for each 2pi level
 !              with convention omega .le. j .le. jmax+0.5
-!  variables in common block /covibp/
-!    ivpi:     array of vbibrational quantum numbers of the 2pi state to be
-!              included in the calculation.  must be consistent with order of
-!              levels listed in common block cvibp, from pot routine.
-!  variables in common block /covibp/
-!    numvib:   number of 2pi vibrational levels for which  the pot routine
-!              can provide Vpi, V1, V2 for coupling with the 2sigma state
-!    ivibpi:   array of the vibrational quantum numbers of 2pi levels for
-!              which the pot routine can provide the potentials
 !  variable in common block /coconv/
 !    econv:     conversion factor from cm-1 to hartrees
 !    xmconv:    converson factor from amu to atomic units
@@ -174,8 +179,6 @@ implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
-common /covibp/ ivpi(5)
-common /covpot/ numvib,ivibpi(5)
 dimension j(1), l(1), is(1), jhold(1), ehold(1), ishold(1), &
   ivhold(1), c12(1), c32(1), csig(1), ieps(2), &
   epi(maxvib), bpi(maxvib), dpi(maxvib), aso(maxvib), p(maxvib), &
@@ -1106,7 +1109,6 @@ subroutine sysgpi1 (irpot, readpt, iread)
 !    nparpi:   number of 2pi symmetry doublets included (nparpi=2 will ensure
 !              both lambda doublets).  otherwise, set nparpi=+1 for e levels,
 !              nparpi=-1 for f levels only.
-!    ivibpi:   array of vibrational quantum numbers for 2pi levels
 !    jmax:     array of maximum rotational angular momenta for each 2pi level
 !              with convention omega .le. j .le. jmax+0.5
 !  variable in common bloc /cosys/
@@ -1131,14 +1133,13 @@ implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-integer :: is, isa, isi, isr, isym, iv, ivpi
+integer :: is, isa, isi, isr, isym, iv
 integer :: j, l, lc, nmax, nparsg, nterm, numvpi
 logical existf
 character*8 char
 character*(*) fname
 character*1 dot
 character*60 filnam, line, potfil, filnm1
-common /covibp/ ivpi(5)
 save potfil
 #include "common/comdot.F90"
 irpot = 1

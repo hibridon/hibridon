@@ -935,7 +935,7 @@ subroutine propag (z, w, zmat, amat, bmat, &
                    ien, nerg, en, eshift, rstart, rendld, spac, &
                    tolhi, rendai, rincr, fstfac, tb, tbm, &
                    ipos, prlogd, noprin, airyfl, prairy, &
-                   nch, nopen, nairy, nmax, v2)
+                   nch, nopen, nairy, nmax, v2, isteps, nsteps)
 ! ------------------------------------------------------------------------
 !  subroutine to:
 !    1.  propagate the log-derivative matrix from rstart to rendld
@@ -1029,7 +1029,7 @@ integer, intent(in) :: nerg
 real(8), intent(in) :: en
 real(8), intent(in) :: eshift
 real(8), intent(in) :: rstart
-real(8), intent(in) :: rendld
+real(8), intent(in) :: rendld  ! end radius for log derivative method
 real(8), intent(in) :: spac
 real(8), intent(in) :: tolhi
 real(8), intent(in) :: rendai
@@ -1047,6 +1047,8 @@ integer, intent(out) :: nopen
 integer, intent(in) :: nairy
 integer, intent(in) :: nmax
 type(ancou_type), intent(in) :: v2
+integer, intent(inout) :: isteps
+integer, intent(inout) :: nsteps
 
 logical :: twoen
 logical ::  first
@@ -1115,7 +1117,7 @@ call mtime(ttx,tty)
 call runlog (z, &
              r, rendld, spac, eshift, itwo, twoen, &
              td, tdm, tp, tpm, twf, twfm, prlogd, noprin, &
-             ipos, nch, nmax, v2)
+             ipos, nch, nmax, v2, isteps, nsteps)
 
 !  on return from runlog, z contains the log-derivative matrix at r = rendld
 !  branch to airy integration if desired. integrate coupled equations
@@ -1874,7 +1876,7 @@ end
 subroutine runlog (z, &
                    r, rend, &
                    spac, eshift, itwo, twoen, tl, tlw, tp, tpw, &
-                   twf, twfw, prlogd, noprin, ipos, nch, nmax, v2)
+                   twf, twfw, prlogd, noprin, ipos, nch, nmax, v2, isteps, nsteps)
 !     log-derivative propagator from r to r = rend
 !     the logd code is based on the improved log-derivative method
 !     for reference see  d.e.manolopoulos, j.chem.phys., 85, 6425 (1986)
@@ -1945,13 +1947,13 @@ logical, intent(in) :: noprin
 logical, intent(in) :: ipos
 integer, intent(in) :: nch
 integer, intent(in) :: nmax
+integer, intent(inout) :: isteps
+integer, intent(inout) :: nsteps
 
 !      real eshift, r, rend, rmax, rmin, spac, tl, tlw, tp, tpw
 !      real z
-integer nsteps
 !  internal logical variables
 logical iread, iwrite, print
-common /constp/ nsteps, isteps
 
 !  z, w, amat, and bmat are stored column by column in one dimensional arrays
 

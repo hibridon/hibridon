@@ -1,5 +1,7 @@
 #include "assert.h"
 module mod_hiba09_stpln
+logical :: twomol ! if .true. collision between symmetric top and linear
+                  ! molecule, if .false. collision symmetric top-atom.
 contains
 ! systpln (savstpln/ptrstpln) defines, save variables and reads          *
 !                  potential for symmetric top and singlet sigma molecule*
@@ -144,9 +146,6 @@ subroutine bastpln(j, l, is, jhold, ehold, ishold, nlevel, &
 !  subroutines called:
 !   vlmstpln:  returns molecule-molecule angular coupling coefficient for
 !              particular choice of channel index
-!  variable in common block /co2mol/
-!   twomol     if .true. collision between symmetric top and linear
-!              molecule, if .false. collision symmetric top-atom.
 ! --------------------------------------------------------------------
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
@@ -164,9 +163,8 @@ use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
-logical ihomo, flaghf, csflag, clist, flagsu, bastst, twomol
+logical ihomo, flaghf, csflag, clist, flagsu, bastst
 character*40 fname
-common /co2mol/ twomol
 dimension j(1), l(1), jhold(1), ehold(1), is(1), &
           ishold(1)
 dimension ieps(1), ktemp(1), jtemp(1), isc1(1)
@@ -697,14 +695,13 @@ implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-logical existf, twomol
+logical existf
 integer icod, ircod
 integer i, j, k, l, lc
 character*1 dot
 character*(*) fname
 character*60 line, filnam, potfil, filnm1
 parameter (icod=9, ircod=5)
-common /co2mol/ twomol
 #include "common/comdot.F90"
 save potfil
 
