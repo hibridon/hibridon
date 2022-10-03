@@ -38,6 +38,7 @@ add_library(hib
     hisystem.F90
     hitensor.F90
     hitrnprt.F90
+    hitestptn.F90
     hiutil.F90
     hivector.F90
     hipotutil.F90

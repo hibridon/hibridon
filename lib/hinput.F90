@@ -118,7 +118,7 @@ use mod_hibrid5, only : intcrs, readpc
 use mod_difcrs, only: difcrs
 use mod_hibasis, only: is_twomol
 use mod_hibrid2, only: enord, prsg
-use mod_hibrid3, only: testptn, testpt20, testpt, potmin
+use mod_hibrid3, only: potmin
 use mod_hiutil, only: assignment_parse
 use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT, RPAR_COUNT
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
@@ -132,6 +132,7 @@ use mod_selb, only: ibasty
 use mod_file, only: input, output, jobnam, savfil
 use mod_sav, only: iipar, ixpar, irpar, rxpar
 use mod_tensor, only: tenopa, mrcrs
+use mod_hitestptn, only: testptn
 implicit none
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
@@ -271,7 +272,6 @@ lindx(FCOD_BOUNDC) = LPAR_BOUNDC
 ! stmix:  3000
 ! trnprt:  3100
 ! prsbr:   3200
-! showpot:  3300
 ! nb after changing the following list, check that all the variables "incode"
 ! that follow after address 900 are changed accordingly
 !
@@ -461,7 +461,7 @@ end if
       800,500,1300,700,2300, &
       1200,1600,430,2650,2800, &
       460,2850,2900,2950,3000, &
-      3100,3200,3300),i
+      3100,3200),i
 !
 ! label:set_ibasty(line,l)
 ! basis type and kind of calculation
@@ -945,13 +945,7 @@ goto 15  ! label:interpret_statement(line, l1)
 ! test potential
 ! testpot
 ! you will be prompted for r and theta. to exit, specify r=0
-1200 if (ibasty .eq. 1 .or. ibasty .eq. 4) then
-  call testptn(lpar(LPAR_IHOMO))
-else if (ibasty .eq. 20) then
-  call testpt20(lpar(LPAR_IHOMO))
-else
-  call testpt(lpar(LPAR_IHOMO))
-end if
+1200 call testptn(lpar(LPAR_IHOMO))
 goto 1  ! label:read_next_command
 ! save input parameters
 !     save=filename
@@ -1581,13 +1575,6 @@ call assignment_parse(code(1:lc),empty_var_list,j,a(1))
 ! get in1, in2, jtotmx, join, jmax
 3105 continue
 call trnprt(fnam1,a)
-goto 1  ! label:read_next_command
-3300 continue
-write(6,*) "************************************************************"
-write(6,*) "Entering the DRIVER subroutine of the potential"
-write(6,*) "Press Ctrl+D to go back to Hibridon's console"
-write(6,*) "************************************************************"
-call driver
 goto 1  ! label:read_next_command
 ! pressure broadening cross sections - added by p. dagdigian
 3200 call get_token(line,l,fnam1,lc)
