@@ -27,11 +27,10 @@
 ! 20. fehler     dummy subroutine for molpro2006.3 c compatibility   *
 ! 21. sys_conf   determine and print out details of current machine  *
 !                and O/S                                             *
-! 22. dlm0,pm0   reduced rotation matrix element,Legendre polynomial *
-! 23. tf3jm0     3j-symbol with m=0; use (integer) 2j as arguments   *
-! 24. tf3j       3j-symbol; use (integer) 2j and 2m as arguments     *
-! 25. tf6j       6j-symbol; use (integer) 2j as arguments            *
-! 26. tf9j       9j-symbol; use (integer) 2j as arguments            *
+! 22. tf3jm0     3j-symbol with m=0; use (integer) 2j as arguments   *
+! 23. tf3j       3j-symbol; use (integer) 2j and 2m as arguments     *
+! 24. tf6j       6j-symbol; use (integer) 2j as arguments            *
+! 25. tf9j       9j-symbol; use (integer) 2j as arguments            *
 !*********************************************************************
 ! Warning: Please make sure kfact>3j+2 where j is the maximum value
 ! of angular momentum that may occur (kfact is defined in himain)
@@ -1564,72 +1563,6 @@ write (9,40)
 return
 end
 ! -------------------------------------------------------------------------
-function dlm0(ll,m,theta)
-implicit double precision(a-h,o-z)
-!                          m0
-!...function to calculate d  (cos(theta) as defined in "brink and satchler"
-!                          l
-!   this is only a dummy function for correct phase
-!
-l=ll
-dlm0=(-1)**m*pm1(l,m,theta)
-return
-end
-function pm1(l,m,theta)
-!
-!  calculates value of legendre polynomial for l,m,theta
-!
-implicit double precision(a-h,o-z)
-data pi/3.1415926535897932d0/
-data zero, one, two, one80 /0.d0, 1.d0, 2.d0, 180.d0/
-thedeg=(theta*pi)/one80
-!
-!  if m>l pm1=0 !
-!
-if(m.gt.l) then
-  pm1=zero
-  return
-end if
-lmax=l
-x=cos(thedeg)
-if (m.ge.0) go to 1
-write (6,100)
-100 format('  NEGATIVE M IN LEGENDRE ROUTINE:  ABORT')
-stop
-!     call exit
-1 if (m.gt.0) go to 5
-!  here for regular legendre polynomials
-pm1=one
-pm2=zero
-do 2 l=1,lmax
-pp=((two*l-one)*x*pm1-(l-one)*pm2)/float(l)
-pm2=pm1
-2 pm1=pp
-return
-!
-!  here for alexander-legendre polynomials
-!
-5 imax=2*m
-rat=1.
-do 6 i=2,imax,2
-ai=i
-6 rat=rat*((ai-one)/ai)
-y=sin(thedeg)
-pm1=sqrt(rat)*(y**m)
-pm2=zero
-low=m+1
-do 10 l=low,lmax
-al=(l+m)*(l-m)
-al=one/al
-al2=((l+m-1)*(l-m-1))*al
-al=sqrt(al)
-al2=sqrt(al2)
-pp=(two*l-one)*x*pm1*al-pm2*al2
-pm2=pm1
-10 pm1=pp
-return
-end
-!     ------------------------------------------------------------------
 logical function tf_triang_fail(two_ja, two_jb, two_jc)
 implicit none
 integer, intent(in) :: two_ja, two_jb, two_jc
