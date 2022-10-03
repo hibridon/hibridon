@@ -16,7 +16,7 @@ module mod_hinput
     k_keyword_set_ibasty          =  5      !   50 label:set_ibasty(line,l)
   end enum
 
-  integer, parameter :: ncode = 40  !  ncode is the number of bcod's
+  integer, parameter :: ncode = 39  !  ncode is the number of bcod's
   character(len=8), parameter :: bcod(ncode) = [ &  ! bcod stores hibridon's commands
     'CHECK   ', &
     'DEBROGLI', &
@@ -56,8 +56,7 @@ module mod_hinput
     'HYPXSC  ', &
     'STMIX   ', &
     'TRNPRT  ', &
-    'PRSBR   ', &
-    'SHOWPOT ']
+    'PRSBR   ']
 
   character(len=8), parameter :: bascod(1) = ['BASISTYP']
 
