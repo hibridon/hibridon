@@ -20,9 +20,6 @@ subroutine flow (z, w, zmat, amat, bmat, jq, lq, inq, jlev, &
 !           iflag = 0 if all channels are in classically forbidden region
 !           iflag = 1 if some channels are open
 !           iflag = 2 if all asymptotically open channels are open at r
-!  variable in common block /cojlpo/
-!    jlpold:      parity used in xwrite subroutine to insure correct
-!                 accumulation of partial waves in cases where jlpar=0
 !
 !  variables in module constants
 !    econv:       conversion factor from cm-1 to hartree
@@ -102,8 +99,9 @@ type(ancou_type), allocatable :: v2
 real(8) secnds
 #endif
 
-common /cojlpo/ jlpold
-integer :: jlpold
+! parity used in xwrite subroutine to insure correct
+! accumulation of partial waves in cases where jlpar=0
+integer :: jlpold  
 
 integer :: nlev(25)
 
@@ -651,7 +649,7 @@ call soutpt (z, w, zmat, amat, &
              ipos, csflag, flaghf, prsmat, prt2, t2test, &
              wrsmat, wrpart, prpart, wrxsec, prxsec, twomol, &
              nucros, firstj, nlevel, nlevop, nopen, nchtop, &
-             twojlp)
+             twojlp, jlpold)
 cpuout = cpuout + second() - t11
 
 !  on return from soutpt:
