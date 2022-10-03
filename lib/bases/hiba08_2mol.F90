@@ -87,10 +87,6 @@ subroutine ba2mol (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !     nterm = 3, include dipole-dipole, dipole-quadrupole, and
 !                short-range term (lam1=0  lam2=1  lam=1)
 !    nsym:     interchange symmetry of included channels
-!  variables in common block /cotwo/
-!    numj:     number of j1-j2 values
-!    nj1j2:    specific j1-j2 values (up to a maximum of 50)
-!              N.B. this dimension is set here
 !  variable in module mod_conlam
 !               nlam is set equal to nterm; see above
 !  subroutines called:
@@ -109,12 +105,12 @@ use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax,
 use mod_par, only: readpt, boundc
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
+use mod_two, only: numj, nj1j2
 
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-common /cotwo/ numj,nj1j2(50)
 dimension j(1), l(1), is(1), jhold(1), ehold(1), j12(1), j1(1), &
           j2(1), sc4(1), ishold(1)
 data ione, itwo, ithree / 1, 2, 3 /
@@ -145,7 +141,7 @@ if (flagsu) then
   end if
 end if
 !  check for consistency in values of numj, nterm
-if (numj .gt. 50) then
+if (numj .gt. size(nj1j2)) then
   write (6, 15) numj
   write (9, 15) numj
 15   format (' *** NUMBER OF J1-J2 PAIRS=',i3, &
@@ -492,10 +488,6 @@ subroutine sy2mol (irpot, readpt, iread)
 !  authors:  millard alexander and peter vohralik
 !  current revision date: 19-aug-1991
 !  -----------------------------------------------------------------------
-!  variables in common block /cotwo/
-!    numj:     number of j1-j2 values
-!    nj1j2:    specific j1-j2 values (up to a maximum of 50)
-!              N.B. this dimension is set in hiba2mol
 !  variables in common block /cosysr/
 !    isrcod:   number of real system dependent variables
 !    brot:     rotational constant in cm-1
@@ -527,16 +519,16 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use funit, only: FUNIT_INP
+use mod_two, only: numj, nj1j2
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-integer :: i, ihigh, ij, iline, ilow, itop, j, l, lc, nj1j2, numj
+integer :: i, ihigh, ij, iline, ilow, itop, j, l, lc
 logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-common /cotwo/ numj,nj1j2(3)
 save potfil
 #include "common/comdot.F90"
 

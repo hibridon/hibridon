@@ -30,7 +30,7 @@ subroutine soutpt (tsq, sr, si, scmat, &
                    ipos, csflag, flaghf, prsmat, prt2, t2test, &
                    writs, wrpart, prpart, wrxsec, prxsec, twomol, &
                    nucros, firstj,nlevel, nlevop, nopen, nmax, &
-                   twojlp)
+                   twojlp, jlpold)
 ! ---------------------------------------------------------------------------
 !  subroutine to:
 !                1. write out the elements of the s-matrix and modulus squared
@@ -115,9 +115,6 @@ subroutine soutpt (tsq, sr, si, scmat, &
 !    firstj   if .true. on entry, header is written to s-matrix file
 
 !    nlevel   number of energetically distinct levels included in channel basi
-!  variable in common block /cojlpo/
-!    jlpold:    old value of parity, used to insure correct accumulation
-!               of all partial waves in cases where jlpar=0 .
 !    variables in module constants
 !    econv:    conversion factor from cm-1 to hartrees
 !    xmconv:   converson factor from amu to atomic units
@@ -151,6 +148,9 @@ real(8), intent(out) :: sc2(nmax, nmax)
 integer, intent(in) :: jlev(nlevop)
 real(8), intent(in) :: elev(nlevop)
 integer, intent(in) :: inlev(nlevop)
+integer, intent(in) :: jlpold ! old value of parity, used to insure correct accumulation
+                              ! of all partial waves in cases where jlpar=0 .
+
 logical ipos, csflag, prsmat, prt2, writs, wrpart, prpart, &
         wrxsec, prxsec, flaghf, t2test, firstj, twomol, &
         nucros, faux, twojlp
@@ -159,8 +159,6 @@ integer :: lpack(nmax*nmax)
 
 character*20 cdate
 integer :: soutpt_sc_file = 1
-common /cojsav/ jsav1, jsav2
-common /cojlpo/ jlpold
 !
 data izero, ione /0, 1/
 xjtot = jtot
@@ -1006,8 +1004,6 @@ logical, intent(in) :: ihomo
 real(8) :: ener
 integer :: i, ien, irec, isa, j, jhold, jj1, jj2, jmin, jphold, nlevmx, nlevop, nn, nxfile
 character*20 cdate
-common /cojsav/ jsav1, jsav2
-integer :: jsav1, jsav2
 integer :: cs_file = FUNIT_CS  ! cross secton input file unit
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units

@@ -525,6 +525,12 @@ cdate=cdatefull(5:24)
 return
 end
 !-------------------------------------------------------------------
+!#if defined(HIB_ULTRIX_DEC)  ! note : this fpp directive is commented out because of a limitation in cmake
+  module mod_dec_timer
+    real(8) :: ttim(2)  ! sums time delta provided by etime and secnds
+  end module mod_dec_timer
+!#endif
+
 subroutine mtime(t,te)
 !
 !  subroutine to return elapsed time in seconds
@@ -541,6 +547,9 @@ subroutine mtime(t,te)
 !     less than t
 !
 !  -----------------------------------------------------------------
+#if defined(HIB_ULTRIX_DEC)
+  use mod_dec_timer, only: ttim
+#endif
 implicit none
 real(8), intent(out) :: t
 real(8), intent(out) :: te
@@ -580,17 +589,15 @@ t=tt
 result=dtime(tarray)
 te=result
 #elif defined(HIB_ULTRIX_DEC)
-common /codec/ ttim(2)
-real et, etime, secnds
-dimension et(2)
-real(8) t1, t2, tt2, delt
-t1=etime(et(1),et(2))
-tt2=secnds(0.0)
-delt=tt2-ttim(2)
-if (delt .lt. 0.0) delt=delt+86400.
-ttim(1)=ttim(1)+delt
-ttim(2)=tt2
-t2=ttim(1)
+  real et, etime, secnds
+  dimension et(2)
+  real(8) t1, tt2, delt
+  t1=etime(et(1),et(2))
+  tt2=secnds(0.0)
+  delt=tt2-ttim(2)
+  if (delt .lt. 0.0) delt=delt+86400.
+  ttim(1)=ttim(1)+delt
+  ttim(2)=tt2
 #else
 #error "This fortran compiler is not handled in this function"
 #endif

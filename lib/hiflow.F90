@@ -20,16 +20,11 @@ subroutine flow (z, w, zmat, amat, bmat, jq, lq, inq, jlev, &
 !           iflag = 0 if all channels are in classically forbidden region
 !           iflag = 1 if some channels are open
 !           iflag = 2 if all asymptotically open channels are open at r
-!  variable in common block /cojlpo/
-!    jlpold:      parity used in xwrite subroutine to insure correct
-!                 accumulation of partial waves in cases where jlpar=0
 !
 !  variables in module constants
 !    econv:       conversion factor from cm-1 to hartree
 !    xmconv:      conversion factor from amu to atomic units
 !
-!  variable in common block /coopti/
-!    optifl:      flag, signals if the calculation is an optimization
 !
 use mod_cosout, only: nnout, jout
 use mod_cocent, only: cent
@@ -62,6 +57,10 @@ use mod_surf, only: surf_flagsu => flagsu
 use mod_sav, only: iipar, ixpar, irpar, rxpar
 use mod_pmat, only: rtmn, rtmx, iflag
 use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
+#if defined(HIB_ULTRIX_DEC)
+  use mod_dec_timer, only: ttim
+#endif
+use mod_opti, only: optifl
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
@@ -98,18 +97,11 @@ integer, intent(in) :: nairy
 type(ancou_type), allocatable :: v2
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
 real(8) secnds
-common /codec/ ttim(2)
-real(8) :: ttim
 #endif
 
-common /cojlpo/ jlpold
-integer :: jlpold
-
-common /coopti/ optifl
-logical :: optifl
-
-common /constp/ nsteps, isteps
-integer :: nsteps, isteps
+! parity used in xwrite subroutine to insure correct
+! accumulation of partial waves in cases where jlpar=0
+integer :: jlpold  
 
 integer :: nlev(25)
 
@@ -142,6 +134,8 @@ real(8) :: t1, t11, t2, t22, tb, tbm, tcpu0, tcpu1, tcpu2, tcpuf, twall0, twall1
 real(8) :: xjtot
 
 real(8) :: second
+integer :: isteps
+integer :: nsteps
 
 
 first=.true.
@@ -638,7 +632,7 @@ call propag (z, w, zmat, amat, bmat, &
              ien, nerg, ered, eshift, rstart, rendld, spac, &
              tolhi, rendai, rincr, fstfac, tb, tbm, &
              ipos, prlogd, noprin, airyfl, prairy, &
-             nch, nopen, nairy, ntop, v2)
+             nch, nopen, nairy, ntop, v2, isteps, nsteps)
 
 ! if bound state calculation, end it now
 if (boundc) then
@@ -655,7 +649,7 @@ call soutpt (z, w, zmat, amat, &
              ipos, csflag, flaghf, prsmat, prt2, t2test, &
              wrsmat, wrpart, prpart, wrxsec, prxsec, twomol, &
              nucros, firstj, nlevel, nlevop, nopen, nchtop, &
-             twojlp)
+             twojlp, jlpold)
 cpuout = cpuout + second() - t11
 
 !  on return from soutpt:

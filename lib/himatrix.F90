@@ -1386,6 +1386,9 @@ end
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 use mod_cosc11, only: sc11
 #endif
+#if defined(HIB_UNIX_IBM)
+use mod_cokaux, only kaux => naux
+#endif
 implicit double  precision (a-h,o-z)
 integer icol, icolpt, ierr, ione, irowpt, izero, n, ncol, &
         nmax, nmaxp1
@@ -1393,7 +1396,6 @@ integer kpvt
 dimension a(1), scr(1), kpvt(1)
 #endif
 #if defined(HIB_UNIX_IBM)
-common /cokaux/ kaux
 dimension det(2)
 #endif
 #if (defined(HIB_UNIX) || defined(HIB_CRAY)) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)

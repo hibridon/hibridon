@@ -133,6 +133,8 @@ use mod_file, only: input, output, jobnam, savfil
 use mod_sav, only: iipar, ixpar, irpar, rxpar
 use mod_tensor, only: tenopa, mrcrs
 use mod_hitestptn, only: testptn
+use mod_two, only: numj, nj1j2
+use mod_opti, only: optifl
 implicit none
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
@@ -159,18 +161,12 @@ real(8) :: a(15)
 integer :: ia(10)
 integer :: ihold(15)
 integer :: lhold(15)
-common /cokeyl/ nncode, llcode, ijcode
-integer :: nncode
+
+! these were members of cokeyl common block
+integer :: nncode  
 integer :: llcode
 integer :: ijcode
 
-
-common /coopti/ optifl
-logical :: optifl
-
-common /cotwo/ numj,nj1j2(5)
-integer :: numj
-integer :: nj1j2
 
 ! when adding bases, change size of array basknd and size of
 ! parameter kmxbas in himain.f

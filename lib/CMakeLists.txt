@@ -98,7 +98,6 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       # Non-specific options
       -std=legacy                               # Allow pre-Fortran 77 syntax (e.g. arbitrary length arrays)
       -ffree-line-length-none                   # Allow arbitrary long lines. Needed as preprocessing could generate long line lengths.
-      -fno-automatic                            # Put everything on the heap
 #      -fdefault-integer-8
 #      -finteger-4-integer-8
       $<$<PLATFORM_ID:Linux>:-march=native>     # Tune generated code for host's micro-architecture
