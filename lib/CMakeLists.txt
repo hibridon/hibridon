@@ -85,9 +85,7 @@ target_include_directories(hib PRIVATE ./)
 target_link_libraries(hib INTERFACE "${BLAS_LIBRARIES}")
 target_link_libraries(hib INTERFACE "${LAPACK_LIBRARIES}")
 # Link OpenMP libs
-if(OpenMP_Fortran_FOUND)
-  target_link_libraries(hib INTERFACE OpenMP::OpenMP_Fortran)
-endif()
+target_link_libraries(hib INTERFACE OpenMP::OpenMP_Fortran)
 ################################################################################
 #
 #    COMPILE OPTIONS
