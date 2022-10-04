@@ -1,6 +1,6 @@
 !     -------------------------------------------------------------
 subroutine hypxsc(flname, a)
-USE OMP_LIB
+!$ USE OMP_LIB
 !
 !     subroutine to compute hyperfine-resolved integral
 !     cross sections
@@ -453,7 +453,7 @@ do iftot = iftmn, iftmx
 !$OMP PARALLEL PRIVATE(t2) SHARED(t2sum)
   t2sum = 0.d0
   t2 = 0d0
-        !$OMP DO
+        !$OMP DO 
         do i1=1,idim
           do i2=1,idim
             t2 = t2 + tmatr(i1,i2)**2 &
