@@ -1,5 +1,6 @@
 !     -------------------------------------------------------------
 subroutine hypxsc(flname, a)
+USE OMP_LIB
 !
 !     subroutine to compute hyperfine-resolved integral
 !     cross sections
@@ -353,6 +354,7 @@ allocate(tmatr(idim, idim), stat=ialloc)
 if (ialloc .ne. 0) goto 4011
 allocate(tmati(idim, idim), stat=ialloc)
 if (ialloc .ne. 0) goto 4011
+
 do iftot = iftmn, iftmx
   xftot = iftot + fhspin
   do jlp = 1, 2
@@ -447,13 +449,24 @@ do iftot = iftmn, iftmx
 !     end of if statement checking in length
           end if
         end do
-        t2sum = 0.d0
+  
+!$OMP PARALLEL PRIVATE(t2) SHARED(t2sum)
+  t2sum = 0.d0
+  t2 = 0d0
+        !$OMP DO
         do i1=1,idim
           do i2=1,idim
-            t2sum = t2sum + tmatr(i1,i2)**2 &
+            t2 = t2 + tmatr(i1,i2)**2 &
                 + tmati(i1,i2)**2
           end do
         end do
+        !$OMP END DO
+
+        !$OMP CRITICAL
+        t2sum = t2sum + t2
+        !$OMP END CRITICAL
+!$OMP END PARALLEL
+
         sigma(i,ii) = sigma(i,ii) + t2sum &
             * (2.d0 * xftot + 1.d0)
         if (i.ne.ii) then
@@ -464,6 +477,7 @@ do iftot = iftmn, iftmx
     end do
   end do
 end do
+
 deallocate(tmatr)
 deallocate(tmati)
 !
@@ -850,13 +864,22 @@ do iftot = iftmn, iftmx
             end do
           end do
         end do
-        t2sum = 0.d0
-        do i1 = 1, idim
-          do i2 = 1, idim
-            t2sum = t2sum + tmatr(i1,i2)**2 &
+!$OMP PARALLEL PRIVATE(t2) SHARED(t2sum)
+  t2sum = 0.d0
+  t2 = 0d0
+        !$OMP DO
+        do i1=1,idim
+          do i2=1,idim
+            t2 = t2 + tmatr(i1,i2)**2 &
                 + tmati(i1,i2)**2
           end do
         end do
+        !$OMP END DO
+
+        !$OMP CRITICAL
+        t2sum = t2sum + t2
+        !$OMP END CRITICAL
+!$OMP END PARALLEL
 !  do not include contribution from last ftot
         if (iftot.ne.iftmx) then
           sigma(i,ii) = sigma(i,ii) + t2sum &

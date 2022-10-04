@@ -96,6 +96,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     target_compile_options(hib
       PUBLIC
       # Non-specific options
+      -fopenmp                                  # OpenMP
       -std=legacy                               # Allow pre-Fortran 77 syntax (e.g. arbitrary length arrays)
       -ffree-line-length-none                   # Allow arbitrary long lines. Needed as preprocessing could generate long line lengths.
 #      -fdefault-integer-8
@@ -143,6 +144,7 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
       # this option seems necessary for big values of kmax (eg kmax=5000), according to bdesrousseaux, otherwise the user will experience a segmentation fault. I guess that without this option, the stack becomes too small to contain such big arrays...
       "-heap-arrays 10"                           # Put everything bigger than 10 bytes on the heap
       # "-extend-source 132"                        # Allow arbitrary long lines (132 seems the longest allowed with ifort). Needed as preprocessing could generate long lines.
+      -qopenmp                                    # OpenMP
       -no-wrap-margin                             # Don't wrap output files
       $<$<PLATFORM_ID:Linux>:-mcmodel=large>      # Required on Linux
       # Config-specific options: RELEASE
@@ -187,6 +189,7 @@ endif()
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     target_link_libraries(hib
       PUBLIC
+      -fopenmp
       $<$<CONFIG:DEBUG>:-fsanitize=address>         # Address sanitizer (beware: tests showed that with -fsanitize=address memory is not actually released when deallocate is called. Is this a true momory leak in address sanitizer?)
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -lgcov at link time)
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
@@ -198,6 +201,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
 elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
     target_link_libraries(hib
       PUBLIC
+      -qopenmp
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
       $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
       $<$<AND:$<BOOL:${LINK_TIME_OPTIMIZATION}>,$<CONFIG:RELEASE>>:-ipo>  # activate interprocediral optimization (aka link time optimization)
