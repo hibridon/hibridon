@@ -103,6 +103,9 @@ implicit double precision (a-h,o-z)
 dimension v(5)
 dimension csplin(69,5)
 dimension rr(69), vl(345),vec(69)
+! Initialise arrays
+v=0d0 ; csplin=0  ; vec=0d0
+
 ! here are the 69 values of R
 data rr/ &
   3.000,  3.250,  3.500,  3.750,  4.000, &
