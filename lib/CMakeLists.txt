@@ -84,6 +84,10 @@ target_include_directories(hib PRIVATE ./)
 # Link Blas and Lapack libraries
 target_link_libraries(hib INTERFACE "${BLAS_LIBRARIES}")
 target_link_libraries(hib INTERFACE "${LAPACK_LIBRARIES}")
+# Link OpenMP libs if found
+if(OpenMP_Fortran_FOUND)
+   target_link_libraries(hib INTERFACE OpenMP::OpenMP_Fortran)
+ endif()
 ################################################################################
 #
 #    COMPILE OPTIONS
@@ -95,6 +99,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     target_compile_options(hib
       PUBLIC
       # Non-specific options
+      -fopenmp                                  # OpenMP
       -std=legacy                               # Allow pre-Fortran 77 syntax (e.g. arbitrary length arrays)
       -ffree-line-length-none                   # Allow arbitrary long lines. Needed as preprocessing could generate long line lengths.
 #      -fdefault-integer-8
@@ -137,6 +142,7 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
     target_compile_options(hib
       PUBLIC
       # Non-specific options
+      -qopenmp                                    # OpenMP
       # force arrays to be allocated on the heap instead of the stack, this removes segmentation faults crash, not sure why
       # the following option means : automatic arrays and arrays created for temporary computations are allocated on the stack if their size can be determined at compile time and if it doesn't exceed 10kb.
       # this option seems necessary for big values of kmax (eg kmax=5000), according to bdesrousseaux, otherwise the user will experience a segmentation fault. I guess that without this option, the stack becomes too small to contain such big arrays...
