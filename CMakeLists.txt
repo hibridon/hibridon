@@ -44,7 +44,6 @@ endif()
 
 find_package( BLAS REQUIRED )
 find_package( LAPACK REQUIRED )
-find_package( OpenMP REQUIRED )
 
 # get the name of the compiler
 get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
