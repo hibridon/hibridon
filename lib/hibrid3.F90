@@ -847,7 +847,7 @@ integer ierr, izero, m, n, nmax
 integer :: icol, iptc
 #endif
 integer :: kpvt(n)
-dimension a(1), c(1)
+dimension a(n,n), c(n,n)
 data izero /0/
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 !  factor the matrix
@@ -2120,6 +2120,10 @@ one = 1.0d0
 izero=0
 onemin = -1.d0
 twomin = -2.d0
+
+! init sr and si
+sr = 0d0 ; si =0d0
+
 !  calculate asymptotic wavevectors of each channel
 do  30   i = 1, nopen
   p2 = 2 * rmu * (ered - eint(i))
