@@ -1182,15 +1182,17 @@ subroutine spline_ch2he(vsp_jacek, r)
 !  VNO  pot at r, output
 implicit double precision (a-h,o-z)   
 integer k
-dimension b0(19,190),c0(19,190),a0(19,190),rr(19)
+real(8), save ::  b0(19,190),c0(19,190),a0(19,190),vvec(19,190)
+real(8) :: rr(19)
 dimension vsp_jacek(190)
-dimension vv(3610),v(19,190),vvec(19,190)
+dimension vv(3610),v(19,190)
+integer, save :: ifirst=0
+
 data rr /3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,11, &
  12,13,15,20/
-data ifirst /0/
+
 if (ifirst.eq.0) then
-   open (unit=10,file= &
-     'potdata/ch2he_a190.dat')
+   open (unit=10,file='potdata/ch2he_a190.dat')
 
    read (10,*) vv
    close(10)
@@ -1215,7 +1217,7 @@ do j=1,190
     vsp_jacek(j)=seval(19,r,rr,vvec(1,j),a0(1,j),b0(1,j),c0(1,j))
 enddo             
    
- end   
+end   
 
 
 
