@@ -100,10 +100,12 @@ use mod_covvl, only: vvl
 use mod_par, only: csflag, ihomo
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit double precision (a-h,o-z)
-dimension v(5)
-dimension csplin(69,5)
-dimension rr(69), vl(345),vec(69)
+real(8) :: v(5)
+real(8), save :: csplin(69,5)
+real(8) :: rr(69), vl(345),vec(69)
+integer, save :: ifirst=0
 ! here are the 69 values of R
+v=0d0 ; csplin=0  ; vec=0d0
 data rr/ &
   3.000,  3.250,  3.500,  3.750,  4.000, &
   4.250,  4.500,  4.750,  5.000,  5.250, &
@@ -212,7 +214,6 @@ data vl/ &
  -0.0000000e+00, -0.0000000e+00, -0.0000000e+00, -0.0000000e+00, &
  -0.0000000e+00, -0.0000000e+00, -0.0000000e+00, -0.0000000e+00, &
  -0.0000000e+00 /
-data ifirst /0/
 !
 ! spline fit
 if (ifirst .eq. 0) then

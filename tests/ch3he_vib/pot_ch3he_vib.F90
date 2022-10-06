@@ -239,13 +239,13 @@ subroutine splch3(vsp, r, v2_i, v2_f)
 !   Arguments:
 !       r: intermolecular distance
 !       v2_i, v2_f: initial and final vibrational level
-double precision r
+real(8), intent(in) :: r
 integer v2_i, v2_f
 !
 !
 !   Returned value:
 !       vsp: <v2'|V|v2> at R for all (theta, phi) tuples
-double precision vsp(*)
+real(8), intent(out) :: vsp(*)
 !
 !
 !   Function called:
@@ -253,11 +253,11 @@ integer gblkid
 !
 !
 !   Potential as calculated
-double precision v(NDIST, NANGLE, V2TMAX)
+real(8), save :: v(NDIST, NANGLE, V2TMAX)
 !   Parameters from linear fit
-double precision b(NDIST, NANGLE, V2TMAX)
-double precision c(NDIST, NANGLE, V2TMAX)
-double precision d(NDIST, NANGLE, V2TMAX)
+real(8), save :: b(NDIST, NANGLE, V2TMAX)
+real(8), save :: c(NDIST, NANGLE, V2TMAX)
+real(8), save :: d(NDIST, NANGLE, V2TMAX)
 !   Loop indeces
 integer i, k
 !   Block index
@@ -271,8 +271,7 @@ data RR /3.5d0, 4d0, 4.5d0, 5d0, 5.5d0, 6d0, 6.5d0, 7d0, 7.5d0, &
 double precision seval
 !
 character*255 datfl
-logical isfst
-data isfst /.true./
+logical, save ::  isfst=.true.
 !   In the first call, read data and determine fitted coefficients
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
 emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
