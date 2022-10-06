@@ -2000,6 +2000,7 @@ use mod_cobuf, only: lbuf
 use mod_disc, only: ipos, iun, iostat, icatf, nam
 implicit double precision (a-h,o-z)
 dimension a(1),buf(lbuf)
+buf = 0d0
 if(lseg.gt.lbuf) stop 'lbuf too small in rdabsf'
 ibl=iword/lseg+1
 m=iword-(ibl-1)*lseg
