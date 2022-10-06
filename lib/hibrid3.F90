@@ -2120,6 +2120,10 @@ one = 1.0d0
 izero=0
 onemin = -1.d0
 twomin = -2.d0
+
+! init arrays
+ sr = 0d0 ; si = 0d0 ; scmat = 0d0
+ 
 !  calculate asymptotic wavevectors of each channel
 do  30   i = 1, nopen
   p2 = 2 * rmu * (ered - eint(i))
