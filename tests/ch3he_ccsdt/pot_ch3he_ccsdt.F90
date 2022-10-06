@@ -425,12 +425,13 @@ subroutine spline_ch3he(vsp_jacek, r)
 !  VNO  pot at r, output
 implicit double precision (a-h,o-z)   
 integer k
-dimension b0(19,70),c0(19,70),a0(19,70),rr(19)
+real(8), save :: b0(19,70),c0(19,70),a0(19,70), vvec(19,70)
+real(8) :: rr(19)
 dimension vsp_jacek(70)
-dimension vv(1330),v(19,70),vvec(19,70)
+dimension vv(1330),v(19,70)
+integer, save :: ifirst
 data rr /3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,11, &
   12,13,15,20/
-data ifirst /0/
 if (ifirst.eq.0) then
    open (unit=10,file= &
      'potdata/ch3he_pot.dat')
