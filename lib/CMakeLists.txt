@@ -226,6 +226,10 @@ target_compile_definitions(hib PUBLIC $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME
 # The following is for preprocessing of hiversion.F90
 target_compile_definitions(hib PUBLIC _BUILD_VERS_=${PROJECT_VERSION})
 target_compile_definitions(hib PUBLIC _BUILD_TYPE_="${CMAKE_BUILD_TYPE}")
+execute_process (COMMAND bash -c "git -C ${CMAKE_CURRENT_LIST_DIR} rev-parse HEAD 2>/dev/null" OUTPUT_VARIABLE GIT_REVISION)
+if(NOT GIT_REVISION STREQUAL "")
+  string(STRIP ${GIT_REVISION} GIT_REVISION)
+endif()
 target_compile_definitions(hib PUBLIC _GIT_REVISION_="${GIT_REVISION}")
 target_compile_definitions(hib PUBLIC _BUILD_SYS1_="${CMAKE_HOST_SYSTEM_NAME}")
 target_compile_definitions(hib PUBLIC _BUILD_SYS2_="${CMAKE_HOST_SYSTEM_VERSION}")
