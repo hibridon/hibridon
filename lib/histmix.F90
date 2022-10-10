@@ -38,6 +38,7 @@ use mod_cosc3, only: elevt => sc3 ! elevt(1)
 use mod_hibrid5, only: sread
 use constants, only: econv, xmconv, ang2 => ang2c
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_hiutil, only: gennam, mtime, gettim
 
 implicit double precision (a-h, o-z)
 character*(*) flnam1, flnam2
@@ -704,6 +705,7 @@ use mod_cosc2, only: elev2 => sc2 ! elev2(1)
 use mod_cosc3, only: elevt => sc3 ! elevt(1)
 use constants, only: econv, xmconv, ang2 => ang2c
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_hiutil, only: xf6j
 implicit double precision (a-h, o-z)
 logical sngsmt, trpsmt
 complex*8 t

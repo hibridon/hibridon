@@ -41,6 +41,12 @@
 #if defined(HIB_UNIX_XLF)
 @proc ss fixed(132)
 #endif
+module mod_hiutil
+#if defined(HIB_ULTRIX_DEC)
+    real(8) :: ttim(2)  ! sums time delta provided by etime and secnds
+#endif
+
+contains
 subroutine vaxhlp(line1)
 #if defined(HIB_UNIX_IFORT)
 !dec$ fixedformlinesize:132
@@ -371,9 +377,7 @@ token = line(token_start:token_end)
 ASSERT(i >= 0)  ! i is never suppsed to be negative on output
 return
 end
-module mod_hiutil
-implicit none
-contains
+
 ! ----------------------------------------------------------------
 subroutine assignment_parse(var_assignment, var_list, var_index, val)
 !   current revision date: 23-sept-87
@@ -454,7 +458,6 @@ read(var_assignment_copy(j:), fmt='(f40.5)') val
 return
 end
 
-end module
 ! ----------------------------------------------------------------
 subroutine upper(line)
 character*(*) line
@@ -525,11 +528,6 @@ cdate=cdatefull(5:24)
 return
 end
 !-------------------------------------------------------------------
-!#if defined(HIB_ULTRIX_DEC)  ! note : this fpp directive is commented out because of a limitation in cmake
-  module mod_dec_timer
-    real(8) :: ttim(2)  ! sums time delta provided by etime and secnds
-  end module mod_dec_timer
-!#endif
 
 subroutine mtime(t,te)
 !
@@ -1590,7 +1588,6 @@ real(8) function tf3jm0(two_ja, two_jb, two_jc)
 use mod_cofact, only: si
 implicit none
 integer, intent(in) :: two_ja, two_jb, two_jc
-real(8) :: tdel
 integer :: j, jp
 tf3jm0 = 0d0
 if ((two_jc .gt. (two_ja + two_jb)) .or. &
@@ -1694,7 +1691,6 @@ implicit real(8) (a-h,o-z)
 integer, intent(in) :: two_ja, two_jb, two_je, two_jd, two_jc, &
      two_jf
 real(8), parameter :: tol=1d-10, zero=0d0, one=1d0, two=2d0
-logical :: tf_triang_fail
 x=zero
 tf6j = 0d0
 if (tf_triang_fail(two_ja, two_jb, two_je)) return
@@ -1784,7 +1780,6 @@ real(8) function tf9j(two_ja, two_jb, two_jc, two_jd, two_je, &
 implicit none
 integer, intent(in) :: two_ja, two_jb, two_jc, two_jd, two_je, &
      two_jf, two_jg, two_jh, two_ji
-real(8) :: xf9j
 tf9j = xf9j(two_ja / 2d0, two_jb / 2d0, two_jc / 2d0, &
      two_jd / 2d0, two_je / 2d0, two_jf / 2d0, &
      two_jg / 2d0, two_jh / 2d0, two_ji / 2d0)
@@ -2009,3 +2004,5 @@ if (info /= 0) then
 end if
 ASSERT(info == 0)
 end subroutine
+
+end module mod_hiutil

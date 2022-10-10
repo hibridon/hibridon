@@ -39,6 +39,7 @@ use mod_par, only: wavefl, r1=>bound_r1, r2=>bound_r2, c=>bound_c, spac=>bound_s
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
 use mod_file, only: input, output, jobnam, savfil
+use mod_hiutil, only: gennam
 implicit none
 integer, intent(in) :: nch, nmax
 type(ancou_type), intent(in) :: v2

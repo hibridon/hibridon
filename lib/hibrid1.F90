@@ -92,6 +92,7 @@ use mod_wave, only: irec, ifil, nchwfu, iendwv, get_wfu_airy_rec_length
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_phot, only: photof, wavefn, boundf, writs
+use mod_hiutil, only: daxpy_wrapper
 implicit double precision (a-h, o-z)
 !  matrix dimensions (row dimension = nmax, matrices stored column by column)
 real(8), dimension(nmax*nmax), intent(inout) :: z
@@ -569,6 +570,7 @@ subroutine gndloc (vecnow, scr, rnow, drnow, nch, nmax)
 ! ----------------------------------------------------------------------
 use mod_coqvec2, only: q => q2
 use mod_cotq1, only: tmat => dpsir ! tmat(80)
+use mod_hiutil, only: daxpy_wrapper
 implicit double precision (a-h,o-z)
 !  square matrices (of row dimension nmax)
 dimension vecnow(80), scr(80)
@@ -911,6 +913,7 @@ use mod_cow, only: sreal2 => w_as_vec ! sreal2(1)
 use mod_cozmat, only: simag1 => zmat_as_vec ! simag1(1)
 use mod_hibrid5, only: sread
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_hiutil, only: gennam
 implicit double precision (a-h,o-z)
 character*(*) fname1,fname2
 character*20 cdate1,cdate2

@@ -242,6 +242,7 @@ subroutine helicity_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax,j
 !.....jpack,lpack,ipack: labels for rows
 !.....jq,lq,inq:         labels for columns
   use mod_tensor_ang, only: ang1, ang2, dang
+  use mod_hiutil, only: xf3j
   class(helicity_frame_type) :: this
   integer :: j1
   integer :: inlev1
@@ -279,7 +280,6 @@ real(8) :: sqpi=1.772453850905516d0
 real(8) :: rad=57.295779513082323d0
 real(8) :: angle, beta, fak, fakj, fakp, spin, xj1, xj2, xjtot, xl1, xl2, xmj1, xmj2, xmj2p, xml2, xml2p
 integer :: iang, ihel, ii, ilab, iyof, j1p, j2p, jlab, l1, l2, ll, llmax, mj1, mj2, mj2p, ml2, ml2p
-real(8) :: xf3j
 !
 !.....ai is sqrt(-1)
 ai=cmplx(zero, one)
@@ -431,6 +431,7 @@ subroutine geom_apse_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax,
 !.....jpack,lpack,ipack: labels for rows
 !.....jq,lq,inq:         labels for columns
   use mod_tensor_ang, only: ang1, ang2, dang
+  use mod_hiutil, only: xf3j
 implicit none
   class(geom_apse_frame_type) :: this
   integer :: j1
@@ -466,7 +467,6 @@ logical elastc
 
 integer :: iang, ilab, ii, iyof, j1p, j2p, jlab, l1, l2, ll, llmax, mj1, mj1p, mj2, mj2p, ml2p
 real(8) :: angle, betaga, fakj, fakp, piov2, rad, spin, sqpi, xj1, xj2, xjtot, xl1, xl2, xmj1, xmj1p, xmj2, xmj2p, xml2p
-real(8) :: xf3j
 sqpi = 1.772453850905516d0
 rad = 57.295779513082323d0
 piov2 = 1.570796326794897d0
@@ -596,6 +596,7 @@ use mod_par, only: batch, ipos
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_tensor_ang, only: ang1, ang2, dang
+use mod_hiutil, only: xf3j
 implicit double precision (a-h,o-z)
 integer, intent(in) :: maxk
 integer :: nnout
@@ -1064,6 +1065,8 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use funit, only: FUNIT_TCB, FUNIT_TENS_OUTPUT
+use mod_hiutil, only: gennam, mtime, gettim, dater
+use mod_hiutil, only: xf3jm0
 implicit double precision (a-h,o-z)
 integer :: jtotpa(MAX_NJTOT)
 character*(*) filnam
@@ -1637,6 +1640,7 @@ use mod_par, only: batch
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use funit, only: FUNIT_TCB, FUNIT_MCS
+use mod_hiutil, only: gennam, mtime, gettim
 implicit double precision(a-h,o-z)
 character*(*) filnam
 character*40  tcbfil, mcsfil
@@ -1759,6 +1763,7 @@ use mod_cosc2, only: sc1 => sc2 ! sc1(1)
 use mod_par, only: batch, flaghf
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
+use mod_hiutil, only: xf3j
 implicit double precision(a-h,o-z)
 integer, intent(in) :: mcs_out_unit  ! unit of mcs output file
 character*20  cdate
@@ -1930,6 +1935,8 @@ use mod_par, only: batch, ipos, iprnt=>iprint
 use mod_selb, only: ibasty
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
+use mod_hiutil, only: mtime, gettim
+use mod_hiutil, only: xf6j
 implicit double precision (a-h,o-z)
 integer, intent(in) :: tcs_out_unit  ! unit of tcs output file
 integer, intent(in) :: tcb_out_unit  ! unit of tcb output file
@@ -2379,6 +2386,8 @@ use mod_hibrid5, only: sread
 use mod_par, only: batch, ipos, iprnt=>iprint
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
+use mod_hiutil, only: mtime, gettim
+use mod_hiutil, only: xf3j, xf6j, xf9j, xf3jm0
 implicit double precision (a-h,o-z)
 integer, intent(in) :: tcs_out_unit  ! unit of tenxsc output file (tcs, dgh or dcga file)
 integer, intent(in) :: tcb_out_unit  ! unit of tcb output file
@@ -2814,6 +2823,8 @@ use mod_hibrid5, only: sread
 use mod_par, only: batch, ipos, iprnt=>iprint
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
+use mod_hiutil, only: mtime, gettim
+use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
 integer, intent(in) :: tcs_out_unit  ! unit of tcs output file
 integer, intent(in) :: tcb_out_unit  ! unit of tcb output file

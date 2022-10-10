@@ -49,6 +49,7 @@ use mod_hibrid5, only: sread
 use mod_hibasis, only: is_j12
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
+use mod_hiutil, only: gennam
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
@@ -534,7 +535,7 @@ subroutine spropn (rnow, width, eignow, hp, y1, y4, y2, &
 !-----------------------------------------------------------------------------
 use mod_coqvec2, only: q => q2
 use mod_phot, only: photof, wavefn, boundf, writs
-
+use mod_hiutil, only: intairy
 implicit double precision (a-h,o-z)
 !      implicit none
 double precision a, b, bfact, cs, cs1, cs2, csh, dalph2, dalpha, &
@@ -878,17 +879,21 @@ subroutine wavevc (w, eignow, rnow, nch, nmax, v2)
 ! ----------------------------------------------------------------
 use mod_ancou, only: ancou_type
 use mod_hibrid3, only: potmat
+use mod_hiutil, only: dsyevr_wrapper
 implicit double precision (a-h,o-z)
+real(8), intent(out) :: w(nmax*nmax)
+real(8), intent(out) :: eignow(nch)
+real(8), intent(in) :: rnow
+integer, intent(in) :: nch
+integer, intent(in) :: nmax
 type(ancou_type), intent(in) :: v2
 !      real rnow, xmin1
 !      real eignow, w
+integer, parameter :: ldz = 1
 integer icol, ierr, ipt, nch, nmax, nmaxm1, nmaxp1, nrow
+real(8), dimension(ldz, nch):: vecnow_unused   ! this is the z array that dsyevr wants, even if it's not used when jobz = 'N'
 external dscal, dcopy
 !     external dscal, dcopy, potmat, tred1, tqlrat
-!  square matrix (of row dimension nmax)
-dimension w(1)
-!  vectors dimensioned at least nch
-dimension eignow(1)
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 real(8) :: scr1(nch)
 real(8) :: scr2(nch)
@@ -907,24 +912,24 @@ call potmat (w, rnow, nch, nmax, v2)
 !  m.h. alexander, "hybrid quantum scattering algorithms ..."),
 !  next loop changes its sign
 ipt = 1
-do 100 icol = 1, nch
+do icol = 1, nch
 !  nrow is the number of (diagonal plus subdiagonal) elements in column icol
 !  ipt points to the diagonal element in column icol for a matrix stored in
 !  packed column form
   nrow = nch - icol + 1
   call dscal (nrow, xmin1, w(ipt), 1)
   ipt = ipt + nmaxp1
-100 continue
+end do
 !  next loop fills in upper triangle of w
 if (nch .gt. 1) then
   ipt = 2
-  do 110 icol = 1, nch -1
+  do icol = 1, nch -1
 !  ipt points to the first subdiagonal element in column icol
 !  nrow is the number of subdiagonal elements in column icol
     nrow = nch - icol
     call dcopy (nrow, w(ipt), 1, w(ipt + nmaxm1), nmax)
     ipt = ipt + nmaxp1
-110   continue
+  end do
 end if
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 lwork=57*nch
@@ -934,7 +939,7 @@ lsup=2*nch
 vl = 0.0
 vu = 0.0
 call dsyevr_wrapper('N','A','L',nch,w,nmax,vl,vu,il,iu,abstol,m, &
-   eignow,vecnow,nmax,isuppz,work,lwork,iwork,liwork,ierr)
+   eignow,vecnow_unused,ldz,isuppz,work,lwork,iwork,liwork,ierr)
 
 if (ierr .ne. 0) then
   write (6, 115) ierr
@@ -1070,6 +1075,7 @@ use funit
 use mod_wave, only: irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, get_wfu_rec1_length, wfu_format_version
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
+use mod_hiutil, only: dater
 implicit none
 integer, intent(in) :: jtot
 integer, intent(in) :: jlpar
@@ -1331,6 +1337,7 @@ subroutine psiasy(fj,fn,unit,sr,si,psir,psii,nopen,nmax)
 !    nmax           row dimension of matrices
 ! ----------------------------------------------------------------------------
 use mod_phot, only: photof, wavefn, boundf, writs
+use mod_hiutil, only: daxpy_wrapper
 implicit double precision (a-h,o-z)
 dimension fj(1), fn(1), unit(1), sr(nmax,nmax), si(nmax,nmax), &
           psii(nmax,nmax), psir(nmax,nmax)
@@ -1443,6 +1450,8 @@ use mod_wave, only: irec, inflev
 use funit
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
+use mod_hiutil, only: gennam, mtime, gettim, dater
+use mod_hiutil, only: daxpy_wrapper
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  psifil, wavfil, flxfil
@@ -2395,6 +2404,7 @@ use mod_coqvec, only: nphoto
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_hiba07_13p, only: ttrans
+use mod_hiutil, only: daxpy_wrapper
 ! steve, you may need more space, but i doubt it since tcoord is dimensioned n
 implicit double precision (a-h,o-z)
 logical adiab, kill, photof, propf, sumf, coordf
@@ -2962,6 +2972,7 @@ use mod_cosc8, only: sc8
 use mod_wave, only: ifil, nrlogd
 use funit
 use mod_ered, only: ered, rmu
+use mod_hiutil, only: gennam
 implicit none
 character*(*), intent(in) :: filnam
 integer, intent(in) :: nchmin

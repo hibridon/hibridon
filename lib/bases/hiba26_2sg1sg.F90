@@ -480,6 +480,7 @@ subroutine v2sgsg(j1r,iepsr,j2r,j12r,lr,j1c,iepsc,j2c,j12c, &
 !  current revision date:  19-jun-2017 (p.dagdigian)
 ! --------------------------------------------------------------------
 use mod_1sg1sg
+use mod_hiutil, only: xf3j, xf6j, xf9j
 implicit double precision (a-h,o-z)
 data zero, half, one, two/ 0.d0, 0.5d0, 1.d0, 2.d0/, &
   sq4pi3 / 44.546623974653656d0 /
@@ -562,6 +563,7 @@ use mod_cosysr, only: isrcod, junkr, rspar
 use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_skip, only: nskip, iskip
+use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt

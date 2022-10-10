@@ -128,6 +128,7 @@ use mod_skip, only: nskip, iskip
 use mod_jtot, only: jjtot, jjlpar
 use mod_ja, only: jja
 use mod_el, only: ll
+use mod_hiutil, only: xf3j, xf9j
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
@@ -446,6 +447,7 @@ subroutine vlm3p2s (j1, j12_1, l1, j2, j12_2, l2, jtot, lb, vee)
 !  xf3j:     evaluates 3j symbol
 ! --------------------------------------------------------------------
 use mod_coeig2, only:  t12, t32
+use mod_hiutil, only: xf3j
 implicit double precision (a-h,o-z)
 dimension v12(5,5),v32(3,3),a12(5,5),a32(3,3)
 vee = 0.d0
@@ -616,6 +618,7 @@ use mod_cosysr, only: isrcod
 use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_skip, only: nskip, iskip
+use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt

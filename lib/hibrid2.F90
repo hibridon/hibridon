@@ -390,6 +390,7 @@ use mod_version, only : version
 use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, flaghf, flagsu, ihomo, ipos
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
+use mod_hiutil, only: gennam
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
@@ -897,6 +898,7 @@ use mod_cow, only: scmat => w_as_vec ! scmat(1)
 use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, flaghf, flagsu, ihomo, ipos
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
+use mod_hiutil, only: gennam
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate

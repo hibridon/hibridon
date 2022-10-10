@@ -764,6 +764,7 @@ subroutine openf(lunit,filnam,lmode,isize)
 !     lseg:  number of integer words per disc sector
 !     ------------------------------------------------------------
 use mod_clseg, only: lseg
+use mod_hiutil, only: upper
 logical exstfl, openfl, tmpfil
 logical od
 character*12 fmt, stat, accs
@@ -937,6 +938,7 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_file, only: input, output, jobnam, savfil
 use mod_file_size, only : isize, isizes
+use mod_hiutil, only: gennam
 implicit double precision (a-h,o-z)
 integer ifile, nerg, nfile, lenx
 logical existf

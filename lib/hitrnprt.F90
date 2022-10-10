@@ -57,6 +57,7 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_trn, only: spin, maxjt, nwaves, jfsts, jlparf, jlpars, njmax, jpmax
+use mod_hiutil, only: gennam, mtime, dater
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  trnfil, smtfil
@@ -300,6 +301,8 @@ use mod_par, only: batch, ipos
 use mod_selb, only: ibasty
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_trn, only: spin, maxjt, nwaves, jfsts, jlparf, jlpars, njmax, jpmax
+use mod_hiutil, only: mtime, gettim
+use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
 complex*8 t, tp
 logical diag, diagj, diagin, diagp, diagjp, diagnp
@@ -630,6 +633,8 @@ use mod_par, only: batch, ipos
 use mod_selb, only: ibasty
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_trn, only: spin, maxjt, nwaves, jfsts, jlparf, jlpars, njmax, jpmax
+use mod_hiutil, only: mtime, gettim
+use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
 complex*8 t, tp
 logical diag, diagj, diagin, diagp, diagjp, diagnp, &

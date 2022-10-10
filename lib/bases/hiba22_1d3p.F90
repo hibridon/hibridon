@@ -644,9 +644,9 @@ subroutine vlm1d3p (j1, l1, i1, j2, l2, i2, jtot, lb, vee)
 !  vee:      on return:  contains desired coupling matrix element
 !  subroutines called:
 !  xf3j:     evaluates 3j symbol
-!  xf6j:     evaluates 6j symbol
 ! --------------------------------------------------------------------
 use mod_coeig, only: c0, c1, c2
+use mod_hiutil, only: xf3j
 implicit double precision (a-h,o-z)
 data onth, twth, frth, sqrt2, onsqt3 /0.333333333333333d0, &
   0.666666666666667d0, 1.333333333333333d0, &
@@ -1018,6 +1018,7 @@ use mod_cosysr, only: isrcod, junkr, rspar
 use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_skip, only: nskip, iskip
+use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt

@@ -137,6 +137,7 @@ subroutine potent (w, vecnow, scmat, eignow, hp, scr, &
 !              vectors
 ! ----------------------------------------------------------------------
    use mod_ancou, only: ancou_type
+   use mod_hiutil, only: daxpy_wrapper, dsyevr_wrapper
    implicit none
 !  square matrices (of row dimension nmax)
 real(8), dimension(nmax*nmax), intent(out) :: w
@@ -648,6 +649,7 @@ use funit, only: FUNIT_TRANS_MAT, FUNIT_QUAD_MAT
 use mod_phot, only: photof, wavefn, boundf, writs
 use mod_pmat, only: rtmn, rtmx, iflag
 use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
+use mod_hiutil, only: mtime, gettim
 implicit none
 !   square matrices
 real(8), intent(out) :: z(nmax, nch)
@@ -974,6 +976,8 @@ use mod_wave, only: irec, ifil, nchwfu, nrlogd, iendwv, get_wfu_logd_rec_length
 use funit
 use mod_phot, only: photof, wavefn, boundf, writs
 use mod_surf, only: flagsu
+use mod_hiutil, only: daxpy_wrapper
+use mod_hiutil, only: mtime
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: z(nmax*nch)
 integer, intent(in) :: nmax
@@ -2081,6 +2085,8 @@ use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_phot, only: photof, wavefn, boundf, writs
 use mod_surf, only: flagsu
+use mod_hiutil, only: gennam
+use mod_hiutil, only: daxpy_wrapper
 
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax, nmax), intent(inout) :: tmod
@@ -2544,7 +2550,7 @@ use mod_hibrid2, only: mxoutd, mxoutr
 use mod_wave, only: ifil, ipos2, ipos3, nrlogd, iendwv, ipos2_location
 use mod_ered, only: ered, rmu
 use mod_phot, only: photof, wavefn, boundf, writs
-
+use mod_hiutil, only: mtime
 implicit double precision (a-h,o-z)
 real(8), intent(inout) :: z(nmax,nmax)
 real(8), intent(out) :: sr(nmax,nmax)

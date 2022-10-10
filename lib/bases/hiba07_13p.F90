@@ -433,6 +433,7 @@ subroutine vlm13p (j1, l1, i1, j2, l2, i2, jtot, lb, cmix, vee)
 !  xf3j:     evaluates 3j symbol
 !  xf6j:     evaluates 6j symbol
 ! --------------------------------------------------------------------
+use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
 dimension vterm(4),cs(4),sn(4)
 data  zero, one, two, three /0.d0, 1.d0, 2.d0, 3.d0/
@@ -642,6 +643,7 @@ use mod_cosysr, only: isrcod, junkr, rspar
 use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_skip, only: nskip, iskip
+use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt

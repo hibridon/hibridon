@@ -133,6 +133,7 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
 use mod_phot, only: photof, wavefn, boundf
 use mod_surf, only: flagsu
+use mod_hiutil, only: dater
 implicit double precision (a-h,o-z)
 real(8), intent(inout) :: tsq(nmax,nmax)
 real(8), intent(inout) :: sr(nmax,nmax)
@@ -317,6 +318,7 @@ use constants
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
 use mod_surf, only: flagsu
+use mod_hiutil, only: dater
 implicit double precision (a-h,o-z)
 real(8), intent(in) :: scmat(nmax, nlevop)
 integer, intent(in) :: jlev(nlevop)
@@ -973,6 +975,7 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_surf, only: flagsu
+use mod_hiutil, only: dater
 implicit none
 real(8), intent(out) :: zmat(nmax, nmax)
 real(8), intent(out) :: tq3(nmx, nmx)
@@ -1197,6 +1200,7 @@ use mod_cosc3, only: tsum => sc3 ! tsum(1)
 use mod_version, only : version
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
+use mod_hiutil, only: gennam
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
@@ -1958,6 +1962,8 @@ use mod_par, only: batch, ipos
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
+use mod_hiutil, only: gennam
+use mod_hiutil, only: mtime, gettim
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  icsfil, smtfilnam, xname

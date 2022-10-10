@@ -1096,6 +1096,7 @@ end
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 ! ------------------------------------------------------------
 subroutine sgefa(a,lda,n,ipvt,info)
+use mod_hiutil, only: daxpy_wrapper
 implicit double precision (a-h,o-z)
 integer lda,n,ipvt(1),info
 dimension a(lda,1)
@@ -1206,6 +1207,7 @@ end
 ! ------------------------------------------------
 subroutine sgesl(a,lda,n,ipvt,b,job)
 ! current revision date: 29/09/87
+use mod_hiutil, only: daxpy_wrapper
 implicit double precision (a-h,o-z)
 integer lda,n,ipvt(1),job
 dimension a(lda,1),b(1)
@@ -1329,6 +1331,7 @@ end
 ! -----------------------------------------------------------------------
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 subroutine syminv (a,lda,n,ierr)
+use mod_hiutil, only: dgetri_wrapper
 implicit double precision (a-h,o-z)
 !
 !     -----------------------------------------------------------------

@@ -813,7 +813,7 @@ subroutine vlmats (jp, lp, j, l, jtot, lambda, &
 !    irow:     number of left-side level in channel list
 !    icol:     number of right-side level in channel list
 !  subroutines called:
-!    xf3j, xf6j, prmats
+!    prmats
 !  -----------------------------------------------------------------------
 use mod_coatpi, only: narray
 use mod_coatpr, only: c
@@ -919,6 +919,7 @@ subroutine prmats (jp, lp, j, l, jtot, kp, k, lambda, mu, &
 !  subroutines called:
 !     xf3j, xf6j
 !  -----------------------------------------------------------------------
+use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
 logical csflag
 data one, two, zero / 1.d0, 2.d0, 0.d0 /
@@ -1009,6 +1010,7 @@ use mod_cosysr, only: isrcod, junkr, rspar
 use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_skip, only: nskip, iskip
+use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
