@@ -71,6 +71,7 @@ end
  subroutine fimovs(nfile,jtot,jlpar,nu,ien,ierr)
  use mod_coener, only: energ
  use mod_cofil, only: nfl, maxrec, iofrec
+ use mod_hismat, only: readrc
  implicit none
  integer, intent(in) :: nfile
  integer, intent(in) :: jtot
@@ -939,6 +940,7 @@ use mod_selb, only: ibasty
 use mod_file, only: input, output, jobnam, savfil
 use mod_file_size, only : isize, isizes
 use mod_hiutil, only: gennam
+use mod_hismat, only: rdhead
 implicit double precision (a-h,o-z)
 integer ifile, nerg, nfile, lenx
 logical existf
@@ -1156,136 +1158,6 @@ end
 !---------------------------------------------------------------------
 
 
-!
-!     ------------------------------------------------------------
-subroutine readrc(iadr, smt_file_unit, lrec, jtot, jlpar, nu, nopen, &
-     length, nnout)
-!     author: h.j. werner
-!     revision: 14-jun-1990 by mha
-!     rewritten: 07-jan-2012 by q. ma
-!
-!     Read the header of the s-matrix for a single partial wave
-!
-!     INPUT ARGUMENTS:
-!     iadr: 0 if read next record, otherwize read from byte iadr (one
-!     based) of the file.
-!
-!     RETURNED ARGUMENTS:
-!     lrec: on return contains the size in byte current s-matrix,
-!     or -1 on end of file
-!     Other parameters have their traditional meanings.
-!     ------------------------------------------------------------
-implicit none
-integer :: iadr
-integer, intent(in) :: smt_file_unit
-integer, intent(out) :: lrec
-integer, intent(out) :: jtot
-integer, intent(out) :: jlpar
-integer, intent(out) :: nu
-integer, intent(out) :: nopen
-integer, intent(out) :: length
-integer, intent(out) :: nnout
-if (iadr .eq. 0) inquire (smt_file_unit, pos=iadr)
-read (smt_file_unit, pos=iadr, end=900, err=950) &
-     lrec, jtot, jlpar, nu, nopen, length ,nnout
-return
-!
-900 lrec = -1
-return
-950 write (0, *) '*** ERROR READING S-MATRIX FILE (readrc). ABORT.'
-call exit()
-end
-!     ------------------------------------------------------------
-!
-!     ------------------------------------------------------------
-subroutine rdhead(smt_file_unit, cdate, ered, rmu, csflag, flaghf, &
-     flagsu, twomol, nucros, jfirst, jfinal, jtotd, numin, numax, nud, &
-     nlevel, nlevop, nnout, jlev, inlev, elev, jout)
-!
-!     subroutine to read header from file smt_file_unit
-!     authors: h.j. werner and b. follmeg
-!     revision: 27-oct-95
-!     major revision: 07-jan-2012 by q. ma
-!     ------------------------------------------------------------
-use mod_clseg, only: lseg
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
-implicit none
-integer, intent(in) :: smt_file_unit ! logical unit used to read smt file 
-character*20, intent(out) :: cdate
-double precision, intent(out) :: ered
-double precision, intent(out) :: rmu
-logical, intent(out) :: csflag, flaghf, flagsu, twomol, nucros
-integer, intent(out) :: jfirst, jfinal, jtotd
-integer, intent(out) :: numin, numax, nud
-integer, intent(out) :: nlevel, nlevop, nnout
-integer, dimension(1), intent(out) :: jlev  ! dimension(1:nlevel)
-integer, dimension(1), intent(out) :: inlev ! dimension(1:nlevel)
-double precision, dimension(1), intent(out) :: elev ! dimension(1:nlevel)
-integer, dimension(1), intent(out) :: jout  ! dimension(1:iabs(nnout))
-character*8 csize8
-character*4 csize4
-integer :: lenhd
-integer :: ibasty
-integer :: i
-
-!     Read the magic number (from the start of the file)
-read (smt_file_unit, pos=1, end=900, err=950) csize8
-!     first word on file contains the length of the header
-read (smt_file_unit, end=900, err=950) lenhd
-!
-read (smt_file_unit, end=900, err=950) cdate, label, potnam
-!     Four bytes for alignment
-read (smt_file_unit, end=900, err=950) csize4
-!
-read (smt_file_unit, end=900, err=950) ered, rmu, csflag, flaghf, flagsu, &
-     twomol, nucros, jfirst, jfinal, jtotd, numin, numax, &
-     nud, nlevel, nlevop, nnout, ibasty
-read (smt_file_unit, end=900, err=950) (jlev(i), i=1, nlevel), &
-     (inlev(i), i=1, nlevel), (elev(i), i=1, nlevel)
-read (smt_file_unit, end=900, err=950) (jout(i), i=1, iabs(nnout))
-!
-read (smt_file_unit, end=900, err=950) csize8
-if (csize8 .ne. 'ENDOFHDR') goto 950
-return
-!
-900 continue
-950 write (0, *) '*** ERROR READING S-MATRIX FILE. ABORT.'
-call exit
-end
-!     ------------------------------------------------------------------
-subroutine sinqr(smt_file_unit, njtot, nchmx)
-!
-!     Subroutine to scan an s-matrix file for the number of partial
-!     waves and the maximum number of channels.
-!
-!     If any error occured, njtot is set to -1.
-!
-!     The file pointer will be pointed to the end of the file on return.
-!     It is recommended to call this subroutine prior to calling rdhead.
-!
-!     Author: Qianli Ma
-!     ------------------------------------------------------------------
-implicit none
-integer smt_file_unit, njtot, nchmx, iaddr, lrec
-integer jtot, jlpar, nu, nopen, length, nnout
-!
-!     Read the length of the header
-read (smt_file_unit, pos=9, end=900, err=950) iaddr
-!
-njtot = 0
-nchmx = 0
-iaddr = iaddr + 1
-20 call readrc(iaddr, smt_file_unit, lrec, jtot, jlpar, nu, nopen, length, &
-     nnout)
-if (lrec .lt. 0) return
-njtot = njtot + 1
-if (nchmx .lt. length) nchmx = length
-iaddr = iaddr + lrec
-goto 20
-900 continue
-950 njtot = -1
-return
-end
 !     ------------------------------------------------------------
 subroutine saddr(nfile,jfirst,jfinal,numin,numax,csflag, &
                  iadr,nmax,jfsts,jlparf,jlpars,ierr)
@@ -1313,6 +1185,7 @@ subroutine saddr(nfile,jfirst,jfinal,numin,numax,csflag, &
 !     jlpars:  second parity, if not present jlpars = 0
 !     ierr:    error flag, if .ne. 0 an error has occured
 !     ------------------------------------------------------------
+use mod_hismat, only: readrc
 logical csflag
 integer nfile, iadr, nmax, jfirst, jfsts, jfinal, numin, &
         numax, ierr, jlpars, jlparf

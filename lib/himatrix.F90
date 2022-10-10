@@ -1,3 +1,9 @@
+module mod_himatrix
+
+!   5. transp         subroutine to carry out in place transposition    *
+!                     of n x n matrix a                                 *
+
+contains
 ! NB #if defined(HIB_UNIX_AIX) rather than unix-ibm for fortran not essl routines
 #if defined(HIB_UNIX_IBM)
 subroutine rs(nm,n,a,w,matz,z,fv1,fv2,ierr)
@@ -8147,3 +8153,27 @@ return
 end
 #endif
 
+subroutine transp (a, n, nmax)
+!  subroutine to carry out in place transposition of n x n matrix a
+!  of maximum row dimension nmax stored in packed column form
+!  uses blas routine dswap
+!  written by:  millard alexander
+!  current revision date: 23-sept-87
+implicit double precision (a-h,o-z)
+integer icol, icolpt, irowpt, n, nmax, nrow
+dimension a(1)
+icolpt = 2
+irowpt = nmax + 1
+do 100 icol = 1, n - 1
+!  icolpt points to first sub-diagonal element in column icol
+!  irowpt points to first super-diagonal element in row icol
+!  nrow is number of subdiagonal elements in this column
+  nrow = n - icol
+  call dswap (nrow, a(icolpt), 1, a(irowpt), nmax)
+  icolpt = icolpt + nmax + 1
+  irowpt = irowpt + nmax + 1
+100 continue
+return
+end
+
+end module mod_himatrix

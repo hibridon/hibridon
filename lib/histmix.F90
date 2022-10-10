@@ -35,10 +35,11 @@ use mod_coisc12, only: lpack => isc12 ! lpack(1)
 use mod_cosc1, only: elev1 => sc1 ! elev1(1)
 use mod_cosc2, only: elev2 => sc2 ! elev2(1)
 use mod_cosc3, only: elevt => sc3 ! elevt(1)
-use mod_hibrid5, only: sread
+use mod_hismat, only: sread
 use constants, only: econv, xmconv, ang2 => ang2c
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam, mtime, gettim
+use mod_hismat, only: sread, rdhead, sinqr
 
 implicit double precision (a-h, o-z)
 character*(*) flnam1, flnam2

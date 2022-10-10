@@ -117,6 +117,7 @@ subroutine pot (vv0, r)
 ! ----------------------------------------------------------------------
 
 use mod_covvl, only: vvl
+use mod_hivector, only: dset
 implicit double precision (a-h,o-z)
 dimension xlam1(22),xlam2(22),r0(22),c1(22),c2(22),c3(22), &
           clr(22),vsum(11),xsum(11),vdif(11),xdif(11), &

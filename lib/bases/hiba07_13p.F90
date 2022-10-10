@@ -506,6 +506,8 @@ subroutine tcasea(j,jlpar)
 !   latest revision date:  30-dec-1995
 ! -----------------------------------------
 use mod_cosysr, only: isrcod, junkr, rspar
+use mod_himatrix, only: mxma
+use mod_hivector, only: dset
 implicit double precision (a-h,o-z)
 dimension tatoe(6,6), cmat(6,6)
 data zero, one,two ,three/0.d0, 1.d0, 2.d0, 3.d0/

@@ -565,6 +565,7 @@ subroutine tcasea22(j,jlpar)
 !   author:  brigitte pouilly and millard alexander
 !   latest revision date:  30-dec-1995
 ! -----------------------------------------
+use mod_hivector, only: dset
 implicit double precision (a-h,o-z)
 data zero, one,two ,three,six/0.d0, 1.d0, 2.d0, 3.d0, 6.d0/
 if (j .lt. 2) then
@@ -665,6 +666,9 @@ use mod_coeint, only: eint
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
 use mod_jtot, only: j => jjtot, jlpar => jjlpar
+#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
+  use mod_himatrix, only: mxma
+#endif
 implicit double precision (a-h,o-z)
 #if defined(HIB_UNIX_IBM)
 character*1 forma, formb

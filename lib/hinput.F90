@@ -137,8 +137,8 @@ use mod_two, only: numj, nj1j2
 use mod_opti, only: optifl
 use mod_hiutil, only: get_token, lower, upper, lenstr, vaxhlp, sys_conf
 use mod_hitrnprt, only: trnprt
-use mod_hibrid1, only: difs
-use mod_hibrid4, only: turn, psi, eadiab1, sprint
+use mod_hibrid1, only: difs, turn
+use mod_hibrid4, only: psi, eadiab1, sprint
 implicit none
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's

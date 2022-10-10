@@ -169,6 +169,7 @@ use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax,
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_vib, only: nvibs, ivibs, nvibp, ivibp
+use mod_himatrix, only: mxva
 
 implicit double precision (a-h,o-z)
 real(8), intent(out), dimension(:) :: sc1

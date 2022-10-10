@@ -589,7 +589,7 @@ use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cow, only: simag => w_as_vec ! simag(1)
-use mod_hibrid5, only: sread
+use mod_hismat, only: sread
 use mod_difcrs, only: sphn
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch, ipos
@@ -597,6 +597,7 @@ use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_tensor_ang, only: ang1, ang2, dang
 use mod_hiutil, only: xf3j
+use mod_hismat, only: sread, rdhead
 implicit double precision (a-h,o-z)
 integer, intent(in) :: maxk
 integer :: nnout
@@ -1057,7 +1058,7 @@ use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc2, only: prefac => sc2 ! prefac(1)
 use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cow, only: simag => w_as_vec ! simag(1)
-use mod_hibrid5, only: sread
+use mod_hismat, only: sread
 use tensor_util
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch
@@ -1067,6 +1068,7 @@ use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts
 use funit, only: FUNIT_TCB, FUNIT_TENS_OUTPUT
 use mod_hiutil, only: gennam, mtime, gettim, dater
 use mod_hiutil, only: xf3jm0
+use mod_hismat, only: sread, rdhead
 implicit double precision (a-h,o-z)
 integer :: jtotpa(MAX_NJTOT)
 character*(*) filnam
@@ -1485,10 +1487,11 @@ use mod_coinq, only: inqp => inq ! inqp(1)
 use mod_coisc4, only: jpack => isc4 ! jpack(1)
 use mod_coisc5, only: lpack => isc5 ! lpack(1)
 use mod_coisc6, only: ipack => isc6 ! ipack(1)
-use mod_hibrid5, only: sread
+use mod_hismat, only: sread
 use mod_par, only: batch, iprnt=>iprint
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
+use mod_hismat, only: sread
 implicit double precision (a-h,o-z)
 integer, intent(in) :: tens_out_unit  ! unit of tenxsc output file (tcs, dgh or dcga file)
 logical lprnt
@@ -1930,13 +1933,14 @@ use mod_coinq, only: inq ! inq(1)
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid2, only: mxoutd
-use mod_hibrid5, only: sread
+use mod_hismat, only: sread
 use mod_par, only: batch, ipos, iprnt=>iprint
 use mod_selb, only: ibasty
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf6j
+use mod_hismat, only: sread
 implicit double precision (a-h,o-z)
 integer, intent(in) :: tcs_out_unit  ! unit of tcs output file
 integer, intent(in) :: tcb_out_unit  ! unit of tcb output file
@@ -2382,12 +2386,13 @@ use mod_coinq, only: inq ! inq(1)
 ! added two common blocks - levels for which xs's to be computed (pjd)
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
-use mod_hibrid5, only: sread
+use mod_hismat, only: sread
 use mod_par, only: batch, ipos, iprnt=>iprint
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j, xf9j, xf3jm0
+use mod_hismat, only: sread
 implicit double precision (a-h,o-z)
 integer, intent(in) :: tcs_out_unit  ! unit of tenxsc output file (tcs, dgh or dcga file)
 integer, intent(in) :: tcb_out_unit  ! unit of tcb output file
@@ -2819,12 +2824,13 @@ use mod_coinq, only: inq ! inq(1)
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid2, only: mxoutd
-use mod_hibrid5, only: sread
+use mod_hismat, only: sread
 use mod_par, only: batch, ipos, iprnt=>iprint
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j
+use mod_hismat, only: sread
 implicit double precision (a-h,o-z)
 integer, intent(in) :: tcs_out_unit  ! unit of tcs output file
 integer, intent(in) :: tcb_out_unit  ! unit of tcb output file

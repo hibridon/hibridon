@@ -460,8 +460,8 @@ end subroutine wpr_bound
 !     ------------------------------------------------------------------
 subroutine vmat_bound(wr, r, nch, nmax, v2)
 use mod_ancou, only: ancou_type
-use mod_hibrid3, only: potmat
 use mod_ered, only: ered, rmu
+use mod_hibrid1, only: potmat
 implicit none
 integer, intent(in) :: nch, nmax
 real(8), intent(in) :: r

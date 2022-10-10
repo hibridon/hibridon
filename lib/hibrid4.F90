@@ -9,15 +9,7 @@ contains
 !                          routines included:                           *
 !                                                                       *
 !   2. sprint         prints s-matrices on the screen                   *
-!   3. spropn         this subroutine calculates the diagonal matrices  *
-!                     to propagate the log-derivative matrix through    *
-!                     the current interval                              *
-!   4. steppr         determines matrix to transform log-deriv matrix   *
-!                     into new interval                                 *
-!   5. transp         subroutine to carry out in place transposition    *
-!                     of n x n matrix a                                 *
 !   6. turn           function, determines classical turning point      *
-!   7. wavevc         sets up wavevector matrix and diagonalizes it     *
 !   8. xwrite         subroutine to write out integral cross sections   *
 !   9. waverd         writes and reads header file for wavefunction     *
 !  10. psi            to determine wavefunction
@@ -47,11 +39,12 @@ use mod_coisc4, only: ipack => isc4 ! ipack(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cozmat, only: simag => zmat_as_vec ! simag(1)
-use mod_hibrid5, only: sread
+use mod_hismat, only: sread
 use mod_hibasis, only: is_j12
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_hiutil, only: gennam
+use mod_hismat, only: sread, rdhead
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
@@ -218,754 +211,6 @@ do 350 ja = 1, length, 10
 goto 30
 400 call closf(1)
 close(1)
-return
-end
-! -----------------------------------------------------------------------
-subroutine spropn (rnow, width, eignow, hp, y1, y4, y2, &
-                   gam1, gam2, nch)
-!-----------------------------------------------------------------------------
-!  this subroutine calculates the diagonal matrices to propagate the
-!  log-derivative matrix through the current interval
-!  also calculated are the ihomogeneous propagators (explained below)
-!-----------------------------------------------------------------------------
-!  variables in call list:
-!    rnow:       midpoint of the current interval
-!    width:      width of the current interval
-!    eignow:     array containing the wavevectors
-!                these are defined by eq. (6) of m.alexander,
-!                j. chem. phys. 81,4510 (1984)
-!    hp:         array containing the negative of diagonal elements of the
-!                derivative of the wavevector matrix at the center of the
-!                current interval [see eq. (9) of m.alexander,
-!                j. chem. phys. 81,4510 (1984)
-!                this array thus contains the derivative of the diagonal
-!                elements of the transformed hamiltonian matrix
-!    y1, y2, y4: on entry, contain the desired diagonal elements of the
-!                homogeneous propagator
-!    gam1, gam2: on return, if photof .true, contain the desired diagonal
-!                elements of the ihomogeneous propagators
-!                otherwise gam1 and gam2 are returned as zero
-!    nch:        the number of channels, this equals the dimensions of the
-!                eignow, hp, y1, y2, y2, gam1, and gam2 arrays
-!-----------------------------------------------------------------------------
-!  the key equations, reproduced below, are taken from
-!  m. alexander and d. manolopoulos, "a stable linear reference potential
-!  algorithm for solution ..."
-!  each uncoupled equation can be written as:
-!         2    2
-!     [ d / dr + eignow - hp * r ] f(r) = 0
-!     where r is the distance from the midpoint of the current interval
-!  the linearly indepedent solutions are the airy functions ai(x) and bi(x)
-!  where  x = alpha (r + beta)
-!                   1/3
-!  with   alpha = hp   , and beta = (-eignow) / hp
-!  the three diagonal elements of the cauchy propagator necessary to propagate
-!  the log-derivative matrix are:
-!    b = pi [ ai(x ) bi(x ) - ai(x )bi(x ) ] / alpha
-!                 1      2        2     1
-!    a = pi [ - ai'(x ) bi(x ) + ai(x ) bi'(x ) ]
-!                    1      2        2       1
-!    d = pi [ ai(x ) bi'(x ) - ai'(x ) bi(x ) ]
-!                 1       2         2      1
-!    where x  = alpha ( beta + width / 2) and
-!           2
-!          x  = alpha ( beta - width / 2)
-!           1
-!  here "width" denotes the width of the interval
-!  the diagonal elements of the "imbedding type" propagator are given in terms
-!  of the diagonal elements of the cauchy propagator by:
-!     y = a/b     y = y = 1/b    and   y = d/b
-!      1           2   3                4
-!  for the calculation sof the homogeneous propagators
-!  the airy functions are defined in terms of their moduli and phases
-!  for negative x these definitions are:
-!      ai(-x) = m(x) cos[theta(x)]
-!      bi(-x) = m(x) sin[theta(x)]
-!      ai'(-x) = n(x) cos[phi(x)]
-!      bi'(-x) = n(x) sin[phi(x)]
-!  in other words
-!          2              2        2
-!      m(x)  = sqrt[ ai(x)  + bi(x)  ]
-!          2               2         2
-!      n(x)  = sqrt[ ai'(x)  + bi'(x)  ]
-!      theta(x) = atan [ bi(x) / ai(x) ]
-!      phi(x)   = atan [ bi'(x) / ai'(x) ]
-!  for positive x the moduli and phases are defined by:
-!      ai(x) = m(x) sinh[theta(x)]
-!      bi(x) = m(x) cosh[theta(x)]
-!      ai'(x) = n(x) sinh[phi(x)]
-!      bi'(x) = n(x) cosh[phi(x)]
-!  in other words
-!          2              2        2
-!      m(x)  = sqrt[ bi(x)  - ai(x)  ]
-!          2               2         2
-!      n(x)  = sqrt[ bi'(x)  - ai'(x)  ]
-!      theta(x) = atanh [ ai(x) / bi(x) ]
-!      phi(x)   = atanh [ ai'(x) / bi'(x) ]
-!  here the the exponentially scaled airy functions
-!  ai(x), ai'(x), bi(x), bi'(x) are:
-!      ai(x)  = ai(x)  * exp[zeta]
-!      ai'(x) = ai'(x) * exp[zeta]
-!      bi(x)  = bi(x)  * exp[-zeta]
-!      bi'(x) = bi'(x) * exp[-zeta]
-!                          3/2
-!      where zeta = (2/3) x
-!  note that for positive x the phases are labeled chi and eta in
-!  m. alexander and d. manolopoulos, "a stable linear reference potential
-!  algorithm for solution ..."
-!-----------------------------------------------------------------------------
-!  for both x  and x  negative
-!            1      2
-!  (this corresponds to a channel which is classically open at both ends of th
-!  interval)
-!  we find:
-!  y     = 1 / { m  m  sin[theta -theta ] }
-!   2             1  2          2      1
-!          n  sin[phi -theta ]
-!           1        1      2
-!  y    = ----------------------
-!   1      m  sin[theta - theta ]
-!           1          2       1
-!          n  sin[phi -theta ]
-!           2        2      1
-!  y    = ----------------------
-!   4      m  sin[theta - theta ]
-!           2          2       1
-!  here the subscripts 1 and 2 imply the moduli and phases evaluated at x = x
-!                                                                            1
-!  and x = x  , respectively
-!           2
-!-----------------------------------------------------------------------------
-!  for both x  and x  positive
-!            1      2
-!  (this corresponds to a channel which is classically closed at both ends of
-!  the interval)
-!  we find:
-!  1 / y  =  m  m  cosh[z -z ] { sinh[theta -theta ]
-!       2     1  2       2  1              1      2
-!                         + tanh[z -z ] sinh[theta +theta ] }
-!                                 2  1            1      2
-!                     3/2
-!   where z  = (2/3) x     and similarly for z
-!          1          1                       2
-!          n  { sinh [theta -phi ] - tanh[z -z ] sinh[theta +phi ] }
-!           1              2    1          2  1            2    1
-!  y    = --------------------------------------------------------
-!   1      m  { sinh [theta -theta ] + tanh[z -z ] sinh[theta +theta ] }
-!           1              2      1          2  1            2      1
-!          n  { sinh [theta -phi ] - tanh[z -z ] sinh[theta +phi ] }
-!           2              1    2          2  1            1    2
-!  y     = --------------------------------------------------------
-!   4      m  { sinh [theta -theta ] + tanh[z -z ] sinh[theta +theta ] }
-!           2              2      1          2  1            2      1
-!-----------------------------------------------------------------------------
-!  for x  positive and x  negative we find:
-!       1               2
-!  1 / y  = m  m  cosh[z ] cosh[theta ] { - cos[theta ] (1 + tanh[z ])
-!       2    1  2       1            1               2             1
-!                                   + tanh[theta ] sin[theta ] (1 - tanh[z ])
-!                                               1           2             1
-!      n { cos[theta ](1 + tanh[z ]) - tanh[phi ] sin[theta ] (1 - tanh[z ]) }
-!       1           2            1             1           2             1
-! y = ------------------------------------------------------------------------
-!  1   m {-cos[theta ](1 + tanh[z ]) + tanh[theta ] sin[theta ] (1 - tanh[z ])
-!       1           2            1               1           2             1
-!      n {-cos[phi ](1 + tanh[z ]) + tanh[theta ] sin[phi ] (1 - tanh[z ]) }
-!       2         2            1               1         2             1
-! y  = -----------------------------------------------------------------------
-!  4   m {-cos[theta ](1 + tanh[z ]) + tanh[theta ] sin[theta ] (1 - tanh[z ])
-!       2           2            1               1           2             1
-!-----------------------------------------------------------------------------
-!  for x  negative and x  positive we find:
-!       1               2
-! 1 / y  = m  m  cosh[z ] cosh[theta ] { cos[theta ] (1 + tanh[z ])
-!      2    1  2       2            2             1             2
-!                                  - tanh[theta ] sin[theta ] (1 - tanh[z ]) }
-!                                              2           1             2
-!      n {-cos[phi ](1 + tanh[z ]) + tanh[theta ] sin[phi ] (1 - tanh[z ]) }
-!       1         1            2               2         1             2
-! y  = -----------------------------------------------------------------------
-!  1   m {cos[theta ](1 + tanh[z ]) - tanh[theta ] sin[theta ] (1 - tanh[z ])
-!       1          1            2               2           1             2
-!      n { cos[theta ](1 + tanh[z ]) - tanh[phi ] sin[theta ] (1 - tanh[z ]) }
-!       2           1            2             2           1             2
-! y  = -----------------------------------------------------------------------
-!  4   m {cos[theta ](1 + tanh[z ]) - tanh[theta ] sin[theta ] (1 - tanh[z ])
-!       2          1            2               2           1             2
-!-----------------------------------------------------------------------------
-!  for the special case of a constant reference potential (hp=0)
-!  then the propagators are:
-!  for eignow .gt. 0 (the classically allowed region)
-!    y1 = y4 = k cot (k width)
-!    y2 = k / sin (k width)
-!    where k = sqrt (eignow)
-!  for eignow .lt. 0 (the classically forbidden region)
-!    y1 = y4 = kap coth (kap width)
-!    y2 = kap / sinh (kap width)
-!
-!    where kap = sqrt (-eignow)
-!-----------------------------------------------------------------------------
-!  this subroutine also calculates the diagona linhomogeneous log-derivative
-!  propagators.  key equations are 9.13, 9.14, and 9.25 of the ph. d.
-!  thesis of d. manolopoulos
-!  the diagonal elements of the two inhomogeneous propagators are defined
-!  in terms of the linearly intependent solutions psi+ and psi-, which
-!  are
-!  psi+ = [ - bi(x2)ai(x) + ai(x2)bi(x) ] y2 / w
-!  and
-!  psi- = [ - bi(x1)ai(x) + ai(x1)bi(x) ] y2 / w
-!  where w is the wronskian (1/pi)
-!  in the determination of these inhomogeneous propagators
-!  the airy functions are defined as follows:
-!  for negative x :
-!      ai(-x) = ai(x) cos[th] + bi(x) sin[th]
-!      bi(-x) = bi(x) cos[th] - ai(x) cos[th]
-!                            3/2
-!      where zeta = (2/3) |x|
-!  for positive x :
-!      ai(x) = exp(-zeta) ai(x)
-!      bi(x) = exp(zeta) bi(x)
-
-!  the integrals of the airy functions are defined as:
-
-!  for a > 0
-!      int[ai(x),{0,a}] = 1/3 - exp(-zeta)iai(a)
-!      int[bi(x),{0,a}] = exp(zeta)ibi(a)
-!  and for a < 0
-!      int[ai(x),{a,0}] = int[ai(-x),{0,-a}]
-!                       = 2/3 - q(a) cos(th) + p(a) sin(th)
-!      int[bi(x),{a,0}] = int[bi(-x),{0,-b}] =
-!                       = p(a) cos(th) + q(a) sin(th)
-!  we further assume that the ground state wavefunction times the dipole
-!  moment function can be expanded as phi(x) = phi0 + phi1 x
-!  where phi1 = d[phi,rmid]/alpha and
-!        phi0 = phi(rmid) - beta * d[phi,rmid]
-!-----------------------------------------------------------------------------
-!  for both x  and x  negative
-!            1      2
-!  (this corresponds to a channel which is classically open at both ends of th
-!  interval)
-!  we find:
-!  y     = 1 / { m  m  sin[theta -theta ] }
-!   2             1  2          2      1
-!          n  sin[phi -theta ]
-!           1        1      2
-!  y    = ----------------------
-!   1      m  sin[theta - theta ]
-!           1          2       1
-!          n  sin[phi -theta ]
-!           2        2      1
-!  y    = ----------------------
-!   4      m  sin[theta - theta ]
-!           2          2       1
-!  here the subscripts 1 and 2 imply the moduli and phases evaluated at x = x
-!                                                                            1
-!  and x = x  , respectively
-!           2
-!-----------------------------------------------------------------------------
-!  for both x  and x  positive
-!            1      2
-!  (this corresponds to a channel which is classically closed at both ends of
-!  the interval)
-!  we find:
-!  1 / y  =  m  m  cosh[z -z ] { sinh[theta -theta ]
-!       2     1  2       2  1              1      2
-!                         + tanh[z -z ] sinh[theta +theta ] }
-!                                 2  1            1      2
-!                     3/2
-!   where z  = (2/3) x     and similarly for z
-!          1          1                       2
-!          n  { sinh [theta -phi ] - tanh[z -z ] sinh[theta +phi ] }
-!           1              2    1          2  1            2    1
-!  y    = --------------------------------------------------------
-!   1      m  { sinh [theta -theta ] + tanh[z -z ] sinh[theta +theta ] }
-!           1              2      1          2  1            2      1
-!          n  { sinh [theta -phi ] - tanh[z -z ] sinh[theta +phi ] }
-!           2              1    2          2  1            1    2
-!  y     = --------------------------------------------------------
-!   4      m  { sinh [theta -theta ] + tanh[z -z ] sinh[theta +theta ] }
-!           2              2      1          2  1            2      1
-!-----------------------------------------------------------------------------
-!  for x  positive and x  negative we find:
-!       1               2
-!  1 / y  = m  m  cosh[z ] cosh[theta ] { - cos[theta ] (1 + tanh[z ])
-!       2    1  2       1            1               2             1
-!                                   + tanh[theta ] sin[theta ] (1 - tanh[z ])
-!                                               1           2             1
-!      n { cos[theta ](1 + tanh[z ]) - tanh[phi ] sin[theta ] (1 - tanh[z ]) }
-!       1           2            1             1           2             1
-! y = ------------------------------------------------------------------------
-!  1   m {-cos[theta ](1 + tanh[z ]) + tanh[theta ] sin[theta ] (1 - tanh[z ])
-!       1           2            1               1           2             1
-!      n {-cos[phi ](1 + tanh[z ]) + tanh[theta ] sin[phi ] (1 - tanh[z ]) }
-!       2         2            1               1         2             1
-! y  = -----------------------------------------------------------------------
-!  4   m {-cos[theta ](1 + tanh[z ]) + tanh[theta ] sin[theta ] (1 - tanh[z ])
-!       2           2            1               1           2             1
-!-----------------------------------------------------------------------------
-!  for x  negative and x  positive we find:
-!       1               2
-! 1 / y  = m  m  cosh[z ] cosh[theta ] { cos[theta ] (1 + tanh[z ])
-!      2    1  2       2            2             1             2
-!                                  - tanh[theta ] sin[theta ] (1 - tanh[z ]) }
-!                                              2           1             2
-!      n {-cos[phi ](1 + tanh[z ]) + tanh[theta ] sin[phi ] (1 - tanh[z ]) }
-!       1         1            2               2         1             2
-! y  = -----------------------------------------------------------------------
-!  1   m {cos[theta ](1 + tanh[z ]) - tanh[theta ] sin[theta ] (1 - tanh[z ])
-!       1          1            2               2           1             2
-!      n { cos[theta ](1 + tanh[z ]) - tanh[phi ] sin[theta ] (1 - tanh[z ]) }
-!       2           1            2             2           1             2
-! y  = -----------------------------------------------------------------------
-!  4   m {cos[theta ](1 + tanh[z ]) - tanh[theta ] sin[theta ] (1 - tanh[z ])
-!       2          1            2               2           1             2
-!-----------------------------------------------------------------------------
-!  for the special case of a constant reference potential (hp=0)
-!  then the propagators are:
-!  for eignow .gt. 0 (the classically allowed region)
-!    y1 = y4 = k cot (k width)
-!    y2 = k / sin (k width)
-!    where k = sqrt (eignow)
-!  for eignow .lt. 0 (the classically forbidden region)
-!    y1 = y4 = kap coth (kap width)
-!    y2 = kap / sinh (kap width)
-!
-!    where kap = sqrt (-eignow)
-!-----------------------------------------------------------------------------
-!  written by:  millard alexander
-!  current revision date (algorithm):  30-dec-1994
-!-----------------------------------------------------------------------------
-use mod_coqvec2, only: q => q2
-use mod_phot, only: photof, wavefn, boundf, writs
-use mod_hiutil, only: intairy
-implicit double precision (a-h,o-z)
-!      implicit none
-double precision a, b, bfact, cs, cs1, cs2, csh, dalph2, dalpha, &
-    darg, dbeta, dcay, delzet, denom, dhalf, dkap, dlzeta, &
-    dmmod1, dmmod2, dnmod1, dnmod2, doneth, dphi1, dphi2, &
-    dpi, droot, dslope, dthet1, dthet2, dtnhfm, &
-    dtnhfp, dx1, dx2, dzeta1, dzeta2, emz1, emz2, &
-    ez1, ez2, fact, oflow, one, rnow, scai1, scai2, scbi1, scbi2, &
-    sn, sn1, sn2, snh, tnhfac, width, x1, x2, xairy1, xairy2, &
-    xbiry1, xbiry2, zero
-double precision eignow, gam1, gam2, hp, y1, y2, y4
-integer i, nch
-dimension eignow(1), hp(1), y1(1), y2(1), y4(1), gam1(1), gam2(1)
-data     doneth,        dhalf &
-  / 0.333333333333333d0, 0.5d0 /
-data zero, one /0.d0, 1.d0/
-data  dpi / 3.1415926535897932d0 /
-!  the parameter oflow is the largest value of x for which exp(x)
-!  does not cause a single precision overflow
-!                                     n
-!  a reasonable value is x = [ ln(2) 2 ] - 5, where n is the number of bits in
-!  the characteristic of a floating point number
-data oflow / 83.d0 /
-if (.not. photof) then
- call dset(nch,zero,gam1,1)
- call dset(nch,zero,gam2,1)
-endif
-!     now determine propagators for all nch channels
-do 10  i = 1, nch
-  dslope = hp(i)
-! activate next statement for constant reference potential
-! force slope to equal zero, to force constant potential
-!        dslope=0.d0
-  darg = 1.e+10
-  if (dslope .ne. 0.d0) &
-    darg = log (abs(eignow(i))) - log (abs(dslope))
-  if (darg .gt. 20.d0 .or. width .lt. 1.d-5) then
-!  here if the relative slope in the wavevector matrix is less than 1.**(-20)
-!  in magnitude, or sector width less than 1.e-5 bohr,
-!  in which case the potential is assumed to be constant
-    if (eignow(i) .gt. 0) then
-!  here for classically allowed region (sines and cosines as reference
-!  solutions)
-      dcay = sqrt (eignow(i))
-      darg = dcay * width
-      sn=sin(darg)
-      y1(i) = dcay / tan (darg)
-      y4(i) = y1(i)
-      y2(i) = dcay / sn
-!  here for inhomogeneous propagators
-      if (photof) then
-        cs=cos(darg)
-        b=rnow+width*dhalf
-        a=rnow-width*dhalf
-        denom=dcay*sn
-        fact=(one-cs)*(q(i)-q(nch+i)*rnow)
-        gam1(i)=(fact+(b-a*cs-sn/dcay)*q(nch+i))/denom
-        gam2(i)=(fact+(a-b*cs+sn/dcay)*q(nch+i))/denom
-      endif
-    else
-!  here for classically forbidden region (hyperbolic sines and cosines as
-!  reference solutions)
-      dkap = sqrt ( - eignow(i))
-      darg = dkap * width
-      snh=sinh(darg)
-      y1(i) = dkap / tanh (darg)
-      y4(i) = y1(i)
-      y2(i) = dkap / snh
-!  here for inhomogeneous propagators
-      if (photof) then
-        csh=cosh(darg)
-        b=rnow+width*dhalf
-        a=rnow-width*dhalf
-        denom=dkap*snh
-        fact=(-one+csh)*(q(i)-q(nch+i)*rnow)
-        gam1(i)=(fact+(-b+a*csh+snh/dkap)*q(nch+i))/denom
-        gam2(i)=(fact+(-a+b*csh-snh/dkap)*q(nch+i))/denom
-      endif
-    end if
-  else
-!  here if the relative slope in the wavevector matrix is greater than
-!  1.**(-20) in magnitude, in which case a linear reference potential is used,
-!  with airy functions as reference solutions
-    droot = ( abs (dslope) ) ** doneth
-    dalpha   = sign (droot, dslope)
-    dbeta = - eignow(i) / dslope
-    dx1 = dalpha * ( dbeta - width * dhalf)
-    dx2 = dalpha * ( dbeta + width * dhalf)
-    call airymp (dx1, dthet1, dphi1, dmmod1, dnmod1,scai1, scbi1, &
-             dzeta1)
-    call airymp (dx2, dthet2, dphi2, dmmod2, dnmod2,scai2, scbi2, &
-             dzeta2)
-    if (photof) then
-! determine required airy integrals
-      call intairy(dx1, xairy1, xbiry1)
-      call intairy(dx2, xairy2, xbiry2)
-! convert ground state wavefunction and its derivative from r as
-! independent variable to x
-      q(i)=q(i)-dbeta*q(nch+i)
-      q(nch+i)=q(nch+i)
-    endif
-
-    x1 = dx1
-    x2 = dx2
-!-----------------------------------------------------------------------------
-    if (x1 .gt. zero .and. x2 .gt. zero) then
-!  here for both x  and x  positive
-!                 1      2
-      tnhfac = tanh(dzeta2 - dzeta1)
-      bfact = sinh(dthet1 - dthet2) + &
-              tnhfac * sinh(dthet1 + dthet2)
-      dlzeta = dzeta2 - dzeta1
-      y2(i) = zero
-      if (abs(dlzeta) .le. oflow) then
-        b = dmmod1 * dmmod2 * cosh(dzeta2 - dzeta1) * bfact
-        y2(i) = 1. / b
-      end if
-      y1(i) = dnmod1 * (sinh(dthet2 - dphi1) &
-            - tnhfac * sinh(dthet2 + dphi1) ) / (dmmod1 * bfact)
-      y4(i) = dnmod2 * (sinh(dthet1 - dphi2) &
-            + tnhfac * sinh(dthet1 + dphi2) ) / (dmmod2 * bfact)
-      if (photof) then
-        gam1(i)=-scbi2*xairy2-scai2*xbiry2 &
-           +exp(dlzeta)*scbi2*xairy1+exp(-dlzeta)*scai2*xbiry1
-        gam2(i)=-scbi1*xairy1-scai1*xbiry1 &
-           +exp(dlzeta)*scai1*xbiry2+exp(-dlzeta)*scbi1*xairy2
-      endif
-!-----------------------------------------------------------------------------
-    else if (x1 .le. zero .and. x2 .le. zero) then
-!  here for both x  and x  negative
-!                 1      2
-      b =  dmmod1 * dmmod2 * sin(dthet2 - dthet1)
-      y2(i) = 1. / b
-      y1(i) = dnmod1 * sin(dphi1 - dthet2) &
-            / (dmmod1 * sin(dthet2 - dthet1) )
-      y4(i) = dnmod2 * sin(dphi2 - dthet1) &
-            / (dmmod2 * sin(dthet2 - dthet1) )
-      if (photof) then
-        delzet=dzeta2-dzeta1
-        cs=cos(delzet)
-        sn=sin(delzet)
-        gam1(i)=-scai2*xairy2+scbi2*xbiry2 &
-               +cs*(scai2*xairy1-scbi2*xbiry1) &
-               +sn*(scai2*xbiry1+scbi2*xairy1)
-        gam2(i)=-scai1*xairy1+scbi1*xbiry1 &
-               +cs*(scai1*xairy2-scbi1*xbiry2) &
-               -sn*(scai1*xbiry2+scbi1*xairy2)
-      endif
-!-----------------------------------------------------------------------------
-    else if (x1 .gt. zero .and. x2 .le. zero) then
-!  here for x  positive and x  negative
-!            1               2
-      dtnhfp = 1 + tanh(dzeta1)
-      dtnhfm = 1 - tanh(dzeta1)
-      bfact = cosh(dthet1) * ( - cos(dthet2) * dtnhfp &
-            + tanh(dthet1) * sin(dthet2) * dtnhfm)
-      y2(i) = zero
-      if (abs(dzeta1) .le. oflow) then
-        y2(i) = cosh(dzeta1) * (dmmod1 * dmmod2 * bfact)
-        y2(i) = one / y2(i)
-      end if
-      y1(i) = (dnmod1 * cosh(dphi1) * ( cos(dthet2) * dtnhfp &
-            - tanh(dphi1) * sin(dthet2) * dtnhfm) ) &
-            / (dmmod1 * bfact)
-      y4(i) = (dnmod2 * cosh(dthet1) * ( - cos(dphi2) * dtnhfp &
-            + tanh(dthet1) * sin(dphi2) * dtnhfm) ) &
-            / (dmmod2 * bfact)
-      if (photof) then
-        cs2=cos(dzeta2)
-        sn2=sin(dzeta2)
-        ez1=exp(dzeta1)
-        emz1=one/ez1
-        gam1(i)=scbi2*(-cs2+xbiry2) &
-               +scai2*(sn2-xairy2) &
-                +emz1*xairy1*(scbi2*cs2-scai2*sn2) &
-                +ez1*xbiry1*(scai2*cs2+scbi2*sn2)
-        gam2(i)=-scai1*xbiry1-scbi1*xairy1 &
-                +emz1*scai1*(xairy2*cs2-xbiry2*sn2) &
-                +ez1*scbi1*(one-xbiry2*cs2-xairy2*sn2)
-      endif
-!-----------------------------------------------------------------------------
-    else if (x2 .gt. zero .and. x1 .le. zero) then
-!  here for x  positive and x  negative
-!            2               1
-      dtnhfp = 1 + tanh(dzeta2)
-      dtnhfm = 1 - tanh(dzeta2)
-      bfact = cosh(dthet2) * ( cos(dthet1) * dtnhfp &
-            - tanh(dthet2) * sin(dthet1) * dtnhfm)
-      y2(i) = zero
-      if (abs(dzeta2) .le. oflow) then
-        y2(i) =  cosh(dzeta2) * (dmmod1 * dmmod2 * bfact)
-        y2(i) = one / y2(i)
-      end if
-      y4(i) = (dnmod2 * cosh(dphi2) * ( cos(dthet1) * dtnhfp &
-            - tanh(dphi2) * sin(dthet1) * dtnhfm) ) &
-            / (dmmod2 * bfact)
-      y1(i) = (dnmod1 * cosh(dthet2) * ( - cos(dphi1) * dtnhfp &
-            + tanh(dthet2) * sin(dphi1) * dtnhfm) ) &
-            / (dmmod1 * bfact)
-      if (photof) then
-        ez2=exp(dzeta2)
-        emz2=one/ez2
-        cs1=cos(dzeta1)
-        sn1=sin(dzeta1)
-        gam1(i)=-scai2*xbiry2-scbi2*xairy2 &
-                +emz2*scai2*(xairy1*cs1-xbiry1*sn1) &
-                +ez2*scbi2*(one-xbiry1*cs1-xairy1*sn1)
-! bug corrected here 4/14/94
-        gam2(i)=scbi1*(-cs1+xbiry1) &
-               +scai1*(sn1-xairy1) &
-                +emz2*xairy2*(scbi1*cs1-scai1*sn1) &
-                +ez2*xbiry2*(scai1*cs1+scbi1*sn1)
-! here is the old, incorrect code`
-!             gam1(i)=scbi1*(-cs1+xbiry1)
-!    :               +scai1*(sn1-xairy1)
-!    :                +emz2*xairy2*(scbi1*cs1-scai1*sn1)
-!    :                +ez2*xbiry2*(scai1*cs1+scbi1*sn1)
-      endif
-    end if
-!-----------------------------------------------------------------------------
-    y1(i) = dalpha * y1(i)
-    y4(i) = dalpha * y4(i)
-    y2(i) = dalpha * y2(i) / dpi
-    if (photof) then
-        dalph2=dalpha*dalpha
-        gam1(i)=q(i)*gam1(i)*y2(i)*dpi &
-                +q(nch+i)*(y1(i)-y2(i))/dalpha
-        gam2(i)=q(i)*gam2(i)*y2(i)*dpi &
-                +q(nch+i)*(y4(i)-y2(i))/dalpha
-        gam1(i)=gam1(i)/dalph2
-        gam2(i)=gam2(i)/dalph2
-    endif
-!  at this point the y1, y2, and y4 propagators correspond identically to
-!  eqs. (38)-(44) of m. alexander and d. manolopoulos, "a stable linear
-!  reference potential algorithm for solution ..."
-  end if
-10 continue
-return
-end
-! -----------------------------------------------------------------------
-subroutine steppr (vecnow, vecnew, tmat, nmax, n)
-!  determine matrix to transform log-deriv matrix into new interval
-!  see eq. (22) of m.h. alexander, "hybrid quantum scattering algorithms ..."
-! --------------------------------------------------------------------------
-!  variables in call list:
-!    vecnow:     on entry: matrix of eigenvectors of wavevector matrix in
-!                current interval
-!                on return: matrix of eigenvectors of wavevector matrix in
-!                new interval - this is the matrix tn in eq. (22) of
-!                m.h. alexander, "hybrid quantum scattering algorithms ..."
-!    vecnew:     on entry:  contains matrix of eigenvectors in next interval
-!    tmat:       on return: contains transformation matrix pn in eq. (22)
-!    n:          number of channels
-!    nmax:       maximum row dimension of matrices
-!  subroutines called:
-!     rgmmul:    generalized matrix multiply, called here to evaluate
-!                a.b-transpose
-! --------------------------------------------------------------------------
-implicit double precision (a-h,o-z)
-!      real vecnow, vecnew, tmat
-integer n, nmax, isw
-!  matrices of maximum row dimension nmax, stored in packed column form
-dimension vecnow(1), vecnew(1), tmat(1)
-data isw / 0/
-#if defined(HIB_NONE)
-call mxma (vecnew, 1, nmax, vecnow, nmax, 1, tmat, 1, nmax, &
-            n, n, n)
-#endif
-#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
-call dgemm('n','t',n,n,n,1.d0,vecnew,nmax,vecnow,nmax, &
-           0d0,tmat,nmax)
-#endif
-!  restore eigenvectors
-call matmov (vecnew, vecnow, n, n, nmax, nmax)
-return
-end
-! -----------------------------------------------------------------------
-subroutine transp (a, n, nmax)
-!  subroutine to carry out in place transposition of n x n matrix a
-!  of maximum row dimension nmax stored in packed column form
-!  uses blas routine dswap
-!  written by:  millard alexander
-!  current revision date: 23-sept-87
-implicit double precision (a-h,o-z)
-integer icol, icolpt, irowpt, n, nmax, nrow
-dimension a(1)
-icolpt = 2
-irowpt = nmax + 1
-do 100 icol = 1, n - 1
-!  icolpt points to first sub-diagonal element in column icol
-!  irowpt points to first super-diagonal element in row icol
-!  nrow is number of subdiagonal elements in this column
-  nrow = n - icol
-  call dswap (nrow, a(icolpt), 1, a(irowpt), nmax)
-  icolpt = icolpt + nmax + 1
-  irowpt = irowpt + nmax + 1
-100 continue
-return
-end
-! -----------------------------------------------------------------------
-function turn(e)
-! current revision date: 23-sept-87
-use constants
-implicit double precision (a-h,o-z)
-ee = e/econv
-r = 3.0d0
-dr = 0.5d0
-10 r = r+dr
-call pot(vv0,r)
-if(vv0-ee) 20,50,30
-20 if(dr.lt.0) goto 10
-goto 40
-30 if(dr.gt.0) goto 10
-40 dr = -dr*0.5d0
-if(abs(dr).gt.0.01d0) goto 10
-50 turn = r
-return
-end
-! -----------------------------------------------------------------------
-subroutine wavevc (w, eignow, rnow, nch, nmax, v2)
-!  this subroutine first sets up the wavevector matrix at rnow
-!  then diagonalizes this matrix
-!  written by:  millard alexander
-!  current revision date: 14-dec-2007
-! ----------------------------------------------------------------
-!  variables in call list:
-!  w:           matrix of maximum row dimension nmax used to store
-!               wavevector matrix
-!  eignow:      on return:  array containing eigenvalues of wavevector matrix
-!  scr1, scr2:  scratch vectors of dimension at least nch
-!  rnow:        value of interparticle separation at which wavevector matrix
-!               is to be evaluated
-!  nch:         number of channels
-!  nmax:        maximum number of channels
-!  subroutines called:
-!     potmat:         determines wavevector matrix
-!     tred1,tqlrat:   eispack routines to obtain eigenvalues of real,
-!                     matrix
-!     dsyevr:         latest lapack eigenvalue routine
-!     dscal, dcopy:   linpack blas routines
-! ----------------------------------------------------------------
-use mod_ancou, only: ancou_type
-use mod_hibrid3, only: potmat
-use mod_hiutil, only: dsyevr_wrapper
-implicit double precision (a-h,o-z)
-real(8), intent(out) :: w(nmax*nmax)
-real(8), intent(out) :: eignow(nch)
-real(8), intent(in) :: rnow
-integer, intent(in) :: nch
-integer, intent(in) :: nmax
-type(ancou_type), intent(in) :: v2
-!      real rnow, xmin1
-!      real eignow, w
-integer, parameter :: ldz = 1
-integer icol, ierr, ipt, nch, nmax, nmaxm1, nmaxp1, nrow
-real(8), dimension(ldz, nch):: vecnow_unused   ! this is the z array that dsyevr wants, even if it's not used when jobz = 'N'
-external dscal, dcopy
-!     external dscal, dcopy, potmat, tred1, tqlrat
-#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-real(8) :: scr1(nch)
-real(8) :: scr2(nch)
-#endif
-!  local arrays (for lapack dsyevr)
-#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
-dimension isuppz(2*nch),iwork(10*nch),work(57*nch)
-#endif
-
-! ------------------------------------------------------------------
-data xmin1 / -1.d0/
-nmaxp1 = nmax + 1
-nmaxm1 = nmax - 1
-call potmat (w, rnow, nch, nmax, v2)
-!  since potmat returns negative of lower triangle of w(r) matrix (eq.(3) of
-!  m.h. alexander, "hybrid quantum scattering algorithms ..."),
-!  next loop changes its sign
-ipt = 1
-do icol = 1, nch
-!  nrow is the number of (diagonal plus subdiagonal) elements in column icol
-!  ipt points to the diagonal element in column icol for a matrix stored in
-!  packed column form
-  nrow = nch - icol + 1
-  call dscal (nrow, xmin1, w(ipt), 1)
-  ipt = ipt + nmaxp1
-end do
-!  next loop fills in upper triangle of w
-if (nch .gt. 1) then
-  ipt = 2
-  do icol = 1, nch -1
-!  ipt points to the first subdiagonal element in column icol
-!  nrow is the number of subdiagonal elements in column icol
-    nrow = nch - icol
-    call dcopy (nrow, w(ipt), 1, w(ipt + nmaxm1), nmax)
-    ipt = ipt + nmaxp1
-  end do
-end if
-#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
-lwork=57*nch
-liwork=10*nch
-abstol=1.e-16
-lsup=2*nch
-vl = 0.0
-vu = 0.0
-call dsyevr_wrapper('N','A','L',nch,w,nmax,vl,vu,il,iu,abstol,m, &
-   eignow,vecnow_unused,ldz,isuppz,work,lwork,iwork,liwork,ierr)
-
-if (ierr .ne. 0) then
-  write (6, 115) ierr
-  write (9, 115) ierr
-115   format (' *** IERR =',i3,' IN WAVEVC/DSYEVR;  ABORT ***')
-  write (9, 120) (eignow (i), i=1, nch)
-120   format (' EIGENVALUES ARE:',/,8(1pe16.8) )
-  call exit
-end if
-#endif
-#if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-!  transform w to tridiagonal form
-!  eignow, scr1 and scr2 are used as scratch vectors here
-call tred1 (nmax, nch, w, eignow, scr1, scr2)
-!  get eigenvalues of tridiagonal matrix
-call tqlrat (nch, eignow, scr2, ierr)
-if (ierr .ne. 0) then
-  write (9, 130) ierr
-  write (6, 130) ierr
-130   format &
-    (' *** TQLRAT IERR =', i3, ' .N.E. 0 IN WAVEVC; ABORT ***')
-  call exit
-end if
-#endif
 return
 end
 !
@@ -1175,6 +420,7 @@ use mod_par, only: csflag, flaghf, photof
 use funit
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
+use mod_hivector, only: dset
 implicit none
 integer, intent(out) :: jtot
 integer, intent(out) :: jlpar
@@ -1350,6 +596,7 @@ use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_hiutil, only: gennam, mtime, gettim, dater
 use mod_hiutil, only: daxpy_wrapper
+use mod_hivector, only: dset, matmov, dsum
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  psifil, wavfil, flxfil
@@ -2303,6 +1550,8 @@ use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_hiba07_13p, only: ttrans
 use mod_hiutil, only: daxpy_wrapper
+use mod_himatrix, only: mxma
+use mod_hivector, only: dset, vadd, vmul, dsum
 ! steve, you may need more space, but i doubt it since tcoord is dimensioned n
 implicit double precision (a-h,o-z)
 logical adiab, kill, photof, propf, sumf, coordf
@@ -2332,7 +1581,7 @@ integer :: psifil_unit
 ! steve, you'll need to modify wfintern so that scmat returns both function an
 ! scmat is a vector of length nch containing the nch internal states
 ! evaluated at internal coordinate y
-      call vmul(sc,1,scmat,1,tcoord(ind),1,nch)
+      call vmul(sc,1,scmat,1,tcoord(ind:),1,nch)
 ! this masks the internal states depending on whether the index is
 ! positive or negative
       ind=ind+nch
@@ -2384,11 +1633,11 @@ integer :: psifil_unit
 ! 3rd and 4th columns still contain psi-tilde(b)
 ! propagate derivatives
       call vmul(pk,1,psii,1,scmat2,1,nch)
-      call vmul(pk,1,psii(1+nch),1,scmat2(1+nch),1,nch)
+      call vmul(pk,1,psii(1+nch:),1,scmat2(1+nch:),1,nch)
 ! first and second columns of scmat2 now contain y1 Fa
-      call vmul(sc1,1,psii(ipoint),1,scmat2(ipoint),1,nch)
-      call vmul(sc1,1,psii(ipoint+nch),1, &
-                scmat2(ipoint+nch),1,nch)
+      call vmul(sc1,1,psii(ipoint:),1,scmat2(ipoint:),1,nch)
+      call vmul(sc1,1,psii(ipoint+nch:),1, &
+                scmat2(ipoint+nch:),1,nch)
 ! 3rd and 4th columns of scmat2 now contain y2 Fb
       call daxpy_wrapper(2*nch,onemin,scmat2,1,scmat2(ipoint),1)
 ! 3rd and 4th columns of scmat2 now contains (-y1 Fa + y2 Fb)
@@ -2410,8 +1659,8 @@ integer :: psifil_unit
 ! 1st two columns of psii now contain real and imaginary part of derivative
 ! 3rd and 4th columns contain real and imaginary parts of function
 ! propagate functions
-      call vmul(sc2,1,psii(ipoint),1,scmat2,1,nch)
-      call vmul(sc2,1,psii(ipoint+nch),1,scmat2(1+nch),1,nch)
+      call vmul(sc2,1,psii(ipoint:),1,scmat2,1,nch)
+      call vmul(sc2,1,psii(ipoint+nch:),1,scmat2(1+nch:),1,nch)
 ! first and second columns of scmat2 now contain y4 Fb
       call daxpy_wrapper(2*nch,onemin,scmat2,1,scmat2(ipoint),1)
 ! 3rd and 4th columns of scmat2 now contains (Fb' - y4 Fb)
@@ -2421,20 +1670,20 @@ integer :: psifil_unit
 ! if photodissociation, 3rd column of scmat2 now contains
 !     Re(Fb' - y4 Fb - gamma 2)
 ! multiply by - y2^-1 to get Fa
-      call vmul(sc1,1,scmat2(ipoint),1,psii,1,nch)
-      call vmul(sc1,1,scmat2(ipoint+nch),1,psii(1+nch),1,nch)
+      call vmul(sc1,1,scmat2(ipoint:),1,psii,1,nch)
+      call vmul(sc1,1,scmat2(ipoint+nch:),1,psii(1+nch:),1,nch)
 ! 1st and 2nd columns of psii now contain Fa
       do 320 ii=1, nch
         sc1(ii)=onemin/sc1(ii)
 320       continue
-      call vmul(sc1,1,psii(ipoint),1,scmat2,1,nch)
-      call vmul(sc1,1,psii(ipoint+nch),1,scmat2(1+nch),1,nch)
+      call vmul(sc1,1,psii(ipoint:),1,scmat2,1,nch)
+      call vmul(sc1,1,psii(ipoint+nch:),1,scmat2(1+nch:),1,nch)
 ! 1st and 2nd columns of scmat2 now contain y2 Fb
 ! if photodissociation subtract off gamma1 from real part
       if (photof) call vadd(mone,scmat2,1,sc9,1,nch)
       call dscal(nch,onemin,pk,1)
-      call vmul(pk,1,psii,1,psii(ipoint),1,nch)
-      call vmul(pk,1,psii(1+nch),1,psii(ipoint+nch),1,nch)
+      call vmul(pk,1,psii,1,psii(ipoint:),1,nch)
+      call vmul(pk,1,psii(1+nch:),1,psii(ipoint+nch:),1,nch)
 ! 3rd and 4th columns of psii now contain -y1 Fa
 ! add on y2 Fb and store in 3rd and 4th columns of psii
       call daxpy_wrapper(2*nch,one,scmat2,1,psii(ipoint),1)
@@ -2692,6 +1941,7 @@ use mod_cosc7, only: sc1 => sc7 ! sc1(6)
 use mod_cow, only: sr => w_as_vec ! sr(100)
 use mod_cozmat, only: si => zmat_as_vec ! si(100)
 use mod_wave, only: irec, ifil
+use mod_himatrix, only: mxma
 implicit none
 integer, intent(in) :: npts
 integer, intent(in) :: nch
@@ -2738,6 +1988,7 @@ use mod_cosc7, only: sc1 => sc7 ! sc1(6)
 use mod_cow, only: sr => w_as_vec ! sr(100)
 use mod_cozmat, only: si => zmat_as_vec ! si(100)
 use mod_wave, only: irec, ifil
+use mod_himatrix, only: transp
 implicit double precision (a-h,o-z)
 logical renormf
 dimension scrvec(64)

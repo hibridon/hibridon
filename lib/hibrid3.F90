@@ -7,9 +7,6 @@ contains
 !************************************************************************
 !                          routines included:                           *
 !                                                                       *
-!   1. outmat     writes or reads transformation matrix                 *
-!   2. potent     sets up wavevector matrix, derivativ etc.             *
-!   3. potmat     determines w(r) matrix                                *
 !   4. potmin     function, determines minimum of potential             *
 !   4a. testpt     to print out potential as a function of r or theta   *
 !   4b. testptn   testpot for basistyp 1 and 4                          *
@@ -29,514 +26,7 @@ contains
 !                                                                       *
 !************************************************************************
 ! -----------------------------------------------------------------------
-subroutine outmat (tmat, eigold, hp, eshift, drnow, rnow, &
-                   n, nmax, itwo)
-!  subroutine to either write or read transformation matrix and
-!  relevant information from file FUNIT_TRANS_MAT
-!  called from spropn
-!  author:  millard alexander
-!  current revision date: 14-feb-91
-!  -------------------------------------------------------------------------
-!  variables in call list:
-!    tmat:     n x n matrix to contain transformation matrix
-!    eigold:   array of dimension n which contains local wavevectors
-!    hp:       array of dimension n which contains derivatives of hamiltonian
-!              matrix.  this is just the negative of the derivatives of the
-!              wavevector matrix
-!    eshift:   amount local wavevectors will be shifted in second energy
-!              calculation:  2         2
-!                           k (new) = k (old) + eshift
-!    drnow:    width of current interval
-!    rnow:     midpoint of current interval
-!    n:        number of channels
-!    nmax:     maximum row dimension of matrix tmat
-!    itwo:     if = 0, then subroutine called at first energy of multiple
-!              energy calculation, so transformation matrix and relevant
-!              information will be written
-!              if > 0, then subroutine called at subsequent energy of multiple
-!              energy calculation, so transformation matrix and relevant
-!              information will be read
-!  ------------------------------------------------------------------------
-use funit, only: FUNIT_TRANS_MAT
-implicit none
-real(8), intent(inout) :: tmat(nmax*n)
-real(8), intent(inout) :: eigold(n)
-real(8), intent(inout) :: hp(:)
-real(8), intent(in) :: eshift
-real(8), intent(inout) :: drnow
-real(8), intent(inout) :: rnow
-integer, intent(in) :: n
-integer, intent(in) :: nmax
-integer, intent(in) :: itwo
 
-integer :: i
-logical :: isecnd
-integer, parameter :: lunit = FUNIT_TRANS_MAT
-integer :: nsq 
-
-isecnd = .false.
-if (itwo .gt. 0) isecnd = .true.
-!  if first energy calculation, isecnd = .false.
-!    in which case logical unit lunit will be written
-!  if subsequent energy calculation, isecnd = .true.
-!    in which case logical unit lunit will be written
-!  read/write rnow, drnow, diagonal elements of transformed dw/dr matrix,
-!  and diagonal elements of transformed w matrix
-nsq = n * nmax
-if (isecnd) then
-  read (FUNIT_TRANS_MAT) rnow, drnow, (hp(i) , i = 1, n), &
-        (eigold(i) , i = 1, n), (tmat(i), i=1, nsq)
-else
-  write (FUNIT_TRANS_MAT) rnow, drnow, (hp(i) , i = 1, n), &
-        (eigold(i) , i = 1, n), (tmat(i), i=1, nsq)
-endif
-!  now shift energies (if subsequent energy)
-if (isecnd) then
-  do  i = 1, n
-    eigold(i) = eigold(i) + eshift
-  end do
-end if
-return
-end
-! ----------------------------------------------------------------------
-subroutine potent (w, vecnow, scmat, eignow, hp, scr, &
-   rnow, drnow, en, xlarge, nch, nmax, v2)
-! ----------------------------------------------------------------------
-!  this subroutine first sets up the wave-vector matrices:
-!    w = w[rnow + 0.5 drnow/sqrt(3)] and w = w[rnow - 0.5 drnow/sqrt(3)]
-!     b                                   a
-!  then diagonalizes the average; i.e. 0.5 (w  + w )
-!                                            b    a
-!  the radial derivative of the wavevector matrix is calculated by finite
-!  difference, using the nodes of a two-point gauss-legendre quadrature
-!              1/2
-!   d(w)/dr = 3    (w  - w ) / drnow
-!                    b    a
-!  this is then transformed into the local basis
-!  author:  millard alexander
-!  current revision date: 23-feb-2004
-! ---------------------------------------------------------------------
-!  variables in call list:
-!    w:        on return:  contains transform of dh/dr
-!                          this is the same as the negative of the
-!                          wn-tilde-prime matrix
-!    vecnow:   on return:  contains matrix of eigenvectors
-!    scmat:    scratch matrix
-!    eignow:   on return:  contains eigenvalues of wavevector matrix
-!    hp:       on return: contains diagonal elements of transformed dh/dh
-!                         this is the same as the negative of the diagonal
-!                         elements of the wn-tilde-prime matrix
-!    scr:      scratch vector
-!    rnow:     midpoint of the current interval
-!    drnow:    width of the current interval
-!    en:       total energy in atomic units
-!    xlarge:   on return contains largest off-diagonal element in
-!              wn-tilde-prime matrix
-!    nch:      number of channels
-!    nmax:     maximum row dimension of matrices and maximum dimension of
-!              vectors
-! ----------------------------------------------------------------------
-   use mod_ancou, only: ancou_type
-   use mod_hiutil, only: daxpy_wrapper, dsyevr_wrapper
-   use mod_hibrid1, only: dtrans
-   use mod_hibrid4, only: transp
-   implicit none
-!  square matrices (of row dimension nmax)
-real(8), dimension(nmax*nmax), intent(out) :: w
-real(8), dimension(nmax*nmax), intent(out) :: vecnow
-real(8), dimension(nmax*nmax), intent(out) :: scmat
-!  vectors dimensioned at least nch
-real(8), dimension(nmax), intent(out) :: eignow
-real(8), dimension(nmax), intent(out) :: hp
-real(8), dimension(nmax), intent(out) :: scr
-real(8), intent(in) :: rnow
-real(8), intent(in) :: drnow
-real(8), intent(in) :: en
-real(8), intent(out) :: xlarge
-integer, intent(in) :: nch
-integer, intent(in) :: nmax
-type(ancou_type), intent(in) :: v2
-
-!      real eignow, hp, scmat, scr, vecnow, w
-!      real drnow, en, fact, half, one, ra, rb, rnow, sq3, xlarge, xmin1
-integer icol, ierr, ipt, nrow
-!  local arrays (for lapack dsyevr)
-#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
-integer, dimension(2*nch) :: isuppz
-integer, dimension(10*nch) :: iwork
-real(8), dimension(57*nch) :: work
-#endif
-data ione / 1 /
-integer :: ione
-data one,xmin1,half,sq3 /1.d0,-1.d0,0.5d0,1.732050807568877d0/
-real(8) :: one, xmin1, half, sq3
-integer :: nmaxp1, nmaxm1
-real(8) :: ra, rb
-real(8) :: fact, abstol, vl, vu
-integer :: lwork, liwork, lsup, il, iu, m, I
-nmaxp1 = nmax + 1
-nmaxm1 = nmax - 1
-ra = rnow - half * drnow / sq3
-rb = rnow + half * drnow / sq3
-!  scmat is used to store the wavevector matrix at rb
-call potmat (w, ra, nch, nmax, v2)
-call potmat (scmat, rb, nch, nmax, v2)
-!  since potmat returns negative of lower triangle of w(r) matrix (eq.(3) of
-!  m.h. alexander, "hybrid quantum scattering algorithms ..."),
-!  next loop changes its sign
-ipt = 1
-do 100 icol = 1, nch
-!  nrow is the number of (diagonal plus subdiagonal) elements in column icol
-!  ipt points to the diagonal element in column icol for a matrix stored in
-!  packed column form
-  nrow = nch - icol + 1
-  call dscal (nrow, xmin1, w(ipt), 1)
-  call dscal (nrow, xmin1, scmat(ipt), 1)
-  ipt = ipt + nmaxp1
-100 continue
-!  next loop stores average wavevector matrix in scmat and derivative of
-!  hamiltonian matrix, in free basis, in w
-fact =  - sq3 / drnow
-!  the additional minus sign in the preceding expression is introduced because
-!  dh/dr =-dw/dr;  see eq.(9) of
-!  m.h. alexander, "hybrid quantum scattering algorithms ..."
-ipt = 1
-do 105 icol = 1, nch
-!  nrow is the number of (diagonal plus subdiagonal) elements in column icol
-!  ipt points to the diagonal element in column icol for a matrix stored in
-!  packed column form
-!  hp and scr are used as scratch vectors here
-  nrow = nch - icol + 1
-  call dcopy (nrow, scmat(ipt), 1, scr, 1)
-  call daxpy_wrapper (nrow, one, w(ipt), 1, scmat(ipt), 1)
-  call daxpy_wrapper (nrow, xmin1, w(ipt), 1, scr, 1)
-  call dscal (nrow, half, scmat(ipt), 1)
-  call dscal (nrow, fact, scr, 1)
-  call dcopy (nrow, scr, 1, w(ipt), 1)
-  ipt = ipt + nmaxp1
-105 continue
-!  next loop fills in upper triangles of w and scmat
-if (nch .gt. 1) then
-  ipt = 2
-  do 110 icol = 1, nch -1
-!  ipt points to the first subdiagonal element in column icol
-!  nrow is the number of subdiagonal elements in column icol
-    nrow = nch - icol
-    call dcopy (nrow, w(ipt), 1, w(ipt + nmaxm1), nmax)
-    call dcopy (nrow, scmat(ipt), 1, scmat(ipt + nmaxm1), nmax)
-    ipt = ipt + nmaxp1
-110   continue
-end if
-! ----------------------------------------------------------------------
-!  diagonalize scmat at rnow and transpose matrix of eigenvectors
-!  after transposition, the vecnow matrix is identical to the tn matrix
-!  of eq.(6) of m.h. alexander, "hybrid quantum scattering algorithms ..."
-!  now call eispack eigenvalue and eigenvector routine (hp is used as
-!  a scratch vector here)
-#if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-call rs (nmax, nch, scmat, eignow, ione, vecnow, scr, hp, ierr)
-#endif
-#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
-lwork=57*nch
-liwork=10*nch
-abstol=1.d-16
-lsup=2*nch
-vl = 0.0
-vu = 0.0
-
-call dsyevr_wrapper('V','A','L',nch,scmat,nmax,vl,vu,il,iu,abstol,m, &
-   eignow,vecnow,nmax,isuppz,work,lwork,iwork,liwork,ierr)
-#endif
-if (ierr .ne. 0) then
-  write (6, 115) ierr
-  write (9, 115) ierr
-115   format (' *** IERR =',i3,' IN AIRPRP/POTENT/RS;  ABORT ***')
-  write (9, 120) (eignow (i), i=1, nch)
-120   format (' EIGENVALUES ARE:',/,8(1pe16.8) )
-  call exit
-end if
-call transp (vecnow, nch, nmax)
-!  transform the derivative into the local basis
-!  subroutine dtrans returns the negative of the wn-tilde-prime matrix;
-!  eq.(9) of m.h. alexander, "hybrid quantum scattering algorithms ..."
-call dtrans (w, vecnow, scmat, hp, xlarge, nch, nmax, ione)
-return
-end
-
-!#define ANCOUMA_READ_USE_ASSOCIATE
-
-#define ANCOUMA_READ_METHOD_NORMAL 0
-#define ANCOUMA_READ_METHOD_INLINE_LEVEL1 1
-#define ANCOUMA_READ_METHOD_INLINE_LEVEL2 2
-#define ANCOUMA_READ_METHOD_INLINE_LEVEL3 3
-
-#define ANCOUMA_READ_METHOD ANCOUMA_READ_METHOD_INLINE_LEVEL3
-
-
-#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL1)
-
-#define ANCOUMA_GET_ELEMENT(ancouma, element_index, ij, vee) \
-ij = ancouma%v2i%get_element(iv2_element) ; \
-vee = ancouma%v2d%get_element(iv2_element)
-
-#endif
-
-! ------------------------------------------------------------------------
-subroutine potmat (w, r, nch, nmax, v2)
-!  determine negative of lower triangle of w(r) matrix.  see eq. (3) of
-!  m.h. alexander, "hybrid quantum scattering algorithms ..."
-!  author:  millard alexander
-!  latest revision date:  24-apr-1997 by mha
-!  -------------------------------------------------------------------
-!  variables in call list:
-!    w:        matrix of maximum row dimension nmax
-!              on output contains negative of lower triangle of w(r)
-!    r:        value of interparticle distance at which -w(r) is to
-!              be evaluated
-!    nch:      actual size of matrix w
-!    nmax:     maximum row and column dimension of matrix w
-!   lamnum:     number of non-zero v2 matrix elements for each lambda
-
-!  variables in common block /copmat/
-!    rtmn,rtmx: minimum and maximum turning points (not used here)
-!    iflag:     variable used in determination of turning points (not used her
-!           iflag = 0 if all channels are in classically forbidden region
-!           iflag = 1 if some channels are open
-!           iflag = 2 if all asymptotically open channels are open at r
-!  subroutines called:
-!    pot:      returns r-dependence of each angular term in the potential
-!    daxpy:    blas routine
-!    vsmul:    multiplies vector by scalar and stores result in another
-!              vector
-!  -------------------------------------------------------------------
-use mod_ancou, only: ancou_type, ancouma_type
-use mod_cocent, only: cent
-use mod_coeint, only: eint
-use mod_covvl, only: vvl
-use mod_grovec, only: igrovec_type_block, dgrovec_type_block
-use mod_hiba10_22p, only: trans22
-use mod_selb, only: ibasty
-use mod_ered, only: ered, rmu
-use mod_pmat, only: rtmn, rtmx, iflag
-use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
-implicit none
-real(8) :: second
-real(8), dimension(*), intent(out) :: w
-real(8), intent(in) :: r
-integer, intent(in) :: nch
-integer, intent(in) :: nmax
-type(ancou_type), intent(in) :: v2
-
-integer i, ilam
-integer :: iv2_element
-integer :: ij
-integer :: num_nz_elements
-real(8) :: vee
-
-type(ancouma_type), pointer :: ancouma
-
-#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL2) || (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL3)
-integer :: block_size
-integer :: block_index
-integer :: el_index_in_block
-#endif
-
-#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL3)
-integer :: num_full_blocks
-integer :: num_remaining_nz_elements
-type(igrovec_type_block), pointer :: blocki
-type(dgrovec_type_block), pointer :: blockd
-#endif
-
-real(8), parameter :: zero = 0.d0
-real(8), parameter :: one = 1.d0
-real(8), parameter :: two = 2.d0
-
-integer :: icol, icolpt, ioff, ipt, irowpt, iwpt, ncol, nmaxp1
-real(8) :: r2, twormu, vv0, wmax, wmin
-
-
-!ABER only for testing potential-matrix
-!     if (r.le.3.41) icount=0
-!ABER
-!  calculate coefficients of each angular term
-cpupot=cpupot-second()
-call pot( vv0, r)
-
-!  vv0 is the isotropic term in the potential
-!  the coefficients for each angular term in the coupling potential
-!  [ vvl(i) for i = 1, nlam ] are returned in common block vvlcontains
-!  multiply all vvl terms by twice the reduced mass
-twormu = two * rmu
-call dscal(v2%nlam, twormu, vvl, 1)
-!  now loop over angular coupling matrix to calculate the potential matrix
-!    w(ij) = 2 * rmu * vv0 + sum [ 2 * rmu * vvl(ilam) * v2(ij,ilam) ]
-!  first zero out lower triangle of potential matrix
-#if defined(ISSUE49_IS_FIXED)
-iwpt = 1
-do 20 icol = 1, nch
-  ncol = nch - icol + 1
-  call dset(ncol, zero, w(iwpt), 1)
-  iwpt = iwpt + nmax + 1
-20    continue
-#else
-! although w is a lower triangular matrix, initialize both upper and
-! lower part of it as some code is still treating it as full and therefore
-! reading uninitialized values
-iwpt = 1
-ncol = nch
-do icol = 1, nch
-  call dset(ncol, zero, w(iwpt), 1)
-  iwpt = iwpt + nmax
-end do
-#endif
-ioff = 0
-
-!ABER
-!       call druckq(w,nmax,nch,'potential matrix',icount)
-!ABER
-if (v2%nlam .gt. 0) then
-  do ilam = 1, v2%nlam
-      ! write(6,*) 'ilam=', ilam, 'v2%get_angular_coupling_matrix(ilam)%get_num_nonzero_elements()=', v2%get_angular_coupling_matrix(ilam)%get_num_nonzero_elements()
-      !ancouma => v2%ancouma(ilam)
-#if defined(ANCOUMA_READ_USE_ASSOCIATE)
-      associate( ancouma => v2%get_angular_coupling_matrix(ilam) )
-#else
-      ancouma => v2%get_angular_coupling_matrix(ilam)
-#endif
-      num_nz_elements = ancouma%get_num_nonzero_elements()
-      ASSERT(num_nz_elements >= 0)
-
-#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_NORMAL )
-      do iv2_element = 1, num_nz_elements
-        call ancouma%get_element(iv2_element, ij, vee)  
-        w(ij) = w(ij) + vee * vvl(ilam)
-      end do
-#endif
-
-#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL1)
-      do iv2_element = 1, num_nz_elements
-        ANCOUMA_GET_ELEMENT(ancouma, iv2_element, ij, vee)
-        w(ij) = w(ij) + vee * vvl(ilam)
-      end do
-#endif
-
-#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL2)
-      block_size = ancouma%v2i%block_size
-      do iv2_element = 1, num_nz_elements
-        block_index =  (iv2_element-1) / block_size
-        el_index_in_block = iv2_element - 1 - (block_index * block_size)
-        ij = ancouma%v2i%blocks(block_index)%p(el_index_in_block)
-        vee = ancouma%v2d%blocks(block_index)%p(el_index_in_block)
-
-        w(ij) = w(ij) + vee * vvl(ilam)
-      end do
-#endif
-
-#if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL3)
-      !1023 -> 0
-      !1024 -> 1
-      !1025 -> 1 
-      block_size = ancouma%v2i%block_size
-      num_full_blocks = ((num_nz_elements - 1) / block_size)
-      iv2_element = 0
-      do block_index = 0, num_full_blocks-1
-        blocki => ancouma%v2i%blocks(block_index)
-        blockd => ancouma%v2d%blocks(block_index)
-        do el_index_in_block = 0, block_size-1
-          ij = blocki%p(el_index_in_block)
-          vee = blockd%p(el_index_in_block)
-          iv2_element = iv2_element + 1
-          w(ij) = w(ij) + vee * vvl(ilam)
-        end do
-      end do
-      num_remaining_nz_elements = num_nz_elements - iv2_element
-      if (num_remaining_nz_elements > 0) then
-        blocki => ancouma%v2i%blocks(num_full_blocks)
-        blockd => ancouma%v2d%blocks(num_full_blocks)
-        do el_index_in_block = 0, num_remaining_nz_elements-1
-          ij = blocki%p(el_index_in_block)
-          vee = blockd%p(el_index_in_block)
-          iv2_element = iv2_element + 1
-          w(ij) = w(ij) + vee * vvl(ilam)
-        end do
-      end if
-#endif
-
-#if defined(ANCOUMA_READ_USE_ASSOCIATE)
-      end associate
-#endif
-
-  end do
-endif
-!ABER
-!       call druckq(w,nmax,nch,'potential matrix',icount)
-!ABER
-!  now add on isotropic term plus centrifugal barrier and subtract wavevectors
-!  from diagonal terms
-r2 = 1.d0 / ( r * r )
-ipt = 1
-do i = 1, nch
-  w(ipt) = w(ipt) + twormu * ( vv0  - (ered - eint(i)) ) &
-           + r2 * cent(i)
-  ipt = ipt + nmax + 1
-end do
-
-!ABER
-!       call druckq(w,nmax,nch,'potential matrix',icount)
-!ABER
-!  look for innermost and outermost turning points
-wmax = - 1.e+20
-wmin = - wmax
-ipt = 1
-do i = 1, nch
-  if (w(ipt) .lt. wmin) wmin = w(ipt)
-  !  ignore closed channels
-  if (eint(i) .lt. ered) then
-    if (w(ipt) .gt. wmax) wmax = w(ipt)
-  end if
-  ipt = ipt+ nmax + 1
-end do
-if (iflag .ge. 2) go to 70
-if (wmin .gt. zero) go to 90
-if (iflag - 1) 60, 65, 90
-60 iflag = 1
-rtmn = r
-go to 90
-65 if (wmax .gt. zero) go to 90
-iflag = 2
-rtmx = r
-!  check that no centrifugal barrier is present
-70 if (wmin .lt. zero) go to 75
-rtmn = r
-75 if (wmax .lt. zero) go to 90
-rtmx = r
-90 continue
-
-cpupot=cpupot+second()
-! here for 2s-2p scattering
-! fill in upper triangle of w matrix
-!  first fill in upper half of original matrix
-if (ibasty .eq. 10) then
-
-  nmaxp1 = nmax + 1
-  icolpt = 2
-  irowpt = nmaxp1
-  do icol = 1, nch - 1
-!  icolpt points to first sub-diagonal element in column icol
-!  irowpt points to first super-diagonal element in row icol
-!  ncol is number of subdiagonal elements in column icol
-    ncol = nch - icol
-    call dcopy (ncol, w(icolpt), 1, w(irowpt), nmax)
-    icolpt = icolpt + nmaxp1
-    irowpt = irowpt + nmaxp1
-  end do
-!  transform w matrix into case e basis
-  call trans22(w,nch, nmax)
-endif
-
-return
-end
 ! -------------------------------------------------------------------------
 subroutine druckq(w,n,m,string)
 implicit double precision (a-h,o-z)
@@ -981,6 +471,13 @@ use mod_phot, only: photof, wavefn, boundf, writs
 use mod_surf, only: flagsu
 use mod_hiutil, only: daxpy_wrapper
 use mod_hiutil, only: mtime
+use mod_himatrix, only: mxma
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
+use mod_himatrix, only: syminv
+#endif
+use mod_hivector, only: dset, matmov
+use mod_hibrid1, only: potmat
+
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: z(nmax*nch)
 integer, intent(in) :: nmax
@@ -2050,6 +1547,7 @@ subroutine psiasy(fj,fn,unit,sr,si,psir,psii,nopen,nmax)
 ! ----------------------------------------------------------------------------
 use mod_phot, only: photof, wavefn, boundf, writs
 use mod_hiutil, only: daxpy_wrapper
+use mod_hivector, only: matmov
 implicit double precision (a-h,o-z)
 dimension fj(1), fn(1), unit(1), sr(nmax,nmax), si(nmax,nmax), &
           psii(nmax,nmax), psir(nmax,nmax)
@@ -2194,7 +1692,14 @@ use mod_surf, only: flagsu
 use mod_hiutil, only: gennam
 use mod_hiutil, only: daxpy_wrapper
 use mod_hibrid1, only: cbesj, cbesn
-use mod_hibrid4, only: transp
+use mod_himatrix, only: transp
+use mod_hivector, only: matmov, vsmul, vmul
+#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
+use mod_himatrix, only: mxma
+#endif
+#if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
+use mod_himatrix, only: syminv
+#endif
 
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax, nmax), intent(inout) :: tmod
@@ -2365,10 +1870,10 @@ call mxma (tmod, 1, nmax, si, 1, nmax, sr, 1, nmax, &
 !  t-matrix
 !  now calculate t-squared
 do 90  icol = 1, nopen
-  call vmul (sr(1,icol), 1, sr(1,icol), 1,tmod(1,icol), 1, &
+  call vmul (sr(:,icol), 1, sr(:,icol), 1,tmod(:,icol), 1, &
              nopen)
 !  tmod now contains (s-real - del)**2
-  call vmul (si(1,icol), 1, si(1,icol), 1, scmat(1,icol), 1, &
+  call vmul (si(:,icol), 1, si(:,icol), 1, scmat(:,icol), 1, &
              nopen)
 !  scmat now contains s-imag **2
 !  now add s-imag**2 to (s-real - del)**2
@@ -2804,6 +2309,7 @@ subroutine expand(ncol,nopen,nch,nmax,ipack,sr,si,bmat)
 ! bmat      scratch matrix
 !  ---------------------------------------------------------------------------
 use mod_par, only: photof
+use mod_hivector, only: dset, matmov
 implicit double precision (a-h,o-z)
 dimension sr(nopen,nopen),si(nopen,nopen), &
           bmat(nmax,nmax),ipack(15)

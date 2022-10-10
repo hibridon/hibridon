@@ -55,6 +55,7 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_trn, only: spin, maxjt, njmax, jpmax
 use mod_hiutil, only: gennam, mtime, dater
+use mod_hismat, only: rdhead, sinqr
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  trnfil, smtfil
@@ -292,11 +293,12 @@ use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cow, only: simag => w_as_vec ! simag(1)
 use mod_hibrid2, only: mxoutd
-use mod_hibrid5, only: sread
+use mod_hismat, only: sread
 use mod_par, only: batch, ipos
 use mod_trn, only: spin, maxjt, njmax
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j
+use mod_hismat, only: sread
 implicit double precision (a-h,o-z)
 complex*8 t, tp
 logical diag, diagp
@@ -621,13 +623,14 @@ use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cow, only: simag => w_as_vec ! simag(1)
 use mod_hibrid2, only: mxoutd
-use mod_hibrid5, only: sread
+use mod_hismat, only: sread
 use mod_hibasis, only: is_j12, is_twomol
 use mod_par, only: batch, ipos
 use mod_selb, only: ibasty
 use mod_trn, only: spin, maxjt, njmax
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j
+use mod_hismat, only: sread
 implicit double precision (a-h,o-z)
 complex*8 t, tp
 logical diag, diagp, &
