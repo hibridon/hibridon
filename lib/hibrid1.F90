@@ -1198,7 +1198,7 @@ type(ancou_type), intent(in) :: v2
 !      real rnow, xmin1
 !      real eignow, w
 integer, parameter :: ldz = 1
-integer icol, ierr, ipt, nch, nmax, nmaxm1, nmaxp1, nrow
+integer icol, ierr, ipt, nmaxm1, nmaxp1, nrow
 real(8), dimension(ldz, nch):: vecnow_unused   ! this is the z array that dsyevr wants, even if it's not used when jobz = 'N'
 external dscal, dcopy
 !     external dscal, dcopy, potmat, tred1, tqlrat
