@@ -1,3 +1,4 @@
+#include "hiutil.inc.F90"
 ! ------------------------------------------------------------------
 module mod_hitrnprt
 contains
@@ -71,7 +72,7 @@ data  tol,   zero,   nstep &
 ! initialize timer
 call mtime(cpu0,ela0)
 ! input
-iener = a(1)
+iener = nint(a(1))
 if (iener.le. 0) iener = 1
 !
 ! generate filename and check if it is present
@@ -318,10 +319,13 @@ dimension f36j(0:2)
 !   subscripts:  jtot, jlp (=1/2 for jlpar = +1/-1), length of channel basis
 ! sigma: array to hold transport cross sections
 double precision, dimension(:, :, :), allocatable :: &
-     sr, si, j, in, l, sigma
+     sr, si, sigma
+integer, allocatable :: in(:,:,:)
+integer, allocatable :: j(:,:,:)
+integer, allocatable :: l(:,:,:)
 ! length of arrays
 !   subscripts:  jtot, jlp (=1/2 for jlpar = +1/-1)
-double precision, dimension(:, :), allocatable :: length
+integer, dimension(:, :), allocatable :: length
 !
 onesix = 1.d0/6.d0
 twothr = 2.d0/3.d0
@@ -505,31 +509,31 @@ do jtot = jfirst, maxjt
                     - 0.5d0*(xl1 - xl1p + xl2 - xl2p))
                 if ((ipower/2)*2 .ne. ipower) phase = -1.d0
 ! get T-matrix elements
-                t = - cmplx(sr(jtot,jlp,ii), si(jtot,jlp,ii))
+                t = - cmplx(sr(jtot,jlp,ii), si(jtot,jlp,ii), 8)
 !                      if (diag .and. (l1.eq.l2))
                 if (diag) &
-                    t = (1.d0, 0.d0) + t
-                tp=-cmplx(sr(jtotp,jlpp,iip),si(jtotp,jlpp,iip))
+                    t = cmplx(1.d0, 0.d0, 8) + t
+                tp=-cmplx(sr(jtotp,jlpp,iip),si(jtotp,jlpp,iip),8)
 !                      if (diagp .and. (l1p.eq.l2p))
                 if (diagp) &
-                     tp = (1.d0, 0.d0) + tp
+                     tp = cmplx(1.d0, 0.d0, 8) + tp
                 factor = phase * facjjp * sl1 * sl2 * sl1p &
                     * sl2p * real(t*conjg(tp))/(2.d0*xj1 + 1.d0)
 !
 ! loop over k
-                do 100 k = 0, 2
+                do k = 0, 2
                   xk = k
                   f36j(k) = 0.d0
                   x1 = xf3j(xl1,xl1p,xk,0.d0,0.d0,0.d0)
-                  if (x1 .eq. 0.d0) goto 100
+                  if (IS_EXACTLY_ZERO(x1)) cycle
                   x2 = xf3j(xl2,xl2p,xk,0.d0,0.d0,0.d0)
-                  if (x2 .eq. 0.d0) goto 100
+                  if (IS_EXACTLY_ZERO(x2)) cycle
                   x3 = xf6j(xl1,xjtot,xj1,xjtotp,xl1p,xk)
-                  if (x3 .eq. 0.d0) goto 100
+                  if (IS_EXACTLY_ZERO(x3)) cycle
                   x4 = xf6j(xl2,xjtot,xj2,xjtotp,xl2p,xk)
-                  if (x4 .eq. 0.d0) goto 100
+                  if (IS_EXACTLY_ZERO(x4)) cycle
                   f36j(k) = factor * x1*x2*x3*x4*(-1.d0)**k
-100                 continue
+                end do
                 epove = etcol/etrow
 !
 ! N = 1
@@ -632,7 +636,7 @@ use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j
 use mod_hismat, only: sread
 implicit double precision (a-h,o-z)
-complex*8 t, tp
+complex(8) t, tp
 logical diag, diagp, &
   flaghf
 character*10 elaps, cpu
@@ -651,12 +655,16 @@ dimension f36j(0:2)
 !   subscripts:  jtot, jlp (=1/2 for jlpar = +1/-1), length of channel basis
 ! sigma: array to hold transport cross sections
 double precision, dimension(:, :, :), allocatable :: &
-     sr, si, j, in, l, jj12, sigma &
+     sr, si, sigma &
   , plam
-!
+integer, allocatable :: in(:,:,:)
+integer, allocatable :: j(:,:,:)
+integer, allocatable :: jj12(:,:,:)
+integer, allocatable :: l(:,:,:)
+
 ! length of arrays
 !   subscripts:  jtot, jlp (=1/2 for jlpar = +1/-1)
-double precision, dimension(:, :), allocatable :: length
+integer, dimension(:, :), allocatable :: length
 !
 onesix = 1.d0/6.d0
 twothr = 2.d0/3.d0
@@ -785,7 +793,7 @@ goto 20
         do 400 irow = 1, length(jtot,jlp)
           if (is_twomol(ibasty)) then
             j1_i = j(jtot,jlp,irow)/10
-            j2_i = mod(j(jtot,jlp,irow),10.d0)
+            j2_i = mod(j(jtot,jlp,irow),10)
           end if
           if (.not. is_twomol(ibasty) .and. is_j12(ibasty)) then
             j1_i = j(jtot,jlp,irow)
@@ -824,8 +832,8 @@ goto 20
 ! check for diagonal S matrix element
             diag = irow .eq. icol
             do 84 ij = 1, njmax
-              if (int(j(jtot,jlp,icol)) .ne. jslist(ij)) goto 84
-              if (int(in(jtot,jlp,icol)) .ne. inlist(ij)) goto 84
+              if (j(jtot,jlp,icol) .ne. jslist(ij)) goto 84
+              if (in(jtot,jlp,icol) .ne. inlist(ij)) goto 84
               ic = ij
               etcol = etrans(ij)
               goto 85
@@ -876,10 +884,10 @@ goto 20
                     - 0.5d0*(xl1 - xl1p + xl2 - xl2p))
                 if ((ipower/2)*2 .ne. ipower) phase = -1.d0
 ! get T-matrix elements
-                t = - cmplx(sr(jtot,jlp,ii), si(jtot,jlp,ii))
+                t = - cmplx(sr(jtot,jlp,ii), si(jtot,jlp,ii),8)
                 if (diag) &
                     t = (1.d0, 0.d0) + t
-                tp = -cmplx(sr(jtotp,jlpp,iip),si(jtotp,jlpp,iip))
+                tp = -cmplx(sr(jtotp,jlpp,iip),si(jtotp,jlpp,iip), 8)
                 if (diagp) &
                      tp = (1.d0, 0.d0) + tp
                 factor = phase * facjjp * sl1 * sl2 * sl1p &
@@ -887,21 +895,22 @@ goto 20
                     / ((2.d0*xj1_i + 1.d0) * (2.d0*xj2_i + 1.d0))
 !
 ! loop over k
-                do 100 k = 0, 2
+                do k = 0, 2
                   xk = k
                   f36j(k) = 0.d0
+                  
                   x1 = xf3j(xl1,xl1p,xk,0.d0,0.d0,0.d0)
-                  if (x1 .eq. 0.d0) goto 100
+                  if (IS_EXACTLY_ZERO(x1)) cycle
                   x2 = xf3j(xl2,xl2p,xk,0.d0,0.d0,0.d0)
-                  if (x2 .eq. 0.d0) goto 100
+                  if (IS_EXACTLY_ZERO(x2)) cycle
                   x3 = xf6j(xl1,xjtot,xj1,xjtotp,xl1p,xk)
-                  if (x3 .eq. 0.d0) goto 100
+                  if (IS_EXACTLY_ZERO(x3)) cycle
                   x4 = xf6j(xl2,xjtot,xj2,xjtotp,xl2p,xk)
-                  if (x4 .eq. 0.d0) goto 100
+                  if (IS_EXACTLY_ZERO(x4)) cycle
                   f36j(k) = factor * x1*x2*x3*x4*(-1.d0)**k
                   if (iplmt.eq.1) plam(ic,ir,k+1) &
                     = plam(ic,ir,k+1) + f36j(k)
-100                 continue
+                end do
                 epove = etcol/etrow
 !
 ! N = 1
