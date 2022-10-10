@@ -134,6 +134,7 @@ use mod_ered, only: ered, rmu
 use mod_phot, only: photof, wavefn, boundf
 use mod_surf, only: flagsu
 use mod_hiutil, only: dater
+use mod_hibrid4, only: transp
 implicit double precision (a-h,o-z)
 real(8), intent(inout) :: tsq(nmax,nmax)
 real(8), intent(inout) :: sr(nmax,nmax)

@@ -1,3 +1,5 @@
+module mod_hibrid1
+contains
 !************************************************************************
 !                                                                       *
 !                         hibridon 1  library                           *
@@ -93,6 +95,7 @@ use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_phot, only: photof, wavefn, boundf, writs
 use mod_hiutil, only: daxpy_wrapper
+use mod_hibrid4, only: wavevc, spropn, steppr, transp
 implicit double precision (a-h, o-z)
 !  matrix dimensions (row dimension = nmax, matrices stored column by column)
 real(8), dimension(nmax*nmax), intent(inout) :: z
@@ -1203,3 +1206,4 @@ ermrel=100.d0*ermrel
 return
 end
 !  -------------------------------------------------------------
+end module mod_hibrid1

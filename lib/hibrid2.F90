@@ -686,6 +686,7 @@ end
 subroutine aver1 (zmat, scmat, n)
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
+use mod_hibrid4, only: transp
 implicit double precision (a-h,o-z)
 !  subroutine to sum and average cross section matrix over positive
 !  and negative values of index
@@ -723,6 +724,7 @@ use mod_cojhld, only: jlev => jhold ! jlev(4)
 use mod_cosc1, only: elev => sc1 ! elev(4)
 use mod_coisc1, only: inlev => isc1 ! inlev(4)
 use mod_selb, only: ibasty
+use mod_hibrid4, only: transp
 
 implicit double precision (a-h,o-z)
 !      current revision date: 16-dec-2007
@@ -1265,6 +1267,7 @@ end
 subroutine aver2 (zmat, scmat, n)
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
+use mod_hibrid4, only: transp
 
 implicit double precision (a-h,o-z)
 !  subroutine to sum and average cross section matrix over positive
@@ -1303,6 +1306,7 @@ use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_par, only: flaghf, ihomo, ipos
+use mod_hibrid4, only: transp
 implicit double precision (a-h,o-z)
 
 !  current revision date:  10-oct-2001 by ab

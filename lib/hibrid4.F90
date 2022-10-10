@@ -1,3 +1,5 @@
+module mod_hibrid4
+contains
 #include "assert.h"
 !***********************************************************************
 !                                                                       *
@@ -18,7 +20,7 @@
 !   7. wavevc         sets up wavevector matrix and diagonalizes it     *
 !   8. xwrite         subroutine to write out integral cross sections   *
 !   9. waverd         writes and reads header file for wavefunction     *
-!  10. psiasym/psi    to determine wavefunction
+!  10. psi            to determine wavefunction
 !  11. flux           to determine fluxes
 !  12. transmt        print out transformation matrix at rout
 !************************************************************************
@@ -1186,7 +1188,6 @@ real(8), intent(out) :: rstart
 real(8), intent(out) :: rendld
 real(8), intent(out) :: rinf
 
-integer(8) :: iwavsk
 
 character*48 :: oldlab, oldpot
 character*20 :: olddat
@@ -1298,109 +1299,6 @@ return
 call exit
 return
 !
-end
-! ----------------------------------------------------------------------
-subroutine psiasy(fj,fn,unit,sr,si,psir,psii,nopen,nmax)
-! subroutine to determine real and imaginary part of asymptotic wavefunction o
-! derivative of these
-!  asmptotically, in the case of inelastic scattering, the wavefunction is
-!  exp[-i(kr-l pi/2)] - S exp[i(kr-l pi/2)]
-!  whereas in the case of photodissociation,
-!  exp[-i(kr-l pi/2)] S - exp[i(kr-l pi/2)]
-!  this is equivalent to, in the case of inelastic scattering
-!  - yl (1-Sr) + jl Si + i [-jl(1+Sr)+yl Si]
-!  and, for photodissociation,
-!   yl (1-Sr) + jl Si + i [-jl(1+Sr)-yl Si]
-!  written by:  millard alexander
-!  current revision date:  16-jun-1990
-! ---------------------------------------------------------------------
-!  variables in call list:
-!    fj             contains (for wavefunction calculation) the normalized
-!                   ricatti bessel function jl
-!                   contains (for derivative calculation) the derivative with
-!                   respect to r of the normalized ricatti bessel function jl
-!    fn             contains (for wavefunction calculation) the normalized
-!                   ricatti bessel function yl
-!                   contains (for derivative calculation) the derivative with
-!                   respect to r of the normalized ricatti bessel function yl
-!    unit           scratch vector
-!    sr, si         matrices of order nmax x nmax which contain
-!                   on input: real and imaginary parts of s-matrix
-!                   on return: real and imaginary parts of asymptotic
-!                   wavefunction
-!    psir           on return contains nopen x nopen real part of
-!                   asymptotic wavefunction (or derivative)
-!    psii           on return contains nopen x nopen imag part of asymptotic
-!                   wavefunction (or derivative)
-!
-!    nopen          number of open channels
-!    nmax           row dimension of matrices
-! ----------------------------------------------------------------------------
-use mod_phot, only: photof, wavefn, boundf, writs
-use mod_hiutil, only: daxpy_wrapper
-implicit double precision (a-h,o-z)
-dimension fj(1), fn(1), unit(1), sr(nmax,nmax), si(nmax,nmax), &
-          psii(nmax,nmax), psir(nmax,nmax)
-one=1.d0
-onemin=-1.d0
-!   put unit vector into array unit
-do 80  icol = 1, nopen
-  unit(icol) = one
-80 continue
-! first we want to calculate real part of wavefunction at infinity
-! that is   yl(kr) (Sr-1) + jl(kr) Si for scattering or
-!         - yl(kr) (Sr-1) + jl(kr) Si for photodissociation
-! first move Sreal into psii
-  call matmov (sr, psii, nopen, nopen, nmax, nmax)
-! now subtract unit matrix
-  call daxpy_wrapper (nopen, onemin, unit, 1, psii(1, 1), nmax + 1)
-! now premultiply by diagonal matrix -yl(kr) for photodissociation or
-! +yl(kr) for scattering
-  do 130 irow = 1, nopen
-    fac=one*fn(irow)
-    if (photof) fac=-fac
-    call dscal(nopen, fac, psii(irow,1), nmax)
-130   continue
-! now store simag in psir
-  call matmov(si, psir, nopen, nopen, nmax, nmax)
-! premultiply by diagonal matrix jl(kr)
-  do 140 irow = 1, nopen
-    call dscal(nopen, fj(irow), psir(irow,1), nmax)
-140   continue
-! now evaluate +/- yl(kr) (Sr-1) + jl(kR) Si, save in psir
-  do 150 icol = 1, nopen
-    call daxpy_wrapper(nopen, one, psii(1, icol), 1, psir(1,icol), 1)
-150   continue
-! psir now contains real part of asymptotic scattering wavefunction
-! now compute imaginary part of asymptotic wavefunction
-! that is - jl(kr) (1+Sr) + yl(kr) Si for scattering or
-!         - jl(kr) (1+Sr) - yl(kr) Si for photodissociation
-! now move Sreal into psii
-  call matmov (sr, psii, nopen, nopen, nmax, nmax)
-! now add unit matrix
-  call daxpy_wrapper (nopen, one, unit, 1, psii(1, 1), nmax + 1)
-! now premultiply by diagonal matrix -jl(kr)
-  do 157 irow = 1, nopen
-    fac=-fj(irow)
-    call dscal(nopen, fac, psii(irow,1), nmax)
-157   continue
-! replace real part of s matrix by real part of asymptotic wavefunction
-  call matmov(psir,sr,nopen, nopen, nmax, nmax)
-! premultiply Simag by diagonal matrix yl(kr) for scattering or by
-! -yl(kr) for photodissociation
-  do 159 irow = 1, nopen
-    fac=fn(irow)
-    if (photof) fac=-fac
-    call dscal(nopen, fac, si(irow,1), nmax)
-159   continue
-! now evaluate - jl(kr) (1+Sr) +/- yl(kR) Si, save in psii
-  do 161 icol = 1, nopen
-    call daxpy_wrapper(nopen, one, si(1, icol), 1, psii(1,icol), 1)
-161   continue
-! replace imaginary part of s matrix by imaginary part of
-! asymptotic wavefunction
-  call matmov(psii,si,nopen, nopen, nmax, nmax)
-return
 end
 ! ------------------------------------------------------------------
 subroutine psi(filnam,a)
@@ -2413,7 +2311,6 @@ dimension scc(100)
 data zero, one, onemin /0.d0, 1.d0, -1.d0/
 data ione, mone /1,-1/
 integer :: psifil_unit
-integer(8) :: iwavsk
 ! if propf = true then true back-subsititution for flux
 ! if propf = false then inward propagation
 ! noffset is start of 5th column of psir
@@ -2714,7 +2611,6 @@ implicit none
 integer, intent(in) :: npts
 integer, intent(in) :: nch
 integer, intent(in) :: nj
-integer(8) :: iwavsk 
 integer :: i, nni
 integer :: kstep
 real(8) :: r
@@ -2802,7 +2698,6 @@ integer, intent(in) :: nch
 integer, intent(in) :: nchsq
 integer, intent(in) :: nj
 integer, intent(in) :: psifil_unit
-integer(8) :: iwavsk
 integer :: i, kstep
 real(8) :: drnow, r
   irec=npts+4
@@ -2844,7 +2739,6 @@ use mod_cow, only: sr => w_as_vec ! sr(100)
 use mod_cozmat, only: si => zmat_as_vec ! si(100)
 use mod_wave, only: irec, ifil
 implicit double precision (a-h,o-z)
-integer(8) :: iwavsk
 logical renormf
 dimension scrvec(64)
 irec=npts+4
@@ -2978,7 +2872,6 @@ character*(*), intent(in) :: filnam
 integer, intent(in) :: nchmin
 integer, intent(inout) :: nchmax
 
-integer(8) :: iwavsk
 integer :: i, j
 integer :: jtot, jlpar, nu, nch, npts, nopen, nphoto
 integer(8) :: noffst
@@ -3044,3 +2937,4 @@ goto 990
 close(eadfil_unit)
 return
 end
+end module mod_hibrid4

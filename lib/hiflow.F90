@@ -62,6 +62,7 @@ use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
 #endif
 use mod_opti, only: optifl
 use mod_hiutil, only: mtime, gettim, dater
+use mod_hibrid4, only: wavewr
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
