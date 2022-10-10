@@ -2106,8 +2106,8 @@ real(8), dimension(nopen) :: dern
 integer isw, i, icol, l
 #if defined(HIB_UNIX_IBM)
 character*1 forma
-character*40 flxfil
 #endif
+character*40 flxfil
 !     The following three variables are used to determine the (machine
 !     dependent) size of built-in types
 integer int_t
