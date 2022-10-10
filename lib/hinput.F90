@@ -115,7 +115,7 @@ module mod_hinput
     k_keyword_execute_command_mgr_command     =  6   !   45 label:execute_command_mgr_command(i)
   end enum
 
-  integer, parameter :: ncode = 40  !  ncode is the number of bcod's
+  integer, parameter :: ncode = 31  !  ncode is the number of bcod's
   character(len=8), parameter :: bcod(ncode) = [ &  ! bcod stores hibridon's commands
     'CHECK   ', &
     'DEBROGLI', &
@@ -234,12 +234,6 @@ use mod_two, only: numj, nj1j2
 use mod_opti, only: optifl
 
 implicit none
-!  iicode is the number of integer pcod's
-!  ircode is the number of real pcod's
-integer, parameter :: lcode = LPAR_COUNT
-integer, parameter :: iicode = IPAR_COUNT
-integer, parameter :: ircode = RPAR_COUNT
-integer, parameter :: icode = iicode+ircode
 character(len=K_MAX_USER_LINE_LENGTH) line
 character(len=40) :: fnam1
 character(len=40) :: fnam2
@@ -339,7 +333,6 @@ lindx(FCOD_BOUNDC) = LPAR_BOUNDC
 ! hypxsc: 2950
 ! stmix:  3000
 ! trnprt:  3100
-! prsbr:   3200
 ! showpot:  3300
 ! nb after changing the following list, check that all the variables "incode"
 ! that follow after address 900 are changed accordingly
@@ -1411,34 +1404,6 @@ write(6,*) "Entering the DRIVER subroutine of the potential"
 write(6,*) "Press Ctrl+D to go back to Hibridon's console"
 write(6,*) "************************************************************"
 call driver
-goto 1  ! label:read_new_line
-! pressure broadening cross sections - added by p. dagdigian
-3200 call get_token(line,l,fnam1,lc)
-if(fnam1 .eq. ' ') fnam1 = jobnam
-call lower(fnam1)
-call upper(fnam1(1:1))
-! get iener for 1st smt file
-a(1) = 0.d0
-if(l .eq. 0) goto 3205
-call get_token(line,l,code,lc)
-call assignment_parse(code(1:lc),empty_var_list,j,a(1))
-3205 call get_token(line,l,fnam2,lc)
-if(fnam2 .eq. ' ') fnam2 = jobnam
-call lower(fnam2)
-call upper(fnam2(1:1))
-! get iener for 2nd smt file
-a(2) = 0.d0
-if(l .eq. 0) goto 3210
-call get_token(line,l,code,lc)
-call assignment_parse(code(1:lc),empty_var_list,j,a(2))
-! get k, j1, in1, j2, in2, diag, j1p, in1p, j2p, in2p
-3210 do 3220 i = 3, 12
-  a(i) = 0.d0
-  if(l .eq. 0) goto 3220
-  call get_token(line,l,code,lc)
-  call assignment_parse(code(1:lc),empty_var_list,j,a(i))
-3220 continue
-call prsbr(fnam1,fnam2,a)
 goto 1  ! label:read_new_line
 end
 

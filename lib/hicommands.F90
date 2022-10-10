@@ -74,9 +74,7 @@ contains
     use mod_par, only: lpar, ipar
     use ipar_enum
     use lpar_enum
-
-    common /coselb/ ibasty
-    integer ibasty
+    use mod_selb, only: ibasty
 
     if (.not. lpar(LPAR_CSFLAG)) then
       lpar(LPAR_NUCROS)=.false.
@@ -103,22 +101,13 @@ contains
     use mod_hinput_state, only: lindx
     use mod_si_params, only: lcode
     use mod_par, only: lpar
+    use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
     use lpar_enum
+    use mod_selb, only: ibasty
+    use mod_par, only: fcod
+    use mod_two, only: numj, nj1j2
     implicit none
     integer, intent(in) :: out_unit
-
-#include "common/parbas.F90"
-
-    common /coselb/ ibasty
-    integer ibasty
-
-    common /cotwo/ numj,nj1j2(5)
-    integer :: numj
-    integer :: nj1j2
-
-    ! fcod = Flags CODes : stores the name of system independent parameters of type logical
-    common /cofcod/ fcod
-    character*8 :: fcod(lcode)
 
     integer :: j
     integer :: length
@@ -163,17 +152,13 @@ contains
   subroutine input_execute(this, statements, bofargs, next_statement, post_action)
     use mod_command, only: k_post_action_exit_hibridon, k_post_action_read_new_line
     use mod_hinput_state, only: batch
+    use mod_file, only: input, output, jobnam, savfil
+
     class(input_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
     integer, intent(in) :: bofargs
     integer, intent(out) :: next_statement
     integer, intent(out) :: post_action
-
-    common /cofile/ input, output, jobnam, savfil
-    character*40 :: input
-    character*40 :: output
-    character*40 :: jobnam
-    character*40 :: savfil
 
     character(len=40) :: argument
     integer :: l, lc, len
@@ -205,6 +190,7 @@ contains
   ! input, output, and label are now lower case:  mha 6.6.91
   subroutine job_execute(this, statements, bofargs, next_statement, post_action)
     use mod_command, only: k_post_action_interpret_next_statement
+    use mod_file, only: input, output, jobnam, savfil
     class(job_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
     integer, intent(in) :: bofargs
@@ -213,12 +199,6 @@ contains
 
     character(len=40) :: code
     integer :: l, lc
-
-    common /cofile/ input, output, jobnam, savfil
-    character*40 :: input
-    character*40 :: output
-    character*40 :: jobnam
-    character*40 :: savfil
 
     l = bofargs
     call get_token(statements, l, code, lc)
@@ -235,6 +215,7 @@ contains
     !  intcrs,jobfile,in1,in2,ienerg,maxjtot
     use mod_hiutil, only: assignment_parse
     use mod_command, only: k_post_action_read_new_line
+    use mod_file, only: input, output, jobnam, savfil
     implicit none
     class(intcrs_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
@@ -243,11 +224,6 @@ contains
     integer, intent(out) :: post_action
     character(len=40) :: code
 
-    common /cofile/ input, output, jobnam, savfil
-    character*40 :: input
-    character*40 :: output
-    character*40 :: jobnam
-    character*40 :: savfil
 
     character(len=40) :: fnam1
 
@@ -276,6 +252,8 @@ contains
   ! input, output, and label are now lower case:  mha 6.6.91
   subroutine label_execute(this, statements, bofargs, next_statement, post_action)
     use mod_command, only: k_post_action_interpret_next_statement
+    use mod_parpot, only: label => pot_label
+    use mod_file, only: input, output, jobnam, savfil
     class(label_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
     integer, intent(in) :: bofargs
@@ -284,17 +262,8 @@ contains
 
     integer :: l
 
-    common /cofile/ input, output, jobnam, savfil
-    character*40 :: input
-    character*40 :: output
-    character*40 :: jobnam
-    character*40 :: savfil
-
     integer :: low, lend
     integer :: lenstr
-
-    ! parpot.F90 defines label
-#include "common/parpot.F90"
 
     low = index (statements, '=') + 1
     lend = index (statements, ';') - 1
@@ -316,6 +285,7 @@ contains
   subroutine output_execute(this, statements, bofargs, next_statement, post_action)
     use mod_command, only: k_post_action_interpret_next_statement
     use funit
+    use mod_file, only: input, output, jobnam, savfil
     class(output_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
     integer, intent(in) :: bofargs
@@ -324,12 +294,6 @@ contains
 
     character(len=40) :: argument
     integer :: l, lc
-
-    common /cofile/ input, output, jobnam, savfil
-    character*40 :: input
-    character*40 :: output
-    character*40 :: jobnam
-    character*40 :: savfil
 
     logical :: openfl
 
@@ -352,6 +316,7 @@ contains
     ! pressure broadening cross sections - added by p. dagdigian
     use mod_hiutil, only: assignment_parse
     use mod_command, only: k_post_action_read_new_line
+    use mod_file, only: input, output, jobnam, savfil
     class(prsbr_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
     integer, intent(in) :: bofargs
@@ -366,12 +331,6 @@ contains
     integer :: i, j, lc
     integer, parameter :: k_num_args = 12
     real(8) :: a(k_num_args)
-
-    common /cofile/ input, output, jobnam, savfil
-    character*40 :: input
-    character*40 :: output
-    character*40 :: jobnam
-    character*40 :: savfil
 
     l = bofargs
 
@@ -411,15 +370,13 @@ contains
     use mod_hinput_state, only: irpot, irinp
     use mod_command, only: k_post_action_interpret_next_statement
     use lpar_enum
+    use mod_par, only: pcod
+
     class(read_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
     integer, intent(in) :: bofargs
     integer, intent(out) :: next_statement
     integer, intent(out) :: post_action
-
-    ! pcod = Parameters CODes : stores the name of system independent parameters of type integer and real
-    common /copcod/ pcod
-    character*8 :: pcod(icode)
 
     integer :: ione
 
@@ -447,41 +404,23 @@ contains
     use mod_hinput_state, only: lindx, irpot, irinp
     use mod_command, only: k_post_action_write_cr_and_exit, k_post_action_exit_hinput, k_post_action_exit_hibridon
     use rpar_enum
+    use mod_parpot, only: potnam=>pot_name, label=>pot_label
     !
     ! label:execute_run
     !
     ! start execution,run
     use mod_command, only: k_post_action_read_new_line
+    use mod_selb, only: ibasty
+    use mod_file, only: input, output, jobnam, savfil
+    use mod_par, only: pcod
+    use mod_sav, only: iipar, ixpar, irpar, rxpar
+
     implicit none
     class(run_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
     integer, intent(in) :: bofargs
     integer, intent(out) :: next_statement
     integer, intent(out) :: post_action
-
-#include "common/parpot.F90"
-
-    common /cofile/ input, output, jobnam, savfil
-    character*40 :: input
-    character*40 :: output
-    character*40 :: jobnam
-    character*40 :: savfil
-
-    common /coselb/ ibasty
-    integer ibasty
-
-    ! pcod = Parameters CODes : stores the name of system independent parameters of type integer and real
-    common /copcod/ pcod
-    character*8 :: pcod(icode)
-
-    common /cosavi/ iipar, ixpar(iicode)
-    integer :: iipar
-    integer :: ixpar
-
-    common /cosavr/ irpar, junks, rxpar(ircode)
-    integer :: irpar
-    integer :: junks
-    real(8) :: rxpar
 
     integer :: i, j
     integer :: nerg
@@ -595,7 +534,11 @@ contains
     use mod_coener, only: energ
     use mod_command, only: k_post_action_interpret_next_statement, k_post_action_read_new_line
     use mod_hibrid2, only: enord
-
+    use mod_parpot, only: potnam=>pot_name, label=>pot_label
+    use mod_selb, only: ibasty
+    use mod_file, only: input, output, jobnam, savfil
+    use mod_par, only: fcod, pcod
+    use mod_two, only: numj, nj1j2
 
     ! show all parameters and flags
     ! show
@@ -604,31 +547,6 @@ contains
     integer, intent(in) :: bofargs
     integer, intent(out) :: next_statement
     integer, intent(out) :: post_action
-
-#include "common/parbas.F90"
-#include "common/parpot.F90"
-
-
-    common /cofile/ input, output, jobnam, savfil
-    character*40 :: input
-    character*40 :: output
-    character*40 :: jobnam
-    character*40 :: savfil
-
-    common /coselb/ ibasty
-    integer ibasty
-
-    ! pcod = Parameters CODes : stores the name of system independent parameters of type integer and real
-    common /copcod/ pcod
-    character*8 :: pcod(icode)
-
-    ! fcod = Flags CODes : stores the name of system independent parameters of type logical
-    common /cofcod/ fcod
-    character*8 :: fcod(lcode)
-
-    common /cotwo/ numj,nj1j2(5)
-    integer :: numj
-    integer :: nj1j2
 
     integer :: j
     integer :: l, lc, length, leninp, lenjob, lenout
