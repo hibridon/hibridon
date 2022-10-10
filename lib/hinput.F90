@@ -136,6 +136,7 @@ use mod_hitestptn, only: testptn
 use mod_two, only: numj, nj1j2
 use mod_opti, only: optifl
 use mod_hiutil, only: get_token, lower, upper, lenstr, vaxhlp, sys_conf
+use mod_hitrnprt, only: trnprt
 implicit none
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's

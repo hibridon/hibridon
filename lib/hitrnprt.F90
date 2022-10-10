@@ -1,4 +1,6 @@
 ! ------------------------------------------------------------------
+module mod_hitrnprt
+contains
 subroutine trnprt(filnam,a)
 !
 ! subroutine to calculate effective cross sections for transport
@@ -35,9 +37,6 @@ use mod_cosout
 use mod_codim, only: mmax
 use mod_cotble, only: jttble
 use mod_coamat, only: labadr ! labadr(1)
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 use mod_coisc2, only: inlev => isc2 ! inlev(1)
 use mod_coisc3, only: jlev => isc3 ! jlev(1)
 use mod_coisc4, only: jpack => isc4 ! jpack(1)
@@ -49,20 +48,17 @@ use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc2, only: prefac => sc2 ! prefac(1)
 use mod_cosc3, only: etrans => sc3 ! etrans(1)
-use mod_cozmat, only: jtotpa => zmat_as_vec ! jtotpa(1)
 use mod_hibasis, only: is_j12, is_twomol
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
-use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
-use mod_trn, only: spin, maxjt, nwaves, jfsts, jlparf, jlpars, njmax, jpmax
+use mod_trn, only: spin, maxjt, njmax, jpmax
 use mod_hiutil, only: gennam, mtime, dater
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  trnfil, smtfil
 character*20  cdate
-character*10  elaps, cpu
 logical csflag, flaghf, flagsu, twomol, exstfl, &
         nucros
 !
@@ -235,13 +231,13 @@ if (is_twomol(ibasty) .or. is_j12(ibasty)) then
    nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
    lpack,ipack,jttble,prefac, &
    etrans,labadr, &
-   jtotpa,jlpmin,jlpmax,flaghf,ierr)
+   jlpmin,jlpmax,flaghf,ierr)
 else
   call sigkap(1,m1jtot,m1chmx, &
    nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
    lpack,ipack,jttble,prefac, &
    etrans,labadr, &
-   jtotpa,jlpmin,jlpmax,ierr)
+   jlpmin,jlpmax,ierr)
 endif
 goto 300
 300 close (1)
@@ -249,7 +245,7 @@ close (2)
 close (3)
 close (4)
 return
-999 write(2,1000)
+write(2,1000)
 if(.not.batch) write(6,1000)
 1000 format(' *** I/O ERROR IN TRNPRT.  ABORT')
 close (1)
@@ -264,7 +260,7 @@ subroutine sigkap(iunit,mjtot,mchmx, &
                 nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
                 lpack,ipack,jttble,prefac, &
                 etrans,labadr, &
-                jtotpa,jlpmin,jlpmax,ierr)
+                jlpmin,jlpmax,ierr)
 !
 ! subroutine to calculate Q(n) effective cross sections
 !
@@ -298,20 +294,18 @@ use mod_cow, only: simag => w_as_vec ! simag(1)
 use mod_hibrid2, only: mxoutd
 use mod_hibrid5, only: sread
 use mod_par, only: batch, ipos
-use mod_selb, only: ibasty
-use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
-use mod_trn, only: spin, maxjt, nwaves, jfsts, jlparf, jlpars, njmax, jpmax
+use mod_trn, only: spin, maxjt, njmax
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
 complex*8 t, tp
-logical diag, diagj, diagin, diagp, diagjp, diagnp
+logical diag, diagp
 character*10 elaps, cpu
 ! common blocks for levels for which xs's to be computed
 !
 dimension etrans(1)
 dimension jpack(1),ipack(1),lpack(1)
-dimension prefac(1), labadr(1), jtotpa(1)
+dimension prefac(1), labadr(1)
 dimension jttble(1)
 dimension f36j(0:2)
 !
@@ -554,7 +548,7 @@ do jtot = jfirst, maxjt
 end do
 !
 ! here when calculation has been done
-999 do 1100 k = 1, 2
+do 1100 k = 1, 2
   write(2,800) k
   if(.not.batch) write(6,800) k
 800   format(/' N =',i3)
@@ -576,7 +570,7 @@ if(.not. batch) write(6,1200) elaps, cpu
         ' CPU: ',a,/)
 !
 1000 continue
-4007 deallocate(length)
+deallocate(length)
 4006 deallocate(l)
 4005 deallocate(in)
 4004 deallocate(j)
@@ -593,7 +587,7 @@ subroutine sigkp1(iunit,mjtot,mchmx, &
                 nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
                 lpack,ipack,jttble,prefac, &
                 etrans,labadr, &
-                jtotpa,jlpmin,jlpmax,flaghf,ierr)
+                jlpmin,jlpmax,flaghf,ierr)
 !
 ! subroutine to calculate Q(n) effective cross sections
 !
@@ -631,20 +625,19 @@ use mod_hibrid5, only: sread
 use mod_hibasis, only: is_j12, is_twomol
 use mod_par, only: batch, ipos
 use mod_selb, only: ibasty
-use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
-use mod_trn, only: spin, maxjt, nwaves, jfsts, jlparf, jlpars, njmax, jpmax
+use mod_trn, only: spin, maxjt, njmax
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
 complex*8 t, tp
-logical diag, diagj, diagin, diagp, diagjp, diagnp, &
+logical diag, diagp, &
   flaghf
 character*10 elaps, cpu
 ! common blocks for levels for which xs's to be computed
 !
 dimension etrans(1)
 dimension jpack(1),ipack(1),lpack(1)
-dimension prefac(1), labadr(1), jtotpa(1)
+dimension prefac(1), labadr(1)
 dimension jttble(1)
 dimension f36j(0:2)
 !
@@ -926,7 +919,7 @@ goto 20
 end do
 !
 ! here when calculation has been done
-999 do 1100 k = 1, 2
+do 1100 k = 1, 2
   write(2,800) k
   if(.not.batch) write(6,800) k
 800   format(/' N =',i3)
@@ -965,8 +958,8 @@ if(.not. batch) write(6,1200) elaps, cpu
         ' CPU: ',a,/)
 !
 1000 continue
-4007 deallocate(length)
-4014 deallocate(jj12)
+deallocate(length)
+deallocate(jj12)
 4006 deallocate(l)
 4005 deallocate(in)
 4004 deallocate(j)
@@ -984,3 +977,4 @@ if (ialloc .ne. 0) write (6, 4100)
 return
 end
 !=====eof=====
+end module mod_hitrnprt
