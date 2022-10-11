@@ -694,6 +694,7 @@ subroutine vchirl(jp, lp, j, l, isp, is, jtot, lam, mu, vee, &
 !  -----------------------------------------------------------------------
 use mod_coatpi, only: narray
 use mod_coatpr, only: c
+use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
 !
 data one, zero, two / 1.0d0, 0.0d0, 2.0d0 /
@@ -806,6 +807,7 @@ subroutine prmtp2 (jp, lp, j, l, jtot, kp, k, iepsp, ieps, &
 !  subroutine called:
 !     xf3j
 !  -----------------------------------------------------------------------
+use mod_hiutil, only: xf3j
 implicit double precision (a-h,o-z)
 data one, two, zero, onsq2 / 1.d0, 2.d0, 0.d0, &
   0.707106781186547d0 /
@@ -889,6 +891,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt

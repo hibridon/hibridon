@@ -60,6 +60,7 @@ subroutine prmatp (jp, lp, j, l, jtot, kp, k, lambda, mu, &
 !  subroutines called:
 !     xf3j, xf6j
 !  -----------------------------------------------------------------------
+use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
 logical csflag
 data half, one, two, zero, four / 0.5d0, 1.d0, 2.d0, 0.d0, 4.d0/
@@ -138,6 +139,7 @@ subroutine prmstp (jp, lp, j, l, jtot, kp, k, lambda, mu, &
 !  subroutines called:
 !     xf3j, xf6j
 !  -----------------------------------------------------------------------
+use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
 logical csflag
 data half, one, two, zero, four / 0.5d0, 1.d0, 2.d0, 0.d0, 4.d0/
@@ -226,10 +228,11 @@ subroutine prmstpln (jp, lp, j2p, j12p, j, l, j2, j12, &
 !              if .false., then cc calculation; in this case:
 !                jtot is total angular momentum
 !  subroutines called:
-!     xf3j, xf6j, xf9j
+!     xf3j, xf6j
 !     f9j (Claire's routines)
 !
 ! -----------------------------------------------------------------------
+use mod_hiutil, only: xf3j, xf6j, f9j
 implicit double precision (a-h,o-z)
 logical csflag
 data half, one, two, zero, four / 0.5d0, 1.d0, 2.d0, 0.d0, 4.d0/
@@ -432,6 +435,7 @@ subroutine vlm2sg (jp, lp, j, l, jtot, lambda, iepsp, ieps, &
 !  subroutines called:
 !     xf3j, xf6j
 !  -----------------------------------------------------------------------
+use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
 integer jp, j, jtot, lp, l, lambda, iepsp, ieps, nu, iphase
 logical csflag
@@ -517,7 +521,7 @@ subroutine vlmstp (jp, lp, j, l, jtot, kp, k, lambda, mu, &
 !                jtot is total angular momentum and l and lp correspond
 !                to the orbital angular momenta
 !  subroutines called:
-!     xf3j, xf6j, prmstp
+!     prmstp
 !  -----------------------------------------------------------------------
 implicit double precision (a-h,o-z)
 logical csflag
@@ -623,7 +627,7 @@ subroutine vlmstpln (jp, lp, j, l, j2p, j2, &
 !                jtot is total angular momentum and l and lp correspond
 !                to the orbital angular momenta
 !  subroutines called:
-!     xf3j, xf6j, xf9j, prmstp
+!     prmstp
 !     f9j (Claire's routine)
 !
 ! -----------------------------------------------------------------------

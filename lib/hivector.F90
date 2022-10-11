@@ -1,3 +1,5 @@
+module mod_hivector
+contains
 !*************************************************************************
 !                                                                        *
 !                    vector routines library supplement             *
@@ -135,8 +137,14 @@ subroutine vmul (a, na, b, nb, c, nc, n)
 !  c(m) = a(m) * b(m) for m=1 to n
 !  -----------------------------------------------------------------------
 implicit double precision (a-h,o-z)
-integer i, inda, indb, indc, n, na, nb, nc
-dimension a(1), b(1), c(1)
+real(8), intent(in) :: a(:)
+integer, intent(in) :: na
+real(8), intent(in) :: b(:)
+integer, intent(in) :: nb
+real(8), intent(out) :: c(:)
+integer, intent(in) :: nc
+integer, intent(in) :: n
+integer i, inda, indb, indc
 inda = 1
 indb = 1
 indc = 1
@@ -1744,3 +1752,4 @@ do 30 i = 2, n
 return
 end
 #endif
+end module mod_hivector

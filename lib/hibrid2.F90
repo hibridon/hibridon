@@ -390,6 +390,8 @@ use mod_version, only : version
 use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, flaghf, flagsu, ihomo, ipos
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
+use mod_hiutil, only: gennam
+use mod_hivector, only: matmov
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
@@ -685,6 +687,8 @@ end
 subroutine aver1 (zmat, scmat, n)
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
+use mod_himatrix, only: transp
+use mod_hivector, only: matmov
 implicit double precision (a-h,o-z)
 !  subroutine to sum and average cross section matrix over positive
 !  and negative values of index
@@ -722,6 +726,7 @@ use mod_cojhld, only: jlev => jhold ! jlev(4)
 use mod_cosc1, only: elev => sc1 ! elev(4)
 use mod_coisc1, only: inlev => isc1 ! inlev(4)
 use mod_selb, only: ibasty
+use mod_himatrix, only: transp
 
 implicit double precision (a-h,o-z)
 !      current revision date: 16-dec-2007
@@ -897,6 +902,8 @@ use mod_cow, only: scmat => w_as_vec ! scmat(1)
 use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, flaghf, flagsu, ihomo, ipos
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
+use mod_hiutil, only: gennam
+use mod_hivector, only: dset
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
@@ -1263,6 +1270,8 @@ end
 subroutine aver2 (zmat, scmat, n)
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
+use mod_himatrix, only: transp
+use mod_hivector, only: matmov
 
 implicit double precision (a-h,o-z)
 !  subroutine to sum and average cross section matrix over positive
@@ -1301,6 +1310,7 @@ use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_par, only: flaghf, ihomo, ipos
+use mod_himatrix, only: transp
 implicit double precision (a-h,o-z)
 
 !  current revision date:  10-oct-2001 by ab

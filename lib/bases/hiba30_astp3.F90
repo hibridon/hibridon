@@ -835,6 +835,7 @@ subroutine vastp3(j1r,j2r,j12r,lr,j1c,j2c,j12c,lc, &
 !  -----------------------------------------------------------------------
 use mod_coatpi, only: narray, isiz
 use mod_coatpr, only: c
+use mod_hiutil, only: xf3j, xf6j, xf9j
 implicit double precision (a-h,o-z)
 data one, zero, two / 1.0d0, 0.0d0, 2.0d0 /
 data fourpi / 12.566370614d0 /, sqr2 / 1.414213562373095d0 /
@@ -1018,6 +1019,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt

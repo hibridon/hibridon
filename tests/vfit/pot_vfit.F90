@@ -306,6 +306,7 @@ subroutine vcalc(rr,a,pinv,rvecp,avec,iblkx)
 ! current revision date: 26-may-1991 by mha
 !
 ! --------------------------------------------------------------------
+use mod_himatrix, only: mxva
 implicit double precision(a-h,o-z)
 parameter (maxang=10)
 dimension pinv(maxang,maxang),a(20,50),rvecp(10),avec(10)

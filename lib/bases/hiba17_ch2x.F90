@@ -921,7 +921,7 @@ subroutine vlmctp (jp, lp, j, l, jtot, isp, is, lambda, mu, &
 !    indp:     number of left-side level in channel list
 !    ind:      number of right-side level in channel list
 !  subroutines called:
-!    xf3j, xf6j, prmctp
+!    prmctp
 !  -----------------------------------------------------------------------
 use mod_hibasutil, only: prmatp
 implicit double precision (a-h,o-z)
@@ -1022,6 +1022,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt

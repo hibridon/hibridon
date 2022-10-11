@@ -51,10 +51,13 @@ use mod_cosc3, only: lpack1 => sc3int ! lpack1(1)
 use mod_cosc4, only: ipack1 => sc4int ! ipack1(1)
 use mod_coz, only: sreal1 => z_as_vec ! sreal1(1)
 use mod_cow, only: simag1 => w_as_vec ! simag1(1)
-use mod_hibrid5, only: sread
+use mod_hismat, only: sread
 use mod_hibasis, only: is_j12, is_twomol
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
+use mod_hiutil, only: gennam, mtime, gettim, dater
+use mod_hiutil, only: xf3j
+use mod_hismat, only: sread, rdhead
 implicit double precision (a-h,o-z)
 character*(*) fname1
 character*20 cdate1
@@ -963,6 +966,7 @@ use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12, is_twomol
 use mod_selb, only: ibasty
+use mod_hiutil, only: xf3j
 implicit double precision (a-h,o-z)
 complex*16 ai,yy,tmat
 parameter (zero=0.0d0, one=1.0d0, two=2.0d0)

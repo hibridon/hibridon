@@ -32,7 +32,8 @@ use mod_coeint, only: eint
 use mod_coener, only: energ
 use mod_hibasis, only : basis
 use mod_version, only : version, acknow
-use mod_hibrid5, only : soutpt, nusum, xwrite, wrhead, restrt, rsave
+use mod_hibrid5, only : soutpt, nusum, xwrite, restrt, rsave
+use mod_hismat, only: wrhead
 use mod_ancou, only: ancou_type
 use constants
 use mod_hibrid2, only: set_default_params
@@ -61,6 +62,9 @@ use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
   use mod_dec_timer, only: ttim
 #endif
 use mod_opti, only: optifl
+use mod_hiutil, only: mtime, gettim, dater
+use mod_hibrid4, only: wavewr
+use mod_hismat, only: wrhead
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
