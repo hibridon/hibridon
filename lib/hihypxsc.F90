@@ -288,11 +288,7 @@ if (ialloc .ne. 0) goto 4010
 !     fix for case where jtot=0 has only one parity
 jfrst = 2000
 jfin = 0
-do ij = 0, jfinl
-  do ip = 1, 2
-    length(ij,ip) = 0
-  end do
-end do
+
 !     parameter to read lower triangle of open channel(s)
 100 nopen = -1
 call sread (0, sreal, simag, jtot, jlpar, &
