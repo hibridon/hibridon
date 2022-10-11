@@ -162,10 +162,14 @@ use mod_hibasis, only: is_j12
 use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 integer, intent(inout) :: nopen
+integer, intent(out) :: inpack(:)
+integer, intent(out) :: jpack(:)
+integer, intent(out) :: lpack(:)
 integer, intent(in) :: smt_file_unit
+integer, intent(in) :: nmax
 logical triang
 dimension sreal(nmax,1), simag(nmax,1), &
-     jpack(1), lpack(1),inpack(1),jq(1),lq(1),inq(1)
+     jq(1),lq(1),inq(1)
 character*8 csize8
 !
 ierr=0

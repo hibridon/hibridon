@@ -1558,8 +1558,8 @@ do 100 jtp=jtpmin,jtpmax
 ! read s-matrix for jtot' into buffer
    nopenp = -1
    call sread ( iaddrp, srealp(ioffs), simagp(ioffs), jtotp, &
-                jlparp, nu, jqp, lqp, inqp, ipackp(ioff), &
-                jpackp(ioff), lpackp(ioff), &
+                jlparp, nu, jqp, lqp, inqp, ipackp(ioff:), &
+                jpackp(ioff:), lpackp(ioff:), &
                 1, maxlsp, nopenp, lengtp, ierr)
    if(ierr.eq.-1) goto 999
    if(ierr.lt.-1) then

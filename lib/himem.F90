@@ -1644,18 +1644,6 @@ module mod_el
   integer :: ll(9)
 end module mod_el
 
-! used to be common block cotrn
-module mod_trn
-  real(8) :: spin
-  integer :: maxjt
-  integer :: nwaves
-  integer :: jfsts
-  integer :: jlparf
-  integer :: jlpars
-  integer :: njmax
-  integer :: jpmax
-end module mod_trn
-
 ! used to be common block cosavi and cosavr
 module mod_sav
   use mod_hiparcst, only: IPAR_COUNT, RPAR_COUNT

@@ -1,5 +1,17 @@
+#include "assert.h"
 #include "hiutil.inc.F90"
 ! ------------------------------------------------------------------
+
+! used to be common block cotrn
+module mod_trn
+  real(8) :: spin
+  integer :: nwaves
+  integer :: jfsts
+  integer :: jlparf
+  integer :: jlpars
+  integer :: jpmax
+end module mod_trn
+
 module mod_hitrnprt
 contains
 subroutine trnprt(filnam,a)
@@ -36,8 +48,6 @@ subroutine trnprt(filnam,a)
 ! ------------------------------------------------------------------
 use mod_cosout
 use mod_codim, only: mmax
-use mod_cotble, only: jttble
-use mod_coamat, only: labadr ! labadr(1)
 use mod_coisc2, only: inlev => isc2 ! inlev(1)
 use mod_coisc3, only: jlev => isc3 ! jlev(1)
 use mod_coisc4, only: jpack => isc4 ! jpack(1)
@@ -54,7 +64,7 @@ use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
-use mod_trn, only: spin, maxjt, njmax, jpmax
+use mod_trn, only: spin, jpmax
 use mod_hiutil, only: gennam, mtime, dater
 use mod_hismat, only: rdhead, sinqr
 implicit double precision (a-h,o-z)
@@ -155,8 +165,6 @@ call dater(cdate)
 write(2, 22) cdate
 if(.not. batch) write(6, 22) cdate
 22 format(' DATE:    ',(a))
-! set maxjt to jfinal
-maxjt = jfinal
 !
 ! set up list of open levels and calculate prefactors
 ! save pointer in array jlist
@@ -178,7 +186,6 @@ do 40 i=1, iabs(nout)
         (2.d0* rmu * etrans(nj))
 30   continue
 40 continue
-njmax = nj
 ! set values for jlpar in s-matrix read
 ! this works if j=0 level has jlpar=+1
 ! needs fix for bach2x
@@ -196,9 +203,9 @@ if (nlevop.eq.1 .and. jlev(1).eq.0) then
   if (ibasty.eq.13) jlpmax = 2
 end if
 ! write header
-write(2,60) ered*econv,rmu*xmconv,jfirst,maxjt
+write(2,60) ered*econv,rmu*xmconv,jfirst,jfinal
 if(.not.batch) write(6,60) &
-  ered*econv,rmu*xmconv,jfirst,maxjt
+  ered*econv,rmu*xmconv,jfirst,jfinal
 60 format(/,' ENERGY: ',f11.3,' cm(-1)    MASS: ',f11.3,/, &
      ' SUMMING PARTIAL WAVES FROM JTOT=',i3,' TO JTOT=',i3)
 !
@@ -229,9 +236,9 @@ do 68 i = 1, nj
 !
 ! now compute transport cross sections
 call compute_transport_xs(1,m1jtot,m1chmx, &
-   nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
-   lpack,ipack,jttble,prefac, &
-   etrans,labadr, &
+   jfirst,jfinal,jtotd,nj,mmax,jpack, &
+   lpack,ipack,prefac, &
+   etrans, &
    jlpmin,jlpmax,flaghf,ierr)
 
 goto 300
@@ -252,9 +259,9 @@ return
 end
 ! ------------------------------------------------------------------
 subroutine compute_transport_xs(iunit,mjtot,mchmx, &
-                nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
-                lpack,ipack,jttble,prefac, &
-                etrans,labadr, &
+                jfirst,jfinal,jtotd,nj,mmax,jpack, &
+                lpack,ipack,prefac, &
+                etrans, &
                 jlpmin,jlpmax,flaghf,ierr)
 !
 ! subroutine to calculate Q(n) effective cross sections
@@ -290,20 +297,33 @@ use mod_hismat, only: sread
 use mod_hibasis, only: is_j12, is_twomol
 use mod_par, only: batch, ipos
 use mod_selb, only: ibasty
-use mod_trn, only: spin, maxjt, njmax
+use mod_trn, only: spin
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j
 use mod_hismat, only: sread
 implicit double precision (a-h,o-z)
+integer, intent(in) :: iunit
+integer, intent(in) :: mjtot
+integer, intent(in) :: mchmx
+integer, intent(in) :: jfirst
+integer, intent(in) :: jfinal
+integer, intent(in) :: jtotd
+integer, intent(in) :: nj
+integer, intent(in) :: mmax
+integer, intent(out) :: jpack(mmax)
+integer, intent(out) :: lpack(mmax)
+integer, intent(out) :: ipack(mmax)
+real(8), intent(in) :: prefac(nj)
+real(8), intent(in) :: etrans(nj)
+integer, intent(in) :: jlpmin
+integer, intent(in) :: jlpmax
+logical, intent(in) :: flaghf
+integer, intent(out) :: ierr
 complex(8) t, tp
-logical diag, diagp, flaghf
+logical diag, diagp
 character*10 elaps, cpu
 ! common blocks for levels for which xs's to be computed
 !
-dimension etrans(1)
-dimension jpack(1),ipack(1),lpack(1)
-dimension prefac(1), labadr(1)
-dimension jttble(1)
 dimension f36j(0:2)
 !
 ! sr, si: s-matrix elements
@@ -331,6 +351,10 @@ uses_j12 = is_twomol(ibasty) .or. is_j12(ibasty)
 
 onesix = 1.d0/6.d0
 twothr = 2.d0/3.d0
+
+ASSERT(jtotd == 1)  ! not sure that this subroutine handles the case where jtotd is not 1
+
+
 !
 if (uses_j12) then
   spnj2 = 0.d0
@@ -356,7 +380,7 @@ end if
 call mtime(cpu0,ela0)
 ierr = 0
 ! allocate and clear sigma array
-allocate(sigma(njmax, njmax, 2), stat=ialloc)
+allocate(sigma(nj, nj, 2), stat=ialloc)
 if (ialloc .ne. 0) goto 4000
 sigma = 0d0
 !
@@ -365,7 +389,7 @@ if (uses_j12) then
   iplmt = 1
 !
 !
-  allocate(plam(njmax, njmax, 3), stat=ialloc)
+  allocate(plam(nj, nj, 3), stat=ialloc)
   if (ialloc .ne. 0) goto 4400
   plam = 0d0
 end if
@@ -432,7 +456,7 @@ do ii = 1, len2
   si(jtot,jlp,ii) = simag(ii)
 end do
 ! check for end of s-matrix file
-if (jtot.eq.maxjt) then
+if (jtot.eq.jfinal) then
     if (jlpar.eq.1 .and. jlpmax.eq.2) goto 20
     if (jlpar.eq.1 .and. jlpmax.eq.1) goto 22
     if (jlpar.eq.-1) goto 22
@@ -444,7 +468,7 @@ goto 20
 !
 ! now sum over the jtot/jlpar pairs
 22 continue
-do jtot = jfirst, maxjt
+do jtot = jfirst, jfinal
 !
   if (jtot.eq.0) write(6,*) '  '
   if (jtot.eq.10*(jtot/10) .and. jtot.ne.0) write(6,210) jtot
@@ -461,7 +485,7 @@ do jtot = jfirst, maxjt
 !
 ! boundaries of sum over jtotp
     jtpmin = max((jtot - 2), jfirst)
-    jtpmax = min((jtot + 2), maxjt)
+    jtpmax = min((jtot + 2), jfinal)
     do jtotp = jtpmin, jtpmax
       if (uses_j12) then
         xjtotp = jtotp + spntot
@@ -498,7 +522,7 @@ do jtot = jfirst, maxjt
           l1 = l(jtot,jlp,irow)
           xl1 = l1
           sl1 = sqrt(2.d0 * xl1 + 1.d0)
-          do 74 ij = 1, njmax
+          do 74 ij = 1, nj
             if (uses_j12) then
               if (j(jtot,jlp,irow) .ne. jslist(ij)) goto 74
             else
@@ -532,7 +556,7 @@ do jtot = jfirst, maxjt
 !                  diagj = j1 .eq. j2
 !                  diagin = in(jtot,j1p,irow) .eq. in(jtot,j1p,icol)
 !                  diag = diagj .and. diagin
-            do 84 ij = 1, njmax
+            do 84 ij = 1, nj
               if (uses_j12) then
                 if (j(jtot,jlp,icol) .ne. jslist(ij)) goto 84
               else
@@ -675,11 +699,11 @@ do 1100 k = 1, 2
   write(2,800) k
   if(.not.batch) write(6,800) k
 800   format(/' N =',i3)
-  call mxoutd (2, sigma(1,1,k), njmax, njmax, 0, ipos)
+  call mxoutd (2, sigma(1,1,k), nj, nj, 0, ipos)
 ! use diag as scratch variable (ipos = .false. for screen output)
   diag = .false.
   if(.not. batch) &
-    call mxoutd (6, sigma(1,1,k), njmax, njmax, 0, diag)
+    call mxoutd (6, sigma(1,1,k), nj, nj, 0, diag)
 1100 continue
 !
 if (uses_j12) then
@@ -690,7 +714,7 @@ if (uses_j12) then
     do k = 0,2
       write(6,800)k
       diag=.false.
-      call mxoutd (6, plam(1,1,k+1), njmax, njmax, 0, diag)
+      call mxoutd (6, plam(1,1,k+1), nj, nj, 0, diag)
     enddo
   endif
 end if
