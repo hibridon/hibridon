@@ -170,11 +170,11 @@ integer nvvlp, i, j
 !   dgelsd), and YLMC(S/A) is a stationary copy of the array.
 !   s/a stands for symmetric/anti-symmetric (of <v2'|V|v2>)
 double precision ylm(NANGLE, NVLM)
-double precision YLMCS(NANGLE, NVLM), YLMCA(NANGLE, NVLM)
+real(8), save ::  YLMCS(NANGLE, NVLM), YLMCA(NANGLE, NVLM)
 !
 !   Load Y_lm terms in the first call
-logical isfst
-data isfst /.true./
+logical, save :: isfst=.true.
+
 character*255 datfl
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
 emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
