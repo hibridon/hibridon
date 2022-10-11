@@ -356,7 +356,7 @@ allocate(tmatr(idim, idim), stat=ialloc)
 if (ialloc .ne. 0) goto 4011
 allocate(tmati(idim, idim), stat=ialloc)
 if (ialloc .ne. 0) goto 4011
-!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(jfrst,jttmin,jfinl,jttmax,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(jfrst,jfinl,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
 !$OMP DO
 do iftot = iftmn, iftmx
   xftot = iftot + fhspin
@@ -524,7 +524,7 @@ allocate(tmati(idim, idim), stat=ialloc)
 if (ialloc .ne. 0) goto 4011
 !
 !  NOTE:  xftot is called K in Lara-Moreno et al.
-!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(jfrst,jttmin,jfinl,jttmax,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(jfrst,jfinl,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
 !$OMP DO
 do iftot = iftmn, iftmx-1
   xftot = float(iftot) + dspin
@@ -734,7 +734,7 @@ allocate(tmatr(idim, idim), stat=ialloc)
 if (ialloc .ne. 0) goto 4011
 allocate(tmati(idim, idim), stat=ialloc)
 if (ialloc .ne. 0) goto 4011
-!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(jfrst,jttmin,jfinl,jttmax,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(jfrst,jfinl,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
 !$OMP DO
 do iftot = iftmn, iftmx
   xftot = iftot + fhspin
