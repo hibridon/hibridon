@@ -18,7 +18,7 @@ program comp_tests
     ! Extract file extension in ext string variable
     ext = ref(scan(trim(ref),".", BACK= .true.)+1:len(ref))
 
-    write(Output_Unit, *) 'comparing test file ', trim(test), ' to reference file ', trim(ref)
+    write(Output_Unit, "(4a)") 'comparing test file ', trim(test), ' to reference file ', trim(ref)
 
     ! Tolerance is set to 1%
     tolerance=0.01d0
