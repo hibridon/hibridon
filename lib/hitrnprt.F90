@@ -50,9 +50,6 @@ use mod_cosout
 use mod_codim, only: mmax
 use mod_coisc2, only: inlev => isc2 ! inlev(1)
 use mod_coisc3, only: jlev => isc3 ! jlev(1)
-use mod_coisc4, only: jpack => isc4 ! jpack(1)
-use mod_coisc5, only: lpack => isc5 ! lpack(1)
-use mod_coisc6, only: ipack => isc6 ! ipack(1)
 use mod_coisc8, only: jlist => isc8 ! jlist(1)
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
@@ -236,8 +233,7 @@ do 68 i = 1, nj
 !
 ! now compute transport cross sections
 call compute_transport_xs(1,m1jtot,m1chmx, &
-   jfirst,jfinal,jtotd,nj,mmax,jpack, &
-   lpack,ipack,prefac, &
+   jfirst,jfinal,jtotd,nj,mmax,prefac, &
    etrans, &
    jlpmin,jlpmax,flaghf,ierr)
 
@@ -259,8 +255,7 @@ return
 end
 ! ------------------------------------------------------------------
 subroutine compute_transport_xs(iunit,mjtot,mchmx, &
-                jfirst,jfinal,jtotd,nj,mmax,jpack, &
-                lpack,ipack,prefac, &
+                jfirst,jfinal,jtotd,nj,mmax,prefac, &
                 etrans, &
                 jlpmin,jlpmax,flaghf,ierr)
 !
@@ -310,9 +305,6 @@ integer, intent(in) :: jfinal
 integer, intent(in) :: jtotd
 integer, intent(in) :: nj
 integer, intent(in) :: mmax
-integer, intent(out) :: jpack(mmax)
-integer, intent(out) :: lpack(mmax)
-integer, intent(out) :: ipack(mmax)
 real(8), intent(in) :: prefac(nj)
 real(8), intent(in) :: etrans(nj)
 integer, intent(in) :: jlpmin
@@ -325,6 +317,10 @@ character*10 elaps, cpu
 ! common blocks for levels for which xs's to be computed
 !
 dimension f36j(0:2)
+
+integer :: jpack(mmax)
+integer :: lpack(mmax)
+integer :: ipack(mmax)
 !
 ! sr, si: s-matrix elements
 !   second letter is real (r), imaginary (i)
