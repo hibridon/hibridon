@@ -352,11 +352,10 @@ lmax = iftmx + jmx + 1
 jrmx = lmax + jmx + 1
 idimr = jrmx + 1
 idim = idimr * (lmax + 1)
-allocate(tmatr(idim, idim), stat=ialloc)
-if (ialloc .ne. 0) goto 4011
-allocate(tmati(idim, idim), stat=ialloc)
-if (ialloc .ne. 0) goto 4011
-!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(jfrst,jfinl,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
+
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
+allocate(tmatr(idim, idim))
+allocate(tmati(idim, idim))
 !$OMP DO
 do iftot = iftmn, iftmx
   xftot = iftot + fhspin
@@ -464,9 +463,9 @@ do iftot = iftmn, iftmx
   end do
 end do
 !$OMP END DO
-!$OMP END PARALLEL
 deallocate(tmatr)
 deallocate(tmati)
+!$OMP END PARALLEL
 !
 else
 !
@@ -518,13 +517,11 @@ lmax = iftmx + jmx + 1
 jrmx = lmax + jmx + 1
 idimr = jrmx + 1
 idim = idimr * (lmax + 1)
-allocate(tmatr(idim, idim), stat=ialloc)
-if (ialloc .ne. 0) goto 4011
-allocate(tmati(idim, idim), stat=ialloc)
-if (ialloc .ne. 0) goto 4011
-!
+
 !  NOTE:  xftot is called K in Lara-Moreno et al.
-!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(jfrst,jfinl,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
+allocate(tmatr(idim, idim))
+allocate(tmati(idim, idim))
 !$OMP DO
 do iftot = iftmn, iftmx-1
   xftot = float(iftot) + dspin
@@ -643,9 +640,9 @@ do iftot = iftmn, iftmx-1
   end do
 end do
 !$OMP END DO
-!$OMP END PARALLEL
 deallocate(tmatr)
 deallocate(tmati)
+!$OMP END PARALLEL
 !
 !  compute cross sections for atom-molecule collisions with two nuclear spins
 !
@@ -730,11 +727,10 @@ jrmx = lmax + j2mx + 1
 idimr = jrmx + 1
 idim = idimr * (lmax + 1)
 !     next allocate scratch arrays
-allocate(tmatr(idim, idim), stat=ialloc)
-if (ialloc .ne. 0) goto 4011
-allocate(tmati(idim, idim), stat=ialloc)
-if (ialloc .ne. 0) goto 4011
-!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(jfrst,jfinl,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
+
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
+allocate(tmatr(idim, idim))
+allocate(tmati(idim, idim))
 !$OMP DO
 do iftot = iftmn, iftmx
   xftot = iftot + fhspin
@@ -866,9 +862,9 @@ do iftot = iftmn, iftmx
   end do
 end do
 !$OMP END DO
-!$OMP END PARALLEL
 deallocate(tmatr)
 deallocate(tmati)
+!$OMP END PARALLEL
 !
 !  end of molecule-molecule section
 !
