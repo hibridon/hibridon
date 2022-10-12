@@ -2413,7 +2413,7 @@ character*10 elaps, cpu
 ! states with up to 9 state indices allowed
 integer, allocatable :: iadr(:,:,:)
 !      common/cadr/ iadr(0:jmx,lmx)
-real(8), allocatable :: f6a(:,:,:), f9a(:)  ! 6jt
+real(8), allocatable :: f6a(:,:,:), f9a(:,:)  ! 6jt
 
 dimension jpack(1),ipack(1),lpack(1)
 dimension sreal(1), simag(1)
