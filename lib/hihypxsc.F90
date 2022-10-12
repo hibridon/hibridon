@@ -519,7 +519,7 @@ idimr = jrmx + 1
 idim = idimr * (lmax + 1)
 
 !  NOTE:  xftot is called K in Lara-Moreno et al.
-!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,iftmn,dspin,fspin,nlevlh2,jlevh2,flevh1,flevh2,f2nuc,finuc,length,inlevh2,j,in,sr,si) REDUCTION(+:sigma)
 allocate(tmatr(idim, idim))
 allocate(tmati(idim, idim))
 !$OMP DO
@@ -728,7 +728,7 @@ idimr = jrmx + 1
 idim = idimr * (lmax + 1)
 !     next allocate scratch arrays
 
-!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,j12,in,inlevh,l,sr,si) REDUCTION(+:sigma)
 allocate(tmatr(idim, idim))
 allocate(tmati(idim, idim))
 !$OMP DO
