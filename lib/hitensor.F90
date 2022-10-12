@@ -1954,8 +1954,8 @@ logical lprnt,lprntf
 character*10 elaps, cpu
 ! 3rd subscript is for state index (subscript = 5 + IN)
 ! states with up to 9 state indices allowed
-integer, allocatable :: iadr
-real(8), allocatable :: f6a, f6p  ! 6jt
+integer, allocatable :: iadr(:,:,:)
+real(8), allocatable :: f6a(:,:,:), f6p(:)  ! 6jt
 !
 dimension jpack(1),ipack(1),lpack(1)
 dimension sreal(1), simag(1)
@@ -2411,9 +2411,9 @@ logical lprnt2
 character*10 elaps, cpu
 ! add 3rd subscript for state index (subscript = 5 - IN) (pjd)
 ! states with up to 9 state indices allowed
-integer, allocatable :: iadr
+integer, allocatable :: iadr(:,:,:)
 !      common/cadr/ iadr(0:jmx,lmx)
-real(8), allocatable :: f6a,f9a  ! 6jt
+real(8), allocatable :: f6a(:,:,:), f9a(:)  ! 6jt
 
 dimension jpack(1),ipack(1),lpack(1)
 dimension sreal(1), simag(1)
@@ -2855,9 +2855,9 @@ character*10 elaps, cpu
 
 ! add 3rd subscript for state index (subscript = 5 + IN)
 ! states with up to 9 state indices allowed
-integer, allocatable :: iadr
+integer, allocatable :: iadr(:,:,:)
 !      common/cadr/ iadr(0:jmx,lmx)
-real(8), allocatable :: f6a, f6p  ! 6jt
+real(8), allocatable :: f6a(:,:,:), f6p(:)  ! 6jt
 !
 dimension jpack(1),ipack(1),lpack(1)
 dimension sreal(1), simag(1)
