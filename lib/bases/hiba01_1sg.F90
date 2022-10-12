@@ -544,8 +544,9 @@ subroutine vlm1sg (j1, l1, j2, l2, jtot, nu, lb, v, csflag)
 !  xf3j:     evaluates 3j symbol
 !  xf6j:     evaluates 6j symbol
 ! --------------------------------------------------------------------
+use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
-!      real v, xj1, xj2, xjtot, xl1, xl2, xlb, xnu, zero, xf3j, xf6j
+!      real v, xj1, xj2, xjtot, xl1, xl2, xlb, xnu, zero
 integer ij, il, j1, j2, jtot, l1, l2, lb, nu
 logical csflag
 zero = 0.
@@ -612,7 +613,8 @@ use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_selb, only: ibasty
 use mod_skip, only: nskip, iskip
-use mod_vib, only: nvib => nvibs, ivib => ivibs 
+use mod_vib, only: nvib => nvibs, ivib => ivibs
+use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt

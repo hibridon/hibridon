@@ -36,10 +36,12 @@ add_library(hib
     hinput.F90
     hiparcst.F90
     hiprsbr.F90
+    hismat.F90
     histmix.F90
     hisystem.F90
     hitensor.F90
     hitrnprt.F90
+    hitestptn.F90
     hiutil.F90
     hivector.F90
     hipotutil.F90
@@ -85,7 +87,10 @@ target_include_directories(hib PRIVATE ./)
 # Link Blas and Lapack libraries
 target_link_libraries(hib INTERFACE "${BLAS_LIBRARIES}")
 target_link_libraries(hib INTERFACE "${LAPACK_LIBRARIES}")
-
+# Link OpenMP if found
+if(OpenMP_Fortran_FOUND)
+    target_link_libraries(hib INTERFACE OpenMP::OpenMP_Fortran)
+  endif()
 ################################################################################
 #
 #    COMPILE OPTIONS
@@ -104,6 +109,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<PLATFORM_ID:Linux>:-march=native>     # Tune generated code for host's micro-architecture
       $<$<PLATFORM_ID:Darwin>:-mtune=native>    # Tune generated code for host's micro-architecture (march not working on Darwin)
       $<$<PLATFORM_ID:Linux>:-mcmodel=large>    # Required on Linux
+      $<$<BOOL:${LINK_TIME_OPTIMIZATION}>:-fopenmp> # Compile with fopenmp option if OpenMP libs are found
       # Config-specific options: RELEASE
       $<$<CONFIG:RELEASE>:-O3>                  # Optimization level at 3 for Release
       $<$<AND:$<BOOL:${LINK_TIME_OPTIMIZATION}>,$<CONFIG:RELEASE>>:-flto>  # Activate link time optimizations so that gfortran can inline some function calls
@@ -146,6 +152,7 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
       # "-extend-source 132"                        # Allow arbitrary long lines (132 seems the longest allowed with ifort). Needed as preprocessing could generate long lines.
       -no-wrap-margin                             # Don't wrap output files
       $<$<PLATFORM_ID:Linux>:-mcmodel=large>      # Required on Linux
+      $<$<BOOL:${LINK_TIME_OPTIMIZATION}>:-qopenmp> # Compile with qopenmp option if OpenMP libs are found
       # Config-specific options: RELEASE
       $<$<CONFIG:RELEASE>:-O3>                    # Optimization level at 3 for Release
       $<$<CONFIG:RELEASE>:-xHost>                 # Generate instructions for the highest instruction set available on the compilation host processor
@@ -227,6 +234,10 @@ target_compile_definitions(hib PUBLIC $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME
 # The following is for preprocessing of hiversion.F90
 target_compile_definitions(hib PUBLIC _BUILD_VERS_=${PROJECT_VERSION})
 target_compile_definitions(hib PUBLIC _BUILD_TYPE_="${CMAKE_BUILD_TYPE}")
+execute_process (COMMAND bash -c "git -C ${CMAKE_CURRENT_LIST_DIR} rev-parse HEAD 2>/dev/null" OUTPUT_VARIABLE GIT_REVISION)
+if(NOT GIT_REVISION STREQUAL "")
+  string(STRIP ${GIT_REVISION} GIT_REVISION)
+endif()
 target_compile_definitions(hib PUBLIC _GIT_REVISION_="${GIT_REVISION}")
 target_compile_definitions(hib PUBLIC _BUILD_SYS1_="${CMAKE_HOST_SYSTEM_NAME}")
 target_compile_definitions(hib PUBLIC _BUILD_SYS2_="${CMAKE_HOST_SYSTEM_VERSION}")

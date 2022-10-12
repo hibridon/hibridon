@@ -169,6 +169,7 @@ use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax,
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_vib, only: nvibs, ivibs, nvibp, ivibp
+use mod_himatrix, only: mxva
 
 implicit double precision (a-h,o-z)
 real(8), intent(out), dimension(:) :: sc1
@@ -1055,11 +1056,11 @@ subroutine vlsgpi (jp, lp, j, l, jtot, iomegp, iomeg, lambda, &
 !  subroutines called:
 !     xf3j, xf6j
 !  -----------------------------------------------------------------------
+use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
 !      real half, halfm, one, onem, threhf, thrhfm, two, v, x, xj,
 !     :     xjp, xjtot, xl, xlamda, xlp, xnorm, xnu, xnum, xomeg,
 !     :     xomegm, xomegp, xomgpm, zero
-!      real xf3j, xf6j
 integer ieps, iepsp, iomeg, iomegp, ione, iphase, j, jp, jtot, &
         l, lambda, lp, nu
 logical csflag
@@ -1348,6 +1349,7 @@ use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_skip, only: nskip, iskip
 use mod_vib, only: nvibs, ivibs, nvibp, ivibp
+use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt

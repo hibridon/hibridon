@@ -146,8 +146,7 @@ module mod_hinput
     'SYSCONF ', &
     'HYPXSC  ', &
     'STMIX   ', &
-    'TRNPRT  ', &
-    'SHOWPOT ']
+    'TRNPRT  ']
 
   character(len=8), parameter :: bascod(1) = ['BASISTYP']
 
@@ -210,7 +209,7 @@ use mod_hibrid5, only : readpc
 use mod_difcrs, only: difcrs
 use mod_hibasis, only: is_twomol, basknd
 use mod_hibrid2, only: enord, prsg
-use mod_hibrid3, only: testptn, testpt20, testpt, potmin
+use mod_hibrid3, only: potmin
 use mod_hiutil, only: assignment_parse
 use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT, RPAR_COUNT
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
@@ -230,9 +229,13 @@ use mod_selb, only: ibasty
 use mod_file, only: input, output, jobnam, savfil
 use mod_sav, only: iipar, ixpar, irpar, rxpar
 use mod_tensor, only: tenopa, mrcrs
+use mod_hitestptn, only: testptn
 use mod_two, only: numj, nj1j2
 use mod_opti, only: optifl
-
+use mod_hiutil, only: get_token, lower, upper, lenstr, vaxhlp, sys_conf
+use mod_hitrnprt, only: trnprt
+use mod_hibrid1, only: difs, turn
+use mod_hibrid4, only: psi, eadiab1, sprint
 implicit none
 character(len=K_MAX_USER_LINE_LENGTH) line
 character(len=40) :: fnam1
@@ -333,7 +336,6 @@ lindx(FCOD_BOUNDC) = LPAR_BOUNDC
 ! hypxsc: 2950
 ! stmix:  3000
 ! trnprt:  3100
-! showpot:  3300
 ! nb after changing the following list, check that all the variables "incode"
 ! that follow after address 900 are changed accordingly
 !
@@ -768,13 +770,7 @@ goto 15  ! label:interpret_next_statement(line, l1)
 ! test potential
 ! testpot
 ! you will be prompted for r and theta. to exit, specify r=0
-1200 if (ibasty .eq. 1 .or. ibasty .eq. 4) then
-  call testptn(lpar(LPAR_IHOMO))
-else if (ibasty .eq. 20) then
-  call testpt20(lpar(LPAR_IHOMO))
-else
-  call testpt(lpar(LPAR_IHOMO))
-end if
+1200 call testptn(lpar(LPAR_IHOMO))
 goto 1  ! label:read_new_line
 ! save input parameters
 !     save=filename
@@ -1397,13 +1393,6 @@ call assignment_parse(code(1:lc),empty_var_list,j,a(1))
 ! get in1, in2, jtotmx, join, jmax
 3105 continue
 call trnprt(fnam1,a)
-goto 1  ! label:read_new_line
-3300 continue
-write(6,*) "************************************************************"
-write(6,*) "Entering the DRIVER subroutine of the potential"
-write(6,*) "Press Ctrl+D to go back to Hibridon's console"
-write(6,*) "************************************************************"
-call driver
 goto 1  ! label:read_new_line
 end
 

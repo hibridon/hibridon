@@ -36,6 +36,7 @@
 !     filled in the pot routine.
 !     This module replaces lammin, lammax, mproj in hibridon.
 module mod_stp1sg
+use mod_hiutil, only: tf3j, f6j, f9j, tf3jm0
 implicit none
 !
 type lm_type
@@ -62,11 +63,12 @@ module mod_hiba21_stp1sg
 !     ------------------------------------------------------------------
    real(8) function vstp1sg(j1p, lp, j1, l, j2p, j2, j12p, j12, &
    jtot, kp, k, lam1, mu1, lam2, lam, epsp, eps)
+use mod_hiutil, only: tf3j, f6j, f9j, tf3jm0
 implicit none
 integer :: j1p, kp, epsp, j2p, j12p, lp, j1, k, eps, j2, j12, l, &
    jtot, lam1, mu1, lam2, lam
 integer :: iphase, tj1p, tj1, tlam1, tkp, tmu1, tk
-real(8) :: pref, threej, sixj, ninej, tf3jm0, tf3j, f6j, f9j
+real(8) :: pref, threej, sixj, ninej
 real(8), parameter :: machep = epsilon(0d0)
 !
 vstp1sg = 0d0

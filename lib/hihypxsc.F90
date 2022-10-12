@@ -44,11 +44,14 @@ use mod_coisc11, only: jpack => isc11 ! jpack(1)
 use mod_coisc12, only: lpack => isc12 ! lpack(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc3, only: elevh => sc3 ! elevh(1)
-use mod_hibrid5, only: sread
+use mod_hismat, only: sread
 use mod_hibasis, only: is_j12
 use constants, only: econv, xmconv, ang2 => ang2c
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
+use mod_hiutil, only: gennam, mtime
+use mod_hiutil, only: xf6j
+use mod_hismat, only: sread, rdhead, sinqr
 implicit double precision (a-h,o-z)
 character*(*) flname
 real(8), dimension(4), intent(in) :: a(4)
@@ -285,11 +288,7 @@ if (ialloc .ne. 0) goto 4010
 !     fix for case where jtot=0 has only one parity
 jfrst = 2000
 jfin = 0
-do ij = 0, jfinl
-  do ip = 1, 2
-    length(ij,ip) = 0
-  end do
-end do
+
 !     parameter to read lower triangle of open channel(s)
 100 nopen = -1
 call sread (0, sreal, simag, jtot, jlpar, &
@@ -353,10 +352,11 @@ lmax = iftmx + jmx + 1
 jrmx = lmax + jmx + 1
 idimr = jrmx + 1
 idim = idimr * (lmax + 1)
-allocate(tmatr(idim, idim), stat=ialloc)
-if (ialloc .ne. 0) goto 4011
-allocate(tmati(idim, idim), stat=ialloc)
-if (ialloc .ne. 0) goto 4011
+
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
+allocate(tmatr(idim, idim))
+allocate(tmati(idim, idim))
+!$OMP DO
 do iftot = iftmn, iftmx
   xftot = iftot + fhspin
   do jlp = 1, 2
@@ -451,13 +451,7 @@ do iftot = iftmn, iftmx
 !     end of if statement checking in length
           end if
         end do
-        t2sum = 0.d0
-        do i1=1,idim
-          do i2=1,idim
-            t2sum = t2sum + tmatr(i1,i2)**2 &
-                + tmati(i1,i2)**2
-          end do
-        end do
+        t2sum = sum(tmatr*tmatr + tmati*tmati)
         sigma(i,ii) = sigma(i,ii) + t2sum &
             * (2.d0 * xftot + 1.d0)
         if (i.ne.ii) then
@@ -468,8 +462,10 @@ do iftot = iftmn, iftmx
     end do
   end do
 end do
+!$OMP END DO
 deallocate(tmatr)
 deallocate(tmati)
+!$OMP END PARALLEL
 !
 else
 !
@@ -521,12 +517,12 @@ lmax = iftmx + jmx + 1
 jrmx = lmax + jmx + 1
 idimr = jrmx + 1
 idim = idimr * (lmax + 1)
-allocate(tmatr(idim, idim), stat=ialloc)
-if (ialloc .ne. 0) goto 4011
-allocate(tmati(idim, idim), stat=ialloc)
-if (ialloc .ne. 0) goto 4011
-!
+
 !  NOTE:  xftot is called K in Lara-Moreno et al.
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
+allocate(tmatr(idim, idim))
+allocate(tmati(idim, idim))
+!$OMP DO
 do iftot = iftmn, iftmx-1
   xftot = float(iftot) + dspin
   do jlp = 1, 2
@@ -632,13 +628,7 @@ do iftot = iftmn, iftmx-1
           end if
          end do
         end do
-        t2sum = 0.d0
-        do i1=1,idim
-          do i2=1,idim
-            t2sum = t2sum + tmatr(i1,i2)**2 &
-                + tmati(i1,i2)**2
-          end do
-        end do
+        t2sum = sum(tmatr*tmatr + tmati*tmati)
         sigma(i,ii) = sigma(i,ii) + t2sum &
             * (2.d0 * xftot + 1.d0)
         if (i.ne.ii) then
@@ -649,8 +639,10 @@ do iftot = iftmn, iftmx-1
     end do
   end do
 end do
+!$OMP END DO
 deallocate(tmatr)
 deallocate(tmati)
+!$OMP END PARALLEL
 !
 !  compute cross sections for atom-molecule collisions with two nuclear spins
 !
@@ -735,10 +727,11 @@ jrmx = lmax + j2mx + 1
 idimr = jrmx + 1
 idim = idimr * (lmax + 1)
 !     next allocate scratch arrays
-allocate(tmatr(idim, idim), stat=ialloc)
-if (ialloc .ne. 0) goto 4011
-allocate(tmati(idim, idim), stat=ialloc)
-if (ialloc .ne. 0) goto 4011
+
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
+allocate(tmatr(idim, idim))
+allocate(tmati(idim, idim))
+!$OMP DO
 do iftot = iftmn, iftmx
   xftot = iftot + fhspin
   do jlp = 1, 2
@@ -854,13 +847,7 @@ do iftot = iftmn, iftmx
             end do
           end do
         end do
-        t2sum = 0.d0
-        do i1 = 1, idim
-          do i2 = 1, idim
-            t2sum = t2sum + tmatr(i1,i2)**2 &
-                + tmati(i1,i2)**2
-          end do
-        end do
+        t2sum = sum(tmatr*tmatr + tmati*tmati)
 !  do not include contribution from last ftot
         if (iftot.ne.iftmx) then
           sigma(i,ii) = sigma(i,ii) + t2sum &
@@ -874,8 +861,10 @@ do iftot = iftmn, iftmx
     end do
   end do
 end do
+!$OMP END DO
 deallocate(tmatr)
 deallocate(tmati)
+!$OMP END PARALLEL
 !
 !  end of molecule-molecule section
 !

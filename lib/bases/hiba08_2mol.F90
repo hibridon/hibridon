@@ -445,6 +445,7 @@ function f2mol(lb1,lb2,lb,j1,j2,j12,l,j1p,j2p,j12p,lp,j)
 ! considerations in the quantum treatment of collisions
 ! between two diatomic molecules'.
 ! note that (4*pi)**3=1984.40171
+use mod_hiutil, only: f3j0, f6j
 implicit double precision (a-h,o-z)
 data zero /0.d0/
 f2mol=zero
@@ -520,6 +521,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use funit, only: FUNIT_INP
 use mod_two, only: numj, nj1j2
+use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt

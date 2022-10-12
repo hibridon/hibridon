@@ -605,6 +605,7 @@ end
 double precision function v2pisg(jtot, j1p, eps1p, c12p, c32p, &
      j2p, j12p, lp, j1, eps1, c12, c32, j2, j12, l, &
      lam1, lam2, lam, isdiag)
+use mod_hiutil, only: xf3j, xf6j, xf9j, xf3jm0
 implicit none
 !     
 !     The subroutine calculate the coupling matrix elements, shown in
@@ -621,7 +622,6 @@ integer :: iphase
 real(8) :: phase, pref, threej, sixj, ninej
 real(8) :: xj1p, xj2p, xj12p, xlp, &
      xj1, xj2, xj12, xl, xjtot, xlam1, xlam2, xlam
-real(8) :: xf3jm0, xf3j, xf6j, xf9j
 real(8), parameter :: machep=epsilon(0d0)
 !     
 !     One is added since j1p and j1 should be half integers

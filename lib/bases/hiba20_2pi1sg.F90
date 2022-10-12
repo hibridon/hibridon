@@ -41,6 +41,7 @@ contains
 double precision function v2pi1sg(tjtot, tj1p, eps1p, c32p, c12p, &
      tj2p, tj12p, tlp, tj1, eps1, c32, c12, tj2, tj12, tl, &
      tlam1, tlam2, tlam, isdiag)
+use mod_hiutil, only: tf3j, tf6j, tf9j, tf3jm0
 implicit none
 !
 !     The subroutine calculate the coupling matrix elements, shown in
@@ -55,7 +56,6 @@ real(8) :: c12p, c32p, c12, c32
 logical :: isdiag
 integer :: iphase
 real(8) :: phase, pref, threej, sixj, ninej
-real(8) :: tf3j, tf6j, tf9j, tf3jm0
 real(8), parameter :: machep=epsilon(0d0)
 !
 v2pi1sg = 0d0

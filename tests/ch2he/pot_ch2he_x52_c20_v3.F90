@@ -596,13 +596,14 @@ subroutine spline_ch2he(vsp_jacek, r)
 !  r  new distance, where pot need to be calculated by spline-Fitchbur
 !  VNO  pot at r, output
 implicit double precision (a-h,o-z)   
-integer k
-dimension b0(19,52),c0(19,52),a0(19,52),rr(19)
-dimension vsp_jacek(52)
-dimension vv(988),v(19,52),vvec(19,52)
-data rr /3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,11, &
- 12,13,15,20/
-data ifirst /0/
+real(8), intent(out) :: vsp_jacek(52)
+real(8), intent(in)  :: r
+real(8), save :: b0(19,52), c0(19,52), a0(19,52), vvec(19,52)
+real(8) :: rr(19)
+real(8) ::  vv(988),v(19,52)
+integer :: k
+integer, save :: ifirst=0
+data rr /3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,11,12,13,15,20/
 if (ifirst.eq.0) then
    open (unit=10,file= &
      'potdata/ch2he_x52_v3.dat')
