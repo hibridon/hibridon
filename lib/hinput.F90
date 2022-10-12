@@ -115,7 +115,7 @@ module mod_hinput
     k_keyword_execute_command_mgr_command     =  6   !   45 label:execute_command_mgr_command(i)
   end enum
 
-  integer, parameter :: ncode = 31  !  ncode is the number of bcod's
+  integer, parameter :: ncode = 30  !  ncode is the number of bcod's
   character(len=8), parameter :: bcod(ncode) = [ &  ! bcod stores hibridon's commands
     'CHECK   ', &
     'DEBROGLI', &
@@ -244,8 +244,6 @@ character*40 :: code
 character*8 empty_var_list(0)
 integer nerg
 logical first
-integer :: lenstr
-real(8) :: turn
 logical logp, opti
 real(8) :: a(15)  ! real arguments
 integer :: ia(10)  ! integer arguments of commands

@@ -54,12 +54,6 @@ implicit none
     procedure :: execute => run_execute
   end type run_command_type
 
-  ! showpot
-  type, extends(command_type) :: showpot_command_type
-  contains
-    procedure :: execute => showpot_execute
-  end type showpot_command_type
-
   ! show
   type, extends(command_type) :: show_command_type
   contains
@@ -153,6 +147,7 @@ contains
     use mod_command, only: k_post_action_exit_hibridon, k_post_action_read_new_line
     use mod_hinput_state, only: batch
     use mod_file, only: input, output, jobnam, savfil
+    use mod_hiutil, only: get_token, lower, upper
 
     class(input_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
@@ -191,6 +186,8 @@ contains
   subroutine job_execute(this, statements, bofargs, next_statement, post_action)
     use mod_command, only: k_post_action_interpret_next_statement
     use mod_file, only: input, output, jobnam, savfil
+    use mod_hiutil, only: get_token, lower, upper
+
     class(job_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
     integer, intent(in) :: bofargs
@@ -216,6 +213,8 @@ contains
     use mod_hiutil, only: assignment_parse
     use mod_command, only: k_post_action_read_new_line
     use mod_file, only: input, output, jobnam, savfil
+    use mod_hiutil, only: get_token, lower, upper
+
     implicit none
     class(intcrs_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
@@ -254,6 +253,8 @@ contains
     use mod_command, only: k_post_action_interpret_next_statement
     use mod_parpot, only: label => pot_label
     use mod_file, only: input, output, jobnam, savfil
+    use mod_hiutil, only: lenstr
+
     class(label_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
     integer, intent(in) :: bofargs
@@ -263,7 +264,6 @@ contains
     integer :: l
 
     integer :: low, lend
-    integer :: lenstr
 
     low = index (statements, '=') + 1
     lend = index (statements, ';') - 1
@@ -286,6 +286,8 @@ contains
     use mod_command, only: k_post_action_interpret_next_statement
     use funit
     use mod_file, only: input, output, jobnam, savfil
+    use mod_hiutil, only: get_token, lower, upper
+
     class(output_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
     integer, intent(in) :: bofargs
@@ -317,6 +319,7 @@ contains
     use mod_hiutil, only: assignment_parse
     use mod_command, only: k_post_action_read_new_line
     use mod_file, only: input, output, jobnam, savfil
+    use mod_hiutil, only: get_token, lower, upper
     class(prsbr_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
     integer, intent(in) :: bofargs
@@ -414,6 +417,7 @@ contains
     use mod_file, only: input, output, jobnam, savfil
     use mod_par, only: pcod
     use mod_sav, only: iipar, ixpar, irpar, rxpar
+    use mod_hiutil, only: get_token, lower, upper
 
     implicit none
     class(run_command_type) :: this
@@ -505,22 +509,6 @@ contains
     post_action = k_post_action_write_cr_and_exit
   end subroutine run_execute
 
-
-  subroutine showpot_execute(this, statements, bofargs, next_statement, post_action)
-    use mod_command, only: k_post_action_read_new_line
-    class(showpot_command_type) :: this
-    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
-    integer, intent(in) :: bofargs
-    integer, intent(out) :: next_statement
-    integer, intent(out) :: post_action
-    write(6,*) "************************************************************"
-    write(6,*) "Entering the DRIVER subroutine of the potential"
-    write(6,*) "Press Ctrl+D to go back to Hibridon's console"
-    write(6,*) "************************************************************"
-    call driver
-    post_action = k_post_action_read_new_line
-  end subroutine
-
   subroutine show_execute(this, statements, bofargs, next_statement, post_action)
     use mod_par, only: ipar, lpar, rpar
     use mod_hinput_state, only: batch
@@ -539,6 +527,7 @@ contains
     use mod_file, only: input, output, jobnam, savfil
     use mod_par, only: fcod, pcod
     use mod_two, only: numj, nj1j2
+    use mod_hiutil, only: get_token
 
     ! show all parameters and flags
     ! show
@@ -672,10 +661,6 @@ contains
 
     com = run_command_type()
     call command_mgr%register_command('RUN', com)
-    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
-
-    com = showpot_command_type()
-    call command_mgr%register_command('SHOWPOT', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
     com = show_command_type()
