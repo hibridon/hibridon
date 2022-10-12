@@ -1954,8 +1954,8 @@ logical lprnt,lprntf
 character*10 elaps, cpu
 ! 3rd subscript is for state index (subscript = 5 + IN)
 ! states with up to 9 state indices allowed
-integer :: iadr(0:2*jmx,lmx,9)
-real(8) :: f6a(kmx,0:2*jmx,lmx),f6p(kmx)  ! 6jt
+integer, allocatable :: iadr
+real(8), allocatable :: f6a, f6p  ! 6jt
 !
 dimension jpack(1),ipack(1),lpack(1)
 dimension sreal(1), simag(1)
@@ -1965,6 +1965,9 @@ dimension sigma(nj,nj,maxk+1)
 ! array to store partial-j cross sections (K=0-2 only)
 dimension psig0(1001),psig1(1001),psig2(1001)
 !
+allocate(iadr(0:2*jmx,lmx,9))
+allocate(f6a(kmx,0:2*jmx,lmx),f6p(kmx))
+
 ! FLAG FOR DIAGNOSTIC PRINTING
 lprnt = .false.
 if (iprnt .eq. 2) lprnt = .true.
@@ -2357,6 +2360,8 @@ write(tcs_out_unit, 1200) elaps, cpu
 if(.not. batch) write(6,1200) elaps, cpu
 1200 format(/' ** N = 0 COMPLETED, TIMING ELAPSED: ',a, &
         ' CPU: ',a,/)
+deallocate(iadr)
+deallocate(f6a,f6p)
 return
 end
 !------------------------------------------------------------------------
@@ -2406,9 +2411,9 @@ logical lprnt2
 character*10 elaps, cpu
 ! add 3rd subscript for state index (subscript = 5 - IN) (pjd)
 ! states with up to 9 state indices allowed
-integer :: iadr(0:2*jmx,lmx,9)
+integer, allocatable :: iadr
 !      common/cadr/ iadr(0:jmx,lmx)
-real(8) :: f6a(kmx,0:2*jmx,lmx),f9a(3*kmx,lmx)  ! 6jt
+real(8), allocatable :: f6a,f9a  ! 6jt
 
 dimension jpack(1),ipack(1),lpack(1)
 dimension sreal(1), simag(1)
@@ -2423,6 +2428,9 @@ data ai / (0.d0,1.d0)/
 #if defined(HIB_CRAY)
 data ai / (0.d0,1.d0)/
 #endif
+
+allocate(iadr(0:2*jmx,lmx,9))
+allocate(f6a(kmx,0:2*jmx,lmx),f9a(3*kmx,lmx))
 
 !* flag for diagnostic printing
 lprnt2 = .false.
@@ -2799,6 +2807,8 @@ cpu1 = cpu1 - cpu0
 ela1 = ela1 - ela0
 call gettim(ela1,elaps)
 call gettim(cpu1,cpu)
+deallocate(iadr)
+deallocate(f6a,f6p)
 return
 end
 !-------------------------------------------------------------------------
@@ -2845,9 +2855,9 @@ character*10 elaps, cpu
 
 ! add 3rd subscript for state index (subscript = 5 + IN)
 ! states with up to 9 state indices allowed
-integer :: iadr(0:jmx,lmx,9)
+integer, allocatable :: iadr
 !      common/cadr/ iadr(0:jmx,lmx)
-real(8) :: f6a(kmx,0:jmx,lmx),f6p(kmx)  ! 6jt
+real(8), allocatable :: f6a, f6p  ! 6jt
 !
 dimension jpack(1),ipack(1),lpack(1)
 dimension sreal(1), simag(1)
@@ -2857,6 +2867,8 @@ dimension sigma(nj,nj,maxk+1)
 ! array to store partial-j cross sections (K=0-2 only)
 dimension psig0(1001),psig1(1001),psig2(1001)
 !
+allocate(iadr(0:jmx,lmx,9))
+allocate(f6a(kmx,0:jmx,lmx),f6p(kmx))
 ! FLAG FOR DIAGNOSTIC PRINTING
 lprnt = .false.
 if (iprnt .eq. 2) lprnt = .true.
@@ -3242,6 +3254,8 @@ write(tcs_out_unit, 1200) elaps, cpu
 if(.not. batch) write(6,1200) elaps, cpu
 1200 format(/' ** N = 0 COMPLETED, TIMING ELAPSED: ',a, &
         ' CPU: ',a,/)
+deallocate(iadr)
+deallocate(f6a,f6p)
 return
 end
 
