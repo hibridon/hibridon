@@ -2808,7 +2808,7 @@ ela1 = ela1 - ela0
 call gettim(ela1,elaps)
 call gettim(cpu1,cpu)
 deallocate(iadr)
-deallocate(f6a,f6p)
+deallocate(f6a,f9a)
 return
 end
 !-------------------------------------------------------------------------
