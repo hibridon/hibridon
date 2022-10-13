@@ -264,7 +264,11 @@ subroutine fill_levelh(nlevel, jlev, elev, inlev, j1min, j2max, ered, fspin, fin
       endif
     endif
   enddo
+  return
 end subroutine fill_levelh
+
+
+
 
 
 !************************************************************************************************
@@ -299,12 +303,12 @@ subroutine molecule_atom_1spin(nucspin, fspin, finuc, fhspin, j1min, j2max, nlev
   iftmx = int(jfinl + fspin + finuc - fhspin)
 
   ! Count and set up list of hyperfine levels for which XS are to be calculated
+  ! Count
   call fill_levelh(nlevel, jlev, elev, inlev, j1min, j2max, ered, fspin, finuc, .false., .false.,&
                    nlevelh, jlevh, inlevh, iflevh, elevh)
   allocate(elevh(nlevelh), jlevh(nlevelh), inlevh(nlevelh), iflevh(nlevelh))
   call fill_levelh(nlevel, jlev, elev, inlev, j1min, j2max, ered, fspin, finuc, .false., .true.,&
                    nlevelh, jlevh, inlevh, iflevh, elevh)
-
   ! Allocate sigma array
   allocate(sigma(nlevelh,nlevelh))
   sigma = 0d0
@@ -385,7 +389,7 @@ subroutine molecule_atom_1spin(nucspin, fspin, finuc, fhspin, j1min, j2max, nlev
                     tmati(ll+1,lp+1) = tmati(ll+1,lp+1) + aimag(t)
   !     for initial level = final level, but l.ne.lp, need to include
   !     both T(l,lp) and T(lp,l)
-                    if (jlevh(i).eq.jlevh(ii) .and. inlevh(i).eq.inlevh(ii) .and. abs(xl-xlp)<1d-60) then
+                    if (jlevh(i).eq.jlevh(ii) .and. inlevh(i).eq.inlevh(ii) .and. abs(xl-xlp)>1d-60) then
   !     note that T(l,lp) = T(lp,l)* (Hermitean matrix)
                       tmatr(lp+1,ll+1) = tmatr(lp+1,ll+1) + real(t)
                       tmati(lp+1,ll+1) = tmati(lp+1,ll+1) - aimag(t)
@@ -399,16 +403,13 @@ subroutine molecule_atom_1spin(nucspin, fspin, finuc, fhspin, j1min, j2max, nlev
           end do
           t2sum = sum(tmatr*tmatr + tmati*tmati)
           sigma(i,ii) = sigma(i,ii) + t2sum * (2.d0 * xftot + 1.d0)
-          if (i.ne.ii) then
-            sigma(ii,i) = sigma(ii,i) + t2sum * (2.d0 * xftot + 1.d0)
-          end if
+          if (i.ne.ii) sigma(ii,i) = sigma(ii,i) + t2sum * (2.d0 * xftot + 1.d0)
         end do
       end do
     end do
   enddo
   deallocate(tmatr)
   deallocate(tmati)
-
   ! Compute hyperfine XS
   call compute_xs(nlevelh, rmu, .false., ered, fhspin, iflevh, elevh, jlevh, sigma)
   ! Print hyperfine cross sections
