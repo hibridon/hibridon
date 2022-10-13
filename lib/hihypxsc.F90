@@ -1,7 +1,31 @@
 module mod_hypxsc
 implicit none
-
-
+!*******************************************************************************
+!     Module to compute hyperfine-resolved integral cross sections
+!
+!     reference:  alexander and dagdigian, jcp 83, 2191 (1985)
+!     see also corey and mccourt, jpca 87, 2723 (1983) for
+!     expression for spin-resolved T-matrix elements
+!
+!     this subroutine requires close-coupled s-matrix for
+!     both parities
+!
+!     cross sections written to both terminal output and
+!     {jobname}n.hfx file
+!
+!     Three cases can be treated:
+!        - atom-molecule collisions with one nuclear spine
+!        - atom-molecule collisions with two nuclear spine
+!        - molecule-molecule collisions with one nuclear spine
+!
+!     original author:  p.j. dagdigian
+!     this subroutine is a complete rewrite of an earlier
+!     subroutine written by j. klos and f. lique
+!
+!     Refactored as a module and parallelized by 
+!              b. desrousseaux (oct. 2022)
+!
+!*******************************************************************************
 
 contains 
 
@@ -33,9 +57,9 @@ subroutine hypxsc(flname, a)
   real(8), dimension(4), intent(in) :: a(4)
   ! Local variables
   character*40 :: smtfil, hfxfil
-  integer :: iener, lend, hfxfil_unit, nucspin, len2, mchmx2, j1min, j2max, nlevelh
+  integer :: iener, lend, hfxfil_unit, nucspin, len2, mchmx2, j1min, j2max
   logical :: supported, exstfl
-  real(8) :: ee, fspin, fhspin, finuc, f2nuc
+  real(8) :: ee, fspin, finuc, f2nuc
   real(8), allocatable :: sigma(:,:)
   ! Read from S-matrix file:
   integer :: mjtot, mchmx, lngth, ierr, jtot, jlpar, nu, nopen, jlp
@@ -47,6 +71,11 @@ subroutine hypxsc(flname, a)
   real(8), allocatable :: sr(:,:,:), si(:,:,:)
   integer, allocatable :: j(:,:,:), in(:,:,:), l(:,:,:), j12(:,:,:), length(:,:)
   logical, allocatable :: exsmtn(:), exsmtp(:)
+  ! Data related to hyperfine levels
+  integer :: nlevelh
+  real(8) :: fhspin
+  real(8), allocatable :: elevh(:)
+  integer, allocatable :: jlevh(:), inlevh(:), iflevh(:)
 
   !call mtime(cpu0, ela0)! initialize timer 
 
@@ -71,6 +100,7 @@ subroutine hypxsc(flname, a)
   nucspin = int(a(2)) ! nucspin is nuclear spin I times 2
   j1min = int(a(3))
   j2max = int(a(4))
+
 
   ! Check if hypxsc supports the basis type and parameters provided in the input
   call check_if_supported(ibasty, flgsu, csflg, jtotd, nnout, nucspin, twmol, supported)
@@ -114,21 +144,35 @@ subroutine hypxsc(flname, a)
     si(jtot,jlp,1:len2) = simag(1:len2)
     if(jtot==jfinl .and. jlpar==-1) exit
   enddo
-
   ! Compute spins
     call compute_spins(nucspin, flaghf, fspin, finuc, f2nuc, fhspin)
 
-  ! Determine the type of collision and call corresponding subroutine
+  ! Count and set up list of hyperfine levels for which XS are to be calculated
+  ! Count:
+  call fill_levelh(nlevel, jlev, elev, inlev, j1min, j2max, ered, fspin, finuc, twmol, .false.,&
+                   nlevelh, jlevh, inlevh, iflevh, elevh)
+  allocate(elevh(nlevelh), jlevh(nlevelh), inlevh(nlevelh), iflevh(nlevelh))
+  ! Fill:
+  call fill_levelh(nlevel, jlev, elev, inlev, j1min, j2max, ered, fspin, finuc, twmol, .true.,&
+                   nlevelh, jlevh, inlevh, iflevh, elevh)
+
+
+  ! Determine the type of collision and call corresponding subroutine to compute squared T-matrix elements
   if (.not. twmol) then 
     if(nucspin < 100) then ! Molecule-Atom with 1 nuclear spin
-      call molecule_atom_1spin(nucspin, fspin, finuc, fhspin, j1min, j2max, nlevel, jlev, elev, inlev, ered,&
-                               jfrst, jfinl, flaghf, rmu, l, in, j, length, sr, si, nlevelh, sigma)
+      call molecule_atom_1spin(fspin, finuc, fhspin, nlevel, jlev, jfrst, jfinl, l, in, j, length, sr, si,&
+                               nlevelh, jlevh, inlevh, iflevh, sigma)
     else ! Molecule-Atom with 2 nuclear spins
       call molecule_atom_2spin()
     endif
   else ! Molecule-Molecule with 1 nuclear spin
       call molecule_molecule_1spin()
   endif
+
+  ! Compute hyperfine XS
+  call compute_xs(nlevelh, rmu, .false., ered, fhspin, iflevh, elevh, jlevh, sigma)
+  ! Print hyperfine cross sections
+  call print_xs(.false., hfxfil_unit, ered, nlevelh, jlevh, iflevh, inlevh, fspin, fhspin, sigma)
 end subroutine hypxsc
 
 
@@ -274,41 +318,32 @@ end subroutine fill_levelh
 !************************************************************************************************
 ! This subroutine computes T matrix elements for molecule-atom collisions with one spin
 !************************************************************************************************
-subroutine molecule_atom_1spin(nucspin, fspin, finuc, fhspin, j1min, j2max, nlevel, jlev, elev, inlev, ered,&
-                               jfrst, jfinl, flaghf, rmu, l, in, j, length, sr, si, nlevelh, sigma)
+subroutine molecule_atom_1spin(fspin, finuc, fhspin, nlevel, jlev, jfrst, jfinl, l, in, j, length, sr, si,&
+                               nlevelh, jlevh, inlevh, iflevh, sigma)
   use mod_hiutil, only: xf6j
   implicit none
   ! Arguments
-  integer, intent(in) :: jlev(*), inlev(*), l(0:jfinl,2,*), j(0:jfinl,2,*), in(0:jfinl,2,*), length(0:jfinl, 2)
-  integer, intent(in) :: nucspin, nlevel, jfrst, jfinl, j1min, j2max
-  real(8), intent(in) :: elev(*), sr(0:jfinl,2,*) , si(0:jfinl,2,*), ered, rmu, fspin, finuc, fhspin
-  logical, intent(in) :: flaghf
-  integer, intent(out) :: nlevelh
-  real(8), allocatable, intent(inout) :: sigma(:,:)
+  integer, intent(in) :: jlev(*), l(0:jfinl,2,*), j(0:jfinl,2,*), in(0:jfinl,2,*), length(0:jfinl, 2)
+  integer, intent(in) :: nlevel, jfrst, jfinl
+  real(8), intent(in) :: sr(0:jfinl,2,*) , si(0:jfinl,2,*), fspin, finuc, fhspin
+  integer, intent(in) :: nlevelh
+  real(8), allocatable, intent(out) :: sigma(:,:)
+  integer, allocatable, intent(in) :: jlevh(:), inlevh(:), iflevh(:)
   ! Local variables
   integer :: jmx, idim
-  real(8), allocatable :: tmatr(:,:), tmati(:,:), elevh(:)
-  integer, allocatable :: jlevh(:), inlevh(:), iflevh(:)
   ! Used within the loops
+  real(8), allocatable :: tmatr(:,:), tmati(:,:)
   integer :: iftot, iftmn, iftmx, jlp, jlpar, i, ii, is
   real(8) :: xftot, xj, xjp, xf, xfp, fffp, xjttmn, xjtot, fjtot, xl, xlp, t2sum
   integer :: jttmin, jttmax, jtot, jlparf, jlpt, irow, icol, iflag, iph, ll, lp, phase
   complex(8) :: t
-  ! For XS
-  integer :: ij1, ij2, ij2p
-  real(8) :: ffi, fff, fak, dencol, denrow
+
+ 
 
   ! Boundaries for loop over iftop   
   iftmn = max(0,int(jfrst + fspin - finuc - fhspin))
   iftmx = int(jfinl + fspin + finuc - fhspin)
 
-  ! Count and set up list of hyperfine levels for which XS are to be calculated
-  ! Count
-  call fill_levelh(nlevel, jlev, elev, inlev, j1min, j2max, ered, fspin, finuc, .false., .false.,&
-                   nlevelh, jlevh, inlevh, iflevh, elevh)
-  allocate(elevh(nlevelh), jlevh(nlevelh), inlevh(nlevelh), iflevh(nlevelh))
-  call fill_levelh(nlevel, jlev, elev, inlev, j1min, j2max, ered, fspin, finuc, .false., .true.,&
-                   nlevelh, jlevh, inlevh, iflevh, elevh)
   ! Allocate sigma array
   allocate(sigma(nlevelh,nlevelh))
   sigma = 0d0
@@ -410,10 +445,6 @@ subroutine molecule_atom_1spin(nucspin, fspin, finuc, fhspin, j1min, j2max, nlev
   enddo
   deallocate(tmatr)
   deallocate(tmati)
-  ! Compute hyperfine XS
-  call compute_xs(nlevelh, rmu, .false., ered, fhspin, iflevh, elevh, jlevh, sigma)
-  ! Print hyperfine cross sections
-  call print_xs(.false., 3, ered, rmu, nlevelh, elevh, jlevh, iflevh, inlevh, fspin, fhspin, sigma)
 end subroutine molecule_atom_1spin
 
 
@@ -449,7 +480,7 @@ subroutine compute_xs(nlevelh, rmu, twmol, ered, fhspin, iflevh, elevh, jlevh, s
   real(8), intent(inout) :: sigma(nlevelh,nlevelh)
   ! Local variables
   real(8) :: fak, dencol, denrow, ffi, fff
-  integer :: ij12, ij2, ij2p, i, ii
+  integer :: ij2, ij2p, i, ii
 
   fak = acos(-1.d0) * ang2 / (2.0d0 * rmu)
   do i=1,nlevelh
@@ -472,17 +503,21 @@ end subroutine compute_xs
 !************************************************************************************************
 ! This subroutine prints XS 
 !************************************************************************************************
-subroutine print_xs(twmol, hfxfil_unit, ered, rmu, nlevelh, elevh, jlevh, iflevh, inlevh, fspin, fhspin, sigma)
-  use constants, only: econv, ang2 => ang2c
+subroutine print_xs(twmol, hfxfil_unit, ered, nlevelh, jlevh, iflevh, inlevh, fspin, fhspin, sigma)
+  use constants, only: econv
   implicit none
   ! Arguments
   integer, intent(in) :: nlevelh
   integer, intent(in) :: iflevh(nlevelh), jlevh(nlevelh), inlevh(nlevelh), hfxfil_unit
-  real(8), intent(in) :: rmu, ered, fspin, fhspin, elevh(nlevelh), sigma(nlevelh,nlevelh)
+  real(8), intent(in) :: ered, fspin, fhspin, sigma(nlevelh,nlevelh)
   logical, intent(in) :: twmol
   ! Local variables
   integer :: i, ii, ij2, ij2p
   real(8) :: xj, xf, xjp, xfp, ee
+
+  ! Write header
+  write(6,"(a)") '%     E(CM-1)     JI     INI   FI      JF     INF   FF      CROSS SECTION (ANG^2)'
+  write(hfxfil_unit,"(a)") '%     E(CM-1)     JI     INI   FI      JF     INF   FF      CROSS SECTION (ANG^2)'
 
   ee = ered*econv
   do i=1,nlevelh
@@ -495,8 +530,8 @@ subroutine print_xs(twmol, hfxfil_unit, ered, rmu, nlevelh, elevh, jlevh, iflevh
         if (sigma(i,ii)>0d0) then
           write(6,"(f12.3,f8.1,i6,f6.1,3x,f6.1,i6,f6.1,5x,1pe15.4)")&
                 ee,xj,inlevh(i),xf,xjp,inlevh(ii),xfp,sigma(i,ii)
-          !write(hfxfil_unit,"(f12.3,f8.1,i6,f6.1,3x,f6.1,i6,f6.1,5x,1pe15.4)")&
-          !      ee,xj,inlevh(i),xf,xjp,inlevh(ii),xfp,sigma(i,ii)
+          write(hfxfil_unit,"(f12.3,f8.1,i6,f6.1,3x,f6.1,i6,f6.1,5x,1pe15.4)")&
+                ee,xj,inlevh(i),xf,xjp,inlevh(ii),xfp,sigma(i,ii)
         end if
       else
         xj = (jlevh(i)/10) + fspin
@@ -508,8 +543,8 @@ subroutine print_xs(twmol, hfxfil_unit, ered, rmu, nlevelh, elevh, jlevh, iflevh
         if (sigma(i,ii)>0d0) then
           write(6,"(f12.3,f8.1,i6,f6.1,i6,3x,f6.1,i6,f6.1,i6,5x,1pe15.4)")&
                 ee,xj,inlevh(i),xf,ij2,xjp,inlevh(ii),xfp,ij2p,sigma(i,ii)
-          !write(hfxfil_unit,"(f12.3,f8.1,i6,f6.1,i6,3x,f6.1,i6,f6.1,i6,5x,1pe15.4)")&
-          !      ee,xj,inlevh(i),xf,ij2,xjp,inlevh(ii),xfp,ij2p,sigma(i,ii)
+          write(hfxfil_unit,"(f12.3,f8.1,i6,f6.1,i6,3x,f6.1,i6,f6.1,i6,5x,1pe15.4)")&
+                ee,xj,inlevh(i),xf,ij2,xjp,inlevh(ii),xfp,ij2p,sigma(i,ii)
         endif
       endif
     enddo
