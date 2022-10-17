@@ -35,6 +35,7 @@ implicit none
     integer, allocatable :: j(:)
     integer, allocatable :: in(:)
     integer, allocatable :: if(:)
+    real(8), allocatable :: f1(:)
   end type hflvl
 
   type spin_data
@@ -178,15 +179,19 @@ subroutine hypxsc(flname, a)
   ! Count and fill hyperfine levels for which XS are to be calculated
   call fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, hf1, hf2)
 
+
   ! Determine the type of collision and call corresponding subroutine to compute squared T-matrix elements
   if (.not. twmol) then 
-    if(nucspin < 100) then ! Molecule-Atom with 1 nuclear spin
+    if(.not. spins%two) then ! Molecule-Atom with 1 nuclear spin
+        write(6,"(a)") "HYPXSC | Molecule-Atom with 1 nuclear spin"
       call molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, l, j, in, length, sr, si,  spins, hf1, sigma)
     else ! Molecule-Atom with 2 nuclear spins
-      call molecule_atom_2spin()
+        write(6,"(a)") "HYPXSC | Molecule-Atom with 2 nuclear spins"
+      call molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, l, j, in, length, sr, si, spins, hf2, sigma)
     endif
   else ! Molecule-Molecule with 1 nuclear spin
-      call molecule_molecule_1spin()
+      write(6,"(a)") "HYPXSC | Molecule-Molecule with 1 nuclear spins"
+      !call molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, l, j, in, length, sr, si,  spins, hf1, hf2, sigma)
   endif
 
   ! Compute hyperfine XS
@@ -367,6 +372,7 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
             if(fill) then
               hf2%j(n2) = hf1%j(i)
               hf2%in(n2) = hf1%in(i)
+              hf2%f1(n2) = f1
               f2 = fnmin + (ii - 1)
               hf2%if(n2) = int(f2)
               hf2%e(n2) = hf1%e(i)
@@ -376,7 +382,7 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
       enddo
       if(.not. fill) then
         hf2%n = n2
-        allocate(hf2%e(hf2%n), hf2%j(hf2%n), hf2%in(hf2%n), hf2%if(hf2%n))
+        allocate(hf2%e(hf2%n), hf2%j(hf2%n), hf2%in(hf2%n), hf2%if(hf2%n), hf2%f1(hf2%n))
         fill = .true.
       else
         exit
@@ -388,13 +394,100 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
 end subroutine fill_hf
 
 
+!************************************************************************************************
+! This subroutine computes XS from T matrix elements 
+!************************************************************************************************
+subroutine compute_xs(twmol, rmu, ered, spins, hf1, hf2, sigma)
+  use constants, only: ang2 => ang2c
+  implicit none
+  ! Arguments
+  logical, intent(in) :: twmol
+  real(8), intent(in) :: rmu, ered
+  type(spin_data), intent(in) :: spins
+  type(hflvl), intent(in) :: hf1, hf2
+  real(8), intent(inout) :: sigma(hf1%n, hf1%n)
+  ! Local variables
+  real(8) :: fak, dencol, denrow, ffi, fff
+  integer :: ij2, ij2p, i, ii
+
+  fak = acos(-1.d0) * ang2 / (2.0d0 * rmu)
+  do i = 1, hf1%n
+    ij2 = 0.d0
+    if (twmol) ij2 = mod(hf1%j(i),10)
+    ffi = hf1%if(i) + spins%h
+    denrow = (2.d0 * ffi + 1.d0) * (2.d0 * ij2 + 1.d0) * (ered - hf1%e(i))
+    do ii = i, hf1%n
+      ij2p = 0.d0
+      if (twmol) ij2p = mod(hf1%j(ii),10)
+      fff = hf1%if(ii) + spins%h
+      dencol = (2.d0 * fff + 1.d0) * (2.d0 * ij2p + 1.d0) * (ered - hf1%e(ii))
+      sigma(i,ii) = sigma(i,ii) * fak / denrow
+      if (i.ne.ii) sigma(ii,i) = sigma(ii,i) * fak / dencol
+   end do
+end do  
+end subroutine compute_xs
+
+
+!************************************************************************************************
+! This subroutine prints XS 
+!************************************************************************************************
+subroutine print_xs(twmol, hfxfil_unit, ered, spins, hf1, hf2, sigma)
+  use constants, only: econv
+  implicit none
+  ! Arguments
+  logical, intent(in) :: twmol
+  integer, intent(in) :: hfxfil_unit
+  real(8), intent(in) :: ered
+  type(spin_data), intent(in) :: spins
+  type(hflvl), intent(in) :: hf1, hf2
+  real(8), intent(in) :: sigma(hf1%n,hf1%n)
+  ! Local variables
+  integer :: i, ii, ij2, ij2p
+  real(8) :: xj, xf, xjp, xfp, ee
+
+  ! Write header
+  write(6,"(a)") '%     E(CM-1)     JI     INI   FI      JF     INF   FF      CROSS SECTION (ANG^2)'
+  write(hfxfil_unit,"(a)") '%     E(CM-1)     JI     INI   FI      JF     INF   FF      CROSS SECTION (ANG^2)'
+
+  ee = ered*econv
+  do i = 1, hf1%n
+    do ii = 1, hf1%n
+      if (.not. twmol) then
+        xj = hf1%j(i) + spins%f
+        xf = hf1%if(i) + spins%h
+        xjp =  hf1%j(ii) + spins%f
+        xfp = hf1%if(ii) + spins%h
+        if (sigma(i,ii)>0d0) then
+          write(6,"(f12.3,f8.1,i6,f6.1,3x,f6.1,i6,f6.1,5x,1pe15.4)")&
+                ee,xj,hf1%in(i),xf,xjp,hf1%in(ii),xfp,sigma(i,ii)
+          write(hfxfil_unit,"(f12.3,f8.1,i6,f6.1,3x,f6.1,i6,f6.1,5x,1pe15.4)")&
+                ee,xj,hf1%in(i),xf,xjp,hf1%in(ii),xfp,sigma(i,ii)
+        end if
+      else
+        xj = (hf1%j(i)/10) + spins%f
+        ij2 = mod(hf1%j(i),10)
+        xf  = hf1%if(i) + spins%h
+        xjp = (hf1%j(ii)/10) + spins%f
+        ij2p = mod(hf1%j(ii),10)
+        xfp  = hf1%if(ii) + spins%h
+        if (sigma(i,ii)>0d0) then
+          write(6,"(f12.3,f8.1,i6,f6.1,i6,3x,f6.1,i6,f6.1,i6,5x,1pe15.4)")&
+                ee,xj,hf1%in(i),xf,ij2,xjp,hf1%in(ii),xfp,ij2p,sigma(i,ii)
+          write(hfxfil_unit,"(f12.3,f8.1,i6,f6.1,i6,3x,f6.1,i6,f6.1,i6,5x,1pe15.4)")&
+                ee,xj,hf1%in(i),xf,ij2,xjp,hf1%in(ii),xfp,ij2p,sigma(i,ii)
+        endif
+      endif
+    enddo
+  enddo
+end subroutine print_xs
+
 
 
 
 !************************************************************************************************
 ! This subroutine computes T matrix elements for molecule-atom collisions with one spin
 !************************************************************************************************
-subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, l, j, in, length, sr, si,  spins, hf1, sigma)
+subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, l, j, in, length, sr, si, spins, hf1, sigma)
   use mod_hiutil, only: xf6j
   implicit none
   ! Arguments
@@ -409,12 +502,12 @@ subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, l, j, in, length, sr,
   ! Used within the loops
   real(8), allocatable :: tmatr(:,:), tmati(:,:)
   integer :: iftot, iftmn, iftmx, jlp, jlpar, i, ii, is
-  real(8) :: xftot, xj, xjp, xf, xfp, fffp, xjttmn, xjtot, fjtot, xl, xlp, t2sum
-  integer :: jttmin, jttmax, jtot, jlparf, jlpt, irow, icol, iflag, iph, ll, lp, phase
+  real(8) :: xftot, xj, xjp, xf, xfp, fffp, xjttmn, xjtot, fjtot, xl, xlp, t2sum, phase
+  integer :: jttmin, jttmax, jtot, jlparf, jlpt, irow, icol, iflag, iph, ll, lp
   complex(8) :: t
 
 
-  ! Boundaries for loop over iftop   
+  ! Boundaries for loop over iftot  
   iftmn = max(0,int(jfrst + spins%f - spins%nuc1 - spins%h))
   iftmx = int(jfinl + spins%f + spins%nuc1 - spins%h)
 
@@ -526,8 +619,162 @@ end subroutine molecule_atom_1spin
 !************************************************************************************************
 ! This subroutine computes T matrix elements for molecule-atom collisions with two spins
 !************************************************************************************************
-subroutine molecule_atom_2spin()
+subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, l, j, in, length, sr, si, spins, hf2, sigma)
+  use mod_hiutil, only: xf6j
   implicit none
+  ! Arguments
+  integer, intent(in) :: jfrst, jfinl, nlevel
+  integer, intent(in) :: jlev(*), l(0:jfinl,2,*), j(0:jfinl,2,*), in(0:jfinl,2,*), length(0:jfinl, 2)
+  real(8), intent(in) :: sr(0:jfinl,2,*) , si(0:jfinl,2,*)
+  type(spin_data), intent(in) :: spins
+  type(hflvl), intent(in) :: hf2
+  real(8), allocatable, intent(out) :: sigma(:,:)
+  ! Local variables
+  integer :: jmx, idim
+  real(8) :: dspin
+  ! Used within the loops
+  real(8), allocatable :: tmatr(:,:), tmati(:,:)
+  integer :: iftot, iftmn, iftmx, jlp, jlpar, i, ii, is, iqmax, iqmin, ir, irmax, irmin
+  real(8) :: xftot, xj, xjp, xf, xfp, fffp, xjtot, fjtot, xl, xlp, t2sum, rprod, xf2, xf2p, r, rmin, phase
+  integer :: jtot, jlparf, jlpt, irow, icol, iflag, iph, ll, lp
+  complex(8) :: t
+
+
+  ! Boundaries for loop over iftot  
+  iftmn = max(0,int(jfrst + spins%f - spins%nuc1 - spins%nuc2))
+  iftmx = int(jfinl + spins%f + spins%nuc1 + spins%nuc2)
+
+  ! Allocate sigma array
+  allocate(sigma(hf2%n, hf2%n))
+  sigma = 0d0
+
+  ! Allocate work arrays
+  jmx = maxval(jlev(1:nlevel))
+  idim = (iftmx + 2*jmx + 3) * (iftmx + jmx + 2)
+  allocate(tmatr(idim, idim))
+  allocate(tmati(idim, idim))
+
+  dspin = spins%f + spins%nuc1  + spins%nuc2
+  if (abs(dspin - 2d0*int(dspin)) < 1d-60) then
+    dspin = 0d0
+  else
+    dspin = 0.5d0
+  endif
+
+  !  NOTE:  xftot is called K in Lara-Moreno et al.
+
+  allocate(tmatr(idim, idim))
+  allocate(tmati(idim, idim))
+
+  do iftot = iftmn, iftmx-1
+    xftot = float(iftot) + dspin
+    do jlp = 1, 2
+      jlpar = 1 - (jlp -1)*2
+      write(6,1334) xftot,jlpar
+  1334      format(' *** Computing partial wave K_tot =',f5.1, &
+                  ', jlpar=',i4)
+      do i=1, hf2%n
+        xj = hf2%j(i) + spins%f
+        xf = hf2%f1(i)
+        xf2 = hf2%if(i)
+        do ii=i, hf2%n
+          xjp = hf2%j(ii) + spins%f
+          xfp = hf2%f1(ii)
+          xf2p = hf2%if(ii)
+          fffp = sqrt((2.d0*xf+1.d0)*(2.d0*xfp+1.d0) &
+            * (2.d0*xf2+1.d0)*(2.d0*xf2p+1.d0))
+          iph = int(xf - xfp - xf2 + xf2p)
+          phase = (-1.d0)**iph
+  !  clear T-matrix array
+          tmatr = 0.d0
+          tmati = 0.d0
+  !  sum over R = K - I2 consistent with vector addition
+          rmin = abs(xftot - spins%nuc2)
+          irmin = int(rmin)
+          irmax = int(xftot + spins%nuc2)
+          do ir = irmin, irmax
+            r  = rmin + (ir - irmin)
+            iqmin = int(abs(r - spins%nuc1))
+            iqmax = int(r + spins%nuc1)
+            do jtot = iqmin, iqmax
+              xjtot = jtot + spins%f
+              fjtot = 2.d0 * xjtot + 1.d0
+  !  total parity must be the same for all T-matrix elements
+  !  in sum over jtot (for the same parity, jlparf
+  !  changes sign for each increase in jtot by 1)
+              jlparf = jlpar*(-1)**(iftot - jtot)
+              jlpt = 1 + (1 - jlparf)/2
+              if (length(jtot,jlpt) .gt. 0) then
+              do irow=1,length(jtot,jlpt)
+  !  flag to make sure initial level is the bra, final level the ket
+                iflag = 0
+                if (j(jtot,jlpt,irow).eq.hf2%j(i) .and. &
+                    in(jtot,jlpt,irow).eq.hf2%in(i)) then
+                  iflag = 1
+                end if
+                do icol=1,irow
+                  if (j(jtot,jlpt,irow).eq.hf2%j(i) .and. &
+                      in(jtot,jlpt,irow).eq.hf2%in(i) .and. &
+                      j(jtot,jlpt,icol).eq.hf2%j(ii) .and. &
+                      in(jtot,jlpt,icol).eq.hf2%in(ii) .or. &
+                      j(jtot,jlpt,icol).eq.hf2%j(i) .and. &
+                      in(jtot,jlpt,icol).eq.hf2%in(i) .and. &
+                      j(jtot,jlpt,irow).eq.hf2%j(ii) .and. &
+                      in(jtot,jlpt,irow).eq.hf2%in(ii)) then
+                    is = (irow*(irow - 1))/2 + icol
+                    if (iflag.ne.1) then
+                      xl = l(jtot,jlpt,icol)
+                      xlp = l(jtot,jlpt,irow)
+                    else
+                      xl = l(jtot,jlpt,irow)
+                      xlp = l(jtot,jlpt,icol)
+                    end if
+  !  convert S-matrix element to T-matrix element
+                    t = -cmplx(sr(jtot,jlpt,is), si(jtot,jlpt,is), 8)
+  !     next statement for diagonal T-matrix element
+                    if (irow.eq.icol) then
+                      t = t + cmplx(1.d0, 0.d0, 8)
+                    end if
+                    rprod = (2.d0*r + 1.d0) &
+                      * xf6j(spins%nuc2,xf,xf2,xl,xftot,r) &
+                      * xf6j(spins%nuc2,xfp,xf2p,xlp,xftot,r) &
+                      * xf6j(spins%nuc1,xj,xf,xl,r,xjtot) &
+                      * xf6j(spins%nuc1,xjp,xfp,xlp,r,xjtot)
+                    t = t * phase * fffp * (2.d0*xjtot + 1.d0) &
+                      * rprod
+                    ll = int(xl)
+                    lp = int(xlp)
+                    tmatr(ll+1,lp+1) = tmatr(ll+1,lp+1) + real(t)
+                    tmati(ll+1,lp+1) = tmati(ll+1,lp+1) + aimag(t)
+  !     for initial level = final level, but l.ne.lp, need to include
+  !     both T(l,lp) and T(lp,l)
+                    if (hf2%j(i) == hf2%j(ii) .and. hf2%in(i) == hf2%in(ii) .and. abs(xl-xlp) > 1d-60) then
+  !     note that T(l,lp) = T(lp,l)* (Hermitean matrix)
+                      tmatr(lp+1,ll+1) = tmatr(lp+1,ll+1) + real(t)
+                      tmati(lp+1,ll+1) = tmati(lp+1,ll+1) - aimag(t)
+                    end if
+  !     if statement below is end of tests for triangle relations
+                  end if
+                end do
+              end do
+  !     end of if statement checking in length
+            end if
+          end do
+          end do
+          t2sum = sum(tmatr*tmatr + tmati*tmati)
+          sigma(i,ii) = sigma(i,ii) + t2sum * (2.d0 * xftot + 1.d0)
+          if (i.ne.ii) then
+            sigma(ii,i) = sigma(ii,i) + t2sum * (2.d0 * xftot + 1.d0)
+          end if
+        end do
+      end do
+    end do
+  end do
+
+  deallocate(tmatr)
+  deallocate(tmati)
+
+
 end subroutine molecule_atom_2spin
 
 
@@ -539,93 +786,6 @@ subroutine molecule_molecule_1spin()
   implicit none
 end subroutine molecule_molecule_1spin
 
-
-!************************************************************************************************
-! This subroutine computes XS from T matrix elements 
-!************************************************************************************************
-subroutine compute_xs(twmol, rmu, ered, spins, hf1, hf2, sigma)
-  use constants, only: ang2 => ang2c
-  implicit none
-  ! Arguments
-  logical, intent(in) :: twmol
-  real(8), intent(in) :: rmu, ered
-  type(spin_data), intent(in) :: spins
-  type(hflvl), intent(in) :: hf1, hf2
-  real(8), intent(inout) :: sigma(hf1%n, hf1%n)
-  ! Local variables
-  real(8) :: fak, dencol, denrow, ffi, fff
-  integer :: ij2, ij2p, i, ii
-
-  fak = acos(-1.d0) * ang2 / (2.0d0 * rmu)
-  do i = 1, hf1%n
-    ij2 = 0.d0
-    if (twmol) ij2 = mod(hf1%j(i),10)
-    ffi = hf1%if(i) + spins%h
-    denrow = (2.d0 * ffi + 1.d0) * (2.d0 * ij2 + 1.d0) * (ered - hf1%e(i))
-    do ii = i, hf1%n
-      ij2p = 0.d0
-      if (twmol) ij2p = mod(hf1%j(ii),10)
-      fff = hf1%if(ii) + spins%h
-      dencol = (2.d0 * fff + 1.d0) * (2.d0 * ij2p + 1.d0) * (ered - hf1%e(ii))
-      sigma(i,ii) = sigma(i,ii) * fak / denrow
-      if (i.ne.ii) sigma(ii,i) = sigma(ii,i) * fak / dencol
-   end do
-end do  
-end subroutine compute_xs
-
-
-!************************************************************************************************
-! This subroutine prints XS 
-!************************************************************************************************
-subroutine print_xs(twmol, hfxfil_unit, ered, spins, hf1, hf2, sigma)
-  use constants, only: econv
-  implicit none
-  ! Arguments
-  logical, intent(in) :: twmol
-  integer, intent(in) :: hfxfil_unit
-  real(8), intent(in) :: ered
-  type(spin_data), intent(in) :: spins
-  type(hflvl), intent(in) :: hf1, hf2
-  real(8), intent(in) :: sigma(hf1%n,hf1%n)
-  ! Local variables
-  integer :: i, ii, ij2, ij2p
-  real(8) :: xj, xf, xjp, xfp, ee
-
-  ! Write header
-  write(6,"(a)") '%     E(CM-1)     JI     INI   FI      JF     INF   FF      CROSS SECTION (ANG^2)'
-  write(hfxfil_unit,"(a)") '%     E(CM-1)     JI     INI   FI      JF     INF   FF      CROSS SECTION (ANG^2)'
-
-  ee = ered*econv
-  do i = 1, hf1%n
-    do ii = 1, hf1%n
-      if (.not. twmol) then
-        xj = hf1%j(i) + spins%f
-        xf = hf1%if(i) + spins%h
-        xjp =  hf1%j(ii) + spins%f
-        xfp = hf1%if(ii) + spins%h
-        if (sigma(i,ii)>0d0) then
-          write(6,"(f12.3,f8.1,i6,f6.1,3x,f6.1,i6,f6.1,5x,1pe15.4)")&
-                ee,xj,hf1%in(i),xf,xjp,hf1%in(ii),xfp,sigma(i,ii)
-          write(hfxfil_unit,"(f12.3,f8.1,i6,f6.1,3x,f6.1,i6,f6.1,5x,1pe15.4)")&
-                ee,xj,hf1%in(i),xf,xjp,hf1%in(ii),xfp,sigma(i,ii)
-        end if
-      else
-        xj = (hf1%j(i)/10) + spins%f
-        ij2 = mod(hf1%j(i),10)
-        xf  = hf1%if(i) + spins%h
-        xjp = (hf1%j(ii)/10) + spins%f
-        ij2p = mod(hf1%j(ii),10)
-        xfp  = hf1%if(ii) + spins%h
-        if (sigma(i,ii)>0d0) then
-          write(6,"(f12.3,f8.1,i6,f6.1,i6,3x,f6.1,i6,f6.1,i6,5x,1pe15.4)")&
-                ee,xj,hf1%in(i),xf,ij2,xjp,hf1%in(ii),xfp,ij2p,sigma(i,ii)
-          write(hfxfil_unit,"(f12.3,f8.1,i6,f6.1,i6,3x,f6.1,i6,f6.1,i6,5x,1pe15.4)")&
-                ee,xj,hf1%in(i),xf,ij2,xjp,hf1%in(ii),xfp,ij2p,sigma(i,ii)
-        endif
-      endif
-    enddo
-  enddo
-end subroutine print_xs
 
 
 end module mod_hypxsc
