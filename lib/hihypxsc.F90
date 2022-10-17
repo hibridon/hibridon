@@ -191,7 +191,7 @@ subroutine hypxsc(flname, a)
     endif
   else ! Molecule-Molecule with 1 nuclear spin
       write(6,"(a)") "HYPXSC | Molecule-Molecule with 1 nuclear spins"
-      !call molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, l, j, in, length, sr, si,  spins, hf1, hf2, sigma)
+      call molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, j12, l, j, in, length, sr, si,  spins, hf1, sigma)
   endif
 
   ! Compute hyperfine XS
@@ -670,9 +670,7 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, l, j, in, length, sr,
     xftot = float(iftot) + dspin
     do jlp = 1, 2
       jlpar = 1 - (jlp -1)*2
-      write(6,1334) xftot,jlpar
-  1334      format(' *** Computing partial wave K_tot =',f5.1, &
-                  ', jlpar=',i4)
+      write(6,"(A,F5.1,A,I4)") ' Computing partial wave K_tot =', xftot, ', jlpar=', jlpar
       do i=1, hf2%n
         xj = hf2%j(i) + spins%f
         xf = hf2%f1(i)
@@ -782,8 +780,163 @@ end subroutine molecule_atom_2spin
 !************************************************************************************************
 ! This subroutine computes T matrix elements for molecule-molecule collisions with one spin
 !************************************************************************************************
-subroutine molecule_molecule_1spin()
+subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, j12, l, j, in, length, sr, si, spins, hf1, sigma)
+  use mod_hiutil, only: xf6j
   implicit none
+  ! Arguments
+  integer, intent(in) :: jfrst, jfinl, nlevel
+  integer, intent(in) :: jlev(*), j12(0:jfinl,2,*), l(0:jfinl,2,*), j(0:jfinl,2,*), in(0:jfinl,2,*), length(0:jfinl, 2)
+  real(8), intent(in) :: sr(0:jfinl,2,*) , si(0:jfinl,2,*)
+  type(spin_data), intent(in) :: spins
+  type(hflvl), intent(in) :: hf1
+  real(8), allocatable, intent(out) :: sigma(:,:)
+  ! Local variables
+  integer :: jmx, jmx2, idim
+  ! Used within the loops
+  real(8), allocatable :: tmatr(:,:), tmati(:,:)
+  integer :: jttmax, jttmin, iftot, iftmn, iftmx, jlp, jlpar, i, ii, is
+  real(8) :: xjttmn, xftot, xj, xjp, xf, xfp, fffp, xjtot, fjtot, xl, xlp, t2sum
+  real(8) :: fj12, fj12p, fjr, fjrp, ph, xj12, xj12p, xj2, xj2p, xjr, xjrp
+  integer :: jtot, jlparf, jlpt, irow, icol, iflag, iph, ll, lp, idimr, isp, jr, jrmax, jrmin, jrp, jrpmax, jrpmin
+  complex(8) :: t, tf
+
+
+  ! Boundaries for loop over iftot  
+  iftmn = max(0,int(jfrst + spins%f - spins%nuc1 - spins%h))
+  iftmx = int(jfinl + spins%f + spins%nuc1 - spins%h)
+
+  ! Allocate sigma array
+  allocate(sigma(hf1%n, hf1%n))
+  sigma = 0d0
+
+  ! Allocate work arrays
+  jmx = maxval(jlev(1:nlevel)/10)
+  jmx2 = maxval(mod(jlev(1:nlevel),10))
+  idim = (iftmx + jmx + 2*jmx2 + 3) * (iftmx + jmx + jmx2 + 2)
+  allocate(tmatr(idim, idim))
+  allocate(tmati(idim, idim))
+
+  do iftot = iftmn, iftmx
+    xftot = iftot + spins%h
+    do jlp = 1, 2
+      jlpar = 1 - (jlp -1) * 2
+      write(6,"(A,F5.1,A,I4)") ' Computing partial wave J_tot =', xftot, ', jlpar=', jlpar
+      do i = 1, hf1%n
+        do ii = i, hf1%n
+          xj = (hf1%j(i)/10) + spins%f
+          xjp = (hf1%j(ii)/10) + spins%f
+          xj2 = mod(hf1%j(i),10)
+          xj2p = mod(hf1%j(ii),10)
+          xf = hf1%if(i) + spins%h
+          xfp = hf1%if(ii) + spins%h
+          fffp = sqrt((2.d0*xf+1.d0)*(2.d0*xfp+1.d0))
+          xjttmn = max(spins%h, xftot - spins%nuc1)
+          jttmin = int(xjttmn - spins%f)
+          jttmin = max(jfrst, jttmin)
+          jttmax = int(xftot + spins%nuc1)
+          jttmax = min(jfinl, jttmax)
+  !     clear tmat arrays
+          tmatr = 0.d0
+          tmati = 0.d0
+  !     sum over jtot consistent with vector addition
+  !     ftot = jtot + nucspin
+          do jtot=jttmin,jttmax
+            xjtot = jtot + spins%f
+            fjtot = 2.d0 * xjtot + 1.d0
+  !     total parity must be the same for all T-matrix elements
+  !     in sum over jtot (for the same parity, jlparf
+  !     changes sign for each increase in jtot by 1)
+            jlparf = jlpar*(-1)**(iftot - jtot)
+            jlpt = 1 + (1 - jlparf)/2
+            do irow = 1, length(jtot,jlpt)
+  !     flag to make sure initial level is the bra, final level the ket
+              iflag = 0
+              if (j(jtot,jlpt,irow) == hf1%j(i) .and. in(jtot,jlpt,irow) == hf1%in(i)) then
+                iflag = 1
+              end if
+              do icol=1,irow
+                if (j(jtot,jlpt,irow).eq.hf1%j(i) .and. &
+                    in(jtot,jlpt,irow).eq.hf1%in(i) .and. &
+                    j(jtot,jlpt,icol).eq.hf1%j(ii) .and. &
+                    in(jtot,jlpt,icol).eq.hf1%in(ii) .or. &
+                    j(jtot,jlpt,icol).eq.hf1%j(i) .and. &
+                    in(jtot,jlpt,icol).eq.hf1%in(i) .and. &
+                    j(jtot,jlpt,irow).eq.hf1%j(ii) .and. &
+                    in(jtot,jlpt,irow).eq.hf1%in(ii)) then
+                  is = (irow*(irow - 1))/2 + icol
+                  if (iflag.ne.1) then
+                    xl = l(jtot,jlpt,icol)
+                    xlp = l(jtot,jlpt,irow)
+                    xj12 = j12(jtot,jlpt,icol) + spins%f
+                    xj12p = j12(jtot,jlpt,irow) + spins%f
+                  else
+                    xl = l(jtot,jlpt,irow)
+                    xlp = l(jtot,jlpt,icol)
+                    xj12 = j12(jtot,jlpt,irow) + spins%f
+                    xj12p = j12(jtot,jlpt,icol) + spins%f
+                  end if
+                  fj12 = sqrt(2.d0 * xj12 + 1.d0)
+                  fj12p = sqrt(2.d0 * xj12p + 1.d0)
+  !     convert S-matrix element to T-matrix element
+                  t = -cmplx(sr(jtot,jlpt,is), si(jtot,jlpt,is), 8)
+  !     next statement for diagonal T-matrix element
+                  if (irow.eq.icol) then
+                    t = t + cmplx(1.d0, 0.d0, 8)
+                  end if
+  !     sums over jR and jRp
+                  jrmin = int(abs(xj2 - xl))
+                  jrmax = int(xj2 + xl)
+                  jrpmin = int(abs(xj2p - xlp))
+                  jrpmax = int(xj2p + xlp)
+                  do jr = jrmin, jrmax
+                    xjr = jr
+                    fjr = sqrt(2.d0 * xjr + 1.d0)
+                    do jrp = jrpmin, jrpmax
+                      xjrp = jrp
+                      fjrp = sqrt(2.d0 * xjrp + 1.d0)
+                      iph = int(xjr + xjrp + xl + xlp + xj2 + xj2p)
+                      ph = 1.d0
+                      if (iph.ne.2*(iph/2)) ph = -1.d0
+                      tf = t * ph * fjtot * fffp &
+                          * fjr * fjrp * fj12 * fj12p &
+                          * xf6j(xj,xj2,xj12,xl,xjtot,xjr) &
+                          * xf6j(xjp,xj2p,xj12p,xlp,xjtot,xjrp) &
+                          * xf6j(xjr,xj,xjtot,spins%nuc1,xftot,xf) &
+                          * xf6j(xjrp,xjp,xjtot,spins%nuc1,xftot,xfp)
+                      ll = int(xl)
+                      lp = int(xlp)
+                      is = (ll + 1) * (idimr - 1) + (jr + 1)
+                      isp = (lp + 1) * (idimr - 1) + (jrp + 1)
+                      tmatr(is,isp) = tmatr(is,isp) + real(tf)
+                      tmati(is,isp) = tmati(is,isp) + aimag(tf)
+  !     for initial level = final level, but l.ne.lp or j12.ne.j12p, need to include
+  !     both T(l,lp) and T(lp,l)
+                      if (hf1%j(i) == hf1%j(ii) .and. hf1%in(i) == hf1%in(ii) .and. irow /= icol) then
+  !     note that T(l,lp) = T(lp,l)* (Hermitean matrix)
+                        tmatr(isp,is) = tmatr(isp,is) + real(tf)
+                        tmati(isp,is) = tmati(isp,is) - aimag(tf)
+                      end if
+                    end do
+                  end do
+                end if
+              end do
+            end do
+          end do
+          t2sum = sum(tmatr*tmatr + tmati*tmati)
+  !  do not include contribution from last ftot
+          if (iftot.ne.iftmx) then
+            sigma(i,ii) = sigma(i,ii) + t2sum * (2.d0 * xftot + 1.d0)
+            if (i.ne.ii) then
+              sigma(ii,i) = sigma(ii,i) + t2sum * (2.d0 * xftot + 1.d0)
+            end if
+          end if
+        end do
+      end do
+    end do
+  end do
+  deallocate(tmatr)
+  deallocate(tmati)
+
 end subroutine molecule_molecule_1spin
 
 
