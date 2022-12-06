@@ -405,9 +405,6 @@ subroutine pot(vv0, r)
 !    ....
 !    vvl(lammax(1)+lammax(2) - 2) contains the [lammax(2),3,0,0]
 !    etc... [l2,m2] sorted as: [0,0],[2,0],[2,-+1],[2,-+2]
-!  variable in module mod_covvl
-!    vvl        array to store r-dependence of each angular term in the
-!               potential
 
 
 !      implicit none

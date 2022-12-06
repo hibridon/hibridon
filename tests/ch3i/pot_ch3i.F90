@@ -263,9 +263,6 @@ subroutine pot (vv0, r)
 !  vvl(6) contains the first anisotropic (2,2) potential
 !  vvl(7) contains the second anisotropic (2,2) potential
 !
-!  variable in module mod_covvl
-!    vvl        array to store r-dependence of each angular term in the
-!               potential
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
 use mod_ch3i, only: vib
