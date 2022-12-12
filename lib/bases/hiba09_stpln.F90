@@ -550,10 +550,10 @@ if (bastst.and. iprint.ge. 2) then
 340   format (/' ILAM  LAMBDA  ICOL  IROW   I    IV2    VEE')
 end if
 lamsum = 0
-ilam = 0
 ASSERT(.not. allocated(v2))
 v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 400 iterm = 1, nterm
+  ilam = 0
   lbmin = lammin(iterm)
 !  if bastst = .true., then get the matrix elements of the lb=0 term
 !  in the potential
