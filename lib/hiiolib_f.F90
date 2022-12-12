@@ -1874,8 +1874,11 @@ use mod_clseg, only: lseg
 use mod_cobuf, only: lbuf
 use mod_disc, only: ipos, iun, iostat, icatf, nam
 implicit double precision (a-h,o-z)
-dimension a(1),buf(lbuf)
+integer, intent(in) :: l, iword
+real(8), intent(out) :: a(l)
+real(8) :: buf(lbuf)
 buf = 0d0
+a = 0d0
 if(lseg.gt.lbuf) stop 'lbuf too small in rdabsf'
 ibl=iword/lseg+1
 m=iword-(ibl-1)*lseg
@@ -1895,9 +1898,22 @@ ibl=ibl+1
 l1=l1-lseg
 25 n=n+lseg
 return
-!
-entry wrabsf(luni,a,l,iword)
-!
+end subroutine rdabsf
+
+subroutine fwait(luni)
+  integer, intent(in) :: luni
+end subroutine fwait
+
+subroutine wrabsf(luni,a,l,iword)
+use mod_clseg, only: lseg
+use mod_cobuf, only: lbuf
+use mod_disc, only: ipos, iun, iostat, icatf, nam
+implicit double precision (a-h,o-z)
+integer, intent(in) :: l, iword
+real(8), intent(in) :: a(l)
+real(8) :: buf(lbuf)
+buf = 0d0
+
 if(lseg.gt.lbuf) stop 'lbuf too small in wrabsf'
 ibl=iword/lseg+1
 m=iword-(ibl-1)*lseg
@@ -1931,11 +1947,12 @@ do 50 i=1,l-n
 write(luni,rec=ibl) (buf(i),i=1,lseg)
 ipos(luni)=max(ipos(luni),ibl)
 return
-!
-entry fwait(luni)
-return
-!
-end
+end subroutine wrabsf
+
+
+
+
+
 #endif
 #if ( defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86) ) && !defined(UNIX_CIO)
 subroutine tmpnm(ifil,name)
