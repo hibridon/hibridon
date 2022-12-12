@@ -882,13 +882,20 @@ subroutine dbout(irec,i1,i2,i3,q,nmax,n)
 implicit none
 integer :: irec
 integer :: i1, i2, i3
+integer, dimension(1) :: ii1, ii2, ii3
 integer :: nmax, n
 real(8), dimension(nmax, n) :: q
 integer :: ifile, i
 ifile=1
-call dbwi(i1,1,ifile,irec)
-call dbwi(i2,1,ifile,0)
-call dbwi(i3,1,ifile,0)
+
+ii1(1) = i1
+ii2(1) = i2
+ii3(1) = i3
+
+call dbwi(ii1,1,ifile,irec)
+call dbwi(ii2,1,ifile,0)
+call dbwi(ii3,1,ifile,0)
+
 do i=1,n
   call dbwr(q(1,i),n,ifile,0)
 end do
@@ -907,12 +914,19 @@ implicit none
 integer, intent(in) :: ifile
 integer :: irec
 integer, intent(out) :: i1, i2, i3
+integer, dimension(1) :: ii1, ii2, ii3
 integer :: nmax, n
 real(8), dimension(nmax, n), intent(out) :: q
 integer :: i
-call dbri(i1,1,ifile,irec)
-call dbri(i2,1,ifile,0)
-call dbri(i3,1,ifile,0)
+
+call dbri(ii1,1,ifile,irec)
+call dbri(ii2,1,ifile,0)
+call dbri(ii3,1,ifile,0)
+
+i1 = ii1(1)
+i2 = ii2(1)
+i3 = ii3(1)
+
 do i=1,n
   call dbrr(q(1,i),n,ifile,0)
 end do
