@@ -155,8 +155,8 @@ integer, intent(in) :: jlpold ! old value of parity, used to insure correct accu
 logical ipos, csflag, prsmat, prt2, writs, wrpart, prpart, &
         wrxsec, prxsec, flaghf, t2test, firstj, twomol, &
         nucros, faux, twojlp
-integer :: jpack(nmax*nmax)
-integer :: lpack(nmax*nmax)
+integer, allocatable :: jpack(:)
+integer, allocatable :: lpack(:)
 
 character*20 cdate
 integer :: soutpt_sc_file = 1
@@ -252,8 +252,12 @@ if (writs .and. nopen .gt. 0) then
                 jtotd, numin, numax, nud, nlevel, nlevop, nnout, &
                 jlev, inlev, elev, jout)
     end if
+    allocate(jpack(nmax*nmax))
+    allocate(lpack(nmax*nmax))
     call swrite (sr, si, jtot, jlpar, nu, jq, lq, inq, isc1, &
                  isc2, jpack, lpack, sc2, nfile, nmax, nopen)
+    deallocate(jpack)
+    deallocate(lpack)
 end if
 
 if (.not. prxsec .and. .not. wrxsec .and. .not.prpart &
