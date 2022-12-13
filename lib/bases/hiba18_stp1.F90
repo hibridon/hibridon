@@ -569,7 +569,7 @@ do 400 iterm = 1, nterm
           if (bastst.and. iprint.ge.2) then
             write (6, 345) ilam, lb, icol, irow, i, vee
             write (9, 345) ilam, lb, icol, irow, i, vee
-345               format (i4, 2i7, 2i6, g17.8)
+345               format (2i4, 2i7, 1i12, 1pe20.10)
           end if
         end if
       end do
