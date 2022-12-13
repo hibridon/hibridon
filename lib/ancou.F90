@@ -168,7 +168,7 @@ module mod_ancou
       real(8) :: expected_sparsity = 0.1
       integer :: expected_num_elements
       ASSERT(ilam > 0)
-      ASSERT(ilam <= this%nlam)
+      ASSERT(ilam-1 <= this%nlam)
       ! v2 matrix is triangular
       max_num_elements = this%num_channels * (this%num_channels + 1)
       expected_num_elements = expected_sparsity * max_num_elements

@@ -550,6 +550,7 @@ if (bastst.and. iprint.ge. 2) then
 340   format (/' ILAM  LAMBDA  ICOL  IROW   I    IV2    VEE')
 end if
 lamsum = 0
+i = 0
 ilam = 0
 ASSERT(.not. allocated(v2))
 v2 = ancou_type(nlam=nlam, num_channels=ntop)
@@ -606,7 +607,7 @@ do 400 iterm = 1, nterm
           if (bastst.and. iprint.ge.2) then
             write (6, 345) ilam, lb, icol, irow, i, vee
             write (9, 345) ilam, lb, icol, irow, i, vee
-345               format (i4, 2i7, 2i6, i6, f17.10)
+345               format (2i4, 2i7, 1i12, 1pe20.10)
           end if
         end if
 350       continue
@@ -626,6 +627,7 @@ if (clist .and. bastst) then
 460   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', &
            i8)
 end if
+call v2%print_summary(667)
 return
 end
 
