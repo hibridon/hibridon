@@ -146,7 +146,8 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
       # force arrays to be allocated on the heap instead of the stack, this removes segmentation faults crash, not sure why
       # the following option means : automatic arrays and arrays created for temporary computations are allocated on the stack if their size can be determined at compile time and if it doesn't exceed 10kb.
       # this option seems necessary for big values of kmax (eg kmax=5000), according to bdesrousseaux, otherwise the user will experience a segmentation fault. I guess that without this option, the stack becomes too small to contain such big arrays...
-      "-heap-arrays 10"                           # Put everything bigger than 10 bytes on the heap
+      -heap-arrays
+      8000                           # Put everything bigger than 8 kbytes on the heap
       # "-extend-source 132"                        # Allow arbitrary long lines (132 seems the longest allowed with ifort). Needed as preprocessing could generate long lines.
       -no-wrap-margin                             # Don't wrap output files
       $<$<PLATFORM_ID:Linux>:-mcmodel=large>      # Required on Linux
