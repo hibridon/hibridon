@@ -529,7 +529,7 @@ real(8),allocatable :: bmat(:)
 
 !     w             scratch array of dimension (nmax,nch)
 !                   used as workspace for the potential matrix
-real(8) :: w(nmax*nch)
+real(8), allocatable :: w(:)
 
 !     The following variables are for size-determination of (machine
 !     dependent) built-in types
@@ -562,6 +562,7 @@ if (nsteps .ne. 0) then
    end if 
 end if
 
+allocate(w(nmax*nch))
 !     row, column and diagonal increments for matrices z and w
 nrow = 1
 ncol = nmax
@@ -983,6 +984,7 @@ if (nsteps /= 0) then
   !     propagation loop ends here
   250 continue
 
+  deallocate(w)
   deallocate(bmat)
   deallocate(amat)
 
@@ -2182,7 +2184,7 @@ logical, intent(in) :: kwrit
 logical, intent(in) :: ipos
 
 
-real(8) :: amat(nmax,nmax)
+real(8), allocatable :: amat(:,:)
 integer :: isc1(nch)
 
 data izero /0/
@@ -2212,6 +2214,8 @@ do   50  i = 1, nch
     lq(nopen) = lq(i)
   end if
 50 continue
+
+allocate(amat(nmax, nmax))
 if (nopen .lt. nch) then
 !  now pack the log-derivative matrix into a matrix of size nopen x nopen
 !  keeping only the open-channel components
@@ -2279,6 +2283,7 @@ if (wavefn) then
    iendwv = iendwv + 8 * sizeof(char_t) &
         + (4 * nopen ** 2 + nopen) * sizeof(dble_t)
 endif
+deallocate(amat)
 call mtime(t11,t22)
 ts=t11 - t1
 tsw=t22 -t2

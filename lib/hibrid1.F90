@@ -1386,10 +1386,10 @@ data powr /3.d0/
 !     dependent) built-in types
 double precision dble_t
 character char_t
-real(8) :: w(nch*nmax)
-real(8), dimension(nch*nmax) :: tmat
-real(8), dimension(nch*nmax) :: vecnow
-real(8), dimension(nch*nmax) :: vecnew
+real(8), allocatable :: w(:)
+real(8), allocatable :: tmat(:)
+real(8), allocatable :: vecnow(:)
+real(8), allocatable :: vecnew(:)
 !  vectors dimensioned nch
 real(8), dimension(nch) :: eigold
 real(8), dimension(nch) :: eignow
@@ -1402,6 +1402,10 @@ real(8), dimension(nch) :: gam1
 real(8), dimension(nch) :: gam2
 integer(8) :: lrairy ! length of an airy record in bytes
 ! ----------------------------------------------------------------------------
+allocate(w(nch*nmax))
+allocate(tmat(nch*nmax))
+allocate(vecnow(nch*nmax))
+allocate(vecnew(nch*nmax))
 if (.not.twoen) itwo = -1
 if (itwo .le. 0) then
   if (photof) then
@@ -1801,6 +1805,11 @@ if (.not. noprin) then
           '   RINCR =',f7.3, &
           '   DRMIN =',f7.3, '   DRMAX =',f7.3,'   NSTEP =', i4)
 end if
+
+deallocate(w)
+deallocate(tmat)
+deallocate(vecnow)
+deallocate(vecnew)
 
 return
 !
