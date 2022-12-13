@@ -1379,7 +1379,7 @@ use mod_file_size, only : isize, isizes
 implicit double precision (a-h,o-z)
 character*(*) name
 parameter (maxun=2, maxrec=5000)
-dimension ii(llbuf)
+dimension ii(l)
 if(iun(ifil).eq.0) then
   write(6,10) ifil,irec
 10   format(/' DIRECT READ ERROR ON FILE',i2,' RECORD',i3, &
@@ -1413,7 +1413,7 @@ if(mod(l,intrel).ne.0.or.mod(ir,intrel).ne.0) then
 end if
 ll=l/intrel
 ir=ir/intrel
-call rdabsf(iun(ifil),ii,llbuf,ir)
+call rdabsf(iun(ifil),ii,ll,ir)
 call fwait(iun(ifil))
 iostat(ifil)=0
 return
