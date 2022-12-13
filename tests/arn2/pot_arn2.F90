@@ -17,7 +17,7 @@ implicit none
     real(8) :: r, vv0
     write(6, *) potnam
     do while(.true.)
-        print *, ' r (bohr)'
+        write (6, *) ' r (bohr)'
         read (5, *, iostat=ios) r
         if (ios /= 0) exit
         call pot(vv0, r)  ! values of the potential are returned in vv0 and vvl
