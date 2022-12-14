@@ -227,7 +227,7 @@ endif()
 
 # make the code aware that ENABLE_UNINIT_VAR_RUNTIME_DETECTOR is on, to allow the code to use workarounds to prevent the code from stopping because of use on unintialized variables in some libraries we have no control (eg mkl's dsyevr function uses uninitialized variables) 
 target_compile_definitions(hib PUBLIC $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>)
-target_compile_definitions(hib PUBLIC $<CONFIG:DEBUG>>:FLOATING_POINT_ERRORS_CAUSE_EXCEPTIONS=1>)
+target_compile_definitions(hib PUBLIC $<$<CONFIG:DEBUG>:FLOATING_POINT_ERRORS_CAUSE_EXCEPTIONS=1>)
 
 # The following is for preprocessing of hiversion.F90
 target_compile_definitions(hib PUBLIC _BUILD_VERS_=${PROJECT_VERSION})
