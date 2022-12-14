@@ -1857,7 +1857,7 @@ character, intent(in) :: jobz
 character, intent(in) :: range
 character, intent(in) :: uplo
 integer, intent(in) :: n
-real(8), dimension(n, n), intent(inout) :: a
+real(8), dimension(lda, n), intent(inout) :: a
 integer, intent(in) :: lda
 real(8), intent(in) :: vl
 real(8), intent(in) :: vu
