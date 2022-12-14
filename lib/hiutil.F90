@@ -1923,7 +1923,8 @@ sum_for_nan_detection = sum(a(1:n,:))
 ! straing: it seems necessay to initialize work, otherwise
 ! floating point exceptions can happen (at least on gfortran
 ! debug build with fpe on)
-work = 0 
+work = 0d0 
+a(n+1:lda,:) = 0d0
 !iwork = 0
 !info = 0
 
