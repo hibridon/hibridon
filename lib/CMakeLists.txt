@@ -102,8 +102,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       # Non-specific options
       -std=legacy                               # Allow pre-Fortran 77 syntax (e.g. arbitrary length arrays)
       -ffree-line-length-none                   # Allow arbitrary long lines. Needed as preprocessing could generate long line lengths.
-#      -fdefault-integer-8
-#      -finteger-4-integer-8
+      -fmax-stack-var-size=8176                 # Limit largest array that will be put on the stack to 8176 Bytes (default limit on macOS)
       $<$<PLATFORM_ID:Linux>:-march=native>     # Tune generated code for host's micro-architecture
       $<$<PLATFORM_ID:Darwin>:-mtune=native>    # Tune generated code for host's micro-architecture (march not working on Darwin)
       $<$<PLATFORM_ID:Linux>:-mcmodel=large>    # Required on Linux
@@ -227,7 +226,8 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
 endif()
 
 # make the code aware that ENABLE_UNINIT_VAR_RUNTIME_DETECTOR is on, to allow the code to use workarounds to prevent the code from stopping because of use on unintialized variables in some libraries we have no control (eg mkl's dsyevr function uses uninitialized variables) 
-target_compile_definitions(hib PUBLIC $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:FLOATING_POINT_ERRORS_CAUSE_EXCEPTIONS=1>)
+target_compile_definitions(hib PUBLIC $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>)
+target_compile_definitions(hib PUBLIC $<CONFIG:DEBUG>>:FLOATING_POINT_ERRORS_CAUSE_EXCEPTIONS=1>)
 
 # The following is for preprocessing of hiversion.F90
 target_compile_definitions(hib PUBLIC _BUILD_VERS_=${PROJECT_VERSION})
