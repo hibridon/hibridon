@@ -1510,16 +1510,16 @@ if (oldlab .ne. label) then
 end if
 jtot=iword(11)
 if(iword(12).ne.jtotd) then
-    write(6,60) iword(12),jtotd
-60     format(/' RESTART: JTOTD=',i2,' RESET TO',i3)
+    write(6,60) jtotd, iword(12)
+60     format(/' RESTART: JTOTD=',i3,' RESET TO ',i3)
 end if
 jtotd=iword(12)
 jlpar=iword(13)
 nu=iword(14)
 nutop=iword(15)
 if(iword(16).ne.nud) then
-    write(6,70) iword(12),jtotd
-70     format(/' RESTART: JTOTD=',i2,' RESET TO',i3)
+    write(6,70) nud, iword(16)
+70     format(/' RESTART: NUD=',i3,' RESET TO ',i3)
 end if
 nud=iword(16)
 nerg=iword(17)
