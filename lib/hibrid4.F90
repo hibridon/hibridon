@@ -505,7 +505,7 @@ read (ifil, end=900, err=950) (w(i), i=1, nopsq), &
      (zmat(i), i=1, nopsq)
 if (photof) then
 ! read in number of initial photodissociation states
-!        call dbri(mphoto,1,ifil,izero)
+!        call dbri(mphoto,1,ifil,REC_LAST_USED)
 !        nphoto=mphoto
 ! read in real part of photodissociation amplitude
 ! overlay sreal which is not needed for photodissociation problem

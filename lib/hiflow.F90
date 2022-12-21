@@ -66,6 +66,7 @@ use mod_opti, only: optifl
 use mod_hiutil, only: mtime, gettim, dater
 use mod_hibrid4, only: wavewr
 use mod_hismat, only: wrhead
+use mod_savfile, only: REC_EN_START, EN_REC_COUNT, EN_REC_PRESENT_INTEGRAL_XS, EN_REC_PREVIOUS_INTEGRAL_XS, EN_REC_PRESENT_PARTIAL_XS, EN_REC_PREVIOUS_PARTIAL_XS, EN_REC_2NDLAST_PARTIAL_XS
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
@@ -123,7 +124,7 @@ logical :: twojlp
 data twojlp / .false. /
 
 real(8), parameter :: mtime_granularity = 0.5d0
-integer, parameter :: tmp_file = 1
+integer, parameter :: tmp_file = FILEID_SAV
 !   to obtain timing information calls are made to system-specific
 !   time subroutine:  call mtime(cpu,wallt) where cpu is clock cpu
 !   time in seconds and wallt is wall clock time in seconds
@@ -559,7 +560,7 @@ else if(ien.gt.1) then
 250     continue
   end if
 end if
-irec=(ien-1)*5+2
+irec = (ien-1) * EN_REC_COUNT + REC_EN_START
 nlevop=0
 do 255 i=1,nlevel
 255 if(elev(i).le.ered) nlevop=nlevop+1
@@ -574,18 +575,18 @@ if (ien .gt. 1) then
 endif
 if (wrxsec .or. prxsec .or. prpart .or. wrpart) then
   if (.not. wavefl .and. .not. photof) then
-    call dres(nlevop**2 + 4, FILEID_SAV, irec)  ! todo : graffy: why +4 ? (+2 should be enough to store i1, i2, i3 ? maybe not on architectures where integers are stored on 8 bytes...?) 
-    call dres(nlevop**2 + 4, FILEID_SAV, irec + 1)
-    call dres(nlevop**2 + 4, FILEID_SAV, irec + 2)
-    call dres(nlevop**2 + 4, FILEID_SAV, irec + 3)
-    call dres(nlevop**2 + 4, FILEID_SAV, irec + 4)
+    call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_PRESENT_INTEGRAL_XS)  ! todo : graffy: why +4 ? (+2 should be enough to store i1, i2, i3 ? maybe not on architectures where integers are stored on 8 bytes...?) 
+    call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_PREVIOUS_INTEGRAL_XS)
+    call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_PRESENT_PARTIAL_XS)
+    call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_PREVIOUS_PARTIAL_XS)
+    call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_2NDLAST_PARTIAL_XS)
     if(nucros) then
-      irec=(nerg+ien-1)*5+2
-      call dres(nlevop**2 + 4, FILEID_SAV, irec)
-      call dres(nlevop**2 + 4, FILEID_SAV, irec + 1)
-      call dres(nlevop**2 + 4, FILEID_SAV, irec + 2)
-      call dres(nlevop**2 + 4, FILEID_SAV, irec + 3)
-      call dres(nlevop**2 + 4, FILEID_SAV, irec + 4)
+      irec= (nerg + ien - 1) * EN_REC_COUNT + REC_EN_START
+      call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_PRESENT_INTEGRAL_XS)
+      call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_PREVIOUS_INTEGRAL_XS)
+      call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_PRESENT_PARTIAL_XS)
+      call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_PREVIOUS_PARTIAL_XS)
+      call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_2NDLAST_PARTIAL_XS)
     end if
     call dsave(FILEID_SAV)
   endif

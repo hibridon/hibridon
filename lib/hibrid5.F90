@@ -18,8 +18,8 @@ implicit none
 
   enum, bind( C )
   enumerator ::  &
-    REC_REALPARAMS        =   0, & 
-    REC_INTPARAMS         =   1, &
+    REC_LAST_USED         =   0, &  ! not actually a valid record index; it is used as a convention by db[wr][ri] subroutines to reuse the last used record index 
+    REC_PARAMS            =   1, &  ! this record stores an array aof real parameters, followed by an array of integer parameters
     REC_EN_START          =   2     ! start of energy records
   end enum
 
@@ -617,7 +617,7 @@ subroutine nusum (tsq, tq1, tq2, tq3, &
 use constants
 use mod_coener, only: energ
 use mod_ered, only: ered, rmu
-use mod_savfile, only: REC_EN_START, EN_REC_COUNT
+use mod_savfile, only: REC_EN_START, EN_REC_COUNT, EN_REC_PRESENT_INTEGRAL_XS
 implicit double precision (a-h,o-z)
 logical ipos, csflag, wrpart, prpart, flaghf, twomol, nucros,vrai
 dimension tsq(nmax,1),tq1(nmax,1),tq2(nmax,1),tq3(nmax,1), &
@@ -629,7 +629,7 @@ do 100 ien = 1,nerg
   ered = ener/econv
   irec=(ien-1)* EN_REC_COUNT + REC_EN_START
   nlevop=nlev(ien)
-  call dbin(tmp_file,irec,jl,jlp,nn,tsq,nmax,nlevop)
+  call dbin(tmp_file,irec+EN_REC_PRESENT_INTEGRAL_XS,jl,jlp,nn,tsq,nmax,nlevop)
 ! print partial cross sections, summed over lbar, for given nu
   if(prpart.or.wrpart) then
     vrai=.false.
@@ -676,9 +676,9 @@ subroutine intpol(irec,jl3a,j1,j2,jd,jp,jpi,jlev, &
 !       the second last partial cross sections on record irec+4 (if available)
 ! ----------------------------------------------------------------------
 use mod_coisc8, only: list => isc8 ! list(20)
-use mod_savfile
+use mod_savfile, only: EN_REC_PRESENT_INTEGRAL_XS, EN_REC_PREVIOUS_INTEGRAL_XS, EN_REC_PRESENT_PARTIAL_XS, EN_REC_PREVIOUS_PARTIAL_XS, EN_REC_2NDLAST_PARTIAL_XS
 implicit double precision (a-h,o-z)
-integer, intent(in) :: irec
+integer, intent(in) :: irec  ! index of the first record (in the sense of iadr(irec, ifil)) used to store the current energy data in the sav file (EN_REC_COUNT records are used for each energy level) 
 integer, intent(in) :: jl3a
 integer, intent(in) :: j1
 integer, intent(in) :: j2
@@ -736,7 +736,7 @@ goto 31
     return
   else
 !.....simply add for jd=1
-    call dbin(tmp_file, irec,jl,jpl,next,q,nmax,n)
+    call dbin(tmp_file, irec + EN_REC_PRESENT_INTEGRAL_XS,jl,jpl,next,q,nmax,n)
     if(jp.eq.jpl.and.jl+1.ne.jl3) then
       write(6,15) jp,jl,jl3
 15       format(/' ERROR IN INTPOL: JP, JL, JL3:',3i4)
@@ -772,7 +772,7 @@ if(jl3.eq.j1.and.jp.eq.jpi) then
   return
 end if
 !.....jl is value up to which jtot has been summed so far
-call dbin(tmp_file, irec,jl,jpl,next,q,nmax,n)
+call dbin(tmp_file, irec + EN_REC_PRESENT_INTEGRAL_XS,jl,jpl,next,q,nmax,n)
 if(jpl.ne.jp) then
   do 30 i=1,n
   do 30 j=1,n
@@ -786,9 +786,9 @@ if(jpl.ne.jp) then
 end if
 nn=min(next+1,3)
 call dbout(irec + EN_REC_PREVIOUS_INTEGRAL_XS,jl,jpl,nn,q,nmax,n)
-call dbin(tmp_file, irec+2,jl2,jp2,nn,q2,nmax,n)
+call dbin(tmp_file, irec + EN_REC_PRESENT_PARTIAL_XS,jl2,jp2,nn,q2,nmax,n)
 if(next.eq.1) goto 50
-call dbin(tmp_file, irec+3,jl1,jp1,nn,q1,nmax,n)
+call dbin(tmp_file, irec + EN_REC_PREVIOUS_PARTIAL_XS,jl1,jp1,nn,q1,nmax,n)
 !
 !.....we will now sum from ji to jf
 !
@@ -939,18 +939,19 @@ subroutine dbout(irec,i1,i2,i3,q,nmax,n)
 !
 ! ---------------------------------------------------------------------------
 use mod_fileid, only: FILEID_SAV
+use mod_savfile, only: REC_LAST_USED
 implicit none
-integer :: irec
-integer :: i1, i2, i3
-integer :: nmax, n
-real(8), dimension(nmax, n) :: q
+integer, intent(in) :: irec
+integer, intent(in) :: i1, i2, i3
+integer, intent(in) :: nmax, n
+real(8), intent(in) :: q(nmax, n)
 integer :: ifile, i
 ifile = FILEID_SAV
 call dbwi(i1,1,ifile,irec)
-call dbwi(i2,1,ifile,0)
-call dbwi(i3,1,ifile,0)
+call dbwi(i2,1,ifile,REC_LAST_USED)
+call dbwi(i3,1,ifile,REC_LAST_USED)
 do i=1,n
-  call dbwr(q(1,i),n,ifile,0)
+  call dbwr(q(1,i),n,ifile,REC_LAST_USED)
 end do
 call dbwc(ifile,irec)
 return
@@ -963,6 +964,7 @@ end
 !
 ! ---------------------------------------------------------------------------
 subroutine dbin(ifile,irec,i1,i2,i3,q,nmax,n)
+use mod_savfile, only: REC_LAST_USED
 implicit none
 integer, intent(in) :: ifile
 integer :: irec
@@ -971,10 +973,10 @@ integer :: nmax, n
 real(8), dimension(nmax, n), intent(out) :: q
 integer :: i
 call dbri(i1,1,ifile,irec)
-call dbri(i2,1,ifile,0)
-call dbri(i3,1,ifile,0)
+call dbri(i2,1,ifile,REC_LAST_USED)
+call dbri(i3,1,ifile,REC_LAST_USED)
 do i=1,n
-  call dbrr(q(1,i),n,ifile,0)
+  call dbrr(q(1,i),n,ifile,REC_LAST_USED)
 end do
 return
 end
@@ -1185,7 +1187,7 @@ if (wrxsec) then
     irec=(ien-1)* EN_REC_COUNT + REC_EN_START
     if(nucros) irec = irec + nerg * EN_REC_COUNT
     nlevop=nlev(ien)
-    call dbin(sav_file, irec,jhold,jphold,nn,zmat,nmax,nlevop)
+    call dbin(sav_file, irec + EN_REC_PRESENT_INTEGRAL_XS,jhold,jphold,nn,zmat,nmax,nlevop)
     call dater (cdate)
     write (nxfile, 215) cdate
 215     format (1x,a)
@@ -1463,19 +1465,21 @@ subroutine intchk(irec,q,q1,q2,q3,jf,jp,nmax,n,nucros)
 !
 ! ---------------------------------------------------------------------------
 !
+use mod_savfile, only: EN_REC_PRESENT_INTEGRAL_XS, EN_REC_PREVIOUS_INTEGRAL_XS, EN_REC_PRESENT_PARTIAL_XS, EN_REC_PREVIOUS_PARTIAL_XS, EN_REC_2NDLAST_PARTIAL_XS
+use mod_fileid, only: FILEID_SAV
 implicit double precision (a-h,o-z)
 logical nucros
 dimension q(nmax,n),q1(nmax,n),q2(nmax,n),q3(nmax,n)
-integer :: cs_file = 1
+integer :: sav_file = FILEID_SAV
 !
 write(6,5)
 write(9,5)
 5 format(/' CHECKING INTERPOLATION DATA IN RESTART FILE:'/)
-call dbin(cs_file, irec+1,jl,jpl,next,q,nmax,n)
+call dbin(sav_file, irec + EN_REC_PREVIOUS_INTEGRAL_XS,jl,jpl,next,q,nmax,n)
 write(6,6) jl,jpl
 write(9,6) jl,jpl
 6 format(' READ INTEGRAL CROSS SECTIONS FOR J=',i3,'  JP=',i2)
-call dbin(cs_file, irec+2,jl3,jp3,nn,q3,nmax,n)
+call dbin(sav_file, irec + EN_REC_PRESENT_PARTIAL_XS,jl3,jp3,nn,q3,nmax,n)
 write(6,7) jl3,jp3
 write(9,7) jl3,jp3
 7 format(' READ PARTIAL  CROSS SECTIONS FOR J=',i3,'  JP=',i2)
@@ -1485,21 +1489,21 @@ if(next.eq.1) then
 10   q(j,i)=q(j,i)+q3(j,i)
   goto 15
 else if(next.eq.2) then
-  call dbin(cs_file, irec+3,jl2,jp2,nn,q2,nmax,n)
+  call dbin(sav_file, irec + EN_REC_PREVIOUS_PARTIAL_XS,jl2,jp2,nn,q2,nmax,n)
   write(6,7) jl2,jp2
   write(9,7) jl2,jp2
   call intpl2(jl,jl2,jl3,nmax,n,q,q2,q3,nucros)
   goto 15
 else if(next.ge.3) then
-  call dbin(cs_file, irec+3,jl2,jp2,nn,q2,nmax,n)
+  call dbin(sav_file, irec + EN_REC_PREVIOUS_PARTIAL_XS,jl2,jp2,nn,q2,nmax,n)
   write(6,7) jl2,jp2
   write(9,7) jl2,jp2
-  call dbin(cs_file, irec+4,jl1,jp1,nn,q1,nmax,n)
+  call dbin(sav_file, irec + EN_REC_2NDLAST_PARTIAL_XS,jl1,jp1,nn,q1,nmax,n)
   write(6,7) jl1,jp1
   write(9,7) jl1,jp1
   call intpl3(jl,jl1,jl2,jl3,nmax,n,q,q1,q2,q3,nucros)
 end if
-15 call dbin(cs_file, irec,jf,jp,nn,q1,nmax,n)
+15 call dbin(sav_file, irec + EN_REC_PRESENT_INTEGRAL_XS,jf,jp,nn,q1,nmax,n)
 write(6,6) jf,jp
 write(9,6) jf,jp
 if(jl3.ne.jf.or.jp3.ne.jp) then
@@ -1546,6 +1550,7 @@ logical writs,csflag,nucros
 character*40 oldlab
 integer jtot, nchmax
 integer, parameter :: bufsize = 32
+integer, parameter :: num_real_params = 20
 dimension word(bufsize),iword(bufsize),nlev(1)
 if (.not. wrpart .and. .not. wrxsec) then
   write (6, 5)
@@ -1555,7 +1560,7 @@ if (.not. wrpart .and. .not. wrxsec) then
   call exit
 endif
 call drest(FILEID_SAV)
-call dbri(iword, bufsize, FILEID_SAV, REC_INTPARAMS)
+call dbri(iword, bufsize, FILEID_SAV, REC_PARAMS)
 j=1
 do i = SAV_INTPARAMS_LABEL, SAV_INTPARAMS_LABEL + NUM_INTS_IN_LABEL - 1
   write(oldlab(j:j + NUM_CHARS_IN_INT - 1),'(A4)') iword(i)
@@ -1590,7 +1595,7 @@ csflag=iword(SAV_INTPARAMS_CSFLAG).ne.0
 writs =iword(SAV_INTPARAMS_WRITS).ne.0
 nucros=iword(SAV_INTPARAMS_NUCROS).ne.0
 jtop=iword(SAV_INTPARAMS_JTOP)
-call dbrr(word, 20, FILEID_SAV, REC_REALPARAMS)
+call dbrr(word, num_real_params, FILEID_SAV, REC_LAST_USED)
 rtmn1=word(1)
 rtmx1=word(2)
 dinsid=word(3)
@@ -1603,7 +1608,7 @@ energ(ien)=word(10+ien)
 nlev(ien)=iword(22+ien)
 n=nlev(ien)
 irec=(ien-1)* EN_REC_COUNT + REC_EN_START
-if(nucros) irec=irec+5*nerg
+if(nucros) irec = irec + EN_REC_COUNT * nerg
 write(6,80) energ(ien),nlev(ien)
 write(9,80) energ(ien),nlev(ien)
 80 format(/' ENERGY=',f10.3,' NLEVOP=',i3)
@@ -1648,8 +1653,8 @@ do 100 ien=1,nerg
   word(10+ien)=energ(ien)
   iword(22+ien)=nlev(ien)
 100 word(8+ien)=energ(ien)
-call dbwi(iword, bufsize, FILEID_SAV, REC_INTPARAMS)
-call dbwr(word, 20, FILEID_SAV, REC_REALPARAMS)
+call dbwi(iword, bufsize, FILEID_SAV, REC_PARAMS)
+call dbwr(word, num_real_params, FILEID_SAV, REC_LAST_USED)
 call dbwc(FILEID_SAV, 1)
 call dclos(FILEID_SAV)
 call dopen(FILEID_SAV, FUNIT_SAV, savfil)
