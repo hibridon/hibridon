@@ -1648,7 +1648,7 @@ subroutine dbri(buffer,l,ifil,irec)
 !     buffer : input buffer containing l integers
 !
 use mod_clseg, only: intrel
-use mod_cdbf, only: libuf,ibfil,ibrec,ibof,ibstat,idbuf
+use mod_cdbf, only: libuf,ibfil,ibrec,ibof,ibstat,idbuf,ibadr
 implicit none
 integer, intent(in) :: l
 integer, dimension(l), intent(out) :: buffer
@@ -1656,7 +1656,7 @@ integer, intent(in) :: ifil
 integer, intent(in) :: irec
 
 integer :: lre
-integer :: i, iof, len, ibadr
+integer :: i, iof, len
 
 ! implicit double precision (a-h,o-z)
 lre=l
@@ -1670,7 +1670,7 @@ entry dbrr(buffer,l,ifil,irec)
 !
 lre=l*intrel
 !
-5 ibadr = 0
+5 continue 
 if(irec.gt.0) then
   if(ibstat.eq.1) call dwrite(idbuf,libuf,ibfil,ibrec,ibadr)
   ibstat=0
