@@ -10,7 +10,6 @@ contains
 !                                                                       *
 !   2. sprint         prints s-matrices on the screen                   *
 !   6. turn           function, determines classical turning point      *
-!   8. xwrite         subroutine to write out integral cross sections   *
 !   9. waverd         writes and reads header file for wavefunction     *
 !  10. psi            to determine wavefunction
 !  11. flux           to determine fluxes
