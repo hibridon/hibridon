@@ -2023,7 +2023,7 @@ if (photof) then
 ! save transition amplitudes
   if (wavefn) then
 
-!          call dbwi(nphoto,1,ifil,izero)
+!          call dbwi(nphoto,1,ifil,REC_LAST_USED)
      do jrow = 1, nphoto
         write (ifil, err=950) (sr(jrow, jcol), jcol=1, nopen)
      end do

@@ -47,6 +47,7 @@ use mod_par, only: airyfl, prairy, bastst, chlist, &
                 lscreen, iprint, &
                 fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, tolhi=>scat_tolai, xmu
 use funit
+use mod_fileid, only: FILEID_SAV
 use ipar_enum
 use rpar_enum
 use mod_hinput, only:hinput
@@ -65,6 +66,7 @@ use mod_opti, only: optifl
 use mod_hiutil, only: mtime, gettim, dater
 use mod_hibrid4, only: wavewr
 use mod_hismat, only: wrhead
+use mod_savfile, only: REC_EN_START, EN_REC_COUNT, EN_REC_PRESENT_INTEGRAL_XS, EN_REC_PREVIOUS_INTEGRAL_XS, EN_REC_PRESENT_PARTIAL_XS, EN_REC_PREVIOUS_PARTIAL_XS, EN_REC_2NDLAST_PARTIAL_XS
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
@@ -122,7 +124,7 @@ logical :: twojlp
 data twojlp / .false. /
 
 real(8), parameter :: mtime_granularity = 0.5d0
-integer, parameter :: tmp_file = 1
+integer, parameter :: tmp_file = FILEID_SAV
 !   to obtain timing information calls are made to system-specific
 !   time subroutine:  call mtime(cpu,wallt) where cpu is clock cpu
 !   time in seconds and wallt is wall clock time in seconds
@@ -558,7 +560,7 @@ else if(ien.gt.1) then
 250     continue
   end if
 end if
-irec=(ien-1)*5+2
+irec = (ien-1) * EN_REC_COUNT + REC_EN_START
 nlevop=0
 do 255 i=1,nlevel
 255 if(elev(i).le.ered) nlevop=nlevop+1
@@ -573,20 +575,20 @@ if (ien .gt. 1) then
 endif
 if (wrxsec .or. prxsec .or. prpart .or. wrpart) then
   if (.not. wavefl .and. .not. photof) then
-    call dres(nlevop**2+4,1,irec)
-    call dres(nlevop**2+4,1,irec+1)
-    call dres(nlevop**2+4,1,irec+2)
-    call dres(nlevop**2+4,1,irec+3)
-    call dres(nlevop**2+4,1,irec+4)
+    call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_PRESENT_INTEGRAL_XS)  ! todo : graffy: why +4 ? (+2 should be enough to store i1, i2, i3 ? maybe not on architectures where integers are stored on 8 bytes...?) 
+    call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_PREVIOUS_INTEGRAL_XS)
+    call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_PRESENT_PARTIAL_XS)
+    call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_PREVIOUS_PARTIAL_XS)
+    call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_2NDLAST_PARTIAL_XS)
     if(nucros) then
-      irec=(nerg+ien-1)*5+2
-      call dres(nlevop**2+4,1,irec)
-      call dres(nlevop**2+4,1,irec+1)
-      call dres(nlevop**2+4,1,irec+2)
-      call dres(nlevop**2+4,1,irec+3)
-      call dres(nlevop**2+4,1,irec+4)
+      irec= (nerg + ien - 1) * EN_REC_COUNT + REC_EN_START
+      call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_PRESENT_INTEGRAL_XS)
+      call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_PREVIOUS_INTEGRAL_XS)
+      call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_PRESENT_PARTIAL_XS)
+      call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_PREVIOUS_PARTIAL_XS)
+      call dres(nlevop**2 + 4, FILEID_SAV, irec + EN_REC_2NDLAST_PARTIAL_XS)
     end if
-    call dsave(1)
+    call dsave(FILEID_SAV)
   endif
 endif
 ! store header and reserve space on direct access file 2 if wavefunction
@@ -860,7 +862,7 @@ end if
 if (.not. bastst .and. &
    prxsec .or. wrxsec .or. wrpart .or. prpart) then
   if (.not. wavefl .and. .not. photof) then
-    call dclos(1)
+    call dclos(FILEID_SAV)
    endif
 endif
 if (wavefl .and. .not. boundc) close(FUNIT_WFU)
