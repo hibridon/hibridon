@@ -1,5 +1,57 @@
 #include "assert.h"
+
+module mod_savfile
+implicit none
+
+  integer, parameter :: num_recs_per_energy = 5
+
+  ! records for each energy
+  enum, bind( C )
+  enumerator ::  &
+    EN_REC_PRESENT_INTEGRAL_XS  =   0, &  ! present integral cross section
+    EN_REC_PREVIOUS_INTEGRAL_XS =   1, &  ! previous integral cross section
+    EN_REC_PRESENT_PARTIAL_XS   =   2, &  ! present partial cross section
+    EN_REC_PREVIOUS_PARTIAL_XS  =   3, &  ! previous partial cross section (if available)
+    EN_REC_2NDLAST_PARTIAL_XS   =   4, &  ! the second last partial cross sections (if available)
+    EN_REC_COUNT                =   5     ! number of records per energy
+  end enum
+
+  enum, bind( C )
+  enumerator ::  &
+    REC_REALPARAMS        =   0, & 
+    REC_INTPARAMS         =   1, &
+    REC_EN_START          =   2     ! start of energy records
+  end enum
+
+
+  integer, parameter :: LABEL_SIZE = 40  ! in characters
+  integer, parameter :: NUM_CHARS_IN_INT = 4
+  integer, parameter :: NUM_INTS_IN_LABEL = LABEL_SIZE / NUM_CHARS_IN_INT
+
+
+  enum, bind( C )
+  enumerator ::  &
+    SAV_INTPARAMS_LABEL          =   1, &  ! the first 10 integers are used to store the 40 characters of the label
+    SAV_INTPARAMS_JTOT           =  SAV_INTPARAMS_LABEL + NUM_INTS_IN_LABEL, &
+    SAV_INTPARAMS_JTOTD          =  12, &
+    SAV_INTPARAMS_JLPAR          =  13, &
+    SAV_INTPARAMS_NU             =  14, &
+    SAV_INTPARAMS_NUTOP          =  15, &
+    SAV_INTPARAMS_NUD            =  16, &
+    SAV_INTPARAMS_NERG           =  17, &
+    SAV_INTPARAMS_NCHMAX         =  18, &
+    SAV_INTPARAMS_CSFLAG         =  19, &
+    SAV_INTPARAMS_WRITS          =  20, &
+    SAV_INTPARAMS_NUCROS         =  21, &
+    SAV_INTPARAMS_JTOP           =  22
+  end enum
+
+end module mod_savfile
+
 module mod_hibrid5
+
+
+
 contains
 ! ---------------------------------------------------------------------------
 ! hibrid5 library
@@ -127,6 +179,7 @@ use mod_coj12, only: j12
 use mod_coener, only: ener => energ
 use mod_hibrid2, only: mxoutd, mxoutr
 use funit
+use mod_savfile, only: REC_EN_START, EN_REC_COUNT
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
 use mod_phot, only: photof, wavefn, boundf
@@ -297,7 +350,7 @@ if((prpart .or. wrpart) .and. .not. nucros .and. &
 end if
 !  sum up partial cross sections to get integral cross sections
 if (.not. csflag .or. (csflag .and. (nu .eq. numax) ) ) then
-   irec=(ien-1)*5+2
+   irec=(ien-1)* EN_REC_COUNT + REC_EN_START
    faux = .false.
    call intpol(irec,jtot,jfirst,jfinal,jtotd,jlpar,jlpold, &
                 jlev,nmax,nlevop,tsq,sr,si,scmat,faux,soutpt_sc_file)
@@ -564,6 +617,7 @@ subroutine nusum (tsq, tq1, tq2, tq3, &
 use constants
 use mod_coener, only: energ
 use mod_ered, only: ered, rmu
+use mod_savfile, only: REC_EN_START, EN_REC_COUNT
 implicit double precision (a-h,o-z)
 logical ipos, csflag, wrpart, prpart, flaghf, twomol, nucros,vrai
 dimension tsq(nmax,1),tq1(nmax,1),tq2(nmax,1),tq3(nmax,1), &
@@ -573,7 +627,7 @@ integer :: tmp_file
 do 100 ien = 1,nerg
   ener = energ(ien)
   ered = ener/econv
-  irec=(ien-1)*5+2
+  irec=(ien-1)* EN_REC_COUNT + REC_EN_START
   nlevop=nlev(ien)
   call dbin(tmp_file,irec,jl,jlp,nn,tsq,nmax,nlevop)
 ! print partial cross sections, summed over lbar, for given nu
@@ -585,7 +639,7 @@ do 100 ien = 1,nerg
                vrai,nucros,nlevel, nlevop, nopen, nmax)
     endif
 ! sum up over nu
-  irec=(nerg+ien-1)*5+2
+  irec=(nerg+ien-1)* EN_REC_COUNT + REC_EN_START
   vrai=.true.
   call intpol(irec,nu,numin,numax,nud,jlpar,jlpar, &
               jlev, nmax,nlevop,tq1,tq2,tq3,tsq,vrai,tmp_file)
@@ -616,12 +670,13 @@ subroutine intpol(irec,jl3a,j1,j2,jd,jp,jpi,jlev, &
 !
 !     this routine stores:
 !       the present integral cross sections on record irec
-!       the previous inetral cross sections on record irec+1
+!       the previous integral cross sections on record irec+1
 !       the present  partial cross sections on record irec+2
 !       the previous partial cross sections on record irec+3 (if available)
 !       the second last partial cross sections on record irec+4 (if available)
 ! ----------------------------------------------------------------------
 use mod_coisc8, only: list => isc8 ! list(20)
+use mod_savfile
 implicit double precision (a-h,o-z)
 integer, intent(in) :: irec
 integer, intent(in) :: jl3a
@@ -672,11 +727,11 @@ goto 31
     q2(j,i)=0
 10     q(j,i)=q3(j,i)
     jf=jl3
-    call dbout(irec,jl3,jp,1,q,nmax,n)
+    call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jl3,jp,1,q,nmax,n)
 !          print *, 'after dbout1'
-    call dbout(irec+1,-1,jp,1,q2,nmax,n)
+    call dbout(irec + EN_REC_PREVIOUS_INTEGRAL_XS,-1,jp,1,q2,nmax,n)
 !          print *, 'after dbout2'
-    call dbout(irec+2,jl3,jp,0,q3,nmax,n)
+    call dbout(irec + EN_REC_PRESENT_PARTIAL_XS,jl3,jp,0,q3,nmax,n)
 !          print *, 'after dbout3'
     return
   else
@@ -694,9 +749,9 @@ goto 31
       end do
     end do
     jf=jl3
-    call dbout(irec,jf,jp,1,q,nmax,n)
-    call dbout(irec+1,jl,jpl,1,q2,nmax,n)
-    call dbout(irec+2,jl3,jp,0,q3,nmax,n)
+    call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jf,jp,1,q,nmax,n)
+    call dbout(irec + EN_REC_PREVIOUS_INTEGRAL_XS,jl,jpl,1,q2,nmax,n)
+    call dbout(irec + EN_REC_PRESENT_PARTIAL_XS,jl3,jp,0,q3,nmax,n)
     return
   end if
 end if
@@ -711,9 +766,9 @@ if(jl3.eq.j1.and.jp.eq.jpi) then
 25   q(j,i)=q3(j,i)
   jf=jl3
   jl=-1
-  call dbout(irec,jf,jp,1,q,nmax,n)
-  call dbout(irec+1,jl,jp,1,q2,nmax,n)
-  call dbout(irec+2,jl3,jp,0,q3,nmax,n)
+  call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jf,jp,1,q,nmax,n)
+  call dbout(irec + EN_REC_PREVIOUS_INTEGRAL_XS,jl,jp,1,q2,nmax,n)
+  call dbout(irec + EN_REC_PRESENT_PARTIAL_XS,jl3,jp,0,q3,nmax,n)
   return
 end if
 !.....jl is value up to which jtot has been summed so far
@@ -724,13 +779,13 @@ if(jpl.ne.jp) then
   q2(j,i)=q(j,i)
 30   q(j,i)=q(j,i)+q3(j,i)
   jf=jl3
-  call dbout(irec,jf,jp,1,q,nmax,n)
-  call dbout(irec+1,jl,jpl,1,q2,nmax,n)
-  call dbout(irec+2,jl3,jp,0,q3,nmax,n)
+  call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jf,jp,1,q,nmax,n)
+  call dbout(irec + EN_REC_PREVIOUS_INTEGRAL_XS,jl,jpl,1,q2,nmax,n)
+  call dbout(irec + EN_REC_PRESENT_PARTIAL_XS,jl3,jp,0,q3,nmax,n)
   return
 end if
 nn=min(next+1,3)
-call dbout(irec+1,jl,jpl,nn,q,nmax,n)
+call dbout(irec + EN_REC_PREVIOUS_INTEGRAL_XS,jl,jpl,nn,q,nmax,n)
 call dbin(tmp_file, irec+2,jl2,jp2,nn,q2,nmax,n)
 if(next.eq.1) goto 50
 call dbin(tmp_file, irec+3,jl1,jp1,nn,q1,nmax,n)
@@ -774,10 +829,10 @@ end if
 !
 if(nowrit) return
 !
-call dbout(irec,jf,jp,3,q,nmax,n)
-call dbout(irec+2,jl3,jp,0,q3,nmax,n)
-call dbout(irec+3,jl2,jp2,0,q2,nmax,n)
-call dbout(irec+4,jl1,jp1,0,q1,nmax,n)
+call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jf,jp,3,q,nmax,n)
+call dbout(irec + EN_REC_PRESENT_PARTIAL_XS,jl3,jp,0,q3,nmax,n)
+call dbout(irec + EN_REC_PREVIOUS_PARTIAL_XS,jl2,jp2,0,q2,nmax,n)
+call dbout(irec + EN_REC_2NDLAST_PARTIAL_XS,jl1,jp1,0,q1,nmax,n)
 return
 !
 !.....linear interpolation if only two points available
@@ -821,9 +876,9 @@ end if
 !
 if(nowrit) return
 !
-call dbout(irec,jf,jp,2,q,nmax,n)
-call dbout(irec+2,jl3,jp,0,q3,nmax,n)
-call dbout(irec+3,jl2,jp2,0,q2,nmax,n)
+call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jf,jp,2,q,nmax,n)
+call dbout(irec + EN_REC_PRESENT_PARTIAL_XS,jl3,jp,0,q3,nmax,n)
+call dbout(irec + EN_REC_PREVIOUS_PARTIAL_XS,jl2,jp2,0,q2,nmax,n)
 return
 end
 subroutine nulist(nu,jf,jlev,list,nj,nleq,nlge)
@@ -883,13 +938,14 @@ subroutine dbout(irec,i1,i2,i3,q,nmax,n)
 !  with their labels
 !
 ! ---------------------------------------------------------------------------
+use mod_fileid, only: FILEID_SAV
 implicit none
 integer :: irec
 integer :: i1, i2, i3
 integer :: nmax, n
 real(8), dimension(nmax, n) :: q
 integer :: ifile, i
-ifile=1
+ifile = FILEID_SAV
 call dbwi(i1,1,ifile,irec)
 call dbwi(i2,1,ifile,0)
 call dbwi(i3,1,ifile,0)
@@ -975,6 +1031,8 @@ use mod_cosysi, only: ispar
 use mod_basis, only: basis_get_isa
 use mod_par, only: iprint
 use funit
+use mod_fileid, only: FILEID_SAV
+use mod_savfile, only: REC_EN_START, EN_REC_COUNT, EN_REC_PRESENT_INTEGRAL_XS
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
@@ -1011,7 +1069,7 @@ logical, intent(in) :: ihomo
 real(8) :: ener
 integer :: i, ien, irec, isa, j, jhold, jj1, jj2, jmin, jphold, nlevmx, nlevop, nn, nxfile
 character*20 cdate
-integer :: cs_file = FUNIT_CS  ! cross secton input file unit
+integer :: sav_file = FILEID_SAV
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
 nlevmx=0
@@ -1098,8 +1156,8 @@ if (prxsec) then
                  '  M-MAX=', f6.1, '  M-STEP=', i2)
       end if
     end if
-    irec=(ien-1)*5+2
-    if(nucros) irec=irec+nerg*5
+    irec=(ien-1)* EN_REC_COUNT + REC_EN_START
+    if(nucros) irec = irec + nerg * EN_REC_COUNT
     nlevop=nlev(ien)
     jmin=10000
     do 190 i=1,nlevop
@@ -1107,7 +1165,7 @@ if (prxsec) then
 190     continue
     if ((jmin .le. numax .or. iprint.ge.2) .or. .not.csflag) &
         then
-      call dbin(cs_file, irec,jhold,jphold,nn,zmat,nmax,nlevop)
+      call dbin(sav_file, irec + EN_REC_PRESENT_INTEGRAL_XS,jhold,jphold,nn,zmat,nmax,nlevop)
       call print_integral_cross_sections(9,zmat,nlevop,nmax,ipos,csflag,flaghf,twomol, &
                  numax,jlev,inlev)
     else
@@ -1124,10 +1182,10 @@ if (wrxsec) then
   do 300  ien = 1, nerg
     nxfile = FUNIT_ICS_START + ien - 1
 !         rewind nxfile
-    irec=(ien-1)*5+2
-    if(nucros) irec=irec+nerg*5
+    irec=(ien-1)* EN_REC_COUNT + REC_EN_START
+    if(nucros) irec = irec + nerg * EN_REC_COUNT
     nlevop=nlev(ien)
-    call dbin(cs_file, irec,jhold,jphold,nn,zmat,nmax,nlevop)
+    call dbin(sav_file, irec,jhold,jphold,nn,zmat,nmax,nlevop)
     call dater (cdate)
     write (nxfile, 215) cdate
 215     format (1x,a)
@@ -1480,6 +1538,9 @@ use mod_cozmat, only: q2 => zmat_as_vec ! q2(1)
 use mod_par, only: wrpart, wrxsec
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_file, only: input, output, jobnam, savfil
+use funit, only: FUNIT_SAV
+use mod_fileid, only: FILEID_SAV
+use mod_savfile
 implicit double precision (a-h,o-z)
 logical writs,csflag,nucros
 character*40 oldlab
@@ -1493,12 +1554,13 @@ if (.not. wrpart .and. .not. wrxsec) then
     ' ORIGINAL DATA',/,'    FOR RESTART TO WORK; ABORT')
   call exit
 endif
-call drest(1)
-call dbri(iword,bufsize,1,1)
+call drest(FILEID_SAV)
+call dbri(iword, bufsize, FILEID_SAV, REC_INTPARAMS)
 j=1
-do 10 i=1,10
-write(oldlab(j:j+3),'(A4)') iword(i)
-10 j=j+4
+do i = SAV_INTPARAMS_LABEL, SAV_INTPARAMS_LABEL + NUM_INTS_IN_LABEL - 1
+  write(oldlab(j:j + NUM_CHARS_IN_INT - 1),'(A4)') iword(i)
+  j = j + NUM_CHARS_IN_INT
+end do
 if (oldlab .ne. label) then
     write (9, 50) oldlab, label
     write (6, 50) oldlab, label
@@ -1508,27 +1570,27 @@ if (oldlab .ne. label) then
                         '      INPUT:', a)
     call exit
 end if
-jtot=iword(11)
-if(iword(12).ne.jtotd) then
-    write(6,60) jtotd, iword(12)
+jtot=iword(SAV_INTPARAMS_JTOT)
+if(iword(SAV_INTPARAMS_JTOTD).ne.jtotd) then
+    write(6,60) jtotd, iword(SAV_INTPARAMS_JTOTD)
 60     format(/' RESTART: JTOTD=',i3,' RESET TO ',i3)
 end if
-jtotd=iword(12)
-jlpar=iword(13)
-nu=iword(14)
-nutop=iword(15)
-if(iword(16).ne.nud) then
-    write(6,70) nud, iword(16)
+jtotd=iword(SAV_INTPARAMS_JTOTD)
+jlpar=iword(SAV_INTPARAMS_JLPAR)
+nu=iword(SAV_INTPARAMS_NU)
+nutop=iword(SAV_INTPARAMS_NUTOP)
+if(iword(SAV_INTPARAMS_NUD).ne.nud) then
+    write(6,70) nud, iword(SAV_INTPARAMS_NUD)
 70     format(/' RESTART: NUD=',i3,' RESET TO ',i3)
 end if
-nud=iword(16)
-nerg=iword(17)
-nchmax=iword(18)
-csflag=iword(19).ne.0
-writs =iword(20).ne.0
-nucros=iword(21).ne.0
-jtop=iword(22)
-call dbrr(word,20,1,0)
+nud=iword(SAV_INTPARAMS_NUD)
+nerg=iword(SAV_INTPARAMS_NERG)
+nchmax=iword(SAV_INTPARAMS_NCHMAX)
+csflag=iword(SAV_INTPARAMS_CSFLAG).ne.0
+writs =iword(SAV_INTPARAMS_WRITS).ne.0
+nucros=iword(SAV_INTPARAMS_NUCROS).ne.0
+jtop=iword(SAV_INTPARAMS_JTOP)
+call dbrr(word, 20, FILEID_SAV, REC_REALPARAMS)
 rtmn1=word(1)
 rtmx1=word(2)
 dinsid=word(3)
@@ -1540,7 +1602,7 @@ do 90 ien=1,nerg
 energ(ien)=word(10+ien)
 nlev(ien)=iword(22+ien)
 n=nlev(ien)
-irec=(ien-1)*5+2
+irec=(ien-1)* EN_REC_COUNT + REC_EN_START
 if(nucros) irec=irec+5*nerg
 write(6,80) energ(ien),nlev(ien)
 write(9,80) energ(ien),nlev(ien)
@@ -1559,37 +1621,38 @@ entry rsave(jtot,jtop,jtotd,jlpar,nu,nutop,nud,nerg,nlev, &
        nchmax,rtmn1,rtmx1,dinsid,writs, csflag, nucros)
 j=1
 !.....reserve space for restart information
-call dres(64,1,1)
-do 95 i=1,10
-read(label(j:j+3),'(A4)') iword(i)
-95 j=j+4
-iword(11)=jtot
-iword(12)=jtotd
-iword(13)=jlpar
-iword(14)=nu
-iword(15)=nutop
-iword(16)=nud
-iword(17)=nerg
-iword(18)=nchmax
-iword(19)=0
-iword(20)=0
-iword(21)=0
-iword(22)=jtop
-if(csflag) iword(19)=1
-if(writs)  iword(20)=1
-if(nucros) iword(21)=1
+call dres(64, FILEID_SAV, 1)
+do i = SAV_INTPARAMS_LABEL, SAV_INTPARAMS_LABEL + NUM_INTS_IN_LABEL - 1
+  read(label(j:j + NUM_CHARS_IN_INT - 1),'(A4)') iword(i)
+  j = j + NUM_CHARS_IN_INT
+end do
+iword(SAV_INTPARAMS_JTOT)=jtot
+iword(SAV_INTPARAMS_JTOTD)=jtotd
+iword(SAV_INTPARAMS_JLPAR)=jlpar
+iword(SAV_INTPARAMS_NU)=nu
+iword(SAV_INTPARAMS_NUTOP)=nutop
+iword(SAV_INTPARAMS_NUD)=nud
+iword(SAV_INTPARAMS_NERG)=nerg
+iword(SAV_INTPARAMS_NCHMAX)=nchmax
+iword(SAV_INTPARAMS_CSFLAG)=0
+iword(SAV_INTPARAMS_WRITS)=0
+iword(SAV_INTPARAMS_NUCROS)=0
+iword(SAV_INTPARAMS_JTOP)=jtop
+if(csflag) iword(SAV_INTPARAMS_CSFLAG)=1
+if(writs)  iword(SAV_INTPARAMS_WRITS)=1
+if(nucros) iword(SAV_INTPARAMS_NUCROS)=1
 word(1)=rtmn1
 word(2)=rtmx1
 word(3)=dinsid
 do 100 ien=1,nerg
-word(10+ien)=energ(ien)
-iword(22+ien)=nlev(ien)
+  word(10+ien)=energ(ien)
+  iword(22+ien)=nlev(ien)
 100 word(8+ien)=energ(ien)
-call dbwi(iword,bufsize,1,1)
-call dbwr(word,20,1,0)
-call dbwc(1,1)
-call dclos(1)
-call dopen(1,3,savfil)
+call dbwi(iword, bufsize, FILEID_SAV, REC_INTPARAMS)
+call dbwr(word, 20, FILEID_SAV, REC_REALPARAMS)
+call dbwc(FILEID_SAV, 1)
+call dclos(FILEID_SAV)
+call dopen(FILEID_SAV, FUNIT_SAV, savfil)
 return
 end
 ! ------------------------------------------------------------------
@@ -1639,13 +1702,14 @@ use mod_ered, only: ered, rmu
 use mod_hiutil, only: gennam
 use mod_hiutil, only: mtime, gettim
 use mod_hismat, only: rdhead
+use mod_fileid, only: FILEID_TMP
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  icsfil, smtfilnam, xname
 integer :: smt_unit = 1
 integer :: ics_unit = 2
 integer :: tmp_unit = 3
-integer :: tmp_file = 1
+integer :: tmp_file = FILEID_TMP
 character*20  cdate
 character*10  elaps, cpu
 character*13  string

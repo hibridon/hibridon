@@ -47,6 +47,7 @@ use mod_par, only: airyfl, prairy, bastst, chlist, &
                 lscreen, iprint, &
                 fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, tolhi=>scat_tolai, xmu
 use funit
+use mod_fileid, only: FILEID_SAV
 use ipar_enum
 use rpar_enum
 use mod_hinput, only:hinput
@@ -573,20 +574,20 @@ if (ien .gt. 1) then
 endif
 if (wrxsec .or. prxsec .or. prpart .or. wrpart) then
   if (.not. wavefl .and. .not. photof) then
-    call dres(nlevop**2+4,1,irec)
-    call dres(nlevop**2+4,1,irec+1)
-    call dres(nlevop**2+4,1,irec+2)
-    call dres(nlevop**2+4,1,irec+3)
-    call dres(nlevop**2+4,1,irec+4)
+    call dres(nlevop**2 + 4, FILEID_SAV, irec)  ! todo : graffy: why +4 ? (+2 should be enough to store i1, i2, i3 ? maybe not on architectures where integers are stored on 8 bytes...?) 
+    call dres(nlevop**2 + 4, FILEID_SAV, irec + 1)
+    call dres(nlevop**2 + 4, FILEID_SAV, irec + 2)
+    call dres(nlevop**2 + 4, FILEID_SAV, irec + 3)
+    call dres(nlevop**2 + 4, FILEID_SAV, irec + 4)
     if(nucros) then
       irec=(nerg+ien-1)*5+2
-      call dres(nlevop**2+4,1,irec)
-      call dres(nlevop**2+4,1,irec+1)
-      call dres(nlevop**2+4,1,irec+2)
-      call dres(nlevop**2+4,1,irec+3)
-      call dres(nlevop**2+4,1,irec+4)
+      call dres(nlevop**2 + 4, FILEID_SAV, irec)
+      call dres(nlevop**2 + 4, FILEID_SAV, irec + 1)
+      call dres(nlevop**2 + 4, FILEID_SAV, irec + 2)
+      call dres(nlevop**2 + 4, FILEID_SAV, irec + 3)
+      call dres(nlevop**2 + 4, FILEID_SAV, irec + 4)
     end if
-    call dsave(1)
+    call dsave(FILEID_SAV)
   endif
 endif
 ! store header and reserve space on direct access file 2 if wavefunction
@@ -860,7 +861,7 @@ end if
 if (.not. bastst .and. &
    prxsec .or. wrxsec .or. wrpart .or. prpart) then
   if (.not. wavefl .and. .not. photof) then
-    call dclos(1)
+    call dclos(FILEID_SAV)
    endif
 endif
 if (wavefl .and. .not. boundc) close(FUNIT_WFU)

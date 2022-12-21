@@ -30,11 +30,13 @@ implicit none
 
    enum, bind( C )
    enumerator ::  &
-      FUNIT_CS             =  1, &   ! cross sections
+      FUNIT_CS             =  1, &   ! cross sections 
+      FUNIT_ICS            =  1, &   ! <job-name>.ics
       FUNIT_EADIAB         =  2, &   ! <job-name>.eadiab
       FUNIT_TENS_OUTPUT    =  2, &   ! <job-name>.tcs or <job-name>.dch or <job-name>.dcga
       FUNIT_MCS            =  2, &   ! <job-name>.mcs
       FUNIT_SAV            =  3, &   ! <job-name>.sav
+      FUNIT_XSC            =  3, &   ! <job-name>.xsc
       FUNIT_TCB            =  4, &   ! <job-name>.tcb (result of tenxsc)
       FUNIT_STDOUT         =  6, &   ! standard output
       FUNIT_INP            =  8, &   ! input file (*.inp)
@@ -51,3 +53,15 @@ implicit none
 
 
 end module funit
+
+module mod_fileid
+implicit none
+
+   enum, bind( C )
+   enumerator ::  &
+      FILEID_SAV           =  1, &   ! <job-name>.sav
+      FILEID_TMP           =  1      ! <job-name>.tmp
+   end enum
+
+
+end module mod_fileid
