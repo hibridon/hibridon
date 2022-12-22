@@ -109,7 +109,7 @@ real(8) secnds
 ! accumulation of partial waves in cases where jlpar=0
 integer :: jlpold  
 
-integer :: nlev(25)
+integer :: nlev(men)
 
 integer :: jtotmx
 character*20 :: cdate

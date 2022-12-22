@@ -19,7 +19,7 @@ implicit none
   enum, bind( C )
   enumerator ::  &
     REC_LAST_USED         =   0, &  ! not actually a valid record index; it is used as a convention by db[wr][ri] subroutines to reuse the last used record index 
-    REC_PARAMS            =   1, &  ! this record stores an array aof real parameters, followed by an array of integer parameters
+    REC_PARAMS            =   1, &  ! this record stores an array of real parameters, followed by an array of integer parameters
     REC_EN_START          =   2     ! start of energy records
   end enum
 
@@ -43,8 +43,31 @@ implicit none
     SAV_INTPARAMS_CSFLAG         =  19, &
     SAV_INTPARAMS_WRITS          =  20, &
     SAV_INTPARAMS_NUCROS         =  21, &
-    SAV_INTPARAMS_JTOP           =  22
+    SAV_INTPARAMS_JTOP           =  22, &
+    SAV_INTPARAMS_NLEV_START     =  23
   end enum
+
+  enum, bind( C )
+  enumerator ::  &
+    SAV_REALPARAMS_RTMN1         =   1, &
+    SAV_REALPARAMS_RTMX1         =   2, &
+    SAV_REALPARAMS_DINSID        =   3, &
+    SAV_REALPARAMS_ENERG_START   =  11
+
+  end enum
+
+contains
+  function get_sav_int_params_count()
+  use mod_coener, only: max_en
+  integer :: get_sav_int_params_count
+  get_sav_int_params_count = SAV_INTPARAMS_NLEV_START + max_en -1
+  end function
+
+  function get_sav_real_params_count()
+  use mod_coener, only: max_en
+  integer :: get_sav_real_params_count
+  get_sav_real_params_count = SAV_REALPARAMS_ENERG_START + max_en -1
+  end function
 
 end module mod_savfile
 
@@ -180,7 +203,7 @@ use mod_coener, only: ener => energ
 use mod_hibrid2, only: mxoutd, mxoutr
 use funit
 use mod_savfile, only: REC_EN_START, EN_REC_COUNT
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: label=>pot_label
 use mod_ered, only: ered, rmu
 use mod_phot, only: photof, wavefn, boundf
 use mod_surf, only: flagsu
@@ -1536,22 +1559,36 @@ subroutine restrt (jtot,jtop,jtotd,jlpar,nu,nutop,nud,nerg,nlev, &
 ! --------------------------------------------------------------------
 use mod_coamat, only: q3 => amat ! q3(1)
 use mod_cobmat, only: q => bmat ! q(1)
-use mod_coener, only: energ
+use mod_coener, only: energ, max_en
 use mod_cow, only: q1 => w_as_vec ! q1(1)
 use mod_cozmat, only: q2 => zmat_as_vec ! q2(1)
 use mod_par, only: wrpart, wrxsec
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
-use mod_file, only: input, output, jobnam, savfil
-use funit, only: FUNIT_SAV
+use mod_parpot, only: label=>pot_label
 use mod_fileid, only: FILEID_SAV
 use mod_savfile
-implicit double precision (a-h,o-z)
-logical writs,csflag,nucros
+implicit none
+integer, intent(out)   :: jtot
+integer, intent(out)   :: jtop
+integer, intent(inout) :: jtotd
+integer, intent(out)   :: jlpar
+integer, intent(out)   :: nu
+integer, intent(out)   :: nutop
+integer, intent(inout) :: nud
+integer, intent(out)   :: nerg
+integer, intent(out)   :: nlev(max_en)
+integer, intent(out)   :: nchmax
+real(8), intent(out)   :: rtmn1
+real(8), intent(out)   :: rtmx1
+real(8), intent(out)   :: dinsid
+logical, intent(out)   :: writs
+logical, intent(out)   :: csflag
+logical, intent(out)   :: nucros
 character*40 oldlab
-integer jtot, nchmax
-integer, parameter :: bufsize = 32
-integer, parameter :: num_real_params = 20
-dimension word(bufsize),iword(bufsize),nlev(1)
+real(8), allocatable :: word(:)
+integer, allocatable :: iword(:)
+integer :: i, j, ien, irec, jf, jp, n
+allocate(word(get_sav_real_params_count()))
+allocate(iword(get_sav_int_params_count()))
 if (.not. wrpart .and. .not. wrxsec) then
   write (6, 5)
   write (9, 5)
@@ -1560,7 +1597,7 @@ if (.not. wrpart .and. .not. wrxsec) then
   call exit
 endif
 call drest(FILEID_SAV)
-call dbri(iword, bufsize, FILEID_SAV, REC_PARAMS)
+call dbri(iword, get_sav_int_params_count(), FILEID_SAV, REC_PARAMS)
 j=1
 do i = SAV_INTPARAMS_LABEL, SAV_INTPARAMS_LABEL + NUM_INTS_IN_LABEL - 1
   write(oldlab(j:j + NUM_CHARS_IN_INT - 1),'(A4)') iword(i)
@@ -1595,35 +1632,68 @@ csflag=iword(SAV_INTPARAMS_CSFLAG).ne.0
 writs =iword(SAV_INTPARAMS_WRITS).ne.0
 nucros=iword(SAV_INTPARAMS_NUCROS).ne.0
 jtop=iword(SAV_INTPARAMS_JTOP)
-call dbrr(word, num_real_params, FILEID_SAV, REC_LAST_USED)
-rtmn1=word(1)
-rtmx1=word(2)
-dinsid=word(3)
+call dbrr(word, get_sav_real_params_count(), FILEID_SAV, REC_LAST_USED)
+rtmn1=word(SAV_REALPARAMS_RTMN1)
+rtmx1=word(SAV_REALPARAMS_RTMX1)
+dinsid=word(SAV_REALPARAMS_DINSID)
 write(6,75) jtot,jlpar,nu
 write(9,75) jtot,jlpar,nu
 75 format(/' RESTART DATA FOUND FOR JTOT=',i3,'  JLPAR=',i2, &
           '  NU=',i3)
-do 90 ien=1,nerg
-energ(ien)=word(10+ien)
-nlev(ien)=iword(22+ien)
-n=nlev(ien)
-irec=(ien-1)* EN_REC_COUNT + REC_EN_START
-if(nucros) irec = irec + EN_REC_COUNT * nerg
-write(6,80) energ(ien),nlev(ien)
-write(9,80) energ(ien),nlev(ien)
+do ien=1,nerg
+  energ(ien)=word(SAV_REALPARAMS_ENERG_START + ien - 1)
+  nlev(ien)=iword(SAV_INTPARAMS_NLEV_START + ien - 1)
+  n=nlev(ien)
+  irec=(ien-1)* EN_REC_COUNT + REC_EN_START
+  if(nucros) irec = irec + EN_REC_COUNT * nerg
+  write(6,80) energ(ien),nlev(ien)
+  write(9,80) energ(ien),nlev(ien)
 80 format(/' ENERGY=',f10.3,' NLEVOP=',i3)
-call intchk(irec,q,q1,q2,q3,jf,jp,n,n,nucros)
-if((.not.nucros.and.(jf.ne.jtot.or.jp.ne.jlpar)) &
+  call intchk(irec,q,q1,q2,q3,jf,jp,n,n,nucros)
+  if((.not.nucros.and.(jf.ne.jtot.or.jp.ne.jlpar)) &
      .or. (nucros.and.jf.ne.nu)) then
     write(6,85)
     write(9,85)
 85     format(/' INCONSISTENT DATA DETECTED. ABORT')
     call exit
-end if
-90 continue
+  end if
+end do
+deallocate(iword)
+deallocate(word)
 return
-entry rsave(jtot,jtop,jtotd,jlpar,nu,nutop,nud,nerg,nlev, &
+end subroutine
+
+subroutine rsave(jtot,jtop,jtotd,jlpar,nu,nutop,nud,nerg,nlev, &
        nchmax,rtmn1,rtmx1,dinsid,writs, csflag, nucros)
+use mod_coener, only: energ, max_en
+use mod_parpot, only: label=>pot_label
+use mod_file, only: savfil
+use funit, only: FUNIT_SAV
+use mod_fileid, only: FILEID_SAV
+use mod_savfile
+implicit none
+integer, intent(in)   :: jtot
+integer, intent(in)   :: jtop
+integer, intent(in) :: jtotd
+integer, intent(in)   :: jlpar
+integer, intent(in)   :: nu
+integer, intent(in)   :: nutop
+integer, intent(in)   :: nud
+integer, intent(in)   :: nerg
+integer, intent(in)   :: nlev(max_en)
+integer, intent(in)   :: nchmax
+real(8), intent(in)   :: rtmn1
+real(8), intent(in)   :: rtmx1
+real(8), intent(in)   :: dinsid
+logical, intent(in)   :: writs
+logical, intent(in)   :: csflag
+logical, intent(in)   :: nucros
+real(8), allocatable :: word(:)
+integer, allocatable :: iword(:)
+integer :: i, j, ien
+allocate(word(get_sav_real_params_count()))
+allocate(iword(get_sav_int_params_count()))
+
 j=1
 !.....reserve space for restart information
 call dres(64, FILEID_SAV, 1)
@@ -1646,18 +1716,20 @@ iword(SAV_INTPARAMS_JTOP)=jtop
 if(csflag) iword(SAV_INTPARAMS_CSFLAG)=1
 if(writs)  iword(SAV_INTPARAMS_WRITS)=1
 if(nucros) iword(SAV_INTPARAMS_NUCROS)=1
-word(1)=rtmn1
-word(2)=rtmx1
-word(3)=dinsid
-do 100 ien=1,nerg
-  word(10+ien)=energ(ien)
-  iword(22+ien)=nlev(ien)
-100 word(8+ien)=energ(ien)
-call dbwi(iword, bufsize, FILEID_SAV, REC_PARAMS)
-call dbwr(word, num_real_params, FILEID_SAV, REC_LAST_USED)
+word(SAV_REALPARAMS_RTMN1)=rtmn1
+word(SAV_REALPARAMS_RTMX1)=rtmx1
+word(SAV_REALPARAMS_DINSID)=dinsid
+do ien = 1, nerg
+  word(SAV_REALPARAMS_ENERG_START + ien - 1) = energ(ien)
+  iword(SAV_INTPARAMS_NLEV_START + ien - 1) = nlev(ien)
+end do
+call dbwi(iword, get_sav_int_params_count(), FILEID_SAV, REC_PARAMS)
+call dbwr(word, get_sav_real_params_count(), FILEID_SAV, REC_LAST_USED)
 call dbwc(FILEID_SAV, 1)
 call dclos(FILEID_SAV)
 call dopen(FILEID_SAV, FUNIT_SAV, savfil)
+deallocate(iword)
+deallocate(word)
 return
 end
 ! ------------------------------------------------------------------
@@ -1701,7 +1773,7 @@ use mod_cow, only: simag => w_as_vec ! simag(1)
 use mod_cozmat, only: sigma => zmat_as_vec ! sigma(1)
 use mod_hibrid2, only: mxoutr
 use mod_par, only: batch, ipos
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: label=>pot_label
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_hiutil, only: gennam

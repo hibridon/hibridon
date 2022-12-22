@@ -185,10 +185,12 @@ module mod_coener
    ! *    energ:     array containing total energies (in cm-1) at which scattering
    ! *               calculations are to be performed
    implicit none
+   integer :: max_en
    real(8), dimension(:), allocatable :: energ
    contains
    subroutine allocate_coener(n)
       integer, intent(in) :: n
+      max_en = n
       allocate(energ(n)) ;
    end subroutine allocate_coener
 end module mod_coener
