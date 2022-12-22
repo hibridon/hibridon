@@ -942,6 +942,7 @@ use mod_file, only: input, output, jobnam, savfil
 use mod_file_size, only : isize, isizes
 use mod_hiutil, only: gennam
 use mod_hismat, only: rdhead
+use mod_coener, only: max_en
 implicit double precision (a-h,o-z)
 integer ifile, nerg, nfile, lenx
 logical existf
@@ -949,11 +950,11 @@ character*40  oldlab,newlab
 character*40 xname,xnam1
 character*20 cdate
 if (nerg .gt. 1) then
-!  check to see if nerg .le. 25
-  if (nerg .gt. 25) then
+!  check to see if nerg <= max_en
+  if (nerg .gt. max_en) then
     write (FUNIT_OUT, 10) nerg
-    write (6, 10) nerg
-10     format (/' *** NERG =', i2,' > 25; ABORT ***')
+    write (6, 10) nerg, max_en
+10     format (/' *** NERG =', i2,' > ', i0,'; ABORT ***')
     call exit
   end if
 !  open units 10, 11, and 12 for storage of channel parameters, transformation
