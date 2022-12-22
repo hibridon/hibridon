@@ -27,8 +27,6 @@ implicit none
   integer, parameter :: LABEL_SIZE = 40  ! in characters
   integer, parameter :: NUM_CHARS_IN_INT = 4
   integer, parameter :: NUM_INTS_IN_LABEL = LABEL_SIZE / NUM_CHARS_IN_INT
-  integer, parameter :: SAV_NUM_REAL_PARAMS = 20  ! number of real params in REC_PARAMS
-  integer, parameter :: SAV_NUM_INT_PARAMS = 32   ! number of integer params in REC_PARAMS
 
 
   enum, bind( C )
@@ -45,15 +43,31 @@ implicit none
     SAV_INTPARAMS_CSFLAG         =  19, &
     SAV_INTPARAMS_WRITS          =  20, &
     SAV_INTPARAMS_NUCROS         =  21, &
-    SAV_INTPARAMS_JTOP           =  22
+    SAV_INTPARAMS_JTOP           =  22, &
+    SAV_INTPARAMS_NLEV_START     =  23
   end enum
 
   enum, bind( C )
   enumerator ::  &
     SAV_REALPARAMS_RTMN1         =   1, &
     SAV_REALPARAMS_RTMX1         =   2, &
-    SAV_REALPARAMS_DINSID        =   3
+    SAV_REALPARAMS_DINSID        =   3, &
+    SAV_REALPARAMS_ENERG_START   =  11
+
   end enum
+
+contains
+  function get_sav_int_params_count()
+  use mod_coener, only: max_en
+  integer :: get_sav_int_params_count
+  get_sav_int_params_count = SAV_INTPARAMS_NLEV_START + max_en -1
+  end function
+
+  function get_sav_real_params_count()
+  use mod_coener, only: max_en
+  integer :: get_sav_real_params_count
+  get_sav_real_params_count = SAV_REALPARAMS_ENERG_START + max_en -1
+  end function
 
 end module mod_savfile
 
@@ -1570,9 +1584,11 @@ logical, intent(out)   :: writs
 logical, intent(out)   :: csflag
 logical, intent(out)   :: nucros
 character*40 oldlab
-real(8) :: word(SAV_NUM_REAL_PARAMS)
-integer :: iword(SAV_NUM_INT_PARAMS)
+real(8), allocatable :: word(:)
+integer, allocatable :: iword(:)
 integer :: i, j, ien, irec, jf, jp, n
+allocate(word(get_sav_real_params_count()))
+allocate(iword(get_sav_int_params_count()))
 if (.not. wrpart .and. .not. wrxsec) then
   write (6, 5)
   write (9, 5)
@@ -1581,7 +1597,7 @@ if (.not. wrpart .and. .not. wrxsec) then
   call exit
 endif
 call drest(FILEID_SAV)
-call dbri(iword, SAV_NUM_INT_PARAMS, FILEID_SAV, REC_PARAMS)
+call dbri(iword, get_sav_int_params_count(), FILEID_SAV, REC_PARAMS)
 j=1
 do i = SAV_INTPARAMS_LABEL, SAV_INTPARAMS_LABEL + NUM_INTS_IN_LABEL - 1
   write(oldlab(j:j + NUM_CHARS_IN_INT - 1),'(A4)') iword(i)
@@ -1616,7 +1632,7 @@ csflag=iword(SAV_INTPARAMS_CSFLAG).ne.0
 writs =iword(SAV_INTPARAMS_WRITS).ne.0
 nucros=iword(SAV_INTPARAMS_NUCROS).ne.0
 jtop=iword(SAV_INTPARAMS_JTOP)
-call dbrr(word, SAV_NUM_REAL_PARAMS, FILEID_SAV, REC_LAST_USED)
+call dbrr(word, get_sav_real_params_count(), FILEID_SAV, REC_LAST_USED)
 rtmn1=word(SAV_REALPARAMS_RTMN1)
 rtmx1=word(SAV_REALPARAMS_RTMX1)
 dinsid=word(SAV_REALPARAMS_DINSID)
@@ -1624,24 +1640,26 @@ write(6,75) jtot,jlpar,nu
 write(9,75) jtot,jlpar,nu
 75 format(/' RESTART DATA FOUND FOR JTOT=',i3,'  JLPAR=',i2, &
           '  NU=',i3)
-do 90 ien=1,nerg
-energ(ien)=word(10+ien)
-nlev(ien)=iword(22+ien)
-n=nlev(ien)
-irec=(ien-1)* EN_REC_COUNT + REC_EN_START
-if(nucros) irec = irec + EN_REC_COUNT * nerg
-write(6,80) energ(ien),nlev(ien)
-write(9,80) energ(ien),nlev(ien)
+do ien=1,nerg
+  energ(ien)=word(SAV_REALPARAMS_ENERG_START + ien - 1)
+  nlev(ien)=iword(SAV_INTPARAMS_NLEV_START + ien - 1)
+  n=nlev(ien)
+  irec=(ien-1)* EN_REC_COUNT + REC_EN_START
+  if(nucros) irec = irec + EN_REC_COUNT * nerg
+  write(6,80) energ(ien),nlev(ien)
+  write(9,80) energ(ien),nlev(ien)
 80 format(/' ENERGY=',f10.3,' NLEVOP=',i3)
-call intchk(irec,q,q1,q2,q3,jf,jp,n,n,nucros)
-if((.not.nucros.and.(jf.ne.jtot.or.jp.ne.jlpar)) &
+  call intchk(irec,q,q1,q2,q3,jf,jp,n,n,nucros)
+  if((.not.nucros.and.(jf.ne.jtot.or.jp.ne.jlpar)) &
      .or. (nucros.and.jf.ne.nu)) then
     write(6,85)
     write(9,85)
 85     format(/' INCONSISTENT DATA DETECTED. ABORT')
     call exit
-end if
-90 continue
+  end if
+end do
+deallocate(iword)
+deallocate(word)
 return
 end subroutine
 
@@ -1670,9 +1688,11 @@ real(8), intent(in)   :: dinsid
 logical, intent(in)   :: writs
 logical, intent(in)   :: csflag
 logical, intent(in)   :: nucros
-real(8) :: word(SAV_NUM_REAL_PARAMS)
-integer :: iword(SAV_NUM_INT_PARAMS)
+real(8), allocatable :: word(:)
+integer, allocatable :: iword(:)
 integer :: i, j, ien
+allocate(word(get_sav_real_params_count()))
+allocate(iword(get_sav_int_params_count()))
 
 j=1
 !.....reserve space for restart information
@@ -1699,15 +1719,17 @@ if(nucros) iword(SAV_INTPARAMS_NUCROS)=1
 word(SAV_REALPARAMS_RTMN1)=rtmn1
 word(SAV_REALPARAMS_RTMX1)=rtmx1
 word(SAV_REALPARAMS_DINSID)=dinsid
-do 100 ien=1,nerg
-  word(10+ien)=energ(ien)
-  iword(22+ien)=nlev(ien)
-100 continue
-call dbwi(iword, SAV_NUM_INT_PARAMS, FILEID_SAV, REC_PARAMS)
-call dbwr(word, SAV_NUM_REAL_PARAMS, FILEID_SAV, REC_LAST_USED)
+do ien = 1, nerg
+  word(SAV_REALPARAMS_ENERG_START + ien - 1) = energ(ien)
+  iword(SAV_INTPARAMS_NLEV_START + ien - 1) = nlev(ien)
+end do
+call dbwi(iword, get_sav_int_params_count(), FILEID_SAV, REC_PARAMS)
+call dbwr(word, get_sav_real_params_count(), FILEID_SAV, REC_LAST_USED)
 call dbwc(FILEID_SAV, 1)
 call dclos(FILEID_SAV)
 call dopen(FILEID_SAV, FUNIT_SAV, savfil)
+deallocate(iword)
+deallocate(word)
 return
 end
 ! ------------------------------------------------------------------
