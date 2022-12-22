@@ -1702,7 +1702,7 @@ word(SAV_REALPARAMS_DINSID)=dinsid
 do 100 ien=1,nerg
   word(10+ien)=energ(ien)
   iword(22+ien)=nlev(ien)
-100 word(8+ien)=energ(ien)
+100 continue
 call dbwi(iword, SAV_NUM_INT_PARAMS, FILEID_SAV, REC_PARAMS)
 call dbwr(word, SAV_NUM_REAL_PARAMS, FILEID_SAV, REC_LAST_USED)
 call dbwc(FILEID_SAV, 1)
