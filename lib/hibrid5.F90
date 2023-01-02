@@ -338,7 +338,7 @@ end if
 
 if (.not. prxsec .and. .not. wrxsec .and. .not.prpart &
     .and. .not.wrpart) return
-call  partcr (tsq,  scmat, isc1, isc2, sc1, nopen, nopen, &
+call  partcr (tsq,  scmat, nopen, nopen, &
                    inq, jq, lq, inq, jq, lq, &
                    inlev, jlev, elev, jtot, nu, &
                    csflag, flaghf,twomol,flagsu, &
@@ -2110,7 +2110,7 @@ iaddr = 0
 call tsqmat(tsq,sreal,simag,inq,jq,lq, &
    inpack,jpack,lpack,nopen,length,nmax)
 ! calculate partial cross sections
-call partcr(tsq,sc1,isc1,isc2,sc2,nopen,length, &
+call partcr(tsq,sc1,nopen,length, &
             inq, jq, lq, inpack, jpack, lpack, &
             inlev, jlev, elev, jtot, nu, &
             csflag,flaghf,twomol,flagsu, &
@@ -2208,7 +2208,7 @@ do 400 icol = 1, ncol
 return
 end
 ! ----------------------------------------------------------------------
-subroutine partcr (tsq,  scmat, isc1, isc2, sc2, nopen, ncol, &
+subroutine partcr (tsq,  scmat, nopen, ncol, &
                    inrow, jrow, lrow, incol, jcol, lcol, &
                    inlev, jlev, elev, jtot, nu, &
                    csflag, flaghf,twomol,flagsu, &
@@ -2219,7 +2219,6 @@ subroutine partcr (tsq,  scmat, isc1, isc2, sc2, nopen, ncol, &
 !  incol, jcol, lcol: column indices of t-matrix (ncol values)
 !  inlev, jlev: quantum numbers of asymptotic states (nlevop values)
 !  elev: energy levels of asymptotic states (nlevop values)
-!  isc1, isc2, sc2: scratch arrays
 !
 !  current revision:  20-oct-2014 by p. dagdigian
 !
@@ -2244,9 +2243,6 @@ implicit double precision (a-h,o-z)
 real(8), dimension(nmax,nmax), intent(in) :: tsq
 !      real(8), dimension(:,:), intent(in), target :: tototsq
 real(8), dimension(nmax,nmax), intent(out) :: scmat
-integer, dimension(nmax), intent(out) :: isc1
-integer, dimension(nmax), intent(out) :: isc2
-real(8), dimension(nmax), intent(out) :: sc2
 integer, dimension(nopen), intent(in) :: inrow
 integer, dimension(nopen), intent(in) :: jrow
 integer, dimension(nopen), intent(in) :: lrow
@@ -2256,6 +2252,10 @@ integer, dimension(ncol), intent(in) :: lcol
 integer, dimension(nlevop), intent(in) :: inlev
 integer, dimension(nlevop), intent(in) :: jlev
 real(8), dimension(nlevop), intent(in) :: elev
+integer, dimension(nmax) :: isc1  ! scratch array
+integer, dimension(nmax) :: isc2  ! scratch array
+real(8), dimension(nmax) :: sc2   ! scratch array
+
 logical csflag, flaghf, flagsu, twomol
 !      real(8), pointer :: tsq(:,:)
 !      tsq => tototsq(1::nmax,1::nmax)
