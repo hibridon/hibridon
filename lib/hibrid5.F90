@@ -376,7 +376,7 @@ if (.not. csflag .or. (csflag .and. (nu .eq. numax) ) ) then
    irec=(ien-1)* EN_REC_COUNT + REC_EN_START
    faux = .false.
    call intpol(irec,jtot,jfirst,jfinal,jtotd,jlpar,jlpold, &
-                jlev,nmax,nlevop,tsq,sr,si,scmat,faux,soutpt_sc_file)
+                jlev,nmax,nlevop,tsq,scmat,faux,soutpt_sc_file)
 end if
 return
 end
@@ -665,13 +665,13 @@ do 100 ien = 1,nerg
   irec=(nerg+ien-1)* EN_REC_COUNT + REC_EN_START
   vrai=.true.
   call intpol(irec,nu,numin,numax,nud,jlpar,jlpar, &
-              jlev, nmax,nlevop,tq1,tq2,tq3,tsq,vrai,tmp_file)
+              jlev, nmax,nlevop,tq1,tsq,vrai,tmp_file)
 100 continue
 return
 end
 ! ----------------------------------------------------------------------
 subroutine intpol(irec,jl3,j1,j2,jd,jp,jpi,jlev, &
-                  nmax,n,q,q1,q2,q3,nucros,tmp_file)
+                  nmax,n,q,q3,nucros,tmp_file)
 ! ----------------------------------------------------------------------
 !
 ! subroutine to sum up and interpolate partial cross sections
@@ -698,11 +698,11 @@ integer, intent(in) :: jlev(n)
 integer, intent(in) :: nmax  ! the first dimension of the matrices
 integer, intent(in) :: n     ! the actual dimension of the matrices (= nlevop)
 real(8), intent(out) :: q(nmax,n)  ! on return contains the present integral cross sections, summed up to jl3
-real(8), intent(out) :: q1(nmax,n) ! scratch array, used for previous partial waves
-real(8), intent(out) :: q2(nmax,n) ! scratch array, used for previous partial waves
 real(8), intent(in) :: q3(nmax,n)
 logical, intent(in) :: nucros
 integer, intent(in) :: tmp_file
+real(8) :: q1(nmax,n) ! scratch array, used for previous partial waves
+real(8) :: q2(nmax,n) ! scratch array, used for previous partial waves
 integer :: i, j
 integer :: jl, num_partial_xs, jl1, jp1, jl2, jp2, nn
 integer :: jpl               ! the previous parity (l=last?)
@@ -794,6 +794,9 @@ else
     end if
   end if
 end if  ! end of handling for jd /= 1
+! q = 0.0d0
+q1 = 0.01d0
+q2 = 0.01d0
 
 end subroutine
 
@@ -2122,18 +2125,18 @@ end if
 if(csflag.and.nucros) then
   irec=2
   call intpol(irec,jtot,jfirst,jfinal,jtotd,jlpar,jlpold, &
-              jlev,nmax,nlevop,tsq,sc1,sc2,scmat,nucros,tmp_file)
+              jlev,nmax,nlevop,tsq,scmat,nucros,tmp_file)
   if(jtot+jtotd.gt.jfinal) then
     irec=7
     call intpol(irec,nu,numin,numax,nud,jlpar,jlpar, &
-                jlev,nmax,nlevop,sigma,sc1,sc2,tsq,nucros, tmp_file)
+                jlev,nmax,nlevop,sigma,tsq,nucros, tmp_file)
 
   end if
 else
   if (.not. csflag .or. (csflag .and. (nu .eq. numax) ) ) then
     irec=2
     call intpol(irec,jtot,jfirst,jfinal,jtotd,jlpar,jlpold, &
-               jlev,nmax,nlevop,sigma,sc1,sc2,scmat,nucros,tmp_file)
+               jlev,nmax,nlevop,sigma,scmat,nucros,tmp_file)
   end if
 end if
 ! loop back for next partial wave
