@@ -670,24 +670,11 @@ do 100 ien = 1,nerg
 return
 end
 ! ----------------------------------------------------------------------
-subroutine intpol(irec,jl3a,j1,j2,jd,jp,jpi,jlev, &
+subroutine intpol(irec,jl3,j1,j2,jd,jp,jpi,jlev, &
                   nmax,n,q,q1,q2,q3,nucros,tmp_file)
 ! ----------------------------------------------------------------------
 !
 ! subroutine to sum up and interpolate partial cross sections
-!
-!     jl3 is jtot or nu value of present partial cross sections in q3
-!     j1, j2 are start and end values of jtot (nu)
-!     jd is incrment between jtot (nu) values
-!     jp is present parity
-!     jpi is the first parity
-!     jpl is the previous parity
-!     nmax is the first dimension of the matrices
-!     n is the actual dimension of the matrices (= nlevop)
-!     q1, q2 are scratch arrays, used for previous partial waves
-!     on return, q contains present integral cross sections, summed up to jl3
-!
-!  latest revision date: 19-may-1997 by mha
 !
 ! ----------------------------------------------------------------------
 !
@@ -699,53 +686,47 @@ subroutine intpol(irec,jl3a,j1,j2,jd,jp,jpi,jlev, &
 !       the second last partial cross sections on record irec+4 (if available)
 ! ----------------------------------------------------------------------
 use mod_savfile, only: EN_REC_PRESENT_INTEGRAL_XS, EN_REC_PREVIOUS_INTEGRAL_XS, EN_REC_PRESENT_PARTIAL_XS, EN_REC_PREVIOUS_PARTIAL_XS, EN_REC_2NDLAST_PARTIAL_XS
-implicit double precision (a-h,o-z)
+implicit none
 integer, intent(in) :: irec  ! index of the first record (in the sense of iadr(irec, ifil)) used to store the current energy data in the sav file (EN_REC_COUNT records are used for each energy level) 
-integer, intent(in) :: jl3a
-integer, intent(in) :: j1
-integer, intent(in) :: j2
-integer, intent(in) :: jd
-integer, intent(in) :: jp
-integer, intent(in) :: jpi
+integer, intent(in) :: jl3  ! jtot or nu value of present partial cross sections in q3
+integer, intent(in) :: j1    ! start value of jtot (nu)
+integer, intent(in) :: j2    ! end value of jtot (nu)
+integer, intent(in) :: jd    ! increment between jtot (nu) values
+integer, intent(in) :: jp    ! present parity
+integer, intent(in) :: jpi   ! the first parity
 integer, intent(in) :: jlev(n)
-integer, intent(in) :: nmax
-integer, intent(in) :: n ! = nlevop
-real(8), intent(out) :: q(nmax,n)
-real(8), intent(out) :: q1(nmax,n)
-real(8), intent(out) :: q2(nmax,n)
-real(8), intent(out) :: q3(nmax,n)
+integer, intent(in) :: nmax  ! the first dimension of the matrices
+integer, intent(in) :: n     ! the actual dimension of the matrices (= nlevop)
+real(8), intent(out) :: q(nmax,n)  ! on return contains the present integral cross sections, summed up to jl3
+real(8), intent(out) :: q1(nmax,n) ! scratch array, used for previous partial waves
+real(8), intent(out) :: q2(nmax,n) ! scratch array, used for previous partial waves
+real(8), intent(in) :: q3(nmax,n)
 logical, intent(in) :: nucros
 integer, intent(in) :: tmp_file
-
-logical nowrit
+integer :: i, j
+integer :: jl, num_partial_xs, jl1, jp1, jl2, jp2, nn
+integer :: jpl               ! the previous parity (l=last?)
 !
-jl3=jl3a
-nowrit=.false.
 !
-if(jd.le.1) then
-!
-!.....here for jd.eq.1
-!
-  if(jl3.eq.j1.and.jp.eq.jpi) then
-!.....initialize at first j (or nu)
+if(jd <= 1) then
+  !
+  ! here for jd == 1
+  !
+  if(jl3 == j1 .and. jp == jpi) then
+    ! initialize at first j (or nu)
     do i=1,n
       do j=1,n
        q2(j,i)=0
        q(j,i)=q3(j,i)
       end do
     end do
-    jf=jl3
     call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jl3,jp,1,q,nmax,n)
-!          print *, 'after dbout1'
     call dbout(irec + EN_REC_PREVIOUS_INTEGRAL_XS,-1,jp,1,q2,nmax,n)
-!          print *, 'after dbout2'
     call dbout(irec + EN_REC_PRESENT_PARTIAL_XS,jl3,jp,0,q3,nmax,n)
-!          print *, 'after dbout3'
-    return
   else
-!.....simply add for jd=1
-    call dbin(tmp_file, irec + EN_REC_PRESENT_INTEGRAL_XS,jl,jpl,next,q,nmax,n)
-    if(jp.eq.jpl.and.jl+1.ne.jl3) then
+    ! jd == 1 and (jl3,jp) /= (j1,jpi) => simply add
+    call dbin(tmp_file, irec + EN_REC_PRESENT_INTEGRAL_XS,jl,jpl,num_partial_xs,q,nmax,n)
+    if(jp == jpl .and. jl+1 /= jl3) then
       write(6,15) jp,jl,jl3
 15       format(/' ERROR IN INTPOL: JP, JL, JL3:',3i4)
       call exit
@@ -756,78 +737,73 @@ if(jd.le.1) then
         q(j,i)=q(j,i)+q3(j,i)
       end do
     end do
-    jf=jl3
-    call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jf,jp,1,q,nmax,n)
+    call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jl3,jp,1,q,nmax,n)
     call dbout(irec + EN_REC_PREVIOUS_INTEGRAL_XS,jl,jpl,1,q2,nmax,n)
     call dbout(irec + EN_REC_PRESENT_PARTIAL_XS,jl3,jp,0,q3,nmax,n)
-    return
   end if
-end if
-!
-!.....here for jd.ne.1
-!
-if(jl3.eq.j1.and.jp.eq.jpi) then
-!.....initialize for jd.ne.1
-  do i=1,n
-    do j=1,n
-      q2(j,i)=0
-      q(j,i)=q3(j,i)
-    end do
-  end do
-  jf=jl3
-  jl=-1
-  call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jf,jp,1,q,nmax,n)
-  call dbout(irec + EN_REC_PREVIOUS_INTEGRAL_XS,jl,jp,1,q2,nmax,n)
-  call dbout(irec + EN_REC_PRESENT_PARTIAL_XS,jl3,jp,0,q3,nmax,n)
-  return
-end if
-!.....jl is value up to which jtot has been summed so far
-call dbin(tmp_file, irec + EN_REC_PRESENT_INTEGRAL_XS,jl,jpl,next,q,nmax,n)
-if(jpl.ne.jp) then
-  do i=1,n
-    do j=1,n
-      q2(j,i)=q(j,i)
-      q(j,i)=q(j,i)+q3(j,i)
-    end do
-  end do
-  jf=jl3
-  call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jf,jp,1,q,nmax,n)
-  call dbout(irec + EN_REC_PREVIOUS_INTEGRAL_XS,jl,jpl,1,q2,nmax,n)
-  call dbout(irec + EN_REC_PRESENT_PARTIAL_XS,jl3,jp,0,q3,nmax,n)
-  return
-end if
-nn=min(next+1,3)
-call dbout(irec + EN_REC_PREVIOUS_INTEGRAL_XS,jl,jpl,nn,q,nmax,n)
-call dbin(tmp_file, irec + EN_REC_PRESENT_PARTIAL_XS,jl2,jp2,nn,q2,nmax,n)
-if(next.eq.1) then
-  call intpl2(jl, jl2 ,jl3 , nmax, n, q, q2, q3, jlev, nucros)
-  jf = jl3
-  if(nowrit) return
-  !
-  call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jf,jp,2,q,nmax,n)
-  call dbout(irec + EN_REC_PRESENT_PARTIAL_XS,jl3,jp,0,q3,nmax,n)
-  call dbout(irec + EN_REC_PREVIOUS_PARTIAL_XS,jl2,jp2,0,q2,nmax,n)
 else
-  call dbin(tmp_file, irec + EN_REC_PREVIOUS_PARTIAL_XS,jl1,jp1,nn,q1,nmax,n)
-  call intpl3(jl, jl1, jl2, jl3, nmax, n, q, q1, q2, q3, jlev, nucros)
-  jf = jl3
-  if(nowrit) return
   !
-  call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jf,jp,3,q,nmax,n)
-  call dbout(irec + EN_REC_PRESENT_PARTIAL_XS,jl3,jp,0,q3,nmax,n)
-  call dbout(irec + EN_REC_PREVIOUS_PARTIAL_XS,jl2,jp2,0,q2,nmax,n)
-  call dbout(irec + EN_REC_2NDLAST_PARTIAL_XS,jl1,jp1,0,q1,nmax,n)
-end if
+  !.....here for jd /= 1
+  !
+  if(jl3 == j1 .and. jp == jpi) then
+  !.....initialize for jd.ne.1
+    do i=1,n
+      do j=1,n
+        q2(j,i)=0
+        q(j,i)=q3(j,i)
+      end do
+    end do
+    jl=-1
+    call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jl3,jp,1,q,nmax,n)
+    call dbout(irec + EN_REC_PREVIOUS_INTEGRAL_XS,jl,jp,1,q2,nmax,n)
+    call dbout(irec + EN_REC_PRESENT_PARTIAL_XS,jl3,jp,0,q3,nmax,n)
+  else
+    !.....jl is value up to which jtot has been summed so far
+    call dbin(tmp_file, irec + EN_REC_PRESENT_INTEGRAL_XS,jl,jpl,num_partial_xs,q,nmax,n)
+    if(jpl /= jp) then
+      do i=1,n
+        do j=1,n
+          q2(j,i)=q(j,i)
+          q(j,i)=q(j,i)+q3(j,i)
+        end do
+      end do
+      call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jl3,jp,1,q,nmax,n)
+      call dbout(irec + EN_REC_PREVIOUS_INTEGRAL_XS,jl,jpl,1,q2,nmax,n)
+      call dbout(irec + EN_REC_PRESENT_PARTIAL_XS,jl3,jp,0,q3,nmax,n)
+    else
+      nn=min(num_partial_xs+1,3)
+      call dbout(irec + EN_REC_PREVIOUS_INTEGRAL_XS,jl,jpl,nn,q,nmax,n)
+      call dbin(tmp_file, irec + EN_REC_PRESENT_PARTIAL_XS,jl2,jp2,nn,q2,nmax,n)
+      if(num_partial_xs == 1) then
+        call intpl2(jl, jl2 ,jl3 , nmax, n, q, q2, q3, jlev, nucros)
+        !
+        call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jl3,jp,2,q,nmax,n)
+        call dbout(irec + EN_REC_PRESENT_PARTIAL_XS,jl3,jp,0,q3,nmax,n)
+        call dbout(irec + EN_REC_PREVIOUS_PARTIAL_XS,jl2,jp2,0,q2,nmax,n)
+      else
+        ASSERT (num_partial_xs > 1)
+        ! the previous partial cross section is available; use it for interpolation
+        call dbin(tmp_file, irec + EN_REC_PREVIOUS_PARTIAL_XS,jl1,jp1,nn,q1,nmax,n)
+        call intpl3(jl, jl1, jl2, jl3, nmax, n, q, q1, q2, q3, jlev, nucros)
+        !
+        call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jl3,jp,3,q,nmax,n)
+        call dbout(irec + EN_REC_PRESENT_PARTIAL_XS,jl3,jp,0,q3,nmax,n)
+        call dbout(irec + EN_REC_PREVIOUS_PARTIAL_XS,jl2,jp2,0,q2,nmax,n)
+        call dbout(irec + EN_REC_2NDLAST_PARTIAL_XS,jl1,jp1,0,q1,nmax,n)
+      end if
+    end if
+  end if
+end if  ! end of handling for jd /= 1
 
 end subroutine
 
-subroutine intpl3(jlx,jl1x,jl2x,jl3x,nmax,n,q,q1,q2,q3,jlev,nucros)
+subroutine intpl3(jl,jl1,jl2,jl3,nmax,n,q,q1,q2,q3,jlev,nucros)
 use mod_coisc8, only: list => isc8 ! list(20)
 implicit none
-integer, intent(in) :: jlx
-integer, intent(in) :: jl1x
-integer, intent(in) :: jl2x
-integer, intent(in) :: jl3x
+integer, intent(in) :: jl
+integer, intent(in) :: jl1
+integer, intent(in) :: jl2
+integer, intent(in) :: jl3
 integer, intent(in) :: nmax
 integer, intent(in) :: n
 real(8), intent(out) :: q(nmax, n)
@@ -836,52 +812,48 @@ real(8), intent(in) :: q2(nmax, n)
 real(8), intent(in) :: q3(nmax, n)
 integer, intent(in) :: jlev(n)
 logical, intent(in) :: nucros
-integer :: jl, jl1, jl2, jl3
 real(8) :: f0, f1, f2
 integer :: i, j, ii, jj
 integer :: nleq, nlge
 integer :: nu
 integer :: jf
-jl=jlx
-jl1=jl1x
-jl2=jl2x
-jl3=jl3x
 !
 !.....we will now sum from ji to jf
 !
-31 if(jl.ne.jl2) then
+if(jl /= jl2) then
   write(6,32) jl,jl2
 32   format(/' ERROR IN INTPL3: JL=',i0,' NOT EQUAL JL2=',i3)
   call exit
 end if
-jf=jl3
-if(.not.nucros) then
+jf = jl3
+if(.not. nucros) then
   call prefac(jl1,jl2,jl3,jl+1,jf,f0,f1,f2)
-  do i=1,n
-    do j=1,n
-      q(j,i)=q(j,i)+f0*q2(j,i) &
-                   +f1*(q2(j,i)-q3(j,i)) &
-                   +f2*(q1(j,i)-q2(j,i))
+  do i=1, n
+    do j=1, n
+      q(j,i) = q(j,i) + f0 * q2(j,i) &
+                      + f1 * (q2(j,i)-q3(j,i)) &
+                      + f2 * (q1(j,i)-q2(j,i))
     end do
   end do
 else
-!......here for sparse algorithm
-  do 42 nu=jl+1,jf
-  call nulist(nu,jlev,list,n,nleq,nlge)
-!       write(6,*) 'three-point, jl=',jl,'  jf=',jf,'  nu=',nu,nleq,nlge
-!       do 42 nuu=jl+1,nu
-!       call prefac(jl1,jl2,nu,nuu,nuu,f0,f1,f2)
-  call prefac(jl1,jl2,nu,jl+1,nu,f0,f1,f2)
-  do 42 ii=1,nlge
-  i=list(ii)
-  do 42 jj=1,nlge
-  if(nu.lt.jf.and.jj.gt.nleq.and.ii.gt.nleq) goto 42
-  j=list(jj)
-!       write(6,99) nuu,i,j,q(j,i),q1(j,i),q2(j,i),q3(j,i),f0,f1,f2
-  q(j,i)=q(j,i)+f0*q2(j,i) &
-               +f1*(q2(j,i)-q3(j,i)) &
-               +f2*(q1(j,i)-q2(j,i))
-42   continue
+  ! here for sparse algorithm
+  do nu = jl+1, jf
+    call nulist(nu,jlev,list,n,nleq,nlge)
+    !       write(6,*) 'three-point, jl=',jl,'  jf=',jf,'  nu=',nu,nleq,nlge
+    !       do 42 nuu=jl+1,nu
+    !       call prefac(jl1,jl2,nu,nuu,nuu,f0,f1,f2)
+    call prefac(jl1,jl2,nu,jl+1,nu,f0,f1,f2)
+    do ii = 1, nlge
+      i = list(ii)
+      do jj = 1, nlge
+        if(nu < jf .and. jj > nleq .and. ii > nleq) cycle
+        j = list(jj)
+        q(j,i) = q(j,i) + f0 * q2(j,i) &
+                        + f1 * (q2(j,i)-q3(j,i)) &
+                        + f2 * (q1(j,i)-q2(j,i))
+      end do
+    end do
+  end do
 end if
 !
 return
@@ -889,12 +861,12 @@ end subroutine
 !
 !.....linear interpolation if only two points available
 !
-subroutine intpl2(jlx,jl2x,jl3x,nmax,n,q,q2,q3,jlev,nucros)
+subroutine intpl2(jl,jl2,jl3,nmax,n,q,q2,q3,jlev,nucros)
 use mod_coisc8, only: list => isc8 ! list(20)
 implicit none
-integer, intent(in) :: jlx
-integer, intent(in) :: jl2x
-integer, intent(in) :: jl3x
+integer, intent(in) :: jl
+integer, intent(in) :: jl2
+integer, intent(in) :: jl3
 integer, intent(in) :: nmax
 integer, intent(in) :: n
 real(8), intent(out) :: q(nmax, n)
@@ -902,49 +874,45 @@ real(8), intent(in) :: q2(nmax, n)
 real(8), intent(in) :: q3(nmax, n)
 integer, intent(in) :: jlev(n)
 logical, intent(in) :: nucros
-integer :: jl, jl2, jl3
 real(8) :: f0, f1, f2
 integer :: i, j, ii, jj
 integer :: jf
 integer :: nleq, nlge
 integer :: nu
-jl=jlx
-jl2=jl2x
-jl3=jl3x
-  if(jl.ne.jl2) then
-  write(6,32) jl,jl2
+
+if(jl /= jl2) then
+  write(6,32) jl, jl2
 32   format(/' ERROR IN INTPL2: JL=',i3,' NOT EQUAL JL2=',i3)
   call exit
 end if
 jf=jl3
 if(.not.nucros) then
-  call prefac(jl2,jl2,jl3,jl+1,jf,f0,f1,f2)
-  do i=1,n
-    do j=1,n
-    q(j,i)=q(j,i)+f0*q2(j,i) &
-                 +f1*(q2(j,i)-q3(j,i))
+  call prefac(jl2, jl2, jl3, jl + 1, jf, f0, f1, f2)
+  do i = 1, n
+    do j = 1, n
+      q(j,i) = q(j,i) + f0 * q2(j, i) &
+                      + f1 * (q2(j, i)-q3(j, i))
     end do
   end do
-
 else
 !......here for sparse algorithm
-  do 62 nu=jl+1,jf
-!.....select contributing levels
-  call nulist(nu,jlev,list,n,nleq,nlge)
-!       write(6,*) 'two-point jl=',jl,'  jf=',jf,'  nu=',nu,nleq,nlge
-!       do 62 nuu=jl+1,nu
-!       call prefac(jl2,jl2,nu,nuu,nuu,f0,f1,f2)
-  call prefac(jl2,jl2,nu,jl+1,nu,f0,f1,f2)
-  do 62 ii=1,nlge
-  i=list(ii)
-  do 62 jj=1,nlge
-  if(nu.lt.jf.and.jj.gt.nleq.and.ii.gt.nleq) goto 62
-  j=list(jj)
-!       write(6,99) nuu,i,j,q(j,i),0.0d0,q2(j,i),q3(j,i),f0,f1
-!99      format(1x,3i4,4f10.4,3x,3f12.3)
-  q(j,i)=q(j,i)+f0*q2(j,i) &
-               +f1*(q2(j,i)-q3(j,i))
-62   continue
+  do nu = jl + 1, jf
+    !.....select contributing levels
+    call nulist(nu, jlev, list, n, nleq, nlge)
+    !       write(6,*) 'two-point jl=',jl,'  jf=',jf,'  nu=',nu,nleq,nlge
+    !       do 62 nuu=jl+1,nu
+    !       call prefac(jl2,jl2,nu,nuu,nuu,f0,f1,f2)
+    call prefac(jl2, jl2, nu, jl + 1, nu, f0, f1, f2)
+    do ii = 1, nlge
+      i=list(ii)
+      do jj = 1, nlge
+        if(nu < jf .and. jj > nleq .and. ii > nleq) cycle
+        j=list(jj)
+        q(j,i) = q(j,i) + f0 * q2(j,i) &
+                        + f1 * (q2(j,i)-q3(j,i))
+      end do
+    end do
+  end do  ! end of loop on nu
 
 !......now all levels for j.ge.nu=jl3
 end if
