@@ -745,10 +745,12 @@ goto 31
 !
   if(jl3.eq.j1.and.jp.eq.jpi) then
 !.....initialize at first j (or nu)
-    do 10 i=1,n
-    do 10 j=1,n
-    q2(j,i)=0
-10     q(j,i)=q3(j,i)
+    do i=1,n
+      do j=1,n
+       q2(j,i)=0
+       q(j,i)=q3(j,i)
+      end do
+    end do
     jf=jl3
     call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jl3,jp,1,q,nmax,n)
 !          print *, 'after dbout1'
@@ -783,10 +785,12 @@ end if
 !
 if(jl3.eq.j1.and.jp.eq.jpi) then
 !.....initialize for jd.ne.1
-  do 25 i=1,n
-  do 25 j=1,n
-  q2(j,i)=0
-25   q(j,i)=q3(j,i)
+  do i=1,n
+    do j=1,n
+      q2(j,i)=0
+      q(j,i)=q3(j,i)
+    end do
+  end do
   jf=jl3
   jl=-1
   call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jf,jp,1,q,nmax,n)
@@ -797,10 +801,12 @@ end if
 !.....jl is value up to which jtot has been summed so far
 call dbin(tmp_file, irec + EN_REC_PRESENT_INTEGRAL_XS,jl,jpl,next,q,nmax,n)
 if(jpl.ne.jp) then
-  do 30 i=1,n
-  do 30 j=1,n
-  q2(j,i)=q(j,i)
-30   q(j,i)=q(j,i)+q3(j,i)
+  do i=1,n
+    do j=1,n
+      q2(j,i)=q(j,i)
+      q(j,i)=q(j,i)+q3(j,i)
+    end do
+  end do
   jf=jl3
   call dbout(irec + EN_REC_PRESENT_INTEGRAL_XS,jf,jp,1,q,nmax,n)
   call dbout(irec + EN_REC_PREVIOUS_INTEGRAL_XS,jl,jpl,1,q2,nmax,n)
@@ -990,9 +996,9 @@ subroutine dbin(ifile,irec,i1,i2,i3,q,nmax,n)
 use mod_savfile, only: REC_LAST_USED
 implicit none
 integer, intent(in) :: ifile
-integer :: irec
+integer, intent(in) :: irec
 integer, intent(out) :: i1, i2, i3
-integer :: nmax, n
+integer, intent(in) :: nmax, n
 real(8), dimension(nmax, n), intent(out) :: q
 integer :: i
 call dbri(i1,1,ifile,irec)
@@ -1490,10 +1496,24 @@ subroutine intchk(irec,q,q1,q2,q3,jf,jp,nmax,n,nucros)
 !
 use mod_savfile, only: EN_REC_PRESENT_INTEGRAL_XS, EN_REC_PREVIOUS_INTEGRAL_XS, EN_REC_PRESENT_PARTIAL_XS, EN_REC_PREVIOUS_PARTIAL_XS, EN_REC_2NDLAST_PARTIAL_XS
 use mod_fileid, only: FILEID_SAV
-implicit double precision (a-h,o-z)
-logical nucros
-dimension q(nmax,n),q1(nmax,n),q2(nmax,n),q3(nmax,n)
+implicit none
+integer, intent(in) :: irec  ! the base (minimum of the record ranges for an energy) record index to use to read the cross sections in the sav_file.
+real(8), intent(out) :: q(nmax,n)
+real(8), intent(out) :: q1(nmax,n)
+real(8), intent(out) :: q2(nmax,n)
+real(8), intent(out) :: q3(nmax,n)
+integer, intent(out) :: jf
+integer, intent(out) :: jp
+integer, intent(in) :: nmax
+integer, intent(in) :: n
+logical, intent(out) :: nucros
 integer :: sav_file = FILEID_SAV
+integer :: i, j
+integer :: jl, jl1, jl2, jl3
+integer :: jpl, jp1, jp2, jp3
+integer :: next
+integer :: nn
+integer :: ierr
 !
 write(6,5)
 write(9,5)
@@ -1507,9 +1527,11 @@ write(6,7) jl3,jp3
 write(9,7) jl3,jp3
 7 format(' READ PARTIAL  CROSS SECTIONS FOR J=',i3,'  JP=',i2)
 if(next.eq.1) then
-  do 10 i=1,n
-  do 10 j=1,n
-10   q(j,i)=q(j,i)+q3(j,i)
+  do i=1,n
+    do j=1,n
+      q(j,i) = q(j,i) + q3(j,i)
+    end do
+  end do
   goto 15
 else if(next.eq.2) then
   call dbin(sav_file, irec + EN_REC_PREVIOUS_PARTIAL_XS,jl2,jp2,nn,q2,nmax,n)
@@ -1536,9 +1558,11 @@ if(jl3.ne.jf.or.jp3.ne.jp) then
   call exit
 end if
 ierr=0
-do 30 i=1,n
-do 30 j=1,n
-30 if(abs(q(j,i)-q1(j,i)).gt.1.d-10) ierr=ierr+1
+do i=1,n
+  do j=1,n
+    if(abs(q(j,i)-q1(j,i)) > 1.d-10) ierr=ierr+1
+  end do
+end do
 if(ierr.ne.0) then
   write(6,40) ierr
   write(9,40) ierr
