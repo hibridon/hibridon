@@ -141,6 +141,42 @@ goto 20
 950 njtot = -1
 return
 end
+subroutine smatread (iadr, sreal, simag, jtot, jlpar, nu, &
+                  jq, lq, inq, packed_base, &
+                  smt_file_unit, nmax, nopen, ierr)
+use mod_coj12, only: j12
+use mod_coj12p, only: j12pk
+use mod_hibasis, only: is_j12
+use mod_selb, only: ibasty
+use mod_hitypes, only: packed_base_type
+implicit none
+integer, intent(in) :: iadr
+real(8), intent(out) :: sreal(nmax,1)
+real(8), intent(out) :: simag(nmax,1)
+integer, intent(out) :: jtot
+integer, intent(out) :: jlpar
+integer, intent(out) :: nu
+integer, intent(out) :: jq(1)
+integer, intent(out) :: lq(1)
+integer, intent(out) :: inq(1)
+type(packed_base_type), intent(out) :: packed_base
+integer, intent(in) :: smt_file_unit
+integer, intent(in) :: nmax
+integer, intent(inout) :: nopen
+integer, intent(out) :: ierr
+logical :: triang
+character*8 :: csize8
+integer :: iaddr
+integer :: lrec, i, nnout, irow, icol, ioff
+
+call packed_base%init(nmax)
+
+call sread (iadr, sreal, simag, jtot, jlpar, nu, &
+                  jq, lq, inq, packed_base%inpack, packed_base%jpack, packed_base%lpack, &
+                  smt_file_unit, nmax, nopen, packed_base%length, ierr)
+
+end subroutine smatread
+
 subroutine sread (iadr, sreal, simag, jtot, jlpar, nu, &
                   jq, lq, inq, inpack, jpack, lpack, &
                   smt_file_unit, nmax, nopen, length, ierr)
