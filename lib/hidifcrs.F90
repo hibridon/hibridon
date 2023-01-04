@@ -504,15 +504,17 @@ end if
 !
 !.....calculate contributions to amplitudes for present jtot
 !
-call ampli(j1,in1,j2,in2,jtot,sreal1,simag1,mmax,packed_base1%jpack,packed_base1%lpack, &
-     packed_base1%inpack,packed_base1%length,jq,lq,inq,nopen1,y,q,l2max,nangle,ihomo,flaghf, &
-     iydim1,iydim2,iq1min,iq1max,iq2min,iq2max,iq3)
+call ampli( &
+    j1, in1, j2, in2, jtot, sreal1, simag1, mmax, packed_base1, &
+    jq, lq, inq, nopen1, y, q, l2max, nangle, ihomo, flaghf, &
+    iydim1, iydim2, iq1min, iq1max, iq2min, iq2max, iq3)
 !.... calculate contributions for negative initial index
-if (stflag) &
-     call ampli(j1,-in1,j2,in2,jtot,sreal1,simag1,mmax, &
-     packed_base1%jpack,packed_base1%lpack,packed_base1%inpack,packed_base1%length,jq,lq,inq,nopen1,y,qm, &
-     l2max,nangle,ihomo,flaghf,iydim1,iydim2,iq1min,iq1max, &
-     iq2min,iq2max,iq3)
+if (stflag) then
+  call ampli( &
+    j1, -in1, j2, in2, jtot, sreal1, simag1, mmax, packed_base1, &
+    jq, lq, inq, nopen1, y, qm, l2max, nangle, ihomo, flaghf, &
+    iydim1, iydim2, iq1min, iq1max, iq2min, iq2max, iq3)
+end if
 !
 !.....loop back to next jtot/jlpar
 !
@@ -958,8 +960,8 @@ endif
 return
 end
 ! -----------------------------------------------------------------------
-subroutine ampli(j1,in1,j2,in2,jtot,sreal,simag,mmax,jpack,lpack, &
-     ipack,length,jq,lq,inq,nopen,y,q,maxl2,nangle,ihomo,flaghf, &
+subroutine ampli(j1,in1,j2,in2,jtot,sreal,simag,mmax, packed_base, &
+     jq,lq,inq,nopen,y,q,maxl2,nangle,ihomo,flaghf, &
      iydim1,iydim2,iq1min,iq1max,iq2min,iq2max,iq3)
 !subr  calculates scattering amplitudes for given jtot and set
 !subr  of angles
@@ -974,7 +976,7 @@ subroutine ampli(j1,in1,j2,in2,jtot,sreal,simag,mmax,jpack,lpack, &
 !
 !  current revision date:  22-may-2021 by p. dagdigian
 !
-!.....jpack,lpack,ipack: labels for rows
+!.....packed_base%jpack,packed_base%lpack,packed_base%inpack: labels for rows
 !.....jq,lq,inq:         labels for columns
 !
 use mod_coj12, only: j12
@@ -982,11 +984,13 @@ use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12, is_twomol
 use mod_selb, only: ibasty
 use mod_hiutil, only: xf3j
+use mod_hitypes, only: packed_base_type
 implicit double precision (a-h,o-z)
+type(packed_base_type) :: packed_base
 complex*16 ai,yy,tmat
 parameter (zero=0.0d0, one=1.0d0, two=2.0d0)
 logical ihomo,flaghf,elastc
-dimension jpack(1),lpack(1),ipack(1),jq(1),inq(1)
+dimension jq(1),inq(1)
 integer, intent(in) :: lq(1)
 dimension sreal(mmax,1),simag(mmax,1)
 integer, dimension(:), allocatable :: ilab1
@@ -1079,8 +1083,8 @@ else
 end if
 !
 llmax = 0
-do ilab=1,length
-   if(jpack(ilab).ne.j1.or.ipack(ilab).ne.in1) cycle
+do ilab=1,packed_base%length
+   if(packed_base%jpack(ilab).ne.j1.or.packed_base%inpack(ilab).ne.in1) cycle
    llmax = llmax + 1
 end do
 !
@@ -1089,9 +1093,9 @@ allocate(fak1(llmax))
 allocate(fak2(llmax))
 allocate(fak3(llmax))
 ll = 0
-do ilab=1,length
-   if(jpack(ilab).ne.j1.or.ipack(ilab).ne.in1) cycle
-   l1 = lpack(ilab)
+do ilab=1,packed_base%length
+   if(packed_base%jpack(ilab).ne.j1.or.packed_base%inpack(ilab).ne.in1) cycle
+   l1 = packed_base%lpack(ilab)
    ll = ll + 1
    fak1(ll)=fakj*sqrt(two * dble(l1) + one)
    ilab1(ll)=ilab
@@ -1107,7 +1111,7 @@ if (is_j12(ibasty)) then
 end if
 do 60 ll=1,llmax
 ilab=ilab1(ll)
-l1=lpack(ilab)
+l1=packed_base%lpack(ilab)
 if (is_j12(ibasty)) then
   j12_i = j12pk(ilab)
   xj12_i = j12_i + spin
@@ -1131,7 +1135,7 @@ if (.not. is_j12(ibasty)) then
 !
   do 70 ll=1,llmax
   ilab=ilab1(ll)
-  xl1=lpack(ilab)
+  xl1=packed_base%lpack(ilab)
 70   fak3(ll)=fak2(ll)*xf3j(xj1,xl1,xjtot,xmj1,zero,-xmj1)
 !
   do 300 mj2=-j2p,j2
@@ -1163,7 +1167,7 @@ elseif (is_twomol(ibasty)) then
 !
     do 1070 ll = 1, llmax
       ilab = ilab1(ll)
-      xl1 = lpack(ilab)
+      xl1 = packed_base%lpack(ilab)
       j12_i = j12pk(ilab)
       xj12_i = j12_i + spin
       fak3(ll) = fak2(ll) * (-1)**j12_i &
@@ -1206,7 +1210,7 @@ else
 !
     do 3070 ll = 1, llmax
       ilab = ilab1(ll)
-      xl1 = lpack(ilab)
+      xl1 = packed_base%lpack(ilab)
       j12_i = j12pk(ilab)
       xj12_i = j12_i + spin
       fak3(ll) = fak2(ll) * (-1)**j12_i &
