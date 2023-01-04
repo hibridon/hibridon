@@ -2029,9 +2029,6 @@ use mod_cojq, only: jq ! jq(1)
 use mod_colq, only: lq ! lq(1)
 use mod_coinq, only: inq ! inq(1)
 use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
-use mod_coisc3, only: jpack => isc3 ! jpack(1)
-use mod_coisc4, only: lpack => isc4 ! lpack(1)
-use mod_coisc5, only: inpack => isc5 ! inpack(1)
 use mod_coisc6, only: isc1 => isc6 ! isc1(1)
 use mod_coisc7, only: isc2 => isc7 ! isc2(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
@@ -2039,7 +2036,8 @@ use mod_cosc2, only: inlev => sc2int ! inlev(1)
 use mod_cosc3, only: jlev => sc3int ! jlev(1)
 use mod_par, only: batch, ipos
 use mod_selb, only: ibasty
-use mod_hismat, only: sread
+use mod_hismat, only: smatread
+use mod_hitypes, only: packed_base_type
 implicit double precision (a-h,o-z)
 logical, intent(in) :: csflag
 logical, intent(in) :: flaghf
@@ -2063,6 +2061,9 @@ real(8), intent(out) :: tsq(nmax, nlevop)
 integer, intent(in) :: nlevop
 integer, intent(in) :: nmax
 integer, intent(in) :: tmp_file
+
+type(packed_base_type) :: packed_base
+
 ! clear sigma array
 one=1.0d0
 zero=0.0d0
@@ -2076,9 +2077,9 @@ iaddr = 0
 !
 ! j12 is read into a common block for molecule-molecule collisions
 10 nopen = 0
-call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
-             jq, lq, inq, inpack, jpack, lpack, &
-             1, nmax, nopen, length, ierr)
+call smatread ( iaddr, sreal, simag, jtot, jlpar, nu, &
+  jq, lq, inq, packed_base, &
+  1, nmax, nopen, ierr)
 if(jlpold.eq.0) jlpold=jlpar
 if(ierr.eq.-1) goto 100
 if (csflag .and. (jtot.gt.maxjt)) goto 100
@@ -2108,10 +2109,10 @@ endif
 iaddr = 0
 ! calculate squared t-matrix
 call tsqmat(tsq,sreal,simag,inq,jq,lq, &
-   inpack,jpack,lpack,nopen,length,nmax)
+   packed_base%inpack,packed_base%jpack,packed_base%lpack,nopen,packed_base%length,nmax)
 ! calculate partial cross sections
-call partcr(tsq,sc1,nopen,length, &
-            inq, jq, lq, inpack, jpack, lpack, &
+call partcr(tsq,sc1,nopen,packed_base%length, &
+            inq, jq, lq, packed_base%inpack, packed_base%jpack, packed_base%lpack, &
             inlev, jlev, elev, jtot, nu, &
             csflag,flaghf,twomol,flagsu, &
             nlevop,nmax)
