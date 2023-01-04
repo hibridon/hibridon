@@ -318,11 +318,11 @@ integer, intent(in) :: nu
 integer, intent(in) :: jq(nopen)
 integer, intent(in) :: lq(nopen)
 integer, intent(in) :: inq(nopen)
-integer, intent(out) :: iorder(nopen*iabs(nnout))
-integer, intent(out) :: inpack(nopen*iabs(nnout))
-integer, intent(out) :: jpack(nopen*iabs(nnout))
-integer, intent(out) :: lpack(nopen*iabs(nnout))
-real(8), intent(out) :: epack(nopen*iabs(nnout))
+integer, intent(out) :: iorder(nopen)
+integer, intent(out) :: inpack(nopen)
+integer, intent(out) :: jpack(nopen)
+integer, intent(out) :: lpack(nopen)
+real(8), intent(out) :: epack(nopen)
 integer, intent(in) :: nfile
 integer, intent(in) :: nmax
 integer, intent(in) :: nopen
