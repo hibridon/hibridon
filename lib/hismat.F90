@@ -160,21 +160,33 @@ use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12
 use mod_selb, only: ibasty
-implicit double precision (a-h,o-z)
-integer, intent(inout) :: nopen
+implicit none
+integer, intent(in) :: iadr
+real(8), intent(out) :: sreal(nmax,1)
+real(8), intent(out) :: simag(nmax,1)
+integer, intent(out) :: jtot
+integer, intent(out) :: jlpar
+integer, intent(out) :: nu
+integer, intent(out) :: jq(1)
+integer, intent(out) :: lq(1)
+integer, intent(out) :: inq(1)
 integer, intent(out) :: inpack(:)
 integer, intent(out) :: jpack(:)
 integer, intent(out) :: lpack(:)
 integer, intent(in) :: smt_file_unit
 integer, intent(in) :: nmax
-logical triang
-dimension sreal(nmax,1), simag(nmax,1), &
-     jq(1),lq(1),inq(1)
-character*8 csize8
+integer, intent(inout) :: nopen
+integer, intent(out) :: length
+integer, intent(out) :: ierr
+logical :: triang
+character*8 :: csize8
+integer :: iaddr
+integer :: lrec, i, nnout, irow, icol, ioff
+
 !
 ierr=0
 triang =.false.
-if (nopen .lt. 0) then
+if (nopen < 0) then
    triang = .true.
    nopen = iabs(nopen)
 end if
@@ -189,8 +201,8 @@ end if
 !     read next s-matrix header
 iaddr = iadr
 call readrc(iaddr,smt_file_unit,lrec,jtot,jlpar,nu,nopen,length,nnout)
-if (lrec .lt. 0) goto 900
-!
+if (lrec < 0) goto 900
+
 read (smt_file_unit, end=900, err=950) (jpack(i), i=1, length), &
      (lpack(i), i=1, length), (inpack(i), i=1, length)
 if (is_j12(ibasty)) &
