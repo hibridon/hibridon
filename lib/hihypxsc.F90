@@ -47,7 +47,7 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_hiutil, only: gennam, mtime
 use mod_hiutil, only: xf6j
-use mod_hismat, only: smatread, rdhead, sinqr
+use mod_hismat, only: sread, rdhead, sinqr
 use mod_hitypes, only: packed_base_type
 implicit double precision (a-h,o-z)
 type(packed_base_type) :: packed_base
@@ -289,7 +289,7 @@ jfin = 0
 
 !     parameter to read lower triangle of open channel(s)
 100 nopen = -1
-call smatread (0, sreal, simag, jtot, jlpar, &
+call sread (0, sreal, simag, jtot, jlpar, &
      nu, jq, lq, inq, packed_base, &
      1, mmax, nopen, ierr)
 if (ierr .lt. -1) then

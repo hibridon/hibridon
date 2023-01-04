@@ -2033,7 +2033,7 @@ use mod_cosc2, only: inlev => sc2int ! inlev(1)
 use mod_cosc3, only: jlev => sc3int ! jlev(1)
 use mod_par, only: batch, ipos
 use mod_selb, only: ibasty
-use mod_hismat, only: smatread
+use mod_hismat, only: sread
 use mod_hitypes, only: packed_base_type
 implicit double precision (a-h,o-z)
 logical, intent(in) :: csflag
@@ -2074,7 +2074,7 @@ iaddr = 0
 !
 ! j12 is read into a common block for molecule-molecule collisions
 10 nopen = 0
-call smatread ( iaddr, sreal, simag, jtot, jlpar, nu, &
+call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
   jq, lq, inq, packed_base, &
   1, nmax, nopen, ierr)
 if(jlpold.eq.0) jlpold=jlpar

@@ -53,7 +53,7 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_hiutil, only: gennam, mtime, gettim, dater
 use mod_hiutil, only: xf3j
-use mod_hismat, only: smatread, rdhead
+use mod_hismat, only: sread, rdhead
 use mod_hitypes, only: packed_base_type
 implicit none
 character*(*), intent(in) :: fname1
@@ -467,7 +467,7 @@ jplast=0
 !.....read next s-matrix
 !
 250 nopen1 = 0
-call smatread (0,sreal1, simag1, jtot, jlpar, nu1, &
+call sread (0,sreal1, simag1, jtot, jlpar, nu1, &
                   jq, lq, inq, packed_base1, &
                   smt_unit, mmax, nopen1, ierr)
 if(ierr.eq.-1) then

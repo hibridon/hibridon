@@ -294,7 +294,7 @@ use mod_selb, only: ibasty
 use mod_trn, only: spin
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j
-use mod_hismat, only: smatread
+use mod_hismat, only: sread
 use mod_hitypes, only: packed_base_type
 implicit double precision (a-h,o-z)
 integer, intent(in) :: iunit
@@ -418,7 +418,7 @@ if (ialloc .ne. 0) goto 4006
 iaddr = 0
 length(0,2) = 0  ! the s-matrix contains no partial wave for jtot = 0 and jlpar = -1
 20 nopen = -1
-call smatread (iaddr, sreal, simag, jtot, jlpar, &
+call sread (iaddr, sreal, simag, jtot, jlpar, &
    nu, jq, lq, inq, packed_base, &
    iunit, mmax, nopen, ierr)
 if (ierr .lt. -1) then

@@ -39,7 +39,7 @@ use mod_hibasis, only: is_j12
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_hiutil, only: gennam
-use mod_hismat, only: smatread, rdhead
+use mod_hismat, only: sread, rdhead
 use mod_hitypes, only: packed_base_type
 implicit none
 character*(*), intent(in) :: fname
@@ -118,7 +118,7 @@ jtotb = min0(jtotb, jfinal)
 !
 iadr=0
 30 nopen = 0
-call smatread (iadr, sreal, simag, jtot, jlpar, nu, &
+call sread (iadr, sreal, simag, jtot, jlpar, nu, &
                   jq, lq, inq, packed_base, &
                    1, nmax, nopen, ierr)
 if(csflag) jlpar=0
