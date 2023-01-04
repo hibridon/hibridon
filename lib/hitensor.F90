@@ -14,12 +14,13 @@ module mod_tensor_ang
 end module mod_tensor_ang
 
 module tensor_util
+use mod_hitypes, only: packed_base_type
 implicit none
 integer :: jmx, kmx, lmx, kkmx, lbufs, lbuflb
 parameter (jmx=90, kmx=2*jmx+1, lmx=kmx, kkmx=3*kmx)
 parameter (lbufs=13504500, lbuflb=9000)
 real(8), dimension(:), allocatable :: srealp, simagp
-integer, dimension(:), allocatable :: ipackp, jpackp, lpackp
+type(packed_base_type) :: packp
 integer :: ialloc
 
   type, abstract :: frame_type
@@ -968,9 +969,7 @@ end
 subroutine tensor_allocate()
 allocate(srealp(lbufs), stat=ialloc)
 allocate(simagp(lbufs), stat=ialloc)
-allocate(ipackp(lbuflb), stat=ialloc)
-allocate(jpackp(lbuflb), stat=ialloc)
-allocate(lpackp(lbuflb), stat=ialloc)
+call packp%init(lbuflb)
 if (ialloc .ne. 0) then
    print *, '  *** MEMORY ALLOCATION FAILS, EXITING ***'
    call tensor_free()
@@ -981,9 +980,7 @@ end subroutine tensor_allocate
 subroutine tensor_free()
 if (allocated(srealp)) deallocate(srealp)
 if (allocated(simagp)) deallocate(simagp)
-if (allocated(ipackp)) deallocate(ipackp)
-if (allocated(jpackp)) deallocate(jpackp)
-if (allocated(lpackp)) deallocate(lpackp)
+call packp%deinit()
 end subroutine tensor_free
 end module tensor_util
 
@@ -1046,9 +1043,6 @@ use mod_colq, only: lq ! lq(1)
 use mod_coinq, only: inq ! inq(1)
 use mod_coisc2, only: inlev => isc2 ! inlev(1)
 use mod_coisc3, only: jlev => isc3 ! jlev(1)
-use mod_coisc4, only: jpack => isc4 ! jpack(1)
-use mod_coisc5, only: lpack => isc5 ! lpack(1)
-use mod_coisc6, only: ipack => isc6 ! ipack(1)
 use mod_coisc7, only: matel => isc7 ! matel(1)
 use mod_coisc8, only: jlist => isc8 ! jlist(1)
 ! added two common blocks - levels for which xs's to be computed (pjd)
@@ -1058,7 +1052,6 @@ use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc2, only: prefac => sc2 ! prefac(1)
 use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cow, only: simag => w_as_vec ! simag(1)
-use mod_hismat, only: sread
 use tensor_util
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch
@@ -1068,7 +1061,8 @@ use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts
 use funit, only: FUNIT_TCB, FUNIT_TENS_OUTPUT
 use mod_hiutil, only: gennam, mtime, gettim, dater
 use mod_hiutil, only: xf3jm0
-use mod_hismat, only: sread, rdhead
+use mod_hismat, only: smatread, rdhead
+use mod_hitypes, only: packed_base_type
 implicit double precision (a-h,o-z)
 integer :: jtotpa(MAX_NJTOT)
 character*(*) filnam
@@ -1086,15 +1080,16 @@ save nout
 dimension a(9)
 data  tol,   zero,   nstep &
     /1.d-7,  0.d0,     2/
+type(packed_base_type) :: packed_base
 !
 call tensor_allocate()
 ! initialize timer and arays
 call mtime(cpu0,ela0)
 srealp(lbufs)=zero
 simagp(lbufs)=zero
-ipackp(lbuflb)=0
-jpackp(lbuflb)=0
-lpackp(lbuflb)=0
+packp%inpack(lbuflb)=0
+packp%jpack(lbuflb)=0
+packp%lpack(lbuflb)=0
 ! these 2 parameters are set in partens
 lnbufs = lbufs
 lnbufl = lbuflb
@@ -1319,11 +1314,11 @@ if (jlparf .eq. 1) jlp = 0
 jj = jlp * nwaves + jfinal + 1
 iaddr = jttble(jj)
 nopen = -1
-call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
-            jq, lq, inq, ipack, jpack, lpack, &
-             1, mmax, nopen, length, ierr)
-maxlsp = (length*(length+1))/2
-maxllb = length
+call smatread ( iaddr, sreal, simag, jtot, jlpar, nu, &
+            jq, lq, inq, packed_base, &
+             1, mmax, nopen, ierr)
+maxlsp = (packed_base%length*(packed_base%length+1))/2
+maxllb = packed_base%length
 nbuf1 = lnbufs/maxlsp
 nbuf2 = lnbufl/maxllb
 nbuf = min(nbuf1,nbuf2)
@@ -1388,15 +1383,15 @@ n = minn
      goto 300
 ! iframe = 0
 171        continue
-       call sigk(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
-             lpack,ipack,jttble,prefac,sigma, &
+       call sigk(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,packed_base%jpack, &
+             packed_base%lpack, packed_base%inpack, jttble,prefac,sigma, &
              sreal,simag,matel,lenlab,labadr, &
              jtotpa,fast,ierr, FUNIT_TENS_OUTPUT, FUNIT_TCB)
        if(ierr.ne.0) goto 4000
        goto 300
 ! iframe = 1
-172        call sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
-             lpack,ipack,jttble,prefac, &
+172        call sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,packed_base%jpack, &
+             packed_base%lpack, packed_base%inpack, jttble,prefac, &
              sreal,simag,matel,lenlab,labadr, &
              jtotpa,fast,ierr, FUNIT_TENS_OUTPUT, FUNIT_TCB)
        if(ierr.ne.0) goto 4000
@@ -1404,16 +1399,16 @@ n = minn
 ! iframe = 2
 173        jlevel = jlev(jlist(1))
        inlevel = inlev(jlist(1))
-       call dsigh(maxk,nnout,jfirst,jfinal,jtotd,jpack,lpack, &
-             ipack,jlevel,inlevel,elev(jlist(1)),flaghf, &
+       call dsigh(maxk,nnout,jfirst,jfinal,jtotd,packed_base%jpack, packed_base%lpack, &
+             packed_base%inpack, jlevel,inlevel,elev(jlist(1)),flaghf, &
              iframe,ierr, FUNIT_TENS_OUTPUT)
        if(ierr.ne.0) goto 4000
        goto 300
 ! iframe = 3
 174        jlevel = jlev(jlist(1))
        inlevel = inlev(jlist(1))
-       call dsigga(maxk,nnout,jfirst,jfinal,jtotd,jpack,lpack, &
-             ipack,jlevel,inlevel,elev(jlist(1)),flaghf, &
+       call dsigga(maxk,nnout,jfirst,jfinal,jtotd,packed_base%jpack, packed_base%lpack, &
+             packed_base%inpack, jlevel,inlevel,elev(jlist(1)),flaghf, &
              iframe,ierr, FUNIT_TENS_OUTPUT)
        if(ierr.ne.0) goto 4000
 else
@@ -1440,7 +1435,7 @@ else
      goto 4000
    end if
    call sigkkp(n,maxk,nk,nnout,jfirst,jfinal,jtotd,nj,mmax, &
-        jpack,lpack,ipack,jttble,prefac,sigma, &
+        packed_base%jpack, packed_base%lpack, packed_base%inpack, jttble,prefac,sigma, &
         sreal,simag,matel,lenlab,labadr, &
         jtotpa,kplist,f9pha,fast,ierr, FUNIT_TENS_OUTPUT, FUNIT_TCB)
    if(ierr.ne.0) goto 4000
@@ -1484,19 +1479,17 @@ use tensor_util
 use mod_cojq, only: jqp => jq ! jqp(1)
 use mod_colq, only: lqp => lq ! lqp(1)
 use mod_coinq, only: inqp => inq ! inqp(1)
-use mod_coisc4, only: jpack => isc4 ! jpack(1)
-use mod_coisc5, only: lpack => isc5 ! lpack(1)
-use mod_coisc6, only: ipack => isc6 ! ipack(1)
-use mod_hismat, only: sread
 use mod_par, only: batch, iprnt=>iprint
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
-use mod_hismat, only: sread
+use mod_hismat, only: smatread
+use mod_hitypes, only: packed_base_type
 implicit double precision (a-h,o-z)
 integer, intent(in) :: tens_out_unit  ! unit of tenxsc output file (tcs, dgh or dcga file)
 logical lprnt
 ! add these three common blocks (mha 9/30/08)
 dimension labadr(1),lenlab(1),jtotpa(1),jttble(1)
+type(packed_base_type) :: tmp_pack
 !
 ! FLAG FOR DIAGNOSTIC PRINTING
 lprnt = .false.
@@ -1557,10 +1550,10 @@ do 100 jtp=jtpmin,jtpmax
 !
 ! read s-matrix for jtot' into buffer
    nopenp = -1
-   call sread ( iaddrp, srealp(ioffs), simagp(ioffs), jtotp, &
-                jlparp, nu, jqp, lqp, inqp, ipackp(ioff:), &
-                jpackp(ioff:), lpackp(ioff:), &
-                1, maxlsp, nopenp, lengtp, ierr)
+   call tmp_pack%init(nopenp)
+   call smatread ( iaddrp, srealp(ioffs), simagp(ioffs), jtotp, &
+                jlparp, nu, jqp, lqp, inqp, tmp_pack, &
+                1, maxlsp, nopenp, ierr)
    if(ierr.eq.-1) goto 999
    if(ierr.lt.-1) then
       write(tens_out_unit, 20)
@@ -1568,6 +1561,11 @@ do 100 jtp=jtpmin,jtpmax
 20       format(' ** READ ERROR IN ADDSP, ABORT **')
       return
    end if
+   packp%inpack(ioff:ioff+tmp_pack%length-1) = tmp_pack%inpack(1:tmp_pack%length)
+   packp%jpack(ioff:ioff+tmp_pack%length-1) = tmp_pack%jpack(1:tmp_pack%length)
+   packp%lpack(ioff:ioff+tmp_pack%length-1) = tmp_pack%lpack(1:tmp_pack%length)
+   lengtp = tmp_pack%length
+   call tmp_pack%deinit()
 !* DIAGNOSTIC PRINT
    if (lprnt) write (6,2001) jtp,j1p,jjp,jtotp,jlparp, &
        iaddrp
@@ -2049,9 +2047,9 @@ call addsp(jtpmin,jtpmax,jlp, &
            labadr,lenlab,jtotpa,jttble, tcs_out_unit)
 if (srealp(lbufs) .ne. 0.d0) print *, 'srealp error in sigk'
 if (simagp(lbufs) .ne. 0.d0) print *, 'simagp error in sigk'
-if (ipackp(lbuflb) .ne. 0) print *, 'ipackp error in sigk'
-if (lpackp(lbuflb) .ne. 0) print *, 'lpackp error in sigk'
-if (jpackp(lbuflb) .ne. 0) print *, 'jpackp error in sigk'
+if (packp%inpack(lbuflb) .ne. 0) print *, 'packp%inpack error in sigk'
+if (packp%lpack(lbuflb) .ne. 0) print *, 'packp%lpack error in sigk'
+if (packp%jpack(lbuflb) .ne. 0) print *, 'packp%jpack error in sigk'
 ! prepare for sum over jtot'
 jtotp = jtpmin
 !
@@ -2090,7 +2088,7 @@ jplujp = nint(xjtot + xjtotp)
 kmin=jminjp
 jpmax = 0
 do irowp = 1,lengtp
-  jpmax = max(jpackp(ioff+irowp),jpmax)
+  jpmax = max(packp%jpack(ioff+irowp),jpmax)
 end do
 ! now loop over all transitions
 lmax=jtotp+jpmax+1
@@ -2105,10 +2103,10 @@ do 67 index=1,9
 !
 do 70 irowp = 1, lengtp
   irp = ioff + irowp
-  j1p = jpackp(irp)
-  l1p = lpackp(irp)
-  indp = ipackp(irp)
-  if (ipackp(irp).ne.in1 .and. ipackp(irp).ne.in2) goto 70
+  j1p = packp%jpack(irp)
+  l1p = packp%lpack(irp)
+  indp = packp%inpack(irp)
+  if (packp%inpack(irp).ne.in1 .and. packp%inpack(irp).ne.in2) goto 70
 !
 ! special treatment for ibasty = 4 and 19
   if (iabsty.eq.4 .or. ibasty.eq.19) then
@@ -2545,11 +2543,11 @@ jplujp = nint(xjtot + xjtotp)
 !
 ! next 2 statements assume last basis level for jtot' has highest j
 ! replace with scan over all jtot' levels (pjd)
-!      j2mxp=jpackp(ioff+lengtp)
+!      j2mxp=packp%jpack(ioff+lengtp)
 !      j2mx =jpack(length)
 j2mxp = 0
 do irowp = 1,lengtp
-  j2mxp = max(jpackp(ioff+irowp),j2mxp)
+  j2mxp = max(packp%jpack(ioff+irowp),j2mxp)
 end do
 io = labadr(jtot + 1)
 j2mx = 0
@@ -2592,13 +2590,13 @@ iadr(j,l,index) = 0
 79 continue
 do 80 icolp=1,lengtp
 irp = ioff + icolp
-ind = ipackp(irp)
+ind = packp%inpack(irp)
 ! moved next 2 statements before if statement (pjd)
-j1=jpackp(irp)
-l1=lpackp(irp)
+j1=packp%jpack(irp)
+l1=packp%lpack(irp)
 ! modify if statement to include test for in2 (pjd)
-!      if(ipackp(irp).ne.in1) goto 80
-if(ipackp(irp).ne.in1 .and. ipackp(irp).ne.in2) goto 80
+!      if(packp%inpack(irp).ne.in1) goto 80
+if(packp%inpack(irp).ne.in1 .and. packp%inpack(irp).ne.in2) goto 80
 ! added 3rd subscript in next statement (pjd)
 iadr(j1,lmaxp-l1,5+ind)=icolp
 80 continue
@@ -2950,9 +2948,9 @@ call addsp(jtpmin,jtpmax,jlp, &
            labadr,lenlab,jtotpa,jttble, tcs_out_unit)
 if (srealp(lbufs) .ne. 0.d0) print *, 'srealp error in sigkc'
 if (simagp(lbufs) .ne. 0.d0) print *, 'simagp error in sigkc'
-if (ipackp(lbuflb) .ne. 0) print *, 'ipackp error in sigkc'
-if (lpackp(lbuflb) .ne. 0) print *, 'lpackp error in sigkc'
-if (jpackp(lbuflb) .ne. 0) print *, 'jpackp error in sigkc'
+if (packp%inpack(lbuflb) .ne. 0) print *, 'packp%inpack error in sigkc'
+if (packp%lpack(lbuflb) .ne. 0) print *, 'packp%lpack error in sigkc'
+if (packp%jpack(lbuflb) .ne. 0) print *, 'packp%jpack error in sigkc'
 ! prepare for sum over jtot'
 jtotp = jtpmin
 !
@@ -2992,7 +2990,7 @@ jplujp = nint(xjtot + xjtotp)
 kmin=jminjp
 jpmax = 0
 do irowp = 1,lengtp
-  jpmax = max(jpackp(ioff+irowp),jpmax)
+  jpmax = max(packp%jpack(ioff+irowp),jpmax)
 end do
 ! now loop over all transitions
 lmax=jtotp+jpmax+1
@@ -3007,10 +3005,10 @@ iadr(j,l,index) = 0
 !
 do 70 irowp = 1, lengtp
   irp = ioff + irowp
-  j1p = jpackp(irp)
-  l1p = lpackp(irp)
-  indp = ipackp(irp)
-  if (ipackp(irp).ne.in1 .and. ipackp(irp).ne.in2) goto 70
+  j1p = packp%jpack(irp)
+  l1p = packp%lpack(irp)
+  indp = packp%inpack(irp)
+  if (packp%inpack(irp).ne.in1 .and. packp%inpack(irp).ne.in2) goto 70
   iadr(j1p,lmax-l1p,5+indp) = irowp
 70 continue
 !
@@ -3088,11 +3086,11 @@ do 400 irow = 1, length
 ! sum over row index for jtotp
     do 150 irowp = 1, lengtp
       irpp = ioff + irowp
-      j1pp = jpackp(irpp)
-      l1pp = lpackp(irpp)
+      j1pp = packp%jpack(irpp)
+      l1pp = packp%lpack(irpp)
 ! basis function must be the same as for irow
       if (j1pp.ne.j1) goto 150
-      if (ipackp(irpp) .ne. ipack(irow)) goto 150
+      if (packp%inpack(irpp) .ne. ipack(irow)) goto 150
       xl1pp = l1pp
 ! icolp is index for (j2,l2,ind.jtotp) basis function
       icolp =iadr(j2,l2m,5+ipack(icol))
