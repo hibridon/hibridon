@@ -1,3 +1,4 @@
+#include "assert.h"
 ! ------------------------------------------------------------------
 !  in this header, arrays are set up as allocatable.
 !  in addition, procedures to allocate and deallocate these
@@ -1369,15 +1370,15 @@ n = minn
      goto 300
 ! iframe = 0
 171        continue
-       call sigk(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,packed_base%jpack, &
-             packed_base%lpack, packed_base%inpack, jttble,prefac,sigma, &
+       call sigk(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,packed_base, &
+             jttble,prefac,sigma, &
              sreal,simag,matel,lenlab,labadr, &
              jtotpa,fast,ierr, FUNIT_TENS_OUTPUT, FUNIT_TCB)
        if(ierr.ne.0) goto 4000
        goto 300
 ! iframe = 1
-172        call sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,packed_base%jpack, &
-             packed_base%lpack, packed_base%inpack, jttble,prefac, &
+172        call sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,packed_base, &
+             jttble,prefac, &
              sreal,simag,matel,lenlab,labadr, &
              jtotpa,fast,ierr, FUNIT_TENS_OUTPUT, FUNIT_TCB)
        if(ierr.ne.0) goto 4000
@@ -1421,7 +1422,7 @@ else
      goto 4000
    end if
    call sigkkp(n,maxk,nk,nnout,jfirst,jfinal,jtotd,nj,mmax, &
-        packed_base%jpack, packed_base%lpack, packed_base%inpack, jttble,prefac,sigma, &
+        packed_base, jttble,prefac,sigma, &
         sreal,simag,matel,lenlab,labadr, &
         jtotpa,kplist,f9pha,fast,ierr, FUNIT_TENS_OUTPUT, FUNIT_TCB)
    if(ierr.ne.0) goto 4000
@@ -1888,8 +1889,7 @@ ierr = 1
 return
 end
 !------- -----------------------------------------------------------------
-subroutine sigk(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
-                lpack,ipack,jttble,prefac,sigma, &
+subroutine sigk(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,packed_base,jttble,prefac,sigma, &
                 sreal,simag,matel,lenlab,labadr, &
                 jtotpa,fast,ierr, tcs_out_unit, tcb_out_unit)
 !
@@ -1917,15 +1917,17 @@ use mod_coinq, only: inq ! inq(1)
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid2, only: mxoutd
-use mod_hismat, only: sread
 use mod_par, only: batch, ipos, iprnt=>iprint
 use mod_selb, only: ibasty
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf6j
-use mod_hismat, only: sread
+use mod_hismat, only: smatread
+use mod_hitypes, only: packed_base_type
 implicit double precision (a-h,o-z)
+type(packed_base_type), intent(out) :: packed_base
+
 integer, intent(in) :: tcs_out_unit  ! unit of tcs output file
 integer, intent(in) :: tcb_out_unit  ! unit of tcb output file
 complex*8 t, tp
@@ -1941,7 +1943,6 @@ character*10 elaps, cpu
 integer, allocatable :: iadr(:,:,:)
 real(8), allocatable :: f6a(:,:,:), f6p(:)  ! 6jt
 !
-dimension jpack(1),ipack(1),lpack(1)
 dimension sreal(1), simag(1)
 dimension prefac(1), matel(1), labadr(1), jtotpa(1)
 dimension lenlab(1), jttble(1)
@@ -2008,9 +2009,9 @@ iaddr = jttble(jj)
 if(iaddr .lt. 0) goto 700
 ! read s-matrix for jtot
 nopen = -1
-call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
-            jq, lq, inq, ipack, jpack, lpack, &
-             1, mmax, nopen, length, ierr)
+call smatread ( iaddr, sreal, simag, jtot, jlpar, nu, &
+            jq, lq, inq, packed_base, &
+             1, mmax, nopen, ierr)
 if(ierr.eq.-1) goto 999
 if(ierr.lt.-1) then
   write(tcs_out_unit, 20)
@@ -2124,19 +2125,19 @@ do 70 irowp = 1, lengtp
 jmx1=0
 !
 ! sum over row index for jtot
-do 400 irow = 1, length
-  j1 = jpack(irow)
+do 400 irow = 1, packed_base%length
+  j1 = packed_base%jpack(irow)
   xj1 = j1 + spin
   if (j1 .gt. j2max ) goto 400
   if (j1 .gt. jpmax ) goto 400
   if (j1 .lt. j1min ) goto 400
-  l1 = lpack(irow)
+  l1 = packed_base%lpack(irow)
   xl1 = l1
   if (xl1.lt.abs(xjtotp-xj1) .or. xl1.gt.xjtotp+xj1) goto 400
   j1t2 = nint(2.d0*xj1)
   do 74 ij = 1, njmax
   if (j1.ne.jslist(ij)) goto 74
-  if (ipack(irow).ne.inlist(ij)) goto 74
+  if (packed_base%inpack(irow).ne.inlist(ij)) goto 74
   ir = ij
   denrow = prefac(ij)
   goto 75
@@ -2162,18 +2163,18 @@ do 400 irow = 1, length
 !
 ! sum over column index for jtot
   do 200 icol = 1, irow
-    if (ipack(irow).eq.in1 .and. ipack(icol).eq.in2) &
+    if (packed_base%inpack(irow).eq.in1 .and. packed_base%inpack(icol).eq.in2) &
        go to 82
-    if (ipack(irow).eq.in2 .and. ipack(icol).eq.in1) &
+    if (packed_base%inpack(irow).eq.in2 .and. packed_base%inpack(icol).eq.in1) &
        go to 82
     go to 200
 82     continue
-    j2 = jpack(icol)
+    j2 = packed_base%jpack(icol)
     xj2 = j2 + spin
     if (j2 .gt. j2max) goto 200
     if (j2 .gt. jpmax) goto 200
     if (j2 .lt. j1min) goto 200
-    l2 = lpack(icol)
+    l2 = packed_base%lpack(icol)
     xl2 = l2
     if (xl2.lt.abs(xjtotp-xj2) .or. xl2.gt.xjtotp+xj2) goto 200
     diagj = j1.eq.j2
@@ -2182,7 +2183,7 @@ do 400 irow = 1, length
     if (min2j .lt. jminjp) goto 200
     do 84 ij = 1, njmax
       if (j2.ne.jslist(ij)) goto 84
-      if (ipack(icol).ne.inlist(ij)) goto 84
+      if (packed_base%inpack(icol).ne.inlist(ij)) goto 84
       ic = ij
       dencol = prefac(ij)
       goto 85
@@ -2194,24 +2195,24 @@ do 400 irow = 1, length
     l2m=lmax-l2
 ! special treament for iabsty = 4 and 19
     if (ibasty.eq.4 .or. ibasty.eq.19) then
-      if (ipack(irow).eq. 100) isubr = 1
-      if (ipack(irow).eq.-100) isubr = 2
-      if (ipack(irow).eq. 200) isubr = 3
-      if (ipack(irow).eq.-200) isubr = 4
-      if (ipack(irow).eq. 300) isubr = 5
-      if (ipack(irow).eq.-300) isubr = 6
-      if (ipack(icol).eq. 100) isubc = 1
-      if (ipack(icol).eq.-100) isubc = 2
-      if (ipack(icol).eq. 200) isubc = 3
-      if (ipack(icol).eq.-200) isubc = 4
-      if (ipack(icol).eq. 300) isubc = 5
-      if (ipack(icol).eq.-300) isubc = 6
+      if (packed_base%inpack(irow).eq. 100) isubr = 1
+      if (packed_base%inpack(irow).eq.-100) isubr = 2
+      if (packed_base%inpack(irow).eq. 200) isubr = 3
+      if (packed_base%inpack(irow).eq.-200) isubr = 4
+      if (packed_base%inpack(irow).eq. 300) isubr = 5
+      if (packed_base%inpack(irow).eq.-300) isubr = 6
+      if (packed_base%inpack(icol).eq. 100) isubc = 1
+      if (packed_base%inpack(icol).eq.-100) isubc = 2
+      if (packed_base%inpack(icol).eq. 200) isubc = 3
+      if (packed_base%inpack(icol).eq.-200) isubc = 4
+      if (packed_base%inpack(icol).eq. 300) isubc = 5
+      if (packed_base%inpack(icol).eq.-300) isubc = 6
       irowp=iadr(j1,l1m,isubr)
       icolp=iadr(j2,l2m,isubc)
 ! all other basis types
     else
-      irowp=iadr(j1,l1m,5+ipack(irow))
-      icolp=iadr(j2,l2m,5+ipack(icol))
+      irowp=iadr(j1,l1m,5+packed_base%inpack(irow))
+      icolp=iadr(j2,l2m,5+packed_base%inpack(icol))
     end if
 ! if l1p <> l1 or l2p <> l2, do not include this (jtot,jtotp) term
     if (irowp.eq.0 .or. icolp.eq.0) goto 200
@@ -2350,7 +2351,7 @@ return
 end
 !------------------------------------------------------------------------
 subroutine sigkkp(n,maxk,nk,nnout,jfirst,jfinal,jtotd,nj,mmax, &
-         jpack,lpack,ipack,jttble,prefac,sigma, &
+         packed_base, jttble,prefac,sigma, &
          sreal,simag,matel,lenlab,labadr, &
          jtotpa,kplist,f9pha,fast,ierr, tcs_out_unit, tcb_out_unit)
 !
@@ -2375,14 +2376,15 @@ use mod_coinq, only: inq ! inq(1)
 ! added two common blocks - levels for which xs's to be computed (pjd)
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
-use mod_hismat, only: sread
 use mod_par, only: batch, ipos, iprnt=>iprint
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j, xf9j, xf3jm0
-use mod_hismat, only: sread
+use mod_hismat, only: smatread
+use mod_hitypes, only: packed_base_type
 implicit double precision (a-h,o-z)
+type(packed_base_type), intent(out) :: packed_base
 integer, intent(in) :: tcs_out_unit  ! unit of tenxsc output file (tcs, dgh or dcga file)
 integer, intent(in) :: tcb_out_unit  ! unit of tcb output file
 complex*8 t, tp, ai, cphase
@@ -2399,7 +2401,6 @@ integer, allocatable :: iadr(:,:,:)
 !      common/cadr/ iadr(0:jmx,lmx)
 real(8), allocatable :: f6a(:,:,:), f9a(:,:)  ! 6jt
 
-dimension jpack(1),ipack(1),lpack(1)
 dimension sreal(1), simag(1)
 dimension prefac(1), matel(1), labadr(1), jtotpa(1)
 dimension lenlab(1), jttble(1), kplist(0:maxk)
@@ -2489,9 +2490,9 @@ iaddr = jttble(jj)
 if(iaddr .lt. 0) goto 700
 ! read s-matrix for jtot
 nopen = -1
-call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
-            jq, lq, inq, ipack, jpack, lpack, &
-             1, mmax, nopen, length, ierr)
+call smatread ( iaddr, sreal, simag, jtot, jlpar, nu, &
+            jq, lq, inq, packed_base, &
+             1, mmax, nopen, ierr)
 if(ierr.eq.-1) goto 999
 if(ierr.lt.-1) then
   write(tcs_out_unit, 20)
@@ -2530,15 +2531,15 @@ jplujp = nint(xjtot + xjtotp)
 ! next 2 statements assume last basis level for jtot' has highest j
 ! replace with scan over all jtot' levels (pjd)
 !      j2mxp=packp%jpack(ioff+lengtp)
-!      j2mx =jpack(length)
+!      j2mx =packed_base%jpack(packed_base%length)
 j2mxp = 0
 do irowp = 1,lengtp
   j2mxp = max(packp%jpack(ioff+irowp),j2mxp)
 end do
 io = labadr(jtot + 1)
 j2mx = 0
-do irow = 1,length
-  j2mx = max(jpack(io+irow),j2mx)
+do irow = 1,packed_base%length
+  j2mx = max(packed_base%jpack(io+irow),j2mx)
 end do
 ! end of addition to set j2mxp and j2mx (pjd)
 ! modify next 2 statements for half-integral j (pjd)
@@ -2549,12 +2550,12 @@ lmaxp = nint(xjtotp+j2mxp+spin+1.d0)
 kpmin=jminjp
 kmin=abs(kpmin-n)
 t1=second()
-do 70 icol=1,length
+do 70 icol=1,packed_base%length
 ! modify next if statement in include test for in2 (pjd)
-!      if(ipack(icol).ne.in2) goto 70
-if(ipack(icol).ne.in2 .and. ipack(icol).ne.in1) goto 70
-j2=jpack(icol)
-l2=lpack(icol)
+!      if(packed_base%inpack(icol).ne.in2) goto 70
+if(packed_base%inpack(icol).ne.in2 .and. packed_base%inpack(icol).ne.in1) goto 70
+j2=packed_base%jpack(icol)
+l2=packed_base%lpack(icol)
 xj2=j2+spin
 xl2=l2
 kpmax=min(jplujp,nint(2*xj2))
@@ -2588,15 +2589,15 @@ iadr(j1,lmaxp-l1,5+ind)=icolp
 80 continue
 !
 ! now loop over all transitions
-do 400 irow = 1, length
-   if(ipack(irow).ne.in1) goto 400
-   j1 = jpack(irow)
+do 400 irow = 1, packed_base%length
+   if(packed_base%inpack(irow).ne.in1) goto 400
+   j1 = packed_base%jpack(irow)
 ! moved next statement ahead of if statements (pjd)
    xj1 = j1 + spin
    if (j1 .gt. j2max) goto 500
    if (j1 .gt. j2mxp) goto 500
    if (j1 .lt. j1min) goto 400
-   l1 = lpack(irow)
+   l1 = packed_base%lpack(irow)
 ! moved next statement ahead of if statements (pjd)
    xl1 = l1
    l1pmin=max(abs(l1-n),abs(j1-jtotp))
@@ -2612,7 +2613,7 @@ do 400 irow = 1, length
 ! replace previous 2 statements (pjd)
    do 84 ij=1,njmax
    if (j1.ne.jslist(ij)) goto 84
-   if (ipack(irow).ne.inlist(ij)) goto 84
+   if (packed_base%inpack(irow).ne.inlist(ij)) goto 84
    ir = ij
    denrow = prefac(ij)
    goto 85
@@ -2656,14 +2657,14 @@ do 100 l1p=l1pmin,l1pmax,2
    t9j=t9j+second()-t1
 !
 ! compute all transitions separately, unlike in SIGK
-do 300 icol = 1, length
-   if(ipack(icol).ne.in2) goto 300
-   j2 = jpack(icol)
+do 300 icol = 1, packed_base%length
+   if(packed_base%inpack(icol).ne.in2) goto 300
+   j2 = packed_base%jpack(icol)
    xj2 = j2 + spin
    if (j2 .gt. j2max) goto 400
    if (j2 .gt. j2mxp) goto 400
    if (j2 .lt. j1min) goto 300
-   l2 = lpack(icol)
+   l2 = packed_base%lpack(icol)
    xl2 = l2
 ! next if statement tested on actual angular momenta, not integer values (pjd)
    if(xl2.gt.xjtotp+xj2 .or. xl2.lt.abs(xjtotp-xj2)) goto 300
@@ -2677,7 +2678,7 @@ do 300 icol = 1, length
    if (diag .and. l1.eq.l2) t = t + (1.d0,0.d0)
    l2m=lmax-l2
 ! added 3rd subscript in next statement (pjd)
-   icolp=iadr(j2,lmaxp-l2,5+ipack(icol))
+   icolp=iadr(j2,lmaxp-l2,5+packed_base%inpack(icol))
    if(icolp.eq.0) goto 300
    potenz = ((2.d0* xj1) - xj2 + xl2)
    ipower = nint(xjtotp+potenz)
@@ -2691,7 +2692,7 @@ do 300 icol = 1, length
 ! replace previous statement with following code (pjd)
    do 104 ij = 1,njmax
    if (j2.ne.jslist(ij)) goto 104
-   if (ipack(icol).ne.inlist(ij)) goto 104
+   if (packed_base%inpack(icol).ne.inlist(ij)) goto 104
    ic = ij
    goto 105
 104    continue
@@ -2703,7 +2704,7 @@ do 300 icol = 1, length
 do 200 l1p=l1pmin,l1pmax,2
    ll=ll+1
 ! added 3rd subscript in next statement (pjd)
-   irowp=iadr(j1,lmaxp-l1p,5+ipack(irow))
+   irowp=iadr(j1,lmaxp-l1p,5+packed_base%inpack(irow))
 ! do not include terms if both levels not ln list (pjd)
 !         if(irowp.eq.0) goto 200
    if(irowp.eq.0 .or. icolp.eq.0) goto 200
@@ -2796,8 +2797,7 @@ deallocate(f6a,f9a)
 return
 end
 !-------------------------------------------------------------------------
-subroutine sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
-                lpack,ipack,jttble,prefac, &
+subroutine sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,packed_base,jttble,prefac, &
                 sreal,simag,matel,lenlab,labadr, &
                 jtotpa,fast,ierr, tcs_out_unit, tcb_out_unit)
 !
@@ -2818,14 +2818,15 @@ use mod_coinq, only: inq ! inq(1)
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid2, only: mxoutd
-use mod_hismat, only: sread
 use mod_par, only: batch, ipos, iprnt=>iprint
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j
-use mod_hismat, only: sread
+use mod_hismat, only: smatread
+use mod_hitypes, only: packed_base_type
 implicit double precision (a-h,o-z)
+type(packed_base_type), intent(out) :: packed_base
 integer, intent(in) :: tcs_out_unit  ! unit of tcs output file
 integer, intent(in) :: tcb_out_unit  ! unit of tcb output file
 complex*8 t, tp
@@ -2843,7 +2844,6 @@ integer, allocatable :: iadr(:,:,:)
 !      common/cadr/ iadr(0:jmx,lmx)
 real(8), allocatable :: f6a(:,:,:), f6p(:)  ! 6jt
 !
-dimension jpack(1),ipack(1),lpack(1)
 dimension sreal(1), simag(1)
 dimension prefac(1), matel(1), labadr(1), jtotpa(1)
 dimension lenlab(1), jttble(1)
@@ -2909,9 +2909,9 @@ iaddr = jttble(jj)
 if(iaddr .lt. 0) goto 700
 ! read s-matrix for jtot
 nopen = -1
-call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
-            jq, lq, inq, ipack, jpack, lpack, &
-             1, mmax, nopen, length, ierr)
+call smatread ( iaddr, sreal, simag, jtot, jlpar, nu, &
+            jq, lq, inq, packed_base, &
+             1, mmax, nopen, ierr)
 if(ierr.eq.-1) goto 999
 if(ierr.lt.-1) then
   write(tcs_out_unit, 20)
@@ -3001,13 +3001,13 @@ do 70 irowp = 1, lengtp
 jmx1=0
 !
 ! sum over row index for jtot
-do 400 irow = 1, length
-  j1 = jpack(irow)
+do 400 irow = 1, packed_base%length
+  j1 = packed_base%jpack(irow)
   xj1 = j1 + spin
   if (j1 .gt. j2max ) goto 400
   if (j1 .gt. jpmax ) goto 400
   if (j1 .lt. j1min ) goto 400
-  l1 = lpack(irow)
+  l1 = packed_base%lpack(irow)
   xl1 = l1
 ! delete next statement
 !        if (xl1.lt.abs(xjtotp-xj1) .or. xl1.gt.xjtotp+xj1) goto 400
@@ -3015,7 +3015,7 @@ do 400 irow = 1, length
   j1t2 = nint(2.d0*xj1)
   do 74 ij = 1, njmax
   if (j1.ne.jslist(ij)) goto 74
-  if (ipack(irow).ne.inlist(ij)) goto 74
+  if (packed_base%inpack(irow).ne.inlist(ij)) goto 74
   ir = ij
   denrow = prefac(ij)
   goto 75
@@ -3032,19 +3032,19 @@ do 400 irow = 1, length
   l1m=lmax-l1
 !
 ! sum over column index for jtot - scan over full set of (irow,icol) values
-   do 200 icol = 1,length
-    if (ipack(irow).eq.in1 .and. ipack(icol).eq.in2) &
+   do 200 icol = 1,packed_base%length
+    if (packed_base%inpack(irow).eq.in1 .and. packed_base%inpack(icol).eq.in2) &
        go to 82
-    if (ipack(irow).eq.in2 .and. ipack(icol).eq.in1) &
+    if (packed_base%inpack(irow).eq.in2 .and. packed_base%inpack(icol).eq.in1) &
        go to 82
     go to 200
 82     continue
-    j2 = jpack(icol)
+    j2 = packed_base%jpack(icol)
     xj2 = j2 + spin
     if (j2 .gt. j2max) goto 200
     if (j2 .gt. jpmax) goto 200
     if (j2 .lt. j1min) goto 200
-    l2 = lpack(icol)
+    l2 = packed_base%lpack(icol)
     xl2 = l2
     if (xl2.lt.abs(xjtotp-xj2) .or. xl2.gt.xjtotp+xj2) goto 200
     diagj = j1.eq.j2
@@ -3053,7 +3053,7 @@ do 400 irow = 1, length
     if (min2j .lt. jminjp) goto 200
     do 84 ij = 1, njmax
       if (j2.ne.jslist(ij)) goto 84
-      if (ipack(icol).ne.inlist(ij)) goto 84
+      if (packed_base%inpack(icol).ne.inlist(ij)) goto 84
       ic = ij
       dencol = prefac(ij)
       goto 85
@@ -3076,10 +3076,10 @@ do 400 irow = 1, length
       l1pp = packp%lpack(irpp)
 ! basis function must be the same as for irow
       if (j1pp.ne.j1) goto 150
-      if (packp%inpack(irpp) .ne. ipack(irow)) goto 150
+      if (packp%inpack(irpp) .ne. packed_base%inpack(irow)) goto 150
       xl1pp = l1pp
 ! icolp is index for (j2,l2,ind.jtotp) basis function
-      icolp =iadr(j2,l2m,5+ipack(icol))
+      icolp =iadr(j2,l2m,5+packed_base%inpack(icol))
       if (icolp .eq. 0) goto 150
 ! determine index of element in s' matrix
       if(irowp.ge.icolp) then
