@@ -36,9 +36,10 @@ integer :: ialloc
       character(len=:), allocatable, intent(out) :: label
     end subroutine
 
-    subroutine compute_scat_ampl_interface(this, j1, inlev1, j2, inlev2, jtot, mmax, jpack, &
-      lpack, ipack, length, jq, lq, inq, nopen, maxl2, &
+    subroutine compute_scat_ampl_interface(this, j1, inlev1, j2, inlev2, jtot, mmax, packed_base, &
+      jq, lq, inq, nopen, maxl2, &
       nangle, flaghf, sreal, simag, y, q)
+    use mod_hitypes, only: packed_base_type
     import frame_type
       class(frame_type) :: this
       integer :: j1
@@ -47,10 +48,7 @@ integer :: ialloc
       integer :: inlev2
       integer :: jtot
       integer :: mmax
-      integer :: jpack(:)
-      integer :: lpack(:)
-      integer :: ipack(:)
-      integer :: length
+      type(packed_base_type), intent(in) :: packed_base
       integer :: jq(:)
       integer :: lq(:)
       integer :: inq(:)
@@ -227,8 +225,8 @@ subroutine helicity_frame_get_label(this, label)
   label = 'HELICITY'
 end subroutine
 
-subroutine helicity_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax,jpack, &
-  lpack,ipack,length,jq,lq,inq,nopen,maxl2, &
+subroutine helicity_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax, packed_base, &
+  jq,lq,inq,nopen,maxl2, &
   nangle,flaghf,sreal,simag,y,q)
 !
 ! calculates scattering amplitudes for given jtot and set
@@ -244,6 +242,7 @@ subroutine helicity_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax,j
 !.....jq,lq,inq:         labels for columns
   use mod_tensor_ang, only: ang1, ang2, dang
   use mod_hiutil, only: xf3j
+  use mod_hitypes, only: packed_base_type
   class(helicity_frame_type) :: this
   integer :: j1
   integer :: inlev1
@@ -251,10 +250,7 @@ subroutine helicity_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax,j
   integer :: inlev2
   integer :: jtot
   integer :: mmax
-  integer :: jpack(:)
-  integer :: lpack(:)
-  integer :: ipack(:)
-  integer :: length
+  type(packed_base_type), intent(in) :: packed_base
   integer :: jq(:)
   integer :: lq(:)
   integer :: inq(:)
@@ -303,10 +299,10 @@ xjtot=dble(jtot)+spin
 xj1=dble(j1)+spin
 xj2=dble(j2)+spin
 ll=0
-do 50 ilab=1,length
-  if(jpack(ilab).ne.j1 .or. ipack(ilab).ne.inlev1) &
+do 50 ilab=1,packed_base%length
+  if(packed_base%jpack(ilab).ne.j1 .or. packed_base%inpack(ilab).ne.inlev1) &
      goto 50
-  l1=lpack(ilab)
+  l1=packed_base%lpack(ilab)
   ll=ll+1
   fak1(ll)=fakj*sqrt(2.d0*l1 + 1.0d0)
   ilab1(ll)=ilab
@@ -319,7 +315,7 @@ do 500 jlab=1,nopen
   xl2=l2
   do 60 ll=1,llmax
     ilab=ilab1(ll)
-    l1=lpack(ilab)
+    l1=packed_base%lpack(ilab)
 !.....convert to t-matrix
     tmat=-cmplx(sreal(jlab,ilab),simag(jlab,ilab))
     if(elastc .and. l1.eq.l2) tmat = tmat + 1.0d0
@@ -333,7 +329,7 @@ do 500 jlab=1,nopen
 !
     do 70 ll=1,llmax
       ilab=ilab1(ll)
-      xl1=lpack(ilab)
+      xl1=packed_base%lpack(ilab)
       fak3(ll)=fak2(ll)*xf3j(xj1,xl1,xjtot,xmj1,zero,-xmj1)
 70     continue
 
@@ -416,8 +412,8 @@ subroutine geom_apse_frame_get_label(this, label)
 end subroutine
 
 
-subroutine geom_apse_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax,jpack, &
-  lpack,ipack,length,jq,lq,inq,nopen,maxl2,nangle, &
+subroutine geom_apse_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax, packed_base, &
+  jq,lq,inq,nopen,maxl2,nangle, &
   flaghf,sreal,simag,y,q)
 !
 ! calculates scattering amplitudes for given jtot and set
@@ -433,6 +429,7 @@ subroutine geom_apse_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax,
 !.....jq,lq,inq:         labels for columns
   use mod_tensor_ang, only: ang1, ang2, dang
   use mod_hiutil, only: xf3j
+  use mod_hitypes, only: packed_base_type
 implicit none
   class(geom_apse_frame_type) :: this
   integer :: j1
@@ -441,10 +438,7 @@ implicit none
   integer :: inlev2
   integer :: jtot
   integer :: mmax
-  integer :: jpack(:)
-  integer :: lpack(:)
-  integer :: ipack(:)
-  integer :: length
+  type(packed_base_type), intent(in) :: packed_base
   integer :: jq(:)
   integer :: lq(:)
   integer :: inq(:)
@@ -493,10 +487,10 @@ xjtot=dble(jtot)+spin
 xj1=dble(j1)+spin
 xj2=dble(j2)+spin
 ll=0
-do 50 ilab=1,length
-  if(jpack(ilab).ne.j1 .or. ipack(ilab).ne.inlev1) &
+do 50 ilab=1,packed_base%length
+  if(packed_base%jpack(ilab).ne.j1 .or. packed_base%inpack(ilab).ne.inlev1) &
      goto 50
-  l1=lpack(ilab)
+  l1=packed_base%lpack(ilab)
   ll=ll+1
   fak1(ll)=fakj*sqrt(2.d0*l1 + 1.0d0)
   ilab1(ll)=ilab
@@ -509,7 +503,7 @@ do 500 jlab=1,nopen
   xl2=l2
   do 60 ll=1,llmax
     ilab=ilab1(ll)
-    l1=lpack(ilab)
+    l1=packed_base%lpack(ilab)
 !.....convert to t-matrix
     tmat = -cmplx(sreal(jlab,ilab),simag(jlab,ilab))
     if(elastc .and. l1.eq.l2) tmat = tmat + 1.0d0
@@ -536,7 +530,7 @@ do 500 jlab=1,nopen
           yy = 0.d0
           do 70 ll=1,llmax
             ilab=ilab1(ll)
-            xl1=lpack(ilab)
+            xl1=packed_base%lpack(ilab)
             fak3(ll)=fak2(ll) &
               *xf3j(xj1,xl1,xjtot,xmj1p,zero,-xmj1p)
 70           continue
@@ -566,8 +560,8 @@ do 500 jlab=1,nopen
 return
 end
 
-subroutine dsig(maxk,nnout,jfirst,jfinal,jtotd,jpack, &
-                lpack,ipack,jlevel,inlevel,elevel,flaghf, &
+subroutine dsig(maxk,nnout,jfirst,jfinal,jtotd, packed_base, &
+                jlevel,inlevel,elevel,flaghf, &
                 iframe,ierr, frame, tens_out_unit)
 !
 ! subroutine to calculate m-resolved differential cross sections
@@ -590,7 +584,6 @@ use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cow, only: simag => w_as_vec ! simag(1)
-use mod_hismat, only: sread
 use mod_difcrs, only: sphn
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch, ipos
@@ -598,16 +591,15 @@ use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_tensor_ang, only: ang1, ang2, dang
 use mod_hiutil, only: xf3j
-use mod_hismat, only: sread, rdhead
+use mod_hismat, only: smatread, rdhead
+use mod_hitypes, only: packed_base_type
 implicit double precision (a-h,o-z)
 integer, intent(in) :: maxk
 integer :: nnout
 integer :: jfirst
 integer :: jfinal
 integer :: jtotd
-integer :: jpack(:)
-integer :: lpack(:)
-integer :: ipack(:)
+type(packed_base_type), intent(out) :: packed_base
 integer :: jlevel
 integer :: inlevel
 real(8) :: elevel
@@ -639,7 +631,7 @@ data rad/57.295779513082323d0/
 character(len=:), allocatable :: label
 integer :: i, i1, i2, iang, ii, immprt, iph, ipower, isub1, isub2
 integer :: jlevlp, jlpar, jplast, jtlast, jtot
-integer :: k, k1, l2max, length, maxk1, maxq, mfvals, mivals, mj1, mj2, ml, mlmax
+integer :: k, k1, l2max, maxk1, maxq, mfvals, mivals, mj1, mj2, ml, mlmax
 integer :: nangle, nlevel, nlevop, nopen, nu, nud, numax, numin, numjm
 call frame%get_label(label)
 maxq = mmax*mmax/2
@@ -692,9 +684,9 @@ call rdhead(1,cdate1,ered1,rmu1,csflg1,flghf1,flgsu1, &
 !.....read next s-matrix
 !
 250 nopen = 0
-call sread (0, sreal, simag, jtot, jlpar, nu, &
-            jq, lq, inq, ipack, jpack, lpack, &
-            1, mmax, nopen, length, ierr)
+call smatread (0, sreal, simag, jtot, jlpar, nu, &
+            jq, lq, inq, packed_base, &
+            1, mmax, nopen, ierr)
 if(ierr .eq. -1) then
    write(6,260) xnam1,jtlast,jplast
 260    format(' END OF FILE DETECTED READING FILE ',(a), &
@@ -720,19 +712,19 @@ if(jlpar.eq.jplast .and. jtot.ne.jtlast+1) write(6,275) jtot,jtlast
 jtlast=jtot
 jplast=jlpar
 if(nnout.gt.0) then
-  do 290 i=1,length
-    inq(i)=ipack(i)
-    jq(i)=jpack(i)
-    lq(i)=lpack(i)
+  do 290 i=1,packed_base%length
+    inq(i)=packed_base%inpack(i)
+    jq(i)=packed_base%jpack(i)
+    lq(i)=packed_base%lpack(i)
 290   continue
-  nopen = length
+  nopen = packed_base%length
 end if
 !
 !.....calculate contributions to amplitudes for present jtot
 !     for elastic (jlevel,inlevel) -> (jlevel,inlevel) transition
 !
 call frame%compute_scat_ampl(jlevel,inlevel,jlevel,inlevel,jtot,mmax, &
-  jpack,lpack,ipack,length,jq,lq,inq,nopen, &
+  packed_base,jq,lq,inq,nopen, &
   l2max,nangle,flaghf,sreal,simag,y,q)
 
 !
@@ -889,8 +881,7 @@ write(6,406) (k, sigkto(k+1),k=0, maxk)
 return
 end
 
-subroutine dsigh(maxk, nnout, jfirst, jfinal, jtotd, jpack, &
-                lpack, ipack, jlevel, inlevel, elevel, flaghf, &
+subroutine dsigh(maxk, nnout, jfirst, jfinal, jtotd, packed_base, jlevel, inlevel, elevel, flaghf, &
                 iframe, ierr, tens_out_unit)
 !
 ! subroutine to calculate m-resolved differential cross sections
@@ -901,15 +892,13 @@ subroutine dsigh(maxk, nnout, jfirst, jfinal, jtotd, jpack, &
 ! author: pj dagdigian
 ! current revision date: 7-oct-2011 by pj dagdigian
 !------------------------------------------------------------------------
+use mod_hitypes, only: packed_base_type
 implicit none
 integer :: maxk
 integer :: nnout
 integer :: jfirst
 integer :: jfinal
 integer :: jtotd
-integer :: jpack(:)
-integer :: lpack(:)
-integer :: ipack(:)
 integer :: jlevel
 integer :: inlevel
 real(8) :: elevel
@@ -917,18 +906,17 @@ logical :: flaghf
 integer :: iframe
 integer :: ierr
 integer, intent(in) :: tens_out_unit  ! unit of tenxsc output file (tcs, dgh or dcga file)
-
+type(packed_base_type), intent(out) :: packed_base
 class(helicity_frame_type), allocatable :: helicity_frame
 
 allocate(helicity_frame)
 
-call dsig(maxk, nnout, jfirst, jfinal, jtotd, jpack, &
-        lpack, ipack, jlevel, inlevel, elevel, flaghf, &
+call dsig(maxk, nnout, jfirst, jfinal, jtotd, packed_base, jlevel, inlevel, elevel, flaghf, &
         iframe, ierr, helicity_frame, tens_out_unit)
 end
 
-subroutine dsigga(maxk, nnout, jfirst, jfinal, jtotd, jpack, &
-                lpack, ipack, jlevel, inlevel, elevel, flaghf, &
+subroutine dsigga(maxk, nnout, jfirst, jfinal, jtotd, packed_base, &
+                jlevel, inlevel, elevel, flaghf, &
                 iframe, ierr, tens_out_unit)
 !
 ! subroutine to calculate m-resolved differential cross sections
@@ -939,15 +927,13 @@ subroutine dsigga(maxk, nnout, jfirst, jfinal, jtotd, jpack, &
 ! author: pj dagdigian
 ! current revision date: 7-oct-2011 by pj dagdigian
 !------------------------------------------------------------------------
+use mod_hitypes, only: packed_base_type
 implicit none
 integer :: maxk
 integer :: nnout
 integer :: jfirst
 integer :: jfinal
 integer :: jtotd
-integer :: jpack(:)
-integer :: lpack(:)
-integer :: ipack(:)
 integer :: jlevel
 integer :: inlevel
 real(8) :: elevel
@@ -955,13 +941,13 @@ logical :: flaghf
 integer :: iframe
 integer :: ierr
 integer, intent(in) :: tens_out_unit  ! unit of tenxsc output file (tcs, dgh or dcga file)
+type(packed_base_type), intent(out) :: packed_base
 
 class(geom_apse_frame_type), allocatable :: geometric_apse_frame
 
 allocate(geometric_apse_frame)
 
-call dsig(maxk, nnout, jfirst, jfinal, jtotd, jpack, &
-        lpack, ipack, jlevel, inlevel, elevel, flaghf, &
+call dsig(maxk, nnout, jfirst, jfinal, jtotd, packed_base, jlevel, inlevel, elevel, flaghf, &
         iframe, ierr, geometric_apse_frame, tens_out_unit)
 end
 
@@ -1399,16 +1385,16 @@ n = minn
 ! iframe = 2
 173        jlevel = jlev(jlist(1))
        inlevel = inlev(jlist(1))
-       call dsigh(maxk,nnout,jfirst,jfinal,jtotd,packed_base%jpack, packed_base%lpack, &
-             packed_base%inpack, jlevel,inlevel,elev(jlist(1)),flaghf, &
+       call dsigh(maxk,nnout,jfirst,jfinal,jtotd,packed_base, &
+             jlevel,inlevel,elev(jlist(1)),flaghf, &
              iframe,ierr, FUNIT_TENS_OUTPUT)
        if(ierr.ne.0) goto 4000
        goto 300
 ! iframe = 3
 174        jlevel = jlev(jlist(1))
        inlevel = inlev(jlist(1))
-       call dsigga(maxk,nnout,jfirst,jfinal,jtotd,packed_base%jpack, packed_base%lpack, &
-             packed_base%inpack, jlevel,inlevel,elev(jlist(1)),flaghf, &
+       call dsigga(maxk,nnout,jfirst,jfinal,jtotd,packed_base, &
+             jlevel,inlevel,elev(jlist(1)),flaghf, &
              iframe,ierr, FUNIT_TENS_OUTPUT)
        if(ierr.ne.0) goto 4000
 else
