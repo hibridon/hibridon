@@ -39,20 +39,18 @@ use mod_coisc5, only: jout => isc5 ! jout(1)
 use mod_coisc7, only: jlevh => isc7 ! jlevh(1)
 use mod_coisc8, only: iflevh => isc8 ! iflevh(1)
 use mod_coisc9, only: inlevh => isc9 ! inlevh(1)
-use mod_coisc10, only: ipack => isc10 ! ipack(1)
-use mod_coisc11, only: jpack => isc11 ! jpack(1)
-use mod_coisc12, only: lpack => isc12 ! lpack(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc3, only: elevh => sc3 ! elevh(1)
-use mod_hismat, only: sread
 use mod_hibasis, only: is_j12
 use constants, only: econv, xmconv, ang2 => ang2c
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_hiutil, only: gennam, mtime
 use mod_hiutil, only: xf6j
-use mod_hismat, only: sread, rdhead, sinqr
+use mod_hismat, only: smatread, rdhead, sinqr
+use mod_hitypes, only: packed_base_type
 implicit double precision (a-h,o-z)
+type(packed_base_type) :: packed_base
 character*(*) flname
 real(8), dimension(4), intent(in) :: a(4)
 complex(8) t, tf
@@ -291,9 +289,9 @@ jfin = 0
 
 !     parameter to read lower triangle of open channel(s)
 100 nopen = -1
-call sread (0, sreal, simag, jtot, jlpar, &
-     nu, jq, lq, inq, ipack, jpack, lpack, &
-     1, mmax, nopen, lngth, ierr)
+call smatread (0, sreal, simag, jtot, jlpar, &
+     nu, jq, lq, inq, packed_base, &
+     1, mmax, nopen, ierr)
 if (ierr .lt. -1) then
    write(6,102)
 102    format(/' ** READ ERROR IN HYPXSC. ABORT **'/)
@@ -303,17 +301,17 @@ jfrst = min(jfrst, jtot)
 jfin = max(jfin, jtot)
 jlp = 1 - (jlpar - 1)/2
 !     copy s-matrix for this jtot1/jlpar1
-length(jtot,jlp) = lngth
-len2 = lngth*(lngth + 1)/2
+length(jtot,jlp) = packed_base%length
+len2 = packed_base%length*(packed_base%length + 1)/2
 if (jlpar.eq.1) then
    exsmtp(jtot) = .true.
 else
    exsmtn(jtot) = .true.
 end if
-do i = 1, lngth
-   j(jtot,jlp,i) = jpack(i)
-   in(jtot,jlp,i) = ipack(i)
-   l(jtot,jlp,i) = lpack(i)
+do i = 1, packed_base%length
+   j(jtot,jlp,i) = packed_base%jpack(i)
+   in(jtot,jlp,i) = packed_base%inpack(i)
+   l(jtot,jlp,i) = packed_base%lpack(i)
    j12(jtot,jlp,i) = j12q(i)
 end do
 do ii = 1, len2
