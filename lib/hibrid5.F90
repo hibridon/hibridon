@@ -2021,7 +2021,6 @@ subroutine intcr(csflag,flaghf,twomol,flagsu,nucros, &
 ! ----------------------------------------------------------------------
 use mod_cosout, only: nnout, jout
 use mod_coj12, only: j12
-use mod_coj12p, only: j12pk
 use mod_cojq, only: jq ! jq(1)
 use mod_colq, only: lq ! lq(1)
 use mod_coinq, only: inq ! inq(1)
