@@ -27,9 +27,6 @@ use mod_cosout, only : nnout, jout
 use mod_coj12p, only: j12pk
 use constants
 use mod_codim, only: nmax => mmax
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 use mod_coinhl, only: jlev => inhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
@@ -39,7 +36,7 @@ use mod_hibasis, only: is_j12
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_hiutil, only: gennam
-use mod_hismat, only: sread, rdhead
+use mod_hismat, only: smatread, rdhead
 use mod_hitypes, only: bqs_type
 implicit none
 character*(*), intent(in) :: fname
@@ -50,6 +47,7 @@ integer :: i, iadr, ienerg, ierr, ij
 integer :: j, ja, je, jfinal, jfirst, jj1, jj2, jlp, jlpar, jtot, jtota, jtotb, jtotd
 integer :: lenx, ncol, nlevel, nlevop, nopen, nu,nud, numax, numin
 
+type(bqs_type) :: row_bqs
 type(bqs_type) :: packed_bqs
 character*20 cdate
 character*40 xname
@@ -118,8 +116,9 @@ jtotb = min0(jtotb, jfinal)
 !
 iadr=0
 30 nopen = 0
-call sread (iadr, sreal, simag, jtot, jlpar, nu, &
-                  jq, lq, inq, packed_bqs, &
+
+call smatread (iadr, sreal, simag, jtot, jlpar, nu, &
+                  row_bqs, packed_bqs, &
                    1, nmax, nopen, ierr)
 if(csflag) jlpar=0
 if(ierr.eq.-1) goto 400
@@ -151,17 +150,17 @@ if (nnout.le.0) then
   write (6, 290) 'N    ', (j, j=1, nopen)
   if (.not. twomol) then
     if (flaghf) then
-      write (6, 260) 'J    ', (jq(j)+0.5d0, j=1, nopen)
+      write (6, 260) 'J    ', (row_bqs%jq(j)+0.5d0, j=1, nopen)
 260       format (1x, (a), (t10, 20(f6.1)) )
     else
-      write (6, 290) 'J    ', (jq(j), j=1, nopen)
+      write (6, 290) 'J    ', (row_bqs%jq(j), j=1, nopen)
     end if
   else
-    write (6, 270) 'J1/J2', (jq(j), j=1, nopen)
+    write (6, 270) 'J1/J2', (row_bqs%jq(j), j=1, nopen)
 270     format(1x, (a), (t10, 10i6) )
   end if
-  write (6, 290) 'L    ', (lq(j), j=1, nopen)
-  write (6, 290) 'INDEX', (inq(j), j=1, nopen)
+  write (6, 290) 'L    ', (row_bqs%lq(j), j=1, nopen)
+  write (6, 290) 'INDEX', (row_bqs%inq(j), j=1, nopen)
 end if
   write (6, 280)
 280   format(/' ROW INDICES:')
