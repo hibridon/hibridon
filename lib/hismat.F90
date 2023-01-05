@@ -141,6 +141,143 @@ goto 20
 950 njtot = -1
 return
 end
+subroutine smatread (iadr, sreal, simag, jtot, jlpar, nu, &
+                  row_bqs, packed_bqs, &
+                  smt_file_unit, nmax, nopen, ierr)
+!     authors: h.j. werner and b. follmeg
+!     revision: 21-feb-2006 by mha
+!     major revision: 07-feb-2012 by q. ma
+!     added /coj12/ common block (p.dagdigian)
+!     current revision:  8-oct-2012 by q. ma
+!
+!     read real and imaginary parts of s-matrix together with
+!     other information as written in soutpt, swrite
+!     if iadr = 0 read sequential (next record)
+!     if iadr > 0 read absolute
+!     if nopen = -1, the lower triangle is filled
+!     ------------------------------------------------------------
+use mod_coj12, only: j12
+use mod_coj12p, only: j12pk
+use mod_hibasis, only: is_j12
+use mod_selb, only: ibasty
+use mod_hitypes, only: bqs_type
+implicit none
+integer, intent(in) :: iadr
+real(8), intent(out) :: sreal(nmax,1)
+real(8), intent(out) :: simag(nmax,1)
+integer, intent(out) :: jtot
+integer, intent(out) :: jlpar
+integer, intent(out) :: nu
+type(bqs_type), intent(out) :: row_bqs
+type(bqs_type), intent(out) :: packed_bqs
+integer, intent(in) :: smt_file_unit
+integer, intent(in) :: nmax
+integer, intent(inout) :: nopen
+integer, intent(out) :: ierr
+logical :: triang
+character*8 :: csize8
+integer :: iaddr
+integer :: lrec, i, nnout, irow, icol, ioff
+
+call row_bqs%init(nmax)
+call packed_bqs%init(nmax)
+
+!
+ierr=0
+triang =.false.
+if (nopen < 0) then
+   triang = .true.
+   nopen = iabs(nopen)
+end if
+!     on return:
+!
+!     the packed_bqs will hold the column indices of
+!     the packed basis (dimension length)
+!
+!     the vectors jq, lq, inq will hold the row indices of the packed
+!     basis (dimension nopen)
+!
+!     read next s-matrix header
+iaddr = iadr
+call readrc(iaddr,smt_file_unit,lrec,jtot,jlpar,nu,nopen,packed_bqs%length,nnout)
+if (lrec < 0) goto 900
+
+read (smt_file_unit, end=900, err=950) &
+     (packed_bqs%jq(i), i=1, packed_bqs%length), &
+     (packed_bqs%lq(i), i=1, packed_bqs%length), &
+     (packed_bqs%inq(i), i=1, packed_bqs%length)
+if (is_j12(ibasty)) &
+     read (smt_file_unit, end=900, err=950) (j12pk(i), i=1, packed_bqs%length)
+
+
+
+!      write(6,*) 'SREAD'
+!      write(6,*) jtot,jlpar,length
+!      write(6,*) (j12pk(i), i=1, length)
+
+
+
+!
+if (nnout .gt. 0) then
+   do 50 i = 1, packed_bqs%length
+      row_bqs%jq(i) = packed_bqs%jq(i)
+      row_bqs%lq(i) = packed_bqs%lq(i)
+      row_bqs%inq(i)= packed_bqs%inq(i)
+      if (is_j12(ibasty)) j12(i) = j12pk(i)
+50    continue
+   nopen = packed_bqs%length
+   if (triang) then
+      ioff = 1
+      do 70 irow = 1, packed_bqs%length
+         read (smt_file_unit, end=900, err=950) &
+              (sreal(ioff + i, 1), i=0, irow - 1), &
+              (simag(ioff + i, 1), i=0, irow - 1)
+         ioff = ioff + irow
+70       continue
+      goto 800
+   end if
+!     read s-matrix
+   do 80  icol = 1, packed_bqs%length
+      read (smt_file_unit, end=900, err=950) &
+           (sreal(i, icol), i=1, icol)
+      read (smt_file_unit, end=900, err=950) &
+           (simag(i, icol), i=1, icol)
+80    continue
+!     fill lower triangle
+   do icol=1,packed_bqs%length
+      do irow=1,icol
+         sreal(icol,irow)=sreal(irow,icol)
+         simag(icol,irow)=simag(irow,icol)
+      end do
+   end do
+!
+else if (nnout .le. 0) then
+!     here if you have written out columns of the s-matrix
+   read (smt_file_unit, end=900, err=950) (row_bqs%jq(i), i=1, nopen), &
+        (row_bqs%lq(i), i=1, nopen), (row_bqs%inq(i), i=1, nopen)
+   if (is_j12(ibasty)) read (smt_file_unit, end=900, err=950) &
+        (j12(i), i=1, nopen)
+!     now read columns of the s-matrix
+   do 140 icol = 1, packed_bqs%length
+      read (smt_file_unit, end=900, err=950) &
+           (sreal(i, icol), i=1, nopen), &
+           (simag(i, icol), i=1, nopen)
+140    continue
+end if
+row_bqs%length = nopen
+!
+!     Read eight bytes "ENDOFSMT"
+800 read (smt_file_unit, end=900, err=950) csize8
+if (csize8 .ne. 'ENDOFSMT') goto 950
+return
+!
+!     End-of-file
+900 continue
+!     Read error
+950 ierr = -1
+return
+end
+
 subroutine sread (iadr, sreal, simag, jtot, jlpar, nu, &
                   jq, lq, inq, packed_bqs, &
                   smt_file_unit, nmax, nopen, ierr)
