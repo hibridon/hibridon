@@ -53,7 +53,7 @@ use mod_selb, only: ibasty
 use mod_hiutil, only: gennam, mtime, gettim, dater
 use mod_hiutil, only: xf3j
 use mod_hismat, only: sread, rdhead
-use mod_hitypes, only: packed_base_type
+use mod_hitypes, only: bqs_type
 implicit none
 character*(*), intent(in) :: fname1
 real(8), intent(in) :: a(15)
@@ -101,7 +101,7 @@ complex(8), dimension(:, :, :), allocatable :: q, qm
 real(8), dimension(:, :), allocatable :: ximdep
 real(8), dimension(:), allocatable :: ytmp
 real(8), dimension(:, :, :), allocatable :: y
-type(packed_base_type) :: packed_base1
+type(bqs_type) :: packed_bqs1
 !
 maxq=mmax*mmax/2
 !
@@ -467,7 +467,7 @@ jplast=0
 !
 250 nopen1 = 0
 call sread (0,sreal1, simag1, jtot, jlpar, nu1, &
-                  jq, lq, inq, packed_base1, &
+                  jq, lq, inq, packed_bqs1, &
                   smt_unit, mmax, nopen1, ierr)
 if(ierr.eq.-1) then
    write(6,260) xnam1,jtlast,jplast
@@ -494,23 +494,23 @@ if(jlpar.eq.jplast.and.jtot.ne.jtlast+1) write(6,275) jtot,jtlast
 jtlast=jtot
 jplast=jlpar
 if(nnout.gt.0) then
-   do 290 i=1,packed_base1%length
-   inq(i)=packed_base1%inpack(i)
-   jq(i)=packed_base1%jpack(i)
-290    lq(i)=packed_base1%lpack(i)
-   nopen1=packed_base1%length
+   do 290 i=1,packed_bqs1%length
+   inq(i)=packed_bqs1%inq(i)
+   jq(i)=packed_bqs1%jq(i)
+290    lq(i)=packed_bqs1%lq(i)
+   nopen1=packed_bqs1%length
 end if
 !
 !.....calculate contributions to amplitudes for present jtot
 !
 call ampli( &
-    j1, in1, j2, in2, jtot, sreal1, simag1, mmax, packed_base1, &
+    j1, in1, j2, in2, jtot, sreal1, simag1, mmax, packed_bqs1, &
     jq, lq, inq, nopen1, y, q, l2max, nangle, ihomo, flaghf, &
     iydim1, iydim2, iq1min, iq1max, iq2min, iq2max, iq3)
 !.... calculate contributions for negative initial index
 if (stflag) then
   call ampli( &
-    j1, -in1, j2, in2, jtot, sreal1, simag1, mmax, packed_base1, &
+    j1, -in1, j2, in2, jtot, sreal1, simag1, mmax, packed_bqs1, &
     jq, lq, inq, nopen1, y, qm, l2max, nangle, ihomo, flaghf, &
     iydim1, iydim2, iq1min, iq1max, iq2min, iq2max, iq3)
 end if
@@ -959,7 +959,7 @@ endif
 return
 end
 ! -----------------------------------------------------------------------
-subroutine ampli(j1,in1,j2,in2,jtot,sreal,simag,mmax, packed_base, &
+subroutine ampli(j1,in1,j2,in2,jtot,sreal,simag,mmax, packed_bqs, &
      jq,lq,inq,nopen,y,q,maxl2,nangle,ihomo,flaghf, &
      iydim1,iydim2,iq1min,iq1max,iq2min,iq2max,iq3)
 !subr  calculates scattering amplitudes for given jtot and set
@@ -975,7 +975,7 @@ subroutine ampli(j1,in1,j2,in2,jtot,sreal,simag,mmax, packed_base, &
 !
 !  current revision date:  22-may-2021 by p. dagdigian
 !
-!.....packed_base%jpack,packed_base%lpack,packed_base%inpack: labels for rows
+!.....packed_bqs%jq,packed_bqs%lq,packed_bqs%inq: labels for rows
 !.....jq,lq,inq:         labels for columns
 !
 use mod_coj12, only: j12
@@ -983,9 +983,9 @@ use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12, is_twomol
 use mod_selb, only: ibasty
 use mod_hiutil, only: xf3j
-use mod_hitypes, only: packed_base_type
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
-type(packed_base_type) :: packed_base
+type(bqs_type) :: packed_bqs
 complex*16 ai,yy,tmat
 parameter (zero=0.0d0, one=1.0d0, two=2.0d0)
 logical ihomo,flaghf,elastc
@@ -1082,8 +1082,8 @@ else
 end if
 !
 llmax = 0
-do ilab=1,packed_base%length
-   if(packed_base%jpack(ilab).ne.j1.or.packed_base%inpack(ilab).ne.in1) cycle
+do ilab=1,packed_bqs%length
+   if(packed_bqs%jq(ilab).ne.j1.or.packed_bqs%inq(ilab).ne.in1) cycle
    llmax = llmax + 1
 end do
 !
@@ -1092,9 +1092,9 @@ allocate(fak1(llmax))
 allocate(fak2(llmax))
 allocate(fak3(llmax))
 ll = 0
-do ilab=1,packed_base%length
-   if(packed_base%jpack(ilab).ne.j1.or.packed_base%inpack(ilab).ne.in1) cycle
-   l1 = packed_base%lpack(ilab)
+do ilab=1,packed_bqs%length
+   if(packed_bqs%jq(ilab).ne.j1.or.packed_bqs%inq(ilab).ne.in1) cycle
+   l1 = packed_bqs%lq(ilab)
    ll = ll + 1
    fak1(ll)=fakj*sqrt(two * dble(l1) + one)
    ilab1(ll)=ilab
@@ -1110,7 +1110,7 @@ if (is_j12(ibasty)) then
 end if
 do 60 ll=1,llmax
 ilab=ilab1(ll)
-l1=packed_base%lpack(ilab)
+l1=packed_bqs%lq(ilab)
 if (is_j12(ibasty)) then
   j12_i = j12pk(ilab)
   xj12_i = j12_i + spin
@@ -1134,7 +1134,7 @@ if (.not. is_j12(ibasty)) then
 !
   do 70 ll=1,llmax
   ilab=ilab1(ll)
-  xl1=packed_base%lpack(ilab)
+  xl1=packed_bqs%lq(ilab)
 70   fak3(ll)=fak2(ll)*xf3j(xj1,xl1,xjtot,xmj1,zero,-xmj1)
 !
   do 300 mj2=-j2p,j2
@@ -1166,7 +1166,7 @@ elseif (is_twomol(ibasty)) then
 !
     do 1070 ll = 1, llmax
       ilab = ilab1(ll)
-      xl1 = packed_base%lpack(ilab)
+      xl1 = packed_bqs%lq(ilab)
       j12_i = j12pk(ilab)
       xj12_i = j12_i + spin
       fak3(ll) = fak2(ll) * (-1)**j12_i &
@@ -1209,7 +1209,7 @@ else
 !
     do 3070 ll = 1, llmax
       ilab = ilab1(ll)
-      xl1 = packed_base%lpack(ilab)
+      xl1 = packed_bqs%lq(ilab)
       j12_i = j12pk(ilab)
       xj12_i = j12_i + spin
       fak3(ll) = fak2(ll) * (-1)**j12_i &

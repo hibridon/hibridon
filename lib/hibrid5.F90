@@ -2033,7 +2033,7 @@ use mod_cosc3, only: jlev => sc3int ! jlev(1)
 use mod_par, only: batch, ipos
 use mod_selb, only: ibasty
 use mod_hismat, only: sread
-use mod_hitypes, only: packed_base_type
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 logical, intent(in) :: csflag
 logical, intent(in) :: flaghf
@@ -2058,7 +2058,7 @@ integer, intent(in) :: nlevop
 integer, intent(in) :: nmax
 integer, intent(in) :: tmp_file
 
-type(packed_base_type) :: packed_base
+type(bqs_type) :: packed_bqs
 
 ! clear sigma array
 one=1.0d0
@@ -2074,7 +2074,7 @@ iaddr = 0
 ! j12 is read into a common block for molecule-molecule collisions
 10 nopen = 0
 call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
-  jq, lq, inq, packed_base, &
+  jq, lq, inq, packed_bqs, &
   1, nmax, nopen, ierr)
 if(jlpold.eq.0) jlpold=jlpar
 if(ierr.eq.-1) goto 100
@@ -2105,10 +2105,10 @@ endif
 iaddr = 0
 ! calculate squared t-matrix
 call tsqmat(tsq,sreal,simag,inq,jq,lq, &
-   packed_base%inpack,packed_base%jpack,packed_base%lpack,nopen,packed_base%length,nmax)
+   packed_bqs%inq,packed_bqs%jq,packed_bqs%lq,nopen,packed_bqs%length,nmax)
 ! calculate partial cross sections
-call partcr(tsq,sc1,nopen,packed_base%length, &
-            inq, jq, lq, packed_base%inpack, packed_base%jpack, packed_base%lpack, &
+call partcr(tsq,sc1,nopen,packed_bqs%length, &
+            inq, jq, lq, packed_bqs%inq, packed_bqs%jq, packed_bqs%lq, &
             inlev, jlev, elev, jtot, nu, &
             csflag,flaghf,twomol,flagsu, &
             nlevop,nmax)

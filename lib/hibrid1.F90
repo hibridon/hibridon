@@ -2179,7 +2179,7 @@ use mod_cozmat, only: simag1 => zmat_as_vec ! simag1(1)
 use mod_hismat, only: sread, rdhead
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam
-use mod_hitypes, only: packed_base_type
+use mod_hitypes, only: bqs_type
 implicit none
 character*(*), intent(in) :: fname1
 character*(*), intent(in) :: fname2
@@ -2192,8 +2192,8 @@ integer, intent(out) :: imx
 integer, intent(out) :: jmx
 integer, intent(out) :: ityp
 
-type(packed_base_type) :: pack1
-type(packed_base_type) :: pack2
+type(bqs_type) :: pack1
+type(bqs_type) :: pack2
 real(8) :: erabs, ered1, ered2, ermabs, ermrel, errel
 integer :: i, idif, ierr, ij, im
 integer :: jfinal, jfirst, jlpar1, jlpar2, jm, jtot1, jtot2, jtotd
@@ -2297,9 +2297,9 @@ if(jtot1.ne.jtot2) idif=idif+1
 if(jlpar1.ne.jlpar2) idif=idif+1
 if(pack1%length /= pack2%length) idif=idif+1
 do 60 i=1,pack1%length
-if(pack1%jpack(i) /= pack2%jpack(i)) idif=idif+1
-if(pack1%lpack(i) /= pack2%lpack(i)) idif=idif+1
-60 if(pack1%inpack(i) /= pack2%inpack(i)) idif=idif+1
+if(pack1%jq(i) /= pack2%jq(i)) idif=idif+1
+if(pack1%lq(i) /= pack2%lq(i)) idif=idif+1
+60 if(pack1%inq(i) /= pack2%inq(i)) idif=idif+1
 if(idif.ne.0) then
   write(6,70) jtot1,jtot2
 70   format(/' PARAMETERS NOT EQUAL FOR JTOT1=',i3,'  JTOT2=',i3)

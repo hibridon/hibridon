@@ -142,7 +142,7 @@ goto 20
 return
 end
 subroutine sread (iadr, sreal, simag, jtot, jlpar, nu, &
-                  jq, lq, inq, packed_base, &
+                  jq, lq, inq, packed_bqs, &
                   smt_file_unit, nmax, nopen, ierr)
 !     authors: h.j. werner and b. follmeg
 !     revision: 21-feb-2006 by mha
@@ -160,7 +160,7 @@ use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12
 use mod_selb, only: ibasty
-use mod_hitypes, only: packed_base_type
+use mod_hitypes, only: bqs_type
 implicit none
 integer, intent(in) :: iadr
 real(8), intent(out) :: sreal(nmax,1)
@@ -171,7 +171,7 @@ integer, intent(out) :: nu
 integer, intent(out) :: jq(1)
 integer, intent(out) :: lq(1)
 integer, intent(out) :: inq(1)
-type(packed_base_type), intent(out) :: packed_base
+type(bqs_type), intent(out) :: packed_bqs
 integer, intent(in) :: smt_file_unit
 integer, intent(in) :: nmax
 integer, intent(inout) :: nopen
@@ -181,7 +181,7 @@ character*8 :: csize8
 integer :: iaddr
 integer :: lrec, i, nnout, irow, icol, ioff
 
-call packed_base%init(nmax)
+call packed_bqs%init(nmax)
 
 !
 ierr=0
@@ -200,15 +200,15 @@ end if
 !
 !     read next s-matrix header
 iaddr = iadr
-call readrc(iaddr,smt_file_unit,lrec,jtot,jlpar,nu,nopen,packed_base%length,nnout)
+call readrc(iaddr,smt_file_unit,lrec,jtot,jlpar,nu,nopen,packed_bqs%length,nnout)
 if (lrec < 0) goto 900
 
 read (smt_file_unit, end=900, err=950) &
-     (packed_base%jpack(i), i=1, packed_base%length), &
-     (packed_base%lpack(i), i=1, packed_base%length), &
-     (packed_base%inpack(i), i=1, packed_base%length)
+     (packed_bqs%jq(i), i=1, packed_bqs%length), &
+     (packed_bqs%lq(i), i=1, packed_bqs%length), &
+     (packed_bqs%inq(i), i=1, packed_bqs%length)
 if (is_j12(ibasty)) &
-     read (smt_file_unit, end=900, err=950) (j12pk(i), i=1, packed_base%length)
+     read (smt_file_unit, end=900, err=950) (j12pk(i), i=1, packed_bqs%length)
 
 
 
@@ -220,16 +220,16 @@ if (is_j12(ibasty)) &
 
 !
 if (nnout .gt. 0) then
-   do 50 i = 1, packed_base%length
-      jq(i) = packed_base%jpack(i)
-      lq(i) = packed_base%lpack(i)
-      inq(i)= packed_base%inpack(i)
+   do 50 i = 1, packed_bqs%length
+      jq(i) = packed_bqs%jq(i)
+      lq(i) = packed_bqs%lq(i)
+      inq(i)= packed_bqs%inq(i)
       if (is_j12(ibasty)) j12(i) = j12pk(i)
 50    continue
-   nopen = packed_base%length
+   nopen = packed_bqs%length
    if (triang) then
       ioff = 1
-      do 70 irow = 1, packed_base%length
+      do 70 irow = 1, packed_bqs%length
          read (smt_file_unit, end=900, err=950) &
               (sreal(ioff + i, 1), i=0, irow - 1), &
               (simag(ioff + i, 1), i=0, irow - 1)
@@ -238,14 +238,14 @@ if (nnout .gt. 0) then
       goto 800
    end if
 !     read s-matrix
-   do 80  icol = 1, packed_base%length
+   do 80  icol = 1, packed_bqs%length
       read (smt_file_unit, end=900, err=950) &
            (sreal(i, icol), i=1, icol)
       read (smt_file_unit, end=900, err=950) &
            (simag(i, icol), i=1, icol)
 80    continue
 !     fill lower triangle
-   do icol=1,packed_base%length
+   do icol=1,packed_bqs%length
       do irow=1,icol
          sreal(icol,irow)=sreal(irow,icol)
          simag(icol,irow)=simag(irow,icol)
@@ -259,7 +259,7 @@ else if (nnout .le. 0) then
    if (is_j12(ibasty)) read (smt_file_unit, end=900, err=950) &
         (j12(i), i=1, nopen)
 !     now read columns of the s-matrix
-   do 140 icol = 1, packed_base%length
+   do 140 icol = 1, packed_bqs%length
       read (smt_file_unit, end=900, err=950) &
            (sreal(i, icol), i=1, nopen), &
            (simag(i, icol), i=1, nopen)

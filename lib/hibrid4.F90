@@ -40,7 +40,7 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_hiutil, only: gennam
 use mod_hismat, only: sread, rdhead
-use mod_hitypes, only: packed_base_type
+use mod_hitypes, only: bqs_type
 implicit none
 character*(*), intent(in) :: fname
 integer, intent(in) :: ia(4)
@@ -50,7 +50,7 @@ integer :: i, iadr, ienerg, ierr, ij
 integer :: j, ja, je, jfinal, jfirst, jj1, jj2, jlp, jlpar, jtot, jtota, jtotb, jtotd
 integer :: lenx, ncol, nlevel, nlevop, nopen, nu,nud, numax, numin
 
-type(packed_base_type) :: packed_base
+type(bqs_type) :: packed_bqs
 character*20 cdate
 character*40 xname
 logical  existf, csflag, flaghf, flagsu, twomol, nucros
@@ -119,7 +119,7 @@ jtotb = min0(jtotb, jfinal)
 iadr=0
 30 nopen = 0
 call sread (iadr, sreal, simag, jtot, jlpar, nu, &
-                  jq, lq, inq, packed_base, &
+                  jq, lq, inq, packed_bqs, &
                    1, nmax, nopen, ierr)
 if(csflag) jlpar=0
 if(ierr.eq.-1) goto 400
@@ -165,34 +165,34 @@ if (nnout.le.0) then
 end if
   write (6, 280)
 280   format(/' ROW INDICES:')
-  write (6, 290) 'N    ', (j, j=1, packed_base%length)
+  write (6, 290) 'N    ', (j, j=1, packed_bqs%length)
   if (.not. is_j12(ibasty)) then
     if (flaghf) then
-      write (6, 260) 'J    ', (packed_base%jpack(j)+0.5d0, j=1, packed_base%length)
+      write (6, 260) 'J    ', (packed_bqs%jq(j)+0.5d0, j=1, packed_bqs%length)
     else
-      write (6, 290) 'J    ', (packed_base%jpack(j), j=1, packed_base%length)
+      write (6, 290) 'J    ', (packed_bqs%jq(j), j=1, packed_bqs%length)
     end if
-    write (6, 290) 'IS   ', (packed_base%inpack(j), j=1, packed_base%length)
+    write (6, 290) 'IS   ', (packed_bqs%inq(j), j=1, packed_bqs%length)
   else
     if (ibasty.eq.12 .or. ibasty.eq.15) then
       ASSERT(.false.)
-      write (6, 290) 'J    ', (packed_base%jpack(j), j=1, packed_base%length)
-      write (6, 260) 'JA   ', (packed_base%inpack(j)+0.5d0, j=1, packed_base%length)
-      write (6, 260) 'J12  ', (j12pk(j)+0.5d0, j=1, packed_base%length)
+      write (6, 290) 'J    ', (packed_bqs%jq(j), j=1, packed_bqs%length)
+      write (6, 260) 'JA   ', (packed_bqs%inq(j)+0.5d0, j=1, packed_bqs%length)
+      write (6, 260) 'J12  ', (j12pk(j)+0.5d0, j=1, packed_bqs%length)
     else
-      write (6, 270) 'J1/J2', (packed_base%jpack(j), j=1, packed_base%length)
-      write (6, 270) 'J12', (j12pk(j), j=1, packed_base%length)
-      write (6, 270) 'IS', (packed_base%inpack(j), j=1, packed_base%length)
+      write (6, 270) 'J1/J2', (packed_bqs%jq(j), j=1, packed_bqs%length)
+      write (6, 270) 'J12', (j12pk(j), j=1, packed_bqs%length)
+      write (6, 270) 'IS', (packed_bqs%inq(j), j=1, packed_bqs%length)
     endif
   end if
-  write (6, 290) 'L    ', (packed_base%lpack(j), j=1, packed_base%length)
+  write (6, 290) 'L    ', (packed_bqs%lq(j), j=1, packed_bqs%length)
 290   format(1x, (a), (t10, 10i6))
 ncol = nopen
-if(nnout.gt.0) ncol = packed_base%length
+if(nnout.gt.0) ncol = packed_bqs%length
 write (6, 300) 'REAL PART OF THE S-MATRIX'
 300 format(/1x, (a))
-do 330 ja = 1, packed_base%length, 10
-  je=min0(ja+9,packed_base%length)
+do 330 ja = 1, packed_bqs%length, 10
+  je=min0(ja+9,packed_bqs%length)
   write (6, 310) (j, j = ja, je)
 310   format(10i12)
   ij=1-nmax
@@ -203,8 +203,8 @@ do 330 ja = 1, packed_base%length, 10
 320   ij=ij+1
 330 continue
 write (6, 300) 'IMAGINARY PART OF THE S-MATRIX'
-do 350 ja = 1, packed_base%length, 10
-  je=min0(ja+9,packed_base%length)
+do 350 ja = 1, packed_bqs%length, 10
+  je=min0(ja+9,packed_bqs%length)
   write (6, 310) (j, j = ja, je)
   ij=1-nmax
   do 340 i = 1, ncol

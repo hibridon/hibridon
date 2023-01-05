@@ -48,9 +48,9 @@ use mod_selb, only: ibasty
 use mod_hiutil, only: gennam, mtime
 use mod_hiutil, only: xf6j
 use mod_hismat, only: sread, rdhead, sinqr
-use mod_hitypes, only: packed_base_type
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
-type(packed_base_type) :: packed_base
+type(bqs_type) :: packed_bqs
 character*(*) flname
 real(8), dimension(4), intent(in) :: a(4)
 complex(8) t, tf
@@ -290,7 +290,7 @@ jfin = 0
 !     parameter to read lower triangle of open channel(s)
 100 nopen = -1
 call sread (0, sreal, simag, jtot, jlpar, &
-     nu, jq, lq, inq, packed_base, &
+     nu, jq, lq, inq, packed_bqs, &
      1, mmax, nopen, ierr)
 if (ierr .lt. -1) then
    write(6,102)
@@ -301,17 +301,17 @@ jfrst = min(jfrst, jtot)
 jfin = max(jfin, jtot)
 jlp = 1 - (jlpar - 1)/2
 !     copy s-matrix for this jtot1/jlpar1
-length(jtot,jlp) = packed_base%length
-len2 = packed_base%length*(packed_base%length + 1)/2
+length(jtot,jlp) = packed_bqs%length
+len2 = packed_bqs%length*(packed_bqs%length + 1)/2
 if (jlpar.eq.1) then
    exsmtp(jtot) = .true.
 else
    exsmtn(jtot) = .true.
 end if
-do i = 1, packed_base%length
-   j(jtot,jlp,i) = packed_base%jpack(i)
-   in(jtot,jlp,i) = packed_base%inpack(i)
-   l(jtot,jlp,i) = packed_base%lpack(i)
+do i = 1, packed_bqs%length
+   j(jtot,jlp,i) = packed_bqs%jq(i)
+   in(jtot,jlp,i) = packed_bqs%inq(i)
+   l(jtot,jlp,i) = packed_bqs%lq(i)
    j12(jtot,jlp,i) = j12q(i)
 end do
 do ii = 1, len2

@@ -34,9 +34,9 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam, mtime, gettim
 use mod_hiutil, only: xf6j
 use mod_hismat, only: sread, rdhead, sinqr
-use mod_hitypes, only: packed_base_type
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h, o-z)
-type(packed_base_type) :: packed_base
+type(bqs_type) :: packed_bqs
 character*(*) flnam1, flnam2
 character*20  cdate1, cdate2
 character*40  smtfil1, smtfil2, prtfil
@@ -423,7 +423,7 @@ end if
 iaddr = 0
 20 nopen = -1
 call sread (iaddr, sreal, simag, jtot1, jlpar1, &
-   nu1, jq, lq, inq, packed_base, &
+   nu1, jq, lq, inq, packed_bqs, &
    1, mmax, nopen, ierr)
 if (ierr .lt. -1) then
   write(6,105)
@@ -433,15 +433,15 @@ if (ierr .lt. -1) then
   goto 1000
   return
 end if
-lngth1 = packed_base%length
+lngth1 = packed_bqs%length
 jlp = 1 - (jlpar1 - 1)/2
 !  copy s-matrix for this jtot1/jlpar1
 lngtha(jtot1,jlp) = lngth1
 len2 = lngth1*(lngth1 + 1)/2
 do i = 1, lngth1
-  ja(jtot1,jlp,i) = packed_base%jpack(i)
-  ina(jtot1,jlp,i) = packed_base%inpack(i)
-  la(jtot1,jlp,i) = packed_base%lpack(i)
+  ja(jtot1,jlp,i) = packed_bqs%jq(i)
+  ina(jtot1,jlp,i) = packed_bqs%inq(i)
+  la(jtot1,jlp,i) = packed_bqs%lq(i)
 end do
 do ii = 1, len2
   sra(jtot1,jlp,ii) = sreal(ii)
@@ -468,7 +468,7 @@ goto 20
 22 iaddr = 0
 1020 nopen = -1
 call sread (iaddr, sreal, simag, jtot2, jlpar2, &
-   nu2, jq, lq, inq, packed_base, &
+   nu2, jq, lq, inq, packed_bqs, &
    11, mmax, nopen, ierr)
 if (ierr .lt. -1) then
   write(6,1105)
@@ -476,15 +476,15 @@ if (ierr .lt. -1) then
       'SMT FILE. ABORT **'/)
   goto 1000
 end if
-lngth2 = packed_base%length
+lngth2 = packed_bqs%length
 jlp = 1 - (jlpar2 - 1)/2
 !  copy s-matrix for this jtot2/jlpar2
 lngthb(jtot2,jlp) = lngth2
 len2 = lngth2*(lngth2 + 1)/2
 do i = 1, lngth2
-  jb(jtot2,jlp,i) = packed_base%jpack(i)
-  inb(jtot2,jlp,i) = packed_base%inpack(i)
-  lb(jtot2,jlp,i) = packed_base%lpack(i)
+  jb(jtot2,jlp,i) = packed_bqs%jq(i)
+  inb(jtot2,jlp,i) = packed_bqs%inq(i)
+  lb(jtot2,jlp,i) = packed_bqs%lq(i)
 end do
 do ii = 1, len2
   srb(jtot2,jlp,ii) = sreal(ii)
