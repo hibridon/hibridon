@@ -2165,9 +2165,6 @@ subroutine difs(fname1,fname2,ienerg,iprint,acc,accmx,thrs, &
 !  ------------------------------------------------------------
 use mod_codim, only: mmax
 use mod_coamat, only: simag2 ! simag2(1)
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 use mod_cojhld, only: jout1 => jhold ! jout1(1)
 use mod_coehld, only: jout2 => eholdint ! jout2(1)
 use mod_coinhl, only: jlev => inhold ! jlev(1)
@@ -2176,7 +2173,7 @@ use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_coz, only: sreal1 => z_as_vec ! sreal1(1)
 use mod_cow, only: sreal2 => w_as_vec ! sreal2(1)
 use mod_cozmat, only: simag1 => zmat_as_vec ! simag1(1)
-use mod_hismat, only: sread, rdhead
+use mod_hismat, only: smatread, rdhead
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam
 use mod_hitypes, only: bqs_type
@@ -2191,7 +2188,7 @@ real(8), intent(in) :: thrs
 integer, intent(out) :: imx
 integer, intent(out) :: jmx
 integer, intent(out) :: ityp
-
+type(bqs_type) :: row_bqs
 type(bqs_type) :: pack1
 type(bqs_type) :: pack2
 real(8) :: erabs, ered1, ered2, ermabs, ermrel, errel
@@ -2274,8 +2271,8 @@ do 26 i=1,iabs(nnout1)
 26 if (jout1(i).ne.jout2(i)) idif=idif+1
 !
 30 nopen1 = 0
-call sread (0,sreal1, simag1, jtot1, jlpar1, nu1, &
-                  jq, lq, inq, pack1, &
+call smatread (0,sreal1, simag1, jtot1, jlpar1, nu1, &
+                  row_bqs, pack1, &
                   1, mmax, nopen1, ierr)
 if(ierr.eq.-1) goto 200
 if(ierr.lt.-1) then
@@ -2284,8 +2281,8 @@ if(ierr.lt.-1) then
   goto 200
 end if
 nopen2 = 0
-call sread (0,sreal2, simag2, jtot2, jlpar2, nu2, &
-                  jq, lq, inq, pack2, &
+call smatread (0,sreal2, simag2, jtot2, jlpar2, nu2, &
+                  row_bqs, pack2, &
                   2, mmax, nopen2, ierr)
 if(ierr.eq.-1) goto 200
 if(ierr.lt.-1) then
