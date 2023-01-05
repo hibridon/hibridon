@@ -2101,7 +2101,7 @@ endif
 iaddr = 0
 ! calculate squared t-matrix
 call tsqmat(tsq,sreal,simag,inq,jq,lq, &
-   packed_bqs%inq,packed_bqs%jq,packed_bqs%lq,nopen,packed_bqs%length,nmax)
+   packed_bqs,nopen,nmax)
 ! calculate partial cross sections
 call partcr(tsq,sc1,nopen,packed_bqs%length, &
             inq, jq, lq, packed_bqs%inq, packed_bqs%jq, packed_bqs%lq, &
@@ -2157,7 +2157,7 @@ return
 end
 ! ----------------------------------------------------------------------
 subroutine tsqmat(tsq,sreal,simag,inrow,jrow,lrow, &
-          incol,jcol,lcol,nopen,ncol,nmax)
+          bqs_col,nopen,nmax)
 ! ----------------------------------------------------------------------
 !
 !  routine to compute modulus squared t-matrix from given s-matrix
@@ -2168,20 +2168,31 @@ use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12
 use mod_selb, only: ibasty
-implicit double precision (a-h,o-z)
-complex*8 t
-logical diag
-dimension sreal(nmax,1), simag(nmax,1), tsq(nmax,1)
-dimension inrow(1),jrow(1),lrow(1),incol(1),jcol(1),lcol(1)
+use mod_hitypes, only: bqs_type
+implicit none
+real(8), intent(out) :: tsq(nmax, nmax)
+real(8), intent(in) :: sreal(nmax, nmax)
+real(8), intent(in) :: simag(nmax, nmax)
+integer, intent(in) :: inrow(nopen)
+integer, intent(in) :: jrow(nopen)
+integer, intent(in) :: lrow(nopen)
+type(bqs_type), intent(in) :: bqs_col
+integer, intent(in) :: nopen
+integer, intent(in) :: nmax
+
+integer :: icol, irow, in1, j1, l1, in2, j2, l2, j121, j122
+complex*8 :: t
+real(8) :: t2
+logical :: diag
 !
-one=1.0d0
-zero=0.0d0
-do 400 icol = 1, ncol
-   in1 = incol(icol)
-   j1 = jcol(icol)
-   l1 = lcol(icol)
+real(8), parameter :: zero = 0.0d0
+real(8), parameter :: one = 1.0d0
+do icol = 1, bqs_col%length
+   in1 = bqs_col%inq(icol)
+   j1 = bqs_col%jq(icol)
+   l1 = bqs_col%lq(icol)
    if (is_j12(ibasty)) j121 = j12(icol)
-   do 300 irow = 1, nopen
+   do irow = 1, nopen
       in2 = inrow(irow)
       j2 = jrow(irow)
       l2 = lrow(irow)
@@ -2196,8 +2207,8 @@ do 400 icol = 1, ncol
       if (diag) t = t + cmplx(one,zero)
       t2 = real(t * conjg(t))
       tsq(irow,icol) = t2
-300    continue
-400 continue
+   end do
+end do
 return
 end
 ! ----------------------------------------------------------------------
