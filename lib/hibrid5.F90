@@ -210,6 +210,7 @@ use mod_surf, only: flagsu
 use mod_hiutil, only: dater
 use mod_himatrix, only: transp
 use mod_hismat, only: wrhead, swrite
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 real(8), intent(inout) :: tsq(nmax,nmax)
 real(8), intent(inout) :: sr(nmax,nmax)
@@ -231,8 +232,7 @@ integer, intent(in) :: jlpold ! old value of parity, used to insure correct accu
 logical ipos, csflag, prsmat, prt2, writs, wrpart, prpart, &
         wrxsec, prxsec, flaghf, t2test, firstj, twomol, &
         nucros, faux, twojlp
-integer, allocatable :: jpack(:)
-integer, allocatable :: lpack(:)
+type(bqs_type) :: packed_bqs
 
 character*20 cdate
 integer :: soutpt_sc_file = 1
@@ -328,12 +328,8 @@ if (writs .and. nopen .gt. 0) then
                 jtotd, numin, numax, nud, nlevel, nlevop, nnout, &
                 jlev, inlev, elev, jout)
     end if
-    allocate(jpack(nmax*nmax))
-    allocate(lpack(nmax*nmax))
     call swrite (sr, si, jtot, jlpar, nu, jq, lq, inq, isc1, &
-                 isc2, jpack, lpack, sc2, nfile, nmax, nopen)
-    deallocate(jpack)
-    deallocate(lpack)
+                 packed_bqs, sc2, nfile, nmax, nopen)
 end if
 
 if (.not. prxsec .and. .not. wrxsec .and. .not.prpart &

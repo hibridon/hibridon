@@ -192,7 +192,7 @@ if (nopen < 0) then
 end if
 !     on return:
 !
-!     the vectors jpack, lpack, inpack will hold the column indices of
+!     the packed_bqs will hold the column indices of
 !     the packed basis (dimension length)
 !
 !     the vectors jq, lq, inq will hold the row indices of the packed
@@ -281,7 +281,7 @@ end
 !
 !     ------------------------------------------------------------
 subroutine swrite (sreal, simag, jtot, jlpar, nu, &
-                   jq, lq, inq, iorder, inpack, jpack, lpack, &
+                   jq, lq, inq, iorder, packed_bqs, &
                    epack, nfile, nmax, nopen)
 !  subroutine to write selected elements of s-matrix to file nfile
 !  author:  millard alexander
@@ -309,8 +309,6 @@ subroutine swrite (sreal, simag, jtot, jlpar, nu, &
 !    of the rotational quantum numbers, the total angular momentum,
 !    and the coupled-states projection index are equal to the values
 !    stored in jq, jtot, and nu plus 1/2
-!    inpack,jpack,
-!    lpack, epack
 !    nfile:     logical unit for output of s-matrices
 !    nmax:      maximum row dimension of matrices
 !    nopen:     number of channels
@@ -323,6 +321,7 @@ use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
+use mod_hitypes, only: bqs_type
 implicit none
 real(8), intent(inout) :: sreal(nmax,nmax)
 real(8), intent(inout) :: simag(nmax,nmax)
@@ -333,9 +332,7 @@ integer, intent(in) :: jq(nopen)
 integer, intent(in) :: lq(nopen)
 integer, intent(in) :: inq(nopen)
 integer, intent(out) :: iorder(nopen)
-integer, intent(out) :: inpack(nopen)
-integer, intent(out) :: jpack(nopen)
-integer, intent(out) :: lpack(nopen)
+type(bqs_type), intent(out) :: packed_bqs
 real(8), intent(out) :: epack(nopen)
 integer, intent(in) :: nfile
 integer, intent(in) :: nmax
@@ -358,18 +355,11 @@ end if
 ! the vector iorder will point to the position in the unpacked basis
 ! of each state in the packed basis
 !
-! the vector jpack will hold the rotational quantum numbers in the
-! packed bas
-!
-! the vector lpack will hold the orbital angular momenta of each
-! channel in the packed basis
-!
 ! the vector epack will hold the channel energies in the packed basis
-!
-! the vector inpack will hold the symmetry indices in the packed basis
 ! first sum over the unpacked states
 !
 mmout = iabs(nnout)
+call packed_bqs%init(nopen)
 length = 0
 do icol = 1, nopen
    ! now sum over the packed states, find labels
@@ -377,16 +367,17 @@ do icol = 1, nopen
       if (jq(icol) == jout(ii) ) then
          ! here if match
          length = length + 1
-         jpack(length) = jq(icol)
-         lpack(length) = lq(icol)
+         packed_bqs%jq(length) = jq(icol)
+         packed_bqs%lq(length) = lq(icol)
          epack(length) = eint(icol)
-         inpack(length) = inq(icol)
+         packed_bqs%inq(length) = inq(icol)
          if (is_j12(ibasty)) j12pk(length) = j12(icol)
          iorder(length) = icol
          exit
       end if
    end do
 end do
+packed_bqs%length = length
 ! calculate number of words that will be written
 nrecw = sizeof(int_t) * 7 + sizeof(int_t) * nchnid * length
 if(nnout > 0) then
@@ -398,10 +389,10 @@ end if
 nrecw = nrecw + 8
 ! write out general information on next record
 write (nfile, err=950) nrecw, jtot, jlpar, nu, nopen, &
-     length ,nnout
-write (nfile, err=950) (jpack(i), i=1, length)
-write (nfile, err=950) (lpack(i), i=1, length)
-write (nfile, err=950) (inpack(i), i=1, length)
+     packed_bqs%length ,nnout
+write (nfile, err=950) (packed_bqs%jq(i), i=1, length)
+write (nfile, err=950) (packed_bqs%lq(i), i=1, length)
+write (nfile, err=950) (packed_bqs%inq(i), i=1, length)
 if (is_j12(ibasty)) write (nfile, err=950) (j12pk(i), i=1, length)
 ! here we pack the s-matrix and print out just those elements for
 ! which the initial and final rotational quantum numbers correspond
