@@ -290,7 +290,7 @@ ASSERT(iwavsk > 0)
 end
 !
 ! -------------------------------------------------------------------------
-subroutine wavewr(jtot,jlpar,nu,nch,rstart,rendld)
+subroutine wavewr(jtot,jlpar,nu,nch,rstart,rendld, inq, jq, lq)
 ! -------------------------------------------------------
 !  subroutine to write initial header information on wavefunction file
 !  (file jobname.WFU, logical unit 22), unit is opened in subroutine openfi
@@ -318,9 +318,6 @@ use mod_coamat, only: amat ! amat(25)
 #if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_NOVEC)
 use mod_coamat, only: amat ! amat(25)
 #endif
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 use mod_par, only: csflag, flaghf, wrsmat, photof
 use funit
 use mod_wave, only: irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, get_wfu_rec1_length, wfu_format_version
@@ -334,6 +331,9 @@ integer, intent(in) :: nu
 integer, intent(in) :: nch
 real(8), intent(in) :: rstart
 real(8), intent(in) :: rendld
+integer, intent(in) :: inq(nch)
+integer, intent(in) :: jq(nch)
+integer, intent(in) :: lq(nch)
 
 character*20 :: cdate
 

@@ -594,7 +594,7 @@ endif
 ! store header and reserve space on direct access file 2 if wavefunction
 ! is desired (not if bound state calculation)
 if (wavefl .and. .not.boundc) &
-  call wavewr(jtot,jlpar,nu,nch,rstart,rendld)
+  call wavewr(jtot,jlpar,nu,nch,rstart,rendld, inq, jq, lq)
 call mtime (t11, t22)
 tb =  t11 - t1
 tbm = t22 - t2
