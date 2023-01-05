@@ -564,69 +564,29 @@ subroutine psi(filnam,a)
 ! special version for 13p collisions
 !
 ! ------------------------------------------------------------------
-use mod_cosout, only: nnout, jout
-use mod_coiout, only: niout, indout
-use constants
-use mod_coqvec, only: nphoto
-use mod_coeint, only: eint
-use mod_coamat, only: psir ! psir(100) psir(nopen,nopen)
-use mod_cobmat, only: psii ! psii(100) 
-use mod_cotq1, only: dpsir ! dpsir(100)
-use mod_cotq2, only: dpsii ! dpsii(100)
 use mod_cojq, only: jq ! jq(60)
 use mod_colq, only: lq ! lq(10)
 use mod_coinq, only: inq ! inq(60)
-use mod_coisc1, only: ipack => isc1 ! ipack(10)
-use mod_coisc2, only: nlist => isc2 ! nlist(50)
-use mod_coisc3, only: nalist => isc3 ! nalist(60)
-use mod_coisc5, only: nblist  => isc5   ! nblist(60)
-use mod_cosc2, only: fj  => sc2   ! fj(10)
-use mod_cosc3, only: fjp => sc3   ! fjp(10)
-use mod_cosc4, only: fn  => sc4   ! fn(10)
-use mod_cosc5, only: fnp => sc5   ! fnp(10)
-use mod_cosc6, only: sc  => sc6   ! sc(100)
-use mod_cosc7, only: sc1  => sc7   ! sc1(100)
-use mod_cosysi, only: ispar
-use mod_coz, only: scmat => z_as_vec ! scmat(100)
-use mod_cow, only: sr => w_as_vec ! sr(100)
-use mod_cozmat, only: si => zmat_as_vec ! si(100)
-use mod_version, only : version
-use mod_hibrid3, only: expand
-use mod_hiba07_13p, only: tcasea
-use mod_par, only: batch, csflag, photof
-use mod_wave, only: irec, inflev
-use funit
-use mod_selb, only: ibasty
-use mod_ered, only: ered, rmu
-use mod_hiutil, only: gennam, mtime, gettim, dater
-use mod_hiutil, only: daxpy_wrapper
-use mod_hivector, only: dset, matmov, dsum
-implicit double precision (a-h,o-z)
-character*(*) filnam
-character*40  psifil, wavfil, flxfil
-character*20  cdate
-character*10  elaps, cpu
-character*5   s13p(12)
-logical exstfl, adiab, &
-                kill,propf, sumf, &
-                coordf
-! common for y1, y2, y4
-dimension a(7)  ! arguments
-data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f', &
-           '3SG1e','3PI0e','3PI1e','3PI2e','1SG0e','1PI1e'/
-!
+implicit none
+character*(*), intent(in) :: filnam
+real(8), intent(in) :: a(7)  ! arguments
 
-integer, pointer :: ipol
-integer, parameter :: psifil_unit = 2
-ipol=>ispar(3)
+integer :: iflux
+integer :: iprint
+real(8) :: thresh
+real(8) :: factr
+integer :: inchj
+integer :: inchl
+integer :: inchi
+logical :: coordf
+logical :: sumf
+logical :: adiab
+integer :: jflux
+integer :: ny
+real(8) :: ymin
+real(8) :: dy
+real(8) :: rout
 
-
-one=1.d0
-onemin=-1.d0
-zero=0.d0
-! initialize timer
-call mtime(cpu0,ela0)
-! input
 iflux=a(1)
 if (iflux .gt. 4 .or. iflux .lt. -3) then
   write (6, 2) iflux
@@ -634,11 +594,12 @@ if (iflux .gt. 4 .or. iflux .lt. -3) then
   return
 endif
 iprint=a(2)
+thresh=a(3)
+factr=a(4)
 inchj = a(5)
 inchl = a(6)
 inchi = a(7)
-thresh=a(3)
-factr=a(4)
+
 coordf=.false.
 sumf=.false.
 adiab=.false.
@@ -666,6 +627,85 @@ if (jflux .eq. 4) then
   sumf=.false.
   coordf=.true.
 endif
+
+call compute_wave_and_fluxes(filnam, iflux, iprint, thresh, factr, inchj, inchl, inchi, coordf, sumf, adiab, jflux, ny, ymin, dy, rout, inq, jq, lq)
+end subroutine
+! ------------------------------------------------------------------
+subroutine compute_wave_and_fluxes(filnam, iflux, iprint, thresh, factr, inchj, inchl, inchi, coordf, sumf, adiab, jflux, ny, ymin, dy, rout, inq, jq, lq)
+!
+! driver subroutine to calculate scattering wavefunction and fluxes
+! from information stored in direct access file
+!
+! author: millard alexander
+! current revision date (algorithm): 15-apr-1997 by mha
+! revised on 30-mar-2012 by q. ma for stream I/O of wfu files
+! current revision: 20-apr-2012 by q. ma
+!
+! special version for 13p collisions
+!
+! ------------------------------------------------------------------
+use mod_cosout, only: nnout, jout
+use mod_coiout, only: niout, indout
+use constants
+use mod_coqvec, only: nphoto
+use mod_coeint, only: eint
+use mod_coamat, only: psir ! psir(100) psir(nopen,nopen)
+use mod_cobmat, only: psii ! psii(100) 
+use mod_cotq1, only: dpsir ! dpsir(100)
+use mod_cotq2, only: dpsii ! dpsii(100)
+use mod_coisc1, only: ipack => isc1 ! ipack(10)
+use mod_coisc2, only: nlist => isc2 ! nlist(50)
+use mod_coisc3, only: nalist => isc3 ! nalist(60)
+use mod_coisc5, only: nblist  => isc5   ! nblist(60)
+use mod_cosc2, only: fj  => sc2   ! fj(10)
+use mod_cosc3, only: fjp => sc3   ! fjp(10)
+use mod_cosc4, only: fn  => sc4   ! fn(10)
+use mod_cosc5, only: fnp => sc5   ! fnp(10)
+use mod_cosc6, only: sc  => sc6   ! sc(100)
+use mod_cosc7, only: sc1  => sc7   ! sc1(100)
+use mod_cosysi, only: ispar
+use mod_coz, only: scmat => z_as_vec ! scmat(100)
+use mod_cow, only: sr => w_as_vec ! sr(100)
+use mod_cozmat, only: si => zmat_as_vec ! si(100)
+use mod_version, only : version
+use mod_hibrid3, only: expand
+use mod_hiba07_13p, only: tcasea
+use mod_par, only: batch, csflag, photof
+use mod_wave, only: irec, inflev
+use funit
+use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
+use mod_hiutil, only: gennam, mtime, gettim, dater
+use mod_hiutil, only: daxpy_wrapper
+use mod_hivector, only: dset, matmov, dsum
+implicit double precision (a-h,o-z)
+character*(*), intent(in) :: filnam
+integer, intent(in) :: inq(*)
+integer, intent(in) :: jq(*)
+integer, intent(in) :: lq(*)
+character*40  psifil, wavfil, flxfil
+character*20  cdate
+character*10  elaps, cpu
+character*5   s13p(12)
+logical exstfl, adiab, &
+                kill,propf, sumf, &
+                coordf
+! common for y1, y2, y4
+data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f', &
+           '3SG1e','3PI0e','3PI1e','3PI2e','1SG0e','1PI1e'/
+!
+
+integer, pointer :: ipol
+integer, parameter :: psifil_unit = 2
+ipol=>ispar(3)
+
+
+one=1.d0
+onemin=-1.d0
+zero=0.d0
+! initialize timer
+call mtime(cpu0,ela0)
+! input
 if (photof) then
    if (thresh .eq. 0.d0) thresh=-1.d9
    if (iprint .eq. 0) iprint= 1
