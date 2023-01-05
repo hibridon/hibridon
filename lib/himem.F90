@@ -185,25 +185,28 @@ module mod_coener
    ! *    energ:     array containing total energies (in cm-1) at which scattering
    ! *               calculations are to be performed
    implicit none
+   integer :: max_en
    real(8), dimension(:), allocatable :: energ
    contains
    subroutine allocate_coener(n)
       integer, intent(in) :: n
+      max_en = n
       allocate(energ(n)) ;
    end subroutine allocate_coener
 end module mod_coener
 
 module mod_cdbf
+   ! buffer of 32 bits words (integers)
    implicit none
    integer, allocatable :: ldbuf
-   integer, allocatable :: libuf
-   integer, allocatable :: ibfil
-   integer, allocatable :: ibrec
-   integer, allocatable :: ibof
-   integer, allocatable :: ibstat
-   integer, dimension(:), allocatable :: idbuf
+   integer, allocatable :: libuf                ! length of ibuf
+   integer, allocatable :: ibfil                ! current fileid 
+   integer, allocatable :: ibrec                ! current record
+   integer, allocatable :: ibof                 ! current position in the buffer (idbuf[1:ibof-1] is expected to be already filled)
+   integer, allocatable :: ibstat               ! 0: buffer already saved to disc, 1: buffer contains unsaved data
+   integer, dimension(:), allocatable :: idbuf  ! buffer of llbuf integers
    integer, allocatable :: llbuf
-   integer :: ibadr
+   integer :: ibadr                             ! where to write idbuf on disc (word position relative to the current record)
    contains
    subroutine allocate_cdbf()
       allocate(llbuf)
@@ -230,7 +233,7 @@ end module mod_cdbf
 
 module mod_clseg
    !  variables in this module
-   !    lseg:      number of integer words per disc sector
+   !    lseg:      number of integer words per disc sector (length of a segment)
    !    intrel:    number of integer words per real words
    !    lchar:     number of characters per integer word
    implicit none

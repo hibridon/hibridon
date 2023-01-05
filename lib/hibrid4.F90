@@ -10,7 +10,6 @@ contains
 !                                                                       *
 !   2. sprint         prints s-matrices on the screen                   *
 !   6. turn           function, determines classical turning point      *
-!   8. xwrite         subroutine to write out integral cross sections   *
 !   9. waverd         writes and reads header file for wavefunction     *
 !  10. psi            to determine wavefunction
 !  11. flux           to determine fluxes
@@ -33,24 +32,28 @@ use mod_colq, only: lq ! lq(1)
 use mod_coinq, only: inq ! inq(1)
 use mod_coinhl, only: jlev => inhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
-use mod_coisc2, only: jpack => isc2 ! jpack(1)
-use mod_coisc3, only: lpack => isc3 ! lpack(1)
-use mod_coisc4, only: ipack => isc4 ! ipack(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cozmat, only: simag => zmat_as_vec ! simag(1)
-use mod_hismat, only: sread
 use mod_hibasis, only: is_j12
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_hiutil, only: gennam
 use mod_hismat, only: sread, rdhead
-implicit double precision (a-h,o-z)
-character*(*) fname
+use mod_hitypes, only: packed_base_type
+implicit none
+character*(*), intent(in) :: fname
+integer, intent(in) :: ia(4)
+
+real(8) :: ered, rmu
+integer :: i, iadr, ienerg, ierr, ij
+integer :: j, ja, je, jfinal, jfirst, jj1, jj2, jlp, jlpar, jtot, jtota, jtotb, jtotd
+integer :: lenx, ncol, nlevel, nlevop, nopen, nu,nud, numax, numin
+
+type(packed_base_type) :: packed_base
 character*20 cdate
 character*40 xname
 logical  existf, csflag, flaghf, flagsu, twomol, nucros
-dimension ia(4)
 
 !
 !.....jtota: first jtot to be printed
@@ -116,8 +119,8 @@ jtotb = min0(jtotb, jfinal)
 iadr=0
 30 nopen = 0
 call sread (iadr, sreal, simag, jtot, jlpar, nu, &
-                  jq, lq, inq, ipack, jpack, lpack, &
-                   1, nmax, nopen, length, ierr)
+                  jq, lq, inq, packed_base, &
+                   1, nmax, nopen, ierr)
 if(csflag) jlpar=0
 if(ierr.eq.-1) goto 400
 if(ierr.lt.-1) then
@@ -162,33 +165,34 @@ if (nnout.le.0) then
 end if
   write (6, 280)
 280   format(/' ROW INDICES:')
-  write (6, 290) 'N    ', (j, j=1, length)
+  write (6, 290) 'N    ', (j, j=1, packed_base%length)
   if (.not. is_j12(ibasty)) then
     if (flaghf) then
-      write (6, 260) 'J    ', (jpack(j)+0.5d0, j=1, length)
+      write (6, 260) 'J    ', (packed_base%jpack(j)+0.5d0, j=1, packed_base%length)
     else
-      write (6, 290) 'J    ', (jpack(j), j=1, length)
+      write (6, 290) 'J    ', (packed_base%jpack(j), j=1, packed_base%length)
     end if
-    write (6, 290) 'IS   ', (ipack(j), j=1, length)
+    write (6, 290) 'IS   ', (packed_base%inpack(j), j=1, packed_base%length)
   else
     if (ibasty.eq.12 .or. ibasty.eq.15) then
-      write (6, 290) 'J    ', (jpack(j), j=1, length)
-      write (6, 260) 'JA   ', (ipack(j)+0.5d0, j=1, length)
-      write (6, 260) 'J12  ', (j12pk(j)+0.5d0, j=1, length)
+      ASSERT(.false.)
+      write (6, 290) 'J    ', (packed_base%jpack(j), j=1, packed_base%length)
+      write (6, 260) 'JA   ', (packed_base%inpack(j)+0.5d0, j=1, packed_base%length)
+      write (6, 260) 'J12  ', (j12pk(j)+0.5d0, j=1, packed_base%length)
     else
-      write (6, 270) 'J1/J2', (jpack(j), j=1, length)
-      write (6, 270) 'J12', (j12pk(j), j=1, length)
-      write (6, 270) 'IS', (ipack(j), j=1, length)
+      write (6, 270) 'J1/J2', (packed_base%jpack(j), j=1, packed_base%length)
+      write (6, 270) 'J12', (j12pk(j), j=1, packed_base%length)
+      write (6, 270) 'IS', (packed_base%inpack(j), j=1, packed_base%length)
     endif
   end if
-  write (6, 290) 'L    ', (lpack(j), j=1, length)
+  write (6, 290) 'L    ', (packed_base%lpack(j), j=1, packed_base%length)
 290   format(1x, (a), (t10, 10i6))
 ncol = nopen
-if(nnout.gt.0) ncol = length
+if(nnout.gt.0) ncol = packed_base%length
 write (6, 300) 'REAL PART OF THE S-MATRIX'
 300 format(/1x, (a))
-do 330 ja = 1, length, 10
-  je=min0(ja+9,length)
+do 330 ja = 1, packed_base%length, 10
+  je=min0(ja+9,packed_base%length)
   write (6, 310) (j, j = ja, je)
 310   format(10i12)
   ij=1-nmax
@@ -199,8 +203,8 @@ do 330 ja = 1, length, 10
 320   ij=ij+1
 330 continue
 write (6, 300) 'IMAGINARY PART OF THE S-MATRIX'
-do 350 ja = 1, length, 10
-  je=min0(ja+9,length)
+do 350 ja = 1, packed_base%length, 10
+  je=min0(ja+9,packed_base%length)
   write (6, 310) (j, j = ja, je)
   ij=1-nmax
   do 340 i = 1, ncol
@@ -506,7 +510,7 @@ read (ifil, end=900, err=950) (w(i), i=1, nopsq), &
      (zmat(i), i=1, nopsq)
 if (photof) then
 ! read in number of initial photodissociation states
-!        call dbri(mphoto,1,ifil,izero)
+!        call dbri(mphoto,1,ifil,REC_LAST_USED)
 !        nphoto=mphoto
 ! read in real part of photodissociation amplitude
 ! overlay sreal which is not needed for photodissociation problem

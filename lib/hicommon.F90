@@ -30,11 +30,13 @@ implicit none
 
    enum, bind( C )
    enumerator ::  &
-      FUNIT_CS             =  1, &   ! cross sections
+      FUNIT_CS             =  1, &   ! cross sections 
+      FUNIT_ICS            =  1, &   ! <job-name>.ics
       FUNIT_EADIAB         =  2, &   ! <job-name>.eadiab
       FUNIT_TENS_OUTPUT    =  2, &   ! <job-name>.tcs or <job-name>.dch or <job-name>.dcga
       FUNIT_MCS            =  2, &   ! <job-name>.mcs
       FUNIT_SAV            =  3, &   ! <job-name>.sav
+      FUNIT_XSC            =  3, &   ! <job-name>.xsc
       FUNIT_TCB            =  4, &   ! <job-name>.tcb (result of tenxsc)
       FUNIT_STDOUT         =  6, &   ! standard output
       FUNIT_INP            =  8, &   ! input file (*.inp)
@@ -51,3 +53,75 @@ implicit none
 
 
 end module funit
+
+module mod_fileid
+implicit none
+
+   enum, bind( C )
+   enumerator ::  &
+      FILEID_SAV           =  1, &   ! <job-name>.sav
+      FILEID_TMP           =  1      ! <job-name>.tmp
+   end enum
+
+
+end module mod_fileid
+
+module mod_hitypes
+   implicit none
+   private
+
+   type, public :: packed_base_type
+      ! the vector iorder will point to the position in the unpacked basis
+      ! of each state in the packed basis
+      !
+      ! the vector jpack will hold the rotational quantum numbers in the
+      ! packed bas
+      !
+      ! the vector lpack will hold the orbital angular momenta of each
+      ! channel in the packed basis
+      !
+      ! the vector epack will hold the channel energies in the packed basis
+      !
+      ! the vector inpack will hold the symmetry indices in the packed basis
+      ! first sum over the unpacked states
+      
+      integer, allocatable :: iorder(:)
+      integer, allocatable :: jpack(:)
+      integer, allocatable :: lpack(:)
+      real(8), allocatable :: epack(:)
+      integer, allocatable :: inpack(:)
+      integer, allocatable :: j12pk(:)
+      integer, allocatable :: length  ! number of elements used in all arrays
+   contains
+      procedure :: init => packed_base_type_init
+      procedure :: deinit => packed_base_type_deinit
+   end type packed_base_type
+
+contains
+   subroutine packed_base_type_init(this, nopen)
+      class(packed_base_type) :: this
+      integer, intent(in) :: nopen
+
+      call packed_base_type_deinit(this)
+      
+      allocate(this%iorder(nopen))
+      allocate(this%jpack(nopen))
+      allocate(this%lpack(nopen))
+      allocate(this%epack(nopen))
+      allocate(this%inpack(nopen))
+      allocate(this%j12pk(nopen))
+      this%length = 0
+   end subroutine 
+
+   subroutine packed_base_type_deinit(this)
+      class(packed_base_type) :: this
+      if (allocated(this%iorder)) deallocate(this%iorder)
+      if (allocated(this%jpack)) deallocate(this%jpack)
+      if (allocated(this%lpack)) deallocate(this%lpack)
+      if (allocated(this%epack)) deallocate(this%epack)
+      if (allocated(this%inpack)) deallocate(this%inpack)
+      if (allocated(this%j12pk)) deallocate(this%j12pk)
+      this%length = 0
+   end subroutine 
+
+end module mod_hitypes
