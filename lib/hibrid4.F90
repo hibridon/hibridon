@@ -1195,7 +1195,7 @@ if (jflux .eq. 0) then
     iwf = 1
     propf=.true.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,inq)
     write(2, 210)
 210     format(/' R (BOHR) AND IMAGINARY PART OF CHI')
 ! reread asymptotic information
@@ -1217,7 +1217,7 @@ if (jflux .eq. 0) then
     iwf = -1
     irec=npts+4
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,inq)
   endif
 else if (jflux .eq. 2) then
   write(3, 300)
@@ -1299,7 +1299,7 @@ else if (jflux .eq. 1) then
 ! plot out all fluxes for total flux which is numerically well behaved
     tthresh=-1.e9
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,.false., &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,inq)
   endif
   if (.not. photof) then
 ! now for incoming flux (only for scattering)
@@ -1365,7 +1365,7 @@ else if (jflux .eq. 1) then
     iwf = 0
     propf=.false.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,inq)
   endif
 ! now for outgoing flux
   if (.not.photof) then
@@ -1500,7 +1500,7 @@ else if (jflux .eq. 1) then
   if (photof) propf=.true.
   if (.not. photof) propf=.false.
   call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,inq)
 endif
 700 if (photof .or. jflux .eq. 0) close (psifil_unit)
 if (jflux .ne. 0) close (3)
@@ -1522,7 +1522,7 @@ return
 end
 ! ------------------------------------------------------------------
 subroutine flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-                photof, propf, sumf,iwf,coordf,nny,ymin,dy,psifil_unit)
+                photof, propf, sumf,iwf,coordf,nny,ymin,dy,psifil_unit,inq)
 !
 ! subroutine to calculate fluxes
 !
@@ -1538,7 +1538,6 @@ use mod_coamat, only: psir ! psir(100) (4,nch)
 use mod_cobmat, only: psii ! psii(100) Here psii is used as a vector
 use mod_cotq2, only: scmat2 => dpsii ! scmat2(100)
 use mod_cotq3, only: scmat3 => scmat ! scmat3(100)
-use mod_coinq, only: inq ! inq(60)
 use mod_cosc1, only: pk => sc1 ! pk(6)
 use mod_coisc2, only: nlist => isc2 ! nlist(60)
 use mod_coisc3, only: nalist => isc3 ! nalist(60)
@@ -1558,6 +1557,7 @@ use mod_himatrix, only: mxma
 use mod_hivector, only: dset, vadd, vmul, dsum
 ! steve, you may need more space, but i doubt it since tcoord is dimensioned n
 implicit double precision (a-h,o-z)
+integer, intent(in) :: inq(nch)
 logical adiab, kill, photof, propf, sumf, coordf
 
 dimension scc(100)
