@@ -426,8 +426,8 @@ subroutine geom_apse_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax,
 !
 !     revision date: 13-oct-2011
 !
-!.....jpack,lpack,ipack: labels for rows
-!.....jq,lq,inq:         labels for columns
+!.....jq,lq,inq in packed_bqs : labels for rows
+!.....jq,lq,inq               : labels for columns
   use mod_tensor_ang, only: ang1, ang2, dang
   use mod_hiutil, only: xf3j
   use mod_hitypes, only: bqs_type
