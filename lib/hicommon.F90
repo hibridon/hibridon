@@ -92,6 +92,18 @@ module mod_hitypes
       procedure :: deinit => bqs_type_deinit
    end type bqs_type
 
+   type, public :: rbesself_type  ! ricatti bessel functions
+      real(8), allocatable :: fj(:)
+      real(8), allocatable :: fpj(:)
+      real(8), allocatable :: fn(:)
+      real(8), allocatable :: fpn(:)
+      integer, allocatable :: length  ! number of elements used in all arrays
+   contains
+      procedure :: init => rbesself_type_init
+      procedure :: deinit => rbesself_type_deinit
+   end type rbesself_type
+
+
 contains
    subroutine bqs_type_init(this, nopen)
       class(bqs_type) :: this
@@ -112,6 +124,28 @@ contains
       if (allocated(this%lq)) deallocate(this%lq)
       if (allocated(this%inq)) deallocate(this%inq)
       if (allocated(this%j12pk)) deallocate(this%j12pk)
+      this%length = 0
+   end subroutine 
+
+   subroutine rbesself_type_init(this, nopen)
+      class(rbesself_type) :: this
+      integer, intent(in) :: nopen
+
+      call rbesself_type_deinit(this)
+      
+      allocate(this%fj(nopen))
+      allocate(this%fpj(nopen))
+      allocate(this%fn(nopen))
+      allocate(this%fpn(nopen))
+      this%length = 0
+   end subroutine 
+
+   subroutine rbesself_type_deinit(this)
+      class(rbesself_type) :: this
+      if (allocated(this%fj)) deallocate(this%fj)
+      if (allocated(this%fpj)) deallocate(this%fpj)
+      if (allocated(this%fn)) deallocate(this%fn)
+      if (allocated(this%fpn)) deallocate(this%fpn)
       this%length = 0
    end subroutine 
 

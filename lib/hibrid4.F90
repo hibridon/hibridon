@@ -392,7 +392,7 @@ end subroutine wavewr
 !     ------------------------------------------------------------------
 !     reads header file for wavefunction (wfu file)
 subroutine waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto,jflux, &
-     rstart,rendld,rinf)
+     rstart,rendld,rinf, rbesself)
 use mod_wave, only: irec, ifil, nchwfu, ipos2, ipos3, nrlogd, inflev, get_wfu_rec1_length, wfu_format_version
 use mod_coeint, only: eint
 #if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_DISTINCT)
@@ -413,10 +413,6 @@ use mod_colq, only: lq ! lq(1)
 use mod_coinq, only: inq ! inq(1)
 use mod_coisc1, only: isc1 ! isc1(25)
 use mod_cosc1, only: pk => sc1 ! sc1(10)  ! pk (asymptotic wavevectors)
-use mod_cosc2, only: fj => sc2 ! sc2(10)  ! fj
-use mod_cosc3, only: fpj => sc3 ! sc3(10)  ! fpj
-use mod_cosc4, only: fn => sc4 ! sc4(10)  ! fn
-use mod_cosc5, only: fpn => sc5 ! sc5(10)  ! fpn
 use mod_cow, only: w => w_as_vec ! w(25)
 use mod_cozmat, only: zmat => zmat_as_vec ! zmat(25)
 use mod_par, only: csflag, flaghf, photof
@@ -424,6 +420,7 @@ use funit
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
 use mod_hivector, only: dset
+use mod_hitypes, only: rbesself_type
 implicit none
 integer, intent(out) :: jtot
 integer, intent(out) :: jlpar
@@ -436,6 +433,7 @@ integer, intent(out) :: jflux
 real(8), intent(out) :: rstart
 real(8), intent(out) :: rendld
 real(8), intent(out) :: rinf
+type(rbesself_type), intent(out) :: rbesself
 
 
 character*48 :: oldlab, oldpot
@@ -495,14 +493,16 @@ read (ifil, end=900, err=950, pos=iwavsk(2)) nrecs, nopen, &
 npts = nrecs - 3
 ! read in wavevectors, bessel functions j, j', n, n'
 ! first initialize to zero for all channels
+call rbesself%init(nch)
 call dset(nch,zero,pk,1)  ! pk (asymptotic wavevectors)
-call dset(nch,zero,fj,1)  ! fj
-call dset(nch,zero,fpj,1)  ! fpj
-call dset(nch,zero,fn,1)  ! fn
-call dset(nch,zero,fpn,1)  ! fpn
+call dset(nch,zero,rbesself%fj,1)  ! fj
+call dset(nch,zero,rbesself%fpj,1)  ! fpj
+call dset(nch,zero,rbesself%fn,1)  ! fn
+call dset(nch,zero,rbesself%fpn,1)  ! fpn
 read (ifil, end=900, err=950) (pk(i), i=1, nopen), &
-     (fj(i), i=1, nopen), (fpj(i), i=1, nopen), &
-     (fn(i), i=1, nopen), (fpn(i), i=1, nopen)
+     (rbesself%fj(i), i=1, nopen), (rbesself%fpj(i), i=1, nopen), &
+     (rbesself%fn(i), i=1, nopen), (rbesself%fpn(i), i=1, nopen)
+rbesself%length = nopen
 nopsq = nopen ** 2
 ! read in sreal and simag, store in w and zmat
 read (ifil, end=900, err=950) (w(i), i=1, nopsq), &
@@ -656,10 +656,6 @@ use mod_coisc1, only: ipack => isc1 ! ipack(10)
 use mod_coisc2, only: nlist => isc2 ! nlist(50)
 use mod_coisc3, only: nalist => isc3 ! nalist(60)
 use mod_coisc5, only: nblist  => isc5   ! nblist(60)
-use mod_cosc2, only: fj  => sc2   ! fj(10)
-use mod_cosc3, only: fjp => sc3   ! fjp(10)
-use mod_cosc4, only: fn  => sc4   ! fn(10)
-use mod_cosc5, only: fnp => sc5   ! fnp(10)
 use mod_cosc6, only: sc  => sc6   ! sc(100)
 use mod_cosc7, only: sc1  => sc7   ! sc1(100)
 use mod_cosysi, only: ispar
@@ -677,6 +673,7 @@ use mod_ered, only: ered, rmu
 use mod_hiutil, only: gennam, mtime, gettim, dater
 use mod_hiutil, only: daxpy_wrapper
 use mod_hivector, only: dset, matmov, dsum
+use mod_hitypes, only: rbesself_type
 implicit double precision (a-h,o-z)
 character*(*), intent(in) :: filnam
 integer, intent(in) :: inq(*)
@@ -696,6 +693,7 @@ data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f', &
 
 integer, pointer :: ipol
 integer, parameter :: psifil_unit = 2
+type(rbesself_type) :: rbesself
 ipol=>ispar(3)
 
 
@@ -780,7 +778,7 @@ endif
 ! read header information, s matrix, and asymptotic wavefunction and
 ! derivative
 call waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto, &
-            jflux,rstart,rendld,rinf)
+            jflux,rstart,rendld,rinf,rbesself)
 if (inflev .ne. 0) then
    write (6, *) '** CALCULATION WITH WRSMAT=.T. REQUIRED.'
    goto 700
@@ -1239,7 +1237,7 @@ if (jflux .eq. 0) then
 210     format(/' R (BOHR) AND IMAGINARY PART OF CHI')
 ! reread asymptotic information
     call waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto, &
-            jflux,rstart,rendld,rinf)
+            jflux,rstart,rendld,rinf,rbesself)
     if (nch .gt. nopen) then
       call expand(nopen,nopen,nch,nch,ipack, &
                   psir,psii,scmat)
@@ -1350,10 +1348,10 @@ else if (jflux .eq. 1) then
     call dset(nchsq,zero,dpsii,1)
     ipoint=1
     do 335 i=1, nch
-      psir(ipoint)=-fn(i)
-      psii(ipoint)=-fj(i)
-      dpsir(ipoint)=-fnp(i)
-      dpsii(ipoint)=-fjp(i)
+      psir(ipoint)=-rbesself%fn(i)
+      psii(ipoint)=-rbesself%fj(i)
+      dpsir(ipoint)=-rbesself%fpn(i)
+      dpsii(ipoint)=-rbesself%fpj(i)
       ipoint=ipoint+nch+1
 335     continue
     write(3, 340)
@@ -1413,8 +1411,8 @@ else if (jflux .eq. 1) then
     call matmov (si, psii, nopen, nopen, nopen, nopen)
 ! premultiply Sr by diagonal matrix yl(kr) and Si by jl(kr)
     do 430 irow = 1, nopen
-      fac1=fn(irow)
-      fac2=fj(irow)
+      fac1=rbesself%fn(irow)
+      fac2=rbesself%fj(irow)
       call dscal(nopen, fac1, psir(irow), nopen)
       call dscal(nopen, fac2, psii(irow), nopen)
 430     continue
@@ -1425,8 +1423,8 @@ else if (jflux .eq. 1) then
     call matmov (si, dpsii, nopen, nopen, nopen, nopen)
 ! premultiply Sr by diagonal matrix -ylp(kr) and Si by jlp(kr)
     do 440 irow = 1, nopen
-      fac1=fnp(irow)
-      fac2=fjp(irow)
+      fac1=rbesself%fpn(irow)
+      fac2=rbesself%fpj(irow)
       call dscal(nopen, fac1, dpsir(irow), nopen)
       call dscal(nopen, fac2, dpsii(irow), nopen)
 440     continue
@@ -1438,8 +1436,8 @@ else if (jflux .eq. 1) then
     call matmov (sr, scmat, nopen, nopen, nopen, nopen)
 ! premultiply Sr by diagonal matrix -jl(kr) and Si by yl(kr)
     do 450 irow = 1, nopen
-      fac1=fn(irow)
-      fac2=-fj(irow)
+      fac1=rbesself%fn(irow)
+      fac2=-rbesself%fj(irow)
       call dscal(nopen, fac1, psii(irow), nopen)
       call dscal(nopen, fac2, scmat(irow), nopen)
 450     continue
@@ -1450,8 +1448,8 @@ else if (jflux .eq. 1) then
     call matmov (sr, scmat, nopen, nopen, nopen, nopen)
 ! premultiply Sr by diagonal matrix jl(kr) and Si by yl(kr)
     do 460 irow = 1, nopen
-      fac1=fnp(irow)
-      fac2=-fjp(irow)
+      fac1=rbesself%fpn(irow)
+      fac2=-rbesself%fpj(irow)
       call dscal(nopen, fac1, dpsii(irow), nopen)
       call dscal(nopen, fac2, scmat(irow), nopen)
 460     continue
@@ -2161,6 +2159,7 @@ use mod_wave, only: ifil, nrlogd
 use funit
 use mod_ered, only: ered, rmu
 use mod_hiutil, only: gennam
+use mod_hitypes, only: rbesself_type
 implicit none
 character*(*), intent(in) :: filnam
 integer, intent(in) :: nchmin
@@ -2180,6 +2179,7 @@ integer(8) :: seek_pos
 double precision :: dble_t
 integer, parameter :: eadfil_unit = FUNIT_EADIAB
 integer, parameter :: ien = 0
+type(rbesself_type) :: rbesself
 !
 if (nchmax .ne. 0 .and. nchmax .lt. nchmin) goto 990
 wavfil = filnam // '.wfu'
@@ -2200,7 +2200,7 @@ write (6, 15) eadfil(1:lenft)
 15 format (' ** WRITING ADIABATIC ENERGIES TO ', (a))
 !
 call waverd(jtot, jlpar, nu, nch, npts, nopen, nphoto, &
-     jflux, rstart, rendld, rinf)
+     jflux, rstart, rendld, rinf, rbesself)
 if (nchmin .gt. nch) goto 990
 if (nchmax .eq. 0 .or. nchmax .gt. nch) nchmax = nch
 nchpr = nchmax - nchmin + 1
