@@ -32,9 +32,6 @@ use mod_cobmat, only: allocate_cobmat, bmat
 use mod_cotq1, only: allocate_cotq1, tq1
 use mod_cotq2, only: allocate_cotq2, tq2
 use mod_cotq3, only: allocate_cotq3, tq3
-use mod_cojq, only: allocate_cojq, jq
-use mod_colq, only: allocate_colq, lq
-use mod_coinq, only: allocate_coinq, inq
 use mod_cojhld, only: allocate_cojhld, jhold
 use mod_coehld, only: allocate_coehld, ehold
 use mod_coinhl, only: allocate_coinhl, inhold
@@ -155,7 +152,6 @@ integer :: arg_index
 integer :: stat
 character(len=32) :: arg
 
-
 kmax = 0
 
 arg_index = 1
@@ -247,9 +243,6 @@ call allocate_cobmat(kairy)
 call allocate_cotq1(T_MATRIX_SIZE)
 call allocate_cotq2(T_MATRIX_SIZE)
 call allocate_cotq3(T_MATRIX_SIZE)
-call allocate_cojq(kmax)
-call allocate_colq(kmax)
-call allocate_coinq(kmax)
 call allocate_cojhld(kmax)
 call allocate_coehld(kmax)
 call allocate_coinhl(kmax)
@@ -321,7 +314,7 @@ men = ken
 !  coupling coefficient routines:  factlg(i)=log(fact(i-1))
 call factlg(kfact)
 ! start scattering calculation
-call flow (z, w, zmat, amat, bmat, jq, lq, inq, jhold, ehold, &
+call flow (z, w, zmat, amat, bmat, jhold, ehold, &
            inhold, isc1, isc2, isc3, isc4, lsc1, &
            sc2, sc1, sc3, sc4, sc5, &
            sc6, sc7, sc8, sc9, tq1, tq2, tq3, men, mmax, mairy)

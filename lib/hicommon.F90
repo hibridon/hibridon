@@ -70,57 +70,90 @@ module mod_hitypes
    implicit none
    private
 
-   type, public :: packed_base_type
-      ! the vector iorder will point to the position in the unpacked basis
-      ! of each state in the packed basis
-      !
-      ! the vector jpack will hold the rotational quantum numbers in the
+   type, public :: bqs_type  ! base quantum states
+      ! stores an array of base quantum states
+      ! rotational angular momenta, orbital angular momenta, and
+      ! additional quantum index for each channel
+      ! if the calculation involves the collisions of two diatomic
+      ! molecules, the bqs%jq = j1 + 10000 j2, where j1 and j2 are the
+      ! rotational quantum numbers of each molecule      
+
+      ! the vector jq will hold the rotational quantum numbers in the
       ! packed bas
       !
-      ! the vector lpack will hold the orbital angular momenta of each
+      ! the vector lq will hold the orbital angular momenta of each
       ! channel in the packed basis
       !
-      ! the vector epack will hold the channel energies in the packed basis
-      !
-      ! the vector inpack will hold the symmetry indices in the packed basis
+      ! the vector inq will hold the symmetry indices in the packed basis
       ! first sum over the unpacked states
       
-      integer, allocatable :: iorder(:)
-      integer, allocatable :: jpack(:)
-      integer, allocatable :: lpack(:)
-      real(8), allocatable :: epack(:)
-      integer, allocatable :: inpack(:)
-      integer, allocatable :: j12pk(:)
+      integer, allocatable :: jq(:)  ! combined rotational quantum number. This integer stores an encoded representation of the set of rotational quantum numbers: for most bases, it only contains the value of j (rotational quantum number), but in case of 2 molecule collisions it encodes both j1 (rotational quantum number of modlecule 1) and j2 (rotational quantum number of molecule 2). The base itself is responsible for encoding and decoding this number.
+      integer, allocatable :: lq(:)  ! orbital angular momentum quantum number
+      integer, allocatable :: inq(:)  ! symmetry index
+      integer, allocatable :: j12pk(:)   ! rotational quantum number (only for 2 molecules systems)
+      integer :: length  ! number of elements used in all arrays
+      integer :: max_length
+   contains
+      procedure :: init => bqs_type_init
+      procedure :: deinit => bqs_type_deinit
+   end type bqs_type
+
+   type, public :: rbesself_type  ! ricatti bessel functions
+      real(8), allocatable :: fj(:)
+      real(8), allocatable :: fpj(:)
+      real(8), allocatable :: fn(:)
+      real(8), allocatable :: fpn(:)
       integer, allocatable :: length  ! number of elements used in all arrays
    contains
-      procedure :: init => packed_base_type_init
-      procedure :: deinit => packed_base_type_deinit
-   end type packed_base_type
+      procedure :: init => rbesself_type_init
+      procedure :: deinit => rbesself_type_deinit
+   end type rbesself_type
+
 
 contains
-   subroutine packed_base_type_init(this, nopen)
-      class(packed_base_type) :: this
+   subroutine bqs_type_init(this, nopen)
+      class(bqs_type) :: this
       integer, intent(in) :: nopen
 
-      call packed_base_type_deinit(this)
+      call bqs_type_deinit(this)
       
-      allocate(this%iorder(nopen))
-      allocate(this%jpack(nopen))
-      allocate(this%lpack(nopen))
-      allocate(this%epack(nopen))
-      allocate(this%inpack(nopen))
+      allocate(this%jq(nopen))
+      allocate(this%lq(nopen))
+      allocate(this%inq(nopen))
       allocate(this%j12pk(nopen))
+      this%length = 0
+      this%max_length = nopen
+   end subroutine 
+
+   subroutine bqs_type_deinit(this)
+      class(bqs_type) :: this
+      if (allocated(this%jq)) deallocate(this%jq)
+      if (allocated(this%lq)) deallocate(this%lq)
+      if (allocated(this%inq)) deallocate(this%inq)
+      if (allocated(this%j12pk)) deallocate(this%j12pk)
+      this%length = 0
+      this%max_length = 0
+   end subroutine 
+
+   subroutine rbesself_type_init(this, nopen)
+      class(rbesself_type) :: this
+      integer, intent(in) :: nopen
+
+      call rbesself_type_deinit(this)
+      
+      allocate(this%fj(nopen))
+      allocate(this%fpj(nopen))
+      allocate(this%fn(nopen))
+      allocate(this%fpn(nopen))
       this%length = 0
    end subroutine 
 
-   subroutine packed_base_type_deinit(this)
-      class(packed_base_type) :: this
-      if (allocated(this%iorder)) deallocate(this%iorder)
-      if (allocated(this%jpack)) deallocate(this%jpack)
-      if (allocated(this%lpack)) deallocate(this%lpack)
-      if (allocated(this%epack)) deallocate(this%epack)
-      if (allocated(this%inpack)) deallocate(this%inpack)
-      if (allocated(this%j12pk)) deallocate(this%j12pk)
+   subroutine rbesself_type_deinit(this)
+      class(rbesself_type) :: this
+      if (allocated(this%fj)) deallocate(this%fj)
+      if (allocated(this%fpj)) deallocate(this%fpj)
+      if (allocated(this%fn)) deallocate(this%fn)
+      if (allocated(this%fpn)) deallocate(this%fpn)
       this%length = 0
    end subroutine 
 

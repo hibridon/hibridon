@@ -2,7 +2,7 @@
 !  -------------------------------------------------------------
 module mod_flow
 contains
-subroutine flow (z, w, zmat, amat, bmat, jq, lq, inq, jlev, &
+subroutine flow (z, w, zmat, amat, bmat, jlev, &
             elev, inlev, isc1, isc2, isc3, isc4, lsc1, &
             sc2, sc1, sc3, sc4, &
             sc5, sc6, sc7, sc8, sc9, tq1, tq2, tq3, men, &
@@ -67,15 +67,13 @@ use mod_hiutil, only: mtime, gettim, dater
 use mod_hibrid4, only: wavewr
 use mod_hismat, only: wrhead
 use mod_savfile, only: REC_EN_START, EN_REC_COUNT, EN_REC_PRESENT_INTEGRAL_XS, EN_REC_PREVIOUS_INTEGRAL_XS, EN_REC_PRESENT_PARTIAL_XS, EN_REC_PREVIOUS_PARTIAL_XS, EN_REC_2NDLAST_PARTIAL_XS
+use mod_hitypes, only: bqs_type
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
 real(8), intent(out) :: zmat(nmax,nmax)
 real(8), intent(out) :: amat(nmax,nmax)
 real(8), intent(out) :: bmat(nairy,nairy)
-integer, intent(out) :: jq(10)
-integer, intent(out) :: lq(10)
-integer, intent(out) :: inq(10)
 integer, intent(out) :: jlev(1)
 real(8), intent(out) :: elev(1)
 integer, intent(out) :: inlev(1)
@@ -143,6 +141,7 @@ real(8) :: second
 integer :: isteps
 integer :: nsteps
 
+type(bqs_type) :: bqs
 
 first=.true.
 !  get default data
@@ -434,10 +433,12 @@ if (ien .eq. 1) then
   end do
 #endif
 
-  call basis (jq, lq, inq, jlev, elev, inlev, nlevel, nlevop, &
+  call bqs%init(nmax)
+  call basis (bqs%jq, bqs%lq, bqs%inq, jlev, elev, inlev, nlevel, nlevop, &
               sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
               csflag, clist, bastst, ihomo, nu, numin, jlpar, &
               twomol, nch, nmax, nchtop, v2)
+  bqs%length = nch
 
   ! if nch == 0, then v2 is usually not allocated at all
   if ( nch > 0 ) then
@@ -546,7 +547,7 @@ if (ien .eq. 1) then
 170     format (i4)
     if (nch .gt. 0) then
       do 180  i = 1, nch
-        write (FUNIT_CHANNEL_PARAMS, 175) jq(i), lq(i), inq(i), cent(i), eint(i)
+        write (FUNIT_CHANNEL_PARAMS, 175) bqs%jq(i), bqs%lq(i), bqs%inq(i), cent(i), eint(i)
 175         format (3i6, 2e25.15)
 180       continue
     end if
@@ -556,8 +557,9 @@ else if(ien.gt.1) then
   read (FUNIT_CHANNEL_PARAMS, 170) nch
   if (nch .gt. 0) then
     do 250  i = 1, nch
-      read (FUNIT_CHANNEL_PARAMS, 175) jq(i), lq(i), inq(i), cent(i), eint(i)
+      read (FUNIT_CHANNEL_PARAMS, 175) bqs%jq(i), bqs%lq(i), bqs%inq(i), cent(i), eint(i)
 250     continue
+    bqs%length = nch
   end if
 end if
 irec = (ien-1) * EN_REC_COUNT + REC_EN_START
@@ -593,8 +595,9 @@ if (wrxsec .or. prxsec .or. prpart .or. wrpart) then
 endif
 ! store header and reserve space on direct access file 2 if wavefunction
 ! is desired (not if bound state calculation)
-if (wavefl .and. .not.boundc) &
-  call wavewr(jtot,jlpar,nu,nch,rstart,rendld)
+if (wavefl .and. .not.boundc) then
+  call wavewr(jtot,jlpar,nu,nch,rstart,rendld, bqs)
+end if
 call mtime (t11, t22)
 tb =  t11 - t1
 tbm = t22 - t2
@@ -634,7 +637,7 @@ ntop = nchtop
 !
 
 call propag (z, w, zmat, amat, bmat, &
-             jq, lq, inq, &
+             bqs, &
              ien, nerg, ered, eshift, rstart, rendld, spac, &
              tolhi, rendai, rincr, fstfac, tb, tbm, &
              ipos, prlogd, noprin, airyfl, prairy, &
@@ -649,7 +652,7 @@ endif
 !  now print out s-matrix and t-matrix squared, and calculate partial
 !  cross sections and print them out, if desired
 call soutpt (z, w, zmat, amat, &
-             lq, jq, inq, isc1, isc2, bmat, tq1, &
+             bqs, isc1, isc2, bmat, tq1, &
              jlev, elev, inlev, jtot, jfirst, &
              jtot2, jtotd, nu, numin, nulast, nud, jlpar, ien, &
              ipos, csflag, flaghf, prsmat, prt2, t2test, &

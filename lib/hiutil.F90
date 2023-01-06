@@ -1798,10 +1798,8 @@ integer, intent(in)                       :: incy
 real(8) :: sum_for_nan_detection
 integer :: i
 
-! write(6,*) 'graffy: n = ', n
 sum_for_nan_detection = dx(1)
 do i=1,n
-      !write(6,*) 'graffy: i = ', i
       sum_for_nan_detection = sum_for_nan_detection + dx(1+((i-1)*incx))
 end do
 sum_for_nan_detection = dx(1)
