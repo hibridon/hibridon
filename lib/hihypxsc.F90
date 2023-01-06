@@ -44,7 +44,7 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_hiutil, only: gennam, mtime
 use mod_hiutil, only: xf6j
-use mod_hismat, only: sread, rdhead, sinqr
+use mod_hismat, only: smatread, rdhead, sinqr
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(bqs_type) :: packed_bqs
@@ -287,11 +287,9 @@ jfin = 0
 
 !     parameter to read lower triangle of open channel(s)
 100 nopen = -1
-call row_bqs%init(mmax)
-call sread (0, sreal, simag, jtot, jlpar, &
-     nu, row_bqs%jq, row_bqs%lq, row_bqs%inq, packed_bqs, &
+call smatread (0, sreal, simag, jtot, jlpar, &
+     nu, row_bqs, packed_bqs, &
      1, mmax, nopen, ierr)
-row_bqs%length = nopen
 if (ierr .lt. -1) then
    write(6,102)
 102    format(/' ** READ ERROR IN HYPXSC. ABORT **'/)

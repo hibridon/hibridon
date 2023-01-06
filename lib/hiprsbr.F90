@@ -33,9 +33,10 @@ use mod_cosc3, only: elevt => sc3 ! elevt(1)
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam, mtime, gettim
 use mod_hiutil, only: xf6j
-use mod_hismat, only: sread, rdhead, sinqr
+use mod_hismat, only: smatread, rdhead, sinqr
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h, o-z)
+type(bqs_type) :: row_bqs
 type(bqs_type) :: packed_bqs
 character*(*) flnam1, flnam2
 character*20  cdate1, cdate2
@@ -51,7 +52,6 @@ logical csflg1, flghf1, flgsu1, twmol1, nucrs1, &
 
 dimension a(12)
 !
-integer, dimension(:), allocatable :: jq, lq, inq
 double precision, dimension(:), allocatable :: sreal, simag
 ! storage for s-matrix elements:
 !   second letter is real (r), imaginary (i)
@@ -252,14 +252,9 @@ jtotmx = max(jfinl1,jfinl2)
 !  maximum number of the elements of (the lower triangle of) a single s-matrix
 mmax2 = mchmx * (mchmx + 1) / 2
 !  allocate memory
-allocate(jq(mchmx), stat=ialloc)
-if (ialloc .ne. 0) goto 4000
-allocate(lq(mchmx), stat=ialloc)
-if (ialloc .ne. 0) goto 4001
-allocate(inq(mchmx), stat=ialloc)
-if (ialloc .ne. 0) goto 4002
+call row_bqs%init(mchmx)
 allocate(sreal(mmax2), stat=ialloc)
-if (ialloc .ne. 0) goto 4003
+if (ialloc .ne. 0) goto 4000
 allocate(simag(mmax2), stat=ialloc)
 if (ialloc .ne. 0) goto 4004
 allocate(sra(0:jtotmx, 2, mmax2), stat=ialloc)
@@ -422,8 +417,8 @@ end if
 ! read s-matrix for present jtot, jlpar
 iaddr = 0
 20 nopen = -1
-call sread (iaddr, sreal, simag, jtot1, jlpar1, &
-   nu1, jq, lq, inq, packed_bqs, &
+call smatread (iaddr, sreal, simag, jtot1, jlpar1, &
+   nu1, row_bqs, packed_bqs, &
    1, mmax, nopen, ierr)
 if (ierr .lt. -1) then
   write(6,105)
@@ -467,8 +462,8 @@ goto 20
 ! read s-matrix for present jtot, jlpar
 22 iaddr = 0
 1020 nopen = -1
-call sread (iaddr, sreal, simag, jtot2, jlpar2, &
-   nu2, jq, lq, inq, packed_bqs, &
+call smatread (iaddr, sreal, simag, jtot2, jlpar2, &
+   nu2, row_bqs, packed_bqs, &
    11, mmax, nopen, ierr)
 if (ierr .lt. -1) then
   write(6,1105)
@@ -715,9 +710,6 @@ ialloc = 0
 4006 deallocate(sra)
 4005 deallocate(simag)
 4004 deallocate(sreal)
-4003 deallocate(inq)
-4002 deallocate(lq)
-4001 deallocate(jq)
 4000 close(1)
 close(11)
 if (ialloc .ne. 0) write (6, 4100)

@@ -2020,7 +2020,7 @@ use mod_cosc2, only: inlev => sc2int ! inlev(1)
 use mod_cosc3, only: jlev => sc3int ! jlev(1)
 use mod_par, only: batch, ipos
 use mod_selb, only: ibasty
-use mod_hismat, only: sread
+use mod_hismat, only: smatread
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 logical, intent(in) :: csflag
@@ -2062,11 +2062,9 @@ iaddr = 0
 !
 ! j12 is read into a common block for molecule-molecule collisions
 10 nopen = 0
-call row_bqs%init(nmax)
-call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
-  row_bqs%jq, row_bqs%lq, row_bqs%inq, packed_bqs, &
+call smatread ( iaddr, sreal, simag, jtot, jlpar, nu, &
+  row_bqs, packed_bqs, &
   1, nmax, nopen, ierr)
-row_bqs%length = nopen
 if(jlpold.eq.0) jlpold=jlpar
 if(ierr.eq.-1) goto 100
 if (csflag .and. (jtot.gt.maxjt)) goto 100
@@ -2256,9 +2254,6 @@ integer, dimension(nmax) :: isc2  ! scratch array
 real(8), dimension(nmax) :: sc2   ! scratch array
 
 logical csflag, flaghf, flagsu, twomol
-!      real(8), pointer :: tsq(:,:)
-!      tsq => tototsq(1::nmax,1::nmax)
-!write(6,*) 'graffy: len(tototsq)', size(tototsq)
 !
 xjtot = jtot
 if (flaghf .and. .not. csflag) xjtot = jtot + 0.5d0

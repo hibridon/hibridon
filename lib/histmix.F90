@@ -35,10 +35,11 @@ use mod_cosc3, only: elevt => sc3 ! elevt(1)
 use constants, only: econv, xmconv, ang2 => ang2c
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam, mtime, gettim
-use mod_hismat, only: sread, rdhead, sinqr
+use mod_hismat, only: smatread, rdhead, sinqr
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h, o-z)
 type(bqs_type) :: packed_bqs
+type(bqs_type) :: row_bqs
 character*(*) flnam1, flnam2
 character*20  cdate1, cdate2
 character*40  smtfil1, smtfil2
@@ -57,7 +58,7 @@ dimension e(narray,narray), eig(narray), vec(narray,narray), &
 !     for transitions out of the 2 perturbed levels,the second 2 columns
 !     will contain cross sections for transitions into these levels
 double precision, dimension(:, :), allocatable :: sigma
-integer, dimension(:), allocatable :: iptsng, ipttrp, jq, lq, inq
+integer, dimension(:), allocatable :: iptsng, ipttrp
 double precision, dimension(:), allocatable :: sreal, simag
 !     storage for s-matrix elements:
 !     second letter is real (r), imaginary (i)
@@ -395,16 +396,11 @@ jlpar = 1
 irdsng = 1
 irdtrp = 1
 !
-allocate(jq(mmaxst), stat=ialloc)
-if (ialloc .ne. 0) goto 4003
-allocate(lq(mmaxst), stat=ialloc)
-if (ialloc .ne. 0) goto 4004
-allocate(inq(mmaxst), stat=ialloc)
-if (ialloc .ne. 0) goto 4005
 allocate(sreal(mmaxst * (mmaxst + 1) / 2), stat=ialloc)
-if (ialloc .ne. 0) goto 4006
+if (ialloc .ne. 0) goto 4003
 allocate(simag(mmaxst * (mmaxst + 1) / 2), stat=ialloc)
 if (ialloc .ne. 0) goto 4007
+call row_bqs%init(mmaxst)
 allocate(srs(0:jfinl1, 2, mmax2s), stat=ialloc)
 if (ialloc .ne. 0) goto 4008
 allocate(sis(0:jfinl1, 2, mmax2s), stat=ialloc)
@@ -446,8 +442,8 @@ lngtht = 0
 !     parameter to read lower triangle of s-matrix in sread
 !     (overwritten with number of open channels)
    nopen = -1
-   call sread (0, sreal, simag, jtot1, jlpar1, &
-        nu1, jq, lq, inq, packed_bqs, &
+   call smatread (0, sreal, simag, jtot1, jlpar1, &
+        nu1, row_bqs, packed_bqs, &
         1, mmax, nopen, ierr)
    if (ierr .lt. -1) then
       write(6,102)
@@ -490,8 +486,8 @@ if (irdtrp.eq.1) then
 !     parameter to read lower triangle of s-matrix in sread
 !     (overwritten with number of open channels)
    nopen = -1
-   call sread (0, sreal, simag, jtot2, jlpar2, &
-        nu2, jq, lq, inq, packed_bqs, &
+   call smatread (0, sreal, simag, jtot2, jlpar2, &
+        nu2, row_bqs, packed_bqs, &
         11, mmax, nopen, ierr)
    if (ierr .lt. -1) then
       write(6,102)
@@ -666,9 +662,6 @@ write(6,400) elaps, cpu
 4009 deallocate(srs)
 4008 deallocate(simag)
 4007 deallocate(sreal)
-4006 deallocate(inq)
-4005 deallocate(lq)
-4004 deallocate(jq)
 4003 deallocate(sigma)
 4002 deallocate(ipttrp)
 4001 deallocate(iptsng)
