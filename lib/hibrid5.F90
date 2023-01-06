@@ -97,7 +97,7 @@ contains
 !
 ! ---------------------------------------------------------------------------
 subroutine soutpt (tsq, sr, si, scmat, &
-                   lq, jq, inq, isc1, isc2, sc1, sc2, &
+                   bqs, isc1, isc2, sc1, sc2, &
                    jlev, elev, inlev, jtot, jfirst, &
                    jfinal, jtotd, nu, numin, numax, nud,jlpar,ien, &
                    ipos, csflag, flaghf, prsmat, prt2, t2test, &
@@ -132,10 +132,10 @@ subroutine soutpt (tsq, sr, si, scmat, &
 !                         contains the real part of the s-matrix
 !    si:      on input:   the upper-left nopen x nopen block of si
 !                         contains the imaginary part of the s-matrix
-!    jq, lq:  rotational angular momenta, orbital angular momenta, and
-!    inq,     additional quantum index for each channel
+!    bqs:     rotational angular momenta, orbital angular momenta, and
+!             additional quantum index for each channel
 !             if the calculation involves the collisions of two diatomic
-!             molecules, the jq = j1 + 10000 j2, where j1 and j2 are the
+!             molecules, the bqs%jq = j1 + 10000 j2, where j1 and j2 are the
 !             rotational quantum numbers of each molecule
 !    isc1,isc2: scratch vectors (min length nopen)
 !    sc1, sc2:  scratch  matrices (min length nopen x nopen)
@@ -158,7 +158,7 @@ subroutine soutpt (tsq, sr, si, scmat, &
 !    note!!!   if flaghf = .true.( see below), then the true values
 !    of the rotational quantum numbers, the total angular momentum,
 !    and the coupled-states projection index are equal to the values
-!    stored in jq, jtot, jfirst, jfinal, nu, numin, and numax plus 1/2
+!    stored in bqs%jq, jtot, jfirst, jfinal, nu, numin, and numax plus 1/2
 !    ien:     ordinal number of total energy at which this routine is
 !             called.  i.e. if ien = 2, we are now at second value of
 !             the total energy
@@ -216,9 +216,7 @@ real(8), intent(inout) :: tsq(nmax,nmax)
 real(8), intent(inout) :: sr(nmax,nmax)
 real(8), intent(inout) :: si(nmax,nmax)
 real(8), intent(out) :: scmat(nmax,nmax)
-integer, intent(in) :: lq(nopen)
-integer, intent(in) :: jq(nopen)
-integer, intent(in) :: inq(nopen)
+type(bqs_type), intent(in) :: bqs
 integer, intent(out) :: isc1(nopen)
 integer, intent(out) :: isc2(nopen)
 real(8), intent(out) :: sc1(nmax, nmax)
@@ -328,14 +326,14 @@ if (writs .and. nopen .gt. 0) then
                 jtotd, numin, numax, nud, nlevel, nlevop, nnout, &
                 jlev, inlev, elev, jout)
     end if
-    call swrite (sr, si, jtot, jlpar, nu, jq, lq, inq, isc1, &
+    call swrite (sr, si, jtot, jlpar, nu, bqs%jq, bqs%lq, bqs%inq, isc1, &
                  packed_bqs, sc2, nfile, nmax, nopen)
 end if
 
 if (.not. prxsec .and. .not. wrxsec .and. .not.prpart &
     .and. .not.wrpart) return
 call  partcr (tsq,  scmat, nopen, nopen, &
-                   inq, jq, lq, inq, jq, lq, &
+                   bqs%inq, bqs%jq, bqs%lq, bqs%inq, bqs%jq, bqs%lq, &
                    inlev, jlev, elev, jtot, nu, &
                    csflag, flaghf,twomol,flagsu, &
                    nlevop,nmax)

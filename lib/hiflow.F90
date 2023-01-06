@@ -650,7 +650,7 @@ endif
 !  now print out s-matrix and t-matrix squared, and calculate partial
 !  cross sections and print them out, if desired
 call soutpt (z, w, zmat, amat, &
-             bqs%lq, bqs%jq, bqs%inq, isc1, isc2, bmat, tq1, &
+             bqs, isc1, isc2, bmat, tq1, &
              jlev, elev, inlev, jtot, jfirst, &
              jtot2, jtotd, nu, numin, nulast, nud, jlpar, ien, &
              ipos, csflag, flaghf, prsmat, prt2, t2test, &
