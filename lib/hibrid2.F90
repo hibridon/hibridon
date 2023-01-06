@@ -379,7 +379,6 @@ subroutine prsg (fname, a)
 !  ------------------------------------------------------------------
 use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
-use mod_colq, only: ipoint => lq ! ipoint(5)
 use mod_cojhld, only: jlev => jhold ! jlev(5)
 use mod_coisc1, only: inlev => isc1 ! inlev(5)
 use mod_coisc2, only: jpoint => isc2 ! jpoint(5)
@@ -407,6 +406,7 @@ integer i, ienerg, iout, isize, j, jbegin, jend, jfinal, &
         nlevop, nout, numax, numin, nud, iaver
 dimension  a(3)
 data econv / 219474.6d0/
+integer, allocatable :: ipoint(:)
 !  input parameters
 iprint=.true.
 eprint=.false.
@@ -640,6 +640,7 @@ end if
 !  find all rows of cross sections matrix for which initial rotational
 !  quantum number is equal to one of the values of jout
 isize = 0
+allocate(ipoint(nlevop))
 nout = abs (nnout)
 do  280  iout = 1, nout
   jtemp = jout(iout)
@@ -679,8 +680,9 @@ else
   if (iprint) write (6, 260)
 260   format (/' ** COLUMN HEADINGS ARE INITIAL STATES, ROW', &
         ' HEADINGS ARE FINAL STATES **')
-  call xscpr1(zmat, nlevop, isize, iaver, ipos, iprint, flaghf, FUNIT_XSC)
+  call xscpr1(zmat, nlevop, isize, iaver, ipos, iprint, flaghf, FUNIT_XSC, ipoint)
 endif
+deallocate(ipoint)
 close (1)
 close (3)
 return
@@ -721,8 +723,7 @@ return
 end
 ! -------------------------------------------------
 subroutine xscpr1 (zmat, nlevop, isize, iaver, &
-                   ipos, iprint, flaghf, xsc_funit)
-use mod_colq, only: ipoint => lq ! ipoint(4)
+                   ipos, iprint, flaghf, xsc_funit, ipoint)
 use mod_cojhld, only: jlev => jhold ! jlev(4)
 use mod_cosc1, only: elev => sc1 ! elev(4)
 use mod_coisc1, only: inlev => isc1 ! inlev(4)
@@ -731,6 +732,7 @@ use mod_himatrix, only: transp
 
 implicit double precision (a-h,o-z)
 integer, intent(in) :: xsc_funit  ! the file unit for xsc file (it's expected to be open in write mode)
+integer, intent(in) :: ipoint(*)
 !      current revision date: 16-dec-2007
 !  subroutine to print out specified columns of cross section matrix
 !  if iaver = 1, then nth and (n+1) st rows are added before printing
@@ -891,7 +893,6 @@ use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
 use constants
 use mod_coamat, only: zbuf ! zbuf(1)
-use mod_colq, only: ipoint => lq ! ipoint(1)
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 !mha
@@ -919,6 +920,7 @@ character*12 accs
 logical iprint, twomol, existf, &
         openfl, eprint
 dimension  a(4)
+integer, allocatable :: ipoint(:)
 !  input parameters
 !mha
 iprint=.true.
@@ -1203,6 +1205,7 @@ end if
 !mha
 !  find all rows of cross sections matrix for which initial rotational
 !  quantum number is equal to one of the values of jout
+allocate(ipoint(nlevop))
 isize = 0
 insize=0
 nout = abs (nnout)
@@ -1262,10 +1265,11 @@ else
 298   format('x',i4,'=[')
 299   format('x',i5,'=[')
 !  now print out desired columns of cross section matrix
-  call xscpr2(zmat, xthresh, nlevop, isize, iaver, iprint, isa, FUNIT_XSC)
+  call xscpr2(zmat, xthresh, nlevop, isize, iaver, iprint, isa, FUNIT_XSC, ipoint)
   write (FUNIT_XSC,300)
 300   format('];')
 endif
+deallocate(ipoint)
 close (1)
 close (3)
 return
@@ -1307,8 +1311,7 @@ return
 end
 ! ------------------------------------------------------
 subroutine xscpr2 (zmat, xthresh, nlevop, isize, iaver, &
-                   iprint, isa, xsc_funit)
-use mod_colq, only: ipoint => lq ! ipoint(1)
+                   iprint, isa, xsc_funit, ipoint)
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
@@ -1316,6 +1319,7 @@ use mod_par, only: flaghf, ihomo, ipos
 use mod_himatrix, only: transp
 implicit double precision (a-h,o-z)
 integer, intent(in) :: xsc_funit  ! the file unit for xsc file (it's expected to be open in write mode)
+integer, intent(in) :: ipoint(*)
 
 !  current revision date:  10-oct-2001 by ab
 !  subroutine to print out specified columns of cross section matrix
