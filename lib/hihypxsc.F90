@@ -30,9 +30,6 @@ subroutine hypxsc(flname, a)
 !     -------------------------------------------------------------
 use mod_coj12, only: j12q => j12
 use mod_codim, only: mmax
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 use mod_coisc1, only: jlev => isc1 ! jlev(1)
 use mod_coisc3, only: inlev => isc3 ! inlev(1)
 use mod_coisc5, only: jout => isc5 ! jout(1)
@@ -51,6 +48,7 @@ use mod_hismat, only: sread, rdhead, sinqr
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(bqs_type) :: packed_bqs
+type(bqs_type) :: row_bqs
 character*(*) flname
 real(8), dimension(4), intent(in) :: a(4)
 complex(8) t, tf
@@ -289,9 +287,11 @@ jfin = 0
 
 !     parameter to read lower triangle of open channel(s)
 100 nopen = -1
+call row_bqs%init(mmax)
 call sread (0, sreal, simag, jtot, jlpar, &
-     nu, jq, lq, inq, packed_bqs, &
+     nu, row_bqs%jq, row_bqs%lq, row_bqs%inq, packed_bqs, &
      1, mmax, nopen, ierr)
+row_bqs%length = nopen
 if (ierr .lt. -1) then
    write(6,102)
 102    format(/' ** READ ERROR IN HYPXSC. ABORT **'/)
