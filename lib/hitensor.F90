@@ -574,9 +574,6 @@ subroutine dsig(maxk,nnout,jfirst,jfinal,jtotd, packed_bqs, &
 ! current revision date: 7-oct-2011 by pj dagdigian
 !------------------------------------------------------------------------
 use mod_codim, only: mmax
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 ! common blocks for levels for which xs's to be computed
@@ -592,7 +589,7 @@ use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_tensor_ang, only: ang1, ang2, dang
 use mod_hiutil, only: xf3j
-use mod_hismat, only: sread, rdhead
+use mod_hismat, only: smatread, rdhead
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 integer, intent(in) :: maxk
@@ -634,6 +631,7 @@ integer :: i, i1, i2, iang, ii, immprt, iph, ipower, isub1, isub2
 integer :: jlevlp, jlpar, jplast, jtlast, jtot
 integer :: k, k1, l2max, maxk1, maxq, mfvals, mivals, mj1, mj2, ml, mlmax
 integer :: nangle, nlevel, nlevop, nopen, nu, nud, numax, numin, numjm
+type(bqs_type) :: row_bqs
 call frame%get_label(label)
 maxq = mmax*mmax/2
 !
@@ -685,8 +683,8 @@ call rdhead(1,cdate1,ered1,rmu1,csflg1,flghf1,flgsu1, &
 !.....read next s-matrix
 !
 250 nopen = 0
-call sread (0, sreal, simag, jtot, jlpar, nu, &
-            jq, lq, inq, packed_bqs, &
+call smatread (0, sreal, simag, jtot, jlpar, nu, &
+            row_bqs, packed_bqs, &
             1, mmax, nopen, ierr)
 if(ierr .eq. -1) then
    write(6,260) xnam1,jtlast,jplast
@@ -714,18 +712,19 @@ jtlast=jtot
 jplast=jlpar
 if(nnout.gt.0) then
   do 290 i=1,packed_bqs%length
-    inq(i)=packed_bqs%inq(i)
-    jq(i)=packed_bqs%jq(i)
-    lq(i)=packed_bqs%lq(i)
+    row_bqs%inq(i)=packed_bqs%inq(i)
+    row_bqs%jq(i)=packed_bqs%jq(i)
+    row_bqs%lq(i)=packed_bqs%lq(i)
 290   continue
   nopen = packed_bqs%length
+  row_bqs%length = nopen
 end if
 !
 !.....calculate contributions to amplitudes for present jtot
 !     for elastic (jlevel,inlevel) -> (jlevel,inlevel) transition
 !
 call frame%compute_scat_ampl(jlevel,inlevel,jlevel,inlevel,jtot,mmax, &
-  packed_bqs,jq,lq,inq,nopen, &
+  packed_bqs,row_bqs%jq,row_bqs%lq,row_bqs%inq,nopen, &
   l2max,nangle,flaghf,sreal,simag,y,q)
 
 !
@@ -1025,9 +1024,6 @@ use mod_codim, only: mmax
 use mod_cotble, only: npnt, jttble
 use mod_coamat, only: labadr ! labadr(1)
 use mod_cobmat, only: sigma ! sigma(kkmx*jmx*jmx)
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 use mod_coisc2, only: inlev => isc2 ! inlev(1)
 use mod_coisc3, only: jlev => isc3 ! jlev(1)
 use mod_coisc7, only: matel => isc7 ! matel(1)
@@ -1048,7 +1044,7 @@ use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts
 use funit, only: FUNIT_TCB, FUNIT_TENS_OUTPUT
 use mod_hiutil, only: gennam, mtime, gettim, dater
 use mod_hiutil, only: xf3jm0
-use mod_hismat, only: sread, rdhead
+use mod_hismat, only: smatread, rdhead
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 integer :: jtotpa(MAX_NJTOT)
@@ -1068,6 +1064,7 @@ dimension a(9)
 data  tol,   zero,   nstep &
     /1.d-7,  0.d0,     2/
 type(bqs_type) :: packed_bqs
+type(bqs_type) :: row_bqs
 !
 call tensor_allocate()
 ! initialize timer and arays
@@ -1301,8 +1298,8 @@ if (jlparf .eq. 1) jlp = 0
 jj = jlp * nwaves + jfinal + 1
 iaddr = jttble(jj)
 nopen = -1
-call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
-            jq, lq, inq, packed_bqs, &
+call smatread ( iaddr, sreal, simag, jtot, jlpar, nu, &
+            row_bqs, packed_bqs, &
              1, mmax, nopen, ierr)
 maxlsp = (packed_bqs%length*(packed_bqs%length+1))/2
 maxllb = packed_bqs%length
@@ -1463,13 +1460,10 @@ subroutine addsp(jtmin,jtmax,jlp, &
 !
 use ISO_FORTRAN_ENV, only : ERROR_UNIT
 use tensor_util
-use mod_cojq, only: jqp => jq ! jqp(1)
-use mod_colq, only: lqp => lq ! lqp(1)
-use mod_coinq, only: inqp => inq ! inqp(1)
 use mod_par, only: batch, iprnt=>iprint
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
-use mod_hismat, only: sread
+use mod_hismat, only: smatread
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 integer, intent(in) :: tens_out_unit  ! unit of tenxsc output file (tcs, dgh or dcga file)
@@ -1477,6 +1471,7 @@ logical lprnt
 ! add these three common blocks (mha 9/30/08)
 dimension labadr(1),lenlab(1),jtotpa(1),jttble(1)
 type(bqs_type) :: tmp_pack
+type(bqs_type) :: row_bqsp
 !
 ! FLAG FOR DIAGNOSTIC PRINTING
 lprnt = .false.
@@ -1538,8 +1533,8 @@ do 100 jtp=jtpmin,jtpmax
 ! read s-matrix for jtot' into buffer
    nopenp = -1
    call tmp_pack%init(nopenp)
-   call sread ( iaddrp, srealp(ioffs), simagp(ioffs), jtotp, &
-                jlparp, nu, jqp, lqp, inqp, tmp_pack, &
+   call smatread ( iaddrp, srealp(ioffs), simagp(ioffs), jtotp, &
+                jlparp, nu, row_bqsp, tmp_pack, &
                 1, maxlsp, nopenp, ierr)
    if(ierr.eq.-1) goto 999
    if(ierr.lt.-1) then
@@ -1910,9 +1905,6 @@ subroutine sigk(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,packed_bqs,jttble,prefac,
 !
 !------------------------------------------------------------------------
 use tensor_util
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 ! modules for levels for which xs's to be computed
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
@@ -1923,7 +1915,7 @@ use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf6j
-use mod_hismat, only: sread
+use mod_hismat, only: smatread
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(bqs_type), intent(out) :: packed_bqs
@@ -1949,6 +1941,8 @@ dimension lenlab(1), jttble(1)
 dimension sigma(nj,nj,maxk+1)
 ! array to store partial-j cross sections (K=0-2 only)
 dimension psig0(1001),psig1(1001),psig2(1001)
+
+type(bqs_type) :: row_bqs
 !
 allocate(iadr(0:2*jmx,lmx,9))
 allocate(f6a(kmx,0:2*jmx,lmx),f6p(kmx))
@@ -2009,8 +2003,8 @@ iaddr = jttble(jj)
 if(iaddr .lt. 0) goto 700
 ! read s-matrix for jtot
 nopen = -1
-call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
-            jq, lq, inq, packed_bqs, &
+call smatread ( iaddr, sreal, simag, jtot, jlpar, nu, &
+            row_bqs, packed_bqs, &
              1, mmax, nopen, ierr)
 if(ierr.eq.-1) goto 999
 if(ierr.lt.-1) then
@@ -2370,9 +2364,6 @@ subroutine sigkkp(n,maxk,nk,nnout,jfirst,jfinal,jtotd,nj,mmax, &
 !
 !------------------------------------------------------------------------
 use tensor_util
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 ! added two common blocks - levels for which xs's to be computed (pjd)
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
@@ -2381,7 +2372,7 @@ use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j, xf9j, xf3jm0
-use mod_hismat, only: sread
+use mod_hismat, only: smatread
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(bqs_type), intent(out) :: packed_bqs
@@ -2413,6 +2404,7 @@ data ai / (0.d0,1.d0)/
 #if defined(HIB_CRAY)
 data ai / (0.d0,1.d0)/
 #endif
+type(bqs_type) :: row_bqs
 
 allocate(iadr(0:2*jmx,lmx,9))
 allocate(f6a(kmx,0:2*jmx,lmx),f9a(3*kmx,lmx))
@@ -2490,8 +2482,8 @@ iaddr = jttble(jj)
 if(iaddr .lt. 0) goto 700
 ! read s-matrix for jtot
 nopen = -1
-call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
-            jq, lq, inq, packed_bqs, &
+call smatread ( iaddr, sreal, simag, jtot, jlpar, nu, &
+            row_bqs, packed_bqs, &
              1, mmax, nopen, ierr)
 if(ierr.eq.-1) goto 999
 if(ierr.lt.-1) then
@@ -2811,9 +2803,6 @@ subroutine sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,packed_bqs,jttble,prefac
 ! current revision date: 5-mar-2010 by pj dagdigian
 !------------------------------------------------------------------------
 use tensor_util
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 ! common blocks for levels for which xs's to be computed
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
@@ -2823,7 +2812,7 @@ use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j
-use mod_hismat, only: sread
+use mod_hismat, only: smatread
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(bqs_type), intent(out) :: packed_bqs
@@ -2850,6 +2839,7 @@ dimension lenlab(1), jttble(1)
 dimension sigma(nj,nj,maxk+1)
 ! array to store partial-j cross sections (K=0-2 only)
 dimension psig0(1001),psig1(1001),psig2(1001)
+type(bqs_type) :: row_bqs
 !
 allocate(iadr(0:jmx,lmx,9))
 allocate(f6a(kmx,0:jmx,lmx),f6p(kmx))
@@ -2909,8 +2899,8 @@ iaddr = jttble(jj)
 if(iaddr .lt. 0) goto 700
 ! read s-matrix for jtot
 nopen = -1
-call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
-            jq, lq, inq, packed_bqs, &
+call smatread ( iaddr, sreal, simag, jtot, jlpar, nu, &
+            row_bqs, packed_bqs, &
              1, mmax, nopen, ierr)
 if(ierr.eq.-1) goto 999
 if(ierr.lt.-1) then
