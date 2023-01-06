@@ -72,6 +72,11 @@ module mod_hitypes
 
    type, public :: bqs_type  ! base quantum states
       ! stores an array of base quantum states
+      ! rotational angular momenta, orbital angular momenta, and
+      ! additional quantum index for each channel
+      ! if the calculation involves the collisions of two diatomic
+      ! molecules, the bqs%jq = j1 + 10000 j2, where j1 and j2 are the
+      ! rotational quantum numbers of each molecule      
 
       ! the vector jq will hold the rotational quantum numbers in the
       ! packed bas
