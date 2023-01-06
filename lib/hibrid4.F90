@@ -392,7 +392,7 @@ end subroutine wavewr
 !     ------------------------------------------------------------------
 !     reads header file for wavefunction (wfu file)
 subroutine waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto,jflux, &
-     rstart,rendld,rinf, rbesself)
+     rstart,rendld,rinf, rbesself, jq, lq, inq)
 use mod_wave, only: irec, ifil, nchwfu, ipos2, ipos3, nrlogd, inflev, get_wfu_rec1_length, wfu_format_version
 use mod_coeint, only: eint
 #if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_DISTINCT)
@@ -408,9 +408,6 @@ use mod_coamat, only: amat ! amat(25)
 use mod_cobmat, only: bmat => psii ! bmat(25), here bmat is used as a vector 
 use mod_cotq1, only: dpsir ! dpsir(25)
 use mod_cotq2, only: dpsii ! dpsii(25)
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 use mod_coisc1, only: isc1 ! isc1(25)
 use mod_cosc1, only: pk => sc1 ! sc1(10)  ! pk (asymptotic wavevectors)
 use mod_cow, only: w => w_as_vec ! w(25)
@@ -434,6 +431,9 @@ real(8), intent(out) :: rstart
 real(8), intent(out) :: rendld
 real(8), intent(out) :: rinf
 type(rbesself_type), intent(out) :: rbesself
+integer, intent(out) :: jq(*)
+integer, intent(out) :: lq(*)
+integer, intent(out) :: inq(*)
 
 
 character*48 :: oldlab, oldpot
@@ -563,9 +563,6 @@ subroutine psi(filnam,a)
 ! special version for 13p collisions
 !
 ! ------------------------------------------------------------------
-use mod_cojq, only: jq ! jq(60)
-use mod_colq, only: lq ! lq(10)
-use mod_coinq, only: inq ! inq(60)
 implicit none
 character*(*), intent(in) :: filnam
 real(8), intent(in) :: a(7)  ! arguments
@@ -627,10 +624,10 @@ if (jflux .eq. 4) then
   coordf=.true.
 endif
 
-call compute_wave_and_fluxes(filnam, iflux, iprint, thresh, factr, inchj, inchl, inchi, coordf, sumf, adiab, jflux, ny, ymin, dy, rout, inq, jq, lq)
+call compute_wave_and_fluxes(filnam, iflux, iprint, thresh, factr, inchj, inchl, inchi, coordf, sumf, adiab, jflux, ny, ymin, dy, rout)
 end subroutine
 ! ------------------------------------------------------------------
-subroutine compute_wave_and_fluxes(filnam, iflux, iprint, thresh, factr, inchj, inchl, inchi, coordf, sumf, adiab, jflux, ny, ymin, dy, rout, inq, jq, lq)
+subroutine compute_wave_and_fluxes(filnam, iflux, iprint, thresh, factr, inchj, inchl, inchi, coordf, sumf, adiab, jflux, ny, ymin, dy, rout)
 !
 ! driver subroutine to calculate scattering wavefunction and fluxes
 ! from information stored in direct access file
@@ -643,6 +640,7 @@ subroutine compute_wave_and_fluxes(filnam, iflux, iprint, thresh, factr, inchj, 
 ! special version for 13p collisions
 !
 ! ------------------------------------------------------------------
+use mod_codim, only: nmax => mmax
 use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
 use constants
@@ -676,9 +674,6 @@ use mod_hivector, only: dset, matmov, dsum
 use mod_hitypes, only: rbesself_type
 implicit double precision (a-h,o-z)
 character*(*), intent(in) :: filnam
-integer, intent(in) :: inq(*)
-integer, intent(in) :: jq(*)
-integer, intent(in) :: lq(*)
 character*40  psifil, wavfil, flxfil
 character*20  cdate
 character*10  elaps, cpu
@@ -694,6 +689,11 @@ data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f', &
 integer, pointer :: ipol
 integer, parameter :: psifil_unit = 2
 type(rbesself_type) :: rbesself
+
+integer :: inq(nmax)
+integer :: jq(nmax)
+integer :: lq(nmax)
+
 ipol=>ispar(3)
 
 
@@ -778,7 +778,7 @@ endif
 ! read header information, s matrix, and asymptotic wavefunction and
 ! derivative
 call waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto, &
-            jflux,rstart,rendld,rinf,rbesself)
+            jflux,rstart,rendld,rinf,rbesself, jq, lq, inq)
 if (inflev .ne. 0) then
    write (6, *) '** CALCULATION WITH WRSMAT=.T. REQUIRED.'
    goto 700
@@ -1237,7 +1237,7 @@ if (jflux .eq. 0) then
 210     format(/' R (BOHR) AND IMAGINARY PART OF CHI')
 ! reread asymptotic information
     call waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto, &
-            jflux,rstart,rendld,rinf,rbesself)
+            jflux,rstart,rendld,rinf,rbesself, jq, lq, inq)
     if (nch .gt. nopen) then
       call expand(nopen,nopen,nch,nch,ipack, &
                   psir,psii,scmat)
@@ -2154,6 +2154,7 @@ subroutine eadiab1(filnam, nchmin, nchmax)
 !
 !     ------------------------------------------------------------------
 use constants
+use mod_codim, only: nmax => mmax
 use mod_cosc8, only: sc8
 use mod_wave, only: ifil, nrlogd
 use funit
@@ -2180,6 +2181,10 @@ double precision :: dble_t
 integer, parameter :: eadfil_unit = FUNIT_EADIAB
 integer, parameter :: ien = 0
 type(rbesself_type) :: rbesself
+
+integer :: inq(nmax)
+integer :: jq(nmax)
+integer :: lq(nmax)
 !
 if (nchmax .ne. 0 .and. nchmax .lt. nchmin) goto 990
 wavfil = filnam // '.wfu'
@@ -2200,7 +2205,7 @@ write (6, 15) eadfil(1:lenft)
 15 format (' ** WRITING ADIABATIC ENERGIES TO ', (a))
 !
 call waverd(jtot, jlpar, nu, nch, npts, nopen, nphoto, &
-     jflux, rstart, rendld, rinf, rbesself)
+     jflux, rstart, rendld, rinf, rbesself, jq, lq, inq)
 if (nchmin .gt. nch) goto 990
 if (nchmax .eq. 0 .or. nchmax .gt. nch) nchmax = nch
 nchpr = nchmax - nchmin + 1
