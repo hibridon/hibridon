@@ -91,7 +91,8 @@ module mod_hitypes
       integer, allocatable :: lq(:)  ! orbital angular momentum quantum number
       integer, allocatable :: inq(:)  ! symmetry index
       integer, allocatable :: j12pk(:)   ! rotational quantum number (only for 2 molecules systems)
-      integer, allocatable :: length  ! number of elements used in all arrays
+      integer :: length  ! number of elements used in all arrays
+      integer :: max_length
    contains
       procedure :: init => bqs_type_init
       procedure :: deinit => bqs_type_deinit
@@ -121,6 +122,7 @@ contains
       allocate(this%inq(nopen))
       allocate(this%j12pk(nopen))
       this%length = 0
+      this%max_length = nopen
    end subroutine 
 
    subroutine bqs_type_deinit(this)
@@ -130,6 +132,7 @@ contains
       if (allocated(this%inq)) deallocate(this%inq)
       if (allocated(this%j12pk)) deallocate(this%j12pk)
       this%length = 0
+      this%max_length = 0
    end subroutine 
 
    subroutine rbesself_type_init(this, nopen)
