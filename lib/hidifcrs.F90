@@ -38,9 +38,6 @@ subroutine difcrs(fname1,a,ihomo,flaghf)
 use constants
 use mod_codim, only: mmax
 use mod_coj12, only: j12
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 use mod_coisc2, only: jout1 => isc2 ! jout1(1)
@@ -101,6 +98,7 @@ complex(8), dimension(:, :, :), allocatable :: q, qm
 real(8), dimension(:, :), allocatable :: ximdep
 real(8), dimension(:), allocatable :: ytmp
 real(8), dimension(:, :, :), allocatable :: y
+type(bqs_type) :: row_bqs1
 type(bqs_type) :: packed_bqs1
 !
 maxq=mmax*mmax/2
@@ -466,9 +464,11 @@ jplast=0
 !.....read next s-matrix
 !
 250 nopen1 = 0
+call row_bqs1%init(mmax)
 call sread (0,sreal1, simag1, jtot, jlpar, nu1, &
-                  jq, lq, inq, packed_bqs1, &
+                  row_bqs1%jq, row_bqs1%lq, row_bqs1%inq, packed_bqs1, &
                   smt_unit, mmax, nopen1, ierr)
+row_bqs1%length = nopen1
 if(ierr.eq.-1) then
    write(6,260) xnam1,jtlast,jplast
 260    format(' END OF FILE DETECTED READING FILE ',(a), &
@@ -495,23 +495,24 @@ jtlast=jtot
 jplast=jlpar
 if(nnout.gt.0) then
    do 290 i=1,packed_bqs1%length
-   inq(i)=packed_bqs1%inq(i)
-   jq(i)=packed_bqs1%jq(i)
-290    lq(i)=packed_bqs1%lq(i)
+   row_bqs1%inq(i)=packed_bqs1%inq(i)
+   row_bqs1%jq(i)=packed_bqs1%jq(i)
+290    row_bqs1%lq(i)=packed_bqs1%lq(i)
    nopen1=packed_bqs1%length
+   row_bqs1%length = nopen1
 end if
 !
 !.....calculate contributions to amplitudes for present jtot
 !
 call ampli( &
     j1, in1, j2, in2, jtot, sreal1, simag1, mmax, packed_bqs1, &
-    jq, lq, inq, nopen1, y, q, l2max, nangle, ihomo, flaghf, &
+    row_bqs1%jq, row_bqs1%lq, row_bqs1%inq, nopen1, y, q, l2max, nangle, ihomo, flaghf, &
     iydim1, iydim2, iq1min, iq1max, iq2min, iq2max, iq3)
 !.... calculate contributions for negative initial index
 if (stflag) then
   call ampli( &
     j1, -in1, j2, in2, jtot, sreal1, simag1, mmax, packed_bqs1, &
-    jq, lq, inq, nopen1, y, qm, l2max, nangle, ihomo, flaghf, &
+    row_bqs1%jq, row_bqs1%lq, row_bqs1%inq, nopen1, y, qm, l2max, nangle, ihomo, flaghf, &
     iydim1, iydim2, iq1min, iq1max, iq2min, iq2max, iq3)
 end if
 !
