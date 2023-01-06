@@ -1511,7 +1511,7 @@ zeta = zeta + pib4
 return
 end
 ! ----------------------------------------------------------------------
-subroutine psiasy(fj,fn,unit,sr,si,psir,psii,nopen,nmax)
+subroutine psiasy(fj,fn,sr,si,psir,psii,nopen,nmax)
 ! subroutine to determine real and imaginary part of asymptotic wavefunction o
 ! derivative of these
 !  asmptotically, in the case of inelastic scattering, the wavefunction is
@@ -1534,7 +1534,6 @@ subroutine psiasy(fj,fn,unit,sr,si,psir,psii,nopen,nmax)
 !                   ricatti bessel function yl
 !                   contains (for derivative calculation) the derivative with
 !                   respect to r of the normalized ricatti bessel function yl
-!    unit           scratch vector
 !    sr, si         matrices of order nmax x nmax which contain
 !                   on input: real and imaginary parts of s-matrix
 !                   on return: real and imaginary parts of asymptotic
@@ -1550,67 +1549,78 @@ subroutine psiasy(fj,fn,unit,sr,si,psir,psii,nopen,nmax)
 use mod_phot, only: photof, wavefn, boundf, writs
 use mod_hiutil, only: daxpy_wrapper
 use mod_hivector, only: matmov
-implicit double precision (a-h,o-z)
-dimension fj(1), fn(1), unit(1), sr(nmax,nmax), si(nmax,nmax), &
-          psii(nmax,nmax), psir(nmax,nmax)
-one=1.d0
-onemin=-1.d0
-!   put unit vector into array unit
-do 80  icol = 1, nopen
-  unit(icol) = one
-80 continue
-! first we want to calculate real part of wavefunction at infinity
-! that is   yl(kr) (Sr-1) + jl(kr) Si for scattering or
-!         - yl(kr) (Sr-1) + jl(kr) Si for photodissociation
-! first move Sreal into psii
+implicit none
+real(8), intent(in) :: fj(nopen)
+real(8), intent(in) :: fn(nopen)
+real(8), intent(in) :: sr(nmax,nmax)
+real(8), intent(in) :: si(nmax,nmax)
+real(8), intent(out) :: psir(nmax,nmax)
+real(8), intent(out) :: psii(nmax,nmax)
+integer, intent(in) :: nopen
+integer, intent(in) :: nmax
+
+real(8), parameter :: one=1.d0
+real(8), parameter :: onemin=-1.d0
+integer :: icol, irow
+real(8) :: fac
+!    unit           scratch vector
+real(8) :: unit(nopen)
+  !   put unit vector into array unit
+  do icol = 1, nopen
+    unit(icol) = one
+  end do
+  ! first we want to calculate real part of wavefunction at infinity
+  ! that is   yl(kr) (Sr-1) + jl(kr) Si for scattering or
+  !         - yl(kr) (Sr-1) + jl(kr) Si for photodissociation
+  ! first move Sreal into psii
   call matmov (sr, psii, nopen, nopen, nmax, nmax)
-! now subtract unit matrix
+  ! now subtract unit matrix
   call daxpy_wrapper (nopen, onemin, unit, 1, psii(1, 1), nmax + 1)
-! now premultiply by diagonal matrix -yl(kr) for photodissociation or
-! +yl(kr) for scattering
-  do 130 irow = 1, nopen
+  ! now premultiply by diagonal matrix -yl(kr) for photodissociation or
+  ! +yl(kr) for scattering
+  do irow = 1, nopen
     fac=one*fn(irow)
     if (photof) fac=-fac
     call dscal(nopen, fac, psii(irow,1), nmax)
-130   continue
-! now store simag in psir
+  end do
+  ! now store simag in psir
   call matmov(si, psir, nopen, nopen, nmax, nmax)
-! premultiply by diagonal matrix jl(kr)
-  do 140 irow = 1, nopen
+  ! premultiply by diagonal matrix jl(kr)
+  do irow = 1, nopen
     call dscal(nopen, fj(irow), psir(irow,1), nmax)
-140   continue
-! now evaluate +/- yl(kr) (Sr-1) + jl(kR) Si, save in psir
-  do 150 icol = 1, nopen
+  end do
+  ! now evaluate +/- yl(kr) (Sr-1) + jl(kR) Si, save in psir
+  do icol = 1, nopen
     call daxpy_wrapper(nopen, one, psii(1, icol), 1, psir(1,icol), 1)
-150   continue
-! psir now contains real part of asymptotic scattering wavefunction
-! now compute imaginary part of asymptotic wavefunction
-! that is - jl(kr) (1+Sr) + yl(kr) Si for scattering or
-!         - jl(kr) (1+Sr) - yl(kr) Si for photodissociation
-! now move Sreal into psii
+  end do
+  ! psir now contains real part of asymptotic scattering wavefunction
+  ! now compute imaginary part of asymptotic wavefunction
+  ! that is - jl(kr) (1+Sr) + yl(kr) Si for scattering or
+  !         - jl(kr) (1+Sr) - yl(kr) Si for photodissociation
+  ! now move Sreal into psii
   call matmov (sr, psii, nopen, nopen, nmax, nmax)
-! now add unit matrix
+  ! now add unit matrix
   call daxpy_wrapper (nopen, one, unit, 1, psii(1, 1), nmax + 1)
-! now premultiply by diagonal matrix -jl(kr)
-  do 157 irow = 1, nopen
+  ! now premultiply by diagonal matrix -jl(kr)
+  do irow = 1, nopen
     fac=-fj(irow)
     call dscal(nopen, fac, psii(irow,1), nmax)
-157   continue
-! replace real part of s matrix by real part of asymptotic wavefunction
+  end do
+  ! replace real part of s matrix by real part of asymptotic wavefunction
   call matmov(psir,sr,nopen, nopen, nmax, nmax)
-! premultiply Simag by diagonal matrix yl(kr) for scattering or by
-! -yl(kr) for photodissociation
-  do 159 irow = 1, nopen
+  ! premultiply Simag by diagonal matrix yl(kr) for scattering or by
+  ! -yl(kr) for photodissociation
+  do irow = 1, nopen
     fac=fn(irow)
     if (photof) fac=-fac
     call dscal(nopen, fac, si(irow,1), nmax)
-159   continue
-! now evaluate - jl(kr) (1+Sr) +/- yl(kR) Si, save in psii
-  do 161 icol = 1, nopen
+  end do
+  ! now evaluate - jl(kr) (1+Sr) +/- yl(kR) Si, save in psii
+  do icol = 1, nopen
     call daxpy_wrapper(nopen, one, si(1, icol), 1, psii(1,icol), 1)
-161   continue
-! replace imaginary part of s matrix by imaginary part of
-! asymptotic wavefunction
+  end do
+  ! replace imaginary part of s matrix by imaginary part of
+  ! asymptotic wavefunction
   call matmov(psii,si,nopen, nopen, nmax, nmax)
 return
 end
@@ -1716,11 +1726,13 @@ integer, intent(in) :: nmax
 logical, intent(in) :: kwrit
 logical, intent(in) :: ipos
 
-real(8), dimension(nopen) :: fj
+! ricatti-bessel functions
+real(8), dimension(nopen) :: fj  
 real(8), dimension(nopen) :: fn
 real(8), dimension(nopen) :: fpj
 real(8), dimension(nopen) :: fpn
-real(8), dimension(nopen) :: pk
+
+real(8), dimension(nopen) :: pk  ! wavevectors for open channels
 real(8), dimension(nopen) :: derj
 real(8), dimension(nopen) :: dern
 
@@ -1948,12 +1960,12 @@ iendwv = iendwv + 8 * sizeof(char_t) &
     call matmov(sr,srsave,nopen,nopen,nmax,nmax)
     call matmov(si,sisave,nopen,nopen,nmax,nmax)
 ! here if wavefunction wanted
-  call psiasy(fj,fn,fpn,sr,si,tmod,scmat,nopen,nmax)
+  call psiasy(fj,fn,sr,si,tmod,scmat,nopen,nmax)
 ! on return, sr contains real part of asymptotic wavefunction, si contains
 ! imaginary part of asymptotic wavefunction
 ! also determine real and imaginary part of derivative of
 ! asymptotic wavefunction
- call psiasy(derj,dern,fpn,srsave,sisave,tmod, &
+ call psiasy(derj,dern,srsave,sisave,tmod, &
              scmat,nopen,nmax)
 endif
 ! here for photodissociation, at this point:
