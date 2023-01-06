@@ -2014,9 +2014,6 @@ subroutine intcr(csflag,flaghf,twomol,flagsu,nucros, &
 ! ----------------------------------------------------------------------
 use mod_cosout, only: nnout, jout
 use mod_coj12, only: j12
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
 use mod_coisc6, only: isc1 => isc6 ! isc1(1)
 use mod_coisc7, only: isc2 => isc7 ! isc2(1)
@@ -2051,6 +2048,7 @@ integer, intent(in) :: nlevop
 integer, intent(in) :: nmax
 integer, intent(in) :: tmp_file
 
+type(bqs_type) :: row_bqs
 type(bqs_type) :: packed_bqs
 
 ! clear sigma array
@@ -2066,9 +2064,11 @@ iaddr = 0
 !
 ! j12 is read into a common block for molecule-molecule collisions
 10 nopen = 0
+call row_bqs%init(nmax)
 call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
-  jq, lq, inq, packed_bqs, &
+  row_bqs%jq, row_bqs%lq, row_bqs%inq, packed_bqs, &
   1, nmax, nopen, ierr)
+row_bqs%length = nopen
 if(jlpold.eq.0) jlpold=jlpar
 if(ierr.eq.-1) goto 100
 if (csflag .and. (jtot.gt.maxjt)) goto 100
@@ -2097,11 +2097,11 @@ if (jtot .eq. 10*(jtot/10)) then
 endif
 iaddr = 0
 ! calculate squared t-matrix
-call tsqmat(tsq,sreal,simag,inq,jq,lq, &
+call tsqmat(tsq,sreal,simag,row_bqs%inq,row_bqs%jq,row_bqs%lq, &
    packed_bqs,nopen,nmax)
 ! calculate partial cross sections
 call partcr(tsq,sc1,nopen,packed_bqs%length, &
-            inq, jq, lq, packed_bqs%inq, packed_bqs%jq, packed_bqs%lq, &
+            row_bqs%inq, row_bqs%jq, row_bqs%lq, packed_bqs%inq, packed_bqs%jq, packed_bqs%lq, &
             inlev, jlev, elev, jtot, nu, &
             csflag,flaghf,twomol,flagsu, &
             nlevop,nmax)
