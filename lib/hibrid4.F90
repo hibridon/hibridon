@@ -392,7 +392,7 @@ end subroutine wavewr
 !     ------------------------------------------------------------------
 !     reads header file for wavefunction (wfu file)
 subroutine waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto,jflux, &
-     rstart,rendld,rinf, rbesself, jq, lq, inq)
+     rstart,rendld,rinf, rbesself, bqs)
 use mod_wave, only: irec, ifil, nchwfu, ipos2, ipos3, nrlogd, inflev, get_wfu_rec1_length, wfu_format_version
 use mod_coeint, only: eint
 #if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_DISTINCT)
@@ -417,7 +417,7 @@ use funit
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
 use mod_hivector, only: dset
-use mod_hitypes, only: rbesself_type
+use mod_hitypes, only: rbesself_type, bqs_type
 implicit none
 integer, intent(out) :: jtot
 integer, intent(out) :: jlpar
@@ -431,10 +431,7 @@ real(8), intent(out) :: rstart
 real(8), intent(out) :: rendld
 real(8), intent(out) :: rinf
 type(rbesself_type), intent(out) :: rbesself
-integer, intent(out) :: jq(*)
-integer, intent(out) :: lq(*)
-integer, intent(out) :: inq(*)
-
+type(bqs_type), intent(out) :: bqs
 
 character*48 :: oldlab, oldpot
 character*20 :: olddat
@@ -483,9 +480,11 @@ write (6, 251) oldpot
 251 format('    INITIAL POT NAME: ', (a))
 !
 !     Read in channel labels
-read (ifil, end=900, err=950) (jq(i), i=1, nch), &
-     (lq(i), i=1, nch), (inq(i), i=1, nch), &
+call bqs%init(nch)
+read (ifil, end=900, err=950) (bqs%jq(i), i=1, nch), &
+     (bqs%lq(i), i=1, nch), (bqs%inq(i), i=1, nch), &
      (eint(i), i=1, nch)
+bqs%length = nch
 !
 ! start reading in information from record 2 here
 read (ifil, end=900, err=950, pos=iwavsk(2)) nrecs, nopen, &
@@ -671,7 +670,7 @@ use mod_ered, only: ered, rmu
 use mod_hiutil, only: gennam, mtime, gettim, dater
 use mod_hiutil, only: daxpy_wrapper
 use mod_hivector, only: dset, matmov, dsum
-use mod_hitypes, only: rbesself_type
+use mod_hitypes, only: rbesself_type, bqs_type
 implicit double precision (a-h,o-z)
 character*(*), intent(in) :: filnam
 character*40  psifil, wavfil, flxfil
@@ -690,9 +689,7 @@ integer, pointer :: ipol
 integer, parameter :: psifil_unit = 2
 type(rbesself_type) :: rbesself
 
-integer :: inq(nmax)
-integer :: jq(nmax)
-integer :: lq(nmax)
+type(bqs_type) :: bqs
 
 ipol=>ispar(3)
 
@@ -777,8 +774,9 @@ if (jflux .ne. 0) then
 endif
 ! read header information, s matrix, and asymptotic wavefunction and
 ! derivative
+call bqs%init(nmax)
 call waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto, &
-            jflux,rstart,rendld,rinf,rbesself, jq, lq, inq)
+            jflux,rstart,rendld,rinf,rbesself, bqs)
 if (inflev .ne. 0) then
    write (6, *) '** CALCULATION WITH WRSMAT=.T. REQUIRED.'
    goto 700
@@ -901,14 +899,15 @@ else if(jflux.eq.0) then
    i4,' POINTS',/)
 endif
 inch=0
+
 ! check if initial channel is in list of channels
 ! not for photodissociation
 if (.not. photof) then
   if (ibasty .ne. 7) then
     do 40 nn=1, nch
-      j1 = jq(nn)
-      l1 = lq(nn)
-      i1 = inq(nn)
+      j1 = bqs%jq(nn)
+      l1 = bqs%lq(nn)
+      i1 = bqs%inq(nn)
 
 
 
@@ -974,12 +973,12 @@ if (.not.coordf)  then
           (ibasty .eq. 7 .and. (ipol .eq. 0 .or. adiab &
            .and. jlpar .eq. 1))) then
         if (jflux.eq.0) &
-          write(2, 57) inchc, jq(inch), lq(inch), inq(inch), &
+          write(2, 57) inchc, bqs%jq(inch), bqs%lq(inch), bqs%inq(inch), &
             econv*eint(inch)
         if (jflux.ne.0) &
-          write(3, 57) inchc, jq(inch), lq(inch), inq(inch), &
+          write(3, 57) inchc, bqs%jq(inch), bqs%lq(inch), bqs%inq(inch), &
             econv*eint(inch)
-        write (6, 57) inchc, jq(inch), lq(inch), inq(inch), &
+        write (6, 57) inchc, bqs%jq(inch), bqs%lq(inch), bqs%inq(inch), &
             econv*eint(inch)
 57         format(/,15x,'INITIAL:',3i4,i5,f13.3)
       else if (ibasty .eq.7 .and. jlpar .eq. -1 &
@@ -1006,7 +1005,7 @@ endif
 if (jflux .eq. 4) then
   write (3,55)
   do 60  i=1, nch
-    write (3, 59) i, jq(i), lq(i), inq(i), econv*eint(i)
+    write (3, 59) i, bqs%jq(i), bqs%lq(i), bqs%inq(i), econv*eint(i)
 59     format(10x,4i4,f13.3)
 60   continue
 endif
@@ -1045,18 +1044,18 @@ do 120 i=1, iabs(nnout)
      endif
    endif
    do 100 nn=1, nch
-     j1 = jq(nn)
+     j1 = bqs%jq(nn)
      if(j1.ne.jo) goto 100
        if (jflux .ne. 2) then
          do 75 in = 1, iabs(niout)
            io = indout(in)
-           if(inq(nn).ne.io) goto 75
+           if(bqs%inq(nn).ne.io) goto 75
            nj = nj + 1
            nlist(nj) =nn
 75          continue
        else
-          innq=inq(nn)
-          if(innq.ne.io .or. lq(nn) .ne. llo) goto 100
+          innq=bqs%inq(nn)
+          if(innq.ne.io .or. bqs%lq(nn) .ne. llo) goto 100
 ! check to see if state has already been found
            ifound=0
            do 80 if=1,nj
@@ -1123,11 +1122,11 @@ if (.not. coordf) then
       endif
       if (ibasty .ne. 7 .or. adiab) then
         if (jflux.eq.0) &
-        write(2, 140) nnn, jq(nn), lq(nn), inq(nn), &
+        write(2, 140) nnn, bqs%jq(nn), bqs%lq(nn), bqs%inq(nn), &
                  eint(nn)*econv, sq
-        if (jflux.ne.0) write(3,140) nnn,jq(nn),lq(nn),inq(nn), &
+        if (jflux.ne.0) write(3,140) nnn,bqs%jq(nn),bqs%lq(nn),bqs%inq(nn), &
                  eint(nn)*econv, sq
-        write (6, 140) nnn, jq(nn), lq(nn), inq(nn), &
+        write (6, 140) nnn, bqs%jq(nn), bqs%lq(nn), bqs%inq(nn), &
                  eint(nn)*econv, sq
 140         format(16x,'PROBED:',3i4,i5,f13.3,f13.4)
       else
@@ -1232,12 +1231,12 @@ if (jflux .eq. 0) then
     iwf = 1
     propf=.true.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,inq)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,bqs%inq)
     write(2, 210)
 210     format(/' R (BOHR) AND IMAGINARY PART OF CHI')
 ! reread asymptotic information
     call waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto, &
-            jflux,rstart,rendld,rinf,rbesself, jq, lq, inq)
+            jflux,rstart,rendld,rinf,rbesself, bqs)
     if (nch .gt. nopen) then
       call expand(nopen,nopen,nch,nch,ipack, &
                   psir,psii,scmat)
@@ -1254,7 +1253,7 @@ if (jflux .eq. 0) then
     iwf = -1
     irec=npts+4
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,inq)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,bqs%inq)
   endif
 else if (jflux .eq. 2) then
   write(3, 300)
@@ -1321,7 +1320,7 @@ else if (jflux .eq. 1) then
         scc=psir(nni)*psir(3*nch+nni)-psir(nch+nni) &
             *psir(2*nch+nni)
         do 327 ni=1, niout
-          if (inq(nni) .eq. indout(ni)) sc(ni)=sc(ni)+scc
+          if (bqs%inq(nni) .eq. indout(ni)) sc(ni)=sc(ni)+scc
 327         continue
 330       continue
       scsum=dsum(niout,sc,1)
@@ -1336,7 +1335,7 @@ else if (jflux .eq. 1) then
 ! plot out all fluxes for total flux which is numerically well behaved
     tthresh=-1.e9
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,.false., &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,inq)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,bqs%inq)
   endif
   if (.not. photof) then
 ! now for incoming flux (only for scattering)
@@ -1389,7 +1388,7 @@ else if (jflux .eq. 1) then
           scc=psir(nni)*psir(3*nch+nni)-psir(nch+nni) &
             *psir(2*nch+nni)
           do 364 ni=1, niout
-            if (inq(nni) .eq. indout(ni)) sc(ni)=sc(ni)+scc
+            if (bqs%inq(nni) .eq. indout(ni)) sc(ni)=sc(ni)+scc
 364          continue
 365         continue
         scsum=dsum(niout,sc,1)
@@ -1402,7 +1401,7 @@ else if (jflux .eq. 1) then
     iwf = 0
     propf=.false.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,inq)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,bqs%inq)
   endif
 ! now for outgoing flux
   if (.not.photof) then
@@ -1519,7 +1518,7 @@ else if (jflux .eq. 1) then
           scc=psir(nni)*psir(3*nch+nni)-psir(nch+nni) &
             *psir(2*nch+nni)
           do 579 ni=1, niout
-            if (inq(nni) .eq. indout(ni)) sc(ni)=sc(ni)+scc
+            if (bqs%inq(nni) .eq. indout(ni)) sc(ni)=sc(ni)+scc
 579          continue
 580         continue
         scsum=dsum(niout,sc,1)
@@ -1537,7 +1536,7 @@ else if (jflux .eq. 1) then
   if (photof) propf=.true.
   if (.not. photof) propf=.false.
   call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,inq)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,bqs%inq)
 endif
 700 if (photof .or. jflux .eq. 0) close (psifil_unit)
 if (jflux .ne. 0) close (3)
@@ -2160,7 +2159,7 @@ use mod_wave, only: ifil, nrlogd
 use funit
 use mod_ered, only: ered, rmu
 use mod_hiutil, only: gennam
-use mod_hitypes, only: rbesself_type
+use mod_hitypes, only: rbesself_type, bqs_type
 implicit none
 character*(*), intent(in) :: filnam
 integer, intent(in) :: nchmin
@@ -2181,10 +2180,8 @@ double precision :: dble_t
 integer, parameter :: eadfil_unit = FUNIT_EADIAB
 integer, parameter :: ien = 0
 type(rbesself_type) :: rbesself
+type(bqs_type) :: bqs
 
-integer :: inq(nmax)
-integer :: jq(nmax)
-integer :: lq(nmax)
 !
 if (nchmax .ne. 0 .and. nchmax .lt. nchmin) goto 990
 wavfil = filnam // '.wfu'
@@ -2205,7 +2202,7 @@ write (6, 15) eadfil(1:lenft)
 15 format (' ** WRITING ADIABATIC ENERGIES TO ', (a))
 !
 call waverd(jtot, jlpar, nu, nch, npts, nopen, nphoto, &
-     jflux, rstart, rendld, rinf, rbesself, jq, lq, inq)
+     jflux, rstart, rendld, rinf, rbesself, bqs)
 if (nchmin .gt. nch) goto 990
 if (nchmax .eq. 0 .or. nchmax .gt. nch) nchmax = nch
 nchpr = nchmax - nchmin + 1
