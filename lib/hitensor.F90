@@ -589,7 +589,7 @@ use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_tensor_ang, only: ang1, ang2, dang
 use mod_hiutil, only: xf3j
-use mod_hismat, only: smatread, rdhead
+use mod_hismat, only: sread, rdhead
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 integer, intent(in) :: maxk
@@ -683,7 +683,7 @@ call rdhead(1,cdate1,ered1,rmu1,csflg1,flghf1,flgsu1, &
 !.....read next s-matrix
 !
 250 nopen = 0
-call smatread (0, sreal, simag, jtot, jlpar, nu, &
+call sread (0, sreal, simag, jtot, jlpar, nu, &
             row_bqs, packed_bqs, &
             1, mmax, nopen, ierr)
 if(ierr .eq. -1) then
@@ -1044,7 +1044,7 @@ use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts
 use funit, only: FUNIT_TCB, FUNIT_TENS_OUTPUT
 use mod_hiutil, only: gennam, mtime, gettim, dater
 use mod_hiutil, only: xf3jm0
-use mod_hismat, only: smatread, rdhead
+use mod_hismat, only: sread, rdhead
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 integer :: jtotpa(MAX_NJTOT)
@@ -1298,7 +1298,7 @@ if (jlparf .eq. 1) jlp = 0
 jj = jlp * nwaves + jfinal + 1
 iaddr = jttble(jj)
 nopen = -1
-call smatread ( iaddr, sreal, simag, jtot, jlpar, nu, &
+call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
             row_bqs, packed_bqs, &
              1, mmax, nopen, ierr)
 maxlsp = (packed_bqs%length*(packed_bqs%length+1))/2
@@ -1463,7 +1463,7 @@ use tensor_util
 use mod_par, only: batch, iprnt=>iprint
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
-use mod_hismat, only: smatread
+use mod_hismat, only: sread
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 integer, intent(in) :: tens_out_unit  ! unit of tenxsc output file (tcs, dgh or dcga file)
@@ -1533,7 +1533,7 @@ do 100 jtp=jtpmin,jtpmax
 ! read s-matrix for jtot' into buffer
    nopenp = -1
    call tmp_pack%init(nopenp)
-   call smatread ( iaddrp, srealp(ioffs), simagp(ioffs), jtotp, &
+   call sread ( iaddrp, srealp(ioffs), simagp(ioffs), jtotp, &
                 jlparp, nu, row_bqsp, tmp_pack, &
                 1, maxlsp, nopenp, ierr)
    if(ierr.eq.-1) goto 999
@@ -1915,7 +1915,7 @@ use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf6j
-use mod_hismat, only: smatread
+use mod_hismat, only: sread
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(bqs_type), intent(out) :: packed_bqs
@@ -2003,7 +2003,7 @@ iaddr = jttble(jj)
 if(iaddr .lt. 0) goto 700
 ! read s-matrix for jtot
 nopen = -1
-call smatread ( iaddr, sreal, simag, jtot, jlpar, nu, &
+call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
             row_bqs, packed_bqs, &
              1, mmax, nopen, ierr)
 if(ierr.eq.-1) goto 999
@@ -2372,7 +2372,7 @@ use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j, xf9j, xf3jm0
-use mod_hismat, only: smatread
+use mod_hismat, only: sread
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(bqs_type), intent(out) :: packed_bqs
@@ -2482,7 +2482,7 @@ iaddr = jttble(jj)
 if(iaddr .lt. 0) goto 700
 ! read s-matrix for jtot
 nopen = -1
-call smatread ( iaddr, sreal, simag, jtot, jlpar, nu, &
+call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
             row_bqs, packed_bqs, &
              1, mmax, nopen, ierr)
 if(ierr.eq.-1) goto 999
@@ -2812,7 +2812,7 @@ use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j
-use mod_hismat, only: smatread
+use mod_hismat, only: sread
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(bqs_type), intent(out) :: packed_bqs
@@ -2899,7 +2899,7 @@ iaddr = jttble(jj)
 if(iaddr .lt. 0) goto 700
 ! read s-matrix for jtot
 nopen = -1
-call smatread ( iaddr, sreal, simag, jtot, jlpar, nu, &
+call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
             row_bqs, packed_bqs, &
              1, mmax, nopen, ierr)
 if(ierr.eq.-1) goto 999
