@@ -412,11 +412,11 @@ use mod_cojq, only: jq ! jq(1)
 use mod_colq, only: lq ! lq(1)
 use mod_coinq, only: inq ! inq(1)
 use mod_coisc1, only: isc1 ! isc1(25)
-use mod_cosc1, only: sc1 ! sc1(10)  ! pk (asymptotic wavevectors)
-use mod_cosc2, only: sc2 ! sc2(10)  ! fj
-use mod_cosc3, only: sc3 ! sc3(10)  ! fpj
-use mod_cosc4, only: sc4 ! sc4(10)  ! fn
-use mod_cosc5, only: sc5 ! sc5(10)  ! fpn
+use mod_cosc1, only: pk => sc1 ! sc1(10)  ! pk (asymptotic wavevectors)
+use mod_cosc2, only: fj => sc2 ! sc2(10)  ! fj
+use mod_cosc3, only: fpj => sc3 ! sc3(10)  ! fpj
+use mod_cosc4, only: fn => sc4 ! sc4(10)  ! fn
+use mod_cosc5, only: fpn => sc5 ! sc5(10)  ! fpn
 use mod_cow, only: w => w_as_vec ! w(25)
 use mod_cozmat, only: zmat => zmat_as_vec ! zmat(25)
 use mod_par, only: csflag, flaghf, photof
@@ -495,14 +495,14 @@ read (ifil, end=900, err=950, pos=iwavsk(2)) nrecs, nopen, &
 npts = nrecs - 3
 ! read in wavevectors, bessel functions j, j', n, n'
 ! first initialize to zero for all channels
-call dset(nch,zero,sc1,1)  ! pk (asymptotic wavevectors)
-call dset(nch,zero,sc2,1)  ! fj
-call dset(nch,zero,sc3,1)  ! fpj
-call dset(nch,zero,sc4,1)  ! fn
-call dset(nch,zero,sc5,1)  ! fpn
-read (ifil, end=900, err=950) (sc1(i), i=1, nopen), &
-     (sc2(i), i=1, nopen), (sc3(i), i=1, nopen), &
-     (sc4(i), i=1, nopen), (sc5(i), i=1, nopen)
+call dset(nch,zero,pk,1)  ! pk (asymptotic wavevectors)
+call dset(nch,zero,fj,1)  ! fj
+call dset(nch,zero,fpj,1)  ! fpj
+call dset(nch,zero,fn,1)  ! fn
+call dset(nch,zero,fpn,1)  ! fpn
+read (ifil, end=900, err=950) (pk(i), i=1, nopen), &
+     (fj(i), i=1, nopen), (fpj(i), i=1, nopen), &
+     (fn(i), i=1, nopen), (fpn(i), i=1, nopen)
 nopsq = nopen ** 2
 ! read in sreal and simag, store in w and zmat
 read (ifil, end=900, err=950) (w(i), i=1, nopsq), &
