@@ -635,7 +635,7 @@ ntop = nchtop
 !
 
 call propag (z, w, zmat, amat, bmat, &
-             bqs%jq, bqs%lq, bqs%inq, &
+             bqs, &
              ien, nerg, ered, eshift, rstart, rendld, spac, &
              tolhi, rendai, rincr, fstfac, tb, tbm, &
              ipos, prlogd, noprin, airyfl, prairy, &

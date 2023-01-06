@@ -58,7 +58,7 @@ return
 end
 ! -------------------------------------------------------------------------
 subroutine propag (z, w, zmat, amat, bmat, &
-                   jq, lq, inq, &
+                   bqs, &
                    ien, nerg, en, eshift, rstart, rendld, spac, &
                    tolhi, rendai, rincr, fstfac, tb, tbm, &
                    ipos, prlogd, noprin, airyfl, prairy, &
@@ -86,8 +86,8 @@ subroutine propag (z, w, zmat, amat, bmat, &
 !    zmat:        on return: the upper-left nopen x nopen block of si
 !                         contains the imaginary part of the s-matrix
 !    amat,bmat:   scratch matrices of maximum dimension nmax x nmax
-!    jq, lq       on entry: contain the rotational angular momenta, orbital
-!    inq:         angular momenta, and other quantum index for each channel
+!    bqs:         on entry: contain the rotational angular momenta, orbital
+!                 angular momenta, and other quantum index for each channel
 !                 on return: the first nopen elements contain the rotational
 !                 angular momenta, and other quantum index for each open chann
 !    nerg:        the number of total energies at which calculation is to be
@@ -143,6 +143,7 @@ use mod_pmat, only: rtmn, rtmx, iflag
 use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
 use mod_hiutil, only: mtime, gettim
 use mod_hibrid1, only: airprp
+use mod_hitypes, only: bqs_type
 implicit none
 !   square matrices
 real(8), intent(out) :: z(nmax, nch)
@@ -150,9 +151,7 @@ real(8), intent(out) :: w(nmax, nch)
 real(8), intent(out) :: zmat(nmax, nch)
 real(8), intent(out) :: amat(nmax, nch)
 real(8), intent(out) :: bmat(nairy, nairy)
-integer, intent(inout) :: jq(nch)
-integer, intent(inout) :: lq(nch)
-integer, intent(inout) :: inq(nch)
+type(bqs_type), intent(inout) :: bqs
 integer, intent(in) :: ien
 integer, intent(in) :: nerg
 real(8), intent(in) :: en
@@ -287,7 +286,7 @@ if (prlogd .and. airyfl) then
 end if
 !  now calculate s-matrix and t-matrix squared
 call smatrx (z, w, zmat, &
-             lq, jq, inq, r, prec, tw, twm, nopen, nch, nmax, &
+             bqs, r, prec, tw, twm, nopen, nch, nmax, &
              prlogd,ipos)
 
 ! convert to time string
@@ -2133,7 +2132,7 @@ call exit()
 end
 ! -----------------------------------------------------------------------
 subroutine smatrx (z, sr, si, &
-                   lq, jq, inq, r, prec, ts, tsw, nopen, nch, nmax, &
+                   bqs, r, prec, ts, tsw, nopen, nch, nmax, &
                    kwrit,ipos)
 ! -----------------------------------------------------------------------
 !  subroutine to:
@@ -2153,8 +2152,8 @@ subroutine smatrx (z, sr, si, &
 !                        contains the imaginary part of the s-matrix
 !    amat,    scratch matrices
 !     bmat
-!    jq, lq:  rotational angular momenta, orbital angular momenta, and
-!    inq,     additional quantum index for each channel
+!    bqs:     rotational angular momenta, orbital angular momenta, and
+!             additional quantum index for each channel
 !    isc1,sc1,
 !    sc2,sc3,   scratch vectors of dimension at least equal to the number of
 !    sc4,sc5:   channels
@@ -2178,13 +2177,12 @@ use mod_wave, only: ifil, ipos2, ipos3, nrlogd, iendwv, ipos2_location
 use mod_ered, only: ered, rmu
 use mod_phot, only: photof, wavefn, boundf, writs
 use mod_hiutil, only: mtime
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 real(8), intent(inout) :: z(nmax,nmax)
 real(8), intent(out) :: sr(nmax,nmax)
 real(8), intent(out) :: si(nmax,nmax)
-integer, intent(inout) :: lq(nch)
-integer, intent(inout) :: jq(nch)
-integer, intent(inout) :: inq(nch)
+type(bqs_type), intent(inout) :: bqs
 real(8), intent(in) :: r
 real(8), intent(in) :: prec
 real(8), intent(out) :: ts
@@ -2221,12 +2219,12 @@ do   50  i = 1, nch
     nopen = nopen + 1
     isc1(nopen) = i
     eint(nopen) = eint(i)
-    jq(nopen) = jq(i)
-    inq(nopen) = inq(i)
-    lq(nopen) = lq(i)
+    bqs%jq(nopen) = bqs%jq(i)
+    bqs%inq(nopen) = bqs%inq(i)
+    bqs%lq(nopen) = bqs%lq(i)
   end if
 50 continue
-
+bqs%length = nopen
 allocate(amat(nmax, nmax))
 if (nopen .lt. nch) then
 !  now pack the log-derivative matrix into a matrix of size nopen x nopen
@@ -2264,7 +2262,7 @@ endif
 !  isc1, sc1, sc2, sc3, and sc4 are all used as scratch arrays
 !  scmat is used as scratch matrix here
 !  this uses new smat routine involving just open channels
-call smatop (z, sr, si, amat, lq, r, prec, nopen, nmax, kwrit,ipos)
+call smatop (z, sr, si, amat, bqs%lq, r, prec, nopen, nmax, kwrit,ipos)
 if (wavefn) then
 ! if wavefunction desired, then
 ! sr and si contain open channel portion of asymptotic wavefunction
