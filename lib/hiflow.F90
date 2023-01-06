@@ -438,7 +438,8 @@ if (ien .eq. 1) then
               sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
               csflag, clist, bastst, ihomo, nu, numin, jlpar, &
               twomol, nch, nmax, nchtop, v2)
-  bqs%length = nlevop
+  bqs%length = nch
+
   ! if nch == 0, then v2 is usually not allocated at all
   if ( nch > 0 ) then
     ASSERT(allocated(v2))  ! if this fails, this means that the used base doesn't yet support v2 as growable array
@@ -594,8 +595,9 @@ if (wrxsec .or. prxsec .or. prpart .or. wrpart) then
 endif
 ! store header and reserve space on direct access file 2 if wavefunction
 ! is desired (not if bound state calculation)
-if (wavefl .and. .not.boundc) &
-  call wavewr(jtot,jlpar,nu,nch,rstart,rendld, bqs%inq, bqs%jq, bqs%lq)
+if (wavefl .and. .not.boundc) then
+  call wavewr(jtot,jlpar,nu,nch,rstart,rendld, bqs)
+end if
 call mtime (t11, t22)
 tb =  t11 - t1
 tbm = t22 - t2

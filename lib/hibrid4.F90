@@ -289,7 +289,7 @@ ASSERT(iwavsk > 0)
 end
 !
 ! -------------------------------------------------------------------------
-subroutine wavewr(jtot,jlpar,nu,nch,rstart,rendld, inq, jq, lq)
+subroutine wavewr(jtot,jlpar,nu,nch,rstart,rendld, bqs)
 ! -------------------------------------------------------
 !  subroutine to write initial header information on wavefunction file
 !  (file jobname.WFU, logical unit 22), unit is opened in subroutine openfi
@@ -323,6 +323,7 @@ use mod_wave, only: irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, get_wfu_re
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
 use mod_hiutil, only: dater
+use mod_hitypes, only: bqs_type
 implicit none
 integer, intent(in) :: jtot
 integer, intent(in) :: jlpar
@@ -330,9 +331,7 @@ integer, intent(in) :: nu
 integer, intent(in) :: nch
 real(8), intent(in) :: rstart
 real(8), intent(in) :: rendld
-integer, intent(in) :: inq(nch)
-integer, intent(in) :: jq(nch)
-integer, intent(in) :: lq(nch)
+type(bqs_type), intent(in) :: bqs
 
 character*20 :: cdate
 
@@ -342,7 +341,7 @@ integer(8) :: end_of_rec1_pos
 #if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_POINTER)
 real, pointer :: amat_as_vec(:)
 #endif
-
+ASSERT( bqs%length == nch )
 ifil = FUNIT_WFU
 
 nchwfu = nch
@@ -371,8 +370,8 @@ write (ifil, err=950) char(0), char(0), char(0), char(0)
 write (ifil, err=950) jtot, jlpar, nu, nch, csflag, flaghf, photof
 write (ifil, err=950) ered, rmu, rstart, rendld
 !
-write (ifil, err=950) (jq(i), i=1, nch), (lq(i), i=1, nch), &
-     (inq(i), i=1, nch)
+write (ifil, err=950) (bqs%jq(i), i=1, nch), (bqs%lq(i), i=1, nch), &
+     (bqs%inq(i), i=1, nch)
 write (ifil, err=950) (eint(i), i=1, nch)
 !
 write (ifil, err=950) 'ENDWFUR', char(1)
