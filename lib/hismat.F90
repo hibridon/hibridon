@@ -418,7 +418,7 @@ end
 !
 !     ------------------------------------------------------------
 subroutine swrite (sreal, simag, jtot, jlpar, nu, &
-                   jq, lq, inq, iorder, packed_bqs, &
+                   row_bqs, iorder, packed_bqs, &
                    epack, nfile, nmax, nopen)
 !  subroutine to write selected elements of s-matrix to file nfile
 !  author:  millard alexander
@@ -439,13 +439,13 @@ subroutine swrite (sreal, simag, jtot, jlpar, nu, &
 !    flaghf:    if .true., then system with half-integer spin
 !                if .false., then system with integer spin
 !    nu:        cs projection index (not used in cc calculation)
-!    jq:        channel rotational angular momenta
-!    lq:        channel orbital angular momenta
-!    inq:       additional quantum index of each channel
+!    row_bqs%jq:        channel rotational angular momenta
+!    row_bqs%lq:        channel orbital angular momenta
+!    row_bqs%inq:       additional quantum index of each channel
 !    note!!!   if flaghf = .true., then the true values
 !    of the rotational quantum numbers, the total angular momentum,
 !    and the coupled-states projection index are equal to the values
-!    stored in jq, jtot, and nu plus 1/2
+!    stored in row_bqs%jq, jtot, and nu plus 1/2
 !    nfile:     logical unit for output of s-matrices
 !    nmax:      maximum row dimension of matrices
 !    nopen:     number of channels
@@ -465,9 +465,7 @@ real(8), intent(inout) :: simag(nmax,nmax)
 integer, intent(in) :: jtot
 integer, intent(in) :: jlpar
 integer, intent(in) :: nu
-integer, intent(in) :: jq(nopen)
-integer, intent(in) :: lq(nopen)
-integer, intent(in) :: inq(nopen)
+type(bqs_type), intent(in) :: row_bqs
 integer, intent(out) :: iorder(nopen)
 type(bqs_type), intent(out) :: packed_bqs
 real(8), intent(out) :: epack(nopen)
@@ -482,10 +480,10 @@ integer int_t
 double precision dble_t
 !
 
-! by default, each channel is uses three parameters: j, l, inq
+! by default, each channel is uses three parameters: row_bqs%j, row_bqs%l, row_bqs%inq
 nchnid = 3
 if (is_j12(ibasty)) then
-   ! some basis have an additional channel parameter j12
+   ! some basis have an additional channel parameter row_bqs%j12
    nchnid = nchnid + 1
 end if
 !
@@ -501,13 +499,13 @@ length = 0
 do icol = 1, nopen
    ! now sum over the packed states, find labels
    do ii = 1, mmout
-      if (jq(icol) == jout(ii) ) then
+      if (row_bqs%jq(icol) == jout(ii) ) then
          ! here if match
          length = length + 1
-         packed_bqs%jq(length) = jq(icol)
-         packed_bqs%lq(length) = lq(icol)
+         packed_bqs%jq(length) = row_bqs%jq(icol)
+         packed_bqs%lq(length) = row_bqs%lq(icol)
          epack(length) = eint(icol)
-         packed_bqs%inq(length) = inq(icol)
+         packed_bqs%inq(length) = row_bqs%inq(icol)
          if (is_j12(ibasty)) j12pk(length) = j12(icol)
          iorder(length) = icol
          exit
@@ -553,9 +551,9 @@ if (nnout > 0) then
    ! here if you want to print out columns of the s-matrix
 else
    ASSERT (nnout <= 0)
-   write (nfile, err=950) (jq(i), i=1, nopen)
-   write (nfile, err=950) (lq(i), i=1, nopen)
-   write (nfile, err=950) (inq(i), i=1, nopen)
+   write (nfile, err=950) (row_bqs%jq(i), i=1, nopen)
+   write (nfile, err=950) (row_bqs%lq(i), i=1, nopen)
+   write (nfile, err=950) (row_bqs%inq(i), i=1, nopen)
    if (is_j12(ibasty)) write (nfile, err=950) (j12(i), i=1, nopen)
    ! now write out columns of the s-matrix into buffer length is the
    ! number of columns of the s-matrix to save

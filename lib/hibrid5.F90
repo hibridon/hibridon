@@ -326,7 +326,7 @@ if (writs .and. nopen .gt. 0) then
                 jtotd, numin, numax, nud, nlevel, nlevop, nnout, &
                 jlev, inlev, elev, jout)
     end if
-    call swrite (sr, si, jtot, jlpar, nu, bqs%jq, bqs%lq, bqs%inq, isc1, &
+    call swrite (sr, si, jtot, jlpar, nu, bqs, isc1, &
                  packed_bqs, sc2, nfile, nmax, nopen)
 end if
 
