@@ -194,7 +194,7 @@ end if
 !     the packed_bqs will hold the column indices of
 !     the packed basis (dimension length)
 !
-!     the vectors jq, lq, inq will hold the row indices of the packed
+!     the vectors row_bqs%jq, row_bqs%lq, row_bqs%inq will hold the row indices of the packed
 !     basis (dimension nopen)
 !
 !     read next s-matrix header

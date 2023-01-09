@@ -469,9 +469,9 @@ if (ien .eq. 1) then
 !  nch is number of channels
 !  nchtop is the maximum row dimension of all matrices passed to the
 !  subroutines propag and soutpt
-!  inq is the additional quantum index of each channel
-!  jq is array of rotational quantum numbers
-!  lq is array of orbital angular momenta
+!  bqs%inq is the additional quantum index of each channel
+!  bqs%jq is array of rotational quantum numbers
+!  bqs%lq is array of orbital angular momenta
   if (nch .gt. nchmax) nchmax = nch
 ! in rare cases one might come back from basis with no open channels (but
 ! with closed channels present).  to deal with this case set nchop to the
