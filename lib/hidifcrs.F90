@@ -504,13 +504,13 @@ end if
 !
 call ampli( &
     j1, in1, j2, in2, jtot, sreal1, simag1, mmax, packed_bqs1, &
-    row_bqs1%jq, row_bqs1%lq, row_bqs1%inq, nopen1, y, q, l2max, nangle, ihomo, flaghf, &
+    row_bqs1, nopen1, y, q, l2max, nangle, ihomo, flaghf, &
     iydim1, iydim2, iq1min, iq1max, iq2min, iq2max, iq3)
 !.... calculate contributions for negative initial index
 if (stflag) then
   call ampli( &
     j1, -in1, j2, in2, jtot, sreal1, simag1, mmax, packed_bqs1, &
-    row_bqs1%jq, row_bqs1%lq, row_bqs1%inq, nopen1, y, qm, l2max, nangle, ihomo, flaghf, &
+    row_bqs1, nopen1, y, qm, l2max, nangle, ihomo, flaghf, &
     iydim1, iydim2, iq1min, iq1max, iq2min, iq2max, iq3)
 end if
 !
@@ -959,7 +959,7 @@ return
 end
 ! -----------------------------------------------------------------------
 subroutine ampli(j1,in1,j2,in2,jtot,sreal,simag,mmax, packed_bqs, &
-     jq,lq,inq,nopen,y,q,maxl2,nangle,ihomo,flaghf, &
+     row_bqs,nopen,y,q,maxl2,nangle,ihomo,flaghf, &
      iydim1,iydim2,iq1min,iq1max,iq2min,iq2max,iq3)
 !subr  calculates scattering amplitudes for given jtot and set
 !subr  of angles
@@ -975,7 +975,7 @@ subroutine ampli(j1,in1,j2,in2,jtot,sreal,simag,mmax, packed_bqs, &
 !  current revision date:  22-may-2021 by p. dagdigian
 !
 !.....packed_bqs%jq,packed_bqs%lq,packed_bqs%inq: labels for rows
-!.....jq,lq,inq:         labels for columns
+!.....row_bqs%jq,row_bqs%lq,row_bqs%inq:         labels for columns
 !
 use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
@@ -984,12 +984,11 @@ use mod_selb, only: ibasty
 use mod_hiutil, only: xf3j
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
-type(bqs_type) :: packed_bqs
+type(bqs_type), intent(in) :: packed_bqs
+type(bqs_type), intent(in) :: row_bqs
 complex*16 ai,yy,tmat
 parameter (zero=0.0d0, one=1.0d0, two=2.0d0)
 logical ihomo,flaghf,elastc
-dimension jq(1),inq(1)
-integer, intent(in) :: lq(1)
 dimension sreal(mmax,1),simag(mmax,1)
 integer, dimension(:), allocatable :: ilab1
 real(8), dimension(:), allocatable :: fak1
@@ -1100,8 +1099,8 @@ do ilab=1,packed_bqs%length
 end do
 !
 do 500 jlab=1,nopen
-if(jq(jlab).ne.j2.or.inq(jlab).ne.in2) goto 500
-l2=lq(jlab)
+if(row_bqs%jq(jlab).ne.j2.or. row_bqs%inq(jlab).ne.in2) goto 500
+l2=row_bqs%lq(jlab)
 xl2=l2
 if (is_j12(ibasty)) then
   j12_f = j12(jlab)

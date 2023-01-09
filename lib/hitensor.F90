@@ -38,7 +38,7 @@ integer :: ialloc
     end subroutine
 
     subroutine compute_scat_ampl_interface(this, j1, inlev1, j2, inlev2, jtot, mmax, packed_bqs, &
-      jq, lq, inq, nopen, maxl2, &
+      row_bqs, nopen, maxl2, &
       nangle, flaghf, sreal, simag, y, q)
     use mod_hitypes, only: bqs_type
     import frame_type
@@ -50,9 +50,7 @@ integer :: ialloc
       integer :: jtot
       integer :: mmax
       type(bqs_type), intent(in) :: packed_bqs
-      integer :: jq(:)
-      integer :: lq(:)
-      integer :: inq(:)
+      type(bqs_type), intent(in) :: row_bqs
       integer :: nopen
       integer :: maxl2
       integer :: nangle
@@ -227,7 +225,7 @@ subroutine helicity_frame_get_label(this, label)
 end subroutine
 
 subroutine helicity_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax, packed_bqs, &
-  jq,lq,inq,nopen,maxl2, &
+  row_bqs, nopen, maxl2, &
   nangle,flaghf,sreal,simag,y,q)
 !
 ! calculates scattering amplitudes for given jtot and set
@@ -239,8 +237,8 @@ subroutine helicity_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax, 
 !
 !     revision date: 13-oct-2011
 !
-!.....jq,lq,inq in packed_bqs : labels for rows
-!.....jq,lq,inq               : labels for columns
+! packed_bqs%jq,packed_bqs%lq,packed_bqs%inq : labels for rows
+! row_bqs%jq,row_bqs%lq,row_bqs%inq          : labels for columns
   use mod_tensor_ang, only: ang1, ang2, dang
   use mod_hiutil, only: xf3j
   use mod_hitypes, only: bqs_type
@@ -252,9 +250,7 @@ subroutine helicity_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax, 
   integer :: jtot
   integer :: mmax
   type(bqs_type), intent(in) :: packed_bqs
-  integer :: jq(:)
-  integer :: lq(:)
-  integer :: inq(:)
+  type(bqs_type), intent(in) :: row_bqs
   integer :: nopen
   integer :: maxl2
   integer :: nangle
@@ -311,8 +307,8 @@ do 50 ilab=1,packed_bqs%length
 llmax=ll
 !
 do 500 jlab=1,nopen
-  if(jq(jlab).ne.j2 .or. inq(jlab).ne.inlev2) goto 500
-  l2=lq(jlab)
+  if(row_bqs%jq(jlab).ne.j2 .or. row_bqs%inq(jlab).ne.inlev2) goto 500
+  l2=row_bqs%lq(jlab)
   xl2=l2
   do 60 ll=1,llmax
     ilab=ilab1(ll)
@@ -414,7 +410,7 @@ end subroutine
 
 
 subroutine geom_apse_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax, packed_bqs, &
-  jq,lq,inq,nopen,maxl2,nangle, &
+  row_bqs,nopen,maxl2,nangle, &
   flaghf,sreal,simag,y,q)
 !
 ! calculates scattering amplitudes for given jtot and set
@@ -426,8 +422,8 @@ subroutine geom_apse_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax,
 !
 !     revision date: 13-oct-2011
 !
-!.....jq,lq,inq in packed_bqs : labels for rows
-!.....jq,lq,inq               : labels for columns
+! packed_bqs%jq,packed_bqs%lq,packed_bqs%inq : labels for rows
+! row_bqs%jq,row_bqs%lq,row_bqs%inq          : labels for columns
   use mod_tensor_ang, only: ang1, ang2, dang
   use mod_hiutil, only: xf3j
   use mod_hitypes, only: bqs_type
@@ -440,9 +436,7 @@ implicit none
   integer :: jtot
   integer :: mmax
   type(bqs_type), intent(in) :: packed_bqs
-  integer :: jq(:)
-  integer :: lq(:)
-  integer :: inq(:)
+  type(bqs_type), intent(in) :: row_bqs
   integer :: nopen
   integer :: maxl2
   integer :: nangle
@@ -499,8 +493,8 @@ do 50 ilab=1,packed_bqs%length
 llmax=ll
 !
 do 500 jlab=1,nopen
-  if(jq(jlab).ne.j2 .or. inq(jlab).ne.inlev2) goto 500
-  l2=lq(jlab)
+  if(row_bqs%jq(jlab).ne.j2 .or. row_bqs%inq(jlab).ne.inlev2) goto 500
+  l2=row_bqs%lq(jlab)
   xl2=l2
   do 60 ll=1,llmax
     ilab=ilab1(ll)
@@ -724,7 +718,7 @@ end if
 !     for elastic (jlevel,inlevel) -> (jlevel,inlevel) transition
 !
 call frame%compute_scat_ampl(jlevel,inlevel,jlevel,inlevel,jtot,mmax, &
-  packed_bqs,row_bqs%jq,row_bqs%lq,row_bqs%inq,nopen, &
+  packed_bqs, row_bqs, nopen, &
   l2max,nangle,flaghf,sreal,simag,y,q)
 
 !
