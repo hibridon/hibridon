@@ -119,7 +119,6 @@ subroutine soutpt (tsq, sr, si, scmat, &
 !                   sections
 !  author:  millard alexander
 !  heavily modified by h.-j. werner
-!  added common block /coj12/ to pass j12 array (p. dagdigian)
 !  current revision date: 24-jan-2012 by p.dagdigian
 ! ---------------------------------------------------------------------------
 !  variables in call list
@@ -2058,7 +2057,6 @@ iaddr = 0
 !
 ! read s-matrix for present jtot, nu
 !
-! j12 is read into a common block for molecule-molecule collisions
 10 nopen = 0
 call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
   row_bqs, packed_bqs, &
@@ -2155,8 +2153,6 @@ subroutine tsqmat(tsq,sreal,simag,row_bqs, &
 !  current revsion date:  24-jan-2012 by p.dagdigian
 !
 ! ----------------------------------------------------------------------
-use mod_coj12, only: j12
-use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12
 use mod_selb, only: ibasty
 use mod_hitypes, only: bqs_type
@@ -2180,12 +2176,14 @@ do icol = 1, col_bqs%length
    in1 = col_bqs%inq(icol)
    j1 = col_bqs%jq(icol)
    l1 = col_bqs%lq(icol)
-   if (is_j12(ibasty)) j121 = j12(icol)
+   if (is_j12(ibasty)) then
+     j121 = col_bqs%j12(icol)
+   end if
    do irow = 1, nopen
       in2 = row_bqs%inq(irow)
       j2 = row_bqs%jq(irow)
       l2 = row_bqs%lq(irow)
-      if (is_j12(ibasty)) j122 = j12pk(irow)
+      if (is_j12(ibasty)) j122 = row_bqs%j12(irow)
       diag = j1.eq.j2 .and. in1.eq.in2 .and. l1.eq.l2
       if (is_j12(ibasty)) diag = diag .and. j121.eq.j122
 !

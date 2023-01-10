@@ -433,8 +433,7 @@ if (ien .eq. 1) then
   end do
 #endif
 
-  call bqs%init(nmax)
-  call basis (bqs%jq, bqs%lq, bqs%inq, jlev, elev, inlev, nlevel, nlevop, &
+  call basis (bqs, jlev, elev, inlev, nlevel, nlevop, &
               sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
               csflag, clist, bastst, ihomo, nu, numin, jlpar, &
               twomol, nch, nmax, nchtop, v2)
@@ -649,6 +648,7 @@ if (boundc) then
   close (9)
   goto 1
 endif
+
 !  now print out s-matrix and t-matrix squared, and calculate partial
 !  cross sections and print them out, if desired
 call soutpt (z, w, zmat, amat, &

@@ -279,7 +279,6 @@ subroutine compute_transport_xs(iunit,mjtot,mchmx, &
 !
 ! current revision date:  23-jun-2015 by pjd
 !------------------------------------------------------------------------
-use mod_coj12, only: j12
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_coz, only: sreal => z_as_vec ! sreal(1)
@@ -439,7 +438,7 @@ do i = 1, packed_bqs%length
 end do
 if (uses_j12) then
   do i = 1, packed_bqs%length
-    jj12(jtot,jlp,i) = j12(i)
+    jj12(jtot,jlp,i) = packed_bqs%j12(i)
   end do
 end if
 do ii = 1, len2

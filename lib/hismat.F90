@@ -156,8 +156,6 @@ subroutine sread (iadr, sreal, simag, jtot, jlpar, nu, &
 !     if iadr > 0 read absolute
 !     if nopen = -1, the lower triangle is filled
 !     ------------------------------------------------------------
-use mod_coj12, only: j12
-use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12
 use mod_selb, only: ibasty
 use mod_hitypes, only: bqs_type
@@ -206,24 +204,18 @@ read (smt_file_unit, end=900, err=950) &
      (packed_bqs%jq(i), i=1, packed_bqs%length), &
      (packed_bqs%lq(i), i=1, packed_bqs%length), &
      (packed_bqs%inq(i), i=1, packed_bqs%length)
-if (is_j12(ibasty)) &
-     read (smt_file_unit, end=900, err=950) (j12pk(i), i=1, packed_bqs%length)
-
-
-
-!      write(6,*) 'SREAD'
-!      write(6,*) jtot,jlpar,length
-!      write(6,*) (j12pk(i), i=1, length)
-
-
-
+if (is_j12(ibasty)) then
+     read (smt_file_unit, end=900, err=950) (packed_bqs%j12(i), i=1, packed_bqs%length)
+end if
 !
 if (nnout .gt. 0) then
    do 50 i = 1, packed_bqs%length
       row_bqs%jq(i) = packed_bqs%jq(i)
       row_bqs%lq(i) = packed_bqs%lq(i)
       row_bqs%inq(i)= packed_bqs%inq(i)
-      if (is_j12(ibasty)) j12(i) = j12pk(i)
+      if (is_j12(ibasty)) then
+         row_bqs%j12(i) = packed_bqs%j12(i)
+      end if
 50    continue
    nopen = packed_bqs%length
    if (triang) then
@@ -255,8 +247,9 @@ else if (nnout .le. 0) then
 !     here if you have written out columns of the s-matrix
    read (smt_file_unit, end=900, err=950) (row_bqs%jq(i), i=1, nopen), &
         (row_bqs%lq(i), i=1, nopen), (row_bqs%inq(i), i=1, nopen)
-   if (is_j12(ibasty)) read (smt_file_unit, end=900, err=950) &
-        (j12(i), i=1, nopen)
+   if (is_j12(ibasty)) then
+      read (smt_file_unit, end=900, err=950) (row_bqs%j12(i), i=1, nopen)
+   end if
 !     now read columns of the s-matrix
    do 140 icol = 1, packed_bqs%length
       read (smt_file_unit, end=900, err=950) &
@@ -316,8 +309,6 @@ subroutine swrite (sreal, simag, jtot, jlpar, nu, &
 !  ------------------------------------------------------------------
 use mod_cosout, only: nnout, jout
 use mod_coeint, only: eint
-use mod_coj12, only: j12
-use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
@@ -369,7 +360,7 @@ do icol = 1, nopen
          packed_bqs%lq(length) = row_bqs%lq(icol)
          epack(length) = eint(icol)
          packed_bqs%inq(length) = row_bqs%inq(icol)
-         if (is_j12(ibasty)) j12pk(length) = j12(icol)
+         if (is_j12(ibasty)) packed_bqs%j12(length) = row_bqs%j12(icol)
          iorder(length) = icol
          exit
       end if
@@ -391,7 +382,10 @@ write (nfile, err=950) nrecw, jtot, jlpar, nu, nopen, &
 write (nfile, err=950) (packed_bqs%jq(i), i=1, length)
 write (nfile, err=950) (packed_bqs%lq(i), i=1, length)
 write (nfile, err=950) (packed_bqs%inq(i), i=1, length)
-if (is_j12(ibasty)) write (nfile, err=950) (j12pk(i), i=1, length)
+if (is_j12(ibasty)) then
+   write (nfile, err=950) (packed_bqs%j12(i), i=1, length)
+end if
+
 ! here we pack the s-matrix and print out just those elements for
 ! which the initial and final rotational quantum numbers correspond
 ! to an element in the array jout
@@ -417,7 +411,7 @@ else
    write (nfile, err=950) (row_bqs%jq(i), i=1, nopen)
    write (nfile, err=950) (row_bqs%lq(i), i=1, nopen)
    write (nfile, err=950) (row_bqs%inq(i), i=1, nopen)
-   if (is_j12(ibasty)) write (nfile, err=950) (j12(i), i=1, nopen)
+   if (is_j12(ibasty)) write (nfile, err=950) (row_bqs%j12(i), i=1, nopen)
    ! now write out columns of the s-matrix into buffer length is the
    ! number of columns of the s-matrix to save
    do ii = 1, length

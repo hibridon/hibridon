@@ -490,7 +490,7 @@ return
 end
 ! --------------------------------------------------------------------
 
-subroutine bausr (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
+subroutine bausr (bqs, jhold, ehold, ishold, nlevel, nlevop, &
                   sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
                   n, nmax, ntop, v2)
@@ -601,10 +601,9 @@ use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_ered, only: ered, rmu
 use mod_ch3i, only: vib
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
-integer, intent(out) :: j(:)
-integer, intent(out) :: l(:)
-integer, intent(out) :: is(:)
+type(bqs_type), intent(out) :: bqs
 integer, intent(out), dimension(:) :: jhold
 real(8), intent(out), dimension(:) :: ehold
 integer, intent(out), dimension(:) :: ishold
@@ -639,6 +638,7 @@ one = 1.d0
 two = 2.d0
 clfl = .true.
 nel= 2
+call bqs%init(nmax)
 n=0
 nlevel=0
 do i=1, nel
@@ -651,11 +651,12 @@ do i=1, nel
     vib%ie(n)=i
     vib%iv(n)=nvmin+k-1
     cent(n)=0.d0
-    j(n)=0
-    jhold(n)=j(n)
-    l(n)=0
-    is(n)=(3-2*i)*(vib%iv(n)+1)
-    ishold(n)=is(n)
+    bqs%jq(n)=0
+    jhold(n)=bqs%jq(n)
+    bqs%lq(n)=0
+    bqs%inq(n)=(3-2*i)*(vib%iv(n)+1)
+    ishold(n)=bqs%inq(n)
+    bqs%length = n
     eel=rcod(2*i)
     evib=rcod(2*i+1)
     eint(n)=eel + (vib%iv(n)+0.5d0)*evib
@@ -690,21 +691,21 @@ if (n .gt. 1) then
         esave = eint(i2)
         eint(i2) = eint(i1)
         eint(i1) = esave
-        jsave = j(i2)
-        j(i2) = j(i1)
-        j(i1) = jsave
+        jsave = bqs%jq(i2)
+        bqs%jq(i2) = bqs%jq(i1)
+        bqs%jq(i1) = jsave
         jsave = jhold(i2)
         jhold(i2) = jhold(i1)
         jhold(i1) = jsave
-        lsave = l(i2)
-        l(i2) = l(i1)
-        l(i1) = lsave
+        lsave = bqs%lq(i2)
+        bqs%lq(i2) = bqs%lq(i1)
+        bqs%lq(i1) = lsave
         csave = cent(i2)
         cent(i2) = cent(i1)
         cent(i1) = csave
-        issave = is(i2)
-        is(i2) = is(i1)
-        is(i1) = issave
+        issave = bqs%inq(i2)
+        bqs%inq(i2) = bqs%inq(i1)
+        bqs%inq(i1) = issave
         issave = ishold(i2)
         ishold(i2) = ishold(i1)
         ishold(i1) = issave
@@ -779,11 +780,11 @@ if (clist .or. bastst) then
 256   format(/' Open channels:'// &
           '   N   EL  V  IND     EINT(CM-1)')
   do 265  i = 1, nlevel
-    nv = abs(is(i))-1
-    ieps = is(i)/abs(is(i))
+    nv = abs(bqs%inq(i))-1
+    ieps = bqs%inq(i)/abs(bqs%inq(i))
     iel = (3-ieps)/2
-    write (6, 260) i, iel, nv, is(i), eint(i) * econv
-    write (9, 260) i, iel, nv, is(i), eint(i) * econv
+    write (6, 260) i, iel, nv, bqs%inq(i), eint(i) * econv
+    write (9, 260) i, iel, nv, bqs%inq(i), eint(i) * econv
 260     format (4i4, f13.3)
 265   continue
   write (6, 256)

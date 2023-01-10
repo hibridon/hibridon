@@ -37,7 +37,6 @@ subroutine difcrs(fname1,a,ihomo,flaghf)
 !---------------------------------------------------------------*
 use constants
 use mod_codim, only: mmax
-use mod_coj12, only: j12
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 use mod_coisc2, only: jout1 => isc2 ! jout1(1)
@@ -977,8 +976,6 @@ subroutine ampli(j1,in1,j2,in2,jtot,sreal,simag,mmax, packed_bqs, &
 !.....packed_bqs%jq,packed_bqs%lq,packed_bqs%inq: labels for rows
 !.....row_bqs%jq,row_bqs%lq,row_bqs%inq:         labels for columns
 !
-use mod_coj12, only: j12
-use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12, is_twomol
 use mod_selb, only: ibasty
 use mod_hiutil, only: xf3j
@@ -1136,14 +1133,14 @@ if(row_bqs%jq(jlab).ne.j2.or. row_bqs%inq(jlab).ne.in2) goto 500
 l2=row_bqs%lq(jlab)
 xl2=l2
 if (is_j12(ibasty)) then
-  j12_f = j12(jlab)
+  j12_f = row_bqs%j12(jlab)
   xj12_f = j12_f + spin
 end if
 do 60 ll=1,llmax
 ilab=ilab1(ll)
 l1=packed_bqs%lq(ilab)
 if (is_j12(ibasty)) then
-  j12_i = j12pk(ilab)
+  j12_i = packed_bqs%j12(ilab)
   xj12_i = j12_i + spin
 end if
 !.....convert to t-matrix
@@ -1198,7 +1195,7 @@ elseif (is_twomol(ibasty)) then
     do 1070 ll = 1, llmax
       ilab = ilab1(ll)
       xl1 = packed_bqs%lq(ilab)
-      j12_i = j12pk(ilab)
+      j12_i = packed_bqs%j12(ilab)
       xj12_i = j12_i + spin
       fak3(ll) = fak2(ll) * (-1)**j12_i &
         * sqrt(two * xj12_i + one) &
@@ -1241,7 +1238,7 @@ else
     do 3070 ll = 1, llmax
       ilab = ilab1(ll)
       xl1 = packed_bqs%lq(ilab)
-      j12_i = j12pk(ilab)
+      j12_i = packed_bqs%j12(ilab)
       xj12_i = j12_i + spin
       fak3(ll) = fak2(ll) * (-1)**j12_i &
         * sqrt(two * xj12_i + one) &
