@@ -198,7 +198,6 @@ use constants
 use mod_coqvec, only: nphoto
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_coj12, only: j12
 use mod_coener, only: ener => energ
 use mod_hibrid2, only: mxoutd, mxoutr
 use funit
@@ -2011,7 +2010,6 @@ subroutine intcr(csflag,flaghf,twomol,flagsu,nucros, &
 !
 ! ----------------------------------------------------------------------
 use mod_cosout, only: nnout, jout
-use mod_coj12, only: j12
 use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
 use mod_coisc6, only: isc1 => isc6 ! isc1(1)
 use mod_coisc7, only: isc2 => isc7 ! isc2(1)
