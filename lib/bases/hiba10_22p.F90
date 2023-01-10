@@ -7,7 +7,7 @@ contains
 ! sy22p (sav22p/ptr22p) defines, save variables and reads                *
 !                  potential for 2S / 2P atom scattering                 *
 ! --------------------------------------------------
-subroutine ba22p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
+subroutine ba22p (bqs, jhold, ehold, ishold, nlevel, nlevop, &
                   isc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
                   n, nmax, ntop, v2)
@@ -107,13 +107,15 @@ use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_skip, only: nskip, iskip
 use mod_jtot, only: jjtot, jjlpar
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
+type(bqs_type), intent(out) :: bqs
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 
-dimension j(9), l(9), jhold(9), ehold(9), isc1(9), sc2(9), sc3(9), &
-          sc4(9), ishold(9), is(9)
+dimension  jhold(9), ehold(9), isc1(9), sc2(9), sc3(9), &
+          sc4(9), ishold(9)
 integer, pointer :: nterm, nphoto
 real(8), pointer :: aso
 nterm=>ispar(1); nphoto=>ispar(2)
@@ -170,6 +172,7 @@ if (clist) then
           f8.2)
 endif
 !  assign quantum numbers and energies in case (e) basis
+call bqs%init(nmax)
 n=0
 nlevel = 0
 jmin=0
@@ -193,7 +196,7 @@ do 120 ji=jmin, jmax
       do 80 li=lmin, lmax, 2
         n = n + 1
         if (n .gt. nmax) go to 180
-        l(n) = li
+        bqs%lq(n) = li
 ! centrifugal contribution to hamiltonian in case (a) basis
         cent(n) = jtot*(jtot+1)
 ! add on constant terms in various cases
@@ -203,9 +206,10 @@ do 120 ji=jmin, jmax
         if (n .eq. 4) cent(n)=cent(n)-3
 ! here for 1Pi1
         if (n .eq. 6) cent(n)=cent(n)-1
-        is(n)=1
+        bqs%inq(n)=1
         isc1(n) = j12
-        j(n) = ji
+        bqs%jq(n) = ji
+        bqs%length = n
 ! constant channel energy is zero in case a
         eint(n)=zero
         if (ji .eq. 0) sc2(n)=aso/econv
@@ -227,7 +231,7 @@ do 120 ji=jmin, jmax
       do 100 li=lmin, lmax,2
         n = n + 1
         if (n .gt. nmax) go to 180
-        l(n) = li
+        bqs%lq(n) = li
 ! centrifugal contribution to hamiltonian in case (a) basis
         cent(n) = jtot*(jtot+1)
 ! add on constant terms in various cases
@@ -237,9 +241,10 @@ do 120 ji=jmin, jmax
         if (n .eq. 4) cent(n)=cent(n)-3
 ! here for 1Pi1
         if (n .eq. 6) cent(n)=cent(n)-1
-        is(n)=1
+        bqs%inq(n)=1
         isc1(n) = j12
-        j(n) = ji
+        bqs%jq(n) = ji
+        bqs%length = n
 ! constant channel energy is zero in case a
         eint(n)=zero
         if (ji .eq. 0) sc2(n)=aso/econv
@@ -284,14 +289,15 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and..not.boundc) then
 !  here if this channel is to be included
         nn = nn + 1
         sc2(nn) = sc2(i)
-        is(nn) = is(i)
-        j(nn) = j(i)
+        bqs%inq(nn) = bqs%inq(i)
+        bqs%jq(nn) = bqs%jq(i)
         cent(nn) = cent(i)
-        l(nn) = l(i)
+        bqs%lq(nn) = bqs%lq(i)
       end if
 195     continue
 !  reset number of channels
     n = nn
+    bqs%length = n
   end if
 end if
 !  return if no channels
@@ -311,8 +317,8 @@ if (clist) then
   write (9, 255)
 255   format(/'   N    J   J12    L      EINT(CM-1)')
   do 265  i = 1, n
-    write (6, 260) i, j(i)+half, isc1(i), l(i), sc2(i) * econv
-    write (9, 260) i, j(i)+half, isc1(i), l(i), sc2(i) * econv
+    write (6, 260) i, bqs%jq(i)+half, isc1(i), bqs%lq(i), sc2(i) * econv
+    write (9, 260) i, bqs%jq(i)+half, isc1(i), bqs%lq(i), sc2(i) * econv
 260     format (i4, f5.1,i6, i5, f14.3)
 265   continue
 end if

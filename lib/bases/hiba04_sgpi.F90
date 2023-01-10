@@ -4,7 +4,7 @@ contains
 ! sysgpi (savsgpi/ptrsgpi) defines, saves variables and reads            *
 !                  potential for doublet/pi sigma scattering             *
 ! ----------------------------------------------------------------------
-subroutine basgpi (j, l, is, jhold, ehold, ishold, nlevel, &
+subroutine basgpi (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1, sc2, sc3, sc4, &
                   rcut, jtot, flaghf, flagsu, csflag, clist, &
                   bastst, ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
@@ -170,6 +170,7 @@ use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_vib, only: nvibs, ivibs, nvibp, ivibp
 use mod_himatrix, only: mxva
+use mod_hitypes, only: bqs_type
 
 implicit double precision (a-h,o-z)
 real(8), intent(out), dimension(:) :: sc1
@@ -177,12 +178,12 @@ real(8), intent(out), dimension(:) :: sc2
 real(8), intent(out), dimension(:) :: sc3
 real(8), intent(out), dimension(:) :: sc4
 type(ancou_type), intent(out), allocatable, target :: v2
+type(bqs_type), intent(out) :: bqs
 type(ancouma_type), pointer :: ancouma
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
 !  these parameters must be the same as in hisysgpi
 dimension e(3,3), ieps(2), iepp(2), iomc(4), iomr(4), eig(3)
-dimension jhold(1), ishold(1), ehold(1), &
-          j(1), is(1), l(1)
+dimension jhold(1), ishold(1), ehold(1)
 parameter (nvmax=20)
 dimension ipvs(0:nvmax),ipvp(0:nvmax)
 integer, dimension(nmax) :: iom    ! on return contains nominal omega values for each channel
@@ -424,6 +425,7 @@ end if
 !    every vibrational energy level is referred to the lowest
 !    vibrational level
 !
+call bqs%init(nmax)
 n=0
 !  first transformation matrix for unperturbed sigma states
 nvec=1
@@ -458,9 +460,10 @@ else
 !  omega = 1/2 Pi levels
     n = n + 1
     if(n.gt.nmax) goto 1000
-    j(n) = ji
+    bqs%jq(n) = ji
     iom(n) = 0
-    is (n) = iepp(ip)
+    bqs%inq(n) = iepp(ip)
+    bqs%length = n
 !  dimension of h-matrix is temporarily stored in ivec
     ivec(n) = 1
     nlv(n)=iip
@@ -470,14 +473,15 @@ else
   n2=n
 !  now add the omega = 3/2 pi levels
   do 50 i = n1+1, n2
-    if (j(i) .eq. 0) goto 50
+    if (bqs%jq(i) .eq. 0) goto 50
     n = n + 1
     if(n.gt.nmax) goto 1000
 !  pointer to this level temporarily stored in ishold
     ishold(i) = n
-    j(n) = j(i)
+    bqs%jq(n) = bqs%jq(i)
     iom(n) = 1
-    is (n) = is(i)
+    bqs%inq(n) = bqs%inq(i)
+    bqs%length = n
     ivec(i) = 2
     ivec(n) = nvec+i-n1
     nlv(n)=nlv(i)
@@ -509,8 +513,9 @@ else
                  .and. ieps(ip)*(-1)**ji.ne.isplus) goto 60
         n = n + 1
         if(n.gt.nmax) goto 1000
-        is(n) = ieps(ip)
-        j(n) = ji
+        bqs%inq(n) = ieps(ip)
+        bqs%jq(n) = ji
+        bqs%length = n
 !  assign iom=2 to sigma levels to distinguish them from pi levels
         iom(n) = 2
         nlv(n) = ivibs(ivs)
@@ -518,7 +523,7 @@ else
         nlvp(n) = 0
 !  now find perturbing Pi level
         do 55 i=n1+1,n2
-          if(j(i).eq.ji.and.is(i).eq.is(n)) then
+          if(bqs%jq(i).eq.ji.and.bqs%inq(i).eq.bqs%inq(n)) then
             ivec(i)=3
             ivec(n)=nvec+i-n1
 !  pointer to perturbing p-level temporarily stored in jhold
@@ -531,7 +536,7 @@ else
           end if
 55         continue
 !  no level found, so calculate sigma energy
-        call hsgpi(j(n),is(n),e(1,1),rpar(noffs+ivs*nprsg+1), &
+        call hsgpi(bqs%jq(n),bqs%inq(n),e(1,1),rpar(noffs+ivs*nprsg+1), &
                    rpar(noffp+ivp*nprpi+1),3,-1)
         eint(n)=e(3,3)
         ivec(n)=1
@@ -548,11 +553,11 @@ else
     nvec=nvec+1
     ivec(i)=nvec
 !  hsgpi returns in e the idim*idim h-matrix
-    call hsgpi(j(i),is(i),e(1,1),rpar(noffs+ivs*nprsg+1), &
+    call hsgpi(bqs%jq(i),bqs%inq(i),e(1,1),rpar(noffs+ivs*nprsg+1), &
                rpar(noffp+ivp*nprpi+1),-idim,isgpi)
     call jacobi(idim,e(1,1),3,vec(1,1,nvec),3,eig)
     eint(i)=eig(1)
-    if(j(i).ne.0) then
+    if(bqs%jq(i).ne.0) then
       eint(ishold(i))=eig(2)
       if(ivec(ishold(i)).ne.nvec) stop 'chaos 1'
     else
@@ -607,8 +612,9 @@ if(isg.ne.0) then
                .and. ieps(ip)*(-1)**ji.ne.isplus) goto 100
       n = n + 1
       if(n.gt.nmax) goto 1000
-      is(n) = ieps(ip)
-      j(n) = ji
+      bqs%inq(n) = ieps(ip)
+      bqs%jq(n) = ji
+      bqs%length = n
 !  assign iom=2 to sigma levels to distinguish them from pi levels
       iom(n) = 2
       ivec(n) = 1
@@ -617,7 +623,7 @@ if(isg.ne.0) then
 !  now assign energies for case (a) level and store in array eint
 !  the matrix elements are given by a. j. kotlar, r. w. field,
 !  and j. i. steinfeld, j. mol. spectr. 80, 86 (1980)
-      call hsgpi(j(n),is(n),e(1,1),rpar(noffs+ivs*nprsg+1), &
+      call hsgpi(bqs%jq(n),bqs%inq(n),e(1,1),rpar(noffs+ivs*nprsg+1), &
                 rpar(noffp+ivp*nprpi+1),3,-1)
       eint(n)=e(3,3)
 100     continue
@@ -646,8 +652,8 @@ do 115  i = 1, nlevel
     n=n+1
     ehold(n) = eint(i) / econv
     emin=min(emin,ehold(n))
-    jhold(n) = j(i)
-    ishold(n) = is(i)
+    jhold(n) = bqs%jq(i)
+    ishold(n) = bqs%inq(i)
     iohold(n) = iom(i)
     ivhold(n) = ivec(i)
     nvhold(n) = nlv(i)
@@ -659,8 +665,8 @@ if(n.ne.nlevel) stop 'chaos 3'
 do 125 i=1,n
   ehold(i)=ehold(i)-emin
   eint(i)=ehold(i)
-  j(i)=jhold(i)
-  is(i)=ishold(i)
+  bqs%jq(i)=jhold(i)
+  bqs%inq(i)=ishold(i)
   iom(i)=iohold(i)
   ivec(i)=ivhold(i)
   nlv(i)=nvhold(i)
@@ -675,16 +681,16 @@ if (csflag) then
 !
   n=0
   do 130 i=1,nlevel
-    if(j(i).ge.nu) then
+    if(bqs%jq(i).ge.nu) then
       n=n+1
-      j(n)=j(i)
+      bqs%jq(n)=bqs%jq(i)
       eint(n)=eint(i)
-      is(n)=is(i)
+      bqs%inq(n)=bqs%inq(i)
       iom(n)=iom(i)
       ivec(n)=ivec(i)
       nlv(n)=nlv(i)
       nlvp(n)=nlvp(i)
-      l(n) = jtot
+      bqs%lq(n) = jtot
       cent(n) = jtot * (jtot + 1)
     end if
 130   continue
@@ -705,13 +711,14 @@ else if (.not. csflag) then
         n = n + 1
         if (n .gt. nmax) goto 1000
         eint(n) = ehold(i)
-        j(n) = jhold(i)
-        is(n) = ishold(i)
+        bqs%jq(n) = jhold(i)
+        bqs%inq(n) = ishold(i)
         iom(n) = iohold(i)
         ivec(n) = ivhold(i)
         nlv(n) = nvhold(i)
         nlvp(n) = nvphol(i)
-        l(n) = li
+        bqs%lq(n) = li
+        bqs%length = n
         cent(n) = li * ( li + 1)
       end if
 140     continue
@@ -766,14 +773,15 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and..not.boundc) then
 !  here if this channel is to be included
         n = n + 1
         eint(n) = eint(i)
-        j(n) = j(i)
-        is(n) = is(i)
+        bqs%jq(n) = bqs%jq(i)
+        bqs%inq(n) = bqs%inq(i)
         cent(n) = cent(i)
         iom(n) = iom(i)
         ivec(n) = ivec(i)
         nlv(n) = nlv(i)
         nlvp(n) = nlvp(i)
-        l(n) = l(i)
+        bqs%lq(n) = bqs%lq(i)
+        bqs%length = n
       end if
 230     continue
 !  reset number of channels
@@ -806,14 +814,14 @@ if (clist .or. bastst .and. iprint .ge. 1) then
 250   format(/1x,'   N   V  VP   J  EPS OMEGA    L  EINT(CM-1)', &
    '     C-1/2       C-3/2       C-SIG')
   do 280  i = 1, n
-    fj = j(i) + half
+    fj = bqs%jq(i) + half
     xmga = iom(i) + half
     ecm = eint(i) * econv
     ive = ivec(i)
     ico = iom(i) + 1
-    write (6, 270) i,nlv(i),nlvp(i),fj,is(i),xmga,l(i), ecm, &
+    write (6, 270) i,nlv(i),nlvp(i),fj,bqs%inq(i),xmga,bqs%lq(i), ecm, &
                                (vec(k,ico,ive),k=1,3)
-    write (9, 270) i, nlv(i),nlvp(i),fj, is(i), xmga, l(i), ecm, &
+    write (9, 270) i, nlv(i),nlvp(i),fj, bqs%inq(i), xmga, bqs%lq(i), ecm, &
                                (vec(k,ico,ive),k=1,3)
 270     format (1x,3i4, f5.1, i4, f5.1, i6, f10.3, 3f12.6)
 280   continue
@@ -900,7 +908,7 @@ do 600 it=1,nterm
       else
         if(nlv(irow).ne.ivr) goto 350
       end if
-      lrow = l(irow)
+      lrow = bqs%lq(irow)
       if (csflag) lrow = nu
 !  always initialize potential to zero
       vee = 0
@@ -913,39 +921,39 @@ do 600 it=1,nterm
 !  lb is the actual value of lambda
          if(ipi.ne.0) then
            if(iterm.eq.2) then
-             call vlsgpi (j(irow), lrow, j(icol), l(icol), jtot, &
+             call vlsgpi (bqs%jq(irow), lrow, bqs%jq(icol), bqs%lq(icol), jtot, &
                          izero, izero, il, &
-                         is(irow), is(icol), e(1,1), csflag)
-             call vlsgpi (j(irow), lrow, j(icol), l(icol), jtot, &
+                         bqs%inq(irow), bqs%inq(icol), e(1,1), csflag)
+             call vlsgpi (bqs%jq(irow), lrow, bqs%jq(icol), bqs%lq(icol), jtot, &
                          ione, ione, il, &
-                         is(irow), is(icol), e(2,2), csflag)
+                         bqs%inq(irow), bqs%inq(icol), e(2,2), csflag)
            else if(iterm.eq.4) then
-             call vlsgpi (j(irow), lrow, j(icol), l(icol), jtot, &
+             call vlsgpi (bqs%jq(irow), lrow, bqs%jq(icol), bqs%lq(icol), jtot, &
                          ione, izero, il, &
-                         is(irow), is(icol), e(2,1), csflag)
-             call vlsgpi (j(irow), lrow, j(icol), l(icol), jtot, &
+                         bqs%inq(irow), bqs%inq(icol), e(2,1), csflag)
+             call vlsgpi (bqs%jq(irow), lrow, bqs%jq(icol), bqs%lq(icol), jtot, &
                          izero, ione, il, &
-                         is(irow), is(icol), e(1,2), csflag)
+                         bqs%inq(irow), bqs%inq(icol), e(1,2), csflag)
            end if
          end if
          if(isg.ne.0) then
            if(iterm.eq.1) then
-             call vlsgpi (j(irow), lrow, j(icol), l(icol), jtot, &
+             call vlsgpi (bqs%jq(irow), lrow, bqs%jq(icol), bqs%lq(icol), jtot, &
                          itwo, itwo, il, &
-                         is(irow), is(icol), e(3,3), csflag)
+                         bqs%inq(irow), bqs%inq(icol), e(3,3), csflag)
            else if(iterm.eq.3.and.ipi.ne.0) then
-             call vlsgpi (j(irow), lrow, j(icol), l(icol), jtot, &
+             call vlsgpi (bqs%jq(irow), lrow, bqs%jq(icol), bqs%lq(icol), jtot, &
                          itwo, izero, il, &
-                         is(irow), is(icol), e(3,1), csflag)
-             call vlsgpi (j(irow), lrow, j(icol), l(icol), jtot, &
+                         bqs%inq(irow), bqs%inq(icol), e(3,1), csflag)
+             call vlsgpi (bqs%jq(irow), lrow, bqs%jq(icol), bqs%lq(icol), jtot, &
                          itwo, ione, il, &
-                         is(irow), is(icol), e(3,2), csflag)
-             call vlsgpi (j(irow), lrow, j(icol), l(icol), jtot, &
+                         bqs%inq(irow), bqs%inq(icol), e(3,2), csflag)
+             call vlsgpi (bqs%jq(irow), lrow, bqs%jq(icol), bqs%lq(icol), jtot, &
                          izero, itwo, il, &
-                         is(irow), is(icol), e(1,3), csflag)
-             call vlsgpi (j(irow), lrow, j(icol), l(icol), jtot, &
+                         bqs%inq(irow), bqs%inq(icol), e(1,3), csflag)
+             call vlsgpi (bqs%jq(irow), lrow, bqs%jq(icol), bqs%lq(icol), jtot, &
                          ione, itwo, il, &
-                         is(irow), is(icol), e(2,3), csflag)
+                         bqs%inq(irow), bqs%inq(icol), e(2,3), csflag)
            end if
          end if
          icc=iom(icol)+1
@@ -985,7 +993,7 @@ end if
 !  set epsilon equal to +/- 2 for nominally omega=3/2 pi states
 !  and equal to +/- 3 for sigma states
 do 640 i = 1, n
-  is(i) = ((1 + iom(i))*100 + nlv(i)) * is(i)
+  bqs%inq(i) = ((1 + iom(i))*100 + nlv(i)) * bqs%inq(i)
 640 continue
 do 650 i=1,nlevel
   ishold(i) = ((1 + iohold(i))*100 + nvhold(i)) * ishold(i)
@@ -995,15 +1003,16 @@ if (bastst .and. iprint .ge. 1) then
 660   format(/1x,'   N   V  VP   J   EPS    L  EINT(CM-1)', &
    '    C-1/2       C-3/2       C-SIG')
   do 680  i = 1, n
-    fj = j(i) + half
+    fj = bqs%jq(i) + half
     ecm = eint(i) * econv
     ive = ivec(i)
     ico = iom(i) + 1
-    write (6, 670) i,nlv(i),nlvp(i),fj,is(i),l(i), ecm, &
+    write (6, 670) i,nlv(i),nlvp(i),fj,bqs%inq(i),bqs%lq(i), ecm, &
                                (vec(k,ico,ive),k=1,3)
 670     format (1x,3i4, f5.1, i5, i6, f10.3, 3f12.6)
 680   continue
 end if
+bqs%length = n
 return
 1000 write (6, 1010) n, nmax
 write (9, 1010) n, nmax

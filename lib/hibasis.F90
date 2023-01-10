@@ -178,7 +178,6 @@ call C_F_POINTER (C_LOC(sc2), sc2_as_int, [nmax])
 call C_F_POINTER (C_LOC(sc3), sc3_as_int, [nmax])
 call C_F_POINTER (C_LOC(sc4), sc4_as_int, [nmax])
 
-call bqs%init(nmax)
 !  select basis routine according to value of ibasty
 if (ibasty .ge. 99) then
 !  user supplied routine
@@ -193,49 +192,49 @@ goto (100,200,300,400,500,600,700,800,900,1000,1100,1200,1300, &
       2500,2600,2700,2800,2900,3000) &
       ibasty
 !  singlet sigma basis
-100   call ba1sg (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, nlevop, &
+100   call ba1sg (bqs, jhold, ehold, ishold, nlevel, nlevop, &
                   sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
                   n, nmax, ntop, v2)
 return
 !  doublet sigma basis
-200   call ba2sg (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+200   call ba2sg (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1_as_int, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 return
 !  doublet pi basis
-300   call ba2pi (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+300   call ba2pi (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 return
 !  sigma/pi basis
-400   call basgpi (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+400   call basgpi (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 return
 !   general pi basis
-500    call bapi (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+500    call bapi (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 return
 !  symmetric top basis, with inversion doubling
-600   call bastp (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+600   call bastp (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 return
 !  1/3 P atom basis
-700   call ba13p (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+700   call ba13p (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 return
 ! 1sigma + 1sigma basis
-800   call ba2mol (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+800   call ba2mol (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1_as_int, sc2_as_int, sc3_as_int, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
@@ -247,13 +246,13 @@ return
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 return
 ! 2/2 P atom basis
-1000   call ba22p (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+1000   call ba22p (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1_as_int, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 return
 !  singlet delta basis
-1100  call ba1del (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+1100  call ba1del (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
@@ -271,41 +270,41 @@ return
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 return
 !  doublet delta basis
-1400  call ba2del (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+1400  call ba2del (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1_as_int, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 return
 !  heteronuclear + 2P atom basis
-!1500  call bah2p (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+!1500  call bah2p (bqs, jhold, ehold, ishold, nlevel, &
 !    :                  nlevop, sc2, sc3, sc4, rcut, jtot, &
 !    :                  flaghf, flagsu, csflag, clist, bastst, &
 !    :                  ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
-1500  call badiat2p (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+1500  call badiat2p (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1_as_int, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 !  asymmetric top basis
-1600   call baastp (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+1600   call baastp (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 return
 !  CH2(X 3B1) (0,v2,0) bender levels
-1700   call bach2x (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+1700   call bach2x (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 return
 !  symmetric top basis, with no inversion doubling
-1800   call bastp1 (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+1800   call bastp1 (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1_as_int, sc2_as_int, sc3_as_int, sc4_as_int, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 return
 !  2sig-2pi + atom scattering (one 2sigma state and one or more 2pi
 !   vibrational levels, no sigma-pi spectroscopic perturbations)
-1900   call basgpi1 (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+1900   call basgpi1 (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1_as_int, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
@@ -321,7 +320,7 @@ return
      bastst, ihomo, nu, numin, jlpar, twomol, n, nmax, ntop, v2)
 return
 !  1D/3P atom + closed-shell atom
- 2200 call ba1d3p(bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+ 2200 call ba1d3p(bqs, jhold, ehold, ishold, nlevel, &
      nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, &
      bastst, ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 return
@@ -331,7 +330,7 @@ return
      bastst, ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 return
 !   spherical top + atom
- 2400 call basphtp (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+ 2400 call basphtp (bqs, jhold, ehold, ishold, nlevel, &
      nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
      flaghf, flagsu, csflag, clist, bastst, ihomo, &
      nu, numin, jlpar, n, nmax, ntop, v2)
@@ -349,7 +348,7 @@ return
      nu, numin, jlpar, n, nmax, ntop, v2)
 return
 !   C2v asymmetric top + atom scattering
- 2700 call baastp1 (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+ 2700 call baastp1 (bqs, jhold, ehold, ishold, nlevel, &
      nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
      flaghf, flagsu, csflag, clist, bastst, ihomo, &
      nu, numin, jlpar, n, nmax, ntop, v2)
@@ -361,7 +360,7 @@ return
      nu, numin, jlpar, n, nmax, ntop, v2)
 return
 !   chiral asymmetric top + atom scattering
- 2900 call baastp2 (bqs%jq, bqs%lq, bqs%inq, jhold, ehold, ishold, nlevel, &
+ 2900 call baastp2 (bqs, jhold, ehold, ishold, nlevel, &
      nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
      flaghf, flagsu, csflag, clist, bastst, ihomo, &
      nu, numin, jlpar, n, nmax, ntop, v2)

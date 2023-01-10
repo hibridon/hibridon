@@ -437,6 +437,7 @@ if (ien .eq. 1) then
               sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
               csflag, clist, bastst, ihomo, nu, numin, jlpar, &
               twomol, nch, nmax, nchtop, v2)
+  ASSERT(bqs%length == nch)
   bqs%length = nch
 
   ! if nch == 0, then v2 is usually not allocated at all

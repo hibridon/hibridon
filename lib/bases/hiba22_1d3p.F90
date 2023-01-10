@@ -5,7 +5,7 @@ contains
 !                  potentials for atom in 1D/3P states in collision      *
 !                  with an atom                                          *
 ! --------------------------------------------------------------------
-subroutine ba1d3p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
+subroutine ba1d3p (bqs, jhold, ehold, ishold, nlevel, nlevop, &
                   rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
                   n, nmax, ntop, v2)
@@ -120,14 +120,16 @@ use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax,
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_skip, only: nskip, iskip
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
+type(bqs_type), intent(out) :: bqs
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 
 !   eigenvectors for the atomic Hamiltonian
-dimension j(1), l(1), jhold(1), ehold(1), &
-          ishold(1), is(1), ieig(0:2)
+dimension  jhold(1), ehold(1), &
+          ishold(1), ieig(0:2)
 !  scratch arrays for computing asymmetric top energies and wave fns.
 dimension en0(4), en1(3), en2(2), vec(4,4), work(288)
 integer, pointer :: nterm, nstate
@@ -299,6 +301,7 @@ enddo
 !
 !  assign quantum numbers and energies
 !  zero of energy is energy of lowest (3P2) level
+call bqs%init(nmax)
 n=0
 nlevel = 0
 ! here if 3P state is included
@@ -323,10 +326,11 @@ if (nstate .ge. 1) then
 !  here for correct orbital angular momentum
         n = n + 1
         if (n .gt. nmax) go to 130
-        l(n) = li
+        bqs%lq(n) = li
         cent(n) = li * (li + 1.)
-        is(n) = 3
-        j(n) = ji
+        bqs%inq(n) = 3
+        bqs%jq(n) = ji
+        bqs%length = n
         if (axy .gt. 0.d0) then
 !  here for p^4 configuration
           goto (102,104,106),ji + 1
@@ -383,10 +387,11 @@ if (nstate .ne. 1) then
 !  here for correct orbital angular momentum
       n = n + 1
       if (n .gt. nmax) go to 130
-      l(n) = li
+      bqs%lq(n) = li
       cent(n) = li * (li + 1.)
-      is(n) = 1
-      j(n) = 2
+      bqs%inq(n) = 1
+      bqs%jq(n) = 2
+      bqs%length = n
       eint(n) = (en0(4) - en0(1))/econv
     end if
 125   continue
@@ -431,14 +436,15 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and..not.boundc) then
 !  here if this channel is to be included
         nn = nn + 1
         eint(nn) = eint(i)
-        is(nn) = is(i)
-        j(nn) = j(i)
+        bqs%inq(nn) = bqs%inq(i)
+        bqs%jq(nn) = bqs%jq(i)
         cent(nn) = cent(i)
-        l(nn) = l(i)
+        bqs%lq(nn) = bqs%lq(i)
       end if
 150     continue
 !  reset number of channels
     n = nn
+    bqs%length = n
   end if
 end if
 !  return if no channels
@@ -543,8 +549,8 @@ if (bastst) then
 255   format(/' CHANNEL BASIS FUNCTIONS' &
       /'   N   S   J    L      EINT(CM-1)')
   do 265  i = 1, n
-    write (6, 260) i, is(i), j(i), l(i), eint(i) * econv
-    write (9, 260) i, is(i), j(i), l(i), eint(i) * econv
+    write (6, 260) i, bqs%inq(i), bqs%jq(i), bqs%lq(i), eint(i) * econv
+    write (9, 260) i, bqs%inq(i), bqs%jq(i), bqs%lq(i), eint(i) * econv
 260     format (3i4, i5, f13.3)
 265   continue
 end if
@@ -577,8 +583,8 @@ do 320 il = 1, 19
 405   continue
   do icol= 1, n
     do irow = icol, n
-      call vlm1d3p (j(irow), l(irow), is(irow), j(icol), &
-        l(icol), is(icol), jtot, lb, vee)
+      call vlm1d3p (bqs%jq(irow), bqs%lq(irow), bqs%inq(irow), bqs%jq(icol), &
+        bqs%lq(icol), bqs%inq(icol), jtot, lb, vee)
       if (vee .ne. 0) then
         i = i + 1
         inum = inum + 1
