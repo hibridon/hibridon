@@ -147,7 +147,6 @@ subroutine sread (iadr, sreal, simag, jtot, jlpar, nu, &
 !     authors: h.j. werner and b. follmeg
 !     revision: 21-feb-2006 by mha
 !     major revision: 07-feb-2012 by q. ma
-!     added /coj12/ common block (p.dagdigian)
 !     current revision:  8-oct-2012 by q. ma
 !
 !     read real and imaginary parts of s-matrix together with
