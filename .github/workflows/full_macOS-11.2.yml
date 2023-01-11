@@ -7,7 +7,7 @@ env:
   CMAKE_BUILD_PARALLEL_LEVEL: "1" # disable parallel builds
   CTEST_OUTPUT_ON_FAILURE: "ON" # This way we don't need a flag to ctest
   CTEST_PARALLEL_LEVEL: "1"
-
+  OMP_NUM_THREADS: "2"
 jobs:
   build_and_test:
     runs-on: ${{ matrix.os }}
@@ -17,7 +17,8 @@ jobs:
         os: [macos-11.2]
         build_type: [Debug, Release]
         compiler: [gfortran-11, gfortran-9, gfortran-10, ifort]
-        library: [Apple, Intel10_64lp]
+        #library: [Apple, Intel10_64lp]
+        library: [Intel10_64lp]
     env:
       FC: ${{ matrix.compiler }}
 

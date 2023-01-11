@@ -10,14 +10,57 @@
 !
 !     DUMMY SUBROUTINES FOR ALL USER-DEFINED BASIS/POT.
 #include "assert.h"
+#include "hiutil.inc.F90"
 #include "common/ground.F90"
 !
+module mod_pot_ohh2_bausr
+implicit none
+!     Maximum number of R's, terms of B's and F's
+!     The R grid does not need to be evenly spaced
+integer, parameter :: MAX_NR = 400
+integer, parameter :: MAX_NVB = 100
+integer, parameter :: MAX_NVF = 70
+!     
+!     Actual number of R's, terms of B's and F's, R, B, F
+
+! pisg1
+integer :: nr, nvb, nvf
+
+! pisg2
+real(8) :: rr(MAX_NR)
+real(8) :: bcoef(MAX_NR, MAX_NVB)
+real(8) :: fcoef(MAX_NR, MAX_NVF)
+
+! pisg3
+!     Arrays listing l1, l2, and l
+integer :: lam1b(MAX_NVB), lam2b(MAX_NVB), lamb(MAX_NVB)
+integer :: lam1f(MAX_NVF), lam2f(MAX_NVF), lamf(MAX_NVF)
+
+!     Arrays storing information for cubic spline evaluation
+! pisgb
+real(8) :: splb_b(MAX_NR, MAX_NVB)
+real(8) :: splb_c(MAX_NR, MAX_NVB)
+real(8) :: splb_d(MAX_NR, MAX_NVB)
+
+! pisgf
+real(8) :: splf_b(MAX_NR, MAX_NVF)
+real(8) :: splf_c(MAX_NR, MAX_NVF)
+real(8) :: splf_d(MAX_NR, MAX_NVF)
+
+!     Machine epsilon
+real(8), parameter :: machep=epsilon(0d0)
+
+end module
 !     ------------------------------------------------------------------
 !     THE FOLLOWING SOUBROUTINE WILL BE THE MAIN FUNCTION FOR MAKEPOT.
 !     NOTE THAT VVL IS IN HARTREES.
 subroutine driver
 !
-#include "pot_ohh2_bausr_common.F90"
+use mod_covvl, only: vvl
+use constants, only: econv
+!     size of vvl : MAX_NVB+MAX_NVF
+use mod_pot_ohh2_bausr, only: lam1b, lam2b, lamb, lam1f, lam2f, lamf, nvb, nvf
+implicit none
 character*40 filenm
 double precision r, vv0
 integer i
@@ -40,9 +83,12 @@ goto 10
 !     ------------------------------------------------------------------
 !     DATA FILE, IF REQUIRED, CAN BE LOADED WITH THIS SOUBROUTINE.
 subroutine loapot(iunit, filnam)
+use mod_hibasutil, only: raise
 !
-#include "pot_ohh2_bausr_common.F90"
-#include "common/parpot.F90"
+use constants, only: econv
+use mod_pot_ohh2_bausr, only: rr, lam1b, lam2b, lamb, lam1f, lam2f, lamf, bcoef, fcoef, MAX_NR, MAX_NVB, MAX_NVF, nr, nvb, nvf, splb_b, splb_c, splb_d, splf_b, splf_c, splf_d
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+implicit none
 !
 character*(*) filnam
 integer iunit, ir, iv
@@ -112,7 +158,13 @@ end
 !     VVL SHOULD BE IN HARTREES.
 subroutine pot(vv0, r_raw)
 !
-#include "pot_ohh2_bausr_common.F90"
+use mod_covvl, only: vvl
+!     size of vvl : MAX_NVB+MAX_NVF
+use mod_pot_ohh2_bausr, only: nr, nvb, nvf, rr, &
+  splb_b, splb_c, splb_d, &
+  splf_b, splf_c, splf_d, &
+  bcoef, fcoef
+implicit none
 real(8), intent(in) :: r_raw
 real(8), intent(out) :: vv0
 real(8) seval, r
@@ -140,11 +192,14 @@ end
 subroutine syusr(irpot, readpt, iread)
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only : isrcod, junkr, rspar
+use mod_cosysr, only : isrcod, rspar
+use mod_hibasutil, only: raise
+use funit, only: FUNIT_INP
 !
-#include "pot_ohh2_bausr_common.F90"
-integer irpot, iread
-logical readpt
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
 character*(*) fname
 !     NUMBER OF BASIS-SPECIFIC VARIABLES, MODIFY ACCORDINGLY.
 integer icod, ircod
@@ -155,6 +210,7 @@ save potfil
 
 integer, pointer :: j1max, npar, j2min, j2max, iptsy2
 real(8), pointer :: brot, aso, p, q, drot
+
 j1max=>ispar(1); npar=>ispar(2); j2min=>ispar(3); j2max=>ispar(4); iptsy2=>ispar(5)
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
 !     DEFINE THE NAMES HERE
@@ -186,19 +242,21 @@ return
 return
 !     ------------------------------------------------------------------
 entry ptrusr(fname, readpt)
+UNUSED(fname)
+UNUSED(readpt)
 return
 !     ------------------------------------------------------------------
 entry savusr(readpt)
 !     WRITE THE LAST FEW LINES OF THE INPUT FILE.
-write (8, 230) j1max, npar
+write (FUNIT_INP, 230) j1max, npar
 230 format (2i4, 22x, '   j1max, npar')
-write (8,231) j2min, j2max, iptsy2
+write (FUNIT_INP,231) j2min, j2max, iptsy2
 231 format (3i4, 18x,'   j2min, j2max, iptsy2')
-write (8, 250) brot, aso, p, q
+write (FUNIT_INP, 250) brot, aso, p, q
 250 format (4(f10.4, 1x), 'brot, aso, p, q' )
-write (8, 251) drot
+write (FUNIT_INP, 251) drot
 251 format (f12.6, 18x,'   drot')
-write (8, *) potfil
+write (FUNIT_INP, *) potfil
 return
 end
 !     ------------------------------------------------------------------
@@ -209,39 +267,60 @@ end
 !     IV2, LAMNUM.
 subroutine bausr(j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
      sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, csflag, &
-     clist, bastst, ihomo, nu, numin, jlpar, n, nmax, ntop)
-use mod_cov2, only: nv2max, v2
-use mod_coiv2, only: iv2
+     clist, bastst, ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coj12, only: j12
-use mod_conlam, only: nlam, nlammx, lamnum
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_conlam, only: nlam
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
+use mod_hibasutil, only: raise
+use mod_par, only: iprint
 !
-#include "pot_ohh2_bausr_common.F90"
-double precision rcut
-integer jtot, nu, numin, jlpar, nmax
-logical flaghf, flagsu, csflag, clist, bastst, ihomo
-integer j(*), l(*), is(*), jhold(*), ishold(*)
-double precision ehold(*)
-integer nlevel, nlevop, n, ntop
+use constants, only: econv
+use mod_pot_ohh2_bausr, only: machep, &
+   nvb, nvf, &
+   lam1b, lam2b, lamb, &
+   lam1f, lam2f, lamf
+use mod_ered, only: ered, rmu
+implicit none
+integer, intent(out) :: j(:)
+integer, intent(out) :: l(:)
+integer, intent(out) :: is(:)
+integer, intent(out), dimension(:) :: jhold
+real(8), intent(out), dimension(:) :: ehold
+integer, intent(out), dimension(:) :: ishold
+integer, intent(out) :: nlevel
+integer, intent(out) :: nlevop
+real(8), intent(out), dimension(:), target :: sc1  ! k
+real(8), intent(out), dimension(:), target :: sc2  ! ieps
+real(8), intent(out), dimension(:), target :: sc3  ! jtemp
+real(8), intent(out), dimension(:), target :: sc4  ! ktemp
+real(8), intent(in) :: rcut
+integer, intent(in) :: jtot
+logical, intent(in) :: flaghf
+logical, intent(in) :: flagsu
+logical, intent(in) :: csflag
+logical, intent(in) :: clist
+logical, intent(in) :: bastst
+logical, intent(in) :: ihomo
+integer, intent(in) :: nu
+integer, intent(in) :: numin
+integer, intent(in) :: jlpar
+integer, intent(out) :: n
+integer, intent(in) :: nmax
+integer, intent(out) :: ntop
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 !     sc1--sc4 are scratches, whose type can be arbitary
 !     In this pot routine, sc1 is the mixing angle between omega=3/2 and
 !     omega=1/2 states for each level; sc2 is that mixing angle for each
 !     channel; sc3 and sc4 are coefficients for omega=3/2 and omega=1/2
 !     states, respectively, for each channel.
-double precision sc1(*), sc2(*), sc3(*), sc4(*)
-!
-!     
-common /coered/ ered, rmu
-double precision ered, rmu
-common /coipar/ junkip, iprint
-integer junkip(9), iprint
-!
 integer nlist, ji1, eps1, fi1, ji2, li, ji1p, eps1p, fi1p, &
      ji2p, lip, jsave, isave, ipar, j12min, ji12, ji12p, &
-     lpar, i, lamsum, ilam, ivx, iv, icol, irow, inum, &
+     lpar, i, ilam, ivx, iv, icol, irow, inum, &
      i1, i2
 double precision roteng, esave, vee, s1save, c12p, c32p, c12, c32
 double precision v2pisg
@@ -249,10 +328,11 @@ double precision x, o11, o12, o22, tho
 character(3) :: strfi
 integer, pointer :: j1max, npar, j2min, j2max, iptsy2
 real(8), pointer :: brot, aso, p, q, drot
+UNUSED(rcut)
+UNUSED(clist)
 j1max=>ispar(1); npar=>ispar(2); j2min=>ispar(3); j2max=>ispar(4); iptsy2=>ispar(5)
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
 !
-ASSERT(nlammx .ge. (MAX_NVB + MAX_NVF))  ! ensure lamnum array is big enough
 if (.not. flaghf) call &
      raise('FLAGHF = .FALSE. FOR DOUBLET SYSTEM')
 if (ihomo) call raise ('HOMONUCLEAR 2PI NOT IMPLEMENTED')
@@ -282,7 +362,6 @@ do ji1 = 0, j1max
            - 0.5d0 * (1d0 - eps1 * x) * dsqrt(x ** 2 - 1d0) * q
 !     tho is the mixing angle between omega=3/2 and omega=1/2 states
       tho = 0.5d0 * datan(2 * o12 / (o11 - o22))
-291       format (2i4, 4f10.3)
       do fi1 = 1, 2
          if (ji1 .eq. 0 .and. fi1 .eq. 1) cycle
          if (fi1 .eq. 1) then
@@ -422,10 +501,12 @@ end if
 !     Calculate coupling matrix elements
 nlam = nvb + nvf
 i = 0
-lamsum = 0
 ilam = 0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do ivx = 1, nvb + nvf
    ilam = ilam + 1
+   ancouma => v2%get_angular_coupling_matrix(ilam)
    inum = 0
    do icol = 1, n
       do irow = icol, n
@@ -459,40 +540,30 @@ do ivx = 1, nvb + nvf
                  li, lam1f(iv), lam2f(iv), lamf(iv), .false.)
          end if
          if (dabs(vee) .lt. machep) cycle
-         if (i .eq. nv2max) call raise( &
-              'too many non-zero V-matrix terms.')
          i = i + 1
          inum = inum + 1
-         v2(i) = vee
-         iv2(i) = ntop * (icol - 1) + irow
+         call ancouma%set_element(irow=irow, icol=icol, vee=vee)
          if (bastst .and. iprint .ge. 2) then
             if (ivx .le. nvb) then
                write (6, 345) ilam, lam1b(iv), lam2b(iv), &
-                    lamb(iv), icol, irow, i, iv2(i), vee
+                    lamb(iv), icol, irow, i, vee
             else
                write (6, 345) ilam, lam1f(iv), lam2f(iv), &
-                    lamf(iv), icol, irow, i, iv2(i), vee
+                    lamf(iv), icol, irow, i, vee
             end if
          end if
-345          format (i4, 3i3, 2i4, 2i5, f17.10)
+345          format (i4, 3i3, 2i4, i5, f17.10)
       end do
    end do
-   lamnum(ilam) = inum
-   lamsum = lamsum + inum
    if (bastst .and. ivx .le. nvb) write (6, 347) &
-        ilam, lam1b(iv), lam2b(iv), lamb(iv), lamnum(ilam)
+        ilam, lam1b(iv), lam2b(iv), lamb(iv), ancouma%get_num_nonzero_elements()
    if (bastst .and. ivx .gt. nvb) write (6, 347) &
-        ilam, lam1f(iv), lam2f(iv), lamf(iv), lamnum(ilam) 
+        ilam, lam1f(iv), lam2f(iv), lamf(iv), ancouma%get_num_nonzero_elements()
 347    format ('ILAM=', i3, ' LAM1=', i3, ' LAM2=', i3, &
         ' LAM=', i3, ' LAMNUM(ILAM) = ', i6)
 end do
 if (bastst .and. iprint .ge. 2) then
-   write (6, 350) i
-350    format ('number of non-zero terms: ', i6)
-   write (6, 351) (v2(i1), i1=1, i)
-351    format (10(f7.2), 1x)
-   write (6, 352) (iv2(i1), i1=1, i)
-352    format (10(i7), 1x)
+   call v2%print(unit=6)
 end if
 return
 end
@@ -529,17 +600,12 @@ do i = 1, n
 end do
 return
 end
-!     ------------------------------------------------------------------
-subroutine raise(mesg)
-implicit none
-character*(*) mesg
-write (0, *) 'hibridon: error: ', mesg
-stop
-end
+
 !     ------------------------------------------------------------------
 double precision function v2pisg(jtot, j1p, eps1p, c12p, c32p, &
      j2p, j12p, lp, j1, eps1, c12, c32, j2, j12, l, &
      lam1, lam2, lam, isdiag)
+use mod_hiutil, only: xf3j, xf6j, xf9j, xf3jm0
 implicit none
 !     
 !     The subroutine calculate the coupling matrix elements, shown in
@@ -556,7 +622,6 @@ integer :: iphase
 real(8) :: phase, pref, threej, sixj, ninej
 real(8) :: xj1p, xj2p, xj12p, xlp, &
      xj1, xj2, xj12, xl, xjtot, xlam1, xlam2, xlam
-real(8) :: xf3jm0, xf3j, xf6j, xf9j
 real(8), parameter :: machep=epsilon(0d0)
 !     
 !     One is added since j1p and j1 should be half integers

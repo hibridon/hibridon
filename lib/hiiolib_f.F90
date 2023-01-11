@@ -30,6 +30,26 @@
 !
 !  NB cstart ultrix-dec for i/o with fortran instead of c routines
 #include "assert.h"
+
+! block data io
+! cosize
+!    isize:     size of files (only needed for univac, optional on vax)
+!    isizes:    size of s-matrix file (only needed for univac, optional
+!               on vax
+module mod_file_size
+  integer :: isize
+  integer :: isizes
+end module mod_file_size
+
+
+module mod_disc
+  integer :: ipos(98)
+  integer :: iun(98)
+  integer :: iostat(98)
+  integer :: icatf(98)
+  character(len=14) :: nam(98)
+end module mod_disc
+
 ! ---------------------------------------------------------------
 subroutine fimove (nxfile)
 ! ---------------------------------------------------------------
@@ -51,6 +71,7 @@ end
  subroutine fimovs(nfile,jtot,jlpar,nu,ien,ierr)
  use mod_coener, only: energ
  use mod_cofil, only: nfl, maxrec, iofrec
+ use mod_hismat, only: readrc
  implicit none
  integer, intent(in) :: nfile
  integer, intent(in) :: jtot
@@ -189,9 +210,9 @@ subroutine gendat
 !    nud:       step size for nu (nu=numin:nud:numax)
 !  line 12:
 !    nnout:     the values of the channel rotational quantum numbers for which
-!               the s-matrix elements will be printed to file 14 (if writs = t
+!               the s-matrix elements will be printed to file 14 (if wrsmat = t
 !    niout:     the values of the additional channel index for which
-!               the s-matrix elements will be printed to file 14 (if writs = t
+!               the s-matrix elements will be printed to file 14 (if wrsmat = t
 !  line 13:
 !    jout:      an array containing these values of the rotational angular
 !               momenta
@@ -269,32 +290,25 @@ use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
 use constants
 use mod_coener, only: energ
+use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, &
+                flaghf, flagsu, ihomo, ipos, logdfl, prlogd, &
+                noprin, prpart, readpt, rsflag, prsmat, &
+                t2test, prt2, twomol, wrsmat, wrpart, wrxsec, &
+                prxsec, nucros, photof, wavefl, boundc, &
+                jtot1, jtot2, jtotd, jlpar, nerg, numax, numin, nud, &
+                lscreen, iprint, &
+                fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, tolai=>scat_tolai, xmu ! NB if boundc = .true. then these parameters are: r1,r2,c,spac,delr,hsimp,eigmin,tolai,xmu
+use funit, only: FUNIT_INP
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
+use mod_skip, only: nskip, iskip
+use mod_file, only: input, output, jobnam, savfil
 implicit double precision (a-h,o-z)
-integer i, jlpar, jtot1, jtot2, jtotd, length, nerg, &
-        numax, numin, ibasty
-logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
-        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf, &
-        csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
-        readpt, ihomo, bastst, twomol, nucros, photof, wavefl, &
-        boundc
-character*40 input, jobnam, output, savfil
+integer i, length
+logical existf
 character*(*) filnam
-#include "common/parpot.F90"
-common /coselb/ ibasty
-common /coipar/ jtot1, jtot2, jtotd,jlpar,nerg,numax, numin, nud, &
-                lscreen, iprint
-common /corpar/ fstfac, rincr, rcut, rendai, rendld, rstart, spac, &
-                tolai, xmu
-! NB if boundc = .true. then these variables are:
-!      common /corpar/ r1,r2,c,spac,delr,hsimp,eigmin,tolai,xmu
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-                noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr, nucros, photof, wavefl, boundc
-common /coskip/ nskip,iskip
-common /cofile/ input, output, jobnam, savfil
-common /coered/ ered, rmu
+
 
 ! ----------------------------------------------------------------
 !  open unit 8 for standard input
@@ -310,7 +324,7 @@ end if
 ! open sequential/formatted (mode='sf') file
 call openf(8, input, 'sf', 0)
 ! ----------------------------------------------------------------
-rewind 8
+rewind FUNIT_INP
 iline=1
 !  read in input data
 !  line 1
@@ -332,14 +346,14 @@ if (.not. logdfl) then
   rendld = rstart
 end if
 !  line 4
-  read (8, 50, err=195) airypr
+  read (8, 50, err=195) prairy
 iline = iline + 1
 !  line 5
   read (8, *, err=195) tolai, rincr, rendai, fstfac
 iline = iline + 1
 if (.not. airyfl) then
 !  give dummy values to airy parameters if airyfl = .false.
-  airypr = .false.
+  prairy = .false.
   tolai = 1.
   rincr = 1.
   rendai = rendld
@@ -352,7 +366,7 @@ read (8, *, err=195) (energ(i), i = 1, nerg)
 iline = iline + 1
 !  line 8
 read (8, *, err=195) xmu
-! convert to atomic units of mass and store in /coered/
+! convert to atomic units of mass and store in mod_ered
 rmu=xmu/xmconv
 iline = iline + 1
 !  line 9
@@ -375,10 +389,10 @@ if(niout.gt.0) then
   iline = iline + 1
 end if
 !  line 14
-read (8, 50, err=195) logwr, swrit, t2writ, t2test, writs
+read (8, 50, err=195) prlogd, prsmat, prt2, t2test, wrsmat
 iline = iline + 1
 !  line 15
-read (8, 50, err=195) wrpart, partw, xsecwr, wrxsec, wavefl
+read (8, 50, err=195) wrpart, prpart, prxsec, wrxsec, wavefl
 iline = iline + 1
 !  line 16
 read (8, 50 ,err=195) noprin, chlist, ipos, nucros, photof
@@ -481,8 +495,8 @@ end if
    if (batch) call exit
    return
  end if
-!   if writs = .true., then warning unless jtotd = 1
-if (writs .and. jtotd .ne. 1) then
+!   if wrsmat = .true., then warning unless jtotd = 1
+if (wrsmat .and. jtotd .ne. 1) then
   write (6, 170) jtotd
 170   format &
    (' WARNING *** WRSMAT = .TRUE. BUT JTOTD=',i3,' .NE. 1 ')
@@ -490,10 +504,10 @@ end if
 ! here if photodissociation calculation or wavefunction desired
 ! reset all flags accordingly
 if (photof .or. wavefl) then
-   if (t2writ) then
+   if (prt2) then
     write (6, 171)
 171     format (' PRT2 SET .FALSE., SINCE PHOTOF OR WAVEFN .TRUE.')
-    t2writ = .false.
+    prt2 = .false.
   endif
   if (t2test) then
     write (6, 172)
@@ -505,19 +519,19 @@ if (photof .or. wavefl) then
 175     format (' WRPART SET .FALSE., SINCE PHOTOF OR WAVEFN .TRUE.')
     wrpart = .false.
   endif
-  if (partw) then
+  if (prpart) then
     write (6, 176)
 176     format (' PRPART SET .FALSE., SINCE PHOTFL OR WAVEFN .TRUE.')
-    partw = .false.
+    prpart = .false.
   endif
-  if (.not. writs) then
+  if (.not. wrsmat) then
     if (wavefl) write (6, 178)
 178     format (' WRSMAT IS .FALSE., ONLY ADIABATIC ENERGIES SAVED')
   endif
-  if (xsecwr) then
+  if (prxsec) then
     write (6, 179)
 179     format (' PRXSEC SET .FALSE., SINCE PHOTOF OR WAVEFN .TRUE.')
-    xsecwr = .false.
+    prxsec = .false.
   endif
   if (wrxsec) then
     write (6, 180)
@@ -567,7 +581,7 @@ if (jtotd .eq. 0) then
   jtotd=1
 endif
 if (nucros) then
-  if (.not.wrxsec .and. .not.xsecwr .and. .not.partw &
+  if (.not.wrxsec .and. .not.prxsec .and. .not.prpart &
                   .and. .not.wrpart) then
     write (6, 192)
 192     format(' NUCROSS SET .FALSE. BECAUSE PRPART, PRXSEC,', &
@@ -610,111 +624,111 @@ else
   endif
 endif
 if (inew .eq. 0) then
-   call openf(8, input, 'sf', 0)
+   call openf(FUNIT_INP, input, 'sf', 0)
 else
-   close (8)
-   call openf(8, filnam, 'sf', 0)
+   close (FUNIT_INP)
+   call openf(FUNIT_INP, filnam, 'sf', 0)
 endif
-rewind (8)
+rewind (FUNIT_INP)
 nline=0
 !  line 1
 nline=nline+1
-write (8, 210, err=999) label
+write (FUNIT_INP, 210, err=999) label
 210 format ((a))
 !  line 1a
 nline=nline+1
-write (8, 215, err=999) ibasty
+write (FUNIT_INP, 215, err=999) ibasty
 215 format(i4,25x,'    ibasty')
 !  line 2
 nline=nline+1
-write (8, 220, err=999) logdfl, airyfl, readpt, bastst
+write (FUNIT_INP, 220, err=999) logdfl, airyfl, readpt, bastst
 220 format (4l3,18x, '   logdfl, airyfl, readpt, bastst')
 !  line 3
 nline=nline+1
 if (.not.boundc) then
-  write (8, 230, err=999) rstart, rendld, spac
+  write (FUNIT_INP, 230, err=999) rstart, rendld, spac
 230   format (3f10.4, '   rstart, rendld, spac')
 else
-  write (8, 232, err=999) rstart, rendld, spac
+  write (FUNIT_INP, 232, err=999) rstart, rendld, spac
 232   format (2f10.4,g11.4, '  hsimp, delr, eigmin')
 endif
 !  line 4
 nline=nline+1
-write (8, 240, err=999) airypr
+write (FUNIT_INP, 240, err=999) prairy
 240 format (l3, 27x,'   prairy')
 !  line 5
 nline=nline+1
 if (.not.boundc) then
-  write (8, 250, err=999) tolai, rincr, rendai, fstfac
+  write (FUNIT_INP, 250, err=999) tolai, rincr, rendai, fstfac
 250   format (g11.4, f6.2, f8.1, f6.2, &
         '  tolai, rincr, rendai, fstfac')
 else
-  write (8, 252, err=999) tolai, rincr, rendai, fstfac
+  write (FUNIT_INP, 252, err=999) tolai, rincr, rendai, fstfac
 252   format (g11.4, f6.2, f8.4, f6.3, &
         '  tolai, r2, spac, r1')
 endif
 !  line 6
 nline=nline+1
-write (8, 260, err=999) nerg
+write (FUNIT_INP, 260, err=999) nerg
 260 format (i4,26x, '   nerg')
 !  line 7
 nline=nline+1
-write (8, 270, err=999) (energ(i), i = 1, nerg)
+write (FUNIT_INP, 270, err=999) (energ(i), i = 1, nerg)
 270 format (10f11.4)
 !  line 8
 nline=nline+1
-write (8, 280, err=999) xmu
+write (FUNIT_INP, 280, err=999) xmu
 280 format (f11.5, 19x, '   xmu')
 !  line 9
 nline=nline+1
 if (.not. boundc) then
-  write (8, 290, err=999) rcut
+  write (FUNIT_INP, 290, err=999) rcut
 290   format (f10.4, 20x,'   rcut')
 else
-  write (8, 292, err=999) rcut
+  write (FUNIT_INP, 292, err=999) rcut
 292   format (f10.4, 20x,'   c')
 endif
 !  line 10
 nline=nline+1
-write (8, 300, err=999) jtot1, jtot2, jtotd, jlpar, numin, &
+write (FUNIT_INP, 300, err=999) jtot1, jtot2, jtotd, jlpar, numin, &
                         numax, nud
 300 format (3i4,4i4,2x,'   jtot1,jtot2,jtotd,jlpar,numin,numax,', &
                        'nud')
 nline=nline+1
-write (8, 301, err=999) lscreen, iprint
+write (FUNIT_INP, 301, err=999) lscreen, iprint
 301 format(2i4,23x,'  lscreen, iprint')
 !  line 11
 nline=nline+1
-write (8, 305, err=999) nnout, niout
+write (FUNIT_INP, 305, err=999) nnout, niout
 305 format (2i5,20x,'   nnout,niout')
 !  line 12
 nline=nline+1
-write (8, 315, err=999) (jout(i), i=1, iabs(nnout))
+write (FUNIT_INP, 315, err=999) (jout(i), i=1, iabs(nnout))
 315 format (20(i4, 1x))
 !  line 13
 if(niout.gt.0) then
   nline=nline+1
-  write (8, 315, err=999) (indout(i), i=1, niout)
+  write (FUNIT_INP, 315, err=999) (indout(i), i=1, niout)
 endif
 !  line 14
   nline=nline+1
-write (8, 330, err=999) logwr, swrit, t2writ, t2test, writs
+write (FUNIT_INP, 330, err=999) prlogd, prsmat, prt2, t2test, wrsmat
 330 format (5l3,15x,'   prlogd, prsmat, prt2, t2test, wrsmat')
 !  line 15
   nline=nline+1
-write (8, 340, err=999) wrpart, partw, xsecwr, wrxsec, wavefl
+write (FUNIT_INP, 340, err=999) wrpart, prpart, prxsec, wrxsec, wavefl
 340 format (5l3,15x,'   wrpart, prpart, prxsec, wrxsec, wavefl')
 !  line 16
   nline=nline+1
-write (8, 350, err=999) noprin, chlist, ipos, nucros, photof
+write (FUNIT_INP, 350, err=999) noprin, chlist, ipos, nucros, photof
 350 format (5l3,15x,'   noprin, chlist, ipos, nucros, photof')
 !  line 17
   nline=nline+1
-write (8, 360, err=999) flaghf, csflag, flagsu, ihomo, twomol
+write (FUNIT_INP, 360, err=999) flaghf, csflag, flagsu, ihomo, twomol
 360 format (5l3,15x,'   flaghf, csflag, flagsu, ihomo, twomol')
 !  line 18
   nline=nline+1
-write (8, 370, err=999) rsflag, boundc
+write (FUNIT_INP, 370, err=999) rsflag, boundc
 370 format (2l3,24x, '   rsflag, boundc')
 return
 ! here if write error
@@ -729,17 +743,6 @@ endif
 if(batch) call exit
 end
 ! ---------------------------------------------------------------
-block data io
-! ---------------------------------------------------------------
-!     revision date: 5-mar-2008
-!
-!  variable in common block /cosize/
-!    isize:     size of files (only needed for univac, optional on vax)
-!    isizes:    size of s-matrix file (only needed for univac, optional
-!               on vax
-! -----------------------------------------------------
-common /cosize/ isize, isizes
-end
 !
 !     ------------------------------------------------------------
 subroutine openf(lunit,filnam,lmode,isize)
@@ -762,6 +765,7 @@ subroutine openf(lunit,filnam,lmode,isize)
 !     lseg:  number of integer words per disc sector
 !     ------------------------------------------------------------
 use mod_clseg, only: lseg
+use mod_hiutil, only: upper
 logical exstfl, openfl, tmpfil
 logical od
 character*12 fmt, stat, accs
@@ -876,51 +880,47 @@ subroutine openfi (nerg)
 !    nerg:       number of different total energies at which scattering
 !                calculation is to be done
 !                if nerg.gt.1, then three files are opened:
-!                              unit=10 (filename tmp10) for storage of
+!                              unit=FUNIT_TRANS_MAT (filename tmp10) for storage of
 !                                      transformation matrices in airy
 !                                      propagation
-!                              unit=11 (filename tmp11) for storage of
+!                              unit=FUNIT_QUAD_MAT (filename tmp11) for storage of
 !                                      quadrature matrices in logd propagation
-!                              unit=12 (filename tmp12) for storage of
+!                              unit=FUNIT_CHANNEL_PARAMS (filename tmp12) for storage of
 !                                      rotational angular momenta, orbital
 !                                      angular momenta, extra quantum index,
 !                                      and internal energies for all channels
 !  variables in common block /colpar/  (see further description in subroutine
 !                                       flow)
-!    airyfl:     note, unit=10 is opened only if airyfl = .true.
-!    writs:      if .true., then unit=45 to unit=(44+nerg) are opened as files
+!    airyfl:     note, unit=FUNIT_TRANS_MAT is opened only if airyfl = .true.
+!    wrsmat:      if .true., then unit=FUNIT_SMT_START to unit=(FUNIT_SMT_START+nerg-1) are opened as files
 !                           smat1, smat2, ... smatnerg for
 !                           storage of real and imaginary parts of
 !                           selected elements of s-matrix
-!    wrpart:     if .true., then unit=25 to unit=(24+nerg) are opened as files
+!    wrpart:     if .true., then unit=FUNIT_PCS_START to unit=(FUNIT_PCS_START+nerg-1) are opened as files
 !                           psec1, psec2,... psecnerg for
 !                           storage of of some input date and degeneracy
 !                           averaged partial cross sections
-!    csflag:     if .true., and partw or or wrpart or xsecwr or wrxsec = .true
-!                           then unit=35 to unit=(34+nerg)
+!    csflag:     if .true., and prpart or or wrpart or prxsec or wrxsec = .true
+!                           then unit=FUNIT_APCS_START to unit=(FUNIT_APCS_START+nerg-1)
 !                           are opened as files tmp35, tmp36, ... etc.
 !                           for accumulation of partial cross sections
 !                           at each cs projection index
-!    wrxsec, xsecwr:
-!                if either of these variables is .true., then unit=70 to
-!                           unit=(69+nerg) are opened for storage of some
+!    wrxsec, prxsec:
+!                if either of these variables is .true., then unit=FUNIT_ICS_START to
+!                           unit=(FUNIT_ICS_START+nerg-1) are opened for storage of some
 !                           input data and degeneracy averaged integral
 !                           cross sections
-!                if wrxsec = .true., then unit=70 to unit=(69+nerg) are opened
+!                if wrxsec = .true., then unit=FUNIT_ICS_START to unit=(FUNIT_ICS_START+nerg-1) are opened
 !                                    as permanent files with filenames
 !                                    xsec1, xsec2, xsec3, ... , xsecn
 !                                    where n = nerg
-!                          = .false., then unit=70 to unit=(69+nerg) are opene
+!                          = .false., then unit=FUNIT_ICS_START to unit=(FUNIT_ICS_START+nerg-1) are opene
 !                                     as files tmpx1, tmpx2, ... tmpxn
 !    rsflag:     if .true., then calculation is being restarted
 !                abort will occur unless all requested i/o files already exist
 !                if .false, then initial calculation
 !                in any case unit=13 (filename trstrt) is opened to hold
 !                temporary information in case of restart
-!  variable in common block /cosize/
-!    isize:     size of files (only needed for univac, optional on vax)
-!    isizes:    size of s-matrix file (only needed for univac, optional
-!               on vax
 !
 !  subroutines called: open
 !  --------------------------------------------------------------------
@@ -931,55 +931,51 @@ use mod_coisc3, only: isc3 ! isc3(3)
 use mod_coisc4, only: isc4 ! isc4(1)
 use mod_cosc1, only: rsc1 => sc1 ! rsc1(2)
 use mod_cosc2, only: rsc2 => sc2 ! rsc2(1)
-
+use mod_par, only: airyfl, csflag, flaghf, flagsu, ipos, &
+                prpart, readpt, rsflag, twomol, wrsmat, &
+                wrpart, wrxsec, prxsec, nucros, photof, wavefl, boundc
+use funit
+use mod_fileid, only: FILEID_SAV
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
+use mod_file, only: input, output, jobnam, savfil
+use mod_file_size, only : isize, isizes
+use mod_hiutil, only: gennam
+use mod_hismat, only: rdhead
+use mod_coener, only: max_en
 implicit double precision (a-h,o-z)
-integer ifile, nerg, nfile, lenx, isize, isizes
-logical airyfl, airypr, bastst, batch, chlist, csflag, existf, &
-        flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-        noprin, partw, readpt, rsflag, swrit, &
-        t2test, t2writ, writs, wrpart, wrxsec, &
-        xsecwr, twomol, nucros, photof, wavefl, boundc
+integer ifile, nerg, nfile, lenx
+logical existf
 character*40  oldlab,newlab
-#include "common/parpot.F90"
 character*40 xname,xnam1
 character*20 cdate
-character*40 input,output,jobnam,savfil
-common /cofile/ input,output,jobnam,savfil
-common /cosize/ isize, isizes
-common /colpar/ airyfl, airypr, bastst, batch, chlist, &
-                csflag, flaghf, flagsu, ihomo, ipos, &
-                logdfl, logwr, noprin, partw, readpt, &
-                rsflag, swrit, t2test, t2writ, twomol, writs, &
-                wrpart, wrxsec, xsecwr, nucros, photof, wavefl, &
-                boundc
-common /coselb/ ibasty
 if (nerg .gt. 1) then
-!  check to see if nerg .le. 25
-  if (nerg .gt. 25) then
-    write (9, 10) nerg
-    write (6, 10) nerg
-10     format (/' *** NERG =', i2,' > 25; ABORT ***')
+!  check to see if nerg <= max_en
+  if (nerg .gt. max_en) then
+    write (FUNIT_OUT, 10) nerg
+    write (6, 10) nerg, max_en
+10     format (/' *** NERG =', i2,' > ', i0,'; ABORT ***')
     call exit
   end if
 !  open units 10, 11, and 12 for storage of channel parameters, transformation
 !  and quadrature matrices if more than one energy desired
 #if defined(HIB_UNIX) || defined(HIB_CRAY) || defined(HIB_MAC)
   if (airyfl) then
-    call tmpnm (10, xname)
+    call tmpnm (FUNIT_TRANS_MAT, xname)
 ! open scratch file (unit is therefore negativ here, see open)
 ! isize is only needed on a univac
-    call openf(-10, xname, 'su', isize)
+    call openf(-FUNIT_TRANS_MAT, xname, 'su', isize)
   endif
 #endif
-  call tmpnm (11, xname)
-  call openf(-11, xname, 'su', isize)
-  call tmpnm (12, xname)
-  call openf(-12, xname, 'sf', 0)
+  call tmpnm (FUNIT_QUAD_MAT, xname)
+  call openf(-FUNIT_QUAD_MAT, xname, 'su', isize)
+  call tmpnm (FUNIT_CHANNEL_PARAMS, xname)
+  call openf(-FUNIT_CHANNEL_PARAMS, xname, 'sf', 0)
 end if
 !   open files for storage of integral cross sections
-if (wrxsec .or. xsecwr) then
+if (wrxsec .or. prxsec) then
   do 60  ifile = 1, nerg
-    nfile = 69 + ifile
+    nfile = FUNIT_ICS_START - 1 + ifile
     if (wrxsec) then
        call gennam (xname, jobnam, ifile, 'ics', lenx)
        if(ifile.eq.1) xnam1=xname
@@ -996,10 +992,10 @@ if (wrxsec .or. xsecwr) then
 60   continue
   if(wrxsec) then
     if (nerg .eq. 1) then
-      write (9, 110) xnam1(1:lenx)
+      write (FUNIT_OUT, 110) xnam1(1:lenx)
 110       format (' ** INTEGRAL CROSS SECTIONS SAVED IN FILE ',(a))
     else
-      write (9, 115) xnam1(1:lenx),xname(1:lenx)
+      write (FUNIT_OUT, 115) xnam1(1:lenx),xname(1:lenx)
 115       format &
     (' ** INTEGRAL CROSS SECTIONS SAVED IN FILES ',(a), &
      ' THROUGH ',(a))
@@ -1009,10 +1005,10 @@ end if
 !.....open direct access file for interpolation and restart
 !     only if partial or total cross sections desired, never if
 !     photodissociation calculation or wavefunction calculation
-if (wrxsec .or. xsecwr .or. partw .or. wrpart) then
+if (wrxsec .or. prxsec .or. prpart .or. wrpart) then
   if (.not. wavefl .and. .not. photof) then
      call dinit
-     nfile = 3
+     nfile = FUNIT_SAV
      lenj=index(jobnam,' ')-1
      if (lenj .eq. 0) lenj=40
      if (lenj .gt. 8) then
@@ -1029,7 +1025,7 @@ if (wrxsec .or. xsecwr .or. partw .or. wrpart) then
        end if
      end if
      savfil=xname
-     call dopen(1,nfile,savfil)
+     call dopen(FILEID_SAV, nfile,savfil)
      write (9, 180) xname(1:lenx)
 180      format (' ** RESTART INFORMATION SAVED IN FILE ',(a))
    endif
@@ -1037,7 +1033,7 @@ endif
 ! open direct access file for storage of wavefunction
 if (wavefl.and. .not. boundc) then
   call dinit
-  nfile = 22
+  nfile = FUNIT_WFU
   lenj=index(jobnam,' ')-1
   if (lenj .eq. 0) lenj=40
   if (lenj .gt. 8) then
@@ -1052,9 +1048,9 @@ if (wavefl.and. .not. boundc) then
         write (6, 300) xname(1:lenx)
         call exit
      end if
-     call openf(22, xname, 'TU', 0)
+     call openf(FUNIT_WFU, xname, 'TU', 0)
   else
-     call openf(22, xname, 'TW', 0)
+     call openf(FUNIT_WFU, xname, 'TW', 0)
   end if
   write (6, 210) xname(1:lenx)
   write (9, 210) xname(1:lenx)
@@ -1063,7 +1059,7 @@ endif
 !   open files for storage of partial cross sections
 if (wrpart) then
   do 230  ifile = 1, nerg
-    nfile = 24 + ifile
+    nfile = FUNIT_PCS_START + ifile - 1
     call gennam (xname, jobnam, ifile, 'pcs',lenx)
     if(ifile.eq.1) xnam1=xname
     inquire (file=xname, exist=existf)
@@ -1100,16 +1096,16 @@ end if
 !   projection index
 if (csflag) then
   do 280  ifile = 1, nerg
-    nfile = 34 + ifile
+    nfile = FUNIT_APCS_START + ifile - 1
     call tmpnm (nfile, xname)
     nnfile=-nfile
     call openf(nnfile, xname, 'su', 0)
 280   continue
 end if
 !  open files smatn for storage of selected s-matrix elements
-if (writs .and. .not. photof .and. .not. wavefl) then
+if (wrsmat .and. .not. photof .and. .not. wavefl) then
   do 330  ifile = 1, nerg
-  nfile = ifile + 44
+  nfile = FUNIT_SMT_START + ifile - 1
     call gennam(xname, jobnam, ifile, 'smt', lenx)
     if(ifile.eq.1) xnam1=xname
     if (rsflag) then
@@ -1147,7 +1143,7 @@ if (writs .and. .not. photof .and. .not. wavefl) then
       end if
     end if
 330    continue
-if (writs) then
+if (wrsmat) then
   if (nerg .eq. 1) then
     write (9, 340) xnam1(1:lenx)
 340     format (' ** SELECTED S-MATRIX ELEMENTS SAVED IN FILE ',(a))
@@ -1164,136 +1160,6 @@ end
 !---------------------------------------------------------------------
 
 
-!
-!     ------------------------------------------------------------
-subroutine readrc(iadr, smt_file_unit, lrec, jtot, jlpar, nu, nopen, &
-     length, nnout)
-!     author: h.j. werner
-!     revision: 14-jun-1990 by mha
-!     rewritten: 07-jan-2012 by q. ma
-!
-!     Read the header of the s-matrix for a single partial wave
-!
-!     INPUT ARGUMENTS:
-!     iadr: 0 if read next record, otherwize read from byte iadr (one
-!     based) of the file.
-!
-!     RETURNED ARGUMENTS:
-!     lrec: on return contains the size in byte current s-matrix,
-!     or -1 on end of file
-!     Other parameters have their traditional meanings.
-!     ------------------------------------------------------------
-implicit none
-integer :: iadr
-integer, intent(in) :: smt_file_unit
-integer, intent(out) :: lrec
-integer, intent(out) :: jtot
-integer, intent(out) :: jlpar
-integer, intent(out) :: nu
-integer, intent(out) :: nopen
-integer, intent(out) :: length
-integer, intent(out) :: nnout
-if (iadr .eq. 0) inquire (smt_file_unit, pos=iadr)
-read (smt_file_unit, pos=iadr, end=900, err=950) &
-     lrec, jtot, jlpar, nu, nopen, length ,nnout
-return
-!
-900 lrec = -1
-return
-950 write (0, *) '*** ERROR READING S-MATRIX FILE (readrc). ABORT.'
-call exit()
-end
-!     ------------------------------------------------------------
-!
-!     ------------------------------------------------------------
-subroutine rdhead(smt_file_unit, cdate, ered, rmu, csflag, flaghf, &
-     flagsu, twomol, nucros, jfirst, jfinal, jtotd, numin, numax, nud, &
-     nlevel, nlevop, nnout, jlev, inlev, elev, jout)
-!
-!     subroutine to read header from file smt_file_unit
-!     authors: h.j. werner and b. follmeg
-!     revision: 27-oct-95
-!     major revision: 07-jan-2012 by q. ma
-!     ------------------------------------------------------------
-use mod_clseg, only: lseg
-implicit none
-integer, intent(in) :: smt_file_unit ! logical unit used to read smt file 
-character*20, intent(out) :: cdate
-double precision, intent(out) :: ered
-double precision, intent(out) :: rmu
-logical, intent(out) :: csflag, flaghf, flagsu, twomol, nucros
-integer, intent(out) :: jfirst, jfinal, jtotd
-integer, intent(out) :: numin, numax, nud
-integer, intent(out) :: nlevel, nlevop, nnout
-integer, dimension(1), intent(out) :: jlev  ! dimension(1:nlevel)
-integer, dimension(1), intent(out) :: inlev ! dimension(1:nlevel)
-double precision, dimension(1), intent(out) :: elev ! dimension(1:nlevel)
-integer, dimension(1), intent(out) :: jout  ! dimension(1:iabs(nnout))
-#include "common/parpot.F90"
-character*8 csize8
-character*4 csize4
-integer :: lenhd
-integer :: ibasty
-integer :: i
-
-!     Read the magic number (from the start of the file)
-read (smt_file_unit, pos=1, end=900, err=950) csize8
-!     first word on file contains the length of the header
-read (smt_file_unit, end=900, err=950) lenhd
-!
-read (smt_file_unit, end=900, err=950) cdate, label, potnam
-!     Four bytes for alignment
-read (smt_file_unit, end=900, err=950) csize4
-!
-read (smt_file_unit, end=900, err=950) ered, rmu, csflag, flaghf, flagsu, &
-     twomol, nucros, jfirst, jfinal, jtotd, numin, numax, &
-     nud, nlevel, nlevop, nnout, ibasty
-read (smt_file_unit, end=900, err=950) (jlev(i), i=1, nlevel), &
-     (inlev(i), i=1, nlevel), (elev(i), i=1, nlevel)
-read (smt_file_unit, end=900, err=950) (jout(i), i=1, iabs(nnout))
-!
-read (smt_file_unit, end=900, err=950) csize8
-if (csize8 .ne. 'ENDOFHDR') goto 950
-return
-!
-900 continue
-950 write (0, *) '*** ERROR READING S-MATRIX FILE. ABORT.'
-call exit
-end
-!     ------------------------------------------------------------------
-subroutine sinqr(smt_file_unit, njtot, nchmx)
-!
-!     Subroutine to scan an s-matrix file for the number of partial
-!     waves and the maximum number of channels.
-!
-!     If any error occured, njtot is set to -1.
-!
-!     The file pointer will be pointed to the end of the file on return.
-!     It is recommended to call this subroutine prior to calling rdhead.
-!
-!     Author: Qianli Ma
-!     ------------------------------------------------------------------
-implicit none
-integer smt_file_unit, njtot, nchmx, iaddr, lrec
-integer jtot, jlpar, nu, nopen, length, nnout
-!
-!     Read the length of the header
-read (smt_file_unit, pos=9, end=900, err=950) iaddr
-!
-njtot = 0
-nchmx = 0
-iaddr = iaddr + 1
-20 call readrc(iaddr, smt_file_unit, lrec, jtot, jlpar, nu, nopen, length, &
-     nnout)
-if (lrec .lt. 0) return
-njtot = njtot + 1
-if (nchmx .lt. length) nchmx = length
-iaddr = iaddr + lrec
-goto 20
-900 continue
-950 njtot = -1
-return
-end
 !     ------------------------------------------------------------
 subroutine saddr(nfile,jfirst,jfinal,numin,numax,csflag, &
                  iadr,nmax,jfsts,jlparf,jlpars,ierr)
@@ -1321,6 +1187,7 @@ subroutine saddr(nfile,jfirst,jfinal,numin,numax,csflag, &
 !     jlpars:  second parity, if not present jlpars = 0
 !     ierr:    error flag, if .ne. 0 an error has occured
 !     ------------------------------------------------------------
+use mod_hismat, only: readrc
 logical csflag
 integer nfile, iadr, nmax, jfirst, jfsts, jfinal, numin, &
         numax, ierr, jlpars, jlparf
@@ -1415,7 +1282,7 @@ module mod_cdio
       integer, dimension(:), pointer :: iostat ! view of one section memory_block
       integer, dimension(:), pointer :: last   ! view of one section memory_block
       integer, pointer :: lhea                 ! view of one section memory_block
-      ! lhea : size of memory_block in integers
+      ! lhea : length of header (size of memory_block in integers)
       integer, pointer :: junk                 ! view of one section memory_block
       ! note : junk is probably here to make memory_block a multiple of 8 bytes as some
       ! copy functions that are involved transfer data with words of 8 bytes
@@ -1505,20 +1372,15 @@ subroutine dread(ii,l,ifil,irec,iof)
 !
 !.....read "l" integer words from record "irec" on file "ifil"
 !.....with offset iof
-!
-!  variable in common block /cosize/
-!    isize:     size of files (only needed for univac, optional on vax)
-!    isizes:    size of s-matrix file (only needed for univac, optional
-!               on vax
 ! --------------------------------------------------------------
 use mod_clseg, only: intrel
 use mod_cdbf, only: ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf,llbuf
 use mod_cdio, only: allocate_cdio, cdio_is_allocated, iadr, len, next, iun, iostat, last, lhea, junk, memory_block
 use mod_cobuf, only: lbuf, ibuf
+use mod_file_size, only : isize, isizes
 implicit double precision (a-h,o-z)
 character*(*) name
 parameter (maxun=2, maxrec=5000)
-common /cosize/ isize,isizes
 dimension ii(1)
 if(iun(ifil).eq.0) then
   write(6,10) ifil,irec
@@ -1579,7 +1441,6 @@ if(iadr(irec,ifil).lt.0) then
   iadr(irec,ifil)=next(ifil)
   next(ifil)=next(ifil)+((ll-1)/lbuf+1)*lbuf
   len(irec,ifil)=next(ifil)-iadr(irec,ifil)
-  ! write(6,*) 'graffy/dread : len(', irec, ',', ifil, ') has been set to ', len(irec,ifil)
 end if
 if(ll.gt.len(irec,ifil)) then
   write(6,50) ifil,irec,ll,len(irec,ifil)
@@ -1589,9 +1450,9 @@ if(ll.gt.len(irec,ifil)) then
 end if
 return
 !
-entry dwrite(ii,l,ifil,irec,iof)
+entry dwrite(ii, l, ifil, irec, iof)
 !
-!.....write "l" integer words to record "irec" on file "ifil"
+!.....write "l" integer words (stored in ii array) to record "irec" on file "ifil"
 !.....with offset iof
 !
 if(iun(ifil).eq.0) then
@@ -1606,35 +1467,35 @@ if(irec.gt.maxrec) then
           ' OUT OF RANGE. ALLOWED',i4)
   call exit
 end if
-if(iadr(irec,ifil).lt.0) then
-  iadr(irec,ifil)=next(ifil)
-  next(ifil)=next(ifil)+((l-1)/lbuf+1)*lbuf
-  len(irec,ifil)=next(ifil)-iadr(irec,ifil)
-  ! write(6,*) 'graffy/dwrite : len(', irec, ',', ifil, ') has been set to ', len(irec,ifil)
+if(iadr(irec,ifil) < 0) then
+  ! allocate a range of positions in the file for the record irec
+  iadr(irec,ifil) = next(ifil) ! position of the start of the record in its file (unit : 32 bit words)
+  next(ifil) = next(ifil) + ((l-1)/lbuf+1) * lbuf
+  len(irec,ifil) = next(ifil) - iadr(irec,ifil)
+  write(6,*) 'graffy/dwrite : len(', irec, ',', ifil, ') has been set to ', len(irec,ifil)
 end if
 if(iof+l.gt.len(irec,ifil)) then
   if(irec.ge.last(ifil)) then
     next(ifil)=iadr(irec,ifil)+((iof+l-1)/lbuf+1)*lbuf
     len(irec,ifil)=next(ifil)-iadr(irec,ifil)
-    ! write(6,*) 'graffy/dwrite/2 : len(', irec, ',', ifil, ') has been set to ',len(irec,ifil)
   else
-write (6,*) 'ii,l,ifil,irec,iof', ii,l,ifil,irec,iof
+    write (6,*) 'ii,l,ifil,irec,iof', ii,l,ifil,irec,iof
     write(6,65) ifil,irec,iof+l,len(irec,ifil)
 65     format(/' DIRECT WRITE ERROR ON FILE',i2,' RECORD',i3, &
           ' TRY TO WRITE',i6,' WORDS, RECORDLENGTH=',i6,' WORDS')
     call exit
   end if
 end if
-ir=iadr(irec,ifil)+iof
+ir = iadr(irec,ifil) + iof  ! ! where to write the buffer in the output file (units : number of 32 bits words)  
 if(mod(l,intrel).ne.0.or.mod(ir,intrel).ne.0) then
   write(6,66) ifil,irec,l,ir
 66   format(/' DIRECT WRITE ERROR ON FILE',i2,' RECORD',i3, &
     ' LENGTH=',i4,' OR ADRESS=',i6,' NOT MULTIPLE OF INTREL')
   call exit
 end if
-ll=l/intrel
-ir=ir/intrel
-call wrabsf(iun(ifil),ii,ll,ir)
+ll = l / intrel  ! number of real8 in the ii array
+ir = ir / intrel  ! where to write the buffer in the output file (units : number of 64 bits words) 
+call wrabsf(iun(ifil), ii, ll, ir)
 call fwait(iun(ifil))
 last(ifil)=max(last(ifil),irec)
 iostat(ifil)=0
@@ -1788,7 +1649,7 @@ subroutine dbri(buffer,l,ifil,irec)
 !     buffer : input buffer containing l integers
 !
 use mod_clseg, only: intrel
-use mod_cdbf, only: libuf,ibfil,ibrec,ibof,ibstat,idbuf
+use mod_cdbf, only: libuf,ibfil,ibrec,ibof,ibstat,idbuf,ibadr
 implicit none
 integer, intent(in) :: l
 integer, dimension(l), intent(out) :: buffer
@@ -1796,7 +1657,7 @@ integer, intent(in) :: ifil
 integer, intent(in) :: irec
 
 integer :: lre
-integer :: i, iof, len, ibadr
+integer :: i, iof, len
 
 ! implicit double precision (a-h,o-z)
 lre=l
@@ -1810,7 +1671,7 @@ entry dbrr(buffer,l,ifil,irec)
 !
 lre=l*intrel
 !
-5 ibadr = 0
+5 continue 
 if(irec.gt.0) then
   if(ibstat.eq.1) call dwrite(idbuf,libuf,ibfil,ibrec,ibadr)
   ibstat=0
@@ -1868,31 +1729,43 @@ integer, intent(in) :: l
 integer, intent(in) :: ifil
 integer, intent(in) :: irec
 
-integer :: i, iof, len
-integer :: lre
+integer :: i
+integer :: iof  ! offset relative to buffer, position of the next word to read from buffer
+integer :: len  ! 
+integer :: lre  ! length remaining (number of words to write)
 lre = l
-
 !
-if(irec.gt.0) then
-  if(ibstat.gt.0) call dwrite(idbuf,libuf,ibfil,ibrec,ibadr)
-  ibof=0
-  ibadr=0
-  ibrec=irec
-  ibfil=ifil
-  ibstat=1
+if(irec > 0) then
+  ! switch idbuf buffer to irec
+  if(ibstat > 0) then
+    ! write idbuf buffer to disc before emptying it
+    call dwrite(idbuf,libuf,ibfil,ibrec,ibadr)
+  end if
+  ! initialize idbuf buffer
+  ibof = 0
+  ibadr = 0
+  ibrec = irec
+  ibfil = ifil
+  ibstat = 1
+else
+  ! writing to current position (stored in ibfil, ibrec, ibof, ibadr)
+  ASSERT(ibfil == ifil)  ! we expect that ifil hasn't changed since last call
 end if
-iof=0
-70 len=min(lre,libuf-ibof)
-do i=1,len
-  idbuf(ibof+i)=buffer(iof+i)
+iof = 0
+70 continue
+! fill idbuf with words from buffer
+len = min(lre, libuf - ibof)  
+do i=1, len
+  idbuf(ibof+i) = buffer(iof+i)
 end do
-iof=iof+len
-lre=lre-len
-ibof=ibof+len
-if(lre.gt.0) then
-  ibof=0
-  call dwrite(idbuf,libuf,ifil,ibrec,ibadr)
-  ibadr=ibadr+libuf
+iof = iof + len
+lre = lre - len
+ibof = ibof + len
+if(lre > 0) then
+  ! we still have lre words to write from buffer, so before we carry on, we been to flush idbuf to the disc to free it
+  ibof = 0
+  call dwrite(idbuf,libuf,ifil,ibrec,ibadr)  ! send idbuf to disc
+  ibadr = ibadr + libuf
   goto 70
 end if
 return
@@ -1934,11 +1807,10 @@ subroutine assgn(luni,filnam,isize,icat)
 !  icat:  if icat=0, scratch
 !         if icat>0, permanent
 use mod_clseg, only: lseg
+use mod_disc, only: ipos, iun, iostat, icatf, nam
 character*(*) filnam
-character*14 nam
 character*12 stat
 character*(*) name
-common/disc/ ipos(98),iun(98),iostat(98),icatf(98),nam(98)
 logical openfl,exstfl
 !
 isize=0
@@ -2013,10 +1885,10 @@ subroutine rdabsf(luni,a,l,iword)
 ! on file. l and iword should be multiple of lseg, otherwise unefficient
 use mod_clseg, only: lseg
 use mod_cobuf, only: lbuf
+use mod_disc, only: ipos, iun, iostat, icatf, nam
 implicit double precision (a-h,o-z)
-character*14 nam
-common/disc/ ipos(98),iun(98),iostat(98),icatf(98),nam(98)
 dimension a(1),buf(lbuf)
+buf = 0d0
 if(lseg.gt.lbuf) stop 'lbuf too small in rdabsf'
 ibl=iword/lseg+1
 m=iword-(ibl-1)*lseg
@@ -2038,39 +1910,56 @@ l1=l1-lseg
 return
 !
 entry wrabsf(luni,a,l,iword)
-!
+! write l real8 numbers from a array into file unit luni at offset iword
+! luni : the logical unit of the file to write to (eg 3)
+! a : the array of double precision numbers to write (eg [0.5, 0.7])
+! l : the number of real numbers to write (eg 2)
+! iword : offset on file in real8 units where the write should start (eg 2047)
+
 if(lseg.gt.lbuf) stop 'lbuf too small in wrabsf'
-ibl=iword/lseg+1
-m=iword-(ibl-1)*lseg
-n=0
-if(m.eq.0) goto 40
-!.....first address not on sector boundary
-n=min0(lseg-m,l)
-if(ibl.le.ipos(luni)) &
-   read(luni,rec=ibl) (buf(i),i=1,lseg)
-do 30 i=1,n
-30 buf(m+i)=a(i)
-write(luni,rec=ibl) (buf(i),i=1,lseg)
-ipos(luni)=max(ipos(luni),ibl)
-ibl=ibl+1
+ibl=iword/lseg+1  ! index of block where iword is (eg ibl = 2 if lseg == 1024)
+m = iword - (ibl - 1) * lseg  ! offset of iword relative to its block (eg 1023)
+n = 0
+if(m /= 0) then
+  !.....first address not on sector boundary
+  n = min0(lseg-m, l)  ! number of words to write in the block ibl (eg 1)
+
+  if(ibl <= ipos(luni)) then
+    ! read the whole block ibl from disk into buf
+    read(luni, rec=ibl) (buf(i),i=1,lseg)
+  end if
+  ! write the words into buf
+  do i = 1, n
+    buf(m + i) = a(i)
+  end do
+  ! then write back the updated block ibl on the file
+  write(luni, rec=ibl) (buf(i), i=1, lseg)
+  ipos(luni) = max(ipos(luni), ibl)
+  ibl = ibl + 1
+end if
 !.....write from next sector boundary
-40 l1=l-n
-if(l1.eq.0) return
-lbl=l1/lseg
-do 45 ib=1,lbl
-write(luni,rec=ibl) (a(n+i),i=1,lseg)
-ipos(luni)=max(ipos(luni),ibl)
-ibl=ibl+1
-l1=l1-lseg
-45 n=n+lseg
-if(n.eq.l) return
+l1 = l - n  ! number of remaining words to write (eg 1)
+if(l1 == 0) return
+lbl = l1 / lseg  ! num blocks
+! write the full blocks
+do ib=1,lbl
+  write(luni,rec=ibl) (a(n+i),i=1,lseg)
+  ipos(luni) = max(ipos(luni),ibl)
+  ibl = ibl + 1
+  l1 = l1 - lseg
+  n = n + lseg
+end do
+
+if(n.eq.l) return  ! all words have been written to disk
 !.....last address not at end of sector
+! write the remaining n-l words in the last block 
 if(ibl.le.ipos(luni)) &
    read(luni,rec=ibl) (buf(i),i=1,lseg)
-do 50 i=1,l-n
-50 buf(i)=a(n+i)
+do i = 1, l-n
+  buf(i) = a(n+i)
+end do
 write(luni,rec=ibl) (buf(i),i=1,lseg)
-ipos(luni)=max(ipos(luni),ibl)
+ipos(luni) = max(ipos(luni),ibl)
 return
 !
 entry fwait(luni)
@@ -2124,9 +2013,8 @@ end
 subroutine assgn(luni,name,lenn,icat)
 implicit double precision (a-h,o-z)
 character*(*) name
-character*14 nam,blank
+character*14 blank
 character*15 namx
-common/disc/ ipos(98),iun(98),iostat(98),icatf(98),nam(98)
 data lendef/2000/,blank/'              '/
 if (iun(luni).ne.0) return
 if(name.eq.blank) call tmpnm(luni,name)

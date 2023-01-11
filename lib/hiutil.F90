@@ -27,11 +27,10 @@
 ! 20. fehler     dummy subroutine for molpro2006.3 c compatibility   *
 ! 21. sys_conf   determine and print out details of current machine  *
 !                and O/S                                             *
-! 22. dlm0,pm0   reduced rotation matrix element,Legendre polynomial *
-! 23. tf3jm0     3j-symbol with m=0; use (integer) 2j as arguments   *
-! 24. tf3j       3j-symbol; use (integer) 2j and 2m as arguments     *
-! 25. tf6j       6j-symbol; use (integer) 2j as arguments            *
-! 26. tf9j       9j-symbol; use (integer) 2j as arguments            *
+! 22. tf3jm0     3j-symbol with m=0; use (integer) 2j as arguments   *
+! 23. tf3j       3j-symbol; use (integer) 2j and 2m as arguments     *
+! 24. tf6j       6j-symbol; use (integer) 2j as arguments            *
+! 25. tf9j       9j-symbol; use (integer) 2j as arguments            *
 !*********************************************************************
 ! Warning: Please make sure kfact>3j+2 where j is the maximum value
 ! of angular momentum that may occur (kfact is defined in himain)
@@ -42,15 +41,20 @@
 #if defined(HIB_UNIX_XLF)
 @proc ss fixed(132)
 #endif
+module mod_hiutil
+#if defined(HIB_ULTRIX_DEC)
+    real(8) :: ttim(2)  ! sums time delta provided by etime and secnds
+#endif
+
+contains
 subroutine vaxhlp(line1)
 #if defined(HIB_UNIX_IFORT)
 !dec$ fixedformlinesize:132
 #endif
 ! latest revision 24-feb-2004
+use mod_par, only: lscreen
 implicit character*10(z)
 character*(*) line1
-common /coipar/ jtot1, jtot2, jtotd, jlpar, nerg,numax,numin,nud, &
-                lscreen, iprint
 #if defined(HIB_CRAY)
 ! return for these machines
   write (6,2)
@@ -293,54 +297,89 @@ crd = line(i1:i2-1)
 return
 end
 ! ----------------------------------------------------------------
-subroutine parse(line,i,code,lcod)
+subroutine get_token(line,i,token,token_length)
+!   parse the line to get the token before the next delimiter
+
 !   current revision date: 9-apr-90
-!   returns string between delimiters "," or ";" in code(1:lcod)
+!   returns string between delimiters "," or ";" in token(1:token_length)
 !   on input, iabs(i) points to first character to be searched in line
 !   on output, i points to first character after next delimiter
 !   if remainder of line is blank, i=0 is returned
 !   if i.lt.0 on entry, first delimiter may also be '='
 !   if i.eq.0 on entry, blank is returned and i unchanged
-character*(*) line,code
-code=' '
-lcod=0
-if(i.eq.0) return
-i1=iabs(i)
-k1=index(line(i1:),',')
-k2=index(line(i1:),';')
-k3=index(line(i1:),'=')
-k=k1
-if(k1.eq.0.or.(k2.ne.0.and.k2.lt.k1)) k=k2
-if(i.lt.0.and.k3.ne.0.and.(k3.lt.k.or.k.eq.0)) k=k3
-i=i1+k
-if(k.eq.0) then
-  i=0
-!       k=index(line(i1:),';')
-  if(k.eq.0) k=len(line)-i1+2
+! examples:
+!   if line == ' JTOT = 5 , BROT=3.14;' and i==-1, token='JTOT'
+!   if line == ' JTOT = 5 , BROT=3.14;' and i==1, token='JTOT = 5'
+
+implicit none
+character*(*), intent(in) :: line
+integer, intent(inout) :: i
+character*(*), intent(out) :: token
+integer, intent(out) :: token_length
+
+logical :: consider_equal_as_delimiter
+integer :: istart, iend
+integer :: k, k1, k2, k3
+integer :: token_start, token_end
+consider_equal_as_delimiter = (i < 0)
+istart = iabs(i)
+token=' '
+token_length = 0
+if ( i == 0 ) return
+k1 = index(line(istart:),',')
+k2 = index(line(istart:),';')
+k3 = index(line(istart:),'=')
+k = k1
+if (k1 == 0) then
+  k = k2
 end if
-lcod=k-1
-if(lcod.le.0) then
-  code=' '
-  lcod=0
+if (k2 /= 0 .and. k2 < k1) then
+  k = k2
+end if
+if (consider_equal_as_delimiter) then
+  if (k3 /= 0) then
+    if (k3 < k .or. k == 0) k = k3
+  endif
+end if
+! at this point, k contains the index of the next delimiter, relative to istart (0 if no delimiter has been found)
+i = istart + k
+! at this point, i contains the index of the next delimiter
+if (k == 0) then
+  i = 0
+  ! k=index(line(istart:),';')
+  k = len(line) - istart + 2
+end if
+token_length = k - 1
+if (token_length < 0) then
+  token = ' '
+  token_length = 0
+  ASSERT(i >= 0)  ! i is never suppsed to be negative on output
   return
 end if
-i2=i1+lcod-1
-do 10 k1=i1,i2
-10 if(line(k1:k1).ne.' ') goto 20
-code=' '
-lcod=0
-return
-20 do 30 k2=i2,k1,-1
-30 if(line(k2:k2).ne.' ') goto 40
-40 lcod=k2-k1+1
-code=line(k1:k2)
+iend = istart + token_length - 1
+! find the start of the token (non spaced character)
+do token_start = istart, iend
+  if (line(token_start:token_start) /= ' ') exit
+  if (token_start == iend) then
+    ! the start of the token hasn't been found because the string before delimiter only contains spaces
+    token=' '
+    token_length=0
+    ASSERT(i >= 0)  ! i is never suppsed to be negative on output
+    return
+  end if
+end do
+
+do token_end = iend, token_start, -1
+  if (line(token_end:token_end) /= ' ') exit
+end do
+token_length = token_end - token_start + 1
+token = line(token_start:token_end)
+ASSERT(i >= 0)  ! i is never suppsed to be negative on output
 return
 end
-module mod_hiutil
-implicit none
-contains
+
 ! ----------------------------------------------------------------
-subroutine getval(var_assignment, var_list, var_index, val)
+subroutine assignment_parse(var_assignment, var_list, var_index, val)
 !   current revision date: 23-sept-87
 !   searches strings in var_list to match var_assignment
 !   returns associated value in val and position in var_list in var_index
@@ -419,7 +458,6 @@ read(var_assignment_copy(j:), fmt='(f40.5)') val
 return
 end
 
-end module
 ! ----------------------------------------------------------------
 subroutine upper(line)
 character*(*) line
@@ -490,6 +528,7 @@ cdate=cdatefull(5:24)
 return
 end
 !-------------------------------------------------------------------
+
 subroutine mtime(t,te)
 !
 !  subroutine to return elapsed time in seconds
@@ -506,6 +545,9 @@ subroutine mtime(t,te)
 !     less than t
 !
 !  -----------------------------------------------------------------
+#if defined(HIB_ULTRIX_DEC)
+  use mod_dec_timer, only: ttim
+#endif
 implicit none
 real(8), intent(out) :: t
 real(8), intent(out) :: te
@@ -545,17 +587,15 @@ t=tt
 result=dtime(tarray)
 te=result
 #elif defined(HIB_ULTRIX_DEC)
-common /codec/ ttim(2)
-real et, etime, secnds
-dimension et(2)
-real(8) t1, t2, tt2, delt
-t1=etime(et(1),et(2))
-tt2=secnds(0.0)
-delt=tt2-ttim(2)
-if (delt .lt. 0.0) delt=delt+86400.
-ttim(1)=ttim(1)+delt
-ttim(2)=tt2
-t2=ttim(1)
+  real et, etime, secnds
+  dimension et(2)
+  real(8) t1, tt2, delt
+  t1=etime(et(1),et(2))
+  tt2=secnds(0.0)
+  delt=tt2-ttim(2)
+  if (delt .lt. 0.0) delt=delt+86400.
+  ttim(1)=ttim(1)+delt
+  ttim(2)=tt2
 #else
 #error "This fortran compiler is not handled in this function"
 #endif
@@ -1515,78 +1555,12 @@ write (9,35) profile
 #endif
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 write (6,40)
-write (8,40)
+write (9,40)
 40 format('*** COMMAND SYSCONF NOT IMPLEMENTED FOR CURRENT O/S')
 #endif
 return
 end
 ! -------------------------------------------------------------------------
-function dlm0(ll,m,theta)
-implicit double precision(a-h,o-z)
-!                          m0
-!...function to calculate d  (cos(theta) as defined in "brink and satchler"
-!                          l
-!   this is only a dummy function for correct phase
-!
-l=ll
-dlm0=(-1)**m*pm1(l,m,theta)
-return
-end
-function pm1(l,m,theta)
-!
-!  calculates value of legendre polynomial for l,m,theta
-!
-implicit double precision(a-h,o-z)
-data pi/3.1415926535897932d0/
-data zero, one, two, one80 /0.d0, 1.d0, 2.d0, 180.d0/
-thedeg=(theta*pi)/one80
-!
-!  if m>l pm1=0 !
-!
-if(m.gt.l) then
-  pm1=zero
-  return
-end if
-lmax=l
-x=cos(thedeg)
-if (m.ge.0) go to 1
-write (6,100)
-100 format('  NEGATIVE M IN LEGENDRE ROUTINE:  ABORT')
-stop
-!     call exit
-1 if (m.gt.0) go to 5
-!  here for regular legendre polynomials
-pm1=one
-pm2=zero
-do 2 l=1,lmax
-pp=((two*l-one)*x*pm1-(l-one)*pm2)/float(l)
-pm2=pm1
-2 pm1=pp
-return
-!
-!  here for alexander-legendre polynomials
-!
-5 imax=2*m
-rat=1.
-do 6 i=2,imax,2
-ai=i
-6 rat=rat*((ai-one)/ai)
-y=sin(thedeg)
-pm1=sqrt(rat)*(y**m)
-pm2=zero
-low=m+1
-do 10 l=low,lmax
-al=(l+m)*(l-m)
-al=one/al
-al2=((l+m-1)*(l-m-1))*al
-al=sqrt(al)
-al2=sqrt(al2)
-pp=(two*l-one)*x*pm1*al-pm2*al2
-pm2=pm1
-10 pm1=pp
-return
-end
-!     ------------------------------------------------------------------
 logical function tf_triang_fail(two_ja, two_jb, two_jc)
 implicit none
 integer, intent(in) :: two_ja, two_jb, two_jc
@@ -1614,7 +1588,6 @@ real(8) function tf3jm0(two_ja, two_jb, two_jc)
 use mod_cofact, only: si
 implicit none
 integer, intent(in) :: two_ja, two_jb, two_jc
-real(8) :: tdel
 integer :: j, jp
 tf3jm0 = 0d0
 if ((two_jc .gt. (two_ja + two_jb)) .or. &
@@ -1718,7 +1691,6 @@ implicit real(8) (a-h,o-z)
 integer, intent(in) :: two_ja, two_jb, two_je, two_jd, two_jc, &
      two_jf
 real(8), parameter :: tol=1d-10, zero=0d0, one=1d0, two=2d0
-logical :: tf_triang_fail
 x=zero
 tf6j = 0d0
 if (tf_triang_fail(two_ja, two_jb, two_je)) return
@@ -1808,7 +1780,6 @@ real(8) function tf9j(two_ja, two_jb, two_jc, two_jd, two_je, &
 implicit none
 integer, intent(in) :: two_ja, two_jb, two_jc, two_jd, two_je, &
      two_jf, two_jg, two_jh, two_ji
-real(8) :: xf9j
 tf9j = xf9j(two_ja / 2d0, two_jb / 2d0, two_jc / 2d0, &
      two_jd / 2d0, two_je / 2d0, two_jf / 2d0, &
      two_jg / 2d0, two_jh / 2d0, two_ji / 2d0)
@@ -2033,3 +2004,5 @@ if (info /= 0) then
 end if
 ASSERT(info == 0)
 end subroutine
+
+end module mod_hiutil

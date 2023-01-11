@@ -13,8 +13,8 @@
 ! ------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
-#include "common/parpot.F90"
 econv=219474.6d0
 potnam='HCO PES-Nijmegen-lmax=15'
 print *, potnam
@@ -44,12 +44,12 @@ end
 ! --------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: nscode, isicod, ispar
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 character*(*) filnam
-#include "common/parbas.F90"
-#include "common/parpot.F90" 
 integer, pointer :: nterm
 nterm=>ispar(1)
 potnam='HCO PES-Nijmegen-lmax=15'
@@ -84,21 +84,17 @@ subroutine pot (vv0, r)
 !  the coefficients for each angular term in the coupling potential
 !  [ vvl(i) for i = 1, nlam ] are returned in module mod_covvl
 
-!  variable in module mod_covvl
-!    vvl        array to store r-dependence of each angular term in the
-!               potential
-! 
 ! author:  paul dagdigian
 ! latest revision date:  21-jan-2015
 ! ----------------------------------------------------------------------
 use mod_covvl, only: vvl
+use mod_par, only: csflag, ihomo
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit double precision (a-h,o-z)
-logical ljunk, ihomo, csflag, lljunk
-#include "common/parbas.F90"
 dimension v(16)
-dimension csplin(47,16)
-dimension rr(47), vl(752),vec(47)
-common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
+real(8), save :: csplin(47,16)
+dimension rr(47), vl(752), vec(47)
+integer, save :: ifirst = 0 
 !
 !  47 values or R
 data rr / &
@@ -321,7 +317,7 @@ data vl / &
  -2.7460288e-09, -2.2721617e-10, 1.3578006e-09, 8.6114066e-10, &
  -3.1364622e-09, -3.2758118e-09, 2.3199119e-10, -1.3792231e-09, &
  1.0451870e-09, 6.6641097e-10, 1.1706160e-10 /
-data ifirst /0/
+
 ! spline fit
 if (ifirst .eq. 0) then
 ! spline fit of the vl coefficients

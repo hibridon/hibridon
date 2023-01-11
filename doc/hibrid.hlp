@@ -1289,9 +1289,9 @@ The first line of the subroutine SYSDAT must be
 The following instructions must be followed in order to interface your
 SYSDAT subroutine with the rest of the program
  
-the program must create the following four common blocks:
+the program must use the following four modules:
  
-      common /cobspt/ lammin(20), lammax(20), mproj(10)
+      use mod_parbas, only: lammin, lammax, mproj
  
       common /cosysr/ isrcod, rvar1, rvar2, ... rvar{isrcod} where isrcod
 is the total number of real system specific variables

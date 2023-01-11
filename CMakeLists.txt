@@ -6,7 +6,7 @@ enable_language (Fortran)
 message("Fortran compiler ID: ${CMake_Fortran_COMPILER_ID}")
 # Default build type as Release
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose Release or Debug" FORCE)
 endif()
 
 # profiling is disabled by default because:
@@ -44,6 +44,7 @@ endif()
 
 find_package( BLAS REQUIRED )
 find_package( LAPACK REQUIRED )
+find_package ( OpenMP )
 
 # get the name of the compiler
 get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
@@ -61,5 +62,6 @@ add_subdirectory(lib)
 if(BUILD_TESTING)
   enable_testing()
   add_subdirectory(tests)
-endif()
+  add_subdirectory(src/unittests)
+  endif()
 

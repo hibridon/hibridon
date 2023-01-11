@@ -17,9 +17,8 @@
 ! ------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
-#include "common/parpot.F90"
-s4pi = sqrt ( 4.d0 * acos(-1.d0) )
 econv=219474.6d0
 potnam='Ar-CH4 Nijmegen 1997'
 print *, potnam
@@ -49,10 +48,10 @@ end
 subroutine loapot(iunit,filnam)
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 character*(*) filnam
-#include "common/parbas.F90"
-#include "common/parpot.F90" 
 integer, pointer :: nterm
 nterm=> ispar(1)
 potnam='Ar-CH4 Nijmegen 1997'
@@ -89,9 +88,6 @@ subroutine pot (vv0, r)
 !  variable in module mod_covvl
 !    vvl:        vector of length 4 to store r-dependence of each term
 !                in potential expansion
-!  variable in common block /coloapot/
-!    s4pi:       normalization factor for isotropic potential
-!
 !  uses linear least squares routines from lapack
 !
 ! author:  paul dagdigian
@@ -101,14 +97,15 @@ subroutine pot (vv0, r)
 ! R = [3:0.5:10 11 12 13 15 20]
 !
 use mod_covvl, only: vvl
+use mod_par, only: csflag, ihomo
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 implicit double precision (a-h,o-z)
-logical ljunk, ihomo, csflag, lljunk
-#include "common/parbas.F90"
-dimension v(5)
-dimension csplin(69,5)
-dimension rr(69), vl(345),vec(69)
-common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
+real(8) :: v(5)
+real(8), save :: csplin(69,5)
+real(8) :: rr(69), vl(345),vec(69)
+integer, save :: ifirst=0
 ! here are the 69 values of R
+v=0d0 ; csplin=0  ; vec=0d0
 data rr/ &
   3.000,  3.250,  3.500,  3.750,  4.000, &
   4.250,  4.500,  4.750,  5.000,  5.250, &
@@ -217,7 +214,6 @@ data vl/ &
  -0.0000000e+00, -0.0000000e+00, -0.0000000e+00, -0.0000000e+00, &
  -0.0000000e+00, -0.0000000e+00, -0.0000000e+00, -0.0000000e+00, &
  -0.0000000e+00 /
-data ifirst /0/
 !
 ! spline fit
 if (ifirst .eq. 0) then

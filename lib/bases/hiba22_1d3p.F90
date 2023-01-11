@@ -1,3 +1,6 @@
+#include "assert.h"
+module mod_hiba22_1d3p
+contains
 ! sy1d3p (sav1d3p/ptr1d3p) defines, saves variables and reads            *
 !                  potentials for atom in 1D/3P states in collision      *
 !                  with an atom                                          *
@@ -5,7 +8,7 @@
 subroutine ba1d3p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
                   rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-                  n, nmax, ntop)
+                  n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine coupling potential (electrostatic + spin-orbit)
 !  for collision involving the 1D and 3P states of atom in a p^2 or p^4
@@ -86,10 +89,6 @@ subroutine ba1d3p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !              nstate=0:   just 1D state
 !              nstate=1:   just 3P state
 !              nstate=2:   both 1D and 3P states
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  variable in module mod_conlam
 !    nlam:      the number of case(a) interaction potentials actually used
 !               this is :  nlam = nlam0 + nlam1
@@ -109,22 +108,23 @@ subroutine ba1d3p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !              choice of channel index
 ! ------------------------------------------------------------
 use mod_coeig, only: c0, c1, c2
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_covvl, only: vvl
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
+use mod_skip, only: nskip, iskip
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-#include "common/parbas.F90"
-#include "common/parbasl.F90"
 
-common /coered/ ered, rmu
-common /coskip/ nskip, iskip
 !   eigenvectors for the atomic Hamiltonian
 dimension j(1), l(1), jhold(1), ehold(1), &
           ishold(1), is(1), ieig(0:2)
@@ -480,7 +480,7 @@ endif
 if (nlevop .le. 0) then
   write (9,185)
   write (6,185)
-185   format('*** NO OPEN LEVELS IN BA1D3P; ABOST')	
+185   format('*** NO OPEN LEVELS IN BA1D3P; ABOST')
   if (bastst) return
   call exit
 endif
@@ -559,12 +559,14 @@ end if
 ! i counts v2 elements
 ! inum counts v2 elements for given lambda
 ! ilam counts number of v2 matrices
-! ij is address of given v2 element in present v2 matrix
 i = 0
 ilam=0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 320 il = 1, 19
   lb = il
   ilam=ilam+1
+  ancouma => v2%get_angular_coupling_matrix(ilam)
   inum = 0
   if (nstate.eq.0 .and. lb.gt.3) goto 410
   if (nstate.eq.1) then
@@ -572,51 +574,31 @@ do 320 il = 1, 19
       405,405,410,410,410,410,410, &
       405,405,410,410,410,410,410), lb
   endif
-405   ij=0
-  do 310  icol= 1, n
-    do 300  irow = icol, n
-      ij = ntop * (icol - 1) +irow
+405   continue
+  do icol= 1, n
+    do irow = icol, n
       call vlm1d3p (j(irow), l(irow), is(irow), j(icol), &
         l(icol), is(icol), jtot, lb, vee)
-      if (vee .eq. 0) goto 300
+      if (vee .ne. 0) then
         i = i + 1
         inum = inum + 1
-        if (i .gt. nv2max) goto 300
-          v2(i) = vee
-          iv2(i) = ij
-          if (bastst) then
-            write (6, 290) ilam, lb, icol, irow, i, iv2(i), &
-                           vee
-            write (9, 290) ilam, lb, icol, irow, i, iv2(i), &
-                           vee
-290             format (i4, 2i7, 2i6, i6, g17.8)
-          endif
-300     continue
-310   continue
-410   if(ilam.gt.nlammx) then
-  write(6,311) ilam
-311   format(/' ILAM.GT.NLAMMX IN BA1D3P')
-  call exit
-end if
-lamnum(ilam) = inum
+        call ancouma%set_element(irow=irow, icol=icol, vee=vee)
+        if (bastst) then
+          write (6, 290) ilam, lb, icol, irow, i, vee
+          write (6, 290) ilam, lb, icol, irow, i, vee
+290             format (i4, 2i7, 2i6, g17.8)
+        endif
+      end if
+    end do
+  end do
+410 continue
 if (bastst) then
-  write (6, 315) ilam, lamnum(ilam)
-  write (9, 315) ilam, lamnum(ilam)
+  write (6, 315) ilam, ancouma%get_num_nonzero_elements()
+  write (9, 315) ilam, ancouma%get_num_nonzero_elements()
 315   format ('ILAM=',i3,' LAMNUM(ILAM) = ',i6)
 end if
 320 continue
 nlam = ilam
-if ( i.gt. nv2max) then
-  write (6, 350) i, nv2max
-  write (9, 350) i, nv2max
-350   format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-  if (bastst) then
-    return
-  else
-    call exit
-  end if
-end if
 if (bastst) then
   write (6, 360) i
   write (9, 360) i
@@ -662,9 +644,9 @@ subroutine vlm1d3p (j1, l1, i1, j2, l2, i2, jtot, lb, vee)
 !  vee:      on return:  contains desired coupling matrix element
 !  subroutines called:
 !  xf3j:     evaluates 3j symbol
-!  xf6j:     evaluates 6j symbol
 ! --------------------------------------------------------------------
 use mod_coeig, only: c0, c1, c2
+use mod_hiutil, only: xf3j
 implicit double precision (a-h,o-z)
 data onth, twth, frth, sqrt2, onsqt3 /0.333333333333333d0, &
   0.666666666666667d0, 1.333333333333333d0, &
@@ -1005,7 +987,7 @@ goto 120
 end
 ! ------------------------------eof-----------------------------------
 ! -----------------------------------------------------------------------
-subroutine sy1d3p (irpot, readp, iread)
+subroutine sy1d3p (irpot, readpt, iread)
 !  subroutine to read in system dependent parameters for collisions of
 !  atom in 1D and/or 3P state with closed shell atom
 !  current revision date: 20-dec-2013 by p.dagdigian
@@ -1033,24 +1015,19 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-integer irpot
-logical readp
-logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
-        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf, &
-        csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
-        readpt, ihomo, bastst, twomol, lpar
-
+use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_skip, only: nskip, iskip
+use mod_hiutil, only: gennam, get_token
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: j, l, lc
+logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-#include "common/parbas.F90"
-common /coskip/ nskip,iskip
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-                noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr,lpar(3)
 #include "common/comdot.F90"
 save potfil
 integer, pointer :: nterm, nstate, ipol, npot
@@ -1084,7 +1061,7 @@ if(iread.eq.0) return
 read (8, *, err=888) nstate
 read (8, *, err=888) en1d
 line=' '
-if(.not.readp.or.iread.eq.0) then
+if(.not.readpt.or.iread.eq.0) then
   call loapot(1,' ')
   return
 endif
@@ -1096,12 +1073,12 @@ goto 286
 1000 format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
 return
 ! --------------------------------------------------------------
-entry ptr1d3p (fname,readp)
+entry ptr1d3p (fname,readpt)
 line = fname
-readp = .true.
-286 if (readp) then
+readpt = .true.
+286 if (readpt) then
   l=1
-  call parse(line,l,filnam,lc)
+  call get_token(line,l,filnam,lc)
   if(lc.eq.0) then
     write(6,1020)
 1020     format(' FILENAME MISSING FOR POTENTIAL INPUT')
@@ -1126,12 +1103,13 @@ close (8)
 irpot=1
 return
 ! --------------------------------------------------------------
-entry sav1d3p (readp)
+entry sav1d3p (readpt)
 !  save input parameters for 1D/3P atom + atom scattering
-write (8, 300) nstate
+write (FUNIT_INP, 300) nstate
 300 format(i4, 29x,'nstate')
-write (8, 310) en1d
+write (FUNIT_INP, 310) en1d
 310 format((1pg12.4),21x,'E-1D')
-write (8, 285) potfil
+write (FUNIT_INP, 285) potfil
 return
 end
+end module mod_hiba22_1d3p

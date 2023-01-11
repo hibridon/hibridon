@@ -27,14 +27,16 @@ use mod_coisc6, only: jout2 => isc6 ! jout2(1)
 use mod_coisc7, only: nlevt => isc7 ! nlevt(1)
 use mod_coisc8, only: jlevt => isc8 ! jlevt(1)
 use mod_coisc9, only: inlevt => isc9 ! inlevt(1)
-use mod_coisc10, only: ipack => isc10 ! ipack(1)
-use mod_coisc11, only: jpack => isc11 ! jpack(1)
-use mod_coisc12, only: lpack => isc12 ! lpack(1)
 use mod_cosc1, only: elev1 => sc1 ! elev1(1)
 use mod_cosc2, only: elev2 => sc2 ! elev2(1)
 use mod_cosc3, only: elevt => sc3 ! elevt(1)
-use mod_hibrid5, only: sread
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_hiutil, only: gennam, mtime, gettim
+use mod_hiutil, only: xf6j
+use mod_hismat, only: sread, rdhead, sinqr
+use mod_hitypes, only: packed_base_type
 implicit double precision (a-h, o-z)
+type(packed_base_type) :: packed_base
 character*(*) flnam1, flnam2
 character*20  cdate1, cdate2
 character*40  smtfil1, smtfil2, prtfil
@@ -46,7 +48,6 @@ logical csflg1, flghf1, flgsu1, twmol1, nucrs1, &
         batch, fast, lpar2, lpar, exstfl, diagst, &
         diagj, diagin, &
         diagjp, daginp, diag, diagp
-#include "common/parpot.F90"
 
 dimension a(12)
 !
@@ -422,8 +423,8 @@ end if
 iaddr = 0
 20 nopen = -1
 call sread (iaddr, sreal, simag, jtot1, jlpar1, &
-   nu1, jq, lq, inq, ipack, jpack, lpack, &
-   1, mmax, nopen, lngth1, ierr)
+   nu1, jq, lq, inq, packed_base, &
+   1, mmax, nopen, ierr)
 if (ierr .lt. -1) then
   write(6,105)
 105   format(/' ** READ ERROR IN PRSBR - INITIAL ', &
@@ -432,14 +433,15 @@ if (ierr .lt. -1) then
   goto 1000
   return
 end if
+lngth1 = packed_base%length
 jlp = 1 - (jlpar1 - 1)/2
 !  copy s-matrix for this jtot1/jlpar1
 lngtha(jtot1,jlp) = lngth1
 len2 = lngth1*(lngth1 + 1)/2
 do i = 1, lngth1
-  ja(jtot1,jlp,i) = jpack(i)
-  ina(jtot1,jlp,i) = ipack(i)
-  la(jtot1,jlp,i) = lpack(i)
+  ja(jtot1,jlp,i) = packed_base%jpack(i)
+  ina(jtot1,jlp,i) = packed_base%inpack(i)
+  la(jtot1,jlp,i) = packed_base%lpack(i)
 end do
 do ii = 1, len2
   sra(jtot1,jlp,ii) = sreal(ii)
@@ -466,22 +468,23 @@ goto 20
 22 iaddr = 0
 1020 nopen = -1
 call sread (iaddr, sreal, simag, jtot2, jlpar2, &
-   nu2, jq, lq, inq, ipack, jpack, lpack, &
-   11, mmax, nopen, lngth2, ierr)
+   nu2, jq, lq, inq, packed_base, &
+   11, mmax, nopen, ierr)
 if (ierr .lt. -1) then
   write(6,1105)
 1105   format(/' ** READ ERROR IN PRSBR - FINAL ', &
       'SMT FILE. ABORT **'/)
   goto 1000
 end if
+lngth2 = packed_base%length
 jlp = 1 - (jlpar2 - 1)/2
 !  copy s-matrix for this jtot2/jlpar2
 lngthb(jtot2,jlp) = lngth2
 len2 = lngth2*(lngth2 + 1)/2
 do i = 1, lngth2
-  jb(jtot2,jlp,i) = jpack(i)
-  inb(jtot2,jlp,i) = ipack(i)
-  lb(jtot2,jlp,i) = lpack(i)
+  jb(jtot2,jlp,i) = packed_base%jpack(i)
+  inb(jtot2,jlp,i) = packed_base%inpack(i)
+  lb(jtot2,jlp,i) = packed_base%lpack(i)
 end do
 do ii = 1, len2
   srb(jtot2,jlp,ii) = sreal(ii)

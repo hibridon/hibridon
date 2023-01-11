@@ -1,10 +1,13 @@
+#include "assert.h"
+module mod_hiba13_h3p
+contains
 ! syh3p (savh3p/ptrh3p) defines, saves variables and reads               *
 !                  potential for homonuclear+3P atom scattering          *
 ! --------------------------------------------------
 subroutine bah3p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
                   isc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-                  n, nmax, ntop)
+                  n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential
 !  for collision of a triplet atom in a P state and a homonuclear molecule
@@ -85,14 +88,9 @@ subroutine bah3p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !    iop:      ortho (iop=1) or para (iop=0)
 !    jmax:     maximum rotational quantum number of diatomic
 !    eint:     array containing channel energies (in hartree)
-!  variables in common block /coered/
-!    ered:     collision energy in atomic units (hartrees)
-!    rmu:      collision reduced mass in atomic units
-!              (mass of electron = 1)
 !  variable in module mod_conlam
 !    nlam:     the number of case(a) interaction potentials actually used
 !              this is 5 here
-!    nlammx:   the maximum number of angular coupling terms
 !  variable in common block /coconv/
 !     econv:   conversion factor from cm-1 to hartrees
 !     xmconv:  converson factor from amu to atomic units
@@ -100,23 +98,24 @@ subroutine bah3p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !   vlmh3p:    returns angular coupling coefficient for particular
 !              choice of channel index
 ! ------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coj12, only: j12
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+use mod_par, only: iprint
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
+use mod_skip, only: nskip, iskip
+use mod_jtot, only: jjtot, jjlpar
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-#include "common/parbas.F90"
-#include "common/parbasl.F90"
-common /coipar/ iiipar(9), iprint
-common /coered/ ered, rmu
-common /coskip/ nskip, iskip
-common /cojtot/ jjtot,jjlpar
 dimension j(9), l(9), jhold(9), ehold(9), isc1(9), sc2(9), sc3(9), &
           sc4(9), ishold(9), is(9)
 dimension lamr(9),lama(9),lam12(9), mu(9)
@@ -157,11 +156,11 @@ if(nterm.ne.1) then
 9   format(' *** NTERM = ',i3,' .NE. 1 FOR MOL + 3P ATOM; ABORT')
   call exit
 end if
-nsum=5
+nsum=nlam
 if (bastst) write (6, 14) nsum
 write (9, 14) nsum
 14 format (' ** TOTAL NUMBER OF ANISOTROPIC TERMS=', i2)
-nlam = nsum
+!nlam = nsum
 if (bastst) then
   if (flagsu) then
     write (6,16) rmu * xmconv, ered * econv, jtot, jlpar
@@ -615,19 +614,20 @@ end if
 ! ij is address of given v2 element in present v2 matrix
 i = 0
 ilam=0
-do 320 il = 1,lammax(1)
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
+do 320 il = 1,nlam
 !      do 320 il = 4,4
   ilam=ilam+1
+  ancouma => v2%get_angular_coupling_matrix(ilam)
   inum = 0
   ij=0
   ilamr=lamr(il)
   ilama=lama(il)
   ilam12=lam12(il)
   imu=mu(il)
-  do 310  icol= 1, n
-    do 300  irow = icol, n
-!        do 310  icol= 2, 3
-!          do 300  irow = icol, 3
+  do icol= 1, n
+    do irow = icol, n
       ij = ntop * (icol - 1) +irow
       j12row=j12(irow)
       j12col=j12(icol)
@@ -637,60 +637,35 @@ do 320 il = 1,lammax(1)
         is(icol), j12row, j12col, l(irow), l(icol), ilamr, &
         ilama, ilam12, nu, csflag, vee)
       else if (csflag .and. .not.ihomo) then
-! NB j12row and j12col are krow and kcol here
+      ! NB j12row and j12col are krow and kcol here
         call vlmh3pc(irow,icol,jtot,jlpar,j(irow),j(icol), &
         is(irow), &
         is(icol), j12row, j12col, ilamr, &
         ilama, imu, nu, jmol, flaghf, vee)
       endif
-!           write (6,291) irow,icol,jtot,jlpar,j(irow),j(icol),is(irow),
-!     :         is(icol),j12row,j12col,nu,ilamr,ilama,ilam12,vee
-291  format(14i3,g17.8)
-      if (vee .eq. 0) goto 300
+      if (vee .ne. 0) then
         i = i + 1
         inum = inum + 1
-        if (i .gt. nv2max) goto 300
-          v2(i) = vee
-          iv2(i) = ij
-          if (bastst .and. iprint .gt. 1) then
-            if (.not. csflag .or. (csflag .and. ihomo)) then
-              write (6, 290) ilam, ilamr,ilama,ilam12, icol, irow, &
-                           i, iv2(i), vee
-              write (9, 290) ilam, ilamr,ilama,ilam12, icol, irow, &
-                           i, iv2(i), vee
+        call ancouma%set_element(irow=irow, icol=icol, vee=vee)
+        if (bastst .and. iprint .gt. 1) then
+          if (.not. csflag .or. (csflag .and. ihomo)) then
+            write (6, 290) ilam, ilamr,ilama,ilam12, icol, irow, i, vee
+            write (9, 290) ilam, ilamr,ilama,ilam12, icol, irow, i, vee
 290               format (i4, i5,2i3,i5, 2i6, i6, g17.8)
-            elseif (csflag .and. .not.ihomo) then
-              write (6, 290) ilam, ilamr,ilama,imu, icol, irow, &
-                           i, iv2(i), vee
-              write (9, 290) ilam, ilamr,ilama,imu, icol, irow, &
-                           i, iv2(i), vee
-            endif
+          elseif (csflag .and. .not.ihomo) then
+            write (6, 290) ilam, ilamr,ilama,imu, icol, irow, i, vee
+            write (9, 290) ilam, ilamr,ilama,imu, icol, irow, i, vee
           endif
-300     continue
-310   continue
-if(ilam.gt.nlammx) then
-  write(6,311) ilam
-311   format(/' ILAM.GT.NLAMMX IN BAH3P')
-  call exit
-end if
-lamnum(ilam) = inum
+        endif
+      end if
+    end do
+  end do
 if (bastst .and. iprint .gt. 1) then
-  write (6, 315) ilam, lamnum(ilam)
-  write (9, 315) ilam, lamnum(ilam)
+  write (6, 315) ilam, ancouma%get_num_nonzero_elements()
+  write (9, 315) ilam, ancouma%get_num_nonzero_elements()
 315   format ('ILAM=',i3,' LAMNUM(ILAM) = ',i6)
 end if
 320 continue
-if ( i.gt. nv2max) then
-  write (6, 350) i, nv2max
-  write (9, 350) i, nv2max
-350   format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-  if (bastst) then
-    return
-  else
-    call exit
-  end if
-end if
 if (clist) then
   write (6, 360) i
   write (9, 360) i
@@ -723,6 +698,7 @@ subroutine vlmh3p (irow, icol, jtot, jlpar, j, jp, ja, jap, &
 !  nu         projection index (called P by Dubernet and Hutson)
 !  vee:        on return:  contains desired coupling matrix element
 ! --------------------------------------------------------------------
+use mod_hiutil, only: xf3j, xf6j, xf9j
 implicit double precision (a-h,o-z)
 logical csflag
 data  zero, one, two, three /0.d0, 1.d0, 2.d0, 3.d0/
@@ -815,6 +791,7 @@ subroutine vlmh3pc (irow, icol, jtot, jlpar, j, jp, ja, jap, &
 !  nu         projection index (called P by Dubernet and Hutson)
 !  vee:        on return:  contains desired coupling matrix element
 ! --------------------------------------------------------------------
+use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
 logical flaghf
 data  zero, one, two /0.d0, 1.d0, 2.d0/
@@ -946,12 +923,19 @@ use mod_coiout, only: niout, indout
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-logical readpt, existf
+use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_hiutil, only: gennam, get_token
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: icod, ircod, j, l, lc
+logical existf
 character*1 dot
 character*(*) fname
 character*60 line, filnam, potfil, filnm1
 parameter (icod=3, ircod=3)
-#include "common/parbas.F90"
 save potfil
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
@@ -1013,7 +997,7 @@ line = fname
 readpt = .true.
 100 if (readpt) then
   l=1
-  call parse(line,l,filnam,lc)
+  call get_token(line,l,filnam,lc)
   if(lc.eq.0) then
     write(6,102)
 102     format(' FILENAME MISSING FOR POTENTIAL INPUT')
@@ -1045,11 +1029,12 @@ entry savh3p (readpt)
 !  be left blank, and the names of the variables should be printed in spaces
 !  34-80
 !  line 18:
-write (8, 220) iop, jmax
+write (FUNIT_INP, 220) iop, jmax
 220 format (2i4, 14x,'   iop, jmax')
 !  line 21
-write (8, 250) brot, aso1, aso2
+write (FUNIT_INP, 250) brot, aso1, aso2
 250 format(f12.4,2f14.4, 2x, '   brot, aso1, aso2')
-write (8, 60) potfil
+write (FUNIT_INP, 60) potfil
 return
 end
+end module mod_hiba13_h3p

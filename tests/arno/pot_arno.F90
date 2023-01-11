@@ -6,8 +6,8 @@ subroutine driver
 use mod_covvl, only: vvl
 use constants, only: econv
 use mod_cosysr, only: rspar
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
-#include "common/parpot.F90"
 real(8), pointer :: rshift, xfact
 rshift=>rspar(1) ; xfact=>rspar(2)
 potnam='ALEXANDER Ar-NO CEPA'
@@ -27,9 +27,9 @@ goto 1
 ! --------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 character*(*) filnam
-#include "common/parbas.F90"
-#include "common/parpot.F90"
 potnam='ALEXANDER Ar-NO CEPA'
 lammin(1)=1
 lammax(1)=10
@@ -66,6 +66,7 @@ subroutine pot (vv0, r)
 
 use mod_covvl, only: vvl
 use constants, only: econv
+use mod_hivector, only: dset
 implicit double precision (a-h,o-z)
 dimension xlam1(22),xlam2(22),r0(22),c1(22),c2(22),c3(22), &
           clr(22),vsum(11),xsum(11),vdif(11),xdif(11), &

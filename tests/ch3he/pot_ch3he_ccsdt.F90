@@ -18,9 +18,9 @@
 ! ------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use constants, only: s4pi
 implicit double precision (a-h,o-z)
-#include "common/parpot.F90"
-s4pi = sqrt ( 4.d0 * acos(-1.d0) )
 potnam='Dagdigian CH3-He PES'
 print *, potnam
 1 print *, 'R (bohr):'
@@ -50,12 +50,12 @@ close(12)
 end
 ! ------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: nscode, isicod, ispar
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 character*(*) filnam
-#include "common/parbas.F90"
-#include "common/parpot.F90" 
 integer, pointer :: nterm
 nterm=>ispar(1)
 potnam='Dagdigian CH3-He PES'
@@ -113,8 +113,6 @@ subroutine pot (vv0, r)
 !    vvl(5-8):   expansion coefficients in [Yl3 - Y(l,-3)] (l=3:9:3) of v(lam,3)
 !    vvl(9,10):  expansion coefficients in [Yl6 + Y(l,-6)] (l=6:8:2) of v(lam,6)
 !    vvl(11):    expansion coefficients in [Yl9 - Y(l,-9)] (l=9)     of v(lam,9)
-!  variable in common block /coloapot/
-!    s4pi:       normalization factor for isotropic potential
 !
 !  uses linear least squares routines from lapack
 !
@@ -122,6 +120,7 @@ subroutine pot (vv0, r)
 ! latest revision date:  march-4-2011
 !
 use mod_covvl, only: vvl
+use constants, only: s4pi
 implicit double precision (a-h,o-z)
 dimension iwork(1000),ylm(70,12)
 dimension swork(12), work(1812)
@@ -405,7 +404,6 @@ call dcopy(11,vsp_jacek(2),1,vvl,1)
 ! at r=15.5, merge spherical potential to long-range behaviour and damp
 ! all the anisotropic terms 
 fact=0.5d0*(tanh((r-15.5d0))+1d0)
-s4pi = sqrt ( 4.d0 * acos(-1.d0) )
 vv0=vsp_jacek(1)*(1d0-fact)-fact*c6/r**6
 vv0=vv0*tohat/s4pi
 call dscal(11,(1d0-fact),vvl,1)
@@ -426,14 +424,15 @@ subroutine spline_ch3he(vsp_jacek, r)
 !  Rp, XX   original data, Rp & XX should have the same dimensions
 !  r  new distance, where pot need to be calculated by spline-Fitchbur
 !  VNO  pot at r, output
-implicit double precision (a-h,o-z)   
-integer k
-dimension b0(19,70),c0(19,70),a0(19,70),rr(19)
-dimension vsp_jacek(70)
-dimension vv(1330),v(19,70),vvec(19,70)
-data rr /3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,11, &
-  12,13,15,20/
-data ifirst /0/
+implicit double precision (a-h,o-z)  
+real(8), intent(out) :: vsp_jacek(70)
+real(8), intent(in)  :: r
+real(8), save :: b0(19,70), c0(19,70), a0(19,70), vvec(19,70)
+real(8) :: rr(19)
+real(8) ::  vv(1330),v(19,70)
+integer :: k
+integer, save :: ifirst=0
+data rr /3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,11,12,13,15,20/ 
 if (ifirst.eq.0) then
    open (unit=10,file= &
      'potdata/ch3he_pot.dat')

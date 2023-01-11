@@ -18,7 +18,7 @@ program comp_tests
     ! Extract file extension in ext string variable
     ext = ref(scan(trim(ref),".", BACK= .true.)+1:len(ref))
 
-    write(Output_Unit, *) 'comparing test file ', trim(test), ' to reference file ', trim(ref)
+    write(Output_Unit, "(4a)") 'comparing test file ', trim(test), ' to reference file ', trim(ref)
 
     ! Tolerance is set to 1%
     tolerance=0.01d0
@@ -36,6 +36,7 @@ program comp_tests
         min_significant_value = 1e-20
     case("trn") ; num_header_lines = 7
     case("xxsc"); num_header_lines = 3
+    case("tcb"); num_header_lines = 2
     case ("flx") ! Header ends at first occurence of "R (BOHR) AND OUTGOING FLUXES"
         num_header_lines(1) = get_first_occ_of("R (BOHR) AND OUTGOING FLUXES",ref)
         num_header_lines(2) = get_first_occ_of("R (BOHR) AND OUTGOING FLUXES",test)

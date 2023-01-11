@@ -1,10 +1,16 @@
+#include "assert.h"
+module mod_hiba10_22p
+
+real(8) :: ttrans(6,6)
+
+contains
 ! sy22p (sav22p/ptr22p) defines, save variables and reads                *
 !                  potential for 2S / 2P atom scattering                 *
 ! --------------------------------------------------
 subroutine ba22p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
                   isc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-                  n, nmax, ntop)
+                  n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential
 !  for collision of a doublet atom in an S state and a doublet atom in a
@@ -79,10 +85,6 @@ subroutine ba22p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !              this should be 1 here
 !               in case (a) basis
 !
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  variable in module mod_conlam
 !    nlam:      the number of case(a) interaction potentials actually used
 !               this is 14 here
@@ -93,22 +95,23 @@ subroutine ba22p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !   vlm22p:    returns angular coupling coefficient for particular
 !              choice of channel index
 ! ------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
+use mod_skip, only: nskip, iskip
+use mod_jtot, only: jjtot, jjlpar
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-#include "common/parbas.F90"
-#include "common/parbasl.F90"
 
-common /coered/ ered, rmu
-common /coskip/ nskip, iskip
-common /cojtot/ jjtot,jjlpar
 dimension j(9), l(9), jhold(9), ehold(9), isc1(9), sc2(9), sc3(9), &
           sc4(9), ishold(9), is(9)
 integer, pointer :: nterm, nphoto
@@ -341,56 +344,36 @@ end if
 ! i counts v2 elements
 ! inum counts v2 elements for given lambda
 ! ilam counts number of v2 matrices
-! ij is address of given v2 element in present v2 matrix
 i = 0
 ilam=0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 320 il = 1,lammax(1)
   lb = il
   ilam=ilam+1
+  ancouma => v2%get_angular_coupling_matrix(ilam)
   inum = 0
-  ij=0
-  do 310  icol= 1, n
-    do 300  irow = icol, n
-      ij = ntop * (icol - 1) +irow
+  do icol= 1, n
+    do irow = icol, n
       call vlm22p (irow, icol, jtot, jlpar, lb, vee)
-      if (vee .eq. 0) goto 300
+      if (vee .ne. 0) then
         i = i + 1
         inum = inum + 1
-        if (i .gt. nv2max) goto 300
-          v2(i) = vee
-          iv2(i) = ij
+          call ancouma%set_element(irow=irow, icol=icol, vee=vee)
           if (bastst) then
-            write (6, 290) ilam, lb, icol, irow, i, iv2(i), &
-                           vee
-            write (9, 290) ilam, lb, icol, irow, i, iv2(i), &
-                           vee
-290             format (i4, 2i7, 2i6, i6, g17.8)
-          endif
-300     continue
-310   continue
-if(ilam.gt.nlammx) then
-  write(6,311) ilam
-311   format(/' ILAM.GT.NLAMMX IN BA22P')
-  call exit
-end if
-lamnum(ilam) = inum
+            write (6, 290) ilam, lb, icol, irow, i, vee
+            write (9, 290) ilam, lb, icol, irow, i, vee
+290             format (i4, 2i7, 2i6, g17.8)
+          end if
+        end if
+      end do
+    end do
 if (bastst) then
-  write (6, 315) ilam, lamnum(ilam)
-  write (9, 315) ilam, lamnum(ilam)
+  write (6, 315) ilam, ancouma%get_num_nonzero_elements()
+  write (9, 315) ilam, ancouma%get_num_nonzero_elements()
 315   format ('ILAM=',i3,' LAMNUM(ILAM) = ',i6)
 end if
 320 continue
-if ( i.gt. nv2max) then
-  write (6, 350) i, nv2max
-  write (9, 350) i, nv2max
-350   format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-  if (bastst) then
-    return
-  else
-    call exit
-  end if
-end if
 if (clist) then
   write (6, 360) i
   write (9, 360) i
@@ -582,8 +565,8 @@ subroutine tcasea22(j,jlpar)
 !   author:  brigitte pouilly and millard alexander
 !   latest revision date:  30-dec-1995
 ! -----------------------------------------
+use mod_hivector, only: dset
 implicit double precision (a-h,o-z)
-common /cotrans/ t(6,6)
 data zero, one,two ,three,six/0.d0, 1.d0, 2.d0, 3.d0, 6.d0/
 if (j .lt. 2) then
 ! error if jtot is less than 2
@@ -592,7 +575,7 @@ if (j .lt. 2) then
   stop
 endif
 ! initialization of the matrix tatoe
-call dset(36,zero,t,1)
+call dset(36,zero,ttrans,1)
 !
 xj=j
 xjp1=j+1
@@ -603,67 +586,67 @@ if(jlpar.lt.0) then
 ! transformation from asymptotic states (rows) into case (a) states (columns)
 ! with ordering (of columns)
 !  3Sig1, 3Pi0, 3Pi1, 3Pi2, 1Sig, 1Pi1
-  t(1,1)=-sqrt(xjp1/three)
-  t(1,2)= sqrt(two*xj/three)
-  t(1,3)= sqrt(xjp1/three)
-  t(1,5)=-sqrt(xj/three)
-  t(1,6)=-sqrt(xjp1/three)
-  t(2,1)=t(1,5)
-  t(2,2)=-sqrt(two*xjp1/three)
-  t(2,3)= sqrt(xj/three)
-  t(2,5)= sqrt(xjp1/three)
-  t(2,6)=-sqrt(xj/three)
-  t(3,5)= sqrt(two*xj/three)
-  t(3,6)= sqrt(two*xjp1/three)
-  t(3,1)=-sqrt(xjp1/six)
-  t(3,2)= sqrt(xj/three)
-  t(3,3)= sqrt(xjp1/six)
-  t(4,5)=-sqrt(2*xjp1/three)
-  t(4,6)= sqrt(2*xj/three)
-  t(4,1)=-sqrt(xj/six)
-  t(4,2)=-sqrt(xjp1/three)
-  t(4,3)= sqrt(xj/six)
-  t(5,1)= sqrt(xjm1/two)
-  t(5,3)=t(5,1)
-  t(5,4)= sqrt(xj+two)
-  t(6,1)=-sqrt((xj+two)/two)
-  t(6,3)=t(6,1)
-  t(6,4)= sqrt(xjm1)
+  ttrans(1,1)=-sqrt(xjp1/three)
+  ttrans(1,2)= sqrt(two*xj/three)
+  ttrans(1,3)= sqrt(xjp1/three)
+  ttrans(1,5)=-sqrt(xj/three)
+  ttrans(1,6)=-sqrt(xjp1/three)
+  ttrans(2,1)=ttrans(1,5)
+  ttrans(2,2)=-sqrt(two*xjp1/three)
+  ttrans(2,3)= sqrt(xj/three)
+  ttrans(2,5)= sqrt(xjp1/three)
+  ttrans(2,6)=-sqrt(xj/three)
+  ttrans(3,5)= sqrt(two*xj/three)
+  ttrans(3,6)= sqrt(two*xjp1/three)
+  ttrans(3,1)=-sqrt(xjp1/six)
+  ttrans(3,2)= sqrt(xj/three)
+  ttrans(3,3)= sqrt(xjp1/six)
+  ttrans(4,5)=-sqrt(2*xjp1/three)
+  ttrans(4,6)= sqrt(2*xj/three)
+  ttrans(4,1)=-sqrt(xj/six)
+  ttrans(4,2)=-sqrt(xjp1/three)
+  ttrans(4,3)= sqrt(xj/six)
+  ttrans(5,1)= sqrt(xjm1/two)
+  ttrans(5,3)=ttrans(5,1)
+  ttrans(5,4)= sqrt(xj+two)
+  ttrans(6,1)=-sqrt((xj+two)/two)
+  ttrans(6,3)=ttrans(6,1)
+  ttrans(6,4)= sqrt(xjm1)
   denom=one/sqrt(two*xj+one)
-  call dscal(36,denom,t,1)
+  call dscal(36,denom,ttrans,1)
 ! here for f-labelled states
 !  3Sig1, 3Pi0, 3Pi1, 3Pi2, 3Sig0, 1Pi1
 
 else
-  t(1,5)=-sqrt(one/three)
-  t(1,2)= sqrt(two/three)
-  t(2,1)=t(1,5)
-  t(2,3)=-t(1,5)
-  t(2,6)=t(1,5)
-  t(3,1)=-sqrt(one/six)
-  t(3,3)= sqrt(one/six)
-  t(3,6)=sqrt(two/three)
-  t(4,5)=sqrt(xj*xjm1)
-  t(4,1)= sqrt(xjp1*xjm1)
-  t(4,2)=sqrt(xj*xjm1/two)
-  t(4,3)= sqrt(xjp1*xjm1)
-  t(4,4)=sqrt(xjp1*xjp2/two)
+  ttrans(1,5)=-sqrt(one/three)
+  ttrans(1,2)= sqrt(two/three)
+  ttrans(2,1)=ttrans(1,5)
+  ttrans(2,3)=-ttrans(1,5)
+  ttrans(2,6)=ttrans(1,5)
+  ttrans(3,1)=-sqrt(one/six)
+  ttrans(3,3)= sqrt(one/six)
+  ttrans(3,6)=sqrt(two/three)
+  ttrans(4,5)=sqrt(xj*xjm1)
+  ttrans(4,1)= sqrt(xjp1*xjm1)
+  ttrans(4,2)=sqrt(xj*xjm1/two)
+  ttrans(4,3)= sqrt(xjp1*xjm1)
+  ttrans(4,4)=sqrt(xjp1*xjp2/two)
   denom=one/sqrt((two*xj+one)*(two*xj-one))
-  call dscal(6,denom,t(4,1),6)
-  t(5,5)=-sqrt(two*xj*xjp1/three)
-  t(5,1)=-sqrt(three/two)
-  t(5,2)=-sqrt(xjp1*xj/three)
-  t(5,3)=-sqrt(three/two)
-  t(5,4)=sqrt(three*xjp2*xjm1)
+  call dscal(6,denom,ttrans(4,1),6)
+  ttrans(5,5)=-sqrt(two*xj*xjp1/three)
+  ttrans(5,1)=-sqrt(three/two)
+  ttrans(5,2)=-sqrt(xjp1*xj/three)
+  ttrans(5,3)=-sqrt(three/two)
+  ttrans(5,4)=sqrt(three*xjp2*xjm1)
   denom=one/sqrt((two*xj+three)*(two*xj-one))
-  call dscal(6,denom,t(5,1),6)
-  t(6,5)=sqrt(xjp1*xjp2)
-  t(6,1)=-sqrt(xj*xjp2)
-  t(6,2)= sqrt(xjp1*xjp2/two)
-  t(6,3)=-sqrt(xjp2*xj)
-  t(6,4)=sqrt(xj*xjm1/two)
+  call dscal(6,denom,ttrans(5,1),6)
+  ttrans(6,5)=sqrt(xjp1*xjp2)
+  ttrans(6,1)=-sqrt(xj*xjp2)
+  ttrans(6,2)= sqrt(xjp1*xjp2/two)
+  ttrans(6,3)=-sqrt(xjp2*xj)
+  ttrans(6,4)=sqrt(xj*xjm1/two)
   denom=one/sqrt((two*xj+one)*(two*xj+three))
-  call dscal(6,denom,t(6,1),6)
+  call dscal(6,denom,ttrans(6,1),6)
 endif
 return
 end
@@ -682,12 +665,14 @@ subroutine trans22(w,n,nmax)
 use mod_coeint, only: eint
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+use mod_jtot, only: j => jjtot, jlpar => jjlpar
+#if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
+  use mod_himatrix, only: mxma
+#endif
 implicit double precision (a-h,o-z)
 #if defined(HIB_UNIX_IBM)
 character*1 forma, formb
 #endif
-common /cotrans/ t(6,6)
-common /cojtot/ j,jlpar
 dimension w(42), sc(49)
 data one,half /1.d0,0.5d0/
 data nnmax /6/
@@ -703,14 +688,14 @@ if (n .ne. 6) then
   stop
 endif
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
- call mxma (t,1,nnmax,w,1,nmax,sc,1,nmax,n,n,n)
- call mxma (sc,1,nmax,t,nnmax,1,w,1,nmax,n,n,n)
+ call mxma (ttrans,1,nnmax,w,1,nmax,sc,1,nmax,n,n,n)
+ call mxma (sc,1,nmax,ttrans,nnmax,1,w,1,nmax,n,n,n)
 #endif
 #if defined(HIB_UNIX_IBM)
 forma='N'
 formb='T'
-call dgemul (t,nnmax,forma,w,nmax,forma,sc,nmax,n,n,n)
-call dgemul (sc,nmax,forma,t,nnmax,formb,w,nmax,n,n,n)
+call dgemul (ttrans,nnmax,forma,w,nmax,forma,sc,nmax,n,n,n)
+call dgemul (sc,nmax,forma,ttrans,nnmax,formb,w,nmax,n,n,n)
 #endif
 return
 !  w now contains desired product
@@ -728,7 +713,7 @@ call dscal(6,fact,eint,1)
 return
 end
 ! -----------------------------------------------------------------------
-subroutine sy22p (irpot, readp, iread)
+subroutine sy22p (irpot, readpt, iread)
 !  subroutine to read in system dependent parameters for collisions of
 ! atom in doublet S state with atom in doublet P state
 !  if iread = 1 read data from input file
@@ -756,24 +741,21 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod=>rspar
-implicit double precision (a-h,o-z)
-integer irpot
-logical readp
-logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
-        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf, &
-        csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
-        readpt, ihomo, bastst, twomol,lpar
+use mod_par, only:  jtot1,jtot2,jtotd,jlpar
+use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_skip, only: nskip, iskip
+use mod_hiutil, only: gennam, get_token
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+real(8) :: aso
+integer :: ibran, j, l, lc, nphoto, nterm, nvib
+logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-common /coipar/ jtot1,jtot2,jtotd,jlpar
-#include "common/parbas.F90"
-common /coskip/ nskip,iskip
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-                noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr,lpar(3)
 #include "common/comdot.F90"
 save potfil
 !  number and names of system dependent parameters
@@ -837,7 +819,7 @@ endif
 print *, ibran, jlpar
 rcod(1)=aso
 line=' '
-if(.not.readp.or.iread.eq.0) then
+if(.not.readpt.or.iread.eq.0) then
   call loapot(1,' ')
   return
 endif
@@ -849,12 +831,12 @@ goto 286
 1000 format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
 return
 ! --------------------------------------------------------------
-entry ptr22p (fname,readp)
+entry ptr22p (fname,readpt)
 line = fname
-readp = .true.
-286 if (readp) then
+readpt = .true.
+286 if (readpt) then
   l=1
-  call parse(line,l,filnam,lc)
+  call get_token(line,l,filnam,lc)
   if(lc.eq.0) then
     write(6,1020)
 1020     format(' FILENAME MISSING FOR POTENTIAL INPUT')
@@ -879,14 +861,15 @@ close (8)
 irpot=1
 return
 !
-entry sav22p (readp)
+entry sav22p (readpt)
 !  save input parameters for singlet-sigma + atom scattering
 nphoto=iscod(2)
 nvib=iscod(3)
 ibran=iscod(4)
 aso=rcod(1)
-write (8, 300) nphoto, nvib, ibran, aso
+write (FUNIT_INP, 300) nphoto, nvib, ibran, aso
 300 format(i4,2(2x,i4),1pg12.5,3x,'  nphoto, nvib, ibran, a-so')
-write (8, 285) potfil
+write (FUNIT_INP, 285) potfil
 return
 end
+end module mod_hiba10_22p

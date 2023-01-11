@@ -1,3 +1,4 @@
+#include "assert.h"
 ! sy1sg1sg (sav1sg1sg/ptr1sg1sg) defines, saves variables and reads      *
 !                  potentials for 1sigma - 1sigma (different molecules)  *
 ! --------------------------------------------------------------------
@@ -30,10 +31,13 @@ end type lm_type
 type(lm_type), dimension(:), allocatable :: lms
 end module mod_1sg1sg
 ! --------------------------------------------------------------------
+module mod_hiba25_1sg1sg
+  contains
+  
 subroutine ba1sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
      nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
      flaghf, flagsu, csflag, clist, bastst, ihomo, &
-     nu, numin, jlpar, n, nmax, ntop)
+     nu, numin, jlpar, n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  variables in call list:
 !    j:        on return contains combined rotational quantum numbers for each
@@ -105,31 +109,28 @@ subroutine ba1sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
 !    j2max:    maximum rotational angular momentum of molecule 2
 !    ipotsy:   symmetry of potential.  set to 2 for homonuclear
 !              molecule 2, set to 1 for heteronuclear molecule 2
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  subroutines called:
 !   vlmlml:    returns molecule-molecule angular coupling coefficient for
 !              particular choice of channel index
 ! --------------------------------------------------------------------
 use mod_1sg1sg
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coj12, only: j12
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+use mod_par, only: iprint
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_par, only: readpt, boundc
+use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-#include "common/parbas.F90"
-#include "common/parbasl.F90"
-common /coipar/ iiipar(9), iprint
-common /coselb/ ibasty
-common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
     sc1(1), sc2(1), sc3(1), sc4(1), ishold(1)
 data zero, ione, itwo, ithree / 0.d0, 1, 2, 3 /
@@ -201,10 +202,10 @@ do j1 = 0, j1max
     ishold(nlevel) = 0
     jj1 = j1 * (j1 + 1.d0)
 !
-!  Subtract energy of lowest H2 level
-    ezero = b2rot * (j2min * (j2min + 1.d0))
+!  subtract energy of lowest H2 level (13-jan-2022)
+    ezero = b2rot * j2min * (j2min + 1d0)
     ehold(nlevel) = (b1rot * jj1 - d1rot * jj1**2 &
-      + b2rot * (j2 * (j2 + 1.d0)) - ezero) / econv
+      + b2rot * j2 * (j2 + 1.d0) - ezero) / econv
   end do
 end do
 !
@@ -378,9 +379,11 @@ if (bastst .and. iprint.eq.2) then
     '      IV2         VEE')
 end if
 i = 0
-lamsum = 0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 400 ilam = 1, nlam
 !     ilam denotes a particular L1,L2,L term
+  ancouma => v2%get_angular_coupling_matrix(ilam)
   ll1 = lms(ilam)%l1
   ll2 = lms(ilam)%l2
   lltot = lms(ilam)%ltot
@@ -391,7 +394,6 @@ do 400 ilam = 1, nlam
     j12c = j12(icol)
     lc = l(icol)
     do 350 irow = icol, n
-      ij = ntop * (icol - 1) + irow
       j1r = j(irow)/10
       j2r = mod(j(irow),10)
       j12r = j12(irow)
@@ -402,38 +404,27 @@ do 400 ilam = 1, nlam
           lc,jtot,ll1,ll2,lltot,vee)
       if (vee .ne. zero) then
         i = i + 1
-        if (i .le. nv2max) then
-          inum = inum + 1
-          v2(i) = vee
-          iv2(i) = ij
-          if (bastst .and. iprint.ge.2) then
-            write (6, 290) ilam, ll1, ll2, lltot, &
-                icol, irow, i, iv2(i), vee
-            write (9, 290) ilam, ll1, ll2, lltot, &
-                icol, irow, i, iv2(i), vee
-290             format (i4, 3i5, 2x, 2i5, 2i8, e20.7)
-          end if
+        inum = inum + 1
+        call ancouma%set_element(irow=irow, icol=icol, vee=vee)
+        if (bastst .and. iprint.ge.2) then
+          write (6, 290) ilam, ll1, ll2, lltot, &
+              icol, irow, i, vee
+          write (9, 290) ilam, ll1, ll2, lltot, &
+              icol, irow, i, vee
+290             format (i4, 3i5, 2x, 2i5, i8, e20.7)
         end if
       end if
 350     continue
 355   continue
-  if (i .le. nv2max) lamnum(ilam) = inum
   if (bastst) then
-    write (6, 370) ilam, lamnum(ilam)
-    write (9, 370) ilam, lamnum(ilam)
+    write (6, 370) ilam, ancouma%get_num_nonzero_elements()
+    write (9, 370) ilam, ancouma%get_num_nonzero_elements()
 370     format ('ILAM=',i4,' LAMNUM(ILAM) = ',i7)
   end if
-  lamsum = lamsum + lamnum(ilam)
 400 continue
-if (i .gt. nv2max) then
-  write (6, 410) i, nv2max
-  write (6, 410) i, nv2max
-410   format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-      ' .GT. NV2MAX=',i6,'; ABORT ***')
-end if
 if (clist .and. bastst) then
-  write (6, 420) lamsum
-  write (9, 420) lamsum
+  write (6, 420) v2%get_num_nonzero_elements()
+  write (9, 420) v2%get_num_nonzero_elements()
 420   format (' *** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', &
       i6)
 end if
@@ -456,6 +447,7 @@ subroutine v1sgsg(j1r,j2r,j12r,lr,j1c,j2c,j12c, &
 !  current revision date:  2-jun-2017 (p.dagdigian)
 ! --------------------------------------------------------------------
 use mod_1sg1sg
+use mod_hiutil, only: xf3j, xf6j, xf9j
 implicit double precision (a-h,o-z)
 data zero, one, two/ 0.d0, 1.d0, 2.d0/, &
   sq4pi3 / 44.546623974653656d0 /
@@ -494,7 +486,7 @@ vee = phase * facj * cg1 * cg2 * cg3 * f6j * f9j / sq4pi3
 return
 end
 ! -----------------------------------------------------------------------
-subroutine sy1sg1sg (irpot, readp, iread)
+subroutine sy1sg1sg (irpot, readpt, iread)
 !  subroutine to read in system dependent parameters for collisions of
 !  two different 1sigma linear molecules
 !  current revision date: 23-may-2017 by p.dagdigian
@@ -526,24 +518,19 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-integer irpot
-logical readp
-logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
-        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf, &
-        csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
-        readpt, ihomo, bastst, twomol, lpar
-
+use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_skip, only: nskip, iskip
+use mod_hiutil, only: gennam, get_token
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: j, l, lc
+logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-#include "common/parbas.F90"
-common /coskip/ nskip,iskip
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-                noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr,lpar(3)
 #include "common/comdot.F90"
 save potfil
 
@@ -571,7 +558,7 @@ nscode = isicod + isrcod + 3
 if(iread.eq.0) return
 !  read the last few lines of the input file
 read (8, *, err=888) j1max, j2min, j2max, ipotsy2
-read (8, *, err=888) b1rot, d2rot, b2rot
+read (8, *, err=888) b1rot, d1rot, b2rot
 read (8, *, err=888) potfil
 call loapot(10, potfil)
 close(8)
@@ -581,12 +568,12 @@ return
 1000 format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
 return
 ! --------------------------------------------------------------
-entry ptr1sg1sg (fname,readp)
+entry ptr1sg1sg (fname,readpt)
 line = fname
-readp = .true.
-286 if (readp) then
+readpt = .true.
+286 if (readpt) then
   l=1
-  call parse(line,l,filnam,lc)
+  call get_token(line,l,filnam,lc)
   if(lc.eq.0) then
     write(6,1020)
 1020     format(' FILENAME MISSING FOR POTENTIAL INPUT')
@@ -611,16 +598,17 @@ close (8)
 irpot=1
 return
 ! --------------------------------------------------------------
-entry sav1sg1sg (readp)
+entry sav1sg1sg (readpt)
 !  save input parameters for two unlike 1sigma molecule scattering
-write (8, 310) j1max, j2min, j2max, ipotsy2
+write (FUNIT_INP, 310) j1max, j2min, j2max, ipotsy2
 310 format(5i4,15x,'j1max, j2min, j2min, ipotsy2')
-write (8, 320) b1rot, d2rot, b2rot
+write (FUNIT_INP, 320) b1rot, d1rot, b2rot
 320 format(f10.7, e12.5, f10.7, '   b1rot, d1rot, b2rot')
-write (8, 285) potfil
+write (FUNIT_INP, 285) potfil
 285 format (a)
 return
 end
 
 ! --------------------------------eof---------------------------------
 
+end module mod_hiba25_1sg1sg

@@ -1,3 +1,6 @@
+#include "assert.h"
+module mod_hiba17_ch2x
+contains
 ! sych2x (savch2x/ptrch2x) defines, saves variables and reads            *
 !                  potential for CH2(X 3B1 (0,v2,0)-atom scattering      *
 ! ----------------------------------------------------------------------
@@ -5,7 +8,7 @@ subroutine bach2x (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
                   etemp, fjtemp, fktemp, fistmp, &
                   rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-                  n, nmax, ntop)
+                  n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision
 !  of CH2(X 3B1) in a (0,v2,0) bender vibrational level with a structureless
@@ -119,10 +122,6 @@ subroutine bach2x (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !              iop=-1
 !    ivbend:   bend vibrational quantum number (can equal 0 to 3)
 !    jmax:     the maximum rotational angular momentum for the asymmetric top
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  variables in common block /coconv/
 !   econv:      conversion factor from cm-1 to hartrees
 !   xmconv:     converson factor from amu to atomic units
@@ -131,21 +130,22 @@ subroutine bach2x (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !               choice of channel index
 !               NOTE:  this subroutine is in hibastp.f
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+use mod_par, only: iprint
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*1 slab
-#include "common/parbas.F90"
-#include "common/parbasl.F90"
-common /coipar/ iiipar(9), iprint
-common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
           fistmp(1)
@@ -502,13 +502,6 @@ do 35  i = 1, nterm
   end if
   nsum = nsum + (lammax(i) - lammin(i)) / ipotsy + 1
 35 continue
-if (nlammx .lt. nsum) then
-  write (6, 40) nsum, nlammx
-  write (9, 40) nsum, nlammx
-40   format (' ** TOTAL NUMBER OF ANISOTROPIC TERMS=', i2, &
-          ' .GT. NLAMMX=', i2,'; ABORT')
-  stop
-end if
 if (nsum .ne. nlam) then
   write (6, 45) nsum, nlam
   write (9, 45) nsum, nlam
@@ -826,8 +819,9 @@ if (bastst.and. iprint.ge. 2) then
   write (9, 340)
 340   format (/' ILAM  LAMBDA   MU    ICOL  IROW    I    IV2    VEE')
 end if
-lamsum = 0
 ilam = 0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 400 iterm = 1, nterm
   lbmin = lammin(iterm)
 !  if bastst = .true., then get the matrix elements of the lb=0 term
@@ -837,56 +831,42 @@ do 400 iterm = 1, nterm
 !  ilam is the index for the next term in the potential matrix
 !  lb is the actual value of lambda
     ilam = ilam + 1
+    ancouma => v2%get_angular_coupling_matrix(ilam)
     mu = mproj(iterm)
     inum = 0
     ij = 0
-    do 355  icol = 1, n
-      do 350  irow = icol, n
+    do icol = 1, n
+      do irow = icol, n
         ij = ntop * (icol - 1) + irow
         lrow = l(irow)
         if (csflag) lrow = nu
         call vlmctp (j(irow), lrow, j(icol), l(icol), jtot, &
                 is(irow), is(icol), lb, mu, vee, csflag)
 
-!  change check for nonzero v2 matrix element
-!              if (vee .ne. zero) then
+        ! change check for nonzero v2 matrix element
         if (abs(vee) .gt. 1.d-15) then
 
           i = i + 1
-          if (i .le. nv2max) then
-            inum = inum + 1
-            v2(i) = vee
-            iv2(i) = ij
-            if (bastst.and. iprint.ge.2) then
-              write (6, 345) ilam, lb, mu, icol, irow, i, iv2(i), &
-                             vee
-              write (9, 345) ilam, lb, mu, icol, irow, i, iv2(i), &
-                             vee
-345               format (i4, 3i7, 2i6, i6, g17.8)
-            end if
+          inum = inum + 1
+          call ancouma%set_element(irow=irow, icol=icol, vee=vee)
+          if (bastst.and. iprint.ge.2) then
+            write (6, 345) ilam, lb, mu, icol, irow, i, vee
+            write (9, 345) ilam, lb, mu, icol, irow, i, vee
+345               format (i4, 3i7, 2i6, g17.8)
           end if
         end if
-350       continue
-355     continue
-    if (i .le. nv2max) lamnum(ilam) = inum
+      end do
+    end do
     if (bastst) then
-      write (6, 370) ilam, lamnum(ilam)
-      write (9, 370) ilam, lamnum(ilam)
+      write (6, 370) ilam, ancouma%get_num_nonzero_elements()
+      write (9, 370) ilam, ancouma%get_num_nonzero_elements()
 370       format ('ILAM=',i3,' LAMNUM(ILAM) = ',i6)
     end if
-    lamsum = lamsum + lamnum(ilam)
 390   continue
 400 continue
-if ( i.gt. nv2max) then
-   write (6, 450) i, nv2max
-   write (9, 450) i, nv2max
-450    format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-   stop
-end if
 if (clist .and. bastst) then
-  write (6, 460) lamsum
-  write (9, 460) lamsum
+  write (6, 460) v2%get_num_nonzero_elements()
+  write (9, 460) v2%get_num_nonzero_elements()
 460   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS ', &
            i5)
 end if
@@ -941,8 +921,9 @@ subroutine vlmctp (jp, lp, j, l, jtot, isp, is, lambda, mu, &
 !    indp:     number of left-side level in channel list
 !    ind:      number of right-side level in channel list
 !  subroutines called:
-!    xf3j, xf6j, prmctp
+!    prmctp
 !  -----------------------------------------------------------------------
+use mod_hibasutil, only: prmatp
 implicit double precision (a-h,o-z)
 logical csflag
 data one, zero, two / 1.0d0, 0.0d0, 2.0d0 /
@@ -1039,14 +1020,20 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-logical readpt, existf
+use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_hiutil, only: gennam, get_token
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+logical existf
 integer icod, ircod
-integer i, iread, irpot
+integer :: i, j, l, lc
 character*1 dot
 character*(*) fname
 character*60 line, filnam, potfil, filnm1
 parameter (icod=6, ircod=1)
-#include "common/parbas.F90"
 save potfil
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
@@ -1147,7 +1134,7 @@ line = fname
 readpt = .true.
 100 if (readpt) then
   l=1
-  call parse(line,l,filnam,lc)
+  call get_token(line,l,filnam,lc)
   if(lc.eq.0) then
     write(6,102)
 102     format(' FILENAME MISSING FOR POTENTIAL INPUT')
@@ -1179,11 +1166,12 @@ entry savch2x (readpt)
 !  be left blank, and the names of the variables should be printed in spaces
 !  34-80
 !  line 18:
-write (8, 220) ipotsy, iop, ivbend
+write (FUNIT_INP, 220) ipotsy, iop, ivbend
 220 format (3i4, 18x,'   ipotsy, iop, ivbend')
 !  line 20
-write (8, 230) jmax, emax
+write (FUNIT_INP, 230) jmax, emax
 230 format (i4, g12.5,14x, '   jmax, emax')
-write (8, 60) potfil
+write (FUNIT_INP, 60) potfil
 return
 end
+end module mod_hiba17_ch2x

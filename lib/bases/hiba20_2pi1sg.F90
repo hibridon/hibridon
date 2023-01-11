@@ -1,3 +1,4 @@
+#include "assert.h"
 ! sy2pi1sg (sav2pi1sg/ptr2pi1sg) defines, saves variables and            *
 !                  reads potential for doublet pi-singlet sigma* system  *
 !     Basis subroutine for the collision of a doublet-Pi molecule with
@@ -32,19 +33,89 @@ type(lm_type), dimension(:), allocatable :: lms
 type(lev_type), dimension(:), allocatable :: levs
 type(chn_type), dimension(:), allocatable :: chns
 end module mod_2pi1sg
+
+module mod_hiba20_2pi1sg
+contains
+
+!     ------------------------------------------------------------------
+double precision function v2pi1sg(tjtot, tj1p, eps1p, c32p, c12p, &
+     tj2p, tj12p, tlp, tj1, eps1, c32, c12, tj2, tj12, tl, &
+     tlam1, tlam2, tlam, isdiag)
+use mod_hiutil, only: tf3j, tf6j, tf9j, tf3jm0
+implicit none
+!
+!     The subroutine calculate the coupling matrix elements, shown in
+!     Eq. (27) in the notes of Q. Ma.
+!
+!     If (omeg1p .eq. omeg1), the coefficient before B is calculated;
+!     otherwise the coefficient before F is calculated.
+!
+integer :: tjtot, tj1p, eps1p, tj2p, tj12p, tlp, tj1, eps1, &
+     tj2, tj12, tl, tlam1, tlam2, tlam
+real(8) :: c12p, c32p, c12, c32
+logical :: isdiag
+integer :: iphase
+real(8) :: phase, pref, threej, sixj, ninej
+real(8), parameter :: machep=epsilon(0d0)
+!
+v2pi1sg = 0d0
+!
+iphase = eps1p * eps1 * (-1) ** ((tj1p + tj1 + tlam1) / 2)
+if (iphase .eq. 1) return
+!
+threej = tf3jm0(tj2p, tlam2, tj2) * tf3jm0(tlp, tlam, tl)
+if (dabs(threej) .lt. machep) return
+!     omega-dependent part
+if (isdiag) then
+   threej = threej * &
+        (c12p * c12 * tf3j(tj1p, tlam1, tj1, -1, 0, 1) &
+        - c32p * c32 * tf3j(tj1p, tlam1, tj1, -3, 0, 3))
+else
+   threej = threej * dble(eps1) * &
+        (c12p * c32 * tf3j(tj1p, tlam1, tj1, -1, 4, -3) &
+        - c32p * c12 * tf3j(tj1p, tlam1, tj1, -3, 4, -1))
+end if
+if (dabs(threej) .lt. machep) return
+!
+sixj = tf6j(tj12, tl, tjtot, tlp, tj12p, tlam)
+if (dabs(sixj) .lt. machep) return
+ninej = tf9j(tj1, tj2, tj12, tj1p, tj2p, tj12p, &
+     tlam1, tlam2, tlam)
+if (dabs(ninej) .lt. machep) return
+!
+!     Again 1 is added to compensate the dropped half-integer part
+iphase = (tjtot + tlam1 - tlam2 + tj1 - tj2 + tj12p - tl - tlp &
+     - 1) / 2
+if (mod(iphase, 2) .eq. 0) then
+   phase = 1d0
+else
+   phase = -1d0
+end if
+!
+pref = (tj1p + 1d0) * (tj2p + 1d0) * (tj12p + 1d0) * (tlp + 1d0) &
+     * (tj1 + 1d0) * (tj2 + 1d0) * (tj12 + 1d0) * (tl + 1d0) &
+     * (tlam + 1d0)
+pref = dsqrt(pref)
+!
+v2pi1sg = phase * pref * threej * sixj * ninej
+return
+end
+
 !     ------------------------------------------------------------------
 subroutine ba2pi1sg(jchn, lchn, ischn, jlev, elev, islev, nlev, &
      nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, bastst, &
-     ihomo, nu, numin, jlpar, twomol, nchn, nmax, ntop)
+     ihomo, nu, numin, jlpar, twomol, nchn, nmax, ntop, v2)
 use mod_2pi1sg
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cchn => cent
 use mod_coeint, only: echn => eint
 use mod_coj12, only: j12chn => j12
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar 
+use mod_hibasutil, only: raise
+use mod_par, only: iprint
+use mod_ered, only: ered, rmu
 implicit none
 !
 !     The following arrays store the parameters of channels and levels.
@@ -60,15 +131,11 @@ logical :: flaghf, flagsu, csflag, clist, bastst, ihomo, twomol
 integer :: nmax, ntop
 !
 real(8) :: rcut
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 !
-common /coered/ ered, rmu
-real(8) :: ered, rmu
-common /coipar/ junkip, iprint
-integer, dimension(9) :: junkip
-integer :: iprint
-!
-integer :: i, ilev, iv, irow, icol, inum, i1, i2, lamsum
-real(8) :: vee, v2pi1sg
+integer :: i, ilev, iv, irow, icol, inum, i1, i2
+real(8) :: vee
 real(8), parameter :: machep=epsilon(0d0)
 !
 integer, pointer :: j1max, npar, j2min, j2max, iptsy2
@@ -77,19 +144,17 @@ j1max=>ispar(1); npar=>ispar(2); j2min=>ispar(3); j2max=>ispar(4); iptsy2=>ispar
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
 
 if (.not. flaghf) &
-     call raise_2pi1sg('FLAGHF = .FALSE. FOR DOUBLET SYSTEM')
-if (ihomo) call raise_2pi1sg('HOMONUCLEAR 2PI NOT IMPLEMENTED')
+     call raise('FLAGHF = .FALSE. FOR DOUBLET SYSTEM')
+if (ihomo) call raise('HOMONUCLEAR 2PI NOT IMPLEMENTED')
 if (flagsu) &
-     call raise_2pi1sg('FLAGSU = .TRUE. FOR MOL-MOL COLLISION')
+     call raise('FLAGSU = .TRUE. FOR MOL-MOL COLLISION')
 if (csflag) &
-     call raise_2pi1sg('CS CALCULATION NOT IMPLEMENTED')
-if (nv .gt. nlammx) &
-     call raise_2pi1sg('NLAMMX TOO SMALL FOR THE POTENTIAL.')
+     call raise('CS CALCULATION NOT IMPLEMENTED')
 if (rcut .ge. 0d0) &
-     call raise_2pi1sg('RCUT NOT IMPLEMENTED, PLEASE SET IT ' &
+     call raise('RCUT NOT IMPLEMENTED, PLEASE SET IT ' &
      // 'NEGATIVE.')
 if (.not. twomol) &
-     call raise_2pi1sg('TWOMOL IS FALSE FOR MOL-MOL COLLISION.')
+     call raise('TWOMOL IS FALSE FOR MOL-MOL COLLISION.')
 !
 call genlev_2pi1sg(2 * j1max + 1, 2 * j2min, 2 * j2max, &
      2 * iptsy2, npar, brot, aso, p, q, drot)
@@ -103,7 +168,7 @@ nlev = size(levs)
 nchn = size(chns)
 ntop = max(nchn, nlev)
 if (nchn .gt. nmax) &
-     call raise_2pi1sg('TOO MANY CHANNELS.')
+     call raise('TOO MANY CHANNELS.')
 if (nchn .eq. 0) return
 do ilev = 1, nlev
    jlev(ilev) = levs(ilev)%tj1 / 2 * 10 + levs(ilev)%tj2 / 2
@@ -132,8 +197,10 @@ end do
 !     Calculate coupling matrix elements
 nlam = nv
 i = 0
-lamsum = 0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do iv = 1, nv
+   ancouma => v2%get_angular_coupling_matrix(iv)
    inum = 0
    do icol = 1, nchn
       i1 = chns(icol)%ilev
@@ -147,22 +214,17 @@ do iv = 1, nv
               2*lms(iv)%l1, 2*lms(iv)%l2, 2*lms(iv)%l, &
               lms(iv)%is_diag)
          if (dabs(vee) .lt. machep) cycle
-         if (i .eq. nv2max) call raise_2pi1sg( &
-              'TOO MANY NON-ZERO V-MATRIX TERMS.')
          i = i + 1
          inum = inum + 1
-         v2(i) = vee
-         iv2(i) = ntop * (icol - 1) + irow
+         call ancouma%set_element(irow=irow, icol=icol, vee=vee)
          if (bastst .and. iprint .ge. 2) write (6, 346) iv, &
               lms(iv)%l1, lms(iv)%l2, lms(iv)%l, icol, irow, &
-              i, iv2(i), vee
-346          format(i4, 3i3, 2i4, 2i5, f17.10)
+              i, vee
+346          format(i4, 3i3, 2i4, i5, f17.10)
       end do
    end do
-   lamnum(iv) = inum
-   lamsum = lamsum + inum
    if (bastst) write (6, 347) iv, lms(iv)%l1, lms(iv)%l2, &
-        lms(iv)%l, lamnum(iv)
+        lms(iv)%l, ancouma%get_num_nonzero_elements()
 347    format ('ILAM=', i3, ' LAM1=', i3, ' LAM2=', i3, &
         ' LAM=', i3, ' LAMNUM(ILAM) = ', i6)
 end do
@@ -234,6 +296,7 @@ end subroutine sortlev_2pi1sg
 subroutine genlev_2pi1sg(tj1max, tj2min, tj2max, tipotsy2, npar, &
      brot, aso, p, q, drot)
 use mod_2pi1sg
+use mod_hibasutil, only: raise
 use constants, only: econv
 implicit none
 integer, intent(in) :: tj1max, tj2min, tj2max, tipotsy2, npar
@@ -292,7 +355,7 @@ do tj1 = 1, tj1max, 2
       end do
    end do
 end do
-if (ilev .ne. nlev) call raise_2pi1sg('NUMBER OF CHANNELS ' &
+if (ilev .ne. nlev) call raise('NUMBER OF CHANNELS ' &
      // 'INCONSISTENT WITH PREDICTION, CHECK PARAMETERS')
 return
 end subroutine genlev_2pi1sg
@@ -341,84 +404,17 @@ write (6, *)
 return
 end subroutine prtchn_2pi1sg
 !     ------------------------------------------------------------------
-subroutine raise_2pi1sg(mesg)
-implicit none
-character*(*) mesg
-write (0, *) ' *** ', mesg
-stop
-end subroutine raise_2pi1sg
-!     ------------------------------------------------------------------
-double precision function v2pi1sg(tjtot, tj1p, eps1p, c32p, c12p, &
-     tj2p, tj12p, tlp, tj1, eps1, c32, c12, tj2, tj12, tl, &
-     tlam1, tlam2, tlam, isdiag)
-implicit none
-!
-!     The subroutine calculate the coupling matrix elements, shown in
-!     Eq. (27) in the notes of Q. Ma.
-!
-!     If (omeg1p .eq. omeg1), the coefficient before B is calculated;
-!     otherwise the coefficient before F is calculated.
-!
-integer :: tjtot, tj1p, eps1p, tj2p, tj12p, tlp, tj1, eps1, &
-     tj2, tj12, tl, tlam1, tlam2, tlam
-real(8) :: c12p, c32p, c12, c32
-logical :: isdiag
-integer :: iphase
-real(8) :: phase, pref, threej, sixj, ninej
-real(8) :: tf3j, tf6j, tf9j, tf3jm0
-real(8), parameter :: machep=epsilon(0d0)
-!
-v2pi1sg = 0d0
-!
-iphase = eps1p * eps1 * (-1) ** ((tj1p + tj1 + tlam1) / 2)
-if (iphase .eq. 1) return
-!
-threej = tf3jm0(tj2p, tlam2, tj2) * tf3jm0(tlp, tlam, tl)
-if (dabs(threej) .lt. machep) return
-!     omega-dependent part
-if (isdiag) then
-   threej = threej * &
-        (c12p * c12 * tf3j(tj1p, tlam1, tj1, -1, 0, 1) &
-        - c32p * c32 * tf3j(tj1p, tlam1, tj1, -3, 0, 3))
-else
-   threej = threej * dble(eps1) * &
-        (c12p * c32 * tf3j(tj1p, tlam1, tj1, -1, 4, -3) &
-        - c32p * c12 * tf3j(tj1p, tlam1, tj1, -3, 4, -1))
-end if
-if (dabs(threej) .lt. machep) return
-!
-sixj = tf6j(tj12, tl, tjtot, tlp, tj12p, tlam)
-if (dabs(sixj) .lt. machep) return
-ninej = tf9j(tj1, tj2, tj12, tj1p, tj2p, tj12p, &
-     tlam1, tlam2, tlam)
-if (dabs(ninej) .lt. machep) return
-!
-!     Again 1 is added to compensate the dropped half-integer part
-iphase = (tjtot + tlam1 - tlam2 + tj1 - tj2 + tj12p - tl - tlp &
-     - 1) / 2
-if (mod(iphase, 2) .eq. 0) then
-   phase = 1d0
-else
-   phase = -1d0
-end if
-!
-pref = (tj1p + 1d0) * (tj2p + 1d0) * (tj12p + 1d0) * (tlp + 1d0) &
-     * (tj1 + 1d0) * (tj2 + 1d0) * (tj12 + 1d0) * (tl + 1d0) &
-     * (tlam + 1d0)
-pref = dsqrt(pref)
-!
-v2pi1sg = phase * pref * threej * sixj * ninej
-return
-end
-!     ------------------------------------------------------------------
 !  ---------------------------------------------------------------------
 subroutine sy2pi1sg(irpot, readpt, iread)
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use mod_hibasutil, only: raise
+use funit, only: FUNIT_INP
 implicit none
-integer irpot, iread
-logical readpt
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
 character*(*) fname
 !     NUMBER OF BASIS-SPECIFIC VARIABLES, MODIFY ACCORDINGLY.
 integer icod, ircod
@@ -457,20 +453,21 @@ read (8, *, err=80) potfil
 call loapot(10, potfil)
 close (8)
 return
-80 call raise_2pi1sg('ERROR READING FROM INPUT FILE.')
+80 call raise('ERROR READING FROM INPUT FILE.')
 return
 entry ptr2pi1sg(fname, readpt)
 return
 entry sav2pi1sg(readpt)
 !     WRITE THE LAST FEW LINES OF THE INPUT FILE.
-write (8, 230) j1max, npar
+write (FUNIT_INP, 230) j1max, npar
 230 format (2i4, 22x, '   j1max, npar')
-write (8,231) j2min, j2max, iptsy2
+write (FUNIT_INP,231) j2min, j2max, iptsy2
 231 format (3i4, 18x,'   j2min, j2max, iptsy2')
-write (8, 250) brot, aso, p, q
+write (FUNIT_INP, 250) brot, aso, p, q
 250 format (4(f10.4, 1x), 'brot, aso, p, q' )
-write (8, 251) drot
+write (FUNIT_INP, 251) drot
 251 format (f12.6, 18x,'   drot')
-write (8, *) potfil
+write (FUNIT_INP, *) potfil
 return
 end
+end module mod_hiba20_2pi1sg

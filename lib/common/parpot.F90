@@ -1,3 +1,0 @@
-!comdeck parpot
-character*48 potnam, label
-common /coptnm/ potnam, label

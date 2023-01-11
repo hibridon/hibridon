@@ -19,327 +19,13 @@
 !     current revision:  24-jul-2019 (p.dagdigian)                       *
 !                                                                       *
 !************************************************************************
-module mod_hiba1sg
+module mod_hiba01_1sg
 contains
 ! --------------------------------------------------------------------
-subroutine basis (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
-                  sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
-                  csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-                  twomol, n, nmax, ntop)
-! --------------------------------------------------------------------
-!
-!  dispatcher to select the correct basis routine for given problem
-!  the variable in common block /coselb/ ibasty determines the
-!  basis used in the current calculation
-!
-!  basis routines currently available are:
-!  ibasty         basis routine          kind of problem
-!    1              ba1sg             singlet sigma scattering
-!    2              ba2sg             doublet sigma scattering
-!    3              ba2pi             doublet pi scattering
-!    4              basgpi            sigma/pi scattering
-!    5              bapi              general pi scattering
-!    6              bastp             symmetric top scattering
-!    7              ba13p             1/3 P atom scattering
-!    8              ba2mol            1sigma + 1sigma
-!    9              bastpln           symmetric top + linear molecule
-!    10             ba22p             2/2 P atom scattering
-!    11             ba1del            singlet delta scattering
-!    12             bah2p             homonuclear + 2P atom
-!    13             bah3p             homonuclear + 3P atom
-!    14             ba2del            doublet delta scattering
-!    15             badiat2p          heteronuclear + 2P atom  **to check
-!    16             baastp            asymmetric top scattering
-!    17             bach2x            CH2(X B1) (0,v2,0) bender levels
-!    18             bastp1            symmetric top - no inversion doubling
-!    19             basgpi1           2sigma | 2pi + atom (no pertubations)
-!    20             ba2pi1sg          2pi molecule + 1sigma molecules
-!    21             bastp1sg          symmetric top + 1sigma molecules
-!    22             ba1d3p            1D/3P atom + closed-shell atom
-!    23             ba3p2s            3P atom + 2S atom
-!    24             basphtp           spherical top + atom scattering
-!    25             ba1sg1sg           1sigma + 1sigma (different molecules)
-!    26             ba2sg1sg          2sigma + 1sigma molecules
-!    27             baastp1           C2v asymmetric top scattering, w body-frame
-!                                     quant axis along C2 axis (compatible w MOLSCAT)
-!    28             ba3sg1sg          3sigma + 1sigma molecules
-!    29             baastp2           chiral asymmetric top + atom scattering
-!    30             baastp3           C2v asymmetric top + linear molecule
-!    99 or higher   bausr             user defined basis
-!  author: b. follmeg
-!  current revision of list:  20-jun-2019 (p.dagdigian)
-! --------------------------------------------------------------------
-!  variables in call list:
-!    j:        on return contains rotational quantum numbers for each
-!              channel
-!    l:        on return contains orbital angular momentum for each
-!              channel
-!    is:       on return contains symmetry index for each channel
-!    jhold:    on return contains rotational quantum numbers for each
-!              rotational level
-!    ehold:    on return contains energy in hartrees of each rotational
-!              level
-!    ishold:   on return contains symmetry index of each rotational level
-!    nlevel:   on return contains number of energetically distinct
-!              rotational levels used in channel basis
-!    nlevop:   on return contains number of energetically distinct
-!              rotational levels used in channel basis which are open
-!              asymptotically
-!    sc1,sc2:  scratch vectors of length at least nmax
-!    sc3,sc4:  scratch vectors of length at least nmax
-!              these scratch vectors are not used here
-!    rcut:     cut-off point for keeping higher energy channels
-!              if any open channel is still closed at r=rcut, then
-!              all closed channels as well any open channels which are
-!              still closed at r=rcut are dropped from basis
-!              note that this is ignored in molecule-surface collisions!!!
-!    jtot:     total angular momentum
-!    flaghf:   if .true., then system with half-integer spin
-!              if .false., then system with integer spin (this is the case
-!              here)
-!    flagsu:   if .true., then molecule-surface collisons
-!    csflag:   if .true., then coupled-states calculation
-!              if .false., the close-coupled calculation
-!    clist:    if .true., then quantum numbers and energies listed for
-!              each channel
-!    bastst:   if .true., then execution terminates after the first call
-!              to basis
-!    ihomo:    if .true. , then homonuclear molecule
-!              if .false., then heteronuclear molecule
-!              if the molecule is homonuclear (ihomo = .true.), the
-!              rotational levels included go from jmin to jmax in steps
-!              of 2 and only even lambda terms in the anisotropy are
-!              included
-!    nu:       coupled-states projection index
-!    numin:    minimum coupled states projection index
-!              for cc calculations nu and numin are both set = 0 by calling
-!              program
-!    jlpar:    total parity of included channels in cc calculation
-!              parity=(-1)**jlpar (by definition parity=(-1)**(j+l+jtot) )
-!    n:        on return equals number of channels
-!    nmax:     maximum dimension of arrays
-!    ntop:     maximum row dimension of all matrices passed to subroutines
-!              propag and soutpt.  ntop is set in basis only if nu = numin
-!              otherwise it is unchanged from the value supplied by the
-!              calling program
-!    note!!!   if flaghf = .true., then the true values of the rotational
-!    quantum numbers, the total angular momentum, and the coupled-states
-!    projection index are equal to the values stored in j, jtot, and nu
-!    plus 1/2
-implicit double precision (a-h,o-z)
-integer :: j(:)
-integer :: l(:)
-integer :: is(:)
-integer :: jhold(:)
-real(8) :: ehold(:)
-integer :: ishold(:)
-real(8) :: sc1(:), sc2(:), sc3(:), sc4(:)
-integer nlevel, nlevop, jtot, nu, &
-        jlpar, n, nmax
-!      real ehold, sc1, sc2, sc3, sc4, rcut
-logical flaghf, flagsu, csflag, clist, bastst, ihomo, twomol
-integer ibasty
-common /coselb/ ibasty
-!
-!  select basis routine according to value of ibasty
-if (ibasty .ge. 99) then
-!  user supplied routine
-  call bausr(j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
-                  sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
-                  csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-                  n, nmax, ntop)
-  return
-endif
-goto (100,200,300,400,500,600,700,800,900,1000,1100,1200,1300, &
-      1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400, &
-      2500,2600,2700,2800,2900,3000) &
-      ibasty
-!  singlet sigma basis
-100 call ba1sg (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
-                  sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
-                  csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-                  n, nmax, ntop)
-return
-!  doublet sigma basis
-200 call ba2sg (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  doublet pi basis
-300 call ba2pi (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  sigma/pi basis
-400 call basgpi (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!   general pi basis
-500  call bapi (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  symmetric top basis, with inversion doubling
-600 call bastp (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  1/3 P atom basis
-700 call ba13p (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-! 1sigma + 1sigma basis
-800 call ba2mol (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-! symmetric top + 1 sigma basis
-900 call bastpln (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-! 2/2 P atom basis
-1000  call ba22p (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  singlet delta basis
-1100 call ba1del (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  homonuclear + 2P atom basis
-1200 call bah2p (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  homonuclear + 3P atom basis
-1300 call bah3p (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  doublet delta basis
-1400 call ba2del (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  heteronuclear + 2P atom basis
-!1500  call bah2p (j, l, is, jhold, ehold, ishold, nlevel,
-!    :                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot,
-!    :                  flaghf, flagsu, csflag, clist, bastst,
-!    :                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-1500 call badiat2p (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-!  asymmetric top basis
-1600  call baastp (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  CH2(X 3B1) (0,v2,0) bender levels
-1700  call bach2x (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  symmetric top basis, with no inversion doubling
-1800  call bastp1 (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  2sig-2pi + atom scattering (one 2sigma state and one or more 2pi
-!   vibrational levels, no sigma-pi spectroscopic perturbations)
-1900  call basgpi1 (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-                  flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!  2pi + 1sigma molecules
-2000 call ba2pi1sg(j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, &
-     bastst, ihomo, nu, numin, jlpar, twomol, n, nmax, ntop)
-return
-!  symmetric top + 1sigma molecules
-2100 call bastp1sg(j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, &
-     bastst, ihomo, nu, numin, jlpar, twomol, n, nmax, ntop)
-return
-!  1D/3P atom + closed-shell atom
-2200 call ba1d3p(j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, &
-     bastst, ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!   3P atom + 2S atom
-2300 call ba3p2s (j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, &
-     bastst, ihomo, nu, numin, jlpar, n, nmax, ntop)
-return
-!   spherical top + atom
-2400 call basphtp (j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-     flaghf, flagsu, csflag, clist, bastst, ihomo, &
-     nu, numin, jlpar, n, nmax, ntop)
-return
-!   1sigma + 1sigma basis (different molecules)
-2500 call ba1sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-     flaghf, flagsu, csflag, clist, bastst, ihomo, &
-     nu, numin, jlpar, n, nmax, ntop)
-return
-!   2sigma + 1sigma basis
-2600 call ba2sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-     flaghf, flagsu, csflag, clist, bastst, ihomo, &
-     nu, numin, jlpar, n, nmax, ntop)
-return
-!   C2v asymmetric top + atom scattering
-2700 call baastp1 (j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-     flaghf, flagsu, csflag, clist, bastst, ihomo, &
-     nu, numin, jlpar, n, nmax, ntop)
-return
-!   3sigma + 1sigma basis
-2800 call ba3sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-     flaghf, flagsu, csflag, clist, bastst, ihomo, &
-     nu, numin, jlpar, n, nmax, ntop)
-return
-!   chiral asymmetric top + atom scattering
-2900 call baastp2 (j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-     flaghf, flagsu, csflag, clist, bastst, ihomo, &
-     nu, numin, jlpar, n, nmax, ntop)
-return
-!   C2v asymmetric top + linear molecule scattering
-3000 call baastp3 (j, l, is, jhold, ehold, ishold, nlevel, &
-     nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
-     flaghf, flagsu, csflag, clist, bastst, ihomo, &
-     nu, numin, jlpar, n, nmax, ntop)
-return
-end
-!--------------------------------------------------------------------
 subroutine ba1sg (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
                   sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-                  n, nmax, ntop)
+                  n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential
 !  for collision of singlet-sigma molecule with a structureless atom
@@ -414,29 +100,24 @@ subroutine ba1sg (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !              expansion of potential
 !    jmin:     the minimum rotational angular momenta
 !    jmax:     the maximum rotational angular momenta
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
-!  variable in common block /coskip/
-!   nskip  for a homonuclear molecule lamda is running in steps of nskip=2
-!          for a heteronuclear molecule nskip=1
-!
-!   iskip   same as nskip, used for consistency check
-!
 !  subroutines called:
 !   vlm1sg:    returns singlet-sigma angular coupling coefficient for
 !              particular choice of initial and final channel quantum numbers
 !
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar, convert_ispar_to_mat
 use mod_cosysr, only: isrcod, junkr, rspar, convert_rspar_to_mat
 use constants, only: econv, xmconv, ang2c
+use mod_par, only: iprint
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
+use mod_skip, only: nskip, iskip
+use mod_vib, only: nvib=>nvibs, ivib=>ivibs
 
 implicit double precision (a-h,o-z)
 integer, intent(out) :: j(:)
@@ -465,12 +146,8 @@ integer, intent(in) :: jlpar
 integer, intent(out) :: n
 integer, intent(in) :: nmax
 integer, intent(out) :: ntop
-#include "common/parbas.F90"
-#include "common/parbasl.F90"
-common /covib/ nvib,ivib(maxvib)
-common /coipar/ iiipar(9), iprint
-common /coered/ ered, rmu
-common /coskip/ nskip, iskip
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
 real(8), dimension(4, maxvib) :: rpar
@@ -802,6 +479,12 @@ call exit
 ! ij is address of given v2 element in present v2 matrix
 i = 0
 ilam=0
+ASSERT(.not. allocated(v2))
+num_lam = 0
+do il = lammin(1), lammax(1), nskip
+  num_lam = num_lam + ntv(1)
+end do
+v2 = ancou_type(nlam=num_lam, num_channels=ntop)
 do 320 iv=1,ntv(1)
     ivr=ivrow(iv,1)
     ivc=ivcol(iv,1)
@@ -809,11 +492,10 @@ do 320 il = lammin(1), lammax(1), nskip
   lb=il
   ilam=ilam+1
   inum = 0
-  ij=0
+  ancouma => v2%get_angular_coupling_matrix(ilam)
   do 310  icol= 1, n
     do 300  irow = icol, n
       if(is(irow).ne.ivr.or.is(icol).ne.ivc) goto 300
-      ij = ntop * (icol - 1) +irow
 !  here for coupling between molecular rotational levels
       call vlm1sg (j(irow), l(irow), j(icol), l(icol), jtot, &
                    nu, lb, vee, csflag)
@@ -821,24 +503,13 @@ do 320 il = lammin(1), lammax(1), nskip
         i = i + 1
         inum = inum + 1
          if (bastst .and. iprint.gt.1) then
-           write (6, 340) ivr,ivc,il,ilam,i,irow,icol, &
-                          ij,vee
-           write (9, 340) ivr,ivc,il,ilam,i,irow,icol, &
-                          ij,vee
-340            format (1x,2i3,6i6, g17.8)
+           write (6, 340) ivr,ivc,il,ilam,i,irow,icol, vee
+           write (9, 340) ivr,ivc,il,ilam,i,irow,icol, vee
+340            format (1x,2i3,5i6, g17.8)
          end if
-        if (i .le. nv2max) then
-          v2(i) = vee
-          iv2(i) = ij
-        end if
+         call ancouma%set_element(irow=irow, icol=icol, vee=vee)
 300     continue
 310   continue
-  if(ilam.gt.nlammx) then
-    write(6,311) ilam, nlammx
-311     format(/' ILAM =',i3,' .GT. NLAMMX =',i3,' IN BA1SG; ABORT')
-    call exit
-  end if
-  lamnum(ilam) = inum
   if (bastst .and. iprint.ge.1) then
     write (6, 420) ivr,ivc,il,inum
     write (9, 420) ivr,ivc,il,inum
@@ -847,17 +518,6 @@ do 320 il = lammin(1), lammax(1), nskip
   end if
   if(inum.ne.0) nlam=ilam
 320 continue
-if ( i.gt. nv2max) then
-  write (6, 350) i, nv2max
-  write (9, 350) i, nv2max
-350   format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-  if (bastst) then
-    return
-  else
-    call exit
-  end if
-end if
 if (clist) then
   write (6, 360) i
   write (9, 360) i
@@ -884,8 +544,9 @@ subroutine vlm1sg (j1, l1, j2, l2, jtot, nu, lb, v, csflag)
 !  xf3j:     evaluates 3j symbol
 !  xf6j:     evaluates 6j symbol
 ! --------------------------------------------------------------------
+use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
-!      real v, xj1, xj2, xjtot, xl1, xl2, xlb, xnu, zero, xf3j, xf6j
+!      real v, xj1, xj2, xjtot, xl1, xl2, xlb, xnu, zero
 integer ij, il, j1, j2, jtot, l1, l2, lb, nu
 logical csflag
 zero = 0.
@@ -919,7 +580,7 @@ end if
 return
 end
 !  -----------------------------------------------------------------------
-subroutine sy1sg (irpot, readp, iread)
+subroutine sy1sg (irpot, readpt, iread)
 !  subroutine to read in system dependent parameters for singlet-sigma
 !   + atom scattering using werner-follmeg potential form
 !  if iread = 1 read data from input file
@@ -947,22 +608,25 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, junkr, rcod => rspar
-implicit double precision (a-h,o-z)
-integer irpot
-logical readp, existf
-logical airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar
+use mod_par, only: ihomo
+use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_selb, only: ibasty
+use mod_skip, only: nskip, iskip
+use mod_vib, only: nvib => nvibs, ivib => ivibs
+use mod_hiutil, only: gennam, get_token
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: i, iofi, iofr
+integer :: j, l, lc
+logical existf
 character*1 dot
 character*4 char
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-#include "common/parbas.F90"
-common/covib/ nvib,ivib(maxvib)
-common /coskip/ nskip,iskip
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar(18)
 
-common /coselb/ ibasty
 save potfil
 !equivalence(iscod(1),nterm),(iscod(2),nvibmn),(iscod(3),nvibmx)
 #include "common/comdot.F90"
@@ -982,7 +646,7 @@ if (iread .eq. 0) then
   indout(1)=0
   nvib = 1
 endif
-if (.not.readp)irpot=1
+if (.not.readpt)irpot=1
 if (iread .eq. 1) irpot=1
 if (ihomo) nskip = 2
 potfil = ' '
@@ -1028,7 +692,7 @@ end do
 if(isicod+isrcod+3.gt.size(scod,1)) stop 'lencod'
 nscode=isicod+isrcod
 line=' '
-if(.not.readp.or.iread.eq.0) then
+if(.not.readpt.or.iread.eq.0) then
   call loapot(1,' ')
   close (8)
   return
@@ -1045,12 +709,12 @@ return
   ' PROBABLY NOT ENOUGH VIBRATIONAL LEVELS SUPPLIED')
 return
 ! --------------------------------------------------------------
-entry ptr1sg (fname,readp)
+entry ptr1sg (fname,readpt)
 line = fname
-readp = .true.
-186 if (readp) then
+readpt = .true.
+186 if (readpt) then
   l=1
-  call parse(line,l,filnam,lc)
+  call get_token(line,l,filnam,lc)
   if(lc.eq.0) then
     write(6,190)
 190     format(' FILENAME MISSING FOR POTENTIAL INPUT')
@@ -1075,30 +739,30 @@ end if
 irpot=1
 return
 ! --------------------------------------------------------------
-entry sav1sg (readp)
+entry sav1sg (readpt)
 !  save input parameters for singlet-sigma + atom scattering
 if (iscod(3) .lt. iscod(2)) then
   write (6, 210) iscod(3), iscod(2)
 210   format ('**  VMAX =',i3,' .LT. VMIN =',i3,' SET VMAX = VMIN')
 iscod(3)=iscod(2)
 endif
-write (8, 220) nvib, iscod(2),iscod(3)
+write (FUNIT_INP, 220) nvib, iscod(2),iscod(3)
 220 format(3i4, t34,'nvib, vmin,vmax')
 iofi=3
 iofr=0
 do 301 i=1,nvib
-write (8, 310) ivib(i),(iscod(iofi+j),j=1,2)
+write (FUNIT_INP, 310) ivib(i),(iscod(iofi+j),j=1,2)
 310 format (3i4, t50,'iv,jmin,jmax')
-write (8, 320) (rcod(iofr+j),j=1,4)
+write (FUNIT_INP, 320) (rcod(iofr+j),j=1,4)
 iofi=iofi+2
 iofr=iofr+4
 320 format(3g14.6,t50,'brot,drot,hrot'/f15.8,t50,'evib')
 301 continue
-write (8, 85) potfil
+write (FUNIT_INP, 85) potfil
 return
 end
 
-end module mod_hiba1sg
+end module mod_hiba01_1sg
 !     ------------------------------------------------------------------
 logical function is_twomol(ibasty)
 !     ------------------------------------------------------------------

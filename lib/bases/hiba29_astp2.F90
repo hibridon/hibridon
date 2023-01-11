@@ -1,3 +1,4 @@
+#include "assert.h"
 ! syastp2 (savastp2/ptrastp2) defines, saves variables and reads         *
 !                  potential for chiral asymmetric top-atom scattering   *
 !                  (or molecule with no symmetry elements)               *
@@ -33,11 +34,13 @@ end type lm_type
 type(lm_type), dimension(:), allocatable :: lms
 end module mod_chiral
 ! --------------------------------------------------------------------
+module mod_hiba29_astp2
+  contains  
 subroutine baastp2(j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
                   etemp, fjtemp, fktemp, fistmp, &
                   rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-                  n, nmax, ntop)
+                  n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  variables in call list:
 !    j:        on return contains rotational quantum number for each
@@ -115,10 +118,6 @@ subroutine baastp2(j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !    numpot:   the number of the potential used, this variable is passed
 !              to the pot subroutine
 !    jmax:     the maximum rotational angular momentum for the asymmetric top
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  variable in module mod_conlam
 !               nlam is set equal to nterm; see above
 !  variables in common block /coconv/
@@ -132,8 +131,7 @@ subroutine baastp2(j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !   rotham:     computes matrix elements of asymmetric top hamiltonian
 ! --------------------------------------------------------------------
 use mod_chiral
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coatpi, only: narray, isiz
@@ -141,18 +139,21 @@ use mod_coatpr, only: c
 use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_coatp3, only: isizh
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
+use mod_hibasutil, only: rotham
 use constants, only: econv, xmconv
+use mod_par, only: iprint
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_par, only: readpt, boundc
+use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*1 slab
-#include "common/parbas.F90"
-#include "common/parbasl.F90"
-common /coipar/ iiipar(9), iprint
-common /coselb/ ibasty
-common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
           fistmp(1)
@@ -601,7 +602,6 @@ end if
 !  i counts v2 elements
 !  inum counts v2 elements for given lambda
 !  ilam counts number of v2 matrices
-!  ij is address of given v2 element in present v2 matrix
 if (bastst) then
   write (6, 340)
   write (9, 340)
@@ -609,10 +609,12 @@ if (bastst) then
     '        VEE')
  end if
 i = 0
-lamsum = 0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 !  ilam denotes a particular lambda,mu term
 do 400 ilam = 1, nlam
 !     ilam denotes a particular LAMBDA,MU term
+  ancouma => v2%get_angular_coupling_matrix(ilam)
   lam = lms(ilam)%l1
   mu = lms(ilam)%m1
 !
@@ -621,9 +623,8 @@ do 400 ilam = 1, nlam
   if (mu .lt. 0) goto 400
 !
   inum = 0
-  do 355 icol = 1, n
-    do 350 irow = icol, n
-      ij = ntop * (icol - 1) + irow
+  do icol = 1, n
+    do irow = icol, n
 !     initialize potential to zero
       vee = 0.d0
       call vchirl(j(irow), l(irow), j(icol), l(icol), &
@@ -632,44 +633,30 @@ do 400 ilam = 1, nlam
 !     check for nonzro matrix element
       if (abs(vee) .gt. 1.d-10) then
         i = i + 1
-        if (i .le. nv2max) then
-          inum = inum + 1
-          v2(i) = vee
-          iv2(i) = ij
-          if (bastst .and. iprint.ge.2) then
-            write (6, 390) ilam, lam, mu, &
-                icol, irow, i, iv2(i), vee
-            write (9, 390) ilam, lam,mu, &
-                icol, irow, i, iv2(i), vee
-390             format (i6, 2i5, 2x, 2i5, 2i8, e20.7)
-          end if
-        else
-          write (6, 410) i, nv2max
-          write (9, 410) i, nv2max
-410           format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i16, &
-            ' .GT. NV2MAX=',i16,'; ABORT ***')
-          stop
+        inum = inum + 1
+        call ancouma%set_element(irow=irow, icol=icol, vee=vee)
+        if (bastst .and. iprint.ge.2) then
+          write (6, 390) ilam, lam, mu, &
+              icol, irow, i, vee
+          write (9, 390) ilam, lam,mu, &
+              icol, irow, i, vee
+390             format (i6, 2i5, 2x, 2i5, i8, e20.7)
         end if
       end if
-350     continue
-355   continue
-  if (i .le. nv2max) lamnum(ilam) = inum
+    end do
+  end do
   if (bastst) then
-    write (6, 370) ilam, lam, mu, lamnum(ilam)
-    write (9, 370) ilam, lam, mu, lamnum(ilam)
+    write (6, 370) ilam, lam, mu, ancouma%get_num_nonzero_elements()
+    write (9, 370) ilam, lam, mu, ancouma%get_num_nonzero_elements()
 370     format ('ILAM=',i4,'  L1=',i3,' M1=',i3, &
       '  LAMNUM(ILAM) = ',i7)
   end if
-  lamsum = lamsum + lamnum(ilam)
 400 continue
 if (bastst) then
-  write (6, 420) lamsum
-  write (9, 420) lamsum,nv2max
+  write (6, 420) v2%get_num_nonzero_elements()
+  write (9, 420) v2%get_num_nonzero_elements()
 420   format (' *** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS ', &
       i16)
-  write (6, 441) nv2max
-  write (9, 441) nv2max
-441   format('     MAXIMUM ALLOWED NUMBER IS',i16)
 end if
 return
 end
@@ -707,6 +694,7 @@ subroutine vchirl(jp, lp, j, l, isp, is, jtot, lam, mu, vee, &
 !  -----------------------------------------------------------------------
 use mod_coatpi, only: narray
 use mod_coatpr, only: c
+use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
 !
 data one, zero, two / 1.0d0, 0.0d0, 2.0d0 /
@@ -819,6 +807,7 @@ subroutine prmtp2 (jp, lp, j, l, jtot, kp, k, iepsp, ieps, &
 !  subroutine called:
 !     xf3j
 !  -----------------------------------------------------------------------
+use mod_hiutil, only: xf3j
 implicit double precision (a-h,o-z)
 data one, two, zero, onsq2 / 1.d0, 2.d0, 0.d0, &
   0.707106781186547d0 /
@@ -865,7 +854,7 @@ end
 !  author:  paul dagdigian
 !  current revision date:  16-aug-2009
 !  -----------------------------------------------------------------------
-subroutine syastp2 (irpot, readp, iread)
+subroutine syastp2 (irpot, readpt, iread)
 !  subroutine to read in system dependent parameters for chiral asymmetric top
 !      + atom scattering
 !
@@ -900,23 +889,18 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-integer irpot
-logical readp
-logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
-        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf, &
-        csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
-        readpt, ihomo, bastst, twomol, lpar
+use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_hiutil, only: gennam, get_token
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: j, l, lc
+logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-#include "common/parbas.F90"
-common /coskip/ nskip,iskip
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-                noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr,lpar(3)
 #include "common/comdot.F90"
 save potfil
 
@@ -956,12 +940,12 @@ return
 90 format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
 return
 !  -----------------------------------------------------------------------
-entry ptrastp2 (fname, readp)
+entry ptrastp2 (fname, readpt)
 line = fname
-readp = .true.
-100 if (readp) then
+readpt = .true.
+100 if (readpt) then
   l=1
-  call parse(line,l,filnam,lc)
+  call get_token(line,l,filnam,lc)
   if(lc.eq.0) then
     write(6,102)
 102     format(' FILENAME MISSING FOR POTENTIAL INPUT')
@@ -985,20 +969,21 @@ endif
 close (8)
 return
 !  -----------------------------------------------------------------------
-entry savastp2 (readp)
+entry savastp2 (readpt)
 !  save input parameters for chiral asymmetric top + atom scattering
 !  the order of the write statements should be identical to the read statement
 !  above. for consistency with the data file written by gendat, format
 !  statements should reserve the first 30 spaces for data, spaces 31-33 should
 !  be left blank, and the names of the variables should be printed in spaces
 !  34-80
-write (8, 230) jmax, emax
+write (FUNIT_INP, 230) jmax, emax
 230 format (i4, 3x, g12.5, 14x, 'jmax, emax')
-write (8, 250) arot, brot, crot
+write (FUNIT_INP, 250) arot, brot, crot
 250 format(3f9.4, 6x, 'arot, brot, crot')
-write (8, 60) potfil
+write (FUNIT_INP, 60) potfil
 60 format (a)
 return
 end
 
 ! ---------------------------------eof----------------------------------
+end module mod_hiba29_astp2

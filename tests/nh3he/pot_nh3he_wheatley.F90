@@ -18,8 +18,8 @@
 ! ------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl  ! vvl(21)
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
-#include "common/parpot.F90"
 integer i
 double precision PI, DEG, S4PI
 parameter (PI=3.14159265358979323846d0, DEG=PI/180d0, &
@@ -56,11 +56,11 @@ end
 !
 subroutine loapot(iunit,filnam)
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam, nlammx
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 character*(*) filnam
-#include "common/parbas.F90"
-#include "common/parpot.F90" 
 integer, pointer :: nterm
 nterm=>ispar(1)
 potnam='Wheatley/Hodges NH3-He PES'
@@ -108,8 +108,6 @@ subroutine pot (vv0, r)
 !  variable in common block /covvl/
 !    vvl:        vector of length 21 to store r-dependence of each term
 !                in potential expansion
-!  variable in common block /coloapot/
-!    s4pi:       normalization factor for isotropic potential
 !
 !  uses linear least squares routines from lapack
 !

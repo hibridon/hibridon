@@ -39,15 +39,18 @@ use mod_coisc5, only: jout => isc5 ! jout(1)
 use mod_coisc7, only: jlevh => isc7 ! jlevh(1)
 use mod_coisc8, only: iflevh => isc8 ! iflevh(1)
 use mod_coisc9, only: inlevh => isc9 ! inlevh(1)
-use mod_coisc10, only: ipack => isc10 ! ipack(1)
-use mod_coisc11, only: jpack => isc11 ! jpack(1)
-use mod_coisc12, only: lpack => isc12 ! lpack(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc3, only: elevh => sc3 ! elevh(1)
-use mod_hibrid5, only: sread
+use mod_hibasis, only: is_j12
 use constants, only: econv, xmconv, ang2 => ang2c
-
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
+use mod_hiutil, only: gennam, mtime
+use mod_hiutil, only: xf6j
+use mod_hismat, only: sread, rdhead, sinqr
+use mod_hitypes, only: packed_base_type
 implicit double precision (a-h,o-z)
+type(packed_base_type) :: packed_base
 character*(*) flname
 real(8), dimension(4), intent(in) :: a(4)
 complex(8) t, tf
@@ -56,10 +59,7 @@ character*40 smtfil, hfxfil
 character*10 elaps, cpu
 logical csflg, flaghf, flgsu, twmol, nucrs, &
      batch, fast, lpar2, lpar, exstfl
-
-#include "common/parpot.F90"
-common /codim/ nairy
-common /coselb/ ibasty
+integer, parameter :: hfxfil_unit = 11
 !
 !     storage for S-matrix elements red from .smt file
 real(8), dimension(:), allocatable :: sreal, simag
@@ -194,11 +194,11 @@ end if
 !
 !     generate output file name
 call gennam(hfxfil,flname,iener,'hfx',lendh)
-call openf(11, hfxfil(1:lendh),'sf',0)
+call openf(hfxfil_unit, hfxfil(1:lendh),'sf',0)
 !
 ee = ered * econv
 write (6, 22) label, potnam, smtfil, cdate
-write (11, 22) label, potnam, smtfil, cdate
+write (hfxfil_unit, 22) label, potnam, smtfil, cdate
 22 format(/'% HYPERFINE-RESOLVED CROSS SECTIONS'/ &
      '%      LABEL:     ',(a)/ &
      '%      POT NAME:  ',(a)/ &
@@ -206,13 +206,13 @@ write (11, 22) label, potnam, smtfil, cdate
      '%      WRITTEN:   ',(a))
 if (itwospn .eq. 0) then
   write (6,24) jfinl, ee, finuc
-  write (11,24) jfinl, ee, finuc
+  write (hfxfil_unit,24) jfinl, ee, finuc
 24 format('%      JTOT2:     ',i10/ &
      '%      ETOT:      ',f10.3,' CM(-1)' &
      //'% NUCLEAR SPIN = ',f4.1/)
 else
   write (6,224) jfinl, ee, finuc, f2nuc
-  write (11,224) jfinl, ee, finuc, f2nuc
+  write (hfxfil_unit,224) jfinl, ee, finuc, f2nuc
 224    format('%      JTOT2:     ',i10/ &
      '%      ETOT:      ',f10.3,' CM(-1)' &
      //'% NUCLEAR SPINS = ',2f6.1/)
@@ -253,7 +253,7 @@ if (ialloc .ne. 0) goto 4000
 sigma = 0d0
 !
 !     clear length array, in case minimum jtot > 0
-allocate(length(0:jfinl, 2), stat=ialloc)
+allocate(length(0:jfinl+1, 2), stat=ialloc)
 if (ialloc .ne. 0) goto 4001
 length = 0d0
 !
@@ -286,16 +286,12 @@ if (ialloc .ne. 0) goto 4010
 !     fix for case where jtot=0 has only one parity
 jfrst = 2000
 jfin = 0
-do ij = 0, jfinl
-  do ip = 1, 2
-    length(ij,ip) = 0
-  end do
-end do
+
 !     parameter to read lower triangle of open channel(s)
 100 nopen = -1
 call sread (0, sreal, simag, jtot, jlpar, &
-     nu, jq, lq, inq, ipack, jpack, lpack, &
-     1, mmax, nopen, lngth, ierr)
+     nu, jq, lq, inq, packed_base, &
+     1, mmax, nopen, ierr)
 if (ierr .lt. -1) then
    write(6,102)
 102    format(/' ** READ ERROR IN HYPXSC. ABORT **'/)
@@ -305,17 +301,17 @@ jfrst = min(jfrst, jtot)
 jfin = max(jfin, jtot)
 jlp = 1 - (jlpar - 1)/2
 !     copy s-matrix for this jtot1/jlpar1
-length(jtot,jlp) = lngth
-len2 = lngth*(lngth + 1)/2
+length(jtot,jlp) = packed_base%length
+len2 = packed_base%length*(packed_base%length + 1)/2
 if (jlpar.eq.1) then
    exsmtp(jtot) = .true.
 else
    exsmtn(jtot) = .true.
 end if
-do i = 1, lngth
-   j(jtot,jlp,i) = jpack(i)
-   in(jtot,jlp,i) = ipack(i)
-   l(jtot,jlp,i) = lpack(i)
+do i = 1, packed_base%length
+   j(jtot,jlp,i) = packed_base%jpack(i)
+   in(jtot,jlp,i) = packed_base%inpack(i)
+   l(jtot,jlp,i) = packed_base%lpack(i)
    j12(jtot,jlp,i) = j12q(i)
 end do
 do ii = 1, len2
@@ -354,10 +350,11 @@ lmax = iftmx + jmx + 1
 jrmx = lmax + jmx + 1
 idimr = jrmx + 1
 idim = idimr * (lmax + 1)
-allocate(tmatr(idim, idim), stat=ialloc)
-if (ialloc .ne. 0) goto 4011
-allocate(tmati(idim, idim), stat=ialloc)
-if (ialloc .ne. 0) goto 4011
+
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
+allocate(tmatr(idim, idim))
+allocate(tmati(idim, idim))
+!$OMP DO
 do iftot = iftmn, iftmx
   xftot = iftot + fhspin
   do jlp = 1, 2
@@ -452,13 +449,7 @@ do iftot = iftmn, iftmx
 !     end of if statement checking in length
           end if
         end do
-        t2sum = 0.d0
-        do i1=1,idim
-          do i2=1,idim
-            t2sum = t2sum + tmatr(i1,i2)**2 &
-                + tmati(i1,i2)**2
-          end do
-        end do
+        t2sum = sum(tmatr*tmatr + tmati*tmati)
         sigma(i,ii) = sigma(i,ii) + t2sum &
             * (2.d0 * xftot + 1.d0)
         if (i.ne.ii) then
@@ -469,8 +460,10 @@ do iftot = iftmn, iftmx
     end do
   end do
 end do
+!$OMP END DO
 deallocate(tmatr)
 deallocate(tmati)
+!$OMP END PARALLEL
 !
 else
 !
@@ -481,7 +474,7 @@ nuc1 = 2 * finuc
 if (flaghf .and. nuc1.eq.2*(nuc1/2) .or. &
      .not.flaghf .and. nuc1.ne.2*(nuc1/2)) &
      fhspin = 0.5d0
-nlevelh2 = 0
+nlevlh2 = 0
 do 160 i=1, nlevelh
 !  check that level is energetically allowed
   if (elevh(i).gt.ered) go to 160
@@ -522,12 +515,12 @@ lmax = iftmx + jmx + 1
 jrmx = lmax + jmx + 1
 idimr = jrmx + 1
 idim = idimr * (lmax + 1)
-allocate(tmatr(idim, idim), stat=ialloc)
-if (ialloc .ne. 0) goto 4011
-allocate(tmati(idim, idim), stat=ialloc)
-if (ialloc .ne. 0) goto 4011
-!
+
 !  NOTE:  xftot is called K in Lara-Moreno et al.
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
+allocate(tmatr(idim, idim))
+allocate(tmati(idim, idim))
+!$OMP DO
 do iftot = iftmn, iftmx-1
   xftot = float(iftot) + dspin
   do jlp = 1, 2
@@ -633,13 +626,7 @@ do iftot = iftmn, iftmx-1
           end if
          end do
         end do
-        t2sum = 0.d0
-        do i1=1,idim
-          do i2=1,idim
-            t2sum = t2sum + tmatr(i1,i2)**2 &
-                + tmati(i1,i2)**2
-          end do
-        end do
+        t2sum = sum(tmatr*tmatr + tmati*tmati)
         sigma(i,ii) = sigma(i,ii) + t2sum &
             * (2.d0 * xftot + 1.d0)
         if (i.ne.ii) then
@@ -650,8 +637,10 @@ do iftot = iftmn, iftmx-1
     end do
   end do
 end do
+!$OMP END DO
 deallocate(tmatr)
 deallocate(tmati)
+!$OMP END PARALLEL
 !
 !  compute cross sections for atom-molecule collisions with two nuclear spins
 !
@@ -672,7 +661,7 @@ end do
 !     print out cross sections for atom-molecule collisions with two nuclear spins
 !
 write(6,1005)
-write(11,1005)
+write(hfxfil_unit,1005)
 1005  format('%',5x,'E(CM-1)',3x,'JI',2x,'INI',2x,'F1I',3x,'F2I',5x,'JF', &
   2x,'INF',2x,'F1F',3x,'F2F',2x,'CROSS SECTION (ANG^2)')
 ee = ered * econv
@@ -687,7 +676,7 @@ do 190 i=1,nlevlh2
     if (sigma(i,ii).ne.0.d0) then
       write(6,1006) ee,xj,inlevh2(i),xf,xf2, &
          xjp,inlevh2(ii),xfp,xf2p,sigma(i,ii)
-      write(11,1006) ee,xj,inlevh2(i),xf,xf2, &
+      write(hfxfil_unit,1006) ee,xj,inlevh2(i),xf,xf2, &
          xjp,inlevh2(ii),xfp,xf2p,sigma(i,ii)
 1006       format(f12.3,f6.1,i4,f6.1,f6.1,f7.1,i4, &
          f6.1,f6.1,2x,1pe15.4)
@@ -736,10 +725,11 @@ jrmx = lmax + j2mx + 1
 idimr = jrmx + 1
 idim = idimr * (lmax + 1)
 !     next allocate scratch arrays
-allocate(tmatr(idim, idim), stat=ialloc)
-if (ialloc .ne. 0) goto 4011
-allocate(tmati(idim, idim), stat=ialloc)
-if (ialloc .ne. 0) goto 4011
+
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,fspin,fhspin,nlevelh,jlevh,iflevh,finuc,length,j,in,inlevh,l,sr,si) REDUCTION(+:sigma)
+allocate(tmatr(idim, idim))
+allocate(tmati(idim, idim))
+!$OMP DO
 do iftot = iftmn, iftmx
   xftot = iftot + fhspin
   do jlp = 1, 2
@@ -855,13 +845,7 @@ do iftot = iftmn, iftmx
             end do
           end do
         end do
-        t2sum = 0.d0
-        do i1 = 1, idim
-          do i2 = 1, idim
-            t2sum = t2sum + tmatr(i1,i2)**2 &
-                + tmati(i1,i2)**2
-          end do
-        end do
+        t2sum = sum(tmatr*tmatr + tmati*tmati)
 !  do not include contribution from last ftot
         if (iftot.ne.iftmx) then
           sigma(i,ii) = sigma(i,ii) + t2sum &
@@ -875,8 +859,10 @@ do iftot = iftmn, iftmx
     end do
   end do
 end do
+!$OMP END DO
 deallocate(tmatr)
 deallocate(tmati)
+!$OMP END PARALLEL
 !
 !  end of molecule-molecule section
 !
@@ -913,12 +899,12 @@ end do
 !
 if (.not. twmol) then
   write(6,1001)
-  write(11,1001)
+  write(hfxfil_unit,1001)
 1001   format('%',5x,'E(CM-1)',5x,'JI',5x,'INI',3x,'FI',6x,'JF',5x, &
        'INF',3x,'FF',6x,'CROSS SECTION (ANG^2)')
 else
   write(6,2001)
-  write(11,2001)
+  write(hfxfil_unit,2001)
 2001   format(/'%',4x,'E(CM-1)',5x,'JI',5x,'INI',3x,'FI',4x,'J2',6x, &
        'JF',5x,'INF', &
        3x,'FF',4x,'J2P',6x,'CROSS SECTION (ANG^2)')
@@ -934,7 +920,7 @@ do 90 i=1,nlevelh
       if (sigma(i,ii).ne.0.d0) then
         write(6,1002) ee,xj,inlevh(i),xf, &
              xjp,inlevh(ii),xfp,sigma(i,ii)
-          write(11,1002) ee,xj,inlevh(i),xf, &
+          write(hfxfil_unit,1002) ee,xj,inlevh(i),xf, &
            xjp,inlevh(ii),xfp,sigma(i,ii)
 1002         format(f12.3,f8.1,i6,f6.1,3x,f6.1,i6,f6.1, &
              5x,1pe15.4)
@@ -949,7 +935,7 @@ do 90 i=1,nlevelh
       if (sigma(i,ii).ne.0.d0) then
         write(6,2002) ee,xj,inlevh(i),xf,ij2, &
              xjp,inlevh(ii),xfp,ij2p,sigma(i,ii)
-        write(11,2002) ee,xj,inlevh(i),xf,ij2, &
+        write(hfxfil_unit,2002) ee,xj,inlevh(i),xf,ij2, &
              xjp,inlevh(ii),xfp,ij2p,sigma(i,ii)
 2002         format(f12.3,f8.1,i6,f6.1,i6,3x,f6.1,i6,f6.1, &
              i6,5x,1pe15.4)
@@ -976,7 +962,7 @@ do 90 i=1,nlevelh
 4002 deallocate(length)
 4001 deallocate(sigma)
 4000 close(1)
-close(11)
+close(hfxfil_unit)
 if (ialloc .ne. 0) write (6, 4100)
 4100 format (' *** INSUFFICIENT MEMORY OR SMT FILE CORRUPTED. ***')
 return

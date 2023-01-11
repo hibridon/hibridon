@@ -1,7 +1,39 @@
 # Hibridon ChangeLog
 
-- 31/03/2022 Fixed a bug that caused the `isa` parameter written in the `ics` file to be wrong in most cases
 
+## The following major changes have been made in bringing Hibridon 4.4 to release level 5.0
+
+- Modified licence for Hibridon 5.0: [`GPLv3`](https://www.gnu.org/licenses/gpl-3.0.en.html) licence
+
+- Added version control using [`GIT`](https://git-scm.com), source code hosted on [GitHub](www.github.com/hibridon/hibridon)
+
+- Added continuous integration - This validates the code for MacOS and Linux using either gfortran or ifort
+
+- Added automatic testing of Hibridon
+
+- Removed previous custom preprocessing (`ftconv`) system and replaced with `fpp` (Fortran PreProcessor)
+
+- Changed from fixed source form to free source form
+
+- Code is now using fortran features up to the 2008 standard
+
+- Updated most common blocks into modules
+
+- Replaced custom build system with `CMake`
+
+- Added interactive command `showpot` that replaces the `testpot` program
+
+- Made the `v2` array (angular coupling matrices) growable to replace its arbitrary hardcoded size - This reduces Hibridon memory footprint
+
+- Replaced hardcoded `kmax` value with a runtime argument (`-k <KMAX>`) - This allows to control Hibridon memory footprint without recompiling
+
+- Added the `-c <COMFILE>` runtime argument to specify a command file
+
+- Changed informations displayed in headers of the log files
+
+- Fixed bugs (see [GitHub closed issues](https://github.com/hibridon/hibridon/issues?q=is%3Aclosed+) for details):
+  - Fixed bug to allow proper handling of the `WFU` files bigger than 2GB (!!! WFU file format has changed !!!)
+  
 ## The following changes have been made in bringing hibridon 4.3 to release level 4.4
 
 - 11/13     Added routines ofr collision of 1D/3P atom with atom

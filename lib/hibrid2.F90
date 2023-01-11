@@ -7,7 +7,7 @@
 !                                                                       *
 !   1. hiblk       block data, default settings                         *
 !   2. hinput      input driver                                         *
-!   4. mxoutd (mxoutr) mxoutc      matrix print utility
+!   4. mxoutd (mxoutr) print_integral_cross_sections      matrix print utility
 !   5. prsg/aver1/xscpr1  integral cross section print
 !   6. prsgpi/aver2/xscpr2 integral cross section print for sigma/pi
 !                                                                       *
@@ -15,7 +15,7 @@
 module mod_hibrid2
 contains
 ! ------------------------------------------------------------------
-subroutine default
+subroutine set_default_params
 !  current revision date:  22-jan-2008 by mha
 ! ------------------------------------------------------------------
 use mod_cosout, only: nnout, jout
@@ -26,26 +26,19 @@ use mod_cosysi, only: nscode, isicod
 use mod_cosysl, only: islcod
 use mod_cosysr, only: isrcod
 use constants, only: econv, xmconv, ang2c
-implicit double precision (a-h,o-z)
-character*40 jobnam,input,output,savfil
-logical logwr, swrit, t2writ, wrpart, partw, airyfl, airypr, &
-        ipos, noprin, chlist, wrxsec, xsecwr, writs, csflag, &
-        flaghf, rsflag, t2test, logdfl, flagsu, batch, &
-        readpt, ihomo, bastst, twomol, nucros, photof, wavefl, &
-        boundc
-#include "common/parpot.F90"
-common /cofile/ input, output, jobnam, savfil
-! nb if the nextcommon is changed, it should be also changed in common/parsys
-common /coselb/ ibasty
-common /coipar/ jtot1,jtot2,jtotd,jlpar,nerg,numax,numin,nud, &
-                lscreen, iprint
-common /corpar/ fstfac, rincr, rcut, rendai, rendld, rstart, spac, &
-                tolai, xmu
-common /colpar/ airyfl, airypr, bastst, batch, chlist, &
+use mod_par, only: airyfl, prairy, bastst, batch, chlist, &
                 csflag, flaghf, flagsu, ihomo, ipos, logdfl, &
-                logwr, noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr, nucros, photof, wavefl, boundc
+                prlogd, noprin, prpart, readpt, rsflag, prsmat, &
+                t2test, prt2, twomol, wrsmat, wrpart, wrxsec, &
+                prxsec, nucros, photof, wavefl, boundc, &
+                jtot1, jtot2, jtotd, jlpar, nerg, numax, numin, nud, lscreen, iprint, &
+                fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, &
+                tolaifstfac=>scat_tolai, xmu
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
+use mod_file, only: input, output, jobnam, savfil
+implicit double precision (a-h,o-z)
+! nb if the nextcommon is changed, it should be also changed in common/parsys
 !  this sets the maximum number of energies
 !
 jtot1=20
@@ -56,10 +49,7 @@ nerg=1
 numax=0
 numin=0
 nud=1
-! lscreen is the number of lines available on your terminal screen
 lscreen=48
-! iprint controls degree of print output in some routines
-!     iprint=-1 (no print); iprint=0 (min print); iprint=1 some print, etc
 iprint=0
 energ(1)=208.509d0
 do i=2,25
@@ -81,7 +71,7 @@ xmu=16.47d0
 ! default basis type is 1 (singlet sigma)
 ibasty=1
 airyfl=.true.
-airypr=.false.
+prairy=.false.
 batch=.false.
 chlist=.true.
 csflag=.false.
@@ -90,19 +80,19 @@ flagsu=.false.
 ihomo=.true.
 ipos=.false.
 logdfl=.true.
-logwr=.false.
+prlogd=.false.
 noprin=.false.
-partw=.false.
+prpart=.false.
 readpt=.false.
 rsflag=.false.
-swrit=.false.
+prsmat=.false.
 t2test=.false.
-t2writ=.true.
-writs=.true.
+prt2=.true.
+wrsmat=.true.
 wrpart=.false.
 wrxsec=.false.
 nucros=.false.
-xsecwr=.true.
+prxsec=.true.
 bastst=.false.
 photof=.false.
 wavefl=.false.
@@ -237,17 +227,28 @@ do  50   j = 1, jmax
 60 return
 end
 ! --------------------------------------------
-subroutine mxoutc (ifile,zmat,nlevop,nmax,ipos,csflag,flaghf, &
-                   twomol,numax,jlev,inlev)
+! routine to print integral cross sections
+subroutine print_integral_cross_sections(ifile, zmat, nlevop, nmax, ipos, csflag, flaghf, twomol, numax, jlev, inlev)
 use constants
 use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
-implicit double precision (a-h,o-z)
-logical csflag,flaghf,twomol,ipos, csff
+use mod_par, only: iprint
+implicit none
+integer, intent(in) :: ifile  ! the output file's unit (expected to be open)
+real(8), intent(in) :: zmat(nmax, nlevop)
+integer, intent(in) :: nlevop
+integer, intent(in) :: nmax
+logical, intent(in) :: ipos
+logical, intent(in) :: csflag
+logical, intent(in) :: flaghf
+logical, intent(in) :: twomol
+integer, intent(in) :: numax
+integer, intent(in) :: inlev(nlevop)
+integer, intent(in) :: jlev(nlevop)
+
+integer :: i, ii, j, j1, j2
+real(8) :: spin
+logical csff
 character*40 form
-common /coipar/ ipar(9), iprint
-dimension zmat(nmax,nlevop),inlev(1),jlev(1)
-! routine to print integral cross sections
-!  latest revision date:  24-jun-1991
 spin=0
 csff=csflag
 if (csflag .and. iprint .ge. 2) then
@@ -386,24 +387,24 @@ use mod_cosc1, only: elev => sc1 ! elev(5)
 use mod_coz, only: zmat => z_as_vec ! zmat(1)
 use mod_cow, only: scmat => w_as_vec ! scmat(1)
 use mod_version, only : version
+use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, flaghf, flagsu, ihomo, ipos
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
+use mod_hiutil, only: gennam
+use mod_hivector, only: matmov
+use funit, only: FUNIT_ICS, FUNIT_XSC
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
 character*3 stat
 character*12 accs
 character*40 xnam1, xnam2
-logical csflag, flaghf, iprint, ipos, flagsu, twomol, existf, &
-        openfl,lpar(17), &
-        airyfl,airypr,bastst,batch,chlist,ihomo, eprint
-common /colpar/ airyfl, airypr, bastst, batch, chlist, &
-                csflag, flaghf, flagsu, ihomo, ipos,lpar
+logical iprint, twomol, existf, openfl, eprint
 !     real econv, ener, xmu
 !     real a, elev, scmat, zmat
 integer i, ienerg, iout, isize, j, jbegin, jend, jfinal, &
         jfirst, jj1, jj2, jlpar, jtemp, jtotd, lenx, n, nlevel, &
         nlevop, nout, numax, numin, nud, iaver
-#include "common/parpot.F90"
-common /coselb/ ibasty
 dimension  a(3)
 data econv / 219474.6d0/
 !  input parameters
@@ -422,7 +423,7 @@ if (.not. existf) then
 10   format(/' integral cross section file ',(a),' not found',/)
   return
 end if
-open (1, file = xnam1,status = 'old')
+open (FUNIT_ICS, file = xnam1,status = 'old')
 !  open output file for integral cross sections
 call gennam (xnam2, fname, ienerg, 'xsc', lenx)
 if (.not.iprint) write(6,20) xnam2
@@ -445,38 +446,38 @@ if (.not. openfl) then
   else
     stat='new'
   end if
-  open (3, file = xnam2, status = stat, access = accs)
+  open (FUNIT_XSC, file = xnam2, status = stat, access = accs)
 endif
-call version(3)
-read (1, 40) cdate
+call version(FUNIT_XSC)
+read (FUNIT_ICS, 40) cdate
 40 format (1x, a)
-read (1, 40) label
-read (1, 40) potnam
+read (FUNIT_ICS, 40) label
+read (FUNIT_ICS, 40) potnam
 !  print job information
-write (3, 50) xnam1, cdate, label, potnam
+write (FUNIT_XSC, 50) xnam1, cdate, label, potnam
 if (iprint) write (6, 50) xnam1, cdate, label, potnam
 50 format(/' INTEGRAL CROSS SECTIONS READ FROM FILE ',(a)/ &
         ' WRITTEN:   ',(a)/ &
         ' LABEL:     ',(a)/, &
         ' POT NAME:  ',(a) )
-read (1, 60) ener, xmu
+read (FUNIT_ICS, 60) ener, xmu
 60 format (f10.3, f15.11)
-read (1, 70) csflag, flaghf, flagsu, twomol
+read (FUNIT_ICS, 70) csflag, flaghf, flagsu, twomol
 70 format (4l3)
-read (1, 75) jfirst, jfinal, jtotd, numin, numax, &
+read (FUNIT_ICS, 75) jfirst, jfinal, jtotd, numin, numax, &
              nud, jlpar
 75 format (7i5)
 if (ipos) then
 80   format (24i5)
-  read (1, 80)  nlevel, nlevop
-  read (1, 80) (jlev(i), inlev(i), i = 1, nlevel)
-  read (1, 90) (elev(i), i = 1, nlevel)
+  read (FUNIT_ICS, 80)  nlevel, nlevop
+  read (FUNIT_ICS, 80) (jlev(i), inlev(i), i = 1, nlevel)
+  read (FUNIT_ICS, 90) (elev(i), i = 1, nlevel)
 90   format (8(1pe15.8))
 !90      format (8f16.9)
 else
-  read (1, *)  nlevel, nlevop
-  read (1, *) (jlev(i), inlev(i), i = 1, nlevel)
-  read (1, *) (elev(i), i = 1, nlevel)
+  read (FUNIT_ICS, *)  nlevel, nlevop
+  read (FUNIT_ICS, *) (jlev(i), inlev(i), i = 1, nlevel)
+  read (FUNIT_ICS, *) (elev(i), i = 1, nlevel)
 endif
 !  read in matrix of cross sections, column by column
 do 95  i = 1, nlevop
@@ -485,16 +486,16 @@ do 95  i = 1, nlevop
   jbegin = (i - 1) * nlevop + 1
   jend = i * nlevop
   if (ipos) then
-    read (1, 90) (zmat(j), j = jbegin, jend)
+    read (FUNIT_ICS, 90) (zmat(j), j = jbegin, jend)
   else
-    read (1, *) (zmat(j), j = jbegin, jend)
+    read (FUNIT_ICS, *) (zmat(j), j = jbegin, jend)
   endif
 95 continue
 if (.not. flagsu) then
   if (.not.flaghf .or. ibasty.eq.12) then
     if (iprint) write (6, 100) ienerg, xmu, ener, jlpar, &
                                 jfirst, jfinal, jtotd
-    write (3, 100) ienerg, xmu, ener, jlpar, jfirst, &
+    write (FUNIT_XSC, 100) ienerg, xmu, ener, jlpar, jfirst, &
                    jfinal, jtotd
 100     format (/' ** INTEGRAL CROSS SECTIONS; IEN=', i2,' **', &
             /'    RMU=', f9.4, '  E=', f9.2,'  JLPAR=', i2, &
@@ -503,7 +504,7 @@ if (.not. flagsu) then
   else
     if (iprint) write (6, 105) ienerg, xmu, ener, jlpar, &
                       (jfirst+0.5), (jfinal+0.5), jtotd
-    write (3, 105) ienerg, xmu, ener, jlpar, (jfirst+0.5), &
+    write (FUNIT_XSC, 105) ienerg, xmu, ener, jlpar, (jfirst+0.5), &
                    (jfinal+0.5), jtotd
 105     format (/' ** INTEGRAL CROSS SECTIONS; IEN=', i2,' **', &
             /'    RMU=', f9.4, '  E=', f9.2,'  JLPAR=', i2, &
@@ -514,7 +515,7 @@ else
   if (.not. flaghf) then
     if (iprint) write (6, 110) ienerg, xmu, ener, numin, &
                                numax, nud
-    write (3, 110) ienerg, xmu, ener, numin, numax, nud
+    write (FUNIT_XSC, 110) ienerg, xmu, ener, numin, numax, nud
 110     format (/' ** SUMMED DEGENERACY AVERAGED TRANSITION', &
              ' PROBABILITIES;  IEN=', i2,' **', &
             /'    RMU=', f9.4, '  E=', f8.2,'  M-MIN=', i3, &
@@ -522,7 +523,7 @@ else
   else
     if (iprint) write (6, 115) ienerg, xmu, ener, (numin+0.5), &
                                (numax+0.5), nud
-    write (3, 115) ienerg, xmu, ener, (numin+0.5), &
+    write (FUNIT_XSC, 115) ienerg, xmu, ener, (numin+0.5), &
                    (numax+0.5), nud
 115     format (/' ** SUMMED DEGENERACY AVERAGED TRANSITION', &
              ' PROBABILITIES;  IEN=', i2,' **', &
@@ -532,22 +533,22 @@ else
 end if
 if (.not. csflag) then
   if (jlpar .eq. 0) then
-    write (3, 120)
+    write (FUNIT_XSC, 120)
     if (iprint) write (6, 120)
 120     format (' ** CC CALCULATION, BOTH PARITIES **')
   else
-    write (3, 125) jlpar
+    write (FUNIT_XSC, 125) jlpar
     if (iprint) write (6, 125) jlpar
 125     format (' ** CC CALCULATION, JLPAR=', i2, ' **')
   end if
 else
   if (.not. flaghf) then
-    write (3, 130) numin, numax, nud
+    write (FUNIT_XSC, 130) numin, numax, nud
     if (iprint) write (6, 130) numin, numax, nud
 130     format (' ** CS CALCULATION, NUMIN=', i2,', NUMAX=', &
                i2,' NUD=', i2, ' **')
   else
-    write (3, 140) numin + 0.5, numax + 0.5, nud
+    write (FUNIT_XSC, 140) numin + 0.5, numax + 0.5, nud
     if (iprint) write (6, 140) numin+0.5, numax+ 0.5, nud
 140     format (' ** CS CALCULATION, NUMIN=', f4.1, ', NUMAX=', &
             f4.1,' NUD=', i2, ' **')
@@ -557,13 +558,13 @@ if (eprint) then
   if (.not. twomol) then
     if (.not. flagsu) then
       if (iprint) write (6, 145)
-      write (3, 145)
+      write (FUNIT_XSC, 145)
 145       format &
        (' LEVEL LIST FOR INTEGRAL CROSS SECTIONS', &
         /'   N   J  INDEX  EINT(CM-1)',/)
     else
       if (iprint) write (6, 150)
-      write (3, 150)
+      write (FUNIT_XSC, 150)
 150       format &
        (' LEVEL LIST FOR DEGENERACY AVERAGED', &
          ' TRANSITION PROBABILITIES', &
@@ -573,19 +574,19 @@ if (eprint) then
       if (.not. flaghf) then
         if (iprint) &
         write (6, 160) i, jlev(i), inlev(i), elev(i) * econv
-        write (3, 160) i, jlev(i), inlev(i), elev(i) * econv
+        write (FUNIT_XSC, 160) i, jlev(i), inlev(i), elev(i) * econv
 160         format (i4, i5, i6, f11.3)
       else
         if (iprint) write (6, 165) i, (jlev(i)+0.5), inlev(i), &
                        elev(i) * econv
-        write (3, 165) i, (jlev(i)+0.5), inlev(i), &
+        write (FUNIT_XSC, 165) i, (jlev(i)+0.5), inlev(i), &
                        elev(i) * econv
 165         format (i4, f5.1, i6, f11.3)
       end if
 170     continue
   else
     if (iprint) write (6, 175)
-    write (3, 175)
+    write (FUNIT_XSC, 175)
 175       format (' LEVEL LIST FOR INTEGRAL CROSS SECTIONS', &
               /'   N   J1   J2  INDEX  EINT(CM-1)'/)
     do 190  i = 1, nlevop
@@ -593,7 +594,7 @@ if (eprint) then
       jj1 = jlev(i) / 10
       if (iprint) &
       write (6, 180) i, jj1, jj2, inlev(i), elev(i) * econv
-      write (3, 180) i, jj1, jj2, inlev(i), elev(i) * econv
+      write (FUNIT_XSC, 180) i, jj1, jj2, inlev(i), elev(i) * econv
 180       format (i4, 2i5, i6, f11.3)
 190     continue
   end if
@@ -619,19 +620,19 @@ if (iaver .gt. 0) then
 200   continue
   if (isum .ne. 0) then
     write (6, 230) isum
-    write (3, 230) isum
+    write (FUNIT_XSC, 230) isum
 230     format (' *** SUM OF INDICES =',i3, &
                ' AVERAGING MAY NOT WORK ***')
   end if
   if  (iaver .eq. 2) then
     if (iprint) write (6, 245)
-    write (3, 245)
+    write (FUNIT_XSC, 245)
 245     format &
       (' ** CROSS SECTIONS SUMMED AND AVERAGED OVER INDEX **')
     call aver1 (zmat, scmat, nlevop)
    else if (iaver .eq. 1) then
     if (iprint) write (6, 250)
-    write (3, 250)
+    write (FUNIT_XSC, 250)
 250     format &
       (' ** CROSS SECTIONS SUMMED OVER FINAL STATE INDEX **')
    end if
@@ -670,15 +671,15 @@ endif
 if (isize .eq. 0) then
 !  here if no initial states found
   write (6, 283)
-  write (3, 283)
+  write (FUNIT_XSC, 283)
 283   format (' ** NO INITIAL STATES FOUND; ABORT')
 else
 !  now print out desired columns of cross section matrix
-  write (3, 260)
+  write (FUNIT_XSC, 260)
   if (iprint) write (6, 260)
 260   format (/' ** COLUMN HEADINGS ARE INITIAL STATES, ROW', &
         ' HEADINGS ARE FINAL STATES **')
-  call xscpr1(zmat, nlevop, isize, iaver, ipos, iprint, flaghf)
+  call xscpr1(zmat, nlevop, isize, iaver, ipos, iprint, flaghf, FUNIT_XSC)
 endif
 close (1)
 close (3)
@@ -687,6 +688,8 @@ end
 subroutine aver1 (zmat, scmat, n)
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
+use mod_himatrix, only: transp
+use mod_hivector, only: matmov
 implicit double precision (a-h,o-z)
 !  subroutine to sum and average cross section matrix over positive
 !  and negative values of index
@@ -718,13 +721,16 @@ return
 end
 ! -------------------------------------------------
 subroutine xscpr1 (zmat, nlevop, isize, iaver, &
-                   ipos, iprint, flaghf)
+                   ipos, iprint, flaghf, xsc_funit)
 use mod_colq, only: ipoint => lq ! ipoint(4)
 use mod_cojhld, only: jlev => jhold ! jlev(4)
 use mod_cosc1, only: elev => sc1 ! elev(4)
 use mod_coisc1, only: inlev => isc1 ! inlev(4)
+use mod_selb, only: ibasty
+use mod_himatrix, only: transp
 
 implicit double precision (a-h,o-z)
+integer, intent(in) :: xsc_funit  ! the file unit for xsc file (it's expected to be open in write mode)
 !      current revision date: 16-dec-2007
 !  subroutine to print out specified columns of cross section matrix
 !  if iaver = 1, then nth and (n+1) st rows are added before printing
@@ -734,7 +740,6 @@ integer ind
 !     real elev, zmat
 logical ipos, iprint, flaghf
 dimension zmat(nlevop,nlevop), ind(50)
-common /coselb/ ibasty
 !     first transpose the cross section matrix so that initial
 !     states are columns and final states are rows
 call transp (zmat, nlevop, nlevop)
@@ -763,19 +768,19 @@ do  150   j = 1, jmax
 !  write as a heading the column index of each column to be printed
   if (.not. flaghf .or. ibasty.eq.12) then
     if (iprint) write (6, 15) ( jlev(ind(i)), i = 1,ncol)
-    write (3, 15) ( jlev(ind(i)), i = 1, ncol )
+    write (xsc_funit, 15) ( jlev(ind(i)), i = 1, ncol )
 15     format (/12x,'J=', i5, 2x, 12 (2x, i6, 2x) )
   else
     if (iprint) write (6, 30) ( jlev(ind(i))+0.5, &
                                  i = 1,ncol)
-    write (3, 30) ( jlev(ind(i))+0.5, i = 1,ncol)
+    write (xsc_funit, 30) ( jlev(ind(i))+0.5, i = 1,ncol)
 30     format (/11x,'J= ', f5.1, 2x, 12 (2x, f6.1, 2x) )
   end if
   if (iprint) write (6, 40) ( inlev(ind(i)), i = 1,ncol)
-  write (3, 40) ( inlev(ind(i)), i = 1,ncol)
+  write (xsc_funit, 40) ( inlev(ind(i)), i = 1,ncol)
 40   format ('   J    I | I=', i5, 2x, 12 (2x, i6, 2x))
   if (iprint) write (6, 50)
-  write (3, 50)
+  write (xsc_funit, 50)
 50   format (1h )
 !  now loop through the rows of the matrix, which will be printed out
 !  in groups of 10 with a blank line in between
@@ -791,14 +796,14 @@ do  150   j = 1, jmax
         if (iprint) &
           write (6, 60) jlev(jrow),inrow, &
             ( zmat(jrow,ind(jcol)), jcol = 1,ncol)
-        write (3, 60) jlev(jrow),inrow, &
+        write (xsc_funit, 60) jlev(jrow),inrow, &
           ( zmat(jrow,ind(jcol)), jcol = 1,ncol)
 60         format (i5, i5, 2x, 13 (1pe10.3,1x) )
       else
         if (iprint) &
           write (6, 70) jlev(jrow)+0.5, inrow, &
             ( zmat(jrow,ind(jcol)), jcol = 1,ncol)
-        write (3, 70) jlev(jrow)+0.5, inrow, &
+        write (xsc_funit, 70) jlev(jrow)+0.5, inrow, &
           ( zmat(jrow,ind(jcol)), jcol = 1,ncol)
 70         format (f5.1, i5, 2x, 13 (1pe10.3,1x) )
       end if
@@ -808,7 +813,7 @@ do  150   j = 1, jmax
           write (6, 60) jlev(jrow),inrow, &
             (zmat(jrow,ind(jcol)) + zmat(jrow + 1,ind(jcol)), &
                 jcol = 1,ncol)
-        write (3, 60) jlev(jrow),inrow, &
+        write (xsc_funit, 60) jlev(jrow),inrow, &
             (zmat(jrow,ind(jcol)) + zmat(jrow + 1,ind(jcol)), &
                 jcol = 1,ncol)
       else
@@ -816,7 +821,7 @@ do  150   j = 1, jmax
           write (6, 70) jlev(jrow)+0.5, inrow, &
             (zmat(jrow,ind(jcol)) + zmat(jrow + 1,ind(jcol)), &
                 jcol = 1,ncol)
-        write (3, 70) jlev(jrow)+0.5, inrow, &
+        write (xsc_funit, 70) jlev(jrow)+0.5, inrow, &
             (zmat(jrow,ind(jcol)) + zmat(jrow + 1,ind(jcol)), &
                 jcol = 1,ncol)
       end if
@@ -896,6 +901,12 @@ use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_coener, only: energ
 use mod_coz, only: zmat => z_as_vec ! zmat(1)
 use mod_cow, only: scmat => w_as_vec ! scmat(1)
+use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, flaghf, flagsu, ihomo, ipos
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
+use mod_hiutil, only: gennam
+use mod_hivector, only: dset
+use funit, only: FUNIT_ICS, FUNIT_XSC
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
@@ -905,13 +916,8 @@ character*80 line
 character*3 stat
 character*12 accs
 !mha
-logical csflag, flaghf, iprint, ipos, flagsu, twomol, existf, &
-        openfl,lpar(17), &
-        airyfl, airypr, bastst, batch, chlist, ihomo, eprint
-#include "common/parpot.F90"
-common /colpar/ airyfl, airypr, bastst, batch, chlist, &
-                csflag, flaghf, flagsu, ihomo, ipos,lpar
-common /coselb/ ibasty
+logical iprint, twomol, existf, &
+        openfl, eprint
 dimension  a(4)
 !  input parameters
 !mha
@@ -939,7 +945,7 @@ if (.not. existf) then
 10   format(/' integral cross section file ',(a),' not found',/)
   return
 end if
-open (1, file = xnam1,status = 'old')
+open (FUNIT_ICS, file = xnam1,status = 'old')
 !  open output file for integral cross sections
 call gennam (xnam2, fname, ienerg, 'xsc', lenx)
 ! inquire file specifications
@@ -960,7 +966,7 @@ if (.not. openfl) then
   else
     stat='new'
   end if
-  open (3, file = xnam2, status = stat,access = accs)
+  open (FUNIT_XSC, file = xnam2, status = stat,access = accs)
 endif
 !mha
 !mha (print out message only if no other print out)
@@ -970,12 +976,12 @@ if (.not.iprint) write(6,20) xnam2
         (a))
 !mha
 !      call version(3)
-read (1, 40) cdate
+read (FUNIT_ICS, 40) cdate
 40 format (1x, a)
-read (1, 40) label
-read (1, 40) potnam
+read (FUNIT_ICS, 40) label
+read (FUNIT_ICS, 40) potnam
 !  print job information
-write (3, 50) xnam1, cdate, label, potnam
+write (FUNIT_XSC, 50) xnam1, cdate, label, potnam
 if (iprint) write (6, 50) xnam1, cdate, label, potnam
 50 format( &
 !mha
@@ -984,22 +990,22 @@ if (iprint) write (6, 50) xnam1, cdate, label, potnam
         '% WRITTEN:   ',(a)/ &
         '% LABEL:     ',(a)/, &
         '% POT NAME:  ',(a) )
-read (1, 60) ener, xmu
+read (FUNIT_ICS, 60) ener, xmu
 60 format (f10.3, f15.11)
-read (1, 70) csflag, flaghf, flagsu, twomol, ihomo
+read (FUNIT_ICS, 70) csflag, flaghf, flagsu, twomol, ihomo
 70 format (5l3)
-read (1, 80) jfirst, jfinal, jtotd, numin, numax, &
+read (FUNIT_ICS, 80) jfirst, jfinal, jtotd, numin, numax, &
              nud, jlpar, isa
 80 format (24i5)
 if (ipos) then
-  read (1, 80)  nlevel, nlevop
-  read (1, 80) (jlev(i), inlev(i), i = 1, nlevel)
-  read (1, 90) (elev(i), i = 1, nlevel)
+  read (FUNIT_ICS, 80)  nlevel, nlevop
+  read (FUNIT_ICS, 80) (jlev(i), inlev(i), i = 1, nlevel)
+  read (FUNIT_ICS, 90) (elev(i), i = 1, nlevel)
 90   format (8f16.9)
 else
-  read (1, *)  nlevel, nlevop
-  read (1, *) (jlev(i), inlev(i), i = 1, nlevel)
-  read (1, *) (elev(i), i = 1, nlevel)
+  read (FUNIT_ICS, *)  nlevel, nlevop
+  read (FUNIT_ICS, *) (jlev(i), inlev(i), i = 1, nlevel)
+  read (FUNIT_ICS, *) (elev(i), i = 1, nlevel)
 endif
 !aber_begin
 !  zero out zmat
@@ -1013,31 +1019,31 @@ call dset(nlevop*nlevop,0.d0, zmat,1)
   jend = i * nlevop
 !            write (nxfile, 90) (zmat(j,i), j = 1, nlevop)
 !  chnage format of reac statement (p. dagdigian, 7-mar-2012)
-!        read (1, 90) (zbuf(j), j = jbegin, jend)
-  read (1, *) (zbuf(j), j = jbegin, jend)
+!        read (FUNIT_ICS, 90) (zbuf(j), j = jbegin, jend)
+  read (FUNIT_ICS, *) (zbuf(j), j = jbegin, jend)
   do 96 j=jbegin,jend
     zmat(j)=zmat(j)+zbuf(j)
 96   continue
 95 continue
-read(1,'(a)',end=999) line
+read (FUNIT_ICS,'(a)',end=999) line
 if (line(1:14).eq.' ** RESTART **') then
-  read(1,40) cdate
-  read(1,40) label
-  read (1,40) potnam
-  read (1, 60) ener, xmu
-  read (1, 70) csflag, flaghf, flagsu, twomol, ihomo
-  read (1, 80) idum, jfinal, jtotd, numin, numax, &
+  read (FUNIT_ICS,40) cdate
+  read (FUNIT_ICS,40) label
+  read (FUNIT_ICS,40) potnam
+  read (FUNIT_ICS, 60) ener, xmu
+  read (FUNIT_ICS, 70) csflag, flaghf, flagsu, twomol, ihomo
+  read (FUNIT_ICS, 80) idum, jfinal, jtotd, numin, numax, &
                jlpar, isa
-  read (1, 80)  nlevel, nlevop
-  read (1, 80) (jlev(i), inlev(i), i = 1, nlevel)
-  read (1, 90) (elev(i), i = 1, nlevel)
+  read (FUNIT_ICS, 80)  nlevel, nlevop
+  read (FUNIT_ICS, 80) (jlev(i), inlev(i), i = 1, nlevel)
+  read (FUNIT_ICS, 90) (elev(i), i = 1, nlevel)
   goto 99
 end if
 999 if (.not. flagsu) then
   if (.not. flaghf) then
     if (iprint) write (6, 100) ienerg, xmu, ener, jlpar, &
                                 jfirst, jfinal, jtotd
-    write (3, 100) ienerg, xmu, ener, jlpar, jfirst, &
+    write (FUNIT_XSC, 100) ienerg, xmu, ener, jlpar, jfirst, &
                    jfinal, jtotd
 100     format ('% ** INTEGRAL CROSS SECTIONS; IEN=', i2,' **', &
             /'%    RMU=', f9.4, '  E=', f9.2,'  JLPAR=', i2, &
@@ -1046,7 +1052,7 @@ end if
   else
     if (iprint) write (6, 105) ienerg, xmu, ener, jlpar, &
                       (jfirst+0.5), (jfinal+0.5), jtotd
-    write (3, 105) ienerg, xmu, ener, jlpar, (jfirst+0.5), &
+    write (FUNIT_XSC, 105) ienerg, xmu, ener, jlpar, (jfirst+0.5), &
                    (jfinal+0.5), jtotd
 105     format ('% ** INTEGRAL CROSS SECTIONS; IEN=', i2,' **', &
             /'%    RMU=', f9.4, '  E=', f9.2,'  JLPAR=', i2, &
@@ -1057,7 +1063,7 @@ else
   if (.not. flaghf) then
     if (iprint) write (6, 110) ienerg, xmu, ener, numin, &
                                numax, nud
-    write (3, 110) ienerg, xmu, ener, numin, numax, nud
+    write (FUNIT_XSC, 110) ienerg, xmu, ener, numin, numax, nud
 110     format ('% ** SUMMED DEGENERACY AVERAGED TRANSITION', &
              ' PROBABILITIES;  IEN=', i2,' **', &
             /'    RMU=', f9.4, '  E=', f8.2,'  M-MIN=', i3, &
@@ -1065,7 +1071,7 @@ else
   else
     if (iprint) write (6, 115) ienerg, xmu, ener, (numin+0.5), &
                                (numax+0.5), nud
-    write (3, 115) ienerg, xmu, ener, (numin+0.5), &
+    write (FUNIT_XSC, 115) ienerg, xmu, ener, (numin+0.5), &
                    (numax+0.5), nud
 115     format ('% ** SUMMED DEGENERACY AVERAGED TRANSITION', &
              ' PROBABILITIES;  IEN=', i2,' **', &
@@ -1075,22 +1081,22 @@ else
 end if
 if (.not. csflag) then
   if (jlpar .eq. 0) then
-    write (3, 120)
+    write (FUNIT_XSC, 120)
     if (iprint) write (6, 120)
 120     format ('$ ** CC CALCULATION, BOTH PARITIES **')
   else
-    write (3, 125) jlpar
+    write (FUNIT_XSC, 125) jlpar
     if (iprint) write (6, 125) jlpar
 125     format ('% ** CC CALCULATION, JLPAR=', i2, ' **')
   end if
 else
   if (.not. flaghf) then
-    write (3, 130) numin, numax
+    write (FUNIT_XSC, 130) numin, numax
     if (iprint) write (6, 130) numin, numax, nud
 130     format ('% ** CS CALCULATION, NUMIN=', i2,', NUMAX=', &
                i2,', NUD=',i2,' **')
   else
-    write (3, 140) numin + 0.5, numax + 0.5
+    write (FUNIT_XSC, 140) numin + 0.5, numax + 0.5
     if (iprint) write (6, 140) numin+0.5, numax+ 0.5,nud
 140     format ('% ** CS CALCULATION, NUMIN=', f4.1, ', NUMAX=', &
             f4.1,', NUD=',i2,' **')
@@ -1102,13 +1108,13 @@ if (eprint) then
   if (.not. twomol) then
     if (.not. flagsu) then
       if (iprint) write (6, 145)
-      write (3, 145)
+      write (FUNIT_XSC, 145)
 145       format &
        (/'% LEVEL LIST FOR INTEGRAL CROSS SECTIONS', &
         /'   N   J  INDEX  EINT(CM-1)',/)
     else
       if (iprint) write (6, 150)
-      write (3, 150)
+      write (FUNIT_XSC, 150)
 150       format &
        (/'% LEVEL LIST FOR DEGENERACY AVERAGED', &
          ' TRANSITION PROBABILITIES', &
@@ -1118,19 +1124,19 @@ if (eprint) then
       if (.not. flaghf) then
         if (iprint) &
         write (6, 160) i, jlev(i), inlev(i), elev(i) * econv
-        write (3, 160) i, jlev(i), inlev(i), elev(i) * econv
+        write (FUNIT_XSC, 160) i, jlev(i), inlev(i), elev(i) * econv
 160         format (i4, i5, i6, f11.3)
       else
         if (iprint) write (6, 165) i, (jlev(i)+0.5), inlev(i), &
                        elev(i) * econv
-        write (3, 165) i, (jlev(i)+0.5), inlev(i), &
+        write (FUNIT_XSC, 165) i, (jlev(i)+0.5), inlev(i), &
                        elev(i) * econv
 165         format (1x,'%',i4, f5.1, i6, f11.3)
       end if
 170     continue
   else
     if (iprint) write (6, 175)
-    write (3, 175)
+    write (FUNIT_XSC, 175)
 175       format (/'% LEVEL LIST FOR INTEGRAL CROSS SECTIONS', &
               /'%   N   J1   J2  INDEX  EINT(CM-1)'/)
     do 190  i = 1, nlevop
@@ -1138,7 +1144,7 @@ if (eprint) then
       jj1 = jlev(i) / 10
       if (iprint) &
       write (6, 180) i, jj1, jj2, inlev(i), elev(i) * econv
-      write (3, 180) i, jj1, jj2, inlev(i), elev(i) * econv
+      write (FUNIT_XSC, 180) i, jj1, jj2, inlev(i), elev(i) * econv
 180       format ('%',i4, 2i5, i6, f11.3)
 190     continue
   end if
@@ -1175,19 +1181,19 @@ if (iaver .gt. 0) then
 200   continue
   if (isum .ne. 0 .and. .not.flaghf) then
     write (6, 230) isum
-    write (3, 230) isum
+    write (FUNIT_XSC, 230) isum
 230     format ('% *** SUM OF INDICES =',i4, &
                ' AVERAGING MAY NOT WORK ***')
   end if
   if  (iaver .eq. 2) then
     if (iprint) write (6, 245)
-    write (3, 245)
+    write (FUNIT_XSC, 245)
 245     format &
       ('% ** CROSS SECTIONS SUMMED AND AVERAGED OVER INDEX **')
     call aver2 (zmat, scmat, nlevop)
   else if (iaver .eq. 1) then
     if (iprint) write (6, 250)
-    write (3, 250)
+    write (FUNIT_XSC, 250)
 250     format &
       ('% ** CROSS SECTIONS SUMMED FINAL STATE INDEX **')
   end if
@@ -1231,24 +1237,24 @@ endif
 if (isize .eq. 0) then
 !  here if no initial states found
   write (6, 283)
-  write (3, 283)
+  write (FUNIT_XSC, 283)
 283   format ('% ** NO INITIAL STATES FOUND; ABORT')
 else
-  write (3, 290) xthresh
+  write (FUNIT_XSC, 290) xthresh
   if (iprint) write (6, 290) xthresh
 290   format (/'% ** COLUMN HEADINGS ARE INITIAL STATES, ROW', &
         ' HEADINGS ARE FINAL STATES **', &
       /'%      CROSS SECTION PRINT THRESHOLD=',1pd8.1)
   if (iener.lt.10) then
-      write (3,295) iener
+      write (FUNIT_XSC,295) iener
   elseif (iener.lt.100) then
-      write (3,296) iener
+      write (FUNIT_XSC,296) iener
   elseif (iener.lt.1000) then
-      write (3,297) iener
+      write (FUNIT_XSC,297) iener
   elseif (iener.lt.10000) then
-      write (3,298) iener
+      write (FUNIT_XSC,298) iener
   elseif (iener.lt.100000) then
-      write (3,299) iener
+      write (FUNIT_XSC,299) iener
   endif
 295   format('x',i1,'=[')
 296   format('x',i2,'=[')
@@ -1256,8 +1262,8 @@ else
 298   format('x',i4,'=[')
 299   format('x',i5,'=[')
 !  now print out desired columns of cross section matrix
-  call xscpr2(zmat, xthresh, nlevop, isize, iaver, iprint, isa)
-  write (3,300)
+  call xscpr2(zmat, xthresh, nlevop, isize, iaver, iprint, isa, FUNIT_XSC)
+  write (FUNIT_XSC,300)
 300   format('];')
 endif
 close (1)
@@ -1267,6 +1273,8 @@ end
 subroutine aver2 (zmat, scmat, n)
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
+use mod_himatrix, only: transp
+use mod_hivector, only: matmov
 
 implicit double precision (a-h,o-z)
 !  subroutine to sum and average cross section matrix over positive
@@ -1299,12 +1307,15 @@ return
 end
 ! ------------------------------------------------------
 subroutine xscpr2 (zmat, xthresh, nlevop, isize, iaver, &
-                   iprint,isa)
+                   iprint, isa, xsc_funit)
 use mod_colq, only: ipoint => lq ! ipoint(1)
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
+use mod_par, only: flaghf, ihomo, ipos
+use mod_himatrix, only: transp
 implicit double precision (a-h,o-z)
+integer, intent(in) :: xsc_funit  ! the file unit for xsc file (it's expected to be open in write mode)
 
 !  current revision date:  10-oct-2001 by ab
 !  subroutine to print out specified columns of cross section matrix
@@ -1312,11 +1323,8 @@ implicit double precision (a-h,o-z)
 integer i, isize, iskip, j, jcol, jhigh, jj, jlow, jmax, &
         jrow, ncol, nlevop, iaver
 integer ind, isa
-logical airyfl, airypr, bastst, batch, chlist, csflag, flaghf, &
-                flagsu, ihomo, ipos, iprint,lpar(17)
+logical iprint
 dimension zmat(nlevop,nlevop), ind(50)
-common /colpar/ airyfl, airypr, bastst, batch, chlist, &
-                csflag, flaghf, flagsu, ihomo, ipos,lpar
 !  first transpose cross section matrix so that initial states are
 !  columns and final states are rows
 call transp (zmat, nlevop, nlevop)
@@ -1343,19 +1351,19 @@ do  150   j = 1, jmax
 !  write as a heading the column index of each column to be printed
   if (.not. flaghf) then
     if (iprint) write (6, 15) ( jlev(ind(i)),i = 1,ncol)
-    write (3, 15) ( jlev(ind(i)), i = 1,ncol)
+    write (xsc_funit, 15) ( jlev(ind(i)), i = 1,ncol)
 15     format (/11x,'J= ', i4, 2x, 12 (2x, i5, 2x) )
   else
     if (iprint) write (6, 30) ( jlev(ind(i))+0.5, &
                                  i = 1,ncol)
-    write (3, 30) ( jlev(ind(i))+0.5, i = 1,ncol)
+    write (xsc_funit, 30) ( jlev(ind(i))+0.5, i = 1,ncol)
 30     format (/'%',11x,'J= ', f4.1, 2x, 12 (2x, f5.1, 2x) )
   end if
   if (iprint) write (6, 40) ( inlev(ind(i)), i = 1,ncol)
-  write (3, 40) ( inlev(ind(i)), i = 1,ncol)
+  write (xsc_funit, 40) ( inlev(ind(i)), i = 1,ncol)
 40   format ('%   J    I | I=', i4, 2x, 12 (2x, i5, 2x))
   if (iprint) write (6, 50)
-  write (3, 50)
+  write (xsc_funit, 50)
 50   format (1h )
 !  now loop through the rows of the matrix, which will be printed out
 !  in groups of 10 with a blank line in between
@@ -1400,7 +1408,7 @@ do  150   j = 1, jmax
           write (6, 60) jlev(jrow),inrow, &
             (zmat(jrow,ind(jcol)) + zmat(jrow + 1,ind(jcol)), &
                 jcol = 1,ncol)
-          write (3, 60) jlev(jrow),inrow, &
+          write (xsc_funit, 60) jlev(jrow),inrow, &
             (zmat(jrow,ind(jcol)) + zmat(jrow + 1,ind(jcol)), &
                 jcol = 1,ncol)
 60           format (i5, i5, 2x, 13 (1pe9.2,1x) )
@@ -1409,7 +1417,7 @@ do  150   j = 1, jmax
             write (6, 70) jlev(jrow)+0.5, inrow, &
             (zmat(jrow,ind(jcol)) + zmat(jrow + 1,ind(jcol)), &
                 jcol = 1,ncol)
-          write (3, 70) jlev(jrow)+0.5, inrow, &
+          write (xsc_funit, 70) jlev(jrow)+0.5, inrow, &
             (zmat(jrow,ind(jcol)) + zmat(jrow + 1,ind(jcol)), &
                 jcol = 1,ncol)
 70           format (f5.1, i5, 2x, 13 (1pe9.2,1x) )
@@ -1420,7 +1428,7 @@ do  150   j = 1, jmax
           if (iprint) &
             write (6, 60) jlev(jrow),inrow, &
             ( zmat(jrow,ind(jcol)), jcol = 1,ncol)
-          write (3, 60) jlev(jrow),inrow, &
+          write (xsc_funit, 60) jlev(jrow),inrow, &
            ( zmat(jrow,ind(jcol)), jcol = 1,ncol)
           nlev = 1
         else
@@ -1428,7 +1436,7 @@ do  150   j = 1, jmax
           write (6, 60) jlev(jrow)+1,inrow, &
             (zmat(jrow,ind(jcol)) + zmat(jrow + 1,ind(jcol)), &
                 jcol = 1,ncol)
-          write (3, 60) jlev(jrow)+1,inrow, &
+          write (xsc_funit, 60) jlev(jrow)+1,inrow, &
             (zmat(jrow,ind(jcol)) + zmat(jrow + 1,ind(jcol)), &
                 jcol = 1,ncol)
           nlev = nlev + 1
@@ -1446,13 +1454,13 @@ do  150   j = 1, jmax
            if (iprint) &
              write (6, 60) jlev(jrow),inrow, &
                ( zmat(jrow,ind(jcol)), jcol = 1,ncol)
-           write (3, 60) jlev(jrow),inrow, &
+           write (xsc_funit, 60) jlev(jrow),inrow, &
              ( zmat(jrow,ind(jcol)), jcol = 1,ncol)
          else
            if (iprint) &
              write (6, 70) jlev(jrow)+0.5, inrow, &
                ( zmat(jrow,ind(jcol)), jcol = 1,ncol)
-           write (3, 70) jlev(jrow)+0.5, inrow, &
+           write (xsc_funit, 70) jlev(jrow)+0.5, inrow, &
              ( zmat(jrow,ind(jcol)), jcol = 1,ncol)
          end if
       endif

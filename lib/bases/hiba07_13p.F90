@@ -1,10 +1,14 @@
+#include "assert.h"
+module mod_hiba07_13p
+real(8) :: ttrans(6,6)
+contains
 ! sy13p (sav13p/ptr13p) defines, save variables and reads                *
 !                  potential for 1S / 3P atom scattering                 *
 ! --------------------------------------------------
 subroutine ba13p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
                   sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
-                  n, nmax, ntop)
+                  n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential
 !  for collision of a singlet and triplet atom with a structureless atom
@@ -92,10 +96,6 @@ subroutine ba13p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !    ipol:     =0 if no polarization state preparation
 !    ipol:     =1 if polaratization state preparation
 !    npot:     potential designator (1-4 currently allowed)
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  variable in module mod_conlam
 !    nlam:      the number of case(a) interaction potentials actually used
 !               this is :  nlam = nlam0 + nlam1
@@ -117,22 +117,23 @@ subroutine ba13p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !   vlm13p:    returns angular coupling coefficient for particular
 !              choice of channel index
 ! ------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
+use mod_skip, only: nskip, iskip
 
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-#include "common/parbas.F90"
-#include "common/parbasl.F90"
 
-common /coered/ ered, rmu
-common /coskip/ nskip, iskip
 dimension j(1), l(1), jhold(1), ehold(1), sc1(1), sc2(1), sc3(1), &
           sc4(1), ishold(1), is(1)
 !   econv is conversion factor from cm-1 to hartrees
@@ -364,57 +365,41 @@ end if
 ! i counts v2 elements
 ! inum counts v2 elements for given lambda
 ! ilam counts number of v2 matrices
-! ij is address of given v2 element in present v2 matrix
 i = 0
 ilam=0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 320 il = 0, 6, 2
   lb = il
   ilam=ilam+1
-  inum = 0
-  ij=0
-  do 310  icol= 1, n
-    do 300  irow = icol, n
-      ij = ntop * (icol - 1) +irow
+  if ( ilam .le. nlam ) then  ! depending on nstate, nlam could be 2 or 4, while the il loop always iterate 4 times
+    inum = 0
+    ancouma => v2%get_angular_coupling_matrix(ilam)
+    do icol= 1, n
+      do irow = icol, n
         call vlm13p (j(irow), l(irow), is(irow), j(icol), &
-                     l(icol), is(icol), jtot, lb, cmix, vee)
-      if (vee .eq. 0) goto 300
-        i = i + 1
-        inum = inum + 1
-        if (i .gt. nv2max) goto 300
-          v2(i) = vee
-          iv2(i) = ij
+                       l(icol), is(icol), jtot, lb, cmix, vee)
+        if (vee .ne. 0) then
+          i = i + 1
+          inum = inum + 1
+          call ancouma%set_element(irow=irow, icol=icol, vee=vee)
           if (bastst) then
-            write (6, 290) ilam, lb, icol, irow, i, iv2(i), &
+            write (6, 290) ilam, lb, icol, irow, i, &
                            vee
-            write (9, 290) ilam, lb, icol, irow, i, iv2(i), &
+            write (9, 290) ilam, lb, icol, irow, i, &
                            vee
-290             format (i4, 2i7, 2i6, i6, g17.8)
-          endif
-300     continue
-310   continue
-if(ilam.gt.nlammx) then
-  write(6,311) ilam
-311   format(/' ILAM.GT.NLAMMX IN BA13P')
-  call exit
-end if
-lamnum(ilam) = inum
+  290             format (i4, 2i7, 2i6, i6, g17.8)
+          end if
+        end if
+      end do
+    end do
+  end if
 if (bastst) then
-  write (6, 315) ilam, lamnum(ilam)
-  write (9, 315) ilam, lamnum(ilam)
+  write (6, 315) ilam, ancouma%get_num_nonzero_elements()
+  write (9, 315) ilam, ancouma%get_num_nonzero_elements()
 315   format ('ILAM=',i3,' LAMNUM(ILAM) = ',i6)
 end if
 320 continue
-if ( i.gt. nv2max) then
-  write (6, 350) i, nv2max
-  write (9, 350) i, nv2max
-350   format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-  if (bastst) then
-    return
-  else
-    call exit
-  end if
-end if
 if (clist) then
   write (6, 360) i
   write (9, 360) i
@@ -448,6 +433,7 @@ subroutine vlm13p (j1, l1, i1, j2, l2, i2, jtot, lb, cmix, vee)
 !  xf3j:     evaluates 3j symbol
 !  xf6j:     evaluates 6j symbol
 ! --------------------------------------------------------------------
+use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
 dimension vterm(4),cs(4),sn(4)
 data  zero, one, two, three /0.d0, 1.d0, 2.d0, 3.d0/
@@ -520,9 +506,10 @@ subroutine tcasea(j,jlpar)
 !   latest revision date:  30-dec-1995
 ! -----------------------------------------
 use mod_cosysr, only: isrcod, junkr, rspar
+use mod_himatrix, only: mxma
+use mod_hivector, only: dset
 implicit double precision (a-h,o-z)
-common /cotrans/ ttrans
-dimension tatoe(6,6), cmat(6,6), ttrans(6,6)
+dimension tatoe(6,6), cmat(6,6)
 data zero, one,two ,three/0.d0, 1.d0, 2.d0, 3.d0/
 real(8), dimension(:), pointer :: en, de, re, be, rl, cl
 real(8), pointer :: cmix
@@ -625,7 +612,7 @@ call mxma(cmat,1,6,tatoe,1,6,ttrans,1,6,6,6,6)
 return
 end
 ! -----------------------------------------------------------------------
-subroutine sy13p (irpot, readp, iread)
+subroutine sy13p (irpot, readpt, iread)
 !  subroutine to read in system dependent parameters for collisions of
 ! atom in singlet and/or triplet P electronic state with closed shell atom
 !  if iread = 1 read data from input file
@@ -655,24 +642,21 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-integer irpot
-logical readp
-logical airyfl, airypr, logwr, swrit, t2writ, writs, wrpart, &
-        partw, xsecwr, wrxsec, noprin, chlist, ipos, flaghf, &
-        csflag, flagsu, rsflag, t2test, existf, logdfl, batch, &
-        readpt, ihomo, bastst, twomol, lpar
+use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_skip, only: nskip, iskip
+use mod_hiutil, only: gennam, get_token
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: i, j, l, lc
+real(8) :: rms
+logical existf
 
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-#include "common/parbas.F90"
-common /coskip/ nskip,iskip
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo, ipos, logdfl, logwr, &
-                noprin, partw, readpt, rsflag, swrit, &
-                t2test, t2writ, twomol, writs, wrpart, wrxsec, &
-                xsecwr,lpar(3)
 #include "common/comdot.F90"
 save potfil
 integer, pointer :: nterm, nstate, ipol, npot
@@ -752,7 +736,7 @@ read (8, *, err=888)  demor, remor, bemor, dissmor
 read (8, *, err=888)  rgaus, agaus, alphg
 rms=0.d0
 line=' '
-if(.not.readp.or.iread.eq.0) then
+if(.not.readpt.or.iread.eq.0) then
   call loapot(1,' ')
   return
 endif
@@ -764,12 +748,12 @@ goto 286
 1000 format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
 return
 ! --------------------------------------------------------------
-entry ptr13p (fname,readp)
+entry ptr13p (fname,readpt)
 line = fname
-readp = .true.
-286 if (readp) then
+readpt = .true.
+286 if (readpt) then
   l=1
-  call parse(line,l,filnam,lc)
+  call get_token(line,l,filnam,lc)
   if(lc.eq.0) then
     write(6,1020)
 1020     format(' FILENAME MISSING FOR POTENTIAL INPUT')
@@ -794,26 +778,27 @@ close (8)
 irpot=1
 return
 !
-entry sav13p (readp)
+entry sav13p (readpt)
 !  save input parameters for singlet-sigma + atom scattering
-write (8, 300) nstate, ipol, npot
+write (FUNIT_INP, 300) nstate, ipol, npot
 300 format(3i4, 18x,'   nstate, ipol, npot')
-write (8, 310) (en(i), i=1,3)
+write (FUNIT_INP, 310) (en(i), i=1,3)
 310 format(3(1pg12.4),4x,'   E-3P0, 3P1, 3P2')
-write (8, 315) en(4), cmix
+write (FUNIT_INP, 315) en(4), cmix
 315 format (2(1pg12.4),16x,'   E-1P1, CMIX')
-write (8, 320) de(1), re(1), be(1), rl(1), cl(1)
+write (FUNIT_INP, 320) de(1), re(1), be(1), rl(1), cl(1)
 320 format (5(1pg12.4),' 3 Pi Parameters')
-write (8, 325) de(2), re(2), be(2), rl(2), cl(2)
+write (FUNIT_INP, 325) de(2), re(2), be(2), rl(2), cl(2)
 325 format (5(1pg12.4),' 3 Sig Parameters')
-write (8, 330) de(3), re(3), be(3), rl(3), cl(3)
+write (FUNIT_INP, 330) de(3), re(3), be(3), rl(3), cl(3)
 330 format (5(1pg12.4),' 1 Pi Parameters')
-write (8, 335) de(4), re(4), be(4), rl(4), cl(4)
+write (FUNIT_INP, 335) de(4), re(4), be(4), rl(4), cl(4)
 335 format (5(1pg12.4),' 1 Sig Parameters')
-write (8, 336) demor, remor, bemor, dissmor
+write (FUNIT_INP, 336) demor, remor, bemor, dissmor
 336 format(4(1pg12.4),12x,' 1 Sigma Morse')
-write (8, 337) rgaus, agaus, alphg
+write (FUNIT_INP, 337) rgaus, agaus, alphg
 337 format (3(1pg12.4),24x,' Gaussian Coupling')
-write (8, 285) potfil
+write (FUNIT_INP, 285) potfil
 return
 end
+end module mod_hiba07_13p

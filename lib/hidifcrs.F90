@@ -1,3 +1,4 @@
+#include "assert.h"
 module mod_difcrs
 contains
 !  -------------------------------------------------------------
@@ -45,16 +46,35 @@ use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 use mod_coisc2, only: jout1 => isc2 ! jout1(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
-use mod_cosc2, only: jpack1 => sc2int ! jpack1(1)
-use mod_cosc3, only: lpack1 => sc3int ! lpack1(1)
-use mod_cosc4, only: ipack1 => sc4int ! ipack1(1)
-use mod_cov2, only: nv2max
 use mod_coz, only: sreal1 => z_as_vec ! sreal1(1)
 use mod_cow, only: simag1 => w_as_vec ! simag1(1)
-use mod_hibrid5, only: sread
+use mod_hibasis, only: is_j12, is_twomol
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
+use mod_hiutil, only: gennam, mtime, gettim, dater
+use mod_hiutil, only: xf3j
+use mod_hismat, only: sread, rdhead
+use mod_hitypes, only: packed_base_type
+implicit none
+character*(*), intent(in) :: fname1
+real(8), intent(in) :: a(15)
+logical, intent(in) :: ihomo
+logical, intent(in) :: flaghf
 
-implicit double precision (a-h,o-z)
-character*(*) fname1
+real(8) :: a1term, a2term, aangle, algfak, algn, alph1, alphm1, ang0, ang1, ang2, angle
+real(8) :: ca, cpu0, cpu1
+real(8) :: dang, dsigterm
+real(8) :: ecol, ela0, ela1, ered1
+real(8) :: fak, faksq, fjjp1, fjjp12
+integer :: i, ideg, ideg1, ideg2, ienerg, ierr, ij, in1, in2, iq1max, iq1min, iq2max, iq2min, iq3, iydim1, iydim2
+integer :: j, jfinal, jfirst, jj, jlpar, jplast, jtlast, jtot, jtot1, jtot2, jtotd
+integer :: j1, j1_f, j1_fp, j1_i, j1_ip, j1p
+integer :: j2, j2_f, j2_fp, j2_i, j2_ip, j2p
+integer :: l2max, lenx
+integer :: maxq, mj1, mj1_f, mj1_i, mj2, mj2_f, mj2_i, ml, mlmax, msign, msteric
+integer :: nangle, nlevel, nlevop, nnout, nopen1, nu1, nud, numax, numin
+real(8) :: octupfak, rmu1, sn, term, term_11, term_21, termm, threej, xint, xintm, xj2, xm, xm2, xmj1, xmj2, xsctot
+
 character*20 cdate1
 character*20  cdate
 character*10  elaps, cpu
@@ -63,14 +83,12 @@ character*1 m1string,m2string
 character*8 amplstring
 
 complex(8) :: stampl, stamplm
-logical existf,csflg1,flghf1,flgsu1,ihomo,flaghf,twomol, &
-        nucros,iprint,mflag,stflag,is_twomol,is_j12
+logical existf,csflg1,flghf1,flgsu1,twomol, &
+        nucros,iprint,mflag,stflag
 integer :: ii
 integer, parameter :: smt_unit = 1
 integer, parameter :: dcs_unit = 2
 integer, parameter :: rho_unit = 3
-#include "common/parpot.F90"
-common /coselb/ ibasty
 real(8), dimension(:), allocatable :: s, sm, sm6
 ! to store a22p,a21p and a11p amplitudes
 complex(8), dimension(:, :), allocatable :: fm1m2
@@ -84,10 +102,9 @@ complex(8), dimension(:, :, :), allocatable :: q, qm
 real(8), dimension(:, :), allocatable :: ximdep
 real(8), dimension(:), allocatable :: ytmp
 real(8), dimension(:, :, :), allocatable :: y
-dimension a(15)
+type(packed_base_type) :: packed_base1
 !
 maxq=mmax*mmax/2
-maxy=nv2max
 !
 !.....input parameters
 !
@@ -334,9 +351,8 @@ if (.not.iprint.and.mflag) write (6, 176) xnam3(1:lenx)
    ideg=ideg1*ideg2
 179    nangle=(ang2-ang1)/dang+1.4d0
    if(nangle.eq.0) then
-      write(6,180) maxq,maxy
-180       format(' *** NOT ENOUGH CORE IN DIFCRS. MAXQ=',i6, &
-           ' MAXY=',i6)
+      write(6,180) maxq
+180       format(' *** NOT ENOUGH CORE IN DIFCRS. MAXQ=',i6)
       return
    end if
 !
@@ -452,8 +468,8 @@ jplast=0
 !
 250 nopen1 = 0
 call sread (0,sreal1, simag1, jtot, jlpar, nu1, &
-                  jq, lq, inq, ipack1, jpack1, lpack1, &
-                  smt_unit, mmax, nopen1, lengt1, ierr)
+                  jq, lq, inq, packed_base1, &
+                  smt_unit, mmax, nopen1, ierr)
 if(ierr.eq.-1) then
    write(6,260) xnam1,jtlast,jplast
 260    format(' END OF FILE DETECTED READING FILE ',(a), &
@@ -479,24 +495,26 @@ if(jlpar.eq.jplast.and.jtot.ne.jtlast+1) write(6,275) jtot,jtlast
 jtlast=jtot
 jplast=jlpar
 if(nnout.gt.0) then
-   do 290 i=1,lengt1
-   inq(i)=ipack1(i)
-   jq(i)=jpack1(i)
-290    lq(i)=lpack1(i)
-   nopen1=lengt1
+   do 290 i=1,packed_base1%length
+   inq(i)=packed_base1%inpack(i)
+   jq(i)=packed_base1%jpack(i)
+290    lq(i)=packed_base1%lpack(i)
+   nopen1=packed_base1%length
 end if
 !
 !.....calculate contributions to amplitudes for present jtot
 !
-call ampli(j1,in1,j2,in2,jtot,sreal1,simag1,mmax,jpack1,lpack1, &
-     ipack1,lengt1,jq,lq,inq,nopen1,y,q,l2max,nangle,ihomo,flaghf, &
-     iydim1,iydim2,iq1min,iq1max,iq2min,iq2max,iq3)
+call ampli( &
+    j1, in1, j2, in2, jtot, sreal1, simag1, mmax, packed_base1, &
+    jq, lq, inq, nopen1, y, q, l2max, nangle, ihomo, flaghf, &
+    iydim1, iydim2, iq1min, iq1max, iq2min, iq2max, iq3)
 !.... calculate contributions for negative initial index
-if (stflag) &
-     call ampli(j1,-in1,j2,in2,jtot,sreal1,simag1,mmax, &
-     jpack1,lpack1,ipack1,lengt1,jq,lq,inq,nopen1,y,qm, &
-     l2max,nangle,ihomo,flaghf,iydim1,iydim2,iq1min,iq1max, &
-     iq2min,iq2max,iq3)
+if (stflag) then
+  call ampli( &
+    j1, -in1, j2, in2, jtot, sreal1, simag1, mmax, packed_base1, &
+    jq, lq, inq, nopen1, y, qm, l2max, nangle, ihomo, flaghf, &
+    iydim1, iydim2, iq1min, iq1max, iq2min, iq2max, iq3)
+end if
 !
 !.....loop back to next jtot/jlpar
 !
@@ -699,7 +717,7 @@ write (2,346)
 if (mflag) write (3,346)
 346 format('  ')
 if (.not.stflag) then
-   write (2,348)
+   write (dcs_unit,348)
    if (iprint) write (6,347)
 347    format &
   ('    DEGENERACY AVERAGED DXSC (ANG^2/SR) AND ', &
@@ -942,8 +960,8 @@ endif
 return
 end
 ! -----------------------------------------------------------------------
-subroutine ampli(j1,in1,j2,in2,jtot,sreal,simag,mmax,jpack,lpack, &
-     ipack,length,jq,lq,inq,nopen,y,q,maxl2,nangle,ihomo,flaghf, &
+subroutine ampli(j1,in1,j2,in2,jtot,sreal,simag,mmax, packed_base, &
+     jq,lq,inq,nopen,y,q,maxl2,nangle,ihomo,flaghf, &
      iydim1,iydim2,iq1min,iq1max,iq2min,iq2max,iq3)
 !subr  calculates scattering amplitudes for given jtot and set
 !subr  of angles
@@ -958,17 +976,22 @@ subroutine ampli(j1,in1,j2,in2,jtot,sreal,simag,mmax,jpack,lpack, &
 !
 !  current revision date:  22-may-2021 by p. dagdigian
 !
-!.....jpack,lpack,ipack: labels for rows
+!.....packed_base%jpack,packed_base%lpack,packed_base%inpack: labels for rows
 !.....jq,lq,inq:         labels for columns
 !
 use mod_coj12, only: j12
 use mod_coj12p, only: j12pk
+use mod_hibasis, only: is_j12, is_twomol
+use mod_selb, only: ibasty
+use mod_hiutil, only: xf3j
+use mod_hitypes, only: packed_base_type
 implicit double precision (a-h,o-z)
+type(packed_base_type) :: packed_base
 complex*16 ai,yy,tmat
 parameter (zero=0.0d0, one=1.0d0, two=2.0d0)
-logical ihomo,flaghf,elastc,is_twomol,is_j12
-common /coselb/ ibasty
-dimension jpack(1),lpack(1),ipack(1),jq(1),lq(1),inq(1)
+logical ihomo,flaghf,elastc
+dimension jq(1),inq(1)
+integer, intent(in) :: lq(1)
 dimension sreal(mmax,1),simag(mmax,1)
 integer, dimension(:), allocatable :: ilab1
 real(8), dimension(:), allocatable :: fak1
@@ -1060,8 +1083,8 @@ else
 end if
 !
 llmax = 0
-do ilab=1,length
-   if(jpack(ilab).ne.j1.or.ipack(ilab).ne.in1) cycle
+do ilab=1,packed_base%length
+   if(packed_base%jpack(ilab).ne.j1.or.packed_base%inpack(ilab).ne.in1) cycle
    llmax = llmax + 1
 end do
 !
@@ -1070,9 +1093,9 @@ allocate(fak1(llmax))
 allocate(fak2(llmax))
 allocate(fak3(llmax))
 ll = 0
-do ilab=1,length
-   if(jpack(ilab).ne.j1.or.ipack(ilab).ne.in1) cycle
-   l1 = lpack(ilab)
+do ilab=1,packed_base%length
+   if(packed_base%jpack(ilab).ne.j1.or.packed_base%inpack(ilab).ne.in1) cycle
+   l1 = packed_base%lpack(ilab)
    ll = ll + 1
    fak1(ll)=fakj*sqrt(two * dble(l1) + one)
    ilab1(ll)=ilab
@@ -1088,7 +1111,7 @@ if (is_j12(ibasty)) then
 end if
 do 60 ll=1,llmax
 ilab=ilab1(ll)
-l1=lpack(ilab)
+l1=packed_base%lpack(ilab)
 if (is_j12(ibasty)) then
   j12_i = j12pk(ilab)
   xj12_i = j12_i + spin
@@ -1112,7 +1135,7 @@ if (.not. is_j12(ibasty)) then
 !
   do 70 ll=1,llmax
   ilab=ilab1(ll)
-  xl1=lpack(ilab)
+  xl1=packed_base%lpack(ilab)
 70   fak3(ll)=fak2(ll)*xf3j(xj1,xl1,xjtot,xmj1,zero,-xmj1)
 !
   do 300 mj2=-j2p,j2
@@ -1123,6 +1146,10 @@ if (.not. is_j12(ibasty)) then
   fak=xf3j(xj2,xl2,xjtot,xmj2,xml2,-xmj1)
   if(ml2.gt.0) fak=fak*(-1)**ml2
 !
+  ASSERT(l2 .ge. 0)
+  ASSERT(l2 .le. iydim1)
+  ASSERT(iabs(ml2) .ge. 0)
+  ASSERT(iabs(ml2) .le. iydim2)
   q(mj1, mj2, :) = q(mj1, mj2, :) + sum(fak3) &
        * fak * y(l2, iabs(ml2), :)
 300   continue ! mj2 (jk)
@@ -1140,7 +1167,7 @@ elseif (is_twomol(ibasty)) then
 !
     do 1070 ll = 1, llmax
       ilab = ilab1(ll)
-      xl1 = lpack(ilab)
+      xl1 = packed_base%lpack(ilab)
       j12_i = j12pk(ilab)
       xj12_i = j12_i + spin
       fak3(ll) = fak2(ll) * (-1)**j12_i &
@@ -1183,7 +1210,7 @@ else
 !
     do 3070 ll = 1, llmax
       ilab = ilab1(ll)
-      xl1 = lpack(ilab)
+      xl1 = packed_base%lpack(ilab)
       j12_i = j12pk(ilab)
       xj12_i = j12_i + spin
       fak3(ll) = fak2(ll) * (-1)**j12_i &

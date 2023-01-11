@@ -1,12 +1,4 @@
 #include "assert.h"
-!   cov2 module
-!       nv2max: maximum core memory allocated for the v2 matrix
-!       v2: lower triangle of nonzero angular coupling matrix elements stored in packed column form that is (1,1), (2,1), (3,1) ... (n,1), (2,2), (3,2) ... (n,2), etc.
-use mod_cov2, only: nv2max, v2
-!
-!   coiv2 block
-!       iv2: row+column index of v2 matrix for each non-zero element
-use mod_coiv2, only: iv2
 !   coiout block
 !       niout: number of level indeces included in the output of hibridon
 !       indout: level indeces included in the output of hibridon
@@ -28,10 +20,11 @@ use mod_coeint, only: eint
 use mod_covvl, only: vvl
 !     size of vvl : NVVL
 
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam, nlammx
 use mod_cosys, only: scod
 use mod_cosysr, only: isrcod, junkr, rspar
 use mod_cosysi, only: nscode, isicod, ispar
+use mod_ered, only: ered, rmu
 implicit double precision (a-h, o-z)
 !   Define the sizes of grids
 !       V2MAX: maximum value of v2 included in the pot file
@@ -110,13 +103,6 @@ data muasy /0, 0, 0, 0, 0, 3, 3, 3, 3, 6, 6, 9/
 !       vmax: maximum value of v2 (starts from zero) included in the calculation
 !       emax0, emax1, emax2, emax3: maximum total energy of a level to be included in the channel basis, for four vibrational levels
 
-!
-!   coered block
-!       ered: collision energy in atomic units (hartrees)
-!       rmu: collision reduced mass in atomic units
-common /coered/ ered, rmu
-double precision ered, rmu
-!
 !
 !   coipar block
 !       junkip: not refered to

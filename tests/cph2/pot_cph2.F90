@@ -9,10 +9,10 @@
 #include "common/bausr.F90"
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 character*(*) filnam
-#include "common/parbas.F90"
-#include "common/parpot.F90"
-common /coselb/ ibasty
 potnam='HALVICK Cp(2P)-H2 PES'
 ibasty=12
 lammin(1)=1
@@ -26,11 +26,10 @@ end
 ! --------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl
+use mod_par, only: csflag, ihomo
 implicit double precision (a-h,o-z)
 character *48 potnam
 character *2 frame
-logical csflag, ljunk, ihomo, lljunk
-common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
 potnam='HALVICK C+(2P)-H2 PES'
 print *, potnam
 print *
@@ -99,9 +98,8 @@ subroutine pot (vv0, r)
 
 
 use mod_covvl, only: vvl
+use mod_par, only: csflag, ihomo
 implicit double precision (a-h,o-z)
-logical ljunk, ihomo, csflag, lljunk
-common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
 dimension evec(5)
 dimension vvll(18)
 data zero, one, half /0.d0,1.d0,0.5d0/

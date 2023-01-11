@@ -38,14 +38,13 @@ use mod_1sg1sg
 use mod_nhh2
 use mod_conlam, only: nlam
 use mod_covvl, only: vvl
+use mod_parpot, only: pot_name, pot_label
 implicit none
 !     common/parbas is replaced by module ba1sg1sg to allow more
 !     parameters be passed between the pot routine and the basis routine
-common /coptnm/ pot_name, pot_label
-character(48) :: pot_name, pot_label
 character*(*) :: file_name
 character(255) :: file_path
-integer :: iunit, ir, iv, nv, nlammx, lamnum
+integer :: iunit, ir, iv, nv, nlammx
 !     A call to this subroutine with a string containing a space will be
 !     made at the time hibridon loads. Input file is not available at
 !     the time.

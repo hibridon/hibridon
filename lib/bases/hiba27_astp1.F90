@@ -1,3 +1,6 @@
+#include "assert.h"
+module mod_hiba27_astp1
+contains
 ! syastp1 (savastp1/ptrastp1) defines, saves variables and reads         *
 !                  potential for C2v asymmetric top-atom scattering      *
 ! ----------------------------------------------------------------------
@@ -5,7 +8,7 @@ subroutine baastp1 (j, l, is, jhold, ehold, ishold, nlevel, &
                   nlevop, etemp, fjtemp, fktemp, fistmp, &
                   rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, &
-                  jlpar, n, nmax, ntop)
+                  jlpar, n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision
 !  of an asymmetric top molecule of C2v symmetry with a structureless atom
@@ -101,10 +104,6 @@ subroutine baastp1 (j, l, is, jhold, ehold, ishold, nlevel, &
 !              para states will be included if iop=1 and only ortho states if
 !              iop=-1
 !    jmax:     the maximum rotational angular momentum for the asymmetric top
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  variables in common block /coconv/
 !   econv:      conversion factor from cm-1 to hartrees
 !   xmconv:     converson factor from amu to atomic units
@@ -115,8 +114,7 @@ subroutine baastp1 (j, l, is, jhold, ehold, ishold, nlevel, &
 !               between symmetric top basis fns.
 !   rotham:     computes matrix elements of asymmetric top hamiltonian
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coatpi, only: narray, isiz
@@ -124,16 +122,19 @@ use mod_coatpr, only: c
 use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_coatp3, only: isizh
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
 use constants, only: econv, xmconv
+use mod_hibasutil, only: rotham1
+use mod_par, only: iprint
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
-#include "common/parbas.F90"
-#include "common/parbasl.F90"
-common /coipar/ iiipar(9), iprint
-common /coered/ ered, rmu
 dimension j(1), l(1), is(1), jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
           fistmp(1)
@@ -184,13 +185,6 @@ do 35  i = 1, nterm
   end if
   nsum = nsum + (lammax(i) - lammin(i)) + 1
 35 continue
-if (nlammx .lt. nsum) then
-  write (6, 40) nsum, nlammx
-  write (9, 40) nsum, nlammx
-40   format (' ** TOTAL NUMBER OF ANISOTROPIC TERMS=', i2, &
-          ' .GT. NLAMMX=', i2,'; ABORT')
-  stop
-end if
 if (nsum .ne. nlam) then
   write (6, 45) nsum, nlam
   write (9, 45) nsum, nlam
@@ -721,15 +715,15 @@ end if
 !  i counts v2 elements
 !  inum counts v2 elements for given lambda
 !  ilam counts number of v2 matrices
-!  ij is address of given v2 element in present v2 matrix
 i = 0
 if (bastst.and. iprint.ge. 2) then
   write (6, 340)
   write (9, 340)
 340   format (/' ILAM  LAMBDA   MU    ICOL  IROW    I    IV2    VEE')
 end if
-lamsum = 0
 ilam = 0
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 400 iterm = 1, nterm
   lbmin = lammin(iterm)
 !  if bastst = .true., then get the matrix elements of the lb=0 term
@@ -739,12 +733,11 @@ do 400 iterm = 1, nterm
 !  ilam is the index for the next term in the potential matrix
 !  lb is the actual value of lambda
     ilam = ilam + 1
+    ancouma => v2%get_angular_coupling_matrix(ilam)
     mu = mproj(iterm)
     inum = 0
-    ij = 0
-    do 355  icol = 1, n
-      do 350  irow = icol, n
-        ij = ntop * (icol - 1) + irow
+    do icol = 1, n
+      do irow = icol, n
         lrow = l(irow)
         if (csflag) lrow = nu
         call vlmatp1 (j(irow), lrow, j(icol), l(icol), jtot, &
@@ -756,40 +749,26 @@ do 400 iterm = 1, nterm
         if (abs(vee) .gt. 1.d-15) then
 
           i = i + 1
-          if (i .le. nv2max) then
-            inum = inum + 1
-            v2(i) = vee
-            iv2(i) = ij
-            if (bastst.and. iprint.ge.2) then
-              write (6, 345) ilam, lb, mu, icol, irow, i, iv2(i), &
-                             vee
-              write (9, 345) ilam, lb, mu, icol, irow, i, iv2(i), &
-                             vee
-345               format (i4, 3i7, 2i6, i6, g17.8)
-            end if
+          inum = inum + 1
+          call ancouma%set_element(irow=irow, icol=icol, vee=vee)
+          if (bastst.and. iprint.ge.2) then
+            write (6, 345) ilam, lb, mu, icol, irow, i, vee
+            write (9, 345) ilam, lb, mu, icol, irow, i, vee
+345               format (i4, 3i7, 2i6, g17.8)
           end if
         end if
-350       continue
-355     continue
-    if (i .le. nv2max) lamnum(ilam) = inum
+      end do
+    end do
     if (bastst) then
-      write (6, 370) ilam, lamnum(ilam)
-      write (9, 370) ilam, lamnum(ilam)
+      write (6, 370) ilam, ancouma%get_num_nonzero_elements()
+      write (9, 370) ilam, ancouma%get_num_nonzero_elements()
 370       format ('ILAM=',i3,' LAMNUM(ILAM) = ',i6)
     end if
-    lamsum = lamsum + lamnum(ilam)
 390   continue
 400 continue
-if ( i.gt. nv2max) then
-   write (6, 450) i, nv2max
-   write (9, 450) i, nv2max
-450    format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-   stop
-end if
 if (clist .and. bastst) then
-  write (6, 460) lamsum
-  write (9, 460) lamsum
+  write (6, 460) v2%get_num_nonzero_elements()
+  write (9, 460) v2%get_num_nonzero_elements()
 460   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS ', &
            i5)
 end if
@@ -840,7 +819,8 @@ subroutine vlmatp1 (jp, lp, j, l, jtot, isp, is, lambda, mu, &
 !    xf3j, xf6j, prmatp
 !  -----------------------------------------------------------------------
 use mod_coatpi, only: narray
-use mod_coatpr, only: c 
+use mod_coatpr, only: c
+use mod_hibasutil, only: prmatp
 implicit double precision (a-h,o-z)
 logical csflag
 !
@@ -973,6 +953,7 @@ subroutine prmatp1 (jp, lp, j, l, jtot, kp, k, lambda, mu, &
 !  subroutines called:
 !     xf3j, xf6j
 !  -----------------------------------------------------------------------
+use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
 logical csflag
 data half, one, two, zero, four / 0.5d0, 1.d0, 2.d0, 0.d0, 4.d0/
@@ -1016,54 +997,6 @@ else if (csflag) then
   x = x * xf3j (xjp, xlamda, xj, -xkp, xmu, xk)
 end if
 vprm = ( (-1) ** iphase) * x * sqrt(xnorm)
-return
-end
-! ----------------------------------------------------------------------
-double precision function rotham1(ji, ki, jf, kf)
-!
-!  subroutine to compute matrix elements of the asymmmetric top hamiltionian
-!  in a prolate (case Ia) basis between unsymmetrized basis functions
-!  (ji,ki) and (jf,kf)
-!
-!  here, the body-frame quantization axis is along the C2 axis
-!  (b inertial axis) of the symmetrical molecule
-!
-!  modification of rotham subr in hibaastp.f
-!
-!  author:  paul dagdigian
-!  current revision date:  18-sep-2017
-!  -----------------------------------------------------------------------
-use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-
-real(8), pointer :: arot, brot, crot, emax
-arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4)
-
-aa = brot
-bb = arot
-cc = crot
-bpc = (bb + cc)*0.5d0
-bmc = (bb - cc)*0.25d0
-if (ji .ne. jf) goto 900
-fjj1 = ji*(ji + 1.d0)
-fk = ki
-if (ki .ne. kf) goto 10
-!
-!     diagonal term
-rotham1 = bpc*(fjj1 - fk**2) + aa*fk**2
-goto 1000
-!
-!     off-diagonal terms
-10 if (kf .ne. (ki + 2)) goto 20
-rotham1 = bmc*sqrt((fjj1 - fk*(fk + 1.d0)) &
-  *(fjj1 - (fk + 1.d0)*(fk + 2.d0)))
-goto 1000
-20 if (kf .ne. (ki - 2)) goto 900
-rotham1 = bmc*sqrt((fjj1 - fk*(fk - 1.d0)) &
-  *(fjj1 - (fk - 1.d0)*(fk - 2.d0)))
-goto 1000
-900 rotham1 = 0.d0
-1000 continue
 return
 end
 ! -----------------------------------------------------------------------
@@ -1112,14 +1045,20 @@ use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-logical readpt, existf
+use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_hiutil, only: gennam, get_token
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: i, j, l, lc
+logical existf
 integer icod, ircod
-integer i, iread, irpot
 character*1 dot
 character*(*) fname
 character*60 line, filnam, potfil, filnm1
 parameter (icod=4, ircod=4)
-#include "common/parbas.F90"
 save potfil
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
@@ -1214,7 +1153,7 @@ line = fname
 readpt = .true.
 100 if (readpt) then
   l=1
-  call parse(line,l,filnam,lc)
+  call get_token(line,l,filnam,lc)
   if(lc.eq.0) then
     write(6,102)
 102     format(' FILENAME MISSING FOR POTENTIAL INPUT')
@@ -1246,15 +1185,16 @@ entry savastp1 (readpt)
 !  be left blank, and the names of the variables should be printed in spaces
 !  34-80
 !  line 18:
-write (8, 220) iop
+write (FUNIT_INP, 220) iop
 220 format (i4, 26x,'   iop')
 !  line 20
-write (8, 230) jmax, emax
+write (FUNIT_INP, 230) jmax, emax
 230 format (i4, 3x, g12.5, 14x, 'jmax, emax')
 !  line 21
-write (8, 250) arot, brot, crot
+write (FUNIT_INP, 250) arot, brot, crot
 250 format(3f9.4, 6x, 'arot, brot, crot')
-write (8, 60) potfil
+write (FUNIT_INP, 60) potfil
 return
 end
 ! -----------------------------------eof--------------------------------
+end module mod_hiba27_astp1

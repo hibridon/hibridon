@@ -10,8 +10,6 @@ use mod_cdbf, only: allocate_cdbf
 
 use mod_cosout, only: allocate_cosout
 use mod_coiout, only: allocate_coiout
-use mod_cov2, only: allocate_cov2
-use mod_coiv2, only: allocate_coiv2
 use mod_cocent, only: allocate_cocent
 use mod_coeint, only: allocate_coeint
 use mod_coj12, only: allocate_coj12
@@ -81,7 +79,9 @@ use mod_cosys, only: allocate_cosys
 use mod_cosysl, only: allocate_cosysl
 use mod_cosysi, only: allocate_cosysi
 use mod_cosysr, only: allocate_cosysr
+use mod_par, only: allocate_par
 use mod_flow, only: flow
+use mod_hiutil, only: factlg
 !**********************************************************************
 !***   this code is not released for general public use            ****
 !***   all use must be by specific prior arrangement with:         ****
@@ -133,10 +133,6 @@ integer :: kaux3
 integer :: kq2
 integer :: kqmax
 
-! kv2max sets the maximum size of the v2 matrix
-integer(8) :: kv2max
-integer :: nv2max
-
 ! krotmx set the maximum size of the asym top e.fn expansion
 integer :: krotmx
 
@@ -154,9 +150,6 @@ integer, parameter :: kmaxpar = 150 ! max number of base specific parameters
 integer :: men
 !
 !  ----------------------------------------------------------
-common /comom/  xmom(3), imom(13)
-real(8) :: xmom
-integer :: imom
 
 integer :: arg_index
 integer :: stat
@@ -234,13 +227,6 @@ kaux3 = max( 66 * kmax, 2 * kmax * kmax + 1)
 #error "hibridon doesn't know what value to choose for kaux on this architecture"
 #endif
 
-! kv2max sets the maximum size of the v2 matrix, a reasonable size is
-! kmax**2
-! increase kv2max from 2 * kmax * kmax to 20 * kmax * kmax (pjd - 13-dec-2019)
-kv2max = int(50, 8) * kmax * kmax
-ASSERT(kv2max <= int(2, 8)**31)
-nv2max = kv2max
-
 !   square matrices and vectors
 call allocate_coener(ken)
 call allocate_clseg()
@@ -297,16 +283,14 @@ call allocate_cosc11(kaux3)
 call allocate_cosc11(kaux)
 #endif
 !   total matrix and vector storage required is:
-!     7 kmax**2 + 25 kmax + kv2max + kfact -- without airy integration
-!     8 kmax**2 + 25 kmax + kv2max + kfact -- with airy integration
+!     7 kmax**2 + 25 kmax + v2 storage + kfact -- without airy integration
+!     8 kmax**2 + 25 kmax + v2 storage + kfact -- with airy integration
 !   if linked with -b option, then storage requirements drop to
-!     5 kmax**2 + 25 kmax + kv2max + kfact -- with airy integration
+!     5 kmax**2 + 25 kmax + v2 storage + kfact -- with airy integration
 !
 !  parameter below sets maximum size of asymmetric top basis fn expansion
 call allocate_cosout(kout)
 call allocate_coiout(kout)
-call allocate_cov2(nv2max)
-call allocate_coiv2(nv2max)
 call allocate_cocent(kmax)
 call allocate_coeint(kmax)
 call allocate_coj12(kmax)
@@ -330,6 +314,7 @@ call allocate_cosysl(kmaxpar)
 call allocate_cosysr(kmaxpar)
 call allocate_cosyr(kmaxpar)
 call allocate_cosys(2*kmaxpar+3)
+call allocate_par()
 !
 men = ken
 !  calculate array containing logs of factorials for use in vector

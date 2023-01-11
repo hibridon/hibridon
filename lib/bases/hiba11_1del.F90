@@ -1,10 +1,13 @@
+#include "assert.h"
+module mod_hiba11_1del
+contains
 ! sy1del (sav1del/ptr1del) defines, saves variables and reads            *
 !                  potential for singlet delta scattering                *
 ! --------------------------------------------------------------------
 subroutine ba1del (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, ifi, c12, c32, sc4, rcut, jtot, &
+                  nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
-                  ihomo, nu, numin, jlpar, n, nmax, ntop)
+                  ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision
 !  of a 1del molecule in an intermediate coupling basis with a
@@ -92,30 +95,31 @@ subroutine ba1del (j, l, is, jhold, ehold, ishold, nlevel, &
 !    npar:     number of symmetry doublets included (npar=2 will ensure
 !              both lambda doublets; npar=1, just eps=1 levels, npar=-1,
 !              just eps=-1 levels
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  subroutines called:
 !   vlm1del:    returns angular coupling coefficient for particular
 !              choice of channel index
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, idum=>junkr, rspar
 use constants, only: econv, xmconv
+use mod_par, only: iprint
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
 implicit double precision (a-h,o-z)
+real(8), intent(out), dimension(:) :: sc1
+real(8), intent(out), dimension(:) :: sc2
+real(8), intent(out), dimension(:) :: sc3
+real(8), intent(out), dimension(:) :: sc4
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
-#include "common/parbas.F90"
-#include "common/parbasl.F90"
-common /coipar/ iiipar(9), iprint
-common /coered/ ered, rmu
 dimension j(2), l(1), jhold(1), ehold(1), is(2), &
-           ieps(2), ishold(1), sc4(1)
+           ieps(2), ishold(1)
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
 data ieps / -1, 1 / , izero, itwo, min10 / 0, 2, -10 /
@@ -230,11 +234,6 @@ if (nlam .ne. nsum) then
 14   format (' ** NLAM=',i2, ' RESET TO NLAM=',i2, &
           '    IN BASIS')
   nlam = nsum
-  if (nlam .gt. nlammx) then
-    write (6, 15) nlam
-15     format(/' NLAM = ',i3,' .GT. NLAMMX IN BA1DEL; ABORT')
-    call exit
-  endif
 end if
 if (clist) then
   if (flagsu) then
@@ -526,9 +525,7 @@ endif
 !  i counts v2 elements
 !  inum counts v2 elements for given lambda
 !  ilam counts number of v2 matrices
-!  ij is address of given v2 element in present v2 matrix
 i = 0
-lamsum = 0
 istep = 1
 if (ihomo) istep = 2
 nlam2 = (lammax(2) - lammin(2))/istep + 1
@@ -538,64 +535,56 @@ if (bastst .and. iprint .gt. 1) then
   write (9, 285)
 285   format (/' ILAM  LAMBDA  ICOL  IROW   I    IV2    VEE')
 end if
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 400 ilam = 1, nlam
-!  ilam is the angular expansion label
-!  here for l=0 term in electrostatic potential
+  !  ilam is the angular expansion label
+  !  here for l=0 term in electrostatic potential
+  ancouma => v2%get_angular_coupling_matrix(ilam)
   if (ilam .le. nlam0) then
     lb = lammin(1) + (ilam - 1) * istep
   else
     lb = lammin(2) + (ilam - nlam0 - 1) * istep
   end if
-!  lb is the actual value of lambda
-  ij=0
+  ! lb is the actual value of lambda
   inum=0
-  do 355  icol = 1, n
-    do 350  irow = icol, n
-      ij = ntop * (icol - 1) +irow
+  do icol = 1, n
+    do irow = icol, n
       vee=0
       lrow = l(irow)
       if (csflag) lrow = nu
-!  here for l=0 terms in potential (average potential)
+      ! here for l=0 terms in potential (average potential)
       if (ilam .le. nlam0) then
         call vlm1del (j(irow), lrow, j(icol), l(icol), jtot, &
                      izero, izero, lb, is(irow), is(icol), &
                      vee, csflag)
       else
-!  here for l=4 terms in potential (difference potential)
+        ! here for l=4 terms in potential (difference potential)
         call vlm1del (j(irow), lrow, j(icol), l(icol), jtot, &
                      izero, itwo, lb, is(irow), is(icol), &
                      vee, csflag)
       end if
-      if(vee.eq.zero) goto 350
+      if(vee .ne. zero) then
         i=i+1
         inum=inum+1
-        if(i.gt.nv2max) goto 350
-          v2(i)=vee
-          iv2(i)=ij
-          if(.not.bastst .or. iprint .le. 1) goto 350
-            write (6, 290) ilam, lb, icol, irow, i, iv2(i),vee
-            write (9, 290) ilam, lb, icol, irow, i, iv2(i),vee
-290             format (i4, 2i7, 2i6, i6, g17.8)
-350     continue
-355   continue
-  if (i .le. nv2max) lamnum(ilam) = inum
+        call ancouma%set_element(irow=irow, icol=icol, vee=vee)
+        if (bastst .and. iprint .gt. 1) then
+          write (6, 290) ilam, lb, icol, irow, i, vee
+          write (9, 290) ilam, lb, icol, irow, i, vee
+290             format (i4, 2i7, 2i6, g17.8)
+        end if
+      end if
+    end do
+  end do
   if (bastst) then
-    write (6, 360) ilam, lamnum(ilam)
-    write (9, 360) ilam, lamnum(ilam)
+    write (6, 360) ilam, ancouma%get_num_nonzero_elements()
+    write (9, 360) ilam, ancouma%get_num_nonzero_elements()
 360     format ('ILAM=', i3, ' LAMNUM(ILAM) =', i6)
   end if
-  lamsum = lamsum + lamnum(ilam)
 400 continue
-if(i.gt.nv2max) then
-   write (6, 410) i, nv2max
-   write (9, 410) i, nv2max
-410    format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-   call exit
-end if
 if (clist .and. bastst) then
-  write (6, 430) lamsum
-  write (9, 430) lamsum
+  write (6, 430) v2%get_num_nonzero_elements()
+  write (9, 430) v2%get_num_nonzero_elements()
 430   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', i4)
 end if
 ! now multiply is array by ifi array, so that index will equal +/- 1 for
@@ -660,6 +649,7 @@ subroutine vlm1del (jp, lp, j, l, jtot, iomegp, iomeg, lambda, &
 !  subroutines called:
 !     xf3j, xf6j
 !  -----------------------------------------------------------------------
+use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
 integer iomegp, iomeg, jp, j, jtot, lp, l, lambda, &
         iepsp, ieps, nu, iphase
@@ -734,30 +724,25 @@ subroutine sy1del (irpot, readpt, iread)
 !  variable in common /cosys
 !    scod:    character*8 array of dimension nscode, which contains names
 !             of all system dependent parameters
-!  variable in common block /coskip/
-!   nskip  for a homonuclear molecule lamda is running in steps of nskip=2
-!          for a heteronuclear molecule nskip=1
-!
-!   skip   same as nskip, used for consistency check
-!
 !  subroutines called: loapot(iunit,filnam)
 use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, idum=>junkr, rspar
-implicit double precision (a-h,o-z)
-logical readpt, existf
-integer irpot
+use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_skip, only: nskip, iskip
+use mod_hiutil, only: gennam, get_token
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: j, l, lc
+logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
-#include "common/parbas.F90"
-logical         airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar(18)
-common /coskip/ nskip,iskip
 save potfil
 #include "common/comdot.F90"
 integer, pointer :: nterm, jmax, igu, isa, npar
@@ -819,7 +804,7 @@ line = fname
 readpt = .true.
 286 if (readpt) then
   l=1
-  call parse(line,l,filnam,lc)
+  call get_token(line,l,filnam,lc)
   if(lc.eq.0) then
     write(6,1020)
 1020     format(' FILENAME MISSING FOR POTENTIAL INPUT')
@@ -847,12 +832,13 @@ return
 entry sav1del (readpt)
 !  save input parameters for singlet-delta + atom scattering
 !  line 13:
-write (8, 315) jmax, igu, isa, npar
+write (FUNIT_INP, 315) jmax, igu, isa, npar
 315 format(4i4,18x,'jmax, igu, isa, npar')
 !  line 14
-write (8, 320) brot,  q
+write (FUNIT_INP, 320) brot,  q
 320 format(f10.5,f10.4,2(1pg11.3),' brot,  q')
 !  line 15
-write (8, 285) potfil
+write (FUNIT_INP, 285) potfil
 return
 end
+end module mod_hiba11_1del

@@ -1,10 +1,13 @@
+#include "assert.h"
+module mod_hiba04_sgpi
+contains
 ! sysgpi (savsgpi/ptrsgpi) defines, saves variables and reads            *
 !                  potential for doublet/pi sigma scattering             *
 ! ----------------------------------------------------------------------
 subroutine basgpi (j, l, is, jhold, ehold, ishold, nlevel, &
-                  nlevop, iom, iohold, nvhold, nlv, &
+                  nlevop, sc1, sc2, sc3, sc4, &
                   rcut, jtot, flaghf, flagsu, csflag, clist, &
-                  bastst, ihomo, nu, numin, jlpar, n, nmax, ntop)
+                  bastst, ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 ! ----------------------------------------------------------------------
 !  subroutine to determine angular coupling potential for collision of a
 !  molecule in either a 2pi electronic state in an intermediate coupling
@@ -40,17 +43,12 @@ subroutine basgpi (j, l, is, jhold, ehold, ishold, nlevel, &
 !              level
 !    ishold:   on return contains symmetry index of each energetically
 !              distinct level, similar to is
-!    iohold:   on return, contains nominal omega values for each level
-!    nvhold:   on return, contains vibr. quantum numbers for each level
-!    nlv:      on return, contains vibr. quantum numbers for each chan.
 !    nlvp:     scratch array which holds perturbing vibrational levels
 !    nlevel:   on return contains number of energetically distinct
 !              rotational levels used in channel basis
 !    nlevop:   on return contains number of energetically distinct
 !              rotational levels used in channel basis which are open
 !              asymptotically
-!    iom:      on return contains nominal omega values for each channel
-!              for 2sigma states iom is assigned the value of 2
 !    rcut:     cut-off point for keeping higher energy channels
 !              if any open channel is still closed at r=rcut, then
 !              all closed channels as well any open channels which are
@@ -141,30 +139,11 @@ subroutine basgpi (j, l, is, jhold, ehold, ishold, nlevel, &
 !    isg:      if isg=1 and ipi=0 then 2sig + atom scattering
 !    ipi:      if ipi=1 and isg=0 then 2pi + atom scattering
 !              if isg=1 and ipi=1 then 2pi-2sig + atom scattering
-!  variables in common block /cobsp2/
-!    nvt:      Number of vibrational blocks for each term. All of these
-!              use same lammin, lammax, mproj. These numbers as well
-!              as the corresponding ivcol, ivrow (see below) should be
-!              set in loapot and must be consistent with the pot routine
-!              Otherwise unrecognized chaos!!!
-!              Each block corresponds to a pair of vibrational quantum
-!              numbers (ivrow,ivcol), which must correspond to lower triangle
-!              of potential matrix (i.e., ivrow.ge.ivcol for
-!              iterm=1 (Vsig), iterm=2 (Vpi), iterm=4 (V2) and
-!              for iterm=3 (V1) ivrow=ivs, ivcol=ivp)
-!    ivrow(ivb,iterm): row vibrational state for vibrational block ivb
-!                      in term iterm
-!    ivcol(ivb,iterm): column vibrational state for vibrational block ivb
-!                      in term iterm
 !  variables in common block /cosgpi/
 !    nvibs:    number of vibrational terms for sigma state in input file
 !    ivibs:    vibrational quantum number for each of these
 !    nvibp:    number of vibrational terms for pi state in input file
 !    ivibp:    vibrational quantum number for each of these
-!  variables in common block /coered/
-!    ered:      collision energy in atomic units (hartrees)
-!    rmu:       collision reduced mass in atomic units
-!               (mass of electron = 1)
 !  variable in common block /coconv/
 !     econv:    conversion factor from cm-1 to hartrees
 !     xmconv:   converson factor from amu to atomic units
@@ -172,33 +151,45 @@ subroutine basgpi (j, l, is, jhold, ehold, ishold, nlevel, &
 !   vlsgpi:    returns angular coupling coefficient for particular
 !              choice of channel index
 ! --------------------------------------------------------------------
-use mod_cov2, only: nv2max, junkv => ndummy, v2
-use mod_coiv2, only: iv2
+use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coisc1, only: ivec => isc1 ! ivec(1)
 use mod_coisc2, only: ivhold => isc2 ! ivhold(1)
 use mod_coisc3, only: nlvp => isc3 ! nlvp(1)
 use mod_coisc4, only: nvphol => isc4 ! nvphol(1)
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rpar=>rspar
+use mod_hibasutil, only: iswap, rswap
 use constants, only: econv, xmconv, ang2c
+use mod_par, only: iprint
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_par, only: readpt, boundc
+use mod_ered, only: ered, rmu
+use mod_vib, only: nvibs, ivibs, nvibp, ivibp
+use mod_himatrix, only: mxva
 
 implicit double precision (a-h,o-z)
+real(8), intent(out), dimension(:) :: sc1
+real(8), intent(out), dimension(:) :: sc2
+real(8), intent(out), dimension(:) :: sc3
+real(8), intent(out), dimension(:) :: sc4
+type(ancou_type), intent(out), allocatable, target :: v2
+type(ancouma_type), pointer :: ancouma
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
-#include "common/parbas.F90"
-#include "common/parbasl.F90"
-common /coipar/ iiipar(9), iprint
 !  these parameters must be the same as in hisysgpi
-common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
-common /coered/ ered, rmu
 dimension e(3,3), ieps(2), iepp(2), iomc(4), iomr(4), eig(3)
-dimension jhold(1), ishold(1), iohold(1), nvhold(1), ehold(1), &
-          j(1), is(1), iom(1), nlv(1), l(1)
+dimension jhold(1), ishold(1), ehold(1), &
+          j(1), is(1), l(1)
 parameter (nvmax=20)
 dimension ipvs(0:nvmax),ipvp(0:nvmax)
-real(8), dimension(3, 3, nmax) :: vec
+integer, dimension(nmax) :: iom    ! on return contains nominal omega values for each channel
+                                   ! for 2sigma states iom is assigned the value of 2
+integer, dimension(nmax) :: iohold ! on return contains nominal omega values for each level
+integer, dimension(nmax) :: nvhold ! on return contains vibr. quantum numbers for each level
+integer, dimension(nmax) :: nlv    ! on return contains vibr. quantum numbers for each chan.
+
 data iomc/2,1,1,1/
 data iomr/2,1,2,1/
 ! this determines which eps level is first in channel list (arbitrary)
@@ -871,9 +862,16 @@ i=0
 !  i counts v2 elements
 !  ilam counts number of v2 matrices
 !  inum counts v2 elements for given ilam
-!  ij is address of given v2 element in present v2 matrix
 !
 ilam=0
+nlam=0
+do it = 1, nterm
+  do il = lammin(it), lammax(it), istep
+    nlam = nlam + 1
+  end do
+end do
+ASSERT(.not. allocated(v2))
+v2 = ancou_type(nlam=nlam, num_channels=ntop)
 do 600 it=1,nterm
   iterm=it
 !  formally reassign iterm if no sigma state present
@@ -891,6 +889,7 @@ do 600 it=1,nterm
     ivr=ivrow(iv,it)
     do 450 il=lammin(it),lammax(it),istep
       ilam=ilam+1
+      ancouma => v2%get_angular_coupling_matrix(ilam)
       inum = 0
       do 400  icol = 1, n
       if(max(1,iom(icol)).ne.ioc) then
@@ -906,7 +905,6 @@ do 600 it=1,nterm
       else
         if(nlv(irow).ne.ivr) goto 350
       end if
-      ij = ntop * (icol - 1) +irow
       lrow = l(irow)
       if (csflag) lrow = nu
 !  always initialize potential to zero
@@ -965,44 +963,24 @@ do 600 it=1,nterm
          i = i + 1
          inum = inum + 1
          if (bastst .and. iprint.gt.1) then
-           write (6, 340) it,ivr,ivc,il,ilam,i,icol,irow, &
-                          ij,vee
-           write (9, 340) it,ivr,ivc,il,ilam,i,icol,irow, &
-                          ij,vee
+           write (6, 340) it,ivr,ivc,il,ilam,i,icol,irow, vee
+           write (9, 340) it,ivr,ivc,il,ilam,i,icol,irow, vee
 340            format (1x,3i3,6i6, g17.8)
          end if
-         if (i .le. nv2max) then
-           v2(i) = vee
-           iv2(i) = ij
-         end if
+         call ancouma%set_element(irow=irow, icol=icol, vee=vee)
        end if
 350      continue
 400      continue
-     if(ilam.le.nlammx) lamnum(ilam) = inum
      if (bastst .and.iprint.ge.1) then
        write (6, 420) it,ivr,ivc,il,inum
        write (9, 420) it,ivr,ivc,il,inum
 420        format(' ITERM=',i1,'  IVR=',i2,'  IVC=',i2,'  LAMBDA=',i2, &
               ' NUMBER OF NONZERO MATRIX ELEMENTS',i8)
      end if
-     if(inum.ne.0) nlam=ilam
 450    continue
 500  continue
 continue
 600 continue
-if (nlam.gt.nlammx) then
-  write(6,610) nlam,nlammx
-  write(9,610) nlam,nlammx
-610   format (' *** NLAM = ',i6,' .GT. NLAMMX=',i6,'; ABORT ***')
-  call exit
-end if
-if (i.gt.nv2max) then
-  write (6, 620) i, nv2max
-  write (9, 620) i, nv2max
-620   format (' *** NUMBER OF NONZERO V2 ELEMENTS = ',i6, &
-           ' .GT. NV2MAX=',i6,'; ABORT ***')
-  call exit
-end if
 if (clist) then
   write (6, 630) i
   write (9, 630) i
@@ -1083,11 +1061,11 @@ subroutine vlsgpi (jp, lp, j, l, jtot, iomegp, iomeg, lambda, &
 !  subroutines called:
 !     xf3j, xf6j
 !  -----------------------------------------------------------------------
+use mod_hiutil, only: xf3j, xf6j
 implicit double precision (a-h,o-z)
 !      real half, halfm, one, onem, threhf, thrhfm, two, v, x, xj,
 !     :     xjp, xjtot, xl, xlamda, xlp, xnorm, xnu, xnum, xomeg,
 !     :     xomegm, xomegp, xomgpm, zero
-!      real xf3j, xf6j
 integer ieps, iepsp, iomeg, iomegp, ione, iphase, j, jp, jtot, &
         l, lambda, lp, nu
 logical csflag
@@ -1223,22 +1201,6 @@ end
   if (th.gt.thmin) goto 30
   return
   end
-! ----------------------------------------------------------------------
-subroutine iswap(ia,ib)
-implicit integer (a-z)
-ii=ia
-ia=ib
-ib=ii
-return
-end
-! ----------------------------------------------------------------------
-subroutine rswap(a,b)
-implicit double precision (a-h,o-z)
-c=a
-a=b
-b=c
-return
-end
 ! ----------------------------------------------------------------------
 subroutine hsgpi(ji,ise,e,rp1,rp2,iflag,iperpi)
 ! ----------------------------------------------------------------------
@@ -1380,7 +1342,6 @@ subroutine sysgpi (irpot, readpt, iread)
 !  current revision date: 21-dec-1995 by pjd, mha, ade, ab
 !  latest revision:  24-feb-2004 by mha
 !
-!  variables in common/cobspt/ must be set in loapot!!
 !
 use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
@@ -1388,23 +1349,25 @@ use mod_cosys, only: scod
 use mod_cosyr, only: rcod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-logical readpt, existf
+use mod_par, only: ihomo
+use funit, only: FUNIT_INP
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_skip, only: nskip, iskip
+use mod_vib, only: nvibs, ivibs, nvibp, ivibp
+use mod_hiutil, only: gennam, get_token
+implicit none
+integer, intent(out) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) :: iread
+integer :: i, ipi, isg, isgpi, ivp, ivs, j, k, l, lc, nterm, nvmaxp, nvmaxs, nvminp, nvmins
+logical existf
 character*8 char
 character*(*) fname
 character*1 dot
 character*60 filnam, line, potfil, filnm1
-#include "common/parbas.F90"
-common /covib/ nvibs,ivibs(maxvib),nvibp,ivibp(maxvib)
-logical         airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar
-common /colpar/ airyfl, airypr, bastst, batch, chlist, csflag, &
-                flaghf, flagsu, ihomo,lpar(18)
-common /coskip/ nskip,iskip
 save potfil
 #include "common/comdot.F90"
 !  set default values for 2pi-2sigma scattering
-rpar=0
 ispar=0
 potfil = ' '
 isicod=0
@@ -1638,7 +1601,7 @@ line = fname
 readpt = .true.
 1000 if (readpt) then
   l=1
-  call parse(line,l,filnam,lc)
+  call get_token(line,l,filnam,lc)
   if(lc.eq.0) then
     write(6,1020)
 1020     format(' FILENAME MISSING FOR POTENTIAL INPUT')
@@ -1671,48 +1634,48 @@ isg=ispar(2)
 ipi=ispar(3)
 isicod=0
 isrcod=0
-write (8, 105) (ispar(isicod+j),j=2,5),'isg, ipi, isgpi, isa'
+write (FUNIT_INP, 105) (ispar(isicod+j),j=2,5),'isg, ipi, isgpi, isa'
 isicod=isicod+5
 if(isg.ne.0) then
 !  save symmetry parameters for sigma state
-  write (8, 103) (ispar(isicod+j),j=1,3), &
+  write (FUNIT_INP, 103) (ispar(isicod+j),j=1,3), &
           'igusg, nparsg, isymsg'
   isicod=isicod+3
 !  save number of vib states for sigma state
-  write (8, 103) nvibs,(ispar(isicod+j),j=1,2) &
+  write (FUNIT_INP, 103) nvibs,(ispar(isicod+j),j=1,2) &
                 ,'nvibs, vminsg, vmaxsg'
   nvmins=ispar(isicod+1)
   nvmaxs=ispar(isicod+2)
   isicod=isicod+2
 !  save data for each vib state
   do 100 i=1,nvibs
-    write (8,103) ivibs(i),(ispar(isicod+j),j=1,2), &
+    write (FUNIT_INP,103) ivibs(i),(ispar(isicod+j),j=1,2), &
                   'ivs,  nmin,  nmax'
-    write (8,203) (rspar(isrcod+j),j=1,3),'bsg, dsg, hsg'
-    write (8,203) (rspar(isrcod+j),j=4,6),'gs, gsd, gsh'
-    write (8,201)  rspar(isrcod+7),'esg'
+    write (FUNIT_INP,203) (rspar(isrcod+j),j=1,3),'bsg, dsg, hsg'
+    write (FUNIT_INP,203) (rspar(isrcod+j),j=4,6),'gs, gsd, gsh'
+    write (FUNIT_INP,201)  rspar(isrcod+7),'esg'
     isicod=isicod+2
     isrcod=isrcod+7
 100   continue
 end if
 if(ipi.ne.0) then
-  write (8, 102) (ispar(isicod+j),j=1,2),'igupi, nparpi'
+  write (FUNIT_INP, 102) (ispar(isicod+j),j=1,2),'igupi, nparpi'
   isicod=isicod+2
-  write (8,103) nvibp,(ispar(isicod+j),j=1,2), &
+  write (FUNIT_INP,103) nvibp,(ispar(isicod+j),j=1,2), &
                 'nvibp, vminpi, vmaxpi'
   nvminp=ispar(isicod+1)
   nvmaxp=ispar(isicod+2)
   isicod=isicod+2
   do 101 i=1,nvibp
-    write (8,103) ivibp(i),(ispar(isicod+j),j=1,2), &
+    write (FUNIT_INP,103) ivibp(i),(ispar(isicod+j),j=1,2), &
            'ivp, jmin, jmax'
-    write (8,203) (rspar(isrcod+j),j=1,3),'bpi, dpi, hpi'
-    write (8,203) (rspar(isrcod+j),j=4,6),'aso, p, pd'
-    write (8,203) (rspar(isrcod+j),j=7,9),'q, qd, qh'
-    write (8,202) (rspar(isrcod+j),j=10,12),'epi, adi, gpi'
+    write (FUNIT_INP,203) (rspar(isrcod+j),j=1,3),'bpi, dpi, hpi'
+    write (FUNIT_INP,203) (rspar(isrcod+j),j=4,6),'aso, p, pd'
+    write (FUNIT_INP,203) (rspar(isrcod+j),j=7,9),'q, qd, qd'
+    write (FUNIT_INP,202) (rspar(isrcod+j),j=10,12),'epi, adi, gpi'
     if(ispar(4).ne.0) then
       ivs=ispar(isicod+3)
-      write (8,204) ivs,(rspar(isrcod+k),k=13,14), &
+      write (FUNIT_INP,204) ivs,(rspar(isrcod+k),k=13,14), &
                     'ipt, a, b'
       isrcod=isrcod+14
     else if(ispar(4).eq.0) then
@@ -1728,7 +1691,8 @@ end if
 202 format(g14.6,2g14.6,t50,a)
 203 format(3g14.6,t50,a)
 204 format(i4,2g14.6,t50,a)
-write (8, 300) potfil
+write (FUNIT_INP, 300) potfil
 300 format(a)
 return
 end
+end module mod_hiba04_sgpi

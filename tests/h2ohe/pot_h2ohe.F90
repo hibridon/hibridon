@@ -18,11 +18,10 @@
 ! ------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use constants, only: s4pi
 implicit double precision (a-h,o-z)
 dimension xxl(15)
-common /coloapot/ s4pi
-#include "common/parpot.F90"
-s4pi = sqrt ( 4.d0 * acos(-1.d0) )
 potnam='Patkowski et al. H2O-He SAPT PES'
 print *, potnam
 1 print *, 'R (bohr):'
@@ -42,19 +41,16 @@ goto 1
 99 end
 ! ------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: nscode, isicod, ispar
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use constants, only: s4pi
 implicit double precision (a-h,o-z)
 character*(*) filnam
-#include "common/parbas.F90"
-#include "common/parpot.F90"
-common /coloapot/ s4pi
 integer, pointer :: nterm
 nterm=>ispar(1)
 potnam='Patkowski et al. H2O-He SAPT PES'
-!
-!  s4pi is factor to normalize isotropic term
-s4pi = sqrt ( 4.d0 * acos(-1.d0) )
 nterm = 4
 mproj(1) = 0
 mproj(2) = 1
@@ -102,8 +98,6 @@ subroutine pot (vv0, r)
 !    vvl(4-6):   expansion coefficients in [Yl1 + Y(l,-1)] (l=1:6:2) of v(lam,1)
 !    vvl(7-9):  expansion coefficients in [Yl2 + Y(l,-2)] (l=2:6:2) of v(lam,2)
 !    vvl(10-11): expansion coefficients in [Yl4 + Y(l,-4)] (l=3:5:2) of v(lam,3)
-!  variable in common block /coloapot/
-!    s4pi:       normalization factor for isotropic potential
 !
 !  uses linear least squares routines from lapack
 !
@@ -111,6 +105,7 @@ subroutine pot (vv0, r)
 ! latest revision date:  28-aug-2009
 !
 use mod_covvl, only: vvl
+use constants, only: s4pi
 implicit double precision (a-h,o-z)
 dimension iwork(1000)
 dimension ylm(60,16), thetab(60), phib(60), vcalc(60), &
@@ -123,7 +118,6 @@ dimension y11t(60), y22t(60), y31t(60), y33t(60), &
   y42t(60), y51t(60), y53t(60), y62t(60), &
   y71t(60), y73t(60), y82t(60)
 !
-common /coloapot/ s4pi
 !
 !  coefficients for Ylm terms - all (lambda,mu) combinations up to lambda .le. 8
 !  and mu .le. 3, with lambda + mu = even (total of 15 anisotropic terms)

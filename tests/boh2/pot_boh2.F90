@@ -8,10 +8,10 @@
 #include "common/bausr.F90"
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 character*(*) filnam
-#include "common/parbas.F90"
-#include "common/parpot.F90"
-common /coselb/ ibasty
 potnam='ALEXANDER B(2P)H2(J=0,1) DUBERNET-HUTSON'
 ibasty=12
 lammin(1)=1
@@ -25,11 +25,10 @@ end
 ! --------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl
+use mod_par, only: csflag, ihomo
 implicit double precision (a-h,o-z)
 character *48 potnam
 character *2 frame
-logical csflag, ljunk, ihomo, lljunk
-common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
 potnam='ALEXANDER B(2P)H2(J=0,1) DUBERNET-HUTSON'
 print *, potnam
 print *
@@ -108,9 +107,8 @@ subroutine pot (vv0, r)
 
 
 use mod_covvl, only: vvl
+use mod_par, only: csflag, ihomo
 implicit double precision (a-h,o-z)
-logical ljunk, ihomo, csflag, lljunk
-common /colpar/ ljunk(5),csflag,lljunk(2),ihomo
 dimension vsl1(9), vsl2(9), vsr0(9), vsc1(9), vsc2(9), &
   vsc3(9), vscl(9)
 dimension vzzl1(9), vzzl2(9), vzzr0(9), vzzc1(9), vzzc2(9), &

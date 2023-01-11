@@ -65,15 +65,17 @@ subroutine loapot(iunit,filnam)
 !
 ! --------------------------------------------------------------------------
 use mod_cosysi, only: nscode, isicod, ispar
+use mod_par, only: readpt
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
+use mod_skip, only: nskip, iskip
 implicit double precision(a-h,o-z)
 character*(*) filnam
 character*80 potlab, filnm1
-#include "common/parpot.F90"
-logical readpt, lpar
 common /coptx/ nblkx,maxpwx,minmpx,maxmpx,mpsstx,junk, &
   rex(20),rin(20),tanhy(250),fex(250),a1(250),ah(250), &
   art(250),are(250)
-#include "common/parbas.F90"
 #include "common/parvfit.F90"
 common /copot/ nc(maxtrm),a(20,50,maxtrm),maxpw(maxtrm), &
                minms(maxtrm),maxms(maxtrm),msstp(maxtrm), &
@@ -82,9 +84,6 @@ common /copot/ nc(maxtrm),a(20,50,maxtrm),maxpw(maxtrm), &
                avec(maxang)
 common /cofit/ npa,maxpws,minmps,maxmps,mpsstp,idimp,idimr
 common /core/  re
-common /coskip/ nskip,iskip
-common /colpar/ lpar(14), readpt
-common /coselb/ ibasty
 integer, pointer :: nterm
 nterm=>ispar(1)
 potnam='WERNER-FOLLMEG VFIT'
@@ -167,12 +166,11 @@ end
 
 subroutine driver
 use mod_covvl, only: vvl
+use mod_par, only: readpt
 implicit double precision (a-h,o-z)
 character *48 potnam
 character *40 filnam
 character *2 frame
-logical lpar,readpt
-common /colpar/ lpar(14), readpt
 readpt=.true.
 potnam='WERNER-FOLLMEG VFIT'
 print *, 'potential subroutine:  ',potnam
@@ -207,8 +205,10 @@ subroutine pot(vv0,r)
 ! -------------------------------------------------------------------
 use mod_covvl, only: vvl
 use mod_cosysi, only: nscode, isicod, ispar
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_selb, only: ibasty
+use mod_skip, only: nskip, iskip
 implicit double precision(a-h,o-z)
-#include "common/parbas.F90"
 #include "common/parvfit.F90"
 common /copot/ nc(maxtrm),a(20,50,maxtrm),maxpw(maxtrm), &
                minms(maxtrm),maxms(maxtrm),msstp(maxtrm), &
@@ -220,8 +220,6 @@ common /coptx/ nblkx,maxpwx,minmpx,maxmpx,mpsstx,junk, &
   rex(20),rin(20),tanhy(250),fex(250),a1(250),ah(250), &
   art(250),are(250)
 common /core/  re
-common /coskip/ nskip,iskip
-common /coselb/ ibasty
 integer, pointer :: nterm
 nterm=>ispar(1)
 rr = r
@@ -308,6 +306,7 @@ subroutine vcalc(rr,a,pinv,rvecp,avec,iblkx)
 ! current revision date: 26-may-1991 by mha
 !
 ! --------------------------------------------------------------------
+use mod_himatrix, only: mxva
 implicit double precision(a-h,o-z)
 parameter (maxang=10)
 dimension pinv(maxang,maxang),a(20,50),rvecp(10),avec(10)
