@@ -37,7 +37,6 @@ subroutine difcrs(fname1,a,ihomo,flaghf)
 !---------------------------------------------------------------*
 use constants
 use mod_codim, only: mmax
-use mod_coj12, only: j12
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 use mod_coisc2, only: jout1 => isc2 ! jout1(1)
@@ -504,13 +503,13 @@ end if
 !
 call ampli( &
     j1, in1, j2, in2, jtot, sreal1, simag1, mmax, packed_bqs1, &
-    row_bqs1%jq, row_bqs1%lq, row_bqs1%inq, nopen1, y, q, l2max, nangle, ihomo, flaghf, &
+    row_bqs1, nopen1, y, q, l2max, nangle, flaghf, &
     iydim1, iydim2, iq1min, iq1max, iq2min, iq2max, iq3)
 !.... calculate contributions for negative initial index
 if (stflag) then
   call ampli( &
     j1, -in1, j2, in2, jtot, sreal1, simag1, mmax, packed_bqs1, &
-    row_bqs1%jq, row_bqs1%lq, row_bqs1%inq, nopen1, y, qm, l2max, nangle, ihomo, flaghf, &
+    row_bqs1, nopen1, y, qm, l2max, nangle, flaghf, &
     iydim1, iydim2, iq1min, iq1max, iq2min, iq2max, iq3)
 end if
 !
@@ -959,7 +958,7 @@ return
 end
 ! -----------------------------------------------------------------------
 subroutine ampli(j1,in1,j2,in2,jtot,sreal,simag,mmax, packed_bqs, &
-     jq,lq,inq,nopen,y,q,maxl2,nangle,ihomo,flaghf, &
+     row_bqs,nopen,y,q,maxl2,nangle,flaghf, &
      iydim1,iydim2,iq1min,iq1max,iq2min,iq2max,iq3)
 !subr  calculates scattering amplitudes for given jtot and set
 !subr  of angles
@@ -975,28 +974,58 @@ subroutine ampli(j1,in1,j2,in2,jtot,sreal,simag,mmax, packed_bqs, &
 !  current revision date:  22-may-2021 by p. dagdigian
 !
 !.....packed_bqs%jq,packed_bqs%lq,packed_bqs%inq: labels for rows
-!.....jq,lq,inq:         labels for columns
+!.....row_bqs%jq,row_bqs%lq,row_bqs%inq:         labels for columns
 !
-use mod_coj12, only: j12
-use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12, is_twomol
 use mod_selb, only: ibasty
 use mod_hiutil, only: xf3j
 use mod_hitypes, only: bqs_type
-implicit double precision (a-h,o-z)
-type(bqs_type) :: packed_bqs
-complex*16 ai,yy,tmat
-parameter (zero=0.0d0, one=1.0d0, two=2.0d0)
-logical ihomo,flaghf,elastc
-dimension jq(1),inq(1)
-integer, intent(in) :: lq(1)
-dimension sreal(mmax,1),simag(mmax,1)
+implicit none
+integer, intent(in) :: j1
+integer, intent(in) :: in1
+integer, intent(in) :: j2
+integer, intent(in) :: in2
+integer, intent(in) :: jtot
+real(8), intent(in) :: sreal(mmax,1)
+real(8), intent(in) :: simag(mmax,1)
+integer, intent(in) :: mmax
+type(bqs_type), intent(in) :: packed_bqs
+type(bqs_type), intent(in) :: row_bqs
+integer, intent(in) :: nopen
+real(8), intent(in) :: y(0:iydim1, 0:iydim2, nangle)
+complex(8), intent(out) :: q(iq1min:iq1max, iq2min:iq2max, iq3)
+integer, intent(in) :: maxl2
+integer, intent(in) :: nangle
+logical, intent(in) :: flaghf
+integer, intent(in) :: iydim1
+integer, intent(in) :: iydim2
+integer, intent(in) :: iq1min
+integer, intent(in) :: iq1max
+integer, intent(in) :: iq2min
+integer, intent(in) :: iq2max
+integer, intent(in) :: iq3
+
+real(8), parameter :: zero=0.0d0, one=1.0d0, two=2.0d0
+real(8), parameter :: sqpi=1.772453850905516d0
+integer :: iang, ii, ilab, iyof, j12_f, j12_i, jlab
+integer :: j1_f, j1_fp, j1_i, j1_ip,      j1p
+integer :: j2_f, j2_fp, j2_i, j2_ip, j2i, j2p
+integer :: l1, l2, ll, llmax
+integer :: mj1, mj1_f, mj1_i
+integer :: mj2, mj2_f, mj2_i, ml2
+integer :: mj12_f, mj12_i
+real(8) :: xj1, xj1_f, xj1_i
+real(8) :: xj2, xj2_f, xj2_i
+real(8) :: xj12_f, xj12_i
+real(8) :: xl1, xmj1, xmj1_f, xmj1_i
+real(8) :: xl2, xmj2, xmj2_f, xmj2_i
+real(8) :: xmj12_f, xmj12_i
+real(8) :: fak, fakj, spin, xml2, xjtot
+complex*16 :: ai, yy, tmat
+logical elastc
 integer, dimension(:), allocatable :: ilab1
 real(8), dimension(:), allocatable :: fak1
 complex(8), dimension(:), allocatable :: fak2, fak3
-real(8), dimension(0:iydim1, 0:iydim2, nangle) :: y
-complex(8), dimension(iq1min:iq1max, iq2min:iq2max, iq3) :: q
-sqpi=1.772453850905516d0
 !
 ai=cmplx(zero,one)
 elastc=j1.eq.j2 .and. in1.eq.in2
@@ -1100,18 +1129,18 @@ do ilab=1,packed_bqs%length
 end do
 !
 do 500 jlab=1,nopen
-if(jq(jlab).ne.j2.or.inq(jlab).ne.in2) goto 500
-l2=lq(jlab)
+if(row_bqs%jq(jlab).ne.j2.or. row_bqs%inq(jlab).ne.in2) goto 500
+l2=row_bqs%lq(jlab)
 xl2=l2
 if (is_j12(ibasty)) then
-  j12_f = j12(jlab)
+  j12_f = row_bqs%j12(jlab)
   xj12_f = j12_f + spin
 end if
 do 60 ll=1,llmax
 ilab=ilab1(ll)
 l1=packed_bqs%lq(ilab)
 if (is_j12(ibasty)) then
-  j12_i = j12pk(ilab)
+  j12_i = packed_bqs%j12(ilab)
   xj12_i = j12_i + spin
 end if
 !.....convert to t-matrix
@@ -1166,7 +1195,7 @@ elseif (is_twomol(ibasty)) then
     do 1070 ll = 1, llmax
       ilab = ilab1(ll)
       xl1 = packed_bqs%lq(ilab)
-      j12_i = j12pk(ilab)
+      j12_i = packed_bqs%j12(ilab)
       xj12_i = j12_i + spin
       fak3(ll) = fak2(ll) * (-1)**j12_i &
         * sqrt(two * xj12_i + one) &
@@ -1209,7 +1238,7 @@ else
     do 3070 ll = 1, llmax
       ilab = ilab1(ll)
       xl1 = packed_bqs%lq(ilab)
-      j12_i = j12pk(ilab)
+      j12_i = packed_bqs%j12(ilab)
       xj12_i = j12_i + spin
       fak3(ll) = fak2(ll) * (-1)**j12_i &
         * sqrt(two * xj12_i + one) &

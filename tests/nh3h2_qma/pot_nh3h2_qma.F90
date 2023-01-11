@@ -245,13 +245,12 @@ end
 !     NTOP, AND POSSIBLY J12 ARE TO BE RETURNED FOR CHANNEL INFORMATION;
 !     ALSO CALCULATE NON-ZERO COUPLING MATRIX ELEMENTS AND RETURN IN V2,
 !     IV2, LAMNUM.
-subroutine bausr(j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
+subroutine bausr(bqs, jhold, ehold, ishold, nlevel, nlevop, &
      sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, csflag, &
      clist, bastst, ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_coj12, only: j12
 use mod_coamat, only: ietmp ! ietmp(1)
 use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
@@ -261,10 +260,9 @@ use constants, only: econv, xmconv
 use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
 use mod_par, only: iprint
 use mod_ered, only: ered, rmu
+use mod_hitypes, only: bqs_type
 implicit none
-integer, intent(out) :: j(:)
-integer, intent(out) :: l(:)
-integer, intent(out) :: is(:)
+type(bqs_type), intent(out) :: bqs
 integer, intent(out), dimension(:) :: jhold
 real(8), intent(out), dimension(:) :: ehold
 integer, intent(out), dimension(:) :: ishold
@@ -378,6 +376,7 @@ end do
 if (bastst) call pr_lev_nh3h2(nlist, jtemp, ktemp, ietmp, ehold)
 !
 !     now set up channel and level list for scattering calculation
+call bqs%init(nmax)
 n = 0
 do nlevel = 1, nlist
    ki = ktemp(nlevel)
@@ -391,16 +390,17 @@ do nlevel = 1, nlist
          if (ipar * lpar .ne. jlpar) cycle
          n = n + 1
          if (n .gt. nmax) call raise('too many channels.')
-         j(n) = jtemp(nlevel)
-         is(n) = -iepsil * (-1) ** ji * ki
+         bqs%jq(n) = jtemp(nlevel)
+         bqs%inq(n) = -iepsil * (-1) ** ji * ki
          ieps(n) = iepsil
-         j12(n) = ji12
+         bqs%j12(n) = ji12
          eint(n) = ehold(nlevel)
-         l(n) = li
+         bqs%lq(n) = li
+         bqs%length = n
          cent(n) = li * (li + 1)
          if (bastst .and. iprint .ge. 2) &
-              write (6, 280) n, j(n), is(n), ieps(n), j12(n), &
-              l(n), eint(n) * econv
+              write (6, 280) n, bqs%jq(n), bqs%inq(n), ieps(n), bqs%j12(n), &
+              bqs%lq(n), eint(n) * econv
 280          format (6i6, f12.3)
       end do
    end do
@@ -437,16 +437,16 @@ do iv = 1, nv
    inum = 0
    do icol = 1, n
       do irow = icol, n
-         jc = j(icol) / 10
-         jr = j(irow) / 10
-         j2c = mod(j(icol), 10)
-         j2r = mod(j(irow), 10)
-         kc = iabs(is(icol))
-         kr = iabs(is(irow))
-         j12c = j12(icol)
-         j12r = j12(irow)
-         lc = l(icol)
-         lr = l(irow)
+         jc = bqs%jq(icol) / 10
+         jr = bqs%jq(irow) / 10
+         j2c = mod(bqs%jq(icol), 10)
+         j2r = mod(bqs%jq(irow), 10)
+         kc = iabs(bqs%inq(icol))
+         kr = iabs(bqs%inq(irow))
+         j12c = bqs%j12(icol)
+         j12r = bqs%j12(irow)
+         lc = bqs%lq(icol)
+         lr = bqs%lq(irow)
          call vlmstpln(jr, lr, jc, lc, j2r, j2c, j12r, j12c, &
               jtot, kr, kc, lb1(iv), mu1(iv), lb2(iv), mu2(iv), &
               ieps(irow), ieps(icol), vee, csflag)

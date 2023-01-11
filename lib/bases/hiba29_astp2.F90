@@ -36,7 +36,7 @@ end module mod_chiral
 ! --------------------------------------------------------------------
 module mod_hiba29_astp2
   contains  
-subroutine baastp2(j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
+subroutine baastp2 (bqs, jhold, ehold, ishold, nlevel, nlevop, &
                   etemp, fjtemp, fktemp, fistmp, &
                   rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
@@ -149,12 +149,14 @@ use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax,
 use mod_par, only: readpt, boundc
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
+type(bqs_type), intent(out) :: bqs
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*1 slab
-dimension j(1), l(1), is(1), jhold(1), ehold(1), &
+dimension jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
           fistmp(1)
 !  scratch arrays for computing asymmetric top energies and wave fns.
@@ -208,7 +210,7 @@ if (bastst) then
 end if
 
 !
-!  first set up list of all j(kp,ko) states included in basis
+!  first set up list of all bqs%jq(kp,ko) states included in basis
 nlist = 0
 do ji = 0, jmax
 ! set up and diagonalize rotational hamiltonian for each value of ji
@@ -427,6 +429,7 @@ if (bastst .or. clist) then
    'LEVEL LIST SORTED BY ENERGY',/,'   N   J  ', &
      'IS  KP  KO  S   EINT(CM-1)  COEFFS')
 end if
+call bqs%init(nmax)
 n = 0
 nlevel = 0
 do 170  njk = 1, nlist
@@ -516,10 +519,11 @@ do 170  njk = 1, nlist
              ' .GT. MAX DIMENSION OF',i5,' ABORT ***')
           stop
         end if
-        is(n) = ishold(nlevel)
-        j(n) = ji
+        bqs%inq(n) = ishold(nlevel)
+        bqs%jq(n) = ji
         eint(n) = ehold(nlevel)
-        l(n) = li
+        bqs%lq(n) = li
+        bqs%length = n
         cent(n) = li * (li + 1)
 !  move e.fn also
         isiz(n) = isizh(nlevel)
@@ -573,23 +577,23 @@ if (bastst) then
       isize = isiz(i)
       isub = (i - 1)*narray
       if (isize .gt. 12) then
-        write (6, 320) i, j(i), is(i), l(i), ecm, &
+        write (6, 320) i, bqs%jq(i), bqs%inq(i), bqs%lq(i), ecm, &
           (c(isub + mm), mm=1,isize)
-        write (9, 320) i, j(i), is(i), l(i), ecm, &
+        write (9, 320) i, bqs%jq(i), bqs%inq(i), bqs%lq(i), ecm, &
           (c(isub + mm), mm=1,isize)
 320         format (4i4, f10.3, 3x, 6f8.4/29x, 6f8.4/ &
           29x, 6f8.4)
       else
         if (isize .gt. 6) then
-          write (6, 3201) i, j(i), is(i), l(i), ecm, &
+          write (6, 3201) i, bqs%jq(i), bqs%inq(i), bqs%lq(i), ecm, &
             (c(isub + mm), mm=1,isize)
-          write (9, 3201) i, j(i), is(i), l(i), ecm, &
+          write (9, 3201) i, bqs%jq(i), bqs%inq(i), bqs%lq(i), ecm, &
             (c(isub + mm), mm=1,isize)
 3201            format (4i4, f10.3, 3x, 6f8.4/29x, 6f8.4)
         else
-          write (6, 3202) i, j(i), is(i), l(i), ecm, &
+          write (6, 3202) i, bqs%jq(i), bqs%inq(i), bqs%lq(i), ecm, &
             (c(isub + mm), mm=1,isize)
-          write (9, 3202) i, j(i), is(i), l(i), ecm, &
+          write (9, 3202) i, bqs%jq(i), bqs%inq(i), bqs%lq(i), ecm, &
             (c(isub + mm), mm=1,isize)
 3202           format (4i4, f10.3, 3x, 6f8.4)
         end if
@@ -627,8 +631,8 @@ do 400 ilam = 1, nlam
     do irow = icol, n
 !     initialize potential to zero
       vee = 0.d0
-      call vchirl(j(irow), l(irow), j(icol), l(icol), &
-        is(irow), is(icol), jtot, lam, mu, vee, &
+      call vchirl(bqs%jq(irow), bqs%lq(irow), bqs%jq(icol), bqs%lq(icol), &
+        bqs%inq(irow), bqs%inq(icol), jtot, lam, mu, vee, &
         irow, icol)
 !     check for nonzro matrix element
       if (abs(vee) .gt. 1.d-10) then

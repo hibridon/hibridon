@@ -90,7 +90,7 @@ module mod_hitypes
       integer, allocatable :: jq(:)  ! combined rotational quantum number. This integer stores an encoded representation of the set of rotational quantum numbers: for most bases, it only contains the value of j (rotational quantum number), but in case of 2 molecule collisions it encodes both j1 (rotational quantum number of modlecule 1) and j2 (rotational quantum number of molecule 2). The base itself is responsible for encoding and decoding this number.
       integer, allocatable :: lq(:)  ! orbital angular momentum quantum number
       integer, allocatable :: inq(:)  ! symmetry index
-      integer, allocatable :: j12pk(:)   ! rotational quantum number (only for 2 molecules systems)
+      integer, allocatable :: j12(:)   ! rotational quantum number (only for 2 molecules systems)
       integer :: length  ! number of elements used in all arrays
       integer :: max_length
    contains
@@ -120,7 +120,7 @@ contains
       allocate(this%jq(nopen))
       allocate(this%lq(nopen))
       allocate(this%inq(nopen))
-      allocate(this%j12pk(nopen))
+      allocate(this%j12(nopen))
       this%length = 0
       this%max_length = nopen
    end subroutine 
@@ -130,7 +130,7 @@ contains
       if (allocated(this%jq)) deallocate(this%jq)
       if (allocated(this%lq)) deallocate(this%lq)
       if (allocated(this%inq)) deallocate(this%inq)
-      if (allocated(this%j12pk)) deallocate(this%j12pk)
+      if (allocated(this%j12)) deallocate(this%j12)
       this%length = 0
       this%max_length = 0
    end subroutine 

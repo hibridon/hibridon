@@ -12,8 +12,6 @@ use mod_cosout, only: allocate_cosout
 use mod_coiout, only: allocate_coiout
 use mod_cocent, only: allocate_cocent
 use mod_coeint, only: allocate_coeint
-use mod_coj12, only: allocate_coj12
-use mod_coj12p, only: allocate_coj12p
 use mod_covvl, only: allocate_covvl
 use mod_cofact, only: allocate_cofact
 
@@ -286,8 +284,6 @@ call allocate_cosout(kout)
 call allocate_coiout(kout)
 call allocate_cocent(kmax)
 call allocate_coeint(kmax)
-call allocate_coj12(kmax)
-call allocate_coj12p(kmax)
 call allocate_covvl(klammx)
 call allocate_cofact(kfact)
 call allocate_coeig()

@@ -24,7 +24,6 @@ subroutine sprint (fname, ia)
 !   current revision date: 19-jun-2015 by p.dagdigian
 ! ----------------------------------------------------------------------
 use mod_cosout, only : nnout, jout
-use mod_coj12p, only: j12pk
 use constants
 use mod_codim, only: nmax => mmax
 use mod_coinhl, only: jlev => inhold ! jlev(1)
@@ -177,10 +176,10 @@ end if
       ASSERT(.false.)
       write (6, 290) 'J    ', (packed_bqs%jq(j), j=1, packed_bqs%length)
       write (6, 260) 'JA   ', (packed_bqs%inq(j)+0.5d0, j=1, packed_bqs%length)
-      write (6, 260) 'J12  ', (j12pk(j)+0.5d0, j=1, packed_bqs%length)
+      write (6, 260) 'J12  ', (packed_bqs%j12(j)+0.5d0, j=1, packed_bqs%length)
     else
       write (6, 270) 'J1/J2', (packed_bqs%jq(j), j=1, packed_bqs%length)
-      write (6, 270) 'J12', (j12pk(j), j=1, packed_bqs%length)
+      write (6, 270) 'J12', (packed_bqs%j12(j), j=1, packed_bqs%length)
       write (6, 270) 'IS', (packed_bqs%inq(j), j=1, packed_bqs%length)
     endif
   end if
