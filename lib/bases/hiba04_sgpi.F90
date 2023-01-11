@@ -154,6 +154,7 @@ subroutine basgpi (j, l, is, jhold, ehold, ishold, nlevel, &
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
+use mod_cotq1, only: vec ! vec(3,3,1)
 use mod_coisc1, only: ivec => isc1 ! ivec(1)
 use mod_coisc2, only: ivhold => isc2 ! ivhold(1)
 use mod_coisc3, only: nlvp => isc3 ! nlvp(1)
