@@ -11,7 +11,7 @@ set(TEST_LABELS "coverage")
 
 # BASTST for basis 01
 set(TEST_ID bastst_01)
-set(TEST_INPUT_FILES  "bastst_01.inp")
+set(TEST_INPUT_FILES  "Bastst_01.inp")
 set(TEST_OUTPUT_FILES "Bastst_01.out")
 set(TEST_COMMAND_FILE "bastst_01.com")
 add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")
