@@ -10,7 +10,7 @@
 - Changed `fortran` source code from fixed source form to free source form
 - Code is now using `fortran` features up to the 2008 standard
 - Removed previous custom preprocessing (`ftconv`) system and replaced with `fpp` (Fortran PreProcessor)
-- Added interactive command `showpot` that replaces the `testpot` program
+- Added interactive command `testpot` that replaces the `testpot` program
 - Made the `v2` array (angular coupling matrices) growable to replace its arbitrary hardcoded size - This reduces Hibridon memory footprint ([#51](https://github.com/hibridon/hibridon/issues/51))
 - Replaced hardcoded `kmax` value with a runtime argument (`-k <KMAX>`) - This allows to control Hibridon memory footprint without recompiling ([#44](https://github.com/hibridon/hibridon/issues/44))
 - Updated most common blocks into modules ([#7](https://github.com/hibridon/hibridon/issues/7))
