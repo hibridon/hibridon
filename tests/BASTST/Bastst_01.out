@@ -12,8 +12,8 @@
  NTERM  =   1        VMIN   =   0        VMAX   =   0        JMIN   =   0
  JMAX   =  20
  BROT   =  2.010     DROT   =  0.000     HROT   =  0.000     EVIB   =  0.000    
- LAMMIN:    0
- LAMMAX:   -1
+ LAMMIN:    2
+ LAMMAX:    2
  MPROJ:     0
      *** Flags:
  AIRYFL= F    BASTST= T    BATCH = F    CHLIST= T    CSFLAG= F    FLAGHF= F
@@ -36,25 +36,25 @@
           G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
  --------------------------------------------------------------------------
            BUILD CONFIGURATION:
-CMAKE BUILD DATE: 2023-01-12 at 11:07
-CMAKE BUILD TYPE: Release
-CODE GIT REVISION: 29ddde8bde5171a8584a179b03a600eff6f4dac6
-SYS: Darwin 22.2.0 x86_64
-COMPILER: /usr/local/bin/gfortran
+CMAKE BUILD DATE: 2023-01-16 at 15:14
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: a0cd61f07c3b3e19dc839ac9475200ee158d7895
+SYS: Darwin 20.3.0 x86_64
+COMPILER: /opt/intel/oneapi/compiler/2022.1.0/mac/bin/intel64/ifort
 COMPILE OPTIONS: 
  --------------------------------------------------------------------------
             CURRENT HARDWARE CONFIGURATION:
-
-      Model Name: MacBook Pro
-      Model Identifier: MacBookPro14,3
-      Processor Name: Quad-Core Intel Core i7
-      Processor Speed: 2.9 GHz
+ 
+      Model Name: Mac Pro
+      Model Identifier: MacPro7,1
+      Processor Name: 16-Core Intel Xeon W
+      Processor Speed: 3,2 GHz
       Number of Processors: 1
-      Total Number of Cores: 4
-      L2 Cache (per Core): 256 KB
-      L3 Cache: 8 MB
+      Total Number of Cores: 16
+      L2 Cache (per Core): 1 MB
+      L3 Cache: 22 MB
       Hyper-Threading Technology: Enabled
-      Memory: 16 GB
+      Memory: 96 GB
  --------------------------------------------------------------------------
 
  -----------------------------------------------------------------------------
@@ -86,7 +86,7 @@ COMPILE OPTIONS:
 
  ** LABEL:          DUMMY                                      
  ** POT NAME:  DUMMY POTENTIAL FOR TESTING PURPOSES            
- ** DATE:      Jan 12 11:19:20 2023
+ ** DATE:      Jan 16 16:18:24 2023
 
  *** WARNING:  NAIRY .NE. 1 BUT AIRYFL .EQ. .FALSE.
  ** NMAX= 500  NAIRY= 500
@@ -331,10 +331,10 @@ COMPILE OPTIONS:
  229   0  20   36      844.200
  230   0  20   38      844.200
  231   0  20   40      844.200
- ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS     0
+ ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS  1009
  ** BASTST=.TRUE.; TEST OF SUBROUTINE BASIS
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:     0
-      TIMING:  ELAPSED          / CPU          / MP RATIO    0.0 %
-      CURRENT DATE:  Jan 12 11:19:20 2023
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    1.5 %
+      CURRENT DATE:  Jan 16 16:18:24 2023
  ===============================================================================

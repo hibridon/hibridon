@@ -12,8 +12,8 @@
  NTERM  =   1        NRMAX  =  10        NPAR   =   2        ISYM   =   1
  IGU    =   1        ISA    =   1
  BROT   =  2.000     GSR    = 1.0000E-02 DROT   = 5.0000E-05 HROT   = 1.0000E-02
- LAMMIN:    0
- LAMMAX:   -1
+ LAMMIN:    1
+ LAMMAX:   10
  MPROJ:     0
      *** Flags:
  AIRYFL= F    BASTST= T    BATCH = F    CHLIST= T    CSFLAG= F    FLAGHF= T
@@ -36,25 +36,25 @@
           G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
  --------------------------------------------------------------------------
            BUILD CONFIGURATION:
-CMAKE BUILD DATE: 2023-01-12 at 11:24
-CMAKE BUILD TYPE: Release
-CODE GIT REVISION: 29ddde8bde5171a8584a179b03a600eff6f4dac6
-SYS: Darwin 22.2.0 x86_64
-COMPILER: /usr/local/bin/gfortran
+CMAKE BUILD DATE: 2023-01-16 at 15:14
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: a0cd61f07c3b3e19dc839ac9475200ee158d7895
+SYS: Darwin 20.3.0 x86_64
+COMPILER: /opt/intel/oneapi/compiler/2022.1.0/mac/bin/intel64/ifort
 COMPILE OPTIONS: 
  --------------------------------------------------------------------------
             CURRENT HARDWARE CONFIGURATION:
-
-      Model Name: MacBook Pro
-      Model Identifier: MacBookPro14,3
-      Processor Name: Quad-Core Intel Core i7
-      Processor Speed: 2.9 GHz
+ 
+      Model Name: Mac Pro
+      Model Identifier: MacPro7,1
+      Processor Name: 16-Core Intel Xeon W
+      Processor Speed: 3,2 GHz
       Number of Processors: 1
-      Total Number of Cores: 4
-      L2 Cache (per Core): 256 KB
-      L3 Cache: 8 MB
+      Total Number of Cores: 16
+      L2 Cache (per Core): 1 MB
+      L3 Cache: 22 MB
       Hyper-Threading Technology: Enabled
-      Memory: 16 GB
+      Memory: 96 GB
  --------------------------------------------------------------------------
 
  -----------------------------------------------------------------------------
@@ -86,11 +86,11 @@ COMPILE OPTIONS:
 
  ** LABEL:          DUMMY                                      
  ** POT NAME:  DUMMY POTENTIAL FOR TESTING PURPOSES            
- ** DATE:      Jan 12 18:09:05 2023
+ ** DATE:      Jan 16 16:20:17 2023
 
  *** WARNING:  NAIRY .NE. 1 BUT AIRYFL .EQ. .FALSE.
  ** NMAX= 500  NAIRY= 500
- ** TOTAL NUMBER OF ANISTROPIC TERMS IN POTENTIAL =  0
+ ** TOTAL NUMBER OF ANISTROPIC TERMS IN POTENTIAL = 10
 
  **  CC 2SIGMA ** RMU=  16.4700  BROT=  2.000  G-SR= 0.100E-01  +/-= 1
      E=5000.00  JTOT= 20.5   JLPAR=-1
@@ -219,12 +219,32 @@ COMPILE OPTIONS:
  119 10.5   1  10    27 13529.445
  120 10.5   1  10    29 13529.445
  121 10.5   1  10    31 13529.445
- ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS   0
-total :          0/         0 non zero elements (sparsity :   NaN%)
-storage efficiency :    NaN% (              0 used bytes /               0 allocated bytes)
+ILAM=  1 LAMNUM(ILAM) =    300
+ILAM=  2 LAMNUM(ILAM) =    743
+ILAM=  3 LAMNUM(ILAM) =   1101
+ILAM=  4 LAMNUM(ILAM) =   1631
+ILAM=  5 LAMNUM(ILAM) =   1971
+ILAM=  6 LAMNUM(ILAM) =   2421
+ILAM=  7 LAMNUM(ILAM) =   2614
+ILAM=  8 LAMNUM(ILAM) =   2885
+ILAM=  9 LAMNUM(ILAM) =   2870
+ILAM= 10 LAMNUM(ILAM) =   2929
+ ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS****
+ilam =   1 :        300/     14641 non zero elements (sparsity:   2.05%)
+ilam =   2 :        743/     14641 non zero elements (sparsity:   5.07%)
+ilam =   3 :       1101/     14641 non zero elements (sparsity:   7.52%)
+ilam =   4 :       1631/     14641 non zero elements (sparsity:  11.14%)
+ilam =   5 :       1971/     14641 non zero elements (sparsity:  13.46%)
+ilam =   6 :       2421/     14641 non zero elements (sparsity:  16.54%)
+ilam =   7 :       2614/     14641 non zero elements (sparsity:  17.85%)
+ilam =   8 :       2885/     14641 non zero elements (sparsity:  19.70%)
+ilam =   9 :       2870/     14641 non zero elements (sparsity:  19.60%)
+ilam =  10 :       2929/     14641 non zero elements (sparsity:  20.01%)
+total :      19465/    146410 non zero elements (sparsity : 13.29%)
+storage efficiency :  77.57% (         233580 used bytes /          301104 allocated bytes)
  ** BASTST=.TRUE.; TEST OF SUBROUTINE BASIS
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:     0
-      TIMING:  ELAPSED          / CPU          / MP RATIO    0.0 %
-      CURRENT DATE:  Jan 12 18:09:05 2023
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    5.1 %
+      CURRENT DATE:  Jan 16 16:20:17 2023
  ===============================================================================
