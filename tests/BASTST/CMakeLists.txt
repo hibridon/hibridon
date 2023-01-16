@@ -9,7 +9,7 @@ set(TEST_KMAX 500)
 set(TEST_T_MATRIX_SIZE kmax)
 set(TEST_LABELS "coverage")
 
-set(supported_bases 01 02 03 30)
+set(supported_bases 01 02 03 29 30)
 
 foreach(ibasty IN LISTS supported_bases)
   set(TEST_ID bastst_${ibasty})

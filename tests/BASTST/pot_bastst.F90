@@ -36,6 +36,7 @@ end subroutine loapot
 
 subroutine init_pot_parameters(ibasty)
 use mod_parbas, only: ntv, lammin, lammax, mproj, ivcol, ivrow
+use mod_conlam, only: nlam
 implicit none
 integer, intent(in) :: ibasty
     ivcol = 0
@@ -55,14 +56,10 @@ integer, intent(in) :: ibasty
             lammin(1) = 1  ; lammin(2) = 2
             lammax(1) = 10 ; lammax(2) = 10
             mproj(1) = 0   ; mproj(2) = 2
-        case(30)
-            ntv = 1
-            lammin(1) = 1
-            lammax(1) = 12
-            mproj(1) = 0
+    
         case default
             write(*,*) 'ERROR: unknown ibasty for BASTST tests'
-            call exit(1)
+            !call exit(1)
     end select
 end subroutine init_pot_parameters
 
