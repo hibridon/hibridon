@@ -21,27 +21,41 @@ end subroutine driver
 subroutine loapot(iunit, filnam)
 use mod_selb, only: ibasty
 use mod_parpot, only: potnam=>pot_name
-use mod_parbas, only: ntv, lammin, lammax, mproj, ivcol, ivrow
 implicit none
 
     integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
     character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)
     potnam = 'DUMMY POTENTIAL FOR TESTING PURPOSES'
 
-    ivcol = 0
-    ivrow = 0
-    select case (ibasty)
-        case (1)
-            ntv(1) = 1
-            lammin(1) = 2 ; lammax(1) = 2
-        case (2)
-            ntv(1) = 1
-            lammin(1) = 1 ; lammax(1) = 10
-            mproj(1) = 0
-    end select
+    call init_pot_parameters(ibasty)
 
     return
 end subroutine loapot
+
+
+
+subroutine init_pot_parameters(ibasty)
+use mod_parbas, only: ntv, lammin, lammax, mproj, ivcol, ivrow
+implicit none
+integer, intent(in) :: ibasty
+    ivcol = 0
+    ivrow = 0
+    select case (i)
+        case (1)
+            ntv(1) = 1
+            lammin(1) = 2
+            lammax(1) = 2
+        case (2)
+            ntv(1) = 1
+            lammin(1) = 1
+            lammax(1) = 10
+            mproj(1) = 0
+        case default
+            write(*,*) 'ERROR: unknown ibasty for BASTST tests'
+            call exit(1)
+    end select
+end subroutine init_pot_parameters
+
 
 !  -----------------------------------------------------------------------
 !  calculates the r-dependent coefficients in the collision of Ar with N2
