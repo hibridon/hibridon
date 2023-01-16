@@ -1,6 +1,6 @@
     BASTST
    3                             ibasty
-  T  T  F  F                     logdfl, airyfl, readpt, bastst
+  F  F  F  T                     logdfl, airyfl, readpt, bastst
     5.5000    9.0000     .1400   rstart, rendld, spac
   F                              prairy
   1.160      8.00    25.0  7.00  tolai, rincr, rendai, fstfac
