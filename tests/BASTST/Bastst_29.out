@@ -11,8 +11,8 @@
      *** CASYMTOP system parameters:
  NTERM  =   1        NUMPOT =   0        JMAX   =  10
  AROT   =  27.88     BROT   =  14.51     CROT   =  9.285     EMAX   =  1500.    
- LAMMIN:    1
- LAMMAX:   12
+ LAMMIN:    2
+ LAMMAX:    2
  MPROJ:     0
      *** Flags:
  AIRYFL= F    BASTST= T    BATCH = F    CHLIST= F    CSFLAG= F    FLAGHF= F
@@ -35,7 +35,7 @@
           G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
  --------------------------------------------------------------------------
            BUILD CONFIGURATION:
-CMAKE BUILD DATE: 2023-01-16 at 20:19
+CMAKE BUILD DATE: 2023-01-16 at 20:29
 CMAKE BUILD TYPE: Debug
 CODE GIT REVISION: 824de4b23745670578e26d001f092ff17bccea87
 SYS: Darwin 22.2.0 x86_64
@@ -85,7 +85,7 @@ COMPILE OPTIONS:
 
  ** LABEL:         BASTST                                      
  ** POT NAME:  DUMMY POTENTIAL FOR TESTING PURPOSES            
- ** DATE:      Jan 16 20:29:02 2023
+ ** DATE:      Jan 16 22:31:53 2023
 
  *** WARNING:  NAIRY .NE. 1 BUT AIRYFL .EQ. .FALSE.
  ** NMAX= 500  NAIRY= 500
@@ -151,10 +151,15 @@ COMPILE OPTIONS:
   53   9  -5   9  1493.274     0.0746  0.3480  0.9172 -0.1790  0.0066
 
   ILAM LAMBDA MU    ICOL IROW      I      IV2        VEE
- *** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS                0
+ILAM=   1  L1=  0 M1=  0  LAMNUM(ILAM) =      53
+ILAM=   2  L1=  1 M1=  1  LAMNUM(ILAM) =     145
+ILAM=   3  L1=  2 M1=  2  LAMNUM(ILAM) =     233
+ILAM=   4  L1=  3 M1=  0  LAMNUM(ILAM) =     252
+ILAM=   5  L1=  4 M1=  1  LAMNUM(ILAM) =     283
+ *** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS              966
  ** BASTST=.TRUE.; TEST OF SUBROUTINE BASIS
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:     0
-      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    5.2 %
-      CURRENT DATE:  Jan 16 20:29:02 2023
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    7.2 %
+      CURRENT DATE:  Jan 16 22:31:53 2023
  ===============================================================================
