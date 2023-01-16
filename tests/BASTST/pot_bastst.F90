@@ -50,6 +50,11 @@ integer, intent(in) :: ibasty
             lammin(1) = 1
             lammax(1) = 10
             mproj(1) = 0
+        case (3)
+            ntv(1) = 1
+            lammin(1) = 1  ; lammin(2) = 2
+            lammax(1) = 10 ; lammax(2) = 10
+            mproj(1) = 0   ; mproj(2) = 2
         case default
             write(*,*) 'ERROR: unknown ibasty for BASTST tests'
             call exit(1)
