@@ -40,7 +40,7 @@ implicit none
 integer, intent(in) :: ibasty
     ivcol = 0
     ivrow = 0
-    select case (i)
+    select case (ibasty)
         case (1)
             ntv(1) = 1
             lammin(1) = 2
