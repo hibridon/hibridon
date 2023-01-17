@@ -39,6 +39,7 @@ use mod_parbas, only: ntv, lammin, lammax, mproj, ivcol, ivrow
 use mod_conlam, only: nlam
 use mod_chiral, only: lms_chiral => lms
 use mod_asymln, only: lms_asymln => lms
+use mod_1sg1sg, only: lms_1sg1sg => lms
 implicit none
 integer, intent(in) :: ibasty
     ivcol = 0
@@ -58,6 +59,12 @@ integer, intent(in) :: ibasty
             lammin(1) = 1  ; lammin(2) = 2
             lammax(1) = 10 ; lammax(2) = 10
             mproj(1) = 0   ; mproj(2) = 2
+        case (28)
+            nlam = 3
+            allocate(lms_1sg1sg(nlam))
+            lms_1sg1sg(1)%l1 = 0 ; lms_1sg1sg(1)%l2 = 0 ;lms_1sg1sg(1)%ltot = 0
+            lms_1sg1sg(2)%l1 = 0 ; lms_1sg1sg(2)%l2 = 2 ;lms_1sg1sg(2)%ltot = 2
+            lms_1sg1sg(3)%l1 = 1 ; lms_1sg1sg(3)%l2 = 0 ;lms_1sg1sg(3)%ltot = 1
         case (29)
             nlam = 5
             allocate(lms_chiral(nlam))
