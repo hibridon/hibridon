@@ -15,7 +15,7 @@
    0
   F  F  F  F  F                  prlogd, prsmat, prt2, t2test, wrsmat
   F  F  F  F  F                  wrpart, prpart, prxsec, wrxsec, wavefl
-  F  F  F  F  F                  noprin, chlist, ipos, nucros, photof
+  F  T  F  F  F                  noprin, chlist, ipos, nucros, photof
   F  F  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
   F  F                           rsflag, boundc
   10 1500                         jmax, emax

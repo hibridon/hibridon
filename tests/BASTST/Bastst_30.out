@@ -15,7 +15,7 @@
  B2ROT  = 0.8171    
  J1/J2: 
      *** Flags:
- AIRYFL= F    BASTST= T    BATCH = F    CHLIST= F    CSFLAG= F    FLAGHF= F
+ AIRYFL= F    BASTST= T    BATCH = F    CHLIST= T    CSFLAG= F    FLAGHF= F
  FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= F    NOPRIN= F    NUCROS= F
  PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
  PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= T    WAVEFL= F
@@ -35,9 +35,9 @@
           G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
  --------------------------------------------------------------------------
            BUILD CONFIGURATION:
-CMAKE BUILD DATE: 2023-01-16 at 20:29
+CMAKE BUILD DATE: 2023-01-17 at 11:22
 CMAKE BUILD TYPE: Debug
-CODE GIT REVISION: 824de4b23745670578e26d001f092ff17bccea87
+CODE GIT REVISION: 4a68289e6183a36dae41c0fb214e430c24fc6e3f
 SYS: Darwin 22.2.0 x86_64
 COMPILER: /opt/intel/oneapi/compiler/2022.2.1/mac/bin/intel64/ifort
 COMPILE OPTIONS: 
@@ -85,7 +85,7 @@ COMPILE OPTIONS:
 
  ** LABEL:         BASTST                                      
  ** POT NAME:  DUMMY POTENTIAL FOR TESTING PURPOSES            
- ** DATE:      Jan 16 22:31:49 2023
+ ** DATE:      Jan 17 11:27:30 2023
 
  *** WARNING:  NAIRY .NE. 1 BUT AIRYFL .EQ. .FALSE.
  ** NMAX= 500  NAIRY= 500
@@ -6135,6 +6135,6 @@ ILAM=   3 LAMNUM(ILAM) =    3643
  ** BASTST=.TRUE.; TEST OF SUBROUTINE BASIS
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:     0
-      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO   27.3 %
-      CURRENT DATE:  Jan 16 22:31:49 2023
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO   26.1 %
+      CURRENT DATE:  Jan 17 11:27:30 2023
  ===============================================================================
