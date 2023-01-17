@@ -460,8 +460,13 @@ if (ien .eq. 1) then
 
   if (ready) goto 370
   if (bastst) then
-     write(6,140)
-     write(9,140)
+    call mtime (tcpuf, twallf)
+    tcpuf = tcpuf - tcpu0
+    twallf = twallf - twall0
+    call gettim(tcpuf,time)
+    call gettim(twallf,timew)
+    write(6,140)
+    write(9,140)
 140      format(' ** BASTST=.TRUE.; TEST OF SUBROUTINE BASIS')
      goto 420
   end if

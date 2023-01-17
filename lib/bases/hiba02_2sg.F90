@@ -578,7 +578,7 @@ if (clist .and. bastst) then
   write (6, 420) v2%get_num_nonzero_elements()
   write (9, 420) v2%get_num_nonzero_elements()
 420   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', &
-           i4)
+           i6)
 end if
 if(bastst) call v2%print_summary(unit=9)
 return

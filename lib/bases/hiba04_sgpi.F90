@@ -207,6 +207,9 @@ data nprsg,nprpi/7,14/
 nterm=ispar(1)
 isg=ispar(2)
 ipi=ispar(3)
+if ((isg == 0) .and. (ipi == 0)) then
+  stop 'at least one of isg and ipi is expected to be non zero'
+end if
 if(nterm.eq.1) then
   isg=1
   ipi=0
@@ -628,6 +631,9 @@ if(isg.ne.0) then
       eint(n)=e(3,3)
 100     continue
 110   continue
+end if
+if (n < 1) then
+  stop 'the total number of distinct levels is expected to be greater than 0'
 end if
 nlevel = n
 !  nlevel now contains the total number of distinct levels
@@ -1426,7 +1432,7 @@ if (isg .eq. 1 .and. ipi .eq. 0) then
   nterm=1
   if (isgpi .ne. 0) then
     write (6, 6) isgpi
-6     format ('  ISGPI SET EQUAL TO 0 BECAUSE ONLY SIGMA STATE')
+6     format ('  ISGPI SET EQUAL TO 0 INSTEAD OF ', i2, ' BECAUSE ONLY SIGMA STATE')
     isgpi=0
     ispar(4)=0
   endif
@@ -1435,7 +1441,7 @@ if (isg .eq. 0 .and. ipi .eq. 1) then
   nterm=2
   if (isgpi .ne. 0) then
     write (6, 10) isgpi
-10     format ('  ISGPI SET EQUAL TO 0 BECAUSE ONLY PI STATE')
+10     format ('  ISGPI SET EQUAL TO 0 INSTEAD OF ', i2, ' BECAUSE ONLY PI STATE')
     isgpi=0
     ispar(4)=0
   endif
@@ -1469,7 +1475,7 @@ if(isg.ne.0) then
 !  evibsg is E (see Kotlar et al., JMS 80, 86 (1980), Table II))
   do 15 i=1,nvibs
         if(isicod+2.gt.size(ispar,1)) stop 'isicod'
-        if(isrcod+7.gt.size(ispar,1)) stop 'isrcod'
+        if(isrcod+7.gt.size(rspar,1)) stop 'isrcod'
         if(iread.ne.0) then
       read (8,*,err=800) ivs,(ispar(isicod+j),j=1,2)
       ivibs(i)=ivs

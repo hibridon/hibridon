@@ -34,4 +34,5 @@ add_subdirectory(ohh2_j1)
 add_subdirectory(ohh2_j13)
 add_subdirectory(stp1sg)
 add_subdirectory(vfit)
+add_subdirectory(BASTST)
 

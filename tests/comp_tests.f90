@@ -52,6 +52,9 @@ program comp_tests
     case("stdout") ! Header ends at first occurence of "Hibridon>"
         num_header_lines(1) = get_first_occ_of("Hibridon>",ref)
         num_header_lines(2) = get_first_occ_of("Hibridon>",test)
+    case("out")
+        num_header_lines(1) = get_first_occ_of("** LABEL:",ref)
+        num_header_lines(2) = get_first_occ_of("** LABEL:",test)
     end select
 
     ! Compare numeric values between reference and test files
