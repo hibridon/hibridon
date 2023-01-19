@@ -1,0 +1,1 @@
+LSCREEN limits the number of lines that will be displayed at your terminal before prompting for a carriage return. This segmenting effects only the output of the commands [SHOW](SHOW,-SAVE,-and-READ) and the on-line [HELP](HELP) features of the Hibridon code.
