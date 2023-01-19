@@ -5,7 +5,7 @@
 [what does that mean ?](link_to_wiki_page)
 
 ---
-# Hibridon v5.0 alpha
+# Hibridon v5.0
 
 Computer Software for
 Molecular Inelastic Scattering and Photodissociation
