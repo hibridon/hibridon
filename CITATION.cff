@@ -22,7 +22,7 @@ authors:
   given-names: "François"
   orcid: "https://orcid.org/0000-0002-0664-2536"
 title: "Hibridon"
-version: 5.0.0
-doi: 10.5281/zenodo.1234
+version: 5.0
+doi:  10.5281/zenodo.7551616
 date-released: 2022-08-24
 url: "https://github.com/hibridon/hibridon"
