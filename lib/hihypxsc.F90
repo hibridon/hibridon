@@ -197,6 +197,7 @@ subroutine hypxsc(flname, a)
   ! Compute hyperfine XS
   call compute_xs(twmol, rmu, ered, spins, hf1, hf2, sigma)
   ! Print hyperfine cross sections
+  call print_xs(twmol, 6, ered, spins, hf1, hf2, sigma)
   call print_xs(twmol, hfxfil_unit, ered, spins, hf1, hf2, sigma)
 end subroutine hypxsc
 
@@ -446,7 +447,6 @@ subroutine print_xs(twmol, hfxfil_unit, ered, spins, hf1, hf2, sigma)
   real(8) :: xj, xf, xjp, xfp, ee
 
   ! Write header
-  write(6,"(a)") '%     E(CM-1)     JI     INI   FI      JF     INF   FF      CROSS SECTION (ANG^2)'
   write(hfxfil_unit,"(a)") '%     E(CM-1)     JI     INI   FI      JF     INF   FF      CROSS SECTION (ANG^2)'
 
   ee = ered*econv
