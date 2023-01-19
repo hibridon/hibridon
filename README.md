@@ -11,8 +11,8 @@ Computer Software for
 Molecular Inelastic Scattering and Photodissociation
 
 Documentation is available on
-- [http://www2.chem.umd.edu/groups/alexander/hibridon](http://www2.chem.umd.edu/groups/alexander/hibridon)
-- [<hibridon_root_path>/doc](doc)
+
+[https://github.com/hibridon/hibridon/wiki](https://github.com/hibridon/hibridon/wiki)
 
 Changes:
 - [CHANGELOG](CHANGELOG.md)
