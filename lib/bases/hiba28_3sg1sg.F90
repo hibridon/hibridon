@@ -274,6 +274,11 @@ do jj1 = 1, j1max
   call dgemm ('n','n',3,3,3,1.d0,wsig,3,u,3,0.d0,ham,3)
 !  diagonalize hamiltonian
   call dsyev('V','L',3,ham,3,eig,work,lwork,ierr)
+  if (ierr .ne. 0) then
+    write (6, "(a,i0,a)") ' *** ERROR IN CALL TO DSYEV; IERR=', ierr, ' ABORT ***'
+    write (9, "(a,i0,a)") ' *** ERROR IN CALL TO DSYEV; IERR=', ierr, ' ABORT ***'
+    stop
+  endif
   n1 = n1 + 1
   e1(n1) = eig(1)
   j1(n1) = jj1
