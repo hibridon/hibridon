@@ -290,7 +290,7 @@ do jj1 = 1, j1max
   if (ham(2,2) .lt. zero) then
     do kk = 1, 3
       do ll = 1,3
-        ham(kk,ll) = - ham(kk,ll)
+        ham(kk,ll) = -1d0 * ham(kk,ll)
       end do
     end do
   end if
