@@ -37,7 +37,8 @@
   - `NPAR` = 2 will ensure both lambda doublets
   - `NPARPI` = 1 just &epsilon; = 1 doublets
   - `NPARPI` = -1, just &epsilon; = -1 doublets
-  - `NPARSG`: number of spin doublets in <sup>2</sup>&Sigma; state included (NPAR = 2 will ensure both spin doublets)
+
+- `NPARSG`: number of spin doublets in <sup>2</sup>&Sigma; state included (NPAR = 2 will ensure both spin doublets)
 
 - `ISYMSG`: if ISYM =+1, then the electronic symmetry of the <sup>2</sup>&Sigma; state is sigma-plus if ISYM = -1, then the electronic symmetry is sigma-minus 
 
