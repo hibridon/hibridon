@@ -38,7 +38,11 @@
   - `NPARPI` = 1 just &epsilon; = 1 doublets
   - `NPARPI` = -1, just &epsilon; = -1 doublets
   - `NPARSG`: number of spin doublets in <sup>2</sup>&Sigma; state included (NPAR = 2 will ensure both spin doublets)
-- `ISYMSG`: if ISYM =+1, then the electronic symmetry of the <sup>2</sup>&Sigma; state is sigma-plus if ISYM = -1, then the electronic symmetry is sigma-minus ISA: s/a symmetry index, if the molecule is homonuclear (ihomo=t) then, if isa=+1 then only the s-levels (both for sigma and pi) are included in the basis, if isa=-1, then only the a-levels are included
+
+- `ISYMSG`: if ISYM =+1, then the electronic symmetry of the <sup>2</sup>&Sigma; state is sigma-plus if ISYM = -1, then the electronic symmetry is sigma-minus 
+
+- `ISA`: s/a symmetry index, if the molecule is homonuclear (ihomo=t) then, if isa=+1 then only the s-levels (both for sigma and pi) are included in the basis, if isa=-1, then only the a-levels are included
+
 - `ISG`: if isg=1 and ipi=0 then <sup>2</sup>&Sigma; + atom scattering
 
 - `IPI`: if ipi=1 and isg=0 then <sup>2</sup>&Pi; + atom scattering. If isg=1 and ipi=1 then <sup>2</sup>&Pi;-<sup>2</sup>&Sigma; + atom scattering
