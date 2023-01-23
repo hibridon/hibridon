@@ -270,8 +270,7 @@ do jj1 = 1, j1max
 !  transform to symmetrized basis:  (1) sigma=1, eps=+1; (2) sigma=1, eps=-1;
 !  sigma = 0, eps=+1
   u = uu / sq2
-  call dgemm ('n','n',3,3,3,1.d0,u,3,ham,3,0.d0,wsig,3)
-  call dgemm ('n','n',3,3,3,1.d0,wsig,3,u,3,0.d0,ham,3)
+  ham = matmul( matmul(u, ham), u)
 !  diagonalize hamiltonian
   call dsyev('V','L',3,ham,3,eig,work,lwork,ierr)
   if (ierr .ne. 0) then
@@ -292,7 +291,7 @@ do jj1 = 1, j1max
   j1(n1) = jj1
   is1(n1) = 3
 !  make sure sign of (2,2) element of eignvector matrix is positive (i.e. +1)
-  if (ham(2,2) .lt. zero .and. abs(ham(2,2)) .gt. 1d-10) then
+  if (ham(2,2) .lt. zero) then
     do kk = 1, 3
       do ll = 1,3
         ham(kk,ll) = -1d0 * ham(kk,ll)
