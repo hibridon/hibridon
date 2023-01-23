@@ -265,7 +265,6 @@ do jj1 = 1, j1max
     do jj = 1, 3
       ham(ii,jj) = b1rot * fnn1(ii,jj) - d1rot * fnn2(ii,jj) &
         + flmbda * hss(ii,jj) + gamma * hsr(ii,jj)
-        write(*,*) b1rot, fnn1(ii,jj), d1rot, fnn2(ii,jj), flmbda, hss(ii,jj), gamma, hsr(ii,jj)
     end do
   end do
 !  transform to symmetrized basis:  (1) sigma=1, eps=+1; (2) sigma=1, eps=-1;
