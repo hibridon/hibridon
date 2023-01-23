@@ -293,7 +293,6 @@ do jj1 = 1, j1max
   j1(n1) = jj1
   is1(n1) = 3
 !  make sure sign of (2,2) element of eignvector matrix is positive (i.e. +1)
-write(*,*) ham
   if (ham(2,2) .lt. zero) then
     do kk = 1, 3
       do ll = 1,3
@@ -301,7 +300,6 @@ write(*,*) ham
       end do
     end do
   end if
-  write(*,*) ham
 !  save eigenvectors
   do jj = 1, 3
     do kk = 1, 3
