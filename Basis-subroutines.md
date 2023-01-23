@@ -35,7 +35,7 @@ M. H. Alexander, Chem. Phys.  92 , 337 (1985);\
 G. C. Corey and M. H. Alexander, J. Chem. Phys.  85 , 5652 (1986).
 
 
-### [4. A<sup>1</sup>&Delta; molecule and a spherical atom - ba1del](Basis-subroutines---ba1del)
+### [4. Collisional Mixing of <sup>2</sup>&Pi; and <sup>2</sup>&Sigma; states of a diatomic molecule induced by a spherical atom](Basis-subroutines---basgpi)
 Ref: D. G. Sauder, D. Patel-Misra, and P. J. Dagdigian, J. Chem. Phys.  91 , 5316 (1989).
 
 [](ba2del.html) [](rightarrowsmall.gif)
