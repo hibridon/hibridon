@@ -835,29 +835,33 @@ end if
 !  the following only for safety. Checks that pot routine
 !  contains all required vib. levels in correct order
 !
-do 295 irow=1,n
-ior=iom(irow)
-ivr=nlv(irow)
-do 290 icol=1,irow
-ioc=iom(icol)
-ivc=nlv(icol)
-iterm=0
-if(ior.eq.ioc) then
-  if(ior.eq.2) iterm=1
-  if(ior.le.1) iterm=2
-else
-  if(ior.eq.1) iterm=3
-  if(ior.eq.2) iterm=4
-end if
-if(iterm.eq.0) stop 'chaos 4'
-do 290 ivb=1,ntv(iterm)
-290 if(ivrow(ivb,iterm).eq.ivr.and. &
-   ivcol(ivb,iterm).eq.ivc) goto 295
-write(6,291) ivr,ivc
-write(9,291) ivr,ivc
+do irow = 1, n
+  ior = iom(irow)
+  ivr = nlv(irow)
+  do icol = 1, irow
+    ioc = iom(icol)
+    ivc = nlv(icol)
+    iterm = 0
+    if (ior .eq. ioc) then
+      if (ior .eq. 2) iterm = 1
+      if (ior .le. 1) iterm = 2
+    else
+      if (ior .eq. 1) iterm = 3
+      if (ior .eq. 2) iterm = 4
+    end if
+    if (iterm .eq. 0) stop 'chaos 4'
+    do ivb = 1, ntv(iterm)
+      if (ivrow(ivb,iterm) /= ivr .or. ivcol(ivb,iterm) /= ivc) then
+        write(6,291) ivr,ivc
+        write(9,291) ivr,ivc
+        !call exit
+      end if
+    end do
+  end do
+end do
 291 format(/' VIBRATIONAL STATE NOT DEFINED IN POT',2i5)
-call exit
-295 continue
+
+
 i=0
 !
 !  i counts v2 elements
