@@ -4,7 +4,7 @@ contains
 ! sy3p2s (sav3p2s/ptr3p2s) defines, saves variables and reads            *
 !                  potentials for 3P atom + 2S atom                      *
 ! --------------------------------------------------------------------
-subroutine ba3p2s (j, l, is, jhold, ehold, ishold, nlevel, &
+subroutine ba3p2s (bqs, jhold, ehold, ishold, nlevel, &
      nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, &
      bastst, ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
@@ -18,8 +18,6 @@ subroutine ba3p2s (j, l, is, jhold, ehold, ishold, nlevel, &
 !  6060 (1983).  UNLIKE THE ROUTINE hiba3p2s.f~origPJD, THE SPIN-ORBIT
 !  COUPLING IS PARAMETERIZED WITH JUST TWO PARAMETERS and APERP, WORKED
 !  OUT IN MHA'S NOTES.  APAR AND APERP ARE ASSUMED TO BE CONSTANTS.
-!
-!  j12 array is in module mod_coj12 to pass to other subrs
 !
 !  author:  paul dagdigian
 !  current revision date:  14-jan-2019 by p.dagdigian
@@ -114,7 +112,6 @@ use mod_coeig2, only: t12, t32
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_coj12, only: j12
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
@@ -129,12 +126,14 @@ use mod_jtot, only: jjtot, jjlpar
 use mod_ja, only: jja
 use mod_el, only: ll
 use mod_hiutil, only: xf3j, xf9j
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
+type(bqs_type), intent(out) :: bqs
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 !  arrays in argument list
-dimension j(1), l(1), is(1),jhold(1),ehold(1),ishold(1)
+dimension jhold(1),ehold(1),ishold(1)
 !  matrices for transformation between atomic and molecular BF functions
 dimension c12(5,5), c32(3,3)
 !  quantum numbers for BF atomic and basis functions
@@ -156,10 +155,12 @@ data flam12 /-1.d0, 1.d0, 0.d0, 1.d0, 0.d0/, &
   stot12 /1.5d0, 1.5d0, 1.5d0, 0.5d0, 0.5d0/
 !  scratch arrays for computing asymmetric top energies and wave fns.
 dimension en0(4), en12(5), en32(3), vec(5,5), work(288)
-integer, pointer :: nterm, nstate
+integer, pointer :: nterm, nstate, npot
 real(8), pointer :: en1d
-nterm=>ispar(1); nstate=>ispar(2)
+nterm=>ispar(1); nstate=>ispar(2); npot=>ispar(4)
 en1d=>rspar(1)
+
+npot = 0
 
 zero = 0.d0
 two = 2.d0
@@ -265,6 +266,7 @@ if (nlevop .le. 0) then
 endif
 !
 !  set up CC channel basis
+call bqs%init(nmax)
 n = 0
 do 120 jj = 1, nlevel
   ji = jhold(jj)
@@ -283,14 +285,15 @@ do 120 jj = 1, nlevel
 !  here for correct orbital angular momentum
         n = n + 1
         if (n .gt. nmax) go to 130
-        l(n) = li
+        bqs%lq(n) = li
         cent(n) = li * (li + 1.)
-        is(n) = 3
-        j(n) = ji
-        j12(n) = j12i
+        bqs%inq(n) = 3
+        bqs%jq(n) = ji
+        bqs%j12(n) = j12i
+        bqs%length = n
 !  next two variables for transmission to ground subroutine
-        jja(n) = j(n)
-        ll(n) = l(n)
+        jja(n) = bqs%jq(n)
+        ll(n) = bqs%lq(n)
         eint(n) = ehold(jj)
       end if
 110     continue
@@ -334,8 +337,8 @@ if (bastst) then
 255   format(/' CHANNEL BASIS FUNCTIONS' &
       /'   N   S   J   J12   L      EINT(CM-1)')
   do 265  i = 1, n
-    write (6, 260) i, is(i), j(i), j12(i), l(i), eint(i) * econv
-    write (9, 260) i, is(i), j(i), j12(i), l(i), eint(i) * econv
+    write (6, 260) i, bqs%inq(i), bqs%jq(i), bqs%j12(i), bqs%lq(i), eint(i) * econv
+    write (9, 260) i, bqs%inq(i), bqs%jq(i), bqs%j12(i), bqs%lq(i), eint(i) * econv
 260     format (3i4, 2i5, f13.3)
 265   continue
 end if
@@ -393,8 +396,8 @@ do 320 lb = 1, nlam
   inum = 0
   do icol= 1, n
     do irow = icol, n
-      call vlm3p2s (j(irow), j12(irow), l(irow), &
-        j(icol), j12(icol), l(icol), jtot, lb, vee)
+      call vlm3p2s (bqs%jq(irow), bqs%j12(irow), bqs%lq(irow), &
+        bqs%jq(icol), bqs%j12(icol), bqs%lq(icol), jtot, lb, vee)
       if (vee .ne. 0) then
         i = i + 1
         inum = inum + 1

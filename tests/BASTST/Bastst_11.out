@@ -1,0 +1,346 @@
+      BASTST                                     
+ DUMMY POTENTIAL FOR TESTING PURPOSES            
+ ==============================
+     *** Parameters:
+ JTOT1  =  20        JTOT2  =  20        JTOTD  =   5        JLPAR  =   1
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  48        IPRINT =   1
+ FSTFAC =  15.00     RINCR  =  1.000     RCUT   =  30.00     RENDAI =  1.000    
+ RENDLD =  1.000     RSTART =  1.000     SPAC   = 0.1000     TOLAI  =  1.000    
+ XMU    =  16.47    
+     *** 1-DELTA system parameters:
+ NTERM  =   2        JMAX   =  10        IGU    =   1        ISA    =   0
+ NPAR   =   2
+ BROT   = 0.8000     Q      = 2.0000E-02
+ LAMMIN:    1   4
+ LAMMAX:    1   4
+ MPROJ:     0   4
+     *** Flags:
+ AIRYFL= F    BASTST= T    BATCH = F    CHLIST= T    CSFLAG= F    FLAGHF= F
+ FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= F    NOPRIN= F    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= F    WAVEFL= F
+ WRPART= F    WRSMAT= F    WRXSEC= F    BOUNDC= F
+ ** Energies:     5000.000000
+ NOUT: -2; JOUT:  0   2
+ INDOUT:    0   1
+ ==============================
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2023-01-24 at 10:25
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: 404b2e914bad976f0789d6d349fe3971e0cb99a1
+SYS: Darwin 22.2.0 x86_64
+COMPILER: /opt/intel/oneapi/compiler/2022.2.1/mac/bin/intel64/ifort
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+ 
+      Model Name: MacBook Pro
+      Model Identifier: MacBookPro14,3
+      Processor Name: Quad-Core Intel Core i7
+      Processor Speed: 2.9 GHz
+      Number of Processors: 1
+      Total Number of Cores: 4
+      L2 Cache (per Core): 256 KB
+      L3 Cache: 8 MB
+      Hyper-Threading Technology: Enabled
+      Memory: 16 GB
+ --------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ All publications resulting from use of the integrators included in the
+ Hibridon code must include the following reference:
+
+ D. E. Manolopoulos, J. Chem. Phys. 85, 6425 (1986); M. H. Alexander and D. E.
+ Manolopoulos, J. Chem. Phys. 80, 2044 (1987).
+
+ All publications involving the determination ofphotodissociation cross sections
+ must also include the following reference:
+
+ M. H. Alexander, Comput. Phys. Commun, 75, 87 (1993).
+
+ All publications investigating flux redistribution must include the following references:
+
+ M. H. Alexander, J. Chem. Phys. 95, 8931 (1991); D. E. Manolopoulos and
+ M. H. Alexander, J. Chem. Phys.  97, 2527 (1992).
+
+ All publications resulting from use of the Hibridon package must include
+ the following reference:
+
+ HIBRIDON is a package of programs for the time-independent quantum treatment
+ of inelastic collisions and photodissociation written by M. H. Alexander,
+ D. E.  Manolopoulos, H.-J. Werner, and B. Follmeg, with contributions by
+ P. F. Vohralik, D. Lemoine, G. Corey, B. Johnson, T. Orlikowski, A. Berning,
+ A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly, G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J. Klos, and F. Lique
+ -----------------------------------------------------------------------------
+
+ ** LABEL:          BASTST                                     
+ ** POT NAME:  DUMMY POTENTIAL FOR TESTING PURPOSES            
+ ** DATE:      Jan 24 10:33:57 2023
+
+ *** WARNING:  NAIRY .NE. 1 BUT AIRYFL .EQ. .FALSE.
+ ** NMAX= 500  NAIRY= 500
+ ** NLAM= 0 RESET TO NLAM= 2    IN BASIS
+
+ **  CC 1DELTA ** RMU=  16.4700  BROT=  0.800
+     E=5000.00  JTOT= 20   JLPAR= 1
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=   30.00
+
+   N  J  EPS    L    EINT(CM-1)
+   1   2  -1    19    37.440
+   2   2  -1    21    37.440
+   3   2   1    18    38.160
+   4   2   1    20    38.160
+   5   2   1    22    38.160
+   6   3  -1    18    41.160
+   7   3  -1    20    41.160
+   8   3  -1    22    41.160
+   9   3   1    17    44.040
+  10   3   1    19    44.040
+  11   3   1    21    44.040
+  12   3   1    23    44.040
+  13   4  -1    17    45.000
+  14   4  -1    19    45.000
+  15   4  -1    21    45.000
+  16   4  -1    23    45.000
+  17   4   1    16    53.000
+  18   4   1    18    53.000
+  19   4   1    20    53.000
+  20   4   1    22    53.000
+  21   4   1    24    53.000
+  22   5  -1    16    48.000
+  23   5  -1    18    48.000
+  24   5  -1    20    48.000
+  25   5  -1    22    48.000
+  26   5  -1    24    48.000
+  27   5   1    15    66.000
+  28   5   1    17    66.000
+  29   5   1    19    66.000
+  30   5   1    21    66.000
+  31   5   1    23    66.000
+  32   5   1    25    66.000
+  33   6  -1    15    48.960
+  34   6  -1    17    48.960
+  35   6  -1    19    48.960
+  36   6  -1    21    48.960
+  37   6  -1    23    48.960
+  38   6  -1    25    48.960
+  39   6   1    14    84.240
+  40   6   1    16    84.240
+  41   6   1    18    84.240
+  42   6   1    20    84.240
+  43   6   1    22    84.240
+  44   6   1    24    84.240
+  45   6   1    26    84.240
+  46   7  -1    14    46.440
+  47   7  -1    16    46.440
+  48   7  -1    18    46.440
+  49   7  -1    20    46.440
+  50   7  -1    22    46.440
+  51   7  -1    24    46.440
+  52   7  -1    26    46.440
+  53   7   1    13   109.160
+  54   7   1    15   109.160
+  55   7   1    17   109.160
+  56   7   1    19   109.160
+  57   7   1    21   109.160
+  58   7   1    23   109.160
+  59   7   1    25   109.160
+  60   7   1    27   109.160
+  61   8  -1    13    38.760
+  62   8  -1    15    38.760
+  63   8  -1    17    38.760
+  64   8  -1    19    38.760
+  65   8  -1    21    38.760
+  66   8  -1    23    38.760
+  67   8  -1    25    38.760
+  68   8  -1    27    38.760
+  69   8   1    12   142.440
+  70   8   1    14   142.440
+  71   8   1    16   142.440
+  72   8   1    18   142.440
+  73   8   1    20   142.440
+  74   8   1    22   142.440
+  75   8   1    24   142.440
+  76   8   1    26   142.440
+  77   8   1    28   142.440
+  78   9  -1    12    24.000
+  79   9  -1    14    24.000
+  80   9  -1    16    24.000
+  81   9  -1    18    24.000
+  82   9  -1    20    24.000
+  83   9  -1    22    24.000
+  84   9  -1    24    24.000
+  85   9  -1    26    24.000
+  86   9  -1    28    24.000
+  87   9   1    11   186.000
+  88   9   1    13   186.000
+  89   9   1    15   186.000
+  90   9   1    17   186.000
+  91   9   1    19   186.000
+  92   9   1    21   186.000
+  93   9   1    23   186.000
+  94   9   1    25   186.000
+  95   9   1    27   186.000
+  96   9   1    29   186.000
+  97  10  -1    11     0.000
+  98  10  -1    13     0.000
+  99  10  -1    15     0.000
+ 100  10  -1    17     0.000
+ 101  10  -1    19     0.000
+ 102  10  -1    21     0.000
+ 103  10  -1    23     0.000
+ 104  10  -1    25     0.000
+ 105  10  -1    27     0.000
+ 106  10  -1    29     0.000
+ 107  10   1    10   242.000
+ 108  10   1    12   242.000
+ 109  10   1    14   242.000
+ 110  10   1    16   242.000
+ 111  10   1    18   242.000
+ 112  10   1    20   242.000
+ 113  10   1    22   242.000
+ 114  10   1    24   242.000
+ 115  10   1    26   242.000
+ 116  10   1    28   242.000
+ 117  10   1    30   242.000
+ILAM=  1 LAMNUM(ILAM) =   300
+ILAM=  2 LAMNUM(ILAM) =  1582
+ ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS1882
+  **  FINAL CHANNEL LIST AFTER BASIS
+
+   N  J  EPS    L    EINT(CM-1)
+   1   2  -1    19    37.440
+   2   2  -1    21    37.440
+   3   2   1    18    38.160
+   4   2   1    20    38.160
+   5   2   1    22    38.160
+   6   3  -1    18    41.160
+   7   3  -1    20    41.160
+   8   3  -1    22    41.160
+   9   3   1    17    44.040
+  10   3   1    19    44.040
+  11   3   1    21    44.040
+  12   3   1    23    44.040
+  13   4  -1    17    45.000
+  14   4  -1    19    45.000
+  15   4  -1    21    45.000
+  16   4  -1    23    45.000
+  17   4   1    16    53.000
+  18   4   1    18    53.000
+  19   4   1    20    53.000
+  20   4   1    22    53.000
+  21   4   1    24    53.000
+  22   5  -1    16    48.000
+  23   5  -1    18    48.000
+  24   5  -1    20    48.000
+  25   5  -1    22    48.000
+  26   5  -1    24    48.000
+  27   5   1    15    66.000
+  28   5   1    17    66.000
+  29   5   1    19    66.000
+  30   5   1    21    66.000
+  31   5   1    23    66.000
+  32   5   1    25    66.000
+  33   6  -1    15    48.960
+  34   6  -1    17    48.960
+  35   6  -1    19    48.960
+  36   6  -1    21    48.960
+  37   6  -1    23    48.960
+  38   6  -1    25    48.960
+  39   6   1    14    84.240
+  40   6   1    16    84.240
+  41   6   1    18    84.240
+  42   6   1    20    84.240
+  43   6   1    22    84.240
+  44   6   1    24    84.240
+  45   6   1    26    84.240
+  46   7  -1    14    46.440
+  47   7  -1    16    46.440
+  48   7  -1    18    46.440
+  49   7  -1    20    46.440
+  50   7  -1    22    46.440
+  51   7  -1    24    46.440
+  52   7  -1    26    46.440
+  53   7   1    13   109.160
+  54   7   1    15   109.160
+  55   7   1    17   109.160
+  56   7   1    19   109.160
+  57   7   1    21   109.160
+  58   7   1    23   109.160
+  59   7   1    25   109.160
+  60   7   1    27   109.160
+  61   8  -1    13    38.760
+  62   8  -1    15    38.760
+  63   8  -1    17    38.760
+  64   8  -1    19    38.760
+  65   8  -1    21    38.760
+  66   8  -1    23    38.760
+  67   8  -1    25    38.760
+  68   8  -1    27    38.760
+  69   8   1    12   142.440
+  70   8   1    14   142.440
+  71   8   1    16   142.440
+  72   8   1    18   142.440
+  73   8   1    20   142.440
+  74   8   1    22   142.440
+  75   8   1    24   142.440
+  76   8   1    26   142.440
+  77   8   1    28   142.440
+  78   9  -1    12    24.000
+  79   9  -1    14    24.000
+  80   9  -1    16    24.000
+  81   9  -1    18    24.000
+  82   9  -1    20    24.000
+  83   9  -1    22    24.000
+  84   9  -1    24    24.000
+  85   9  -1    26    24.000
+  86   9  -1    28    24.000
+  87   9   1    11   186.000
+  88   9   1    13   186.000
+  89   9   1    15   186.000
+  90   9   1    17   186.000
+  91   9   1    19   186.000
+  92   9   1    21   186.000
+  93   9   1    23   186.000
+  94   9   1    25   186.000
+  95   9   1    27   186.000
+  96   9   1    29   186.000
+  97  10  -1    11     0.000
+  98  10  -1    13     0.000
+  99  10  -1    15     0.000
+ 100  10  -1    17     0.000
+ 101  10  -1    19     0.000
+ 102  10  -1    21     0.000
+ 103  10  -1    23     0.000
+ 104  10  -1    25     0.000
+ 105  10  -1    27     0.000
+ 106  10  -1    29     0.000
+ 107  10   1    10   242.000
+ 108  10   1    12   242.000
+ 109  10   1    14   242.000
+ 110  10   1    16   242.000
+ 111  10   1    18   242.000
+ 112  10   1    20   242.000
+ 113  10   1    22   242.000
+ 114  10   1    24   242.000
+ 115  10   1    26   242.000
+ 116  10   1    28   242.000
+ 117  10   1    30   242.000
+ ** BASTST=.TRUE.; TEST OF SUBROUTINE BASIS
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:     0
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    1.6 %
+      CURRENT DATE:  Jan 24 10:33:57 2023
+ ===============================================================================

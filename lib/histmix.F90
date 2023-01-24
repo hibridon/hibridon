@@ -36,9 +36,10 @@ use constants, only: econv, xmconv, ang2 => ang2c
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam, mtime, gettim
 use mod_hismat, only: sread, rdhead, sinqr
-use mod_hitypes, only: packed_base_type
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h, o-z)
-type(packed_base_type) :: packed_base
+type(bqs_type) :: packed_bqs
+type(bqs_type) :: row_bqs
 character*(*) flnam1, flnam2
 character*20  cdate1, cdate2
 character*40  smtfil1, smtfil2
@@ -57,7 +58,7 @@ dimension e(narray,narray), eig(narray), vec(narray,narray), &
 !     for transitions out of the 2 perturbed levels,the second 2 columns
 !     will contain cross sections for transitions into these levels
 double precision, dimension(:, :), allocatable :: sigma
-integer, dimension(:), allocatable :: iptsng, ipttrp, jq, lq, inq
+integer, dimension(:), allocatable :: iptsng, ipttrp
 double precision, dimension(:), allocatable :: sreal, simag
 !     storage for s-matrix elements:
 !     second letter is real (r), imaginary (i)
@@ -395,16 +396,11 @@ jlpar = 1
 irdsng = 1
 irdtrp = 1
 !
-allocate(jq(mmaxst), stat=ialloc)
-if (ialloc .ne. 0) goto 4003
-allocate(lq(mmaxst), stat=ialloc)
-if (ialloc .ne. 0) goto 4004
-allocate(inq(mmaxst), stat=ialloc)
-if (ialloc .ne. 0) goto 4005
 allocate(sreal(mmaxst * (mmaxst + 1) / 2), stat=ialloc)
-if (ialloc .ne. 0) goto 4006
+if (ialloc .ne. 0) goto 4003
 allocate(simag(mmaxst * (mmaxst + 1) / 2), stat=ialloc)
 if (ialloc .ne. 0) goto 4007
+call row_bqs%init(mmaxst)
 allocate(srs(0:jfinl1, 2, mmax2s), stat=ialloc)
 if (ialloc .ne. 0) goto 4008
 allocate(sis(0:jfinl1, 2, mmax2s), stat=ialloc)
@@ -447,14 +443,14 @@ lngtht = 0
 !     (overwritten with number of open channels)
    nopen = -1
    call sread (0, sreal, simag, jtot1, jlpar1, &
-        nu1, jq, lq, inq, packed_base, &
+        nu1, row_bqs, packed_bqs, &
         1, mmax, nopen, ierr)
    if (ierr .lt. -1) then
       write(6,102)
 102       format(/' ** READ ERROR IN STMIX. ABORT **'/)
       goto 1000
    end if
-   lngth1 = packed_base%length
+   lngth1 = packed_bqs%length
    sngsmt = .true.
    jlp = 1 - (jlpar1 - 1)/2
 !     copy s-matrix for this jtot1/jlpar1
@@ -466,9 +462,9 @@ lngtht = 0
       exsmtn(jtot1,1) = .true.
    end if
    do i = 1, lngth1
-      js(jtot1,jlp,i) = packed_base%jpack(i)
-      ins(jtot1,jlp,i) = packed_base%inpack(i)
-      ls(jtot1,jlp,i) =packed_base%lpack(i)
+      js(jtot1,jlp,i) = packed_bqs%jq(i)
+      ins(jtot1,jlp,i) = packed_bqs%inq(i)
+      ls(jtot1,jlp,i) =packed_bqs%lq(i)
    end do
    do ii = 1, len2
       srs(jtot1,jlp,ii) = sreal(ii)
@@ -491,13 +487,13 @@ if (irdtrp.eq.1) then
 !     (overwritten with number of open channels)
    nopen = -1
    call sread (0, sreal, simag, jtot2, jlpar2, &
-        nu2, jq, lq, inq, packed_base, &
+        nu2, row_bqs, packed_bqs, &
         11, mmax, nopen, ierr)
    if (ierr .lt. -1) then
       write(6,102)
       goto 1000
    end if
-   lngth2 = packed_base%length
+   lngth2 = packed_bqs%length
 
    trpsmt = .true.
    jlp = 1 - (jlpar2 - 1)/2
@@ -511,9 +507,9 @@ if (irdtrp.eq.1) then
       exsmtn(jtot2,2) = .true.
    end if
    do i = 1, lngth2
-      jt(jtot2,jlp,i) = packed_base%jpack(i)
-      intt(jtot2,jlp,i) = packed_base%inpack(i)
-      lt(jtot2,jlp,i) = packed_base%lpack(i)
+      jt(jtot2,jlp,i) = packed_bqs%jq(i)
+      intt(jtot2,jlp,i) = packed_bqs%inq(i)
+      lt(jtot2,jlp,i) = packed_bqs%lq(i)
    end do
    do ii = 1, len2
       srt(jtot2,jlp,ii) = sreal(ii)
@@ -666,9 +662,6 @@ write(6,400) elaps, cpu
 4009 deallocate(srs)
 4008 deallocate(simag)
 4007 deallocate(sreal)
-4006 deallocate(inq)
-4005 deallocate(lq)
-4004 deallocate(jq)
 4003 deallocate(sigma)
 4002 deallocate(ipttrp)
 4001 deallocate(iptsng)

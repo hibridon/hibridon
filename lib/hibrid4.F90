@@ -24,12 +24,8 @@ subroutine sprint (fname, ia)
 !   current revision date: 19-jun-2015 by p.dagdigian
 ! ----------------------------------------------------------------------
 use mod_cosout, only : nnout, jout
-use mod_coj12p, only: j12pk
 use constants
 use mod_codim, only: nmax => mmax
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 use mod_coinhl, only: jlev => inhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
@@ -40,7 +36,7 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_hiutil, only: gennam
 use mod_hismat, only: sread, rdhead
-use mod_hitypes, only: packed_base_type
+use mod_hitypes, only: bqs_type
 implicit none
 character*(*), intent(in) :: fname
 integer, intent(in) :: ia(4)
@@ -50,7 +46,8 @@ integer :: i, iadr, ienerg, ierr, ij
 integer :: j, ja, je, jfinal, jfirst, jj1, jj2, jlp, jlpar, jtot, jtota, jtotb, jtotd
 integer :: lenx, ncol, nlevel, nlevop, nopen, nu,nud, numax, numin
 
-type(packed_base_type) :: packed_base
+type(bqs_type) :: row_bqs
+type(bqs_type) :: packed_bqs
 character*20 cdate
 character*40 xname
 logical  existf, csflag, flaghf, flagsu, twomol, nucros
@@ -118,8 +115,9 @@ jtotb = min0(jtotb, jfinal)
 !
 iadr=0
 30 nopen = 0
+
 call sread (iadr, sreal, simag, jtot, jlpar, nu, &
-                  jq, lq, inq, packed_base, &
+                  row_bqs, packed_bqs, &
                    1, nmax, nopen, ierr)
 if(csflag) jlpar=0
 if(ierr.eq.-1) goto 400
@@ -151,48 +149,48 @@ if (nnout.le.0) then
   write (6, 290) 'N    ', (j, j=1, nopen)
   if (.not. twomol) then
     if (flaghf) then
-      write (6, 260) 'J    ', (jq(j)+0.5d0, j=1, nopen)
+      write (6, 260) 'J    ', (row_bqs%jq(j)+0.5d0, j=1, nopen)
 260       format (1x, (a), (t10, 20(f6.1)) )
     else
-      write (6, 290) 'J    ', (jq(j), j=1, nopen)
+      write (6, 290) 'J    ', (row_bqs%jq(j), j=1, nopen)
     end if
   else
-    write (6, 270) 'J1/J2', (jq(j), j=1, nopen)
+    write (6, 270) 'J1/J2', (row_bqs%jq(j), j=1, nopen)
 270     format(1x, (a), (t10, 10i6) )
   end if
-  write (6, 290) 'L    ', (lq(j), j=1, nopen)
-  write (6, 290) 'INDEX', (inq(j), j=1, nopen)
+  write (6, 290) 'L    ', (row_bqs%lq(j), j=1, nopen)
+  write (6, 290) 'INDEX', (row_bqs%inq(j), j=1, nopen)
 end if
   write (6, 280)
 280   format(/' ROW INDICES:')
-  write (6, 290) 'N    ', (j, j=1, packed_base%length)
+  write (6, 290) 'N    ', (j, j=1, packed_bqs%length)
   if (.not. is_j12(ibasty)) then
     if (flaghf) then
-      write (6, 260) 'J    ', (packed_base%jpack(j)+0.5d0, j=1, packed_base%length)
+      write (6, 260) 'J    ', (packed_bqs%jq(j)+0.5d0, j=1, packed_bqs%length)
     else
-      write (6, 290) 'J    ', (packed_base%jpack(j), j=1, packed_base%length)
+      write (6, 290) 'J    ', (packed_bqs%jq(j), j=1, packed_bqs%length)
     end if
-    write (6, 290) 'IS   ', (packed_base%inpack(j), j=1, packed_base%length)
+    write (6, 290) 'IS   ', (packed_bqs%inq(j), j=1, packed_bqs%length)
   else
     if (ibasty.eq.12 .or. ibasty.eq.15) then
       ASSERT(.false.)
-      write (6, 290) 'J    ', (packed_base%jpack(j), j=1, packed_base%length)
-      write (6, 260) 'JA   ', (packed_base%inpack(j)+0.5d0, j=1, packed_base%length)
-      write (6, 260) 'J12  ', (j12pk(j)+0.5d0, j=1, packed_base%length)
+      write (6, 290) 'J    ', (packed_bqs%jq(j), j=1, packed_bqs%length)
+      write (6, 260) 'JA   ', (packed_bqs%inq(j)+0.5d0, j=1, packed_bqs%length)
+      write (6, 260) 'J12  ', (packed_bqs%j12(j)+0.5d0, j=1, packed_bqs%length)
     else
-      write (6, 270) 'J1/J2', (packed_base%jpack(j), j=1, packed_base%length)
-      write (6, 270) 'J12', (j12pk(j), j=1, packed_base%length)
-      write (6, 270) 'IS', (packed_base%inpack(j), j=1, packed_base%length)
+      write (6, 270) 'J1/J2', (packed_bqs%jq(j), j=1, packed_bqs%length)
+      write (6, 270) 'J12', (packed_bqs%j12(j), j=1, packed_bqs%length)
+      write (6, 270) 'IS', (packed_bqs%inq(j), j=1, packed_bqs%length)
     endif
   end if
-  write (6, 290) 'L    ', (packed_base%lpack(j), j=1, packed_base%length)
+  write (6, 290) 'L    ', (packed_bqs%lq(j), j=1, packed_bqs%length)
 290   format(1x, (a), (t10, 10i6))
 ncol = nopen
-if(nnout.gt.0) ncol = packed_base%length
+if(nnout.gt.0) ncol = packed_bqs%length
 write (6, 300) 'REAL PART OF THE S-MATRIX'
 300 format(/1x, (a))
-do 330 ja = 1, packed_base%length, 10
-  je=min0(ja+9,packed_base%length)
+do 330 ja = 1, packed_bqs%length, 10
+  je=min0(ja+9,packed_bqs%length)
   write (6, 310) (j, j = ja, je)
 310   format(10i12)
   ij=1-nmax
@@ -203,8 +201,8 @@ do 330 ja = 1, packed_base%length, 10
 320   ij=ij+1
 330 continue
 write (6, 300) 'IMAGINARY PART OF THE S-MATRIX'
-do 350 ja = 1, packed_base%length, 10
-  je=min0(ja+9,packed_base%length)
+do 350 ja = 1, packed_bqs%length, 10
+  je=min0(ja+9,packed_bqs%length)
   write (6, 310) (j, j = ja, je)
   ij=1-nmax
   do 340 i = 1, ncol
@@ -290,7 +288,7 @@ ASSERT(iwavsk > 0)
 end
 !
 ! -------------------------------------------------------------------------
-subroutine wavewr(jtot,jlpar,nu,nch,rstart,rendld)
+subroutine wavewr(jtot,jlpar,nu,nch,rstart,rendld, bqs)
 ! -------------------------------------------------------
 !  subroutine to write initial header information on wavefunction file
 !  (file jobname.WFU, logical unit 22), unit is opened in subroutine openfi
@@ -318,15 +316,13 @@ use mod_coamat, only: amat ! amat(25)
 #if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_NOVEC)
 use mod_coamat, only: amat ! amat(25)
 #endif
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 use mod_par, only: csflag, flaghf, wrsmat, photof
 use funit
 use mod_wave, only: irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, get_wfu_rec1_length, wfu_format_version
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
 use mod_hiutil, only: dater
+use mod_hitypes, only: bqs_type
 implicit none
 integer, intent(in) :: jtot
 integer, intent(in) :: jlpar
@@ -334,6 +330,7 @@ integer, intent(in) :: nu
 integer, intent(in) :: nch
 real(8), intent(in) :: rstart
 real(8), intent(in) :: rendld
+type(bqs_type), intent(in) :: bqs
 
 character*20 :: cdate
 
@@ -343,7 +340,7 @@ integer(8) :: end_of_rec1_pos
 #if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_POINTER)
 real, pointer :: amat_as_vec(:)
 #endif
-
+ASSERT( bqs%length == nch )
 ifil = FUNIT_WFU
 
 nchwfu = nch
@@ -372,8 +369,8 @@ write (ifil, err=950) char(0), char(0), char(0), char(0)
 write (ifil, err=950) jtot, jlpar, nu, nch, csflag, flaghf, photof
 write (ifil, err=950) ered, rmu, rstart, rendld
 !
-write (ifil, err=950) (jq(i), i=1, nch), (lq(i), i=1, nch), &
-     (inq(i), i=1, nch)
+write (ifil, err=950) (bqs%jq(i), i=1, nch), (bqs%lq(i), i=1, nch), &
+     (bqs%inq(i), i=1, nch)
 write (ifil, err=950) (eint(i), i=1, nch)
 !
 write (ifil, err=950) 'ENDWFUR', char(1)
@@ -393,7 +390,7 @@ end subroutine wavewr
 !     ------------------------------------------------------------------
 !     reads header file for wavefunction (wfu file)
 subroutine waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto,jflux, &
-     rstart,rendld,rinf)
+     rstart,rendld,rinf, rbesself, bqs)
 use mod_wave, only: irec, ifil, nchwfu, ipos2, ipos3, nrlogd, inflev, get_wfu_rec1_length, wfu_format_version
 use mod_coeint, only: eint
 #if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_DISTINCT)
@@ -409,15 +406,8 @@ use mod_coamat, only: amat ! amat(25)
 use mod_cobmat, only: bmat => psii ! bmat(25), here bmat is used as a vector 
 use mod_cotq1, only: dpsir ! dpsir(25)
 use mod_cotq2, only: dpsii ! dpsii(25)
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 use mod_coisc1, only: isc1 ! isc1(25)
-use mod_cosc1, only: sc1 ! sc1(10)
-use mod_cosc2, only: sc2 ! sc2(10)
-use mod_cosc3, only: sc3 ! sc3(10)
-use mod_cosc4, only: sc4 ! sc4(10)
-use mod_cosc5, only: sc5 ! sc5(10)
+use mod_cosc1, only: pk => sc1 ! sc1(10)  ! pk (asymptotic wavevectors)
 use mod_cow, only: w => w_as_vec ! w(25)
 use mod_cozmat, only: zmat => zmat_as_vec ! zmat(25)
 use mod_par, only: csflag, flaghf, photof
@@ -425,6 +415,7 @@ use funit
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
 use mod_hivector, only: dset
+use mod_hitypes, only: rbesself_type, bqs_type
 implicit none
 integer, intent(out) :: jtot
 integer, intent(out) :: jlpar
@@ -437,7 +428,8 @@ integer, intent(out) :: jflux
 real(8), intent(out) :: rstart
 real(8), intent(out) :: rendld
 real(8), intent(out) :: rinf
-
+type(rbesself_type), intent(out) :: rbesself
+type(bqs_type), intent(out) :: bqs
 
 character*48 :: oldlab, oldpot
 character*20 :: olddat
@@ -486,9 +478,11 @@ write (6, 251) oldpot
 251 format('    INITIAL POT NAME: ', (a))
 !
 !     Read in channel labels
-read (ifil, end=900, err=950) (jq(i), i=1, nch), &
-     (lq(i), i=1, nch), (inq(i), i=1, nch), &
+call bqs%init(nch)
+read (ifil, end=900, err=950) (bqs%jq(i), i=1, nch), &
+     (bqs%lq(i), i=1, nch), (bqs%inq(i), i=1, nch), &
      (eint(i), i=1, nch)
+bqs%length = nch
 !
 ! start reading in information from record 2 here
 read (ifil, end=900, err=950, pos=iwavsk(2)) nrecs, nopen, &
@@ -496,14 +490,16 @@ read (ifil, end=900, err=950, pos=iwavsk(2)) nrecs, nopen, &
 npts = nrecs - 3
 ! read in wavevectors, bessel functions j, j', n, n'
 ! first initialize to zero for all channels
-call dset(nch,zero,sc1,1)
-call dset(nch,zero,sc2,1)
-call dset(nch,zero,sc3,1)
-call dset(nch,zero,sc4,1)
-call dset(nch,zero,sc5,1)
-read (ifil, end=900, err=950) (sc1(i), i=1, nopen), &
-     (sc2(i), i=1, nopen), (sc3(i), i=1, nopen), &
-     (sc4(i), i=1, nopen), (sc5(i), i=1, nopen)
+call rbesself%init(nch)
+call dset(nch,zero,pk,1)  ! pk (asymptotic wavevectors)
+call dset(nch,zero,rbesself%fj,1)  ! fj
+call dset(nch,zero,rbesself%fpj,1)  ! fpj
+call dset(nch,zero,rbesself%fn,1)  ! fn
+call dset(nch,zero,rbesself%fpn,1)  ! fpn
+read (ifil, end=900, err=950) (pk(i), i=1, nopen), &
+     (rbesself%fj(i), i=1, nopen), (rbesself%fpj(i), i=1, nopen), &
+     (rbesself%fn(i), i=1, nopen), (rbesself%fpn(i), i=1, nopen)
+rbesself%length = nopen
 nopsq = nopen ** 2
 ! read in sreal and simag, store in w and zmat
 read (ifil, end=900, err=950) (w(i), i=1, nopsq), &
@@ -564,69 +560,26 @@ subroutine psi(filnam,a)
 ! special version for 13p collisions
 !
 ! ------------------------------------------------------------------
-use mod_cosout, only: nnout, jout
-use mod_coiout, only: niout, indout
-use constants
-use mod_coqvec, only: nphoto
-use mod_coeint, only: eint
-use mod_coamat, only: psir ! psir(100) psir(nopen,nopen)
-use mod_cobmat, only: psii ! psii(100) 
-use mod_cotq1, only: dpsir ! dpsir(100)
-use mod_cotq2, only: dpsii ! dpsii(100)
-use mod_cojq, only: jq ! jq(60)
-use mod_colq, only: lq ! lq(10)
-use mod_coinq, only: inq ! inq(60)
-use mod_coisc1, only: ipack => isc1 ! ipack(10)
-use mod_coisc2, only: nlist => isc2 ! nlist(50)
-use mod_coisc3, only: nalist => isc3 ! nalist(60)
-use mod_coisc5, only: nblist  => isc5   ! nblist(60)
-use mod_cosc2, only: fj  => sc2   ! fj(10)
-use mod_cosc3, only: fjp => sc3   ! fjp(10)
-use mod_cosc4, only: fn  => sc4   ! fn(10)
-use mod_cosc5, only: fnp => sc5   ! fnp(10)
-use mod_cosc6, only: sc  => sc6   ! sc(100)
-use mod_cosc7, only: sc1  => sc7   ! sc1(100)
-use mod_cosysi, only: ispar
-use mod_coz, only: scmat => z_as_vec ! scmat(100)
-use mod_cow, only: sr => w_as_vec ! sr(100)
-use mod_cozmat, only: si => zmat_as_vec ! si(100)
-use mod_version, only : version
-use mod_hibrid3, only: expand
-use mod_hiba07_13p, only: tcasea
-use mod_par, only: batch, csflag, photof
-use mod_wave, only: irec, inflev
-use funit
-use mod_selb, only: ibasty
-use mod_ered, only: ered, rmu
-use mod_hiutil, only: gennam, mtime, gettim, dater
-use mod_hiutil, only: daxpy_wrapper
-use mod_hivector, only: dset, matmov, dsum
-implicit double precision (a-h,o-z)
-character*(*) filnam
-character*40  psifil, wavfil, flxfil
-character*20  cdate
-character*10  elaps, cpu
-character*5   s13p(12)
-logical exstfl, adiab, &
-                kill,propf, sumf, &
-                coordf
-! common for y1, y2, y4
-dimension a(7)  ! arguments
-data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f', &
-           '3SG1e','3PI0e','3PI1e','3PI2e','1SG0e','1PI1e'/
-!
+implicit none
+character*(*), intent(in) :: filnam
+real(8), intent(in) :: a(7)  ! arguments
 
-integer, pointer :: ipol
-integer, parameter :: psifil_unit = 2
-ipol=>ispar(3)
+integer :: iflux
+integer :: iprint
+real(8) :: thresh
+real(8) :: factr
+integer :: inchj
+integer :: inchl
+integer :: inchi
+logical :: coordf
+logical :: sumf
+logical :: adiab
+integer :: jflux
+integer :: ny
+real(8) :: ymin
+real(8) :: dy
+real(8) :: rout
 
-
-one=1.d0
-onemin=-1.d0
-zero=0.d0
-! initialize timer
-call mtime(cpu0,ela0)
-! input
 iflux=a(1)
 if (iflux .gt. 4 .or. iflux .lt. -3) then
   write (6, 2) iflux
@@ -634,11 +587,12 @@ if (iflux .gt. 4 .or. iflux .lt. -3) then
   return
 endif
 iprint=a(2)
+thresh=a(3)
+factr=a(4)
 inchj = a(5)
 inchl = a(6)
 inchi = a(7)
-thresh=a(3)
-factr=a(4)
+
 coordf=.false.
 sumf=.false.
 adiab=.false.
@@ -666,6 +620,84 @@ if (jflux .eq. 4) then
   sumf=.false.
   coordf=.true.
 endif
+
+call compute_wave_and_fluxes(filnam, iflux, iprint, thresh, factr, inchj, inchl, inchi, coordf, sumf, adiab, jflux, ny, ymin, dy, rout)
+end subroutine
+! ------------------------------------------------------------------
+subroutine compute_wave_and_fluxes(filnam, iflux, iprint, thresh, factr, inchj, inchl, inchi, coordf, sumf, adiab, jflux, ny, ymin, dy, rout)
+!
+! driver subroutine to calculate scattering wavefunction and fluxes
+! from information stored in direct access file
+!
+! author: millard alexander
+! current revision date (algorithm): 15-apr-1997 by mha
+! revised on 30-mar-2012 by q. ma for stream I/O of wfu files
+! current revision: 20-apr-2012 by q. ma
+!
+! special version for 13p collisions
+!
+! ------------------------------------------------------------------
+use mod_codim, only: nmax => mmax
+use mod_cosout, only: nnout, jout
+use mod_coiout, only: niout, indout
+use constants
+use mod_coqvec, only: nphoto
+use mod_coeint, only: eint
+use mod_coamat, only: psir ! psir(100) psir(nopen,nopen)
+use mod_cobmat, only: psii ! psii(100) 
+use mod_cotq1, only: dpsir ! dpsir(100)
+use mod_cotq2, only: dpsii ! dpsii(100)
+use mod_coisc1, only: ipack => isc1 ! ipack(10)
+use mod_coisc2, only: nlist => isc2 ! nlist(50)
+use mod_coisc3, only: nalist => isc3 ! nalist(60)
+use mod_coisc5, only: nblist  => isc5   ! nblist(60)
+use mod_cosc6, only: sc  => sc6   ! sc(100)
+use mod_cosc7, only: sc1  => sc7   ! sc1(100)
+use mod_cosysi, only: ispar
+use mod_coz, only: scmat => z_as_vec ! scmat(100)
+use mod_cow, only: sr => w_as_vec ! sr(100)
+use mod_cozmat, only: si => zmat_as_vec ! si(100)
+use mod_version, only : version
+use mod_hibrid3, only: expand
+use mod_hiba07_13p, only: tcasea
+use mod_par, only: batch, csflag, photof
+use mod_wave, only: irec, inflev
+use funit
+use mod_selb, only: ibasty
+use mod_ered, only: ered, rmu
+use mod_hiutil, only: gennam, mtime, gettim, dater
+use mod_hiutil, only: daxpy_wrapper
+use mod_hivector, only: dset, matmov, dsum
+use mod_hitypes, only: rbesself_type, bqs_type
+implicit double precision (a-h,o-z)
+character*(*), intent(in) :: filnam
+character*40  psifil, wavfil, flxfil
+character*20  cdate
+character*10  elaps, cpu
+character*5   s13p(12)
+logical exstfl, adiab, &
+                kill,propf, sumf, &
+                coordf
+! common for y1, y2, y4
+data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f', &
+           '3SG1e','3PI0e','3PI1e','3PI2e','1SG0e','1PI1e'/
+!
+
+integer, pointer :: ipol
+integer, parameter :: psifil_unit = 2
+type(rbesself_type) :: rbesself
+
+type(bqs_type) :: bqs
+
+ipol=>ispar(3)
+
+
+one=1.d0
+onemin=-1.d0
+zero=0.d0
+! initialize timer
+call mtime(cpu0,ela0)
+! input
 if (photof) then
    if (thresh .eq. 0.d0) thresh=-1.d9
    if (iprint .eq. 0) iprint= 1
@@ -740,8 +772,9 @@ if (jflux .ne. 0) then
 endif
 ! read header information, s matrix, and asymptotic wavefunction and
 ! derivative
+call bqs%init(nmax)
 call waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto, &
-            jflux,rstart,rendld,rinf)
+            jflux,rstart,rendld,rinf,rbesself, bqs)
 if (inflev .ne. 0) then
    write (6, *) '** CALCULATION WITH WRSMAT=.T. REQUIRED.'
    goto 700
@@ -864,14 +897,15 @@ else if(jflux.eq.0) then
    i4,' POINTS',/)
 endif
 inch=0
+
 ! check if initial channel is in list of channels
 ! not for photodissociation
 if (.not. photof) then
   if (ibasty .ne. 7) then
     do 40 nn=1, nch
-      j1 = jq(nn)
-      l1 = lq(nn)
-      i1 = inq(nn)
+      j1 = bqs%jq(nn)
+      l1 = bqs%lq(nn)
+      i1 = bqs%inq(nn)
 
 
 
@@ -937,12 +971,12 @@ if (.not.coordf)  then
           (ibasty .eq. 7 .and. (ipol .eq. 0 .or. adiab &
            .and. jlpar .eq. 1))) then
         if (jflux.eq.0) &
-          write(2, 57) inchc, jq(inch), lq(inch), inq(inch), &
+          write(2, 57) inchc, bqs%jq(inch), bqs%lq(inch), bqs%inq(inch), &
             econv*eint(inch)
         if (jflux.ne.0) &
-          write(3, 57) inchc, jq(inch), lq(inch), inq(inch), &
+          write(3, 57) inchc, bqs%jq(inch), bqs%lq(inch), bqs%inq(inch), &
             econv*eint(inch)
-        write (6, 57) inchc, jq(inch), lq(inch), inq(inch), &
+        write (6, 57) inchc, bqs%jq(inch), bqs%lq(inch), bqs%inq(inch), &
             econv*eint(inch)
 57         format(/,15x,'INITIAL:',3i4,i5,f13.3)
       else if (ibasty .eq.7 .and. jlpar .eq. -1 &
@@ -969,7 +1003,7 @@ endif
 if (jflux .eq. 4) then
   write (3,55)
   do 60  i=1, nch
-    write (3, 59) i, jq(i), lq(i), inq(i), econv*eint(i)
+    write (3, 59) i, bqs%jq(i), bqs%lq(i), bqs%inq(i), econv*eint(i)
 59     format(10x,4i4,f13.3)
 60   continue
 endif
@@ -1008,18 +1042,18 @@ do 120 i=1, iabs(nnout)
      endif
    endif
    do 100 nn=1, nch
-     j1 = jq(nn)
+     j1 = bqs%jq(nn)
      if(j1.ne.jo) goto 100
        if (jflux .ne. 2) then
          do 75 in = 1, iabs(niout)
            io = indout(in)
-           if(inq(nn).ne.io) goto 75
+           if(bqs%inq(nn).ne.io) goto 75
            nj = nj + 1
            nlist(nj) =nn
 75          continue
        else
-          innq=inq(nn)
-          if(innq.ne.io .or. lq(nn) .ne. llo) goto 100
+          innq=bqs%inq(nn)
+          if(innq.ne.io .or. bqs%lq(nn) .ne. llo) goto 100
 ! check to see if state has already been found
            ifound=0
            do 80 if=1,nj
@@ -1086,11 +1120,11 @@ if (.not. coordf) then
       endif
       if (ibasty .ne. 7 .or. adiab) then
         if (jflux.eq.0) &
-        write(2, 140) nnn, jq(nn), lq(nn), inq(nn), &
+        write(2, 140) nnn, bqs%jq(nn), bqs%lq(nn), bqs%inq(nn), &
                  eint(nn)*econv, sq
-        if (jflux.ne.0) write(3,140) nnn,jq(nn),lq(nn),inq(nn), &
+        if (jflux.ne.0) write(3,140) nnn,bqs%jq(nn),bqs%lq(nn),bqs%inq(nn), &
                  eint(nn)*econv, sq
-        write (6, 140) nnn, jq(nn), lq(nn), inq(nn), &
+        write (6, 140) nnn, bqs%jq(nn), bqs%lq(nn), bqs%inq(nn), &
                  eint(nn)*econv, sq
 140         format(16x,'PROBED:',3i4,i5,f13.3,f13.4)
       else
@@ -1195,12 +1229,12 @@ if (jflux .eq. 0) then
     iwf = 1
     propf=.true.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,bqs%inq)
     write(2, 210)
 210     format(/' R (BOHR) AND IMAGINARY PART OF CHI')
 ! reread asymptotic information
     call waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto, &
-            jflux,rstart,rendld,rinf)
+            jflux,rstart,rendld,rinf,rbesself, bqs)
     if (nch .gt. nopen) then
       call expand(nopen,nopen,nch,nch,ipack, &
                   psir,psii,scmat)
@@ -1217,7 +1251,7 @@ if (jflux .eq. 0) then
     iwf = -1
     irec=npts+4
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,bqs%inq)
   endif
 else if (jflux .eq. 2) then
   write(3, 300)
@@ -1284,7 +1318,7 @@ else if (jflux .eq. 1) then
         scc=psir(nni)*psir(3*nch+nni)-psir(nch+nni) &
             *psir(2*nch+nni)
         do 327 ni=1, niout
-          if (inq(nni) .eq. indout(ni)) sc(ni)=sc(ni)+scc
+          if (bqs%inq(nni) .eq. indout(ni)) sc(ni)=sc(ni)+scc
 327         continue
 330       continue
       scsum=dsum(niout,sc,1)
@@ -1299,7 +1333,7 @@ else if (jflux .eq. 1) then
 ! plot out all fluxes for total flux which is numerically well behaved
     tthresh=-1.e9
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,.false., &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,bqs%inq)
   endif
   if (.not. photof) then
 ! now for incoming flux (only for scattering)
@@ -1311,10 +1345,10 @@ else if (jflux .eq. 1) then
     call dset(nchsq,zero,dpsii,1)
     ipoint=1
     do 335 i=1, nch
-      psir(ipoint)=-fn(i)
-      psii(ipoint)=-fj(i)
-      dpsir(ipoint)=-fnp(i)
-      dpsii(ipoint)=-fjp(i)
+      psir(ipoint)=-rbesself%fn(i)
+      psii(ipoint)=-rbesself%fj(i)
+      dpsir(ipoint)=-rbesself%fpn(i)
+      dpsii(ipoint)=-rbesself%fpj(i)
       ipoint=ipoint+nch+1
 335     continue
     write(3, 340)
@@ -1352,7 +1386,7 @@ else if (jflux .eq. 1) then
           scc=psir(nni)*psir(3*nch+nni)-psir(nch+nni) &
             *psir(2*nch+nni)
           do 364 ni=1, niout
-            if (inq(nni) .eq. indout(ni)) sc(ni)=sc(ni)+scc
+            if (bqs%inq(nni) .eq. indout(ni)) sc(ni)=sc(ni)+scc
 364          continue
 365         continue
         scsum=dsum(niout,sc,1)
@@ -1365,7 +1399,7 @@ else if (jflux .eq. 1) then
     iwf = 0
     propf=.false.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,bqs%inq)
   endif
 ! now for outgoing flux
   if (.not.photof) then
@@ -1374,8 +1408,8 @@ else if (jflux .eq. 1) then
     call matmov (si, psii, nopen, nopen, nopen, nopen)
 ! premultiply Sr by diagonal matrix yl(kr) and Si by jl(kr)
     do 430 irow = 1, nopen
-      fac1=fn(irow)
-      fac2=fj(irow)
+      fac1=rbesself%fn(irow)
+      fac2=rbesself%fj(irow)
       call dscal(nopen, fac1, psir(irow), nopen)
       call dscal(nopen, fac2, psii(irow), nopen)
 430     continue
@@ -1386,8 +1420,8 @@ else if (jflux .eq. 1) then
     call matmov (si, dpsii, nopen, nopen, nopen, nopen)
 ! premultiply Sr by diagonal matrix -ylp(kr) and Si by jlp(kr)
     do 440 irow = 1, nopen
-      fac1=fnp(irow)
-      fac2=fjp(irow)
+      fac1=rbesself%fpn(irow)
+      fac2=rbesself%fpj(irow)
       call dscal(nopen, fac1, dpsir(irow), nopen)
       call dscal(nopen, fac2, dpsii(irow), nopen)
 440     continue
@@ -1399,8 +1433,8 @@ else if (jflux .eq. 1) then
     call matmov (sr, scmat, nopen, nopen, nopen, nopen)
 ! premultiply Sr by diagonal matrix -jl(kr) and Si by yl(kr)
     do 450 irow = 1, nopen
-      fac1=fn(irow)
-      fac2=-fj(irow)
+      fac1=rbesself%fn(irow)
+      fac2=-rbesself%fj(irow)
       call dscal(nopen, fac1, psii(irow), nopen)
       call dscal(nopen, fac2, scmat(irow), nopen)
 450     continue
@@ -1411,8 +1445,8 @@ else if (jflux .eq. 1) then
     call matmov (sr, scmat, nopen, nopen, nopen, nopen)
 ! premultiply Sr by diagonal matrix jl(kr) and Si by yl(kr)
     do 460 irow = 1, nopen
-      fac1=fnp(irow)
-      fac2=-fjp(irow)
+      fac1=rbesself%fpn(irow)
+      fac2=-rbesself%fpj(irow)
       call dscal(nopen, fac1, dpsii(irow), nopen)
       call dscal(nopen, fac2, scmat(irow), nopen)
 460     continue
@@ -1482,7 +1516,7 @@ else if (jflux .eq. 1) then
           scc=psir(nni)*psir(3*nch+nni)-psir(nch+nni) &
             *psir(2*nch+nni)
           do 579 ni=1, niout
-            if (inq(nni) .eq. indout(ni)) sc(ni)=sc(ni)+scc
+            if (bqs%inq(nni) .eq. indout(ni)) sc(ni)=sc(ni)+scc
 579          continue
 580         continue
         scsum=dsum(niout,sc,1)
@@ -1500,7 +1534,7 @@ else if (jflux .eq. 1) then
   if (photof) propf=.true.
   if (.not. photof) propf=.false.
   call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,bqs%inq)
 endif
 700 if (photof .or. jflux .eq. 0) close (psifil_unit)
 if (jflux .ne. 0) close (3)
@@ -1522,7 +1556,7 @@ return
 end
 ! ------------------------------------------------------------------
 subroutine flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-                photof, propf, sumf,iwf,coordf,nny,ymin,dy,psifil_unit)
+                photof, propf, sumf,iwf,coordf,nny,ymin,dy,psifil_unit,inq)
 !
 ! subroutine to calculate fluxes
 !
@@ -1538,7 +1572,6 @@ use mod_coamat, only: psir ! psir(100) (4,nch)
 use mod_cobmat, only: psii ! psii(100) Here psii is used as a vector
 use mod_cotq2, only: scmat2 => dpsii ! scmat2(100)
 use mod_cotq3, only: scmat3 => scmat ! scmat3(100)
-use mod_coinq, only: inq ! inq(60)
 use mod_cosc1, only: pk => sc1 ! pk(6)
 use mod_coisc2, only: nlist => isc2 ! nlist(60)
 use mod_coisc3, only: nalist => isc3 ! nalist(60)
@@ -1558,6 +1591,7 @@ use mod_himatrix, only: mxma
 use mod_hivector, only: dset, vadd, vmul, dsum
 ! steve, you may need more space, but i doubt it since tcoord is dimensioned n
 implicit double precision (a-h,o-z)
+integer, intent(in) :: inq(nch)
 logical adiab, kill, photof, propf, sumf, coordf
 
 dimension scc(100)
@@ -2117,11 +2151,13 @@ subroutine eadiab1(filnam, nchmin, nchmax)
 !
 !     ------------------------------------------------------------------
 use constants
+use mod_codim, only: nmax => mmax
 use mod_cosc8, only: sc8
 use mod_wave, only: ifil, nrlogd
 use funit
 use mod_ered, only: ered, rmu
 use mod_hiutil, only: gennam
+use mod_hitypes, only: rbesself_type, bqs_type
 implicit none
 character*(*), intent(in) :: filnam
 integer, intent(in) :: nchmin
@@ -2141,6 +2177,9 @@ integer(8) :: seek_pos
 double precision :: dble_t
 integer, parameter :: eadfil_unit = FUNIT_EADIAB
 integer, parameter :: ien = 0
+type(rbesself_type) :: rbesself
+type(bqs_type) :: bqs
+
 !
 if (nchmax .ne. 0 .and. nchmax .lt. nchmin) goto 990
 wavfil = filnam // '.wfu'
@@ -2161,7 +2200,7 @@ write (6, 15) eadfil(1:lenft)
 15 format (' ** WRITING ADIABATIC ENERGIES TO ', (a))
 !
 call waverd(jtot, jlpar, nu, nch, npts, nopen, nphoto, &
-     jflux, rstart, rendld, rinf)
+     jflux, rstart, rendld, rinf, rbesself, bqs)
 if (nchmin .gt. nch) goto 990
 if (nchmax .eq. 0 .or. nchmax .gt. nch) nchmax = nch
 nchpr = nchmax - nchmin + 1

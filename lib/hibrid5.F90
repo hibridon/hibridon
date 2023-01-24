@@ -97,7 +97,7 @@ contains
 !
 ! ---------------------------------------------------------------------------
 subroutine soutpt (tsq, sr, si, scmat, &
-                   lq, jq, inq, isc1, isc2, sc1, sc2, &
+                   bqs, isc1, isc2, sc1, sc2, &
                    jlev, elev, inlev, jtot, jfirst, &
                    jfinal, jtotd, nu, numin, numax, nud,jlpar,ien, &
                    ipos, csflag, flaghf, prsmat, prt2, t2test, &
@@ -119,7 +119,6 @@ subroutine soutpt (tsq, sr, si, scmat, &
 !                   sections
 !  author:  millard alexander
 !  heavily modified by h.-j. werner
-!  added common block /coj12/ to pass j12 array (p. dagdigian)
 !  current revision date: 24-jan-2012 by p.dagdigian
 ! ---------------------------------------------------------------------------
 !  variables in call list
@@ -132,10 +131,10 @@ subroutine soutpt (tsq, sr, si, scmat, &
 !                         contains the real part of the s-matrix
 !    si:      on input:   the upper-left nopen x nopen block of si
 !                         contains the imaginary part of the s-matrix
-!    jq, lq:  rotational angular momenta, orbital angular momenta, and
-!    inq,     additional quantum index for each channel
+!    bqs:     rotational angular momenta, orbital angular momenta, and
+!             additional quantum index for each channel
 !             if the calculation involves the collisions of two diatomic
-!             molecules, the jq = j1 + 10000 j2, where j1 and j2 are the
+!             molecules, the bqs%jq = j1 + 10000 j2, where j1 and j2 are the
 !             rotational quantum numbers of each molecule
 !    isc1,isc2: scratch vectors (min length nopen)
 !    sc1, sc2:  scratch  matrices (min length nopen x nopen)
@@ -158,7 +157,7 @@ subroutine soutpt (tsq, sr, si, scmat, &
 !    note!!!   if flaghf = .true.( see below), then the true values
 !    of the rotational quantum numbers, the total angular momentum,
 !    and the coupled-states projection index are equal to the values
-!    stored in jq, jtot, jfirst, jfinal, nu, numin, and numax plus 1/2
+!    stored in bqs%jq, jtot, jfirst, jfinal, nu, numin, and numax plus 1/2
 !    ien:     ordinal number of total energy at which this routine is
 !             called.  i.e. if ien = 2, we are now at second value of
 !             the total energy
@@ -198,7 +197,6 @@ use constants
 use mod_coqvec, only: nphoto
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_coj12, only: j12
 use mod_coener, only: ener => energ
 use mod_hibrid2, only: mxoutd, mxoutr
 use funit
@@ -210,14 +208,13 @@ use mod_surf, only: flagsu
 use mod_hiutil, only: dater
 use mod_himatrix, only: transp
 use mod_hismat, only: wrhead, swrite
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 real(8), intent(inout) :: tsq(nmax,nmax)
 real(8), intent(inout) :: sr(nmax,nmax)
 real(8), intent(inout) :: si(nmax,nmax)
 real(8), intent(out) :: scmat(nmax,nmax)
-integer, intent(in) :: lq(nopen)
-integer, intent(in) :: jq(nopen)
-integer, intent(in) :: inq(nopen)
+type(bqs_type), intent(in) :: bqs
 integer, intent(out) :: isc1(nopen)
 integer, intent(out) :: isc2(nopen)
 real(8), intent(out) :: sc1(nmax, nmax)
@@ -231,8 +228,7 @@ integer, intent(in) :: jlpold ! old value of parity, used to insure correct accu
 logical ipos, csflag, prsmat, prt2, writs, wrpart, prpart, &
         wrxsec, prxsec, flaghf, t2test, firstj, twomol, &
         nucros, faux, twojlp
-integer, allocatable :: jpack(:)
-integer, allocatable :: lpack(:)
+type(bqs_type) :: packed_bqs
 
 character*20 cdate
 integer :: soutpt_sc_file = 1
@@ -328,18 +324,14 @@ if (writs .and. nopen .gt. 0) then
                 jtotd, numin, numax, nud, nlevel, nlevop, nnout, &
                 jlev, inlev, elev, jout)
     end if
-    allocate(jpack(nmax*nmax))
-    allocate(lpack(nmax*nmax))
-    call swrite (sr, si, jtot, jlpar, nu, jq, lq, inq, isc1, &
-                 isc2, jpack, lpack, sc2, nfile, nmax, nopen)
-    deallocate(jpack)
-    deallocate(lpack)
+    call swrite (sr, si, jtot, jlpar, nu, bqs, isc1, &
+                 packed_bqs, sc2, nfile, nmax, nopen)
 end if
 
 if (.not. prxsec .and. .not. wrxsec .and. .not.prpart &
     .and. .not.wrpart) return
-call  partcr (tsq,  scmat, nopen, nopen, &
-                   inq, jq, lq, inq, jq, lq, &
+call  partcr (tsq,  scmat, nopen, &
+                   bqs, bqs, &
                    inlev, jlev, elev, jtot, nu, &
                    csflag, flaghf,twomol,flagsu, &
                    nlevop,nmax)
@@ -1802,9 +1794,6 @@ use mod_cotq1, only: sc1 => scmat ! sc1(1)
 use mod_cotq2, only: sc2 => scmat ! sc2(1)
 use mod_cotq3, only: sc3 => scmat ! sc3(1)
 use mod_coamat, only: sc4 => toto ! sc4(1)
-use mod_coinq, only: inq ! inq(1)
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
 use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
 use mod_coisc6, only: isc1 => isc6 ! isc1(1)
 use mod_coisc7, only: isc2 => isc7 ! isc2(1)
@@ -2020,11 +2009,6 @@ subroutine intcr(csflag,flaghf,twomol,flagsu,nucros, &
 !
 ! ----------------------------------------------------------------------
 use mod_cosout, only: nnout, jout
-use mod_coj12, only: j12
-use mod_coj12p, only: j12pk
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
 use mod_coisc6, only: isc1 => isc6 ! isc1(1)
 use mod_coisc7, only: isc2 => isc7 ! isc2(1)
@@ -2034,7 +2018,7 @@ use mod_cosc3, only: jlev => sc3int ! jlev(1)
 use mod_par, only: batch, ipos
 use mod_selb, only: ibasty
 use mod_hismat, only: sread
-use mod_hitypes, only: packed_base_type
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 logical, intent(in) :: csflag
 logical, intent(in) :: flaghf
@@ -2059,7 +2043,8 @@ integer, intent(in) :: nlevop
 integer, intent(in) :: nmax
 integer, intent(in) :: tmp_file
 
-type(packed_base_type) :: packed_base
+type(bqs_type) :: row_bqs
+type(bqs_type) :: packed_bqs
 
 ! clear sigma array
 one=1.0d0
@@ -2072,10 +2057,9 @@ iaddr = 0
 !
 ! read s-matrix for present jtot, nu
 !
-! j12 is read into a common block for molecule-molecule collisions
 10 nopen = 0
 call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
-  jq, lq, inq, packed_base, &
+  row_bqs, packed_bqs, &
   1, nmax, nopen, ierr)
 if(jlpold.eq.0) jlpold=jlpar
 if(ierr.eq.-1) goto 100
@@ -2105,11 +2089,11 @@ if (jtot .eq. 10*(jtot/10)) then
 endif
 iaddr = 0
 ! calculate squared t-matrix
-call tsqmat(tsq,sreal,simag,inq,jq,lq, &
-   packed_base%inpack,packed_base%jpack,packed_base%lpack,nopen,packed_base%length,nmax)
+call tsqmat(tsq,sreal,simag,row_bqs, &
+   packed_bqs,nopen,nmax)
 ! calculate partial cross sections
-call partcr(tsq,sc1,nopen,packed_base%length, &
-            inq, jq, lq, packed_base%inpack, packed_base%jpack, packed_base%lpack, &
+call partcr(tsq,sc1,nopen, &
+            row_bqs, packed_bqs, &
             inlev, jlev, elev, jtot, nu, &
             csflag,flaghf,twomol,flagsu, &
             nlevop,nmax)
@@ -2161,36 +2145,45 @@ end if
 return
 end
 ! ----------------------------------------------------------------------
-subroutine tsqmat(tsq,sreal,simag,inrow,jrow,lrow, &
-          incol,jcol,lcol,nopen,ncol,nmax)
+subroutine tsqmat(tsq,sreal,simag,row_bqs, &
+          col_bqs,nopen,nmax)
 ! ----------------------------------------------------------------------
 !
 !  routine to compute modulus squared t-matrix from given s-matrix
 !  current revsion date:  24-jan-2012 by p.dagdigian
 !
 ! ----------------------------------------------------------------------
-use mod_coj12, only: j12
-use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12
 use mod_selb, only: ibasty
-implicit double precision (a-h,o-z)
-complex*8 t
-logical diag
-dimension sreal(nmax,1), simag(nmax,1), tsq(nmax,1)
-dimension inrow(1),jrow(1),lrow(1),incol(1),jcol(1),lcol(1)
+use mod_hitypes, only: bqs_type
+implicit none
+real(8), intent(out) :: tsq(nmax, nmax)
+real(8), intent(in) :: sreal(nmax, nmax)
+real(8), intent(in) :: simag(nmax, nmax)
+type(bqs_type), intent(in) :: row_bqs
+type(bqs_type), intent(in) :: col_bqs
+integer, intent(in) :: nopen
+integer, intent(in) :: nmax
+
+integer :: icol, irow, in1, j1, l1, in2, j2, l2, j121, j122
+complex*8 :: t
+real(8) :: t2
+logical :: diag
 !
-one=1.0d0
-zero=0.0d0
-do 400 icol = 1, ncol
-   in1 = incol(icol)
-   j1 = jcol(icol)
-   l1 = lcol(icol)
-   if (is_j12(ibasty)) j121 = j12(icol)
-   do 300 irow = 1, nopen
-      in2 = inrow(irow)
-      j2 = jrow(irow)
-      l2 = lrow(irow)
-      if (is_j12(ibasty)) j122 = j12pk(irow)
+real(8), parameter :: zero = 0.0d0
+real(8), parameter :: one = 1.0d0
+do icol = 1, col_bqs%length
+   in1 = col_bqs%inq(icol)
+   j1 = col_bqs%jq(icol)
+   l1 = col_bqs%lq(icol)
+   if (is_j12(ibasty)) then
+     j121 = col_bqs%j12(icol)
+   end if
+   do irow = 1, nopen
+      in2 = row_bqs%inq(irow)
+      j2 = row_bqs%jq(irow)
+      l2 = row_bqs%lq(irow)
+      if (is_j12(ibasty)) j122 = row_bqs%j12(irow)
       diag = j1.eq.j2 .and. in1.eq.in2 .and. l1.eq.l2
       if (is_j12(ibasty)) diag = diag .and. j121.eq.j122
 !
@@ -2201,20 +2194,20 @@ do 400 icol = 1, ncol
       if (diag) t = t + cmplx(one,zero)
       t2 = real(t * conjg(t))
       tsq(irow,icol) = t2
-300    continue
-400 continue
+   end do
+end do
 return
 end
 ! ----------------------------------------------------------------------
-subroutine partcr (tsq,  scmat, nopen, ncol, &
-                   inrow, jrow, lrow, incol, jcol, lcol, &
+subroutine partcr (tsq,  scmat, nopen, &
+                   row_bqs, col_bqs, &
                    inlev, jlev, elev, jtot, nu, &
                    csflag, flaghf,twomol,flagsu, &
                    nlevop,nmax)
 ! ----------------------------------------------------------------------
 !  this routine computes partial cross sections from squared t matrix
-!  inrow, jrow, lrow: row indices of t-matrix (nopen values)
-!  incol, jcol, lcol: column indices of t-matrix (ncol values)
+!  row_bqs: row indices of t-matrix (nopen values)
+!  col_bqs: column indices of t-matrix (ncol values)
 !  inlev, jlev: quantum numbers of asymptotic states (nlevop values)
 !  elev: energy levels of asymptotic states (nlevop values)
 !
@@ -2223,7 +2216,7 @@ subroutine partcr (tsq,  scmat, nopen, ncol, &
 !  revision:  30-may-2013 by q. ma
 !     WARNING: starting from this revision, flaghf no longer applies
 !     to the second molecule (j2) if twomol is set true.
-!  latest revision:  include correct degeneracy factor, (2*xjrow1+1)*2,
+!  latest revision:  include correct degeneracy factor, (2*xrow_bqs%jq1+1)*2,
 !  [2nd factor is 2*s2+1)] in denominator for ibasty=23 (3P + 2S atom-atom)
 !
 !  revision:  15-aug-2016 by p.dagdigian
@@ -2237,16 +2230,13 @@ use mod_hibasis, only: is_j12
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_hivector, only: dset
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax,nmax), intent(in) :: tsq
 !      real(8), dimension(:,:), intent(in), target :: tototsq
 real(8), dimension(nmax,nmax), intent(out) :: scmat
-integer, dimension(nopen), intent(in) :: inrow
-integer, dimension(nopen), intent(in) :: jrow
-integer, dimension(nopen), intent(in) :: lrow
-integer, dimension(ncol), intent(in) :: incol
-integer, dimension(ncol), intent(in) :: jcol
-integer, dimension(ncol), intent(in) :: lcol
+type(bqs_type), intent(in) :: row_bqs
+type(bqs_type), intent(in) :: col_bqs
 integer, dimension(nlevop), intent(in) :: inlev
 integer, dimension(nlevop), intent(in) :: jlev
 real(8), dimension(nlevop), intent(in) :: elev
@@ -2255,10 +2245,10 @@ integer, dimension(nmax) :: isc2  ! scratch array
 real(8), dimension(nmax) :: sc2   ! scratch array
 
 logical csflag, flaghf, flagsu, twomol
-!      real(8), pointer :: tsq(:,:)
-!      tsq => tototsq(1::nmax,1::nmax)
-!write(6,*) 'graffy: len(tototsq)', size(tototsq)
 !
+ASSERT(row_bqs%length == nopen)
+ncol = col_bqs%length
+
 xjtot = jtot
 if (flaghf .and. .not. csflag) xjtot = jtot + 0.5d0
 !  special fix for ibasty=23 (3P + 2S atom-atom)
@@ -2278,10 +2268,10 @@ do 10 icol = 1,nlevop
 !  set pointer array for columns (final states)
 do 40 i = 1, ncol
   do 20 icol = 1, nlevop
-    if (is_j12(ibasty) .and. incol(i) .ne. inlev(icol)) &
+    if (is_j12(ibasty) .and. col_bqs%inq(i) .ne. inlev(icol)) &
           go to 20
-    if (.not. twomol .and. incol(i).ne.inlev(icol)) go to 20
-    if (jcol(i) .ne. jlev(icol)) goto 20
+    if (.not. twomol .and. col_bqs%inq(i).ne.inlev(icol)) go to 20
+    if (col_bqs%jq(i) .ne. jlev(icol)) goto 20
     isc1(i) = icol
     goto 40
 20   continue
@@ -2294,10 +2284,10 @@ do 40 i = 1, ncol
 ! set pointer array and degeneracy factors for rows (initial states)
 do 140 j = 1, nopen
   do 120 irow = 1, nlevop
-     if (is_j12(ibasty) .and. inrow(j).ne.inlev(irow)) &
+     if (is_j12(ibasty) .and. row_bqs%inq(j).ne.inlev(irow)) &
           go to 120
-     if (.not. twomol.and.inrow(j).ne.inlev(irow)) go to 120
-     if (jrow(j) .ne. jlev(irow)) goto 120
+     if (.not. twomol.and.row_bqs%inq(j).ne.inlev(irow)) go to 120
+     if (row_bqs%jq(j) .ne. jlev(irow)) goto 120
      jj = jlev(irow)
      if (.not. twomol) then
        xjrow1 = jj

@@ -19,7 +19,7 @@ contains
 !                  potential for 2sig-2pi + atom scattering (one 2sigma  *
 !                  and one or more 2pi levels (no perturbations)         *
 ! ----------------------------------------------------------------------
-subroutine basgpi1(j, l, is, jhold, ehold, ishold, nlevel, &
+subroutine basgpi1 (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, ivhold, c12, c32, csig, &
                   rcut, jtot,flaghf, flagsu, csflag, clist, &
                   bastst, ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
@@ -175,11 +175,13 @@ use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
+type(bqs_type), intent(out) :: bqs
 type(ancouma_type), pointer :: ancouma
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
-dimension j(1), l(1), is(1), jhold(1), ehold(1), ishold(1), &
+dimension jhold(1), ehold(1), ishold(1), &
   ivhold(1), c12(1), c32(1), csig(1), ieps(2), &
   epi(maxvib), bpi(maxvib), dpi(maxvib), aso(maxvib), p(maxvib), &
   q(maxvib), jmax(maxvib)
@@ -304,6 +306,7 @@ end if
 !    every vibrational energy level is referred to the lowest
 !    vibrational level
 !
+call bqs%init(nmax)
 n=0
 !  first set up list of 2sigma rotational levels
 n = 0
@@ -338,18 +341,19 @@ do 145 nnrot = 0, nmaxsg
             ' .GT. MAX DIMENSION OF',i4,' ABORT ***')
          stop
        end if
-       is(n) = ieps(ip)
-       j(n) = ji
+       bqs%inq(n) = ieps(ip)
+       bqs%jq(n) = ji
        nrot(n) = nnrot
 !  now assign energies for case (a) level and store in array eint
 !    the matrix elements are given by a. j. kotlar, r. w. field,
 !    and j. i. steinfeld, j. mol. spectr. 80, 86 (1980)
-       x = float(j(n)) + 1.
-       nn1 = x * (x - is(n))
+       x = float(bqs%jq(n)) + 1.
+       nn1 = x * (x - bqs%inq(n))
        eint(n) = esg + bsg * nn1 - dsg*nn1**2 &
-            - half * (1 - is(n) * x) * gsr
+            - half * (1 - bqs%inq(n) * x) * gsr
 !  parameters to designate level as belonging to 2sigma state
-       is(n) = 300 * is(n) * isym
+       bqs%inq(n) = 300 * bqs%inq(n) * isym
+       bqs%length = n
        c12(n) = 0.
        c32(n) = 0.
        csig(n) = 1.
@@ -386,8 +390,9 @@ do 103 iv=1,numvpi
            ' .GT. MAX DIMENSION OF',i4,' ABORT ***')
           stop
         end if
-        is(n) = ieps(ip)
-        j(n) = ji
+        bqs%inq(n) = ieps(ip)
+        bqs%jq(n) = ji
+        bqs%length = n
       end if
 45   continue
 !  now assign omega values and energies for case (a) levels
@@ -400,26 +405,26 @@ do 103 iv=1,numvpi
 !    the matrix elements are given by a. j. kotlar, r. w. field,
 !    and j. i. steinfeld, j. mol. spectr. 80, 86 (1980)
 !    x is j + 1/2
-    x = j(i) + one
+    x = bqs%jq(i) + one
     xsq = x*x
     eint(i) = epi(iv) - half * aso(iv) + bpi(iv) * xsq &
       + dpi(iv) * ((1 - xsq**2) - xsq) &
-      + half * (one - is(i) * x) * (p(iv) &
-      + q(iv) * (one - is(i) * x))
+      + half * (one - bqs%inq(i) * x) * (p(iv) &
+      + q(iv) * (one - bqs%inq(i) * x))
     cent(i) = epi(iv) + half * aso(iv) + bpi(iv) * (xsq - two) &
      + dpi(iv) * ((1 - xsq) - (xsq - two)**2) &
      + half * (xsq - one) * q(iv)
 !  now calculate the mixing angle due to the j.s term in the hamiltonian
 !  store this angle temporarily in the array c12 and store the 1/2 - 3/2
 !  coupling matrix element temporarily in the array c32
-    if (j(i) .eq. 0) then
+    if (bqs%jq(i) .eq. 0) then
 !  no mixing if j = 1/2
       c32(i) = 0.
       c12(i) = 0.
-    else if (j(i) .gt. 0) then
+    else if (bqs%jq(i) .gt. 0) then
       c32(i) = - quart * sqrt(xsq - one) &
         * (four * bpi(iv) - two * four * dpi(iv) * (xsq - one) &
-        + p(iv) + two * (one - is(i) * x) * q(iv))
+        + p(iv) + two * (one - bqs%inq(i) * x) * q(iv))
       adum1=two*c32(i)
       adum2=eint(i) - cent(i)
       c12(i) = half * atan2(adum1,adum2) + pi2
@@ -435,7 +440,7 @@ do 103 iv=1,numvpi
 !  reorder omega=1/2 channels so that j=1/2 comes at the end, appropriate
 !  to F2
     nmn = 1
-    if (j(n0+2) .eq. 0) nmn=2
+    if (bqs%jq(n0+2) .eq. 0) nmn=2
 ! nmn is the number of j=0 levels
     eh1 = eint(n0+1)
     eh2 = eint(n0+2)
@@ -447,18 +452,18 @@ do 103 iv=1,numvpi
     c322 = c32(n0+2)
     csig1 = csig(n0+1)
     csig2 = csig(n0+2)
-    ish1 = is(n0+1)
-    ish2 = is(n0+2)
+    ish1 = bqs%inq(n0+1)
+    ish2 = bqs%inq(n0+2)
     ivh1 = ivhold(n0+1)
     ivh2 = ivhold(n0+2)
     do 53 i = n0+nmn+1, n
-      j(i-nmn) = j(i)
+      bqs%jq(i-nmn) = bqs%jq(i)
       eint(i-nmn) = eint(i)
       cent(i-nmn) = cent(i)
       c12(i-nmn) = c12(i)
       c32(i-nmn) = c32(i)
       csig(i-nmn) = csig(i)
-      is(i-nmn) = is(i)
+      bqs%inq(i-nmn) = bqs%inq(i)
       ivhold(i-nmn) = ivhold(i)
 53     continue
     if (nmn .eq. 2) then
@@ -472,12 +477,12 @@ do 103 iv=1,numvpi
       c32(n) = c322
       csig(n-1) = csig1
       csig(n) = csig2
-      j(n-1) = 0
-      j(n) = 0
+      bqs%jq(n-1) = 0
+      bqs%jq(n) = 0
       ifi(n-1) = 2
       ifi(n) = 2
-      is(n-1) = ish1
-      is(n) = ish2
+      bqs%inq(n-1) = ish1
+      bqs%inq(n) = ish2
       ivhold(n-1) = ivh1
       ivhold(n) = ivh2
     else
@@ -486,23 +491,23 @@ do 103 iv=1,numvpi
       c12(n) = c121
       c32(n) = c321
       csig(n) = csig1
-      j(n) = 0
+      bqs%jq(n) = 0
       ifi(n) = 2
-      is(n) = ish1
+      bqs%inq(n) = ish1
       ivhold(n) = ivh1
     endif
   endif
 !  now add the omega = 3/2 levels
   nn = n
   do 60 i = n0 + 1, n
-    if ( j(i) .eq. 0) then
+    if ( bqs%jq(i) .eq. 0) then
 !  here for j = 1/2, which can exist only for omega = 1/2 and hence
 !  is always a pure case (a) state
       c12(i) = 1.
       c32(i) = 0.
       csig(i) = 0.
       ivhold(i) = ivpi(iv)
-    else if ( j(i) .ge. 1) then
+    else if ( bqs%jq(i) .ge. 1) then
 !  here for j .ge. 3/2
 !  the index nn points to the nominal omega = 3/2 channels
       nn = nn + 1
@@ -511,11 +516,11 @@ do 103 iv=1,numvpi
         write (9, 40) nn, nmax
         stop
       end if
-      j(nn) = j(i)
-      l(nn) = l(i)
+      bqs%jq(nn) = bqs%jq(i)
+      bqs%lq(nn) = bqs%lq(i)
 ! assign F2 label to each level
       ifi(nn) = 2
-      is(nn) = is(i)
+      bqs%inq(nn) = bqs%inq(i)
       ivhold(nn) = ivhold(i)
 !  now determine array of mixing coefficients:
 !    the c12 array indicates the amount of omega = 1/2 component in each
@@ -547,9 +552,9 @@ do 103 iv=1,numvpi
 60   continue
 !  attach full label to "is"
   do 62 i=n0 + 1,nn
-    is(i) = (100*ifi(i) + 10*ivpi(iv)) * is(i)
+    bqs%inq(i) = (100*ifi(i) + 10*ivpi(iv)) * bqs%inq(i)
 !  make c12 coeff for Fi = 1 levels negative, to match ba2pi basis routine
-    if (j(i).ne.0) then
+    if (bqs%jq(i).ne.0) then
       if ((abs(c12(i)) .gt. abs(c32(i))) .and. &
           (c12(i).gt.0.)) then
         c12(i) = -c12(i)
@@ -564,8 +569,9 @@ do 103 iv=1,numvpi
 62   continue
 !  set n to equal total number of levels
   n = nn
+  bqs%length = n
 !  find lowest energy
-  emin = 1.e+7
+  emin = 1.d7
   do 65  i = 1, n
     if (eint(i) .lt. emin) emin = eint(i)
 65   continue
@@ -577,8 +583,8 @@ nlevel = 0
 do 70  i = 1, n
   nlevel = nlevel + 1
   ehold(nlevel) = (eint(i) - emin) / econv
-  jhold(nlevel) = j(i)
-  ishold(nlevel) = is(i)
+  jhold(nlevel) = bqs%jq(i)
+  ishold(nlevel) = bqs%inq(i)
 70 continue
 !
 !  now sort this list to put closed levels at end
@@ -608,7 +614,7 @@ if (csflag) then
   do 85  i = 1, n
 !  include only channels with j at least equal to coupled states
 !  projection index
-    if (j(i) .ge. nu) then
+    if (bqs%jq(i) .ge. nu) then
       nn = nn + 1
       if (nn .gt. nmax) then
         write (6, 40) nn, nmax
@@ -616,39 +622,40 @@ if (csflag) then
         stop
       end if
       eint(nn) = (eint(i) - emin) / econv
-      j(nn) = j(i)
+      bqs%jq(nn) = bqs%jq(i)
       c12(nn) = c12(i)
       c32(nn) = c32(i)
       csig(nn) = csig(i)
-      is(nn) = is(i)
+      bqs%inq(nn) = bqs%inq(i)
       ifi(nn) = ifi(i)
-      l(nn) = jtot
+      bqs%lq(nn) = jtot
       if (.not. boundc) then
            cent(nn) = jtot * (jtot + 1)
       else
            xjtot=jtot+0.5d0
-           xj=j(nn)+0.5d0
+           xj=bqs%jq(nn)+0.5d0
            cent(nn)=xjtot*(xjtot+1)+xj*(xj+1)-2*xnu*xnu
       endif
     end if
 85   continue
 !  set number of coupled states channels
   n = nn
+  bqs%length = n
 !
 !  set up close-coupled channel basis (if desired)
 else if (.not. csflag) then
 !  first move all indices of rotational levels to the top of the vectors
-!  e.g. move j(n) to j(nmax), j(n-1) to j(nmax-1),  etc
+!  e.g. move bqs%jq(n) to bqs%jq(nmax), bqs%jq(n-1) to bqs%jq(nmax-1),  etc
   do 90  i = 1, n
 !  move (n-i+1)th element to (nmax-i+1)th element
     inew = nmax - i + 1
     iold = n - i + 1
     eint(inew) = eint(iold)
-    j(inew) = j(iold)
+    bqs%jq(inew) = bqs%jq(iold)
     c12(inew) = c12(iold)
     c32(inew) = c32(iold)
     csig(inew) = csig(iold)
-    is(inew) = is(iold)
+    bqs%inq(inew) = bqs%inq(iold)
     ifi(inew) = ifi(iold)
 90   continue
   nn = 0
@@ -657,10 +664,10 @@ else if (.not. csflag) then
 !  required for rotational degeneracy, and store the new elements in
 !  nn, nn+1, ....
     ipoint = nmax - n + i
-    ji = j(ipoint)
+    ji = bqs%jq(ipoint)
     lmax = jtot + ji + 1
     lmin = iabs (jtot - ji)
-    isx = sign(ione,is(ipoint))
+    isx = sign(ione,bqs%inq(ipoint))
     do 95  li = lmin, lmax
       ix = (-1) ** (ji + li - jtot) * isx
       if (ix .eq. jlpar) then
@@ -671,19 +678,20 @@ else if (.not. csflag) then
           stop
         end if
         eint(nn) = (eint(ipoint) - emin) / econv
-        j(nn) = ji
+        bqs%jq(nn) = ji
         c12(nn) = c12(ipoint)
         c32(nn) = c32(ipoint)
         csig(nn) = csig(ipoint)
-        is(nn) = is(ipoint)
+        bqs%inq(nn) = bqs%inq(ipoint)
         ifi(nn) = ifi(ipoint)
-        l(nn) = li
+        bqs%lq(nn) = li
         cent(nn) = li * ( li + 1)
       end if
 95     continue
 100   continue
 !  set number of close coupled channels
   n = nn
+  bqs%length = n
 end if
 !
 !  now check to see if any of the open channels are closed at r = rcut
@@ -710,18 +718,19 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and..not.boundc) then
 !  here if this channel is to be included
         nn = nn + 1
         eint(nn) = eint(i)
-        j(nn) = j(i)
+        bqs%jq(nn) = bqs%jq(i)
         c12(nn) = c12(i)
         c32(nn) = c32(i)
         csig(nn) = csig(i)
-        is(nn) = is(i)
+        bqs%inq(nn) = bqs%inq(i)
         cent(nn) = cent(i)
         ifi(nn) = ifi(i)
-        l(nn) = l(i)
+        bqs%lq(nn) = bqs%lq(i)
       end if
 130     continue
 !  reset number of channels
     n = nn
+    bqs%length = n
   end if
 end if
 !  return if no channels
@@ -767,14 +776,14 @@ if (clist) then
        '      C-3/2      CSIG','  **  NU=', f4.1)
   end if
   do 230  i = 1, n
-    fj = j(i) + half
-    ie = sign(ione,is(i))
-    iv = abs((is(i) - 100*(is(i)/100))/10)
+    fj = bqs%jq(i) + half
+    ie = sign(ione,bqs%inq(i))
+    iv = abs((bqs%inq(i) - 100*(bqs%inq(i)/100))/10)
     ecm = eint(i) * econv
     if (bastst) &
-    write (6, 220) i, iv, fj, ie, ifi(i), l(i), ecm, &
+    write (6, 220) i, iv, fj, ie, ifi(i), bqs%lq(i), ecm, &
                    c12(i), c32(i),csig(i)
-    write (9, 220) i, iv, fj, ie, ifi(i), l(i), ecm, &
+    write (9, 220) i, iv, fj, ie, ifi(i), bqs%lq(i), ecm, &
                    c12(i), c32(i),csig(i)
 220     format (i4, i4, f5.1, i6, i4, i6, f13.3, 3f11.5)
 230   continue
@@ -842,21 +851,21 @@ do 600 iterm=1,nterm
   if (mod(iterm,3).eq.1 .and. iterm.ne.1) ipot = 4
 499   nlami = (lammax(iterm) - lammin(iterm))/istep + 1
   do 500 il=1,nlami
-    ancouma => v2%get_angular_coupling_matrix(ilam)
+    ancouma => v2%get_angular_coupling_matrix(il)
     lb = lammin(iterm) + (il - 1) * istep
     mu = mproj(iterm)
     inum = 0
     do icol = 1, n
       do irow = icol, n
         vee = zero
-        isignr = sign(ione,is(irow))
-        isignc = sign(ione,is(icol))
-        iomr = abs(is(irow))/100
-        iomc = abs(is(icol))/100
-        lrow = l(irow)
-        lcol = l(icol)
-        ivibr = mod(abs(is(irow)),100)/10
-        ivibc = mod(abs(is(icol)),100)/10
+        isignr = sign(ione,bqs%inq(irow))
+        isignc = sign(ione,bqs%inq(icol))
+        iomr = abs(bqs%inq(irow))/100
+        iomc = abs(bqs%inq(icol))/100
+        lrow = bqs%lq(irow)
+        lcol = bqs%lq(icol)
+        ivibr = mod(abs(bqs%inq(irow)),100)/10
+        ivibc = mod(abs(bqs%inq(icol)),100)/10
         if (csflag) then
           lrow = nu
           lcol = nu
@@ -864,17 +873,17 @@ do 600 iterm=1,nterm
         goto (460, 470, 480, 490), ipot
   !  Vsig
   460       if (iomr.eq.3 .and. iomc.eq.3) then
-          call vlm2sg(j(irow), lrow, j(icol), lcol, &
+          call vlm2sg(bqs%jq(irow), lrow, bqs%jq(icol), lcol, &
             jtot, lb, isignr, isignc, vee, csflag)
         end if
         goto 440
   !  Vpi
   470       if (iomr.lt.3 .and. iomc.lt.3 .and. &
             ivibr.eq.ivibc .and. ivibr.eq.(iterm-2)/3) then
-          call vlm2pi(j(irow), lrow, j(icol), lcol, &
+          call vlm2pi(bqs%jq(irow), lrow, bqs%jq(icol), lcol, &
             jtot, izero, izero, lb, isignr, isignc, &
             v1212, csflag)
-          call vlm2pi(j(irow), lrow, j(icol), lcol, &
+          call vlm2pi(bqs%jq(irow), lrow, bqs%jq(icol), lcol, &
             jtot, ione, ione, lb, isignr, isignc, &
             v3232, csflag)
           vee = c12(irow) * c12(icol) * v1212 &
@@ -884,10 +893,10 @@ do 600 iterm=1,nterm
   !  V2
   480       if (iomr.lt.3 .and. iomc.lt.3 .and. &
             ivibr.eq.ivibc .and. ivibr.eq.(iterm-3)/3) then
-          call vlm2pi(j(irow), lrow, j(icol), lcol, &
+          call vlm2pi(bqs%jq(irow), lrow, bqs%jq(icol), lcol, &
             jtot, izero, ione, lb, isignr, isignc, &
             v1212, csflag)
-          call vlm2pi(j(irow), lrow, j(icol), lcol, &
+          call vlm2pi(bqs%jq(irow), lrow, bqs%jq(icol), lcol, &
             jtot, ione, izero, lb, isignr, isignc, &
             v3232, csflag)
           vee = c12(irow) * c32(icol) * v1212 &
@@ -897,20 +906,20 @@ do 600 iterm=1,nterm
   !  V1
   490       if (iomr.eq.3 .and. iomc.lt.3 .and. &
             ivibc.eq.(iterm-4)/3) then
-          call vlmsp1 (j(irow), lrow, j(icol), &
+          call vlmsp1 (bqs%jq(irow), lrow, bqs%jq(icol), &
             lcol, jtot, lb, izero, &
             isignr, isignc, v12, csflag)
-          call vlmsp1 (j(irow), lrow, j(icol), &
+          call vlmsp1 (bqs%jq(irow), lrow, bqs%jq(icol), &
             lrow, jtot, lb, ione, &
             isignr, isignc, v32, csflag)
           vee = c12(icol) * v12 + c32(icol) * v32
         end if
         if (iomc.eq.3 .and. iomr.lt.3 .and. &
             ivibr.eq.(iterm-4)/3) then
-          call vlmsp1 (j(icol), lcol, j(irow), &
+          call vlmsp1 (bqs%jq(icol), lcol, bqs%jq(irow), &
             lrow, jtot, lb, izero, &
             isignc, isignr, v12, csflag)
-          call vlmsp1 (j(icol), lcol, j(irow), &
+          call vlmsp1 (bqs%jq(icol), lcol, bqs%jq(irow), &
             lrow, jtot, lb, ione, &
             isignc, isignr, v32, csflag)
           vee = c12(irow) * v12 + c32(irow) * v32
@@ -946,12 +955,12 @@ if (bastst .and. iprint .ge. 1) then
 660   format(/1x,'   N   V   J   EPS   FI    L   EINT(CM-1)', &
    '     C-1/2       C-3/2       C-SIG')
   do 680  i = 1, n
-    fj = j(i) + half
-    ie = sign(ione,is(i))
-    iv = abs((is(i) - 100*(is(i)/100))/10)
-    iom = abs(is(i)/100)
+    fj = bqs%jq(i) + half
+    ie = sign(ione,bqs%inq(i))
+    iv = abs((bqs%inq(i) - 100*(bqs%inq(i)/100))/10)
+    iom = abs(bqs%inq(i)/100)
     ecm = eint(i) * econv
-    write (6, 670) i,iv,fj,ie,iom,l(i), ecm, &
+    write (6, 670) i,iv,fj,ie,iom,bqs%lq(i), ecm, &
         c12(i), c32(i), csig(i)
 670     format (1x,2i4, f5.1, i5, i4, i6, f13.3, 3f12.6)
 680   continue

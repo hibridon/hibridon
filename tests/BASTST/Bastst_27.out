@@ -1,0 +1,154 @@
+      BASTST                                     
+ DUMMY POTENTIAL FOR TESTING PURPOSES            
+ ==============================
+     *** Parameters:
+ JTOT1  =  20        JTOT2  =  20        JTOTD  =   5        JLPAR  =   1
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  48        IPRINT =   1
+ FSTFAC =  15.00     RINCR  =  1.000     RCUT   =  30.00     RENDAI =  1.000    
+ RENDLD =  1.000     RSTART =  1.000     SPAC   = 0.1000     TOLAI  =  1.000    
+ XMU    =  16.47    
+     *** C2v-ASTP system parameters:
+ NTERM  =   4        NUMPOT =   0        IOP    =   1        JMAX   =   3
+ AROT   = 0.8000     BROT   = 0.7000     CROT   = 0.6000     EMAX   =  5000.    
+ LAMMIN:    0   2   4   6
+ LAMMAX:    8   8   8   8
+ MPROJ:     0   2   4   6
+     *** Flags:
+ AIRYFL= F    BASTST= T    BATCH = F    CHLIST= T    CSFLAG= F    FLAGHF= F
+ FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= F    NOPRIN= F    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= F    WAVEFL= F
+ WRPART= F    WRSMAT= F    WRXSEC= F    BOUNDC= F
+ ** Energies:     5000.000000
+ NOUT: -2; JOUT:  0   2
+ INDOUT:    0   1
+ ==============================
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2023-01-24 at 15:17
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: 17bf6f24fc9fedc76661bce2dfe03883f27e8b8f
+SYS: Darwin 22.2.0 x86_64
+COMPILER: /opt/intel/oneapi/compiler/2022.2.1/mac/bin/intel64/ifort
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+ 
+      Model Name: MacBook Pro
+      Model Identifier: MacBookPro14,3
+      Processor Name: Quad-Core Intel Core i7
+      Processor Speed: 2.9 GHz
+      Number of Processors: 1
+      Total Number of Cores: 4
+      L2 Cache (per Core): 256 KB
+      L3 Cache: 8 MB
+      Hyper-Threading Technology: Enabled
+      Memory: 16 GB
+ --------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ All publications resulting from use of the integrators included in the
+ Hibridon code must include the following reference:
+
+ D. E. Manolopoulos, J. Chem. Phys. 85, 6425 (1986); M. H. Alexander and D. E.
+ Manolopoulos, J. Chem. Phys. 80, 2044 (1987).
+
+ All publications involving the determination ofphotodissociation cross sections
+ must also include the following reference:
+
+ M. H. Alexander, Comput. Phys. Commun, 75, 87 (1993).
+
+ All publications investigating flux redistribution must include the following references:
+
+ M. H. Alexander, J. Chem. Phys. 95, 8931 (1991); D. E. Manolopoulos and
+ M. H. Alexander, J. Chem. Phys.  97, 2527 (1992).
+
+ All publications resulting from use of the Hibridon package must include
+ the following reference:
+
+ HIBRIDON is a package of programs for the time-independent quantum treatment
+ of inelastic collisions and photodissociation written by M. H. Alexander,
+ D. E.  Manolopoulos, H.-J. Werner, and B. Follmeg, with contributions by
+ P. F. Vohralik, D. Lemoine, G. Corey, B. Johnson, T. Orlikowski, A. Berning,
+ A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly, G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J. Klos, and F. Lique
+ -----------------------------------------------------------------------------
+
+ ** LABEL:          BASTST                                     
+ ** POT NAME:  DUMMY POTENTIAL FOR TESTING PURPOSES            
+ ** DATE:      Jan 24 15:40:21 2023
+
+ *** WARNING:  NAIRY .NE. 1 BUT AIRYFL .EQ. .FALSE.
+ ** NMAX= 500  NAIRY= 500
+ ** TOTAL NUMBER OF ANISOTROPIC TERMS IN POTENTIAL = 24
+
+ **  CC ASYMMETRIC TOP **
+     RMU=  16.4700  AROT=  0.800  BROT=  0.700  CROT=  0.600
+    O/P= 1  E=5000.00  JTOT=  20   JLPAR= 1
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=   30.00
+
+  CHANNEL LIST SORTED BY ENERGY
+   N   J  IS   L   EINT(CM-1)
+   1   0   0  20     0.000
+   2   1   0  19     1.400
+   3   1   0  21     1.400
+   4   2   0  18     3.854
+   5   2   0  20     3.854
+   6   2   0  22     3.854
+   7   2  -2  19     4.200
+   8   2  -2  21     4.200
+   9   2   2  18     4.546
+  10   2   2  20     4.546
+  11   2   2  22     4.546
+  12   3   0  17     7.625
+  13   3   0  19     7.625
+  14   3   0  21     7.625
+  15   3   0  23     7.625
+  16   3  -2  18     8.400
+  17   3  -2  20     8.400
+  18   3  -2  22     8.400
+  19   3   2  17     9.175
+  20   3   2  19     9.175
+  21   3   2  21     9.175
+  22   3   2  23     9.175
+ILAM=  1 LAMNUM(ILAM) =     22
+ILAM=  2 LAMNUM(ILAM) =     58
+ILAM=  3 LAMNUM(ILAM) =     81
+ILAM=  4 LAMNUM(ILAM) =     98
+ILAM=  5 LAMNUM(ILAM) =    112
+ILAM=  6 LAMNUM(ILAM) =     78
+ILAM=  7 LAMNUM(ILAM) =     42
+ILAM=  8 LAMNUM(ILAM) =      0
+ILAM=  9 LAMNUM(ILAM) =      0
+ILAM= 10 LAMNUM(ILAM) =     72
+ILAM= 11 LAMNUM(ILAM) =     98
+ILAM= 12 LAMNUM(ILAM) =     80
+ILAM= 13 LAMNUM(ILAM) =     72
+ILAM= 14 LAMNUM(ILAM) =     20
+ILAM= 15 LAMNUM(ILAM) =      0
+ILAM= 16 LAMNUM(ILAM) =      0
+ILAM= 17 LAMNUM(ILAM) =     96
+ILAM= 18 LAMNUM(ILAM) =     54
+ILAM= 19 LAMNUM(ILAM) =     42
+ILAM= 20 LAMNUM(ILAM) =      0
+ILAM= 21 LAMNUM(ILAM) =      0
+ILAM= 22 LAMNUM(ILAM) =      0
+ILAM= 23 LAMNUM(ILAM) =      0
+ILAM= 24 LAMNUM(ILAM) =      0
+ ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS  1025
+ ** BASTST=.TRUE.; TEST OF SUBROUTINE BASIS
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:     0
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    8.8 %
+      CURRENT DATE:  Jan 24 15:40:21 2023
+ ===============================================================================

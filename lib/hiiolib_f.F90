@@ -1472,7 +1472,6 @@ if(iadr(irec,ifil) < 0) then
   iadr(irec,ifil) = next(ifil) ! position of the start of the record in its file (unit : 32 bit words)
   next(ifil) = next(ifil) + ((l-1)/lbuf+1) * lbuf
   len(irec,ifil) = next(ifil) - iadr(irec,ifil)
-  write(6,*) 'graffy/dwrite : len(', irec, ',', ifil, ') has been set to ', len(irec,ifil)
 end if
 if(iof+l.gt.len(irec,ifil)) then
   if(irec.ge.last(ifil)) then
@@ -1504,7 +1503,6 @@ return
 entry dinit
 
 if ( .NOT. cdio_is_allocated ) then
-      ! write(6,*) 'graffy/dinit : allocating cdio from dinit' 
       call allocate_cdio(maxrec, maxun)
       cdio_is_allocated = .TRUE.
 end if
@@ -1527,7 +1525,6 @@ ibof=0
 ibstat=0
 libuf=lbuf
 ldbuf=lbuf/intrel
-! write(6,*) 'graffy/dinit setting len(:,:) to 0'
 do 70 if=1,maxun
 next(if)=lnex
 iun(if)=0
@@ -1543,11 +1540,9 @@ entry dopen(ifil,iunit,name)
 !.....open file "ifil" as unit "iunit" with filename "name"
 !
 if ( .NOT. cdio_is_allocated ) then
-      ! write(6,*) 'graffy/dopen : allocating cdio from dopen' 
       call allocate_cdio(maxrec, maxun)
       cdio_is_allocated = .TRUE.
 end if
-! write(6,*), 'graffy/dopen : ifil=', ifil, 'iunit=', iunit, 'name=', name
 if(iun(ifil).eq.iunit) return
 if(iun(ifil).ne.0) then
   write(6,75) ifil,iunit,iun(ifil)
