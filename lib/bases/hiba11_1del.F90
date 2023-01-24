@@ -198,8 +198,8 @@ do 10  i = 1, nterm
 nsum = 0
 do 13  i = 1, nterm
   if (mproj(i) .gt. lammin(i) ) then
-    write (6, 11) i, mproj(i), lammin(i)
-    write (9, 11) i, mproj(i), lammin(i)
+    write (6, 11) mproj(i), lammin(i), i
+    write (9, 11) mproj(i), lammin(i), i
 11     format (' *** MPROJ=',i2,' > LAMMIN=',i2, &
             ' FOR TERM',i2,'; ABORT ***')
     if (bastst) then
