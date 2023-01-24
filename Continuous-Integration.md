@@ -1,3 +1,15 @@
+- macOS:
+  - macOS-11.2, Debug, gfortran-11, Intel10_64lp
+  - macos-11.2, Debug, gfortran-9, Intel10_64lp
+  - macos-11.2, Debug, gfortran-10, Intel10_64lp
+  - macos-11.2, Debug, ifort, Intel10_64lp
+  - macos-11.2, Release, gfortran-11, Intel10_64lp
+  - macos-11.2, Release, gfortran-9, Intel10_64lp
+  - macos-11.2, Release, gfortran-10, Intel10_64lp
+  - macos-11.2, Release, ifort, Intel10_64lp
+- Linux:
+  - Debian 9, Debug, gfortran, Atlas
+  - Debian 9,Debug, ifort, Atlas
+  - Debian 9,Release, gfortran, Atlas
+  - Debian 9,Release, ifort, Atlas
 
-
-![ci](https://user-images.githubusercontent.com/20931653/214399041-9df53229-bc0e-4210-9c59-9609fde9692a.jpg)
