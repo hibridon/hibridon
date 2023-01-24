@@ -155,8 +155,7 @@ brot=>rspar(1); aso=>rspar(2)
 zero = 0.d0
 half=0.5d0
 two = 2.d0
-!  check for consistency in the values of flaghf and csflag
-write(6,*) airyfl,bastst,batch,chlist, csflag,flaghf
+
 if (.not.flaghf .and. (.not.csflag .or. csflag .and. ihomo))  then
   write (6, 5)
   write (9, 5)
@@ -270,7 +269,7 @@ if (.not. csflag) then
           if (jai .eq. 1) sc2(n)=sc2(n)+aso/two
           sc2(n)=sc2(n)/econv
         endif
-        ehold(nlevel)=sc2(n)
+        if (n>0) ehold(nlevel)=sc2(n)
 80       continue
 90     continue
 100   continue
@@ -457,6 +456,7 @@ end if
 if (n .eq. 0) return
 !  eliminate closed channels from level list
 ! sort level list in terms of increasing energy
+ilow = 1
 if (nlevel.gt.1) then
    do i=1,nlevel-1
       elow=ehold(i)
