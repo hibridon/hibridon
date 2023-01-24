@@ -571,7 +571,7 @@ do 103 iv=1,numvpi
   n = nn
   bqs%length = n
 !  find lowest energy
-  emin = 1.e+7
+  emin = 1.d7
   do 65  i = 1, n
     if (eint(i) .lt. emin) emin = eint(i)
 65   continue
@@ -851,7 +851,7 @@ do 600 iterm=1,nterm
   if (mod(iterm,3).eq.1 .and. iterm.ne.1) ipot = 4
 499   nlami = (lammax(iterm) - lammin(iterm))/istep + 1
   do 500 il=1,nlami
-    ancouma => v2%get_angular_coupling_matrix(ilam)
+    ancouma => v2%get_angular_coupling_matrix(il)
     lb = lammin(iterm) + (il - 1) * istep
     mu = mproj(iterm)
     inum = 0
