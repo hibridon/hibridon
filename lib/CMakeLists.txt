@@ -6,7 +6,7 @@
 
 set(ENABLE_ASSERTS "ON" CACHE BOOL "to enable or disable assert checks for debug builds (mostly for developers).")
 
-set(LINK_TIME_OPTIMIZATION "ON" CACHE BOOL "to enable or disable link time optimizations on release builds for compilers that support it (slightly improves performance but greatly slows down link time)")
+set(LINK_TIME_OPTIMIZATION "OFF" CACHE BOOL "to enable or disable link time optimizations on release builds for compilers that support it (slightly improves performance but greatly slows down link time)")
 
 # With gfortran, variables are initialized to 0 by default, but it's not the case with ifort compiler. Therefore, all variables need to be initialized to guarantee the program works in a deterministic way on every compiler.
 set(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR "ON" CACHE BOOL "if set, causes the use of uninitilazed variables to trigger an exception on debug builds, thus making the program stop. This is useful to detect uninitialized memory issues.")
