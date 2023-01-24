@@ -295,7 +295,7 @@ end if
 !  return if no channels
 if (nch .eq. 0) return
 if (nu .eq. numin) then
-  ntop = max(nn, nlevop)
+  ntop = max(nch, nlevop)
 !  ntop is the maximum row dimension of all matrices passed in the
 !  call list of subroutines propag and soutpt.
 !  for fps make sure this is an odd number, for faster bank access.
