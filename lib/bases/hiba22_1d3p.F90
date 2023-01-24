@@ -285,7 +285,6 @@ c0(3,4) = bxs * 2.d0 * sqrt(2.d0/3.d0) - bss / sqrt(3.d0)
 c0(4,3) = c0(3,4)
 c0(4,4) = en1d
 lwork = 144
-write(*,*) c0
 call dsyev('V','L',isize,c0,isize,en0,work,lwork,ierr)
 !  make sure largest element of e.vectors are positive
 do ii = 1,isize
