@@ -1,6 +1,6 @@
 Each time Hibridon source code is modified merging a Pull Request or directly pushing to the master branch, the new source code is automatically built and tested. This continuous integration ensures that the new modifications added to the source code does not unexpectedly affect the results of Hibridon calculations.
 
-On the main page of the [Hibridon GitHub repository](https://github.com/hibridon/hibridon/), the two labels at the top of the build instructions allow you to check if the last bunch of tests were successful:
+On the main page of the [Hibridon GitHub repository](https://github.com/hibridon/hibridon/), the two labels at the top of the build instructions allow you to check if the last bunch of tests were successful (passing):
 
 <img width="400px" src="https://user-images.githubusercontent.com/20931653/214405225-1f61f2e1-af8a-4210-a2bb-37fb8e1c55a5.jpg">
 
