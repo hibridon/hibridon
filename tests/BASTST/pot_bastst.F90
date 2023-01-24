@@ -44,40 +44,38 @@ implicit none
 integer, intent(in) :: ibasty
     ivcol = 0
     ivrow = 0
+    ntv = 1
     select case (ibasty)
         case (1)
-            ntv(1) = 1
             lammin(1) = 2
             lammax(1) = 2
         case (2)
-            ntv(1) = 1
             lammin(1) = 1
             lammax(1) = 10
             mproj(1) = 0
         case (3)
-            ntv(1) = 1 ; ntv(2) = 1
             lammin(1) = 1  ; lammin(2) = 2
             lammax(1) = 10 ; lammax(2) = 10
             mproj(1) = 0   ; mproj(2) = 2
         case (4)
-            ntv = 1
             lammin(1) = 0 
             lammax(1) = 10 
             mproj(1) = 0  
         case (5)
-            ntv = 1
             lammin(1) = 0 
             lammax(1) = 10 
             mproj(1) = 0  
         case (8)
-            ntv = 1
             lammin(1) = 2
             lammax(1) = 4
             mproj(1) = 0
         case (10)
-            ntv=1
             lammin(1) = 1
             lammax(1) = 13
+        case (11)
+            lammin(1) = 1 ; lammin(2) = 4
+            lammax(1) = 1 ; lammax(2) = 4
+            mproj(1)  = 0 ; mproj(2)  = 4
         case (28)
             nlam = 3
             allocate(lms_1sg1sg(nlam))
