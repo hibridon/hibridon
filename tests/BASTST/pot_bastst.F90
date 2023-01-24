@@ -40,6 +40,7 @@ use mod_conlam, only: nlam
 use mod_chiral, only: lms_chiral => lms
 use mod_asymln, only: lms_asymln => lms
 use mod_1sg1sg, only: lms_1sg1sg => lms
+use mod_hiba19_sgpi1, only: numvib_sgpi1 => numvib, ivibpi_sgpi1 => ivibpi
 implicit none
 integer, intent(in) :: ibasty
     ivcol = 0
@@ -86,6 +87,12 @@ integer, intent(in) :: ibasty
             lammin(1) = 1
             lammax(1) = 10
             mproj(1) = 0
+        case (19)
+            nlam = 4
+            numvib_sgpi1 = 1
+            ivibpi_sgpi1(1) = 0
+            lammin = 1
+            lammax = 1
         case (28)
             nlam = 3
             allocate(lms_1sg1sg(nlam))
