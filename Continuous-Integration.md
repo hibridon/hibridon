@@ -6,8 +6,8 @@ On the main page of the [Hibridon GitHub repository](https://github.com/hibridon
 
  
 
-Currently, these tests are done on two different platforms (macOS and Linux), using different build modes (Release and Debug), different compilers, and different BLAS/LAPACK libraries.
-The full list of the different configurations used for the continuous integration is the following:
+Currently, these tests are done on two different platforms (macOS and Linux), using different build modes (Release and Debug), compilers, and BLAS/LAPACK libraries.
+The full list of the configurations used for the continuous integration is the following:
 
 | Platform  | OS version  | Build mode  | Compiler  | BLAS/LAPACK Library |
 |---|---|---|---|---|
