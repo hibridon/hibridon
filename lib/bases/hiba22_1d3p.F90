@@ -132,9 +132,9 @@ dimension  jhold(1), ehold(1), &
           ishold(1), ieig(0:2)
 !  scratch arrays for computing asymmetric top energies and wave fns.
 dimension en0(4), en1(3), en2(2), vec(4,4), work(288)
-integer, pointer :: nterm, nstate
+integer, pointer :: nterm, nstate, ipol, npot
 real(8), pointer :: en1d
-nterm=>ispar(1); nstate=>ispar(2)
+nterm=>ispar(1); nstate=>ispar(2); ipol=>ispar(3); npot=>ispar(4)
 en1d=>rspar(1)
 
 zero = 0.d0
@@ -270,7 +270,7 @@ isize = 4
 
 c0(1,1) = - axy
 c0(1,2) = 0.d0
-c0(2,1) = c0(2,1)
+c0(2,1) = c0(1,2)
 c0(1,3) = 0.d0
 c0(3,1) = c0(1,3)
 c0(1,4) = bxs * 2.d0 / sqrt(3.d0) + sqrt(2.d0/3.d0) * bss
@@ -285,6 +285,7 @@ c0(3,4) = bxs * 2.d0 * sqrt(2.d0/3.d0) - bss / sqrt(3.d0)
 c0(4,3) = c0(3,4)
 c0(4,4) = en1d
 lwork = 144
+write(*,*) c0
 call dsyev('V','L',isize,c0,isize,en0,work,lwork,ierr)
 !  make sure largest element of e.vectors are positive
 do ii = 1,isize
