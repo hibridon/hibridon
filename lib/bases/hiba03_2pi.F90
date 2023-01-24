@@ -782,7 +782,7 @@ do 450 i = 1, nn
             c12(i), c32(i)
     end if
 450 continue
-deallocate(ifi)
+if (allocated(ifi)) deallocate(ifi)
 
 ! call v2%print_summary(unit=6)
 return
