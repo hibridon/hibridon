@@ -93,6 +93,10 @@ integer, intent(in) :: ibasty
             ivibpi_sgpi1(1) = 0
             lammin = 1
             lammax = 1
+        case (22)
+            lammin(1) = 1
+            lammax(1) = 12
+            mproj(1) = 0
         case (28)
             nlam = 3
             allocate(lms_1sg1sg(nlam))
@@ -135,6 +139,7 @@ end subroutine init_pot_parameters
 subroutine pot (vv0, r)
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
+use mod_selb, only: ibasty
     implicit none
     real(8), intent(out) :: vv0
     real(8), intent(in) :: r
