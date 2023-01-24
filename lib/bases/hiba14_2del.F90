@@ -387,7 +387,7 @@ if (y .le. 2) then
   centh2=cent(2)
   ish1=is(1)
   ish2=is(2)
-  do 53 i = nmn, n
+  do 53 i = nmn+1, n+1
     j(i-nmn)=j(i)
     cent(i-nmn)=cent(i)
     is(i-nmn)=is(i)
