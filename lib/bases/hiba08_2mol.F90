@@ -212,7 +212,7 @@ do 200  i = 1, numj
         j12(nch) = jj12
         bqs%lq(nch) = ll
         bqs%inq(nch)=ijpar
-        bqs%length = n
+        bqs%length = nch
 !  now calculate the diagonal matrix elements of the hamiltonian
 !  first the internal rotational energy
         fj1 = jj1 * (jj1 + ione)
