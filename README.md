@@ -7,15 +7,13 @@
 ---
 # Hibridon v5.0
 
-Computer Software for
-Molecular Inelastic Scattering and Photodissociation
+Hibridon is a program package to solve the close-coupled equations which occur in the quantum treatment of inelastic atomic and molecular collisions. Gas-phase scattering, photodissociation, collisions of atoms and/or molecules with flat surfaces, and bound states of weakly-bound complexes can be treated
 
-Documentation is available on
-
-[https://github.com/hibridon/hibridon/wiki](https://github.com/hibridon/hibridon/wiki)
+The full documentation is available on [https://github.com/hibridon/hibridon/wiki](https://github.com/hibridon/hibridon/wiki)
 
 Changes:
 - [CHANGELOG](CHANGELOG.md)
+
 
 #  Prerequisites
 
