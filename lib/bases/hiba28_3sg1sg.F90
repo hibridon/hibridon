@@ -34,7 +34,7 @@ contains
 !      type(lm_type), dimension(:), allocatable :: lms
 !      end module mod_1sg1sg
 ! --------------------------------------------------------------------
-subroutine ba3sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
+subroutine ba3sg1sg (bqs, jhold, ehold, ishold, nlevel, &
      nlevop, e1, sc2, sc3, sc4, rcut, jtot, &
      flaghf, flagsu, csflag, clist, bastst, ihomo, &
      nu, numin, jlpar, n, nmax, ntop, v2)
@@ -124,7 +124,6 @@ use mod_1sg1sg
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_coj12, only: j12
 use mod_coatpr, only: c
 use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
@@ -137,11 +136,13 @@ use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax,
 use mod_par, only: readpt, boundc
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
+type(bqs_type), intent(out) :: bqs
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-dimension j(1), l(1), is(1), jhold(1), ehold(1), &
+dimension jhold(1), ehold(1), &
     e1(1), sc2(1), sc3(1), sc4(1), ishold(1)
 dimension j1(2000),is1(2000), fnn1(3,3), fnn2(3,3), &
   hss(3,3), hsr(3,3), ham(3,3), u(3,3), uu(3,3), wsig(3,3), &
@@ -393,6 +394,7 @@ if (bastst) then
 end if
 !
 !  set up CC scattering channel basis
+call bqs%init(nmax)
 n = 0
 xjtot = jtot
 do i = 1, nlevel
@@ -412,10 +414,11 @@ do i = 1, nlevel
       if (ix .eq. jlpar) then
         n = n + 1
         if (n .le. nmax) then
-          j(n) = jhold(i)
-          is(n) = ishold(i)
-          l(n) = li
-          j12(n) = j12i
+          bqs%jq(n) = jhold(i)
+          bqs%inq(n) = ishold(i)
+          bqs%lq(n) = li
+          bqs%j12(n) = j12i
+          bqs%length = n
           eint(n) = ehold(i)
           cent(n) = li * (li + 1.d0)
           do kk = 1, 3
@@ -468,14 +471,14 @@ if (bastst) then
       ' EINT(CM-1)     COEFFS')
   do i = 1, n
     ecm = eint(i) * econv
-    jj1 = j(i)/10
+    jj1 = bqs%jq(i)/10
     fj1 = jj1
-    j2 = mod(j(i),10)
-    fj12 = j12(i)
+    j2 = mod(bqs%jq(i),10)
+    fj12 = bqs%j12(i)
     isub = (i - 1) * 3
-    write (6, 220) i, fj1, is(i), j2, fj12, l(i), ecm, &
+    write (6, 220) i, fj1, bqs%inq(i), j2, fj12, bqs%lq(i), ecm, &
       (c(isub + kk), kk=1,3)
-    write (9, 220) i, fj1, is(i), j2, fj12, l(i), ecm, &
+    write (9, 220) i, fj1, bqs%inq(i), j2, fj12, bqs%lq(i), ecm, &
       (c(isub + kk), kk=1,3)
 220     format (i4, f7.1, 2i6, f7.1, i7, f13.3, 2x, 3f7.3)
   end do
@@ -499,17 +502,17 @@ do 400 ilam = 1, nlam
   lltot = lms(ilam)%ltot
   inum = 0
   do icol = 1, n
-    j1c = j(icol)/10
-    j2c = mod(j(icol),10)
-    ifc = is(icol)
-    j12c = j12(icol)
-    lc = l(icol)
+    j1c = bqs%jq(icol)/10
+    j2c = mod(bqs%jq(icol),10)
+    ifc = bqs%inq(icol)
+    j12c = bqs%j12(icol)
+    lc = bqs%lq(icol)
     do irow = icol, n
-      j1r = j(irow)/10
-      j2r = mod(j(irow),10)
-      ifr = is(irow)
-      j12r = j12(irow)
-      lr = l(irow)
+      j1r = bqs%jq(irow)/10
+      j2r = mod(bqs%jq(irow),10)
+      ifr = bqs%inq(irow)
+      j12r = bqs%j12(irow)
+      lr = bqs%lq(irow)
 !     initialize potential to zero
       vee = 0.d0
       call v3sgsg(irow,icol,j1r,ifr,j2r,j12r,lr, &

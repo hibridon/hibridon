@@ -22,7 +22,7 @@
 module mod_hiba01_1sg
 contains
 ! --------------------------------------------------------------------
-subroutine ba1sg (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
+subroutine ba1sg (bqs, jhold, ehold, ishold, nlevel, nlevop, &
                   sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
                   n, nmax, ntop, v2)
@@ -118,11 +118,9 @@ use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_skip, only: nskip, iskip
 use mod_vib, only: nvib=>nvibs, ivib=>ivibs
-
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
-integer, intent(out) :: j(:)
-integer, intent(out) :: l(:)
-integer, intent(out) :: is(:)
+type(bqs_type), intent(out) :: bqs
 integer, intent(out), dimension(:) :: jhold
 real(8), intent(out), dimension(:) :: ehold
 integer, intent(out), dimension(:) :: ishold
@@ -235,6 +233,7 @@ if (clist) then
   end do
 35   format(1x,i3,2x,3g12.5,f15.8)
 end if
+call bqs%init(nmax)
 n=0
 nskip = 1
 if (ihomo) nskip = 2
@@ -267,10 +266,11 @@ do 120 iv=iva,ive
     !  here for correct combination of j and l
           n = n + 1
           if (n .gt. nmax) go to 130
-          l(n) = li
+          bqs%lq(n) = li
           cent(n) = li * (li + 1.)
-          is(n) = ivib(iv)
-          j(n) = ji
+          bqs%inq(n) = ivib(iv)
+          bqs%jq(n) = ji
+          bqs%length = n
           eint(n) = ee
         end if
       end do
@@ -279,17 +279,18 @@ do 120 iv=iva,ive
       if (ji .lt. nu) go to 120
       n = n + 1
       if (n .gt. nmax) go to 130
-      l(n) = jtot
+      bqs%lq(n) = jtot
       if (.not.boundc) then
         cent(n) = jtot * (jtot + 1)
       else
         xjtot=jtot
-        xj=j(n)
+        xj=bqs%jq(n)
         xnu=nu
         cent(n)=xjtot*(xjtot+1)+xj*(xj+1)-2*xnu*xnu
       endif
-      is(n) = ivib(iv)
-      j(n) = ji
+      bqs%inq(n) = ivib(iv)
+      bqs%jq(n) = ji
+      bqs%length = n
       eint(n) = ee
     end if
 120 continue
@@ -331,10 +332,11 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and. .not.boundc) then
 !  here if this channel is to be included
         n = n + 1
         eint(n) = eint(i)
-        is(n) = is(i)
-        j(n) = j(i)
+        bqs%inq(n) = bqs%inq(i)
+        bqs%jq(n) = bqs%jq(i)
         cent(n) = cent(i)
-        l(n) = l(i)
+        bqs%lq(n) = bqs%lq(i)
+        bqs%length = n
       end if
     end do
 !  reset number of channels
@@ -437,8 +439,8 @@ if (clist) then
   write (9, 255)
 255   format(/'   N   V   J    L      EINT(CM-1)',/)
   do 265  i = 1, n
-    write (6, 260) i, is(i), j(i), l(i), eint(i) * econv
-    write (9, 260) i, is(i), j(i), l(i), eint(i) * econv
+    write (6, 260) i, bqs%inq(i), bqs%jq(i), bqs%lq(i), eint(i) * econv
+    write (9, 260) i, bqs%inq(i), bqs%jq(i), bqs%lq(i), eint(i) * econv
 260     format (3i4, i5, f13.3)
 265   continue
   write (6, 256)
@@ -461,9 +463,9 @@ end if
 !  contains all required vib. levels in correct order
 !
 do 295 irow=1,n
-ivr=is(irow)
+ivr=bqs%inq(irow)
 do 290 icol=1,irow
-ivc=is(icol)
+ivc=bqs%inq(icol)
 do 290 ivb=1,ntv(1)
 if(ivrow(ivb,1).eq.ivr.and. &
    ivcol(ivb,1).eq.ivc) goto 295
@@ -495,9 +497,9 @@ do 320 il = lammin(1), lammax(1), nskip
   ancouma => v2%get_angular_coupling_matrix(ilam)
   do 310  icol= 1, n
     do 300  irow = icol, n
-      if(is(irow).ne.ivr.or.is(icol).ne.ivc) goto 300
+      if(bqs%inq(irow).ne.ivr.or.bqs%inq(icol).ne.ivc) goto 300
 !  here for coupling between molecular rotational levels
-      call vlm1sg (j(irow), l(irow), j(icol), l(icol), jtot, &
+      call vlm1sg (bqs%jq(irow), bqs%lq(irow), bqs%jq(icol), bqs%lq(icol), jtot, &
                    nu, lb, vee, csflag)
       if (vee .eq. 0) goto 300
         i = i + 1

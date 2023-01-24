@@ -10,9 +10,9 @@ authors:
 - family-names: "Werner"
   given-names: "Hans Joachim"
   orcid: "https://orcid.org/0000-0002-0435-539X"
-- family-names: "Manolopoulos"
-  given-names: "David Eusthatios"
-  orcid: "https://orcid.org/0000-0002-7111-0763"
+- family-names: "Klos"
+  given-names: "Jacek"
+  orcid: "https://orcid.org/0000-0002-7407-303X"
 - family-names: "Desrousseaux"
   given-names: "Benjamin"
   orcid: "https://orcid.org/0000-0001-8578-3590"
@@ -22,7 +22,7 @@ authors:
   given-names: "François"
   orcid: "https://orcid.org/0000-0002-0664-2536"
 title: "Hibridon"
-version: 5.0.0
-doi: 10.5281/zenodo.1234
+version: 5.0
+doi:  10.5281/zenodo.7551616
 date-released: 2022-08-24
 url: "https://github.com/hibridon/hibridon"

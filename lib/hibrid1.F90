@@ -2165,9 +2165,6 @@ subroutine difs(fname1,fname2,ienerg,iprint,acc,accmx,thrs, &
 !  ------------------------------------------------------------
 use mod_codim, only: mmax
 use mod_coamat, only: simag2 ! simag2(1)
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 use mod_cojhld, only: jout1 => jhold ! jout1(1)
 use mod_coehld, only: jout2 => eholdint ! jout2(1)
 use mod_coinhl, only: jlev => inhold ! jlev(1)
@@ -2179,7 +2176,7 @@ use mod_cozmat, only: simag1 => zmat_as_vec ! simag1(1)
 use mod_hismat, only: sread, rdhead
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam
-use mod_hitypes, only: packed_base_type
+use mod_hitypes, only: bqs_type
 implicit none
 character*(*), intent(in) :: fname1
 character*(*), intent(in) :: fname2
@@ -2191,9 +2188,9 @@ real(8), intent(in) :: thrs
 integer, intent(out) :: imx
 integer, intent(out) :: jmx
 integer, intent(out) :: ityp
-
-type(packed_base_type) :: pack1
-type(packed_base_type) :: pack2
+type(bqs_type) :: row_bqs
+type(bqs_type) :: pack1
+type(bqs_type) :: pack2
 real(8) :: erabs, ered1, ered2, ermabs, ermrel, errel
 integer :: i, idif, ierr, ij, im
 integer :: jfinal, jfirst, jlpar1, jlpar2, jm, jtot1, jtot2, jtotd
@@ -2275,7 +2272,7 @@ do 26 i=1,iabs(nnout1)
 !
 30 nopen1 = 0
 call sread (0,sreal1, simag1, jtot1, jlpar1, nu1, &
-                  jq, lq, inq, pack1, &
+                  row_bqs, pack1, &
                   1, mmax, nopen1, ierr)
 if(ierr.eq.-1) goto 200
 if(ierr.lt.-1) then
@@ -2285,7 +2282,7 @@ if(ierr.lt.-1) then
 end if
 nopen2 = 0
 call sread (0,sreal2, simag2, jtot2, jlpar2, nu2, &
-                  jq, lq, inq, pack2, &
+                  row_bqs, pack2, &
                   2, mmax, nopen2, ierr)
 if(ierr.eq.-1) goto 200
 if(ierr.lt.-1) then
@@ -2297,9 +2294,9 @@ if(jtot1.ne.jtot2) idif=idif+1
 if(jlpar1.ne.jlpar2) idif=idif+1
 if(pack1%length /= pack2%length) idif=idif+1
 do 60 i=1,pack1%length
-if(pack1%jpack(i) /= pack2%jpack(i)) idif=idif+1
-if(pack1%lpack(i) /= pack2%lpack(i)) idif=idif+1
-60 if(pack1%inpack(i) /= pack2%inpack(i)) idif=idif+1
+if(pack1%jq(i) /= pack2%jq(i)) idif=idif+1
+if(pack1%lq(i) /= pack2%lq(i)) idif=idif+1
+60 if(pack1%inq(i) /= pack2%inq(i)) idif=idif+1
 if(idif.ne.0) then
   write(6,70) jtot1,jtot2
 70   format(/' PARAMETERS NOT EQUAL FOR JTOT1=',i3,'  JTOT2=',i3)
