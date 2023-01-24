@@ -391,7 +391,7 @@ if (y .le. 2) then
   centh2=cent(2)
   ish1=bqs%inq(1)
   ish2=bqs%inq(2)
-  do 53 i = nmn, n
+  do 53 i = nmn+1, n+1
     bqs%jq(i-nmn)=bqs%jq(i)
     cent(i-nmn)=cent(i)
     bqs%inq(i-nmn)=bqs%inq(i)

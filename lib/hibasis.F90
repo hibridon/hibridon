@@ -284,6 +284,7 @@ return
                   nlevop, sc1_as_int, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
+return
 !  asymmetric top basis
 1600   call baastp (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &

@@ -39,25 +39,79 @@ use mod_parbas, only: ntv, lammin, lammax, mproj, ivcol, ivrow
 use mod_conlam, only: nlam
 use mod_chiral, only: lms_chiral => lms
 use mod_asymln, only: lms_asymln => lms
+use mod_1sg1sg, only: lms_1sg1sg => lms
+use mod_hiba19_sgpi1, only: numvib_sgpi1 => numvib, ivibpi_sgpi1 => ivibpi
 implicit none
 integer, intent(in) :: ibasty
     ivcol = 0
     ivrow = 0
+    ntv = 1
+    nlam = 1
     select case (ibasty)
         case (1)
-            ntv(1) = 1
             lammin(1) = 2
             lammax(1) = 2
         case (2)
-            ntv(1) = 1
             lammin(1) = 1
             lammax(1) = 10
             mproj(1) = 0
         case (3)
-            ntv(1) = 1
             lammin(1) = 1  ; lammin(2) = 2
             lammax(1) = 10 ; lammax(2) = 10
             mproj(1) = 0   ; mproj(2) = 2
+        case (4)
+            lammin(1) = 0 
+            lammax(1) = 10 
+            mproj(1) = 0  
+        case (5)
+            lammin(1) = 0 
+            lammax(1) = 10 
+            mproj(1) = 0  
+        case (8)
+            lammin(1) = 2
+            lammax(1) = 4
+            mproj(1) = 0
+        case (10)
+            lammin(1) = 1
+            lammax(1) = 13
+        case (11)
+            lammin(1) = 1 ; lammin(2) = 4
+            lammax(1) = 1 ; lammax(2) = 4
+            mproj(1)  = 0 ; mproj(2)  = 4
+        case (14)
+            lammin(1) = 1 ; lammin(2) = 2
+            lammax(1) = 1 ; lammax(2) = 2
+            mproj(1)  = 0 ; mproj(2)  = 2
+        case (15)
+            nlam = 10
+            lammin(1) = 1
+            lammax(1) = 10
+            mproj(1) = 0
+        case (19)
+            nlam = 4
+            numvib_sgpi1 = 1
+            ivibpi_sgpi1(1) = 0
+            lammin = 1
+            lammax = 1
+        case (22)
+            lammin(1) = 1
+            lammax(1) = 12
+            mproj(1) = 0
+        case (23)
+            lammin(1) = 1
+            lammax(1) = 6
+            mproj(1) = 0
+        case (27)
+            nlam = 24
+            lammin(1) = 0 ; lammin(2) = 2 ; lammin(3) = 4 ; lammin(4) = 6
+            lammax(1) = 8 ; lammax(2) = 8 ; lammax(3) = 8 ; lammax(4) = 8
+            mproj(1)  = 0 ; mproj(2)  = 2 ; mproj(3)  = 4 ; mproj(4)  = 6
+        case (28)
+            nlam = 3
+            allocate(lms_1sg1sg(nlam))
+            lms_1sg1sg(1)%l1 = 0 ; lms_1sg1sg(1)%l2 = 0 ;lms_1sg1sg(1)%ltot = 0
+            lms_1sg1sg(2)%l1 = 0 ; lms_1sg1sg(2)%l2 = 2 ;lms_1sg1sg(2)%ltot = 2
+            lms_1sg1sg(3)%l1 = 1 ; lms_1sg1sg(3)%l2 = 0 ;lms_1sg1sg(3)%ltot = 1
         case (29)
             nlam = 5
             allocate(lms_chiral(nlam))
@@ -94,10 +148,20 @@ end subroutine init_pot_parameters
 subroutine pot (vv0, r)
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
+use mod_selb, only: ibasty
     implicit none
     real(8), intent(out) :: vv0
     real(8), intent(in) :: r
     vv0  = 0d0
     vvl = 0d0
+
+    select case (ibasty)
+        case (22)
+        vvl(6) = 2d-4; vvl(9) = 1d-4
+        case (23)
+        vvl(5) = 1d-4
+    end select
+
+
     return
 end subroutine pot

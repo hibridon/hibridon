@@ -132,10 +132,12 @@ dimension  jhold(1), ehold(1), &
           ishold(1), ieig(0:2)
 !  scratch arrays for computing asymmetric top energies and wave fns.
 dimension en0(4), en1(3), en2(2), vec(4,4), work(288)
-integer, pointer :: nterm, nstate
+integer, pointer :: nterm, nstate, ipol, npot
 real(8), pointer :: en1d
-nterm=>ispar(1); nstate=>ispar(2)
+nterm=>ispar(1); nstate=>ispar(2); ipol=>ispar(3); npot=>ispar(4)
 en1d=>rspar(1)
+
+npot = 0
 
 zero = 0.d0
 two = 2.d0
@@ -270,7 +272,7 @@ isize = 4
 
 c0(1,1) = - axy
 c0(1,2) = 0.d0
-c0(2,1) = c0(2,1)
+c0(2,1) = c0(1,2)
 c0(1,3) = 0.d0
 c0(3,1) = c0(1,3)
 c0(1,4) = bxs * 2.d0 / sqrt(3.d0) + sqrt(2.d0/3.d0) * bss
@@ -784,8 +786,10 @@ goto 1000
 50 om0 = c0(3,ieig0_1) * c0(3,ieig0_2)
 vee = twth * xl12 * xf0 * om0
 !   3P1 <-> 3P1
-om0 = c0(2,ieig1_1) * c0(2,ieig1_2)
-vee = vee + xl12 * xf0 * om0
+if (ieig1_1.ne.0 .and. ieig1_2.ne.0) then
+  om0 = c0(2,ieig1_1) * c0(2,ieig1_2)
+  vee = vee + xl12 * xf0 * om0
+endif 
 if (ieig1_1.ne.0 .and. ieig1_2.ne.0) then
   om1 = c1(2,ieig1_1) * c1(2,ieig1_2)
   vee = vee + 2.d0 * 0.5d0 * xl12 * xf1 * om1
@@ -825,8 +829,10 @@ goto 1000
 om0 = c0(3,ieig0_1) * c0(3,ieig0_2)
 vee = twth * xl12 * xf0 * om0
 !   3P1 <-> 3P1
-om0 = c0(2,ieig1_1) * c0(2,ieig1_2)
-vee = vee + xl12 * xf0 * om0
+if (ieig1_1.ne.0 .and. ieig1_2.ne.0) then
+  om0 = c0(2,ieig1_1) * c0(2,ieig1_2)
+  vee = vee + xl12 * xf0 * om0
+endif
 !   3P2 <-> 3P2
 om0 = c0(1,ieig0_1) * c0(1,ieig0_2)
 vee = vee + onth * xl12 * xf0 * om0
@@ -881,8 +887,10 @@ goto 70
 om0 = c0(3,ieig0_1) * c0(4,ieig0_2)
 vee = - onsqt3 * xl12 * xf0 * om0
 !   1D2 <-> 3P0
-om0 = c0(4,ieig0_1) * c0(3,ieig0_2)
-vee = vee - onsqt3 * xl12 * xf0 * om0
+if (ieig0_1 .ne. 0 .and. ieig0_2 .ne. 0) then
+  om0 = c0(4,ieig0_1) * c0(3,ieig0_2)
+  vee = vee - onsqt3 * xl12 * xf0 * om0
+endif 
 !   3P2 <-> 1D2
 om0 = c0(1,ieig0_1) * c0(4,ieig0_2)
 vee = vee + sqrt2 * onsqt3 * xl12 * xf0 * om0

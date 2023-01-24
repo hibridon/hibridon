@@ -271,10 +271,19 @@ do jj1 = 1, j1max
 !  transform to symmetrized basis:  (1) sigma=1, eps=+1; (2) sigma=1, eps=-1;
 !  sigma = 0, eps=+1
   u = uu / sq2
-  call dgemm ('n','n',3,3,3,1.d0,u,3,ham,3,0.d0,wsig,3)
-  call dgemm ('n','n',3,3,3,1.d0,wsig,3,u,3,0.d0,ham,3)
+  ham = matmul( matmul(u, ham), u)
+! Clean ham matrix from small elements
+  where (abs(ham) .lt. 1.d-12) ham = 0.d0 
 !  diagonalize hamiltonian
   call dsyev('V','L',3,ham,3,eig,work,lwork,ierr)
+  if (ierr .ne. 0) then
+    write (6, "(a,i0,a)") ' *** ERROR IN CALL TO DSYEV; IERR=', ierr, ' ABORT ***'
+    write (9, "(a,i0,a)") ' *** ERROR IN CALL TO DSYEV; IERR=', ierr, ' ABORT ***'
+    stop
+  endif
+! Clean ham matrix from small elements
+  where (abs(ham) .lt. 1.d-12) ham = 0.d0 
+
   n1 = n1 + 1
   e1(n1) = eig(1)
   j1(n1) = jj1
@@ -291,7 +300,7 @@ do jj1 = 1, j1max
   if (ham(2,2) .lt. zero) then
     do kk = 1, 3
       do ll = 1,3
-        ham(kk,ll) = - ham(kk,ll)
+        if (abs(ham(kk,ll))>0d0) ham(kk,ll) = -1d0 * ham(kk,ll)
       end do
     end do
   end if

@@ -155,10 +155,12 @@ data flam12 /-1.d0, 1.d0, 0.d0, 1.d0, 0.d0/, &
   stot12 /1.5d0, 1.5d0, 1.5d0, 0.5d0, 0.5d0/
 !  scratch arrays for computing asymmetric top energies and wave fns.
 dimension en0(4), en12(5), en32(3), vec(5,5), work(288)
-integer, pointer :: nterm, nstate
+integer, pointer :: nterm, nstate, npot
 real(8), pointer :: en1d
-nterm=>ispar(1); nstate=>ispar(2)
+nterm=>ispar(1); nstate=>ispar(2); npot=>ispar(4)
 en1d=>rspar(1)
+
+npot = 0
 
 zero = 0.d0
 two = 2.d0
