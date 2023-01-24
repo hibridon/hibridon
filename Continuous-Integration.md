@@ -9,7 +9,7 @@
   - macos-11.2, Release, ifort, Intel MKL
 - Linux:
   - Debian 9, Debug, gfortran, Atlas
-  - Debian 9,Debug, ifort, Atlas
-  - Debian 9,Release, gfortran, Atlas
-  - Debian 9,Release, ifort, Atlas
+  - Debian 9, Debug, ifort, Atlas
+  - Debian 9, Release, gfortran, Atlas
+  - Debian 9, Release, ifort, Atlas
 
