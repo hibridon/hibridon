@@ -35,9 +35,9 @@
           G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
  --------------------------------------------------------------------------
            BUILD CONFIGURATION:
-CMAKE BUILD DATE: 2023-01-24 at 11:08
+CMAKE BUILD DATE: 2023-01-24 at 11:46
 CMAKE BUILD TYPE: Debug
-CODE GIT REVISION: daf4968d022a657c7a8b386d000e4737c913181c
+CODE GIT REVISION: 490a05d5957aa87d9c9668b1fd83ca5b6dbd246d
 SYS: Darwin 22.2.0 x86_64
 COMPILER: /opt/intel/oneapi/compiler/2022.2.1/mac/bin/intel64/ifort
 COMPILE OPTIONS: 
@@ -85,12 +85,12 @@ COMPILE OPTIONS:
 
  ** LABEL:          BASTST                                     
  ** POT NAME:  DUMMY POTENTIAL FOR TESTING PURPOSES            
- ** DATE:      Jan 24 11:25:13 2023
+ ** DATE:      Jan 24 12:01:36 2023
 
  *** WARNING:  NAIRY .NE. 1 BUT AIRYFL .EQ. .FALSE.
  ** NMAX= 500  NAIRY= 500
 
-   **  CC  HF-HF  **  E= 5000.000  JTOT=  20  SYM= 1  PAR= 1  N-LAM= 4
+   **  CC  HF-HF  **  E= 5000.000  JTOT=  20  SYM= 1  PAR= 1  N-LAM= 1
 
  OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=   30.00
  **  LIST OF ROTATIONAL LEVELS :
@@ -130,6 +130,6 @@ COMPILE OPTIONS:
  ** BASTST=.TRUE.; TEST OF SUBROUTINE BASIS
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:     0
-      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    0.7 %
-      CURRENT DATE:  Jan 24 11:25:13 2023
+      TIMING:  ELAPSED 00:00:01 / CPU 00:00:00 / MP RATIO    0.3 %
+      CURRENT DATE:  Jan 24 12:01:36 2023
  ===============================================================================
