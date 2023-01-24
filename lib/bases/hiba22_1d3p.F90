@@ -784,8 +784,10 @@ goto 1000
 50 om0 = c0(3,ieig0_1) * c0(3,ieig0_2)
 vee = twth * xl12 * xf0 * om0
 !   3P1 <-> 3P1
-om0 = c0(2,ieig1_1) * c0(2,ieig1_2)
-vee = vee + xl12 * xf0 * om0
+if (ieig1_1.ne.0 .and. ieig1_2.ne.0) then
+  om0 = c0(2,ieig1_1) * c0(2,ieig1_2)
+  vee = vee + xl12 * xf0 * om0
+endif 
 if (ieig1_1.ne.0 .and. ieig1_2.ne.0) then
   om1 = c1(2,ieig1_1) * c1(2,ieig1_2)
   vee = vee + 2.d0 * 0.5d0 * xl12 * xf1 * om1
