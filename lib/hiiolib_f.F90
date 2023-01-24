@@ -1193,7 +1193,7 @@ integer nfile, iadr, nmax, jfirst, jfsts, jfinal, numin, &
         numax, ierr, jlpars, jlparf
 integer jln, jlp, nwaves, nrec, jlpold, nparit, jj, iaddr, &
         lrec, jtot, jlpar, nu, nopen, length, nnout
-dimension iadr(1)
+dimension iadr(nmax)
 !
 ierr = 0
 jln=2
@@ -1381,7 +1381,7 @@ use mod_file_size, only : isize, isizes
 implicit double precision (a-h,o-z)
 character*(*) name
 parameter (maxun=2, maxrec=5000)
-dimension ii(1)
+dimension ii(l)
 if(iun(ifil).eq.0) then
   write(6,10) ifil,irec
 10   format(/' DIRECT READ ERROR ON FILE',i2,' RECORD',i3, &
@@ -1630,7 +1630,7 @@ return
 end
 ! -------------------------------------------------------------------
 subroutine imove(ia,ib,n)
-dimension ia(1),ib(1)
+dimension ia(n),ib(n)
 do 10 i=1,n
 10 ib(i)=ia(i)
 return
@@ -1882,7 +1882,7 @@ use mod_clseg, only: lseg
 use mod_cobuf, only: lbuf
 use mod_disc, only: ipos, iun, iostat, icatf, nam
 implicit double precision (a-h,o-z)
-dimension a(1),buf(lbuf)
+dimension a(l),buf(lbuf)
   buf = 0d0
   if(lseg.gt.lbuf) stop 'lbuf too small in rdabsf'
   ibl=iword/lseg+1
@@ -1915,7 +1915,7 @@ use mod_clseg, only: lseg
 use mod_cobuf, only: lbuf
 use mod_disc, only: ipos, iun, iostat, icatf, nam
 implicit double precision (a-h,o-z)
-dimension a(1),buf(lbuf)
+dimension a(l), buf(lbuf)
   if(lseg.gt.lbuf) stop 'lbuf too small in wrabsf'
   ibl=iword/lseg+1  ! index of block where iword is (eg ibl = 2 if lseg == 1024)
   m = iword - (ibl - 1) * lseg  ! offset of iword relative to its block (eg 1023)
