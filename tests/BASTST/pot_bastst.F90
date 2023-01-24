@@ -149,5 +149,14 @@ use mod_selb, only: ibasty
     real(8), intent(in) :: r
     vv0  = 0d0
     vvl = 0d0
+
+    select case (ibasty)
+        case (22)
+        vvl(6) = 2d-4; vvl(9) = 1d-4
+        case (23)
+        vvl(5) = 1d-4
+    end select
+
+
     return
 end subroutine pot

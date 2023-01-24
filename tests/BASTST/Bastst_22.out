@@ -35,9 +35,9 @@
           G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
  --------------------------------------------------------------------------
            BUILD CONFIGURATION:
-CMAKE BUILD DATE: 2023-01-24 at 14:52
+CMAKE BUILD DATE: 2023-01-24 at 15:17
 CMAKE BUILD TYPE: Debug
-CODE GIT REVISION: 2a984169e644073870446c89ba2074f6032cdd5b
+CODE GIT REVISION: 17bf6f24fc9fedc76661bce2dfe03883f27e8b8f
 SYS: Darwin 22.2.0 x86_64
 COMPILER: /opt/intel/oneapi/compiler/2022.2.1/mac/bin/intel64/ifort
 COMPILE OPTIONS: 
@@ -85,7 +85,7 @@ COMPILE OPTIONS:
 
  ** LABEL:          BASTST                                     
  ** POT NAME:  DUMMY POTENTIAL FOR TESTING PURPOSES            
- ** DATE:      Jan 24 15:11:14 2023
+ ** DATE:      Jan 24 15:22:15 2023
 
  *** WARNING:  NAIRY .NE. 1 BUT AIRYFL .EQ. .FALSE.
  ** NMAX= 500  NAIRY= 500
@@ -98,55 +98,55 @@ COMPILE OPTIONS:
 
  ASYMPTOTIC ATOMIC ENERGY LEVELS
    N   S   J      EINT(CM-1)  OMEGA   EFN: 3P2       3P1       3P0       1D2
-   1   3   0        0.000
+   1   3   2        0.000
+                                0        0.957647  0.000000  0.000000 -0.287945
+                                1        0.957647  0.000000           -0.287945
+                                2        0.957647                     -0.287945
+   2   3   1       97.122
+                                0       -0.000000  1.000000  0.000000 -0.000000
+                                1       -0.000000  1.000000           -0.000000
+   3   3   0      112.560
+                                0        0.287945  0.000000 -0.000000  0.957647
+   4   1   2      141.017
                                 0        0.000000  0.000000  1.000000  0.000000
-   2   3   1        0.000
-                                0        0.000000  1.000000  0.000000  0.000000
-                                1        0.000000  1.000000            0.000000
-   3   3   2        0.000
-                                0        1.000000  0.000000  0.000000  0.000000
-                                1        1.000000  0.000000            0.000000
-                                2        1.000000                      0.000000
-   4   1   2       50.000
-                                0        0.000000  0.000000  0.000000  1.000000
-                                1        0.000000  0.000000            1.000000
-                                2        0.000000                      1.000000
+                                1        0.287945  0.000000            0.957647
+                                2        0.287945                      0.957647
 
  CHANNEL BASIS FUNCTIONS
    N   S   J    L      EINT(CM-1)
-   1   3   0   20        0.000
-   2   3   1   20        0.000
-   3   3   2   18        0.000
-   4   3   2   20        0.000
-   5   3   2   22        0.000
-   6   1   2   18       50.000
-   7   1   2   20       50.000
-   8   1   2   22       50.000
+   1   3   2   18        0.000
+   2   3   2   20        0.000
+   3   3   2   22        0.000
+   4   3   1   20       97.122
+   5   3   0   20      112.560
+   6   1   2   18      141.017
+   7   1   2   20      141.017
+   8   1   2   22      141.017
 
  ILAM  LAMBDA  ICOL  IROW   I    IV2    VEE
-ILAM=  1 LAMNUM(ILAM) =      6
-ILAM=  2 LAMNUM(ILAM) =      6
-ILAM=  3 LAMNUM(ILAM) =      6
-ILAM=  4 LAMNUM(ILAM) =     14
-ILAM=  5 LAMNUM(ILAM) =     14
-ILAM=  6 LAMNUM(ILAM) =     10
-ILAM=  7 LAMNUM(ILAM) =     11
-ILAM=  8 LAMNUM(ILAM) =     12
-ILAM=  9 LAMNUM(ILAM) =     12
-ILAM= 10 LAMNUM(ILAM) =     12
-ILAM= 11 LAMNUM(ILAM) =     12
-ILAM= 12 LAMNUM(ILAM) =      9
-ILAM= 13 LAMNUM(ILAM) =     10
-ILAM= 14 LAMNUM(ILAM) =     11
-ILAM= 15 LAMNUM(ILAM) =     12
-ILAM= 16 LAMNUM(ILAM) =     12
-ILAM= 17 LAMNUM(ILAM) =     12
-ILAM= 18 LAMNUM(ILAM) =     12
-ILAM= 19 LAMNUM(ILAM) =      9
- ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS   202
+ILAM=  1 LAMNUM(ILAM) =     28
+ILAM=  2 LAMNUM(ILAM) =     28
+ILAM=  3 LAMNUM(ILAM) =     21
+ILAM=  4 LAMNUM(ILAM) =     35
+ILAM=  5 LAMNUM(ILAM) =     35
+ILAM=  6 LAMNUM(ILAM) =     28
+ILAM=  7 LAMNUM(ILAM) =     35
+ILAM=  8 LAMNUM(ILAM) =     28
+ILAM=  9 LAMNUM(ILAM) =     28
+ILAM= 10 LAMNUM(ILAM) =     28
+ILAM= 11 LAMNUM(ILAM) =     28
+ILAM= 12 LAMNUM(ILAM) =     21
+ILAM= 13 LAMNUM(ILAM) =     28
+ILAM= 14 LAMNUM(ILAM) =     35
+ILAM= 15 LAMNUM(ILAM) =     28
+ILAM= 16 LAMNUM(ILAM) =     28
+ILAM= 17 LAMNUM(ILAM) =     28
+ILAM= 18 LAMNUM(ILAM) =     28
+ILAM= 19 LAMNUM(ILAM) =     21
+ ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS   539
  ** BASTST=.TRUE.; TEST OF SUBROUTINE BASIS
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:     0
-      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    6.9 %
-      CURRENT DATE:  Jan 24 15:11:14 2023
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    6.3 %
+      CURRENT DATE:  Jan 24 15:22:15 2023
  ===============================================================================
