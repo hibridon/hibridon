@@ -151,7 +151,7 @@ The executable files will be put in the current directory (`~/hib_build`).
   Where `<executable>` is one of the executable you defined in the CMakeLists.txt configuration file, e.g.: `NH3-H2.exe`.
 
 ## 5. Test Hibridon (Optional)
-Hibridon testing must be enabled (see previous section).
+Hibridon testing must be enabled (see Section 3: Configure your project's build).
 The following commands need to be executed within the Hibridon build directory (e.g. ~/hib_build/project/hibridon/).
 
 - **Run all tests**
