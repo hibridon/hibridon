@@ -137,6 +137,8 @@ real(8), pointer :: en1d
 nterm=>ispar(1); nstate=>ispar(2); ipol=>ispar(3); npot=>ispar(4)
 en1d=>rspar(1)
 
+npot = 0
+
 zero = 0.d0
 two = 2.d0
 !  check for consistency in the values of flaghf and csflag
