@@ -22,79 +22,38 @@ will print out a sample input file called  `Test.inp` , which you can then exami
 ## Basis Routines
 
 ### [1. A<sup>1</sup>&Sigma; molecule and a spherical atom - ba1sg](Basis-subroutines---ba1sg)
-Ref:  W. A. Lester, Jr., Meth. Comput. Phys.  10 , 211 (1971).
 
-
-### [2. A<sup>2</sup>&Sigma; molecule and a spherical Atom - ba2sg](Basis-subroutines---ba2sg)
-Ref:  M. H. Alexander, J. Chem. Phys.  76 , 3637 (1982).
-
+### [2. A<sup>2</sup>&Sigma; molecule and a spherical atom - ba2sg](Basis-subroutines---ba2sg)
 
 ### [3. A<sup>2</sup>&Pi; molecule and a spherical atom - ba2pi](Basis-subroutines---ba2pi)
-Ref:  M. H. Alexander, J. Chem. Phys.  76 , 5974 (1982);\
-M. H. Alexander, Chem. Phys.  92 , 337 (1985);\
-G. C. Corey and M. H. Alexander, J. Chem. Phys.  85 , 5652 (1986).
-
 
 ### [4. Collisional Mixing of <sup>2</sup>&Pi; and <sup>2</sup>&Sigma; states of a diatomic molecule induced by a spherical atom](Basis-subroutines---basgpi)
-Ref: D. G. Sauder, D. Patel-Misra, and P. J. Dagdigian, J. Chem. Phys.  91 , 5316 (1989).
 
-[](ba2del.html) [](rightarrowsmall.gif)
+### [5. Collisions of a molecule in a  <sup>1</sup>&Pi;, <sup>2</sup>&Pi;, or <sup>3</sup>&Pi; state with a spherical atom - bapi](Basis-subroutines---bapi)
 
-### [5. A<sup>2</sup>&Delta; molecule and a spherical atom - ba2del](Basis-subroutines---ba2del)
-Ref:  B. Nizamov, P. J. Dagdigian, Y.-R. Tzeng, and M. H. Alexander, J. Chem. Phys.  115 , 800 (2001).
+### [6. A singlet symmetric top molecule and a spherical atom - bastp](Basis-subroutines---bastp)
 
+### [7. An atom in a  <sup>1</sup>P and/or  <sup>3</sup>P state and a spherical atom - bas13p](Basis-subroutines---ba13p)
 
-### [6. Collisional mixing of  <sup>2</sup>&Pi;  and  <sup>2</sup>&Sigma;  states of a diatomic molecule induced by a spherical atom - basgpi](Basis-subroutines---basgpi)
-Ref:  M. H. Alexander and G. C. Corey, J. Chem. Phys.  84 , 100 (1986);\
-H.-J. Werner, B. Follmeg, M. H. Alexander, and D. Lemoine,  ibid.   91 , 5425 (1989).
+### [8. Two  <sup>1</sup>&Sigma; diatomics - ba2mol](Basis-subroutines---ba2mol)
 
+### [9. A symmetric top and a linear molecule - bastpln](Basis-subroutines---bastpln)
 
-### [7. Collisions of a molecule in a  <sup>1</sup>&Pi;, <sup>2</sup>&Pi;, or <sup>3</sup>&Pi; state with a spherical atom - bapi](Basis-subroutines---bapi)
-Ref:  M. H. Alexander, J. Chem. Phys.  76 , 5974 (1982);\
-M. H. Alexander, Chem. Phys.  92 , 337 (1985);\
-G. C. Corey and M. H. Alexander, J. Chem. Phys.  85 , 5652 (1986);\
-D. Lemoine, G. C. Corey, M. H. Alexander, and J. Derouard, Chem. Phys.  118 , 357 (1987).
+### [10. Collisions of an atom in a  <sup>2</sup>P state and an atom in a <sup>2</sup>S electronic state - ba22p](Basis-subroutines---ba22p)
 
+### [11. Collisions between a  <sup>1</sup>&Delta; molecule and a spherical atom](Basis-subroutines---ba1del)
 
-### [8. A singlet symmetric top molecule and a spherical atom - bastp](Basis-subroutines---bastp)
-Ref:  S. Green, J. Chem. Phys.  64 , 3463 (1976);  67 , 816 (1979).
+### [12. An atom in a  <sup>2</sup>P electronic state and a homonuclear diatomic - bah2p](Basis-subroutines---bah2p)
 
+### [13. An atom in a <sup>3</sup>P electronic state and a homonuclear diatomic - bah3p](Basis-subroutines---bah3p)
 
-### [9. A singlet asymmetric top and a spherical atom - baastp](Basis-subroutines---baastp)
-Ref:  B. J. Garrison  et al. , J. Chem. Phys.  65 , 2193 (1976);\
-S. Green, J. Chem. Phys.  64 , 3463 (1976);  67 , 816 (1979).
+### [14. Collisions between a <sup>2</sup>&Delta; molecule and a spherical atom](Basis-subroutines---ba2del)
 
+### [15. Collisions between an atom in a <sup>2</sup>P electronic state and a heteronuclear diatomic](Basis-subroutines---badiat2p)
 
-### [10. An atom in a  <sup>1</sup>P and/or  <sup>3</sup>P state and a spherical atom - bas13p](Basis-subroutines---ba13p)
-Ref:  B. Pouilly, T. Orlikowski, and M. H. Alexander, J. Phys. B  18 , 1953 (1985);\
-B. Pouilly and M. H. Alexander, J. Chem. Phys.  86 , 4790 (1987);\
-B. Pouilly, J.-M. Robbe, and M. H. Alexander,  ibid.   91 , 1658 (1989).
+### [16. Collisions between of an atom with a symmetric top](Basis-subroutines---bastp)
 
-
-[](ba2mol.html) [](rightarrowsmall.gif)
-
-### [11. Two  <sup>1</sup>&Sigma; diatomics - ba2mol](Basis-subroutines---ba2mol)
-Ref:  S. Green, J. Chem. Phys.  62 , 2271 (1975);\
-A. E. DePristo and M. H. Alexander,   ibid.   66 , 1334 (1977);\
-M. H. Alexander,   ibid.   73 , 5135 (1980).
-
-
-### [12. A symmetric top and a linear molecule - bastpln](Basis-subroutines---bastpln)
-Ref:  C. Rist, M. H. Alexander, and P. Valiron, J. Chem. Phys.  98 , 4662 (1993).
-
-[](ba22p.html) [](rightarrowsmall.gif)
-
-### [13. Collisions of an atom in a  <sup>2</sup>P state and an atom in a <sup>2</sup>S electronic state - ba22p](Basis-subroutines---ba22p)
-Ref:  M. H. Alexander, B. Pouilly, and T. Duhoo, J. Chem. Phys.  99 , 1752 (1993).
-
-### [14. An atom in a  <sup>2</sup>P electronic state and a homonuclear diatomic - bah2p](Basis-subroutines---bah2p)
-Ref:  M.-L. Dubernet and J. M. Hutson, J. Chem. Phys.  101, 1939 (1994).
-
-
-### [16. An atom in a <sup>3</sup>P electronic state and a homonuclear diatomic - bah3p](Basis-subroutines---bah3p)
-Ref:  M.-L. Dubernet and J. M. Hutson, J. Chem. Phys.  101, 1939 (1994).
-
-### [17. Collisions between a  <sup>2</sup>&Delta; Molecule and a Spherical Atom](Basis-subroutines---ba2del)
+### [17. Collision of an Atom with a CH<sub>2</sub>(X <sup>3</sup>B<sub>1</sub>) (0,v<sub>2</sub>,0) bender vibrational level](Basis-subroutines---bach2x)
 
 ### [18. Collisions between of an atom with a symmetric top, with no inversion doubling](Basis-subroutines---bastp1)
 
