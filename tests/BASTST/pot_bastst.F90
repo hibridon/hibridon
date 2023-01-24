@@ -45,6 +45,7 @@ integer, intent(in) :: ibasty
     ivcol = 0
     ivrow = 0
     ntv = 1
+    nlam = 1
     select case (ibasty)
         case (1)
             lammin(1) = 2
