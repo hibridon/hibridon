@@ -1193,7 +1193,7 @@ integer nfile, iadr, nmax, jfirst, jfsts, jfinal, numin, &
         numax, ierr, jlpars, jlparf
 integer jln, jlp, nwaves, nrec, jlpold, nparit, jj, iaddr, &
         lrec, jtot, jlpar, nu, nopen, length, nnout
-dimension iadr(1)
+dimension iadr(nmax)
 !
 ierr = 0
 jln=2
@@ -1381,7 +1381,7 @@ use mod_file_size, only : isize, isizes
 implicit double precision (a-h,o-z)
 character*(*) name
 parameter (maxun=2, maxrec=5000)
-dimension ii(1)
+dimension ii(l)
 if(iun(ifil).eq.0) then
   write(6,10) ifil,irec
 10   format(/' DIRECT READ ERROR ON FILE',i2,' RECORD',i3, &
@@ -1630,7 +1630,7 @@ return
 end
 ! -------------------------------------------------------------------
 subroutine imove(ia,ib,n)
-dimension ia(1),ib(1)
+dimension ia(n),ib(n)
 do 10 i=1,n
 10 ib(i)=ia(i)
 return
@@ -1882,85 +1882,92 @@ use mod_clseg, only: lseg
 use mod_cobuf, only: lbuf
 use mod_disc, only: ipos, iun, iostat, icatf, nam
 implicit double precision (a-h,o-z)
-dimension a(1),buf(lbuf)
-buf = 0d0
-if(lseg.gt.lbuf) stop 'lbuf too small in rdabsf'
-ibl=iword/lseg+1
-m=iword-(ibl-1)*lseg
-n=0
-if(m.eq.0) goto 20
-n=min0(lseg-m,l)
-read(luni,rec=ibl) (buf(i),i=1,lseg)
-ibl=ibl+1
-do 15 i=1,n
-15 a(i)=buf(m+i)
-20 l1=l-n
-if(l1.eq.0) return
-lbl=(l1-1)/lseg+1
-do 25 ib=1,lbl
-read(luni,rec=ibl) (a(n+i),i=1,min0(l1,lseg))
-ibl=ibl+1
-l1=l1-lseg
-25 n=n+lseg
-return
+dimension a(l),buf(lbuf)
+  buf = 0d0
+  if(lseg.gt.lbuf) stop 'lbuf too small in rdabsf'
+  ibl=iword/lseg+1
+  m=iword-(ibl-1)*lseg
+  n=0
+  if(m.eq.0) goto 20
+  n=min0(lseg-m,l)
+  read(luni,rec=ibl) (buf(i),i=1,lseg)
+  ibl=ibl+1
+  do 15 i=1,n
+  15 a(i)=buf(m+i)
+  20 l1=l-n
+  if(l1.eq.0) return
+  lbl=(l1-1)/lseg+1
+  do 25 ib=1,lbl
+  read(luni,rec=ibl) (a(n+i),i=1,min0(l1,lseg))
+  ibl=ibl+1
+  l1=l1-lseg
+  25 n=n+lseg
+  return
+end subroutine rdabsf
 !
-entry wrabsf(luni,a,l,iword)
+subroutine wrabsf(luni,a,l,iword)
 ! write l real8 numbers from a array into file unit luni at offset iword
 ! luni : the logical unit of the file to write to (eg 3)
 ! a : the array of double precision numbers to write (eg [0.5, 0.7])
 ! l : the number of real numbers to write (eg 2)
 ! iword : offset on file in real8 units where the write should start (eg 2047)
+use mod_clseg, only: lseg
+use mod_cobuf, only: lbuf
+use mod_disc, only: ipos, iun, iostat, icatf, nam
+implicit double precision (a-h,o-z)
+dimension a(l), buf(lbuf)
+  if(lseg.gt.lbuf) stop 'lbuf too small in wrabsf'
+  ibl=iword/lseg+1  ! index of block where iword is (eg ibl = 2 if lseg == 1024)
+  m = iword - (ibl - 1) * lseg  ! offset of iword relative to its block (eg 1023)
+  n = 0
+  if(m /= 0) then
+    !.....first address not on sector boundary
+    n = min0(lseg-m, l)  ! number of words to write in the block ibl (eg 1)
 
-if(lseg.gt.lbuf) stop 'lbuf too small in wrabsf'
-ibl=iword/lseg+1  ! index of block where iword is (eg ibl = 2 if lseg == 1024)
-m = iword - (ibl - 1) * lseg  ! offset of iword relative to its block (eg 1023)
-n = 0
-if(m /= 0) then
-  !.....first address not on sector boundary
-  n = min0(lseg-m, l)  ! number of words to write in the block ibl (eg 1)
-
-  if(ibl <= ipos(luni)) then
-    ! read the whole block ibl from disk into buf
-    read(luni, rec=ibl) (buf(i),i=1,lseg)
+    if(ibl <= ipos(luni)) then
+      ! read the whole block ibl from disk into buf
+      read(luni, rec=ibl) (buf(i),i=1,lseg)
+    end if
+    ! write the words into buf
+    do i = 1, n
+      buf(m + i) = a(i)
+    end do
+    ! then write back the updated block ibl on the file
+    write(luni, rec=ibl) (buf(i), i=1, lseg)
+    ipos(luni) = max(ipos(luni), ibl)
+    ibl = ibl + 1
   end if
-  ! write the words into buf
-  do i = 1, n
-    buf(m + i) = a(i)
+  !.....write from next sector boundary
+  l1 = l - n  ! number of remaining words to write (eg 1)
+  if(l1 == 0) return
+  lbl = l1 / lseg  ! num blocks
+  ! write the full blocks
+  do ib=1,lbl
+    write(luni,rec=ibl) (a(n+i),i=1,lseg)
+    ipos(luni) = max(ipos(luni),ibl)
+    ibl = ibl + 1
+    l1 = l1 - lseg
+    n = n + lseg
   end do
-  ! then write back the updated block ibl on the file
-  write(luni, rec=ibl) (buf(i), i=1, lseg)
-  ipos(luni) = max(ipos(luni), ibl)
-  ibl = ibl + 1
-end if
-!.....write from next sector boundary
-l1 = l - n  ! number of remaining words to write (eg 1)
-if(l1 == 0) return
-lbl = l1 / lseg  ! num blocks
-! write the full blocks
-do ib=1,lbl
-  write(luni,rec=ibl) (a(n+i),i=1,lseg)
-  ipos(luni) = max(ipos(luni),ibl)
-  ibl = ibl + 1
-  l1 = l1 - lseg
-  n = n + lseg
-end do
 
-if(n.eq.l) return  ! all words have been written to disk
-!.....last address not at end of sector
-! write the remaining n-l words in the last block 
-if(ibl.le.ipos(luni)) &
-   read(luni,rec=ibl) (buf(i),i=1,lseg)
-do i = 1, l-n
-  buf(i) = a(n+i)
-end do
-write(luni,rec=ibl) (buf(i),i=1,lseg)
-ipos(luni) = max(ipos(luni),ibl)
+  if(n.eq.l) return  ! all words have been written to disk
+  !.....last address not at end of sector
+  ! write the remaining n-l words in the last block 
+  if(ibl.le.ipos(luni)) &
+    read(luni,rec=ibl) (buf(i),i=1,lseg)
+  do i = 1, l-n
+    buf(i) = a(n+i)
+  end do
+  write(luni,rec=ibl) (buf(i),i=1,lseg)
+  ipos(luni) = max(ipos(luni),ibl)
+  return
+end subroutine wrabsf
+
+
+subroutine fwait(luni)
 return
-!
-entry fwait(luni)
-return
-!
-end
+end subroutine fwait
+
 #endif
 #if ( defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86) ) && !defined(UNIX_CIO)
 subroutine tmpnm(ifil,name)
