@@ -2,7 +2,7 @@
 [![Full CI on macOS-11.2](https://github.com/hibridon/hibridon/actions/workflows/full_macOS-11.2.yml/badge.svg)](https://github.com/hibridon/hibridon/actions/workflows/full_macOS-11.2.yml)
 [![Full CI on Debian 9](https://github.com/hibridon/hibridon/actions/workflows/full_Debian-9.yml/badge.svg)](https://github.com/hibridon/hibridon/actions/workflows/full_Debian-9.yml)
 
-[what does that mean ?](link_to_wiki_page)
+[what does that mean ?](https://github.com/hibridon/hibridon/wiki/Continuous-Integration)
 
 ---
 # Hibridon v5.0
