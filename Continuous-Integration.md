@@ -1,12 +1,12 @@
 - macOS:
-  - macOS-11.2, Debug, gfortran-11, Intel10_64lp
-  - macos-11.2, Debug, gfortran-9, Intel10_64lp
-  - macos-11.2, Debug, gfortran-10, Intel10_64lp
-  - macos-11.2, Debug, ifort, Intel10_64lp
-  - macos-11.2, Release, gfortran-11, Intel10_64lp
-  - macos-11.2, Release, gfortran-9, Intel10_64lp
-  - macos-11.2, Release, gfortran-10, Intel10_64lp
-  - macos-11.2, Release, ifort, Intel10_64lp
+  - macOS-11.2, Debug, gfortran-11, Intel MKL
+  - macos-11.2, Debug, gfortran-9, Intel MKL
+  - macos-11.2, Debug, gfortran-10, Intel MKL
+  - macos-11.2, Debug, ifort, Intel MKL
+  - macos-11.2, Release, gfortran-11, Intel MKL
+  - macos-11.2, Release, gfortran-9, Intel MKL
+  - macos-11.2, Release, gfortran-10, Intel MKL
+  - macos-11.2, Release, ifort, Intel MKL
 - Linux:
   - Debian 9, Debug, gfortran, Atlas
   - Debian 9,Debug, ifort, Atlas
