@@ -97,6 +97,10 @@ integer, intent(in) :: ibasty
             lammin(1) = 1
             lammax(1) = 12
             mproj(1) = 0
+        case (23)
+            lammin(1) = 1
+            lammax(1) = 6
+            mproj(1) = 0
         case (28)
             nlam = 3
             allocate(lms_1sg1sg(nlam))
