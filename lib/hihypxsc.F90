@@ -80,7 +80,7 @@ subroutine hypxsc(flname, a)
 
   ! For filenames and IO -------------------------------------------------------
   character*40 :: smtfil, hfxfil ! Filenames for S-Matrix and output HFX file
-  integer      :: hfxfil_unit
+  integer      :: hfxfil_unit = 11
   integer      :: lend
   logical      :: exstfl
 
