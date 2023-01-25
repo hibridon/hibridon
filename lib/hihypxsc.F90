@@ -196,6 +196,7 @@ subroutine hypxsc(flname, a)
       call molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf1, sigma)
   endif
 
+
   deallocate(sr, si, jlev, bqs)
 
   ! Compute hyperfine XS
@@ -206,6 +207,9 @@ subroutine hypxsc(flname, a)
   call print_xs(twmol, hfxfil_unit, ered, spins, hf1, hf2, sigma)
 
   deallocate(sigma)
+
+  close(1)           ! Close S-Matrix file
+  close(hfxfil_unit) ! Close output file
 end subroutine hypxsc
 
 
