@@ -56,50 +56,46 @@ contains
 !************************************************************************************************
 subroutine hypxsc(flname, a)
 ! Modules used -----------------------------------------------------------------
-  use mod_coj12, only: j12q => j12
-  use mod_codim, only: mmax
-  use mod_cojq, only: jq ! jq(1)
-  use mod_colq, only: lq ! lq(1)
-  use mod_coinq, only: inq ! inq(1)
-  use mod_coisc1, only: jlev => isc1 ! jlev(1)
-  use mod_coisc3, only: inlev => isc3 ! inlev(1)
-  use mod_coisc5, only: jout => isc5 ! jout(1)
-  use mod_coisc10, only: ipack => isc10 ! ipack(1)
-  use mod_coisc11, only: jpack => isc11 ! jpack(1)
-  use mod_coisc12, only: lpack => isc12 ! lpack(1)
-  use mod_cosc1, only: elev => sc1 ! elev(1)
-  use mod_hismat, only: sread
-  use constants, only: econv
-  use mod_parpot, only: potnam=>pot_name, label=>pot_label
-  use mod_selb, only: ibasty
-  use mod_hiutil, only: gennam, mtime
-  use mod_hismat, only: sread, rdhead, sinqr
+  use mod_codim, only: mmax           ! Maximum number of channels
+  use mod_hismat, only: sread, rdhead, sinqr  ! Read S-matrix from file
+  use constants, only: econv                  ! To convert energy units
+  use mod_selb, only: ibasty                  ! Basis type
+  use mod_hiutil, only: gennam, mtime         ! To generate filenames and print time
+  use mod_hitypes, only: bqs_type             ! To store basis set data
   
   implicit none
 
+  ! Scratch arrays -------------------------------------------------------------
+  integer, allocatable :: jlev(:), inlev(:), jout(:)
+  real(8), allocatable :: elev(:)
+  real(8), allocatable :: sreal(:), simag(:)
+  type(bqs_type)       :: row_bqs
+  type(bqs_type)       :: packed_bqs
   ! Arguments ------------------------------------------------------------------
-  character*(*), intent(in) :: flname
+  character*(*), intent(in)         :: flname
   real(8), dimension(4), intent(in) :: a(4)
-  
+
   ! To store data from argument a(i) -------------------------------------------
   integer :: iener, nucspin, j1min, j2max
 
   ! For filenames and IO -------------------------------------------------------
   character*40 :: smtfil, hfxfil ! Filenames for S-Matrix and output HFX file
-  integer :: hfxfil_unit
-  integer :: lend
-  logical :: exstfl
+  integer      :: hfxfil_unit
+  integer      :: lend
+  logical      :: exstfl
 
   ! Read from S-matrix file ----------------------------------------------------
   integer :: mjtot, mchmx, lngth, ierr, jtot, jlpar, nu, nopen, jlp
   character*20 :: cdate
+  character*48 :: potnam, label
   integer :: jfrst, jfinl, jtotd, numin, numax, nud, nlevel, nlvop, nnout
   real(8) :: ered, rmu, ee
   logical :: nucrs, csflg, flaghf, flgsu, twmol
-  real(8), allocatable :: sreal(:), simag(:)
+
+  ! To store S-matrix elements and channels info--------------------------------
   real(8), allocatable :: sr(:,:,:), si(:,:,:)
-  integer, allocatable :: j(:,:,:), in(:,:,:), l(:,:,:), j12(:,:,:), length(:,:)
-  logical, allocatable :: exsmtn(:), exsmtp(:)
+  integer, allocatable :: length(:,:)
+  type(bqs_type), allocatable :: bqs(:,:)
 
   ! MISC -----------------------------------------------------------------------
   integer :: len2, mchmx2
@@ -127,12 +123,22 @@ subroutine hypxsc(flname, a)
   ! Open S-matrix file and read its header
   call openf(1, smtfil, 'tu', 0)
   call sinqr(1, mjtot, mchmx)
+
+  allocate(elev(mchmx2))
+  allocate(jlev(mchmx2))
+  allocate(inlev(mchmx2))
+  allocate(jout(mchmx2))
+
   call rdhead(1,cdate,ered,rmu,csflg,flaghf,flgsu, &
      twmol,nucrs,jfrst,jfinl,jtotd,numin,numax,nud, &
      nlevel,nlvop,nnout,jlev,inlev,elev,jout)
-
   ! Check if hypxsc supports the basis type and parameters provided in the input
   if (.not. supported(ibasty, flgsu, csflg, jtotd, nnout, nucspin, twmol)) return
+  ! Compute spins
+  call compute_spins(nucspin, flaghf, spins)
+  ! Count and fill hyperfine levels for which XS are to be calculated
+  call fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, hf1, hf2)
+  deallocate(elev, inlev, jout) ! Won't be used anymore
 
   ! Generate output file name and open it
   call gennam(hfxfil,flname,iener,'hfx',lend)
@@ -142,63 +148,61 @@ subroutine hypxsc(flname, a)
   ! Write info to stdout and output file
   call print_infos(6, label, potnam, smtfil, cdate, jfinl, ee, nucspin)
   call print_infos(hfxfil_unit, label, potnam, smtfil, cdate, jfinl, ee, nucspin)
-
-  ! Allocate and init arrays
+ 
   mchmx2 = mchmx * (mchmx + 1) / 2
-  allocate(sreal(mchmx2), simag(mchmx2))
-  sreal = 0d0 ; simag = 0d0
-  allocate(sr(0:jfinl, 2, mchmx2), si(0:jfinl, 2, mchmx2))
-  sr = 0d0 ; si = 0d0
-  allocate(j(0:jfinl, 2, mchmx), in(0:jfinl, 2, mchmx), l(0:jfinl, 2, mchmx), j12(0:jfinl, 2, mchmx))
-  j = 0 ; in = 0 ; l = 0 ; j12 = 0
-  allocate(exsmtp(0:jfinl), exsmtn(0:jfinl))
-  exsmtp = .false. ; exsmtn = .false.
-  allocate(length(0:jfinl, 2))
 
-  ! Read the S-Matrix
+  allocate(sr(0:jfinl, 2, mchmx2)) ; sr = 0d0
+  allocate(si(0:jfinl, 2, mchmx2)) ; si = 0d0
+  allocate(length(0:jfinl, 2)) ; length = 0
+  allocate(bqs(0:jfinl, 2))                       
+  
+
+  allocate(sreal(mchmx2))
+  allocate(simag(mchmx2))
+
+  ! Read the S-Matrix elements
   do
     nopen = -1
-    call sread (0, sreal, simag, jtot, jlpar, nu, jq, lq, inq, ipack, jpack, lpack, 1, mmax, nopen, lngth, ierr)
+    call sread (0, sreal, simag, jtot, jlpar, nu, row_bqs, packed_bqs, 1, mchmx2, nopen, ierr)
     if(ierr < -1) then ; write(6,*) '*** READ ERROR IN HYPXSC. ABORT ***' ; return ; endif
     jlp = 1 - (jlpar-1)/2
-    length(jtot, jlp) = lngth 
-    len2 = lngth*(lngth + 1)/2
-    if(jlpar==1) then ; exsmtp(jtot) = .true. ; else ; exsmtn(jtot) = .true. ; endif
-    j(jtot,jlp,1:lngth) = jpack(1:lngth)
-    in(jtot,jlp,1:lngth) = ipack(1:lngth)
-    l(jtot,jlp,1:lngth) = lpack(1:lngth)
-    j12(jtot,jlp,1:lngth) = j12q(1:lngth)
-    sr(jtot,jlp,1:len2) = sreal(1:len2)
-    si(jtot,jlp,1:len2) = simag(1:len2)
+
+    call bqs(jtot,jlp)%init(packed_bqs%length)
+    bqs(jtot,jlp)         = packed_bqs
+
+    sr(jtot,jlp,1:len2)   = sreal(1:lngth*(lngth + 1)/2)
+    si(jtot,jlp,1:len2)   = simag(1:lngth*(lngth + 1)/2)
+
     if(jtot==jfinl .and. jlpar==-1) exit
   enddo
 
-  ! Compute spins
-  call compute_spins(nucspin, flaghf, spins)
+  deallocate(sreal, simag) 
 
-  ! Count and fill hyperfine levels for which XS are to be calculated
-  call fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, hf1, hf2)
-
+  call packed_bqs%deinit()
+  call row_bqs%deinit()
 
   ! Determine the type of collision and call corresponding subroutine to compute squared T-matrix elements
   if (.not. twmol) then 
     if(.not. spins%two) then ! Molecule-Atom with 1 nuclear spin
         write(6,"(a)") "HYPXSC | Molecule-Atom with 1 nuclear spin"
-      call molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, l, j, in, length, sr, si,  spins, hf1, sigma)
+      call molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf1, sigma)
     else ! Molecule-Atom with 2 nuclear spins
         write(6,"(a)") "HYPXSC | Molecule-Atom with 2 nuclear spins"
-      call molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, l, j, in, length, sr, si, spins, hf2, sigma)
+      call molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf2, sigma)
     endif
   else ! Molecule-Molecule with 1 nuclear spin
       write(6,"(a)") "HYPXSC | Molecule-Molecule with 1 nuclear spins"
-      call molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, j12, l, j, in, length, sr, si,  spins, hf1, sigma)
+      call molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf1, sigma)
   endif
 
+  deallocate(sr, si, length, bqs, jlev) ! Won't be used anymore
+
   ! Compute hyperfine XS
-  call compute_xs(twmol, rmu, ered, spins, hf1, hf2, sigma)
+  call compute_xs(twmol, rmu, ered, spins, hf1, hf2, sigma) ! Sigma is allocated within this subroutine
   ! Print hyperfine cross sections
   call print_xs(twmol, 6, ered, spins, hf1, hf2, sigma)
   call print_xs(twmol, hfxfil_unit, ered, spins, hf1, hf2, sigma)
+  deallocate(sigma) ! Won't be used anymore
 end subroutine hypxsc
 
 
@@ -487,12 +491,14 @@ end subroutine print_xs
 !************************************************************************************************
 ! This subroutine computes T matrix elements for molecule-atom collisions with one spin
 !************************************************************************************************
-subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, l, j, in, length, sr, si, spins, hf1, sigma)
+subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf1, sigma)
+  use mod_hitypes, only: bqs_type
   use mod_hiutil, only: xf6j
   implicit none
   ! Arguments
   integer, intent(in) :: jfrst, jfinl, nlevel
-  integer, intent(in) :: jlev(*), l(0:jfinl,2,*), j(0:jfinl,2,*), in(0:jfinl,2,*), length(0:jfinl, 2)
+  integer, intent(in) :: jlev(*)
+  type(bqs_type), intent(in) :: bqs(0:jfinl,2)
   real(8), intent(in) :: sr(0:jfinl,2,*) , si(0:jfinl,2,*)
   type(spin_data), intent(in) :: spins
   type(hflvl), intent(in) :: hf1
@@ -548,29 +554,29 @@ subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, l, j, in, length, sr,
   !     changes sign for each increase in jtot by 1)
             jlparf = jlpar*(-1)**(iftot - jtot)
             jlpt = 1 + (1 - jlparf)/2
-            if (length(jtot,jlpt) .gt. 0) then
-              do irow = 1, length(jtot,jlpt)
+            if (bqs(jtot,jlpt)%length .gt. 0) then
+              do irow = 1, bqs(jtot,jlpt)%length
   !     flag to make sure initial level is the bra, final level the ket
                 iflag = 0
-                if (j(jtot,jlpt,irow) == hf1%j(i) .and. in(jtot,jlpt,irow) == hf1%in(i)) then
+                if (bqs(jtot,jlpt)%jq(irow) == hf1%j(i) .and. bqs(jtot,jlpt)%inq(irow) == hf1%in(i)) then
                   iflag = 1
                 endif
                 do icol = 1, irow
-                  if (j(jtot,jlpt,irow).eq.hf1%j(i) .and. &
-                      in(jtot,jlpt,irow).eq.hf1%in(i) .and. &
-                      j(jtot,jlpt,icol).eq.hf1%j(ii) .and. &
-                      in(jtot,jlpt,icol).eq.hf1%in(ii) .or. &
-                      j(jtot,jlpt,icol).eq.hf1%j(i) .and. &
-                      in(jtot,jlpt,icol).eq.hf1%in(i) .and. &
-                      j(jtot,jlpt,irow).eq.hf1%j(ii) .and. &
-                      in(jtot,jlpt,irow).eq.hf1%in(ii)) then
+                  if (bqs(jtot,jlpt)%jq(irow).eq.hf1%j(i) .and. &
+                      bqs(jtot,jlpt)%inq(irow).eq.hf1%in(i) .and. &
+                      bqs(jtot,jlpt)%jq(icol).eq.hf1%j(ii) .and. &
+                      bqs(jtot,jlpt)%inq(icol).eq.hf1%in(ii) .or. &
+                      bqs(jtot,jlpt)%jq(icol).eq.hf1%j(i) .and. &
+                      bqs(jtot,jlpt)%inq(icol).eq.hf1%in(i) .and. &
+                      bqs(jtot,jlpt)%jq(irow).eq.hf1%j(ii) .and. &
+                      bqs(jtot,jlpt)%inq(irow).eq.hf1%in(ii)) then
                     is = (irow*(irow - 1))/2 + icol
                     if (iflag.ne.1) then
-                      xl = l(jtot,jlpt,icol)
-                      xlp = l(jtot,jlpt,irow)
+                      xl = bqs(jtot,jlpt)%lq(irow)
+                      xlp = bqs(jtot,jlpt)%lq(irow)
                     else
-                      xl = l(jtot,jlpt,irow)
-                      xlp = l(jtot,jlpt,icol)
+                      xl = bqs(jtot,jlpt)%lq(irow)
+                      xlp = bqs(jtot,jlpt)%lq(irow)
                     end if
   !     convert S-matrix element to T-matrix element
                     t = -cmplx(sr(jtot,jlpt,is), si(jtot,jlpt,is), 8)
@@ -619,12 +625,14 @@ end subroutine molecule_atom_1spin
 !************************************************************************************************
 ! This subroutine computes T matrix elements for molecule-atom collisions with two spins
 !************************************************************************************************
-subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, l, j, in, length, sr, si, spins, hf2, sigma)
+subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf2, sigma)
+  use mod_hitypes, only: bqs_type
   use mod_hiutil, only: xf6j
   implicit none
   ! Arguments
   integer, intent(in) :: jfrst, jfinl, nlevel
-  integer, intent(in) :: jlev(*), l(0:jfinl,2,*), j(0:jfinl,2,*), in(0:jfinl,2,*), length(0:jfinl, 2)
+  integer, intent(in) :: jlev(*)
+  type(bqs_type), intent(in) :: bqs(0:jfinl,2)
   real(8), intent(in) :: sr(0:jfinl,2,*) , si(0:jfinl,2,*)
   type(spin_data), intent(in) :: spins
   type(hflvl), intent(in) :: hf2
@@ -702,30 +710,30 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, l, j, in, length, sr,
   !  changes sign for each increase in jtot by 1)
               jlparf = jlpar*(-1)**(iftot - jtot)
               jlpt = 1 + (1 - jlparf)/2
-              if (length(jtot,jlpt) .gt. 0) then
-              do irow=1,length(jtot,jlpt)
+              if (bqs(jtot,jlpt)%length .gt. 0) then
+              do irow=1,bqs(jtot,jlpt)%length
   !  flag to make sure initial level is the bra, final level the ket
                 iflag = 0
-                if (j(jtot,jlpt,irow).eq.hf2%j(i) .and. &
-                    in(jtot,jlpt,irow).eq.hf2%in(i)) then
+                if (bqs(jtot,jlpt)%jq(irow).eq.hf2%j(i) .and. &
+                    bqs(jtot,jlpt)%inq(irow).eq.hf2%in(i)) then
                   iflag = 1
                 end if
                 do icol=1,irow
-                  if (j(jtot,jlpt,irow).eq.hf2%j(i) .and. &
-                      in(jtot,jlpt,irow).eq.hf2%in(i) .and. &
-                      j(jtot,jlpt,icol).eq.hf2%j(ii) .and. &
-                      in(jtot,jlpt,icol).eq.hf2%in(ii) .or. &
-                      j(jtot,jlpt,icol).eq.hf2%j(i) .and. &
-                      in(jtot,jlpt,icol).eq.hf2%in(i) .and. &
-                      j(jtot,jlpt,irow).eq.hf2%j(ii) .and. &
-                      in(jtot,jlpt,irow).eq.hf2%in(ii)) then
+                  if (bqs(jtot,jlpt)%jq(irow).eq.hf2%j(i) .and. &
+                      bqs(jtot,jlpt)%inq(irow).eq.hf2%in(i) .and. &
+                      bqs(jtot,jlpt)%jq(icol).eq.hf2%j(ii) .and. &
+                      bqs(jtot,jlpt)%inq(icol).eq.hf2%in(ii) .or. &
+                      bqs(jtot,jlpt)%jq(icol).eq.hf2%j(i) .and. &
+                      bqs(jtot,jlpt)%inq(icol).eq.hf2%in(i) .and. &
+                      bqs(jtot,jlpt)%jq(irow).eq.hf2%j(ii) .and. &
+                      bqs(jtot,jlpt)%inq(irow).eq.hf2%in(ii)) then
                     is = (irow*(irow - 1))/2 + icol
                     if (iflag.ne.1) then
-                      xl = l(jtot,jlpt,icol)
-                      xlp = l(jtot,jlpt,irow)
+                      xl = bqs(jtot,jlpt)%lq(irow)
+                      xlp = bqs(jtot,jlpt)%lq(irow)
                     else
-                      xl = l(jtot,jlpt,irow)
-                      xlp = l(jtot,jlpt,icol)
+                      xl = bqs(jtot,jlpt)%lq(irow)
+                      xlp = bqs(jtot,jlpt)%lq(irow)
                     end if
   !  convert S-matrix element to T-matrix element
                     t = -cmplx(sr(jtot,jlpt,is), si(jtot,jlpt,is), 8)
@@ -780,12 +788,14 @@ end subroutine molecule_atom_2spin
 !************************************************************************************************
 ! This subroutine computes T matrix elements for molecule-molecule collisions with one spin
 !************************************************************************************************
-subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, j12, l, j, in, length, sr, si, spins, hf1, sigma)
+subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf1, sigma)
+  use mod_hitypes, only: bqs_type
   use mod_hiutil, only: xf6j
   implicit none
   ! Arguments
   integer, intent(in) :: jfrst, jfinl, nlevel
-  integer, intent(in) :: jlev(*), j12(0:jfinl,2,*), l(0:jfinl,2,*), j(0:jfinl,2,*), in(0:jfinl,2,*), length(0:jfinl, 2)
+  integer, intent(in) :: jlev(*)
+  type(bqs_type), intent(in) :: bqs(0:jfinl,2)
   real(8), intent(in) :: sr(0:jfinl,2,*) , si(0:jfinl,2,*)
   type(spin_data), intent(in) :: spins
   type(hflvl), intent(in) :: hf1
@@ -848,32 +858,32 @@ subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, j12, l, j, in, le
   !     changes sign for each increase in jtot by 1)
             jlparf = jlpar*(-1)**(iftot - jtot)
             jlpt = 1 + (1 - jlparf)/2
-            do irow = 1, length(jtot,jlpt)
+            do irow = 1, bqs(jtot,jlpt)%length
   !     flag to make sure initial level is the bra, final level the ket
               iflag = 0
-              if (j(jtot,jlpt,irow) == hf1%j(i) .and. in(jtot,jlpt,irow) == hf1%in(i)) then
+              if (bqs(jtot,jlpt)%jq(irow) == hf1%j(i) .and. bqs(jtot,jlpt)%inq(irow) == hf1%in(i)) then
                 iflag = 1
               end if
               do icol=1,irow
-                if (j(jtot,jlpt,irow).eq.hf1%j(i) .and. &
-                    in(jtot,jlpt,irow).eq.hf1%in(i) .and. &
-                    j(jtot,jlpt,icol).eq.hf1%j(ii) .and. &
-                    in(jtot,jlpt,icol).eq.hf1%in(ii) .or. &
-                    j(jtot,jlpt,icol).eq.hf1%j(i) .and. &
-                    in(jtot,jlpt,icol).eq.hf1%in(i) .and. &
-                    j(jtot,jlpt,irow).eq.hf1%j(ii) .and. &
-                    in(jtot,jlpt,irow).eq.hf1%in(ii)) then
+                if (bqs(jtot,jlpt)%jq(irow).eq.hf1%j(i) .and. &
+                    bqs(jtot,jlpt)%inq(irow).eq.hf1%in(i) .and. &
+                    bqs(jtot,jlpt)%jq(icol).eq.hf1%j(ii) .and. &
+                    bqs(jtot,jlpt)%inq(icol).eq.hf1%in(ii) .or. &
+                    bqs(jtot,jlpt)%jq(icol).eq.hf1%j(i) .and. &
+                    bqs(jtot,jlpt)%inq(icol).eq.hf1%in(i) .and. &
+                    bqs(jtot,jlpt)%jq(irow).eq.hf1%j(ii) .and. &
+                    bqs(jtot,jlpt)%inq(irow).eq.hf1%in(ii)) then
                   is = (irow*(irow - 1))/2 + icol
                   if (iflag.ne.1) then
-                    xl = l(jtot,jlpt,icol)
-                    xlp = l(jtot,jlpt,irow)
-                    xj12 = j12(jtot,jlpt,icol) + spins%f
-                    xj12p = j12(jtot,jlpt,irow) + spins%f
+                    xl = bqs(jtot,jlpt)%lq(irow)
+                    xlp = bqs(jtot,jlpt)%lq(irow)
+                    xj12 = bqs(jtot,jlpt)%j12(irow) + spins%f
+                    xj12p = bqs(jtot,jlpt)%j12(irow) + spins%f
                   else
-                    xl = l(jtot,jlpt,irow)
-                    xlp = l(jtot,jlpt,icol)
-                    xj12 = j12(jtot,jlpt,irow) + spins%f
-                    xj12p = j12(jtot,jlpt,icol) + spins%f
+                    xl = bqs(jtot,jlpt)%lq(irow)
+                    xlp = bqs(jtot,jlpt)%lq(irow)
+                    xj12 = bqs(jtot,jlpt)%j12(irow) + spins%f
+                    xj12p = bqs(jtot,jlpt)%j12(irow) + spins%f
                   end if
                   fj12 = sqrt(2.d0 * xj12 + 1.d0)
                   fj12p = sqrt(2.d0 * xj12p + 1.d0)
