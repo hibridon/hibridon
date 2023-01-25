@@ -106,14 +106,13 @@ use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
 use mod_codim, only: nmax => mmax
 use mod_coamat, only: scmat => toto ! scmat(1)
-use mod_coener, only: energ
+use mod_coener, only: energ, max_en
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysl, only: islcod, lspar
 use mod_cosysr, only: isrcod, idum=>junkr, rspar
 use mod_version, only : version
-use mod_coj12, only: j12
 use mod_hibrid5, only : intcrs, readpc
 use mod_difcrs, only: difcrs
 use mod_hibasis, only: is_twomol
@@ -565,20 +564,20 @@ call assignment_parse(code(1:lc),empty_var_list,j,energ(i))
 goto 310
 320 if (energ(1) .gt. 0) then
    if (i .ne. nerg) then
-     if (i .le. 25) then
+     if (i .le. max_en) then
        write (6, 321) i
 321        format (' ** NERG HAS BEEN RESET TO',i3)
        nerg = i
      else
-       write (6, 322)
-322        format (' ** NERG RESET TO 25 (MAXIMUM VALUE)')
-       nerg=25
+       write (6, 322) max_en
+322        format (' ** NERG RESET TO ',i0,' (MAXIMUM VALUE)')
+       nerg = max_en
      end if
    end if
 elseif (energ(1) .lt. 0) then
    nerg=energ(4)+0.001d0
-   if (nerg.gt.25) then
-      nerg=25
+   if (nerg > max_en) then
+      nerg = max_en
       write (6,322)
    endif
    e1=energ(2)

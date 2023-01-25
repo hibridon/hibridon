@@ -265,13 +265,12 @@ end
 !     NTOP, AND POSSIBLY J12 ARE TO BE RETURNED FOR CHANNEL INFORMATION;
 !     ALSO CALCULATE NON-ZERO COUPLING MATRIX ELEMENTS AND RETURN IN V2,
 !     IV2, LAMNUM.
-subroutine bausr(j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
+subroutine bausr(bqs, jhold, ehold, ishold, nlevel, nlevop, &
      sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, csflag, &
      clist, bastst, ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_coj12, only: j12
 use mod_conlam, only: nlam
 use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
@@ -284,10 +283,9 @@ use mod_pot_ohh2_bausr, only: machep, &
    lam1b, lam2b, lamb, &
    lam1f, lam2f, lamf
 use mod_ered, only: ered, rmu
+use mod_hitypes, only: bqs_type
 implicit none
-integer, intent(out) :: j(:)
-integer, intent(out) :: l(:)
-integer, intent(out) :: is(:)
+type(bqs_type), intent(out) :: bqs
 integer, intent(out), dimension(:) :: jhold
 real(8), intent(out), dimension(:) :: ehold
 integer, intent(out), dimension(:) :: ishold
@@ -414,6 +412,7 @@ end do
 if (bastst) call pr_lev_ohh2(nlist, jhold, ishold, ehold, sc1)
 !     
 !     Create a channel list from the level list
+call bqs%init(nmax)
 n = 0
 do nlevel = 1, nlist
    ji1 = jhold(nlevel) / 10
@@ -433,11 +432,12 @@ do nlevel = 1, nlist
          if (ipar * lpar .ne. jlpar) cycle
          n = n + 1
          if (n .gt. nmax) call raise('too many channels.')
-         j(n) = jhold(nlevel)
-         is(n) = ishold(nlevel)
-         j12(n) = ji12
+         bqs%jq(n) = jhold(nlevel)
+         bqs%inq(n) = ishold(nlevel)
+         bqs%j12(n) = ji12
          eint(n) = ehold(nlevel)
-         l(n) = li
+         bqs%lq(n) = li
+         bqs%length = n
          cent(n) = li * (li + 1)
          sc2(n) = sc1(nlevel)
          if (iabs(ishold(nlevel)) .eq. 1) then
@@ -457,9 +457,9 @@ if (bastst .and. iprint .ge. 1) then
    write (6, 275) jtot * 2 + 1, jlpar
 275    format (' ** CHANNEL LIST FOR JTOT=', i3, '/2, JLPAR=', i2)
    do i = 1, n
-      ji1 = j(i) / 10
-      ji2 = mod(j(i), 10)
-      select case (is(i))
+      ji1 = bqs%jq(i) / 10
+      ji2 = mod(bqs%jq(i), 10)
+      select case (bqs%inq(i))
          case (-2)
             strfi = 'F2f'
          case (-1)
@@ -469,8 +469,8 @@ if (bastst .and. iprint .ge. 1) then
          case (2)
             strfi = 'F2e'
       end select
-      write (6, 280) i, 2 * ji1 + 1, strfi, ji2, 2 * j12(i) + 1, &
-           l(i), sc3(i), sc4(i), eint(i) * econv
+      write (6, 280) i, 2 * ji1 + 1, strfi, ji2, 2 * bqs%j12(i) + 1, &
+           bqs%lq(i), sc3(i), sc4(i), eint(i) * econv
 280       format (i4, 1x, 'J1=', i2, '/2 ', a, 2x, &
            'J2=', i2, 2x, 'J12=', i2, '/2  L=', i3, 2x, &
            'C3/2=', f7.4, 1x, 'C1/2=', f7.4, 2x, &
@@ -510,21 +510,21 @@ do ivx = 1, nvb + nvf
    inum = 0
    do icol = 1, n
       do irow = icol, n
-         ji1p = j(icol) / 10
-         fi1p = iabs(is(icol))
-         eps1p = isign(1, is(icol))
-         ji2p = mod(j(icol), 10)
-         ji12p = j12(icol)
-         lip = l(icol)
+         ji1p = bqs%jq(icol) / 10
+         fi1p = iabs(bqs%inq(icol))
+         eps1p = isign(1, bqs%inq(icol))
+         ji2p = mod(bqs%jq(icol), 10)
+         ji12p = bqs%j12(icol)
+         lip = bqs%lq(icol)
          c32p = sc3(icol)
          c12p = sc4(icol)
 !     
-         ji1 = j(irow) / 10
-         fi1 = iabs(is(irow))
-         eps1 = isign(1, is(irow))
-         ji2 = mod(j(irow), 10)
-         ji12 = j12(irow)
-         li = l(irow)
+         ji1 = bqs%jq(irow) / 10
+         fi1 = iabs(bqs%inq(irow))
+         eps1 = isign(1, bqs%inq(irow))
+         ji2 = mod(bqs%jq(irow), 10)
+         ji12 = bqs%j12(irow)
+         li = bqs%lq(irow)
          c32 = sc3(irow)
          c12 = sc4(irow)
 !     

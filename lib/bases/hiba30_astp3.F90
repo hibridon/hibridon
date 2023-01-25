@@ -23,7 +23,7 @@ end module mod_asymln
 module mod_hiba30_astp3
 contains
   ! ----------------------------------------------------------------------
-subroutine baastp3 (j, l, is, jhold, ehold, ishold, nlevel, &
+subroutine baastp3 (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, etemp, fjtemp, fktemp, fistmp, &
                   rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, &
@@ -158,7 +158,6 @@ use mod_asymln
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_coj12, only: j12
 use mod_coatpi, only: narray, isiz
 use mod_coatpr, only: c
 use mod_coatp1, only: ctemp
@@ -173,18 +172,20 @@ use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
+type(bqs_type), intent(out) :: bqs
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 
-dimension j(1), l(1), is(1), jhold(1), ehold(1), &
+dimension jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
           fistmp(1)
 !  scratch arrays for computing asymmetric top energies and wave fns.
 dimension e(narray,narray), eig(narray), vec(narray,narray), &
-  sc1(narray), sc2(narray), work(1000), kp(1000), ko(1000), &
-  j2rot(1000), e2rot(1000)
+  sc1(narray), sc2(narray), work(10000), kp(10000), ko(10000), &
+  j2rot(10000), e2rot(10000)
 !
 integer, pointer :: nterm, numpot, jmax, iop, j2min, j2max, ipotsy2
 real(8), pointer :: arot, brot, crot, emax, b2rot
@@ -639,6 +640,7 @@ do 250  i = 1, nlevel
 !  determine parity of molecular state [Eq. (A21) of S. Green, 
 !  J. Chem. Phys. 73, 2740 (1980) and Townes and Schawlow, 
 !  Microwave Spectroscopy, Eq. (3-27), p. 64.].
+call bqs%init(nmax)
 n = 0
 do i = 1, nlevel
   j1 = jhold(i)/10
@@ -664,10 +666,11 @@ do i = 1, nlevel
           stop
         end if
         eint(n) = ehold(i)
-        j(n) = jhold(i)
-        is(n) = ishold(i)
-        l(n) = li
-        j12(n) = j12i
+        bqs%jq(n) = jhold(i)
+        bqs%inq(n) = ishold(i)
+        bqs%lq(n) = li
+        bqs%j12(n) = j12i
+        bqs%length = n
         cent(n) = li * (li + 1)
 !  move e.fn also
         isiz(n) = isizh(nlevel)
@@ -708,23 +711,23 @@ if (bastst) then
     '   #  J1  IS  J2  J12  L     EINT(CM-1)'/1x,50('-'))
   do 330  i = 1, n
     ecm = eint(i) * econv
-    j1 = j(i)/10
-    j2 = mod(j(i),10)
+    j1 = bqs%jq(i)/10
+    j2 = mod(bqs%jq(i),10)
     if (bastst) then
       isize = isiz(i)
       isub = (i - 1)*narray
       if (isize .gt. 12) then
-        write (6, 320) i, j1, is(i), j2, j12(i), l(i), ecm
-        write (9, 320) i, j1, is(i), j2, j12(i), l(i), ecm
+        write (6, 320) i, j1, bqs%inq(i), j2, bqs%j12(i), bqs%lq(i), ecm
+        write (9, 320) i, j1, bqs%inq(i), j2, bqs%j12(i), bqs%lq(i), ecm
 320         format (6i4, f12.3)
       else
         if (isize .gt. 6) then
-          write (6, 3201) i, j1, is(i), j2, j12(i), l(i), ecm
-          write (9, 3201) i, j1, is(i), j2, j12(i), l(i), ecm
+          write (6, 3201) i, j1, bqs%inq(i), j2, bqs%j12(i), bqs%lq(i), ecm
+          write (9, 3201) i, j1, bqs%inq(i), j2, bqs%j12(i), bqs%lq(i), ecm
 3201            format (6i4, f12.3)
         else
-          write (6, 3202) i, j1, is(i), j2, j12(i), l(i), ecm
-          write (9, 3202) i, j1, is(i), j2, j12(i), l(i), ecm
+          write (6, 3202) i, j1, bqs%inq(i), j2, bqs%j12(i), bqs%lq(i), ecm
+          write (9, 3202) i, j1, bqs%inq(i), j2, bqs%j12(i), bqs%lq(i), ecm
 3202           format (6i4, f12.3)
         end if
       end if
@@ -756,17 +759,17 @@ do 400 ilam = 1, nlam
   inum = 0
   ancouma => v2%get_angular_coupling_matrix(ilam)
   do 355 icol = 1, n
-    j1c = j(icol)/10
-    j2c = mod(j(icol),10)
-    j12c = j12(icol)
-    lc = l(icol)
+    j1c = bqs%jq(icol)/10
+    j2c = mod(bqs%jq(icol),10)
+    j12c = bqs%j12(icol)
+    lc = bqs%lq(icol)
     do 350 irow = icol, n
-      j1r = j(irow)/10
-      j2r = mod(j(irow),10)
-      j12r = j12(irow)
-      lr = l(irow)
+      j1r = bqs%jq(irow)/10
+      j2r = mod(bqs%jq(irow),10)
+      j12r = bqs%j12(irow)
+      lr = bqs%lq(irow)
       call vastp3(j1r,j2r,j12r,lr,j1c,j2c,j12c,lc, &
-          is(irow),is(icol),irow,icol,jtot, &
+          bqs%inq(irow),bqs%inq(icol),irow,icol,jtot, &
           ll1,mm1,ll2,lltot,vee)
       if (abs(vee) .gt. 1.d-10) then
         i = i + 1
@@ -777,7 +780,7 @@ do 400 ilam = 1, nlam
             icol, irow, i, vee
           write (9, 290) ilam, ll1, mm1, ll2, lltot, &
             icol, irow, i, vee
-290             format (i4, 4i5, 2x, 2i6, i10, i9, e20.7)
+290             format (i4, 4i5, 2x, 2i6, i10, e20.7)
         end if
       end if
 350     continue

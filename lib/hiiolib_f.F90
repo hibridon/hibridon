@@ -935,12 +935,14 @@ use mod_par, only: airyfl, csflag, flaghf, flagsu, ipos, &
                 prpart, readpt, rsflag, twomol, wrsmat, &
                 wrpart, wrxsec, prxsec, nucros, photof, wavefl, boundc
 use funit
+use mod_fileid, only: FILEID_SAV
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_file, only: input, output, jobnam, savfil
 use mod_file_size, only : isize, isizes
 use mod_hiutil, only: gennam
 use mod_hismat, only: rdhead
+use mod_coener, only: max_en
 implicit double precision (a-h,o-z)
 integer ifile, nerg, nfile, lenx
 logical existf
@@ -948,11 +950,11 @@ character*40  oldlab,newlab
 character*40 xname,xnam1
 character*20 cdate
 if (nerg .gt. 1) then
-!  check to see if nerg .le. 25
-  if (nerg .gt. 25) then
+!  check to see if nerg <= max_en
+  if (nerg .gt. max_en) then
     write (FUNIT_OUT, 10) nerg
-    write (6, 10) nerg
-10     format (/' *** NERG =', i2,' > 25; ABORT ***')
+    write (6, 10) nerg, max_en
+10     format (/' *** NERG =', i2,' > ', i0,'; ABORT ***')
     call exit
   end if
 !  open units 10, 11, and 12 for storage of channel parameters, transformation
@@ -1023,7 +1025,7 @@ if (wrxsec .or. prxsec .or. prpart .or. wrpart) then
        end if
      end if
      savfil=xname
-     call dopen(1,nfile,savfil)
+     call dopen(FILEID_SAV, nfile,savfil)
      write (9, 180) xname(1:lenx)
 180      format (' ** RESTART INFORMATION SAVED IN FILE ',(a))
    endif
@@ -1280,7 +1282,7 @@ module mod_cdio
       integer, dimension(:), pointer :: iostat ! view of one section memory_block
       integer, dimension(:), pointer :: last   ! view of one section memory_block
       integer, pointer :: lhea                 ! view of one section memory_block
-      ! lhea : size of memory_block in integers
+      ! lhea : length of header (size of memory_block in integers)
       integer, pointer :: junk                 ! view of one section memory_block
       ! note : junk is probably here to make memory_block a multiple of 8 bytes as some
       ! copy functions that are involved transfer data with words of 8 bytes
@@ -1439,7 +1441,6 @@ if(iadr(irec,ifil).lt.0) then
   iadr(irec,ifil)=next(ifil)
   next(ifil)=next(ifil)+((ll-1)/lbuf+1)*lbuf
   len(irec,ifil)=next(ifil)-iadr(irec,ifil)
-  ! write(6,*) 'graffy/dread : len(', irec, ',', ifil, ') has been set to ', len(irec,ifil)
 end if
 if(ll.gt.len(irec,ifil)) then
   write(6,50) ifil,irec,ll,len(irec,ifil)
@@ -1449,9 +1450,9 @@ if(ll.gt.len(irec,ifil)) then
 end if
 return
 !
-entry dwrite(ii,l,ifil,irec,iof)
+entry dwrite(ii, l, ifil, irec, iof)
 !
-!.....write "l" integer words to record "irec" on file "ifil"
+!.....write "l" integer words (stored in ii array) to record "irec" on file "ifil"
 !.....with offset iof
 !
 if(iun(ifil).eq.0) then
@@ -1466,35 +1467,34 @@ if(irec.gt.maxrec) then
           ' OUT OF RANGE. ALLOWED',i4)
   call exit
 end if
-if(iadr(irec,ifil).lt.0) then
-  iadr(irec,ifil)=next(ifil)
-  next(ifil)=next(ifil)+((l-1)/lbuf+1)*lbuf
-  len(irec,ifil)=next(ifil)-iadr(irec,ifil)
-  ! write(6,*) 'graffy/dwrite : len(', irec, ',', ifil, ') has been set to ', len(irec,ifil)
+if(iadr(irec,ifil) < 0) then
+  ! allocate a range of positions in the file for the record irec
+  iadr(irec,ifil) = next(ifil) ! position of the start of the record in its file (unit : 32 bit words)
+  next(ifil) = next(ifil) + ((l-1)/lbuf+1) * lbuf
+  len(irec,ifil) = next(ifil) - iadr(irec,ifil)
 end if
 if(iof+l.gt.len(irec,ifil)) then
   if(irec.ge.last(ifil)) then
     next(ifil)=iadr(irec,ifil)+((iof+l-1)/lbuf+1)*lbuf
     len(irec,ifil)=next(ifil)-iadr(irec,ifil)
-    ! write(6,*) 'graffy/dwrite/2 : len(', irec, ',', ifil, ') has been set to ',len(irec,ifil)
   else
-write (6,*) 'ii,l,ifil,irec,iof', ii,l,ifil,irec,iof
+    write (6,*) 'ii,l,ifil,irec,iof', ii,l,ifil,irec,iof
     write(6,65) ifil,irec,iof+l,len(irec,ifil)
 65     format(/' DIRECT WRITE ERROR ON FILE',i2,' RECORD',i3, &
           ' TRY TO WRITE',i6,' WORDS, RECORDLENGTH=',i6,' WORDS')
     call exit
   end if
 end if
-ir=iadr(irec,ifil)+iof
+ir = iadr(irec,ifil) + iof  ! ! where to write the buffer in the output file (units : number of 32 bits words)  
 if(mod(l,intrel).ne.0.or.mod(ir,intrel).ne.0) then
   write(6,66) ifil,irec,l,ir
 66   format(/' DIRECT WRITE ERROR ON FILE',i2,' RECORD',i3, &
     ' LENGTH=',i4,' OR ADRESS=',i6,' NOT MULTIPLE OF INTREL')
   call exit
 end if
-ll=l/intrel
-ir=ir/intrel
-call wrabsf(iun(ifil),ii,ll,ir)
+ll = l / intrel  ! number of real8 in the ii array
+ir = ir / intrel  ! where to write the buffer in the output file (units : number of 64 bits words) 
+call wrabsf(iun(ifil), ii, ll, ir)
 call fwait(iun(ifil))
 last(ifil)=max(last(ifil),irec)
 iostat(ifil)=0
@@ -1503,7 +1503,6 @@ return
 entry dinit
 
 if ( .NOT. cdio_is_allocated ) then
-      ! write(6,*) 'graffy/dinit : allocating cdio from dinit' 
       call allocate_cdio(maxrec, maxun)
       cdio_is_allocated = .TRUE.
 end if
@@ -1526,7 +1525,6 @@ ibof=0
 ibstat=0
 libuf=lbuf
 ldbuf=lbuf/intrel
-! write(6,*) 'graffy/dinit setting len(:,:) to 0'
 do 70 if=1,maxun
 next(if)=lnex
 iun(if)=0
@@ -1542,11 +1540,9 @@ entry dopen(ifil,iunit,name)
 !.....open file "ifil" as unit "iunit" with filename "name"
 !
 if ( .NOT. cdio_is_allocated ) then
-      ! write(6,*) 'graffy/dopen : allocating cdio from dopen' 
       call allocate_cdio(maxrec, maxun)
       cdio_is_allocated = .TRUE.
 end if
-! write(6,*), 'graffy/dopen : ifil=', ifil, 'iunit=', iunit, 'name=', name
 if(iun(ifil).eq.iunit) return
 if(iun(ifil).ne.0) then
   write(6,75) ifil,iunit,iun(ifil)
@@ -1648,7 +1644,7 @@ subroutine dbri(buffer,l,ifil,irec)
 !     buffer : input buffer containing l integers
 !
 use mod_clseg, only: intrel
-use mod_cdbf, only: libuf,ibfil,ibrec,ibof,ibstat,idbuf
+use mod_cdbf, only: libuf,ibfil,ibrec,ibof,ibstat,idbuf,ibadr
 implicit none
 integer, intent(in) :: l
 integer, dimension(l), intent(out) :: buffer
@@ -1656,7 +1652,7 @@ integer, intent(in) :: ifil
 integer, intent(in) :: irec
 
 integer :: lre
-integer :: i, iof, len, ibadr
+integer :: i, iof, len
 
 ! implicit double precision (a-h,o-z)
 lre=l
@@ -1670,7 +1666,7 @@ entry dbrr(buffer,l,ifil,irec)
 !
 lre=l*intrel
 !
-5 ibadr = 0
+5 continue 
 if(irec.gt.0) then
   if(ibstat.eq.1) call dwrite(idbuf,libuf,ibfil,ibrec,ibadr)
   ibstat=0
@@ -1728,31 +1724,43 @@ integer, intent(in) :: l
 integer, intent(in) :: ifil
 integer, intent(in) :: irec
 
-integer :: i, iof, len
-integer :: lre
+integer :: i
+integer :: iof  ! offset relative to buffer, position of the next word to read from buffer
+integer :: len  ! 
+integer :: lre  ! length remaining (number of words to write)
 lre = l
-
 !
-if(irec.gt.0) then
-  if(ibstat.gt.0) call dwrite(idbuf,libuf,ibfil,ibrec,ibadr)
-  ibof=0
-  ibadr=0
-  ibrec=irec
-  ibfil=ifil
-  ibstat=1
+if(irec > 0) then
+  ! switch idbuf buffer to irec
+  if(ibstat > 0) then
+    ! write idbuf buffer to disc before emptying it
+    call dwrite(idbuf,libuf,ibfil,ibrec,ibadr)
+  end if
+  ! initialize idbuf buffer
+  ibof = 0
+  ibadr = 0
+  ibrec = irec
+  ibfil = ifil
+  ibstat = 1
+else
+  ! writing to current position (stored in ibfil, ibrec, ibof, ibadr)
+  ASSERT(ibfil == ifil)  ! we expect that ifil hasn't changed since last call
 end if
-iof=0
-70 len=min(lre,libuf-ibof)
-do i=1,len
-  idbuf(ibof+i)=buffer(iof+i)
+iof = 0
+70 continue
+! fill idbuf with words from buffer
+len = min(lre, libuf - ibof)  
+do i=1, len
+  idbuf(ibof+i) = buffer(iof+i)
 end do
-iof=iof+len
-lre=lre-len
-ibof=ibof+len
-if(lre.gt.0) then
-  ibof=0
-  call dwrite(idbuf,libuf,ifil,ibrec,ibadr)
-  ibadr=ibadr+libuf
+iof = iof + len
+lre = lre - len
+ibof = ibof + len
+if(lre > 0) then
+  ! we still have lre words to write from buffer, so before we carry on, we been to flush idbuf to the disc to free it
+  ibof = 0
+  call dwrite(idbuf,libuf,ifil,ibrec,ibadr)  ! send idbuf to disc
+  ibadr = ibadr + libuf
   goto 70
 end if
 return
@@ -1897,39 +1905,56 @@ l1=l1-lseg
 return
 !
 entry wrabsf(luni,a,l,iword)
-!
+! write l real8 numbers from a array into file unit luni at offset iword
+! luni : the logical unit of the file to write to (eg 3)
+! a : the array of double precision numbers to write (eg [0.5, 0.7])
+! l : the number of real numbers to write (eg 2)
+! iword : offset on file in real8 units where the write should start (eg 2047)
+
 if(lseg.gt.lbuf) stop 'lbuf too small in wrabsf'
-ibl=iword/lseg+1
-m=iword-(ibl-1)*lseg
-n=0
-if(m.eq.0) goto 40
-!.....first address not on sector boundary
-n=min0(lseg-m,l)
-if(ibl.le.ipos(luni)) &
-   read(luni,rec=ibl) (buf(i),i=1,lseg)
-do 30 i=1,n
-30 buf(m+i)=a(i)
-write(luni,rec=ibl) (buf(i),i=1,lseg)
-ipos(luni)=max(ipos(luni),ibl)
-ibl=ibl+1
+ibl=iword/lseg+1  ! index of block where iword is (eg ibl = 2 if lseg == 1024)
+m = iword - (ibl - 1) * lseg  ! offset of iword relative to its block (eg 1023)
+n = 0
+if(m /= 0) then
+  !.....first address not on sector boundary
+  n = min0(lseg-m, l)  ! number of words to write in the block ibl (eg 1)
+
+  if(ibl <= ipos(luni)) then
+    ! read the whole block ibl from disk into buf
+    read(luni, rec=ibl) (buf(i),i=1,lseg)
+  end if
+  ! write the words into buf
+  do i = 1, n
+    buf(m + i) = a(i)
+  end do
+  ! then write back the updated block ibl on the file
+  write(luni, rec=ibl) (buf(i), i=1, lseg)
+  ipos(luni) = max(ipos(luni), ibl)
+  ibl = ibl + 1
+end if
 !.....write from next sector boundary
-40 l1=l-n
-if(l1.eq.0) return
-lbl=l1/lseg
-do 45 ib=1,lbl
-write(luni,rec=ibl) (a(n+i),i=1,lseg)
-ipos(luni)=max(ipos(luni),ibl)
-ibl=ibl+1
-l1=l1-lseg
-45 n=n+lseg
-if(n.eq.l) return
+l1 = l - n  ! number of remaining words to write (eg 1)
+if(l1 == 0) return
+lbl = l1 / lseg  ! num blocks
+! write the full blocks
+do ib=1,lbl
+  write(luni,rec=ibl) (a(n+i),i=1,lseg)
+  ipos(luni) = max(ipos(luni),ibl)
+  ibl = ibl + 1
+  l1 = l1 - lseg
+  n = n + lseg
+end do
+
+if(n.eq.l) return  ! all words have been written to disk
 !.....last address not at end of sector
+! write the remaining n-l words in the last block 
 if(ibl.le.ipos(luni)) &
    read(luni,rec=ibl) (buf(i),i=1,lseg)
-do 50 i=1,l-n
-50 buf(i)=a(n+i)
+do i = 1, l-n
+  buf(i) = a(n+i)
+end do
 write(luni,rec=ibl) (buf(i),i=1,lseg)
-ipos(luni)=max(ipos(luni),ibl)
+ipos(luni) = max(ipos(luni),ibl)
 return
 !
 entry fwait(luni)

@@ -114,42 +114,6 @@ module mod_coeint
    end subroutine allocate_coeint
 end module mod_coeint
 
-module mod_coj12
-   ! variables in this module
-   !    j12:   array containing vector sum of ja + j (similar
-   !           situation with molecule-molecule scattering,
-   !           see hibastpln basis routine)
-   !    j12:      array containing vector sum of ja + j (similar
-   !              here j12 is lower-case j in alexander, dagdigian, klos notes
-   !              situation with molecule-molecule scattering,
-   !              see hibastpln basis routine)
-   !    j12:       vector resultant of j1 + j2
-   !    j12:       array containing the j12 quantum number of each channel  
-   !    j12:       array containing vector sum of j1 + j2 for molecule-molecule
-   !               systems and open-shell atom - molecule systems
-   
-   implicit none
-   integer, dimension(:), allocatable :: j12
-   contains
-   subroutine allocate_coj12(amax)
-      integer, intent(in) :: amax
-      allocate(j12(amax)) ;
-   end subroutine allocate_coj12
-end module mod_coj12
-
-module mod_coj12p
-   !  variables in this module
-   !    j12p:  arrays containing vector sum of j1 + j2 for molecule-molecule 
-   !               systems and open-shell atom - molecule systems
-   implicit none
-   integer, dimension(:), allocatable :: j12pk
-   contains
-   subroutine allocate_coj12p(amax)
-      integer, intent(in) :: amax
-      allocate(j12pk(amax)) ;
-   end subroutine allocate_coj12p
-end module mod_coj12p
-
 module mod_covvl
    !  variable in this module
    !    vvl:       array to store r-dependence of each angular term in the
@@ -185,25 +149,28 @@ module mod_coener
    ! *    energ:     array containing total energies (in cm-1) at which scattering
    ! *               calculations are to be performed
    implicit none
+   integer :: max_en
    real(8), dimension(:), allocatable :: energ
    contains
    subroutine allocate_coener(n)
       integer, intent(in) :: n
+      max_en = n
       allocate(energ(n)) ;
    end subroutine allocate_coener
 end module mod_coener
 
 module mod_cdbf
+   ! buffer of 32 bits words (integers)
    implicit none
    integer, allocatable :: ldbuf
-   integer, allocatable :: libuf
-   integer, allocatable :: ibfil
-   integer, allocatable :: ibrec
-   integer, allocatable :: ibof
-   integer, allocatable :: ibstat
-   integer, dimension(:), allocatable :: idbuf
+   integer, allocatable :: libuf                ! length of ibuf
+   integer, allocatable :: ibfil                ! current fileid 
+   integer, allocatable :: ibrec                ! current record
+   integer, allocatable :: ibof                 ! current position in the buffer (idbuf[1:ibof-1] is expected to be already filled)
+   integer, allocatable :: ibstat               ! 0: buffer already saved to disc, 1: buffer contains unsaved data
+   integer, dimension(:), allocatable :: idbuf  ! buffer of llbuf integers
    integer, allocatable :: llbuf
-   integer :: ibadr
+   integer :: ibadr                             ! where to write idbuf on disc (word position relative to the current record)
    contains
    subroutine allocate_cdbf()
       allocate(llbuf)
@@ -230,7 +197,7 @@ end module mod_cdbf
 
 module mod_clseg
    !  variables in this module
-   !    lseg:      number of integer words per disc sector
+   !    lseg:      number of integer words per disc sector (length of a segment)
    !    intrel:    number of integer words per real words
    !    lchar:     number of characters per integer word
    implicit none
@@ -526,36 +493,6 @@ module mod_cotq3
       allocate(scmat(n*n))  ! note : the size has been found by trial and error (with all tests passing)
    end subroutine allocate_cotq3
 end module mod_cotq3
-
-module mod_cojq
-   implicit none
-   integer, dimension(:), allocatable :: jq
-   contains
-   subroutine allocate_cojq(n)
-      integer, intent(in) :: n
-      allocate(jq(n))
-   end subroutine allocate_cojq
-end module mod_cojq
-
-module mod_colq
-   implicit none
-   integer, dimension(:), allocatable :: lq
-   contains
-   subroutine allocate_colq(n)
-      integer, intent(in) :: n
-      allocate(lq(n))
-   end subroutine allocate_colq
-end module mod_colq
-
-module mod_coinq
-   implicit none
-   integer, dimension(:), allocatable :: inq
-   contains
-   subroutine allocate_coinq(n)
-      integer, intent(in) :: n
-      allocate(inq(n))
-   end subroutine allocate_coinq
-end module mod_coinq
 
 module mod_cojhld
    implicit none
@@ -1680,8 +1617,6 @@ end module mod_cputim
     !!   common /coiout/ niout, indout(kout)
     !!   common /cocent/ cent(kmax)
     !!   common /coeint/ eint(kmax)
-    !!   common /coj12/ j12(kmax)
-    !!   common /coj12p/ j12pk(kmax)
     !!   common /covvl/  vvl(klammx)
     !!   common /cofact/ si(kfact)
     !!  common /coener/ energ(ken)
@@ -1702,9 +1637,6 @@ end module mod_cputim
     !!   common /cotq1/ tq1(kmax,kmax)
     !!   common /cotq2/ tq2(kmax,kmax)
     !!   common /cotq3/ tq3(kmax,kmax)
-    !!   common /cojq/ jq(kmax)
-    !!   common /colq/ lq(kmax)
-    !!   common /coinq/ inq(kmax)
     !!   common /cojhld/ jhold(kmax)
     !!   common /coehld/ ehold(kmax)
     !!   common /coinhl/ inhold(kmax)

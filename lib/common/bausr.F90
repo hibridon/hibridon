@@ -1,15 +1,14 @@
 #include "hiutil.inc.F90"
 !comdeck bausr
 ! --------------------------------------------------------------------
-subroutine bausr (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
+subroutine bausr (bqs, jhold, ehold, ishold, nlevel, nlevop, &
                   sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
                   n, nmax, ntop, v2)
 use mod_ancou, only: ancou_type, ancouma_type
+use mod_hitypes, only: bqs_type
 implicit none
-integer, intent(out) :: j(:)
-integer, intent(out) :: l(:)
-integer, intent(out) :: is(:)
+type(bqs_type), intent(out) :: bqs
 integer, intent(out), dimension(:) :: jhold
 real(8), intent(out), dimension(:) :: ehold
 integer, intent(out), dimension(:) :: ishold
@@ -35,9 +34,7 @@ integer, intent(in) :: nmax
 integer, intent(out) :: ntop
 type(ancou_type), intent(out), allocatable, target :: v2
 
-UNUSED(j)
-UNUSED(l)
-UNUSED(is)
+UNUSED(bqs)
 UNUSED(jhold)
 UNUSED(ehold)
 UNUSED(ishold)

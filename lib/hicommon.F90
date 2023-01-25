@@ -30,11 +30,13 @@ implicit none
 
    enum, bind( C )
    enumerator ::  &
-      FUNIT_CS             =  1, &   ! cross sections
+      FUNIT_CS             =  1, &   ! cross sections 
+      FUNIT_ICS            =  1, &   ! <job-name>.ics
       FUNIT_EADIAB         =  2, &   ! <job-name>.eadiab
       FUNIT_TENS_OUTPUT    =  2, &   ! <job-name>.tcs or <job-name>.dch or <job-name>.dcga
       FUNIT_MCS            =  2, &   ! <job-name>.mcs
       FUNIT_SAV            =  3, &   ! <job-name>.sav
+      FUNIT_XSC            =  3, &   ! <job-name>.xsc
       FUNIT_TCB            =  4, &   ! <job-name>.tcb (result of tenxsc)
       FUNIT_STDOUT         =  6, &   ! standard output
       FUNIT_INP            =  8, &   ! input file (*.inp)
@@ -51,3 +53,108 @@ implicit none
 
 
 end module funit
+
+module mod_fileid
+implicit none
+
+   enum, bind( C )
+   enumerator ::  &
+      FILEID_SAV           =  1, &   ! <job-name>.sav
+      FILEID_TMP           =  1      ! <job-name>.tmp
+   end enum
+
+
+end module mod_fileid
+
+module mod_hitypes
+   implicit none
+   private
+
+   type, public :: bqs_type  ! base quantum states
+      ! stores an array of base quantum states
+      ! rotational angular momenta, orbital angular momenta, and
+      ! additional quantum index for each channel
+      ! if the calculation involves the collisions of two diatomic
+      ! molecules, the bqs%jq = j1 + 10000 j2, where j1 and j2 are the
+      ! rotational quantum numbers of each molecule      
+
+      ! the vector jq will hold the rotational quantum numbers in the
+      ! packed bas
+      !
+      ! the vector lq will hold the orbital angular momenta of each
+      ! channel in the packed basis
+      !
+      ! the vector inq will hold the symmetry indices in the packed basis
+      ! first sum over the unpacked states
+      
+      integer, allocatable :: jq(:)  ! combined rotational quantum number. This integer stores an encoded representation of the set of rotational quantum numbers: for most bases, it only contains the value of j (rotational quantum number), but in case of 2 molecule collisions it encodes both j1 (rotational quantum number of modlecule 1) and j2 (rotational quantum number of molecule 2). The base itself is responsible for encoding and decoding this number.
+      integer, allocatable :: lq(:)  ! orbital angular momentum quantum number
+      integer, allocatable :: inq(:)  ! symmetry index
+      integer, allocatable :: j12(:)   ! rotational quantum number (only for 2 molecules systems)
+      integer :: length  ! number of elements used in all arrays
+      integer :: max_length
+   contains
+      procedure :: init => bqs_type_init
+      procedure :: deinit => bqs_type_deinit
+   end type bqs_type
+
+   type, public :: rbesself_type  ! ricatti bessel functions
+      real(8), allocatable :: fj(:)
+      real(8), allocatable :: fpj(:)
+      real(8), allocatable :: fn(:)
+      real(8), allocatable :: fpn(:)
+      integer, allocatable :: length  ! number of elements used in all arrays
+   contains
+      procedure :: init => rbesself_type_init
+      procedure :: deinit => rbesself_type_deinit
+   end type rbesself_type
+
+
+contains
+   subroutine bqs_type_init(this, nopen)
+      class(bqs_type) :: this
+      integer, intent(in) :: nopen
+
+      call bqs_type_deinit(this)
+      
+      allocate(this%jq(nopen))
+      allocate(this%lq(nopen))
+      allocate(this%inq(nopen))
+      allocate(this%j12(nopen))
+      this%length = 0
+      this%max_length = nopen
+   end subroutine 
+
+   subroutine bqs_type_deinit(this)
+      class(bqs_type) :: this
+      if (allocated(this%jq)) deallocate(this%jq)
+      if (allocated(this%lq)) deallocate(this%lq)
+      if (allocated(this%inq)) deallocate(this%inq)
+      if (allocated(this%j12)) deallocate(this%j12)
+      this%length = 0
+      this%max_length = 0
+   end subroutine 
+
+   subroutine rbesself_type_init(this, nopen)
+      class(rbesself_type) :: this
+      integer, intent(in) :: nopen
+
+      call rbesself_type_deinit(this)
+      
+      allocate(this%fj(nopen))
+      allocate(this%fpj(nopen))
+      allocate(this%fn(nopen))
+      allocate(this%fpn(nopen))
+      this%length = 0
+   end subroutine 
+
+   subroutine rbesself_type_deinit(this)
+      class(rbesself_type) :: this
+      if (allocated(this%fj)) deallocate(this%fj)
+      if (allocated(this%fpj)) deallocate(this%fpj)
+      if (allocated(this%fn)) deallocate(this%fn)
+      if (allocated(this%fpn)) deallocate(this%fpn)
+      this%length = 0
+   end subroutine 
+
+end module mod_hitypes

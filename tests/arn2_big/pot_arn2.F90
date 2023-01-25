@@ -46,10 +46,6 @@ subroutine pot (vv0, r)
 !  [ vvl(i) for i = 1, nlam ] are returned in module mod_covvl
 !  vvl(1) contains the anisotropic (n=2) term in the potential
 
-!  variable in module mod_covvl
-!    vvl        array to store r-dependence of each angular term in the
-!               potential
-
 !  -----------------------------------------------------------------------
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam

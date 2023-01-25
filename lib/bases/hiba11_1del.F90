@@ -4,7 +4,7 @@ contains
 ! sy1del (sav1del/ptr1del) defines, saves variables and reads            *
 !                  potential for singlet delta scattering                *
 ! --------------------------------------------------------------------
-subroutine ba1del (j, l, is, jhold, ehold, ishold, nlevel, &
+subroutine ba1del (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
@@ -110,15 +110,17 @@ use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 real(8), intent(out), dimension(:) :: sc1
 real(8), intent(out), dimension(:) :: sc2
 real(8), intent(out), dimension(:) :: sc3
 real(8), intent(out), dimension(:) :: sc4
 type(ancou_type), intent(out), allocatable, target :: v2
+type(bqs_type), intent(out) :: bqs
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
-dimension j(2), l(1), jhold(1), ehold(1), is(2), &
+dimension jhold(1), ehold(1), &
            ieps(2), ishold(1)
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
@@ -198,8 +200,8 @@ do 10  i = 1, nterm
 nsum = 0
 do 13  i = 1, nterm
   if (mproj(i) .gt. lammin(i) ) then
-    write (6, 11) i, mproj(i), lammin(i)
-    write (9, 11) i, mproj(i), lammin(i)
+    write (6, 11) mproj(i), lammin(i), i
+    write (9, 11) mproj(i), lammin(i), i
 11     format (' *** MPROJ=',i2,' > LAMMIN=',i2, &
             ' FOR TERM',i2,'; ABORT ***')
     if (bastst) then
@@ -310,6 +312,7 @@ end if
 !  for homonuclear molecules in gerade electronic states the e levels
 !  are s for even j, a for odd j, while the f levels are a for even j,
 !  s for odd j,  this reverses for ungerade
+call bqs%init(nmax)
 n = 0
 do 45 ji = 2, jmax
   npbot=1
@@ -329,17 +332,18 @@ do 45 ji = 2, jmax
            ' .GT. MAX DIMENSION OF',i3,' ABORT ***')
         stop
       end if
-      is (n) = ieps(ip)
-      j(n) = ji
+      bqs%inq(n) = ieps(ip)
+      bqs%jq(n) = ji
+      bqs%length = n
     end if
 45 continue
 !  now assign omega values and energies for case (a) levels
 do 50 i = 1, n
 !  now set up arrays of internal energies for the case (a) levels
 !    eint contains the energies of the omega = 1 levels
-  x = j(i) + one
+  x = bqs%jq(i) + one
   xsq = x*x
-  eint(i) =  brot*(j(i)*x-four)+0.5*is(i)*q*(j(i)*x)**2
+  eint(i) =  brot*(bqs%jq(i)*x-four)+0.5*bqs%inq(i)*q*(bqs%jq(i)*x)**2
 50 continue
 !  n now contains the number of  levels
 !  find lowest energy
@@ -353,8 +357,8 @@ nlevel = 0
 do 70  i = 1, n
   nlevel = nlevel + 1
   ehold(nlevel) = (eint(i) - emin) / econv
-  jhold(nlevel) = j(i)
-  ishold(nlevel) = is(i)
+  jhold(nlevel) = bqs%jq(i)
+  ishold(nlevel) = bqs%inq(i)
 70 continue
 !  now sort this list to put closed levels at end
 !  also determine number of levels which are open
@@ -387,7 +391,7 @@ if (csflag) then
   do 85  i = 1, n
 !  include only channels with j at least equal to coupled states
 !  projection index
-    if (j(i) .ge. nu) then
+    if (bqs%jq(i) .ge. nu) then
       nn = nn + 1
       if (nn .gt. nmax) then
         write (6, 40) nn, nmax
@@ -395,25 +399,26 @@ if (csflag) then
         stop
       end if
       eint(nn) = (eint(i) - emin) / econv
-      j(nn) = j(i)
-      is(nn) = is(i)
-      l(nn) = jtot
+      bqs%jq(nn) = bqs%jq(i)
+      bqs%inq(nn) = bqs%inq(i)
+      bqs%lq(nn) = jtot
       cent(nn) = jtot * (jtot + 1)
     end if
 85   continue
 !  set number of coupled states channels
   n = nn
+  bqs%length = n
 !  set up close-coupled channel basis (if desired)
 else if (.not. csflag) then
 !  first move all indices of rotational levels to the top of the vectors
-!  e.g. move j(n) to j(nmax), j(n-1) to j(nmax-1),  etc
+!  e.g. move bqs%jq(n) to bqs%jq(nmax), bqs%jq(n-1) to bqs%jq(nmax-1),  etc
   do 90  i = 1, n
 !  move (n-i+1)th element to (nmax-i+1)th element
     inew = nmax - i + 1
     iold = n - i + 1
     eint(inew) = eint(iold)
-    j(inew) = j(iold)
-    is(inew) = is(iold)
+    bqs%jq(inew) = bqs%jq(iold)
+    bqs%inq(inew) = bqs%inq(iold)
 90   continue
   nn = 0
   do 100  i = 1, n
@@ -421,12 +426,12 @@ else if (.not. csflag) then
 !  required for rotational degeneray, and store the new elements in
 !  nn, nn+1, ....
     ipoint = nmax - n + i
-    ji = j(ipoint)
+    ji = bqs%jq(ipoint)
 !mby          lmax = jtot + ji + 1
     lmax = jtot + ji
     lmin = iabs (jtot - ji)
     do 95  li = lmin, lmax
-      ix = (-1) ** (ji + li - jtot) * is(ipoint)
+      ix = (-1) ** (ji + li - jtot) * bqs%inq(ipoint)
       if (ix .eq. jlpar) then
         nn = nn + 1
         if (nn .gt. nmax) then
@@ -435,15 +440,16 @@ else if (.not. csflag) then
          stop
         end if
         eint(nn) = (eint(ipoint) - emin) / econv
-        j(nn) = ji
-        is(nn) = is(ipoint)
-        l(nn) = li
+        bqs%jq(nn) = ji
+        bqs%inq(nn) = bqs%inq(ipoint)
+        bqs%lq(nn) = li
         cent(nn) = li * ( li + 1)
       end if
 95     continue
 100   continue
 !  set number of close coupled channels
   n = nn
+  bqs%length = n
 end if
 !  now check to see if any of the open channels are closed at r=rcut
 !  this is not done for molecule-surface collisions or for rcut < 0
@@ -469,14 +475,15 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and..not.boundc) then
 !  here if this channel is to be included
         nn = nn + 1
         eint(nn) = eint(i)
-        j(nn) = j(i)
-        is(nn) = is(i)
+        bqs%jq(nn) = bqs%jq(i)
+        bqs%inq(nn) = bqs%inq(i)
         cent(nn) = cent(i)
-        l(nn) = l(i)
+        bqs%lq(nn) = bqs%lq(i)
       end if
 130     continue
 !  reset number of channels
     n = nn
+    bqs%length = n
   end if
 end if
 !  return if no channels
@@ -516,8 +523,8 @@ if (clist) then
   do 230  i = 1, n
     ecm = eint(i) * econv
     if (bastst) &
-    write (6, 220) i, j(i), is(i),  l(i), ecm
-    write (9, 220) i, j(i), is(i),  l(i), ecm
+    write (6, 220) i, bqs%jq(i), bqs%inq(i),  bqs%lq(i), ecm
+    write (9, 220) i, bqs%jq(i), bqs%inq(i),  bqs%lq(i), ecm
 220     format (3i4,  i6, 3f10.3)
 230   continue
 endif
@@ -551,17 +558,17 @@ do 400 ilam = 1, nlam
   do icol = 1, n
     do irow = icol, n
       vee=0
-      lrow = l(irow)
+      lrow = bqs%lq(irow)
       if (csflag) lrow = nu
       ! here for l=0 terms in potential (average potential)
       if (ilam .le. nlam0) then
-        call vlm1del (j(irow), lrow, j(icol), l(icol), jtot, &
-                     izero, izero, lb, is(irow), is(icol), &
+        call vlm1del (bqs%jq(irow), lrow, bqs%jq(icol), bqs%lq(icol), jtot, &
+                     izero, izero, lb, bqs%inq(irow), bqs%inq(icol), &
                      vee, csflag)
       else
         ! here for l=4 terms in potential (difference potential)
-        call vlm1del (j(irow), lrow, j(icol), l(icol), jtot, &
-                     izero, itwo, lb, is(irow), is(icol), &
+        call vlm1del (bqs%jq(irow), lrow, bqs%jq(icol), bqs%lq(icol), jtot, &
+                     izero, itwo, lb, bqs%inq(irow), bqs%inq(icol), &
                      vee, csflag)
       end if
       if(vee .ne. zero) then
@@ -605,8 +612,8 @@ end if
 do 450 i = 1, nn
     ecm = eint(i) * econv
     if (bastst) then
-      write (6, 220) i, j(i), is(i), l(i), ecm
-      write (9, 220) i, j(i), is(i), l(i), ecm
+      write (6, 220) i, bqs%jq(i), bqs%inq(i), bqs%lq(i), ecm
+      write (9, 220) i, bqs%jq(i), bqs%inq(i), bqs%lq(i), ecm
     end if
 450 continue
 return

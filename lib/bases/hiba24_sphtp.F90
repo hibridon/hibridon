@@ -4,7 +4,7 @@ contains
 ! sysphtp (savsphtp/ptrsphtp) defines, saves variables and reads         *
 !                  potentials for spherical top + atom                   *
 ! ----------------------------------------------------------------------
-subroutine basphtp (j, l, is, jhold, ehold, ishold, nlevel, &
+subroutine basphtp (bqs, jhold, ehold, ishold, nlevel, &
        nlevop, etemp, fjtemp, fitemp, fistmp, rcut, jtot, &
        flaghf, flagsu, csflag, clist, bastst, ihomo, &
        nu, numin, jlpar, n, nmax, ntop, v2)
@@ -118,11 +118,13 @@ use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
+type(bqs_type), intent(out) :: bqs
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
-dimension j(1), l(1), is(1), jhold(1), ehold(1), &
+dimension jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fitemp(1), &
           fistmp(1)
 !  scratch arrays
@@ -131,7 +133,7 @@ dimension na(17), ne(11), nf(11), ipa(11), nepsa(25), &
      nepse(20), nepsf(30), ua(25,17), ue(20,11), &
      uf(30,11)
 !
-!  number of levels of A, E, F type for each j (=0 to 12 for A levels,
+!  number of levels of A, E, F type for each bqs%jq(=0 to 12 for A levels,
 !  to 10 for E and F levels)
 data na / 1, 0, 0, 1, 1, 0, 2, 1, 1, 2, 2, 1, 3, 2, &
      2, 3, 3 /, &
@@ -513,6 +515,7 @@ if (bastst .or. clist) then
    'LEVEL LIST SORTED BY ENERGY',/,'   N   J  ', &
      'IS  EPS  EINT(CM-1)  COEFFS')
 end if
+call bqs%init(nmax)
 n = 0
 nlevel = 0
 do 170  njk = 1, nlist
@@ -556,10 +559,11 @@ do 170  njk = 1, nlist
              ' .GT. MAX DIMENSION OF',i5,' ABORT ***')
         stop
       end if
-      is(n) = ishold(nlevel)
-      j(n) = ji
+      bqs%inq(n) = ishold(nlevel)
+      bqs%jq(n) = ji
       eint(n) = ehold(nlevel)
-      l(n) = jtot
+      bqs%lq(n) = jtot
+      bqs%length = n
       cent(n) = jtot * (jtot + 1)
 !  move e.fn also
       do mm = 1, narray
@@ -593,10 +597,11 @@ do 170  njk = 1, nlist
           write (9, 150) n, nmax
           stop
         end if
-        is(n) = ishold(nlevel)
-        j(n) = ji
+        bqs%inq(n) = ishold(nlevel)
+        bqs%jq(n) = ji
         eint(n) = ehold(nlevel)
-        l(n) = li
+        bqs%lq(n) = li
+        bqs%length = n
         cent(n) = li * (li + 1)
         ips(n) = ieps(nlevel)
 !  move e.fn also
@@ -641,10 +646,10 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and. .not.boundc) then
 !  here if this channel is to be included
         nn = nn + 1
         eint(nn) = eint(i)
-        j(nn) = j(i)
-        is(nn) = is(i)
+        bqs%jq(nn) = bqs%jq(i)
+        bqs%inq(nn) = bqs%inq(i)
         cent(nn) = cent(i)
-        l(nn) = l(i)
+        bqs%lq(nn) = bqs%lq(i)
         ips(nn) = ips(n)
         do mm = 1, narray
           isub = (nn - 1)*narray + mm
@@ -655,6 +660,7 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and. .not.boundc) then
 300     continue
 !  reset number of channels
     n = nn
+    bqs%length = n
   end if
 end if
 !  return if no channels
@@ -696,12 +702,12 @@ if (bastst) then
     ecm = eint(i) * econv
     if (bastst .or. clist) then
       if (.not.csflag) then
-        write (6, 320) i, j(i), is(i), ips(i), l(i), ecm
-        write (9, 320) i, j(i), is(i), ips(i), l(i), ecm
+        write (6, 320) i, bqs%jq(i), bqs%inq(i), ips(i), bqs%lq(i), ecm
+        write (9, 320) i, bqs%jq(i), bqs%inq(i), ips(i), bqs%lq(i), ecm
 320         format (5i4, f10.3)
       else
-        write (6, 1320) i, j(i), is(i), l(i), ecm
-        write (9, 1320) i, j(i), is(i), l(i), ecm
+        write (6, 1320) i, bqs%jq(i), bqs%inq(i), bqs%lq(i), ecm
+        write (9, 1320) i, bqs%jq(i), bqs%inq(i), bqs%lq(i), ecm
 1320         format (4i4, f10.3)
       endif
     end if
@@ -733,9 +739,9 @@ do 400 iterm = 1, nterm
     ancouma => v2%get_angular_coupling_matrix(ilam)
     do 355  icol = 1, n
       do 350  irow = icol, n
-        lrow = l(irow)
+        lrow = bqs%lq(irow)
         if (csflag) lrow = nu
-        call vlmats (j(irow), lrow, j(icol), l(icol), jtot, &
+        call vlmats (bqs%jq(irow), lrow, bqs%jq(icol), bqs%lq(icol), jtot, &
           lb, vee, csflag, irow, icol)
 
 !  check for nonzero v2 matrix element

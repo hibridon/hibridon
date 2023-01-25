@@ -4,7 +4,7 @@ contains
 ! sych2x (savch2x/ptrch2x) defines, saves variables and reads            *
 !                  potential for CH2(X 3B1 (0,v2,0)-atom scattering      *
 ! ----------------------------------------------------------------------
-subroutine bach2x (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
+subroutine bach2x (bqs, jhold, ehold, ishold, nlevel, nlevop, &
                   etemp, fjtemp, fktemp, fistmp, &
                   rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
@@ -24,7 +24,7 @@ subroutine bach2x (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !  the scattering calculations are carried out with a spin-free basis
 !  since CH2(X 3B1) is well described by Hund's case (b) coupling
 !
-!  the MORBID energies go up to j = 14.  the energies for higher j (<= 25),
+!  the MORBID energies go up to j = 14.  the energies for higher bqs%jq(<= 25),
 !  for IS = 0,-1,1,...,5, were estimated by extrapolation, fitting the MORBID
 !  energies to the rigid rotor expression x0 + x1*j*(j+1) for each IS stack.
 !  the extrapolated energies are appended to the MORBID energy list below.
@@ -141,12 +141,14 @@ use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
+type(bqs_type), intent(out) :: bqs
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*1 slab
-dimension j(1), l(1), is(1), jhold(1), ehold(1), &
+dimension jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
           fistmp(1)
 !  table of rotational energies from Jensen's MORBID calculation
@@ -573,7 +575,7 @@ if (clist) then
 90   format (/' OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=', &
           f8.2)
 end if
-!  first set up list of all j(kp,ko) states included in basis
+!  first set up list of all bqs%jq(kp,ko) states included in basis
 !  for j < jmax and e < emax
 ivsub = ivbend + 3
 nlist = 0
@@ -619,6 +621,7 @@ if (bastst .or. clist) then
    'LEVEL LIST SORTED BY ENERGY',/,'   #   N  ', &
      'IS  KP  KO  S   EINT(CM-1)')
 end if
+call bqs%init(nmax)
 n = 0
 nlevel = 0
 do 170  njk = 1, nlist
@@ -679,10 +682,11 @@ do 170  njk = 1, nlist
              ' .GT. MAX DIMENSION OF',i5,' ABORT ***')
         stop
       end if
-      is(n) = ishold(nlevel)
-      j(n) = ji
+      bqs%inq(n) = ishold(nlevel)
+      bqs%jq(n) = ji
       eint(n) = ehold(nlevel)
-      l(n) = jtot
+      bqs%lq(n) = jtot
+      bqs%length = n
       cent(n) = jtot * (jtot + 1)
     end if
   else if (.not. csflag) then
@@ -712,10 +716,11 @@ do 170  njk = 1, nlist
           write (9, 150) n, nmax
           stop
         end if
-        is(n) = ishold(nlevel)
-        j(n) = ji
+        bqs%inq(n) = ishold(nlevel)
+        bqs%jq(n) = ji
         eint(n) = ehold(nlevel)
-        l(n) = li
+        bqs%lq(n) = li
+        bqs%length = n
         cent(n) = li * (li + 1)
       end if
 155     continue
@@ -753,14 +758,15 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and. .not.boundc) then
 !  here if this channel is to be included
         nn = nn + 1
         eint(nn) = eint(i)
-        j(nn) = j(i)
-        is(nn) = is(i)
+        bqs%jq(nn) = bqs%jq(i)
+        bqs%inq(nn) = bqs%inq(i)
         cent(nn) = cent(i)
-        l(nn) = l(i)
+        bqs%lq(nn) = bqs%lq(i)
       end if
 300     continue
 !  reset number of channels
     n = nn
+    bqs%length = n
   end if
 end if
 !  return if no channels
@@ -801,8 +807,8 @@ if (clist) then
   do 330  i = 1, n
     ecm = eint(i) * econv
     if (bastst .or. clist) then
-      write (6, 320) i, j(i), is(i), l(i), ecm
-      write (9, 320) i, j(i), is(i), l(i), ecm
+      write (6, 320) i, bqs%jq(i), bqs%inq(i), bqs%lq(i), ecm
+      write (9, 320) i, bqs%jq(i), bqs%inq(i), bqs%lq(i), ecm
 320       format (4i4, f10.3)
     end if
 330   continue
@@ -838,10 +844,10 @@ do 400 iterm = 1, nterm
     do icol = 1, n
       do irow = icol, n
         ij = ntop * (icol - 1) + irow
-        lrow = l(irow)
+        lrow = bqs%lq(irow)
         if (csflag) lrow = nu
-        call vlmctp (j(irow), lrow, j(icol), l(icol), jtot, &
-                is(irow), is(icol), lb, mu, vee, csflag)
+        call vlmctp (bqs%jq(irow), lrow, bqs%jq(icol), bqs%lq(icol), jtot, &
+                bqs%inq(irow), bqs%inq(icol), lb, mu, vee, csflag)
 
         ! change check for nonzero v2 matrix element
         if (abs(vee) .gt. 1.d-15) then

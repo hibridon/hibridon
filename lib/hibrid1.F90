@@ -1386,10 +1386,10 @@ data powr /3.d0/
 !     dependent) built-in types
 double precision dble_t
 character char_t
-real(8) :: w(nch*nmax)
-real(8), dimension(nch*nmax) :: tmat
-real(8), dimension(nch*nmax) :: vecnow
-real(8), dimension(nch*nmax) :: vecnew
+real(8), allocatable :: w(:)
+real(8), allocatable :: tmat(:)
+real(8), allocatable :: vecnow(:)
+real(8), allocatable :: vecnew(:)
 !  vectors dimensioned nch
 real(8), dimension(nch) :: eigold
 real(8), dimension(nch) :: eignow
@@ -1402,6 +1402,10 @@ real(8), dimension(nch) :: gam1
 real(8), dimension(nch) :: gam2
 integer(8) :: lrairy ! length of an airy record in bytes
 ! ----------------------------------------------------------------------------
+allocate(w(nch*nmax))
+allocate(tmat(nch*nmax))
+allocate(vecnow(nch*nmax))
+allocate(vecnew(nch*nmax))
 if (.not.twoen) itwo = -1
 if (itwo .le. 0) then
   if (photof) then
@@ -1802,6 +1806,11 @@ if (.not. noprin) then
           '   DRMIN =',f7.3, '   DRMAX =',f7.3,'   NSTEP =', i4)
 end if
 
+deallocate(w)
+deallocate(tmat)
+deallocate(vecnow)
+deallocate(vecnew)
+
 return
 !
 950 write (0, *) ' *** ERROR WRITING WFU FILE (AIRY). ABORT.'
@@ -2156,36 +2165,47 @@ subroutine difs(fname1,fname2,ienerg,iprint,acc,accmx,thrs, &
 !  ------------------------------------------------------------
 use mod_codim, only: mmax
 use mod_coamat, only: simag2 ! simag2(1)
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 use mod_cojhld, only: jout1 => jhold ! jout1(1)
 use mod_coehld, only: jout2 => eholdint ! jout2(1)
 use mod_coinhl, only: jlev => inhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
-use mod_coisc2, only: ipack1 => isc2 ! ipack1(1)
-use mod_coisc3, only: ipack2 => isc3 ! ipack2(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
-use mod_cosc2, only: jpack1 => sc2int ! jpack1(1)
-use mod_cosc3, only: jpack2 => sc3int ! jpack2(1)
-use mod_cosc4, only: lpack1 => sc4int ! lpack1(1)
-use mod_cosc5, only: lpack2 => sc5int ! lpack2(1)
 use mod_coz, only: sreal1 => z_as_vec ! sreal1(1)
 use mod_cow, only: sreal2 => w_as_vec ! sreal2(1)
 use mod_cozmat, only: simag1 => zmat_as_vec ! simag1(1)
 use mod_hismat, only: sread, rdhead
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam
-implicit double precision (a-h,o-z)
-character*(*) fname1,fname2
+use mod_hitypes, only: bqs_type
+implicit none
+character*(*), intent(in) :: fname1
+character*(*), intent(in) :: fname2
+integer, intent(in) :: ienerg
+integer, intent(in) :: iprint
+real(8), intent(out) :: acc
+real(8), intent(out) :: accmx
+real(8), intent(in) :: thrs
+integer, intent(out) :: imx
+integer, intent(out) :: jmx
+integer, intent(out) :: ityp
+type(bqs_type) :: row_bqs
+type(bqs_type) :: pack1
+type(bqs_type) :: pack2
+real(8) :: erabs, ered1, ered2, ermabs, ermrel, errel
+integer :: i, idif, ierr, ij, im
+integer :: jfinal, jfirst, jlpar1, jlpar2, jm, jtot1, jtot2, jtotd
+integer :: length, lenx1, lenx2
+integer :: n, ncol, nlevel, nlevop, nnout1, nnout2, nopen1, nopen2, nu1, nu2, nud, numax, numin
+real(8) :: rmu1, rmu2
+real(8), parameter :: zero = 0
 character*20 cdate1,cdate2
 character*40 xnam1,xnam2
 character*48 potnam1,potnam2,label1,label2
 
 logical existf,csflg1,csflg2,flghf1,flghf2,flgsu1,flgsu2
 logical twoml1,twoml2,nucr1,nucr2
+
 !
-zero=0
 acc=0
 accmx=0
 imx=0
@@ -2252,8 +2272,8 @@ do 26 i=1,iabs(nnout1)
 !
 30 nopen1 = 0
 call sread (0,sreal1, simag1, jtot1, jlpar1, nu1, &
-                  jq, lq, inq, ipack1, jpack1, lpack1, &
-                  1, mmax, nopen1, lengt1, ierr)
+                  row_bqs, pack1, &
+                  1, mmax, nopen1, ierr)
 if(ierr.eq.-1) goto 200
 if(ierr.lt.-1) then
   write(6,35) xnam1
@@ -2262,8 +2282,8 @@ if(ierr.lt.-1) then
 end if
 nopen2 = 0
 call sread (0,sreal2, simag2, jtot2, jlpar2, nu2, &
-                  jq, lq, inq, ipack2, jpack2, lpack2, &
-                  2, mmax, nopen2, lengt2, ierr)
+                  row_bqs, pack2, &
+                  2, mmax, nopen2, ierr)
 if(ierr.eq.-1) goto 200
 if(ierr.lt.-1) then
   write(6,35) xnam2
@@ -2272,17 +2292,17 @@ end if
 if(nu1.ne.nu2) idif=idif+1
 if(jtot1.ne.jtot2) idif=idif+1
 if(jlpar1.ne.jlpar2) idif=idif+1
-if(lengt1.ne.lengt2) idif=idif+1
-do 60 i=1,lengt1
-if(jpack1(i).ne.jpack2(i)) idif=idif+1
-if(lpack1(i).ne.lpack2(i)) idif=idif+1
-60 if(ipack1(i).ne.ipack2(i)) idif=idif+1
+if(pack1%length /= pack2%length) idif=idif+1
+do 60 i=1,pack1%length
+if(pack1%jq(i) /= pack2%jq(i)) idif=idif+1
+if(pack1%lq(i) /= pack2%lq(i)) idif=idif+1
+60 if(pack1%inq(i) /= pack2%inq(i)) idif=idif+1
 if(idif.ne.0) then
   write(6,70) jtot1,jtot2
 70   format(/' PARAMETERS NOT EQUAL FOR JTOT1=',i3,'  JTOT2=',i3)
   goto 200
 end if
-ncol=lengt1
+ncol=pack1%length
 if(nnout1.lt.0) then
   if(nopen1.ne.nopen2) then
     write(6,80) nopen1,nopen2
@@ -2300,7 +2320,7 @@ if (thrs .lt. zero) then
   if(iprint.ge.1) write(6,90) 'real',jtot1,jlpar1,nu1
 90   format(/' comparing ',a,' part of S matrices for jtot=',i3, &
        '  jlpar=',i2,'  NU=',i3)
-  call compar(sreal1,sreal2,mmax,lengt1,nopen1, &
+  call compar(sreal1,sreal2,mmax,pack1%length,nopen1, &
     erabs,errel,ermabs,ermrel,thrs,n,iprint,im,jm)
   acc=max(acc,abs(errel))
   if(abs(ermrel).gt.accmx) then
@@ -2315,7 +2335,7 @@ if (thrs .lt. zero) then
                  sreal1(ij),im,jm,sreal2(ij)
     write(6,90) 'IMAGINARY',jtot1,jlpar1,nu1
   end if
-  call compar(simag1,simag2,mmax,lengt1,nopen1, &
+  call compar(simag1,simag2,mmax,pack1%length,nopen1, &
     erabs,errel,ermabs,ermrel,thrs,n,iprint,im,jm)
   acc=max(acc,abs(errel))
   if(abs(ermrel).gt.accmx) then
@@ -2341,7 +2361,7 @@ else
   if(iprint.ge.1) write(6,105) jtot1,jlpar1,nu1
 105   format(/' moduli of S matrices for jtot=',i3, &
        '  jlpar=',i2,'  NU=',i3)
-  call compt2(sreal1,simag1,sreal2,simag2,mmax,lengt1,nopen1, &
+  call compt2(sreal1,simag1,sreal2,simag2,mmax,pack1%length,nopen1, &
        erabs,errel,ermabs,ermrel,thrs,n,iprint,im,jm)
   acc=max(acc,abs(errel))
   if(abs(ermrel).gt.accmx) then

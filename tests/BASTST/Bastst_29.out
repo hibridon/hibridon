@@ -1,0 +1,165 @@
+     BASTST                                      
+ DUMMY POTENTIAL FOR TESTING PURPOSES            
+ ==============================
+     *** Parameters:
+ JTOT1  =   0        JTOT2  =   0        JTOTD  =   1        JLPAR  =   0
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  48        IPRINT =   0
+ FSTFAC =  7.000     RINCR  =  1.000     RCUT   =  30.00     RENDAI =  5.500    
+ RENDLD =  5.500     RSTART =  5.500     SPAC   = 0.1400     TOLAI  =  1.000    
+ XMU    =  17.14    
+     *** CASYMTOP system parameters:
+ NTERM  =   1        NUMPOT =   0        JMAX   =  10
+ AROT   =  27.88     BROT   =  14.51     CROT   =  9.285     EMAX   =  1500.    
+ LAMMIN:    2
+ LAMMAX:    2
+ MPROJ:     0
+     *** Flags:
+ AIRYFL= F    BASTST= T    BATCH = F    CHLIST= T    CSFLAG= F    FLAGHF= F
+ FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= F    NOPRIN= F    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= F    WAVEFL= F
+ WRPART= F    WRSMAT= F    WRXSEC= F    BOUNDC= F
+ ** Energies:      442.000000
+ NOUT: 10; JOUT:  0   1   2   3   4   5   6   7   8   9
+ INDOUT:    0
+ ==============================
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2023-01-17 at 11:22
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: 4a68289e6183a36dae41c0fb214e430c24fc6e3f
+SYS: Darwin 22.2.0 x86_64
+COMPILER: /opt/intel/oneapi/compiler/2022.2.1/mac/bin/intel64/ifort
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+ 
+      Model Name: MacBook Pro
+      Model Identifier: MacBookPro14,3
+      Processor Name: Quad-Core Intel Core i7
+      Processor Speed: 2.9 GHz
+      Number of Processors: 1
+      Total Number of Cores: 4
+      L2 Cache (per Core): 256 KB
+      L3 Cache: 8 MB
+      Hyper-Threading Technology: Enabled
+      Memory: 16 GB
+ --------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ All publications resulting from use of the integrators included in the
+ Hibridon code must include the following reference:
+
+ D. E. Manolopoulos, J. Chem. Phys. 85, 6425 (1986); M. H. Alexander and D. E.
+ Manolopoulos, J. Chem. Phys. 80, 2044 (1987).
+
+ All publications involving the determination ofphotodissociation cross sections
+ must also include the following reference:
+
+ M. H. Alexander, Comput. Phys. Commun, 75, 87 (1993).
+
+ All publications investigating flux redistribution must include the following references:
+
+ M. H. Alexander, J. Chem. Phys. 95, 8931 (1991); D. E. Manolopoulos and
+ M. H. Alexander, J. Chem. Phys.  97, 2527 (1992).
+
+ All publications resulting from use of the Hibridon package must include
+ the following reference:
+
+ HIBRIDON is a package of programs for the time-independent quantum treatment
+ of inelastic collisions and photodissociation written by M. H. Alexander,
+ D. E.  Manolopoulos, H.-J. Werner, and B. Follmeg, with contributions by
+ P. F. Vohralik, D. Lemoine, G. Corey, B. Johnson, T. Orlikowski, A. Berning,
+ A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly, G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J. Klos, and F. Lique
+ -----------------------------------------------------------------------------
+
+ ** LABEL:         BASTST                                      
+ ** POT NAME:  DUMMY POTENTIAL FOR TESTING PURPOSES            
+ ** DATE:      Jan 17 11:27:29 2023
+
+ *** WARNING:  NAIRY .NE. 1 BUT AIRYFL .EQ. .FALSE.
+ ** NMAX= 500  NAIRY= 500
+
+ **  CC CHIRAL ASYMMETRIC TOP **
+     RMU=  17.1350  AROT= 27.877  BROT= 14.512  CROT=  9.285
+     E= 442.00  JTOT=   0   JLPAR= 1
+
+  CC CHANNEL LIST SORTED BY ENERGY
+   N   J  IS   L   EINT(CM-1)   COEFFS
+   1   0   0   0     0.000     1.0000
+   2   1   0   1    23.797     1.0000
+   3   1  -1   1    37.162     1.0000
+   4   2   0   2    70.133     0.9905 -0.1376
+   5   2  -1   2    79.529     1.0000
+   6   2   2   2   136.563     0.1376  0.9905
+   7   3   0   3   136.909     0.9604 -0.2786
+   8   3  -1   3   142.369     0.9975 -0.0700
+   9   3   2   3   212.569     0.2786  0.9604
+  10   4   0   4   222.369     0.9135 -0.4064  0.0207
+  11   4  -1   4   225.068     0.9914 -0.1312
+  12   3  -3   3   287.299     0.0700  0.9975
+  13   4   2   4   316.467     0.4068  0.9107 -0.0711
+  14   5   0   5   325.905     0.8642 -0.5010  0.0475
+  15   5  -1   5   327.096     0.9813 -0.1922  0.0078
+  16   4  -3   4   384.522     0.1312  0.9914
+  17   6   0   6   447.599     0.8211 -0.5652  0.0790 -0.0027
+  18   5   2   5   447.925     0.5023  0.8532 -0.1407
+  19   6  -1   6   448.089     0.9684 -0.2489  0.0185
+  20   4   4   4   494.643     0.0100  0.0734  0.9973
+  21   5  -3   5   506.187     0.1923  0.9789 -0.0686
+  22   7   0   7   587.642     0.7857 -0.6083  0.1123 -0.0069
+  23   7  -1   7   587.833     0.9537 -0.2989  0.0326 -0.0009
+  24   6   2   6   605.511     0.5668  0.7915 -0.2282  0.0103
+  25   5   4   5   616.605     0.0300  0.1454  0.9889
+  26   6  -3   6   651.859     0.2491  0.9597 -0.1303
+  27   8   0   8   746.150     0.7566 -0.6374  0.1453 -0.0130  0.0003
+  28   8  -1   8   746.223     0.9384 -0.3419  0.0492 -0.0026
+  29   5  -5   5   757.627     0.0055  0.0688  0.9976
+  30   6   4   6   764.250     0.0665  0.2324  0.9681 -0.0662
+  31   7   2   7   787.118     0.6060  0.7203 -0.3362  0.0296
+  32   7  -3   7   820.815     0.2993  0.9332 -0.1989  0.0079
+  33   6  -5   6   903.627     0.0146  0.1307  0.9913
+  34   9   0   9   923.184     0.7322 -0.6575  0.1768 -0.0208  0.0009
+  35   9  -1   9   923.211     0.9232 -0.3782  0.0674 -0.0051  0.0001
+  36   7   4   7   938.718     0.1242  0.3330  0.9267 -0.1223
+  37   8   2   8   990.141     0.6219  0.6326 -0.4573  0.0633 -0.0020
+  38   8  -3   8  1012.134     0.3419  0.8991 -0.2728  0.0202
+  39   7  -5   7  1074.738     0.0291  0.1995  0.9773 -0.0651
+  40   6   6   6  1076.384     0.0007  0.0057  0.0668  0.9978
+  41  10   0  10  1118.768     0.7114 -0.6712  0.2062 -0.0301  0.0020 -0.0000
+  42  10  -1  10  1118.778     0.9085 -0.4087  0.0865 -0.0086  0.0003
+  43   8   4   8  1141.573     0.2021  0.4388  0.8567 -0.1809  0.0070
+  44   9   2   9  1212.034     0.6165  0.5292 -0.5721  0.1124 -0.0067
+  45   9  -3   9  1224.828     0.3769  0.8574 -0.3483  0.0389 -0.0011
+  46   7   6   7  1246.583     0.0027  0.0154  0.1251  0.9920
+  47   8  -5   8  1271.230     0.0492  0.2731  0.9532 -0.1200
+  48   9   4   9  1374.214     0.2892  0.5334  0.7578 -0.2395  0.0176
+  49   8   6   8  1441.855     0.0071  0.0317  0.1894  0.9793 -0.0641
+  50   7  -7   7  1450.895     0.0004  0.0053  0.0653  0.9978
+  51  10   2  10  1451.264     0.5969  0.4221 -0.6601  0.1720 -0.0155  0.0004
+  52  10  -3  10  1457.978     0.4046  0.8090 -0.4214  0.0644 -0.0033
+  53   9  -5   9  1493.274     0.0746  0.3480  0.9172 -0.1790  0.0066
+
+  ILAM LAMBDA MU    ICOL IROW      I      IV2        VEE
+ILAM=   1  L1=  0 M1=  0  LAMNUM(ILAM) =      53
+ILAM=   2  L1=  1 M1=  1  LAMNUM(ILAM) =     145
+ILAM=   3  L1=  2 M1=  2  LAMNUM(ILAM) =     233
+ILAM=   4  L1=  3 M1=  0  LAMNUM(ILAM) =     252
+ILAM=   5  L1=  4 M1=  1  LAMNUM(ILAM) =     283
+ *** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS              966
+ ** BASTST=.TRUE.; TEST OF SUBROUTINE BASIS
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:     0
+      TIMING:  ELAPSED 00:00:01 / CPU 00:00:00 / MP RATIO    3.5 %
+      CURRENT DATE:  Jan 17 11:27:30 2023
+ ===============================================================================

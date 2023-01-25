@@ -1,3 +1,4 @@
+#include "assert.h"
 ! ------------------------------------------------------------------
 !  in this header, arrays are set up as allocatable.
 !  in addition, procedures to allocate and deallocate these
@@ -14,12 +15,13 @@ module mod_tensor_ang
 end module mod_tensor_ang
 
 module tensor_util
+use mod_hitypes, only: bqs_type
 implicit none
 integer :: jmx, kmx, lmx, kkmx, lbufs, lbuflb
 parameter (jmx=90, kmx=2*jmx+1, lmx=kmx, kkmx=3*kmx)
 parameter (lbufs=13504500, lbuflb=9000)
 real(8), dimension(:), allocatable :: srealp, simagp
-integer, dimension(:), allocatable :: ipackp, jpackp, lpackp
+type(bqs_type) :: packp
 integer :: ialloc
 
   type, abstract :: frame_type
@@ -35,9 +37,10 @@ integer :: ialloc
       character(len=:), allocatable, intent(out) :: label
     end subroutine
 
-    subroutine compute_scat_ampl_interface(this, j1, inlev1, j2, inlev2, jtot, mmax, jpack, &
-      lpack, ipack, length, jq, lq, inq, nopen, maxl2, &
+    subroutine compute_scat_ampl_interface(this, j1, inlev1, j2, inlev2, jtot, mmax, packed_bqs, &
+      row_bqs, nopen, maxl2, &
       nangle, flaghf, sreal, simag, y, q)
+    use mod_hitypes, only: bqs_type
     import frame_type
       class(frame_type) :: this
       integer :: j1
@@ -46,13 +49,8 @@ integer :: ialloc
       integer :: inlev2
       integer :: jtot
       integer :: mmax
-      integer :: jpack(:)
-      integer :: lpack(:)
-      integer :: ipack(:)
-      integer :: length
-      integer :: jq(:)
-      integer :: lq(:)
-      integer :: inq(:)
+      type(bqs_type), intent(in) :: packed_bqs
+      type(bqs_type), intent(in) :: row_bqs
       integer :: nopen
       integer :: maxl2
       integer :: nangle
@@ -226,8 +224,8 @@ subroutine helicity_frame_get_label(this, label)
   label = 'HELICITY'
 end subroutine
 
-subroutine helicity_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax,jpack, &
-  lpack,ipack,length,jq,lq,inq,nopen,maxl2, &
+subroutine helicity_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax, packed_bqs, &
+  row_bqs, nopen, maxl2, &
   nangle,flaghf,sreal,simag,y,q)
 !
 ! calculates scattering amplitudes for given jtot and set
@@ -239,10 +237,11 @@ subroutine helicity_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax,j
 !
 !     revision date: 13-oct-2011
 !
-!.....jpack,lpack,ipack: labels for rows
-!.....jq,lq,inq:         labels for columns
+! packed_bqs%jq,packed_bqs%lq,packed_bqs%inq : labels for rows
+! row_bqs%jq,row_bqs%lq,row_bqs%inq          : labels for columns
   use mod_tensor_ang, only: ang1, ang2, dang
   use mod_hiutil, only: xf3j
+  use mod_hitypes, only: bqs_type
   class(helicity_frame_type) :: this
   integer :: j1
   integer :: inlev1
@@ -250,13 +249,8 @@ subroutine helicity_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax,j
   integer :: inlev2
   integer :: jtot
   integer :: mmax
-  integer :: jpack(:)
-  integer :: lpack(:)
-  integer :: ipack(:)
-  integer :: length
-  integer :: jq(:)
-  integer :: lq(:)
-  integer :: inq(:)
+  type(bqs_type), intent(in) :: packed_bqs
+  type(bqs_type), intent(in) :: row_bqs
   integer :: nopen
   integer :: maxl2
   integer :: nangle
@@ -302,10 +296,10 @@ xjtot=dble(jtot)+spin
 xj1=dble(j1)+spin
 xj2=dble(j2)+spin
 ll=0
-do 50 ilab=1,length
-  if(jpack(ilab).ne.j1 .or. ipack(ilab).ne.inlev1) &
+do 50 ilab=1,packed_bqs%length
+  if(packed_bqs%jq(ilab).ne.j1 .or. packed_bqs%inq(ilab).ne.inlev1) &
      goto 50
-  l1=lpack(ilab)
+  l1=packed_bqs%lq(ilab)
   ll=ll+1
   fak1(ll)=fakj*sqrt(2.d0*l1 + 1.0d0)
   ilab1(ll)=ilab
@@ -313,12 +307,12 @@ do 50 ilab=1,length
 llmax=ll
 !
 do 500 jlab=1,nopen
-  if(jq(jlab).ne.j2 .or. inq(jlab).ne.inlev2) goto 500
-  l2=lq(jlab)
+  if(row_bqs%jq(jlab).ne.j2 .or. row_bqs%inq(jlab).ne.inlev2) goto 500
+  l2=row_bqs%lq(jlab)
   xl2=l2
   do 60 ll=1,llmax
     ilab=ilab1(ll)
-    l1=lpack(ilab)
+    l1=packed_bqs%lq(ilab)
 !.....convert to t-matrix
     tmat=-cmplx(sreal(jlab,ilab),simag(jlab,ilab))
     if(elastc .and. l1.eq.l2) tmat = tmat + 1.0d0
@@ -332,7 +326,7 @@ do 500 jlab=1,nopen
 !
     do 70 ll=1,llmax
       ilab=ilab1(ll)
-      xl1=lpack(ilab)
+      xl1=packed_bqs%lq(ilab)
       fak3(ll)=fak2(ll)*xf3j(xj1,xl1,xjtot,xmj1,zero,-xmj1)
 70     continue
 
@@ -415,8 +409,8 @@ subroutine geom_apse_frame_get_label(this, label)
 end subroutine
 
 
-subroutine geom_apse_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax,jpack, &
-  lpack,ipack,length,jq,lq,inq,nopen,maxl2,nangle, &
+subroutine geom_apse_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax, packed_bqs, &
+  row_bqs,nopen,maxl2,nangle, &
   flaghf,sreal,simag,y,q)
 !
 ! calculates scattering amplitudes for given jtot and set
@@ -428,10 +422,11 @@ subroutine geom_apse_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax,
 !
 !     revision date: 13-oct-2011
 !
-!.....jpack,lpack,ipack: labels for rows
-!.....jq,lq,inq:         labels for columns
+! packed_bqs%jq,packed_bqs%lq,packed_bqs%inq : labels for rows
+! row_bqs%jq,row_bqs%lq,row_bqs%inq          : labels for columns
   use mod_tensor_ang, only: ang1, ang2, dang
   use mod_hiutil, only: xf3j
+  use mod_hitypes, only: bqs_type
 implicit none
   class(geom_apse_frame_type) :: this
   integer :: j1
@@ -440,13 +435,8 @@ implicit none
   integer :: inlev2
   integer :: jtot
   integer :: mmax
-  integer :: jpack(:)
-  integer :: lpack(:)
-  integer :: ipack(:)
-  integer :: length
-  integer :: jq(:)
-  integer :: lq(:)
-  integer :: inq(:)
+  type(bqs_type), intent(in) :: packed_bqs
+  type(bqs_type), intent(in) :: row_bqs
   integer :: nopen
   integer :: maxl2
   integer :: nangle
@@ -492,10 +482,10 @@ xjtot=dble(jtot)+spin
 xj1=dble(j1)+spin
 xj2=dble(j2)+spin
 ll=0
-do 50 ilab=1,length
-  if(jpack(ilab).ne.j1 .or. ipack(ilab).ne.inlev1) &
+do 50 ilab=1,packed_bqs%length
+  if(packed_bqs%jq(ilab).ne.j1 .or. packed_bqs%inq(ilab).ne.inlev1) &
      goto 50
-  l1=lpack(ilab)
+  l1=packed_bqs%lq(ilab)
   ll=ll+1
   fak1(ll)=fakj*sqrt(2.d0*l1 + 1.0d0)
   ilab1(ll)=ilab
@@ -503,12 +493,12 @@ do 50 ilab=1,length
 llmax=ll
 !
 do 500 jlab=1,nopen
-  if(jq(jlab).ne.j2 .or. inq(jlab).ne.inlev2) goto 500
-  l2=lq(jlab)
+  if(row_bqs%jq(jlab).ne.j2 .or. row_bqs%inq(jlab).ne.inlev2) goto 500
+  l2=row_bqs%lq(jlab)
   xl2=l2
   do 60 ll=1,llmax
     ilab=ilab1(ll)
-    l1=lpack(ilab)
+    l1=packed_bqs%lq(ilab)
 !.....convert to t-matrix
     tmat = -cmplx(sreal(jlab,ilab),simag(jlab,ilab))
     if(elastc .and. l1.eq.l2) tmat = tmat + 1.0d0
@@ -535,7 +525,7 @@ do 500 jlab=1,nopen
           yy = 0.d0
           do 70 ll=1,llmax
             ilab=ilab1(ll)
-            xl1=lpack(ilab)
+            xl1=packed_bqs%lq(ilab)
             fak3(ll)=fak2(ll) &
               *xf3j(xj1,xl1,xjtot,xmj1p,zero,-xmj1p)
 70           continue
@@ -565,8 +555,8 @@ do 500 jlab=1,nopen
 return
 end
 
-subroutine dsig(maxk,nnout,jfirst,jfinal,jtotd,jpack, &
-                lpack,ipack,jlevel,inlevel,elevel,flaghf, &
+subroutine dsig(maxk,nnout,jfirst,jfinal,jtotd, packed_bqs, &
+                jlevel,inlevel,elevel,flaghf, &
                 iframe,ierr, frame, tens_out_unit)
 !
 ! subroutine to calculate m-resolved differential cross sections
@@ -578,9 +568,6 @@ subroutine dsig(maxk,nnout,jfirst,jfinal,jtotd,jpack, &
 ! current revision date: 7-oct-2011 by pj dagdigian
 !------------------------------------------------------------------------
 use mod_codim, only: mmax
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 ! common blocks for levels for which xs's to be computed
@@ -589,7 +576,6 @@ use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cow, only: simag => w_as_vec ! simag(1)
-use mod_hismat, only: sread
 use mod_difcrs, only: sphn
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch, ipos
@@ -598,15 +584,14 @@ use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts
 use mod_tensor_ang, only: ang1, ang2, dang
 use mod_hiutil, only: xf3j
 use mod_hismat, only: sread, rdhead
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 integer, intent(in) :: maxk
 integer :: nnout
 integer :: jfirst
 integer :: jfinal
 integer :: jtotd
-integer :: jpack(:)
-integer :: lpack(:)
-integer :: ipack(:)
+type(bqs_type), intent(out) :: packed_bqs
 integer :: jlevel
 integer :: inlevel
 real(8) :: elevel
@@ -638,8 +623,9 @@ data rad/57.295779513082323d0/
 character(len=:), allocatable :: label
 integer :: i, i1, i2, iang, ii, immprt, iph, ipower, isub1, isub2
 integer :: jlevlp, jlpar, jplast, jtlast, jtot
-integer :: k, k1, l2max, length, maxk1, maxq, mfvals, mivals, mj1, mj2, ml, mlmax
+integer :: k, k1, l2max, maxk1, maxq, mfvals, mivals, mj1, mj2, ml, mlmax
 integer :: nangle, nlevel, nlevop, nopen, nu, nud, numax, numin, numjm
+type(bqs_type) :: row_bqs
 call frame%get_label(label)
 maxq = mmax*mmax/2
 !
@@ -692,8 +678,8 @@ call rdhead(1,cdate1,ered1,rmu1,csflg1,flghf1,flgsu1, &
 !
 250 nopen = 0
 call sread (0, sreal, simag, jtot, jlpar, nu, &
-            jq, lq, inq, ipack, jpack, lpack, &
-            1, mmax, nopen, length, ierr)
+            row_bqs, packed_bqs, &
+            1, mmax, nopen, ierr)
 if(ierr .eq. -1) then
    write(6,260) xnam1,jtlast,jplast
 260    format(' END OF FILE DETECTED READING FILE ',(a), &
@@ -719,19 +705,20 @@ if(jlpar.eq.jplast .and. jtot.ne.jtlast+1) write(6,275) jtot,jtlast
 jtlast=jtot
 jplast=jlpar
 if(nnout.gt.0) then
-  do 290 i=1,length
-    inq(i)=ipack(i)
-    jq(i)=jpack(i)
-    lq(i)=lpack(i)
+  do 290 i=1,packed_bqs%length
+    row_bqs%inq(i)=packed_bqs%inq(i)
+    row_bqs%jq(i)=packed_bqs%jq(i)
+    row_bqs%lq(i)=packed_bqs%lq(i)
 290   continue
-  nopen = length
+  nopen = packed_bqs%length
+  row_bqs%length = nopen
 end if
 !
 !.....calculate contributions to amplitudes for present jtot
 !     for elastic (jlevel,inlevel) -> (jlevel,inlevel) transition
 !
 call frame%compute_scat_ampl(jlevel,inlevel,jlevel,inlevel,jtot,mmax, &
-  jpack,lpack,ipack,length,jq,lq,inq,nopen, &
+  packed_bqs, row_bqs, nopen, &
   l2max,nangle,flaghf,sreal,simag,y,q)
 
 !
@@ -888,8 +875,7 @@ write(6,406) (k, sigkto(k+1),k=0, maxk)
 return
 end
 
-subroutine dsigh(maxk, nnout, jfirst, jfinal, jtotd, jpack, &
-                lpack, ipack, jlevel, inlevel, elevel, flaghf, &
+subroutine dsigh(maxk, nnout, jfirst, jfinal, jtotd, packed_bqs, jlevel, inlevel, elevel, flaghf, &
                 iframe, ierr, tens_out_unit)
 !
 ! subroutine to calculate m-resolved differential cross sections
@@ -900,15 +886,13 @@ subroutine dsigh(maxk, nnout, jfirst, jfinal, jtotd, jpack, &
 ! author: pj dagdigian
 ! current revision date: 7-oct-2011 by pj dagdigian
 !------------------------------------------------------------------------
+use mod_hitypes, only: bqs_type
 implicit none
 integer :: maxk
 integer :: nnout
 integer :: jfirst
 integer :: jfinal
 integer :: jtotd
-integer :: jpack(:)
-integer :: lpack(:)
-integer :: ipack(:)
 integer :: jlevel
 integer :: inlevel
 real(8) :: elevel
@@ -916,18 +900,17 @@ logical :: flaghf
 integer :: iframe
 integer :: ierr
 integer, intent(in) :: tens_out_unit  ! unit of tenxsc output file (tcs, dgh or dcga file)
-
+type(bqs_type), intent(out) :: packed_bqs
 class(helicity_frame_type), allocatable :: helicity_frame
 
 allocate(helicity_frame)
 
-call dsig(maxk, nnout, jfirst, jfinal, jtotd, jpack, &
-        lpack, ipack, jlevel, inlevel, elevel, flaghf, &
+call dsig(maxk, nnout, jfirst, jfinal, jtotd, packed_bqs, jlevel, inlevel, elevel, flaghf, &
         iframe, ierr, helicity_frame, tens_out_unit)
 end
 
-subroutine dsigga(maxk, nnout, jfirst, jfinal, jtotd, jpack, &
-                lpack, ipack, jlevel, inlevel, elevel, flaghf, &
+subroutine dsigga(maxk, nnout, jfirst, jfinal, jtotd, packed_bqs, &
+                jlevel, inlevel, elevel, flaghf, &
                 iframe, ierr, tens_out_unit)
 !
 ! subroutine to calculate m-resolved differential cross sections
@@ -938,15 +921,13 @@ subroutine dsigga(maxk, nnout, jfirst, jfinal, jtotd, jpack, &
 ! author: pj dagdigian
 ! current revision date: 7-oct-2011 by pj dagdigian
 !------------------------------------------------------------------------
+use mod_hitypes, only: bqs_type
 implicit none
 integer :: maxk
 integer :: nnout
 integer :: jfirst
 integer :: jfinal
 integer :: jtotd
-integer :: jpack(:)
-integer :: lpack(:)
-integer :: ipack(:)
 integer :: jlevel
 integer :: inlevel
 real(8) :: elevel
@@ -954,13 +935,13 @@ logical :: flaghf
 integer :: iframe
 integer :: ierr
 integer, intent(in) :: tens_out_unit  ! unit of tenxsc output file (tcs, dgh or dcga file)
+type(bqs_type), intent(out) :: packed_bqs
 
 class(geom_apse_frame_type), allocatable :: geometric_apse_frame
 
 allocate(geometric_apse_frame)
 
-call dsig(maxk, nnout, jfirst, jfinal, jtotd, jpack, &
-        lpack, ipack, jlevel, inlevel, elevel, flaghf, &
+call dsig(maxk, nnout, jfirst, jfinal, jtotd, packed_bqs, jlevel, inlevel, elevel, flaghf, &
         iframe, ierr, geometric_apse_frame, tens_out_unit)
 end
 
@@ -968,9 +949,7 @@ end
 subroutine tensor_allocate()
 allocate(srealp(lbufs), stat=ialloc)
 allocate(simagp(lbufs), stat=ialloc)
-allocate(ipackp(lbuflb), stat=ialloc)
-allocate(jpackp(lbuflb), stat=ialloc)
-allocate(lpackp(lbuflb), stat=ialloc)
+call packp%init(lbuflb)
 if (ialloc .ne. 0) then
    print *, '  *** MEMORY ALLOCATION FAILS, EXITING ***'
    call tensor_free()
@@ -981,9 +960,7 @@ end subroutine tensor_allocate
 subroutine tensor_free()
 if (allocated(srealp)) deallocate(srealp)
 if (allocated(simagp)) deallocate(simagp)
-if (allocated(ipackp)) deallocate(ipackp)
-if (allocated(jpackp)) deallocate(jpackp)
-if (allocated(lpackp)) deallocate(lpackp)
+call packp%deinit()
 end subroutine tensor_free
 end module tensor_util
 
@@ -1041,14 +1018,8 @@ use mod_codim, only: mmax
 use mod_cotble, only: npnt, jttble
 use mod_coamat, only: labadr ! labadr(1)
 use mod_cobmat, only: sigma ! sigma(kkmx*jmx*jmx)
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 use mod_coisc2, only: inlev => isc2 ! inlev(1)
 use mod_coisc3, only: jlev => isc3 ! jlev(1)
-use mod_coisc4, only: jpack => isc4 ! jpack(1)
-use mod_coisc5, only: lpack => isc5 ! lpack(1)
-use mod_coisc6, only: ipack => isc6 ! ipack(1)
 use mod_coisc7, only: matel => isc7 ! matel(1)
 use mod_coisc8, only: jlist => isc8 ! jlist(1)
 ! added two common blocks - levels for which xs's to be computed (pjd)
@@ -1058,7 +1029,6 @@ use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc2, only: prefac => sc2 ! prefac(1)
 use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cow, only: simag => w_as_vec ! simag(1)
-use mod_hismat, only: sread
 use tensor_util
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch
@@ -1069,6 +1039,7 @@ use funit, only: FUNIT_TCB, FUNIT_TENS_OUTPUT
 use mod_hiutil, only: gennam, mtime, gettim, dater
 use mod_hiutil, only: xf3jm0
 use mod_hismat, only: sread, rdhead
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 integer :: jtotpa(MAX_NJTOT)
 character*(*) filnam
@@ -1086,15 +1057,17 @@ save nout
 dimension a(9)
 data  tol,   zero,   nstep &
     /1.d-7,  0.d0,     2/
+type(bqs_type) :: packed_bqs
+type(bqs_type) :: row_bqs
 !
 call tensor_allocate()
 ! initialize timer and arays
 call mtime(cpu0,ela0)
 srealp(lbufs)=zero
 simagp(lbufs)=zero
-ipackp(lbuflb)=0
-jpackp(lbuflb)=0
-lpackp(lbuflb)=0
+packp%inq(lbuflb)=0
+packp%jq(lbuflb)=0
+packp%lq(lbuflb)=0
 ! these 2 parameters are set in partens
 lnbufs = lbufs
 lnbufl = lbuflb
@@ -1320,10 +1293,10 @@ jj = jlp * nwaves + jfinal + 1
 iaddr = jttble(jj)
 nopen = -1
 call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
-            jq, lq, inq, ipack, jpack, lpack, &
-             1, mmax, nopen, length, ierr)
-maxlsp = (length*(length+1))/2
-maxllb = length
+            row_bqs, packed_bqs, &
+             1, mmax, nopen, ierr)
+maxlsp = (packed_bqs%length*(packed_bqs%length+1))/2
+maxllb = packed_bqs%length
 nbuf1 = lnbufs/maxlsp
 nbuf2 = lnbufl/maxllb
 nbuf = min(nbuf1,nbuf2)
@@ -1388,15 +1361,15 @@ n = minn
      goto 300
 ! iframe = 0
 171        continue
-       call sigk(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
-             lpack,ipack,jttble,prefac,sigma, &
+       call sigk(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,packed_bqs, &
+             jttble,prefac,sigma, &
              sreal,simag,matel,lenlab,labadr, &
              jtotpa,fast,ierr, FUNIT_TENS_OUTPUT, FUNIT_TCB)
        if(ierr.ne.0) goto 4000
        goto 300
 ! iframe = 1
-172        call sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
-             lpack,ipack,jttble,prefac, &
+172        call sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,packed_bqs, &
+             jttble,prefac, &
              sreal,simag,matel,lenlab,labadr, &
              jtotpa,fast,ierr, FUNIT_TENS_OUTPUT, FUNIT_TCB)
        if(ierr.ne.0) goto 4000
@@ -1404,16 +1377,16 @@ n = minn
 ! iframe = 2
 173        jlevel = jlev(jlist(1))
        inlevel = inlev(jlist(1))
-       call dsigh(maxk,nnout,jfirst,jfinal,jtotd,jpack,lpack, &
-             ipack,jlevel,inlevel,elev(jlist(1)),flaghf, &
+       call dsigh(maxk,nnout,jfirst,jfinal,jtotd,packed_bqs, &
+             jlevel,inlevel,elev(jlist(1)),flaghf, &
              iframe,ierr, FUNIT_TENS_OUTPUT)
        if(ierr.ne.0) goto 4000
        goto 300
 ! iframe = 3
 174        jlevel = jlev(jlist(1))
        inlevel = inlev(jlist(1))
-       call dsigga(maxk,nnout,jfirst,jfinal,jtotd,jpack,lpack, &
-             ipack,jlevel,inlevel,elev(jlist(1)),flaghf, &
+       call dsigga(maxk,nnout,jfirst,jfinal,jtotd,packed_bqs, &
+             jlevel,inlevel,elev(jlist(1)),flaghf, &
              iframe,ierr, FUNIT_TENS_OUTPUT)
        if(ierr.ne.0) goto 4000
 else
@@ -1440,7 +1413,7 @@ else
      goto 4000
    end if
    call sigkkp(n,maxk,nk,nnout,jfirst,jfinal,jtotd,nj,mmax, &
-        jpack,lpack,ipack,jttble,prefac,sigma, &
+        packed_bqs, jttble,prefac,sigma, &
         sreal,simag,matel,lenlab,labadr, &
         jtotpa,kplist,f9pha,fast,ierr, FUNIT_TENS_OUTPUT, FUNIT_TCB)
    if(ierr.ne.0) goto 4000
@@ -1481,22 +1454,18 @@ subroutine addsp(jtmin,jtmax,jlp, &
 !
 use ISO_FORTRAN_ENV, only : ERROR_UNIT
 use tensor_util
-use mod_cojq, only: jqp => jq ! jqp(1)
-use mod_colq, only: lqp => lq ! lqp(1)
-use mod_coinq, only: inqp => inq ! inqp(1)
-use mod_coisc4, only: jpack => isc4 ! jpack(1)
-use mod_coisc5, only: lpack => isc5 ! lpack(1)
-use mod_coisc6, only: ipack => isc6 ! ipack(1)
-use mod_hismat, only: sread
 use mod_par, only: batch, iprnt=>iprint
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_hismat, only: sread
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 integer, intent(in) :: tens_out_unit  ! unit of tenxsc output file (tcs, dgh or dcga file)
 logical lprnt
 ! add these three common blocks (mha 9/30/08)
 dimension labadr(1),lenlab(1),jtotpa(1),jttble(1)
+type(bqs_type) :: tmp_pack
+type(bqs_type) :: row_bqsp
 !
 ! FLAG FOR DIAGNOSTIC PRINTING
 lprnt = .false.
@@ -1557,10 +1526,10 @@ do 100 jtp=jtpmin,jtpmax
 !
 ! read s-matrix for jtot' into buffer
    nopenp = -1
+   call tmp_pack%init(nopenp)
    call sread ( iaddrp, srealp(ioffs), simagp(ioffs), jtotp, &
-                jlparp, nu, jqp, lqp, inqp, ipackp(ioff:), &
-                jpackp(ioff:), lpackp(ioff:), &
-                1, maxlsp, nopenp, lengtp, ierr)
+                jlparp, nu, row_bqsp, tmp_pack, &
+                1, maxlsp, nopenp, ierr)
    if(ierr.eq.-1) goto 999
    if(ierr.lt.-1) then
       write(tens_out_unit, 20)
@@ -1568,6 +1537,11 @@ do 100 jtp=jtpmin,jtpmax
 20       format(' ** READ ERROR IN ADDSP, ABORT **')
       return
    end if
+   packp%inq(ioff:ioff+tmp_pack%length-1) = tmp_pack%inq(1:tmp_pack%length)
+   packp%jq(ioff:ioff+tmp_pack%length-1) = tmp_pack%jq(1:tmp_pack%length)
+   packp%lq(ioff:ioff+tmp_pack%length-1) = tmp_pack%lq(1:tmp_pack%length)
+   lengtp = tmp_pack%length
+   call tmp_pack%deinit()
 !* DIAGNOSTIC PRINT
    if (lprnt) write (6,2001) jtp,j1p,jjp,jtotp,jlparp, &
        iaddrp
@@ -1904,8 +1878,7 @@ ierr = 1
 return
 end
 !------- -----------------------------------------------------------------
-subroutine sigk(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
-                lpack,ipack,jttble,prefac,sigma, &
+subroutine sigk(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,packed_bqs,jttble,prefac,sigma, &
                 sreal,simag,matel,lenlab,labadr, &
                 jtotpa,fast,ierr, tcs_out_unit, tcb_out_unit)
 !
@@ -1926,14 +1899,10 @@ subroutine sigk(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
 !
 !------------------------------------------------------------------------
 use tensor_util
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 ! modules for levels for which xs's to be computed
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid2, only: mxoutd
-use mod_hismat, only: sread
 use mod_par, only: batch, ipos, iprnt=>iprint
 use mod_selb, only: ibasty
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
@@ -1941,7 +1910,10 @@ use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf6j
 use mod_hismat, only: sread
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
+type(bqs_type), intent(out) :: packed_bqs
+
 integer, intent(in) :: tcs_out_unit  ! unit of tcs output file
 integer, intent(in) :: tcb_out_unit  ! unit of tcb output file
 complex*8 t, tp
@@ -1954,17 +1926,21 @@ logical lprnt,lprntf
 character*10 elaps, cpu
 ! 3rd subscript is for state index (subscript = 5 + IN)
 ! states with up to 9 state indices allowed
-integer :: iadr(0:2*jmx,lmx,9)
-real(8) :: f6a(kmx,0:2*jmx,lmx),f6p(kmx)  ! 6jt
+integer, allocatable :: iadr(:,:,:)
+real(8), allocatable :: f6a(:,:,:), f6p(:)  ! 6jt
 !
-dimension jpack(1),ipack(1),lpack(1)
 dimension sreal(1), simag(1)
 dimension prefac(1), matel(1), labadr(1), jtotpa(1)
 dimension lenlab(1), jttble(1)
 dimension sigma(nj,nj,maxk+1)
 ! array to store partial-j cross sections (K=0-2 only)
 dimension psig0(1001),psig1(1001),psig2(1001)
+
+type(bqs_type) :: row_bqs
 !
+allocate(iadr(0:2*jmx,lmx,9))
+allocate(f6a(kmx,0:2*jmx,lmx),f6p(kmx))
+
 ! FLAG FOR DIAGNOSTIC PRINTING
 lprnt = .false.
 if (iprnt .eq. 2) lprnt = .true.
@@ -2022,8 +1998,8 @@ if(iaddr .lt. 0) goto 700
 ! read s-matrix for jtot
 nopen = -1
 call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
-            jq, lq, inq, ipack, jpack, lpack, &
-             1, mmax, nopen, length, ierr)
+            row_bqs, packed_bqs, &
+             1, mmax, nopen, ierr)
 if(ierr.eq.-1) goto 999
 if(ierr.lt.-1) then
   write(tcs_out_unit, 20)
@@ -2046,9 +2022,9 @@ call addsp(jtpmin,jtpmax,jlp, &
            labadr,lenlab,jtotpa,jttble, tcs_out_unit)
 if (srealp(lbufs) .ne. 0.d0) print *, 'srealp error in sigk'
 if (simagp(lbufs) .ne. 0.d0) print *, 'simagp error in sigk'
-if (ipackp(lbuflb) .ne. 0) print *, 'ipackp error in sigk'
-if (lpackp(lbuflb) .ne. 0) print *, 'lpackp error in sigk'
-if (jpackp(lbuflb) .ne. 0) print *, 'jpackp error in sigk'
+if (packp%inq(lbuflb) .ne. 0) print *, 'packp%inq error in sigk'
+if (packp%lq(lbuflb) .ne. 0) print *, 'packp%lq error in sigk'
+if (packp%jq(lbuflb) .ne. 0) print *, 'packp%jq error in sigk'
 ! prepare for sum over jtot'
 jtotp = jtpmin
 !
@@ -2087,7 +2063,7 @@ jplujp = nint(xjtot + xjtotp)
 kmin=jminjp
 jpmax = 0
 do irowp = 1,lengtp
-  jpmax = max(jpackp(ioff+irowp),jpmax)
+  jpmax = max(packp%jq(ioff+irowp),jpmax)
 end do
 ! now loop over all transitions
 lmax=jtotp+jpmax+1
@@ -2102,10 +2078,10 @@ do 67 index=1,9
 !
 do 70 irowp = 1, lengtp
   irp = ioff + irowp
-  j1p = jpackp(irp)
-  l1p = lpackp(irp)
-  indp = ipackp(irp)
-  if (ipackp(irp).ne.in1 .and. ipackp(irp).ne.in2) goto 70
+  j1p = packp%jq(irp)
+  l1p = packp%lq(irp)
+  indp = packp%inq(irp)
+  if (packp%inq(irp).ne.in1 .and. packp%inq(irp).ne.in2) goto 70
 !
 ! special treatment for ibasty = 4 and 19
   if (iabsty.eq.4 .or. ibasty.eq.19) then
@@ -2137,19 +2113,19 @@ do 70 irowp = 1, lengtp
 jmx1=0
 !
 ! sum over row index for jtot
-do 400 irow = 1, length
-  j1 = jpack(irow)
+do 400 irow = 1, packed_bqs%length
+  j1 = packed_bqs%jq(irow)
   xj1 = j1 + spin
   if (j1 .gt. j2max ) goto 400
   if (j1 .gt. jpmax ) goto 400
   if (j1 .lt. j1min ) goto 400
-  l1 = lpack(irow)
+  l1 = packed_bqs%lq(irow)
   xl1 = l1
   if (xl1.lt.abs(xjtotp-xj1) .or. xl1.gt.xjtotp+xj1) goto 400
   j1t2 = nint(2.d0*xj1)
   do 74 ij = 1, njmax
   if (j1.ne.jslist(ij)) goto 74
-  if (ipack(irow).ne.inlist(ij)) goto 74
+  if (packed_bqs%inq(irow).ne.inlist(ij)) goto 74
   ir = ij
   denrow = prefac(ij)
   goto 75
@@ -2175,18 +2151,18 @@ do 400 irow = 1, length
 !
 ! sum over column index for jtot
   do 200 icol = 1, irow
-    if (ipack(irow).eq.in1 .and. ipack(icol).eq.in2) &
+    if (packed_bqs%inq(irow).eq.in1 .and. packed_bqs%inq(icol).eq.in2) &
        go to 82
-    if (ipack(irow).eq.in2 .and. ipack(icol).eq.in1) &
+    if (packed_bqs%inq(irow).eq.in2 .and. packed_bqs%inq(icol).eq.in1) &
        go to 82
     go to 200
 82     continue
-    j2 = jpack(icol)
+    j2 = packed_bqs%jq(icol)
     xj2 = j2 + spin
     if (j2 .gt. j2max) goto 200
     if (j2 .gt. jpmax) goto 200
     if (j2 .lt. j1min) goto 200
-    l2 = lpack(icol)
+    l2 = packed_bqs%lq(icol)
     xl2 = l2
     if (xl2.lt.abs(xjtotp-xj2) .or. xl2.gt.xjtotp+xj2) goto 200
     diagj = j1.eq.j2
@@ -2195,7 +2171,7 @@ do 400 irow = 1, length
     if (min2j .lt. jminjp) goto 200
     do 84 ij = 1, njmax
       if (j2.ne.jslist(ij)) goto 84
-      if (ipack(icol).ne.inlist(ij)) goto 84
+      if (packed_bqs%inq(icol).ne.inlist(ij)) goto 84
       ic = ij
       dencol = prefac(ij)
       goto 85
@@ -2207,24 +2183,24 @@ do 400 irow = 1, length
     l2m=lmax-l2
 ! special treament for iabsty = 4 and 19
     if (ibasty.eq.4 .or. ibasty.eq.19) then
-      if (ipack(irow).eq. 100) isubr = 1
-      if (ipack(irow).eq.-100) isubr = 2
-      if (ipack(irow).eq. 200) isubr = 3
-      if (ipack(irow).eq.-200) isubr = 4
-      if (ipack(irow).eq. 300) isubr = 5
-      if (ipack(irow).eq.-300) isubr = 6
-      if (ipack(icol).eq. 100) isubc = 1
-      if (ipack(icol).eq.-100) isubc = 2
-      if (ipack(icol).eq. 200) isubc = 3
-      if (ipack(icol).eq.-200) isubc = 4
-      if (ipack(icol).eq. 300) isubc = 5
-      if (ipack(icol).eq.-300) isubc = 6
+      if (packed_bqs%inq(irow).eq. 100) isubr = 1
+      if (packed_bqs%inq(irow).eq.-100) isubr = 2
+      if (packed_bqs%inq(irow).eq. 200) isubr = 3
+      if (packed_bqs%inq(irow).eq.-200) isubr = 4
+      if (packed_bqs%inq(irow).eq. 300) isubr = 5
+      if (packed_bqs%inq(irow).eq.-300) isubr = 6
+      if (packed_bqs%inq(icol).eq. 100) isubc = 1
+      if (packed_bqs%inq(icol).eq.-100) isubc = 2
+      if (packed_bqs%inq(icol).eq. 200) isubc = 3
+      if (packed_bqs%inq(icol).eq.-200) isubc = 4
+      if (packed_bqs%inq(icol).eq. 300) isubc = 5
+      if (packed_bqs%inq(icol).eq.-300) isubc = 6
       irowp=iadr(j1,l1m,isubr)
       icolp=iadr(j2,l2m,isubc)
 ! all other basis types
     else
-      irowp=iadr(j1,l1m,5+ipack(irow))
-      icolp=iadr(j2,l2m,5+ipack(icol))
+      irowp=iadr(j1,l1m,5+packed_bqs%inq(irow))
+      icolp=iadr(j2,l2m,5+packed_bqs%inq(icol))
     end if
 ! if l1p <> l1 or l2p <> l2, do not include this (jtot,jtotp) term
     if (irowp.eq.0 .or. icolp.eq.0) goto 200
@@ -2357,11 +2333,13 @@ write(tcs_out_unit, 1200) elaps, cpu
 if(.not. batch) write(6,1200) elaps, cpu
 1200 format(/' ** N = 0 COMPLETED, TIMING ELAPSED: ',a, &
         ' CPU: ',a,/)
+deallocate(iadr)
+deallocate(f6a,f6p)
 return
 end
 !------------------------------------------------------------------------
 subroutine sigkkp(n,maxk,nk,nnout,jfirst,jfinal,jtotd,nj,mmax, &
-         jpack,lpack,ipack,jttble,prefac,sigma, &
+         packed_bqs, jttble,prefac,sigma, &
          sreal,simag,matel,lenlab,labadr, &
          jtotpa,kplist,f9pha,fast,ierr, tcs_out_unit, tcb_out_unit)
 !
@@ -2380,20 +2358,18 @@ subroutine sigkkp(n,maxk,nk,nnout,jfirst,jfinal,jtotd,nj,mmax, &
 !
 !------------------------------------------------------------------------
 use tensor_util
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 ! added two common blocks - levels for which xs's to be computed (pjd)
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
-use mod_hismat, only: sread
 use mod_par, only: batch, ipos, iprnt=>iprint
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j, xf9j, xf3jm0
 use mod_hismat, only: sread
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
+type(bqs_type), intent(out) :: packed_bqs
 integer, intent(in) :: tcs_out_unit  ! unit of tenxsc output file (tcs, dgh or dcga file)
 integer, intent(in) :: tcb_out_unit  ! unit of tcb output file
 complex*8 t, tp, ai, cphase
@@ -2406,11 +2382,10 @@ logical lprnt2
 character*10 elaps, cpu
 ! add 3rd subscript for state index (subscript = 5 - IN) (pjd)
 ! states with up to 9 state indices allowed
-integer :: iadr(0:2*jmx,lmx,9)
+integer, allocatable :: iadr(:,:,:)
 !      common/cadr/ iadr(0:jmx,lmx)
-real(8) :: f6a(kmx,0:2*jmx,lmx),f9a(3*kmx,lmx)  ! 6jt
+real(8), allocatable :: f6a(:,:,:), f9a(:,:)  ! 6jt
 
-dimension jpack(1),ipack(1),lpack(1)
 dimension sreal(1), simag(1)
 dimension prefac(1), matel(1), labadr(1), jtotpa(1)
 dimension lenlab(1), jttble(1), kplist(0:maxk)
@@ -2423,6 +2398,10 @@ data ai / (0.d0,1.d0)/
 #if defined(HIB_CRAY)
 data ai / (0.d0,1.d0)/
 #endif
+type(bqs_type) :: row_bqs
+
+allocate(iadr(0:2*jmx,lmx,9))
+allocate(f6a(kmx,0:2*jmx,lmx),f9a(3*kmx,lmx))
 
 !* flag for diagnostic printing
 lprnt2 = .false.
@@ -2498,8 +2477,8 @@ if(iaddr .lt. 0) goto 700
 ! read s-matrix for jtot
 nopen = -1
 call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
-            jq, lq, inq, ipack, jpack, lpack, &
-             1, mmax, nopen, length, ierr)
+            row_bqs, packed_bqs, &
+             1, mmax, nopen, ierr)
 if(ierr.eq.-1) goto 999
 if(ierr.lt.-1) then
   write(tcs_out_unit, 20)
@@ -2537,16 +2516,16 @@ jplujp = nint(xjtot + xjtotp)
 !
 ! next 2 statements assume last basis level for jtot' has highest j
 ! replace with scan over all jtot' levels (pjd)
-!      j2mxp=jpackp(ioff+lengtp)
-!      j2mx =jpack(length)
+!      j2mxp=packp%jq(ioff+lengtp)
+!      j2mx =packed_bqs%jq(packed_bqs%length)
 j2mxp = 0
 do irowp = 1,lengtp
-  j2mxp = max(jpackp(ioff+irowp),j2mxp)
+  j2mxp = max(packp%jq(ioff+irowp),j2mxp)
 end do
 io = labadr(jtot + 1)
 j2mx = 0
-do irow = 1,length
-  j2mx = max(jpack(io+irow),j2mx)
+do irow = 1,packed_bqs%length
+  j2mx = max(packed_bqs%jq(io+irow),j2mx)
 end do
 ! end of addition to set j2mxp and j2mx (pjd)
 ! modify next 2 statements for half-integral j (pjd)
@@ -2557,12 +2536,12 @@ lmaxp = nint(xjtotp+j2mxp+spin+1.d0)
 kpmin=jminjp
 kmin=abs(kpmin-n)
 t1=second()
-do 70 icol=1,length
+do 70 icol=1,packed_bqs%length
 ! modify next if statement in include test for in2 (pjd)
-!      if(ipack(icol).ne.in2) goto 70
-if(ipack(icol).ne.in2 .and. ipack(icol).ne.in1) goto 70
-j2=jpack(icol)
-l2=lpack(icol)
+!      if(packed_bqs%inq(icol).ne.in2) goto 70
+if(packed_bqs%inq(icol).ne.in2 .and. packed_bqs%inq(icol).ne.in1) goto 70
+j2=packed_bqs%jq(icol)
+l2=packed_bqs%lq(icol)
 xj2=j2+spin
 xl2=l2
 kpmax=min(jplujp,nint(2*xj2))
@@ -2584,27 +2563,27 @@ iadr(j,l,index) = 0
 79 continue
 do 80 icolp=1,lengtp
 irp = ioff + icolp
-ind = ipackp(irp)
+ind = packp%inq(irp)
 ! moved next 2 statements before if statement (pjd)
-j1=jpackp(irp)
-l1=lpackp(irp)
+j1=packp%jq(irp)
+l1=packp%lq(irp)
 ! modify if statement to include test for in2 (pjd)
-!      if(ipackp(irp).ne.in1) goto 80
-if(ipackp(irp).ne.in1 .and. ipackp(irp).ne.in2) goto 80
+!      if(packp%inq(irp).ne.in1) goto 80
+if(packp%inq(irp).ne.in1 .and. packp%inq(irp).ne.in2) goto 80
 ! added 3rd subscript in next statement (pjd)
 iadr(j1,lmaxp-l1,5+ind)=icolp
 80 continue
 !
 ! now loop over all transitions
-do 400 irow = 1, length
-   if(ipack(irow).ne.in1) goto 400
-   j1 = jpack(irow)
+do 400 irow = 1, packed_bqs%length
+   if(packed_bqs%inq(irow).ne.in1) goto 400
+   j1 = packed_bqs%jq(irow)
 ! moved next statement ahead of if statements (pjd)
    xj1 = j1 + spin
    if (j1 .gt. j2max) goto 500
    if (j1 .gt. j2mxp) goto 500
    if (j1 .lt. j1min) goto 400
-   l1 = lpack(irow)
+   l1 = packed_bqs%lq(irow)
 ! moved next statement ahead of if statements (pjd)
    xl1 = l1
    l1pmin=max(abs(l1-n),abs(j1-jtotp))
@@ -2620,7 +2599,7 @@ do 400 irow = 1, length
 ! replace previous 2 statements (pjd)
    do 84 ij=1,njmax
    if (j1.ne.jslist(ij)) goto 84
-   if (ipack(irow).ne.inlist(ij)) goto 84
+   if (packed_bqs%inq(irow).ne.inlist(ij)) goto 84
    ir = ij
    denrow = prefac(ij)
    goto 85
@@ -2664,14 +2643,14 @@ do 100 l1p=l1pmin,l1pmax,2
    t9j=t9j+second()-t1
 !
 ! compute all transitions separately, unlike in SIGK
-do 300 icol = 1, length
-   if(ipack(icol).ne.in2) goto 300
-   j2 = jpack(icol)
+do 300 icol = 1, packed_bqs%length
+   if(packed_bqs%inq(icol).ne.in2) goto 300
+   j2 = packed_bqs%jq(icol)
    xj2 = j2 + spin
    if (j2 .gt. j2max) goto 400
    if (j2 .gt. j2mxp) goto 400
    if (j2 .lt. j1min) goto 300
-   l2 = lpack(icol)
+   l2 = packed_bqs%lq(icol)
    xl2 = l2
 ! next if statement tested on actual angular momenta, not integer values (pjd)
    if(xl2.gt.xjtotp+xj2 .or. xl2.lt.abs(xjtotp-xj2)) goto 300
@@ -2685,7 +2664,7 @@ do 300 icol = 1, length
    if (diag .and. l1.eq.l2) t = t + (1.d0,0.d0)
    l2m=lmax-l2
 ! added 3rd subscript in next statement (pjd)
-   icolp=iadr(j2,lmaxp-l2,5+ipack(icol))
+   icolp=iadr(j2,lmaxp-l2,5+packed_bqs%inq(icol))
    if(icolp.eq.0) goto 300
    potenz = ((2.d0* xj1) - xj2 + xl2)
    ipower = nint(xjtotp+potenz)
@@ -2699,7 +2678,7 @@ do 300 icol = 1, length
 ! replace previous statement with following code (pjd)
    do 104 ij = 1,njmax
    if (j2.ne.jslist(ij)) goto 104
-   if (ipack(icol).ne.inlist(ij)) goto 104
+   if (packed_bqs%inq(icol).ne.inlist(ij)) goto 104
    ic = ij
    goto 105
 104    continue
@@ -2711,7 +2690,7 @@ do 300 icol = 1, length
 do 200 l1p=l1pmin,l1pmax,2
    ll=ll+1
 ! added 3rd subscript in next statement (pjd)
-   irowp=iadr(j1,lmaxp-l1p,5+ipack(irow))
+   irowp=iadr(j1,lmaxp-l1p,5+packed_bqs%inq(irow))
 ! do not include terms if both levels not ln list (pjd)
 !         if(irowp.eq.0) goto 200
    if(irowp.eq.0 .or. icolp.eq.0) goto 200
@@ -2799,11 +2778,12 @@ cpu1 = cpu1 - cpu0
 ela1 = ela1 - ela0
 call gettim(ela1,elaps)
 call gettim(cpu1,cpu)
+deallocate(iadr)
+deallocate(f6a,f9a)
 return
 end
 !-------------------------------------------------------------------------
-subroutine sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
-                lpack,ipack,jttble,prefac, &
+subroutine sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,packed_bqs,jttble,prefac, &
                 sreal,simag,matel,lenlab,labadr, &
                 jtotpa,fast,ierr, tcs_out_unit, tcb_out_unit)
 !
@@ -2817,21 +2797,19 @@ subroutine sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,jpack, &
 ! current revision date: 5-mar-2010 by pj dagdigian
 !------------------------------------------------------------------------
 use tensor_util
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 ! common blocks for levels for which xs's to be computed
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid2, only: mxoutd
-use mod_hismat, only: sread
 use mod_par, only: batch, ipos, iprnt=>iprint
 use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j
 use mod_hismat, only: sread
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
+type(bqs_type), intent(out) :: packed_bqs
 integer, intent(in) :: tcs_out_unit  ! unit of tcs output file
 integer, intent(in) :: tcb_out_unit  ! unit of tcb output file
 complex*8 t, tp
@@ -2845,18 +2823,20 @@ character*10 elaps, cpu
 
 ! add 3rd subscript for state index (subscript = 5 + IN)
 ! states with up to 9 state indices allowed
-integer :: iadr(0:jmx,lmx,9)
+integer, allocatable :: iadr(:,:,:)
 !      common/cadr/ iadr(0:jmx,lmx)
-real(8) :: f6a(kmx,0:jmx,lmx),f6p(kmx)  ! 6jt
+real(8), allocatable :: f6a(:,:,:), f6p(:)  ! 6jt
 !
-dimension jpack(1),ipack(1),lpack(1)
 dimension sreal(1), simag(1)
 dimension prefac(1), matel(1), labadr(1), jtotpa(1)
 dimension lenlab(1), jttble(1)
 dimension sigma(nj,nj,maxk+1)
 ! array to store partial-j cross sections (K=0-2 only)
 dimension psig0(1001),psig1(1001),psig2(1001)
+type(bqs_type) :: row_bqs
 !
+allocate(iadr(0:jmx,lmx,9))
+allocate(f6a(kmx,0:jmx,lmx),f6p(kmx))
 ! FLAG FOR DIAGNOSTIC PRINTING
 lprnt = .false.
 if (iprnt .eq. 2) lprnt = .true.
@@ -2914,8 +2894,8 @@ if(iaddr .lt. 0) goto 700
 ! read s-matrix for jtot
 nopen = -1
 call sread ( iaddr, sreal, simag, jtot, jlpar, nu, &
-            jq, lq, inq, ipack, jpack, lpack, &
-             1, mmax, nopen, length, ierr)
+            row_bqs, packed_bqs, &
+             1, mmax, nopen, ierr)
 if(ierr.eq.-1) goto 999
 if(ierr.lt.-1) then
   write(tcs_out_unit, 20)
@@ -2938,9 +2918,9 @@ call addsp(jtpmin,jtpmax,jlp, &
            labadr,lenlab,jtotpa,jttble, tcs_out_unit)
 if (srealp(lbufs) .ne. 0.d0) print *, 'srealp error in sigkc'
 if (simagp(lbufs) .ne. 0.d0) print *, 'simagp error in sigkc'
-if (ipackp(lbuflb) .ne. 0) print *, 'ipackp error in sigkc'
-if (lpackp(lbuflb) .ne. 0) print *, 'lpackp error in sigkc'
-if (jpackp(lbuflb) .ne. 0) print *, 'jpackp error in sigkc'
+if (packp%inq(lbuflb) .ne. 0) print *, 'packp%inq error in sigkc'
+if (packp%lq(lbuflb) .ne. 0) print *, 'packp%lq error in sigkc'
+if (packp%jq(lbuflb) .ne. 0) print *, 'packp%jq error in sigkc'
 ! prepare for sum over jtot'
 jtotp = jtpmin
 !
@@ -2980,7 +2960,7 @@ jplujp = nint(xjtot + xjtotp)
 kmin=jminjp
 jpmax = 0
 do irowp = 1,lengtp
-  jpmax = max(jpackp(ioff+irowp),jpmax)
+  jpmax = max(packp%jq(ioff+irowp),jpmax)
 end do
 ! now loop over all transitions
 lmax=jtotp+jpmax+1
@@ -2995,23 +2975,23 @@ iadr(j,l,index) = 0
 !
 do 70 irowp = 1, lengtp
   irp = ioff + irowp
-  j1p = jpackp(irp)
-  l1p = lpackp(irp)
-  indp = ipackp(irp)
-  if (ipackp(irp).ne.in1 .and. ipackp(irp).ne.in2) goto 70
+  j1p = packp%jq(irp)
+  l1p = packp%lq(irp)
+  indp = packp%inq(irp)
+  if (packp%inq(irp).ne.in1 .and. packp%inq(irp).ne.in2) goto 70
   iadr(j1p,lmax-l1p,5+indp) = irowp
 70 continue
 !
 jmx1=0
 !
 ! sum over row index for jtot
-do 400 irow = 1, length
-  j1 = jpack(irow)
+do 400 irow = 1, packed_bqs%length
+  j1 = packed_bqs%jq(irow)
   xj1 = j1 + spin
   if (j1 .gt. j2max ) goto 400
   if (j1 .gt. jpmax ) goto 400
   if (j1 .lt. j1min ) goto 400
-  l1 = lpack(irow)
+  l1 = packed_bqs%lq(irow)
   xl1 = l1
 ! delete next statement
 !        if (xl1.lt.abs(xjtotp-xj1) .or. xl1.gt.xjtotp+xj1) goto 400
@@ -3019,7 +2999,7 @@ do 400 irow = 1, length
   j1t2 = nint(2.d0*xj1)
   do 74 ij = 1, njmax
   if (j1.ne.jslist(ij)) goto 74
-  if (ipack(irow).ne.inlist(ij)) goto 74
+  if (packed_bqs%inq(irow).ne.inlist(ij)) goto 74
   ir = ij
   denrow = prefac(ij)
   goto 75
@@ -3036,19 +3016,19 @@ do 400 irow = 1, length
   l1m=lmax-l1
 !
 ! sum over column index for jtot - scan over full set of (irow,icol) values
-   do 200 icol = 1,length
-    if (ipack(irow).eq.in1 .and. ipack(icol).eq.in2) &
+   do 200 icol = 1,packed_bqs%length
+    if (packed_bqs%inq(irow).eq.in1 .and. packed_bqs%inq(icol).eq.in2) &
        go to 82
-    if (ipack(irow).eq.in2 .and. ipack(icol).eq.in1) &
+    if (packed_bqs%inq(irow).eq.in2 .and. packed_bqs%inq(icol).eq.in1) &
        go to 82
     go to 200
 82     continue
-    j2 = jpack(icol)
+    j2 = packed_bqs%jq(icol)
     xj2 = j2 + spin
     if (j2 .gt. j2max) goto 200
     if (j2 .gt. jpmax) goto 200
     if (j2 .lt. j1min) goto 200
-    l2 = lpack(icol)
+    l2 = packed_bqs%lq(icol)
     xl2 = l2
     if (xl2.lt.abs(xjtotp-xj2) .or. xl2.gt.xjtotp+xj2) goto 200
     diagj = j1.eq.j2
@@ -3057,7 +3037,7 @@ do 400 irow = 1, length
     if (min2j .lt. jminjp) goto 200
     do 84 ij = 1, njmax
       if (j2.ne.jslist(ij)) goto 84
-      if (ipack(icol).ne.inlist(ij)) goto 84
+      if (packed_bqs%inq(icol).ne.inlist(ij)) goto 84
       ic = ij
       dencol = prefac(ij)
       goto 85
@@ -3076,14 +3056,14 @@ do 400 irow = 1, length
 ! sum over row index for jtotp
     do 150 irowp = 1, lengtp
       irpp = ioff + irowp
-      j1pp = jpackp(irpp)
-      l1pp = lpackp(irpp)
+      j1pp = packp%jq(irpp)
+      l1pp = packp%lq(irpp)
 ! basis function must be the same as for irow
       if (j1pp.ne.j1) goto 150
-      if (ipackp(irpp) .ne. ipack(irow)) goto 150
+      if (packp%inq(irpp) .ne. packed_bqs%inq(irow)) goto 150
       xl1pp = l1pp
 ! icolp is index for (j2,l2,ind.jtotp) basis function
-      icolp =iadr(j2,l2m,5+ipack(icol))
+      icolp =iadr(j2,l2m,5+packed_bqs%inq(icol))
       if (icolp .eq. 0) goto 150
 ! determine index of element in s' matrix
       if(irowp.ge.icolp) then
@@ -3242,6 +3222,8 @@ write(tcs_out_unit, 1200) elaps, cpu
 if(.not. batch) write(6,1200) elaps, cpu
 1200 format(/' ** N = 0 COMPLETED, TIMING ELAPSED: ',a, &
         ' CPU: ',a,/)
+deallocate(iadr)
+deallocate(f6a,f6p)
 return
 end
 

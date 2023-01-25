@@ -27,18 +27,17 @@ use mod_coisc6, only: jout2 => isc6 ! jout2(1)
 use mod_coisc7, only: nlevt => isc7 ! nlevt(1)
 use mod_coisc8, only: jlevt => isc8 ! jlevt(1)
 use mod_coisc9, only: inlevt => isc9 ! inlevt(1)
-use mod_coisc10, only: ipack => isc10 ! ipack(1)
-use mod_coisc11, only: jpack => isc11 ! jpack(1)
-use mod_coisc12, only: lpack => isc12 ! lpack(1)
 use mod_cosc1, only: elev1 => sc1 ! elev1(1)
 use mod_cosc2, only: elev2 => sc2 ! elev2(1)
 use mod_cosc3, only: elevt => sc3 ! elevt(1)
-use mod_hismat, only: sread
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam, mtime, gettim
 use mod_hiutil, only: xf6j
 use mod_hismat, only: sread, rdhead, sinqr
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h, o-z)
+type(bqs_type) :: row_bqs
+type(bqs_type) :: packed_bqs
 character*(*) flnam1, flnam2
 character*20  cdate1, cdate2
 character*40  smtfil1, smtfil2, prtfil
@@ -53,7 +52,6 @@ logical csflg1, flghf1, flgsu1, twmol1, nucrs1, &
 
 dimension a(12)
 !
-integer, dimension(:), allocatable :: jq, lq, inq
 double precision, dimension(:), allocatable :: sreal, simag
 ! storage for s-matrix elements:
 !   second letter is real (r), imaginary (i)
@@ -254,14 +252,9 @@ jtotmx = max(jfinl1,jfinl2)
 !  maximum number of the elements of (the lower triangle of) a single s-matrix
 mmax2 = mchmx * (mchmx + 1) / 2
 !  allocate memory
-allocate(jq(mchmx), stat=ialloc)
-if (ialloc .ne. 0) goto 4000
-allocate(lq(mchmx), stat=ialloc)
-if (ialloc .ne. 0) goto 4001
-allocate(inq(mchmx), stat=ialloc)
-if (ialloc .ne. 0) goto 4002
+call row_bqs%init(mchmx)
 allocate(sreal(mmax2), stat=ialloc)
-if (ialloc .ne. 0) goto 4003
+if (ialloc .ne. 0) goto 4000
 allocate(simag(mmax2), stat=ialloc)
 if (ialloc .ne. 0) goto 4004
 allocate(sra(0:jtotmx, 2, mmax2), stat=ialloc)
@@ -425,8 +418,8 @@ end if
 iaddr = 0
 20 nopen = -1
 call sread (iaddr, sreal, simag, jtot1, jlpar1, &
-   nu1, jq, lq, inq, ipack, jpack, lpack, &
-   1, mmax, nopen, lngth1, ierr)
+   nu1, row_bqs, packed_bqs, &
+   1, mmax, nopen, ierr)
 if (ierr .lt. -1) then
   write(6,105)
 105   format(/' ** READ ERROR IN PRSBR - INITIAL ', &
@@ -435,14 +428,15 @@ if (ierr .lt. -1) then
   goto 1000
   return
 end if
+lngth1 = packed_bqs%length
 jlp = 1 - (jlpar1 - 1)/2
 !  copy s-matrix for this jtot1/jlpar1
 lngtha(jtot1,jlp) = lngth1
 len2 = lngth1*(lngth1 + 1)/2
 do i = 1, lngth1
-  ja(jtot1,jlp,i) = jpack(i)
-  ina(jtot1,jlp,i) = ipack(i)
-  la(jtot1,jlp,i) = lpack(i)
+  ja(jtot1,jlp,i) = packed_bqs%jq(i)
+  ina(jtot1,jlp,i) = packed_bqs%inq(i)
+  la(jtot1,jlp,i) = packed_bqs%lq(i)
 end do
 do ii = 1, len2
   sra(jtot1,jlp,ii) = sreal(ii)
@@ -469,22 +463,23 @@ goto 20
 22 iaddr = 0
 1020 nopen = -1
 call sread (iaddr, sreal, simag, jtot2, jlpar2, &
-   nu2, jq, lq, inq, ipack, jpack, lpack, &
-   11, mmax, nopen, lngth2, ierr)
+   nu2, row_bqs, packed_bqs, &
+   11, mmax, nopen, ierr)
 if (ierr .lt. -1) then
   write(6,1105)
 1105   format(/' ** READ ERROR IN PRSBR - FINAL ', &
       'SMT FILE. ABORT **'/)
   goto 1000
 end if
+lngth2 = packed_bqs%length
 jlp = 1 - (jlpar2 - 1)/2
 !  copy s-matrix for this jtot2/jlpar2
 lngthb(jtot2,jlp) = lngth2
 len2 = lngth2*(lngth2 + 1)/2
 do i = 1, lngth2
-  jb(jtot2,jlp,i) = jpack(i)
-  inb(jtot2,jlp,i) = ipack(i)
-  lb(jtot2,jlp,i) = lpack(i)
+  jb(jtot2,jlp,i) = packed_bqs%jq(i)
+  inb(jtot2,jlp,i) = packed_bqs%inq(i)
+  lb(jtot2,jlp,i) = packed_bqs%lq(i)
 end do
 do ii = 1, len2
   srb(jtot2,jlp,ii) = sreal(ii)
@@ -715,9 +710,6 @@ ialloc = 0
 4006 deallocate(sra)
 4005 deallocate(simag)
 4004 deallocate(sreal)
-4003 deallocate(inq)
-4002 deallocate(lq)
-4001 deallocate(jq)
 4000 close(1)
 close(11)
 if (ialloc .ne. 0) write (6, 4100)
