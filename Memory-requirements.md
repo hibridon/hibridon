@@ -5,5 +5,3 @@ The major data memory requirements associated with the Hibridon code are:
 - 3 kmax $\timesù kmax matrices, which hold the R-independent potential matrix elements and associated indices
 
 - 25 vectors of length kmax
-
-To reduce to 5 the total number of scratch matrices required, you can [link](link) the code with the -b option.
