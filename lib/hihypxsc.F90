@@ -29,25 +29,22 @@ implicit none
 
 
 ! DERIVED DATA TYPES USED IN THIS SUBROUTINE
-  type hflvl
+  type hflvl_type
     integer :: n
     real(8), allocatable :: e(:)
     integer, allocatable :: j(:)
     integer, allocatable :: in(:)
     integer, allocatable :: if(:)
-    real(8), allocatable :: f1(:)
-  end type hflvl
+    real(8), allocatable :: f(:)
+  end type hflvl_type
 
-  type spin_data
-    integer :: i1 ! nuclear spin I times 2
-    integer :: i2 ! nuclear spin I times 2
-    real(8) :: nuc1
-    real(8) :: nuc2
-    real(8) :: f
-    real(8) :: h
-    logical :: two
-
-  end type spin_data
+  type spin_type
+    integer :: i(2) ! nuclear spin I times 2
+    real(8) :: nuc(2)
+    real(8) :: f = 0
+    real(8) :: h = 0
+    logical :: two = .false.
+  end type spin_type
 
 contains 
 
@@ -99,10 +96,10 @@ subroutine hypxsc(flname, a)
   integer :: len2, mchmx2
 
   ! Data related to spins -----------------------------------------------------
-  type(spin_data) :: spins
+  type(spin_type) :: spins
 
   ! Data related to hyperfine levels -------------------------------------------
-  type(hflvl) :: hf1, hf2
+  type(hflvl_type) :: hf1, hf2
 
   ! To store T-Matrices and Cross Sections -------------------------------------
   real(8), allocatable :: sigma(:,:)
@@ -286,7 +283,7 @@ subroutine compute_spins(nucspin, flaghf, spins)
   ! Arguments
   integer, intent(in) :: nucspin
   logical, intent(in) :: flaghf
-  type(spin_data), intent(out) :: spins
+  type(spin_type), intent(out) :: spins
   
  
   if(flaghf) spins%f = 0.5d0 
@@ -295,14 +292,14 @@ subroutine compute_spins(nucspin, flaghf, spins)
 
   if(nucspin<100) then
     spins%two = .false.
-    spins%nuc1 = nucspin/2d0
-    spins%i1 = int(2*spins%nuc1)
+    spins%nuc(1) = nucspin/2d0
+    spins%i(1) = int(2*spins%nuc(1))
   else
     spins%two = .true.
-    spins%nuc1 = (nucspin/100)/2.d0
-    spins%i1 = int(2*spins%nuc1)
-    spins%nuc2 = mod(nucspin,100)/2.d0
-    spins%i2 = int(2*spins%nuc2)
+    spins%nuc(1) = (nucspin/100)/2.d0
+    spins%i(1) = int(2*spins%nuc(1))
+    spins%nuc(2) = mod(nucspin,100)/2.d0
+    spins%i(2) = int(2*spins%nuc(2))
   endif
   
 end subroutine compute_spins
@@ -322,8 +319,8 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
   integer, intent(in) :: j1min, j2max
   real(8), intent(in) :: ered
   logical, intent(in) :: twmol
-  type(spin_data), intent(in) :: spins
-  type(hflvl), intent(out) :: hf1, hf2
+  type(spin_type), intent(in) :: spins
+  type(hflvl_type), intent(out) :: hf1, hf2
   ! Local variables
   integer :: i, ii, ij1, n, n2, nhyp
   real(8) :: ff, fj, ffmin, ffmax, f1, fnmin, fnmax, f2
@@ -339,8 +336,8 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
       if(ij1 >= j1min .and. ij1 <= j2max) then
         if(elev(i) <= ered) then
           fj = ij1 + spins%f
-          ffmin = abs(fj - spins%nuc1)
-          ffmax = fj + spins%nuc1
+          ffmin = abs(fj - spins%nuc(1))
+          ffmax = fj + spins%nuc(1)
           nhyp = int(ffmax - ffmin + 1)
           do ii = 1, nhyp
             n = n + 1
@@ -375,15 +372,15 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
       do i = 1, n
         if (hf1%e(i)<= ered) then
           f1 = hf1%if(i) + spins%f
-          fnmin = abs(f1 - spins%nuc2)
-          fnmax = f1 + spins%nuc2
+          fnmin = abs(f1 - spins%nuc(2))
+          fnmax = f1 + spins%nuc(2)
           nhyp = int(fnmax - fnmin + 1)
           do ii = 1,  nhyp
             n2 = n2 + 1
             if(fill) then
               hf2%j(n2) = hf1%j(i)
               hf2%in(n2) = hf1%in(i)
-              hf2%f1(n2) = f1
+              hf2%f(n2) = f1
               f2 = fnmin + (ii - 1)
               hf2%if(n2) = int(f2)
               hf2%e(n2) = hf1%e(i)
@@ -393,7 +390,7 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
       enddo
       if(.not. fill) then
         hf2%n = n2
-        allocate(hf2%e(hf2%n), hf2%j(hf2%n), hf2%in(hf2%n), hf2%if(hf2%n), hf2%f1(hf2%n))
+        allocate(hf2%e(hf2%n), hf2%j(hf2%n), hf2%in(hf2%n), hf2%if(hf2%n), hf2%f(hf2%n))
         fill = .true.
       else
         exit
@@ -414,8 +411,8 @@ subroutine compute_xs(twmol, rmu, ered, spins, hf1, hf2, sigma)
   ! Arguments
   logical, intent(in) :: twmol
   real(8), intent(in) :: rmu, ered
-  type(spin_data), intent(in) :: spins
-  type(hflvl), intent(in) :: hf1, hf2
+  type(spin_type), intent(in) :: spins
+  type(hflvl_type), intent(in) :: hf1, hf2
   real(8), intent(inout) :: sigma(hf1%n, hf1%n)
   ! Local variables
   real(8) :: fak, dencol, denrow, ffi, fff
@@ -449,8 +446,8 @@ subroutine print_xs(twmol, hfxfil_unit, ered, spins, hf1, hf2, sigma)
   logical, intent(in) :: twmol
   integer, intent(in) :: hfxfil_unit
   real(8), intent(in) :: ered
-  type(spin_data), intent(in) :: spins
-  type(hflvl), intent(in) :: hf1, hf2
+  type(spin_type), intent(in) :: spins
+  type(hflvl_type), intent(in) :: hf1, hf2
   real(8), intent(in) :: sigma(hf1%n,hf1%n)
   ! Local variables
   integer :: i, ii, ij2, ij2p
@@ -467,10 +464,10 @@ subroutine print_xs(twmol, hfxfil_unit, ered, spins, hf1, hf2, sigma)
         xf = hf1%if(i) + spins%h
         xjp =  hf1%j(ii) + spins%f
         xfp = hf1%if(ii) + spins%h
-        !if (sigma(i,ii)>0d0) then
+        if (sigma(i,ii)>0d0) then
           write(hfxfil_unit,"(f12.3,f8.1,i6,f6.1,3x,f6.1,i6,f6.1,5x,1pe15.4)")&
                 ee,xj,hf1%in(i),xf,xjp,hf1%in(ii),xfp,sigma(i,ii)
-        !end if
+        end if
       else
         xj = (hf1%j(i)/10) + spins%f
         ij2 = mod(hf1%j(i),10)
@@ -502,8 +499,8 @@ subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
   integer, intent(in) :: jlev(*)
   type(bqs_type), intent(in) :: bqs(0:jfinl,2)
   real(8), intent(in) :: sr(0:jfinl,2,*) , si(0:jfinl,2,*)
-  type(spin_data), intent(in) :: spins
-  type(hflvl), intent(in) :: hf1
+  type(spin_type), intent(in) :: spins
+  type(hflvl_type), intent(in) :: hf1
   real(8), allocatable, intent(out) :: sigma(:,:)
   ! Local variables
   integer :: jmx, idim
@@ -516,8 +513,8 @@ subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
 
 
   ! Boundaries for loop over iftot  
-  iftmn = max(0,int(jfrst + spins%f - spins%nuc1 - spins%h))
-  iftmx = int(jfinl + spins%f + spins%nuc1 - spins%h)
+  iftmn = max(0,int(jfrst + spins%f - spins%nuc(1) - spins%h))
+  iftmx = int(jfinl + spins%f + spins%nuc(1) - spins%h)
 
   ! Allocate sigma array
   allocate(sigma(hf1%n, hf1%n))
@@ -540,9 +537,9 @@ subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
           xf = hf1%if(i) + spins%h
           xfp = hf1%if(ii) + spins%h
           fffp = sqrt((2.d0*xf+1.d0)*(2.d0*xfp+1.d0))
-          xjttmn = max(spins%h, xftot - spins%nuc1)
+          xjttmn = max(spins%h, xftot - spins%nuc(1))
           jttmin = max(jfrst, int(xjttmn-spins%f))
-          jttmax = min(jfinl, int(xftot + spins%nuc1))
+          jttmax = min(jfinl, int(xftot + spins%nuc(1)))
   !     clear T-matrix array
           tmatr = 0.d0
           tmati = 0.d0
@@ -590,8 +587,8 @@ subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
                     phase = 1.d0
                     if (iph.ne.2*(iph/2)) phase = -1.d0
                     t = t * phase * fffp * fjtot &
-                        * xf6j(spins%nuc1,xj,xf,xl,xftot,xjtot) &
-                      * xf6j(spins%nuc1,xjp,xfp,xlp,xftot,xjtot)
+                        * xf6j(spins%nuc(1),xj,xf,xl,xftot,xjtot) &
+                      * xf6j(spins%nuc(1),xjp,xfp,xlp,xftot,xjtot)
                     ll = int(xl)
                     lp = int(xlp)
                     tmatr(ll+1,lp+1) = tmatr(ll+1,lp+1) + real(t)
@@ -636,8 +633,8 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
   integer, intent(in) :: jlev(*)
   type(bqs_type), intent(in) :: bqs(0:jfinl,2)
   real(8), intent(in) :: sr(0:jfinl,2,*) , si(0:jfinl,2,*)
-  type(spin_data), intent(in) :: spins
-  type(hflvl), intent(in) :: hf2
+  type(spin_type), intent(in) :: spins
+  type(hflvl_type), intent(in) :: hf2
   real(8), allocatable, intent(out) :: sigma(:,:)
   ! Local variables
   integer :: jmx, idim
@@ -651,8 +648,8 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
 
 
   ! Boundaries for loop over iftot  
-  iftmn = max(0,int(jfrst + spins%f - spins%nuc1 - spins%nuc2))
-  iftmx = int(jfinl + spins%f + spins%nuc1 + spins%nuc2)
+  iftmn = max(0,int(jfrst + spins%f - spins%nuc(1) - spins%nuc(2)))
+  iftmx = int(jfinl + spins%f + spins%nuc(1) + spins%nuc(2))
 
   ! Allocate sigma array
   allocate(sigma(hf2%n, hf2%n))
@@ -664,7 +661,7 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
   allocate(tmatr(idim, idim))
   allocate(tmati(idim, idim))
 
-  dspin = spins%f + spins%nuc1  + spins%nuc2
+  dspin = spins%f + spins%nuc(1)  + spins%nuc(2)
   if (abs(dspin - 2d0*int(dspin)) < 1d-60) then
     dspin = 0d0
   else
@@ -683,11 +680,11 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
       write(6,"(A,F5.1,A,I4)") ' Computing partial wave K_tot =', xftot, ', jlpar=', jlpar
       do i=1, hf2%n
         xj = hf2%j(i) + spins%f
-        xf = hf2%f1(i)
+        xf = hf2%f(i)
         xf2 = hf2%if(i)
         do ii=i, hf2%n
           xjp = hf2%j(ii) + spins%f
-          xfp = hf2%f1(ii)
+          xfp = hf2%f(ii)
           xf2p = hf2%if(ii)
           fffp = sqrt((2.d0*xf+1.d0)*(2.d0*xfp+1.d0) &
             * (2.d0*xf2+1.d0)*(2.d0*xf2p+1.d0))
@@ -697,13 +694,13 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
           tmatr = 0.d0
           tmati = 0.d0
   !  sum over R = K - I2 consistent with vector addition
-          rmin = abs(xftot - spins%nuc2)
+          rmin = abs(xftot - spins%nuc(2))
           irmin = int(rmin)
-          irmax = int(xftot + spins%nuc2)
+          irmax = int(xftot + spins%nuc(2))
           do ir = irmin, irmax
             r  = rmin + (ir - irmin)
-            iqmin = int(abs(r - spins%nuc1))
-            iqmax = int(r + spins%nuc1)
+            iqmin = int(abs(r - spins%nuc(1)))
+            iqmax = int(r + spins%nuc(1))
             do jtot = iqmin, iqmax
               xjtot = jtot + spins%f
               fjtot = 2.d0 * xjtot + 1.d0
@@ -744,10 +741,10 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
                       t = t + cmplx(1.d0, 0.d0, 8)
                     end if
                     rprod = (2.d0*r + 1.d0) &
-                      * xf6j(spins%nuc2,xf,xf2,xl,xftot,r) &
-                      * xf6j(spins%nuc2,xfp,xf2p,xlp,xftot,r) &
-                      * xf6j(spins%nuc1,xj,xf,xl,r,xjtot) &
-                      * xf6j(spins%nuc1,xjp,xfp,xlp,r,xjtot)
+                      * xf6j(spins%nuc(2),xf,xf2,xl,xftot,r) &
+                      * xf6j(spins%nuc(2),xfp,xf2p,xlp,xftot,r) &
+                      * xf6j(spins%nuc(1),xj,xf,xl,r,xjtot) &
+                      * xf6j(spins%nuc(1),xjp,xfp,xlp,r,xjtot)
                     t = t * phase * fffp * (2.d0*xjtot + 1.d0) &
                       * rprod
                     ll = int(xl)
@@ -799,8 +796,8 @@ subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spin
   integer, intent(in) :: jlev(*)
   type(bqs_type), intent(in) :: bqs(0:jfinl,2)
   real(8), intent(in) :: sr(0:jfinl,2,*) , si(0:jfinl,2,*)
-  type(spin_data), intent(in) :: spins
-  type(hflvl), intent(in) :: hf1
+  type(spin_type), intent(in) :: spins
+  type(hflvl_type), intent(in) :: hf1
   real(8), allocatable, intent(out) :: sigma(:,:)
   ! Local variables
   integer :: jmx, jmx2, idim
@@ -814,8 +811,8 @@ subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spin
 
 
   ! Boundaries for loop over iftot  
-  iftmn = max(0,int(jfrst + spins%f - spins%nuc1 - spins%h))
-  iftmx = int(jfinl + spins%f + spins%nuc1 - spins%h)
+  iftmn = max(0,int(jfrst + spins%f - spins%nuc(1) - spins%h))
+  iftmx = int(jfinl + spins%f + spins%nuc(1) - spins%h)
 
   ! Allocate sigma array
   allocate(sigma(hf1%n, hf1%n))
@@ -842,10 +839,10 @@ subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spin
           xf = hf1%if(i) + spins%h
           xfp = hf1%if(ii) + spins%h
           fffp = sqrt((2.d0*xf+1.d0)*(2.d0*xfp+1.d0))
-          xjttmn = max(spins%h, xftot - spins%nuc1)
+          xjttmn = max(spins%h, xftot - spins%nuc(1))
           jttmin = int(xjttmn - spins%f)
           jttmin = max(jfrst, jttmin)
-          jttmax = int(xftot + spins%nuc1)
+          jttmax = int(xftot + spins%nuc(1))
           jttmax = min(jfinl, jttmax)
   !     clear tmat arrays
           tmatr = 0.d0
@@ -913,8 +910,8 @@ subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spin
                           * fjr * fjrp * fj12 * fj12p &
                           * xf6j(xj,xj2,xj12,xl,xjtot,xjr) &
                           * xf6j(xjp,xj2p,xj12p,xlp,xjtot,xjrp) &
-                          * xf6j(xjr,xj,xjtot,spins%nuc1,xftot,xf) &
-                          * xf6j(xjrp,xjp,xjtot,spins%nuc1,xftot,xfp)
+                          * xf6j(xjr,xj,xjtot,spins%nuc(1),xftot,xf) &
+                          * xf6j(xjrp,xjp,xjtot,spins%nuc(1),xftot,xfp)
                       ll = int(xl)
                       lp = int(xlp)
                       is = (ll + 1) * (idimr - 1) + (jr + 1)
