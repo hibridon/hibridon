@@ -59,7 +59,7 @@ subroutine hypxsc(flname, a)
   use mod_selb, only: ibasty                  ! Basis type
   use mod_hiutil, only: gennam, mtime         ! To generate filenames and print time
   use mod_hitypes, only: bqs_type             ! To store basis set data
-  use mod_parpot, only: potnam=>pot_name, label=>pot_label
+  use mod_parpot, only: potnam=>pot_name, label=>pot_label ! To store PES infos
   implicit none
 
   ! Scratch arrays -------------------------------------------------------------
@@ -207,6 +207,8 @@ subroutine hypxsc(flname, a)
   call print_xs(twmol, hfxfil_unit, ered, spins, hf1, hf2, sigma)
 
   deallocate(sigma)
+  deallocate(hf1%e, hf1%j, hf1%in, hf1%if)
+  if(allocated(hf2%e)) deallocate(hf2%e, hf2%j, hf2%in, hf2%if)
 
   close(1)           ! Close S-Matrix file
   close(hfxfil_unit) ! Close output file
@@ -423,6 +425,7 @@ subroutine compute_xs(twmol, rmu, ered, spins, hf1, hf2, sigma)
   integer :: ij2, ij2p, i, ii
 
   fak = acos(-1.d0) * ang2 / (2.0d0 * rmu)
+  !$OMP PARALLEL DO PRIVATE(i, ii, ij2, ij2p, ffi, fff, denrow, dencol)
   do i = 1, hf1%n
     ij2 = 0.d0
     if (twmol) ij2 = mod(hf1%j(i),10)
@@ -435,8 +438,9 @@ subroutine compute_xs(twmol, rmu, ered, spins, hf1, hf2, sigma)
       dencol = (2.d0 * fff + 1.d0) * (2.d0 * ij2p + 1.d0) * (ered - hf1%e(ii))
       sigma(i,ii) = sigma(i,ii) * fak / denrow
       if (i.ne.ii) sigma(ii,i) = sigma(ii,i) * fak / dencol
-   end do
-end do  
+    end do
+  end do  
+  !$OMP END PARALLEL DO
 end subroutine compute_xs
 
 
@@ -526,9 +530,11 @@ subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
   ! Allocate work arrays
   jmx = maxval(jlev(1:nlevel))
   idim = (iftmx + 2*jmx + 3) * (iftmx + jmx + 2)
+
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,spins,bqs,hf1,sr,si) REDUCTION(+:sigma)
   allocate(tmatr(idim, idim)) 
   allocate(tmati(idim, idim)) 
-
+!$OMP DO
   do iftot = iftmn, iftmx
     xftot = iftot + spins%h
     do jlp = 1, 2
@@ -618,8 +624,10 @@ subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
       end do
     end do
   enddo
+!$OMP END DO
   deallocate(tmatr)
   deallocate(tmati)
+!$OMP END PARALLEL
 end subroutine molecule_atom_1spin
 
 
@@ -662,8 +670,6 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
   ! Allocate work arrays
   jmx = maxval(jlev(1:nlevel))
   idim = (iftmx + 2*jmx + 3) * (iftmx + jmx + 2)
-  allocate(tmatr(idim, idim))
-  allocate(tmati(idim, idim))
 
   dspin = spins%f + spins%nuc(1)  + spins%nuc(2)
   if (abs(dspin - 2d0*int(dspin)) < 1d-60) then
@@ -673,10 +679,10 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
   endif
 
   !  NOTE:  xftot is called K in Lara-Moreno et al.
-
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,spins,bqs,hf2,sr,si, dspin) REDUCTION(+:sigma)
   allocate(tmatr(idim, idim))
   allocate(tmati(idim, idim))
-
+!$OMP DO
   do iftot = iftmn, iftmx-1
     xftot = float(iftot) + dspin
     do jlp = 1, 2
@@ -779,10 +785,10 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
       end do
     end do
   end do
-
+!$OMP END DO
   deallocate(tmatr)
   deallocate(tmati)
-
+!$OMP END PARALLEL
 
 end subroutine molecule_atom_2spin
 
@@ -826,9 +832,11 @@ subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spin
   jmx = maxval(jlev(1:nlevel)/10)
   jmx2 = maxval(mod(jlev(1:nlevel),10))
   idim = (iftmx + jmx + 2*jmx2 + 3) * (iftmx + jmx + jmx2 + 2)
+
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,spins,bqs,hf1,sr,si) REDUCTION(+:sigma)
   allocate(tmatr(idim, idim))
   allocate(tmati(idim, idim))
-
+!$OMP DO
   do iftot = iftmn, iftmx
     xftot = iftot + spins%h
     do jlp = 1, 2
@@ -947,9 +955,10 @@ subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spin
       end do
     end do
   end do
+!$OMP END DO
   deallocate(tmatr)
   deallocate(tmati)
-
+!$OMP END PARALLEL
 end subroutine molecule_molecule_1spin
 
 
