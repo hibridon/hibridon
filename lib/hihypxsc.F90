@@ -62,7 +62,7 @@ subroutine hypxsc(flname, a)
   use mod_selb, only: ibasty                  ! Basis type
   use mod_hiutil, only: gennam, mtime         ! To generate filenames and print time
   use mod_hitypes, only: bqs_type             ! To store basis set data
-  
+  use mod_parpot, only: potnam=>pot_name, label=>pot_label
   implicit none
 
   ! Scratch arrays -------------------------------------------------------------
@@ -87,14 +87,12 @@ subroutine hypxsc(flname, a)
   ! Read from S-matrix file ----------------------------------------------------
   integer :: mjtot, mchmx, lngth, ierr, jtot, jlpar, nu, nopen, jlp
   character*20 :: cdate
-  character*48 :: potnam, label
   integer :: jfrst, jfinl, jtotd, numin, numax, nud, nlevel, nlvop, nnout
   real(8) :: ered, rmu, ee
   logical :: nucrs, csflg, flaghf, flgsu, twmol
 
   ! To store S-matrix elements and channels info--------------------------------
   real(8), allocatable :: sr(:,:,:), si(:,:,:)
-  integer, allocatable :: length(:,:)
   type(bqs_type), allocatable :: bqs(:,:)
 
   ! MISC -----------------------------------------------------------------------
@@ -124,27 +122,32 @@ subroutine hypxsc(flname, a)
   call openf(1, smtfil, 'tu', 0)
   call sinqr(1, mjtot, mchmx)
 
-  allocate(elev(mchmx2))
-  allocate(jlev(mchmx2))
-  allocate(inlev(mchmx2))
-  allocate(jout(mchmx2))
+  allocate(elev(mmax))
+  allocate(jlev(mmax))
+  allocate(inlev(mmax))
+  allocate(jout(mmax))
 
   call rdhead(1,cdate,ered,rmu,csflg,flaghf,flgsu, &
      twmol,nucrs,jfrst,jfinl,jtotd,numin,numax,nud, &
      nlevel,nlvop,nnout,jlev,inlev,elev,jout)
+  deallocate(jout)
+
   ! Check if hypxsc supports the basis type and parameters provided in the input
   if (.not. supported(ibasty, flgsu, csflg, jtotd, nnout, nucspin, twmol)) return
+
   ! Compute spins
   call compute_spins(nucspin, flaghf, spins)
+
   ! Count and fill hyperfine levels for which XS are to be calculated
   call fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, hf1, hf2)
-  deallocate(elev, inlev, jout) ! Won't be used anymore
+  deallocate(elev, inlev)
 
   ! Generate output file name and open it
   call gennam(hfxfil,flname,iener,'hfx',lend)
   call openf(hfxfil_unit, hfxfil(1:lend),'sf',0)
 
   ee = ered*econv ! Convert collision energy
+
   ! Write info to stdout and output file
   call print_infos(6, label, potnam, smtfil, cdate, jfinl, ee, nucspin)
   call print_infos(hfxfil_unit, label, potnam, smtfil, cdate, jfinl, ee, nucspin)
@@ -153,7 +156,6 @@ subroutine hypxsc(flname, a)
 
   allocate(sr(0:jfinl, 2, mchmx2)) ; sr = 0d0
   allocate(si(0:jfinl, 2, mchmx2)) ; si = 0d0
-  allocate(length(0:jfinl, 2)) ; length = 0
   allocate(bqs(0:jfinl, 2))                       
   
 
@@ -166,20 +168,22 @@ subroutine hypxsc(flname, a)
     call sread (0, sreal, simag, jtot, jlpar, nu, row_bqs, packed_bqs, 1, mchmx2, nopen, ierr)
     if(ierr < -1) then ; write(6,*) '*** READ ERROR IN HYPXSC. ABORT ***' ; return ; endif
     jlp = 1 - (jlpar-1)/2
+    len2 = packed_bqs%length*(packed_bqs%length + 1)/2
 
     call bqs(jtot,jlp)%init(packed_bqs%length)
     bqs(jtot,jlp)         = packed_bqs
 
-    sr(jtot,jlp,1:len2)   = sreal(1:lngth*(lngth + 1)/2)
-    si(jtot,jlp,1:len2)   = simag(1:lngth*(lngth + 1)/2)
+    sr(jtot,jlp,1:len2)   = sreal(1:len2)
+    si(jtot,jlp,1:len2)   = simag(1:len2)
 
     if(jtot==jfinl .and. jlpar==-1) exit
   enddo
 
-  deallocate(sreal, simag) 
-
+  deallocate(sreal, simag)
   call packed_bqs%deinit()
   call row_bqs%deinit()
+
+
 
   ! Determine the type of collision and call corresponding subroutine to compute squared T-matrix elements
   if (.not. twmol) then 
@@ -195,14 +199,16 @@ subroutine hypxsc(flname, a)
       call molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf1, sigma)
   endif
 
-  deallocate(sr, si, length, bqs, jlev) ! Won't be used anymore
+  deallocate(sr, si, jlev, bqs)
 
   ! Compute hyperfine XS
   call compute_xs(twmol, rmu, ered, spins, hf1, hf2, sigma) ! Sigma is allocated within this subroutine
+  
   ! Print hyperfine cross sections
   call print_xs(twmol, 6, ered, spins, hf1, hf2, sigma)
   call print_xs(twmol, hfxfil_unit, ered, spins, hf1, hf2, sigma)
-  deallocate(sigma) ! Won't be used anymore
+
+  deallocate(sigma)
 end subroutine hypxsc
 
 
@@ -461,12 +467,10 @@ subroutine print_xs(twmol, hfxfil_unit, ered, spins, hf1, hf2, sigma)
         xf = hf1%if(i) + spins%h
         xjp =  hf1%j(ii) + spins%f
         xfp = hf1%if(ii) + spins%h
-        if (sigma(i,ii)>0d0) then
-          write(6,"(f12.3,f8.1,i6,f6.1,3x,f6.1,i6,f6.1,5x,1pe15.4)")&
-                ee,xj,hf1%in(i),xf,xjp,hf1%in(ii),xfp,sigma(i,ii)
+        !if (sigma(i,ii)>0d0) then
           write(hfxfil_unit,"(f12.3,f8.1,i6,f6.1,3x,f6.1,i6,f6.1,5x,1pe15.4)")&
                 ee,xj,hf1%in(i),xf,xjp,hf1%in(ii),xfp,sigma(i,ii)
-        end if
+        !end if
       else
         xj = (hf1%j(i)/10) + spins%f
         ij2 = mod(hf1%j(i),10)
@@ -475,8 +479,6 @@ subroutine print_xs(twmol, hfxfil_unit, ered, spins, hf1, hf2, sigma)
         ij2p = mod(hf1%j(ii),10)
         xfp  = hf1%if(ii) + spins%h
         if (sigma(i,ii)>0d0) then
-          write(6,"(f12.3,f8.1,i6,f6.1,i6,3x,f6.1,i6,f6.1,i6,5x,1pe15.4)")&
-                ee,xj,hf1%in(i),xf,ij2,xjp,hf1%in(ii),xfp,ij2p,sigma(i,ii)
           write(hfxfil_unit,"(f12.3,f8.1,i6,f6.1,i6,3x,f6.1,i6,f6.1,i6,5x,1pe15.4)")&
                 ee,xj,hf1%in(i),xf,ij2,xjp,hf1%in(ii),xfp,ij2p,sigma(i,ii)
         endif
@@ -523,8 +525,8 @@ subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
   ! Allocate work arrays
   jmx = maxval(jlev(1:nlevel))
   idim = (iftmx + 2*jmx + 3) * (iftmx + jmx + 2)
-  allocate(tmatr(idim, idim))
-  allocate(tmati(idim, idim))
+  allocate(tmatr(idim, idim)) 
+  allocate(tmati(idim, idim)) 
 
   do iftot = iftmn, iftmx
     xftot = iftot + spins%h
@@ -562,21 +564,21 @@ subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
                   iflag = 1
                 endif
                 do icol = 1, irow
-                  if (bqs(jtot,jlpt)%jq(irow).eq.hf1%j(i) .and. &
-                      bqs(jtot,jlpt)%inq(irow).eq.hf1%in(i) .and. &
-                      bqs(jtot,jlpt)%jq(icol).eq.hf1%j(ii) .and. &
-                      bqs(jtot,jlpt)%inq(icol).eq.hf1%in(ii) .or. &
-                      bqs(jtot,jlpt)%jq(icol).eq.hf1%j(i) .and. &
-                      bqs(jtot,jlpt)%inq(icol).eq.hf1%in(i) .and. &
-                      bqs(jtot,jlpt)%jq(irow).eq.hf1%j(ii) .and. &
-                      bqs(jtot,jlpt)%inq(irow).eq.hf1%in(ii)) then
+                  if (bqs(jtot,jlpt)%jq(irow) .eq. hf1%j(i)  .and. &
+                      bqs(jtot,jlpt)%inq(irow).eq. hf1%in(i) .and. &
+                      bqs(jtot,jlpt)%jq(icol) .eq. hf1%j(ii) .and. &
+                      bqs(jtot,jlpt)%inq(icol).eq. hf1%in(ii) .or. &
+                      bqs(jtot,jlpt)%jq(icol) .eq. hf1%j(i)  .and. &
+                      bqs(jtot,jlpt)%inq(icol).eq. hf1%in(i) .and. &
+                      bqs(jtot,jlpt)%jq(irow) .eq. hf1%j(ii) .and. &
+                      bqs(jtot,jlpt)%inq(irow).eq. hf1%in(ii)) then
                     is = (irow*(irow - 1))/2 + icol
                     if (iflag.ne.1) then
-                      xl = bqs(jtot,jlpt)%lq(irow)
+                      xl = bqs(jtot,jlpt)%lq(icol)
                       xlp = bqs(jtot,jlpt)%lq(irow)
                     else
                       xl = bqs(jtot,jlpt)%lq(irow)
-                      xlp = bqs(jtot,jlpt)%lq(irow)
+                      xlp = bqs(jtot,jlpt)%lq(icol)
                     end if
   !     convert S-matrix element to T-matrix element
                     t = -cmplx(sr(jtot,jlpt,is), si(jtot,jlpt,is), 8)
@@ -729,11 +731,11 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
                       bqs(jtot,jlpt)%inq(irow).eq.hf2%in(ii)) then
                     is = (irow*(irow - 1))/2 + icol
                     if (iflag.ne.1) then
-                      xl = bqs(jtot,jlpt)%lq(irow)
+                      xl = bqs(jtot,jlpt)%lq(icol)
                       xlp = bqs(jtot,jlpt)%lq(irow)
                     else
                       xl = bqs(jtot,jlpt)%lq(irow)
-                      xlp = bqs(jtot,jlpt)%lq(irow)
+                      xlp = bqs(jtot,jlpt)%lq(icol)
                     end if
   !  convert S-matrix element to T-matrix element
                     t = -cmplx(sr(jtot,jlpt,is), si(jtot,jlpt,is), 8)
@@ -875,15 +877,15 @@ subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spin
                     bqs(jtot,jlpt)%inq(irow).eq.hf1%in(ii)) then
                   is = (irow*(irow - 1))/2 + icol
                   if (iflag.ne.1) then
-                    xl = bqs(jtot,jlpt)%lq(irow)
+                    xl = bqs(jtot,jlpt)%lq(icol)
                     xlp = bqs(jtot,jlpt)%lq(irow)
-                    xj12 = bqs(jtot,jlpt)%j12(irow) + spins%f
+                    xj12 = bqs(jtot,jlpt)%j12(icol) + spins%f
                     xj12p = bqs(jtot,jlpt)%j12(irow) + spins%f
                   else
                     xl = bqs(jtot,jlpt)%lq(irow)
-                    xlp = bqs(jtot,jlpt)%lq(irow)
+                    xlp = bqs(jtot,jlpt)%lq(icol)
                     xj12 = bqs(jtot,jlpt)%j12(irow) + spins%f
-                    xj12p = bqs(jtot,jlpt)%j12(irow) + spins%f
+                    xj12p = bqs(jtot,jlpt)%j12(icol) + spins%f
                   end if
                   fj12 = sqrt(2.d0 * xj12 + 1.d0)
                   fj12p = sqrt(2.d0 * xj12p + 1.d0)
