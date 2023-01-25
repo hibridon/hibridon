@@ -150,6 +150,7 @@ The executable files will be put in the current directory (`~/hib_build`).
   ```
   Where `<executable>` is one of the executable you defined in the CMakeLists.txt configuration file, e.g.: `NH3-H2.exe`.
 
+
 ## 5. Test Hibridon (Optional)
 Hibridon testing must be enabled (see Section 3: Configure your project's build).
 The following commands need to be executed within the Hibridon build directory (e.g. ~/hib_build/project/hibridon/).
@@ -179,7 +180,27 @@ The following commands need to be executed within the Hibridon build directory (
     ctest --print-labels
     ```
 
-### 6. One liner example
+### 6. Run your project
+Once your executables are created (step 4), you can interactively run hibridon using:
+```bash
+./<executable> -k <kmax>
+# or 
+./<executable> --kmax <kmax>
+```
+Where `<kmax>` is the maximum number of channels (see [Memory Requirements](https://github.com/hibridon/hibridon/wiki/Memory-requirements)).
+
+
+You can also run your Hibridon executable using a command file:
+```bash
+./<executable> -k <kmax> < <command file>
+# or
+./<executable> -k <kmax> -c <command file>
+# or
+./<executable> -k <kmax> --com <command file>
+```
+Where `<commands file>` is a file containing the input commands you want to execute (see [Batch-mode-and-background-execution](https://github.com/hibridon/hibridon/wiki/Batch-mode-and-background-execution))
+
+### 7. One liner example
 
 This one line command configures, builds and tests Hibridon from a directory `~/hib_build` containing the source code. Build files are placed in the current directory.
 
