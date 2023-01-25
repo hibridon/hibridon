@@ -28,12 +28,11 @@ RUN
 EXIT
 ```
 
-Then, after making the command file executable chmod +x runner.com
-
-
 You would execute the command
 ```bash
-hib_xx < runner.com > runner.log &
+hib_xx -k <kmax> < runner.com > runner.log &
+# or
+hib_xx -k <kmax> -c runner.com > runner.log &
 ```
 
 Where `hib_xx` is the name of your executable code, and the file  `runner.log`  will contain a log of the execution.
