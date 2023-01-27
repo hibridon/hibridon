@@ -690,12 +690,12 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
       write(6,"(A,F5.1,A,I4)") ' Computing partial wave K_tot =', xftot, ', jlpar=', jlpar
       do i=1, hf2%n
         xj = hf2%j(i) + spins%f
-        xf = hf2%f(i)
-        xf2 = hf2%if(i)
+        xf = hf2%if(i)
+        xf2 = hf2%f(i)
         do ii=i, hf2%n
           xjp = hf2%j(ii) + spins%f
-          xfp = hf2%f(ii)
-          xf2p = hf2%if(ii)
+          xfp = hf2%if(ii)
+          xf2p = hf2%f(ii)
           fffp = sqrt((2.d0*xf+1.d0)*(2.d0*xfp+1.d0) &
             * (2.d0*xf2+1.d0)*(2.d0*xf2p+1.d0))
           iph = int(xf - xfp - xf2 + xf2p)
