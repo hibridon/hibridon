@@ -490,10 +490,23 @@ subroutine print_xs(twmol, hfxfil_unit, ered, spins, hf, sigma)
 
   ! Write header
   if(.not.spins%two) then
-    write(hfxfil_unit,"(a)") '%     E(CM-1)     JI     INI   FI      JF     INF   FF      CROSS SECTION (ANG^2)'
-  else
-    write(hfxfil_unit,"(a)") '%     E(CM-1)     JI     INI   F1I      F2I      JF     INF   F1F      F2F      CROSS SECTION (ANG^2)'
+  ! ONE SPIN
+    if (.not.twmol) then
+    ! ONE MOLECULE
+      write(hfxfil_unit,"(a)") '%     E(CM-1)     JI     INI   FI      JF     INF   FF      CROSS SECTION (ANG^2)'
+    else
+    ! TWO MOLECULES
+      write(hfxfil_unit,"(a)") '%     E(CM-1)     JI     INI   FI      J2      JF     INF   FF      J2P      CROSS SECTION (ANG^2)'
+    end if
+  else 
+  ! TWO SPINS
+    if (.not.twmol) then
+    ! ONE MOLECULE
+      write(hfxfil_unit,"(a)") '%     E(CM-1)     JI     INI   F1I      F2I      JF     INF   F1F      F2F      CROSS SECTION (ANG^2)'
+    end if
   end if
+
+
   
   ee = ered*econv
   do i = 1, hf%n
@@ -521,6 +534,8 @@ subroutine print_xs(twmol, hfxfil_unit, ered, spins, hf, sigma)
       endif
     enddo
   enddo
+
+
 end subroutine print_xs
 
 
