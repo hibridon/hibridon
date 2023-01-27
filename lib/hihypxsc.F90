@@ -34,7 +34,7 @@ implicit none
     real(8), allocatable :: e(:)
     integer, allocatable :: j(:)
     integer, allocatable :: in(:)
-    real(8), allocatable :: if(:)
+    integer, allocatable :: if(:)
     real(8), allocatable :: f(:)
   end type hflvl_type
 
@@ -199,11 +199,12 @@ subroutine hypxsc(flname, a)
 
   deallocate(sr, si, jlev, bqs)
 
-  ! Compute and print hyperfine XS
+  ! Compute hyperfine XS
+  call compute_xs(twmol, rmu, ered, spins, hf, sigma)
+  call print_xs(twmol, 6, ered, spins, hf, sigma)
 
-    call compute_xs(twmol, rmu, ered, spins, hf, sigma)
-    call print_xs(twmol, 6, ered, spins, hf, sigma)
-    call print_xs(twmol, hfxfil_unit, ered, spins, hf, sigma)
+  ! Print hyperfine XS
+  call print_xs(twmol, hfxfil_unit, ered, spins, hf, sigma)
 
 
 
@@ -351,7 +352,7 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
               hf1%j(n) = jlev(i)
               hf1%in(n) = inlev(i)
               ff = ffmin + (ii - 1)
-              hf1%if(n) = ff
+              hf1%if(n) = int(ff)
               hf1%e(n) = elev(i)
             endif
           enddo
@@ -390,7 +391,7 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
               hf2%in(n2) = hf1%in(i)
               hf2%f(n2) = f1
               f2 = fnmin + (ii - 1)
-              hf2%if(n2) = f2
+              hf2%if(n2) = int(f2)
               hf2%e(n2) = hf1%e(i)
             endif
           enddo
