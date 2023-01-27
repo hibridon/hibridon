@@ -291,7 +291,7 @@ subroutine compute_spins(nucspin, flaghf, spins)
   logical, intent(in) :: flaghf
   type(spin_type), intent(out) :: spins
   
- 
+  spins%h = 0d0
   if(flaghf) spins%f = 0.5d0 
   if (flaghf .and. nucspin.eq.2*(nucspin/2)) spins%h = 0.5d0
   if (.not.flaghf .and. nucspin.ne.2*(nucspin/2)) spins%h = 0.5d0
@@ -421,26 +421,35 @@ subroutine compute_xs(twmol, rmu, ered, spins, hf1, hf2, sigma)
   type(hflvl_type), intent(in) :: hf1, hf2
   real(8), intent(inout) :: sigma(hf1%n, hf1%n)
   ! Local variables
+  type(hflvl_type) :: hf
   real(8) :: fak, dencol, denrow, ffi, fff
   integer :: ij2, ij2p, i, ii
 
   fak = acos(-1.d0) * ang2 / (2.0d0 * rmu)
+
+  if(spins%two) then
+    hf = hf2
+  else 
+    hf = hf1
+  endif
+
   !$OMP PARALLEL DO PRIVATE(i, ii, ij2, ij2p, ffi, fff, denrow, dencol)
-  do i = 1, hf1%n
+  do i = 1, hf%n
     ij2 = 0.d0
-    if (twmol) ij2 = mod(hf1%j(i),10)
-    ffi = hf1%if(i) + spins%h
-    denrow = (2.d0 * ffi + 1.d0) * (2.d0 * ij2 + 1.d0) * (ered - hf1%e(i))
-    do ii = i, hf1%n
+    if (twmol) ij2 = mod(hf%j(i),10)
+    ffi = hf%if(i) + spins%h
+    denrow = (2.d0 * ffi + 1.d0) * (2.d0 * ij2 + 1.d0) * (ered - hf%e(i))
+    do ii = i, hf%n
       ij2p = 0.d0
-      if (twmol) ij2p = mod(hf1%j(ii),10)
-      fff = hf1%if(ii) + spins%h
-      dencol = (2.d0 * fff + 1.d0) * (2.d0 * ij2p + 1.d0) * (ered - hf1%e(ii))
+      if (twmol) ij2p = mod(hf%j(ii),10)
+      fff = hf%if(ii) + spins%h
+      dencol = (2.d0 * fff + 1.d0) * (2.d0 * ij2p + 1.d0) * (ered - hf%e(ii))
       sigma(i,ii) = sigma(i,ii) * fak / denrow
       if (i.ne.ii) sigma(ii,i) = sigma(ii,i) * fak / dencol
     end do
   end do  
   !$OMP END PARALLEL DO
+
 end subroutine compute_xs
 
 
