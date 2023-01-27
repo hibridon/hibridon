@@ -832,8 +832,9 @@ subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spin
   jmx = maxval(jlev(1:nlevel)/10)
   jmx2 = maxval(mod(jlev(1:nlevel),10))
   idim = (iftmx + jmx + 2*jmx2 + 3) * (iftmx + jmx + jmx2 + 2)
+  idimr = idim / (iftmx + jmx + jmx2 +1)
 
-!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,spins,bqs,hf1,sr,si) REDUCTION(+:sigma)
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,idimr,jfrst,jfinl,iftmn,iftmx,spins,bqs,hf1,sr,si) REDUCTION(+:sigma)
   allocate(tmatr(idim, idim))
   allocate(tmati(idim, idim))
 !$OMP DO
@@ -926,8 +927,9 @@ subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spin
                           * xf6j(xjrp,xjp,xjtot,spins%nuc(1),xftot,xfp)
                       ll = int(xl)
                       lp = int(xlp)
-                      is = (ll + 1) * (idimr - 1) + (jr + 1)
+                      is =  (ll + 1) * (idimr - 1) + (jr + 1)
                       isp = (lp + 1) * (idimr - 1) + (jrp + 1)
+                      write(*,*) is, isp, tf, real(tf), aimag(tf)
                       tmatr(is,isp) = tmatr(is,isp) + real(tf)
                       tmati(is,isp) = tmati(is,isp) + aimag(tf)
   !     for initial level = final level, but l.ne.lp or j12.ne.j12p, need to include
