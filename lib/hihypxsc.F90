@@ -486,7 +486,7 @@ subroutine print_xs(twmol, hfxfil_unit, ered, spins, hf, sigma)
   real(8), intent(in) :: sigma(hf%n,hf%n)
   ! Local variables
   integer :: i, ii, ij2, ij2p
-  real(8) :: xj, xf, xjp, xfp, ee
+  real(8) :: xj, xf, xjp, xfp, ee, xf2, xf2p
 
   ! Write header
   if(.not.spins%two) then
@@ -506,34 +506,55 @@ subroutine print_xs(twmol, hfxfil_unit, ered, spins, hf, sigma)
     end if
   end if
 
+ee = ered*econv
 
-  
-  ee = ered*econv
-  do i = 1, hf%n
-    do ii = 1, hf%n
-      if (.not. twmol) then
-        xj = hf%j(i) + spins%f
-        xf = hf%if(i) + spins%h
-        xjp =  hf%j(ii) + spins%f
-        xfp = hf%if(ii) + spins%h
-        if (sigma(i,ii)>0d0) then
-          write(hfxfil_unit,"(f12.3,f8.1,i6,f6.1,3x,f6.1,i6,f6.1,5x,1pe15.4)")&
-                ee,xj,hf%in(i),xf,xjp,hf%in(ii),xfp,sigma(i,ii)
-        end if
-      else
-        xj = (hf%j(i)/10) + spins%f
-        ij2 = mod(hf%j(i),10)
-        xf  = hf%if(i) + spins%h
-        xjp = (hf%j(ii)/10) + spins%f
-        ij2p = mod(hf%j(ii),10)
-        xfp  = hf%if(ii) + spins%h
-        if (sigma(i,ii)>0d0) then
-          write(hfxfil_unit,"(f12.3,f8.1,i6,f6.1,i6,3x,f6.1,i6,f6.1,i6,5x,1pe15.4)")&
-                ee,xj,hf%in(i),xf,ij2,xjp,hf%in(ii),xfp,ij2p,sigma(i,ii)
+  if (.not.spins%two) then 
+  ! ONE SPIN
+    do i = 1, hf%n
+      do ii = 1, hf%n
+        if (.not. twmol) then
+        ! ONE MOLECULE
+          xj = hf%j(i) + spins%f
+          xf = hf%if(i) + spins%h
+          xjp =  hf%j(ii) + spins%f
+          xfp = hf%if(ii) + spins%h
+          if (sigma(i,ii)>0d0) then
+            write(hfxfil_unit,"(f12.3,f8.1,i6,f6.1,3x,f6.1,i6,f6.1,5x,1pe15.4)")&
+                  ee,xj,hf%in(i),xf,xjp,hf%in(ii),xfp,sigma(i,ii)
+          end if
+        else
+        ! TWO MOLECULES
+          xj = (hf%j(i)/10) + spins%f
+          ij2 = mod(hf%j(i),10)
+          xf  = hf%if(i) + spins%h
+          xjp = (hf%j(ii)/10) + spins%f
+          ij2p = mod(hf%j(ii),10)
+          xfp  = hf%if(ii) + spins%h
+          if (sigma(i,ii)>0d0) then
+            write(hfxfil_unit,"(f12.3,f8.1,i6,f6.1,i6,3x,f6.1,i6,f6.1,i6,5x,1pe15.4)")&
+                  ee,xj,hf%in(i),xf,ij2,xjp,hf%in(ii),xfp,ij2p,sigma(i,ii)
+          endif
         endif
-      endif
+      enddo
     enddo
-  enddo
+
+  else
+  ! TWO SPINS
+    do i = 1, hf%n
+      do ii = 1, hf%n
+        xj = hf%j(i) + spins%f
+        xf = hf%f(i)
+        xf2 = hf%if(i)
+        xjp = hf%j(ii) + spins%f
+        xfp = hf%f(ii)
+        xf2p = hf%if(ii)
+        if (sigma(i,ii)>0.d0) then
+          write(hfxfil_unit,"(f12.3,f6.1,i4,f6.1,f6.1,f7.1,i4,f6.1,f6.1,2x,1pe15.4)")&
+          ee,xj,hf%in(i),xf,xf2,xjp,hf%in(ii),xfp,xf2p,sigma(i,ii)
+        endif
+      end do
+    end do
+  end if
 
 
 end subroutine print_xs
