@@ -34,7 +34,7 @@ implicit none
     real(8), allocatable :: e(:)
     integer, allocatable :: j(:)
     integer, allocatable :: in(:)
-    integer, allocatable :: if(:)
+    real(8), allocatable :: if(:)
     real(8), allocatable :: f(:)
   end type hflvl_type
 
@@ -99,7 +99,7 @@ subroutine hypxsc(flname, a)
   type(spin_type) :: spins
 
   ! Data related to hyperfine levels -------------------------------------------
-  type(hflvl_type) :: hf1, hf2
+  type(hflvl_type) :: hf
 
   ! To store T-Matrices and Cross Sections -------------------------------------
   real(8), allocatable :: sigma(:,:)
@@ -136,7 +136,7 @@ subroutine hypxsc(flname, a)
   call compute_spins(nucspin, flaghf, spins)
 
   ! Count and fill hyperfine levels for which XS are to be calculated
-  call fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, hf1, hf2)
+  call fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, hf)
   deallocate(elev, inlev)
 
   ! Generate output file name and open it
@@ -186,29 +186,28 @@ subroutine hypxsc(flname, a)
   if (.not. twmol) then 
     if(.not. spins%two) then ! Molecule-Atom with 1 nuclear spin
         write(6,"(a)") "HYPXSC | Molecule-Atom with 1 nuclear spin"
-      call molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf1, sigma)
+      call molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf, sigma)
     else ! Molecule-Atom with 2 nuclear spins
         write(6,"(a)") "HYPXSC | Molecule-Atom with 2 nuclear spins"
-      call molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf2, sigma)
+      call molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf, sigma)
     endif
   else ! Molecule-Molecule with 1 nuclear spin
       write(6,"(a)") "HYPXSC | Molecule-Molecule with 1 nuclear spins"
-      call molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf1, sigma)
+      call molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf, sigma)
   endif
 
 
   deallocate(sr, si, jlev, bqs)
 
-  ! Compute hyperfine XS
-  if (spins%two) call compute_xs(twmol, rmu, ered, spins, hf1, sigma) 
-  if (spins%two) call compute_xs(twmol, rmu, ered, spins, hf1, sigma)
-  ! Print hyperfine cross sections
-  call print_xs(twmol, 6, ered, spins, hf1, hf2, sigma)
-  call print_xs(twmol, hfxfil_unit, ered, spins, hf1, hf2, sigma)
+  ! Compute and print hyperfine XS
+
+    call compute_xs(twmol, rmu, ered, spins, hf, sigma)
+    call print_xs(twmol, 6, ered, spins, hf, sigma)
+    call print_xs(twmol, hfxfil_unit, ered, spins, hf, sigma)
+
+
 
   deallocate(sigma)
-  deallocate(hf1%e, hf1%j, hf1%in, hf1%if)
-  if(allocated(hf2%e)) deallocate(hf2%e, hf2%j, hf2%in, hf2%if)
 
   close(1)           ! Close S-Matrix file
   close(hfxfil_unit) ! Close output file
@@ -315,7 +314,7 @@ end subroutine compute_spins
 !************************************************************************************************
 ! This subroutine compute the number of hyperfine levels and fills the hyperfine arrays
 !************************************************************************************************
-subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, hf1, hf2)
+subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, hf)
   implicit none
   ! Arguments
   integer, intent(in) :: nlevel
@@ -326,8 +325,9 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
   real(8), intent(in) :: ered
   logical, intent(in) :: twmol
   type(spin_type), intent(in) :: spins
-  type(hflvl_type), intent(out) :: hf1, hf2
+  type(hflvl_type), intent(out) :: hf
   ! Local variables
+  type(hflvl_type) :: hf1, hf2
   integer :: i, ii, ij1, n, n2, nhyp
   real(8) :: ff, fj, ffmin, ffmax, f1, fnmin, fnmax, f2
   logical :: fill
@@ -351,7 +351,7 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
               hf1%j(n) = jlev(i)
               hf1%in(n) = inlev(i)
               ff = ffmin + (ii - 1)
-              hf1%if(n) = int(ff)
+              hf1%if(n) = ff
               hf1%e(n) = elev(i)
             endif
           enddo
@@ -367,10 +367,12 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
     endif
   enddo
 
+  hf = hf1
+
+
   ! THIS IS FOR TWO SPINS
   ! First pass will just count and allocate 
   ! Second pass will fill arrays
-
   if(spins%two) then
     fill = .false.
     do
@@ -388,7 +390,7 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
               hf2%in(n2) = hf1%in(i)
               hf2%f(n2) = f1
               f2 = fnmin + (ii - 1)
-              hf2%if(n2) = int(f2)
+              hf2%if(n2) = f2
               hf2%e(n2) = hf1%e(i)
             endif
           enddo
@@ -402,6 +404,7 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
         exit
       endif
     enddo
+    hf = hf2
   endif
 
   return
@@ -426,6 +429,7 @@ subroutine compute_xs(twmol, rmu, ered, spins, hf, sigma)
 
   fak = acos(-1.d0) * ang2 / (2.0d0 * rmu)
 
+if (.not. spins%two) then
   !$OMP PARALLEL DO PRIVATE(i, ii, ij2, ij2p, ffi, fff, denrow, dencol)
   do i = 1, hf%n
     ij2 = 0.d0
@@ -442,6 +446,26 @@ subroutine compute_xs(twmol, rmu, ered, spins, hf, sigma)
     end do
   end do  
   !$OMP END PARALLEL DO
+else
+  !$OMP PARALLEL DO PRIVATE(i, ii, ij2, ij2p, ffi, fff, denrow, dencol)
+  do i = 1, hf%n
+    ij2 = 0.d0
+    if (twmol) ij2 = mod(hf%j(i),10)
+    ffi = hf%f(i)
+    denrow = (2.d0 * ffi + 1.d0) * (2.d0 * ij2 + 1.d0) * (ered - hf%e(i))
+    do ii = i, hf%n
+      ij2p = 0.d0
+      if (twmol) ij2p = mod(hf%j(ii),10)
+      fff = hf%f(ii)
+      dencol = (2.d0 * fff + 1.d0) * (2.d0 * ij2p + 1.d0) * (ered - hf%e(ii))
+      sigma(i,ii) = sigma(i,ii) * fak / denrow
+      if (i.ne.ii) sigma(ii,i) = sigma(ii,i) * fak / dencol
+    end do
+  end do  
+  !$OMP END PARALLEL DO
+end if
+
+
 
 end subroutine compute_xs
 
@@ -449,7 +473,7 @@ end subroutine compute_xs
 !************************************************************************************************
 ! This subroutine prints XS 
 !************************************************************************************************
-subroutine print_xs(twmol, hfxfil_unit, ered, spins, hf1, hf2, sigma)
+subroutine print_xs(twmol, hfxfil_unit, ered, spins, hf, sigma)
   use constants, only: econv
   implicit none
   ! Arguments
@@ -457,37 +481,41 @@ subroutine print_xs(twmol, hfxfil_unit, ered, spins, hf1, hf2, sigma)
   integer, intent(in) :: hfxfil_unit
   real(8), intent(in) :: ered
   type(spin_type), intent(in) :: spins
-  type(hflvl_type), intent(in) :: hf1, hf2
-  real(8), intent(in) :: sigma(hf1%n,hf1%n)
+  type(hflvl_type), intent(in) :: hf
+  real(8), intent(in) :: sigma(hf%n,hf%n)
   ! Local variables
   integer :: i, ii, ij2, ij2p
   real(8) :: xj, xf, xjp, xfp, ee
 
   ! Write header
-  write(hfxfil_unit,"(a)") '%     E(CM-1)     JI     INI   FI      JF     INF   FF      CROSS SECTION (ANG^2)'
-
+  if(.not.spins%two) then
+    write(hfxfil_unit,"(a)") '%     E(CM-1)     JI     INI   FI      JF     INF   FF      CROSS SECTION (ANG^2)'
+  else
+    write(hfxfil_unit,"(a)") '%     E(CM-1)     JI     INI   F1I      F2I      JF     INF   F1F      F2F      CROSS SECTION (ANG^2)'
+  end if
+  
   ee = ered*econv
-  do i = 1, hf1%n
-    do ii = 1, hf1%n
+  do i = 1, hf%n
+    do ii = 1, hf%n
       if (.not. twmol) then
-        xj = hf1%j(i) + spins%f
-        xf = hf1%if(i) + spins%h
-        xjp =  hf1%j(ii) + spins%f
-        xfp = hf1%if(ii) + spins%h
+        xj = hf%j(i) + spins%f
+        xf = hf%if(i) + spins%h
+        xjp =  hf%j(ii) + spins%f
+        xfp = hf%if(ii) + spins%h
         if (sigma(i,ii)>0d0) then
           write(hfxfil_unit,"(f12.3,f8.1,i6,f6.1,3x,f6.1,i6,f6.1,5x,1pe15.4)")&
-                ee,xj,hf1%in(i),xf,xjp,hf1%in(ii),xfp,sigma(i,ii)
+                ee,xj,hf%in(i),xf,xjp,hf%in(ii),xfp,sigma(i,ii)
         end if
       else
-        xj = (hf1%j(i)/10) + spins%f
-        ij2 = mod(hf1%j(i),10)
-        xf  = hf1%if(i) + spins%h
-        xjp = (hf1%j(ii)/10) + spins%f
-        ij2p = mod(hf1%j(ii),10)
-        xfp  = hf1%if(ii) + spins%h
+        xj = (hf%j(i)/10) + spins%f
+        ij2 = mod(hf%j(i),10)
+        xf  = hf%if(i) + spins%h
+        xjp = (hf%j(ii)/10) + spins%f
+        ij2p = mod(hf%j(ii),10)
+        xfp  = hf%if(ii) + spins%h
         if (sigma(i,ii)>0d0) then
           write(hfxfil_unit,"(f12.3,f8.1,i6,f6.1,i6,3x,f6.1,i6,f6.1,i6,5x,1pe15.4)")&
-                ee,xj,hf1%in(i),xf,ij2,xjp,hf1%in(ii),xfp,ij2p,sigma(i,ii)
+                ee,xj,hf%in(i),xf,ij2,xjp,hf%in(ii),xfp,ij2p,sigma(i,ii)
         endif
       endif
     enddo
@@ -500,7 +528,7 @@ end subroutine print_xs
 !************************************************************************************************
 ! This subroutine computes T matrix elements for molecule-atom collisions with one spin
 !************************************************************************************************
-subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf1, sigma)
+subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf, sigma)
   use mod_hitypes, only: bqs_type
   use mod_hiutil, only: xf6j
   implicit none
@@ -510,7 +538,7 @@ subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
   type(bqs_type), intent(in) :: bqs(0:jfinl,2)
   real(8), intent(in) :: sr(0:jfinl,2,*) , si(0:jfinl,2,*)
   type(spin_type), intent(in) :: spins
-  type(hflvl_type), intent(in) :: hf1
+  type(hflvl_type), intent(in) :: hf
   real(8), allocatable, intent(out) :: sigma(:,:)
   ! Local variables
   integer :: jmx, idim
@@ -527,13 +555,13 @@ subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
   iftmx = int(jfinl + spins%f + spins%nuc(1) - spins%h)
 
   ! Allocate sigma array
-  allocate(sigma(hf1%n, hf1%n))
+  allocate(sigma(hf%n, hf%n))
   sigma = 0d0
   ! Allocate work arrays
   jmx = maxval(jlev(1:nlevel))
   idim = (iftmx + 2*jmx + 3) * (iftmx + jmx + 2)
 
-!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,spins,bqs,hf1,sr,si) REDUCTION(+:sigma)
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,spins,bqs,hf,sr,si) REDUCTION(+:sigma)
   allocate(tmatr(idim, idim)) 
   allocate(tmati(idim, idim)) 
 !$OMP DO
@@ -542,12 +570,12 @@ subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
     do jlp = 1, 2
       jlpar = 1 - (jlp -1)*2
       write(6,"(A,F5.1,A,I4)") ' Computing partial wave J_tot =', xftot, ', jlpar=', jlpar
-      do i = 1, hf1%n
-        do ii = i, hf1%n
-          xj = hf1%j(i) + spins%f
-          xjp = hf1%j(ii) + spins%f
-          xf = hf1%if(i) + spins%h
-          xfp = hf1%if(ii) + spins%h
+      do i = 1, hf%n
+        do ii = i, hf%n
+          xj = hf%j(i) + spins%f
+          xjp = hf%j(ii) + spins%f
+          xf = hf%if(i) + spins%h
+          xfp = hf%if(ii) + spins%h
           fffp = sqrt((2.d0*xf+1.d0)*(2.d0*xfp+1.d0))
           xjttmn = max(spins%h, xftot - spins%nuc(1))
           jttmin = max(jfrst, int(xjttmn-spins%f))
@@ -569,18 +597,18 @@ subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
               do irow = 1, bqs(jtot,jlpt)%length
   !     flag to make sure initial level is the bra, final level the ket
                 iflag = 0
-                if (bqs(jtot,jlpt)%jq(irow) == hf1%j(i) .and. bqs(jtot,jlpt)%inq(irow) == hf1%in(i)) then
+                if (bqs(jtot,jlpt)%jq(irow) == hf%j(i) .and. bqs(jtot,jlpt)%inq(irow) == hf%in(i)) then
                   iflag = 1
                 endif
                 do icol = 1, irow
-                  if (bqs(jtot,jlpt)%jq(irow) .eq. hf1%j(i)  .and. &
-                      bqs(jtot,jlpt)%inq(irow).eq. hf1%in(i) .and. &
-                      bqs(jtot,jlpt)%jq(icol) .eq. hf1%j(ii) .and. &
-                      bqs(jtot,jlpt)%inq(icol).eq. hf1%in(ii) .or. &
-                      bqs(jtot,jlpt)%jq(icol) .eq. hf1%j(i)  .and. &
-                      bqs(jtot,jlpt)%inq(icol).eq. hf1%in(i) .and. &
-                      bqs(jtot,jlpt)%jq(irow) .eq. hf1%j(ii) .and. &
-                      bqs(jtot,jlpt)%inq(irow).eq. hf1%in(ii)) then
+                  if (bqs(jtot,jlpt)%jq(irow) .eq. hf%j(i)  .and. &
+                      bqs(jtot,jlpt)%inq(irow).eq. hf%in(i) .and. &
+                      bqs(jtot,jlpt)%jq(icol) .eq. hf%j(ii) .and. &
+                      bqs(jtot,jlpt)%inq(icol).eq. hf%in(ii) .or. &
+                      bqs(jtot,jlpt)%jq(icol) .eq. hf%j(i)  .and. &
+                      bqs(jtot,jlpt)%inq(icol).eq. hf%in(i) .and. &
+                      bqs(jtot,jlpt)%jq(irow) .eq. hf%j(ii) .and. &
+                      bqs(jtot,jlpt)%inq(irow).eq. hf%in(ii)) then
                     is = (irow*(irow - 1))/2 + icol
                     if (iflag.ne.1) then
                       xl = bqs(jtot,jlpt)%lq(icol)
@@ -607,7 +635,7 @@ subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
                     tmati(ll+1,lp+1) = tmati(ll+1,lp+1) + aimag(t)
   !     for initial level = final level, but l.ne.lp, need to include
   !     both T(l,lp) and T(lp,l)
-                    if (hf1%j(i) == hf1%j(ii) .and. hf1%in(i) == hf1%in(ii) .and. abs(xl-xlp) > 1d-60) then
+                    if (hf%j(i) == hf%j(ii) .and. hf%in(i) == hf%in(ii) .and. abs(xl-xlp) > 1d-60) then
   !     note that T(l,lp) = T(lp,l)* (Hermitean matrix)
                       tmatr(lp+1,ll+1) = tmatr(lp+1,ll+1) + real(t)
                       tmati(lp+1,ll+1) = tmati(lp+1,ll+1) - aimag(t)
@@ -638,7 +666,7 @@ end subroutine molecule_atom_1spin
 !************************************************************************************************
 ! This subroutine computes T matrix elements for molecule-atom collisions with two spins
 !************************************************************************************************
-subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf2, sigma)
+subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf, sigma)
   use mod_hitypes, only: bqs_type
   use mod_hiutil, only: xf6j
   implicit none
@@ -648,7 +676,7 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
   type(bqs_type), intent(in) :: bqs(0:jfinl,2)
   real(8), intent(in) :: sr(0:jfinl,2,*) , si(0:jfinl,2,*)
   type(spin_type), intent(in) :: spins
-  type(hflvl_type), intent(in) :: hf2
+  type(hflvl_type), intent(in) :: hf
   real(8), allocatable, intent(out) :: sigma(:,:)
   ! Local variables
   integer :: jmx, idim
@@ -666,7 +694,7 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
   iftmx = int(jfinl + spins%f + spins%nuc(1) + spins%nuc(2))
 
   ! Allocate sigma array
-  allocate(sigma(hf2%n, hf2%n))
+  allocate(sigma(hf%n, hf%n))
   sigma = 0d0
 
   ! Allocate work arrays
@@ -681,7 +709,7 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
   endif
 
   !  NOTE:  xftot is called K in Lara-Moreno et al.
-!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,spins,bqs,hf2,sr,si, dspin) REDUCTION(+:sigma)
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,spins,bqs,hf,sr,si, dspin) REDUCTION(+:sigma)
   allocate(tmatr(idim, idim))
   allocate(tmati(idim, idim))
 !$OMP DO
@@ -690,14 +718,14 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
     do jlp = 1, 2
       jlpar = 1 - (jlp -1)*2
       write(6,"(A,F5.1,A,I4)") ' Computing partial wave K_tot =', xftot, ', jlpar=', jlpar
-      do i=1, hf2%n
-        xj = hf2%j(i) + spins%f
-        xf = hf2%if(i)
-        xf2 = hf2%f(i)
-        do ii=i, hf2%n
-          xjp = hf2%j(ii) + spins%f
-          xfp = hf2%if(ii)
-          xf2p = hf2%f(ii)
+      do i=1, hf%n
+        xj = hf%j(i) + spins%f
+        xf = hf%if(i)
+        xf2 = hf%f(i)
+        do ii=i, hf%n
+          xjp = hf%j(ii) + spins%f
+          xfp = hf%if(ii)
+          xf2p = hf%f(ii)
           fffp = sqrt((2.d0*xf+1.d0)*(2.d0*xfp+1.d0) &
             * (2.d0*xf2+1.d0)*(2.d0*xf2p+1.d0))
           iph = int(xf - xfp - xf2 + xf2p)
@@ -725,19 +753,19 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
               do irow=1,bqs(jtot,jlpt)%length
   !  flag to make sure initial level is the bra, final level the ket
                 iflag = 0
-                if (bqs(jtot,jlpt)%jq(irow).eq.hf2%j(i) .and. &
-                    bqs(jtot,jlpt)%inq(irow).eq.hf2%in(i)) then
+                if (bqs(jtot,jlpt)%jq(irow).eq.hf%j(i) .and. &
+                    bqs(jtot,jlpt)%inq(irow).eq.hf%in(i)) then
                   iflag = 1
                 end if
                 do icol=1,irow
-                  if (bqs(jtot,jlpt)%jq(irow).eq.hf2%j(i) .and. &
-                      bqs(jtot,jlpt)%inq(irow).eq.hf2%in(i) .and. &
-                      bqs(jtot,jlpt)%jq(icol).eq.hf2%j(ii) .and. &
-                      bqs(jtot,jlpt)%inq(icol).eq.hf2%in(ii) .or. &
-                      bqs(jtot,jlpt)%jq(icol).eq.hf2%j(i) .and. &
-                      bqs(jtot,jlpt)%inq(icol).eq.hf2%in(i) .and. &
-                      bqs(jtot,jlpt)%jq(irow).eq.hf2%j(ii) .and. &
-                      bqs(jtot,jlpt)%inq(irow).eq.hf2%in(ii)) then
+                  if (bqs(jtot,jlpt)%jq(irow).eq.hf%j(i) .and. &
+                      bqs(jtot,jlpt)%inq(irow).eq.hf%in(i) .and. &
+                      bqs(jtot,jlpt)%jq(icol).eq.hf%j(ii) .and. &
+                      bqs(jtot,jlpt)%inq(icol).eq.hf%in(ii) .or. &
+                      bqs(jtot,jlpt)%jq(icol).eq.hf%j(i) .and. &
+                      bqs(jtot,jlpt)%inq(icol).eq.hf%in(i) .and. &
+                      bqs(jtot,jlpt)%jq(irow).eq.hf%j(ii) .and. &
+                      bqs(jtot,jlpt)%inq(irow).eq.hf%in(ii)) then
                     is = (irow*(irow - 1))/2 + icol
                     if (iflag.ne.1) then
                       xl = bqs(jtot,jlpt)%lq(icol)
@@ -765,7 +793,7 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
                     tmati(ll+1,lp+1) = tmati(ll+1,lp+1) + aimag(t)
   !     for initial level = final level, but l.ne.lp, need to include
   !     both T(l,lp) and T(lp,l)
-                    if (hf2%j(i) == hf2%j(ii) .and. hf2%in(i) == hf2%in(ii) .and. abs(xl-xlp) > 1d-60) then
+                    if (hf%j(i) == hf%j(ii) .and. hf%in(i) == hf%in(ii) .and. abs(xl-xlp) > 1d-60) then
   !     note that T(l,lp) = T(lp,l)* (Hermitean matrix)
                       tmatr(lp+1,ll+1) = tmatr(lp+1,ll+1) + real(t)
                       tmati(lp+1,ll+1) = tmati(lp+1,ll+1) - aimag(t)
@@ -799,7 +827,7 @@ end subroutine molecule_atom_2spin
 !************************************************************************************************
 ! This subroutine computes T matrix elements for molecule-molecule collisions with one spin
 !************************************************************************************************
-subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf1, sigma)
+subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf, sigma)
   use mod_hitypes, only: bqs_type
   use mod_hiutil, only: xf6j
   implicit none
@@ -809,7 +837,7 @@ subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spin
   type(bqs_type), intent(in) :: bqs(0:jfinl,2)
   real(8), intent(in) :: sr(0:jfinl,2,*) , si(0:jfinl,2,*)
   type(spin_type), intent(in) :: spins
-  type(hflvl_type), intent(in) :: hf1
+  type(hflvl_type), intent(in) :: hf
   real(8), allocatable, intent(out) :: sigma(:,:)
   ! Local variables
   integer :: jmx, jmx2, idim
@@ -827,7 +855,7 @@ subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spin
   iftmx = int(jfinl + spins%f + spins%nuc(1) - spins%h)
 
   ! Allocate sigma array
-  allocate(sigma(hf1%n, hf1%n))
+  allocate(sigma(hf%n, hf%n))
   sigma = 0d0
 
   ! Allocate work arrays
@@ -836,7 +864,7 @@ subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spin
   idim = (iftmx + jmx + 2*jmx2 + 3) * (iftmx + jmx + jmx2 + 2)
   idimr = idim / (iftmx + jmx + jmx2 +1)
 
-!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,idimr,jfrst,jfinl,iftmn,iftmx,spins,bqs,hf1,sr,si) REDUCTION(+:sigma)
+!$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,idimr,jfrst,jfinl,iftmn,iftmx,spins,bqs,hf,sr,si) REDUCTION(+:sigma)
   allocate(tmatr(idim, idim))
   allocate(tmati(idim, idim))
 !$OMP DO
@@ -845,14 +873,14 @@ subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spin
     do jlp = 1, 2
       jlpar = 1 - (jlp -1) * 2
       write(6,"(A,F5.1,A,I4)") ' Computing partial wave J_tot =', xftot, ', jlpar=', jlpar
-      do i = 1, hf1%n
-        do ii = i, hf1%n
-          xj = (hf1%j(i)/10) + spins%f
-          xjp = (hf1%j(ii)/10) + spins%f
-          xj2 = mod(hf1%j(i),10)
-          xj2p = mod(hf1%j(ii),10)
-          xf = hf1%if(i) + spins%h
-          xfp = hf1%if(ii) + spins%h
+      do i = 1, hf%n
+        do ii = i, hf%n
+          xj = (hf%j(i)/10) + spins%f
+          xjp = (hf%j(ii)/10) + spins%f
+          xj2 = mod(hf%j(i),10)
+          xj2p = mod(hf%j(ii),10)
+          xf = hf%if(i) + spins%h
+          xfp = hf%if(ii) + spins%h
           fffp = sqrt((2.d0*xf+1.d0)*(2.d0*xfp+1.d0))
           xjttmn = max(spins%h, xftot - spins%nuc(1))
           jttmin = int(xjttmn - spins%f)
@@ -875,18 +903,18 @@ subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spin
             do irow = 1, bqs(jtot,jlpt)%length
   !     flag to make sure initial level is the bra, final level the ket
               iflag = 0
-              if (bqs(jtot,jlpt)%jq(irow) == hf1%j(i) .and. bqs(jtot,jlpt)%inq(irow) == hf1%in(i)) then
+              if (bqs(jtot,jlpt)%jq(irow) == hf%j(i) .and. bqs(jtot,jlpt)%inq(irow) == hf%in(i)) then
                 iflag = 1
               end if
               do icol=1,irow
-                if (bqs(jtot,jlpt)%jq(irow).eq.hf1%j(i) .and. &
-                    bqs(jtot,jlpt)%inq(irow).eq.hf1%in(i) .and. &
-                    bqs(jtot,jlpt)%jq(icol).eq.hf1%j(ii) .and. &
-                    bqs(jtot,jlpt)%inq(icol).eq.hf1%in(ii) .or. &
-                    bqs(jtot,jlpt)%jq(icol).eq.hf1%j(i) .and. &
-                    bqs(jtot,jlpt)%inq(icol).eq.hf1%in(i) .and. &
-                    bqs(jtot,jlpt)%jq(irow).eq.hf1%j(ii) .and. &
-                    bqs(jtot,jlpt)%inq(irow).eq.hf1%in(ii)) then
+                if (bqs(jtot,jlpt)%jq(irow).eq.hf%j(i) .and. &
+                    bqs(jtot,jlpt)%inq(irow).eq.hf%in(i) .and. &
+                    bqs(jtot,jlpt)%jq(icol).eq.hf%j(ii) .and. &
+                    bqs(jtot,jlpt)%inq(icol).eq.hf%in(ii) .or. &
+                    bqs(jtot,jlpt)%jq(icol).eq.hf%j(i) .and. &
+                    bqs(jtot,jlpt)%inq(icol).eq.hf%in(i) .and. &
+                    bqs(jtot,jlpt)%jq(irow).eq.hf%j(ii) .and. &
+                    bqs(jtot,jlpt)%inq(irow).eq.hf%in(ii)) then
                   is = (irow*(irow - 1))/2 + icol
                   if (iflag.ne.1) then
                     xl = bqs(jtot,jlpt)%lq(icol)
@@ -935,7 +963,7 @@ subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spin
                       tmati(is,isp) = tmati(is,isp) + aimag(tf)
   !     for initial level = final level, but l.ne.lp or j12.ne.j12p, need to include
   !     both T(l,lp) and T(lp,l)
-                      if (hf1%j(i) == hf1%j(ii) .and. hf1%in(i) == hf1%in(ii) .and. irow /= icol) then
+                      if (hf%j(i) == hf%j(ii) .and. hf%in(i) == hf%in(ii) .and. irow /= icol) then
   !     note that T(l,lp) = T(lp,l)* (Hermitean matrix)
                         tmatr(isp,is) = tmatr(isp,is) + real(tf)
                         tmati(isp,is) = tmati(isp,is) - aimag(tf)
