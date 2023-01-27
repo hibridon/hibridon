@@ -543,11 +543,11 @@ ee = ered*econv
     do i = 1, hf%n
       do ii = 1, hf%n
         xj = hf%j(i) + spins%f
-        xf = hf%f(i)
-        xf2 = hf%if(i)
+        xf = hf%if(i)
+        xf2 = hf%f(i)
         xjp = hf%j(ii) + spins%f
-        xfp = hf%f(ii)
-        xf2p = hf%if(ii)
+        xfp = hf%if(ii)
+        xf2p = hf%f(ii)
         if (sigma(i,ii)>0.d0) then
           write(hfxfil_unit,"(f12.3,f6.1,i4,f6.1,f6.1,f7.1,i4,f6.1,f6.1,2x,1pe15.4)")&
           ee,xj,hf%in(i),xf,xf2,xjp,hf%in(ii),xfp,xf2p,sigma(i,ii)
