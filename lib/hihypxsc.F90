@@ -200,8 +200,8 @@ subroutine hypxsc(flname, a)
   deallocate(sr, si, jlev, bqs)
 
   ! Compute hyperfine XS
-  call compute_xs(twmol, rmu, ered, spins, hf1, hf2, sigma) ! Sigma is allocated within this subroutine
-  
+  if (spins%two) call compute_xs(twmol, rmu, ered, spins, hf1, sigma) 
+  if (spins%two) call compute_xs(twmol, rmu, ered, spins, hf1, sigma)
   ! Print hyperfine cross sections
   call print_xs(twmol, 6, ered, spins, hf1, hf2, sigma)
   call print_xs(twmol, hfxfil_unit, ered, spins, hf1, hf2, sigma)
@@ -411,27 +411,20 @@ end subroutine fill_hf
 !************************************************************************************************
 ! This subroutine computes XS from T matrix elements 
 !************************************************************************************************
-subroutine compute_xs(twmol, rmu, ered, spins, hf1, hf2, sigma)
+subroutine compute_xs(twmol, rmu, ered, spins, hf, sigma)
   use constants, only: ang2 => ang2c
   implicit none
   ! Arguments
   logical, intent(in) :: twmol
   real(8), intent(in) :: rmu, ered
   type(spin_type), intent(in) :: spins
-  type(hflvl_type), intent(in) :: hf1, hf2
-  real(8), intent(inout) :: sigma(hf1%n, hf1%n)
+  type(hflvl_type), intent(in) :: hf
+  real(8), intent(inout) :: sigma(hf%n, hf%n)
   ! Local variables
-  type(hflvl_type) :: hf
   real(8) :: fak, dencol, denrow, ffi, fff
   integer :: ij2, ij2p, i, ii
 
   fak = acos(-1.d0) * ang2 / (2.0d0 * rmu)
-
-  if(spins%two) then
-    hf = hf2
-  else 
-    hf = hf1
-  endif
 
   !$OMP PARALLEL DO PRIVATE(i, ii, ij2, ij2p, ffi, fff, denrow, dencol)
   do i = 1, hf%n
