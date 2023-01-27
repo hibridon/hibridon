@@ -709,8 +709,8 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
           irmax = int(xftot + spins%nuc(2))
           do ir = irmin, irmax
             r  = rmin + (ir - irmin)
-            iqmin = max(jfinl, int(abs(r - spins%nuc(1))))
-            iqmax = min(jfrst, int(r + spins%nuc(1)))
+            iqmin = max(jfrst, int(abs(r - spins%nuc(1))))
+            iqmax = min(jfinl, int(r + spins%nuc(1)))
             do jtot = iqmin, iqmax
               xjtot = jtot + spins%f
               fjtot = 2.d0 * xjtot + 1.d0
