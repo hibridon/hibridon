@@ -929,7 +929,6 @@ subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spin
                       lp = int(xlp)
                       is =  (ll + 1) * (idimr - 1) + (jr + 1)
                       isp = (lp + 1) * (idimr - 1) + (jrp + 1)
-                      write(*,*) is, isp, tf, real(tf), aimag(tf)
                       tmatr(is,isp) = tmatr(is,isp) + real(tf)
                       tmati(is,isp) = tmati(is,isp) + aimag(tf)
   !     for initial level = final level, but l.ne.lp or j12.ne.j12p, need to include
