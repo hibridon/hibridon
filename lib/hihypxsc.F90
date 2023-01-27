@@ -14,16 +14,15 @@ implicit none
 !     {jobname}n.hfx file
 !
 !     Three cases can be treated:
-!        - atom-molecule collisions with one nuclear spine
-!        - atom-molecule collisions with two nuclear spine
-!        - molecule-molecule collisions with one nuclear spine
+!        - atom-molecule collisions with one nuclear spin
+!        - atom-molecule collisions with two nuclear spin
+!        - molecule-molecule collisions with one nuclear spin
 !
 !     original author:  p.j. dagdigian
 !     this subroutine is a complete rewrite of an earlier
 !     subroutine written by j. klos and f. lique
 !
-!     Refactored as a module and parallelized by 
-!              b. desrousseaux (oct. 2022)
+!     Refactored as a module and 'parallelized' by b. desrousseaux (jan. 2023)
 !
 !*******************************************************************************
 
