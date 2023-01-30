@@ -165,7 +165,7 @@ subroutine hypxsc(flname, a)
     if(ierr < -1) then ; write(6,*) '*** READ ERROR IN HYPXSC. ABORT ***' ; return ; endif
     jlp = 1 - (jlpar-1)/2
     len2 = packed_bqs%length*(packed_bqs%length + 1)/2
-
+    
     call bqs(jtot,jlp)%init(packed_bqs%length)
     bqs(jtot,jlp)         = packed_bqs
 
@@ -495,13 +495,13 @@ subroutine print_xs(twmol, hfxfil_unit, ered, spins, hf, sigma)
       write(hfxfil_unit,"(a)") '%     E(CM-1)     JI     INI   FI      JF     INF   FF      CROSS SECTION (ANG^2)'
     else
     ! TWO MOLECULES
-      write(hfxfil_unit,"(a)") '%     E(CM-1)     JI     INI   FI      J2      JF     INF   FF      J2P      CROSS SECTION (ANG^2)'
+      write(hfxfil_unit,"(a)") '%    E(CM-1)     JI     INI   FI    J2      JF     INF   FF    J2P      CROSS SECTION (ANG^2)'
     end if
   else 
   ! TWO SPINS
     if (.not.twmol) then
     ! ONE MOLECULE
-      write(hfxfil_unit,"(a)") '%     E(CM-1)     JI     INI   F1I      F2I      JF     INF   F1F      F2F      CROSS SECTION (ANG^2)'
+      write(hfxfil_unit,"(a)") '%     E(CM-1)  JI   INI  F1I   F2I     JF  INF  F1F   F2F  CROSS SECTION (ANG^2)'
     end if
   end if
 
