@@ -501,7 +501,7 @@ subroutine print_xs(twmol, hfxfil_unit, ered, spins, hf, sigma)
   ! TWO SPINS
     if (.not.twmol) then
     ! ONE MOLECULE
-      write(hfxfil_unit,"(a)") '%     E(CM-1)     JI     INI   F1I      F2I      JF     INF   F1F      F2F      CROSS SECTION (ANG^2)'
+      write(hfxfil_unit,"(a)") '%     E(CM-1)  JI   INI  F1I   F2I     JF  INF  F1F   F2F  CROSS SECTION (ANG^2)'
     end if
   end if
 
