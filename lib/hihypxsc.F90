@@ -739,7 +739,7 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
   idim = (iftmx + 2*jmx + 3) * (iftmx + jmx + 2)
 
   dspin = spins%f + spins%nuc(1)  + spins%nuc(2)
-  if (abs(dspin - 2d0*int(dspin)) < 1d-60) then
+  if (abs(dspin - 2d0*int(dspin/2)) < 1d-60) then
     dspin = 0d0
   else
     dspin = 0.5d0
