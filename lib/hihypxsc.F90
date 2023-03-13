@@ -1,4 +1,5 @@
 module mod_hypxsc
+use omp_lib
 implicit none
 !*******************************************************************************
 !     Module to compute hyperfine-resolved integral cross sections
