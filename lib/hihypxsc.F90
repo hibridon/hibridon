@@ -822,8 +822,7 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
                       * xf6j(spins%nuc(2),xfp,xf2p,xlp,xftot,r) &
                       * xf6j(spins%nuc(1),xj,xf,xl,r,xjtot) &
                       * xf6j(spins%nuc(1),xjp,xfp,xlp,r,xjtot)
-                    t = t * phase * fffp * (2.d0*xjtot + 1.d0) &
-                      * rprod
+                    t = t * phase * fffp * (2.d0*xjtot + 1.d0) * rprod
                     ll = int(xl)
                     lp = int(xlp)
                     tmatr(ll+1,lp+1) = tmatr(ll+1,lp+1) + real(t)
