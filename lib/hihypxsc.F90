@@ -41,8 +41,8 @@ implicit none
   type spin_type
     integer :: i(2) ! nuclear spin I times 2
     real(8) :: nuc(2)
-    real(8) :: f = 0
-    real(8) :: h = 0
+    real(8) :: f = 0d0
+    real(8) :: h = 0d0
     logical :: two = .false.
   end type spin_type
 
@@ -291,8 +291,11 @@ subroutine compute_spins(nucspin, flaghf, spins)
   logical, intent(in) :: flaghf
   type(spin_type), intent(out) :: spins
   
-  spins%h = 0d0
+
+  spins%f = 0d0
   if(flaghf) spins%f = 0.5d0 
+
+  spins%h = 0d0
   if (flaghf .and. nucspin.eq.2*(nucspin/2)) spins%h = 0.5d0
   if (.not.flaghf .and. nucspin.ne.2*(nucspin/2)) spins%h = 0.5d0
 
@@ -307,7 +310,7 @@ subroutine compute_spins(nucspin, flaghf, spins)
     spins%nuc(2) = mod(nucspin,100)/2.d0
     spins%i(2) = int(2*spins%nuc(2))
   endif
-  
+
 end subroutine compute_spins
 
 
@@ -405,6 +408,7 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
     enddo
     hf = hf2
   endif
+
 
   return
 end subroutine fill_hf
