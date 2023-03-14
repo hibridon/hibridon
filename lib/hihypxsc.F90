@@ -203,9 +203,10 @@ subroutine hypxsc(flname, a)
 
   ! Compute hyperfine XS
   call compute_xs(twmol, rmu, ered, spins, hf, sigma)
-  call print_xs(twmol, 6, ered, spins, hf, sigma)
 
-  ! Print hyperfine XS
+  ! Print hyperfine XS to standard output
+  call print_xs(twmol, 6, ered, spins, hf, sigma)
+  ! Print hyperfine XS to output file
   call print_xs(twmol, hfxfil_unit, ered, spins, hf, sigma)
 
 
