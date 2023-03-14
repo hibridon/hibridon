@@ -34,7 +34,7 @@ implicit none
     real(8), allocatable :: e(:)
     integer, allocatable :: j(:)
     integer, allocatable :: in(:)
-    integer, allocatable :: if(:)
+    real(8), allocatable :: if(:)
     real(8), allocatable :: f(:)
   end type hflvl_type
 
@@ -185,10 +185,10 @@ subroutine hypxsc(flname, a)
   ! Determine the type of collision and call corresponding subroutine to compute squared T-matrix elements
   if (.not. twmol) then 
     if(.not. spins%two) then ! Molecule-Atom with 1 nuclear spin
-        write(6,"(a)") "HYPXSC | Molecule-Atom with 1 nuclear spin"
+      write(6,"(a)") "HYPXSC | Molecule-Atom with 1 nuclear spin"
       call molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf, sigma)
     else ! Molecule-Atom with 2 nuclear spins
-        write(6,"(a)") "HYPXSC | Molecule-Atom with 2 nuclear spins"
+      write(6,"(a)") "HYPXSC | Molecule-Atom with 2 nuclear spins"
       call molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf, sigma)
     endif
   else ! Molecule-Molecule with 1 nuclear spin
@@ -382,7 +382,7 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
     do
       n2 = 0
       do i = 1, n
-        f1 = hf1%if(i) + spins%f
+        f1 = hf1%if(i) + spins%h
         fnmin = abs(f1 - spins%nuc(2))
         fnmax = f1 + spins%nuc(2)
         nhyp = int(fnmax - fnmin + 1)
@@ -393,7 +393,7 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
             hf2%in(n2) = hf1%in(i)
             hf2%f(n2) = f1
             f2 = fnmin + (ii - 1)
-            hf2%if(n2) = int(f2)
+            hf2%if(n2) = f2
             hf2%e(n2) = hf1%e(i)
           endif
         enddo
@@ -408,7 +408,6 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
     enddo
     hf = hf2
   endif
-
 
   return
 end subroutine fill_hf
@@ -454,20 +453,19 @@ else
   do i = 1, hf%n
     ij2 = 0.d0
     if (twmol) ij2 = mod(hf%j(i),10)
-    ffi = hf%f(i)
+    ffi = hf%if(i)
     denrow = (2.d0 * ffi + 1.d0) * (2.d0 * ij2 + 1.d0) * (ered - hf%e(i))
     do ii = i, hf%n
       ij2p = 0.d0
       if (twmol) ij2p = mod(hf%j(ii),10)
-      fff = hf%f(ii)
+      fff = hf%if(ii)
       dencol = (2.d0 * fff + 1.d0) * (2.d0 * ij2p + 1.d0) * (ered - hf%e(ii))
       sigma(i,ii) = sigma(i,ii) * fak / denrow
       if (i.ne.ii) sigma(ii,i) = sigma(ii,i) * fak / dencol
     end do
-  end do  
+  end do
   !$OMP END PARALLEL DO
 end if
-
 
 
 end subroutine compute_xs
@@ -759,12 +757,12 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
       write(6,"(A,F5.1,A,I4)") ' Computing partial wave K_tot =', xftot, ', jlpar=', jlpar
       do i=1, hf%n
         xj = hf%j(i) + spins%f
-        xf = hf%if(i)
-        xf2 = hf%f(i)
+        xf = hf%f(i)
+        xf2 = hf%if(i)
         do ii=i, hf%n
           xjp = hf%j(ii) + spins%f
-          xfp = hf%if(ii)
-          xf2p = hf%f(ii)
+          xfp = hf%f(ii)
+          xf2p = hf%if(ii)
           fffp = sqrt((2.d0*xf+1.d0)*(2.d0*xfp+1.d0) &
             * (2.d0*xf2+1.d0)*(2.d0*xf2p+1.d0))
           iph = int(xf - xfp - xf2 + xf2p)
