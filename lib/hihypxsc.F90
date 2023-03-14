@@ -195,6 +195,8 @@ subroutine hypxsc(flname, a)
       write(6,"(a)") "HYPXSC | Molecule-Molecule with 1 nuclear spins"
       call molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf, sigma)
   endif
+  ! Print maximum number of threads used by OpenMP
+  write(6,"(a,i0)") "Maximum number of threads used by OpenMP: ", omp_get_max_threads()
 
 
   deallocate(sr, si, jlev, bqs)
