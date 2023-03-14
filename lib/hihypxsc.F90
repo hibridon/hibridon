@@ -379,23 +379,21 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
     do
       n2 = 0
       do i = 1, n
-        if (hf1%e(i)<= ered) then
-          f1 = hf1%if(i) + spins%f
-          fnmin = abs(f1 - spins%nuc(2))
-          fnmax = f1 + spins%nuc(2)
-          nhyp = int(fnmax - fnmin + 1)
-          do ii = 1,  nhyp
-            n2 = n2 + 1
-            if(fill) then
-              hf2%j(n2) = hf1%j(i)
-              hf2%in(n2) = hf1%in(i)
-              hf2%f(n2) = f1
-              f2 = fnmin + (ii - 1)
-              hf2%if(n2) = int(f2)
-              hf2%e(n2) = hf1%e(i)
-            endif
-          enddo
-        endif
+        f1 = hf1%if(i) + spins%f
+        fnmin = abs(f1 - spins%nuc(2))
+        fnmax = f1 + spins%nuc(2)
+        nhyp = int(fnmax - fnmin + 1)
+        do ii = 1,  nhyp
+          n2 = n2 + 1
+          if(fill) then
+            hf2%j(n2) = hf1%j(i)
+            hf2%in(n2) = hf1%in(i)
+            hf2%f(n2) = f1
+            f2 = fnmin + (ii - 1)
+            hf2%if(n2) = int(f2)
+            hf2%e(n2) = hf1%e(i)
+          endif
+        enddo
       enddo
       if(.not. fill) then
         hf2%n = n2
