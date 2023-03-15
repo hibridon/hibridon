@@ -4,8 +4,8 @@ ARNO TEST
     5.5000    9.0000     .1400   rstart, rendld, spac
   F                              prairy
   1.160      8.00    25.0  7.00  tolai, rincr, rendai, fstfac
-   1                             nerg
-   442.0000
+   3                             nerg
+   442.0000 542.0000 642.0000    
    17.13500                      xmu
    30.0000                       rcut
    0   5   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
