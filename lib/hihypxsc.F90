@@ -1,4 +1,5 @@
 module mod_hypxsc
+use omp_lib
 implicit none
 !*******************************************************************************
 !     Module to compute hyperfine-resolved integral cross sections
@@ -33,15 +34,15 @@ implicit none
     real(8), allocatable :: e(:)
     integer, allocatable :: j(:)
     integer, allocatable :: in(:)
-    integer, allocatable :: if(:)
+    real(8), allocatable :: if(:)
     real(8), allocatable :: f(:)
   end type hflvl_type
 
   type spin_type
     integer :: i(2) ! nuclear spin I times 2
     real(8) :: nuc(2)
-    real(8) :: f = 0
-    real(8) :: h = 0
+    real(8) :: f = 0d0
+    real(8) :: h = 0d0
     logical :: two = .false.
   end type spin_type
 
@@ -184,25 +185,28 @@ subroutine hypxsc(flname, a)
   ! Determine the type of collision and call corresponding subroutine to compute squared T-matrix elements
   if (.not. twmol) then 
     if(.not. spins%two) then ! Molecule-Atom with 1 nuclear spin
-        write(6,"(a)") "HYPXSC | Molecule-Atom with 1 nuclear spin"
+      write(6,"(a)") "HYPXSC | Molecule-Atom with 1 nuclear spin"
       call molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf, sigma)
     else ! Molecule-Atom with 2 nuclear spins
-        write(6,"(a)") "HYPXSC | Molecule-Atom with 2 nuclear spins"
+      write(6,"(a)") "HYPXSC | Molecule-Atom with 2 nuclear spins"
       call molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf, sigma)
     endif
   else ! Molecule-Molecule with 1 nuclear spin
       write(6,"(a)") "HYPXSC | Molecule-Molecule with 1 nuclear spins"
       call molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, hf, sigma)
   endif
+  ! Print maximum number of threads used by OpenMP
+  write(6,"(a,i0)") "Maximum number of threads used by OpenMP: ", omp_get_max_threads()
 
 
   deallocate(sr, si, jlev, bqs)
 
   ! Compute hyperfine XS
   call compute_xs(twmol, rmu, ered, spins, hf, sigma)
-  call print_xs(twmol, 6, ered, spins, hf, sigma)
 
-  ! Print hyperfine XS
+  ! Print hyperfine XS to standard output
+  call print_xs(twmol, 6, ered, spins, hf, sigma)
+  ! Print hyperfine XS to output file
   call print_xs(twmol, hfxfil_unit, ered, spins, hf, sigma)
 
 
@@ -290,8 +294,11 @@ subroutine compute_spins(nucspin, flaghf, spins)
   logical, intent(in) :: flaghf
   type(spin_type), intent(out) :: spins
   
-  spins%h = 0d0
+
+  spins%f = 0d0
   if(flaghf) spins%f = 0.5d0 
+
+  spins%h = 0d0
   if (flaghf .and. nucspin.eq.2*(nucspin/2)) spins%h = 0.5d0
   if (.not.flaghf .and. nucspin.ne.2*(nucspin/2)) spins%h = 0.5d0
 
@@ -306,7 +313,7 @@ subroutine compute_spins(nucspin, flaghf, spins)
     spins%nuc(2) = mod(nucspin,100)/2.d0
     spins%i(2) = int(2*spins%nuc(2))
   endif
-  
+
 end subroutine compute_spins
 
 
@@ -378,23 +385,21 @@ subroutine fill_hf(nlevel, jlev, elev, inlev, j1min, j2max, ered, twmol, spins, 
     do
       n2 = 0
       do i = 1, n
-        if (hf1%e(i)<= ered) then
-          f1 = hf1%if(i) + spins%f
-          fnmin = abs(f1 - spins%nuc(2))
-          fnmax = f1 + spins%nuc(2)
-          nhyp = int(fnmax - fnmin + 1)
-          do ii = 1,  nhyp
-            n2 = n2 + 1
-            if(fill) then
-              hf2%j(n2) = hf1%j(i)
-              hf2%in(n2) = hf1%in(i)
-              hf2%f(n2) = f1
-              f2 = fnmin + (ii - 1)
-              hf2%if(n2) = int(f2)
-              hf2%e(n2) = hf1%e(i)
-            endif
-          enddo
-        endif
+        f1 = hf1%if(i) + spins%h
+        fnmin = abs(f1 - spins%nuc(2))
+        fnmax = f1 + spins%nuc(2)
+        nhyp = int(fnmax - fnmin + 1)
+        do ii = 1,  nhyp
+          n2 = n2 + 1
+          if(fill) then
+            hf2%j(n2) = hf1%j(i)
+            hf2%in(n2) = hf1%in(i)
+            hf2%f(n2) = f1
+            f2 = fnmin + (ii - 1)
+            hf2%if(n2) = f2
+            hf2%e(n2) = hf1%e(i)
+          endif
+        enddo
       enddo
       if(.not. fill) then
         hf2%n = n2
@@ -451,20 +456,19 @@ else
   do i = 1, hf%n
     ij2 = 0.d0
     if (twmol) ij2 = mod(hf%j(i),10)
-    ffi = hf%f(i)
+    ffi = hf%if(i)
     denrow = (2.d0 * ffi + 1.d0) * (2.d0 * ij2 + 1.d0) * (ered - hf%e(i))
     do ii = i, hf%n
       ij2p = 0.d0
       if (twmol) ij2p = mod(hf%j(ii),10)
-      fff = hf%f(ii)
+      fff = hf%if(ii)
       dencol = (2.d0 * fff + 1.d0) * (2.d0 * ij2p + 1.d0) * (ered - hf%e(ii))
       sigma(i,ii) = sigma(i,ii) * fak / denrow
       if (i.ne.ii) sigma(ii,i) = sigma(ii,i) * fak / dencol
     end do
-  end do  
+  end do
   !$OMP END PARALLEL DO
 end if
-
 
 
 end subroutine compute_xs
@@ -542,11 +546,11 @@ ee = ered*econv
     do i = 1, hf%n
       do ii = 1, hf%n
         xj = hf%j(i) + spins%f
-        xf = hf%if(i)
-        xf2 = hf%f(i)
+        xf = hf%f(i)
+        xf2 = hf%if(i)
         xjp = hf%j(ii) + spins%f
-        xfp = hf%if(ii)
-        xf2p = hf%f(ii)
+        xfp = hf%f(ii)
+        xf2p = hf%if(ii)
         if (sigma(i,ii)>0.d0) then
           write(hfxfil_unit,"(f12.3,f6.1,i4,f6.1,f6.1,f7.1,i4,f6.1,f6.1,2x,1pe15.4)")&
           ee,xj,hf%in(i),xf,xf2,xjp,hf%in(ii),xfp,xf2p,sigma(i,ii)
@@ -738,7 +742,7 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
   idim = (iftmx + 2*jmx + 3) * (iftmx + jmx + 2)
 
   dspin = spins%f + spins%nuc(1)  + spins%nuc(2)
-  if (abs(dspin - 2d0*int(dspin)) < 1d-60) then
+  if (abs(dspin - 2d0*int(dspin/2)) < 1d-60) then
     dspin = 0d0
   else
     dspin = 0.5d0
@@ -756,12 +760,12 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
       write(6,"(A,F5.1,A,I4)") ' Computing partial wave K_tot =', xftot, ', jlpar=', jlpar
       do i=1, hf%n
         xj = hf%j(i) + spins%f
-        xf = hf%if(i)
-        xf2 = hf%f(i)
+        xf = hf%f(i)
+        xf2 = hf%if(i)
         do ii=i, hf%n
           xjp = hf%j(ii) + spins%f
-          xfp = hf%if(ii)
-          xf2p = hf%f(ii)
+          xfp = hf%f(ii)
+          xf2p = hf%if(ii)
           fffp = sqrt((2.d0*xf+1.d0)*(2.d0*xfp+1.d0) &
             * (2.d0*xf2+1.d0)*(2.d0*xf2p+1.d0))
           iph = int(xf - xfp - xf2 + xf2p)
@@ -821,8 +825,7 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
                       * xf6j(spins%nuc(2),xfp,xf2p,xlp,xftot,r) &
                       * xf6j(spins%nuc(1),xj,xf,xl,r,xjtot) &
                       * xf6j(spins%nuc(1),xjp,xfp,xlp,r,xjtot)
-                    t = t * phase * fffp * (2.d0*xjtot + 1.d0) &
-                      * rprod
+                    t = t * phase * fffp * (2.d0*xjtot + 1.d0) * rprod
                     ll = int(xl)
                     lp = int(xlp)
                     tmatr(ll+1,lp+1) = tmatr(ll+1,lp+1) + real(t)
