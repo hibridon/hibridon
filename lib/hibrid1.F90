@@ -1402,10 +1402,15 @@ real(8), dimension(nch) :: gam1
 real(8), dimension(nch) :: gam2
 integer(8) :: lrairy ! length of an airy record in bytes
 ! ----------------------------------------------------------------------------
+! Save variables for subsequent energies
+save spcmn, spcmx, rmin, maxstp
+
 allocate(w(nch*nmax))
 allocate(tmat(nch*nmax))
 allocate(vecnow(nch*nmax))
 allocate(vecnew(nch*nmax))
+
+
 if (.not.twoen) itwo = -1
 if (itwo .le. 0) then
   if (photof) then
