@@ -136,7 +136,6 @@ type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-integer :: ifs1
 integer :: nn
 dimension jhold(1), ehold(1), &
     sc1(1), sc2(1), sc3(1), sc4(1), ishold(1)
@@ -146,7 +145,6 @@ real(8), pointer :: b1rot, d1rot, gamma, b2rot
 n1max=>ispar(1); j2min=>ispar(2); j2max=>ispar(3); ipotsy2=>ispar(4)
 b1rot=>rspar(1); d1rot=>rspar(2); gamma=>rspar(3); b2rot=>rspar(4);
 !  check for consistency in the values of flaghf and csflag
-ifs1 = 0
 call bqs%init(nmax)
 nn = 0
 if (.not. flaghf) then
@@ -222,7 +220,7 @@ do n1 = 0, n1max
 !  DON'T subtract energy of lowest H2 level
         ehold(nlevel) = b1rot * nn1 - d1rot * nn1**2 &
             + b2rot * j2 * (j2 + 1.d0)
-          if (ifs1.eq.1) then
+          if (iep1.eq.1) then
             ehold(nlevel) = ehold(nlevel) + 0.5d0 * gamma * n1
           else
             ehold(nlevel) = ehold(nlevel) &
