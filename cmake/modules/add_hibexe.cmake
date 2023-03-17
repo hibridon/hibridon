@@ -77,4 +77,8 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
 # Intel (ifort)
 endif()
 
+
+# Install instructions
+install(TARGETS ${EXE_NAME} DESTINATION bin)
+
 endfunction(add_hibexe)
