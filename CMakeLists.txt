@@ -9,6 +9,9 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose Release or Debug" FORCE)
 endif()
 
+# Code coverage
+set(ENABLE_CODE_COVERAGE "OFF" CACHE BOOL "to enable or disable code coverage (mostly for developers)")
+
 # profiling is disabled by default because:
 # 1. most users won't need it: this is targetted to developers, not users
 # 2. it makes code slower

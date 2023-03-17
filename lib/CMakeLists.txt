@@ -134,7 +134,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-ffpe-trap=invalid,zero,overflow>
 
 
-      $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -fprofile-arcs -ftest-coverage at compile time)
+      $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage -Wno-coverage-invalid-line-number> # Code coverage (same as -fprofile-arcs -ftest-coverage at compile time)
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
       $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
     )
