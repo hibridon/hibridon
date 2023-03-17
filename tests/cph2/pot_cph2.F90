@@ -12,6 +12,7 @@ subroutine loapot(iunit,filnam)
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
+use mod_conlam, only: nlam
 character*(*) filnam
 potnam='HALVICK Cp(2P)-H2 PES'
 ibasty=12
@@ -21,6 +22,7 @@ mproj(1)=0
 ntv(1)=1
 ivcol(1,1)=0
 ivrow(1,1)=0
+nlam=4
 return
 end
 ! --------------------------------------------------------------------------
@@ -126,7 +128,6 @@ vvl(2)=(rac5/9.d0)*(2.d0*evec(1)-evec(2)-evec(3) &
 vvl(3)=(2.d0*(evec(4)-evec(1)-evec(5))+evec(2)+evec(3))/9.d0
 ! v222
 vvl(4)=(evec(3)-evec(2))/3.d0
-vvl(5)=0.0d0 ! todo: check if zero is correct here as vvl(5) needs to be initialized because it's used later on by h2p base co      !de
 ! transform to space frame terms if CC or CS case 1C
 if (.not. csflag .or. (csflag .and. ihomo)) then
   call dcopy(4,vvl,1,vvll,1)
