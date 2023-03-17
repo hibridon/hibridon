@@ -1051,8 +1051,8 @@ save potfil
 !  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
 #include "common/comdot.F90"
 
-integer, pointer :: nterm, numpot, ipotsy, iop, ivbend, jmax
-real(8), pointer :: emax
+integer, pointer, save :: nterm, numpot, ipotsy, iop, ivbend, jmax
+real(8), pointer, save :: emax
 nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=>ispar(4); ivbend=>ispar(5); jmax=>ispar(6);
 emax=>rspar(1)
 

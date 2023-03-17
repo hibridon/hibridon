@@ -539,8 +539,8 @@ character*60 filnam, line, potfil, filnm1
 save potfil
 #include "common/comdot.F90"
 
-integer, pointer :: nterm, nsym
-real(8), pointer :: brot, drot, hrot
+integer, pointer, save :: nterm, nsym
+real(8), pointer, save :: brot, drot, hrot
 nterm=>ispar(1); nsym=>ispar(2)
 brot=>rspar(1); drot=>rspar(2); hrot=>rspar(3)
 

@@ -574,8 +574,8 @@ character*(*) fname
 character*60 filnam, line, potfil, filnm1
 #include "common/comdot.F90"
 save potfil
-integer, pointer :: n1max, j2min, j2max, ipotsy2
-real(8), pointer :: b1rot, d1rot, gamma, b2rot
+integer, pointer, save :: n1max, j2min, j2max, ipotsy2
+real(8), pointer, save :: b1rot, d1rot, gamma, b2rot
 n1max=>ispar(1); j2min=>ispar(2); j2max=>ispar(3); ipotsy2=>ispar(4)
 b1rot=>rspar(1); d1rot=>rspar(2); gamma=>rspar(3); b2rot=>rspar(4);
 

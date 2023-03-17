@@ -908,8 +908,8 @@ character*60 filnam, line, potfil, filnm1
 #include "common/comdot.F90"
 save potfil
 
-integer, pointer ::nterm, numpot, jmax 
-real(8), pointer :: arot, brot, crot, emax
+integer, pointer, save ::nterm, numpot, jmax 
+real(8), pointer, save :: arot, brot, crot, emax
 nterm=>ispar(1); numpot=>ispar(2); jmax=>ispar(3)
 arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4)
 

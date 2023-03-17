@@ -707,8 +707,8 @@ character*60 filnam, line, potfil, filnm1
 save potfil
 
 
-integer, pointer :: j1max, j2min, j2max, ipotsy2
-real(8), pointer :: b1rot, d1rot, flmbda, gamma, b2rot
+integer, pointer, save :: j1max, j2min, j2max, ipotsy2
+real(8), pointer, save :: b1rot, d1rot, flmbda, gamma, b2rot
 j1max=>ispar(1); j2min=>ispar(2); j2max=>ispar(3); ipotsy2=>ispar(4)
 b1rot=>rspar(1); d1rot=>rspar(2); flmbda=>rspar(3); gamma=>rspar(4); b2rot=>rspar(5)
 

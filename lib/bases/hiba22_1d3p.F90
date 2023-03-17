@@ -1044,8 +1044,8 @@ character*(*) fname
 character*60 filnam, line, potfil, filnm1
 #include "common/comdot.F90"
 save potfil
-integer, pointer :: nterm, nstate, ipol, npot
-real(8), pointer :: en1d
+integer, pointer, save :: nterm, nstate, ipol, npot
+real(8), pointer, save :: en1d
 nterm=>ispar(1); nstate=>ispar(2); ipol=>ispar(3); npot=>ispar(4)
 en1d=>rspar(1)
 

@@ -653,8 +653,8 @@ save potfil
 !  in the same order as in the common block /cosysr/
 !  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
 #include "common/comdot.F90"
-integer, pointer :: nterm, numpot, ipotsy, iop, jmax
-real(8), pointer :: brot, crot, delta, emax
+integer, pointer, save :: nterm, numpot, ipotsy, iop, jmax
+real(8), pointer, save :: brot, crot, delta, emax
 nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=>ispar(4); jmax=>ispar(5)
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4)
 

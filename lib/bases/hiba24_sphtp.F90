@@ -1028,8 +1028,8 @@ character*(*) fname
 character*60 filnam, line, potfil, filnm1
 #include "common/comdot.F90"
 save potfil
-integer, pointer :: nterm, iop, jmax
-real(8), pointer :: brot, dj, dk
+integer, pointer, save :: nterm, iop, jmax
+real(8), pointer, save :: brot, dj, dk
 nterm=>ispar(1); iop=>ispar(2); jmax=>ispar(3)
 brot=>rspar(1) ; dj=>rspar(2); dk=>rspar(3)
 
