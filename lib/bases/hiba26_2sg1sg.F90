@@ -218,13 +218,11 @@ do n1 = 0, n1max
         nn1 = n1 * (n1 + 1.d0)
 !
 !  DON'T subtract energy of lowest H2 level
-        ehold(nlevel) = b1rot * nn1 - d1rot * nn1**2 &
-            + b2rot * j2 * (j2 + 1.d0)
-          if (iep1.eq.1) then
+        ehold(nlevel) = b1rot * nn1 - d1rot * nn1**2 + b2rot * j2 * (j2 + 1.d0)
+          if (ieps1.eq.1) then
             ehold(nlevel) = ehold(nlevel) + 0.5d0 * gamma * n1
           else
-            ehold(nlevel) = ehold(nlevel) &
-             - 0.5d0 * gamma * (n1 + 1.d0)
+            ehold(nlevel) = ehold(nlevel) - 0.5d0 * gamma * (n1 + 1.d0)
         end if
         ehold(nlevel) = ehold(nlevel) / econv
       end do
