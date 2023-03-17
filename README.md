@@ -133,16 +133,16 @@ This will automatically find the required libraries and compiler and create a Ma
     ```
 - **Build in debug mode**
 
-By default, the source files are compiled in "Release" mode.
-You can build Hibridon in a "Debug" mode that will disable all compiler optimizations and produce debugging symbols table and traceback informations:
+  By default, the source files are compiled in "Release" mode.
+  You can build Hibridon in a "Debug" mode that will disable all compiler optimizations and produce debugging symbols table and traceback informations:
     ```bash
     cd ~/hib_build
     cmake ./project/ -DCMAKE_BUILD_TYPE=Debug
     ```
 
 - **Change the default install prefix**
-By default, the executables will be installed in `/usr/local/bin/`.
-You can change this by setting the `CMAKE_INSTALL_PREFIX` variable:
+  By default, the executables will be installed in `/usr/local/bin/`.
+  You can change this by setting the `CMAKE_INSTALL_PREFIX` variable:
     ```bash
     cd ~/hib_build
     cmake ./project/ -DCMAKE_INSTALL_PREFIX=<path>
@@ -154,7 +154,7 @@ You can change this by setting the `CMAKE_INSTALL_PREFIX` variable:
     ```bash
     make
     ```
-The executable files will be put in the current directory (`~/hib_build`).
+  The executable files will be put in the current directory (`~/hib_build`).
 - **Make a specific executable** 
   ```bash
     make <executable>
@@ -162,15 +162,16 @@ The executable files will be put in the current directory (`~/hib_build`).
   Where `<executable>` is one of the executable you defined in the CMakeLists.txt configuration file, e.g.: `NH3-H2.exe`.
 
 - **Install executables in /usr/local/bin/ (Optional)** 
-You can install all the generatted executables in the `<prefix>/bin/` directory by running:
+
+  You can install all the generatted executables in the `<prefix>/bin/` directory by running:
     ```bash
     make install
     ```
-By default, `<prefix>` is set to `/usr/local/`, which is the standard location for user-installed software on macOS and most Linux distributions.
+  By default, `<prefix>` is set to `/usr/local/`, which is the standard location for user-installed software on macOS and most Linux distributions.
 
-Note that this will overwrite any existing executable with the same name in the destination folder.
+  Note that this will overwrite any existing executable with the same name in the destination folder.
 
-The default <prefix> directory (`/usr/local/`) can be changed by setting the `CMAKE_INSTALL_PREFIX` (see previous section).
+  The default <prefix> directory (`/usr/local/`) can be changed by setting the `CMAKE_INSTALL_PREFIX` (see previous section).
 
 ## 5. Test Hibridon (Optional)
 Hibridon testing must be enabled (see Section 3: Configure your project's build).
