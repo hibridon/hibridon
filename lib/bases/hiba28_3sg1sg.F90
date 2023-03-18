@@ -778,7 +778,7 @@ entry sav3sg1sg (readpt)
 write (FUNIT_INP, 310) j1max, j2min, j2max, ipotsy2, iop
 310 format(5i4,14x,'j1max, j2min, j2min, ipotsy2, iop')
 write (FUNIT_INP, 320) b1rot, d1rot, flmbda, gamma, b2rot
-320 format(f10.7, e12.5, f10.7,'  b1rot, d1rot, flmbda, gamma, b2rot')
+320 format(f10.7, e12.5, f10.7, e12.5, f10.7'  b1rot, d1rot, flmbda, gamma, b2rot')
 write (FUNIT_INP, 285) potfil
 285 format (a)
 return
