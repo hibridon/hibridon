@@ -1145,7 +1145,8 @@ integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: is, isa, isi, isr, isym, iv
-integer :: j, l, lc, nmax, nparsg, nterm, numvpi
+integer :: j, l, lc, nmax, nparsg, nterm
+integer, save :: numvpi
 logical existf
 character*8 char
 character*(*) fname
