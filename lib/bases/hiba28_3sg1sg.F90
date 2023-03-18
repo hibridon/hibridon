@@ -674,9 +674,6 @@ subroutine sy3sg1sg (irpot, readpt, iread)
 !    j2max:    maximum rotational angular momentum for molecule 2
 !    ipotsy2:  symmetry of potential.  set to 2 for homonuclear
 !              molecule 2, set to 1 for heteronuclear molecule 2
-!    iop:      ortho/para label for levele of molecule 2. If ihomo=.true.
-!              then only para states will be included if iop=1 and
-!              only ortho states if iop=-1
 !  variable in common  /cosys/
 !    scod:    character*8 array of dimension lcode, which contains names
 !             of all system dependent parameters
@@ -705,7 +702,6 @@ character*(*) fname
 character*60 filnam, line, potfil, filnm1
 #include "common/comdot.F90"
 save potfil
-integer, save :: iop
 integer, pointer, save :: j1max, j2min, j2max, ipotsy2
 real(8), pointer, save :: b1rot, d1rot, flmbda, gamma, b2rot
 j1max=>ispar(1); j2min=>ispar(2); j2max=>ispar(3); ipotsy2=>ispar(4)
@@ -774,8 +770,8 @@ return
 ! --------------------------------------------------------------
 entry sav3sg1sg (readpt)
 !  save input parameters for 3sigma-1sigma molecule scattering
-write (FUNIT_INP, 310) j1max, j2min, j2max, ipotsy2, iop
-310 format(5i4,14x,'j1max, j2min, j2min, ipotsy2, iop')
+write (FUNIT_INP, 310) j1max, j2min, j2max, ipotsy2
+310 format(4i4,14x,'j1max, j2min, j2min, ipotsy2')
 write (FUNIT_INP, 320) b1rot, d1rot, flmbda, gamma, b2rot
 320 format(f10.7, e12.5, f10.7, e12.5, f10.7'  b1rot, d1rot, flmbda, gamma, b2rot')
 write (FUNIT_INP, 285) potfil
