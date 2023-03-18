@@ -698,15 +698,14 @@ implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-integer :: iop, j, l, lc
+integer :: j, l, lc
 logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 #include "common/comdot.F90"
 save potfil
-
-
+integer, save :: iop
 integer, pointer, save :: j1max, j2min, j2max, ipotsy2
 real(8), pointer, save :: b1rot, d1rot, flmbda, gamma, b2rot
 j1max=>ispar(1); j2min=>ispar(2); j2max=>ispar(3); ipotsy2=>ispar(4)
