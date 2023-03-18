@@ -22,4 +22,7 @@
              1             2                           igupi, nparpi
    200.000      0.800000      0.200000E-02  0.200000   esg, bsg, dsg, gsr
    1                                                  numvpi
+   0   5                                              ivpi, jmax
+   100.000      0.800000      0.200000E-02            epi, bpi, dpi
+  0.100000E-01  0.100000E-01  0.100000E-01            aso, p, q
                                                             
