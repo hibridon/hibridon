@@ -194,6 +194,12 @@ integer, intent(in) :: ibasty
             lms_1sg1sg%l1 = 0 ; lms_1sg1sg%l2 = 0 ;lms_1sg1sg%ltot = 0
             lms_1sg1sg%l1 = 0 ; lms_1sg1sg%l2 = 2 ;lms_1sg1sg%ltot = 2
             lms_1sg1sg%l1 = 0 ; lms_1sg1sg%l2 = 4 ;lms_1sg1sg%ltot = 4
+        case (26)
+            nlam = 3
+            allocate(lms_1sg1sg(nlam))
+            lms_1sg1sg%l1 = 0 ; lms_1sg1sg%l2 = 0 ;lms_1sg1sg%ltot = 0
+            lms_1sg1sg%l1 = 0 ; lms_1sg1sg%l2 = 2 ;lms_1sg1sg%ltot = 2
+            lms_1sg1sg%l1 = 0 ; lms_1sg1sg%l2 = 4 ;lms_1sg1sg%ltot = 4
         case (27)
             nlam = 24
             lammin(1) = 0 ; lammin(2) = 2 ; lammin(3) = 4 ; lammin(4) = 6
