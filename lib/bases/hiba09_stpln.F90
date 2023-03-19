@@ -707,8 +707,8 @@ parameter (icod=9, ircod=5)
 #include "common/comdot.F90"
 save potfil
 
-integer, pointer :: nterm, numpot, ipotsy, iop, ninv, jmax, ipotsy2, j2max, j2min
-real(8), pointer :: brot, crot, delta, emax, drot
+integer, pointer, save :: nterm, numpot, ipotsy, iop, ninv, jmax, ipotsy2, j2max, j2min
+real(8), pointer, save :: brot, crot, delta, emax, drot
 nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=> ispar(4); ninv=>ispar(5)
 jmax=>ispar(6); ipotsy2=>ispar(7); j2max=>ispar(8); j2min=>ispar(9)
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)

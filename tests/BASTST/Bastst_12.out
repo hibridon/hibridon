@@ -1,0 +1,234 @@
+      BASTST                                     
+ DUMMY POTENTIAL FOR TESTING PURPOSES            
+ ==============================
+     *** Parameters:
+ JTOT1  =  20        JTOT2  =  20        JTOTD  =   5        JLPAR  =   1
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  48        IPRINT =   1
+ FSTFAC =  15.00     RINCR  =  1.000     RCUT   =  30.00     RENDAI =  1.000    
+ RENDLD =  1.000     RSTART =  1.000     SPAC   = 0.1000     TOLAI  =  1.000    
+ XMU    =  16.47    
+     *** HOMO+2P system parameters:
+ NTERM  =   1        IOP    =   1        JMAX   =   1
+ BROT   =  59.33     ASO    =  10.17    
+ LAMMIN:    1
+ LAMMAX:    9
+ MPROJ:     0
+     *** Flags:
+ AIRYFL= F    BASTST= T    BATCH = F    CHLIST= T    CSFLAG= F    FLAGHF= T
+ FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= F    NOPRIN= F    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= F    WAVEFL= F
+ WRPART= F    WRSMAT= F    WRXSEC= F    BOUNDC= F
+ ** Energies:     5000.000000
+ NOUT:  4; JOUT:  0   1   2   3
+ INDOUT:    0
+ ==============================
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2023-03-19 at 05:05
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: c8d05e5fae8237abaec10305f812301fba7a4468
+SYS: Darwin 22.2.0 x86_64
+COMPILER: /opt/intel/oneapi/compiler/2022.2.1/mac/bin/intel64/ifort
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+ 
+      Model Name: MacBook Pro
+      Model Identifier: MacBookPro14,3
+      Processor Name: Quad-Core Intel Core i7
+      Processor Speed: 2.9 GHz
+      Number of Processors: 1
+      Total Number of Cores: 4
+      L2 Cache (per Core): 256 KB
+      L3 Cache: 8 MB
+      Hyper-Threading Technology: Enabled
+      Memory: 16 GB
+ --------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ All publications resulting from use of the integrators included in the
+ Hibridon code must include the following reference:
+
+ D. E. Manolopoulos, J. Chem. Phys. 85, 6425 (1986); M. H. Alexander and D. E.
+ Manolopoulos, J. Chem. Phys. 80, 2044 (1987).
+
+ All publications involving the determination ofphotodissociation cross sections
+ must also include the following reference:
+
+ M. H. Alexander, Comput. Phys. Commun, 75, 87 (1993).
+
+ All publications investigating flux redistribution must include the following references:
+
+ M. H. Alexander, J. Chem. Phys. 95, 8931 (1991); D. E. Manolopoulos and
+ M. H. Alexander, J. Chem. Phys.  97, 2527 (1992).
+
+ All publications resulting from use of the Hibridon package must include
+ the following reference:
+
+ HIBRIDON is a package of programs for the time-independent quantum treatment
+ of inelastic collisions and photodissociation written by M. H. Alexander,
+ D. E.  Manolopoulos, H.-J. Werner, and B. Follmeg, with contributions by
+ P. F. Vohralik, D. Lemoine, G. Corey, B. Johnson, T. Orlikowski, A. Berning,
+ A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly, G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J. Klos, and F. Lique
+ -----------------------------------------------------------------------------
+
+ ** LABEL:          BASTST                                     
+ ** POT NAME:  DUMMY POTENTIAL FOR TESTING PURPOSES            
+ ** DATE:      Mar 19 05:07:48 2023
+
+ *** WARNING:  NAIRY .NE. 1 BUT AIRYFL .EQ. .FALSE.
+ ** NMAX= 500  NAIRY= 500
+ ** TOTAL NUMBER OF ANISOTROPIC TERMS= 1
+
+ **  CC MOL + 2P ATOM ** RMU=  16.4700       E=  5000.00   JTOT= 20.5   JLPAR= 1
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=   30.00
+
+   N   JA(IS)  JMOL  K(J)    L    CENT    EINT(CM-1)
+   1     0.5     0     1    20   420         0.000
+   2     0.5     1     1    20   420         0.000
+   3     0.5     1     1    22   506         0.000
+   4     1.5     0     1    20   420        15.255
+   5     1.5     1     1    20   420        15.255
+   6     1.5     1     1    22   506        15.255
+   7     1.5     2     1    18   342        15.255
+   8     1.5     2     1    20   420        15.255
+   9     1.5     2     1    22   506        15.255
+
+ ILAM  LR LA L12  ICOL  IROW   I    IV2    VEE
+   1    2  2  0    1     4    10     4   0.12649111    
+   1    2  2  0    2     5    10    14  -0.40000000E-01
+   1    2  2  0    3     6    10    24  -0.40000000E-01
+   1    2  2  0    4     4    10    31   0.89442719E-01
+   1    2  2  0    5     5    10    41  -0.71554175E-01
+   1    2  2  0    6     6    10    51  -0.71554175E-01
+   1    2  2  0    7     7    10    61   0.17888544E-01
+   1    2  2  0    8     8    10    71   0.17888544E-01
+   1    2  2  0    9     9    10    81   0.17888544E-01
+   2    0  2  2    1     5    10     5   0.60999428E-01
+   2    0  2  2    1     6    10     6  -0.11081096    
+   2    0  2  2    1     7    10     7  -0.19499683    
+   2    0  2  2    1     8    10     8   0.12958353    
+   2    0  2  2    1     9    10     9  -0.95834988E-01
+   2    0  2  2    2     4    10    13   0.96448564E-01
+   2    0  2  2    2     5    10    14   0.95682909E-01
+   2    0  2  2    2     6    10    15   0.15114490    
+   2    0  2  2    2     7    10    16  -0.14296074    
+   2    0  2  2    2     8    10    17  -0.34245402E-01
+   2    0  2  2    2     9    10    18   0.13071784    
+   2    0  2  2    3     4    10    22  -0.17520752    
+   2    0  2  2    3     5    10    23   0.15114490    
+   2    0  2  2    3     6    10    24  -0.95682909E-01
+   2    0  2  2    3     8    10    26  -0.71149109E-01
+   2    0  2  2    3     9    10    27   0.11063512    
+   2    0  2  2    4     5    10    32  -0.86266219E-01
+   2    0  2  2    4     6    10    33   0.15671037    
+   2    0  2  2    4     7    10    34  -0.68941791E-01
+   2    0  2  2    4     8    10    35   0.45814695E-01
+   2    0  2  2    4     9    10    36  -0.33882785E-01
+   2    0  2  2    5     5    10    41  -0.21395349E-01
+   2    0  2  2    5     6    10    42  -0.33797027E-01
+   2    0  2  2    5     7    10    43  -0.12786797    
+   2    0  2  2    5     8    10    44  -0.30630019E-01
+   2    0  2  2    5     9    10    45   0.11691759    
+   2    0  2  2    6     6    10    51   0.21395349E-01
+   2    0  2  2    6     8    10    53  -0.63637698E-01
+   2    0  2  2    6     9    10    54   0.98955060E-01
+   2    0  2  2    7     7    10    61   0.92307692E-01
+   2    0  2  2    7     8    10    62  -0.10186315    
+   2    0  2  2    8     8    10    71  -0.84865832E-01
+   2    0  2  2    8     9    10    72  -0.12383355    
+   2    0  2  2    9     9    10    81  -0.74418605E-02
+   3    2  0  2    1     2    10     2   0.13639887    
+   3    2  0  2    1     3    10     3  -0.24778085    
+   3    2  0  2    2     2    10    11  -0.10697674    
+   3    2  0  2    2     3    10    12  -0.16898514    
+   3    2  0  2    3     3    10    21   0.10697674    
+   3    2  0  2    4     5    10    32  -0.43133109E-01
+   3    2  0  2    4     6    10    33   0.78355184E-01
+   3    2  0  2    4     7    10    34  -0.20682537    
+   3    2  0  2    4     8    10    35   0.13744409    
+   3    2  0  2    4     9    10    36  -0.10164835    
+   3    2  0  2    5     5    10    41   0.85581395E-01
+   3    2  0  2    5     6    10    42   0.13518811    
+   3    2  0  2    5     7    10    43   0.19180196    
+   3    2  0  2    5     8    10    44   0.45945028E-01
+   3    2  0  2    5     9    10    45  -0.17537638    
+   3    2  0  2    6     6    10    51  -0.85581395E-01
+   3    2  0  2    6     8    10    53   0.95456547E-01
+   3    2  0  2    6     9    10    54  -0.14843259    
+   3    2  0  2    7     7    10    61   0.92307692E-01
+   3    2  0  2    7     8    10    62  -0.10186315    
+   3    2  0  2    8     8    10    71  -0.84865832E-01
+   3    2  0  2    8     9    10    72  -0.12383355    
+   3    2  0  2    9     9    10    81  -0.74418605E-02
+   4    2  2  2    1     5    10     5   0.45647792E-01
+   4    2  2  2    1     6    10     6  -0.82923332E-01
+   4    2  2  2    1     7    10     7   0.36480567E-01
+   4    2  2  2    1     8    10     8  -0.24242858E-01
+   4    2  2  2    1     9    10     9   0.17929084E-01
+   4    2  2  2    2     4    10    13  -0.36087748E-01
+   4    2  2  2    2     5    10    14   0.17900633E-01
+   4    2  2  2    2     6    10    15   0.28276622E-01
+   4    2  2  2    2     7    10    16  -0.76415731E-02
+   4    2  2  2    2     8    10    17  -0.18304937E-02
+   4    2  2  2    2     9    10    18   0.69871624E-02
+   4    2  2  2    3     4    10    22   0.65556650E-01
+   4    2  2  2    3     5    10    23   0.28276622E-01
+   4    2  2  2    3     6    10    24  -0.17900633E-01
+   4    2  2  2    3     8    10    26  -0.38030799E-02
+   4    2  2  2    3     9    10    27   0.59136959E-02
+   4    2  2  2    4     5    10    32  -0.16138932E-01
+   4    2  2  2    4     6    10    33   0.29317825E-01
+   4    2  2  2    4     7    10    34   0.51591313E-01
+   4    2  2  2    4     8    10    35  -0.34284578E-01
+   4    2  2  2    4     9    10    36   0.25355554E-01
+   4    2  2  2    5     5    10    41   0.32021626E-01
+   4    2  2  2    5     6    10    42   0.50582759E-01
+   4    2  2  2    5     7    10    43   0.34174154E-02
+   4    2  2  2    5     8    10    44   0.81862169E-03
+   4    2  2  2    5     9    10    45  -0.31247540E-02
+   4    2  2  2    6     6    10    51  -0.32021626E-01
+   4    2  2  2    6     8    10    53   0.17007890E-02
+   4    2  2  2    6     9    10    54  -0.26446852E-02
+   4    2  2  2    7     7    10    61   0.98681074E-02
+   4    2  2  2    7     8    10    62  -0.10889628E-01
+   4    2  2  2    8     8    10    71  -0.90725390E-02
+   4    2  2  2    8     9    10    72  -0.13238364E-01
+   4    2  2  2    9     9    10    81  -0.79556835E-03
+   5    2  2  4    2     7    10    16  -0.21458190E-01
+   5    2  2  4    2     8    10    17   0.45156229E-01
+   5    2  2  4    2     9    10    18  -0.58589138E-01
+   5    2  2  4    3     7    10    25   0.10106117    
+   5    2  2  4    3     8    10    26  -0.50151471E-01
+   5    2  2  4    3     9    10    27   0.23221626E-01
+   5    2  2  4    5     7    10    43   0.95963941E-02
+   5    2  2  4    5     8    10    44  -0.20194479E-01
+   5    2  2  4    5     9    10    45   0.26201859E-01
+   5    2  2  4    6     7    10    52  -0.45195929E-01
+   5    2  2  4    6     8    10    53   0.22428420E-01
+   5    2  2  4    6     9    10    54  -0.10385027E-01
+   5    2  2  4    7     7    10    61   0.82342954E-02
+   5    2  2  4    7     8    10    62  -0.30579006E-01
+   5    2  2  4    7     9    10    63   0.58631626E-01
+   5    2  2  4    8     8    10    71   0.26324964E-01
+   5    2  2  4    8     9    10    72   0.20240603E-01
+   5    2  2  4    9     9    10    81  -0.34559259E-01
+ ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS   118
+ ** BASTST=.TRUE.; TEST OF SUBROUTINE BASIS
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:     0
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    1.0 %
+      CURRENT DATE:  Mar 19 05:07:48 2023
+ ===============================================================================

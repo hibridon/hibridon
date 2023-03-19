@@ -426,8 +426,8 @@ parameter (icod=5, ircod=5)
 character*40 potfil
 save potfil
 
-integer, pointer :: j1max, npar, j2min, j2max, iptsy2
-real(8), pointer :: brot, aso, p, q, drot
+integer, pointer, save :: j1max, npar, j2min, j2max, iptsy2
+real(8), pointer, save :: brot, aso, p, q, drot
 j1max=>ispar(1); npar=>ispar(2); j2min=>ispar(3); j2max=>ispar(4); iptsy2=>ispar(5)
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
 

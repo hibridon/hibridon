@@ -36,10 +36,13 @@ end subroutine loapot
 
 subroutine init_pot_parameters(ibasty)
 use mod_parbas, only: ntv, lammin, lammax, mproj, ivcol, ivrow
-use mod_conlam, only: nlam
+use mod_conlam, only: nlam, lamnum, nlammx
+use mod_cosysi, only: ispar
 use mod_chiral, only: lms_chiral => lms
 use mod_asymln, only: lms_asymln => lms
 use mod_1sg1sg, only: lms_1sg1sg => lms
+use mod_2pi1sg, only: lms_2pi1sg => lms
+use mod_stp1sg, only: lms_stp1sg => lms
 use mod_hiba19_sgpi1, only: numvib_sgpi1 => numvib, ivibpi_sgpi1 => ivibpi
 implicit none
 integer, intent(in) :: ibasty
@@ -66,10 +69,19 @@ integer, intent(in) :: ibasty
         case (5)
             lammin(1) = 0 
             lammax(1) = 10 
+            mproj(1) = 0
+        case (7)
+            lammin(1) = 1
+            lammax(1) = 4
             mproj(1) = 0  
         case (8)
             lammin(1) = 2
             lammax(1) = 4
+            mproj(1) = 0
+        case (9)
+            nlam = 45
+            lammin(1) = 0
+            lammax(1) = 6
             mproj(1) = 0
         case (10)
             lammin(1) = 1
@@ -78,6 +90,14 @@ integer, intent(in) :: ibasty
             lammin(1) = 1 ; lammin(2) = 4
             lammax(1) = 1 ; lammax(2) = 4
             mproj(1)  = 0 ; mproj(2)  = 4
+        case (12)
+            lammin(1)=1
+            lammax(1)=9
+            mproj(1)=0
+        case (13)
+            lammin(1)=1
+            lammax(1)=9
+            mproj(1)=0
         case (14)
             lammin(1) = 1 ; lammin(2) = 2
             lammax(1) = 1 ; lammax(2) = 2
@@ -87,12 +107,72 @@ integer, intent(in) :: ibasty
             lammin(1) = 1
             lammax(1) = 10
             mproj(1) = 0
+        case (16)
+            ispar(1) = 4
+            nlam = 12
+            nlammx = 12
+            mproj(1) = 0
+            mproj(2) = 1
+            mproj(3) = 2
+            mproj(4) = 3
+            lammin(1) = 0
+            lammin(2) = 1
+            lammin(3) = 2
+            lammin(4) = 3
+            lammax(1) = 6
+            lammax(2) = 5
+            lammax(3) = 6
+            lammax(4) = 5
+        case (17)
+            ispar(1) = 4
+            nlam = 12
+            nlammx = 12
+            mproj(1) = 0
+            mproj(2) = 1
+            mproj(3) = 2
+            mproj(4) = 3
+            lammin(1) = 0
+            lammin(2) = 1
+            lammin(3) = 2
+            lammin(4) = 3
+            lammax(1) = 6
+            lammax(2) = 5
+            lammax(3) = 6
+            lammax(4) = 5
+        case (18)
+            ispar(1) = 4
+            nlam = 20
+            nlammx = 20
+            mproj(1) = 0
+            mproj(2) = 3
+            mproj(3) = 6
+            mproj(4) = 9
+            lammin(1) = 0
+            lammin(2) = 3
+            lammin(3) = 6
+            lammin(4) = 9
+            lammax(1) = 8
+            lammax(2) = 9
+            lammax(3) = 8
+            lammax(4) = 9
         case (19)
             nlam = 4
             numvib_sgpi1 = 1
             ivibpi_sgpi1(1) = 0
             lammin = 1
             lammax = 1
+        case(20)
+            nlam = 3
+            allocate(lms_2pi1sg(3))
+            lms_2pi1sg(1)%l1 = 0; lms_2pi1sg(1)%l2 = 0 ; lms_2pi1sg(1)%l = 0 ; lms_2pi1sg(1)%is_diag = .true.
+            lms_2pi1sg(2)%l1 = 0; lms_2pi1sg(2)%l2 = 2 ; lms_2pi1sg(2)%l = 2 ; lms_2pi1sg(2)%is_diag = .true.
+            lms_2pi1sg(3)%l1 = 0; lms_2pi1sg(3)%l2 = 4 ; lms_2pi1sg(3)%l = 4 ; lms_2pi1sg(3)%is_diag = .true.
+        case (21)
+            nlam = 3
+            allocate(lms_stp1sg(3))
+            lms_stp1sg(1)%l1 = 0; lms_stp1sg(1)%mu1 = 0 ; lms_stp1sg(1)%l2 = 0 ; lms_stp1sg(1)%l = 0
+            lms_stp1sg(2)%l1 = 0; lms_stp1sg(2)%mu1 = 0 ; lms_stp1sg(2)%l2 = 2 ; lms_stp1sg(2)%l = 2
+            lms_stp1sg(3)%l1 = 0; lms_stp1sg(3)%mu1 = 0 ; lms_stp1sg(3)%l2 = 4 ; lms_stp1sg(3)%l = 4
         case (22)
             lammin(1) = 1
             lammax(1) = 12
@@ -101,6 +181,25 @@ integer, intent(in) :: ibasty
             lammin(1) = 1
             lammax(1) = 6
             mproj(1) = 0
+        case (24)
+            nlam = 4
+            ispar(1) = 4
+            lammin(1) = 3 ; lammax(1) = 3
+            lammin(2) = 4 ; lammax(2) = 4
+            lammin(3) = 6 ; lammax(3) = 6
+            lammin(4) = 7 ; lammax(4) = 7
+        case (25)
+            nlam = 3
+            allocate(lms_1sg1sg(nlam))
+            lms_1sg1sg%l1 = 0 ; lms_1sg1sg%l2 = 0 ;lms_1sg1sg%ltot = 0
+            lms_1sg1sg%l1 = 0 ; lms_1sg1sg%l2 = 2 ;lms_1sg1sg%ltot = 2
+            lms_1sg1sg%l1 = 0 ; lms_1sg1sg%l2 = 4 ;lms_1sg1sg%ltot = 4
+        case (26)
+            nlam = 3
+            allocate(lms_1sg1sg(nlam))
+            lms_1sg1sg%l1 = 0 ; lms_1sg1sg%l2 = 0 ;lms_1sg1sg%ltot = 0
+            lms_1sg1sg%l1 = 0 ; lms_1sg1sg%l2 = 2 ;lms_1sg1sg%ltot = 2
+            lms_1sg1sg%l1 = 0 ; lms_1sg1sg%l2 = 4 ;lms_1sg1sg%ltot = 4
         case (27)
             nlam = 24
             lammin(1) = 0 ; lammin(2) = 2 ; lammin(3) = 4 ; lammin(4) = 6

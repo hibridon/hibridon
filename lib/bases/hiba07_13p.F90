@@ -390,10 +390,8 @@ do 320 il = 0, 6, 2
           inum = inum + 1
           call ancouma%set_element(irow=irow, icol=icol, vee=vee)
           if (bastst) then
-            write (6, 290) ilam, lb, icol, irow, i, &
-                           vee
-            write (9, 290) ilam, lb, icol, irow, i, &
-                           vee
+            write (6, 290) ilam, lb, icol, irow, i, inum, vee
+            write (9, 290) ilam, lb, icol, irow, i, inum, vee
   290             format (i4, 2i7, 2i6, i6, g17.8)
           end if
         end if
@@ -665,9 +663,9 @@ character*(*) fname
 character*60 filnam, line, potfil, filnm1
 #include "common/comdot.F90"
 save potfil
-integer, pointer :: nterm, nstate, ipol, npot
-real(8), dimension(:), pointer :: en, de, re, be, rl, cl
-real(8), pointer :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor
+integer, pointer, save :: nterm, nstate, ipol, npot
+real(8), dimension(:), pointer, save :: en, de, re, be, rl, cl
+real(8), pointer, save :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor
 nterm=>ispar(1); nstate=>ispar(2); ipol=>ispar(3); npot=>ispar(4)
 en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
 rl=>rspar(17:20); cl=>rspar(21:24); cmix=>rspar(25); alphg=>rspar(26)

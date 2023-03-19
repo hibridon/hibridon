@@ -633,7 +633,7 @@ character*(*) fname
 character*60 filnam, line, potfil, filnm1
 #include "common/comdot.F90"
 save potfil
-integer, pointer :: nterm, nvib
+integer, pointer, save :: nterm, nvib
 nterm=>ispar(1); nvib=>ispar(2)
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables

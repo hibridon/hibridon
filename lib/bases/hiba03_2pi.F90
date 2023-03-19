@@ -929,8 +929,8 @@ character*(*) fname
 character*60 filnam, line, potfil, filnm1
 save potfil
 #include "common/comdot.F90"
-integer, pointer :: nterm, jmax, igu, isa, npar
-real(8), pointer :: brot, aso, p, q
+integer, pointer, save :: nterm, jmax, igu, isa, npar
+real(8), pointer, save :: brot, aso, p, q
 nterm=>ispar(1); jmax=>ispar(2); igu=>ispar(3); isa=>ispar(4); npar=>ispar(5) 
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4)
 isicod = 5

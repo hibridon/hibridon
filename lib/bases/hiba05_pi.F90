@@ -1007,8 +1007,8 @@ character*60 filnam, line, potfil, filnm1
 character*1 dot
 save potfil
 #include "common/comdot.F90"
-integer, pointer :: nterm, jmax, igu, isa, npar, imult, nman
-real(8), pointer :: brot, aso, o, p, q, dmom, efield
+integer, pointer, save :: nterm, jmax, igu, isa, npar, imult, nman
+real(8), pointer, save :: brot, aso, o, p, q, dmom, efield
 nterm=>ispar(1); jmax=>ispar(2); igu=>ispar(3); isa=>ispar(4); npar=>ispar(5); imult=>ispar(6); nman=>ispar(7)
 brot=>rspar(1); aso=>rspar(2); o=>rspar(3); p=>rspar(4); q=>rspar(5); dmom=>rspar(6); efield=>rspar(7)
 

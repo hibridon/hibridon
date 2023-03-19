@@ -640,8 +640,8 @@ character*60 line,filnam,potfil, filnm1
 character*1 dot
 save potfil
 #include "common/comdot.F90"
-integer, pointer :: nterm, nrmax, npar, isym, igu, isa
-real(8), pointer :: brot, gsr, drot, hrot
+integer, pointer, save :: nterm, nrmax, npar, isym, igu, isa
+real(8), pointer, save :: brot, gsr, drot, hrot
 brot=>rspar(1); gsr=>rspar(2); drot=>rspar(3); hrot=>rspar(4)
 nterm=>ispar(1); nrmax=>ispar(2); npar=>ispar(3); isym=>ispar(4); igu=>ispar(5); isa=>ispar(6)
 
@@ -734,6 +734,7 @@ irpot=1
 return
 !
 entry sav2sg (readpt)
+
 ASSERT(nrmax .eq. ispar(2))
 ASSERT(npar .eq. ispar(3))
 ASSERT(isym .eq. ispar(4))

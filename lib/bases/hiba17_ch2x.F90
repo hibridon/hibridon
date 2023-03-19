@@ -537,7 +537,7 @@ if (clist) then
        '  O/P=',i2,'  E=', f7.2,'  LBAR=', i5, 2x,' NU=', i3)
     else
       if (bastst) then
-        write (6,75) rmu * xmconv, &
+        write (6,75) rmu * xmconv, ivbend,&
               ipotsy, ered * econv, jtot, nu
       end if
       write (9,75) rmu * xmconv, ivbend, &
@@ -563,7 +563,7 @@ if (clist) then
         write (6,85) rmu * xmconv, ivbend, &
              ered * econv, jtot, jlpar
       end if
-      write (9,85) rmu * xmconv, ivbendt, &
+      write (9,85) rmu * xmconv, ivbend, &
              ered * econv, jtot, jlpar
 85       format(/,' **  CH2(X 3B1) (0,V_BEND,0) VIBRONIC LEVEL **', &
         /,'     RMU=', f9.4,'    V_BEND=',i3/, &
@@ -1051,8 +1051,8 @@ save potfil
 !  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
 #include "common/comdot.F90"
 
-integer, pointer :: nterm, numpot, ipotsy, iop, ivbend, jmax
-real(8), pointer :: emax
+integer, pointer, save :: nterm, numpot, ipotsy, iop, ivbend, jmax
+real(8), pointer, save :: emax
 nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=>ispar(4); ivbend=>ispar(5); jmax=>ispar(6);
 emax=>rspar(1)
 
