@@ -533,11 +533,11 @@ if (clist) then
       write (9,65) rmu * xmconv, ivbend, &
              ipotsy, iop,ered * econv, jtot, nu
 65       format(/,' **  CH2(X 3B1) (0,V_BEND,0) VIBRONIC LEVEL **', &
-        /,'     RMU=', f9.4,'    V_BEND=',i4/,'     POT-SYM=', i2, &
+        /,'     RMU=', f9.4,'    V_BEND=',i3/,'     POT-SYM=', i2, &
        '  O/P=',i2,'  E=', f7.2,'  LBAR=', i5, 2x,' NU=', i3)
     else
       if (bastst) then
-        write (6,75) rmu * xmconv, &
+        write (6,75) rmu * xmconv, ivbend,&
               ipotsy, ered * econv, jtot, nu
       end if
       write (9,75) rmu * xmconv, ivbend, &
@@ -563,7 +563,7 @@ if (clist) then
         write (6,85) rmu * xmconv, ivbend, &
              ered * econv, jtot, jlpar
       end if
-      write (9,85) rmu * xmconv, ivbendt, &
+      write (9,85) rmu * xmconv, ivbend, &
              ered * econv, jtot, jlpar
 85       format(/,' **  CH2(X 3B1) (0,V_BEND,0) VIBRONIC LEVEL **', &
         /,'     RMU=', f9.4,'    V_BEND=',i3/, &
