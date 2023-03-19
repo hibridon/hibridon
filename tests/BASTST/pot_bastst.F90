@@ -181,6 +181,13 @@ integer, intent(in) :: ibasty
             lammin(1) = 1
             lammax(1) = 6
             mproj(1) = 0
+        case (24)
+            nlam = 4
+            ispar(1) = 4
+            lammin(1) = 3 ; lammax(1) = 3
+            lammin(2) = 4 ; lammax(2) = 4
+            lammin(3) = 6 ; lammax(3) = 6
+            lammin(4) = 7 ; lammax(4) = 7
         case (27)
             nlam = 24
             lammin(1) = 0 ; lammin(2) = 2 ; lammin(3) = 4 ; lammin(4) = 6
