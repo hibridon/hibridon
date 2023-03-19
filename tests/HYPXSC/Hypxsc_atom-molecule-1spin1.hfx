@@ -1,9 +1,9 @@
  
 % HYPERFINE-RESOLVED CROSS SECTIONS
-%      LABEL:      HYPXSC TEST FOR ATOM-MOLECULE 1 SPIN         
-%      POT NAME:                  
-%      S-MATRICES READ FROM FILE: Hypxsc_atom-molecule-1spin1.smt                     
-%      WRITTEN:   Jan 30 11:12:11 2023
+%      LABEL:      HeCN(X2Sigma) RCCSD(T) Lique Spielfiede        
+%      POT NAME:  He-CN(2Sigma) CCSDT PES                         
+%      S-MATRICES READ FROM FILE: Hypxsc_atom-molecule-1spin1.smt         
+%      WRITTEN:   Jan 30 11:17:45 2023
 %      JTOT2:              2
 %      ETOT:          40.000 (cm-1)
 %      NUCLEAR SPIN:         1.0
