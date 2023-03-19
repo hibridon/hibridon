@@ -19,6 +19,5 @@
   T  F  F  F  T                  flaghf, csflag, flagsu, ihomo, twomol
   F  F                           rsflag, boundc
    4   1   2   2   0              n1max, j2min, j2min, ipotsy2, iop
- 1.4559180 0.35231E-05-0.0020869  b1rot, d1rot, gamma, b2rot
-59.3220000
+ 1.4559180 0.35231E-05-0.0020869 59.3220000 b1rot, d1rot, gamma, b2rot
 nofile.dat                                                  
