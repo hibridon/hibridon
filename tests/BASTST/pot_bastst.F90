@@ -91,6 +91,10 @@ integer, intent(in) :: ibasty
             lammin(1)=1
             lammax(1)=9
             mproj(1)=0
+        case (13)
+            lammin(1)=1
+            lammax(1)=9
+            mproj(1)=0
         case (14)
             lammin(1) = 1 ; lammin(2) = 2
             lammax(1) = 1 ; lammax(2) = 2
