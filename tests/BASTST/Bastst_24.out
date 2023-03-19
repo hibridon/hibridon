@@ -35,15 +35,15 @@
           G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
  --------------------------------------------------------------------------
            BUILD CONFIGURATION:
-CMAKE BUILD DATE: 2023-03-19 at 06:36
-CMAKE BUILD TYPE: Debug
-CODE GIT REVISION: 5788c311cb90e91c27c606fd2948f736cd119c9e
+CMAKE BUILD DATE: 2023-03-19 at 07:11
+CMAKE BUILD TYPE: Release
+CODE GIT REVISION: 865fa9b03406cbd6da8c4193de3a9362b8dacc65
 SYS: Darwin 22.2.0 x86_64
-COMPILER: /opt/intel/oneapi/compiler/2022.2.1/mac/bin/intel64/ifort
+COMPILER: /usr/local/bin/gfortran
 COMPILE OPTIONS: 
  --------------------------------------------------------------------------
             CURRENT HARDWARE CONFIGURATION:
- 
+
       Model Name: MacBook Pro
       Model Identifier: MacBookPro14,3
       Processor Name: Quad-Core Intel Core i7
@@ -85,7 +85,7 @@ COMPILE OPTIONS:
 
  ** LABEL:          BASTST                                     
  ** POT NAME:  DUMMY POTENTIAL FOR TESTING PURPOSES            
- ** DATE:      Mar 19 06:36:55 2023
+ ** DATE:      Mar 19 07:19:34 2023
 
  *** WARNING:  NAIRY .NE. 1 BUT AIRYFL .EQ. .FALSE.
  ** NMAX= 500  NAIRY= 500
@@ -93,7 +93,7 @@ COMPILE OPTIONS:
 
  **  CC SPHERICAL TOP **
      RMU=  16.4700  BROT=  5.241
-     DJ=          NaN     DK=          NaN
+     DJ= 0.110864E-03     DK= 0.442500E-05
      IOP= 1  E=5000.00  JTOT=  20   JLPAR= 1
 
  OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=  -30.00
@@ -188,6 +188,6 @@ ILAM=  4 LAMNUM(ILAM) =   1129
  ** BASTST=.TRUE.; TEST OF SUBROUTINE BASIS
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:     0
-      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO   30.4 %
-      CURRENT DATE:  Mar 19 06:36:55 2023
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO   11.1 %
+      CURRENT DATE:  Mar 19 07:19:34 2023
  ===============================================================================
