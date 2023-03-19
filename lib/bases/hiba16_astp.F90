@@ -806,7 +806,7 @@ if (clist .and. bastst) then
   write (6, 460) v2%get_num_nonzero_elements()
   write (9, 460) v2%get_num_nonzero_elements()
 460   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS ', &
-           i5)
+           i8)
 end if
 return
 end

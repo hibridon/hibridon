@@ -36,7 +36,8 @@ end subroutine loapot
 
 subroutine init_pot_parameters(ibasty)
 use mod_parbas, only: ntv, lammin, lammax, mproj, ivcol, ivrow
-use mod_conlam, only: nlam
+use mod_conlam, only: nlam, lamnum, nlammx
+use mod_cosysi, only: ispar
 use mod_chiral, only: lms_chiral => lms
 use mod_asymln, only: lms_asymln => lms
 use mod_1sg1sg, only: lms_1sg1sg => lms
@@ -104,6 +105,22 @@ integer, intent(in) :: ibasty
             lammin(1) = 1
             lammax(1) = 10
             mproj(1) = 0
+        case (16)
+            ispar(1) = 4
+            nlam = 12
+            nlammx = 12
+            mproj(1) = 0
+            mproj(2) = 1
+            mproj(3) = 2
+            mproj(4) = 3
+            lammin(1) = 0
+            lammin(2) = 1
+            lammin(3) = 2
+            lammin(4) = 3
+            lammax(1) = 6
+            lammax(2) = 5
+            lammax(3) = 6
+            lammax(4) = 5
         case (19)
             nlam = 4
             numvib_sgpi1 = 1
