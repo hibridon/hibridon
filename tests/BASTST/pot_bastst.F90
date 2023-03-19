@@ -137,6 +137,22 @@ integer, intent(in) :: ibasty
             lammax(2) = 5
             lammax(3) = 6
             lammax(4) = 5
+        case (18)
+            ispar(1) = 4
+            nlam = 20
+            nlammx = 20
+            mproj(1) = 0
+            mproj(2) = 3
+            mproj(3) = 6
+            mproj(4) = 9
+            lammin(1) = 0
+            lammin(2) = 3
+            lammin(3) = 6
+            lammin(4) = 9
+            lammax(1) = 8
+            lammax(2) = 9
+            lammax(3) = 8
+            lammax(4) = 9
         case (19)
             nlam = 4
             numvib_sgpi1 = 1
