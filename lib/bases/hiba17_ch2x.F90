@@ -533,7 +533,7 @@ if (clist) then
       write (9,65) rmu * xmconv, ivbend, &
              ipotsy, iop,ered * econv, jtot, nu
 65       format(/,' **  CH2(X 3B1) (0,V_BEND,0) VIBRONIC LEVEL **', &
-        /,'     RMU=', f9.4,'    V_BEND=',i3/,'     POT-SYM=', i2, &
+        /,'     RMU=', f9.4,'    V_BEND=',i4/,'     POT-SYM=', i2, &
        '  O/P=',i2,'  E=', f7.2,'  LBAR=', i5, 2x,' NU=', i3)
     else
       if (bastst) then
