@@ -390,10 +390,8 @@ do 320 il = 0, 6, 2
           inum = inum + 1
           call ancouma%set_element(irow=irow, icol=icol, vee=vee)
           if (bastst) then
-            write (6, 290) ilam, lb, icol, irow, i, &
-                           vee
-            write (9, 290) ilam, lb, icol, irow, i, &
-                           vee
+            write (6, 290) ilam, lb, icol, irow, i, inum, vee
+            write (9, 290) ilam, lb, icol, irow, i, inum, vee
   290             format (i4, 2i7, 2i6, i6, g17.8)
           end if
         end if
