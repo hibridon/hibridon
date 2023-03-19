@@ -42,6 +42,7 @@ use mod_chiral, only: lms_chiral => lms
 use mod_asymln, only: lms_asymln => lms
 use mod_1sg1sg, only: lms_1sg1sg => lms
 use mod_2pi1sg, only: lms_2pi1sg => lms
+use mod_stp1sg, only: lms_stp1sg => lms
 use mod_hiba19_sgpi1, only: numvib_sgpi1 => numvib, ivibpi_sgpi1 => ivibpi
 implicit none
 integer, intent(in) :: ibasty
@@ -166,6 +167,12 @@ integer, intent(in) :: ibasty
             lms_2pi1sg(1)%l1 = 0; lms_2pi1sg(1)%l2 = 0 ; lms_2pi1sg(1)%l = 0 ; lms_2pi1sg(1)%is_diag = .true.
             lms_2pi1sg(2)%l1 = 0; lms_2pi1sg(2)%l2 = 2 ; lms_2pi1sg(2)%l = 2 ; lms_2pi1sg(2)%is_diag = .true.
             lms_2pi1sg(3)%l1 = 0; lms_2pi1sg(3)%l2 = 4 ; lms_2pi1sg(3)%l = 4 ; lms_2pi1sg(3)%is_diag = .true.
+        case (21)
+            nlam = 3
+            allocate(lms_stp1sg(3))
+            lms_stp1sg(1)%l1 = 0; lms_stp1sg(1)%mu1 = 0 ; lms_stp1sg(1)%l2 = 0 ; lms_stp1sg(1)%l = 0
+            lms_stp1sg(2)%l1 = 0; lms_stp1sg(2)%mu1 = 0 ; lms_stp1sg(2)%l2 = 2 ; lms_stp1sg(2)%l = 2
+            lms_stp1sg(3)%l1 = 0; lms_stp1sg(3)%mu1 = 0 ; lms_stp1sg(3)%l2 = 4 ; lms_stp1sg(3)%l = 4
         case (22)
             lammin(1) = 1
             lammax(1) = 12
