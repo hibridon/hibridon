@@ -12,9 +12,9 @@ set(TEST_T_MATRIX_SIZE kmax)
 set(TEST_LABELS "coverage")
 
 # (BASIS 06 is not supported)
-set(supported_bases 01 02 03 04 05 07 08 09 10 11 14 15 19 22 23 27 28 29 30)
+set(supported_bases 01 02 03 04 05 07 08 09 10 11 12 14 15 19 22 23 27 28 29 30)
 
-# TODO: add 09 12 13 16 17 18 20 21 24 25 26
+# TODO: add 12 13 16 17 18 20 21 24 25 26
 
 foreach(ibasty IN LISTS supported_bases)
   set(TEST_ID bastst_${ibasty})
