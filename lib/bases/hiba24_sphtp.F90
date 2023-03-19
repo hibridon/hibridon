@@ -316,9 +316,9 @@ data (uf(30,ii), ii=1,11) /.707107d0, 9*0.d0, .707107d0/                !  ! j=1
 !
 !  check for consistency in the values of flaghf and csflag
 integer, pointer :: nterm, iop, jmax
-real(8), pointer :: brot
+real(8), pointer :: brot, dj, dk
 nterm=>ispar(1); iop=>ispar(2); jmax=>ispar(3)
-brot=>rspar(1)
+brot=>rspar(1) ; dj=>rspar(2); dk=>rspar(3)
 
 if (flaghf) then
   write (6, 5)
