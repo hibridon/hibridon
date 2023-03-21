@@ -223,7 +223,7 @@ Where `<commands file>` is a file containing the input commands you want to exec
 
 ### 7. One liner example
 
-This one line command configures, builds and tests Hibridon from a directory `~/hib_build` containing the source code. Build files are placed in the current directory.
+This one line command configures, builds and tests Hibridon from a directory `~/hib_build` containing the source code.
 
 ```bash
  git clone https://github.com/hibridon/hibridon.git ~/hib_src && mkdir -p ~/hib_build && cmake -DCMAKE_Fortran_COMPILER=gfortran -DBUILD_TESTING=ON -S ~/hib_src/ -B ~/hib_build && cd ~/hib_build/ && make && ctest -L coverage
