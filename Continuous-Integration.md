@@ -21,7 +21,7 @@ The full list of the configurations used for the continuous integration is the f
 | macOS  | 11.2  | Release  | Intel ifort 2022 |  Intel MKL |
 |---|---|---|---|---|
 | Linux  | Debian 9  | Debug | gfortran 6 |  Atlas |
-| Linux  | Debian 9  | Debug | Intel ifort 2021 |  Atlas |
+| Linux  | Debian 9  | Debug | Intel ifort 2021 |  Intel MKL |
 | Linux  | Debian 9  | Release | gfortran 6 |  Atlas |
-| Linux  | Debian 9  | Release | Intel ifort 2021 |  Atlas |
+| Linux  | Debian 9  | Release | Intel ifort 2021 |  Intel MKL |
 
