@@ -37,6 +37,7 @@ hib_xx -k <kmax> -c runner.com > runner.log &
 
 Where `hib_xx` is the name of your executable code, and the file  `runner.log`  will contain a log of the execution.
 
+⚠️ Note that using the `-c runner.com` option automatically sets Hibridon in BATCH mode. 
 
 ------------------------------
 
