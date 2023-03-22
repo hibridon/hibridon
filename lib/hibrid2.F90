@@ -37,6 +37,7 @@ use mod_par, only: airyfl, prairy, bastst, batch, chlist, &
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_file, only: input, output, jobnam, savfil
+use mod_com, only: com
 implicit double precision (a-h,o-z)
 ! nb if the nextcommon is changed, it should be also changed in common/parsys
 !  this sets the maximum number of energies
@@ -72,7 +73,9 @@ xmu=16.47d0
 ibasty=1
 airyfl=.true.
 prairy=.false.
-batch=.false.
+! If the command file is provided through the -c or --com command line option
+! then batch mode is set to true.
+batch = com
 chlist=.true.
 csflag=.false.
 flaghf=.false.
