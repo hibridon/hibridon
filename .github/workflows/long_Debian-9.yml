@@ -1,4 +1,4 @@
-name: Full CI on Debian 9  # this basic continuous integration is expected to perform the quick main tests, es explained in https://github.com/hibridon/hibridon/issues/102 (it should cover main risks for main platform types) and its runners are expected to be always available to ensure pull requests and pushes are always validated in time.
+name: Long CI on Debian 9  # this basic continuous integration is expected to perform the quick main tests, es explained in https://github.com/hibridon/hibridon/issues/102 (it should cover main risks for main platform types) and its runners are expected to be always available to ensure pull requests and pushes are always validated in time.
 
 on:
   schedule:

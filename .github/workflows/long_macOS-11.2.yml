@@ -1,4 +1,4 @@
-name: Full CI on macOS-11.2
+name: Long CI on macOS-11.2
 
 on:
   schedule:
