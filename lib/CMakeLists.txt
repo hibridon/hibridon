@@ -104,8 +104,6 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       -ffree-line-length-none                   # Allow arbitrary long lines. Needed as preprocessing could generate long line lengths.
 #      -fdefault-integer-8
 #      -finteger-4-integer-8
-      $<$<PLATFORM_ID:Linux>:-march=native>     # Tune generated code for host's micro-architecture
-      $<$<PLATFORM_ID:Darwin>:-mtune=native>    # Tune generated code for host's micro-architecture (march not working on Darwin)
       $<$<PLATFORM_ID:Linux>:-mcmodel=large>    # Required on Linux
       $<$<BOOL:${OpenMP_Fortran_FOUND}>:-fopenmp> # Compile with fopenmp option if OpenMP libs are found
       # Config-specific options: RELEASE
@@ -153,7 +151,6 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
       $<$<BOOL:${OpenMP_Fortran_FOUND}>:-qopenmp> # Compile with qopenmp option if OpenMP libs are found
       # Config-specific options: RELEASE
       $<$<CONFIG:RELEASE>:-O3>                    # Optimization level at 3 for Release
-      $<$<CONFIG:RELEASE>:-xHost>                 # Generate instructions for the highest instruction set available on the compilation host processor
       $<$<AND:$<BOOL:${LINK_TIME_OPTIMIZATION}>,$<CONFIG:RELEASE>>:-ipo>  # activate interprocediral optimization (aka link time optimization)
       $<$<CONFIG:RELEASE>:-init=zero>             # Init variables to zero/false/null
       # Config-specific options: DEBUG
