@@ -543,7 +543,7 @@ do i2 = 1, i2num
 !
     nlevel = nlevel + 1
     ehold(nlevel) = (etemp(i1) + e2rot(i2)) / econv
-    jhold(nlevel) = 10 * ji + j2rot(i2)
+    jhold(nlevel) = 100 * ji + j2rot(i2)
     ishold(nlevel) = isi * ki
     kp(nlevel) = kp1
     ko(nlevel) = ko1
@@ -617,8 +617,8 @@ if (bastst) then
     '   #  J1  IS  KP  KO  J2  Eint(cm-1)  Coeffs'/1x,65('-'))
   do i = 1, nlevel
     ecm = ehold(i) * econv
-    j1 = jhold(i)/10
-    j2 = mod(jhold(i),10)
+    j1 = jhold(i)/100
+    j2 = mod(jhold(i),100)
     write (6, 135) i, j1, ishold(i), kp(i), ko(i), j2, ecm, &
       (chold(nn),nn=(i - 1)*narray + 1, &
       (i - 1)*narray + isizh(i))
@@ -643,8 +643,8 @@ do 250  i = 1, nlevel
 call bqs%init(nmax)
 n = 0
 do i = 1, nlevel
-  j1 = jhold(i)/10
-  j2 = mod(jhold(i),10)
+  j1 = jhold(i)/100
+  j2 = mod(jhold(i),100)
   ki = abs(ishold(i))
   iss = sign(1, ishold(i))
   ipar = iss * (-1) ** (j1 + j2 + ki)
