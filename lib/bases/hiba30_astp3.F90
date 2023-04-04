@@ -711,8 +711,8 @@ if (bastst) then
     '   #  J1  IS  J2  J12  L     EINT(CM-1)'/1x,50('-'))
   do 330  i = 1, n
     ecm = eint(i) * econv
-    j1 = bqs%jq(i)/10
-    j2 = mod(bqs%jq(i),10)
+    j1 = bqs%jq(i)/100
+    j2 = mod(bqs%jq(i),100)
     if (bastst) then
       isize = isiz(i)
       isub = (i - 1)*narray
@@ -759,13 +759,13 @@ do 400 ilam = 1, nlam
   inum = 0
   ancouma => v2%get_angular_coupling_matrix(ilam)
   do 355 icol = 1, n
-    j1c = bqs%jq(icol)/10
-    j2c = mod(bqs%jq(icol),10)
+    j1c = bqs%jq(icol)/100
+    j2c = mod(bqs%jq(icol),100)
     j12c = bqs%j12(icol)
     lc = bqs%lq(icol)
     do 350 irow = icol, n
-      j1r = bqs%jq(irow)/10
-      j2r = mod(bqs%jq(irow),10)
+      j1r = bqs%jq(irow)/100
+      j2r = mod(bqs%jq(irow),100)
       j12r = bqs%j12(irow)
       lr = bqs%lq(irow)
       call vastp3(j1r,j2r,j12r,lr,j1c,j2c,j12c,lc, &
