@@ -1,7 +1,7 @@
 # CMake project file for hibridon
 
 cmake_minimum_required (VERSION 3.13)
-project (hibridon VERSION 5.0)
+project (hibridon VERSION 5.1)
 enable_language (Fortran)
 message("Fortran compiler ID: ${CMake_Fortran_COMPILER_ID}")
 # Default build type as Release

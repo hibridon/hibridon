@@ -1,6 +1,44 @@
 # Hibridon ChangeLog
 
-## [v5.0.0] - 2023-01-31
+## [v5.1.0] - 2023-04-24
+
+### Changed
+
+- Modified licence for Hibridon 5.0: [`GPLv3`](https://www.gnu.org/licenses/gpl-3.0.en.html) licence
+- Added version control using [`GIT`](https://git-scm.com), source code hosted on [GitHub](www.github.com/hibridon/hibridon)
+- Replaced custom build system with `CMake` ([#8](https://github.com/hibridon/hibridon/issues/8))
+- switched the license file to GNU General Public License v3.0 (https://www.gnu.org/licenses/gpl-3.0.en.html)
+- Removed optimization flags (`-march=native` and `-xhost`) that can cause hibridon to malfunction ([#223](https://github.com/hibridon/hibridon/issues/223))
+- Batch mode is now automatically enabled when `--com` option is used ([#221](https://github.com/hibridon/hibridon/issues/221))
+- All arrays are now allocated on the heap instead of only arrays bigger than 10 bytes (`ifort` only)
+- Turned link time optimization off by default because it can break code ([#44](https://github.com/hibridon/hibridon/issues/34))
+- Official documentation is now hosted on https://github.com/hibridon/hibridon/wiki instead of http://www2.chem.umd.edu/groups/alexander/hibridon
+
+### Added
+
+- Added a full test scheduled every week for continuous integration
+- Restored code coverage builds ([#81](https://github.com/hibridon/hibridon/issues/81))
+- Added the option of installing executables in a custom location [#133](https://github.com/hibridon/hibridon/issues/133)
+- Added tests where nerg > 1 ([#196](https://github.com/hibridon/hibridon/issues/196))
+- refactored hypxsc to generatlize it ([#185](https://github.com/hibridon/hibridon/pull/185))
+- Added test for hypxsc atom-molecule-1spin [#207](https://github.com/hibridon/hibridon/pull/207)
+- Added parallelization for hypxsc
+- Added guidelines for contributors
+- Added template to guide users reporting bugs or asking for features
+- Added tests on the `save` command for every basis ([#82](https://github.com/hibridon/hibridon/issues/82))
+- Added tests for all bases in `BASTST` mode to increase code coverage ([#44](https://github.com/hibridon/hibridon/issues/34))
+
+### Fixed 
+
+- Fixed various bugs discovered now that all bases are covered by tests. Bases affected: 03, 07, 08, 11, 14, 15, 17, 19, 22, 23, 24, 26, 28
+- Fixed bug that caused basis 30 to fail when `j1` or `j2` exceed 9 (the limit is now 99) [pull request #228](https://github.com/hibridon/hibridon/pull/228)
+- Fixed bugs in `save` command for bases 02-03, 05-09, 11-18, 20-30
+- Fixed bug in cph2 test [#48](https://github.com/hibridon/hibridon/issues/48)
+- Fixed bug in basis 26 [#40](https://github.com/hibridon/hibridon/issues/40)
+- Fixed bug detected when adding tests for nerg > 1
+- Fixed bug in `ancou`
+
+## [v5.0.0] - 2023-01-19
 
 ### Changed
 

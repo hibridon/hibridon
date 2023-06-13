@@ -1,4 +1,7 @@
 ! Dummy potential for testing purposes
+! the aim of this dummy potential is to provide a potential
+! that works with each basis supported by hibridon
+! important: this potentiel produces meaningless physical results!
 
 #include "common/syusr.F90"
 #include "common/bausr.F90"
@@ -254,6 +257,7 @@ use mod_selb, only: ibasty
     vv0  = 0d0
     vvl = 0d0
 
+    ! set non-zero values of potential for atom-atom col
     select case (ibasty)
         case (22)
         vvl(6) = 2d-4; vvl(9) = 1d-4
