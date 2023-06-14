@@ -4,9 +4,6 @@
 
 ### Changed
 
-- Modified licence for Hibridon 5.0: [`GPLv3`](https://www.gnu.org/licenses/gpl-3.0.en.html) licence
-- Added version control using [`GIT`](https://git-scm.com), source code hosted on [GitHub](www.github.com/hibridon/hibridon)
-- Replaced custom build system with `CMake` ([#8](https://github.com/hibridon/hibridon/issues/8))
 - switched the license file to GNU General Public License v3.0 (https://www.gnu.org/licenses/gpl-3.0.en.html)
 - Removed optimization flags (`-march=native` and `-xhost`) that can cause hibridon to malfunction ([#223](https://github.com/hibridon/hibridon/issues/223))
 - Batch mode is now automatically enabled when `--com` option is used ([#221](https://github.com/hibridon/hibridon/issues/221))
