@@ -77,7 +77,7 @@ add_subdirectory("/home/myuser/hib_src/" hibridon)
 #    - "kmax": for normal cases
 #    - "kbig": for special cases (only arn2_big test uses it)
 
-add_hibexe(NH3-H2.exe "~/my_pots/pot_nh3h2.F90" "kmax") # NH3-H2
+add_hibexe(NH3-H2.exe "/home/myuser/my_pots/pot_nh3h2.F90" "kmax") # NH3-H2
 
 # You can add as many executables as you want by using the add_hibexe function:
 #add_hibexe(OH-H2.exe "/home/myuser/my_pots/pot_ohh2.F90" "kmax") # OH-H2
