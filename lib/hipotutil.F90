@@ -6,15 +6,7 @@ subroutine dspline(x,y,n,yp1,ypn,y2)
 
 ! NOTE abscissa should be in increasing order
 implicit double precision(a-h,o-z)
-parameter (nmax=300)
-dimension x(n),y(n),y2(n),u(nmax)
-save
-if (n .gt. nmax) then
-  write (6,5) n
-  write (9,5) n
-5   format (' *** N = ',i3, ' .GT. NMAX IN DSPLINE; ABORT')
-  call exit
-endif
+dimension x(n),y(n),y2(n),u(n)
 if (yp1.gt..99d30) then
   y2(1)=0.d0
   u(1)=0.d0
@@ -43,8 +35,15 @@ do 12 k=n-1,1,-1
 return
 end
 subroutine dsplint(xa,ya,y2a,n,x,y)
-implicit double precision(a-h,o-z)
-dimension xa(n),ya(n),y2a(n)
+implicit none
+real(8), intent(in) :: xa(n)
+real(8), intent(in) :: ya(n)
+real(8), intent(in) :: y2a(n)
+integer, intent(in) :: n
+real(8), intent(in) :: x
+real(8), intent(out) :: y
+integer :: k, klo, khi
+real(8) :: h, a, b
 save
 klo=1
 khi=n
