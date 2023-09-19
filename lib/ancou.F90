@@ -171,8 +171,10 @@ module mod_ancou
       ASSERT(ilam > 0)
       ASSERT(ilam <= this%nlam)
       ! v2 matrix is triangular
+      ASSERT(this%num_channels > 0)
       max_num_elements = this%num_channels * (this%num_channels + 1)
-      expected_num_elements = expected_sparsity * max_num_elements
+      ASSERT(max_num_elements > 0)
+      expected_num_elements = max(1, int(expected_sparsity * max_num_elements))
       ! optimize block size so that one block should be enough in most cases
       block_size = expected_num_elements
       num_blocks = (max_num_elements / block_size) + 1

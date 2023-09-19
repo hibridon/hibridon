@@ -212,7 +212,7 @@ call pot( vv0, r)
 
 !  vv0 is the isotropic term in the potential
 !  the coefficients for each angular term in the coupling potential
-!  [ vvl(i) for i = 1, nlam ] are returned in common block vvlcontains
+!  [ vvl(i) for i = 1, nlam ] are returned in common block vvl contains
 !  multiply all vvl terms by twice the reduced mass
 twormu = two * rmu
 call dscal(v2%nlam, twormu, vvl, 1)
