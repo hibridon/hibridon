@@ -68,7 +68,7 @@ project (my_pots)
 enable_language (Fortran)
 
 # add hibridon library by specifying the directory in which the source files are
-add_subdirectory("~/hib_src/" hibridon)
+add_subdirectory("/home/myuser/hib_src/" hibridon)
 
 # declare new executables using hibridon's add_hibexe cmake function, where:
 #  - the 1st argument is the name of the resulting executable
@@ -77,14 +77,16 @@ add_subdirectory("~/hib_src/" hibridon)
 #    - "kmax": for normal cases
 #    - "kbig": for special cases (only arn2_big test uses it)
 
-add_hibexe(NH3-H2.exe "~/my_pots/pot_nh3h2.F90" "kmax") # NH3-H2
+add_hibexe(NH3-H2.exe "/home/myuser/my_pots/pot_nh3h2.F90" "kmax") # NH3-H2
 
 # You can add as many executables as you want by using the add_hibexe function:
-#add_hibexe(OH-H2.exe "~/my_pots/pot_ohh2.F90" "kmax") # OH-H2
-#add_hibexe(He-CO.exe "~/my_pots/pot_heco.F90" "kmax") # He-CO
+#add_hibexe(OH-H2.exe "/home/myuser/my_pots/pot_ohh2.F90" "kmax") # OH-H2
+#add_hibexe(He-CO.exe "/home/myuser/my_pots/pot_heco.F90" "kmax") # He-CO
 ```
 
 Adapt this example to suit your needs.
+
+**WARNING**: The tilde `~` character is not exapnded by CMake, you must replace it with the full path to your home directory, e.g. `/home/myuser/`
 
 
 
