@@ -382,12 +382,14 @@ end
 subroutine assignment_parse(var_assignment, var_list, var_index, val)
 !   current revision date: 23-sept-87
 !   searches strings in var_list to match var_assignment
-!   returns associated value in val and position in var_list in var_index
+!   returns associated value in val (and in var_index the position of the related variable  in var_list if this variable exists)
 !   values may be specified as integers or reals or logicals (T or F)
 !   if(code=t(rue)  is specified, val=1 is returned
 !   if(code=f(alse) is specified, val=0 is returned
 !   delimiter between code and value is equal sign
-!   var_assignment : a string containing the assignment of a variable (eg 'JTOT2=4')
+!   var_assignment : a string containing the assignment of a variable in  one of 2 forms:
+!    - if var_list is not empty: '<var_name>=<optional_spaces><var_value>' (eg 'JTOT2= 4')
+!    - if var_list is empty: '<optional_spaces><var_value>' (eg '4')
 !   var_list : array of nlist strings; each of them containing a variable name (eg 'JTOT2').
 !              If this array is empty, the returns var_index is 0
 implicit none
@@ -399,12 +401,15 @@ real(8), intent(out) :: val
 character*80 :: var_assignment_copy
 integer :: j, l
 integer :: assignment_len
-integer :: value_start_index
+integer :: value_start_index  ! index of the start of the value in var_assignment
 integer :: dot_index
 integer :: nlist
 l = -1
 nlist = size(var_list)
-if(nlist.eq.0) goto 30
+if(nlist.eq.0) then
+  ! var_list is empty, so var_assignment is expected to be of the form '<optional_spaces><var_value>'
+  goto 30
+end if
 l = index(var_assignment,'=')
 l = l - 1
 if (l <= 0) then
@@ -414,21 +419,31 @@ if (l <= 0) then
   return
 end if
 do var_index = 1, nlist
-  if(var_assignment(1:l) == var_list(var_index)(1:l)) goto 30
+  if(var_assignment(1:l) == var_list(var_index)(1:l)) then
+    goto 30
+  end if
 end do
 var_index = 0
 return
 
-! the variable name has been found in var_list
-30 value_start_index= l + 2 
+! the variable name has been parsed into var_index
+! now parse the value
+30 value_start_index = l + 2
 ! value_start_index is the index of the 1st character of the value
 assignment_len=len(var_assignment)
-val=0
-if ( assignment_len < value_start_index ) return  ! this means the that the value is missing (eg if var_assignment='JTOT2=')
+val = 0.0  ! default value
+if ( assignment_len < value_start_index ) then
+  ! this means the that the value is missing (eg if var_assignment='JTOT2=').
+  ! in this case, return the default value
+  return  
+end if
+! skip the space characters
 do j = value_start_index, assignment_len
-  if (var_assignment(j:j) /= ' ') goto 50
+  if (var_assignment(j:j) /= ' ') then
+    goto 50
+  end if
 end do
-val = 0.0
+! return the default value if only space characters are found (eg if var_assignment='JTOT2=  ')
 return
 
 ! handling non space character

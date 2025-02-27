@@ -66,6 +66,12 @@ implicit none
     procedure :: execute => show_execute
   end type show_command_type
 
+  ! trnprt
+  type, extends(command_type) :: trnprt_command_type
+  contains
+    procedure :: execute => trnprt_execute
+  end type trnprt_command_type
+
 contains
 
   subroutine update_nu_params()
@@ -640,7 +646,42 @@ contains
     post_action = k_post_action_interpret_next_statement
   end subroutine show_execute
 
+  subroutine trnprt_execute(this, statements, bofargs, next_statement, post_action)
+    ! transport cross sections - added by p. dagdigian
+    ! TRNPRT,JOB,IENERG,IN1,IN2,JTOTMX,JMIN,JMAX
+    use mod_hiutil, only: get_token, lower, upper, assignment_parse
+    use mod_file, only: jobnam
+    use mod_hitrnprt, only: trnprt
+    use mod_command, only: k_post_action_read_new_line
 
+    class(trnprt_command_type) :: this
+    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
+    integer, intent(in) :: bofargs
+    integer, intent(out) :: next_statement
+    integer, intent(out) :: post_action
+
+    real(8) :: a(15)  ! real arguments
+    character*8 empty_var_list(0)
+    character(len=40) :: fnam1
+    character(len=40) :: code
+    integer :: l, lc
+    integer :: j
+
+    l = bofargs
+    call get_token(statements,l,fnam1,lc)
+    if(fnam1 .eq. ' ') fnam1 = jobnam
+    call lower(fnam1)
+    call upper(fnam1(1:1))
+    ! get iener for 1st smt file
+    a(1) = 0.d0
+    if(l /= 0) then
+      call get_token(statements,l,code,lc)
+      call assignment_parse(code(1:lc),empty_var_list,j,a(1))
+      ! todo: get in1, in2, jtotmx, join, jmax
+    end if
+    call trnprt(fnam1, a)
+    post_action = k_post_action_read_new_line
+  end subroutine trnprt_execute
 
 
 
@@ -691,7 +732,9 @@ contains
     call command_mgr%register_command('SHOW', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
-
+    com = trnprt_command_type()
+    call command_mgr%register_command('TRNPRT', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
     ASSERT(associated(command_mgr))
   end subroutine init

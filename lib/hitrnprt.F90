@@ -64,15 +64,25 @@ use mod_selb, only: ibasty
 use mod_trn, only: spin, jpmax
 use mod_hiutil, only: gennam, mtime, dater
 use mod_hismat, only: rdhead, sinqr
-implicit double precision (a-h,o-z)
-character*(*) filnam
-character*40  trnfil, smtfil
-character*20  cdate
-logical csflag, flaghf, flagsu, twomol, exstfl, &
+implicit none
+character*(*), intent(in) :: filnam
+real(8), intent(in) :: a(6)  ! real arguments : a(1) is iener
+
+real(8) :: cpu0
+real(8) :: ela0
+real(8) :: ered
+integer :: i, iener, ierr, ii, in
+integer :: j, j1, jfirst, jfinal, jlpmax, jlpmin, jo, jtotd
+integer :: lenfs, lenft
+integer :: m1chmx, m1jtot
+integer :: nj, nlevel, nlevop, nstep, nud, numax, numin
+integer, save :: nout
+real(8) :: rmu, tol, zero
+character*40 :: trnfil, smtfil
+character*20 :: cdate
+logical :: csflag, flaghf, flagsu, twomol, exstfl, &
         nucros
 !
-save nout
-dimension a(6)
 data  tol,   zero,   nstep &
     /1.d-7,  0.d0,     2/
 !

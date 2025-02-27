@@ -115,7 +115,7 @@ module mod_hinput
     k_keyword_execute_command_mgr_command     =  6   !   45 label:execute_command_mgr_command(i)
   end enum
 
-  integer, parameter :: ncode = 29  !  ncode is the number of bcod's
+  integer, parameter :: ncode = 28  !  ncode is the number of bcod's
   character(len=8), parameter :: bcod(ncode) = [ &  ! bcod stores hibridon's commands
     'DEBROGLI', &
     'DIFFER  ', &
@@ -144,8 +144,7 @@ module mod_hinput
     'EADIAB  ', &
     'SYSCONF ', &
     'HYPXSC  ', &
-    'STMIX   ', &
-    'TRNPRT  ']
+    'STMIX   ']
 
   character(len=8), parameter :: bascod(1) = ['BASISTYP']
 
@@ -231,7 +230,6 @@ use mod_hitestptn, only: testptn
 use mod_two, only: numj, nj1j2
 use mod_opti, only: optifl
 use mod_hiutil, only: get_token, lower, upper, lenstr, vaxhlp, sys_conf
-use mod_hitrnprt, only: trnprt
 use mod_hibrid1, only: difs, turn
 use mod_hibrid4, only: psi, eadiab1, sprint
 use mod_hypxsc, only: hypxsc
@@ -331,7 +329,6 @@ lindx(FCOD_BOUNDC) = LPAR_BOUNDC
 ! sysconf:  2900
 ! hypxsc: 2950
 ! stmix:  3000
-! trnprt:  3100
 ! nb after changing the following list, check that all the variables "incode"
 ! that follow after address 900 are changed accordingly
 !
@@ -517,8 +514,7 @@ end if
       1900,2800,600, &
       1300,2300, &
       1200,1600,430,2650,2800, &
-      460,2850,2900,2950,3000, &
-      3100),i
+      460,2850,2900,2950,3000),i
 !
 ! label:execute_command_mgr_command(i)
 !
@@ -1372,27 +1368,6 @@ call assignment_parse(code(1:lc),empty_var_list,j,a(2))
   call assignment_parse(code(1:lc),empty_var_list,j,a(i))
 3020 continue
 call stmix(fnam1,fnam2,a)
-goto 1  ! label:read_new_line
-! transport cross sections - added by p. dagdigian
-3100 call get_token(line,l,fnam1,lc)
-if(fnam1 .eq. ' ') fnam1 = jobnam
-call lower(fnam1)
-call upper(fnam1(1:1))
-! get iener for 1st smt file
-a(1) = 0.d0
-if(l .eq. 0) goto 3105
-call get_token(line,l,code,lc)
-call assignment_parse(code(1:lc),empty_var_list,j,a(1))
-! get in1, in2, jtotmx, join, jmax
-3105 continue
-do 3120 i = 2, 6
-  a(i) = 0.d0
-  if (l .eq. 2) a(l) = 1.d0
-  if (l .eq. 0) goto 3120
-  call get_token(line, l, code, lc)
-  call assignment_parse(code(1:lc), empty_var_list, j, a(i))
-3120 continue
-call trnprt(fnam1,a)
 goto 1  ! label:read_new_line
 end
 
