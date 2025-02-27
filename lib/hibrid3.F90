@@ -58,7 +58,7 @@ return
 end
 ! -------------------------------------------------------------------------
 subroutine propag (z, w, zmat, amat, bmat, &
-                   jq, lq, inq, &
+                   bqs, &
                    ien, nerg, en, eshift, rstart, rendld, spac, &
                    tolhi, rendai, rincr, fstfac, tb, tbm, &
                    ipos, prlogd, noprin, airyfl, prairy, &
@@ -86,8 +86,8 @@ subroutine propag (z, w, zmat, amat, bmat, &
 !    zmat:        on return: the upper-left nopen x nopen block of si
 !                         contains the imaginary part of the s-matrix
 !    amat,bmat:   scratch matrices of maximum dimension nmax x nmax
-!    jq, lq       on entry: contain the rotational angular momenta, orbital
-!    inq:         angular momenta, and other quantum index for each channel
+!    bqs:         on entry: contain the rotational angular momenta, orbital
+!                 angular momenta, and other quantum index for each channel
 !                 on return: the first nopen elements contain the rotational
 !                 angular momenta, and other quantum index for each open chann
 !    nerg:        the number of total energies at which calculation is to be
@@ -143,6 +143,7 @@ use mod_pmat, only: rtmn, rtmx, iflag
 use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
 use mod_hiutil, only: mtime, gettim
 use mod_hibrid1, only: airprp
+use mod_hitypes, only: bqs_type
 implicit none
 !   square matrices
 real(8), intent(out) :: z(nmax, nch)
@@ -150,9 +151,7 @@ real(8), intent(out) :: w(nmax, nch)
 real(8), intent(out) :: zmat(nmax, nch)
 real(8), intent(out) :: amat(nmax, nch)
 real(8), intent(out) :: bmat(nairy, nairy)
-integer, intent(inout) :: jq(nch)
-integer, intent(inout) :: lq(nch)
-integer, intent(inout) :: inq(nch)
+type(bqs_type), intent(inout) :: bqs
 integer, intent(in) :: ien
 integer, intent(in) :: nerg
 real(8), intent(in) :: en
@@ -287,7 +286,7 @@ if (prlogd .and. airyfl) then
 end if
 !  now calculate s-matrix and t-matrix squared
 call smatrx (z, w, zmat, &
-             lq, jq, inq, r, prec, tw, twm, nopen, nch, nmax, &
+             bqs, r, prec, tw, twm, nopen, nch, nmax, &
              prlogd,ipos)
 
 ! convert to time string
@@ -529,7 +528,7 @@ real(8),allocatable :: bmat(:)
 
 !     w             scratch array of dimension (nmax,nch)
 !                   used as workspace for the potential matrix
-real(8) :: w(nmax*nch)
+real(8), allocatable :: w(:)
 
 !     The following variables are for size-determination of (machine
 !     dependent) built-in types
@@ -562,6 +561,7 @@ if (nsteps .ne. 0) then
    end if 
 end if
 
+allocate(w(nmax*nch))
 !     row, column and diagonal increments for matrices z and w
 nrow = 1
 ncol = nmax
@@ -983,6 +983,7 @@ if (nsteps /= 0) then
   !     propagation loop ends here
   250 continue
 
+  deallocate(w)
   deallocate(bmat)
   deallocate(amat)
 
@@ -1509,7 +1510,7 @@ zeta = zeta + pib4
 return
 end
 ! ----------------------------------------------------------------------
-subroutine psiasy(fj,fn,unit,sr,si,psir,psii,nopen,nmax)
+subroutine psiasy(fj,fn,sr,si,psir,psii,nopen,nmax)
 ! subroutine to determine real and imaginary part of asymptotic wavefunction o
 ! derivative of these
 !  asmptotically, in the case of inelastic scattering, the wavefunction is
@@ -1532,7 +1533,6 @@ subroutine psiasy(fj,fn,unit,sr,si,psir,psii,nopen,nmax)
 !                   ricatti bessel function yl
 !                   contains (for derivative calculation) the derivative with
 !                   respect to r of the normalized ricatti bessel function yl
-!    unit           scratch vector
 !    sr, si         matrices of order nmax x nmax which contain
 !                   on input: real and imaginary parts of s-matrix
 !                   on return: real and imaginary parts of asymptotic
@@ -1548,67 +1548,78 @@ subroutine psiasy(fj,fn,unit,sr,si,psir,psii,nopen,nmax)
 use mod_phot, only: photof, wavefn, boundf, writs
 use mod_hiutil, only: daxpy_wrapper
 use mod_hivector, only: matmov
-implicit double precision (a-h,o-z)
-dimension fj(1), fn(1), unit(1), sr(nmax,nmax), si(nmax,nmax), &
-          psii(nmax,nmax), psir(nmax,nmax)
-one=1.d0
-onemin=-1.d0
-!   put unit vector into array unit
-do 80  icol = 1, nopen
-  unit(icol) = one
-80 continue
-! first we want to calculate real part of wavefunction at infinity
-! that is   yl(kr) (Sr-1) + jl(kr) Si for scattering or
-!         - yl(kr) (Sr-1) + jl(kr) Si for photodissociation
-! first move Sreal into psii
+implicit none
+real(8), intent(in) :: fj(nopen)
+real(8), intent(in) :: fn(nopen)
+real(8), intent(in) :: sr(nmax,nmax)
+real(8), intent(in) :: si(nmax,nmax)
+real(8), intent(out) :: psir(nmax,nmax)
+real(8), intent(out) :: psii(nmax,nmax)
+integer, intent(in) :: nopen
+integer, intent(in) :: nmax
+
+real(8), parameter :: one=1.d0
+real(8), parameter :: onemin=-1.d0
+integer :: icol, irow
+real(8) :: fac
+!    unit           scratch vector
+real(8) :: unit(nopen)
+  !   put unit vector into array unit
+  do icol = 1, nopen
+    unit(icol) = one
+  end do
+  ! first we want to calculate real part of wavefunction at infinity
+  ! that is   yl(kr) (Sr-1) + jl(kr) Si for scattering or
+  !         - yl(kr) (Sr-1) + jl(kr) Si for photodissociation
+  ! first move Sreal into psii
   call matmov (sr, psii, nopen, nopen, nmax, nmax)
-! now subtract unit matrix
+  ! now subtract unit matrix
   call daxpy_wrapper (nopen, onemin, unit, 1, psii(1, 1), nmax + 1)
-! now premultiply by diagonal matrix -yl(kr) for photodissociation or
-! +yl(kr) for scattering
-  do 130 irow = 1, nopen
+  ! now premultiply by diagonal matrix -yl(kr) for photodissociation or
+  ! +yl(kr) for scattering
+  do irow = 1, nopen
     fac=one*fn(irow)
     if (photof) fac=-fac
     call dscal(nopen, fac, psii(irow,1), nmax)
-130   continue
-! now store simag in psir
+  end do
+  ! now store simag in psir
   call matmov(si, psir, nopen, nopen, nmax, nmax)
-! premultiply by diagonal matrix jl(kr)
-  do 140 irow = 1, nopen
+  ! premultiply by diagonal matrix jl(kr)
+  do irow = 1, nopen
     call dscal(nopen, fj(irow), psir(irow,1), nmax)
-140   continue
-! now evaluate +/- yl(kr) (Sr-1) + jl(kR) Si, save in psir
-  do 150 icol = 1, nopen
+  end do
+  ! now evaluate +/- yl(kr) (Sr-1) + jl(kR) Si, save in psir
+  do icol = 1, nopen
     call daxpy_wrapper(nopen, one, psii(1, icol), 1, psir(1,icol), 1)
-150   continue
-! psir now contains real part of asymptotic scattering wavefunction
-! now compute imaginary part of asymptotic wavefunction
-! that is - jl(kr) (1+Sr) + yl(kr) Si for scattering or
-!         - jl(kr) (1+Sr) - yl(kr) Si for photodissociation
-! now move Sreal into psii
+  end do
+  ! psir now contains real part of asymptotic scattering wavefunction
+  ! now compute imaginary part of asymptotic wavefunction
+  ! that is - jl(kr) (1+Sr) + yl(kr) Si for scattering or
+  !         - jl(kr) (1+Sr) - yl(kr) Si for photodissociation
+  ! now move Sreal into psii
   call matmov (sr, psii, nopen, nopen, nmax, nmax)
-! now add unit matrix
+  ! now add unit matrix
   call daxpy_wrapper (nopen, one, unit, 1, psii(1, 1), nmax + 1)
-! now premultiply by diagonal matrix -jl(kr)
-  do 157 irow = 1, nopen
+  ! now premultiply by diagonal matrix -jl(kr)
+  do irow = 1, nopen
     fac=-fj(irow)
     call dscal(nopen, fac, psii(irow,1), nmax)
-157   continue
-! replace real part of s matrix by real part of asymptotic wavefunction
+  end do
+  ! replace real part of s matrix by real part of asymptotic wavefunction
   call matmov(psir,sr,nopen, nopen, nmax, nmax)
-! premultiply Simag by diagonal matrix yl(kr) for scattering or by
-! -yl(kr) for photodissociation
-  do 159 irow = 1, nopen
+  ! premultiply Simag by diagonal matrix yl(kr) for scattering or by
+  ! -yl(kr) for photodissociation
+  do irow = 1, nopen
     fac=fn(irow)
     if (photof) fac=-fac
     call dscal(nopen, fac, si(irow,1), nmax)
-159   continue
-! now evaluate - jl(kr) (1+Sr) +/- yl(kR) Si, save in psii
-  do 161 icol = 1, nopen
+  end do
+  ! now evaluate - jl(kr) (1+Sr) +/- yl(kR) Si, save in psii
+  do icol = 1, nopen
     call daxpy_wrapper(nopen, one, si(1, icol), 1, psii(1,icol), 1)
-161   continue
-! replace imaginary part of s matrix by imaginary part of
-! asymptotic wavefunction
+  end do
+  ! replace imaginary part of s matrix by imaginary part of
+  ! asymptotic wavefunction
   call matmov(psii,si,nopen, nopen, nmax, nmax)
 return
 end
@@ -1714,11 +1725,13 @@ integer, intent(in) :: nmax
 logical, intent(in) :: kwrit
 logical, intent(in) :: ipos
 
-real(8), dimension(nopen) :: fj
+! ricatti-bessel functions
+real(8), dimension(nopen) :: fj  
 real(8), dimension(nopen) :: fn
 real(8), dimension(nopen) :: fpj
 real(8), dimension(nopen) :: fpn
-real(8), dimension(nopen) :: pk
+
+real(8), dimension(nopen) :: pk  ! wavevectors for open channels
 real(8), dimension(nopen) :: derj
 real(8), dimension(nopen) :: dern
 
@@ -1946,12 +1959,12 @@ iendwv = iendwv + 8 * sizeof(char_t) &
     call matmov(sr,srsave,nopen,nopen,nmax,nmax)
     call matmov(si,sisave,nopen,nopen,nmax,nmax)
 ! here if wavefunction wanted
-  call psiasy(fj,fn,fpn,sr,si,tmod,scmat,nopen,nmax)
+  call psiasy(fj,fn,sr,si,tmod,scmat,nopen,nmax)
 ! on return, sr contains real part of asymptotic wavefunction, si contains
 ! imaginary part of asymptotic wavefunction
 ! also determine real and imaginary part of derivative of
 ! asymptotic wavefunction
- call psiasy(derj,dern,fpn,srsave,sisave,tmod, &
+ call psiasy(derj,dern,srsave,sisave,tmod, &
              scmat,nopen,nmax)
 endif
 ! here for photodissociation, at this point:
@@ -2021,7 +2034,7 @@ if (photof) then
 ! save transition amplitudes
   if (wavefn) then
 
-!          call dbwi(nphoto,1,ifil,izero)
+!          call dbwi(nphoto,1,ifil,REC_LAST_USED)
      do jrow = 1, nphoto
         write (ifil, err=950) (sr(jrow, jcol), jcol=1, nopen)
      end do
@@ -2119,7 +2132,7 @@ call exit()
 end
 ! -----------------------------------------------------------------------
 subroutine smatrx (z, sr, si, &
-                   lq, jq, inq, r, prec, ts, tsw, nopen, nch, nmax, &
+                   bqs, r, prec, ts, tsw, nopen, nch, nmax, &
                    kwrit,ipos)
 ! -----------------------------------------------------------------------
 !  subroutine to:
@@ -2139,8 +2152,8 @@ subroutine smatrx (z, sr, si, &
 !                        contains the imaginary part of the s-matrix
 !    amat,    scratch matrices
 !     bmat
-!    jq, lq:  rotational angular momenta, orbital angular momenta, and
-!    inq,     additional quantum index for each channel
+!    bqs:     rotational angular momenta, orbital angular momenta, and
+!             additional quantum index for each channel
 !    isc1,sc1,
 !    sc2,sc3,   scratch vectors of dimension at least equal to the number of
 !    sc4,sc5:   channels
@@ -2164,13 +2177,12 @@ use mod_wave, only: ifil, ipos2, ipos3, nrlogd, iendwv, ipos2_location
 use mod_ered, only: ered, rmu
 use mod_phot, only: photof, wavefn, boundf, writs
 use mod_hiutil, only: mtime
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 real(8), intent(inout) :: z(nmax,nmax)
 real(8), intent(out) :: sr(nmax,nmax)
 real(8), intent(out) :: si(nmax,nmax)
-integer, intent(inout) :: lq(nch)
-integer, intent(inout) :: jq(nch)
-integer, intent(inout) :: inq(nch)
+type(bqs_type), intent(inout) :: bqs
 real(8), intent(in) :: r
 real(8), intent(in) :: prec
 real(8), intent(out) :: ts
@@ -2182,7 +2194,7 @@ logical, intent(in) :: kwrit
 logical, intent(in) :: ipos
 
 
-real(8) :: amat(nmax,nmax)
+real(8), allocatable :: amat(:,:)
 integer :: isc1(nch)
 
 data izero /0/
@@ -2207,11 +2219,13 @@ do   50  i = 1, nch
     nopen = nopen + 1
     isc1(nopen) = i
     eint(nopen) = eint(i)
-    jq(nopen) = jq(i)
-    inq(nopen) = inq(i)
-    lq(nopen) = lq(i)
+    bqs%jq(nopen) = bqs%jq(i)
+    bqs%inq(nopen) = bqs%inq(i)
+    bqs%lq(nopen) = bqs%lq(i)
   end if
 50 continue
+bqs%length = nopen
+allocate(amat(nmax, nmax))
 if (nopen .lt. nch) then
 !  now pack the log-derivative matrix into a matrix of size nopen x nopen
 !  keeping only the open-channel components
@@ -2248,7 +2262,7 @@ endif
 !  isc1, sc1, sc2, sc3, and sc4 are all used as scratch arrays
 !  scmat is used as scratch matrix here
 !  this uses new smat routine involving just open channels
-call smatop (z, sr, si, amat, lq, r, prec, nopen, nmax, kwrit,ipos)
+call smatop (z, sr, si, amat, bqs%lq, r, prec, nopen, nmax, kwrit,ipos)
 if (wavefn) then
 ! if wavefunction desired, then
 ! sr and si contain open channel portion of asymptotic wavefunction
@@ -2279,6 +2293,7 @@ if (wavefn) then
    iendwv = iendwv + 8 * sizeof(char_t) &
         + (4 * nopen ** 2 + nopen) * sizeof(dble_t)
 endif
+deallocate(amat)
 call mtime(t11,t22)
 ts=t11 - t1
 tsw=t22 -t2

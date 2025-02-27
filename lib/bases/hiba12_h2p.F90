@@ -4,7 +4,7 @@
 #include "assert.h"
 module mod_hiba12_h2p
 contains
-subroutine bah2p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
+subroutine bah2p (bqs, jhold, ehold, ishold, nlevel, nlevop, &
                   sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
                   n, nmax, ntop, v2)
@@ -22,12 +22,12 @@ subroutine bah2p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !  current revision date:  3-sep-2020 by p.dagdigian
 ! --------------------------------------------------------------------
 !  variables in call list:
-!    j:        for CC calculation:  returns diatom angular momentum (j) for ea
+!    bqs%jq:   for CC calculation:  returns diatom angular momentum (j) for ea
 !              for CD-case 1A and 1C calculation:  on return contains atom+dia
 !              (j12)
-!    l:        on return contains orbital angular momentum for each
+!    bqs%lq:   on return contains orbital angular momentum for each
 !              channel
-!    is:       on return contains atomic angular momentum (ja) of each channel
+!    bqs%inq:  on return contains atomic angular momentum (ja) of each channel
 !              (0 or 1)
 !    jhold:    for CC calculations:  on return contains diatom angular momentu
 !              for each level
@@ -106,7 +106,6 @@ subroutine bah2p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_coj12, only: j12
 use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
@@ -117,12 +116,14 @@ use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_skip, only: nskip, iskip
 use mod_jtot, only: jjtot, jjlpar
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
+type(bqs_type), intent(out) :: bqs
 type(ancou_type), intent(out), allocatable :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-dimension j(9), l(9), jhold(9), ehold(9), sc2(9), sc3(9), &
-          sc4(9), ishold(9), is(9), isc8(9)
+dimension jhold(9), ehold(9), sc2(9), sc3(9), &
+          sc4(9), ishold(9), isc8(9)
 dimension lamr(13),lama(13),lam12(13), mu(13)
 dimension lamrold(9),lamaold(9),lam12old(9), muold(9)
 !  edited the list below (3-sep-2020)
@@ -235,6 +236,7 @@ endif
 jjtot=jtot
 jjlpar=jlpar
 jmolmin=0
+call bqs%init(nmax)
 if (iop .eq. 1) jmolmin=1
 if (.not. csflag) then
 !  assign quantum numbers and energies for CC calculations
@@ -262,10 +264,11 @@ if (.not. csflag) then
         if ((-1)**li .eq. jlpar*(-1)**(jmolmin-1)) then
           n = n + 1
           if (n .gt. nmax) go to 180
-          l(n) = li
-          is(n)=jai
-          j(n)=jmol
-          j12(n)=j12i
+          bqs%lq(n) = li
+          bqs%inq(n)=jai
+          bqs%jq(n)=jmol
+          bqs%j12(n)=j12i
+          bqs%length = n
           isc8(n)=j12i
 ! centrifugal contribution to hamiltonian
           cent(n) = li*(li+1)
@@ -305,10 +308,11 @@ elseif (csflag) then
           xjtot=jtot+half
           n = n + 1
           if (n .gt. nmax) go to 180
-          l(n) = li
-          is(n)=jai
-          j(n)=j12i
-          j12(n)=jmol
+          bqs%lq(n) = li
+          bqs%inq(n)=jai
+          bqs%jq(n)=j12i
+          bqs%j12(n)=jmol
+          bqs%length = n
           isc8(n)=jmol
           xj12=j12i+half
 ! centrifugal contribution to hamiltonian
@@ -357,12 +361,13 @@ elseif (csflag) then
               li=jtot
               n = n + 1
               if (n .gt. nmax) go to 180
-              j12(n)=jmol
+              bqs%j12(n)=jmol
               isc8(n)=jmol
-              l(n) = li
+              bqs%lq(n) = li
               xjtot=jtot+half
-              is(n)=jai
-              j(n)=ik
+              bqs%inq(n)=jai
+              bqs%jq(n)=ik
+              bqs%length = n
 ! centrifugal contribution to hamiltonian
               cent(n)=xjtot*(xjtot+1)+xjai*(xjai+1)+ &
                   jmol*(jmol+1)-2*xnu**2+2*ik*xomega
@@ -397,11 +402,12 @@ elseif (csflag) then
             li=jtot
             n = n + 1
             if (n .gt. nmax) go to 180
-            j12(n)=jmol
+            bqs%j12(n)=jmol
             isc8(n)=jmol
-            l(n) = li
-            is(n)=1
-            j(n)=ik
+            bqs%lq(n) = li
+            bqs%inq(n)=1
+            bqs%jq(n)=ik
+            bqs%length = n
 ! centrifugal contribution to hamiltonian
             cent(n) = jtot*(jtot+1)+2+jmol*(jmol+1) &
                      -2*nu**2+2*ik*iomega
@@ -465,14 +471,15 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and..not.boundc) then
 !  here if this channel is to be included
         nn = nn + 1
         eint(nn) = eint(i)
-        is(nn) = is(i)
-        j(nn) = j(i)
+        bqs%inq(nn) = bqs%inq(i)
+        bqs%jq(nn) = bqs%jq(i)
         cent(nn) = cent(i)
-        l(nn) = l(i)
+        bqs%lq(nn) = bqs%lq(i)
       end if
 195     continue
 !  reset number of channels
     n = nn
+    bqs%length = n
   end if
 end if
 !  return if no channels
@@ -520,9 +527,9 @@ if (bastst) then
       write (9, 210)
 210       format(/'   N   JA(IS) JMOL  J12(J)    L    EINT(CM-1)')
       do 220  i = 1, n
-        write (6, 215) i,is(i)+half,j(i),j12(i)+half,l(i), &
+        write (6, 215) i,bqs%inq(i)+half,bqs%jq(i),bqs%j12(i)+half,bqs%lq(i), &
              eint(i)*econv
-        write (9, 215) i,is(i)+half,j(i),j12(i)+half,l(i), &
+        write (9, 215) i,bqs%inq(i)+half,bqs%jq(i),bqs%j12(i)+half,bqs%lq(i), &
              eint(i)*econv
 215         format (i4, f8.1,i5, f7.1, i7, f12.3)
 220       continue
@@ -532,11 +539,11 @@ if (bastst) then
 225       format(/'   N   JA(IS) JMOL  J12(J)   CENT   EINT(CM-1)', &
             ';  L = JTOT')
       do 235  i = 1, n
-        xs=is(i)+half
-        xj=j(i)+half
+        xs=bqs%inq(i)+half
+        xj=bqs%jq(i)+half
         icent=cent(i)
-        write (6, 230) i,xs,j12(i),xj,icent,eint(i)*econv
-        write (9, 230) i,xs,j12(i),xj,icent,eint(i)*econv
+        write (6, 230) i,xs,bqs%j12(i),xj,icent,eint(i)*econv
+        write (9, 230) i,xs,bqs%j12(i),xj,icent,eint(i)*econv
 230         format (i4, f8.1,i6,f7.1, i8, f12.3)
 235       continue
     endif
@@ -547,10 +554,10 @@ if (bastst) then
 255       format( &
        /'   N   JA(IS)  JMOL  K(J)    L    CENT    EINT(CM-1)')
       do 265  i = 1, n
-        xs=is(i)+half
+        xs=bqs%inq(i)+half
         icent=cent(i)
-        write (6, 260) i,xs,j12(i),j(i),l(i),icent,eint(i)*econv
-        write (9, 260) i,xs,j12(i),j(i),l(i),icent,eint(i)*econv
+        write (6, 260) i,xs,bqs%j12(i),bqs%jq(i),bqs%lq(i),icent,eint(i)*econv
+        write (9, 260) i,xs,bqs%j12(i),bqs%jq(i),bqs%lq(i),icent,eint(i)*econv
 260         format (i4, f8.1,4i6, f14.3)
 265       continue
     else
@@ -558,9 +565,9 @@ if (bastst) then
       write (9, 270)
 270       format(/'   N   LA(IS)  JMOL  K(J)   CENT    EINT(CM-1)')
       do 275  i = 1, n
-        write (6, 272) i,is(i),j12(i),j(i),idnint(cent(i)), &
+        write (6, 272) i,bqs%inq(i),bqs%j12(i),bqs%jq(i),idnint(cent(i)), &
                        eint(i)*econv
-        write (9, 272) i,is(i),j12(i),j(i),idnint(cent(i)), &
+        write (9, 272) i,bqs%inq(i),bqs%j12(i),bqs%jq(i),idnint(cent(i)), &
                        eint(i)*econv
 272         format (i4, i8,3i6, f14.3)
 275       continue
@@ -653,27 +660,27 @@ do 320 il = 1,lammax(1)
       ij = ntop * (icol - 1) +irow
 !6/13/2002:  reverse definition of j and j12 for CD calculations
       if (csflag) then
-         jrow=j12(irow)
-         jcol=j12(icol)
-         j12row=j(irow)
-         j12col=j(icol)
+         jrow=bqs%j12(irow)
+         jcol=bqs%j12(icol)
+         j12row=bqs%jq(irow)
+         j12col=bqs%jq(icol)
       else
-         jrow=j(irow)
-         jcol=j(icol)
-         j12row=j12(irow)
-         j12col=j12(icol)
+         jrow=bqs%jq(irow)
+         jcol=bqs%jq(icol)
+         j12row=bqs%j12(irow)
+         j12col=bqs%j12(icol)
       endif
       if (.not. csflag .or. (csflag .and. ihomo)) then
-        call vlmh2p (irow, icol, jtot, jlpar, jrow, jcol,is(irow), &
-        is(icol), j12row, j12col, l(irow), l(icol), ilamr, &
+        call vlmh2p (irow, icol, jtot, jlpar, jrow, jcol,bqs%inq(irow), &
+        bqs%inq(icol), j12row, j12col, bqs%lq(irow), bqs%lq(icol), ilamr, &
         ilama, ilam12, nu, csflag, vee)
       else if (csflag .and. .not.ihomo) then
-        call vlmh2pc(irow, icol, jtot, jlpar, jrow, jcol,is(irow), &
-        is(icol), j(irow), j(icol), ilamr, &
+        call vlmh2pc(irow, icol, jtot, jlpar, jrow, jcol,bqs%inq(irow), &
+        bqs%inq(icol), bqs%jq(irow), bqs%jq(icol), ilamr, &
         ilama, imu, nu, jmol, flaghf, vee)
       endif
-!           write (6,291) irow,icol,jtot,jlpar,jrow,jcol,is(irow),is(icol),
-!    : j(irow),j(icol),nu,ilamr,ilama,ilam12,vee
+!           write (6,291) irow,icol,jtot,jlpar,jrow,jcol,bqs%inq(irow),bqs%inq(icol),
+!    : bqs%jq(irow),bqs%jq(icol),nu,ilamr,ilama,ilam12,vee
 291  format(14i3,g17.8)
       if (vee .eq. 0) goto 300
         inum = inum + 1
@@ -981,8 +988,8 @@ save potfil
 !  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
 #include "common/comdot.F90"
 
-integer, pointer :: nterm, iop, jmax
-real(8), pointer :: brot, aso
+integer, pointer, save :: nterm, iop, jmax
+real(8), pointer, save :: brot, aso
 nterm=>ispar(1); iop=>ispar(2); jmax=>ispar(3)
 brot=>rspar(1); aso=>rspar(2)
 

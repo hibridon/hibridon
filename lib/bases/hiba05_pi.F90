@@ -4,7 +4,7 @@ contains
 ! sypi (savpi/ptrpi) defines, save variables and reads                   *
 !                  potential for general pi scattering                   *
 ! ----------------------------------------------------------------------
-subroutine bapi  (j, l, is, jhold, ehold, ishold, nlevel, &
+subroutine bapi (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, c0, c1, c2, cf, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
@@ -133,14 +133,16 @@ use mod_par, only: iprint, rendai=>scat_rendai
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
+type(bqs_type), intent(out) :: bqs
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*80 string
 character*27 case
 character*2 chf
-dimension j(1), is(1), l(1), jhold(1), ishold(1), ieps(2)
+dimension jhold(1), ishold(1), ieps(2)
 dimension c0(1), c1(1), c2(1), cf(1), ehold(1)
 dimension e(3,3), eig(3), sc1(3), sc2(3), vec(3,3), vii(0:2)
 !  cvtown: conversion factor from coulomb.volts to cm-1 (wavenumbers)
@@ -278,6 +280,7 @@ if (efield .ne. zero .and. .not. flagsu) then
   stop
 end if
 !  first set up list of all case (a) levels for first spin-orbit state
+call bqs%init(nmax)
 n = 0
 iommin = 0
 if (imult .eq. 1) iommin = 1
@@ -292,14 +295,15 @@ do 160 ip = 1, npar
   if (ihomo .and. igu*ieps(ip)*(-1)**(ji-ispin) .ne. isa) &
       go to 160
   n = n + 1
-  j(n) = ji
-  is(n) = ieps(ip)
-  if (imult .eq. 1) eint(n) = (brot + half * is(n) * q) &
+  bqs%jq(n) = ji
+  bqs%inq(n) = ieps(ip)
+  bqs%length = n
+  if (imult .eq. 1) eint(n) = (brot + half * bqs%inq(n) * q) &
                               * ji * (ji + 1)
   if (imult .eq. 2) then
     x = ji + one
     eint(n) = - half * (nman - 1) * aso + brot * x * x + &
-       half * (one - is(n) * x) * (p + q * (one - is(n) * x))
+       half * (one - bqs%inq(n) * x) * (p + q * (one - bqs%inq(n) * x))
   end if
 160 continue
 !  n now contains the number of levels for the first spin-orbit state
@@ -311,13 +315,13 @@ iso = isign(1,nint(aso))
 iso01 = (1 - iso) / 2
 nn = n
 do 170 i = 1, n
-  if (j(i) .eq. 0 .or. nman .eq. 1) then
+  if (bqs%jq(i) .eq. 0 .or. nman .eq. 1) then
 !  here for a pure case (a) state
 !  for 3pi (2pi) j = 0 (1/2) can exist only for omega = 0 (1/2)
 !  and hence is always a pure case (a) state
-    if (nman .eq. 2) is(i) = (1 + iso01) * is(i)
+    if (nman .eq. 2) bqs%inq(i) = (1 + iso01) * bqs%inq(i)
     if (imult .eq. 3) eint(i) = - aso + two * brot + &
-                                is(i) * (o + p + q)
+                                bqs%inq(i) * (o + p + q)
     c0(i) = one
     c1(i) = zero
     c2(i) = zero
@@ -325,7 +329,7 @@ do 170 i = 1, n
 !  here for j .ge. 1
 !  the index nn points to the nominal omega=1(+1/2 for 2pi) levels
     nn = nn + 1
-    j(nn) = j(i)
+    bqs%jq(nn) = bqs%jq(i)
     if (imult .eq. 2) then
 !  here for 2pi, the matrix elements are given by a.j. kotlar,
 !  r.w. field and j.i. steinfeld, j. mol. spectr. 80, 86 (1980)
@@ -334,9 +338,9 @@ do 170 i = 1, n
 !  and evaluate 1/2-3/2 coupling matrix element (h1232) and mixing
 !  angle (angle) due to the j.s term in the hamiltonian
       e12 = eint(i)
-      x = j(i) + one
+      x = bqs%jq(i) + one
       e32 = half * aso + (brot + half * q) * (x * x - one) - brot
-      h1232 = - (brot + quart * p + half * (one - is(i) * x) * q) &
+      h1232 = - (brot + quart * p + half * (one - bqs%inq(i) * x) * q) &
               * sqrt(x*x-one)
       angle = half * atan(two*h1232/(e12-e32))
 !  c0 and c1 indicate the amount of omega = 1/2 and 3/2
@@ -353,21 +357,21 @@ do 170 i = 1, n
       eint(nn) = e12 * c0(nn)**2 + e32 * c1(nn)**2 &
                  + two * c0(nn) * c1(nn) * h1232
 !  assign symmetry index: i*eps for Fi levels
-      is(nn) = (2 - iso01) * is(i)
-      is(i) = (1 + iso01) * is(i)
+      bqs%inq(nn) = (2 - iso01) * bqs%inq(i)
+      bqs%inq(i) = (1 + iso01) * bqs%inq(i)
     else if (imult .eq. 3) then
-      is(nn) = 2 * is(i)
+      bqs%inq(nn) = 2 * bqs%inq(i)
 !  here for 3pi, the matrix elements are given by
 !  j.m. brown and a.j. merer, j. mol. spectr. 74, 488 (1979), or by c.r.
 !  brazier, r.s. ram and p.f. bernath, j. mol. spectr. 120, 381 (1986)
 !  save the case (a) energies temporarily in the array e
-      x = float(j(i)*(j(i)+1))
-      e(1,1) = - aso + brot * (x + two) + is(i) * (o + p + q)
-      e(1,2) = - (brot + half * is(i) * (p + two * q)) &
+      x = float(bqs%jq(i)*(bqs%jq(i)+1))
+      e(1,1) = - aso + brot * (x + two) + bqs%inq(i) * (o + p + q)
+      e(1,2) = - (brot + half * bqs%inq(i) * (p + two * q)) &
                * sqrt(two*x)
-      e(1,3) = half * is(i) * q * sqrt(x*(x-two))
+      e(1,3) = half * bqs%inq(i) * q * sqrt(x*(x-two))
       e(2,1) = e(1,2)
-      e(2,2) = brot * (x + two) + half * is(i) * q * x
+      e(2,2) = brot * (x + two) + half * bqs%inq(i) * q * x
       e(2,3) = - brot * sqrt(two*(x-two))
       e(3,1) = e(1,3)
       e(3,2) = e(2,3)
@@ -375,7 +379,7 @@ do 170 i = 1, n
 !  c0, c1 and c2 indicate the amount of omega = 0, 1 and 2
 !  components, respectively, in each mixed level
 !  store the energies of the mixed states in the array eint
-      if (j(i) .eq. 1) then
+      if (bqs%jq(i) .eq. 1) then
 !  only the omega=0 and omega=1 states are mixed for j = 1
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
         lwork=9
@@ -397,7 +401,7 @@ do 170 i = 1, n
         c0(nn) = vec(1,2-iso01)
         c1(nn) = vec(2,2-iso01)
         c2(nn) = zero
-      else if (j(i) .ge. 2) then
+      else if (bqs%jq(i) .ge. 2) then
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
         lwork=9
         call dsyev('V','L',3,e,3,eig,work,lwork,ierr)
@@ -429,16 +433,16 @@ nnn = nn
 if (imult .eq. 3) then
 !  here for 3pi add the omega=2 levels
   do 180 i = 1, n
-    if (j(i) .le. 1) then
+    if (bqs%jq(i) .le. 1) then
 !  here for j = 0 or 1, which can exist only for omega = 0 or 1
-      is(i) = (2 - iso) * is(i)
+      bqs%inq(i) = (2 - iso) * bqs%inq(i)
     else
 !  here for j .ge. 2
 !  the index nnn points to the nominal omega=2 levels
       nnn = nnn + 1
-      j(nnn) = j(i)
-      is(nnn) = (2 + iso) * is(i)
-      is(i) = (2 - iso) * is(i)
+      bqs%jq(nnn) = bqs%jq(i)
+      bqs%inq(nnn) = (2 + iso) * bqs%inq(i)
+      bqs%inq(i) = (2 - iso) * bqs%inq(i)
       eint(nnn) = eint(nmax-n+i)
       c0(nnn) = c0(nmax-n+i)
       c1(nnn) = c1(nmax-n+i)
@@ -485,7 +489,7 @@ else
   fstark = two * cvtown * dmom * efield * (nu + xhf)
   angmix = quart * sign(one,fstark) * acos(-one)
   do 220 i = 1, n, 2
-    if (j(i) .eq. zero .and. imult .eq. 3) then
+    if (bqs%jq(i) .eq. zero .and. imult .eq. 3) then
 !  for 3pi no stark mixing for j = 0, which can exist only for omega = 0
       cf(i) = zero
       cf(i+1) = one
@@ -499,7 +503,7 @@ else
     ee = eint(ie)
     ef = eint(if)
     xomega = xommin + (one + xhf) * c1(i)**2 + two * c2(i)**2
-    hef = fstark * xomega / ((j(i) + xhf) * (j(i) + xhf + one))
+    hef = fstark * xomega / ((bqs%jq(i) + xhf) * (bqs%jq(i) + xhf + one))
     if (ee .ne. ef) then
       angle = half * atan(hef/(ee-ef))
     else
@@ -519,8 +523,8 @@ end if
 nlevel = 0
 do 230 i = 1, n
   nlevel = nlevel + 1
-  jhold(nlevel) = j(i)
-  ishold(nlevel) = is(i)
+  jhold(nlevel) = bqs%jq(i)
+  ishold(nlevel) = bqs%inq(i)
   eint(i) = eint(i) / econv
   ehold(nlevel) = eint(i)
 230 continue
@@ -555,29 +559,29 @@ if (csflag) then
   do 260 i = 1, n
 !  include only channels with j at least equal to coupled states
 !  projection index
-    if (j(i) .ge. nu) then
+    if (bqs%jq(i) .ge. nu) then
       nn = nn + 1
-      j(nn) = j(i)
-      is(nn) = is(i)
+      bqs%jq(nn) = bqs%jq(i)
+      bqs%inq(nn) = bqs%inq(i)
       eint(nn) = eint(i)
       c0(nn) = c0(i)
       c1(nn) = c1(i)
       c2(nn) = c2(i)
       cf(nn) = cf(i)
-      l(nn) = jtot
+      bqs%lq(nn) = jtot
       cent(nn) = jtot * (jtot + 1)
     end if
 260   continue
 else if (.not. csflag) then
 !  set up close-coupled channel basis (if desired)
 !  first move all indices of rotational levels to the top of the vectors
-!  e.g. move j(n) to j(nmax), j(n-1) to j(nmax-1),  etc
+!  e.g. move bqs%jq(n) to bqs%jq(nmax), bqs%jq(n-1) to bqs%jq(nmax-1),  etc
   do 270 i = 1, n
 !  move (n-i+1)th element to (nmax-i+1)th element
     inew = nmax - i + 1
     iold = n - i + 1
-    j(inew) = j(iold)
-    is(inew) = is(iold)
+    bqs%jq(inew) = bqs%jq(iold)
+    bqs%inq(inew) = bqs%inq(iold)
     eint(inew) = eint(iold)
     c0(inew) = c0(iold)
     c1(inew) = c1(iold)
@@ -590,28 +594,29 @@ else if (.not. csflag) then
 !  required for rotational degeneracy, and store the new elements
 !  in nn, nn+1, ....
     ipoint = nmax - n + i
-    ji = j(ipoint)
+    ji = bqs%jq(ipoint)
     lmax = jtot + ji + ihf
     lmin = iabs(jtot-ji)
 !  in the e/f field-free basis:  is = i*eps for Fi level
 !  where i = 1,2,3 and eps = +/- 1 is the "true" case (a) symmetry index
-    if (isign(1,is(ipoint))*(-1)**(ji-ispin+lmin-jtot) .ne. jlpar) &
+    if (isign(1,bqs%inq(ipoint))*(-1)**(ji-ispin+lmin-jtot) .ne. jlpar) &
         lmin = lmin + 1
     do 280 li = lmin, lmax, 2
       nn = nn + 1
-      j(nn) = ji
-      is(nn) = is(ipoint)
+      bqs%jq(nn) = ji
+      bqs%inq(nn) = bqs%inq(ipoint)
       eint(nn) = eint(ipoint)
       c0(nn) = c0(ipoint)
       c1(nn) = c1(ipoint)
       c2(nn) = c2(ipoint)
-      l(nn) = li
+      bqs%lq(nn) = li
       cent(nn) = li * (li + 1)
 280     continue
 290   continue
 end if
 !  set number of coupled channels
 n = nn
+bqs%length = n
 if (n .gt. nmax) then
   write (6, 300) n, nmax
   write (9, 300) n, nmax
@@ -642,18 +647,19 @@ if (.not. flagsu .and. .not.boundc) then
       if (eint(i) .lt. emin) then
 !  here if this channel is to be included
         nn = nn + 1
-        j(nn) = j(i)
-        is(nn) = is(i)
+        bqs%jq(nn) = bqs%jq(i)
+        bqs%inq(nn) = bqs%inq(i)
         eint(nn) = eint(i)
         c0(nn) = c0(i)
         c1(nn) = c1(i)
         c2(nn) = c2(i)
         cent(nn) = cent(i)
-        l(nn) = l(i)
+        bqs%lq(nn) = bqs%lq(i)
       end if
 320     continue
 !  reset number of channels
     n = nn
+    bqs%length = n
   end if
 end if
 !  return if no channels
@@ -685,26 +691,26 @@ if (clist) then
 !  where i = 1,2,3 and eps = +/- 1 is the "true" case (a) symmetry index
 !  therefore eps is the sign of is and Fi is the magnitude of is
     if (nman .eq. 1) then
-      if (bastst) write (6, 333) i, j(i), chf, isign(1,is(i)), &
-                               iabs(is(i)), l(i), eint(i)*econv
-      write (9, 333) i, j(i), chf, isign(1,is(i)), &
-                   iabs(is(i)), l(i), eint(i)*econv
+      if (bastst) write (6, 333) i, bqs%jq(i), chf, isign(1,bqs%inq(i)), &
+                               iabs(bqs%inq(i)), bqs%lq(i), eint(i)*econv
+      write (9, 333) i, bqs%jq(i), chf, isign(1,bqs%inq(i)), &
+                   iabs(bqs%inq(i)), bqs%lq(i), eint(i)*econv
 333       format (2i4, a, i4, i3, i5, f10.3)
     endif
     if (nman .eq. 2) then
-      if (bastst) write (6, 335) i, j(i), chf, isign(1,is(i)), &
-                               iabs(is(i)), l(i), eint(i)*econv, &
+      if (bastst) write (6, 335) i, bqs%jq(i), chf, isign(1,bqs%inq(i)), &
+                               iabs(bqs%inq(i)), bqs%lq(i), eint(i)*econv, &
                                c0(i), c1(i)
-      write (9, 335) i, j(i), chf, isign(1,is(i)), &
-                   iabs(is(i)), l(i), eint(i)*econv, &
+      write (9, 335) i, bqs%jq(i), chf, isign(1,bqs%inq(i)), &
+                   iabs(bqs%inq(i)), bqs%lq(i), eint(i)*econv, &
                                c0(i), c1(i)
 335       format (2i4, a, i4, i3, i5, f10.3,3x,3f7.3)
     else if (imult .eq. 3) then
-      if (bastst) write (6, 335) i, j(i), chf, isign(1,is(i)), &
-                               iabs(is(i)), l(i), eint(i)*econv, &
+      if (bastst) write (6, 335) i, bqs%jq(i), chf, isign(1,bqs%inq(i)), &
+                               iabs(bqs%inq(i)), bqs%lq(i), eint(i)*econv, &
                                c0(i), c1(i), c2(i)
-      write (9, 335) i, j(i), chf, isign(1,is(i)), &
-                   iabs(is(i)), l(i), eint(i)*econv, &
+      write (9, 335) i, bqs%jq(i), chf, isign(1,bqs%inq(i)), &
+                   iabs(bqs%inq(i)), bqs%lq(i), eint(i)*econv, &
                                c0(i), c1(i), c2(i)
     end if
     if (efield .ne. zero) then
@@ -712,7 +718,7 @@ if (clist) then
 !  angmsf is the orientation angle between the
 !  molecular axis and the space-fixed axis Z
       angmsf = acos(two*(xommin+(one+xhf)*c1(i)**2+two*c2(i)**2)* &
-               cei*cf(i)*(nu+xhf)/((j(i)+xhf)*(j(i)+xhf+one)))
+               cei*cf(i)*(nu+xhf)/((bqs%jq(i)+xhf)*(bqs%jq(i)+xhf+one)))
       if (bastst) write (6, 360) cei, cf(i), rdtodg*angmsf
       write (9, 360) cei, cf(i), rdtodg*angmsf
     end if
@@ -742,15 +748,15 @@ do 450 ilam = 1, nlam
   ancouma => v2%get_angular_coupling_matrix(ilam)
   do 430 icol = 1, n
     if (efield .eq. zero) then
-      iepsc = isign(1,is(icol))
+      iepsc = isign(1,bqs%inq(icol))
     else
       iepsc = 1
       ceicol = (-1)**(ispin+icol) * cf(icol-(-1)**icol)
     end if
-    if (.not. csflag) lcol = l(icol)
+    if (.not. csflag) lcol = bqs%lq(icol)
     do 420 irow = icol, n
       if (efield .eq. zero) then
-        iepsr = isign(1,is(irow))
+        iepsr = isign(1,bqs%inq(irow))
       else
         iepsr = 1
         ceirow = (-1)**(ispin+irow) * cf(irow-(-1)**irow)
@@ -760,10 +766,10 @@ do 450 ilam = 1, nlam
 !  diagonal in omega
         lb = lammin(1) + (ilam - 1) * istep
 !  lb is the actual value of lambda
-        if (iabs(j(irow)-j(icol)) .gt. lb) go to 420
+        if (iabs(bqs%jq(irow)-bqs%jq(icol)) .gt. lb) go to 420
         ii = iommin - 1
 400         ii = ii + 1
-        call vlmpi (j(irow), l(irow), j(icol), lcol, jtot, ii, &
+        call vlmpi (bqs%jq(irow), bqs%lq(irow), bqs%jq(icol), lcol, jtot, ii, &
                      ii, lb, iepsr, iepsc, vii(ii), xhf, csflag)
         if (ii .lt. iommin+nman-1) go to 400
         vlam = vii(1)
@@ -776,16 +782,16 @@ do 450 ilam = 1, nlam
 !  off-diagonal in omega for 2pi states
         lb = lammin(2) + (ilam - nlam0 - 1) * istep
 !  lb is the actual value of lambda
-        if (iabs(j(irow)-j(icol)) .gt. lb) go to 420
+        if (iabs(bqs%jq(irow)-bqs%jq(icol)) .gt. lb) go to 420
         if (imult .ne. 2) &
-        call vlmpi (j(irow), l(irow), j(icol), lcol, jtot, &
+        call vlmpi (bqs%jq(irow), bqs%lq(irow), bqs%jq(icol), lcol, jtot, &
                      1, 3, lb, iepsr, iepsc, v11, xhf, csflag)
         vlam = v11
         if (imult .ne. 1) then
           ii = imult - 1
-          call vlmpi (j(irow), l(irow), j(icol), lcol, jtot, &
+          call vlmpi (bqs%jq(irow), bqs%lq(irow), bqs%jq(icol), lcol, jtot, &
                        0, ii, lb, iepsr, iepsc, v0i, xhf, csflag)
-          call vlmpi (j(irow), l(irow), j(icol), lcol, jtot, &
+          call vlmpi (bqs%jq(irow), bqs%lq(irow), bqs%jq(icol), lcol, jtot, &
                        ii, 0, lb, iepsr, iepsc, vi0, xhf, csflag)
           if (imult .eq. 2) then
             vlam = v0i * c0(irow) * c1(icol) + &
@@ -1001,8 +1007,8 @@ character*60 filnam, line, potfil, filnm1
 character*1 dot
 save potfil
 #include "common/comdot.F90"
-integer, pointer :: nterm, jmax, igu, isa, npar, imult, nman
-real(8), pointer :: brot, aso, o, p, q, dmom, efield
+integer, pointer, save :: nterm, jmax, igu, isa, npar, imult, nman
+real(8), pointer, save :: brot, aso, o, p, q, dmom, efield
 nterm=>ispar(1); jmax=>ispar(2); igu=>ispar(3); isa=>ispar(4); npar=>ispar(5); imult=>ispar(6); nman=>ispar(7)
 brot=>rspar(1); aso=>rspar(2); o=>rspar(3); p=>rspar(4); q=>rspar(5); dmom=>rspar(6); efield=>rspar(7)
 

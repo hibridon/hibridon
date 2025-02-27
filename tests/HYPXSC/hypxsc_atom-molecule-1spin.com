@@ -1,0 +1,1 @@
+hypxsc,hypxsc_atom-molecule-1spin,1,2,0,2

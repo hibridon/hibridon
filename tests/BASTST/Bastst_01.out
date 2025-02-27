@@ -1,0 +1,340 @@
+      BASTST                                     
+ DUMMY POTENTIAL FOR TESTING PURPOSES            
+ ==============================
+     *** Parameters:
+ JTOT1  =  20        JTOT2  =  20        JTOTD  =   5        JLPAR  =   1
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  48        IPRINT =   0
+ FSTFAC =  15.00     RINCR  =  1.000     RCUT   =  30.00     RENDAI =  1.000    
+ RENDLD =  1.000     RSTART =  1.000     SPAC   = 0.1000     TOLAI  =  1.000    
+ XMU    =  16.47    
+     *** 1-SIGMA system parameters:
+ NTERM  =   1        VMIN   =   0        VMAX   =   0        JMIN   =   0
+ JMAX   =  20
+ BROT   =  2.010     DROT   =  0.000     HROT   =  0.000     EVIB   =  0.000    
+ LAMMIN:    2
+ LAMMAX:    2
+ MPROJ:     0
+     *** Flags:
+ AIRYFL= F    BASTST= T    BATCH = F    CHLIST= T    CSFLAG= F    FLAGHF= F
+ FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= F    NOPRIN= F    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= F    WAVEFL= F
+ WRPART= F    WRSMAT= F    WRXSEC= F    BOUNDC= F
+ ** Energies:     5000.000000
+ NOUT:  4; JOUT:  0   2   4   6
+ INDOUT:    0
+ ==============================
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2023-01-17 at 11:22
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: 4a68289e6183a36dae41c0fb214e430c24fc6e3f
+SYS: Darwin 22.2.0 x86_64
+COMPILER: /opt/intel/oneapi/compiler/2022.2.1/mac/bin/intel64/ifort
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+ 
+      Model Name: MacBook Pro
+      Model Identifier: MacBookPro14,3
+      Processor Name: Quad-Core Intel Core i7
+      Processor Speed: 2.9 GHz
+      Number of Processors: 1
+      Total Number of Cores: 4
+      L2 Cache (per Core): 256 KB
+      L3 Cache: 8 MB
+      Hyper-Threading Technology: Enabled
+      Memory: 16 GB
+ --------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ All publications resulting from use of the integrators included in the
+ Hibridon code must include the following reference:
+
+ D. E. Manolopoulos, J. Chem. Phys. 85, 6425 (1986); M. H. Alexander and D. E.
+ Manolopoulos, J. Chem. Phys. 80, 2044 (1987).
+
+ All publications involving the determination ofphotodissociation cross sections
+ must also include the following reference:
+
+ M. H. Alexander, Comput. Phys. Commun, 75, 87 (1993).
+
+ All publications investigating flux redistribution must include the following references:
+
+ M. H. Alexander, J. Chem. Phys. 95, 8931 (1991); D. E. Manolopoulos and
+ M. H. Alexander, J. Chem. Phys.  97, 2527 (1992).
+
+ All publications resulting from use of the Hibridon package must include
+ the following reference:
+
+ HIBRIDON is a package of programs for the time-independent quantum treatment
+ of inelastic collisions and photodissociation written by M. H. Alexander,
+ D. E.  Manolopoulos, H.-J. Werner, and B. Follmeg, with contributions by
+ P. F. Vohralik, D. Lemoine, G. Corey, B. Johnson, T. Orlikowski, A. Berning,
+ A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly, G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J. Klos, and F. Lique
+ -----------------------------------------------------------------------------
+
+ ** LABEL:          BASTST                                     
+ ** POT NAME:  DUMMY POTENTIAL FOR TESTING PURPOSES            
+ ** DATE:      Jan 17 11:27:28 2023
+
+ *** WARNING:  NAIRY .NE. 1 BUT AIRYFL .EQ. .FALSE.
+ ** NMAX= 500  NAIRY= 500
+
+ **  CC SINGLET SIGMA DIATOMIC ** RMU=  16.4700       E=5000.00   JTOT=   20   JLPAR= 1
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=   30.00
+
+ State    B(v)         D(v)        H(v)          E(v)
+   0    2.0100      0.0000      0.0000         0.00000000
+
+   N   V   J    L      EINT(CM-1)
+
+   1   0   0   20        0.000
+   2   0   1   19        4.020
+   3   0   1   21        4.020
+   4   0   2   18       12.060
+   5   0   2   20       12.060
+   6   0   2   22       12.060
+   7   0   3   17       24.120
+   8   0   3   19       24.120
+   9   0   3   21       24.120
+  10   0   3   23       24.120
+  11   0   4   16       40.200
+  12   0   4   18       40.200
+  13   0   4   20       40.200
+  14   0   4   22       40.200
+  15   0   4   24       40.200
+  16   0   5   15       60.300
+  17   0   5   17       60.300
+  18   0   5   19       60.300
+  19   0   5   21       60.300
+  20   0   5   23       60.300
+  21   0   5   25       60.300
+  22   0   6   14       84.420
+  23   0   6   16       84.420
+  24   0   6   18       84.420
+  25   0   6   20       84.420
+  26   0   6   22       84.420
+  27   0   6   24       84.420
+  28   0   6   26       84.420
+  29   0   7   13      112.560
+  30   0   7   15      112.560
+  31   0   7   17      112.560
+  32   0   7   19      112.560
+  33   0   7   21      112.560
+  34   0   7   23      112.560
+  35   0   7   25      112.560
+  36   0   7   27      112.560
+  37   0   8   12      144.720
+  38   0   8   14      144.720
+  39   0   8   16      144.720
+  40   0   8   18      144.720
+  41   0   8   20      144.720
+  42   0   8   22      144.720
+  43   0   8   24      144.720
+  44   0   8   26      144.720
+  45   0   8   28      144.720
+  46   0   9   11      180.900
+  47   0   9   13      180.900
+  48   0   9   15      180.900
+  49   0   9   17      180.900
+  50   0   9   19      180.900
+  51   0   9   21      180.900
+  52   0   9   23      180.900
+  53   0   9   25      180.900
+  54   0   9   27      180.900
+  55   0   9   29      180.900
+  56   0  10   10      221.100
+  57   0  10   12      221.100
+  58   0  10   14      221.100
+  59   0  10   16      221.100
+  60   0  10   18      221.100
+  61   0  10   20      221.100
+  62   0  10   22      221.100
+  63   0  10   24      221.100
+  64   0  10   26      221.100
+  65   0  10   28      221.100
+  66   0  10   30      221.100
+  67   0  11    9      265.320
+  68   0  11   11      265.320
+  69   0  11   13      265.320
+  70   0  11   15      265.320
+  71   0  11   17      265.320
+  72   0  11   19      265.320
+  73   0  11   21      265.320
+  74   0  11   23      265.320
+  75   0  11   25      265.320
+  76   0  11   27      265.320
+  77   0  11   29      265.320
+  78   0  11   31      265.320
+  79   0  12    8      313.560
+  80   0  12   10      313.560
+  81   0  12   12      313.560
+  82   0  12   14      313.560
+  83   0  12   16      313.560
+  84   0  12   18      313.560
+  85   0  12   20      313.560
+  86   0  12   22      313.560
+  87   0  12   24      313.560
+  88   0  12   26      313.560
+  89   0  12   28      313.560
+  90   0  12   30      313.560
+  91   0  12   32      313.560
+  92   0  13    7      365.820
+  93   0  13    9      365.820
+  94   0  13   11      365.820
+  95   0  13   13      365.820
+  96   0  13   15      365.820
+  97   0  13   17      365.820
+  98   0  13   19      365.820
+  99   0  13   21      365.820
+ 100   0  13   23      365.820
+ 101   0  13   25      365.820
+ 102   0  13   27      365.820
+ 103   0  13   29      365.820
+ 104   0  13   31      365.820
+ 105   0  13   33      365.820
+ 106   0  14    6      422.100
+ 107   0  14    8      422.100
+ 108   0  14   10      422.100
+ 109   0  14   12      422.100
+ 110   0  14   14      422.100
+ 111   0  14   16      422.100
+ 112   0  14   18      422.100
+ 113   0  14   20      422.100
+ 114   0  14   22      422.100
+ 115   0  14   24      422.100
+ 116   0  14   26      422.100
+ 117   0  14   28      422.100
+ 118   0  14   30      422.100
+ 119   0  14   32      422.100
+ 120   0  14   34      422.100
+ 121   0  15    5      482.400
+ 122   0  15    7      482.400
+ 123   0  15    9      482.400
+ 124   0  15   11      482.400
+ 125   0  15   13      482.400
+ 126   0  15   15      482.400
+ 127   0  15   17      482.400
+ 128   0  15   19      482.400
+ 129   0  15   21      482.400
+ 130   0  15   23      482.400
+ 131   0  15   25      482.400
+ 132   0  15   27      482.400
+ 133   0  15   29      482.400
+ 134   0  15   31      482.400
+ 135   0  15   33      482.400
+ 136   0  15   35      482.400
+ 137   0  16    4      546.720
+ 138   0  16    6      546.720
+ 139   0  16    8      546.720
+ 140   0  16   10      546.720
+ 141   0  16   12      546.720
+ 142   0  16   14      546.720
+ 143   0  16   16      546.720
+ 144   0  16   18      546.720
+ 145   0  16   20      546.720
+ 146   0  16   22      546.720
+ 147   0  16   24      546.720
+ 148   0  16   26      546.720
+ 149   0  16   28      546.720
+ 150   0  16   30      546.720
+ 151   0  16   32      546.720
+ 152   0  16   34      546.720
+ 153   0  16   36      546.720
+ 154   0  17    3      615.060
+ 155   0  17    5      615.060
+ 156   0  17    7      615.060
+ 157   0  17    9      615.060
+ 158   0  17   11      615.060
+ 159   0  17   13      615.060
+ 160   0  17   15      615.060
+ 161   0  17   17      615.060
+ 162   0  17   19      615.060
+ 163   0  17   21      615.060
+ 164   0  17   23      615.060
+ 165   0  17   25      615.060
+ 166   0  17   27      615.060
+ 167   0  17   29      615.060
+ 168   0  17   31      615.060
+ 169   0  17   33      615.060
+ 170   0  17   35      615.060
+ 171   0  17   37      615.060
+ 172   0  18    2      687.420
+ 173   0  18    4      687.420
+ 174   0  18    6      687.420
+ 175   0  18    8      687.420
+ 176   0  18   10      687.420
+ 177   0  18   12      687.420
+ 178   0  18   14      687.420
+ 179   0  18   16      687.420
+ 180   0  18   18      687.420
+ 181   0  18   20      687.420
+ 182   0  18   22      687.420
+ 183   0  18   24      687.420
+ 184   0  18   26      687.420
+ 185   0  18   28      687.420
+ 186   0  18   30      687.420
+ 187   0  18   32      687.420
+ 188   0  18   34      687.420
+ 189   0  18   36      687.420
+ 190   0  18   38      687.420
+ 191   0  19    1      763.800
+ 192   0  19    3      763.800
+ 193   0  19    5      763.800
+ 194   0  19    7      763.800
+ 195   0  19    9      763.800
+ 196   0  19   11      763.800
+ 197   0  19   13      763.800
+ 198   0  19   15      763.800
+ 199   0  19   17      763.800
+ 200   0  19   19      763.800
+ 201   0  19   21      763.800
+ 202   0  19   23      763.800
+ 203   0  19   25      763.800
+ 204   0  19   27      763.800
+ 205   0  19   29      763.800
+ 206   0  19   31      763.800
+ 207   0  19   33      763.800
+ 208   0  19   35      763.800
+ 209   0  19   37      763.800
+ 210   0  19   39      763.800
+ 211   0  20    0      844.200
+ 212   0  20    2      844.200
+ 213   0  20    4      844.200
+ 214   0  20    6      844.200
+ 215   0  20    8      844.200
+ 216   0  20   10      844.200
+ 217   0  20   12      844.200
+ 218   0  20   14      844.200
+ 219   0  20   16      844.200
+ 220   0  20   18      844.200
+ 221   0  20   20      844.200
+ 222   0  20   22      844.200
+ 223   0  20   24      844.200
+ 224   0  20   26      844.200
+ 225   0  20   28      844.200
+ 226   0  20   30      844.200
+ 227   0  20   32      844.200
+ 228   0  20   34      844.200
+ 229   0  20   36      844.200
+ 230   0  20   38      844.200
+ 231   0  20   40      844.200
+ ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS  1009
+ ** BASTST=.TRUE.; TEST OF SUBROUTINE BASIS
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:     0
+      TIMING:  ELAPSED 00:00:01 / CPU 00:00:00 / MP RATIO    1.1 %
+      CURRENT DATE:  Jan 17 11:27:28 2023
+ ===============================================================================

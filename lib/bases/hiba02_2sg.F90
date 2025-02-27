@@ -4,7 +4,7 @@ contains
 ! sy2sg (sav2sg/ptr2sg) defines, saves variables and reads          *
 !                  potential for doublet sigma scattering                *
 ! --------------------------------------------------------------------
-subroutine ba2sg (j, l, is, jhold, ehold, ishold, nlevel, &
+subroutine ba2sg (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, nrot, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
@@ -123,6 +123,7 @@ use funit, only: FUNIT_INP
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
+use mod_hitypes, only: bqs_type
 
 implicit double precision (a-h,o-z)
 integer, intent(out), dimension(:) :: nrot
@@ -130,9 +131,10 @@ real(8), intent(out), dimension(:) :: sc2
 real(8), intent(out), dimension(:) :: sc3
 real(8), intent(out), dimension(:) :: sc4
 type(ancou_type), intent(out), allocatable, target :: v2
+type(bqs_type), intent(out) :: bqs
 type(ancouma_type), pointer :: ancouma
 logical clist, csflag, flaghf, flagsu, ihomo, bastst
-dimension j(1), l(1), jhold(1), ehold(1), is(1), &
+dimension jhold(1), ehold(1), &
           ieps(2), ishold(1)
 data ieps / -1, 1 /
 integer, pointer :: nterm, nrmax, npar, isym, igu, isa
@@ -283,6 +285,7 @@ if (clist) then
           f8.2)
 end if
 !  first set up list of all case (a) levels
+call bqs%init(nmax)
 n = 0
 !  the n=0, eps=+1, j=1/2 level is
 !     s for sigma-g-plus or for sigma-u-minus
@@ -304,18 +307,19 @@ do 45 nnrot = 0, nrmax
     if (.not.ihomo .or. isa.eq.0 .or. &
        (ihomo .and. ieps(ip)*(-1)**ji.eq.isplus)) then
        n = n + 1
-       is (n) = ieps(ip)
-       j(n) = ji
+       bqs%inq(n) = ieps(ip)
+       bqs%jq(n) = ji
        nrot(n) = nnrot
 !  now assign energies for case (a) level and store in array eint
 !    the matrix elements are given by a. j. kotlar, r. w. field,
 !    and j. i. steinfeld, j. mol. spectr. 80, 86 (1980)
-       x = float(j(n)) + 1.
-       nn1 = x * (x - is(n))
+       x = float(bqs%jq(n)) + 1.
+       nn1 = x * (x - bqs%inq(n))
        eint(n) = brotsg * nn1 - drotsg*nn1**2 + hrotsg*nn1**3 &
-                       - half * (1 - is(n) * x) * gsr
+                       - half * (1 - bqs%inq(n) * x) * gsr
 !  next statement to take care of +/- symmetry of the sigma state
-       is(n) = is(n) * isym
+       bqs%inq(n) = bqs%inq(n) * isym
+       bqs%length = n
     end if
 40   continue
 45 continue
@@ -332,8 +336,8 @@ nlevel = 0
 do 70  i = 1, n
   nlevel = nlevel + 1
   ehold(nlevel) = (eint(i) - emin) / econv
-  jhold(nlevel) = j(i)
-  ishold(nlevel) = is(i)
+  jhold(nlevel) = bqs%jq(i)
+  ishold(nlevel) = bqs%inq(i)
 70 continue
 !  now sort this list to put closed levels at end
 !  also determine number of levels which are open
@@ -366,18 +370,18 @@ if (csflag) then
   do 85  i = 1, n
 !  include only channels with j at least equal to coupled states
 !  projection index
-    if (j(i) .ge. nu) then
+    if (bqs%jq(i) .ge. nu) then
       nn = nn + 1
       eint(nn) = (eint(i) - emin) / econv
-      j(nn) = j(i)
-      is(nn) = is(i)
+      bqs%jq(nn) = bqs%jq(i)
+      bqs%inq(nn) = bqs%inq(i)
       nrot(nn) = nrot(i)
-      l(nn) = jtot
+      bqs%lq(nn) = jtot
       if (.not. boundc) then
            cent(nn) = jtot * (jtot + 1)
       else
            xjtot=jtot+0.5d0
-           xj=j(nn)+0.5d0
+           xj=bqs%jq(nn)+0.5d0
            xnu = nu+0.5d0
            cent(nn)=xjtot*(xjtot+1)+xj*(xj+1)-2*xnu*xnu
       endif
@@ -386,17 +390,18 @@ if (csflag) then
 85   continue
 !  set number of coupled states channels
   n = nn
+  bqs%length = n
 !  set up close-coupled channel basis (if desired)
 else if (.not. csflag) then
 !  first move all indices of rotational levels to the top of the vectors
-!  e.g. move j(n) to j(nmax), j(n-1) to j(nmax-1),  etc
+!  e.g. move bqs%jq(n) to bqs%jq(nmax), bqs%jq(n-1) to bqs%jq(nmax-1),  etc
   do 90  i = 1, n
 !  move (n-i+1)th element to (nmax-i+1)th element
     inew = nmax - i + 1
     iold = n - i + 1
     eint(inew) = eint(iold)
-    j(inew) = j(iold)
-    is(inew) = is(iold)
+    bqs%jq(inew) = bqs%jq(iold)
+    bqs%inq(inew) = bqs%inq(iold)
     nrot(inew) = nrot(iold)
 90   continue
   nn = 0
@@ -405,12 +410,12 @@ else if (.not. csflag) then
 !  required for rotational degeneray, and store the new elements in
 !  nn, nn+1, ....
     ipoint = nmax - n + i
-    ji = j(ipoint)
+    ji = bqs%jq(ipoint)
 !  ipar is the symmetry of the molecular wavefunction
 !  eps(-1)**(j-1/2) for sigma plus states
 !  eps(-1)**(j-1/2-1) for sigma minus state
 !  ipar=1 for e levels and -1 for f levels
-    ipar = (-1) ** (ji + (isym - 1)/2 ) * is(ipoint)
+    ipar = (-1) ** (ji + (isym - 1)/2 ) * bqs%inq(ipoint)
     lmax = jtot + ji + 1
     lmin = iabs (jtot - ji)
     do 95  li = lmin, lmax
@@ -418,16 +423,17 @@ else if (.not. csflag) then
       if (ix .eq. jlpar) then
         nn = nn + 1
         eint(nn) = (eint(ipoint) - emin) / econv
-        j(nn) = ji
-        is(nn) = is(ipoint)
+        bqs%jq(nn) = ji
+        bqs%inq(nn) = bqs%inq(ipoint)
         nrot(nn) = nrot(ipoint)
-        l(nn) = li
+        bqs%lq(nn) = li
         cent(nn) = li * ( li + 1)
       end if
 95     continue
 100   continue
 !  set number of close coupled channels
   n = nn
+  bqs%length = n
 end if
 if (n .gt. nmax) then
   write (6, 110) n, nmax
@@ -460,15 +466,16 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and..not.boundc) then
 !  here if this channel is to be included
         nn = nn + 1
         eint(nn) = eint(i)
-        j(nn) = j(i)
-        is(nn) = is(i)
+        bqs%jq(nn) = bqs%jq(i)
+        bqs%inq(nn) = bqs%inq(i)
         nrot(nn) = nrot(i)
         cent(nn) = cent(i)
-        l(nn) = l(i)
+        bqs%lq(nn) = bqs%lq(i)
       end if
 130     continue
 !  reset number of channels
     n = nn
+    bqs%length = n
   end if
 end if
 !  if no channels, return
@@ -512,11 +519,11 @@ if (clist) then
        '    **  NU=', f4.1/)
   end if
   do 230  i = 1, n
-    fj = j(i) + half
+    fj = bqs%jq(i) + half
     ecm = eint(i) * econv
     if (bastst) &
-    write (6, 220) i, fj, is(i), nrot(i), l(i), ecm
-    write (9, 220) i, fj, is(i), nrot(i), l(i), ecm
+    write (6, 220) i, fj, bqs%inq(i), nrot(i), bqs%lq(i), ecm
+    write (9, 220) i, fj, bqs%inq(i), nrot(i), bqs%lq(i), ecm
 220     format (i4, f5.1, 2i4, i6, 1f10.3)
 230   continue
 end if
@@ -540,12 +547,12 @@ do 400 ilam = 1, nlam
   ancouma => v2%get_angular_coupling_matrix(ilam)
   do icol = 1, n
     do irow = icol, n
-      lrow = l(irow)
+      lrow = bqs%lq(irow)
       if (csflag) lrow = nu
       !  always initialize potential to zero
       vee = zero
-      call vlm2sg (j(irow), lrow, j(icol), l(icol), jtot, &
-                   lb, is(irow), is(icol), vee, csflag)
+      call vlm2sg (bqs%jq(irow), lrow, bqs%jq(icol), bqs%lq(icol), jtot, &
+                   lb, bqs%inq(irow), bqs%inq(icol), vee, csflag)
       if (vee .ne. zero) then
         i = i + 1
         inum = inum + 1
@@ -571,7 +578,7 @@ if (clist .and. bastst) then
   write (6, 420) v2%get_num_nonzero_elements()
   write (9, 420) v2%get_num_nonzero_elements()
 420   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS', &
-           i4)
+           i6)
 end if
 if(bastst) call v2%print_summary(unit=9)
 return
@@ -633,8 +640,8 @@ character*60 line,filnam,potfil, filnm1
 character*1 dot
 save potfil
 #include "common/comdot.F90"
-integer, pointer :: nterm, nrmax, npar, isym, igu, isa
-real(8), pointer :: brot, gsr, drot, hrot
+integer, pointer, save :: nterm, nrmax, npar, isym, igu, isa
+real(8), pointer, save :: brot, gsr, drot, hrot
 brot=>rspar(1); gsr=>rspar(2); drot=>rspar(3); hrot=>rspar(4)
 nterm=>ispar(1); nrmax=>ispar(2); npar=>ispar(3); isym=>ispar(4); igu=>ispar(5); isa=>ispar(6)
 
@@ -727,6 +734,7 @@ irpot=1
 return
 !
 entry sav2sg (readpt)
+
 ASSERT(nrmax .eq. ispar(2))
 ASSERT(npar .eq. ispar(3))
 ASSERT(isym .eq. ispar(4))

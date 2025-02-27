@@ -4,7 +4,7 @@ contains
 ! syastp (savastp/ptrastp) defines, saves variables and reads            *
 !                  potential for asymmetric top-atom scattering          *
 ! ----------------------------------------------------------------------
-subroutine baastp (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
+subroutine baastp (bqs, jhold, ehold, ishold, nlevel, nlevop, &
                   etemp, fjtemp, fktemp, fistmp, &
                   rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
@@ -134,12 +134,14 @@ use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
+type(bqs_type), intent(out) :: bqs
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
 character*1 slab
-dimension j(1), l(1), is(1), jhold(1), ehold(1), &
+dimension jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
           fistmp(1)
 !  scratch arrays for computing asymmetric top energies and wave fns.
@@ -252,7 +254,7 @@ if (clist) then
 90   format (/' OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=', &
           f8.2)
 end if
-!  first set up list of all j(kp,ko) states included in basis
+!  first set up list of all bqs%jq(kp,ko) states included in basis
 nlist = 0
 do ji = 0, jmax
 ! set up and diagonalize rotational hamiltonian for each value of ji
@@ -471,6 +473,7 @@ if (bastst .or. clist) then
    'LEVEL LIST SORTED BY ENERGY',/,'   N   J  ', &
      'IS  KP  KO  S   EINT(CM-1)  COEFFS')
 end if
+call bqs%init(nmax)
 n = 0
 nlevel = 0
 do 170  njk = 1, nlist
@@ -567,10 +570,11 @@ do 170  njk = 1, nlist
              ' .GT. MAX DIMENSION OF',i5,' ABORT ***')
         stop
       end if
-      is(n) = ishold(nlevel)
-      j(n) = ji
+      bqs%inq(n) = ishold(nlevel)
+      bqs%jq(n) = ji
       eint(n) = ehold(nlevel)
-      l(n) = jtot
+      bqs%lq(n) = jtot
+      bqs%length = n
       cent(n) = jtot * (jtot + 1)
 !  move e.fn also
       isiz(n) = isizh(nlevel)
@@ -608,10 +612,11 @@ do 170  njk = 1, nlist
           write (9, 150) n, nmax
           stop
         end if
-        is(n) = ishold(nlevel)
-        j(n) = ji
+        bqs%inq(n) = ishold(nlevel)
+        bqs%jq(n) = ji
         eint(n) = ehold(nlevel)
-        l(n) = li
+        bqs%lq(n) = li
+        bqs%length = n
         cent(n) = li * (li + 1)
 !  move e.fn also
         isiz(n) = isizh(nlevel)
@@ -656,10 +661,10 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and. .not.boundc) then
 !  here if this channel is to be included
         nn = nn + 1
         eint(nn) = eint(i)
-        j(nn) = j(i)
-        is(nn) = is(i)
+        bqs%jq(nn) = bqs%jq(i)
+        bqs%inq(nn) = bqs%inq(i)
         cent(nn) = cent(i)
-        l(nn) = l(i)
+        bqs%lq(nn) = bqs%lq(i)
         isiz(nn) = isiz(i)
         do mm = 1, narray
           isub = (nn - 1)*narray + mm
@@ -670,6 +675,7 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and. .not.boundc) then
 300     continue
 !  reset number of channels
     n = nn
+    bqs%length = n
   end if
 end if
 !  return if no channels
@@ -713,23 +719,23 @@ if (clist) then
       isize = isiz(i)
       isub = (i - 1)*narray
       if (isize .gt. 12) then
-        write (6, 320) i, j(i), is(i), l(i), ecm, &
+        write (6, 320) i, bqs%jq(i), bqs%inq(i), bqs%lq(i), ecm, &
           (c(isub + mm), mm=1,isize)
-        write (9, 320) i, j(i), is(i), l(i), ecm, &
+        write (9, 320) i, bqs%jq(i), bqs%inq(i), bqs%lq(i), ecm, &
           (c(isub + mm), mm=1,isize)
 320         format (4i4, f10.3, 3x, 6f8.4/29x, 6f8.4/ &
           29x, 6f8.4)
       else
         if (isize .gt. 6) then
-          write (6, 3201) i, j(i), is(i), l(i), ecm, &
+          write (6, 3201) i, bqs%jq(i), bqs%inq(i), bqs%lq(i), ecm, &
             (c(isub + mm), mm=1,isize)
-          write (9, 3201) i, j(i), is(i), l(i), ecm, &
+          write (9, 3201) i, bqs%jq(i), bqs%inq(i), bqs%lq(i), ecm, &
             (c(isub + mm), mm=1,isize)
 3201            format (4i4, f10.3, 3x, 6f8.4/29x, 6f8.4)
         else
-          write (6, 3202) i, j(i), is(i), l(i), ecm, &
+          write (6, 3202) i, bqs%jq(i), bqs%inq(i), bqs%lq(i), ecm, &
             (c(isub + mm), mm=1,isize)
-          write (9, 3202) i, j(i), is(i), l(i), ecm, &
+          write (9, 3202) i, bqs%jq(i), bqs%inq(i), bqs%lq(i), ecm, &
             (c(isub + mm), mm=1,isize)
 3202           format (4i4, f10.3, 3x, 6f8.4)
         end if
@@ -768,10 +774,10 @@ do 400 iterm = 1, nterm
     do icol = 1, n
       do irow = icol, n
         ij = ntop * (icol - 1) + irow
-        lrow = l(irow)
+        lrow = bqs%lq(irow)
         if (csflag) lrow = nu
-        call vlmatp (j(irow), lrow, j(icol), l(icol), jtot, &
-                     is(irow), is(icol), lb, mu, vee, &
+        call vlmatp (bqs%jq(irow), lrow, bqs%jq(icol), bqs%lq(icol), jtot, &
+                     bqs%inq(irow), bqs%inq(icol), lb, mu, vee, &
                      csflag, irow, icol)
 
 !  change check for nonzero v2 matrix element
@@ -800,7 +806,7 @@ if (clist .and. bastst) then
   write (6, 460) v2%get_num_nonzero_elements()
   write (9, 460) v2%get_num_nonzero_elements()
 460   format (' ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS ', &
-           i5)
+           i8)
 end if
 return
 end
@@ -1019,8 +1025,8 @@ save potfil
 !  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
 #include "common/comdot.F90"
 
-integer, pointer :: nterm, numpot, ipotsy, iop, jmax
-real(8), pointer :: arot, brot, crot, emax
+integer, pointer, save :: nterm, numpot, ipotsy, iop, jmax
+real(8), pointer, save :: arot, brot, crot, emax
 nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=>ispar(4); jmax=>ispar(5)
 arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4)
 

@@ -4,7 +4,7 @@ contains
 ! syh3p (savh3p/ptrh3p) defines, saves variables and reads               *
 !                  potential for homonuclear+3P atom scattering          *
 ! --------------------------------------------------
-subroutine bah3p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
+subroutine bah3p (bqs, jhold, ehold, ishold, nlevel, nlevop, &
                   isc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
                   n, nmax, ntop, v2)
@@ -12,9 +12,6 @@ subroutine bah3p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 !  subroutine to determine angular coupling potential
 !  for collision of a triplet atom in a P state and a homonuclear molecule
 !  authors:  millard alexander
-!
-!  moved j12 (renamed isc1 array) to common block /coj12/ to pass array
-!  to other subrs (p.dagdigian)
 !
 !  revised routine so that CC scattering calculations work.  it appears that
 !  this routine had previously been used only for bound-state calculations
@@ -101,7 +98,6 @@ subroutine bah3p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_coj12, only: j12
 use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
@@ -112,12 +108,14 @@ use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_skip, only: nskip, iskip
 use mod_jtot, only: jjtot, jjlpar
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
+type(bqs_type), intent(out) :: bqs
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-dimension j(9), l(9), jhold(9), ehold(9), isc1(9), sc2(9), sc3(9), &
-          sc4(9), ishold(9), is(9)
+dimension jhold(9), ehold(9), isc1(9), sc2(9), sc3(9), &
+          sc4(9), ishold(9)
 dimension lamr(9),lama(9),lam12(9), mu(9)
 data lamr /2,0,2,2,2,4,4,4,4/
 data lama /2,2,0,2,2,0,2,2,2/
@@ -207,6 +205,7 @@ endif
 !  save jtot and jlpar for use later in transformatin
 jjtot=jtot
 jjlpar=jlpar
+call bqs%init(nmax)
 if (iop .eq. 0) jmolmin=0
 if (iop .eq. 1) jmolmin=1
 if (.not. csflag) then
@@ -235,10 +234,11 @@ if (.not. csflag) then
         if ((-1)**li .eq. jlpar*(-1)**(jmolmin-1)) then
           n = n + 1
           if (n .gt. nmax) go to 180
-          l(n) = li
-          is(n)=jai
-          j(n)=jmol
-          j12(n)=j12i
+          bqs%lq(n) = li
+          bqs%inq(n)=jai
+          bqs%jq(n)=jmol
+          bqs%j12(n)=j12i
+          bqs%length = n
 ! centrifugal contribution to hamiltonian
           cent(n) = li*(li+1)
 ! constant channel energy
@@ -258,18 +258,18 @@ if (.not. csflag) then
           esave = sc2(i2)
           sc2(i2) = sc2(i1)
           sc2(i1) = esave
-          jsave = j(i2)
-          j(i2) = j(i1)
-          j(i1) = jsave
-          jsave = is(i2)
-          is(i2) = is(i1)
-          is(i1) = jsave
-          jsave = l(i2)
-          l(i2) = l(i1)
-          l(i1) = jsave
-          jsave = j12(i2)
-          j12(i2) = j12(i1)
-          j12(i1) = jsave
+          jsave = bqs%jq(i2)
+          bqs%jq(i2) = bqs%jq(i1)
+          bqs%jq(i1) = jsave
+          jsave = bqs%inq(i2)
+          bqs%inq(i2) = bqs%inq(i1)
+          bqs%inq(i1) = jsave
+          jsave = bqs%lq(i2)
+          bqs%lq(i2) = bqs%lq(i1)
+          bqs%lq(i1) = jsave
+          jsave = bqs%j12(i2)
+          bqs%j12(i2) = bqs%j12(i1)
+          bqs%j12(i1) = jsave
         endif
 530       continue
 520     continue
@@ -304,10 +304,11 @@ elseif (csflag) then
           xjtot=jtot
           n = n + 1
           if (n .gt. nmax) go to 180
-          l(n) = li
-          is(n)=jai
-          j(n)=jmol
-          j12(n)=j12i
+          bqs%lq(n) = li
+          bqs%inq(n)=jai
+          bqs%jq(n)=jmol
+          bqs%j12(n)=j12i
+          bqs%length = n
           xj12=j12i
 ! centrifugal contribution to hamiltonian
           cent(n) = xjtot*(xjtot+1)+xj12*(xj12+1)-2*xnu**2
@@ -354,11 +355,12 @@ elseif (csflag) then
               li=jtot
               n = n + 1
               if (n .gt. nmax) go to 180
-              l(n) = li
+              bqs%lq(n) = li
               xjtot=jtot
-              is(n)=jai
-              j(n)=jmol
-              j12(n)=ik
+              bqs%inq(n)=jai
+              bqs%jq(n)=jmol
+              bqs%j12(n)=ik
+              bqs%length = n
 ! centrifugal contribution to hamiltonian
               cent(n)=xjtot*(xjtot+1)+xjai*(xjai+1)+ &
                   jmol*(jmol+1)-2*xnu**2+2*ik*xomega
@@ -394,10 +396,11 @@ elseif (csflag) then
             li=jtot
             n = n + 1
             if (n .gt. nmax) go to 180
-            j12(n)=jmol
-            l(n) = li
-            is(n)=1
-            j(n)=ik
+            bqs%j12(n)=jmol
+            bqs%lq(n) = li
+            bqs%inq(n)=1
+            bqs%jq(n)=ik
+            bqs%length = n
 ! centrifugal contribution to hamiltonian
             cent(n) = jtot*(jtot+1)+2+jmol*(jmol+1) &
                      -2*nu**2+2*ik*iomega
@@ -448,15 +451,16 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and..not.boundc) then
 !  here if this channel is to be included
         nn = nn + 1
         sc2(nn) = sc2(i)
-        is(nn) = is(i)
-        j(nn) = j(i)
+        bqs%inq(nn) = bqs%inq(i)
+        bqs%jq(nn) = bqs%jq(i)
         cent(nn) = cent(i)
-        l(nn) = l(i)
-        j12(nn) = j12(i)
+        bqs%lq(nn) = bqs%lq(i)
+        bqs%j12(nn) = bqs%j12(i)
       end if
 195     continue
 !  reset number of channels
     n = nn
+    bqs%length = n
   end if
 end if
 !  return if no channels
@@ -528,9 +532,9 @@ if (bastst) then
       write (9, 210)
 210       format(/'   N   JA(IS) JMOL(J)  J12    L      EINT(CM-1)')
       do 220  i = 1, n
-        write (6, 215) i,is(i),j(i),j12(i),l(i), &
+        write (6, 215) i,bqs%inq(i),bqs%jq(i),bqs%j12(i),bqs%lq(i), &
              eint(i)*econv
-        write (9, 215) i,is(i),j(i),j12(i),l(i), &
+        write (9, 215) i,bqs%inq(i),bqs%jq(i),bqs%j12(i),bqs%lq(i), &
              eint(i)*econv
 215         format (i4, i7,i6, i8, i6, f14.3)
 220       continue
@@ -541,9 +545,9 @@ if (bastst) then
        /'   N   JA(IS) JMOL(J)  J12   L  CENT    EINT(CM-1)')
       do 235  i = 1, n
         icent=cent(i)
-        write (6, 230) i,is(i),j(i),j12(i),l(i),icent, &
+        write (6, 230) i,bqs%inq(i),bqs%jq(i),bqs%j12(i),bqs%lq(i),icent, &
              eint(i)*econv
-        write (9, 230) i,is(i),j(i),j12(i),l(i),icent, &
+        write (9, 230) i,bqs%inq(i),bqs%jq(i),bqs%j12(i),bqs%lq(i),icent, &
              eint(i)*econv
 230         format (i4, i7,i6,i8, i5,i6, f14.3)
 235       continue
@@ -555,8 +559,8 @@ if (bastst) then
 255       format(/'   N   JA(IS) JMOL(J)   K   CENT    EINT(CM-1)')
       do 265  i = 1, n
         icent=cent(i)
-        write (6, 260) i,is(i),j(i),j12(i),icent,eint(i)*econv
-        write (9, 260) i,is(i),j(i),j12(i),icent,eint(i)*econv
+        write (6, 260) i,bqs%inq(i),bqs%jq(i),bqs%j12(i),icent,eint(i)*econv
+        write (9, 260) i,bqs%inq(i),bqs%jq(i),bqs%j12(i),icent,eint(i)*econv
 260         format (i4, i7,i6,i8,i6, f14.3)
 265       continue
     else
@@ -564,9 +568,9 @@ if (bastst) then
       write (9, 270)
 270       format(/'   N   LA(IS)  JMOL  K(J)   CENT    EINT(CM-1)')
       do 275  i = 1, n
-        write (6, 272) i,is(i),isc1(i),j(i),idnint(cent(i)), &
+        write (6, 272) i,bqs%inq(i),isc1(i),bqs%jq(i),idnint(cent(i)), &
                        eint(i)*econv
-        write (9, 272) i,is(i),isc1(i),j(i),idnint(cent(i)), &
+        write (9, 272) i,bqs%inq(i),isc1(i),bqs%jq(i),idnint(cent(i)), &
                        eint(i)*econv
 272         format (i4, i8,3i6, f14.3)
 275       continue
@@ -629,18 +633,18 @@ do 320 il = 1,nlam
   do icol= 1, n
     do irow = icol, n
       ij = ntop * (icol - 1) +irow
-      j12row=j12(irow)
-      j12col=j12(icol)
+      j12row=bqs%j12(irow)
+      j12col=bqs%j12(icol)
       if (.not. csflag .or. (csflag .and. ihomo)) then
-        call vlmh3p (irow,icol,jtot,jlpar,j(irow),j(icol), &
-        is(irow), &
-        is(icol), j12row, j12col, l(irow), l(icol), ilamr, &
+        call vlmh3p (irow,icol,jtot,jlpar,bqs%jq(irow),bqs%jq(icol), &
+        bqs%inq(irow), &
+        bqs%inq(icol), j12row, j12col, bqs%lq(irow), bqs%lq(icol), ilamr, &
         ilama, ilam12, nu, csflag, vee)
       else if (csflag .and. .not.ihomo) then
       ! NB j12row and j12col are krow and kcol here
-        call vlmh3pc(irow,icol,jtot,jlpar,j(irow),j(icol), &
-        is(irow), &
-        is(icol), j12row, j12col, ilamr, &
+        call vlmh3pc(irow,icol,jtot,jlpar,bqs%jq(irow),bqs%jq(icol), &
+        bqs%inq(irow), &
+        bqs%inq(icol), j12row, j12col, ilamr, &
         ilama, imu, nu, jmol, flaghf, vee)
       endif
       if (vee .ne. 0) then
@@ -947,8 +951,8 @@ save potfil
 !  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
 #include "common/comdot.F90"
 
-integer, pointer :: nterm, iop, jmax 
-real(8), pointer :: brot, aso1, aso2
+integer, pointer, save :: nterm, iop, jmax 
+real(8), pointer, save :: brot, aso1, aso2
 nterm=>ispar(1); iop=>ispar(2); jmax=>ispar(3)
 brot=>rspar(1); aso1=>rspar(2); aso2=>rspar(3)
 

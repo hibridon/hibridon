@@ -34,18 +34,18 @@ contains
 !      type(lm_type), dimension(:), allocatable :: lms
 !      end module mod_1sg1sg
 ! --------------------------------------------------------------------
-subroutine ba2sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
+subroutine ba2sg1sg (bqs, jhold, ehold, ishold, nlevel, &
      nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
      flaghf, flagsu, csflag, clist, bastst, ihomo, &
      nu, numin, jlpar, n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  variables in call list:
-!    j:        on return contains combined rotational quantum numbers for each
+!    bqs%jq:        on return contains combined rotational quantum numbers for each
 !              channel.  in terms of the rotational quantum numbers of each
 !              molecule we have:  j = 10 * j1 + j2
-!    l:        on return contains orbital angular momentum for each
+!    bqs%lq:        on return contains orbital angular momentum for each
 !              channel
-!    is:       additional quantum index of each channel:  on return this is
+!    bqs%inq:       additional quantum index of each channel:  on return this is
 !              set equal to j12 (the vector resultant of j1 and j2) times nsym
 !    jhold:    on return contains rotational quantum numbers for each
 !              rotational level, irrespective of projection degeneracy and the
@@ -120,7 +120,6 @@ use mod_1sg1sg
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_coj12, only: j12
 use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
@@ -130,14 +129,15 @@ use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax,
 use mod_par, only: readpt, boundc
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
+type(bqs_type), intent(out) :: bqs
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-integer :: ifs1
 integer :: nn
-dimension j(1), l(1), is(1), jhold(1), ehold(1), &
+dimension jhold(1), ehold(1), &
     sc1(1), sc2(1), sc3(1), sc4(1), ishold(1)
 data zero, ione, itwo, ithree / 0.d0, 1, 2, 3 /
 integer, pointer :: n1max, j2min, j2max, ipotsy2
@@ -145,7 +145,7 @@ real(8), pointer :: b1rot, d1rot, gamma, b2rot
 n1max=>ispar(1); j2min=>ispar(2); j2max=>ispar(3); ipotsy2=>ispar(4)
 b1rot=>rspar(1); d1rot=>rspar(2); gamma=>rspar(3); b2rot=>rspar(4);
 !  check for consistency in the values of flaghf and csflag
-ifs1 = 0
+call bqs%init(nmax)
 nn = 0
 if (.not. flaghf) then
   write (9, 5)
@@ -218,13 +218,11 @@ do n1 = 0, n1max
         nn1 = n1 * (n1 + 1.d0)
 !
 !  DON'T subtract energy of lowest H2 level
-        ehold(nlevel) = b1rot * nn1 - d1rot * nn1**2 &
-            + b2rot * j2 * (j2 + 1.d0)
-          if (ifs1.eq.1) then
+        ehold(nlevel) = b1rot * nn1 - d1rot * nn1**2 + b2rot * j2 * (j2 + 1.d0)
+          if (ieps1.eq.1) then
             ehold(nlevel) = ehold(nlevel) + 0.5d0 * gamma * n1
           else
-            ehold(nlevel) = ehold(nlevel) &
-             - 0.5d0 * gamma * (n1 + 1.d0)
+            ehold(nlevel) = ehold(nlevel) - 0.5d0 * gamma * (n1 + 1.d0)
         end if
         ehold(nlevel) = ehold(nlevel) / econv
       end do
@@ -277,10 +275,11 @@ do i = 1, nlevel
       if (ix .eq. jlpar) then
         n = n + 1
         if (n .le. nmax) then
-          j(n) = jhold(i)
-          is(n) = ishold(i)
-          l(n) = li
-          j12(n) = j12i
+          bqs%jq(n) = jhold(i)
+          bqs%inq(n) = ishold(i)
+          bqs%lq(n) = li
+          bqs%j12(n) = j12i
+          bqs%length = n
           eint(n) = ehold(i)
           cent(n) = li * (li + 1.d0)
         else
@@ -304,26 +303,26 @@ end do
 if (n .gt. 1) then
   do 212 jj = 2, n
     ekeep = eint(jj)
-    jkeep = j(jj)
-    ikeep = is(jj)
-    lkeep = l(jj)
-    j12kp = j12(jj)
+    jkeep = bqs%jq(jj)
+    ikeep = bqs%inq(jj)
+    lkeep = bqs%lq(jj)
+    j12kp = bqs%j12(jj)
     ckeep = cent(jj)
     do 211 ii = jj-1, 1, -1
       if (eint(ii).le.ekeep) goto 210
       eint(ii+1) = eint(ii)
-      j(ii+1) = j(ii)
-      is(ii+1) = is(ii)
-      l(ii+1) = l(ii)
-      j12(ii+1) = j12(ii)
+      bqs%jq(ii+1) = bqs%jq(ii)
+      bqs%inq(ii+1) = bqs%inq(ii)
+      bqs%lq(ii+1) = bqs%lq(ii)
+      bqs%j12(ii+1) = bqs%j12(ii)
       cent(ii+1) = cent(ii)
 211     continue
     ii = 0
 210     eint(ii+1) = ekeep
-    j(ii+1) = jkeep
-    is(ii+1) = ikeep
-    l(ii+1) = lkeep
-    j12(ii+1) = j12kp
+    bqs%jq(ii+1) = jkeep
+    bqs%inq(ii+1) = ikeep
+    bqs%lq(ii+1) = lkeep
+    bqs%j12(ii+1) = j12kp
     cent(ii+1) = ckeep
 212   continue
 end if
@@ -350,11 +349,11 @@ if (rcut .gt. 0.d0 .and. .not.boundc) then
       if (eint(i) .lt. emin) then
 !  here if this channel is to be included
         nn = nn + 1
-        j(nn) = j(i)
+        bqs%jq(nn) = bqs%jq(i)
         eint(nn) = eint(i)
-        is(nn) = is(i)
-        l(nn) = l(i)
-        j12(nn) = j12(i)
+        bqs%inq(nn) = bqs%inq(i)
+        bqs%lq(nn) = bqs%lq(i)
+        bqs%j12(nn) = bqs%j12(i)
         cent(nn) = cent(i)
       end if
 130     continue
@@ -392,12 +391,12 @@ if (clist) then
       '   EINT(CM-1)')
   do i = 1, n
     ecm = eint(i) * econv
-    jj1 = j(i)/10
+    jj1 = bqs%jq(i)/10
     fj1 = jj1 + 0.5d0
-    j2 = mod(j(i),10)
-    fj12 = j12(i) + 0.5d0
-    write (6, 220) i, fj1, is(i), j2, fj12, l(i), ecm
-    write (9, 220) i, fj1, is(i), j2, fj12, l(i), ecm
+    j2 = mod(bqs%jq(i),10)
+    fj12 = bqs%j12(i) + 0.5d0
+    write (6, 220) i, fj1, bqs%inq(i), j2, fj12, bqs%lq(i), ecm
+    write (9, 220) i, fj1, bqs%inq(i), j2, fj12, bqs%lq(i), ecm
 220     format (i4, f8.1, 2i7, f8.1, i7, f13.3)
   end do
 end if
@@ -420,17 +419,17 @@ do 400 ilam = 1, nlam
   inum = 0
   ancouma => v2%get_angular_coupling_matrix(ilam)
   do 355 icol = 1, n
-    j1c = j(icol)/10
-    iepsc = is(icol)
-    j2c = mod(j(icol),10)
-    j12c = j12(icol)
-    lc = l(icol)
+    j1c = bqs%jq(icol)/10
+    iepsc = bqs%inq(icol)
+    j2c = mod(bqs%jq(icol),10)
+    j12c = bqs%j12(icol)
+    lc = bqs%lq(icol)
     do 350 irow = icol, n
-      j1r = j(irow)/10
-      iepsr = is(irow)
-      j2r = mod(j(irow),10)
-      j12r = j12(irow)
-      lr = l(irow)
+      j1r = bqs%jq(irow)/10
+      iepsr = bqs%inq(irow)
+      j2r = mod(bqs%jq(irow),10)
+      j12r = bqs%j12(irow)
+      lr = bqs%lq(irow)
 !     initialize potential to zero
       vee = zero
       call v2sgsg(j1r,iepsr,j2r,j12r,lr,j1c,iepsc, &
@@ -544,9 +543,6 @@ subroutine sy2sg1sg (irpot, readpt, iread)
 !    j2max:    maximum rotational angular momentum for molecule 2
 !    ipotsy2:  symmetry of potential.  set to 2 for homonuclear
 !              molecule 2, set to 1 for heteronuclear molecule 2
-!    iop:      ortho/para label for levele of molecule 2. If ihomo=.true.
-!              then only para states will be included if iop=1 and
-!              only ortho states if iop=-1
 !  variable in common  /cosys/
 !    scod:    character*8 array of dimension lcode, which contains names
 !             of all system dependent parameters
@@ -568,15 +564,15 @@ implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-integer :: iop, j, l, lc
+integer :: j, l, lc
 logical existf
 character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil, filnm1
 #include "common/comdot.F90"
 save potfil
-integer, pointer :: n1max, j2min, j2max, ipotsy2
-real(8), pointer :: b1rot, d1rot, gamma, b2rot
+integer, pointer, save :: n1max, j2min, j2max, ipotsy2
+real(8), pointer, save :: b1rot, d1rot, gamma, b2rot
 n1max=>ispar(1); j2min=>ispar(2); j2max=>ispar(3); ipotsy2=>ispar(4)
 b1rot=>rspar(1); d1rot=>rspar(2); gamma=>rspar(3); b2rot=>rspar(4);
 
@@ -642,10 +638,10 @@ return
 ! --------------------------------------------------------------
 entry sav2sg1sg (readpt)
 !  save input parameters for 2sigma-1sigma molecule scattering
-write (FUNIT_INP, 310) n1max, j2min, j2max, ipotsy2, iop
-310 format(5i4,14x,'n1max, j2min, j2min, ipotsy2, iop')
+write (FUNIT_INP, 310) n1max, j2min, j2max, ipotsy2
+310 format(4i4,14x,'n1max, j2min, j2min, ipotsy2')
 write (FUNIT_INP, 320) b1rot, d1rot, gamma, b2rot
-320 format(f10.7, e12.5, f10.7, '  b1rot, d1rot, gamma, b2rot')
+320 format(f14.7, e14.5, 2f14.7, '  b1rot, d1rot, gamma, b2rot')
 write (FUNIT_INP, 285) potfil
 285 format (a)
 return

@@ -1,21 +1,22 @@
 
 [![Full CI on macOS-11.2](https://github.com/hibridon/hibridon/actions/workflows/full_macOS-11.2.yml/badge.svg)](https://github.com/hibridon/hibridon/actions/workflows/full_macOS-11.2.yml)
-[![Full CI on Debian 9](https://github.com/hibridon/hibridon/actions/workflows/full_Debian-9.yml/badge.svg)](https://github.com/hibridon/hibridon/actions/workflows/full_Debian-9.yml)
+[![Long CI on macOS-11.2](https://github.com/hibridon/hibridon/actions/workflows/long_macOS-11.2.yml/badge.svg)](https://github.com/hibridon/hibridon/actions/workflows/long_macOS-11.2.yml)
 
-[what does that mean ?](link_to_wiki_page)
+[![Full CI on Debian 9](https://github.com/hibridon/hibridon/actions/workflows/full_Debian-9.yml/badge.svg)](https://github.com/hibridon/hibridon/actions/workflows/full_Debian-9.yml)
+[![Long CI on Debian 9](https://github.com/hibridon/hibridon/actions/workflows/long_Debian-9.yml/badge.svg)](https://github.com/hibridon/hibridon/actions/workflows/long_Debian-9.yml)
+
+[What does that mean ?](https://github.com/hibridon/hibridon/wiki/Continuous-Integration)
 
 ---
-# Hibridon v5.0 alpha
+# Hibridon v5.1
 
-Computer Software for
-Molecular Inelastic Scattering and Photodissociation
+Hibridon is a program package to solve the close-coupled equations which occur in the quantum treatment of inelastic atomic and molecular collisions. Gas-phase scattering, photodissociation, collisions of atoms and/or molecules with flat surfaces, and bound states of weakly-bound complexes can be treated
 
-Documentation is available on
-- [http://www2.chem.umd.edu/groups/alexander/hibridon](http://www2.chem.umd.edu/groups/alexander/hibridon)
-- [<hibridon_root_path>/doc](doc)
+The full documentation is available on [https://github.com/hibridon/hibridon/wiki](https://github.com/hibridon/hibridon/wiki)
 
 Changes:
 - [CHANGELOG](CHANGELOG.md)
+
 
 #  Prerequisites
 
@@ -30,6 +31,7 @@ Changes:
 * BLAS compatible library (e.g. [Netlib BLAS](http://www.netlib.org/blas/))
 * LAPACK compatible library (e.g. [Netlib LAPACK](http://www.netlib.org/lapack/))
   
+
 # Build instructions
 
 ## 1. Get Hibridon source code
@@ -43,7 +45,7 @@ This will create a directory `~/hib_src/` which is a clone of https://github.com
 ### Without GIT
 - Download Hibridon source code as a zip archive: [hibridon-master.zip](https://github.com/hibridon/hibridon/archive/refs/heads/master.zip)
 
-- Extract the content of the archive into `~/hib_src/` 
+- Extract the content of the archive into the directory of your choice, e.g.: `~/hib_src/` 
 
 ## 2. Create a configuration file for your potential energy surfaces (PESs)
 
@@ -65,8 +67,8 @@ cmake_minimum_required (VERSION 3.3)
 project (my_pots)
 enable_language (Fortran)
 
-# add hibridon library
-add_subdirectory("~/hib_src/" hibridon)
+# add hibridon library by specifying the directory in which the source files are
+add_subdirectory("/home/myuser/hib_src/" hibridon)
 
 # declare new executables using hibridon's add_hibexe cmake function, where:
 #  - the 1st argument is the name of the resulting executable
@@ -75,14 +77,16 @@ add_subdirectory("~/hib_src/" hibridon)
 #    - "kmax": for normal cases
 #    - "kbig": for special cases (only arn2_big test uses it)
 
-add_hibexe(NH3-H2.exe "~/my_pots/pot_nh3h2.F90" "kmax") # NH3-H2
+add_hibexe(NH3-H2.exe "/home/myuser/my_pots/pot_nh3h2.F90" "kmax") # NH3-H2
 
 # You can add as many executables as you want by using the add_hibexe function:
-#add_hibexe(OH-H2.exe "~/my_pots/pot_ohh2.F90" "kmax") # OH-H2
-#add_hibexe(He-CO.exe "~/my_pots/pot_heco.F90" "kmax") # He-CO
+#add_hibexe(OH-H2.exe "/home/myuser/my_pots/pot_ohh2.F90" "kmax") # OH-H2
+#add_hibexe(He-CO.exe "/home/myuser/my_pots/pot_heco.F90" "kmax") # He-CO
 ```
 
 Adapt this example to suit your needs.
+
+**WARNING**: The tilde `~` character is not exapnded by CMake, you must replace it with the full path to your home directory, e.g. `/home/myuser/`
 
 
 
@@ -97,6 +101,8 @@ This will automatically find the required libraries and compiler and create a Ma
 
 ### Useful CMake options and special cases:
 
+
+
 - **Use a specific compiler**
 - 
     ```bash
@@ -109,7 +115,7 @@ This will automatically find the required libraries and compiler and create a Ma
     - `ifort` 
 
 - **Use a specific BLAS/LAPACK library**
-- 
+
     ```bash
     cd ~/hib_build
     cmake ./project/ -DBLA_VENDOR=<BLAS_LIB> 
@@ -117,6 +123,7 @@ This will automatically find the required libraries and compiler and create a Ma
     Where `<BLAS_LIB>` is your BLAS library e.g.:
     - `OpenBLAS`
     - `Intel10_64lp`
+    - `Apple`
   
     see [CMake BLAS/LAPACK VENDORS](https://cmake.org/cmake/help/latest/module/FindBLAS.html#blas-lapack-vendors) for a full list of supported libraries
 
@@ -127,24 +134,51 @@ This will automatically find the required libraries and compiler and create a Ma
     cd ~/hib_build
     cmake ./project/ -DBUILD_TESTING=ON
     ```
+- **Build in debug mode**
 
+  By default, the source files are compiled in "Release" mode.
+  You can build Hibridon in a "Debug" mode that will disable all compiler optimizations and produce debugging symbols table and traceback informations:
+    ```bash
+    cd ~/hib_build
+    cmake ./project/ -DCMAKE_BUILD_TYPE=Debug
+    ```
 
+- **Change the default install prefix**
+  By default, the executables will be installed in `/usr/local/bin/`.
+  You can change this by setting the `CMAKE_INSTALL_PREFIX` variable:
+    ```bash
+    cd ~/hib_build
+    cmake ./project/ -DCMAKE_INSTALL_PREFIX=<path>
+    ```
+    Where `<path>` is the path to the directory where you want to install the executables.
 
 ## 4. Make your project
 - **Make all executables**
     ```bash
     make
     ```
-The executable files will be put in the current directory (`~/hib_build`).
+  The executable files will be put in the current directory (`~/hib_build`).
 - **Make a specific executable** 
   ```bash
     make <executable>
   ```
   Where `<executable>` is one of the executable you defined in the CMakeLists.txt configuration file, e.g.: `NH3-H2.exe`.
 
+- **Install executables in /usr/local/bin/ (Optional)** 
+
+  You can install all the generatted executables in the `<prefix>/bin/` directory by running:
+    ```bash
+    make install
+    ```
+  By default, `<prefix>` is set to `/usr/local/`, which is the standard location for user-installed software on macOS and most Linux distributions.
+
+  Note that this will overwrite any existing executable with the same name in the destination folder.
+
+  The default <prefix> directory (`/usr/local/`) can be changed by setting the `CMAKE_INSTALL_PREFIX` (see previous section).
+
 ## 5. Test Hibridon (Optional)
-Hibridon testing must be activated (see previous section).
-The following commands need to be executed within the hibridon build directory (e.g. ~/hib_build/project/hibridon/).
+Hibridon testing must be enabled (see Section 3: Configure your project's build).
+The following commands need to be executed within the Hibridon build directory (e.g. ~/hib_build/project/hibridon/).
 
 - **Run all tests**
     ```bash
@@ -171,9 +205,29 @@ The following commands need to be executed within the hibridon build directory (
     ctest --print-labels
     ```
 
-### 6. One liner example
+### 6. Run your project
+Once your executables are created (step 4), you can interactively run hibridon using:
+```bash
+./<executable> -k <kmax>
+# or 
+./<executable> --kmax <kmax>
+```
+Where `<kmax>` is the maximum number of channels (see [Memory Requirements](https://github.com/hibridon/hibridon/wiki/Memory-requirements)).
 
-This one line command configures, builds and tests Hibridon from a directory `~/hib_build` containing the source code. Build files are placed in the current directory.
+
+You can also run your Hibridon executable using a command file:
+```bash
+./<executable> -k <kmax> < <command file>
+# or
+./<executable> -k <kmax> -c <command file>
+# or
+./<executable> -k <kmax> --com <command file>
+```
+Where `<commands file>` is a file containing the input commands you want to execute (see [Batch-mode-and-background-execution](https://github.com/hibridon/hibridon/wiki/Batch-mode-and-background-execution))
+
+### 7. One liner example
+
+This one line command configures, builds and tests Hibridon from a directory `~/hib_build` containing the source code.
 
 ```bash
  git clone https://github.com/hibridon/hibridon.git ~/hib_src && mkdir -p ~/hib_build && cmake -DCMAKE_Fortran_COMPILER=gfortran -DBUILD_TESTING=ON -S ~/hib_src/ -B ~/hib_build && cd ~/hib_build/ && make && ctest -L coverage

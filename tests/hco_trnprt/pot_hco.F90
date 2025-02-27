@@ -84,10 +84,6 @@ subroutine pot (vv0, r)
 !  the coefficients for each angular term in the coupling potential
 !  [ vvl(i) for i = 1, nlam ] are returned in module mod_covvl
 
-!  variable in module mod_covvl
-!    vvl        array to store r-dependence of each angular term in the
-!               potential
-! 
 ! author:  paul dagdigian
 ! latest revision date:  21-jan-2015
 ! ----------------------------------------------------------------------

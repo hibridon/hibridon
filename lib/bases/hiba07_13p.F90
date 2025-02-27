@@ -5,7 +5,7 @@ contains
 ! sy13p (sav13p/ptr13p) defines, save variables and reads                *
 !                  potential for 1S / 3P atom scattering                 *
 ! --------------------------------------------------
-subroutine ba13p (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
+subroutine ba13p (bqs, jhold, ehold, ishold, nlevel, nlevop, &
                   sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
                   n, nmax, ntop, v2)
@@ -128,14 +128,16 @@ use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax,
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_skip, only: nskip, iskip
+use mod_hitypes, only: bqs_type
 
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
+type(bqs_type), intent(out) :: bqs
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 
-dimension j(1), l(1), jhold(1), ehold(1), sc1(1), sc2(1), sc3(1), &
-          sc4(1), ishold(1), is(1)
+dimension  jhold(1), ehold(1), sc1(1), sc2(1), sc3(1), &
+          sc4(1), ishold(1)
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
 integer, pointer :: nterm, nstate, ipol, npot
@@ -224,6 +226,7 @@ if (clist) then
           f8.2)
 endif
 !  assign quantum numbers and energies
+call bqs%init(nmax)
 n=0
 nlevel = 0
 ! here if triplet state is included
@@ -239,10 +242,11 @@ if (nstate .ge. 1) then
 !  here for correct orbital angular momentum
       n = n + 1
       if (n .gt. nmax) go to 130
-      l(n) = li
+      bqs%lq(n) = li
       cent(n) = li * (li + 1.)
-      is(n) = 1
-      j(n) = ji
+      bqs%inq(n) = 1
+      bqs%jq(n) = ji
+      bqs%length = n
       eint(n) = en(ji+1)/econv
     end if
 110     continue
@@ -262,15 +266,16 @@ if (nstate .ne. 1) then
 !  here for correct orbital angular momentum
       n = n + 1
       if (n .gt. nmax) go to 130
-      l(n) = li
+      bqs%lq(n) = li
       cent(n) = li * (li + 1.)
       if (ipol .eq. 0) then
-        is(n) = 0
+        bqs%inq(n) = 0
       else if (ipol.eq.1) then
-        if (li .lt. jtot) is(n)=-2
-        if (li .gt. jtot) is(n)=2
+        if (li .lt. jtot) bqs%inq(n)=-2
+        if (li .gt. jtot) bqs%inq(n)=2
       endif
-      j(n) = 1
+      bqs%jq(n) = 1
+      bqs%length = n
       eint(n) = en(4)/econv
     end if
 125   continue
@@ -324,14 +329,15 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and..not.boundc) then
 !  here if this channel is to be included
         nn = nn + 1
         eint(nn) = eint(i)
-        is(nn) = is(i)
-        j(nn) = j(i)
+        bqs%inq(nn) = bqs%inq(i)
+        bqs%jq(nn) = bqs%jq(i)
         cent(nn) = cent(i)
-        l(nn) = l(i)
+        bqs%lq(nn) = bqs%lq(i)
       end if
 150     continue
 !  reset number of channels
     n = nn
+    bqs%length = n
   end if
 end if
 !  return if no channels
@@ -351,8 +357,8 @@ if (clist) then
   write (9, 255)
 255   format(/'   N   S   J    L      EINT(CM-1)')
   do 265  i = 1, n
-    write (6, 260) i, is(i), j(i), l(i), eint(i) * econv
-    write (9, 260) i, is(i), j(i), l(i), eint(i) * econv
+    write (6, 260) i, bqs%inq(i), bqs%jq(i), bqs%lq(i), eint(i) * econv
+    write (9, 260) i, bqs%inq(i), bqs%jq(i), bqs%lq(i), eint(i) * econv
 260     format (3i4, i5, f13.3)
 265   continue
 end if
@@ -377,17 +383,15 @@ do 320 il = 0, 6, 2
     ancouma => v2%get_angular_coupling_matrix(ilam)
     do icol= 1, n
       do irow = icol, n
-        call vlm13p (j(irow), l(irow), is(irow), j(icol), &
-                       l(icol), is(icol), jtot, lb, cmix, vee)
+        call vlm13p (bqs%jq(irow), bqs%lq(irow), bqs%inq(irow), bqs%jq(icol), &
+                       bqs%lq(icol), bqs%inq(icol), jtot, lb, cmix, vee)
         if (vee .ne. 0) then
           i = i + 1
           inum = inum + 1
           call ancouma%set_element(irow=irow, icol=icol, vee=vee)
           if (bastst) then
-            write (6, 290) ilam, lb, icol, irow, i, &
-                           vee
-            write (9, 290) ilam, lb, icol, irow, i, &
-                           vee
+            write (6, 290) ilam, lb, icol, irow, i, inum, vee
+            write (9, 290) ilam, lb, icol, irow, i, inum, vee
   290             format (i4, 2i7, 2i6, i6, g17.8)
           end if
         end if
@@ -659,9 +663,9 @@ character*(*) fname
 character*60 filnam, line, potfil, filnm1
 #include "common/comdot.F90"
 save potfil
-integer, pointer :: nterm, nstate, ipol, npot
-real(8), dimension(:), pointer :: en, de, re, be, rl, cl
-real(8), pointer :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor
+integer, pointer, save :: nterm, nstate, ipol, npot
+real(8), dimension(:), pointer, save :: en, de, re, be, rl, cl
+real(8), pointer, save :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor
 nterm=>ispar(1); nstate=>ispar(2); ipol=>ispar(3); npot=>ispar(4)
 en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
 rl=>rspar(17:20); cl=>rspar(21:24); cmix=>rspar(25); alphg=>rspar(26)

@@ -6,7 +6,7 @@ contains
 ! systpln (savstpln/ptrstpln) defines, save variables and reads          *
 !                  potential for symmetric top and singlet sigma molecule*
 !                  scattering                                            *
-subroutine bastpln(j, l, is, jhold, ehold, ishold, nlevel, &
+subroutine bastpln(bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, ktemp, jtemp, &
                   ieps, isc1, rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, &
@@ -24,20 +24,17 @@ subroutine bastpln(j, l, is, jhold, ehold, ishold, nlevel, &
 !  method of symmetric top level selection.  rotational channel basis
 !  now chosen by j < jmax and ehold < emax (p.dagdigian)
 !
-!  moved j12 to common block /coj12/ to pass array to other subrs
-!  (p.dagdigian)
-!
 !  revision:  24-aug-2012 by p.dagdigian
 !  revision:  4-jun-2013 by q. ma (fix a bug in counting anisotropic
 !     terms)
 ! --------------------------------------------------------------------
 !  variables in call list:
-!    j:        on return contains combined rotational quantum numbers for each
+!    bqs%jq:        on return contains combined rotational quantum numbers for each
 !              channel.  in terms of the rotational quantum numbers of each
 !              molecule we have:  j = 10 * j1 + j2
-!    l:        on return contains orbital angular momentum for each
+!    bqs%lq:        on return contains orbital angular momentum for each
 !              channel
-!    is:       on return contains symmetry of inversion vibration for
+!    bqs%inq:       on return contains symmetry of inversion vibration for
 !              each channel
 !  Note that we have adopted the following convention for the symmetry
 !  index "is" so that on return the symmetric top molecular levels can
@@ -150,7 +147,6 @@ subroutine bastpln(j, l, is, jhold, ehold, ishold, nlevel, &
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_coj12, only: j12
 use mod_coamat, only: ietmp ! ietmp(1)
 use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
@@ -160,12 +156,14 @@ use constants, only: econv, xmconv
 use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_ered, only: ered, rmu
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
+type(bqs_type), intent(out) :: bqs
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 character*40 fname
-dimension j(1), l(1), jhold(1), ehold(1), is(1), &
+dimension jhold(1), ehold(1),&
           ishold(1)
 dimension ieps(1), ktemp(1), jtemp(1), isc1(1)
 data ione, itwo, ithree / 1, 2, 3 /
@@ -395,6 +393,7 @@ end if
 !  now set up channel and level list for scattering calculation
 n = 0
 nlevel = 0
+call bqs%init(nmax)
 do 170  njk = 1, nlist
   ki = ktemp(njk)
   ji = jtemp(njk)/10
@@ -430,13 +429,14 @@ do 170  njk = 1, nlist
               ' .GT. MAX DIMENSION OF',i5,' ABORT ***')
           stop
         end if
-        j(n) = 10*ji + ji2
-        is(n) = ishold(nlevel)
+        bqs%jq(n) = 10*ji + ji2
+        bqs%inq(n) = ishold(nlevel)
         ieps(n) = iepsil
-        j12(n) = ji12
+        bqs%j12(n) = ji12
         eint(n) = ehold(nlevel)
-        l(n) = li
+        bqs%lq(n) = li
         cent(n) = li * (li + 1)
+        bqs%length = n
       end if
 155     continue
 156   continue
@@ -473,16 +473,17 @@ if (.not. flagsu .and. rcut .gt. 0.d0) then
 !  here if this channel is to be included
         nn = nn + 1
         eint(nn) = eint(i)
-        j(nn) = j(i)
+        bqs%jq(nn) = bqs%jq(i)
         ieps(nn) = ieps(i)
-        is(nn) = is(i)
-        j12(nn)=j12(i)
+        bqs%inq(nn) = bqs%inq(i)
+        bqs%j12(nn)=bqs%j12(i)
         cent(nn) = cent(i)
-        l(nn) = l(i)
+        bqs%lq(nn) = bqs%lq(i)
       end if
 300     continue
 !  reset number of channels
     n = nn
+    bqs%length = nn
   end if
 end if
 !  return if no channels
@@ -519,21 +520,21 @@ if (clist) then
      /'   N   J  EPS INV  K   L    EINT(CM-1) ** NU = ',i2)
   end if
   do 330  i = 1, n
-    ki = iabs(is(i))
-    if (is(i) .ne. 0) inv = is(i) / ki
+    ki = iabs(bqs%inq(i))
+    if (bqs%inq(i) .ne. 0) inv = bqs%inq(i) / ki
     ecm = eint(i) * econv
     if (twomol) then
-      ji = j(i)/10
-      ji2 = mod(j(i),10)
+      ji = bqs%jq(i)/10
+      ji2 = mod(bqs%jq(i),10)
     else
-      ji = j(i)
+      ji = bqs%jq(i)
       ji2 = 0
     endif
     if (bastst) &
-      write (6, 320) i, ji, ieps(i), inv, ki, ji2, j12(i), &
-                     l(i), ecm
-      write (9, 320) i, ji, ieps(i), inv, ki, ji2, j12(i), &
-                     l(i), ecm
+      write (6, 320) i, ji, ieps(i), inv, ki, ji2, bqs%j12(i), &
+                     bqs%lq(i), ecm
+      write (9, 320) i, ji, ieps(i), inv, ki, ji2, bqs%j12(i), &
+                     bqs%lq(i), ecm
 320       format (8i4, f10.3)
 330   continue
 end if
@@ -571,21 +572,21 @@ do 400 iterm = 1, nterm
     inum = 0
     do 355  icol = 1, n
       do 350  irow = icol, n
-        lr = l(irow)
-        lc = l(icol)
-        kc = iabs (is(icol))
-        kr = iabs (is(irow))
+        lr = bqs%lq(irow)
+        lc = bqs%lq(icol)
+        kc = iabs (bqs%inq(icol))
+        kr = iabs (bqs%inq(irow))
 
         if (csflag) lrow = nu
         if (twomol) then
-          jc = j(icol)/10
-          jr = j(irow)/10
-          j2c = mod(j(icol), 10)
-          j2r = mod(j(irow), 10)
-          kc = iabs (is(icol))
-          kr = iabs (is(irow))
-          j12r = j12(irow)
-          j12c = j12(icol)
+          jc = bqs%jq(icol)/10
+          jr = bqs%jq(irow)/10
+          j2c = mod(bqs%jq(icol), 10)
+          j2r = mod(bqs%jq(irow), 10)
+          kc = iabs (bqs%inq(icol))
+          kr = iabs (bqs%inq(irow))
+          j12r = bqs%j12(irow)
+          j12c = bqs%j12(icol)
 ! this call to vlmstp is a test for sym-atom limit
 !                call vlmstp (jr, lr, jc, lc, jtot,
 !     :                     kr, kc, lb, mu, ieps(irow),
@@ -595,7 +596,7 @@ do 400 iterm = 1, nterm
                      j12r, j12c, jtot, kr, kc, lb, mu, lb2, mu2, &
                      ieps(irow), ieps(icol), vee, csflag)
         else
-          call vlmstp (j(irow), lr, j(icol), lc, jtot, &
+          call vlmstp (bqs%jq(irow), lr, bqs%jq(icol), lc, jtot, &
                      kr, kc, lb, mu, ieps(irow), &
                      ieps(icol), vee, csflag)
         endif
@@ -706,8 +707,8 @@ parameter (icod=9, ircod=5)
 #include "common/comdot.F90"
 save potfil
 
-integer, pointer :: nterm, numpot, ipotsy, iop, ninv, jmax, ipotsy2, j2max, j2min
-real(8), pointer :: brot, crot, delta, emax, drot
+integer, pointer, save :: nterm, numpot, ipotsy, iop, ninv, jmax, ipotsy2, j2max, j2min
+real(8), pointer, save :: brot, crot, delta, emax, drot
 nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=> ispar(4); ninv=>ispar(5)
 jmax=>ispar(6); ipotsy2=>ispar(7); j2max=>ispar(8); j2min=>ispar(9)
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)

@@ -50,9 +50,6 @@ use mod_cosout
 use mod_codim, only: mmax
 use mod_coisc2, only: inlev => isc2 ! inlev(1)
 use mod_coisc3, only: jlev => isc3 ! jlev(1)
-use mod_coisc4, only: jpack => isc4 ! jpack(1)
-use mod_coisc5, only: lpack => isc5 ! lpack(1)
-use mod_coisc6, only: ipack => isc6 ! ipack(1)
 use mod_coisc8, only: jlist => isc8 ! jlist(1)
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
@@ -236,8 +233,7 @@ do 68 i = 1, nj
 !
 ! now compute transport cross sections
 call compute_transport_xs(1,m1jtot,m1chmx, &
-   jfirst,jfinal,jtotd,nj,mmax,jpack, &
-   lpack,ipack,prefac, &
+   jfirst,jfinal,jtotd,nj,mmax,prefac, &
    etrans, &
    jlpmin,jlpmax,flaghf,ierr)
 
@@ -259,8 +255,7 @@ return
 end
 ! ------------------------------------------------------------------
 subroutine compute_transport_xs(iunit,mjtot,mchmx, &
-                jfirst,jfinal,jtotd,nj,mmax,jpack, &
-                lpack,ipack,prefac, &
+                jfirst,jfinal,jtotd,nj,mmax,prefac, &
                 etrans, &
                 jlpmin,jlpmax,flaghf,ierr)
 !
@@ -284,16 +279,11 @@ subroutine compute_transport_xs(iunit,mjtot,mchmx, &
 !
 ! current revision date:  23-jun-2015 by pjd
 !------------------------------------------------------------------------
-use mod_coj12, only: j12
-use mod_cojq, only: jq ! jq(1)
-use mod_colq, only: lq ! lq(1)
-use mod_coinq, only: inq ! inq(1)
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cow, only: simag => w_as_vec ! simag(1)
 use mod_hibrid2, only: mxoutd
-use mod_hismat, only: sread
 use mod_hibasis, only: is_j12, is_twomol
 use mod_par, only: batch, ipos
 use mod_selb, only: ibasty
@@ -301,6 +291,7 @@ use mod_trn, only: spin
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j
 use mod_hismat, only: sread
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 integer, intent(in) :: iunit
 integer, intent(in) :: mjtot
@@ -310,9 +301,6 @@ integer, intent(in) :: jfinal
 integer, intent(in) :: jtotd
 integer, intent(in) :: nj
 integer, intent(in) :: mmax
-integer, intent(out) :: jpack(mmax)
-integer, intent(out) :: lpack(mmax)
-integer, intent(out) :: ipack(mmax)
 real(8), intent(in) :: prefac(nj)
 real(8), intent(in) :: etrans(nj)
 integer, intent(in) :: jlpmin
@@ -342,6 +330,8 @@ integer, allocatable :: l(:,:,:)
 ! length of arrays
 !   subscripts:  jtot, jlp (=1/2 for jlpar = +1/-1)
 integer, dimension(:, :), allocatable :: length
+type(bqs_type) :: row_bqs
+type(bqs_type) :: packed_bqs
 !
 logical :: uses_j12
 ! if true computes transport cross sections for systems in which
@@ -426,8 +416,8 @@ iaddr = 0
 length(0,2) = 0  ! the s-matrix contains no partial wave for jtot = 0 and jlpar = -1
 20 nopen = -1
 call sread (iaddr, sreal, simag, jtot, jlpar, &
-   nu, jq, lq, inq, ipack, jpack, lpack, &
-   iunit, mmax, nopen, lngth, ierr)
+   nu, row_bqs, packed_bqs, &
+   iunit, mmax, nopen, ierr)
 if (ierr .lt. -1) then
   write(6,105)
 105   format(/' ** READ ERROR IN TRNPRT. ABORT **'/)
@@ -439,16 +429,16 @@ end if
 ! |    -1 |   2 |
 jlp = 1 - (jlpar - 1)/2
 !  copy s-matrix for this jtot1/jlpar1
-length(jtot,jlp) = lngth
-len2 = lngth*(lngth + 1)/2
-do i = 1, lngth
-  j(jtot,jlp,i) = jpack(i)
-  in(jtot,jlp,i) = ipack(i)
-  l(jtot,jlp,i) = lpack(i)
+length(jtot,jlp) = packed_bqs%length
+len2 = packed_bqs%length*(packed_bqs%length + 1)/2
+do i = 1, packed_bqs%length
+  j(jtot,jlp,i) = packed_bqs%jq(i)
+  in(jtot,jlp,i) = packed_bqs%inq(i)
+  l(jtot,jlp,i) = packed_bqs%lq(i)
 end do
 if (uses_j12) then
-  do i = 1, lngth
-    jj12(jtot,jlp,i) = j12(i)
+  do i = 1, packed_bqs%length
+    jj12(jtot,jlp,i) = packed_bqs%j12(i)
   end do
 end if
 do ii = 1, len2

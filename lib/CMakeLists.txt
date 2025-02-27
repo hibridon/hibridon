@@ -6,7 +6,7 @@
 
 set(ENABLE_ASSERTS "ON" CACHE BOOL "to enable or disable assert checks for debug builds (mostly for developers).")
 
-set(LINK_TIME_OPTIMIZATION "ON" CACHE BOOL "to enable or disable link time optimizations on release builds for compilers that support it (slightly improves performance but greatly slows down link time)")
+set(LINK_TIME_OPTIMIZATION "OFF" CACHE BOOL "to enable or disable link time optimizations on release builds for compilers that support it (slightly improves performance but greatly slows down link time)")
 
 # With gfortran, variables are initialized to 0 by default, but it's not the case with ifort compiler. Therefore, all variables need to be initialized to guarantee the program works in a deterministic way on every compiler.
 set(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR "ON" CACHE BOOL "if set, causes the use of uninitilazed variables to trigger an exception on debug builds, thus making the program stop. This is useful to detect uninitialized memory issues.")
@@ -106,8 +106,6 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       -ffree-line-length-none                   # Allow arbitrary long lines. Needed as preprocessing could generate long line lengths.
 #      -fdefault-integer-8
 #      -finteger-4-integer-8
-      $<$<PLATFORM_ID:Linux>:-march=native>     # Tune generated code for host's micro-architecture
-      $<$<PLATFORM_ID:Darwin>:-mtune=native>    # Tune generated code for host's micro-architecture (march not working on Darwin)
       $<$<PLATFORM_ID:Linux>:-mcmodel=large>    # Required on Linux
       $<$<BOOL:${OpenMP_Fortran_FOUND}>:-fopenmp> # Compile with fopenmp option if OpenMP libs are found
       # Config-specific options: RELEASE
@@ -136,7 +134,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-ffpe-trap=invalid,zero,overflow>
 
 
-      $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -fprofile-arcs -ftest-coverage at compile time)
+      $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage -Wno-coverage-invalid-line-number> # Code coverage (same as -fprofile-arcs -ftest-coverage at compile time)
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
       $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
     )
@@ -148,14 +146,13 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
       # force arrays to be allocated on the heap instead of the stack, this removes segmentation faults crash, not sure why
       # the following option means : automatic arrays and arrays created for temporary computations are allocated on the stack if their size can be determined at compile time and if it doesn't exceed 10kb.
       # this option seems necessary for big values of kmax (eg kmax=5000), according to bdesrousseaux, otherwise the user will experience a segmentation fault. I guess that without this option, the stack becomes too small to contain such big arrays...
-      "-heap-arrays 10"                           # Put everything bigger than 10 bytes on the heap
+      -heap-arrays                                # Put everything on the heap
       # "-extend-source 132"                        # Allow arbitrary long lines (132 seems the longest allowed with ifort). Needed as preprocessing could generate long lines.
       -no-wrap-margin                             # Don't wrap output files
       $<$<PLATFORM_ID:Linux>:-mcmodel=large>      # Required on Linux
       $<$<BOOL:${OpenMP_Fortran_FOUND}>:-qopenmp> # Compile with qopenmp option if OpenMP libs are found
       # Config-specific options: RELEASE
       $<$<CONFIG:RELEASE>:-O3>                    # Optimization level at 3 for Release
-      $<$<CONFIG:RELEASE>:-xHost>                 # Generate instructions for the highest instruction set available on the compilation host processor
       $<$<AND:$<BOOL:${LINK_TIME_OPTIMIZATION}>,$<CONFIG:RELEASE>>:-ipo>  # activate interprocediral optimization (aka link time optimization)
       $<$<CONFIG:RELEASE>:-init=zero>             # Init variables to zero/false/null
       # Config-specific options: DEBUG
