@@ -115,7 +115,7 @@ module mod_hinput
     k_keyword_execute_command_mgr_command     =  6   !   45 label:execute_command_mgr_command(i)
   end enum
 
-  integer, parameter :: ncode = 27  !  ncode is the number of bcod's
+  integer, parameter :: ncode = 26  !  ncode is the number of bcod's
   character(len=8), parameter :: bcod(ncode) = [ &  ! bcod stores hibridon's commands
     'DEBROGLI', &
     'DIFFER  ', &
@@ -142,8 +142,7 @@ module mod_hinput
     'FLUX    ', &
     'J1J2    ', &
     'EADIAB  ', &
-    'SYSCONF ', &
-    'HYPXSC  ']
+    'SYSCONF ']
 
   character(len=8), parameter :: bascod(1) = ['BASISTYP']
 
@@ -231,7 +230,6 @@ use mod_opti, only: optifl
 use mod_hiutil, only: get_token, lower, upper, lenstr, vaxhlp, sys_conf
 use mod_hibrid1, only: difs, turn
 use mod_hibrid4, only: psi, eadiab1, sprint
-use mod_hypxsc, only: hypxsc
 implicit none
 character(len=K_MAX_USER_LINE_LENGTH) line
 character(len=40) :: fnam1
@@ -326,7 +324,6 @@ lindx(FCOD_BOUNDC) = LPAR_BOUNDC
 ! eadiab: 2850
 ! j1j2:  460
 ! sysconf:  2900
-! hypxsc: 2950
 ! nb after changing the following list, check that all the variables "incode"
 ! that follow after address 900 are changed accordingly
 !
@@ -512,7 +509,7 @@ end if
       1900,2800,600, &
       1300,2300, &
       1200,1600,430,2650,2800, &
-      460,2850,2900,2950),i
+      460,2850,2900),i
 !
 ! label:execute_command_mgr_command(i)
 !
@@ -1317,28 +1314,7 @@ goto 1  ! label:read_new_line
 !  print out system parameters
 2900 call sys_conf
 goto 1  ! label:read_new_line
-!  hyperfine xcs routine (originally written by j. klos,
-!  rewritten by p.j. dagdigian
-!  hypxsc,jobfile, ienerg ,nucspin, j1, j2
-2950 continue
-!     if (.not. lpar(LPAR_TWOMOL)) then
-  call get_token(line,l,fnam1,lc)
-  if(fnam1 .eq. ' ') fnam1 = jobnam
-  call lower(fnam1)
-  call upper(fnam1(1:1))
-  do 2013 i = 1,4
-     a(i) = 0.d0
-     if(l .eq. 0) goto 2013
-     call get_token(line,l,code,lc)
-     call assignment_parse(code(1:lc),empty_var_list,j,a(i))
-2013   continue
-  call hypxsc(fnam1,a)
-!      else
-!        write (6, 2012)
-!2012    format(' Sorry, hyperfine cross sections not yet',
-!     :         /,'  implemented for molecule-molecule collisions')
-!      end if
-goto 1  ! label:read_new_line
+
 end
 
 end module mod_hinput

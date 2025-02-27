@@ -66,6 +66,12 @@ implicit none
     procedure :: execute => show_execute
   end type show_command_type
 
+  ! hypxsc
+  type, extends(command_type) :: hypxsc_command_type
+  contains
+    procedure :: execute => hypxsc_execute
+  end type hypxsc_command_type
+
   ! stmix
   type, extends(command_type) :: stmix_command_type
   contains
@@ -652,6 +658,47 @@ contains
     post_action = k_post_action_interpret_next_statement
   end subroutine show_execute
 
+  subroutine hypxsc_execute(this, statements, bofargs, next_statement, post_action)
+    !  hyperfine xcs routine (originally written by j. klos,
+    !  rewritten by p.j. dagdigian
+    !  hypxsc,jobfile, ienerg ,nucspin, j1, j2
+    use mod_hiutil, only: get_token, lower, upper, assignment_parse
+    use mod_file, only: jobnam
+    use mod_command, only: k_post_action_read_new_line
+    use mod_hypxsc, only: hypxsc
+
+    class(hypxsc_command_type) :: this
+    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
+    integer, intent(in) :: bofargs
+    integer, intent(out) :: next_statement
+    integer, intent(out) :: post_action
+
+    character(len=40) :: fnam1  ! job file name
+    real(8) :: a(4)  ! 4 real arguments:
+    ! 1: ienerg
+    ! 2: nucspin
+    ! 3: j1
+    ! 4: j2
+
+    character*8 empty_var_list(0)
+    character(len=40) :: code
+    integer :: l, lc
+    integer :: i, j
+
+    call get_token(statements,l,fnam1,lc)
+    if(fnam1 .eq. ' ') fnam1 = jobnam
+    call lower(fnam1)
+    call upper(fnam1(1:1))
+    do 2013 i = 1,4
+       a(i) = 0.d0
+       if(l .eq. 0) goto 2013
+       call get_token(statements,l,code,lc)
+       call assignment_parse(code(1:lc),empty_var_list,j,a(i))
+    2013   continue
+    call hypxsc(fnam1,a)
+    post_action = k_post_action_read_new_line
+  end subroutine hypxsc_execute
+
   subroutine stmix_execute(this, statements, bofargs, next_statement, post_action)
     ! singlet-triplet collisional mixing - added by p. dagdigian
     use mod_hiutil, only: get_token, lower, upper, assignment_parse
@@ -793,6 +840,10 @@ contains
 
     com = show_command_type()
     call command_mgr%register_command('SHOW', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
+
+    com = hypxsc_command_type()
+    call command_mgr%register_command('HYPXSC', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
     com = stmix_command_type()
