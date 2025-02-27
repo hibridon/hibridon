@@ -115,9 +115,8 @@ module mod_hinput
     k_keyword_execute_command_mgr_command     =  6   !   45 label:execute_command_mgr_command(i)
   end enum
 
-  integer, parameter :: ncode = 30  !  ncode is the number of bcod's
+  integer, parameter :: ncode = 29  !  ncode is the number of bcod's
   character(len=8), parameter :: bcod(ncode) = [ &  ! bcod stores hibridon's commands
-    'CHECK   ', &
     'DEBROGLI', &
     'DIFFER  ', &
     'DIFCRS  ', &
@@ -304,7 +303,6 @@ lindx(FCOD_WRXSEC) = LPAR_WRXSEC
 lindx(FCOD_BOUNDC) = LPAR_BOUNDC
 
 ! addresses for commands
-! check: 2700
 ! debrogli: 1800
 ! differ: 1500
 ! difcrs: 2000
@@ -510,7 +508,7 @@ end if
 !
 ! label:execute_command(i)
 !
-40 goto (2700, &
+40 goto ( &
       1800,1500,2000,300,600, &
       75, &
       400,1700, &
@@ -1282,9 +1280,6 @@ call get_token(line,l,code,lc)
 call assignment_parse(code(1:lc),empty_var_list,j,a(i))
 2660 continue
 call readpc(fnam1, a, scmat, nmax)
-goto 1  ! label:read_new_line
-! check if inconsistencies in input parameters
-2700 call genchk
 goto 1  ! label:read_new_line
 !  psi(wavefunction calculation),jobfile,mchannel
 !  flux calculation,jobfile,mchannel,iflux,thresh,iprint

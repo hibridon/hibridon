@@ -6,6 +6,12 @@ use mod_command, only: command_type, command_mgr_type
 implicit none
   class(command_mgr_type), pointer :: command_mgr  ! singleton
 
+  ! check
+  type, extends(command_type) :: check_command_type
+  contains
+    procedure :: execute => check_execute
+  end type check_command_type
+
   ! input
   type, extends(command_type) :: input_command_type
   contains
@@ -139,6 +145,20 @@ contains
 
   end subroutine print_main_params
 
+  ! check if inconsistencies in input parameters
+  subroutine check_execute(this, statements, bofargs, next_statement, post_action)
+    use mod_command, only: k_post_action_read_new_line
+
+    class(check_command_type) :: this
+    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
+    integer, intent(in) :: bofargs
+    integer, intent(out) :: next_statement
+    integer, intent(out) :: post_action
+
+    call genchk()
+    post_action = k_post_action_read_new_line
+
+  end subroutine check_execute
 
   ! input, output, label and job file names
   ! input=infile, output=outfile, job=jobfile
