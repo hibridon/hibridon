@@ -1389,8 +1389,8 @@ do 3120 i = 2, 6
   a(i) = 0.d0
   if (l .eq. 2) a(l) = 1.d0
   if (l .eq. 0) goto 3120
-  call parse(line,l,code,lc)
-  call getval(code(1:lc),' ',0,j,a(i))
+  call get_token(line, l, code, lc)
+  call assignment_parse(code(1:lc), empty_var_list, j, a(i))
 3120 continue
 call trnprt(fnam1,a)
 goto 1  ! label:read_new_line
