@@ -651,6 +651,10 @@ contains
       command_mgr%num_commands = 0
     end if
 
+    com = check_command_type()
+    call command_mgr%register_command('CHECK', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
+
     com = input_command_type()
     call command_mgr%register_command('INPUT', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
