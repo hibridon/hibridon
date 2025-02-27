@@ -115,7 +115,7 @@ module mod_hinput
     k_keyword_execute_command_mgr_command     =  6   !   45 label:execute_command_mgr_command(i)
   end enum
 
-  integer, parameter :: ncode = 28  !  ncode is the number of bcod's
+  integer, parameter :: ncode = 27  !  ncode is the number of bcod's
   character(len=8), parameter :: bcod(ncode) = [ &  ! bcod stores hibridon's commands
     'DEBROGLI', &
     'DIFFER  ', &
@@ -143,8 +143,7 @@ module mod_hinput
     'J1J2    ', &
     'EADIAB  ', &
     'SYSCONF ', &
-    'HYPXSC  ', &
-    'STMIX   ']
+    'HYPXSC  ']
 
   character(len=8), parameter :: bascod(1) = ['BASISTYP']
 
@@ -328,7 +327,6 @@ lindx(FCOD_BOUNDC) = LPAR_BOUNDC
 ! j1j2:  460
 ! sysconf:  2900
 ! hypxsc: 2950
-! stmix:  3000
 ! nb after changing the following list, check that all the variables "incode"
 ! that follow after address 900 are changed accordingly
 !
@@ -514,7 +512,7 @@ end if
       1900,2800,600, &
       1300,2300, &
       1200,1600,430,2650,2800, &
-      460,2850,2900,2950,3000),i
+      460,2850,2900,2950),i
 !
 ! label:execute_command_mgr_command(i)
 !
@@ -1340,34 +1338,6 @@ goto 1  ! label:read_new_line
 !2012    format(' Sorry, hyperfine cross sections not yet',
 !     :         /,'  implemented for molecule-molecule collisions')
 !      end if
-goto 1  ! label:read_new_line
-! singlet-triplet collisional mixing - added by p. dagdigian
-3000 call get_token(line,l,fnam1,lc)
-if(fnam1 .eq. ' ') fnam1 = jobnam
-call lower(fnam1)
-call upper(fnam1(1:1))
-! get iener for 1st smt file
-a(1) = 0.d0
-if(l .eq. 0) goto 3005
-call get_token(line,l,code,lc)
-call assignment_parse(code(1:lc),empty_var_list,j,a(1))
-3005 call get_token(line,l,fnam2,lc)
-if(fnam2 .eq. ' ') fnam2 = jobnam
-call lower(fnam2)
-call upper(fnam2(1:1))
-! get iener for 2nd smt file
-a(2) = 0.d0
-if(l .eq. 0) goto 3010
-call get_token(line,l,code,lc)
-call assignment_parse(code(1:lc),empty_var_list,j,a(2))
-! get dele, emax, istata, istatx, hso
-3010 do 3020 i = 3, 7
-  a(i) = 0.d0
-  if(l .eq. 0) goto 3020
-  call get_token(line,l,code,lc)
-  call assignment_parse(code(1:lc),empty_var_list,j,a(i))
-3020 continue
-call stmix(fnam1,fnam2,a)
 goto 1  ! label:read_new_line
 end
 

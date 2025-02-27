@@ -66,6 +66,12 @@ implicit none
     procedure :: execute => show_execute
   end type show_command_type
 
+  ! stmix
+  type, extends(command_type) :: stmix_command_type
+  contains
+    procedure :: execute => stmix_execute
+  end type stmix_command_type
+
   ! trnprt
   type, extends(command_type) :: trnprt_command_type
   contains
@@ -646,6 +652,63 @@ contains
     post_action = k_post_action_interpret_next_statement
   end subroutine show_execute
 
+  subroutine stmix_execute(this, statements, bofargs, next_statement, post_action)
+    ! singlet-triplet collisional mixing - added by p. dagdigian
+    use mod_hiutil, only: get_token, lower, upper, assignment_parse
+    use mod_file, only: jobnam
+    use mod_command, only: k_post_action_read_new_line
+
+    class(stmix_command_type) :: this
+    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
+    integer, intent(in) :: bofargs
+    integer, intent(out) :: next_statement
+    integer, intent(out) :: post_action
+
+    character(len=40) :: fnam1  ! 1st smt file name
+    character(len=40) :: fnam2  ! 2nd smt file name
+    real(8) :: a(7)  ! 7 real arguments:
+    ! 1: iener for 1st smt file
+    ! 2: iener for 2nd smt file
+    ! 3: dele
+    ! 4: emax
+    ! 5: istata
+    ! 6: istatx
+    ! 7: hso
+
+    character*8 empty_var_list(0)
+    character(len=40) :: code
+    integer :: l, lc
+    integer :: i, j
+
+    call get_token(statements,l,fnam1,lc)
+    if(fnam1 .eq. ' ') fnam1 = jobnam
+    call lower(fnam1)
+    call upper(fnam1(1:1))
+    ! get iener for 1st smt file
+    a(1) = 0.d0
+    if(l .eq. 0) goto 3005
+    call get_token(statements,l,code,lc)
+    call assignment_parse(code(1:lc),empty_var_list,j,a(1))
+    3005 call get_token(statements,l,fnam2,lc)
+    if(fnam2 .eq. ' ') fnam2 = jobnam
+    call lower(fnam2)
+    call upper(fnam2(1:1))
+    ! get iener for 2nd smt file
+    a(2) = 0.d0
+    if(l .eq. 0) goto 3010
+    call get_token(statements,l,code,lc)
+    call assignment_parse(code(1:lc),empty_var_list,j,a(2))
+    ! get dele, emax, istata, istatx, hso
+    3010 do 3020 i = 3, 7
+      a(i) = 0.d0
+      if(l .eq. 0) goto 3020
+      call get_token(statements,l,code,lc)
+      call assignment_parse(code(1:lc),empty_var_list,j,a(i))
+    3020 continue
+    call stmix(fnam1,fnam2,a)
+    post_action = k_post_action_read_new_line
+  end subroutine stmix_execute
+
   subroutine trnprt_execute(this, statements, bofargs, next_statement, post_action)
     ! transport cross sections - added by p. dagdigian
     ! TRNPRT,JOB,IENERG,IN1,IN2,JTOTMX,JMIN,JMAX
@@ -660,7 +723,7 @@ contains
     integer, intent(out) :: next_statement
     integer, intent(out) :: post_action
 
-    real(8) :: a(15)  ! real arguments
+    real(8) :: a(6)  ! 6 real arguments
     character*8 empty_var_list(0)
     character(len=40) :: fnam1
     character(len=40) :: code
@@ -730,6 +793,10 @@ contains
 
     com = show_command_type()
     call command_mgr%register_command('SHOW', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
+
+    com = stmix_command_type()
+    call command_mgr%register_command('STMIX', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
     com = trnprt_command_type()
