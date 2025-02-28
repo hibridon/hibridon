@@ -34,18 +34,18 @@ end module mod_1sg1sg
 module mod_hiba25_1sg1sg
   contains
   
-subroutine ba1sg1sg (j, l, is, jhold, ehold, ishold, nlevel, &
+subroutine ba1sg1sg (bqs, jhold, ehold, ishold, nlevel, &
      nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
      flaghf, flagsu, csflag, clist, bastst, ihomo, &
      nu, numin, jlpar, n, nmax, ntop, v2)
 ! --------------------------------------------------------------------
 !  variables in call list:
-!    j:        on return contains combined rotational quantum numbers for each
+!    bqs%jq:   on return contains combined rotational quantum numbers for each
 !              channel.  in terms of the rotational quantum numbers of each
 !              molecule we have:  j = 10 * j1 + j2
-!    l:        on return contains orbital angular momentum for each
+!    bqs%lq:   on return contains orbital angular momentum for each
 !              channel
-!    is:       additional quantum index of each channel:  on return this is
+!    bqs%inq:  additional quantum index of each channel:  on return this is
 !              set equal to j12 (the vector resultant of j1 and j2) times nsym
 !    jhold:    on return contains rotational quantum numbers for each
 !              rotational level, irrespective of projection degeneracy and the
@@ -117,7 +117,6 @@ use mod_1sg1sg
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_coj12, only: j12
 use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar
@@ -127,11 +126,13 @@ use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax,
 use mod_par, only: readpt, boundc
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
+type(bqs_type), intent(out) :: bqs
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-dimension j(1), l(1), is(1), jhold(1), ehold(1), &
+dimension jhold(1), ehold(1), &
     sc1(1), sc2(1), sc3(1), sc4(1), ishold(1)
 data zero, ione, itwo, ithree / 0.d0, 1, 2, 3 /
 integer, pointer :: j1max, j2min, j2max, ipotsy2
@@ -236,6 +237,7 @@ do 80 i = 1, nlevel - 1
 if (ehold(nlevel) .le. ered) nlevop = nlevop + 1
 !
 !  set up CC scattering channel basis
+call bqs%init(nmax)
 n = 0
 do i = 1, nlevel
   j1 = jhold(i)/10
@@ -250,10 +252,11 @@ do i = 1, nlevel
       if (ix .eq. jlpar) then
         n = n + 1
         if (n .le. nmax) then
-          j(n) = 10 * j1 + j2
-          is(n) = 0
-          l(n) = li
-          j12(n) = j12i
+          bqs%jq(n) = 10 * j1 + j2
+          bqs%inq(n) = 0
+          bqs%lq(n) = li
+          bqs%j12(n) = j12i
+          bqs%length = n
           eint(n) = ehold(i)
           cent(n) = li * (li + 1.d0)
         else
@@ -277,26 +280,26 @@ end do
 if (n .gt. 1) then
   do 212 jj = 2, n
     ekeep = eint(jj)
-    jkeep = j(jj)
-    ikeep = is(jj)
-    lkeep = l(jj)
-    j12kp = j12(jj)
+    jkeep = bqs%jq(jj)
+    ikeep = bqs%inq(jj)
+    lkeep = bqs%lq(jj)
+    j12kp = bqs%j12(jj)
     ckeep = cent(jj)
     do 211 ii = jj-1, 1, -1
       if (eint(ii).le.ekeep) goto 210
       eint(ii+1) = eint(ii)
-      j(ii+1) = j(ii)
-      is(ii+1) = is(ii)
-      l(ii+1) = l(ii)
-      j12(ii+1) = j12(ii)
+      bqs%jq(ii+1) = bqs%jq(ii)
+      bqs%inq(ii+1) = bqs%inq(ii)
+      bqs%lq(ii+1) = bqs%lq(ii)
+      bqs%j12(ii+1) = bqs%j12(ii)
       cent(ii+1) = cent(ii)
 211     continue
     ii = 0
 210     eint(ii+1) = ekeep
-    j(ii+1) = jkeep
-    is(ii+1) = ikeep
-    l(ii+1) = lkeep
-    j12(ii+1) = j12kp
+    bqs%jq(ii+1) = jkeep
+    bqs%inq(ii+1) = ikeep
+    bqs%lq(ii+1) = lkeep
+    bqs%j12(ii+1) = j12kp
     cent(ii+1) = ckeep
 212   continue
 end if
@@ -324,14 +327,15 @@ if (rcut .gt. 0.d0 .and. .not.boundc) then
 !  here if this channel is to be included
         nn = nn + 1
         eint(nn) = eint(i)
-        is(nn) = is(i)
-        l(nn) = l(i)
-        j12(nn) = j12(i)
+        bqs%inq(nn) = bqs%inq(i)
+        bqs%lq(nn) = bqs%lq(i)
+        bqs%j12(nn) = bqs%j12(i)
         cent(nn) = cent(i)
       end if
 130     continue
 !  reset number of channels
     n = nn
+    bqs%length = n
   end if
 end if
 !  return if no channels
@@ -363,10 +367,10 @@ if (clist) then
 200   format(/'   N     J1     J2     J12     L   EINT(CM-1)')
   do i = 1, n
     ecm = eint(i) * econv
-    j1 = j(i)/10
-    j2 = mod(j(i),10)
-    write (6, 220) i, j1, j2, j12(i), l(i), ecm
-    write (9, 220) i, j1, j2, j12(i), l(i), ecm
+    j1 = bqs%jq(i)/10
+    j2 = mod(bqs%jq(i),10)
+    write (6, 220) i, j1, j2, bqs%j12(i), bqs%lq(i), ecm
+    write (9, 220) i, j1, j2, bqs%j12(i), bqs%lq(i), ecm
 220     format (i4, 4i7, f10.3)
   end do
 end if
@@ -389,15 +393,15 @@ do 400 ilam = 1, nlam
   lltot = lms(ilam)%ltot
   inum = 0
   do 355 icol = 1, n
-    j1c = j(icol)/10
-    j2c = mod(j(icol),10)
-    j12c = j12(icol)
-    lc = l(icol)
+    j1c = bqs%jq(icol)/10
+    j2c = mod(bqs%jq(icol),10)
+    j12c = bqs%j12(icol)
+    lc = bqs%lq(icol)
     do 350 irow = icol, n
-      j1r = j(irow)/10
-      j2r = mod(j(irow),10)
-      j12r = j12(irow)
-      lr = l(irow)
+      j1r = bqs%jq(irow)/10
+      j2r = mod(bqs%jq(irow),10)
+      j12r = bqs%j12(irow)
+      lr = bqs%lq(irow)
 !     initialize potential to zero
       vee = zero
       call v1sgsg(j1r,j2r,j12r,lr,j1c,j2c,j12c, &
@@ -534,8 +538,8 @@ character*60 filnam, line, potfil, filnm1
 #include "common/comdot.F90"
 save potfil
 
-integer, pointer :: j1max, j2min, j2max, ipotsy2, iop
-real(8), pointer :: b1rot, d1rot, b2rot
+integer, pointer, save :: j1max, j2min, j2max, ipotsy2, iop
+real(8), pointer, save :: b1rot, d1rot, b2rot
 j1max=>ispar(1); j2min=>ispar(2); j2max=>ispar(3); ipotsy2=>ispar(4); iop=>ispar(5)
 b1rot=>rspar(1); d1rot=>rspar(2); b2rot=>rspar(3)
 

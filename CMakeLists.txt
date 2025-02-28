@@ -1,13 +1,16 @@
 # CMake project file for hibridon
 
 cmake_minimum_required (VERSION 3.13)
-project (hibridon VERSION 5.0)
+project (hibridon VERSION 5.1)
 enable_language (Fortran)
 message("Fortran compiler ID: ${CMake_Fortran_COMPILER_ID}")
 # Default build type as Release
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose Release or Debug" FORCE)
 endif()
+
+# Code coverage
+set(ENABLE_CODE_COVERAGE "OFF" CACHE BOOL "to enable or disable code coverage (mostly for developers)")
 
 # profiling is disabled by default because:
 # 1. most users won't need it: this is targetted to developers, not users
@@ -44,6 +47,7 @@ endif()
 
 find_package( BLAS REQUIRED )
 find_package( LAPACK REQUIRED )
+find_package ( OpenMP )
 
 # get the name of the compiler
 get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)

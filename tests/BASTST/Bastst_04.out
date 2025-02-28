@@ -1,0 +1,162 @@
+      BASTST                                     
+ DUMMY POTENTIAL FOR TESTING PURPOSES            
+ ==============================
+     *** Parameters:
+ JTOT1  =  20        JTOT2  =  20        JTOTD  =   5        JLPAR  =   1
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  48        IPRINT =   1
+ FSTFAC =  15.00     RINCR  =  1.000     RCUT   =  30.00     RENDAI =  1.000    
+ RENDLD =  1.000     RSTART =  1.000     SPAC   = 0.1000     TOLAI  =  1.000    
+ XMU    =  16.47    
+     *** SIGMA|PI system parameters:
+ NTERM  =   1        ISG    =   1        IPI    =   0        ISGPI  =   0
+ ISA    =   1        IGUSG  =   1        NPARSG =   2        ISYMSG =   1
+ VMINSG =   0        VMAXSG =   0        NMIN   =   0        NMAX   =   5
+ BSG    =  2.000     DSG    = 1.0000E-02 HSG    =  0.000     GS     = 0.1000    
+ GSD    = 0.1000     GSH    = 0.1000     ESG    =  0.000    
+ LAMMIN:    0
+ LAMMAX:   10
+ MPROJ:     0
+     *** Flags:
+ AIRYFL= F    BASTST= T    BATCH = F    CHLIST= T    CSFLAG= F    FLAGHF= T
+ FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= F    NOPRIN= F    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= F    WAVEFL= F
+ WRPART= F    WRSMAT= F    WRXSEC= F    BOUNDC= F
+ ** Energies:     5000.000000
+ NOUT:  4; JOUT:  0   2   4   6
+ INDOUT:    0
+ ==============================
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2023-01-23 at 16:52
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: 7231cf8826aea043d08c3f4ec8c922433be90696
+SYS: Darwin 22.2.0 x86_64
+COMPILER: /opt/intel/oneapi/compiler/2022.2.1/mac/bin/intel64/ifort
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+ 
+      Model Name: MacBook Pro
+      Model Identifier: MacBookPro14,3
+      Processor Name: Quad-Core Intel Core i7
+      Processor Speed: 2.9 GHz
+      Number of Processors: 1
+      Total Number of Cores: 4
+      L2 Cache (per Core): 256 KB
+      L3 Cache: 8 MB
+      Hyper-Threading Technology: Enabled
+      Memory: 16 GB
+ --------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ All publications resulting from use of the integrators included in the
+ Hibridon code must include the following reference:
+
+ D. E. Manolopoulos, J. Chem. Phys. 85, 6425 (1986); M. H. Alexander and D. E.
+ Manolopoulos, J. Chem. Phys. 80, 2044 (1987).
+
+ All publications involving the determination ofphotodissociation cross sections
+ must also include the following reference:
+
+ M. H. Alexander, Comput. Phys. Commun, 75, 87 (1993).
+
+ All publications investigating flux redistribution must include the following references:
+
+ M. H. Alexander, J. Chem. Phys. 95, 8931 (1991); D. E. Manolopoulos and
+ M. H. Alexander, J. Chem. Phys.  97, 2527 (1992).
+
+ All publications resulting from use of the Hibridon package must include
+ the following reference:
+
+ HIBRIDON is a package of programs for the time-independent quantum treatment
+ of inelastic collisions and photodissociation written by M. H. Alexander,
+ D. E.  Manolopoulos, H.-J. Werner, and B. Follmeg, with contributions by
+ P. F. Vohralik, D. Lemoine, G. Corey, B. Johnson, T. Orlikowski, A. Berning,
+ A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly, G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J. Klos, and F. Lique
+ -----------------------------------------------------------------------------
+
+ ** LABEL:          BASTST                                     
+ ** POT NAME:  DUMMY POTENTIAL FOR TESTING PURPOSES            
+ ** DATE:      Jan 23 16:53:56 2023
+
+ *** WARNING:  NAIRY .NE. 1 BUT AIRYFL .EQ. .FALSE.
+ ** NMAX= 500  NAIRY= 500
+
+ **  2SIG CASE (A) COUPLING **   g/u= 1  +/- =  1   s/a =  1
+
+ ** CC **    RMU=  16.4700  E= 5000.00  JTOT= 20.5 JLPAR= 1
+
+ 2SIG-PARAMETERS:
+  V  JMIN JMAX     BROT        DROT        HROT          GS         GSD
+                    GSH        EVIB
+  0    0    5  2.0000E+00  1.0000E-02  0.0000E+00  1.0000E-01  1.0000E-01
+               1.0000E-01        0.00
+
+ OPEN CHANNELS ELIMINATED WHICH ARE CLOSED AT R=   30.00
+
+    N   V  VP   J  EPS OMEGA    L  EINT(CM-1)     C-1/2       C-3/2       C-SIG
+    1   0   0  0.5   1  2.5    20   140.494    0.000000    0.000000    1.000000
+    2   0   0  0.5  -1  2.5    21   144.223    0.000000    0.000000    1.000000
+    3   0   0  1.5   1  2.5    19   145.394    0.000000    0.000000    1.000000
+    4   0   0  1.5   1  2.5    21   145.394    0.000000    0.000000    1.000000
+    5   0   0  1.5  -1  2.5    20   149.312    0.000000    0.000000    1.000000
+    6   0   0  1.5  -1  2.5    22   149.312    0.000000    0.000000    1.000000
+    7   0   0  2.5   1  2.5    18   160.765    0.000000    0.000000    1.000000
+    8   0   0  2.5   1  2.5    20   160.765    0.000000    0.000000    1.000000
+    9   0   0  2.5   1  2.5    22   160.765    0.000000    0.000000    1.000000
+   10   0   0  2.5  -1  2.5    19   145.791    0.000000    0.000000    1.000000
+   11   0   0  2.5  -1  2.5    21   145.791    0.000000    0.000000    1.000000
+   12   0   0  2.5  -1  2.5    23   145.791    0.000000    0.000000    1.000000
+   13   0   0  3.5   1  2.5    17   202.776    0.000000    0.000000    1.000000
+   14   0   0  3.5   1  2.5    19   202.776    0.000000    0.000000    1.000000
+   15   0   0  3.5   1  2.5    21   202.776    0.000000    0.000000    1.000000
+   16   0   0  3.5   1  2.5    23   202.776    0.000000    0.000000    1.000000
+   17   0   0  3.5  -1  2.5    18   110.291    0.000000    0.000000    1.000000
+   18   0   0  3.5  -1  2.5    20   110.291    0.000000    0.000000    1.000000
+   19   0   0  3.5  -1  2.5    22   110.291    0.000000    0.000000    1.000000
+   20   0   0  3.5  -1  2.5    24   110.291    0.000000    0.000000    1.000000
+   21   0   0  4.5   1  2.5    16   304.156    0.000000    0.000000    1.000000
+   22   0   0  4.5   1  2.5    18   304.156    0.000000    0.000000    1.000000
+   23   0   0  4.5   1  2.5    20   304.156    0.000000    0.000000    1.000000
+   24   0   0  4.5   1  2.5    22   304.156    0.000000    0.000000    1.000000
+   25   0   0  4.5   1  2.5    24   304.156    0.000000    0.000000    1.000000
+   26   0   0  4.5  -1  2.5    17     0.000    0.000000    0.000000    1.000000
+   27   0   0  4.5  -1  2.5    19     0.000    0.000000    0.000000    1.000000
+   28   0   0  4.5  -1  2.5    21     0.000    0.000000    0.000000    1.000000
+   29   0   0  4.5  -1  2.5    23     0.000    0.000000    0.000000    1.000000
+   30   0   0  4.5  -1  2.5    25     0.000    0.000000    0.000000    1.000000
+   31   0   0  5.5   1  2.5    15   520.197    0.000000    0.000000    1.000000
+   32   0   0  5.5   1  2.5    17   520.197    0.000000    0.000000    1.000000
+   33   0   0  5.5   1  2.5    19   520.197    0.000000    0.000000    1.000000
+   34   0   0  5.5   1  2.5    21   520.197    0.000000    0.000000    1.000000
+   35   0   0  5.5   1  2.5    23   520.197    0.000000    0.000000    1.000000
+   36   0   0  5.5   1  2.5    25   520.197    0.000000    0.000000    1.000000
+ ITERM=1  IVR= 0  IVC= 0  LAMBDA= 0 NUMBER OF NONZERO MATRIX ELEMENTS      36
+ ITERM=1  IVR= 0  IVC= 0  LAMBDA= 1 NUMBER OF NONZERO MATRIX ELEMENTS      75
+ ITERM=1  IVR= 0  IVC= 0  LAMBDA= 2 NUMBER OF NONZERO MATRIX ELEMENTS     173
+ ITERM=1  IVR= 0  IVC= 0  LAMBDA= 3 NUMBER OF NONZERO MATRIX ELEMENTS     211
+ ITERM=1  IVR= 0  IVC= 0  LAMBDA= 4 NUMBER OF NONZERO MATRIX ELEMENTS     276
+ ITERM=1  IVR= 0  IVC= 0  LAMBDA= 5 NUMBER OF NONZERO MATRIX ELEMENTS     256
+ ITERM=1  IVR= 0  IVC= 0  LAMBDA= 6 NUMBER OF NONZERO MATRIX ELEMENTS     261
+ ITERM=1  IVR= 0  IVC= 0  LAMBDA= 7 NUMBER OF NONZERO MATRIX ELEMENTS     191
+ ITERM=1  IVR= 0  IVC= 0  LAMBDA= 8 NUMBER OF NONZERO MATRIX ELEMENTS     161
+ ITERM=1  IVR= 0  IVC= 0  LAMBDA= 9 NUMBER OF NONZERO MATRIX ELEMENTS      79
+ ITERM=1  IVR= 0  IVC= 0  LAMBDA=10 NUMBER OF NONZERO MATRIX ELEMENTS      51
+ ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS     1770
+ ** BASTST=.TRUE.; TEST OF SUBROUTINE BASIS
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:     0
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    5.5 %
+      CURRENT DATE:  Jan 23 16:53:56 2023
+ ===============================================================================

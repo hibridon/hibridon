@@ -273,7 +273,8 @@ subroutine get_file_numbers(file_name, numbers, num_header_lines)
             ! num_numbers = num_numbers + 1
         enddo
         if (pass == PASS_COUNT_NUMBERS) then
-            write(Output_Unit, *) file_name, ' : total num_tokens = ', num_tokens, ', total num_numbers = ', num_numbers
+            write(Output_Unit, "(a,a,i0,a,i0)") trim(file_name), ' : total num_tokens = ', num_tokens, &
+            ', total num_numbers = ', num_numbers
             allocate(numbers%array(num_numbers))
         endif
         if (pass == PASS_FILL_VECTOR) then
@@ -299,7 +300,7 @@ module m_diff
         vectors_differ = .FALSE.
 
         if ( size(va) /= size(vb) ) then
-            write(Error_Unit, *) "different number of numbers found in results files : ", &
+            write(Error_Unit, "(a,i0,a,i0)") "different number of numbers found in results files: ", &
                 & size(va), ' <> ', size(vb)
             vectors_differ = .TRUE.
             return
@@ -308,8 +309,9 @@ module m_diff
             do while(number_index <= size(va))
                 if(abs(va(number_index)) > min_significant_value ) then
                     if( abs(va(number_index) - vb(number_index))/max(abs(va(number_index)),1d-300) > tolerance ) then
-                        write(Error_Unit, *) "at number_index ", number_index, " : ", va(number_index), &
-                         " and ", vb(number_index), " differ by more than ", tolerance*100.0d0, " percent"
+                        write(Error_Unit, "(a,i0,a,e11.5,a,e11.5,a,f3.1,a)") "at number_index ", number_index, ": ",&
+                        va(number_index), " and ", vb(number_index), " differ by more than ", tolerance*100.0d0,&
+                        " percent"
                         vectors_differ = .TRUE.
                         !return
                     endif

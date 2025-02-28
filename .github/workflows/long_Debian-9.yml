@@ -1,0 +1,63 @@
+name: Long CI on Debian 9  # this basic continuous integration is expected to perform the quick main tests, es explained in https://github.com/hibridon/hibridon/issues/102 (it should cover main risks for main platform types) and its runners are expected to be always available to ensure pull requests and pushes are always validated in time.
+
+on:
+  schedule:
+    - cron:  '0 02 * * 1'    # Every mondays at 00:02
+env:
+  CTEST_OUTPUT_ON_FAILURE: "ON" # This way we don't need a flag to ctest
+  OMP_NUM_THREADS: "2"
+jobs:
+  build_and_test:
+    runs-on: debian-9
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Debug, Release]
+        compiler: [gfortran, ifort]
+    env:
+      ASAN_OPTIONS: "detect_leaks=${{ matrix.build_type == 'Release' && '0' || '1' }}" # Disable address sanitizer's memory leak detection in release builds
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Configure CMake
+      # LINK_TIME_OPTIMIZATION not operational on debian9 gfortran (gfortran is too old : /usr/bin/ar: CMakeFiles/hib.dir/ancou.F90.o: plugin needed to handle lto object)
+      # ENABLE_UNINIT_VAR_RUNTIME_DETECTOR works on ubuntu 20.04 but causes some tests to fail on debian 9:
+      # AddressSanitizer: FPE on unknown address 0x7f329c9bc3f8 (pc 0x7f329c9bc3f8 bp 0x6290000baf00 sp 0x7ffc8d5cf650 T0)
+      # 0 0x7f329c9bc3f7 in ATL_dtrsmKR_rk4 (/usr/lib/libatlas.so.3+0x10a3f7))
+      # As this seems to be a debian 9 only problem, we prefer to leave ENABLE_UNINIT_VAR_RUNTIME_DETECTOR on by default and turn if off only for this debian 9 configuration
+      run: |
+        mkdir -p ${{github.workspace}}/build && \
+        if [ "${{matrix.compiler}}" == 'ifort' ]
+        then
+          module load compilers/ifort/latest && \
+          /opt/cmake/cmake-3.23.0/bin/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_TESTING=ON -DCMAKE_Fortran_COMPILER=ifort -DBLA_VENDOR=Intel10_64lp -DLINK_TIME_OPTIMIZATION=OFF
+        else
+          /opt/cmake/cmake-3.23.0/bin/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_TESTING=ON -DLINK_TIME_OPTIMIZATION=OFF -DENABLE_UNINIT_VAR_RUNTIME_DETECTOR=OFF
+        fi
+
+    - name: Build
+      run: |
+        if [ "${{matrix.compiler}}" == 'ifort' ]
+        then
+          module load compilers/ifort/latest
+        fi
+        /opt/cmake/cmake-3.23.0/bin/cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
+
+    - name: catch build fail
+      run: |
+        if [ "${{matrix.compiler}}" == 'ifort' ]
+        then
+          module load compilers/ifort/latest
+        fi
+        /opt/cmake/cmake-3.23.0/bin/cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --verbose
+      if: failure()
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      run: |
+        if [ "${{matrix.compiler}}" == 'ifort' ]
+        then
+          module load compilers/ifort/latest
+        fi
+        /opt/cmake/cmake-3.23.0/bin/ctest --output-on-failure

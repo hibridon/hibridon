@@ -27,8 +27,6 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       # Non-specific options
       -std=legacy                               # Allow pre-Fortran 77 syntax (e.g. arbitrary length arrays)
       -fno-automatic                            # Put everything on the heap
-      $<$<PLATFORM_ID:Linux>:-march=native>     # Tune generated code for host's micro-architecture
-      $<$<PLATFORM_ID:Darwin>:-mtune=native>    # Tune generated code for host's micro-architecture (march not working on Darwin)
       $<$<PLATFORM_ID:Linux>:-mcmodel=large>    # Required on Linux
       # Config-specific options: RELEASE
       $<$<CONFIG:RELEASE>:-O3>                  # Optimization level at 3 for Release
@@ -51,7 +49,6 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
       -no-wrap-margin                             # Don't wrap output files
       # Config-specific options: RELEASE
       $<$<CONFIG:RELEASE>:-O3>                    # Optimization level at 3 for Release
-      $<$<CONFIG:RELEASE>:-xHost>                 # Generate instructions for the highest instruction set available on the compilation host processor
       $<$<CONFIG:RELEASE>:-init=zero>             # Init variables to zero/false/null
       # Config-specific options: DEBUG
       $<$<CONFIG:DEBUG>:-O0>                      # Disable all optimizations
@@ -76,5 +73,9 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     )
 # Intel (ifort)
 endif()
+
+
+# Install instructions
+install(TARGETS ${EXE_NAME} DESTINATION bin)
 
 endfunction(add_hibexe)

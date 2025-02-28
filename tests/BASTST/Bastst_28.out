@@ -1,0 +1,173 @@
+     BASTST                                      
+ DUMMY POTENTIAL FOR TESTING PURPOSES            
+ ==============================
+     *** Parameters:
+ JTOT1  =   0        JTOT2  =   5        JTOTD  =   1        JLPAR  =   0
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  48        IPRINT =   0
+ FSTFAC =  7.000     RINCR  =  1.000     RCUT   =  30.00     RENDAI =  5.500    
+ RENDLD =  5.500     RSTART =  5.500     SPAC   = 0.1400     TOLAI  =  1.000    
+ XMU    =  17.14    
+     *** 3SG-1SG system parameters:
+ J1MAX  =   4        J2MIN  =   0        J2MAX  =   2        IPOTSY2=   2
+ B1ROT  =  16.34     D1ROT  = 1.7028E-03 LAMBDA = 0.9199     GAMMA  =-5.4853E-02
+ B2ROT  =  59.32    
+ J1/J2: 
+     *** Flags:
+ AIRYFL= F    BASTST= T    BATCH = F    CHLIST= T    CSFLAG= F    FLAGHF= F
+ FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= F    NOPRIN= F    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= T    WAVEFL= F
+ WRPART= F    WRSMAT= F    WRXSEC= F    BOUNDC= F
+ ** Energies:      442.000000
+ NOUT: 20; J1/J2-OUT: 00  10  20  30  40  50  60  70  80  90  01  11  21  31  41  51  61  71  81  91  
+ INDOUT:    1   2   3
+ ==============================
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.00
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2023-01-17 at 16:50
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: 4f743c2a4c9e108a5be018899b63e84cfbd32023
+SYS: Darwin 22.2.0 x86_64
+COMPILER: /opt/intel/oneapi/compiler/2022.2.1/mac/bin/intel64/ifort
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+ 
+      Model Name: MacBook Pro
+      Model Identifier: MacBookPro14,3
+      Processor Name: Quad-Core Intel Core i7
+      Processor Speed: 2.9 GHz
+      Number of Processors: 1
+      Total Number of Cores: 4
+      L2 Cache (per Core): 256 KB
+      L3 Cache: 8 MB
+      Hyper-Threading Technology: Enabled
+      Memory: 16 GB
+ --------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ All publications resulting from use of the integrators included in the
+ Hibridon code must include the following reference:
+
+ D. E. Manolopoulos, J. Chem. Phys. 85, 6425 (1986); M. H. Alexander and D. E.
+ Manolopoulos, J. Chem. Phys. 80, 2044 (1987).
+
+ All publications involving the determination ofphotodissociation cross sections
+ must also include the following reference:
+
+ M. H. Alexander, Comput. Phys. Commun, 75, 87 (1993).
+
+ All publications investigating flux redistribution must include the following references:
+
+ M. H. Alexander, J. Chem. Phys. 95, 8931 (1991); D. E. Manolopoulos and
+ M. H. Alexander, J. Chem. Phys.  97, 2527 (1992).
+
+ All publications resulting from use of the Hibridon package must include
+ the following reference:
+
+ HIBRIDON is a package of programs for the time-independent quantum treatment
+ of inelastic collisions and photodissociation written by M. H. Alexander,
+ D. E.  Manolopoulos, H.-J. Werner, and B. Follmeg, with contributions by
+ P. F. Vohralik, D. Lemoine, G. Corey, B. Johnson, T. Orlikowski, A. Berning,
+ A. Degli-Esposti, C. Rist, P. Dagdigian, B. Pouilly, G. van der Sanden, M. Yang, F. de Weerd, S. Gregurick, J. Klos, and F. Lique
+ -----------------------------------------------------------------------------
+
+ ** LABEL:         BASTST                                      
+ ** POT NAME:  DUMMY POTENTIAL FOR TESTING PURPOSES            
+ ** DATE:      Jan 17 16:56:26 2023
+
+ *** WARNING:  NAIRY .NE. 1 BUT AIRYFL .EQ. .FALSE.
+ ** NMAX= 500  NAIRY= 500
+
+   **  CC  3SIGMA-1SIGMA ** RMU= 17.135000  E=  442.000  JTOT=   0  JLPAR= 1
+
+  LEVEL LIST SORTED BY ENERGY
+   N    J1    Fi    J2     EINT(CM-1)       COEFFS
+   1     1     1     0         0.000     -0.811  0.000 -0.585
+   2     0     1     0        31.577      0.000  0.000  1.000
+   3     2     1     0        32.505     -0.771  0.000 -0.637
+   4     1     2     0        33.356      0.000  1.000 -0.000
+   5     1     3     0        97.565     -0.585  0.000  0.811
+   6     3     1     0        97.718     -0.753  0.000 -0.658
+   7     2     2     0        98.674      0.000  1.000  0.000
+   8     4     1     0       195.510     -0.743  0.000 -0.669
+   9     2     3     0       195.616     -0.637  0.000  0.771
+  10     3     2     0       196.550      0.000  1.000  0.000
+  11     3     3     0       326.032     -0.658  0.000  0.753
+  12     4     2     0       326.860      0.000  1.000  0.000
+  13     1     1     2       355.932     -0.811  0.000 -0.585
+  14     0     1     2       387.509      0.000  0.000  1.000
+  15     2     1     2       388.437     -0.771  0.000 -0.637
+  16     1     2     2       389.288      0.000  1.000 -0.000
+  17     1     3     2       453.497     -0.585  0.000  0.811
+  18     3     1     2       453.650     -0.753  0.000 -0.658
+  19     2     2     2       454.606      0.000  1.000  0.000
+  20     4     3     0       488.697     -0.669  0.000  0.743
+  21     4     1     2       551.442     -0.743  0.000 -0.669
+  22     2     3     2       551.548     -0.637  0.000  0.771
+  23     3     2     2       552.482      0.000  1.000  0.000
+  24     3     3     2       681.964     -0.658  0.000  0.753
+  25     4     2     2       682.792      0.000  1.000  0.000
+  26     4     3     2       844.629     -0.669  0.000  0.743
+
+  CHANNEL LIST SORTED BY ENERGY
+   N    J1     Fi    J2    J12      L    EINT(CM-1)     COEFFS
+   1    1.0     1     0    1.0      1        0.000   -0.811  0.000 -0.585
+   2    0.0     1     0    0.0      0       31.577    0.000  0.000  1.000
+   3    2.0     1     0    2.0      2       32.505   -0.771  0.000 -0.637
+   4    1.0     3     0    1.0      1       97.565   -0.585  0.000  0.811
+   5    3.0     1     0    3.0      3       97.718   -0.753  0.000 -0.658
+   6    4.0     1     0    4.0      4      195.510   -0.743  0.000 -0.669
+   7    2.0     3     0    2.0      2      195.616   -0.637  0.000  0.771
+   8    3.0     3     0    3.0      3      326.032   -0.658  0.000  0.753
+   9    1.0     1     2    1.0      1      355.932   -0.811  0.000 -0.585
+  10    1.0     1     2    3.0      3      355.932   -0.811  0.000 -0.585
+  11    0.0     1     2    2.0      2      387.509    0.000  0.000  1.000
+  12    2.0     1     2    0.0      0      388.437   -0.771  0.000 -0.637
+  13    2.0     1     2    2.0      2      388.437   -0.771  0.000 -0.637
+  14    2.0     1     2    4.0      4      388.437   -0.771  0.000 -0.637
+  15    1.0     2     2    2.0      2      389.288    0.000  1.000 -0.000
+  16    1.0     3     2    1.0      1      453.497   -0.585  0.000  0.811
+  17    1.0     3     2    3.0      3      453.497   -0.585  0.000  0.811
+  18    3.0     1     2    1.0      1      453.650   -0.753  0.000 -0.658
+  19    3.0     1     2    3.0      3      453.650   -0.753  0.000 -0.658
+  20    3.0     1     2    5.0      5      453.650   -0.753  0.000 -0.658
+  21    2.0     2     2    1.0      1      454.606    0.000  1.000  0.000
+  22    2.0     2     2    3.0      3      454.606    0.000  1.000  0.000
+  23    4.0     3     0    4.0      4      488.697   -0.669  0.000  0.743
+  24    4.0     1     2    2.0      2      551.442   -0.743  0.000 -0.669
+  25    4.0     1     2    4.0      4      551.442   -0.743  0.000 -0.669
+  26    4.0     1     2    6.0      6      551.442   -0.743  0.000 -0.669
+  27    2.0     3     2    0.0      0      551.548   -0.637  0.000  0.771
+  28    2.0     3     2    2.0      2      551.548   -0.637  0.000  0.771
+  29    2.0     3     2    4.0      4      551.548   -0.637  0.000  0.771
+  30    3.0     2     2    2.0      2      552.482    0.000  1.000  0.000
+  31    3.0     2     2    4.0      4      552.482    0.000  1.000  0.000
+  32    3.0     3     2    1.0      1      681.964   -0.658  0.000  0.753
+  33    3.0     3     2    3.0      3      681.964   -0.658  0.000  0.753
+  34    3.0     3     2    5.0      5      681.964   -0.658  0.000  0.753
+  35    4.0     2     2    3.0      3      682.792    0.000  1.000  0.000
+  36    4.0     2     2    5.0      5      682.792    0.000  1.000  0.000
+  37    4.0     3     2    2.0      2      844.629   -0.669  0.000  0.743
+  38    4.0     3     2    4.0      4      844.629   -0.669  0.000  0.743
+  39    4.0     3     2    6.0      6      844.629   -0.669  0.000  0.743
+ILAM=   1  L1=  0 L2=  0 LTOT=  0  LAMNUM(ILAM) =      39
+ILAM=   2  L1=  0 L2=  2 LTOT=  2  LAMNUM(ILAM) =      67
+ILAM=   3  L1=  1 L2=  0 LTOT=  1  LAMNUM(ILAM) =      96
+ *** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS     202
+ ** BASTST=.TRUE.; TEST OF SUBROUTINE BASIS
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:     0
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    6.7 %
+      CURRENT DATE:  Jan 17 16:56:26 2023
+ ===============================================================================

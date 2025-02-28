@@ -12,8 +12,6 @@ use mod_cosout, only: allocate_cosout
 use mod_coiout, only: allocate_coiout
 use mod_cocent, only: allocate_cocent
 use mod_coeint, only: allocate_coeint
-use mod_coj12, only: allocate_coj12
-use mod_coj12p, only: allocate_coj12p
 use mod_covvl, only: allocate_covvl
 use mod_cofact, only: allocate_cofact
 
@@ -32,9 +30,6 @@ use mod_cobmat, only: allocate_cobmat, bmat
 use mod_cotq1, only: allocate_cotq1, tq1
 use mod_cotq2, only: allocate_cotq2, tq2
 use mod_cotq3, only: allocate_cotq3, tq3
-use mod_cojq, only: allocate_cojq, jq
-use mod_colq, only: allocate_colq, lq
-use mod_coinq, only: allocate_coinq, inq
 use mod_cojhld, only: allocate_cojhld, jhold
 use mod_coehld, only: allocate_coehld, ehold
 use mod_coinhl, only: allocate_coinhl, inhold
@@ -155,7 +150,6 @@ integer :: arg_index
 integer :: stat
 character(len=32) :: arg
 
-
 kmax = 0
 
 arg_index = 1
@@ -247,9 +241,6 @@ call allocate_cobmat(kairy)
 call allocate_cotq1(T_MATRIX_SIZE)
 call allocate_cotq2(T_MATRIX_SIZE)
 call allocate_cotq3(T_MATRIX_SIZE)
-call allocate_cojq(kmax)
-call allocate_colq(kmax)
-call allocate_coinq(kmax)
 call allocate_cojhld(kmax)
 call allocate_coehld(kmax)
 call allocate_coinhl(kmax)
@@ -293,8 +284,6 @@ call allocate_cosout(kout)
 call allocate_coiout(kout)
 call allocate_cocent(kmax)
 call allocate_coeint(kmax)
-call allocate_coj12(kmax)
-call allocate_coj12p(kmax)
 call allocate_covvl(klammx)
 call allocate_cofact(kfact)
 call allocate_coeig()
@@ -321,7 +310,7 @@ men = ken
 !  coupling coefficient routines:  factlg(i)=log(fact(i-1))
 call factlg(kfact)
 ! start scattering calculation
-call flow (z, w, zmat, amat, bmat, jq, lq, inq, jhold, ehold, &
+call flow (z, w, zmat, amat, bmat, jhold, ehold, &
            inhold, isc1, isc2, isc3, isc4, lsc1, &
            sc2, sc1, sc3, sc4, sc5, &
            sc6, sc7, sc8, sc9, tq1, tq2, tq3, men, mmax, mairy)

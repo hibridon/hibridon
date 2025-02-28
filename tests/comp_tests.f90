@@ -18,7 +18,7 @@ program comp_tests
     ! Extract file extension in ext string variable
     ext = ref(scan(trim(ref),".", BACK= .true.)+1:len(ref))
 
-    write(Output_Unit, *) 'comparing test file ', trim(test), ' to reference file ', trim(ref)
+    write(Output_Unit, "(4a)") 'comparing test file ', trim(test), ' to reference file ', trim(ref)
 
     ! Tolerance is set to 1%
     tolerance=0.01d0
@@ -52,6 +52,9 @@ program comp_tests
     case("stdout") ! Header ends at first occurence of "Hibridon>"
         num_header_lines(1) = get_first_occ_of("Hibridon>",ref)
         num_header_lines(2) = get_first_occ_of("Hibridon>",test)
+    case("out")
+        num_header_lines(1) = get_first_occ_of("** LABEL:",ref)
+        num_header_lines(2) = get_first_occ_of("** LABEL:",test)
     end select
 
     ! Compare numeric values between reference and test files

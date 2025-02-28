@@ -170,11 +170,11 @@ integer nvvlp, i, j
 !   dgelsd), and YLMC(S/A) is a stationary copy of the array.
 !   s/a stands for symmetric/anti-symmetric (of <v2'|V|v2>)
 double precision ylm(NANGLE, NVLM)
-double precision YLMCS(NANGLE, NVLM), YLMCA(NANGLE, NVLM)
+real(8), save ::  YLMCS(NANGLE, NVLM), YLMCA(NANGLE, NVLM)
 !
 !   Load Y_lm terms in the first call
-logical isfst
-data isfst /.true./
+logical, save :: isfst=.true.
+
 character*255 datfl
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
 emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
@@ -412,18 +412,17 @@ end
 !   The `regular' basis routine
 ! -------------------------------------------------------------------
 !module mod_bausr
-subroutine bausr(j, l, is, jhold, ehold, ishold, nlevel, &
+subroutine bausr(bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1, sc2, sc3, sc4, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 !
 use mod_hibasutil, only: vlmstp, iswap
 use mod_ancou, only: ancou_type, ancouma_type
+use mod_hitypes, only: bqs_type
 use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
 #include "pot_ch3he_vib_common.f90"
-integer, intent(out) :: j(:)
-integer, intent(out) :: l(:)
-integer, intent(out) :: is(:)
+type(bqs_type), intent(out) :: bqs
 integer, intent(out), dimension(:) :: jhold
 real(8), intent(out), dimension(:) :: ehold
 integer, intent(out), dimension(:) :: ishold
@@ -645,6 +644,7 @@ endif
 !
 !
 !   Set up channel and level list for scattering calculation
+call bqs%init(nmax)
 n = 0
 nlevel = 0
 do njk = 1, nlist
@@ -670,13 +670,14 @@ do njk = 1, nlist
 150         format (' *** # CHANNELS EXCEEDS LIMIT; ABORT ***')
         stop
       endif
-      is(n) = ishold(nlevel)
+      bqs%inq(n) = ishold(nlevel)
       eint(n) = lvleng
       v(n) = vi
       k(n) = ki
       ieps(n) = iep
-      j(n) = ji
-      l(n) = li
+      bqs%jq(n) = ji
+      bqs%lq(n) = li
+      bqs%length = n
       cent(n) = li * (li + 1)
     endif
   enddo
@@ -710,15 +711,16 @@ if (rcut .gt. 0d0) then
         nn = nn + 1
         eint(nn) = eint(i)
         v(nn) = v(n)
-        j(nn) = j(i)
+        bqs%jq(nn) = bqs%jq(i)
         ieps(nn) = ieps(i)
-        is(nn) = is(i)
+        bqs%inq(nn) = bqs%inq(i)
         cent(nn) = cent(i)
         k(nn) = k(i)
-        l(nn) = l(i)
+        bqs%lq(nn) = bqs%lq(i)
       endif
     enddo
     n = nn
+    bqs%length = n
   endif
 endif
 !
@@ -753,7 +755,7 @@ if (bastst .and. iprint .ge. 1) then
 311   format (3x, 'N', 4x, 'V', 4x, 'J', 4x, 'K', 3x, 'EPS', 4x, &
           'L', 4x, 'IND', 4x, 'EINT(CM-1)')
   do i = 1, n
-    print 315, i, v(i), j(i), k(i), ieps(i), l(i), is(i), &
+    print 315, i, v(i), bqs%jq(i), k(i), ieps(i), bqs%lq(i), bqs%inq(i), &
                eint(i)*ECONV
   enddo
   print *
@@ -792,7 +794,7 @@ do 160 ilm = 1, nlam
         lambda = lamasy(ilms)
         mu = muasy(ilms)
       endif
-      call vlmstp(j(i1), l(i1), j(j1), l(j1), jtot, &
+      call vlmstp(bqs%jq(i1), bqs%lq(i1), bqs%jq(j1), bqs%lq(j1), jtot, &
                   k(i1), k(j1), lambda, mu, &
                   ieps(i1), ieps(j1), vee, .false.)
       if (dabs(vee) .gt. EPS) then

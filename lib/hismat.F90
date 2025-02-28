@@ -142,12 +142,11 @@ goto 20
 return
 end
 subroutine sread (iadr, sreal, simag, jtot, jlpar, nu, &
-                  jq, lq, inq, inpack, jpack, lpack, &
-                  smt_file_unit, nmax, nopen, length, ierr)
+                  row_bqs, packed_bqs, &
+                  smt_file_unit, nmax, nopen, ierr)
 !     authors: h.j. werner and b. follmeg
 !     revision: 21-feb-2006 by mha
 !     major revision: 07-feb-2012 by q. ma
-!     added /coj12/ common block (p.dagdigian)
 !     current revision:  8-oct-2012 by q. ma
 !
 !     read real and imaginary parts of s-matrix together with
@@ -156,66 +155,71 @@ subroutine sread (iadr, sreal, simag, jtot, jlpar, nu, &
 !     if iadr > 0 read absolute
 !     if nopen = -1, the lower triangle is filled
 !     ------------------------------------------------------------
-use mod_coj12, only: j12
-use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12
 use mod_selb, only: ibasty
-implicit double precision (a-h,o-z)
-integer, intent(inout) :: nopen
-integer, intent(out) :: inpack(:)
-integer, intent(out) :: jpack(:)
-integer, intent(out) :: lpack(:)
+use mod_hitypes, only: bqs_type
+implicit none
+integer, intent(in) :: iadr
+real(8), intent(out) :: sreal(nmax,1)
+real(8), intent(out) :: simag(nmax,1)
+integer, intent(out) :: jtot
+integer, intent(out) :: jlpar
+integer, intent(out) :: nu
+type(bqs_type), intent(out) :: row_bqs
+type(bqs_type), intent(out) :: packed_bqs
 integer, intent(in) :: smt_file_unit
 integer, intent(in) :: nmax
-logical triang
-dimension sreal(nmax,1), simag(nmax,1), &
-     jq(1),lq(1),inq(1)
-character*8 csize8
+integer, intent(inout) :: nopen
+integer, intent(out) :: ierr
+logical :: triang
+character*8 :: csize8
+integer :: iaddr
+integer :: lrec, i, nnout, irow, icol, ioff
+
+call row_bqs%init(nmax)
+call packed_bqs%init(nmax)
+
 !
 ierr=0
 triang =.false.
-if (nopen .lt. 0) then
+if (nopen < 0) then
    triang = .true.
    nopen = iabs(nopen)
 end if
 !     on return:
 !
-!     the vectors jpack, lpack, inpack will hold the column indices of
+!     the packed_bqs will hold the column indices of
 !     the packed basis (dimension length)
 !
-!     the vectors jq, lq, inq will hold the row indices of the packed
+!     the vectors row_bqs%jq, row_bqs%lq, row_bqs%inq will hold the row indices of the packed
 !     basis (dimension nopen)
 !
 !     read next s-matrix header
 iaddr = iadr
-call readrc(iaddr,smt_file_unit,lrec,jtot,jlpar,nu,nopen,length,nnout)
-if (lrec .lt. 0) goto 900
-!
-read (smt_file_unit, end=900, err=950) (jpack(i), i=1, length), &
-     (lpack(i), i=1, length), (inpack(i), i=1, length)
-if (is_j12(ibasty)) &
-     read (smt_file_unit, end=900, err=950) (j12pk(i), i=1, length)
+call readrc(iaddr,smt_file_unit,lrec,jtot,jlpar,nu,nopen,packed_bqs%length,nnout)
+if (lrec < 0) goto 900
 
-
-
-!      write(6,*) 'SREAD'
-!      write(6,*) jtot,jlpar,length
-!      write(6,*) (j12pk(i), i=1, length)
-
-
-
+read (smt_file_unit, end=900, err=950) &
+     (packed_bqs%jq(i), i=1, packed_bqs%length), &
+     (packed_bqs%lq(i), i=1, packed_bqs%length), &
+     (packed_bqs%inq(i), i=1, packed_bqs%length)
+if (is_j12(ibasty)) then
+     read (smt_file_unit, end=900, err=950) (packed_bqs%j12(i), i=1, packed_bqs%length)
+end if
 !
 if (nnout .gt. 0) then
-   do 50 i = 1, length
-      jq(i) = jpack(i)
-      lq(i) = lpack(i)
-      inq(i)= inpack(i)
-      if (is_j12(ibasty)) j12(i) = j12pk(i)
+   do 50 i = 1, packed_bqs%length
+      row_bqs%jq(i) = packed_bqs%jq(i)
+      row_bqs%lq(i) = packed_bqs%lq(i)
+      row_bqs%inq(i)= packed_bqs%inq(i)
+      if (is_j12(ibasty)) then
+         row_bqs%j12(i) = packed_bqs%j12(i)
+      end if
 50    continue
-   nopen = length
+   nopen = packed_bqs%length
    if (triang) then
       ioff = 1
-      do 70 irow = 1, length
+      do 70 irow = 1, packed_bqs%length
          read (smt_file_unit, end=900, err=950) &
               (sreal(ioff + i, 1), i=0, irow - 1), &
               (simag(ioff + i, 1), i=0, irow - 1)
@@ -224,14 +228,14 @@ if (nnout .gt. 0) then
       goto 800
    end if
 !     read s-matrix
-   do 80  icol = 1, length
+   do 80  icol = 1, packed_bqs%length
       read (smt_file_unit, end=900, err=950) &
            (sreal(i, icol), i=1, icol)
       read (smt_file_unit, end=900, err=950) &
            (simag(i, icol), i=1, icol)
 80    continue
 !     fill lower triangle
-   do icol=1,length
+   do icol=1,packed_bqs%length
       do irow=1,icol
          sreal(icol,irow)=sreal(irow,icol)
          simag(icol,irow)=simag(irow,icol)
@@ -240,17 +244,19 @@ if (nnout .gt. 0) then
 !
 else if (nnout .le. 0) then
 !     here if you have written out columns of the s-matrix
-   read (smt_file_unit, end=900, err=950) (jq(i), i=1, nopen), &
-        (lq(i), i=1, nopen), (inq(i), i=1, nopen)
-   if (is_j12(ibasty)) read (smt_file_unit, end=900, err=950) &
-        (j12(i), i=1, nopen)
+   read (smt_file_unit, end=900, err=950) (row_bqs%jq(i), i=1, nopen), &
+        (row_bqs%lq(i), i=1, nopen), (row_bqs%inq(i), i=1, nopen)
+   if (is_j12(ibasty)) then
+      read (smt_file_unit, end=900, err=950) (row_bqs%j12(i), i=1, nopen)
+   end if
 !     now read columns of the s-matrix
-   do 140 icol = 1, length
+   do 140 icol = 1, packed_bqs%length
       read (smt_file_unit, end=900, err=950) &
            (sreal(i, icol), i=1, nopen), &
            (simag(i, icol), i=1, nopen)
 140    continue
 end if
+row_bqs%length = nopen
 !
 !     Read eight bytes "ENDOFSMT"
 800 read (smt_file_unit, end=900, err=950) csize8
@@ -267,7 +273,7 @@ end
 !
 !     ------------------------------------------------------------
 subroutine swrite (sreal, simag, jtot, jlpar, nu, &
-                   jq, lq, inq, iorder, inpack, jpack, lpack, &
+                   row_bqs, iorder, packed_bqs, &
                    epack, nfile, nmax, nopen)
 !  subroutine to write selected elements of s-matrix to file nfile
 !  author:  millard alexander
@@ -288,15 +294,13 @@ subroutine swrite (sreal, simag, jtot, jlpar, nu, &
 !    flaghf:    if .true., then system with half-integer spin
 !                if .false., then system with integer spin
 !    nu:        cs projection index (not used in cc calculation)
-!    jq:        channel rotational angular momenta
-!    lq:        channel orbital angular momenta
-!    inq:       additional quantum index of each channel
+!    row_bqs%jq:        channel rotational angular momenta
+!    row_bqs%lq:        channel orbital angular momenta
+!    row_bqs%inq:       additional quantum index of each channel
 !    note!!!   if flaghf = .true., then the true values
 !    of the rotational quantum numbers, the total angular momentum,
 !    and the coupled-states projection index are equal to the values
-!    stored in jq, jtot, and nu plus 1/2
-!    inpack,jpack,
-!    lpack, epack
+!    stored in row_bqs%jq, jtot, and nu plus 1/2
 !    nfile:     logical unit for output of s-matrices
 !    nmax:      maximum row dimension of matrices
 !    nopen:     number of channels
@@ -304,121 +308,127 @@ subroutine swrite (sreal, simag, jtot, jlpar, nu, &
 !  ------------------------------------------------------------------
 use mod_cosout, only: nnout, jout
 use mod_coeint, only: eint
-use mod_coj12, only: j12
-use mod_coj12p, only: j12pk
 use mod_hibasis, only: is_j12
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
-implicit double precision (a-h,o-z)
-integer ic, icol, ii, ir, irow, jtot, jlpar, length, nmax, &
-        nopen, nfile, nu, mmout
-integer jq, jpack, lq, lpack, inq, inpack, nchnid
-dimension sreal(nmax,nmax), simag(nmax,nmax), &
-          jq(1), lq(1), inq(1), jpack(1), lpack(1), &
-          epack(1), inpack(1), iorder(1)
+use mod_hitypes, only: bqs_type
+implicit none
+real(8), intent(inout) :: sreal(nmax,nmax)
+real(8), intent(inout) :: simag(nmax,nmax)
+integer, intent(in) :: jtot
+integer, intent(in) :: jlpar
+integer, intent(in) :: nu
+type(bqs_type), intent(in) :: row_bqs
+integer, intent(out) :: iorder(nopen)
+type(bqs_type), intent(out) :: packed_bqs
+real(8), intent(out) :: epack(nopen)
+integer, intent(in) :: nfile
+integer, intent(in) :: nmax
+integer, intent(in) :: nopen
+
+integer :: ic, icol, i, ii, ir, irow, length, mmout
+integer :: nchnid, nrecw
+
 integer int_t
 double precision dble_t
 !
 
+! by default, each channel is uses three parameters: row_bqs%j, row_bqs%l, row_bqs%inq
+nchnid = 3
 if (is_j12(ibasty)) then
-!     some basis have an additional channel parameter j12
-   nchnid = 4
-else
-!     by default, each channel is uses three parameters: j, l, ind
-   nchnid = 3
+   ! some basis have an additional channel parameter row_bqs%j12
+   nchnid = nchnid + 1
 end if
 !
-!     the vector iorder will point to the position in the unpacked basis
-!     of each state in the packed basis
+! the vector iorder will point to the position in the unpacked basis
+! of each state in the packed basis
 !
-!     the vector jpack will hold the rotational quantum numbers in the
-!     packed bas
-!
-!     the vector lpack will hold the orbital angular momenta of each
-!     channel in the packed basis
-!
-!     the vector epack will hold the channel energies in the packed basis
-!
-!     the vector inpack will hold the symmetry indices in the packed basis
-!     first sum over the unpacked states
+! the vector epack will hold the channel energies in the packed basis
+! first sum over the unpacked states
 !
 mmout = iabs(nnout)
+call packed_bqs%init(nopen)
 length = 0
-do 30 icol = 1, nopen
-!     now sum over the packed states, find labels
-   do 20  ii = 1, mmout
-      if (jq(icol) .eq. jout(ii) ) then
-!     here if match
+do icol = 1, nopen
+   ! now sum over the packed states, find labels
+   do ii = 1, mmout
+      if (row_bqs%jq(icol) == jout(ii) ) then
+         ! here if match
          length = length + 1
-         jpack(length) = jq(icol)
-         lpack(length) = lq(icol)
+         packed_bqs%jq(length) = row_bqs%jq(icol)
+         packed_bqs%lq(length) = row_bqs%lq(icol)
          epack(length) = eint(icol)
-         inpack(length) = inq(icol)
-         if (is_j12(ibasty)) j12pk(length) = j12(icol)
+         packed_bqs%inq(length) = row_bqs%inq(icol)
+         if (is_j12(ibasty)) packed_bqs%j12(length) = row_bqs%j12(icol)
          iorder(length) = icol
-         go to 30
+         exit
       end if
-20    continue
-30 continue
-!     calculate number of words that will be written
+   end do
+end do
+packed_bqs%length = length
+! calculate number of words that will be written
 nrecw = sizeof(int_t) * 7 + sizeof(int_t) * nchnid * length
-if(nnout.gt.0) then
+if(nnout > 0) then
    nrecw = nrecw + sizeof(dble_t) * length * (length + 1)
 else
    nrecw = nrecw + sizeof(int_t) * nchnid * nopen + &
         sizeof(dble_t) * 2 * length * nopen
 end if
 nrecw = nrecw + 8
-!     write out general information on next record
+! write out general information on next record
 write (nfile, err=950) nrecw, jtot, jlpar, nu, nopen, &
-     length ,nnout
-write (nfile, err=950) (jpack(i), i=1, length)
-write (nfile, err=950) (lpack(i), i=1, length)
-write (nfile, err=950) (inpack(i), i=1, length)
-if (is_j12(ibasty)) write (nfile, err=950) (j12pk(i), i=1, length)
-!     here we pack the s-matrix and print out just those elements for
-!     which the initial and final rotational quantum numbers correspond
-!     to an element in the array jout
-if (nnout .gt. 0) then
-!     the dimension of the packed s-matrix is length x length now pack
-!     the real part of the s-matrix
-   do 45  icol = 1, length
+     packed_bqs%length ,nnout
+write (nfile, err=950) (packed_bqs%jq(i), i=1, length)
+write (nfile, err=950) (packed_bqs%lq(i), i=1, length)
+write (nfile, err=950) (packed_bqs%inq(i), i=1, length)
+if (is_j12(ibasty)) then
+   write (nfile, err=950) (packed_bqs%j12(i), i=1, length)
+end if
+
+! here we pack the s-matrix and print out just those elements for
+! which the initial and final rotational quantum numbers correspond
+! to an element in the array jout
+if (nnout > 0) then
+   ! the dimension of the packed s-matrix is length x length now pack
+   ! the real part of the s-matrix
+   do icol = 1, length
       ic = iorder(icol)
-      do 40  irow = 1, length
+      do irow = 1, length
          ir = iorder(irow)
          sreal(irow,icol) = sreal(ir,ic)
          simag(irow,icol) = simag(ir,ic)
-40       continue
-45    continue
-!     write s-matrix into buffer
-   do 80  icol = 1, length
+      end do
+   end do
+   ! write s-matrix into buffer
+   do icol = 1, length
       write (nfile, err=950) (sreal(i, icol), i=1, icol)
       write (nfile, err=950) (simag(i, icol), i=1, icol)
-80    continue
-!     here if you want to print out columns of the s-matrix
-else if (nnout .le. 0) then
-   write (nfile, err=950) (jq(i), i=1, nopen)
-   write (nfile, err=950) (lq(i), i=1, nopen)
-   write (nfile, err=950) (inq(i), i=1, nopen)
-   if (is_j12(ibasty)) write (nfile, err=950) (j12(i), i=1, nopen)
-!     now write out columns of the s-matrix into buffer length is the
-!     number of columns of the s-matrix to save
-   do 140  ii = 1, length
+   end do
+   ! here if you want to print out columns of the s-matrix
+else
+   ASSERT (nnout <= 0)
+   write (nfile, err=950) (row_bqs%jq(i), i=1, nopen)
+   write (nfile, err=950) (row_bqs%lq(i), i=1, nopen)
+   write (nfile, err=950) (row_bqs%inq(i), i=1, nopen)
+   if (is_j12(ibasty)) write (nfile, err=950) (row_bqs%j12(i), i=1, nopen)
+   ! now write out columns of the s-matrix into buffer length is the
+   ! number of columns of the s-matrix to save
+   do ii = 1, length
       icol = iorder(ii)
       write (nfile, err=950) (sreal(i, icol), i=1, nopen), &
            (simag(i, icol), i=1, nopen)
-140    continue
+   end do
 end if
 write (nfile, err=950) 'ENDOFSMT'
 return
 !
-!     On error
+! On error
 950 write (0, *) '*** ERROR WRITING S-MATRIX FILE. ABORT.'
 call exit()
 end
-!     ------------------------------------------------------------
+! ------------------------------------------------------------
 !
-!     ------------------------------------------------------------
+! ------------------------------------------------------------
 subroutine wrhead(nfile,cdate, &
      ered,rmu,csflag,flaghf, &
      flagsu,twomol,nucros,jfirst,jfinal,jtotd,numin,numax,nud, &

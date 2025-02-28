@@ -8,6 +8,7 @@ env:
   CMAKE_BUILD_PARALLEL_LEVEL: "1" # disable parallel builds
   CTEST_OUTPUT_ON_FAILURE: "ON" # This way we don't need a flag to ctest
   CTEST_PARALLEL_LEVEL: "1"
+  OMP_NUM_THREADS: "2"
 jobs:
   build_and_test:
     runs-on: debian-9
@@ -33,7 +34,7 @@ jobs:
         if [ "${{matrix.compiler}}" == 'ifort' ]
         then
           module load compilers/ifort/latest && \
-          /opt/cmake/cmake-3.23.0/bin/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_TESTING=ON -DCMAKE_Fortran_COMPILER=ifort -DBLA_VENDOR=Intel10_64lp
+          /opt/cmake/cmake-3.23.0/bin/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_TESTING=ON -DCMAKE_Fortran_COMPILER=ifort -DBLA_VENDOR=Intel10_64lp -DLINK_TIME_OPTIMIZATION=OFF
         else
           /opt/cmake/cmake-3.23.0/bin/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_TESTING=ON -DLINK_TIME_OPTIMIZATION=OFF -DENABLE_UNINIT_VAR_RUNTIME_DETECTOR=OFF
         fi

@@ -102,24 +102,25 @@ return
 end
 
 !     ------------------------------------------------------------------
-subroutine ba2pi1sg(jchn, lchn, ischn, jlev, elev, islev, nlev, &
+subroutine ba2pi1sg(bqs, jlev, elev, islev, nlev, &
      nlevop, rcut, jtot, flaghf, flagsu, csflag, clist, bastst, &
      ihomo, nu, numin, jlpar, twomol, nchn, nmax, ntop, v2)
 use mod_2pi1sg
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cchn => cent
 use mod_coeint, only: echn => eint
-use mod_coj12, only: j12chn => j12
 use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, junkr, rspar 
 use mod_hibasutil, only: raise
 use mod_par, only: iprint
 use mod_ered, only: ered, rmu
+use mod_hitypes, only: bqs_type
 implicit none
+type(bqs_type), intent(out) :: bqs
 !
 !     The following arrays store the parameters of channels and levels.
-integer :: jchn(*), lchn(*), ischn(*), jlev(*), islev(*)
+integer :: jlev(*), islev(*)
 real(8) :: elev(*)
 !     The following parameters store the number of channels, opened
 !     levels and levels
@@ -175,14 +176,16 @@ do ilev = 1, nlev
    islev(ilev) = levs(ilev)%eps1 * levs(ilev)%fi1
    elev(ilev) = levs(ilev)%e
 end do
+call bqs%init(nmax)
 do i = 1, nchn
-   jchn(i) = jlev(chns(i)%ilev)
-   ischn(i) = islev(chns(i)%ilev)
-   j12chn(i) = chns(i)%tj12 / 2
-   lchn(i) = chns(i)%tl / 2
-   cchn(i) = dble((lchn(i) * (lchn(i) + 1)))
+   bqs%jq(i) = jlev(chns(i)%ilev)
+   bqs%inq(i) = islev(chns(i)%ilev)
+   bqs%j12(i) = chns(i)%tj12 / 2
+   bqs%lq(i) = chns(i)%tl / 2
+   cchn(i) = dble((bqs%lq(i) * (bqs%lq(i) + 1)))
    echn(i) = elev(chns(i)%ilev)
 end do
+bqs%length = nchn
 !
 !     Count number of asymtotically open levels
 nlevop = 0
@@ -423,8 +426,8 @@ parameter (icod=5, ircod=5)
 character*40 potfil
 save potfil
 
-integer, pointer :: j1max, npar, j2min, j2max, iptsy2
-real(8), pointer :: brot, aso, p, q, drot
+integer, pointer, save :: j1max, npar, j2min, j2max, iptsy2
+real(8), pointer, save :: brot, aso, p, q, drot
 j1max=>ispar(1); npar=>ispar(2); j2min=>ispar(3); j2max=>ispar(4); iptsy2=>ispar(5)
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
 

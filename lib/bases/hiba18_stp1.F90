@@ -5,7 +5,7 @@ contains
 !                  potential for symmetric top/atom scattering           *
 !                  this routine for sym top with no inversion doubling   *
 ! ----------------------------------------------------------------------
-subroutine bastp1(j, l, is, jhold, ehold, ishold, nlevel, &
+subroutine bastp1 (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, k, ieps, jtemp, ktemp, rcut, jtot, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
@@ -157,11 +157,13 @@ use mod_par, only: iprint
 use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
+use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
+type(bqs_type), intent(out) :: bqs
 type(ancouma_type), pointer :: ancouma
 logical flaghf, csflag, clist, flagsu, ihomo, bastst
-dimension j(1), l(1), jhold(1), ehold(1), is(1), k(1), &
+dimension jhold(1), ehold(1), k(1), &
           ieps(1), jtemp(1), ishold(1), ktemp(1)
 
 integer, pointer :: nterm, numpot, ipotsy, iop, jmax
@@ -389,6 +391,7 @@ if (bastst) then
 140   continue
 end if
 !  now set up channel and level list for scattering calculation
+call bqs%init(nmax)
 n = 0
 nlevel = 0
 do 170  njk = 1, nlist
@@ -411,12 +414,13 @@ do 170  njk = 1, nlist
             ' .GT. MAX DIMENSION OF',i5,' ABORT ***')
         stop
       end if
-      j(n) = ji
+      bqs%jq(n) = ji
       k(n) = ki
       ieps(n) = ietmp(njk)
-      is(n) = ietmp(njk) * ki
+      bqs%inq(n) = ietmp(njk) * ki
       eint(n) = ehold(njk)
-      l(n) = jtot
+      bqs%lq(n) = jtot
+      bqs%length = n
       cent(n) = jtot * (jtot + 1)
     end if
   else if (.not. csflag) then
@@ -438,12 +442,13 @@ do 170  njk = 1, nlist
           write (9, 150) n, nmax
           stop
         end if
-        is(n) = ietmp(njk) * ki
+        bqs%inq(n) = ietmp(njk) * ki
         k(n) = ki
         ieps(n) = ietmp(njk)
-        j(n) = ji
+        bqs%jq(n) = ji
         eint(n) = ehold(njk)
-        l(n) = li
+        bqs%lq(n) = li
+        bqs%length = n
         cent(n) = li * (li + 1)
       end if
 155     continue
@@ -473,16 +478,17 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and..not.boundc) then
 !  here if this channel is to be included
         nn = nn + 1
         eint(nn) = eint(i)
-        j(nn) = j(i)
+        bqs%jq(nn) = bqs%jq(i)
         ieps(nn) = ieps(i)
-        is(nn) = is(i)
+        bqs%inq(nn) = bqs%inq(i)
         cent(nn) = cent(i)
         k(nn) = k(i)
-        l(nn) = l(i)
+        bqs%lq(nn) = bqs%lq(i)
       end if
 300     continue
 !  reset number of channels
     n = nn
+    bqs%length = n
   end if
 end if
 !  return if no channels
@@ -521,8 +527,8 @@ if (clist) then
   do 330  i = 1, n
     ecm = eint(i) * econv
     if (bastst) &
-      write (6, 320) i, j(i), ieps(i), k(i), l(i), ecm
-      write (9, 320) i, j(i), ieps(i), k(i), l(i), ecm
+      write (6, 320) i, bqs%jq(i), ieps(i), k(i), bqs%lq(i), ecm
+      write (9, 320) i, bqs%jq(i), ieps(i), k(i), bqs%lq(i), ecm
 320       format (5i4, f10.3)
 330   continue
 end if
@@ -557,9 +563,9 @@ do 400 iterm = 1, nterm
     inum = 0
     do icol = 1, n
       do irow = icol, n
-        lrow = l(irow)
+        lrow = bqs%lq(irow)
         if (csflag) lrow = nu
-        call vlmstp (j(irow), lrow, j(icol), l(icol), jtot, &
+        call vlmstp (bqs%jq(irow), lrow, bqs%jq(icol), bqs%lq(icol), jtot, &
                      k(irow), k(icol), lb, mu, ieps(irow), &
                      ieps(icol), vee, csflag)
         if (vee .ne. zero) then
@@ -663,8 +669,8 @@ save potfil
 !  then the three variable names LAMMIN, LAMMAX, MPROJ, in that order
 #include "common/comdot.F90"
 
-integer, pointer :: nterm, numpot, ipotsy, iop, jmax
-real(8), pointer :: brot, crot, emax
+integer, pointer, save :: nterm, numpot, ipotsy, iop, jmax
+real(8), pointer, save :: brot, crot, emax
 nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=>ispar(4); jmax=>ispar(5)
 brot=>rspar(1); crot=>rspar(2); emax=>rspar(3)
 

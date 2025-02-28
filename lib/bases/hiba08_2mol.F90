@@ -3,7 +3,7 @@ module mod_hiba08_2mol
 contains
 ! sy2mol (sav2mol/ptr2mol) defines, save variables and reads             *
 !                  potential for 2 singlet sigma molecule scattering     *
-subroutine ba2mol (j, l, is, jhold, ehold, ishold, nlevel, nlevop, &
+subroutine ba2mol (bqs, jhold, ehold, ishold, nlevel, nlevop, &
                   j1, j2, j12, sc4, rcut, jtot, flaghf, flagsu, &
                   csflag, clist, bastst, ihomo, nu, numin, jlpar, &
                   nch, nmax, ntop, v2)
@@ -106,12 +106,14 @@ use mod_par, only: readpt, boundc
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_two, only: numj, nj1j2
+use mod_hitypes, only: bqs_type
 
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
+type(bqs_type), intent(out) :: bqs
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-dimension j(1), l(1), is(1), jhold(1), ehold(1), j12(1), j1(1), &
+dimension jhold(1), ehold(1), j12(1), j1(1), &
           j2(1), sc4(1), ishold(1)
 data ione, itwo, ithree / 1, 2, 3 /
 integer, pointer :: nterm, nsym
@@ -182,6 +184,7 @@ write (9, 95) rcut
           f8.2)
 nlam = nterm
 !  assign quantum numbers and energies for rotational levels
+call bqs%init(nmax)
 nlevop = 0
 nch = 0
 do 200  i = 1, numj
@@ -205,10 +208,11 @@ do 200  i = 1, numj
         if (nch .gt. nmax) go to 220
         j1(nch) = jj1
         j2(nch) = jj2
-        j(nch) = 10 * jj1 + jj2
+        bqs%jq(nch) = 10 * jj1 + jj2
         j12(nch) = jj12
-        l(nch) = ll
-        is(nch)=ijpar
+        bqs%lq(nch) = ll
+        bqs%inq(nch)=ijpar
+        bqs%length = nch
 !  now calculate the diagonal matrix elements of the hamiltonian
 !  first the internal rotational energy
         fj1 = jj1 * (jj1 + ione)
@@ -281,21 +285,22 @@ if (.not.flagsu .and. rcut .gt. 0.d0 .and..not.boundc) then
         nn = nn + 1
         eint(nn) = eint(i)
         cent(nn) = cent(i)
-        j(nn) = j(i)
+        bqs%jq(nn) = bqs%jq(i)
         j1(nn) = j1(i)
         j2(nn) = j2(i)
         j12(nn) = j12(i)
-        l(nn) = l(i)
+        bqs%lq(nn) = bqs%lq(i)
       end if
 265     continue
 !  reset number of channels
     nch = nn
+    bqs%length = nch
   end if
 end if
 !  return if no channels
 if (nch .eq. 0) return
 if (nu .eq. numin) then
-  ntop = max(nn, nlevop)
+  ntop = max(nch, nlevop)
 !  ntop is the maximum row dimension of all matrices passed in the
 !  call list of subroutines propag and soutpt.
 !  for fps make sure this is an odd number, for faster bank access.
@@ -351,20 +356,20 @@ do 360  ilam = 1, nterm
     do irow  =  icol,  nch
       !  determine and store angular coupling matrix elements
       call vlmtwo (ilam, jlpar, nsym, j1(irow), j2(irow), &
-                   j12(irow), l(irow), j1(icol), j2(icol), &
-                   j12(icol), l(icol), jtot, vee)
+                   j12(irow), bqs%lq(irow), j1(icol), j2(icol), &
+                   j12(icol), bqs%lq(icol), jtot, vee)
       if (vee .ne. 0) then
         i = i + 1
         inum = inum + 1
         if (bastst .and. iprint.gt.1) then
           write (6, 320) irow, icol, &
                    i, j1(irow), &
-                   j2(irow), j12(irow), l(irow), j1(icol), &
-                   j2(icol), j12(icol), l(icol), jtot, vee
+                   j2(irow), j12(irow), bqs%lq(irow), j1(icol), &
+                   j2(icol), j12(icol), bqs%lq(icol), jtot, vee
           write (9, 320) irow, icol, &
                    i, j1(irow), &
-                   j2(irow), j12(irow), l(irow), j1(icol), &
-                   j2(icol), j12(icol), l(icol), jtot, vee
+                   j2(irow), j12(irow), bqs%lq(irow), j1(icol), &
+                   j2(icol), j12(icol), bqs%lq(icol), jtot, vee
 320           format (i4, 11i5,1pe16.7)
         endif
         call ancouma%set_element(irow=irow, icol=icol, vee=vee)
@@ -386,14 +391,14 @@ if (clist) then
 endif
 do 400 i = 1 , nch
   if (clist) then
-    if (bastst) write (6,390) i, j1(i), j2(i), j12(i), l(i), &
+    if (bastst) write (6,390) i, j1(i), j2(i), j12(i), bqs%lq(i), &
                   eint(i) * econv, eint(i)
-    write (9,390) i, j1(i), j2(i), j12(i), l(i), &
+    write (9,390) i, j1(i), j2(i), j12(i), bqs%lq(i), &
                   eint(i) * econv, eint(i)
 390     format(i4, i5, i4, i4, i5, f9.3, 1pe15.5)
   endif
-  j(i) = 10 * j1(i) + j2(i)
-  is(i) = nsym * j12(i)
+  bqs%jq(i) = 10 * j1(i) + j2(i)
+  bqs%inq(i) = nsym * j12(i)
 400 continue
 return
 end
@@ -534,8 +539,8 @@ character*60 filnam, line, potfil, filnm1
 save potfil
 #include "common/comdot.F90"
 
-integer, pointer :: nterm, nsym
-real(8), pointer :: brot, drot, hrot
+integer, pointer, save :: nterm, nsym
+real(8), pointer, save :: brot, drot, hrot
 nterm=>ispar(1); nsym=>ispar(2)
 brot=>rspar(1); drot=>rspar(2); hrot=>rspar(3)
 

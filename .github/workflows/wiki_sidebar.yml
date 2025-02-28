@@ -1,0 +1,24 @@
+name: Update Wiki sidebar menu
+
+on:
+  gollum
+
+jobs:
+  genmenu:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clone hibridon.wiki repo
+      uses: actions/checkout@v3
+      
+    - name: Clone wiki repository
+      uses: actions/checkout@v3
+      with:
+        repository: hibridon/hibridon.wiki
+    - name: Install github-wiki-sidebar
+      run: npm install github-wiki-sidebar -g
+      
+    - name: Generate sidebar menu
+      run: |
+        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        github-wiki-sidebar --silent --git-push
