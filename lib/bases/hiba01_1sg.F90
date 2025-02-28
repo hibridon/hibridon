@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 ! sy1sg (sav1sg/ptr1sg) defines, saves variables and reads              *
 !                  potential for singlet sigma scattering               *
 !************************************************************************
@@ -109,14 +110,14 @@ use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar, convert_ispar_to_mat
-use mod_cosysr, only: isrcod, junkr, rspar, convert_rspar_to_mat
-use constants, only: econv, xmconv, ang2c
+use mod_cosysi, only: ispar, convert_ispar_to_mat
+use mod_cosysr, only: convert_rspar_to_mat
+use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
+use mod_parbas, only: maxvib, ntv, ivcol, ivrow, lammin, lammax
+use mod_par, only: boundc
 use mod_ered, only: ered, rmu
-use mod_skip, only: nskip, iskip
+use mod_skip, only: nskip
 use mod_vib, only: nvib=>nvibs, ivib=>ivibs
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -152,6 +153,12 @@ real(8), dimension(4, maxvib) :: rpar
 integer, dimension(2, maxvib) :: iscod
 integer, pointer :: nterm, nvmin, nvmax
 nterm=>ispar(1); nvmin=>ispar(2); nvmax=>ispar(3)
+
+UNUSED_DUMMY(sc1)
+UNUSED_DUMMY(sc2)
+UNUSED_DUMMY(sc3)
+UNUSED_DUMMY(sc4)
+
 call convert_rspar_to_mat(4,maxvib, rpar)
 call convert_ispar_to_mat(2, maxvib, 4, iscod)
 zero = 0.d0
@@ -606,15 +613,13 @@ subroutine sy1sg (irpot, readpt, iread)
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
-use mod_cosysr, only: isrcod, junkr, rcod => rspar
+use mod_cosysr, only: isrcod, rcod => rspar
 use mod_par, only: ihomo
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_selb, only: ibasty
-use mod_skip, only: nskip, iskip
+use mod_parbas, only: maxvib, lammin, lammax, mproj
+use mod_skip, only: nskip
 use mod_vib, only: nvib => nvibs, ivib => ivibs
 use mod_hiutil, only: gennam, get_token
 implicit none
@@ -627,12 +632,12 @@ logical existf
 character*1 dot
 character*4 char
 character*(*) fname
-character*60 filnam, line, potfil, filnm1
+character*60 filnam, line, potfil
+character*68 filnm1
 
 save potfil
 !equivalence(iscod(1),nterm),(iscod(2),nvibmn),(iscod(3),nvibmx)
 #include "common/comdot.F90"
-
 
 !     number and names of system dependent parameters
 !  set default values for singlet-sigma scattering

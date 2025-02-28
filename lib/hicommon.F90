@@ -4,6 +4,13 @@
 !     Physical constants
 module constants
 implicit none
+real(8), parameter :: zero = 0.0d0
+real(8), parameter :: half = 0.5d0
+real(8), parameter :: one  = 1.0d0
+real(8), parameter :: two  = 2.0d0
+real(8), parameter :: four = 4.0d0
+real(8), parameter :: rad = 57.29577951308232d0  ! number of angular degrees in a radian
+
 real(8), parameter :: pi=dacos(-1d0)
 real(8), parameter :: s4pi = sqrt( 4.d0 * pi )  ! normalization factor for isotropic potential
 !     Below are constants used in Hibridon 4.4

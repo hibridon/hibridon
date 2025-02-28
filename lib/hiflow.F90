@@ -665,7 +665,7 @@ call soutpt (z, w, zmat, amat, &
              wrsmat, wrpart, prpart, wrxsec, prxsec, twomol, &
              nucros, firstj, nlevel, nlevop, nopen, nchtop, &
              twojlp, jlpold)
-cpuout = cpuout + second() - t11
+cpuout = cpuout + get_elapsed_seconds() - t11
 
 !  on return from soutpt:
 !     if wrxsec,prxsec, wrpart, and prpart are all .false., the upper-left

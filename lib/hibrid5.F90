@@ -2156,6 +2156,7 @@ subroutine tsqmat(tsq,sreal,simag,row_bqs, &
 use mod_hibasis, only: is_j12
 use mod_selb, only: ibasty
 use mod_hitypes, only: bqs_type
+use constants, only: zero, one
 implicit none
 real(8), intent(out) :: tsq(nmax, nmax)
 real(8), intent(in) :: sreal(nmax, nmax)
@@ -2170,8 +2171,6 @@ complex*8 :: t
 real(8) :: t2
 logical :: diag
 !
-real(8), parameter :: zero = 0.0d0
-real(8), parameter :: one = 1.0d0
 do icol = 1, col_bqs%length
    in1 = col_bqs%inq(icol)
    j1 = col_bqs%jq(icol)

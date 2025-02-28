@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba02_2sg
 contains
 ! sy2sg (sav2sg/ptr2sg) defines, saves variables and reads          *
@@ -114,14 +115,14 @@ use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use mod_hibasutil, only: vlm2sg
-use constants, only: econv, xmconv, ang2c
+use constants, only: econv, xmconv
 use mod_par, only: iprint
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
+use mod_parbas, only: lammin, lammax, mproj
+use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
 
@@ -141,6 +142,10 @@ integer, pointer :: nterm, nrmax, npar, isym, igu, isa
 real(8), pointer :: brotsg, gsr, drotsg, hrotsg
 nterm=>ispar(1); nrmax=>ispar(2); npar=>ispar(3); isym=>ispar(4); igu=>ispar(5); isa=>ispar(6)
 brotsg=>rspar(1); gsr=>rspar(2); drotsg=>rspar(3); hrotsg=>rspar(4)
+
+UNUSED_DUMMY(sc2)
+UNUSED_DUMMY(sc3)
+UNUSED_DUMMY(sc4)
 
 half = 0.5d0
 zero = 0.d0
@@ -590,11 +595,11 @@ use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use mod_par, only: ihomo
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_skip, only: nskip, iskip
+use mod_parbas, only: lammin, lammax, mproj
+use mod_skip, only: nskip
 use mod_hiutil, only: gennam, get_token
 implicit none
 !  subroutine to read in system dependent parameters for doublet-sigma
@@ -636,7 +641,8 @@ integer, intent(in) :: iread
 integer :: j, l, lc
 logical existf
 character*(*) fname
-character*60 line,filnam,potfil, filnm1
+character*60 :: line,filnam,potfil
+character*68 :: filnm1
 character*1 dot
 save potfil
 #include "common/comdot.F90"

@@ -1,3 +1,4 @@
+#include "unused.h"
 module mod_hibasutil
 contains
 !     ------------------------------------------------------------------
@@ -26,8 +27,7 @@ return
 end
 	
 ! ----------------------------------------------------------------------
-subroutine prmatp (jp, lp, j, l, jtot, kp, k, lambda, mu, &
-	vprm, csflag)
+subroutine prmatp (jp, lp, j, l, jtot, kp, k, lambda, mu, vprm, csflag)
 !  subroutine to calculate primitive v-lambda matrix elements for close-coupled
 !  treatment of collisions of a symmetric top with an atom
 !  the primitive cc and cs matrix elements are given in eqs. (26) and (32),
@@ -107,8 +107,7 @@ vprm = ( (-1) ** iphase) * x * sqrt(xnorm)
 return
 end
 ! ----------------------------------------------------------------------
-subroutine prmstp (jp, lp, j, l, jtot, kp, k, lambda, mu, &
-	vprm, csflag)
+subroutine prmstp (jp, lp, j, l, jtot, kp, k, lambda, mu, vprm, csflag)
 !  subroutine to calculate primitive v-lambda matrix elements for close-coupled
 !  treatment of collisions of a symmetric top with an atom
 !  the primitive cc and cs matrix elements are given in eqs. (26) and (32),
@@ -187,8 +186,7 @@ return
 end
 ! ----------------------------------------------------------------------
 subroutine prmstpln (jp, lp, j2p, j12p, j, l, j2, j12, &
-	jtot, kp, k, lambda1, mu1,lambda2, mu2, &
-		vprm, csflag)
+  jtot, kp, k, lambda1, mu1,lambda2, mu2, vprm, csflag)
 !  subroutine to calculate primitive v-lambda matrix elements for
 !  close-couple
 !  treatment of collisions of a symmetric top with a linear molecule
@@ -233,10 +231,27 @@ subroutine prmstpln (jp, lp, j2p, j12p, j, l, j2, j12, &
 !
 ! -----------------------------------------------------------------------
 use mod_hiutil, only: xf3j, xf6j, f9j
+use constants, only: half, one, two, zero
 implicit double precision (a-h,o-z)
-logical csflag
-data half, one, two, zero, four / 0.5d0, 1.d0, 2.d0, 0.d0, 4.d0/
-data pi /3.1415926536d0 /
+integer, intent(in) :: jp
+integer, intent(in) :: lp
+integer, intent(in) :: j2p
+integer, intent(in) :: j12p
+integer, intent(in) :: j
+integer, intent(in) :: l
+integer, intent(in) :: j2
+integer, intent(in) :: j12
+integer, intent(in) :: jtot
+integer, intent(in) :: kp
+integer, intent(in) :: k
+integer, intent(in) :: lambda1
+integer, intent(in) :: mu1
+integer, intent(in) :: lambda2
+integer, intent(in) :: mu2
+real(8), intent(out) :: vprm
+logical, intent(in) :: csflag
+
+UNUSED_DUMMY(csflag)
 vprm = zero
 xjp = dble(jp)
 xj = dble(j)
@@ -315,7 +330,7 @@ double precision function rotham(ji, ki, jf, kf)
 !  author:  paul dagdigian
 !  current revision date:  16-aug-2009
 !  -----------------------------------------------------------------------
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: rspar
 implicit double precision (a-h,o-z)
 
 real(8), pointer :: arot, brot, crot, emax
@@ -361,7 +376,7 @@ double precision function rotham1(ji, ki, jf, kf)
 !  author:  paul dagdigian
 !  current revision date:  18-sep-2017
 !  -----------------------------------------------------------------------
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: rspar
 implicit double precision (a-h,o-z)
 
 real(8), pointer :: arot, brot, crot, emax
@@ -396,8 +411,7 @@ return
 end
 
 !  -----------------------------------------------------------------------
-subroutine vlm2sg (jp, lp, j, l, jtot, lambda, iepsp, ieps, &
-	v, csflag)
+subroutine vlm2sg (jp, lp, j, l, jtot, lambda, iepsp, ieps, v, csflag)
 !  subroutine to calculate v-lambda matrices for close-coupled and
 !  coupled-states treatments of collisions of a molecule in a 2sigma
 !  electronic state
@@ -483,8 +497,7 @@ v = iphase * x * sqrt(xnorm)
 return
 end
 ! --------------------------------------------------------------------
-subroutine vlmstp (jp, lp, j, l, jtot, kp, k, lambda, mu, &
-	iepsp, ieps, v, csflag)
+subroutine vlmstp (jp, lp, j, l, jtot, kp, k, lambda, mu, iepsp, ieps, v, csflag)
 !  subroutine to calculate v-lambda matrices for close-coupled or coupled-stat
 !  treatment of collisions of a symmetric top with an atom
 !  the primitive cc and cs matrix elements are given in eqs. (26) and (32),
@@ -573,9 +586,9 @@ return
 end
 ! --------------------------------------------------------------------
 subroutine vlmstpln (jp, lp, j, l, j2p, j2, &
-	j12p, j12, jtot, kp, k, lambda, mu, &
-	lambda2, mu2, &
-	iepsp, ieps, v, csflag)
+  j12p, j12, jtot, kp, k, lambda, mu, &
+  lambda2, mu2, &
+  iepsp, ieps, v, csflag)
 
 !  subroutine to calculate v-lambda matrices for close-coupled or
 !  coupled-state treatment of collisions of a symmetric top with an atom

@@ -980,6 +980,7 @@ use mod_hibasis, only: is_j12, is_twomol
 use mod_selb, only: ibasty
 use mod_hiutil, only: xf3j
 use mod_hitypes, only: bqs_type
+use constants, only: zero, one, two
 implicit none
 integer, intent(in) :: j1
 integer, intent(in) :: in1
@@ -1005,7 +1006,6 @@ integer, intent(in) :: iq2min
 integer, intent(in) :: iq2max
 integer, intent(in) :: iq3
 
-real(8), parameter :: zero=0.0d0, one=1.0d0, two=2.0d0
 real(8), parameter :: sqpi=1.772453850905516d0
 integer :: iang, ii, ilab, iyof, j12_f, j12_i, jlab
 integer :: j1_f, j1_fp, j1_i, j1_ip,      j1p
@@ -1334,17 +1334,13 @@ subroutine plm(m,lmax,theta,p,incp)
 !
 !  generates alexander-legendre polynomials for m.le.l.le.lmax
 !
+use constants, only: zero, one, two, rad
 implicit none
 integer, intent(in) :: m
 integer, intent(in) :: lmax
 real(8), intent(in) :: theta
 real(8), intent(out) :: p(lmax*incp)
 integer, intent(in) :: incp
-
-real(8), parameter :: zero = 0.d0
-real(8), parameter :: one = 1.d0
-real(8), parameter :: two = 2.d0
-real(8), parameter :: rad = 57.29577951308232d0
 
 real(8) :: x, y, pm1, pm2, pp, rat, ai, al, al2
 integer :: i, imax, l, ll, low

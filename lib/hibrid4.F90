@@ -416,6 +416,7 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
 use mod_hivector, only: dset
 use mod_hitypes, only: rbesself_type, bqs_type
+use constants, only: zero
 implicit none
 integer, intent(out) :: jtot
 integer, intent(out) :: jlpar
@@ -438,7 +439,6 @@ character :: csize8(8), csize4(4)
 integer :: i
 integer :: nopsq
 integer :: nrecs
-real(8), parameter :: zero=0.d0
 ! integer, parameter :: izero=0
 
 !

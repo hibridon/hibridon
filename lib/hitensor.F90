@@ -81,6 +81,7 @@ public :: pjacob, redrot
 contains
 
 function pjacob (n,a,b,x)
+use constants, only: zero, one, two, half
 implicit none
 integer, intent(in) :: n
 real(8), intent(in) :: a, b, x
@@ -90,10 +91,6 @@ real(8), intent(in) :: a, b, x
 !     Abramowitz and Stegun eq. (22.7.1)
 !     -----------------------------------------------------------------
 !
-real(8), parameter :: zero = 0.0d0
-real(8), parameter :: half = 0.5d0
-real(8), parameter :: one  = 1.0d0
-real(8), parameter :: two  = 2.0d0
 real(8) :: pjacob
 
 integer :: k
@@ -129,6 +126,7 @@ return
 end function pjacob
 
 function redrot (rj,rk,rm,beta)
+use constants, only: zero, half, one, two
 !
 !     -----------------------------------------------------------------
 !     This function uses eq. (4.1.23) of Edmonds
@@ -143,10 +141,6 @@ real(8), intent(in) :: rk
 real(8), intent(in) :: rm
 real(8), intent(in) :: beta
 real(8) :: redrot
-real(8), parameter :: zero = 0.0d0
-real(8), parameter :: half = 0.5d0
-real(8), parameter :: one  = 1.0d0
-real(8), parameter :: two  = 2.0d0
 !
 !     half integer angular momenta
 !
@@ -427,6 +421,7 @@ subroutine geom_apse_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax,
   use mod_tensor_ang, only: ang1, ang2, dang
   use mod_hiutil, only: xf3j
   use mod_hitypes, only: bqs_type
+  use constants, only: zero, one
 implicit none
   class(geom_apse_frame_type) :: this
   integer :: j1
@@ -452,7 +447,6 @@ complex(8) :: fak2(400)
 complex(8) :: fak3(400)
 integer :: ilab1(400)
 complex(8) :: yy,tmat
-real(8), parameter :: zero=0.0d0, one=1.0d0
 logical elastc
 
 integer :: iang, ilab, ii, iyof, j1p, j2p, jlab, l1, l2, ll, llmax, mj1, mj1p, mj2, mj2p, ml2p
@@ -2535,7 +2529,7 @@ lmax = nint(xjtot+j2mx+spin+1.d0)
 lmaxp = nint(xjtotp+j2mxp+spin+1.d0)
 kpmin=jminjp
 kmin=abs(kpmin-n)
-t1=second()
+t1=get_elapsed_seconds()
 do 70 icol=1,packed_bqs%length
 ! modify next if statement in include test for in2 (pjd)
 !      if(packed_bqs%inq(icol).ne.in2) goto 70
@@ -2551,7 +2545,7 @@ kkp=kkp+1
 xkp=kp
 65 f6a(kkp,j2,lmax-l2) = xf6j(xkp,xjtotp,xjtot,xl2,xj2,xj2)
 70 continue
-t6j=t6j+second()-t1
+t6j = t6j + get_elapsed_seconds() - t1
 kpmx=kpmax
 ! clear iadr array (pjd)
 do 79 j=0,jmx
@@ -2612,7 +2606,7 @@ do 400 irow = 1, packed_bqs%length
    kmax=nint(2*xj1)
    factor=denrow*facjjp
    ll=0
-   t1=second()
+   t1 = get_elapsed_seconds()
 do 100 l1p=l1pmin,l1pmax,2
    ll=ll+1
    xl1p = l1p
@@ -2640,7 +2634,7 @@ do 100 l1p=l1pmin,l1pmax,2
    if(mod(ipower,2).ne.0) f9pha(ik) = -switch
 90 continue
 100 continue
-   t9j=t9j+second()-t1
+   t9j = t9j + get_elapsed_seconds() - t1
 !
 ! compute all transitions separately, unlike in SIGK
 do 300 icol = 1, packed_bqs%length

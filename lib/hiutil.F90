@@ -38,6 +38,7 @@
 ! NB cstart ultrix for fortran rather than c utilities
 !*********************************************************************
 #include "assert.h"
+#include "unused.h"
 #if defined(HIB_UNIX_XLF)
 @proc ss fixed(132)
 #endif
@@ -602,31 +603,32 @@ te=result
 return
 end
 !------------------------------------------------------------------------
-function second()
-double precision second
+function get_elapsed_seconds()
+double precision get_elapsed_seconds
 #if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_PGI) || defined(__GFORTRAN__)
-real*4 te
-call cpu_time(te)
-second=te
+  real*4 te
+  call cpu_time(te)
+  get_elapsed_seconds=te
 #elif defined(HIB_UNIX_XLF)
-second=timef()*1000d0
+  get_elapsed_seconds=timef()*1000d0
 #elif defined(HIB_ULTRIX_DEC)
-double precision function second()
-implicit double precision (a-h,o-z)
-real et(2)
-fe=etime(et(1),et(2))
-second=fe
+  double precision function get_elapsed_seconds()
+  implicit double precision (a-h,o-z)
+  real et(2)
+  fe=etime(et(1),et(2))
+  get_elapsed_seconds=fe
 #elif defined(__G95__)
-real*4 tarray(2), result
-call dtime(tarray,result)
-second=tarray(1)
+  real*4 tarray(2), result
+  call dtime(tarray,result)
+  get_elapsed_seconds=tarray(1)
 #else
 #error "This fortran compiler is not handled in this function"
 #endif
-return
+  return
 end
 !------------------------------------------------------------------------
-subroutine gettim(sec,time)
+subroutine gettim(sec, time)
+implicit none
 !
 !  author: b. follmeg
 !  revision: 30-nov-2007 by mha
@@ -637,9 +639,11 @@ subroutine gettim(sec,time)
 !  on input:  sec   -> seconds
 !  on output: time  -> string containing time (must have been dimensioned
 !                      as character*10 at least)
-integer ihour, imin, isec, imilli
-double precision sec
-character*10 time
+real(8), intent(in) :: sec
+character*10, intent(out) :: time
+
+integer ihour, imin, isec, isecn
+! integer :: imilli
 !$$$      isecn=1000*sec
 !$$$      imilli=mod(isecn,1000)
 !$$$*     write(6,*) 'sec, isec, isecn, imilli', sec, isec, isecn, imilli
@@ -1687,10 +1691,24 @@ function tf6j(two_ja, two_jb, two_je, two_jd, two_jc, two_jf)
 !     Modified from xf6j by Q. Ma
 !     ------------------------------------------------------------------
 use mod_cofact, only: si
-implicit real(8) (a-h,o-z)
+use constants, only: zero
+implicit none
 integer, intent(in) :: two_ja, two_jb, two_je, two_jd, two_jc, &
      two_jf
-real(8), parameter :: tol=1d-10, zero=0d0, one=1d0, two=2d0
+real(8) :: tf6j
+real(8) :: delta
+real(8) :: x, xa, xb, xchi
+
+integer :: iabe, idce, iacf, idbf
+real(8) :: abe, dce, acf, dbf
+
+integer :: iabdc, iaedf, ibecf
+real(8) :: abdc, aedf, becf
+
+integer :: minchi, maxchi
+integer :: i2a, i2b, i2c, i2d, i2e, i2f
+integer :: j1, j2, j3, j4
+integer :: ichi, ii, ipower
 x=zero
 tf6j = 0d0
 if (tf_triang_fail(two_ja, two_jb, two_je)) return
@@ -1882,7 +1900,7 @@ integer, dimension(n) :: ifail
 ! real(8), dimension(lda, n) :: eye
 real(8) :: sum_for_nan_detection
 ! real(8) :: dummy
-integer :: i
+! integer :: i
 
 ! eye = a(1:n,:)
 ! eye = 0
@@ -1961,7 +1979,7 @@ integer, intent(out) :: info
 ! real(8), dimension(lda, n) :: eye
 real(8) :: sum_for_nan_detection
 ! real(8) :: dummy
-integer :: i
+! integer :: i
 
 ! eye = a(1:n,:)
 ! eye = 0

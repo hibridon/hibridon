@@ -166,6 +166,7 @@ use mod_ered, only: ered, rmu
 use mod_pmat, only: rtmn, rtmx, iflag
 use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
 use mod_hivector, only: dset
+use constants, only: zero, one, two
 implicit none
 real(8) :: second
 real(8), dimension(*), intent(out) :: w
@@ -195,9 +196,6 @@ type(igrovec_type_block), pointer :: blocki
 type(dgrovec_type_block), pointer :: blockd
 #endif
 
-real(8), parameter :: zero = 0.d0
-real(8), parameter :: one = 1.d0
-real(8), parameter :: two = 2.d0
 
 integer :: icol, icolpt, ioff, ipt, irowpt, iwpt, ncol, nmaxp1
 real(8) :: r2, twormu, vv0, wmax, wmin
@@ -207,7 +205,7 @@ real(8) :: r2, twormu, vv0, wmax, wmin
 !     if (r.le.3.41) icount=0
 !ABER
 !  calculate coefficients of each angular term
-cpupot=cpupot-second()
+cpupot = cpupot - get_elapsed_seconds()
 call pot( vv0, r)
 
 !  vv0 is the isotropic term in the potential
@@ -360,7 +358,7 @@ rtmn = r
 rtmx = r
 90 continue
 
-cpupot=cpupot+second()
+cpupot = cpupot + get_elapsed_seconds()
 ! here for 2s-2p scattering
 ! fill in upper triangle of w matrix
 !  first fill in upper half of original matrix
@@ -2182,6 +2180,7 @@ use mod_hismat, only: sread, rdhead
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam
 use mod_hitypes, only: bqs_type
+use constants, only: zero
 implicit none
 character*(*), intent(in) :: fname1
 character*(*), intent(in) :: fname2
@@ -2202,7 +2201,6 @@ integer :: jfinal, jfirst, jlpar1, jlpar2, jm, jtot1, jtot2, jtotd
 integer :: length, lenx1, lenx2
 integer :: n, ncol, nlevel, nlevop, nnout1, nnout2, nopen1, nopen2, nu1, nu2, nud, numax, numin
 real(8) :: rmu1, rmu2
-real(8), parameter :: zero = 0
 character*20 cdate1,cdate2
 character*40 xnam1,xnam2
 character*48 potnam1,potnam2,label1,label2
