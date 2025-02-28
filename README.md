@@ -86,7 +86,7 @@ add_hibexe(NH3-H2.exe "/home/myuser/my_pots/pot_nh3h2.F90" "kmax") # NH3-H2
 
 Adapt this example to suit your needs.
 
-**WARNING**: The tilde `~` character is not exapnded by CMake, you must replace it with the full path to your home directory, e.g. `/home/myuser/`
+**WARNING**: The tilde `~` character is not expanded by CMake, you must replace it with the full path to your home directory, e.g. `/home/myuser/`
 
 
 
