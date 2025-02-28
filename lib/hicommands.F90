@@ -174,6 +174,7 @@ contains
     integer, intent(out) :: post_action
 
     call genchk()
+    next_statement = bofargs
     post_action = k_post_action_read_new_line
 
   end subroutine check_execute
@@ -281,6 +282,7 @@ contains
       call assignment_parse(code(1:lc),empty_var_list,j,a(i))
     end do
     call intcrs(fnam1,a)
+    next_statement = l
     post_action = k_post_action_read_new_line
   end subroutine intcrs_execute
 
@@ -401,6 +403,7 @@ contains
       call assignment_parse(code(1:lc),empty_var_list,j,a(i))
     3220 continue
     call prsbr(fnam1,fnam2,a)
+    next_statement = l
     post_action = k_post_action_read_new_line
   end subroutine prsbr_execute
 
@@ -466,6 +469,8 @@ contains
 
     integer :: i, j
     integer :: nerg
+
+    next_statement = bofargs
 
     call update_nu_params()
     call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
@@ -685,6 +690,7 @@ contains
     integer :: l, lc
     integer :: i, j
 
+    l = bofargs
     call get_token(statements,l,fnam1,lc)
     if(fnam1 .eq. ' ') fnam1 = jobnam
     call lower(fnam1)
@@ -696,6 +702,7 @@ contains
        call assignment_parse(code(1:lc),empty_var_list,j,a(i))
     2013   continue
     call hypxsc(fnam1,a)
+    next_statement = l
     post_action = k_post_action_read_new_line
   end subroutine hypxsc_execute
 
@@ -727,6 +734,7 @@ contains
     integer :: l, lc
     integer :: i, j
 
+    l = bofargs
     call get_token(statements,l,fnam1,lc)
     if(fnam1 .eq. ' ') fnam1 = jobnam
     call lower(fnam1)
@@ -753,6 +761,7 @@ contains
       call assignment_parse(code(1:lc),empty_var_list,j,a(i))
     3020 continue
     call stmix(fnam1,fnam2,a)
+    next_statement = l
     post_action = k_post_action_read_new_line
   end subroutine stmix_execute
 
@@ -790,6 +799,7 @@ contains
       ! todo: get in1, in2, jtotmx, join, jmax
     end if
     call trnprt(fnam1, a)
+    next_statement = l
     post_action = k_post_action_read_new_line
   end subroutine trnprt_execute
 

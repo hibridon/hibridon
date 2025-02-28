@@ -11,6 +11,8 @@ set(LINK_TIME_OPTIMIZATION "OFF" CACHE BOOL "to enable or disable link time opti
 # With gfortran, variables are initialized to 0 by default, but it's not the case with ifort compiler. Therefore, all variables need to be initialized to guarantee the program works in a deterministic way on every compiler.
 set(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR "ON" CACHE BOOL "if set, causes the use of uninitilazed variables to trigger an exception on debug builds, thus making the program stop. This is useful to detect uninitialized memory issues.")
 
+set(UNINITIALIZED_INTEGER_VALUE 333333333)
+
 add_library(hib
     ancou.F90
     assert.f90
@@ -129,7 +131,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       # by default, gfortran initializes integers to 0, but not ifort : as a result, some bugs in the code are hidden with gfortran default options
       # set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -fno-init-local-zero")
       # initialize variables to something else than 0 to force the programe to behave badly in case of unitialized variables
-      $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-finit-integer=333333333>
+      $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-finit-integer=$(UNINITIALIZED_INTEGER_VALUE)>
       $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-finit-real=snan>
       $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-ffpe-trap=invalid,zero,overflow>
 
@@ -224,6 +226,9 @@ if (CMake_Fortran_COMPILER_ID STREQUAL "GNU")
 elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
   target_compile_definitions(hib PUBLIC HIB_UNIX_IFORT=1)
 endif()
+
+target_compile_definitions(hib PUBLIC UNINITIALIZED_INTEGER_VALUE=${UNINITIALIZED_INTEGER_VALUE})
+
 
 # make the code aware that ENABLE_UNINIT_VAR_RUNTIME_DETECTOR is on, to allow the code to use workarounds to prevent the code from stopping because of use on unintialized variables in some libraries we have no control (eg mkl's dsyevr function uses uninitialized variables) 
 target_compile_definitions(hib PUBLIC $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:FLOATING_POINT_ERRORS_CAUSE_EXCEPTIONS=1>)

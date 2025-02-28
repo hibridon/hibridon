@@ -514,8 +514,19 @@ end if
 ! label:execute_command_mgr_command(i)
 !
 45 continue
+  next_statement = UNINITIALIZED_INTEGER_VALUE
   call command_mgr%commands(i)%item%execute(statements=line, bofargs=l, next_statement=next_statement, post_action=post_action)
-!
+#ifndef DISABLE_HIB_ASSERT
+#if (UNINITIALIZED_INTEGER_VALUE != 0)
+      ! make sure that next_statement has been initialized by the command's execute method
+      ! note: this test can be removed when the warnings -Wunused-dummy-argument and -Wunused-variable trigger errors (when done, if a command forgets to set the output dummy argumen next_statement, then the compiler will detect a -Wunused-dummy-argument and trigger an error at compile time)
+      if (next_statement == UNINITIALIZED_INTEGER_VALUE) then
+        write(6,*) 'this command forgot to set next_statement :', command_mgr%commands(i)%codex
+        ASSERT(next_statement /= UNINITIALIZED_INTEGER_VALUE)  
+      end if
+#endif
+#endif
+  
 ! label:on_execute_command_completion(post_action)
 !
 47 continue
