@@ -603,22 +603,21 @@ te=result
 return
 end
 !------------------------------------------------------------------------
-function get_elapsed_seconds()
-double precision get_elapsed_seconds
+double precision function get_elapsed_seconds()
+implicit none
 #if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_PGI) || defined(__GFORTRAN__)
-  real*4 te
+  real*4 :: te
   call cpu_time(te)
   get_elapsed_seconds=te
 #elif defined(HIB_UNIX_XLF)
   get_elapsed_seconds=timef()*1000d0
 #elif defined(HIB_ULTRIX_DEC)
-  double precision function get_elapsed_seconds()
-  implicit double precision (a-h,o-z)
-  real et(2)
+  real :: et(2)
+  real(8) :: fe
   fe=etime(et(1),et(2))
   get_elapsed_seconds=fe
 #elif defined(__G95__)
-  real*4 tarray(2), result
+  real*4 :: tarray(2), result
   call dtime(tarray,result)
   get_elapsed_seconds=tarray(1)
 #else
