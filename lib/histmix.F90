@@ -32,7 +32,7 @@ use mod_coisc9, only: inlevt => isc9 ! inlevt(1)
 use mod_cosc1, only: elev1 => sc1 ! elev1(1)
 use mod_cosc2, only: elev2 => sc2 ! elev2(1)
 use mod_cosc3, only: elevt => sc3 ! elevt(1)
-use constants, only: econv, xmconv
+use constants, only: econv, xmconv, ang2c
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam, mtime, gettim
 use mod_hismat, only: sread, rdhead, sinqr
@@ -580,7 +580,7 @@ end do
 !     compute cross sections for sums of squares of t-matrix elements
 !
 !     transitions to/from unperturbed singlet levels
-fak = acos(-1.d0) * ang2 / (2.d0 * rmu1)
+fak = acos(-1.d0) * ang2c / (2.d0 * rmu1)
 do is = 1,nlevels
    isub = iptsng(is)
    xj = jlev1(isub)
