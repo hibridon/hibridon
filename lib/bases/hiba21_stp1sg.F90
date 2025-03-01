@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 ! systp1sg (savstp1sg/ptrstp1sg) defines, saves variables and reads      *
 !                  potential for symmetric top - singlet sigma system    *
 !     Basis subroutine for the collision of a symmetric top with
@@ -163,6 +164,7 @@ integer, pointer :: ipotsy, iop, ipotsy2, j1max, j2min, j2max
 real(8), pointer :: brot, crot, delta, e1max, drot
 ipotsy=>ispar(1); iop=>ispar(2); ipotsy2=>ispar(3); j1max=>ispar(4); j2min=>ispar(5); j2max=>ispar(6)
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); e1max=>rspar(4); drot=>rspar(5); 
+UNUSED_DUMMY(numin)
 
 if (flaghf) &
      call raise('FLAGHF = .TRUE. FOR SINGLET SYSTEM')

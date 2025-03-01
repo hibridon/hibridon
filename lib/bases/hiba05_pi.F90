@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba05_pi
 contains
 ! sypi (savpi/ptrpi) defines, save variables and reads                   *
@@ -130,7 +131,7 @@ use constants, only: econv, xmconv
 use mod_cosysi, only: nscode, ispar
 use mod_cosysr, only: rspar
 use mod_par, only: iprint, rendai=>scat_rendai
-use mod_parbas, only: ntv, lammin, lammax, mproj
+use mod_parbas, only: lammin, lammax, mproj
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
@@ -156,6 +157,7 @@ real(8), pointer :: brot, aso, o, p, q, dmom, efield
 nterm=>ispar(1); jmax=>ispar(2); igu=>ispar(3); isa=>ispar(4); npar=>ispar(5); imult=>ispar(6); nman=>ispar(7)
 brot=>rspar(1); aso=>rspar(2); o=>rspar(3); p=>rspar(4); q=>rspar(5); dmom=>rspar(6); efield=>rspar(7)
 
+UNUSED_DUMMY(numin)
 zero = 0.d0
 one = 1.d0
 two = 2.d0

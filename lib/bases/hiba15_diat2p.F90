@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba15_diat2p
 contains
 ! sydiat2p (savdiat2p/ptrdiat2p) defines, saves variables and read       *
@@ -103,7 +104,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: ivcol, ivrow, lammin, lammax, mproj
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_skip, only: nskip, iskip
@@ -150,6 +151,7 @@ integer, pointer :: nterm, iop, jmax
 real(8), pointer :: brot, aso
 nterm=>ispar(1); iop=>ispar(2); jmax=>ispar(3)
 brot=>rspar(1); aso=>rspar(2)
+UNUSED_DUMMY(numin)
 
 
 !   econv is conversion factor from cm-1 to hartrees
@@ -734,7 +736,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: ivcol, ivrow, lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot

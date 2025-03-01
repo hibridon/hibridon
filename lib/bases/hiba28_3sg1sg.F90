@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba28_3sg1sg
 contains
 ! sy3sg1sg (sav2sg1sg/ptr2sg1sg) defines, saves variables and reads     *
@@ -132,7 +133,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: ivcol, ivrow, lammin, lammax, mproj
 use mod_par, only: readpt, boundc
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
@@ -158,6 +159,7 @@ integer, pointer :: j1max, j2min, j2max, ipotsy2
 real(8), pointer :: b1rot, d1rot, flmbda, gamma, b2rot
 j1max=>ispar(1); j2min=>ispar(2); j2max=>ispar(3); ipotsy2=>ispar(4)
 b1rot=>rspar(1); d1rot=>rspar(2); flmbda=>rspar(3); gamma=>rspar(4); b2rot=>rspar(5)
+UNUSED_DUMMY(numin)
 
 !  check for consistency in the values of flaghf and csflag
 if (flaghf) then
@@ -688,7 +690,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: ivcol, ivrow, lammin, lammax, mproj
 use mod_skip, only: nskip, iskip
 use mod_hiutil, only: gennam, get_token
 implicit none

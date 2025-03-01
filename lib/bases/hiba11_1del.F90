@@ -107,7 +107,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, idum=>junkr, rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj, lam2
+use mod_parbas, only: ivcol, ivrow, lammin, lammax, mproj, lam2
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
@@ -738,7 +738,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, idum=>junkr, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: ivcol, ivrow, lammin, lammax, mproj
 use mod_skip, only: nskip, iskip
 use mod_hiutil, only: gennam, get_token
 implicit none

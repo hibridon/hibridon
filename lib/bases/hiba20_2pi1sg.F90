@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 ! sy2pi1sg (sav2pi1sg/ptr2pi1sg) defines, saves variables and            *
 !                  reads potential for doublet pi-singlet sigma* system  *
 !     Basis subroutine for the collision of a doublet-Pi molecule with
@@ -143,6 +144,7 @@ integer, pointer :: j1max, npar, j2min, j2max, iptsy2
 real(8), pointer :: brot, aso, p, q, drot
 j1max=>ispar(1); npar=>ispar(2); j2min=>ispar(3); j2max=>ispar(4); iptsy2=>ispar(5)
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
+UNUSED_DUMMY(numin)
 
 if (.not. flaghf) &
      call raise('FLAGHF = .FALSE. FOR DOUBLET SYSTEM')

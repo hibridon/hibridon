@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba13_h3p
 contains
 ! syh3p (savh3p/ptrh3p) defines, saves variables and reads               *
@@ -103,7 +104,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: ivcol, ivrow, lammin, lammax, mproj
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_skip, only: nskip, iskip
@@ -127,6 +128,7 @@ integer, pointer :: nterm, iop, jmax
 real(8), pointer :: brot, aso1, aso2
 nterm=>ispar(1); iop=>ispar(2); jmax=>ispar(3)
 brot=>rspar(1); aso1=>rspar(2); aso2=>rspar(3)
+UNUSED_DUMMY(numin)
 
 zero = 0.d0
 half=0.5d0
@@ -928,7 +930,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: ivcol, ivrow, lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot
