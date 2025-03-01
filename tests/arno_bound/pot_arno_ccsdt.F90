@@ -28,7 +28,7 @@ goto 1
 ! --------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
-use mod_parbas, only: maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2
+use mod_parbas, only: maxvib, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 character*(*) filnam
 potnam='ALEXANDER Ar-NO CCSDT'

@@ -9,7 +9,7 @@
 #include "common/bausr.F90"
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
-use mod_parbas, only: maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: maxvib, ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_conlam, only: nlam

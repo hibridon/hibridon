@@ -172,7 +172,7 @@ use mod_cosysr, only: isrcod, rspar
 use mod_hibasutil, only: vlm2sg, iswap, rswap
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: maxvib, ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
@@ -1137,7 +1137,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use mod_par, only: ihomo
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: maxvib, ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_skip, only: nskip, iskip
 use mod_hiutil, only: gennam, get_token
 implicit none
