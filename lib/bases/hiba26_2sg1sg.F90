@@ -125,7 +125,7 @@ use mod_cosysi, only: isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: ivrow, lammin, lammax, mproj
+use mod_parbas, only: lammin, lammax, mproj
 use mod_par, only: boundc
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
@@ -557,7 +557,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: ivrow, lammin, lammax, mproj
+use mod_parbas, only: lammin, lammax, mproj
 use mod_skip, only: nskip, iskip
 use mod_hiutil, only: gennam, get_token
 implicit none
