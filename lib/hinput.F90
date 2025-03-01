@@ -120,7 +120,7 @@ use mod_hibrid2, only: enord, prsg
 use mod_hibrid3, only: potmin
 use mod_hiutil, only: assignment_parse
 use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT, RPAR_COUNT
-use mod_parbas, only: ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: ivrow, lammin, lammax, mproj
 use fcod_enum
 use lpar_enum
 use ipar_enum

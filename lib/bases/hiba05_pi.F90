@@ -145,7 +145,7 @@ character*27 case
 character*2 chf
 dimension jhold(1), ishold(1), ieps(2)
 dimension c0(nmax), c1(nmax), c2(nmax), cf(nmax), ehold(1)
-dimension e(3,3), eig(3), sc1(3), sc2(3), vec(3,3), vii(0:2)
+dimension e(3,3), eig(3), vec(3,3), vii(0:2)
 !  cvtown: conversion factor from coulomb.volts to cm-1 (wavenumbers)
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 ! work vector for dsyev

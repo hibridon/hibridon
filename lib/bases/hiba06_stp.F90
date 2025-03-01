@@ -141,7 +141,7 @@ use mod_cosysr, only: isrcod, rspar
 use mod_hibasutil, only: vlmstp
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: iprint
-use mod_parbas, only: ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: ivrow, lammin, lammax, mproj
 use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
@@ -435,7 +435,6 @@ do 170  njk = 1, nlist
         end if
 155       continue
     end if
-160   continue
 170 continue
 !  also determine number of levels which are open
 nlevop = 0
@@ -629,7 +628,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: ivrow, lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot
@@ -641,7 +640,8 @@ integer icod, ircod
 integer i
 character*1 dot
 character*(*) fname
-character*60 line, filnam, potfil, filnm1
+character*60 line, filnam, potfil
+character*68 filnm1
 parameter (icod = 5, ircod = 4)
 save potfil
 !  number and names of system dependent parameters
