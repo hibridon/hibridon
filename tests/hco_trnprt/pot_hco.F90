@@ -46,7 +46,7 @@ subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
 use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 character*(*) filnam
@@ -89,7 +89,7 @@ subroutine pot (vv0, r)
 ! ----------------------------------------------------------------------
 use mod_covvl, only: vvl
 use mod_par, only: csflag, ihomo
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj
 implicit double precision (a-h,o-z)
 dimension v(16)
 real(8), save :: csplin(47,16)
