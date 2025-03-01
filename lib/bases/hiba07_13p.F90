@@ -120,7 +120,7 @@ subroutine ba13p (bqs, jhold, ehold, ishold, nlevel, nlevop, &
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlammx, lamnum
 use mod_cosysi, only: isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use constants, only: econv, xmconv
@@ -642,7 +642,6 @@ subroutine sy13p (irpot, readpt, iread)
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar

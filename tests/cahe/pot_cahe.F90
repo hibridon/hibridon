@@ -112,7 +112,6 @@ subroutine pot (vv0, r)
 ! latest revision date:  17-may-1994 by bp
 ! ----------------------------------------------------------------------
 use mod_covvl, only: vvl
-use mod_conlam, only: nlam
 use mod_cosysi, only: isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use constants, only: econv

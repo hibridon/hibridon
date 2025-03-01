@@ -1047,7 +1047,6 @@ subroutine syastp1 (irpot, readpt, iread)
 !             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar

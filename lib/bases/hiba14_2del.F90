@@ -888,7 +888,6 @@ subroutine sy2del (irpot, readpt, iread)
 !             of all system dependent parameters
 !  subroutines called: loapot(iunit,filnam)
 use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar

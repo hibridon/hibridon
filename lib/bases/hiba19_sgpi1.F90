@@ -1130,7 +1130,6 @@ subroutine sysgpi1 (irpot, readpt, iread)
 ! ------------------------------------------------------------------------
 !
 use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosyr, only: rcod
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar

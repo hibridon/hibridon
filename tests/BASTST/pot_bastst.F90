@@ -249,7 +249,6 @@ end subroutine init_pot_parameters
 !  -----------------------------------------------------------------------
 subroutine pot (vv0, r)
 use mod_covvl, only: vvl
-use mod_conlam, only: nlam
 use mod_selb, only: ibasty
     implicit none
     real(8), intent(out) :: vv0
