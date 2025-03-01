@@ -154,7 +154,7 @@ use mod_cosysr, only: isrcod, rspar
 use mod_hibasutil, only: vlmstp, vlmstpln
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: maxvib, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -691,7 +691,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxvib, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot

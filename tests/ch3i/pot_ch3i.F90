@@ -73,7 +73,7 @@ goto 1
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
 !  dummy loapot subroutine
-use mod_parbas, only: maxvib, ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
  character*(*) filnam
@@ -125,7 +125,7 @@ subroutine ground(wf, r, nch, nphoto, mxphot)
 use mod_coiout, only: niout, indout
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, rcod=>rspar
-use mod_parbas, only: maxvib, ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_ered, only: ered, rmu
 use mod_ch3i, only: vib, gswf_data
 implicit none
@@ -345,7 +345,7 @@ use mod_cosysr, only: isrcod, rcod=>rspar
 use mod_grnd, only: reg, caypot
 use mod_par, only: par_readpt=>readpt
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxvib, ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 implicit none
 integer, intent(out) :: irpot
 logical, intent(inout) :: readpt
@@ -598,7 +598,7 @@ use mod_cosysr, only: isrcod, rcod=>rspar
 use constants, only: econv, xmconv
 use mod_coiout, only: niout, indout
 use mod_par, only: iprint
-use mod_parbas, only: maxvib, ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_ered, only: ered, rmu
 use mod_ch3i, only: vib
 use mod_hitypes, only: bqs_type

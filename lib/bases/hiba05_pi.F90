@@ -130,7 +130,7 @@ use constants, only: econv, xmconv
 use mod_cosysi, only: nscode, ispar
 use mod_cosysr, only: rspar
 use mod_par, only: iprint, rendai=>scat_rendai
-use mod_parbas, only: maxvib, ntv, lammin, lammax, mproj
+use mod_parbas, only: ntv, lammin, lammax, mproj
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type

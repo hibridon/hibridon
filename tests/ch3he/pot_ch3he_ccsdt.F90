@@ -52,7 +52,7 @@ end
 subroutine loapot(iunit,filnam)
 use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_parbas, only: maxvib, ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 character*(*) filnam

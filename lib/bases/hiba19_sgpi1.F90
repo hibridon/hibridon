@@ -1137,7 +1137,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use mod_par, only: ihomo
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxvib, ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_skip, only: nskip, iskip
 use mod_hiutil, only: gennam, get_token
 implicit none

@@ -19,7 +19,7 @@ goto 1
 #include "common/ground.F90"
 ! --------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
-use mod_parbas, only: maxvib, ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 ! --------------------------------------------------------------------------
 character*(*) filnam
@@ -49,7 +49,7 @@ subroutine pot (vv0, r)
 !  -----------------------------------------------------------------------
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
-use mod_parbas, only: maxvib, ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 implicit double precision (a-h,o-z)
 
 
