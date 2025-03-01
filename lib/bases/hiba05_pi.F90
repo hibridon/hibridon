@@ -132,7 +132,7 @@ use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
 use mod_par, only: iprint, rendai=>scat_rendai
 use mod_parbas, only: lammin, lammax, mproj
-use mod_par, only: readpt, boundc
+use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)

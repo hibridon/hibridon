@@ -108,7 +108,7 @@ use mod_cosysr, only: isrcod, idum=>junkr, rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
 use mod_parbas, only: ivcol, ivrow, lammin, lammax, mproj, lam2
-use mod_par, only: readpt, boundc
+use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)

@@ -119,7 +119,7 @@ use mod_cosysi, only: isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use constants, only: econv, xmconv
 use mod_parbas, only: ivcol, ivrow, lammin, lammax, mproj
-use mod_par, only: readpt, boundc
+use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_skip, only: nskip, iskip
 !  modules mod_jtot, mod_ja, and mod_el used to transmit to ground subroutine
