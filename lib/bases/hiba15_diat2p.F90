@@ -100,7 +100,7 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
 use mod_hiba12_h2p, only: vlmh2p, vlmh2pc
-use mod_cosysi, only: isicod, ispar
+use mod_cosysi, only: ispar
 use mod_cosysr, only: isrcod, rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint

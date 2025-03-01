@@ -121,7 +121,7 @@ use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlammx, lamnum
-use mod_cosysi, only: isicod, ispar
+use mod_cosysi, only: ispar
 use mod_cosysr, only: isrcod, rspar
 use constants, only: econv, xmconv
 use mod_parbas, only: lammin, lammax, mproj

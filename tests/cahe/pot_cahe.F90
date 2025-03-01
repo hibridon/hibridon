@@ -112,7 +112,7 @@ subroutine pot (vv0, r)
 ! latest revision date:  17-may-1994 by bp
 ! ----------------------------------------------------------------------
 use mod_covvl, only: vvl
-use mod_cosysi, only: isicod, ispar
+use mod_cosysi, only: ispar
 use mod_cosysr, only: isrcod, rspar
 use constants, only: econv
 implicit double precision (a-h,o-z)
