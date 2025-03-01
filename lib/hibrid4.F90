@@ -640,7 +640,7 @@ subroutine compute_wave_and_fluxes(filnam, iflux, iprint, thresh, factr, inchj, 
 use mod_codim, only: nmax => mmax
 use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
-use constants, only: zero, one
+use constants, only: zero, one, econv, xmconv
 use mod_coqvec, only: nphoto
 use mod_coeint, only: eint
 use mod_coamat, only: psir ! psir(100) psir(nopen,nopen)
