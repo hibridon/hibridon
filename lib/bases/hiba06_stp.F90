@@ -136,7 +136,7 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coamat, only: ietmp ! ietmp(1)
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysi, only: isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use mod_hibasutil, only: vlmstp
 use constants, only: econv, xmconv, ang2c

@@ -128,7 +128,7 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
 use constants, only: econv, xmconv
-use mod_cosysi, only: nscode, ispar
+use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
 use mod_par, only: iprint, rendai=>scat_rendai
 use mod_parbas, only: lammin, lammax, mproj

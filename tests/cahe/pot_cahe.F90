@@ -113,7 +113,7 @@ subroutine pot (vv0, r)
 ! ----------------------------------------------------------------------
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysi, only: isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use constants, only: econv
 implicit double precision (a-h,o-z)

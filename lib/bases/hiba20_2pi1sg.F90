@@ -111,7 +111,7 @@ use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cchn => cent
 use mod_coeint, only: echn => eint
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysi, only: isicod, ispar
 use mod_cosysr, only: isrcod, rspar 
 use mod_hibasutil, only: raise
 use mod_par, only: iprint

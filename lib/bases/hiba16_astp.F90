@@ -126,7 +126,7 @@ use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_coatp3, only: isizh
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysi, only: isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use mod_hibasutil, only: rotham
 use constants, only: econv, xmconv

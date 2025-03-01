@@ -89,7 +89,7 @@ goto 1
 !              molecule
 !  -----------------------------------------------------------------------
 use mod_conlam, only: nlam, nlammx
-use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysi, only: isicod, ispar
 use mod_parbas, only: ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use constants, only: s4pi

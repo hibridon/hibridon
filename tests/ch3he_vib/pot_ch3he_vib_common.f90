@@ -23,7 +23,7 @@ use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx
 use mod_cosys, only: scod
 use mod_cosysr, only: isrcod, rspar
-use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysi, only: isicod, ispar
 use mod_ered, only: ered, rmu
 implicit double precision (a-h, o-z)
 !   Define the sizes of grids

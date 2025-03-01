@@ -64,7 +64,7 @@ subroutine loapot(iunit,filnam)
 !  the common block /cofit/ is used to pass arguments
 !
 ! --------------------------------------------------------------------------
-use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysi, only: isicod, ispar
 use mod_par, only: readpt
 use mod_parbas, only: maxtrm, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
@@ -204,7 +204,7 @@ subroutine pot(vv0,r)
 !  current revision date: 18-aug-1998 by mha
 ! -------------------------------------------------------------------
 use mod_covvl, only: vvl
-use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysi, only: isicod, ispar
 use mod_parbas, only: maxtrm, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_selb, only: ibasty
 use mod_skip, only: nskip, iskip

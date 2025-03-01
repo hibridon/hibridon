@@ -44,7 +44,7 @@ end module mod_ch3i
 !  vvl(7) contains the second anisotropic (2,2) potential
 subroutine driver
 use mod_covvl, only: vvl
-use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysi, only: isicod, ispar
 use constants, only: econv, xmconv
 use mod_ered, only: ered, rmu
 use mod_ch3i, only: vib
@@ -123,7 +123,7 @@ subroutine ground(wf, r, nch, nphoto, mxphot)
 
 !  -------------------------------------------------------
 use mod_coiout, only: niout, indout
-use mod_cosysi, only: nscode, isicod, iscod=>ispar
+use mod_cosysi, only: isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, rcod=>rspar
 use mod_parbas, only: ivcol, ivrow, lammin, lammax, mproj
 use mod_ered, only: ered, rmu
@@ -593,7 +593,7 @@ use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, iscod=>ispar
+use mod_cosysi, only: isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, rcod=>rspar
 use constants, only: econv, xmconv
 use mod_coiout, only: niout, indout
