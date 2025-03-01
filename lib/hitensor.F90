@@ -2529,7 +2529,7 @@ lmax = nint(xjtot+j2mx+spin+1.d0)
 lmaxp = nint(xjtotp+j2mxp+spin+1.d0)
 kpmin=jminjp
 kmin=abs(kpmin-n)
-t1=get_elapsed_seconds()
+t1=second()
 do 70 icol=1,packed_bqs%length
 ! modify next if statement in include test for in2 (pjd)
 !      if(packed_bqs%inq(icol).ne.in2) goto 70
@@ -2545,7 +2545,7 @@ kkp=kkp+1
 xkp=kp
 65 f6a(kkp,j2,lmax-l2) = xf6j(xkp,xjtotp,xjtot,xl2,xj2,xj2)
 70 continue
-t6j = t6j + get_elapsed_seconds() - t1
+t6j = t6j + second() - t1
 kpmx=kpmax
 ! clear iadr array (pjd)
 do 79 j=0,jmx
@@ -2606,7 +2606,7 @@ do 400 irow = 1, packed_bqs%length
    kmax=nint(2*xj1)
    factor=denrow*facjjp
    ll=0
-   t1 = get_elapsed_seconds()
+   t1 = second()
 do 100 l1p=l1pmin,l1pmax,2
    ll=ll+1
    xl1p = l1p
@@ -2634,7 +2634,7 @@ do 100 l1p=l1pmin,l1pmax,2
    if(mod(ipower,2).ne.0) f9pha(ik) = -switch
 90 continue
 100 continue
-   t9j = t9j + get_elapsed_seconds() - t1
+   t9j = t9j + second() - t1
 !
 ! compute all transitions separately, unlike in SIGK
 do 300 icol = 1, packed_bqs%length

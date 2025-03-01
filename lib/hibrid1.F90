@@ -205,7 +205,7 @@ real(8) :: r2, twormu, vv0, wmax, wmin
 !     if (r.le.3.41) icount=0
 !ABER
 !  calculate coefficients of each angular term
-cpupot = cpupot - get_elapsed_seconds()
+cpupot = cpupot - second()
 call pot( vv0, r)
 
 !  vv0 is the isotropic term in the potential
@@ -358,7 +358,7 @@ rtmn = r
 rtmx = r
 90 continue
 
-cpupot = cpupot + get_elapsed_seconds()
+cpupot = cpupot + second()
 ! here for 2s-2p scattering
 ! fill in upper triangle of w matrix
 !  first fill in upper half of original matrix
