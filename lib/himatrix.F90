@@ -3709,7 +3709,6 @@ if(mcolr.eq.1) then
                     b,mcolb,0.0d0,r,mrowr)
     return
   end if
-  goto 6010
 else if(mrowr.eq.1) then
   if(mcola.eq.1.and.mcolb.eq.1) then
     call dgemm('T','T',nrow,ncol,nlink,1.0d0,b,max(nlink,mrowb), &
@@ -3731,7 +3730,7 @@ else if(mrowr.eq.1) then
 end if
 #endif
 #if !defined(HIB_CRAY) && !defined(HIB_UNIX_CONVEX)
-6010 mxb=mxmblk
+mxb=mxmblk
 !      nkb=mxmbln
 nkb=108
 if(mrowa.ne.1.and.mcolb.ne.1) nkb=nkb/2
@@ -5350,7 +5349,6 @@ if(mcolr.eq.1) then
                      b,mcolb,1.0d0,r,mrowr)
     return
   end if
-  goto 6010
 else if(mrowr.eq.1) then
   if(mcola.eq.1.and.mcolb.eq.1) then
     call dgemm('T','T',nrow,ncol,nlink,1.0d0,b,max(nlink,mrowb), &
@@ -5373,7 +5371,7 @@ end if
 #endif
 #if !defined(HIB_CRAY) && !defined(HIB_UNIX_CONVEX)
 
-6010 mxb=mxmblk
+mxb=mxmblk
 !      nkb=mxmbln
 nkb=mxb
 if(mrowa.ne.1.and.mcolb.ne.1) nkb=nkb/2
@@ -7087,7 +7085,7 @@ ia3=ia3+mrowa
 s4=a(ia4)*b(ib1)+s4
 ia4=ia4+mrowa
 100 ib1=ib1+mcolb
-110 r(ir1)=s1
+r(ir1)=s1
 ir1=ir1+mcolr4
 r(ir2)=s2
 ir2=ir2+mcolr4
@@ -7252,7 +7250,7 @@ ia3=ia3+mrowa
 s4=a(ia4)*b(ib1)+s4
 ia4=ia4+mrowa
 100 ib1=ib1+mcolb
-110 r(ir1)=r(ir1)+s1
+r(ir1)=r(ir1)+s1
 ir1=ir1+mcolr4
 r(ir2)=r(ir2)+s2
 ir2=ir2+mcolr4
