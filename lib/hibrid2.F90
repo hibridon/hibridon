@@ -25,7 +25,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod
 use mod_cosysl, only: islcod
 use mod_cosysr, only: isrcod
-use constants, only: econv, xmconv, ang2c
+use constants, only: econv, xmconv
 use mod_par, only: airyfl, prairy, bastst, batch, chlist, &
                 csflag, flaghf, flagsu, ihomo, ipos, logdfl, &
                 prlogd, noprin, prpart, readpt, rsflag, prsmat, &

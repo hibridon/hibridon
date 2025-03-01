@@ -139,7 +139,7 @@ use mod_conlam, only: nlam
 use mod_cosysi, only: isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use mod_hibasutil, only: vlmstp
-use constants, only: econv, xmconv, ang2c
+use constants, only: econv, xmconv
 use mod_par, only: iprint
 use mod_parbas, only: lammin, lammax, mproj
 use mod_par, only: boundc

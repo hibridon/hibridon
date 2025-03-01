@@ -35,7 +35,7 @@ subroutine difcrs(fname1,a,ihomo,flaghf)
 !  FOR THE BASIS TYPE ARE IN MEMORY                             *
 !                                                               *
 !---------------------------------------------------------------*
-use constants
+use constants, only: ang2c, econv, pi, xmconv
 use mod_codim, only: mmax
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)

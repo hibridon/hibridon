@@ -2224,26 +2224,37 @@ subroutine partcr (tsq,  scmat, nopen, &
 !     corrected degeneracy factor for ibasty = 23
 !
 ! ----------------------------------------------------------------------
-use constants
+use constants, only: ang2c, pi
 use mod_hibasis, only: is_j12
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_hivector, only: dset
 use mod_hitypes, only: bqs_type
-implicit double precision (a-h,o-z)
+implicit none
 real(8), dimension(nmax,nmax), intent(in) :: tsq
-!      real(8), dimension(:,:), intent(in), target :: tototsq
 real(8), dimension(nmax,nmax), intent(out) :: scmat
+integer, intent(in) :: nopen
 type(bqs_type), intent(in) :: row_bqs
 type(bqs_type), intent(in) :: col_bqs
 integer, dimension(nlevop), intent(in) :: inlev
 integer, dimension(nlevop), intent(in) :: jlev
 real(8), dimension(nlevop), intent(in) :: elev
+integer, intent(in) :: jtot
+integer, intent(in) :: nu
+logical, intent(in) :: csflag
+logical, intent(in) :: flaghf
+logical, intent(in) :: twomol
+logical, intent(in) :: flagsu
+integer, intent(in) :: nlevop
+integer, intent(in) :: nmax
+
+
 integer, dimension(nmax) :: isc1  ! scratch array
 integer, dimension(nmax) :: isc2  ! scratch array
 real(8), dimension(nmax) :: sc2   ! scratch array
 
-logical csflag, flaghf, flagsu, twomol
+integer :: i, icol, irow, j, jj, jrow1, jrow2, ncol
+real(8) :: denrow, fak, pj, xjtot, xj2, xjrow1, xjrow2
 !
 ASSERT(row_bqs%length == nopen)
 ncol = col_bqs%length

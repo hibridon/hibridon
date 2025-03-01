@@ -16,7 +16,7 @@ subroutine prsbr(flnam1, flnam2, a)
 !  revision:  27-sep-2013 by p. dagdigian (relax requirement that jfinl1 = jfinl2)
 !  revision:  18-aug-2015 by p. dagdigian (skip in sums if xf6j's equal zero)
 ! -------------------------------------------------------------------------
-use constants
+use constants, only: ang2c, econv
 use mod_codim, only: mmax
 use mod_coisc1, only: jlev1 => isc1 ! jlev1(1)
 use mod_coisc2, only: jlev2 => isc2 ! jlev2(1)
@@ -35,10 +35,13 @@ use mod_hiutil, only: gennam, mtime, gettim
 use mod_hiutil, only: xf6j
 use mod_hismat, only: sread, rdhead, sinqr
 use mod_hitypes, only: bqs_type
-implicit double precision (a-h, o-z)
+implicit none
+character*(*), intent(in) :: flnam1
+character*(*), intent(in) :: flnam2
+real(8), intent(in) :: a(12)
+
 type(bqs_type) :: row_bqs
 type(bqs_type) :: packed_bqs
-character*(*) flnam1, flnam2
 character*20  cdate1, cdate2
 character*40  smtfil1, smtfil2, prtfil
 character*10  elaps, cpu
@@ -49,8 +52,21 @@ logical csflg1, flghf1, flgsu1, twmol1, nucrs1, &
         batch, fast, lpar2, lpar, exstfl, diagst, &
         diagj, diagin, &
         diagjp, daginp, diag, diagp
-
-dimension a(12)
+real(8) :: aimagp
+real(8) :: cpu0, cpu1
+real(8) :: ecoll1, ecoll2
+real(8) :: ela0, ela1
+real(8) :: ered1, ered2, etrans
+real(8) :: facj, facjpp, factor
+integer :: flg, flgp  ! graffy: used to be real(8) ????
+integer :: i, iaddr, ialloc, icol, icolp, iener1, iener2, ierr, ii, iip, in1, in1p, in2, in2p, ipartx, ipower, irow, irowp
+integer :: j1, j1p, j2, j2p, jfinl1, jfinl2, jfrst1, jfrst2, jj1, jj1p, jj2, jj2p, jlp, jlpar, jlpar1, jlpar2, jlparp, jlpmx1, jlpmx2, jlpp
+integer :: jtot, jtot1, jtot2, jtotd1, jtotd2, jtotmx, jtotp, jtpmax, jtpmin
+integer :: k, l1, l1p, l2, l2p, len2, lenfs, lenpb, lngth1, lngth2
+integer :: m1chmx, m1jtot, m2chmx, m2jtot, maxjtot, mchmx, mmax2
+integer :: nlevel1, nlevel2, nlvop1, nlvop2, nnout1, nnout2, nopen, nu1, nu2, nud1, nud2, numax1, numax2, numin1, numin2
+real(8) :: phase, prefac, realp, rmu1, rmu2, sigmai, sigmar, spin, sqj1j1p
+real(8) :: x61, x62, xj1, xj1p, xj2, xj2p, xjtot, xjtotp, xjtpm, xk, xl1, xl1p, xl2, xl2p
 !
 double precision, dimension(:), allocatable :: sreal, simag
 ! storage for s-matrix elements:

@@ -32,7 +32,7 @@ use mod_coisc9, only: inlevt => isc9 ! inlevt(1)
 use mod_cosc1, only: elev1 => sc1 ! elev1(1)
 use mod_cosc2, only: elev2 => sc2 ! elev2(1)
 use mod_cosc3, only: elevt => sc3 ! elevt(1)
-use constants, only: econv, xmconv, ang2 => ang2c
+use constants, only: econv, xmconv
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam, mtime, gettim
 use mod_hismat, only: sread, rdhead, sinqr
@@ -697,7 +697,7 @@ use mod_coisc9, only: inlevt => isc9 ! inlevt(1)
 use mod_cosc1, only: elev1 => sc1 ! elev1(1)
 use mod_cosc2, only: elev2 => sc2 ! elev2(1)
 use mod_cosc3, only: elevt => sc3 ! elevt(1)
-use constants, only: econv, xmconv, ang2 => ang2c
+use constants, only: econv, xmconv
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: xf6j
 implicit double precision (a-h, o-z)

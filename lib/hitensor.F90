@@ -1606,7 +1606,7 @@ use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_coz, only: xm1lab => z_as_vec ! xm1lab(1)
 use mod_cow, only: xm2lab => w_as_vec ! xm2lab(1)
 use mod_cozmat, only: sigma => zmat_as_vec ! sigma(1)
-use constants, only: econv, xmconv, ang2c
+use constants, only: econv, xmconv
 use mod_par, only: batch
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
