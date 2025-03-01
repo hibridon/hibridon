@@ -1,9 +1,9 @@
-#include "assert.h"
 ! sy2pi (sav2pi/ptr2pi) defines, saves variables and reads               *
 !                  potential for doublet pi scattering                   *
 ! --------------------------------------------------------------------
-module mod_hiba03_2pi
 #include "assert.h"
+#include "unused.h"
+module mod_hiba03_2pi
 contains
 subroutine ba2pi (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1, c12, c32, sc4, rcut, jtot, &
@@ -117,12 +117,12 @@ use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
-use constants, only: econv, xmconv, ang2c
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, idum=>junkr, rspar
+use constants, only: econv, xmconv
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use mod_par, only: iprint
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
+use mod_parbas, only: lammin, lammax, mproj
+use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -140,6 +140,9 @@ integer, pointer :: nterm, jmax, igu, isa, npar
 real(8), pointer :: brot, aso, p, q
 nterm=>ispar(1); jmax=>ispar(2); igu=>ispar(3); isa=>ispar(4); npar=>ispar(5) 
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4)
+
+UNUSED_VARIABLE(sc1)
+UNUSED_VARIABLE(sc4)
 
 pi2 = 1.570796327d0
 zero = 0.d0
@@ -910,13 +913,11 @@ subroutine sy2pi (irpot, readpt, iread)
 !             of all system dependent parameters
 !  subroutines called: loapot(iunit,filnam)
 use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_skip, only: nskip, iskip
+use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot
@@ -926,7 +927,8 @@ integer :: j, l, lc
 logical existf
 character*1 dot
 character*(*) fname
-character*60 filnam, line, potfil, filnm1
+character*60 filnam, line, potfil
+character*69 filnm1
 save potfil
 #include "common/comdot.F90"
 integer, pointer, save :: nterm, jmax, igu, isa, npar
