@@ -54,7 +54,7 @@ close(22)
 #include "common/ground.F90"
 ! ----------------------------------------------------------------
 subroutine loapot(iunit,filnam)
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 character*(*) filnam
 UNUSED_VARIABLE(maxtrm)

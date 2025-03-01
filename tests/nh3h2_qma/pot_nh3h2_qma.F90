@@ -152,7 +152,7 @@ end
 subroutine syusr(irpot, readpt, iread)
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use mod_hibasutil, only: raise
 use constants, only: econv, xmconv
 use funit, only: FUNIT_INP
@@ -254,7 +254,7 @@ use mod_coeint, only: eint
 use mod_coamat, only: ietmp ! ietmp(1)
 use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use mod_hibasutil, only: vlmstpln, raise
 use constants, only: econv, xmconv
 use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER

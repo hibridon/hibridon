@@ -111,7 +111,7 @@ use mod_cocent, only: cchn => cent
 use mod_coeint, only: echn => eint
 use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar 
+use mod_cosysr, only: isrcod, rspar 
 use mod_hibasutil, only: raise
 use mod_par, only: iprint
 use mod_ered, only: ered, rmu
@@ -411,7 +411,7 @@ end subroutine prtchn_2pi1sg
 subroutine sy2pi1sg(irpot, readpt, iread)
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use mod_hibasutil, only: raise
 use funit, only: FUNIT_INP
 implicit none

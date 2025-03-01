@@ -126,11 +126,11 @@ use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
-use constants, only: econv, xmconv, ang2c
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use constants, only: econv, xmconv
+use mod_cosysi, only: nscode, ispar
+use mod_cosysr, only: rspar
 use mod_par, only: iprint, rendai=>scat_rendai
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, lammin, lammax, mproj
 use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
@@ -143,7 +143,7 @@ character*80 string
 character*27 case
 character*2 chf
 dimension jhold(1), ishold(1), ieps(2)
-dimension c0(1), c1(1), c2(1), cf(1), ehold(1)
+dimension c0(nmax), c1(nmax), c2(nmax), cf(nmax), ehold(1)
 dimension e(3,3), eig(3), sc1(3), sc2(3), vec(3,3), vii(0:2)
 !  cvtown: conversion factor from coulomb.volts to cm-1 (wavenumbers)
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
@@ -987,14 +987,12 @@ subroutine sypi (irpot, readpt, iread)
 !    islcod:   total number of logical system dependent variables
 ! ----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys, only: scod
-use mod_cosysl, only: islcod, lspar
+use mod_cosysl, only: islcod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_skip, only: nskip, iskip
+use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot
@@ -1003,7 +1001,8 @@ integer, intent(in) :: iread
 integer :: j, l, lc
 logical existf
 character*(*) fname
-character*60 filnam, line, potfil, filnm1
+character*60 filnam, line, potfil
+character*68 filnm1
 character*1 dot
 save potfil
 #include "common/comdot.F90"

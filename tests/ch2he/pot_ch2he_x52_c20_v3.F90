@@ -44,7 +44,7 @@ end
 ! ------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
 use mod_conlam, only: nlam, nlammx, lamnum
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 character*(*) filnam

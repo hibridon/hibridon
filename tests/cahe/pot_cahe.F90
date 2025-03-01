@@ -8,7 +8,7 @@
 ! --------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 character*(*) filnam
@@ -27,7 +27,7 @@ end
 subroutine driver
 use mod_covvl, only: vvl
 use mod_cosysi, only: ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 integer, pointer :: npot
@@ -114,7 +114,7 @@ subroutine pot (vv0, r)
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use constants, only: econv
 implicit double precision (a-h,o-z)
 integer, pointer :: nterm, nstate, ipol, npot
@@ -258,7 +258,7 @@ end if
 ! ---------------------------------------------------------------------
 ! pot1.f
 subroutine pot1(r,vp1,vs1,vp3,vs3)
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 implicit double precision (a-h,o-z)
 
 real(8), dimension(:), pointer :: en, de, re, be, rl, cl
@@ -287,7 +287,7 @@ return
 end
 
 subroutine potmsv(vp,vs,vp1,vs1,r)
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 implicit double precision (a-h,o-z)
 dimension v(4)
 real(8), dimension(:), pointer :: en, de, re, be, rl, cl, c
@@ -346,7 +346,7 @@ subroutine potmorse ( vs, r)
 !
 ! -----------------------------------------------------------------------
 !
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 implicit double precision (a-h,o-z)
 
 real(8), dimension(:), pointer :: en, de, re, be, rl, cl
