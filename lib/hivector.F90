@@ -1682,7 +1682,15 @@ integer function idamin(n, sx, incx)
 !     find smallest index of minimum magnitude of double precision s
 !     isamax =  first i,  i = 1 to n,  to minimize  abs(sx(1-incx+i*incx)
 !
-double precision sx(1), smin, xmag
+implicit none
+integer, intent(in) :: n
+real(8), intent(in) :: sx(n)
+integer, intent(in) :: incx
+
+
+real(8) :: smin, xmag
+integer :: i, ii, ns
+
 idamin = 0
 if (n .le. 0) return
 idamin = 1
@@ -1719,11 +1727,20 @@ integer function idmin(n, sx, incx)
 !     find smallest index of minimum element in double precision s
 !     isamax =  first i,  i = 1 to n,  to minimize  sx(1-incx+i*incx)
 !
-double precision sx(1), smin, xmag
+implicit none
+integer, intent(in) :: n
+real(8), intent(in) :: sx(n)
+integer, intent(in) :: incx
+
+
+real(8) :: smin, xmag
+integer :: i, ii, ns
+
 idmin = 0
 if (n .le. 0) return
 idmin = 1
 if (n .le. 1) return
+
 if (incx .eq. 1) go to 20
 !
 !        code for increments not equal to 1.
