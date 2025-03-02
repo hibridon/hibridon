@@ -126,7 +126,7 @@ subroutine ground(wf, r, nch, nphoto, mxphot)
 use mod_coiout, only: niout, indout
 use mod_cosysi, only: isicod, iscod=>ispar
 use mod_cosysr, only: rcod=>rspar
-use mod_parbas, only: lammin, mproj
+use mod_parbas, only: lammin
 use mod_ered, only: ered, rmu
 use mod_ch3i, only: vib, gswf_data
 implicit none
@@ -599,7 +599,7 @@ use mod_cosysr, only: rcod=>rspar
 use constants, only: econv, xmconv
 use mod_coiout, only: niout, indout
 use mod_par, only: iprint
-use mod_parbas, only: lammin, lammax, mproj
+use mod_parbas, only: lammin, lammax
 use mod_ered, only: ered, rmu
 use mod_ch3i, only: vib
 use mod_hitypes, only: bqs_type

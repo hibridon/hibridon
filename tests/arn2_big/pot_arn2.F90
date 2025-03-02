@@ -49,7 +49,7 @@ subroutine pot (vv0, r)
 !  -----------------------------------------------------------------------
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
-use mod_parbas, only: lammin, mproj
+use mod_parbas, only: lammin
 implicit double precision (a-h,o-z)
 
 

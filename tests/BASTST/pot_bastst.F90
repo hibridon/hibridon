@@ -39,7 +39,7 @@ end subroutine loapot
 
 subroutine init_pot_parameters(ibasty)
 use mod_parbas, only: ntv, lammin, lammax, mproj, ivcol, ivrow
-use mod_conlam, only: nlam, lamnum, nlammx
+use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: ispar
 use mod_chiral, only: lms_chiral => lms
 use mod_asymln, only: lms_asymln => lms

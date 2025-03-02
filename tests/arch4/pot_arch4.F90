@@ -98,7 +98,6 @@ subroutine pot (vv0, r)
 !
 use mod_covvl, only: vvl
 use mod_par, only: csflag, ihomo
-use mod_parbas, only: mproj
 implicit double precision (a-h,o-z)
 real(8) :: v(5)
 real(8), save :: csplin(69,5)

@@ -206,7 +206,7 @@ subroutine pot(vv0,r)
 ! -------------------------------------------------------------------
 use mod_covvl, only: vvl
 use mod_cosysi, only: ispar
-use mod_parbas, only: maxtrm, maxvb2, ntv, lammin, lammax, mproj
+use mod_parbas, only: maxtrm, maxvb2, ntv, lammin, lammax
 use mod_selb, only: ibasty
 use mod_skip, only: nskip, iskip
 implicit double precision(a-h,o-z)

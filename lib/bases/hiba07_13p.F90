@@ -121,11 +121,10 @@ subroutine ba13p (bqs, jhold, ehold, ishold, nlevel, nlevop, &
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_conlam, only: nlammx, lamnum
+use mod_conlam, only: nlammx
 use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
-use mod_parbas, only: mproj
 use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type

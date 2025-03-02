@@ -104,7 +104,7 @@ use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: lammax, mproj
+use mod_parbas, only: lammax
 use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_jtot, only: jjtot, jjlpar

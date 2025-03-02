@@ -107,7 +107,7 @@ use mod_coiout, only: niout, indout
 use mod_codim, only: nmax => mmax
 use mod_coamat, only: scmat => toto ! scmat(1)
 use mod_coener, only: energ, max_en
-use mod_conlam, only: nlammx, lamnum
+use mod_conlam, only: nlammx
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysl, only: islcod, lspar
