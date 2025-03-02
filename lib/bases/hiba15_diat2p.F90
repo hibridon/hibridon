@@ -107,7 +107,6 @@ use mod_par, only: iprint
 use mod_parbas, only: lammin, lammax, mproj
 use mod_par, only: boundc
 use mod_ered, only: ered, rmu
-use mod_skip, only: nskip
 use mod_jtot, only: jjtot, jjlpar
 use mod_hitypes, only: bqs_type
 use mod_hitypes, only: bqs_type

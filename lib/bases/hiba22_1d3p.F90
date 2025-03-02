@@ -119,7 +119,6 @@ use constants, only: econv, xmconv
 use mod_parbas, only: lammin, lammax, mproj
 use mod_par, only: boundc
 use mod_ered, only: ered, rmu
-use mod_skip, only: nskip
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
@@ -1031,7 +1030,6 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
 use mod_parbas, only: lammin, lammax, mproj
-use mod_skip, only: nskip
 use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot

@@ -564,7 +564,6 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
 use mod_parbas, only: lammin, lammax, mproj
-use mod_skip, only: nskip
 use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot
