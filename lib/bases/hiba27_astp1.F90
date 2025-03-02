@@ -1062,7 +1062,8 @@ logical existf
 integer icod, ircod
 character*1 dot
 character*(*) fname
-character*60 line, filnam, potfil, filnm1
+character*60 line, filnam, potfil
+character*68 filnm1
 parameter (icod=4, ircod=4)
 save potfil
 !  number and names of system dependent parameters

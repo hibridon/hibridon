@@ -765,7 +765,8 @@ integer :: ibran, j, l, lc, nphoto, nterm, nvib
 logical existf
 character*1 dot
 character*(*) fname
-character*60 filnam, line, potfil, filnm1
+character*60 filnam, line, potfil
+character*68 filnm1
 #include "common/comdot.F90"
 save potfil
 !  number and names of system dependent parameters

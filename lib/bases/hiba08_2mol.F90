@@ -538,7 +538,8 @@ integer :: i, ihigh, ij, iline, ilow, itop, j, l, lc
 logical existf
 character*1 dot
 character*(*) fname
-character*60 filnam, line, potfil, filnm1
+character*60 filnam, line, potfil
+character*68 filnm1
 save potfil
 #include "common/comdot.F90"
 

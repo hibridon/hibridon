@@ -1150,7 +1150,8 @@ logical existf
 character*8 char
 character*(*) fname
 character*1 dot
-character*60 filnam, line, potfil, filnm1
+character*60 filnam, line, potfil
+character*68 filnm1
 save potfil
 #include "common/comdot.F90"
 irpot = 1

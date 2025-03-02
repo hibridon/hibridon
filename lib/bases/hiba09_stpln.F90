@@ -702,7 +702,8 @@ integer icod, ircod
 integer i, j, k, l, lc
 character*1 dot
 character*(*) fname
-character*60 line, filnam, potfil, filnm1
+character*60 line, filnam, potfil
+character*68 filnm1
 parameter (icod=9, ircod=5)
 #include "common/comdot.F90"
 save potfil

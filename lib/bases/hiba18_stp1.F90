@@ -655,7 +655,8 @@ integer icod, ircod
 integer i, j, l, lc
 character*1 dot
 character*(*) fname
-character*60 line, filnam, potfil, filnm1
+character*60 line, filnam, potfil
+character*68 filnm1
 parameter (icod=5, ircod=3)
 save potfil
 !  number and names of system dependent parameters

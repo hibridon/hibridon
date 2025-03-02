@@ -1002,7 +1002,7 @@ readpt = .true.
     filnam = potfil
   end if
   potfil=filnam
-  filnm1 = '/potdata/'//filnam
+  filnm1 = 'potdata/'//filnam
   inquire(file=filnm1,exist=existf)
   if(.not.existf) then
     write(6,1025) filnam(1:lc)

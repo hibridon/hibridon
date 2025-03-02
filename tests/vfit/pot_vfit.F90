@@ -72,7 +72,8 @@ use mod_selb, only: ibasty
 use mod_skip, only: nskip, iskip
 implicit double precision(a-h,o-z)
 character*(*) filnam
-character*80 potlab, filnm1
+character*80 potlab
+character*68 filnm1
 common /coptx/ nblkx,maxpwx,minmpx,maxmpx,mpsstx,junk, &
   rex(20),rin(20),tanhy(250),fex(250),a1(250),ah(250), &
   art(250),are(250)
