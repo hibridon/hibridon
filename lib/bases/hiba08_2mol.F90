@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba08_2mol
 contains
 ! sy2mol (sav2mol/ptr2mol) defines, save variables and reads             *
@@ -120,6 +121,8 @@ integer, pointer :: nterm, nsym
 real(8), pointer :: brot, drot, hrot
 nterm=>ispar(1); nsym=>ispar(2)
 brot=>rspar(1); drot=>rspar(2); hrot=>rspar(3)
+
+UNUSED_DUMMY(sc4)
 
 !  check for consistency in the values of flaghf and csflag
 if (flaghf) then

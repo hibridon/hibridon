@@ -171,6 +171,7 @@ brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4)
 UNUSED_DUMMY(sc1)
 UNUSED_DUMMY(sc2)
 UNUSED_DUMMY(sc3)
+UNUSED_DUMMY(sc4)
 
 zero = 0.d0
 two = 2.d0

@@ -162,6 +162,7 @@ b1rot=>rspar(1); d1rot=>rspar(2); flmbda=>rspar(3); gamma=>rspar(4); b2rot=>rspa
 UNUSED_DUMMY(numin)
 UNUSED_DUMMY(sc2)
 UNUSED_DUMMY(sc3)
+UNUSED_DUMMY(sc4)
 
 !  check for consistency in the values of flaghf and csflag
 if (flaghf) then

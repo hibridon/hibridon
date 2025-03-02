@@ -149,6 +149,7 @@ b1rot=>rspar(1); d1rot=>rspar(2); gamma=>rspar(3); b2rot=>rspar(4);
 UNUSED_DUMMY(sc1)
 UNUSED_DUMMY(sc2)
 UNUSED_DUMMY(sc3)
+UNUSED_DUMMY(sc4)
 
 !  check for consistency in the values of flaghf and csflag
 call bqs%init(nmax)

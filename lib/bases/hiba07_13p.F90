@@ -150,6 +150,7 @@ rl=>rspar(17:20); cl=> rspar(21:24); cmix=>rspar(25)
 UNUSED_DUMMY(sc1)
 UNUSED_DUMMY(sc2)
 UNUSED_DUMMY(sc3)
+UNUSED_DUMMY(sc4)
 
 zero = 0.d0
 two = 2.d0

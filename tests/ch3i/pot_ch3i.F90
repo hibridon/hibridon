@@ -637,6 +637,7 @@ common /coiscl/ iscl(40)
 UNUSED_DUMMY(sc1)
 UNUSED_DUMMY(sc2)
 UNUSED_DUMMY(sc3)
+UNUSED_DUMMY(sc4)
 
 zero = 0.d0
 one = 1.d0
