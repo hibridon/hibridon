@@ -103,7 +103,6 @@ use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
 use mod_par, only: boundc
-use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_two, only: numj, nj1j2
 use mod_hitypes, only: bqs_type
@@ -522,7 +521,6 @@ subroutine sy2mol (irpot, readpt, iread)
 !  line 14:
 !    brot, drot, hrot:    rotational constants of the molecule in cm-1
 !  -----------------------------------------------------------------------
-use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar

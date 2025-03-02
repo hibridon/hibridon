@@ -50,6 +50,7 @@ use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: ispar
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 character*(*) filnam
 integer, pointer :: nterm

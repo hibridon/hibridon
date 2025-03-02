@@ -149,6 +149,8 @@ UNUSED_DUMMY(sc2)
 UNUSED_DUMMY(sc3)
 UNUSED_DUMMY(sc4)
 UNUSED_DUMMY(ihomo)
+UNUSED_DUMMY(nu)
+UNUSED_DUMMY(numin)
 
 zero = 0.d0
 two = 2.d0
