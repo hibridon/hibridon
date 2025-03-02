@@ -409,12 +409,11 @@ subroutine pot(vv0, r)
 
 !      implicit none
 use mod_covvl, only: vvl
-use mod_conlam, only: nlam, nlammx
+use mod_conlam, only: nlam
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use constants, only: s4pi
 use mod_nh3h2, only: nvv, ivv
 implicit double precision (a-h,o-z)
-!      integer ivv, nvv, nlam, nlammx, kv, kvv, nvmx
 
 double precision  r, v, vv, vv0
 

@@ -44,7 +44,7 @@ implicit none
 !     parameters be passed between the pot routine and the basis routine
 character*(*) :: file_name
 character(255) :: file_path
-integer :: iunit, ir, iv, nv, nlammx
+integer :: iunit, ir, iv, nv
 !     A call to this subroutine with a string containing a space will be
 !     made at the time hibridon loads. Input file is not available at
 !     the time.

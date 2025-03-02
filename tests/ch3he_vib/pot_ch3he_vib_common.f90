@@ -20,7 +20,7 @@ use mod_coeint, only: eint
 use mod_covvl, only: vvl
 !     size of vvl : NVVL
 
-use mod_conlam, only: nlam, nlammx
+use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysr, only: rspar
 use mod_cosysi, only: isicod, ispar
