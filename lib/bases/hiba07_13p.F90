@@ -149,6 +149,7 @@ en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
 rl=>rspar(17:20); cl=> rspar(21:24); cmix=>rspar(25)
 UNUSED_DUMMY(sc1)
 UNUSED_DUMMY(sc2)
+UNUSED_DUMMY(sc3)
 
 zero = 0.d0
 two = 2.d0

@@ -129,6 +129,7 @@ real(8), pointer :: brot, aso1, aso2
 nterm=>ispar(1); iop=>ispar(2); jmax=>ispar(3)
 brot=>rspar(1); aso1=>rspar(2); aso2=>rspar(3)
 UNUSED_DUMMY(numin)
+UNUSED_DUMMY(sc3)
 
 zero = 0.d0
 half=0.5d0

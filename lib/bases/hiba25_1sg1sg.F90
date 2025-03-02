@@ -143,6 +143,7 @@ b1rot=>rspar(1); d1rot=>rspar(2); b2rot=>rspar(3)
 
 UNUSED_DUMMY(sc1)
 UNUSED_DUMMY(sc2)
+UNUSED_DUMMY(sc3)
 
 !  check for consistency in the values of flaghf and csflag
 if (flaghf) then

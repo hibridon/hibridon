@@ -123,6 +123,7 @@ nterm=>ispar(1); nphoto=>ispar(2)
 aso=>rspar(1)
 
 UNUSED_DUMMY(numin)
+UNUSED_DUMMY(sc3)
 
 zero = 0.d0
 half=0.5d0

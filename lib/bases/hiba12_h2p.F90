@@ -148,6 +148,7 @@ real(8), pointer :: brot, aso
 nterm=>ispar(1); iop=>ispar(2); jmax=>ispar(3)
 brot=>rspar(1); aso=>rspar(2)
 UNUSED_DUMMY(numin)
+UNUSED_DUMMY(sc3)
 
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units

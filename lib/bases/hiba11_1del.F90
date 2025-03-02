@@ -133,6 +133,7 @@ brot=>rspar(1); q=>rspar(2)
 
 UNUSED_DUMMY(sc1)
 UNUSED_DUMMY(sc2)
+UNUSED_DUMMY(sc3)
 
 pi2 = 1.570796327d0
 zero = 0.d0
