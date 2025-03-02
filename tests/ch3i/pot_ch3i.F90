@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 
 module mod_grnd
 real(8) :: reg
@@ -633,6 +634,7 @@ logical clfl
 common /coicl/ clfl
 
 common /coiscl/ iscl(40)
+UNUSED_DUMMY(sc1)
 zero = 0.d0
 one = 1.d0
 two = 2.d0

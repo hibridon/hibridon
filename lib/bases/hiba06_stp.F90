@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba06_stp
 contains
 ! systp (savstp/ptrstp) defines, save variables and reads                *
@@ -167,6 +168,7 @@ nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=>ispar(4); jmax=>ispar(
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4)
 
 
+UNUSED_DUMMY(sc1)
 
 zero = 0.d0
 two = 2.d0
@@ -636,7 +638,6 @@ integer, intent(in) :: iread
 integer :: j, l, lc
 logical existf
 integer icod, ircod
-integer i
 character*1 dot
 character*(*) fname
 character*60 line, filnam, potfil

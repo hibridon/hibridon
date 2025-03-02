@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 
 ! syastp3 (savastp3/ptrastp3) defines, saves variables and reads         *
 !                  potential for C2v asym top - lin mo;ecule scattering  *
@@ -193,6 +194,7 @@ integer(8) :: v2_index
 nterm=>ispar(1); numpot=>ispar(2); jmax=>ispar(3); iop=>ispar(4); j2min=>ispar(5); j2max=>ispar(6); ipotsy2=>ispar(7)
 arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4); b2rot=>rspar(5)
   
+UNUSED_DUMMY(sc1)
 
 zero = 0.d0
 two = 2.d0

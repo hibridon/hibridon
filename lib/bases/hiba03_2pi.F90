@@ -141,8 +141,8 @@ real(8), pointer :: brot, aso, p, q
 nterm=>ispar(1); jmax=>ispar(2); igu=>ispar(3); isa=>ispar(4); npar=>ispar(5) 
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4)
 
-UNUSED_VARIABLE(sc1)
-UNUSED_VARIABLE(sc4)
+UNUSED_DUMMY(sc1)
+UNUSED_DUMMY(sc4)
 
 pi2 = 1.570796327d0
 zero = 0.d0

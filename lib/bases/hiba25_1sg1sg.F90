@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 ! sy1sg1sg (sav1sg1sg/ptr1sg1sg) defines, saves variables and reads      *
 !                  potentials for 1sigma - 1sigma (different molecules)  *
 ! --------------------------------------------------------------------
@@ -139,6 +140,9 @@ integer, pointer :: j1max, j2min, j2max, ipotsy2
 real(8), pointer :: b1rot, d1rot, b2rot
 j1max=>ispar(1); j2min=>ispar(2); j2max=>ispar(3); ipotsy2=>ispar(4)
 b1rot=>rspar(1); d1rot=>rspar(2); b2rot=>rspar(3)
+
+UNUSED_DUMMY(sc1)
+
 !  check for consistency in the values of flaghf and csflag
 if (flaghf) then
   write (9, 5)

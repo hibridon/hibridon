@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba26_2sg1sg
 contains
 ! sy2sg1sg (sav2sg1sg/ptr2sg1sg) defines, saves variables and reads     *
@@ -144,6 +145,9 @@ integer, pointer :: n1max, j2min, j2max, ipotsy2
 real(8), pointer :: b1rot, d1rot, gamma, b2rot
 n1max=>ispar(1); j2min=>ispar(2); j2max=>ispar(3); ipotsy2=>ispar(4)
 b1rot=>rspar(1); d1rot=>rspar(2); gamma=>rspar(3); b2rot=>rspar(4);
+
+UNUSED_DUMMY(sc1)
+
 !  check for consistency in the values of flaghf and csflag
 call bqs%init(nmax)
 nn = 0

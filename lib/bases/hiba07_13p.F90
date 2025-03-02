@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba07_13p
 real(8) :: ttrans(6,6)
 contains
@@ -146,6 +147,7 @@ real(8), pointer :: cmix
 nterm=>ispar(1); nstate=>ispar(2); ipol=>ispar(3); npot=>ispar(4)
 en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
 rl=>rspar(17:20); cl=> rspar(21:24); cmix=>rspar(25)
+UNUSED_DUMMY(sc1)
 
 zero = 0.d0
 two = 2.d0

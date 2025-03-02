@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba11_1del
 contains
 ! sy1del (sav1del/ptr1del) defines, saves variables and reads            *
@@ -129,6 +130,8 @@ integer, pointer :: nterm, jmax, igu, isa, npar
 real(8), pointer :: brot, q
 nterm=>ispar(1); jmax=>ispar(2); igu=>ispar(3); isa=>ispar(4); npar=>ispar(5)
 brot=>rspar(1); q=>rspar(2)
+
+UNUSED_DUMMY(sc1)
 
 pi2 = 1.570796327d0
 zero = 0.d0
