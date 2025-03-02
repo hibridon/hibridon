@@ -102,7 +102,7 @@ use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: lammin, lammax, mproj
+use mod_parbas, only: lammin, mproj
 use mod_par, only: boundc
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu

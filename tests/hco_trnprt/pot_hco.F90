@@ -89,7 +89,7 @@ subroutine pot (vv0, r)
 ! ----------------------------------------------------------------------
 use mod_covvl, only: vvl
 use mod_par, only: csflag, ihomo
-use mod_parbas, only: lammin, lammax, mproj
+use mod_parbas, only: lammin, mproj
 implicit double precision (a-h,o-z)
 dimension v(16)
 real(8), save :: csplin(47,16)
