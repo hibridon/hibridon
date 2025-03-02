@@ -124,6 +124,7 @@ aso=>rspar(1)
 UNUSED_DUMMY(numin)
 UNUSED_DUMMY(sc3)
 UNUSED_DUMMY(sc4)
+UNUSED_DUMMY(ihomo)
 
 zero = 0.d0
 half=0.5d0

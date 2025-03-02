@@ -163,6 +163,7 @@ UNUSED_DUMMY(numin)
 UNUSED_DUMMY(sc2)
 UNUSED_DUMMY(sc3)
 UNUSED_DUMMY(sc4)
+UNUSED_DUMMY(ihomo)
 
 !  check for consistency in the values of flaghf and csflag
 if (flaghf) then

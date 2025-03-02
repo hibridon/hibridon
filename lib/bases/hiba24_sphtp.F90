@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba24_sphtp
 contains
 ! sysphtp (savsphtp/ptrsphtp) defines, saves variables and reads         *
@@ -319,6 +320,8 @@ integer, pointer :: nterm, iop, jmax
 real(8), pointer :: brot, dj, dk
 nterm=>ispar(1); iop=>ispar(2); jmax=>ispar(3)
 brot=>rspar(1) ; dj=>rspar(2); dk=>rspar(3)
+
+UNUSED_DUMMY(ihomo)
 
 if (flaghf) then
   write (6, 5)

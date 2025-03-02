@@ -160,7 +160,7 @@ real(8), pointer :: en1d
 nterm=>ispar(1); nstate=>ispar(2); npot=>ispar(4)
 en1d=>rspar(1)
 UNUSED_DUMMY(numin)
-
+UNUSED_DUMMY(ihomo)
 npot = 0
 
 zero = 0.d0

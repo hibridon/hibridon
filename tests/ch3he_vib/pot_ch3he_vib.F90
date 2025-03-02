@@ -1,3 +1,4 @@
+#include "unused.h"
 !   pot_ch3he_vib.f
 !   authors: Qianli Ma
 !
@@ -534,6 +535,8 @@ call C_F_POINTER (C_LOC(sc4), ktemp, [nmax])
 !   Construct emax array from input parameters
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
 emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
+
+UNUSED_DUMMY(ihomo)
 
 emax(1) = emax0
 emax(2) = emax1

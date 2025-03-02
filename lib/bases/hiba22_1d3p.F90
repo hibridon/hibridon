@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba22_1d3p
 contains
 ! sy1d3p (sav1d3p/ptr1d3p) defines, saves variables and reads            *
@@ -135,6 +136,8 @@ integer, pointer :: nterm, nstate, ipol, npot
 real(8), pointer :: en1d
 nterm=>ispar(1); nstate=>ispar(2); ipol=>ispar(3); npot=>ispar(4)
 en1d=>rspar(1)
+
+UNUSED_DUMMY(ihomo)
 
 npot = 0
 

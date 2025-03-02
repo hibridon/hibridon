@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 ! syastp2 (savastp2/ptrastp2) defines, saves variables and reads         *
 !                  potential for chiral asymmetric top-atom scattering   *
 !                  (or molecule with no symmetry elements)               *
@@ -169,6 +170,7 @@ real(8), pointer :: arot, brot, crot, emax
 nterm=>ispar(1); numpot=>ispar(2); jmax=>ispar(3)
 arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4)
 
+UNUSED_DUMMY(ihomo)
 
 zero = 0.d0
 two = 2.d0

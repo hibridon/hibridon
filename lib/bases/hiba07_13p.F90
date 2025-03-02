@@ -150,6 +150,7 @@ UNUSED_DUMMY(sc1)
 UNUSED_DUMMY(sc2)
 UNUSED_DUMMY(sc3)
 UNUSED_DUMMY(sc4)
+UNUSED_DUMMY(ihomo)
 
 zero = 0.d0
 two = 2.d0
@@ -513,7 +514,7 @@ subroutine tcasea(j,jlpar)
 !   author:  thierry duhoo and millard alexander
 !   latest revision date:  30-dec-1995
 ! -----------------------------------------
-use mod_cosysr, only: isrcod, rspar
+use mod_cosysr, only: rspar
 use mod_himatrix, only: mxma
 use mod_hivector, only: dset
 implicit double precision (a-h,o-z)
