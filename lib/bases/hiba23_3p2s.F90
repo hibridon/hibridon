@@ -121,7 +121,7 @@ use constants, only: econv, xmconv
 use mod_parbas, only: lammin, lammax, mproj
 use mod_par, only: boundc
 use mod_ered, only: ered, rmu
-use mod_skip, only: nskip, iskip
+use mod_skip, only: nskip
 !  modules mod_jtot, mod_ja, and mod_el used to transmit to ground subroutine
 use mod_jtot, only: jjtot, jjlpar
 use mod_ja, only: jja
@@ -622,7 +622,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod
 use funit, only: FUNIT_INP
 use mod_parbas, only: lammin, lammax, mproj
-use mod_skip, only: nskip, iskip
+use mod_skip, only: nskip
 use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot

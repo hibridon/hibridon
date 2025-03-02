@@ -106,7 +106,7 @@ use constants, only: econv, xmconv
 use mod_parbas, only: lammin, lammax, mproj
 use mod_par, only: boundc
 use mod_ered, only: ered, rmu
-use mod_skip, only: nskip, iskip
+use mod_skip, only: nskip
 use mod_jtot, only: jjtot, jjlpar
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -754,7 +754,7 @@ use mod_cosysr, only: isrcod, rcod=>rspar
 use mod_par, only:  jtot1,jtot2,jtotd,jlpar
 use funit, only: FUNIT_INP
 use mod_parbas, only: lammin, lammax, mproj
-use mod_skip, only: nskip, iskip
+use mod_skip, only: nskip
 use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(out) :: irpot

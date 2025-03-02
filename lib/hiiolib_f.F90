@@ -302,7 +302,7 @@ use funit, only: FUNIT_INP
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
-use mod_skip, only: nskip, iskip
+use mod_skip, only: nskip
 use mod_file, only: input, output, jobnam, savfil
 implicit double precision (a-h,o-z)
 integer i, length
