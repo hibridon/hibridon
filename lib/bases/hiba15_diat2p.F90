@@ -666,13 +666,13 @@ do 320 il = 1,lammax(1)
          j12col=isc1(icol)
       endif
       if (.not. csflag .or. (csflag .and. ihomo)) then
-        call vlmh2p (irow, icol, jtot, jlpar, jrow, jcol,bqs%inq(irow), &
+        call vlmh2p (jtot, jrow, jcol,bqs%inq(irow), &
         bqs%inq(icol), j12row, j12col, bqs%lq(irow), bqs%lq(icol), ilamr, &
         ilama, ilam12, nu, csflag, vee)
       else if (csflag .and. .not.ihomo) then
-        call vlmh2pc(irow, icol, jtot, jlpar, jrow, jcol,bqs%inq(irow), &
+        call vlmh2pc(jtot, jrow, jcol,bqs%inq(irow), &
         bqs%inq(icol), bqs%jq(irow), bqs%jq(icol), ilamr, &
-        ilama, imu, nu, jmol, flaghf, vee)
+        ilama, imu, nu, flaghf, vee)
       endif
       if (vee .ne. 0) then
         i = i + 1

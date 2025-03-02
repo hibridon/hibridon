@@ -100,7 +100,7 @@ use mod_coeint, only: eint
 use mod_conlam, only: nlam
 use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
-use constants, only: econv, xmconv
+use constants, only: econv
 use mod_par, only: iprint
 use mod_par, only: boundc
 use mod_ered, only: ered, rmu

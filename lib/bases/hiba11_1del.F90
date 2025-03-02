@@ -77,7 +77,6 @@ subroutine ba1del (bqs, jhold, ehold, ishold, nlevel, &
 !    projection index are equal to the values stored in j, jtot, and nu
 !  variables in common bloc /cosysr/
 !    isrcod:   total number of real system dependent variables
-!    idum:     dummy variable for alignment
 !    brot:     rotational constant in cm-1
 !    q:        lambda-doubling constant cm-1
 !  variables in common block /cosysi/
@@ -105,10 +104,10 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
 use mod_cosysi, only: ispar
-use mod_cosysr, only: idum=>junkr, rspar
+use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: lammin, lammax, mproj, lam2
+use mod_parbas, only: lammin, lammax, mproj
 use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
@@ -741,7 +740,7 @@ subroutine sy1del (irpot, readpt, iread)
 use mod_coiout, only: niout, indout
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, idum=>junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
 use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token

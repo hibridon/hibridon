@@ -125,6 +125,7 @@ UNUSED_DUMMY(numin)
 UNUSED_DUMMY(sc3)
 UNUSED_DUMMY(sc4)
 UNUSED_DUMMY(ihomo)
+UNUSED_DUMMY(nu)
 
 zero = 0.d0
 half=0.5d0
@@ -674,8 +675,8 @@ subroutine trans22(w,n,nmax)
 !  latest revision date:  4-oct-1992
 !  --------------------------------------------
 use mod_coeint, only: eint
-use mod_cosysr, only: isrcod, rspar
-use constants, only: econv, xmconv
+use mod_cosysr, only: rspar
+use constants, only: econv
 use mod_jtot, only: j => jjtot, jlpar => jjlpar
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
   use mod_himatrix, only: mxma
@@ -689,7 +690,6 @@ data one,half /1.d0,0.5d0/
 data nnmax /6/
 
 real(8), pointer :: aso
-aso=>rspar(1)
 
 call tcasea22(j,jlpar)
 if (n .ne. 6) then
@@ -712,6 +712,7 @@ return
 !  w now contains desired product
 ! restore internal energies of each channel
 entry energ22
+aso=>rspar(1)
 eint(1)=one
 eint(2)=one
 eint(3)=-half
@@ -751,7 +752,7 @@ use mod_coiout, only: niout, indout
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, rcod=>rspar
-use mod_par, only:  jtot1,jtot2,jtotd,jlpar
+use mod_par, only: jlpar
 use funit, only: FUNIT_INP
 use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token

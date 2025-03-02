@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba09_stpln
 logical :: twomol ! if .true. collision between symmetric top and linear
                   ! molecule, if .false. collision symmetric top-atom.
@@ -162,7 +163,6 @@ type(bqs_type), intent(out) :: bqs
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-character*40 fname
 dimension jhold(1), ehold(1),&
           ishold(1)
 dimension ieps(1), ktemp(1), jtemp(1), isc1(1)
@@ -173,7 +173,7 @@ real(8), pointer :: brot, crot, delta, emax, drot
 nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=> ispar(4); ninv=>ispar(5)
 jmax=>ispar(6); ipotsy2=>ispar(7); j2max=>ispar(8); j2min=>ispar(9)
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)
-
+UNUSED_DUMMY(isc1)
 twomol=.true.
 !  check for consistency in the values of flaghf and csflag
 if (flaghf) then
