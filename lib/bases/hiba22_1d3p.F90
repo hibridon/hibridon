@@ -117,7 +117,7 @@ use mod_conlam, only: nlam
 use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
-use mod_parbas, only: lammin, mproj
+use mod_parbas, only: mproj
 use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
