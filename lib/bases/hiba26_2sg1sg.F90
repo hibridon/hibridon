@@ -147,6 +147,7 @@ n1max=>ispar(1); j2min=>ispar(2); j2max=>ispar(3); ipotsy2=>ispar(4)
 b1rot=>rspar(1); d1rot=>rspar(2); gamma=>rspar(3); b2rot=>rspar(4);
 
 UNUSED_DUMMY(sc1)
+UNUSED_DUMMY(sc2)
 
 !  check for consistency in the values of flaghf and csflag
 call bqs%init(nmax)

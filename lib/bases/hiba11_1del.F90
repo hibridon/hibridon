@@ -132,6 +132,7 @@ nterm=>ispar(1); jmax=>ispar(2); igu=>ispar(3); isa=>ispar(4); npar=>ispar(5)
 brot=>rspar(1); q=>rspar(2)
 
 UNUSED_DUMMY(sc1)
+UNUSED_DUMMY(sc2)
 
 pi2 = 1.570796327d0
 zero = 0.d0

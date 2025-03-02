@@ -160,6 +160,7 @@ real(8), pointer :: b1rot, d1rot, flmbda, gamma, b2rot
 j1max=>ispar(1); j2min=>ispar(2); j2max=>ispar(3); ipotsy2=>ispar(4)
 b1rot=>rspar(1); d1rot=>rspar(2); flmbda=>rspar(3); gamma=>rspar(4); b2rot=>rspar(5)
 UNUSED_DUMMY(numin)
+UNUSED_DUMMY(sc2)
 
 !  check for consistency in the values of flaghf and csflag
 if (flaghf) then
