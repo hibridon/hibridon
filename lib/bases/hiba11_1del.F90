@@ -104,7 +104,7 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
 use mod_cosysi, only: ispar
-use mod_cosysr, only: isrcod, idum=>junkr, rspar
+use mod_cosysr, only: idum=>junkr, rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
 use mod_parbas, only: lammin, lammax, mproj, lam2

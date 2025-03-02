@@ -122,7 +122,7 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlammx, lamnum
 use mod_cosysi, only: ispar
-use mod_cosysr, only: isrcod, rspar
+use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
 use mod_parbas, only: lammin, lammax, mproj
 use mod_par, only: boundc

@@ -131,7 +131,7 @@ use mod_cocent, only: cchn => cent
 use mod_coeint, only: echn => eint
 use mod_conlam, only: nlam
 use mod_cosysi, only: ispar
-use mod_cosysr, only: isrcod, rspar
+use mod_cosysr, only: rspar
 use mod_hibasutil, only: raise
 use mod_par, only: iprint
 use mod_ered, only: ered, rmu

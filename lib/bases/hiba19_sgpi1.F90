@@ -168,7 +168,7 @@ use mod_coisc3, only: ifi => isc3 ! ifi(1)
 use mod_conlam, only: nlam
 use mod_hiba03_2pi, only: vlm2pi
 use mod_cosysi, only: ispar
-use mod_cosysr, only: isrcod, rspar
+use mod_cosysr, only: rspar
 use mod_hibasutil, only: vlm2sg, iswap, rswap
 use constants, only: econv, xmconv
 use mod_par, only: iprint

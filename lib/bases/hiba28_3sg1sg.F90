@@ -130,7 +130,7 @@ use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_conlam, only: nlam
 use mod_cosysi, only: ispar
-use mod_cosysr, only: isrcod, rspar
+use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
 use mod_parbas, only: lammin, lammax, mproj

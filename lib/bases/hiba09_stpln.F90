@@ -150,7 +150,7 @@ use mod_coeint, only: eint
 use mod_coamat, only: ietmp ! ietmp(1)
 use mod_conlam, only: nlam
 use mod_cosysi, only: ispar
-use mod_cosysr, only: isrcod, rspar
+use mod_cosysr, only: rspar
 use mod_hibasutil, only: vlmstp, vlmstpln
 use constants, only: econv, xmconv
 use mod_par, only: iprint
