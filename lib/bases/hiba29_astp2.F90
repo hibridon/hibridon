@@ -146,7 +146,6 @@ use mod_cosysr, only: rspar
 use mod_hibasutil, only: rotham
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -159,8 +158,8 @@ dimension jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
           fistmp(1)
 !  scratch arrays for computing asymmetric top energies and wave fns.
-dimension e(narray,narray), eig(narray), vec(narray,narray), &
-  sc1(narray), sc2(narray), work(288)
+dimension e(narray,narray), eig(narray), &
+  sc1(narray), work(288)
 !
 
 integer, pointer ::nterm, numpot, jmax 
@@ -169,6 +168,7 @@ nterm=>ispar(1); numpot=>ispar(2); jmax=>ispar(3)
 arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4)
 
 UNUSED_DUMMY(ihomo)
+UNUSED_DUMMY(rcut)
 
 zero = 0.d0
 two = 2.d0
@@ -888,7 +888,6 @@ subroutine syastp2 (irpot, readpt, iread)
 !
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
-use mod_coiout, only: niout, indout
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
@@ -912,7 +911,7 @@ real(8), pointer, save :: arot, brot, crot, emax
 nterm=>ispar(1); numpot=>ispar(2); jmax=>ispar(3)
 arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4)
 
-
+UNUSED_DUMMY(irpot)
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
 !  in the same order as in the common block /cosysi/
@@ -946,7 +945,7 @@ return
 entry ptrastp2 (fname, readpt)
 line = fname
 readpt = .true.
-100 if (readpt) then
+if (readpt) then
   l=1
   call get_token(line,l,filnam,lc)
   if(lc.eq.0) then

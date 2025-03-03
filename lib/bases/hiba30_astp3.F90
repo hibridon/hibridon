@@ -169,8 +169,6 @@ use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
 use mod_hibasutil, only: rotham, rotham1
 use constants, only: econv, xmconv
-use mod_par, only: iprint
-use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -183,17 +181,18 @@ dimension jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
           fistmp(1)
 !  scratch arrays for computing asymmetric top energies and wave fns.
-dimension e(narray,narray), eig(narray), vec(narray,narray), &
-  sc1(narray), sc2(narray), work(10000), kp(10000), ko(10000), &
+dimension e(narray,narray), eig(narray), &
+  sc1(narray), work(10000), kp(10000), ko(10000), &
   j2rot(10000), e2rot(10000)
 !
 integer, pointer :: nterm, numpot, jmax, iop, j2min, j2max, ipotsy2
 real(8), pointer :: arot, brot, crot, emax, b2rot
-integer(8) :: v2_index
 nterm=>ispar(1); numpot=>ispar(2); jmax=>ispar(3); iop=>ispar(4); j2min=>ispar(5); j2max=>ispar(6); ipotsy2=>ispar(7)
 arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4); b2rot=>rspar(5)
   
 UNUSED_DUMMY(sc1)
+UNUSED_DUMMY(rcut)
+UNUSED_DUMMY(clist)
 
 zero = 0.d0
 two = 2.d0
@@ -837,7 +836,7 @@ subroutine vastp3(j1r,j2r,j12r,lr,j1c,j2c,j12c,lc, &
 !  subroutines called:
 !    xf3j, xf6j, xf9j
 !  -----------------------------------------------------------------------
-use mod_coatpi, only: narray, isiz
+use mod_coatpi, only: narray
 use mod_coatpr, only: c
 use mod_hiutil, only: xf3j, xf6j, xf9j
 implicit double precision (a-h,o-z)
@@ -1016,7 +1015,6 @@ subroutine syastp3 (irpot, readpt, iread)
 !
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
-use mod_coiout, only: niout, indout
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
@@ -1039,6 +1037,8 @@ integer, pointer, save :: nterm, numpot, jmax, iop, j2min, j2max, ipotsy2
 real(8), pointer, save :: arot, brot, crot, emax, b2rot
 nterm=>ispar(1); numpot=>ispar(2); jmax=>ispar(3); iop=>ispar(4); j2min=>ispar(5); j2max=>ispar(6); ipotsy2=>ispar(7)
 arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4); b2rot=>rspar(5)
+
+UNUSED_DUMMY(irpot)
 
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
@@ -1077,7 +1077,7 @@ return
 entry ptrastp3 (fname, readpt)
 line = fname
 readpt = .true.
-100 if (readpt) then
+if (readpt) then
   l=1
   call get_token(line,l,filnam,lc)
   if(lc.eq.0) then
