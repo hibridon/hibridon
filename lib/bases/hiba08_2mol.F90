@@ -529,7 +529,7 @@ use funit, only: FUNIT_INP
 use mod_two, only: numj, nj1j2
 use mod_hiutil, only: gennam, get_token
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: i, ihigh, ij, iline, ilow, itop, j, l, lc

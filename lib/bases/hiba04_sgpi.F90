@@ -1375,7 +1375,7 @@ use mod_skip, only: nskip
 use mod_vib, only: nvibs, ivibs, nvibp, ivibp
 use mod_hiutil, only: gennam, get_token
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: i, ipi, isg, isgpi, ivp, ivs, j, k, l, lc, nterm, nvmaxp, nvmaxs, nvminp, nvmins

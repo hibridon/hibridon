@@ -145,8 +145,8 @@ dimension jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
           fistmp(1)
 !  scratch arrays for computing asymmetric top energies and wave fns.
-dimension e(narray,narray), eig(narray), vec(narray,narray), &
-  sc1(narray), sc2(narray), work(288)
+dimension e(narray,narray), eig(narray), &
+  sc1(narray), work(288)
 !
 integer, pointer :: nterm, numpot, ipotsy, iop, jmax
 real(8), pointer :: arot, brot, crot, emax
@@ -1004,10 +1004,10 @@ use funit, only: FUNIT_INP
 use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-integer :: i, icod, ircod, j, l, lc
+integer :: icod, ircod, j, l, lc
 logical existf
 character*1 dot
 character*(*) fname

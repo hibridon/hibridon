@@ -185,7 +185,7 @@ data basknd /'1-SIGMA', '2-SIGMA', '2-PI', 'SIGMA|PI', &
 ! graffy: colpar and fcod both contain the 28 logical parameters but in a different order, thus requiring a remapping through lindx. Why not simply having the same order, by making fcod match colpar?
 integer :: lindx(LPAR_COUNT)
 
-integer :: irpot
+integer :: irpot  ! 1 if potentiel has been defined, 0 otherwise
 integer :: irinp
 data irpot, irinp /0, 0/
 
@@ -1099,7 +1099,7 @@ goto 1  ! label:read_next_command
 !.....determine turning point from isotropic potential
 !     turn
 1600 if(irpot .eq. 0) then
-  write(6,510)
+  write(6,510)  ! potentiel not yet defined
   goto 1  ! label:read_next_command
 end if
 e = 0

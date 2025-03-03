@@ -88,7 +88,6 @@ subroutine ba2del (bqs, jhold, ehold, ishold, nlevel, &
 !    plus 1/2
 !  variables in common bloc /cosysr/
 !    isrcod:   total number of real system dependent variables
-!    idum:     dummy variable for alignment
 !    brot:     rotational constant in cm-1
 !    aso:      spin-orbit constant in cm-1
 !    p, q:     lambda-doubling constants cm-1
@@ -117,10 +116,10 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
 use mod_cosysi, only: ispar
-use mod_cosysr, only: isrcod, idum=>junkr, rspar
+use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: lammin, lammax, mproj, lam2
+use mod_parbas, only: lammin, lammax, mproj
 use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
@@ -898,7 +897,7 @@ use funit, only: FUNIT_INP
 use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: j, l, lc
@@ -982,7 +981,7 @@ readpt = .true.
     filnam = potfil
   end if
   potfil=filnam
-  filnm1 = '.potdata/'//filnam
+  filnm1 = 'potdata/'//filnam
   inquire(file=filnm1,exist=existf)
   if(.not.existf) then
     write(6,1025) filnam(1:lc)

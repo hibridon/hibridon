@@ -172,7 +172,7 @@ double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV), &
      spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV), &
      spl_d(MAX_NR, MAX_NV)
 
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 character*(*) fname

@@ -348,7 +348,7 @@ use mod_par, only: par_readpt=>readpt
 use funit, only: FUNIT_INP
 use mod_parbas, only: lammin, lammax, mproj
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: i, j, iel, iofi, iofr, ndip, nel

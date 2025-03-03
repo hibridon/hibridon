@@ -635,7 +635,7 @@ implicit none
 !             of the variable names in cosysi followed by the ordering of
 !             variable names in cosysr followed by lammin, lammax, and mproj
 ! ------------------------------------------------------------------------
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: j, l, lc

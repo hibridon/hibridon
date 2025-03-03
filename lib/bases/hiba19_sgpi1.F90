@@ -161,8 +161,6 @@ subroutine basgpi1 (bqs, jhold, ehold, ishold, nlevel, &
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_cotq1, only: vec => tq1 ! vec(3,3)
-use mod_coisc1, only: ivec => isc1 ! ivec(1)
 use mod_coisc2, only: nrot => isc2 ! nrot(1)
 use mod_coisc3, only: ifi => isc3 ! ifi(1)
 use mod_conlam, only: nlam
@@ -185,7 +183,6 @@ dimension jhold(1), ehold(1), ishold(1), &
   ivhold(1), c12(1), c32(1), csig(1), ieps(2), &
   epi(maxvib), bpi(maxvib), dpi(maxvib), aso(maxvib), p(maxvib), &
   q(maxvib), jmax(maxvib)
-parameter (nvmax=10)
 ! this determines which eps level is first in channel list (arbitrary)
 data ieps / -1, 1 /
 data izero, ione, itwo / 0,     1,    2 /
@@ -966,7 +963,7 @@ if (bastst .and. iprint .ge. 1) then
 680   continue
 end if
 return
-1000 write (6, 1010) n, nmax
+write (6, 1010) n, nmax
 write (9, 1010) n, nmax
 1010 format(/' *** NCHANNELS=', i4,' .GT. MAX DIMENSION OF', &
          i4,' ABORT ***')
@@ -1140,14 +1137,14 @@ use mod_parbas, only: lammin, lammax, mproj
 use mod_skip, only: nskip
 use mod_hiutil, only: gennam, get_token
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: is, isa, isi, isr, isym, iv
 integer :: j, l, lc, nmax, nparsg, nterm
 integer, save :: numvpi
 logical existf
-character*8 char
+character*4 char
 character*(*) fname
 character*1 dot
 character*60 filnam, line, potfil

@@ -321,7 +321,7 @@ use funit, only: FUNIT_INP
 !   Parameters:
 !       iread: 1 to read data from input file, 0 to set default
 !       irpot, readpt: not refered to in this basis
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 !

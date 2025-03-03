@@ -115,7 +115,7 @@ use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar 
 use mod_hibasutil, only: raise
 use mod_par, only: iprint
-use mod_ered, only: ered, rmu
+use mod_ered, only: ered
 use mod_hitypes, only: bqs_type
 implicit none
 type(bqs_type), intent(out) :: bqs
@@ -145,6 +145,8 @@ real(8), pointer :: brot, aso, p, q, drot
 j1max=>ispar(1); npar=>ispar(2); j2min=>ispar(3); j2max=>ispar(4); iptsy2=>ispar(5)
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
 UNUSED_DUMMY(numin)
+UNUSED_DUMMY(clist)
+UNUSED_DUMMY(nu)
 
 if (.not. flaghf) &
      call raise('FLAGHF = .FALSE. FOR DOUBLET SYSTEM')
@@ -417,7 +419,7 @@ use mod_cosysr, only: isrcod, rspar
 use mod_hibasutil, only: raise
 use funit, only: FUNIT_INP
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 character*(*) fname
@@ -433,6 +435,8 @@ real(8), pointer, save :: brot, aso, p, q, drot
 j1max=>ispar(1); npar=>ispar(2); j2min=>ispar(3); j2max=>ispar(4); iptsy2=>ispar(5)
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
 
+UNUSED_DUMMY(irpot)
+UNUSED_DUMMY(readpt)
 !     DEFINE THE NAMES HERE
 scod(1)='J1MAX'
 scod(2)='NPAR'
@@ -461,6 +465,7 @@ return
 80 call raise('ERROR READING FROM INPUT FILE.')
 return
 entry ptr2pi1sg(fname, readpt)
+UNUSED_DUMMY(fname)
 return
 entry sav2pi1sg(readpt)
 !     WRITE THE LAST FEW LINES OF THE INPUT FILE.

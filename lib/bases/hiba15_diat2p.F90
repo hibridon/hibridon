@@ -732,7 +732,6 @@ subroutine sydiat2p (irpot, readpt, iread)
 !             of the variable names in cosysi followed by the ordering of
 !             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 !  -----------------------------------------------------------------------
-use mod_coiout, only: niout, indout
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
@@ -740,7 +739,7 @@ use funit, only: FUNIT_INP
 use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: icod, ircod, j, l, lc

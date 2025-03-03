@@ -100,7 +100,7 @@ use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, ispar
+use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
@@ -638,16 +638,16 @@ do 320 il = 1,nlam
       j12row=bqs%j12(irow)
       j12col=bqs%j12(icol)
       if (.not. csflag .or. (csflag .and. ihomo)) then
-        call vlmh3p (irow,icol,jtot,jlpar,bqs%jq(irow),bqs%jq(icol), &
+        call vlmh3p (jtot,bqs%jq(irow),bqs%jq(icol), &
         bqs%inq(irow), &
         bqs%inq(icol), j12row, j12col, bqs%lq(irow), bqs%lq(icol), ilamr, &
         ilama, ilam12, nu, csflag, vee)
       else if (csflag .and. .not.ihomo) then
       ! NB j12row and j12col are krow and kcol here
-        call vlmh3pc(irow,icol,jtot,jlpar,bqs%jq(irow),bqs%jq(icol), &
+        call vlmh3pc(jtot,bqs%jq(irow),bqs%jq(icol), &
         bqs%inq(irow), &
         bqs%inq(icol), j12row, j12col, ilamr, &
-        ilama, imu, nu, jmol, flaghf, vee)
+        ilama, imu, nu, flaghf, vee)
       endif
       if (vee .ne. 0) then
         i = i + 1
@@ -681,7 +681,7 @@ end if
 return
 end
 ! --------------------------------------------------------------------
-subroutine vlmh3p (irow, icol, jtot, jlpar, j, jp, ja, jap, &
+subroutine vlmh3p (jtot, j, jp, ja, jap, &
             j12, j12p, l, lp, lamr, lama, lam12, nu, csflag, vee)
 ! --------------------------------------------------------------------
 !  subroutine to evaluate the angular coupling matrix element for rotationally
@@ -693,7 +693,6 @@ subroutine vlmh3p (irow, icol, jtot, jlpar, j, jp, ja, jap, &
 !  current revision date: 6-jul-1995
 ! --------------------------------------------------------------------
 !  variables in call list:
-!  irow, icol:  row and column of fully coupled states
 !  jtot:      total angular momentum
 !  jlpar:     parity (-1 for e, +1 for f)
 !  j, jp      bra and ket values of molecular angular momentum
@@ -775,8 +774,8 @@ vee=term*xnorm*iphase
 return
 end
 ! --------------------------------------------------------------------
-subroutine vlmh3pc (irow, icol, jtot, jlpar, j, jp, ja, jap, &
-            k, kp, lamr, lama, mu, nu, jmol, flaghf, vee)
+subroutine vlmh3pc (jtot, j, jp, ja, jap, &
+            k, kp, lamr, lama, mu, nu, flaghf, vee)
 ! --------------------------------------------------------------------
 !  subroutine to evaluate the angular coupling matrix element for rotationally
 !  inelastic collisions of a homonuclear molecule (j=1) and a 3P atom
@@ -788,7 +787,6 @@ subroutine vlmh3pc (irow, icol, jtot, jlpar, j, jp, ja, jap, &
 !  current revision date: 13-jun-1997
 ! --------------------------------------------------------------------
 !  variables in call list:
-!  irow, icol:  row and column of fully coupled states
 !  jtot:      total angular momentum
 !  j, jp      bra and ket values of molecular angular momentum
 !  ja, jap:   bra and ket values of atomic angular momentum
@@ -925,7 +923,6 @@ subroutine syh3p (irpot, readpt, iread)
 !             of the variable names in cosysi followed by the ordering of
 !             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 !  -----------------------------------------------------------------------
-use mod_coiout, only: niout, indout
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
@@ -933,7 +930,7 @@ use funit, only: FUNIT_INP
 use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: icod, ircod, j, l, lc

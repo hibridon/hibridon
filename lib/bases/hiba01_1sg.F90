@@ -623,7 +623,7 @@ use mod_skip, only: nskip
 use mod_vib, only: nvib => nvibs, ivib => ivibs
 use mod_hiutil, only: gennam, get_token
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: i, iofi, iofr

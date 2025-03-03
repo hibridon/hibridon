@@ -197,7 +197,7 @@ use mod_hibasutil, only: raise
 use funit, only: FUNIT_INP
 !
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 character*(*) fname

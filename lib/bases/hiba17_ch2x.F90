@@ -1029,12 +1029,12 @@ use funit, only: FUNIT_INP
 use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 logical existf
 integer icod, ircod
-integer :: i, j, l, lc
+integer :: j, l, lc
 character*1 dot
 character*(*) fname
 character*60 line, filnam, potfil
