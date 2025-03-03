@@ -55,7 +55,6 @@ function get_wfu_logd_rec_length(nchwfu, inflev)
   integer :: int_t
   real(8) :: dble_t
   integer, parameter :: char_size = int(sizeof(char_t), kind(int_t))
-  integer, parameter :: int_size = int(sizeof(int_t), kind(int_t))
   integer, parameter :: dbl_size = int(sizeof(dble_t), kind(int_t))
 
   get_wfu_logd_rec_length = 0
@@ -89,7 +88,6 @@ function get_wfu_airy_rec_length(nchwfu, inflev)
   integer :: int_t
   real(8) :: dble_t
   integer, parameter :: char_size = int(sizeof(char_t), kind(int_t))
-  integer, parameter :: int_size = int(sizeof(int_t), kind(int_t))
   integer, parameter :: dbl_size = int(sizeof(dble_t), kind(int_t))
 
   get_wfu_airy_rec_length = 0

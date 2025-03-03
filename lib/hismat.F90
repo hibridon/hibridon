@@ -62,7 +62,6 @@ subroutine rdhead(smt_file_unit, cdate, ered, rmu, csflag, flaghf, &
 !     revision: 27-oct-95
 !     major revision: 07-jan-2012 by q. ma
 !     ------------------------------------------------------------
-use mod_clseg, only: lseg
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit none
 integer, intent(in) :: smt_file_unit ! logical unit used to read smt file 
@@ -310,7 +309,6 @@ use mod_cosout, only: nnout, jout
 use mod_coeint, only: eint
 use mod_hibasis, only: is_j12
 use mod_selb, only: ibasty
-use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
 implicit none
 real(8), intent(inout) :: sreal(nmax,nmax)
@@ -448,7 +446,6 @@ logical csflag, flaghf, flagsu, twomol, nucros
 character*20 cdate
 dimension jlev(1),inlev(1),elev(1),jout(1)
 integer int_t
-double precision double_t
 !     Calculate the length of the header (in bytes)
 lenhd = sizeof(cdate) + sizeof(label) + sizeof(potnam) + &
      sizeof(dble_t) * 2 + sizeof(int_t) * 16 + &

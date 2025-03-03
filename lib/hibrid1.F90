@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hibrid1
 contains
 !************************************************************************
@@ -80,15 +81,14 @@ integer, intent(in) :: itwo
 
 integer :: i
 logical :: isecnd
-integer, parameter :: lunit = FUNIT_TRANS_MAT
 integer :: nsq 
 
 isecnd = .false.
 if (itwo .gt. 0) isecnd = .true.
 !  if first energy calculation, isecnd = .false.
-!    in which case logical unit lunit will be written
+!    in which case logical unit FUNIT_TRANS_MAT will be written
 !  if subsequent energy calculation, isecnd = .true.
-!    in which case logical unit lunit will be written
+!    in which case logical unit FUNIT_TRANS_MAT will be written
 !  read/write rnow, drnow, diagonal elements of transformed dw/dr matrix,
 !  and diagonal elements of transformed w matrix
 nsq = n * nmax
@@ -164,9 +164,9 @@ use mod_hiba10_22p, only: trans22
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_pmat, only: rtmn, rtmx, iflag
-use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
+use mod_cputim, only: cpupot
 use mod_hivector, only: dset
-use constants, only: zero, one, two
+use constants, only: zero, two
 implicit none
 real(8) :: second
 real(8), dimension(*), intent(out) :: w
@@ -384,7 +384,7 @@ return
 end
 ! ----------------------------------------------------------------------
 subroutine potent (w, vecnow, scmat, eignow, hp, scr, &
-   rnow, drnow, en, xlarge, nch, nmax, v2)
+   rnow, drnow, xlarge, nch, nmax, v2)
 ! ----------------------------------------------------------------------
 !  this subroutine first sets up the wave-vector matrices:
 !    w = w[rnow + 0.5 drnow/sqrt(3)] and w = w[rnow - 0.5 drnow/sqrt(3)]
@@ -413,7 +413,6 @@ subroutine potent (w, vecnow, scmat, eignow, hp, scr, &
 !    scr:      scratch vector
 !    rnow:     midpoint of the current interval
 !    drnow:    width of the current interval
-!    en:       total energy in atomic units
 !    xlarge:   on return contains largest off-diagonal element in
 !              wn-tilde-prime matrix
 !    nch:      number of channels
@@ -434,7 +433,6 @@ real(8), dimension(nmax), intent(out) :: hp
 real(8), dimension(nmax), intent(out) :: scr
 real(8), intent(in) :: rnow
 real(8), intent(in) :: drnow
-real(8), intent(in) :: en
 real(8), intent(out) :: xlarge
 integer, intent(in) :: nch
 integer, intent(in) :: nmax
@@ -861,7 +859,7 @@ subroutine spropn (rnow, width, eignow, hp, y1, y4, y2, &
 !  current revision date (algorithm):  30-dec-1994
 !-----------------------------------------------------------------------------
 use mod_coqvec2, only: q => q2
-use mod_phot, only: photof, wavefn, boundf, writs
+use mod_phot, only: photof
 use mod_hiutil, only: intairy
 use mod_hivector, only: dset
 implicit double precision (a-h,o-z)
@@ -1337,8 +1335,7 @@ use mod_hiba10_22p, only: energ22
 use mod_par, only: par_iprint=>iprint
 use mod_wave, only: irec, ifil, nchwfu, iendwv, get_wfu_airy_rec_length
 use mod_selb, only: ibasty
-use mod_ered, only: ered, rmu
-use mod_phot, only: photof, wavefn, boundf, writs
+use mod_phot, only: photof, wavefn, writs
 use mod_hiutil, only: daxpy_wrapper
 use mod_himatrix, only: transp
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
@@ -1382,8 +1379,6 @@ data izero, ione, zero, one /0, 1, 0.d0, 1.d0/
 data powr /3.d0/
 !     The following variables are for size-determination of (machine
 !     dependent) built-in types
-double precision dble_t
-character char_t
 real(8), allocatable :: w(:)
 real(8), allocatable :: tmat(:)
 real(8), allocatable :: vecnow(:)
@@ -1402,6 +1397,8 @@ integer(8) :: lrairy ! length of an airy record in bytes
 ! ----------------------------------------------------------------------------
 ! Save variables for subsequent energies
 save spcmn, spcmx, rmin, maxstp
+
+UNUSED_DUMMY(en)
 
 allocate(w(nch*nmax))
 allocate(tmat(nch*nmax))
@@ -1435,7 +1432,7 @@ if (itwo .le. 0) then
   !  define local basis at rnow and carry out transformations
   !  vecnew is used as scratch matrix and y1 is used as scratch vector here
   call potent (w, vecnow, vecnew, eignow, hp, y1, &
-               rnow, drnow, en, xlarge, nch, nmax, v2)
+               rnow, drnow, xlarge, nch, nmax, v2)
   !  vecnow is transformation from free basis into local basis
   !  in first interval
   !  e.g. p1=vecnow  ; see eq.(23) of
@@ -1715,7 +1712,7 @@ do kstep = 1, maxstp
       !  define local basis at rnew and carry out transformations
       !  tmat is used as scratch matrix and y1 is used as scratch vector here
       call potent (w, vecnew, tmat, eignow, hp, y1, &
-                   rnew, drnow, en, xlarge, nch, nmax, v2)
+                   rnew, drnow, xlarge, nch, nmax, v2)
       !  determine matrix to transform log-deriv matrix into new interval
       !  see eq. (22) of m.h. alexander, "hybrid quantum scattering algorithms ..."
       !  on return from subroutine 'steppr':
