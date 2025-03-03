@@ -658,7 +658,7 @@ endif
 !  now print out s-matrix and t-matrix squared, and calculate partial
 !  cross sections and print them out, if desired
 call soutpt (z, w, zmat, amat, &
-             bqs, isc1, isc2, bmat, tq1, &
+             bqs, isc1, bmat, tq1, &
              jlev, elev, inlev, jtot, jfirst, &
              jtot2, jtotd, nu, numin, nulast, nud, jlpar, ien, &
              ipos, csflag, flaghf, prsmat, prt2, t2test, &
@@ -782,11 +782,11 @@ if (twojlp .and. jlpar .gt. 0) then
 end if
 !.....next nu value if nu runs in outer loop
 if (nucros .and. .not. wavefl .and. .not. photof) then
-  call nusum (z, tq1, tq2, tq3, &
+  call nusum (z, tq1, &
               jlev,elev, inlev, jtot, jfirst, &
               jtop, jtotd, nu, nufirs, numax, nud, jlpar, &
               nerg, ipos, csflag, flaghf, wrpart, prpart, &
-              twomol, nucros, nlevel, nlev, nopen, nmax, tmp_file)
+              twomol, nucros, nlev, nmax, tmp_file)
 !.....save restart information
   if (wrxsec .or. prxsec .or. prpart .or. wrpart) then
     if (.not. wavefl .and. .not. photof) then
@@ -845,7 +845,7 @@ end if
 !  write out integral cross sections if desired
 370 if (prxsec .or. wrxsec) then
   if(.not.bastst) &
-  call xwrite (amat, tq3, jlev, elev, inlev, nerg, energ, &
+  call xwrite (amat, jlev, elev, inlev, nerg, energ, &
              jfirst, jtot2, jtotd, csflag, flaghf, &
              wrxsec, prxsec, ipos, twomol, nucros, nlevel, &
              nlev, nufirs, nulast, nud, jlpar, nchtop, nmax, &

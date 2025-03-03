@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 
 module mod_savfile
 implicit none
@@ -97,7 +98,7 @@ contains
 !
 ! ---------------------------------------------------------------------------
 subroutine soutpt (tsq, sr, si, scmat, &
-                   bqs, isc1, isc2, sc1, sc2, &
+                   bqs, isc1, sc1, sc2, &
                    jlev, elev, inlev, jtot, jfirst, &
                    jfinal, jtotd, nu, numin, numax, nud,jlpar,ien, &
                    ipos, csflag, flaghf, prsmat, prt2, t2test, &
@@ -136,7 +137,7 @@ subroutine soutpt (tsq, sr, si, scmat, &
 !             if the calculation involves the collisions of two diatomic
 !             molecules, the bqs%jq = j1 + 10000 j2, where j1 and j2 are the
 !             rotational quantum numbers of each molecule
-!    isc1,isc2: scratch vectors (min length nopen)
+!    isc1: scratch vectors (min length nopen)
 !    sc1, sc2:  scratch  matrices (min length nopen x nopen)
 !    jlev:   rotational angular momenta of each energetically open level
 !    elev:   energy (in hartree) of each energetically open level
@@ -195,15 +196,12 @@ subroutine soutpt (tsq, sr, si, scmat, &
 use mod_cosout
 use constants
 use mod_coqvec, only: nphoto
-use mod_cocent, only: cent
-use mod_coeint, only: eint
 use mod_coener, only: ener => energ
 use mod_hibrid2, only: mxoutd, mxoutr
 use funit
 use mod_savfile, only: REC_EN_START, EN_REC_COUNT
-use mod_parpot, only: label=>pot_label
 use mod_ered, only: ered, rmu
-use mod_phot, only: photof, wavefn, boundf
+use mod_phot, only: photof, wavefn
 use mod_surf, only: flagsu
 use mod_hiutil, only: dater
 use mod_himatrix, only: transp
@@ -216,7 +214,6 @@ real(8), intent(inout) :: si(nmax,nmax)
 real(8), intent(out) :: scmat(nmax,nmax)
 type(bqs_type), intent(in) :: bqs
 integer, intent(out) :: isc1(nopen)
-integer, intent(out) :: isc2(nopen)
 real(8), intent(out) :: sc1(nmax, nmax)
 real(8), intent(out) :: sc2(nmax, nmax)
 integer, intent(in) :: jlev(nlevop)
@@ -361,7 +358,7 @@ if((prpart .or. wrpart) .and. .not. nucros .and. &
                jfinal, jtotd, nu, numin, numax, nud, jlpar, ien, &
                ipos, csflag, flaghf, wrpart, prpart, twomol, &
                twojlp, &
-               nucros,nlevel, nlevop, nopen, nmax)
+               nucros, nlevop, nmax)
 end if
 !  sum up partial cross sections to get integral cross sections
 if (.not. csflag .or. (csflag .and. (nu .eq. numax) ) ) then
@@ -376,7 +373,7 @@ end
 subroutine prpartr(scmat,jlev, elev, inlev, jtot, jfirst, &
                   jfinal, jtotd, nu, numin, numax, nud, jlpar,ien, &
                   ipos, csflag, flaghf, wrpart, prpart, twomol, &
-                  twojlp,nucros,nlevel, nlevop, nopen, nmax)
+                  twojlp,nucros, nlevop, nmax)
 ! ---------------------------------------------------------------------------
 !
 !  subroutine to print partial cross sections
@@ -618,11 +615,11 @@ end if
 return
 end
 ! ----------------------------------------------------------------------
-subroutine nusum (tsq, tq1, tq2, tq3, &
+subroutine nusum (tsq, tq1, &
                  jlev,elev, inlev, jtot, jfirst, &
                  jfinal, jtotd, nu, numin, numax, nud, jlpar, &
                  nerg, ipos, csflag, flaghf, wrpart, prpart, &
-                 twomol, nucros, nlevel, nlev, nopen, nmax, tmp_file)
+                 twomol, nucros, nlev, nmax, tmp_file)
 ! ---------------------------------------------------------------------------
 !
 !  subroutine to sum partial cross sections over nu
@@ -631,11 +628,11 @@ subroutine nusum (tsq, tq1, tq2, tq3, &
 ! ---------------------------------------------------------------------------
 use constants
 use mod_coener, only: energ
-use mod_ered, only: ered, rmu
+use mod_ered, only: ered
 use mod_savfile, only: REC_EN_START, EN_REC_COUNT, EN_REC_PRESENT_INTEGRAL_XS
 implicit double precision (a-h,o-z)
 logical ipos, csflag, wrpart, prpart, flaghf, twomol, nucros,vrai
-dimension tsq(nmax,1),tq1(nmax,1),tq2(nmax,1),tq3(nmax,1), &
+dimension tsq(nmax,1),tq1(nmax,1), &
           jlev(1),elev(1),inlev(1),nlev(1)
 integer :: tmp_file
 !
@@ -651,7 +648,7 @@ do 100 ien = 1,nerg
     call prpartr (tsq,jlev, elev, inlev, jtot, jfirst, &
                jfinal, jtotd, nu, numin, nu, nud, jlpar, ien, &
                ipos, csflag, flaghf, wrpart, prpart, twomol, &
-               vrai,nucros,nlevel, nlevop, nopen, nmax)
+               vrai,nucros, nlevop, nmax)
     endif
 ! sum up over nu
   irec=(nerg+ien-1)* EN_REC_COUNT + REC_EN_START
@@ -700,6 +697,7 @@ integer :: jl, num_partial_xs, jl1, jp1, jl2, jp2, nn
 integer :: jpl               ! the previous parity (l=last?)
 !
 !
+UNUSED_DUMMY(j2)
 if(jd <= 1) then
   !
   ! here for jd == 1
@@ -1021,7 +1019,7 @@ end do
 return
 end
 ! ----------------------------------------------------------------------
-subroutine xwrite (zmat, tq3, jlev, elev, inlev, nerg, energ, &
+subroutine xwrite (zmat, jlev, elev, inlev, nerg, energ, &
                    jfirst, jfinal, jtotd, csflag, flaghf, &
                    wrxsec, prxsec, ipos, twomol, nucros,nlevel, &
                    nlev, numin, numax, nud, jlpar, nmax, nmx, &
@@ -1077,12 +1075,11 @@ use mod_fileid, only: FILEID_SAV
 use mod_savfile, only: REC_EN_START, EN_REC_COUNT, EN_REC_PRESENT_INTEGRAL_XS
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
-use mod_ered, only: ered, rmu
+use mod_ered, only: rmu
 use mod_surf, only: flagsu
 use mod_hiutil, only: dater
 implicit none
 real(8), intent(out) :: zmat(nmax, nmax)
-real(8), intent(out) :: tq3(nmx, nmx)
 integer, intent(in) :: jlev(nmx)
 real(8), intent(in) :: elev(nmx)
 integer, intent(in) :: inlev(nmx)
@@ -1791,12 +1788,9 @@ use mod_codim, only: mmax
 use mod_cosout
 use constants
 use mod_cotq1, only: sc1 => scmat ! sc1(1)
-use mod_cotq2, only: sc2 => scmat ! sc2(1)
 use mod_cotq3, only: sc3 => scmat ! sc3(1)
 use mod_coamat, only: sc4 => toto ! sc4(1)
 use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
-use mod_coisc6, only: isc1 => isc6 ! isc1(1)
-use mod_coisc7, only: isc2 => isc7 ! isc2(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc2, only: inlev => sc2int ! inlev(1)
 use mod_cosc3, only: jlev => sc3int ! jlev(1)
@@ -1917,7 +1911,7 @@ end if
 ! now compute cross sections
 call intcr(csflag,flaghf,twomol,flagsu,nucros, &
             numin,numax,nud,jfirst,jfinal,jtotd,maxjt, &
-            sigma,sreal,simag,sc1,sc2,sc3,sc4,nlevop,mmax,tmp_file)
+            sigma,sreal,simag,sc1,sc3,sc4,nlevop,mmax,tmp_file)
 string=' '
 if(nnout.lt.0) string='(COLUMNS)'
 write (ics_unit, 210) string
@@ -1998,7 +1992,7 @@ end
 ! ----------------------------------------------------------------------
 subroutine intcr(csflag,flaghf,twomol,flagsu,nucros, &
            numin,numax,nud,jfirst,jfinal,jtotd,maxjt, &
-           sigma,sreal,simag,sc1,sc2,scmat,tsq,nlevop,nmax,tmp_file)
+           sigma,sreal,simag,sc1,scmat,tsq,nlevop,nmax,tmp_file)
 !
 ! subroutine to calculate integral cross sections from s-matrix
 ! elements
@@ -2008,15 +2002,12 @@ subroutine intcr(csflag,flaghf,twomol,flagsu,nucros, &
 ! current revision date: 8-oct-2012 by q. ma
 !
 ! ----------------------------------------------------------------------
-use mod_cosout, only: nnout, jout
+use mod_cosout, only: nnout
 use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
-use mod_coisc6, only: isc1 => isc6 ! isc1(1)
-use mod_coisc7, only: isc2 => isc7 ! isc2(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc2, only: inlev => sc2int ! inlev(1)
 use mod_cosc3, only: jlev => sc3int ! jlev(1)
-use mod_par, only: batch, ipos
-use mod_selb, only: ibasty
+use mod_par, only: batch
 use mod_hismat, only: sread
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -2036,7 +2027,6 @@ real(8), intent(out) :: sigma(nmax, nlevop)
 real(8), intent(out) :: sreal(nmax, nlevop)
 real(8), intent(out) :: simag(nmax, nlevop)
 real(8), intent(out) :: sc1(nmax, nlevop)
-real(8), intent(out) :: sc2(nmax, nlevop)
 real(8), intent(out) :: scmat(nmax, nlevop)
 real(8), intent(out) :: tsq(nmax, nlevop)
 integer, intent(in) :: nlevop
