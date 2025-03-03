@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hibrid3
 contains
 !************************************************************************
@@ -57,12 +58,12 @@ if(abs(dr).gt.0.01d0) goto 10
 return
 end
 ! -------------------------------------------------------------------------
-subroutine propag (z, w, zmat, amat, bmat, &
+subroutine propag (z, w, zmat, &
                    bqs, &
                    ien, nerg, en, eshift, rstart, rendld, spac, &
                    tolhi, rendai, rincr, fstfac, tb, tbm, &
                    ipos, prlogd, noprin, airyfl, prairy, &
-                   nch, nopen, nairy, nmax, v2, isteps, nsteps)
+                   nch, nopen, nmax, v2, isteps, nsteps)
 ! ------------------------------------------------------------------------
 !  subroutine to:
 !    1.  propagate the log-derivative matrix from rstart to rendld
@@ -85,7 +86,6 @@ subroutine propag (z, w, zmat, amat, bmat, &
 !                          contains the real part of the s-matrix
 !    zmat:        on return: the upper-left nopen x nopen block of si
 !                         contains the imaginary part of the s-matrix
-!    amat,bmat:   scratch matrices of maximum dimension nmax x nmax
 !    bqs:         on entry: contain the rotational angular momenta, orbital
 !                 angular momenta, and other quantum index for each channel
 !                 on return: the first nopen elements contain the rotational
@@ -124,8 +124,7 @@ subroutine propag (z, w, zmat, amat, bmat, &
 !                 out in airy propagation
 !    nopen        on return:  number of energetically open channels
 !    nch          number of coupled equations
-!    nairy        leading dimension of matrix bmat
-!    nmax         leading dimension of matrices z, w, zmat, and amat as well a
+!    nmax         leading dimension of matrices z, w, zmat, as well a
 !                 all vectors
 
 !  variables in common block /copmat/
@@ -138,7 +137,7 @@ subroutine propag (z, w, zmat, amat, bmat, &
 use mod_ancou, only: ancou_type
 use mod_hibrid2, only: mxoutd
 use funit, only: FUNIT_TRANS_MAT, FUNIT_QUAD_MAT
-use mod_phot, only: photof, wavefn, boundf, writs
+use mod_phot, only: boundf
 use mod_pmat, only: rtmn, rtmx, iflag
 use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
 use mod_hiutil, only: mtime, gettim
@@ -149,8 +148,6 @@ implicit none
 real(8), intent(out) :: z(nmax, nch)
 real(8), intent(out) :: w(nmax, nch)
 real(8), intent(out) :: zmat(nmax, nch)
-real(8), intent(out) :: amat(nmax, nch)
-real(8), intent(out) :: bmat(nairy, nairy)
 type(bqs_type), intent(inout) :: bqs
 integer, intent(in) :: ien
 integer, intent(in) :: nerg
@@ -172,7 +169,6 @@ logical, intent(in) :: airyfl
 logical, intent(in) :: prairy
 integer, intent(in) :: nch
 integer, intent(out) :: nopen
-integer, intent(in) :: nairy
 integer, intent(in) :: nmax
 type(ancou_type), intent(in) :: v2
 integer, intent(inout) :: isteps
@@ -199,7 +195,7 @@ real(8) :: td, tdm, tp, tpm, tw, twm, twf, twfm
 !  vectors
 !  prec is precision of single precision floating pt number
 real(8), parameter :: prec = 1.d+11
-
+UNUSED_DUMMY(tbm)
 call mtime(t11,t22)
 first = .true.
 r = rstart
@@ -466,8 +462,7 @@ use mod_ancou, only: ancou_type
 use mod_wave, only: irec, ifil, nchwfu, nrlogd, iendwv, get_wfu_logd_rec_length
 
 use funit
-use mod_phot, only: photof, wavefn, boundf, writs
-use mod_surf, only: flagsu
+use mod_phot, only: photof, wavefn, writs
 use mod_hiutil, only: daxpy_wrapper
 use mod_hiutil, only: mtime
 use mod_himatrix, only: mxma
@@ -530,11 +525,6 @@ real(8),allocatable :: bmat(:)
 !                   used as workspace for the potential matrix
 real(8), allocatable :: w(:)
 
-!     The following variables are for size-determination of (machine
-!     dependent) built-in types
-integer int_t
-double precision dble_t
-character char_t
 integer :: nqmax
 real(8) :: simpwt  ! simpson quadrature weight
 nqmax = 0
@@ -1065,7 +1055,7 @@ subroutine runlog (z, &
 use mod_coqvec, only: nphoto, q
 use mod_ancou, only: ancou_type
 use mod_hibrid2, only: mxoutd, mxoutr
-use mod_phot, only: photof, wavefn, boundf, writs
+use mod_phot, only: photof
 implicit double precision (a-h, o-z)
 type(ancou_type), intent(in) :: v2
 real(8), intent(out) :: z(nmax*nch)
@@ -1095,6 +1085,10 @@ integer, intent(inout) :: nsteps
 logical iread, iwrite, print
 
 !  z, w, amat, and bmat are stored column by column in one dimensional arrays
+
+UNUSED_DUMMY(tlw)
+UNUSED_DUMMY(tpw)
+UNUSED_DUMMY(twfw)
 
 iwrite = twoen .and. (itwo.eq.0)
 iread =  twoen .and. (itwo.gt.0)
@@ -1545,7 +1539,7 @@ subroutine psiasy(fj,fn,sr,si,psir,psii,nopen,nmax)
 !    nopen          number of open channels
 !    nmax           row dimension of matrices
 ! ----------------------------------------------------------------------------
-use mod_phot, only: photof, wavefn, boundf, writs
+use mod_phot, only: photof
 use mod_hiutil, only: daxpy_wrapper
 use mod_hivector, only: matmov
 implicit none
@@ -1698,7 +1692,7 @@ use mod_par, only: prsmat, jlpar! spac=>scat_spac
 use mod_wave, only: irec, ifil, ipos2, ipos3, nrlogd, iendwv, ipos2_location
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
-use mod_phot, only: photof, wavefn, boundf, writs
+use mod_phot, only: photof, wavefn
 use mod_surf, only: flagsu
 use mod_hiutil, only: gennam
 use mod_hiutil, only: daxpy_wrapper
@@ -2174,8 +2168,8 @@ use mod_coqvec, only: nphoto, q
 use mod_coeint, only: eint
 use mod_hibrid2, only: mxoutd, mxoutr
 use mod_wave, only: ifil, ipos2, ipos3, nrlogd, iendwv, ipos2_location
-use mod_ered, only: ered, rmu
-use mod_phot, only: photof, wavefn, boundf, writs
+use mod_ered, only: ered
+use mod_phot, only: photof, wavefn
 use mod_hiutil, only: mtime
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
