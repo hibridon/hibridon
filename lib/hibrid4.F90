@@ -235,18 +235,9 @@ implicit none
 integer, intent(in) :: irecr
 integer(8) :: iwavsk
 
-!     The following variables are for size-determination of (machine
-!     dependent) built-in types
-integer int_t
-double precision dble_t
-character char_t
-
 integer(8) :: lr1  ! length of record 1 in bytes
 integer(8) :: lrlogd  ! length of a logd record
 integer(8) :: lrairy  ! length of an airy record
-integer, parameter :: char_size = int(sizeof(char_t), kind(int_t))
-integer, parameter :: int_size = int(sizeof(int_t), kind(int_t))
-integer, parameter :: dbl_size = int(sizeof(dble_t), kind(int_t))
 !
 if (irecr .le. 0) then
    iwavsk = -1
@@ -1579,10 +1570,10 @@ use mod_cosc8, only: sc8
 use mod_cosc9, only: sc9
 use mod_coz, only: scmat => z_as_vec ! scmat(100)
 use mod_cozmat, only: tcoord => zmat_as_vec ! tcoord(100)
-use mod_wave, only: irec, ifil, nrlogd
+use mod_wave, only: irec, ifil
 use mod_coqvec, only: nphoto
 use mod_selb, only: ibasty
-use mod_ered, only: ered, rmu
+use mod_ered, only: rmu
 use mod_hiba07_13p, only: ttrans
 use mod_hiutil, only: daxpy_wrapper
 use mod_himatrix, only: mxma
@@ -2026,7 +2017,7 @@ use mod_cozmat, only: si => zmat_as_vec ! si(100)
 use mod_wave, only: irec, ifil
 use mod_himatrix, only: transp
 implicit double precision (a-h,o-z)
-logical renormf
+logical :: renormf = .false.
 dimension scrvec(64)
 irec=npts+4
 delold=1.d+18
@@ -2149,7 +2140,6 @@ subroutine eadiab1(filnam, nchmin, nchmax)
 !
 !     ------------------------------------------------------------------
 use constants
-use mod_codim, only: nmax => mmax
 use mod_cosc8, only: sc8
 use mod_wave, only: ifil, nrlogd
 use funit
