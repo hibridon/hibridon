@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 ! ------------------------------------------------------------------
 !  in this header, arrays are set up as allocatable.
 !  in addition, procedures to allocate and deallocate these
@@ -214,6 +215,7 @@ end function redrot
 subroutine helicity_frame_get_label(this, label)
   class(helicity_frame_type) :: this
   character(len=:), allocatable, intent(out) :: label
+  UNUSED_DUMMY(this)
   !allocate( character(len=20) :: label )
   label = 'HELICITY'
 end subroutine
@@ -233,7 +235,7 @@ subroutine helicity_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax, 
 !
 ! packed_bqs%jq,packed_bqs%lq,packed_bqs%inq : labels for rows
 ! row_bqs%jq,row_bqs%lq,row_bqs%inq          : labels for columns
-  use mod_tensor_ang, only: ang1, ang2, dang
+  use mod_tensor_ang, only: ang1, dang
   use mod_hiutil, only: xf3j
   use mod_hitypes, only: bqs_type
   class(helicity_frame_type) :: this
@@ -398,6 +400,7 @@ end
 subroutine geom_apse_frame_get_label(this, label)
   class(geom_apse_frame_type) :: this
   character(len=:), allocatable, intent(out) :: label
+  UNUSED_DUMMY(this)
   !allocate( character(len=20) :: label )
   label = 'GEOMETRIC APSE'
 end subroutine
@@ -418,7 +421,7 @@ subroutine geom_apse_frame_compute_scat_ampl(this,j1,inlev1,j2,inlev2,jtot,mmax,
 !
 ! packed_bqs%jq,packed_bqs%lq,packed_bqs%inq : labels for rows
 ! row_bqs%jq,row_bqs%lq,row_bqs%inq          : labels for columns
-  use mod_tensor_ang, only: ang1, ang2, dang
+  use mod_tensor_ang, only: ang1, dang
   use mod_hiutil, only: xf3j
   use mod_hitypes, only: bqs_type
   use constants, only: zero, one
@@ -451,6 +454,7 @@ logical elastc
 
 integer :: iang, ilab, ii, iyof, j1p, j2p, jlab, l1, l2, ll, llmax, mj1, mj1p, mj2, mj2p, ml2p
 real(8) :: angle, betaga, fakj, fakp, piov2, rad, spin, sqpi, xj1, xj2, xjtot, xl1, xl2, xmj1, xmj1p, xmj2, xmj2p, xml2p
+UNUSED_DUMMY(this)
 sqpi = 1.772453850905516d0
 rad = 57.295779513082323d0
 piov2 = 1.570796326794897d0
@@ -537,7 +541,6 @@ do 500 jlab=1,nopen
             do 100 ll=1,llmax
               yy = yy + fak3(ll)*fakp
 100             continue
-370             continue
 350           continue
           q(ii) = q(ii) + yy
 380         continue
@@ -565,16 +568,12 @@ use mod_codim, only: mmax
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 ! common blocks for levels for which xs's to be computed
-use mod_coisc9, only: jslist => isc9 ! jslist(1)
-use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_coz, only: sreal => z_as_vec ! sreal(1)
 use mod_cow, only: simag => w_as_vec ! simag(1)
 use mod_difcrs, only: sphn
-use constants, only: econv, xmconv, ang2c
-use mod_par, only: batch, ipos
-use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
-use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
+use constants, only: ang2c
+use mod_mom, only: spin, xj1
 use mod_tensor_ang, only: ang1, ang2, dang
 use mod_hiutil, only: xf3j
 use mod_hismat, only: sread, rdhead
@@ -597,11 +596,8 @@ integer, intent(in) :: tens_out_unit  ! unit of tenxsc output file (tcs, dgh or 
 real(8), dimension(:), allocatable :: y
 ! size of q for j <= 5 and 0.5 deg angle increment
 complex*16 q(43681)
-logical diag, diagj, diagin, &
-        twopar, fast
-logical existf,csflg1,flghf1,flgsu1,twomol, &
-        nucros, iprint
-character*10 elaps, cpu
+logical csflg1,flghf1,flgsu1,twomol, &
+        nucros
 character*20 cdate1
 
 integer :: jout1(mmax)
@@ -1027,8 +1023,8 @@ use tensor_util
 use constants, only: econv, xmconv, ang2c
 use mod_par, only: batch
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
-use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
-use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
+use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb
+use mod_mom, only: spin, j1, in1, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use funit, only: FUNIT_TCB, FUNIT_TENS_OUTPUT
 use mod_hiutil, only: gennam, mtime, gettim, dater
 use mod_hiutil, only: xf3jm0
@@ -1355,17 +1351,17 @@ n = minn
      goto 300
 ! iframe = 0
 171        continue
-       call sigk(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,packed_bqs, &
+       call sigk(maxk,jfirst,jfinal,nj,mmax,packed_bqs, &
              jttble,prefac,sigma, &
-             sreal,simag,matel,lenlab,labadr, &
-             jtotpa,fast,ierr, FUNIT_TENS_OUTPUT, FUNIT_TCB)
+             sreal,simag,lenlab,labadr, &
+             jtotpa,ierr, FUNIT_TENS_OUTPUT, FUNIT_TCB)
        if(ierr.ne.0) goto 4000
        goto 300
 ! iframe = 1
-172        call sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,packed_bqs, &
+172    call sigkc(maxk,jfirst,jfinal,nj,mmax,packed_bqs, &
              jttble,prefac, &
-             sreal,simag,matel,lenlab,labadr, &
-             jtotpa,fast,ierr, FUNIT_TENS_OUTPUT, FUNIT_TCB)
+             sreal,simag,lenlab,labadr, &
+             jtotpa,ierr, FUNIT_TENS_OUTPUT, FUNIT_TCB)
        if(ierr.ne.0) goto 4000
        goto 300
 ! iframe = 2
@@ -1406,10 +1402,10 @@ else
 76      format(/' TENOPA: kkmx too small:',2i5)
      goto 4000
    end if
-   call sigkkp(n,maxk,nk,nnout,jfirst,jfinal,jtotd,nj,mmax, &
+   call sigkkp(n,maxk,nk,jfirst,jfinal,nj,mmax, &
         packed_bqs, jttble,prefac,sigma, &
-        sreal,simag,matel,lenlab,labadr, &
-        jtotpa,kplist,f9pha,fast,ierr, FUNIT_TENS_OUTPUT, FUNIT_TCB)
+        sreal,simag,lenlab,labadr, &
+        jtotpa,kplist,f9pha, fast, ierr, FUNIT_TENS_OUTPUT, FUNIT_TCB)
    if(ierr.ne.0) goto 4000
 end if
 ! next n
@@ -1449,8 +1445,8 @@ subroutine addsp(jtmin,jtmax,jlp, &
 use ISO_FORTRAN_ENV, only : ERROR_UNIT
 use tensor_util
 use mod_par, only: batch, iprnt=>iprint
-use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
-use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
+use mod_spbf, only: nbuf, maxlsp, maxllb, ihibuf
+use mod_mom, only: nwaves, jfsts, jlparf, jlpars
 use mod_hismat, only: sread
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -1514,6 +1510,7 @@ do 100 jtp=jtpmin,jtpmax
 11    format (' *** JTP = ',i3, '; IOFFS = ', i8)
 ! set offsets differently (pjd)
 !         ioff = (ibuf-1)*maxllb + 1
+UNUSED_VARIABLE(maxllb)
 ! replace 1421 below with global parameter lbuflb (pjd)
    if (ioff .gt. lbuflb) write (6,12) jtp, ioff
 12    format (' *** JTP = ',i3, '; IOFF = ', i5)
@@ -1605,11 +1602,9 @@ use mod_coisc3, only: jlist => isc3 ! jlist(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_coz, only: xm1lab => z_as_vec ! xm1lab(1)
 use mod_cow, only: xm2lab => w_as_vec ! xm2lab(1)
-use mod_cozmat, only: sigma => zmat_as_vec ! sigma(1)
-use constants, only: econv, xmconv
 use mod_par, only: batch
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
-use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
+use mod_parpot, only: label=>pot_label
+use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, njmax
 use funit, only: FUNIT_TCB, FUNIT_MCS
 use mod_hiutil, only: gennam, mtime, gettim
 implicit double precision(a-h,o-z)
@@ -1729,11 +1724,10 @@ subroutine sigms(numk,ii,jj,m1comp,m2comp,minn,maxn,nstep, &
 use mod_coisc4, only: isc1 => isc4 ! isc1(1)
 use mod_coisc5, only: isc2 => isc5 ! isc2(1)
 use mod_coisc6, only: isc3 => isc6 ! isc3(1)
-use mod_coisc7, only: isc4 => isc7 ! isc4(1)
 use mod_cosc2, only: sc1 => sc2 ! sc1(1)
 use mod_par, only: batch, flaghf
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
-use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
+use mod_parpot, only: label=>pot_label
+use mod_mom, only: xj1, xj2, in1, in2, njmax
 use mod_hiutil, only: xf3j
 implicit double precision(a-h,o-z)
 integer, intent(in) :: mcs_out_unit  ! unit of mcs output file
@@ -1872,9 +1866,9 @@ ierr = 1
 return
 end
 !------- -----------------------------------------------------------------
-subroutine sigk(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,packed_bqs,jttble,prefac,sigma, &
-                sreal,simag,matel,lenlab,labadr, &
-                jtotpa,fast,ierr, tcs_out_unit, tcb_out_unit)
+subroutine sigk(maxk,jfirst,jfinal,nj,mmax,packed_bqs,jttble,prefac,sigma, &
+                sreal,simag,lenlab,labadr, &
+                jtotpa,ierr, tcs_out_unit, tcb_out_unit)
 !
 ! subroutine to calculate sigma(k,j1,j2) cross sections:
 ! ( see also " m.h. alexander and s.l. davis, jcp 78(11),6748(1983)"
@@ -1899,8 +1893,8 @@ use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid2, only: mxoutd
 use mod_par, only: batch, ipos, iprnt=>iprint
 use mod_selb, only: ibasty
-use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
-use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
+use mod_spbf, only: ihibuf, igjtp
+use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf6j
 use mod_hismat, only: sread
@@ -1912,7 +1906,7 @@ integer, intent(in) :: tcs_out_unit  ! unit of tcs output file
 integer, intent(in) :: tcb_out_unit  ! unit of tcb output file
 complex*8 t, tp
 logical diag, diagj, diagin, &
-        twopar, fast
+        twopar
 
 !* flags for diagnostic printing
 logical lprnt,lprntf
@@ -1924,7 +1918,7 @@ integer, allocatable :: iadr(:,:,:)
 real(8), allocatable :: f6a(:,:,:), f6p(:)  ! 6jt
 !
 dimension sreal(1), simag(1)
-dimension prefac(1), matel(1), labadr(1), jtotpa(1)
+dimension prefac(1), labadr(1), jtotpa(1)
 dimension lenlab(1), jttble(1)
 dimension sigma(nj,nj,maxk+1)
 ! array to store partial-j cross sections (K=0-2 only)
@@ -2267,7 +2261,7 @@ do 400 irow = 1, packed_bqs%length
 400 continue
 !
 ! next jtot'
-500 jtotp = jtotp + jtpstp
+jtotp = jtotp + jtpstp
 if(jtotp.le.jtpmax) goto 60
 !
 ! next jtot
@@ -2332,9 +2326,9 @@ deallocate(f6a,f6p)
 return
 end
 !------------------------------------------------------------------------
-subroutine sigkkp(n,maxk,nk,nnout,jfirst,jfinal,jtotd,nj,mmax, &
+subroutine sigkkp(n,maxk,nk,jfirst,jfinal,nj,mmax, &
          packed_bqs, jttble,prefac,sigma, &
-         sreal,simag,matel,lenlab,labadr, &
+         sreal,simag,lenlab,labadr, &
          jtotpa,kplist,f9pha,fast,ierr, tcs_out_unit, tcb_out_unit)
 !
 ! subroutine to calculate sigma(lambda; j1, j2, ki, kf) cross section
@@ -2355,9 +2349,9 @@ use tensor_util
 ! added two common blocks - levels for which xs's to be computed (pjd)
 use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
-use mod_par, only: batch, ipos, iprnt=>iprint
-use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
-use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
+use mod_par, only: batch, iprnt=>iprint
+use mod_spbf, only: ihibuf, igjtp
+use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j, xf9j, xf3jm0
 use mod_hismat, only: sread
@@ -2381,7 +2375,7 @@ integer, allocatable :: iadr(:,:,:)
 real(8), allocatable :: f6a(:,:,:), f9a(:,:)  ! 6jt
 
 dimension sreal(1), simag(1)
-dimension prefac(1), matel(1), labadr(1), jtotpa(1)
+dimension prefac(1), labadr(1), jtotpa(1)
 dimension lenlab(1), jttble(1), kplist(0:maxk)
 dimension sigma(nk,nj,nj), f9pha(nk)
 data tol /1.d-10/
@@ -2777,9 +2771,9 @@ deallocate(f6a,f9a)
 return
 end
 !-------------------------------------------------------------------------
-subroutine sigkc(maxk,nnout,jfirst,jfinal,jtotd,nj,mmax,packed_bqs,jttble,prefac, &
-                sreal,simag,matel,lenlab,labadr, &
-                jtotpa,fast,ierr, tcs_out_unit, tcb_out_unit)
+subroutine sigkc(maxk,jfirst,jfinal,nj,mmax,packed_bqs,jttble,prefac, &
+                sreal,simag,lenlab,labadr, &
+                jtotpa, ierr, tcs_out_unit, tcb_out_unit)
 !
 ! subroutine to calculate tensor cross sections with the
 ! quantization axis along the initial relative velocity vector
@@ -2796,8 +2790,8 @@ use mod_coisc9, only: jslist => isc9 ! jslist(1)
 use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_hibrid2, only: mxoutd
 use mod_par, only: batch, ipos, iprnt=>iprint
-use mod_spbf, only: lnbufs, lnbufl, nbuf, maxlsp, maxllb, ihibuf, igjtp
-use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, maxjot, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
+use mod_spbf, only: ihibuf, igjtp
+use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
 use mod_hiutil, only: mtime, gettim
 use mod_hiutil, only: xf3j, xf6j
 use mod_hismat, only: sread
@@ -2807,8 +2801,7 @@ type(bqs_type), intent(out) :: packed_bqs
 integer, intent(in) :: tcs_out_unit  ! unit of tcs output file
 integer, intent(in) :: tcb_out_unit  ! unit of tcb output file
 complex*8 t, tp
-logical diag, diagj, diagin, &
-        twopar, fast
+logical diag, diagj, diagin, twopar
 
 !* flags for diagnostic printing
 logical lprnt,lprntf
@@ -2822,7 +2815,7 @@ integer, allocatable :: iadr(:,:,:)
 real(8), allocatable :: f6a(:,:,:), f6p(:)  ! 6jt
 !
 dimension sreal(1), simag(1)
-dimension prefac(1), matel(1), labadr(1), jtotpa(1)
+dimension prefac(1), labadr(1), jtotpa(1)
 dimension lenlab(1), jttble(1)
 dimension sigma(nj,nj,maxk+1)
 ! array to store partial-j cross sections (K=0-2 only)
@@ -3150,7 +3143,7 @@ do 400 irow = 1, packed_bqs%length
 400 continue
 !
 ! next jtot'
-500 jtotp = jtotp + jtpstp
+jtotp = jtotp + jtpstp
 if(jtotp.le.jtpmax) goto 60
 !
 ! next jtot

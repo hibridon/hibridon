@@ -82,7 +82,7 @@ subroutine hypxsc(flname, a)
   logical      :: exstfl
 
   ! Read from S-matrix file ----------------------------------------------------
-  integer :: mjtot, mchmx, lngth, ierr, jtot, jlpar, nu, nopen, jlp
+  integer :: mjtot, mchmx, ierr, jtot, jlpar, nu, nopen, jlp
   character*20 :: cdate
   integer :: jfrst, jfinl, jtotd, numin, numax, nud, nlevel, nlvop, nnout
   real(8) :: ered, rmu, ee

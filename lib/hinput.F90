@@ -111,7 +111,7 @@ use mod_conlam, only: nlammx
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysl, only: islcod, lspar
-use mod_cosysr, only: isrcod, idum=>junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use mod_version, only : version
 use mod_hibrid5, only : intcrs, readpc
 use mod_difcrs, only: difcrs
@@ -128,7 +128,7 @@ use rpar_enum
 use mod_par, only: lpar, ipar, rpar, set_param_names, fcod, pcod
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
-use mod_file, only: input, output, jobnam, savfil
+use mod_file, only: input, output, jobnam
 use mod_sav, only: iipar, ixpar, irpar, rxpar
 use mod_tensor, only: tenopa, mrcrs
 use mod_hitestptn, only: testptn
@@ -1195,7 +1195,7 @@ goto 1  ! label:read_next_command
      call assignment_parse(code(1:lc),empty_var_list,j,a(i))
 2010   continue
   write (6,*) 'hinput : lpar = ' 
-  call difcrs(fnam1,a,lpar(LPAR_IHOMO),lpar(LPAR_FLAGHF))
+  call difcrs(fnam1,a,lpar(LPAR_FLAGHF))
 else
   write (6, 2011)
 2011   format(' Sorry, differential cross sections not yet', &

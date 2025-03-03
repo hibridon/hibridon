@@ -2,7 +2,7 @@
 module mod_difcrs
 contains
 !  -------------------------------------------------------------
-subroutine difcrs(fname1,a,ihomo,flaghf)
+subroutine difcrs(fname1,a,flaghf)
 !  -------------------------------------------------------------
 !  calculates differential cross sections
 !  author h.-j. werner
@@ -53,7 +53,6 @@ use mod_hitypes, only: bqs_type
 implicit none
 character*(*), intent(in) :: fname1
 real(8), intent(in) :: a(15)
-logical, intent(in) :: ihomo
 logical, intent(in) :: flaghf
 
 real(8) :: a1term, a2term, aangle, algfak, algn, alph1, alphm1, ang0, ang1, ang2, angle
@@ -74,7 +73,7 @@ character*20 cdate1
 character*20  cdate
 character*10  elaps, cpu
 character*40 xnam1,xnam2,xnam3
-character*1 m1string,m2string
+character*1 m1string
 character*8 amplstring
 
 complex(8) :: stampl, stamplm
@@ -169,7 +168,7 @@ call openf(smt_unit,xnam1(1:lenx),'tu',0)
 !.....open output file for differential cross sections
 !
 !     ifil=1
-20 call gennam(xnam2,fname1,ienerg,'dcs',lenx)
+call gennam(xnam2,fname1,ienerg,'dcs',lenx)
 call openf(dcs_unit,xnam2(1:lenx),'sf',0)
 !.....open output file for final-m dependence of (m,m) and (m,m+2) density matrix
 if (mflag) then
@@ -235,7 +234,7 @@ write(6,70) 'j1=',j1,'in1=',in1
 write(6,80) (j,jlev(j),inlev(j),elev(j)*econv,j=1,nlevel)
 80 format(1x,2i3,i5,f12.3)
 !     check if other symmetry doublet exists for steric effect
-82 if (stflag) then
+if (stflag) then
    do 85 j=1,nlevel
 85    if(jlev(j).eq.j1.and.inlev(j).eq.-in1) goto 90
    write(6,70) 'j1=',j1,'in1=',-in1
@@ -817,8 +816,8 @@ if (mflag) then
 endif
 ! determine integral oriented (steric) cross sections
 if (stflag) then
-   xint=0.5d0*fak*xint*2d0*pi*dang*pi/180d0	
-   xintm=0.5d0*fak*xintm*2d0*pi*dang*pi/180d0	
+   xint=0.5d0*fak*xint*2d0*pi*dang*pi/180d0
+   xintm=0.5d0*fak*xintm*2d0*pi*dang*pi/180d0
    write (6,390) ang0,dang,ang2,xint,xintm, &
             100d0*(xint-xintm)/(xint+xintm)
    write (2,391) ang0,dang,ang2,xint,xintm, &

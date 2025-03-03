@@ -314,9 +314,6 @@ character*10 elaps, cpu
 !
 dimension f36j(0:2)
 
-integer :: jpack(mmax)
-integer :: lpack(mmax)
-integer :: ipack(mmax)
 !
 ! sr, si: s-matrix elements
 !   second letter is real (r), imaginary (i)
