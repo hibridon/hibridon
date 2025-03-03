@@ -126,7 +126,6 @@ use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: mproj
 use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
@@ -150,6 +149,7 @@ UNUSED_DUMMY(sc2)
 UNUSED_DUMMY(sc3)
 UNUSED_DUMMY(sc4)
 UNUSED_DUMMY(ihomo)
+UNUSED_DUMMY(nu)
 
 !  check for consistency in the values of flaghf and csflag
 call bqs%init(nmax)
@@ -558,12 +558,10 @@ subroutine sy2sg1sg (irpot, readpt, iread)
 !
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
-use mod_coiout, only: niout, indout
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: mproj
 use mod_hiutil, only: gennam, get_token
 implicit none
 integer, intent(inout) :: irpot
@@ -615,7 +613,7 @@ return
 entry ptr2sg1sg (fname,readpt)
 line = fname
 readpt = .true.
-286 if (readpt) then
+if (readpt) then
   l=1
   call get_token(line,l,filnam,lc)
   if(lc.eq.0) then

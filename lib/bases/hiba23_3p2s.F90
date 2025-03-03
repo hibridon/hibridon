@@ -118,10 +118,7 @@ use mod_conlam, only: nlam
 use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
-use mod_par, only: boundc
 use mod_ered, only: ered, rmu
-!  modules mod_jtot, mod_ja, and mod_el used to transmit to ground subroutine
-use mod_jtot, only: jjtot, jjlpar
 use mod_ja, only: jja
 use mod_el, only: ll
 use mod_hiutil, only: xf3j, xf9j
@@ -133,8 +130,6 @@ type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 !  arrays in argument list
 dimension jhold(1),ehold(1),ishold(1)
-!  matrices for transformation between atomic and molecular BF functions
-dimension c12(5,5), c32(3,3)
 !  quantum numbers for BF atomic and basis functions
 dimension &
   fjo32(3), fj32(3), flam32(3), sigm32(3), stot32(3), &
@@ -152,14 +147,14 @@ data fjo12 /2.d0, 2.d0, 1.d0, 1.d0, 0.d0/, &
 data flam12 /-1.d0, 1.d0, 0.d0, 1.d0, 0.d0/, &
   sigm12 /1.5d0, -0.5d0, 0.5d0, -0.5d0, 0.5d0/, &
   stot12 /1.5d0, 1.5d0, 1.5d0, 0.5d0, 0.5d0/
-!  scratch arrays for computing asymmetric top energies and wave fns.
-dimension en0(4), en12(5), en32(3), vec(5,5), work(288)
 integer, pointer :: nterm, nstate, npot
 real(8), pointer :: en1d
 nterm=>ispar(1); nstate=>ispar(2); npot=>ispar(4)
 en1d=>rspar(1)
 UNUSED_DUMMY(numin)
 UNUSED_DUMMY(ihomo)
+UNUSED_DUMMY(clist)
+UNUSED_DUMMY(nu)
 npot = 0
 
 zero = 0.d0
@@ -260,7 +255,7 @@ endif
 if (nlevop .le. 0) then
   write (9,185)
   write (6,185)
-185   format('*** NO OPEN LEVELS IN BA3P2S; ABORT')	
+185   format('*** NO OPEN LEVELS IN BA3P2S; ABORT')
   if (bastst) return
   call exit
 endif
@@ -625,7 +620,7 @@ implicit none
 integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-integer :: i, j, l, lc
+integer :: j, l, lc
 logical existf
 character*1 dot
 character*(*) fname

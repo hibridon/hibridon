@@ -130,13 +130,16 @@ logical ihomo, flaghf, csflag, clist, flagsu, bastst
 dimension  jhold(1), ehold(1), &
           ishold(1), ieig(0:2)
 !  scratch arrays for computing asymmetric top energies and wave fns.
-dimension en0(4), en1(3), en2(2), vec(4,4), work(288)
+dimension en0(4), en1(3), en2(2), work(288)
 integer, pointer :: nterm, nstate, ipol, npot
 real(8), pointer :: en1d
 nterm=>ispar(1); nstate=>ispar(2); ipol=>ispar(3); npot=>ispar(4)
 en1d=>rspar(1)
 
 UNUSED_DUMMY(ihomo)
+UNUSED_DUMMY(clist)
+UNUSED_DUMMY(nu)
+UNUSED_DUMMY(numin)
 
 npot = 0
 
@@ -1026,7 +1029,6 @@ subroutine sy1d3p (irpot, readpt, iread)
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar

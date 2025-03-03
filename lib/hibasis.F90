@@ -161,10 +161,10 @@ use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(bqs_type), intent(inout) :: bqs
 type(ancou_type), intent(out), allocatable :: v2
-integer :: jhold(:)
-real(8) :: ehold(:)
-integer :: ishold(:)
-real(8), target :: sc1(:), sc2(:), sc3(:), sc4(:)
+integer :: jhold(nmax)
+real(8) :: ehold(nmax)
+integer :: ishold(nmax)
+real(8), target :: sc1(nmax), sc2(nmax), sc3(nmax), sc4(nmax)
 integer nlevel, nlevop, jtot, nu, &
         jlpar, n, nmax
 !      real ehold, sc1, sc2, sc3, sc4, rcut

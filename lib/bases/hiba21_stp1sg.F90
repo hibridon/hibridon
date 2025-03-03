@@ -134,7 +134,7 @@ use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
 use mod_hibasutil, only: raise
 use mod_par, only: iprint
-use mod_ered, only: ered, rmu
+use mod_ered, only: ered
 use mod_hitypes, only: bqs_type
 implicit none
 type(bqs_type), intent(out) :: bqs
@@ -165,6 +165,9 @@ real(8), pointer :: brot, crot, delta, e1max, drot
 ipotsy=>ispar(1); iop=>ispar(2); ipotsy2=>ispar(3); j1max=>ispar(4); j2min=>ispar(5); j2max=>ispar(6)
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); e1max=>rspar(4); drot=>rspar(5); 
 UNUSED_DUMMY(numin)
+UNUSED_DUMMY(clist)
+UNUSED_DUMMY(nu)
+UNUSED_DUMMY(rcut)
 
 if (flaghf) &
      call raise('FLAGHF = .TRUE. FOR SINGLET SYSTEM')
@@ -297,11 +300,9 @@ return
 end subroutine genchn_stp1sg
 !     ------------------------------------------------------------------
 subroutine sortlev_stp1sg()
-use mod_stp1sg
-use constants, only: econv
+use mod_stp1sg, only: lev_type, levs
 implicit none
 type(lev_type) :: temp
-type(lev_type), dimension(:), allocatable :: levs1
 integer :: i, j
 real(8) :: esave
 do i = 1, size(levs) - 1
@@ -417,7 +418,7 @@ end subroutine prtlev_stp1sg
 !     ------------------------------------------------------------------
 subroutine prtchn_stp1sg()
 use mod_stp1sg
-use constants, only: econv, xmconv
+use constants, only: econv
 implicit none
 integer :: i, ilev
 write (6, 10)
@@ -460,6 +461,9 @@ real(8), pointer, save :: brot, crot, delta, e1max, drot
 ipotsy=>ispar(1); iop=>ispar(2); ipotsy2=>ispar(3); j1max=>ispar(4); j2min=>ispar(5); j2max=>ispar(6)
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); e1max=>rspar(4); drot=>rspar(5); 
 
+UNUSED_DUMMY(irpot)
+UNUSED_DUMMY(readpt)
+
 !     DEFINE THE NAMES HERE
 scod(1)='IPOTSY'
 scod(2)='IOP'
@@ -491,6 +495,7 @@ return
 return
 !     ------------------------------------------------------------------
 entry ptrstp1sg(fname, readpt)
+UNUSED_DUMMY(fname)
 return
 !     ------------------------------------------------------------------
 entry savstp1sg(readpt)

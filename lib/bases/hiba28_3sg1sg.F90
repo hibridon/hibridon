@@ -133,7 +133,6 @@ use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -141,10 +140,12 @@ type(bqs_type), intent(out) :: bqs
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-dimension jhold(1), ehold(1), &
-    e1(1), sc2(1), sc3(1), sc4(1), ishold(1)
+integer :: jhold(nmax)
+real(8) :: ehold(nmax)
+integer :: ishold(nmax)
+real(8) :: e1(nmax), sc2(nmax), sc3(nmax), sc4(nmax)
 dimension j1(2000),is1(2000), fnn1(3,3), fnn2(3,3), &
-  hss(3,3), hsr(3,3), ham(3,3), u(3,3), uu(3,3), wsig(3,3), &
+  hss(3,3), hsr(3,3), ham(3,3), u(3,3), uu(3,3), &
   eig(3), eigkp(3)
 data zero, one, two, three, twthr, sq2 / 0.d0, 1.d0, 2.d0, 3.d0, &
   0.666666666666667d0,  1.414213562373095/
@@ -157,11 +158,14 @@ integer, pointer :: j1max, j2min, j2max, ipotsy2
 real(8), pointer :: b1rot, d1rot, flmbda, gamma, b2rot
 j1max=>ispar(1); j2min=>ispar(2); j2max=>ispar(3); ipotsy2=>ispar(4)
 b1rot=>rspar(1); d1rot=>rspar(2); flmbda=>rspar(3); gamma=>rspar(4); b2rot=>rspar(5)
-UNUSED_DUMMY(numin)
 UNUSED_DUMMY(sc2)
 UNUSED_DUMMY(sc3)
 UNUSED_DUMMY(sc4)
 UNUSED_DUMMY(ihomo)
+UNUSED_DUMMY(rcut)
+UNUSED_DUMMY(clist)
+UNUSED_DUMMY(nu)
+UNUSED_DUMMY(numin)
 
 !  check for consistency in the values of flaghf and csflag
 if (flaghf) then
@@ -686,7 +690,6 @@ subroutine sy3sg1sg (irpot, readpt, iread)
 !
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
-use mod_coiout, only: niout, indout
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
@@ -743,7 +746,7 @@ return
 entry ptr3sg1sg (fname,readpt)
 line = fname
 readpt = .true.
-286 if (readpt) then
+if (readpt) then
   l=1
   call get_token(line,l,filnam,lc)
   if(lc.eq.0) then

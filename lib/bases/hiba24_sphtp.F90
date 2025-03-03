@@ -113,7 +113,7 @@ use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: ispar
-use mod_cosysr, only: isrcod, rspar
+use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
 use mod_parbas, only: lammin, lammax, mproj
@@ -130,7 +130,7 @@ dimension jhold(1), ehold(1), &
           fistmp(1)
 !  scratch arrays
 dimension sc1(narray), ieps(narray), ips(narray)
-dimension na(17), ne(11), nf(11), ipa(11), nepsa(25), &
+dimension na(17), ne(11), nf(11), nepsa(25), &
      nepse(20), nepsf(30), ua(25,17), ue(20,11), &
      uf(30,11)
 !
