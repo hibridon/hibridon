@@ -312,8 +312,8 @@ call factlg(kfact)
 ! start scattering calculation
 call flow (z, w, zmat, amat, bmat, jhold, ehold, &
            inhold, isc1, isc2, isc3, isc4, lsc1, &
-           sc2, sc1, sc3, sc4, sc5, &
-           sc6, sc7, sc8, sc9, tq1, tq2, tq3, men, mmax, mairy)
+           sc2, sc1, sc3, sc4, &
+           tq1, men, mmax, mairy)
 call finit ! Closes all I/O units
 contains
 subroutine print_help()

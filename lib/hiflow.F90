@@ -5,7 +5,7 @@ contains
 subroutine flow (z, w, zmat, amat, bmat, jlev, &
             elev, inlev, isc1, isc2, isc3, isc4, lsc1, &
             sc2, sc1, sc3, sc4, &
-            sc5, sc6, sc7, sc8, sc9, tq1, tq2, tq3, men, &
+            tq1, men, &
             nmax, nairy)
 !  -------------------------------------------------------------
 !  program to control the log-derivative/airy integration
@@ -26,7 +26,6 @@ subroutine flow (z, w, zmat, amat, bmat, jlev, &
 !    xmconv:      conversion factor from amu to atomic units
 !
 !
-use mod_cosout, only: nnout, jout
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coener, only: energ
@@ -44,7 +43,6 @@ use mod_par, only: airyfl, prairy, bastst, chlist, &
                 t2test, prt2, twomol, wrsmat, wrpart, wrxsec, &
                 prxsec, nucros, photof, wavefl, boundc, &
                 jtot1, jtot2, jtotd, jlpar, nerg, numax, numin, nud, &
-                lscreen, iprint, &
                 fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, tolhi=>scat_tolai, xmu
 use funit
 use mod_fileid, only: FILEID_SAV
@@ -52,12 +50,11 @@ use ipar_enum
 use rpar_enum
 use mod_hinput, only:hinput
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
-use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_phot, only: phot_photof => photof, wavefn, boundf, writs
 use mod_surf, only: surf_flagsu => flagsu
-use mod_sav, only: iipar, ixpar, irpar, rxpar
-use mod_pmat, only: rtmn, rtmx, iflag
+use mod_sav, only: ixpar, rxpar
+use mod_pmat, only: rtmn, rtmx
 use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
 #if defined(HIB_ULTRIX_DEC)
   use mod_dec_timer, only: ttim
@@ -86,14 +83,7 @@ real(8), intent(out) :: sc2(1)
 real(8), intent(out) :: sc1(2)
 real(8), intent(out) :: sc3(1)
 real(8), intent(out) :: sc4(1)
-real(8), intent(out) :: sc5(1)
-real(8), intent(out) :: sc6(1)
-real(8), intent(out) :: sc7(1)
-real(8), intent(out) :: sc8(1)
-real(8), intent(out) :: sc9(1)
 real(8), intent(out) :: tq1(1)
-real(8), intent(out) :: tq2(1)
-real(8), intent(out) :: tq3(1)
 integer, intent(in) :: men
 integer, intent(in) :: nmax
 integer, intent(in) :: nairy
