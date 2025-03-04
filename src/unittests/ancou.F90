@@ -135,7 +135,7 @@ program test_ancou_type
 #ifdef TEST_V2MAT_USE_ASSOCIATE
     type(ancou_type) :: v2
 #else
-    type(ancou_type) :: v2, target
+    type(ancou_type) :: v2
     type(ancouma_type), pointer :: ancouma
 #endif
 #if (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL2) || (ANCOUMA_READ_METHOD == ANCOUMA_READ_METHOD_INLINE_LEVEL3)

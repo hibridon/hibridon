@@ -2,7 +2,7 @@
 ! Reference: 
 ! J. Klos, G. Chalasinski, M. T. Berry, R. A. Kendall, 
 ! R. Burcl, and M. M. Szczesniak, J. Chem. Phys. 112, 4952 (2000)
-
+#include "unused.h"
 
 subroutine driver
 use mod_covvl, only: vvl
@@ -33,6 +33,8 @@ use mod_conlam, only: nlam, nlammx, lamnum
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 character*(*) filnam
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='KLOS-CHALASINSKI Ar-OH UMP4'
 lammin(1)=1
 lammax(1)=5

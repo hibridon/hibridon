@@ -11,7 +11,7 @@
 !
 !  Note:  subr spline_ch2he requires 1 data file to be in hibxx/bin/progs/potdata:
 !         ch2he_a190.dat
-
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/ground.F90"
 #include "common/bausr.F90"
@@ -46,6 +46,8 @@ implicit double precision (a-h,o-z)
 character*(*) filnam
 integer, pointer :: nterm
 nterm=>ispar(1) 
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='MA CH2(a)-He PES'
 !
 nterm = 7

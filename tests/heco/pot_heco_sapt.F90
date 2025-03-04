@@ -2,12 +2,12 @@
 ! reference: Tino G. A. Heijmen, Robert Moszynski, 
 ! Paul E. S. Wormer, and Ad van der Avoird
 ! J. Chem. Phys. 107, 9921 (1997)
-
+#include "unused.h"
 
 subroutine driver
 use mod_covvl, only: vvl
 use mod_cosysr, only: rspar
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 implicit double precision (a-h,o-z)
 real(8), pointer :: rshift, xfact
 rshift=>rspar(1); xfact=>rspar(2)
@@ -29,8 +29,10 @@ goto 1
 subroutine loapot(iunit,filnam)
 ! ------------------------------------------------------------------------
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 character*(*) filnam
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='HeCO Moszynski et al. SAPT PES'
 lammin(1)=1
 lammax(1)=10
@@ -65,10 +67,9 @@ subroutine pot (vv0, r)
 
 use mod_covvl, only: vvl
 implicit double precision (a-h,o-z)
-dimension xlam1(7),xlam2(7),r0(7), &
-          vsum(11),xsum(11), &
+dimension vsum(11),xsum(11), &
           d0(121),aa(121),thta(11),cthta(11)
-dimension kpvt(11),qraux(11),work(121),rsd(11),re(14)
+dimension kpvt(11),qraux(11),work(121),rsd(11)
 
 data half, zero, one, alph /0.5d0, 0.d0, 1.d0, 1.2d0/
 ! for distances beyond rmax difference potential is damped

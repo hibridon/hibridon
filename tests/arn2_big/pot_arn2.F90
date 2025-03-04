@@ -23,6 +23,8 @@ use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 ! --------------------------------------------------------------------------
 character*(*) filnam
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='PATTENGILL-LABUDDE-BERNSTEIN AR-N2'
 lammin(1)=2
 lammax(1)=2

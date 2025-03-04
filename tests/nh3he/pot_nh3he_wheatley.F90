@@ -63,6 +63,8 @@ implicit double precision (a-h,o-z)
 character*(*) filnam
 integer, pointer :: nterm
 nterm=>ispar(1)
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='Wheatley/Hodges NH3-He PES'
 !
 nterm = 4

@@ -6,6 +6,7 @@
 !  Note:  this pot routine requires a data file to be in hibxx/bin/progs/potdata:
 !         vthet_heohx.txt
 !
+#include "unused.h"
 subroutine driver
 use mod_covvl, only: vvl
 use mod_cosysr, only: rspar
@@ -76,6 +77,8 @@ use mod_conlam, only: nlam, nlammx, lamnum
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 character*(*) filnam
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='Cybulski et al He-OH(X) RCCSDT PES'
 lammin(1)=1
 lammax(1)=10

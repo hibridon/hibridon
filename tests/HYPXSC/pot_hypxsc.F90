@@ -1,5 +1,6 @@
 ! Dummy potential for testing purposes
 
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/bausr.F90"
 #include "common/ground.F90"
@@ -8,8 +9,6 @@
 ! subroutine called by testpot to interactively provide potential values
 !  -----------------------------------------------------------------------
 subroutine driver
-use mod_covvl, only: vvl
-use mod_parpot, only: potnam=>pot_name
 implicit none
     write(*,*) 'This is a dummy potential for testing purposes'
     return
@@ -24,6 +23,8 @@ implicit none
     integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
     character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)
     
+    UNUSED_DUMMY(iunit)
+    UNUSED_DUMMY(filnam)
     potnam = 'DUMMY POTENTIAL FOR TESTING PURPOSES'
 
     return
@@ -43,11 +44,11 @@ end subroutine loapot
 !  -----------------------------------------------------------------------
 subroutine pot (vv0, r)
 use mod_covvl, only: vvl
-use mod_conlam, only: nlam
 implicit none
     real(8), intent(out) :: vv0
     real(8), intent(in) :: r
-    
+
+    UNUSED_DUMMY(r)
     vv0  = 0d0
     vvl = 0d0
 

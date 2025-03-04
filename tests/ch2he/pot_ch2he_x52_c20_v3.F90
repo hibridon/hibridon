@@ -13,6 +13,7 @@
 !  Note:  subroutine spline_ch2he requires 1 data file to be in hib44/bin/progs/potdata:
 !         ch2he_x52_v3.dat
 !
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/ground.F90"
 #include "common/bausr.F90"
@@ -48,6 +49,8 @@ use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
 character*(*) filnam
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='MA CH2(X,030)-He PES'
 !
 nterm = 7

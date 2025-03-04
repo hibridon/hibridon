@@ -2,6 +2,7 @@
 !references: M. H. Alexander, J. Chem. Phys. 99, 6014 (1993).
 ! M.-L. Dubernet and J. M. Hutson, J. Chem. Phys. 101, 1939 (1994).
 !  M. H. Alexander and M. Yang, J. Chem. Phys. 103, 7956 (1995).
+#include "unused.h"
 
 #include "common/syusr.F90"
 #include "common/ground.F90"
@@ -12,6 +13,8 @@ use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 character*(*) filnam
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='ALEXANDER B(2P)H2(J=0,1) DUBERNET-HUTSON'
 ibasty=12
 lammin(1)=1

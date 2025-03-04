@@ -57,6 +57,8 @@ subroutine loapot(iunit,filnam)
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 character*(*) filnam
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 
 potnam='He-CN(2Sigma) CCSDT PES'
 lammin(1)=1

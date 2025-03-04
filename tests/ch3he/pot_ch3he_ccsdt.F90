@@ -12,6 +12,7 @@
 !
 !  Reference:  M.H.Alexander and P.J.Dagdigian, J. Chem. Phys. 135, 064306 (2011)
 !
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/ground.F90"
 #include "common/bausr.F90"
@@ -58,6 +59,8 @@ implicit double precision (a-h,o-z)
 character*(*) filnam
 integer, pointer :: nterm
 nterm=>ispar(1)
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='Dagdigian CH3-He PES'
 !
 nterm = 4

@@ -164,7 +164,7 @@ double precision bcoef,fbcl,fbcr,t, tol,txn,tx1,vnikx,w,wdtol, &
  x, xl, &
  y
 !     real r1mach
-dimension x(1), y(1), t(1), bcoef(2), w(5,1), vnikx(4,4), work(15)
+dimension x(ndata), y(ndata), t(n+4), bcoef(n), w(5,3), vnikx(4,4), work(15)
 wdtol = 1.e-9
 !     r1mach(4)
 tol = sqrt(wdtol)
@@ -793,7 +793,7 @@ integer i,ideriv,iderp1,ihi,ihmkmj,ilo,imk,imkpj, inbv, ipj, &
  ip1, ip1mj, j, jj, j1, j2, k, kmider, kmj, km1, kpk, mflag, n
 double precision a, fkmj, t, work, x, bvalu
 !     dimension t(n+k), work(3*k)
-dimension t(1), a(n), work(1)
+dimension t(1), a(n), work(3*k)
 bvalu = 0.0e0
 if(k.lt.1) go to 102
 if(n.lt.k) go to 101

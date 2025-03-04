@@ -1,3 +1,4 @@
+#include "unused.h"
 !system:  NH3-H2 - Pierre Valiron/Claire Rist
 !  details are published in Maret at el., MNRAS 399, 425 (2009)
 !  subr provided by Claire Rist - Nov-2011
@@ -146,7 +147,8 @@ nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=>ispar(4); ninv=>ispar(
 jmax0=>ispar(7); jmax1=>ispar(8); jmax2=>ispar(9); jmax3=>ispar(10); jmax4=>ispar(11); jmax5=>ispar(12); 
 jmax6=>ispar(13); jmax7=>ispar(14); jmax8=>ispar(15); jmax9=>ispar(16); jmax10=>ispar(17); jmax11=>ispar(18);
 jmax12=>ispar(19); ipotsy2=>ispar(20); j2max=>ispar(21); j2min=>ispar(22)
-
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='RIST/VALIRON NH3-H2 2009'
 
 nterm = 16
@@ -223,7 +225,7 @@ do j=1, l2m2
   enddo
 enddo
 lammin(1) = 1
-200 continue
+continue
 
 iwrite = 9
 ifile  = 60
@@ -283,7 +285,7 @@ end if
 1000 format(' loapot -- initialize potential surface parameters' &
        /' potential data:  ', &
         'potdata/fitvij_bf_62.h2')
-1001 format('     iwrite     ifile'/,1x,2i10)
+!1001 format('     iwrite     ifile'/,1x,2i10)
 1002 format('     conv =',f9.6,'   econv = ',f10.3)
 
 !  force reading the potential expansion ( with lsurf = 0 )
@@ -410,12 +412,10 @@ subroutine pot(vv0, r)
 !      implicit none
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
-use constants, only: s4pi
 use mod_nh3h2, only: nvv, ivv
 implicit double precision (a-h,o-z)
 
-double precision  r, v, vv, vv0
+double precision  r, v, vv0
 
 if (nlam .ne. nvv) then
   write(6,*) ' entry pot --', nvv, nlam,'   nvv, expected nlam'
@@ -448,7 +448,7 @@ subroutine vinit(i,r,v)
 
 double precision  r, v, conv, econv
 double precision  rstart
-double precision v0, v1, v2
+double precision v0
 common /fisurf/ conv,econv,lsurf
 common /fiunit/ iwrite,ifile
 
@@ -593,7 +593,7 @@ end
 !  comment out write statement
 !        write(6,221) hdd
 !221     format (' ddyini - reading distances.  ndd: ', i4)
-201   format(/i10)
+! 201   format(/i10)
   if (ndd.gt.nddmx) then
       write (6,222)
       write (iwrite,222)
@@ -604,7 +604,7 @@ end
 !  comment out write statements
 !        write(6,*) 'ddyini - reading distances'
 !        write(6, 202) (dd(idd),idd=1,ndd)
-202   format(/(8f10.4))
+! 202   format(/(8f10.4))
 ! ***************************************************************
 ! convert input units(bohr) to conv units (angstroms for molscat)
 ! ***************************************************************
@@ -630,8 +630,7 @@ enddo
 !            write(6, '(a,i3,a,4i2)')'reading term', iv,' = ',
 !     :                l1,m1,l2,m2
       read(ifile,*) (y1(idd,iv),idd=1,ndd)
-204       format(/(4f20.12))
-40   enddo
+  enddo
 
   do iv=1,nv
     do idd=1,ndd

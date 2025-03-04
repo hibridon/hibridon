@@ -2,6 +2,7 @@
 !  References
 !   B. Pouilly, J.-M. Robbe, and M. H. Alexander, J. Chem. Phys. 91, 1658 (1989).
 !   T. Duhoo and B. Pouilly, J. Chem. Phys. 101, 7554 (1994).
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/bausr.F90"
 #include "common/ground.F90"
@@ -12,6 +13,8 @@ use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 character*(*) filnam
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='Ca(4s5p)-He'
 ibasty=7
 lammin(1)=1

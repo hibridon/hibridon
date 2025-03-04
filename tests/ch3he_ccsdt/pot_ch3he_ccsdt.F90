@@ -1,3 +1,4 @@
+#include "unused.h"
 !  system:  CH3-He, PES computed by P. J. Dagdigian
 !
 !
@@ -58,6 +59,8 @@ implicit double precision (a-h,o-z)
 character*(*) filnam
 integer, pointer :: nterm
 nterm=>ispar(1)
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='Dagdigian CH3-He PES'
 !
 nterm = 4

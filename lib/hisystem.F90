@@ -76,7 +76,6 @@ subroutine baschk(ival)
 !     COMMON BLOCK COMXBS DEFINED IN HIMAIN
 ! -------------------------------------------------------
 use mod_comxbs, only: maxbas
-use mod_selb, only: ibasty
 logical icheck
 icheck=.false.
 do 100 i=1, maxbas
@@ -195,7 +194,7 @@ use mod_hiba27_astp1, only: syastp1
 use mod_hiba28_3sg1sg, only: sy3sg1sg
 use mod_hiba29_astp2, only: syastp2
 use mod_hiba30_astp3, only: syastp3
-use mod_parbas, only: maxtrm, ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parbas, only: maxtrm, ntv, ivcol, ivrow
 use mod_selb, only: ibasty
 integer irpot, iread
 logical readpt

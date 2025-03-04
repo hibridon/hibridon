@@ -2,7 +2,7 @@
 ! the aim of this dummy potential is to provide a potential
 ! that works with each basis supported by hibridon
 ! important: this potentiel produces meaningless physical results!
-
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/bausr.F90"
 #include "common/ground.F90"
@@ -28,6 +28,8 @@ implicit none
 
     integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
     character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)
+    UNUSED_DUMMY(iunit)
+    UNUSED_DUMMY(filnam)
     potnam = 'DUMMY POTENTIAL FOR TESTING PURPOSES'
 
     call init_pot_parameters(ibasty)

@@ -11,13 +11,14 @@
 !
 !  the PES is fitted with 5 angular terms
 !
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/ground.F90"
 #include "common/bausr.F90"
 ! ------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 implicit double precision (a-h,o-z)
 econv=219474.6d0
 potnam='Ar-CH4 Nijmegen 1997'
@@ -49,12 +50,14 @@ subroutine loapot(iunit,filnam)
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_cosysi, only: ispar
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
 character*(*) filnam
 integer, pointer :: nterm
 nterm=> ispar(1)
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='Ar-CH4 Nijmegen 1997'
 ibasty = 24
 !
@@ -98,7 +101,6 @@ subroutine pot (vv0, r)
 ! R = [3:0.5:10 11 12 13 15 20]
 !
 use mod_covvl, only: vvl
-use mod_par, only: csflag, ihomo
 implicit double precision (a-h,o-z)
 real(8) :: v(5)
 real(8), save :: csplin(69,5)

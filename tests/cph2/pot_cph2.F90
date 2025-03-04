@@ -4,6 +4,7 @@
 !  F. Lique, G. Werfelli, P. Halvick, T. Stoecklin, A. Faure, L. Wiesenfeld,
 !  and P. J. Dagdigian, J. Chem. Phys. 138, 204314 (2013).
 !
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/ground.F90"
 #include "common/bausr.F90"
@@ -14,6 +15,8 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_conlam, only: nlam
 character*(*) filnam
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='HALVICK Cp(2P)-H2 PES'
 ibasty=12
 lammin(1)=1

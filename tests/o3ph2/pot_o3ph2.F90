@@ -9,6 +9,7 @@
 ! NB potential fitted to all ab initio mrci scaled points determined
 ! with avqz basis with the restrictions:  R .ge. 4 and E .le. 2000 cm-1
 ! rms fit to these points is 0.0011 (relative error)
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/ground.F90"
 #include "common/bausr.F90"
@@ -19,6 +20,8 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 ! --------------------------------------------------------------------------
 character*(*) filnam
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='ALEXANDER SCALED (s=1.21) O(3P)H2 DUBERNET-HUTSON'
 ibasty=13
 lammin(1)=1

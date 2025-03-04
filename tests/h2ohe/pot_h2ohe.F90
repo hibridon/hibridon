@@ -12,6 +12,7 @@
 !  Note:  subr heh2osapt requires 3 data files to be in hibxx/bin/progs/potdata:
 !         h2o_coefd.dat, h2o_coefi.dat, h2o_params.dat
 !
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/ground.F90"
 #include "common/bausr.F90"
@@ -50,6 +51,8 @@ implicit double precision (a-h,o-z)
 character*(*) filnam
 integer, pointer :: nterm
 nterm=>ispar(1)
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='Patkowski et al. H2O-He SAPT PES'
 nterm = 4
 mproj(1) = 0

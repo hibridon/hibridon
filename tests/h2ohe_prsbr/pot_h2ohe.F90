@@ -50,6 +50,8 @@ implicit double precision (a-h,o-z)
 character*(*) filnam
 integer, pointer :: nterm
 nterm=>ispar(1)
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='Patkowski et al. H2O-He SAPT PES'
 nterm = 4
 mproj(1) = 0

@@ -1,13 +1,13 @@
 ! System:  NO(X 2Pi)+Ar, new inf basis set CCSDT ab initio PES's
 ! Reference:  M. H. Alexander J. Chem. Phys. 111, 7426 (1999)
 ! NB Vlam components correspond to theta=0 for ArON!!!,
+#include "unused.h"
 
 
 subroutine driver
 use mod_covvl, only: vvl
 use mod_cosysr, only: rspar
-use constants, only: econv
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 implicit double precision (a-h,o-z)
 real(8), pointer :: rshift, xfact
 rshift=>rspar(1); xfact=>rspar(2)
@@ -28,9 +28,11 @@ goto 1
 ! --------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
-use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj, lam2
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parpot, only: potnam=>pot_name
 character*(*) filnam
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='ALEXANDER Ar-NO CCSDT'
 lammin(1)=1
 lammax(1)=8
@@ -72,7 +74,7 @@ use mod_hivector, only: dset
 implicit double precision (a-h,o-z)
 dimension xlam1(17),xlam2(17),r0(17),c1(17),c2(17),c3(17), &
           clr(17),vsum(9),xsum(9),vdif(9),xdif(9), &
-          ddif(9),vap(9),va2p(9), &
+          vap(9),va2p(9), &
           d0(81),d2(49),aa(121)
 dimension kpvt(9),qraux(9),work(55),rsd(9)
 

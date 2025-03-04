@@ -1,12 +1,11 @@
 ! System:  NO(X 2Pi)+Ar, original ab initio CEPA PES's
 ! Reference: M. H. Alexander, J. Chem. Phys. 99, 7725 (1993).
-
+#include "unused.h"
 
 subroutine driver
 use mod_covvl, only: vvl
-use constants, only: econv
 use mod_cosysr, only: rspar
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 implicit double precision (a-h,o-z)
 real(8), pointer :: rshift, xfact
 rshift=>rspar(1) ; xfact=>rspar(2)
@@ -28,8 +27,10 @@ goto 1
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 character*(*) filnam
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='ALEXANDER Ar-NO CEPA'
 lammin(1)=1
 lammax(1)=10

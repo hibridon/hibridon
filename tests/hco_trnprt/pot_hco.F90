@@ -7,6 +7,7 @@
 !  
 !   written by p. dagdigian
 !   current revision date:  21-jan-2015
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/bausr.F90"
 #include "common/ground.F90"
@@ -52,6 +53,8 @@ implicit double precision (a-h,o-z)
 character*(*) filnam
 integer, pointer :: nterm
 nterm=>ispar(1)
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='HCO PES-Nijmegen-lmax=15'
 npot=1
 nterm=1

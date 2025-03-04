@@ -3,6 +3,7 @@
 !  and c.f. curtiss, j. chem. phys. 55, 5517 (1971)]
 
 ! declare unused user subroutines syusr, bausr and ground
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/bausr.F90"
 #include "common/ground.F90"
@@ -35,6 +36,8 @@ implicit none
     integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
     character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)
     integer, parameter :: l1i = 1  ! lambda1 index
+    UNUSED_DUMMY(iunit)
+    UNUSED_DUMMY(filnam)
     potnam = 'PATTENGILL-LABUDDE-BERNSTEIN AR-N2'
     lammin(l1i) = 2 ; lammax(l1i) = 2  ! lambda1's range is [2, 2]
     mproj(l1i) = 0

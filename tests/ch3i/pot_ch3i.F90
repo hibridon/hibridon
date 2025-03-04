@@ -78,6 +78,8 @@ use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
  character*(*) filnam
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='SHAPIRO-GUO-SCHATZ 2D CH3I'
 ibasty=99
 lammin(1)=1
