@@ -122,6 +122,8 @@ end
 20  ierr=1
  return
  end
+
+
 ! ---------------------------------------------------------------
 subroutine gendat
 !  subroutine to read system independent input parameters for hibridon code
@@ -1261,9 +1263,6 @@ end
 !     ------------------------------------------------------------
 !
 !     ------------------------------------------------------------
-module mod_hiiolib
-contains
-end module mod_hiiolib
 !     ------------------------------------------------------------
 !
 ! common /cdio/iadr(maxrec,maxun),len(maxrec,maxun),next(maxun),
@@ -1378,10 +1377,11 @@ use mod_cdbf, only: ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf,llbuf
 use mod_cdio, only: allocate_cdio, cdio_is_allocated, iadr, len, next, iun, iostat, last, lhea, junk, memory_block
 use mod_cobuf, only: lbuf, ibuf
 use mod_file_size, only : isize, isizes
+use mod_hiiolib, only: rdabsi, rdabsf
 implicit double precision (a-h,o-z)
 character*(*) name
 parameter (maxun=2, maxrec=5000)
-dimension ii(l)
+integer :: ii(l)
 if(iun(ifil).eq.0) then
   write(6,10) ifil,irec
 10   format(/' DIRECT READ ERROR ON FILE',i2,' RECORD',i3, &
@@ -1413,9 +1413,7 @@ if(mod(l,intrel).ne.0.or.mod(ir,intrel).ne.0) then
     ' LENGTH=',i4,' OR ADRESS=',i6,' NOT MULTIPLE OF INTREL')
   call exit
 end if
-ll=l/intrel
-ir=ir/intrel
-call rdabsf(iun(ifil),ii,ll,ir)
+call rdabsi(iun(ifil), ii, l, ir)
 call fwait(iun(ifil))
 iostat(ifil)=0
 return
@@ -1597,7 +1595,7 @@ end if
 iofh=0
 do 91 ib=1,lhea,lbuf
 ll=min(lhea-iofh,lbuf)
-call rdabsf(iun(ifil),idbuf,ldbuf,iofh/intrel)
+call rdabsi(iun(ifil),idbuf,lbuf,iofh)
 call fwait(iun(ifil))
 ASSERT(ifil .eq. 1) ! unexpected case : graffy suspects the following imove to only work when ifil=1'
 call imove(idbuf,memory_block(iofh+1),ll)
@@ -1871,39 +1869,78 @@ iflag=icatf(luni)
 name=nam(luni)
 return
 end
+
+module mod_hiiolib
+
+contains
+
 ! ---------------------------------------------------------------
-subroutine rdabsf(luni,a,l,iword)
+subroutine rdabsf(luni, a, l, iword)
 !
 ! author: h.j. werner
 !
 ! read of l double precision words into a. iword is zero adjusted adress
 ! on file. l and iword should be multiple of lseg, otherwise unefficient
 use mod_clseg, only: lseg
-use mod_cobuf, only: lbuf
 use mod_disc, only: ipos, iun, iostat, icatf, nam
-implicit double precision (a-h,o-z)
-dimension a(l),buf(lbuf)
+implicit none
+integer, intent(in) :: luni  ! logical unit
+real(8), intent(out) :: a(l)  ! array to fill with the reals read from luni
+integer, intent(in) :: l  ! number of double precision reals to read
+integer, intent(in) :: iword  ! 0 based word position in the luni file where to start reading
+
+integer :: remainder, n, block_index, i, l1, lbl, ib
+real(8) :: buf(lseg)
   buf = 0d0
-  if(lseg.gt.lbuf) stop 'lbuf too small in rdabsf'
-  ibl=iword/lseg+1
-  m=iword-(ibl-1)*lseg
-  n=0
-  if(m.eq.0) goto 20
-  n=min0(lseg-m,l)
-  read(luni,rec=ibl) (buf(i),i=1,lseg)
-  ibl=ibl+1
-  do 15 i=1,n
-  15 a(i)=buf(m+i)
-  20 l1=l-n
-  if(l1.eq.0) return
-  lbl=(l1-1)/lseg+1
-  do 25 ib=1,lbl
-  read(luni,rec=ibl) (a(n+i),i=1,min0(l1,lseg))
-  ibl=ibl+1
-  l1=l1-lseg
-  25 n=n+lseg
+  block_index = iword / lseg + 1   ! index of the first block to read (at least partially)
+  remainder = iword - (block_index - 1) * lseg
+  n = 0
+  if (remainder .ne. 0) then
+    n = min0(lseg - remainder, l)
+    ! there are n values to read from the first block
+    read(luni, rec=block_index) (buf(i), i=1, lseg)
+    block_index = block_index + 1
+    do i = 1, n
+      a(i) = buf(remainder + i)
+    end do
+  end if
+  ! read the remaining blocks
+  l1 = l - n  ! number of remaining values to read
+  if (l1 .eq. 0) return
+  lbl = (l1 - 1) / lseg + 1  ! number of remaining blocks
+  do ib = 1, lbl
+    read(luni, rec=block_index) (a(n+i), i=1, min0(l1, lseg))
+    block_index = block_index + 1
+    l1 = l1 - lseg
+    n = n + lseg
+  end do
   return
 end subroutine rdabsf
+
+subroutine rdabsi(luni, a, num_ints, start_int_pos)
+! read of num_ints integer words into a. start_int_pos is zero adjusted adress
+! on file. num_ints*intrel and start_int_pos*intrel should be multiple of lseg, otherwise unefficient
+use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
+use mod_clseg, only: intrel
+implicit none
+integer, intent(in) :: luni  ! logical unit
+integer, intent(out), target :: a(num_ints)  ! array to fill with the integers read from luni
+integer, intent(in) :: num_ints  ! number of integers to read
+integer, intent(in) :: start_int_pos  ! 0 based word position in the luni file where to start reading
+
+!integer, target :: a_as_int(num_ints)
+real(8), pointer :: a_as_real(:)
+integer :: num_reals
+integer :: start_real_pos
+!a_as_int => a 
+call C_F_POINTER (C_LOC(a), a_as_real, [num_ints])
+num_reals = num_ints / intrel
+start_real_pos = start_int_pos / intrel
+call rdabsf(luni, a_as_real, num_reals, start_real_pos)
+
+end subroutine rdabsi
+
+end module mod_hiiolib!
 !
 subroutine wrabsf(luni,a,l,iword)
 ! write l real8 numbers from a array into file unit luni at offset iword
