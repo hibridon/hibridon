@@ -193,7 +193,7 @@ end if
 !     reduced mass in the two smt files must be the same
 !
 if (rmu1 .ne. rmu2) then
-   write(6,16)
+   write(6,19)
 19    format(/' *** REDUCED MASS IN BOTH SMT FILES', &
         ' MUST BE EQUAL ***'/)
    goto 4000
