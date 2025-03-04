@@ -1528,7 +1528,9 @@ use mod_cdio, only: allocate_cdio, cdio_is_allocated, iadr, len, next, iun, iost
 use mod_cobuf, only: lbuf, ibuf
 use mod_file_size, only : isize, isizes
 use mod_hiiolib, only: rdabsi, rdabsf, wrabsf, wrabsi
+use, intrinsic :: ISO_C_BINDING
 implicit double precision (a-h,o-z)
+integer, pointer :: iadr_as_vec1d(:)
 character*(*) name
 parameter (maxun=2, maxrec=5000)
 integer :: ii(l)
@@ -1765,7 +1767,8 @@ end if
 iofh=0
 do 96 ib=1,lhea,lbuf
 ll=min(lhea-iofh,lbuf)
-call imove(iadr(iofh+1,ifil),idbuf,ll)
+call C_F_POINTER (C_LOC(iadr(iofh+1,ifil)), iadr_as_vec1d, [ll])
+call imove(iadr_as_vec1d,idbuf,ll)
 call wrabsi(iun(ifil),idbuf,lbuf,iofh)
 call fwait(iun(ifil))
 96 iofh=iofh+lbuf
