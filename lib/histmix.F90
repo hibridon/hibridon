@@ -37,6 +37,7 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam, mtime, gettim
 use mod_hismat, only: sread, rdhead, sinqr
 use mod_hitypes, only: bqs_type
+use mod_par, only: batch
 implicit double precision (a-h, o-z)
 type(bqs_type) :: packed_bqs
 type(bqs_type) :: row_bqs
@@ -47,7 +48,7 @@ character*10  elaps, cpu
 character*1 slab
 logical csflg1, flghf1, flgsu1, twmol1, nucrs1, &
      csflg2, flghf2, flgsu2, twmol2, nucrs2, &
-     batch, exstfl, sngsmt, trpsmt
+     exstfl, sngsmt, trpsmt
 dimension a(8)
 dimension epert(2), cpert(2,2)
 !     scratch arrays for diagonalization subroutine
