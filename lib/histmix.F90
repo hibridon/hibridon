@@ -184,7 +184,7 @@ end if
 !     electron spin cannot be half-integral
 !
 if (flghf2 .or. flghf2) then
-   write(6,16)
+   write(6,18)
 18    format(/' *** ELECTRON SPIN CANNOT BE', &
         ' HALF-INTEGRAL ***'/)
    goto 4000
