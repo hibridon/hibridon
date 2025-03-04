@@ -948,7 +948,7 @@ use mod_coener, only: max_en
 implicit double precision (a-h,o-z)
 integer ifile, nerg, nfile, lenx
 logical existf
-character*40  oldlab,newlab
+character*48 oldlab,newlab
 character*40 xname,xnam1
 character*20 cdate
 if (nerg .gt. 1) then
@@ -1849,15 +1849,19 @@ subroutine dbwr(buffer,l,ifil,irec)
 !.....zero or negative record means start at present position
 !
 use mod_clseg, only: intrel
+use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
 implicit none
-real(8), dimension(l), intent(in) :: buffer
+real(8), target, intent(in) :: buffer(l)
 integer, intent(in) :: l
 integer, intent(in) :: ifil
 integer, intent(in) :: irec
 
+integer, pointer :: buffer_of_ints(:)
+
 integer :: lre
 lre = l*intrel
-call dbwi(buffer,lre,ifil,irec)
+call C_F_POINTER (C_LOC(buffer), buffer_of_ints, [lre])
+call dbwi(buffer_of_ints,lre,ifil,irec)
 end subroutine
 subroutine dbwi(buffer,l,ifil,irec)
 !
