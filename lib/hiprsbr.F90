@@ -24,13 +24,8 @@ use mod_coisc3, only: inlev1 => isc3 ! inlev1(1)
 use mod_coisc4, only: inlev2 => isc4 ! inlev2(1)
 use mod_coisc5, only: jout1 => isc5 ! jout1(1)
 use mod_coisc6, only: jout2 => isc6 ! jout2(1)
-use mod_coisc7, only: nlevt => isc7 ! nlevt(1)
-use mod_coisc8, only: jlevt => isc8 ! jlevt(1)
-use mod_coisc9, only: inlevt => isc9 ! inlevt(1)
 use mod_cosc1, only: elev1 => sc1 ! elev1(1)
 use mod_cosc2, only: elev2 => sc2 ! elev2(1)
-use mod_cosc3, only: elevt => sc3 ! elevt(1)
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam, mtime, gettim
 use mod_hiutil, only: xf6j
 use mod_hismat, only: sread, rdhead, sinqr
@@ -45,11 +40,10 @@ type(bqs_type) :: packed_bqs
 character*20  cdate1, cdate2
 character*40  smtfil1, smtfil2, prtfil
 character*10  elaps, cpu
-character*1 slab
 complex*8 sa, sb, term
 logical csflg1, flghf1, flgsu1, twmol1, nucrs1, &
         csflg2, flghf2, flgsu2, twmol2, nucrs2, &
-        batch, fast, lpar2, lpar, exstfl, diagst, &
+        exstfl, diagst, &
         diagj, diagin, &
         diagjp, daginp, diag, diagp
 real(8) :: aimagp

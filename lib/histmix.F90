@@ -32,7 +32,7 @@ use mod_coisc9, only: inlevt => isc9 ! inlevt(1)
 use mod_cosc1, only: elev1 => sc1 ! elev1(1)
 use mod_cosc2, only: elev2 => sc2 ! elev2(1)
 use mod_cosc3, only: elevt => sc3 ! elevt(1)
-use constants, only: econv, xmconv, ang2c
+use constants, only: econv, ang2c
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam, mtime, gettim
 use mod_hismat, only: sread, rdhead, sinqr
@@ -47,13 +47,13 @@ character*10  elaps, cpu
 character*1 slab
 logical csflg1, flghf1, flgsu1, twmol1, nucrs1, &
      csflg2, flghf2, flgsu2, twmol2, nucrs2, &
-     batch, fast, lpar2, lpar, exstfl, sngsmt, trpsmt
+     batch, exstfl, sngsmt, trpsmt
 dimension a(8)
 dimension epert(2), cpert(2,2)
 !     scratch arrays for diagonalization subroutine
 parameter (narray = 2)
-dimension e(narray,narray), eig(narray), vec(narray,narray), &
-     sc1(narray), sc2(narray), work(144)
+dimension e(narray,narray), eig(narray), &
+     work(144)
 !     cross section array  -- first 2 columns will contain cross sections
 !     for transitions out of the 2 perturbed levels,the second 2 columns
 !     will contain cross sections for transitions into these levels
@@ -572,8 +572,8 @@ do jtot = 0, jfinl1
       call mixint(mmaxs, mmax2s, mmaxt, mmax2t, sigma, &
            jtot, jlpar, istats, istatt, srs, sis, srt, sit, &
            js, ins, ls, jt, intt, lt, lngth1, lngtht, &
-           jfinl1, jfinl2, nlevel1, nlevels, nlevel2, nlevelt, &
-           cpert, iptsng, ipttrp, sngsmt, trpsmt)
+           jfinl1, jfinl2, nlevels, nlevelt, &
+           cpert, iptsng, sngsmt, trpsmt)
    end do
 end do
 !
@@ -646,7 +646,7 @@ write(6,400) elaps, cpu
 400 format(/,' ** STMIX FINAL TIMING, ELAPSED: ',a,'  CPU: ',a,' **'/)
 !
 1000 continue
-4022 deallocate(exsmtn)
+deallocate(exsmtn)
 4021 deallocate(exsmtp)
 4020 deallocate(lngtht)
 4019 deallocate(lngths)
@@ -675,8 +675,8 @@ end
 subroutine mixint(mmaxs, mmax2s, mmaxt, mmax2t, sigma, &
      jtot, jlpar, istats, istatt, srs, sis, srt, sit, &
      js, ins, ls, jt, intt, lt, lngth1, lngtht, &
-     jfinl1, jfinl2, nlevel1, nlevels, nlevel2, nlevelt, &
-     cpert, iptsng, ipttrp, sngsmt, trpsmt)
+     jfinl1, jfinl2, nlevels, nlevelt, &
+     cpert, iptsng, sngsmt, trpsmt)
 !
 ! subroutine to compute the contribution of a given jtot/jlpar to the integral
 ! cross sections for collisional transitions out of a mixed singlet/triplet
@@ -686,25 +686,16 @@ subroutine mixint(mmaxs, mmax2s, mmaxt, mmax2t, sigma, &
 !  current revision date:  1-jun-2010
 ! -------------------------------------------------------------------------
 use mod_coisc1, only: jlev1 => isc1 ! jlev1(1)
-use mod_coisc2, only: jlev2 => isc2 ! jlev2(1)
 use mod_coisc3, only: inlev1 => isc3 ! inlev1(1)
-use mod_coisc4, only: inlev2 => isc4 ! inlev2(1)
-use mod_coisc5, only: jout1 => isc5 ! jout1(1)
-use mod_coisc6, only: jout2 => isc6 ! jout2(1)
 use mod_coisc7, only: nlevt => isc7 ! nlevt(1)
 use mod_coisc8, only: jlevt => isc8 ! jlevt(1)
 use mod_coisc9, only: inlevt => isc9 ! inlevt(1)
-use mod_cosc1, only: elev1 => sc1 ! elev1(1)
-use mod_cosc2, only: elev2 => sc2 ! elev2(1)
-use mod_cosc3, only: elevt => sc3 ! elevt(1)
-use constants, only: econv, xmconv
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: xf6j
 implicit double precision (a-h, o-z)
 logical sngsmt, trpsmt
 complex*8 t
 double precision sigma(nlevels + nlevelt, 4)
-dimension cpert(2,2), iptsng(1), ipttrp(1)
+dimension cpert(2,2), iptsng(1)
 ! storage for s-matrix elements:
 !   second letter is real (r), imaginary (i)
 !   third letter is singlet (s), triplet (t)
@@ -1088,7 +1079,7 @@ else
     end do
   end do
 end if
-4004 deallocate(tmatis)
+deallocate(tmatis)
 4003 deallocate(tmatrs)
 4002 deallocate(tmatit)
 4001 deallocate(tmatrt)
