@@ -31,14 +31,13 @@ subroutine bound(nch, nmax, v2)
 !     nch     Number of coupled equations
 !     nmax    Leading dimension of the w matrix used in Hibridon
 !     ------------------------------------------------------------------
-use mod_coiout, only: niout
 use mod_version, only: version
-use constants, only: econv, xmconv
+use constants, only: econv
 use mod_ancou, only: ancou_type
-use mod_par, only: wavefl, r1=>bound_r1, r2=>bound_r2, c=>bound_c, spac=>bound_spac, delr=>bound_delr, hsimp=>bound_hsimp, eigmin=>bound_eigmin, tolai=>bound_tolai, xmu
+use mod_par, only: wavefl, r1=>bound_r1, r2=>bound_r2, c=>bound_c, spac=>bound_spac, delr=>bound_delr, hsimp=>bound_hsimp, eigmin=>bound_eigmin, tolai=>bound_tolai
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
-use mod_ered, only: ered, rmu
-use mod_file, only: input, output, jobnam, savfil
+use mod_ered, only: rmu
+use mod_file, only: jobnam
 use mod_hiutil, only: gennam
 implicit none
 integer, intent(in) :: nch, nmax
@@ -140,7 +139,7 @@ allocate(wr(nmax, nmax))
 if (hsimp .gt. 0d0) goto 200
 !
 !     Gauss-Hermite quadrature integration
-100 ngh = int(dabs(hsimp))
+ngh = int(dabs(hsimp))
 if (ngh .le. 1) ngh = 1
 write (1, 110) ngh
 write (6, 110) ngh
@@ -400,7 +399,7 @@ implicit none
 integer, intent(in) :: iunit, n, nch, ng, m, mch
 real(8), dimension(n, m), intent(in) :: z
 real(8), intent(in) :: r1, r2, alph
-real(8), dimension(:), allocatable :: chnwt, r
+real(8), dimension(:), allocatable :: chnwt
 real(8), dimension(:, :), allocatable :: g, w
 real(8) :: chwtmx, del
 integer :: i, j, ich, mchnow, ichnow, ir, ig, irrow, igrow
@@ -468,7 +467,7 @@ real(8), intent(in) :: r
 real(8), dimension(nmax, nmax), intent(out) :: wr
 type(ancou_type), intent(in) :: v2
 real(8) :: xirmu
-integer :: i, j, ig, jg, ilast, ntop
+integer :: i, j
 !
 xirmu = 0.5d0 / rmu
 call potmat(wr, r, nch, nmax, v2)
@@ -510,7 +509,7 @@ do i = 0, m - 1
       case (3)
          z = 1.91d0 * z - 0.91d0 * x(1)
       case default
-         z = 2.0d0 * z - x(i - 2)
+         z = 2.0d0 * z - x(i - 2)  ! this line causes a false positive in gfortran: Error: Array reference at (1) out of bounds (-2 < 0) in loop beginning at (2) [-Werror=do-subscript]
    end select
    do its = 1, maxit
       p1 = pim4

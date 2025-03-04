@@ -406,7 +406,7 @@ if (abs(ecoll1 - ecoll2)*econv .gt. 0.1d0) then
   write (6,21) ecoll1 * econv, ecoll2 * econv
 21   format (/' *** DIFFERENCE OF COLLISION ENERGIES', &
     ' .GT. 0.1 cm^-1 ***'/ &
-    5x,'ECOLL1 =',f11.3,	4x,'ECOLL2 =',f11.3,' CM(-1)'/)
+    5x,'ECOLL1 =',f11.3,4x,'ECOLL2 =',f11.3,' CM(-1)'/)
   if (ipartx.eq.1) close(2)
   goto 1000
 end if
@@ -710,7 +710,7 @@ write(6,900) elaps, cpu
 900 format(/,' ** PRSBR FINAL TIMING, ELAPSED: ',a,'  CPU: ',a,' **'/)
 ialloc = 0
 1000 continue
-4019 deallocate(partxi)
+ deallocate(partxi)
 4018 deallocate(partxr)
 4017 deallocate(lngthb)
 4016 deallocate(lngtha)

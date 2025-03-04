@@ -30,6 +30,7 @@
 !
 !  NB cstart ultrix-dec for i/o with fortran instead of c routines
 #include "assert.h"
+#include "unused.h"
 
 ! block data io
 ! cosize
@@ -70,7 +71,7 @@ end
 ! -------------------------------------------------------------------
  subroutine fimovs(nfile,jtot,jlpar,nu,ien,ierr)
  use mod_coener, only: energ
- use mod_cofil, only: nfl, maxrec, iofrec
+ use mod_cofil, only: maxrec, iofrec
  use mod_hismat, only: readrc
  implicit none
  integer, intent(in) :: nfile
@@ -301,11 +302,11 @@ use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, &
                 lscreen, iprint, &
                 fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, tolai=>scat_tolai, xmu ! NB if boundc = .true. then these parameters are: r1,r2,c,spac,delr,hsimp,eigmin,tolai,xmu
 use funit, only: FUNIT_INP
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: label=>pot_label
 use mod_selb, only: ibasty
-use mod_ered, only: ered, rmu
+use mod_ered, only: rmu
 use mod_skip, only: nskip
-use mod_file, only: input, output, jobnam, savfil
+use mod_file, only: input, output
 implicit double precision (a-h,o-z)
 integer i, length
 logical existf
@@ -766,7 +767,6 @@ subroutine openf(lunit,filnam,lmode,isize)
 !     isize  -> number of tracks (only for univac and vax)
 !     lseg:  number of integer words per disc sector
 !     ------------------------------------------------------------
-use mod_clseg, only: lseg
 use mod_hiutil, only: upper
 logical exstfl, openfl, tmpfil
 logical od
@@ -933,14 +933,13 @@ use mod_coisc3, only: isc3 ! isc3(3)
 use mod_coisc4, only: isc4 ! isc4(1)
 use mod_cosc1, only: rsc1 => sc1 ! rsc1(2)
 use mod_cosc2, only: rsc2 => sc2 ! rsc2(1)
-use mod_par, only: airyfl, csflag, flaghf, flagsu, ipos, &
-                prpart, readpt, rsflag, twomol, wrsmat, &
-                wrpart, wrxsec, prxsec, nucros, photof, wavefl, boundc
+use mod_par, only: airyfl, csflag, &
+                prpart, rsflag, wrsmat, &
+                wrpart, wrxsec, prxsec, photof, wavefl, boundc
 use funit
 use mod_fileid, only: FILEID_SAV
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
-use mod_selb, only: ibasty
-use mod_file, only: input, output, jobnam, savfil
+use mod_parpot, only: label=>pot_label
+use mod_file, only: jobnam, savfil
 use mod_file_size, only : isize, isizes
 use mod_hiutil, only: gennam
 use mod_hismat, only: rdhead
@@ -1372,7 +1371,6 @@ subroutine rdabsf(luni, a, l, iword)
 ! read of l double precision words into a. iword is zero adjusted adress
 ! on file. l and iword should be multiple of lseg, otherwise unefficient
 use mod_clseg, only: lseg
-use mod_disc, only: ipos, iun, iostat, icatf, nam
 implicit none
 integer, intent(in) :: luni  ! logical unit
 real(8), intent(out) :: a(l)  ! array to fill with the reals read from luni
@@ -1439,7 +1437,7 @@ subroutine wrabsf(luni,a,l,iword)
 ! iword : offset on file in real8 units where the write should start (eg 2047)
 use mod_clseg, only: lseg
 use mod_cobuf, only: lbuf
-use mod_disc, only: ipos, iun, iostat, icatf, nam
+use mod_disc, only: ipos
 implicit double precision (a-h,o-z)
 dimension a(l), buf(lbuf)
   if(lseg.gt.lbuf) stop 'lbuf too small in wrabsf'
@@ -1524,9 +1522,9 @@ subroutine dread(ii,l,ifil,irec,iof)
 ! --------------------------------------------------------------
 use mod_clseg, only: intrel
 use mod_cdbf, only: ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf,llbuf
-use mod_cdio, only: allocate_cdio, cdio_is_allocated, iadr, len, next, iun, iostat, last, lhea, junk, memory_block
-use mod_cobuf, only: lbuf, ibuf
-use mod_file_size, only : isize, isizes
+use mod_cdio, only: allocate_cdio, cdio_is_allocated, iadr, len, next, iun, iostat, last, lhea, memory_block
+use mod_cobuf, only: lbuf
+use mod_file_size, only : isize
 use mod_hiiolib, only: rdabsi, rdabsf, wrabsf, wrabsi
 use, intrinsic :: ISO_C_BINDING
 implicit double precision (a-h,o-z)
@@ -1869,7 +1867,6 @@ subroutine dbwi(buffer,l,ifil,irec)
 !.....positive irec indicates start at beginning or record
 !.....zero or negative record means start at present position
 !
-use mod_clseg, only: intrel
 use mod_cdbf, only: libuf,ibfil,ibrec,ibof,ibstat,idbuf,ibadr
 implicit none
 integer, dimension(l), intent(in) :: buffer
@@ -2027,6 +2024,7 @@ end
 
 
 subroutine fwait(luni)
+UNUSED_DUMMY(luni)
 return
 end subroutine fwait
 
