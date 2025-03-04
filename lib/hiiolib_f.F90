@@ -1360,6 +1360,156 @@ module mod_cdio
       end subroutine allocate_cdio            
 end module mod_cdio 
 
+module mod_hiiolib
+
+contains
+
+! ---------------------------------------------------------------
+subroutine rdabsf(luni, a, l, iword)
+!
+! author: h.j. werner
+!
+! read of l double precision words into a. iword is zero adjusted adress
+! on file. l and iword should be multiple of lseg, otherwise unefficient
+use mod_clseg, only: lseg
+use mod_disc, only: ipos, iun, iostat, icatf, nam
+implicit none
+integer, intent(in) :: luni  ! logical unit
+real(8), intent(out) :: a(l)  ! array to fill with the reals read from luni
+integer, intent(in) :: l  ! number of double precision reals to read
+integer, intent(in) :: iword  ! 0 based word position in the luni file where to start reading
+
+integer :: remainder, n, block_index, i, l1, lbl, ib
+real(8) :: buf(lseg)
+  buf = 0d0
+  block_index = iword / lseg + 1   ! index of the first block to read (at least partially)
+  remainder = iword - (block_index - 1) * lseg
+  n = 0
+  if (remainder .ne. 0) then
+    n = min0(lseg - remainder, l)
+    ! there are n values to read from the first block
+    read(luni, rec=block_index) (buf(i), i=1, lseg)
+    block_index = block_index + 1
+    do i = 1, n
+      a(i) = buf(remainder + i)
+    end do
+  end if
+  ! read the remaining blocks
+  l1 = l - n  ! number of remaining values to read
+  if (l1 .eq. 0) return
+  lbl = (l1 - 1) / lseg + 1  ! number of remaining blocks
+  do ib = 1, lbl
+    read(luni, rec=block_index) (a(n+i), i=1, min0(l1, lseg))
+    block_index = block_index + 1
+    l1 = l1 - lseg
+    n = n + lseg
+  end do
+  return
+end subroutine rdabsf
+
+subroutine rdabsi(luni, a, num_ints, start_int_pos)
+! read of num_ints integer words into a. start_int_pos is zero adjusted adress
+! on file. num_ints*intrel and start_int_pos*intrel should be multiple of lseg, otherwise unefficient
+use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
+use mod_clseg, only: intrel
+implicit none
+integer, intent(in) :: luni  ! logical unit
+integer, intent(out), target :: a(num_ints)  ! array to fill with the integers read from luni
+integer, intent(in) :: num_ints  ! number of integers to read
+integer, intent(in) :: start_int_pos  ! 0 based word position in the luni file where to start reading
+
+!integer, target :: a_as_int(num_ints)
+real(8), pointer :: a_as_real(:)
+integer :: num_reals
+integer :: start_real_pos
+!a_as_int => a 
+call C_F_POINTER (C_LOC(a), a_as_real, [num_ints])
+num_reals = num_ints / intrel
+start_real_pos = start_int_pos / intrel
+call rdabsf(luni, a_as_real, num_reals, start_real_pos)
+
+end subroutine rdabsi
+
+!
+subroutine wrabsf(luni,a,l,iword)
+! write l real8 numbers from a array into file unit luni at offset iword
+! luni : the logical unit of the file to write to (eg 3)
+! a : the array of double precision numbers to write (eg [0.5, 0.7])
+! l : the number of real numbers to write (eg 2)
+! iword : offset on file in real8 units where the write should start (eg 2047)
+use mod_clseg, only: lseg
+use mod_cobuf, only: lbuf
+use mod_disc, only: ipos, iun, iostat, icatf, nam
+implicit double precision (a-h,o-z)
+dimension a(l), buf(lbuf)
+  if(lseg.gt.lbuf) stop 'lbuf too small in wrabsf'
+  ibl=iword/lseg+1  ! index of block where iword is (eg ibl = 2 if lseg == 1024)
+  m = iword - (ibl - 1) * lseg  ! offset of iword relative to its block (eg 1023)
+  n = 0
+  if(m /= 0) then
+    !.....first address not on sector boundary
+    n = min0(lseg-m, l)  ! number of words to write in the block ibl (eg 1)
+
+    if(ibl <= ipos(luni)) then
+      ! read the whole block ibl from disk into buf
+      read(luni, rec=ibl) (buf(i),i=1,lseg)
+    end if
+    ! write the words into buf
+    do i = 1, n
+      buf(m + i) = a(i)
+    end do
+    ! then write back the updated block ibl on the file
+    write(luni, rec=ibl) (buf(i), i=1, lseg)
+    ipos(luni) = max(ipos(luni), ibl)
+    ibl = ibl + 1
+  end if
+  !.....write from next sector boundary
+  l1 = l - n  ! number of remaining words to write (eg 1)
+  if(l1 == 0) return
+  lbl = l1 / lseg  ! num blocks
+  ! write the full blocks
+  do ib=1,lbl
+    write(luni,rec=ibl) (a(n+i),i=1,lseg)
+    ipos(luni) = max(ipos(luni),ibl)
+    ibl = ibl + 1
+    l1 = l1 - lseg
+    n = n + lseg
+  end do
+
+  if(n.eq.l) return  ! all words have been written to disk
+  !.....last address not at end of sector
+  ! write the remaining n-l words in the last block 
+  if(ibl.le.ipos(luni)) &
+    read(luni,rec=ibl) (buf(i),i=1,lseg)
+  do i = 1, l-n
+    buf(i) = a(n+i)
+  end do
+  write(luni,rec=ibl) (buf(i),i=1,lseg)
+  ipos(luni) = max(ipos(luni),ibl)
+  return
+end subroutine wrabsf
+
+subroutine wrabsi(luni, a, num_ints, start_int_pos)
+use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
+use mod_clseg, only: intrel
+implicit none
+integer, intent(in) :: luni  ! logical unit
+integer, intent(in), target :: a(num_ints)  ! array to fill with the integers read from luni
+integer, intent(in) :: num_ints  ! number of integers to read
+integer, intent(in) :: start_int_pos  ! 0 based word position in the luni file where to start writing, in integer units
+
+real(8), pointer :: a_as_real(:)
+integer :: num_reals
+integer :: start_real_pos
+call C_F_POINTER (C_LOC(a), a_as_real, [num_ints])
+num_reals = num_ints / intrel
+start_real_pos = start_int_pos / intrel
+call wrabsf(luni, a_as_real, num_reals, start_real_pos)
+
+end subroutine wrabsi
+
+end module mod_hiiolib!
+
 ! -------------------------------------------------------------------
 subroutine dread(ii,l,ifil,irec,iof)
 ! --------------------------------------------------------------
@@ -1377,7 +1527,7 @@ use mod_cdbf, only: ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf,llbuf
 use mod_cdio, only: allocate_cdio, cdio_is_allocated, iadr, len, next, iun, iostat, last, lhea, junk, memory_block
 use mod_cobuf, only: lbuf, ibuf
 use mod_file_size, only : isize, isizes
-use mod_hiiolib, only: rdabsi, rdabsf
+use mod_hiiolib, only: rdabsi, rdabsf, wrabsf, wrabsi
 implicit double precision (a-h,o-z)
 character*(*) name
 parameter (maxun=2, maxrec=5000)
@@ -1490,9 +1640,7 @@ if(mod(l,intrel).ne.0.or.mod(ir,intrel).ne.0) then
     ' LENGTH=',i4,' OR ADRESS=',i6,' NOT MULTIPLE OF INTREL')
   call exit
 end if
-ll = l / intrel  ! number of real8 in the ii array
-ir = ir / intrel  ! where to write the buffer in the output file (units : number of 64 bits words) 
-call wrabsf(iun(ifil), ii, ll, ir)
+call wrabsi(iun(ifil), ii, l, ir)
 call fwait(iun(ifil))
 last(ifil)=max(last(ifil),irec)
 iostat(ifil)=0
@@ -1576,7 +1724,7 @@ do 86 ib=1,lhea,lbuf  ! ib: block index
 lh=min(lhea-iofh,lbuf)  ! number of integers to move for this block
 ASSERT( ifil .eq. 1 ) ! unexpected case : graffy suspects the following imove to only work when ifil=1'
 call imove(memory_block(iofh+1),idbuf,lh)  ! copy lh integers from iadr to idbuf
-call wrabsf(iun(ifil),idbuf,ldbuf,iofh/intrel)
+call wrabsi(iun(ifil),idbuf,lbuf,iofh)
 call fwait(iun(ifil))
 86 iofh=iofh+lbuf
 iostat(ifil)=0
@@ -1618,7 +1766,7 @@ iofh=0
 do 96 ib=1,lhea,lbuf
 ll=min(lhea-iofh,lbuf)
 call imove(iadr(iofh+1,ifil),idbuf,ll)
-call wrabsf(iun(ifil),idbuf,ldbuf,iofh/intrel)
+call wrabsi(iun(ifil),idbuf,lbuf,iofh)
 call fwait(iun(ifil))
 96 iofh=iofh+lbuf
 call closf(iun(ifil))
@@ -1869,136 +2017,6 @@ iflag=icatf(luni)
 name=nam(luni)
 return
 end
-
-module mod_hiiolib
-
-contains
-
-! ---------------------------------------------------------------
-subroutine rdabsf(luni, a, l, iword)
-!
-! author: h.j. werner
-!
-! read of l double precision words into a. iword is zero adjusted adress
-! on file. l and iword should be multiple of lseg, otherwise unefficient
-use mod_clseg, only: lseg
-use mod_disc, only: ipos, iun, iostat, icatf, nam
-implicit none
-integer, intent(in) :: luni  ! logical unit
-real(8), intent(out) :: a(l)  ! array to fill with the reals read from luni
-integer, intent(in) :: l  ! number of double precision reals to read
-integer, intent(in) :: iword  ! 0 based word position in the luni file where to start reading
-
-integer :: remainder, n, block_index, i, l1, lbl, ib
-real(8) :: buf(lseg)
-  buf = 0d0
-  block_index = iword / lseg + 1   ! index of the first block to read (at least partially)
-  remainder = iword - (block_index - 1) * lseg
-  n = 0
-  if (remainder .ne. 0) then
-    n = min0(lseg - remainder, l)
-    ! there are n values to read from the first block
-    read(luni, rec=block_index) (buf(i), i=1, lseg)
-    block_index = block_index + 1
-    do i = 1, n
-      a(i) = buf(remainder + i)
-    end do
-  end if
-  ! read the remaining blocks
-  l1 = l - n  ! number of remaining values to read
-  if (l1 .eq. 0) return
-  lbl = (l1 - 1) / lseg + 1  ! number of remaining blocks
-  do ib = 1, lbl
-    read(luni, rec=block_index) (a(n+i), i=1, min0(l1, lseg))
-    block_index = block_index + 1
-    l1 = l1 - lseg
-    n = n + lseg
-  end do
-  return
-end subroutine rdabsf
-
-subroutine rdabsi(luni, a, num_ints, start_int_pos)
-! read of num_ints integer words into a. start_int_pos is zero adjusted adress
-! on file. num_ints*intrel and start_int_pos*intrel should be multiple of lseg, otherwise unefficient
-use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
-use mod_clseg, only: intrel
-implicit none
-integer, intent(in) :: luni  ! logical unit
-integer, intent(out), target :: a(num_ints)  ! array to fill with the integers read from luni
-integer, intent(in) :: num_ints  ! number of integers to read
-integer, intent(in) :: start_int_pos  ! 0 based word position in the luni file where to start reading
-
-!integer, target :: a_as_int(num_ints)
-real(8), pointer :: a_as_real(:)
-integer :: num_reals
-integer :: start_real_pos
-!a_as_int => a 
-call C_F_POINTER (C_LOC(a), a_as_real, [num_ints])
-num_reals = num_ints / intrel
-start_real_pos = start_int_pos / intrel
-call rdabsf(luni, a_as_real, num_reals, start_real_pos)
-
-end subroutine rdabsi
-
-end module mod_hiiolib!
-!
-subroutine wrabsf(luni,a,l,iword)
-! write l real8 numbers from a array into file unit luni at offset iword
-! luni : the logical unit of the file to write to (eg 3)
-! a : the array of double precision numbers to write (eg [0.5, 0.7])
-! l : the number of real numbers to write (eg 2)
-! iword : offset on file in real8 units where the write should start (eg 2047)
-use mod_clseg, only: lseg
-use mod_cobuf, only: lbuf
-use mod_disc, only: ipos, iun, iostat, icatf, nam
-implicit double precision (a-h,o-z)
-dimension a(l), buf(lbuf)
-  if(lseg.gt.lbuf) stop 'lbuf too small in wrabsf'
-  ibl=iword/lseg+1  ! index of block where iword is (eg ibl = 2 if lseg == 1024)
-  m = iword - (ibl - 1) * lseg  ! offset of iword relative to its block (eg 1023)
-  n = 0
-  if(m /= 0) then
-    !.....first address not on sector boundary
-    n = min0(lseg-m, l)  ! number of words to write in the block ibl (eg 1)
-
-    if(ibl <= ipos(luni)) then
-      ! read the whole block ibl from disk into buf
-      read(luni, rec=ibl) (buf(i),i=1,lseg)
-    end if
-    ! write the words into buf
-    do i = 1, n
-      buf(m + i) = a(i)
-    end do
-    ! then write back the updated block ibl on the file
-    write(luni, rec=ibl) (buf(i), i=1, lseg)
-    ipos(luni) = max(ipos(luni), ibl)
-    ibl = ibl + 1
-  end if
-  !.....write from next sector boundary
-  l1 = l - n  ! number of remaining words to write (eg 1)
-  if(l1 == 0) return
-  lbl = l1 / lseg  ! num blocks
-  ! write the full blocks
-  do ib=1,lbl
-    write(luni,rec=ibl) (a(n+i),i=1,lseg)
-    ipos(luni) = max(ipos(luni),ibl)
-    ibl = ibl + 1
-    l1 = l1 - lseg
-    n = n + lseg
-  end do
-
-  if(n.eq.l) return  ! all words have been written to disk
-  !.....last address not at end of sector
-  ! write the remaining n-l words in the last block 
-  if(ibl.le.ipos(luni)) &
-    read(luni,rec=ibl) (buf(i),i=1,lseg)
-  do i = 1, l-n
-    buf(i) = a(n+i)
-  end do
-  write(luni,rec=ibl) (buf(i),i=1,lseg)
-  ipos(luni) = max(ipos(luni),ibl)
-  return
-end subroutine wrabsf
 
 
 subroutine fwait(luni)
