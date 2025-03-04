@@ -1,7 +1,7 @@
-name: Quick CI on Debian 11  # this basic continuous integration is expected to perform the quick main tests, es explained in https://github.com/hibridon/hibridon/issues/102 (it should cover main risks for main platform types) and its runners are expected to be always available to ensure pull requests and pushes are always validated in time.
+name: Full CI on Debian 12  # this basic continuous integration is expected to perform the quick main tests, es explained in https://github.com/hibridon/hibridon/issues/102 (it should cover main risks for main platform types) and its runners are expected to be always available to ensure pull requests and pushes are always validated in time.
 
 on:
-  pull_request:
+  push:
     branches: [ master ]
 env:
   BUILD_TYPE: "Debug"
@@ -11,12 +11,12 @@ env:
   OMP_NUM_THREADS: "2"
 jobs:
   build_and_test:
-    runs-on: debian-11
+    runs-on: debian-12
     strategy:
       fail-fast: false
       matrix:
         build_type: [Debug, Release]
-        compiler: [gfortran, ifort]
+        compiler: [gfortran-12, ifort]
     env:
       ASAN_OPTIONS: "detect_leaks=${{ matrix.build_type == 'Release' && '0' || '1' }}" # Disable address sanitizer's memory leak detection in release builds
     steps:
@@ -34,9 +34,9 @@ jobs:
         if [ "${{matrix.compiler}}" == 'ifort' ]
         then
           module load compilers/ifort/latest && \
-          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_TESTING=ON -DCMAKE_Fortran_COMPILER=ifort -DBLA_VENDOR=Intel10_64lp -DLINK_TIME_OPTIMIZATION=OFF
+          /opt/cmake/cmake-3.23.0/bin/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_TESTING=ON -DCMAKE_Fortran_COMPILER=ifort -DBLA_VENDOR=Intel10_64lp -DLINK_TIME_OPTIMIZATION=OFF
         else
-          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_TESTING=ON -DLINK_TIME_OPTIMIZATION=OFF -DENABLE_UNINIT_VAR_RUNTIME_DETECTOR=OFF
+          /opt/cmake/cmake-3.23.0/bin/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_TESTING=ON -DLINK_TIME_OPTIMIZATION=OFF -DENABLE_UNINIT_VAR_RUNTIME_DETECTOR=OFF
         fi
 
     - name: Build
@@ -45,7 +45,7 @@ jobs:
         then
           module load compilers/ifort/latest
         fi
-        cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
+        /opt/cmake/cmake-3.23.0/bin/cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
 
     - name: catch build fail
       run: |
@@ -53,7 +53,7 @@ jobs:
         then
           module load compilers/ifort/latest
         fi
-        cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --verbose
+        /opt/cmake/cmake-3.23.0/bin/cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --verbose
       if: failure()
 
     - name: Test
@@ -63,4 +63,4 @@ jobs:
         then
           module load compilers/ifort/latest
         fi
-        ctest --parallel --output-on-failure -L coverage
+        /opt/cmake/cmake-3.23.0/bin/ctest --parallel --output-on-failure -L coverage
