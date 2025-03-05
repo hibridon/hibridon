@@ -1,3 +1,4 @@
+#include "assert.h"
 #include "unused.h"
 !   pot_ch3he_vib.f
 !   authors: Qianli Ma
@@ -13,10 +14,83 @@
 !       pot_ch3he_vib_ylmsym
 !       pot_ch3he_vib_ylmasym
 !       pot_ch3he_vib_data
-!   Included source file  (placed in hibxx/src/pot):
-!       pot_ch3he_vib_common.f
 !
 !   These dummy subroutines are not used in this pot file
+
+
+module mod_ch3he
+  implicit none
+
+  !   Define the sizes of grids
+  !       V2MAX: maximum value of v2 included in the pot file
+  !       V2TMAX: number of (v2, v2') combination, C(V2MAX+1, 2)
+  !       NVLM: number of v_lm terms for each (v2, v2') combination
+  !       NVVL: total number of v_lm terms, for all (v2, v2') blocks
+  !       NTHETA, NPHI: number of theta/phi's in the ab initio calculation
+  !       NANGLE: number of (theta, phi) tuples
+  !       NDIST: number of distances included in the ab initio calculation
+  integer, parameter :: V2MAX = 3
+  integer, parameter :: V2TMAX = (V2MAX+1)*(V2MAX+2)/2
+  integer, parameter :: NVLM = 12
+  integer, parameter :: NVVL = NVLM*V2TMAX
+  integer, parameter :: NTHETA = 19
+  integer, parameter :: NPHI = 7
+  integer, parameter :: NANGLE = NTHETA * NPHI
+  integer, parameter :: NDIST = 19
+  !   ch3he block: data used only by this pot/basis combination
+  !       brot, crot: rotational constants of CH3 for each vibrational level
+  !       evib: vibrational level energies
+  !       nlamsi: number of v_lm terms for each (v2, v2') combination
+  !       lamsym, musym: list of lambda/mu's used for the coupling potential symmetric to theta = 90 deg
+  !       lamasy, muasy: list of lambda/mu's used for the coupling potential anti-symmetric to theta = 90 deg
+  !
+  !     Source of rotational constants:
+  !     Yamada, C., et. al., JCP, 75, 5256
+  !     Amano, T., et. al., JCP, 77, 5284
+  !
+  real(8), parameter :: brot(V2MAX+1) = [9.57789d0, 9.25814d0, 8.93320d0, 8.60974d0]
+  real(8), parameter :: crot(V2MAX+1) = [4.74275d0, 4.811643d0, 4.871213d0, 4.92655d0]
+  real(8), parameter :: evib(V2MAX+1) = [0d0, 6.064531d2, 1.28809d3, 2.0191657d3]
+  integer, parameter :: lamsym(NVLM) = [0, 2, 4, 6, 8, 3, 5, 7, 9, 6, 8, 9]
+  integer, parameter :: musym(NVLM)  = [0, 0, 0, 0, 0, 3, 3, 3, 3, 6, 6, 9]
+  integer, parameter :: lamasy(NVLM) = [1, 3, 5, 7, 9, 4, 6, 8, 10, 7, 9, 10]
+  integer, parameter :: muasy(NVLM)  = [0, 0, 0, 0, 0, 3, 3, 3, 3, 6, 6, 9]
+!   lambda/mu's used in this pot routine
+!
+!   When <v2'|V|v2> is symmetric about theta=90 deg (even v2 + v2')
+!       lambda =  0  2  4  6  8  3  5  7  9  6  8  9
+!       mu     =  0  0  0  0  0  3  3  3  3  6  6  9
+!   When <v2'|V|v2> is anti-symmetric about theta=90 deg (odd v2 + v2')
+!       lambda =  1  3  5  7  9  4  6  8 10  7  9 10
+!       mu     =  0  0  0  0  0  3  3  3  3  6  6  9
+end module mod_ch3he
+
+!
+!
+!   Max number of channels
+!      integer KKMAX
+!      parameter (KMAX=10000)
+!
+!
+!
+!
+!   cosysi block
+!       nscod: total number of variable names which are passed to HINPUT, nscod must equal isrcod + isicod + 3
+!       isicod: total number of integer system dependent variables
+!       nterm: number of different associated legendre terms in expansion of potential
+!       numpot: the number of the potential used, this variable is passed to the pot subroutine
+!       ipotsy: cylindrical symmetry of potential. Should be set to 3 for CH3.
+!       iop: ortho/para label for molecular states. Only para states are included if iop=1 and only ortho states if iop=-1.
+!
+
+!
+!   cosysr block
+!       isrcod: total number of real system dependent variables
+!       junkr: junk variable (required by hibridon)
+!       vmax: maximum value of v2 (starts from zero) included in the calculation
+!       emax0, emax1, emax2, emax3: maximum total energy of a level to be included in the channel basis, for four vibrational levels
+
+
 #include "common/ground.F90"
 !
 !
@@ -32,14 +106,20 @@ end subroutine datfln
 ! -------------------------------------------------------------------
 subroutine driver
 !
-#include "pot_ch3he_vib_common.f90"
+use mod_covvl, only: vvl
+use mod_cosysr, only: rspar
+use mod_cosysi, only: ispar
+use mod_ch3he, only: NVLM
+implicit double precision (a-h, o-z)
 
 !   Main function for `makepot', no arguments, print vvl's interactively
 !
 double precision r, vv0
-integer i, j, k, iblock
+integer i, j, iblock
 !   Temporary for print
 double precision vvltmp(NVLM)
+real(8), pointer :: emax0, emax1, emax2, emax3
+integer, pointer :: nterm, ipotsy, iop, jmax, vmax
 !
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
 emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
@@ -77,15 +157,20 @@ goto 10
 ! -------------------------------------------------------------------
 subroutine loapot(iunit, filnam)
 !
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
-#include "pot_ch3he_vib_common.f90"
+use mod_parpot, only: potnam=>pot_name
+use mod_conlam, only: nlam
+use mod_cosysr, only: rspar
+use mod_cosysi, only: ispar
+use mod_ch3he, only: NVLM
+implicit double precision (a-h, o-z)
 !   Initialize parameters for the potential
 !
 !   Arguments:
 !       Arguments are not refered to in this basis routine
+real(8), pointer :: emax0, emax1, emax2, emax3
+integer, pointer :: nterm, ipotsy, iop, jmax, vmax!
 character*(*) filnam
 integer iunit
-!
 !
 !   Hidden returned value:
 !       mod_conlam: nlam
@@ -127,7 +212,11 @@ subroutine pot(vv0, r)
 !
 !   vv0 will not be used (set to zero).
 !
-#include "pot_ch3he_vib_common.f90"
+use mod_covvl, only: vvl
+use mod_cosysr, only: rspar
+use mod_cosysi, only: ispar
+use mod_ch3he, only: NVLM, NANGLE
+implicit double precision (a-h, o-z)
 !
 !
 !   Arguments:
@@ -179,6 +268,8 @@ real(8), save ::  YLMCS(NANGLE, NVLM), YLMCA(NANGLE, NVLM)
 logical, save :: isfst=.true.
 
 character*255 datfl
+real(8), pointer :: emax0, emax1, emax2, emax3
+integer, pointer :: nterm, ipotsy, iop, jmax, vmax!
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
 emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
 
@@ -235,7 +326,10 @@ end
 !
 ! -------------------------------------------------------------------
 subroutine splch3(vsp, r, v2_i, v2_f)
-#include "pot_ch3he_vib_common.f90"
+use mod_cosysr, only: rspar
+use mod_cosysi, only: ispar
+use mod_ch3he, only: V2MAX, V2TMAX, NANGLE, NDIST
+implicit double precision (a-h, o-z)
 !   Spline the interaction potential (integreted over vibrational
 !   coordinate Q2) to the given R for a particular (v2, v2') tuple.
 !
@@ -275,6 +369,8 @@ double precision seval
 !
 character*255 datfl
 logical, save ::  isfst=.true.
+real(8), pointer :: emax0, emax1, emax2, emax3
+integer, pointer :: nterm, ipotsy, iop, jmax, vmax!
 !   In the first call, read data and determine fitted coefficients
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
 emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
@@ -317,7 +413,16 @@ subroutine syusr(irpot, readpt, iread)
 use funit, only: FUNIT_INP
 
 !
-#include "pot_ch3he_vib_common.f90"
+use mod_coiout, only: niout, indout
+use mod_cosys, only: scod
+use mod_cosysr, only: rspar
+use mod_cosysi, only: isicod, ispar
+! use mod_cosysr, only: isrcod
+implicit double precision (a-h, o-z)
+!   Lengths of cod array, 
+!       ICOD, IRCOD: lenghts of cod array
+integer ICOD, IRCOD
+parameter (ICOD=5, IRCOD=4)
 !   Subroutine to read parameters for CH3 v2 vibrational relaxation
 !
 !   Parameters:
@@ -348,9 +453,12 @@ integer i
 character*(*) fname
 !
 !
+real(8), pointer :: emax0, emax1, emax2, emax3
+integer, pointer :: nterm, ipotsy, iop, jmax, vmax!
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
 emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
-
+UNUSED_DUMMY(irpot)
+UNUSED_DUMMY(readpt)
 !   Set system dependent parameters
 scod(1) = 'NTERM'
 scod(2) = 'IPOTSY'
@@ -393,12 +501,16 @@ return
 !
 ! -------------------------------------------------------------------
 entry ptrusr(fname, readpt)
+  UNUSED_DUMMY(fname)
 !   This subroutine will not be used.
 return
 !
 ! -------------------------------------------------------------------
 entry savusr(readpt)
 !   Save parameters
+nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
+emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
+
 write (FUNIT_INP, 201) ipotsy, iop
 write (FUNIT_INP, 202) jmax, vmax
 write (FUNIT_INP, 203) emax0, emax1, emax2, emax3
@@ -423,8 +535,17 @@ subroutine bausr(bqs, jhold, ehold, ishold, nlevel, &
 use mod_hibasutil, only: vlmstp, iswap
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_hitypes, only: bqs_type
+use constants, only: amu_to_emu
 use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
-#include "pot_ch3he_vib_common.f90"
+use mod_cocent, only: cent
+use mod_coeint, only: eint
+use mod_conlam, only: nlam
+use mod_cosysr, only: rspar
+use mod_cosysi, only: ispar
+use mod_ered, only: ered, rmu
+use mod_ch3he, only: V2MAX, NVLM, brot, crot, evib, lamsym, musym, lamasy, muasy
+use mod_par, only: iprint
+implicit double precision (a-h, o-z)
 type(bqs_type), intent(out) :: bqs
 integer, intent(out), dimension(:) :: jhold
 real(8), intent(out), dimension(:) :: ehold
@@ -495,7 +616,6 @@ type(ancouma_type), pointer :: ancouma
 !       /cosysi/ nscode, isicod, nterm, ipotsy, iop, jmax, vmax
 !       /cosysr/ isrcod, emax0, emax1, emax2, emax3
 !       mod_ered: ered, rmu
-!       /coipar/ iprint
 !
 !
 !   Hidden returned value:
@@ -516,8 +636,7 @@ integer ilmmin, ilmmax, vibblk
 double precision lvleng
 integer, dimension(nmax) :: vtemp
 integer, dimension(nmax) :: ietemp
-double precision esave, etemp
-integer vsave, jsave, ksave, iesave
+double precision etemp
 double precision vee
 double precision emax(V2MAX+1), emin
 integer ipar, lpar, lmax, lmin, li, ilm, ilms, lambda, mu
@@ -526,6 +645,8 @@ integer v(nmax)
 !
 !   Function called:
 integer gblkid
+real(8), pointer :: emax0, emax1, emax2, emax3
+integer, pointer :: nterm, ipotsy, iop, jmax, vmax!
 !
 ! -------------------------------------------------------------------
 
@@ -538,7 +659,9 @@ call C_F_POINTER (C_LOC(sc4), ktemp, [nmax])
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
 emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
 
+UNUSED_VARIABLE(cent)
 UNUSED_DUMMY(ihomo)
+UNUSED_DUMMY(flagsu)
 
 emax(1) = emax0
 emax(2) = emax1
@@ -564,8 +687,8 @@ endif
 !
 !   Write info when clist is true
 if (clist) then
-  write (6, 10) rmu*XMCONV, ered*econv, jtot, jlpar
-  write (9, 10) rmu*XMCONV, ered*econv, jtot, jlpar
+  write (6, 10) rmu*amu_to_emu, ered*econv, jtot, jlpar
+  write (9, 10) rmu*amu_to_emu, ered*econv, jtot, jlpar
 10   format (/, ' **  CC SYMMETRIC TOP VIBRATION **', &
           /, '    RMU=', f9.4, '  E=', f7.2, '  JTOT=', i4, 2x, &
           '  JLPAR=', i2)
@@ -848,9 +971,7 @@ endif
 !
 return
 !
-end
-!end module mod_bausr
-!   end subroutine bastpv
+end subroutine bausr
 !
 !
 ! -------------------------------------------------------------------
