@@ -16,7 +16,7 @@
 subroutine loapot(iunit,filnam)
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 use mod_selb, only: ibasty
 ! --------------------------------------------------------------------------
 character*(*) filnam
@@ -38,7 +38,7 @@ subroutine driver
 use mod_covvl, only: vvl ! vvl(9)
 use mod_par, only: csflag, ihomo
 implicit double precision (a-h,o-z)
-character *48 potnam
+character *64 potnam
 character *2 frame
 potnam='ALEXANDER SCALED (s=1.21) O(3P)H2 DUBERNET-HUTSON'
 print *, potnam
@@ -74,7 +74,7 @@ do i=1,100
  r=r+0.2
 enddo
 
-99 end
+end
 subroutine pot (vv0, r)
 ! ----------------------------------------------------------------------
 !  subroutine to calculate the r-dependent coefficients in the
@@ -135,7 +135,6 @@ dimension vxzl1(7), vxzl2(7), vxzc1(7), vxzc2(7)
 dimension vxx(9), vyy(9), vs(9),vzz(9),vd(9),vxz(9), &
           v1ap(9),v2ap(9)
 dimension d0(45),d1(36),d2(36),aa(45)
-dimension fthet(3,9)
 dimension xzz(5),xs(5),x1ap(5),x2ap(5),xd(4),x1(4),kpvt(9), &
           qraux(9), work(24),rsd(9)
 dimension vvll(28)

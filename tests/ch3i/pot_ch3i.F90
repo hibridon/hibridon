@@ -75,7 +75,7 @@ subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
 !  dummy loapot subroutine
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 use mod_selb, only: ibasty
  character*(*) filnam
 UNUSED_DUMMY(iunit)
@@ -125,11 +125,10 @@ subroutine ground(wf, r, nch, nphoto, mxphot)
 
 
 !  -------------------------------------------------------
-use mod_coiout, only: niout, indout
-use mod_cosysi, only: isicod, iscod=>ispar
+use mod_coiout, only: niout
+use mod_cosysi, only: iscod=>ispar
 use mod_cosysr, only: rcod=>rspar
-use mod_parbas, only: lammin
-use mod_ered, only: ered, rmu
+use mod_ered, only: rmu
 use mod_ch3i, only: vib, gswf_data
 implicit none
 
@@ -144,7 +143,7 @@ integer, intent(in) :: mxphot  ! maximum size of q vector (mxphot .ge. nch*nphot
 
 integer :: ndip
 real(8) :: rshift
-
+UNUSED_DUMMY(mxphot)
 !     separate the variables into CH3 umbrella motion and C-I stretch
 !     for each value of CH3--I distance, the component of the ground
 !     state on the asymptotic vibrationnal basis must be determined.
@@ -462,7 +461,7 @@ return
 ! --------------------------------------------------------------
 entry ptrusr (fname,readpt)
 readpt = .true.
-186 if (readpt) then
+if (readpt) then
 ! now call loapot(iunit,filnam) routine to read potential parameters
   filnam = ' '
   call loapot(1,filnam)
@@ -1112,7 +1111,7 @@ end do
 end subroutine
 
 subroutine  ptmatrix(il,ir,ic,v,ii)
-use constants, only: econv, xmconv
+use constants, only: xmconv
 implicit none
 integer, intent(in) :: il
 integer, intent(in) :: ir

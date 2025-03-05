@@ -19,7 +19,7 @@
 ! ------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 use constants, only: s4pi
 implicit double precision (a-h,o-z)
 potnam='Dagdigian CH3-He PES'
@@ -54,7 +54,7 @@ subroutine loapot(iunit,filnam)
 use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: ispar
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 implicit double precision (a-h,o-z)
 character*(*) filnam
 integer, pointer :: nterm

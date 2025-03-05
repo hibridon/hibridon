@@ -36,7 +36,7 @@ subroutine loapot (iunit, file_name)
 use mod_1sg1sg
 use mod_c2hh2
 use mod_conlam, only: nlam
-use mod_parpot, only: pot_name, pot_label
+use mod_parpot, only: pot_name
 implicit none
 !     common/parbas is replaced by module ba1sg1sg to allow more
 !     parameters be passed between the pot routine and the basis routine
@@ -97,7 +97,7 @@ use mod_conlam, only: nlam
 implicit none
 character(40), parameter :: data_file_name='pot_c2hh2_12_6.dat'
 real(8) :: r, vv0
-integer :: i, nv
+integer :: i
 call loapot(10, data_file_name)
 10 print *, 'R (bohr), Ctrl+D to exit:'
 read (5, *, end=99) r

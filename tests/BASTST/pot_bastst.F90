@@ -11,8 +11,6 @@
 ! subroutine called by testpot to interactively provide potential values
 !  -----------------------------------------------------------------------
 subroutine driver
-use mod_covvl, only: vvl
-use mod_parpot, only: potnam=>pot_name
 implicit none
     write(*,*) 'This is a dummy potential for testing purposes'
     return
@@ -257,6 +255,8 @@ use mod_selb, only: ibasty
     real(8), intent(in) :: r
     vv0  = 0d0
     vvl = 0d0
+
+    UNUSED_DUMMY(r)
 
     ! set non-zero values of potential for atom-atom col
     select case (ibasty)

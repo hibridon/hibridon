@@ -10,7 +10,7 @@
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 use mod_selb, only: ibasty
 character*(*) filnam
 UNUSED_DUMMY(iunit)
@@ -30,7 +30,7 @@ subroutine driver
 use mod_covvl, only: vvl
 use mod_par, only: csflag, ihomo
 implicit double precision (a-h,o-z)
-character *48 potnam
+character *64 potnam
 character *2 frame
 potnam='ALEXANDER B(2P)H2(J=0,1) DUBERNET-HUTSON'
 print *, potnam
@@ -65,7 +65,7 @@ do i=1,100
  r=r+0.2
 enddo
 
-99 end
+end
 subroutine pot (vv0, r)
 ! ----------------------------------------------------------------------
 !  subroutine to calculate the r-dependent coefficients in the

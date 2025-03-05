@@ -10,7 +10,7 @@
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 use mod_selb, only: ibasty
 character*(*) filnam
 UNUSED_DUMMY(iunit)
@@ -31,7 +31,7 @@ subroutine driver
 use mod_covvl, only: vvl
 use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 implicit double precision (a-h,o-z)
 integer, pointer :: npot
 real(8), dimension(:), pointer :: en, de, re, be, rl, cl
@@ -117,7 +117,6 @@ subroutine pot (vv0, r)
 use mod_covvl, only: vvl
 use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
-use constants, only: econv
 implicit double precision (a-h,o-z)
 integer, pointer :: nterm, nstate, ipol, npot
 real(8), dimension(:), pointer :: en, de, re, be, rl, cl

@@ -112,8 +112,8 @@ use constants, only: s4pi
 implicit double precision (a-h,o-z)
 dimension iwork(1000)
 dimension ylm(60,16), thetab(60), phib(60), vcalc(60), &
-  aa(960), vfit(16), kpvt(16), qraux(16),swork(16), &
-  work(1812), rsd(16),y00(60),y11(60),y20(60),y22(60), &
+  swork(16), &
+  work(1812), y00(60),y11(60),y20(60),y22(60), &
   y31(60),y33(60),y40(60),y42(60),y51(60),y53(60), &
   y60(60),y62(60),y71(60),y73(60),y80(60),y82(60), &
   vcalcx(60)
@@ -1091,7 +1091,6 @@ common/exch/lex(5,mxl),cex(maxb),nex,irpowex,iwex,iexback,igrx, &
   do i=1,(irpowex+1)*nex
    read(7,*) num, cex(i)
   end do
-10   format(6i4)
  return
  end
 !

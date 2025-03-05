@@ -12,6 +12,7 @@
 !  Note:  this pot routine requires a data file to be in hibxx/bin/progs/potdata:
 !         filnam (cetermined in last line of input file)
 !
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/bausr.F90"
 #include "common/ground.F90"
@@ -67,8 +68,7 @@ subroutine loapot(iunit,filnam)
 use mod_cosysi, only: ispar
 use mod_par, only: readpt
 use mod_parbas, only: maxtrm, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
-use mod_selb, only: ibasty
+use mod_parpot, only: potnam=>pot_name
 use mod_skip, only: nskip, iskip
 implicit double precision(a-h,o-z)
 character*(*) filnam
@@ -169,13 +169,12 @@ subroutine driver
 use mod_covvl, only: vvl
 use mod_par, only: readpt
 implicit double precision (a-h,o-z)
-character *48 potnam
+character *64 potnam
 character *40 filnam
-character *2 frame
 readpt=.true.
 potnam='WERNER-FOLLMEG VFIT'
 print *, 'potential subroutine:  ',potnam
-1  print *, 'filename ?  '
+print *, 'filename ?  '
 read (5, *)filnam
 call loapot(1,filnam)
 2 print *, ' r (bohr) '
@@ -195,7 +194,7 @@ goto 2
    write (6,101) r,vv0,vvl
 101    format(f5.2,30(1pg10.2))
 enddo
-99 end
+end
 ! -------------------------------------------------------------------
 subroutine pot(vv0,r)
 ! -------------------------------------------------------------------
@@ -208,7 +207,7 @@ use mod_covvl, only: vvl
 use mod_cosysi, only: ispar
 use mod_parbas, only: maxtrm, maxvb2, ntv, lammin, lammax
 use mod_selb, only: ibasty
-use mod_skip, only: nskip, iskip
+use mod_skip, only: nskip
 implicit double precision(a-h,o-z)
 #include "common/parvfit.F90"
 common /copot/ nc(maxtrm),a(20,50,maxtrm),maxpw(maxtrm), &
@@ -330,6 +329,7 @@ common /coptx/ nblkx,maxpwx,minmpx,maxmpx,mpsstx,junk, &
 !
 !   first built up b(r) matrix
 !
+UNUSED_DUMMY(rr)
 iblk = 0
 ne=maxpws-1
 m1=maxpws+1

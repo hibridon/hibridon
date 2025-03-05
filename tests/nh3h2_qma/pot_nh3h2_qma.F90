@@ -15,6 +15,7 @@
 !
 !     DUMMY SUBROUTINES FOR ALL USER-DEFINED BASIS/POT.
 #include "assert.h"
+#include "unused.h"
 #include "common/ground.F90"
 !
 !     ------------------------------------------------------------------
@@ -23,7 +24,7 @@
 subroutine driver
 use mod_covvl, only: vvl
 use mod_hibasutil, only: raise
-use constants, only: econv, xmconv
+use constants, only: econv
 implicit none
 !
 integer MAX_NR, MAX_NV
@@ -58,8 +59,7 @@ goto 10
 !     DATA FILE, IF REQUIRED, CAN BE LOADED WITH THIS SOUBROUTINE.
 subroutine loapot(iunit, filnam)
 use mod_hibasutil, only: raise
-use constants, only: econv, xmconv
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use constants, only: econv
 implicit none
 !
 integer MAX_NR, MAX_NV
@@ -117,7 +117,6 @@ end
 !     VVL SHOULD BE IN HARTREES.
 subroutine pot(vv0, r)
 use mod_covvl, only: vvl
-use constants, only: econv, xmconv
 implicit none
 !
 integer MAX_NR, MAX_NV
@@ -154,7 +153,6 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use mod_hibasutil, only: raise
-use constants, only: econv, xmconv
 use funit, only: FUNIT_INP
 implicit none
 !
@@ -189,6 +187,8 @@ nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); ninv=>ispar(4); jmax=>ispar(5)
 j2max=>ispar(7); j2min=>ispar(8)
 
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)
+UNUSED_DUMMY(irpot)
+UNUSED_DUMMY(readpt)
 !     DEFINE THE NAMES HERE
 scod(1)='NTERM'
 scod(2)='IPOTSY'
@@ -222,6 +222,7 @@ return
 return
 !     ------------------------------------------------------------------
 entry ptrusr(fname, readpt)
+UNUSED_DUMMY(fname)
 return
 !     ------------------------------------------------------------------
 entry savusr(readpt)
@@ -254,12 +255,12 @@ use mod_coeint, only: eint
 use mod_coamat, only: ietmp ! ietmp(1)
 use mod_conlam, only: nlam
 use mod_cosysi, only: ispar
-use mod_cosysr, only: isrcod, rspar
+use mod_cosysr, only: rspar
 use mod_hibasutil, only: vlmstpln, raise
-use constants, only: econv, xmconv
+use constants, only: econv
 use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
 use mod_par, only: iprint
-use mod_ered, only: ered, rmu
+use mod_ered, only: ered
 use mod_hitypes, only: bqs_type
 implicit none
 type(bqs_type), intent(out) :: bqs
@@ -306,13 +307,16 @@ double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV), &
      spl_d(MAX_NR, MAX_NV)
 !
 integer nlist, ki, ji, numeps, iep, iepsil, isym, ji2, i1, i2, &
-     jsave, ksave, isave, njk, ipar, j12max, j12min, ji12, &
-     lmax, lmin, li, lpar, j2par, i, ilam, iv, icol, &
+     jsave, ksave, isave, ipar, ji12, &
+     li, lpar, i, ilam, iv, icol, &
      irow, jc, jr, j2c, j2r, kc, kr, j12c, j12r, lc, lr, inum
 double precision roteng, esave, vee
 !
 integer, pointer :: nterm, ipotsy, iop, ninv, jmax, ipotsy2, j2max, j2min
 real(8), pointer :: brot, crot, delta, emax, drot
+UNUSED_DUMMY(rcut)
+UNUSED_DUMMY(clist)
+UNUSED_DUMMY(ihomo)
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); ninv=>ispar(4); jmax=>ispar(5); ipotsy2=>ispar(6)
 j2max=>ispar(7); j2min=>ispar(8)
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)

@@ -11,7 +11,7 @@
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 use mod_selb, only: ibasty
 use mod_conlam, only: nlam
 character*(*) filnam
@@ -33,7 +33,7 @@ subroutine driver
 use mod_covvl, only: vvl
 use mod_par, only: csflag, ihomo
 implicit double precision (a-h,o-z)
-character *48 potnam
+character *64 potnam
 character *2 frame
 potnam='HALVICK C+(2P)-H2 PES'
 print *, potnam
@@ -69,7 +69,7 @@ do i=1,500
  r=r+0.2
 enddo
 
-99 end
+end
 subroutine pot (vv0, r)
 ! ----------------------------------------------------------------------
 !  subroutine to calculate the r-dependent coefficients in the
@@ -425,8 +425,8 @@ do i=1,nx
     xsup = xgr(i)
     xinf = y
   else
-	  xsup = y
-	  xinf = xgr(i)
+    xsup = y
+    xinf = xgr(i)
   end if
     q2m = fac1*xsup**(-mq2m-1) * (1.d0 - fac2*xinf/xsup)  
     sum = sum + coef(i)*q2m

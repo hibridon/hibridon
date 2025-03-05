@@ -6,9 +6,8 @@
 
 subroutine driver
 use mod_covvl, only: vvl
-use constants, only: econv
 use mod_cosysr, only: rspar
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 implicit double precision (a-h,o-z)
 real(8), pointer :: rshift, xfact
 rshift=>rspar(1); xfact=>rspar(2)
@@ -31,7 +30,7 @@ subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 character*(*) filnam
 UNUSED_DUMMY(iunit)
 UNUSED_DUMMY(filnam)
@@ -76,8 +75,7 @@ subroutine pot (vv0, r)
 use mod_covvl, only: vvl
 use mod_hivector, only: dset
 implicit double precision (a-h,o-z)
-dimension xlam1(17),xlam2(17),vsum(10),xsum(10),vdif(10),xdif(10), &
-          ddif(10), &
+dimension vsum(10),xsum(10),vdif(10),xdif(10), &
           d0(100),d2(64),aa(121)
 dimension kpvt(10),qraux(10),work(55),rsd(10), costh(10)
 

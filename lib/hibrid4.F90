@@ -423,7 +423,7 @@ real(8), intent(out) :: rinf
 type(rbesself_type), intent(out) :: rbesself
 type(bqs_type), intent(out) :: bqs
 
-character*48 :: oldlab, oldpot
+character*64 :: oldlab, oldpot
 character*20 :: olddat
 
 character :: csize8(8), csize4(4)
