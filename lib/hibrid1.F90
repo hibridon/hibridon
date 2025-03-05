@@ -2200,7 +2200,7 @@ integer :: n, ncol, nlevel, nlevop, nnout1, nnout2, nopen1, nopen2, nu1, nu2, nu
 real(8) :: rmu1, rmu2
 character*20 cdate1,cdate2
 character*40 xnam1,xnam2
-character*64 potnam1,potnam2,label1,label2
+character*48 potnam1,potnam2,label1,label2
 
 logical existf,csflg1,csflg2,flghf1,flghf2,flgsu1,flgsu2
 logical twoml1,twoml2,nucr1,nucr2

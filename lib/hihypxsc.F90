@@ -266,7 +266,7 @@ subroutine print_infos(iunit, label, potnam, smtfil, cdate, jfinl, ered, nucspin
   ! Arguments
   integer, intent(in) :: iunit, jfinl, nucspin
   character*20, intent(in) :: cdate
-  character*64, intent(in) :: label, potnam
+  character*48, intent(in) :: label, potnam
   character*40, intent(in) :: smtfil 
   ! Local variables
   real(8), intent(in) :: ered

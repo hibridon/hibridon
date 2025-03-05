@@ -169,7 +169,7 @@ subroutine driver
 use mod_covvl, only: vvl
 use mod_par, only: readpt
 implicit double precision (a-h,o-z)
-character *64 potnam
+character *48 potnam
 character *40 filnam
 readpt=.true.
 potnam='WERNER-FOLLMEG VFIT'

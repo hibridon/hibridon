@@ -30,7 +30,7 @@ subroutine driver
 use mod_covvl, only: vvl
 use mod_par, only: csflag, ihomo
 implicit double precision (a-h,o-z)
-character *64 potnam
+character *48 potnam
 character *2 frame
 potnam='ALEXANDER B(2P)H2(J=0,1) DUBERNET-HUTSON'
 print *, potnam

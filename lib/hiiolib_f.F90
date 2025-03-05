@@ -947,7 +947,7 @@ use mod_coener, only: max_en
 implicit double precision (a-h,o-z)
 integer ifile, nerg, nfile, lenx
 logical existf
-character*64 oldlab,newlab
+character*48 oldlab,newlab
 character*40 xname,xnam1
 character*20 cdate
 if (nerg .gt. 1) then
