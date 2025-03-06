@@ -65,15 +65,7 @@ module mod_ch3he
 !       mu     =  0  0  0  0  0  3  3  3  3  6  6  9
 end module mod_ch3he
 
-!
-!
-!   Max number of channels
-!      integer KKMAX
-!      parameter (KMAX=10000)
-!
-!
-!
-!
+! TODO: check that these old common block global variables are now bound to the related module global variables
 !   cosysi block
 !       nscod: total number of variable names which are passed to HINPUT, nscod must equal isrcod + isicod + 3
 !       isicod: total number of integer system dependent variables
@@ -110,6 +102,7 @@ use mod_covvl, only: vvl
 use mod_cosysr, only: rspar
 use mod_cosysi, only: ispar
 use mod_ch3he, only: NVLM
+use constants, only: econv
 implicit double precision (a-h, o-z)
 
 !   Main function for `makepot', no arguments, print vvl's interactively
@@ -140,7 +133,7 @@ do i = 0, vmax
       print 52, iblock, i, j
     endif
     call dcopy(NVLM, vvl((iblock - 1) * NVLM + 1), 1, vvltmp, 1)
-    print 55, vvltmp * ECONV
+    print 55, vvltmp * econv
   enddo
 enddo
 goto 10
@@ -216,6 +209,7 @@ use mod_covvl, only: vvl
 use mod_cosysr, only: rspar
 use mod_cosysi, only: ispar
 use mod_ch3he, only: NVLM, NANGLE
+use constants, only: econv
 implicit double precision (a-h, o-z)
 !
 !
@@ -316,7 +310,7 @@ do i = 0, vmax
   vvl(j) = vvl(j) + lrpot
 enddo
 !   Convert potential to hartree
-call dscal(nvvlp, 1d0 / ECONV, vvl, 1)
+call dscal(nvvlp, 1d0 / econv, vvl, 1)
 !   vv0 is not used here
 vv0 = 0
 return
@@ -535,7 +529,7 @@ subroutine bausr(bqs, jhold, ehold, ishold, nlevel, &
 use mod_hibasutil, only: vlmstp, iswap
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_hitypes, only: bqs_type
-use constants, only: amu_to_emu
+use constants, only: amu_to_emu, econv
 use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
 use mod_cocent, only: cent
 use mod_coeint, only: eint
@@ -884,7 +878,7 @@ if (bastst .and. iprint .ge. 1) then
           'L', 4x, 'IND', 4x, 'EINT(CM-1)')
   do i = 1, n
     print 315, i, v(i), bqs%jq(i), k(i), ieps(i), bqs%lq(i), bqs%inq(i), &
-               eint(i)*ECONV
+               eint(i)*econv
   enddo
   print *
 315   format (4(i4, 1x), 2x, i2, 2x, i4, 1x, i6, 2x, f12.4)
