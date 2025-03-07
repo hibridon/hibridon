@@ -16,10 +16,61 @@
 #include "common/syusr.F90"
 #include "common/ground.F90"
 #include "common/bausr.F90"
+
+module mod_h2ohe
+  implicit none
+  ! parameter (mxl=100)
+  ! parameter (maxb=4*mxl,maxp=800)
+  ! parameter (maxc=5000)
+  ! use mod_h2ohe, only: mxl, maxb, maxp, maxc
+  integer, parameter :: mxl = 100
+  integer, parameter :: maxb = 4 * mxl
+  integer, parameter :: maxp = 800
+  integer, parameter :: maxc = 5000
+
+  ! group damp
+  integer :: ldum(5,mxl)
+  real(8) :: cdum(maxb)
+  integer :: ndum
+
+  ! group exch
+  integer :: lex(5,mxl)
+  real(8) :: cex(maxb)
+  integer :: nex
+  integer :: irpowex
+  integer :: iwex
+  integer :: iexback
+  integer :: igrx
+  integer :: idonex
+  real(8) :: exscale
+  integer :: lmaxex
+
+  !  group spher
+  integer :: lsp(5,mxl)
+  real(8) :: csp(maxb)
+  integer :: nsp
+  integer :: irpowsp
+  integer :: iwsp
+  integer :: ispback
+  integer :: igrt
+  integer :: lmaxli
+
+  ! group dind : dispersion and induction coefs.
+  real(8) :: cd(maxc)
+  real(8) :: ci(maxc)
+  integer :: ld(6,maxc)
+  integer :: li(6,maxc)
+  integer :: idisp
+  integer :: iind
+  integer :: lmaxi
+  integer :: lmaxd
+
+end module mod_h2ohe
+
 ! ------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 use constants, only: s4pi
 implicit double precision (a-h,o-z)
 dimension xxl(15)
@@ -45,8 +96,7 @@ subroutine loapot(iunit,filnam)
 use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: ispar
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
-use constants, only: s4pi
+use mod_parpot, only: potnam=>pot_name
 implicit double precision (a-h,o-z)
 character*(*) filnam
 integer, pointer :: nterm
@@ -118,8 +168,8 @@ dimension ylm(60,16), thetab(60), phib(60), vcalc(60), &
   y60(60),y62(60),y71(60),y73(60),y80(60),y82(60), &
   vcalcx(60)
 dimension y11t(60), y22t(60), y31t(60), y33t(60), &
-  y42t(60), y51t(60), y53t(60), y62t(60), &
-  y71t(60), y73t(60), y82t(60)
+  y42t(60), y51t(60), y53t(60), y62t(60)
+  
 !
 !
 !  coefficients for Ylm terms - all (lambda,mu) combinations up to lambda .le. 8
@@ -488,19 +538,13 @@ end
 !...    actual calculation of potential
   subroutine heh2osapt(iaa,r,theta,phi,energy)
 !       subroutine arh2osapt(iaa,r,theta,phi,energy,tima,timb)
+  use mod_h2ohe, only: ldum, cdum,ndum
+  use mod_h2ohe, only: lex, cex, nex, lmaxex
+  use mod_h2ohe, only: lmaxli
+  use mod_h2ohe, only: lmaxi, lmaxd
   implicit real*8 (a-h,o-z)
   logical first
-  parameter (mxl=100)
-  parameter (maxb=4*mxl,maxp=800)
-  parameter (maxc=5000)
   dimension rpt(6)
-  common/damp/ ldum(5,mxl),cdum(maxb),ndum
-  common/exch/ lex(5,mxl),cex(maxb),nex,irpowex,iwex,iexback,igrx, &
-               idonex,exscale,lmaxex
-  common/spher/lsp(5,mxl),csp(maxb),nsp,irpowsp,iwsp,ispback,igrt, &
-               lmaxli
-  common/dind/ cd(maxc),ci(maxc),ld(6,maxc),li(6,maxc), &
-               idisp,iind,lmaxi,lmaxd
   data a0 /0.529177249d0/
   data first /.true./
   data xkcal /627.51d0/
@@ -617,10 +661,8 @@ end
 ! with the proper phases after the induct calculation...
 !
   subroutine rdcoef
+  use mod_h2ohe, only: cd, ci, ld ,li, idisp, iind, lmaxi, lmaxd
   implicit real*8 (a-h,o-z)
-  parameter (maxc=5000)
-  common/dind/ cd(maxc),ci(maxc),ld(6,maxc),li(6,maxc), &
- idisp,iind,lmaxi,lmaxd
 !
   open(unit=1,file= &
     'potdata/h2o_coefd.dat', &
@@ -678,10 +720,8 @@ end
 ! in radians. 
 !
   subroutine elst(rpt,el)
+  use mod_h2ohe, only: maxb
   implicit real*8 (a-h,o-z)
-  complex*16 a, alm
- parameter (mxl=100)
- parameter (maxb=4*mxl,maxp=800)
   dimension rrev(20), oa(3), ob(3), oc(2), rpt(6), el(20)
   common/factorial/ fac(0:40)
   common/moments/ qa(100,3), qb(100,3),la(maxb),ka(maxb),lb(maxb), &
@@ -747,12 +787,10 @@ end
 !   th1, th2, phi in radians...., R in Angstroms.
 !
   subroutine asymp(rpt,value,valder)
+  use mod_h2ohe, only: ldum, cdum,ndum
   implicit real*8 (a-h,o-z)
- parameter (mxl=100)
- parameter (maxb=4*mxl,maxp=800)
   dimension rpt(6),oa(3), ob(3), oc(2)
-  dimension en(20), el(20), ei(20), ed(20)
-common/damp/ ldum(5,mxl),cdum(maxb),ndum
+  dimension en(20), ei(20), ed(20)
 common/realm/ almre(0:50,0:50)
 data oa(1) /0.d0/, oc /0.d0,0.d0/
 integer :: iperm
@@ -869,13 +907,9 @@ end
 !       A_lm = A_l,-m for this symmetry.
 !
   subroutine dispind(rpt,eld,eli)
+  use mod_h2ohe, only: cd, ci, ld ,li, idisp, iind
   implicit real*8 (a-h,o-z)
-  parameter (maxc=5000)
   dimension rr(20),oa(3),ob(3),oc(2), rpt(6), eld(20), eli(20)
-  complex*16 a, alm
-!--- common/dind/ contains dispersion and induction coefs.
-  common/dind/ cd(maxc),ci(maxc),ld(6,maxc),li(6,maxc), &
-               idisp,iind
   common/realm/ almre(0:50,0:50)
   data Pi /3.1415926535897932D0/
   data a0 /0.529177249d0/
@@ -941,20 +975,17 @@ end
 !
   subroutine potentot(rpt,vex,vsp,valas,der,imode)
 !       subroutine potentot(rpt,vex,vsp,valas,der,imode,timb)
+  use mod_h2ohe, only: lex, cex, nex, irpowex, iexback
+  use mod_h2ohe, only: lsp, csp, nsp, irpowsp, ispback
   implicit real*8 (a-h,o-z)
-  complex*16 glamc, alm
- parameter (mxl=100)
- parameter (maxb=4*mxl,maxp=800)
   dimension rr(10), rpt(6), oa(3), ob(3), oc(2)
   integer :: iperm
-common/exch/lex(5,mxl),cex(maxb),nex,irpowex,iwex,iexback,igrx, &
- idonex,exscale
-common/spher/lsp(5,mxl),csp(maxb),nsp,irpowsp,iwsp,ispback,igrt
 common/realm/ almre(0:50,0:50)
 data xkcal /627.51d0/
 data cm    /219474.63d0/
 data oa(1) /0.d0/, oc /0.d0,0.d0/
 !
+  UNUSED_DUMMY(der)
   iperm = 0
   r = rpt(1)
   oa(2) = rpt(2)
@@ -1069,11 +1100,8 @@ subroutine rdexch
 !
 !     reads in the parameters of the expansion of exponential
 !      
+use mod_h2ohe, only: lex, cex, nex, irpowex, lmaxex
 implicit real*8 (a-h,o-z)
-parameter (mxl=100)
-parameter (maxb=4*mxl,maxp=800)
-common/exch/lex(5,mxl),cex(maxb),nex,irpowex,iwex,iexback,igrx, &
-           idonex,exscale,lmaxex
 !
   open(unit=7,file= &
     'potdata/h2o_params.dat', &
@@ -1098,11 +1126,8 @@ subroutine rdlin
 !
 !     reads in the parameters of the expansion of linear factor
 !
+use mod_h2ohe, only: lsp, csp, nsp, irpowsp, lmaxli
 implicit real*8 (a-h,o-z)
-parameter (mxl=100)
-parameter (maxb=4*mxl,maxp=800)
-common/spher/lsp(5,mxl),csp(maxb),nsp,irpowsp,iwsp,ispback,igrt, &
-             lmaxli
 !
 read(7,*) nsp,irpowsp
 lmaxli=0
