@@ -46,8 +46,8 @@ end module mod_ch3i
 subroutine driver
 use mod_covvl, only: vvl
 use mod_cosysi, only: ispar
-use constants, only: econv, xmconv
-use mod_ered, only: ered, rmu
+use constants, only: xmconv
+use mod_ered, only: rmu
 use mod_ch3i, only: vib
 implicit double precision (a-h,o-z)
 dimension wf(16)
@@ -125,11 +125,10 @@ subroutine ground(wf, r, nch, nphoto, mxphot)
 
 
 !  -------------------------------------------------------
-use mod_coiout, only: niout
 use mod_cosysi, only: iscod=>ispar
 use mod_cosysr, only: rcod=>rspar
 use mod_ered, only: rmu
-use mod_ch3i, only: vib, gswf_data
+use mod_ch3i, only: gswf_data
 implicit none
 
 real(8), intent(out) :: wf(nch*nphoto) ! array of dimension nch*nphoto, containing, on return,
@@ -178,7 +177,7 @@ call wfintern(wf, 0.d0, nch, nphoto, 0, .true.)
 end subroutine ground
 !      entry wfintern(wf,yymin,nnvib,nny) ! original Rist statement
 subroutine wfintern(wf, yymin, nch, nphoto, nny, ifull)
-use constants, only: econv, xmconv
+use constants, only: xmconv
 use mod_ch3i, only: vib, gswf_data
 implicit none
 real(8), intent(out) :: wf(nch*nphoto) ! array of dimension nch*nphoto, containing, on return,
@@ -266,8 +265,6 @@ subroutine pot (vv0, r)
 !  vvl(7) contains the second anisotropic (2,2) potential
 !
 use mod_covvl, only: vvl
-use mod_conlam, only: nlam
-use mod_ch3i, only: vib
 implicit double precision (a-h, o-z)
 real(8), intent(out) :: vv0
 !  -----------------------------------------------------------------------
@@ -339,12 +336,11 @@ subroutine syusr (irpot, readpt, iread)
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
-use mod_coqvec, only: mxphot, nphoto, q
+use mod_coqvec, only: nphoto
 use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
 use mod_cosysr, only: isrcod, rcod=>rspar
-use mod_grnd, only: reg, caypot
 use mod_par, only: par_readpt=>readpt
 use funit, only: FUNIT_INP
 use mod_parbas, only: lammin, lammax, mproj
@@ -354,11 +350,10 @@ logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: i, j, iel, iofi, iofr, ndip, nel
 real(8) :: rshift, rsm
-logical existf
 character*1 dot
 character*4 char
 character*(*) fname
-character*40 filnam, line, potfil
+character*40 filnam, potfil
 save potfil
 #include "common/comdot.F90"
 
@@ -460,6 +455,7 @@ goto 286
 return
 ! --------------------------------------------------------------
 entry ptrusr (fname,readpt)
+UNUSED_DUMMY(fname)
 readpt = .true.
 if (readpt) then
 ! now call loapot(iunit,filnam) routine to read potential parameters
@@ -597,11 +593,10 @@ use mod_coeint, only: eint
 use mod_conlam, only: nlam
 use mod_cosysi, only: iscod=>ispar
 use mod_cosysr, only: rcod=>rspar
-use constants, only: econv, xmconv
-use mod_coiout, only: niout, indout
+use constants, only: econv
 use mod_par, only: iprint
 use mod_parbas, only: lammin, lammax
-use mod_ered, only: ered, rmu
+use mod_ered, only: ered
 use mod_ch3i, only: vib
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -639,7 +634,13 @@ UNUSED_DUMMY(sc1)
 UNUSED_DUMMY(sc2)
 UNUSED_DUMMY(sc3)
 UNUSED_DUMMY(sc4)
+UNUSED_DUMMY(rcut)
+UNUSED_DUMMY(jtot)
+UNUSED_DUMMY(flaghf)
+UNUSED_DUMMY(flagsu)
+UNUSED_DUMMY(csflag)
 UNUSED_DUMMY(ihomo)
+UNUSED_DUMMY(jlpar)
 
 zero = 0.d0
 one = 1.d0
