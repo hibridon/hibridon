@@ -786,15 +786,18 @@ end
 !   Calculate the total damped asymptotics from elst and dispind..
 !   th1, th2, phi in radians...., R in Angstroms.
 !
-  subroutine asymp(rpt,value,valder)
+subroutine asymp(rpt,value,valder)
   use mod_h2ohe, only: ldum, cdum,ndum
   implicit real*8 (a-h,o-z)
-  dimension rpt(6),oa(3), ob(3), oc(2)
+  real(8), intent(in) :: rpt(6)
+  real(8), intent(out) :: value
+  real(8), intent(out) :: valder
+  dimension oa(3), ob(3), oc(2)
   dimension en(20), ei(20), ed(20)
-common/realm/ almre(0:50,0:50)
-data oa(1) /0.d0/, oc /0.d0,0.d0/
-integer :: iperm
-iperm = 0
+  common/realm/ almre(0:50,0:50)
+  data oa(1) /0.d0/, oc /0.d0,0.d0/
+  integer :: iperm
+  iperm = 0
 !
   r = rpt(1)
   oa(2) = rpt(2)
@@ -802,60 +805,60 @@ iperm = 0
   ob(1) = rpt(4)
   ob(2) = rpt(5)
   ob(3) = rpt(6)
-!
-!---- call the asymptotics procedures to be changed....
-!
+  !
+  !---- call the asymptotics procedures to be changed....
+  !
   call dispind(rpt,ed,ei)
-!       call elst(rpt,el) ! KSz deacive for ArH2O
-!        call shrtas(R,th1,th2,phi,srval)
-!
-!---- Compute the damping constant for a given geometry
-!
+  !       call elst(rpt,el) ! KSz deacive for ArH2O
+  !        call shrtas(R,th1,th2,phi,srval)
+  !
+  !---- Compute the damping constant for a given geometry
+  !
   dump = 0.d0
   do i=1,ndum
-   la = ldum(1,i)
-   ka = ldum(2,i)
-   lb = ldum(3,i)
-   kb = ldum(4,i)
-   l  = ldum(5,i)
-! glamc changed into glam to test the real alm version...
-!...     replace calls to almre by substitution of precomputed value
-!        glam = almre(la,ka,lb,kb,l,oa,ob,oc)
-   if(ka .lt. 0) then
-     write(6,*) 'ka .lt. 0 in asympt'
-     stop
-   endif
-   glam = almre(la,ka) ! KSz
-! -- symmetrize iif molecules identical...
-   if(iperm.eq.1) then
-    iphase = (-1)**(la+lb)
-!         glam = glam + iphase*almre(lb,kb,la,ka,l,oa,ob,oc)
-    if(kb .lt. 0) then
-      write(6,*) 'kb .lt. 0 in asympt'
+    la = ldum(1,i)
+    ka = ldum(2,i)
+    lb = ldum(3,i)
+    kb = ldum(4,i)
+    l  = ldum(5,i)
+    ! glamc changed into glam to test the real alm version...
+    !...     replace calls to almre by substitution of precomputed value
+    !        glam = almre(la,ka,lb,kb,l,oa,ob,oc)
+    if(ka .lt. 0) then
+      write(6,*) 'ka .lt. 0 in asympt'
       stop
     endif
-    glam = glam + iphase*almre(lb,kb)
-   endif
-!         glam = real(glamc)
-   dump = dump - cdum(i)*glam
+    glam = almre(la,ka) ! KSz
+    ! -- symmetrize iif molecules identical...
+    if(iperm.eq.1) then
+      iphase = (-1)**(la+lb)
+      !         glam = glam + iphase*almre(lb,kb,la,ka,l,oa,ob,oc)
+      if(kb .lt. 0) then
+        write(6,*) 'kb .lt. 0 in asympt'
+        stop
+      endif
+      glam = glam + iphase*almre(lb,kb)
+    endif
+    !         glam = real(glamc)
+    dump = dump - cdum(i)*glam
   end do
-!
-!--- Damping factor ready, proceed to the asymptotics...
-!
-!       do i=1,20
+  !
+  !--- Damping factor ready, proceed to the asymptotics...
+  !
+  !       do i=1,20
   do i=6,12
-!        en(i) = el(i) + ed(i) + ei(i)
-   en(i) = ed(i) + ei(i)
+    !        en(i) = el(i) + ed(i) + ei(i)
+    en(i) = ed(i) + ei(i)
   end do
   value = 0.d0
   valder = 0.d0
   do i=6,12 ! KSz changed from 1,20
-   ddd = d(i,dump,r)
-   value = value + ddd*en(i)
-!1     valder = valder + en(i)*(dd(i,dump,r)-i*ddd/r)
+    ddd = d(i,dump,r)
+    value = value + ddd*en(i)
+    !1     valder = valder + en(i)*(dd(i,dump,r)-i*ddd/r)
   end do
- return
- end
+  return
+end
 !
 function d(n,beta,r)
 !
@@ -909,7 +912,10 @@ end
   subroutine dispind(rpt,eld,eli)
   use mod_h2ohe, only: cd, ci, ld ,li, idisp, iind
   implicit real*8 (a-h,o-z)
-  dimension rr(20),oa(3),ob(3),oc(2), rpt(6), eld(20), eli(20)
+  real(8), intent(in) :: rpt(6)
+  real(8), intent(out) :: eld(20)
+  real(8), intent(out) :: eli(20)
+  dimension rr(20),oa(3),ob(3),oc(2)
   common/realm/ almre(0:50,0:50)
   data Pi /3.1415926535897932D0/
   data a0 /0.529177249d0/
@@ -978,7 +984,13 @@ end
   use mod_h2ohe, only: lex, cex, nex, irpowex, iexback
   use mod_h2ohe, only: lsp, csp, nsp, irpowsp, ispback
   implicit real*8 (a-h,o-z)
-  dimension rr(10), rpt(6), oa(3), ob(3), oc(2)
+  real(8), intent(in) :: rpt(6)
+  real(8), intent(out) :: vex
+  real(8), intent(out) :: vsp
+  real(8), intent(out) :: valas
+  real(8), intent(inout) :: der
+  integer, intent(in) :: imode
+  dimension rr(10), oa(3), ob(3), oc(2)
   integer :: iperm
 common/realm/ almre(0:50,0:50)
 data xkcal /627.51d0/
