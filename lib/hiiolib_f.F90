@@ -1027,7 +1027,7 @@ if (wrxsec .or. prxsec .or. prpart .or. wrpart) then
      end if
      savfil=xname
      call dopen(FILEID_SAV, nfile,savfil)
-     write (9, 180) xname(1:lenx)
+     write (FUNIT_OUT, 180) xname(1:lenx)
 180      format (' ** RESTART INFORMATION SAVED IN FILE ',(a))
    endif
 endif

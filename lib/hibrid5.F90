@@ -388,6 +388,7 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
 use mod_surf, only: flagsu
 use mod_hiutil, only: dater
+use funit, only: FUNIT_PCS_START
 implicit double precision (a-h,o-z)
 real(8), intent(in) :: scmat(nmax, nlevop)
 integer, intent(in) :: jlev(nlevop)
@@ -417,7 +418,7 @@ do 2 i=1, iabs(nnout)
 1  continue
 2 continue
 if (wrpart) then
-  nfile = 24 + ien
+  nfile = FUNIT_PCS_START + ien - 1
   headf=.false.
   if (nucros .and. nu.eq.numin) headf=.true.
   if (twojlp) then

@@ -555,7 +555,7 @@ allocate(w(nmax*nch))
 !     row, column and diagonal increments for matrices z and w
 nrow = 1
 ncol = nmax
-ndiag = nmax + 1
+ndiag = nmax + 1  ! stride between 2 consecutive diagonal elements (nmax to skip a row, then add 1 to reach the next column)
 !     obtain coupling matrix, w, at r = rmin
 !     diagonal elements must be shifted at subsequent energies
 tp = zero
