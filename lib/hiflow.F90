@@ -106,7 +106,7 @@ character*10 :: timew, cpubaw, cpuptw, cpuaiw, cpuldw, cpusmw, cpuouw, &
              cpuphw, timew1, timew2, time1, time2
 logical :: clist, firstj, ready
 !  -------------------------------------------------------------
-logical :: first_time = .true.
+logical :: first_time
 
 logical :: twojlp
 data twojlp / .false. /
@@ -132,7 +132,7 @@ integer :: isteps
 integer :: nsteps
 
 type(bqs_type) :: bqs
-
+first_time = .true.
 !  get default data
 call set_default_params
 1 call hinput(first_time)
