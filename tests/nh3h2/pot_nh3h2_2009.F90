@@ -30,7 +30,7 @@ end module mod_nh3h2
 subroutine driver
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 use constants, only: s4pi
 implicit double precision (a-h,o-z)
 character*60 filnam
@@ -92,8 +92,7 @@ goto 1
 use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: ispar
 use mod_parbas, only: lammin, lammax, mproj, lam2, m2proj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
-use constants, only: s4pi
+use mod_parpot, only: potnam=>pot_name
 use mod_nh3h2, only: nvv, ivv
 implicit double precision (a-h,o-z)
 
@@ -511,17 +510,16 @@ end
 !       parameter nvmx          max number of vij terms
 
 !        implicit none
-  use mod_parpot, only: potnam=>pot_name, label=>pot_label
 
   implicit double precision (a-h,o-z)
 !        integer nddmx, nvmx
 !        parameter (nvmx = 45)
   parameter (nddmx=250)
-  double precision r, v, dd, y, y1, y2, y3, yref, h, conv, econv
+  double precision r, v, dd, y, y1, y2, y3, h, conv, econv
 !        dimension dd(nddmx),y(nddmx,nvmx),y1(nddmx,nvmx)
-!     1       ,y2(nddmx,nvmx),y3(nddmx,nvmx) , yref(nddmx)
+!     1       ,y2(nddmx,nvmx),y3(nddmx,nvmx)
   dimension dd(250),y(250,300),y1(250,300) &
-       ,y2(250,300),y3(250,300) , yref(250)
+       ,y2(250,300),y3(250,300)
   common /fisurf/ conv,econv,lsurf
   common /fiunit/ iwrite,ifile
   parameter (nvmx = 300)
@@ -531,7 +529,7 @@ end
 ! algorithm is fast but does not allow frequent changes in lsurf value.
   if (lsurf.eq.0) then 
 ! initialisation of the decomposition for all r when lsurf = 0
-    call ddyini (dd,y,y1,y2,y3,yref,nddmx,nvmx,ndd,nv)
+    call ddyini (dd,y,y1,y2,y3,nddmx,nvmx,ndd,nv)
     lsurf=1
   endif
 
@@ -566,18 +564,18 @@ end
   return
   end
 !  -----------------------------------------------------------------------
-  subroutine ddyini (dd,y,y1,y2,y3,yref,nddmx,nvmx,ndd,nv)
+  subroutine ddyini (dd,y,y1,y2,y3,nddmx,nvmx,ndd,nv)
 !
 !       reads the vijkl decomposition on logical unit ifile
 !       sets up the coefficients of the spline interpolation
 !
  implicit double precision (a-h,o-z)
-  double precision dd, y, y1, y2, y3, yref, conv, &
-                   econv, damp
+  double precision dd, y, y1, y2, y3, conv, &
+                   econv
 !        dimension dd(nddmx),y(nddmx,nvmx),y1(nddmx,nvmx)
 !     1         ,y2(nddmx,nvmx),y3(nddmx,nvmx) , yref(nddmx)
   dimension dd(250),y(250,300),y1(250,300) &
-       ,y2(250,300),y3(250,300) , yref(250)
+       ,y2(250,300),y3(250,300)
   common /fisurf/ conv,econv,lsurf,nv1
   common /fiunit/ iwrite,ifile
 !        character*(*) datafl

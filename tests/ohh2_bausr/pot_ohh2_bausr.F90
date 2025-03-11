@@ -10,6 +10,7 @@
 !
 !     DUMMY SUBROUTINES FOR ALL USER-DEFINED BASIS/POT.
 #include "assert.h"
+#include "unused.h"
 #include "hiutil.inc.F90"
 #include "common/ground.F90"
 !
@@ -87,7 +88,7 @@ use mod_hibasutil, only: raise
 !
 use constants, only: econv
 use mod_pot_ohh2_bausr, only: rr, lam1b, lam2b, lamb, lam1f, lam2f, lamf, bcoef, fcoef, MAX_NR, MAX_NVB, MAX_NVF, nr, nvb, nvf, splb_b, splb_c, splb_d, splf_b, splf_c, splf_d
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 implicit none
 !
 character*(*) filnam
@@ -213,6 +214,7 @@ real(8), pointer :: brot, aso, p, q, drot
 
 j1max=>ispar(1); npar=>ispar(2); j2min=>ispar(3); j2max=>ispar(4); iptsy2=>ispar(5)
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
+UNUSED_DUMMY(irpot)
 !     DEFINE THE NAMES HERE
 scod(1)='J1MAX'
 scod(2)='NPAR'
@@ -282,7 +284,7 @@ use mod_pot_ohh2_bausr, only: machep, &
    nvb, nvf, &
    lam1b, lam2b, lamb, &
    lam1f, lam2f, lamf
-use mod_ered, only: ered, rmu
+use mod_ered, only: ered
 use mod_hitypes, only: bqs_type
 implicit none
 type(bqs_type), intent(out) :: bqs

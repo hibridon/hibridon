@@ -12,7 +12,7 @@
 subroutine driver
 use mod_covvl, only: vvl
 use mod_cosysr, only: rspar
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 implicit double precision (a-h,o-z)
 real(8), pointer :: rshift, xfact
 rshift=>rspar(1); xfact=>rspar(2)
@@ -55,7 +55,7 @@ close(22)
 ! ----------------------------------------------------------------
 subroutine loapot(iunit,filnam)
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 character*(*) filnam
 UNUSED_DUMMY(iunit)
 UNUSED_DUMMY(filnam)
@@ -560,7 +560,7 @@ call mlv%read_from_file(file_path)
 end subroutine 
 
 subroutine potential(R_,angl,V_)
-use pot_hech_dgels, only: mlv, max_b, max_p, max_r, max_rr, max_par, max_theta
+use pot_hech_dgels, only: mlv, max_r, max_theta
 implicit none
 real*8 R_,angl,V_
 
@@ -573,7 +573,6 @@ integer :: lmax
 ! FIN TYPE POT
 ! DEBUT DECLARATION DES VARIABLES
 integer*4 iblk
-logical exstfl,openfl
 real*8 vcalc,vvlsum,vvl(max_theta),vvlp(max_theta)
 real*8 pvec(max_theta)
 real*8 rvecp(max_theta),rvecpp(max_theta),b(max_theta,max_r),dr
@@ -720,17 +719,17 @@ real*8 a(n,n)
 integer*4 ik(100),jk(100)
 
 
-10 det=1.
-11 do 100 k=1,nc
+det=1.
+do 100 k=1,nc
 amax=0.
 21 do 30 i=k,nc
 do 30 j=k,nc
-23    if (dabs(amax)-dabs(a(i,j))) 24,24,30
+  if (dabs(amax)-dabs(a(i,j))) 24,24,30
 24    amax=a(i,j)
 ik(k)=i
 jk(k)=j
 30 continue
-31 if (amax) 41,32,41
+if (amax) 41,32,41
 32 det=0.
 goto 140
 41 i=ik(k)
@@ -749,19 +748,19 @@ if (j-k) 21,61,53
   if (i-k) 63,70,63
 63   a(i,k)=-a(i,k)/amax
 70 continue
-71 do 80 i=1,nc
+do 80 i=1,nc
   do 80 j=1,nc
     if (i-k) 74,80,74
 74     if (j-k) 75,80,75
 75     a(i,j)=a(i,j)+a(i,k)*a(k,j)
 80 continue
-81 do 90 j=1,nc
+do 90 j=1,nc
   if (j-k) 83,90,83
 83   a(k,j)=a(k,j)/amax
 90 continue
 a(k,k)=1./amax
 100 det=det*amax
-101 do 130 l=1,nc
+do 130 l=1,nc
   k=nc-l+1
   j=ik(k)
   if (j-k) 111,111,105

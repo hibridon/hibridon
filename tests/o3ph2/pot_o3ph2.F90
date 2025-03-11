@@ -22,7 +22,7 @@ use mod_selb, only: ibasty
 character*(*) filnam
 UNUSED_DUMMY(iunit)
 UNUSED_DUMMY(filnam)
-potnam='ALEXANDER SCALED (s=1.21) O(3P)H2 DUBERNET-HUTSON'
+potnam='ALEXANDER SCALED(s=1.21) O(3P)H2 DUBERNET-HUTSON'
 ibasty=13
 lammin(1)=1
 lammax(1)=9
@@ -40,7 +40,7 @@ use mod_par, only: csflag, ihomo
 implicit double precision (a-h,o-z)
 character *48 potnam
 character *2 frame
-potnam='ALEXANDER SCALED (s=1.21) O(3P)H2 DUBERNET-HUTSON'
+potnam='ALEXANDER SCALED(s=1.21) O(3P)H2 DUBERNET-HUTSON'
 print *, potnam
 print *
 1  print *, ' r (bohr) frame (sf/bf)'

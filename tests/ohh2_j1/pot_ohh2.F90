@@ -49,7 +49,7 @@ end subroutine driver
 !     Load the data file of the potential
 subroutine loapot(iunit, file_name)
 use pot_ohh2
-use mod_parpot, only: pot_name, pot_label
+use mod_parpot, only: pot_name
 implicit none
 !     common/parbas is replaced by module ba2pi1sg to allow more
 !     parameters be passed between the pot routine and the basis routine

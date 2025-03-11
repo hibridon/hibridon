@@ -14,7 +14,7 @@
 ! ------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 implicit double precision (a-h,o-z)
 econv=219474.6d0
 potnam='HCO PES-Nijmegen-lmax=15'
@@ -48,7 +48,7 @@ subroutine loapot(iunit,filnam)
 use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: ispar
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 implicit double precision (a-h,o-z)
 character*(*) filnam
 integer, pointer :: nterm
@@ -91,7 +91,6 @@ subroutine pot (vv0, r)
 ! latest revision date:  21-jan-2015
 ! ----------------------------------------------------------------------
 use mod_covvl, only: vvl
-use mod_par, only: csflag, ihomo
 implicit double precision (a-h,o-z)
 dimension v(16)
 real(8), save :: csplin(47,16)

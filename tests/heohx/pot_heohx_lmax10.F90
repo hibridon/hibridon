@@ -10,7 +10,7 @@
 subroutine driver
 use mod_covvl, only: vvl
 use mod_cosysr, only: rspar
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 implicit double precision (a-h,o-z)
 dimension thta(11),cthta(11),vap(11),va2p(11)
 real(8), pointer :: rshift, xfact
@@ -75,7 +75,7 @@ subroutine loapot(iunit,filnam)
 ! ------------------------------------------------------------------------
 use mod_conlam, only: nlam, nlammx, lamnum
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 character*(*) filnam
 UNUSED_DUMMY(iunit)
 UNUSED_DUMMY(filnam)
@@ -122,11 +122,9 @@ subroutine pot (vv0, r)
 use mod_covvl, only: vvl
 use mod_hivector, only: dset
 implicit double precision (a-h,o-z)
-dimension xlam1(22),xlam2(22),r0(22),c1(22),c2(22),c3(22), &
-          clr(22),vsum(11),xsum(11),vdif(11),xdif(11), &
-          ddif(11),vap(11),va2p(11), &
+dimension vsum(11),xsum(11),vdif(11),xdif(11), &
           d0(121),d2(81),aa(121),thta(11),cthta(11)
-dimension kpvt(11),qraux(11),work(200),rsd(11),re(22)
+dimension kpvt(11),qraux(11),work(200),rsd(11)
 
 data half, zero, one, alph /0.5d0, 0.d0, 1.d0, 1.2d0/
 ! for distances beyond rmax difference potential is damped
