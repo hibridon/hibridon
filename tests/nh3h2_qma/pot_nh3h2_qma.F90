@@ -21,6 +21,11 @@
 !     ------------------------------------------------------------------
 !     THE FOLLOWING SOUBROUTINE WILL BE THE MAIN FUNCTION FOR MAKEPOT.
 !     NOTE THAT VVL IS IN HARTREES.
+
+module mod_nh3h2_qma
+   character*40 :: potfil
+end module mod_nh3h2_qma
+
 subroutine driver
 use mod_covvl, only: vvl
 use mod_hibasutil, only: raise
@@ -153,7 +158,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use mod_hibasutil, only: raise
-use funit, only: FUNIT_INP
+use mod_nh3h2_qma, only: potfil
 implicit none
 !
 integer MAX_NR, MAX_NV
@@ -173,14 +178,11 @@ double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV), &
 integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-character*(*) fname
 !     NUMBER OF BASIS-SPECIFIC VARIABLES, MODIFY ACCORDINGLY.
 integer icod, ircod
 parameter (icod=5, ircod=5)
 
 
-character*40 potfil
-save potfil
 integer, pointer :: nterm, ipotsy, iop, ninv, jmax, ipotsy2, j2max, j2min
 real(8), pointer :: brot, crot, delta, emax, drot
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); ninv=>ispar(4); jmax=>ispar(5); ipotsy2=>ispar(6)
@@ -220,12 +222,31 @@ close (8)
 return
 80 call raise('error read from input file.')
 return
+end subroutine
 !     ------------------------------------------------------------------
-entry ptrusr(fname, readpt)
+subroutine ptrusr(fname, readpt)
+implicit none
+character*(*), intent(inout) :: fname
+logical, intent(inout) :: readpt
 UNUSED_DUMMY(fname)
+UNUSED_DUMMY(readpt)
 return
+end subroutine
 !     ------------------------------------------------------------------
-entry savusr(readpt)
+subroutine savusr(readpt)
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
+use funit, only: FUNIT_INP
+use mod_nh3h2_qma, only: potfil
+implicit none
+logical, intent(inout) :: readpt
+integer, pointer :: nterm, ipotsy, iop, ninv, jmax, ipotsy2, j2max, j2min
+real(8), pointer :: brot, crot, delta, emax, drot
+nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); ninv=>ispar(4); jmax=>ispar(5); ipotsy2=>ispar(6)
+j2max=>ispar(7); j2min=>ispar(8)
+
+brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)
+UNUSED_DUMMY(readpt)
 !     WRITE THE LAST FEW LINES OF THE INPUT FILE.
 write (FUNIT_INP, 220) ipotsy, iop, ninv, ipotsy2
 220 format (4i4, 14x,'   ipotsy, iop, ninv, ipotsy2')

@@ -543,10 +543,9 @@ end
   use mod_h2ohe, only: lmaxli
   use mod_h2ohe, only: lmaxi, lmaxd
   implicit real*8 (a-h,o-z)
-  logical first
+  logical, save :: first_time = .true.
   dimension rpt(6)
   data a0 /0.529177249d0/
-  data first /.true./
   data xkcal /627.51d0/
   data cm    /219474.63d0/
   data icount /0/
@@ -584,12 +583,12 @@ end
   if(iaa.eq.2) rpt(1) = r
   rpt(2) = d2rad*theta
   rpt(3) = d2rad*phi
-  if(first) then
+  if(first_time) then
 !          call rdmom    ! now superfluous call
     call rdcoef   ! read induction and dispersion coeffs
     call rdexch   ! read short-range exponential parms
     call rdlin    ! read short-range linear parms
-    first=.false.
+    first_time=.false.
   endif
   ndum = nex
   ipow = 2

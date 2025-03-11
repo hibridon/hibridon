@@ -51,6 +51,7 @@ real(8) :: splf_d(MAX_NR, MAX_NVF)
 !     Machine epsilon
 real(8), parameter :: machep=epsilon(0d0)
 
+character*40 :: potfil
 end module
 !     ------------------------------------------------------------------
 !     THE FOLLOWING SOUBROUTINE WILL BE THE MAIN FUNCTION FOR MAKEPOT.
@@ -195,19 +196,15 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only : isrcod, rspar
 use mod_hibasutil, only: raise
-use funit, only: FUNIT_INP
+use mod_pot_ohh2_bausr, only: potfil
 !
 implicit none
 integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-character*(*) fname
 !     NUMBER OF BASIS-SPECIFIC VARIABLES, MODIFY ACCORDINGLY.
 integer icod, ircod
 parameter (icod=5, ircod=5)
-
-character*40 potfil
-save potfil
 
 integer, pointer :: j1max, npar, j2min, j2max, iptsy2
 real(8), pointer :: brot, aso, p, q, drot
@@ -215,6 +212,7 @@ real(8), pointer :: brot, aso, p, q, drot
 j1max=>ispar(1); npar=>ispar(2); j2min=>ispar(3); j2max=>ispar(4); iptsy2=>ispar(5)
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
 UNUSED_DUMMY(irpot)
+UNUSED_DUMMY(readpt)
 !     DEFINE THE NAMES HERE
 scod(1)='J1MAX'
 scod(2)='NPAR'
@@ -242,13 +240,30 @@ close (8)
 return
 80 call raise('error read from input file.')
 return
+end subroutine
 !     ------------------------------------------------------------------
-entry ptrusr(fname, readpt)
+subroutine ptrusr(fname, readpt)
+implicit none
+character*(*), intent(inout) :: fname
+logical, intent(inout) :: readpt
 UNUSED(fname)
 UNUSED(readpt)
 return
+end subroutine
 !     ------------------------------------------------------------------
-entry savusr(readpt)
+subroutine savusr(readpt)
+use mod_pot_ohh2_bausr, only: potfil
+use mod_cosysi, only: ispar
+use mod_cosysr, only : rspar
+use funit, only: FUNIT_INP
+implicit none
+logical, intent(inout) :: readpt
+integer, pointer :: j1max, npar, j2min, j2max, iptsy2
+real(8), pointer :: brot, aso, p, q, drot
+UNUSED_DUMMY(readpt)
+
+j1max=>ispar(1); npar=>ispar(2); j2min=>ispar(3); j2max=>ispar(4); iptsy2=>ispar(5)
+brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
 !     WRITE THE LAST FEW LINES OF THE INPUT FILE.
 write (FUNIT_INP, 230) j1max, npar
 230 format (2i4, 22x, '   j1max, npar')

@@ -409,12 +409,11 @@ double precision function frecip(y,mq2m,nx,xgr,coef)
 !
 implicit double precision(a-h,o-z)
 dimension xgr(nx),coef(nx)
-logical first
+logical, save :: first_time = .true.
 save fac1,fac2
-data first/.true./
 !
-if (first) then
-first  = .false.
+if (first_time) then
+first_time  = .false.
   fac1 = 4.d0 / ((mq2m+1.d0)*(mq2m+2.d0))
   fac2 = (mq2m+1.d0) / (mq2m+3.d0)
 end if

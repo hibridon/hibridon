@@ -251,14 +251,13 @@ COMMON /param/ ael(0:10,0:3), bel(0:10,0:3), alel(0:10), &
                aex(0:8,0:3),  bex(0:8,0:3), alex(0:8), &
                ad(0:8,0:3),  bd(0:8), bdd(0:8), cd(6:12,0:6,0:3), &
                ai(0:10,0:3), bi(0:8), ci(6:12,0:6,0:3)
-LOGICAL first
-DATA first /.true./
+logical, save :: first_time = .true.
 SAVE
 
 !... Fill array DLFAC with log(n!)
-IF (first) THEN
+IF (first_time) THEN
   CALL filfac(dlfac, logmax)
-  first = .false.
+  first_time = .false.
 ENDIF
 
 !.. Deviation of CO bond length from equilibrium

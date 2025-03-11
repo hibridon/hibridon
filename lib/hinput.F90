@@ -61,7 +61,7 @@ module mod_hinput
   character(len=8), parameter :: bascod(1) = ['BASISTYP']
 
 contains
-subroutine hinput(first)
+subroutine hinput(first_time)
 !  subroutine to redefine system independent input parameters for
 !  hibridon code
 !  author:  h.-j. werner
@@ -142,6 +142,7 @@ use mod_hypxsc, only: hypxsc
 implicit none
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
+logical, intent(inout) :: first_time
 integer, parameter :: lcode = LPAR_COUNT
 integer, parameter :: iicode = IPAR_COUNT
 integer, parameter :: ircode = RPAR_COUNT
@@ -157,7 +158,7 @@ character*8 empty_var_list(0)
 !  pcod, fcod, and bcod)
 character*8 codex(15)
 integer nerg
-logical existf, first, openfl
+logical existf, openfl
 logical logp, opti, jtrunc
 real(8) :: a(15)
 integer :: ia(10)
@@ -282,13 +283,13 @@ ijcode=icode
 if(com) open(unit=1312, status='old', file=trim(com_file))
 
 !   define system dependent parameter codes
-if(first) then
+if(first_time) then
    islcod=0
    isrcod=0
    isicod=0
    izero=0
    call sysdat(irpot, lpar(LPAR_READPT), izero)
-   first = .false.
+   first_time = .false.
    call version(6)
 !  in this next statement the $ sign implies no line feed
 !  replace this with an equivalent formatting character if your system
