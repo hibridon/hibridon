@@ -1123,10 +1123,12 @@ f3j0=(-1)**jp*dexp(x)
 return
 end
 ! -------------------------------------------------------------------
-function f6j(j1,j2,j3,l1,l2,l3)
+function f6j(j1,j2,j3,l1,l2,l3,f6j_is_zero)
 use mod_cofact, only: si
 implicit double precision (a-h,o-z)
+logical, intent(out) :: f6j_is_zero
 f6j=0.d0
+f6j_is_zero = .true.
 if(j3.gt.(j1+j2)) return
 if(j3.lt.iabs(j2-j1)) return
 if(l3.gt.(j1+l2)) return
@@ -1135,6 +1137,7 @@ if(l3.gt.(l1+j2)) return
 if(l3.lt.iabs(j2-l1)) return
 if(j3.gt.(l1+l2)) return
 if(j3.lt.iabs(l2-l1)) return
+f6j_is_zero = .false.
 ia1=j1+j2+l1+l2
 ia2=j2+j3+l2+l3
 ia3=j3+j1+l3+l1
@@ -1154,11 +1157,12 @@ ib4=k1-ib4
 ll=0
 x=1.0d0
 if(k2.le.0) go to 2
-do 1 i=1,k2
+do i=1,k2
 xl=float(k2-i+1)
 xa=(ia1-xl+1.0d0)*(ia2-xl+1.0d0)*(ia3-xl+1.0d0)
 xb=(ib1+xl)*(ib2+xl)*(ib3+xl)*(ib4+xl)
-1 x=1.0d0-xa*(k1+xl+1.0d0)*x/xb
+x=1.0d0-xa*(k1+xl+1.0d0)*x/xb
+end do 
 if(x) 4,3,2
 4 x=-x
 ll=1
@@ -1167,7 +1171,10 @@ ll=1
 x=x+del(j1,j2,j3)+del(j1,l2,l3)+del(l1,j2,l3)+del(l1,l2,j3)
 ll=ll+k1
 x=(-1)**ll*dexp(x)
+f6j=x
+return
 3 f6j=x
+f6j_is_zero = .true.
 return
 end
 ! -------------------------------------------------------------------
@@ -1186,6 +1193,7 @@ end
 ! -------------------------------------------------------------------
 function f9j(i1,i2,i3,i4,i5,i6,i7,i8,i9)
 implicit double precision (a-h,o-z)
+logical :: f6j_is_zero
 data zero /0.d0/
 kmin=max0(iabs(i6-i2),iabs(i8-i4))
 kmin=max0(kmin,iabs(i9-i1))
@@ -1194,12 +1202,12 @@ kmax=min0(kmax,(i9+i1))
 sum=zero
 f9j=zero
 do 20 k=kmin,kmax
-  b2=f6j(i1,i2,i3,i6,i9,k)
-  if(b2.eq.zero) goto 20
-  b3=f6j(i4,i7,i1,i9,k,i8)
-  if(b3.eq.zero) goto 20
-  b4=f6j(i5,i8,i2,k,i6,i4)
-  if(b4.eq.zero) goto 20
+  b2=f6j(i1,i2,i3,i6,i9,k,f6j_is_zero)
+  if(f6j_is_zero) goto 20
+  b3=f6j(i4,i7,i1,i9,k,i8,f6j_is_zero)
+  if(f6j_is_zero) goto 20
+  b4=f6j(i5,i8,i2,k,i6,i4,f6j_is_zero)
+  if(f6j_is_zero) goto 20
   sum=sum+(2*k+1)*b2*b3*b4
 20 continue
 f9j=sum
@@ -1250,6 +1258,7 @@ subroutine intairy(x, xairy, xbiry)
 !  current revision date:  11-feb-1991 (modified for sun by
 !  alexandra borysow)
 ! ----------------------------------------------------------------------------
+use constants, only: tolerance
 implicit double precision (a-h,o-z)
 dimension a3(22),r1(17),b3(29),s1(36)
 dimension c3(25),d3(26),p3(21),q3(25)
@@ -1379,7 +1388,7 @@ data q3 / &
 !        xairy=oneth-(one/(pi*sqrt(3.d0)))*xintk
 !        write (6, 10) x, chi,  xairy, oneth-xairy
 !      endif
-if (x .eq. zero) then
+if (abs(x) < tolerance) then
   xairy=-twoth
   xbiry=zero
 else if (x .gt. zero) then

@@ -454,6 +454,7 @@ function f2mol(lb1,lb2,lb,j1,j2,j12,l,j1p,j2p,j12p,lp,j)
 ! note that (4*pi)**3=1984.40171
 use mod_hiutil, only: f3j0, f6j
 implicit double precision (a-h,o-z)
+logical :: f6j_is_zero
 data zero /0.d0/
 f2mol=zero
 if(iabs(j1-j1p).gt.lb1) return
@@ -462,8 +463,8 @@ if(iabs(j2-j2p).gt.lb2) return
 if((j2+j2p).lt.lb2) return
 if((-1)**(lb1+lb2+lb).lt.0.or.(-1)**(l+lp+lb).lt.0) return
 if((-1)**(j1+j1p+lb1).lt.0.or.(-1)**(j2+j2p+lb2).lt.0) return
-b1=f6j(l,lp,lb,j12p,j12,j)
-if(b1.eq.zero) return
+b1=f6j(l,lp,lb,j12p,j12,j,f6j_is_zero)
+if(f6j_is_zero) return
 a=(2*j1+1)*(2*j2+1)*(2*j12+1)*(2*l+1)*(2*lb1+1)
 ap=(2*j1p+1)*(2*j2p+1)*(2*j12p+1)*(2*lp+1)*(2*lb2+1)
 factor=(-1)**(j+j1+j2+j12p)*sqrt((a*ap))*(2*lb+1)
@@ -477,12 +478,12 @@ kmax=min0((j12+lb2),(j2p+j1))
 kmax=min0(kmax,(j12p+lb1))
 sum=zero
 do 10 k=kmin,kmax
-b2=f6j(lb1,lb2,lb,j12,j12p,k)
-if(b2.eq.zero) go to 10
-b3=f6j(j1,j1p,lb1,j12p,k,j2p)
-if(b3.eq.zero) go to 10
-b4=f6j(j2,j2p,lb2,k,j12,j1)
-if(b4.eq.zero) go  to 10
+b2=f6j(lb1,lb2,lb,j12,j12p,k,f6j_is_zero)
+if(f6j_is_zero) go to 10
+b3=f6j(j1,j1p,lb1,j12p,k,j2p,f6j_is_zero)
+if(f6j_is_zero) go to 10
+b4=f6j(j2,j2p,lb2,k,j12,j1,f6j_is_zero)
+if(f6j_is_zero) go  to 10
 sum=sum+(2*k+1)*b2*b3*b4
 10 continue
 f2mol=sum*b1*factor

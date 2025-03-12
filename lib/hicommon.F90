@@ -4,6 +4,7 @@
 !     Physical constants
 module constants
 implicit none
+real(8), parameter :: tolerance = 1.0d-10
 real(8), parameter :: zero = 0.0d0
 real(8), parameter :: half = 0.5d0
 real(8), parameter :: one  = 1.0d0

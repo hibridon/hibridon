@@ -71,6 +71,7 @@ integer :: j1p, kp, epsp, j2p, j12p, lp, j1, k, eps, j2, j12, l, &
 integer :: iphase, tj1p, tj1, tlam1, tkp, tmu1, tk
 real(8) :: pref, threej, sixj, ninej
 real(8), parameter :: machep = epsilon(0d0)
+logical :: f6j_is_zero
 !
 vstp1sg = 0d0
 iphase = epsp * eps * (-1) ** (j1p + j1 + lam2 + lam + mu1)
@@ -92,7 +93,7 @@ threej = threej * (tf3j(tj1p, tlam1, tj1, -tkp, tmu1, tk) &
    + eps * tf3j(tj1p, tlam1, tj1, -tkp, tmu1, -tk))
 if (dabs(threej) .lt. machep) return
 !
-sixj = f6j(j12, l, jtot, lp, j12p, lam)
+sixj = f6j(j12, l, jtot, lp, j12p, lam, f6j_is_zero)
 if (dabs(sixj) .lt. machep) return
 ninej = f9j(j1, j2, j12, j1p, j2p, j12p, lam1, lam2, lam)
 if (dabs(ninej) .lt. machep) return
