@@ -660,7 +660,7 @@ end
 ! with the proper phases after the induct calculation...
 !
   subroutine rdcoef
-  use mod_h2ohe, only: cd, ci, ld ,li, idisp, iind, lmaxi, lmaxd
+  use mod_h2ohe, only: cd, ci, ld ,li, idisp, iind, lmaxi, lmaxd, maxc
   implicit real*8 (a-h,o-z)
 !
   open(unit=1,file= &
@@ -673,7 +673,7 @@ end
   lmaxd=0
   nmin=1000
   nmax=0
-  do i=1,100000
+  do i=1,maxc
    read(1,*,end=100)(ld(j,i),j=1,6), c0,c1,ctot
 ! !!!! update !!!!
 !        cd(i) = c0    ! KSz
@@ -692,7 +692,7 @@ end
   lmaxi=0
   nmin=1000
   nmax=0
-  do i=1,100000
+  do i=1,maxc
    read(2,*,END=200)(li(j,i),j=1,6),c0,c1,ctot
 ! !!!! update !!!!
 !        ci(i) = c0    ! KSz
