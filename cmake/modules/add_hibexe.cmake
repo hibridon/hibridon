@@ -26,7 +26,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       PUBLIC
       # Non-specific options
       -std=legacy                               # Allow pre-Fortran 77 syntax (e.g. arbitrary length arrays)
-      # -fno-automatic                            # Put local variables on the heap instead of the stack. As a side effect, all affected variables receive the save attribute (persistance between calls). This flag conflicts with -fopenmp (f951: Warning: Flag ‘-fno-automatic’ overwrites ‘-frecursive’ implied by ‘-fopenmp’)
+      -fno-automatic                            # Put local variables on the heap instead of the stack. As a side effect, all affected variables receive the save attribute (persistance between calls). This flag conflicts with -fopenmp (f951: Warning: Flag ‘-fno-automatic’ overwrites ‘-frecursive’ implied by ‘-fopenmp’)
       $<$<PLATFORM_ID:Linux>:-mcmodel=large>    # Required on Linux
       # Config-specific options: RELEASE
       $<$<CONFIG:RELEASE>:-O3>                  # Optimization level at 3 for Release
