@@ -39,6 +39,7 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: rmu
 use mod_file, only: jobnam
 use mod_hiutil, only: gennam
+use mod_hiiolib1, only: openf
 implicit none
 integer, intent(in) :: nch, nmax
 type(ancou_type), intent(in) :: v2

@@ -1699,6 +1699,7 @@ use mod_hiutil, only: daxpy_wrapper
 use mod_hibrid1, only: cbesj, cbesn
 use mod_himatrix, only: transp
 use mod_hivector, only: matmov, vsmul, vmul
+use mod_hiiolib1, only: openf
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
 use mod_himatrix, only: mxma
 #endif

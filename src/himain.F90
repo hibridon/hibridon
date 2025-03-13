@@ -77,6 +77,7 @@ use mod_cosysr, only: allocate_cosysr
 use mod_par, only: allocate_par
 use mod_flow, only: flow
 use mod_hiutil, only: factlg
+use mod_hiiolib1, only: finit
 !**********************************************************************
 !***   this code is not released for general public use            ****
 !***   all use must be by specific prior arrangement with:         ****

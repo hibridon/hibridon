@@ -50,6 +50,7 @@ use mod_hiutil, only: gennam, mtime, gettim, dater
 use mod_hiutil, only: xf3j
 use mod_hismat, only: sread, rdhead
 use mod_hitypes, only: bqs_type
+use mod_hiiolib1, only: openf
 implicit none
 character*(*), intent(in) :: fname1
 real(8), intent(in) :: a(15)

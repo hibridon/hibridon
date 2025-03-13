@@ -1030,6 +1030,7 @@ use mod_hiutil, only: gennam, mtime, gettim, dater
 use mod_hiutil, only: xf3jm0
 use mod_hismat, only: sread, rdhead
 use mod_hitypes, only: bqs_type
+use mod_hiiolib1, only: openf, saddr
 implicit double precision (a-h,o-z)
 integer :: jtotpa(MAX_NJTOT)
 character*(*) filnam
@@ -1607,6 +1608,7 @@ use mod_parpot, only: label=>pot_label
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, njmax
 use funit, only: FUNIT_TCB, FUNIT_MCS
 use mod_hiutil, only: gennam, mtime, gettim
+use mod_hiiolib1, only: openf
 implicit double precision(a-h,o-z)
 character*(*) filnam
 character*40  tcbfil, mcsfil

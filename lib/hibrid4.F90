@@ -37,6 +37,7 @@ use mod_selb, only: ibasty
 use mod_hiutil, only: gennam
 use mod_hismat, only: sread, rdhead
 use mod_hitypes, only: bqs_type
+use mod_hiiolib1, only: openf, closf
 implicit none
 character*(*), intent(in) :: fname
 integer, intent(in) :: ia(4)
@@ -660,6 +661,7 @@ use mod_hiutil, only: gennam, mtime, gettim, dater
 use mod_hiutil, only: daxpy_wrapper
 use mod_hivector, only: dset, matmov, dsum
 use mod_hitypes, only: rbesself_type, bqs_type
+use mod_hiiolib1, only: openf
 implicit double precision (a-h,o-z)
 character*(*), intent(in) :: filnam
 character*40  psifil, wavfil, flxfil
@@ -1969,6 +1971,7 @@ use mod_cow, only: sr => w_as_vec ! sr(100)
 use mod_cozmat, only: si => zmat_as_vec ! si(100)
 use mod_wave, only: irec, ifil
 use mod_himatrix, only: mxma
+use mod_hiiolib1, only: openf
 implicit none
 integer, intent(in) :: npts
 integer, intent(in) :: nch
@@ -2016,6 +2019,7 @@ use mod_cow, only: sr => w_as_vec ! sr(100)
 use mod_cozmat, only: si => zmat_as_vec ! si(100)
 use mod_wave, only: irec, ifil
 use mod_himatrix, only: transp
+use mod_hiiolib1, only: openf
 implicit double precision (a-h,o-z)
 logical :: renormf = .false.
 dimension scrvec(64)
@@ -2146,6 +2150,7 @@ use funit
 use mod_ered, only: ered, rmu
 use mod_hiutil, only: gennam
 use mod_hitypes, only: rbesself_type, bqs_type
+use mod_hiiolib1, only: openf
 implicit none
 character*(*), intent(in) :: filnam
 integer, intent(in) :: nchmin

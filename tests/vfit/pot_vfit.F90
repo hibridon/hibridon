@@ -70,6 +70,7 @@ use mod_par, only: readpt
 use mod_parbas, only: maxtrm, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name
 use mod_skip, only: nskip, iskip
+use mod_hiiolib1, only: openf
 implicit double precision(a-h,o-z)
 character*(*) filnam
 character*80 potlab

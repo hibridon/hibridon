@@ -65,6 +65,7 @@ use mod_hibrid4, only: wavewr
 use mod_hismat, only: wrhead
 use mod_savfile, only: REC_EN_START, EN_REC_COUNT, EN_REC_PRESENT_INTEGRAL_XS, EN_REC_PREVIOUS_INTEGRAL_XS, EN_REC_PRESENT_PARTIAL_XS, EN_REC_PREVIOUS_PARTIAL_XS, EN_REC_2NDLAST_PARTIAL_XS
 use mod_hitypes, only: bqs_type
+use mod_hiiolib1, only: openfi, fimovs, dres, dsave, dclos, closf
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)

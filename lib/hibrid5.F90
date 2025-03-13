@@ -979,16 +979,21 @@ subroutine dbout(irec,i1,i2,i3,q,nmax,n)
 ! ---------------------------------------------------------------------------
 use mod_fileid, only: FILEID_SAV
 use mod_savfile, only: REC_LAST_USED
+use mod_hiiolib2, only: dbwi, dbwr, dbwc
 implicit none
 integer, intent(in) :: irec
 integer, intent(in) :: i1, i2, i3
 integer, intent(in) :: nmax, n
 real(8), intent(in) :: q(nmax, n)
 integer :: ifile, i
+integer :: bi(1)
 ifile = FILEID_SAV
-call dbwi(i1,1,ifile,irec)
-call dbwi(i2,1,ifile,REC_LAST_USED)
-call dbwi(i3,1,ifile,REC_LAST_USED)
+bi(1) = i1
+call dbwi(bi,size(bi),ifile,irec)
+bi(1) = i2
+call dbwi(bi,size(bi),ifile,REC_LAST_USED)
+bi(1) = i3
+call dbwi(bi,size(bi),ifile,REC_LAST_USED)
 do i=1,n
   call dbwr(q(1,i),n,ifile,REC_LAST_USED)
 end do
@@ -1004,6 +1009,7 @@ end
 ! ---------------------------------------------------------------------------
 subroutine dbin(ifile,irec,i1,i2,i3,q,nmax,n)
 use mod_savfile, only: REC_LAST_USED
+use mod_hiiolib2, only: dbri, dbrr
 implicit none
 integer, intent(in) :: ifile
 integer, intent(in) :: irec
@@ -1011,9 +1017,13 @@ integer, intent(out) :: i1, i2, i3
 integer, intent(in) :: nmax, n
 real(8), dimension(nmax, n), intent(out) :: q
 integer :: i
-call dbri(i1,1,ifile,irec)
-call dbri(i2,1,ifile,REC_LAST_USED)
-call dbri(i3,1,ifile,REC_LAST_USED)
+integer :: bi(1)
+call dbri(bi,1,ifile,irec)
+i1 = bi(1)
+call dbri(bi,1,ifile,REC_LAST_USED)
+i2 = bi(1)
+call dbri(bi,1,ifile,REC_LAST_USED)
+i3 = bi(1)
 do i=1,n
   call dbrr(q(1,i),n,ifile,REC_LAST_USED)
 end do
@@ -1303,6 +1313,7 @@ use mod_version, only : version
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_hiutil, only: gennam
+use mod_hiiolib1, only: openf
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
@@ -1602,6 +1613,9 @@ use mod_par, only: wrpart, wrxsec
 use mod_parpot, only: label=>pot_label
 use mod_fileid, only: FILEID_SAV
 use mod_savfile
+use mod_hiiolib2, only: dbri, dbrr
+use mod_hiiolib1, only: drest
+
 implicit none
 integer, intent(out)   :: jtot
 integer, intent(out)   :: jtop
@@ -1707,6 +1721,8 @@ use mod_file, only: savfil
 use funit, only: FUNIT_SAV
 use mod_fileid, only: FILEID_SAV
 use mod_savfile
+use mod_hiiolib1, only: dclos, dopen, dres
+use mod_hiiolib2, only: dbwi, dbwr, dbwc
 implicit none
 integer, intent(in)   :: jtot
 integer, intent(in)   :: jtop
@@ -1807,6 +1823,7 @@ use mod_hiutil, only: gennam
 use mod_hiutil, only: mtime, gettim
 use mod_hismat, only: rdhead
 use mod_fileid, only: FILEID_TMP
+use mod_hiiolib1, only: openf, dopen, closf, dinit
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  icsfil, smtfilnam, xname

@@ -60,7 +60,8 @@ subroutine hypxsc(flname, a)
   use mod_hiutil, only: gennam, mtime         ! To generate filenames and print time
   use mod_hitypes, only: bqs_type             ! To store basis set data
   use mod_parpot, only: potnam=>pot_name, label=>pot_label ! To store PES infos
-  implicit none
+  use mod_hiiolib1, only: openf
+implicit none
 
   ! Scratch arrays -------------------------------------------------------------
   integer, allocatable :: jlev(:), inlev(:), jout(:)

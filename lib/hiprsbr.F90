@@ -30,6 +30,7 @@ use mod_hiutil, only: gennam, mtime, gettim
 use mod_hiutil, only: xf6j
 use mod_hismat, only: sread, rdhead, sinqr
 use mod_hitypes, only: bqs_type
+use mod_hiiolib1, only: openf
 implicit none
 character*(*), intent(in) :: flnam1
 character*(*), intent(in) :: flnam2

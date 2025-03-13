@@ -139,6 +139,7 @@ use mod_hitrnprt, only: trnprt
 use mod_hibrid1, only: difs, turn
 use mod_hibrid4, only: psi, eadiab1, sprint
 use mod_hypxsc, only: hypxsc
+use mod_hiiolib1, only: openf, gendat, savdat, genchk
 implicit none
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's

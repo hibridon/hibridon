@@ -2178,6 +2178,8 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam
 use mod_hitypes, only: bqs_type
 use constants, only: zero
+use mod_hiiolib1, only: openf
+use mod_hiiolib1, only: closf
 implicit none
 character*(*), intent(in) :: fname1
 character*(*), intent(in) :: fname2

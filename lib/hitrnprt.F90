@@ -64,6 +64,7 @@ use mod_selb, only: ibasty
 use mod_trn, only: spin, jpmax
 use mod_hiutil, only: gennam, mtime, dater
 use mod_hismat, only: rdhead, sinqr
+use mod_hiiolib1, only: openf
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  trnfil, smtfil
