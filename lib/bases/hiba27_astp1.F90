@@ -394,7 +394,6 @@ write (6,1225)
         e(mm,nn) = 0.d0
       end do
     end do
-    jx = jj
     e(1,1) = rotham1(ji,1,ji,1) - rotham1(ji,1,ji,-1)
     if (isize .gt. 1) then
       do mm = 2, isize

@@ -437,7 +437,6 @@ write (6,1225)
         e(mm,nn) = 0.d0
       end do
     end do
-    jx = jj
     if (iop .ne. 0) then
       e(1,1) = rotham1(ji,1,ji,1) - rotham1(ji,1,ji,-1)
     else

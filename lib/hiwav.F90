@@ -2,7 +2,7 @@
 module mod_wave  ! mod_wav is a modern replacement of common block cowave
   implicit none
   integer :: irec    ! record number of last written g(a,b) matrix
-  integer :: ifil    ! file unit used for wfu file
+  integer :: ifil    ! file unit used for wfu file (is it always FUNIT_WFU ?)
   integer :: nchwfu  ! number of channels in wfu file
   integer(8) :: ipos2
   integer(8) :: ipos3
@@ -96,13 +96,14 @@ function get_wfu_airy_rec_length(nchwfu, inflev)
   get_wfu_airy_rec_length = get_wfu_airy_rec_length + nchwfu * dbl_size  ! eigold
 
   if (inflev .eq. 0) then
-    get_wfu_airy_rec_length = get_wfu_airy_rec_length + (nchwfu ** 2) * dbl_size  ! z(nchwfu, nchwfu)
-    get_wfu_airy_rec_length = get_wfu_airy_rec_length + (nchwfu ** 2) * dbl_size  ! vecnow(nchwfu, nchwfu)
+    get_wfu_airy_rec_length = get_wfu_airy_rec_length + (nchwfu ** 2) * dbl_size  ! z(nchwfu, nchwfu) (real part)
+    get_wfu_airy_rec_length = get_wfu_airy_rec_length + (nchwfu ** 2) * dbl_size  ! z(nchwfu, nchwfu) (imaginary part)
+    ! propagators
     get_wfu_airy_rec_length = get_wfu_airy_rec_length + nchwfu * dbl_size  ! y1
     get_wfu_airy_rec_length = get_wfu_airy_rec_length + nchwfu * dbl_size  ! y2
     get_wfu_airy_rec_length = get_wfu_airy_rec_length + nchwfu * dbl_size  ! y4
     get_wfu_airy_rec_length = get_wfu_airy_rec_length + nchwfu * dbl_size  ! gam1
-    get_wfu_airy_rec_length = get_wfu_airy_rec_length + nchwfu * dbl_size  ! sc10
+    get_wfu_airy_rec_length = get_wfu_airy_rec_length + nchwfu * dbl_size  ! muab
   else if (inflev == 1) then
   else
     stop 'unexpected value for inflev'

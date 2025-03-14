@@ -47,8 +47,10 @@ implicit none
       FUNIT_EADIAB         =  2, &   ! <job-name>.eadiab
       FUNIT_TENS_OUTPUT    =  2, &   ! <job-name>.tcs or <job-name>.dch or <job-name>.dcga
       FUNIT_MCS            =  2, &   ! <job-name>.mcs
+      FUNIT_PSI            =  2, &   ! <job-name>.psi
       FUNIT_SAV            =  3, &   ! <job-name>.sav
       FUNIT_XSC            =  3, &   ! <job-name>.xsc
+      FUNIT_FLX            =  3, &   ! <job-name>.flx
       FUNIT_TCB            =  4, &   ! <job-name>.tcb (result of tenxsc)
       FUNIT_STDOUT         =  6, &   ! standard output
       FUNIT_INP            =  8, &   ! input file (*.inp)

@@ -1140,9 +1140,8 @@ implicit none
 integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-integer :: is, isa, isi, isr, isym, iv
-integer :: j, l, lc, nmax, nparsg, nterm
-integer, save :: numvpi
+integer :: is, isi, isr, iv
+integer :: j, l, lc, nmax
 logical existf
 character*4 char
 character*(*) fname
@@ -1150,7 +1149,14 @@ character*1 dot
 character*60 filnam, line, potfil
 character*68 filnm1
 save potfil
+integer, pointer :: nterm, isym, isa, nparsg, numvpi
 #include "common/comdot.F90"
+nterm=>ispar(1)
+isym=>ispar(2)
+isa=>ispar(3)
+nparsg=>ispar(6)
+numvpi=>ispar(9)
+
 irpot = 1
 !     number and names of system dependent parameters
 !  first all the system dependent integer variables

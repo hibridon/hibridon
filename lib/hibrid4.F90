@@ -234,7 +234,7 @@ function iwavsk(irecr)
 use mod_wave, only: nchwfu, ipos2, ipos3, nrlogd, inflev, get_wfu_rec1_length, get_wfu_logd_rec_length, get_wfu_airy_rec_length
 implicit none
 integer, intent(in) :: irecr
-integer(8) :: iwavsk
+integer(8) :: iwavsk  ! 1-based offset in the wfu file, in bytes
 
 integer(8) :: lr1  ! length of record 1 in bytes
 integer(8) :: lrlogd  ! length of a logd record
@@ -417,7 +417,7 @@ integer, intent(out) :: nch
 integer, intent(out) :: npts
 integer, intent(out) :: nopen
 integer, intent(out) :: nphoto
-integer, intent(out) :: jflux
+integer, intent(in) :: jflux
 real(8), intent(out) :: rstart
 real(8), intent(out) :: rendld
 real(8), intent(out) :: rinf
@@ -457,14 +457,14 @@ read (ifil, end=900, err=950) jtot, jlpar, nu, nch, csflag, &
 nchwfu = nch
 read (ifil, end=900, err=950) ered, rmu, rstart, rendld
 write (6, 245) olddat
-if (jflux .ne. 0) write (3, 245) olddat
+if (jflux .ne. 0) write (FUNIT_FLX, 245) olddat
 if (jflux .eq. 0) write (2, 245) olddat
 245 format('    FROM CALCULATION ON: ',(a))
-if (jflux .ne. 0) write (3, 250) oldlab
+if (jflux .ne. 0) write (FUNIT_FLX, 250) oldlab
 if (jflux .eq. 0) write (2, 250) oldlab
 write (6, 250) oldlab
 250 format('    INITIAL JOB LABEL: ', (a))
-if (jflux .ne. 0) write (3, 251) oldpot
+if (jflux .ne. 0) write (FUNIT_FLX, 251) oldpot
 if (jflux .eq. 0) write (2, 251) oldpot
 write (6, 251) oldpot
 251 format('    INITIAL POT NAME: ', (a))
@@ -572,7 +572,12 @@ real(8) :: ymin
 real(8) :: dy
 real(8) :: rout
 
-iflux=a(1)
+ny = 0
+ymin = 0.d0
+dy = 0.d0
+rout = 0.d0
+
+iflux=a(1) ! iflux
 if (iflux .gt. 4 .or. iflux .lt. -3) then
   write (6, 2) iflux
 2   format (' *** IFLUX =',i3,' MUST BE -3 ... 4  ***')
@@ -581,14 +586,14 @@ endif
 iprint=a(2)
 thresh=a(3)
 factr=a(4)
-inchj = a(5)
-inchl = a(6)
-inchi = a(7)
+inchj = a(5)  ! INITIAL-J:  the rotational angular momentum of the incoming channel
+inchl = a(6)  ! INITIAL-L:  the orbital angular momentum of the incoming channel
+inchi = a(7)  ! INITIAL-IND:  the value of additional index for the incoming channel
 
 coordf=.false.
 sumf=.false.
 adiab=.false.
-jflux=iabs(iflux)
+jflux=iabs(iflux)  ! jflux in [0, 4]
 if (iflux .eq. -1 .or. iflux .eq. 2) adiab = .true.
 if (iflux .eq. -2) then
   sumf=.true.
@@ -612,6 +617,16 @@ if (jflux .eq. 4) then
   sumf=.false.
   coordf=.true.
 endif
+! | iflux | jflux | args                                       |
+! | ----: | ----: | ------------------------------------------ |
+! |    -3 |     3 | iprint, thresh, factr, inchj, inchl, inchi |
+! |    -2 |     1 | iprint, thresh, factr, inchj, inchl, inchi |
+! |    -1 |     1 | iprint, thresh, factr, inchj, inchl, inchi |
+! |     0 |     0 | iprint, thresh, factr, inchj, inchl, inchi |
+! |     1 |     1 | iprint, thresh, factr, inchj, inchl, inchi |
+! |     2 |     2 | iprint, thresh, factr, inchj, inchl, inchi |
+! |     3 |     1 | ny, ymin, dy, iprint, thresh, factr        |
+! |     4 |     4 | rout, thresh, factr, inchj, inchl, inchi   |
 
 call compute_wave_and_fluxes(filnam, iflux, iprint, thresh, factr, inchj, inchl, inchi, coordf, sumf, adiab, jflux, ny, ymin, dy, rout)
 end subroutine
@@ -662,28 +677,44 @@ use mod_hiutil, only: daxpy_wrapper
 use mod_hivector, only: dset, matmov, dsum
 use mod_hitypes, only: rbesself_type, bqs_type
 use mod_hiiolib1, only: openf
+use funit, only: FUNIT_WFU, FUNIT_PSI, FUNIT_FLX
 implicit double precision (a-h,o-z)
+! filnam, iflux, iprint, thresh, factr, inchj, inchl, inchi, coordf, sumf, adiab, jflux, ny, ymin, dy, rout
 character*(*), intent(in) :: filnam
+integer, intent(in) :: iflux
+integer, intent(inout) :: iprint
+real(8), intent(inout) :: thresh
+real(8), intent(inout) :: factr
+integer, intent(in) :: inchj
+integer, intent(in) :: inchl
+integer, intent(in) :: inchi
+logical, intent(in) :: coordf
+logical, intent(in) :: sumf
+logical, intent(in) :: adiab
+integer, intent(in) :: jflux
+integer, intent(in) :: ny
+real(8), intent(in) :: ymin
+real(8), intent(in) :: dy
+real(8), intent(in) :: rout
 character*40  psifil, wavfil, flxfil
 character*20  cdate
 character*10  elaps, cpu
 character*5   s13p(12)
-logical exstfl, adiab, &
-                kill,propf, sumf, &
-                coordf
+logical exstfl, kill, propf
+                
 ! common for y1, y2, y4
 data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f', &
            '3SG1e','3PI0e','3PI1e','3PI2e','1SG0e','1PI1e'/
 !
 
 integer, pointer :: ipol
-integer, parameter :: psifil_unit = 2
 type(rbesself_type) :: rbesself
 
 type(bqs_type) :: bqs
 
 ipol=>ispar(3)
 
+ASSERT( (jflux == 0) .or. (jflux == 1) .or. (jflux == 2) .or. (jflux == 4) )
 
 onemin=-1.d0
 ! initialize timer
@@ -713,52 +744,52 @@ if (.not. exstfl) then
     return
 end if
 ! open file which holds transformation data and asymptotic wavefunction
-call openf(22, wavfil, 'TU', 0)
+call openf(FUNIT_WFU, wavfil, 'TU', 0)
 call dater(cdate)
 ! open file to save generated wavefunction
 if (jflux .eq. 0) then
   call gennam(psifil,filnam,ien,'psi',lenft)
-  call openf(psifil_unit, psifil,'sf',0)
+  call openf(FUNIT_PSI, psifil,'sf',0)
 ! write a header
-  call version(2)
-  write(2,11)
+  call version(FUNIT_PSI)
+  write(FUNIT_PSI,11)
   write(6,11)
 11   format(/' ** WAVEFUNCTION DETERMINATION ***',/)
-  write (psifil_unit, 12) wavfil
+  write (FUNIT_PSI, 12) wavfil
 12   format('    INFORMATION FROM FILE: ',(a))
-  write (psifil_unit,13) cdate
+  write (FUNIT_PSI,13) cdate
 13 format('    THIS CALCULATION ON: ',(a))
 endif
 if (jflux .ne. 0) then
 ! open file to save generated flux
   call gennam(flxfil,filnam,ien,'flx',lenft)
-  call openf(3,flxfil,'sf',0)
+  call openf(FUNIT_FLX,flxfil,'sf',0)
 ! write a header
-  call version(3)
+  call version(FUNIT_FLX)
   if (jflux .eq. 1) then
     if (photof) then
-      write(3,14)
+      write(FUNIT_FLX,14)
       write(6,14)
 14       format(/, &
    ' ** DETERMINATION OF OUTGOING FLUX ***')
     else
-      write(3,15)
+      write(FUNIT_FLX,15)
       write(6,15)
 15       format(/, &
    ' ** DETERMINATION OF INCOMING AND OUTGOING FLUX ***')
     endif
   endif
   if (jflux .eq. 2) then
-    write(3,16)
+    write(FUNIT_FLX,16)
     write(6,16)
 16     format(/' ** ADIABATIC ENERGIES ***',/)
   endif
   if (jflux .eq. 4) then
-    write(3,17)
+    write(FUNIT_FLX,17)
     write(6,17)
 17     format(/' ** TRANSFORMATION MATRIX **',/)
   endif
-  write (3,18) cdate
+  write (FUNIT_FLX,18) cdate
 18   format('    THIS CALCULATION ON: ',(a))
 endif
 ! read header information, s matrix, and asymptotic wavefunction and
@@ -772,32 +803,32 @@ if (inflev .ne. 0) then
 end if
 if (photof) then
   write (6, 19)
-  if (jflux .eq. 0) write(psifil_unit, 19)
-  if (jflux .ne. 0) write (3, 19)
+  if (jflux .eq. 0) write(FUNIT_PSI, 19)
+  if (jflux .ne. 0) write (FUNIT_FLX, 19)
 19   format('    PHOTODISSOCIATION BOUNDARY CONDITIONS')
 else
   write (6, 20)
-  if (jflux .eq. 0) write(psifil_unit, 20)
-  if (jflux .ne. 0) write (3, 20)
+  if (jflux .eq. 0) write(FUNIT_PSI, 20)
+  if (jflux .ne. 0) write (FUNIT_FLX, 20)
 20   format('    SCATTERING BOUNDARY CONDITIONS')
   photof=.false.
 endif
 if (adiab) then
-  if (jflux .eq. 0)  write(psifil_unit,21)
-  if (jflux .ne. 0)  write (3,21)
+  if (jflux .eq. 0)  write(FUNIT_PSI,21)
+  if (jflux .ne. 0)  write (FUNIT_FLX,21)
   write (6,21)
 21   format ('    ADIABATIC BASIS')
 endif
 if (.not.adiab .and. .not. sumf) then
   if (.not. coordf) then
     if (ibasty .ne. 7) then
-      if (jflux .eq. 0) write(psifil_unit,22)
-      if (jflux .ne. 0)  write (3,22)
+      if (jflux .eq. 0) write(FUNIT_PSI,22)
+      if (jflux .ne. 0)  write (FUNIT_FLX,22)
       write (6,22)
 22       format ('    DIABATIC (ASYMPTOTIC) BASIS')
     else
-      if (jflux .eq. 0) write(psifil_unit,23)
-      if (jflux .ne. 0)  write (3,23)
+      if (jflux .eq. 0) write(FUNIT_PSI,23)
+      if (jflux .ne. 0)  write (FUNIT_FLX,23)
 !  print flux even inside of closed region in molecular basis
       kill = .false.
       write (6,23)
@@ -805,14 +836,14 @@ if (.not.adiab .and. .not. sumf) then
     endif
   else
     if (ny .gt. 0) then
-      if (jflux .eq. 0) write(psifil_unit,24)
-      if (jflux .ne. 0) write (3,24)
+      if (jflux .eq. 0) write(FUNIT_PSI,24)
+      if (jflux .ne. 0) write (FUNIT_FLX,24)
       write (6,24)
 24       format &
        ('    COORDINATE SPACE FLUX; POSITIVE INDEX CHOSEN')
     else
-      if (jflux .eq. 0) write(psifil_unit,25)
-      if (jflux .ne. 0) write (3,25)
+      if (jflux .eq. 0) write(FUNIT_PSI,25)
+      if (jflux .ne. 0) write (FUNIT_FLX,25)
       write (6,25)
 25       format &
        ('    COORDINATE SPACE FLUX; NEGATIVE INDEX CHOSEN')
@@ -820,32 +851,33 @@ if (.not.adiab .and. .not. sumf) then
   endif
 endif
 if (sumf) then
-      if (jflux .eq. 0) write(psifil_unit,26)
-      if (jflux .ne. 0) write (3,26)
+      if (jflux .eq. 0) write(FUNIT_PSI,26)
+      if (jflux .ne. 0) write (FUNIT_FLX,26)
       write (6,26)
 26       format &
    ('    DIABATIC (ASYMPTOTIC) BASIS;', &
     ' INELASTIC FLUX SUMMED OVER ROTATIONAL LEVELS')
 endif
-if (jflux .ne. 0) write (3, 12) wavfil
+if (jflux .ne. 0) write (FUNIT_FLX, 12) wavfil
 write (6, 12) wavfil
 if (csflag) then
   if (jflux .ne. 0) &
-    write(3,27) ered*econv, rmu*xmconv, jtot, nu
+    write(FUNIT_FLX,27) ered*econv, rmu*xmconv, jtot, nu
   if (jflux .eq.0) &
-    write(2,27) ered*econv, rmu*xmconv, jtot, nu
+    write(FUNIT_PSI,27) ered*econv, rmu*xmconv, jtot, nu
   write(6,27) ered*econv, rmu*xmconv, jtot, nu
 27   format('    ENERGY = ',f10.3,' cm(-1);  MASS = ',f9.4, &
      ' amu',/,'    CS CALCULATION:  JTOT = ',i3,'; NU =',i3)
 else
   if (jflux .ne. 0) &
-     write(3,29) ered*econv, rmu*xmconv, jtot, jlpar
+     write(FUNIT_FLX,29) ered*econv, rmu*xmconv, jtot, jlpar
   if (jflux .eq. 0) &
-      write(2,29) ered*econv, rmu*xmconv, jtot, jlpar
+      write(FUNIT_PSI,29) ered*econv, rmu*xmconv, jtot, jlpar
   write(6,29) ered*econv, rmu*xmconv, jtot, jlpar
 29   format('    ENERGY = ',f10.3,' cm(-1);  MASS = ',f9.4, &
      /,'    CC CALCULATION:  JTOT = ',i3,'; JLPAR =',i3)
 endif
+! jflux == 1
 if (iabs(jflux).eq.1) then
   if (rendld .ge. rinf) then
     write (6, 30) rendld, rinf
@@ -853,35 +885,38 @@ if (iabs(jflux).eq.1) then
             ' .GE. RINF=',f7.3)
     return
   endif
-  write(3, 31) rendld, rinf
+  write(FUNIT_FLX, 31) rendld, rinf
   write (6, 31) rendld, rinf
 31   format ('    FLUXES DETERMINED FROM R = ', &
         f7.3,' TO R = ',f7.3)
   if (coordf) then
     write (6,34) ymin, dy, ymin+(iabs(ny)-1)*dy
-    write (3,34) ymin, dy, ymin+(iabs(ny)-1)*dy
+    write (FUNIT_FLX,34) ymin, dy, ymin+(iabs(ny)-1)*dy
 34     format ('                           R-INT = ',f5.2,':', &
           f5.2,':',f5.2)
   endif
-  write(3,32) thresh
+  write(FUNIT_FLX,32) thresh
   write (6,32) thresh
 32   format ('    CLOSED CHANNEL THRESHOLD = ',1pg10.3)
-  write(3,33) factr
+  write(FUNIT_FLX,33) factr
   write (6,33) factr
 33   format ('    FACTOR FOR CLOSED CHANNEL DAMP = ',f5.2)
+! jflux == 2
 else if(jflux.eq.2) then
-  write(3, 35) rendld, rinf
+  write(FUNIT_FLX, 35) rendld, rinf
   write (6, 35) rendld, rinf
 35   format ('    ADIABATIC ENERGIES DETERMINED FROM R = ', &
         f7.3,' TO R = ',f7.3)
+! jflux == 4
 else if(jflux.eq.4) then
   write (6,36) rout
-  write (3,36) rout
+  write (FUNIT_FLX,36) rout
 36   format ( &
  '    DIABATIC->ADIABATIC TRANSFORMATION REQUESTED AT R = ', &
      f7.3)
+! jflux == 0
 else if(jflux.eq.0) then
-  write(2, 37) rstart, rinf, npts
+  write(FUNIT_PSI, 37) rstart, rinf, npts
   write (6, 37) rstart, rinf, npts
 37   format ( &
   /,'    WF DEFINED FROM R = ',f7.3,' TO R = ',f7.3,' AT ', &
@@ -914,7 +949,7 @@ if (.not. photof) then
     inch=inchj
   endif
 41   if ((jflux .ne. 2 .and. jflux .ne. 4).and. inch .eq. 0) then
-    if (jflux.ne.0) write(3, 43) inchj, inchl, inchi
+    if (jflux.ne.0) write(FUNIT_FLX, 43) inchj, inchl, inchi
     write (6, 43) inchj, inchl, inchi
 43     format( /,' ** CHANNEL (J, l, IN = ',2i3,i4,') NOT IN LIST')
     return
@@ -950,7 +985,7 @@ do 51 i = 1, nch
 !   nalist(i) is the number in original list of the channel of ith
 !   lowest energy
 if (.not.coordf)  then
-  if (jflux.ne.0) write(3, 55)
+  if (jflux.ne.0) write(FUNIT_FLX, 55)
   write (6, 55)
 55   format('    CHANNEL PARAMETERS:', &
        '   N   J   L   IN    ENERGY(CM-1)    SQRT(K)')
@@ -962,10 +997,10 @@ if (.not.coordf)  then
           (ibasty .eq. 7 .and. (ipol .eq. 0 .or. adiab &
            .and. jlpar .eq. 1))) then
         if (jflux.eq.0) &
-          write(2, 57) inchc, bqs%jq(inch), bqs%lq(inch), bqs%inq(inch), &
+          write(FUNIT_PSI, 57) inchc, bqs%jq(inch), bqs%lq(inch), bqs%inq(inch), &
             econv*eint(inch)
         if (jflux.ne.0) &
-          write(3, 57) inchc, bqs%jq(inch), bqs%lq(inch), bqs%inq(inch), &
+          write(FUNIT_FLX, 57) inchc, bqs%jq(inch), bqs%lq(inch), bqs%inq(inch), &
             econv*eint(inch)
         write (6, 57) inchc, bqs%jq(inch), bqs%lq(inch), bqs%inq(inch), &
             econv*eint(inch)
@@ -973,10 +1008,10 @@ if (.not.coordf)  then
       else if (ibasty .eq.7 .and. jlpar .eq. -1 &
               .and. ipol.ne.0) then
         if (jflux.eq.0) &
-          write(2, 58) inchc, s13p(inch+6), &
+          write(FUNIT_PSI, 58) inchc, s13p(inch+6), &
             econv*eint(inch)
         if (jflux.ne.0) &
-          write(3, 58) inchc, s13p(inch+6), &
+          write(FUNIT_FLX, 58) inchc, s13p(inch+6), &
             econv*eint(inch)
         write (6, 58) inchc, s13p(inch+6), &
             econv*eint(inch)
@@ -992,9 +1027,9 @@ if (.not.coordf)  then
   endif
 endif
 if (jflux .eq. 4) then
-  write (3,55)
+  write (FUNIT_FLX,55)
   do 60  i=1, nch
-    write (3, 59) i, bqs%jq(i), bqs%lq(i), bqs%inq(i), econv*eint(i)
+    write (FUNIT_FLX, 59) i, bqs%jq(i), bqs%lq(i), bqs%inq(i), econv*eint(i)
 59     format(10x,4i4,f13.3)
 60   continue
 endif
@@ -1067,8 +1102,8 @@ if (coordf .or. ibasty .eq. 7 .or. sumf) then
 endif
 if(nj.eq.0) then
   if(jflux.ne.4) then
-    if (jflux .ne. 0) write(3,130)
-    if (jflux .eq. 0) write(2,130)
+    if (jflux .ne. 0) write(FUNIT_FLX,130)
+    if (jflux .eq. 0) write(FUNIT_PSI,130)
     write(6,130)
     if(.not. batch) write(6,130)
 130       format(' *** NO PROBE STATES FOUND, ABORT ***')
@@ -1111,9 +1146,9 @@ if (.not. coordf) then
       endif
       if (ibasty .ne. 7 .or. adiab) then
         if (jflux.eq.0) &
-        write(2, 140) nnn, bqs%jq(nn), bqs%lq(nn), bqs%inq(nn), &
+        write(FUNIT_PSI, 140) nnn, bqs%jq(nn), bqs%lq(nn), bqs%inq(nn), &
                  eint(nn)*econv, sq
-        if (jflux.ne.0) write(3,140) nnn,bqs%jq(nn),bqs%lq(nn),bqs%inq(nn), &
+        if (jflux.ne.0) write(FUNIT_FLX,140) nnn,bqs%jq(nn),bqs%lq(nn),bqs%inq(nn), &
                  eint(nn)*econv, sq
         write (6, 140) nnn, bqs%jq(nn), bqs%lq(nn), bqs%inq(nn), &
                  eint(nn)*econv, sq
@@ -1121,9 +1156,9 @@ if (.not. coordf) then
       else
         if (jlpar .eq. -1) nn=nn+6
         if (jflux.eq.0) &
-        write(2, 141) nnn, s13p(nn), &
+        write(FUNIT_PSI, 141) nnn, s13p(nn), &
                  eint(nnn)*econv, sq
-        if (jflux.ne.0) write(3,141) nnn,s13p(nn), &
+        if (jflux.ne.0) write(FUNIT_FLX,141) nnn,s13p(nn), &
                  eint(nnn)*econv, sq
         write (6, 141) nnn, s13p(nn), &
                  eint(nnn)*econv, sq
@@ -1132,7 +1167,7 @@ if (.not. coordf) then
 142     continue
   else
     do 145 ni = 1, niout
-      write (3, 143) indout(ni)
+      write (FUNIT_FLX, 143) indout(ni)
       write (6, 143) indout(ni)
 143       format(16x,'PROBED:  INDEX =',i4)
 145     continue
@@ -1140,11 +1175,11 @@ if (.not. coordf) then
 endif
 if (jflux.eq.1) then
   if(.not.coordf) then
-     write(3, 146)
+     write(FUNIT_FLX, 146)
      write (6, 146)
 146      format(17x,'TOTAL:  LAST COLUMN')
   else
-     write(3, 147)
+     write(FUNIT_FLX, 147)
      write (6, 147)
 147      format('    TOTAL FLUX IN LAST COLUMN')
   endif
@@ -1159,7 +1194,7 @@ npoint=(inch-1)*nch + 1
 if (ibasty .eq.7 .and. jlpar.eq.-1 .and. ipol.eq.1) then
 !         if (adiab) then
 !           write (6, 149)
-!           if (jflux.ne.0) write(3, 149)
+!           if (jflux.ne.0) write(FUNIT_FLX, 149)
 !149        format('    STATE 5 IS PARALLEL POLARIZATION, STATE 6'm
 !     :            ' IS PERPENDICULAR')
 !         endif
@@ -1184,17 +1219,17 @@ if (jflux .eq. 0) then
 ! columns of psir
     if (inch .ne. 1) call dcopy(nch,psir(npoint),1,psir,1)
     call dcopy(nch,psii(npoint),1,psir(nch+1),1)
-    write(2, 150)
+    write(FUNIT_PSI, 150)
 150     format(/' R (BOHR) AND REAL PART OF WAVEFUNCTION', &
           ' (R < 0 INDICATES AIRY PROPAGATION)',/)
-    call psicalc(npts, nch, nchsq, nj, psifil_unit)
+    call psicalc(npts, nch, nchsq, nj, FUNIT_PSI)
 ! copy imaginary part of asymptotic wavefunction into first column of psir
 ! so we can use same loop as above
     call dcopy(nch,psir(nch+1),1,psir,1)
-    write(2, 185)
+    write(FUNIT_PSI, 185)
 185     format(/' R (BOHR) AND IMAGINARY PART OF WAVEFUNCTION', &
           '(R < 0 INDICATES AIRY PROPAGATION)',/)
-    call psicalc(npts,nch,nchsq,nj, psifil_unit)
+    call psicalc(npts,nch,nchsq,nj, FUNIT_PSI)
   else
 ! here for photdissociation, in which case outgoing wavefunction is a
 ! given column of chi
@@ -1215,13 +1250,13 @@ if (jflux .eq. 0) then
     call dcopy(nch,dpsii(npoint),1,psir(3*nch+1),1)
     ipoint=2*nch+1
     irec=npts+4
-    write(2, 200)
+    write(FUNIT_PSI, 200)
 200     format(/' R (BOHR) AND REAL PART OF CHI')
     iwf = 1
     propf=.true.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,bqs%inq)
-    write(2, 210)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq)
+    write(FUNIT_PSI, 210)
 210     format(/' R (BOHR) AND IMAGINARY PART OF CHI')
 ! reread asymptotic information
     call waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto, &
@@ -1242,15 +1277,15 @@ if (jflux .eq. 0) then
     iwf = -1
     irec=npts+4
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,bqs%inq)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq)
   endif
 else if (jflux .eq. 2) then
-  write(3, 300)
+  write(FUNIT_FLX, 300)
 300   format(/' R (BOHR) AND ADIABATIC ENERGIES (CM-1)',/)
   irec=npts+4
   call eadiab(npts,nch,nj)
 else if (jflux .eq. 4) then
-  call transmt(npts,nch,nchsq,rout)
+  call transmt(npts,nch,rout,FUNIT_FLX)
 else if (jflux .eq. 1) then
 ! here for flux calculation
 ! first for total flux (only for scattering)
@@ -1271,7 +1306,7 @@ else if (jflux .eq. 1) then
     call dcopy(nch,dpsir(npoint),1,psir(2*nch+1),1)
     call dcopy(nch,dpsii(npoint),1,psir(3*nch+1),1)
 ! now compute desired total fluxes
-    write(3, 305)
+    write(FUNIT_FLX, 305)
 305     format(/' R (BOHR) AND TOTAL FLUXES (UNITS OF HBAR/MU; ', &
             'NO DAMPING)'/)
 ! first initial flux (not if adiabatic or not if 13p scattering or
@@ -1284,7 +1319,7 @@ else if (jflux .eq. 1) then
               *psir(2*nch+nni)
       scsum=scsum+sc(i)
 310       continue
-      write(3, 320) rinf, (sc(i), i=1,nj), scsum
+      write(FUNIT_FLX, 320) rinf, (sc(i), i=1,nj), scsum
 320       format(f10.4,30(1pe11.3))
     endif
 
@@ -1315,7 +1350,7 @@ else if (jflux .eq. 1) then
       scsum=dsum(niout,sc,1)
       nout=niout
     endif
-    write(3, 320) rinf, (sc(i), i=1,nout), scsum
+    write(FUNIT_FLX, 320) rinf, (sc(i), i=1,nout), scsum
     endif
     irec=npts+4
     ipoint=2*nch+1
@@ -1324,7 +1359,7 @@ else if (jflux .eq. 1) then
 ! plot out all fluxes for total flux which is numerically well behaved
     tthresh=-1.e9
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,.false., &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,bqs%inq)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq)
   endif
   if (.not. photof) then
 ! now for incoming flux (only for scattering)
@@ -1342,7 +1377,7 @@ else if (jflux .eq. 1) then
       dpsii(ipoint)=-rbesself%fpj(i)
       ipoint=ipoint+nch+1
 335     continue
-    write(3, 340)
+    write(FUNIT_FLX, 340)
 340     format(/' R (BOHR) AND INCOMING FLUXES (UNITS OF HBAR/MU)',/)
     if (ibasty .eq.7 .and. jlpar.eq.-1 .and. ipol.eq.1) &
         call waverot(jtot,nch)
@@ -1365,7 +1400,7 @@ else if (jflux .eq. 1) then
               *psir(2*nch+nni)
         scsum=scsum+sc(i)
 360         continue
-        write(3, 320) rinf, (sc(i), i=1,nj), scsum
+        write(FUNIT_FLX, 320) rinf, (sc(i), i=1,nj), scsum
       else
 ! here for sum of fluxes over desired indices
         do 362 i=1,niout
@@ -1383,14 +1418,14 @@ else if (jflux .eq. 1) then
         scsum=dsum(niout,sc,1)
         nout=niout
       endif
-      write(3, 320) rinf, (sc(i), i=1,nout), scsum
+      write(FUNIT_FLX, 320) rinf, (sc(i), i=1,nout), scsum
     endif
     irec=npts+4
     ipoint=2*nch+1
     iwf = 0
     propf=.false.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,bqs%inq)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq)
   endif
 ! now for outgoing flux
   if (.not.photof) then
@@ -1477,13 +1512,13 @@ else if (jflux .eq. 1) then
 
 
 ! now compute desired outgoing fluxes
-  if (.not. photof) write(3, 550)
+  if (.not. photof) write(FUNIT_FLX, 550)
 550   format(/' R (BOHR) AND OUTGOING FLUXES (UNITS OF HBAR/MU)',/)
-  if (photof) write(3, 551)
+  if (photof) write(FUNIT_FLX, 551)
 551   format(/' R (BOHR) AND OUTGOING FLUXES (ATOMIC UNITS)',/)
 ! first initial flux
   if (coordf) then
-    write (3, 554) (ymin+dy*(iy-1), iy=1,iabs(ny))
+    write (FUNIT_FLX, 554) (ymin+dy*(iy-1), iy=1,iabs(ny))
 554     format('    R-INT:',f9.3,30(f11.3))
   endif
   if ((.not. adiab .and. .not. coordf) .and. ibasty .ne.7) then
@@ -1517,7 +1552,7 @@ else if (jflux .eq. 1) then
       call dscal(nj,1.d0/rmu,sc,1)
       scsum=scsum/rmu
     endif
-    write(3, 320) rinf, (sc(i), i=1,nout), scsum
+    write(FUNIT_FLX, 320) rinf, (sc(i), i=1,nout), scsum
   endif
   ipoint=2*nch+1
   irec=npts+4
@@ -1525,10 +1560,10 @@ else if (jflux .eq. 1) then
   if (photof) propf=.true.
   if (.not. photof) propf=.false.
   call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,psifil_unit,bqs%inq)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq)
 endif
-700 if (photof .or. jflux .eq. 0) close (psifil_unit)
-if (jflux .ne. 0) close (3)
+700 if (photof .or. jflux .eq. 0) close (FUNIT_PSI)
+if (jflux .ne. 0) close (FUNIT_FLX)
 close (FUNIT_WFU)
 call mtime(cpu1,ela1)
 cpu1 = cpu1 - cpu0
@@ -2003,8 +2038,89 @@ return
 950 write (0, *) '*** ERROR READING WFU FILE (PSICALC). ABORT.'
 call exit()
 end
+
+subroutine print_trans_mat(r, drnow, si, nch, flx_file, num_considered_channels, num_considered_states, write_mat_file)
+use mod_himatrix, only: transp
+use mod_hiiolib1, only: openf
+implicit none
+  real(8), intent(in) :: r
+  real(8), intent(in) :: drnow
+  real(8), intent(inout) :: si(nch * nch)
+  integer, intent(in) :: nch
+  integer, intent(in) :: flx_file
+  integer, intent(in) :: num_considered_channels   ! -1 if no restrictions on the number of channels
+  integer, intent(in) :: num_considered_states   ! -1 if no restrictions on the number of states
+  logical, intent(in) :: write_mat_file
+
+  logical :: renormf = .false.
+  real(8) :: cnorm
+  real(8) :: scrvec(num_considered_channels)
+  integer :: nchsq
+  real(8) :: ddot
+  integer :: ind, ii, ij
+  integer :: nstate, nnch
+
+  ASSERT((num_considered_channels > 0) .or. (num_considered_channels == -1))
+  ASSERT((num_considered_states > 0) .or. (num_considered_states == -1))
+
+  nchsq = nch * nch
+  ! transpose matrix is stored column by column
+  ! after transposition, columns correspond to eigenvectors
+  call transp (si, nch, nch)
+  write (flx_file,160) -r+0.5*drnow
+160     format('    TRANSFORMATION MATRIX AT R = ',f10.6,' IS:',/)
+  write (6,161) abs(r)
+161     format('    TRANSFORMATION MATRIX DETERMINED AT R = ',f10.6)
+  ! print out transpose matrix (reverse order since eispack
+  ! determines highest eigenvalue first
+  ind=nchsq-nch+1
+  ! if more than 64 channels, then eliminate all elements with i>64, and renormalize vector
+  nnch=nch
+  if (num_considered_channels /= -1) then
+    if (nch > num_considered_channels) then
+      renormf=.true.
+      write (flx_file,162) nch, num_considered_channels
+      write (6,162) nch, num_considered_channels
+162       format('    CHANNEL EXPANSION TRUNCATED FROM NCH =',i4,' TO NCH = ',i4,';')
+      write (flx_file,163)
+      write (6,163)
+163       format('       EIGENVECTOR RENORMALIZED')
+      nnch=num_considered_channels
+    else
+      renormf=.false.
+    endif
+  end if
+  if(write_mat_file) then
+    call openf(4,'tmatrix.dat','sf',0)
+  end if
+  nstate=nch
+  if(num_considered_states > 0) then
+    nstate=min(num_considered_states,nch)
+  end if
+  do ii=1,nstate
+!     do ii=1,nch
+    if (renormf) then
+      call dcopy(num_considered_channels,si(ind),1,scrvec,1)
+      cnorm=ddot(num_considered_channels,scrvec,1,scrvec,1)
+      cnorm=1d0/sqrt(cnorm)
+      call dscal(num_considered_channels,cnorm,scrvec,1)
+      call dcopy(num_considered_channels,scrvec,1,si(ind),1)
+    endif
+    write (flx_file,175) -r+0.5*drnow, ii, (si(ij), ij=ind,ind+nnch-1)
+    if(write_mat_file) then
+      write (4,175) -r+0.5*drnow, ii, (si(ij), ij=ind,ind+nnch-1)
+    end if
+175       format(f7.4,i3,64f10.6)
+    ind=ind-nch
+  end do  ! ii
+  if(write_mat_file) then
+    close(4)
+  end if
+end subroutine print_trans_mat
+
+
 ! ------------------------------------------------------------------
-subroutine transmt(npts,nch,nchsq,rout)
+subroutine transmt(npts,nch,rout,flx_file)
 !
 ! subroutine to print out transformation matrix at rout
 !
@@ -2014,112 +2130,49 @@ subroutine transmt(npts,nch,nchsq,rout)
 ! current revision: 20-apr-2012 by q. ma
 !
 ! ------------------------------------------------------------------
-use mod_cosc7, only: sc1 => sc7 ! sc1(6)
-use mod_cow, only: sr => w_as_vec ! sr(100)
-use mod_cozmat, only: si => zmat_as_vec ! si(100)
-use mod_wave, only: irec, ifil
-use mod_himatrix, only: transp
-use mod_hiiolib1, only: openf
-implicit double precision (a-h,o-z)
-logical :: renormf = .false.
-dimension scrvec(64)
+use mod_cow, only: sr => w_as_vec ! sr(100) (real part)
+use mod_cozmat, only: si => zmat_as_vec ! si(100) (imaginary part)
+use mod_wave, only: wfu_file => ifil  ! FUNIT_WFU
+implicit none
+integer, intent(in) :: npts
+integer, intent(in) :: nch
+real(8), intent(in) :: rout
+integer, intent(in) :: flx_file  ! file unit of <job>.flx file
+integer :: irec
+real(8) :: del, delold
+integer :: kstep
+real(8) :: r, drnow
+integer :: i
+integer :: nchsq
+real(8) :: sc1(nch)
+integer, parameter :: NUM_CONSIDERED_CHANNELS = 64
+nchsq = nch * nch
 irec=npts+4
 delold=1.d+18
-do 200 kstep=1, npts
-    irec=irec-1
-    read (ifil, end=900, err=950, pos=iwavsk(irec)) r, drnow
-    del=abs(abs(r)-rout)
-! read in adiabtic energies (which we don't need)
-    read (ifil, end=900, err=950) (sc1(i), i=1, nch)
-! read in first G(n,n+1) matrix,  then Tn transformation
-! matrix into local interval
-    read (ifil, end=900, err=950) (sr(i), i=1, nchsq), &
-         (si(i), i=1, nchsq)
-    if (rout .gt. 0.d0) then
-      if (del .gt.delold) then
-! transpose matrix is stored column by column
-! after transposition, columns correspond to eigenvectors
-        call transp (si, nch, nch)
-        write (3,160) -r+0.5*drnow
-160    format('    TRANSFORMATION MATRIX AT R = ',f10.6,' IS:',/)
-        write (6,161) abs(r)
-161    format('    TRANSFORMATION MATRIX DETERMINED AT R = ',f10.6)
-! print out transpose matrix (reverse order since eispack
-! determines highest eigenvalue first
-        ind=nchsq-nch+1
-! if more than 64 channels, then eliminate all elements with i>64, and renormalize vector
-        nnch=nch
-        if (nch.gt.64) then
-           renormf=.true.
-           write (3,162) nch
-           write (6,162) nch
-162    format('    CHANNEL EXPANSION TRUNCATED FROM NCH =',i4, &
-             ' TO NCH = 64;')
-           write (3,163)
-           write (6,163)
-163    format('       EIGENVECTOR RENORMALIZED')
-           nnch=64
-        else
-           renormf=.false.
-        endif
-        call openf(4,'tmatrix.dat','sf',0)
-        nstate=min(12,nch)
-        do 190 ii=1,nstate
-!             do 190 ii=1,nch
-          if (renormf) then
-             call dcopy(64,si(ind),1,scrvec,1)
-             cnorm=ddot(64,scrvec,1,scrvec,1)
-             cnorm=1d0/sqrt(cnorm)
-             call dscal(64,cnorm,scrvec,1)
-             call dcopy(64,scrvec,1,si(ind),1)
-          endif
-          write (3,175) -r+0.5*drnow, ii, &
-            (si(ij), ij=ind,ind+nnch-1)
-          write (4,175) -r+0.5*drnow, ii, &
-            (si(ij), ij=ind,ind+nnch-1)
-175         format(f7.4,i3,64f10.6)
-          ind=ind-nch
-190         continue
-        close(4)
-        return
-      endif
-    else
-        call transp (si, nch, nch)
-! print out transpose matrix (reverse order since eispack
-! determines highest eigenvalue first
-        ind=nchsq-nch+1
-
-        call openf(4,'tmatrix.dat','sf',0)
-        do 195 ii=1,nstate
-          if (renormf) then
-             call dcopy(64,si(ind),1,scrvec,1)
-             cnorm=ddot(64,scrvec,1,scrvec,1)
-             cnorm=1d0/sqrt(cnorm)
-             call dscal(64,cnorm,scrvec,1)
-             call dcopy(64,scrvec,1,si(ind),1)
-          endif
-!              do 195 ii=1,nch
-          write (4,175) -r+0.5*drnow, ii, &
-            (si(ij), ij=ind,ind+nnch-1)
-          ind=ind-nch
-195         continue
-        close(4)
+do kstep=1, npts
+  irec=irec-1
+  read (wfu_file, end=900, err=950, pos=iwavsk(irec)) r, drnow  ! we assume that we are reading an airy record, in which case r < 0.0
+  del=abs(abs(r)-rout)
+  ! read in adiabatic energies (which we don't need)
+  read (wfu_file, end=900, err=950) (sc1(i), i=1, nch)
+  ! read in first G(n,n+1) matrix,  then Tn transformation
+  ! matrix into local interval
+  read (wfu_file, end=900, err=950) (sr(i), i=1, nchsq), (si(i), i=1, nchsq)
+  if (rout > 0.d0) then
+    if (del > delold) then
+      call print_trans_mat(r, drnow, si, nch, flx_file, NUM_CONSIDERED_CHANNELS, 12, .true.)
+      return
     endif
-    call dcopy(nchsq,sr,1,si,1)
-    delold=del
-200 continue
+  else
+    ! rout < 0.0
+    call print_trans_mat(r, drnow, si, nch, flx_file, NUM_CONSIDERED_CHANNELS, 12, .true.)
+  endif
+  call dcopy(nchsq,sr,1,si,1)
+  delold=del
+end do  ! ksteps
 ! here if rout not reached at end of airy propagation region, print out
 ! last transformation matrix
-call transp (si, nch, nch)
-write (3,160)-r+0.5*drnow
-write (6,160)-r+0.5*drnow
-! print out transpose matrix
-ind=nchsq-nch+1
-do 250 ii=1,12
-!      do 250 ii=1,nch
-  write (3,175) -r+0.5*drnow,  ii, (si(ij), ij=ind,ind+nch-1)
-  ind=ind-nch
-250 continue
+call print_trans_mat(r, drnow, si, nch, flx_file, -1, 12, .false.)
 return
 !
 900 continue
