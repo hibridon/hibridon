@@ -114,7 +114,7 @@ use mod_coatp2, only: chold
 use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
-use constants, only: econv, xmconv, two
+use constants, only: econv, xmconv
 use mod_par, only: iprint
 use mod_parbas, only: lammin, lammax, mproj
 use mod_par, only: boundc
