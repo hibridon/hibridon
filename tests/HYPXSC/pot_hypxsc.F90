@@ -1,9 +1,9 @@
 ! Dummy potential for testing purposes
 
 #include "unused.h"
-#include "common/syusr.F90"
 #include "common/bausr.F90"
 #include "common/ground.F90"
+
 
 !  -----------------------------------------------------------------------
 ! subroutine called by testpot to interactively provide potential values
@@ -30,6 +30,7 @@ implicit none
     return
 end subroutine loapot
 
+#include "common/syusr.F90"
 
 !  -----------------------------------------------------------------------
 !  calculates the r-dependent coefficients in the collision of Ar with N2

@@ -98,7 +98,8 @@ use mod_cosysi, only: ispar
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name
 implicit double precision (a-h,o-z)
-character*(*) filnam
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
 integer, pointer :: nterm
 nterm=>ispar(1)
 UNUSED_DUMMY(iunit)

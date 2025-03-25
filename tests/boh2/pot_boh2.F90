@@ -12,7 +12,8 @@ subroutine loapot(iunit,filnam)
 use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name
 use mod_selb, only: ibasty
-character*(*) filnam
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
 UNUSED_DUMMY(iunit)
 UNUSED_DUMMY(filnam)
 potnam='ALEXANDER B(2P)H2(J=0,1) DUBERNET-HUTSON'

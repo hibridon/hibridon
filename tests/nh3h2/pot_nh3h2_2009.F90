@@ -131,7 +131,8 @@ common /fisurf/ conv, econv, lsurf
 !    datanm:      name of namelist data file ( set with pot= )
 
 common /fiunit/ iwrite,ifile
-character*(*) filnam
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
 parameter (nvmx = 300)
 integer   ivij(nvmx), jvij(nvmx), i2vij(nvmx), j2vij(nvmx), &
           lambda(nvmx), mu(nvmx), &

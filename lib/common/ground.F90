@@ -12,7 +12,9 @@ integer, intent(in) :: nphoto ! number of different wavefunctions calculated
 integer, intent(in) :: mxphot  ! maximum size of q vector (mxphot .ge. nch*nphoto)
 
 UNUSED(wf)
+wf(1) = 0.0  ! to silence warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
 UNUSED(r)
+r = 0.0  ! to silence warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
 UNUSED(nch)
 UNUSED(nphoto)
 UNUSED(mxphot)
@@ -31,6 +33,7 @@ integer, intent(in) :: nny
 logical, intent(in) :: ifull
 
 UNUSED(wf)
+wf(1) = 0.0  ! to silence warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
 UNUSED(yymin)
 UNUSED(nch)
 UNUSED(nny)

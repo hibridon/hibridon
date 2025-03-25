@@ -92,8 +92,9 @@ use mod_pot_ohh2_bausr, only: rr, lam1b, lam2b, lamb, lam1f, lam2f, lamf, bcoef,
 use mod_parpot, only: potnam=>pot_name
 implicit none
 !
-character*(*) filnam
-integer iunit, ir, iv
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
+integer ir, iv
 character*255 datfl
 !     
 !     WHEN HIBRIDON LOADS, A STRING CONTAINING ONLY ONE SPACE WILL BE
