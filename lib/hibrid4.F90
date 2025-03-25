@@ -1461,7 +1461,7 @@ else if (jflux .eq. 1) then
       fac1=rbesself%fn(irow)
       fac2=-rbesself%fj(irow)
       call dscal(nopen, fac1, psii(irow), nopen)
-      call dscal(nopen, fac2, scmat(irow), nopen)
+      call dscal(nopen, fac2, scmat(irow:), nopen)
 450     continue
 ! add together, resave in psii, this is imaginary part of outgoing wave
     call daxpy_wrapper(nopsq, one,scmat, 1, psii, 1)
@@ -1473,7 +1473,7 @@ else if (jflux .eq. 1) then
       fac1=rbesself%fpn(irow)
       fac2=-rbesself%fpj(irow)
       call dscal(nopen, fac1, dpsii(irow), nopen)
-      call dscal(nopen, fac2, scmat(irow), nopen)
+      call dscal(nopen, fac2, scmat(irow:), nopen)
 460     continue
 ! add together, resave in dpsii, this is imaginary part of derivative
 ! of outgoing wave
@@ -1800,13 +1800,13 @@ integer :: psifil_unit
         call dset(nch,zero,sc,1)
         do i=1,ny
           ind=(i-1)*nch+1
-          scc1=ddot(nch,psir,1,tcoord(ind),1)
+          scc1=ddot(nch,psir,1,tcoord(ind:),1)
 ! scc1 contains sum(psi-real*phi_internal)
-          scc2=ddot(nch,psir(nch+1),1,tcoord(ind),1)
+          scc2=ddot(nch,psir(nch+1),1,tcoord(ind:),1)
 ! scc2 contains sum(psi-imag*phi_internal)
-          scc3=ddot(nch,psir(2*nch+1),1,tcoord(ind),1)
+          scc3=ddot(nch,psir(2*nch+1),1,tcoord(ind:),1)
 ! scc3 contains sum(dpsi-real*phi_internal)
-          scc4=ddot(nch,psir(3*nch+1),1,tcoord(ind),1)
+          scc4=ddot(nch,psir(3*nch+1),1,tcoord(ind:),1)
 ! scc4 contains sum(dpsi-imag*phi_internal)
           sc(i)=scc1*scc4-scc2*scc3
 !steve, you'll need to append to this to calculate r-component of current dens

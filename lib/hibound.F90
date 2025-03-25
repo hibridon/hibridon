@@ -60,6 +60,8 @@ integer, dimension(1) :: iworks
 !
 real(8), dimension(:, :), allocatable :: cchn, schn, tchn, s, h, &
      wr, z
+real(8) :: unused_z(1, 1)
+
 real(8), dimension(:), allocatable :: w, work, xgh, wgh, rgh, &
      wgh1, g
 integer, dimension(:), allocatable :: iwork
@@ -318,7 +320,7 @@ else
       if (iu .lt. 1) iu = 1
       allocate(work(1))
       call dsygvx(1, 'N', 'I', 'L', ndim, h, ndim, s, ndim, &
-           0d0, 0d0, il, iu, 0d0, m, w, 0d0, ione, &
+           0d0, 0d0, il, iu, 0d0, m, w, unused_z, ione, &
            work, -1, iworks, ifail, info)
       lwork = work(1)
       liwork = 5 * ndim
@@ -327,7 +329,7 @@ else
       allocate(work(lwork))
       allocate(iwork(liwork))
       call dsygvx(1, 'N', 'I', 'L', ndim, h, ndim, s, ndim, &
-           0d0, 0d0, il, iu, 0d0, m, w, 0d0, ione, &
+           0d0, 0d0, il, iu, 0d0, m, w, unused_z, ione, &
            work, lwork, iwork, ifail, info)
   end if
 end if
