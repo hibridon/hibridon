@@ -144,8 +144,11 @@ nterm=>ispar(1); nrmax=>ispar(2); npar=>ispar(3); isym=>ispar(4); igu=>ispar(5);
 brotsg=>rspar(1); gsr=>rspar(2); drotsg=>rspar(3); hrotsg=>rspar(4)
 
 UNUSED_DUMMY(sc2)
+sc2(1) = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
 UNUSED_DUMMY(sc3)
+sc3(1) = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
 UNUSED_DUMMY(sc4)
+sc4(1) = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
 
 half = 0.5d0
 zero = 0.d0

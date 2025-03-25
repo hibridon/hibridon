@@ -1526,7 +1526,7 @@ integer, intent(out) :: jf
 integer, intent(out) :: jp
 integer, intent(in) :: nmax
 integer, intent(in) :: n
-logical, intent(out) :: nucros
+logical, intent(in) :: nucros
 integer :: sav_file = FILEID_SAV
 integer :: i, j
 integer :: jl, jl1, jl2, jl3

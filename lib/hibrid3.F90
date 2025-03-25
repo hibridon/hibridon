@@ -160,7 +160,7 @@ real(8), intent(in) :: tolhi
 real(8), intent(in) :: rendai
 real(8), intent(in) :: rincr
 real(8), intent(in) :: fstfac
-real(8), intent(out) :: tb
+real(8), intent(in) :: tb
 real(8), intent(out) :: tbm
 logical, intent(in) :: ipos
 logical, intent(in) :: prlogd
@@ -196,6 +196,8 @@ real(8) :: td, tdm, tp, tpm, tw, twm, twf, twfm
 !  prec is precision of single precision floating pt number
 real(8), parameter :: prec = 1.d+11
 UNUSED_DUMMY(tbm)
+tbm = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
+
 call mtime(t11,t22)
 first = .true.
 r = rstart
@@ -1087,8 +1089,11 @@ logical iread, iwrite, print
 !  z, w, amat, and bmat are stored column by column in one dimensional arrays
 
 UNUSED_DUMMY(tlw)
+tlw = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
 UNUSED_DUMMY(tpw)
+tpw = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
 UNUSED_DUMMY(twfw)
+twfw = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
 
 iwrite = twoen .and. (itwo.eq.0)
 iread =  twoen .and. (itwo.gt.0)

@@ -669,7 +669,6 @@ use mod_hibrid3, only: expand
 use mod_hiba07_13p, only: tcasea
 use mod_par, only: batch, csflag, photof
 use mod_wave, only: irec, inflev
-use funit
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_hiutil, only: gennam, mtime, gettim, dater
