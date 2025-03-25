@@ -1,4 +1,7 @@
 #include "assert.h"
+#include "unused.h"
+
+
 module mod_hiba19_sgpi1
 !    ivpi:     array of vibrational quantum numbers of the 2pi state to be
 !              included in the calculation.  must be consistent with order of
@@ -13,6 +16,8 @@ integer :: ivpi(5)
 
 integer :: numvib
 integer :: ivibpi(5)
+
+character*60 potfil
 
 contains
 ! sysgpi1 (savsgpi1/ptrsgpi1) defines, saves variables and reads         *
@@ -1132,7 +1137,6 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use mod_par, only: ihomo
-use funit, only: FUNIT_INP
 use mod_parbas, only: lammin, lammax, mproj
 use mod_skip, only: nskip
 use mod_hiutil, only: gennam, get_token
@@ -1140,17 +1144,22 @@ implicit none
 integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-integer :: is, isa, isi, isr, isym, iv
-integer :: j, l, lc, nmax, nparsg, nterm
-integer, save :: numvpi
+integer :: is, iv
+integer :: j, l, lc, nmax
 logical existf
 character*4 char
 character*(*) fname
 character*1 dot
-character*60 filnam, line, potfil
+character*60 filnam, line
 character*68 filnm1
-save potfil
+integer, pointer :: nterm, isym, isa, nparsg, numvpi
 #include "common/comdot.F90"
+nterm=>ispar(1)
+isym=>ispar(2)
+isa=>ispar(3)
+nparsg=>ispar(6)
+numvpi=>ispar(9)
+
 irpot = 1
 !     number and names of system dependent parameters
 !  first all the system dependent integer variables
@@ -1299,8 +1308,20 @@ close (8)
 irpot=1
 ihomo=nskip.eq.2
 return
+end subroutine 
 !
-entry savsgpi1 (readpt)
+subroutine savsgpi1 (readpt)
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
+use funit, only: FUNIT_INP
+
+implicit none
+logical, intent(inout) :: readpt
+integer :: iv, isi, isr, j
+integer, pointer :: numvpi
+numvpi=>ispar(9)
+
+UNUSED_DUMMY(readpt)
 !  save parameters for 2sigma and 2pi states
 !      write (FUNIT_INP, 105) isym, isa, igusg, nmaxsg, nparsg,
 !     :  ' isym, isa, igusg, nmaxsg, nparsg'
