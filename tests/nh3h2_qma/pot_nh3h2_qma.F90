@@ -30,6 +30,7 @@ subroutine driver
 use mod_covvl, only: vvl
 use mod_hibasutil, only: raise
 use constants, only: econv
+use mod_hipot, only: loapot, pot
 implicit none
 !
 integer MAX_NR, MAX_NV
@@ -160,6 +161,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use mod_hibasutil, only: raise
 use mod_nh3h2_qma, only: potfil
+use mod_hipot, only: loapot
 implicit none
 !
 integer MAX_NR, MAX_NV

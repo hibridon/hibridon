@@ -95,6 +95,7 @@ use mod_1sg1sg
 use mod_c2hh2
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
+use mod_hipot, only: loapot, pot
 implicit none
 character(40), parameter :: data_file_name='pot_c2hh2_12_6.dat'
 real(8) :: r, vv0

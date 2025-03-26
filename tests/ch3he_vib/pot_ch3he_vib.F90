@@ -411,6 +411,7 @@ use mod_coiout, only: niout, indout
 use mod_cosys, only: scod
 use mod_cosysr, only: rspar
 use mod_cosysi, only: isicod, ispar
+use mod_hipot, only: loapot
 ! use mod_cosysr, only: isrcod
 implicit double precision (a-h, o-z)
 !   Lengths of cod array, 

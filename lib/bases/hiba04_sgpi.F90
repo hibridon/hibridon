@@ -1383,6 +1383,7 @@ use mod_parbas, only: maxvib, lammin, lammax, mproj
 use mod_skip, only: nskip
 use mod_vib, only: nvibs, ivibs, nvibp, ivibp
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
 integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt

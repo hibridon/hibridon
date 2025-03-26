@@ -62,6 +62,7 @@ use mod_covvl, only: vvl
 use constants, only: econv
 !     size of vvl : MAX_NVB+MAX_NVF
 use mod_pot_ohh2_bausr, only: lam1b, lam2b, lamb, lam1f, lam2f, lamf, nvb, nvf
+use mod_hipot, only: loapot, pot
 implicit none
 character*40 filenm
 double precision r, vv0
@@ -198,6 +199,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only : isrcod, rspar
 use mod_hibasutil, only: raise
 use mod_pot_ohh2_bausr, only: potfil
+use mod_hipot, only: loapot
 !
 implicit none
 integer, intent(inout) :: irpot

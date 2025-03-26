@@ -445,6 +445,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use mod_hibasutil, only: raise
 use funit, only: FUNIT_INP
+use mod_hipot, only: loapot
 implicit none
 !
 integer, intent(inout) :: irpot

@@ -344,6 +344,7 @@ use mod_cosysr, only: isrcod, rcod=>rspar
 use mod_par, only: par_readpt=>readpt
 use funit, only: FUNIT_INP
 use mod_parbas, only: lammin, lammax, mproj
+use mod_hipot, only: loapot
 implicit none
 integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt

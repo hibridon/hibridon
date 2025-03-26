@@ -529,6 +529,7 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
 integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt

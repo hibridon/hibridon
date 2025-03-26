@@ -616,6 +616,7 @@ use mod_cosysr, only: isrcod
 use funit, only: FUNIT_INP
 use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
 integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt

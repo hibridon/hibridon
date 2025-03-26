@@ -96,6 +96,7 @@ use mod_1sg1sg
 use mod_nhh2
 use mod_conlam, only: nlam
 use mod_covvl, only: vvl
+use mod_hipot, only: loapot, pot
 implicit none
 character(40), parameter :: data_file_name= &
   'pot_nhh2_10_4.dat'

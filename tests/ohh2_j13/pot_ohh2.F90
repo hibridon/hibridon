@@ -29,6 +29,7 @@ end module pot_ohh2
 subroutine driver
 use pot_ohh2
 use mod_covvl, only: vvl
+use mod_hipot, only: loapot, pot
 implicit none
 character(40), parameter :: data_file_name= &
     'pot_ohh2_mrci_core1_highsym.dat'
