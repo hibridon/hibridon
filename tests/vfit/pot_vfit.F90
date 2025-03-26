@@ -80,6 +80,7 @@ contains
   use mod_copot, only: maxang
   use mod_coptx, only: rex, rin, tanhy, fex
   use mod_cofit, only: maxpws, minmps, maxmps, mpsstp, idimp, idimr
+  use mod_hiblas, only: ddot
   use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
   implicit double precision(a-h,o-z)
   real(8), intent(in) :: rr
@@ -89,7 +90,6 @@ contains
   real(8), intent(out) :: avec(10)
   integer, intent(inout) :: iblkx
 
-  real(8) :: ddot
   real(8) :: rvecpp(10)  ! scratch array
   real(8), target :: b(10,10)  ! scratch array
 
@@ -118,9 +118,9 @@ contains
   do 100 n = 1, idimp
   iblk =iblk +1
   iblkx=iblkx+1
-  b(n,l)=fex(iblkx)*ddot(ne,a(2,iblk),1,rex,1)
+  b(n,l)=fex(iblkx)*ddot(ne,a(2:,iblk),1,rex,1)
   if(nm.ne.0) b(n,l)=b(n,l) &
-      -tanhy(iblkx)*ddot(nm,a(m1,iblk),1,rin(minmps),mpsstp)
+      -tanhy(iblkx)*ddot(nm,a(m1:,iblk),1,rin(minmps:),mpsstp)
   100 continue
   200 continue
   !
@@ -303,6 +303,7 @@ end
 subroutine driver
 use mod_covvl, only: vvl
 use mod_par, only: readpt
+use mod_hipot, only: pot, loapot
 implicit none
 character *48 potnam
 character *40 filnam
@@ -343,11 +344,11 @@ subroutine pot(vv0,r)
 ! -------------------------------------------------------------------
 use mod_covvl, only: vvl
 use mod_cosysi, only: ispar
-use mod_parbas, only: maxtrm, maxvb2, ntv, lammin, lammax
+use mod_parbas, only: ntv, lammin, lammax
 use mod_selb, only: ibasty
 use mod_skip, only: nskip
 use mod_coptx, only: nblkx, maxpwx, minmpx, maxmpx, rex, rin, tanhy, fex, a1, ah, art, are
-use mod_copot, only: maxang, maxnr, nc, a, maxpw, minms, maxms, msstp, mdimp, pinv, mdimr, vibmat, avec
+use mod_copot, only: nc, a, maxpw, minms, maxms, msstp, mdimp, pinv, mdimr, vibmat, avec
 use mod_cofit, only: npa, maxpws, minmps, maxmps, mpsstp, idimp, idimr
 use mod_vfit, only: vcalc
 implicit none

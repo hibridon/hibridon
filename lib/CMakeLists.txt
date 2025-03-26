@@ -18,6 +18,7 @@ add_library(hib
     hiamp.F90
     hibasis.F90
     hibasutil.F90
+    hiblas.F90
     hibound.F90
     hibrid1.F90
     hibrid2.F90
@@ -33,6 +34,7 @@ add_library(hib
     himem.F90
     hinput.F90
     hiparcst.F90
+    hipot.F90
     hiprsbr.F90
     hismat.F90
     histmix.F90
