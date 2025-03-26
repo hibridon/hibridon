@@ -1,5 +1,6 @@
 
 function(set_compile_options TARGET)
+# TARGET: the cmake target identifier (eg the name of a library target such as hib) of the target that compile options need to be set
 
 ################################################################################
 #
@@ -51,7 +52,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     )
 # Intel (ifort)
 elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
-    target_compile_options(${TEST_ID}
+    target_compile_options(${TARGET}
       PUBLIC
       # Non-specific options
       # force arrays to be allocated on the heap instead of the stack, this removes segmentation faults crash, not sure why
