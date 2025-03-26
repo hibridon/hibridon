@@ -6974,12 +6974,21 @@ goto (301,302,303,304,305),ncest
   r(ir5)=r(ir5)-s51
   return
 end
+
 !--------------------------------------------------------------------
 subroutine mxva(a,mcola,mrowa,b,mcolb, &
                 r,mcolr,ncol,nlink)
 !--------------------------------------------------------------------
 implicit double precision (a-h,o-z)
-dimension r(1),a(1),b(1)
+real(8), intent(in) :: a(:)
+integer, intent(in) :: mcola
+integer, intent(in) :: mrowa
+real(8), intent(in) :: b(:)
+integer, intent(in) :: mcolb
+real(8), intent(out) :: r(:)
+integer, intent(in) :: mcolr
+integer, intent(in) :: ncol
+integer, intent(in) :: nlink
 !...  r(ncol)=a(ncol,nlink)*b(nlink) matrix mult
 ! mcola is spacing between adjacent column elements of a (column stride)
 ! mrowa is spacing between adjacent row elements of a (row stride)
@@ -7145,6 +7154,32 @@ else if(ncoll.eq.3) then
 end if
 return
 end
+
+subroutine mxva_mat(a,mcola,mrowa,b,mcolb, &
+                r,mcolr,ncol,nlink)
+   use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
+   implicit none
+   real(8), intent(in), target :: a(:, :)
+   integer, intent(in) :: mcola
+   integer, intent(in) :: mrowa
+   real(8), intent(in), target :: b(:, :)
+   integer, intent(in) :: mcolb
+   real(8), intent(out), target :: r(:, :)
+   integer, intent(in) :: mcolr
+   integer, intent(in) :: ncol
+   integer, intent(in) :: nlink
+
+   real(8), pointer :: a_as_vec(:)
+   real(8), pointer :: b_as_vec(:)
+   real(8), pointer :: r_as_vec(:)
+
+   call C_F_POINTER (C_LOC(a), a_as_vec, [mrowa*mcola])
+   call C_F_POINTER (C_LOC(b), b_as_vec, [mcola*mcolb])
+   call C_F_POINTER (C_LOC(r), r_as_vec, [mcola*mcolr])
+   call mxva(a_as_vec, mcola, mrowa, b_as_vec, mcolb, r_as_vec, mcolr, ncol, nlink)
+end subroutine mxva_mat
+
+
 !--------------------------------------------------------------------
 subroutine mxvb(a,mcola,mrowa,b,mcolb, &
                 r,mcolr,ncol,nlink)

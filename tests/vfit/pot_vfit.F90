@@ -16,6 +16,147 @@
 #include "common/syusr.F90"
 #include "common/bausr.F90"
 #include "common/ground.F90"
+
+module mod_coptx
+  integer :: nblkx
+  integer :: maxpwx
+  integer :: minmpx
+  integer :: maxmpx
+  integer :: mpsstx
+  integer :: junk
+  real(8) :: rex(20)
+  real(8) :: rin(20)
+  real(8) :: tanhy(250)
+  real(8) :: fex(250)
+  real(8) :: a1(250)
+  real(8) :: ah(250)
+  real(8) :: art(250)
+  real(8) :: are(250)
+end module mod_coptx
+
+module mod_copot
+  use mod_parbas, only: maxtrm, maxvb2
+  integer, parameter :: maxang = 10
+  integer, parameter :: maxnr = 5
+  integer :: nc(maxtrm)
+  real(8) :: a(20,50,maxtrm)
+  integer :: maxpw(maxtrm)
+  integer :: minms(maxtrm)
+  integer :: maxms(maxtrm)
+  integer :: msstp(maxtrm)
+  integer :: mdimp(maxtrm)
+  real(8) ::pinv(maxang,maxang,maxtrm)
+  integer :: mdimr(maxtrm)
+  real(8) ::vibmat(maxnr,maxvb2,maxtrm)
+  real(8) ::avec(maxang)
+end module mod_copot
+
+! the module mod_cofit is used to pass arguments
+module mod_cofit
+  integer :: npa
+  integer :: maxpws
+  integer :: minmps
+  integer :: maxmps
+  integer :: mpsstp
+  integer :: idimp
+  integer :: idimr
+end module mod_cofit
+
+module mod_core
+  real(8) :: re
+end module mod_core
+
+module mod_vfit
+contains
+  ! --------------------------------------------------------------------
+  subroutine vcalc(rr,a,pinv,rvecp,avec,iblkx)
+  ! --------------------------------------------------------------------
+  !
+  ! author: b.follmeg
+  ! current revision date: 26-may-1991 by mha
+  !
+  ! --------------------------------------------------------------------
+  use mod_himatrix, only: mxva
+  use mod_copot, only: maxang
+  use mod_coptx, only: rex, rin, tanhy, fex
+  use mod_cofit, only: maxpws, minmps, maxmps, mpsstp, idimp, idimr
+  use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
+  implicit double precision(a-h,o-z)
+  real(8), intent(in) :: rr
+  real(8), intent(in) :: a(20,50)
+  real(8), intent(in), target :: pinv(maxang,maxang)
+  real(8), intent(in) :: rvecp(10)
+  real(8), intent(out) :: avec(10)
+  integer, intent(inout) :: iblkx
+
+  real(8) :: ddot
+  real(8) :: rvecpp(10)  ! scratch array
+  real(8), target :: b(10,10)  ! scratch array
+
+  real(8), pointer :: pinv_as_vec(:)
+  real(8), pointer :: b_as_vec(:)
+  integer :: iblk, ne, m1, nm, l, n
+  !
+  !    obtain vector of a(r) coefficients:
+  !
+  !               -1          -1          -1
+  !              p  * b(r) * r  * rvec = p  * b(r) * rvec' = a(r)
+  !
+  !                       -1
+  !   the vector rvec' = r  * rvec must be provided by vfit !
+  !
+  !   first built up b(r) matrix
+  !
+  UNUSED_DUMMY(rr)
+  iblk = 0
+  ne=maxpws-1
+  m1=maxpws+1
+  nm=0
+  if(mpsstp.ne.0.and.maxmps.ne.0.and.minmps.ne.0) &
+        nm=(maxmps-minmps)/mpsstp+1
+  do 200 l = 1, idimr
+  do 100 n = 1, idimp
+  iblk =iblk +1
+  iblkx=iblkx+1
+  b(n,l)=fex(iblkx)*ddot(ne,a(2,iblk),1,rex,1)
+  if(nm.ne.0) b(n,l)=b(n,l) &
+      -tanhy(iblkx)*ddot(nm,a(m1,iblk),1,rin(minmps),mpsstp)
+  100 continue
+  200 continue
+  !
+  ! fast loop if idimr = 1 and rvecp(1) = 1
+  !
+  call C_F_POINTER (C_LOC(b), b_as_vec, [10*10])
+  call C_F_POINTER (C_LOC(pinv), pinv_as_vec, [maxang*maxang])
+
+  if((idimr.gt.1).or.(rvecp(1).ne.1.)) then
+  !
+  !  calculate  b(r) * rvec' = rvec''
+  !
+    call mxva(b_as_vec,1,10,rvecp,1,rvecpp,1,idimp,idimr)
+  !              -1
+  !  calculate  p  * rvec'' = a(r)
+  !
+    call mxva(pinv_as_vec,1,maxang,rvecpp,1,avec,1,idimp,idimp)
+  !                                                  -1
+  !  here if number of bond distances is 1: avec = p   * b(r) where
+  !  b(r) is a now column vector rather than a matrix
+  !
+  else
+    call mxva(pinv_as_vec,1,maxang,b_as_vec,1,avec,1,idimp,idimp)
+  !
+  end if
+  !
+  !  avec now contains
+  !  avec(1) = vv0, avec(2) = vvl(1), ... ( if iterm=1 and lammin=0) or
+  !  avec(1) = vvl(1), avec(2) = vvl(2), ... ( if iterm > 1 or lammin > 0)
+  !
+  return
+  end subroutine vcalc
+end module mod_vfit
+
+
+
 ! --------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
@@ -62,7 +203,6 @@ subroutine loapot(iunit,filnam)
 !   re         -> equilibrium bond distance of the molecule used in the
 !                 calculation of the vibrational matrix elements
 !
-!  the common block /cofit/ is used to pass arguments
 !
 ! --------------------------------------------------------------------------
 use mod_cosysi, only: ispar
@@ -71,22 +211,15 @@ use mod_parbas, only: maxtrm, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name
 use mod_skip, only: nskip, iskip
 use mod_hiiolib1, only: openf
-implicit double precision(a-h,o-z)
+use mod_coptx, only: nblkx, maxpwx, minmpx, maxmpx, mpsstx, a1, ah, art, are
+use mod_copot, only: maxang, maxnr, nc, a, maxpw, minms, maxms, msstp, mdimp, pinv, mdimr, vibmat
+use mod_core, only: re
+implicit none
   integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
   character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
+integer :: ierr, it, iblk, i, j, nblk, nangle
 character*80 potlab
 character*68 filnm1
-common /coptx/ nblkx,maxpwx,minmpx,maxmpx,mpsstx,junk, &
-  rex(20),rin(20),tanhy(250),fex(250),a1(250),ah(250), &
-  art(250),are(250)
-#include "common/parvfit.F90"
-common /copot/ nc(maxtrm),a(20,50,maxtrm),maxpw(maxtrm), &
-               minms(maxtrm),maxms(maxtrm),msstp(maxtrm), &
-               mdimp(maxtrm),pinv(maxang,maxang,maxtrm), &
-               mdimr(maxtrm),vibmat(maxnr,maxvb2,maxtrm), &
-               avec(maxang)
-common /cofit/ npa,maxpws,minmps,maxmps,mpsstp,idimp,idimr
-common /core/  re
 integer, pointer :: nterm
 nterm=>ispar(1)
 potnam='WERNER-FOLLMEG VFIT'
@@ -170,9 +303,11 @@ end
 subroutine driver
 use mod_covvl, only: vvl
 use mod_par, only: readpt
-implicit double precision (a-h,o-z)
+implicit none
 character *48 potnam
 character *40 filnam
+real(8) :: r, vv0
+integer :: j
 readpt=.true.
 potnam='WERNER-FOLLMEG VFIT'
 print *, 'potential subroutine:  ',potnam
@@ -197,6 +332,7 @@ goto 2
 101    format(f5.2,30(1pg10.2))
 enddo
 end
+
 ! -------------------------------------------------------------------
 subroutine pot(vv0,r)
 ! -------------------------------------------------------------------
@@ -210,19 +346,16 @@ use mod_cosysi, only: ispar
 use mod_parbas, only: maxtrm, maxvb2, ntv, lammin, lammax
 use mod_selb, only: ibasty
 use mod_skip, only: nskip
-implicit double precision(a-h,o-z)
-#include "common/parvfit.F90"
-common /copot/ nc(maxtrm),a(20,50,maxtrm),maxpw(maxtrm), &
-               minms(maxtrm),maxms(maxtrm),msstp(maxtrm), &
-               mdimp(maxtrm),pinv(maxang,maxang,maxtrm), &
-               mdimr(maxtrm),vibmat(maxnr,maxvb2,maxtrm), &
-               avec(maxang)
-common /cofit/ npa,maxpws,minmps,maxmps,mpsstp,idimp,idimr
-common /coptx/ nblkx,maxpwx,minmpx,maxmpx,mpsstx,junk, &
-  rex(20),rin(20),tanhy(250),fex(250),a1(250),ah(250), &
-  art(250),are(250)
-common /core/  re
+use mod_coptx, only: nblkx, maxpwx, minmpx, maxmpx, rex, rin, tanhy, fex, a1, ah, art, are
+use mod_copot, only: maxang, maxnr, nc, a, maxpw, minms, maxms, msstp, mdimp, pinv, mdimr, vibmat, avec
+use mod_cofit, only: npa, maxpws, minmps, maxmps, mpsstp, idimp, idimr
+use mod_vfit, only: vcalc
+implicit none
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r
 integer, pointer :: nterm
+real(8) :: rr, ri
+integer :: i, ii, jj, iblkx, iblkxx, ishift, iterm, l, lmin, lmax, ivmax, iv
 nterm=>ispar(1)
 rr = r
 vv0 = 0.d0
@@ -266,7 +399,7 @@ do 100 iterm = 1, nterm
 !
    do 80 iv = 1, ivmax
    iblkx=iblkxx
-     call vcalc(rr,a(1,1,iterm),pinv(1,1,iterm), &
+     call vcalc(rr,a(1:,1:,iterm),pinv(1,1,iterm), &
                 vibmat(1,iv,iterm),avec,iblkx)
      ii = 0
 !
@@ -298,79 +431,5 @@ do 100 iterm = 1, nterm
 80   continue
 iblkxx=iblkx
 100 continue
-return
-end
-! --------------------------------------------------------------------
-subroutine vcalc(rr,a,pinv,rvecp,avec,iblkx)
-! --------------------------------------------------------------------
-!
-! author: b.follmeg
-! current revision date: 26-may-1991 by mha
-!
-! --------------------------------------------------------------------
-use mod_himatrix, only: mxva
-implicit double precision(a-h,o-z)
-parameter (maxang=10)
-dimension pinv(maxang,maxang),a(20,50),rvecp(10),avec(10)
-common /cofit/ npa,maxpws,minmps,maxmps,mpsstp,idimp,idimr
-!
-! the arrays in common block /cowork/ are used as scratch arrays
-!
-common /cowork/ pvec(10),rvecpp(10),b(10,10)
-common /coptx/ nblkx,maxpwx,minmpx,maxmpx,mpsstx,junk, &
-  rex(20),rin(20),tanhy(250),fex(250),a1(250),ah(250), &
-  art(250),are(250)
-!
-!    obtain vector of a(r) coefficients:
-!
-!               -1          -1          -1
-!              p  * b(r) * r  * rvec = p  * b(r) * rvec' = a(r)
-!
-!                       -1
-!   the vector rvec' = r  * rvec must be provided by vfit !
-!
-!   first built up b(r) matrix
-!
-UNUSED_DUMMY(rr)
-iblk = 0
-ne=maxpws-1
-m1=maxpws+1
-nm=0
-if(mpsstp.ne.0.and.maxmps.ne.0.and.minmps.ne.0) &
-      nm=(maxmps-minmps)/mpsstp+1
-do 200 l = 1, idimr
-do 100 n = 1, idimp
-iblk =iblk +1
-iblkx=iblkx+1
-b(n,l)=fex(iblkx)*ddot(ne,a(2,iblk),1,rex,1)
-if(nm.ne.0) b(n,l)=b(n,l) &
-    -tanhy(iblkx)*ddot(nm,a(m1,iblk),1,rin(minmps),mpsstp)
-100 continue
-200 continue
-!
-! fast loop if idimr = 1 and rvecp(1) = 1
-!
-if((idimr.gt.1).or.(rvecp(1).ne.1.)) then
-!
-!  calculate  b(r) * rvec' = rvec''
-!
-  call mxva(b,1,10,rvecp,1,rvecpp,1,idimp,idimr)
-!              -1
-!  calculate  p  * rvec'' = a(r)
-!
-  call mxva(pinv,1,maxang,rvecpp,1,avec,1,idimp,idimp)
-!                                                  -1
-!  here if number of bond distances is 1: avec = p   * b(r) where
-!  b(r) is a now column vector rather than a matrix
-!
-else
-  call mxva(pinv,1,maxang,b,1,avec,1,idimp,idimp)
-!
-end if
-!
-!  avec now contains
-!  avec(1) = vv0, avec(2) = vvl(1), ... ( if iterm=1 and lammin=0) or
-!  avec(1) = vvl(1), avec(2) = vvl(2), ... ( if iterm > 1 or lammin > 0)
-!
 return
 end

@@ -172,6 +172,8 @@ use mod_ered, only: ered, rmu
 use mod_vib, only: nvibs, ivibs, nvibp, ivibp
 use mod_himatrix, only: mxva
 use mod_hitypes, only: bqs_type
+use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
+
 
 implicit double precision (a-h,o-z)
 real(8), intent(out), dimension(:) :: sc1
@@ -183,7 +185,9 @@ type(bqs_type), intent(out) :: bqs
 type(ancouma_type), pointer :: ancouma
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
 !  these parameters must be the same as in hisysgpi
-dimension e(3,3), ieps(2), iepp(2), iomc(4), iomr(4), eig(3)
+real(8), target :: e(3,3)
+real(8), pointer :: e_as_vec(:)
+dimension ieps(2), iepp(2), iomc(4), iomr(4), eig(3)
 dimension jhold(1), ishold(1), ehold(1)
 parameter (nvmax=20)
 dimension ipvs(0:nvmax),ipvp(0:nvmax)
@@ -212,6 +216,8 @@ UNUSED_DUMMY(sc3)
 sc3(1) = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
 UNUSED_DUMMY(sc4)
 sc4(1) = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
+
+call C_F_POINTER (C_LOC(e), e_as_vec, [3*3])
 
 ! recover system parameters
 nterm=ispar(1)
@@ -980,7 +986,7 @@ do 600 it=1,nterm
          icr=iom(irow)+1
          itc=ivec(icol)
          itr=ivec(irow)
-         call mxva(e,1,3,vec(1,icc,itc),1,eig,1,3,3)
+         call mxva(e_as_vec,1,3,vec(1,icc,itc:),1,eig,1,3,3)
          vee=ddot(3,eig,1,vec(1,icr,itr),1)
        if (abs(vee) .gt. tzero) then
          i = i + 1
