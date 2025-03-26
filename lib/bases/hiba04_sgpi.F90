@@ -217,8 +217,6 @@ sc3(1) = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT
 UNUSED_DUMMY(sc4)
 sc4(1) = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
 
-call C_F_POINTER (C_LOC(e), e_as_vec, [3*3])
-
 ! recover system parameters
 nterm=ispar(1)
 isg=ispar(2)
@@ -937,6 +935,7 @@ do 600 it=1,nterm
       lrow = bqs%lq(irow)
       if (csflag) lrow = nu
 !  always initialize potential to zero
+      call C_F_POINTER (C_LOC(e), e_as_vec, [3*3])
       vee = 0
       do 300 mm=1,3
       do 300 nn=1,3
@@ -986,7 +985,7 @@ do 600 it=1,nterm
          icr=iom(irow)+1
          itc=ivec(icol)
          itr=ivec(irow)
-         call mxva(e_as_vec,1,3,vec(1,icc,itc:),1,eig,1,3,3)
+         call mxva(e_as_vec,1,3,vec(1:,icc,itc),1,eig,1,3,3)
          vee=ddot(3,eig,1,vec(1,icr,itr),1)
        if (abs(vee) .gt. tzero) then
          i = i + 1
