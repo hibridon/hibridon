@@ -56,6 +56,7 @@ message("Fortran compiler: ${Fortran_COMPILER_NAME}")
 # Include useful functions
 include(cmake/modules/add_hibexe.cmake)
 include(cmake/modules/add_hibridon_test.cmake)
+include(cmake/modules/set_compile_options.cmake)
 
 
 # Add the hibridon library
