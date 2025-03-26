@@ -92,7 +92,7 @@ if(OpenMP_Fortran_FOUND)
     target_link_libraries(hib INTERFACE OpenMP::OpenMP_Fortran)
 endif()
 
-set_compile_options(hib)
+set_compile_options(hib "OFF")
 
 
 

@@ -1,7 +1,7 @@
 
-function(set_compile_options TARGET)
+function(set_compile_options TARGET SAVE)
 # TARGET: the cmake target identifier (eg the name of a library target such as hib) of the target that compile options need to be set
-
+# SAVE: if true, all local variables receive the save attribute. This argument should be removed once all programs work without this option (using local variables with an implicit save attribute should be avoided as it's error prone)
 ################################################################################
 #
 #    COMPILE OPTIONS
@@ -16,6 +16,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       -ffree-line-length-none                   # Allow arbitrary long lines. Needed as preprocessing could generate long line lengths.
 #      -fdefault-integer-8
 #      -finteger-4-integer-8
+      $<$<BOOL:${SAVE}>:-fno-automatic>          # Put local variables on the heap instead of the stack. As a side effect, all affected variables receive the save attribute (persistance between calls). This flag conflicts with -fopenmp (f951: Warning: Flag ‘-fno-automatic’ overwrites ‘-frecursive’ implied by ‘-fopenmp’)
       $<$<PLATFORM_ID:Linux>:-mcmodel=large>    # Required on Linux
       $<$<BOOL:${OpenMP_Fortran_FOUND}>:-fopenmp> # Compile with fopenmp option if OpenMP libs are found
       # Config-specific options: RELEASE
@@ -69,7 +70,7 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
       $<$<CONFIG:RELEASE>:-init=zero>             # Init variables to zero/false/null
       # Config-specific options: DEBUG
       $<$<CONFIG:DEBUG>:-O0>                      # Disable all optimizations
-      $<$<CONFIG:DEBUG>:-g>                   # Generates complete debugging information
+      $<$<CONFIG:DEBUG>:-g>                       # Generates complete debugging information
       $<$<CONFIG:DEBUG>:-traceback>               # Generates extra information in the object file to provide source file traceback information when a severe error occurs at run time
       $<$<CONFIG:DEBUG>:-fp-stack-check>          # Tell the compiler to generate extra code after every function call to ensure that the floating-point stack is in the expected state
       #$<$<CONFIG:DEBUG>:-warn all>                # Enable all warnings
@@ -91,6 +92,7 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
 
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
       $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
+      $<$<CONFIG:DEBUG>:-warn all>                # Enable all warnings
     )
 endif()
 
