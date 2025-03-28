@@ -2,11 +2,14 @@
 
 ### Changed
 
+- Increased the maximum length of path to the help file is (256 instead of 80), thus reducing the risk of the help command to fail.
+
 ### Added
+
 
 ### Fixed 
 
-- fixed typo that caused stmix subroutine (used by stmix command) to misfunction in some cases.
+- Fixed typo that caused stmix subroutine (used by stmix command) to misfunction in some cases.
 - Fixed bug in tenxsc command with base 04.
 
 ## [v5.1.0] - 2023-04-24
