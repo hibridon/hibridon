@@ -126,7 +126,9 @@ use mod_nhh2
 use mod_conlam, only: nlam
 use mod_covvl, only: vvl
 implicit none
-double precision vv0, r_inp, r
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r_inp
+double precision r
 double precision seval
 integer iv
 vv0 = 0.d0

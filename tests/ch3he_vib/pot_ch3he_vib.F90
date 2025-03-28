@@ -156,14 +156,14 @@ use mod_cosysr, only: rspar
 use mod_cosysi, only: ispar
 use mod_ch3he, only: NVLM
 implicit double precision (a-h, o-z)
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
 !   Initialize parameters for the potential
 !
 !   Arguments:
 !       Arguments are not refered to in this basis routine
 real(8), pointer :: emax0, emax1, emax2, emax3
 integer, pointer :: nterm, ipotsy, iop, jmax, vmax!
-character*(*) filnam
-integer iunit
 !
 !   Hidden returned value:
 !       mod_conlam: nlam

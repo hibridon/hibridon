@@ -125,6 +125,8 @@ end
 subroutine pot(vv0, r)
 use mod_covvl, only: vvl
 implicit none
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r
 !
 integer MAX_NR, MAX_NV
 parameter (MAX_NR=300, MAX_NV=300)
@@ -141,7 +143,6 @@ double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV), &
      spl_d(MAX_NR, MAX_NV)
 
 
-double precision vv0, r
 double precision seval
 integer iv
 !
