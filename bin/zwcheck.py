@@ -240,14 +240,15 @@ def parse_warnings(make_stdout_file_path: Path) -> Tuple[List[Alert], List[FlagW
                     if current_alert is not None:
                         # we expect non_ansi_line to be related to current_warning
                         parse_warning_detail_line(non_ansi_line, current_alert, disabled_warnings)
-    if current_alert.alert_type == 'warning':
-        warnings.append(current_alert)
-        current_alert = None
-    elif current_alert.alert_type == 'note':
-        warnings[-1].add_related_note(current_alert)
-    else:
-        # assert False
-        pass
+    if current_alert is not None:
+        if current_alert.alert_type == 'warning':
+            warnings.append(current_alert)
+            current_alert = None
+        elif current_alert.alert_type == 'note':
+            warnings[-1].add_related_note(current_alert)
+        else:
+            # assert False
+            pass
     return warnings, flag_warnings
 
 
