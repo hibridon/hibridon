@@ -990,7 +990,7 @@ subroutine tenopa(filnam,a)
 !  by evaluation of tensor diff. cross sections (started 7-oct-2011, pjd).
 !  see statements after "input:" for details of types of cross sections
 !  that can be calculated
-! took care of special problem with is lables for ibasty = 4 and 19
+! took care of special problem with is labels for ibasty = 4 and 19
 !  in sigk (NOTE:  this is still a problem in other types of calculations)
 !
 ! revision:  5-oct-2012 (p.j.dagdigian)
@@ -2074,7 +2074,7 @@ do 70 irowp = 1, lengtp
   if (packp%inq(irp).ne.in1 .and. packp%inq(irp).ne.in2) goto 70
 !
 ! special treatment for ibasty = 4 and 19
-  if (iabsty.eq.4 .or. ibasty.eq.19) then
+  if (ibasty.eq.4 .or. ibasty.eq.19) then
     if (mod(abs(indp),100).eq.10) then
       write (6,1075)
 1075       format(' *** v=1 IN PI STATE NOT IMPLEMENTED.', &
@@ -2171,7 +2171,7 @@ do 400 irow = 1, packed_bqs%length
 85     continue
     ii = (irow*(irow-1))/2 + icol
     l2m=lmax-l2
-! special treament for iabsty = 4 and 19
+! special treament for ibasty = 4 and 19
     if (ibasty.eq.4 .or. ibasty.eq.19) then
       if (packed_bqs%inq(irow).eq. 100) isubr = 1
       if (packed_bqs%inq(irow).eq.-100) isubr = 2

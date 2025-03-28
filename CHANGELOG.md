@@ -1,5 +1,13 @@
 # Hibridon ChangeLog
 
+### Changed
+
+### Added
+
+### Fixed 
+
+- Fixed bug in tenxsc command with base 04.
+
 ## [v5.1.0] - 2023-04-24
 
 ### Changed
