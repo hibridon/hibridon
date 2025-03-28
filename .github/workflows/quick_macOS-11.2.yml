@@ -39,7 +39,7 @@ jobs:
         then
           source /opt/intel/oneapi/setvars.sh --force
         fi
-        unbuffer cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} > >(tee ${{github.workspace}}/build/make.stdout) 2> >(tee ${{github.workspace}}/build/make.stderr >&2)
+        cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} > >(tee ${{github.workspace}}/build/make.stdout) 2> >(tee ${{github.workspace}}/build/make.stderr >&2)
         if [ "${{matrix.compiler}}" == 'gfortran-11' ]
         then
           ${{github.workspace}}/bin/zwcheck.py --make-stdout ${{github.workspace}}/build/make.stdout --show-warnings 'true'
