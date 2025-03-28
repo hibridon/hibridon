@@ -6,6 +6,7 @@
 
 ### Fixed 
 
+- fixed typo that caused stmix subroutine (used by stmix command) to misfunction in some cases.
 - Fixed bug in tenxsc command with base 04.
 
 ## [v5.1.0] - 2023-04-24

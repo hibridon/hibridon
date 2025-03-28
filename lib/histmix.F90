@@ -524,7 +524,7 @@ if (irdtrp.eq.1) then
       irdtrp = 0
    end if
 else
-   if (irstrp.eq.2) trpsmt = .false.
+   if (irdtrp.eq.2) trpsmt = .false.
 end if
 !
 if (sngsmt) then
