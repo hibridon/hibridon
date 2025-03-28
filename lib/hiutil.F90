@@ -72,7 +72,8 @@ character*(*) helpdir,helptail
 parameter (helpdir = _HELPDIR_)
 parameter (helptail = '.hlp')
 #if defined(HIB_UNIX)
-character*80 helpfile,line,lin,lin2
+character*256 helpfile
+character*80 line,lin,lin2
 character*1 pat
 #endif
 #if defined(HIB_UNIX)
