@@ -212,7 +212,7 @@ do 100 i=1,11
   vsum(i)=half*(va2p(i)+vap(i))
 ! don't compute vdif for colinear geometries
   if (i.ne.1 .and. i.ne.11) then
-    vdif(i-1)=half*(va2p(i)-vap(i))  ! disable-warnin gs:do-subscript
+    vdif(i-1)=half*(va2p(i)-vap(i))  ! disable-warnings:do-subscript
 ! for long range damp out difference potential
     if (r .gt. rmax) then
       damp=-half*(tanh(3.d0*(r-9.5d0))-one)
