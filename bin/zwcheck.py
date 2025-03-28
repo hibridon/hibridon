@@ -32,8 +32,16 @@ def remove_ansi(ansi_string: str):
 
     # ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
     # result = ansi_escape.sub('', sometext)
+
+    # handle ansi links
+    # A non-xterm extension is the hyperlink, ESC ]8;;link ST
+    # eg 'ESC]8;;https://gcc.gnu.org/onlinedocs/gfortran/Error-and-Warning-Options.html#index-Wcharacter-truncation^G-Wcharacter-truncation'
+    # ESC = 0x1B
+    # BEL (^G) = 0x07
+    ansi_string_wout_link = re.sub(r'\x1B\]8;;[^\x07]*\x07', '', ansi_string)
+
     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-    non_ansi_string = ansi_escape.sub('', ansi_string)
+    non_ansi_string = ansi_escape.sub('', ansi_string_wout_link)
     return non_ansi_string
 
 
