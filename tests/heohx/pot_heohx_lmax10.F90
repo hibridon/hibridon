@@ -369,12 +369,12 @@ do 100 i=1,11
 !          rdif=5d0
 !         endif
 ! CHANGE SIGN OF PHEOHD FOR CORRECT DEFINITION
-    vdif(i-1)=-PHEOHD(rr,cthta(i))
+    vdif(i-1)=-PHEOHD(rr,cthta(i))  ! disable-warnings:do-subscript
 ! for long range damp out difference potential
 
     if (r .gt. rmax) then
       damp=-half*(tanh(3.d0*(r-rmax))-one)
-      vdif(i-1)=vdif(i-1)*damp
+      vdif(i-1)=vdif(i-1)*damp  ! disable-warnings:do-subscript
     endif
   endif
 100 continue

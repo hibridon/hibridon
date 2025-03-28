@@ -512,7 +512,7 @@ do i = 0, m - 1
       case (3)
          z = 1.91d0 * z - 0.91d0 * x(1)
       case default
-         z = 2.0d0 * z - x(i - 2)  ! this line causes a false positive in gfortran: Error: Array reference at (1) out of bounds (-2 < 0) in loop beginning at (2) [-Werror=do-subscript]
+         z = 2.0d0 * z - x(i - 2)  ! disable-warnings:do-subscript
    end select
    do its = 1, maxit
       p1 = pim4

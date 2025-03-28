@@ -180,10 +180,10 @@ do 100 i=1,9
   vsum(i)=half*(va2p(i)+vap(i))
 ! don't compute vdif for colinear geometries
   if (i.ne.1 .and. i.ne.9) then
-    vdif(i-1)=half*(va2p(i)-vap(i))
+    vdif(i-1)=half*(va2p(i)-vap(i))  ! disable-warnings:do-subscript
 ! for long range damp out difference potential
     damp=-half*(tanh(2.d0*(r-rmax))-one)
-    vdif(i-1)=damp*vdif(i-1)
+    vdif(i-1)=damp*vdif(i-1)  ! disable-warnings:do-subscript
   endif
 100 continue
 ! solve simultaneous equations for solutions

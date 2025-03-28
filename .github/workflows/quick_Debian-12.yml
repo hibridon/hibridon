@@ -45,8 +45,11 @@ jobs:
         then
           module load compilers/ifort/latest
         fi
-        cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
-
+        unbuffer cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} > >(tee ${{github.workspace}}/build/make.stdout) 2> >(tee ${{github.workspace}}/build/make.stderr >&2)
+        if [ "${{matrix.compiler}}" == 'gfortran-12' ]
+        then
+          ${{github.workspace}}/bin/zwcheck.py --make-stdout ${{github.workspace}}/build/make.stdout --show-warnings 'true'
+        fi
     - name: catch build fail
       run: |
         if [ "${{matrix.compiler}}" == 'ifort' ]

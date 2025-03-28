@@ -316,8 +316,8 @@ do 200 i=1,9
      vxz(i)=0d0
   else
 ! double exponential at other angles
-     vxz(i)=vxzc1(i-1)*exp(-vxzl1(i-1)*r)+ &
-        vxzc2(i-1)*exp(-vxzl2(i-1)*r)
+     vxz(i)=vxzc1(i-1)*exp(-vxzl1(i-1)*r)+ &  ! disable-warnings:do-subscript
+        vxzc2(i-1)*exp(-vxzl2(i-1)*r)  ! disable-warnings:do-subscript
   endif
 ! include sqrt(2) (table I of mh alexander, jcp 99, 6014)
   vxz(i)=sq2*vxz(i)
