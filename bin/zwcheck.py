@@ -65,7 +65,7 @@ WarningTypeId = str  # eg 'do-subscript'
 
 class Alert():
     _alert_type: Optional[str]  # one of {'warning', 'note'}
-    compile_option: Optional[str]  # the compilation option that triggered the warning, eg '-Wdo-subscript'
+    warn_type_id: Optional[str]  # eg 'do-subscript'
     description: Optional[str]  # eg 'Array reference at (1) out of bounds (0 < 1) in loop beginning at (2)'
     src_file_path: Optional[Path]
     src_line_number: Optional[int]  # the line number in the source code causing the warning
@@ -77,7 +77,7 @@ class Alert():
 
     def __init__(self):
         self._alert_type = None
-        self.compile_option = None
+        self.warn_type_id = None
         self.description = None
         self.src_file_path = None
         self.src_line_number = None
@@ -96,18 +96,22 @@ class Alert():
         assert alert_type in {'warning', 'note'}
         self._alert_type = alert_type
 
+    def set_compile_option(self, compile_option: str):
+        # compile_option: the compilation option that triggered the warning, eg '-Wdo-subscript'
+        assert compile_option is not None, f'self = {self}'
+        match = re.match(r'^-W(?P<warning_type_id>[^ ]*)$', compile_option)
+        assert match, f'failed to parse compile option: {compile_option}'
+        self.warn_type_id = WarningTypeId(match['warning_type_id'])
+
     def get_type_id(self) -> WarningTypeId:
-        assert self.compile_option is not None, f'self = {self}'
-        match = re.match(r'^-W(?P<warning_type_id>[^ ]*)$', self.compile_option)
-        assert match, f'failed to parse compile option: {self.compile_option}'
-        return match['warning_type_id']
+        return self.warn_type_id
 
     def add_related_note(self, note: Warning):
         assert note.alert_type == 'note'
         self.related_notes.append(note)
 
     def __str__(self):
-        return f'{self.compile_option} in {self.src_file_path}:{self.src_line_number}: {self.description} {self.is_disabled}'
+        return f'{self.warn_type_id} in {self.src_file_path}:{self.src_line_number}: {self.description} {self.is_disabled}'
 
     def print_details(self):
         for details_line in self.details:
@@ -143,16 +147,39 @@ def parse_warning_detail_line(detail_line: str, alert: Alert, disabled_warnings:
                     # assert False
     else:
         # Warning: Array reference at (1) out of bounds (0 < 1) in loop beginning at (2) [-Wdo-subscript]
-        match = re.match(r'^Warning: (?P<warning_description>[^\[]+)\[(?P<compile_option>[^\]]+)\]$', detail_line)
-        # match = re.match(r'^Warning: (?P<warning_description>[^[]+)]\[(?P<compile_option>[^]]+)\]$', non_ansi_line)
+        match = re.match(r'^Warning: (?P<warning_text>.*)$', detail_line)
         if match:
+            warning_text = match['warning_text']
             # print(f'compile option line : "{detail_line}"')
             # print(match['warning_description'])
             alert.alert_type = 'warning'
-            alert.compile_option = match['compile_option']
-            alert.description = match['warning_description']
-            if alert.get_type_id() in disabled_warnings:
+
+            match = re.match(r'^(?P<warning_description>[^\[]+)\[(?P<compile_option>[^\]]+)\]$', warning_text)
+            if match:
+                alert.set_compile_option(match['compile_option'])
+                alert.description = match['warning_description']
+            else:
+                # some warnings such as the following don't have labels
+                # /opt/ipr/cluster/work.local/graffy/hibridon/issue174/hibridon.git/tests/c2hh2/pot_c2hh2_12_6.F90:121:14:
+
+                #    98 | use mod_hipot, only: loapot, pot
+                #       |    2
+                # ......
+                #   121 | subroutine pot(vv0, r_inp)
+                #       |              1
+                # Warning: INTENT mismatch in argument 'vv0' between (1) and (2)
+                alert.description = warning_text
+                pattern_to_warn_type_id = {
+                    'INTENT mismatch': 'intent-mismatch'
+                }
+                for pattern, warn_type_id in pattern_to_warn_type_id.items():
+                    if re.match(pattern, warning_text):
+                        alert.warn_type_id = warn_type_id
+                        break
+                assert alert.warn_type_id is not None, f'unhandled warning : "{warning_text}"'
+            if alert.warn_type_id in disabled_warnings:
                 alert.is_disabled = True
+
         else:
             # handle notes such as in
             # /opt/ipr/cluster/work.local/graffy/hibridon/issue174/hibridon.git/lib/hitensor.F90:2077:22:
