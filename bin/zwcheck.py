@@ -285,7 +285,7 @@ def check_warnings(make_stdout_file_path: Path, show_warning_details: bool) -> b
 
 def main():
     parser = argparse.ArgumentParser(description='analyzes make\'s stdout to detect non disabled warnings')
-    parser.add_argument('--make-stdout', type=Path, required=True)
+    parser.add_argument('--make-stdout', type=Path, required=True, help='path to the file containing make\'s standard output. For example, make.stdout can be obtained by the command "unbuffer make > >(tee make.stdout) 2> >(tee make.stderr >&2)"')
     parser.add_argument('--show-warnings', type=str, default='true')
 
     args = parser.parse_args()
