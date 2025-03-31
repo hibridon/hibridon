@@ -144,6 +144,7 @@ use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
 use mod_hiutil, only: mtime, gettim
 use mod_hibrid1, only: airprp
 use mod_hitypes, only: bqs_type
+use mod_hiblas, only: dcopy
 implicit none
 !   square matrices
 real(8), intent(out) :: z(nmax, nch)
@@ -474,6 +475,7 @@ use mod_himatrix, only: syminv
 #endif
 use mod_hivector, only: dset, matmov
 use mod_hibrid1, only: potmat
+use mod_hiblas, only: dscal
 
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: z(nmax*nch)
@@ -1548,11 +1550,12 @@ subroutine psiasy(fj,fn,sr,si,psir,psii,nopen,nmax)
 use mod_phot, only: photof
 use mod_hiutil, only: daxpy_wrapper
 use mod_hivector, only: matmov
+use mod_hiblas, only: dscal
 implicit none
 real(8), intent(in) :: fj(nopen)
 real(8), intent(in) :: fn(nopen)
 real(8), intent(in) :: sr(nmax,nmax)
-real(8), intent(in) :: si(nmax,nmax)
+real(8), intent(inout) :: si(nmax,nmax)
 real(8), intent(out) :: psir(nmax,nmax)
 real(8), intent(out) :: psii(nmax,nmax)
 integer, intent(in) :: nopen
@@ -1712,6 +1715,7 @@ use mod_himatrix, only: mxma
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 use mod_himatrix, only: syminv
 #endif
+use mod_hiblas, only: dscal, dcopy
 
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax, nmax), intent(inout) :: tmod
@@ -2179,6 +2183,7 @@ use mod_ered, only: ered
 use mod_phot, only: photof, wavefn
 use mod_hiutil, only: mtime
 use mod_hitypes, only: bqs_type
+use mod_hiblas, only: dcopy
 implicit double precision (a-h,o-z)
 real(8), intent(inout) :: z(nmax,nmax)
 real(8), intent(out) :: sr(nmax,nmax)

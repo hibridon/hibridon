@@ -678,6 +678,7 @@ use mod_hivector, only: dset, matmov, dsum
 use mod_hitypes, only: rbesself_type, bqs_type
 use mod_hiiolib1, only: openf
 use funit, only: FUNIT_WFU, FUNIT_PSI, FUNIT_FLX
+use mod_hiblas, only: dscal, dcopy
 implicit double precision (a-h,o-z)
 ! filnam, iflux, iprint, thresh, factr, inchj, inchl, inchi, coordf, sumf, adiab, jflux, ny, ymin, dy, rout
 character*(*), intent(in) :: filnam
@@ -1615,6 +1616,7 @@ use mod_hiba07_13p, only: ttrans
 use mod_hiutil, only: daxpy_wrapper
 use mod_himatrix, only: mxma
 use mod_hivector, only: dset, vadd, vmul, dsum
+use mod_hiblas, only: dcopy
 ! steve, you may need more space, but i doubt it since tcoord is dimensioned n
 implicit double precision (a-h,o-z)
 integer, intent(in) :: inq(nch)
@@ -2007,6 +2009,7 @@ use mod_cozmat, only: si => zmat_as_vec ! si(100)
 use mod_wave, only: irec, ifil
 use mod_himatrix, only: mxma
 use mod_hiiolib1, only: openf
+use mod_hiblas, only: dcopy
 implicit none
 integer, intent(in) :: npts
 integer, intent(in) :: nch
@@ -2042,6 +2045,7 @@ end
 subroutine print_trans_mat(r, drnow, si, nch, flx_file, num_considered_channels, num_considered_states, write_mat_file)
 use mod_himatrix, only: transp
 use mod_hiiolib1, only: openf
+use mod_hiblas, only: dscal, dcopy
 implicit none
   real(8), intent(in) :: r
   real(8), intent(in) :: drnow
@@ -2133,6 +2137,7 @@ subroutine transmt(npts,nch,rout,flx_file)
 use mod_cow, only: sr => w_as_vec ! sr(100) (real part)
 use mod_cozmat, only: si => zmat_as_vec ! si(100) (imaginary part)
 use mod_wave, only: wfu_file => ifil  ! FUNIT_WFU
+use mod_hiblas, only: dcopy
 implicit none
 integer, intent(in) :: npts
 integer, intent(in) :: nch

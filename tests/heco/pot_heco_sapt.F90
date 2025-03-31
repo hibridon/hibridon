@@ -67,6 +67,8 @@ subroutine pot (vv0, r)
 ! ----------------------------------------------------------------------
 
 use mod_covvl, only: vvl
+use mod_hiblas, only: dcopy
+use mod_hipotutil, only: dqrank, dqrlss
 implicit double precision (a-h,o-z)
 dimension vsum(11),xsum(11), &
           d0(121),aa(121),thta(11),cthta(11)

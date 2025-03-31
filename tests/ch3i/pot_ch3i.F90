@@ -470,6 +470,7 @@ end subroutine ground
 subroutine wfintern(wf, yymin, nch, nphoto, nny, ifull)
 use constants, only: xmconv
 use mod_ch3i, only: vib, gswf_data, hof
+use mod_hiblas, only: dcopy
 implicit none
 real(8), intent(out) :: wf(nch*nphoto) ! array of dimension nch*nphoto, containing, on return,
 ! ground state wavefunction in each of nch components

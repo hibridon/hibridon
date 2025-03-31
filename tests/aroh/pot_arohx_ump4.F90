@@ -75,6 +75,8 @@ subroutine pot (vv0, r)
 
 use mod_covvl, only: vvl
 use mod_hivector, only: dset
+use mod_hiblas, only: dscal, dcopy
+use mod_hipotutil, only: dqrank, dqrlss
 implicit double precision (a-h,o-z)
 dimension vsum(10),xsum(10),vdif(10),xdif(10), &
           d0(100),d2(64),aa(121)

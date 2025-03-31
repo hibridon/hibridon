@@ -36,6 +36,7 @@ use mod_1sg1sg
 use mod_cnh2
 use mod_conlam, only: nlam
 use mod_parpot, only: pot_name
+use mod_hipotutil, only: spline
 implicit none
 integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
 character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
@@ -111,9 +112,9 @@ use mod_1sg1sg
 use mod_cnh2
 use mod_conlam, only: nlam
 use mod_covvl, only: vvl
+use mod_hipotutil, only: seval
 implicit none
 double precision vv0, r_inp, r
-double precision seval
 integer iv
 vv0 = 0.d0
 if (r_inp .lt. 4.5d0) then

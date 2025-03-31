@@ -1316,6 +1316,7 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_hiutil, only: gennam
 use mod_hiiolib1, only: openf
+use mod_hiblas, only: dscal
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate

@@ -115,6 +115,7 @@ subroutine pot (vv0, r)
 !  uses linear least squares routines from lapack
 !
 use mod_covvl, only: vvl ! vvl(NLMTRM-1)
+use mod_hiblas, only: dcopy
 implicit double precision (a-h,o-z)
 ! Define the sizes of grids
 ! NLMTRM: number of lambda-mu tuples for the fit

@@ -103,6 +103,8 @@ subroutine pot (vv0, r)
 ! R = [3:0.5:10 11 12 13 15 20]
 !
 use mod_covvl, only: vvl
+use mod_hiblas, only: dscal, dcopy
+use mod_hipotutil, only: dspline, dsplint
 implicit double precision (a-h,o-z)
 real(8) :: v(5)
 real(8), save :: csplin(69,5)

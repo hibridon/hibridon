@@ -87,6 +87,7 @@ subroutine pot (vv0, r)
 ! 0 degree for He-NP and 180 for He-PN
 ! ----------------------------------------------------------------------
 use mod_covvl, only: vvl
+use mod_hiblas, only: dscal, dcopy
 implicit double precision (a-h,o-z)
 dimension &
           vsum(13), &

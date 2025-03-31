@@ -1,3 +1,5 @@
+module mod_hipotutil
+contains
 ! -----------------------------------------
 ! spline routines from didier lemoine
 subroutine dspline(x,y,n,yp1,ypn,y2)
@@ -1177,6 +1179,7 @@ end
 !$$$cmlib:linpackd       dqrdc
 subroutine dqrdc(x,ldx,n,p,qraux,jpvt,work,job)
 use mod_hiutil, only: daxpy_wrapper
+use mod_hiblas, only: dscal
 integer ldx,n,p,job
 integer jpvt(1)
 double precision x(ldx,1),qraux(1),work(1)
@@ -1257,7 +1260,7 @@ double precision x(ldx,1),qraux(1),work(1)
 !
 !     dqrdc uses the following functions and subprograms.
 !
-!     blas daxpy,ddot,dscal,dswap,dnrm2
+!     blas daxpy,ddot,dswap,dnrm2
 !     fortran dabs,dmax1,min0,dsqrt
 !
 !     internal variables
@@ -1386,6 +1389,7 @@ end
 !$$$cmlib:linpackd       dqrsl
 subroutine dqrsl(x,ldx,n,k,qraux,y,qy,qty,b,rsd,xb,job,info)
 use mod_hiutil, only: daxpy_wrapper
+use mod_hiblas, only: dcopy
 integer ldx,n,k,job,info
 double precision x(ldx,1),qraux(1),y(1),qy(1),qty(1),b(1),rsd(1), &
                  xb(1)
@@ -1525,7 +1529,7 @@ double precision x(ldx,1),qraux(1),y(1),qy(1),qty(1),b(1),rsd(1), &
 !
 !     dqrsl uses the following functions and subprograms.
 !
-!     blas daxpy,dcopy,ddot
+!     blas daxpy,ddot
 !     fortran dabs,min0,mod
 !
 !     internal variables
@@ -1808,3 +1812,4 @@ if ( j .gt. i+1 ) go to 20
 seval = y(i) + dx*(b(i) + dx*(c(i) + dx*d(i)))
 return
 end
+end module mod_hipotutil

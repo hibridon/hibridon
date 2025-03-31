@@ -24,6 +24,7 @@ contains
 !*************************************************************************
 #if defined(HIB_UNIX) || defined(HIB_CRAY)
 subroutine matmov (a, b, nr, nc, na, nb)
+use mod_hiblas, only: dcopy
 !  subroutine to put nr x nc matrix a into nr x nc matrix b
 !  author:  millard alexander
 !  current revision date: 24-sept-87
@@ -92,6 +93,7 @@ return
 end
 !  -----------------------------------------------------------------------
 subroutine vsmul (a, na, b, c, nc, n)
+use mod_hiblas, only: dscal, dcopy
 !  subroutine to multiply the elements of a vector by a scalar
 !  current revision date: 24-sept-87
 !  -----------------------------------------------------------------------
@@ -1036,6 +1038,7 @@ return
 !
 end
 subroutine dlasyf( uplo, n, nb, kb, a, lda, ipiv, w, ldw, info )
+use mod_hiblas, only: dscal, dcopy
 !
 !  -- LAPACK routine (version 1.0) --
 !     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
@@ -1149,7 +1152,7 @@ integer            idamax
 external           lsame, idamax
 !     ..
 !     .. External Subroutines ..
-external           dcopy, dgemm, dgemv, dscal, dswap
+external           dgemm, dgemv, dswap
 !     ..
 !     .. Intrinsic Functions ..
 intrinsic          abs, max, min, sqrt

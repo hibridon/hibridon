@@ -92,6 +92,8 @@ subroutine pot (vv0, r)
 ! latest revision date:  21-jan-2015
 ! ----------------------------------------------------------------------
 use mod_covvl, only: vvl
+use mod_hiblas, only: dscal, dcopy
+use mod_hipotutil, only: dsplint, dspline
 implicit double precision (a-h,o-z)
 dimension v(16)
 real(8), save :: csplin(47,16)

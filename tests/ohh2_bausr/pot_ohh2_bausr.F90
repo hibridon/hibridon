@@ -91,6 +91,8 @@ use mod_hibasutil, only: raise
 use constants, only: econv
 use mod_pot_ohh2_bausr, only: rr, lam1b, lam2b, lamb, lam1f, lam2f, lamf, bcoef, fcoef, MAX_NR, MAX_NVB, MAX_NVF, nr, nvb, nvf, splb_b, splb_c, splb_d, splf_b, splf_c, splf_d
 use mod_parpot, only: potnam=>pot_name
+use mod_hiblas, only: dscal
+use mod_hipotutil, only: spline
 implicit none
 !
 integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
@@ -168,10 +170,11 @@ use mod_pot_ohh2_bausr, only: nr, nvb, nvf, rr, &
   splb_b, splb_c, splb_d, &
   splf_b, splf_c, splf_d, &
   bcoef, fcoef
+use mod_hipotutil, only: seval
 implicit none
 real(8), intent(in) :: r_raw
 real(8), intent(out) :: vv0
-real(8) seval, r
+real(8) r
 integer :: iv
 !
 if (r_raw .lt. 3.5d0) then

@@ -104,6 +104,7 @@ use mod_cosysr, only: rspar
 use mod_cosysi, only: ispar
 use mod_ch3he, only: NVLM
 use constants, only: econv
+use mod_hiblas, only: dcopy
 implicit double precision (a-h, o-z)
 
 !   Main function for `makepot', no arguments, print vvl's interactively
@@ -211,6 +212,7 @@ use mod_cosysr, only: rspar
 use mod_cosysi, only: ispar
 use mod_ch3he, only: NVLM, NANGLE
 use constants, only: econv
+use mod_hiblas, only: dscal, dcopy
 implicit double precision (a-h, o-z)
 !
 !
@@ -324,6 +326,7 @@ subroutine splch3(vsp, r, v2_i, v2_f)
 use mod_cosysr, only: rspar
 use mod_cosysi, only: ispar
 use mod_ch3he, only: V2MAX, V2TMAX, NANGLE, NDIST
+use mod_hipotutil, only: spline, seval
 implicit double precision (a-h, o-z)
 !   Spline the interaction potential (integreted over vibrational
 !   coordinate Q2) to the given R for a particular (v2, v2') tuple.
@@ -360,7 +363,6 @@ data RR /3.5d0, 4d0, 4.5d0, 5d0, 5.5d0, 6d0, 6.5d0, 7d0, 7.5d0, &
          8d0, 8.5d0, 9d0, 9.5d0, 1d1, 1.1d1, 1.2d1, 1.3d1, &
          1.5d1, 2d1/
 !   Function to evaluate splined potential
-double precision seval
 !
 character*255 datfl
 logical, save ::  isfst=.true.

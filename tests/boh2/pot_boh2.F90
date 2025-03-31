@@ -112,6 +112,8 @@ subroutine pot (vv0, r)
 
 use mod_covvl, only: vvl
 use mod_par, only: csflag, ihomo
+use mod_hiblas, only: dscal, dcopy
+use mod_hipotutil, only: dqrank, dqrlss
 implicit double precision (a-h,o-z)
 dimension vsl1(9), vsl2(9), vsr0(9), vsc1(9), vsc2(9), &
   vsc3(9), vscl(9)

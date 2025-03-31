@@ -1103,6 +1103,7 @@ end
 ! ------------------------------------------------------------
 subroutine sgefa(a,lda,n,ipvt,info)
 use mod_hiutil, only: daxpy_wrapper
+use mod_hiblas, only: dscal
 implicit double precision (a-h,o-z)
 integer lda,n,ipvt(1),info
 dimension a(lda,1)
@@ -2109,6 +2110,7 @@ return
 !
 end
 subroutine dsytf2( uplo, n, a, lda, ipiv, info )
+use mod_hiblas, only: dscal
 !
 !  -- LAPACK routine (version 1.0b) --
 !     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
@@ -2239,7 +2241,7 @@ integer            idamax
 external           lsame, idamax
 !     ..
 !     .. External Subroutines ..
-external           dlaev2, drot, dscal, dswap, dsyr, xerbla
+external           dlaev2, drot, dswap, dsyr, xerbla
 !     ..
 !     .. Intrinsic Functions ..
 intrinsic          abs, max, sqrt

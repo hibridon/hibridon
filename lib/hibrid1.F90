@@ -168,6 +168,7 @@ use mod_pmat, only: rtmn, rtmx, iflag
 use mod_cputim, only: cpupot
 use mod_hivector, only: dset
 use constants, only: zero, two
+use mod_hiblas, only: dscal, dcopy
 implicit none
 real(8) :: second
 real(8), dimension(*), intent(out) :: w
@@ -423,6 +424,7 @@ subroutine potent (w, vecnow, scmat, eignow, hp, scr, &
    use mod_ancou, only: ancou_type
    use mod_hiutil, only: daxpy_wrapper, dsyevr_wrapper
    use mod_himatrix, only: transp
+   use mod_hiblas, only: dscal, dcopy
    implicit none
 !  square matrices (of row dimension nmax)
 real(8), dimension(nmax*nmax), intent(out) :: w
@@ -1181,10 +1183,10 @@ subroutine wavevc (w, eignow, rnow, nch, nmax, v2)
 !     tred1,tqlrat:   eispack routines to obtain eigenvalues of real,
 !                     matrix
 !     dsyevr:         latest lapack eigenvalue routine
-!     dscal, dcopy:   linpack blas routines
 ! ----------------------------------------------------------------
 use mod_ancou, only: ancou_type
 use mod_hiutil, only: dsyevr_wrapper
+use mod_hiblas, only: dscal, dcopy
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: w(nmax*nmax)
 real(8), intent(out) :: eignow(nch)
@@ -1197,8 +1199,7 @@ type(ancou_type), intent(in) :: v2
 integer, parameter :: ldz = 1
 integer icol, ierr, ipt, nmaxm1, nmaxp1, nrow
 real(8), dimension(ldz, nch):: vecnow_unused   ! this is the z array that dsyevr wants, even if it's not used when jobz = 'N'
-external dscal, dcopy
-!     external dscal, dcopy, potmat, tred1, tqlrat
+!     external potmat, tred1, tqlrat
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 real(8) :: scr1(nch)
 real(8) :: scr2(nch)
@@ -1346,7 +1347,7 @@ use mod_himatrix, only: mxma
 use mod_himatrix, only: syminv
 #endif
 use mod_hivector, only: dset, vadd, vmul, matmov
-
+use mod_hiblas, only: dscal, dcopy
 
 implicit double precision (a-h, o-z)
 !  matrix dimensions (row dimension = nmax, matrices stored column by column)
@@ -1842,6 +1843,7 @@ use mod_cotq1, only: tmat => dpsir ! tmat(80)
 use mod_hiutil, only: daxpy_wrapper
 use mod_himatrix, only: mxma
 use mod_hivector, only: matmov
+use mod_hiblas, only: dscal, dcopy
 implicit double precision (a-h,o-z)
 !  square matrices (of row dimension nmax)
 dimension vecnow(80), scr(80)
@@ -2039,6 +2041,7 @@ subroutine corr (eignow, eigold, hp, drnow, drmid, xlarge, &
 !               algorithms"
 !    nch:       number of channels
 !  ----------------------------------------------------------------------
+use mod_hiblas, only: dcopy
 implicit double precision (a-h,o-z)
 data zero,one,two /0.d0, 1.d0, 2.d0/
 !      real  cay, cdiag, coff, drmid, drnow, factor, w2p, xlarge
@@ -2102,10 +2105,10 @@ subroutine dtrans (a, b, c, diag, xlarge, n, nmax, ifind)
 !  all matrices are stored in packed column form
 !  subroutines called:
 !  rgmmul:      generalized matrix multiply ( a * b = c or a * b-transpose = c
-!  dcopy:       linpack blas
 !  maxmgv:      find maximum (absolute value) element in a vector
 ! -----------------------------------------------------------------------
 use mod_hivector, only: maxmgv
+use mod_hiblas, only: dcopy
 implicit double precision (a-h,o-z)
 #if defined(HIB_UNIX_IBM)
 character*1 forma, formb

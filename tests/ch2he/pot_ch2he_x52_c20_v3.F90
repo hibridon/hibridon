@@ -121,6 +121,7 @@ subroutine pot (vv0, r)
 !
 use mod_covvl, only: vvl
 use constants, only: s4pi
+use mod_hiblas, only: dscal, dcopy
 implicit double precision (a-h,o-z)
 dimension iwork(3000),ylm(52,20)
 dimension swork(20), work(3624)
@@ -599,6 +600,8 @@ subroutine spline_ch2he(vsp_jacek, r)
 !  Rp, XX   orignal data, Rp & XX should have the same dimensions
 !  r  new distance, where pot need to be calculated by spline-Fitchbur
 !  VNO  pot at r, output
+use mod_hiblas, only: dcopy
+use mod_hipotutil, only: spline, seval
 implicit double precision (a-h,o-z)   
 real(8), intent(out) :: vsp_jacek(52)
 real(8), intent(in)  :: r

@@ -579,6 +579,7 @@ subroutine tcasea22(j,jlpar)
 !   latest revision date:  30-dec-1995
 ! -----------------------------------------
 use mod_hivector, only: dset
+use mod_hiblas, only: dscal
 implicit double precision (a-h,o-z)
 data zero, one,two ,three,six/0.d0, 1.d0, 2.d0, 3.d0, 6.d0/
 if (j .lt. 2) then
@@ -679,6 +680,7 @@ use mod_coeint, only: eint
 use mod_cosysr, only: rspar
 use constants, only: econv
 use mod_jtot, only: j => jjtot, jlpar => jjlpar
+use mod_hiblas, only: dscal
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
   use mod_himatrix, only: mxma
 #endif
