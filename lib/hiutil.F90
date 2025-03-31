@@ -1839,6 +1839,7 @@ end subroutine
 !     ------------------------------------------------------------------
 subroutine dsyevr_wrapper(jobz, range, uplo, n, a, lda, vl, vu, &
       il, iu, abstol, m, w, z, ldz, isuppz, work, lwork, iwork, liwork, info)
+use mod_hiblas, only: dsyevx
 implicit none
 #ifdef FLOATING_POINT_ERRORS_CAUSE_EXCEPTIONS
 ! use dsyevx instead of dsyevr if floating point exceptions are on
@@ -1952,6 +1953,7 @@ end subroutine
 
 !#define DEBUG_DSYEV_WRAPPER
 subroutine dsyev_wrapper(jobz, uplo, n, a, lda, w, work, lwork, info)
+use mod_hiblas, only: dsyev
 implicit none
 character, intent(in) :: jobz
 character, intent(in) :: uplo

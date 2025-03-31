@@ -1124,6 +1124,7 @@ subroutine steppr (vecnow, vecnew, tmat, nmax, n)
 !                a.b-transpose
 ! --------------------------------------------------------------------------
 use mod_hivector, only: matmov
+use mod_hiblas, only: dgemm
 implicit double precision (a-h,o-z)
 !      real vecnow, vecnew, tmat
 integer n, nmax, isw
@@ -2108,7 +2109,7 @@ subroutine dtrans (a, b, c, diag, xlarge, n, nmax, ifind)
 !  maxmgv:      find maximum (absolute value) element in a vector
 ! -----------------------------------------------------------------------
 use mod_hivector, only: maxmgv
-use mod_hiblas, only: dcopy
+use mod_hiblas, only: dcopy, dgemm
 implicit double precision (a-h,o-z)
 #if defined(HIB_UNIX_IBM)
 character*1 forma, formb

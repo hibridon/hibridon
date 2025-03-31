@@ -136,6 +136,7 @@ use constants, only: econv, xmconv
 use mod_par, only: iprint
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
+use mod_hiblas, only: dsyev, dgemm
 implicit double precision (a-h,o-z)
 type(bqs_type), intent(out) :: bqs
 type(ancou_type), intent(out), allocatable, target :: v2

@@ -2661,6 +2661,7 @@ subroutine mxma(a,mcola,mrowa,b,mcolb,mrowb, &
 ! written 04-jan-85 by ron shepard.
 !
 use mod_comxm, only: ncache, mxmblk
+use mod_hiblas, only: dgemm
 implicit double precision (a-h,o-z)
 #include "common/vax1.F90"
 #include "common/vax2.F90"
@@ -4321,6 +4322,7 @@ subroutine mxmb(a,mcola,mrowa,b,mcolb,mrowb, &
 !--------------------------------------------------------------------
 !.....unrolled version for ibm6000 and other risc machines
 use mod_comxm, only: ncache, mxmblk
+use mod_hiblas, only: dgemm
 implicit double precision (a-h,o-z)
 #include "common/vax1.F90"
 dimension r(*),a(*),b(*)

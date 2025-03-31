@@ -9,6 +9,7 @@
 
 ### Fixed 
 
+- Fixed a buffer overwrite bug in `bound`, where `dsygvx` was called with a vector `ifail` that was undersized
 - Fixed typo that caused stmix subroutine (used by stmix command) to misfunction in some cases.
 - Fixed bug in tenxsc command with base 04.
 

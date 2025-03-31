@@ -1038,7 +1038,7 @@ return
 !
 end
 subroutine dlasyf( uplo, n, nb, kb, a, lda, ipiv, w, ldw, info )
-use mod_hiblas, only: dscal, dcopy
+use mod_hiblas, only: dscal, dcopy, dgemm
 !
 !  -- LAPACK routine (version 1.0) --
 !     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
@@ -1152,7 +1152,7 @@ integer            idamax
 external           lsame, idamax
 !     ..
 !     .. External Subroutines ..
-external           dgemm, dgemv, dswap
+external           dgemv, dswap
 !     ..
 !     .. Intrinsic Functions ..
 intrinsic          abs, max, min, sqrt

@@ -1715,7 +1715,7 @@ use mod_himatrix, only: mxma
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 use mod_himatrix, only: syminv
 #endif
-use mod_hiblas, only: dscal, dcopy
+use mod_hiblas, only: dscal, dcopy, dgemm
 
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax, nmax), intent(inout) :: tmod

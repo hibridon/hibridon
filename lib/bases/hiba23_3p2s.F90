@@ -447,6 +447,7 @@ subroutine vlm3p2s (j1, j12_1, l1, j2, j12_2, l2, jtot, lb, vee)
 ! --------------------------------------------------------------------
 use mod_coeig2, only:  t12, t32
 use mod_hiutil, only: xf3j
+use mod_hiblas, only: dgemm
 implicit double precision (a-h,o-z)
 dimension v12(5,5),v32(3,3),a12(5,5),a32(3,3)
 vee = 0.d0

@@ -40,6 +40,7 @@ use mod_ered, only: rmu
 use mod_file, only: jobnam
 use mod_hiutil, only: gennam
 use mod_hiiolib1, only: openf
+use mod_hiblas, only: dsyevx, dsygvx
 implicit none
 integer, intent(in) :: nch, nmax
 type(ancou_type), intent(in) :: v2
@@ -53,8 +54,10 @@ real(8), parameter :: pi=dacos(-1d0)
 integer, parameter :: maxpos=20, maxchn=10, maxvec=20, ione=1
 character(40) :: evalfil
 integer :: vmax, ndim, i, j, k, irow, icol, nr, ir, &
-     nbound, lwork, ifail, info, m, lenx, liwork, irow1, irow2, &
+     nbound, lwork, info, m, lenx, liwork, irow1, irow2, &
      icol1, icol2, ngh, i1, j1, il, iu
+integer :: unused_ifail(1)
+integer, allocatable :: ifail(:)
 real(8) :: del, alph, hexac, rnow, wt, xij, xfact, ratio
 integer, dimension(1) :: iworks
 !
@@ -106,7 +109,7 @@ lwork = 8 * vmax
 allocate(work(lwork))
 allocate(iwork(5 * vmax))
 call dsyevx('N', 'I', 'L', vmax, cchn, vmax, 0d0, 0d0, 1, 1, 0d0, &
-     m, w, 0d0, 1, work, lwork, iwork, ifail, info)
+     m, w, unused_z, 1, work, lwork, iwork, unused_ifail, info)
 deallocate(iwork)
 deallocate(work)
 write (1, 19) w(1)
@@ -279,6 +282,7 @@ if (wavefl) then
 411       format (' ** CALL DSYGVX TO CALCULATE ', i3, &
            ' LOWEST EIGENVALUES AND CORRESPONDING EIGENVECTORS.')
       allocate(work(1))
+      allocate(ifail(ndim))
       call dsygvx(1, 'V', 'I', 'L', ndim, h, ndim, s, ndim, &
            0d0, 0d0, il, iu, 0d0, m, w, z, ndim, &
            work, -1, iworks, ifail, info)
@@ -294,6 +298,7 @@ if (wavefl) then
            work, lwork, iwork, ifail, info)
       h(:, :m) = z(:, :m)
       deallocate(z)
+      deallocate(ifail)
    end if
 else
    if (tolai .ge. 0d0) then
@@ -321,7 +326,7 @@ else
       allocate(work(1))
       call dsygvx(1, 'N', 'I', 'L', ndim, h, ndim, s, ndim, &
            0d0, 0d0, il, iu, 0d0, m, w, unused_z, ione, &
-           work, -1, iworks, ifail, info)
+           work, -1, iworks, unused_ifail, info)
       lwork = work(1)
       liwork = 5 * ndim
       write (1, *) 'REQUIRED ARRAY LENGTH', lwork, liwork
@@ -330,7 +335,7 @@ else
       allocate(iwork(liwork))
       call dsygvx(1, 'N', 'I', 'L', ndim, h, ndim, s, ndim, &
            0d0, 0d0, il, iu, 0d0, m, w, unused_z, ione, &
-           work, lwork, iwork, ifail, info)
+           work, lwork, iwork, unused_ifail, info)
   end if
 end if
 deallocate(iwork)

@@ -136,6 +136,7 @@ use mod_parbas, only: lammin, lammax, mproj
 use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
+use mod_hiblas, only: dsyev
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(bqs_type), intent(out) :: bqs

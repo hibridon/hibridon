@@ -39,6 +39,7 @@ use mod_hismat, only: sread, rdhead, sinqr
 use mod_hitypes, only: bqs_type
 use mod_par, only: batch
 use mod_hiiolib1, only: openf
+use mod_hiblas, only: dsyev
 implicit double precision (a-h, o-z)
 type(bqs_type) :: packed_bqs
 type(bqs_type) :: row_bqs
