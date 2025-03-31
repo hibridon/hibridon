@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "unused.h"
 module mod_hiba08_2mol
+  use mod_assert, only: fassert
 contains
 ! sy2mol (sav2mol/ptr2mol) defines, save variables and reads             *
 !                  potential for 2 singlet sigma molecule scattering     *

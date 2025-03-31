@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "unused.h"
 module mod_hibrid3
+  use mod_assert, only: fassert
 contains
 !************************************************************************
 !                         hibridon 3  library                           *

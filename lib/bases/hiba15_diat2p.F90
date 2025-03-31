@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "unused.h"
 module mod_hiba15_diat2p
+  use mod_assert, only: fassert
 contains
 ! sydiat2p (savdiat2p/ptrdiat2p) defines, saves variables and read       *
 !                  potential for heteronuclear + 2P atom scattering      *

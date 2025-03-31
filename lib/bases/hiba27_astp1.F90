@@ -1,5 +1,6 @@
 #include "assert.h"
 module mod_hiba27_astp1
+  use mod_assert, only: fassert
 contains
 ! syastp1 (savastp1/ptrastp1) defines, saves variables and reads         *
 !                  potential for C2v asymmetric top-atom scattering      *

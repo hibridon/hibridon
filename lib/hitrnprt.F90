@@ -13,6 +13,7 @@ module mod_trn
 end module mod_trn
 
 module mod_hitrnprt
+  use mod_assert, only: fassert
 contains
 subroutine trnprt(filnam,a)
 !

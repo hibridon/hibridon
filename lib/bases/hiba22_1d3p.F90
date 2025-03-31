@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "unused.h"
 module mod_hiba22_1d3p
+  use mod_assert, only: fassert
 contains
 ! sy1d3p (sav1d3p/ptr1d3p) defines, saves variables and reads            *
 !                  potentials for atom in 1D/3P states in collision      *

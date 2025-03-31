@@ -14,8 +14,9 @@
 !     current revision:  24-jul-2019 (p.dagdigian)                       *
 !                                                                       *
 !************************************************************************
-module mod_hibasis
 #include "assert.h"
+module mod_hibasis
+use mod_assert, only: fassert
 contains
 ! --------------------------------------------------------------------
 subroutine basis (bqs, jhold, ehold, ishold, nlevel, nlevop, &

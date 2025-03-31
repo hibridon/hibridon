@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "unused.h"
 module mod_hiba24_sphtp
+  use mod_assert, only: fassert
 contains
 ! sysphtp (savsphtp/ptrsphtp) defines, saves variables and reads         *
 !                  potentials for spherical top + atom                   *

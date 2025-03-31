@@ -1,5 +1,6 @@
 #include "assert.h"
 module mod_hiba17_ch2x
+  use mod_assert, only: fassert
 contains
 ! sych2x (savch2x/ptrch2x) defines, saves variables and reads            *
 !                  potential for CH2(X 3B1 (0,v2,0)-atom scattering      *

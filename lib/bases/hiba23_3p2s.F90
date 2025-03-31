@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "unused.h"
 module mod_hiba23_3p2s
+  use mod_assert, only: fassert
 contains
 ! sy3p2s (sav3p2s/ptr3p2s) defines, saves variables and reads            *
 !                  potentials for 3P atom + 2S atom                      *

@@ -23,6 +23,7 @@
 !     This module replaces lammin, lammax, mproj in hibridon.
 !
 module mod_1sg1sg
+  use mod_assert, only: fassert
 implicit none
 !
 type lm_type

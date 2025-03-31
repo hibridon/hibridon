@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "unused.h"
 module mod_hiba05_pi
+  use mod_assert, only: fassert
 contains
 ! sypi (savpi/ptrpi) defines, save variables and reads                   *
 !                  potential for general pi scattering                   *

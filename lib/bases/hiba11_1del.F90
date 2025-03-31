@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "unused.h"
 module mod_hiba11_1del
+  use mod_assert, only: fassert
 contains
 ! sy1del (sav1del/ptr1del) defines, saves variables and reads            *
 !                  potential for singlet delta scattering                *

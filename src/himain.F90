@@ -1,5 +1,7 @@
 #include "assert.h"
 program logair
+use mod_assert, only: fassert
+
 use mod_com, only: com_file, com
 use mod_clseg, only: allocate_clseg
 use mod_cobuf, only: allocate_cobuf

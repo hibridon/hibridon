@@ -37,6 +37,7 @@
 !     filled in the pot routine.
 !     This module replaces lammin, lammax, mproj in hibridon.
 module mod_stp1sg
+  use mod_assert, only: fassert
 use mod_hiutil, only: tf3j, f6j, f9j, tf3jm0
 implicit none
 !

@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "unused.h"
 module mod_hiba28_3sg1sg
+  use mod_assert, only: fassert
 contains
 ! sy3sg1sg (sav2sg1sg/ptr2sg1sg) defines, saves variables and reads     *
 !                  potentials for 3sigma - 1sigma                        *

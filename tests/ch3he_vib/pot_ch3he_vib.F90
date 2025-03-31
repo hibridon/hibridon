@@ -19,6 +19,7 @@
 
 
 module mod_ch3he
+  use mod_assert, only: fassert
   implicit none
 
   !   Define the sizes of grids
@@ -527,6 +528,8 @@ subroutine bausr(bqs, jhold, ehold, ishold, nlevel, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 !
+use mod_assert, only: fassert
+
 use mod_hibasutil, only: vlmstp, iswap
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_hitypes, only: bqs_type

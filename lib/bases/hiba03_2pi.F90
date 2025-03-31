@@ -4,6 +4,7 @@
 #include "assert.h"
 #include "unused.h"
 module mod_hiba03_2pi
+  use mod_assert, only: fassert
 contains
 subroutine ba2pi (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1, c12, c32, sc4, rcut, jtot, &

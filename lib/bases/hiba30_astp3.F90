@@ -22,6 +22,7 @@ end module mod_asymln
 
 
 module mod_hiba30_astp3
+  use mod_assert, only: fassert
 contains
   ! ----------------------------------------------------------------------
 subroutine baastp3 (bqs, jhold, ehold, ishold, nlevel, &

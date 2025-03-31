@@ -1,6 +1,7 @@
 #include "assert.h"
 !  -------------------------------------------------------------
 module mod_flow
+  use mod_assert, only: fassert
 contains
 subroutine flow (z, w, zmat, amat, bmat, jlev, &
             elev, inlev, isc1, isc2, isc3, isc4, lsc1, &

@@ -4,6 +4,7 @@
 #include "assert.h"
 #include "unused.h"
 module mod_hiba12_h2p
+  use mod_assert, only: fassert
 contains
 subroutine bah2p (bqs, jhold, ehold, ishold, nlevel, nlevop, &
                   sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &

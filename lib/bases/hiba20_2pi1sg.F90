@@ -13,6 +13,7 @@
 !     filled in the pot routine.
 !     This module replaces lammin, lammax, mproj in hibridon.
 module mod_2pi1sg
+  use mod_assert, only: fassert
 implicit none
 !
 type lm_type

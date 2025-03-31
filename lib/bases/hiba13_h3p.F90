@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "unused.h"
 module mod_hiba13_h3p
+  use mod_assert, only: fassert
 contains
 ! syh3p (savh3p/ptrh3p) defines, saves variables and reads               *
 !                  potential for homonuclear+3P atom scattering          *

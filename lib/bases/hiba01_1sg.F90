@@ -21,6 +21,7 @@
 !                                                                       *
 !************************************************************************
 module mod_hiba01_1sg
+  use mod_assert, only: fassert
 contains
 ! --------------------------------------------------------------------
 subroutine ba1sg (bqs, jhold, ehold, ishold, nlevel, nlevop, &
@@ -777,6 +778,7 @@ end
 end module mod_hiba01_1sg
 
 module mod_basis
+  use mod_assert, only: fassert
 implicit none
 contains
 

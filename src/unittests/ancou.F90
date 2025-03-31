@@ -112,6 +112,7 @@ end subroutine test_alloc_simpler
 !   number of ancouma_type instances created :           55
 
 program test_ancou_type
+    use mod_assert, only: fassert
     use mod_ancou, only: ancou_type, ancouma_type, print_ancou_stats
     use mod_grovec, only: print_grovec_stats, igrovec_type_block, dgrovec_type_block
 

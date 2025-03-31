@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "unused.h"
 module mod_hiba09_stpln
+  use mod_assert, only: fassert
 logical :: twomol ! if .true. collision between symmetric top and linear
                   ! molecule, if .false. collision symmetric top-atom.
 contains

@@ -43,6 +43,7 @@
 @proc ss fixed(132)
 #endif
 module mod_hiutil
+  use mod_assert, only: fassert
 #if defined(HIB_ULTRIX_DEC)
     real(8) :: ttim(2)  ! sums time delta provided by etime and secnds
 #endif

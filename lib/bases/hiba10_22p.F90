@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "unused.h"
 module mod_hiba10_22p
+  use mod_assert, only: fassert
 
 real(8) :: ttrans(6,6)
 

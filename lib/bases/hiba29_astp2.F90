@@ -36,6 +36,7 @@ type(lm_type), dimension(:), allocatable :: lms
 end module mod_chiral
 ! --------------------------------------------------------------------
 module mod_hiba29_astp2
+  use mod_assert, only: fassert
   contains  
 subroutine baastp2 (bqs, jhold, ehold, ishold, nlevel, nlevop, &
                   etemp, fjtemp, fktemp, fistmp, &

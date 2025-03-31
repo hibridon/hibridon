@@ -152,6 +152,7 @@ module mod_cdio
 end module mod_cdio 
 
 module mod_hiiolib
+  use mod_assert, only: fassert
 contains
 
 ! ---------------------------------------------------------------
@@ -301,6 +302,7 @@ end module mod_hiiolib
 
 
 module mod_hiiolib1
+  use mod_assert, only: fassert
 contains
 ! ---------------------------------------------------------------
 subroutine fimove (nxfile)
@@ -2003,6 +2005,7 @@ end
 end module mod_hiiolib1
 
 module mod_hiiolib2
+  use mod_assert, only: fassert
 contains
 ! -------------------------------------------------------------------
 ! -------------------------------------------------------------------

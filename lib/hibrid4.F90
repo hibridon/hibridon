@@ -1,6 +1,7 @@
-module mod_hibrid4
-contains
 #include "assert.h"
+module mod_hibrid4
+use mod_assert, only: fassert
+contains
 !***********************************************************************
 !                                                                       *
 !                         hibridon 4  library                           *

@@ -2,6 +2,7 @@
 #include "unused.h"
 
 module mod_savfile
+  use mod_assert, only: fassert
 implicit none
 
   integer, parameter :: num_recs_per_energy = 5
@@ -73,6 +74,7 @@ contains
 end module mod_savfile
 
 module mod_hibrid5
+use mod_assert, only: fassert
 
 
 

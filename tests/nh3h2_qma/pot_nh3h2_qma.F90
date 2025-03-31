@@ -274,6 +274,7 @@ end
 subroutine bausr(bqs, jhold, ehold, ishold, nlevel, nlevop, &
      sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, csflag, &
      clist, bastst, ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
+use mod_assert, only: fassert
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint

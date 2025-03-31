@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "unused.h"
 module mod_hiba02_2sg
+  use mod_assert, only: fassert
 contains
 ! sy2sg (sav2sg/ptr2sg) defines, saves variables and reads          *
 !                  potential for doublet sigma scattering                *

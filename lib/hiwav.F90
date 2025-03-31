@@ -1,5 +1,6 @@
 #include "assert.h"
 module mod_wave  ! mod_wav is a modern replacement of common block cowave
+  use mod_assert, only: fassert
   implicit none
   integer :: irec    ! record number of last written g(a,b) matrix
   integer :: ifil    ! file unit used for wfu file (is it always FUNIT_WFU ?)

@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "unused.h"
 module mod_hiba14_2del
+  use mod_assert, only: fassert
 contains
 ! sy2del (sav2de/ptr2de) defines, saves variables and reads              *
 !                  potential for doublet-delta scattering                *

@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "unused.h"
 module mod_hiba04_sgpi
+  use mod_assert, only: fassert
 contains
 ! sysgpi (savsgpi/ptrsgpi) defines, saves variables and reads            *
 !                  potential for doublet/pi sigma scattering             *

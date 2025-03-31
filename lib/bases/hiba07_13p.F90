@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "unused.h"
 module mod_hiba07_13p
+  use mod_assert, only: fassert
 real(8) :: ttrans(6,6)
 contains
 ! sy13p (sav13p/ptr13p) defines, save variables and reads                *

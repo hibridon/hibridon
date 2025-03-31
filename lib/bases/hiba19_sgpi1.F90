@@ -3,6 +3,7 @@
 
 
 module mod_hiba19_sgpi1
+  use mod_assert, only: fassert
 !    ivpi:     array of vibrational quantum numbers of the 2pi state to be
 !              included in the calculation.  must be consistent with order of
 !              levels listed in common block cvibp, from pot routine.

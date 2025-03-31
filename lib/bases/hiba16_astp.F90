@@ -1,5 +1,6 @@
 #include "assert.h"
 module mod_hiba16_astp
+  use mod_assert, only: fassert
 contains
 ! syastp (savastp/ptrastp) defines, saves variables and reads            *
 !                  potential for asymmetric top-atom scattering          *

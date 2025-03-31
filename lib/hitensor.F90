@@ -16,6 +16,7 @@ module mod_tensor_ang
 end module mod_tensor_ang
 
 module tensor_util
+use mod_assert, only: fassert
 use mod_hitypes, only: bqs_type
 implicit none
 integer :: jmx, kmx, lmx, kkmx, lbufs, lbuflb
@@ -955,6 +956,7 @@ end subroutine tensor_free
 end module tensor_util
 
 module mod_tensor
+  use mod_assert, only: fassert
 contains
 ! ------------------------------------------------------------------
 subroutine tenopa(filnam,a)

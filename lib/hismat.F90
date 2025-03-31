@@ -1,5 +1,6 @@
 #include "assert.h"
 module mod_hismat
+  use mod_assert, only: fassert
 contains
 
 ! ---------------------------------------------------------------------------

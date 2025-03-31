@@ -7,6 +7,8 @@
 #endif
 
 module mod_hinput
+  use mod_assert, only: fassert
+
   enum, bind( C )
   enumerator :: &
     k_keyword_execute_command     =  1, &   !   40 label:execute_command(i)

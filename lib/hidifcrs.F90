@@ -1,5 +1,6 @@
 #include "assert.h"
 module mod_difcrs
+  use mod_assert, only: fassert
 contains
 !  -------------------------------------------------------------
 subroutine difcrs(fname1,a,flaghf)
