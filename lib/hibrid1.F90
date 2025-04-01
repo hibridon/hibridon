@@ -152,7 +152,6 @@ subroutine potmat (w, r, nch, nmax, v2)
 !           iflag = 2 if all asymptotically open channels are open at r
 !  subroutines called:
 !    pot:      returns r-dependence of each angular term in the potential
-!    daxpy:    blas routine
 !    vsmul:    multiplies vector by scalar and stores result in another
 !              vector
 !  -------------------------------------------------------------------
@@ -422,9 +421,8 @@ subroutine potent (w, vecnow, scmat, eignow, hp, scr, &
 !              vectors
 ! ----------------------------------------------------------------------
    use mod_ancou, only: ancou_type
-   use mod_hiutil, only: daxpy_wrapper, dsyevr_wrapper
    use mod_himatrix, only: transp
-   use mod_hiblas, only: dscal, dcopy
+   use mod_hiblas, only: dscal, dcopy, daxpy_wrapper, dsyevr_wrapper
    implicit none
 !  square matrices (of row dimension nmax)
 real(8), dimension(nmax*nmax), intent(out) :: w
@@ -1186,8 +1184,7 @@ subroutine wavevc (w, eignow, rnow, nch, nmax, v2)
 !     dsyevr:         latest lapack eigenvalue routine
 ! ----------------------------------------------------------------
 use mod_ancou, only: ancou_type
-use mod_hiutil, only: dsyevr_wrapper
-use mod_hiblas, only: dscal, dcopy
+use mod_hiblas, only: dscal, dcopy, dsyevr_wrapper
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: w(nmax*nmax)
 real(8), intent(out) :: eignow(nch)
@@ -1339,7 +1336,6 @@ use mod_par, only: par_iprint=>iprint
 use mod_wave, only: irec, ifil, nchwfu, iendwv, get_wfu_airy_rec_length
 use mod_selb, only: ibasty
 use mod_phot, only: photof, wavefn, writs
-use mod_hiutil, only: daxpy_wrapper
 use mod_himatrix, only: transp
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
 use mod_himatrix, only: mxma
@@ -1348,7 +1344,7 @@ use mod_himatrix, only: mxma
 use mod_himatrix, only: syminv
 #endif
 use mod_hivector, only: dset, vadd, vmul, matmov
-use mod_hiblas, only: dscal, dcopy
+use mod_hiblas, only: dscal, dcopy, daxpy_wrapper
 
 implicit double precision (a-h, o-z)
 !  matrix dimensions (row dimension = nmax, matrices stored column by column)
@@ -1841,10 +1837,9 @@ subroutine gndloc (vecnow, scr, rnow, drnow, nch, nmax)
 ! ----------------------------------------------------------------------
 use mod_coqvec2, only: q => q2
 use mod_cotq1, only: tmat => dpsir ! tmat(80)
-use mod_hiutil, only: daxpy_wrapper
 use mod_himatrix, only: mxma
 use mod_hivector, only: matmov
-use mod_hiblas, only: dscal, dcopy
+use mod_hiblas, only: dscal, dcopy, daxpy_wrapper
 implicit double precision (a-h,o-z)
 !  square matrices (of row dimension nmax)
 dimension vecnow(80), scr(80)

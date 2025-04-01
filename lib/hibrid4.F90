@@ -673,12 +673,11 @@ use mod_wave, only: irec, inflev
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_hiutil, only: gennam, mtime, gettim, dater
-use mod_hiutil, only: daxpy_wrapper
 use mod_hivector, only: dset, matmov, dsum
 use mod_hitypes, only: rbesself_type, bqs_type
 use mod_hiiolib1, only: openf
 use funit, only: FUNIT_WFU, FUNIT_PSI, FUNIT_FLX
-use mod_hiblas, only: dscal, dcopy
+use mod_hiblas, only: dscal, dcopy, daxpy_wrapper
 implicit double precision (a-h,o-z)
 ! filnam, iflux, iprint, thresh, factr, inchj, inchl, inchi, coordf, sumf, adiab, jflux, ny, ymin, dy, rout
 character*(*), intent(in) :: filnam
@@ -1613,10 +1612,9 @@ use mod_coqvec, only: nphoto
 use mod_selb, only: ibasty
 use mod_ered, only: rmu
 use mod_hiba07_13p, only: ttrans
-use mod_hiutil, only: daxpy_wrapper
 use mod_himatrix, only: mxma
 use mod_hivector, only: dset, vadd, vmul, dsum
-use mod_hiblas, only: dcopy
+use mod_hiblas, only: dcopy, daxpy_wrapper
 ! steve, you may need more space, but i doubt it since tcoord is dimensioned n
 implicit double precision (a-h,o-z)
 integer, intent(in) :: inq(nch)

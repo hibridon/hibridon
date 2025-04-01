@@ -467,7 +467,6 @@ use mod_wave, only: irec, ifil, nchwfu, nrlogd, iendwv, get_wfu_logd_rec_length
 
 use funit
 use mod_phot, only: photof, wavefn, writs
-use mod_hiutil, only: daxpy_wrapper
 use mod_hiutil, only: mtime
 use mod_himatrix, only: mxma
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
@@ -475,7 +474,7 @@ use mod_himatrix, only: syminv
 #endif
 use mod_hivector, only: dset, matmov
 use mod_hibrid1, only: potmat
-use mod_hiblas, only: dscal
+use mod_hiblas, only: dscal, daxpy_wrapper
 
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: z(nmax*nch)
@@ -515,7 +514,7 @@ integer ich, icode, icol, idiag, ierr, ij, irow, istep, kstep, &
 !     :     tn, tp,  zero, wdiag
 !      real w, z
 !      real scr1, scr2, wref, z1, z2
-!      external mtime, potmat, daxpy, smxinv, dscal
+!      external mtime, potmat, smxinv, dscal
 !     matrices z and w are stored column by column as one-dimensi
 data zero,  one,  two, three,six,  eight &
     / 0.d0, 1.d0, 2.d0, 3.d0, 6.d0, 8.d0 /
@@ -1548,9 +1547,8 @@ subroutine psiasy(fj,fn,sr,si,psir,psii,nopen,nmax)
 !    nmax           row dimension of matrices
 ! ----------------------------------------------------------------------------
 use mod_phot, only: photof
-use mod_hiutil, only: daxpy_wrapper
 use mod_hivector, only: matmov
-use mod_hiblas, only: dscal
+use mod_hiblas, only: dscal, daxpy_wrapper
 implicit none
 real(8), intent(in) :: fj(nopen)
 real(8), intent(in) :: fn(nopen)
@@ -1687,7 +1685,6 @@ subroutine smatop (tmod, sr, si, scmat, lq, r, prec, &
 !    cbesn,cbesj  ricatti-bessel functions (from b.r. johnson)
 !    rles:      linear equation solver
 !    rgmmul:    sub-matrix multiply
-!    daxpy:     linpack blas routine
 !    vmul:      vector times a vector
 ! --------------------------------------------------------------------
 use mod_coqvec, only: nphoto, q
@@ -1704,7 +1701,6 @@ use mod_ered, only: ered, rmu
 use mod_phot, only: photof, wavefn
 use mod_surf, only: flagsu
 use mod_hiutil, only: gennam
-use mod_hiutil, only: daxpy_wrapper
 use mod_hibrid1, only: cbesj, cbesn
 use mod_himatrix, only: transp
 use mod_hivector, only: matmov, vsmul, vmul
@@ -1715,7 +1711,7 @@ use mod_himatrix, only: mxma
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 use mod_himatrix, only: syminv
 #endif
-use mod_hiblas, only: dscal, dcopy, dgemm
+use mod_hiblas, only: dscal, dcopy, dgemm, daxpy_wrapper
 
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax, nmax), intent(inout) :: tmod

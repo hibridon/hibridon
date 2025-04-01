@@ -991,12 +991,14 @@ end
   real(8), intent(out) :: valas
   real(8), intent(inout) :: der
   integer, intent(in) :: imode
-  dimension rr(10), oa(3), ob(3), oc(2)
+  dimension rr(10), oa(3), ob(3)
+  ! dimension oc(2)
   integer :: iperm
 common/realm/ almre(0:50,0:50)
 data xkcal /627.51d0/
 data cm    /219474.63d0/
-data oa(1) /0.d0/, oc /0.d0,0.d0/
+data oa(1) /0.d0/
+!data oc /0.d0,0.d0/
 !
   UNUSED_DUMMY(der)
   iperm = 0
