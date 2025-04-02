@@ -106,7 +106,7 @@ use mod_covvl, only: vvl
 use mod_hipotutil, only: seval
 implicit none
 real(8), intent(out) :: vv0
-real(8), intent(in) :: r_inp
+real(8), intent(in) :: r_inp  ! intermolecular distance
 double precision r
 integer iv
 vv0 = 0d0

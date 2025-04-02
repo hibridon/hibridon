@@ -172,8 +172,8 @@ use mod_pot_ohh2_bausr, only: nr, nvb, nvf, rr, &
   bcoef, fcoef
 use mod_hipotutil, only: seval
 implicit none
-real(8), intent(in) :: r_raw
 real(8), intent(out) :: vv0
+real(8), intent(in) :: r_raw  ! intermolecular distance
 real(8) r
 integer :: iv
 !

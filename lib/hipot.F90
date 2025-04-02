@@ -4,7 +4,7 @@ module mod_hipot
 
     subroutine pot(vv0, r)
       real(8), intent(out) :: vv0
-      real(8), intent(in) :: r
+      real(8), intent(in) :: r  ! intermolecular distance
     end subroutine
 
     subroutine loapot(iunit, filnam)

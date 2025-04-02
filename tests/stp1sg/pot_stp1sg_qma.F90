@@ -105,7 +105,9 @@ use pot_stp1sg_qma
 use mod_covvl, only: vvl
 use mod_hipotutil, only: seval
 implicit none
-double precision vv0, r_inp, r
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r_inp  ! intermolecular distance
+double precision r
 integer iv
 vv0 = 0d0
 r = r_inp

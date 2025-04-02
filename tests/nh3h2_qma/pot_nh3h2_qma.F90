@@ -129,7 +129,7 @@ use mod_covvl, only: vvl
 use mod_hipotutil, only: seval
 implicit none
 real(8), intent(out) :: vv0
-real(8), intent(in) :: r
+real(8), intent(in) :: r  ! intermolecular distance
 !
 integer MAX_NR, MAX_NV
 parameter (MAX_NR=300, MAX_NV=300)

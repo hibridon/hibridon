@@ -353,7 +353,7 @@ use mod_cofit, only: npa, maxpws, minmps, maxmps, mpsstp, idimp, idimr
 use mod_vfit, only: vcalc
 implicit none
 real(8), intent(out) :: vv0
-real(8), intent(in) :: r
+real(8), intent(in) :: r  ! intermolecular distance
 integer, pointer :: nterm
 real(8) :: rr, ri
 integer :: i, ii, jj, iblkx, iblkxx, ishift, iterm, l, lmin, lmax, ivmax, iv

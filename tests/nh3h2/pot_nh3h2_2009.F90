@@ -415,8 +415,10 @@ use mod_covvl, only: vvl
 use mod_conlam, only: nlam
 use mod_nh3h2, only: nvv, ivv
 implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
 
-double precision  r, v, vv0
+double precision  v
 
 if (nlam .ne. nvv) then
   write(6,*) ' entry pot --', nvv, nlam,'   nvv, expected nlam'
