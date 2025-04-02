@@ -2356,7 +2356,7 @@ use mod_coisc10, only: inlist => isc10 ! inlist(1)
 use mod_par, only: batch, iprnt=>iprint
 use mod_spbf, only: ihibuf, igjtp
 use mod_mom, only: spin, xj1,xj2, j1, in1, j2, in2, maxjt, nwaves, jfsts, jlparf, jlpars, njmax, j1min, j2max
-use mod_hiutil, only: mtime, gettim
+use mod_hiutil, only: mtime, gettim, get_cpu_time
 use mod_hiutil, only: xf3j, xf6j, xf9j, xf3jm0
 use mod_hismat, only: sread
 use mod_hitypes, only: bqs_type
@@ -2527,7 +2527,7 @@ lmax = nint(xjtot+j2mx+spin+1.d0)
 lmaxp = nint(xjtotp+j2mxp+spin+1.d0)
 kpmin=jminjp
 kmin=abs(kpmin-n)
-t1=second()
+t1=get_cpu_time()
 do 70 icol=1,packed_bqs%length
 ! modify next if statement in include test for in2 (pjd)
 !      if(packed_bqs%inq(icol).ne.in2) goto 70
@@ -2543,7 +2543,7 @@ kkp=kkp+1
 xkp=kp
 65 f6a(kkp,j2,lmax-l2) = xf6j(xkp,xjtotp,xjtot,xl2,xj2,xj2)
 70 continue
-t6j = t6j + second() - t1
+t6j = t6j + get_cpu_time() - t1
 kpmx=kpmax
 ! clear iadr array (pjd)
 do 79 j=0,jmx
@@ -2604,7 +2604,7 @@ do 400 irow = 1, packed_bqs%length
    kmax=nint(2*xj1)
    factor=denrow*facjjp
    ll=0
-   t1 = second()
+   t1 = get_cpu_time()
 do 100 l1p=l1pmin,l1pmax,2
    ll=ll+1
    xl1p = l1p
@@ -2632,7 +2632,7 @@ do 100 l1p=l1pmin,l1pmax,2
    if(mod(ipower,2).ne.0) f9pha(ik) = -switch
 90 continue
 100 continue
-   t9j = t9j + second() - t1
+   t9j = t9j + get_cpu_time() - t1
 !
 ! compute all transitions separately, unlike in SIGK
 do 300 icol = 1, packed_bqs%length

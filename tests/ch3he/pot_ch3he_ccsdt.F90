@@ -21,6 +21,7 @@ subroutine driver
 use mod_covvl, only: vvl
 use mod_parpot, only: potnam=>pot_name
 use constants, only: s4pi
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 potnam='Dagdigian CH3-He PES'
 print *, potnam

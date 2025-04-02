@@ -30,6 +30,7 @@ end
 subroutine driver
 use mod_covvl, only: vvl
 use mod_par, only: csflag, ihomo
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 character *48 potnam
 character *2 frame

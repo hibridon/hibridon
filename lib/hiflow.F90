@@ -61,7 +61,7 @@ use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
   use mod_dec_timer, only: ttim
 #endif
 use mod_opti, only: optifl
-use mod_hiutil, only: mtime, gettim, dater
+use mod_hiutil, only: mtime, gettim, dater, get_cpu_time
 use mod_hibrid4, only: wavewr
 use mod_hismat, only: wrhead
 use mod_savfile, only: REC_EN_START, EN_REC_COUNT, EN_REC_PRESENT_INTEGRAL_XS, EN_REC_PREVIOUS_INTEGRAL_XS, EN_REC_PRESENT_PARTIAL_XS, EN_REC_PREVIOUS_PARTIAL_XS, EN_REC_2NDLAST_PARTIAL_XS
@@ -129,7 +129,6 @@ real(8) :: rstrt0, rtmn1, rtmnla, rtmx1, rtmxla
 real(8) :: t1, t11, t2, t22, tb, tbm, tcpu0, tcpu1, tcpu2, tcpuf, twall0, twall1, twall2, twallf
 real(8) :: xjtot
 
-real(8) :: second
 integer :: isteps
 integer :: nsteps
 
@@ -656,7 +655,7 @@ call soutpt (z, w, zmat, amat, &
              wrsmat, wrpart, prpart, wrxsec, prxsec, twomol, &
              nucros, firstj, nlevel, nlevop, nopen, nchtop, &
              twojlp, jlpold)
-cpuout = cpuout + second() - t11
+cpuout = cpuout + get_cpu_time() - t11
 
 !  on return from soutpt:
 !     if wrxsec,prxsec, wrpart, and prpart are all .false., the upper-left

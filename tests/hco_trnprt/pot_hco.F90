@@ -15,6 +15,7 @@
 subroutine driver
 use mod_covvl, only: vvl
 use mod_parpot, only: potnam=>pot_name
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 econv=219474.6d0
 potnam='HCO PES-Nijmegen-lmax=15'

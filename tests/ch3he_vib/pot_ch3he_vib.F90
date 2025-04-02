@@ -105,6 +105,7 @@ use mod_cosysi, only: ispar
 use mod_ch3he, only: NVLM
 use constants, only: econv
 use mod_hiblas, only: dcopy
+use mod_hipot, only: pot
 implicit double precision (a-h, o-z)
 
 !   Main function for `makepot', no arguments, print vvl's interactively

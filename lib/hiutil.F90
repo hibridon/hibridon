@@ -511,6 +511,9 @@ subroutine dater (cdate)
 !              in format dd-mmm-yy followed by the time in
 !              format hh:mm:ss
 !  -----------------------------------------------------------------
+#if defined(HIB_UNIX_IFORT)
+  use ifport, only: fdate
+#endif
 character*20 cdate
 #if defined(HIB_UNIX_XLF)
 character*8 d, date, c, clock
@@ -551,9 +554,15 @@ subroutine mtime(t,te)
 #if defined(HIB_ULTRIX_DEC)
   use mod_dec_timer, only: ttim
 #endif
+#if defined(HIB_UNIX_IFORT)
+  use ifposix, only: pxftime
+#endif
+
 implicit none
 real(8), intent(out) :: t
 real(8), intent(out) :: te
+
+intrinsic :: cpu_time
 #if defined(HIB_UNIX_XLF)
 t=timef()/1000d0
 te=t
@@ -709,6 +718,16 @@ return
 end
 !#endif
 #endif
+
+function get_cpu_time()
+  implicit none
+  real(8) :: get_cpu_time
+  intrinsic :: cpu_time
+  real(8) :: t
+
+  call cpu_time(t)
+  get_cpu_time = t
+end function
 ! ----------------------------------------------------------------
 subroutine gennam(xname,jobnam,ifil,xtens,ln)
 !
@@ -1524,6 +1543,9 @@ subroutine fehler
 return
 end
 subroutine sys_conf
+#if defined(HIB_UNIX_IFORT)
+use ifport, only: system
+#endif
 character*120 profile
 ! to print out details of current hardware configuration
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)

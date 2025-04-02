@@ -124,6 +124,7 @@ use mod_ja, only: jja
 use mod_el, only: ll
 use mod_hiutil, only: xf3j, xf9j
 use mod_hitypes, only: bqs_type
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 type(bqs_type), intent(out) :: bqs
 type(ancou_type), intent(out), allocatable, target :: v2

@@ -72,6 +72,7 @@ subroutine driver
 use mod_covvl, only: vvl
 use mod_parpot, only: potnam=>pot_name
 use constants, only: s4pi
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 dimension xxl(15)
 potnam='Patkowski et al. H2O-He SAPT PES'

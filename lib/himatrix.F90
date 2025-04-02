@@ -390,6 +390,7 @@ end
 #endif
 #if defined(HIB_UNIX_AIX) || defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
 subroutine tql2(nm,n,d,e,z,ierr)
+use mod_hiblas, only: drot
 !
 integer i,j,k,l,m,n,ii,l1,l2,nm,mml,ierr
 double precision d(n),e(n),z(nm,n)
@@ -1337,7 +1338,7 @@ end
 ! -----------------------------------------------------------------------
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 subroutine syminv (a,lda,n,ierr)
-use mod_hiblas, only: dgetri_wrapper
+use mod_hiblas, only: dgetri_wrapper, dgetrf
 implicit double precision (a-h,o-z)
 !
 !     -----------------------------------------------------------------
@@ -2109,7 +2110,7 @@ return
 !
 end
 subroutine dsytf2( uplo, n, a, lda, ipiv, info )
-use mod_hiblas, only: dscal
+use mod_hiblas, only: dscal, drot
 !
 !  -- LAPACK routine (version 1.0b) --
 !     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
@@ -2240,7 +2241,7 @@ integer            idamax
 external           lsame, idamax
 !     ..
 !     .. External Subroutines ..
-external           dlaev2, drot, dswap, dsyr, xerbla
+external           dlaev2, dswap, dsyr, xerbla
 !     ..
 !     .. Intrinsic Functions ..
 intrinsic          abs, max, sqrt

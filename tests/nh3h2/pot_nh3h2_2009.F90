@@ -32,6 +32,7 @@ use mod_covvl, only: vvl
 use mod_conlam, only: nlam, nlammx
 use mod_parpot, only: potnam=>pot_name
 use constants, only: s4pi
+use mod_hipot, only: loapot
 implicit double precision (a-h,o-z)
 character*60 filnam
 common /fisurf/ conv,econv,lsurf,nv

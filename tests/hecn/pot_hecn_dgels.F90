@@ -13,6 +13,7 @@ subroutine driver
 use mod_covvl, only: vvl
 use mod_cosysr, only: rspar
 use mod_parpot, only: potnam=>pot_name
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 real(8), pointer :: rshift, xfact
 rshift=>rspar(1); xfact=>rspar(2)

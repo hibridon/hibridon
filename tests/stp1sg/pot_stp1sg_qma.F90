@@ -27,6 +27,7 @@ end module pot_stp1sg_qma
 subroutine driver
 use pot_stp1sg_qma
 use mod_covvl, only: vvl
+use mod_hipot, only: loapot, pot
 implicit none
 real(8) :: r, vv0
 integer :: i

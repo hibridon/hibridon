@@ -22,8 +22,6 @@ contains
 !   2. airprp        airy zeroth-order propagator                       *
 !   2a. gndloc       computes ground state wf and transform to local    *
 !                    basis                                              *
-!   3. airymp        returns the moduli and phases of the airy          *
-!                    functions and their derivatives                    *
 !   4. cbesj         centrifugal scattering function and its            *
 !                    derivative.(first kind)                            *
 !   5. cbesn         centrifugal scattering function and its            *
@@ -168,8 +166,9 @@ use mod_cputim, only: cpupot
 use mod_hivector, only: dset
 use constants, only: zero, two
 use mod_hiblas, only: dscal, dcopy
+use mod_hipot, only: pot
+use mod_hiutil, only: get_cpu_time
 implicit none
-real(8) :: second
 real(8), dimension(*), intent(out) :: w
 real(8), intent(in) :: r
 integer, intent(in) :: nch
@@ -206,7 +205,7 @@ real(8) :: r2, twormu, vv0, wmax, wmin
 !     if (r.le.3.41) icount=0
 !ABER
 !  calculate coefficients of each angular term
-cpupot = cpupot - second()
+cpupot = cpupot - get_cpu_time()
 call pot( vv0, r)
 
 !  vv0 is the isotropic term in the potential
@@ -359,7 +358,7 @@ rtmn = r
 rtmx = r
 90 continue
 
-cpupot = cpupot + second()
+cpupot = cpupot + get_cpu_time()
 ! here for 2s-2p scattering
 ! fill in upper triangle of w matrix
 !  first fill in upper half of original matrix
@@ -863,6 +862,7 @@ use mod_coqvec2, only: q => q2
 use mod_phot, only: photof
 use mod_hiutil, only: intairy
 use mod_hivector, only: dset
+use mod_hiamp, only: airymp
 implicit double precision (a-h,o-z)
 !      implicit none
 double precision a, b, bfact, cs, cs1, cs2, csh, dalph2, dalpha, &
@@ -1144,8 +1144,12 @@ end
 ! -----------------------------------------------------------------------
 function turn(e)
 ! current revision date: 23-sept-87
-use constants
-implicit double precision (a-h,o-z)
+use constants, only: econv
+use mod_hipot, only: pot
+implicit none
+real(8), intent(in) :: e
+real(8) :: ee, r, dr, vv0
+real(8) :: turn
 ee = e/econv
 r = 3.0d0
 dr = 0.5d0
@@ -1840,6 +1844,7 @@ use mod_cotq1, only: tmat => dpsir ! tmat(80)
 use mod_himatrix, only: mxma
 use mod_hivector, only: matmov
 use mod_hiblas, only: dscal, dcopy, daxpy_wrapper
+use mod_hipot, only: ground
 implicit double precision (a-h,o-z)
 !  square matrices (of row dimension nmax)
 dimension vecnow(80), scr(80)

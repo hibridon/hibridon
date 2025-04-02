@@ -13,6 +13,7 @@
 subroutine driver
 use mod_covvl, only: vvl
 use mod_parpot, only: potnam=>pot_name
+use mod_hipot, only: pot
 implicit none
     integer :: ios
     real(8) :: r, vv0

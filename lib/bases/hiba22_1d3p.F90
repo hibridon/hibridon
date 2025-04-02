@@ -122,6 +122,7 @@ use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
 use mod_hiblas, only: dsyev
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(bqs_type), intent(out) :: bqs
@@ -211,7 +212,7 @@ endif
 !
 !  get 3P and 1D-3P spin-orbit parameters, for calculating asymptotic
 !  electrostatic + spin-orbit atomic energies
-call pot (vv0, 8.5d0)
+call pot(vv0, 8.5d0)
 axy = vvl(6) * econv
 byx = vvl(9) * econv
 bss = byx * sqrt(4.d0/3.d0)

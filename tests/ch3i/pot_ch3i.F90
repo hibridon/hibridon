@@ -339,6 +339,7 @@ use mod_cosysi, only: ispar
 use constants, only: xmconv
 use mod_ered, only: rmu
 use mod_ch3i, only: vib
+use mod_hipot, only: pot, ground
 implicit double precision (a-h,o-z)
 dimension wf(16)
 ispar(3)=1
@@ -420,6 +421,7 @@ use mod_cosysi, only: iscod=>ispar
 use mod_cosysr, only: rcod=>rspar
 use mod_ered, only: rmu
 use mod_ch3i, only: gswf_data, hof
+use mod_hipot, only: wfintern
 implicit none
 
 real(8), intent(out) :: wf(nch*nphoto) ! array of dimension nch*nphoto, containing, on return,

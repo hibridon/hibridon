@@ -45,6 +45,47 @@ module mod_hiblas
       integer, intent(in) :: ldc
     end subroutine
 
+    subroutine dgetrf(m, n, a, lda, ipiv, info)
+      integer, intent(in) :: m
+      integer, intent(in) :: n
+      real(8), intent(inout) :: a(lda,*)
+      integer, intent(in) :: lda
+      integer, intent(out) :: ipiv(*)
+      integer, intent(out) :: info
+    end subroutine
+
+    subroutine dgetri(n, a, lda, ipiv, work, lwork, info)
+      integer, intent(in) :: n
+      real(8), intent(inout) :: a(lda,*)
+      integer, intent(in) :: lda
+      integer, intent(in) :: ipiv(*)
+      real(8), intent(out) :: work(*)
+      integer, intent(in) :: lwork
+      integer, intent(out) :: info
+    end subroutine
+
+    subroutine dgetrs(trans, n, nrhs, a, lda, ipiv, b, ldb, info)
+      character, intent(in) :: trans
+      integer, intent(in) :: n
+      integer, intent(in) :: nrhs
+      real(8), intent(in) :: a(lda,*)
+      integer, intent(in) :: lda
+      integer, intent(in) :: ipiv(*)
+      real(8), intent(inout) :: b(ldb,*)
+      integer, intent(in) :: ldb
+      integer, intent(out) :: info
+    end subroutine
+
+    subroutine drot(n, dx, incx, dy, incy, c, s)
+      integer, intent(in) :: n
+      real(8), intent(inout) :: dx(*)
+      integer, intent(in) :: incx
+      real(8), intent(inout) :: dy(*)
+      integer, intent(in) :: incy
+      real(8), intent(in) :: c
+      real(8), intent(in) :: s
+    end subroutine
+
     subroutine dscal(n, da, dx, incx)
       integer, intent(in) :: n
       real(8), intent(in) :: da

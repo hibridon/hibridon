@@ -33,6 +33,7 @@ use mod_covvl, only: vvl
 use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
 use mod_parpot, only: potnam=>pot_name
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 integer, pointer :: npot
 real(8), dimension(:), pointer :: en, de, re, be, rl, cl

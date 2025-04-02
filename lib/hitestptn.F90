@@ -39,6 +39,7 @@ contains
         use mod_covvl, only: vvl
         use mod_cosysi, only: ispar
         use mod_parbas, only: lammin, lammax, mproj
+        use mod_hipot, only: pot
         implicit none
         logical, intent(in) :: ihomo
         integer :: nterm, nstep
@@ -92,6 +93,7 @@ contains
     logical function pot_loader()
         use mod_file, only: input
         use mod_covvl, only: vvl
+        use mod_hipot, only: loapot
         implicit none
         integer ::  ios
         logical :: existf

@@ -19,6 +19,7 @@
 subroutine driver
 use mod_covvl, only: vvl  ! vvl(21)
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 integer i
 double precision PI, DEG, S4PI

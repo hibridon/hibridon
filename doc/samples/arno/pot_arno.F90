@@ -7,6 +7,7 @@ use mod_covvl, only: vvl
 use constants, only: econv
 use mod_cosysr, only: rspar
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 real(8), pointer :: rshift, xfact
 rshift=>rspar(1); xfact=>rspar(2)

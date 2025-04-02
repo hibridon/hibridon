@@ -1614,7 +1614,8 @@ use mod_ered, only: rmu
 use mod_hiba07_13p, only: ttrans
 use mod_himatrix, only: mxma
 use mod_hivector, only: dset, vadd, vmul, dsum
-use mod_hiblas, only: dcopy, daxpy_wrapper
+use mod_hiblas, only: dcopy, daxpy_wrapper, ddot, dscal
+use mod_hipot, only: wfintern
 ! steve, you may need more space, but i doubt it since tcoord is dimensioned n
 implicit double precision (a-h,o-z)
 integer, intent(in) :: inq(nch)
@@ -1968,6 +1969,7 @@ use mod_coamat, only: psir ! psir(100) (4,nch)
 use mod_cobmat, only: psii ! psii(100) Here psii is used as a vector
 use mod_cotq1, only: dpsir ! dpsir(100) 
 use mod_cotq2, only: dpsii ! dpsii(100)
+use mod_hiblas, only: drot
 implicit none
 integer, intent(in) :: jtot
 integer, intent(in) :: nch
