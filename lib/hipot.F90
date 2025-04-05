@@ -16,7 +16,7 @@ module mod_hipot
       real(8), intent(out) :: wf(nch*nphoto) ! array of dimension nch*nphoto, containing, on return,
       ! ground state wavefunction in each of nch components
       ! nphoto is number of difference ground state wavefunctions
-      real(8), intent(out) :: r  ! value of separation coordinate
+      real(8), intent(in) :: r  ! value of separation coordinate
       integer, intent(in) :: nch  ! total number of channels (row dimension of q)
       integer, intent(in) :: nphoto ! number of different wavefunctions calculated
       ! column index of q vector
