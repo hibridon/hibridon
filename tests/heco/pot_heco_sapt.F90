@@ -71,6 +71,9 @@ use mod_covvl, only: vvl
 use mod_hiblas, only: dcopy
 use mod_hipotutil, only: dqrank, dqrlss
 implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
+
 dimension vsum(11),xsum(11), &
           d0(121),aa(121),thta(11),cthta(11)
 dimension kpvt(11),qraux(11),work(121),rsd(11)

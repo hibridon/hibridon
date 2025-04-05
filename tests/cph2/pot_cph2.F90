@@ -108,6 +108,8 @@ use mod_covvl, only: vvl
 use mod_par, only: csflag, ihomo
 use mod_hiblas, only: dscal, dcopy
 implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
 dimension evec(5)
 dimension vvll(18)
 data zero, one, half /0.d0,1.d0,0.5d0/

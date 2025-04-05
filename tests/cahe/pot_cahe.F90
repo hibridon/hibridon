@@ -120,6 +120,9 @@ use mod_covvl, only: vvl
 use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
 implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
+
 integer, pointer :: nterm, nstate, ipol, npot
 real(8), dimension(:), pointer :: en, de, re, be, rl, cl
 real(8), pointer :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor

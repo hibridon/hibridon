@@ -561,6 +561,7 @@ subroutine pot (vv0, r)
 use mod_covvl, only: vvl
 implicit double precision (a-h, o-z)
 real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
 !  -----------------------------------------------------------------------
 data a11, b11, a12, b12, b13, y0, r0 / 51.53d0, 1.64d0, 25.15d0, &
           1.3d0, &

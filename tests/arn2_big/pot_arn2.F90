@@ -53,8 +53,8 @@ use mod_covvl, only: vvl
 use mod_conlam, only: nlam
 use mod_parbas, only: lammin
 implicit double precision (a-h,o-z)
-
-
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
 
 !  pattengill ar-n2 potential [m.d. pattengill, r. a. labudde, r.b. bernstein,
 !  and c.f. curtiss, j. chem. phys. 55, 5517 (1971)]

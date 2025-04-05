@@ -100,20 +100,20 @@ end do
 return
 end subroutine loapot
 !     ------------------------------------------------------------------
-subroutine pot(vv0, r_inp)
+subroutine pot(vv0, r)
 use pot_stp1sg_qma
 use mod_covvl, only: vvl
 use mod_hipotutil, only: seval
 implicit none
 real(8), intent(out) :: vv0
-real(8), intent(in) :: r_inp  ! intermolecular distance
-double precision r
+real(8), intent(in) :: r  ! intermolecular distance
+double precision clamped_r
 integer iv
 vv0 = 0d0
-r = r_inp
-if (r .lt. rr(1)) r = rr(1)
+clamped_r = r
+if (clamped_r .lt. rr(1)) clamped_r = rr(1)
 do iv = 1, nv
-   vvl(iv) = seval(nr, r, rr, coef(1, iv), spl_b(1, iv), &
+   vvl(iv) = seval(nr, clamped_r, rr, coef(1, iv), spl_b(1, iv), &
         spl_c(1, iv), spl_d(1, iv))
 end do
 return

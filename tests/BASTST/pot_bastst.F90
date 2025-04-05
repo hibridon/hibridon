@@ -252,7 +252,7 @@ use mod_covvl, only: vvl
 use mod_selb, only: ibasty
     implicit none
     real(8), intent(out) :: vv0
-    real(8), intent(in) :: r
+    real(8), intent(in) :: r  ! intermolecular distance
     vv0  = 0d0
     vvl = 0d0
 

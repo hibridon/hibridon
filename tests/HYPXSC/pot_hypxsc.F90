@@ -47,7 +47,7 @@ subroutine pot (vv0, r)
 use mod_covvl, only: vvl
 implicit none
     real(8), intent(out) :: vv0
-    real(8), intent(in) :: r
+    real(8), intent(in) :: r  ! intermolecular distance
 
     UNUSED_DUMMY(r)
     vv0  = 0d0

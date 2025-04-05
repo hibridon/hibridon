@@ -116,6 +116,9 @@ use mod_par, only: csflag, ihomo
 use mod_hiblas, only: dscal, dcopy
 use mod_hipotutil, only: dqrank, dqrlss
 implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
+
 dimension vsl1(9), vsl2(9), vsr0(9), vsc1(9), vsc2(9), &
   vsc3(9), vscl(9)
 dimension vzzl1(9), vzzl2(9), vzzr0(9), vzzc1(9), vzzc2(9), &

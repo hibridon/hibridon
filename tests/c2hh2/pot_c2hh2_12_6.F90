@@ -119,7 +119,7 @@ goto 10
 99 stop
 end subroutine driver
 !     ------------------------------------------------------------------
-subroutine pot(vv0, r_inp)
+subroutine pot(vv0, r)
 use mod_1sg1sg
 use mod_c2hh2
 use mod_covvl, only: vvl
@@ -127,17 +127,17 @@ use mod_conlam, only: nlam
 use mod_hipotutil, only: seval
 implicit none
 real(8), intent(out) :: vv0
-real(8), intent(in) :: r_inp
-double precision r
+real(8), intent(in) :: r  ! intermolecular distance
+double precision clamped_r
 integer iv
 vv0 = 0.d0
-if (r_inp .lt. 4.25d0) then
-   r = 4.25d0
+if (r .lt. 4.25d0) then
+   clamped_r = 4.25d0
 else
-   r = r_inp
+   clamped_r = r
 end if
 do iv = 1, nlam
-   vvl(iv) = seval(nr1, r, rr1, coef1(1, iv), spl_b1(1, iv), &
+   vvl(iv) = seval(nr1, clamped_r, rr1, coef1(1, iv), spl_b1(1, iv), &
         spl_c1(1, iv), spl_d1(1, iv))
 end do
 return

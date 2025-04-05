@@ -72,6 +72,9 @@ use mod_hivector, only: dset
 use mod_hiblas, only: dscal, dcopy
 use mod_hipotutil, only: dqrank, dqrlss
 implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
+
 dimension xlam1(22),xlam2(22),r0(22),c1(22),c2(22),c3(22), &
           clr(22),vsum(11),xsum(11),vdif(11),xdif(11), &
           ddif(11),vap(11),va2p(11), &

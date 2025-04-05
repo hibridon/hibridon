@@ -63,7 +63,7 @@ use mod_covvl, only: vvl
 use mod_conlam, only: nlam
     implicit none
     real(8), intent(out) :: vv0
-    real(8), intent(in) :: r
+    real(8), intent(in) :: r  ! intermolecular distance
     real(8) :: eps, a6, a12, r0, eps_au, rat, w(6), rr0 
     data eps, a6, a12, r0 / 83.05d0, 0.13d0, 0.5d0, 3.929d0/  ! from reference paper above
     w = (/ 1.0d0, 0.2d0, 0.1d0, 0.0d0, 0.025d0, 0.02d0/)  ! weights

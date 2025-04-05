@@ -215,8 +215,8 @@ use mod_ch3he, only: NVLM, NANGLE
 use constants, only: econv
 use mod_hiblas, only: dscal, dcopy
 implicit double precision (a-h, o-z)
-      real(8), intent(out) :: vv0
-      real(8), intent(in) :: r  ! intermolecular distance
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
 !
 !
 !   Hidden returned value:

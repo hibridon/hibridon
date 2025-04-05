@@ -118,6 +118,8 @@ subroutine pot (vv0, r)
 use mod_covvl, only: vvl ! vvl(NLMTRM-1)
 use mod_hiblas, only: dcopy
 implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
 ! Define the sizes of grids
 ! NLMTRM: number of lambda-mu tuples for the fit
 ! NTHETA, NPHI: number of theta and pi

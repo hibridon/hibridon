@@ -107,6 +107,9 @@ use mod_covvl, only: vvl
 use mod_hiblas, only: dscal, dcopy
 use mod_hipotutil, only: dspline, dsplint
 implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
+
 real(8) :: v(5)
 real(8), save :: csplin(69,5)
 real(8) :: rr(69), vl(345),vec(69)

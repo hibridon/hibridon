@@ -128,6 +128,9 @@ use mod_hiblas, only: dscal, dcopy
 use mod_hipotutil, only: dqrank, dqrlss
 
 implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
+
 dimension vxxl1(9), vxxl2(9), vxxr0(9), vxxc1(9), vxxc2(9), &
   vxxc3(9), vxxcl(9)
 dimension vyyl1(9), vyyl2(9), vyyr0(9), vyyc1(9), vyyc2(9), &

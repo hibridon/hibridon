@@ -128,6 +128,8 @@ use mod_covvl, only: vvl
 use constants, only: s4pi
 use mod_hiblas, only: dscal, dcopy
 implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
 dimension iwork(1000),ylm(70,12)
 dimension swork(12), work(1812)
 dimension y00(70),y20(70),y40(70),y60(70),y80(70)

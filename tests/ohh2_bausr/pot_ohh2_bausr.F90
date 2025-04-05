@@ -162,7 +162,7 @@ end
 !     ALWAYS SET VV0 = 0 TO AVOID CONFUSION.  THE ISOTROPIC TERM CAN BE
 !     EASILY TREAT AS ONE TERM IN THE POTENTIAL EXPANSION.  NOTE THAT
 !     VVL SHOULD BE IN HARTREES.
-subroutine pot(vv0, r_raw)
+subroutine pot(vv0, r)
 !
 use mod_covvl, only: vvl
 !     size of vvl : MAX_NVB+MAX_NVF
@@ -173,22 +173,22 @@ use mod_pot_ohh2_bausr, only: nr, nvb, nvf, rr, &
 use mod_hipotutil, only: seval
 implicit none
 real(8), intent(out) :: vv0
-real(8), intent(in) :: r_raw  ! intermolecular distance
-real(8) r
+real(8), intent(in) :: r  ! intermolecular distance
+real(8) clamped_r
 integer :: iv
 !
-if (r_raw .lt. 3.5d0) then
-   r = 3.5d0
+if (r .lt. 3.5d0) then
+   clamped_r = 3.5d0
 else
-   r = r_raw
+   clamped_r = r
 end if
 vv0 = 0d0
 do iv = 1, nvb
-   vvl(iv) = seval(nr, r, rr, bcoef(1, iv), &
+   vvl(iv) = seval(nr, clamped_r, rr, bcoef(1, iv), &
         splb_b(1, iv), splb_c(1, iv), splb_d(1, iv))
 end do
 do iv = 1, nvf
-   vvl(iv + nvb) = seval(nr, r, rr, fcoef(1, iv), &
+   vvl(iv + nvb) = seval(nr, clamped_r, rr, fcoef(1, iv), &
         splf_b(1, iv), splf_c(1, iv), splf_d(1, iv))
 end do
 return
