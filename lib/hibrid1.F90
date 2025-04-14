@@ -1851,16 +1851,16 @@ use mod_hiblas, only: dscal, dcopy, daxpy_wrapper
 use mod_hipot, only: ground
 use constants, only: one, half
 implicit none
-integer, parameter :: nphoto = 1
-integer, intent(in) :: nch
-real(8), intent(in) :: vecnow(nch*nphoto)
+real(8), intent(in) :: vecnow(2*nch)
 real(8), intent(in) :: rnow
 real(8), intent(in) :: drnow
+integer, intent(in) :: nch
 integer, intent(in) :: nmax
 real(8), intent(out) :: q(2*nch)
 
+integer, parameter :: nphoto = 1
 integer :: mxphot
-real(8) :: scr(nch*nphoto)  ! scratch matrix
+real(8) :: scr(2*nch)  ! scratch matrix
 real(8) :: ra, rb, fact
 real(8), parameter :: onemn = -1.d0
 real(8), parameter :: sq3 = sqrt(3.d0)
