@@ -545,7 +545,7 @@ return
 end
 ! -----------------------------------------------------------------------
 subroutine spropn (rnow, width, eignow, hp, y1, y4, y2, &
-                   gam1, gam2, nch)
+                   gam1, gam2, nch, photof, q)
 !-----------------------------------------------------------------------------
 !  this subroutine calculates the diagonal matrices to propagate the
 !  log-derivative matrix through the current interval
@@ -569,7 +569,7 @@ subroutine spropn (rnow, width, eignow, hp, y1, y4, y2, &
 !                elements of the ihomogeneous propagators
 !                otherwise gam1 and gam2 are returned as zero
 !    nch:        the number of channels, this equals the dimensions of the
-!                eignow, hp, y1, y2, y2, gam1, and gam2 arrays
+!                eignow, hp, y1, y2, y4, gam1, and gam2 arrays
 !-----------------------------------------------------------------------------
 !  the key equations, reproduced below, are taken from
 !  m. alexander and d. manolopoulos, "a stable linear reference potential
@@ -858,24 +858,32 @@ subroutine spropn (rnow, width, eignow, hp, y1, y4, y2, &
 !  written by:  millard alexander
 !  current revision date (algorithm):  30-dec-1994
 !-----------------------------------------------------------------------------
-use mod_coqvec2, only: q => q2
-use mod_phot, only: photof
 use mod_hiutil, only: intairy
 use mod_hivector, only: dset
 use mod_hiamp, only: airymp
 implicit double precision (a-h,o-z)
+real(8), intent(in) :: rnow
+real(8), intent(in) :: width
+real(8), intent(in) :: eignow(nch)
+real(8), intent(in) :: hp(nch)
+real(8), intent(out) :: y1(nch)
+real(8), intent(out) :: y4(nch)
+real(8), intent(out) :: y2(nch)
+real(8), intent(out) :: gam1(nch)
+real(8), intent(out) :: gam2(nch)
+integer, intent(in) :: nch
+logical, intent(in) :: photof
+real(8), intent(inout) :: q(2*nch)
 !      implicit none
 double precision a, b, bfact, cs, cs1, cs2, csh, dalph2, dalpha, &
     darg, dbeta, dcay, delzet, denom, dhalf, dkap, dlzeta, &
     dmmod1, dmmod2, dnmod1, dnmod2, doneth, dphi1, dphi2, &
     dpi, droot, dslope, dthet1, dthet2, dtnhfm, &
     dtnhfp, dx1, dx2, dzeta1, dzeta2, emz1, emz2, &
-    ez1, ez2, fact, oflow, one, rnow, scai1, scai2, scbi1, scbi2, &
-    sn, sn1, sn2, snh, tnhfac, width, x1, x2, xairy1, xairy2, &
+    ez1, ez2, fact, oflow, one, scai1, scai2, scbi1, scbi2, &
+    sn, sn1, sn2, snh, tnhfac, x1, x2, xairy1, xairy2, &
     xbiry1, xbiry2, zero
-double precision eignow, gam1, gam2, hp, y1, y2, y4
-integer i, nch
-dimension eignow(1), hp(1), y1(1), y2(1), y4(1), gam1(1), gam2(1)
+integer i
 data     doneth,        dhalf &
   / 0.333333333333333d0, 0.5d0 /
 data zero, one /0.d0, 1.d0/
@@ -1508,8 +1516,16 @@ do kstep = 1, maxstp
   !  determine these diagonal matrices
   !  eqs. (38)-(44) of m. alexander and d. manolopoulos, "a stable linear
   !                    reference potential algorithm for solution ..."
+
+#ifdef DEBUG
+  ! fill y1, y2 and y4 with silly values to make sure that spropn overwrites them
+  call dset(nch,1.d+300,y1,1)
+  call dset(nch,1.d+300,y2,1)
+  call dset(nch,1.d+300,y4,1)
+#endif
+
   call spropn ( rnow, drnow, eigold, hp, y1, y4, y2, &
-                   gam1, gam2, nch)
+                   gam1, gam2, nch, photof, q2)
   !  set up matrix to be inverted
   !  nskip is spacing between diagonal elements of matrix stored column by colum
   nskip = nmax + 1
