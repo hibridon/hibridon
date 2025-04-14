@@ -1121,7 +1121,7 @@ subroutine steppr (vecnow, vecnew, tmat, nmax, n)
 !     rgmmul:    generalized matrix multiply, called here to evaluate
 !                a.b-transpose
 ! --------------------------------------------------------------------------
-use mod_hivector, only: matmov
+use mod_hivector, only: matcopy
 use mod_hiblas, only: dgemm
 implicit double precision (a-h,o-z)
 !      real vecnow, vecnew, tmat
@@ -1138,7 +1138,7 @@ call dgemm('n','t',n,n,n,1.d0,vecnew,nmax,vecnow,nmax, &
            0d0,tmat,nmax)
 #endif
 !  restore eigenvectors
-call matmov (vecnew, vecnow, n, n, nmax, nmax)
+call matcopy (vecnew, vecnow, n, n, nmax, nmax)
 return
 end
 ! -----------------------------------------------------------------------
@@ -1347,7 +1347,7 @@ use mod_himatrix, only: mxma
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 use mod_himatrix, only: syminv
 #endif
-use mod_hivector, only: dset, vadd, vmul, matmov
+use mod_hivector, only: dset, vadd, vmul, matcopy
 use mod_hiblas, only: dscal, dcopy, daxpy_wrapper
 
 implicit double precision (a-h, o-z)
@@ -1441,7 +1441,7 @@ if (itwo .le. 0) then
   !  e.g. p1=vecnow  ; see eq.(23) of
   !  m.h. alexander, "hybrid quantum scattering algorithms ..."
   !  store vecnow in tmat
-  call matmov (vecnow, tmat, nch, nch, nmax, nmax)
+  call matcopy (vecnow, tmat, nch, nch, nmax, nmax)
   !  determine approximate values for diagonal and off-diagonal
   !  correction terms
   call corr (eignow, eigold, hp, drnow, drmid, xlarge, cdiag, &
@@ -1842,7 +1842,7 @@ subroutine gndloc (vecnow, scr, rnow, drnow, nch, nmax)
 use mod_coqvec2, only: q => q2
 use mod_cotq1, only: tmat => dpsir ! tmat(80)
 use mod_himatrix, only: mxma
-use mod_hivector, only: matmov
+use mod_hivector, only: matcopy
 use mod_hiblas, only: dscal, dcopy, daxpy_wrapper
 use mod_hipot, only: ground
 implicit double precision (a-h,o-z)
@@ -1855,7 +1855,7 @@ fact = sq3 / drnow
 nphoto=1
 mxphot=nch*nphoto
 !  save vecnow in matrix tmat
-call matmov(vecnow,tmat,nch,nch,nmax,nch)
+call matcopy(vecnow,tmat,nch,nch,nmax,nch)
 call ground(scr, ra, nch, nphoto, mxphot)
 call ground(q, rb, nch, nphoto, mxphot)
 call dcopy(nch,q,1,q(nch+1),1)

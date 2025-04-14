@@ -7,7 +7,7 @@ contains
 !*************************************************************************
 !                        routines included                               *
 !                                                                        *
-!  1. matmov   puts a nr x nc matrix a into nr x nc matrix b             *
+!  1. matcopy   puts a nr x nc matrix a into nr x nc matrix b             *
 !  2. maxmgv   finds largest value in a vector                           *
 !  3. vsmul    multiplies the elements of a vector by a scalar           *
 !  4. vmul     multiplies the elements of two vectors                    *
@@ -23,7 +23,7 @@ contains
 !                                                                        *
 !*************************************************************************
 #if defined(HIB_UNIX) || defined(HIB_CRAY)
-subroutine matmov (a, b, nr, nc, na, nb)
+subroutine matcopy (a, b, nr, nc, na, nb)
 use mod_hiblas, only: dcopy
 !  subroutine to put nr x nc matrix a into nr x nc matrix b
 !  author:  millard alexander

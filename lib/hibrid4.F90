@@ -673,7 +673,7 @@ use mod_wave, only: irec, inflev
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_hiutil, only: gennam, mtime, gettim, dater
-use mod_hivector, only: dset, matmov, dsum
+use mod_hivector, only: dset, matcopy, dsum
 use mod_hitypes, only: rbesself_type, bqs_type
 use mod_hiiolib1, only: openf
 use funit, only: FUNIT_WFU, FUNIT_PSI, FUNIT_FLX
@@ -1430,8 +1430,8 @@ else if (jflux .eq. 1) then
 ! now for outgoing flux
   if (.not.photof) then
 ! outgoing wave: move Sreal into psir and Simag into psii
-    call matmov (sr, psir, nopen, nopen, nopen, nopen)
-    call matmov (si, psii, nopen, nopen, nopen, nopen)
+    call matcopy (sr, psir, nopen, nopen, nopen, nopen)
+    call matcopy (si, psii, nopen, nopen, nopen, nopen)
 ! premultiply Sr by diagonal matrix yl(kr) and Si by jl(kr)
     do 430 irow = 1, nopen
       fac1=rbesself%fn(irow)
@@ -1442,8 +1442,8 @@ else if (jflux .eq. 1) then
 ! add together, resave in psir, this is real part of outgoing wave
     call daxpy_wrapper(nopsq, one, psii, 1, psir, 1)
 ! repeat for derivative of part of outgoing wave
-    call matmov (sr, dpsir, nopen, nopen, nopen, nopen)
-    call matmov (si, dpsii, nopen, nopen, nopen, nopen)
+    call matcopy (sr, dpsir, nopen, nopen, nopen, nopen)
+    call matcopy (si, dpsii, nopen, nopen, nopen, nopen)
 ! premultiply Sr by diagonal matrix -ylp(kr) and Si by jlp(kr)
     do 440 irow = 1, nopen
       fac1=rbesself%fpn(irow)
@@ -1455,8 +1455,8 @@ else if (jflux .eq. 1) then
 ! real part of outgoing wave
     call daxpy_wrapper(nopsq, one, dpsii, 1, dpsir, 1)
 ! repeat for imaginary part of outgoing wave
-    call matmov (si, psii, nopen, nopen, nopen, nopen)
-    call matmov (sr, scmat, nopen, nopen, nopen, nopen)
+    call matcopy (si, psii, nopen, nopen, nopen, nopen)
+    call matcopy (sr, scmat, nopen, nopen, nopen, nopen)
 ! premultiply Sr by diagonal matrix -jl(kr) and Si by yl(kr)
     do 450 irow = 1, nopen
       fac1=rbesself%fn(irow)
@@ -1467,8 +1467,8 @@ else if (jflux .eq. 1) then
 ! add together, resave in psii, this is imaginary part of outgoing wave
     call daxpy_wrapper(nopsq, one,scmat, 1, psii, 1)
 ! repeat for derivative of imaginary part of outgoing wave
-    call matmov (si, dpsii, nopen, nopen, nopen, nopen)
-    call matmov (sr, scmat, nopen, nopen, nopen, nopen)
+    call matcopy (si, dpsii, nopen, nopen, nopen, nopen)
+    call matcopy (sr, scmat, nopen, nopen, nopen, nopen)
 ! premultiply Sr by diagonal matrix jl(kr) and Si by yl(kr)
     do 460 irow = 1, nopen
       fac1=rbesself%fpn(irow)

@@ -473,7 +473,7 @@ use mod_himatrix, only: mxma
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 use mod_himatrix, only: syminv
 #endif
-use mod_hivector, only: dset, matmov
+use mod_hivector, only: dset, matcopy
 use mod_hibrid1, only: potmat
 use mod_hiblas, only: dscal, daxpy_wrapper
 use mod_hipot, only: ground
@@ -768,7 +768,7 @@ if (nsteps /= 0) then
   !     if photodissociation calculation or wavefunction desired:
   !     save this matrix, which is hg(a,m), in amat
      if (photof .or. wavefn) &
-       call matmov(z, amat, nch, nch, nmax, nmax)
+       call matcopy(z, amat, nch, nch, nmax, nmax)
      irow = 1
      do  110 ich = 1, nch
         fac = - z2(ich)
@@ -868,7 +868,7 @@ if (nsteps /= 0) then
   !     if photodissociation calculation or wavefunction desired:
      if (photof .or. wavefn) then
   !     first save this matrix, which is g(c,b), in bmat
-       call matmov(z, bmat, nch, nch, nmax, nmax)
+       call matcopy(z, bmat, nch, nch, nmax, nmax)
   !     use bmat and w as temporary storage here
        call mxma (amat, 1, nmax, bmat, 1, nmax, w, 1, nmax, &
                   nch, nch, nch)
@@ -1190,7 +1190,7 @@ subroutine psiasy(fj,fn,sr,si,psir,psii,nopen,nmax)
 !    nmax           row dimension of matrices
 ! ----------------------------------------------------------------------------
 use mod_phot, only: photof
-use mod_hivector, only: matmov
+use mod_hivector, only: matcopy
 use mod_hiblas, only: dscal, daxpy_wrapper
 implicit none
 real(8), intent(in) :: fj(nopen)
@@ -1216,7 +1216,7 @@ real(8) :: unit(nopen)
   ! that is   yl(kr) (Sr-1) + jl(kr) Si for scattering or
   !         - yl(kr) (Sr-1) + jl(kr) Si for photodissociation
   ! first move Sreal into psii
-  call matmov (sr, psii, nopen, nopen, nmax, nmax)
+  call matcopy (sr, psii, nopen, nopen, nmax, nmax)
   ! now subtract unit matrix
   call daxpy_wrapper (nopen, onemin, unit, 1, psii(1, 1), nmax + 1)
   ! now premultiply by diagonal matrix -yl(kr) for photodissociation or
@@ -1227,7 +1227,7 @@ real(8) :: unit(nopen)
     call dscal(nopen, fac, psii(irow,1), nmax)
   end do
   ! now store simag in psir
-  call matmov(si, psir, nopen, nopen, nmax, nmax)
+  call matcopy(si, psir, nopen, nopen, nmax, nmax)
   ! premultiply by diagonal matrix jl(kr)
   do irow = 1, nopen
     call dscal(nopen, fj(irow), psir(irow,1), nmax)
@@ -1241,7 +1241,7 @@ real(8) :: unit(nopen)
   ! that is - jl(kr) (1+Sr) + yl(kr) Si for scattering or
   !         - jl(kr) (1+Sr) - yl(kr) Si for photodissociation
   ! now move Sreal into psii
-  call matmov (sr, psii, nopen, nopen, nmax, nmax)
+  call matcopy (sr, psii, nopen, nopen, nmax, nmax)
   ! now add unit matrix
   call daxpy_wrapper (nopen, one, unit, 1, psii(1, 1), nmax + 1)
   ! now premultiply by diagonal matrix -jl(kr)
@@ -1250,7 +1250,7 @@ real(8) :: unit(nopen)
     call dscal(nopen, fac, psii(irow,1), nmax)
   end do
   ! replace real part of s matrix by real part of asymptotic wavefunction
-  call matmov(psir,sr,nopen, nopen, nmax, nmax)
+  call matcopy(psir,sr,nopen, nopen, nmax, nmax)
   ! premultiply Simag by diagonal matrix yl(kr) for scattering or by
   ! -yl(kr) for photodissociation
   do irow = 1, nopen
@@ -1264,7 +1264,7 @@ real(8) :: unit(nopen)
   end do
   ! replace imaginary part of s matrix by imaginary part of
   ! asymptotic wavefunction
-  call matmov(psii,si,nopen, nopen, nmax, nmax)
+  call matcopy(psii,si,nopen, nopen, nmax, nmax)
 return
 end
 ! ----------------------------------------------------------------------
@@ -1346,7 +1346,7 @@ use mod_surf, only: flagsu
 use mod_hiutil, only: gennam
 use mod_hibrid1, only: cbesj, cbesn
 use mod_himatrix, only: transp
-use mod_hivector, only: matmov, vsmul, vmul
+use mod_hivector, only: matcopy, vsmul, vmul
 use mod_hiiolib1, only: openf
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
 use mod_himatrix, only: mxma
@@ -1407,7 +1407,7 @@ do  30   i = 1, nopen
 30 continue
 !  calculate K-matrix
 ! if photodissocation calculation, save log-derivative matrix in si
-if (photof) call matmov(tmod,si,nopen,nopen,nmax,nmax)
+if (photof) call matcopy(tmod,si,nopen,nopen,nmax,nmax)
 do  60   i = 1, nopen
   l = lq(i)
   p = pk(i)
@@ -1600,8 +1600,8 @@ write (ifil, err=950) 'ENDWFUR', char(2)
 iendwv = iendwv + 8 * sizeof(char_t) &
      + (2 * nopen ** 2) * sizeof(dble_t)
 ! save smatrix temporarily
-    call matmov(sr,srsave,nopen,nopen,nmax,nmax)
-    call matmov(si,sisave,nopen,nopen,nmax,nmax)
+    call matcopy(sr,srsave,nopen,nopen,nmax,nmax)
+    call matcopy(si,sisave,nopen,nopen,nmax,nmax)
 ! here if wavefunction wanted
   call psiasy(fj,fn,sr,si,tmod,scmat,nopen,nmax)
 ! on return, sr contains real part of asymptotic wavefunction, si contains
@@ -1616,7 +1616,7 @@ endif
 !              si contains log-derivative matrix
 if (photof) then
 ! copy K matrix into sr
-  call matmov(tmod,sr,nopen,nopen,nmax,nmax)
+  call matcopy(tmod,sr,nopen,nopen,nmax,nmax)
 ! invert K matrix
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
   call smxinv(sr,nmax,nopen,srsave,sisave,ierr)
@@ -1649,7 +1649,7 @@ if (photof) then
   call dscal(nopen*nphoto,onemin,q,1)
 ! q now contains real part of transition amplitudes
 ! store real part of transition amplitudes in sr
-  call matmov(q,sr,nopen,nopen,nopen,nmax)
+  call matcopy(q,sr,nopen,nopen,nopen,nmax)
 ! now calculate imaginary part of transition amplitudes
   call dscal(nopen*nphoto,onemin,q,1)
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
@@ -1662,7 +1662,7 @@ if (photof) then
                 srsave,nmax,nopen,nopen,nphoto)
 #endif
 ! store imaginary part of transition amplitudes in si
-  call matmov(srsave,si,nopen,nopen,nmax,nmax)
+  call matcopy(srsave,si,nopen,nopen,nmax,nmax)
 ! transpose transition amplitudes for output
   call transp(sr, nopen, nmax)
   call transp(si,nopen,nmax)
@@ -1969,7 +1969,7 @@ subroutine expand(ncol,nopen,nch,nmax,ipack,sr,si,bmat)
 ! bmat      scratch matrix
 !  ---------------------------------------------------------------------------
 use mod_par, only: photof
-use mod_hivector, only: dset, matmov
+use mod_hivector, only: dset, matcopy
 implicit double precision (a-h,o-z)
 dimension sr(nopen,nopen),si(nopen,nopen), &
           bmat(nmax,nmax),ipack(15)
@@ -1993,7 +1993,7 @@ if (.not. photof) then
       bmat(ir,ic)=sr(irow,icol)
 225     continue
 230   continue
-  call matmov(bmat,sr,nch,nch,nmax,nmax)
+  call matcopy(bmat,sr,nch,nch,nmax,nmax)
   do 250 icol=1, ncol
 ! ic is index of icolth open channel in the full channel list
     ic=ipack(icol)
@@ -2002,7 +2002,7 @@ if (.not. photof) then
       bmat(ir,ic)=si(irow,icol)
 245     continue
 250   continue
-  call matmov(bmat,si,nch,nch,nmax,nmax)
+  call matcopy(bmat,si,nch,nch,nmax,nmax)
 else
 ! here for photodissociation, expansion just applies to 1st column
   call dset(nch, zero, bmat, 1)
@@ -2011,12 +2011,12 @@ else
     ir=ipack(irow)
     bmat(ir,1)=sr(irow,1)
 325   continue
-  call matmov(bmat,sr,nch,nch,nmax,nmax)
+  call matcopy(bmat,sr,nch,nch,nmax,nmax)
   do 345 irow=1, nopen
     ir=ipack(irow)
     bmat(ir,1)=si(irow,1)
 345   continue
-  call matmov(bmat,si,nch,nch,nmax,nmax)
+  call matcopy(bmat,si,nch,nch,nmax,nmax)
 endif
 return
 end

@@ -390,7 +390,7 @@ use mod_par, only: csflag, flaghf, flagsu, ipos
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_hiutil, only: gennam
-use mod_hivector, only: matmov
+use mod_hivector, only: matcopy
 use funit, only: FUNIT_ICS, FUNIT_XSC
 implicit double precision (a-h,o-z)
 character*(*) fname
@@ -691,7 +691,7 @@ subroutine aver1 (zmat, scmat, n)
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 use mod_himatrix, only: transp
-use mod_hivector, only: matmov
+use mod_hivector, only: matcopy
 implicit double precision (a-h,o-z)
 !  subroutine to sum and average cross section matrix over positive
 !  and negative values of index
@@ -699,7 +699,7 @@ integer i, ind, index, j, jnd, n, nn
 !     real scmat, zmat
 dimension zmat(1), scmat(n,n)
 !  first copy cross section matrix into scmat
-call matmov (zmat, scmat, n, n, n, n)
+call matcopy (zmat, scmat, n, n, n, n)
 nn = n / 2
 index = 0
 do  30  i = 1, nn
@@ -1276,7 +1276,7 @@ subroutine aver2 (zmat, scmat, n)
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 use mod_himatrix, only: transp
-use mod_hivector, only: matmov
+use mod_hivector, only: matcopy
 
 implicit double precision (a-h,o-z)
 !  subroutine to sum and average cross section matrix over positive
@@ -1285,7 +1285,7 @@ integer i, ind, index, j, jnd, n, nn
 !     real scmat, zmat
 dimension zmat(1), scmat(n,n)
 !  first copy cross section matrix into scmat
-call matmov (zmat, scmat, n, n, n, n)
+call matcopy (zmat, scmat, n, n, n, n)
 nn = n / 2
 index = 0
 do  30  i = 1, nn
