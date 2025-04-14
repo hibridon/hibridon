@@ -1333,6 +1333,7 @@ subroutine airprp (z, &
 !     noprin:       if .true., then most printing is suppressed
 ! ----------------------------------------------------------------------------
 use mod_coqvec, only: nphoto, q
+use mod_coqvec2, only: q2
 use mod_cosc10, only: sc10
 use mod_ancou, only: ancou_type
 use mod_hiba10_22p, only: energ22
@@ -1340,6 +1341,7 @@ use mod_par, only: par_iprint=>iprint
 use mod_wave, only: irec, ifil, nchwfu, iendwv, get_wfu_airy_rec_length
 use mod_selb, only: ibasty
 use mod_phot, only: photof, wavefn, writs
+use mod_cotq1, only: tmat2 => dpsir
 use mod_himatrix, only: transp
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
 use mod_himatrix, only: mxma
@@ -1486,7 +1488,11 @@ do kstep = 1, maxstp
   !  determine ground state wavefunction and derivative and then
   !  transform these into local basis (photodissociation)
   !  y1 and y4 are used as scratch vectors here
-  if (photof) call gndloc(vecnow,w,rnow,drnow,nch,nmax)
+  if (photof) then
+    ! save vecnow in matrix tmat2
+    call matcopy(vecnow,tmat2,nch,nch,nmax,nch)
+    call gndloc(vecnow,rnow,drnow,nch,nmax,q2)
+  end if 
   !  transform logderivative matrix into current interval
   call dtrans ( z, tmat, w, y1, xlarge, nch, nmax, izero)
   !  tmat is no longer needed
@@ -1820,7 +1826,7 @@ return
 call exit()
 end
 ! ----------------------------------------------------------------------
-subroutine gndloc (vecnow, scr, rnow, drnow, nch, nmax)
+subroutine gndloc (vecnow, rnow, drnow, nch, nmax, q)
 ! ----------------------------------------------------------------------
 !  this subroutine first determines the ground state wavefunction at
 !    rnow +/- 0.5 drnow/sqrt(3), to estimate the function and its
@@ -1832,30 +1838,37 @@ subroutine gndloc (vecnow, scr, rnow, drnow, nch, nmax)
 ! ---------------------------------------------------------------------
 !  variables in call list:
 !    vecnow:   contains Tn matrix (transformation into local basis)
-!    scr:      scratch matrix
+!    scr:      
 !    rnow:     midpoint of the current interval
 !    drnow:    width of the current interval
 !    nch:      number of channels
 !    nmax:     maximum row dimension of matrices and maximum dimension of
 !              vectors
 ! ----------------------------------------------------------------------
-use mod_coqvec2, only: q => q2
-use mod_cotq1, only: tmat => dpsir ! tmat(80)
 use mod_himatrix, only: mxma
 use mod_hivector, only: matcopy
 use mod_hiblas, only: dscal, dcopy, daxpy_wrapper
 use mod_hipot, only: ground
-implicit double precision (a-h,o-z)
+use constants, only: one, half
+implicit none
+integer, parameter :: nphoto = 1
+integer, intent(in) :: nch
+real(8), intent(in) :: vecnow(nch*nphoto)
+real(8), intent(in) :: rnow
+real(8), intent(in) :: drnow
+integer, intent(in) :: nmax
+real(8), intent(out) :: q(2*nch)
+
+integer :: mxphot
+real(8) :: scr(nch*nphoto)  ! scratch matrix
+real(8) :: ra, rb, fact
+real(8), parameter :: onemn = -1.d0
+real(8), parameter :: sq3 = sqrt(3.d0)
+mxphot = nch * nphoto
 !  square matrices (of row dimension nmax)
-dimension vecnow(80), scr(80)
-data one, onemn, half, sq3 /1.d0, -1.d0, 0.5d0, 1.732050807d0/
 ra = rnow - half * drnow / sq3
 rb = rnow + half * drnow / sq3
 fact = sq3 / drnow
-nphoto=1
-mxphot=nch*nphoto
-!  save vecnow in matrix tmat
-call matcopy(vecnow,tmat,nch,nch,nmax,nch)
 call ground(scr, ra, nch, nphoto, mxphot)
 call ground(q, rb, nch, nphoto, mxphot)
 call dcopy(nch,q,1,q(nch+1),1)
