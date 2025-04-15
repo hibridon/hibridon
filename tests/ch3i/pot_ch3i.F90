@@ -763,7 +763,7 @@ rsm = 0
 irpot=1
 return
 ! --------------------------------------------------------------
-entry savusr (readpt)
+entry savusr ()
 !  save input parameters for model dissociation problem
 write (FUNIT_INP, 290) iscod(2), iscod(3)
 290 format(2i4,24x,' nphoto, ndip')

@@ -836,7 +836,7 @@ endif
 close (8)
 return
 !
-entry savdiat2p (readpt)
+entry savdiat2p ()
 !  save input parameters for heteronuclear diatom + 2P atom scattering
 !  the order of the write statements should be identical to the read statement
 !  above. for consistency with the data file written by gendat, format

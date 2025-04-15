@@ -560,6 +560,7 @@ use mod_selb, only: ibasty
 use mod_ered, only: rmu
 use mod_skip, only: nskip
 use mod_file, only: input, output
+use mod_hisystem, only: baschk
 implicit double precision (a-h,o-z)
 integer i, length
 logical existf

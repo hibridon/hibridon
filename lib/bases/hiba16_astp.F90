@@ -1158,7 +1158,7 @@ endif
 close (8)
 return
 !
-entry savastp (readpt)
+entry savastp ()
 !  save input parameters for asymmetric top + atom scattering
 !  the order of the write statements should be identical to the read statement
 !  above. for consistency with the data file written by gendat, format

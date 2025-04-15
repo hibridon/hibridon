@@ -17,7 +17,30 @@
 #include "assert.h"
 module mod_hibasis
 use mod_assert, only: fassert
+
+interface
+
+  subroutine syusr(irpot, readpt, iread)
+    integer, intent(inout) :: irpot
+    logical, intent(inout) :: readpt
+    integer, intent(in) :: iread
+  end subroutine syusr
+
+  subroutine ptrusr(fname, readpt)
+    character*(*), intent(in) :: fname
+    logical, intent(inout) :: readpt
+  end subroutine ptrusr
+
+  subroutine savusr()
+  end subroutine savusr
+
+  subroutine chkusr ()
+  end subroutine chkusr
+
+end interface
+
 contains
+
 ! --------------------------------------------------------------------
 subroutine basis (bqs, jhold, ehold, ishold, nlevel, nlevop, &
                   sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &

@@ -640,7 +640,7 @@ close (8)
 irpot=1
 return
 !
-entry sav2mol (readpt)
+entry sav2mol ()
 !  save input parameters for hf-hf scattering
 !  line 13:
 write (FUNIT_INP, 300) nterm, nsym,numj

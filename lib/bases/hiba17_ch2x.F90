@@ -1166,7 +1166,7 @@ endif
 close (8)
 return
 !
-entry savch2x (readpt)
+entry savch2x ()
 !  save input parameters for CH2(X 3B1) (0,v2,0) bender + atom scattering
 !  the order of the write statements should be identical to the read statement
 !  above. for consistency with the data file written by gendat, format

@@ -699,7 +699,7 @@ close (8)
 irpot=1
 return
 ! --------------------------------------------------------------
-entry sav3p2s (readpt)
+entry sav3p2s ()
 !  save input parameters for 3P atom + 2S atom scattering
 write (FUNIT_INP, 1285) nvib
 1285 format(i4, 29x,'nvib')

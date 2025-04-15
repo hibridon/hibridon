@@ -1105,7 +1105,7 @@ endif
 close (8)
 return
 !  -----------------------------------------------------------------------
-entry savastp3 (readpt)
+entry savastp3 ()
 !  save input parameters for chiral asymmetric top + atom scattering
 !  the order of the write statements should be identical to the read statement
 !  above. for consistency with the data file written by gendat, format

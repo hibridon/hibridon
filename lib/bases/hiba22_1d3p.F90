@@ -1124,7 +1124,7 @@ close (8)
 irpot=1
 return
 ! --------------------------------------------------------------
-entry sav1d3p (readpt)
+entry sav1d3p ()
 !  save input parameters for 1D/3P atom + atom scattering
 write (FUNIT_INP, 300) nstate
 300 format(i4, 29x,'nstate')

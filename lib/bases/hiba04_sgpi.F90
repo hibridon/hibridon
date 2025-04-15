@@ -1660,7 +1660,7 @@ irpot=1
 ihomo=nskip.eq.2
 return
 !
-entry savsgpi (readpt)
+entry savsgpi ()
 nterm=ispar(1)
 isg=ispar(2)
 ipi=ispar(3)

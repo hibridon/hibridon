@@ -876,7 +876,7 @@ close (8)
 irpot=1
 return
 !
-entry sav22p (readpt)
+entry sav22p ()
 !  save input parameters for singlet-sigma + atom scattering
 nphoto=iscod(2)
 nvib=iscod(3)

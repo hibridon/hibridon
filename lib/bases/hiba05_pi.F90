@@ -1118,7 +1118,7 @@ close (8)
 irpot=1
 return
 !
-entry savpi (readpt)
+entry savpi ()
 !  save input parameters for singlet, doublet or
 !  triplet-pi molecule + atom scattering
 !  the order of the write statements should be identical to the read

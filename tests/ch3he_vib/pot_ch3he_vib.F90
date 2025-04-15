@@ -497,7 +497,7 @@ entry ptrusr(fname, readpt)
 return
 !
 ! -------------------------------------------------------------------
-entry savusr(readpt)
+entry savusr()
 !   Save parameters
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
 emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)

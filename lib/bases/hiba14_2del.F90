@@ -997,7 +997,7 @@ close (8)
 irpot=1
 return
 !
-entry sav2del (readpt)
+entry sav2del ()
 !  save input parameters for doublet-delta + atom scattering
 !  line 13:
 write (FUNIT_INP, 315) jmax, igu, isa, npar

@@ -744,7 +744,7 @@ nlam=nlam+(lammax(1)-lammin(1))/nskip+1
 irpot=1
 return
 !
-entry sav2sg (readpt)
+entry sav2sg ()
 
 ASSERT(nrmax .eq. ispar(2))
 ASSERT(npar .eq. ispar(3))

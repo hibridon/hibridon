@@ -469,7 +469,7 @@ return
 entry ptr2pi1sg(fname, readpt)
 UNUSED_DUMMY(fname)
 return
-entry sav2pi1sg(readpt)
+entry sav2pi1sg()
 !     WRITE THE LAST FEW LINES OF THE INPUT FILE.
 write (FUNIT_INP, 230) j1max, npar
 230 format (2i4, 22x, '   j1max, npar')

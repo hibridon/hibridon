@@ -1312,18 +1312,16 @@ ihomo=nskip.eq.2
 return
 end subroutine 
 !
-subroutine savsgpi1 (readpt)
+subroutine savsgpi1 ()
 use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
 use funit, only: FUNIT_INP
 
 implicit none
-logical, intent(inout) :: readpt
 integer :: iv, isi, isr, j
 integer, pointer :: numvpi
 numvpi=>ispar(9)
 
-UNUSED_DUMMY(readpt)
 !  save parameters for 2sigma and 2pi states
 !      write (FUNIT_INP, 105) isym, isa, igusg, nmaxsg, nparsg,
 !     :  ' isym, isa, igusg, nmaxsg, nparsg'

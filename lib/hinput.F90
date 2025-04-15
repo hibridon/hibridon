@@ -142,6 +142,7 @@ use mod_hibrid1, only: difs, turn
 use mod_hibrid4, only: psi, eadiab1, sprint
 use mod_hypxsc, only: hypxsc
 use mod_hiiolib1, only: openf, gendat, savdat, genchk
+use mod_hisystem, only: baschk, sysdat, syssav, ptread
 implicit none
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
@@ -969,7 +970,7 @@ else
   code = input
 end if
 call savdat(inew,code)
-call syssav(lpar(LPAR_READPT))
+call syssav()
 close(8)
 l1 = l
 irinp = 1

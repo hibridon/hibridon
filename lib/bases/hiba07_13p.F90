@@ -788,7 +788,7 @@ close (8)
 irpot=1
 return
 !
-entry sav13p (readpt)
+entry sav13p ()
 !  save input parameters for singlet-sigma + atom scattering
 write (FUNIT_INP, 300) nstate, ipol, npot
 300 format(3i4, 18x,'   nstate, ipol, npot')

@@ -16,7 +16,7 @@ if(.not.readpt.or.iread.eq.0) then
 endif
 entry ptrusr (fname, readpt)
 UNUSED(fname)
-entry savusr (readpt)
+entry savusr ()
 entry chkusr
 return
 end

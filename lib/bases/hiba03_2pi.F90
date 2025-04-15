@@ -1018,7 +1018,7 @@ close (8)
 irpot=1
 return
 !
-entry sav2pi (readpt)
+entry sav2pi ()
 !  save input parameters for doublet-pi + atom scattering
 !  line 13:
 write (FUNIT_INP, 315) jmax, igu, isa, npar

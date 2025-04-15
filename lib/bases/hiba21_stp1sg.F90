@@ -501,7 +501,7 @@ entry ptrstp1sg(fname, readpt)
 UNUSED_DUMMY(fname)
 return
 !     ------------------------------------------------------------------
-entry savstp1sg(readpt)
+entry savstp1sg()
 !     WRITE THE LAST FEW LINES OF THE INPUT FILE.
 write (FUNIT_INP, 220) ipotsy, iop
 220 format (2i4, 25x,'ipotsy, iop')

@@ -642,7 +642,7 @@ close (8)
 irpot=1
 return
 ! --------------------------------------------------------------
-entry sav2sg1sg (readpt)
+entry sav2sg1sg ()
 !  save input parameters for 2sigma-1sigma molecule scattering
 write (FUNIT_INP, 310) n1max, j2min, j2max, ipotsy2
 310 format(4i4,14x,'n1max, j2min, j2min, ipotsy2')

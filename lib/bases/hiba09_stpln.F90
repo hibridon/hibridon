@@ -836,7 +836,7 @@ endif
 close (8)
 return
 !
-entry savstpln (readpt)
+entry savstpln ()
 !  save input parameters for symmetric top + linear molecule scattering
 !  the order of the write statements should be identical to the read statement
 !  above. for consistency with the data file written by gendat, format

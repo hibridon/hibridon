@@ -1113,7 +1113,7 @@ close (8)
 irpot=1
 return
 ! --------------------------------------------------------------
-entry savsphtp (readpt)
+entry savsphtp ()
 iop=>ispar(2); jmax=>ispar(3)
 brot=>rspar(1) ; dj=>rspar(2); dk=>rspar(3)
 ASSERT(iop .eq. ispar(2))

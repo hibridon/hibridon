@@ -752,7 +752,7 @@ end if
 irpot=1
 return
 ! --------------------------------------------------------------
-entry sav1sg (readpt)
+entry sav1sg ()
 !  save input parameters for singlet-sigma + atom scattering
 if (iscod(3) .lt. iscod(2)) then
   write (6, 210) iscod(3), iscod(2)
