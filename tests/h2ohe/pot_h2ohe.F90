@@ -18,7 +18,7 @@
 #include "common/bausr.F90"
 
 module mod_h2ohe
-  implicit none
+  ! implicit none
   ! parameter (mxl=100)
   ! parameter (maxb=4*mxl,maxp=800)
   ! parameter (maxc=5000)
@@ -64,7 +64,750 @@ module mod_h2ohe
   integer :: iind
   integer :: lmaxi
   integer :: lmaxd
+contains
+! ----------------------------------------------------------------------
 
+!
+! Read the multipole moment components
+!  commented subr rdmom out, since listed in calling subr as superfluous
+!  (paul dagdigian, aug-2009)
+!
+!        subroutine rdmom
+!        implicit real*8 (a-h,o-z)
+!       parameter (mxl=100)
+!       parameter (maxb=4*mxl,maxp=800)
+!        common/moments/ qa(100,3), qb(100,3),la(maxb),ka(maxb),lb(maxb),
+!     1 kb(maxb),nmoma, nmomb
+!
+!---- read the moments for molecule A
+!        open(unit=3,file='moments.a',form='formatted')
+!
+!        do i=1,1000
+!         read(3,*,END=100) la(i),ka(i),(qa(i,j),j=1,3)
+!        end do
+! 100    continue
+!        nmoma = i - 1
+!        close(3,STATUS='delete')
+!---- read the moments for molecule B
+!        open(unit=3,file='moments.b',form='formatted')
+!
+!        do i=1,1000
+!         read(3,*,END=101) lb(i),kb(i),(qb(i,j),j=1,3)
+!        end do
+! 101    continue
+!        nmomb = i - 1
+!        close(3,STATUS='delete')
+!
+!        return
+!        end
+!
+! Read the dispersion ond induction coefficients.
+! It is assumed that the induction coefficients are
+! complete, i.e., that both A->B and B->A are included,
+! with the proper phases after the induct calculation...
+!
+  subroutine rdcoef
+  !use mod_h2ohe, only: cd, ci, ld ,li, idisp, iind, lmaxi, lmaxd, maxc
+  implicit real*8 (a-h,o-z)
+!
+  open(unit=1,file= &
+    'potdata/h2o_coefd.dat', &
+    form='formatted')
+  open(unit=2,file= &
+    'potdata/h2o_coefi.dat', &
+    form='formatted')
+!
+  lmaxd=0
+  nmin=1000
+  nmax=0
+  do i=1,maxc
+   read(1,*,end=100)(ld(j,i),j=1,6), c0,c1,ctot
+! !!!! update !!!!
+!        cd(i) = c0    ! KSz
+   cd(i) = ctot  ! KSz
+   lmaxd=max0(lmaxd,ld(1,i))
+   nmin=min0(nmin,ld(6,i))
+   nmax=max0(nmax,ld(6,i))
+  end do
+100   continue
+  if(nmin.lt.6 .or. nmax.gt.12) then
+    write(6,*) 'n out of range in rdcoef-disp',nmin,nmax
+    stop
+  endif
+  idisp = i-1
+!
+  lmaxi=0
+  nmin=1000
+  nmax=0
+  do i=1,maxc
+   read(2,*,END=200)(li(j,i),j=1,6),c0,c1,ctot
+! !!!! update !!!!
+!        ci(i) = c0    ! KSz
+   ci(i) = ctot  ! KSz
+   lmaxi=max0(lmaxi,li(1,i))
+   nmin=min0(nmin,li(6,i))
+   nmax=max0(nmax,li(6,i))
+  end do
+200   continue
+  if(nmin.lt.6 .or. nmax.gt.12) then
+    write(6,*) 'n out of range in rdcoef-ind',nmin,nmax
+    stop
+  endif
+  iind = i-1
+!
+  close(1)
+  close(2)
+  return
+  end
+
+! ----------------------------------------------------------------------
+!  saptpot.f
+!
+!  program obtained from phillip stancil and benyui yang (uga)
+!  compute H2O-He SAPT potential [see Patkowski et al., J. Molec.
+!  Struct. Theochem 591, 231-241 (2002)]
+!
+!  original name of subr was arh2osapt (written for Ar-H2O PES, but
+!  never published)
+!
+!...    actual calculation of potential
+  subroutine heh2osapt(iaa,r,theta,phi,energy)
+!       subroutine arh2osapt(iaa,r,theta,phi,energy,tima,timb)
+  !use mod_h2ohe, only: ldum, cdum,ndum
+  !use mod_h2ohe, only: lex, cex, nex, lmaxex
+  !use mod_h2ohe, only: lmaxli
+  !use mod_h2ohe, only: lmaxi, lmaxd
+  implicit real*8 (a-h,o-z)
+  logical, save :: first_time = .true.
+  dimension rpt(6)
+  data a0 /0.529177249d0/
+  data xkcal /627.51d0/
+  data cm    /219474.63d0/
+  data icount /0/
+!
+!       Modified version of subroutine computing the Ar-H2O potential.
+!       The calls to Wormer's almre were replaced by a calculation of
+!       spherical harmonics -- subroutine ssh.
+!
+!       INPUT:
+!       ======
+!       dimer geometry (R, theta, phi)   -- via header or read in
+!       long-range coefficients          -- in files h2o_coefi.dat and h2o_coefd.dat
+!       short-range optimized parameters -- in params
+!
+!       irpowex = 1  now read in rdexch
+!       irpowsp = 3  now read in rdlin
+!       imode   = i  controls terms computed by potentot
+!                 3  only asymptotics
+!                 4  both short-range and asymptotics
+!
+!       Lines deactivated by c1 compute derviatives.
+!
+!       icount=icount+1
+!       if((icount/100)*100 .eq. icount) write(6,*) 'icount=', icount
+  pi = dacos(-1.d0)
+  d2rad = pi/180.d0
+!...    activate next two lines for stand alone program
+!       write(6,*)'enter: i=1 or 2 for bohr/ang, R, theta, phi in deg'
+!       read(5,*) iaa,r,theta,phi
+  do j=1,6
+    rpt(j)=0.0d0
+  enddo
+!...    program uses R in angstroms
+  if(iaa.eq.1) rpt(1) = a0*r
+  if(iaa.eq.2) rpt(1) = r
+  rpt(2) = d2rad*theta
+  rpt(3) = d2rad*phi
+  if(first_time) then
+!          call rdmom    ! now superfluous call
+    call rdcoef   ! read induction and dispersion coeffs
+    call rdexch   ! read short-range exponential parms
+    call rdlin    ! read short-range linear parms
+    first_time=.false.
+  endif
+  ndum = nex
+  ipow = 2
+  do i=1,nex
+   cdum(i) = cex(ipow*i-ipow+2)
+   do k=1,5
+    ldum(k,i) = lex(k,i)
+   end do
+  end do
+!
+!       compute table of A_lm functions.  There functions are
+!       for this particular case identical to those produced by almre.
+!
+  lmax = max0(lmaxex,lmaxli,lmaxi,lmaxd)
+!       write(6,*) 'lmax', lmax
+!       call gclock(tim1)
+  call ssh(lmax,rpt(2),rpt(3))
+!       call gclock(tim2)
+!       tima=tima+tim2-tim1
+!
+  imode = 4
+!       call potentot(rpt,vex,vsp,valas,der,imode,timb)
+  call potentot(rpt,vex,vsp,valas,der,imode)
+  tot = vsp + valas
+  energy=tot*cm/xkcal
+!       write(6,*)'Total energy:',energy
+!       energy=tot
+!       stop
+  return
+  end
+
+
+!
+! Subroutine for the calculation of the multipole
+! part of the electrostatic energy for a given
+! dimer conformation. The angles are expressed
+! in radians. 
+!
+  subroutine elst(rpt,el)
+  !use mod_h2ohe, only: maxb
+  implicit real*8 (a-h,o-z)
+  dimension rrev(20), oa(3), ob(3), oc(2), rpt(6), el(20)
+  common/factorial/ fac(0:40)
+  common/moments/ qa(100,3), qb(100,3),la(maxb),ka(maxb),lb(maxb), &
+ kb(maxb),nmoma, nmomb
+  common/realm/ almre(0:50,0:50)
+  data Pi /3.1415926535897932D0/
+  data efact /627.51d0/
+  data a0 /0.529177249d0/
+  data oa(1) /0.d0/, oc /0.d0,0.d0/
+!
+  r = rpt(1)
+  oa(2) = rpt(2)
+  oa(3) = rpt(3)
+  ob(1) = rpt(4)
+  ob(2) = rpt(5)
+  ob(3) = rpt(6)
+  rrev(1) = 1.d0/(R/a0)
+  do i=2,20
+   rrev(i) = rrev(i-1)*rrev(1)
+  end do
+!
+   els = 0.d0
+  do i=1,20
+   el(i) = 0.d0
+  end do
+!
+  do ia=1,nmoma
+  do ib=1,nmomb
+   phase = fac(2*la(ia)+2*lb(ib)+1)
+   phase = phase/(fac(2*la(ia))*fac(2*lb(ib)))
+   phase = (-1.d0)**la(ia) * dsqrt(phase)
+   ll = la(ia) + lb(ib)
+   rrr = rrev(ll+1)
+!...     replace call to almre by substitution of precomputed value
+!        aa  = almre(la(ia),ka(ia),lb(ib),kb(ib),ll,OA,OB,OC)
+   if(ka(ia) .lt. 0) then
+     write(6,*) 'ka .lt. 0 in elst'
+     stop
+   endif
+   aa  = almre(la(ia),ka(ia))
+! calculate the product of multipole moments at the proper level
+! (currently -- MP3-resp)
+   qpr = qa(ia,1)*qb(ib,1) + qa(ia,1)*(qb(ib,2)+qb(ib,3))
+   qpr = qpr + (qa(ia,2)+qa(ia,3))*qb(ib,1)
+! limitation to R^-11 in electrostatics....
+   if((ll+1).le.11) &
+!     1   el(ll+1) = el(ll+1) + phase*rrr*real(a)*qpr
+   el(ll+1) = el(ll+1) + phase*rrr*aa*qpr
+  end do
+  end do
+!
+  do i=1,20
+   el(i) = efact*el(i)
+  end do
+!
+! That's all
+!
+  return
+  end
+!
+!
+!   Calculate the total damped asymptotics from elst and dispind..
+!   th1, th2, phi in radians...., R in Angstroms.
+!
+subroutine asymp(rpt,value,valder)
+  !use mod_h2ohe, only: ldum, cdum,ndum
+  implicit real*8 (a-h,o-z)
+  real(8), intent(in) :: rpt(6)
+  real(8), intent(out) :: value
+  real(8), intent(out) :: valder
+  dimension oa(3), ob(3), oc(2)
+  dimension en(20), ei(20), ed(20)
+  common/realm/ almre(0:50,0:50)
+  data oa(1) /0.d0/, oc /0.d0,0.d0/
+  integer :: iperm
+  iperm = 0
+!
+  r = rpt(1)
+  oa(2) = rpt(2)
+  oa(3) = rpt(3)
+  ob(1) = rpt(4)
+  ob(2) = rpt(5)
+  ob(3) = rpt(6)
+  !
+  !---- call the asymptotics procedures to be changed....
+  !
+  call dispind(rpt,ed,ei)
+  !       call elst(rpt,el) ! KSz deacive for ArH2O
+  !        call shrtas(R,th1,th2,phi,srval)
+  !
+  !---- Compute the damping constant for a given geometry
+  !
+  dump = 0.d0
+  do i=1,ndum
+    la = ldum(1,i)
+    ka = ldum(2,i)
+    lb = ldum(3,i)
+    kb = ldum(4,i)
+    l  = ldum(5,i)
+    ! glamc changed into glam to test the real alm version...
+    !...     replace calls to almre by substitution of precomputed value
+    !        glam = almre(la,ka,lb,kb,l,oa,ob,oc)
+    if(ka .lt. 0) then
+      write(6,*) 'ka .lt. 0 in asympt'
+      stop
+    endif
+    glam = almre(la,ka) ! KSz
+    ! -- symmetrize iif molecules identical...
+    if(iperm.eq.1) then
+      iphase = (-1)**(la+lb)
+      !         glam = glam + iphase*almre(lb,kb,la,ka,l,oa,ob,oc)
+      if(kb .lt. 0) then
+        write(6,*) 'kb .lt. 0 in asympt'
+        stop
+      endif
+      glam = glam + iphase*almre(lb,kb)
+    endif
+    !         glam = real(glamc)
+    dump = dump - cdum(i)*glam
+  end do
+  !
+  !--- Damping factor ready, proceed to the asymptotics...
+  !
+  !       do i=1,20
+  do i=6,12
+    !        en(i) = el(i) + ed(i) + ei(i)
+    en(i) = ed(i) + ei(i)
+  end do
+  value = 0.d0
+  valder = 0.d0
+  do i=6,12 ! KSz changed from 1,20
+    ddd = d(i,dump,r)
+    value = value + ddd*en(i)
+    !1     valder = valder + en(i)*(dd(i,dump,r)-i*ddd/r)
+  end do
+  return
+end
+!
+function d(n,beta,r)
+!
+!     calculate the damping factor (small R correct)
+!
+implicit real*8 (a-h,o-z)
+br=beta*r
+sum=1.0d0
+term=1.0d0
+ncn=n
+do i=1,ncn
+  term=term*br/i
+  sum=sum+term
+enddo
+d=1.0d0 - dexp(-br)*sum
+!     in case of d --> 0 use
+!     d=1.0d0 - dexp(-br)*sum = sum_m=ncn+1^\infty br^m/m!
+if(dabs(d).lt.1.0d-8) then
+  d=0.0d0
+  do i=ncn+1,1000
+    term=term*br/i
+    d=d+term
+    if(term/d .lt. 1.0d-8) go to 111
+  enddo
+111 continue
+d=d*dexp(-br)
+endif
+!     write(6,'(i4,2f10.5,e20.10)') n,beta,r,d
+return
+end
+!
+function dd(n,b,r)
+implicit real*8 (a-h,o-z)
+common/factorial/ f(0:40)
+br = b*r
+dd = b*dexp(-br)*(br)**n/f(n)
+return
+end
+!
+! Subroutine for the calculation of the multipole
+! part of the dispersion and induction energies for a given
+! dimer conformation. 
+!
+!       Ar-H2O version:
+!       *** NOTICE ***
+!       For Ar-H2O C_n^lm = C_n^l,-m,  however,  Polcor suite
+!       includes both types of coefficients in output.
+!       To avoid calculation of Alm for negative m we use
+!       A_lm = A_l,-m for this symmetry.
+!
+  subroutine dispind(rpt,eld,eli)
+  !use mod_h2ohe, only: cd, ci, ld ,li, idisp, iind
+  implicit real*8 (a-h,o-z)
+  real(8), intent(in) :: rpt(6)
+  real(8), intent(out) :: eld(20)
+  real(8), intent(out) :: eli(20)
+  dimension rr(20),oa(3),ob(3),oc(2)
+  common/realm/ almre(0:50,0:50)
+  data Pi /3.1415926535897932D0/
+  data a0 /0.529177249d0/
+  data efact /627.51d0/        
+  data oa(1) /0.d0/, oc /0.d0,0.d0/
+!
+  r = rpt(1)
+  oa(2) = rpt(2)
+  oa(3) = rpt(3)
+  ob(1) = rpt(4)
+  ob(2) = rpt(5)
+  ob(3) = rpt(6)
+  rrev = 1.d0/(R/a0)
+  rr(1) = rrev
+  do i=2,12
+   rr(i) = rr(i-1)*rrev
+  end do
+  do i=1,20
+   eld(i) = 0.d0
+   eli(i) = 0.d0
+  end do
+!
+  do i=1,idisp
+   la = ld(1,i)
+   ka = ld(2,i)
+   lb = ld(3,i)
+   kb = ld(4,i)
+   l  = ld(5,i)
+   n  = ld(6,i)
+!...     replace calls to almre by substitution of precomputed value
+!        aa = almre(la,ka,lb,kb,l,oa,ob,oc)
+   aa = almre(la,iabs(ka)) ! KSz: notice iabs.
+!         eld(n) = eld(n) + cd(i)*rr(n)*real(a)
+   eld(n) = eld(n) + cd(i)*rr(n)*aa
+  end do
+!
+  do i=1,iind
+   la = li(1,i)
+   ka = li(2,i)
+   lb = li(3,i)
+   kb = li(4,i)
+   l  = li(5,i)
+   n  = li(6,i)
+!        aa = almre(la,ka,lb,kb,l,oa,ob,oc)
+   aa = almre(la,iabs(ka)) ! KSz: notice iabs.
+!         eli(n) = eli(n) + ci(i)*rr(n)*real(a)
+   eli(n) = eli(n) + ci(i)*rr(n)*aa
+  end do
+!       do i=1,20
+  do i=6,12
+   eli(i) = -efact*eli(i)
+   eld(i) = -efact*eld(i)
+  end do
+!
+! That's all
+!
+  return
+  end
+!
+!  A short subroutine to calculate the total interaction
+!  potential from the exchange, "spherical", and
+!  asymptotic parts...
+!
+  subroutine potentot(rpt,vex,vsp,valas,der,imode)
+!       subroutine potentot(rpt,vex,vsp,valas,der,imode,timb)
+  !use mod_h2ohe, only: lex, cex, nex, irpowex, iexback
+  !use mod_h2ohe, only: lsp, csp, nsp, irpowsp, ispback
+  implicit real*8 (a-h,o-z)
+  real(8), intent(in) :: rpt(6)
+  real(8), intent(out) :: vex
+  real(8), intent(out) :: vsp
+  real(8), intent(out) :: valas
+  real(8), intent(inout) :: der
+  integer, intent(in) :: imode
+  dimension rr(10), oa(3), ob(3)
+  ! dimension oc(2)
+  integer :: iperm
+common/realm/ almre(0:50,0:50)
+data xkcal /627.51d0/
+data cm    /219474.63d0/
+data oa(1) /0.d0/
+!data oc /0.d0,0.d0/
+!
+  UNUSED_DUMMY(der)
+  iperm = 0
+  r = rpt(1)
+  oa(2) = rpt(2)
+  oa(3) = rpt(3)
+  ob(1) = rpt(4)
+  ob(2) = rpt(5)
+  ob(3) = rpt(6)
+  vex = 0.d0
+  vsp = 0.d0
+  valas = 0.d0
+  if(imode.ne.3) then
+  rr(1) = 1.d0
+  do i=2,max(irpowex,irpowsp)+1
+   rr(i) = rr(i-1)*r
+  end do
+!---- Compute the exchange part
+  ipow = irpowex+1
+!       write(6,*) 'ipow:', ipow
+!       write(6,*) 'iexback:', iexback
+  rrev = r**(-iexback)
+  damp = 0.d0
+  do i=1,nex
+   la = lex(1,i)
+   ka = lex(2,i)
+   lb = lex(3,i)
+   kb = lex(4,i)
+   l  = lex(5,i)
+! glamc changed into glam to test the real alm version...
+!...     replace calls to almre by substitution of precomputed value
+!        glam = almre(la,ka,lb,kb,l,oa,ob,oc)
+   if(ka .lt. 0) then
+     write(6,*) 'ka .lt. 0 in potentot'
+     stop
+   endif
+   glam = almre(la,ka)
+! --- symmetrize if molecules identical...
+!        write(6,*) 'iperm:', iperm
+   if(iperm.eq.1) then
+    iphase = (-1)**(la+lb)
+!         glam = glam + iphase*almre(lb,kb,la,ka,l,oa,ob,oc)
+    if(kb .lt. 0) then
+      write(6,*) 'kb .lt. 0 in potentot'
+      stop
+    endif
+    glam = glam + iphase*almre(lb,kb)
+   endif
+!         glam = real(glamc)
+!1       damp = damp + glam*cex(2*i)
+   do k=1,ipow
+   vex = vex + glam*cex(ipow*i-ipow+k)*rr(k)*rrev
+!        write(6,'(2i2,4f16.8)') i,k,glam,cex(ipow*i-ipow+k),
+!    $                 rr(k),vex
+   end do
+  end do
+  vex = dexp(vex)
+  if(imode.gt.1) then
+!---- Compute the "spherical" part
+  ipow = irpowsp + 1
+!       write(6,*) 'ipow:', ipow
+  rrev = r**(-ispback)
+  rrev1 = rrev/r
+  vsp = 0.d0
+  vsp1 = 0.d0
+  do i=1,nsp
+   la = lsp(1,i)
+   ka = lsp(2,i)
+   lb = lsp(3,i)
+   kb = lsp(4,i)
+   l  = lsp(5,i)
+! glamc changed into glam to test the real alm version...
+!        glam = almre(la,ka,lb,kb,l,oa,ob,oc)
+   if(ka .lt. 0) then
+     write(6,*) 'ka .lt. 0 in potentot'
+     stop
+   endif
+   glam = almre(la,ka)
+! --- symmetrize if molecules identical....
+   if(iperm.eq.1) then
+    iphase = (-1)**(la+lb)
+!         glam = glam + iphase*almre(lb,kb,la,ka,l,oa,ob,oc)
+    if(kb .lt. 0) then
+      write(6,*) 'kb .lt. 0 in potentot'
+      stop
+    endif
+    glam = glam + iphase*almre(lb,kb)
+   endif
+!         glam = real(glamc)
+   do k=1,ipow
+!---- skip dividing by r when done with experiments, 
+!---- update gradient if proved successful
+   vsp = vsp + glam*csp(ipow*i-ipow+k)*rr(k)*rrev
+!        write(6,'(2i2,4f16.8)') i,k,glam,csp(ipow*i-ipow+k)*cm/xkcal,
+!    $                 rr(k),vsp*cm/xkcal
+!1       vsp1 = vsp1+ (k-ispback-1)*glam*csp(ipow*i-ipow+k)*rr(k)*rrev1
+   end do
+  end do
+  vsp = vex*vsp
+!1      vsp1 = vsp1*vex + damp*vsp
+  endif
+  endif
+!----- Compute the asymptotics...
+!       call gclock(tim1)
+  if(imode.ge.3) &
+  call asymp(rpt,valas,valdr)
+!       call gclock(tim2)
+!       timb=timb+tim2-tim1
+!1      der = vsp1 + valdr
+  return
+  end
+!
+subroutine rdexch
+!
+!     reads in the parameters of the expansion of exponential
+!      
+!use mod_h2ohe, only: lex, cex, nex, irpowex, lmaxex
+implicit real*8 (a-h,o-z)
+!
+  open(unit=7,file= &
+    'potdata/h2o_params.dat', &
+    form='formatted')
+!
+!       read nex     - number of angular functions in expansion of exponent
+!            irpowex - largest power of R in exponent
+!
+  read(7,*) nex,irpowex
+  lmaxex=0
+  do i=1,nex
+   read(7,*)num,(lex(j,i),j=1,5)
+   lmaxex=max0(lmaxex,lex(1,i))
+  end do
+  do i=1,(irpowex+1)*nex
+   read(7,*) num, cex(i)
+  end do
+ return
+ end
+!
+subroutine rdlin
+!
+!     reads in the parameters of the expansion of linear factor
+!
+!use mod_h2ohe, only: lsp, csp, nsp, irpowsp, lmaxli
+implicit real*8 (a-h,o-z)
+!
+read(7,*) nsp,irpowsp
+lmaxli=0
+do k=1,irpowsp+1
+do i=1,nsp
+ read(7,*) (lsp(j,i),j=1,5),csp((irpowsp+1)*i-irpowsp-1+k)
+ lmaxli=max0(lmaxli,lsp(1,i))
+end do
+end do
+return
+end
+
+!
+! compute the matrix of N!
+!
+  subroutine fct(nmax)
+  implicit real*8 (a-h,o-z)
+  common/factorial/ f(0:40)
+!       
+  f(0) = 1.d0
+  do i=1,nmax
+   f(i) = f(i-1)*i
+  end do
+  return
+  end
+
+subroutine ssh(lmax,theta,phi)
+!     computes symmetrized spherical harmonics
+!     which for Ar-H2O are equivalent to real part of
+!     the function Alm.
+!
+!     theta and phi in radians
+!
+implicit real*8 (a-h,o-z)
+common/realm/ almre(0:50,0:50)
+common/factorial/ fac(0:40)
+dimension cosm(0:8)
+if(lmax.gt.50) then
+  write(6,*) 'lmax gt 50'
+  stop
+endif
+nmax=2*lmax
+if(nmax.gt.54) then
+  write(6,*) 'nmax gt 40'
+  stop
+endif
+call fct(nmax)
+x=dcos(theta)
+!...  Plm is Robert's program computing associated Legendre polynomials.
+!...  Normalization was changed to standard,  i.e., P_l0(1) = 1.
+call xplm(almre,x,lmax)
+do m=0,lmax
+  cosm(m)=dcos(m*phi)
+enddo
+do l=0,lmax
+!...    now we need only even m but if odd needed,  change the line below
+  do m=0,l,2
+!         write(6,*) l,m, almre(l,m)
+    almre(l,m) = almre(l,m)*(-1)**(l+m) &
+                 *dsqrt(fac(l-m)/fac(l+m)/(2*l+1)) &
+                 *cosm(m)
+!         write(6,*) 'TESST',l,m, almre(l,m)
+  enddo
+enddo
+return
+end 
+! 
+! Compute the set of associated Legendre polynomials P_lm
+! for l=0,1,...,lmax, and m=0,1,...,l. First the standard
+! polynomials
+!
+!   P^m_l(x) = (1/2^l l!)(1-x^2)^(m/2) (d^(l+m)/d x^(l+m))(x^2 -1)^l
+!
+! are computed, and then multiplied by
+!
+!  (-1)^m sqrt[(2l+1)(l-m)!/2(l+m)!]/sqrt(2Pi)
+!
+! to get the P_lm polynomials....
+!
+  subroutine xplm(p,x,lmax)
+  implicit real*8 (a-h,o-z)
+  dimension p(0:50,0:50)
+  common/factorial/ fact(0:40)
+! inverse of dsqrt(2Pi)
+  data twopinv /0.3989422804014d0/
+!
+! starting value
+!
+  p(0,0) = 1.d0
+  u = dsqrt(1-x*x)
+!
+! compute the diagonal elements
+!
+  do l=1,lmax
+   p(l,l) = (2*l-1)*p(l-1,l-1)*u
+  end do
+!
+! compute P_lm along the columns with fixed m
+!
+  do m = 0,lmax-1
+  do l = m,lmax-1
+   if((l-1).lt.m) then
+     pp = 0
+   else
+     pp = p(l-1,m)
+   endif
+   p(l+1,m) = ((2*l+1)*x*p(l,m)-(l+m)*pp)/(l-m+1)
+  end do 
+  end do
+!
+! Renormalize values...
+!
+!       do l=0,lmax
+!       mm = 1
+!       do m=0,l
+!        dnorm = fact(l-m)*(2*l+1)/(2*fact(l+m))
+!        p(l,m) = mm*twopinv*dsqrt(dnorm)*p(l,m)
+!        mm = -mm
+!       end do
+!       end do
+!
+  return
+  end
 end module mod_h2ohe
 
 ! ------------------------------------------------------------------------
@@ -137,7 +880,7 @@ end do
 nlammx = nlam
 return
 end
-! ----------------------------------------------------------------------
+
 subroutine pot (vv0, r)
 !  subroutine to calculate the r-dependent coefficients
 !  in atomic units (distance and energy)
@@ -162,6 +905,7 @@ subroutine pot (vv0, r)
 use mod_covvl, only: vvl
 use constants, only: s4pi
 use mod_hiblas, only: dscal, dcopy, dgelsd
+use mod_h2ohe, only: heh2osapt
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: vv0
 real(8), intent(in) :: r  ! intermolecular distance
@@ -530,742 +1274,3 @@ call dcopy(11,vcalcx(2),1,vvl,1)
 call dscal(11,econv,vvl,1)
 return
 end
-! ----------------------------------------------------------------------
-!  saptpot.f
-!
-!  program obtained from phillip stancil and benyui yang (uga)
-!  compute H2O-He SAPT potential [see Patkowski et al., J. Molec.
-!  Struct. Theochem 591, 231-241 (2002)]
-!
-!  original name of subr was arh2osapt (written for Ar-H2O PES, but
-!  never published)
-!
-!...    actual calculation of potential
-  subroutine heh2osapt(iaa,r,theta,phi,energy)
-!       subroutine arh2osapt(iaa,r,theta,phi,energy,tima,timb)
-  use mod_h2ohe, only: ldum, cdum,ndum
-  use mod_h2ohe, only: lex, cex, nex, lmaxex
-  use mod_h2ohe, only: lmaxli
-  use mod_h2ohe, only: lmaxi, lmaxd
-  implicit real*8 (a-h,o-z)
-  logical, save :: first_time = .true.
-  dimension rpt(6)
-  data a0 /0.529177249d0/
-  data xkcal /627.51d0/
-  data cm    /219474.63d0/
-  data icount /0/
-!
-!       Modified version of subroutine computing the Ar-H2O potential.
-!       The calls to Wormer's almre were replaced by a calculation of
-!       spherical harmonics -- subroutine ssh.
-!
-!       INPUT:
-!       ======
-!       dimer geometry (R, theta, phi)   -- via header or read in
-!       long-range coefficients          -- in files h2o_coefi.dat and h2o_coefd.dat
-!       short-range optimized parameters -- in params
-!
-!       irpowex = 1  now read in rdexch
-!       irpowsp = 3  now read in rdlin
-!       imode   = i  controls terms computed by potentot
-!                 3  only asymptotics
-!                 4  both short-range and asymptotics
-!
-!       Lines deactivated by c1 compute derviatives.
-!
-!       icount=icount+1
-!       if((icount/100)*100 .eq. icount) write(6,*) 'icount=', icount
-  pi = dacos(-1.d0)
-  d2rad = pi/180.d0
-!...    activate next two lines for stand alone program
-!       write(6,*)'enter: i=1 or 2 for bohr/ang, R, theta, phi in deg'
-!       read(5,*) iaa,r,theta,phi
-  do j=1,6
-    rpt(j)=0.0d0
-  enddo
-!...    program uses R in angstroms
-  if(iaa.eq.1) rpt(1) = a0*r
-  if(iaa.eq.2) rpt(1) = r
-  rpt(2) = d2rad*theta
-  rpt(3) = d2rad*phi
-  if(first_time) then
-!          call rdmom    ! now superfluous call
-    call rdcoef   ! read induction and dispersion coeffs
-    call rdexch   ! read short-range exponential parms
-    call rdlin    ! read short-range linear parms
-    first_time=.false.
-  endif
-  ndum = nex
-  ipow = 2
-  do i=1,nex
-   cdum(i) = cex(ipow*i-ipow+2)
-   do k=1,5
-    ldum(k,i) = lex(k,i)
-   end do
-  end do
-!
-!       compute table of A_lm functions.  There functions are
-!       for this particular case identical to those produced by almre.
-!
-  lmax = max0(lmaxex,lmaxli,lmaxi,lmaxd)
-!       write(6,*) 'lmax', lmax
-!       call gclock(tim1)
-  call ssh(lmax,rpt(2),rpt(3))
-!       call gclock(tim2)
-!       tima=tima+tim2-tim1
-!
-  imode = 4
-!       call potentot(rpt,vex,vsp,valas,der,imode,timb)
-  call potentot(rpt,vex,vsp,valas,der,imode)
-  tot = vsp + valas
-  energy=tot*cm/xkcal
-!       write(6,*)'Total energy:',energy
-!       energy=tot
-!       stop
-  return
-  end
-
-!
-! Read the multipole moment components
-!  commented subr rdmom out, since listed in calling subr as superfluous
-!  (paul dagdigian, aug-2009)
-!
-!        subroutine rdmom
-!        implicit real*8 (a-h,o-z)
-!       parameter (mxl=100)
-!       parameter (maxb=4*mxl,maxp=800)
-!        common/moments/ qa(100,3), qb(100,3),la(maxb),ka(maxb),lb(maxb),
-!     1 kb(maxb),nmoma, nmomb
-!
-!---- read the moments for molecule A
-!        open(unit=3,file='moments.a',form='formatted')
-!
-!        do i=1,1000
-!         read(3,*,END=100) la(i),ka(i),(qa(i,j),j=1,3)
-!        end do
-! 100    continue
-!        nmoma = i - 1
-!        close(3,STATUS='delete')
-!---- read the moments for molecule B
-!        open(unit=3,file='moments.b',form='formatted')
-!
-!        do i=1,1000
-!         read(3,*,END=101) lb(i),kb(i),(qb(i,j),j=1,3)
-!        end do
-! 101    continue
-!        nmomb = i - 1
-!        close(3,STATUS='delete')
-!
-!        return
-!        end
-!
-! Read the dispersion ond induction coefficients.
-! It is assumed that the induction coefficients are
-! complete, i.e., that both A->B and B->A are included,
-! with the proper phases after the induct calculation...
-!
-  subroutine rdcoef
-  use mod_h2ohe, only: cd, ci, ld ,li, idisp, iind, lmaxi, lmaxd, maxc
-  implicit real*8 (a-h,o-z)
-!
-  open(unit=1,file= &
-    'potdata/h2o_coefd.dat', &
-    form='formatted')
-  open(unit=2,file= &
-    'potdata/h2o_coefi.dat', &
-    form='formatted')
-!
-  lmaxd=0
-  nmin=1000
-  nmax=0
-  do i=1,maxc
-   read(1,*,end=100)(ld(j,i),j=1,6), c0,c1,ctot
-! !!!! update !!!!
-!        cd(i) = c0    ! KSz
-   cd(i) = ctot  ! KSz
-   lmaxd=max0(lmaxd,ld(1,i))
-   nmin=min0(nmin,ld(6,i))
-   nmax=max0(nmax,ld(6,i))
-  end do
-100   continue
-  if(nmin.lt.6 .or. nmax.gt.12) then
-    write(6,*) 'n out of range in rdcoef-disp',nmin,nmax
-    stop
-  endif
-  idisp = i-1
-!
-  lmaxi=0
-  nmin=1000
-  nmax=0
-  do i=1,maxc
-   read(2,*,END=200)(li(j,i),j=1,6),c0,c1,ctot
-! !!!! update !!!!
-!        ci(i) = c0    ! KSz
-   ci(i) = ctot  ! KSz
-   lmaxi=max0(lmaxi,li(1,i))
-   nmin=min0(nmin,li(6,i))
-   nmax=max0(nmax,li(6,i))
-  end do
-200   continue
-  if(nmin.lt.6 .or. nmax.gt.12) then
-    write(6,*) 'n out of range in rdcoef-ind',nmin,nmax
-    stop
-  endif
-  iind = i-1
-!
-  close(1)
-  close(2)
-  return
-  end
-!
-! Subroutine for the calculation of the multipole
-! part of the electrostatic energy for a given
-! dimer conformation. The angles are expressed
-! in radians. 
-!
-  subroutine elst(rpt,el)
-  use mod_h2ohe, only: maxb
-  implicit real*8 (a-h,o-z)
-  dimension rrev(20), oa(3), ob(3), oc(2), rpt(6), el(20)
-  common/factorial/ fac(0:40)
-  common/moments/ qa(100,3), qb(100,3),la(maxb),ka(maxb),lb(maxb), &
- kb(maxb),nmoma, nmomb
-  common/realm/ almre(0:50,0:50)
-  data Pi /3.1415926535897932D0/
-  data efact /627.51d0/
-  data a0 /0.529177249d0/
-  data oa(1) /0.d0/, oc /0.d0,0.d0/
-!
-  r = rpt(1)
-  oa(2) = rpt(2)
-  oa(3) = rpt(3)
-  ob(1) = rpt(4)
-  ob(2) = rpt(5)
-  ob(3) = rpt(6)
-  rrev(1) = 1.d0/(R/a0)
-  do i=2,20
-   rrev(i) = rrev(i-1)*rrev(1)
-  end do
-!
-   els = 0.d0
-  do i=1,20
-   el(i) = 0.d0
-  end do
-!
-  do ia=1,nmoma
-  do ib=1,nmomb
-   phase = fac(2*la(ia)+2*lb(ib)+1)
-   phase = phase/(fac(2*la(ia))*fac(2*lb(ib)))
-   phase = (-1.d0)**la(ia) * dsqrt(phase)
-   ll = la(ia) + lb(ib)
-   rrr = rrev(ll+1)
-!...     replace call to almre by substitution of precomputed value
-!        aa  = almre(la(ia),ka(ia),lb(ib),kb(ib),ll,OA,OB,OC)
-   if(ka(ia) .lt. 0) then
-     write(6,*) 'ka .lt. 0 in elst'
-     stop
-   endif
-   aa  = almre(la(ia),ka(ia))
-! calculate the product of multipole moments at the proper level
-! (currently -- MP3-resp)
-   qpr = qa(ia,1)*qb(ib,1) + qa(ia,1)*(qb(ib,2)+qb(ib,3))
-   qpr = qpr + (qa(ia,2)+qa(ia,3))*qb(ib,1)
-! limitation to R^-11 in electrostatics....
-   if((ll+1).le.11) &
-!     1   el(ll+1) = el(ll+1) + phase*rrr*real(a)*qpr
-   el(ll+1) = el(ll+1) + phase*rrr*aa*qpr
-  end do
-  end do
-!
-  do i=1,20
-   el(i) = efact*el(i)
-  end do
-!
-! That's all
-!
-  return
-  end
-!
-!
-!   Calculate the total damped asymptotics from elst and dispind..
-!   th1, th2, phi in radians...., R in Angstroms.
-!
-subroutine asymp(rpt,value,valder)
-  use mod_h2ohe, only: ldum, cdum,ndum
-  implicit real*8 (a-h,o-z)
-  real(8), intent(in) :: rpt(6)
-  real(8), intent(out) :: value
-  real(8), intent(out) :: valder
-  dimension oa(3), ob(3), oc(2)
-  dimension en(20), ei(20), ed(20)
-  common/realm/ almre(0:50,0:50)
-  data oa(1) /0.d0/, oc /0.d0,0.d0/
-  integer :: iperm
-  iperm = 0
-!
-  r = rpt(1)
-  oa(2) = rpt(2)
-  oa(3) = rpt(3)
-  ob(1) = rpt(4)
-  ob(2) = rpt(5)
-  ob(3) = rpt(6)
-  !
-  !---- call the asymptotics procedures to be changed....
-  !
-  call dispind(rpt,ed,ei)
-  !       call elst(rpt,el) ! KSz deacive for ArH2O
-  !        call shrtas(R,th1,th2,phi,srval)
-  !
-  !---- Compute the damping constant for a given geometry
-  !
-  dump = 0.d0
-  do i=1,ndum
-    la = ldum(1,i)
-    ka = ldum(2,i)
-    lb = ldum(3,i)
-    kb = ldum(4,i)
-    l  = ldum(5,i)
-    ! glamc changed into glam to test the real alm version...
-    !...     replace calls to almre by substitution of precomputed value
-    !        glam = almre(la,ka,lb,kb,l,oa,ob,oc)
-    if(ka .lt. 0) then
-      write(6,*) 'ka .lt. 0 in asympt'
-      stop
-    endif
-    glam = almre(la,ka) ! KSz
-    ! -- symmetrize iif molecules identical...
-    if(iperm.eq.1) then
-      iphase = (-1)**(la+lb)
-      !         glam = glam + iphase*almre(lb,kb,la,ka,l,oa,ob,oc)
-      if(kb .lt. 0) then
-        write(6,*) 'kb .lt. 0 in asympt'
-        stop
-      endif
-      glam = glam + iphase*almre(lb,kb)
-    endif
-    !         glam = real(glamc)
-    dump = dump - cdum(i)*glam
-  end do
-  !
-  !--- Damping factor ready, proceed to the asymptotics...
-  !
-  !       do i=1,20
-  do i=6,12
-    !        en(i) = el(i) + ed(i) + ei(i)
-    en(i) = ed(i) + ei(i)
-  end do
-  value = 0.d0
-  valder = 0.d0
-  do i=6,12 ! KSz changed from 1,20
-    ddd = d(i,dump,r)
-    value = value + ddd*en(i)
-    !1     valder = valder + en(i)*(dd(i,dump,r)-i*ddd/r)
-  end do
-  return
-end
-!
-function d(n,beta,r)
-!
-!     calculate the damping factor (small R correct)
-!
-implicit real*8 (a-h,o-z)
-br=beta*r
-sum=1.0d0
-term=1.0d0
-ncn=n
-do i=1,ncn
-  term=term*br/i
-  sum=sum+term
-enddo
-d=1.0d0 - dexp(-br)*sum
-!     in case of d --> 0 use
-!     d=1.0d0 - dexp(-br)*sum = sum_m=ncn+1^\infty br^m/m!
-if(dabs(d).lt.1.0d-8) then
-  d=0.0d0
-  do i=ncn+1,1000
-    term=term*br/i
-    d=d+term
-    if(term/d .lt. 1.0d-8) go to 111
-  enddo
-111 continue
-d=d*dexp(-br)
-endif
-!     write(6,'(i4,2f10.5,e20.10)') n,beta,r,d
-return
-end
-!
-function dd(n,b,r)
-implicit real*8 (a-h,o-z)
-common/factorial/ f(0:40)
-br = b*r
-dd = b*dexp(-br)*(br)**n/f(n)
-return
-end
-!
-! Subroutine for the calculation of the multipole
-! part of the dispersion and induction energies for a given
-! dimer conformation. 
-!
-!       Ar-H2O version:
-!       *** NOTICE ***
-!       For Ar-H2O C_n^lm = C_n^l,-m,  however,  Polcor suite
-!       includes both types of coefficients in output.
-!       To avoid calculation of Alm for negative m we use
-!       A_lm = A_l,-m for this symmetry.
-!
-  subroutine dispind(rpt,eld,eli)
-  use mod_h2ohe, only: cd, ci, ld ,li, idisp, iind
-  implicit real*8 (a-h,o-z)
-  real(8), intent(in) :: rpt(6)
-  real(8), intent(out) :: eld(20)
-  real(8), intent(out) :: eli(20)
-  dimension rr(20),oa(3),ob(3),oc(2)
-  common/realm/ almre(0:50,0:50)
-  data Pi /3.1415926535897932D0/
-  data a0 /0.529177249d0/
-  data efact /627.51d0/        
-  data oa(1) /0.d0/, oc /0.d0,0.d0/
-!
-  r = rpt(1)
-  oa(2) = rpt(2)
-  oa(3) = rpt(3)
-  ob(1) = rpt(4)
-  ob(2) = rpt(5)
-  ob(3) = rpt(6)
-  rrev = 1.d0/(R/a0)
-  rr(1) = rrev
-  do i=2,12
-   rr(i) = rr(i-1)*rrev
-  end do
-  do i=1,20
-   eld(i) = 0.d0
-   eli(i) = 0.d0
-  end do
-!
-  do i=1,idisp
-   la = ld(1,i)
-   ka = ld(2,i)
-   lb = ld(3,i)
-   kb = ld(4,i)
-   l  = ld(5,i)
-   n  = ld(6,i)
-!...     replace calls to almre by substitution of precomputed value
-!        aa = almre(la,ka,lb,kb,l,oa,ob,oc)
-   aa = almre(la,iabs(ka)) ! KSz: notice iabs.
-!         eld(n) = eld(n) + cd(i)*rr(n)*real(a)
-   eld(n) = eld(n) + cd(i)*rr(n)*aa
-  end do
-!
-  do i=1,iind
-   la = li(1,i)
-   ka = li(2,i)
-   lb = li(3,i)
-   kb = li(4,i)
-   l  = li(5,i)
-   n  = li(6,i)
-!        aa = almre(la,ka,lb,kb,l,oa,ob,oc)
-   aa = almre(la,iabs(ka)) ! KSz: notice iabs.
-!         eli(n) = eli(n) + ci(i)*rr(n)*real(a)
-   eli(n) = eli(n) + ci(i)*rr(n)*aa
-  end do
-!       do i=1,20
-  do i=6,12
-   eli(i) = -efact*eli(i)
-   eld(i) = -efact*eld(i)
-  end do
-!
-! That's all
-!
-  return
-  end
-!
-!  A short subroutine to calculate the total interaction
-!  potential from the exchange, "spherical", and
-!  asymptotic parts...
-!
-  subroutine potentot(rpt,vex,vsp,valas,der,imode)
-!       subroutine potentot(rpt,vex,vsp,valas,der,imode,timb)
-  use mod_h2ohe, only: lex, cex, nex, irpowex, iexback
-  use mod_h2ohe, only: lsp, csp, nsp, irpowsp, ispback
-  implicit real*8 (a-h,o-z)
-  real(8), intent(in) :: rpt(6)
-  real(8), intent(out) :: vex
-  real(8), intent(out) :: vsp
-  real(8), intent(out) :: valas
-  real(8), intent(inout) :: der
-  integer, intent(in) :: imode
-  dimension rr(10), oa(3), ob(3)
-  ! dimension oc(2)
-  integer :: iperm
-common/realm/ almre(0:50,0:50)
-data xkcal /627.51d0/
-data cm    /219474.63d0/
-data oa(1) /0.d0/
-!data oc /0.d0,0.d0/
-!
-  UNUSED_DUMMY(der)
-  iperm = 0
-  r = rpt(1)
-  oa(2) = rpt(2)
-  oa(3) = rpt(3)
-  ob(1) = rpt(4)
-  ob(2) = rpt(5)
-  ob(3) = rpt(6)
-  vex = 0.d0
-  vsp = 0.d0
-  valas = 0.d0
-  if(imode.ne.3) then
-  rr(1) = 1.d0
-  do i=2,max(irpowex,irpowsp)+1
-   rr(i) = rr(i-1)*r
-  end do
-!---- Compute the exchange part
-  ipow = irpowex+1
-!       write(6,*) 'ipow:', ipow
-!       write(6,*) 'iexback:', iexback
-  rrev = r**(-iexback)
-  damp = 0.d0
-  do i=1,nex
-   la = lex(1,i)
-   ka = lex(2,i)
-   lb = lex(3,i)
-   kb = lex(4,i)
-   l  = lex(5,i)
-! glamc changed into glam to test the real alm version...
-!...     replace calls to almre by substitution of precomputed value
-!        glam = almre(la,ka,lb,kb,l,oa,ob,oc)
-   if(ka .lt. 0) then
-     write(6,*) 'ka .lt. 0 in potentot'
-     stop
-   endif
-   glam = almre(la,ka)
-! --- symmetrize if molecules identical...
-!        write(6,*) 'iperm:', iperm
-   if(iperm.eq.1) then
-    iphase = (-1)**(la+lb)
-!         glam = glam + iphase*almre(lb,kb,la,ka,l,oa,ob,oc)
-    if(kb .lt. 0) then
-      write(6,*) 'kb .lt. 0 in potentot'
-      stop
-    endif
-    glam = glam + iphase*almre(lb,kb)
-   endif
-!         glam = real(glamc)
-!1       damp = damp + glam*cex(2*i)
-   do k=1,ipow
-   vex = vex + glam*cex(ipow*i-ipow+k)*rr(k)*rrev
-!        write(6,'(2i2,4f16.8)') i,k,glam,cex(ipow*i-ipow+k),
-!    $                 rr(k),vex
-   end do
-  end do
-  vex = dexp(vex)
-  if(imode.gt.1) then
-!---- Compute the "spherical" part
-  ipow = irpowsp + 1
-!       write(6,*) 'ipow:', ipow
-  rrev = r**(-ispback)
-  rrev1 = rrev/r
-  vsp = 0.d0
-  vsp1 = 0.d0
-  do i=1,nsp
-   la = lsp(1,i)
-   ka = lsp(2,i)
-   lb = lsp(3,i)
-   kb = lsp(4,i)
-   l  = lsp(5,i)
-! glamc changed into glam to test the real alm version...
-!        glam = almre(la,ka,lb,kb,l,oa,ob,oc)
-   if(ka .lt. 0) then
-     write(6,*) 'ka .lt. 0 in potentot'
-     stop
-   endif
-   glam = almre(la,ka)
-! --- symmetrize if molecules identical....
-   if(iperm.eq.1) then
-    iphase = (-1)**(la+lb)
-!         glam = glam + iphase*almre(lb,kb,la,ka,l,oa,ob,oc)
-    if(kb .lt. 0) then
-      write(6,*) 'kb .lt. 0 in potentot'
-      stop
-    endif
-    glam = glam + iphase*almre(lb,kb)
-   endif
-!         glam = real(glamc)
-   do k=1,ipow
-!---- skip dividing by r when done with experiments, 
-!---- update gradient if proved successful
-   vsp = vsp + glam*csp(ipow*i-ipow+k)*rr(k)*rrev
-!        write(6,'(2i2,4f16.8)') i,k,glam,csp(ipow*i-ipow+k)*cm/xkcal,
-!    $                 rr(k),vsp*cm/xkcal
-!1       vsp1 = vsp1+ (k-ispback-1)*glam*csp(ipow*i-ipow+k)*rr(k)*rrev1
-   end do
-  end do
-  vsp = vex*vsp
-!1      vsp1 = vsp1*vex + damp*vsp
-  endif
-  endif
-!----- Compute the asymptotics...
-!       call gclock(tim1)
-  if(imode.ge.3) &
-  call asymp(rpt,valas,valdr)
-!       call gclock(tim2)
-!       timb=timb+tim2-tim1
-!1      der = vsp1 + valdr
-  return
-  end
-!
-subroutine rdexch
-!
-!     reads in the parameters of the expansion of exponential
-!      
-use mod_h2ohe, only: lex, cex, nex, irpowex, lmaxex
-implicit real*8 (a-h,o-z)
-!
-  open(unit=7,file= &
-    'potdata/h2o_params.dat', &
-    form='formatted')
-!
-!       read nex     - number of angular functions in expansion of exponent
-!            irpowex - largest power of R in exponent
-!
-  read(7,*) nex,irpowex
-  lmaxex=0
-  do i=1,nex
-   read(7,*)num,(lex(j,i),j=1,5)
-   lmaxex=max0(lmaxex,lex(1,i))
-  end do
-  do i=1,(irpowex+1)*nex
-   read(7,*) num, cex(i)
-  end do
- return
- end
-!
-subroutine rdlin
-!
-!     reads in the parameters of the expansion of linear factor
-!
-use mod_h2ohe, only: lsp, csp, nsp, irpowsp, lmaxli
-implicit real*8 (a-h,o-z)
-!
-read(7,*) nsp,irpowsp
-lmaxli=0
-do k=1,irpowsp+1
-do i=1,nsp
- read(7,*) (lsp(j,i),j=1,5),csp((irpowsp+1)*i-irpowsp-1+k)
- lmaxli=max0(lmaxli,lsp(1,i))
-end do
-end do
-return
-end
-subroutine ssh(lmax,theta,phi)
-!     computes symmetrized spherical harmonics
-!     which for Ar-H2O are equivalent to real part of
-!     the function Alm.
-!
-!     theta and phi in radians
-!
-implicit real*8 (a-h,o-z)
-common/realm/ almre(0:50,0:50)
-common/factorial/ fac(0:40)
-dimension cosm(0:8)
-if(lmax.gt.50) then
-  write(6,*) 'lmax gt 50'
-  stop
-endif
-nmax=2*lmax
-if(nmax.gt.54) then
-  write(6,*) 'nmax gt 40'
-  stop
-endif
-call fct(nmax)
-x=dcos(theta)
-!...  Plm is Robert's program computing associated Legendre polynomials.
-!...  Normalization was changed to standard,  i.e., P_l0(1) = 1.
-call xplm(almre,x,lmax)
-do m=0,lmax
-  cosm(m)=dcos(m*phi)
-enddo
-do l=0,lmax
-!...    now we need only even m but if odd needed,  change the line below
-  do m=0,l,2
-!         write(6,*) l,m, almre(l,m)
-    almre(l,m) = almre(l,m)*(-1)**(l+m) &
-                 *dsqrt(fac(l-m)/fac(l+m)/(2*l+1)) &
-                 *cosm(m)
-!         write(6,*) 'TESST',l,m, almre(l,m)
-  enddo
-enddo
-return
-end 
-! 
-! Compute the set of associated Legendre polynomials P_lm
-! for l=0,1,...,lmax, and m=0,1,...,l. First the standard
-! polynomials
-!
-!   P^m_l(x) = (1/2^l l!)(1-x^2)^(m/2) (d^(l+m)/d x^(l+m))(x^2 -1)^l
-!
-! are computed, and then multiplied by
-!
-!  (-1)^m sqrt[(2l+1)(l-m)!/2(l+m)!]/sqrt(2Pi)
-!
-! to get the P_lm polynomials....
-!
-  subroutine xplm(p,x,lmax)
-  implicit real*8 (a-h,o-z)
-  dimension p(0:50,0:50)
-  common/factorial/ fact(0:40)
-! inverse of dsqrt(2Pi)
-  data twopinv /0.3989422804014d0/
-!
-! starting value
-!
-  p(0,0) = 1.d0
-  u = dsqrt(1-x*x)
-!
-! compute the diagonal elements
-!
-  do l=1,lmax
-   p(l,l) = (2*l-1)*p(l-1,l-1)*u
-  end do
-!
-! compute P_lm along the columns with fixed m
-!
-  do m = 0,lmax-1
-  do l = m,lmax-1
-   if((l-1).lt.m) then
-     pp = 0
-   else
-     pp = p(l-1,m)
-   endif
-   p(l+1,m) = ((2*l+1)*x*p(l,m)-(l+m)*pp)/(l-m+1)
-  end do 
-  end do
-!
-! Renormalize values...
-!
-!       do l=0,lmax
-!       mm = 1
-!       do m=0,l
-!        dnorm = fact(l-m)*(2*l+1)/(2*fact(l+m))
-!        p(l,m) = mm*twopinv*dsqrt(dnorm)*p(l,m)
-!        mm = -mm
-!       end do
-!       end do
-!
-  return
-  end
-!
-! compute the matrix of N!
-!
-  subroutine fct(nmax)
-  implicit real*8 (a-h,o-z)
-  common/factorial/ f(0:40)
-!       
-  f(0) = 1.d0
-  do i=1,nmax
-   f(i) = f(i-1)*i
-  end do
-  return
-  end
-
-

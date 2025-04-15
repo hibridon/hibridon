@@ -52,139 +52,6 @@ ivcol(1,1)=0
 ivrow(1,1)=0
 return
 end
-!  -----------------------------------------------------------------------
-subroutine pot (vv0, r)
-!  subroutine to calculate the r-dependent coefficients in the
-!  Ar-OH potentials of klos and chalasinski
-!  in atomic units (distance and energy)
-! ----------------------------------------------------------------------
-!  on entry:
-!    r:      interparticle distance
-!  on return:
-!  vv0      spherically symmetric term in V0
-!  variable in module mod_covvl
-!    vvl:     vector of length 13 to store r-dependence of each term
-!             in potential expansion
-!    vvl(1-8) expansion coefficients in dl0 (l=1:8) of vsum
-!    vvl(9-15) expansion coefficients in dl2 (l=2:8) of vdif
-
-! uses linear least squares routines from cmlib
-
-! author:  millard alexander
-! latest revision date:  11-mar-1999
-! ----------------------------------------------------------------------
-
-use mod_covvl, only: vvl
-use mod_hivector, only: dset
-use mod_hiblas, only: dscal, dcopy
-use mod_hipotutil, only: dqrank, dqrlss
-implicit double precision (a-h,o-z)
-real(8), intent(out) :: vv0
-real(8), intent(in) :: r  ! intermolecular distance
-
-dimension vsum(10),xsum(10),vdif(10),xdif(10), &
-          d0(100),d2(64),aa(121)
-dimension kpvt(10),qraux(10),work(55),rsd(10), costh(10)
-
-
-data half, zero, one, alph /0.5d0, 0.d0, 1.d0, 1.2d0/
-! coefficicients for d0 rotation matrices
-! stored (by column) for each of 10 angles [0:20:180]
-! and for l=0:9
-data d0/ &
- 1d0, 1d0, 1d0, 1d0, 1d0, 1d0, 1d0, 1d0, 1d0, 1d0, 1d0, &
- 9.3969262d-1, 7.6604445d-1, 5.0000001d-1, 1.7364819d-1, &
- -1.7364816d-1, -4.9999998d-1, -7.6604443d-1, -9.3969261d-1, &
- -1d0,1d0, 8.2453334d-1, 3.8023614d-1, -1.2499999d-1, &
- -4.5476946d-1, -4.5476947d-1, -1.2500002d-1, 3.8023610d-1, &
- 8.2453331d-1, 1d0,1d0, 6.6488474d-1, -2.5233323d-2, &
- -4.3750000d-1, -2.4738195d-1, 2.4738191d-1, 4.3750001d-1, &
- 2.5233373d-2, -6.6488469d-1, -1d0,1d0, 4.7497774d-1, &
- -3.1900434d-1, -2.8906251d-1, 2.6590160d-1, 2.6590163d-1, &
- -2.8906248d-1, -3.1900437d-1, 4.7497767d-1, 1d0,1d0, &
- 2.7149176d-1, -4.1968205d-1, 8.9843733d-2, 2.8101755d-1, &
- -2.8101752d-1, -8.9843784d-2, 4.1968205d-1, -2.7149167d-1, &
- -1d0,1d0, 7.1903012d-2, -3.2357074d-1, 3.2324218d-1, &
- -1.3212132d-1, -1.3212137d-1, 3.2324220d-1, -3.2357069d-1, &
- 7.1902917d-2, 1d0,1d0, -1.0722615d-1, -1.0060172d-1, &
- 2.2314455d-1, -2.8347993d-1, 2.8347991d-1, -2.2314450d-1, &
- 1.0060165d-1, 1.0722624d-1, -1d0,1d0, -2.5183942d-1, &
- 1.3862678d-1, -7.3638895d-2, 2.3307822d-2, 2.3307885d-2, &
- -7.3638959d-2, 1.3862685d-1, -2.5183950d-1, 1d0,1d0, &
- -3.5169654d-1, 2.9001294d-1, -2.6789855d-1, 2.5962717d-1, &
- -2.5962718d-1, 2.6789857d-1, -2.9001298d-1, 3.5169659d-1, -1d0/
-! coefficicients for d2 rotation matrices
-! stored (by column) for each of 8 angles [20:20:160]
-! and for l=2:9
-data d2/ &
- 7.1633967d-2, 2.5301754d-1, 4.5927933d-1, 5.9390715d-1, &
- 5.9390715d-1, 4.5927933d-1, 2.5301754d-1, 7.1633967d-2, &
- 1.5051848d-1, 4.3340069d-1, 5.1348990d-1, 2.3060769d-1, &
- -2.3060769d-1, -5.1348990d-1, -4.3340069d-1, -1.5051848d-1, &
- 2.3957418d-1, 5.0756736d-1, 2.2234765d-1, -3.0244624d-1, &
- -3.0244624d-1, 2.2234765d-1, 5.0756736d-1, 2.3957418d-1, &
- 3.2835759d-1, 4.3600553d-1, -1.6982082d-1, -2.7746877d-1, &
- 2.7746877d-1, 1.6982082d-1, -4.3600553d-1, -3.2835759d-1, &
- 4.0592179d-1, 2.3830028d-1, -3.4523418d-1, 1.5131756d-1, &
- 1.5131756d-1, -3.4523418d-1, 2.3830028d-1, 4.0592179d-1, &
- 4.6231022d-1, -1.3906540d-2, -1.9131358d-1, 2.8490318d-1, &
- -2.8490318d-1, 1.9131358d-1, 1.3906540d-2, -4.6231022d-1, &
- 4.8973053d-1, -2.2700359d-1, 1.1374299d-1, -3.5240961d-2, &
- -3.5240961d-2, 1.1374299d-1, -2.2700359d-1, 4.8973053d-1, &
- 4.8345441d-1, -3.2461587d-1, 2.7905801d-1, -2.6334950d-1, &
- 2.6334950d-1, -2.7905801d-1, 3.2461587d-1, -4.8345441d-1/
-! cos of angle
-data costh / &
- 1d0, 9.3969262d-1, 7.6604444d-1, 5.d-1, 1.7364818d-1, &
- -1.7364818d-1, -5.d-1, -7.6604444d-1, -9.3969262d-1,-1d0/
-! conversion from kcal/mol to hartree
-data econv /1.593563611216621d-3/
-
-
-! determine A' and A" potentials at angles
-! NOTE, that function vvdif works if angle is defined as pi-theta
-! this checks with paper of klos et al
-rm3=one/r**3
-rm6=rm3*rm3
-do 100 i=1,10
-!        vsum(i)=vvsum(r,costh(10-i+1))
-  vsum(i)=vvsum(r,costh(i))
-  if (i.ne.1 .or. i.ne.10) then
-!          vdif(i)=vvdif(r,costh(i))
-     vdif(i)=vvdif(r,costh(10-i+1))
-  endif
-100 continue
-! diagonostic
-!     do i=1,10
-!        write (6,101) acos(costh(i))*180/3.1415927,
-!    :             econv*1.e+6*(vsum(i)-vdif(i)),
-!    :             econv*1.e+6*(vsum(i)+vdif(i))
-!101      format(f5.1,2f8.1)
-!     enddo
-! solve simultaneous equations for solutions
-lsum=10
-ldif=8
-tol=1.d-10
-call dset(13,zero,vvl,1)
-call dcopy(100,d0,1,aa,1)
-call dqrank(aa,10,10,lsum,tol,kr,kpvt,qraux,work)
-call dqrlss(aa,10,10,lsum,kr,vsum,xsum,rsd,kpvt,qraux)
-! remove terms less than 0.2 cm-1 in size
-!     do 110 i=1,10
-!       if (abs(xsum(i)) .lt. 0.2d0) xsum(i)=zero
-!110   continue
-vv0=xsum(1)*econv
-call dcopy(5,xsum(2),1,vvl,1)
-call dcopy(64,d2,1,aa,1)
-call dqrank(aa,8,8,ldif,tol,kr,kpvt,qraux,work)
-call dqrlss(aa,8,8,ldif,kr,vdif(2),xdif,rsd,kpvt,qraux)
-!     do 120 i=1,8
-!       if (abs(xdif(i)) .lt. 0.2d0) xdif(i)=zero
-!120   continue
-call dcopy(ldif,xdif,1,vvl(6),1)
-! convert potential to hartree
-call dscal(13,econv,vvl,1)
-end
 function vvsum(rr,y)
 !Code for Vsum at MP4 level for  ArOH: Vsum=(A'+A")*1/2
 ! input: rr in a.u., y = cos(theta) theta=0 for Ar---HO
@@ -460,4 +327,138 @@ vas9 = (1.d0/r9)*c95*a2(4)
 vvdif = vsh+vas6+vas7+vas8+vas9
 
  return
+end
+
+!  -----------------------------------------------------------------------
+subroutine pot (vv0, r)
+!  subroutine to calculate the r-dependent coefficients in the
+!  Ar-OH potentials of klos and chalasinski
+!  in atomic units (distance and energy)
+! ----------------------------------------------------------------------
+!  on entry:
+!    r:      interparticle distance
+!  on return:
+!  vv0      spherically symmetric term in V0
+!  variable in module mod_covvl
+!    vvl:     vector of length 13 to store r-dependence of each term
+!             in potential expansion
+!    vvl(1-8) expansion coefficients in dl0 (l=1:8) of vsum
+!    vvl(9-15) expansion coefficients in dl2 (l=2:8) of vdif
+
+! uses linear least squares routines from cmlib
+
+! author:  millard alexander
+! latest revision date:  11-mar-1999
+! ----------------------------------------------------------------------
+
+use mod_covvl, only: vvl
+use mod_hivector, only: dset
+use mod_hiblas, only: dscal, dcopy
+use mod_hipotutil, only: dqrank, dqrlss
+implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
+
+dimension vsum(10),xsum(10),vdif(10),xdif(10), &
+          d0(100),d2(64),aa(121)
+dimension kpvt(10),qraux(10),work(55),rsd(10), costh(10)
+
+
+data half, zero, one, alph /0.5d0, 0.d0, 1.d0, 1.2d0/
+! coefficicients for d0 rotation matrices
+! stored (by column) for each of 10 angles [0:20:180]
+! and for l=0:9
+data d0/ &
+ 1d0, 1d0, 1d0, 1d0, 1d0, 1d0, 1d0, 1d0, 1d0, 1d0, 1d0, &
+ 9.3969262d-1, 7.6604445d-1, 5.0000001d-1, 1.7364819d-1, &
+ -1.7364816d-1, -4.9999998d-1, -7.6604443d-1, -9.3969261d-1, &
+ -1d0,1d0, 8.2453334d-1, 3.8023614d-1, -1.2499999d-1, &
+ -4.5476946d-1, -4.5476947d-1, -1.2500002d-1, 3.8023610d-1, &
+ 8.2453331d-1, 1d0,1d0, 6.6488474d-1, -2.5233323d-2, &
+ -4.3750000d-1, -2.4738195d-1, 2.4738191d-1, 4.3750001d-1, &
+ 2.5233373d-2, -6.6488469d-1, -1d0,1d0, 4.7497774d-1, &
+ -3.1900434d-1, -2.8906251d-1, 2.6590160d-1, 2.6590163d-1, &
+ -2.8906248d-1, -3.1900437d-1, 4.7497767d-1, 1d0,1d0, &
+ 2.7149176d-1, -4.1968205d-1, 8.9843733d-2, 2.8101755d-1, &
+ -2.8101752d-1, -8.9843784d-2, 4.1968205d-1, -2.7149167d-1, &
+ -1d0,1d0, 7.1903012d-2, -3.2357074d-1, 3.2324218d-1, &
+ -1.3212132d-1, -1.3212137d-1, 3.2324220d-1, -3.2357069d-1, &
+ 7.1902917d-2, 1d0,1d0, -1.0722615d-1, -1.0060172d-1, &
+ 2.2314455d-1, -2.8347993d-1, 2.8347991d-1, -2.2314450d-1, &
+ 1.0060165d-1, 1.0722624d-1, -1d0,1d0, -2.5183942d-1, &
+ 1.3862678d-1, -7.3638895d-2, 2.3307822d-2, 2.3307885d-2, &
+ -7.3638959d-2, 1.3862685d-1, -2.5183950d-1, 1d0,1d0, &
+ -3.5169654d-1, 2.9001294d-1, -2.6789855d-1, 2.5962717d-1, &
+ -2.5962718d-1, 2.6789857d-1, -2.9001298d-1, 3.5169659d-1, -1d0/
+! coefficicients for d2 rotation matrices
+! stored (by column) for each of 8 angles [20:20:160]
+! and for l=2:9
+data d2/ &
+ 7.1633967d-2, 2.5301754d-1, 4.5927933d-1, 5.9390715d-1, &
+ 5.9390715d-1, 4.5927933d-1, 2.5301754d-1, 7.1633967d-2, &
+ 1.5051848d-1, 4.3340069d-1, 5.1348990d-1, 2.3060769d-1, &
+ -2.3060769d-1, -5.1348990d-1, -4.3340069d-1, -1.5051848d-1, &
+ 2.3957418d-1, 5.0756736d-1, 2.2234765d-1, -3.0244624d-1, &
+ -3.0244624d-1, 2.2234765d-1, 5.0756736d-1, 2.3957418d-1, &
+ 3.2835759d-1, 4.3600553d-1, -1.6982082d-1, -2.7746877d-1, &
+ 2.7746877d-1, 1.6982082d-1, -4.3600553d-1, -3.2835759d-1, &
+ 4.0592179d-1, 2.3830028d-1, -3.4523418d-1, 1.5131756d-1, &
+ 1.5131756d-1, -3.4523418d-1, 2.3830028d-1, 4.0592179d-1, &
+ 4.6231022d-1, -1.3906540d-2, -1.9131358d-1, 2.8490318d-1, &
+ -2.8490318d-1, 1.9131358d-1, 1.3906540d-2, -4.6231022d-1, &
+ 4.8973053d-1, -2.2700359d-1, 1.1374299d-1, -3.5240961d-2, &
+ -3.5240961d-2, 1.1374299d-1, -2.2700359d-1, 4.8973053d-1, &
+ 4.8345441d-1, -3.2461587d-1, 2.7905801d-1, -2.6334950d-1, &
+ 2.6334950d-1, -2.7905801d-1, 3.2461587d-1, -4.8345441d-1/
+! cos of angle
+data costh / &
+ 1d0, 9.3969262d-1, 7.6604444d-1, 5.d-1, 1.7364818d-1, &
+ -1.7364818d-1, -5.d-1, -7.6604444d-1, -9.3969262d-1,-1d0/
+! conversion from kcal/mol to hartree
+data econv /1.593563611216621d-3/
+
+
+! determine A' and A" potentials at angles
+! NOTE, that function vvdif works if angle is defined as pi-theta
+! this checks with paper of klos et al
+rm3=one/r**3
+rm6=rm3*rm3
+do 100 i=1,10
+!        vsum(i)=vvsum(r,costh(10-i+1))
+  vsum(i)=vvsum(r,costh(i))
+  if (i.ne.1 .or. i.ne.10) then
+!          vdif(i)=vvdif(r,costh(i))
+     vdif(i)=vvdif(r,costh(10-i+1))
+  endif
+100 continue
+! diagonostic
+!     do i=1,10
+!        write (6,101) acos(costh(i))*180/3.1415927,
+!    :             econv*1.e+6*(vsum(i)-vdif(i)),
+!    :             econv*1.e+6*(vsum(i)+vdif(i))
+!101      format(f5.1,2f8.1)
+!     enddo
+! solve simultaneous equations for solutions
+lsum=10
+ldif=8
+tol=1.d-10
+call dset(13,zero,vvl,1)
+call dcopy(100,d0,1,aa,1)
+call dqrank(aa,10,10,lsum,tol,kr,kpvt,qraux,work)
+call dqrlss(aa,10,10,lsum,kr,vsum,xsum,rsd,kpvt,qraux)
+! remove terms less than 0.2 cm-1 in size
+!     do 110 i=1,10
+!       if (abs(xsum(i)) .lt. 0.2d0) xsum(i)=zero
+!110   continue
+vv0=xsum(1)*econv
+call dcopy(5,xsum(2),1,vvl,1)
+call dcopy(64,d2,1,aa,1)
+call dqrank(aa,8,8,ldif,tol,kr,kpvt,qraux,work)
+call dqrlss(aa,8,8,ldif,kr,vdif(2),xdif,rsd,kpvt,qraux)
+!     do 120 i=1,8
+!       if (abs(xdif(i)) .lt. 0.2d0) xdif(i)=zero
+!120   continue
+call dcopy(ldif,xdif,1,vvl(6),1)
+! convert potential to hartree
+call dscal(13,econv,vvl,1)
 end

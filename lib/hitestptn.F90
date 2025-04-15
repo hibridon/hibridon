@@ -25,6 +25,7 @@ contains
     end subroutine testptn
 
     subroutine vlam()
+        use mod_hipot, only: driver
         implicit none
         write(6,*)
         write(6,*) "************************************************************"

@@ -35,5 +35,8 @@ module mod_hipot
       logical, intent(in) :: ifull
     end subroutine
 
+    subroutine driver()
+    end subroutine driver
+
   end interface
 end module mod_hipot
