@@ -92,7 +92,7 @@ use constants, only: econv
 use mod_pot_ohh2_bausr, only: rr, lam1b, lam2b, lamb, lam1f, lam2f, lamf, bcoef, fcoef, MAX_NR, MAX_NVB, MAX_NVF, nr, nvb, nvf, splb_b, splb_c, splb_d, splf_b, splf_c, splf_d
 use mod_parpot, only: potnam=>pot_name
 use mod_hiblas, only: dscal
-use mod_hipotutil, only: spline
+use mod_hipotutil, only: spline, datfln
 implicit none
 !
 integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
@@ -709,9 +709,3 @@ pref = dsqrt(pref)
 v2pisg = phase * pref * threej * sixj * ninej
 return
 end
-
-subroutine datfln(filenm, fullnm)
-character (len=*) :: filenm, fullnm
-fullnm = 'potdata/' // trim(filenm)
-return
-end subroutine datfln

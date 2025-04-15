@@ -1,5 +1,14 @@
 module mod_hipotutil
 contains
+
+!   Routine for compatibility with hib44
+subroutine datfln(filenm, fullnm)
+implicit none
+character (len=*), intent(in) :: filenm
+character (len=*), intent(out) :: fullnm
+fullnm = "potdata/" // trim(filenm)
+return
+end subroutine datfln
 ! -----------------------------------------
 ! spline routines from didier lemoine
 subroutine dspline(x,y,n,yp1,ypn,y2)
@@ -1178,7 +1187,7 @@ return
 end
 !$$$cmlib:linpackd       dqrdc
 subroutine dqrdc(x,ldx,n,p,qraux,jpvt,work,job)
-use mod_hiblas, only: dscal, daxpy_wrapper, dswap, ddot
+use mod_hiblas, only: dscal, daxpy_wrapper, dswap, ddot, dnrm2
 integer ldx,n,p,job
 integer jpvt(1)
 double precision x(ldx,1),qraux(1),work(1)
@@ -1259,13 +1268,12 @@ double precision x(ldx,1),qraux(1),work(1)
 !
 !     dqrdc uses the following functions and subprograms.
 !
-!     blas dnrm2
 !     fortran dabs,dmax1,min0,dsqrt
 !
 !     internal variables
 !
 integer j,jp,l,lp1,lup,maxj,pl,pu
-double precision maxnrm,dnrm2,tt
+double precision maxnrm,tt
 double precision nrmxl,t
 logical negj,swapj
 !

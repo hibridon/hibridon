@@ -116,7 +116,7 @@ subroutine pot (vv0, r)
 !  uses linear least squares routines from lapack
 !
 use mod_covvl, only: vvl ! vvl(NLMTRM-1)
-use mod_hiblas, only: dcopy
+use mod_hiblas, only: dcopy, dgelsd
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: vv0
 real(8), intent(in) :: r  ! intermolecular distance

@@ -52,7 +52,7 @@ end
 subroutine loapot(iunit, filnam)
 use pot_stp1sg_qma
 use mod_parpot, only: pot_name
-use mod_hipotutil, only: spline
+use mod_hipotutil, only: spline, datfln
 implicit none
 integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
 character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
@@ -118,9 +118,3 @@ do iv = 1, nv
 end do
 return
 end subroutine pot
-!     ------------------------------------------------------------------
-subroutine datfln(filenm, fullnm)
-character (len=*) :: filenm, fullnm
-fullnm = 'potdata/' // trim(filenm)
-return
-end subroutine datfln

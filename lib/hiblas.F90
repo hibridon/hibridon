@@ -29,6 +29,23 @@ module mod_hiblas
       real(8) :: ddot
     end function
 
+    subroutine dgelsd(m, n, nrhs, a, lda, b, ldb, s, rcond, rank, work, lwork, iwork, info)
+      integer, intent(in) :: m
+      integer, intent(in) :: n
+      integer, intent(in) :: nrhs
+      real(8), intent(inout) :: a(lda, n)
+      integer, intent(in) :: lda
+      real(8), intent(inout) :: b(ldb, nrhs)
+      integer, intent(in) :: ldb
+      real(8), intent(out) :: s(*)
+      real(8), intent(in) :: rcond
+      integer, intent(out) :: rank
+      real(8), intent(out) :: work(*)
+      integer, intent(in) :: lwork
+      integer, intent(out) :: iwork(*)
+      integer, intent(out) :: info
+    end subroutine
+
     subroutine dgemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc)
       character, intent(in) :: transa
       character, intent(in) :: transb
@@ -75,6 +92,13 @@ module mod_hiblas
       integer, intent(in) :: ldb
       integer, intent(out) :: info
     end subroutine
+
+    function dnrm2(n, x, incx)
+      real(8) :: dnrm2
+      integer, intent(in) :: n
+      real(8), intent(in) :: x(*)
+      integer, intent(in) :: incx
+    end function
 
     subroutine drot(n, dx, incx, dy, incy, c, s)
       integer, intent(in) :: n

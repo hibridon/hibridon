@@ -145,6 +145,7 @@ use mod_hiutil, only: mtime, gettim
 use mod_hibrid1, only: airprp
 use mod_hitypes, only: bqs_type
 use mod_hiblas, only: dcopy
+use mod_hibound, only: bound
 implicit none
 !   square matrices
 real(8), intent(out) :: z(nmax, nch)

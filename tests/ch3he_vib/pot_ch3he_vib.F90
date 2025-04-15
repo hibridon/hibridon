@@ -87,13 +87,6 @@ end module mod_ch3he
 #include "common/ground.F90"
 !
 !
-!   Routine for compatibility with hib44
-subroutine datfln(filenm, fullnm)
-implicit none
-character (len=*) :: filenm, fullnm
-fullnm = "potdata/" // trim(filenm)
-return
-end subroutine datfln
 !
 !   The `regular' pot routine
 ! -------------------------------------------------------------------
@@ -213,7 +206,8 @@ use mod_cosysr, only: rspar
 use mod_cosysi, only: ispar
 use mod_ch3he, only: NVLM, NANGLE
 use constants, only: econv
-use mod_hiblas, only: dscal, dcopy
+use mod_hiblas, only: dscal, dcopy, dgelsd
+use mod_hipotutil, only: datfln
 implicit double precision (a-h, o-z)
 real(8), intent(out) :: vv0
 real(8), intent(in) :: r  ! intermolecular distance
@@ -319,7 +313,7 @@ subroutine splch3(vsp, r, v2_i, v2_f)
 use mod_cosysr, only: rspar
 use mod_cosysi, only: ispar
 use mod_ch3he, only: V2MAX, V2TMAX, NANGLE, NDIST
-use mod_hipotutil, only: spline, seval
+use mod_hipotutil, only: spline, seval, datfln
 implicit double precision (a-h, o-z)
 !   Spline the interaction potential (integreted over vibrational
 !   coordinate Q2) to the given R for a particular (v2, v2') tuple.

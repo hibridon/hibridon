@@ -1,3 +1,4 @@
+module mod_hibound
 !     hibound library, subroutines included:
 !
 !     1. bound        Bound state program
@@ -5,6 +6,7 @@
 !     3. gauger       Nodes and weights for Gauss-Hermite quadrature
 !
 !     ------------------------------------------------------------------
+contains
 subroutine bound(nch, nmax, v2)
 !     Bound state program, to be called by propag in hibrid3.f
 !
@@ -540,3 +542,5 @@ do i = 0, m - 1
 end do
 return
 end subroutine gauher
+
+end module mod_hibound

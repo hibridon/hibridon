@@ -122,7 +122,7 @@ subroutine pot (vv0, r)
 !
 use mod_covvl, only: vvl
 use constants, only: s4pi
-use mod_hiblas, only: dscal, dcopy
+use mod_hiblas, only: dscal, dcopy, dgelsd
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: vv0
 real(8), intent(in) :: r  ! intermolecular distance

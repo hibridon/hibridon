@@ -1,3 +1,5 @@
+module mod_histmix
+contains
 ! -------------------------------------------------------------------------
 subroutine stmix(flnam1, flnam2, a)
 !
@@ -1092,3 +1094,4 @@ if (ialloc .ne. 0) write (6, 4100)
 return
 end
 ! -------------------------------------------------------------------------
+end module mod_histmix

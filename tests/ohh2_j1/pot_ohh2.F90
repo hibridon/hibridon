@@ -51,7 +51,7 @@ end subroutine driver
 subroutine loapot(iunit, filnam)
 use pot_ohh2
 use mod_parpot, only: pot_name
-use mod_hipotutil, only: spline
+use mod_hipotutil, only: spline, datfln
 implicit none
 !     common/parbas is replaced by module ba2pi1sg to allow more
 !     parameters be passed between the pot routine and the basis routine
@@ -122,9 +122,3 @@ end do
 return
 end subroutine pot
 !     ------------------------------------------------------------------
-
-subroutine datfln(filenm, fullnm)
-character (len=*) :: filenm, fullnm
-fullnm = 'potdata/' // trim(filenm)
-return
-end subroutine datfln

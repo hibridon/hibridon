@@ -1,3 +1,5 @@
+module mod_hiprsbr
+contains
 ! -------------------------------------------------------------------------
 subroutine prsbr(flnam1, flnam2, a)
 !
@@ -728,3 +730,4 @@ if (ialloc .ne. 0) write (6, 4100)
 return
 end
 ! -------------------------------eof---------------------------------------
+end module mod_hiprsbr
