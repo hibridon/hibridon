@@ -1354,7 +1354,7 @@ use mod_himatrix, only: mxma
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 use mod_himatrix, only: syminv
 #endif
-use mod_hiblas, only: dscal, dcopy, dgemm, daxpy_wrapper, drot
+use mod_hiblas, only: dscal, dcopy, dgemm, daxpy_wrapper, drot, ddot
 
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax, nmax), intent(inout) :: tmod

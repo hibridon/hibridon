@@ -1175,7 +1175,7 @@ return
 end
 !$$$cmlib:linpackd       dqrdc
 subroutine dqrdc(x,ldx,n,p,qraux,jpvt,work,job)
-use mod_hiblas, only: dscal, daxpy_wrapper
+use mod_hiblas, only: dscal, daxpy_wrapper, dswap
 integer ldx,n,p,job
 integer jpvt(1)
 double precision x(ldx,1),qraux(1),work(1)

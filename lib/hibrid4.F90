@@ -2045,7 +2045,7 @@ end
 subroutine print_trans_mat(r, drnow, si, nch, flx_file, num_considered_channels, num_considered_states, write_mat_file)
 use mod_himatrix, only: transp
 use mod_hiiolib1, only: openf
-use mod_hiblas, only: dscal, dcopy
+use mod_hiblas, only: dscal, dcopy, ddot
 implicit none
   real(8), intent(in) :: r
   real(8), intent(in) :: drnow
@@ -2060,7 +2060,6 @@ implicit none
   real(8) :: cnorm
   real(8) :: scrvec(num_considered_channels)
   integer :: nchsq
-  real(8) :: ddot
   integer :: ind, ii, ij
   integer :: nstate, nnch
 

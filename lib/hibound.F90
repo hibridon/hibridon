@@ -40,7 +40,7 @@ use mod_ered, only: rmu
 use mod_file, only: jobnam
 use mod_hiutil, only: gennam
 use mod_hiiolib1, only: openf
-use mod_hiblas, only: dsyevx, dsygvx
+use mod_hiblas, only: dsyevx, dsygvx, dsygvd
 implicit none
 integer, intent(in) :: nch, nmax
 type(ancou_type), intent(in) :: v2

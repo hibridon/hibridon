@@ -1178,7 +1178,7 @@ return
 end
 !$$$cmlib:linpackd       dqrdc
 subroutine dqrdc(x,ldx,n,p,qraux,jpvt,work,job)
-use mod_hiblas, only: dscal, daxpy_wrapper
+use mod_hiblas, only: dscal, daxpy_wrapper, dswap, ddot
 integer ldx,n,p,job
 integer jpvt(1)
 double precision x(ldx,1),qraux(1),work(1)
@@ -1259,14 +1259,14 @@ double precision x(ldx,1),qraux(1),work(1)
 !
 !     dqrdc uses the following functions and subprograms.
 !
-!     blas ddot,dswap,dnrm2
+!     blas dnrm2
 !     fortran dabs,dmax1,min0,dsqrt
 !
 !     internal variables
 !
 integer j,jp,l,lp1,lup,maxj,pl,pu
 double precision maxnrm,dnrm2,tt
-double precision ddot,nrmxl,t
+double precision nrmxl,t
 logical negj,swapj
 !
 !
@@ -1387,7 +1387,7 @@ return
 end
 !$$$cmlib:linpackd       dqrsl
 subroutine dqrsl(x,ldx,n,k,qraux,y,qy,qty,b,rsd,xb,job,info)
-use mod_hiblas, only: dcopy, daxpy_wrapper
+use mod_hiblas, only: dcopy, daxpy_wrapper, ddot
 integer ldx,n,k,job,info
 double precision x(ldx,1),qraux(1),y(1),qy(1),qty(1),b(1),rsd(1), &
                  xb(1)
@@ -1527,13 +1527,12 @@ double precision x(ldx,1),qraux(1),y(1),qy(1),qty(1),b(1),rsd(1), &
 !
 !     dqrsl uses the following functions and subprograms.
 !
-!     blas ddot
 !     fortran dabs,min0,mod
 !
 !     internal variables
 !
 integer i,j,jj,ju,kp1
-double precision ddot,t,temp
+double precision t,temp
 logical cb,cqy,cqty,cr,cxb
 !
 !

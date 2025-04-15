@@ -173,6 +173,7 @@ use mod_ered, only: ered, rmu
 use mod_vib, only: nvibs, ivibs, nvibp, ivibp
 use mod_himatrix, only: mxva
 use mod_hitypes, only: bqs_type
+use mod_hiblas, only: ddot
 use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
 
 
