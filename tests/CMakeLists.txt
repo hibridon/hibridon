@@ -18,9 +18,9 @@ add_subdirectory(ch3he_vib)
 add_subdirectory(ch3i)
 add_subdirectory(cnh2)
 add_subdirectory(cph2)
-add_subdirectory(h2ohe)
-add_subdirectory(h2ohe_orig)
-add_subdirectory(h2ohe_prsbr)
+# add_subdirectory(h2ohe)  # temporarily disabled until [https://github.com/hibridon/hibridon/issues/239] is fixed
+# add_subdirectory(h2ohe_orig)  # temporarily disabled until [https://github.com/hibridon/hibridon/issues/239] is fixed
+# add_subdirectory(h2ohe_prsbr)  # temporarily disabled until [https://github.com/hibridon/hibridon/issues/239] is fixed
 add_subdirectory(hco_trnprt)
 add_subdirectory(hecn)
 add_subdirectory(heco)
