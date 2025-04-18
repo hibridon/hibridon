@@ -562,6 +562,7 @@ data oa(1) /0.d0/
   ipow = irpowex+1
 !       write(6,*) 'ipow:', ipow
 !       write(6,*) 'iexback:', iexback
+  iexback = 0  ! this value is likely to be wrong, see [https://github.com/hibridon/hibridon/issues/239]
   rrev = r**(-iexback)
   damp = 0.d0
   do i=1,nex
@@ -602,6 +603,7 @@ data oa(1) /0.d0/
 !---- Compute the "spherical" part
   ipow = irpowsp + 1
 !       write(6,*) 'ipow:', ipow
+  ispback = 0  ! this value is likely to be wrong, see [https://github.com/hibridon/hibridon/issues/239]
   rrev = r**(-ispback)
   rrev1 = rrev/r
   vsp = 0.d0
