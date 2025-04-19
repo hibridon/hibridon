@@ -92,8 +92,9 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
 
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
       $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
-      $<$<CONFIG:DEBUG>:-warn all>                # Enable all warnings
-      -diag-disable 6717       # disable warning #6717 (This name has not been given an explicit type.   [LMAXP]) until all variables have been declared explicitely (implicit None)
+      -diag-disable 6717,7712       # disable warning #6717 (This name has not been given an explicit type.   [LMAXP]) until all variables have been declared explicitely (implicit None)
+      # -diag-disable 7712       # disable remark #7712: This variable has not been used. until all variables have been declared explicitely (implicit None)
+      $<$<CONFIG:DEBUG>:-warn all,nounused,nodeclarations,errors>                # Enable all warnings except for some that have not been fixed yet, and treat warnings as errors for a zero warning policy
     )
 endif()
 
