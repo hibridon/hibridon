@@ -91,7 +91,7 @@ use mod_1sg1sg
 use mod_cnh2
 use mod_conlam, only: nlam
 use mod_covvl, only: vvl
-use mod_hipot, only: pot
+use mod_hipot, only: pot, loapot
 implicit none
 character(40), parameter :: data_file_name='pot_cnh2_lique.dat'
 real(8) :: r, vv0

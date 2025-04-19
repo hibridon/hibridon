@@ -4,54 +4,8 @@
 ! R. Burcl, and M. M. Szczesniak, J. Chem. Phys. 112, 4952 (2000)
 #include "unused.h"
 
-subroutine driver
-use mod_covvl, only: vvl
-use mod_cosysr, only: rspar
-use mod_parpot, only: potnam=>pot_name
-use mod_hipot, only: pot
-implicit double precision (a-h,o-z)
-real(8), pointer :: rshift, xfact
-rshift=>rspar(1); xfact=>rspar(2)
-potnam='KLOS-CHALASINSKI Ar-OH UMP4'
-1  print *, ' r (bohr)'
-rshift=0.5
-xfact=0.8
-read (5, *, end=99) r
-call pot(vv0,r)
-write (6, 100) vv0,vvl
-100 format(' vsum',/,6(1pe16.8),/, &
-    '  vdif',/,8e16.8)
-goto 1
-99 end
-#include "common/syusr.F90"
-#include "common/bausr.F90"
-#include "common/ground.F90"
-! --------------------------------------------------------------------------
-subroutine loapot(iunit,filnam)
-! --------------------------------------------------------------------------
-use mod_conlam, only: nlam, nlammx, lamnum
-use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
-use mod_parpot, only: potnam=>pot_name
-integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
-character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
-UNUSED_DUMMY(iunit)
-UNUSED_DUMMY(filnam)
-potnam='KLOS-CHALASINSKI Ar-OH UMP4'
-lammin(1)=1
-lammax(1)=5
-lammin(2)=2
-lammax(2)=9
-lamnum(1)=lammax(1)-lammin(1)+1
-lamnum(2)=lammax(2)-lammin(2)+1
-nlam=lamnum(1)+lamnum(2)
-nlammx=nlam
-mproj(1)=0
-mproj(2)=2
-ntv(1)=1
-ivcol(1,1)=0
-ivrow(1,1)=0
-return
-end
+module mod_arohx
+contains
 function vvsum(rr,y)
 !Code for Vsum at MP4 level for  ArOH: Vsum=(A'+A")*1/2
 ! input: rr in a.u., y = cos(theta) theta=0 for Ar---HO
@@ -329,6 +283,56 @@ vvdif = vsh+vas6+vas7+vas8+vas9
  return
 end
 
+end module mod_arohx
+
+subroutine driver
+use mod_covvl, only: vvl
+use mod_cosysr, only: rspar
+use mod_parpot, only: potnam=>pot_name
+use mod_hipot, only: pot
+implicit double precision (a-h,o-z)
+real(8), pointer :: rshift, xfact
+rshift=>rspar(1); xfact=>rspar(2)
+potnam='KLOS-CHALASINSKI Ar-OH UMP4'
+1  print *, ' r (bohr)'
+rshift=0.5
+xfact=0.8
+read (5, *, end=99) r
+call pot(vv0,r)
+write (6, 100) vv0,vvl
+100 format(' vsum',/,6(1pe16.8),/, &
+    '  vdif',/,8e16.8)
+goto 1
+99 end
+#include "common/syusr.F90"
+#include "common/bausr.F90"
+#include "common/ground.F90"
+! --------------------------------------------------------------------------
+subroutine loapot(iunit,filnam)
+! --------------------------------------------------------------------------
+use mod_conlam, only: nlam, nlammx, lamnum
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parpot, only: potnam=>pot_name
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
+potnam='KLOS-CHALASINSKI Ar-OH UMP4'
+lammin(1)=1
+lammax(1)=5
+lammin(2)=2
+lammax(2)=9
+lamnum(1)=lammax(1)-lammin(1)+1
+lamnum(2)=lammax(2)-lammin(2)+1
+nlam=lamnum(1)+lamnum(2)
+nlammx=nlam
+mproj(1)=0
+mproj(2)=2
+ntv(1)=1
+ivcol(1,1)=0
+ivrow(1,1)=0
+return
+end
 !  -----------------------------------------------------------------------
 subroutine pot (vv0, r)
 !  subroutine to calculate the r-dependent coefficients in the
@@ -355,6 +359,7 @@ use mod_covvl, only: vvl
 use mod_hivector, only: dset
 use mod_hiblas, only: dscal, dcopy
 use mod_hipotutil, only: dqrank, dqrlss
+use mod_arohx, only: vvsum, vvdif
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: vv0
 real(8), intent(in) :: r  ! intermolecular distance

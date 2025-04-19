@@ -64,6 +64,129 @@ module mod_ch3he
 !   When <v2'|V|v2> is anti-symmetric about theta=90 deg (odd v2 + v2')
 !       lambda =  1  3  5  7  9  4  6  8 10  7  9 10
 !       mu     =  0  0  0  0  0  3  3  3  3  6  6  9
+contains
+
+! -------------------------------------------------------------------
+function gblkid(v2, v2p, vmax)
+implicit none
+integer gblkid, v2, v2p, vmax
+!
+!   Subroutine to determine the ID of a (v2, v2') block in the
+!   compact form - 00, 01, 02, ..., 11, 12, ...
+!
+!   Arguments
+!       v2, v2p: v_2 and v_2'
+!       vmax: maximum value of v2
+!   Return
+!       The corresponding block ID for the v2, v2p combination
+!
+!   Example
+!       gblkid(1, 0, 4) = 2
+!           when vmax = 4, (10)=(01) is the second block in the list
+!       gblkid(1, 2, 3) = 6
+!           when vmax = 3, (12)=(21) is the sixth block in the list
+!
+integer vl, vg
+!   The lesser/greater v2p
+if (v2 .lt. v2p) then
+  vl = v2
+  vg = v2p
+else
+  vl = v2p
+  vg = v2
+endif
+!   In the compact form, the lesser v_2 (v_2l) is indexed first.
+!   The number of blocks for v_2l < vl is
+!       (vmax + 1 - 0) + (vmax + 1 - 1) + ... + (vmax + 1 - (vl - 1))
+!   For v_2l = vl, v_2g = vg is the
+!       vg - vl + 1
+!   th block.
+gblkid = ((2 * vmax + 3 - vl) * vl) / 2 &
+         + (vg - vl + 1)
+return
+end
+!   end function gblkid
+
+! -------------------------------------------------------------------
+subroutine splch3(vsp, r, v2_i, v2_f)
+use mod_cosysr, only: rspar
+use mod_cosysi, only: ispar
+! use mod_ch3he, only: V2MAX, V2TMAX, NANGLE, NDIST
+use mod_hipotutil, only: spline, seval, datfln
+implicit double precision (a-h, o-z)
+!   Spline the interaction potential (integreted over vibrational
+!   coordinate Q2) to the given R for a particular (v2, v2') tuple.
+!
+!   Arguments:
+!       r: intermolecular distance
+!       v2_i, v2_f: initial and final vibrational level
+real(8), intent(in) :: r
+integer v2_i, v2_f
+!
+!
+!   Returned value:
+!       vsp: <v2'|V|v2> at R for all (theta, phi) tuples
+real(8), intent(out) :: vsp(*)
+!
+!
+!   Function called:
+!
+!
+!   Potential as calculated
+real(8), save :: v(NDIST, NANGLE, V2TMAX)
+!   Parameters from linear fit
+real(8), save :: b(NDIST, NANGLE, V2TMAX)
+real(8), save :: c(NDIST, NANGLE, V2TMAX)
+real(8), save :: d(NDIST, NANGLE, V2TMAX)
+!   Loop indeces
+integer i, k
+!   Block index
+integer iblock
+!   Intermolecular distances used in the ab initio calculation
+double precision RR(NDIST)
+data RR /3.5d0, 4d0, 4.5d0, 5d0, 5.5d0, 6d0, 6.5d0, 7d0, 7.5d0, &
+         8d0, 8.5d0, 9d0, 9.5d0, 1d1, 1.1d1, 1.2d1, 1.3d1, &
+         1.5d1, 2d1/
+!   Function to evaluate splined potential
+!
+character*255 datfl
+logical, save ::  isfst=.true.
+real(8), pointer :: emax0, emax1, emax2, emax3
+integer, pointer :: nterm, ipotsy, iop, jmax, vmax!
+!   In the first call, read data and determine fitted coefficients
+nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
+emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
+
+if (isfst) then
+!   Read data file
+  call datfln('pot_ch3he_vib_data', datfl)
+  open (unit=10, file=datfl)
+  read (10, *) v
+  close(10)
+!   Calculate coefficients for each block
+  do k = 1, V2TMAX
+    do i = 1, NANGLE
+!   calculate coefficients
+      call spline(NDIST, RR, v(1, i, k), b(1, i, k), c(1, i, k), &
+                  d(1, i, k))
+    enddo
+  enddo
+  isfst = .false.
+endif
+!
+!   On a regular run, calculate potential from previously determined
+!   spline coefficients.
+!
+!   Calculate potential from spline coefficients
+iblock = gblkid(v2_i, v2_f, V2MAX)
+do i = 1, NANGLE
+  vsp(i) = seval(NDIST, r, RR, v(1, i, iblock), b(1, i, iblock), &
+                 c(1, i, iblock), d(1, i, iblock))
+enddo
+return
+end
+!   end subroutine splch3
+!
 end module mod_ch3he
 
 ! TODO: check that these old common block global variables are now bound to the related module global variables
@@ -204,7 +327,7 @@ subroutine pot(vv0, r)
 use mod_covvl, only: vvl
 use mod_cosysr, only: rspar
 use mod_cosysi, only: ispar
-use mod_ch3he, only: NVLM, NANGLE
+use mod_ch3he, only: NVLM, NANGLE, splch3, gblkid
 use constants, only: econv
 use mod_hiblas, only: dscal, dcopy, dgelsd
 use mod_hipotutil, only: datfln
@@ -217,8 +340,6 @@ real(8), intent(in) :: r  ! intermolecular distance
 !       mod_covvl.vvl
 !
 !
-!   Function called:
-integer gblkid
 !
 !
 !   vsp: potential for all theta/phi tuples, to be obtained from splch3
@@ -308,87 +429,7 @@ end
 !   end subroutine pot
 !
 !
-! -------------------------------------------------------------------
-subroutine splch3(vsp, r, v2_i, v2_f)
-use mod_cosysr, only: rspar
-use mod_cosysi, only: ispar
-use mod_ch3he, only: V2MAX, V2TMAX, NANGLE, NDIST
-use mod_hipotutil, only: spline, seval, datfln
-implicit double precision (a-h, o-z)
-!   Spline the interaction potential (integreted over vibrational
-!   coordinate Q2) to the given R for a particular (v2, v2') tuple.
-!
-!   Arguments:
-!       r: intermolecular distance
-!       v2_i, v2_f: initial and final vibrational level
-real(8), intent(in) :: r
-integer v2_i, v2_f
-!
-!
-!   Returned value:
-!       vsp: <v2'|V|v2> at R for all (theta, phi) tuples
-real(8), intent(out) :: vsp(*)
-!
-!
-!   Function called:
-integer gblkid
-!
-!
-!   Potential as calculated
-real(8), save :: v(NDIST, NANGLE, V2TMAX)
-!   Parameters from linear fit
-real(8), save :: b(NDIST, NANGLE, V2TMAX)
-real(8), save :: c(NDIST, NANGLE, V2TMAX)
-real(8), save :: d(NDIST, NANGLE, V2TMAX)
-!   Loop indeces
-integer i, k
-!   Block index
-integer iblock
-!   Intermolecular distances used in the ab initio calculation
-double precision RR(NDIST)
-data RR /3.5d0, 4d0, 4.5d0, 5d0, 5.5d0, 6d0, 6.5d0, 7d0, 7.5d0, &
-         8d0, 8.5d0, 9d0, 9.5d0, 1d1, 1.1d1, 1.2d1, 1.3d1, &
-         1.5d1, 2d1/
-!   Function to evaluate splined potential
-!
-character*255 datfl
-logical, save ::  isfst=.true.
-real(8), pointer :: emax0, emax1, emax2, emax3
-integer, pointer :: nterm, ipotsy, iop, jmax, vmax!
-!   In the first call, read data and determine fitted coefficients
-nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
-emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
 
-if (isfst) then
-!   Read data file
-  call datfln('pot_ch3he_vib_data', datfl)
-  open (unit=10, file=datfl)
-  read (10, *) v
-  close(10)
-!   Calculate coefficients for each block
-  do k = 1, V2TMAX
-    do i = 1, NANGLE
-!   calculate coefficients
-      call spline(NDIST, RR, v(1, i, k), b(1, i, k), c(1, i, k), &
-                  d(1, i, k))
-    enddo
-  enddo
-  isfst = .false.
-endif
-!
-!   On a regular run, calculate potential from previously determined
-!   spline coefficients.
-!
-!   Calculate potential from spline coefficients
-iblock = gblkid(v2_i, v2_f, V2MAX)
-do i = 1, NANGLE
-  vsp(i) = seval(NDIST, r, RR, v(1, i, iblock), b(1, i, iblock), &
-                 c(1, i, iblock), d(1, i, iblock))
-enddo
-return
-end
-!   end subroutine splch3
-!
 !
 !
 !   User defined basis
@@ -530,7 +571,7 @@ use mod_conlam, only: nlam
 use mod_cosysr, only: rspar
 use mod_cosysi, only: ispar
 use mod_ered, only: ered, rmu
-use mod_ch3he, only: V2MAX, NVLM, brot, crot, evib, lamsym, musym, lamasy, muasy
+use mod_ch3he, only: V2MAX, NVLM, brot, crot, evib, lamsym, musym, lamasy, muasy, gblkid
 use mod_par, only: iprint
 implicit double precision (a-h, o-z)
 type(bqs_type), intent(out) :: bqs
@@ -630,8 +671,6 @@ integer ipar, lpar, lmax, lmin, li, ilm, ilms, lambda, mu
 integer v(nmax)
 !
 !
-!   Function called:
-integer gblkid
 real(8), pointer :: emax0, emax1, emax2, emax3
 integer, pointer :: nterm, ipotsy, iop, jmax, vmax!
 !
@@ -961,43 +1000,3 @@ return
 end subroutine bausr
 !
 !
-! -------------------------------------------------------------------
-function gblkid(v2, v2p, vmax)
-implicit none
-integer gblkid, v2, v2p, vmax
-!
-!   Subroutine to determine the ID of a (v2, v2') block in the
-!   compact form - 00, 01, 02, ..., 11, 12, ...
-!
-!   Arguments
-!       v2, v2p: v_2 and v_2'
-!       vmax: maximum value of v2
-!   Return
-!       The corresponding block ID for the v2, v2p combination
-!
-!   Example
-!       gblkid(1, 0, 4) = 2
-!           when vmax = 4, (10)=(01) is the second block in the list
-!       gblkid(1, 2, 3) = 6
-!           when vmax = 3, (12)=(21) is the sixth block in the list
-!
-integer vl, vg
-!   The lesser/greater v2p
-if (v2 .lt. v2p) then
-  vl = v2
-  vg = v2p
-else
-  vl = v2p
-  vg = v2
-endif
-!   In the compact form, the lesser v_2 (v_2l) is indexed first.
-!   The number of blocks for v_2l < vl is
-!       (vmax + 1 - 0) + (vmax + 1 - 1) + ... + (vmax + 1 - (vl - 1))
-!   For v_2l = vl, v_2g = vg is the
-!       vg - vl + 1
-!   th block.
-gblkid = ((2 * vmax + 3 - vl) * vl) / 2 &
-         + (vg - vl + 1)
-return
-end
-!   end function gblkid

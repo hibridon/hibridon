@@ -15,6 +15,64 @@
 #include "common/syusr.F90"
 #include "common/ground.F90"
 #include "common/bausr.F90"
+
+module mod_ch2he_a190
+contains
+! ----------------------------------------------------------------------
+subroutine spline_ch2he(vsp_jacek, r)
+!  spline_ch2he.f
+!  using Jacek's code to do spline_fit of pot
+!  example:
+!    K=57
+!    call splinej(K,Rp,XX,b0,c0,d0)
+!    VNO=sevalj(K, r, Rp, XX, b0,c0,d0)
+!  where,
+!  K  the number of points to be fitted
+!  Rp, XX   orignal data, Rp & XX should have the same dimensions
+!  r  new distance, where pot need to be calculated by spline-Fitchbur
+!  VNO  pot at r, output
+use mod_hiblas, only: dcopy
+use mod_hipotutil, only: spline, seval
+implicit double precision (a-h,o-z)   
+real(8), intent(out) :: vsp_jacek(190)
+real(8), intent(in)  :: r
+real(8), save :: b0(19,190),c0(19,190),a0(19,190),vvec(19,190)
+real(8) :: rr(19)
+real(8) :: vv(3610),v(19,190)
+integer :: k
+integer, save :: ifirst=0
+data rr /3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,11,12,13,15,20/
+if (ifirst.eq.0) then
+   open (unit=10,file= &
+     'potdata/ch2he_a190.dat')
+
+   read (10,*) vv
+   close(10)
+
+   do i=1,19
+      do j=1,190         
+        k=(i-1)*190+j
+        v(i,j)=vv(k)
+      enddo
+   enddo          
+
+   do j=1,190
+      call dcopy(19,v(1,j),1,vvec(1,j),1)
+! vvec contains potentials at all 19 points (rows) for each 190 theta/phi (columns)
+! determine spline coefficients for all 190 theta/phi values
+      call spline(19,rr,vvec(1,j),a0(1,j),b0(1,j),c0(1,j))
+   enddo
+   ifirst=1
+endif
+do j=1,190
+! using previously determined spline coefficients to determine potential at all 190 theta/phi values
+    vsp_jacek(j)=seval(19,r,rr,vvec(1,j),a0(1,j),b0(1,j),c0(1,j))
+enddo             
+   
+ end   
+
+end module mod_ch2he_a190
+
 ! ------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl
@@ -115,6 +173,7 @@ subroutine pot (vv0, r)
 use mod_covvl, only: vvl
 use constants, only: s4pi
 use mod_hiblas, only: dscal, dcopy, dgelsd
+use mod_ch2he_a190, only: spline_ch2he
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: vv0
 real(8), intent(in) :: r  ! intermolecular distance
@@ -1173,59 +1232,5 @@ call dscal(19,(1d0-fact),vvl,1)
 call dscal(19,tohat,vvl,1)
 return
 end
-
-! ----------------------------------------------------------------------
-subroutine spline_ch2he(vsp_jacek, r)
-!  spline_ch2he.f
-!  using Jacek's code to do spline_fit of pot
-!  example:
-!    K=57
-!    call splinej(K,Rp,XX,b0,c0,d0)
-!    VNO=sevalj(K, r, Rp, XX, b0,c0,d0)
-!  where,
-!  K  the number of points to be fitted
-!  Rp, XX   orignal data, Rp & XX should have the same dimensions
-!  r  new distance, where pot need to be calculated by spline-Fitchbur
-!  VNO  pot at r, output
-use mod_hiblas, only: dcopy
-use mod_hipotutil, only: spline, seval
-implicit double precision (a-h,o-z)   
-real(8), intent(out) :: vsp_jacek(190)
-real(8), intent(in)  :: r
-real(8), save :: b0(19,190),c0(19,190),a0(19,190),vvec(19,190)
-real(8) :: rr(19)
-real(8) :: vv(3610),v(19,190)
-integer :: k
-integer, save :: ifirst=0
-data rr /3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,11,12,13,15,20/
-if (ifirst.eq.0) then
-   open (unit=10,file= &
-     'potdata/ch2he_a190.dat')
-
-   read (10,*) vv
-   close(10)
-
-   do i=1,19
-      do j=1,190         
-        k=(i-1)*190+j
-        v(i,j)=vv(k)
-      enddo
-   enddo          
-
-   do j=1,190
-      call dcopy(19,v(1,j),1,vvec(1,j),1)
-! vvec contains potentials at all 19 points (rows) for each 190 theta/phi (columns)
-! determine spline coefficients for all 190 theta/phi values
-      call spline(19,rr,vvec(1,j),a0(1,j),b0(1,j),c0(1,j))
-   enddo
-   ifirst=1
-endif
-do j=1,190
-! using previously determined spline coefficients to determine potential at all 190 theta/phi values
-    vsp_jacek(j)=seval(19,r,rr,vvec(1,j),a0(1,j),b0(1,j),c0(1,j))
-enddo             
-   
- end   
-
 
 

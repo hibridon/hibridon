@@ -29,6 +29,20 @@ module mod_hiblas
       real(8) :: ddot
     end function
 
+    subroutine dgels(trans, m, n, nrhs, a, lda, b, ldb, work, lwork, info)
+      character, intent(in) :: trans
+      integer, intent(in) :: m
+      integer, intent(in) :: n
+      integer, intent(in) :: nrhs
+      real(8), intent(inout) :: a(lda, n)
+      integer, intent(in) :: lda
+      real(8), intent(inout) :: b(ldb, nrhs)
+      integer, intent(in) :: ldb
+      real(8), intent(out) :: work(*)
+      integer, intent(in) :: lwork
+      integer, intent(out) :: info
+    end subroutine
+
     subroutine dgelsd(m, n, nrhs, a, lda, b, ldb, s, rcond, rank, work, lwork, iwork, info)
       integer, intent(in) :: m
       integer, intent(in) :: n

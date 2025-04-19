@@ -52,6 +52,127 @@ real(8) :: splf_d(MAX_NR, MAX_NVF)
 real(8), parameter :: machep=epsilon(0d0)
 
 character*40 :: potfil
+
+contains
+!     ------------------------------------------------------------------
+subroutine pr_lev_ohh2(n, js, iss, es, thos)
+implicit none
+!
+integer n, js(*), iss(*)
+double precision es(*), thos(*)
+integer i, j1, j2, fi1, eps1
+double precision ecm, econv, tho, c12, c32
+parameter (econv=219474.6315343234)
+write (6, 125)
+125 format (/, 10x, &
+     'SORTED LEVEL LIST', /, '     N    J1  F1/2  EPS1    J2', &
+     '  EINT(CM-1)       C-1/2       C-3/2')
+do i = 1, n
+   j2 = mod(js(i), 10)
+   j1 = js(i) / 10
+   fi1 = iabs(iss(i))
+   eps1 = isign(1, iss(i))
+   ecm = es(i) * econv
+   tho = thos(i)
+   if (fi1 .eq. 1) then
+      c32 = dcos(tho)
+      c12 = dsin(tho)
+   else
+      c32 = dsin(tho)
+      c12 = -dcos(tho)
+   end if
+   write (6, 126) i, dble(j1) + 0.5d0, fi1, eps1, j2, &
+        ecm, c12, c32
+126    format (i6, f6.1, 3i6, 3f12.3)
+end do
+return
+end
+
+!     ------------------------------------------------------------------
+double precision function v2pisg(jtot, j1p, eps1p, c12p, c32p, &
+     j2p, j12p, lp, j1, eps1, c12, c32, j2, j12, l, &
+     lam1, lam2, lam, isdiag)
+use mod_hiutil, only: xf3j, xf6j, xf9j, xf3jm0
+implicit none
+!     
+!     The subroutine calculate the coupling matrix elements, shown in
+!     Eq. (27) in the notes of Q. Ma.
+!     
+!     If (omeg1p .eq. omeg1), the coefficient before B is calculated;
+!     otherwise the coefficient before F is calculated.
+!     
+integer :: jtot, j1p, eps1p, j2p, j12p, lp, j1, eps1, &
+     j2, j12, l, lam1, lam2, lam
+real(8) :: c12p, c32p, c12, c32
+logical :: isdiag
+integer :: iphase
+real(8) :: phase, pref, threej, sixj, ninej
+real(8) :: xj1p, xj2p, xj12p, xlp, &
+     xj1, xj2, xj12, xl, xjtot, xlam1, xlam2, xlam
+real(8), parameter :: machep=epsilon(0d0)
+!     
+!     One is added since j1p and j1 should be half integers
+iphase = eps1p * eps1 * (-1) ** (j1p + j1 + lam1 + 1)
+if (iphase .eq. 1) then
+   v2pisg = 0d0
+   return
+end if
+!     
+xj1p = dble(j1p) + 0.5d0
+xj2p = dble(j2p)
+xj12p = dble(j12p) + 0.5d0
+xlp = dble(lp)
+xj1 = dble(j1) + 0.5d0
+xj2 = dble(j2)
+xj12 = dble(j12) + 0.5d0
+xl = dble(l)
+xjtot = dble(jtot) + 0.5d0
+xlam1 = dble(lam1)
+xlam2 = dble(lam2)
+xlam = dble(lam)
+!     
+!     
+v2pisg = 0d0
+!
+threej = xf3jm0(xj2p, xlam2, xj2) * xf3jm0(xlp, xlam, xl)
+if (dabs(threej) .lt. machep) return
+!     omega-dependent part
+if (isdiag) then
+   threej = threej * &
+        (c12p * c12 * xf3j(xj1p, xlam1, xj1, -0.5d0, 0d0, 0.5d0) &
+        - c32p * c32 * xf3j(xj1p, xlam1, xj1, -1.5d0, 0d0, 1.5d0))
+else
+   threej = threej * dble(eps1) * &
+        (c12p * c32 * xf3j(xj1p, xlam1, xj1, -0.5d0, 2d0, -1.5d0) &
+        - c32p * c12 * xf3j(xj1p, xlam1, xj1, &
+        -1.5d0, 2d0, -0.5d0))
+end if
+if (dabs(threej) .lt. machep) return
+!     
+sixj = xf6j(xj12, xl, xjtot, xlp, xj12p, xlam)
+if (dabs(sixj) .lt. machep) return
+ninej = xf9j(xj1, xj2, xj12, xj1p, xj2p, xj12p, &
+     xlam1, xlam2, xlam)
+if (dabs(ninej) .lt. machep) return
+!     
+!     Again 1 is added to compensate the dropped half-integer part
+iphase = jtot + lam1 - lam2 + j1 - j2 + j12p - l - lp  + 1
+if (mod(iphase, 2) .eq. 0) then
+   phase = 1d0
+else
+   phase = -1d0
+end if
+!     
+pref = (2d0 * xj1p + 1d0) * (2d0 * xj2p + 1d0) &
+     * (2d0 * xj12p + 1d0) * (2d0 * xlp + 1d0) &
+     * (2d0 * xj1 + 1d0) * (2d0 * xj2 + 1d0) * (2d0 * xj12 + 1d0) &
+     * (2d0 * xl + 1d0) * (2d0 * xlam + 1d0)
+pref = dsqrt(pref)
+!     
+v2pisg = phase * pref * threej * sixj * ninej
+return
+end
+
 end module
 !     ------------------------------------------------------------------
 !     THE FOLLOWING SOUBROUTINE WILL BE THE MAIN FUNCTION FOR MAKEPOT.
@@ -305,7 +426,8 @@ use constants, only: econv
 use mod_pot_ohh2_bausr, only: machep, &
    nvb, nvf, &
    lam1b, lam2b, lamb, &
-   lam1f, lam2f, lamf
+   lam1f, lam2f, lamf, &
+   pr_lev_ohh2, v2pisg
 use mod_ered, only: ered
 use mod_hitypes, only: bqs_type
 implicit none
@@ -345,7 +467,6 @@ integer nlist, ji1, eps1, fi1, ji2, li, ji1p, eps1p, fi1p, &
      lpar, i, ilam, ivx, iv, icol, irow, inum, &
      i1, i2
 double precision roteng, esave, vee, s1save, c12p, c32p, c12, c32
-double precision v2pisg
 double precision x, o11, o12, o22, tho
 character(3) :: strfi
 integer, pointer :: j1max, npar, j2min, j2max, iptsy2
@@ -589,123 +710,5 @@ end do
 if (bastst .and. iprint .ge. 2) then
    call v2%print(unit=6)
 end if
-return
-end
-!     ------------------------------------------------------------------
-subroutine pr_lev_ohh2(n, js, iss, es, thos)
-implicit none
-!
-integer n, js(*), iss(*)
-double precision es(*), thos(*)
-integer i, j1, j2, fi1, eps1
-double precision ecm, econv, tho, c12, c32
-parameter (econv=219474.6315343234)
-write (6, 125)
-125 format (/, 10x, &
-     'SORTED LEVEL LIST', /, '     N    J1  F1/2  EPS1    J2', &
-     '  EINT(CM-1)       C-1/2       C-3/2')
-do i = 1, n
-   j2 = mod(js(i), 10)
-   j1 = js(i) / 10
-   fi1 = iabs(iss(i))
-   eps1 = isign(1, iss(i))
-   ecm = es(i) * econv
-   tho = thos(i)
-   if (fi1 .eq. 1) then
-      c32 = dcos(tho)
-      c12 = dsin(tho)
-   else
-      c32 = dsin(tho)
-      c12 = -dcos(tho)
-   end if
-   write (6, 126) i, dble(j1) + 0.5d0, fi1, eps1, j2, &
-        ecm, c12, c32
-126    format (i6, f6.1, 3i6, 3f12.3)
-end do
-return
-end
-
-!     ------------------------------------------------------------------
-double precision function v2pisg(jtot, j1p, eps1p, c12p, c32p, &
-     j2p, j12p, lp, j1, eps1, c12, c32, j2, j12, l, &
-     lam1, lam2, lam, isdiag)
-use mod_hiutil, only: xf3j, xf6j, xf9j, xf3jm0
-implicit none
-!     
-!     The subroutine calculate the coupling matrix elements, shown in
-!     Eq. (27) in the notes of Q. Ma.
-!     
-!     If (omeg1p .eq. omeg1), the coefficient before B is calculated;
-!     otherwise the coefficient before F is calculated.
-!     
-integer :: jtot, j1p, eps1p, j2p, j12p, lp, j1, eps1, &
-     j2, j12, l, lam1, lam2, lam
-real(8) :: c12p, c32p, c12, c32
-logical :: isdiag
-integer :: iphase
-real(8) :: phase, pref, threej, sixj, ninej
-real(8) :: xj1p, xj2p, xj12p, xlp, &
-     xj1, xj2, xj12, xl, xjtot, xlam1, xlam2, xlam
-real(8), parameter :: machep=epsilon(0d0)
-!     
-!     One is added since j1p and j1 should be half integers
-iphase = eps1p * eps1 * (-1) ** (j1p + j1 + lam1 + 1)
-if (iphase .eq. 1) then
-   v2pisg = 0d0
-   return
-end if
-!     
-xj1p = dble(j1p) + 0.5d0
-xj2p = dble(j2p)
-xj12p = dble(j12p) + 0.5d0
-xlp = dble(lp)
-xj1 = dble(j1) + 0.5d0
-xj2 = dble(j2)
-xj12 = dble(j12) + 0.5d0
-xl = dble(l)
-xjtot = dble(jtot) + 0.5d0
-xlam1 = dble(lam1)
-xlam2 = dble(lam2)
-xlam = dble(lam)
-!     
-!     
-v2pisg = 0d0
-!
-threej = xf3jm0(xj2p, xlam2, xj2) * xf3jm0(xlp, xlam, xl)
-if (dabs(threej) .lt. machep) return
-!     omega-dependent part
-if (isdiag) then
-   threej = threej * &
-        (c12p * c12 * xf3j(xj1p, xlam1, xj1, -0.5d0, 0d0, 0.5d0) &
-        - c32p * c32 * xf3j(xj1p, xlam1, xj1, -1.5d0, 0d0, 1.5d0))
-else
-   threej = threej * dble(eps1) * &
-        (c12p * c32 * xf3j(xj1p, xlam1, xj1, -0.5d0, 2d0, -1.5d0) &
-        - c32p * c12 * xf3j(xj1p, xlam1, xj1, &
-        -1.5d0, 2d0, -0.5d0))
-end if
-if (dabs(threej) .lt. machep) return
-!     
-sixj = xf6j(xj12, xl, xjtot, xlp, xj12p, xlam)
-if (dabs(sixj) .lt. machep) return
-ninej = xf9j(xj1, xj2, xj12, xj1p, xj2p, xj12p, &
-     xlam1, xlam2, xlam)
-if (dabs(ninej) .lt. machep) return
-!     
-!     Again 1 is added to compensate the dropped half-integer part
-iphase = jtot + lam1 - lam2 + j1 - j2 + j12p - l - lp  + 1
-if (mod(iphase, 2) .eq. 0) then
-   phase = 1d0
-else
-   phase = -1d0
-end if
-!     
-pref = (2d0 * xj1p + 1d0) * (2d0 * xj2p + 1d0) &
-     * (2d0 * xj12p + 1d0) * (2d0 * xlp + 1d0) &
-     * (2d0 * xj1 + 1d0) * (2d0 * xj2 + 1d0) * (2d0 * xj12 + 1d0) &
-     * (2d0 * xl + 1d0) * (2d0 * xlam + 1d0)
-pref = dsqrt(pref)
-!     
-v2pisg = phase * pref * threej * sixj * ninej
 return
 end

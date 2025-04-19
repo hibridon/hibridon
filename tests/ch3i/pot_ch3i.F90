@@ -928,9 +928,13 @@ common /coicl/ clfl
 
 common /coiscl/ iscl(40)
 UNUSED_DUMMY(sc1)
+sc1(1) = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
 UNUSED_DUMMY(sc2)
+sc2(1) = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
 UNUSED_DUMMY(sc3)
+sc3(1) = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
 UNUSED_DUMMY(sc4)
+sc4(1) = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
 UNUSED_DUMMY(rcut)
 UNUSED_DUMMY(jtot)
 UNUSED_DUMMY(flaghf)

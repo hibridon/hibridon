@@ -4,11 +4,12 @@
 #if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_X86)
 #define SYSTEM_MEM_USAGE_WORKS
 #endif
-
+module mod_ancou_main
+contains
 #if defined(SYSTEM_MEM_USAGE_WORKS)
 subroutine system_mem_usage(valueRSS)
 #if defined(HIB_UNIX_IFORT)
-use ifport ! needed to use getpid on ifort compiler
+use ifport, only: getpid
 #endif 
 implicit none
 integer, intent(out) :: valueRSS
@@ -49,7 +50,6 @@ close(100)
 return
 end subroutine system_mem_usage
 #endif
-
 
 #define ANCOUMA_READ_METHOD_NORMAL 0
 #define ANCOUMA_READ_METHOD_INLINE_LEVEL1 1
@@ -101,6 +101,9 @@ subroutine test_alloc_simpler
    end do
 end subroutine test_alloc_simpler
 
+end module mod_ancou_main
+
+
 ! ancou statistics from test nh3h2_qma_long
 !  total :   24452296/ 834406375 non zero elements (sparsity :  2.93%)
 !  storage efficiency :  29.30% (      293427552 used bytes /      1001544720 allocated bytes)
@@ -115,7 +118,7 @@ program test_ancou_type
     use mod_assert, only: fassert
     use mod_ancou, only: ancou_type, ancouma_type, print_ancou_stats
     use mod_grovec, only: print_grovec_stats, igrovec_type_block, dgrovec_type_block
-
+    use mod_ancou_main, only: system_mem_usage
     implicit none
     integer :: nlam = 55  ! same as nh3h2_qma_long test
     integer :: num_channels = 3895  ! same as nh3h2_qma_long test

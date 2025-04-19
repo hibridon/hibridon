@@ -4,352 +4,6 @@
 ! J. Chem. Phys. 107, 9921 (1997)
 #include "unused.h"
 
-subroutine driver
-use mod_covvl, only: vvl
-use mod_cosysr, only: rspar
-use mod_parpot, only: potnam=>pot_name
-use mod_hipot, only: pot
-implicit double precision (a-h,o-z)
-real(8), pointer :: rshift, xfact
-rshift=>rspar(1); xfact=>rspar(2)
-potnam='HeCO Moszynski et al. SAPT PES'
-print *, potnam
-1  print *, ' r (bohr)'
-rshift=0.5
-xfact=0.8
-read (5, *, end=99) r
-call pot(vv0,r)
-write (6, 100) vv0,vvl
-100 format(' vsum',/,7(1pe16.8))
-goto 1
-99 end
-
-#include "common/syusr.F90"
-#include "common/bausr.F90"
-#include "common/ground.F90"
-subroutine loapot(iunit,filnam)
-! ------------------------------------------------------------------------
-use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
-use mod_parpot, only: potnam=>pot_name
-integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
-character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
-UNUSED_DUMMY(iunit)
-UNUSED_DUMMY(filnam)
-potnam='HeCO Moszynski et al. SAPT PES'
-lammin(1)=1
-lammax(1)=10
-mproj(1)=0
-ntv(1)=1
-ivcol(1,1)=0
-ivrow(1,1)=0
-return
-end
-! ----------------------------------------------------------------------
-subroutine pot (vv0, r)
-!  subroutine to calculate the r-dependent coefficients
-!  in atomic units (distance and energy)
-! ----------------------------------------------------------------------
-!  on entry:
-!    r:      interparticle distance
-!  on return:
-!  vv0        contains isotropic term (d00 term in vsum)
-!  variable in module mod_covvl
-!    vvl:     vector of length 6 to store r-dependence of each term
-!             in potential expansion
-!    vvl(1-10) expansion coefficients in dl0 (l=1:11) of vsum
-
-! uses linear least squares routines from cmlib
-
-! author:  millard alexander
-! latest revision date:  8-oct-1993
-! revised for He-NO(X) : 1-20-95 by Moonbong Yang
-! revised for CCSD(T) PES: 2002.10.13 by Jacek Klos
-!revised for Ar-OH(A^2Sigma+) 2005 J.Klos
-! ----------------------------------------------------------------------
-
-use mod_covvl, only: vvl
-use mod_hiblas, only: dcopy
-use mod_hipotutil, only: dqrank, dqrlss
-implicit double precision (a-h,o-z)
-real(8), intent(out) :: vv0
-real(8), intent(in) :: r  ! intermolecular distance
-
-dimension vsum(11),xsum(11), &
-          d0(121),aa(121),thta(11),cthta(11)
-dimension kpvt(11),qraux(11),work(121),rsd(11)
-
-data half, zero, one, alph /0.5d0, 0.d0, 1.d0, 1.2d0/
-! for distances beyond rmax difference potential is damped
-data rmax /13d0/
-! coefficicients for d0 rotation matrices
-! stored (by column) for each of 7 angles and for l=0:6
-! angles are 0 20 40 60 80 90 100 120 140 160 180
-data d0/ &
-  1.d0,& !l=0
-  1.d0, &
-  1.d0, &
-  1.d0, &
-  1.d0, &
-  1.d0, &
-  1.d0, &
-  1.d0, &
-  1.d0, &
-  1.d0, &
-  1.d0,& !l=0
-                    1.d0, & !l=1
-    0.939692620785908d0, &
-    0.766044443118978d0, &
-                  0.5d0, &
-     0.17364817766693d0, &
-                  1d-16, &
-    -0.17364817766693d0, &
-                 -0.5d0, &
-   -0.766044443118978d0, &
-   -0.939692620785908d0, &
-                   -1d0, & !l=1
-                    1d0, & !l=2
-    0.824533332339233d0, &
-    0.380236133250197d0, &
-               -0.125d0, &
-   -0.454769465589431d0, &
-                 -0.5d0, &
-   -0.454769465589431d0, &
-               -0.125d0, &
-    0.380236133250197d0, &
-    0.824533332339233d0, &
-                    1d0, & !l=2
-                    1d0, & !l=3
-    0.664884732794716d0, &
-  -0.0252333338303835d0, &
-              -0.4375d0, &
-   -0.247381933374901d0, &
-                  1d-16, &
-    0.247381933374901d0, &
-               0.4375d0, &
-   0.0252333338303835d0, &
-   -0.664884732794716d0, &
-                   -1d0, & !l=3
- 1d0,                   & !l=4
-    0.474977735636283d0, &
-   -0.319004346471378d0, &
-           -0.2890625d0, &
-    0.265901610835095d0, &
-                0.375d0, &
-    0.265901610835095d0, &
-           -0.2890625d0, &
-   -0.319004346471378d0, &
-    0.474977735636283d0, &
-                    1d0,& !l=4
-  1.d0,                 & !l=5
-    0.271491745551255d0, &
-   -0.419682045437054d0, &
-           0.08984375d0, &
-    0.281017540988309d0, &
-                  1d-16, &
-   -0.281017540988309d0, &
-          -0.08984375d0, &
-    0.419682045437054d0, &
-   -0.271491745551255d0, &
-                   -1d0,& !l=5
-                   1.d0,& !l=6
-   0.0719030017842305d0, &
-   -0.323570725710931d0, &
-         0.3232421875d0, &
-   -0.132121338573299d0, &
-              -0.3125d0, &
-   -0.132121338573299d0, &
-         0.3232421875d0, &
-   -0.323570725710931d0, &
-   0.0719030017842305d0, &
-                    1d0, & !l=6
-                    1d0, & !l=7
-   -0.107226158692938d0, &
-   -0.100601708629502d0, &
-        0.22314453125d0, &
-   -0.283479918813435d0, &
-                  1d-16, &
-    0.283479918813435d0, &
-       -0.22314453125d0, &
-    0.100601708629502d0, &
-    0.107226158692938d0, &
-                   -1d0,& !l=7
-                    1d0,& !l=8
-   -0.251839432959275d0, &
-    0.138626797752243d0, &
-   -0.073638916015625d0, &
-   0.0233078500507821d0, &
-            0.2734375d0, &
-   0.0233078500507821d0, &
-   -0.073638916015625d0, &
-    0.138626797752243d0, &
-   -0.251839432959275d0, &
-                    1d0,& !l=8
-                    1d0, & !l=9
-   -0.351696543958561d0, &
-    0.290012951832139d0, &
-   -0.267898559570312d0, &
-    0.259627174131175d0, &
-                  1d-16, &
-   -0.259627174131175d0, &
-    0.267898559570312d0, &
-   -0.290012951832139d0, &
-    0.351696543958561d0, &
-                   -1d0, & !l=9
-                    1d0, & !l=10
-   -0.401269139852809d0, &
-    0.297345221371711d0, &
-   -0.188228607177734d0, &
-   0.0646821277096134d0, &
-          -0.24609375d0, &
-   0.0646821277096134d0, &
-   -0.188228607177734d0, &
-    0.297345221371711d0, &
-   -0.401269139852809d0, &
-                    1d0/!l=10
-thta(1)=0.D0
-thta(2)=20.D0
-thta(3)=40.D0
-thta(4)=60.D0
-thta(5)=80.D0
-thta(6)=90.D0
-thta(7)=100.D0
-thta(8)=120.D0
-thta(9)=140.D0
-thta(10)=160.D0
-thta(11)=180.D0
-do i=1,11
-cthta(i)=dcos(thta(i)*dacos(-1.D0)/180.D0)
-enddo
-RCO=2.132d0
-do 100 i=1,11
-  vsum(i)=hecopot(r,RCO,cthta(i))
-100 continue
-! solve simultaneous equations for solutions
-tol=1.e-10
-call dcopy(121,d0,1,aa,1)
-call dqrank(aa,11,11,11,tol,kr,kpvt,qraux,work)
-call dqrlss(aa,11,11,11,kr,vsum,xsum,rsd,kpvt,qraux)
-! convert to hartree
-!      conv=1.d0/219474.6
-!      call dscal(11,conv,xsum,1)
-vv0=xsum(1)
-call dcopy(10,xsum(2),1,vvl,1)
-end
-!------PES---------
-
-!===============================================================================
-REAL*8 FUNCTION HECOPOT (RDIM, RCO, XCOS)
-!-------------------------------------------------------------------------------
-!
-!  Function returns the ab initio SAPT potential energy of the He--CO complex.
-!  The configuration of the system is specified by the Jacobi coordinates 
-!  RDIM [distance between atom and molecular c.o.m.], RCO [CO bond length],
-!  and XCOS [= cos(THETA)].
-!  Energies are in Hartree, distances are in bohr.
-!
-!  Analytical fit by R. Moszynski, September 1996.
-!  Update of the Fortran code by T.G.A. Heijmen, May 1997.
-!
-!-------------------------------------------------------------------------------
-IMPLICIT REAL*8 (a-h,o-z)
-PARAMETER ( re=2.132d0, logmax=12 )
-DIMENSION xi(0:3), pleg(0:10), dlfac(0:logmax)
-COMMON /param/ ael(0:10,0:3), bel(0:10,0:3), alel(0:10), &
-               aex(0:8,0:3),  bex(0:8,0:3), alex(0:8), &
-               ad(0:8,0:3),  bd(0:8), bdd(0:8), cd(6:12,0:6,0:3), &
-               ai(0:10,0:3), bi(0:8), ci(6:12,0:6,0:3)
-logical, save :: first_time = .true.
-SAVE
-
-!... Fill array DLFAC with log(n!)
-IF (first_time) THEN
-  CALL filfac(dlfac, logmax)
-  first_time = .false.
-ENDIF
-
-!.. Deviation of CO bond length from equilibrium
-xi(0) = 1.d0
-xi(1) = rco - re
-DO k=2,3
-  xi(k) = xi(k-1) * xi(1)
-ENDDO
-
-!.. Fill array PLEG with Legendre polynomials P(l,xcos)
-CALL polleg(pleg, 10, xcos)
-
-!.. Electrostatics
-aael = 0.d0
-bbel = 0.d0
-alphael = 0.d0
-DO l=0,10
-  DO k=0,3
-    aael = aael + ael(l,k) * pleg(l) * xi(k)
-    bbel = bbel + bel(l,k) * pleg(l) * xi(k)
-  ENDDO ! k
-  alphael = alphael + alel(l) * pleg(l)
-ENDDO ! l
-elst = ( aael + bbel*rdim ) * exp( -alphael*rdim )
-
-!.. Exchange
-alphaex = 0.d0
-aaex = 0.d0
-bbex = 0.d0
-DO l=0,8
-  alphaex = alphaex + alex(l) * pleg(l)
-  DO k=0,3
-    aaex = aaex + aex(l,k) * pleg(l) * xi(k)
-    bbex = bbex + bex(l,k) * pleg(l) * xi(k)
-  ENDDO ! k
-ENDDO ! l
-exch = ( aaex + bbex*rdim ) * exp( -alphaex*rdim )
-
-!.. Dispersion (short-range component)
-aad = 0.d0
-betad = 0.d0
-betadd = 0.d0
-DO l=0,8
-  DO k=0,3
-    aad = aad + ad(l,k) * pleg(l) * xi(k)
-  ENDDO ! k
-  betad = betad + bd(l) * pleg(l)
-  betadd = betadd + bdd(l) * pleg(l)
-ENDDO ! l
-disp = aad * exp(-betad * rdim)
-
-!.. Induction (short-range component)
-aai = 0.d0
-betai = 0.d0
-DO l=0,10
-  DO k=0,3
-    aai = aai + ai(l,k) * pleg(l) * xi(k)
-  ENDDO ! k
-ENDDO ! l
-DO l=0,8
-  betai = betai + bi(l) * pleg(l)
-ENDDO ! l
-xind = aai * exp(-betai * rdim)
-
-!.. Long-range contributions to dispersion and induction energies
-rn = rdim**(-5)
-DO n=6,12
-  cdn = 0.d0
-  cin = 0.d0
-  rn = rn / rdim
-  DO l=mod(n,2),min(n-4,6),2
-    DO k=0,3
-      cdn = cdn + cd(n,l,k) * pleg(l) * xi(k)
-      cin = cin + ci(n,l,k) * pleg(l) * xi(k)
-    ENDDO ! k
-  ENDDO ! l
-  disp = disp + cdn * fdamp(n, rdim, betadd, dlfac, logmax) * rn
-  xind = xind + cin * fdamp(n, rdim, betai, dlfac, logmax) * rn
-ENDDO ! n
-
-!.. Sum the contributions
-hecopot = elst + exch + xind + disp
-!     hecopot = hecopot * 219474.6307d0 ! conversion to cm-1
-
-END
 !-------------------------------------------------------------------------------
 BLOCK DATA
 !-------------------------------------------------------------------------------
@@ -576,6 +230,125 @@ DATA ci /   6.183263214D-02, 0.D+00,-4.729079539D+00, 0.D+00,   & !l=0, k=0
             4*0.D+00, 2.131138829D+01, 0.D+00, 1.138565305D+03/ ! l=6     
 
 END
+
+
+module mod_heco
+contains
+
+!===============================================================================
+REAL*8 FUNCTION HECOPOT (RDIM, RCO, XCOS)
+!-------------------------------------------------------------------------------
+!
+!  Function returns the ab initio SAPT potential energy of the He--CO complex.
+!  The configuration of the system is specified by the Jacobi coordinates 
+!  RDIM [distance between atom and molecular c.o.m.], RCO [CO bond length],
+!  and XCOS [= cos(THETA)].
+!  Energies are in Hartree, distances are in bohr.
+!
+!  Analytical fit by R. Moszynski, September 1996.
+!  Update of the Fortran code by T.G.A. Heijmen, May 1997.
+!
+!-------------------------------------------------------------------------------
+IMPLICIT REAL*8 (a-h,o-z)
+PARAMETER ( re=2.132d0, logmax=12 )
+DIMENSION xi(0:3), pleg(0:10), dlfac(0:logmax)
+COMMON /param/ ael(0:10,0:3), bel(0:10,0:3), alel(0:10), &
+               aex(0:8,0:3),  bex(0:8,0:3), alex(0:8), &
+               ad(0:8,0:3),  bd(0:8), bdd(0:8), cd(6:12,0:6,0:3), &
+               ai(0:10,0:3), bi(0:8), ci(6:12,0:6,0:3)
+logical, save :: first_time = .true.
+SAVE
+
+!... Fill array DLFAC with log(n!)
+IF (first_time) THEN
+  CALL filfac(dlfac, logmax)
+  first_time = .false.
+ENDIF
+
+!.. Deviation of CO bond length from equilibrium
+xi(0) = 1.d0
+xi(1) = rco - re
+DO k=2,3
+  xi(k) = xi(k-1) * xi(1)
+ENDDO
+
+!.. Fill array PLEG with Legendre polynomials P(l,xcos)
+CALL polleg(pleg, 10, xcos)
+
+!.. Electrostatics
+aael = 0.d0
+bbel = 0.d0
+alphael = 0.d0
+DO l=0,10
+  DO k=0,3
+    aael = aael + ael(l,k) * pleg(l) * xi(k)
+    bbel = bbel + bel(l,k) * pleg(l) * xi(k)
+  ENDDO ! k
+  alphael = alphael + alel(l) * pleg(l)
+ENDDO ! l
+elst = ( aael + bbel*rdim ) * exp( -alphael*rdim )
+
+!.. Exchange
+alphaex = 0.d0
+aaex = 0.d0
+bbex = 0.d0
+DO l=0,8
+  alphaex = alphaex + alex(l) * pleg(l)
+  DO k=0,3
+    aaex = aaex + aex(l,k) * pleg(l) * xi(k)
+    bbex = bbex + bex(l,k) * pleg(l) * xi(k)
+  ENDDO ! k
+ENDDO ! l
+exch = ( aaex + bbex*rdim ) * exp( -alphaex*rdim )
+
+!.. Dispersion (short-range component)
+aad = 0.d0
+betad = 0.d0
+betadd = 0.d0
+DO l=0,8
+  DO k=0,3
+    aad = aad + ad(l,k) * pleg(l) * xi(k)
+  ENDDO ! k
+  betad = betad + bd(l) * pleg(l)
+  betadd = betadd + bdd(l) * pleg(l)
+ENDDO ! l
+disp = aad * exp(-betad * rdim)
+
+!.. Induction (short-range component)
+aai = 0.d0
+betai = 0.d0
+DO l=0,10
+  DO k=0,3
+    aai = aai + ai(l,k) * pleg(l) * xi(k)
+  ENDDO ! k
+ENDDO ! l
+DO l=0,8
+  betai = betai + bi(l) * pleg(l)
+ENDDO ! l
+xind = aai * exp(-betai * rdim)
+
+!.. Long-range contributions to dispersion and induction energies
+rn = rdim**(-5)
+DO n=6,12
+  cdn = 0.d0
+  cin = 0.d0
+  rn = rn / rdim
+  DO l=mod(n,2),min(n-4,6),2
+    DO k=0,3
+      cdn = cdn + cd(n,l,k) * pleg(l) * xi(k)
+      cin = cin + ci(n,l,k) * pleg(l) * xi(k)
+    ENDDO ! k
+  ENDDO ! l
+  disp = disp + cdn * fdamp(n, rdim, betadd, dlfac, logmax) * rn
+  xind = xind + cin * fdamp(n, rdim, betai, dlfac, logmax) * rn
+ENDDO ! n
+
+!.. Sum the contributions
+hecopot = elst + exch + xind + disp
+!     hecopot = hecopot * 219474.6307d0 ! conversion to cm-1
+
+END
+
 !-------------------------------------------------------------------------------
 SUBROUTINE FILFAC(DLFAC, LOGMAX)
 !-------------------------------------------------------------------------------
@@ -627,4 +400,239 @@ DO i=1,lmax-1
 ENDDO
 
 END
+end module mod_heco
+
+subroutine driver
+use mod_covvl, only: vvl
+use mod_cosysr, only: rspar
+use mod_parpot, only: potnam=>pot_name
+use mod_hipot, only: pot
+implicit double precision (a-h,o-z)
+real(8), pointer :: rshift, xfact
+rshift=>rspar(1); xfact=>rspar(2)
+potnam='HeCO Moszynski et al. SAPT PES'
+print *, potnam
+1  print *, ' r (bohr)'
+rshift=0.5
+xfact=0.8
+read (5, *, end=99) r
+call pot(vv0,r)
+write (6, 100) vv0,vvl
+100 format(' vsum',/,7(1pe16.8))
+goto 1
+99 end
+
+#include "common/syusr.F90"
+#include "common/bausr.F90"
+#include "common/ground.F90"
+subroutine loapot(iunit,filnam)
+! ------------------------------------------------------------------------
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parpot, only: potnam=>pot_name
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
+potnam='HeCO Moszynski et al. SAPT PES'
+lammin(1)=1
+lammax(1)=10
+mproj(1)=0
+ntv(1)=1
+ivcol(1,1)=0
+ivrow(1,1)=0
+return
+end
+! ----------------------------------------------------------------------
+subroutine pot (vv0, r)
+!  subroutine to calculate the r-dependent coefficients
+!  in atomic units (distance and energy)
+! ----------------------------------------------------------------------
+!  on entry:
+!    r:      interparticle distance
+!  on return:
+!  vv0        contains isotropic term (d00 term in vsum)
+!  variable in module mod_covvl
+!    vvl:     vector of length 6 to store r-dependence of each term
+!             in potential expansion
+!    vvl(1-10) expansion coefficients in dl0 (l=1:11) of vsum
+
+! uses linear least squares routines from cmlib
+
+! author:  millard alexander
+! latest revision date:  8-oct-1993
+! revised for He-NO(X) : 1-20-95 by Moonbong Yang
+! revised for CCSD(T) PES: 2002.10.13 by Jacek Klos
+!revised for Ar-OH(A^2Sigma+) 2005 J.Klos
+! ----------------------------------------------------------------------
+
+use mod_covvl, only: vvl
+use mod_hiblas, only: dcopy
+use mod_hipotutil, only: dqrank, dqrlss
+use mod_heco, only: hecopot
+implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
+
+dimension vsum(11),xsum(11), &
+          d0(121),aa(121),thta(11),cthta(11)
+dimension kpvt(11),qraux(11),work(121),rsd(11)
+
+data half, zero, one, alph /0.5d0, 0.d0, 1.d0, 1.2d0/
+! for distances beyond rmax difference potential is damped
+data rmax /13d0/
+! coefficicients for d0 rotation matrices
+! stored (by column) for each of 7 angles and for l=0:6
+! angles are 0 20 40 60 80 90 100 120 140 160 180
+data d0/ &
+  1.d0,& !l=0
+  1.d0, &
+  1.d0, &
+  1.d0, &
+  1.d0, &
+  1.d0, &
+  1.d0, &
+  1.d0, &
+  1.d0, &
+  1.d0, &
+  1.d0,& !l=0
+                    1.d0, & !l=1
+    0.939692620785908d0, &
+    0.766044443118978d0, &
+                  0.5d0, &
+     0.17364817766693d0, &
+                  1d-16, &
+    -0.17364817766693d0, &
+                 -0.5d0, &
+   -0.766044443118978d0, &
+   -0.939692620785908d0, &
+                   -1d0, & !l=1
+                    1d0, & !l=2
+    0.824533332339233d0, &
+    0.380236133250197d0, &
+               -0.125d0, &
+   -0.454769465589431d0, &
+                 -0.5d0, &
+   -0.454769465589431d0, &
+               -0.125d0, &
+    0.380236133250197d0, &
+    0.824533332339233d0, &
+                    1d0, & !l=2
+                    1d0, & !l=3
+    0.664884732794716d0, &
+  -0.0252333338303835d0, &
+              -0.4375d0, &
+   -0.247381933374901d0, &
+                  1d-16, &
+    0.247381933374901d0, &
+               0.4375d0, &
+   0.0252333338303835d0, &
+   -0.664884732794716d0, &
+                   -1d0, & !l=3
+ 1d0,                   & !l=4
+    0.474977735636283d0, &
+   -0.319004346471378d0, &
+           -0.2890625d0, &
+    0.265901610835095d0, &
+                0.375d0, &
+    0.265901610835095d0, &
+           -0.2890625d0, &
+   -0.319004346471378d0, &
+    0.474977735636283d0, &
+                    1d0,& !l=4
+  1.d0,                 & !l=5
+    0.271491745551255d0, &
+   -0.419682045437054d0, &
+           0.08984375d0, &
+    0.281017540988309d0, &
+                  1d-16, &
+   -0.281017540988309d0, &
+          -0.08984375d0, &
+    0.419682045437054d0, &
+   -0.271491745551255d0, &
+                   -1d0,& !l=5
+                   1.d0,& !l=6
+   0.0719030017842305d0, &
+   -0.323570725710931d0, &
+         0.3232421875d0, &
+   -0.132121338573299d0, &
+              -0.3125d0, &
+   -0.132121338573299d0, &
+         0.3232421875d0, &
+   -0.323570725710931d0, &
+   0.0719030017842305d0, &
+                    1d0, & !l=6
+                    1d0, & !l=7
+   -0.107226158692938d0, &
+   -0.100601708629502d0, &
+        0.22314453125d0, &
+   -0.283479918813435d0, &
+                  1d-16, &
+    0.283479918813435d0, &
+       -0.22314453125d0, &
+    0.100601708629502d0, &
+    0.107226158692938d0, &
+                   -1d0,& !l=7
+                    1d0,& !l=8
+   -0.251839432959275d0, &
+    0.138626797752243d0, &
+   -0.073638916015625d0, &
+   0.0233078500507821d0, &
+            0.2734375d0, &
+   0.0233078500507821d0, &
+   -0.073638916015625d0, &
+    0.138626797752243d0, &
+   -0.251839432959275d0, &
+                    1d0,& !l=8
+                    1d0, & !l=9
+   -0.351696543958561d0, &
+    0.290012951832139d0, &
+   -0.267898559570312d0, &
+    0.259627174131175d0, &
+                  1d-16, &
+   -0.259627174131175d0, &
+    0.267898559570312d0, &
+   -0.290012951832139d0, &
+    0.351696543958561d0, &
+                   -1d0, & !l=9
+                    1d0, & !l=10
+   -0.401269139852809d0, &
+    0.297345221371711d0, &
+   -0.188228607177734d0, &
+   0.0646821277096134d0, &
+          -0.24609375d0, &
+   0.0646821277096134d0, &
+   -0.188228607177734d0, &
+    0.297345221371711d0, &
+   -0.401269139852809d0, &
+                    1d0/!l=10
+thta(1)=0.D0
+thta(2)=20.D0
+thta(3)=40.D0
+thta(4)=60.D0
+thta(5)=80.D0
+thta(6)=90.D0
+thta(7)=100.D0
+thta(8)=120.D0
+thta(9)=140.D0
+thta(10)=160.D0
+thta(11)=180.D0
+do i=1,11
+cthta(i)=dcos(thta(i)*dacos(-1.D0)/180.D0)
+enddo
+RCO=2.132d0
+do 100 i=1,11
+  vsum(i)=hecopot(r,RCO,cthta(i))
+100 continue
+! solve simultaneous equations for solutions
+tol=1.e-10
+call dcopy(121,d0,1,aa,1)
+call dqrank(aa,11,11,11,tol,kr,kpvt,qraux,work)
+call dqrlss(aa,11,11,11,kr,vsum,xsum,rsd,kpvt,qraux)
+! convert to hartree
+!      conv=1.d0/219474.6
+!      call dscal(11,conv,xsum,1)
+vv0=xsum(1)
+call dcopy(10,xsum(2),1,vvl,1)
+end
+!------PES---------
 !===============================================================================

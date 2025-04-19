@@ -7,36 +7,9 @@
 #include "common/bausr.F90"
 #include "common/ground.F90"
 
-!  -----------------------------------------------------------------------
-! subroutine called by testpot to interactively provide potential values
-!  -----------------------------------------------------------------------
-subroutine driver
-implicit none
-    write(*,*) 'This is a dummy potential for testing purposes'
-    return
-end subroutine driver
+module mod_bastst
 
-!  -----------------------------------------------------------------------
-! subroutine to initialize the potential
-!  -----------------------------------------------------------------------
-subroutine loapot(iunit, filnam)
-use mod_selb, only: ibasty
-use mod_parpot, only: potnam=>pot_name
-implicit none
-
-    integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
-    character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)
-    UNUSED_DUMMY(iunit)
-    UNUSED_DUMMY(filnam)
-    potnam = 'DUMMY POTENTIAL FOR TESTING PURPOSES'
-
-    call init_pot_parameters(ibasty)
-
-    return
-end subroutine loapot
-
-
-
+contains
 subroutine init_pot_parameters(ibasty)
 use mod_parbas, only: ntv, lammin, lammax, mproj, ivcol, ivrow
 use mod_conlam, only: nlam, nlammx
@@ -235,6 +208,37 @@ integer, intent(in) :: ibasty
     end select
 end subroutine init_pot_parameters
 
+end module mod_bastst
+
+
+!  -----------------------------------------------------------------------
+! subroutine called by testpot to interactively provide potential values
+!  -----------------------------------------------------------------------
+subroutine driver
+implicit none
+    write(*,*) 'This is a dummy potential for testing purposes'
+    return
+end subroutine driver
+
+!  -----------------------------------------------------------------------
+! subroutine to initialize the potential
+!  -----------------------------------------------------------------------
+subroutine loapot(iunit, filnam)
+use mod_selb, only: ibasty
+use mod_parpot, only: potnam=>pot_name
+use mod_bastst, only: init_pot_parameters
+implicit none
+
+    integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+    character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)
+    UNUSED_DUMMY(iunit)
+    UNUSED_DUMMY(filnam)
+    potnam = 'DUMMY POTENTIAL FOR TESTING PURPOSES'
+
+    call init_pot_parameters(ibasty)
+
+    return
+end subroutine loapot
 
 !  -----------------------------------------------------------------------
 !  calculates the r-dependent coefficients in the collision of Ar with N2

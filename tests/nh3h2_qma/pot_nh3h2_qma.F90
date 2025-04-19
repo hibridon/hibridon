@@ -24,6 +24,33 @@
 
 module mod_nh3h2_qma
    character*40 :: potfil
+
+contains
+
+!     ------------------------------------------------------------------
+subroutine pr_lev_nh3h2(n, js, ks, iepss, es)
+implicit none
+!
+integer n, js(*), ks(*), iepss(*)
+double precision es(*)
+integer i, j1, j2, isym
+double precision ecm, econv
+parameter (econv=219474.6315343234)
+write (6, 125)
+125 format (/, 10x, &
+     'SORTED LEVEL LIST', /, '   N   J   K  EPS INV J2   ', &
+     'EINT(CM-1)')
+do i = 1, n
+   j2 = mod(js(i), 10)
+   j1 = js(i) / 10
+   isym = -iepss(i) * (-1) ** j1
+   ecm = es(i) * econv
+   write (6, 126) i, j1, ks(i), iepss(i), isym, j2, ecm
+126    format (6i4, f10.3)
+end do
+return
+end
+
 end module mod_nh3h2_qma
 
 subroutine driver
@@ -289,6 +316,7 @@ use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
 use mod_par, only: iprint
 use mod_ered, only: ered
 use mod_hitypes, only: bqs_type
+use mod_nh3h2_qma, only: pr_lev_nh3h2
 implicit none
 type(bqs_type), intent(out) :: bqs
 integer, intent(out), dimension(:) :: jhold
@@ -498,28 +526,5 @@ end do
 if (bastst .and. iprint .ge. 2) then
    call v2%print(unit=6)
 end if
-return
-end
-!     ------------------------------------------------------------------
-subroutine pr_lev_nh3h2(n, js, ks, iepss, es)
-implicit none
-!
-integer n, js(*), ks(*), iepss(*)
-double precision es(*)
-integer i, j1, j2, isym
-double precision ecm, econv
-parameter (econv=219474.6315343234)
-write (6, 125)
-125 format (/, 10x, &
-     'SORTED LEVEL LIST', /, '   N   J   K  EPS INV J2   ', &
-     'EINT(CM-1)')
-do i = 1, n
-   j2 = mod(js(i), 10)
-   j1 = js(i) / 10
-   isym = -iepss(i) * (-1) ** j1
-   ecm = es(i) * econv
-   write (6, 126) i, j1, ks(i), iepss(i), isym, j2, ecm
-126    format (6i4, f10.3)
-end do
 return
 end
