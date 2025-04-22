@@ -139,6 +139,59 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
   target_compile_definitions(hib PUBLIC HIB_UNIX_IFORT=1)
 endif()
 
+if(ENABLE_CODE_COVERAGE)
+  if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+  else()
+    message(FATAL_ERROR "ENABLE_CODE_COVERAGE is not yet supported with compiler ${Fortran_COMPILER_NAME}")
+  endif()
+
+  find_program(COVERAGE_LCOV_EXE lcov)
+  if (NOT COVERAGE_LCOV_EXE)
+      message(FATAL_ERROR "failed to find lcov executable (tool used incode coverage analysis)")
+  endif()
+  message(STATUS "COVERAGE_LCOV_EXE = ${COVERAGE_LCOV_EXE}")
+
+  find_program(COVERAGE_GENHTML_EXE genhtml)
+  if (NOT COVERAGE_GENHTML_EXE)
+      message(FATAL_ERROR "failed to find genhtml executable (tool used in code coverage analysis)")
+  endif()
+  message(STATUS "COVERAGE_GENHTML_EXE = ${COVERAGE_GENHTML_EXE}")
+
+
+  # build 
+  add_custom_target(clean_coverages VERBATIM COMMAND bash -c "\
+    for info_file in $(find ${CMAKE_BINARY_DIR} -name \"*.info\") ; \
+    do \
+      echo deleting $info_file ; \
+      rm $info_file ; \
+    done ;"
+    COMMENT "deleting the *.info *.gcda files found in ${CMAKE_BINARY_DIR} to erase all traces of previous exe runs for code coverages")
+
+  add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/coverage/total.info COMMAND bash -c "\
+    mkdir -p ${CMAKE_BINARY_DIR}/coverage ; \
+    command='${COVERAGE_LCOV_EXE} ' ; \
+    for test_coverage in $(find ${CMAKE_BINARY_DIR} -name \"*.info\") ; \
+    do \
+      echo adding test coverage $test_coverage to ${CMAKE_BINARY_DIR}/coverage/total.info ; \
+      command=\"\$command -a \$test_coverage\" ; \
+    done ; \
+    command=\"\$command -o ${CMAKE_BINARY_DIR}/coverage/total.info\" ; \
+    \$command" VERBATIM
+    COMMENT "building total code coverage ${CMAKE_BINARY_DIR}/coverage/total.info from all code coverage files found in $(find ${CMAKE_BINARY_DIR}")
+
+  add_custom_target(html_coverages DEPENDS ${CMAKE_BINARY_DIR}/coverage/total.info VERBATIM COMMAND bash -c "\
+    for test_coverage_file in $(find ${CMAKE_BINARY_DIR}/coverage -name \"*.info\") ; \
+    do \
+      html_root=${CMAKE_BINARY_DIR}/coverage/\$(basename \$test_coverage_file | sed 's/.info//') ; \
+      echo building $html_root/index.html from $test_coverage_file ; \
+      mkdir -p \$html_root ; \
+      echo ${COVERAGE_GENHTML_EXE} ; \
+      ${COVERAGE_GENHTML_EXE} \$test_coverage_file -o \$html_root > /dev/null ; \
+    done ;"
+    COMMENT "building an html report for each code coverage file found in ${CMAKE_BINARY_DIR}/coverage")
+endif()
+
+
 # make the code aware that ENABLE_UNINIT_VAR_RUNTIME_DETECTOR is on, to allow the code to use workarounds to prevent the code from stopping because of use on unintialized variables in some libraries we have no control (eg mkl's dsyevr function uses uninitialized variables) 
 target_compile_definitions(hib PUBLIC $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:FLOATING_POINT_ERRORS_CAUSE_EXCEPTIONS=1>)
 

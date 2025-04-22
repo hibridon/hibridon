@@ -46,7 +46,8 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-finit-real=snan>
       $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-ffpe-trap=invalid,zero,overflow>
 
-
+      # The --coverage option of the Gcc compiler, which is synonymous with -fprofile-arcs and -ftest-coverage for compilation and -lgcov for linking, allows the generation of code coverage data files after program execution. After tests performed with Check, the test executable produces a .gcno (Gcov notes) file and a .gcda (Gcov data) file for each file compiled with the -fprofile-arcs option and used during the test (see gcc manual).
+      # These files are then used by the lcov tool to produce a code coverage report in HTML format.
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage -Wno-coverage-invalid-line-number> # Code coverage (same as -fprofile-arcs -ftest-coverage at compile time)
       $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
       $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
