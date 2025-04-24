@@ -265,20 +265,18 @@ UNUSED_DUMMY(readpt)
 return
 end subroutine
 !     ------------------------------------------------------------------
-subroutine savusr(readpt)
+subroutine savusr()
 use mod_cosysi, only: ispar
 use mod_cosysr, only: rspar
 use funit, only: FUNIT_INP
 use mod_nh3h2_qma, only: potfil
 implicit none
-logical, intent(inout) :: readpt
 integer, pointer :: nterm, ipotsy, iop, ninv, jmax, ipotsy2, j2max, j2min
 real(8), pointer :: brot, crot, delta, emax, drot
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); ninv=>ispar(4); jmax=>ispar(5); ipotsy2=>ispar(6)
 j2max=>ispar(7); j2min=>ispar(8)
 
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)
-UNUSED_DUMMY(readpt)
 !     WRITE THE LAST FEW LINES OF THE INPUT FILE.
 write (FUNIT_INP, 220) ipotsy, iop, ninv, ipotsy2
 220 format (4i4, 14x,'   ipotsy, iop, ninv, ipotsy2')

@@ -378,16 +378,14 @@ UNUSED(readpt)
 return
 end subroutine
 !     ------------------------------------------------------------------
-subroutine savusr(readpt)
+subroutine savusr()
 use mod_pot_ohh2_bausr, only: potfil
 use mod_cosysi, only: ispar
 use mod_cosysr, only : rspar
 use funit, only: FUNIT_INP
 implicit none
-logical, intent(inout) :: readpt
 integer, pointer :: j1max, npar, j2min, j2max, iptsy2
 real(8), pointer :: brot, aso, p, q, drot
-UNUSED_DUMMY(readpt)
 
 j1max=>ispar(1); npar=>ispar(2); j2min=>ispar(3); j2max=>ispar(4); iptsy2=>ispar(5)
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
