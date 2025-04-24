@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 
 set(TEST_ID h2ohe_prsbr)
-set(TEST_POT_SRC_FILE "pot_h2ohe.F90")
+set(TEST_POT_SRC_FILE "pot_h2ohe_prsbr.F90")
 set(TEST_POT_DATA_FILES "h2o_coefd.dat h2o_params.dat h2o_coefi.dat")
 set(TEST_COMMAND_FILE "prsbr.com")
 set(TEST_INPUT_FILES "H2ohe_ortho.inp H2ohe_para.inp")

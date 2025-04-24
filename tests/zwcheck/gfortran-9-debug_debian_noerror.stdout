@@ -1,0 +1,237 @@
+[  1%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/grovec.F90.o[0m
+[  2%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/ancou.F90.o[0m
+[  2%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hicommon.F90.o[0m
+[  2%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hiparcst.F90.o[0m
+[  2%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/parbas.F90.o[0m
+[  3%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/himem.F90.o[0m
+[  4%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hipot.F90.o[0m
+[  4%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hiutil.F90.o[0m
+[  4%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba01_1sg.F90.o[0m
+[  5%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hibasutil.F90.o[0m
+[  6%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba02_2sg.F90.o[0m
+[  7%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba03_2pi.F90.o[0m
+[  7%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/himatrix.F90.o[0m
+[  7%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba04_sgpi.F90.o[0m
+[  8%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba05_pi.F90.o[0m
+[  8%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba06_stp.F90.o[0m
+[  9%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hivector.F90.o[0m
+[ 10%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba07_13p.F90.o[0m
+[ 11%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba08_2mol.F90.o[0m
+[ 11%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba09_stpln.F90.o[0m
+[ 12%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba10_22p.F90.o[0m
+[ 12%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba11_1del.F90.o[0m
+[ 13%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba12_h2p.F90.o[0m
+[ 13%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba13_h3p.F90.o[0m
+[ 14%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba14_2del.F90.o[0m
+[ 15%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba15_diat2p.F90.o[0m
+[ 15%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba16_astp.F90.o[0m
+[ 16%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba17_ch2x.F90.o[0m
+[ 16%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba18_stp1.F90.o[0m
+[ 17%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba19_sgpi1.F90.o[0m
+[ 18%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba20_2pi1sg.F90.o[0m
+[ 18%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba21_stp1sg.F90.o[0m
+[ 19%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba22_1d3p.F90.o[0m
+[ 19%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba23_3p2s.F90.o[0m
+[ 20%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba24_sphtp.F90.o[0m
+[ 21%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba25_1sg1sg.F90.o[0m
+[ 21%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba26_2sg1sg.F90.o[0m
+[ 22%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba27_astp1.F90.o[0m
+[ 22%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba28_3sg1sg.F90.o[0m
+[ 23%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba29_astp2.F90.o[0m
+[ 23%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/bases/hiba30_astp3.F90.o[0m
+[ 23%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hibasis.F90.o[0m
+[ 23%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hiblas.F90.o[0m
+[ 24%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/parpot.F90.o[0m
+[ 25%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hismat.F90.o[0m
+[ 26%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hiiolib_f.F90.o[0m
+[ 27%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hiwav.F90.o[0m
+[ 28%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hibrid1.F90.o[0m
+[ 28%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hiversion.F90.o[0m
+[ 28%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hibrid2.F90.o[0m
+[ 29%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hibrid3.F90.o[0m
+[ 29%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hibrid4.F90.o[0m
+[ 30%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hibrid5.F90.o[0m
+[ 31%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hidifcrs.F90.o[0m
+[ 32%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hitestptn.F90.o[0m
+[ 32%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hitrnprt.F90.o[0m
+[ 32%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hihypxsc.F90.o[0m
+[ 33%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hitensor.F90.o[0m
+[ 34%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hinput.F90.o[0m
+[ 35%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hiflow.F90.o[0m
+[ 35%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/assert.f90.o[0m
+[ 36%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hiamp.F90.o[0m
+[ 37%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hibound.F90.o[0m
+[ 37%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hiprsbr.F90.o[0m
+[ 37%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/histmix.F90.o[0m
+[ 38%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hisystem.F90.o[0m
+[ 39%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hipotutil.F90.o[0m
+[ 40%] [32m[1mLinking Fortran static library libhib.a[0m
+[ 40%] Built target hib
+[ 40%] [32mBuilding Fortran object tests/CMakeFiles/check_outputs.dir/comp_mods.f90.o[0m
+[ 41%] [32mBuilding Fortran object tests/CMakeFiles/check_outputs.dir/comp_tests.f90.o[0m
+[ 41%] [32m[1mLinking Fortran executable check_outputs[0m
+[ 41%] Built target check_outputs
+[ 42%] [32mBuilding Fortran object tests/arch4/CMakeFiles/pot_arch4.dir/pot_arch4.F90.o[0m
+[ 42%] [32mBuilding Fortran object tests/arch4/CMakeFiles/pot_arch4.dir/__/__/src/himain.F90.o[0m
+[ 43%] [32m[1mLinking Fortran executable pot_arch4[0m
+[ 43%] Built target pot_arch4
+[ 43%] [32mBuilding Fortran object tests/arn2/CMakeFiles/pot_arn2.dir/pot_arn2.F90.o[0m
+[ 44%] [32mBuilding Fortran object tests/arn2/CMakeFiles/pot_arn2.dir/__/__/src/himain.F90.o[0m
+[ 45%] [32m[1mLinking Fortran executable pot_arn2[0m
+[ 45%] Built target pot_arn2
+[ 45%] [32mBuilding Fortran object tests/arno/CMakeFiles/pot_arno.dir/pot_arno.F90.o[0m
+[ 46%] [32mBuilding Fortran object tests/arno/CMakeFiles/pot_arno.dir/__/__/src/himain.F90.o[0m
+[ 46%] [32m[1mLinking Fortran executable pot_arno[0m
+[ 46%] Built target pot_arno
+[ 47%] [32mBuilding Fortran object tests/arno_bound/CMakeFiles/pot_arno_ccsdt.dir/pot_arno_ccsdt.F90.o[0m
+[ 47%] [32mBuilding Fortran object tests/arno_bound/CMakeFiles/pot_arno_ccsdt.dir/__/__/src/himain.F90.o[0m
+[ 48%] [32m[1mLinking Fortran executable pot_arno_ccsdt[0m
+[ 48%] Built target pot_arno_ccsdt
+[ 49%] [32mBuilding Fortran object tests/aroh/CMakeFiles/pot_arohx_ump4.dir/pot_arohx_ump4.F90.o[0m
+[ 49%] [32mBuilding Fortran object tests/aroh/CMakeFiles/pot_arohx_ump4.dir/__/__/src/himain.F90.o[0m
+[ 50%] [32m[1mLinking Fortran executable pot_arohx_ump4[0m
+[ 50%] Built target pot_arohx_ump4
+[ 50%] [32mBuilding Fortran object tests/boh2/CMakeFiles/pot_boh2.dir/pot_boh2.F90.o[0m
+[ 51%] [32mBuilding Fortran object tests/boh2/CMakeFiles/pot_boh2.dir/__/__/src/himain.F90.o[0m
+[ 51%] [32m[1mLinking Fortran executable pot_boh2[0m
+[ 51%] Built target pot_boh2
+[ 52%] [32mBuilding Fortran object tests/c2hh2/CMakeFiles/pot_c2hh2_12_6.dir/pot_c2hh2_12_6.F90.o[0m
+[ 52%] [32mBuilding Fortran object tests/c2hh2/CMakeFiles/pot_c2hh2_12_6.dir/__/__/src/himain.F90.o[0m
+[ 53%] [32m[1mLinking Fortran executable pot_c2hh2_12_6[0m
+[ 53%] Built target pot_c2hh2_12_6
+[ 54%] [32mBuilding Fortran object tests/cahe/CMakeFiles/pot_cahe.dir/pot_cahe.F90.o[0m
+[ 54%] [32mBuilding Fortran object tests/cahe/CMakeFiles/pot_cahe.dir/__/__/src/himain.F90.o[0m
+[ 55%] [32m[1mLinking Fortran executable pot_cahe[0m
+[ 55%] Built target pot_cahe
+[ 55%] [32mBuilding Fortran object tests/ch2he/CMakeFiles/pot_ch2he_a190_c20.dir/pot_ch2he_a190_c20.F90.o[0m
+[ 56%] [32mBuilding Fortran object tests/ch2he/CMakeFiles/pot_ch2he_a190_c20.dir/__/__/src/himain.F90.o[0m
+[ 57%] [32m[1mLinking Fortran executable pot_ch2he_a190_c20[0m
+[ 57%] Built target pot_ch2he_a190_c20
+[ 57%] [32mBuilding Fortran object tests/ch2he/CMakeFiles/pot_ch2he_x52_c20_v3.dir/pot_ch2he_x52_c20_v3.F90.o[0m
+[ 58%] [32mBuilding Fortran object tests/ch2he/CMakeFiles/pot_ch2he_x52_c20_v3.dir/__/__/src/himain.F90.o[0m
+[ 58%] [32m[1mLinking Fortran executable pot_ch2he_x52_c20_v3[0m
+[ 58%] Built target pot_ch2he_x52_c20_v3
+[ 59%] [32mBuilding Fortran object tests/ch3he/CMakeFiles/pot_ch3he_ccsdt.dir/pot_ch3he_ccsdt.F90.o[0m
+[ 59%] [32mBuilding Fortran object tests/ch3he/CMakeFiles/pot_ch3he_ccsdt.dir/__/__/src/himain.F90.o[0m
+[ 60%] [32m[1mLinking Fortran executable pot_ch3he_ccsdt[0m
+[ 60%] Built target pot_ch3he_ccsdt
+[ 61%] [32mBuilding Fortran object tests/ch3he_vib/CMakeFiles/pot_ch3he_vib.dir/pot_ch3he_vib.F90.o[0m
+[ 61%] [32mBuilding Fortran object tests/ch3he_vib/CMakeFiles/pot_ch3he_vib.dir/__/__/src/himain.F90.o[0m
+[ 62%] [32m[1mLinking Fortran executable pot_ch3he_vib[0m
+[ 62%] Built target pot_ch3he_vib
+[ 62%] [32mBuilding Fortran object tests/ch3i/CMakeFiles/pot_ch3i.dir/pot_ch3i.F90.o[0m
+[ 63%] [32mBuilding Fortran object tests/ch3i/CMakeFiles/pot_ch3i.dir/__/__/src/himain.F90.o[0m
+[ 64%] [32m[1mLinking Fortran executable pot_ch3i[0m
+[ 64%] Built target pot_ch3i
+[ 64%] [32mBuilding Fortran object tests/cnh2/CMakeFiles/pot_cnh2_lique.dir/pot_cnh2_lique.F90.o[0m
+[ 65%] [32mBuilding Fortran object tests/cnh2/CMakeFiles/pot_cnh2_lique.dir/__/__/src/himain.F90.o[0m
+[ 65%] [32m[1mLinking Fortran executable pot_cnh2_lique[0m
+[ 65%] Built target pot_cnh2_lique
+[ 66%] [32mBuilding Fortran object tests/cph2/CMakeFiles/pot_cph2.dir/pot_cph2.F90.o[0m
+[ 67%] [32mBuilding Fortran object tests/cph2/CMakeFiles/pot_cph2.dir/__/__/src/himain.F90.o[0m
+[ 67%] [32m[1mLinking Fortran executable pot_cph2[0m
+[ 67%] Built target pot_cph2
+[ 68%] [32mBuilding Fortran object tests/h2ohe/CMakeFiles/pot_h2ohe.dir/pot_h2ohe.F90.o[0m
+[ 68%] [32mBuilding Fortran object tests/h2ohe/CMakeFiles/pot_h2ohe.dir/__/__/src/himain.F90.o[0m
+[ 69%] [32m[1mLinking Fortran executable pot_h2ohe[0m
+[ 69%] Built target pot_h2ohe
+[ 69%] [32mBuilding Fortran object tests/h2ohe_orig/CMakeFiles/pot_h2ohe_orig.dir/pot_h2ohe_orig.F90.o[0m
+[ 70%] [32mBuilding Fortran object tests/h2ohe_orig/CMakeFiles/pot_h2ohe_orig.dir/__/__/src/himain.F90.o[0m
+[ 71%] [32m[1mLinking Fortran executable pot_h2ohe_orig[0m
+[ 71%] Built target pot_h2ohe_orig
+[ 71%] [32mBuilding Fortran object tests/h2ohe_prsbr/CMakeFiles/pot_h2ohe_prsbr.dir/pot_h2ohe_prsbr.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 72%] [32mBuilding Fortran object tests/h2ohe_prsbr/CMakeFiles/pot_h2ohe_prsbr.dir/__/__/src/himain.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 72%] [32m[1mLinking Fortran executable pot_h2ohe_prsbr[0m
+[ 72%] Built target pot_h2ohe_prsbr
+[ 73%] [32mBuilding Fortran object tests/hco_trnprt/CMakeFiles/pot_hco.dir/pot_hco.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 74%] [32mBuilding Fortran object tests/hco_trnprt/CMakeFiles/pot_hco.dir/__/__/src/himain.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 74%] [32m[1mLinking Fortran executable pot_hco[0m
+[ 74%] Built target pot_hco
+[ 75%] [32mBuilding Fortran object tests/hecn/CMakeFiles/pot_hecn_dgels.dir/pot_hecn_dgels.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 75%] [32mBuilding Fortran object tests/hecn/CMakeFiles/pot_hecn_dgels.dir/__/__/src/himain.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 76%] [32m[1mLinking Fortran executable pot_hecn_dgels[0m
+[ 76%] Built target pot_hecn_dgels
+[ 76%] [32mBuilding Fortran object tests/heco/CMakeFiles/pot_heco_sapt.dir/pot_heco_sapt.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 77%] [32mBuilding Fortran object tests/heco/CMakeFiles/pot_heco_sapt.dir/__/__/src/himain.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 78%] [32m[1mLinking Fortran executable pot_heco_sapt[0m
+[ 78%] Built target pot_heco_sapt
+[ 78%] [32mBuilding Fortran object tests/heohx/CMakeFiles/pot_heohx_lmax10.dir/pot_heohx_lmax10.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 79%] [32mBuilding Fortran object tests/heohx/CMakeFiles/pot_heohx_lmax10.dir/__/__/src/himain.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 79%] [32m[1mLinking Fortran executable pot_heohx_lmax10[0m
+[ 79%] Built target pot_heohx_lmax10
+[ 80%] [32mBuilding Fortran object tests/nh3h2/CMakeFiles/pot_nh3h2_2009.dir/pot_nh3h2_2009.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 80%] [32mBuilding Fortran object tests/nh3h2/CMakeFiles/pot_nh3h2_2009.dir/__/__/src/himain.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 81%] [32m[1mLinking Fortran executable pot_nh3h2_2009[0m
+[ 81%] Built target pot_nh3h2_2009
+[ 81%] [32mBuilding Fortran object tests/nh3h2_qma/CMakeFiles/pot_nh3h2_qma.dir/pot_nh3h2_qma.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 82%] [32mBuilding Fortran object tests/nh3h2_qma/CMakeFiles/pot_nh3h2_qma.dir/__/__/src/himain.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 83%] [32m[1mLinking Fortran executable pot_nh3h2_qma[0m
+[ 83%] Built target pot_nh3h2_qma
+[ 83%] [32mBuilding Fortran object tests/nhph2/CMakeFiles/pot_nhh2_10_4.dir/pot_nhh2_10_4.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 84%] [32mBuilding Fortran object tests/nhph2/CMakeFiles/pot_nhh2_10_4.dir/__/__/src/himain.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 84%] [32m[1mLinking Fortran executable pot_nhh2_10_4[0m
+[ 84%] Built target pot_nhh2_10_4
+[ 85%] [32mBuilding Fortran object tests/o3ph2/CMakeFiles/pot_o3ph2.dir/pot_o3ph2.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 86%] [32mBuilding Fortran object tests/o3ph2/CMakeFiles/pot_o3ph2.dir/__/__/src/himain.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 86%] [32m[1mLinking Fortran executable pot_o3ph2[0m
+[ 86%] Built target pot_o3ph2
+[ 86%] [32mBuilding Fortran object tests/ohh2_bausr/CMakeFiles/pot_ohh2_bausr.dir/pot_ohh2_bausr.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 87%] [32mBuilding Fortran object tests/ohh2_bausr/CMakeFiles/pot_ohh2_bausr.dir/__/__/src/himain.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 88%] [32m[1mLinking Fortran executable pot_ohh2_bausr[0m
+[ 88%] Built target pot_ohh2_bausr
+[ 89%] [32mBuilding Fortran object tests/ohh2_j1/CMakeFiles/pot_ohh2.dir/pot_ohh2.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 89%] [32mBuilding Fortran object tests/ohh2_j1/CMakeFiles/pot_ohh2.dir/__/__/src/himain.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 90%] [32m[1mLinking Fortran executable pot_ohh2[0m
+[ 90%] Built target pot_ohh2
+[ 90%] [32mBuilding Fortran object tests/stp1sg/CMakeFiles/pot_stp1sg_qma.dir/pot_stp1sg_qma.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 91%] [32mBuilding Fortran object tests/stp1sg/CMakeFiles/pot_stp1sg_qma.dir/__/__/src/himain.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 91%] [32m[1mLinking Fortran executable pot_stp1sg_qma[0m
+[ 91%] Built target pot_stp1sg_qma
+[ 92%] [32mBuilding Fortran object tests/vfit/CMakeFiles/pot_vfit.dir/pot_vfit.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 93%] [32mBuilding Fortran object tests/vfit/CMakeFiles/pot_vfit.dir/__/__/src/himain.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 93%] [32m[1mLinking Fortran executable pot_vfit[0m
+[ 93%] Built target pot_vfit
+[ 93%] [32mBuilding Fortran object tests/BASTST/CMakeFiles/pot_bastst.dir/pot_bastst.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 94%] [32mBuilding Fortran object tests/BASTST/CMakeFiles/pot_bastst.dir/__/__/src/himain.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 95%] [32m[1mLinking Fortran executable pot_bastst[0m
+[ 95%] Built target pot_bastst
+[ 96%] [32mBuilding Fortran object tests/HYPXSC/CMakeFiles/pot_hypxsc.dir/pot_hypxsc.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 97%] [32mBuilding Fortran object tests/HYPXSC/CMakeFiles/pot_hypxsc.dir/__/__/src/himain.F90.o[0m
+[01m[Kf951:[m[K [01;35m[KWarning:[m[K Flag ‘[01m[K-fno-automatic[m[K’ overwrites ‘[01m[K-frecursive[m[K’ implied by ‘[01m[K-fopenmp[m[K’
+[ 97%] [32m[1mLinking Fortran executable pot_hypxsc[0m
+[ 97%] Built target pot_hypxsc
+[ 98%] [32mBuilding Fortran object src/unittests/CMakeFiles/unit_ancou.dir/ancou.F90.o[0m
+[ 98%] [32m[1mLinking Fortran executable unit_ancou[0m
+[ 98%] Built target unit_ancou
+[ 99%] [32mBuilding Fortran object src/unittests/CMakeFiles/unit_grovec.dir/grovec.F90.o[0m
+[100%] [32m[1mLinking Fortran executable unit_grovec[0m
+[100%] Built target unit_grovec

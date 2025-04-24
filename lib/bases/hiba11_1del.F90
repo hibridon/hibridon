@@ -1,5 +1,7 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba11_1del
+  use mod_assert, only: fassert
 contains
 ! sy1del (sav1del/ptr1del) defines, saves variables and reads            *
 !                  potential for singlet delta scattering                *
@@ -76,7 +78,6 @@ subroutine ba1del (bqs, jhold, ehold, ishold, nlevel, &
 !    projection index are equal to the values stored in j, jtot, and nu
 !  variables in common bloc /cosysr/
 !    isrcod:   total number of real system dependent variables
-!    idum:     dummy variable for alignment
 !    brot:     rotational constant in cm-1
 !    q:        lambda-doubling constant cm-1
 !  variables in common block /cosysi/
@@ -103,12 +104,12 @@ use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, idum=>junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
+use mod_parbas, only: lammin, lammax, mproj
+use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -129,6 +130,15 @@ integer, pointer :: nterm, jmax, igu, isa, npar
 real(8), pointer :: brot, q
 nterm=>ispar(1); jmax=>ispar(2); igu=>ispar(3); isa=>ispar(4); npar=>ispar(5)
 brot=>rspar(1); q=>rspar(2)
+
+UNUSED_DUMMY(sc1)
+sc1(1) = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
+UNUSED_DUMMY(sc2)
+sc2(1) = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
+UNUSED_DUMMY(sc3)
+sc3(1) = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
+UNUSED_DUMMY(sc4)
+sc4(1) = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
 
 pi2 = 1.570796327d0
 zero = 0.d0
@@ -733,23 +743,23 @@ subroutine sy1del (irpot, readpt, iread)
 !             of all system dependent parameters
 !  subroutines called: loapot(iunit,filnam)
 use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, idum=>junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_skip, only: nskip, iskip
+use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: j, l, lc
 logical existf
 character*1 dot
 character*(*) fname
-character*60 filnam, line, potfil, filnm1
+character*60 filnam, line, potfil
+character*68 filnm1
 save potfil
 #include "common/comdot.F90"
 integer, pointer, save :: nterm, jmax, igu, isa, npar
@@ -836,7 +846,7 @@ close (8)
 irpot=1
 return
 !
-entry sav1del (readpt)
+entry sav1del ()
 !  save input parameters for singlet-delta + atom scattering
 !  line 13:
 write (FUNIT_INP, 315) jmax, igu, isa, npar

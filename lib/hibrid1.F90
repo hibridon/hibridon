@@ -1,5 +1,7 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hibrid1
+use mod_assert, only: fassert
 contains
 !************************************************************************
 !                                                                       *
@@ -20,8 +22,6 @@ contains
 !   2. airprp        airy zeroth-order propagator                       *
 !   2a. gndloc       computes ground state wf and transform to local    *
 !                    basis                                              *
-!   3. airymp        returns the moduli and phases of the airy          *
-!                    functions and their derivatives                    *
 !   4. cbesj         centrifugal scattering function and its            *
 !                    derivative.(first kind)                            *
 !   5. cbesn         centrifugal scattering function and its            *
@@ -80,15 +80,14 @@ integer, intent(in) :: itwo
 
 integer :: i
 logical :: isecnd
-integer, parameter :: lunit = FUNIT_TRANS_MAT
 integer :: nsq 
 
 isecnd = .false.
 if (itwo .gt. 0) isecnd = .true.
 !  if first energy calculation, isecnd = .false.
-!    in which case logical unit lunit will be written
+!    in which case logical unit FUNIT_TRANS_MAT will be written
 !  if subsequent energy calculation, isecnd = .true.
-!    in which case logical unit lunit will be written
+!    in which case logical unit FUNIT_TRANS_MAT will be written
 !  read/write rnow, drnow, diagonal elements of transformed dw/dr matrix,
 !  and diagonal elements of transformed w matrix
 nsq = n * nmax
@@ -151,7 +150,6 @@ subroutine potmat (w, r, nch, nmax, v2)
 !           iflag = 2 if all asymptotically open channels are open at r
 !  subroutines called:
 !    pot:      returns r-dependence of each angular term in the potential
-!    daxpy:    blas routine
 !    vsmul:    multiplies vector by scalar and stores result in another
 !              vector
 !  -------------------------------------------------------------------
@@ -164,10 +162,13 @@ use mod_hiba10_22p, only: trans22
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_pmat, only: rtmn, rtmx, iflag
-use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
+use mod_cputim, only: cpupot
 use mod_hivector, only: dset
+use constants, only: zero, two
+use mod_hiblas, only: dscal, dcopy
+use mod_hipot, only: pot
+use mod_hiutil, only: get_cpu_time
 implicit none
-real(8) :: second
 real(8), dimension(*), intent(out) :: w
 real(8), intent(in) :: r
 integer, intent(in) :: nch
@@ -195,9 +196,6 @@ type(igrovec_type_block), pointer :: blocki
 type(dgrovec_type_block), pointer :: blockd
 #endif
 
-real(8), parameter :: zero = 0.d0
-real(8), parameter :: one = 1.d0
-real(8), parameter :: two = 2.d0
 
 integer :: icol, icolpt, ioff, ipt, irowpt, iwpt, ncol, nmaxp1
 real(8) :: r2, twormu, vv0, wmax, wmin
@@ -207,7 +205,7 @@ real(8) :: r2, twormu, vv0, wmax, wmin
 !     if (r.le.3.41) icount=0
 !ABER
 !  calculate coefficients of each angular term
-cpupot=cpupot-second()
+cpupot = cpupot - get_cpu_time()
 call pot( vv0, r)
 
 !  vv0 is the isotropic term in the potential
@@ -360,7 +358,7 @@ rtmn = r
 rtmx = r
 90 continue
 
-cpupot=cpupot+second()
+cpupot = cpupot + get_cpu_time()
 ! here for 2s-2p scattering
 ! fill in upper triangle of w matrix
 !  first fill in upper half of original matrix
@@ -386,7 +384,7 @@ return
 end
 ! ----------------------------------------------------------------------
 subroutine potent (w, vecnow, scmat, eignow, hp, scr, &
-   rnow, drnow, en, xlarge, nch, nmax, v2)
+   rnow, drnow, xlarge, nch, nmax, v2)
 ! ----------------------------------------------------------------------
 !  this subroutine first sets up the wave-vector matrices:
 !    w = w[rnow + 0.5 drnow/sqrt(3)] and w = w[rnow - 0.5 drnow/sqrt(3)]
@@ -415,7 +413,6 @@ subroutine potent (w, vecnow, scmat, eignow, hp, scr, &
 !    scr:      scratch vector
 !    rnow:     midpoint of the current interval
 !    drnow:    width of the current interval
-!    en:       total energy in atomic units
 !    xlarge:   on return contains largest off-diagonal element in
 !              wn-tilde-prime matrix
 !    nch:      number of channels
@@ -423,8 +420,8 @@ subroutine potent (w, vecnow, scmat, eignow, hp, scr, &
 !              vectors
 ! ----------------------------------------------------------------------
    use mod_ancou, only: ancou_type
-   use mod_hiutil, only: daxpy_wrapper, dsyevr_wrapper
    use mod_himatrix, only: transp
+   use mod_hiblas, only: dscal, dcopy, daxpy_wrapper, dsyevr_wrapper
    implicit none
 !  square matrices (of row dimension nmax)
 real(8), dimension(nmax*nmax), intent(out) :: w
@@ -436,7 +433,6 @@ real(8), dimension(nmax), intent(out) :: hp
 real(8), dimension(nmax), intent(out) :: scr
 real(8), intent(in) :: rnow
 real(8), intent(in) :: drnow
-real(8), intent(in) :: en
 real(8), intent(out) :: xlarge
 integer, intent(in) :: nch
 integer, intent(in) :: nmax
@@ -549,7 +545,7 @@ return
 end
 ! -----------------------------------------------------------------------
 subroutine spropn (rnow, width, eignow, hp, y1, y4, y2, &
-                   gam1, gam2, nch)
+                   gam1, gam2, nch, photof, q)
 !-----------------------------------------------------------------------------
 !  this subroutine calculates the diagonal matrices to propagate the
 !  log-derivative matrix through the current interval
@@ -573,7 +569,7 @@ subroutine spropn (rnow, width, eignow, hp, y1, y4, y2, &
 !                elements of the ihomogeneous propagators
 !                otherwise gam1 and gam2 are returned as zero
 !    nch:        the number of channels, this equals the dimensions of the
-!                eignow, hp, y1, y2, y2, gam1, and gam2 arrays
+!                eignow, hp, y1, y2, y4, gam1, and gam2 arrays
 !-----------------------------------------------------------------------------
 !  the key equations, reproduced below, are taken from
 !  m. alexander and d. manolopoulos, "a stable linear reference potential
@@ -862,23 +858,32 @@ subroutine spropn (rnow, width, eignow, hp, y1, y4, y2, &
 !  written by:  millard alexander
 !  current revision date (algorithm):  30-dec-1994
 !-----------------------------------------------------------------------------
-use mod_coqvec2, only: q => q2
-use mod_phot, only: photof, wavefn, boundf, writs
 use mod_hiutil, only: intairy
 use mod_hivector, only: dset
+use mod_hiamp, only: airymp
 implicit double precision (a-h,o-z)
+real(8), intent(in) :: rnow
+real(8), intent(in) :: width
+real(8), intent(in) :: eignow(nch)
+real(8), intent(in) :: hp(nch)
+real(8), intent(out) :: y1(nch)
+real(8), intent(out) :: y4(nch)
+real(8), intent(out) :: y2(nch)
+real(8), intent(out) :: gam1(nch)
+real(8), intent(out) :: gam2(nch)
+integer, intent(in) :: nch
+logical, intent(in) :: photof
+real(8), intent(inout) :: q(2*nch)
 !      implicit none
 double precision a, b, bfact, cs, cs1, cs2, csh, dalph2, dalpha, &
     darg, dbeta, dcay, delzet, denom, dhalf, dkap, dlzeta, &
     dmmod1, dmmod2, dnmod1, dnmod2, doneth, dphi1, dphi2, &
     dpi, droot, dslope, dthet1, dthet2, dtnhfm, &
     dtnhfp, dx1, dx2, dzeta1, dzeta2, emz1, emz2, &
-    ez1, ez2, fact, oflow, one, rnow, scai1, scai2, scbi1, scbi2, &
-    sn, sn1, sn2, snh, tnhfac, width, x1, x2, xairy1, xairy2, &
+    ez1, ez2, fact, oflow, one, scai1, scai2, scbi1, scbi2, &
+    sn, sn1, sn2, snh, tnhfac, x1, x2, xairy1, xairy2, &
     xbiry1, xbiry2, zero
-double precision eignow, gam1, gam2, hp, y1, y2, y4
-integer i, nch
-dimension eignow(1), hp(1), y1(1), y2(1), y4(1), gam1(1), gam2(1)
+integer i
 data     doneth,        dhalf &
   / 0.333333333333333d0, 0.5d0 /
 data zero, one /0.d0, 1.d0/
@@ -1124,7 +1129,8 @@ subroutine steppr (vecnow, vecnew, tmat, nmax, n)
 !     rgmmul:    generalized matrix multiply, called here to evaluate
 !                a.b-transpose
 ! --------------------------------------------------------------------------
-use mod_hivector, only: matmov
+use mod_hivector, only: matcopy
+use mod_hiblas, only: dgemm
 implicit double precision (a-h,o-z)
 !      real vecnow, vecnew, tmat
 integer n, nmax, isw
@@ -1140,14 +1146,18 @@ call dgemm('n','t',n,n,n,1.d0,vecnew,nmax,vecnow,nmax, &
            0d0,tmat,nmax)
 #endif
 !  restore eigenvectors
-call matmov (vecnew, vecnow, n, n, nmax, nmax)
+call matcopy (vecnew, vecnow, n, n, nmax, nmax)
 return
 end
 ! -----------------------------------------------------------------------
 function turn(e)
 ! current revision date: 23-sept-87
-use constants
-implicit double precision (a-h,o-z)
+use constants, only: econv
+use mod_hipot, only: pot
+implicit none
+real(8), intent(in) :: e
+real(8) :: ee, r, dr, vv0
+real(8) :: turn
 ee = e/econv
 r = 3.0d0
 dr = 0.5d0
@@ -1184,10 +1194,9 @@ subroutine wavevc (w, eignow, rnow, nch, nmax, v2)
 !     tred1,tqlrat:   eispack routines to obtain eigenvalues of real,
 !                     matrix
 !     dsyevr:         latest lapack eigenvalue routine
-!     dscal, dcopy:   linpack blas routines
 ! ----------------------------------------------------------------
 use mod_ancou, only: ancou_type
-use mod_hiutil, only: dsyevr_wrapper
+use mod_hiblas, only: dscal, dcopy, dsyevr_wrapper
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: w(nmax*nmax)
 real(8), intent(out) :: eignow(nch)
@@ -1200,8 +1209,7 @@ type(ancou_type), intent(in) :: v2
 integer, parameter :: ldz = 1
 integer icol, ierr, ipt, nmaxm1, nmaxp1, nrow
 real(8), dimension(ldz, nch):: vecnow_unused   ! this is the z array that dsyevr wants, even if it's not used when jobz = 'N'
-external dscal, dcopy
-!     external dscal, dcopy, potmat, tred1, tqlrat
+!     external potmat, tred1, tqlrat
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
 real(8) :: scr1(nch)
 real(8) :: scr2(nch)
@@ -1333,15 +1341,15 @@ subroutine airprp (z, &
 !     noprin:       if .true., then most printing is suppressed
 ! ----------------------------------------------------------------------------
 use mod_coqvec, only: nphoto, q
+use mod_coqvec2, only: q2
 use mod_cosc10, only: sc10
 use mod_ancou, only: ancou_type
 use mod_hiba10_22p, only: energ22
 use mod_par, only: par_iprint=>iprint
 use mod_wave, only: irec, ifil, nchwfu, iendwv, get_wfu_airy_rec_length
 use mod_selb, only: ibasty
-use mod_ered, only: ered, rmu
-use mod_phot, only: photof, wavefn, boundf, writs
-use mod_hiutil, only: daxpy_wrapper
+use mod_phot, only: photof, wavefn, writs
+use mod_cotq1, only: tmat2 => dpsir
 use mod_himatrix, only: transp
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
 use mod_himatrix, only: mxma
@@ -1349,8 +1357,8 @@ use mod_himatrix, only: mxma
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 use mod_himatrix, only: syminv
 #endif
-use mod_hivector, only: dset, vadd, vmul, matmov
-
+use mod_hivector, only: dset, vadd, vmul, matcopy
+use mod_hiblas, only: dscal, dcopy, daxpy_wrapper
 
 implicit double precision (a-h, o-z)
 !  matrix dimensions (row dimension = nmax, matrices stored column by column)
@@ -1384,8 +1392,6 @@ data izero, ione, zero, one /0, 1, 0.d0, 1.d0/
 data powr /3.d0/
 !     The following variables are for size-determination of (machine
 !     dependent) built-in types
-double precision dble_t
-character char_t
 real(8), allocatable :: w(:)
 real(8), allocatable :: tmat(:)
 real(8), allocatable :: vecnow(:)
@@ -1404,6 +1410,8 @@ integer(8) :: lrairy ! length of an airy record in bytes
 ! ----------------------------------------------------------------------------
 ! Save variables for subsequent energies
 save spcmn, spcmx, rmin, maxstp
+
+UNUSED_DUMMY(en)
 
 allocate(w(nch*nmax))
 allocate(tmat(nch*nmax))
@@ -1437,13 +1445,13 @@ if (itwo .le. 0) then
   !  define local basis at rnow and carry out transformations
   !  vecnew is used as scratch matrix and y1 is used as scratch vector here
   call potent (w, vecnow, vecnew, eignow, hp, y1, &
-               rnow, drnow, en, xlarge, nch, nmax, v2)
+               rnow, drnow, xlarge, nch, nmax, v2)
   !  vecnow is transformation from free basis into local basis
   !  in first interval
   !  e.g. p1=vecnow  ; see eq.(23) of
   !  m.h. alexander, "hybrid quantum scattering algorithms ..."
   !  store vecnow in tmat
-  call matmov (vecnow, tmat, nch, nch, nmax, nmax)
+  call matcopy (vecnow, tmat, nch, nch, nmax, nmax)
   !  determine approximate values for diagonal and off-diagonal
   !  correction terms
   call corr (eignow, eigold, hp, drnow, drmid, xlarge, cdiag, &
@@ -1488,7 +1496,11 @@ do kstep = 1, maxstp
   !  determine ground state wavefunction and derivative and then
   !  transform these into local basis (photodissociation)
   !  y1 and y4 are used as scratch vectors here
-  if (photof) call gndloc(vecnow,w,rnow,drnow,nch,nmax)
+  if (photof) then
+    ! save vecnow in matrix tmat2
+    call matcopy(vecnow,tmat2,nch,nch,nmax,nch)
+    call gndloc(vecnow,rnow,drnow,nch,nmax,q2)
+  end if 
   !  transform logderivative matrix into current interval
   call dtrans ( z, tmat, w, y1, xlarge, nch, nmax, izero)
   !  tmat is no longer needed
@@ -1504,8 +1516,16 @@ do kstep = 1, maxstp
   !  determine these diagonal matrices
   !  eqs. (38)-(44) of m. alexander and d. manolopoulos, "a stable linear
   !                    reference potential algorithm for solution ..."
+
+#ifdef DEBUG
+  ! fill y1, y2 and y4 with silly values to make sure that spropn overwrites them
+  call dset(nch,1.d+300,y1,1)
+  call dset(nch,1.d+300,y2,1)
+  call dset(nch,1.d+300,y4,1)
+#endif
+
   call spropn ( rnow, drnow, eigold, hp, y1, y4, y2, &
-                   gam1, gam2, nch)
+                   gam1, gam2, nch, photof, q2)
   !  set up matrix to be inverted
   !  nskip is spacing between diagonal elements of matrix stored column by colum
   nskip = nmax + 1
@@ -1717,7 +1737,7 @@ do kstep = 1, maxstp
       !  define local basis at rnew and carry out transformations
       !  tmat is used as scratch matrix and y1 is used as scratch vector here
       call potent (w, vecnew, tmat, eignow, hp, y1, &
-                   rnew, drnow, en, xlarge, nch, nmax, v2)
+                   rnew, drnow, xlarge, nch, nmax, v2)
       !  determine matrix to transform log-deriv matrix into new interval
       !  see eq. (22) of m.h. alexander, "hybrid quantum scattering algorithms ..."
       !  on return from subroutine 'steppr':
@@ -1822,7 +1842,7 @@ return
 call exit()
 end
 ! ----------------------------------------------------------------------
-subroutine gndloc (vecnow, scr, rnow, drnow, nch, nmax)
+subroutine gndloc (vecnow, rnow, drnow, nch, nmax, q)
 ! ----------------------------------------------------------------------
 !  this subroutine first determines the ground state wavefunction at
 !    rnow +/- 0.5 drnow/sqrt(3), to estimate the function and its
@@ -1834,29 +1854,37 @@ subroutine gndloc (vecnow, scr, rnow, drnow, nch, nmax)
 ! ---------------------------------------------------------------------
 !  variables in call list:
 !    vecnow:   contains Tn matrix (transformation into local basis)
-!    scr:      scratch matrix
+!    scr:      
 !    rnow:     midpoint of the current interval
 !    drnow:    width of the current interval
 !    nch:      number of channels
 !    nmax:     maximum row dimension of matrices and maximum dimension of
 !              vectors
 ! ----------------------------------------------------------------------
-use mod_coqvec2, only: q => q2
-use mod_cotq1, only: tmat => dpsir ! tmat(80)
-use mod_hiutil, only: daxpy_wrapper
 use mod_himatrix, only: mxma
-use mod_hivector, only: matmov
-implicit double precision (a-h,o-z)
+use mod_hivector, only: matcopy
+use mod_hiblas, only: dscal, dcopy, daxpy_wrapper
+use mod_hipot, only: ground
+use constants, only: one, half
+implicit none
+real(8), intent(in) :: vecnow(2*nch)
+real(8), intent(in) :: rnow
+real(8), intent(in) :: drnow
+integer, intent(in) :: nch
+integer, intent(in) :: nmax
+real(8), intent(out) :: q(2*nch)
+
+integer, parameter :: nphoto = 1
+integer :: mxphot
+real(8) :: scr(2*nch)  ! scratch matrix
+real(8) :: ra, rb, fact
+real(8), parameter :: onemn = -1.d0
+real(8), parameter :: sq3 = sqrt(3.d0)
+mxphot = nch * nphoto
 !  square matrices (of row dimension nmax)
-dimension vecnow(80), scr(80)
-data one, onemn, half, sq3 /1.d0, -1.d0, 0.5d0, 1.732050807d0/
 ra = rnow - half * drnow / sq3
 rb = rnow + half * drnow / sq3
 fact = sq3 / drnow
-nphoto=1
-mxphot=nch*nphoto
-!  save vecnow in matrix tmat
-call matmov(vecnow,tmat,nch,nch,nmax,nch)
 call ground(scr, ra, nch, nphoto, mxphot)
 call ground(q, rb, nch, nphoto, mxphot)
 call dcopy(nch,q,1,q(nch+1),1)
@@ -2043,6 +2071,7 @@ subroutine corr (eignow, eigold, hp, drnow, drmid, xlarge, &
 !               algorithms"
 !    nch:       number of channels
 !  ----------------------------------------------------------------------
+use mod_hiblas, only: dcopy
 implicit double precision (a-h,o-z)
 data zero,one,two /0.d0, 1.d0, 2.d0/
 !      real  cay, cdiag, coff, drmid, drnow, factor, w2p, xlarge
@@ -2106,10 +2135,10 @@ subroutine dtrans (a, b, c, diag, xlarge, n, nmax, ifind)
 !  all matrices are stored in packed column form
 !  subroutines called:
 !  rgmmul:      generalized matrix multiply ( a * b = c or a * b-transpose = c
-!  dcopy:       linpack blas
 !  maxmgv:      find maximum (absolute value) element in a vector
 ! -----------------------------------------------------------------------
 use mod_hivector, only: maxmgv
+use mod_hiblas, only: dcopy, dgemm
 implicit double precision (a-h,o-z)
 #if defined(HIB_UNIX_IBM)
 character*1 forma, formb
@@ -2182,6 +2211,9 @@ use mod_hismat, only: sread, rdhead
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam
 use mod_hitypes, only: bqs_type
+use constants, only: zero
+use mod_hiiolib1, only: openf
+use mod_hiiolib1, only: closf
 implicit none
 character*(*), intent(in) :: fname1
 character*(*), intent(in) :: fname2
@@ -2202,7 +2234,6 @@ integer :: jfinal, jfirst, jlpar1, jlpar2, jm, jtot1, jtot2, jtotd
 integer :: length, lenx1, lenx2
 integer :: n, ncol, nlevel, nlevop, nnout1, nnout2, nopen1, nopen2, nu1, nu2, nud, numax, numin
 real(8) :: rmu1, rmu2
-real(8), parameter :: zero = 0
 character*20 cdate1,cdate2
 character*40 xnam1,xnam2
 character*48 potnam1,potnam2,label1,label2

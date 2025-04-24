@@ -2,44 +2,17 @@
 ! the aim of this dummy potential is to provide a potential
 ! that works with each basis supported by hibridon
 ! important: this potentiel produces meaningless physical results!
-
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/bausr.F90"
 #include "common/ground.F90"
 
-!  -----------------------------------------------------------------------
-! subroutine called by testpot to interactively provide potential values
-!  -----------------------------------------------------------------------
-subroutine driver
-use mod_covvl, only: vvl
-use mod_parpot, only: potnam=>pot_name
-implicit none
-    write(*,*) 'This is a dummy potential for testing purposes'
-    return
-end subroutine driver
+module mod_bastst
 
-!  -----------------------------------------------------------------------
-! subroutine to initialize the potential
-!  -----------------------------------------------------------------------
-subroutine loapot(iunit, filnam)
-use mod_selb, only: ibasty
-use mod_parpot, only: potnam=>pot_name
-implicit none
-
-    integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
-    character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)
-    potnam = 'DUMMY POTENTIAL FOR TESTING PURPOSES'
-
-    call init_pot_parameters(ibasty)
-
-    return
-end subroutine loapot
-
-
-
+contains
 subroutine init_pot_parameters(ibasty)
 use mod_parbas, only: ntv, lammin, lammax, mproj, ivcol, ivrow
-use mod_conlam, only: nlam, lamnum, nlammx
+use mod_conlam, only: nlam, nlammx
 use mod_cosysi, only: ispar
 use mod_chiral, only: lms_chiral => lms
 use mod_asymln, only: lms_asymln => lms
@@ -235,6 +208,37 @@ integer, intent(in) :: ibasty
     end select
 end subroutine init_pot_parameters
 
+end module mod_bastst
+
+
+!  -----------------------------------------------------------------------
+! subroutine called by testpot to interactively provide potential values
+!  -----------------------------------------------------------------------
+subroutine driver
+implicit none
+    write(*,*) 'This is a dummy potential for testing purposes'
+    return
+end subroutine driver
+
+!  -----------------------------------------------------------------------
+! subroutine to initialize the potential
+!  -----------------------------------------------------------------------
+subroutine loapot(iunit, filnam)
+use mod_selb, only: ibasty
+use mod_parpot, only: potnam=>pot_name
+use mod_bastst, only: init_pot_parameters
+implicit none
+
+    integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+    character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)
+    UNUSED_DUMMY(iunit)
+    UNUSED_DUMMY(filnam)
+    potnam = 'DUMMY POTENTIAL FOR TESTING PURPOSES'
+
+    call init_pot_parameters(ibasty)
+
+    return
+end subroutine loapot
 
 !  -----------------------------------------------------------------------
 !  calculates the r-dependent coefficients in the collision of Ar with N2
@@ -249,13 +253,14 @@ end subroutine init_pot_parameters
 !  -----------------------------------------------------------------------
 subroutine pot (vv0, r)
 use mod_covvl, only: vvl
-use mod_conlam, only: nlam
 use mod_selb, only: ibasty
     implicit none
     real(8), intent(out) :: vv0
-    real(8), intent(in) :: r
+    real(8), intent(in) :: r  ! intermolecular distance
     vv0  = 0d0
     vvl = 0d0
+
+    UNUSED_DUMMY(r)
 
     ! set non-zero values of potential for atom-atom col
     select case (ibasty)

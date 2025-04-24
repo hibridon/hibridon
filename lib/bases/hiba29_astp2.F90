@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 ! syastp2 (savastp2/ptrastp2) defines, saves variables and reads         *
 !                  potential for chiral asymmetric top-atom scattering   *
 !                  (or molecule with no symmetry elements)               *
@@ -35,6 +36,7 @@ type(lm_type), dimension(:), allocatable :: lms
 end module mod_chiral
 ! --------------------------------------------------------------------
 module mod_hiba29_astp2
+  use mod_assert, only: fassert
   contains  
 subroutine baastp2 (bqs, jhold, ehold, ishold, nlevel, nlevop, &
                   etemp, fjtemp, fktemp, fistmp, &
@@ -140,16 +142,14 @@ use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_coatp3, only: isizh
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use mod_hibasutil, only: rotham
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
-use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
+use mod_hiblas, only: dsyev
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(bqs_type), intent(out) :: bqs
@@ -160,8 +160,8 @@ dimension jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
           fistmp(1)
 !  scratch arrays for computing asymmetric top energies and wave fns.
-dimension e(narray,narray), eig(narray), vec(narray,narray), &
-  sc1(narray), sc2(narray), work(288)
+dimension e(narray,narray), eig(narray), &
+  sc1(narray), work(288)
 !
 
 integer, pointer ::nterm, numpot, jmax 
@@ -169,6 +169,8 @@ real(8), pointer :: arot, brot, crot, emax
 nterm=>ispar(1); numpot=>ispar(2); jmax=>ispar(3)
 arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4)
 
+UNUSED_DUMMY(ihomo)
+UNUSED_DUMMY(rcut)
 
 zero = 0.d0
 two = 2.d0
@@ -888,23 +890,22 @@ subroutine syastp2 (irpot, readpt, iread)
 !
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
-use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: j, l, lc
 logical existf
 character*1 dot
 character*(*) fname
-character*60 filnam, line, potfil, filnm1
+character*60 filnam, line, potfil
+character*68 filnm1
 #include "common/comdot.F90"
 save potfil
 
@@ -913,7 +914,7 @@ real(8), pointer, save :: arot, brot, crot, emax
 nterm=>ispar(1); numpot=>ispar(2); jmax=>ispar(3)
 arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4)
 
-
+UNUSED_DUMMY(irpot)
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
 !  in the same order as in the common block /cosysi/
@@ -947,7 +948,7 @@ return
 entry ptrastp2 (fname, readpt)
 line = fname
 readpt = .true.
-100 if (readpt) then
+if (readpt) then
   l=1
   call get_token(line,l,filnam,lc)
   if(lc.eq.0) then
@@ -973,7 +974,7 @@ endif
 close (8)
 return
 !  -----------------------------------------------------------------------
-entry savastp2 (readpt)
+entry savastp2 ()
 !  save input parameters for chiral asymmetric top + atom scattering
 !  the order of the write statements should be identical to the read statement
 !  above. for consistency with the data file written by gendat, format

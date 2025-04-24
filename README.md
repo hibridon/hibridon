@@ -86,7 +86,7 @@ add_hibexe(NH3-H2.exe "/home/myuser/my_pots/pot_nh3h2.F90" "kmax") # NH3-H2
 
 Adapt this example to suit your needs.
 
-**WARNING**: The tilde `~` character is not exapnded by CMake, you must replace it with the full path to your home directory, e.g. `/home/myuser/`
+**WARNING**: The tilde `~` character is not expanded by CMake, you must replace it with the full path to your home directory, e.g. `/home/myuser/`
 
 
 
@@ -237,17 +237,29 @@ Please note that this only builds and tests Hibridon library; it doesn't build a
 
 ## For code contributors
 
-<!---
 ### Code coverage
 
-Code coverage option `ENABLE_CODE_COVERAGE` allows the delvelopers to identify the portions of hibridon source code that are not yet covered by the tests.
+Code coverage option `ENABLE_CODE_COVERAGE` allows the developers to identify the portions of hibridon source code that are not yet covered by the tests.
 
-To activate code coverage, add `-DENABLE_CODE_COVERAGE=ON` to the cmake command. This option will generate code coverage info files when running tests.
+To generate the code coverage report `<hibridon_build_dir>/coverage/total/index.html`:
+1. build hibridon with the following options:
+  - make sure that the option `-DBUILD_TESTING=ON` is added so that you will be able to run hibridon tests.
+  - add `-DENABLE_CODE_COVERAGE=ON` to the cmake command to enable compilation in code coverage mode. This option will generate code coverage metrics files when running tests.
+2. run `make clean_coverages` to make sure that code coverage metrics of previous runs are deleted.
+3. run the tests you want to measure the coverage for, typically the coverage test suite (`ctest -L '^coverage$'`). For each test `<test_id>` run, the coverage metrics file `<hibridon_build_dir>/tests/<test_id>/coverage/<test_id>` is generated.
+4. run `make html_coverages`, will convert these coverage metrics files into html reports:
+<!--- `<hibridon_build_dir>/coverage/<test_id>/index.html`: a report that shows the code covered by the test `<test_id>` -->
+  - `<hibridon_build_dir>/coverage/total/index.html`: a report that shows the code covered by all tests
 
-Then, `make html_coverages`, will convert these coverage files into html reports:
-- `<hibridon_build_dir>/coverage/<test_id>/index.html`: a report that shows the code covered by the test `<test_id>`
-- `<hibridon_build_dir>/coverage/total/index.html`: a report that shows the code covered by all tests
--->
+Short example to generate `<hibridon_build_dir>/coverage/total/index.html` from hibridon source code:
+
+```sh
+bob@workstation:~bob/hibridon/build$ cmake ../hibridon.git -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Debug -DENABLE_CODE_COVERAGE=ON
+bob@workstation:~bob/hibridon/build$ make
+bob@workstation:~bob/hibridon/build$ make clean_coverages
+bob@workstation:~bob/hibridon/build$ ctest --output-on-failure -L "^coverage$"
+bob@workstation:~bob/hibridon/build$ make html_coverages
+```
 
 ### Performance profiling
 

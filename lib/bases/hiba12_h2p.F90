@@ -2,7 +2,9 @@
 !                  potential for homonuclear+2P atom scattering          *
 ! --------------------------------------------------
 #include "assert.h"
+#include "unused.h"
 module mod_hiba12_h2p
+  use mod_assert, only: fassert
 contains
 subroutine bah2p (bqs, jhold, ehold, ishold, nlevel, nlevop, &
                   sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
@@ -107,14 +109,13 @@ use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
+use mod_parbas, only: lammax
+use mod_par, only: boundc
 use mod_ered, only: ered, rmu
-use mod_skip, only: nskip, iskip
 use mod_jtot, only: jjtot, jjlpar
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -146,6 +147,9 @@ integer, pointer :: nterm, iop, jmax
 real(8), pointer :: brot, aso
 nterm=>ispar(1); iop=>ispar(2); jmax=>ispar(3)
 brot=>rspar(1); aso=>rspar(2)
+UNUSED_DUMMY(numin)
+UNUSED_DUMMY(sc3)
+UNUSED_DUMMY(sc4)
 
 !   econv is conversion factor from cm-1 to hartrees
 !   xmconv is converson factor from amu to atomic units
@@ -671,17 +675,17 @@ do 320 il = 1,lammax(1)
          j12col=bqs%j12(icol)
       endif
       if (.not. csflag .or. (csflag .and. ihomo)) then
-        call vlmh2p (irow, icol, jtot, jlpar, jrow, jcol,bqs%inq(irow), &
+        call vlmh2p (jtot, jrow, jcol,bqs%inq(irow), &
         bqs%inq(icol), j12row, j12col, bqs%lq(irow), bqs%lq(icol), ilamr, &
         ilama, ilam12, nu, csflag, vee)
       else if (csflag .and. .not.ihomo) then
-        call vlmh2pc(irow, icol, jtot, jlpar, jrow, jcol,bqs%inq(irow), &
+        call vlmh2pc(jtot, jrow, jcol,bqs%inq(irow), &
         bqs%inq(icol), bqs%jq(irow), bqs%jq(icol), ilamr, &
-        ilama, imu, nu, jmol, flaghf, vee)
+        ilama, imu, nu, flaghf, vee)
       endif
 !           write (6,291) irow,icol,jtot,jlpar,jrow,jcol,bqs%inq(irow),bqs%inq(icol),
 !    : bqs%jq(irow),bqs%jq(icol),nu,ilamr,ilama,ilam12,vee
-291  format(14i3,g17.8)
+! 291  format(14i3,g17.8)
       if (vee .eq. 0) goto 300
         inum = inum + 1
           call ancouma%set_element(irow, icol, vee)
@@ -717,7 +721,7 @@ end if
 return
 end
 ! --------------------------------------------------------------------
-subroutine vlmh2p (irow, icol, jtot, jlpar, j, jp, ja, jap, &
+subroutine vlmh2p (jtot, j, jp, ja, jap, &
             j12, j12p, l, lp, lamr, lama, lam12, nu, csflag, vee)
 ! --------------------------------------------------------------------
 !  subroutine to evaluate the angular coupling matrix element for rotationally
@@ -729,7 +733,6 @@ subroutine vlmh2p (irow, icol, jtot, jlpar, j, jp, ja, jap, &
 !  current revision date: 6-jul-1995
 ! --------------------------------------------------------------------
 !  variables in call list:
-!  irow, icol:  row and column of fully coupled states
 !  jtot:      total angular momentum
 !  jlpar:     parity (-1 for e, +1 for f)
 !  j, jp      bra and ket values of molecular angular momentum
@@ -811,8 +814,8 @@ vee=term*xnorm*iphase
 return
 end
 ! --------------------------------------------------------------------
-subroutine vlmh2pc (irow, icol, jtot, jlpar, j, jp, ja, jap, &
-            k, kp, lamr, lama, mu, nu, jmol, flaghf, vee)
+subroutine vlmh2pc (jtot, j, jp, ja, jap, &
+            k, kp, lamr, lama, mu, nu, flaghf, vee)
 ! --------------------------------------------------------------------
 !  subroutine to evaluate the angular coupling matrix element for rotationally
 !  inelastic collisions of a homonuclear molecule (j=1) and a 2P atom
@@ -824,7 +827,6 @@ subroutine vlmh2pc (irow, icol, jtot, jlpar, j, jp, ja, jap, &
 !  current revision date: 14-apr-1997
 ! --------------------------------------------------------------------
 !  variables in call list:
-!  irow, icol:  row and column of fully coupled states
 !  jtot:      total angular momentum
 !  j, jp      bra and ket values of molecular angular momentum
 !  ja, jap:   bra and ket values of atomic angular momentum
@@ -960,22 +962,23 @@ subroutine syh2p (irpot, readpt, iread)
 !             of the variable names in cosysi followed by the ordering of
 !             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 !  -----------------------------------------------------------------------
-use mod_coiout, only: niout, indout
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 logical existf
 integer :: icod, ircod, j, l, lc
 character*1 dot
 character*(*) fname
-character*60 line, filnam, potfil, filnm1
+character*60 line, filnam, potfil
+character*68 filnm1
 parameter (icod=3, ircod=2)
 save potfil
 !  number and names of system dependent parameters
@@ -1061,7 +1064,7 @@ endif
 close (8)
 return
 !
-entry savh2p (readpt)
+entry savh2p ()
 !  save input parameters for symmetric top + atom scattering
 !  the order of the write statements should be identical to the read statement
 !  above. for consistency with the data file written by gendat, format

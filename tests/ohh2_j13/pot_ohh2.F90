@@ -29,6 +29,7 @@ end module pot_ohh2
 subroutine driver
 use pot_ohh2
 use mod_covvl, only: vvl
+use mod_hipot, only: loapot, pot
 implicit none
 character(40), parameter :: data_file_name= &
     'pot_ohh2_mrci_core1_highsym.dat'
@@ -47,22 +48,24 @@ goto 10
 end subroutine driver
 !     ------------------------------------------------------------------
 !     Load the data file of the potential
-subroutine loapot(iunit, file_name)
+subroutine loapot(iunit, filnam)
 use pot_ohh2
 use mod_parpot, only: pot_name, pot_label
+use mod_hipotutil, only: spline, datfln
 implicit none
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
 !     common/parbas is replaced by module ba2pi1sg to allow more
 !     parameters be passed between the pot routine and the basis routine
-character*(*) :: file_name
 character(255) :: file_path
-integer :: iunit, ir, iv
+integer :: ir, iv
 !     A call to this subroutine with a string containing a space will be
 !     made at the time hibridon loads. Input file is not available at
 !     the time.
-if (file_name .eq. " ") return
+if (filnam .eq. " ") return
 !     
 pot_name = 'MA-DAGDIGIAN-KLOS-ALEXANDER OH--H2 MRCI PES'
-call datfln(trim(file_name), file_path)
+call datfln(trim(filnam), file_path)
 open (unit=iunit, file=file_path, status="old")
 !     
 read (iunit, *) nr
@@ -97,29 +100,25 @@ end do
 return
 end subroutine loapot
 !     ------------------------------------------------------------------
-subroutine pot(vv0, r_inp)
+subroutine pot(vv0, r)
 use pot_ohh2
 use mod_covvl, only: vvl
+use mod_hipotutil, only: seval
 implicit none
-double precision vv0, r_inp, r
-double precision seval
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
+double precision clamped_r
 integer iv
 vv0 = 0d0
-if (r_inp .lt. 3.5d0) then
-   r = 3.5d0
+if (r .lt. 3.5d0) then
+   clamped_r = 3.5d0
 else
-   r = r_inp
+   clamped_r = r
 end if
 do iv = 1, nv
-   vvl(iv) = seval(nr, r, rr, coef(1, iv), spl_b(1, iv), &
+   vvl(iv) = seval(nr, clamped_r, rr, coef(1, iv), spl_b(1, iv), &
         spl_c(1, iv), spl_d(1, iv))
 end do
 return
 end subroutine pot
 !     ------------------------------------------------------------------
-
-subroutine datfln(filenm, fullnm)
-character (len=*) :: filenm, fullnm
-fullnm = 'potdata/' // trim(filenm)
-return
-end subroutine datfln

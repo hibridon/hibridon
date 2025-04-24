@@ -1,5 +1,7 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba04_sgpi
+  use mod_assert, only: fassert
 contains
 ! sysgpi (savsgpi/ptrsgpi) defines, saves variables and reads            *
 !                  potential for doublet/pi sigma scattering             *
@@ -160,17 +162,20 @@ use mod_coisc2, only: ivhold => isc2 ! ivhold(1)
 use mod_coisc3, only: nlvp => isc3 ! nlvp(1)
 use mod_coisc4, only: nvphol => isc4 ! nvphol(1)
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rpar=>rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rpar=>rspar
 use mod_hibasutil, only: iswap, rswap
-use constants, only: econv, xmconv, ang2c
+use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax
+use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_vib, only: nvibs, ivibs, nvibp, ivibp
 use mod_himatrix, only: mxva
 use mod_hitypes, only: bqs_type
+use mod_hiblas, only: ddot
+use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
+
 
 implicit double precision (a-h,o-z)
 real(8), intent(out), dimension(:) :: sc1
@@ -182,7 +187,9 @@ type(bqs_type), intent(out) :: bqs
 type(ancouma_type), pointer :: ancouma
 logical csflag, clist, flaghf, flagsu, ihomo, bastst
 !  these parameters must be the same as in hisysgpi
-dimension e(3,3), ieps(2), iepp(2), iomc(4), iomr(4), eig(3)
+real(8), target :: e(3,3)
+real(8), pointer :: e_as_vec(:)
+dimension ieps(2), iepp(2), iomc(4), iomr(4), eig(3)
 dimension jhold(1), ishold(1), ehold(1)
 parameter (nvmax=20)
 dimension ipvs(0:nvmax),ipvp(0:nvmax)
@@ -202,6 +209,15 @@ data izero, ione, itwo &
 ! nprsg is number of real parameters per vib state for sigma state
 ! nprpi is number of real parameters per vib state for pi state
 data nprsg,nprpi/7,14/
+
+UNUSED_DUMMY(sc1)
+sc1(1) = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
+UNUSED_DUMMY(sc2)
+sc2(1) = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
+UNUSED_DUMMY(sc3)
+sc3(1) = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
+UNUSED_DUMMY(sc4)
+sc4(1) = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
 
 ! recover system parameters
 nterm=ispar(1)
@@ -921,6 +937,7 @@ do 600 it=1,nterm
       lrow = bqs%lq(irow)
       if (csflag) lrow = nu
 !  always initialize potential to zero
+      call C_F_POINTER (C_LOC(e), e_as_vec, [3*3])
       vee = 0
       do 300 mm=1,3
       do 300 nn=1,3
@@ -970,7 +987,7 @@ do 600 it=1,nterm
          icr=iom(irow)+1
          itc=ivec(icol)
          itr=ivec(irow)
-         call mxva(e,1,3,vec(1,icc,itc),1,eig,1,3,3)
+         call mxva(e_as_vec,1,3,vec(1:,icc,itc),1,eig,1,3,3)
          vee=ddot(3,eig,1,vec(1,icr,itr),1)
        if (abs(vee) .gt. tzero) then
          i = i + 1
@@ -1358,27 +1375,28 @@ subroutine sysgpi (irpot, readpt, iread)
 !
 !
 use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosyr, only: rcod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use mod_par, only: ihomo
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_skip, only: nskip, iskip
+use mod_parbas, only: maxvib, lammin, lammax, mproj
+use mod_skip, only: nskip
 use mod_vib, only: nvibs, ivibs, nvibp, ivibp
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: i, ipi, isg, isgpi, ivp, ivs, j, k, l, lc, nterm, nvmaxp, nvmaxs, nvminp, nvmins
 logical existf
-character*8 char
+character*4 char
 character*(*) fname
 character*1 dot
-character*60 filnam, line, potfil, filnm1
+character*60 filnam, line, potfil
+character*68 filnm1
 save potfil
 #include "common/comdot.F90"
 !  set default values for 2pi-2sigma scattering
@@ -1427,7 +1445,7 @@ scod(2)='ISG'
 scod(3)='IPI'
 scod(4)='ISGPI'
 scod(5)='ISA'
-if(iread.ne.0) read (8, *, err=800) (ispar(isicod+j),j=2,5)
+if(iread.ne.0) read (FUNIT_INP, *, err=800) (ispar(isicod+j),j=2,5)
 nterm=ispar(1)
 isg=ispar(2)
 ipi=ispar(3)
@@ -1458,13 +1476,13 @@ end if
 ispar(1)=nterm
 if(isg.ne.0) then
 !  read symmetry parameters for sigma state
-  if(iread.ne.0) read (8, *, err=800) (ispar(isicod+j),j=1,3)
+  if(iread.ne.0) read (FUNIT_INP, *, err=800) (ispar(isicod+j),j=1,3)
   scod(isicod+1)='IGUSG'
   scod(isicod+2)='NPARSG'
   scod(isicod+3)='ISYMSG'
   isicod=isicod+3
 !  read number of vib states for sigma state
-  if(iread.ne.0) read (8, *, err=800) nvibs, &
+  if(iread.ne.0) read (FUNIT_INP, *, err=800) nvibs, &
       (ispar(isicod+j),j=1,2)
   if(nvibs.gt.maxvib) stop 'nvibs'
   nvmins=ispar(isicod+1)
@@ -1478,20 +1496,20 @@ if(isg.ne.0) then
 !  gs is gamma, gsd is gamma(d), gsh is gamma(h)
 !  evibsg is E (see Kotlar et al., JMS 80, 86 (1980), Table II))
   do 15 i=1,nvibs
-        if(isicod+2.gt.size(ispar,1)) stop 'isicod'
-        if(isrcod+7.gt.size(rspar,1)) stop 'isrcod'
-        if(iread.ne.0) then
-      read (8,*,err=800) ivs,(ispar(isicod+j),j=1,2)
+    if(isicod+2.gt.size(ispar,1)) stop 'isicod'
+    if(isrcod+7.gt.size(rspar,1)) stop 'isrcod'
+    if(iread.ne.0) then
+      read (FUNIT_INP,*,err=800) ivs,(ispar(isicod+j),j=1,2)
       ivibs(i)=ivs
-      read (8,*,err=800) (rspar(isrcod+j),j=1,3)
-      read (8,*,err=800) (rspar(isrcod+j),j=4,6)
-      read (8,*,err=800) rspar(isrcod+7)
-        end if
-        char=' '
-        if(nvibs.gt.1.or.ivs.ne.0) then
+      read (FUNIT_INP,*,err=800) (rspar(isrcod+j),j=1,3)
+      read (FUNIT_INP,*,err=800) (rspar(isrcod+j),j=4,6)
+      read (FUNIT_INP,*,err=800) rspar(isrcod+7)
+    end if
+    char=' '
+    if(nvibs.gt.1.or.ivs.ne.0) then
       if(ivs.le.9) write(char,'(''('',i1,'')'')') ivs
       if(ivs.gt.9) write(char,'(''('',i2,'')'')') ivs
-        end if
+    end if
     scod(isicod+1)='NMIN'//char
     scod(isicod+2)='NMAX'//char
     rcod(isrcod+1)='BSG'//char
@@ -1507,12 +1525,12 @@ if(isg.ne.0) then
 end if
 if(ipi.ne.0) then
 !  read symmetry parameters for pi state
-  if(iread.ne.0) read (8, *, err=800) (ispar(isicod+j),j=1,2)
+  if(iread.ne.0) read (FUNIT_INP, *, err=800) (ispar(isicod+j),j=1,2)
   scod(isicod+1)='IGUPI'
   scod(isicod+2)='NPARPI'
   isicod=isicod+2
 !  read number of vib states for pi state
-  if(iread.ne.0) read (8,*,err=800) nvibp, &
+  if(iread.ne.0) read (FUNIT_INP,*,err=800) nvibp, &
            (ispar(isicod+i),i=1,2)
   if(nvibp.gt.maxvib) stop 'nvibp'
   nvminp=ispar(isicod+1)
@@ -1526,12 +1544,12 @@ if(ipi.ne.0) then
     if(isicod+3.gt.size(ispar,1)) stop 'isicod'
     if(isrcod+13.gt.size(ispar,1)) stop 'isrcod'
     if(iread.ne.0) then
-      read (8,*,err=800) ivp,(ispar(isicod+j),j=1,2)
+      read (FUNIT_INP,*,err=800) ivp,(ispar(isicod+j),j=1,2)
       ivibp(i)=ivp
-      read (8,*,err=800) (rspar(isrcod+j),j=1,3)
-      read (8,*,err=800) (rspar(isrcod+j),j=4,6)
-      read (8,*,err=800) (rspar(isrcod+j),j=7,9)
-      read (8,*,err=800) (rspar(isrcod+j),j=10,12)
+      read (FUNIT_INP,*,err=800) (rspar(isrcod+j),j=1,3)
+      read (FUNIT_INP,*,err=800) (rspar(isrcod+j),j=4,6)
+      read (FUNIT_INP,*,err=800) (rspar(isrcod+j),j=7,9)
+      read (FUNIT_INP,*,err=800) (rspar(isrcod+j),j=10,12)
     end if
     char=' '
     if(nvibp.gt.1.or.ivp.gt.0) then
@@ -1565,7 +1583,7 @@ if(ipi.ne.0) then
     endif
     if(isgpi.ne.0) then
       if(iread.ne.0) then
-        read (8,*,err=800) ispar(isicod+3),(rspar(isrcod+j), &
+        read (FUNIT_INP,*,err=800) ispar(isicod+3),(rspar(isrcod+j), &
                            j=13,14)
         ivs=ispar(isicod+3)
       end if
@@ -1602,7 +1620,7 @@ if(.not.readpt.or.iread.eq.0) then
   call loapot(1,' ')
   return
 endif
-read (8, 50, end=1000) line
+read (FUNIT_INP, 50, end=1000) line
 50 format (a)
 goto 1000
 ! here if read error occurs
@@ -1642,7 +1660,7 @@ irpot=1
 ihomo=nskip.eq.2
 return
 !
-entry savsgpi (readpt)
+entry savsgpi ()
 nterm=ispar(1)
 isg=ispar(2)
 ipi=ispar(3)

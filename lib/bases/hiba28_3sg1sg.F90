@@ -1,5 +1,7 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba28_3sg1sg
+  use mod_assert, only: fassert
 contains
 ! sy3sg1sg (sav2sg1sg/ptr2sg1sg) defines, saves variables and reads     *
 !                  potentials for 3sigma - 1sigma                        *
@@ -128,24 +130,24 @@ use mod_coatpr, only: c
 use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
-use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
+use mod_hiblas, only: dsyev, dgemm
 implicit double precision (a-h,o-z)
 type(bqs_type), intent(out) :: bqs
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-dimension jhold(1), ehold(1), &
-    e1(1), sc2(1), sc3(1), sc4(1), ishold(1)
+integer :: jhold(nmax)
+real(8) :: ehold(nmax)
+integer :: ishold(nmax)
+real(8) :: e1(nmax), sc2(nmax), sc3(nmax), sc4(nmax)
 dimension j1(2000),is1(2000), fnn1(3,3), fnn2(3,3), &
-  hss(3,3), hsr(3,3), ham(3,3), u(3,3), uu(3,3), wsig(3,3), &
+  hss(3,3), hsr(3,3), ham(3,3), u(3,3), uu(3,3), &
   eig(3), eigkp(3)
 data zero, one, two, three, twthr, sq2 / 0.d0, 1.d0, 2.d0, 3.d0, &
   0.666666666666667d0,  1.414213562373095/
@@ -158,6 +160,14 @@ integer, pointer :: j1max, j2min, j2max, ipotsy2
 real(8), pointer :: b1rot, d1rot, flmbda, gamma, b2rot
 j1max=>ispar(1); j2min=>ispar(2); j2max=>ispar(3); ipotsy2=>ispar(4)
 b1rot=>rspar(1); d1rot=>rspar(2); flmbda=>rspar(3); gamma=>rspar(4); b2rot=>rspar(5)
+UNUSED_DUMMY(sc2)
+UNUSED_DUMMY(sc3)
+UNUSED_DUMMY(sc4)
+UNUSED_DUMMY(ihomo)
+UNUSED_DUMMY(rcut)
+UNUSED_DUMMY(clist)
+UNUSED_DUMMY(nu)
+UNUSED_DUMMY(numin)
 
 !  check for consistency in the values of flaghf and csflag
 if (flaghf) then
@@ -682,24 +692,22 @@ subroutine sy3sg1sg (irpot, readpt, iread)
 !
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
-use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_skip, only: nskip, iskip
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: j, l, lc
 logical existf
 character*1 dot
 character*(*) fname
-character*60 filnam, line, potfil, filnm1
+character*60 filnam, line, potfil
+character*68 filnm1
 #include "common/comdot.F90"
 save potfil
 integer, pointer, save :: j1max, j2min, j2max, ipotsy2
@@ -741,7 +749,7 @@ return
 entry ptr3sg1sg (fname,readpt)
 line = fname
 readpt = .true.
-286 if (readpt) then
+if (readpt) then
   l=1
   call get_token(line,l,filnam,lc)
   if(lc.eq.0) then
@@ -768,7 +776,7 @@ close (8)
 irpot=1
 return
 ! --------------------------------------------------------------
-entry sav3sg1sg (readpt)
+entry sav3sg1sg ()
 !  save input parameters for 3sigma-1sigma molecule scattering
 write (FUNIT_INP, 310) j1max, j2min, j2max, ipotsy2
 310 format(4i4,14x,'j1max, j2min, j2min, ipotsy2')

@@ -1,5 +1,7 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba24_sphtp
+  use mod_assert, only: fassert
 contains
 ! sysphtp (savsphtp/ptrsphtp) defines, saves variables and reads         *
 !                  potentials for spherical top + atom                   *
@@ -111,12 +113,13 @@ use mod_coatpr, only: c
 use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_conlam, only: nlam, nlammx
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
-use constants, only: econv, xmconv
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
+use constants, only: econv, xmconv, two
+! dummy comment   
 use mod_par, only: iprint
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
+use mod_parbas, only: lammin, lammax, mproj
+use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -129,7 +132,7 @@ dimension jhold(1), ehold(1), &
           fistmp(1)
 !  scratch arrays
 dimension sc1(narray), ieps(narray), ips(narray)
-dimension na(17), ne(11), nf(11), ipa(11), nepsa(25), &
+dimension na(17), ne(11), nf(11), nepsa(25), &
      nepse(20), nepsf(30), ua(25,17), ue(20,11), &
      uf(30,11)
 !
@@ -319,6 +322,8 @@ integer, pointer :: nterm, iop, jmax
 real(8), pointer :: brot, dj, dk
 nterm=>ispar(1); iop=>ispar(2); jmax=>ispar(3)
 brot=>rspar(1) ; dj=>rspar(2); dk=>rspar(3)
+
+UNUSED_DUMMY(ihomo)
 
 if (flaghf) then
   write (6, 5)
@@ -1009,23 +1014,23 @@ subroutine sysphtp (irpot, readpt, iread)
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys,  only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_skip, only: nskip, iskip
+use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: i, j, l, lc
 logical existf
 character*1 dot
 character*(*) fname
-character*60 filnam, line, potfil, filnm1
+character*60 filnam, line, potfil
+character*68 filnm1
 #include "common/comdot.F90"
 save potfil
 integer, pointer, save :: nterm, iop, jmax
@@ -1108,7 +1113,7 @@ close (8)
 irpot=1
 return
 ! --------------------------------------------------------------
-entry savsphtp (readpt)
+entry savsphtp ()
 iop=>ispar(2); jmax=>ispar(3)
 brot=>rspar(1) ; dj=>rspar(2); dk=>rspar(3)
 ASSERT(iop .eq. ispar(2))

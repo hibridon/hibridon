@@ -1,7 +1,9 @@
 !comdeck syusr
 #include "hiutil.inc.F90"
+
 subroutine syusr (irpot, readpt, iread)
 !  dummy syusr subroutine
+use mod_hipot, only: loapot
 implicit none
 integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
@@ -14,7 +16,7 @@ if(.not.readpt.or.iread.eq.0) then
 endif
 entry ptrusr (fname, readpt)
 UNUSED(fname)
-entry savusr (readpt)
+entry savusr ()
 entry chkusr
 return
 end

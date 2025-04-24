@@ -1,3 +1,5 @@
+#include "assert.h"
+#include "unused.h"
 !   pot_ch3he_vib.f
 !   authors: Qianli Ma
 !
@@ -12,33 +14,224 @@
 !       pot_ch3he_vib_ylmsym
 !       pot_ch3he_vib_ylmasym
 !       pot_ch3he_vib_data
-!   Included source file  (placed in hibxx/src/pot):
-!       pot_ch3he_vib_common.f
 !
 !   These dummy subroutines are not used in this pot file
+
+
+module mod_ch3he
+  use mod_assert, only: fassert
+  implicit none
+
+  !   Define the sizes of grids
+  !       V2MAX: maximum value of v2 included in the pot file
+  !       V2TMAX: number of (v2, v2') combination, C(V2MAX+1, 2)
+  !       NVLM: number of v_lm terms for each (v2, v2') combination
+  !       NVVL: total number of v_lm terms, for all (v2, v2') blocks
+  !       NTHETA, NPHI: number of theta/phi's in the ab initio calculation
+  !       NANGLE: number of (theta, phi) tuples
+  !       NDIST: number of distances included in the ab initio calculation
+  integer, parameter :: V2MAX = 3
+  integer, parameter :: V2TMAX = (V2MAX+1)*(V2MAX+2)/2
+  integer, parameter :: NVLM = 12
+  integer, parameter :: NVVL = NVLM*V2TMAX
+  integer, parameter :: NTHETA = 19
+  integer, parameter :: NPHI = 7
+  integer, parameter :: NANGLE = NTHETA * NPHI
+  integer, parameter :: NDIST = 19
+  !   ch3he block: data used only by this pot/basis combination
+  !       brot, crot: rotational constants of CH3 for each vibrational level
+  !       evib: vibrational level energies
+  !       nlamsi: number of v_lm terms for each (v2, v2') combination
+  !       lamsym, musym: list of lambda/mu's used for the coupling potential symmetric to theta = 90 deg
+  !       lamasy, muasy: list of lambda/mu's used for the coupling potential anti-symmetric to theta = 90 deg
+  !
+  !     Source of rotational constants:
+  !     Yamada, C., et. al., JCP, 75, 5256
+  !     Amano, T., et. al., JCP, 77, 5284
+  !
+  real(8), parameter :: brot(V2MAX+1) = [9.57789d0, 9.25814d0, 8.93320d0, 8.60974d0]
+  real(8), parameter :: crot(V2MAX+1) = [4.74275d0, 4.811643d0, 4.871213d0, 4.92655d0]
+  real(8), parameter :: evib(V2MAX+1) = [0d0, 6.064531d2, 1.28809d3, 2.0191657d3]
+  integer, parameter :: lamsym(NVLM) = [0, 2, 4, 6, 8, 3, 5, 7, 9, 6, 8, 9]
+  integer, parameter :: musym(NVLM)  = [0, 0, 0, 0, 0, 3, 3, 3, 3, 6, 6, 9]
+  integer, parameter :: lamasy(NVLM) = [1, 3, 5, 7, 9, 4, 6, 8, 10, 7, 9, 10]
+  integer, parameter :: muasy(NVLM)  = [0, 0, 0, 0, 0, 3, 3, 3, 3, 6, 6, 9]
+!   lambda/mu's used in this pot routine
+!
+!   When <v2'|V|v2> is symmetric about theta=90 deg (even v2 + v2')
+!       lambda =  0  2  4  6  8  3  5  7  9  6  8  9
+!       mu     =  0  0  0  0  0  3  3  3  3  6  6  9
+!   When <v2'|V|v2> is anti-symmetric about theta=90 deg (odd v2 + v2')
+!       lambda =  1  3  5  7  9  4  6  8 10  7  9 10
+!       mu     =  0  0  0  0  0  3  3  3  3  6  6  9
+contains
+
+! -------------------------------------------------------------------
+function gblkid(v2, v2p, vmax)
+implicit none
+integer gblkid, v2, v2p, vmax
+!
+!   Subroutine to determine the ID of a (v2, v2') block in the
+!   compact form - 00, 01, 02, ..., 11, 12, ...
+!
+!   Arguments
+!       v2, v2p: v_2 and v_2'
+!       vmax: maximum value of v2
+!   Return
+!       The corresponding block ID for the v2, v2p combination
+!
+!   Example
+!       gblkid(1, 0, 4) = 2
+!           when vmax = 4, (10)=(01) is the second block in the list
+!       gblkid(1, 2, 3) = 6
+!           when vmax = 3, (12)=(21) is the sixth block in the list
+!
+integer vl, vg
+!   The lesser/greater v2p
+if (v2 .lt. v2p) then
+  vl = v2
+  vg = v2p
+else
+  vl = v2p
+  vg = v2
+endif
+!   In the compact form, the lesser v_2 (v_2l) is indexed first.
+!   The number of blocks for v_2l < vl is
+!       (vmax + 1 - 0) + (vmax + 1 - 1) + ... + (vmax + 1 - (vl - 1))
+!   For v_2l = vl, v_2g = vg is the
+!       vg - vl + 1
+!   th block.
+gblkid = ((2 * vmax + 3 - vl) * vl) / 2 &
+         + (vg - vl + 1)
+return
+end
+!   end function gblkid
+
+! -------------------------------------------------------------------
+subroutine splch3(vsp, r, v2_i, v2_f)
+use mod_cosysr, only: rspar
+use mod_cosysi, only: ispar
+! use mod_ch3he, only: V2MAX, V2TMAX, NANGLE, NDIST
+use mod_hipotutil, only: spline, seval, datfln
+implicit double precision (a-h, o-z)
+!   Spline the interaction potential (integreted over vibrational
+!   coordinate Q2) to the given R for a particular (v2, v2') tuple.
+!
+!   Arguments:
+!       r: intermolecular distance
+!       v2_i, v2_f: initial and final vibrational level
+real(8), intent(in) :: r
+integer v2_i, v2_f
+!
+!
+!   Returned value:
+!       vsp: <v2'|V|v2> at R for all (theta, phi) tuples
+real(8), intent(out) :: vsp(*)
+!
+!
+!   Function called:
+!
+!
+!   Potential as calculated
+real(8), save :: v(NDIST, NANGLE, V2TMAX)
+!   Parameters from linear fit
+real(8), save :: b(NDIST, NANGLE, V2TMAX)
+real(8), save :: c(NDIST, NANGLE, V2TMAX)
+real(8), save :: d(NDIST, NANGLE, V2TMAX)
+!   Loop indeces
+integer i, k
+!   Block index
+integer iblock
+!   Intermolecular distances used in the ab initio calculation
+double precision RR(NDIST)
+data RR /3.5d0, 4d0, 4.5d0, 5d0, 5.5d0, 6d0, 6.5d0, 7d0, 7.5d0, &
+         8d0, 8.5d0, 9d0, 9.5d0, 1d1, 1.1d1, 1.2d1, 1.3d1, &
+         1.5d1, 2d1/
+!   Function to evaluate splined potential
+!
+character*255 datfl
+logical, save ::  isfst=.true.
+real(8), pointer :: emax0, emax1, emax2, emax3
+integer, pointer :: nterm, ipotsy, iop, jmax, vmax!
+!   In the first call, read data and determine fitted coefficients
+nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
+emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
+
+if (isfst) then
+!   Read data file
+  call datfln('pot_ch3he_vib_data', datfl)
+  open (unit=10, file=datfl)
+  read (10, *) v
+  close(10)
+!   Calculate coefficients for each block
+  do k = 1, V2TMAX
+    do i = 1, NANGLE
+!   calculate coefficients
+      call spline(NDIST, RR, v(1, i, k), b(1, i, k), c(1, i, k), &
+                  d(1, i, k))
+    enddo
+  enddo
+  isfst = .false.
+endif
+!
+!   On a regular run, calculate potential from previously determined
+!   spline coefficients.
+!
+!   Calculate potential from spline coefficients
+iblock = gblkid(v2_i, v2_f, V2MAX)
+do i = 1, NANGLE
+  vsp(i) = seval(NDIST, r, RR, v(1, i, iblock), b(1, i, iblock), &
+                 c(1, i, iblock), d(1, i, iblock))
+enddo
+return
+end
+!   end subroutine splch3
+!
+end module mod_ch3he
+
+! TODO: check that these old common block global variables are now bound to the related module global variables
+!   cosysi block
+!       nscod: total number of variable names which are passed to HINPUT, nscod must equal isrcod + isicod + 3
+!       isicod: total number of integer system dependent variables
+!       nterm: number of different associated legendre terms in expansion of potential
+!       numpot: the number of the potential used, this variable is passed to the pot subroutine
+!       ipotsy: cylindrical symmetry of potential. Should be set to 3 for CH3.
+!       iop: ortho/para label for molecular states. Only para states are included if iop=1 and only ortho states if iop=-1.
+!
+
+!
+!   cosysr block
+!       isrcod: total number of real system dependent variables
+!       junkr: junk variable (required by hibridon)
+!       vmax: maximum value of v2 (starts from zero) included in the calculation
+!       emax0, emax1, emax2, emax3: maximum total energy of a level to be included in the channel basis, for four vibrational levels
+
+
 #include "common/ground.F90"
 !
 !
-!   Routine for compatibility with hib44
-subroutine datfln(filenm, fullnm)
-implicit none
-character (len=*) :: filenm, fullnm
-fullnm = "potdata/" // trim(filenm)
-return
-end subroutine datfln
 !
 !   The `regular' pot routine
 ! -------------------------------------------------------------------
 subroutine driver
 !
-#include "pot_ch3he_vib_common.f90"
+use mod_covvl, only: vvl
+use mod_cosysr, only: rspar
+use mod_cosysi, only: ispar
+use mod_ch3he, only: NVLM
+use constants, only: econv
+use mod_hiblas, only: dcopy
+use mod_hipot, only: pot
+implicit double precision (a-h, o-z)
 
 !   Main function for `makepot', no arguments, print vvl's interactively
 !
 double precision r, vv0
-integer i, j, k, iblock
+integer i, j, iblock
 !   Temporary for print
 double precision vvltmp(NVLM)
+real(8), pointer :: emax0, emax1, emax2, emax3
+integer, pointer :: nterm, ipotsy, iop, jmax, vmax
 !
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
 emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
@@ -59,7 +252,7 @@ do i = 0, vmax
       print 52, iblock, i, j
     endif
     call dcopy(NVLM, vvl((iblock - 1) * NVLM + 1), 1, vvltmp, 1)
-    print 55, vvltmp * ECONV
+    print 55, vvltmp * econv
   enddo
 enddo
 goto 10
@@ -76,15 +269,20 @@ goto 10
 ! -------------------------------------------------------------------
 subroutine loapot(iunit, filnam)
 !
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
-#include "pot_ch3he_vib_common.f90"
+use mod_parpot, only: potnam=>pot_name
+use mod_conlam, only: nlam
+use mod_cosysr, only: rspar
+use mod_cosysi, only: ispar
+use mod_ch3he, only: NVLM
+implicit double precision (a-h, o-z)
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
 !   Initialize parameters for the potential
 !
 !   Arguments:
 !       Arguments are not refered to in this basis routine
-character*(*) filnam
-integer iunit
-!
+real(8), pointer :: emax0, emax1, emax2, emax3
+integer, pointer :: nterm, ipotsy, iop, jmax, vmax!
 !
 !   Hidden returned value:
 !       mod_conlam: nlam
@@ -94,6 +292,8 @@ integer iunit
 !
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
 emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 
 potnam = 'CH3-He vibrational relaxation'
 !   vvl now represent <v_2'|v_{\lambda\mu}(Q_2, R)|v_2> in the
@@ -124,25 +324,22 @@ subroutine pot(vv0, r)
 !
 !   vv0 will not be used (set to zero).
 !
-#include "pot_ch3he_vib_common.f90"
-!
-!
-!   Arguments:
-!       r: intermolecular distance
-double precision r
-!
-!
-!   Returned value:
-!       vv0: zero
-double precision vv0
+use mod_covvl, only: vvl
+use mod_cosysr, only: rspar
+use mod_cosysi, only: ispar
+use mod_ch3he, only: NVLM, NANGLE, splch3, gblkid
+use constants, only: econv
+use mod_hiblas, only: dscal, dcopy, dgelsd
+use mod_hipotutil, only: datfln
+implicit double precision (a-h, o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
 !
 !
 !   Hidden returned value:
 !       mod_covvl.vvl
 !
 !
-!   Function called:
-integer gblkid
 !
 !
 !   vsp: potential for all theta/phi tuples, to be obtained from splch3
@@ -176,6 +373,8 @@ real(8), save ::  YLMCS(NANGLE, NVLM), YLMCA(NANGLE, NVLM)
 logical, save :: isfst=.true.
 
 character*255 datfl
+real(8), pointer :: emax0, emax1, emax2, emax3
+integer, pointer :: nterm, ipotsy, iop, jmax, vmax!
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
 emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
 
@@ -222,7 +421,7 @@ do i = 0, vmax
   vvl(j) = vvl(j) + lrpot
 enddo
 !   Convert potential to hartree
-call dscal(nvvlp, 1d0 / ECONV, vvl, 1)
+call dscal(nvvlp, 1d0 / econv, vvl, 1)
 !   vv0 is not used here
 vv0 = 0
 return
@@ -230,82 +429,7 @@ end
 !   end subroutine pot
 !
 !
-! -------------------------------------------------------------------
-subroutine splch3(vsp, r, v2_i, v2_f)
-#include "pot_ch3he_vib_common.f90"
-!   Spline the interaction potential (integreted over vibrational
-!   coordinate Q2) to the given R for a particular (v2, v2') tuple.
-!
-!   Arguments:
-!       r: intermolecular distance
-!       v2_i, v2_f: initial and final vibrational level
-real(8), intent(in) :: r
-integer v2_i, v2_f
-!
-!
-!   Returned value:
-!       vsp: <v2'|V|v2> at R for all (theta, phi) tuples
-real(8), intent(out) :: vsp(*)
-!
-!
-!   Function called:
-integer gblkid
-!
-!
-!   Potential as calculated
-real(8), save :: v(NDIST, NANGLE, V2TMAX)
-!   Parameters from linear fit
-real(8), save :: b(NDIST, NANGLE, V2TMAX)
-real(8), save :: c(NDIST, NANGLE, V2TMAX)
-real(8), save :: d(NDIST, NANGLE, V2TMAX)
-!   Loop indeces
-integer i, k
-!   Block index
-integer iblock
-!   Intermolecular distances used in the ab initio calculation
-double precision RR(NDIST)
-data RR /3.5d0, 4d0, 4.5d0, 5d0, 5.5d0, 6d0, 6.5d0, 7d0, 7.5d0, &
-         8d0, 8.5d0, 9d0, 9.5d0, 1d1, 1.1d1, 1.2d1, 1.3d1, &
-         1.5d1, 2d1/
-!   Function to evaluate splined potential
-double precision seval
-!
-character*255 datfl
-logical, save ::  isfst=.true.
-!   In the first call, read data and determine fitted coefficients
-nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
-emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
 
-if (isfst) then
-!   Read data file
-  call datfln('pot_ch3he_vib_data', datfl)
-  open (unit=10, file=datfl)
-  read (10, *) v
-  close(10)
-!   Calculate coefficients for each block
-  do k = 1, V2TMAX
-    do i = 1, NANGLE
-!   calculate coefficients
-      call spline(NDIST, RR, v(1, i, k), b(1, i, k), c(1, i, k), &
-                  d(1, i, k))
-    enddo
-  enddo
-  isfst = .false.
-endif
-!
-!   On a regular run, calculate potential from previously determined
-!   spline coefficients.
-!
-!   Calculate potential from spline coefficients
-iblock = gblkid(v2_i, v2_f, V2MAX)
-do i = 1, NANGLE
-  vsp(i) = seval(NDIST, r, RR, v(1, i, iblock), b(1, i, iblock), &
-                 c(1, i, iblock), d(1, i, iblock))
-enddo
-return
-end
-!   end subroutine splch3
-!
 !
 !
 !   User defined basis
@@ -314,13 +438,23 @@ subroutine syusr(irpot, readpt, iread)
 use funit, only: FUNIT_INP
 
 !
-#include "pot_ch3he_vib_common.f90"
+use mod_coiout, only: niout, indout
+use mod_cosys, only: scod
+use mod_cosysr, only: rspar
+use mod_cosysi, only: isicod, ispar
+use mod_hipot, only: loapot
+! use mod_cosysr, only: isrcod
+implicit double precision (a-h, o-z)
+!   Lengths of cod array, 
+!       ICOD, IRCOD: lenghts of cod array
+integer ICOD, IRCOD
+parameter (ICOD=5, IRCOD=4)
 !   Subroutine to read parameters for CH3 v2 vibrational relaxation
 !
 !   Parameters:
 !       iread: 1 to read data from input file, 0 to set default
 !       irpot, readpt: not refered to in this basis
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 !
@@ -345,9 +479,12 @@ integer i
 character*(*) fname
 !
 !
+real(8), pointer :: emax0, emax1, emax2, emax3
+integer, pointer :: nterm, ipotsy, iop, jmax, vmax!
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
 emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
-
+UNUSED_DUMMY(irpot)
+UNUSED_DUMMY(readpt)
 !   Set system dependent parameters
 scod(1) = 'NTERM'
 scod(2) = 'IPOTSY'
@@ -390,12 +527,16 @@ return
 !
 ! -------------------------------------------------------------------
 entry ptrusr(fname, readpt)
+  UNUSED_DUMMY(fname)
 !   This subroutine will not be used.
 return
 !
 ! -------------------------------------------------------------------
-entry savusr(readpt)
+entry savusr()
 !   Save parameters
+nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
+emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
+
 write (FUNIT_INP, 201) ipotsy, iop
 write (FUNIT_INP, 202) jmax, vmax
 write (FUNIT_INP, 203) emax0, emax1, emax2, emax3
@@ -417,11 +558,22 @@ subroutine bausr(bqs, jhold, ehold, ishold, nlevel, &
                   flaghf, flagsu, csflag, clist, bastst, &
                   ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
 !
+use mod_assert, only: fassert
+
 use mod_hibasutil, only: vlmstp, iswap
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_hitypes, only: bqs_type
+use constants, only: amu_to_emu, econv
 use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
-#include "pot_ch3he_vib_common.f90"
+use mod_cocent, only: cent
+use mod_coeint, only: eint
+use mod_conlam, only: nlam
+use mod_cosysr, only: rspar
+use mod_cosysi, only: ispar
+use mod_ered, only: ered, rmu
+use mod_ch3he, only: V2MAX, NVLM, brot, crot, evib, lamsym, musym, lamasy, muasy, gblkid
+use mod_par, only: iprint
+implicit double precision (a-h, o-z)
 type(bqs_type), intent(out) :: bqs
 integer, intent(out), dimension(:) :: jhold
 real(8), intent(out), dimension(:) :: ehold
@@ -492,7 +644,6 @@ type(ancouma_type), pointer :: ancouma
 !       /cosysi/ nscode, isicod, nterm, ipotsy, iop, jmax, vmax
 !       /cosysr/ isrcod, emax0, emax1, emax2, emax3
 !       mod_ered: ered, rmu
-!       /coipar/ iprint
 !
 !
 !   Hidden returned value:
@@ -513,16 +664,15 @@ integer ilmmin, ilmmax, vibblk
 double precision lvleng
 integer, dimension(nmax) :: vtemp
 integer, dimension(nmax) :: ietemp
-double precision esave, etemp
-integer vsave, jsave, ksave, iesave
+double precision etemp
 double precision vee
 double precision emax(V2MAX+1), emin
 integer ipar, lpar, lmax, lmin, li, ilm, ilms, lambda, mu
 integer v(nmax)
 !
 !
-!   Function called:
-integer gblkid
+real(8), pointer :: emax0, emax1, emax2, emax3
+integer, pointer :: nterm, ipotsy, iop, jmax, vmax!
 !
 ! -------------------------------------------------------------------
 
@@ -534,6 +684,10 @@ call C_F_POINTER (C_LOC(sc4), ktemp, [nmax])
 !   Construct emax array from input parameters
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); jmax=>ispar(4); vmax=>ispar(5)
 emax0=>rspar(1); emax1=>rspar(2); emax2=>rspar(3); emax3=>rspar(4)
+
+UNUSED_VARIABLE(cent)
+UNUSED_DUMMY(ihomo)
+UNUSED_DUMMY(flagsu)
 
 emax(1) = emax0
 emax(2) = emax1
@@ -559,8 +713,8 @@ endif
 !
 !   Write info when clist is true
 if (clist) then
-  write (6, 10) rmu*XMCONV, ered*econv, jtot, jlpar
-  write (9, 10) rmu*XMCONV, ered*econv, jtot, jlpar
+  write (6, 10) rmu*amu_to_emu, ered*econv, jtot, jlpar
+  write (9, 10) rmu*amu_to_emu, ered*econv, jtot, jlpar
 10   format (/, ' **  CC SYMMETRIC TOP VIBRATION **', &
           /, '    RMU=', f9.4, '  E=', f7.2, '  JTOT=', i4, 2x, &
           '  JLPAR=', i2)
@@ -756,7 +910,7 @@ if (bastst .and. iprint .ge. 1) then
           'L', 4x, 'IND', 4x, 'EINT(CM-1)')
   do i = 1, n
     print 315, i, v(i), bqs%jq(i), k(i), ieps(i), bqs%lq(i), bqs%inq(i), &
-               eint(i)*ECONV
+               eint(i)*econv
   enddo
   print *
 315   format (4(i4, 1x), 2x, i2, 2x, i4, 1x, i6, 2x, f12.4)
@@ -843,48 +997,6 @@ endif
 !
 return
 !
-end
-!end module mod_bausr
-!   end subroutine bastpv
+end subroutine bausr
 !
 !
-! -------------------------------------------------------------------
-function gblkid(v2, v2p, vmax)
-implicit none
-integer gblkid, v2, v2p, vmax
-!
-!   Subroutine to determine the ID of a (v2, v2') block in the
-!   compact form - 00, 01, 02, ..., 11, 12, ...
-!
-!   Arguments
-!       v2, v2p: v_2 and v_2'
-!       vmax: maximum value of v2
-!   Return
-!       The corresponding block ID for the v2, v2p combination
-!
-!   Example
-!       gblkid(1, 0, 4) = 2
-!           when vmax = 4, (10)=(01) is the second block in the list
-!       gblkid(1, 2, 3) = 6
-!           when vmax = 3, (12)=(21) is the sixth block in the list
-!
-integer vl, vg
-!   The lesser/greater v2p
-if (v2 .lt. v2p) then
-  vl = v2
-  vg = v2p
-else
-  vl = v2p
-  vg = v2
-endif
-!   In the compact form, the lesser v_2 (v_2l) is indexed first.
-!   The number of blocks for v_2l < vl is
-!       (vmax + 1 - 0) + (vmax + 1 - 1) + ... + (vmax + 1 - (vl - 1))
-!   For v_2l = vl, v_2g = vg is the
-!       vg - vl + 1
-!   th block.
-gblkid = ((2 * vmax + 3 - vl) * vl) / 2 &
-         + (vg - vl + 1)
-return
-end
-!   end function gblkid

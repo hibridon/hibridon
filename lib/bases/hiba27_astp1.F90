@@ -1,5 +1,6 @@
 #include "assert.h"
 module mod_hiba27_astp1
+  use mod_assert, only: fassert
 contains
 ! syastp1 (savastp1/ptrastp1) defines, saves variables and reads         *
 !                  potential for C2v asymmetric top-atom scattering      *
@@ -123,15 +124,16 @@ use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_coatp3, only: isizh
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
 use mod_hibasutil, only: rotham1
 use mod_par, only: iprint
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
+use mod_parbas, only: lammin, lammax, mproj
+use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
+use mod_hiblas, only: dsyev
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(bqs_type), intent(out) :: bqs
@@ -141,8 +143,8 @@ dimension jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
           fistmp(1)
 !  scratch arrays for computing asymmetric top energies and wave fns.
-dimension e(narray,narray), eig(narray), vec(narray,narray), &
-  sc1(narray), sc2(narray), work(1000)
+dimension e(narray,narray), eig(narray), &
+  sc1(narray), work(1000)
 !
 integer, pointer :: nterm, numpot, iop, jmax
 real(8), pointer :: arot, brot, crot, emax
@@ -394,7 +396,6 @@ write (6,1225)
         e(mm,nn) = 0.d0
       end do
     end do
-    jx = jj
     e(1,1) = rotham1(ji,1,ji,1) - rotham1(ji,1,ji,-1)
     if (isize .gt. 1) then
       do mm = 2, isize
@@ -1047,23 +1048,24 @@ subroutine syastp1 (irpot, readpt, iread)
 !             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-integer :: i, j, l, lc
+integer :: j, l, lc
 logical existf
 integer icod, ircod
 character*1 dot
 character*(*) fname
-character*60 line, filnam, potfil, filnm1
+character*60 line, filnam, potfil
+character*68 filnm1
 parameter (icod=4, ircod=4)
 save potfil
 !  number and names of system dependent parameters
@@ -1183,7 +1185,7 @@ endif
 close (8)
 return
 !
-entry savastp1 (readpt)
+entry savastp1 ()
 !  save input parameters for asymmetric top + atom scattering
 !  the order of the write statements should be identical to the read statement
 !  above. for consistency with the data file written by gendat, format

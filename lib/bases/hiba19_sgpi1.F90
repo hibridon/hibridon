@@ -1,5 +1,9 @@
 #include "assert.h"
+#include "unused.h"
+
+
 module mod_hiba19_sgpi1
+  use mod_assert, only: fassert
 !    ivpi:     array of vibrational quantum numbers of the 2pi state to be
 !              included in the calculation.  must be consistent with order of
 !              levels listed in common block cvibp, from pot routine.
@@ -13,6 +17,8 @@ integer :: ivpi(5)
 
 integer :: numvib
 integer :: ivibpi(5)
+
+character*60 potfil
 
 contains
 ! sysgpi1 (savsgpi1/ptrsgpi1) defines, saves variables and reads         *
@@ -161,19 +167,17 @@ subroutine basgpi1 (bqs, jhold, ehold, ishold, nlevel, &
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_cotq1, only: vec => tq1 ! vec(3,3)
-use mod_coisc1, only: ivec => isc1 ! ivec(1)
 use mod_coisc2, only: nrot => isc2 ! nrot(1)
 use mod_coisc3, only: ifi => isc3 ! ifi(1)
 use mod_conlam, only: nlam
 use mod_hiba03_2pi, only: vlm2pi
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use mod_hibasutil, only: vlm2sg, iswap, rswap
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
+use mod_parbas, only: maxvib, lammin, lammax, mproj
+use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -185,7 +189,6 @@ dimension jhold(1), ehold(1), ishold(1), &
   ivhold(1), c12(1), c32(1), csig(1), ieps(2), &
   epi(maxvib), bpi(maxvib), dpi(maxvib), aso(maxvib), p(maxvib), &
   q(maxvib), jmax(maxvib)
-parameter (nvmax=10)
 ! this determines which eps level is first in channel list (arbitrary)
 data ieps / -1, 1 /
 data izero, ione, itwo / 0,     1,    2 /
@@ -966,7 +969,7 @@ if (bastst .and. iprint .ge. 1) then
 680   continue
 end if
 return
-1000 write (6, 1010) n, nmax
+write (6, 1010) n, nmax
 write (9, 1010) n, nmax
 1010 format(/' *** NCHANNELS=', i4,' .GT. MAX DIMENSION OF', &
          i4,' ABORT ***')
@@ -1130,30 +1133,35 @@ subroutine sysgpi1 (irpot, readpt, iread)
 ! ------------------------------------------------------------------------
 !
 use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosyr, only: rcod
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use mod_par, only: ihomo
-use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_skip, only: nskip, iskip
+use mod_parbas, only: lammin, lammax, mproj
+use mod_skip, only: nskip
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-integer :: is, isa, isi, isr, isym, iv
-integer :: j, l, lc, nmax, nparsg, nterm
-integer, save :: numvpi
+integer :: is, iv
+integer :: j, l, lc, nmax
 logical existf
-character*8 char
+character*4 char
 character*(*) fname
 character*1 dot
-character*60 filnam, line, potfil, filnm1
-save potfil
+character*60 filnam, line
+character*68 filnm1
+integer, pointer :: nterm, isym, isa, nparsg, numvpi
 #include "common/comdot.F90"
+nterm=>ispar(1)
+isym=>ispar(2)
+isa=>ispar(3)
+nparsg=>ispar(6)
+numvpi=>ispar(9)
+
 irpot = 1
 !     number and names of system dependent parameters
 !  first all the system dependent integer variables
@@ -1302,8 +1310,18 @@ close (8)
 irpot=1
 ihomo=nskip.eq.2
 return
+end subroutine 
 !
-entry savsgpi1 (readpt)
+subroutine savsgpi1 ()
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
+use funit, only: FUNIT_INP
+
+implicit none
+integer :: iv, isi, isr, j
+integer, pointer :: numvpi
+numvpi=>ispar(9)
+
 !  save parameters for 2sigma and 2pi states
 !      write (FUNIT_INP, 105) isym, isa, igusg, nmaxsg, nparsg,
 !     :  ' isym, isa, igusg, nmaxsg, nparsg'

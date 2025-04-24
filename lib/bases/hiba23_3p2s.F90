@@ -1,5 +1,7 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba23_3p2s
+  use mod_assert, only: fassert
 contains
 ! sy3p2s (sav3p2s/ptr3p2s) defines, saves variables and reads            *
 !                  potentials for 3P atom + 2S atom                      *
@@ -114,19 +116,15 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
-use mod_skip, only: nskip, iskip
-!  modules mod_jtot, mod_ja, and mod_el used to transmit to ground subroutine
-use mod_jtot, only: jjtot, jjlpar
 use mod_ja, only: jja
 use mod_el, only: ll
 use mod_hiutil, only: xf3j, xf9j
 use mod_hitypes, only: bqs_type
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 type(bqs_type), intent(out) :: bqs
 type(ancou_type), intent(out), allocatable, target :: v2
@@ -134,8 +132,6 @@ type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
 !  arrays in argument list
 dimension jhold(1),ehold(1),ishold(1)
-!  matrices for transformation between atomic and molecular BF functions
-dimension c12(5,5), c32(3,3)
 !  quantum numbers for BF atomic and basis functions
 dimension &
   fjo32(3), fj32(3), flam32(3), sigm32(3), stot32(3), &
@@ -153,13 +149,14 @@ data fjo12 /2.d0, 2.d0, 1.d0, 1.d0, 0.d0/, &
 data flam12 /-1.d0, 1.d0, 0.d0, 1.d0, 0.d0/, &
   sigm12 /1.5d0, -0.5d0, 0.5d0, -0.5d0, 0.5d0/, &
   stot12 /1.5d0, 1.5d0, 1.5d0, 0.5d0, 0.5d0/
-!  scratch arrays for computing asymmetric top energies and wave fns.
-dimension en0(4), en12(5), en32(3), vec(5,5), work(288)
 integer, pointer :: nterm, nstate, npot
 real(8), pointer :: en1d
 nterm=>ispar(1); nstate=>ispar(2); npot=>ispar(4)
 en1d=>rspar(1)
-
+UNUSED_DUMMY(numin)
+UNUSED_DUMMY(ihomo)
+UNUSED_DUMMY(clist)
+UNUSED_DUMMY(nu)
 npot = 0
 
 zero = 0.d0
@@ -260,7 +257,7 @@ endif
 if (nlevop .le. 0) then
   write (9,185)
   write (6,185)
-185   format('*** NO OPEN LEVELS IN BA3P2S; ABORT')	
+185   format('*** NO OPEN LEVELS IN BA3P2S; ABORT')
   if (bastst) return
   call exit
 endif
@@ -451,6 +448,7 @@ subroutine vlm3p2s (j1, j12_1, l1, j2, j12_2, l2, jtot, lb, vee)
 ! --------------------------------------------------------------------
 use mod_coeig2, only:  t12, t32
 use mod_hiutil, only: xf3j
+use mod_hiblas, only: dgemm
 implicit double precision (a-h,o-z)
 dimension v12(5,5),v32(3,3),a12(5,5),a32(3,3)
 vee = 0.d0
@@ -619,18 +617,19 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_skip, only: nskip, iskip
+use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-integer :: i, j, l, lc
+integer :: j, l, lc
 logical existf
 character*1 dot
 character*(*) fname
-character*60 filnam, line, potfil, filnm1
+character*60 filnam, line, potfil
+character*68 filnm1
 #include "common/comdot.F90"
 save potfil
 integer, pointer, save :: nterm, nvib
@@ -700,7 +699,7 @@ close (8)
 irpot=1
 return
 ! --------------------------------------------------------------
-entry sav3p2s (readpt)
+entry sav3p2s ()
 !  save input parameters for 3P atom + 2S atom scattering
 write (FUNIT_INP, 1285) nvib
 1285 format(i4, 29x,'nvib')

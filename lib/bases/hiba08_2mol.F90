@@ -1,5 +1,7 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba08_2mol
+  use mod_assert, only: fassert
 contains
 ! sy2mol (sav2mol/ptr2mol) defines, save variables and reads             *
 !                  potential for 2 singlet sigma molecule scattering     *
@@ -97,13 +99,11 @@ use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
-use constants, only: econv, xmconv
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
+use constants, only: econv
 use mod_par, only: iprint
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
-use mod_selb, only: ibasty
+use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_two, only: numj, nj1j2
 use mod_hitypes, only: bqs_type
@@ -120,6 +120,9 @@ integer, pointer :: nterm, nsym
 real(8), pointer :: brot, drot, hrot
 nterm=>ispar(1); nsym=>ispar(2)
 brot=>rspar(1); drot=>rspar(2); hrot=>rspar(3)
+
+UNUSED_DUMMY(sc4)
+UNUSED_DUMMY(ihomo)
 
 !  check for consistency in the values of flaghf and csflag
 if (flaghf) then
@@ -452,6 +455,7 @@ function f2mol(lb1,lb2,lb,j1,j2,j12,l,j1p,j2p,j12p,lp,j)
 ! note that (4*pi)**3=1984.40171
 use mod_hiutil, only: f3j0, f6j
 implicit double precision (a-h,o-z)
+logical :: f6j_is_zero
 data zero /0.d0/
 f2mol=zero
 if(iabs(j1-j1p).gt.lb1) return
@@ -460,8 +464,8 @@ if(iabs(j2-j2p).gt.lb2) return
 if((j2+j2p).lt.lb2) return
 if((-1)**(lb1+lb2+lb).lt.0.or.(-1)**(l+lp+lb).lt.0) return
 if((-1)**(j1+j1p+lb1).lt.0.or.(-1)**(j2+j2p+lb2).lt.0) return
-b1=f6j(l,lp,lb,j12p,j12,j)
-if(b1.eq.zero) return
+b1=f6j(l,lp,lb,j12p,j12,j,f6j_is_zero)
+if(f6j_is_zero) return
 a=(2*j1+1)*(2*j2+1)*(2*j12+1)*(2*l+1)*(2*lb1+1)
 ap=(2*j1p+1)*(2*j2p+1)*(2*j12p+1)*(2*lp+1)*(2*lb2+1)
 factor=(-1)**(j+j1+j2+j12p)*sqrt((a*ap))*(2*lb+1)
@@ -475,12 +479,12 @@ kmax=min0((j12+lb2),(j2p+j1))
 kmax=min0(kmax,(j12p+lb1))
 sum=zero
 do 10 k=kmin,kmax
-b2=f6j(lb1,lb2,lb,j12,j12p,k)
-if(b2.eq.zero) go to 10
-b3=f6j(j1,j1p,lb1,j12p,k,j2p)
-if(b3.eq.zero) go to 10
-b4=f6j(j2,j2p,lb2,k,j12,j1)
-if(b4.eq.zero) go  to 10
+b2=f6j(lb1,lb2,lb,j12,j12p,k,f6j_is_zero)
+if(f6j_is_zero) go to 10
+b3=f6j(j1,j1p,lb1,j12p,k,j2p,f6j_is_zero)
+if(f6j_is_zero) go to 10
+b4=f6j(j2,j2p,lb2,k,j12,j1,f6j_is_zero)
+if(f6j_is_zero) go  to 10
 sum=sum+(2*k+1)*b2*b3*b4
 10 continue
 f2mol=sum*b1*factor
@@ -519,23 +523,24 @@ subroutine sy2mol (irpot, readpt, iread)
 !  line 14:
 !    brot, drot, hrot:    rotational constants of the molecule in cm-1
 !  -----------------------------------------------------------------------
-use mod_coiout, only: niout, indout
 use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
 use mod_two, only: numj, nj1j2
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: i, ihigh, ij, iline, ilow, itop, j, l, lc
 logical existf
 character*1 dot
 character*(*) fname
-character*60 filnam, line, potfil, filnm1
+character*60 filnam, line, potfil
+character*68 filnm1
 save potfil
 #include "common/comdot.F90"
 
@@ -635,7 +640,7 @@ close (8)
 irpot=1
 return
 !
-entry sav2mol (readpt)
+entry sav2mol ()
 !  save input parameters for hf-hf scattering
 !  line 13:
 write (FUNIT_INP, 300) nterm, nsym,numj

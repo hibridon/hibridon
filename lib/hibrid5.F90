@@ -1,6 +1,8 @@
 #include "assert.h"
+#include "unused.h"
 
 module mod_savfile
+  use mod_assert, only: fassert
 implicit none
 
   integer, parameter :: num_recs_per_energy = 5
@@ -72,6 +74,7 @@ contains
 end module mod_savfile
 
 module mod_hibrid5
+use mod_assert, only: fassert
 
 
 
@@ -97,7 +100,7 @@ contains
 !
 ! ---------------------------------------------------------------------------
 subroutine soutpt (tsq, sr, si, scmat, &
-                   bqs, isc1, isc2, sc1, sc2, &
+                   bqs, isc1, sc1, sc2, &
                    jlev, elev, inlev, jtot, jfirst, &
                    jfinal, jtotd, nu, numin, numax, nud,jlpar,ien, &
                    ipos, csflag, flaghf, prsmat, prt2, t2test, &
@@ -136,7 +139,7 @@ subroutine soutpt (tsq, sr, si, scmat, &
 !             if the calculation involves the collisions of two diatomic
 !             molecules, the bqs%jq = j1 + 10000 j2, where j1 and j2 are the
 !             rotational quantum numbers of each molecule
-!    isc1,isc2: scratch vectors (min length nopen)
+!    isc1: scratch vectors (min length nopen)
 !    sc1, sc2:  scratch  matrices (min length nopen x nopen)
 !    jlev:   rotational angular momenta of each energetically open level
 !    elev:   energy (in hartree) of each energetically open level
@@ -195,15 +198,12 @@ subroutine soutpt (tsq, sr, si, scmat, &
 use mod_cosout
 use constants
 use mod_coqvec, only: nphoto
-use mod_cocent, only: cent
-use mod_coeint, only: eint
 use mod_coener, only: ener => energ
 use mod_hibrid2, only: mxoutd, mxoutr
 use funit
 use mod_savfile, only: REC_EN_START, EN_REC_COUNT
-use mod_parpot, only: label=>pot_label
 use mod_ered, only: ered, rmu
-use mod_phot, only: photof, wavefn, boundf
+use mod_phot, only: photof, wavefn
 use mod_surf, only: flagsu
 use mod_hiutil, only: dater
 use mod_himatrix, only: transp
@@ -216,7 +216,6 @@ real(8), intent(inout) :: si(nmax,nmax)
 real(8), intent(out) :: scmat(nmax,nmax)
 type(bqs_type), intent(in) :: bqs
 integer, intent(out) :: isc1(nopen)
-integer, intent(out) :: isc2(nopen)
 real(8), intent(out) :: sc1(nmax, nmax)
 real(8), intent(out) :: sc2(nmax, nmax)
 integer, intent(in) :: jlev(nlevop)
@@ -361,7 +360,7 @@ if((prpart .or. wrpart) .and. .not. nucros .and. &
                jfinal, jtotd, nu, numin, numax, nud, jlpar, ien, &
                ipos, csflag, flaghf, wrpart, prpart, twomol, &
                twojlp, &
-               nucros,nlevel, nlevop, nopen, nmax)
+               nucros, nlevop, nmax)
 end if
 !  sum up partial cross sections to get integral cross sections
 if (.not. csflag .or. (csflag .and. (nu .eq. numax) ) ) then
@@ -376,7 +375,7 @@ end
 subroutine prpartr(scmat,jlev, elev, inlev, jtot, jfirst, &
                   jfinal, jtotd, nu, numin, numax, nud, jlpar,ien, &
                   ipos, csflag, flaghf, wrpart, prpart, twomol, &
-                  twojlp,nucros,nlevel, nlevop, nopen, nmax)
+                  twojlp,nucros, nlevop, nmax)
 ! ---------------------------------------------------------------------------
 !
 !  subroutine to print partial cross sections
@@ -391,6 +390,7 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
 use mod_surf, only: flagsu
 use mod_hiutil, only: dater
+use funit, only: FUNIT_PCS_START
 implicit double precision (a-h,o-z)
 real(8), intent(in) :: scmat(nmax, nlevop)
 integer, intent(in) :: jlev(nlevop)
@@ -420,7 +420,7 @@ do 2 i=1, iabs(nnout)
 1  continue
 2 continue
 if (wrpart) then
-  nfile = 24 + ien
+  nfile = FUNIT_PCS_START + ien - 1
   headf=.false.
   if (nucros .and. nu.eq.numin) headf=.true.
   if (twojlp) then
@@ -618,11 +618,11 @@ end if
 return
 end
 ! ----------------------------------------------------------------------
-subroutine nusum (tsq, tq1, tq2, tq3, &
+subroutine nusum (tsq, tq1, &
                  jlev,elev, inlev, jtot, jfirst, &
                  jfinal, jtotd, nu, numin, numax, nud, jlpar, &
                  nerg, ipos, csflag, flaghf, wrpart, prpart, &
-                 twomol, nucros, nlevel, nlev, nopen, nmax, tmp_file)
+                 twomol, nucros, nlev, nmax, tmp_file)
 ! ---------------------------------------------------------------------------
 !
 !  subroutine to sum partial cross sections over nu
@@ -631,11 +631,11 @@ subroutine nusum (tsq, tq1, tq2, tq3, &
 ! ---------------------------------------------------------------------------
 use constants
 use mod_coener, only: energ
-use mod_ered, only: ered, rmu
+use mod_ered, only: ered
 use mod_savfile, only: REC_EN_START, EN_REC_COUNT, EN_REC_PRESENT_INTEGRAL_XS
 implicit double precision (a-h,o-z)
 logical ipos, csflag, wrpart, prpart, flaghf, twomol, nucros,vrai
-dimension tsq(nmax,1),tq1(nmax,1),tq2(nmax,1),tq3(nmax,1), &
+dimension tsq(nmax,1),tq1(nmax,1), &
           jlev(1),elev(1),inlev(1),nlev(1)
 integer :: tmp_file
 !
@@ -651,7 +651,7 @@ do 100 ien = 1,nerg
     call prpartr (tsq,jlev, elev, inlev, jtot, jfirst, &
                jfinal, jtotd, nu, numin, nu, nud, jlpar, ien, &
                ipos, csflag, flaghf, wrpart, prpart, twomol, &
-               vrai,nucros,nlevel, nlevop, nopen, nmax)
+               vrai,nucros, nlevop, nmax)
     endif
 ! sum up over nu
   irec=(nerg+ien-1)* EN_REC_COUNT + REC_EN_START
@@ -700,6 +700,7 @@ integer :: jl, num_partial_xs, jl1, jp1, jl2, jp2, nn
 integer :: jpl               ! the previous parity (l=last?)
 !
 !
+UNUSED_DUMMY(j2)
 if(jd <= 1) then
   !
   ! here for jd == 1
@@ -980,16 +981,21 @@ subroutine dbout(irec,i1,i2,i3,q,nmax,n)
 ! ---------------------------------------------------------------------------
 use mod_fileid, only: FILEID_SAV
 use mod_savfile, only: REC_LAST_USED
+use mod_hiiolib2, only: dbwi, dbwr, dbwc
 implicit none
 integer, intent(in) :: irec
 integer, intent(in) :: i1, i2, i3
 integer, intent(in) :: nmax, n
 real(8), intent(in) :: q(nmax, n)
 integer :: ifile, i
+integer :: bi(1)
 ifile = FILEID_SAV
-call dbwi(i1,1,ifile,irec)
-call dbwi(i2,1,ifile,REC_LAST_USED)
-call dbwi(i3,1,ifile,REC_LAST_USED)
+bi(1) = i1
+call dbwi(bi,size(bi),ifile,irec)
+bi(1) = i2
+call dbwi(bi,size(bi),ifile,REC_LAST_USED)
+bi(1) = i3
+call dbwi(bi,size(bi),ifile,REC_LAST_USED)
 do i=1,n
   call dbwr(q(1,i),n,ifile,REC_LAST_USED)
 end do
@@ -1005,6 +1011,7 @@ end
 ! ---------------------------------------------------------------------------
 subroutine dbin(ifile,irec,i1,i2,i3,q,nmax,n)
 use mod_savfile, only: REC_LAST_USED
+use mod_hiiolib2, only: dbri, dbrr
 implicit none
 integer, intent(in) :: ifile
 integer, intent(in) :: irec
@@ -1012,16 +1019,20 @@ integer, intent(out) :: i1, i2, i3
 integer, intent(in) :: nmax, n
 real(8), dimension(nmax, n), intent(out) :: q
 integer :: i
-call dbri(i1,1,ifile,irec)
-call dbri(i2,1,ifile,REC_LAST_USED)
-call dbri(i3,1,ifile,REC_LAST_USED)
+integer :: bi(1)
+call dbri(bi,1,ifile,irec)
+i1 = bi(1)
+call dbri(bi,1,ifile,REC_LAST_USED)
+i2 = bi(1)
+call dbri(bi,1,ifile,REC_LAST_USED)
+i3 = bi(1)
 do i=1,n
   call dbrr(q(1,i),n,ifile,REC_LAST_USED)
 end do
 return
 end
 ! ----------------------------------------------------------------------
-subroutine xwrite (zmat, tq3, jlev, elev, inlev, nerg, energ, &
+subroutine xwrite (zmat, jlev, elev, inlev, nerg, energ, &
                    jfirst, jfinal, jtotd, csflag, flaghf, &
                    wrxsec, prxsec, ipos, twomol, nucros,nlevel, &
                    nlev, numin, numax, nud, jlpar, nmax, nmx, &
@@ -1077,12 +1088,11 @@ use mod_fileid, only: FILEID_SAV
 use mod_savfile, only: REC_EN_START, EN_REC_COUNT, EN_REC_PRESENT_INTEGRAL_XS
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
-use mod_ered, only: ered, rmu
+use mod_ered, only: rmu
 use mod_surf, only: flagsu
 use mod_hiutil, only: dater
 implicit none
 real(8), intent(out) :: zmat(nmax, nmax)
-real(8), intent(out) :: tq3(nmx, nmx)
 integer, intent(in) :: jlev(nmx)
 real(8), intent(in) :: elev(nmx)
 integer, intent(in) :: inlev(nmx)
@@ -1305,6 +1315,8 @@ use mod_version, only : version
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_hiutil, only: gennam
+use mod_hiiolib1, only: openf
+use mod_hiblas, only: dscal
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
@@ -1517,7 +1529,7 @@ integer, intent(out) :: jf
 integer, intent(out) :: jp
 integer, intent(in) :: nmax
 integer, intent(in) :: n
-logical, intent(out) :: nucros
+logical, intent(in) :: nucros
 integer :: sav_file = FILEID_SAV
 integer :: i, j
 integer :: jl, jl1, jl2, jl3
@@ -1604,6 +1616,9 @@ use mod_par, only: wrpart, wrxsec
 use mod_parpot, only: label=>pot_label
 use mod_fileid, only: FILEID_SAV
 use mod_savfile
+use mod_hiiolib2, only: dbri, dbrr
+use mod_hiiolib1, only: drest
+
 implicit none
 integer, intent(out)   :: jtot
 integer, intent(out)   :: jtop
@@ -1709,6 +1724,8 @@ use mod_file, only: savfil
 use funit, only: FUNIT_SAV
 use mod_fileid, only: FILEID_SAV
 use mod_savfile
+use mod_hiiolib1, only: dclos, dopen, dres
+use mod_hiiolib2, only: dbwi, dbwr, dbwc
 implicit none
 integer, intent(in)   :: jtot
 integer, intent(in)   :: jtop
@@ -1791,12 +1808,9 @@ use mod_codim, only: mmax
 use mod_cosout
 use constants
 use mod_cotq1, only: sc1 => scmat ! sc1(1)
-use mod_cotq2, only: sc2 => scmat ! sc2(1)
 use mod_cotq3, only: sc3 => scmat ! sc3(1)
 use mod_coamat, only: sc4 => toto ! sc4(1)
 use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
-use mod_coisc6, only: isc1 => isc6 ! isc1(1)
-use mod_coisc7, only: isc2 => isc7 ! isc2(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc2, only: inlev => sc2int ! inlev(1)
 use mod_cosc3, only: jlev => sc3int ! jlev(1)
@@ -1812,6 +1826,7 @@ use mod_hiutil, only: gennam
 use mod_hiutil, only: mtime, gettim
 use mod_hismat, only: rdhead
 use mod_fileid, only: FILEID_TMP
+use mod_hiiolib1, only: openf, dopen, closf, dinit
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  icsfil, smtfilnam, xname
@@ -1917,7 +1932,7 @@ end if
 ! now compute cross sections
 call intcr(csflag,flaghf,twomol,flagsu,nucros, &
             numin,numax,nud,jfirst,jfinal,jtotd,maxjt, &
-            sigma,sreal,simag,sc1,sc2,sc3,sc4,nlevop,mmax,tmp_file)
+            sigma,sreal,simag,sc1,sc3,sc4,nlevop,mmax,tmp_file)
 string=' '
 if(nnout.lt.0) string='(COLUMNS)'
 write (ics_unit, 210) string
@@ -1998,7 +2013,7 @@ end
 ! ----------------------------------------------------------------------
 subroutine intcr(csflag,flaghf,twomol,flagsu,nucros, &
            numin,numax,nud,jfirst,jfinal,jtotd,maxjt, &
-           sigma,sreal,simag,sc1,sc2,scmat,tsq,nlevop,nmax,tmp_file)
+           sigma,sreal,simag,sc1,scmat,tsq,nlevop,nmax,tmp_file)
 !
 ! subroutine to calculate integral cross sections from s-matrix
 ! elements
@@ -2008,15 +2023,12 @@ subroutine intcr(csflag,flaghf,twomol,flagsu,nucros, &
 ! current revision date: 8-oct-2012 by q. ma
 !
 ! ----------------------------------------------------------------------
-use mod_cosout, only: nnout, jout
+use mod_cosout, only: nnout
 use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
-use mod_coisc6, only: isc1 => isc6 ! isc1(1)
-use mod_coisc7, only: isc2 => isc7 ! isc2(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_cosc2, only: inlev => sc2int ! inlev(1)
 use mod_cosc3, only: jlev => sc3int ! jlev(1)
-use mod_par, only: batch, ipos
-use mod_selb, only: ibasty
+use mod_par, only: batch
 use mod_hismat, only: sread
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -2036,7 +2048,6 @@ real(8), intent(out) :: sigma(nmax, nlevop)
 real(8), intent(out) :: sreal(nmax, nlevop)
 real(8), intent(out) :: simag(nmax, nlevop)
 real(8), intent(out) :: sc1(nmax, nlevop)
-real(8), intent(out) :: sc2(nmax, nlevop)
 real(8), intent(out) :: scmat(nmax, nlevop)
 real(8), intent(out) :: tsq(nmax, nlevop)
 integer, intent(in) :: nlevop
@@ -2156,6 +2167,7 @@ subroutine tsqmat(tsq,sreal,simag,row_bqs, &
 use mod_hibasis, only: is_j12
 use mod_selb, only: ibasty
 use mod_hitypes, only: bqs_type
+use constants, only: zero, one
 implicit none
 real(8), intent(out) :: tsq(nmax, nmax)
 real(8), intent(in) :: sreal(nmax, nmax)
@@ -2170,8 +2182,6 @@ complex*8 :: t
 real(8) :: t2
 logical :: diag
 !
-real(8), parameter :: zero = 0.0d0
-real(8), parameter :: one = 1.0d0
 do icol = 1, col_bqs%length
    in1 = col_bqs%inq(icol)
    j1 = col_bqs%jq(icol)
@@ -2225,26 +2235,37 @@ subroutine partcr (tsq,  scmat, nopen, &
 !     corrected degeneracy factor for ibasty = 23
 !
 ! ----------------------------------------------------------------------
-use constants
+use constants, only: ang2c, pi
 use mod_hibasis, only: is_j12
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_hivector, only: dset
 use mod_hitypes, only: bqs_type
-implicit double precision (a-h,o-z)
+implicit none
 real(8), dimension(nmax,nmax), intent(in) :: tsq
-!      real(8), dimension(:,:), intent(in), target :: tototsq
 real(8), dimension(nmax,nmax), intent(out) :: scmat
+integer, intent(in) :: nopen
 type(bqs_type), intent(in) :: row_bqs
 type(bqs_type), intent(in) :: col_bqs
 integer, dimension(nlevop), intent(in) :: inlev
 integer, dimension(nlevop), intent(in) :: jlev
 real(8), dimension(nlevop), intent(in) :: elev
+integer, intent(in) :: jtot
+integer, intent(in) :: nu
+logical, intent(in) :: csflag
+logical, intent(in) :: flaghf
+logical, intent(in) :: twomol
+logical, intent(in) :: flagsu
+integer, intent(in) :: nlevop
+integer, intent(in) :: nmax
+
+
 integer, dimension(nmax) :: isc1  ! scratch array
 integer, dimension(nmax) :: isc2  ! scratch array
 real(8), dimension(nmax) :: sc2   ! scratch array
 
-logical csflag, flaghf, flagsu, twomol
+integer :: i, icol, irow, j, jj, jrow1, jrow2, ncol
+real(8) :: denrow, fak, pj, xjtot, xj2, xjrow1, xjrow2
 !
 ASSERT(row_bqs%length == nopen)
 ncol = col_bqs%length

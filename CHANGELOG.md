@@ -1,5 +1,23 @@
 # Hibridon ChangeLog
 
+### Changed
+
+- Increased the maximum length of path to the help file is (256 instead of 80), thus reducing the risk of the help command to fail (commit ecc26b5).
+- Now that all warnings have been addressed, hibridon adopts a zero warning policy: a build will fail on warnings, except those which are flagged as false positives  using `disable-warnings` tag (currently only needed for `gfortran` builds) in source code. This will help preventing the introduction of bugs.
+- removed dummy argument `readpt` from `sav<base-id>` subroutines (`savusr` for user-defined bases) becaused it was never used (commit 918d729).
+
+### Added
+
+- Restored code coverage reports (commit 9bfb4a4)
+
+### Fixed 
+
+- Fixed a buffer overwrite bug in `bound`, where `dsygvx` was called with a vector `ifail` that was undersized
+- Fixed typo that caused `stmix` subroutine (used by `stmix` command) to misfunction in some cases (commit ecc26b5).
+- Fixed bug in tenxsc command with base 04.
+- Fixed misleading error messages in subroutines `prsbr` and `stmix` (commits 1f60dd9, 5632b9f, 2dda188)
+- Fixed uninitialized variable `batch` in subroutine `stmix`, which caused the message "ENERGY DIFFERENCE OF SMT FILES NOT EQUAL TO DELE" to be unintentinally displayed in batch mode (commit 9434475)
+
 ## [v5.1.0] - 2023-04-24
 
 ### Changed

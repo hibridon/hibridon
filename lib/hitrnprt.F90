@@ -13,6 +13,7 @@ module mod_trn
 end module mod_trn
 
 module mod_hitrnprt
+  use mod_assert, only: fassert
 contains
 subroutine trnprt(filnam,a)
 !
@@ -64,6 +65,7 @@ use mod_selb, only: ibasty
 use mod_trn, only: spin, jpmax
 use mod_hiutil, only: gennam, mtime, dater
 use mod_hismat, only: rdhead, sinqr
+use mod_hiiolib1, only: openf
 implicit double precision (a-h,o-z)
 character*(*) filnam
 character*40  trnfil, smtfil
@@ -313,6 +315,7 @@ character*10 elaps, cpu
 ! common blocks for levels for which xs's to be computed
 !
 dimension f36j(0:2)
+
 !
 ! sr, si: s-matrix elements
 !   second letter is real (r), imaginary (i)

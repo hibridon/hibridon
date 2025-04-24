@@ -19,6 +19,7 @@
 subroutine driver
 use mod_covvl, only: vvl  ! vvl(21)
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 integer i
 double precision PI, DEG, S4PI
@@ -55,14 +56,17 @@ end
 ! ------------------------------------------------------------------------
 !
 subroutine loapot(iunit,filnam)
-use mod_cosysi, only: nscode, isicod, ispar
+use mod_cosysi, only: ispar
 use mod_conlam, only: nlam, nlammx
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 implicit double precision (a-h,o-z)
-character*(*) filnam
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
 integer, pointer :: nterm
 nterm=>ispar(1)
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='Wheatley/Hodges NH3-He PES'
 !
 nterm = 4
@@ -112,7 +116,10 @@ subroutine pot (vv0, r)
 !  uses linear least squares routines from lapack
 !
 use mod_covvl, only: vvl ! vvl(NLMTRM-1)
+use mod_hiblas, only: dcopy, dgelsd
 implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
 ! Define the sizes of grids
 ! NLMTRM: number of lambda-mu tuples for the fit
 ! NTHETA, NPHI: number of theta and pi

@@ -13,14 +13,74 @@
 !  Note:  subroutine spline_ch2he requires 1 data file to be in hib44/bin/progs/potdata:
 !         ch2he_x52_v3.dat
 !
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/ground.F90"
 #include "common/bausr.F90"
+
+module mod_ch2he_x52
+contains
+! ----------------------------------------------------------------------
+subroutine spline_ch2he(vsp_jacek, r)
+!  spline_ch2he.f
+!  using Jacek's code to do spline_fit of pot
+!  example:
+!    K=57
+!    call splinej(K,Rp,XX,b0,c0,d0)
+!    VNO=sevalj(K, r, Rp, XX, b0,c0,d0)
+!  where,
+!  K  the number of points to be fitted
+!  Rp, XX   orignal data, Rp & XX should have the same dimensions
+!  r  new distance, where pot need to be calculated by spline-Fitchbur
+!  VNO  pot at r, output
+use mod_hiblas, only: dcopy
+use mod_hipotutil, only: spline, seval
+implicit double precision (a-h,o-z)   
+real(8), intent(out) :: vsp_jacek(52)
+real(8), intent(in)  :: r
+real(8), save :: b0(19,52), c0(19,52), a0(19,52), vvec(19,52)
+real(8) :: rr(19)
+real(8) ::  vv(988),v(19,52)
+integer :: k
+integer, save :: ifirst=0
+data rr /3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,11,12,13,15,20/
+if (ifirst.eq.0) then
+   open (unit=10,file= &
+     'potdata/ch2he_x52_v3.dat')
+   read (10,*) vv
+   close(10)
+
+   do i=1,19
+      do j=1,52         
+        k=(i-1)*52+j
+        v(i,j)=vv(k)
+      enddo
+   enddo          
+!        print *,'in loop'
+   do j=1,52
+      call dcopy(19,v(1,j),1,vvec(1,j),1)
+! vvec contains potentials at all 19 points (rows) for each 52 theta/phi (columns)
+! determine spline coefficients for all 52 theta/phi values
+      call spline(19,rr,vvec(1,j),a0(1,j),b0(1,j),c0(1,j))
+   enddo
+   ifirst=1
+!         save ifirst
+endif
+do j=1,52
+! using previously determined spline coefficients to determine potential at all 52 theta/phi values
+    vsp_jacek(j)=seval(19,r,rr,vvec(1,j),a0(1,j),b0(1,j),c0(1,j))
+enddo             
+   
+ end   
+end module mod_ch2he_x52
+
+
 ! ------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
 use constants, only: s4pi
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 !      common /vspline/ vsp_jacek(52)
 common /copotvec/ vec(40,21)
@@ -44,10 +104,13 @@ end
 ! ------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
 use mod_conlam, only: nlam, nlammx, lamnum
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parpot, only: potnam=>pot_name
 implicit double precision (a-h,o-z)
-character*(*) filnam
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='MA CH2(X,030)-He PES'
 !
 nterm = 7
@@ -117,7 +180,12 @@ subroutine pot (vv0, r)
 !
 use mod_covvl, only: vvl
 use constants, only: s4pi
+use mod_hiblas, only: dscal, dcopy, dgelsd
+use mod_ch2he_x52, only: spline_ch2he
+
 implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
 dimension iwork(3000),ylm(52,20)
 dimension swork(20), work(3624)
 dimension y00(52),y11(52),y20(52),y22(52),y31(52)
@@ -581,57 +649,4 @@ call dscal(19,(1d0-fact),vvl,1)
 call dscal(19,tohat,vvl,1)
 return
 end
-
-! ----------------------------------------------------------------------
-subroutine spline_ch2he(vsp_jacek, r)
-!  spline_ch2he.f
-!  using Jacek's code to do spline_fit of pot
-!  example:
-!    K=57
-!    call splinej(K,Rp,XX,b0,c0,d0)
-!    VNO=sevalj(K, r, Rp, XX, b0,c0,d0)
-!  where,
-!  K  the number of points to be fitted
-!  Rp, XX   orignal data, Rp & XX should have the same dimensions
-!  r  new distance, where pot need to be calculated by spline-Fitchbur
-!  VNO  pot at r, output
-implicit double precision (a-h,o-z)   
-real(8), intent(out) :: vsp_jacek(52)
-real(8), intent(in)  :: r
-real(8), save :: b0(19,52), c0(19,52), a0(19,52), vvec(19,52)
-real(8) :: rr(19)
-real(8) ::  vv(988),v(19,52)
-integer :: k
-integer, save :: ifirst=0
-data rr /3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,11,12,13,15,20/
-if (ifirst.eq.0) then
-   open (unit=10,file= &
-     'potdata/ch2he_x52_v3.dat')
-   read (10,*) vv
-   close(10)
-
-   do i=1,19
-      do j=1,52         
-        k=(i-1)*52+j
-        v(i,j)=vv(k)
-      enddo
-   enddo          
-!        print *,'in loop'
-   do j=1,52
-      call dcopy(19,v(1,j),1,vvec(1,j),1)
-! vvec contains potentials at all 19 points (rows) for each 52 theta/phi (columns)
-! determine spline coefficients for all 52 theta/phi values
-      call spline(19,rr,vvec(1,j),a0(1,j),b0(1,j),c0(1,j))
-   enddo
-   ifirst=1
-!         save ifirst
-endif
-do j=1,52
-! using previously determined spline coefficients to determine potential at all 52 theta/phi values
-    vsp_jacek(j)=seval(19,r,rr,vvec(1,j),a0(1,j),b0(1,j),c0(1,j))
-enddo             
-   
- end   
-
-
 

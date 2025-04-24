@@ -7,6 +7,8 @@
 #endif
 
 module mod_hinput
+  use mod_assert, only: fassert
+
   enum, bind( C )
   enumerator :: &
     k_keyword_execute_command     =  1, &   !   40 label:execute_command(i)
@@ -61,7 +63,7 @@ module mod_hinput
   character(len=8), parameter :: bascod(1) = ['BASISTYP']
 
 contains
-subroutine hinput(first)
+subroutine hinput(first_time)
 !  subroutine to redefine system independent input parameters for
 !  hibridon code
 !  author:  h.-j. werner
@@ -107,11 +109,11 @@ use mod_coiout, only: niout, indout
 use mod_codim, only: nmax => mmax
 use mod_coamat, only: scmat => toto ! scmat(1)
 use mod_coener, only: energ, max_en
-use mod_conlam, only: nlam, nlammx, lamnum
+use mod_conlam, only: nlammx
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysl, only: islcod, lspar
-use mod_cosysr, only: isrcod, idum=>junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use mod_version, only : version
 use mod_hibrid5, only : intcrs, readpc
 use mod_difcrs, only: difcrs
@@ -120,7 +122,7 @@ use mod_hibrid2, only: enord, prsg
 use mod_hibrid3, only: potmin
 use mod_hiutil, only: assignment_parse
 use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT, RPAR_COUNT
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parbas, only: lammin, lammax, mproj
 use fcod_enum
 use lpar_enum
 use ipar_enum
@@ -128,7 +130,7 @@ use rpar_enum
 use mod_par, only: lpar, ipar, rpar, set_param_names, fcod, pcod
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
-use mod_file, only: input, output, jobnam, savfil
+use mod_file, only: input, output, jobnam
 use mod_sav, only: iipar, ixpar, irpar, rxpar
 use mod_tensor, only: tenopa, mrcrs
 use mod_hitestptn, only: testptn
@@ -139,9 +141,14 @@ use mod_hitrnprt, only: trnprt
 use mod_hibrid1, only: difs, turn
 use mod_hibrid4, only: psi, eadiab1, sprint
 use mod_hypxsc, only: hypxsc
+use mod_hiiolib1, only: openf, gendat, savdat, genchk
+use mod_hisystem, only: baschk, sysdat, syssav, ptread
+use mod_histmix, only: stmix
+use mod_hiprsbr, only: prsbr
 implicit none
 !  iicode is the number of integer pcod's
 !  ircode is the number of real pcod's
+logical, intent(inout) :: first_time
 integer, parameter :: lcode = LPAR_COUNT
 integer, parameter :: iicode = IPAR_COUNT
 integer, parameter :: ircode = RPAR_COUNT
@@ -157,7 +164,7 @@ character*8 empty_var_list(0)
 !  pcod, fcod, and bcod)
 character*8 codex(15)
 integer nerg
-logical existf, first, openfl
+logical existf, openfl
 logical logp, opti, jtrunc
 real(8) :: a(15)
 integer :: ia(10)
@@ -185,7 +192,7 @@ data basknd /'1-SIGMA', '2-SIGMA', '2-PI', 'SIGMA|PI', &
 ! graffy: colpar and fcod both contain the 28 logical parameters but in a different order, thus requiring a remapping through lindx. Why not simply having the same order, by making fcod match colpar?
 integer :: lindx(LPAR_COUNT)
 
-integer :: irpot
+integer :: irpot  ! 1 if potentiel has been defined, 0 otherwise
 integer :: irinp
 data irpot, irinp /0, 0/
 
@@ -282,13 +289,13 @@ ijcode=icode
 if(com) open(unit=1312, status='old', file=trim(com_file))
 
 !   define system dependent parameter codes
-if(first) then
+if(first_time) then
    islcod=0
    isrcod=0
    isicod=0
    izero=0
    call sysdat(irpot, lpar(LPAR_READPT), izero)
-   first = .false.
+   first_time = .false.
    call version(6)
 !  in this next statement the $ sign implies no line feed
 !  replace this with an equivalent formatting character if your system
@@ -965,7 +972,7 @@ else
   code = input
 end if
 call savdat(inew,code)
-call syssav(lpar(LPAR_READPT))
+call syssav()
 close(8)
 l1 = l
 irinp = 1
@@ -1099,7 +1106,7 @@ goto 1  ! label:read_next_command
 !.....determine turning point from isotropic potential
 !     turn
 1600 if(irpot .eq. 0) then
-  write(6,510)
+  write(6,510)  ! potentiel not yet defined
   goto 1  ! label:read_next_command
 end if
 e = 0
@@ -1195,7 +1202,7 @@ goto 1  ! label:read_next_command
      call assignment_parse(code(1:lc),empty_var_list,j,a(i))
 2010   continue
   write (6,*) 'hinput : lpar = ' 
-  call difcrs(fnam1,a,lpar(LPAR_IHOMO),lpar(LPAR_FLAGHF))
+  call difcrs(fnam1,a,lpar(LPAR_FLAGHF))
 else
   write (6, 2011)
 2011   format(' Sorry, differential cross sections not yet', &

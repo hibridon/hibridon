@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 ! systp1sg (savstp1sg/ptrstp1sg) defines, saves variables and reads      *
 !                  potential for symmetric top - singlet sigma system    *
 !     Basis subroutine for the collision of a symmetric top with
@@ -36,6 +37,7 @@
 !     filled in the pot routine.
 !     This module replaces lammin, lammax, mproj in hibridon.
 module mod_stp1sg
+  use mod_assert, only: fassert
 use mod_hiutil, only: tf3j, f6j, f9j, tf3jm0
 implicit none
 !
@@ -70,6 +72,7 @@ integer :: j1p, kp, epsp, j2p, j12p, lp, j1, k, eps, j2, j12, l, &
 integer :: iphase, tj1p, tj1, tlam1, tkp, tmu1, tk
 real(8) :: pref, threej, sixj, ninej
 real(8), parameter :: machep = epsilon(0d0)
+logical :: f6j_is_zero
 !
 vstp1sg = 0d0
 iphase = epsp * eps * (-1) ** (j1p + j1 + lam2 + lam + mu1)
@@ -91,7 +94,7 @@ threej = threej * (tf3j(tj1p, tlam1, tj1, -tkp, tmu1, tk) &
    + eps * tf3j(tj1p, tlam1, tj1, -tkp, tmu1, -tk))
 if (dabs(threej) .lt. machep) return
 !
-sixj = f6j(j12, l, jtot, lp, j12p, lam)
+sixj = f6j(j12, l, jtot, lp, j12p, lam, f6j_is_zero)
 if (dabs(sixj) .lt. machep) return
 ninej = f9j(j1, j2, j12, j1p, j2p, j12p, lam1, lam2, lam)
 if (dabs(ninej) .lt. machep) return
@@ -129,11 +132,11 @@ use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cchn => cent
 use mod_coeint, only: echn => eint
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use mod_hibasutil, only: raise
 use mod_par, only: iprint
-use mod_ered, only: ered, rmu
+use mod_ered, only: ered
 use mod_hitypes, only: bqs_type
 implicit none
 type(bqs_type), intent(out) :: bqs
@@ -163,6 +166,10 @@ integer, pointer :: ipotsy, iop, ipotsy2, j1max, j2min, j2max
 real(8), pointer :: brot, crot, delta, e1max, drot
 ipotsy=>ispar(1); iop=>ispar(2); ipotsy2=>ispar(3); j1max=>ispar(4); j2min=>ispar(5); j2max=>ispar(6)
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); e1max=>rspar(4); drot=>rspar(5); 
+UNUSED_DUMMY(numin)
+UNUSED_DUMMY(clist)
+UNUSED_DUMMY(nu)
+UNUSED_DUMMY(rcut)
 
 if (flaghf) &
      call raise('FLAGHF = .TRUE. FOR SINGLET SYSTEM')
@@ -295,11 +302,9 @@ return
 end subroutine genchn_stp1sg
 !     ------------------------------------------------------------------
 subroutine sortlev_stp1sg()
-use mod_stp1sg
-use constants, only: econv
+use mod_stp1sg, only: lev_type, levs
 implicit none
 type(lev_type) :: temp
-type(lev_type), dimension(:), allocatable :: levs1
 integer :: i, j
 real(8) :: esave
 do i = 1, size(levs) - 1
@@ -415,7 +420,7 @@ end subroutine prtlev_stp1sg
 !     ------------------------------------------------------------------
 subroutine prtchn_stp1sg()
 use mod_stp1sg
-use constants, only: econv, xmconv
+use constants, only: econv
 implicit none
 integer :: i, ilev
 write (6, 10)
@@ -438,12 +443,13 @@ end subroutine prtchn_stp1sg
 subroutine systp1sg(irpot, readpt, iread)
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use mod_hibasutil, only: raise
 use funit, only: FUNIT_INP
+use mod_hipot, only: loapot
 implicit none
 !
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 character*(*) fname
@@ -457,6 +463,9 @@ integer, pointer, save :: ipotsy, iop, ipotsy2, j1max, j2min, j2max
 real(8), pointer, save :: brot, crot, delta, e1max, drot
 ipotsy=>ispar(1); iop=>ispar(2); ipotsy2=>ispar(3); j1max=>ispar(4); j2min=>ispar(5); j2max=>ispar(6)
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); e1max=>rspar(4); drot=>rspar(5); 
+
+UNUSED_DUMMY(irpot)
+UNUSED_DUMMY(readpt)
 
 !     DEFINE THE NAMES HERE
 scod(1)='IPOTSY'
@@ -489,9 +498,10 @@ return
 return
 !     ------------------------------------------------------------------
 entry ptrstp1sg(fname, readpt)
+UNUSED_DUMMY(fname)
 return
 !     ------------------------------------------------------------------
-entry savstp1sg(readpt)
+entry savstp1sg()
 !     WRITE THE LAST FEW LINES OF THE INPUT FILE.
 write (FUNIT_INP, 220) ipotsy, iop
 220 format (2i4, 25x,'ipotsy, iop')

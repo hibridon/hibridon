@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 ! sy2pi1sg (sav2pi1sg/ptr2pi1sg) defines, saves variables and            *
 !                  reads potential for doublet pi-singlet sigma* system  *
 !     Basis subroutine for the collision of a doublet-Pi molecule with
@@ -12,6 +13,7 @@
 !     filled in the pot routine.
 !     This module replaces lammin, lammax, mproj in hibridon.
 module mod_2pi1sg
+  use mod_assert, only: fassert
 implicit none
 !
 type lm_type
@@ -110,11 +112,11 @@ use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cchn => cent
 use mod_coeint, only: echn => eint
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar 
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar 
 use mod_hibasutil, only: raise
 use mod_par, only: iprint
-use mod_ered, only: ered, rmu
+use mod_ered, only: ered
 use mod_hitypes, only: bqs_type
 implicit none
 type(bqs_type), intent(out) :: bqs
@@ -143,6 +145,9 @@ integer, pointer :: j1max, npar, j2min, j2max, iptsy2
 real(8), pointer :: brot, aso, p, q, drot
 j1max=>ispar(1); npar=>ispar(2); j2min=>ispar(3); j2max=>ispar(4); iptsy2=>ispar(5)
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
+UNUSED_DUMMY(numin)
+UNUSED_DUMMY(clist)
+UNUSED_DUMMY(nu)
 
 if (.not. flaghf) &
      call raise('FLAGHF = .FALSE. FOR DOUBLET SYSTEM')
@@ -411,11 +416,12 @@ end subroutine prtchn_2pi1sg
 subroutine sy2pi1sg(irpot, readpt, iread)
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use mod_hibasutil, only: raise
 use funit, only: FUNIT_INP
+use mod_hipot, only: loapot
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 character*(*) fname
@@ -431,6 +437,8 @@ real(8), pointer, save :: brot, aso, p, q, drot
 j1max=>ispar(1); npar=>ispar(2); j2min=>ispar(3); j2max=>ispar(4); iptsy2=>ispar(5)
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4); drot=>rspar(5)
 
+UNUSED_DUMMY(irpot)
+UNUSED_DUMMY(readpt)
 !     DEFINE THE NAMES HERE
 scod(1)='J1MAX'
 scod(2)='NPAR'
@@ -459,8 +467,9 @@ return
 80 call raise('ERROR READING FROM INPUT FILE.')
 return
 entry ptr2pi1sg(fname, readpt)
+UNUSED_DUMMY(fname)
 return
-entry sav2pi1sg(readpt)
+entry sav2pi1sg()
 !     WRITE THE LAST FEW LINES OF THE INPUT FILE.
 write (FUNIT_INP, 230) j1max, npar
 230 format (2i4, 22x, '   j1max, npar')

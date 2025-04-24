@@ -1,5 +1,7 @@
 #include "assert.h"
 program logair
+use mod_assert, only: fassert
+
 use mod_com, only: com_file, com
 use mod_clseg, only: allocate_clseg
 use mod_cobuf, only: allocate_cobuf
@@ -28,8 +30,8 @@ use mod_cozmat, only: allocate_cozmat, zmat
 use mod_coamat, only: allocate_coamat, amat
 use mod_cobmat, only: allocate_cobmat, bmat
 use mod_cotq1, only: allocate_cotq1, tq1
-use mod_cotq2, only: allocate_cotq2, tq2
-use mod_cotq3, only: allocate_cotq3, tq3
+use mod_cotq2, only: allocate_cotq2
+use mod_cotq3, only: allocate_cotq3
 use mod_cojhld, only: allocate_cojhld, jhold
 use mod_coehld, only: allocate_coehld, ehold
 use mod_coinhl, only: allocate_coinhl, inhold
@@ -50,11 +52,11 @@ use mod_cosc1, only: allocate_cosc1, sc1
 use mod_cosc2, only: allocate_cosc2, sc2
 use mod_cosc3, only: allocate_cosc3, sc3
 use mod_cosc4, only: allocate_cosc4, sc4
-use mod_cosc5, only: allocate_cosc5, sc5
-use mod_cosc6, only: allocate_cosc6, sc6
-use mod_cosc7, only: allocate_cosc7, sc7
-use mod_cosc8, only: allocate_cosc8, sc8
-use mod_cosc9, only: allocate_cosc9, sc9
+use mod_cosc5, only: allocate_cosc5
+use mod_cosc6, only: allocate_cosc6
+use mod_cosc7, only: allocate_cosc7
+use mod_cosc8, only: allocate_cosc8
+use mod_cosc9, only: allocate_cosc9
 use mod_cosc10, only: allocate_cosc10
 use mod_cosc11, only: allocate_cosc11
 use mod_coeig, only: allocate_coeig
@@ -77,6 +79,7 @@ use mod_cosysr, only: allocate_cosysr
 use mod_par, only: allocate_par
 use mod_flow, only: flow
 use mod_hiutil, only: factlg
+use mod_hiiolib1, only: finit
 !**********************************************************************
 !***   this code is not released for general public use            ****
 !***   all use must be by specific prior arrangement with:         ****
@@ -96,9 +99,6 @@ use mod_hiutil, only: factlg
 !  current revision date:  19-jun-2019 (p. dagdigian)
 !
 implicit none
-#if defined(HIB_UNIX_IBM) || defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
-character *40 test
-#endif
 !  ----------------------------------------------------------
 !  in the following parameter statements:
 !     kmxbas is maximum number of included basis routines, this should
@@ -312,8 +312,8 @@ call factlg(kfact)
 ! start scattering calculation
 call flow (z, w, zmat, amat, bmat, jhold, ehold, &
            inhold, isc1, isc2, isc3, isc4, lsc1, &
-           sc2, sc1, sc3, sc4, sc5, &
-           sc6, sc7, sc8, sc9, tq1, tq2, tq3, men, mmax, mairy)
+           sc2, sc1, sc3, sc4, &
+           tq1, men, mmax, mairy)
 call finit ! Closes all I/O units
 contains
 subroutine print_help()
