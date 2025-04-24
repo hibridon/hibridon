@@ -13,6 +13,19 @@ zwcheck.py will ignore warnings explicitly flagged as disabled. To explicitely f
 ```
 ! disable-warnings:do-subscript,maybe-uninitialized
 ```
+
+important note: zwcheck.py currently only understands the messages outputted by gfortran.
+
+example script of a typical use of zwcheck.py:
+```py
+#!/usr/bin/env bash
+# rebuilds hibridon using make, then calls zwcheck.py to detect if there are unwanted warnings remaining
+make clean
+unbuffer make > >(tee make.stdout) 2> >(tee make.stderr >&2)
+zwcheck.py --make-stdout ./make.stdout --show-warnings 'false'
+```
+
+
 """
 
 
