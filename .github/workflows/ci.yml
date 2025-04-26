@@ -48,7 +48,7 @@ jobs:
           then
             module load compilers/ifort/latest
           fi
-        elif [ "${{matrix.compiler}}" == 'gfortran']
+        elif [ "${{matrix.compiler}}" == 'gfortran' ]
         then
           if [ "${{matrix.os}}" == 'debian-12' ]
           then
