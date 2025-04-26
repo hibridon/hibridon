@@ -1,155 +1,152 @@
 name: Build and Test Hibridon
-# builds and tests hibridon for a given configuration
-on:
-  workflow_call:
-    inputs:
-      build_type:
-        required: false
-        type: string
-        default: "Debug"
-      compiler:
-        required: false
-        type: string
-        default: "gfortran"
-      os:
-        required: false
-        type: string
-        default: "debian-12"
+description: builds and tests hibridon for a given configuration
+inputs:
+  build_type:
+    required: false
+    type: string
+    default: "Debug"
+  compiler:
+    required: false
+    type: string
+    default: "gfortran"
+  os:
+    required: false
+    type: string
+    default: "debian-12"
 env:
   CMAKE_BUILD_PARALLEL_LEVEL: "1" # disable parallel builds
   CTEST_OUTPUT_ON_FAILURE: "ON" # This way we don't need a flag to ctest
   CTEST_PARALLEL_LEVEL: "1"
   OMP_NUM_THREADS: "2"
-jobs:
-  build_and_test:
-    runs-on: ${{ inputs.os }}
-    env:
-      ASAN_OPTIONS: "detect_leaks=${{ inputs.build_type == 'Release' && '0' || '1' }}" # Disable address sanitizer's memory leak detection in release builds
-      # LINK_TIME_OPTIMIZATION not operational on debian9 gfortran (gfortran is too old : /usr/bin/ar: CMakeFiles/hib.dir/ancou.F90.o: plugin needed to handle lto object)
-      LINK_TIME_OPTIMIZATION: "OFF"
+runs:
+  using: "composite"
+  env:
+    ASAN_OPTIONS: "detect_leaks=${{ inputs.build_type == 'Release' && '0' || '1' }}" # Disable address sanitizer's memory leak detection in release builds
+    # LINK_TIME_OPTIMIZATION not operational on debian9 gfortran (gfortran is too old : /usr/bin/ar: CMakeFiles/hib.dir/ancou.F90.o: plugin needed to handle lto object)
+    LINK_TIME_OPTIMIZATION: "OFF"
 
-      # ENABLE_UNINIT_VAR_RUNTIME_DETECTOR works on ubuntu 20.04 but causes some tests to fail on debian 9:
-      # AddressSanitizer: FPE on unknown address 0x7f329c9bc3f8 (pc 0x7f329c9bc3f8 bp 0x6290000baf00 sp 0x7ffc8d5cf650 T0)
-      # 0 0x7f329c9bc3f7 in ATL_dtrsmKR_rk4 (/usr/lib/libatlas.so.3+0x10a3f7))
-      ENABLE_UNINIT_VAR_RUNTIME_DETECTOR: ${{ inputs.build_type == 'Debug' && 'ON' || 'OFF' }}
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    # ENABLE_UNINIT_VAR_RUNTIME_DETECTOR works on ubuntu 20.04 but causes some tests to fail on debian 9:
+    # AddressSanitizer: FPE on unknown address 0x7f329c9bc3f8 (pc 0x7f329c9bc3f8 bp 0x6290000baf00 sp 0x7ffc8d5cf650 T0)
+    # 0 0x7f329c9bc3f7 in ATL_dtrsmKR_rk4 (/usr/lib/libatlas.so.3+0x10a3f7))
+    ENABLE_UNINIT_VAR_RUNTIME_DETECTOR: ${{ inputs.build_type == 'Debug' && 'ON' || 'OFF' }}
+  steps:
+  - name: Checkout code
+    uses: actions/checkout@v2
 
-    - name: Configure CMake
-      run: |
-        mkdir -p ${{github.workspace}}/build && \
-        CMAKE_OPTIONS=""
-        if [ "${{inputs.compiler}}" == 'ifort' ]
+  - name: Configure CMake
+    run: |
+      mkdir -p ${{github.workspace}}/build && \
+      CMAKE_OPTIONS=""
+      if [ "${{inputs.compiler}}" == 'ifort' ]
+      then
+        if [ "${{inputs.os}}" == 'debian-12' ]
         then
-          if [ "${{inputs.os}}" == 'debian-12' ]
-          then
-            module load compilers/ifort/latest
-          elif [ "${{inputs.os}}" == 'macos-11.2' ]
-          then
-            source /opt/intel/oneapi/setvars.sh --force
-          fi
-          CMAKE_OPTIONS="${CMAKE_OPTIONS} -DBLA_VENDOR=Intel10_64lp"
-          FORTRAN_COMPILER=ifort
-        elif [ "${{inputs.compiler}}" == 'gfortran' ]
+          module load compilers/ifort/latest
+        elif [ "${{inputs.os}}" == 'macos-11.2' ]
         then
-          if [ "${{inputs.os}}" == 'debian-12' ]
-          then
-            FORTRAN_COMPILER=gfortran-12
-          elif [ "${{inputs.os}}" == 'macos-11.2' ]
-          then
-            FORTRAN_COMPILER=gfortran-11
-            CMAKE_OPTIONS="${CMAKE_OPTIONS} -DBLA_VENDOR=Apple"
-          else
-            echo "Unknown os: ${{inputs.os}}"
-            exit 1
-          fi
+          source /opt/intel/oneapi/setvars.sh --force
+        fi
+        CMAKE_OPTIONS="${CMAKE_OPTIONS} -DBLA_VENDOR=Intel10_64lp"
+        FORTRAN_COMPILER=ifort
+      elif [ "${{inputs.compiler}}" == 'gfortran' ]
+      then
+        if [ "${{inputs.os}}" == 'debian-12' ]
+        then
+          FORTRAN_COMPILER=gfortran-12
+        elif [ "${{inputs.os}}" == 'macos-11.2' ]
+        then
+          FORTRAN_COMPILER=gfortran-11
+          CMAKE_OPTIONS="${CMAKE_OPTIONS} -DBLA_VENDOR=Apple"
         else
-          echo "Unknown compiler: ${{inputs.compiler}}"
+          echo "Unknown os: ${{inputs.os}}"
           exit 1
         fi
-        CMAKE_OPTIONS="${CMAKE_OPTIONS} -DCMAKE_BUILD_TYPE=${{inputs.build_type}}"
-        CMAKE_OPTIONS="${CMAKE_OPTIONS} -DBUILD_TESTING=ON"
-        CMAKE_OPTIONS="${CMAKE_OPTIONS} -DCMAKE_Fortran_COMPILER=${FORTRAN_COMPILER}"
-        CMAKE_OPTIONS="${CMAKE_OPTIONS} -DLINK_TIME_OPTIMIZATION=${{env.LINK_TIME_OPTIMIZATION}}"
-        CMAKE_OPTIONS="${CMAKE_OPTIONS} -DENABLE_UNINIT_VAR_RUNTIME_DETECTOR=${{env.ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}}"
-        cmake -B ${{github.workspace}}/build $CMAKE_OPTIONS
+      else
+        echo "Unknown compiler: ${{inputs.compiler}}"
+        exit 1
+      fi
+      CMAKE_OPTIONS="${CMAKE_OPTIONS} -DCMAKE_BUILD_TYPE=${{inputs.build_type}}"
+      CMAKE_OPTIONS="${CMAKE_OPTIONS} -DBUILD_TESTING=ON"
+      CMAKE_OPTIONS="${CMAKE_OPTIONS} -DCMAKE_Fortran_COMPILER=${FORTRAN_COMPILER}"
+      CMAKE_OPTIONS="${CMAKE_OPTIONS} -DLINK_TIME_OPTIMIZATION=${{env.LINK_TIME_OPTIMIZATION}}"
+      CMAKE_OPTIONS="${CMAKE_OPTIONS} -DENABLE_UNINIT_VAR_RUNTIME_DETECTOR=${{env.ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}}"
+      cmake -B ${{github.workspace}}/build $CMAKE_OPTIONS
 
-    - name: Build
-      run: |
-        if [ "${{inputs.compiler}}" == 'ifort' ]
+  - name: Build
+    run: |
+      if [ "${{inputs.compiler}}" == 'ifort' ]
+      then
+        if [ "${{inputs.os}}" == 'debian-12' ]
         then
-          if [ "${{inputs.os}}" == 'debian-12' ]
-          then
-            module load compilers/ifort/latest
-          elif [ "${{inputs.os}}" == 'macos-11.2' ]
-          then
-            source /opt/intel/oneapi/setvars.sh --force
-          fi
-        fi
-        if [ "${{inputs.os}}" == 'debian-12' ] && [ "${{inputs.compiler}}" == 'gfortran' ]
+          module load compilers/ifort/latest
+        elif [ "${{inputs.os}}" == 'macos-11.2' ]
         then
-          # build with zwcheck.py to ensure zero warnings policy
-          unbuffer cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}} > >(tee ${{github.workspace}}/build/make.stdout) 2> >(tee ${{github.workspace}}/build/make.stderr >&2)
-          ${{github.workspace}}/bin/zwcheck.py --make-stdout ${{github.workspace}}/build/make.stdout --show-warnings 'true'
-        else
-          # build without zwcheck.py because:
-          # - unbuffer command is not available on macos
-          # - zwcheck.py only works with gfortran at the moment
-          cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}}
+          source /opt/intel/oneapi/setvars.sh --force
         fi
-    - name: Show failure details
-      run: |
-        if [ "${{inputs.compiler}}" == 'ifort' ]
+      fi
+      if [ "${{inputs.os}}" == 'debian-12' ] && [ "${{inputs.compiler}}" == 'gfortran' ]
+      then
+        # build with zwcheck.py to ensure zero warnings policy
+        unbuffer cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}} > >(tee ${{github.workspace}}/build/make.stdout) 2> >(tee ${{github.workspace}}/build/make.stderr >&2)
+        ${{github.workspace}}/bin/zwcheck.py --make-stdout ${{github.workspace}}/build/make.stdout --show-warnings 'true'
+      else
+        # build without zwcheck.py because:
+        # - unbuffer command is not available on macos
+        # - zwcheck.py only works with gfortran at the moment
+        cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}}
+      fi
+  - name: Show failure details
+    run: |
+      if [ "${{inputs.compiler}}" == 'ifort' ]
+      then
+        if [ "${{inputs.os}}" == 'debian-12' ]
         then
-          if [ "${{inputs.os}}" == 'debian-12' ]
-          then
-            module load compilers/ifort/latest
-          elif [ "${{inputs.os}}" == 'macos-11.2' ]
-          then
-            source /opt/intel/oneapi/setvars.sh --force
-          fi
-        fi
-        if [ "${{inputs.os}}" == 'debian-12' ] && [ "${{inputs.compiler}}" == 'gfortran' ]
+          module load compilers/ifort/latest
+        elif [ "${{inputs.os}}" == 'macos-11.2' ]
         then
-          # build with zwcheck.py to ensure zero warnings policy
-          unbuffer cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}} --verbose > >(tee ${{github.workspace}}/build/make.stdout) 2> >(tee ${{github.workspace}}/build/make.stderr >&2)
-          ${{github.workspace}}/bin/zwcheck.py --make-stdout ${{github.workspace}}/build/make.stdout --show-warnings 'true'
-        else
-          # build without zwcheck.py because:
-          # - unbuffer command is not available on macos
-          # - zwcheck.py only works with gfortran at the moment
-          cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}} --verbose
+          source /opt/intel/oneapi/setvars.sh --force
         fi
-      if: failure()
+      fi
+      if [ "${{inputs.os}}" == 'debian-12' ] && [ "${{inputs.compiler}}" == 'gfortran' ]
+      then
+        # build with zwcheck.py to ensure zero warnings policy
+        unbuffer cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}} --verbose > >(tee ${{github.workspace}}/build/make.stdout) 2> >(tee ${{github.workspace}}/build/make.stderr >&2)
+        ${{github.workspace}}/bin/zwcheck.py --make-stdout ${{github.workspace}}/build/make.stdout --show-warnings 'true'
+      else
+        # build without zwcheck.py because:
+        # - unbuffer command is not available on macos
+        # - zwcheck.py only works with gfortran at the moment
+        cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}} --verbose
+      fi
+    if: failure()
 
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: |
-        if [ "${{inputs.compiler}}" == 'ifort' ]
+  - name: Test
+    working-directory: ${{github.workspace}}/build
+    run: |
+      if [ "${{inputs.compiler}}" == 'ifort' ]
+      then
+        if [ "${{inputs.os}}" == 'debian-12' ]
         then
-          if [ "${{inputs.os}}" == 'debian-12' ]
-          then
-            module load compilers/ifort/latest
-          elif [ "${{inputs.os}}" == 'macos-11.2' ]
-          then
-            source /opt/intel/oneapi/setvars.sh --force
-          fi
+          module load compilers/ifort/latest
+        elif [ "${{inputs.os}}" == 'macos-11.2' ]
+        then
+          source /opt/intel/oneapi/setvars.sh --force
         fi
-        TEST_SUITE=''
-        if [ "${{github.event_name}}" == 'pull_request' ]
-        then
-          TEST_SUITE='coverage'
-        elif [ "${{github.event_name}}" == 'push' ]
-        then
-          TEST_SUITE='coverage'
-        elif [ "${{github.event_name}}" == 'schedule' ]
-        then
-          TEST_SUITE=''  # run all tests
-        fi
-        if [ "${TEST_SUITE}" == '' ]
-        then
-          ctest --parallel --output-on-failure
-        else
-          ctest --parallel --output-on-failure -L "^${TEST_SUITE}$"
-        fi
+      fi
+      TEST_SUITE=''
+      if [ "${{github.event_name}}" == 'pull_request' ]
+      then
+        TEST_SUITE='coverage'
+      elif [ "${{github.event_name}}" == 'push' ]
+      then
+        TEST_SUITE='coverage'
+      elif [ "${{github.event_name}}" == 'schedule' ]
+      then
+        TEST_SUITE=''  # run all tests
+      fi
+      if [ "${TEST_SUITE}" == '' ]
+      then
+        ctest --parallel --output-on-failure
+      else
+        ctest --parallel --output-on-failure -L "^${TEST_SUITE}$"
+      fi
