@@ -33,6 +33,9 @@ jobs:
       # 0 0x7f329c9bc3f7 in ATL_dtrsmKR_rk4 (/usr/lib/libatlas.so.3+0x10a3f7))
       ENABLE_UNINIT_VAR_RUNTIME_DETECTOR: ${{ inputs.build_type == 'Debug' && 'ON' || 'OFF' }}
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
     - name: Configure CMake
       run: |
         mkdir -p ${{github.workspace}}/build && \
