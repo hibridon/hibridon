@@ -42,12 +42,15 @@ jobs:
         CMAKE_OPTIONS=""
         if [ "${{matrix.compiler}}" == 'ifort' ]
         then
-          CMAKE_OPTIONS="${CMAKE_OPTIONS} -DBLA_VENDOR=Intel10_64lp"
-          FORTRAN_COMPILER=ifort
           if [ "${{matrix.os}}" == 'debian-12' ]
           then
             module load compilers/ifort/latest
+          elif [ "${{matrix.os}}" == 'macos-11.2' ]
+          then
+            source /opt/intel/oneapi/setvars.sh --force
           fi
+          CMAKE_OPTIONS="${CMAKE_OPTIONS} -DBLA_VENDOR=Intel10_64lp"
+          FORTRAN_COMPILER=ifort
         elif [ "${{matrix.compiler}}" == 'gfortran' ]
         then
           if [ "${{matrix.os}}" == 'debian-12' ]
@@ -56,6 +59,7 @@ jobs:
           elif [ "${{matrix.os}}" == 'macos-11.2' ]
           then
             FORTRAN_COMPILER=gfortran-11
+            CMAKE_OPTIONS="${CMAKE_OPTIONS} -DBLA_VENDOR=Apple"
           else
             echo "Unknown os: ${{matrix.os}}"
             exit 1
@@ -78,6 +82,9 @@ jobs:
           if [ "${{matrix.os}}" == 'debian-12' ]
           then
             module load compilers/ifort/latest
+          elif [ "${{matrix.os}}" == 'macos-11.2' ]
+          then
+            source /opt/intel/oneapi/setvars.sh --force
           fi
         fi
         if [ "${{matrix.os}}" == 'debian-12' ] && [ "${{matrix.compiler}}" == 'gfortran' ]
@@ -98,6 +105,9 @@ jobs:
           if [ "${{matrix.os}}" == 'debian-12' ]
           then
             module load compilers/ifort/latest
+          elif [ "${{matrix.os}}" == 'macos-11.2' ]
+          then
+            source /opt/intel/oneapi/setvars.sh --force
           fi
         fi
         if [ "${{matrix.os}}" == 'debian-12' ] && [ "${{matrix.compiler}}" == 'gfortran' ]
@@ -121,6 +131,9 @@ jobs:
           if [ "${{matrix.os}}" == 'debian-12' ]
           then
             module load compilers/ifort/latest
+          elif [ "${{matrix.os}}" == 'macos-11.2' ]
+          then
+            source /opt/intel/oneapi/setvars.sh --force
           fi
         fi
         TEST_SUITE=''
