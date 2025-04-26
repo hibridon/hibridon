@@ -24,6 +24,9 @@ jobs:
           build_type: [Debug, Release]
           compiler: [gfortran, ifort]
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2  # apparently needed to ensure that the reusable workflows are checked out
+
       - name: Call build_and_test
         uses: ./.github/workflows/lib/build_and_test.yml
         with:
