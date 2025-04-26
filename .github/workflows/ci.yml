@@ -138,5 +138,5 @@ jobs:
         then
           ctest --parallel --output-on-failure
         else
-          ctest --parallel --output-on-failure -L '^$TEST_SUITE$
+          ctest --parallel --output-on-failure -L '^$TEST_SUITE$'
         fi
