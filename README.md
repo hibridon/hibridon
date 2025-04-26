@@ -1,9 +1,9 @@
 
-[![Full CI on macOS-11.2](https://github.com/hibridon/hibridon/actions/workflows/full_macOS-11.2.yml/badge.svg)](https://github.com/hibridon/hibridon/actions/workflows/full_macOS-11.2.yml)
-[![Long CI on macOS-11.2](https://github.com/hibridon/hibridon/actions/workflows/long_macOS-11.2.yml/badge.svg)](https://github.com/hibridon/hibridon/actions/workflows/long_macOS-11.2.yml)
+code status (hibridon main branch):
 
-[![Full CI on Debian 9](https://github.com/hibridon/hibridon/actions/workflows/full_Debian-9.yml/badge.svg)](https://github.com/hibridon/hibridon/actions/workflows/full_Debian-9.yml)
-[![Long CI on Debian 9](https://github.com/hibridon/hibridon/actions/workflows/long_Debian-9.yml/badge.svg)](https://github.com/hibridon/hibridon/actions/workflows/long_Debian-9.yml)
+![full CI](https://github.com/hibridon/hibridon/actions/workflows/ci.yml/badge.svg?event=scheduler)
+
+![main CI](https://github.com/hibridon/hibridon/actions/workflows/ci.yml/badge.svg?event=push)
 
 [What does that mean ?](https://github.com/hibridon/hibridon/wiki/Continuous-Integration)
 
