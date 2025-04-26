@@ -98,7 +98,7 @@ jobs:
           # - zwcheck.py only works with gfortran at the moment
           cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
         fi
-    - name: catch build fail
+    - name: Show failure details
       run: |
         if [ "${{matrix.compiler}}" == 'ifort' ]
         then
@@ -151,5 +151,5 @@ jobs:
         then
           ctest --parallel --output-on-failure
         else
-          ctest --parallel --output-on-failure -L '^$TEST_SUITE$'
+          ctest --parallel --output-on-failure -L "^${TEST_SUITE}$""
         fi
