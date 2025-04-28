@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Set up environment
+      - name: env-setup
         run: |
           TEST_SUITE=''
           if [ "${{github.event_name}}" == 'pull_request' ]
@@ -34,6 +34,7 @@ jobs:
           then
             TEST_SUITE='all'  # run all tests
           fi
+          echo "TEST_SUITE=${TEST_SUITE}" >> $GITHUB_ENV
       - name: Use reusable steps
         id: reusable-steps
         uses: ./.github/test-config # To use this syntax, we must have the repository checked out
@@ -41,7 +42,7 @@ jobs:
           os: ${{ matrix.os }}
           compiler: ${{ matrix.compiler }}
           build_type: ${{ matrix.build_type }}
-          test_suite: ${TEST_SUITE}
+          test_suite: ${{ env.TEST_SUITE }}
         env:
           HELLO_WORLD_SECRET: TERCES_DLROW_OLLEH
 
