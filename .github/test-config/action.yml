@@ -113,7 +113,7 @@ runs:
       # then
       #   # build with zwcheck.py to ensure zero warnings policy
       #   unbuffer cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}} > >(tee ${{github.workspace}}/build/make.stdout) 2> >(tee ${{github.workspace}}/build/make.stderr >&2)
-        ${{github.workspace}}/bin/zwcheck.py --make-stdout ${{github.workspace}}/build/make.stdout --show-warnings 'true'
+      #   ${{github.workspace}}/bin/zwcheck.py --make-stdout ${{github.workspace}}/build/make.stdout --show-warnings 'true'
       # else
       #   # build without zwcheck.py because:
       #   # - unbuffer command is not available on macos
@@ -137,7 +137,7 @@ runs:
       # then
       #   # build with zwcheck.py to ensure zero warnings policy
       #   unbuffer cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}} --verbose > >(tee ${{github.workspace}}/build/make.stdout) 2> >(tee ${{github.workspace}}/build/make.stderr >&2)
-        ${{github.workspace}}/bin/zwcheck.py --make-stdout ${{github.workspace}}/build/make.stdout --show-warnings 'true'
+      #   ${{github.workspace}}/bin/zwcheck.py --make-stdout ${{github.workspace}}/build/make.stdout --show-warnings 'true'
       # else
       #   # build without zwcheck.py because:
       #   # - unbuffer command is not available on macos
