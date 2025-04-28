@@ -9,22 +9,7 @@ defaults:
     shell: bash
 
 jobs:
-  job-1:
-    runs-on: ${{ matrix.os }}
-    strategy:
-        fail-fast: false
-        matrix:
-          os: [debian-12, macos-11.2]
-          build_type: [Debug, Release]
-          compiler: [gfortran, ifort]
-    steps:
-      - name: Print Hello World
-        run: echo "Hello World ${{ matrix.compiler }} on ${{ matrix.os }} with ${{ matrix.build_type }}"
-      - name: Create a file
-        run: echo "Hello World" > input.txt
-
-  job-2:
-    needs: job-1
+  test-common-configs:
     runs-on: ${{ matrix.os }}
     strategy:
         fail-fast: false
@@ -38,10 +23,33 @@ jobs:
           fetch-depth: 0
       - name: Use reusable steps
         id: reusable-steps
-        uses: ./.github/reusable-steps # To use this syntax, we must have the repository checked out
+        uses: ./.github/test-config # To use this syntax, we must have the repository checked out
         with:
           os: ${{ matrix.os }}
-          complier: ${{ matrix.compiler }}
+          compiler: ${{ matrix.compiler }}
+          build_type: ${{ matrix.build_type }}
+        env:
+          HELLO_WORLD_SECRET: TERCES_DLROW_OLLEH
+
+  test-code-coverage:
+    needs: test-common-configs
+    runs-on: ${{ matrix.os }}
+    strategy:
+        fail-fast: false
+        matrix:
+          os: [debian-12, macos-11.2]
+          build_type: [CodeCoverage]
+          compiler: [gfortran]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Use reusable steps
+        id: reusable-steps
+        uses: ./.github/test-config # To use this syntax, we must have the repository checked out
+        with:
+          os: ${{ matrix.os }}
+          compiler: ${{ matrix.compiler }}
           build_type: ${{ matrix.build_type }}
         env:
           HELLO_WORLD_SECRET: TERCES_DLROW_OLLEH

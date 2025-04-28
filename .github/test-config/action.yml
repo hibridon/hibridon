@@ -1,5 +1,6 @@
-name: Reusable steps (AKA composite action)
-description: Demonstrate how to use reusable steps in a workflow
+name: Build and Test Configuration
+description: a composite that builds hibridons then tests it for a given configuration
+# This is a composite action that runs on the same runner as the main workflow.
 # Schema: https://json.schemastore.org/github-action.json
 
 # Runs on the same runner and same work area as the main workflow.
@@ -20,7 +21,6 @@ inputs:
     required: false
     type: string
     default: "debian-12"
-
 runs:
   using: 'composite'
   steps:
