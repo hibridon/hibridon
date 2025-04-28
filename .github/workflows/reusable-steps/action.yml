@@ -1,0 +1,39 @@
+name: Reusable steps (AKA composite action)
+description: Demonstrate how to use reusable steps in a workflow
+# Schema: https://json.schemastore.org/github-action.json
+
+# Runs on the same runner and same work area as the main workflow.
+# No need to use 'build artifacts' to share files with the main workflow.
+# Env variables are inherited.
+# Secrets are not available -- must be passed explicitly as inputs or env vars.
+
+inputs:
+  build_type:
+    required: false
+    type: string
+    default: "Debug"
+  compiler:
+    required: false
+    type: string
+    default: "gfortran"
+  os:
+    required: false
+    type: string
+    default: "debian-12"
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Configure CMake
+      shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
+      run: |
+        echo "fake configure for ${{ inputs.build_type }} ${{ inputs.compiler }} ${{ inputs.os }}" && \
+        mkdir -p ${{github.workspace}}/build
+    - name: Build
+      shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
+      run: |
+        echo "fake build for ${{ inputs.build_type }} ${{ inputs.compiler }} ${{ inputs.os }}"
+    - name: Test
+      shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
+      run: |
+        echo "fake test for ${{ inputs.build_type }} ${{ inputs.compiler }} ${{ inputs.os }}"
