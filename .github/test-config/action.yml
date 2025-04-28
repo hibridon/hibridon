@@ -109,17 +109,17 @@ runs:
           source /opt/intel/oneapi/setvars.sh --force
         fi
       fi
-      # if [ "${{inputs.os}}" == 'debian-12' ] && [ "${{inputs.compiler}}" == 'gfortran' ]
-      # then
-      #   # build with zwcheck.py to ensure zero warnings policy
-      #   unbuffer cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}} > >(tee ${{github.workspace}}/build/make.stdout) 2> >(tee ${{github.workspace}}/build/make.stderr >&2)
-      #   ${{github.workspace}}/bin/zwcheck.py --make-stdout ${{github.workspace}}/build/make.stdout --show-warnings 'true'
-      # else
-      #   # build without zwcheck.py because:
-      #   # - unbuffer command is not available on macos
-      #   # - zwcheck.py only works with gfortran at the moment
-      #   cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}}
-      # fi
+      if [ "${{inputs.os}}" == 'debian-12' ] && [ "${{inputs.compiler}}" == 'gfortran' ]
+      then
+        # build with zwcheck.py to ensure zero warnings policy
+        unbuffer cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}} > >(tee ${{github.workspace}}/build/make.stdout) 2> >(tee ${{github.workspace}}/build/make.stderr >&2)
+        ${{github.workspace}}/bin/zwcheck.py --make-stdout ${{github.workspace}}/build/make.stdout --show-warnings 'true'
+      else
+        # build without zwcheck.py because:
+        # - unbuffer command is not available on macos
+        # - zwcheck.py only works with gfortran at the moment
+        cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}}
+      fi
   - name: Show failure details
     shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
     run: |
@@ -133,18 +133,25 @@ runs:
           source /opt/intel/oneapi/setvars.sh --force
         fi
       fi
-      # if [ "${{inputs.os}}" == 'debian-12' ] && [ "${{inputs.compiler}}" == 'gfortran' ]
-      # then
-      #   # build with zwcheck.py to ensure zero warnings policy
-      #   unbuffer cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}} --verbose > >(tee ${{github.workspace}}/build/make.stdout) 2> >(tee ${{github.workspace}}/build/make.stderr >&2)
-      #   ${{github.workspace}}/bin/zwcheck.py --make-stdout ${{github.workspace}}/build/make.stdout --show-warnings 'true'
-      # else
-      #   # build without zwcheck.py because:
-      #   # - unbuffer command is not available on macos
-      #   # - zwcheck.py only works with gfortran at the moment
-      #   cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}} --verbose
-      # fi
+      if [ "${{inputs.os}}" == 'debian-12' ] && [ "${{inputs.compiler}}" == 'gfortran' ]
+      then
+        # build with zwcheck.py to ensure zero warnings policy
+        unbuffer cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}} --verbose > >(tee ${{github.workspace}}/build/make.stdout) 2> >(tee ${{github.workspace}}/build/make.stderr >&2)
+        ${{github.workspace}}/bin/zwcheck.py --make-stdout ${{github.workspace}}/build/make.stdout --show-warnings 'true'
+      else
+        # build without zwcheck.py because:
+        # - unbuffer command is not available on macos
+        # - zwcheck.py only works with gfortran at the moment
+        cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}} --verbose
+      fi
     if: failure()
+
+  - name: Make sure no code coverage metrics files exist before running tests
+    if: ${{ inputs.build_type == 'code_coverage' }}
+    shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
+    working-directory: ${{github.workspace}}/build
+    run: |
+      make clean_coverages
 
   - name: Test
     shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
@@ -160,12 +167,12 @@ runs:
           source /opt/intel/oneapi/setvars.sh --force
         fi
       fi
-      # if [ "${{inputs.test_suite}}" == 'all' ]
-      # then
-      #   ctest --parallel --output-on-failure
-      # else
-      #   ctest --parallel --output-on-failure -L "^${{inputs.test_suite}}$"
-      # fi
+      if [ "${{inputs.test_suite}}" == 'all' ]
+      then
+        ctest --parallel --output-on-failure
+      else
+        ctest --parallel --output-on-failure -L "^${{inputs.test_suite}}$"
+      fi
   - name: Create Code Coverage Report
     if: ${{ inputs.build_type == 'code_coverage' }}
     shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597

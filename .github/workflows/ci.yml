@@ -53,7 +53,7 @@ jobs:
     strategy:
         fail-fast: false
         matrix:
-          os: [debian-12, macos-11.2]
+          os: [debian-12]
           build_type: [code_coverage]
           compiler: [gfortran]
     steps:
