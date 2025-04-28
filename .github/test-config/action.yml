@@ -36,7 +36,7 @@ runs:
   - name: Configure CMake
     shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
     run: |
-      echo "configuring cmake with options: ${{inputs.build_type}} ${{inputs.compiler}} ${{inputs.os}} ${{input.test_suite}} "
+      echo "configuring cmake with options: ${{inputs.build_type}} ${{inputs.compiler}} ${{inputs.os}} ${{inputs.test_suite}} "
       mkdir -p ${{github.workspace}}/build && \
       CMAKE_BUILD_TYPE=''
       ENABLE_CODE_COVERAGE='OFF'
