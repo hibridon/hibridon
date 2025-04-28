@@ -34,6 +34,7 @@ runs:
   using: 'composite'
   steps:
   - name: Set up environment
+    shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
     run: |
       CMAKE_BUILD_TYPE=''
       ENABLE_CODE_COVERAGE='OFF'
@@ -56,6 +57,7 @@ runs:
           exit 1
       esac
   - name: Configure CMake
+    shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
     run: |
       mkdir -p ${{github.workspace}}/build && \
       CMAKE_OPTIONS=""
@@ -96,6 +98,7 @@ runs:
       cmake -B ${{github.workspace}}/build $CMAKE_OPTIONS
 
   - name: Build
+    shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
     run: |
       if [ "${{inputs.compiler}}" == 'ifort' ]
       then
@@ -119,6 +122,7 @@ runs:
         cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}}
       fi
   - name: Show failure details
+    shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
     run: |
       if [ "${{inputs.compiler}}" == 'ifort' ]
       then
@@ -144,6 +148,7 @@ runs:
     if: failure()
 
   - name: Test
+    shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
     working-directory: ${{github.workspace}}/build
     run: |
       if [ "${{inputs.compiler}}" == 'ifort' ]
@@ -163,5 +168,6 @@ runs:
       #   ctest --parallel --output-on-failure -L "^${{inputs.test_suite}}$"
       # fi
   - name: Create Code Coverage Report
+    shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
     run: |
       make html_coverages
