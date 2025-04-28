@@ -49,6 +49,7 @@ jobs:
   test-code-coverage:
     needs: test-common-configs
     runs-on: ${{ matrix.os }}
+    # if: ${{ github.event_name == 'push' }}
     strategy:
         fail-fast: false
         matrix:
