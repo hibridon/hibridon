@@ -10,10 +10,16 @@ defaults:
 
 jobs:
   job-1:
-    runs-on: debian-12
+    runs-on: ${{ matrix.os }}
+    strategy:
+        fail-fast: false
+        matrix:
+          os: [debian-12, macos-11.2]
+          build_type: [Debug, Release]
+          compiler: [gfortran, ifort]
     steps:
       - name: Print Hello World
-        run: echo "Hello World"
+        run: echo "Hello World ${{ matrix.compiler }} on ${{ matrix.os }} with ${{ matrix.build_type }}"
       - name: Create a file
         run: echo "Hello World" > input.txt
       - uses: actions/upload-artifact@v4
