@@ -15,12 +15,25 @@ jobs:
         fail-fast: false
         matrix:
           os: [debian-12, macos-11.2]
-          build_type: [Debug, Release]
+          build_type: [debug, release]
           compiler: [gfortran, ifort]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Set up environment
+        run: |
+          TEST_SUITE=''
+          if [ "${{github.event_name}}" == 'pull_request' ]
+          then
+            TEST_SUITE='coverage'
+          elif [ "${{github.event_name}}" == 'push' ]
+          then
+            TEST_SUITE='coverage'
+          elif [ "${{github.event_name}}" == 'schedule' ]
+          then
+            TEST_SUITE='all'  # run all tests
+          fi
       - name: Use reusable steps
         id: reusable-steps
         uses: ./.github/test-config # To use this syntax, we must have the repository checked out
@@ -28,6 +41,7 @@ jobs:
           os: ${{ matrix.os }}
           compiler: ${{ matrix.compiler }}
           build_type: ${{ matrix.build_type }}
+          test_suite: ${TEST_SUITE}
         env:
           HELLO_WORLD_SECRET: TERCES_DLROW_OLLEH
 
@@ -38,7 +52,7 @@ jobs:
         fail-fast: false
         matrix:
           os: [debian-12, macos-11.2]
-          build_type: [CodeCoverage]
+          build_type: [code_coverage]
           compiler: [gfortran]
     steps:
       - uses: actions/checkout@v4

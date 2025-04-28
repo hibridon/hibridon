@@ -12,7 +12,7 @@ inputs:
   build_type:
     required: false
     type: string
-    default: "Debug"
+    default: "debug"  # other options: "release", "code_coverage", "profiling"
   compiler:
     required: false
     type: string
@@ -21,19 +21,147 @@ inputs:
     required: false
     type: string
     default: "debian-12"
+  test_suite:   # test suite
+    required: true
+    type: string
+    default: "quick"
+env:
+  CMAKE_BUILD_PARALLEL_LEVEL: "1" # disable parallel builds
+  CTEST_OUTPUT_ON_FAILURE: "ON" # This way we don't need a flag to ctest
+  CTEST_PARALLEL_LEVEL: "1"
+  OMP_NUM_THREADS: "2"
 runs:
   using: 'composite'
   steps:
-    - name: Configure CMake
-      shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
-      run: |
-        echo "fake configure for ${{ inputs.build_type }} ${{ inputs.compiler }} ${{ inputs.os }}" && \
-        mkdir -p ${{github.workspace}}/build
-    - name: Build
-      shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
-      run: |
-        echo "fake build for ${{ inputs.build_type }} ${{ inputs.compiler }} ${{ inputs.os }}"
-    - name: Test
-      shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
-      run: |
-        echo "fake test for ${{ inputs.build_type }} ${{ inputs.compiler }} ${{ inputs.os }}"
+  - name: Set up environment
+    run: |
+      CMAKE_BUILD_TYPE=''
+      ENABLE_CODE_COVERAGE='OFF'
+      case "${{inputs.build_type}}" in
+        debug)
+          CMAKE_BUILD_TYPE=Debug
+          ;;
+        release)
+          CMAKE_BUILD_TYPE=Release
+          ;;
+        code_coverage)
+          CMAKE_BUILD_TYPE=Debug
+          ENABLE_CODE_COVERAGE='ON'
+          ;;
+        profiling)
+          CMAKE_BUILD_TYPE=Release
+          ;;
+        *)
+          echo "Unknown build type: ${{inputs.build_type}}"
+          exit 1
+      esac
+  - name: Configure CMake
+    run: |
+      mkdir -p ${{github.workspace}}/build && \
+      CMAKE_OPTIONS=""
+      if [ "${{inputs.compiler}}" == 'ifort' ]
+      then
+        if [ "${{inputs.os}}" == 'debian-12' ]
+        then
+          module load compilers/ifort/latest
+        elif [ "${{inputs.os}}" == 'macos-11.2' ]
+        then
+          source /opt/intel/oneapi/setvars.sh --force
+        fi
+        CMAKE_OPTIONS="${CMAKE_OPTIONS} -DBLA_VENDOR=Intel10_64lp"
+        FORTRAN_COMPILER=ifort
+      elif [ "${{inputs.compiler}}" == 'gfortran' ]
+      then
+        if [ "${{inputs.os}}" == 'debian-12' ]
+        then
+          FORTRAN_COMPILER=gfortran-12
+        elif [ "${{inputs.os}}" == 'macos-11.2' ]
+        then
+          FORTRAN_COMPILER=gfortran-11
+          CMAKE_OPTIONS="${CMAKE_OPTIONS} -DBLA_VENDOR=Apple"
+        else
+          echo "Unknown os: ${{inputs.os}}"
+          exit 1
+        fi
+      else
+        echo "Unknown compiler: ${{inputs.compiler}}"
+        exit 1
+      fi
+      CMAKE_OPTIONS="${CMAKE_OPTIONS} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+      CMAKE_OPTIONS="${CMAKE_OPTIONS} -DBUILD_TESTING=ON"
+      CMAKE_OPTIONS="${CMAKE_OPTIONS} -DENABLE_CODE_COVERAGE=${ENABLE_CODE_COVERAGE}"
+      CMAKE_OPTIONS="${CMAKE_OPTIONS} -DCMAKE_Fortran_COMPILER=${FORTRAN_COMPILER}"
+      CMAKE_OPTIONS="${CMAKE_OPTIONS} -DLINK_TIME_OPTIMIZATION=${{env.LINK_TIME_OPTIMIZATION}}"
+      CMAKE_OPTIONS="${CMAKE_OPTIONS} -DENABLE_UNINIT_VAR_RUNTIME_DETECTOR=${{env.ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}}"
+      cmake -B ${{github.workspace}}/build $CMAKE_OPTIONS
+
+  - name: Build
+    run: |
+      if [ "${{inputs.compiler}}" == 'ifort' ]
+      then
+        if [ "${{inputs.os}}" == 'debian-12' ]
+        then
+          module load compilers/ifort/latest
+        elif [ "${{inputs.os}}" == 'macos-11.2' ]
+        then
+          source /opt/intel/oneapi/setvars.sh --force
+        fi
+      fi
+      if [ "${{inputs.os}}" == 'debian-12' ] && [ "${{inputs.compiler}}" == 'gfortran' ]
+      then
+        # build with zwcheck.py to ensure zero warnings policy
+        unbuffer cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}} > >(tee ${{github.workspace}}/build/make.stdout) 2> >(tee ${{github.workspace}}/build/make.stderr >&2)
+        ${{github.workspace}}/bin/zwcheck.py --make-stdout ${{github.workspace}}/build/make.stdout --show-warnings 'true'
+      else
+        # build without zwcheck.py because:
+        # - unbuffer command is not available on macos
+        # - zwcheck.py only works with gfortran at the moment
+        cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}}
+      fi
+  - name: Show failure details
+    run: |
+      if [ "${{inputs.compiler}}" == 'ifort' ]
+      then
+        if [ "${{inputs.os}}" == 'debian-12' ]
+        then
+          module load compilers/ifort/latest
+        elif [ "${{inputs.os}}" == 'macos-11.2' ]
+        then
+          source /opt/intel/oneapi/setvars.sh --force
+        fi
+      fi
+      # if [ "${{inputs.os}}" == 'debian-12' ] && [ "${{inputs.compiler}}" == 'gfortran' ]
+      # then
+      #   # build with zwcheck.py to ensure zero warnings policy
+      #   unbuffer cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}} --verbose > >(tee ${{github.workspace}}/build/make.stdout) 2> >(tee ${{github.workspace}}/build/make.stderr >&2)
+        ${{github.workspace}}/bin/zwcheck.py --make-stdout ${{github.workspace}}/build/make.stdout --show-warnings 'true'
+      # else
+      #   # build without zwcheck.py because:
+      #   # - unbuffer command is not available on macos
+      #   # - zwcheck.py only works with gfortran at the moment
+      #   cmake --build ${{github.workspace}}/build --config ${{inputs.build_type}} --verbose
+      # fi
+    if: failure()
+
+  - name: Test
+    working-directory: ${{github.workspace}}/build
+    run: |
+      if [ "${{inputs.compiler}}" == 'ifort' ]
+      then
+        if [ "${{inputs.os}}" == 'debian-12' ]
+        then
+          module load compilers/ifort/latest
+        elif [ "${{inputs.os}}" == 'macos-11.2' ]
+        then
+          source /opt/intel/oneapi/setvars.sh --force
+        fi
+      fi
+      # if [ "${{inputs.test_suite}}" == 'all' ]
+      # then
+      #   ctest --parallel --output-on-failure
+      # else
+      #   ctest --parallel --output-on-failure -L "^${{inputs.test_suite}}$"
+      # fi
+  - name: Create Code Coverage Report
+    run: |
+      make html_coverages
