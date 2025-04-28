@@ -167,6 +167,7 @@ runs:
       #   ctest --parallel --output-on-failure -L "^${{inputs.test_suite}}$"
       # fi
   - name: Create Code Coverage Report
+    if: ${{ inputs.build_type == 'code_coverage' }}
     shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
     run: |
       make html_coverages
