@@ -82,7 +82,7 @@ runs:
       echo "configuring cmake with options: ${{inputs.build_type}} ${{inputs.compiler}} ${{inputs.os}} ${{inputs.test_suite}} "
       if [ "${{inputs.build_type}}" == 'profiling' ]
       then
-        source ./profiling.venv/bin/activate
+        source ${{github.workspace}}/build/profiling.venv/bin/activate
       fi
       CMAKE_BUILD_TYPE=''
       ENABLE_CODE_COVERAGE='OFF'
