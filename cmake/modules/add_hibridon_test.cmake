@@ -105,7 +105,9 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
   endif()
  
   if(GENERATE_PROFILING_PDF)
-    set_tests_properties(${TEST_ID}_build_profiling_pdf PROPERTIES LABELS ${TEST_ID} ${TEST_LABELS})
+    foreach(OUTPUT_FILE ${TEST_OUTPUT_FILES})
+      set_tests_properties(${TEST_ID}_build_profiling_pdf PROPERTIES DEPENDS "${TEST_ID}_test_check_${OUTPUT_FILE}")
+    endforeach()
   endif()
 
 

@@ -20,19 +20,19 @@ set(ENABLE_PROFILING "OFF" CACHE BOOL "to enable or disable performance profilin
 if(ENABLE_PROFILING)
   find_program(PROFILING_GPROF_EXE gprof)
   if (NOT PROFILING_GPROF_EXE)
-      message(WARNING "failed to find gprof executable (tool used to generate dpf output of performance profiling); without it, no pdf output for profiling will be produced.")
+      message(WARNING "failed to find gprof executable (tool used to generate pdf output of performance profiling); without it, no pdf output for profiling will be produced.")
   endif()
   message(STATUS "PROFILING_GPROF_EXE = ${PROFILING_GPROF_EXE}")
 
   find_program(PROFILING_GPROF2DOT_EXE gprof2dot)
   if (NOT PROFILING_GPROF2DOT_EXE)
-      message(WARNING "failed to find gprof2dot executable (tool used to generate dpf output of performance profiling); without it, no pdf output for profiling will be produced. gprof2dot can be installed using pip install gprof2dot.")
+      message(WARNING "failed to find gprof2dot executable (tool used to generate pdf output of performance profiling); without it, no pdf output for profiling will be produced. gprof2dot can be installed using pip install gprof2dot.")
   endif()
   message(STATUS "PROFILING_GPROF2DOT_EXE = ${PROFILING_GPROF2DOT_EXE}")
 
   find_program(PROFILING_DOT_EXE dot)
   if (NOT PROFILING_DOT_EXE)
-      message(WARNING "failed to find dot executable (graphviz tool used to generate dpf output of performance profiling); without it, no pdf output for profiling will be produced. dot executable is part of an open source software named graphviz.")
+      message(WARNING "failed to find dot executable (graphviz tool used to generate pdf output of performance profiling); without it, no pdf output for profiling will be produced. dot executable is part of an open source software named graphviz.")
   endif()
   message(STATUS "PROFILING_DOT_EXE = ${PROFILING_DOT_EXE}")
 
