@@ -73,6 +73,7 @@ runs:
       mkdir -p ${{github.workspace}}/build && \
       CMAKE_BUILD_TYPE=''
       ENABLE_CODE_COVERAGE='OFF'
+      ENABLE_PROFILING='OFF'
       case "${{inputs.build_type}}" in
         debug)
           CMAKE_BUILD_TYPE=Debug
@@ -86,6 +87,7 @@ runs:
           ;;
         profiling)
           CMAKE_BUILD_TYPE=Release
+          ENABLE_PROFILING='ON'
           ;;
         *)
           echo "Unknown build type: ${{inputs.build_type}}"
@@ -123,6 +125,7 @@ runs:
       CMAKE_OPTIONS="${CMAKE_OPTIONS} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
       CMAKE_OPTIONS="${CMAKE_OPTIONS} -DBUILD_TESTING=ON"
       CMAKE_OPTIONS="${CMAKE_OPTIONS} -DENABLE_CODE_COVERAGE=${ENABLE_CODE_COVERAGE}"
+      CMAKE_OPTIONS="${CMAKE_OPTIONS} -DENABLE_PROFILING=${ENABLE_PROFILING}"
       CMAKE_OPTIONS="${CMAKE_OPTIONS} -DCMAKE_Fortran_COMPILER=${FORTRAN_COMPILER}"
       CMAKE_OPTIONS="${CMAKE_OPTIONS} -DLINK_TIME_OPTIMIZATION=${{env.LINK_TIME_OPTIMIZATION}}"
       CMAKE_OPTIONS="${CMAKE_OPTIONS} -DENABLE_UNINIT_VAR_RUNTIME_DETECTOR=${{env.ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}}"
