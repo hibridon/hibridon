@@ -25,23 +25,47 @@ inputs:
     required: true
     type: string
     default: "quick"
-env:
-  CMAKE_BUILD_PARALLEL_LEVEL: "1" # disable parallel builds
-  CTEST_OUTPUT_ON_FAILURE: "ON" # This way we don't need a flag to ctest
-  CTEST_PARALLEL_LEVEL: "1"
-  OMP_NUM_THREADS: "2"
-
-  ASAN_OPTIONS: "detect_leaks=${{ inputs.build_type == 'release' && '0' || '1' }}" # Disable address sanitizer's memory leak detection in release builds
-  # LINK_TIME_OPTIMIZATION not operational on debian9 gfortran (gfortran is too old : /usr/bin/ar: CMakeFiles/hib.dir/ancou.F90.o: plugin needed to handle lto object)
-  LINK_TIME_OPTIMIZATION: "OFF"
-
-  # ENABLE_UNINIT_VAR_RUNTIME_DETECTOR works on ubuntu 20.04 but causes some tests to fail on debian 9:
-  # AddressSanitizer: FPE on unknown address 0x7f329c9bc3f8 (pc 0x7f329c9bc3f8 bp 0x6290000baf00 sp 0x7ffc8d5cf650 T0)
-  # 0 0x7f329c9bc3f7 in ATL_dtrsmKR_rk4 (/usr/lib/libatlas.so.3+0x10a3f7))
-  ENABLE_UNINIT_VAR_RUNTIME_DETECTOR: ${{ inputs.build_type == 'debug' && 'ON' || 'OFF' }}
 runs:
   using: 'composite'
   steps:
+  - name: Set up environment
+    shell: bash # Must explicitly specify the shell for each step.
+    run: |
+      echo "Setting up environment variables for ${{inputs.build_type}} with ${{inputs.compiler}}"
+      CMAKE_BUILD_PARALLEL_LEVEL="1" # disable parallel builds
+      CTEST_OUTPUT_ON_FAILURE="ON" # This way we don't need a flag to ctest
+      CTEST_PARALLEL_LEVEL="1"
+      OMP_NUM_THREADS="2"
+
+      # Disable address sanitizer's memory leak detection in release builds
+      if [ "${{inputs.build_type}}" == 'release' ]
+      then
+        ASAN_OPTIONS="detect_leaks=0"
+      else
+        ASAN_OPTIONS="detect_leaks=1"
+      fi
+      
+      # LINK_TIME_OPTIMIZATION not operational on debian9 gfortran (gfortran is too old : /usr/bin/ar: CMakeFiles/hib.dir/ancou.F90.o: plugin needed to handle lto object)
+      LINK_TIME_OPTIMIZATION="OFF"
+
+      # ENABLE_UNINIT_VAR_RUNTIME_DETECTOR works on ubuntu 20.04 but causes some tests to fail on debian 9:
+      # AddressSanitizer: FPE on unknown address 0x7f329c9bc3f8 (pc 0x7f329c9bc3f8 bp 0x6290000baf00 sp 0x7ffc8d5cf650 T0)
+      # 0 0x7f329c9bc3f7 in ATL_dtrsmKR_rk4 (/usr/lib/libatlas.so.3+0x10a3f7))
+      if [ "${{inputs.build_type}}" == 'debug' ]
+      then
+        ENABLE_UNINIT_VAR_RUNTIME_DETECTOR=ON
+      else
+        ENABLE_UNINIT_VAR_RUNTIME_DETECTOR=OFF
+      fi
+
+      # export the environment variables for use in next steps
+      echo CMAKE_BUILD_PARALLEL_LEVEL=${CMAKE_BUILD_PARALLEL_LEVEL} >> $GITHUB_ENV
+      echo CTEST_OUTPUT_ON_FAILURE=${CTEST_OUTPUT_ON_FAILURE} >> $GITHUB_ENV
+      echo CTEST_PARALLEL_LEVEL=${CTEST_PARALLEL_LEVEL} >> $GITHUB_ENV
+      echo OMP_NUM_THREADS=${OMP_NUM_THREADS} >> $GITHUB_ENV
+      echo ASAN_OPTIONS=${ASAN_OPTIONS} >> $GITHUB_ENV
+      echo LINK_TIME_OPTIMIZATION=${LINK_TIME_OPTIMIZATION} >> $GITHUB_ENV
+      echo ENABLE_UNINIT_VAR_RUNTIME_DETECTOR=${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR} >> $GITHUB_ENV
   - name: Configure CMake
     shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
     run: |
