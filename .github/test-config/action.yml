@@ -66,10 +66,23 @@ runs:
       echo ASAN_OPTIONS=${ASAN_OPTIONS} >> $GITHUB_ENV
       echo LINK_TIME_OPTIMIZATION=${LINK_TIME_OPTIMIZATION} >> $GITHUB_ENV
       echo ENABLE_UNINIT_VAR_RUNTIME_DETECTOR=${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR} >> $GITHUB_ENV
+  - name: Install profiling tools
+    if: ${{ inputs.build_type == 'profiling' }}
+    shell: bash # Must explicitly specify the shell for each step.
+    working-directory: ${{github.workspace}}/build
+    run: |
+      python3 -m venv ./profiling.venv && \
+      source ./profiling.venv/bin/activate && \
+      pip install --upgrade pip && \
+      pip install gprof2dot
   - name: Configure CMake
     shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
     run: |
       echo "configuring cmake with options: ${{inputs.build_type}} ${{inputs.compiler}} ${{inputs.os}} ${{inputs.test_suite}} "
+      if [ "${{inputs.build_type}}" == 'profiling' ]
+      then
+        source ./profiling.venv/bin/activate
+      fi
       mkdir -p ${{github.workspace}}/build && \
       CMAKE_BUILD_TYPE=''
       ENABLE_CODE_COVERAGE='OFF'
@@ -188,16 +201,6 @@ runs:
     working-directory: ${{github.workspace}}/build
     run: |
       make clean_coverages
-
-  - name: Install profiling tools
-    if: ${{ inputs.build_type == 'profiling' }}
-    shell: bash # Must explicitly specify the shell for each step.
-    working-directory: ${{github.workspace}}/build
-    run: |
-      python3 -m venv ./profiling.venv && \
-      source ./profiling.venv/bin/activate && \
-      pip install --upgrade pip && \
-      pip install gprof2dot
 
   - name: Test
     shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
