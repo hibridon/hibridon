@@ -32,6 +32,7 @@ runs:
     shell: bash # Must explicitly specify the shell for each step.
     run: |
       echo "Setting up environment variables for ${{inputs.build_type}} with ${{inputs.compiler}}"
+      mkdir -p ${{github.workspace}}/build
       CMAKE_BUILD_PARALLEL_LEVEL="1" # disable parallel builds
       CTEST_OUTPUT_ON_FAILURE="ON" # This way we don't need a flag to ctest
       CTEST_PARALLEL_LEVEL="1"
@@ -83,7 +84,6 @@ runs:
       then
         source ./profiling.venv/bin/activate
       fi
-      mkdir -p ${{github.workspace}}/build && \
       CMAKE_BUILD_TYPE=''
       ENABLE_CODE_COVERAGE='OFF'
       ENABLE_PROFILING='OFF'
