@@ -33,18 +33,18 @@ jobs:
           elif [ "${{github.event_name}}" == 'schedule' ]
           then
             TEST_SUITE='all'  # run all tests
+          else
+            echo "Unknown event name: ${{github.event_name}}"
+            exit 1
           fi
           echo "TEST_SUITE=${TEST_SUITE}" >> $GITHUB_ENV
-      - name: Use reusable steps
-        id: reusable-steps
+      - name: Test Common Configuration
         uses: ./.github/test-config # To use this syntax, we must have the repository checked out
         with:
           os: ${{ matrix.os }}
           compiler: ${{ matrix.compiler }}
           build_type: ${{ matrix.build_type }}
           test_suite: ${{ env.TEST_SUITE }}
-        env:
-          HELLO_WORLD_SECRET: TERCES_DLROW_OLLEH
 
   test-code-coverage:
     needs: test-common-configs
@@ -60,13 +60,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Use reusable steps
-        id: reusable-steps
+      - name: Generate code coverage report
         uses: ./.github/test-config # To use this syntax, we must have the repository checked out
         with:
           os: ${{ matrix.os }}
           compiler: ${{ matrix.compiler }}
           build_type: ${{ matrix.build_type }}
-        env:
-          HELLO_WORLD_SECRET: TERCES_DLROW_OLLEH
-  
+          test_suite: 'coverage'
