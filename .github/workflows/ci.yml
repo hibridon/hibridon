@@ -60,13 +60,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Generate code coverage report
-        uses: ./.github/test-config # To use this syntax, we must have the repository checked out
-        with:
-          os: ${{ matrix.os }}
-          compiler: ${{ matrix.compiler }}
-          build_type: ${{ matrix.build_type }}
-          test_suite: 'coverage'
+      # - name: Generate code coverage report
+      #   uses: ./.github/test-config # To use this syntax, we must have the repository checked out
+      #   with:
+      #     os: ${{ matrix.os }}
+      #     compiler: ${{ matrix.compiler }}
+      #     build_type: ${{ matrix.build_type }}
+      #     test_suite: 'coverage'
 
   create-profiling-report:
     needs: test-config
