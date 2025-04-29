@@ -151,6 +151,30 @@ module mod_hiblas
       integer, intent(out) :: info
     end subroutine
 
+    subroutine dsyevr(jobz, range, uplo, n, a, lda, vl, vu, il, iu, abstol, m, w, z, ldz, isuppz, work, lwork, iwork, liwork, info)
+      character, intent(in) :: jobz
+      character, intent(in) :: range
+      character, intent(in) :: uplo
+      integer, intent(in) :: n
+      real(8), intent(inout) :: a(lda, *)
+      integer, intent(in) :: lda
+      real(8), intent(in) :: vl
+      real(8), intent(in) :: vu
+      integer, intent(in) :: il
+      integer, intent(in) :: iu
+      real(8), intent(in) :: abstol
+      integer, intent(out) :: m
+      real(8), intent(out) :: w(*)
+      real(8), intent(out) :: z(ldz, *)
+      integer, intent(in) :: ldz
+      integer, intent(out) :: isuppz(*)
+      real(8), intent(out) :: work(*)
+      integer, intent(in) :: lwork
+      integer, intent(out) :: iwork(*)
+      integer, intent(in) :: liwork
+      integer, intent(out) :: info
+    end subroutine
+
     subroutine dsyevx(jobz, range, uplo, n, a, lda, vl, vu, il, iu, abstol, m, w, z, ldz, work, lwork, iwork, ifail, info)
       character, intent(in) :: jobz
       character, intent(in) :: range
