@@ -1,8 +1,12 @@
-name: Run with reusable steps
+name: hibridon ci
 
 on:
-    pull_request:
-        branches: [ master ]     # run basic ci on pull requests on master
+  pull_request:
+    branches: [ master ]     # run basic ci on pull requests on master
+  push:
+    branches: [ master ]     # run basic ci on pushes on master
+  schedule:
+    - cron:  '0 02 * * 1'    # run full ci Every mondays at 00:02
 
 defaults:
   run:
@@ -92,5 +96,6 @@ jobs:
       - name: Upload profiling reports
         uses: actions/upload-artifact@v4
         with:
-          name: arch4_quick profiling call graph
-          path: $GITHUB_WORKSPACE/build/tests/arch4/arch4_quick_call_graph.pdf
+          name: profiling call graphs
+          path: ${{github.workspace}}/build/tests/**/*_call_graph.pdf
+          if-no-files-found: error
