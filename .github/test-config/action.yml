@@ -186,10 +186,24 @@ runs:
     run: |
       make clean_coverages
 
+  - name: Install profiling tools
+    if: ${{ inputs.build_type == 'profiling' }}
+    shell: bash # Must explicitly specify the shell for each step.
+    working-directory: ${{github.workspace}}/build
+    run: |
+      python3 -m venv ./profiling.venv && \
+      source ./profiling.venv/bin/activate && \
+      pip install --upgrade pip && \
+      pip install gprof2dot
+
   - name: Test
     shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
     working-directory: ${{github.workspace}}/build
     run: |
+      if [ "${{inputs.build_type}}" == 'profiling' ]
+      then
+        source ./profiling.venv/bin/activate
+      fi
       if [ "${{inputs.compiler}}" == 'ifort' ]
       then
         if [ "${{inputs.os}}" == 'debian-12' ]
@@ -212,3 +226,4 @@ runs:
     working-directory: ${{github.workspace}}/build
     run: |
       make html_coverages
+      
