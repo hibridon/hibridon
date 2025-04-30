@@ -28,7 +28,7 @@ contains
     UNUSED_DUMMY(statements)
     UNUSED_DUMMY(bofargs)
     UNUSED_DUMMY(next_statement)
-    write (6,*) 'executing dummyc1'
+    next_statement = bofargs  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.    write (6,*) 'executing dummyc1'
     post_action = k_post_action_read_new_line
   end subroutine
 
@@ -42,13 +42,15 @@ contains
     UNUSED_DUMMY(statements)
     UNUSED_DUMMY(bofargs)
     UNUSED_DUMMY(next_statement)
+    next_statement = bofargs  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
     write (6,*) 'executing dummyc2'
     post_action = k_post_action_read_new_line
   end subroutine
 
 end module mod_unitcommands
 
-
+module mod_command_unit_test
+contains
 subroutine test_commands()
   use mod_unitcommands, only: dummyc2_command_type, dummyc1_command_type
   use mod_command, only: command_type, command_mgr_type
@@ -82,8 +84,11 @@ subroutine test_commands()
   call command_mgr%execute_command('DUMMYC2', post_action)
 end subroutine test_commands
 
-program unittest_commands
+end module mod_command_unit_test
 
+
+program unittest_commands
+use mod_command_unit_test, only: test_commands
 call test_commands()
         
 end program unittest_commands
