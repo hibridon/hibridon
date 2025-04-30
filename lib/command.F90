@@ -49,13 +49,14 @@ module mod_command
 
   ! interface to create an instance of command_mgr_type using a construct familiar to other languages:
   ! g1 = command_mgr_type()
-  interface command_mgr_type
-    module procedure command_mgr_ctor
-  end interface command_mgr_type
+  ! interface command_mgr_type
+  !   module procedure command_mgr_ctor
+  ! end interface command_mgr_type
 
 contains
 
   subroutine commands_register_command(this, codex, command)
+    use mod_assert, only: fassert
     class(command_mgr_type), intent(inout) :: this
     character(len=*), intent(in) :: codex
     class(command_type), intent(in), allocatable :: command
@@ -83,6 +84,7 @@ contains
   end subroutine commands_execute_command
 
   function commands_get_command(this, command_name) result(command)
+    use mod_assert, only: fassert
     class(command_mgr_type), intent(inout), target :: this
     character(len=*), intent(in) :: command_name
     class(command_type), pointer :: command
@@ -97,12 +99,12 @@ contains
     command => null()
   end function commands_get_command
 
-  function command_mgr_ctor() result(command_mgr)
-    class(command_mgr_type), pointer :: command_mgr
-    class(command_mgr_type), allocatable, target :: mgr
-    command_mgr => mgr
+  ! function command_mgr_ctor() result(command_mgr)
+  !   class(command_mgr_type), pointer :: command_mgr
+  !   class(command_mgr_type), allocatable, target :: mgr
+  !   command_mgr => mgr  ! disable-warnings:target-lifetime
 
-  end function command_mgr_ctor
+  ! end function command_mgr_ctor
 
 end module mod_command
 

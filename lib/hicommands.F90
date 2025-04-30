@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 #include "command.inc.F90"
 
 module mod_hicommands
@@ -114,12 +115,12 @@ contains
     use mod_hibasis, only: basknd
     use mod_cosys, only: scod
     use mod_cosysl, only: islcod, lspar
-    use mod_cosysi, only: nscode, isicod, ispar
+    use mod_cosysi, only: isicod, ispar
     use mod_cosysr, only: isrcod, rspar
     use mod_hinput_state, only: lindx
     use mod_si_params, only: lcode
     use mod_par, only: lpar
-    use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+    use mod_parbas, only: lammin, lammax, mproj
     use lpar_enum
     use mod_selb, only: ibasty
     use mod_par, only: fcod
@@ -166,13 +167,15 @@ contains
   ! check if inconsistencies in input parameters
   subroutine check_execute(this, statements, bofargs, next_statement, post_action)
     use mod_command, only: k_post_action_read_new_line
+    use mod_hiiolib1, only: genchk
 
     class(check_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
     integer, intent(in) :: bofargs
     integer, intent(out) :: next_statement
     integer, intent(out) :: post_action
-
+    UNUSED_DUMMY(this)
+    UNUSED_DUMMY(statements)
     call genchk()
     next_statement = bofargs
     post_action = k_post_action_read_new_line
@@ -185,7 +188,7 @@ contains
   subroutine input_execute(this, statements, bofargs, next_statement, post_action)
     use mod_command, only: k_post_action_exit_hibridon, k_post_action_read_new_line
     use mod_hinput_state, only: batch
-    use mod_file, only: input, output, jobnam, savfil
+    use mod_file, only: input
     use mod_hiutil, only: get_token, lower, upper
 
     class(input_command_type) :: this
@@ -198,7 +201,7 @@ contains
     integer :: l, lc, len
     class(command_type), pointer :: command
     logical :: existf
-
+    UNUSED_DUMMY(this)
     l = bofargs
     call get_token(statements,l,argument,lc)
     input = argument(1:lc)
@@ -224,7 +227,7 @@ contains
   ! input, output, and label are now lower case:  mha 6.6.91
   subroutine job_execute(this, statements, bofargs, next_statement, post_action)
     use mod_command, only: k_post_action_interpret_next_statement
-    use mod_file, only: input, output, jobnam, savfil
+    use mod_file, only: jobnam
     use mod_hiutil, only: get_token, lower, upper
 
     class(job_command_type) :: this
@@ -235,7 +238,7 @@ contains
 
     character(len=40) :: code
     integer :: l, lc
-
+    UNUSED_DUMMY(this)
     l = bofargs
     call get_token(statements, l, code, lc)
     jobnam = code(1:lc)
@@ -251,7 +254,7 @@ contains
     !  intcrs,jobfile,in1,in2,ienerg,maxjtot
     use mod_hiutil, only: assignment_parse
     use mod_command, only: k_post_action_read_new_line
-    use mod_file, only: input, output, jobnam, savfil
+    use mod_file, only: jobnam
     use mod_hiutil, only: get_token, lower, upper
 
     implicit none
@@ -270,6 +273,7 @@ contains
     real(8) :: a(k_num_args)  ! in1,in2,ienerg,maxjtot
     character*8 empty_var_list(0)
 
+    UNUSED_DUMMY(this)
     l = bofargs
     call get_token(statements,l,fnam1,lc)
     if(fnam1 .eq. ' ') fnam1 = jobnam
@@ -292,7 +296,6 @@ contains
   subroutine label_execute(this, statements, bofargs, next_statement, post_action)
     use mod_command, only: k_post_action_interpret_next_statement
     use mod_parpot, only: label => pot_label
-    use mod_file, only: input, output, jobnam, savfil
     use mod_hiutil, only: lenstr
 
     class(label_command_type) :: this
@@ -304,6 +307,9 @@ contains
     integer :: l
 
     integer :: low, lend
+
+    UNUSED_DUMMY(this)
+    UNUSED_DUMMY(bofargs)
 
     low = index (statements, '=') + 1
     lend = index (statements, ';') - 1
@@ -325,8 +331,9 @@ contains
   subroutine output_execute(this, statements, bofargs, next_statement, post_action)
     use mod_command, only: k_post_action_interpret_next_statement
     use funit
-    use mod_file, only: input, output, jobnam, savfil
+    use mod_file, only: output
     use mod_hiutil, only: get_token, lower, upper
+    use mod_hiiolib1, only: openf
 
     class(output_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
@@ -339,6 +346,7 @@ contains
 
     logical :: openfl
 
+    UNUSED_DUMMY(this)
     l = bofargs
     call get_token(statements,l,argument,lc)
     output = argument(1:lc)
@@ -358,8 +366,9 @@ contains
     ! pressure broadening cross sections - added by p. dagdigian
     use mod_hiutil, only: assignment_parse
     use mod_command, only: k_post_action_read_new_line
-    use mod_file, only: input, output, jobnam, savfil
+    use mod_file, only: jobnam
     use mod_hiutil, only: get_token, lower, upper
+    use mod_hiprsbr, only: prsbr
     class(prsbr_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
     integer, intent(in) :: bofargs
@@ -375,6 +384,7 @@ contains
     integer, parameter :: k_num_args = 12
     real(8) :: a(k_num_args)
 
+    UNUSED_DUMMY(this)
     l = bofargs
 
     call get_token(statements,l,fnam1,lc)
@@ -415,6 +425,8 @@ contains
     use mod_command, only: k_post_action_interpret_next_statement
     use lpar_enum
     use mod_par, only: pcod
+    use mod_hiiolib1, only: gendat
+    use mod_hisystem, only: sysdat
 
     class(read_command_type) :: this
     character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
@@ -423,6 +435,8 @@ contains
     integer, intent(out) :: post_action
 
     integer :: ione
+    UNUSED_DUMMY(this)
+    UNUSED_DUMMY(statements)
 
     ! read
     call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
@@ -437,28 +451,28 @@ contains
 
   subroutine run_execute(this, statements, bofargs, next_statement, post_action)
     use mod_par, only: ipar, lpar, rpar
-    use mod_si_params, only: iicode, ircode, icode, lcode, set_param_names
+    use mod_si_params, only: iicode, ircode, icode, set_param_names
     use ipar_enum
     use lpar_enum
     use mod_coiout, only: niout, indout
     use mod_cosout, only: nnout, jout
     use mod_coener, only: energ
-    use mod_command, only: k_post_action_interpret_next_statement, k_post_action_read_new_line
     use mod_hibrid2, only: enord
-    use mod_hinput_state, only: lindx, irpot, irinp
-    use mod_command, only: k_post_action_write_cr_and_exit, k_post_action_exit_hinput, k_post_action_exit_hibridon
+    use mod_hinput_state, only: irpot, irinp
+    use mod_command, only: k_post_action_write_cr_and_exit, k_post_action_exit_hinput, k_post_action_exit_hibridon, k_post_action_read_new_line
     use rpar_enum
     use mod_parpot, only: potnam=>pot_name, label=>pot_label
+    use mod_hiiolib1, only: genchk
     !
     ! label:execute_run
     !
     ! start execution,run
     use mod_command, only: k_post_action_read_new_line
-    use mod_selb, only: ibasty
-    use mod_file, only: input, output, jobnam, savfil
+    use mod_file, only: output
     use mod_par, only: pcod
-    use mod_sav, only: iipar, ixpar, irpar, rxpar
+    use mod_sav, only: ixpar, rxpar
     use mod_hiutil, only: get_token, lower, upper
+    use mod_hiiolib1, only: openf
 
     implicit none
     class(run_command_type) :: this
@@ -470,6 +484,8 @@ contains
     integer :: i, j
     integer :: nerg
 
+    UNUSED_DUMMY(this)
+    UNUSED_DUMMY(statements)
     next_statement = bofargs
 
     call update_nu_params()
@@ -555,7 +571,7 @@ contains
   subroutine show_execute(this, statements, bofargs, next_statement, post_action)
     use mod_par, only: ipar, lpar, rpar
     use mod_hinput_state, only: batch
-    use mod_si_params, only: iicode, ircode, icode, lcode, set_param_names
+    use mod_si_params, only: iicode, ircode, icode, set_param_names
     use ipar_enum
     use lpar_enum
     use mod_coiout, only: niout, indout
@@ -566,10 +582,8 @@ contains
     use mod_command, only: k_post_action_interpret_next_statement, k_post_action_read_new_line
     use mod_hibrid2, only: enord
     use mod_parpot, only: potnam=>pot_name, label=>pot_label
-    use mod_selb, only: ibasty
-    use mod_file, only: input, output, jobnam, savfil
-    use mod_par, only: fcod, pcod
-    use mod_two, only: numj, nj1j2
+    use mod_file, only: input, output, jobnam
+    use mod_par, only: pcod
     use mod_hiutil, only: get_token
 
     ! show all parameters and flags
@@ -581,11 +595,12 @@ contains
     integer, intent(out) :: post_action
 
     integer :: j
-    integer :: l, lc, length, leninp, lenjob, lenout
+    integer :: l, lc, leninp, lenjob, lenout
     logical :: jtrunc
     character*40 :: code
     character(len=K_MAX_USER_LINE_LENGTH) :: answer
 
+    UNUSED_DUMMY(this)
     l = bofargs
     next_statement = l
     call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
@@ -690,6 +705,7 @@ contains
     integer :: l, lc
     integer :: i, j
 
+    UNUSED_DUMMY(this)
     l = bofargs
     call get_token(statements,l,fnam1,lc)
     if(fnam1 .eq. ' ') fnam1 = jobnam
@@ -707,6 +723,7 @@ contains
   end subroutine hypxsc_execute
 
   subroutine stmix_execute(this, statements, bofargs, next_statement, post_action)
+    use mod_histmix, only: stmix
     ! singlet-triplet collisional mixing - added by p. dagdigian
     use mod_hiutil, only: get_token, lower, upper, assignment_parse
     use mod_file, only: jobnam
@@ -721,19 +738,20 @@ contains
     character(len=40) :: fnam1  ! 1st smt file name
     character(len=40) :: fnam2  ! 2nd smt file name
     real(8) :: a(7)  ! 7 real arguments:
-    ! 1: iener for 1st smt file
-    ! 2: iener for 2nd smt file
+    ! 1: ienerg1: ienerg for 1st smt file
+    ! 2: ienerg2: ienerg for 2nd smt file
     ! 3: dele
     ! 4: emax
-    ! 5: istata
-    ! 6: istatx
-    ! 7: hso
+    ! 5: istats
+    ! 6: istatt
+    ! 7: wso
 
     character*8 empty_var_list(0)
     character(len=40) :: code
     integer :: l, lc
     integer :: i, j
 
+    UNUSED_DUMMY(this)
     l = bofargs
     call get_token(statements,l,fnam1,lc)
     if(fnam1 .eq. ' ') fnam1 = jobnam
@@ -753,7 +771,7 @@ contains
     if(l .eq. 0) goto 3010
     call get_token(statements,l,code,lc)
     call assignment_parse(code(1:lc),empty_var_list,j,a(2))
-    ! get dele, emax, istata, istatx, hso
+    ! get dele, emax, istats, istatt, wso
     3010 do 3020 i = 3, 7
       a(i) = 0.d0
       if(l .eq. 0) goto 3020
@@ -786,6 +804,7 @@ contains
     integer :: l, lc
     integer :: j
 
+    UNUSED_DUMMY(this)
     l = bofargs
     call get_token(statements,l,fnam1,lc)
     if(fnam1 .eq. ' ') fnam1 = jobnam
@@ -806,6 +825,7 @@ contains
 
 
   subroutine init()
+    use mod_assert, only: fassert
     class(command_type), allocatable :: com
     if (.not. associated(command_mgr)) then
       allocate(command_mgr)

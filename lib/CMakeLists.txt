@@ -11,8 +11,6 @@ set(LINK_TIME_OPTIMIZATION "OFF" CACHE BOOL "to enable or disable link time opti
 # With gfortran, variables are initialized to 0 by default, but it's not the case with ifort compiler. Therefore, all variables need to be initialized to guarantee the program works in a deterministic way on every compiler.
 set(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR "ON" CACHE BOOL "if set, causes the use of uninitilazed variables to trigger an exception on debug builds, thus making the program stop. This is useful to detect uninitialized memory issues.")
 
-set(UNINITIALIZED_INTEGER_VALUE 333333333)
-
 add_library(hib
     ancou.F90
     assert.f90
@@ -135,6 +133,7 @@ endif()
 ################################################################################
 
 # The following is to define the machine type and compiler
+target_compile_definitions(hib PUBLIC HIB_UNINITIALIZED_INTEGER_VALUE=${UNINITIALIZED_INTEGER_VALUE})
 target_compile_definitions(hib PUBLIC HIB_UNIX_X86=1)
 target_compile_definitions(hib PUBLIC HIB_UNIX=1)
 if (CMake_Fortran_COMPILER_ID STREQUAL "GNU")

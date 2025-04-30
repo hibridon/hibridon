@@ -65,6 +65,8 @@ use mod_selb, only: ibasty
 use mod_trn, only: spin, jpmax
 use mod_hiutil, only: gennam, mtime, dater
 use mod_hismat, only: rdhead, sinqr
+use mod_hiiolib1, only: openf
+
 implicit none
 character*(*), intent(in) :: filnam
 real(8), intent(in) :: a(6)  ! real arguments : a(1) is iener

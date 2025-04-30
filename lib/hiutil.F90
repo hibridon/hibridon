@@ -325,9 +325,9 @@ integer :: istart, iend
 integer :: k, k1, k2, k3
 integer :: token_start, token_end
 #ifndef DISABLE_HIB_ASSERT
-#if (UNINITIALIZED_INTEGER_VALUE != 0)
+#if (HIB_UNINITIALIZED_INTEGER_VALUE != 0)
 ! note: this test can be removed when the warnings -Wunused-dummy-argument and -Wunused-variable trigger errors 
-ASSERT(i /= UNINITIALIZED_INTEGER_VALUE)  ! make sure that i has been initialized (333333333 is a default value)
+ASSERT(i /= HIB_UNINITIALIZED_INTEGER_VALUE)  ! make sure that i has been initialized (333333333 is a default value)
 #endif
 #endif
 

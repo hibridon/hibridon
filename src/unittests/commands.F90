@@ -1,4 +1,5 @@
 #include "command.inc.F90"
+#include "unused.h"
 
 module mod_unitcommands
   use mod_command, only: command_type
@@ -23,7 +24,12 @@ contains
     integer, intent(in) :: bofargs
     integer, intent(out) :: next_statement
     integer, intent(out) :: post_action
+    UNUSED_DUMMY(this)
+    UNUSED_DUMMY(statements)
+    UNUSED_DUMMY(bofargs)
+    UNUSED_DUMMY(next_statement)
     write (6,*) 'executing dummyc1'
+    post_action = k_post_action_read_new_line
   end subroutine
 
   subroutine dummyc2_execute(this, statements, bofargs, next_statement, post_action)
@@ -32,7 +38,12 @@ contains
     integer, intent(in) :: bofargs
     integer, intent(out) :: next_statement
     integer, intent(out) :: post_action
+    UNUSED_DUMMY(this)
+    UNUSED_DUMMY(statements)
+    UNUSED_DUMMY(bofargs)
+    UNUSED_DUMMY(next_statement)
     write (6,*) 'executing dummyc2'
+    post_action = k_post_action_read_new_line
   end subroutine
 
 end module mod_unitcommands

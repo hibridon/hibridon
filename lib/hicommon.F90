@@ -70,12 +70,14 @@ end module funit
 
 ! system independent parameters
 module mod_si_params
+  use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT, RPAR_COUNT
+  implicit none
   !  fcod stores logical flags (length = lcode)
-  integer, parameter :: lcode = 28
+  integer, parameter :: lcode = LPAR_COUNT
   !  iicode is the number of integer pcod's
   !  ircode is the number of real pcod's
-  integer, parameter :: iicode = 10
-  integer, parameter :: ircode = 9
+  integer, parameter :: iicode = IPAR_COUNT
+  integer, parameter :: ircode = RPAR_COUNT
   integer, parameter :: icode = iicode+ircode
 
 contains
@@ -117,7 +119,7 @@ module mod_hinput_state
   logical :: batch
   data batch /.false./
 
-  integer :: irpot
+  integer :: irpot  ! 1 if potentiel has been defined, 0 otherwise
   integer :: irinp
   data irpot, irinp /0, 0/
 
