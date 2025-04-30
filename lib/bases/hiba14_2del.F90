@@ -1,5 +1,7 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba14_2del
+  use mod_assert, only: fassert
 contains
 ! sy2del (sav2de/ptr2de) defines, saves variables and reads              *
 !                  potential for doublet-delta scattering                *
@@ -87,7 +89,6 @@ subroutine ba2del (bqs, jhold, ehold, ishold, nlevel, &
 !    plus 1/2
 !  variables in common bloc /cosysr/
 !    isrcod:   total number of real system dependent variables
-!    idum:     dummy variable for alignment
 !    brot:     rotational constant in cm-1
 !    aso:      spin-orbit constant in cm-1
 !    p, q:     lambda-doubling constants cm-1
@@ -115,12 +116,12 @@ use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, idum=>junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
+use mod_parbas, only: lammin, lammax, mproj
+use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -137,6 +138,8 @@ integer, pointer :: nterm, jmax, igu, isa, npar
 real(8), pointer :: brot, aso, p, q
 nterm=>ispar(1); jmax=>ispar(2); igu=>ispar(3); isa=>ispar(4); npar=>ispar(5)
 brot=>rspar(1); aso=>rspar(2); p=>rspar(3); q=>rspar(4)
+
+UNUSED_DUMMY(sc4)
 
 pi2 = 1.570796327d0
 zero = 0.d0
@@ -888,23 +891,23 @@ subroutine sy2del (irpot, readpt, iread)
 !             of all system dependent parameters
 !  subroutines called: loapot(iunit,filnam)
 use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_skip, only: nskip, iskip
+use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: j, l, lc
 logical existf
 character*1 dot
 character*(*) fname
-character*60 filnam, line, potfil, filnm1
+character*60 filnam, line, potfil
+character*68 filnm1
 save potfil
 #include "common/comdot.F90"
 
@@ -980,7 +983,7 @@ readpt = .true.
     filnam = potfil
   end if
   potfil=filnam
-  filnm1 = '.potdata/'//filnam
+  filnm1 = 'potdata/'//filnam
   inquire(file=filnm1,exist=existf)
   if(.not.existf) then
     write(6,1025) filnam(1:lc)
@@ -994,7 +997,7 @@ close (8)
 irpot=1
 return
 !
-entry sav2del (readpt)
+entry sav2del ()
 !  save input parameters for doublet-delta + atom scattering
 !  line 13:
 write (FUNIT_INP, 315) jmax, igu, isa, npar

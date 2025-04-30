@@ -3,6 +3,7 @@
 !  and c.f. curtiss, j. chem. phys. 55, 5517 (1971)]
 
 ! declare unused user subroutines syusr, bausr and ground
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/bausr.F90"
 #include "common/ground.F90"
@@ -12,6 +13,7 @@
 subroutine driver
 use mod_covvl, only: vvl
 use mod_parpot, only: potnam=>pot_name
+use mod_hipot, only: pot
 implicit none
     integer :: ios
     real(8) :: r, vv0
@@ -35,6 +37,8 @@ implicit none
     integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
     character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)
     integer, parameter :: l1i = 1  ! lambda1 index
+    UNUSED_DUMMY(iunit)
+    UNUSED_DUMMY(filnam)
     potnam = 'PATTENGILL-LABUDDE-BERNSTEIN AR-N2'
     lammin(l1i) = 2 ; lammax(l1i) = 2  ! lambda1's range is [2, 2]
     mproj(l1i) = 0
@@ -59,7 +63,7 @@ use mod_covvl, only: vvl
 use mod_conlam, only: nlam
     implicit none
     real(8), intent(out) :: vv0
-    real(8), intent(in) :: r
+    real(8), intent(in) :: r  ! intermolecular distance
     real(8) :: eps, a6, a12, r0, eps_au, rat, w(6), rr0 
     data eps, a6, a12, r0 / 83.05d0, 0.13d0, 0.5d0, 3.929d0/  ! from reference paper above
     w = (/ 1.0d0, 0.2d0, 0.1d0, 0.0d0, 0.025d0, 0.02d0/)  ! weights

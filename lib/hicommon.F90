@@ -4,16 +4,23 @@
 !     Physical constants
 module constants
 implicit none
+real(8), parameter :: tolerance = 1.0d-10
+real(8), parameter :: zero = 0.0d0
+real(8), parameter :: half = 0.5d0
+real(8), parameter :: one  = 1.0d0
+real(8), parameter :: two  = 2.0d0
+real(8), parameter :: four = 4.0d0
+real(8), parameter :: rad = 57.29577951308232d0  ! number of angular degrees in a radian
+
 real(8), parameter :: pi=dacos(-1d0)
 real(8), parameter :: s4pi = sqrt( 4.d0 * pi )  ! normalization factor for isotropic potential
 !     Below are constants used in Hibridon 4.4
-real(8), parameter :: econv=219474.6d0, xmconv=5.485930d-4, &
-     ang2c=0.280002846d0
 !
 !     All physical constants below are adapted from 2010 values from
 !     http://physics.nist.gov/cuu/Constants/index.html
 !
 !     econv is the conversion from hartree to cm-1
+!     hartree to wavenumber
 !     The value of econv is the rydberg constant in m-1 devided by 50
 !$$$      real(8), parameter :: econv=10973731.568539/50d0
 !     xmconv converts mass in atom units (electron mass) to atom mass
@@ -22,6 +29,11 @@ real(8), parameter :: econv=219474.6d0, xmconv=5.485930d-4, &
 !     ang2c converts bohr^2 to angstrom^2
 !     The value of ang2 is (10^10 Bohr Radius)^2
 !$$$      real(8), parameter :: ang2c=0.52917721092d0**2
+real(8), parameter :: econv = 219474.6d0
+real(8), parameter :: xmconv = 5.485930d-4
+real(8), parameter :: ang2c = 0.280002846d0
+real(8), parameter :: amu_to_emu = 1822.88848477d0  ! amu to electrom mass (1.0 / xmconv)
+
 end module constants
 
 ! file units used in hibridon
@@ -35,8 +47,10 @@ implicit none
       FUNIT_EADIAB         =  2, &   ! <job-name>.eadiab
       FUNIT_TENS_OUTPUT    =  2, &   ! <job-name>.tcs or <job-name>.dch or <job-name>.dcga
       FUNIT_MCS            =  2, &   ! <job-name>.mcs
+      FUNIT_PSI            =  2, &   ! <job-name>.psi
       FUNIT_SAV            =  3, &   ! <job-name>.sav
       FUNIT_XSC            =  3, &   ! <job-name>.xsc
+      FUNIT_FLX            =  3, &   ! <job-name>.flx
       FUNIT_TCB            =  4, &   ! <job-name>.tcb (result of tenxsc)
       FUNIT_STDOUT         =  6, &   ! standard output
       FUNIT_INP            =  8, &   ! input file (*.inp)

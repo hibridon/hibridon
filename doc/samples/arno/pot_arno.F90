@@ -7,6 +7,7 @@ use mod_covvl, only: vvl
 use constants, only: econv
 use mod_cosysr, only: rspar
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 real(8), pointer :: rshift, xfact
 rshift=>rspar(1); xfact=>rspar(2)
@@ -26,7 +27,7 @@ goto 1
 #include "common/ground.F90"
 ! --------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label! --------------------------------------------------------------------------
 character*(*) filnam
 potnam='ALEXANDER Ar-NO CEPA'
@@ -66,6 +67,8 @@ subroutine pot (vv0, r)
 use mod_covvl, only: vvl
 use constants, only: econv
 use mod_hivector, only: dset
+use mod_hiblas, only: dscal, dcopy
+use mod_hipotutil, only: dqrank, dqrlss
 implicit double precision (a-h,o-z)
 dimension xlam1(22),xlam2(22),r0(22),c1(22),c2(22),c3(22), &
           clr(22),vsum(11),xsum(11),vdif(11),xdif(11), &

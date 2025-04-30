@@ -1,5 +1,7 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba09_stpln
+  use mod_assert, only: fassert
 logical :: twomol ! if .true. collision between symmetric top and linear
                   ! molecule, if .false. collision symmetric top-atom.
 contains
@@ -149,12 +151,12 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coamat, only: ietmp ! ietmp(1)
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use mod_hibasutil, only: vlmstp, vlmstpln
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parbas, only: lammin, lammax, mproj, lam2, m2proj
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -162,7 +164,6 @@ type(bqs_type), intent(out) :: bqs
 type(ancou_type), intent(out), allocatable, target :: v2
 type(ancouma_type), pointer :: ancouma
 logical ihomo, flaghf, csflag, clist, flagsu, bastst
-character*40 fname
 dimension jhold(1), ehold(1),&
           ishold(1)
 dimension ieps(1), ktemp(1), jtemp(1), isc1(1)
@@ -173,7 +174,7 @@ real(8), pointer :: brot, crot, delta, emax, drot
 nterm=>ispar(1); numpot=>ispar(2); ipotsy=>ispar(3); iop=> ispar(4); ninv=>ispar(5)
 jmax=>ispar(6); ipotsy2=>ispar(7); j2max=>ispar(8); j2min=>ispar(9)
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)
-
+UNUSED_DUMMY(isc1)
 twomol=.true.
 !  check for consistency in the values of flaghf and csflag
 if (flaghf) then
@@ -689,12 +690,13 @@ subroutine systpln (irpot, readpt, iread)
 use mod_coiout, only: niout, indout
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parbas, only: lammin, lammax, mproj, lam2, m2proj
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 logical existf
@@ -702,7 +704,8 @@ integer icod, ircod
 integer i, j, k, l, lc
 character*1 dot
 character*(*) fname
-character*60 line, filnam, potfil, filnm1
+character*60 line, filnam, potfil
+character*68 filnm1
 parameter (icod=9, ircod=5)
 #include "common/comdot.F90"
 save potfil
@@ -833,7 +836,7 @@ endif
 close (8)
 return
 !
-entry savstpln (readpt)
+entry savstpln ()
 !  save input parameters for symmetric top + linear molecule scattering
 !  the order of the write statements should be identical to the read statement
 !  above. for consistency with the data file written by gendat, format

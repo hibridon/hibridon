@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 
 ! syastp3 (savastp3/ptrastp3) defines, saves variables and reads         *
 !                  potential for C2v asym top - lin mo;ecule scattering  *
@@ -21,6 +22,7 @@ end module mod_asymln
 
 
 module mod_hiba30_astp3
+  use mod_assert, only: fassert
 contains
   ! ----------------------------------------------------------------------
 subroutine baastp3 (bqs, jhold, ehold, ishold, nlevel, &
@@ -164,15 +166,13 @@ use mod_coatp1, only: ctemp
 use mod_coatp2, only: chold
 use mod_coatp3, only: isizh
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use mod_hibasutil, only: rotham, rotham1
 use constants, only: econv, xmconv
-use mod_par, only: iprint
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
+use mod_hiblas, only: dsyev
 implicit double precision (a-h,o-z)
 type(bqs_type), intent(out) :: bqs
 type(ancou_type), intent(out), allocatable, target :: v2
@@ -183,16 +183,18 @@ dimension jhold(1), ehold(1), &
           ishold(1), etemp(1), fjtemp(1), fktemp(1), &
           fistmp(1)
 !  scratch arrays for computing asymmetric top energies and wave fns.
-dimension e(narray,narray), eig(narray), vec(narray,narray), &
-  sc1(narray), sc2(narray), work(10000), kp(10000), ko(10000), &
+dimension e(narray,narray), eig(narray), &
+  sc1(narray), work(10000), kp(10000), ko(10000), &
   j2rot(10000), e2rot(10000)
 !
 integer, pointer :: nterm, numpot, jmax, iop, j2min, j2max, ipotsy2
 real(8), pointer :: arot, brot, crot, emax, b2rot
-integer(8) :: v2_index
 nterm=>ispar(1); numpot=>ispar(2); jmax=>ispar(3); iop=>ispar(4); j2min=>ispar(5); j2max=>ispar(6); ipotsy2=>ispar(7)
 arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4); b2rot=>rspar(5)
   
+UNUSED_DUMMY(sc1)
+UNUSED_DUMMY(rcut)
+UNUSED_DUMMY(clist)
 
 zero = 0.d0
 two = 2.d0
@@ -437,7 +439,6 @@ write (6,1225)
         e(mm,nn) = 0.d0
       end do
     end do
-    jx = jj
     if (iop .ne. 0) then
       e(1,1) = rotham1(ji,1,ji,1) - rotham1(ji,1,ji,-1)
     else
@@ -836,7 +837,7 @@ subroutine vastp3(j1r,j2r,j12r,lr,j1c,j2c,j12c,lc, &
 !  subroutines called:
 !    xf3j, xf6j, xf9j
 !  -----------------------------------------------------------------------
-use mod_coatpi, only: narray, isiz
+use mod_coatpi, only: narray
 use mod_coatpr, only: c
 use mod_hiutil, only: xf3j, xf6j, xf9j
 implicit double precision (a-h,o-z)
@@ -1015,23 +1016,22 @@ subroutine syastp3 (irpot, readpt, iread)
 !
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
-use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: j, l, lc
 logical existf
 character*1 dot
 character*(*) fname
-character*60 filnam, line, potfil, filnm1
+character*60 filnam, line, potfil
+character*68 filnm1
 #include "common/comdot.F90"
 save potfil
 
@@ -1039,6 +1039,8 @@ integer, pointer, save :: nterm, numpot, jmax, iop, j2min, j2max, ipotsy2
 real(8), pointer, save :: arot, brot, crot, emax, b2rot
 nterm=>ispar(1); numpot=>ispar(2); jmax=>ispar(3); iop=>ispar(4); j2min=>ispar(5); j2max=>ispar(6); ipotsy2=>ispar(7)
 arot=>rspar(1); brot=>rspar(2); crot=>rspar(3); emax=>rspar(4); b2rot=>rspar(5)
+
+UNUSED_DUMMY(irpot)
 
 !  number and names of system dependent parameters
 !  first all the system dependent integer variables
@@ -1077,7 +1079,7 @@ return
 entry ptrastp3 (fname, readpt)
 line = fname
 readpt = .true.
-100 if (readpt) then
+if (readpt) then
   l=1
   call get_token(line,l,filnam,lc)
   if(lc.eq.0) then
@@ -1103,7 +1105,7 @@ endif
 close (8)
 return
 !  -----------------------------------------------------------------------
-entry savastp3 (readpt)
+entry savastp3 ()
 !  save input parameters for chiral asymmetric top + atom scattering
 !  the order of the write statements should be identical to the read statement
 !  above. for consistency with the data file written by gendat, format

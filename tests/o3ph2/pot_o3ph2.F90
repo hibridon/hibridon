@@ -9,17 +9,21 @@
 ! NB potential fitted to all ab initio mrci scaled points determined
 ! with avqz basis with the restrictions:  R .ge. 4 and E .le. 2000 cm-1
 ! rms fit to these points is 0.0011 (relative error)
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/ground.F90"
 #include "common/bausr.F90"
 subroutine loapot(iunit,filnam)
 use mod_conlam, only: nlam, nlammx, lamnum
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parpot, only: potnam=>pot_name
 use mod_selb, only: ibasty
 ! --------------------------------------------------------------------------
-character*(*) filnam
-potnam='ALEXANDER SCALED (s=1.21) O(3P)H2 DUBERNET-HUTSON'
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
+potnam='ALEXANDER SCALED(s=1.21) O(3P)H2 DUBERNET-HUTSON'
 ibasty=13
 lammin(1)=1
 lammax(1)=9
@@ -34,10 +38,11 @@ end
 subroutine driver
 use mod_covvl, only: vvl ! vvl(9)
 use mod_par, only: csflag, ihomo
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 character *48 potnam
 character *2 frame
-potnam='ALEXANDER SCALED (s=1.21) O(3P)H2 DUBERNET-HUTSON'
+potnam='ALEXANDER SCALED(s=1.21) O(3P)H2 DUBERNET-HUTSON'
 print *, potnam
 print *
 1  print *, ' r (bohr) frame (sf/bf)'
@@ -71,7 +76,7 @@ do i=1,100
  r=r+0.2
 enddo
 
-99 end
+end
 subroutine pot (vv0, r)
 ! ----------------------------------------------------------------------
 !  subroutine to calculate the r-dependent coefficients in the
@@ -119,8 +124,13 @@ subroutine pot (vv0, r)
 
 use mod_covvl, only: vvl ! vvl(9)
 use mod_par, only: csflag, ihomo
+use mod_hiblas, only: dscal, dcopy
+use mod_hipotutil, only: dqrank, dqrlss
 
 implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
+
 dimension vxxl1(9), vxxl2(9), vxxr0(9), vxxc1(9), vxxc2(9), &
   vxxc3(9), vxxcl(9)
 dimension vyyl1(9), vyyl2(9), vyyr0(9), vyyc1(9), vyyc2(9), &
@@ -132,7 +142,6 @@ dimension vxzl1(7), vxzl2(7), vxzc1(7), vxzc2(7)
 dimension vxx(9), vyy(9), vs(9),vzz(9),vd(9),vxz(9), &
           v1ap(9),v2ap(9)
 dimension d0(45),d1(36),d2(36),aa(45)
-dimension fthet(3,9)
 dimension xzz(5),xs(5),x1ap(5),x2ap(5),xd(4),x1(4),kpvt(9), &
           qraux(9), work(24),rsd(9)
 dimension vvll(28)
@@ -313,8 +322,8 @@ do 200 i=1,9
      vxz(i)=0d0
   else
 ! double exponential at other angles
-     vxz(i)=vxzc1(i-1)*exp(-vxzl1(i-1)*r)+ &
-        vxzc2(i-1)*exp(-vxzl2(i-1)*r)
+     vxz(i)=vxzc1(i-1)*exp(-vxzl1(i-1)*r)+ &  ! disable-warnings:do-subscript
+        vxzc2(i-1)*exp(-vxzl2(i-1)*r)  ! disable-warnings:do-subscript
   endif
 ! include sqrt(2) (table I of mh alexander, jcp 99, 6014)
   vxz(i)=sq2*vxz(i)

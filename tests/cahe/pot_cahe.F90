@@ -2,16 +2,20 @@
 !  References
 !   B. Pouilly, J.-M. Robbe, and M. H. Alexander, J. Chem. Phys. 91, 1658 (1989).
 !   T. Duhoo and B. Pouilly, J. Chem. Phys. 101, 7554 (1994).
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/bausr.F90"
 #include "common/ground.F90"
 ! --------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parpot, only: potnam=>pot_name
 use mod_selb, only: ibasty
-character*(*) filnam
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='Ca(4s5p)-He'
 ibasty=7
 lammin(1)=1
@@ -27,8 +31,9 @@ end
 subroutine driver
 use mod_covvl, only: vvl
 use mod_cosysi, only: ispar
-use mod_cosysr, only: isrcod, junkr, rspar
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_cosysr, only: rspar
+use mod_parpot, only: potnam=>pot_name
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 integer, pointer :: npot
 real(8), dimension(:), pointer :: en, de, re, be, rl, cl
@@ -88,296 +93,6 @@ goto 1
 !   / .9747,8.1,1E-4,7.5E-2,3.5E-3,6.5,.43,4.3E-3/
 ! end
 
-! --------------------------------------------------------------------------
-subroutine pot (vv0, r)
-!  subroutine to calculate the rz-dependent coefficients in the
-!  ca-he msv potentials of pouilly et al.
-!  in units of hartree for energy and bohr for distance
-! ----------------------------------------------------------------------
-!  on entry:
-!    rz:      interparticle distance
-!  on return:
-!  vv0        (not used)
-!  vvl(1,2)   contains the 3pi and 3sig potentials
-!  vvl(3,4)   contains the 1pi and 1sig potentials
-!  variable in module mod_conlam used here
-!    nlam:    the number of angular coupling terms actually used
-!  variable in module mod_covvl
-!    vvl:     array to store r-dependence of each
-!             angular term in the potential
-!  variable in common block /coconv/
-!   econv:     conversion factor from cm-1 to hartrees
-
-! author:  millard alexander and brigitte pouilly
-! latest revision date:  17-may-1994 by bp
-! ----------------------------------------------------------------------
-use mod_covvl, only: vvl
-use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
-use constants, only: econv
-implicit double precision (a-h,o-z)
-integer, pointer :: nterm, nstate, ipol, npot
-real(8), dimension(:), pointer :: en, de, re, be, rl, cl
-real(8), pointer :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor
-nterm=>ispar(1); nstate=>ispar(1); ipol=>ispar(3); npot=>ispar(4)
-en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
-rl=>rspar(17:20); cl=>rspar(21:24); cmix=>rspar(25); alphg=>rspar(26)
-rgaus=>rspar(27); agaus=>rspar(28); demor=>rspar(29); remor=>rspar(30)
-bemor=>rspar(31); dissmor=>rspar(32) 
-
-data onethr, fivthr /0.3333333333333333d0, 1.66666666666667d0/
-if (npot .lt. 1 .or. npot .gt. 3) then
-  write (6, 5) npot
-5   format (' *** NPOT = ',i2, ' NOT ALLOWED IN POT_13P; ABORT')
-  call exit
-endif
-if (npot .eq. 1) then
-! here for original msv potentials
-  call potmsv1(r,vp,vs,re(1:2),de(1:2),be(1:2),rl(1:2),cl(1:2))
-  vv0=0.d0;
-! Commented ou by J. Klos 2012.11.22
-!        vvl(1)=vp
-!        vvl(2)=vs
-! The coupling formula which is coded is identical to
-! Aquilanti's formula Eq. 2.10 in Aquilanti, Grossi
-! J. Chem. Phys. 73,1165 (1980)
-! where coupling elements multiply v_mu, not v_pi and v_sigma
-! vvl(1) is v_0, isotropic part
-! vvl(2) is v_2, anisotropic part
-  vvl(1)=(vs+2.d0*vp)/3.d0
-  vvl(2)=5.d0*(vs-vp)/3.d0
-  vvl(3)=(vs+2.d0*vp)/3.d0
-  vvl(4)=5.d0*(vs-vp)/3.d0
-else if (npot .eq. 2) then
-! here for new msv potentials + coupling for the 1sigma state
-  call pot1(r,vp1,vs1,vp3,vs3)
-else if (npot .eq. 3) then
-! here for czuchaj potentials
-  call pot2(r,vp1,vs1,vp3,vs3)
-endif
-if (npot .gt. 1) then
-  vvl(1)=(vs1+2.d0*vp1)/3.d0
-  vvl(2)=5.d0*(vs1-vp1)/3.d0
-  vvl(3)=(vs3+2.d0*vp3)/3.d0
-  vvl(4)=5.d0*(vs3-vp3)/3.d0
-endif
-return
-end
-subroutine potmsv1 (r, vp, vs, re, de, be, rl, c)
-
-! -----------------------------------------------------------------------
-!
-!  subroutine to calculate the r-dependent coefficients in the
-!  ca-he inelastic problem
-!  in units of hartree for energy and bohr for distance
-!
-!  on return:
-!  vp contains the pi potential
-!  vs contains the sigma potential
-!
-! -----------------------------------------------------------------------
-!
-!  morse-spline-van der waals potential used for all curves
-!
-!      if r .le. re,  v(r) = morse curve with parameters re, de, and be
-!      if re .lt. r .le. rc,  v(r) = spline function
-!      if r .ge. rl, v(r) = - c r**(-nn)
-!
-!  in smp notation we have:
-!
-!   vmorse[r,re,de,be] : de*exp[-(be*(r + -re))]*(-2 + exp[-(be*(r\
-!                        + -re))])
-!   vspline[r,re,de,a,b] : -de + (a + b*(r + -re))*(r + -re)^2
-!       with
-!        a[re,rl,de,c,n] : (3((de + -(c*rl^(-n)))/(-re + rl)) + -(c\
-!                          *n*rl^(-1 + -n)))/(-re + rl)
-!       and
-!        b[re,de,rl,c,n] : (-2((de + -(c*rl^(-n)))/(-re + rl)) + c\
-!                          *n*rl^(-1 + -n))/(-re + rl)^2
-!
-!   the simplified expression for vspline with the explicit values of
-!   the coefficients a and b (preceding lines) incorporated is
-!
-!   vspline[r,re,de,rl,c,n] : (-(de*(-rl + r)^2*(-rl + -2r + 3re))\
-!                            + c*rl^(-1 + -n)*(r + -re)^2*(-2(rl*r) + -(rl*re)\
-!                            + n*(-rl + r)*(-rl + re) + 3(rl^2)))/(-rcl + re)^3
-!
-!
-!   vlr[r,c,n] : -(c*r^(-n))
-!
-!
-!   note that all parameters with energy should
-!   be in hartree, all parameters with distance units [re, rl] should
-!   be in bohr, and all parameters with inverse distance units [be]
-!   should be in inverse bohr
-!
-! -----------------------------------------------------------------------
-!
-implicit double precision (a-h,o-z)
-dimension re(2), de(2), be(2), rl(2), c(2)
-dimension v(2)
-!
-! -----------------------------------------------------------------------
-! now determine potential
-!
-do 30  i = 1, 2
-!
-!
-!  i = 1 for pi; i=2 for sigma
-
-if (r .le. re(i) ) then
-!
-!  here for morse potential
-!
- v(i) = de(i) * exp(- be(i) * (r - re(i))) * (-2. + &
-         exp(- be(i) * (r - re(i))))
-!
-else if (r .gt. rl(i) ) then
-!
-!  here for long-range potential
-!
- v(i) = -c(i) * r ** (-6)
-!
-else if (r .ge. re(i) .and. r .le. rl(i)) then
-!
-   v(i) = (- de(i) * (r  - rl(i)) ** 2 * (-2 * r + 3 * re(i) &
-       - rl(i)) + c(i) * rl(i) ** (-1 - 6) * (r - re(i)) ** 2 &
-       * (-2. * r * rl(i)  - re(i) * rl(i) + 6 * (r - rl(i)) &
-       * (re(i) - rl(i))+ 3 * rl(i)** 2)) / (re(i) - rl(i)) ** 3
-end if
-30 continue
-!
-! -----------------------------------------------------------------------
-!  now set up values to be returned to calling program
-!
- vp = v(1)
- vs = v(2)
- return
- end
-! ---------------------------------------------------------------------
-! pot1.f
-subroutine pot1(r,vp1,vs1,vp3,vs3)
-use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-
-real(8), dimension(:), pointer :: en, de, re, be, rl, cl
-real(8), pointer :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor
-en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
-rl=>rspar(17:20); cl=>rspar(21:24); cmix=>rspar(25); alphg=>rspar(26)
-rgaus=>rspar(27); agaus=>rspar(28); demor=>rspar(29); remor=>rspar(30)
-bemor=>rspar(31); dissmor=>rspar(32) 
-
-call potmsv(vp3,vs3,vp1,vs1,r)
-call potmorse (vs2, r)
-
-!  here vs1 contains the msv part of the excited singlet sigma state
-!  and vs2 contains the morse part of the excited singlet sigma state
-
-!  here to obtain a gaussian form for the coupling
-!  coupsi(1) = h0 * exp(- alpha (r - rmax)**2)
-!  to obtain a maximum of coupsi at r = 8.1 bohr
-!  alpha = 0.075
-!      coupling = coupsi(1) * dexp( -(0.075) * ( r - 8.1)**2)
-coupling = agaus*dexp(-alphg*(r-rgaus)**2)
-vpert = (0.5d0 *(vs1 + vs2) - 0.5d0 * dsqrt((vs1 - vs2)**2 + &
-          4.d0 * coupling**2))
-vs1=vpert
-return
-end
-
-subroutine potmsv(vp,vs,vp1,vs1,r)
-use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-dimension v(4)
-real(8), dimension(:), pointer :: en, de, re, be, rl, cl, c
-en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
-rl=>rspar(17:20); cl=>rspar(21:24); c=>rspar(25:28)
-
-do 30 j=1,4
-!
-!     j=1 for triplet pi
-!     j=2 for triplet sigma
-!     j=3 for singlet pi
-!     j=4 for singlet sigma
-!
-if(r.le.re(j)) then
-v(j)=de(j)*dexp(-be(j)*(r-re(j)))*(-2.+dexp(-be(j)*(r-re(j))))
-else if (r.gt.rl(j)) then
-v(j)=-c(j)*r**(-6)
-else if (r.gt.re(j).and.r.le.rl(j)) then
-v(j)=(-de(j)*(r-rl(j))**2*(-2*r+3*re(j) &
-       -rl(j))+c(j)*rl(j)**(-7)*(r-re(j))**2 &
-       *(-2.*r*rl(j)-re(j)*rl(j)+6*(r-rl(j)) &
-       *(re(j)-rl(j))+3*rl(j)**2))/(re(j)-rl(j))**3
-end if
-30 continue
-!
-vp=v(1)
-vs=v(2)
-vp1=v(3)
-vs1=v(4)
-!
-return
-end
-subroutine potmorse ( vs, r)
-! -----------------------------------------------------------------------
-!
-!  subroutine to calculate the r-dependent coefficients for the morse
-!  part of the excited singlet sigma state of the ca - he system.
-!  units are in hartree or cm-1 for energy and bohr for distance
-
-
-!  on return:
-!  vs contains the morse potential
-! -----------------------------------------------------------------------
-
-!  in smp notation we have:
-!
-!   vmorse[r,re,de,be] : de*exp[-(be*(r + -re))]*(-2 + exp[-(be*(r\
-!                        + -re))])
-!
-!   de should be in hartree, re in bohr and de in inverse bohr
-
-!   note that the morse potential is  shifted by an amount of
-!   energy equal to delrsi
-!   e.g.
-!       v(r) = v(r) - delrsi
-!
-! -----------------------------------------------------------------------
-!
-use mod_cosysr, only: isrcod, junkr, rspar
-implicit double precision (a-h,o-z)
-
-real(8), dimension(:), pointer :: en, de, re, be, rl, cl
-real(8), pointer :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor
-en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
-rl=>rspar(17:20); cl=>rspar(21:24); cmix=>rspar(25); alphg=>rspar(26)
-rgaus=>rspar(27); agaus=>rspar(28); demor=>rspar(29); remor=>rspar(30)
-bemor=>rspar(31); dissmor=>rspar(32)  
-!
-! -----------------------------------------------------------------------
-! now determine potential
-!
-
-!  i = 1 for the morse potential
-!  coup is the coupling between the  morse and the msv parts
-!  of the potential
-
-!
- v = demor * dexp(- bemor * (r - remor)) * (-2.d0 + &
-         dexp(- bemor * (r - remor)))
-
- v = v + dissmor
-!
-! -----------------------------------------------------------------------
-!  now set up values to be returned to calling program
-!
- vs = v
- return
- end
-! -----------------------------------------------------------------------
-! pot2
 block data blk2
 ! -----------------------------------------------------------------------
 ! nouveau fit des potentiels
@@ -477,7 +192,297 @@ common /ppot3si/ x3si(n3si),vl3si(n3si),dvlf3si,dvli3si, &
 -.00000906, &
 -9.22420e-06, -8.63701e-06, -7.67616e-06, -6.50178e-06, &
 -5.16726e-06, -3.83274e-06, -2.44484e-06, -1.05694e-06/
-end 
+end
+
+module mod_cahe
+! --------------------------------------------------------------------------
+contains
+subroutine potmsv1 (r, vp, vs, re, de, be, rl, c)
+
+! -----------------------------------------------------------------------
+!
+!  subroutine to calculate the r-dependent coefficients in the
+!  ca-he inelastic problem
+!  in units of hartree for energy and bohr for distance
+!
+!  on return:
+!  vp contains the pi potential
+!  vs contains the sigma potential
+!
+! -----------------------------------------------------------------------
+!
+!  morse-spline-van der waals potential used for all curves
+!
+!      if r .le. re,  v(r) = morse curve with parameters re, de, and be
+!      if re .lt. r .le. rc,  v(r) = spline function
+!      if r .ge. rl, v(r) = - c r**(-nn)
+!
+!  in smp notation we have:
+!
+!   vmorse[r,re,de,be] : de*exp[-(be*(r + -re))]*(-2 + exp[-(be*(r\
+!                        + -re))])
+!   vspline[r,re,de,a,b] : -de + (a + b*(r + -re))*(r + -re)^2
+!       with
+!        a[re,rl,de,c,n] : (3((de + -(c*rl^(-n)))/(-re + rl)) + -(c\
+!                          *n*rl^(-1 + -n)))/(-re + rl)
+!       and
+!        b[re,de,rl,c,n] : (-2((de + -(c*rl^(-n)))/(-re + rl)) + c\
+!                          *n*rl^(-1 + -n))/(-re + rl)^2
+!
+!   the simplified expression for vspline with the explicit values of
+!   the coefficients a and b (preceding lines) incorporated is
+!
+!   vspline[r,re,de,rl,c,n] : (-(de*(-rl + r)^2*(-rl + -2r + 3re))\
+!                            + c*rl^(-1 + -n)*(r + -re)^2*(-2(rl*r) + -(rl*re)\
+!                            + n*(-rl + r)*(-rl + re) + 3(rl^2)))/(-rcl + re)^3
+!
+!
+!   vlr[r,c,n] : -(c*r^(-n))
+!
+!
+!   note that all parameters with energy should
+!   be in hartree, all parameters with distance units [re, rl] should
+!   be in bohr, and all parameters with inverse distance units [be]
+!   should be in inverse bohr
+!
+! -----------------------------------------------------------------------
+!
+implicit double precision (a-h,o-z)
+dimension re(2), de(2), be(2), rl(2), c(2)
+dimension v(2)
+!
+! -----------------------------------------------------------------------
+! now determine potential
+!
+do 30  i = 1, 2
+!
+!
+!  i = 1 for pi; i=2 for sigma
+
+if (r .le. re(i) ) then
+!
+!  here for morse potential
+!
+ v(i) = de(i) * exp(- be(i) * (r - re(i))) * (-2. + &
+         exp(- be(i) * (r - re(i))))
+!
+else if (r .gt. rl(i) ) then
+!
+!  here for long-range potential
+!
+ v(i) = -c(i) * r ** (-6)
+!
+else if (r .ge. re(i) .and. r .le. rl(i)) then
+!
+   v(i) = (- de(i) * (r  - rl(i)) ** 2 * (-2 * r + 3 * re(i) &
+       - rl(i)) + c(i) * rl(i) ** (-1 - 6) * (r - re(i)) ** 2 &
+       * (-2. * r * rl(i)  - re(i) * rl(i) + 6 * (r - rl(i)) &
+       * (re(i) - rl(i))+ 3 * rl(i)** 2)) / (re(i) - rl(i)) ** 3
+end if
+30 continue
+!
+! -----------------------------------------------------------------------
+!  now set up values to be returned to calling program
+!
+ vp = v(1)
+ vs = v(2)
+ return
+ end
+
+subroutine potmsv(vp,vs,vp1,vs1,r)
+use mod_cosysr, only: rspar
+implicit double precision (a-h,o-z)
+dimension v(4)
+real(8), dimension(:), pointer :: en, de, re, be, rl, cl, c
+en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
+rl=>rspar(17:20); cl=>rspar(21:24); c=>rspar(25:28)
+
+do 30 j=1,4
+!
+!     j=1 for triplet pi
+!     j=2 for triplet sigma
+!     j=3 for singlet pi
+!     j=4 for singlet sigma
+!
+if(r.le.re(j)) then
+v(j)=de(j)*dexp(-be(j)*(r-re(j)))*(-2.+dexp(-be(j)*(r-re(j))))
+else if (r.gt.rl(j)) then
+v(j)=-c(j)*r**(-6)
+else if (r.gt.re(j).and.r.le.rl(j)) then
+v(j)=(-de(j)*(r-rl(j))**2*(-2*r+3*re(j) &
+       -rl(j))+c(j)*rl(j)**(-7)*(r-re(j))**2 &
+       *(-2.*r*rl(j)-re(j)*rl(j)+6*(r-rl(j)) &
+       *(re(j)-rl(j))+3*rl(j)**2))/(re(j)-rl(j))**3
+end if
+30 continue
+!
+vp=v(1)
+vs=v(2)
+vp1=v(3)
+vs1=v(4)
+!
+return
+end
+subroutine potmorse ( vs, r)
+! -----------------------------------------------------------------------
+!
+!  subroutine to calculate the r-dependent coefficients for the morse
+!  part of the excited singlet sigma state of the ca - he system.
+!  units are in hartree or cm-1 for energy and bohr for distance
+
+
+!  on return:
+!  vs contains the morse potential
+! -----------------------------------------------------------------------
+
+!  in smp notation we have:
+!
+!   vmorse[r,re,de,be] : de*exp[-(be*(r + -re))]*(-2 + exp[-(be*(r\
+!                        + -re))])
+!
+!   de should be in hartree, re in bohr and de in inverse bohr
+
+!   note that the morse potential is  shifted by an amount of
+!   energy equal to delrsi
+!   e.g.
+!       v(r) = v(r) - delrsi
+!
+! -----------------------------------------------------------------------
+!
+use mod_cosysr, only: rspar
+implicit double precision (a-h,o-z)
+
+real(8), dimension(:), pointer :: en, de, re, be, rl, cl
+real(8), pointer :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor
+en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
+rl=>rspar(17:20); cl=>rspar(21:24); cmix=>rspar(25); alphg=>rspar(26)
+rgaus=>rspar(27); agaus=>rspar(28); demor=>rspar(29); remor=>rspar(30)
+bemor=>rspar(31); dissmor=>rspar(32)  
+!
+! -----------------------------------------------------------------------
+! now determine potential
+!
+
+!  i = 1 for the morse potential
+!  coup is the coupling between the  morse and the msv parts
+!  of the potential
+
+!
+ v = demor * dexp(- bemor * (r - remor)) * (-2.d0 + &
+         dexp(- bemor * (r - remor)))
+
+ v = v + dissmor
+!
+! -----------------------------------------------------------------------
+!  now set up values to be returned to calling program
+!
+ vs = v
+ return
+ end
+! -----------------------------------------------------------------------
+! pot2
+
+! ------------------------------------
+subroutine dspline1(x,y,n,yp1,ypn,y2)
+implicit double precision(a-h,o-z)
+parameter (nmax=300)
+dimension x(n),y(n),y2(n),u(nmax)
+save
+if (n .gt. nmax) then
+  write (6,5) n
+  write (9,5) n
+5   format (' *** N = ',i3, ' .GT. NMAX IN DSPLINE; ABORT')
+  call exit
+endif
+if (yp1.gt..99d30) then
+  y2(1)=0.d0
+  u(1)=0.d0
+else
+  y2(1)=-0.5d0
+  u(1)=(3.d0/(x(2)-x(1)))*((y(2)-y(1))/(x(2)-x(1))-yp1)
+endif
+do 11 i=2,n-1
+  sig=(x(i)-x(i-1))/(x(i+1)-x(i-1))
+  p=sig*y2(i-1)+2.d0
+  y2(i)=(sig-1.d0)/p
+  u(i)=(6.d0*((y(i+1)-y(i))/(x(i+1)-x(i))-(y(i)-y(i-1)) &
+      /(x(i)-x(i-1)))/(x(i+1)-x(i-1))-sig*u(i-1))/p
+11 continue
+if (ypn.gt..99d30) then
+  qn=0.d0
+  un=0.d0
+else
+  qn=0.5d0
+  un=(3.d0/(x(n)-x(n-1)))*(ypn-(y(n)-y(n-1))/(x(n)-x(n-1)))
+endif
+y2(n)=(un-qn*u(n-1))/(qn*y2(n-1)+1.d0)
+do 12 k=n-1,1,-1
+  y2(k)=y2(k)*y2(k+1)+u(k)
+12 continue
+return
+end
+subroutine dsplint1(xa,ya,y2a,n,x,y)
+implicit double precision(a-h,o-z)
+dimension xa(n),ya(n),y2a(n)
+save
+klo=1
+khi=n
+1 if (khi-klo.gt.1) then
+  k=(khi+klo)/2
+  if(xa(k).gt.x)then
+    khi=k
+  else
+    klo=k
+  endif
+goto 1
+endif
+h=xa(khi)-xa(klo)
+!      if (h.eq.0.d0) pause 'bad xa input.'
+if (h.eq.0.d0) then
+  write (6, 15) h
+  write (9, 15) h
+15   format (' *** bad xa input in splint; abort')
+  call exit
+endif
+a=(xa(khi)-x)/h
+b=(x-xa(klo))/h
+y=a*ya(klo)+b*ya(khi)+ &
+      ((a**3-a)*y2a(klo)+(b**3-b)*y2a(khi))*(h**2)/6.d0
+return
+end
+
+
+! ---------------------------------------------------------------------
+! pot1.f
+subroutine pot1(r,vp1,vs1,vp3,vs3)
+use mod_cosysr, only: rspar
+implicit double precision (a-h,o-z)
+
+real(8), dimension(:), pointer :: en, de, re, be, rl, cl
+real(8), pointer :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor
+en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
+rl=>rspar(17:20); cl=>rspar(21:24); cmix=>rspar(25); alphg=>rspar(26)
+rgaus=>rspar(27); agaus=>rspar(28); demor=>rspar(29); remor=>rspar(30)
+bemor=>rspar(31); dissmor=>rspar(32) 
+
+call potmsv(vp3,vs3,vp1,vs1,r)
+call potmorse (vs2, r)
+
+!  here vs1 contains the msv part of the excited singlet sigma state
+!  and vs2 contains the morse part of the excited singlet sigma state
+
+!  here to obtain a gaussian form for the coupling
+!  coupsi(1) = h0 * exp(- alpha (r - rmax)**2)
+!  to obtain a maximum of coupsi at r = 8.1 bohr
+!  alpha = 0.075
+!      coupling = coupsi(1) * dexp( -(0.075) * ( r - 8.1)**2)
+coupling = agaus*dexp(-alphg*(r-rgaus)**2)
+vpert = (0.5d0 *(vs1 + vs2) - 0.5d0 * dsqrt((vs1 - vs2)**2 + &
+          4.d0 * coupling**2))
+vs1=vpert
+return
+end
+
 ! ----------------------------------------------------------------------
 subroutine pot2(rz,vp1,vs1,vp3,vs3)
 
@@ -615,71 +620,83 @@ vs3 = vvl(2)
 vp3 = vvl(4)
 return
 end
-! ------------------------------------
-subroutine dspline1(x,y,n,yp1,ypn,y2)
-implicit double precision(a-h,o-z)
-parameter (nmax=300)
-dimension x(n),y(n),y2(n),u(nmax)
-save
-if (n .gt. nmax) then
-  write (6,5) n
-  write (9,5) n
-5   format (' *** N = ',i3, ' .GT. NMAX IN DSPLINE; ABORT')
+
+end module mod_cahe
+
+subroutine pot (vv0, r)
+!  subroutine to calculate the rz-dependent coefficients in the
+!  ca-he msv potentials of pouilly et al.
+!  in units of hartree for energy and bohr for distance
+! ----------------------------------------------------------------------
+!  on entry:
+!    rz:      interparticle distance
+!  on return:
+!  vv0        (not used)
+!  vvl(1,2)   contains the 3pi and 3sig potentials
+!  vvl(3,4)   contains the 1pi and 1sig potentials
+!  variable in module mod_conlam used here
+!    nlam:    the number of angular coupling terms actually used
+!  variable in module mod_covvl
+!    vvl:     array to store r-dependence of each
+!             angular term in the potential
+!  variable in common block /coconv/
+!   econv:     conversion factor from cm-1 to hartrees
+
+! author:  millard alexander and brigitte pouilly
+! latest revision date:  17-may-1994 by bp
+! ----------------------------------------------------------------------
+use mod_covvl, only: vvl
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
+use mod_cahe, only: potmsv1, pot1, pot2
+implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
+
+integer, pointer :: nterm, nstate, ipol, npot
+real(8), dimension(:), pointer :: en, de, re, be, rl, cl
+real(8), pointer :: cmix, alphg, rgaus, agaus, demor, remor, bemor, dissmor
+nterm=>ispar(1); nstate=>ispar(1); ipol=>ispar(3); npot=>ispar(4)
+en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
+rl=>rspar(17:20); cl=>rspar(21:24); cmix=>rspar(25); alphg=>rspar(26)
+rgaus=>rspar(27); agaus=>rspar(28); demor=>rspar(29); remor=>rspar(30)
+bemor=>rspar(31); dissmor=>rspar(32) 
+
+data onethr, fivthr /0.3333333333333333d0, 1.66666666666667d0/
+if (npot .lt. 1 .or. npot .gt. 3) then
+  write (6, 5) npot
+5   format (' *** NPOT = ',i2, ' NOT ALLOWED IN POT_13P; ABORT')
   call exit
 endif
-if (yp1.gt..99d30) then
-  y2(1)=0.d0
-  u(1)=0.d0
-else
-  y2(1)=-0.5d0
-  u(1)=(3.d0/(x(2)-x(1)))*((y(2)-y(1))/(x(2)-x(1))-yp1)
+if (npot .eq. 1) then
+! here for original msv potentials
+  call potmsv1(r,vp,vs,re(1:2),de(1:2),be(1:2),rl(1:2),cl(1:2))
+  vv0=0.d0;
+! Commented ou by J. Klos 2012.11.22
+!        vvl(1)=vp
+!        vvl(2)=vs
+! The coupling formula which is coded is identical to
+! Aquilanti's formula Eq. 2.10 in Aquilanti, Grossi
+! J. Chem. Phys. 73,1165 (1980)
+! where coupling elements multiply v_mu, not v_pi and v_sigma
+! vvl(1) is v_0, isotropic part
+! vvl(2) is v_2, anisotropic part
+  vvl(1)=(vs+2.d0*vp)/3.d0
+  vvl(2)=5.d0*(vs-vp)/3.d0
+  vvl(3)=(vs+2.d0*vp)/3.d0
+  vvl(4)=5.d0*(vs-vp)/3.d0
+else if (npot .eq. 2) then
+! here for new msv potentials + coupling for the 1sigma state
+  call pot1(r,vp1,vs1,vp3,vs3)
+else if (npot .eq. 3) then
+! here for czuchaj potentials
+  call pot2(r,vp1,vs1,vp3,vs3)
 endif
-do 11 i=2,n-1
-  sig=(x(i)-x(i-1))/(x(i+1)-x(i-1))
-  p=sig*y2(i-1)+2.d0
-  y2(i)=(sig-1.d0)/p
-  u(i)=(6.d0*((y(i+1)-y(i))/(x(i+1)-x(i))-(y(i)-y(i-1)) &
-      /(x(i)-x(i-1)))/(x(i+1)-x(i-1))-sig*u(i-1))/p
-11 continue
-if (ypn.gt..99d30) then
-  qn=0.d0
-  un=0.d0
-else
-  qn=0.5d0
-  un=(3.d0/(x(n)-x(n-1)))*(ypn-(y(n)-y(n-1))/(x(n)-x(n-1)))
+if (npot .gt. 1) then
+  vvl(1)=(vs1+2.d0*vp1)/3.d0
+  vvl(2)=5.d0*(vs1-vp1)/3.d0
+  vvl(3)=(vs3+2.d0*vp3)/3.d0
+  vvl(4)=5.d0*(vs3-vp3)/3.d0
 endif
-y2(n)=(un-qn*u(n-1))/(qn*y2(n-1)+1.d0)
-do 12 k=n-1,1,-1
-  y2(k)=y2(k)*y2(k+1)+u(k)
-12 continue
-return
-end
-subroutine dsplint1(xa,ya,y2a,n,x,y)
-implicit double precision(a-h,o-z)
-dimension xa(n),ya(n),y2a(n)
-save
-klo=1
-khi=n
-1 if (khi-klo.gt.1) then
-  k=(khi+klo)/2
-  if(xa(k).gt.x)then
-    khi=k
-  else
-    klo=k
-  endif
-goto 1
-endif
-h=xa(khi)-xa(klo)
-!      if (h.eq.0.d0) pause 'bad xa input.'
-if (h.eq.0.d0) then
-  write (6, 15) h
-  write (9, 15) h
-15   format (' *** bad xa input in splint; abort')
-  call exit
-endif
-a=(xa(khi)-x)/h
-b=(x-xa(klo))/h
-y=a*ya(klo)+b*ya(khi)+ &
-      ((a**3-a)*y2a(klo)+(b**3-b)*y2a(khi))*(h**2)/6.d0
 return
 end

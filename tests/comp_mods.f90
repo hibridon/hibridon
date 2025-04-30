@@ -309,7 +309,7 @@ module m_diff
             do while(number_index <= size(va))
                 if(abs(va(number_index)) > min_significant_value ) then
                     if( abs(va(number_index) - vb(number_index))/max(abs(va(number_index)),1d-300) > tolerance ) then
-                        write(Error_Unit, "(a,i0,a,e11.5,a,e11.5,a,f3.1,a)") "at number_index ", number_index, ": ",&
+                        write(Error_Unit, "(a,i0,a,e12.5,a,e12.5,a,f3.1,a)") "at number_index ", number_index, ": ",&
                         va(number_index), " and ", vb(number_index), " differ by more than ", tolerance*100.0d0,&
                         " percent"
                         vectors_differ = .TRUE.

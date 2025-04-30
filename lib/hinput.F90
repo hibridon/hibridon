@@ -73,6 +73,7 @@ function candidates_get_num_candidates(this) result(num_candidates)
 end function candidates_get_num_candidates
 
 function candidates_get_codex(this, candidate_index) result(codex)
+  use mod_assert, only: fassert
   class(candidates_type), intent(in) :: this
   integer, intent(in) :: candidate_index
   character(len=8) :: codex
@@ -81,6 +82,7 @@ function candidates_get_codex(this, candidate_index) result(codex)
 end function candidates_get_codex
 
 function candidates_get_codex_index(this, candidate_index) result(codex_index)
+  use mod_assert, only: fassert
   class(candidates_type), intent(in) :: this
   integer, intent(in) :: candidate_index
   integer :: codex_index
@@ -89,6 +91,7 @@ function candidates_get_codex_index(this, candidate_index) result(codex_index)
 end function candidates_get_codex_index
 
 function candidates_get_bost(this, candidate_index) result(bost)
+  use mod_assert, only: fassert
   class(candidates_type), intent(in) :: this
   integer, intent(in) :: candidate_index
   integer :: bost
@@ -104,7 +107,9 @@ end subroutine candidates_empty
 end module mod_candidates
 
 module mod_hinput
+  use mod_assert, only: fassert
   implicit none
+
   enum, bind( C )
   enumerator :: &
     k_keyword_execute_command     =  1, &   !   40 label:execute_command(i)
@@ -147,8 +152,7 @@ module mod_hinput
   character(len=8), parameter :: bascod(1) = ['BASISTYP']
 
 contains
-
-subroutine hinput(first)
+subroutine hinput(first_time)
 !  subroutine to redefine system independent input parameters for
 !  hibridon code
 !  author:  h.-j. werner
@@ -194,20 +198,17 @@ use mod_coiout, only: niout, indout
 use mod_codim, only: nmax => mmax
 use mod_coamat, only: scmat => toto ! scmat(1)
 use mod_coener, only: energ, max_en
-use mod_conlam, only: nlam, lamnum
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysl, only: islcod, lspar
-use mod_cosysr, only: isrcod, idum=>junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use mod_version, only : version
 use mod_hibrid5, only : readpc
 use mod_difcrs, only: difcrs
-use mod_hibasis, only: is_twomol, basknd
+use mod_hibasis, only: is_twomol
 use mod_hibrid2, only: enord, prsg
 use mod_hibrid3, only: potmin
 use mod_hiutil, only: assignment_parse
-use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT, RPAR_COUNT
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
 use fcod_enum
 use lpar_enum
 use ipar_enum
@@ -219,9 +220,8 @@ use mod_hinput_state, only: batch
 use mod_si_params, only: iicode, ircode, icode, lcode, set_param_names
 use mod_hinput_state, only: lindx, irpot, irinp
 use mod_command, only: k_post_action_interpret_next_statement, k_post_action_read_new_line, k_post_action_exit_hibridon, k_post_action_exit_hinput, k_post_action_write_cr_and_exit
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
-use mod_file, only: input, output, jobnam, savfil
+use mod_file, only: input, jobnam
 use mod_sav, only: iipar, ixpar, irpar, rxpar
 use mod_tensor, only: tenopa, mrcrs
 use mod_hitestptn, only: testptn
@@ -230,19 +230,21 @@ use mod_opti, only: optifl
 use mod_hiutil, only: get_token, lower, upper, lenstr, vaxhlp, sys_conf
 use mod_hibrid1, only: difs, turn
 use mod_hibrid4, only: psi, eadiab1, sprint
+use mod_hypxsc, only: hypxsc
+use mod_hiiolib1, only: openf, gendat, savdat, genchk
+use mod_hisystem, only: baschk, sysdat, syssav, ptread
+use mod_histmix, only: stmix
 implicit none
+logical, intent(inout) :: first_time
 character(len=K_MAX_USER_LINE_LENGTH) line
 character(len=40) :: fnam1
 character(len=40) :: fnam2
 character*40 :: code
 character*8 empty_var_list(0)
 integer nerg
-logical first
 logical logp, opti
 real(8) :: a(15)  ! real arguments
 integer :: ia(10)  ! integer arguments of commands
-integer :: ihold(15)
-integer :: lhold(15)
 
 ! these were members of cokeyl common block
 integer :: nncode  
@@ -251,18 +253,18 @@ integer :: ijcode
 
 
 integer :: ipr, istep, inam, i, ienerg, iflux, ii, im, imx, inew, iprint, iskip, itx, ityp, izero
-integer :: j, jm, jmx, jtot2x, l, l1, l2, lc, lcc, ld, len, lend, low
+integer :: j, jm, jmx, jtot2x, l, l1, l2, lc, lcc, ld, len
 integer :: nde
 real(8) :: optacm, r, thrs, val, waveve, xmu
 real(8) :: a1, acc, acclas, optval, optacc, accmx, delt_e, e, e1
 type(candidates_type) :: candidates
-class(command_type), pointer :: command
+! class(command_type), pointer :: command
 integer :: post_action
-integer :: next_statement
+integer :: next_statement  ! index of the next statement to be interpreted
 save ipr, opti, a, a1, acc, acclas, optval, optacc, istep, inam, &
      code, lc, jtot2x
 
-if (first) then
+if (first_time) then
   call command_init()
 end if
 ASSERT(associated(command_mgr))
@@ -336,13 +338,13 @@ ijcode=icode
 if(com) open(unit=1312, status='old', file=trim(com_file))
 
 !   define system dependent parameter codes
-if(first) then
+if(first_time) then
    islcod=0
    isrcod=0
    isicod=0
    izero=0
    call sysdat(irpot, lpar(LPAR_READPT), izero)
-   first = .false.
+   first_time = .false.
    call version(6)
 !  in this next statement the $ sign implies no line feed
 !  replace this with an equivalent formatting character if your system
@@ -376,7 +378,7 @@ else
   read(5, 10, end=599) line  ! label:write_cr_and_exit in case of error
 endif
 10 format((a))
-11 if(line .eq. ' ') goto 1  ! label:read_new_line
+if(line .eq. ' ') goto 1  ! label:read_new_line
 if (line(1:1) .eq. '?') then
     code='help '//line(2:)
     call vaxhlp(code)
@@ -514,15 +516,15 @@ end if
 ! label:execute_command_mgr_command(i)
 !
 45 continue
-  next_statement = UNINITIALIZED_INTEGER_VALUE
+  next_statement = HIB_UNINITIALIZED_INTEGER_VALUE
   call command_mgr%commands(i)%item%execute(statements=line, bofargs=l, next_statement=next_statement, post_action=post_action)
 #ifndef DISABLE_HIB_ASSERT
-#if (UNINITIALIZED_INTEGER_VALUE != 0)
+#if (HIB_UNINITIALIZED_INTEGER_VALUE != 0)
       ! make sure that next_statement has been initialized by the command's execute method
       ! note: this test can be removed when the warnings -Wunused-dummy-argument and -Wunused-variable trigger errors (when done, if a command forgets to set the output dummy argumen next_statement, then the compiler will detect a -Wunused-dummy-argument and trigger an error at compile time)
-      if (next_statement == UNINITIALIZED_INTEGER_VALUE) then
+      if (next_statement == HIB_UNINITIALIZED_INTEGER_VALUE) then
         write(6,*) 'this command forgot to set next_statement :', command_mgr%commands(i)%codex
-        ASSERT(next_statement /= UNINITIALIZED_INTEGER_VALUE)  
+        ASSERT(next_statement /= HIB_UNINITIALIZED_INTEGER_VALUE)  
       end if
 #endif
 #endif
@@ -790,7 +792,7 @@ else
   code = input
 end if
 call savdat(inew,code)
-call syssav(lpar(LPAR_READPT))
+call syssav()
 close(8)
 l1 = l
 irinp = 1
@@ -924,7 +926,7 @@ goto 1  ! label:read_new_line
 !.....determine turning point from isotropic potential
 !     turn
 1600 if(irpot .eq. 0) then
-  write(6,510)
+  write(6,510)  ! potentiel not yet defined
   goto 1  ! label:read_new_line
 end if
 e = 0
@@ -1027,7 +1029,7 @@ goto 1  ! label:read_new_line
      call assignment_parse(code(1:lc),empty_var_list,j,a(i))
 2010   continue
   write (6,*) 'hinput : lpar = ' 
-  call difcrs(fnam1,a,lpar(LPAR_IHOMO),lpar(LPAR_FLAGHF))
+  call difcrs(fnam1,a,lpar(LPAR_FLAGHF))
 else
   write (6, 2011)
 2011   format(' Sorry, differential cross sections not yet', &

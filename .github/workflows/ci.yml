@@ -1,0 +1,107 @@
+name: hibridon ci
+
+on:
+  pull_request:
+    branches: [ master ]     # run basic ci on pull requests on master
+  push:
+    branches: [ master ]     # run basic ci on pushes on master
+  schedule:
+    - cron:  '0 02 * * 1'    # run full ci Every mondays at 00:02
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test-config:
+    runs-on: ${{ matrix.os }}
+    strategy:
+        fail-fast: false
+        matrix:
+          os: [debian-12, macos-11.2]
+          build_type: [debug, release]
+          compiler: [gfortran, ifort]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: env-setup
+        run: |
+          TEST_SUITE=''
+          if [ "${{github.event_name}}" == 'pull_request' ]
+          then
+            TEST_SUITE='coverage'
+          elif [ "${{github.event_name}}" == 'push' ]
+          then
+            TEST_SUITE='coverage'
+          elif [ "${{github.event_name}}" == 'schedule' ]
+          then
+            TEST_SUITE='all'  # run all tests
+          else
+            echo "Unknown event name: ${{github.event_name}}"
+            exit 1
+          fi
+          echo "TEST_SUITE=${TEST_SUITE}" >> $GITHUB_ENV
+      - name: Test Configuration
+        uses: ./.github/test-config # To use this syntax, we must have the repository checked out
+        with:
+          os: ${{ matrix.os }}
+          compiler: ${{ matrix.compiler }}
+          build_type: ${{ matrix.build_type }}
+          test_suite: ${{ env.TEST_SUITE }}
+
+  create-code-coverage-report:
+    needs: test-config
+    runs-on: ${{ matrix.os }}
+    if: ${{ github.event_name == 'push' }}
+    strategy:
+        fail-fast: false
+        matrix:
+          os: [debian-12]
+          build_type: [code_coverage]
+          compiler: [gfortran]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Generate code coverage report
+        uses: ./.github/test-config # To use this syntax, we must have the repository checked out
+        with:
+          os: ${{ matrix.os }}
+          compiler: ${{ matrix.compiler }}
+          build_type: ${{ matrix.build_type }}
+          test_suite: 'coverage'
+      - name: Upload code coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: total code coverage report
+          path: ${{github.workspace}}/build//coverage/total/
+          if-no-files-found: error
+
+  create-profiling-report:
+    needs: test-config
+    runs-on: ${{ matrix.os }}
+    if: ${{ github.event_name == 'push' }}
+    strategy:
+        fail-fast: false
+        matrix:
+          os: [debian-12]
+          build_type: [profiling]
+          compiler: [gfortran]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Generate profiling reports
+        uses: ./.github/test-config # To use this syntax, we must have the repository checked out
+        with:
+          os: ${{ matrix.os }}
+          compiler: ${{ matrix.compiler }}
+          build_type: ${{ matrix.build_type }}
+          test_suite: 'benchmark'
+      - name: Upload profiling reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: profiling call graphs
+          path: ${{github.workspace}}/build/tests/**/*_call_graph.pdf
+          if-no-files-found: error

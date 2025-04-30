@@ -2,16 +2,20 @@
 !references: M. H. Alexander, J. Chem. Phys. 99, 6014 (1993).
 ! M.-L. Dubernet and J. M. Hutson, J. Chem. Phys. 101, 1939 (1994).
 !  M. H. Alexander and M. Yang, J. Chem. Phys. 103, 7956 (1995).
+#include "unused.h"
 
 #include "common/syusr.F90"
 #include "common/ground.F90"
 #include "common/bausr.F90"
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parpot, only: potnam=>pot_name
 use mod_selb, only: ibasty
-character*(*) filnam
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='ALEXANDER B(2P)H2(J=0,1) DUBERNET-HUTSON'
 ibasty=12
 lammin(1)=1
@@ -26,6 +30,7 @@ end
 subroutine driver
 use mod_covvl, only: vvl
 use mod_par, only: csflag, ihomo
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 character *48 potnam
 character *2 frame
@@ -62,7 +67,7 @@ do i=1,100
  r=r+0.2
 enddo
 
-99 end
+end
 subroutine pot (vv0, r)
 ! ----------------------------------------------------------------------
 !  subroutine to calculate the r-dependent coefficients in the
@@ -108,7 +113,12 @@ subroutine pot (vv0, r)
 
 use mod_covvl, only: vvl
 use mod_par, only: csflag, ihomo
+use mod_hiblas, only: dscal, dcopy
+use mod_hipotutil, only: dqrank, dqrlss
 implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
+
 dimension vsl1(9), vsl2(9), vsr0(9), vsc1(9), vsc2(9), &
   vsc3(9), vscl(9)
 dimension vzzl1(9), vzzl2(9), vzzr0(9), vzzc1(9), vzzc2(9), &

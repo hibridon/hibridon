@@ -14,8 +14,9 @@
 !     current revision:  24-jul-2019 (p.dagdigian)                       *
 !                                                                       *
 !************************************************************************
-module mod_hibasis
 #include "assert.h"
+module mod_hibasis
+use mod_assert, only: fassert
 
   ! when adding bases, change size of array basknd and size of
   ! parameter kmxbas in himain.f
@@ -29,7 +30,29 @@ module mod_hibasis
                '1SG-1SG', '2SG-1SG', 'C2v-ASTP','3SG-1SG', &
                'CASYMTOP', 'ASYM-DIAT' /
 
+interface
+
+  subroutine syusr(irpot, readpt, iread)
+    integer, intent(inout) :: irpot
+    logical, intent(inout) :: readpt
+    integer, intent(in) :: iread
+  end subroutine syusr
+
+  subroutine ptrusr(fname, readpt)
+    character*(*), intent(in) :: fname
+    logical, intent(inout) :: readpt
+  end subroutine ptrusr
+
+  subroutine savusr()
+  end subroutine savusr
+
+  subroutine chkusr ()
+  end subroutine chkusr
+
+end interface
+
 contains
+
 ! --------------------------------------------------------------------
 subroutine basis (bqs, jhold, ehold, ishold, nlevel, nlevop, &
                   sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, &
@@ -174,10 +197,10 @@ use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
 type(bqs_type), intent(inout) :: bqs
 type(ancou_type), intent(out), allocatable :: v2
-integer :: jhold(:)
-real(8) :: ehold(:)
-integer :: ishold(:)
-real(8), target :: sc1(:), sc2(:), sc3(:), sc4(:)
+integer :: jhold(nmax)
+real(8) :: ehold(nmax)
+integer :: ishold(nmax)
+real(8), target :: sc1(nmax), sc2(nmax), sc3(nmax), sc4(nmax)
 integer nlevel, nlevop, jtot, nu, &
         jlpar, n, nmax
 !      real ehold, sc1, sc2, sc3, sc4, rcut

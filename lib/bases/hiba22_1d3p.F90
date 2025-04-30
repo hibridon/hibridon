@@ -1,5 +1,7 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba22_1d3p
+  use mod_assert, only: fassert
 contains
 ! sy1d3p (sav1d3p/ptr1d3p) defines, saves variables and reads            *
 !                  potentials for atom in 1D/3P states in collision      *
@@ -113,14 +115,14 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
+use mod_par, only: boundc
 use mod_ered, only: ered, rmu
-use mod_skip, only: nskip, iskip
 use mod_hitypes, only: bqs_type
+use mod_hiblas, only: dsyev
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 type(ancou_type), intent(out), allocatable, target :: v2
 type(bqs_type), intent(out) :: bqs
@@ -131,11 +133,16 @@ logical ihomo, flaghf, csflag, clist, flagsu, bastst
 dimension  jhold(1), ehold(1), &
           ishold(1), ieig(0:2)
 !  scratch arrays for computing asymmetric top energies and wave fns.
-dimension en0(4), en1(3), en2(2), vec(4,4), work(288)
+dimension en0(4), en1(3), en2(2), work(288)
 integer, pointer :: nterm, nstate, ipol, npot
 real(8), pointer :: en1d
 nterm=>ispar(1); nstate=>ispar(2); ipol=>ispar(3); npot=>ispar(4)
 en1d=>rspar(1)
+
+UNUSED_DUMMY(ihomo)
+UNUSED_DUMMY(clist)
+UNUSED_DUMMY(nu)
+UNUSED_DUMMY(numin)
 
 npot = 0
 
@@ -205,7 +212,7 @@ endif
 !
 !  get 3P and 1D-3P spin-orbit parameters, for calculating asymptotic
 !  electrostatic + spin-orbit atomic energies
-call pot (vv0, 8.5d0)
+call pot(vv0, 8.5d0)
 axy = vvl(6) * econv
 byx = vvl(9) * econv
 bss = byx * sqrt(4.d0/3.d0)
@@ -1025,23 +1032,23 @@ subroutine sy1d3p (irpot, readpt, iread)
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_skip, only: nskip, iskip
+use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: j, l, lc
 logical existf
 character*1 dot
 character*(*) fname
-character*60 filnam, line, potfil, filnm1
+character*60 filnam, line, potfil
+character*68 filnm1
 #include "common/comdot.F90"
 save potfil
 integer, pointer, save :: nterm, nstate, ipol, npot
@@ -1117,7 +1124,7 @@ close (8)
 irpot=1
 return
 ! --------------------------------------------------------------
-entry sav1d3p (readpt)
+entry sav1d3p ()
 !  save input parameters for 1D/3P atom + atom scattering
 write (FUNIT_INP, 300) nstate
 300 format(i4, 29x,'nstate')

@@ -15,15 +15,49 @@
 !
 !     DUMMY SUBROUTINES FOR ALL USER-DEFINED BASIS/POT.
 #include "assert.h"
+#include "unused.h"
 #include "common/ground.F90"
 !
 !     ------------------------------------------------------------------
 !     THE FOLLOWING SOUBROUTINE WILL BE THE MAIN FUNCTION FOR MAKEPOT.
 !     NOTE THAT VVL IS IN HARTREES.
+
+module mod_nh3h2_qma
+   character*40 :: potfil
+
+contains
+
+!     ------------------------------------------------------------------
+subroutine pr_lev_nh3h2(n, js, ks, iepss, es)
+implicit none
+!
+integer n, js(*), ks(*), iepss(*)
+double precision es(*)
+integer i, j1, j2, isym
+double precision ecm, econv
+parameter (econv=219474.6315343234)
+write (6, 125)
+125 format (/, 10x, &
+     'SORTED LEVEL LIST', /, '   N   J   K  EPS INV J2   ', &
+     'EINT(CM-1)')
+do i = 1, n
+   j2 = mod(js(i), 10)
+   j1 = js(i) / 10
+   isym = -iepss(i) * (-1) ** j1
+   ecm = es(i) * econv
+   write (6, 126) i, j1, ks(i), iepss(i), isym, j2, ecm
+126    format (6i4, f10.3)
+end do
+return
+end
+
+end module mod_nh3h2_qma
+
 subroutine driver
 use mod_covvl, only: vvl
 use mod_hibasutil, only: raise
-use constants, only: econv, xmconv
+use constants, only: econv
+use mod_hipot, only: loapot, pot
 implicit none
 !
 integer MAX_NR, MAX_NV
@@ -58,9 +92,12 @@ goto 10
 !     DATA FILE, IF REQUIRED, CAN BE LOADED WITH THIS SOUBROUTINE.
 subroutine loapot(iunit, filnam)
 use mod_hibasutil, only: raise
-use constants, only: econv, xmconv
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use constants, only: econv
+use mod_hiblas, only: dscal
+use mod_hipotutil, only: spline, datfln
 implicit none
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
 !
 integer MAX_NR, MAX_NV
 parameter (MAX_NR=300, MAX_NV=300)
@@ -76,8 +113,7 @@ double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV), &
      spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV), &
      spl_d(MAX_NR, MAX_NV)
 !
-character*(*) filnam
-integer iunit, ir, iv
+integer ir, iv
 character*255 datfl
 !
 !     WHEN HIBRIDON LOADS, A STRING CONTAINING ONLY ONE SPACE WILL BE
@@ -117,8 +153,10 @@ end
 !     VVL SHOULD BE IN HARTREES.
 subroutine pot(vv0, r)
 use mod_covvl, only: vvl
-use constants, only: econv, xmconv
+use mod_hipotutil, only: seval
 implicit none
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
 !
 integer MAX_NR, MAX_NV
 parameter (MAX_NR=300, MAX_NV=300)
@@ -134,9 +172,6 @@ double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV), &
      spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV), &
      spl_d(MAX_NR, MAX_NV)
 
-
-double precision vv0, r
-double precision seval
 integer iv
 !
 vv0 = 0d0
@@ -152,10 +187,10 @@ end
 subroutine syusr(irpot, readpt, iread)
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use mod_hibasutil, only: raise
-use constants, only: econv, xmconv
-use funit, only: FUNIT_INP
+use mod_nh3h2_qma, only: potfil
+use mod_hipot, only: loapot
 implicit none
 !
 integer MAX_NR, MAX_NV
@@ -172,23 +207,22 @@ double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV), &
      spl_b(MAX_NR, MAX_NV), spl_c(MAX_NR, MAX_NV), &
      spl_d(MAX_NR, MAX_NV)
 
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-character*(*) fname
 !     NUMBER OF BASIS-SPECIFIC VARIABLES, MODIFY ACCORDINGLY.
 integer icod, ircod
 parameter (icod=5, ircod=5)
 
 
-character*40 potfil
-save potfil
 integer, pointer :: nterm, ipotsy, iop, ninv, jmax, ipotsy2, j2max, j2min
 real(8), pointer :: brot, crot, delta, emax, drot
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); ninv=>ispar(4); jmax=>ispar(5); ipotsy2=>ispar(6)
 j2max=>ispar(7); j2min=>ispar(8)
 
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)
+UNUSED_DUMMY(irpot)
+UNUSED_DUMMY(readpt)
 !     DEFINE THE NAMES HERE
 scod(1)='NTERM'
 scod(2)='IPOTSY'
@@ -220,11 +254,29 @@ close (8)
 return
 80 call raise('error read from input file.')
 return
+end subroutine
 !     ------------------------------------------------------------------
-entry ptrusr(fname, readpt)
+subroutine ptrusr(fname, readpt)
+implicit none
+character*(*), intent(inout) :: fname
+logical, intent(inout) :: readpt
+UNUSED_DUMMY(fname)
+UNUSED_DUMMY(readpt)
 return
+end subroutine
 !     ------------------------------------------------------------------
-entry savusr(readpt)
+subroutine savusr()
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
+use funit, only: FUNIT_INP
+use mod_nh3h2_qma, only: potfil
+implicit none
+integer, pointer :: nterm, ipotsy, iop, ninv, jmax, ipotsy2, j2max, j2min
+real(8), pointer :: brot, crot, delta, emax, drot
+nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); ninv=>ispar(4); jmax=>ispar(5); ipotsy2=>ispar(6)
+j2max=>ispar(7); j2min=>ispar(8)
+
+brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)
 !     WRITE THE LAST FEW LINES OF THE INPUT FILE.
 write (FUNIT_INP, 220) ipotsy, iop, ninv, ipotsy2
 220 format (4i4, 14x,'   ipotsy, iop, ninv, ipotsy2')
@@ -248,19 +300,21 @@ end
 subroutine bausr(bqs, jhold, ehold, ishold, nlevel, nlevop, &
      sc1, sc2, sc3, sc4, rcut, jtot, flaghf, flagsu, csflag, &
      clist, bastst, ihomo, nu, numin, jlpar, n, nmax, ntop, v2)
+use mod_assert, only: fassert
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coamat, only: ietmp ! ietmp(1)
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use mod_hibasutil, only: vlmstpln, raise
-use constants, only: econv, xmconv
+use constants, only: econv
 use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
 use mod_par, only: iprint
-use mod_ered, only: ered, rmu
+use mod_ered, only: ered
 use mod_hitypes, only: bqs_type
+use mod_nh3h2_qma, only: pr_lev_nh3h2
 implicit none
 type(bqs_type), intent(out) :: bqs
 integer, intent(out), dimension(:) :: jhold
@@ -306,13 +360,16 @@ double precision rr(MAX_NR), v_pot(MAX_NR, MAX_NV), &
      spl_d(MAX_NR, MAX_NV)
 !
 integer nlist, ki, ji, numeps, iep, iepsil, isym, ji2, i1, i2, &
-     jsave, ksave, isave, njk, ipar, j12max, j12min, ji12, &
-     lmax, lmin, li, lpar, j2par, i, ilam, iv, icol, &
+     jsave, ksave, isave, ipar, ji12, &
+     li, lpar, i, ilam, iv, icol, &
      irow, jc, jr, j2c, j2r, kc, kr, j12c, j12r, lc, lr, inum
 double precision roteng, esave, vee
 !
 integer, pointer :: nterm, ipotsy, iop, ninv, jmax, ipotsy2, j2max, j2min
 real(8), pointer :: brot, crot, delta, emax, drot
+UNUSED_DUMMY(rcut)
+UNUSED_DUMMY(clist)
+UNUSED_DUMMY(ihomo)
 nterm=>ispar(1); ipotsy=>ispar(2); iop=>ispar(3); ninv=>ispar(4); jmax=>ispar(5); ipotsy2=>ispar(6)
 j2max=>ispar(7); j2min=>ispar(8)
 brot=>rspar(1); crot=>rspar(2); delta=>rspar(3); emax=>rspar(4); drot=>rspar(5)
@@ -469,32 +526,3 @@ if (bastst .and. iprint .ge. 2) then
 end if
 return
 end
-!     ------------------------------------------------------------------
-subroutine pr_lev_nh3h2(n, js, ks, iepss, es)
-implicit none
-!
-integer n, js(*), ks(*), iepss(*)
-double precision es(*)
-integer i, j1, j2, isym
-double precision ecm, econv
-parameter (econv=219474.6315343234)
-write (6, 125)
-125 format (/, 10x, &
-     'SORTED LEVEL LIST', /, '   N   J   K  EPS INV J2   ', &
-     'EINT(CM-1)')
-do i = 1, n
-   j2 = mod(js(i), 10)
-   j1 = js(i) / 10
-   isym = -iepss(i) * (-1) ** j1
-   ecm = es(i) * econv
-   write (6, 126) i, j1, ks(i), iepss(i), isym, j2, ecm
-126    format (6i4, f10.3)
-end do
-return
-end
-
-subroutine datfln(filenm, fullnm)
-character (len=*) :: filenm, fullnm
-fullnm = 'potdata/' // trim(filenm)
-return
-end subroutine datfln

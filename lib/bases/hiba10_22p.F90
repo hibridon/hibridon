@@ -1,5 +1,7 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba10_22p
+  use mod_assert, only: fassert
 
 real(8) :: ttrans(6,6)
 
@@ -99,13 +101,12 @@ use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
+use mod_parbas, only: lammax
+use mod_par, only: boundc
 use mod_ered, only: ered, rmu
-use mod_skip, only: nskip, iskip
 use mod_jtot, only: jjtot, jjlpar
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -120,6 +121,12 @@ integer, pointer :: nterm, nphoto
 real(8), pointer :: aso
 nterm=>ispar(1); nphoto=>ispar(2)
 aso=>rspar(1)
+
+UNUSED_DUMMY(numin)
+UNUSED_DUMMY(sc3)
+UNUSED_DUMMY(sc4)
+UNUSED_DUMMY(ihomo)
+UNUSED_DUMMY(nu)
 
 zero = 0.d0
 half=0.5d0
@@ -572,6 +579,7 @@ subroutine tcasea22(j,jlpar)
 !   latest revision date:  30-dec-1995
 ! -----------------------------------------
 use mod_hivector, only: dset
+use mod_hiblas, only: dscal
 implicit double precision (a-h,o-z)
 data zero, one,two ,three,six/0.d0, 1.d0, 2.d0, 3.d0, 6.d0/
 if (j .lt. 2) then
@@ -669,9 +677,10 @@ subroutine trans22(w,n,nmax)
 !  latest revision date:  4-oct-1992
 !  --------------------------------------------
 use mod_coeint, only: eint
-use mod_cosysr, only: isrcod, junkr, rspar
-use constants, only: econv, xmconv
+use mod_cosysr, only: rspar
+use constants, only: econv
 use mod_jtot, only: j => jjtot, jlpar => jjlpar
+use mod_hiblas, only: dscal
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
   use mod_himatrix, only: mxma
 #endif
@@ -684,7 +693,6 @@ data one,half /1.d0,0.5d0/
 data nnmax /6/
 
 real(8), pointer :: aso
-aso=>rspar(1)
 
 call tcasea22(j,jlpar)
 if (n .ne. 6) then
@@ -707,6 +715,7 @@ return
 !  w now contains desired product
 ! restore internal energies of each channel
 entry energ22
+aso=>rspar(1)
 eint(1)=one
 eint(2)=one
 eint(3)=-half
@@ -743,17 +752,16 @@ subroutine sy22p (irpot, readpt, iread)
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, iscod=>ispar
-use mod_cosysr, only: isrcod, junkr, rcod=>rspar
-use mod_par, only:  jtot1,jtot2,jtotd,jlpar
+use mod_cosysr, only: isrcod, rcod=>rspar
+use mod_par, only: jlpar
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_skip, only: nskip, iskip
+use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 real(8) :: aso
@@ -761,7 +769,8 @@ integer :: ibran, j, l, lc, nphoto, nterm, nvib
 logical existf
 character*1 dot
 character*(*) fname
-character*60 filnam, line, potfil, filnm1
+character*60 filnam, line, potfil
+character*68 filnm1
 #include "common/comdot.F90"
 save potfil
 !  number and names of system dependent parameters
@@ -867,7 +876,7 @@ close (8)
 irpot=1
 return
 !
-entry sav22p (readpt)
+entry sav22p ()
 !  save input parameters for singlet-sigma + atom scattering
 nphoto=iscod(2)
 nvib=iscod(3)

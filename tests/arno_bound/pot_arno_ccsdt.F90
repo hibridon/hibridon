@@ -1,13 +1,14 @@
 ! System:  NO(X 2Pi)+Ar, new inf basis set CCSDT ab initio PES's
 ! Reference:  M. H. Alexander J. Chem. Phys. 111, 7426 (1999)
 ! NB Vlam components correspond to theta=0 for ArON!!!,
+#include "unused.h"
 
 
 subroutine driver
 use mod_covvl, only: vvl
 use mod_cosysr, only: rspar
-use constants, only: econv
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 real(8), pointer :: rshift, xfact
 rshift=>rspar(1); xfact=>rspar(2)
@@ -28,9 +29,12 @@ goto 1
 ! --------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
-character*(*) filnam
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parpot, only: potnam=>pot_name
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='ALEXANDER Ar-NO CCSDT'
 lammin(1)=1
 lammax(1)=8
@@ -69,10 +73,15 @@ subroutine pot (vv0, r)
 use mod_covvl, only: vvl
 use constants, only: econv
 use mod_hivector, only: dset
+use mod_hiblas, only: dscal, dcopy
+use mod_hipotutil, only: dqrank, dqrlss
 implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
+
 dimension xlam1(17),xlam2(17),r0(17),c1(17),c2(17),c3(17), &
           clr(17),vsum(9),xsum(9),vdif(9),xdif(9), &
-          ddif(9),vap(9),va2p(9), &
+          vap(9),va2p(9), &
           d0(81),d2(49),aa(121)
 dimension kpvt(9),qraux(9),work(55),rsd(9)
 
@@ -177,10 +186,10 @@ do 100 i=1,9
   vsum(i)=half*(va2p(i)+vap(i))
 ! don't compute vdif for colinear geometries
   if (i.ne.1 .and. i.ne.9) then
-    vdif(i-1)=half*(va2p(i)-vap(i))
+    vdif(i-1)=half*(va2p(i)-vap(i))  ! disable-warnings:do-subscript
 ! for long range damp out difference potential
     damp=-half*(tanh(2.d0*(r-rmax))-one)
-    vdif(i-1)=damp*vdif(i-1)
+    vdif(i-1)=damp*vdif(i-1)  ! disable-warnings:do-subscript
   endif
 100 continue
 ! solve simultaneous equations for solutions

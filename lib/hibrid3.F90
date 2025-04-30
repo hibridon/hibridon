@@ -1,5 +1,7 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hibrid3
+  use mod_assert, only: fassert
 contains
 !************************************************************************
 !                         hibridon 3  library                           *
@@ -15,7 +17,6 @@ contains
 !   6. rles       solves a * x = c                                      *
 !      logdb      log derivativ propagator                             *
 !   7. runlog     log-derivative propagator from r to r = rend          *
-!   8. scairy     scaled airy functions and derivatives                 *
 !   9. smatop     subroutine  to compute s-matrix                       *
 !  10. smatrx           see 9.                                          *
 !  11. expand     expands smatrix from open to full basis               *
@@ -42,6 +43,7 @@ return
 end
 ! -------------------------------------------------------------------------
 function potmin()
+use mod_hipot, only: pot
 !  current revision date: 25-sept-87
 implicit double precision (a-h,o-z)
 r = 4.0d0
@@ -57,12 +59,12 @@ if(abs(dr).gt.0.01d0) goto 10
 return
 end
 ! -------------------------------------------------------------------------
-subroutine propag (z, w, zmat, amat, bmat, &
+subroutine propag (z, w, zmat, &
                    bqs, &
                    ien, nerg, en, eshift, rstart, rendld, spac, &
                    tolhi, rendai, rincr, fstfac, tb, tbm, &
                    ipos, prlogd, noprin, airyfl, prairy, &
-                   nch, nopen, nairy, nmax, v2, isteps, nsteps)
+                   nch, nopen, nmax, v2, isteps, nsteps)
 ! ------------------------------------------------------------------------
 !  subroutine to:
 !    1.  propagate the log-derivative matrix from rstart to rendld
@@ -85,7 +87,6 @@ subroutine propag (z, w, zmat, amat, bmat, &
 !                          contains the real part of the s-matrix
 !    zmat:        on return: the upper-left nopen x nopen block of si
 !                         contains the imaginary part of the s-matrix
-!    amat,bmat:   scratch matrices of maximum dimension nmax x nmax
 !    bqs:         on entry: contain the rotational angular momenta, orbital
 !                 angular momenta, and other quantum index for each channel
 !                 on return: the first nopen elements contain the rotational
@@ -124,8 +125,7 @@ subroutine propag (z, w, zmat, amat, bmat, &
 !                 out in airy propagation
 !    nopen        on return:  number of energetically open channels
 !    nch          number of coupled equations
-!    nairy        leading dimension of matrix bmat
-!    nmax         leading dimension of matrices z, w, zmat, and amat as well a
+!    nmax         leading dimension of matrices z, w, zmat, as well a
 !                 all vectors
 
 !  variables in common block /copmat/
@@ -138,19 +138,19 @@ subroutine propag (z, w, zmat, amat, bmat, &
 use mod_ancou, only: ancou_type
 use mod_hibrid2, only: mxoutd
 use funit, only: FUNIT_TRANS_MAT, FUNIT_QUAD_MAT
-use mod_phot, only: photof, wavefn, boundf, writs
+use mod_phot, only: boundf
 use mod_pmat, only: rtmn, rtmx, iflag
 use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
 use mod_hiutil, only: mtime, gettim
 use mod_hibrid1, only: airprp
 use mod_hitypes, only: bqs_type
+use mod_hiblas, only: dcopy
+use mod_hibound, only: bound
 implicit none
 !   square matrices
 real(8), intent(out) :: z(nmax, nch)
 real(8), intent(out) :: w(nmax, nch)
 real(8), intent(out) :: zmat(nmax, nch)
-real(8), intent(out) :: amat(nmax, nch)
-real(8), intent(out) :: bmat(nairy, nairy)
 type(bqs_type), intent(inout) :: bqs
 integer, intent(in) :: ien
 integer, intent(in) :: nerg
@@ -163,7 +163,7 @@ real(8), intent(in) :: tolhi
 real(8), intent(in) :: rendai
 real(8), intent(in) :: rincr
 real(8), intent(in) :: fstfac
-real(8), intent(out) :: tb
+real(8), intent(in) :: tb
 real(8), intent(out) :: tbm
 logical, intent(in) :: ipos
 logical, intent(in) :: prlogd
@@ -172,7 +172,6 @@ logical, intent(in) :: airyfl
 logical, intent(in) :: prairy
 integer, intent(in) :: nch
 integer, intent(out) :: nopen
-integer, intent(in) :: nairy
 integer, intent(in) :: nmax
 type(ancou_type), intent(in) :: v2
 integer, intent(inout) :: isteps
@@ -199,6 +198,8 @@ real(8) :: td, tdm, tp, tpm, tw, twm, twf, twfm
 !  vectors
 !  prec is precision of single precision floating pt number
 real(8), parameter :: prec = 1.d+11
+UNUSED_DUMMY(tbm)
+tbm = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
 
 call mtime(t11,t22)
 first = .true.
@@ -335,6 +336,7 @@ subroutine rles (a, c, n, m, nmax)
 !                   note that in some versions izero should be eliminated
 !                   from call to sgesl
 !  --------------------------------------------------------------------
+use mod_hiblas, only: dgetrf, dgetrs
 implicit double precision (a-h,o-z)
 integer ierr, izero, m, n, nmax
 #if defined(HIB_UNIX) && !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
@@ -466,16 +468,16 @@ use mod_ancou, only: ancou_type
 use mod_wave, only: irec, ifil, nchwfu, nrlogd, iendwv, get_wfu_logd_rec_length
 
 use funit
-use mod_phot, only: photof, wavefn, boundf, writs
-use mod_surf, only: flagsu
-use mod_hiutil, only: daxpy_wrapper
+use mod_phot, only: photof, wavefn, writs
 use mod_hiutil, only: mtime
 use mod_himatrix, only: mxma
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 use mod_himatrix, only: syminv
 #endif
-use mod_hivector, only: dset, matmov
+use mod_hivector, only: dset, matcopy
 use mod_hibrid1, only: potmat
+use mod_hiblas, only: dscal, daxpy_wrapper
+use mod_hipot, only: ground
 
 implicit double precision (a-h,o-z)
 real(8), intent(out) :: z(nmax*nch)
@@ -515,7 +517,7 @@ integer ich, icode, icol, idiag, ierr, ij, irow, istep, kstep, &
 !     :     tn, tp,  zero, wdiag
 !      real w, z
 !      real scr1, scr2, wref, z1, z2
-!      external mtime, potmat, daxpy, smxinv, dscal
+!      external mtime, potmat, smxinv, dscal
 !     matrices z and w are stored column by column as one-dimensi
 data zero,  one,  two, three,six,  eight &
     / 0.d0, 1.d0, 2.d0, 3.d0, 6.d0, 8.d0 /
@@ -530,11 +532,6 @@ real(8),allocatable :: bmat(:)
 !                   used as workspace for the potential matrix
 real(8), allocatable :: w(:)
 
-!     The following variables are for size-determination of (machine
-!     dependent) built-in types
-integer int_t
-double precision dble_t
-character char_t
 integer :: nqmax
 real(8) :: simpwt  ! simpson quadrature weight
 nqmax = 0
@@ -565,7 +562,7 @@ allocate(w(nmax*nch))
 !     row, column and diagonal increments for matrices z and w
 nrow = 1
 ncol = nmax
-ndiag = nmax + 1
+ndiag = nmax + 1  ! stride between 2 consecutive diagonal elements (nmax to skip a row, then add 1 to reach the next column)
 !     obtain coupling matrix, w, at r = rmin
 !     diagonal elements must be shifted at subsequent energies
 tp = zero
@@ -772,7 +769,7 @@ if (nsteps /= 0) then
   !     if photodissociation calculation or wavefunction desired:
   !     save this matrix, which is hg(a,m), in amat
      if (photof .or. wavefn) &
-       call matmov(z, amat, nch, nch, nmax, nmax)
+       call matcopy(z, amat, nch, nch, nmax, nmax)
      irow = 1
      do  110 ich = 1, nch
         fac = - z2(ich)
@@ -872,7 +869,7 @@ if (nsteps /= 0) then
   !     if photodissociation calculation or wavefunction desired:
      if (photof .or. wavefn) then
   !     first save this matrix, which is g(c,b), in bmat
-       call matmov(z, bmat, nch, nch, nmax, nmax)
+       call matcopy(z, bmat, nch, nch, nmax, nmax)
   !     use bmat and w as temporary storage here
        call mxma (amat, 1, nmax, bmat, 1, nmax, w, 1, nmax, &
                   nch, nch, nch)
@@ -1065,7 +1062,7 @@ subroutine runlog (z, &
 use mod_coqvec, only: nphoto, q
 use mod_ancou, only: ancou_type
 use mod_hibrid2, only: mxoutd, mxoutr
-use mod_phot, only: photof, wavefn, boundf, writs
+use mod_phot, only: photof
 implicit double precision (a-h, o-z)
 type(ancou_type), intent(in) :: v2
 real(8), intent(out) :: z(nmax*nch)
@@ -1095,6 +1092,13 @@ integer, intent(inout) :: nsteps
 logical iread, iwrite, print
 
 !  z, w, amat, and bmat are stored column by column in one dimensional arrays
+
+UNUSED_DUMMY(tlw)
+tlw = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
+UNUSED_DUMMY(tpw)
+tpw = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
+UNUSED_DUMMY(twfw)
+twfw = 0.0  ! silences warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.
 
 iwrite = twoen .and. (itwo.eq.0)
 iread =  twoen .and. (itwo.gt.0)
@@ -1150,365 +1154,6 @@ end if
 
 return
 end
-! -------------------------------------------------------------------------
-subroutine scairy (z, scai, scbi, scaip, scbip, zeta)
-!     scaled airy functions and derivatives
-!     this program written by d.e. manolopoulos (sept. 1986)
-!     current revision date: sept-1986
-!  ----------------------------------------------------------------
-!     for  z .lt. (-5.0d0)
-!     ai(z) = scai*cos(zeta) + scbi*sin(zeta)
-!     bi(z) = scbi*cos(zeta) - scai*sin(zeta)
-!     ai'(z) = scaip*cos(zeta) + scbip*sin(zeta)
-!     bi'(z) = scbip*cos(zeta) - scaip*sin(zeta)
-!     where zeta = (2/3)*(-z)**(3/2) + pi/4
-!     for  (-5.0d0) .le. z .le. (+0.0d0)
-!     ai(z) = scai
-!     bi(z) = scbi
-!     ai'(z) = scaip
-!     bi'(z) = scbip
-!     and zeta = 0
-!     for  z > 0.d0
-!     ai(z) = scai*exp(-zeta)
-!     bi(z) = scbi*exp(+zeta)
-!     ai'(z) = scaip*exp(-zeta)
-!     bi'(z) = scbip*exp(+zeta)
-!     where zeta = (2/3)*(+z)**(3/2)
-!  ----------------------------------------------------------------
-!     evaluation of the functions is based on a number of
-!     chebyshev expansions
-!
-!     this version is suitable for machines with full word precision
-!  ----------------------------------------------------------------
-implicit double precision (a-h,o-z)
-double precision a, b, c, c1, c2, df, dg, ex, exp1z, exp2z, f, &
-                 g, pib4, root4z, rootz, rt3, scai, scaip, scbi, &
-                 scbip, t, t2, xeps, y, z, zcube, zeta, zsq
-data c1   / 3.55028053887817239d-01 /
-data c2   / 2.58819403792806798d-01 /
-data rt3  / 1.73205080756887729d+00 /
-data pib4 / 7.85398163397448310d-01 /
-zeta = 0.0d0
-xeps = 0.0d0
-! ----------------------------------------------------------------------------
-!  here if near enough origin to use 3 term power series
-if ( dabs(z) .le. 0.025d0) then
-  zsq = z * z
-  zcube = zsq * z
-!  evaluate power series ( three terms is sufficient for abs(x) < 0.025)
-  df = 1.d0 + zcube / 6.d0 + zcube * zcube / 180.d0
-  dg = z * (1.d0 + zcube / 12.d0 + zcube * zcube / 504.d0)
-  scai = c1 * df - c2 * dg
-  scbi = rt3 * (c1 * df + c2 * dg)
-!  now for derivatives
-  df = zsq / 2.d0 + zsq * zcube / 30.d0
-  dg = 1.d0 + zcube / 3.d0 + zcube * zcube / 72.d0
-  scaip = c1 * df - c2 * dg
-  scbip = rt3 * (c1 * df + c2 * dg)
-!  scale the functions by exp(zeta) if z .gt. 0
-  if (z .gt. 0.d0) then
-    rootz = dsqrt(z)
-    zeta = 2.0d0 * z * rootz / 3.0d0
-    ex = exp(zeta)
-    scai = scai * ex
-    scaip = scaip * ex
-    scbi = scbi / ex
-    scbip = scbip / ex
-  end if
-  return
-end if
-if (z.lt.(+9.0d0)) go to 10
-rootz = dsqrt(z)
-root4z = dsqrt(rootz)
-zeta = 2.0d0*z*rootz/3.0d0
-t = 36.0d0/zeta - 1.0d0
-y = ((((((((( +1.16537795324979200d-15*t &
-  -1.16414171455572480d-14)*t +1.25420655508401920d-13)*t &
-  -1.55860414100340659d-12)*t +2.21045776110011276d-11)*t &
-  -3.67472827517194031d-10)*t +7.44830865396606612d-09)*t &
-  -1.95743559326380581d-07)*t +7.44672431969805149d-06)*t &
-  -5.28651881409929932d-04)*t +2.81558489585006298d-01
-scai = y/root4z
-y = ((((((((((( +4.50165999254528000d-15*t &
-  +1.56232018374502400d-14)*t +5.26240712559918080d-14)*t &
-  +2.97814898856618752d-13)*t +1.97577620975625677d-12)*t &
-  +1.53678944110742706d-11)*t +1.45409933537455235d-10)*t &
-  +1.71547326972380087d-09)*t +2.61898617129147064d-08)*t &
-  +5.49497993491833009d-07)*t +1.76719804365109334d-05)*t &
-  +1.12212109935874117d-03)*t +5.65294557558522063d-01
-scbi = y/root4z
-y = ((((((((( +1.20954638924697600d-15*t &
-  -1.21281218539020800d-14)*t +1.31303723724964224d-13)*t &
-  -1.64152781754533677d-12)*t +2.34672185025709461d-11)*t &
-  -3.94507329122119338d-10)*t +8.13125005420910243d-09)*t &
-  -2.19736365932356533d-07)*t +8.83993515227257822d-06)*t &
-  -7.43456339972080231d-04)*t -2.82847316336379200d-01
-scaip = y*root4z
-y = ((((((((((( -4.59170437029478400d-15*t &
-  -1.59840960512122880d-14)*t -5.41258863340784640d-14)*t &
-  -3.07414589507261184d-13)*t -2.04866616770522650d-12)*t &
-  -1.60321415915690897d-11)*t -1.52922073861488292d-10)*t &
-  -1.82445639488695332d-09)*t -2.83250890588806503d-08)*t &
-  -6.11130377639012647d-07)*t -2.07842147963678572d-05)*t &
-  -1.56350017663858255d-03)*t +5.62646283094843014d-01
-scbip = y*root4z
-return
-10 if (z.lt.(+4.5d0)) go to 20
-rootz = dsqrt(z)
-zeta = 2.0d0*z*rootz/3.0d0
-exp1z = dexp(zeta-2.5d0*z)
-exp2z = dexp(zeta-2.625d0*z)
-t = 4.0d0*z/9.0d0 - 3.0d0
-y = ((((((((((((((((((((( +9.69081960415394529d-11*t &
-  +3.24436136050920784d-10)*t -3.57419513430644674d-09)*t &
-  -3.84461320827974687d-09)*t +8.88116699085949212d-08)*t &
-  -6.26105174374717557d-08)*t -1.69051051004298110d-06)*t &
-  +3.80731416363041759d-06)*t +2.43840529113057777d-05)*t &
-  -9.74379632673654766d-05)*t -2.45324254437931970d-04)*t &
-  +1.69517926953312785d-03)*t +1.19638433540225211d-03)*t &
-  -2.15255594590357451d-02)*t +9.33777073522844198d-03)*t &
-  +1.98716159257796883d-01)*t -2.54001858882057718d-01)*t &
-  -1.27148775197878180d+00)*t +2.52046376168394778d+00)*t &
-  +5.04987271423387057d+00)*t -1.33120978544419281d+01)*t &
-  -9.34903846550381088d+00)*t +3.10330812950257837d+01
-scai = y*exp1z
-y = (((((((((((((((((((((((( +3.79210935744593920d-14*t &
-  -4.16346635040194560d-14)*t -3.63110681886588928d-13)*t &
-  +1.38932592029414195d-12)*t -4.00489068810888806d-12)*t &
-  +1.39019501834951721d-11)*t -4.50877182237241508d-11)*t &
-  +1.38942309844733264d-10)*t -3.92503498108710093d-10)*t &
-  +1.20125005161756928d-09)*t -3.14234550677825531d-09)*t &
-  +1.03100587323694771d-08)*t -2.35240060783126760d-08)*t &
-  +8.98525670958611253d-08)*t -1.57273011181242048d-07)*t &
-  +7.77696763289738864d-07)*t -8.40211181188135235d-07)*t &
-  +6.34887361301864569d-06)*t -2.73464023289055762d-06)*t &
-  +4.54606729925166230d-05)*t +2.20459155042947089d-06)*t &
-  +2.58823388957588056d-04)*t +7.31023768389466446d-05)*t &
-  +1.01013806904596356d-03)*t +2.64794416332118755d-04)*t &
-  +1.97499785553709145d-03
-scbi = y/exp1z
-y = ((((((((((((((((((((( -4.40679918437492851d-10*t &
-  +1.30954945449348301d-10)*t +1.30052079376596751d-08)*t &
-  -2.21315827945437064d-08)*t -2.56850909380644963d-07)*t &
-  +8.66960855365698346d-07)*t +3.75622307499741911d-06)*t &
-  -2.15396233361107222d-05)*t -3.55804094667597110d-05)*t &
-  +3.95317852914037711d-04)*t +5.03369361986934094d-05)*t &
-  -5.54634417403436820d-03)*t +5.29658186908372832d-03)*t &
-  +5.91311623537658225d-02)*t -1.09446664596286554d-01)*t &
-  -4.63589435529194219d-01)*t +1.25323269822030972d+00)*t &
-  +2.50138108959469254d+00)*t -9.12668774193995449d+00)*t &
-  -8.14385732036876466d+00)*t +4.00134082550833019d+01)*t &
-  +1.15396202931444799d+01)*t -8.17378314444550419d+01
-scaip = y*exp1z
-y = (((((((((((((((((((((((( -1.12976379481423872d-13*t &
-  +2.84163275199873024d-13)*t +9.21367859618119680d-14)*t &
-  -6.47465116933029888d-13)*t +5.66210442158931968d-13)*t &
-  -3.03158042458901709d-12)*t +1.32640217809876419d-11)*t &
-  -3.03558223041639219d-11)*t +5.32290407073565901d-11)*t &
-  +1.67561690905544950d-11)*t -3.35234276365918044d-10)*t &
-  +2.92807773020050397d-09)*t -8.76900994127464369d-09)*t &
-  +4.69138029321003869d-08)*t -1.00929917942876779d-07)*t &
-  +5.40401934648687824d-07)*t -8.19977129258456927d-07)*t &
-  +5.13367651438974580d-06)*t -4.77800617725922708d-06)*t &
-  +4.02415391117897098d-05)*t -1.74571192912274417d-05)*t &
-  +2.45332091645215217d-04)*t -2.22916383050374016d-05)*t &
-  +1.02535993549737948d-03)*t +5.94033287658300975d-05)*t &
-  +2.17420627539345627d-03
-scbip = y/exp2z
-return
-20 if (z.le.(+0.0d0)) go to 40
-rootz = dsqrt(z)
-zeta = 2.0d0*z*rootz/3.0d0
-exp1z = dexp(zeta-1.5d0*z)
-exp2z = dexp(zeta-1.375d0*z)
-t = 4.0d0*z/9.0d0 - 1.0d0
-if (z.lt.(+xeps)) go to 30
-y = ((((((((((((((((((((((( +4.97635854909020570d-12*t &
-  -3.25024150273916928d-11)*t -5.15773946723072737d-11)*t &
-  +8.66802872160017711d-10)*t -9.51292671519803048d-10)*t &
-  -1.33268133924677102d-08)*t +4.37061406144179625d-08)*t &
-  +1.18943714086308365d-07)*t -8.66980482244589319d-07)*t &
-  -2.46768077494905499d-08)*t +1.10610939830483627d-05)*t &
-  -1.80475663535516462d-05)*t -9.22213518989192294d-05)*t &
-  +3.15767712665407001d-04)*t +4.08626419412850994d-04)*t &
-  -3.12704269924340764d-03)*t +6.27899244118607949d-04)*t &
-  +1.99062142478229001d-02)*t -2.27427058211322122d-02)*t &
-  -7.94869698136278246d-02)*t +1.54261999158247445d-01)*t &
-  +1.75618463128730757d-01)*t -5.05223670654169859d-01)*t &
-  -1.49695902416050331d-01)*t +6.91290454439828966d-01
-scai = y*exp1z
-y = (((((((((((((((((((((((((((-8.01144609907912212d-11*t &
-  +2.67566208080291037d-10)*t +1.74416971406971503d-10)*t &
-  -3.12642164666800066d-09)*t +1.22114569059570056d-08)*t &
-  -2.93647730218878800d-08)*t +1.76951994785830839d-08)*t &
-  +2.13143266932123830d-07)*t -1.15569603602267288d-06)*t &
-  +3.34394065752949896d-06)*t -5.20143492253259528d-06)*t &
-  -3.21937890029830155d-06)*t +5.00360593064643409d-05)*t &
-  -1.77449408434194908d-04)*t +3.86357389967150628d-04)*t &
-  -4.53337922165622921d-04)*t -2.60866378774883161d-04)*t &
-  +3.01355585350049504d-03)*t -8.39047077309199055d-03)*t &
-  +1.63240267627966090d-02)*t -1.90830727084112485d-02)*t &
-  +1.65592661387959142d-02)*t +1.76101803014184860d-02)*t &
-  -3.36652019472526494d-02)*t +1.23831258886916327d-01)*t &
-  -6.48342330363017516d-02)*t +2.20310550882807725d-01)*t &
-  -1.03883014957365224d-02)*t +2.06857611342460346d-01
-scbi = y/exp2z
-30 y = ((((((((((((((((((((((( -2.31635825886515692d-11*t &
-  +8.43840142802870600d-11)*t +3.68028065271203758d-10)*t &
-  -2.61043232825754937d-09)*t -4.65110871930215858d-10)*t &
-  +4.46164842334855713d-08)*t -9.24599436690579710d-08)*t &
-  -4.55809882095931368d-07)*t +2.21024501804834447d-06)*t &
-  +1.50251398952558802d-06)*t -2.91830008657289876d-05)*t &
-  +3.51391100964982453d-05)*t +2.37966767002002741d-04)*t &
-  -7.00969870295148024d-04)*t -9.84923358717942729d-04)*t &
-  +6.68935321740601810d-03)*t -1.66398286740112083d-03)*t &
-  -3.83618654865390504d-02)*t +4.80463615092658847d-02)*t &
-  +1.28359791076466449d-01)*t -2.80267155846714091d-01)*t &
-  -2.06049815358004057d-01)*t +7.63522843530878467d-01)*t &
-  +6.47699892977822355d-02)*t -8.32940737409625965d-01
-scaip = y*exp2z
-y = (((((((((((((((((((((((((((+2.69330665471830131d-10*t &
-  -1.25313111217921013d-09)*t +1.45057587508619405d-09)*t &
-  +5.82827351134571594d-09)*t -3.96093412314305685d-08)*t &
-  +1.37346521367521144d-07)*t -2.78927594518121271d-07)*t &
-  +2.96531845420687661d-08)*t +2.27734981888044076d-06)*t &
-  -1.02295902888535994d-05)*t +2.65515218319523965d-05)*t &
-  -3.86457370206378782d-05)*t -1.52212232476268640d-05)*t &
-  +2.84765225803690646d-04)*t -9.65798046252914453d-04)*t &
-  +2.04618065580453522d-03)*t -2.68702422147972510d-03)*t &
-  +8.36839039610090712d-04)*t +6.87131161447866570d-03)*t &
-  -2.10563741100004648d-02)*t +4.13290131622517073d-02)*t &
-  -5.03310394511775398d-02)*t +5.95467795825179773d-02)*t &
-  -1.64213101223235839d-02)*t +5.02536006477020710d-02)*t &
-  +5.75601787687195966d-02)*t +1.33220031651076020d-01)*t &
-  +7.76356357899154668d-02)*t +2.11213324176049168d-01
-scbip = y/exp1z
-return
-40 if (z.lt.(-5.0d0)) go to 60
-t = z/5.0d0
-t = -t*t*t
-t = 2.0d0*t - 1.0d0
-t2 = 2.0d0*t
-if (z.gt.(-xeps)) go to 50
-a = +1.63586492025000000d-18
-b = t2*a -1.14937368283025000d-16
-c = t2*b-a +7.06090635856696000d-15
-a = t2*c-b -3.75504581033290114d-13
-b = t2*a-c +1.70874975807662448d-11
-c = t2*b-a -6.56273599013291800d-10
-a = t2*c-b +2.09250023300659871d-08
-b = t2*a-c -5.42780372893997236d-07
-c = t2*b-a +1.11655763472468469d-05
-a = t2*c-b -1.76193215080912647d-04
-b = t2*a-c +2.03792657403144947d-03
-c = t2*b-a -1.61616260941907957d-02
-a = t2*c-b +7.87369695059018748d-02
-b = t2*a-c -1.88090320218915726d-01
-c = t2*b-a +8.83593328666433903d-02
-a = t2*c-b +9.46330439565858235d-02
-f = t*a-c +7.60869994141726643d-02
-a = +1.23340698467000000d-19
-b = t2*a -9.05440546731800000d-18
-c = t2*b-a +5.83052348377146000d-16
-a = t2*c-b -3.26253073273305810d-14
-b = t2*a-c +1.56911825099665634d-12
-c = t2*b-a -6.40386375393414830d-11
-a = t2*c-b +2.18414557202733054d-09
-b = t2*a-c -6.11127835033401880d-08
-c = t2*b-a +1.37095478225289560d-06
-a = t2*c-b -2.39464595313812449d-05
-b = t2*a-c +3.13306256975299299d-04
-c = t2*b-a -2.90953380590207648d-03
-a = t2*c-b +1.76972907074092250d-02
-b = t2*a-c -6.17055677164122241d-02
-c = t2*b-a +9.52472833367213949d-02
-a = t2*c-b -4.32381694223484894d-02
-g = t*a-c +3.76828717701544063d-02
-scai = f - g*z
-scbi = rt3*(f + g*z)
-50 a = -2.51308436743000000d-18
-b = t2*a +1.65543326242034000d-16
-c = t2*b-a -9.49237123028142500d-15
-a = t2*c-b +4.68795260455788096d-13
-b = t2*a-c -1.96942895842729954d-11
-c = t2*b-a +6.93493715818491929d-10
-a = t2*c-b -2.01076965264476206d-08
-b = t2*a-c +4.69655735896232104d-07
-c = t2*b-a -8.59527033121202608d-06
-a = t2*c-b +1.18871496270269531d-04
-b = t2*a-c -1.18244097697332692d-03
-c = t2*b-a +7.87645202148185146d-03
-a = t2*c-b -3.14174372672396468d-02
-b = t2*a-c +6.20464642445295805d-02
-c = t2*b-a -4.83824291776351778d-02
-f = t*c-b +2.64808460123486707d-02
-a = +5.89382778069400000d-18
-b = t2*a -4.04811810887971000d-16
-c = t2*b-a +2.42680453287673090d-14
-a = t2*c-b -1.25683910148099294d-12
-b = t2*a-c +5.55607745069567295d-11
-c = t2*b-a -2.06683376304577072d-09
-a = t2*c-b +6.35924425685425485d-08
-b = t2*a-c -1.58422527393619013d-06
-c = t2*b-a +3.11007119112993551d-05
-a = t2*c-b -4.64189437787271433d-04
-b = t2*a-c +5.00970025411579034d-03
-c = t2*b-a -3.62166342717373453d-02
-a = t2*c-b +1.53114671641953510d-01
-b = t2*a-c -2.69270807740667256d-01
-c = t2*b-a -9.61843661149152853d-02
-a = t2*c-b +2.07099372879297732d-01
-g = t*a-c +9.79943887874547828d-02
-scaip = z*z*f - g
-scbip = rt3*(z*z*f + g)
-return
-60 rootz = dsqrt(-z)
-root4z = -dsqrt(rootz)
-zeta = 2.0d0*(-z)*rootz/3.0d0
-t = -250.0d0/(z*z*z) - 1.0d0
-a = ((((((((((((( -4.50071772808806400d-15*t &
-  +1.11777933477806080d-14)*t -1.39959545848483840d-14)*t &
-  +4.93110187870320640d-14)*t -2.02193307034590720d-13)*t &
-  +7.53585452663569920d-13)*t -3.14632365928501299d-12)*t &
-  +1.52351450024952975d-11)*t -8.75801572233507014d-11)*t &
-  +6.27349413509555121d-10)*t -6.02183526555303242d-09)*t &
-  +8.70043536788235270d-08)*t -2.32935044050984079d-06)*t &
-  +1.83605337367638430d-04)*t -5.64003555099413391d-01
-scbi = a/root4z
-b = (((((((((((((((( -4.12972759036723200d-15*t &
-  +8.36512465551360000d-15)*t -2.05945081774080000d-16)*t &
-  +6.23733840790323200d-15)*t -5.81333983959859200d-14)*t &
-  +1.52893566095288320d-13)*t -4.11064788026333184d-13)*t &
-  +1.33820884559538637d-12)*t -4.74293914921785574d-12)*t &
-  +1.84868021228605050d-11)*t -8.15686769476673166d-11)*t &
-  +4.19373390376196942d-10)*t -2.61584084406303574d-09)*t &
-  +2.10021454539364698d-08)*t -2.37847770210509358d-07)*t &
-  +4.43114636962516363d-06)*t -1.83241371436579068d-04)*t &
-  +3.89918976811026487d-02
-scai = (b/zeta)/root4z
-a = ((((((((((((( -4.58484390222233600d-15*t &
-  +1.13969221615738880d-14)*t -1.43160328250060800d-14)*t &
-  +5.04734978526300160d-14)*t -2.07055957015081472d-13)*t &
-  +7.73043520694004480d-13)*t -3.23454581960357018d-12)*t &
-  +1.57043540332660220d-11)*t -9.06023827679991573d-11)*t &
-  +6.52303613917050367d-10)*t -6.30993998756281944d-09)*t &
-  +9.23711460831703303d-08)*t -2.54030284953639173d-06)*t &
-  +2.17448385781448409d-04)*t +5.64409671680379110d-01
-scaip = a*root4z
-b = (((((((((((((((( +4.19612197958451200d-15*t &
-  -8.50454708509081600d-15)*t +2.31421341122560000d-16)*t &
-  -6.39683104557465600d-15)*t +5.92509321833062400d-14)*t &
-  -1.56008660983891968d-13)*t +4.20106807813331968d-13)*t &
-  -1.36926896339755520d-12)*t +4.86000800286762854d-12)*t &
-  -1.89780061819570625d-11)*t +8.39314701970122041d-11)*t &
-  -4.32843814802265754d-10)*t +2.71124934991469715d-09)*t &
-  -2.19026888712002973d-08)*t +2.50504395196083566d-07)*t &
-  -4.75245434337472120d-06)*t +2.05252791097940732d-04)*t &
-  -5.46414841607309762d-02
-scbip = (b/zeta)*root4z
-zeta = zeta + pib4
-return
-end
 ! ----------------------------------------------------------------------
 subroutine psiasy(fj,fn,sr,si,psir,psii,nopen,nmax)
 ! subroutine to determine real and imaginary part of asymptotic wavefunction o
@@ -1545,14 +1190,14 @@ subroutine psiasy(fj,fn,sr,si,psir,psii,nopen,nmax)
 !    nopen          number of open channels
 !    nmax           row dimension of matrices
 ! ----------------------------------------------------------------------------
-use mod_phot, only: photof, wavefn, boundf, writs
-use mod_hiutil, only: daxpy_wrapper
-use mod_hivector, only: matmov
+use mod_phot, only: photof
+use mod_hivector, only: matcopy
+use mod_hiblas, only: dscal, daxpy_wrapper
 implicit none
 real(8), intent(in) :: fj(nopen)
 real(8), intent(in) :: fn(nopen)
 real(8), intent(in) :: sr(nmax,nmax)
-real(8), intent(in) :: si(nmax,nmax)
+real(8), intent(inout) :: si(nmax,nmax)
 real(8), intent(out) :: psir(nmax,nmax)
 real(8), intent(out) :: psii(nmax,nmax)
 integer, intent(in) :: nopen
@@ -1572,7 +1217,7 @@ real(8) :: unit(nopen)
   ! that is   yl(kr) (Sr-1) + jl(kr) Si for scattering or
   !         - yl(kr) (Sr-1) + jl(kr) Si for photodissociation
   ! first move Sreal into psii
-  call matmov (sr, psii, nopen, nopen, nmax, nmax)
+  call matcopy (sr, psii, nopen, nopen, nmax, nmax)
   ! now subtract unit matrix
   call daxpy_wrapper (nopen, onemin, unit, 1, psii(1, 1), nmax + 1)
   ! now premultiply by diagonal matrix -yl(kr) for photodissociation or
@@ -1583,7 +1228,7 @@ real(8) :: unit(nopen)
     call dscal(nopen, fac, psii(irow,1), nmax)
   end do
   ! now store simag in psir
-  call matmov(si, psir, nopen, nopen, nmax, nmax)
+  call matcopy(si, psir, nopen, nopen, nmax, nmax)
   ! premultiply by diagonal matrix jl(kr)
   do irow = 1, nopen
     call dscal(nopen, fj(irow), psir(irow,1), nmax)
@@ -1597,7 +1242,7 @@ real(8) :: unit(nopen)
   ! that is - jl(kr) (1+Sr) + yl(kr) Si for scattering or
   !         - jl(kr) (1+Sr) - yl(kr) Si for photodissociation
   ! now move Sreal into psii
-  call matmov (sr, psii, nopen, nopen, nmax, nmax)
+  call matcopy (sr, psii, nopen, nopen, nmax, nmax)
   ! now add unit matrix
   call daxpy_wrapper (nopen, one, unit, 1, psii(1, 1), nmax + 1)
   ! now premultiply by diagonal matrix -jl(kr)
@@ -1606,7 +1251,7 @@ real(8) :: unit(nopen)
     call dscal(nopen, fac, psii(irow,1), nmax)
   end do
   ! replace real part of s matrix by real part of asymptotic wavefunction
-  call matmov(psir,sr,nopen, nopen, nmax, nmax)
+  call matcopy(psir,sr,nopen, nopen, nmax, nmax)
   ! premultiply Simag by diagonal matrix yl(kr) for scattering or by
   ! -yl(kr) for photodissociation
   do irow = 1, nopen
@@ -1620,7 +1265,7 @@ real(8) :: unit(nopen)
   end do
   ! replace imaginary part of s matrix by imaginary part of
   ! asymptotic wavefunction
-  call matmov(psii,si,nopen, nopen, nmax, nmax)
+  call matcopy(psii,si,nopen, nopen, nmax, nmax)
 return
 end
 ! ----------------------------------------------------------------------
@@ -1684,7 +1329,6 @@ subroutine smatop (tmod, sr, si, scmat, lq, r, prec, &
 !    cbesn,cbesj  ricatti-bessel functions (from b.r. johnson)
 !    rles:      linear equation solver
 !    rgmmul:    sub-matrix multiply
-!    daxpy:     linpack blas routine
 !    vmul:      vector times a vector
 ! --------------------------------------------------------------------
 use mod_coqvec, only: nphoto, q
@@ -1698,19 +1342,20 @@ use mod_par, only: prsmat, jlpar! spac=>scat_spac
 use mod_wave, only: irec, ifil, ipos2, ipos3, nrlogd, iendwv, ipos2_location
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
-use mod_phot, only: photof, wavefn, boundf, writs
+use mod_phot, only: photof, wavefn
 use mod_surf, only: flagsu
 use mod_hiutil, only: gennam
-use mod_hiutil, only: daxpy_wrapper
 use mod_hibrid1, only: cbesj, cbesn
 use mod_himatrix, only: transp
-use mod_hivector, only: matmov, vsmul, vmul
+use mod_hivector, only: matcopy, vsmul, vmul
+use mod_hiiolib1, only: openf
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
 use mod_himatrix, only: mxma
 #endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 use mod_himatrix, only: syminv
 #endif
+use mod_hiblas, only: dscal, dcopy, dgemm, daxpy_wrapper, drot, ddot
 
 implicit double precision (a-h,o-z)
 real(8), dimension(nmax, nmax), intent(inout) :: tmod
@@ -1763,7 +1408,7 @@ do  30   i = 1, nopen
 30 continue
 !  calculate K-matrix
 ! if photodissocation calculation, save log-derivative matrix in si
-if (photof) call matmov(tmod,si,nopen,nopen,nmax,nmax)
+if (photof) call matcopy(tmod,si,nopen,nopen,nmax,nmax)
 do  60   i = 1, nopen
   l = lq(i)
   p = pk(i)
@@ -1956,8 +1601,8 @@ write (ifil, err=950) 'ENDWFUR', char(2)
 iendwv = iendwv + 8 * sizeof(char_t) &
      + (2 * nopen ** 2) * sizeof(dble_t)
 ! save smatrix temporarily
-    call matmov(sr,srsave,nopen,nopen,nmax,nmax)
-    call matmov(si,sisave,nopen,nopen,nmax,nmax)
+    call matcopy(sr,srsave,nopen,nopen,nmax,nmax)
+    call matcopy(si,sisave,nopen,nopen,nmax,nmax)
 ! here if wavefunction wanted
   call psiasy(fj,fn,sr,si,tmod,scmat,nopen,nmax)
 ! on return, sr contains real part of asymptotic wavefunction, si contains
@@ -1972,7 +1617,7 @@ endif
 !              si contains log-derivative matrix
 if (photof) then
 ! copy K matrix into sr
-  call matmov(tmod,sr,nopen,nopen,nmax,nmax)
+  call matcopy(tmod,sr,nopen,nopen,nmax,nmax)
 ! invert K matrix
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
   call smxinv(sr,nmax,nopen,srsave,sisave,ierr)
@@ -2005,7 +1650,7 @@ if (photof) then
   call dscal(nopen*nphoto,onemin,q,1)
 ! q now contains real part of transition amplitudes
 ! store real part of transition amplitudes in sr
-  call matmov(q,sr,nopen,nopen,nopen,nmax)
+  call matcopy(q,sr,nopen,nopen,nopen,nmax)
 ! now calculate imaginary part of transition amplitudes
   call dscal(nopen*nphoto,onemin,q,1)
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
@@ -2018,7 +1663,7 @@ if (photof) then
                 srsave,nmax,nopen,nopen,nphoto)
 #endif
 ! store imaginary part of transition amplitudes in si
-  call matmov(srsave,si,nopen,nopen,nmax,nmax)
+  call matcopy(srsave,si,nopen,nopen,nmax,nmax)
 ! transpose transition amplitudes for output
   call transp(sr, nopen, nmax)
   call transp(si,nopen,nmax)
@@ -2174,10 +1819,11 @@ use mod_coqvec, only: nphoto, q
 use mod_coeint, only: eint
 use mod_hibrid2, only: mxoutd, mxoutr
 use mod_wave, only: ifil, ipos2, ipos3, nrlogd, iendwv, ipos2_location
-use mod_ered, only: ered, rmu
-use mod_phot, only: photof, wavefn, boundf, writs
+use mod_ered, only: ered
+use mod_phot, only: photof, wavefn
 use mod_hiutil, only: mtime
 use mod_hitypes, only: bqs_type
+use mod_hiblas, only: dcopy
 implicit double precision (a-h,o-z)
 real(8), intent(inout) :: z(nmax,nmax)
 real(8), intent(out) :: sr(nmax,nmax)
@@ -2324,7 +1970,7 @@ subroutine expand(ncol,nopen,nch,nmax,ipack,sr,si,bmat)
 ! bmat      scratch matrix
 !  ---------------------------------------------------------------------------
 use mod_par, only: photof
-use mod_hivector, only: dset, matmov
+use mod_hivector, only: dset, matcopy
 implicit double precision (a-h,o-z)
 dimension sr(nopen,nopen),si(nopen,nopen), &
           bmat(nmax,nmax),ipack(15)
@@ -2348,7 +1994,7 @@ if (.not. photof) then
       bmat(ir,ic)=sr(irow,icol)
 225     continue
 230   continue
-  call matmov(bmat,sr,nch,nch,nmax,nmax)
+  call matcopy(bmat,sr,nch,nch,nmax,nmax)
   do 250 icol=1, ncol
 ! ic is index of icolth open channel in the full channel list
     ic=ipack(icol)
@@ -2357,7 +2003,7 @@ if (.not. photof) then
       bmat(ir,ic)=si(irow,icol)
 245     continue
 250   continue
-  call matmov(bmat,si,nch,nch,nmax,nmax)
+  call matcopy(bmat,si,nch,nch,nmax,nmax)
 else
 ! here for photodissociation, expansion just applies to 1st column
   call dset(nch, zero, bmat, 1)
@@ -2366,12 +2012,12 @@ else
     ir=ipack(irow)
     bmat(ir,1)=sr(irow,1)
 325   continue
-  call matmov(bmat,sr,nch,nch,nmax,nmax)
+  call matcopy(bmat,sr,nch,nch,nmax,nmax)
   do 345 irow=1, nopen
     ir=ipack(irow)
     bmat(ir,1)=si(irow,1)
 345   continue
-  call matmov(bmat,si,nch,nch,nmax,nmax)
+  call matcopy(bmat,si,nch,nch,nmax,nmax)
 endif
 return
 end

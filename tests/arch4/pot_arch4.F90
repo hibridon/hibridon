@@ -11,13 +11,15 @@
 !
 !  the PES is fitted with 5 angular terms
 !
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/ground.F90"
 #include "common/bausr.F90"
 ! ------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 econv=219474.6d0
 potnam='Ar-CH4 Nijmegen 1997'
@@ -47,13 +49,18 @@ end
 ! ------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
 use mod_conlam, only: nlam, nlammx, lamnum
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_cosysi, only: ispar
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parpot, only: potnam=>pot_name
+use mod_selb, only: ibasty
 implicit double precision (a-h,o-z)
-character*(*) filnam
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
+
 integer, pointer :: nterm
 nterm=> ispar(1)
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='Ar-CH4 Nijmegen 1997'
 ibasty = 24
 !
@@ -97,9 +104,12 @@ subroutine pot (vv0, r)
 ! R = [3:0.5:10 11 12 13 15 20]
 !
 use mod_covvl, only: vvl
-use mod_par, only: csflag, ihomo
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_hiblas, only: dscal, dcopy
+use mod_hipotutil, only: dspline, dsplint
 implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
+
 real(8) :: v(5)
 real(8), save :: csplin(69,5)
 real(8) :: rr(69), vl(345),vec(69)

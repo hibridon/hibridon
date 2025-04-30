@@ -1,11 +1,12 @@
 #include "assert.h"
 !  -------------------------------------------------------------
 module mod_flow
+  use mod_assert, only: fassert
 contains
 subroutine flow (z, w, zmat, amat, bmat, jlev, &
             elev, inlev, isc1, isc2, isc3, isc4, lsc1, &
             sc2, sc1, sc3, sc4, &
-            sc5, sc6, sc7, sc8, sc9, tq1, tq2, tq3, men, &
+            tq1, men, &
             nmax, nairy)
 !  -------------------------------------------------------------
 !  program to control the log-derivative/airy integration
@@ -26,7 +27,6 @@ subroutine flow (z, w, zmat, amat, bmat, jlev, &
 !    xmconv:      conversion factor from amu to atomic units
 !
 !
-use mod_cosout, only: nnout, jout
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coener, only: energ
@@ -44,7 +44,6 @@ use mod_par, only: airyfl, prairy, bastst, chlist, &
                 t2test, prt2, twomol, wrsmat, wrpart, wrxsec, &
                 prxsec, nucros, photof, wavefl, boundc, &
                 jtot1, jtot2, jtotd, jlpar, nerg, numax, numin, nud, &
-                lscreen, iprint, &
                 fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, tolhi=>scat_tolai, xmu
 use funit
 use mod_fileid, only: FILEID_SAV
@@ -52,31 +51,31 @@ use ipar_enum
 use rpar_enum
 use mod_hinput, only:hinput
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
-use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_phot, only: phot_photof => photof, wavefn, boundf, writs
 use mod_surf, only: surf_flagsu => flagsu
-use mod_sav, only: iipar, ixpar, irpar, rxpar
-use mod_pmat, only: rtmn, rtmx, iflag
+use mod_sav, only: ixpar, rxpar
+use mod_pmat, only: rtmn, rtmx
 use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
 #if defined(HIB_ULTRIX_DEC)
   use mod_dec_timer, only: ttim
 #endif
 use mod_opti, only: optifl
-use mod_hiutil, only: mtime, gettim, dater
+use mod_hiutil, only: mtime, gettim, dater, get_cpu_time
 use mod_hibrid4, only: wavewr
 use mod_hismat, only: wrhead
 use mod_savfile, only: REC_EN_START, EN_REC_COUNT, EN_REC_PRESENT_INTEGRAL_XS, EN_REC_PREVIOUS_INTEGRAL_XS, EN_REC_PRESENT_PARTIAL_XS, EN_REC_PREVIOUS_PARTIAL_XS, EN_REC_2NDLAST_PARTIAL_XS
 use mod_hitypes, only: bqs_type
+use mod_hiiolib1, only: openfi, fimovs, dres, dsave, dclos, closf
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)
 real(8), intent(out) :: zmat(nmax,nmax)
 real(8), intent(out) :: amat(nmax,nmax)
 real(8), intent(out) :: bmat(nairy,nairy)
-integer, intent(out) :: jlev(1)
-real(8), intent(out) :: elev(1)
-integer, intent(out) :: inlev(1)
+integer, intent(out) :: jlev(nmax)
+real(8), intent(out) :: elev(nmax)
+integer, intent(out) :: inlev(nmax)
 integer, intent(out) :: isc1(9)
 integer, intent(out) :: isc2(1)
 integer, intent(out) :: isc3(1)
@@ -86,14 +85,7 @@ real(8), intent(out) :: sc2(1)
 real(8), intent(out) :: sc1(2)
 real(8), intent(out) :: sc3(1)
 real(8), intent(out) :: sc4(1)
-real(8), intent(out) :: sc5(1)
-real(8), intent(out) :: sc6(1)
-real(8), intent(out) :: sc7(1)
-real(8), intent(out) :: sc8(1)
-real(8), intent(out) :: sc9(1)
 real(8), intent(out) :: tq1(1)
-real(8), intent(out) :: tq2(1)
-real(8), intent(out) :: tq3(1)
 integer, intent(in) :: men
 integer, intent(in) :: nmax
 integer, intent(in) :: nairy
@@ -116,7 +108,7 @@ character*10 :: timew, cpubaw, cpuptw, cpuaiw, cpuldw, cpusmw, cpuouw, &
              cpuphw, timew1, timew2, time1, time2
 logical :: clist, firstj, ready
 !  -------------------------------------------------------------
-logical :: first
+logical :: first_time
 
 logical :: twojlp
 data twojlp / .false. /
@@ -137,16 +129,14 @@ real(8) :: rstrt0, rtmn1, rtmnla, rtmx1, rtmxla
 real(8) :: t1, t11, t2, t22, tb, tbm, tcpu0, tcpu1, tcpu2, tcpuf, twall0, twall1, twall2, twallf
 real(8) :: xjtot
 
-real(8) :: second
 integer :: isteps
 integer :: nsteps
 
 type(bqs_type) :: bqs
-
-first=.true.
+first_time = .true.
 !  get default data
 call set_default_params
-1 call hinput(first)
+1 call hinput(first_time)
 cpupt=0
 #if defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS)
 ttim(1)=0.d0
@@ -641,12 +631,12 @@ call flush(9)
 ntop = nchtop
 !
 
-call propag (z, w, zmat, amat, bmat, &
+call propag (z, w, zmat, &
              bqs, &
              ien, nerg, ered, eshift, rstart, rendld, spac, &
              tolhi, rendai, rincr, fstfac, tb, tbm, &
              ipos, prlogd, noprin, airyfl, prairy, &
-             nch, nopen, nairy, ntop, v2, isteps, nsteps)
+             nch, nopen, ntop, v2, isteps, nsteps)
 
 ! if bound state calculation, end it now
 if (boundc) then
@@ -658,14 +648,14 @@ endif
 !  now print out s-matrix and t-matrix squared, and calculate partial
 !  cross sections and print them out, if desired
 call soutpt (z, w, zmat, amat, &
-             bqs, isc1, isc2, bmat, tq1, &
+             bqs, isc1, bmat, tq1, &
              jlev, elev, inlev, jtot, jfirst, &
              jtot2, jtotd, nu, numin, nulast, nud, jlpar, ien, &
              ipos, csflag, flaghf, prsmat, prt2, t2test, &
              wrsmat, wrpart, prpart, wrxsec, prxsec, twomol, &
              nucros, firstj, nlevel, nlevop, nopen, nchtop, &
              twojlp, jlpold)
-cpuout = cpuout + second() - t11
+cpuout = cpuout + get_cpu_time() - t11
 
 !  on return from soutpt:
 !     if wrxsec,prxsec, wrpart, and prpart are all .false., the upper-left
@@ -782,11 +772,11 @@ if (twojlp .and. jlpar .gt. 0) then
 end if
 !.....next nu value if nu runs in outer loop
 if (nucros .and. .not. wavefl .and. .not. photof) then
-  call nusum (z, tq1, tq2, tq3, &
+  call nusum (z, tq1, &
               jlev,elev, inlev, jtot, jfirst, &
               jtop, jtotd, nu, nufirs, numax, nud, jlpar, &
               nerg, ipos, csflag, flaghf, wrpart, prpart, &
-              twomol, nucros, nlevel, nlev, nopen, nmax, tmp_file)
+              twomol, nucros, nlev, nmax, tmp_file)
 !.....save restart information
   if (wrxsec .or. prxsec .or. prpart .or. wrpart) then
     if (.not. wavefl .and. .not. photof) then
@@ -845,7 +835,7 @@ end if
 !  write out integral cross sections if desired
 370 if (prxsec .or. wrxsec) then
   if(.not.bastst) &
-  call xwrite (amat, tq3, jlev, elev, inlev, nerg, energ, &
+  call xwrite (amat, jlev, elev, inlev, nerg, energ, &
              jfirst, jtot2, jtotd, csflag, flaghf, &
              wrxsec, prxsec, ipos, twomol, nucros, nlevel, &
              nlev, nufirs, nulast, nud, jlpar, nchtop, nmax, &

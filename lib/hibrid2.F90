@@ -21,22 +21,19 @@ subroutine set_default_params
 use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
 use mod_coener, only: energ
-use mod_cosys, only: scod
-use mod_cosysi, only: nscode, isicod
+use mod_cosysi, only: nscode
 use mod_cosysl, only: islcod
 use mod_cosysr, only: isrcod
-use constants, only: econv, xmconv, ang2c
 use mod_par, only: airyfl, prairy, bastst, batch, chlist, &
                 csflag, flaghf, flagsu, ihomo, ipos, logdfl, &
                 prlogd, noprin, prpart, readpt, rsflag, prsmat, &
                 t2test, prt2, twomol, wrsmat, wrpart, wrxsec, &
                 prxsec, nucros, photof, wavefl, boundc, &
                 jtot1, jtot2, jtotd, jlpar, nerg, numax, numin, nud, lscreen, iprint, &
-                fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, &
-                tolaifstfac=>scat_tolai, xmu
+                fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, xmu
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
-use mod_file, only: input, output, jobnam, savfil
+use mod_file, only: input, output, jobnam
 use mod_com, only: com
 implicit double precision (a-h,o-z)
 ! nb if the nextcommon is changed, it should be also changed in common/parsys
@@ -389,11 +386,11 @@ use mod_cosc1, only: elev => sc1 ! elev(5)
 use mod_coz, only: zmat => z_as_vec ! zmat(1)
 use mod_cow, only: scmat => w_as_vec ! scmat(1)
 use mod_version, only : version
-use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, flaghf, flagsu, ihomo, ipos
+use mod_par, only: csflag, flaghf, flagsu, ipos
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_selb, only: ibasty
 use mod_hiutil, only: gennam
-use mod_hivector, only: matmov
+use mod_hivector, only: matcopy
 use funit, only: FUNIT_ICS, FUNIT_XSC
 implicit double precision (a-h,o-z)
 character*(*) fname
@@ -694,7 +691,7 @@ subroutine aver1 (zmat, scmat, n)
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 use mod_himatrix, only: transp
-use mod_hivector, only: matmov
+use mod_hivector, only: matcopy
 implicit double precision (a-h,o-z)
 !  subroutine to sum and average cross section matrix over positive
 !  and negative values of index
@@ -702,7 +699,7 @@ integer i, ind, index, j, jnd, n, nn
 !     real scmat, zmat
 dimension zmat(1), scmat(n,n)
 !  first copy cross section matrix into scmat
-call matmov (zmat, scmat, n, n, n, n)
+call matcopy (zmat, scmat, n, n, n, n)
 nn = n / 2
 index = 0
 do  30  i = 1, nn
@@ -728,7 +725,6 @@ end
 subroutine xscpr1 (zmat, nlevop, isize, iaver, &
                    ipos, iprint, flaghf, xsc_funit, ipoint)
 use mod_cojhld, only: jlev => jhold ! jlev(4)
-use mod_cosc1, only: elev => sc1 ! elev(4)
 use mod_coisc1, only: inlev => isc1 ! inlev(4)
 use mod_selb, only: ibasty
 use mod_himatrix, only: transp
@@ -905,9 +901,8 @@ use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_coener, only: energ
 use mod_coz, only: zmat => z_as_vec ! zmat(1)
 use mod_cow, only: scmat => w_as_vec ! scmat(1)
-use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, flaghf, flagsu, ihomo, ipos
+use mod_par, only: csflag, flaghf, flagsu, ihomo, ipos
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
-use mod_selb, only: ibasty
 use mod_hiutil, only: gennam
 use mod_hivector, only: dset
 use funit, only: FUNIT_ICS, FUNIT_XSC
@@ -1281,7 +1276,7 @@ subroutine aver2 (zmat, scmat, n)
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 use mod_himatrix, only: transp
-use mod_hivector, only: matmov
+use mod_hivector, only: matcopy
 
 implicit double precision (a-h,o-z)
 !  subroutine to sum and average cross section matrix over positive
@@ -1290,7 +1285,7 @@ integer i, ind, index, j, jnd, n, nn
 !     real scmat, zmat
 dimension zmat(1), scmat(n,n)
 !  first copy cross section matrix into scmat
-call matmov (zmat, scmat, n, n, n, n)
+call matcopy (zmat, scmat, n, n, n, n)
 nn = n / 2
 index = 0
 do  30  i = 1, nn
@@ -1317,7 +1312,6 @@ subroutine xscpr2 (zmat, xthresh, nlevop, isize, iaver, &
                    iprint, isa, xsc_funit, ipoint)
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
-use mod_cosc1, only: elev => sc1 ! elev(1)
 use mod_par, only: flaghf, ihomo, ipos
 use mod_himatrix, only: transp
 implicit double precision (a-h,o-z)

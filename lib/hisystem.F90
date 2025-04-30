@@ -1,3 +1,6 @@
+module mod_hisystem
+
+contains
 !*************************************************************************
 !                                                                        *
 !                 system dependent routines library                      *
@@ -76,7 +79,7 @@ subroutine baschk(ival)
 !     COMMON BLOCK COMXBS DEFINED IN HIMAIN
 ! -------------------------------------------------------
 use mod_comxbs, only: maxbas
-use mod_selb, only: ibasty
+integer, intent(in) :: ival
 logical icheck
 icheck=.false.
 do 100 i=1, maxbas
@@ -195,10 +198,12 @@ use mod_hiba27_astp1, only: syastp1
 use mod_hiba28_3sg1sg, only: sy3sg1sg
 use mod_hiba29_astp2, only: syastp2
 use mod_hiba30_astp3, only: syastp3
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parbas, only: maxtrm, ntv, ivcol, ivrow
 use mod_selb, only: ibasty
-integer irpot, iread
-logical readpt
+use mod_hibasis, only: syusr
+integer, intent(inout) :: irpot
+logical, intent(inout) :: readpt
+integer, intent(in) ::  iread
 ! set default for vibrational quantum numbers to zero for each term
 do 10 it=1,maxtrm
 ivrow(1,it)=0
@@ -305,7 +310,7 @@ return
 return
 end
 ! -----------------------------------------------------------------------
-subroutine syssav (readpt)
+subroutine syssav ()
 !   dispatcher to select correct syssav routine
 !   the correct routine is selected according to value of ibasty
 !   the following savdat routines are currently available:
@@ -377,12 +382,11 @@ use mod_hiba28_3sg1sg, only: sav3sg1sg
 use mod_hiba29_astp2, only: savastp2
 use mod_hiba30_astp3, only: savastp3
 use mod_selb, only: ibasty
+use mod_hibasis, only: savusr
 
-
-logical readpt
 if (ibasty .ge. 99) then
 !  user supplied routine
-   call savusr(readpt)
+   call savusr()
    return
 endif
 goto (100,200,300,400,500,600,700,800,900,1000,1100,1200, &
@@ -390,99 +394,99 @@ goto (100,200,300,400,500,600,700,800,900,1000,1100,1200, &
       2300,2400,2500,2600,2700,2800,2900,3000) &
      ibasty
 !  singlet sigma variables
-100 call sav1sg(readpt)
+100 call sav1sg()
 return
 !  doublet sigma variables
-200 call sav2sg(readpt)
+200 call sav2sg()
 return
 !  doublet pi variables
-300 call sav2pi(readpt)
+300 call sav2pi()
 return
 !  sigma/pi variables
-400 call savsgpi(readpt)
+400 call savsgpi()
 return
 !  general pi variables
-500 call savpi(readpt)
+500 call savpi()
 return
 !  symmetric top variables - w. inversion doubling
-600 call savstp(readpt)
+600 call savstp()
 return
 !  1/3 P atom variables
-700 call sav13p(readpt)
+700 call sav13p()
 return
 !  1sigma+1sigma variables
-800 call sav2mol(readpt)
+800 call sav2mol()
 return
 !  symmetric top + 1 sigma molecule
 !900   call savstpln(irpot, readpt, iread) -- change call (pjd)
-900 call savstpln(readpt)
+900 call savstpln()
 return
 !  2/2 P atom variables
-1000 call sav22p(readpt)
+1000 call sav22p()
 return
 !  singlet delta variables
-1100 call sav1del(readpt)
+1100 call sav1del()
 return
 !  homonuclear + 2P atom variables
 !1200  call savh2p(irpot, readpt, iread) -- change call (pjd)
-1200 call savh2p(readpt)
+1200 call savh2p()
 return
 !  homonuclear + 3P atom variables
 !1300  call savh3p(irpot, readpt, iread) -- change call (pjd)
-1300 call savh3p(readpt)
+1300 call savh3p()
 return
 !  doublet-delta + atom variables
 !1400  call sav2del(irpot, readpt, iread) -- change call (pjd)
-1400 call sav2del(readpt)
+1400 call sav2del()
 return
 !  heteronuclear + 2P atom variables
 !1500  call savdiat2p(irpot, readpt, iread) -- change call (pjd)
-1500 call savdiat2p(readpt)
+1500 call savdiat2p()
 return
 !  asymmetric top variables
-1600 call savastp(readpt)
+1600 call savastp()
 return
 !  CH2(X 3B1) (0,v2,0) bender level variables
-1700 call savch2x(readpt)
+1700 call savch2x()
 return
 !  symmetric top variables - w/o. inversion doubling
-1800 call savstp1(readpt)
+1800 call savstp1()
 return
 !  2sigma | 2pi + atom (no perturbations)
-1900 call savsgpi1(readpt)
+1900 call savsgpi1()
 return
 !  2Pi + 1Sigma
-2000 call sav2pi1sg(readpt)
+2000 call sav2pi1sg()
 return
 !  Symmetric top + 1Sigma
-2100 call savstp1sg(readpt)
+2100 call savstp1sg()
 return
 !  1D/3P atom + closed-shell atom
-2200 call sav1d3p(readpt)
+2200 call sav1d3p()
 return
 !  3P atom + 2S atom
-2300 call sav3p2s(readpt)
+2300 call sav3p2s()
 return
 !  spherical top + atom
-2400 call savsphtp(readpt)
+2400 call savsphtp()
 return
 !  two different 1sigma molecules
-2500 call sav1sg1sg(readpt)
+2500 call sav1sg1sg()
 return
 !  2sigma + 1sigma molecules
-2600 call sav2sg1sg(readpt)
+2600 call sav2sg1sg()
 return
 !  C2v asymmetric top variables
-2700 call savastp1(readpt)
+2700 call savastp1()
 return
 !  3sigma + 1sigma molecules
-2800 call sav3sg1sg(readpt)
+2800 call sav3sg1sg()
 return
 !  chiral asymmetric top variables
-2900 call savastp2(readpt)
+2900 call savastp2()
 return
 !  C2v asymmetric top + linear molecule variables
-3000 call savastp3(readpt)
+3000 call savastp3()
 return
 end
 ! -----------------------------------------------------------------------
@@ -558,9 +562,10 @@ use mod_hiba28_3sg1sg, only: ptr3sg1sg
 use mod_hiba29_astp2, only: ptrastp2
 use mod_hiba30_astp3, only: ptrastp3
 use mod_selb, only: ibasty
+use mod_hibasis, only: ptrusr
 
-logical readpt
-character*(*) filnam
+logical, intent(inout) :: readpt
+character*(*), intent(in) :: filnam
 if (ibasty .ge. 99) then
 !  user supplied routine
    call ptrusr(filnam,readpt)
@@ -667,3 +672,4 @@ return
 return
 end
 ! ---------------------------eof--------------------------------
+end module mod_hisystem

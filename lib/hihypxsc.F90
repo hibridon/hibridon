@@ -60,7 +60,8 @@ subroutine hypxsc(flname, a)
   use mod_hiutil, only: gennam, mtime         ! To generate filenames and print time
   use mod_hitypes, only: bqs_type             ! To store basis set data
   use mod_parpot, only: potnam=>pot_name, label=>pot_label ! To store PES infos
-  implicit none
+  use mod_hiiolib1, only: openf
+implicit none
 
   ! Scratch arrays -------------------------------------------------------------
   integer, allocatable :: jlev(:), inlev(:), jout(:)
@@ -82,7 +83,7 @@ subroutine hypxsc(flname, a)
   logical      :: exstfl
 
   ! Read from S-matrix file ----------------------------------------------------
-  integer :: mjtot, mchmx, lngth, ierr, jtot, jlpar, nu, nopen, jlp
+  integer :: mjtot, mchmx, ierr, jtot, jlpar, nu, nopen, jlp
   character*20 :: cdate
   integer :: jfrst, jfinl, jtotd, numin, numax, nud, nlevel, nlvop, nnout
   real(8) :: ered, rmu, ee
@@ -420,7 +421,7 @@ end subroutine fill_hf
 ! This subroutine computes XS from T matrix elements 
 !************************************************************************************************
 subroutine compute_xs(twmol, rmu, ered, spins, hf, sigma)
-  use constants, only: ang2 => ang2c
+  use constants, only: ang2c
   implicit none
   ! Arguments
   logical, intent(in) :: twmol
@@ -432,7 +433,7 @@ subroutine compute_xs(twmol, rmu, ered, spins, hf, sigma)
   real(8) :: fak, dencol, denrow, ffi, fff
   integer :: ij2, ij2p, i, ii
 
-  fak = acos(-1.d0) * ang2 / (2.0d0 * rmu)
+  fak = acos(-1.d0) * ang2c / (2.0d0 * rmu)
 
 if (.not. spins%two) then
   !$OMP PARALLEL DO PRIVATE(i, ii, ij2, ij2p, ffi, fff, denrow, dencol)

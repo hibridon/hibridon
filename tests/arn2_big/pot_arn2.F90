@@ -19,10 +19,12 @@ goto 1
 #include "common/ground.F90"
 ! --------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 ! --------------------------------------------------------------------------
 character*(*) filnam
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='PATTENGILL-LABUDDE-BERNSTEIN AR-N2'
 lammin(1)=2
 lammax(1)=2
@@ -49,10 +51,10 @@ subroutine pot (vv0, r)
 !  -----------------------------------------------------------------------
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parbas, only: lammin
 implicit double precision (a-h,o-z)
-
-
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
 
 !  pattengill ar-n2 potential [m.d. pattengill, r. a. labudde, r.b. bernstein,
 !  and c.f. curtiss, j. chem. phys. 55, 5517 (1971)]

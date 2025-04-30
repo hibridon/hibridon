@@ -13,6 +13,7 @@ module mod_trn
 end module mod_trn
 
 module mod_hitrnprt
+  use mod_assert, only: fassert
 contains
 subroutine trnprt(filnam,a)
 !
@@ -323,6 +324,7 @@ character*10 elaps, cpu
 ! common blocks for levels for which xs's to be computed
 !
 dimension f36j(0:2)
+
 !
 ! sr, si: s-matrix elements
 !   second letter is real (r), imaginary (i)

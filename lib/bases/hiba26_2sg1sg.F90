@@ -1,5 +1,7 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba26_2sg1sg
+  use mod_assert, only: fassert
 contains
 ! sy2sg1sg (sav2sg1sg/ptr2sg1sg) defines, saves variables and reads     *
 !                  potentials for 2sigma - 1sigma                        *
@@ -121,13 +123,11 @@ use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
-use mod_selb, only: ibasty
+use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -144,6 +144,14 @@ integer, pointer :: n1max, j2min, j2max, ipotsy2
 real(8), pointer :: b1rot, d1rot, gamma, b2rot
 n1max=>ispar(1); j2min=>ispar(2); j2max=>ispar(3); ipotsy2=>ispar(4)
 b1rot=>rspar(1); d1rot=>rspar(2); gamma=>rspar(3); b2rot=>rspar(4);
+
+UNUSED_DUMMY(sc1)
+UNUSED_DUMMY(sc2)
+UNUSED_DUMMY(sc3)
+UNUSED_DUMMY(sc4)
+UNUSED_DUMMY(ihomo)
+UNUSED_DUMMY(nu)
+
 !  check for consistency in the values of flaghf and csflag
 call bqs%init(nmax)
 nn = 0
@@ -551,24 +559,22 @@ subroutine sy2sg1sg (irpot, readpt, iread)
 !
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
-use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_skip, only: nskip, iskip
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: j, l, lc
 logical existf
 character*1 dot
 character*(*) fname
-character*60 filnam, line, potfil, filnm1
+character*60 filnam, line, potfil
+character*68 filnm1
 #include "common/comdot.F90"
 save potfil
 integer, pointer, save :: n1max, j2min, j2max, ipotsy2
@@ -609,7 +615,7 @@ return
 entry ptr2sg1sg (fname,readpt)
 line = fname
 readpt = .true.
-286 if (readpt) then
+if (readpt) then
   l=1
   call get_token(line,l,filnam,lc)
   if(lc.eq.0) then
@@ -636,7 +642,7 @@ close (8)
 irpot=1
 return
 ! --------------------------------------------------------------
-entry sav2sg1sg (readpt)
+entry sav2sg1sg ()
 !  save input parameters for 2sigma-1sigma molecule scattering
 write (FUNIT_INP, 310) n1max, j2min, j2max, ipotsy2
 310 format(4i4,14x,'n1max, j2min, j2min, ipotsy2')

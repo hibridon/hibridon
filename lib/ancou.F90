@@ -1,8 +1,8 @@
 #include "assert.h"
 ! module dealing with angular coupling matrices storage
 module mod_ancou
-
    use mod_grovec, only: dgrovec_type, igrovec_type
+   use mod_assert, only: fassert
    implicit none
    integer(8), public, protected :: g_num_ancou_set_calls = 0
    integer(8), public, protected :: g_num_ancou_get_calls = 0

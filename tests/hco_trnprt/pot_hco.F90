@@ -7,13 +7,15 @@
 !  
 !   written by p. dagdigian
 !   current revision date:  21-jan-2015
+#include "unused.h"
 #include "common/syusr.F90"
 #include "common/bausr.F90"
 #include "common/ground.F90"
 ! ------------------------------------------------------------------------
 subroutine driver
 use mod_covvl, only: vvl
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 econv=219474.6d0
 potnam='HCO PES-Nijmegen-lmax=15'
@@ -45,13 +47,16 @@ end
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
 use mod_conlam, only: nlam, nlammx
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_cosysi, only: ispar
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parpot, only: potnam=>pot_name
 implicit double precision (a-h,o-z)
-character*(*) filnam
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
 integer, pointer :: nterm
 nterm=>ispar(1)
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='HCO PES-Nijmegen-lmax=15'
 npot=1
 nterm=1
@@ -88,9 +93,12 @@ subroutine pot (vv0, r)
 ! latest revision date:  21-jan-2015
 ! ----------------------------------------------------------------------
 use mod_covvl, only: vvl
-use mod_par, only: csflag, ihomo
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_hiblas, only: dscal, dcopy
+use mod_hipotutil, only: dsplint, dspline
 implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
+
 dimension v(16)
 real(8), save :: csplin(47,16)
 dimension rr(47), vl(752), vec(47)

@@ -60,6 +60,8 @@ module mod_cosout
 end module mod_cosout
 
 module mod_coiout
+   ! niout: number of level indices included in the output of hibridon
+   ! indout: level indices included in the output of hibridon
    implicit none
    integer, dimension(:), allocatable :: indout
    integer, allocatable               :: niout
@@ -100,11 +102,14 @@ module mod_cocent
    end subroutine allocate_cocent
 end module mod_cocent
 
+!   coeint block
+
 module mod_coeint
    ! variables in this module
    !   eint:     array containing channel energies (in hartree)
    !             the zero of energy is assumed to be the 0(0,0) level
    !             + energy of j2min level of linear molecule
+   !   eint: array containing channel energies (in hartree). The zero of energy is assumed to be the v2=0, j=0, k=0 level
    implicit none
    real(8), dimension(:), allocatable :: eint
    contains
@@ -114,10 +119,17 @@ module mod_coeint
    end subroutine allocate_coeint
 end module mod_coeint
 
+!   covvl block
+
 module mod_covvl
    !  variable in this module
    !    vvl:       array to store r-dependence of each angular term in the
    !               potential   
+   !    vvl: r-dependence of each term in potential expansion
+   !          represent <v_2'|v_{\lambda\mu}(Q_2, R)|v_2> in the following order:
+   !              <0|v_00|0>, <0|v_20|0>, ..., <0|v_99|0>, <0|v_10|1>, ...
+   !          where v2 >= v2'
+   !       size of vvl : NVVL
    implicit none
    real(8), dimension(:), allocatable :: vvl
    contains

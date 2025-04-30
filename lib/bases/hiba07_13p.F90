@@ -1,5 +1,7 @@
 #include "assert.h"
+#include "unused.h"
 module mod_hiba07_13p
+  use mod_assert, only: fassert
 real(8) :: ttrans(6,6)
 contains
 ! sy13p (sav13p/ptr13p) defines, save variables and reads                *
@@ -120,14 +122,11 @@ subroutine ba13p (bqs, jhold, ehold, ishold, nlevel, nlevop, &
 use mod_ancou, only: ancou_type, ancouma_type
 use mod_cocent, only: cent
 use mod_coeint, only: eint
-use mod_conlam, only: nlam, nlammx, lamnum
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use constants, only: econv, xmconv
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
+use mod_par, only: boundc
 use mod_ered, only: ered, rmu
-use mod_skip, only: nskip, iskip
 use mod_hitypes, only: bqs_type
 
 implicit double precision (a-h,o-z)
@@ -146,6 +145,13 @@ real(8), pointer :: cmix
 nterm=>ispar(1); nstate=>ispar(2); ipol=>ispar(3); npot=>ispar(4)
 en=>rspar(1:4); de=>rspar(5:8); re=>rspar(9:12); be=>rspar(13:16)
 rl=>rspar(17:20); cl=> rspar(21:24); cmix=>rspar(25)
+UNUSED_DUMMY(sc1)
+UNUSED_DUMMY(sc2)
+UNUSED_DUMMY(sc3)
+UNUSED_DUMMY(sc4)
+UNUSED_DUMMY(ihomo)
+UNUSED_DUMMY(nu)
+UNUSED_DUMMY(numin)
 
 zero = 0.d0
 two = 2.d0
@@ -509,7 +515,7 @@ subroutine tcasea(j,jlpar)
 !   author:  thierry duhoo and millard alexander
 !   latest revision date:  30-dec-1995
 ! -----------------------------------------
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: rspar
 use mod_himatrix, only: mxma
 use mod_hivector, only: dset
 implicit double precision (a-h,o-z)
@@ -642,16 +648,15 @@ subroutine sy13p (irpot, readpt, iread)
 !  subroutines called: loapot(iunit,filnam)
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_skip, only: nskip, iskip
+use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: i, j, l, lc
@@ -660,7 +665,8 @@ logical existf
 
 character*1 dot
 character*(*) fname
-character*60 filnam, line, potfil, filnm1
+character*60 filnam, line, potfil
+character*68 filnm1
 #include "common/comdot.F90"
 save potfil
 integer, pointer, save :: nterm, nstate, ipol, npot
@@ -782,7 +788,7 @@ close (8)
 irpot=1
 return
 !
-entry sav13p (readpt)
+entry sav13p ()
 !  save input parameters for singlet-sigma + atom scattering
 write (FUNIT_INP, 300) nstate, ipol, npot
 300 format(3i4, 18x,'   nstate, ipol, npot')

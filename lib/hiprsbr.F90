@@ -1,3 +1,5 @@
+module mod_hiprsbr
+contains
 ! -------------------------------------------------------------------------
 subroutine prsbr(flnam1, flnam2, a)
 !
@@ -16,7 +18,7 @@ subroutine prsbr(flnam1, flnam2, a)
 !  revision:  27-sep-2013 by p. dagdigian (relax requirement that jfinl1 = jfinl2)
 !  revision:  18-aug-2015 by p. dagdigian (skip in sums if xf6j's equal zero)
 ! -------------------------------------------------------------------------
-use constants
+use constants, only: ang2c, econv
 use mod_codim, only: mmax
 use mod_coisc1, only: jlev1 => isc1 ! jlev1(1)
 use mod_coisc2, only: jlev2 => isc2 ! jlev2(1)
@@ -24,33 +26,44 @@ use mod_coisc3, only: inlev1 => isc3 ! inlev1(1)
 use mod_coisc4, only: inlev2 => isc4 ! inlev2(1)
 use mod_coisc5, only: jout1 => isc5 ! jout1(1)
 use mod_coisc6, only: jout2 => isc6 ! jout2(1)
-use mod_coisc7, only: nlevt => isc7 ! nlevt(1)
-use mod_coisc8, only: jlevt => isc8 ! jlevt(1)
-use mod_coisc9, only: inlevt => isc9 ! inlevt(1)
 use mod_cosc1, only: elev1 => sc1 ! elev1(1)
 use mod_cosc2, only: elev2 => sc2 ! elev2(1)
-use mod_cosc3, only: elevt => sc3 ! elevt(1)
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam, mtime, gettim
 use mod_hiutil, only: xf6j
 use mod_hismat, only: sread, rdhead, sinqr
 use mod_hitypes, only: bqs_type
-implicit double precision (a-h, o-z)
+use mod_hiiolib1, only: openf
+implicit none
+character*(*), intent(in) :: flnam1
+character*(*), intent(in) :: flnam2
+real(8), intent(in) :: a(12)
+
 type(bqs_type) :: row_bqs
 type(bqs_type) :: packed_bqs
-character*(*) flnam1, flnam2
 character*20  cdate1, cdate2
 character*40  smtfil1, smtfil2, prtfil
 character*10  elaps, cpu
-character*1 slab
 complex*8 sa, sb, term
 logical csflg1, flghf1, flgsu1, twmol1, nucrs1, &
         csflg2, flghf2, flgsu2, twmol2, nucrs2, &
-        batch, fast, lpar2, lpar, exstfl, diagst, &
+        exstfl, diagst, &
         diagj, diagin, &
         diagjp, daginp, diag, diagp
-
-dimension a(12)
+real(8) :: aimagp
+real(8) :: cpu0, cpu1
+real(8) :: ecoll1, ecoll2
+real(8) :: ela0, ela1
+real(8) :: ered1, ered2, etrans
+real(8) :: facj, facjpp, factor
+integer :: flg, flgp  ! graffy: used to be real(8) ????
+integer :: i, iaddr, ialloc, icol, icolp, iener1, iener2, ierr, ii, iip, in1, in1p, in2, in2p, ipartx, ipower, irow, irowp
+integer :: j1, j1p, j2, j2p, jfinl1, jfinl2, jfrst1, jfrst2, jj1, jj1p, jj2, jj2p, jlp, jlpar, jlpar1, jlpar2, jlparp, jlpmx1, jlpmx2, jlpp
+integer :: jtot, jtot1, jtot2, jtotd1, jtotd2, jtotmx, jtotp, jtpmax, jtpmin
+integer :: k, l1, l1p, l2, l2p, len2, lenfs, lenpb, lngth1, lngth2
+integer :: m1chmx, m1jtot, m2chmx, m2jtot, maxjtot, mchmx, mmax2
+integer :: nlevel1, nlevel2, nlvop1, nlvop2, nnout1, nnout2, nopen, nu1, nu2, nud1, nud2, numax1, numax2, numin1, numin2
+real(8) :: phase, prefac, realp, rmu1, rmu2, sigmai, sigmar, spin, sqj1j1p
+real(8) :: x61, x62, xj1, xj1p, xj2, xj2p, xjtot, xjtotp, xjtpm, xk, xl1, xl1p, xl2, xl2p
 !
 double precision, dimension(:), allocatable :: sreal, simag
 ! storage for s-matrix elements:
@@ -189,7 +202,7 @@ end if
 !  reduced mass in the two smt files must be the same
 !
 if (rmu1 .ne. rmu2) then
-   write(6,16)
+   write(6,19)
 19    format(/' *** REDUCED MASS IN BOTH SMT FILES', &
           ' MUST BE EQUAL ***'/)
    close(1)
@@ -390,7 +403,7 @@ if (abs(ecoll1 - ecoll2)*econv .gt. 0.1d0) then
   write (6,21) ecoll1 * econv, ecoll2 * econv
 21   format (/' *** DIFFERENCE OF COLLISION ENERGIES', &
     ' .GT. 0.1 cm^-1 ***'/ &
-    5x,'ECOLL1 =',f11.3,	4x,'ECOLL2 =',f11.3,' CM(-1)'/)
+    5x,'ECOLL1 =',f11.3,4x,'ECOLL2 =',f11.3,' CM(-1)'/)
   if (ipartx.eq.1) close(2)
   goto 1000
 end if
@@ -694,7 +707,7 @@ write(6,900) elaps, cpu
 900 format(/,' ** PRSBR FINAL TIMING, ELAPSED: ',a,'  CPU: ',a,' **'/)
 ialloc = 0
 1000 continue
-4019 deallocate(partxi)
+ deallocate(partxi)
 4018 deallocate(partxr)
 4017 deallocate(lngthb)
 4016 deallocate(lngtha)
@@ -717,3 +730,4 @@ if (ialloc .ne. 0) write (6, 4100)
 return
 end
 ! -------------------------------eof---------------------------------------
+end module mod_hiprsbr

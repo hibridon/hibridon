@@ -1,3 +1,4 @@
+module mod_hibound
 !     hibound library, subroutines included:
 !
 !     1. bound        Bound state program
@@ -5,6 +6,7 @@
 !     3. gauger       Nodes and weights for Gauss-Hermite quadrature
 !
 !     ------------------------------------------------------------------
+contains
 subroutine bound(nch, nmax, v2)
 !     Bound state program, to be called by propag in hibrid3.f
 !
@@ -31,15 +33,16 @@ subroutine bound(nch, nmax, v2)
 !     nch     Number of coupled equations
 !     nmax    Leading dimension of the w matrix used in Hibridon
 !     ------------------------------------------------------------------
-use mod_coiout, only: niout
 use mod_version, only: version
-use constants, only: econv, xmconv
+use constants, only: econv
 use mod_ancou, only: ancou_type
-use mod_par, only: wavefl, r1=>bound_r1, r2=>bound_r2, c=>bound_c, spac=>bound_spac, delr=>bound_delr, hsimp=>bound_hsimp, eigmin=>bound_eigmin, tolai=>bound_tolai, xmu
+use mod_par, only: wavefl, r1=>bound_r1, r2=>bound_r2, c=>bound_c, spac=>bound_spac, delr=>bound_delr, hsimp=>bound_hsimp, eigmin=>bound_eigmin, tolai=>bound_tolai
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
-use mod_ered, only: ered, rmu
-use mod_file, only: input, output, jobnam, savfil
+use mod_ered, only: rmu
+use mod_file, only: jobnam
 use mod_hiutil, only: gennam
+use mod_hiiolib1, only: openf
+use mod_hiblas, only: dsyevx, dsygvx, dsygvd
 implicit none
 integer, intent(in) :: nch, nmax
 type(ancou_type), intent(in) :: v2
@@ -53,13 +56,17 @@ real(8), parameter :: pi=dacos(-1d0)
 integer, parameter :: maxpos=20, maxchn=10, maxvec=20, ione=1
 character(40) :: evalfil
 integer :: vmax, ndim, i, j, k, irow, icol, nr, ir, &
-     nbound, lwork, ifail, info, m, lenx, liwork, irow1, irow2, &
+     nbound, lwork, info, m, lenx, liwork, irow1, irow2, &
      icol1, icol2, ngh, i1, j1, il, iu
+integer :: unused_ifail(1)
+integer, allocatable :: ifail(:)
 real(8) :: del, alph, hexac, rnow, wt, xij, xfact, ratio
 integer, dimension(1) :: iworks
 !
 real(8), dimension(:, :), allocatable :: cchn, schn, tchn, s, h, &
      wr, z
+real(8) :: unused_z(1, 1)
+
 real(8), dimension(:), allocatable :: w, work, xgh, wgh, rgh, &
      wgh1, g
 integer, dimension(:), allocatable :: iwork
@@ -104,7 +111,7 @@ lwork = 8 * vmax
 allocate(work(lwork))
 allocate(iwork(5 * vmax))
 call dsyevx('N', 'I', 'L', vmax, cchn, vmax, 0d0, 0d0, 1, 1, 0d0, &
-     m, w, 0d0, 1, work, lwork, iwork, ifail, info)
+     m, w, unused_z, 1, work, lwork, iwork, unused_ifail, info)
 deallocate(iwork)
 deallocate(work)
 write (1, 19) w(1)
@@ -140,7 +147,7 @@ allocate(wr(nmax, nmax))
 if (hsimp .gt. 0d0) goto 200
 !
 !     Gauss-Hermite quadrature integration
-100 ngh = int(dabs(hsimp))
+ngh = int(dabs(hsimp))
 if (ngh .le. 1) ngh = 1
 write (1, 110) ngh
 write (6, 110) ngh
@@ -277,6 +284,7 @@ if (wavefl) then
 411       format (' ** CALL DSYGVX TO CALCULATE ', i3, &
            ' LOWEST EIGENVALUES AND CORRESPONDING EIGENVECTORS.')
       allocate(work(1))
+      allocate(ifail(ndim))
       call dsygvx(1, 'V', 'I', 'L', ndim, h, ndim, s, ndim, &
            0d0, 0d0, il, iu, 0d0, m, w, z, ndim, &
            work, -1, iworks, ifail, info)
@@ -292,6 +300,7 @@ if (wavefl) then
            work, lwork, iwork, ifail, info)
       h(:, :m) = z(:, :m)
       deallocate(z)
+      deallocate(ifail)
    end if
 else
    if (tolai .ge. 0d0) then
@@ -318,8 +327,8 @@ else
       if (iu .lt. 1) iu = 1
       allocate(work(1))
       call dsygvx(1, 'N', 'I', 'L', ndim, h, ndim, s, ndim, &
-           0d0, 0d0, il, iu, 0d0, m, w, 0d0, ione, &
-           work, -1, iworks, ifail, info)
+           0d0, 0d0, il, iu, 0d0, m, w, unused_z, ione, &
+           work, -1, iworks, unused_ifail, info)
       lwork = work(1)
       liwork = 5 * ndim
       write (1, *) 'REQUIRED ARRAY LENGTH', lwork, liwork
@@ -327,8 +336,8 @@ else
       allocate(work(lwork))
       allocate(iwork(liwork))
       call dsygvx(1, 'N', 'I', 'L', ndim, h, ndim, s, ndim, &
-           0d0, 0d0, il, iu, 0d0, m, w, 0d0, ione, &
-           work, lwork, iwork, ifail, info)
+           0d0, 0d0, il, iu, 0d0, m, w, unused_z, ione, &
+           work, lwork, iwork, unused_ifail, info)
   end if
 end if
 deallocate(iwork)
@@ -400,7 +409,7 @@ implicit none
 integer, intent(in) :: iunit, n, nch, ng, m, mch
 real(8), dimension(n, m), intent(in) :: z
 real(8), intent(in) :: r1, r2, alph
-real(8), dimension(:), allocatable :: chnwt, r
+real(8), dimension(:), allocatable :: chnwt
 real(8), dimension(:, :), allocatable :: g, w
 real(8) :: chwtmx, del
 integer :: i, j, ich, mchnow, ichnow, ir, ig, irrow, igrow
@@ -468,7 +477,7 @@ real(8), intent(in) :: r
 real(8), dimension(nmax, nmax), intent(out) :: wr
 type(ancou_type), intent(in) :: v2
 real(8) :: xirmu
-integer :: i, j, ig, jg, ilast, ntop
+integer :: i, j
 !
 xirmu = 0.5d0 / rmu
 call potmat(wr, r, nch, nmax, v2)
@@ -510,7 +519,7 @@ do i = 0, m - 1
       case (3)
          z = 1.91d0 * z - 0.91d0 * x(1)
       case default
-         z = 2.0d0 * z - x(i - 2)
+         z = 2.0d0 * z - x(i - 2)  ! disable-warnings:do-subscript
    end select
    do its = 1, maxit
       p1 = pim4
@@ -533,3 +542,5 @@ do i = 0, m - 1
 end do
 return
 end subroutine gauher
+
+end module mod_hibound

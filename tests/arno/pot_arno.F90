@@ -1,12 +1,12 @@
 ! System:  NO(X 2Pi)+Ar, original ab initio CEPA PES's
 ! Reference: M. H. Alexander, J. Chem. Phys. 99, 7725 (1993).
-
+#include "unused.h"
 
 subroutine driver
 use mod_covvl, only: vvl
-use constants, only: econv
 use mod_cosysr, only: rspar
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: potnam=>pot_name
+use mod_hipot, only: pot
 implicit double precision (a-h,o-z)
 real(8), pointer :: rshift, xfact
 rshift=>rspar(1) ; xfact=>rspar(2)
@@ -27,9 +27,12 @@ goto 1
 ! --------------------------------------------------------------------------
 subroutine loapot(iunit,filnam)
 ! --------------------------------------------------------------------------
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
-character*(*) filnam
+use mod_parbas, only: ntv, ivcol, ivrow, lammin, lammax, mproj
+use mod_parpot, only: potnam=>pot_name
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
+UNUSED_DUMMY(iunit)
+UNUSED_DUMMY(filnam)
 potnam='ALEXANDER Ar-NO CEPA'
 lammin(1)=1
 lammax(1)=10
@@ -67,7 +70,12 @@ subroutine pot (vv0, r)
 use mod_covvl, only: vvl
 use constants, only: econv
 use mod_hivector, only: dset
+use mod_hiblas, only: dscal, dcopy
+use mod_hipotutil, only: dqrank, dqrlss
 implicit double precision (a-h,o-z)
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
+
 dimension xlam1(22),xlam2(22),r0(22),c1(22),c2(22),c3(22), &
           clr(22),vsum(11),xsum(11),vdif(11),xdif(11), &
           ddif(11),vap(11),va2p(11), &
@@ -210,11 +218,11 @@ do 100 i=1,11
   vsum(i)=half*(va2p(i)+vap(i))
 ! don't compute vdif for colinear geometries
   if (i.ne.1 .and. i.ne.11) then
-    vdif(i-1)=half*(va2p(i)-vap(i))
+    vdif(i-1)=half*(va2p(i)-vap(i))  ! disable-warnings:do-subscript
 ! for long range damp out difference potential
     if (r .gt. rmax) then
       damp=-half*(tanh(3.d0*(r-9.5d0))-one)
-      vdif(i-1)=damp*vdif(i-1)
+      vdif(i-1)=damp*vdif(i-1)  ! disable-warnings:do-subscript
     endif
   endif
 100 continue

@@ -1,5 +1,6 @@
 #include "assert.h"
 module mod_hiba18_stp1
+  use mod_assert, only: fassert
 contains
 ! systp1 (savstp1/ptrstp1) defines, saves variables and reads            *
 !                  potential for symmetric top/atom scattering           *
@@ -149,13 +150,13 @@ use mod_cocent, only: cent
 use mod_coeint, only: eint
 use mod_coamat, only: ietmp ! ietmp(1)
 use mod_conlam, only: nlam
-use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysi, only: ispar
+use mod_cosysr, only: rspar
 use mod_hibasutil, only: vlmstp
 use constants, only: econv, xmconv
 use mod_par, only: iprint
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
-use mod_par, only: readpt, boundc
+use mod_parbas, only: lammin, lammax, mproj
+use mod_par, only: boundc
 use mod_ered, only: ered, rmu
 use mod_hitypes, only: bqs_type
 implicit double precision (a-h,o-z)
@@ -640,23 +641,24 @@ subroutine systp1 (irpot, readpt, iread)
 !             variable names in cosysr followed by LAMMIN, LAMMAX, and MPROJ
 !  -----------------------------------------------------------------------
 use mod_coiout, only: niout, indout
-use mod_conlam, only: nlam
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
-use mod_cosysr, only: isrcod, junkr, rspar
+use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_parbas, only: maxtrm, maxvib, maxvb2, ntv, ivcol, ivrow, lammin, lammax, mproj, lam2, m2proj
+use mod_parbas, only: lammin, lammax, mproj
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
-integer, intent(out) :: irpot
+integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 logical existf
 integer icod, ircod
-integer i, j, l, lc
+integer j, l, lc
 character*1 dot
 character*(*) fname
-character*60 line, filnam, potfil, filnm1
+character*60 line, filnam, potfil
+character*68 filnm1
 parameter (icod=5, ircod=3)
 save potfil
 !  number and names of system dependent parameters
@@ -773,7 +775,7 @@ endif
 close (8)
 return
 !
-entry savstp1 (readpt)
+entry savstp1 ()
 !  save input parameters for asymmetric top + atom scattering
 !  the order of the write statements should be identical to the read statement
 !  above. for consistency with the data file written by gendat, format

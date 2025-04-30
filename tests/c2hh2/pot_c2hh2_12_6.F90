@@ -32,23 +32,25 @@ end module mod_c2hh2
 !     ----------------------------------------------------------------- 
 !     loapot subroutine loads pot parameters for C2H-H2 interaction
 !     ----------------------------------------------------------------- 
-subroutine loapot (iunit, file_name)
+subroutine loapot (iunit, filnam)
 use mod_1sg1sg
 use mod_c2hh2
 use mod_conlam, only: nlam
-use mod_parpot, only: pot_name, pot_label
+use mod_parpot, only: pot_name
+use mod_hipotutil, only: spline, datfln
 implicit none
+integer, intent(in) :: iunit  ! if a data file is used, this subroutine is expected to use this unit to open it in read mode (not used here)
+character*(*), intent(in) :: filnam  ! if a data file is used, the file name of the data file (not used here)    
 !     common/parbas is replaced by module ba1sg1sg to allow more
 !     parameters be passed between the pot routine and the basis routine
-character*(*) :: file_name
 character(255) :: file_path
-integer :: iunit, ir, iv, nv
+integer :: ir, iv, nv
 !     A call to this subroutine with a string containing a space will be
 !     made at the time hibridon loads. Input file is not available at
 !     the time.
-if (file_name .eq. " ") return
+if (filnam .eq. " ") return
 pot_name = 'DAGDIGIAN C2H-H2 RCCSD(T) PES'
-call datfln(trim(file_name), file_path)
+call datfln(trim(filnam), file_path)
 open (unit=iunit, file=file_path, status="old")
 ! 
 read (iunit, *) nr1
@@ -94,10 +96,11 @@ use mod_1sg1sg
 use mod_c2hh2
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
+use mod_hipot, only: loapot, pot
 implicit none
 character(40), parameter :: data_file_name='pot_c2hh2_12_6.dat'
 real(8) :: r, vv0
-integer :: i, nv
+integer :: i
 call loapot(10, data_file_name)
 10 print *, 'R (bohr), Ctrl+D to exit:'
 read (5, *, end=99) r
@@ -116,31 +119,27 @@ goto 10
 99 stop
 end subroutine driver
 !     ------------------------------------------------------------------
-subroutine pot(vv0, r_inp)
+subroutine pot(vv0, r)
 use mod_1sg1sg
 use mod_c2hh2
 use mod_covvl, only: vvl
 use mod_conlam, only: nlam
+use mod_hipotutil, only: seval
 implicit none
-double precision vv0, r_inp, r
-double precision seval
+real(8), intent(out) :: vv0
+real(8), intent(in) :: r  ! intermolecular distance
+double precision clamped_r
 integer iv
 vv0 = 0.d0
-if (r_inp .lt. 4.25d0) then
-   r = 4.25d0
+if (r .lt. 4.25d0) then
+   clamped_r = 4.25d0
 else
-   r = r_inp
+   clamped_r = r
 end if
 do iv = 1, nlam
-   vvl(iv) = seval(nr1, r, rr1, coef1(1, iv), spl_b1(1, iv), &
+   vvl(iv) = seval(nr1, clamped_r, rr1, coef1(1, iv), spl_b1(1, iv), &
         spl_c1(1, iv), spl_d1(1, iv))
 end do
 return
 end subroutine pot
-!     ------------------------------------------------------------------
-subroutine datfln(filenm, fullnm)
-character (len=*) :: filenm, fullnm
-fullnm = 'potdata/' // trim(filenm)
-return
-end subroutine datfln
 !     ----------------------------------eof-----------------------------

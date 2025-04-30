@@ -30,6 +30,7 @@
 !
 !  NB cstart ultrix-dec for i/o with fortran instead of c routines
 #include "assert.h"
+#include "unused.h"
 
 ! block data io
 ! cosize
@@ -50,6 +51,259 @@ module mod_disc
   character(len=14) :: nam(98)
 end module mod_disc
 
+!     ------------------------------------------------------------
+!
+!     ------------------------------------------------------------
+!     ------------------------------------------------------------
+!
+! common /cdio/iadr(maxrec,maxun),len(maxrec,maxun),next(maxun),
+!     1             iun(maxun),iostat(maxun),last(maxun),lhea,junk
+module mod_cdio
+      implicit none
+      save
+
+      integer, dimension(:), allocatable, target :: memory_block
+      ! important note: the arrays contained in memory_block need to be contiguous
+      ! and in this order as they can be filled or read from disk as a bunch
+      integer, dimension(:,:), pointer :: iadr ! view of one section memory_block
+      integer, dimension(:,:), pointer :: len  ! view of one section memory_block
+      integer, dimension(:), pointer :: next   ! view of one section memory_block
+      integer, dimension(:), pointer :: iun    ! view of one section memory_block
+      integer, dimension(:), pointer :: iostat ! view of one section memory_block
+      integer, dimension(:), pointer :: last   ! view of one section memory_block
+      integer, pointer :: lhea                 ! view of one section memory_block
+      ! lhea : length of header (size of memory_block in integers)
+      integer, pointer :: junk                 ! view of one section memory_block
+      ! note : junk is probably here to make memory_block a multiple of 8 bytes as some
+      ! copy functions that are involved transfer data with words of 8 bytes
+      logical :: cdio_is_allocated = .FALSE.
+      contains
+      subroutine allocate_cdio(amaxrec, amaxun)
+         use, intrinsic :: ISO_C_BINDING
+         integer, intent(in) :: amaxrec
+         integer, intent(in) :: amaxun
+         integer :: mem_cell_index ! number of integers from start of memory_block
+         integer :: mem_block_size ! size in integers
+         integer :: iadr_size ! size of iadr array in integers
+         integer :: len_size ! size of len array in integers
+         integer :: next_size ! size of next array in integers
+         integer :: iun_size ! size of iun array in integers
+         integer :: iostat_size ! size of iostat array in integers
+         integer :: last_size ! size of last array in integers
+         integer :: lhea_size ! size of lhea in integers
+         integer :: junk_size ! size of junk in integers
+         iadr_size = amaxrec * amaxun
+         len_size = amaxrec * amaxun
+         next_size = amaxun
+         iun_size = amaxun
+         iostat_size = amaxun
+         last_size = amaxun
+         lhea_size = 1
+         junk_size = 1
+
+         mem_block_size = 0
+         mem_block_size = mem_block_size + iadr_size
+         mem_block_size = mem_block_size + len_size
+         mem_block_size = mem_block_size + next_size
+         mem_block_size = mem_block_size + iun_size
+         mem_block_size = mem_block_size + iostat_size
+         mem_block_size = mem_block_size + last_size
+         mem_block_size = mem_block_size + lhea_size
+         mem_block_size = mem_block_size + junk_size
+
+         ! ASSERT(mem_block_size % 2 .eq. 0)
+
+         allocate(memory_block(mem_block_size))
+         mem_cell_index = 1  ! first cell of memory_block
+
+         ! iadr(amaxrec,amaxun) section of memory_block
+         call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), iadr, [amaxrec, amaxun])
+         mem_cell_index = mem_cell_index + iadr_size
+
+         ! len(amaxrec,amaxun) section of memory_block
+         call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), len, [amaxrec, amaxun])
+         mem_cell_index = mem_cell_index + len_size
+
+         ! next(amaxun) section of memory_block
+         call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), next, [amaxun])
+         mem_cell_index = mem_cell_index + next_size
+
+         ! iun(amaxun) section of memory_block
+         call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), iun, [amaxun])
+         mem_cell_index = mem_cell_index + iun_size
+
+         ! iostat(amaxun) section of memory_block
+         call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), iostat, [amaxun])
+         mem_cell_index = mem_cell_index + iostat_size
+
+         ! last(amaxun) section of memory_block
+         call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), last, [amaxun])
+         mem_cell_index = mem_cell_index + last_size
+
+         ! lhea section of memory_block
+         call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), lhea)
+         mem_cell_index = mem_cell_index + lhea_size
+
+         ! junk section of memory_block
+         call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), junk)
+
+         lhea = mem_block_size ! size of cdio common block in integers
+      end subroutine allocate_cdio            
+end module mod_cdio 
+
+module mod_hiiolib
+  use mod_assert, only: fassert
+contains
+
+! ---------------------------------------------------------------
+subroutine rdabsf(luni, a, l, iword)
+!
+! author: h.j. werner
+!
+! read of l double precision words into a. iword is zero adjusted adress
+! on file. l and iword should be multiple of lseg, otherwise unefficient
+use mod_clseg, only: lseg
+implicit none
+integer, intent(in) :: luni  ! logical unit
+real(8), intent(out) :: a(l)  ! array to fill with the reals read from luni
+integer, intent(in) :: l  ! number of double precision reals to read
+integer, intent(in) :: iword  ! 0 based word position in the luni file where to start reading
+
+integer :: remainder, n, block_index, i, l1, lbl, ib
+real(8) :: buf(lseg)
+  buf = 0d0
+  block_index = iword / lseg + 1   ! index of the first block to read (at least partially)
+  remainder = iword - (block_index - 1) * lseg
+  n = 0
+  if (remainder .ne. 0) then
+    n = min0(lseg - remainder, l)
+    ! there are n values to read from the first block
+    read(luni, rec=block_index) (buf(i), i=1, lseg)
+    block_index = block_index + 1
+    do i = 1, n
+      a(i) = buf(remainder + i)
+    end do
+  end if
+  ! read the remaining blocks
+  l1 = l - n  ! number of remaining values to read
+  if (l1 .eq. 0) return
+  lbl = (l1 - 1) / lseg + 1  ! number of remaining blocks
+  do ib = 1, lbl
+    read(luni, rec=block_index) (a(n+i), i=1, min0(l1, lseg))
+    block_index = block_index + 1
+    l1 = l1 - lseg
+    n = n + lseg
+  end do
+  return
+end subroutine rdabsf
+
+subroutine rdabsi(luni, a, num_ints, start_int_pos)
+! read of num_ints integer words into a. start_int_pos is zero adjusted adress
+! on file. num_ints*intrel and start_int_pos*intrel should be multiple of lseg, otherwise unefficient
+use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
+use mod_clseg, only: intrel
+implicit none
+integer, intent(in) :: luni  ! logical unit
+integer, intent(out), target :: a(num_ints)  ! array to fill with the integers read from luni
+integer, intent(in) :: num_ints  ! number of integers to read
+integer, intent(in) :: start_int_pos  ! 0 based word position in the luni file where to start reading
+
+!integer, target :: a_as_int(num_ints)
+real(8), pointer :: a_as_real(:)
+integer :: num_reals
+integer :: start_real_pos
+!a_as_int => a 
+call C_F_POINTER (C_LOC(a), a_as_real, [num_ints])
+num_reals = num_ints / intrel
+start_real_pos = start_int_pos / intrel
+call rdabsf(luni, a_as_real, num_reals, start_real_pos)
+
+end subroutine rdabsi
+
+!
+subroutine wrabsf(luni,a,l,iword)
+! write l real8 numbers from a array into file unit luni at offset iword
+! luni : the logical unit of the file to write to (eg 3)
+! a : the array of double precision numbers to write (eg [0.5, 0.7])
+! l : the number of real numbers to write (eg 2)
+! iword : offset on file in real8 units where the write should start (eg 2047)
+use mod_clseg, only: lseg
+use mod_cobuf, only: lbuf
+use mod_disc, only: ipos
+implicit double precision (a-h,o-z)
+dimension a(l), buf(lbuf)
+  if(lseg.gt.lbuf) stop 'lbuf too small in wrabsf'
+  ibl=iword/lseg+1  ! index of block where iword is (eg ibl = 2 if lseg == 1024)
+  m = iword - (ibl - 1) * lseg  ! offset of iword relative to its block (eg 1023)
+  n = 0
+  if(m /= 0) then
+    !.....first address not on sector boundary
+    n = min0(lseg-m, l)  ! number of words to write in the block ibl (eg 1)
+
+    if(ibl <= ipos(luni)) then
+      ! read the whole block ibl from disk into buf
+      read(luni, rec=ibl) (buf(i),i=1,lseg)
+    end if
+    ! write the words into buf
+    do i = 1, n
+      buf(m + i) = a(i)
+    end do
+    ! then write back the updated block ibl on the file
+    write(luni, rec=ibl) (buf(i), i=1, lseg)
+    ipos(luni) = max(ipos(luni), ibl)
+    ibl = ibl + 1
+  end if
+  !.....write from next sector boundary
+  l1 = l - n  ! number of remaining words to write (eg 1)
+  if(l1 == 0) return
+  lbl = l1 / lseg  ! num blocks
+  ! write the full blocks
+  do ib=1,lbl
+    write(luni,rec=ibl) (a(n+i),i=1,lseg)
+    ipos(luni) = max(ipos(luni),ibl)
+    ibl = ibl + 1
+    l1 = l1 - lseg
+    n = n + lseg
+  end do
+
+  if(n.eq.l) return  ! all words have been written to disk
+  !.....last address not at end of sector
+  ! write the remaining n-l words in the last block 
+  if(ibl.le.ipos(luni)) &
+    read(luni,rec=ibl) (buf(i),i=1,lseg)
+  do i = 1, l-n
+    buf(i) = a(n+i)
+  end do
+  write(luni,rec=ibl) (buf(i),i=1,lseg)
+  ipos(luni) = max(ipos(luni),ibl)
+  return
+end subroutine wrabsf
+
+subroutine wrabsi(luni, a, num_ints, start_int_pos)
+use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
+use mod_clseg, only: intrel
+implicit none
+integer, intent(in) :: luni  ! logical unit
+integer, intent(in), target :: a(num_ints)  ! array to fill with the integers read from luni
+integer, intent(in) :: num_ints  ! number of integers to read
+integer, intent(in) :: start_int_pos  ! 0 based word position in the luni file where to start writing, in integer units
+
+real(8), pointer :: a_as_real(:)
+integer :: num_reals
+integer :: start_real_pos
+call C_F_POINTER (C_LOC(a), a_as_real, [num_ints])
+num_reals = num_ints / intrel
+start_real_pos = start_int_pos / intrel
+call wrabsf(luni, a_as_real, num_reals, start_real_pos)
+
+end subroutine wrabsi
+
+end module mod_hiiolib
+
+
+module mod_hiiolib1
+  use mod_assert, only: fassert
+contains
 ! ---------------------------------------------------------------
 subroutine fimove (nxfile)
 ! ---------------------------------------------------------------
@@ -70,7 +324,7 @@ end
 ! -------------------------------------------------------------------
  subroutine fimovs(nfile,jtot,jlpar,nu,ien,ierr)
  use mod_coener, only: energ
- use mod_cofil, only: nfl, maxrec, iofrec
+ use mod_cofil, only: maxrec, iofrec
  use mod_hismat, only: readrc
  implicit none
  integer, intent(in) :: nfile
@@ -122,6 +376,8 @@ end
 20  ierr=1
  return
  end
+
+
 ! ---------------------------------------------------------------
 subroutine gendat
 !  subroutine to read system independent input parameters for hibridon code
@@ -299,11 +555,12 @@ use mod_par, only: airyfl, prairy, bastst, batch, chlist, csflag, &
                 lscreen, iprint, &
                 fstfac=>scat_fstfac, rincr=>scat_rincr, rcut=>scat_rcut, rendai=>scat_rendai, rendld=>scat_rendld, rstart=>scat_rstart, spac=>scat_spac, tolai=>scat_tolai, xmu ! NB if boundc = .true. then these parameters are: r1,r2,c,spac,delr,hsimp,eigmin,tolai,xmu
 use funit, only: FUNIT_INP
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_parpot, only: label=>pot_label
 use mod_selb, only: ibasty
-use mod_ered, only: ered, rmu
-use mod_skip, only: nskip, iskip
-use mod_file, only: input, output, jobnam, savfil
+use mod_ered, only: rmu
+use mod_skip, only: nskip
+use mod_file, only: input, output
+use mod_hisystem, only: baschk
 implicit double precision (a-h,o-z)
 integer i, length
 logical existf
@@ -764,7 +1021,6 @@ subroutine openf(lunit,filnam,lmode,isize)
 !     isize  -> number of tracks (only for univac and vax)
 !     lseg:  number of integer words per disc sector
 !     ------------------------------------------------------------
-use mod_clseg, only: lseg
 use mod_hiutil, only: upper
 logical exstfl, openfl, tmpfil
 logical od
@@ -867,6 +1123,496 @@ return
 stop
 end
 !     ------------------------------------------------------------
+!********************************************************************
+!                                                                   *
+!                        i/o routines library                       *
+!  these routines employ standart fortran i/o and may be quite      *
+!  inefficient. If possible, use system i/o for direct access       *
+!  lseg must be set in main program (file driver.f) appropriately   *
+!  lseg should typically be 512. Note that the record length in the *
+!  open statements are measured in bytes.                           *
+!                                                                   *
+!********************************************************************
+!                         routines included:                        *
+!                                                                   *
+!   1. assgn    assigns and opens direct access files               *
+!   2. rdabsf (wrabsf/fwait) read/write absolute routines           *
+!   3. tmpnm    generates a unique filename                         *
+!********************************************************************
+#if ( defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86) ) && !defined(UNIX_CIO)
+subroutine assgn(luni,filnam,isize,icat)
+!
+!  routine to assign and open files
+!
+!  luni: logical unit number
+!  luni .le.10:  formatted sequential files
+!  luni .gt.10:  unformatted direct access files
+!  filnam: filename
+!  isize: size in tracks (output, not working with fortran i/o)
+!  icat:  if icat=0, scratch
+!         if icat>0, permanent
+use mod_clseg, only: lseg
+use mod_disc, only: ipos, iun, iostat, icatf, nam
+character*(*) filnam
+character*12 stat
+character*(*) name
+logical openfl,exstfl
+!
+isize=0
+if(filnam.eq.' ') call tmpnm(luni,filnam)
+! here for standart fortran i/o
+inquire (file=filnam, opened=openfl, exist=exstfl)
+! here if file exists
+if(exstfl) then
+  if(openfl) return
+  stat='OLD'
+else
+  stat='NEW'
+end if
+iun(luni)=luni
+nam(luni)=filnam
+ipos(luni)=0
+iostat(luni)=0
+icatf(luni)=icat
+if(icat.ne.0) then
+!.....permanent file
+    open (luni, file=filnam, status=stat, access='DIRECT', &
+           recl=8*lseg, form='UNFORMATTED', &
+           iostat=ierr, err=999)
+else
+!.....scratch file
+    open (luni, status='SCRATCH',access='DIRECT',recl=8*lseg, &
+           form='UNFORMATTED',iostat=ierr, err=999)
+end if
+return
+! here if open error occurs
+999  lenfil=index(filnam,' ')-1
+ write(6,1000) filnam(1:lenfil),ierr
+1000  format(' %FATAL-ERROR IN ASSGN: cannot open ',(a),', iostat: ', &
+        i4,/)
+ stop
+!
+entry finit
+!.....closes all files
+la=-30
+le=70
+goto 43
+!
+entry closf(luni)
+!.....closes luni
+la=luni
+le=luni
+43 do 44 l=la,le
+if(iun(l).eq.0) goto 44
+close(l)
+icatf(l)=0
+nam(l)=' '
+iostat(l)=0
+ipos(l)=1
+iun(l)=0
+44 continue
+return
+entry chklun(luni,iflag,name)
+!.....checks status of unit
+name=' '
+iflag=0
+if(iun(luni).eq.0) return
+iflag=icatf(luni)
+name=nam(luni)
+return
+end
+#endif
+
+#if ( defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86) ) && !defined(UNIX_CIO)
+subroutine tmpnm(ifil,name)
+!.....should generate a unique filename
+implicit none
+integer, intent(in) :: ifil
+character (len=14), intent(out) :: name
+integer :: id = 0
+!     integer getpid
+!     id=getpid()
+write(name,10) ifil,id
+10 format('T',i2.2,i5.5,'.TMP  ')
+return
+end subroutine tmpnm
+#endif
+! ---------------------------------------------------------------
+#if defined(HIB_NONE)
+!********************************************************************
+!                                                                   *
+!             utility programs for unix systems                     *
+!                                                                   *
+!********************************************************************
+!                     routines included:                            *
+!                                                                   *
+!   1. tmpnam   generates unique temp file names                    *
+!   2. timdat   returns time, date and machine type as char. strings*
+!   3. exit     stops calculation                                   *
+!   4. assgn    assigns direct access files                         *
+!               these routines need c-routines in hiunix.c          *
+!         entries: finit (closes all files)                         *
+!                  closf (closes one file)                          *
+!                  chklun (checks if unit is open)                  *
+!                  fwait (waits for completion of i/o)              *
+!                                                                   *
+!********************************************************************
+subroutine tmpnm(ifil,name)
+use mod_clseg, only: lseg
+character*14 name
+integer getpid
+id=getpid()
+write(name,10) ifil,id
+10 format('t',i2.2,i5.5,'.tmp  ')
+return
+end subroutine tmpnm
+#endif
+
+#if defined(HIB_NONE)
+subroutine assgn(luni,name,lenn,icat)
+implicit double precision (a-h,o-z)
+character*(*) name
+character*14 blank
+character*15 namx
+data lendef/2000/,blank/'              '/
+if (iun(luni).ne.0) return
+if(name.eq.blank) call tmpnm(luni,name)
+if(lenn.eq.0) lenn=lendef
+ll=len(name)
+if(ll.gt.14) name(15:)=' '
+ll=min(ll,14)
+nam(luni)=name
+namx=name(1:ll)
+icat1=index(name,'.TMP')
+if(icat.eq.0.or.icat1.ne.0) then
+icatf(luni)=-1
+! temp file
+call openc(luni,namx,lenn,0)
+else
+icatf(luni)=1
+! catalog file
+call openc(luni,namx,lenn,1)
+end if
+goto 80
+80 iun(luni)=luni
+return
+!
+entry finit
+! close all files
+do 90 i=1,98
+ipos(i)=1
+iun(i)=0
+nam(i)=' '
+iostat(i)=0
+icatf(i)=0
+90 continue
+return
+!
+entry closf(luni)
+! close file luni
+la=luni
+le=luni
+do 44 l=la,le
+if(iun(l).eq.0) goto 44
+call closec(l)
+icatf(l)=0
+nam(l)=' '
+iostat(l)=0
+ipos(l)=1
+iun(l)=0
+44 continue
+return
+entry chklun(luni,iflag,name)
+name=' '
+iflag=0
+if(iun(luni).eq.0) return
+iflag=icatf(luni)
+name=nam(luni)
+return
+end subroutine assign
+#endif
+
+#if ( defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86) ) && !defined(UNIX_CIO)
+subroutine fwait(luni)
+UNUSED_DUMMY(luni)
+return
+end subroutine fwait
+
+#endif
+
+subroutine dread(ii,l,ifil,irec,iof)
+! --------------------------------------------------------------
+! subroutine to control direct access i/o of partial and integral cross
+! sections, restart information, and wavefunction
+! author:  h-j werner
+! latest revision:  6-jun-1991 by hjw (maxrec extended 7-feb-1992)
+! --------------------------------------------------------------
+!
+!.....read "l" integer words from record "irec" on file "ifil"
+!.....with offset iof
+! --------------------------------------------------------------
+use mod_clseg, only: intrel
+use mod_cdbf, only: ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf,llbuf
+use mod_cdio, only: allocate_cdio, cdio_is_allocated, iadr, len, next, iun, iostat, last, lhea, memory_block
+use mod_cobuf, only: lbuf
+use mod_file_size, only : isize
+use mod_hiiolib, only: rdabsi, rdabsf, wrabsf, wrabsi
+use, intrinsic :: ISO_C_BINDING
+implicit double precision (a-h,o-z)
+integer, pointer :: iadr_as_vec1d(:)
+character*(*) name
+parameter (maxun=2, maxrec=5000)
+integer :: ii(l)
+if(iun(ifil).eq.0) then
+  write(6,10) ifil,irec
+10   format(/' DIRECT READ ERROR ON FILE',i2,' RECORD',i3, &
+          ' UNIT NOT OPEN')
+  call exit
+end if
+if(irec.gt.maxrec) then
+  write(6,15) irec,maxrec
+15   format(/' DIRECT READ ERROR ON FILE',i2,' RECORDNUMBER',i3, &
+          ' OUT OF RANGE. ALLOWED',i4)
+  call exit
+end if
+if(iadr(irec,ifil).lt.0) then
+  write(6,20) ifil,irec
+20   format(/' DIRECT READ ERROR ON FILE',i2,' RECORD',i3, &
+          ' UNDEFINED')
+  call exit
+end if
+if(iof+l.gt.len(irec,ifil)) then
+  write(6,30) ifil,irec,iof+l,len(irec,ifil)
+30   format(/' DIRECT READ ERROR ON FILE',i2,' RECORD',i3, &
+          ' TRY TO READ',i6,' WORDS, RECORDLENGTH=',i6,' WORDS')
+  call exit
+end if
+ir=iadr(irec,ifil)+iof
+if(mod(l,intrel).ne.0.or.mod(ir,intrel).ne.0) then
+  write(6,31) ifil,irec,l,ir
+31   format(/' DIRECT READ ERROR ON FILE',i2,' RECORD',i3, &
+    ' LENGTH=',i4,' OR ADRESS=',i6,' NOT MULTIPLE OF INTREL')
+  call exit
+end if
+call rdabsi(iun(ifil), ii, l, ir)
+call fwait(iun(ifil))
+iostat(ifil)=0
+return
+!
+entry dres(l,ifil,irec)
+!
+!.....reserve "l" real*8  words for record "irec" on file "ifil"
+!
+ll=l*intrel
+if(iun(ifil).eq.0) then
+  write(6,40) ifil,irec
+40   format(/' DIRECT RESERVE ERROR ON FILE',i2,' RECORD',i3, &
+          ' UNIT NOT OPEN')
+  call exit
+end if
+if(irec.gt.maxrec) then
+  write(6,45) irec,maxrec
+45   format(/' DIRECT RESERVE ERROR ON FILE',i2,' RECORDNUMBER',i3, &
+          ' OUT OF RANGE. ALLOWED',i4)
+  call exit
+end if
+if(iadr(irec,ifil).lt.0) then
+  iadr(irec,ifil)=next(ifil)
+  next(ifil)=next(ifil)+((ll-1)/lbuf+1)*lbuf
+  len(irec,ifil)=next(ifil)-iadr(irec,ifil)
+end if
+if(ll.gt.len(irec,ifil)) then
+  write(6,50) ifil,irec,ll,len(irec,ifil)
+50   format(/' DIRECT RESERVE ERROR ON FILE',i2,' RECORD',i3,' TRY', &
+          ' TO RESERVE',i6,' WORDS, RECORDLENGTH=',i6,' WORDS')
+  call exit
+end if
+return
+!
+entry dwrite(ii, l, ifil, irec, iof)
+!
+!.....write "l" integer words (stored in ii array) to record "irec" on file "ifil"
+!.....with offset iof
+!
+if(iun(ifil).eq.0) then
+  write(6,55) ifil,irec
+55   format(/' DIRECT WRITE ERROR ON FILE',i2,' RECORD',i3, &
+          ' UNIT NOT OPEN')
+  call exit
+end if
+if(irec.gt.maxrec) then
+  write(6,60) irec,maxrec
+60   format(/' DIRECT WRITE ERROR ON FILE',i2,' RECORDNUMBER',i3, &
+          ' OUT OF RANGE. ALLOWED',i4)
+  call exit
+end if
+if(iadr(irec,ifil) < 0) then
+  ! allocate a range of positions in the file for the record irec
+  iadr(irec,ifil) = next(ifil) ! position of the start of the record in its file (unit : 32 bit words)
+  next(ifil) = next(ifil) + ((l-1)/lbuf+1) * lbuf
+  len(irec,ifil) = next(ifil) - iadr(irec,ifil)
+end if
+if(iof+l.gt.len(irec,ifil)) then
+  if(irec.ge.last(ifil)) then
+    next(ifil)=iadr(irec,ifil)+((iof+l-1)/lbuf+1)*lbuf
+    len(irec,ifil)=next(ifil)-iadr(irec,ifil)
+  else
+    write (6,*) 'ii,l,ifil,irec,iof', ii,l,ifil,irec,iof
+    write(6,65) ifil,irec,iof+l,len(irec,ifil)
+65     format(/' DIRECT WRITE ERROR ON FILE',i2,' RECORD',i3, &
+          ' TRY TO WRITE',i6,' WORDS, RECORDLENGTH=',i6,' WORDS')
+    call exit
+  end if
+end if
+ir = iadr(irec,ifil) + iof  ! ! where to write the buffer in the output file (units : number of 32 bits words)  
+if(mod(l,intrel).ne.0.or.mod(ir,intrel).ne.0) then
+  write(6,66) ifil,irec,l,ir
+66   format(/' DIRECT WRITE ERROR ON FILE',i2,' RECORD',i3, &
+    ' LENGTH=',i4,' OR ADRESS=',i6,' NOT MULTIPLE OF INTREL')
+  call exit
+end if
+call wrabsi(iun(ifil), ii, l, ir)
+call fwait(iun(ifil))
+last(ifil)=max(last(ifil),irec)
+iostat(ifil)=0
+return
+!
+entry dinit
+
+if ( .NOT. cdio_is_allocated ) then
+      call allocate_cdio(maxrec, maxun)
+      cdio_is_allocated = .TRUE.
+end if
+!
+!.....initialize direct i/o. dinit must be called before any call to
+!.....another of these i/o routines
+!
+if (llbuf .ne. lbuf) then
+  write (6, 67) lbuf, llbuf
+67   format ('** I/O BUFFER LENGTH OF', i4, ' IN BLOCK DATA IO .NE.', &
+        /,'   I/O BUFFER LENGTH OF', i4, ' IN DREAD; ABORT')
+  call exit
+endif
+lnex=((lhea-1)/lbuf+1)*lbuf
+! (lhea-1)/lbuf+1 : number of buffers of length lbuf to transfer lhea elements
+!  by chunks of lbuf
+ibfil=0
+ibrec=0
+ibof=0
+ibstat=0
+libuf=lbuf
+ldbuf=lbuf/intrel
+do 70 if=1,maxun
+next(if)=lnex
+iun(if)=0
+last(if)=0
+iostat(if)=0
+do 70 ir=1,maxrec
+len(ir,if)=0
+70 iadr(ir,if)=-1
+return
+!
+entry dopen(ifil,iunit,name)
+!
+!.....open file "ifil" as unit "iunit" with filename "name"
+!
+if ( .NOT. cdio_is_allocated ) then
+      call allocate_cdio(maxrec, maxun)
+      cdio_is_allocated = .TRUE.
+end if
+if(iun(ifil).eq.iunit) return
+if(iun(ifil).ne.0) then
+  write(6,75) ifil,iunit,iun(ifil)
+75   format(/' DIRECT OPEN ERROR FOR FILE',i2,' UNIT',i3, &
+          ' ALREADY OPEN AS UNIT',i3)
+  call exit
+end if
+if(iunit.le.0) then
+  write(6,80) ifil,iunit
+80   format(/' DIRECT OPEN ERROR FOR FILE',i2, &
+          ' ILLEGAL UNIT NUMBER:',i4)
+  call exit
+end if
+isize=0
+call openf(iunit,name,'DU',isize)
+iun(ifil)=iunit
+iostat(ifil)=0
+return
+!
+entry dsave(ifil)
+!
+!.....save file information for restart
+!
+if(iun(ifil).eq.0) then
+  write(6,85) ifil
+85   format(/' DIRECT SAVE ERROR ON FILE',i2, &
+          ' UNIT NOT OPEN')
+  call exit
+end if
+! copy iadr to idbuf by blocks of lbuf integers
+iofh=0 ! number of integers moved
+do 86 ib=1,lhea,lbuf  ! ib: block index
+lh=min(lhea-iofh,lbuf)  ! number of integers to move for this block
+ASSERT( ifil .eq. 1 ) ! unexpected case : graffy suspects the following imove to only work when ifil=1'
+call imove(memory_block(iofh+1),idbuf,lh)  ! copy lh integers from iadr to idbuf
+call wrabsi(iun(ifil),idbuf,lbuf,iofh)
+call fwait(iun(ifil))
+86 iofh=iofh+lbuf
+iostat(ifil)=0
+return
+!
+entry drest(ifil)
+!
+!.....restart file "ifil"
+!
+if(iun(ifil).eq.0) then
+  write(6,90) ifil
+90   format(/' DIRECT RESTART ERROR ON FILE',i2, &
+          ' UNIT NOT OPEN')
+  call exit
+end if
+iofh=0
+do 91 ib=1,lhea,lbuf
+ll=min(lhea-iofh,lbuf)
+call rdabsi(iun(ifil),idbuf,lbuf,iofh)
+call fwait(iun(ifil))
+ASSERT(ifil .eq. 1) ! unexpected case : graffy suspects the following imove to only work when ifil=1'
+call imove(idbuf,memory_block(iofh+1),ll)
+
+91 iofh=iofh+lbuf
+iostat(ifil)=0
+return
+!
+entry dclos(ifil)
+!
+!.....save file information and close file "ifil"
+!
+if(iun(ifil).eq.0) then
+  write(6,95) ifil
+95   format(/' DIRECT CLOSE ERROR ON FILE',i2, &
+          ' UNIT NOT OPEN')
+  call exit
+end if
+iofh=0
+do 96 ib=1,lhea,lbuf
+ll=min(lhea-iofh,lbuf)
+call C_F_POINTER (C_LOC(iadr(iofh+1,ifil)), iadr_as_vec1d, [ll])
+call imove(iadr_as_vec1d,idbuf,ll)
+call wrabsi(iun(ifil),idbuf,lbuf,iofh)
+call fwait(iun(ifil))
+96 iofh=iofh+lbuf
+call closf(iun(ifil))
+iostat(ifil)=0
+iun(ifil)=0
+return
+end
+! -------------------------------------------------------------------
+subroutine imove(ia,ib,n)
+dimension ia(n),ib(n)
+do 10 i=1,n
+10 ib(i)=ia(i)
+return
+end
 
 !  --------------------------------------------------------------------
 subroutine openfi (nerg)
@@ -931,14 +1677,13 @@ use mod_coisc3, only: isc3 ! isc3(3)
 use mod_coisc4, only: isc4 ! isc4(1)
 use mod_cosc1, only: rsc1 => sc1 ! rsc1(2)
 use mod_cosc2, only: rsc2 => sc2 ! rsc2(1)
-use mod_par, only: airyfl, csflag, flaghf, flagsu, ipos, &
-                prpart, readpt, rsflag, twomol, wrsmat, &
-                wrpart, wrxsec, prxsec, nucros, photof, wavefl, boundc
+use mod_par, only: airyfl, csflag, &
+                prpart, rsflag, wrsmat, &
+                wrpart, wrxsec, prxsec, photof, wavefl, boundc
 use funit
 use mod_fileid, only: FILEID_SAV
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
-use mod_selb, only: ibasty
-use mod_file, only: input, output, jobnam, savfil
+use mod_parpot, only: label=>pot_label
+use mod_file, only: jobnam, savfil
 use mod_file_size, only : isize, isizes
 use mod_hiutil, only: gennam
 use mod_hismat, only: rdhead
@@ -946,7 +1691,7 @@ use mod_coener, only: max_en
 implicit double precision (a-h,o-z)
 integer ifile, nerg, nfile, lenx
 logical existf
-character*40  oldlab,newlab
+character*48 oldlab,newlab
 character*40 xname,xnam1
 character*20 cdate
 if (nerg .gt. 1) then
@@ -1026,7 +1771,7 @@ if (wrxsec .or. prxsec .or. prpart .or. wrpart) then
      end if
      savfil=xname
      call dopen(FILEID_SAV, nfile,savfil)
-     write (9, 180) xname(1:lenx)
+     write (FUNIT_OUT, 180) xname(1:lenx)
 180      format (' ** RESTART INFORMATION SAVED IN FILE ',(a))
    endif
 endif
@@ -1258,383 +2003,12 @@ iaddr=iaddr+lrec
 goto 20
 40 return
 end
-!     ------------------------------------------------------------
-!
-!     ------------------------------------------------------------
-module mod_hiiolib
+end module mod_hiiolib1
+
+module mod_hiiolib2
+  use mod_assert, only: fassert
 contains
-end module mod_hiiolib
-!     ------------------------------------------------------------
-!
-! common /cdio/iadr(maxrec,maxun),len(maxrec,maxun),next(maxun),
-!     1             iun(maxun),iostat(maxun),last(maxun),lhea,junk
-module mod_cdio
-      implicit none
-      save
-
-      integer, dimension(:), allocatable, target :: memory_block
-      ! important note: the arrays contained in memory_block need to be contiguous
-      ! and in this order as they can be filled or read from disk as a bunch
-      integer, dimension(:,:), pointer :: iadr ! view of one section memory_block
-      integer, dimension(:,:), pointer :: len  ! view of one section memory_block
-      integer, dimension(:), pointer :: next   ! view of one section memory_block
-      integer, dimension(:), pointer :: iun    ! view of one section memory_block
-      integer, dimension(:), pointer :: iostat ! view of one section memory_block
-      integer, dimension(:), pointer :: last   ! view of one section memory_block
-      integer, pointer :: lhea                 ! view of one section memory_block
-      ! lhea : length of header (size of memory_block in integers)
-      integer, pointer :: junk                 ! view of one section memory_block
-      ! note : junk is probably here to make memory_block a multiple of 8 bytes as some
-      ! copy functions that are involved transfer data with words of 8 bytes
-      logical :: cdio_is_allocated = .FALSE.
-      contains
-      subroutine allocate_cdio(amaxrec, amaxun)
-         use, intrinsic :: ISO_C_BINDING
-         integer, intent(in) :: amaxrec
-         integer, intent(in) :: amaxun
-         integer :: mem_cell_index ! number of integers from start of memory_block
-         integer :: mem_block_size ! size in integers
-         integer :: iadr_size ! size of iadr array in integers
-         integer :: len_size ! size of len array in integers
-         integer :: next_size ! size of next array in integers
-         integer :: iun_size ! size of iun array in integers
-         integer :: iostat_size ! size of iostat array in integers
-         integer :: last_size ! size of last array in integers
-         integer :: lhea_size ! size of lhea in integers
-         integer :: junk_size ! size of junk in integers
-         iadr_size = amaxrec * amaxun
-         len_size = amaxrec * amaxun
-         next_size = amaxun
-         iun_size = amaxun
-         iostat_size = amaxun
-         last_size = amaxun
-         lhea_size = 1
-         junk_size = 1
-
-         mem_block_size = 0
-         mem_block_size = mem_block_size + iadr_size
-         mem_block_size = mem_block_size + len_size
-         mem_block_size = mem_block_size + next_size
-         mem_block_size = mem_block_size + iun_size
-         mem_block_size = mem_block_size + iostat_size
-         mem_block_size = mem_block_size + last_size
-         mem_block_size = mem_block_size + lhea_size
-         mem_block_size = mem_block_size + junk_size
-
-         ! ASSERT(mem_block_size % 2 .eq. 0)
-
-         allocate(memory_block(mem_block_size))
-         mem_cell_index = 1  ! first cell of memory_block
-
-         ! iadr(amaxrec,amaxun) section of memory_block
-         call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), iadr, [amaxrec, amaxun])
-         mem_cell_index = mem_cell_index + iadr_size
-
-         ! len(amaxrec,amaxun) section of memory_block
-         call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), len, [amaxrec, amaxun])
-         mem_cell_index = mem_cell_index + len_size
-
-         ! next(amaxun) section of memory_block
-         call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), next, [amaxun])
-         mem_cell_index = mem_cell_index + next_size
-
-         ! iun(amaxun) section of memory_block
-         call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), iun, [amaxun])
-         mem_cell_index = mem_cell_index + iun_size
-
-         ! iostat(amaxun) section of memory_block
-         call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), iostat, [amaxun])
-         mem_cell_index = mem_cell_index + iostat_size
-
-         ! last(amaxun) section of memory_block
-         call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), last, [amaxun])
-         mem_cell_index = mem_cell_index + last_size
-
-         ! lhea section of memory_block
-         call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), lhea)
-         mem_cell_index = mem_cell_index + lhea_size
-
-         ! junk section of memory_block
-         call C_F_POINTER (C_LOC(memory_block(mem_cell_index)), junk)
-
-         lhea = mem_block_size ! size of cdio common block in integers
-      end subroutine allocate_cdio            
-end module mod_cdio 
-
 ! -------------------------------------------------------------------
-subroutine dread(ii,l,ifil,irec,iof)
-! --------------------------------------------------------------
-! subroutine to control direct access i/o of partial and integral cross
-! sections, restart information, and wavefunction
-! author:  h-j werner
-! latest revision:  6-jun-1991 by hjw (maxrec extended 7-feb-1992)
-! --------------------------------------------------------------
-!
-!.....read "l" integer words from record "irec" on file "ifil"
-!.....with offset iof
-! --------------------------------------------------------------
-use mod_clseg, only: intrel
-use mod_cdbf, only: ldbuf,libuf,ibfil,ibrec,ibof,ibstat,idbuf,llbuf
-use mod_cdio, only: allocate_cdio, cdio_is_allocated, iadr, len, next, iun, iostat, last, lhea, junk, memory_block
-use mod_cobuf, only: lbuf, ibuf
-use mod_file_size, only : isize, isizes
-implicit double precision (a-h,o-z)
-character*(*) name
-parameter (maxun=2, maxrec=5000)
-dimension ii(l)
-if(iun(ifil).eq.0) then
-  write(6,10) ifil,irec
-10   format(/' DIRECT READ ERROR ON FILE',i2,' RECORD',i3, &
-          ' UNIT NOT OPEN')
-  call exit
-end if
-if(irec.gt.maxrec) then
-  write(6,15) irec,maxrec
-15   format(/' DIRECT READ ERROR ON FILE',i2,' RECORDNUMBER',i3, &
-          ' OUT OF RANGE. ALLOWED',i4)
-  call exit
-end if
-if(iadr(irec,ifil).lt.0) then
-  write(6,20) ifil,irec
-20   format(/' DIRECT READ ERROR ON FILE',i2,' RECORD',i3, &
-          ' UNDEFINED')
-  call exit
-end if
-if(iof+l.gt.len(irec,ifil)) then
-  write(6,30) ifil,irec,iof+l,len(irec,ifil)
-30   format(/' DIRECT READ ERROR ON FILE',i2,' RECORD',i3, &
-          ' TRY TO READ',i6,' WORDS, RECORDLENGTH=',i6,' WORDS')
-  call exit
-end if
-ir=iadr(irec,ifil)+iof
-if(mod(l,intrel).ne.0.or.mod(ir,intrel).ne.0) then
-  write(6,31) ifil,irec,l,ir
-31   format(/' DIRECT READ ERROR ON FILE',i2,' RECORD',i3, &
-    ' LENGTH=',i4,' OR ADRESS=',i6,' NOT MULTIPLE OF INTREL')
-  call exit
-end if
-ll=l/intrel
-ir=ir/intrel
-call rdabsf(iun(ifil),ii,ll,ir)
-call fwait(iun(ifil))
-iostat(ifil)=0
-return
-!
-entry dres(l,ifil,irec)
-!
-!.....reserve "l" real*8  words for record "irec" on file "ifil"
-!
-ll=l*intrel
-if(iun(ifil).eq.0) then
-  write(6,40) ifil,irec
-40   format(/' DIRECT RESERVE ERROR ON FILE',i2,' RECORD',i3, &
-          ' UNIT NOT OPEN')
-  call exit
-end if
-if(irec.gt.maxrec) then
-  write(6,45) irec,maxrec
-45   format(/' DIRECT RESERVE ERROR ON FILE',i2,' RECORDNUMBER',i3, &
-          ' OUT OF RANGE. ALLOWED',i4)
-  call exit
-end if
-if(iadr(irec,ifil).lt.0) then
-  iadr(irec,ifil)=next(ifil)
-  next(ifil)=next(ifil)+((ll-1)/lbuf+1)*lbuf
-  len(irec,ifil)=next(ifil)-iadr(irec,ifil)
-end if
-if(ll.gt.len(irec,ifil)) then
-  write(6,50) ifil,irec,ll,len(irec,ifil)
-50   format(/' DIRECT RESERVE ERROR ON FILE',i2,' RECORD',i3,' TRY', &
-          ' TO RESERVE',i6,' WORDS, RECORDLENGTH=',i6,' WORDS')
-  call exit
-end if
-return
-!
-entry dwrite(ii, l, ifil, irec, iof)
-!
-!.....write "l" integer words (stored in ii array) to record "irec" on file "ifil"
-!.....with offset iof
-!
-if(iun(ifil).eq.0) then
-  write(6,55) ifil,irec
-55   format(/' DIRECT WRITE ERROR ON FILE',i2,' RECORD',i3, &
-          ' UNIT NOT OPEN')
-  call exit
-end if
-if(irec.gt.maxrec) then
-  write(6,60) irec,maxrec
-60   format(/' DIRECT WRITE ERROR ON FILE',i2,' RECORDNUMBER',i3, &
-          ' OUT OF RANGE. ALLOWED',i4)
-  call exit
-end if
-if(iadr(irec,ifil) < 0) then
-  ! allocate a range of positions in the file for the record irec
-  iadr(irec,ifil) = next(ifil) ! position of the start of the record in its file (unit : 32 bit words)
-  next(ifil) = next(ifil) + ((l-1)/lbuf+1) * lbuf
-  len(irec,ifil) = next(ifil) - iadr(irec,ifil)
-end if
-if(iof+l.gt.len(irec,ifil)) then
-  if(irec.ge.last(ifil)) then
-    next(ifil)=iadr(irec,ifil)+((iof+l-1)/lbuf+1)*lbuf
-    len(irec,ifil)=next(ifil)-iadr(irec,ifil)
-  else
-    write (6,*) 'ii,l,ifil,irec,iof', ii,l,ifil,irec,iof
-    write(6,65) ifil,irec,iof+l,len(irec,ifil)
-65     format(/' DIRECT WRITE ERROR ON FILE',i2,' RECORD',i3, &
-          ' TRY TO WRITE',i6,' WORDS, RECORDLENGTH=',i6,' WORDS')
-    call exit
-  end if
-end if
-ir = iadr(irec,ifil) + iof  ! ! where to write the buffer in the output file (units : number of 32 bits words)  
-if(mod(l,intrel).ne.0.or.mod(ir,intrel).ne.0) then
-  write(6,66) ifil,irec,l,ir
-66   format(/' DIRECT WRITE ERROR ON FILE',i2,' RECORD',i3, &
-    ' LENGTH=',i4,' OR ADRESS=',i6,' NOT MULTIPLE OF INTREL')
-  call exit
-end if
-ll = l / intrel  ! number of real8 in the ii array
-ir = ir / intrel  ! where to write the buffer in the output file (units : number of 64 bits words) 
-call wrabsf(iun(ifil), ii, ll, ir)
-call fwait(iun(ifil))
-last(ifil)=max(last(ifil),irec)
-iostat(ifil)=0
-return
-!
-entry dinit
-
-if ( .NOT. cdio_is_allocated ) then
-      call allocate_cdio(maxrec, maxun)
-      cdio_is_allocated = .TRUE.
-end if
-!
-!.....initialize direct i/o. dinit must be called before any call to
-!.....another of these i/o routines
-!
-if (llbuf .ne. lbuf) then
-  write (6, 67) lbuf, llbuf
-67   format ('** I/O BUFFER LENGTH OF', i4, ' IN BLOCK DATA IO .NE.', &
-        /,'   I/O BUFFER LENGTH OF', i4, ' IN DREAD; ABORT')
-  call exit
-endif
-lnex=((lhea-1)/lbuf+1)*lbuf
-! (lhea-1)/lbuf+1 : number of buffers of length lbuf to transfer lhea elements
-!  by chunks of lbuf
-ibfil=0
-ibrec=0
-ibof=0
-ibstat=0
-libuf=lbuf
-ldbuf=lbuf/intrel
-do 70 if=1,maxun
-next(if)=lnex
-iun(if)=0
-last(if)=0
-iostat(if)=0
-do 70 ir=1,maxrec
-len(ir,if)=0
-70 iadr(ir,if)=-1
-return
-!
-entry dopen(ifil,iunit,name)
-!
-!.....open file "ifil" as unit "iunit" with filename "name"
-!
-if ( .NOT. cdio_is_allocated ) then
-      call allocate_cdio(maxrec, maxun)
-      cdio_is_allocated = .TRUE.
-end if
-if(iun(ifil).eq.iunit) return
-if(iun(ifil).ne.0) then
-  write(6,75) ifil,iunit,iun(ifil)
-75   format(/' DIRECT OPEN ERROR FOR FILE',i2,' UNIT',i3, &
-          ' ALREADY OPEN AS UNIT',i3)
-  call exit
-end if
-if(iunit.le.0) then
-  write(6,80) ifil,iunit
-80   format(/' DIRECT OPEN ERROR FOR FILE',i2, &
-          ' ILLEGAL UNIT NUMBER:',i4)
-  call exit
-end if
-isize=0
-call openf(iunit,name,'DU',isize)
-iun(ifil)=iunit
-iostat(ifil)=0
-return
-!
-entry dsave(ifil)
-!
-!.....save file information for restart
-!
-if(iun(ifil).eq.0) then
-  write(6,85) ifil
-85   format(/' DIRECT SAVE ERROR ON FILE',i2, &
-          ' UNIT NOT OPEN')
-  call exit
-end if
-! copy iadr to idbuf by blocks of lbuf integers
-iofh=0 ! number of integers moved
-do 86 ib=1,lhea,lbuf  ! ib: block index
-lh=min(lhea-iofh,lbuf)  ! number of integers to move for this block
-ASSERT( ifil .eq. 1 ) ! unexpected case : graffy suspects the following imove to only work when ifil=1'
-call imove(memory_block(iofh+1),idbuf,lh)  ! copy lh integers from iadr to idbuf
-call wrabsf(iun(ifil),idbuf,ldbuf,iofh/intrel)
-call fwait(iun(ifil))
-86 iofh=iofh+lbuf
-iostat(ifil)=0
-return
-!
-entry drest(ifil)
-!
-!.....restart file "ifil"
-!
-if(iun(ifil).eq.0) then
-  write(6,90) ifil
-90   format(/' DIRECT RESTART ERROR ON FILE',i2, &
-          ' UNIT NOT OPEN')
-  call exit
-end if
-iofh=0
-do 91 ib=1,lhea,lbuf
-ll=min(lhea-iofh,lbuf)
-call rdabsf(iun(ifil),idbuf,ldbuf,iofh/intrel)
-call fwait(iun(ifil))
-ASSERT(ifil .eq. 1) ! unexpected case : graffy suspects the following imove to only work when ifil=1'
-call imove(idbuf,memory_block(iofh+1),ll)
-
-91 iofh=iofh+lbuf
-iostat(ifil)=0
-return
-!
-entry dclos(ifil)
-!
-!.....save file information and close file "ifil"
-!
-if(iun(ifil).eq.0) then
-  write(6,95) ifil
-95   format(/' DIRECT CLOSE ERROR ON FILE',i2, &
-          ' UNIT NOT OPEN')
-  call exit
-end if
-iofh=0
-do 96 ib=1,lhea,lbuf
-ll=min(lhea-iofh,lbuf)
-call imove(iadr(iofh+1,ifil),idbuf,ll)
-call wrabsf(iun(ifil),idbuf,ldbuf,iofh/intrel)
-call fwait(iun(ifil))
-96 iofh=iofh+lbuf
-call closf(iun(ifil))
-iostat(ifil)=0
-iun(ifil)=0
-return
-end
-! -------------------------------------------------------------------
-subroutine imove(ia,ib,n)
-dimension ia(n),ib(n)
-do 10 i=1,n
-10 ib(i)=ia(i)
-return
-end
 ! -------------------------------------------------------------------
 subroutine dbri(buffer,l,ifil,irec)
 !
@@ -1643,8 +2017,8 @@ subroutine dbri(buffer,l,ifil,irec)
 !.....zero or negative record means continue at present position
 !     buffer : input buffer containing l integers
 !
-use mod_clseg, only: intrel
 use mod_cdbf, only: libuf,ibfil,ibrec,ibof,ibstat,idbuf,ibadr
+use mod_hiiolib1, only: dwrite, dread
 implicit none
 integer, intent(in) :: l
 integer, dimension(l), intent(out) :: buffer
@@ -1656,17 +2030,7 @@ integer :: i, iof, len
 
 ! implicit double precision (a-h,o-z)
 lre=l
-goto 5
-!
-entry dbrr(buffer,l,ifil,irec)
-!
-!.....sequentially buffer in "l" real words from record "irec" on file "ifil"
-!.....positive irec indicates start at beginning
-!.....zero or negative record means continue at present position
-!
-lre=l*intrel
-!
-5 continue 
+
 if(irec.gt.0) then
   if(ibstat.eq.1) call dwrite(idbuf,libuf,ibfil,ibrec,ibadr)
   ibstat=0
@@ -1692,6 +2056,29 @@ if(lre.gt.0) then
 end if
 return
 end
+
+subroutine dbrr(buffer,l,ifil,irec)
+!
+!.....sequentially buffer in "l" real words from record "irec" on file "ifil"
+!.....positive irec indicates start at beginning
+!.....zero or negative record means continue at present position
+!
+use mod_clseg, only: intrel
+use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
+implicit none
+real(8), target, intent(out) :: buffer(l)
+integer, intent(in) :: l
+integer, intent(in) :: ifil
+integer, intent(in) :: irec
+
+integer, pointer :: buffer_of_ints(:)
+
+integer :: lre
+lre = l*intrel
+call C_F_POINTER (C_LOC(buffer), buffer_of_ints, [lre])
+call dbri(buffer_of_ints,lre,ifil,irec)
+end subroutine dbrr
+
 !
 subroutine dbwr(buffer,l,ifil,irec)
 !
@@ -1700,26 +2087,31 @@ subroutine dbwr(buffer,l,ifil,irec)
 !.....zero or negative record means start at present position
 !
 use mod_clseg, only: intrel
+use, intrinsic :: ISO_C_BINDING   ! for C_LOC and C_F_POINTER
 implicit none
-real(8), dimension(l), intent(in) :: buffer
+real(8), target, intent(in) :: buffer(l)
 integer, intent(in) :: l
 integer, intent(in) :: ifil
 integer, intent(in) :: irec
 
+integer, pointer :: buffer_of_ints(:)
+
 integer :: lre
 lre = l*intrel
-call dbwi(buffer,lre,ifil,irec)
+call C_F_POINTER (C_LOC(buffer), buffer_of_ints, [lre])
+call dbwi(buffer_of_ints,lre,ifil,irec)
 end subroutine
+
 subroutine dbwi(buffer,l,ifil,irec)
 !
 !.....sequentially buffer out "l" integer words to record "irec" on file "ifil
 !.....positive irec indicates start at beginning or record
 !.....zero or negative record means start at present position
 !
-use mod_clseg, only: intrel
 use mod_cdbf, only: libuf,ibfil,ibrec,ibof,ibstat,idbuf,ibadr
+use mod_hiiolib1, only: dwrite
 implicit none
-integer, dimension(l), intent(in) :: buffer
+integer, intent(in) :: buffer(l)
 integer, intent(in) :: l
 integer, intent(in) :: ifil
 integer, intent(in) :: irec
@@ -1773,304 +2165,7 @@ call dwrite(idbuf,libuf,ibfil,ibrec,ibadr)
 ibstat=0
 return
 end
-!********************************************************************
-!                                                                   *
-!                        i/o routines library                       *
-!  these routines employ standart fortran i/o and may be quite      *
-!  inefficient. If possible, use system i/o for direct access       *
-!  lseg must be set in main program (file driver.f) appropriately   *
-!  lseg should typically be 512. Note that the record length in the *
-!  open statements are measured in bytes.                           *
-!                                                                   *
-!********************************************************************
-!                         routines included:                        *
-!                                                                   *
-!   1. assgn    assigns and opens direct access files               *
-!   2. rdabsf (wrabsf/fwait) read/write absolute routines           *
-!   3. tmpnm    generates a unique filename                         *
-!********************************************************************
-#if ( defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86) ) && !defined(UNIX_CIO)
-subroutine assgn(luni,filnam,isize,icat)
-!
-!  routine to assign and open files
-!
-!  luni: logical unit number
-!  luni .le.10:  formatted sequential files
-!  luni .gt.10:  unformatted direct access files
-!  filnam: filename
-!  isize: size in tracks (output, not working with fortran i/o)
-!  icat:  if icat=0, scratch
-!         if icat>0, permanent
-use mod_clseg, only: lseg
-use mod_disc, only: ipos, iun, iostat, icatf, nam
-character*(*) filnam
-character*12 stat
-character*(*) name
-logical openfl,exstfl
-!
-isize=0
-if(filnam.eq.' ') call tmpnm(luni,filnam)
-! here for standart fortran i/o
-inquire (file=filnam, opened=openfl, exist=exstfl)
-! here if file exists
-if(exstfl) then
-  if(openfl) return
-  stat='OLD'
-else
-  stat='NEW'
-end if
-iun(luni)=luni
-nam(luni)=filnam
-ipos(luni)=0
-iostat(luni)=0
-icatf(luni)=icat
-if(icat.ne.0) then
-!.....permanent file
-    open (luni, file=filnam, status=stat, access='DIRECT', &
-           recl=8*lseg, form='UNFORMATTED', &
-           iostat=ierr, err=999)
-else
-!.....scratch file
-    open (luni, status='SCRATCH',access='DIRECT',recl=8*lseg, &
-           form='UNFORMATTED',iostat=ierr, err=999)
-end if
-return
-! here if open error occurs
-999  lenfil=index(filnam,' ')-1
- write(6,1000) filnam(1:lenfil),ierr
-1000  format(' %FATAL-ERROR IN ASSGN: cannot open ',(a),', iostat: ', &
-        i4,/)
- stop
-!
-entry finit
-!.....closes all files
-la=-30
-le=70
-goto 43
-!
-entry closf(luni)
-!.....closes luni
-la=luni
-le=luni
-43 do 44 l=la,le
-if(iun(l).eq.0) goto 44
-close(l)
-icatf(l)=0
-nam(l)=' '
-iostat(l)=0
-ipos(l)=1
-iun(l)=0
-44 continue
-return
-entry chklun(luni,iflag,name)
-!.....checks status of unit
-name=' '
-iflag=0
-if(iun(luni).eq.0) return
-iflag=icatf(luni)
-name=nam(luni)
-return
-end
-! ---------------------------------------------------------------
-subroutine rdabsf(luni,a,l,iword)
-!
-! author: h.j. werner
-!
-! read of l double precision words into a. iword is zero adjusted adress
-! on file. l and iword should be multiple of lseg, otherwise unefficient
-use mod_clseg, only: lseg
-use mod_cobuf, only: lbuf
-use mod_disc, only: ipos, iun, iostat, icatf, nam
-implicit double precision (a-h,o-z)
-dimension a(l),buf(lbuf)
-  buf = 0d0
-  if(lseg.gt.lbuf) stop 'lbuf too small in rdabsf'
-  ibl=iword/lseg+1
-  m=iword-(ibl-1)*lseg
-  n=0
-  if(m.eq.0) goto 20
-  n=min0(lseg-m,l)
-  read(luni,rec=ibl) (buf(i),i=1,lseg)
-  ibl=ibl+1
-  do 15 i=1,n
-  15 a(i)=buf(m+i)
-  20 l1=l-n
-  if(l1.eq.0) return
-  lbl=(l1-1)/lseg+1
-  do 25 ib=1,lbl
-  read(luni,rec=ibl) (a(n+i),i=1,min0(l1,lseg))
-  ibl=ibl+1
-  l1=l1-lseg
-  25 n=n+lseg
-  return
-end subroutine rdabsf
-!
-subroutine wrabsf(luni,a,l,iword)
-! write l real8 numbers from a array into file unit luni at offset iword
-! luni : the logical unit of the file to write to (eg 3)
-! a : the array of double precision numbers to write (eg [0.5, 0.7])
-! l : the number of real numbers to write (eg 2)
-! iword : offset on file in real8 units where the write should start (eg 2047)
-use mod_clseg, only: lseg
-use mod_cobuf, only: lbuf
-use mod_disc, only: ipos, iun, iostat, icatf, nam
-implicit double precision (a-h,o-z)
-dimension a(l), buf(lbuf)
-  if(lseg.gt.lbuf) stop 'lbuf too small in wrabsf'
-  ibl=iword/lseg+1  ! index of block where iword is (eg ibl = 2 if lseg == 1024)
-  m = iword - (ibl - 1) * lseg  ! offset of iword relative to its block (eg 1023)
-  n = 0
-  if(m /= 0) then
-    !.....first address not on sector boundary
-    n = min0(lseg-m, l)  ! number of words to write in the block ibl (eg 1)
-
-    if(ibl <= ipos(luni)) then
-      ! read the whole block ibl from disk into buf
-      read(luni, rec=ibl) (buf(i),i=1,lseg)
-    end if
-    ! write the words into buf
-    do i = 1, n
-      buf(m + i) = a(i)
-    end do
-    ! then write back the updated block ibl on the file
-    write(luni, rec=ibl) (buf(i), i=1, lseg)
-    ipos(luni) = max(ipos(luni), ibl)
-    ibl = ibl + 1
-  end if
-  !.....write from next sector boundary
-  l1 = l - n  ! number of remaining words to write (eg 1)
-  if(l1 == 0) return
-  lbl = l1 / lseg  ! num blocks
-  ! write the full blocks
-  do ib=1,lbl
-    write(luni,rec=ibl) (a(n+i),i=1,lseg)
-    ipos(luni) = max(ipos(luni),ibl)
-    ibl = ibl + 1
-    l1 = l1 - lseg
-    n = n + lseg
-  end do
-
-  if(n.eq.l) return  ! all words have been written to disk
-  !.....last address not at end of sector
-  ! write the remaining n-l words in the last block 
-  if(ibl.le.ipos(luni)) &
-    read(luni,rec=ibl) (buf(i),i=1,lseg)
-  do i = 1, l-n
-    buf(i) = a(n+i)
-  end do
-  write(luni,rec=ibl) (buf(i),i=1,lseg)
-  ipos(luni) = max(ipos(luni),ibl)
-  return
-end subroutine wrabsf
 
 
-subroutine fwait(luni)
-return
-end subroutine fwait
 
-#endif
-#if ( defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86) ) && !defined(UNIX_CIO)
-subroutine tmpnm(ifil,name)
-!.....should generate a unique filename
-implicit none
-integer, intent(in) :: ifil
-character (len=14), intent(out) :: name
-integer :: id = 0
-!     integer getpid
-!     id=getpid()
-write(name,10) ifil,id
-10 format('T',i2.2,i5.5,'.TMP  ')
-return
-end
-#endif
-! ---------------------------------------------------------------
-#if defined(HIB_NONE)
-!********************************************************************
-!                                                                   *
-!             utility programs for unix systems                     *
-!                                                                   *
-!********************************************************************
-!                     routines included:                            *
-!                                                                   *
-!   1. tmpnam   generates unique temp file names                    *
-!   2. timdat   returns time, date and machine type as char. strings*
-!   3. exit     stops calculation                                   *
-!   4. assgn    assigns direct access files                         *
-!               these routines need c-routines in hiunix.c          *
-!         entries: finit (closes all files)                         *
-!                  closf (closes one file)                          *
-!                  chklun (checks if unit is open)                  *
-!                  fwait (waits for completion of i/o)              *
-!                                                                   *
-!********************************************************************
-subroutine tmpnm(ifil,name)
-use mod_clseg, only: lseg
-character*14 name
-integer getpid
-id=getpid()
-write(name,10) ifil,id
-10 format('t',i2.2,i5.5,'.tmp  ')
-return
-end
-subroutine assgn(luni,name,lenn,icat)
-implicit double precision (a-h,o-z)
-character*(*) name
-character*14 blank
-character*15 namx
-data lendef/2000/,blank/'              '/
-if (iun(luni).ne.0) return
-if(name.eq.blank) call tmpnm(luni,name)
-if(lenn.eq.0) lenn=lendef
-ll=len(name)
-if(ll.gt.14) name(15:)=' '
-ll=min(ll,14)
-nam(luni)=name
-namx=name(1:ll)
-icat1=index(name,'.TMP')
-if(icat.eq.0.or.icat1.ne.0) then
-icatf(luni)=-1
-! temp file
-call openc(luni,namx,lenn,0)
-else
-icatf(luni)=1
-! catalog file
-call openc(luni,namx,lenn,1)
-end if
-goto 80
-80 iun(luni)=luni
-return
-!
-entry finit
-! close all files
-do 90 i=1,98
-ipos(i)=1
-iun(i)=0
-nam(i)=' '
-iostat(i)=0
-icatf(i)=0
-90 continue
-return
-!
-entry closf(luni)
-! close file luni
-la=luni
-le=luni
-do 44 l=la,le
-if(iun(l).eq.0) goto 44
-call closec(l)
-icatf(l)=0
-nam(l)=' '
-iostat(l)=0
-ipos(l)=1
-iun(l)=0
-44 continue
-return
-entry chklun(luni,iflag,name)
-name=' '
-iflag=0
-if(iun(luni).eq.0) return
-iflag=icatf(luni)
-name=nam(luni)
-return
-end
-#endif
+end module mod_hiiolib2

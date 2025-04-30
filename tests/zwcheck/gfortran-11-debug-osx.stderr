@@ -1,0 +1,346 @@
+/Users/graffy/hibridon/issue174/hibridon.git/lib/hibound.F90:515:27:
+
+  503 | do i = 0, m - 1
+      |               2            
+......
+  515 |          z = 2.0d0 * z - x(i - 2)  ! disable-warnings:do-subscript
+      |                           1
+Warning: Array reference at (1) out of bounds (-2 < 0) in loop beginning at (2) [-Wdo-subscript]
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+/Users/graffy/hibridon/issue174/hibridon.git/tests/arno/pot_arno.F90:215:9:
+
+  204 | do 100 i=1,11
+      |             2
+......
+  215 |     vdif(i-1)=half*(va2p(i)-vap(i))  ! disable-warnings:do-subscript
+      |         1
+Warning: Array reference at (1) out of bounds (0 < 1) in loop beginning at (2) [-Wdo-subscript]
+/Users/graffy/hibridon/issue174/hibridon.git/tests/arno/pot_arno.F90:219:11:
+
+  204 | do 100 i=1,11
+      |             2
+......
+  219 |       vdif(i-1)=damp*vdif(i-1)  ! disable-warnings:do-subscript
+      |           1
+Warning: Array reference at (1) out of bounds (0 < 1) in loop beginning at (2) [-Wdo-subscript]
+/Users/graffy/hibridon/issue174/hibridon.git/tests/arno/pot_arno.F90:219:26:
+
+  204 | do 100 i=1,11
+      |             2             
+......
+  219 |       vdif(i-1)=damp*vdif(i-1)  ! disable-warnings:do-subscript
+      |                          1
+Warning: Array reference at (1) out of bounds (0 < 1) in loop beginning at (2) [-Wdo-subscript]
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+/Users/graffy/hibridon/issue174/hibridon.git/tests/arno_bound/pot_arno_ccsdt.F90:183:9:
+
+  166 | do 100 i=1,9
+      |            2
+......
+  183 |     vdif(i-1)=half*(va2p(i)-vap(i))  ! disable-warnings:do-subscript
+      |         1
+Warning: Array reference at (1) out of bounds (0 < 1) in loop beginning at (2) [-Wdo-subscript]
+/Users/graffy/hibridon/issue174/hibridon.git/tests/arno_bound/pot_arno_ccsdt.F90:186:9:
+
+  166 | do 100 i=1,9
+      |            2
+......
+  186 |     vdif(i-1)=damp*vdif(i-1)  ! disable-warnings:do-subscript
+      |         1
+Warning: Array reference at (1) out of bounds (0 < 1) in loop beginning at (2) [-Wdo-subscript]
+/Users/graffy/hibridon/issue174/hibridon.git/tests/arno_bound/pot_arno_ccsdt.F90:186:24:
+
+  166 | do 100 i=1,9
+      |            2            
+......
+  186 |     vdif(i-1)=damp*vdif(i-1)  ! disable-warnings:do-subscript
+      |                        1
+Warning: Array reference at (1) out of bounds (0 < 1) in loop beginning at (2) [-Wdo-subscript]
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+/Users/graffy/hibridon/issue174/hibridon.git/tests/heohx/pot_heohx_lmax10.F90:372:9:
+
+  363 | do 100 i=1,11
+      |             2
+......
+  372 |     vdif(i-1)=-PHEOHD(rr,cthta(i))  ! disable-warnings:do-subscript
+      |         1
+Warning: Array reference at (1) out of bounds (0 < 1) in loop beginning at (2) [-Wdo-subscript]
+/Users/graffy/hibridon/issue174/hibridon.git/tests/heohx/pot_heohx_lmax10.F90:377:11:
+
+  363 | do 100 i=1,11
+      |             2
+......
+  377 |       vdif(i-1)=vdif(i-1)*damp  ! disable-warnings:do-subscript
+      |           1
+Warning: Array reference at (1) out of bounds (0 < 1) in loop beginning at (2) [-Wdo-subscript]
+/Users/graffy/hibridon/issue174/hibridon.git/tests/heohx/pot_heohx_lmax10.F90:377:21:
+
+  363 | do 100 i=1,11
+      |             2        
+......
+  377 |       vdif(i-1)=vdif(i-1)*damp  ! disable-warnings:do-subscript
+      |                     1
+Warning: Array reference at (1) out of bounds (0 < 1) in loop beginning at (2) [-Wdo-subscript]
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+/Users/graffy/hibridon/issue174/hibridon.git/tests/o3ph2/pot_o3ph2.F90:319:18:
+
+  302 | do 200 i=1,9
+      |            2      
+......
+  319 |      vxz(i)=vxzc1(i-1)*exp(-vxzl1(i-1)*r)+ &  ! disable-warnings:do-subscript
+      |                  1
+Warning: Array reference at (1) out of bounds (0 < 1) in loop beginning at (2) [-Wdo-subscript]
+/Users/graffy/hibridon/issue174/hibridon.git/tests/o3ph2/pot_o3ph2.F90:319:18:
+
+  302 | do 200 i=1,9
+      |            2      
+......
+  319 |      vxz(i)=vxzc1(i-1)*exp(-vxzl1(i-1)*r)+ &  ! disable-warnings:do-subscript
+      |                  1
+Warning: Array reference at (1) out of bounds (8 > 7) in loop beginning at (2) [-Wdo-subscript]
+/Users/graffy/hibridon/issue174/hibridon.git/tests/o3ph2/pot_o3ph2.F90:319:34:
+
+  302 | do 200 i=1,9
+      |            2                      
+......
+  319 |      vxz(i)=vxzc1(i-1)*exp(-vxzl1(i-1)*r)+ &  ! disable-warnings:do-subscript
+      |                                  1
+Warning: Array reference at (1) out of bounds (0 < 1) in loop beginning at (2) [-Wdo-subscript]
+/Users/graffy/hibridon/issue174/hibridon.git/tests/o3ph2/pot_o3ph2.F90:319:34:
+
+  302 | do 200 i=1,9
+      |            2                      
+......
+  319 |      vxz(i)=vxzc1(i-1)*exp(-vxzl1(i-1)*r)+ &  ! disable-warnings:do-subscript
+      |                                  1
+Warning: Array reference at (1) out of bounds (8 > 7) in loop beginning at (2) [-Wdo-subscript]
+/Users/graffy/hibridon/issue174/hibridon.git/tests/o3ph2/pot_o3ph2.F90:320:14:
+
+  302 | do 200 i=1,9
+      |            2  
+......
+  320 |         vxzc2(i-1)*exp(-vxzl2(i-1)*r)  ! disable-warnings:do-subscript
+      |              1
+Warning: Array reference at (1) out of bounds (0 < 1) in loop beginning at (2) [-Wdo-subscript]
+/Users/graffy/hibridon/issue174/hibridon.git/tests/o3ph2/pot_o3ph2.F90:320:14:
+
+  302 | do 200 i=1,9
+      |            2  
+......
+  320 |         vxzc2(i-1)*exp(-vxzl2(i-1)*r)  ! disable-warnings:do-subscript
+      |              1
+Warning: Array reference at (1) out of bounds (8 > 7) in loop beginning at (2) [-Wdo-subscript]
+/Users/graffy/hibridon/issue174/hibridon.git/tests/o3ph2/pot_o3ph2.F90:320:30:
+
+  302 | do 200 i=1,9
+      |            2                  
+......
+  320 |         vxzc2(i-1)*exp(-vxzl2(i-1)*r)  ! disable-warnings:do-subscript
+      |                              1
+Warning: Array reference at (1) out of bounds (0 < 1) in loop beginning at (2) [-Wdo-subscript]
+/Users/graffy/hibridon/issue174/hibridon.git/tests/o3ph2/pot_o3ph2.F90:320:30:
+
+  302 | do 200 i=1,9
+      |            2                  
+......
+  320 |         vxzc2(i-1)*exp(-vxzl2(i-1)*r)  ! disable-warnings:do-subscript
+      |                              1
+Warning: Array reference at (1) out of bounds (8 > 7) in loop beginning at (2) [-Wdo-subscript]
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+f951: Warning: Flag '-fno-automatic' overwrites '-frecursive' implied by '-fopenmp'
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgomp.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libgfortran.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libasan.dylib) was built for newer macOS version (11.5) than being linked (11.2)
+ld: warning: dylib (/usr/local/Cellar/gcc@11/11.3.0/lib/gcc/11/libquadmath.dylib) was built for newer macOS version (11.5) than being linked (11.2)

@@ -1,0 +1,207 @@
+[  1%] Building Fortran object lib/CMakeFiles/hib.dir/grovec.F90.o
+[  2%] Building Fortran object lib/CMakeFiles/hib.dir/ancou.F90.o
+[  2%] Building Fortran object lib/CMakeFiles/hib.dir/hicommon.F90.o
+[  2%] Building Fortran object lib/CMakeFiles/hib.dir/hiparcst.F90.o
+[  2%] Building Fortran object lib/CMakeFiles/hib.dir/parbas.F90.o
+[  3%] Building Fortran object lib/CMakeFiles/hib.dir/himem.F90.o
+[  4%] Building Fortran object lib/CMakeFiles/hib.dir/hipot.F90.o
+[  4%] Building Fortran object lib/CMakeFiles/hib.dir/hiutil.F90.o
+[  4%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba01_1sg.F90.o
+[  5%] Building Fortran object lib/CMakeFiles/hib.dir/hibasutil.F90.o
+[  6%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba02_2sg.F90.o
+[  7%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba03_2pi.F90.o
+[  7%] Building Fortran object lib/CMakeFiles/hib.dir/himatrix.F90.o
+[  7%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba04_sgpi.F90.o
+[  8%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba05_pi.F90.o
+[  8%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba06_stp.F90.o
+[  9%] Building Fortran object lib/CMakeFiles/hib.dir/hivector.F90.o
+[ 10%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba07_13p.F90.o
+[ 11%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba08_2mol.F90.o
+[ 11%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba09_stpln.F90.o
+[ 12%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba10_22p.F90.o
+[ 12%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba11_1del.F90.o
+[ 13%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba12_h2p.F90.o
+[ 13%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba13_h3p.F90.o
+[ 14%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba14_2del.F90.o
+[ 15%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba15_diat2p.F90.o
+[ 15%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba16_astp.F90.o
+[ 16%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba17_ch2x.F90.o
+[ 16%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba18_stp1.F90.o
+[ 17%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba19_sgpi1.F90.o
+[ 18%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba20_2pi1sg.F90.o
+[ 18%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba21_stp1sg.F90.o
+[ 19%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba22_1d3p.F90.o
+[ 19%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba23_3p2s.F90.o
+[ 20%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba24_sphtp.F90.o
+[ 21%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba25_1sg1sg.F90.o
+[ 21%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba26_2sg1sg.F90.o
+[ 22%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba27_astp1.F90.o
+[ 22%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba28_3sg1sg.F90.o
+[ 23%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba29_astp2.F90.o
+[ 23%] Building Fortran object lib/CMakeFiles/hib.dir/bases/hiba30_astp3.F90.o
+[ 23%] Building Fortran object lib/CMakeFiles/hib.dir/hibasis.F90.o
+[ 23%] Building Fortran object lib/CMakeFiles/hib.dir/hiblas.F90.o
+[ 24%] Building Fortran object lib/CMakeFiles/hib.dir/parpot.F90.o
+[ 25%] Building Fortran object lib/CMakeFiles/hib.dir/hismat.F90.o
+[ 26%] Building Fortran object lib/CMakeFiles/hib.dir/hiiolib_f.F90.o
+[ 27%] Building Fortran object lib/CMakeFiles/hib.dir/hiwav.F90.o
+[ 28%] Building Fortran object lib/CMakeFiles/hib.dir/hibrid1.F90.o
+[ 28%] Building Fortran object lib/CMakeFiles/hib.dir/hiversion.F90.o
+[ 28%] Building Fortran object lib/CMakeFiles/hib.dir/hibrid2.F90.o
+[ 29%] Building Fortran object lib/CMakeFiles/hib.dir/hibrid3.F90.o
+[ 29%] Building Fortran object lib/CMakeFiles/hib.dir/hibrid4.F90.o
+[ 30%] Building Fortran object lib/CMakeFiles/hib.dir/hibrid5.F90.o
+[ 31%] Building Fortran object lib/CMakeFiles/hib.dir/hidifcrs.F90.o
+[ 32%] Building Fortran object lib/CMakeFiles/hib.dir/hitestptn.F90.o
+[ 32%] Building Fortran object lib/CMakeFiles/hib.dir/hitrnprt.F90.o
+[ 32%] Building Fortran object lib/CMakeFiles/hib.dir/hihypxsc.F90.o
+[ 33%] Building Fortran object lib/CMakeFiles/hib.dir/hitensor.F90.o
+[ 34%] Building Fortran object lib/CMakeFiles/hib.dir/hinput.F90.o
+[ 35%] Building Fortran object lib/CMakeFiles/hib.dir/hiflow.F90.o
+[ 35%] Building Fortran object lib/CMakeFiles/hib.dir/assert.f90.o
+[ 36%] Building Fortran object lib/CMakeFiles/hib.dir/hiamp.F90.o
+[ 37%] Building Fortran object lib/CMakeFiles/hib.dir/hibound.F90.o
+[ 37%] Building Fortran object lib/CMakeFiles/hib.dir/hiprsbr.F90.o
+[ 37%] Building Fortran object lib/CMakeFiles/hib.dir/histmix.F90.o
+[ 38%] Building Fortran object lib/CMakeFiles/hib.dir/hisystem.F90.o
+[ 39%] Building Fortran object lib/CMakeFiles/hib.dir/hipotutil.F90.o
+[ 40%] Linking Fortran static library libhib.a
+[ 40%] Built target hib
+[ 40%] Building Fortran object tests/CMakeFiles/check_outputs.dir/comp_mods.f90.o
+[ 41%] Building Fortran object tests/CMakeFiles/check_outputs.dir/comp_tests.f90.o
+[ 41%] Linking Fortran executable check_outputs
+[ 41%] Built target check_outputs
+[ 42%] Building Fortran object tests/arch4/CMakeFiles/pot_arch4.dir/pot_arch4.F90.o
+[ 42%] Building Fortran object tests/arch4/CMakeFiles/pot_arch4.dir/__/__/src/himain.F90.o
+[ 43%] Linking Fortran executable pot_arch4
+[ 43%] Built target pot_arch4
+[ 43%] Building Fortran object tests/arn2/CMakeFiles/pot_arn2.dir/pot_arn2.F90.o
+[ 44%] Building Fortran object tests/arn2/CMakeFiles/pot_arn2.dir/__/__/src/himain.F90.o
+[ 45%] Linking Fortran executable pot_arn2
+[ 45%] Built target pot_arn2
+[ 45%] Building Fortran object tests/arno/CMakeFiles/pot_arno.dir/pot_arno.F90.o
+[ 46%] Building Fortran object tests/arno/CMakeFiles/pot_arno.dir/__/__/src/himain.F90.o
+[ 46%] Linking Fortran executable pot_arno
+[ 46%] Built target pot_arno
+[ 47%] Building Fortran object tests/arno_bound/CMakeFiles/pot_arno_ccsdt.dir/pot_arno_ccsdt.F90.o
+[ 47%] Building Fortran object tests/arno_bound/CMakeFiles/pot_arno_ccsdt.dir/__/__/src/himain.F90.o
+[ 48%] Linking Fortran executable pot_arno_ccsdt
+[ 48%] Built target pot_arno_ccsdt
+[ 49%] Building Fortran object tests/aroh/CMakeFiles/pot_arohx_ump4.dir/pot_arohx_ump4.F90.o
+[ 49%] Building Fortran object tests/aroh/CMakeFiles/pot_arohx_ump4.dir/__/__/src/himain.F90.o
+[ 50%] Linking Fortran executable pot_arohx_ump4
+[ 50%] Built target pot_arohx_ump4
+[ 50%] Building Fortran object tests/boh2/CMakeFiles/pot_boh2.dir/pot_boh2.F90.o
+[ 51%] Building Fortran object tests/boh2/CMakeFiles/pot_boh2.dir/__/__/src/himain.F90.o
+[ 51%] Linking Fortran executable pot_boh2
+[ 51%] Built target pot_boh2
+[ 52%] Building Fortran object tests/c2hh2/CMakeFiles/pot_c2hh2_12_6.dir/pot_c2hh2_12_6.F90.o
+[ 52%] Building Fortran object tests/c2hh2/CMakeFiles/pot_c2hh2_12_6.dir/__/__/src/himain.F90.o
+[ 53%] Linking Fortran executable pot_c2hh2_12_6
+[ 53%] Built target pot_c2hh2_12_6
+[ 54%] Building Fortran object tests/cahe/CMakeFiles/pot_cahe.dir/pot_cahe.F90.o
+[ 54%] Building Fortran object tests/cahe/CMakeFiles/pot_cahe.dir/__/__/src/himain.F90.o
+[ 55%] Linking Fortran executable pot_cahe
+[ 55%] Built target pot_cahe
+[ 55%] Building Fortran object tests/ch2he/CMakeFiles/pot_ch2he_a190_c20.dir/pot_ch2he_a190_c20.F90.o
+[ 56%] Building Fortran object tests/ch2he/CMakeFiles/pot_ch2he_a190_c20.dir/__/__/src/himain.F90.o
+[ 57%] Linking Fortran executable pot_ch2he_a190_c20
+[ 57%] Built target pot_ch2he_a190_c20
+[ 57%] Building Fortran object tests/ch2he/CMakeFiles/pot_ch2he_x52_c20_v3.dir/pot_ch2he_x52_c20_v3.F90.o
+[ 58%] Building Fortran object tests/ch2he/CMakeFiles/pot_ch2he_x52_c20_v3.dir/__/__/src/himain.F90.o
+[ 58%] Linking Fortran executable pot_ch2he_x52_c20_v3
+[ 58%] Built target pot_ch2he_x52_c20_v3
+[ 59%] Building Fortran object tests/ch3he/CMakeFiles/pot_ch3he_ccsdt.dir/pot_ch3he_ccsdt.F90.o
+[ 59%] Building Fortran object tests/ch3he/CMakeFiles/pot_ch3he_ccsdt.dir/__/__/src/himain.F90.o
+[ 60%] Linking Fortran executable pot_ch3he_ccsdt
+[ 60%] Built target pot_ch3he_ccsdt
+[ 61%] Building Fortran object tests/ch3he_vib/CMakeFiles/pot_ch3he_vib.dir/pot_ch3he_vib.F90.o
+[ 61%] Building Fortran object tests/ch3he_vib/CMakeFiles/pot_ch3he_vib.dir/__/__/src/himain.F90.o
+[ 62%] Linking Fortran executable pot_ch3he_vib
+[ 62%] Built target pot_ch3he_vib
+[ 62%] Building Fortran object tests/ch3i/CMakeFiles/pot_ch3i.dir/pot_ch3i.F90.o
+[ 63%] Building Fortran object tests/ch3i/CMakeFiles/pot_ch3i.dir/__/__/src/himain.F90.o
+[ 64%] Linking Fortran executable pot_ch3i
+[ 64%] Built target pot_ch3i
+[ 64%] Building Fortran object tests/cnh2/CMakeFiles/pot_cnh2_lique.dir/pot_cnh2_lique.F90.o
+[ 65%] Building Fortran object tests/cnh2/CMakeFiles/pot_cnh2_lique.dir/__/__/src/himain.F90.o
+[ 65%] Linking Fortran executable pot_cnh2_lique
+[ 65%] Built target pot_cnh2_lique
+[ 66%] Building Fortran object tests/cph2/CMakeFiles/pot_cph2.dir/pot_cph2.F90.o
+[ 67%] Building Fortran object tests/cph2/CMakeFiles/pot_cph2.dir/__/__/src/himain.F90.o
+[ 67%] Linking Fortran executable pot_cph2
+[ 67%] Built target pot_cph2
+[ 68%] Building Fortran object tests/h2ohe/CMakeFiles/pot_h2ohe.dir/pot_h2ohe.F90.o
+[ 68%] Building Fortran object tests/h2ohe/CMakeFiles/pot_h2ohe.dir/__/__/src/himain.F90.o
+[ 69%] Linking Fortran executable pot_h2ohe
+[ 69%] Built target pot_h2ohe
+[ 69%] Building Fortran object tests/h2ohe_orig/CMakeFiles/pot_h2ohe_orig.dir/pot_h2ohe_orig.F90.o
+[ 70%] Building Fortran object tests/h2ohe_orig/CMakeFiles/pot_h2ohe_orig.dir/__/__/src/himain.F90.o
+[ 71%] Linking Fortran executable pot_h2ohe_orig
+[ 71%] Built target pot_h2ohe_orig
+[ 71%] Building Fortran object tests/h2ohe_prsbr/CMakeFiles/pot_h2ohe_prsbr.dir/pot_h2ohe_prsbr.F90.o
+[ 72%] Building Fortran object tests/h2ohe_prsbr/CMakeFiles/pot_h2ohe_prsbr.dir/__/__/src/himain.F90.o
+[ 72%] Linking Fortran executable pot_h2ohe_prsbr
+[ 72%] Built target pot_h2ohe_prsbr
+[ 73%] Building Fortran object tests/hco_trnprt/CMakeFiles/pot_hco.dir/pot_hco.F90.o
+[ 74%] Building Fortran object tests/hco_trnprt/CMakeFiles/pot_hco.dir/__/__/src/himain.F90.o
+[ 74%] Linking Fortran executable pot_hco
+[ 74%] Built target pot_hco
+[ 75%] Building Fortran object tests/hecn/CMakeFiles/pot_hecn_dgels.dir/pot_hecn_dgels.F90.o
+[ 75%] Building Fortran object tests/hecn/CMakeFiles/pot_hecn_dgels.dir/__/__/src/himain.F90.o
+[ 76%] Linking Fortran executable pot_hecn_dgels
+[ 76%] Built target pot_hecn_dgels
+[ 76%] Building Fortran object tests/heco/CMakeFiles/pot_heco_sapt.dir/pot_heco_sapt.F90.o
+[ 77%] Building Fortran object tests/heco/CMakeFiles/pot_heco_sapt.dir/__/__/src/himain.F90.o
+[ 78%] Linking Fortran executable pot_heco_sapt
+[ 78%] Built target pot_heco_sapt
+[ 78%] Building Fortran object tests/heohx/CMakeFiles/pot_heohx_lmax10.dir/pot_heohx_lmax10.F90.o
+[ 79%] Building Fortran object tests/heohx/CMakeFiles/pot_heohx_lmax10.dir/__/__/src/himain.F90.o
+[ 79%] Linking Fortran executable pot_heohx_lmax10
+[ 79%] Built target pot_heohx_lmax10
+[ 80%] Building Fortran object tests/nh3h2/CMakeFiles/pot_nh3h2_2009.dir/pot_nh3h2_2009.F90.o
+[ 80%] Building Fortran object tests/nh3h2/CMakeFiles/pot_nh3h2_2009.dir/__/__/src/himain.F90.o
+[ 81%] Linking Fortran executable pot_nh3h2_2009
+[ 81%] Built target pot_nh3h2_2009
+[ 81%] Building Fortran object tests/nh3h2_qma/CMakeFiles/pot_nh3h2_qma.dir/pot_nh3h2_qma.F90.o
+[ 82%] Building Fortran object tests/nh3h2_qma/CMakeFiles/pot_nh3h2_qma.dir/__/__/src/himain.F90.o
+[ 83%] Linking Fortran executable pot_nh3h2_qma
+[ 83%] Built target pot_nh3h2_qma
+[ 83%] Building Fortran object tests/nhph2/CMakeFiles/pot_nhh2_10_4.dir/pot_nhh2_10_4.F90.o
+[ 84%] Building Fortran object tests/nhph2/CMakeFiles/pot_nhh2_10_4.dir/__/__/src/himain.F90.o
+[ 84%] Linking Fortran executable pot_nhh2_10_4
+[ 84%] Built target pot_nhh2_10_4
+[ 85%] Building Fortran object tests/o3ph2/CMakeFiles/pot_o3ph2.dir/pot_o3ph2.F90.o
+[ 86%] Building Fortran object tests/o3ph2/CMakeFiles/pot_o3ph2.dir/__/__/src/himain.F90.o
+[ 86%] Linking Fortran executable pot_o3ph2
+[ 86%] Built target pot_o3ph2
+[ 86%] Building Fortran object tests/ohh2_bausr/CMakeFiles/pot_ohh2_bausr.dir/pot_ohh2_bausr.F90.o
+[ 87%] Building Fortran object tests/ohh2_bausr/CMakeFiles/pot_ohh2_bausr.dir/__/__/src/himain.F90.o
+[ 88%] Linking Fortran executable pot_ohh2_bausr
+[ 88%] Built target pot_ohh2_bausr
+[ 89%] Building Fortran object tests/ohh2_j1/CMakeFiles/pot_ohh2.dir/pot_ohh2.F90.o
+[ 89%] Building Fortran object tests/ohh2_j1/CMakeFiles/pot_ohh2.dir/__/__/src/himain.F90.o
+[ 90%] Linking Fortran executable pot_ohh2
+[ 90%] Built target pot_ohh2
+[ 90%] Building Fortran object tests/stp1sg/CMakeFiles/pot_stp1sg_qma.dir/pot_stp1sg_qma.F90.o
+[ 91%] Building Fortran object tests/stp1sg/CMakeFiles/pot_stp1sg_qma.dir/__/__/src/himain.F90.o
+[ 91%] Linking Fortran executable pot_stp1sg_qma
+[ 91%] Built target pot_stp1sg_qma
+[ 92%] Building Fortran object tests/vfit/CMakeFiles/pot_vfit.dir/pot_vfit.F90.o
+[ 93%] Building Fortran object tests/vfit/CMakeFiles/pot_vfit.dir/__/__/src/himain.F90.o
+[ 93%] Linking Fortran executable pot_vfit
+[ 93%] Built target pot_vfit
+[ 93%] Building Fortran object tests/BASTST/CMakeFiles/pot_bastst.dir/pot_bastst.F90.o
+[ 94%] Building Fortran object tests/BASTST/CMakeFiles/pot_bastst.dir/__/__/src/himain.F90.o
+[ 95%] Linking Fortran executable pot_bastst
+[ 95%] Built target pot_bastst
+[ 96%] Building Fortran object tests/HYPXSC/CMakeFiles/pot_hypxsc.dir/pot_hypxsc.F90.o
+[ 97%] Building Fortran object tests/HYPXSC/CMakeFiles/pot_hypxsc.dir/__/__/src/himain.F90.o
+[ 97%] Linking Fortran executable pot_hypxsc
+[ 97%] Built target pot_hypxsc
+[ 98%] Building Fortran object src/unittests/CMakeFiles/unit_ancou.dir/ancou.F90.o
+[ 98%] Linking Fortran executable unit_ancou
+[ 98%] Built target unit_ancou
+[ 99%] Building Fortran object src/unittests/CMakeFiles/unit_grovec.dir/grovec.F90.o
+[100%] Linking Fortran executable unit_grovec
+[100%] Built target unit_grovec

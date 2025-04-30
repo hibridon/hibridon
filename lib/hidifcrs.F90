@@ -1,8 +1,9 @@
 #include "assert.h"
 module mod_difcrs
+  use mod_assert, only: fassert
 contains
 !  -------------------------------------------------------------
-subroutine difcrs(fname1,a,ihomo,flaghf)
+subroutine difcrs(fname1,a,flaghf)
 !  -------------------------------------------------------------
 !  calculates differential cross sections
 !  author h.-j. werner
@@ -35,7 +36,7 @@ subroutine difcrs(fname1,a,ihomo,flaghf)
 !  FOR THE BASIS TYPE ARE IN MEMORY                             *
 !                                                               *
 !---------------------------------------------------------------*
-use constants
+use constants, only: ang2c, econv, pi, xmconv
 use mod_codim, only: mmax
 use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
@@ -50,10 +51,10 @@ use mod_hiutil, only: gennam, mtime, gettim, dater
 use mod_hiutil, only: xf3j
 use mod_hismat, only: sread, rdhead
 use mod_hitypes, only: bqs_type
+use mod_hiiolib1, only: openf
 implicit none
 character*(*), intent(in) :: fname1
 real(8), intent(in) :: a(15)
-logical, intent(in) :: ihomo
 logical, intent(in) :: flaghf
 
 real(8) :: a1term, a2term, aangle, algfak, algn, alph1, alphm1, ang0, ang1, ang2, angle
@@ -74,7 +75,7 @@ character*20 cdate1
 character*20  cdate
 character*10  elaps, cpu
 character*40 xnam1,xnam2,xnam3
-character*1 m1string,m2string
+character*1 m1string
 character*8 amplstring
 
 complex(8) :: stampl, stamplm
@@ -169,7 +170,7 @@ call openf(smt_unit,xnam1(1:lenx),'tu',0)
 !.....open output file for differential cross sections
 !
 !     ifil=1
-20 call gennam(xnam2,fname1,ienerg,'dcs',lenx)
+call gennam(xnam2,fname1,ienerg,'dcs',lenx)
 call openf(dcs_unit,xnam2(1:lenx),'sf',0)
 !.....open output file for final-m dependence of (m,m) and (m,m+2) density matrix
 if (mflag) then
@@ -235,7 +236,7 @@ write(6,70) 'j1=',j1,'in1=',in1
 write(6,80) (j,jlev(j),inlev(j),elev(j)*econv,j=1,nlevel)
 80 format(1x,2i3,i5,f12.3)
 !     check if other symmetry doublet exists for steric effect
-82 if (stflag) then
+if (stflag) then
    do 85 j=1,nlevel
 85    if(jlev(j).eq.j1.and.inlev(j).eq.-in1) goto 90
    write(6,70) 'j1=',j1,'in1=',-in1
@@ -817,8 +818,8 @@ if (mflag) then
 endif
 ! determine integral oriented (steric) cross sections
 if (stflag) then
-   xint=0.5d0*fak*xint*2d0*pi*dang*pi/180d0	
-   xintm=0.5d0*fak*xintm*2d0*pi*dang*pi/180d0	
+   xint=0.5d0*fak*xint*2d0*pi*dang*pi/180d0
+   xintm=0.5d0*fak*xintm*2d0*pi*dang*pi/180d0
    write (6,390) ang0,dang,ang2,xint,xintm, &
             100d0*(xint-xintm)/(xint+xintm)
    write (2,391) ang0,dang,ang2,xint,xintm, &
@@ -980,6 +981,7 @@ use mod_hibasis, only: is_j12, is_twomol
 use mod_selb, only: ibasty
 use mod_hiutil, only: xf3j
 use mod_hitypes, only: bqs_type
+use constants, only: zero, one, two
 implicit none
 integer, intent(in) :: j1
 integer, intent(in) :: in1
@@ -1005,7 +1007,6 @@ integer, intent(in) :: iq2min
 integer, intent(in) :: iq2max
 integer, intent(in) :: iq3
 
-real(8), parameter :: zero=0.0d0, one=1.0d0, two=2.0d0
 real(8), parameter :: sqpi=1.772453850905516d0
 integer :: iang, ii, ilab, iyof, j12_f, j12_i, jlab
 integer :: j1_f, j1_fp, j1_i, j1_ip,      j1p
@@ -1334,17 +1335,13 @@ subroutine plm(m,lmax,theta,p,incp)
 !
 !  generates alexander-legendre polynomials for m.le.l.le.lmax
 !
+use constants, only: zero, one, two, rad
 implicit none
 integer, intent(in) :: m
 integer, intent(in) :: lmax
 real(8), intent(in) :: theta
 real(8), intent(out) :: p(lmax*incp)
 integer, intent(in) :: incp
-
-real(8), parameter :: zero = 0.d0
-real(8), parameter :: one = 1.d0
-real(8), parameter :: two = 2.d0
-real(8), parameter :: rad = 57.29577951308232d0
 
 real(8) :: x, y, pm1, pm2, pp, rat, ai, al, al2
 integer :: i, imax, l, ll, low
