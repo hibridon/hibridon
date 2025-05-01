@@ -87,6 +87,7 @@ runs:
       CMAKE_BUILD_TYPE=''
       ENABLE_CODE_COVERAGE='OFF'
       ENABLE_PROFILING='OFF'
+      ENABLE_UNINIT_VAR_RUNTIME_DETECTOR=${{env.ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}}
       case "${{inputs.build_type}}" in
         debug)
           CMAKE_BUILD_TYPE=Debug
@@ -128,7 +129,6 @@ runs:
           FORTRAN_COMPILER=gfortran-11
           CMAKE_OPTIONS="${CMAKE_OPTIONS} -DBLA_VENDOR=Apple"
           ENABLE_UNINIT_VAR_RUNTIME_DETECTOR=OFF  # dgetrf fails with uninit var runtime detector on macos (floating point exception because it reads some Nan values)
-          echo ENABLE_UNINIT_VAR_RUNTIME_DETECTOR=${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR} >> $GITHUB_ENV
         else
           echo "Unknown os: ${{inputs.os}}"
           exit 1
@@ -143,7 +143,7 @@ runs:
       CMAKE_OPTIONS="${CMAKE_OPTIONS} -DENABLE_PROFILING=${ENABLE_PROFILING}"
       CMAKE_OPTIONS="${CMAKE_OPTIONS} -DCMAKE_Fortran_COMPILER=${FORTRAN_COMPILER}"
       CMAKE_OPTIONS="${CMAKE_OPTIONS} -DLINK_TIME_OPTIMIZATION=${{env.LINK_TIME_OPTIMIZATION}}"
-      CMAKE_OPTIONS="${CMAKE_OPTIONS} -DENABLE_UNINIT_VAR_RUNTIME_DETECTOR=${{env.ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}}"
+      CMAKE_OPTIONS="${CMAKE_OPTIONS} -DENABLE_UNINIT_VAR_RUNTIME_DETECTOR=${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}"
       echo "CMAKE_OPTIONS: $CMAKE_OPTIONS"
       cmake -B ${{github.workspace}}/build $CMAKE_OPTIONS
 
