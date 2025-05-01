@@ -127,6 +127,8 @@ runs:
         then
           FORTRAN_COMPILER=gfortran-11
           CMAKE_OPTIONS="${CMAKE_OPTIONS} -DBLA_VENDOR=Apple"
+          ENABLE_UNINIT_VAR_RUNTIME_DETECTOR=OFF  # dgetrf fails with uninit var runtime detector on macos (floating point exception because it reads some Nan values)
+          echo ENABLE_UNINIT_VAR_RUNTIME_DETECTOR=${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR} >> $GITHUB_ENV
         else
           echo "Unknown os: ${{inputs.os}}"
           exit 1
