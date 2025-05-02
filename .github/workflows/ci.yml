@@ -22,18 +22,6 @@ jobs:
           build_type: [debug, release]
           compiler: [gfortran, ifort]
     steps:
-      - name: setup-ur1-http-proxy-env
-        # for all machines in univ-rennes's vlan SIMPA (such as ipr's debian-12 github agent), tell any http request to use univ-rennes proxy, otherwise all http requests (eg checkout github repo) will fail
-        if: ${{ matrix.os == 'debian-12' }}
-        run: |
-          ur1_proxy_url="http://proxy-nt.univ-rennes1.fr:3128"
-          echo "HTTP_PROXY=${ur1_proxy_url}" >> $GITHUB_ENV
-          echo "HTTPS_PROXY=${ur1_proxy_url}" >> $GITHUB_ENV
-          echo "FTP_PROXY=${ur1_proxy_url}" >> $GITHUB_ENV
-          echo "http_proxy=${ur1_proxy_url}" >> $GITHUB_ENV
-          echo "https_proxy=${ur1_proxy_url}" >> $GITHUB_ENV
-          echo "ftp_proxy=${ur1_proxy_url}" >> $GITHUB_ENV
-          echo "HTTPS_PROXY=${ur1_proxy_url}" >> $GITHUB_ENV
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
