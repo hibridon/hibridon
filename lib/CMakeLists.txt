@@ -12,10 +12,10 @@ set(LINK_TIME_OPTIMIZATION "OFF" CACHE BOOL "to enable or disable link time opti
 set(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR "ON" CACHE BOOL "if set, causes the use of uninitilazed variables to trigger an exception on debug builds, thus making the program stop. This is useful to detect uninitialized memory issues.")
 
 add_library(hib
+    generic/grovec.F90
     ancou.F90
     assert.f90
     command.F90
-    grovec.F90
     hiamp.F90
     hibasis.F90
     hibasutil.F90
