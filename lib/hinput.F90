@@ -161,9 +161,6 @@ module mod_hinput
     procedure                  :: initialize => com_parser_type_constructor
     final                      :: com_parser_type_destructor
 
-    procedure                  :: get_token => com_parser_type_get_token
-    procedure                  :: statement_end_reached => com_parser_statement_end_reached
-    procedure                  :: prev_char_is => com_parser_prev_char_is
     procedure                  :: read_statement_line => com_parser_type_read_statement_line
   end type com_parser_type
 
@@ -195,34 +192,8 @@ end subroutine com_parser_type_destructor
 
 !   type(com_parser_type)  :: com_parser
 !   com_parser%com_file_unit = com_file_unit
-!   com_parser%statement_parser = statement_parser_type()
+!   statement_parser = statement_parser_type()
 ! end function
-
-function com_parser_type_get_token(this, equal_is_delimiter) result(token)
-  use mod_hiutil, only: get_token
-  implicit none
-  class(com_parser_type), intent(inout) :: this
-  logical, intent(in) :: equal_is_delimiter
-
-  character(len=:), allocatable :: token
-
-  token = this%statement_parser%get_token(equal_is_delimiter)
-end function
-
-function com_parser_statement_end_reached(this)
-  class(com_parser_type), intent(in) :: this
-  logical :: com_parser_statement_end_reached
-
-  com_parser_statement_end_reached = this%statement_parser%statement_end_reached()
-end function
-
-function com_parser_prev_char_is(this, char)
-  class(com_parser_type), intent(in) :: this
-  character(len=1), intent(in) :: char
-  logical :: com_parser_prev_char_is
-
-  com_parser_prev_char_is = this%statement_parser%prev_char_is(char)
-end function
 
 subroutine com_parser_type_read_statement_line(this, batch_par_value, batch)
   use mod_hiutil, only: upper, vaxhlp
@@ -230,7 +201,7 @@ subroutine com_parser_type_read_statement_line(this, batch_par_value, batch)
   class(com_parser_type), intent(inout) :: this
   logical, intent(inout) :: batch_par_value
   logical, intent(inout) :: batch
-  character*40 :: code
+  character(len=:), allocatable :: code
 1 if (.not. batch_par_value .and. .not. batch) write (6, 2) !label:read_new_line
   !  in this next statement the $ sign implies no line feed
   !  replace this with an equivalent formatting character if your system
@@ -357,6 +328,7 @@ use mod_hypxsc, only: hypxsc
 use mod_hiiolib1, only: openf, gendat, savdat, genchk
 use mod_hisystem, only: baschk, sysdat, syssav, ptread
 use mod_histmix, only: stmix
+use mod_statement_parser, only: statement_parser_type
 implicit none
 logical, intent(inout) :: first_time
 
@@ -387,7 +359,8 @@ type(candidates_type) :: candidates
 ! class(command_type), pointer :: command
 integer :: post_action
 integer :: com_file_unit
-class(com_parser_type), allocatable :: com_parser
+class(com_parser_type), allocatable, target :: com_parser
+class (statement_parser_type), pointer :: statement_parser
 save ipr, opti, a, a1, acc, acclas, optval, optacc, istep, inam, optimized_param_name, &
      code, com_parser, jtot2x
 
@@ -473,6 +446,7 @@ if (.not. allocated(com_parser)) then
   call com_parser%initialize(com_file_unit)
   ! com_parser = com_parser_type(com_file_unit)
 end if
+statement_parser => com_parser%statement_parser
 
 !   define system dependent parameter codes
 if(first_time) then
@@ -498,7 +472,7 @@ end if
 1 call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
 optifl = .false.
 call com_parser%read_statement_line(lpar(LPAR_BATCH), batch)
-statement_start_index = com_parser%statement_parser%current_pos
+statement_start_index = statement_parser%current_pos
 !
 ! label:interpret_next_statement(com_parser, statement_start_index)
 !
@@ -508,12 +482,12 @@ statement_start_index = com_parser%statement_parser%current_pos
 !  - 'RUN'
 ! warning! line can contain multiple statements separated with comma or semicolon (eg 'VMAX(1)=4;VMAX(2)=4')
 15 continue
-com_parser%statement_parser%current_pos = statement_start_index
-if(com_parser%statement_end_reached()) goto 1  ! label:read_new_statement_line
-ASSERT(com_parser%statement_parser%current_pos >= 0)  ! graffy: I suspect that l1 can never be negative
+statement_parser%current_pos = statement_start_index
+if(statement_parser%statement_end_reached()) goto 1  ! label:read_new_statement_line
+ASSERT(statement_parser%current_pos >= 0)  ! graffy: I suspect that l1 can never be negative
 ! read the next token, which is expected to be either a command or a parameter
-statement_start_index = com_parser%statement_parser%current_pos
-code = com_parser%get_token(equal_is_delimiter=.true.)  ! consider '=' as a token delimiter
+statement_start_index = statement_parser%current_pos
+code = statement_parser%get_token(equal_is_delimiter=.true.)  ! consider '=' as a token delimiter
 if(len(code) .eq. 0) goto 1  ! label:read_new_statement_line
 call candidates%empty()
 ! search in commands
@@ -522,7 +496,7 @@ do i = 1,ncode
   write(6,*) 'graffy: code=', code, ' len = ', len(code)
   if(bcod(i)(1:len(code)) .eq. code) then
     if (len(code) .eq. length) goto 40  ! label:execute_command(i)
-    call candidates%add_candidate(codex=bcod(i), codex_index=i, bost=com_parser%statement_parser%current_pos)
+    call candidates%add_candidate(codex=bcod(i), codex_index=i, bost=statement_parser%current_pos)
     iskip = k_keyword_execute_command
   end if
 end do
@@ -531,19 +505,19 @@ do i = 1, command_mgr%num_commands
   length = lenstr(command_mgr%commands(i)%codex)
   if(command_mgr%commands(i)%codex(1:len(code)) .eq. code) then
     if (len(code) .eq. length) goto 45  ! label:execute_command_mgr_command(i)
-    call candidates%add_candidate(codex=bcod(i), codex_index=i, bost=com_parser%statement_parser%current_pos)
+    call candidates%add_candidate(codex=bcod(i), codex_index=i, bost=statement_parser%current_pos)
     iskip = k_keyword_execute_command_mgr_command
   end if
 end do
 
 ASSERT(statement_start_index >= 0) ! graffy: I suspect that l1 can never be negative
-com_parser%statement_parser%current_pos = statement_start_index ! reset index at the start of a statement because the different keyword handling entry points will expect it to be pointing to the beginning of the statement
+statement_parser%current_pos = statement_start_index ! reset index at the start of a statement because the different keyword handling entry points will expect it to be pointing to the beginning of the statement
 ! search in system independent parameters of type integer and real
 do i = 1,icode
   length = index(pcod(i),' ') - 1
   if(pcod(i)(1:len(code)) .eq. code) then
     if (len(code) .eq. length) goto 100  ! label:set_si_ir_param(line, l)
-    call candidates%add_candidate(codex=pcod(i), codex_index=i, bost=com_parser%statement_parser%current_pos)
+    call candidates%add_candidate(codex=pcod(i), codex_index=i, bost=statement_parser%current_pos)
 
     iskip = k_keyword_set_si_ir_param
   end if
@@ -553,7 +527,7 @@ do i = 1,lcode
 length=lenstr(fcod(i))
   if(fcod(i)(1:len(code)) .eq. code) then
     if (len(code) .eq. length) goto 200  ! label:set_si_l_param(line, l)
-    call candidates%add_candidate(codex=fcod(i), codex_index=i, bost=com_parser%statement_parser%current_pos)
+    call candidates%add_candidate(codex=fcod(i), codex_index=i, bost=statement_parser%current_pos)
     iskip = k_keyword_set_si_l_param
   end if
 end do
@@ -563,7 +537,7 @@ do i = 1,nscode
   if(scod(i)(1:len(code)) .eq. code) then
     if (len(code) .eq. length) goto 1400  ! label:set_sd_param(line, l)
 
-    call candidates%add_candidate(codex=scod(i), codex_index=i, bost=com_parser%statement_parser%current_pos)
+    call candidates%add_candidate(codex=scod(i), codex_index=i, bost=statement_parser%current_pos)
     iskip = k_keyword_set_sd_param
   end if
 end do
@@ -571,7 +545,7 @@ end do
 length = 8
 if(bascod(1)(1:len(code)) .eq. code) then
   if (len(code) .eq. length) goto 50  ! label:set_ibasty(line,l)
-  call candidates%add_candidate(codex=bascod(1), codex_index=1, bost=com_parser%statement_parser%current_pos)
+  call candidates%add_candidate(codex=bascod(1), codex_index=1, bost=statement_parser%current_pos)
   iskip = k_keyword_set_ibasty
 end if
 if (candidates%get_num_candidates() == 0) then
@@ -596,7 +570,7 @@ else
   ! the input string is then considered a valid (ie non ambiguous) shortcut for the parameter
   ! set the parameter accordingly
   i = candidates%get_codex_index(1)
-  com_parser%statement_parser%current_pos = candidates%get_bost(1)
+  statement_parser%current_pos = candidates%get_bost(1)
 !  goto (40, 100, 200, 1400, 50, 1410, 1420, 1430), iskip
   goto (40, 100, 200, 1400, 50, 45), iskip
 end if
@@ -617,7 +591,7 @@ end if
 ! label:execute_command_mgr_command(i)
 !
 45 continue
-  call command_mgr%commands(i)%item%execute(com_parser%statement_parser, post_action=post_action)
+  call command_mgr%commands(i)%item%execute(statement_parser, post_action=post_action)
   
 ! label:on_execute_command_completion(post_action)
 !
@@ -625,7 +599,7 @@ end if
   if (post_action == k_post_action_read_new_line) then
     goto 1  ! label:read_new_statement_line
   else if (post_action == k_post_action_interpret_next_statement) then
-    statement_start_index = com_parser%statement_parser%current_pos
+    statement_start_index = statement_parser%current_pos
     goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
   else if (post_action == k_post_action_exit_hibridon) then
     call exit()
@@ -640,9 +614,9 @@ end if
 ! label:set_ibasty(line,l)
 ! basis type and kind of calculation
 ! 
-50 if(com_parser%statement_end_reached()) goto 1  ! label:read_new_statement_line
-statement_start_index = com_parser%statement_parser%current_pos
-code = com_parser%get_token(equal_is_delimiter=.false.)
+50 if(statement_parser%statement_end_reached()) goto 1  ! label:read_new_statement_line
+statement_start_index = statement_parser%current_pos
+code = statement_parser%get_token(equal_is_delimiter=.false.)
 call assignment_parse(code,bascod,j,val)
 if(j .eq. 0) goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 if(j .lt. 0) goto 1  ! label:read_new_statement_line
@@ -655,23 +629,23 @@ else
   lpar(LPAR_TWOMOL)=.false.
 endif
 call sysdat(irpot, lpar(LPAR_READPT), izero)
-statement_start_index = com_parser%statement_parser%current_pos
+statement_start_index = statement_parser%current_pos
 goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 !  request help
 !75    line = '?intro'
 !      call helppr(line)
-75 call vaxhlp(com_parser%statement_parser%current_line)
+75 call vaxhlp(statement_parser%current_line)
 goto 1  ! label:read_new_statement_line
 !
 ! label:set_si_ir_param(line, l)
 !
 ! set system independent parameters (integer and real)
 !  specify parameters in the form cod1=val1, cod2=val2, etc.
-100 if(com_parser%statement_end_reached()) goto 1  ! label:read_new_statement_line
-ASSERT(com_parser%statement_parser%current_pos > 0)
+100 if(statement_parser%statement_end_reached()) goto 1  ! label:read_new_statement_line
+ASSERT(statement_parser%current_pos > 0)
 call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
-statement_start_index = com_parser%statement_parser%current_pos
-code = com_parser%get_token(equal_is_delimiter=.false.)
+statement_start_index = statement_parser%current_pos
+code = statement_parser%get_token(equal_is_delimiter=.false.)
 call assignment_parse(code,pcod,j,val)
 if(j .eq. 0) goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 if(j .lt. 0) goto 1  ! label:read_new_statement_line
@@ -695,9 +669,9 @@ goto 100  ! label:set_si_ir_param(line, l)
 ! set system independent parameters (flags)
 ! specify flags in the form cod1=val1,cod2=val2, etc
 ! where val(i) must be either "t(rue)" or "f(alse)"
-200 if(com_parser%statement_end_reached()) goto 1  ! label:read_new_statement_line
-statement_start_index = com_parser%statement_parser%current_pos
-code = com_parser%get_token(equal_is_delimiter=.false.)
+200 if(statement_parser%statement_end_reached()) goto 1  ! label:read_new_statement_line
+statement_start_index = statement_parser%current_pos
+code = statement_parser%get_token(equal_is_delimiter=.false.)
 call assignment_parse(code,fcod,j,val)
 if(j .eq. 0) goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 if(j .lt.0) goto 1  ! label:read_new_statement_line
@@ -717,10 +691,10 @@ goto 200  ! label:set_si_l_param(line, l)
 ! terminate the string with a semicolon if other parameters will follow
 ! on the same card, e.g. energ=e1,e2,e3;jtot1=0,jtot2=2....
 300 i = 0
-310 if(com_parser%statement_end_reached()) goto 320
-if(com_parser%prev_char_is(';')) goto 320
+310 if(statement_parser%statement_end_reached()) goto 320
+if(statement_parser%prev_char_is(';')) goto 320
 i = i+1
-code = com_parser%get_token(equal_is_delimiter=.false.)
+code = statement_parser%get_token(equal_is_delimiter=.false.)
 call assignment_parse(code,empty_var_list,j,energ(i))
 goto 310
 320 if (energ(1) .gt. 0) then
@@ -756,7 +730,7 @@ endif
 
 call enord(energ,nerg)
 ipar(IPAR_NERG) = nerg
-statement_start_index = com_parser%statement_parser%current_pos
+statement_start_index = statement_parser%current_pos
 goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 ! jout values
 ! specify jout values in the form
@@ -764,20 +738,20 @@ goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 ! terminate the string with a semicolon if other parameters will follow
 ! on the same card, e.g. jout,-3,0,2,4;energ=e1,e2,e3;jtot1=0,jtot2=2....
 400 i = 0
-code = com_parser%get_token(equal_is_delimiter=.false.)
+code = statement_parser%get_token(equal_is_delimiter=.false.)
 call assignment_parse(code,empty_var_list,j,val)
-statement_start_index = com_parser%statement_parser%current_pos
+statement_start_index = statement_parser%current_pos
 nnout=val
-410 if(com_parser%statement_end_reached()) goto 420
-if(com_parser%prev_char_is(';')) goto 420
-code = com_parser%get_token(equal_is_delimiter=.false.)
+410 if(statement_parser%statement_end_reached()) goto 420
+if(statement_parser%prev_char_is(';')) goto 420
+code = statement_parser%get_token(equal_is_delimiter=.false.)
 call assignment_parse(code,empty_var_list,j,val)
 i = i+1
 jout(i) = val
 goto 410
 420 if(nnout.ge.0) nnout = i
 if(nnout.lt.0) nnout = -i
-statement_start_index = com_parser%statement_parser%current_pos
+statement_start_index = statement_parser%current_pos
 goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 ! indout values
 ! specify indout values in the form
@@ -785,20 +759,20 @@ goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 ! terminate the string with a semicolon if other parameters will follow
 ! on the same card, e.g. indout,2,1,-1;energ=e1,e2,e3;jtot1=0,jtot2=2....
 430 i = 0
-code = com_parser%get_token(equal_is_delimiter=.false.)
+code = statement_parser%get_token(equal_is_delimiter=.false.)
 call assignment_parse(code,empty_var_list,j,val)
-statement_start_index = com_parser%statement_parser%current_pos
+statement_start_index = statement_parser%current_pos
 niout=val
 if(niout.eq.0) goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
-440 if(com_parser%statement_end_reached()) goto 450
-if(com_parser%prev_char_is(';')) goto 450
-code = com_parser%get_token(equal_is_delimiter=.false.)
+440 if(statement_parser%statement_end_reached()) goto 450
+if(statement_parser%prev_char_is(';')) goto 450
+code = statement_parser%get_token(equal_is_delimiter=.false.)
 call assignment_parse(code,empty_var_list,j,val)
 i = i+1
 indout(i) = val
 goto 440
 450 if(niout.ge.0) niout = i
-statement_start_index = com_parser%statement_parser%current_pos
+statement_start_index = statement_parser%current_pos
 goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 ! j1j2 values
 ! specify j1j2 values in the form
@@ -811,14 +785,14 @@ goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
   goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 endif
 i = 0
-code = com_parser%get_token(equal_is_delimiter=.false.)
+code = statement_parser%get_token(equal_is_delimiter=.false.)
 call assignment_parse(code,empty_var_list,j,val)
-statement_start_index = com_parser%statement_parser%current_pos
+statement_start_index = statement_parser%current_pos
 numj=val
 if(niout.eq.0) goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
-470 if(com_parser%statement_end_reached()) goto 480
-if(com_parser%prev_char_is(';')) goto 480
-code = com_parser%get_token(equal_is_delimiter=.false.)
+470 if(statement_parser%statement_end_reached()) goto 480
+if(statement_parser%prev_char_is(';')) goto 480
+code = statement_parser%get_token(equal_is_delimiter=.false.)
 call assignment_parse(code,empty_var_list,j,val)
 i = i+1
 nj1j2(i) = val
@@ -829,7 +803,7 @@ else
   write (6, 485)
 485   format(' ** YOU MUST SPECIFY A VALUE OF NUMJ')
 endif
-statement_start_index = com_parser%statement_parser%current_pos
+statement_start_index = statement_parser%current_pos
 goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 
 !
@@ -853,9 +827,9 @@ goto 47 ! label:on_execute_command_completion(post_action)
 call exit
 ! read parameters for potential
 !     pot=potfile
-1000 code = com_parser%get_token(equal_is_delimiter=.false.)
+1000 code = statement_parser%get_token(equal_is_delimiter=.false.)
 call ptread(code,lpar(LPAR_READPT))
-statement_start_index = com_parser%statement_parser%current_pos
+statement_start_index = statement_parser%current_pos
 goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 ! test potential
 ! testpot
@@ -867,8 +841,8 @@ goto 1  ! label:read_new_statement_line
 !     if filename is not specified, the inputfile is overwritten
 1300 inew=0
 call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
-if(.not. com_parser%statement_end_reached()) then
-  code = com_parser%get_token(equal_is_delimiter=.false.)
+if(.not. statement_parser%statement_end_reached()) then
+  code = statement_parser%get_token(equal_is_delimiter=.false.)
   if(len(code) == 0) then
     code = input
   else
@@ -883,7 +857,7 @@ end if
 call savdat(inew,code)
 call syssav()
 close(8)
-statement_start_index = com_parser%statement_parser%current_pos
+statement_start_index = statement_parser%current_pos
 irinp = 1
 goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 !
@@ -894,11 +868,11 @@ goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 ! specify in the same way as other parameters, e.g.
 !     jmin=0,jmax=4,brot=2.2...
 1400 continue
-ASSERT(com_parser%statement_parser%current_pos >= 0)
-if(com_parser%statement_end_reached()) goto 1  ! label:read_new_statement_line
-statement_start_index = com_parser%statement_parser%current_pos
+ASSERT(statement_parser%current_pos >= 0)
+if(statement_parser%statement_end_reached()) goto 1  ! label:read_new_statement_line
+statement_start_index = statement_parser%current_pos
 ! read the next token, which is expected to be an assignment (eg 'VMAX(1)=4' if line(l:)=='VMAX(1)=4;VMAX(2)=4') 
-code = com_parser%get_token(equal_is_delimiter=.false.)
+code = statement_parser%get_token(equal_is_delimiter=.false.)
 ! at this point, l points to the beginning of the next statement
 call assignment_parse(code,scod,j,val)
 if(j .eq. 0) then
@@ -961,11 +935,11 @@ goto 1400  ! label:set_sd_param(line, l)
 !  if iprint.eq.1 these values are given for all individual s-matrices
 !  if iprint.ge.2 s-matrices are printed
 !  thrs: threshold for neglect of small s-matrix elements in comparison
-1500 code = com_parser%get_token(equal_is_delimiter=.false.)
+1500 code = statement_parser%get_token(equal_is_delimiter=.false.)
 if(code /= ' ') fnam1 = code
 call lower(fnam1)
 call upper(fnam1(1:1))
-code = com_parser%get_token(equal_is_delimiter=.false.)
+code = statement_parser%get_token(equal_is_delimiter=.false.)
 if(code /= ' ') fnam2 = code
 call lower(fnam2)
 call upper(fnam2(1:1))
@@ -973,19 +947,19 @@ if(fnam1 == ' ' .or. fnam2 == ' ') goto 1  ! label:read_new_statement_line
 iprint = 0
 ienerg = 1
 thrs = 1.e-5
-if(.not. com_parser%statement_end_reached()) then
-  code = com_parser%get_token(equal_is_delimiter=.false.)
+if(.not. statement_parser%statement_end_reached()) then
+  code = statement_parser%get_token(equal_is_delimiter=.false.)
   call assignment_parse(code,empty_var_list,j,val)
   iprint = val
 end if
-if(.not. com_parser%statement_end_reached()) then
-  code = com_parser%get_token(equal_is_delimiter=.false.)
+if(.not. statement_parser%statement_end_reached()) then
+  code = statement_parser%get_token(equal_is_delimiter=.false.)
   call assignment_parse(code,empty_var_list,j,val)
   ienerg = val
   ienerg = max0(1,ienerg)
 end if
-if(.not. com_parser%statement_end_reached()) then
-  code = com_parser%get_token(equal_is_delimiter=.false.)
+if(.not. statement_parser%statement_end_reached()) then
+  code = statement_parser%get_token(equal_is_delimiter=.false.)
   call assignment_parse(code,empty_var_list,j,val)
   thrs = val
 end if
@@ -1026,7 +1000,7 @@ r = turn(e)
 write(6,1620) r
 1620 format(' Turning point for isotropic potential at R = ', &
          f5.2, ' bohr')
-statement_start_index = com_parser%statement_parser%current_pos
+statement_start_index = statement_parser%current_pos
 goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 !  determine minimum of isotropic potential
 !  minpot
@@ -1037,7 +1011,7 @@ end if
 r = potmin()
 write(6,1710) r
 1710 format(' Minimum of isotropic potential at r = ',f5.2, ' bohr')
-statement_start_index = com_parser%statement_parser%current_pos
+statement_start_index = statement_parser%current_pos
 goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 !  calculate de broglie wavelength in bohr (defined as 2pi/k)
 !  debrogli
@@ -1061,7 +1035,7 @@ waveve = 6.283/r
 write (6, 1831) waveve, 1.8897*waveve
 1831 format ('   wavevector =', g12.5,' Bohr^-1 = ', &
    g12.5,' Angstroms^-1')
-statement_start_index = com_parser%statement_parser%current_pos
+statement_start_index = statement_parser%current_pos
 goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 !
 ! label:execute_command_prints(line, l)
@@ -1076,15 +1050,15 @@ goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 !  jlp: parity; zero means both values
 1900 continue
 ! read the job file name
-fnam1 = com_parser%get_token(equal_is_delimiter=.false.)
+fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)
 if(fnam1 .eq. ' ') fnam1 = jobnam
 call lower(fnam1)
 call upper(fnam1(1:1))
 ! read the remaining arguments
 do i = 1,5
   ia(i) = 0
-  if(com_parser%statement_end_reached()) exit
-  code = com_parser%get_token(equal_is_delimiter=.false.)
+  if(statement_parser%statement_end_reached()) exit
+  code = statement_parser%get_token(equal_is_delimiter=.false.)
   call assignment_parse(code,empty_var_list,j,a(i))
   ia(i)=a(i)
 end do
@@ -1102,14 +1076,14 @@ goto 1  ! label:read_new_statement_line
 !  differential cross sections computed for atom-molecule
 !  collisions or symmetric top-linear molecule collisions
 2000 if (.not. lpar(LPAR_TWOMOL) .or. is_twomol(ibasty)) then
-  fnam1 = com_parser%get_token(equal_is_delimiter=.false.)
+  fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)
   if(fnam1 .eq. ' ') fnam1 = jobnam
   call lower(fnam1)
   call upper(fnam1(1:1))
   do 2010 i = 1,15
     a(i) = 0.d0
-    if(com_parser%statement_end_reached()) goto 2010
-    code = com_parser%get_token(equal_is_delimiter=.false.)
+    if(statement_parser%statement_end_reached()) goto 2010
+    code = statement_parser%get_token(equal_is_delimiter=.false.)
     call assignment_parse(code,empty_var_list,j,a(i))
 2010   continue
   write (6,*) 'hinput : lpar = ' 
@@ -1142,7 +1116,7 @@ goto 1  ! label:read_new_statement_line
 2101   format(' ** NERG SET EQUAL TO 1 FOR OPTIMIZATION')
   ipar(IPAR_NERG)=1
 endif
-optimized_param_name = com_parser%get_token(equal_is_delimiter=.false.)
+optimized_param_name = statement_parser%get_token(equal_is_delimiter=.false.)
 do 2110 ipr = iicode+1,icode
 2110 if(optimized_param_name .eq. pcod(ipr)(1:len(optimized_param_name))) goto 2120
 write(6,2115) optimized_param_name
@@ -1150,8 +1124,8 @@ write(6,2115) optimized_param_name
 goto 1  ! label:read_new_statement_line
 2120 do 2130 i = 1,7
 a(i) = 0.d0
-if(com_parser%statement_end_reached()) goto 2130
-code = com_parser%get_token(equal_is_delimiter=.false.)
+if(statement_parser%statement_end_reached()) goto 2130
+code = statement_parser%get_token(equal_is_delimiter=.false.)
 call assignment_parse(code,empty_var_list,j,a(i))
 2130 continue
 if(a(1) .eq. 0.or.a(2) .eq. 0) then
@@ -1282,14 +1256,14 @@ write(6,255) pcod(ipr)(1:len(optimized_param_name)),a(1)
 goto 500  ! label:execute_run
 !.....tensor cross sections
 !  tenxsc,jobfile,maxn,iframe,in1,in2,ienerg,jtotend,minj,maxj
-2300 fnam1 = com_parser%get_token(equal_is_delimiter=.false.)
+2300 fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)
 if(fnam1 .eq. ' ') fnam1 = jobnam
 call lower(fnam1)
 call upper(fnam1(1:1))
 do 2310 i = 1,9
 a(i) = 0.d0
-if(com_parser%statement_end_reached()) goto 2310
-code = com_parser%get_token(equal_is_delimiter=.false.)
+if(statement_parser%statement_end_reached()) goto 2310
+code = statement_parser%get_token(equal_is_delimiter=.false.)
 call assignment_parse(code,empty_var_list,j,a(i))
 2310 continue
 #if defined(HIB_MAC)
@@ -1308,14 +1282,14 @@ goto 1  ! label:read_new_statement_line
 goto 1  ! label:read_new_statement_line
 !.....m-resolved cross sections
 !  mrcrs,jobfile,ienerg
-2500 fnam1 = com_parser%get_token(equal_is_delimiter=.false.)
+2500 fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)
 if(fnam1 .eq. ' ') fnam1 = jobnam
 call lower(fnam1)
 call upper(fnam1(1:1))
 do 2510 i = 1,1
 a(i) = 0
-if(com_parser%statement_end_reached()) goto 2510
-code = com_parser%get_token(equal_is_delimiter=.false.)
+if(statement_parser%statement_end_reached()) goto 2510
+code = statement_parser%get_token(equal_is_delimiter=.false.)
 call assignment_parse(code,empty_var_list,j,a(i))
 2510 continue
 #if defined(HIB_MAC)
@@ -1328,14 +1302,14 @@ call mrcrs(fnam1,a)
 #endif
 goto 1  ! label:read_new_statement_line
 ! printc : print selected integral cross sections from ics file
-2600 fnam1 = com_parser%get_token(equal_is_delimiter=.false.)
+2600 fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)
 if(fnam1 .eq. ' ') fnam1 = jobnam
 call lower(fnam1)
 call upper(fnam1(1:1))
 do 2610 i = 1,8
 a(i) = 0
-if(com_parser%statement_end_reached()) goto 2610
-code = com_parser%get_token(equal_is_delimiter=.false.)
+if(statement_parser%statement_end_reached()) goto 2610
+code = statement_parser%get_token(equal_is_delimiter=.false.)
 call assignment_parse(code,empty_var_list,j,a(i))
 2610 continue
 if(ibasty.eq. 5) write (6, 2611)
@@ -1351,28 +1325,28 @@ call prsg(fnam1,a)
 !      if(ibasty.eq.4) call prsgpi(fnam1,a)
 goto 1  ! label:read_new_statement_line
 ! print selected partial cross sections from pcs file
-2650 fnam1 = com_parser%get_token(equal_is_delimiter=.false.)
+2650 fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)
 if(fnam1 .eq. ' ') fnam1 = jobnam
 call lower(fnam1)
 call upper(fnam1(1:1))
 do 2660 i = 1,8
 a(i) = 0
-if(com_parser%statement_end_reached()) goto 2660
-code = com_parser%get_token(equal_is_delimiter=.false.)
+if(statement_parser%statement_end_reached()) goto 2660
+code = statement_parser%get_token(equal_is_delimiter=.false.)
 call assignment_parse(code,empty_var_list,j,a(i))
 2660 continue
 call readpc(fnam1, a, scmat, nmax)
 goto 1  ! label:read_new_statement_line
 !  psi(wavefunction calculation),jobfile,mchannel
 !  flux calculation,jobfile,mchannel,iflux,thresh,iprint
-2800 fnam1 = com_parser%get_token(equal_is_delimiter=.false.)
+2800 fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)
 call lower(fnam1)
 call upper(fnam1(1:1))
 if(fnam1 .eq. ' ') fnam1 = jobnam
 do 2810 i = 1,10
 a(i) = 0
-if(com_parser%statement_end_reached()) goto 2810
-code = com_parser%get_token(equal_is_delimiter=.false.)
+if(statement_parser%statement_end_reached()) goto 2810
+code = statement_parser%get_token(equal_is_delimiter=.false.)
 call assignment_parse(code,empty_var_list,j,a(i))
 2810 continue
 iflux=a(1)
@@ -1380,17 +1354,17 @@ if (a(2) .eq. 0.d0) iflux=2
 call psi(fnam1,a)
 goto 1  ! label:read_new_statement_line
 ! adiabatic energy calculation, jobfile
-2850 fnam1 = com_parser%get_token(equal_is_delimiter=.false.)
+2850 fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)
 call lower(fnam1)
 call upper(fnam1(1:1))
 if(fnam1 .eq. ' ') fnam1 = jobnam
-code = com_parser%get_token(equal_is_delimiter=.false.)
+code = statement_parser%get_token(equal_is_delimiter=.false.)
 if (code .eq. ' ') then
   l1 = 1
   l2 = 10
 else
   read (code, *, err=2860, end=2860) l2
-  code = com_parser%get_token(equal_is_delimiter=.false.)
+  code = statement_parser%get_token(equal_is_delimiter=.false.)
   if (code .eq. ' ') then
     l1 = 1
   else
