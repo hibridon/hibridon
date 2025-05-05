@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "unused.h"
 #include "command.inc.F90"
 
 ! code inspired from https://stackoverflow.com/questions/58749579/what-is-the-canonical-way-to-allocate-and-construct-polymorphic-objects-in-fortr
@@ -44,6 +45,7 @@ end subroutine statement_parser_type_constructor
 ! destructor for statement_parser_type
 subroutine statement_parser_type_destructor(this)
   type(statement_parser_type) :: this
+  UNUSED_DUMMY(this)
 end subroutine statement_parser_type_destructor
 
 function statement_parser_type_get_token(this, equal_is_delimiter) result(token)
