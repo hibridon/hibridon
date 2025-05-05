@@ -165,19 +165,17 @@ contains
   end subroutine print_main_params
 
   ! check if inconsistencies in input parameters
-  subroutine check_execute(this, statements, bofargs, next_statement, post_action)
+  subroutine check_execute(this, statement_parser, post_action)
+    use mod_statement_parser, only: statement_parser_type
     use mod_command, only: k_post_action_read_new_line
     use mod_hiiolib1, only: genchk
 
     class(check_command_type) :: this
-    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
-    integer, intent(in) :: bofargs
-    integer, intent(out) :: next_statement
+    class(statement_parser_type), intent(inout) :: statement_parser
     integer, intent(out) :: post_action
     UNUSED_DUMMY(this)
-    UNUSED_DUMMY(statements)
+    UNUSED_DUMMY(statement_parser)
     call genchk()
-    next_statement = bofargs
     post_action = k_post_action_read_new_line
 
   end subroutine check_execute
@@ -185,26 +183,24 @@ contains
   ! input, output, label and job file names
   ! input=infile, output=outfile, job=jobfile
   ! input, output, and label are now lower case:  mha 6.6.91
-  subroutine input_execute(this, statements, bofargs, next_statement, post_action)
+  subroutine input_execute(this, statement_parser, post_action)
+    use mod_statement_parser, only: statement_parser_type
     use mod_command, only: k_post_action_exit_hibridon, k_post_action_read_new_line
     use mod_hinput_state, only: batch
     use mod_file, only: input
     use mod_hiutil, only: get_token, lower, upper
 
     class(input_command_type) :: this
-    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
-    integer, intent(in) :: bofargs
-    integer, intent(out) :: next_statement
+    class(statement_parser_type), intent(inout) :: statement_parser
     integer, intent(out) :: post_action
 
     character(len=40) :: argument
-    integer :: l, lc, len
+    integer :: len
     class(command_type), pointer :: command
     logical :: existf
     UNUSED_DUMMY(this)
-    l = bofargs
-    call get_token(statements,l,argument,lc)
-    input = argument(1:lc)
+    argument = statement_parser%get_token(equal_is_delimiter=.false.)
+    input = argument
     call lower(input)
     call upper(input(1:1))
     inquire (file=input, exist=existf)
@@ -219,36 +215,33 @@ contains
       end if
     end if
     command => command_mgr%get_command('READ')
-    call command%execute(statements, l, next_statement, post_action)
+    call command%execute(statement_parser, post_action)
   end subroutine input_execute
 
   ! input, output, label and job file names
   ! input=infile, output=outfile, job=jobfile
   ! input, output, and label are now lower case:  mha 6.6.91
-  subroutine job_execute(this, statements, bofargs, next_statement, post_action)
+  subroutine job_execute(this, statement_parser, post_action)
+    use mod_statement_parser, only: statement_parser_type
     use mod_command, only: k_post_action_interpret_next_statement
     use mod_file, only: jobnam
     use mod_hiutil, only: get_token, lower, upper
 
     class(job_command_type) :: this
-    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
-    integer, intent(in) :: bofargs
-    integer, intent(out) :: next_statement
+    class(statement_parser_type), intent(inout) :: statement_parser
     integer, intent(out) :: post_action
 
     character(len=40) :: code
-    integer :: l, lc
     UNUSED_DUMMY(this)
-    l = bofargs
-    call get_token(statements, l, code, lc)
-    jobnam = code(1:lc)
+    code = statement_parser%get_token(equal_is_delimiter=.false.)
+    jobnam = code
     call lower(jobnam)
     call upper(jobnam(1:1))
-    next_statement = l
     post_action = k_post_action_interpret_next_statement
   end subroutine job_execute
 
-  subroutine intcrs_execute(this, statements, bofargs, next_statement, post_action)
+  subroutine intcrs_execute(this, statement_parser, post_action)
+    use mod_statement_parser, only: statement_parser_type
     use mod_hibrid5, only :intcrs
     !.....integral cross sections
     !  intcrs,jobfile,in1,in2,ienerg,maxjtot
@@ -259,49 +252,44 @@ contains
 
     implicit none
     class(intcrs_command_type) :: this
-    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
-    integer, intent(in) :: bofargs
-    integer, intent(out) :: next_statement
+    class(statement_parser_type), intent(inout) :: statement_parser
     integer, intent(out) :: post_action
     character(len=40) :: code
 
 
     character(len=40) :: fnam1
 
-    integer :: i, j, l, lc
+    integer :: i, j, l
     integer, parameter :: k_num_args = 4
     real(8) :: a(k_num_args)  ! in1,in2,ienerg,maxjtot
     character*8 empty_var_list(0)
 
     UNUSED_DUMMY(this)
-    l = bofargs
-    call get_token(statements,l,fnam1,lc)
+    fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)
     if(fnam1 .eq. ' ') fnam1 = jobnam
     call lower(fnam1)
     call upper(fnam1(1:1))
     do i = 1, k_num_args
       a(i) = 0
       if(l .eq. 0) cycle
-      call get_token(statements,l,code,lc)
-      call assignment_parse(code(1:lc),empty_var_list,j,a(i))
+      code = statement_parser%get_token(equal_is_delimiter=.false.)
+      call assignment_parse(code,empty_var_list,j,a(i))
     end do
     call intcrs(fnam1,a)
-    next_statement = l
     post_action = k_post_action_read_new_line
   end subroutine intcrs_execute
 
   ! input, output, label and job file names
   ! input=infile, output=outfile, job=jobfile
   ! input, output, and label are now lower case:  mha 6.6.91
-  subroutine label_execute(this, statements, bofargs, next_statement, post_action)
+  subroutine label_execute(this, statement_parser, post_action)
+    use mod_statement_parser, only: statement_parser_type
     use mod_command, only: k_post_action_interpret_next_statement
     use mod_parpot, only: label => pot_label
     use mod_hiutil, only: lenstr
 
     class(label_command_type) :: this
-    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
-    integer, intent(in) :: bofargs
-    integer, intent(out) :: next_statement
+    class(statement_parser_type), intent(inout) :: statement_parser
     integer, intent(out) :: post_action
 
     integer :: l
@@ -309,26 +297,26 @@ contains
     integer :: low, lend
 
     UNUSED_DUMMY(this)
-    UNUSED_DUMMY(bofargs)
 
-    low = index (statements, '=') + 1
-    lend = index (statements, ';') - 1
+    low = index (statement_parser%current_line, '=') + 1
+    lend = index (statement_parser%current_line, ';') - 1
     if(lend.lt.0) then
-      lend=lenstr(statements)
+      lend=lenstr(statement_parser%current_line)
       l=0
     else
       l=lend+2
     end if
-    label = statements(low:lend)
+    label = statement_parser%current_line(low:lend)
 
-    next_statement = l
+    statement_parser%current_pos = l
     post_action = k_post_action_interpret_next_statement
   end subroutine label_execute
 
   ! input, output, label and job file names
   ! input=infile, output=outfile, job=jobfile
   ! input, output, and label are now lower case:  mha 6.6.91
-  subroutine output_execute(this, statements, bofargs, next_statement, post_action)
+  subroutine output_execute(this, statement_parser, post_action)
+    use mod_statement_parser, only: statement_parser_type
     use mod_command, only: k_post_action_interpret_next_statement
     use funit
     use mod_file, only: output
@@ -336,20 +324,16 @@ contains
     use mod_hiiolib1, only: openf
 
     class(output_command_type) :: this
-    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
-    integer, intent(in) :: bofargs
-    integer, intent(out) :: next_statement
+    class(statement_parser_type), intent(inout) :: statement_parser
     integer, intent(out) :: post_action
 
     character(len=40) :: argument
-    integer :: l, lc
 
     logical :: openfl
 
     UNUSED_DUMMY(this)
-    l = bofargs
-    call get_token(statements,l,argument,lc)
-    output = argument(1:lc)
+    argument = statement_parser%get_token(equal_is_delimiter=.false.)
+    output = argument
     call lower(output)
     call upper(output(1:1))
     inquire(FUNIT_OUT, opened=openfl)
@@ -358,21 +342,19 @@ contains
       close(FUNIT_OUT)
     end if
     call openf(FUNIT_OUT, output, 'sf', 0)
-    next_statement = l
     post_action = k_post_action_interpret_next_statement
   end subroutine output_execute
 
-  subroutine prsbr_execute(this, statements, bofargs, next_statement, post_action)
+  subroutine prsbr_execute(this, statement_parser, post_action)
     ! pressure broadening cross sections - added by p. dagdigian
+    use mod_statement_parser, only: statement_parser_type
     use mod_hiutil, only: assignment_parse
     use mod_command, only: k_post_action_read_new_line
     use mod_file, only: jobnam
     use mod_hiutil, only: get_token, lower, upper
     use mod_hiprsbr, only: prsbr
     class(prsbr_command_type) :: this
-    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
-    integer, intent(in) :: bofargs
-    integer, intent(out) :: next_statement
+    class(statement_parser_type), intent(inout) :: statement_parser
     integer, intent(out) :: post_action
     integer :: l
     character*8 empty_var_list(0)
@@ -380,44 +362,43 @@ contains
     character(len=40) :: fnam1
     character(len=40) :: fnam2
 
-    integer :: i, j, lc
+    integer :: i, j
     integer, parameter :: k_num_args = 12
     real(8) :: a(k_num_args)
 
     UNUSED_DUMMY(this)
-    l = bofargs
 
-    call get_token(statements,l,fnam1,lc)
+    fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)
     if(fnam1 .eq. ' ') fnam1 = jobnam
     call lower(fnam1)
     call upper(fnam1(1:1))
     ! get iener for 1st smt file
     a(1) = 0.d0
     if(l .eq. 0) goto 3205
-    call get_token(statements,l,code,lc)
-    call assignment_parse(code(1:lc),empty_var_list,j,a(1))
-    3205 call get_token(statements,l,fnam2,lc)
+    code = statement_parser%get_token(equal_is_delimiter=.false.)
+    call assignment_parse(code,empty_var_list,j,a(1))
+    3205 fnam2 = statement_parser%get_token(equal_is_delimiter=.false.)
     if(fnam2 .eq. ' ') fnam2 = jobnam
     call lower(fnam2)
     call upper(fnam2(1:1))
     ! get iener for 2nd smt file
     a(2) = 0.d0
     if(l .eq. 0) goto 3210
-    call get_token(statements,l,code,lc)
-    call assignment_parse(code(1:lc),empty_var_list,j,a(2))
+    code = statement_parser%get_token(equal_is_delimiter=.false.)
+    call assignment_parse(code,empty_var_list,j,a(2))
     ! get k, j1, in1, j2, in2, diag, j1p, in1p, j2p, in2p
     3210 do 3220 i = 3, 12
       a(i) = 0.d0
       if(l .eq. 0) goto 3220
-      call get_token(statements,l,code,lc)
-      call assignment_parse(code(1:lc),empty_var_list,j,a(i))
+      code = statement_parser%get_token(equal_is_delimiter=.false.)
+      call assignment_parse(code,empty_var_list,j,a(i))
     3220 continue
     call prsbr(fnam1,fnam2,a)
-    next_statement = l
     post_action = k_post_action_read_new_line
   end subroutine prsbr_execute
 
-  subroutine read_execute(this, statements, bofargs, next_statement, post_action)
+  subroutine read_execute(this, statement_parser, post_action)
+    use mod_statement_parser, only: statement_parser_type
     use mod_hinput_state, only: batch
     use mod_par, only: lpar
     use mod_si_params, only: icode, set_param_names
@@ -429,14 +410,12 @@ contains
     use mod_hisystem, only: sysdat
 
     class(read_command_type) :: this
-    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
-    integer, intent(in) :: bofargs
-    integer, intent(out) :: next_statement
+    class(statement_parser_type), intent(inout) :: statement_parser
     integer, intent(out) :: post_action
 
     integer :: ione
     UNUSED_DUMMY(this)
-    UNUSED_DUMMY(statements)
+    UNUSED_DUMMY(statement_parser)
 
     ! read
     call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
@@ -445,11 +424,11 @@ contains
     call sysdat(irpot, lpar(LPAR_READPT),ione)
     irinp = 1
     if (batch) lpar(LPAR_BATCH) = .true.
-    next_statement = bofargs
     post_action = k_post_action_interpret_next_statement
   end subroutine read_execute
 
-  subroutine run_execute(this, statements, bofargs, next_statement, post_action)
+  subroutine run_execute(this, statement_parser, post_action)
+    use mod_statement_parser, only: statement_parser_type
     use mod_par, only: ipar, lpar, rpar
     use mod_si_params, only: iicode, ircode, icode, set_param_names
     use ipar_enum
@@ -476,17 +455,14 @@ contains
 
     implicit none
     class(run_command_type) :: this
-    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
-    integer, intent(in) :: bofargs
-    integer, intent(out) :: next_statement
+    class(statement_parser_type), intent(inout) :: statement_parser
     integer, intent(out) :: post_action
 
     integer :: i, j
     integer :: nerg
 
     UNUSED_DUMMY(this)
-    UNUSED_DUMMY(statements)
-    next_statement = bofargs
+    UNUSED_DUMMY(statement_parser)
 
     call update_nu_params()
     call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
@@ -568,7 +544,8 @@ contains
     post_action = k_post_action_write_cr_and_exit
   end subroutine run_execute
 
-  subroutine show_execute(this, statements, bofargs, next_statement, post_action)
+  subroutine show_execute(this, statement_parser, post_action)
+    use mod_statement_parser, only: statement_parser_type
     use mod_par, only: ipar, lpar, rpar
     use mod_hinput_state, only: batch
     use mod_si_params, only: iicode, ircode, icode, set_param_names
@@ -589,22 +566,18 @@ contains
     ! show all parameters and flags
     ! show
     class(show_command_type) :: this
-    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
-    integer, intent(in) :: bofargs
-    integer, intent(out) :: next_statement
+    class(statement_parser_type), intent(inout) :: statement_parser
     integer, intent(out) :: post_action
 
     integer :: j
-    integer :: l, lc, leninp, lenjob, lenout
+    integer :: leninp, lenjob, lenout
     logical :: jtrunc
     character*40 :: code
     character(len=K_MAX_USER_LINE_LENGTH) :: answer
 
     UNUSED_DUMMY(this)
-    l = bofargs
-    next_statement = l
     call set_param_names(lpar(LPAR_BOUNDC),pcod,icode)
-    call get_token(statements,l,code,lc)
+    code = statement_parser%get_token(equal_is_delimiter=.false.)
 
     if (.not.lpar(LPAR_BOUNDC)) then
       write(6,710) &
@@ -674,23 +647,21 @@ contains
            1x,'** Output file: ',(a),/,1x,'** Jobname:     ',(a), &
            ' (** TRUNCATED TO 8 CHARACTERS **)')
     endif
-    next_statement = l
     post_action = k_post_action_interpret_next_statement
   end subroutine show_execute
 
-  subroutine hypxsc_execute(this, statements, bofargs, next_statement, post_action)
+  subroutine hypxsc_execute(this, statement_parser, post_action)
     !  hyperfine xcs routine (originally written by j. klos,
     !  rewritten by p.j. dagdigian
     !  hypxsc,jobfile, ienerg ,nucspin, j1, j2
+    use mod_statement_parser, only: statement_parser_type
     use mod_hiutil, only: get_token, lower, upper, assignment_parse
     use mod_file, only: jobnam
     use mod_command, only: k_post_action_read_new_line
     use mod_hypxsc, only: hypxsc
 
     class(hypxsc_command_type) :: this
-    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
-    integer, intent(in) :: bofargs
-    integer, intent(out) :: next_statement
+    class(statement_parser_type), intent(inout) :: statement_parser
     integer, intent(out) :: post_action
 
     character(len=40) :: fnam1  ! job file name
@@ -702,27 +673,25 @@ contains
 
     character*8 empty_var_list(0)
     character(len=40) :: code
-    integer :: l, lc
     integer :: i, j
 
     UNUSED_DUMMY(this)
-    l = bofargs
-    call get_token(statements,l,fnam1,lc)
+    fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)
     if(fnam1 .eq. ' ') fnam1 = jobnam
     call lower(fnam1)
     call upper(fnam1(1:1))
     do 2013 i = 1,4
        a(i) = 0.d0
-       if(l .eq. 0) goto 2013
-       call get_token(statements,l,code,lc)
-       call assignment_parse(code(1:lc),empty_var_list,j,a(i))
+       if(statement_parser%statement_end_reached()) goto 2013
+       code = statement_parser%get_token(equal_is_delimiter=.false.)
+       call assignment_parse(code,empty_var_list,j,a(i))
     2013   continue
     call hypxsc(fnam1,a)
-    next_statement = l
     post_action = k_post_action_read_new_line
   end subroutine hypxsc_execute
 
-  subroutine stmix_execute(this, statements, bofargs, next_statement, post_action)
+  subroutine stmix_execute(this, statement_parser, post_action)
+    use mod_statement_parser, only: statement_parser_type
     use mod_histmix, only: stmix
     ! singlet-triplet collisional mixing - added by p. dagdigian
     use mod_hiutil, only: get_token, lower, upper, assignment_parse
@@ -730,9 +699,7 @@ contains
     use mod_command, only: k_post_action_read_new_line
 
     class(stmix_command_type) :: this
-    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
-    integer, intent(in) :: bofargs
-    integer, intent(out) :: next_statement
+    class(statement_parser_type), intent(inout) :: statement_parser
     integer, intent(out) :: post_action
 
     character(len=40) :: fnam1  ! 1st smt file name
@@ -748,77 +715,70 @@ contains
 
     character*8 empty_var_list(0)
     character(len=40) :: code
-    integer :: l, lc
     integer :: i, j
 
     UNUSED_DUMMY(this)
-    l = bofargs
-    call get_token(statements,l,fnam1,lc)
+    fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)
     if(fnam1 .eq. ' ') fnam1 = jobnam
     call lower(fnam1)
     call upper(fnam1(1:1))
     ! get iener for 1st smt file
     a(1) = 0.d0
-    if(l .eq. 0) goto 3005
-    call get_token(statements,l,code,lc)
-    call assignment_parse(code(1:lc),empty_var_list,j,a(1))
-    3005 call get_token(statements,l,fnam2,lc)
+    if(statement_parser%statement_end_reached()) goto 3005
+    code = statement_parser%get_token(equal_is_delimiter=.false.)
+    call assignment_parse(code,empty_var_list,j,a(1))
+    3005 fnam2 = statement_parser%get_token(equal_is_delimiter=.false.)
     if(fnam2 .eq. ' ') fnam2 = jobnam
     call lower(fnam2)
     call upper(fnam2(1:1))
     ! get iener for 2nd smt file
     a(2) = 0.d0
-    if(l .eq. 0) goto 3010
-    call get_token(statements,l,code,lc)
-    call assignment_parse(code(1:lc),empty_var_list,j,a(2))
+    if(statement_parser%statement_end_reached()) goto 3010
+    code = statement_parser%get_token(equal_is_delimiter=.false.)
+    call assignment_parse(code,empty_var_list,j,a(2))
     ! get dele, emax, istats, istatt, wso
     3010 do 3020 i = 3, 7
       a(i) = 0.d0
-      if(l .eq. 0) goto 3020
-      call get_token(statements,l,code,lc)
-      call assignment_parse(code(1:lc),empty_var_list,j,a(i))
+      if(statement_parser%statement_end_reached()) goto 3020
+      code = statement_parser%get_token(equal_is_delimiter=.false.)
+      call assignment_parse(code,empty_var_list,j,a(i))
     3020 continue
     call stmix(fnam1,fnam2,a)
-    next_statement = l
     post_action = k_post_action_read_new_line
   end subroutine stmix_execute
 
-  subroutine trnprt_execute(this, statements, bofargs, next_statement, post_action)
+  subroutine trnprt_execute(this, statement_parser, post_action)
     ! transport cross sections - added by p. dagdigian
     ! TRNPRT,JOB,IENERG,IN1,IN2,JTOTMX,JMIN,JMAX
+    use mod_statement_parser, only: statement_parser_type
     use mod_hiutil, only: get_token, lower, upper, assignment_parse
     use mod_file, only: jobnam
     use mod_hitrnprt, only: trnprt
     use mod_command, only: k_post_action_read_new_line
 
     class(trnprt_command_type) :: this
-    character(len=K_MAX_USER_LINE_LENGTH), intent(in) :: statements
-    integer, intent(in) :: bofargs
-    integer, intent(out) :: next_statement
+    class(statement_parser_type), intent(inout) :: statement_parser
     integer, intent(out) :: post_action
 
     real(8) :: a(6)  ! 6 real arguments
     character*8 empty_var_list(0)
     character(len=40) :: fnam1
     character(len=40) :: code
-    integer :: l, lc
     integer :: j
 
     UNUSED_DUMMY(this)
-    l = bofargs
-    call get_token(statements,l,fnam1,lc)
+    fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)
     if(fnam1 .eq. ' ') fnam1 = jobnam
     call lower(fnam1)
     call upper(fnam1(1:1))
     ! get iener for 1st smt file
     a(1) = 0.d0
-    if(l /= 0) then
-      call get_token(statements,l,code,lc)
-      call assignment_parse(code(1:lc),empty_var_list,j,a(1))
+    if(.not. statement_parser%statement_end_reached()) then
+      code = statement_parser%get_token(equal_is_delimiter=.false.)
+      call assignment_parse(code,empty_var_list,j,a(1))
       ! todo: get in1, in2, jtotmx, join, jmax
     end if
     call trnprt(fnam1, a)
-    next_statement = l
     post_action = k_post_action_read_new_line
   end subroutine trnprt_execute
 
