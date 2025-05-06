@@ -180,6 +180,46 @@ contains
 
   end subroutine check_execute
 
+  subroutine hypxsc_execute(this, statement_parser, post_action)
+    !  hyperfine xcs routine (originally written by j. klos,
+    !  rewritten by p.j. dagdigian
+    !  hypxsc,jobfile, ienerg ,nucspin, j1, j2
+    use mod_statement_parser, only: statement_parser_type
+    use mod_hiutil, only: get_token, lower, upper, assignment_parse
+    use mod_file, only: jobnam
+    use mod_command, only: k_post_action_read_new_line
+    use mod_hypxsc, only: hypxsc
+
+    class(hypxsc_command_type) :: this
+    class(statement_parser_type), intent(inout) :: statement_parser
+    integer, intent(out) :: post_action
+
+    character(len=40) :: fnam1  ! job file name
+    real(8) :: a(4)  ! 4 real arguments:
+    ! 1: ienerg
+    ! 2: nucspin
+    ! 3: j1
+    ! 4: j2
+
+    character*8 empty_var_list(0)
+    character(len=40) :: code
+    integer :: i, j
+
+    UNUSED_DUMMY(this)
+    fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)
+    if(fnam1 .eq. ' ') fnam1 = jobnam
+    call lower(fnam1)
+    call upper(fnam1(1:1))
+    do 2013 i = 1,4
+       a(i) = 0.d0
+       if(statement_parser%statement_end_reached()) goto 2013
+       code = statement_parser%get_token(equal_is_delimiter=.false.)
+       call assignment_parse(code,empty_var_list,j,a(i))
+    2013   continue
+    call hypxsc(fnam1,a)
+    post_action = k_post_action_read_new_line
+  end subroutine hypxsc_execute
+
   ! input, output, label and job file names
   ! input=infile, output=outfile, job=jobfile
   ! input, output, and label are now lower case:  mha 6.6.91
@@ -217,28 +257,6 @@ contains
     command => command_mgr%get_command('READ')
     call command%execute(statement_parser, post_action)
   end subroutine input_execute
-
-  ! input, output, label and job file names
-  ! input=infile, output=outfile, job=jobfile
-  ! input, output, and label are now lower case:  mha 6.6.91
-  subroutine job_execute(this, statement_parser, post_action)
-    use mod_statement_parser, only: statement_parser_type
-    use mod_command, only: k_post_action_interpret_next_statement
-    use mod_file, only: jobnam
-    use mod_hiutil, only: get_token, lower, upper
-
-    class(job_command_type) :: this
-    class(statement_parser_type), intent(inout) :: statement_parser
-    integer, intent(out) :: post_action
-
-    character(len=40) :: code
-    UNUSED_DUMMY(this)
-    code = statement_parser%get_token(equal_is_delimiter=.false.)
-    jobnam = code
-    call lower(jobnam)
-    call upper(jobnam(1:1))
-    post_action = k_post_action_interpret_next_statement
-  end subroutine job_execute
 
   subroutine intcrs_execute(this, statement_parser, post_action)
     use mod_statement_parser, only: statement_parser_type
@@ -278,6 +296,28 @@ contains
     call intcrs(fnam1,a)
     post_action = k_post_action_read_new_line
   end subroutine intcrs_execute
+
+  ! input, output, label and job file names
+  ! input=infile, output=outfile, job=jobfile
+  ! input, output, and label are now lower case:  mha 6.6.91
+  subroutine job_execute(this, statement_parser, post_action)
+    use mod_statement_parser, only: statement_parser_type
+    use mod_command, only: k_post_action_interpret_next_statement
+    use mod_file, only: jobnam
+    use mod_hiutil, only: get_token, lower, upper
+
+    class(job_command_type) :: this
+    class(statement_parser_type), intent(inout) :: statement_parser
+    integer, intent(out) :: post_action
+
+    character(len=40) :: code
+    UNUSED_DUMMY(this)
+    code = statement_parser%get_token(equal_is_delimiter=.false.)
+    jobnam = code
+    call lower(jobnam)
+    call upper(jobnam(1:1))
+    post_action = k_post_action_interpret_next_statement
+  end subroutine job_execute
 
   ! input, output, label and job file names
   ! input=infile, output=outfile, job=jobfile
@@ -649,46 +689,6 @@ contains
     post_action = k_post_action_interpret_next_statement
   end subroutine show_execute
 
-  subroutine hypxsc_execute(this, statement_parser, post_action)
-    !  hyperfine xcs routine (originally written by j. klos,
-    !  rewritten by p.j. dagdigian
-    !  hypxsc,jobfile, ienerg ,nucspin, j1, j2
-    use mod_statement_parser, only: statement_parser_type
-    use mod_hiutil, only: get_token, lower, upper, assignment_parse
-    use mod_file, only: jobnam
-    use mod_command, only: k_post_action_read_new_line
-    use mod_hypxsc, only: hypxsc
-
-    class(hypxsc_command_type) :: this
-    class(statement_parser_type), intent(inout) :: statement_parser
-    integer, intent(out) :: post_action
-
-    character(len=40) :: fnam1  ! job file name
-    real(8) :: a(4)  ! 4 real arguments:
-    ! 1: ienerg
-    ! 2: nucspin
-    ! 3: j1
-    ! 4: j2
-
-    character*8 empty_var_list(0)
-    character(len=40) :: code
-    integer :: i, j
-
-    UNUSED_DUMMY(this)
-    fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)
-    if(fnam1 .eq. ' ') fnam1 = jobnam
-    call lower(fnam1)
-    call upper(fnam1(1:1))
-    do 2013 i = 1,4
-       a(i) = 0.d0
-       if(statement_parser%statement_end_reached()) goto 2013
-       code = statement_parser%get_token(equal_is_delimiter=.false.)
-       call assignment_parse(code,empty_var_list,j,a(i))
-    2013   continue
-    call hypxsc(fnam1,a)
-    post_action = k_post_action_read_new_line
-  end subroutine hypxsc_execute
-
   subroutine stmix_execute(this, statement_parser, post_action)
     use mod_statement_parser, only: statement_parser_type
     use mod_histmix, only: stmix
@@ -795,20 +795,20 @@ contains
     call command_mgr%register_command('CHECK', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
+    com = hypxsc_command_type()
+    call command_mgr%register_command('HYPXSC', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
+
     com = input_command_type()
     call command_mgr%register_command('INPUT', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
-    com = job_command_type()
-    call command_mgr%register_command('JOB', com)
-    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
-
-    com = prsbr_command_type()
-    call command_mgr%register_command('PRSBR', com)
-    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
-
     com = intcrs_command_type()
     call command_mgr%register_command('INTCRS', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
+
+    com = job_command_type()
+    call command_mgr%register_command('JOB', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
     com = label_command_type()
@@ -817,6 +817,10 @@ contains
 
     com = output_command_type()
     call command_mgr%register_command('OUTPUT', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
+
+    com = prsbr_command_type()
+    call command_mgr%register_command('PRSBR', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
     com = read_command_type()
@@ -829,10 +833,6 @@ contains
 
     com = show_command_type()
     call command_mgr%register_command('SHOW', com)
-    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
-
-    com = hypxsc_command_type()
-    call command_mgr%register_command('HYPXSC', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
     com = stmix_command_type()
