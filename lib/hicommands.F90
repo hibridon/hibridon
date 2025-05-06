@@ -208,7 +208,7 @@ contains
     use mod_statement_parser, only: statement_parser_type
     use mod_command, only: k_post_action_read_new_line
     use mod_hibrid4, only: eadiab1
-    use mod_file, only: input, jobnam
+    use mod_file, only: jobnam
     use mod_hiutil, only: lower, upper
 
     class(eadiab_command_type) :: this
