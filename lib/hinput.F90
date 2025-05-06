@@ -122,7 +122,7 @@ module mod_hinput
     k_keyword_execute_command_mgr_command     =  6   !   45 label:execute_command_mgr_command(i)
   end enum
 
-  integer, parameter :: ncode = 25  !  ncode is the number of bcod's
+  integer, parameter :: ncode = 24  !  ncode is the number of bcod's
   character(len=8), parameter :: bcod(ncode) = [ &  ! bcod stores hibridon's commands
     'DEBROGLI', &
     'DIFFER  ', &
@@ -147,8 +147,7 @@ module mod_hinput
     'INDOUT  ', &
     'PARTC   ', &
     'FLUX    ', &
-    'J1J2    ', &
-    'EADIAB  ']
+    'J1J2    ']
 
   character(len=8), parameter :: bascod(1) = ['BASISTYP']
 
@@ -322,7 +321,7 @@ use mod_two, only: numj, nj1j2
 use mod_opti, only: optifl
 use mod_hiutil, only: get_token, lower, upper, lenstr, vaxhlp
 use mod_hibrid1, only: difs, turn
-use mod_hibrid4, only: psi, eadiab1, sprint
+use mod_hibrid4, only: psi, sprint
 use mod_hypxsc, only: hypxsc
 use mod_hiiolib1, only: openf, gendat, savdat, genchk
 use mod_hisystem, only: baschk, sysdat, syssav, ptread
@@ -349,7 +348,6 @@ integer :: ijcode
 
 integer :: ipr, istep, inam, i, ienerg, iflux, ii, im, imx, inew, iprint, iskip, itx, ityp, izero
 integer :: j, jm, jmx, jtot2x, length
-integer :: l1, l2
 integer :: statement_start_index
 integer :: nde
 real(8) :: optacm, r, thrs, val, waveve, xmu
@@ -422,7 +420,6 @@ lindx(FCOD_BOUNDC) = LPAR_BOUNDC
 ! indout: 430
 ! partc: 2650
 ! flux: 2800
-! eadiab: 2850
 ! j1j2:  460
 ! nb after changing the following list, check that all the variables "incode"
 ! that follow after address 900 are changed accordingly
@@ -583,7 +580,7 @@ end if
       1900,2800,600, &
       1300,2300, &
       1200,1600,430,2650,2800, &
-      460,2850),i
+      460),i
 !
 ! label:execute_command_mgr_command(i)
 !
@@ -1350,30 +1347,6 @@ iflux=a(1)
 if (a(2) .eq. 0.d0) iflux=2
 call psi(fnam1,a)
 goto 1  ! label:read_new_statement_line
-! adiabatic energy calculation, jobfile
-2850 fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)
-call lower(fnam1)
-call upper(fnam1(1:1))
-if(fnam1 .eq. ' ') fnam1 = jobnam
-code = statement_parser%get_token(equal_is_delimiter=.false.)
-if (code .eq. ' ') then
-  l1 = 1
-  l2 = 10
-else
-  read (code, *, err=2860, end=2860) l2
-  code = statement_parser%get_token(equal_is_delimiter=.false.)
-  if (code .eq. ' ') then
-    l1 = 1
-  else
-    l1 = l2
-    read (code, *, err=2860, end=2860) l2
-  end if
-end if
-call eadiab1(fnam1,l1,l2)
-goto 1  ! label:read_new_statement_line
-2860 write (6, *) 'Parameters to EADIAB cannot be recognized'
-goto 1  ! label:read_new_statement_line
-!  print out system parameters
 
 end
 

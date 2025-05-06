@@ -13,6 +13,12 @@ implicit none
     procedure :: execute => check_execute
   end type check_command_type
 
+  ! eadiab
+  type, extends(command_type) :: eadiab_command_type
+  contains
+    procedure :: execute => eadiab_execute
+  end type eadiab_command_type
+
   ! hypxsc
   type, extends(command_type) :: hypxsc_command_type
   contains
@@ -185,6 +191,61 @@ contains
     post_action = k_post_action_read_new_line
 
   end subroutine check_execute
+
+  subroutine eadiab_execute(this, statement_parser, post_action)
+    ! adiabatic energy calculation
+    ! eadiab,jobfile,[nch1],[nch2]
+    ! with eadiab,jobfile:
+    !  nchmin = 1
+    !  nchmax = 10
+    ! with eadiab,jobfile,nch1:
+    !  nchmin = 1
+    !  nchmax = nch1
+    ! with eadiab,jobfile,nch1,nch2:
+    !  nchmin = nch1
+    !  nchmax = nch2
+
+    use mod_statement_parser, only: statement_parser_type
+    use mod_command, only: k_post_action_read_new_line
+    use mod_hibrid4, only: eadiab1
+    use mod_file, only: input, jobnam
+    use mod_hiutil, only: lower, upper
+
+    class(eadiab_command_type) :: this
+    class(statement_parser_type), intent(inout) :: statement_parser
+    integer, intent(out) :: post_action
+
+    integer :: nchmin, nchmax
+    character(len=:), allocatable :: fnam1
+    character(len=:), allocatable :: arg
+
+    UNUSED_DUMMY(this)
+
+    fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)
+    call lower(fnam1)
+    call upper(fnam1(1:1))
+    if(fnam1 .eq. ' ') fnam1 = jobnam
+    arg = statement_parser%get_token(equal_is_delimiter=.false.)
+    if (arg .eq. ' ') then
+      nchmin = 1
+      nchmax = 10
+    else
+      read (arg, *, err=2860, end=2860) nchmax
+      arg = statement_parser%get_token(equal_is_delimiter=.false.)
+      if (arg .eq. ' ') then
+        nchmin = 1
+      else
+        nchmin = nchmax
+        read (arg, *, err=2860, end=2860) nchmax
+      end if
+    end if
+    call eadiab1(fnam1, nchmin, nchmax)
+2860 write (6, *) 'Parameters to EADIAB cannot be recognized'
+
+    post_action = k_post_action_read_new_line
+
+
+  end subroutine eadiab_execute
 
   subroutine hypxsc_execute(this, statement_parser, post_action)
     !  hyperfine xcs routine (originally written by j. klos,
@@ -753,6 +814,7 @@ contains
   end subroutine stmix_execute
 
   subroutine sysconf_execute(this, statement_parser, post_action)
+    !  print out system parameters
     use mod_statement_parser, only: statement_parser_type
     use mod_command, only: k_post_action_read_new_line
     use mod_hiutil, only: sys_conf
@@ -814,6 +876,10 @@ contains
 
     com = check_command_type()
     call command_mgr%register_command('CHECK', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
+
+    com = eadiab_command_type()
+    call command_mgr%register_command('EADIAB', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
     com = hypxsc_command_type()
