@@ -13,6 +13,12 @@ implicit none
     procedure :: execute => check_execute
   end type check_command_type
 
+  ! hypxsc
+  type, extends(command_type) :: hypxsc_command_type
+  contains
+    procedure :: execute => hypxsc_execute
+  end type hypxsc_command_type
+
   ! input
   type, extends(command_type) :: input_command_type
   contains
@@ -66,12 +72,6 @@ implicit none
   contains
     procedure :: execute => show_execute
   end type show_command_type
-
-  ! hypxsc
-  type, extends(command_type) :: hypxsc_command_type
-  contains
-    procedure :: execute => hypxsc_execute
-  end type hypxsc_command_type
 
   ! stmix
   type, extends(command_type) :: stmix_command_type
