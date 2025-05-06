@@ -87,13 +87,13 @@ integer, parameter :: dcs_unit = 2
 integer, parameter :: rho_unit = 3
 real(8), dimension(:), allocatable :: s, sm, sm6
 ! to store a22p,a21p and a11p amplitudes
-complex(8), dimension(:, :), allocatable :: fm1m2
-real(8), dimension(:), allocatable :: a22, a22fak, a21, a21fak, &
-     a11, a11fak
+complex(8), dimension(:, :), allocatable :: fm1m2  ! disable-warnings:maybe-uninitialized (fm1m2) todo: fixme (issue #242)
+real(8), dimension(:), allocatable :: a22, a22fak, a21, a21fak, &  ! disable-warnings:maybe-uninitialized (a21fak, a22fak) todo: fixme (issue #242)
+     a11, a11fak  ! disable-warnings:maybe-uninitialized (a11fak) todo: fixme (issue #242)
 ! to store rho and rho2 density matrices
-real(8), dimension(:, :), allocatable :: rho, rho2
+real(8), dimension(:, :), allocatable :: rho, rho2  ! disable-warnings:maybe-uninitialized (rho, rho2) todo: fixme (issue #242)
 !     scattering amplitudes
-complex(8), dimension(:, :, :), allocatable :: q, qm
+complex(8), dimension(:, :, :), allocatable :: q, qm  ! disable-warnings:maybe-uninitialized (qm) todo: fixme (issue #242)
 !     m-dependent integral cross sections
 real(8), dimension(:, :), allocatable :: ximdep
 real(8), dimension(:), allocatable :: ytmp
@@ -181,7 +181,7 @@ endif
 !      call version(2)
 call dater(cdate)
 write (dcs_unit,23) cdate
-if (mflag) write (3,23) cdate
+if (mflag) write (rho_unit,23) cdate
 write (6,22) cdate
 22 format (/,'**  DIFFERENTIAL CROSS SECTION (ANG^2/SR)', &
     /,'    TODAYS DATE:  ',(a))
@@ -300,7 +300,7 @@ write(6,170) j1,in1,j2,in2,jtot1,jtot2,ca,1.8897*ca, &
         '%   COLLISION ENERGY: ',f10.4,' cm-1; ',f10.4,' meV')
 if (stflag) then
    write (6,173) msteric+0.5, alph1,alphm1
-   write (2,172) msteric+0.5, alph1,alphm1
+   write (dcs_unit,172) msteric+0.5, alph1,alphm1
 endif
 172 format('%    STERIC (ORIENTED) CROSS SECTIONS: M = ',f4.1,/, &
         '        ALPH(1) =',f7.4, &
@@ -590,7 +590,7 @@ if (.not. is_j12(ibasty)) then
    endif
    if (mflag) then
      if (mj1.eq.-j1p .and. mj2.eq. -j2p) then
-        write (2,331)
+        write (dcs_unit,331)
         if (iprint) write (6,331)
 331         format('%',4x,'F-REAL (first line)',7x, &
          'F-IMAG (second line); NOT divided by (2j+1)k^2 factor')
@@ -601,7 +601,7 @@ if (.not. is_j12(ibasty)) then
      if (mj1.lt.0) &
         amplstring='fm2_'//'m'//m1string
      if (mj2.eq.-j2p) then
-         write (2,333) amplstring
+         write (dcs_unit,333) amplstring
          if(iprint) write (6,333) amplstring
      endif
 333      format((a),'=[')
@@ -620,7 +620,7 @@ if (.not. is_j12(ibasty)) then
 !        if (mflag) then
 !           if (iprint)
 !    :      write (6,336) aangle,faksq*dreal(q(ii)),faksq*imag(q(ii))
-!           write (2,337) aangle,faksq*dreal(q(ii)),faksq*imag(q(ii))
+!           write (dcs_unit,337) aangle,faksq*dreal(q(ii)),faksq*imag(q(ii))
 !336         format(1x,f7.2,2g15.4)
 !337         format(1x,f7.2,2g15.4)
 !        endif
@@ -628,7 +628,7 @@ if (.not. is_j12(ibasty)) then
 ! here for steric effect
    if (stflag) then
       stampl=alph1*q(mj1, mj2, i) &
-           + msign * alphm1 * qm(mj1, mj2, i)
+           + msign * alphm1 * qm(mj1, mj2, i)  ! disable-warnings:maybe-uninitialized (qm) todo: fixme (issue #242)
       stamplm=alph1*q(mj1, mj2, i) &
            - msign * alphm1 * qm(mj1, mj2, i)
       if (msteric.ge.0 .and. abs(xm).ne.(msteric+0.5d0)) then
@@ -652,7 +652,7 @@ if (.not. is_j12(ibasty)) then
       s(i)=s(i)+dsigterm
 ! accumulate Re[f(j1m1->j2m2)f(j1m1->j2,m2+2)]+Re[f(j1m1->j2m2)f(j1m1->j2,m2+2)]
       fm1m2(mj2,i)=q(mj1, mj2, i)
-      rho(mj2,i)=rho(mj2,i)+dsigterm
+      rho(mj2,i)=rho(mj2,i)+dsigterm  ! disable-warnings:maybe-uninitialized (rho) todo: fixme (issue #242)
 !           print *, 'mj1,mj2,mj2+j2p+1, fm1m2, rho(mj2,i):  ',
 !    :         mj1,mj2, mj2+j2p+1,fm1m2(mj2,i),
 !    :         rho(mj2,i)
@@ -691,7 +691,7 @@ if (.not. is_j12(ibasty)) then
       do 2341 i=1,nangle
       term_11= &
             (dreal(fm1m2(mj2,i))*dimag(fm1m2(mj2+1,i))- &
-             dimag(fm1m2(mj2,i))*dreal(fm1m2(mj2+1,i)))
+             dimag(fm1m2(mj2,i))*dreal(fm1m2(mj2+1,i)))  ! disable-warnings:maybe-uninitialized (fm1m2) todo: fixme (issue #242)
       a11(i)=a11(i)+a11fak(mj2)*term_11
 2341        continue
 2342     continue
@@ -700,19 +700,19 @@ if (mflag) then
    aangle=ang1
    do i=1,nangle
 ! print out real and imaginary parts of scattering amplitudes
-      write (2,344) aangle,(dreal(fm1m2(jj,i)),jj=-j2p,j2)
-      write (2,344) aangle,(dimag(fm1m2(jj,i)),jj=-j2p,j2)
+      write (dcs_unit,344) aangle,(dreal(fm1m2(jj,i)),jj=-j2p,j2)
+      write (dcs_unit,344) aangle,(dimag(fm1m2(jj,i)),jj=-j2p,j2)
       aangle=aangle+dang
    enddo
-   write (2,345)
+   write (dcs_unit,345)
    if (iprint) write (6,345)
 endif
 343 continue
 344 format(f8.2,26(1pg15.4))
 345 format('];')
 !
-write (2,346)
-if (mflag) write (3,346)
+write (dcs_unit,346)
+if (mflag) write (rho_unit,346)
 346 format('  ')
 if (.not.stflag) then
    write (dcs_unit,348)
@@ -723,7 +723,7 @@ if (.not.stflag) then
 348    format &
   ('%   DEGENERACY AVERAGED DXSC (ANG^2/SR) AND ', &
        'A20, A40, A22+, A21+ AND A11- MOMENTS',/,'dcs=[')
-   if (mflag) write (3,349)
+   if (mflag) write (rho_unit,349)
 349    format &
   ('%   DIAGONAL (M-FINAL) DENSITY MATRIX (FIRST ROW)', &
         ' SECOND SUPRA-DIAGONAL (M,M+2) DENSITY MATRIX (2ND ROW)', &
@@ -737,13 +737,13 @@ if (.not.stflag) then
         a21(i)/s(i),a11(i)/s(i)
 350    format(1x,f7.2,6g15.4)
    if (mflag) then
-      write(rho_unit, 352) angle,(rho(ij,i)/s(i),ij=-j2p,j2)
+      write(rho_unit, 352) angle,(rho(ij,i)/s(i),ij=-j2p,j2)  ! disable-warnings:maybe-uninitialized (rho) todo: fixme (issue #242)
       write(rho_unit, 352) angle,(rho2(ij,i)/s(i),ij=-j2p,j2)
    endif
 351    angle=angle+dang
 352    format(f7.2,25g15.4)
 else
-   write (2,360)
+   write (dcs_unit,360)
    if (iprint) write (6,360)
 360    format &
   ('    DEGENERACY AVERAGED STERIC DXSC''S: HEADS AND TAILS')
@@ -801,16 +801,16 @@ if (mflag) then
       ximdep(mj1, mj2)=ximdep(mj1, mj2)*ideg1
       if (flaghf) then
          write (6,378) xmj1,xmj2,ximdep(mj1, mj2)
-         write (2,378) xmj1,xmj2,ximdep(mj1, mj2)
+         write (dcs_unit,378) xmj1,xmj2,ximdep(mj1, mj2)
 378          format(4x,2f6.1,g13.4)
       else
          write (6,379) mj1,mj2,ximdep(mj1, mj2)
-         write (2,379) mj1,mj2,ximdep(mj1, mj2)
+         write (dcs_unit,379) mj1,mj2,ximdep(mj1, mj2)
 379          format(4x,2i5,g13.4)
       endif
 384    continue
 385    continue
-   write (2,387) xsctot, algn/xsctot
+   write (dcs_unit,387) xsctot, algn/xsctot
    write (6,386) xsctot, algn/xsctot
 386    format(/,'    DEG. AVER. XSC =',g12.3,'; ALIGNMENT =',f6.3)
 387    format(/,'%   DEG. AVER. XSC =',g12.3,'; ALIGNMENT =',f6.3)
@@ -822,7 +822,7 @@ if (stflag) then
    xintm=0.5d0*fak*xintm*2d0*pi*dang*pi/180d0
    write (6,390) ang0,dang,ang2,xint,xintm, &
             100d0*(xint-xintm)/(xint+xintm)
-   write (2,391) ang0,dang,ang2,xint,xintm, &
+   write (dcs_unit,391) ang0,dang,ang2,xint,xintm, &
             100d0*(xint-xintm)/(xint+xintm)
 390 format (/, &
  '    INTEGRAL ORIENTED CROSS SECTIONS; ANGLES:',f6.2,':',f5.2, &
