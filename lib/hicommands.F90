@@ -259,7 +259,7 @@ contains
 
     character(len=40) :: fnam1
 
-    integer :: i, j, l
+    integer :: i, j
     integer, parameter :: k_num_args = 4
     real(8) :: a(k_num_args)  ! in1,in2,ienerg,maxjtot
     character*8 empty_var_list(0)
@@ -271,7 +271,7 @@ contains
     call upper(fnam1(1:1))
     do i = 1, k_num_args
       a(i) = 0
-      if(l .eq. 0) cycle
+      if(statement_parser%statement_end_reached()) cycle
       code = statement_parser%get_token(equal_is_delimiter=.false.)
       call assignment_parse(code,empty_var_list,j,a(i))
     end do
@@ -356,7 +356,6 @@ contains
     class(prsbr_command_type) :: this
     class(statement_parser_type), intent(inout) :: statement_parser
     integer, intent(out) :: post_action
-    integer :: l
     character*8 empty_var_list(0)
     character*40 :: code
     character(len=40) :: fnam1
@@ -374,7 +373,7 @@ contains
     call upper(fnam1(1:1))
     ! get iener for 1st smt file
     a(1) = 0.d0
-    if(l .eq. 0) goto 3205
+    if(statement_parser%statement_end_reached()) goto 3205
     code = statement_parser%get_token(equal_is_delimiter=.false.)
     call assignment_parse(code,empty_var_list,j,a(1))
     3205 fnam2 = statement_parser%get_token(equal_is_delimiter=.false.)
@@ -383,13 +382,13 @@ contains
     call upper(fnam2(1:1))
     ! get iener for 2nd smt file
     a(2) = 0.d0
-    if(l .eq. 0) goto 3210
+    if(statement_parser%statement_end_reached()) goto 3210
     code = statement_parser%get_token(equal_is_delimiter=.false.)
     call assignment_parse(code,empty_var_list,j,a(2))
     ! get k, j1, in1, j2, in2, diag, j1p, in1p, j2p, in2p
     3210 do 3220 i = 3, 12
       a(i) = 0.d0
-      if(l .eq. 0) goto 3220
+      if(statement_parser%statement_end_reached()) goto 3220
       code = statement_parser%get_token(equal_is_delimiter=.false.)
       call assignment_parse(code,empty_var_list,j,a(i))
     3220 continue
