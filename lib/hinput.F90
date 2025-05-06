@@ -493,7 +493,6 @@ call candidates%empty()
 ! search in commands
 do i = 1,ncode
   length = lenstr(bcod(i))
-  write(6,*) 'graffy: code=', code, ' len = ', len(code)
   if(bcod(i)(1:len(code)) .eq. code) then
     if (len(code) .eq. length) goto 40  ! label:execute_command(i)
     call candidates%add_candidate(codex=bcod(i), codex_index=i, bost=statement_parser%current_pos)
