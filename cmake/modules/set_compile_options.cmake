@@ -35,7 +35,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<CONFIG:DEBUG>:-Wno-conversion>        # Disable warnings such as Warning: Possible change of value in conversion from REAL(8) to INTEGER(4) at (1) [-Wconversion]
       $<$<CONFIG:DEBUG>:-Wno-compare-reals>     # Disable warnings such as "Warning: Equality comparison for REAL(8) at (1) [-Wcompare-reals]" as they are often fine when comparing with 2 hardcoded zero constants
       $<$<CONFIG:DEBUG>:-fsanitize=address>     # Address sanitizer
-      $<$<AND:$<NOT:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>>,$<CONFIG:DEBUG>>:-Wuninitialized>        # Emit warnings for uninitialized variables. Disable -Wuninitialized when ENABLE_UNINIT_VAR_RUNTIME_DETECTOR is on because the the -finit-* options then used make -Wuninitialized have no effect, see gfortran documentation :
+      $<$<NOT:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>>:-Wuninitialized>        # Emit warnings for uninitialized variables. Disable -Wuninitialized when ENABLE_UNINIT_VAR_RUNTIME_DETECTOR is on because the the -finit-* options then used make -Wuninitialized have no effect, see gfortran documentation :
       # Finally, note that enabling any of the -finit-* options will silence warnings that would have been emitted by -Wuninitialized for the affected local variables.
 
       # handle ENABLE_UNINIT_VAR_RUNTIME_DETECTOR
