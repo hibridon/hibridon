@@ -336,10 +336,10 @@ dimension f36j(0:2)
 ! sigma: array to hold transport cross sections
 double precision, dimension(:, :, :), allocatable :: &
      sr, si, sigma &
-  , plam
+  , plam  ! disable-warnings:maybe-uninitialized (plam)
 integer, allocatable :: in(:,:,:)
 integer, allocatable :: j(:,:,:)
-integer, allocatable :: jj12(:,:,:)
+integer, allocatable :: jj12(:,:,:)  ! disable-warnings:maybe-uninitialized (jj12)
 integer, allocatable :: l(:,:,:)
 ! length of arrays
 !   subscripts:  jtot, jlp (=1/2 for jlpar = +1/-1)

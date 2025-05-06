@@ -221,11 +221,11 @@ contains
 
     UNUSED_DUMMY(this)
 
-    fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)
+    fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)  ! disable-warnings:maybe-uninitialized (fnam1)
     call lower(fnam1)
     call upper(fnam1(1:1))
     if(fnam1 .eq. ' ') fnam1 = jobnam
-    arg = statement_parser%get_token(equal_is_delimiter=.false.)
+    arg = statement_parser%get_token(equal_is_delimiter=.false.)  ! disable-warnings:maybe-uninitialized (arg)
     if (arg .eq. ' ') then
       nchmin = 1
       nchmax = 10

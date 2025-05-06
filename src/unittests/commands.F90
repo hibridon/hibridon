@@ -20,6 +20,7 @@ module mod_unitcommands
 contains
 
   subroutine dummyc1_execute(this, statement_parser, post_action)
+    use mod_command, only: k_post_action_read_new_line
     class(dummyc1_command_type) :: this
     class(statement_parser_type), intent(inout) :: statement_parser
     integer, intent(out) :: post_action
@@ -30,6 +31,7 @@ contains
   end subroutine
 
   subroutine dummyc2_execute(this, statement_parser, post_action)
+    use mod_command, only: k_post_action_read_new_line
     class(dummyc2_command_type) :: this
     class(statement_parser_type), intent(inout) :: statement_parser
     integer, intent(out) :: post_action
