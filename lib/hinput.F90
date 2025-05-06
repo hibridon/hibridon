@@ -122,7 +122,7 @@ module mod_hinput
     k_keyword_execute_command_mgr_command     =  6   !   45 label:execute_command_mgr_command(i)
   end enum
 
-  integer, parameter :: ncode = 26  !  ncode is the number of bcod's
+  integer, parameter :: ncode = 25  !  ncode is the number of bcod's
   character(len=8), parameter :: bcod(ncode) = [ &  ! bcod stores hibridon's commands
     'DEBROGLI', &
     'DIFFER  ', &
@@ -148,8 +148,7 @@ module mod_hinput
     'PARTC   ', &
     'FLUX    ', &
     'J1J2    ', &
-    'EADIAB  ', &
-    'SYSCONF ']
+    'EADIAB  ']
 
   character(len=8), parameter :: bascod(1) = ['BASISTYP']
 
@@ -321,7 +320,7 @@ use mod_tensor, only: tenopa, mrcrs
 use mod_hitestptn, only: testptn
 use mod_two, only: numj, nj1j2
 use mod_opti, only: optifl
-use mod_hiutil, only: get_token, lower, upper, lenstr, vaxhlp, sys_conf
+use mod_hiutil, only: get_token, lower, upper, lenstr, vaxhlp
 use mod_hibrid1, only: difs, turn
 use mod_hibrid4, only: psi, eadiab1, sprint
 use mod_hypxsc, only: hypxsc
@@ -425,7 +424,6 @@ lindx(FCOD_BOUNDC) = LPAR_BOUNDC
 ! flux: 2800
 ! eadiab: 2850
 ! j1j2:  460
-! sysconf:  2900
 ! nb after changing the following list, check that all the variables "incode"
 ! that follow after address 900 are changed accordingly
 !
@@ -585,7 +583,7 @@ end if
       1900,2800,600, &
       1300,2300, &
       1200,1600,430,2650,2800, &
-      460,2850,2900),i
+      460,2850),i
 !
 ! label:execute_command_mgr_command(i)
 !
@@ -1376,8 +1374,6 @@ goto 1  ! label:read_new_statement_line
 2860 write (6, *) 'Parameters to EADIAB cannot be recognized'
 goto 1  ! label:read_new_statement_line
 !  print out system parameters
-2900 call sys_conf
-goto 1  ! label:read_new_statement_line
 
 end
 

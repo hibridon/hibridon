@@ -79,6 +79,12 @@ implicit none
     procedure :: execute => stmix_execute
   end type stmix_command_type
 
+  ! sysconf
+  type, extends(command_type) :: sysconf_command_type
+  contains
+    procedure :: execute => sysconf_execute
+  end type sysconf_command_type
+
   ! trnprt
   type, extends(command_type) :: trnprt_command_type
   contains
@@ -746,6 +752,21 @@ contains
     post_action = k_post_action_read_new_line
   end subroutine stmix_execute
 
+  subroutine sysconf_execute(this, statement_parser, post_action)
+    use mod_statement_parser, only: statement_parser_type
+    use mod_command, only: k_post_action_read_new_line
+    use mod_hiutil, only: sys_conf
+
+    class(sysconf_command_type) :: this
+    class(statement_parser_type), intent(inout) :: statement_parser
+    integer, intent(out) :: post_action
+
+    UNUSED_DUMMY(this)
+    UNUSED_DUMMY(statement_parser)
+    call sys_conf()
+    post_action = k_post_action_read_new_line
+  end subroutine sysconf_execute
+
   subroutine trnprt_execute(this, statement_parser, post_action)
     ! transport cross sections - added by p. dagdigian
     ! TRNPRT,JOB,IENERG,IN1,IN2,JTOTMX,JMIN,JMAX
@@ -837,6 +858,10 @@ contains
 
     com = stmix_command_type()
     call command_mgr%register_command('STMIX', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
+
+    com = sysconf_command_type()
+    call command_mgr%register_command('SYSCONF', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
     com = trnprt_command_type()
