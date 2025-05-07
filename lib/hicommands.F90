@@ -37,6 +37,12 @@ implicit none
     procedure :: execute => intcrs_execute
   end type intcrs_command_type
 
+  ! j1j2
+  type, extends(command_type) :: j1j2_command_type
+  contains
+    procedure :: execute => j1j2_execute
+  end type j1j2_command_type
+
   ! job
   type, extends(command_type) :: job_command_type
   contains
@@ -363,6 +369,60 @@ contains
     call intcrs(fnam1,a)
     post_action = k_post_action_read_new_line
   end subroutine intcrs_execute
+
+  ! j1j2 values
+  ! specify j1j2 values in the form
+  ! j1j2,numj,j1j2(1),...,j1j2(numj)
+  ! terminate the string with a semicolon if other parameters will follow
+  ! on the same card, e.g. j1j2,2,00,10;energ=e1,e2,e3;jtot1=0,jtot2=2....
+  subroutine j1j2_execute(this, statement_parser, post_action)
+    use mod_statement_parser, only: statement_parser_type
+    use mod_command, only: k_post_action_interpret_next_statement
+    use mod_hiutil, only: get_token, assignment_parse
+    use mod_coiout, only: niout
+    use mod_two, only: numj, nj1j2
+    use mod_par, only: lpar
+    use lpar_enum, only: LPAR_TWOMOL
+
+    class(j1j2_command_type) :: this
+    class(statement_parser_type), intent(inout) :: statement_parser
+    integer, intent(out) :: post_action
+
+    character(len=:), allocatable :: argument
+    integer :: i, j
+    real(8) :: arg_val
+    character*8 empty_var_list(0)
+
+    UNUSED_DUMMY(this)
+
+    if (.not. lpar(LPAR_TWOMOL)) then
+      write (6, 465)
+    465   format(' ** NUMJ CAN ONLY BE DEFINED IF TWOMOL = .TRUE.')
+      post_action = k_post_action_interpret_next_statement
+      return
+    endif
+
+    i = 0
+    argument = statement_parser%get_token(equal_is_delimiter=.false.)  ! disable-warnings:maybe-uninitialized (argument)
+    call assignment_parse(argument, empty_var_list, j, arg_val)
+    numj = arg_val
+    if(niout .ne. 0) then
+      do while(.not. statement_parser%statement_end_reached())
+        if(statement_parser%prev_char_is(';')) exit
+        argument = statement_parser%get_token(equal_is_delimiter=.false.)
+        call assignment_parse(argument, empty_var_list, j, arg_val)
+        i = i+1
+        nj1j2(i) = arg_val
+      end do
+      if(numj .ge. 0) then
+        numj = i
+      else
+        write (6, 485)
+      485   format(' ** YOU MUST SPECIFY A VALUE OF NUMJ')
+      endif
+    end if
+    post_action = k_post_action_interpret_next_statement
+  end subroutine j1j2_execute
 
   ! input, output, label and job file names
   ! input=infile, output=outfile, job=jobfile
@@ -892,6 +952,10 @@ contains
 
     com = intcrs_command_type()
     call command_mgr%register_command('INTCRS', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
+
+    com = j1j2_command_type()
+    call command_mgr%register_command('J1J2', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
     com = job_command_type()

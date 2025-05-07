@@ -122,7 +122,7 @@ module mod_hinput
     k_keyword_execute_command_mgr_command     =  6   !   45 label:execute_command_mgr_command(i)
   end enum
 
-  integer, parameter :: ncode = 24  !  ncode is the number of bcod's
+  integer, parameter :: ncode = 23  !  ncode is the number of bcod's
   character(len=8), parameter :: bcod(ncode) = [ &  ! bcod stores hibridon's commands
     'DEBROGLI', &
     'DIFFER  ', &
@@ -146,8 +146,7 @@ module mod_hinput
     'TURN    ', &
     'INDOUT  ', &
     'PARTC   ', &
-    'FLUX    ', &
-    'J1J2    ']
+    'FLUX    ']
 
   character(len=8), parameter :: bascod(1) = ['BASISTYP']
 
@@ -317,7 +316,6 @@ use mod_file, only: input, jobnam
 use mod_sav, only: iipar, ixpar, irpar, rxpar
 use mod_tensor, only: tenopa, mrcrs
 use mod_hitestptn, only: testptn
-use mod_two, only: numj, nj1j2
 use mod_opti, only: optifl
 use mod_hiutil, only: get_token, lower, upper, lenstr, vaxhlp
 use mod_hibrid1, only: difs, turn
@@ -420,7 +418,6 @@ lindx(FCOD_BOUNDC) = LPAR_BOUNDC
 ! indout: 430
 ! partc: 2650
 ! flux: 2800
-! j1j2:  460
 ! nb after changing the following list, check that all the variables "incode"
 ! that follow after address 900 are changed accordingly
 !
@@ -579,8 +576,7 @@ end if
       2400,2100,1000,2600, &
       1900,2800,600, &
       1300,2300, &
-      1200,1600,430,2650,2800, &
-      460),i
+      1200,1600,430,2650,2800),i
 !
 ! label:execute_command_mgr_command(i)
 !
@@ -768,37 +764,7 @@ goto 440
 450 if(niout.ge.0) niout = i
 statement_start_index = statement_parser%current_pos
 goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
-! j1j2 values
-! specify j1j2 values in the form
-! j1j2,numj,j1j2(1),...,j1j2(numj)
-! terminate the string with a semicolon if other parameters will follow
-! on the same card, e.g. j1j2,2,00,10;energ=e1,e2,e3;jtot1=0,jtot2=2....
-460 if (.not.lpar(LPAR_TWOMOL)) then
-  write (6, 465)
-465   format(' ** NUMJ CAN ONLY BE DEFINED IF TWOMOL = .TRUE.')
-  goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
-endif
-i = 0
-code = statement_parser%get_token(equal_is_delimiter=.false.)
-call assignment_parse(code,empty_var_list,j,val)
-statement_start_index = statement_parser%current_pos
-numj=val
-if(niout.eq.0) goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
-470 if(statement_parser%statement_end_reached()) goto 480
-if(statement_parser%prev_char_is(';')) goto 480
-code = statement_parser%get_token(equal_is_delimiter=.false.)
-call assignment_parse(code,empty_var_list,j,val)
-i = i+1
-nj1j2(i) = val
-goto 470
-480 if(numj.ge.0) then
-  numj = i
-else
-  write (6, 485)
-485   format(' ** YOU MUST SPECIFY A VALUE OF NUMJ')
-endif
-statement_start_index = statement_parser%current_pos
-goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
+
 
 !
 ! label:execute_run
