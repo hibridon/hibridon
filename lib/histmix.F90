@@ -53,7 +53,7 @@ character*1 slab
 logical csflg1, flghf1, flgsu1, twmol1, nucrs1, &
      csflg2, flghf2, flgsu2, twmol2, nucrs2, &
      exstfl, sngsmt, trpsmt
-dimension a(8)
+dimension a(7)
 dimension epert(2), cpert(2,2)
 !     scratch arrays for diagonalization subroutine
 parameter (narray = 2)
@@ -87,8 +87,8 @@ call mtime(cpu0,ela0)
 !
 !     generate filename of 1st smt file and check if it is present
 !
-iener1 = a(1)
-call gennam(smtfil1,flnam1,iener1,'smt',lenfs)
+ienerg1 = a(1)
+call gennam(smtfil1,flnam1,ienerg1,'smt',lenfs)
 inquire(file = smtfil1, exist = exstfl)
 if (.not. exstfl) then
    write(6,10) smtfil1(1:lenfs)
@@ -105,8 +105,8 @@ call mtime(cpu0,ela0)
 !
 !     generate filename of 2nd smt file and check if it is present
 !
-iener2 = a(2)
-call gennam(smtfil2,flnam2,iener2,'smt',lenfs)
+ienerg2 = a(2)
+call gennam(smtfil2,flnam2,ienerg2,'smt',lenfs)
 inquire(file = smtfil2, exist = exstfl)
 if (.not. exstfl) then
    write(6,10) smtfil2(1:lenfs)

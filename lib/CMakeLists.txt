@@ -12,9 +12,10 @@ set(LINK_TIME_OPTIMIZATION "OFF" CACHE BOOL "to enable or disable link time opti
 set(ENABLE_UNINIT_VAR_RUNTIME_DETECTOR "ON" CACHE BOOL "if set, causes the use of uninitilazed variables to trigger an exception on debug builds, thus making the program stop. This is useful to detect uninitialized memory issues.")
 
 add_library(hib
+    generic/grovec.F90
     ancou.F90
     assert.f90
-    grovec.F90
+    command.F90
     hiamp.F90
     hibasis.F90
     hibasutil.F90
@@ -25,6 +26,7 @@ add_library(hib
     hibrid3.F90
     hibrid4.F90
     hibrid5.F90
+    hicommands.F90
     hicommon.F90
     hidifcrs.F90
     hiflow.F90
@@ -131,6 +133,7 @@ endif()
 ################################################################################
 
 # The following is to define the machine type and compiler
+target_compile_definitions(hib PUBLIC HIB_UNINITIALIZED_INTEGER_VALUE=${UNINITIALIZED_INTEGER_VALUE})
 target_compile_definitions(hib PUBLIC HIB_UNIX_X86=1)
 target_compile_definitions(hib PUBLIC HIB_UNIX=1)
 if (CMake_Fortran_COMPILER_ID STREQUAL "GNU")

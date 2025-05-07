@@ -650,14 +650,12 @@ write (FUNIT_INP, 320) brot, drot, hrot
 320 format(f8.4, 2g11.4, '   brot, drot, hrot')
 !  line 15
 if (numj .le. 20) then
-  iline=3
   write (FUNIT_INP, 330) (nj1j2(i)/10,mod(nj1j2(i),10), i=1,numj)
 330 format (1x,20(2i1,'  '),t65,'nj1j2')
 else
   ilow=1
   ihigh=20
   do  350 ij = 1, numj, 20
-    iline=iline+1
     itop=min(ihigh,numj)
     write (FUNIT_INP, 330) (nj1j2(i)/10,mod(nj1j2(i),10), &
                     i=ilow,itop)

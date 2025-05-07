@@ -1,0 +1,1 @@
+#define K_MAX_USER_LINE_LENGTH 80

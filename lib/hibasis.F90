@@ -18,6 +18,18 @@
 module mod_hibasis
 use mod_assert, only: fassert
 
+  ! when adding bases, change size of array basknd and size of
+  ! parameter kmxbas in himain.f
+  character*9 :: basknd(30)
+  data basknd /'1-SIGMA', '2-SIGMA', '2-PI', 'SIGMA|PI', &
+               'GEN-PI', 'SYM-TOP-I', '1/3-P-AT', '1SIG+1SIG', &
+               'SYMT-LIN',' 2/2-P-AT', '1-DELTA', 'HOMO+2P', &
+               'HOMO+3P', '2-DELTA', '2P-DIAT', 'ASYM-TOP', &
+               'CH2X', 'SYM-TOP-N', '2SG|2PI_N', '2PI|1SG', &
+               'SYMT|1SG','1D-3P-AT','3P-2S-AT', 'SPH-TOP', &
+               '1SG-1SG', '2SG-1SG', 'C2v-ASTP','3SG-1SG', &
+               'CASYMTOP', 'ASYM-DIAT' /
+
 interface
 
   subroutine syusr(irpot, readpt, iread)

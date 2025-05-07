@@ -173,6 +173,8 @@ def parse_warning_detail_line(detail_line: str, alert: Alert, disabled_warnings:
                 alert.description = match['warning_description']
             else:
                 # some warnings such as the following don't have labels
+                # example1:
+                # ```
                 # /opt/ipr/cluster/work.local/graffy/hibridon/issue174/hibridon.git/tests/c2hh2/pot_c2hh2_12_6.F90:121:14:
 
                 #    98 | use mod_hipot, only: loapot, pot
@@ -181,12 +183,22 @@ def parse_warning_detail_line(detail_line: str, alert: Alert, disabled_warnings:
                 #   121 | subroutine pot(vv0, r_inp)
                 #       |              1
                 # Warning: INTENT mismatch in argument 'vv0' between (1) and (2)
+                # ```
+                # example2:
+                # ```
+                # /opt/github/actions-runner-2.322.0/_work/hibridon/hibridon/lib/hitrnprt.F90:342:35:
+
+                #   342 | integer, allocatable :: jj12(:,:,:)
+                #       |                                   ^
+                # Warning: ‘jj12.dim[2].stride’ may be used uninitialized []
+                # ```
                 alert.description = warning_text
                 pattern_to_warn_type_id = {
-                    'INTENT mismatch': 'intent-mismatch'
+                    'INTENT mismatch': 'intent-mismatch',
+                    'may be used uninitialized': 'maybe-uninitialized',
                 }
                 for pattern, warn_type_id in pattern_to_warn_type_id.items():
-                    if re.match(pattern, warning_text):
+                    if re.search(pattern, warning_text):
                         alert.warn_type_id = warn_type_id
                         break
                 assert alert.warn_type_id is not None, f'unhandled warning : "{warning_text}"'

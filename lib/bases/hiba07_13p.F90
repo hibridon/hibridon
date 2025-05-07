@@ -403,12 +403,12 @@ do 320 il = 0, 6, 2
         end if
       end do
     end do
-  end if
-if (bastst) then
-  write (6, 315) ilam, ancouma%get_num_nonzero_elements()
-  write (9, 315) ilam, ancouma%get_num_nonzero_elements()
+    if (bastst) then
+      write (6, 315) ilam, ancouma%get_num_nonzero_elements()
+      write (9, 315) ilam, ancouma%get_num_nonzero_elements()
 315   format ('ILAM=',i3,' LAMNUM(ILAM) = ',i6)
-end if
+    end if
+  end if
 320 continue
 if (clist) then
   write (6, 360) i
