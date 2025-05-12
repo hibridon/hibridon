@@ -122,7 +122,7 @@ module mod_hinput
     k_keyword_execute_command_mgr_command     =  6   !   45 label:execute_command_mgr_command(i)
   end enum
 
-  integer, parameter :: ncode = 22  !  ncode is the number of bcod's
+  integer, parameter :: ncode = 21  !  ncode is the number of bcod's
   character(len=8), parameter :: bcod(ncode) = [ &  ! bcod stores hibridon's commands
     'DEBROGLI', &
     'DIFFER  ', &
@@ -144,8 +144,7 @@ module mod_hinput
     'TENXSC  ', &
     'TESTPOT ', &
     'TURN    ', &
-    'INDOUT  ', &
-    'PARTC   ']
+    'INDOUT  ']
 
   character(len=8), parameter :: bascod(1) = ['BASISTYP']
 
@@ -285,15 +284,12 @@ subroutine hinput(first_time)
 use mod_com, only: com_file, com
 use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
-use mod_codim, only: nmax => mmax
-use mod_coamat, only: scmat => toto ! scmat(1)
 use mod_coener, only: energ, max_en
 use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysl, only: islcod, lspar
 use mod_cosysr, only: isrcod, rspar
 use mod_version, only : version
-use mod_hibrid5, only : readpc
 use mod_difcrs, only: difcrs
 use mod_hibasis, only: is_twomol
 use mod_hibrid2, only: enord, prsg
@@ -415,7 +411,6 @@ lindx(FCOD_BOUNDC) = LPAR_BOUNDC
 ! testpot: 1200
 ! turn: 1600
 ! indout: 430
-! partc: 2650
 ! nb after changing the following list, check that all the variables "incode"
 ! that follow after address 900 are changed accordingly
 !
@@ -574,7 +569,7 @@ end if
       2400,2100,1000,2600, &
       1900,2800,600, &
       1300,2300, &
-      1200,1600,430,2650),i
+      1200,1600,430),i
 !
 ! label:execute_command_mgr_command(i)
 !
@@ -1281,19 +1276,6 @@ if(ibasty.eq. 6) write (6, 2612)
 call prsg(fnam1,a)
 !      if(ibasty.ne.4) call prsg(fnam1,a)
 !      if(ibasty.eq.4) call prsgpi(fnam1,a)
-goto 1  ! label:read_new_statement_line
-! print selected partial cross sections from pcs file
-2650 fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)
-if(fnam1 .eq. ' ') fnam1 = jobnam
-call lower(fnam1)
-call upper(fnam1(1:1))
-do 2660 i = 1,8
-a(i) = 0
-if(statement_parser%statement_end_reached()) goto 2660
-code = statement_parser%get_token(equal_is_delimiter=.false.)
-call assignment_parse(code,empty_var_list,j,a(i))
-2660 continue
-call readpc(fnam1, a, scmat, nmax)
 goto 1  ! label:read_new_statement_line
 !  psi(wavefunction calculation),jobfile,mchannel
 !  flux calculation,jobfile,mchannel,iflux,thresh,iprint

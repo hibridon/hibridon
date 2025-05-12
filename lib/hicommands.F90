@@ -67,6 +67,12 @@ implicit none
     procedure :: execute => output_execute
   end type output_command_type
 
+  ! partc
+  type, extends(command_type) :: partc_command_type
+  contains
+    procedure :: execute => partc_execute
+  end type partc_command_type
+
   ! prsbr
   type, extends(command_type) :: prsbr_command_type
   contains
@@ -555,6 +561,43 @@ contains
     post_action = k_post_action_interpret_next_statement
   end subroutine output_execute
 
+  subroutine partc_execute(this, statement_parser, post_action)
+    ! print selected partial cross sections from pcs file
+    use mod_statement_parser, only: statement_parser_type
+    use mod_command, only: k_post_action_read_new_line
+    use mod_file, only: jobnam
+    use mod_hiutil, only: get_token, lower, upper, assignment_parse
+    use mod_hibrid5, only : readpc
+    use mod_codim, only: nmax => mmax
+    use mod_coamat, only: scmat => toto ! scmat(1)
+    class(partc_command_type) :: this
+    class(statement_parser_type), intent(inout) :: statement_parser
+    integer, intent(out) :: post_action
+    character*8 empty_var_list(0)
+    character(len=:), allocatable :: arg
+    character(len=:), allocatable :: fnam1
+
+    integer :: i, j
+    integer, parameter :: k_num_args = 8
+    real(8) :: a(k_num_args)
+
+    UNUSED_DUMMY(this)
+
+    fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)  ! disable-warnings:maybe-uninitialized (fnam1)
+    if(fnam1 .eq. ' ') fnam1 = jobnam
+    call lower(fnam1)
+    call upper(fnam1(1:1))
+    do i = 1, k_num_args
+      a(i) = 0
+      if(.not. statement_parser%statement_end_reached()) then
+        arg = statement_parser%get_token(equal_is_delimiter=.false.)
+        call assignment_parse(arg, empty_var_list, j, a(i))
+      end if
+    end do
+    call readpc(fnam1, a, scmat, nmax)
+    post_action = k_post_action_read_new_line
+  end subroutine partc_execute
+
   subroutine prsbr_execute(this, statement_parser, post_action)
     ! pressure broadening cross sections - added by p. dagdigian
     use mod_statement_parser, only: statement_parser_type
@@ -1015,6 +1058,10 @@ contains
 
     com = output_command_type()
     call command_mgr%register_command('OUTPUT', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
+
+    com = partc_command_type()
+    call command_mgr%register_command('PARTC', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
     com = prsbr_command_type()
