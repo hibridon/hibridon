@@ -266,6 +266,7 @@ contains
   end subroutine eadiab_execute
 
   subroutine flux_execute(this, statement_parser, post_action)
+    !  flux calculation,jobfile,mchannel,iflux,thresh,iprint
 
     use mod_statement_parser, only: statement_parser_type
     use mod_command, only: k_post_action_read_new_line
@@ -285,7 +286,6 @@ contains
 
     UNUSED_DUMMY(this)
 
-    !  flux calculation,jobfile,mchannel,iflux,thresh,iprint
     fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)  ! disable-warnings:maybe-uninitialized (argument)
     call lower(fnam1)
     call upper(fnam1(1:1))
