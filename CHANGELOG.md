@@ -7,6 +7,8 @@
 
 ### Added
 
+- the size of `indout` is no longer restricted (previously it had a hard limit of 50)
+- the size of `nj1j2` is no longer restricted (previously it had a hard limit of 50)
 - Restored code coverage reports (commit 9bfb4a4)
 
 ### Fixed 
