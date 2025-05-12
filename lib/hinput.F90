@@ -344,7 +344,7 @@ integer :: llcode
 integer :: ijcode
 
 
-integer :: ipr, istep, inam, i, ienerg, iflux, ii, im, imx, inew, iprint, iskip, itx, ityp, izero
+integer :: ipr, istep, inam, i, ienerg, ii, im, imx, inew, iprint, iskip, itx, ityp, izero
 integer :: j, jm, jmx, jtot2x, length
 integer :: statement_start_index
 integer :: nde
@@ -1309,8 +1309,6 @@ if(statement_parser%statement_end_reached()) goto 2810
 code = statement_parser%get_token(equal_is_delimiter=.false.)
 call assignment_parse(code,empty_var_list,j,a(i))
 2810 continue
-iflux=a(1)
-if (a(2) .eq. 0.d0) iflux=2
 call psi(fnam1,a)
 goto 1  ! label:read_new_statement_line
 
