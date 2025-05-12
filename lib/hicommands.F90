@@ -31,6 +31,12 @@ implicit none
     procedure :: execute => hypxsc_execute
   end type hypxsc_command_type
 
+  ! indout
+  type, extends(command_type) :: indout_command_type
+  contains
+    procedure :: execute => indout_execute
+  end type indout_command_type
+
   ! input
   type, extends(command_type) :: input_command_type
   contains
@@ -154,12 +160,13 @@ contains
     use lpar_enum
     use mod_selb, only: ibasty
     use mod_par, only: fcod
-    use mod_two, only: numj, nj1j2
+    use mod_two, only: nj1j2
     implicit none
     integer, intent(in) :: out_unit
 
     integer :: j
     integer :: length
+    integer :: numj
 
     if (ibasty .lt. 99) then
       length = index(basknd(ibasty),' ') - 1
@@ -181,6 +188,11 @@ contains
       write(out_unit,736) 'LAMMAX: ',(lammax(j),j=1,ispar(1))
       write(out_unit,736) 'MPROJ:  ',(mproj(j),j=1,ispar(1))
     else if (lpar(LPAR_TWOMOL)) then
+      if (allocated(nj1j2)) then
+        numj = size(nj1j2)
+      else
+        numj = 0
+      end if
       write (out_unit, 738)'J1/J2: ',(nj1j2(j)/10,mod(nj1j2(j),10), &
                         j=1,numj)
     end if
@@ -193,6 +205,55 @@ contains
     738   format (1x,(a),1x,20(2i1,'  ') )
 
   end subroutine print_main_params
+
+  subroutine parse_int_array(statement_parser, array_name, int_array, success)
+    use mod_statement_parser, only: statement_parser_type
+    use mod_command, only: k_post_action_interpret_next_statement
+    use mod_hiutil, only: get_token, assignment_parse
+
+    class(statement_parser_type), intent(inout) :: statement_parser
+    character(len=*), intent(in) :: array_name
+    integer, allocatable, intent(out) :: int_array(:)
+    logical, intent(out) :: success
+
+    character(len=:), allocatable :: argument
+    integer :: num_parsed_elements, j
+    real(8) :: arg_val
+    character*8 empty_var_list(0)
+    integer :: num_elements
+
+    success = .true.
+    num_parsed_elements = 0
+    argument = statement_parser%get_token(equal_is_delimiter=.false.)  ! disable-warnings:maybe-uninitialized (argument)
+    call assignment_parse(argument, empty_var_list, j, arg_val)
+    num_elements = arg_val
+    if(num_elements .lt. 0) then
+      write (6, 485), array_name
+    485   format(' ** YOU MUST SPECIFY THE SIZE OF ARRAY ', (a))
+    end if
+
+    if(num_elements .ne. 0) then
+      if ( allocated(int_array) ) deallocate(int_array)
+      allocate(int_array(num_elements))
+      do while(.not. statement_parser%statement_end_reached())
+        if(statement_parser%prev_char_is(';')) exit
+        argument = statement_parser%get_token(equal_is_delimiter=.false.)
+        call assignment_parse(argument, empty_var_list, j, arg_val)
+        num_parsed_elements = num_parsed_elements + 1
+        if (num_parsed_elements > num_elements) then
+          write (6, *) 'ERROR: the number of parsed elements exceeds the size of the array (', num_elements, ')'
+          success = .false.
+          return
+        end if
+        int_array(num_parsed_elements) = arg_val
+      end do
+      if(num_parsed_elements /= num_elements) then
+        write (6, *) 'ERROR: only ', num_parsed_elements,' integers read while ', num_elements, ' were expected'
+        success = .false.
+        return
+      endif
+    end if
+  end subroutine parse_int_array
 
   ! check if inconsistencies in input parameters
   subroutine check_execute(this, statement_parser, post_action)
@@ -342,6 +403,40 @@ contains
     post_action = k_post_action_read_new_line
   end subroutine hypxsc_execute
 
+
+
+
+  ! indout values
+  ! specify indout values in the form
+  ! indout,niout,indout(1),...,indout(niout)
+  ! terminate the string with a semicolon if other parameters will follow
+  ! on the same card, e.g. indout,2,1,-1;energ=e1,e2,e3;jtot1=0,jtot2=2....
+  subroutine indout_execute(this, statement_parser, post_action)
+    use mod_statement_parser, only: statement_parser_type
+    use mod_command, only: k_post_action_interpret_next_statement
+    use mod_hiutil, only: get_token, assignment_parse
+    use mod_coiout, only: niout, indout
+
+    class(indout_command_type) :: this
+    class(statement_parser_type), intent(inout) :: statement_parser
+    integer, intent(out) :: post_action
+
+    character(len=:), allocatable :: argument
+    integer :: i, j
+    real(8) :: arg_val
+    character*8 empty_var_list(0)
+    logical :: parse_succeeded
+
+    UNUSED_DUMMY(this)
+    
+    call parse_int_array(statement_parser, 'indout', indout, parse_succeeded)
+    if (parse_succeeded) then
+      niout = size(indout)
+    end if
+
+    post_action = k_post_action_interpret_next_statement
+  end subroutine indout_execute
+
   ! input, output, label and job file names
   ! input=infile, output=outfile, job=jobfile
   ! input, output, and label are now lower case:  mha 6.6.91
@@ -428,8 +523,7 @@ contains
     use mod_statement_parser, only: statement_parser_type
     use mod_command, only: k_post_action_interpret_next_statement
     use mod_hiutil, only: get_token, assignment_parse
-    use mod_coiout, only: niout
-    use mod_two, only: numj, nj1j2
+    use mod_two, only: nj1j2
     use mod_par, only: lpar
     use lpar_enum, only: LPAR_TWOMOL
 
@@ -441,6 +535,7 @@ contains
     integer :: i, j
     real(8) :: arg_val
     character*8 empty_var_list(0)
+    logical :: parse_succeeded
 
     UNUSED_DUMMY(this)
 
@@ -450,26 +545,13 @@ contains
       post_action = k_post_action_interpret_next_statement
       return
     endif
-
-    i = 0
-    argument = statement_parser%get_token(equal_is_delimiter=.false.)  ! disable-warnings:maybe-uninitialized (argument)
-    call assignment_parse(argument, empty_var_list, j, arg_val)
-    numj = arg_val
-    if(niout .ne. 0) then
-      do while(.not. statement_parser%statement_end_reached())
-        if(statement_parser%prev_char_is(';')) exit
-        argument = statement_parser%get_token(equal_is_delimiter=.false.)
-        call assignment_parse(argument, empty_var_list, j, arg_val)
-        i = i+1
-        nj1j2(i) = arg_val
-      end do
-      if(numj .ge. 0) then
-        numj = i
-      else
-        write (6, 485)
-      485   format(' ** YOU MUST SPECIFY A VALUE OF NUMJ')
-      endif
+    
+    call parse_int_array(statement_parser, 'nj1j2', nj1j2, parse_succeeded)
+    if (.not. parse_succeeded) then
+      post_action = k_post_action_interpret_next_statement
+      return
     end if
+
     post_action = k_post_action_interpret_next_statement
   end subroutine j1j2_execute
 
@@ -1034,6 +1116,10 @@ contains
 
     com = hypxsc_command_type()
     call command_mgr%register_command('HYPXSC', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
+
+    com = indout_command_type()
+    call command_mgr%register_command('INDOUT', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
     com = input_command_type()

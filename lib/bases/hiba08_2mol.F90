@@ -105,7 +105,7 @@ use constants, only: econv
 use mod_par, only: iprint
 use mod_par, only: boundc
 use mod_ered, only: ered, rmu
-use mod_two, only: numj, nj1j2
+use mod_two, only: nj1j2
 use mod_hitypes, only: bqs_type
 
 implicit double precision (a-h,o-z)
@@ -118,6 +118,7 @@ dimension jhold(1), ehold(1), j12(1), j1(1), &
 data ione, itwo, ithree / 1, 2, 3 /
 integer, pointer :: nterm, nsym
 real(8), pointer :: brot, drot, hrot
+integer :: numj
 nterm=>ispar(1); nsym=>ispar(2)
 brot=>rspar(1); drot=>rspar(2); hrot=>rspar(3)
 
@@ -145,18 +146,9 @@ if (flagsu) then
     call exit
   end if
 end if
+
 !  check for consistency in values of numj, nterm
-if (numj .gt. size(nj1j2)) then
-  write (6, 15) numj
-  write (9, 15) numj
-15   format (' *** NUMBER OF J1-J2 PAIRS=',i3, &
-          ' .GT. 50; ABORT ***')
-  if (bastst) then
-    return
-  else
-    call exit
-  end if
-end if
+
 if (nterm .gt. 3) then
   write (6, 20) nterm
   write (9, 20) nterm
@@ -190,6 +182,7 @@ nlam = nterm
 call bqs%init(nmax)
 nlevop = 0
 nch = 0
+numj = size(nj1j2)
 do 200  i = 1, numj
   jj1 = nj1j2(i) / 10
   jj2  = mod(nj1j2(i), 10)
@@ -528,7 +521,7 @@ use mod_cosys, only: scod
 use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
-use mod_two, only: numj, nj1j2
+use mod_two, only: nj1j2
 use mod_hiutil, only: gennam, get_token
 use mod_hipot, only: loapot
 implicit none
@@ -541,6 +534,7 @@ character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil
 character*68 filnm1
+integer :: numj
 save potfil
 #include "common/comdot.F90"
 
@@ -562,6 +556,8 @@ scod(5) = 'HROT'
 nterm = 1
 nsym = 1
 numj = 3
+if (allocated(nj1j2)) deallocate(nj1j2)
+allocate(nj1j2(numj))
 brot =  20.559741
 drot = 2.1204498e-3
 hrot = 0.168e-6
@@ -572,6 +568,8 @@ if(iread.eq.0) return
 !  line 1
 iline=1
 read (8, *, err=888) nterm, nsym, numj
+if (allocated(nj1j2)) deallocate(nj1j2)
+allocate(nj1j2(numj))
 nlam = nterm
 if (numj .le. 0) then
   write (6, 80) numj
@@ -641,6 +639,7 @@ irpot=1
 return
 !
 entry sav2mol ()
+numj = size(nj1j2)
 !  save input parameters for hf-hf scattering
 !  line 13:
 write (FUNIT_INP, 300) nterm, nsym,numj
