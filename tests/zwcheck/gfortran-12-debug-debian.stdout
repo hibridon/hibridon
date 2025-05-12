@@ -59,6 +59,20 @@
 [ 31%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hidifcrs.F90.o[0m
 [ 32%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hitestptn.F90.o[0m
 [ 32%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hitrnprt.F90.o[0m
+/opt/github/actions-runner-2.322.0/_work/hibridon/hibridon/lib/hitrnprt.F90:342:35:
+
+  342 | integer, allocatable :: jj12(:,:,:)
+      |                                   ^
+Warning: ‘jj12.dim[2].stride’ may be used uninitialized []
+/opt/github/actions-runner-2.322.0/_work/hibridon/hibridon/lib/hitrnprt.F90:342:35: Warning: ‘jj12.dim[1].stride’ may be used uninitialized []
+/opt/github/actions-runner-2.322.0/_work/hibridon/hibridon/lib/hitrnprt.F90:342:35: Warning: ‘jj12.offset’ may be used uninitialized []
+/opt/github/actions-runner-2.322.0/_work/hibridon/hibridon/lib/hitrnprt.F90:339:8:
+
+  339 |   , plam
+      |        ^
+Warning: ‘plam.dim[2].stride’ may be used uninitialized []
+/opt/github/actions-runner-2.322.0/_work/hibridon/hibridon/lib/hitrnprt.F90:339:8: Warning: ‘plam.dim[1].stride’ may be used uninitialized []
+/opt/github/actions-runner-2.322.0/_work/hibridon/hibridon/lib/hitrnprt.F90:339:8: Warning: ‘plam.offset’ may be used uninitialized []
 [ 32%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hihypxsc.F90.o[0m
 [ 33%] [32mBuilding Fortran object lib/CMakeFiles/hib.dir/hitensor.F90.o[0m
 [01m[K/opt/ipr/cluster/work.local/graffy/hibridon/issue174/hibridon.git/lib/hitensor.F90:2077:22:[m[K

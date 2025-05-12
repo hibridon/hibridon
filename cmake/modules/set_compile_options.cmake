@@ -1,4 +1,5 @@
 
+set(UNINITIALIZED_INTEGER_VALUE 333333333)
 function(set_compile_options TARGET SAVE)
 # TARGET: the cmake target identifier (eg the name of a library target such as hib) of the target that compile options need to be set
 # SAVE: if true, all local variables receive the save attribute. This argument should be removed once all programs work without this option (using local variables with an implicit save attribute should be avoided as it's error prone)
@@ -34,7 +35,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<CONFIG:DEBUG>:-Wno-conversion>        # Disable warnings such as Warning: Possible change of value in conversion from REAL(8) to INTEGER(4) at (1) [-Wconversion]
       $<$<CONFIG:DEBUG>:-Wno-compare-reals>     # Disable warnings such as "Warning: Equality comparison for REAL(8) at (1) [-Wcompare-reals]" as they are often fine when comparing with 2 hardcoded zero constants
       $<$<CONFIG:DEBUG>:-fsanitize=address>     # Address sanitizer
-      $<$<AND:$<NOT:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>>,$<CONFIG:DEBUG>>:-Wuninitialized>        # Emit warnings for uninitialized variables. Disable -Wuninitialized when ENABLE_UNINIT_VAR_RUNTIME_DETECTOR is on because the the -finit-* options then used make -Wuninitialized have no effect, see gfortran documentation :
+      $<$<NOT:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>>:-Wuninitialized>        # Emit warnings for uninitialized variables. Disable -Wuninitialized when ENABLE_UNINIT_VAR_RUNTIME_DETECTOR is on because the the -finit-* options then used make -Wuninitialized have no effect, see gfortran documentation :
       # Finally, note that enabling any of the -finit-* options will silence warnings that would have been emitted by -Wuninitialized for the affected local variables.
 
       # handle ENABLE_UNINIT_VAR_RUNTIME_DETECTOR
@@ -42,7 +43,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       # by default, gfortran initializes integers to 0, but not ifort : as a result, some bugs in the code are hidden with gfortran default options
       # set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -fno-init-local-zero")
       # initialize variables to something else than 0 to force the programe to behave badly in case of unitialized variables
-      $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-finit-integer=333333333>
+      $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-finit-integer=${UNINITIALIZED_INTEGER_VALUE}>
       $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-finit-real=snan>
       $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-ffpe-trap=invalid,zero,overflow>
 

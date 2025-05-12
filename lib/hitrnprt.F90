@@ -66,15 +66,26 @@ use mod_trn, only: spin, jpmax
 use mod_hiutil, only: gennam, mtime, dater
 use mod_hismat, only: rdhead, sinqr
 use mod_hiiolib1, only: openf
-implicit double precision (a-h,o-z)
-character*(*) filnam
-character*40  trnfil, smtfil
-character*20  cdate
-logical csflag, flaghf, flagsu, twomol, exstfl, &
+
+implicit none
+character*(*), intent(in) :: filnam
+real(8), intent(in) :: a(6)  ! real arguments : a(1) is iener
+
+real(8) :: cpu0
+real(8) :: ela0
+real(8) :: ered
+integer :: i, iener, ierr, ii, in
+integer :: j, j1, jfirst, jfinal, jlpmax, jlpmin, jo, jtotd
+integer :: lenfs, lenft
+integer :: m1chmx, m1jtot
+integer :: nj, nlevel, nlevop, nstep, nud, numax, numin
+integer, save :: nout
+real(8) :: rmu, tol, zero
+character*40 :: trnfil, smtfil
+character*20 :: cdate
+logical :: csflag, flaghf, flagsu, twomol, exstfl, &
         nucros
 !
-save nout
-dimension a(6)
 data  tol,   zero,   nstep &
     /1.d-7,  0.d0,     2/
 !
@@ -325,10 +336,10 @@ dimension f36j(0:2)
 ! sigma: array to hold transport cross sections
 double precision, dimension(:, :, :), allocatable :: &
      sr, si, sigma &
-  , plam
+  , plam  ! disable-warnings:maybe-uninitialized (plam)
 integer, allocatable :: in(:,:,:)
 integer, allocatable :: j(:,:,:)
-integer, allocatable :: jj12(:,:,:)
+integer, allocatable :: jj12(:,:,:)  ! disable-warnings:maybe-uninitialized (jj12)
 integer, allocatable :: l(:,:,:)
 ! length of arrays
 !   subscripts:  jtot, jlp (=1/2 for jlpar = +1/-1)
