@@ -1150,27 +1150,29 @@ call matcopy (vecnew, vecnow, n, n, nmax, nmax)
 return
 end
 ! -----------------------------------------------------------------------
-function turn(e)
-! current revision date: 23-sept-87
-use constants, only: econv
-use mod_hipot, only: pot
-implicit none
-real(8), intent(in) :: e
-real(8) :: ee, r, dr, vv0
-real(8) :: turn
-ee = e/econv
-r = 3.0d0
-dr = 0.5d0
-10 r = r+dr
-call pot(vv0,r)
-if(vv0-ee) 20,50,30
-20 if(dr.lt.0) goto 10
-goto 40
-30 if(dr.gt.0) goto 10
-40 dr = -dr*0.5d0
-if(abs(dr).gt.0.01d0) goto 10
-50 turn = r
-return
+function find_turning_point(e)  result(turning_radius)
+  ! current revision date: 23-sept-87
+  use constants, only: econv
+  use mod_hipot, only: pot
+  implicit none
+  real(8), intent(in) :: e  ! energy
+  real(8) :: turning_radius
+
+  real(8) :: ee, r, dr, vv0
+  ee = e/econv
+  r = 3.0d0
+  dr = 0.5d0
+  10 r = r+dr
+  call pot(vv0,r)
+  if(vv0-ee) 20,50,30
+  20 if(dr.lt.0) goto 10 
+  goto 40  ! change direction and reduce the step
+  30 if(dr.gt.0) goto 10
+  40 dr = -dr*0.5d0  
+  if(abs(dr).gt.0.01d0) goto 10
+  ! the step has become too small, we should be close enough to the requested energy
+  50 turning_radius = r
+  return
 end
 
 ! -----------------------------------------------------------------------

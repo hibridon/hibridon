@@ -121,6 +121,12 @@ implicit none
     procedure :: execute => trnprt_execute
   end type trnprt_command_type
 
+  ! turn
+  type, extends(command_type) :: turn_command_type
+  contains
+    procedure :: execute => turn_execute
+  end type turn_command_type
+
 contains
 
   subroutine update_nu_params()
@@ -205,6 +211,29 @@ contains
     738   format (1x,(a),1x,20(2i1,'  ') )
 
   end subroutine print_main_params
+
+  function get_max_energy(success) result(max_energy)
+    use mod_par, only: ipar
+    use mod_coener, only: energ
+    use ipar_enum, only: IPAR_NERG
+
+    logical, intent(out) :: success
+    real(8) :: max_energy
+    real(8) :: e
+    integer :: i
+
+    success = .true.
+    e = 0
+    do i = 1, ipar(IPAR_NERG)
+      e = max(e,energ(i))
+    end do
+    max_energy = e
+    if(e .eq. 0) then
+      write(6,1610)
+      1610   format(' Total energy has not been given a value !')
+      success = .false.
+    end if
+  end function get_max_energy
 
   subroutine parse_int_array(statement_parser, array_name, int_array, success)
     use mod_statement_parser, only: statement_parser_type
@@ -1092,7 +1121,44 @@ contains
     post_action = k_post_action_read_new_line
   end subroutine trnprt_execute
 
+  subroutine turn_execute(this, statement_parser, post_action)
+    ! determine turning point from isotropic potential
+    use mod_statement_parser, only: statement_parser_type
+    use mod_hiutil, only: get_token, lower, upper, assignment_parse
+    use mod_hibrid1, only: find_turning_point
+    use mod_hinput_state, only: irpot
+    use mod_command, only: k_post_action_read_new_line, k_post_action_interpret_next_statement
 
+    class(turn_command_type) :: this
+    class(statement_parser_type), intent(inout) :: statement_parser
+    integer, intent(out) :: post_action
+
+    real(8) :: e
+    real(8) :: r
+    integer :: i
+    logical :: success
+
+    UNUSED_DUMMY(this)
+    UNUSED_DUMMY(statement_parser)
+
+    if(irpot .eq. 0) then
+      write(6,510)  ! potentiel not yet defined
+      510   format(' Potential not yet defined!')
+      post_action = k_post_action_read_new_line
+      return
+    end if
+
+    e = get_max_energy(success)
+    if (.not. success) then
+      post_action = k_post_action_read_new_line
+      return
+    end if
+
+    r = find_turning_point(e)
+    write(6,1620) r
+    1620 format(' Turning point for isotropic potential at R = ', f5.2, ' bohr')
+    post_action = k_post_action_interpret_next_statement
+  end subroutine turn_execute
 
   subroutine init()
     use mod_assert, only: fassert

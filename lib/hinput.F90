@@ -122,7 +122,7 @@ module mod_hinput
     k_keyword_execute_command_mgr_command     =  6   !   45 label:execute_command_mgr_command(i)
   end enum
 
-  integer, parameter :: ncode = 20  !  ncode is the number of bcod's
+  integer, parameter :: ncode = 19  !  ncode is the number of bcod's
   character(len=8), parameter :: bcod(ncode) = [ &  ! bcod stores hibridon's commands
     'DEBROGLI', &
     'DIFFER  ', &
@@ -142,8 +142,7 @@ module mod_hinput
     'QUIT    ', &
     'SAVE    ', &
     'TENXSC  ', &
-    'TESTPOT ', &
-    'TURN    ']
+    'TESTPOT ']
 
   character(len=8), parameter :: bascod(1) = ['BASISTYP']
 
@@ -311,13 +310,14 @@ use mod_tensor, only: tenopa, mrcrs
 use mod_hitestptn, only: testptn
 use mod_opti, only: optifl
 use mod_hiutil, only: get_token, lower, upper, lenstr, vaxhlp
-use mod_hibrid1, only: difs, turn
+use mod_hibrid1, only: difs
 use mod_hibrid4, only: psi, sprint
 use mod_hypxsc, only: hypxsc
 use mod_hiiolib1, only: openf, gendat, savdat, genchk
 use mod_hisystem, only: baschk, sysdat, syssav, ptread
 use mod_histmix, only: stmix
 use mod_statement_parser, only: statement_parser_type
+use mod_hicommands, only: get_max_energy
 implicit none
 logical, intent(inout) :: first_time
 
@@ -347,6 +347,7 @@ type(candidates_type) :: candidates
 ! class(command_type), pointer :: command
 integer :: post_action
 integer :: com_file_unit
+logical :: success
 class(com_parser_type), allocatable, target :: com_parser
 class (statement_parser_type), pointer :: statement_parser
 save ipr, opti, a, a1, acc, acclas, optval, optacc, istep, inam, optimized_param_name, &
@@ -407,7 +408,6 @@ lindx(FCOD_BOUNDC) = LPAR_BOUNDC
 ! save: 1300
 ! tenxsc: 2300
 ! testpot: 1200
-! turn: 1600
 ! nb after changing the following list, check that all the variables "incode"
 ! that follow after address 900 are changed accordingly
 !
@@ -566,7 +566,7 @@ end if
       2400,2100,1000,2600, &
       1900,2800,600, &
       1300,2300, &
-      1200,1600),i
+      1200),i
 !
 ! label:execute_command_mgr_command(i)
 !
@@ -910,26 +910,6 @@ if(iprint .eq. 0) write(6,1510) acc,accmx,imx,jmx,code, &
  ' (i = ',i2,'  j = ',i2,') element of ',(a)/ &
  ' Inspection threshold is ',1pg8.1)
 goto 1  ! label:read_new_statement_line
-!.....determine turning point from isotropic potential
-!     turn
-1600 if(irpot .eq. 0) then
-  write(6,510)  ! potentiel not yet defined
-  goto 1  ! label:read_new_statement_line
-end if
-e = 0
-do 1605 i = 1,ipar(IPAR_NERG)
-1605 e = max(e,energ(i))
-if(e .eq. 0) then
-  write(6,1610)
-1610   format(' Total energy has not been given a value !')
-  goto 1  ! label:read_new_statement_line
-end if
-r = turn(e)
-write(6,1620) r
-1620 format(' Turning point for isotropic potential at R = ', &
-         f5.2, ' bohr')
-statement_start_index = statement_parser%current_pos
-goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 !  determine minimum of isotropic potential
 !  minpot
 1700 if(irpot .eq. 0) then
@@ -943,12 +923,11 @@ statement_start_index = statement_parser%current_pos
 goto 15  ! label:interpret_next_statement(com_parser, statement_start_index)
 !  calculate de broglie wavelength in bohr (defined as 2pi/k)
 !  debrogli
-1800 e = 0
-do 1810 i = 1,ipar(IPAR_NERG)
-1810 e = max(e,energ(i))
-if(e .eq. 0) then
-  write(6,1610)
+1800 e = get_max_energy(success)
+if (.not. success) then
+  statement_start_index = statement_parser%current_pos
   goto 1  ! label:read_new_statement_line
+  return
 end if
 xmu = rpar(RPAR_XMU)
 if(xmu .eq. 0) then
