@@ -19,6 +19,12 @@ implicit none
     procedure :: execute => eadiab_execute
   end type eadiab_command_type
 
+  ! flux
+  type, extends(command_type) :: flux_command_type
+  contains
+    procedure :: execute => flux_execute
+  end type flux_command_type
+
   ! hypxsc
   type, extends(command_type) :: hypxsc_command_type
   contains
@@ -252,6 +258,43 @@ contains
 
 
   end subroutine eadiab_execute
+
+  subroutine flux_execute(this, statement_parser, post_action)
+
+    use mod_statement_parser, only: statement_parser_type
+    use mod_command, only: k_post_action_read_new_line
+    use mod_hibrid4, only: psi
+    use mod_file, only: jobnam
+    use mod_hiutil, only: lower, upper, assignment_parse
+
+    class(flux_command_type) :: this
+    class(statement_parser_type), intent(inout) :: statement_parser
+    integer, intent(out) :: post_action
+
+    character(len=:), allocatable :: fnam1
+    character(len=:), allocatable :: arg
+    real(8) :: a(7)
+    character*8 empty_var_list(0)
+    integer :: i, j
+
+    UNUSED_DUMMY(this)
+
+    !  flux calculation,jobfile,mchannel,iflux,thresh,iprint
+    fnam1 = statement_parser%get_token(equal_is_delimiter=.false.)  ! disable-warnings:maybe-uninitialized (argument)
+    call lower(fnam1)
+    call upper(fnam1(1:1))
+    if(fnam1 .eq. ' ') fnam1 = jobnam
+    do i = 1, 7
+      a(i) = 0
+      if(.not. statement_parser%statement_end_reached()) then
+        arg = statement_parser%get_token(equal_is_delimiter=.false.)
+        call assignment_parse(arg, empty_var_list,j, a(i))
+      end if
+    end do
+    call psi(fnam1,a)
+
+    post_action = k_post_action_read_new_line
+  end subroutine flux_execute
 
   subroutine hypxsc_execute(this, statement_parser, post_action)
     !  hyperfine xcs routine (originally written by j. klos,
@@ -940,6 +983,10 @@ contains
 
     com = eadiab_command_type()
     call command_mgr%register_command('EADIAB', com)
+    deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
+
+    com = flux_command_type()
+    call command_mgr%register_command('FLUX', com)
     deallocate(com)  ! without deallocation, address sanitizer would detect a heap-use-after-free if com is reused
 
     com = hypxsc_command_type()

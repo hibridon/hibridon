@@ -122,7 +122,7 @@ module mod_hinput
     k_keyword_execute_command_mgr_command     =  6   !   45 label:execute_command_mgr_command(i)
   end enum
 
-  integer, parameter :: ncode = 23  !  ncode is the number of bcod's
+  integer, parameter :: ncode = 22  !  ncode is the number of bcod's
   character(len=8), parameter :: bcod(ncode) = [ &  ! bcod stores hibridon's commands
     'DEBROGLI', &
     'DIFFER  ', &
@@ -145,8 +145,7 @@ module mod_hinput
     'TESTPOT ', &
     'TURN    ', &
     'INDOUT  ', &
-    'PARTC   ', &
-    'FLUX    ']
+    'PARTC   ']
 
   character(len=8), parameter :: bascod(1) = ['BASISTYP']
 
@@ -417,7 +416,6 @@ lindx(FCOD_BOUNDC) = LPAR_BOUNDC
 ! turn: 1600
 ! indout: 430
 ! partc: 2650
-! flux: 2800
 ! nb after changing the following list, check that all the variables "incode"
 ! that follow after address 900 are changed accordingly
 !
@@ -576,7 +574,7 @@ end if
       2400,2100,1000,2600, &
       1900,2800,600, &
       1300,2300, &
-      1200,1600,430,2650,2800),i
+      1200,1600,430,2650),i
 !
 ! label:execute_command_mgr_command(i)
 !
