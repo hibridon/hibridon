@@ -29,7 +29,7 @@ Here **1** designates the identity matrix, R is the interparticle distance, and 
 <img src="https://user-images.githubusercontent.com/20931653/170128659-979154fa-ad5c-4bc1-9266-d240809125db.png" height="50px"> (3)
 
 
-where h designates Planck's constant divided by 2, m is the reduced mass of the collision system and **k**<sup>2</sup> and **l**<sup>2</sup> designate, respectively, the (diagonal) matrices of the wavevector and the relative orbital angular momentum of the collision partners. We have
+where $h$ designates Planck's constant divided by $2\pi$, $m$ is the reduced mass of the collision system and **k**<sup>2</sup> and **l**<sup>2</sup> designate, respectively, the (diagonal) matrices of the wavevector and the relative orbital angular momentum of the collision partners. We have
 
 <img src="https://user-images.githubusercontent.com/20931653/170129917-ff42ce5a-bc12-42ce-bf48-c0a80a8d4b54.png" height="50px"> (4)
 
