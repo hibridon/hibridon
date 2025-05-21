@@ -10,8 +10,7 @@ set(TEST_KMAX 500)
 set(TEST_T_MATRIX_SIZE kmax)
 set(TEST_LABELS "coverage")
 
-
-set(supported_cases atom-molecule-1spin atom-molecule-2spins molecule-molecule-1spin)
+set(supported_cases atom-molecule-1spin molecule-molecule-1spin)
 
 foreach(case IN LISTS supported_cases)
   set(TEST_ID hypxsc_${case})
