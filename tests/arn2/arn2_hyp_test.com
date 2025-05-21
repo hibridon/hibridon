@@ -5,6 +5,6 @@ prxsec=t
 show
 label=Hyperfine structure with 2 spins
 run
-hypxsc,arn2_hyp,1,202,0,5
+hypxsc,arn2_hyp,1,202,4,5
 exit
 
