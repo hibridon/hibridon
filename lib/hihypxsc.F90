@@ -92,6 +92,7 @@ implicit none
   ! To store S-matrix elements and channels info--------------------------------
   real(8), allocatable :: sr(:,:,:), si(:,:,:)
   type(bqs_type), allocatable :: bqs(:,:)
+  logical, allocatable :: bqs_in_smt(:,:)  ! indicates if the bqs for a given jtot and jlpar is present in the smt file
 
   ! MISC -----------------------------------------------------------------------
   integer :: len2, mchmx2
@@ -154,8 +155,9 @@ implicit none
 
   allocate(sr(0:jfinl, 2, mchmx2)) ; sr = 0d0
   allocate(si(0:jfinl, 2, mchmx2)) ; si = 0d0
-  allocate(bqs(0:jfinl, 2))                       
-  
+  allocate(bqs(0:jfinl, 2))
+  allocate(bqs_in_smt(0:jfinl, 2))
+  bqs_in_smt = .false.
 
   allocate(sreal(mchmx2))
   allocate(simag(mchmx2))
@@ -167,7 +169,7 @@ implicit none
     if(ierr < -1) then ; write(6,*) '*** READ ERROR IN HYPXSC. ABORT ***' ; return ; endif
     jlp = 1 - (jlpar-1)/2
     len2 = packed_bqs%length*(packed_bqs%length + 1)/2
-    
+    bqs_in_smt(jtot,jlp) = .true.
     call bqs(jtot,jlp)%init(packed_bqs%length)
     bqs(jtot,jlp)         = packed_bqs
 
@@ -176,6 +178,15 @@ implicit none
 
     if(jtot==jfinl .and. jlpar==-1) exit
   enddo
+
+  ! set base quantum states to zero for the missing s-matrices (s-matrix for second parity is absent for jtot=0)
+  do jtot = 0, jfinl
+    do jlp = 1, 2
+      if( .not. bqs_in_smt(jtot,jlp)) then
+        call bqs(jtot,jlp)%init(0)
+      end if
+    end do
+  end do
 
   deallocate(sreal, simag)
   call packed_bqs%deinit()

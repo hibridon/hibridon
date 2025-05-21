@@ -12,3 +12,18 @@ set(TEST_KMAX 151)
 set(TEST_T_MATRIX_SIZE kmax)
 set(TEST_LABELS "coverage")
 add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")
+
+#------------------------------------------------------------------------------
+# arn2 hypxsc with 2 nuclear spins test
+#------------------------------------------------------------------------------
+
+set(TEST_ID arn2_hyp)
+set(TEST_POT_SRC_FILE "pot_arn2.F90")
+set(TEST_POT_DATA_FILES "")
+set(TEST_COMMAND_FILE "arn2_hyp_test.com")
+set(TEST_INPUT_FILES "Arn2_hyp.inp")
+set(TEST_OUTPUT_FILES "Arn2_hyp1.hfx")
+set(TEST_KMAX 151)
+set(TEST_T_MATRIX_SIZE kmax)
+set(TEST_LABELS "coverage")
+add_hibridon_test("${TEST_ID}" "${TEST_POT_SRC_FILE}" "${TEST_POT_DATA_FILES}" "${TEST_COMMAND_FILE}" "${TEST_INPUT_FILES}" "${TEST_OUTPUT_FILES}" "${TEST_T_MATRIX_SIZE}" "${TEST_LABELS}")
