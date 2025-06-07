@@ -42,11 +42,22 @@ jobs:
             exit 1
           fi
           echo "TEST_SUITE=${TEST_SUITE}" >> $GITHUB_ENV
+          # for debian-12, use the newer ifx compiler that is also provided with oneapi: this allows testing the ifx support and also ifort is being phased out by intel in favor of ifx. 
+          # we could also have added ifx as another compiler in the matrix, but it would increase the burden on the runners.
+          FORTRAN_COMPILER=${{ matrix.compiler }}
+          if [ "${{ matrix.compiler }}" == 'ifort' ]
+          then
+            if [ "${{ matrix.os }}" == 'debian-12' ]
+            then
+              FORTRAN_COMPILER=ifx
+            fi
+          fi
+          echo "FORTRAN_COMPILER=${FORTRAN_COMPILER}" >> $GITHUB_ENV
       - name: Test Configuration
         uses: ./.github/test-config # To use this syntax, we must have the repository checked out
         with:
           os: ${{ matrix.os }}
-          compiler: ${{ matrix.compiler }}
+          compiler: ${{ env.FORTRAN_COMPILER }}
           build_type: ${{ matrix.build_type }}
           test_suite: ${{ env.TEST_SUITE }}
 
