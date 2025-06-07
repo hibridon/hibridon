@@ -7,6 +7,7 @@
 
 ### Added
 
+- Added support for Intel ifx compiler
 - Restored code coverage reports (commit 9bfb4a4)
 
 ### Fixed 

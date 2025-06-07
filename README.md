@@ -112,7 +112,8 @@ This will automatically find the required libraries and compiler and create a Ma
     Where `<compiler>` is your compiler executable e.g.:
     - `gfortran`
     - `gfortran-8`
-    - `ifort` 
+    - `ifort`
+    - `ifx`
 
 - **Use a specific BLAS/LAPACK library**
 
