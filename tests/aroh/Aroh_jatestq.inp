@@ -1,0 +1,23 @@
+AROH Test for Jacek
+   3                             ibasty
+  T  T  F  F                     logdfl, airyfl, readpt, bastst
+    4.6000    8.0000     .1500   rstart, rendld, spac
+  F                              prairy
+  1.150      1.00    20.0  1.50  tolai, rincr, rendai, fstfac
+   1                             nerg
+   451.0000
+   11.92654                      xmu
+   30.0000                       rcut
+   0 101   1   0   0   0   1     jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+  48   0                         lscreen, iprint
+    5    2                       nnout,niout
+    0    1    2    3    4
+   -1    1
+  F  F  F  F  F                  prlogd, prsmat, prt2, t2test, wrsmat
+  T  F  F  T  F                  wrpart, prpart, prxsec, wrxsec, wavefl
+  T  F  T  F  F                  noprin, chlist, ipos, nucros, photof
+  T  F  F  F  F                  flaghf, csflag, flagsu, ihomo, twomol
+  F  F                           rsflag, boundc
+   7   1   0   2                  jmax, igu, isa, npar
+  18.91000 -139.2100   .235     -3.910E-02 brot, aso, p, q
+                                        
