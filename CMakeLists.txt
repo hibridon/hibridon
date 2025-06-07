@@ -3,7 +3,7 @@
 cmake_minimum_required (VERSION 3.13)
 project (hibridon VERSION 5.1)
 enable_language (Fortran)
-message("Fortran compiler ID: ${CMake_Fortran_COMPILER_ID}")
+message("Fortran compiler ID: ${CMAKE_Fortran_COMPILER_ID}")
 # Default build type as Release
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose Release or Debug" FORCE)
