@@ -107,7 +107,7 @@ runs:
           exit 1
       esac
       CMAKE_OPTIONS=""
-      if [ "${{inputs.compiler}}" == 'ifort' ]
+      if [ "${{inputs.compiler}}" == 'ifort' ] || [ "${{inputs.compiler}}" == 'ifx' ]
       then
         if [ "${{inputs.os}}" == 'debian-12' ]
         then
@@ -117,7 +117,7 @@ runs:
           source /opt/intel/oneapi/setvars.sh --force
         fi
         CMAKE_OPTIONS="${CMAKE_OPTIONS} -DBLA_VENDOR=Intel10_64lp"
-        FORTRAN_COMPILER=ifort
+        FORTRAN_COMPILER=${{inputs.compiler}}
       elif [ "${{inputs.compiler}}" == 'gfortran' ]
       then
         if [ "${{inputs.os}}" == 'debian-12' ]
@@ -148,7 +148,7 @@ runs:
   - name: Build
     shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
     run: |
-      if [ "${{inputs.compiler}}" == 'ifort' ]
+      if [ "${{inputs.compiler}}" == 'ifort' ] || [ "${{inputs.compiler}}" == 'ifx' ]
       then
         if [ "${{inputs.os}}" == 'debian-12' ]
         then
@@ -172,7 +172,7 @@ runs:
   - name: Show failure details
     shell: bash # Must explicitly specify the shell for each step. https://github.com/orgs/community/discussions/18597
     run: |
-      if [ "${{inputs.compiler}}" == 'ifort' ]
+      if [ "${{inputs.compiler}}" == 'ifort' ] || [ "${{inputs.compiler}}" == 'ifx' ]
       then
         if [ "${{inputs.os}}" == 'debian-12' ]
         then
@@ -210,7 +210,7 @@ runs:
       then
         source ./profiling.venv/bin/activate
       fi
-      if [ "${{inputs.compiler}}" == 'ifort' ]
+      if [ "${{inputs.compiler}}" == 'ifort' ] || [ "${{inputs.compiler}}" == 'ifx' ]
       then
         if [ "${{inputs.os}}" == 'debian-12' ]
         then
