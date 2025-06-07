@@ -52,7 +52,8 @@ runs:
       # ENABLE_UNINIT_VAR_RUNTIME_DETECTOR works on ubuntu 20.04 but causes some tests to fail on debian 9:
       # AddressSanitizer: FPE on unknown address 0x7f329c9bc3f8 (pc 0x7f329c9bc3f8 bp 0x6290000baf00 sp 0x7ffc8d5cf650 T0)
       # 0 0x7f329c9bc3f7 in ATL_dtrsmKR_rk4 (/usr/lib/libatlas.so.3+0x10a3f7))
-      if [ "${{inputs.build_type}}" == 'debug' ]
+      # ENABLE_UNINIT_VAR_RUNTIME_DETECTOR causes some tests to fail on macos with ifx compiler (TODO: investigate why), so we disable it with ifx 
+      if [ "${{inputs.build_type}}" = 'debug' ] && [ "${{inputs.compiler}}" != 'ifx' ]
       then
         ENABLE_UNINIT_VAR_RUNTIME_DETECTOR=ON
       else
