@@ -3,7 +3,7 @@
 cmake_minimum_required (VERSION 3.13)
 project (hibridon VERSION 5.1)
 enable_language (Fortran)
-message("Fortran compiler ID: ${CMake_Fortran_COMPILER_ID}")
+message("Fortran compiler ID: ${CMAKE_Fortran_COMPILER_ID}")
 # Default build type as Release
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose Release or Debug" FORCE)
@@ -49,7 +49,7 @@ find_package( BLAS REQUIRED )
 find_package( LAPACK REQUIRED )
 find_package ( OpenMP )
 
-# get the name of the compiler
+# get in Fortran_COMPILER_NAME the name of the compiler (eg ifx)
 get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 message("Fortran compiler: ${Fortran_COMPILER_NAME}")
 

@@ -1,14 +1,14 @@
 #include "assert.h"
 !#define TEST_V2MAT_USE_ASSOCIATE
 
-#if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_X86)
+#if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_IFX) || defined(HIB_UNIX_X86)
 #define SYSTEM_MEM_USAGE_WORKS
 #endif
 module mod_ancou_main
 contains
 #if defined(SYSTEM_MEM_USAGE_WORKS)
 subroutine system_mem_usage(valueRSS)
-#if defined(HIB_UNIX_IFORT)
+#if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_IFX)
 use ifport, only: getpid
 #endif 
 implicit none
