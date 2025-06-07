@@ -50,7 +50,7 @@ module mod_hiutil
 
 contains
 subroutine vaxhlp(line1)
-#if defined(HIB_UNIX_IFORT)
+#if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_IFX)
 !dec$ fixedformlinesize:132
 #endif
 ! latest revision 24-feb-2004
@@ -511,7 +511,7 @@ subroutine dater (cdate)
 !              in format dd-mmm-yy followed by the time in
 !              format hh:mm:ss
 !  -----------------------------------------------------------------
-#if defined(HIB_UNIX_IFORT)
+#if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_IFX)
   use ifport, only: fdate
 #endif
 character*20 cdate
@@ -521,7 +521,7 @@ d=date()
 c=clock()
 cdate = d//'  '//c//'  '
 #endif
-#if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_PGI)
+#if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_IFX) || defined(HIB_UNIX_PGI)
 character*24 cdatefull
 call fdate(cdatefull)
 cdate=cdatefull(5:24)
@@ -554,7 +554,7 @@ subroutine mtime(t,te)
 #if defined(HIB_ULTRIX_DEC)
   use mod_dec_timer, only: ttim
 #endif
-#if defined(HIB_UNIX_IFORT)
+#if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_IFX)
   use ifposix, only: pxftime
 #endif
 
@@ -574,7 +574,7 @@ call etime(tarray, user_and_system_time)
 t = user_and_system_time
 wall_time = time8()
 te = dble(wall_time)
-#elif defined(HIB_UNIX_IFORT)
+#elif defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_IFX)
 integer :: itime, ierror
 real*4 tt
 ! use etime for user+cpu time
@@ -1543,7 +1543,7 @@ subroutine fehler
 return
 end
 subroutine sys_conf
-#if defined(HIB_UNIX_IFORT)
+#if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_IFX)
 use ifport, only: system
 #endif
 character*120 profile

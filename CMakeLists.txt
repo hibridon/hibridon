@@ -49,7 +49,7 @@ find_package( BLAS REQUIRED )
 find_package( LAPACK REQUIRED )
 find_package ( OpenMP )
 
-# get the name of the compiler
+# get in Fortran_COMPILER_NAME the name of the compiler (eg ifx)
 get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 message("Fortran compiler: ${Fortran_COMPILER_NAME}")
 
