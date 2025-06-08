@@ -1,5 +1,7 @@
 # Hibridon ChangeLog
 
+## [v5.2.0] - 2025-06-08
+
 ### Changed
 
 - Now that all warnings have been addressed, hibridon adopts a zero warning policy: a build will fail on warnings, except those which are flagged as false positives  using `disable-warnings` tag (currently only needed for `gfortran` builds) in source code. This will help preventing the introduction of bugs.
