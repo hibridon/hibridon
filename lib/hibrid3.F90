@@ -1349,7 +1349,7 @@ use mod_himatrix, only: syminv
 #endif
 use mod_hiblas, only: dscal, dcopy, dgemm, daxpy_wrapper, drot, ddot
 
-implicit double precision (a-h,o-z)
+implicit none
 real(8), dimension(nmax, nmax), intent(inout) :: tmod
 real(8), dimension(nmax, nmax), intent(out) :: sr
 real(8), dimension(nmax, nmax), intent(out) :: si
@@ -1385,388 +1385,379 @@ double precision dble_t
 character char_t
 data isw / 0 /
 integer, pointer :: ipol
-ipol=>ispar(3)
-one = 1.0d0
-izero=0
-onemin = -1.d0
-twomin = -2.d0
+real(8) :: cj, cn, cpj, cpn, cs, cs2, cssn, fac
+integer :: irow, ierr, isym
+integer :: jcol, jrow
+integer :: lenft
+integer :: ncol, nst
+real(8) :: p, p2
+real(8) :: sii, sn, sn2, srr
+real(8) :: t1, t2
+real(8) :: xjtot, xnorm
+real(8), parameter :: one = 1.0d0
+real(8), parameter :: onemin = -1.d0
+real(8), parameter :: twomin = -2.d0
+  ipol=>ispar(3)
 
-! init arrays
- sr = 0d0 ; si = 0d0 ; scmat = 0d0
- 
-!  calculate asymptotic wavevectors of each channel
-do  30   i = 1, nopen
-  p2 = 2 * rmu * (ered - eint(i))
-  pk(i) = sqrt(p2)
-30 continue
-!  calculate K-matrix
-! if photodissocation calculation, save log-derivative matrix in si
-if (photof) call matcopy(tmod,si,nopen,nopen,nmax,nmax)
-do  60   i = 1, nopen
-  l = lq(i)
-  p = pk(i)
-  call cbesj (l, p, r, cj, cpj)
-  call cbesn (l, p, r, cn, cpn)
-!
-!  check for overflow/underflow in ricatti-bessel functions
-  if (isnan(cj)) then
-    write(6,445)
-    write(9,445)
-445     format(/' *** OVERFLOW/UNDERFLOW IN RICATTI-BESSEL FUNCTIONS.', &
-      'ABORT ***'/)
-    stop
-  end if
-!
-  fj(i) = cj
-  fn(i) = cn
-  fpj(i) = cpj
-  fpn(i) = cpn
-  if (cj .eq. 0. .or. cn .eq. 0) write (9 ,50) i
-  if (abs(cj) .lt. (100./prec) .or. abs(cn) .gt. (prec/100.)) &
-      then
-    write (6, 50) i
-    write (9, 50) i
-  end if
-50   format &
-      (' *** R-END TOO SMALL FOR BESSEL FUNCTIONS IN CHANNEL', &
-       i3, '; ABORT ***')
-60 continue
-! if wavefunction desired, then save in record 2 of direct access file
-! 1. number of open channels,
-! 2. total number of records on wavefunction
-! 3. asymptotic interparticle separation
-! 4. wavevectors of open channels
-! 5. bessel functions and derivatives for open channels
-if (wavefn) then
-!
-!     As of the 12.1.3 version of ifort, a big hole is likely to be
-!     created here in the wfu file.  Most likely to be a bug of ifort.
-!
-!     If the bug is fixed in the future, use the following line and
-!     remove ALL references to iendwv
-!$$$         inquire (ifil, pos=ipos2)
-!
-   wfu_file%ipos2 = wfu_file%iendwv
-   write (wfu_file%ifil, err=950, pos=ipos2_location) wfu_file%ipos2, wfu_file%ipos3, wfu_file%nrlogd
-   write (wfu_file%ifil, err=950, pos=wfu_file%ipos2) wfu_file%irec, nopen, nphoto, &
-        r, (pk(i), i=1, nopen), (fj(i), i=1, nopen), &
-        (fpj(i), i=1, nopen), (fn(i), i=1, nopen), &
-        (fpn(i), i=1, nopen)
-   wfu_file%iendwv = wfu_file%iendwv + 3 * int(sizeof(int_t), kind(int_t)) + &
-        (5 * nopen + 1) * int(sizeof(dble_t), kind(int_t))
-endif
-! save derivatives
-call dcopy(nopen,fpj,1,derj,1)
-call dcopy(nopen,fpn,1,dern,1)
-do  70   icol = 1, nopen
-  cj = fj(icol)
-  cn = - fn(icol)
-  call vsmul (tmod(1,icol), 1, cn, sr(1,icol), 1, nopen)
-  sr(icol,icol) = sr(icol,icol) + fpn(icol)
-  call vsmul (tmod(1,icol), 1, cj, tmod(1,icol), 1, nopen)
-  tmod(icol,icol) = tmod(icol,icol) - fpj(icol)
-70 continue
-!  the above loops refer to eq.(18) of bob johnson's contribution to
-!  nrcc workshop "algorithms and computer codes ..." vol. 1
-!  sr is equal to - ( (y(xn)n(xn) - n'(xn) )
-!  tmod is equal to y(xn) j(xn) - j'(xn)
-!  solve linear equations for k-matrix (negative of r-matrix)
-!  fpj is used as scratch vector here
-call rles (sr, tmod, nopen, nopen, nmax)
-!  since r-matrix is negative of k-matrix, r = -tmod at this point
-isym=1
-if (kwrit) then
-  write (9, 76)
-76   format(/,' ** K MATRIX')
-  call mxoutd (9, tmod, nopen, nmax, isym, ipos)
-endif
-if (.not. photof) then
-! here for scattering
-!  calculate r**2, store in sr
+  ! init arrays
+  sr = 0d0 ; si = 0d0 ; scmat = 0d0
+   
+  !  calculate asymptotic wavevectors of each channel
+  do i = 1, nopen
+    p2 = 2 * rmu * (ered - eint(i))
+    pk(i) = sqrt(p2)
+  end do
+  !  calculate K-matrix
+  ! if photodissocation calculation, save log-derivative matrix in si
+  if (photof) call matcopy(tmod,si,nopen,nopen,nmax,nmax)
+  do i = 1, nopen
+    l = lq(i)
+    p = pk(i)
+    call cbesj (l, p, r, cj, cpj)
+    call cbesn (l, p, r, cn, cpn)
+    !
+    !  check for overflow/underflow in ricatti-bessel functions
+    if (isnan(cj)) then
+      write(6,445)
+      write(9,445)
+        445 format(/' *** OVERFLOW/UNDERFLOW IN RICATTI-BESSEL FUNCTIONS.', 'ABORT ***'/)
+      stop
+    end if
+    !
+    fj(i) = cj
+    fn(i) = cn
+    fpj(i) = cpj
+    fpn(i) = cpn
+    if (cj .eq. 0. .or. cn .eq. 0) write (9 ,50) i
+    if (abs(cj) .lt. (100./prec) .or. abs(cn) .gt. (prec/100.)) then
+      write (6, 50) i
+      write (9, 50) i
+    end if
+      50 format (' *** R-END TOO SMALL FOR BESSEL FUNCTIONS IN CHANNEL', i3, '; ABORT ***')
+  end do
+  ! if wavefunction desired, then save in record 2 of direct access file
+  ! 1. number of open channels,
+  ! 2. total number of records on wavefunction
+  ! 3. asymptotic interparticle separation
+  ! 4. wavevectors of open channels
+  ! 5. bessel functions and derivatives for open channels
+  if (wavefn) then
+    !
+    !     As of the 12.1.3 version of ifort, a big hole is likely to be
+    !     created here in the wfu file.  Most likely to be a bug of ifort.
+    !
+    !     If the bug is fixed in the future, use the following line and
+    !     remove ALL references to iendwv
+    !$$$         inquire (ifil, pos=ipos2)
+    !
+    wfu_file%ipos2 = wfu_file%iendwv
+    write (wfu_file%ifil, err=950, pos=ipos2_location) wfu_file%ipos2, wfu_file%ipos3, wfu_file%nrlogd
+    write (wfu_file%ifil, err=950, pos=wfu_file%ipos2) wfu_file%irec, nopen, nphoto, &
+         r, (pk(i), i=1, nopen), (fj(i), i=1, nopen), &
+         (fpj(i), i=1, nopen), (fn(i), i=1, nopen), &
+         (fpn(i), i=1, nopen)
+    wfu_file%iendwv = wfu_file%iendwv + 3 * int(sizeof(int_t), kind(int_t)) + &
+         (5 * nopen + 1) * int(sizeof(dble_t), kind(int_t))
+  endif ! (wavefn)
+  ! save derivatives
+  call dcopy(nopen,fpj,1,derj,1)
+  call dcopy(nopen,fpn,1,dern,1)
+  do icol = 1, nopen
+    cj = fj(icol)
+    cn = - fn(icol)
+    call vsmul (tmod(1,icol), 1, cn, sr(1,icol), 1, nopen)
+    sr(icol,icol) = sr(icol,icol) + fpn(icol)
+    call vsmul (tmod(1,icol), 1, cj, tmod(1,icol), 1, nopen)
+    tmod(icol,icol) = tmod(icol,icol) - fpj(icol)
+  end do
+  !  the above loops refer to eq.(18) of bob johnson's contribution to
+  !  nrcc workshop "algorithms and computer codes ..." vol. 1
+  !  sr is equal to - ( (y(xn)n(xn) - n'(xn) )
+  !  tmod is equal to y(xn) j(xn) - j'(xn)
+  !  solve linear equations for k-matrix (negative of r-matrix)
+  !  fpj is used as scratch vector here
+  call rles (sr, tmod, nopen, nopen, nmax)
+  !  since r-matrix is negative of k-matrix, r = -tmod at this point
+  isym=1
+  if (kwrit) then
+    write (9, 76)
+      76 format(/,' ** K MATRIX')
+    call mxoutd (9, tmod, nopen, nmax, isym, ipos)
+  endif
+  if (.not. photof) then
+    ! here for scattering
+    !  calculate r**2, store in sr
 #if defined(HIB_NONE)
-call rgmmul (isw, nopen, nopen, nopen, tmod, 1, nmax, &
-             tmod, 1, nmax, sr, 1, nmax)
+    call rgmmul (isw, nopen, nopen, nopen, tmod, 1, nmax, tmod, 1, nmax, sr, 1, nmax)
 #endif
 #if defined(HIB_CRAY)
-call mxma (tmod, 1, nmax, tmod, 1, nmax, sr, 1, nmax, &
-            nopen, nopen, nopen)
+    call mxma (tmod, 1, nmax, tmod, 1, nmax, sr, 1, nmax, nopen, nopen, nopen)
 #endif
 #if defined(HIB_UNIX)
-call dgemm('n','n',nopen,nopen,nopen,1.d0,tmod,nmax, &
-            tmod,nmax,0.d0,sr,nmax)
+    call dgemm('n','n',nopen,nopen,nopen,1.d0,tmod,nmax,tmod,nmax,0.d0,sr,nmax)
 #endif
-!  determine imaginary part of s-matrix
-!  also put unit vector into array fpn
-do 80  icol = 1, nopen
-  fpn(icol) = one
-  call vsmul (tmod(1,icol), 1, twomin, si(1,icol), 1, &
-              nopen)
-80 continue
-call daxpy_wrapper (nopen, one, fpn, 1, sr(1,1), nmax + 1)
-!  solve linear equations for s-imaginary
-!  see eq.(67) of r.g. gordon, meth. comp. phys. 10 (1971) 81
-!  fpj is used as scratch vector here
-call rles (sr, si, nopen, nopen, nmax)
-!  determine real part of s-matrix
-!  see eq.(68) of r.g. gordon, meth. comp. phys. 10 (1971) 81
+    !  determine imaginary part of s-matrix
+    !  also put unit vector into array fpn
+    do icol = 1, nopen
+      fpn(icol) = one
+      call vsmul (tmod(1,icol), 1, twomin, si(1,icol), 1, nopen)
+    enddo
+    call daxpy_wrapper (nopen, one, fpn, 1, sr(1,1), nmax + 1)
+    !  solve linear equations for s-imaginary
+    !  see eq.(67) of r.g. gordon, meth. comp. phys. 10 (1971) 81
+    !  fpj is used as scratch vector here
+    call rles (sr, si, nopen, nopen, nmax)
+    !  determine real part of s-matrix
+    !  see eq.(68) of r.g. gordon, meth. comp. phys. 10 (1971) 81
 #if defined(HIB_NONE)
-call rgmmul (isw, nopen, nopen, nopen, tmod, 1, nmax, &
-             si, 1, nmax, sr, 1, nmax)
+    call rgmmul (isw, nopen, nopen, nopen, tmod, 1, nmax, si, 1, nmax, sr, 1, nmax)
 #endif
 #if defined(HIB_CRAY) || defined(HIB_UNIX) || defined(HIB_MAC)
-call mxma (tmod, 1, nmax, si, 1, nmax, sr, 1, nmax, &
-            nopen, nopen, nopen)
+    call mxma (tmod, 1, nmax, si, 1, nmax, sr, 1, nmax, nopen, nopen, nopen)
 #endif
-!  the matrix sr now contains s-real - del, i.e. the negative of the
-!  t-matrix
-!  now calculate t-squared
-do 90  icol = 1, nopen
-  call vmul (sr(:,icol), 1, sr(:,icol), 1,tmod(:,icol), 1, &
-             nopen)
-!  tmod now contains (s-real - del)**2
-  call vmul (si(:,icol), 1, si(:,icol), 1, scmat(:,icol), 1, &
-             nopen)
-!  scmat now contains s-imag **2
-!  now add s-imag**2 to (s-real - del)**2
-  call daxpy_wrapper (nopen, one, scmat(1,icol), 1, tmod(1,icol), 1)
-90 continue
-!  now add 1 back to the diagonal elements of sr to get true s-real
-call daxpy_wrapper (nopen, one, fpn, 1, sr(1,1), nmax + 1)
-! TO RENDER NEXT LOOP OPERATIVE, CHANGE .EQ.10 TO .EQ.1
-if (ibasty.eq.7 .and. jlpar.eq.-1 .and. ipol.eq.10) then
-! special for singlet-triplet mixing:
-! rotate transition probabilities to correspond to state assignment:
-! psi-parallel = (Jtot+1)^1/2 |el=J+1> - Jtot^1/2 |el=J-1>
-! psi-perpendicular = Jtot^1/2 |el=J+1> + (Jtot+1)^1/2 |el=J-1>
-! with assignment that original column five is singlet with el=J-1 and
-! column 6 is singlet with el=J+1
-! use orthogonal plane rotation
-    xjtot=lq(5)+1
-    cs=sqrt(xjtot+1.d0)
-    sn=sqrt(xjtot)
-    xnorm=sqrt(2.d0*xjtot+1.d0)
-    sn=sn/xnorm
-    cs=cs/xnorm
-    cs2=cs*cs
-    sn2=sn*sn
-    cssn=cs*sn
-    call drot(4,sr(1,5),1,sr(1,6),1,cs,sn)
-    call drot(4,si(1,5),1,si(1,6),1,cs,sn)
-    call dcopy(4,sr(1,5),1,sr(5,1),nmax)
-    call dcopy(4,sr(1,6),1,sr(6,1),nmax)
-    call dcopy(4,si(1,5),1,si(5,1),nmax)
-    call dcopy(4,si(1,6),1,si(6,1),nmax)
-    do 95 i=1, 4
-      tmod(5,i)=sr(5,i)*sr(5,i)+si(5,i)*si(5,i)
-      tmod(6,i)=sr(6,i)*sr(6,i)+si(6,i)*si(6,i)
-95     continue
-    call dcopy(4,tmod(5,1),nmax,tmod(1,5),1)
-    call dcopy(4,tmod(6,1),nmax,tmod(1,6),1)
+    !  the matrix sr now contains s-real - del, i.e. the negative of the
+    !  t-matrix
+    !  now calculate t-squared
+    do icol = 1, nopen
+      call vmul (sr(:,icol), 1, sr(:,icol), 1,tmod(:,icol), 1, nopen)
+      !  tmod now contains (s-real - del)**2
+      call vmul (si(:,icol), 1, si(:,icol), 1, scmat(:,icol), 1, nopen)
+      ! scmat now contains s-imag **2
+      ! now add s-imag**2 to (s-real - del)**2
+      call daxpy_wrapper (nopen, one, scmat(1,icol), 1, tmod(1,icol), 1)
+    end do
+    !  now add 1 back to the diagonal elements of sr to get true s-real
+    call daxpy_wrapper (nopen, one, fpn, 1, sr(1,1), nmax + 1)
+    ! TO RENDER NEXT LOOP OPERATIVE, CHANGE .EQ.10 TO .EQ.1
+    if (ibasty.eq.7 .and. jlpar.eq.-1 .and. ipol.eq.10) then
+      ! special for singlet-triplet mixing:
+      ! rotate transition probabilities to correspond to state assignment:
+      ! psi-parallel = (Jtot+1)^1/2 |el=J+1> - Jtot^1/2 |el=J-1>
+      ! psi-perpendicular = Jtot^1/2 |el=J+1> + (Jtot+1)^1/2 |el=J-1>
+      ! with assignment that original column five is singlet with el=J-1 and
+      ! column 6 is singlet with el=J+1
+      ! use orthogonal plane rotation
+      xjtot=lq(5)+1
+      cs=sqrt(xjtot+1.d0)
+      sn=sqrt(xjtot)
+      xnorm=sqrt(2.d0*xjtot+1.d0)
+      sn=sn/xnorm
+      cs=cs/xnorm
+      cs2=cs*cs
+      sn2=sn*sn
+      cssn=cs*sn
+      call drot(4,sr(1,5),1,sr(1,6),1,cs,sn)
+      call drot(4,si(1,5),1,si(1,6),1,cs,sn)
+      call dcopy(4,sr(1,5),1,sr(5,1),nmax)
+      call dcopy(4,sr(1,6),1,sr(6,1),nmax)
+      call dcopy(4,si(1,5),1,si(5,1),nmax)
+      call dcopy(4,si(1,6),1,si(6,1),nmax)
+      do i=1, 4
+        tmod(5,i)=sr(5,i)*sr(5,i)+si(5,i)*si(5,i)
+        tmod(6,i)=sr(6,i)*sr(6,i)+si(6,i)*si(6,i)
+      end do
+      call dcopy(4,tmod(5,1),nmax,tmod(1,5),1)
+      call dcopy(4,tmod(6,1),nmax,tmod(1,6),1)
+    endif
 
-endif
+    !  if molecule-surface collisions, then the diagonal elements of
+    !  tmod should be s-real**2 + s-imag**2
+    if (flagsu) then
+      do icol = 1, nopen
+        tmod(icol,icol) = scmat(icol,icol) + sr(icol,icol) ** 2
+      end do
+    end if
+    if (.not. wavefn) return
+    ! if wavefunction desired, then save
+    ! real and imaginary part of s-matrix in record 2 of direct access file
 
-!  if molecule-surface collisions, then the diagonal elements of
-!  tmod should be s-real**2 + s-imag**2
-if (flagsu) then
-  do 100  icol = 1, nopen
-    tmod(icol,icol) = scmat(icol,icol) + sr(icol,icol) ** 2
-100   continue
-end if
-if (.not. wavefn) return
-! if wavefunction desired, then save
-! real and imaginary part of s-matrix in record 2 of direct access file
-
-do icol=1, nopen
-   write (wfu_file%ifil, err=950) (sr(i, icol), i=1, nopen)
-end do
-do icol=1, nopen
-   write (wfu_file%ifil, err=950) (si(i, icol), i=1, nopen)
-end do
+    do icol=1, nopen
+       write (wfu_file%ifil, err=950) (sr(i, icol), i=1, nopen)
+    end do
+    do icol=1, nopen
+       write (wfu_file%ifil, err=950) (si(i, icol), i=1, nopen)
+    end do
     if (kwrit .and. photof) then
       write (9,121)
-121         format(/,'** REAL PART OF S MATRIX')
-        call mxoutd (9, sr, nopen, nmax, isym, ipos)
+        121 format(/,'** REAL PART OF S MATRIX')
+      call mxoutd (9, sr, nopen, nmax, isym, ipos)
       write (9,122)
-122         format(/,'** IMAGINARY PART OF S MATRIX')
-        call mxoutd (9, si, nopen, nmax, isym, ipos)
+        122 format(/,'** IMAGINARY PART OF S MATRIX')
+      call mxoutd (9, si, nopen, nmax, isym, ipos)
     endif
-write (wfu_file%ifil, err=950) 'ENDWFUR', char(2)
-wfu_file%iendwv = wfu_file%iendwv + 8 * sizeof(char_t) &
-     + (2 * nopen ** 2) * sizeof(dble_t)
-! save smatrix temporarily
+    write (wfu_file%ifil, err=950) 'ENDWFUR', char(2)
+    wfu_file%iendwv = wfu_file%iendwv + 8 * sizeof(char_t) + (2 * nopen ** 2) * sizeof(dble_t)
+    ! save smatrix temporarily
     call matcopy(sr,srsave,nopen,nopen,nmax,nmax)
     call matcopy(si,sisave,nopen,nopen,nmax,nmax)
-! here if wavefunction wanted
-  call psiasy(fj,fn,sr,si,tmod,scmat,nopen,nmax)
-! on return, sr contains real part of asymptotic wavefunction, si contains
-! imaginary part of asymptotic wavefunction
-! also determine real and imaginary part of derivative of
-! asymptotic wavefunction
- call psiasy(derj,dern,srsave,sisave,tmod, &
-             scmat,nopen,nmax)
-endif
-! here for photodissociation, at this point:
-!              tmod contains K matrix
-!              si contains log-derivative matrix
-if (photof) then
-! copy K matrix into sr
-  call matcopy(tmod,sr,nopen,nopen,nmax,nmax)
-! invert K matrix
+    ! here if wavefunction wanted
+    call psiasy(fj,fn,sr,si,tmod,scmat,nopen,nmax)
+    ! on return, sr contains real part of asymptotic wavefunction, si contains
+    ! imaginary part of asymptotic wavefunction
+    ! also determine real and imaginary part of derivative of
+    ! asymptotic wavefunction
+    call psiasy(derj,dern,srsave,sisave,tmod,scmat,nopen,nmax)
+  else
+    ! here for photodissociation, at this point:
+    !              tmod contains K matrix
+    !              si contains log-derivative matrix
+    ! copy K matrix into sr
+    call matcopy(tmod,sr,nopen,nopen,nmax,nmax)
+    ! invert K matrix
 #if !defined(HIB_UNIX_DARWIN) && !defined(HIB_UNIX_X86)
-  call smxinv(sr,nmax,nopen,srsave,sisave,ierr)
+    call smxinv(sr,nmax,nopen,srsave,sisave,ierr)
 #endif
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
-  call syminv(sr,nmax,nopen,ierr)
+    call syminv(sr,nmax,nopen,ierr)
 #endif
-! save lhs for determination of real part of transition amplitudes
-  do  300   icol = 1, nopen
-    cj=fj(icol)
-    do 290 irow=1, nopen
-      sr(irow,icol)=sr(irow,icol)+tmod(irow,icol)
-! sr now contains K + K^-1
-      scmat(irow,icol)=si(irow,icol)*cj
-290     continue
-    scmat(icol,icol)=scmat(icol,icol)-derj(icol)
-300   continue
+  ! save lhs for determination of real part of transition amplitudes
+    do icol = 1, nopen
+      cj=fj(icol)
+      do irow=1, nopen
+        sr(irow,icol)=sr(irow,icol)+tmod(irow,icol)
+  ! sr now contains K + K^-1
+        scmat(irow,icol)=si(irow,icol)*cj
+      enddo
+      scmat(icol,icol)=scmat(icol,icol)-derj(icol)
+    enddo
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
     call mxma(scmat,1,nmax,sr,1,nmax,sisave,1,nmax, &
-                nopen,nopen,nopen)
+                  nopen,nopen,nopen)
 #endif
 #if defined(HIB_UNIX_IBM)
-  forma='N'
-  call dgemul(scmat,nmax,forma,sr,nmax,forma, &
-                sisave,nmax,nopen,nopen,nopen)
+    forma='N'
+    call dgemul(scmat,nmax,forma,sr,nmax,forma, &
+                  sisave,nmax,nopen,nopen,nopen)
 #endif
-! solve linear equations for real part of transition amplitudes
-! fpj is used as scratch here
-  call rles(sisave,q,nopen,nphoto,nmax)
-  call dscal(nopen*nphoto,onemin,q,1)
-! q now contains real part of transition amplitudes
-! store real part of transition amplitudes in sr
-  call matcopy(q,sr,nopen,nopen,nopen,nmax)
-! now calculate imaginary part of transition amplitudes
-  call dscal(nopen*nphoto,onemin,q,1)
+    ! solve linear equations for real part of transition amplitudes
+    ! fpj is used as scratch here
+    call rles(sisave,q,nopen,nphoto,nmax)
+    call dscal(nopen*nphoto,onemin,q,1)
+    ! q now contains real part of transition amplitudes
+    ! store real part of transition amplitudes in sr
+    call matcopy(q,sr,nopen,nopen,nopen,nmax)
+    ! now calculate imaginary part of transition amplitudes
+    call dscal(nopen*nphoto,onemin,q,1)
 #if (defined(HIB_UNIX) || defined(HIB_MAC)) && !defined(HIB_UNIX_IBM)
     call mxma(tmod,1,nmax,q,1,nopen,srsave,1,nmax, &
-                nopen,nopen,nphoto)
+                  nopen,nopen,nphoto)
 #endif
 #if defined(HIB_UNIX_IBM)
-  forma='N'
-  call dgemul(tmod,nmax,forma,q,nopen,forma, &
-                srsave,nmax,nopen,nopen,nphoto)
+    forma='N'
+    call dgemul(tmod,nmax,forma,q,nopen,forma, &
+                  srsave,nmax,nopen,nopen,nphoto)
 #endif
-! store imaginary part of transition amplitudes in si
-  call matcopy(srsave,si,nopen,nopen,nmax,nmax)
-! transpose transition amplitudes for output
-  call transp(sr, nopen, nmax)
-  call transp(si,nopen,nmax)
-  if (kwrit) then
-    write (9, 360)
-360     format (/,'** REAL PART OF TRANSITION AMPLITUDES')
-    isym=0
-    call mxoutr(9, sr, nphoto, nopen, nmax, isym, ipos)
-    write (9, 365)
-365     format (/,'** IMAGINARY PART OF TRANSITION AMPLITUDES')
-    call mxoutr(9, si, nphoto, nopen, nmax, isym, ipos)
-  endif
-! save transition amplitudes
-  if (wavefn) then
-
-!          call dbwi(nphoto,1,ifil,REC_LAST_USED)
-     do jrow = 1, nphoto
+    ! store imaginary part of transition amplitudes in si
+    call matcopy(srsave,si,nopen,nopen,nmax,nmax)
+    ! transpose transition amplitudes for output
+    call transp(sr, nopen, nmax)
+    call transp(si,nopen,nmax)
+    if (kwrit) then
+      write (9, 360)
+        360 format (/,'** REAL PART OF TRANSITION AMPLITUDES')
+      isym=0
+      call mxoutr(9, sr, nphoto, nopen, nmax, isym, ipos)
+      write (9, 365)
+        365 format (/,'** IMAGINARY PART OF TRANSITION AMPLITUDES')
+      call mxoutr(9, si, nphoto, nopen, nmax, isym, ipos)
+    endif
+  ! save transition amplitudes
+    if (wavefn) then
+      ! call dbwi(nphoto,1,ifil,REC_LAST_USED)
+      do jrow = 1, nphoto
         write (wfu_file%ifil, err=950) (sr(jrow, jcol), jcol=1, nopen)
-     end do
-! NB there were 2*nphoto!
-     do jrow = 1, nphoto
+      end do
+      ! NB there were 2*nphoto!
+      do jrow = 1, nphoto
         write (wfu_file%ifil, err=950) (si(jrow, jcol), jcol=1, nopen)
-     end do
+      end do
 
-     write (wfu_file%ifil, err=950) 'ENDWFUR', char(2)
-     wfu_file%iendwv = wfu_file%iendwv + 8 * sizeof(char_t) &
-          + (2 * nopen ** 2) * sizeof(dble_t)
-  endif
-!  now determine transition probabilities by squaring
-!  and normalize to unit total probability
-  do 370 nst=1, nphoto
-! use dern as scratch here
-    dern(nst) = &
-      ddot(nopen,sr(nst,1),nmax,sr(nst,1),nmax) &
-      + ddot(nopen,si(nst,1),nmax, si(nst,1),nmax)
-    dern(nst) = dern(nst)/rmu
-370   continue
-  write (9, 371)
-371   format (/,'** SUM OF PHOTOFRAGMENT FLUXES (AU)')
-  isym=0
-  call mxoutr(9, dern, 1, nphoto, 1, isym, ipos)
-  do 380 nst = 1, nphoto
-    fac=one/rmu
-    do 375 ncol = 1, nopen
-      scmat(nst,ncol) = (sr(nst,ncol)*sr(nst,ncol)+ &
-            si(nst,ncol)*si(nst,ncol))*fac
-375       continue
-380   continue
-  t1=scmat(1,1)+scmat(1,2)
-  t2=scmat(1,3)+scmat(1,4) &
-           +scmat(1,5)+scmat(1,6)
+      write (wfu_file%ifil, err=950) 'ENDWFUR', char(2)
+      wfu_file%iendwv = wfu_file%iendwv + 8 * sizeof(char_t) &
+            + (2 * nopen ** 2) * sizeof(dble_t)
+    endif
+    ! now determine transition probabilities by squaring
+    ! and normalize to unit total probability
+    do nst=1, nphoto
+      ! use dern as scratch here
+      dern(nst) = &
+          ddot(nopen,sr(nst,1),nmax,sr(nst,1),nmax) &
+        + ddot(nopen,si(nst,1),nmax, si(nst,1),nmax)
+      dern(nst) = dern(nst)/rmu
+    end do
+    write (9, 371)
+      371 format (/,'** SUM OF PHOTOFRAGMENT FLUXES (AU)')
+    isym=0
+    call mxoutr(9, dern, 1, nphoto, 1, isym, ipos)
+    do nst = 1, nphoto
+      fac=one/rmu
+      do ncol = 1, nopen
+        scmat(nst,ncol) = (sr(nst,ncol)*sr(nst,ncol)+ &
+              si(nst,ncol)*si(nst,ncol))*fac
+      end do
+    end do
+    t1=scmat(1,1)+scmat(1,2)
+    t2=scmat(1,3)+scmat(1,4)+scmat(1,5)+scmat(1,6)
 
-! just for HCL problem
-  if (ibasty .eq. 10) then
-    call gennam(flxfil,'hclflux',1,'flx',lenft)
-    call openf(3,flxfil,'sf',0)
-    write (3, 381) ered*219474.6,dern(1),t1,t2,t2/t1,t1/dern(1)
-    write (6, 381) ered*219474.6,dern(1),t1,t2,t2/t1,t1/dern(1)
-    close (3)
-381     format(f10.2,3g14.5,2f8.4)
-  endif
-!  scmat now contains transition probabilities into all final
-!  states (columns) for each initial state (rows)
-  write (9,395)
-395   format (/,'** PHOTOFRAGMENT FLUXES (AU)', &
-          ' (COLUMNS ARE FINAL STATES')
-!        write (6, 396) ered*219474.6,dern(1),(scmat(1,i), i=1,nopen)
-!** for cnne flux calc *** mby
-!         call openf(4,'resenergy.dat','sf',0)
-!         write (4,396) ered*219474.6d0,dern(1)
-!         close(4)
-  call mxoutr(9, scmat, nphoto, nopen, nmax, isym, ipos)
-! diagnostic for two state problem; leave in for now 1/21/92
-!        write (23,400) spac, scmat(1,1), scmat(1,2)
-! 400   format (f19.11,2(f25.12))
-  do 410 nst = 1, nphoto
-    fac=one/(rmu*dern(nst))
-    do 405 ncol = 1, nopen
-      scmat(nst,ncol) = (sr(nst,ncol)*sr(nst,ncol)+ &
-            si(nst,ncol)*si(nst,ncol))*fac
-405       continue
-410   continue
-!  scmat now contains normalized photofragment fluxes into all final
-!  states (columns) for each initial state (rows)
-  write (9,420)
-420   format (/,'** NORMALIZED PHOTOFRAGMENT FLUXES', &
-          ' (COLUMNS ARE FINAL STATES')
-  call mxoutr(9, scmat, nphoto, nopen, nmax, isym, ipos)
-! determine real and imaginary parts of chi (save these in sr and si)
-! determine real and imaginary parts of derivatives (save these in tmod
-! and scmat
-  if (wavefn.or.prsmat) then
-! retranspose transition amplitudes
-  call transp(sr, nopen, nmax)
-  call transp(si,nopen,nmax)
-    do  450 icol=1,nphoto
-    do  450 irow=1,nopen
-      srr=sr(irow,icol)
-      sii=si(irow,icol)
-      si(irow,icol)=-fn(irow)*sii+fj(irow)*srr
-      sr(irow,icol)=-fn(irow)*srr-fj(irow)*sii
-      scmat(irow,icol)=-fpn(irow)*sii+derj(irow)*srr
-      tmod(irow,icol)=-fpn(irow)*srr-derj(irow)*sii
-450     continue
-  endif
-endif
-return
-!
-950 write (0, *) '*** ERROR WRITING WFU FILE (SMATOP). ABORT'
-call exit()
+    ! just for HCL problem
+    if (ibasty .eq. 10) then
+      call gennam(flxfil,'hclflux',1,'flx',lenft)
+      call openf(3,flxfil,'sf',0)
+      write (3, 381) ered*219474.6,dern(1),t1,t2,t2/t1,t1/dern(1)
+      write (6, 381) ered*219474.6,dern(1),t1,t2,t2/t1,t1/dern(1)
+      close (3)
+        381 format(f10.2,3g14.5,2f8.4)
+    endif
+    ! scmat now contains transition probabilities into all final
+    ! states (columns) for each initial state (rows)
+    write (9,395)
+      395 format (/,'** PHOTOFRAGMENT FLUXES (AU)', &
+            ' (COLUMNS ARE FINAL STATES')
+    ! write (6, 396) ered*219474.6,dern(1),(scmat(1,i), i=1,nopen)
+    !** for cnne flux calc *** mby
+    ! call openf(4,'resenergy.dat','sf',0)
+    ! write (4,396) ered*219474.6d0,dern(1)
+    ! close(4)
+    call mxoutr(9, scmat, nphoto, nopen, nmax, isym, ipos)
+    ! diagnostic for two state problem; leave in for now 1/21/92
+    !        write (23,400) spac, scmat(1,1), scmat(1,2)
+    ! 400   format (f19.11,2(f25.12))
+    do nst = 1, nphoto
+      fac=one/(rmu*dern(nst))
+      do ncol = 1, nopen
+        scmat(nst,ncol) = (sr(nst,ncol)*sr(nst,ncol)+ &
+              si(nst,ncol)*si(nst,ncol))*fac
+      end do
+    end do
+    !  scmat now contains normalized photofragment fluxes into all final
+    !  states (columns) for each initial state (rows)
+    write (9,420)
+      420 format (/,'** NORMALIZED PHOTOFRAGMENT FLUXES', &
+            ' (COLUMNS ARE FINAL STATES')
+    call mxoutr(9, scmat, nphoto, nopen, nmax, isym, ipos)
+    ! determine real and imaginary parts of chi (save these in sr and si)
+    ! determine real and imaginary parts of derivatives (save these in tmod
+    ! and scmat
+    if (wavefn.or.prsmat) then
+    ! retranspose transition amplitudes
+      call transp(sr, nopen, nmax)
+      call transp(si,nopen,nmax)
+      do icol=1,nphoto
+        do irow=1,nopen
+          srr=sr(irow,icol)
+          sii=si(irow,icol)
+          si(irow,icol)=-fn(irow)*sii+fj(irow)*srr
+          sr(irow,icol)=-fn(irow)*srr-fj(irow)*sii
+          scmat(irow,icol)=-fpn(irow)*sii+derj(irow)*srr
+          tmod(irow,icol)=-fpn(irow)*srr-derj(irow)*sii
+        end do
+      end do
+    endif
+  endif ! (photof)
+  return
+  !
+  950 write (0, *) '*** ERROR WRITING WFU FILE (SMATOP). ABORT'
+  call exit()
 end
 ! -----------------------------------------------------------------------
 subroutine smatrx (z, sr, si, &
