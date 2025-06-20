@@ -64,7 +64,7 @@ subroutine propag (z, w, zmat, &
                    ien, nerg, en, eshift, rstart, rendld, spac, &
                    tolhi, rendai, rincr, fstfac, tb, tbm, &
                    ipos, prlogd, noprin, airyfl, prairy, &
-                   nch, nopen, nmax, v2, isteps, nsteps)
+                   nch, nopen, nmax, v2, isteps, nsteps, wfu_file)
 ! ------------------------------------------------------------------------
 !  subroutine to:
 !    1.  propagate the log-derivative matrix from rstart to rendld
@@ -146,6 +146,7 @@ use mod_hibrid1, only: airprp
 use mod_hitypes, only: bqs_type
 use mod_hiblas, only: dcopy
 use mod_hibound, only: bound
+use mod_wave, only: wfu_file_type
 implicit none
 !   square matrices
 real(8), intent(out) :: z(nmax, nch)
@@ -176,6 +177,7 @@ integer, intent(in) :: nmax
 type(ancou_type), intent(in) :: v2
 integer, intent(inout) :: isteps
 integer, intent(inout) :: nsteps
+type(wfu_file_type), intent(inout) :: wfu_file
 
 logical :: twoen
 logical ::  first
@@ -246,7 +248,7 @@ call mtime(ttx,tty)
 call runlog (z, &
              r, rendld, spac, eshift, itwo, twoen, &
              td, tdm, tp, tpm, twf, twfm, prlogd, noprin, &
-             ipos, nch, nmax, v2, isteps, nsteps)
+             ipos, nch, nmax, v2, isteps, nsteps, wfu_file)
 
 !  on return from runlog, z contains the log-derivative matrix at r = rendld
 !  branch to airy integration if desired. integrate coupled equations
@@ -270,7 +272,7 @@ if (airyfl) then
   call airprp (z, &
                r, rendai, drnow, en, &
                tolhi, rincr, eshift, nch, nmax, itwo, prairy, &
-               twoen,noprin, v2)
+               twoen,noprin, v2, wfu_file)
 !  on return from airprp, z contains the log-derivative matrix at r = rendai
 end if
 call mtime(t11,t22)
@@ -288,7 +290,7 @@ end if
 !  now calculate s-matrix and t-matrix squared
 call smatrx (z, w, zmat, &
              bqs, r, prec, tw, twm, nopen, nch, nmax, &
-             prlogd,ipos)
+             prlogd,ipos,wfu_file)
 
 ! convert to time string
   call mtime(t1,t2)
@@ -313,7 +315,6 @@ call smatrx (z, w, zmat, &
   write (9, 320) rtmn,rtmx
 320   format(' ** TURNING POINTS:  MIN=', f7.3,'  MAX=',f7.3,' BOHR')
 end if
-
 return
 end
 ! ------------------------------------------------------------------------
@@ -410,7 +411,7 @@ end
 ! -------------------------------------------------------------------
 ! -------------------------------------------------------------------
 subroutine logdb (z, nmax, nch, rmin, rmax, nsteps, &
-                  eshift, iread, iwrite, tl, tp, twf, v2)
+                  eshift, iread, iwrite, tl, tp, twf, v2, wfu_file)
 !     routine to initialise the log derivative matrix, y, at r = rmin,
 !     and propagate it from rmin to rmax using the method described in
 !     d.e.manolopoulos, j.chem.phys., 85, 6425 (1986)
@@ -465,7 +466,7 @@ subroutine logdb (z, nmax, nch, rmin, rmax, nsteps, &
 !  ------------------------------------------------------------------
 use mod_coqvec, only: mxphot, nphoto, q ! q is an output of this subroutine
 use mod_ancou, only: ancou_type
-use mod_wave, only: irec, ifil, nchwfu, nrlogd, iendwv, get_wfu_logd_rec_length
+use mod_wave, only: wfu_file_type, get_wfu_logd_rec_length
 
 use funit
 use mod_phot, only: photof, wavefn, writs
@@ -493,6 +494,7 @@ real(8), intent(out) ::  tl
 real(8), intent(out) ::  tp
 real(8), intent(out) ::  twf
 type(ancou_type), intent(in) :: v2
+type(wfu_file_type), intent(inout) :: wfu_file
 
 !     wref          scratch array of dimension nch
 !                   used as workspace for the reference potential
@@ -876,17 +878,17 @@ if (nsteps /= 0) then
   !     w now contains the matrix g(a,m)g(m,b)=g(a,b)
   !     if wavefunction desired, save this matrix
       if (wavefn .and. writs) then
-         irec = irec + 1
+         wfu_file%irec = wfu_file%irec + 1
   !     nrlogd is the number of LOGD records - used to seek the wfu file
-         nrlogd = nrlogd + 1
-         write (ifil, err=950) r - h, r, (w(i), i=1, nch)
+         wfu_file%nrlogd = wfu_file%nrlogd + 1
+         write (wfu_file%ifil, err=950) r - h, r, (w(i), i=1, nch)
          icol = 1
          do ich = 1, nch
-            write (ifil, err=950) (w(icol - 1 + i), i=1, nch)
+            write (wfu_file%ifil, err=950) (w(icol - 1 + i), i=1, nch)
             icol = icol + nmax
          end do
-         write (ifil, err=950) 'ENDWFUR', char(mod(irec, 256))
-         iendwv = iendwv + get_wfu_logd_rec_length(nchwfu, 0)
+         write (wfu_file%ifil, err=950) 'ENDWFUR', char(mod(wfu_file%irec, 256))
+         wfu_file%iendwv = wfu_file%iendwv + get_wfu_logd_rec_length(wfu_file%nchwfu, 0)
       endif
     endif
 
@@ -1012,7 +1014,7 @@ end
 subroutine runlog (z, &
                    r, rend, &
                    spac, eshift, itwo, twoen, tl, tlw, tp, tpw, &
-                   twf, twfw, prlogd, noprin, ipos, nch, nmax, v2, isteps, nsteps)
+                   twf, twfw, prlogd, noprin, ipos, nch, nmax, v2, isteps, nsteps, wfu_file)
 !     log-derivative propagator from r to r = rend
 !     the logd code is based on the improved log-derivative method
 !     for reference see  d.e.manolopoulos, j.chem.phys., 85, 6425 (1986)
@@ -1063,6 +1065,7 @@ use mod_coqvec, only: nphoto, q
 use mod_ancou, only: ancou_type
 use mod_hibrid2, only: mxoutd, mxoutr
 use mod_phot, only: photof
+use mod_wave, only: wfu_file_type
 implicit double precision (a-h, o-z)
 type(ancou_type), intent(in) :: v2
 real(8), intent(out) :: z(nmax*nch)
@@ -1085,6 +1088,7 @@ integer, intent(in) :: nch
 integer, intent(in) :: nmax
 integer, intent(inout) :: isteps
 integer, intent(inout) :: nsteps
+type(wfu_file_type), intent(inout) :: wfu_file
 
 !      real eshift, r, rend, rmax, rmin, spac, tl, tlw, tp, tpw
 !      real z
@@ -1130,7 +1134,7 @@ endif
 call logdb (z, &
             nmax, nch, &
             rmin, rmax, nsteps, eshift, iread, iwrite, &
-            tl, tp, twf, v2)
+            tl, tp, twf, v2, wfu_file)
 
 !  on return: z(i,j) i=1,nch j=1,nch  now contains the log-derivative matrix
 !  at r = rmax (the final interparticle separation)
@@ -1270,7 +1274,7 @@ return
 end
 ! ----------------------------------------------------------------------
 subroutine smatop (tmod, sr, si, scmat, lq, r, prec, &
-                   nopen, nmax,kwrit,ipos)
+                   nopen, nmax,kwrit,ipos, wfu_file)
 !  subroutine to compute s-matrix and, alternatively, the asymptotic
 !  scattering wavefunction
 !  asmptotically, in the case of inelastic scattering, the wavefunction is
@@ -1339,7 +1343,7 @@ use mod_cotq1, only: srsave => dpsir ! srsave(100)
 use mod_cotq2, only: sisave => tq2 ! sisave(100)
 use mod_hibrid2, only: mxoutd, mxoutr
 use mod_par, only: prsmat, jlpar! spac=>scat_spac
-use mod_wave, only: irec, ifil, ipos2, ipos3, nrlogd, iendwv, ipos2_location
+use mod_wave, only: wfu_file_type, ipos2_location
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_phot, only: photof, wavefn
@@ -1369,6 +1373,7 @@ integer, intent(in) :: nopen
 integer, intent(in) :: nmax
 logical, intent(in) :: kwrit
 logical, intent(in) :: ipos
+type(wfu_file_type), intent(inout) :: wfu_file
 
 ! ricatti-bessel functions
 real(8), dimension(nopen) :: fj  
@@ -1453,13 +1458,13 @@ if (wavefn) then
 !     remove ALL references to iendwv
 !$$$         inquire (ifil, pos=ipos2)
 !
-   ipos2 = iendwv
-   write (ifil, err=950, pos=ipos2_location) ipos2, ipos3, nrlogd
-   write (ifil, err=950, pos=ipos2) irec, nopen, nphoto, &
+   wfu_file%ipos2 = wfu_file%iendwv
+   write (wfu_file%ifil, err=950, pos=ipos2_location) wfu_file%ipos2, wfu_file%ipos3, wfu_file%nrlogd
+   write (wfu_file%ifil, err=950, pos=wfu_file%ipos2) wfu_file%irec, nopen, nphoto, &
         r, (pk(i), i=1, nopen), (fj(i), i=1, nopen), &
         (fpj(i), i=1, nopen), (fn(i), i=1, nopen), &
         (fpn(i), i=1, nopen)
-   iendwv = iendwv + 3 * int(sizeof(int_t), kind(int_t)) + &
+   wfu_file%iendwv = wfu_file%iendwv + 3 * int(sizeof(int_t), kind(int_t)) + &
         (5 * nopen + 1) * int(sizeof(dble_t), kind(int_t))
 endif
 ! save derivatives
@@ -1584,10 +1589,10 @@ if (.not. wavefn) return
 ! real and imaginary part of s-matrix in record 2 of direct access file
 
 do icol=1, nopen
-   write (ifil, err=950) (sr(i, icol), i=1, nopen)
+   write (wfu_file%ifil, err=950) (sr(i, icol), i=1, nopen)
 end do
 do icol=1, nopen
-   write (ifil, err=950) (si(i, icol), i=1, nopen)
+   write (wfu_file%ifil, err=950) (si(i, icol), i=1, nopen)
 end do
     if (kwrit .and. photof) then
       write (9,121)
@@ -1597,8 +1602,8 @@ end do
 122         format(/,'** IMAGINARY PART OF S MATRIX')
         call mxoutd (9, si, nopen, nmax, isym, ipos)
     endif
-write (ifil, err=950) 'ENDWFUR', char(2)
-iendwv = iendwv + 8 * sizeof(char_t) &
+write (wfu_file%ifil, err=950) 'ENDWFUR', char(2)
+wfu_file%iendwv = wfu_file%iendwv + 8 * sizeof(char_t) &
      + (2 * nopen ** 2) * sizeof(dble_t)
 ! save smatrix temporarily
     call matcopy(sr,srsave,nopen,nopen,nmax,nmax)
@@ -1681,15 +1686,15 @@ if (photof) then
 
 !          call dbwi(nphoto,1,ifil,REC_LAST_USED)
      do jrow = 1, nphoto
-        write (ifil, err=950) (sr(jrow, jcol), jcol=1, nopen)
+        write (wfu_file%ifil, err=950) (sr(jrow, jcol), jcol=1, nopen)
      end do
 ! NB there were 2*nphoto!
      do jrow = 1, nphoto
-        write (ifil, err=950) (si(jrow, jcol), jcol=1, nopen)
+        write (wfu_file%ifil, err=950) (si(jrow, jcol), jcol=1, nopen)
      end do
 
-     write (ifil, err=950) 'ENDWFUR', char(2)
-     iendwv = iendwv + 8 * sizeof(char_t) &
+     write (wfu_file%ifil, err=950) 'ENDWFUR', char(2)
+     wfu_file%iendwv = wfu_file%iendwv + 8 * sizeof(char_t) &
           + (2 * nopen ** 2) * sizeof(dble_t)
   endif
 !  now determine transition probabilities by squaring
@@ -1778,7 +1783,7 @@ end
 ! -----------------------------------------------------------------------
 subroutine smatrx (z, sr, si, &
                    bqs, r, prec, ts, tsw, nopen, nch, nmax, &
-                   kwrit,ipos)
+                   kwrit,ipos, wfu_file)
 ! -----------------------------------------------------------------------
 !  subroutine to:
 !                1. eliminate closed-channel components in the log-
@@ -1818,13 +1823,13 @@ subroutine smatrx (z, sr, si, &
 use mod_coqvec, only: nphoto, q
 use mod_coeint, only: eint
 use mod_hibrid2, only: mxoutd, mxoutr
-use mod_wave, only: ifil, ipos2, ipos3, nrlogd, iendwv, ipos2_location
+use mod_wave, only: wfu_file_type, ipos2_location
 use mod_ered, only: ered
 use mod_phot, only: photof, wavefn
 use mod_hiutil, only: mtime
 use mod_hitypes, only: bqs_type
 use mod_hiblas, only: dcopy
-implicit double precision (a-h,o-z)
+implicit none
 real(8), intent(inout) :: z(nmax,nmax)
 real(8), intent(out) :: sr(nmax,nmax)
 real(8), intent(out) :: si(nmax,nmax)
@@ -1838,12 +1843,15 @@ integer, intent(in) :: nch
 integer, intent(in) :: nmax
 logical, intent(in) :: kwrit
 logical, intent(in) :: ipos
-
+type(wfu_file_type), intent(inout) :: wfu_file
 
 real(8), allocatable :: amat(:,:)
 integer :: isc1(nch)
+integer :: i, ic, icol, ir, irow, isym
+integer :: npoint
+real(8) :: t1, t2, t11, t22
 
-data izero /0/
+integer, parameter :: izero = 0
 !     The following variables are used to determine the (machine
 !     dependent) size of built-in types
 double precision dble_t
@@ -1908,7 +1916,7 @@ endif
 !  isc1, sc1, sc2, sc3, and sc4 are all used as scratch arrays
 !  scmat is used as scratch matrix here
 !  this uses new smat routine involving just open channels
-call smatop (z, sr, si, amat, bqs%lq, r, prec, nopen, nmax, kwrit,ipos)
+call smatop (z, sr, si, amat, bqs%lq, r, prec, nopen, nmax, kwrit,ipos, wfu_file)
 if (wavefn) then
 ! if wavefunction desired, then
 ! sr and si contain open channel portion of asymptotic wavefunction
@@ -1920,23 +1928,23 @@ if (wavefn) then
 !     Please refer to subroutine smatop for the info regarding the
 !     following commented statement
 !$$$         inquire (ifil, pos=ipos3)
-   ipos3 = iendwv
-   write (ifil, pos=ipos2_location) ipos2, ipos3, nrlogd
-   write (ifil, err=950, pos=ipos3) (isc1(i), i=1, nopen)
+   wfu_file%ipos3 = wfu_file%iendwv
+   write (wfu_file%ifil, pos=ipos2_location) wfu_file%ipos2, wfu_file%ipos3, wfu_file%nrlogd
+   write (wfu_file%ifil, err=950, pos=wfu_file%ipos3) (isc1(i), i=1, nopen)
    do icol = 1, nopen
-      write (ifil, err=950) (sr(i, icol), i=1, nopen)
+      write (wfu_file%ifil, err=950) (sr(i, icol), i=1, nopen)
    end do
    do icol = 1, nopen
-      write (ifil, err=950) (si(i, icol), i=1, nopen)
+      write (wfu_file%ifil, err=950) (si(i, icol), i=1, nopen)
    end do
    do icol = 1, nopen
-      write (ifil, err=950) (z(i, icol), i=1, nopen)
+      write (wfu_file%ifil, err=950) (z(i, icol), i=1, nopen)
    end do
    do icol = 1, nopen
-      write (ifil, err=950) (amat(i, icol), i=1, nopen)
+      write (wfu_file%ifil, err=950) (amat(i, icol), i=1, nopen)
    end do
-   write (ifil, err=950) 'ENDWFUR', char(3)
-   iendwv = iendwv + 8 * sizeof(char_t) &
+   write (wfu_file%ifil, err=950) 'ENDWFUR', char(3)
+   wfu_file%iendwv = wfu_file%iendwv + 8 * sizeof(char_t) &
         + (4 * nopen ** 2 + nopen) * sizeof(dble_t)
 endif
 deallocate(amat)

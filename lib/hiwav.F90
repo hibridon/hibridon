@@ -2,17 +2,23 @@
 module mod_wave  ! mod_wav is a modern replacement of common block cowave
   use mod_assert, only: fassert
   implicit none
-  integer :: irec    ! record number of last written g(a,b) matrix
-  integer :: ifil    ! file unit used for wfu file (is it always FUNIT_WFU ?)
-  integer :: nchwfu  ! number of channels in wfu file
-  integer(8) :: ipos2
-  integer(8) :: ipos3
-  integer :: nrlogd  ! number of log derivatives
-  integer(8) :: iendwv  ! number of bytes in wfu file (integer(8) to allow for wfu files bigger than 2gb)
-  integer :: inflev  ! 0 or 1
   character, parameter :: wfu_format_version = char(3)  ! the version number of the wfu file format (graffy note on 13/09/2022 : unable to find documentation on the 6th byte of the wfu file, I interpreted it as a format version; its value was 2)
-  integer(8), parameter :: ipos2_location = 9  ! locatioon of the ipos2 field relative to the start of the wfu file
+  integer(8), parameter :: ipos2_location = 9  ! location of the ipos2 field relative to the start of the wfu file
+
+  type, public :: wfu_file_type
+    integer :: irec    ! record number of last written g(a,b) matrix
+    integer :: ifil    ! file unit used for wfu file (is it always FUNIT_WFU ?)
+    integer :: nchwfu  ! number of channels in wfu file
+    integer(8) :: ipos2
+    integer(8) :: ipos3
+    integer :: nrlogd  ! number of log derivatives
+    integer(8) :: iendwv  ! number of bytes in wfu file (integer(8) to allow for wfu files bigger than 2gb)
+    integer :: inflev  ! 0 or 1
   contains
+   
+  end type wfu_file_type
+
+contains
 function get_wfu_rec1_length(nchwfu)
   integer, intent(in) :: nchwfu  ! number of channels in wfu file
   integer(8) :: get_wfu_rec1_length

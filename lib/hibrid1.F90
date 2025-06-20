@@ -1285,7 +1285,7 @@ end
 
 subroutine airprp (z, &
    xf, rend, drnow, en, &
-   tolai, rincr, eshift, nch, nmax, itwo, iprint, twoen, noprin, v2)
+   tolai, rincr, eshift, nch, nmax, itwo, iprint, twoen, noprin, v2, wfu_file)
 !  airy zeroth-order propagator from r=xf to r=rend
 !  for reference see m. alexander, "hybrid quantum scattering algorithms ...",
 !                    j. chem. phys. 81, 4510 (1984)
@@ -1346,7 +1346,7 @@ use mod_cosc10, only: sc10
 use mod_ancou, only: ancou_type
 use mod_hiba10_22p, only: energ22
 use mod_par, only: par_iprint=>iprint
-use mod_wave, only: irec, ifil, nchwfu, iendwv, get_wfu_airy_rec_length
+use mod_wave, only: wfu_file_type, get_wfu_airy_rec_length
 use mod_selb, only: ibasty
 use mod_phot, only: photof, wavefn, writs
 use mod_cotq1, only: tmat2 => dpsir
@@ -1378,6 +1378,7 @@ logical, intent(in) :: iprint
 logical, intent(in) :: twoen
 logical, intent(in) :: noprin
 type(ancou_type), intent(in) :: v2
+type(wfu_file_type), intent(inout) :: wfu_file
 logical :: airy_prop_completed
 integer i, icol, ierr, ipt, izero, kstep, maxstp, &
         ncol, npt, nskip
@@ -1599,33 +1600,33 @@ do kstep = 1, maxstp
     ! save this matrix as well as transformation matrix
     ! into local interval and local propagators
     !
-    irec = irec + 1
-    write (ifil, err=950) -rlast, drnow
+    wfu_file%irec = wfu_file%irec + 1
+    write (wfu_file%ifil, err=950) -rlast, drnow
     !     Adiabatic energies
-    write (ifil, err=950) (eigold(i), i=1, nch)
+    write (wfu_file%ifil, err=950) (eigold(i), i=1, nch)
     !     The following information will not be written if writs set to F
     if (writs) then
       icol = 1
       do ich = 1, nch
-         write (ifil, err=950) (z(icol - 1 + i), i=1, nch)
+         write (wfu_file%ifil, err=950) (z(icol - 1 + i), i=1, nch)
          icol = icol + nmax
       end do
       icol = 1
       do ich = 1, nch
-         write (ifil, err=950) (vecnow(icol - 1 + i), i=1, nch)
+         write (wfu_file%ifil, err=950) (vecnow(icol - 1 + i), i=1, nch)
          icol = icol + nmax
       end do
       !
-      write (ifil, err=950) (y1(i), i=1, nch), (y2(i), i=1, nch), &
+      write (wfu_file%ifil, err=950) (y1(i), i=1, nch), (y2(i), i=1, nch), &
            (y4(i), i=1, nch), (gam1(i), i=1, nch), &
            (sc10(i), i=1, nch)
-      lrairy = get_wfu_airy_rec_length(nchwfu, 0)
+      lrairy = get_wfu_airy_rec_length(wfu_file%nchwfu, 0)
     else
-      lrairy = get_wfu_airy_rec_length(nchwfu, 1)
+      lrairy = get_wfu_airy_rec_length(wfu_file%nchwfu, 1)
     end if
     !
-    write (ifil, err=950) 'ENDWFUR', char(mod(irec, 256))
-    iendwv = iendwv + lrairy
+    write (wfu_file%ifil, err=950) 'ENDWFUR', char(mod(wfu_file%irec, 256))
+    wfu_file%iendwv = wfu_file%iendwv + lrairy
 
   end if
   !

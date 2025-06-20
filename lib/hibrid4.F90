@@ -219,7 +219,7 @@ return
 end
 !
 !     ------------------------------------------------------------------
-function iwavsk(irecr)
+function iwavsk(wfu_file, irecr)
 !     ------------------------------------------------------------------
 !     Function to return offset of wfu file for recrod #irec (stream IO)
 !
@@ -232,8 +232,9 @@ function iwavsk(irecr)
 !     The stream IO counterpart for `dbrr(,,,irec)` is `read
 !     (,pos=wavesk(irec))...
 !     ------------------------------------------------------------------
-use mod_wave, only: nchwfu, ipos2, ipos3, nrlogd, inflev, get_wfu_rec1_length, get_wfu_logd_rec_length, get_wfu_airy_rec_length
+use mod_wave, only: wfu_file_type, get_wfu_rec1_length, get_wfu_logd_rec_length, get_wfu_airy_rec_length
 implicit none
+type(wfu_file_type), intent(in) :: wfu_file
 integer, intent(in) :: irecr
 integer(8) :: iwavsk  ! 1-based offset in the wfu file, in bytes
 
@@ -250,27 +251,27 @@ if (irecr .eq. 1) then
    goto 100
 end if
 if (irecr .eq. 2) then
-   iwavsk = ipos2
+   iwavsk = wfu_file%ipos2
    goto 100
 end if
 if (irecr .eq. 3) then
-   iwavsk = ipos3
+   iwavsk = wfu_file%ipos3
    goto 100
 end if
 !     Length for record 1 (at the beginning of the file)
-lr1 = get_wfu_rec1_length(nchwfu)
+lr1 = get_wfu_rec1_length(wfu_file%nchwfu)
 !     Length for each block written by the Airy and LOGDpropagator
-lrairy = get_wfu_airy_rec_length(nchwfu, inflev)
-lrlogd = get_wfu_logd_rec_length(nchwfu, inflev)
+lrairy = get_wfu_airy_rec_length(wfu_file%nchwfu, wfu_file%inflev)
+lrlogd = get_wfu_logd_rec_length(wfu_file%nchwfu, wfu_file%inflev)
 !
-if ((irecr - 3) .le. nrlogd) then
+if ((irecr - 3) .le. wfu_file%nrlogd) then
 !     within the logd range of the file
    iwavsk = lr1 + (irecr - 4) * lrlogd + 1
    goto 100
 else
 !     airy range of the file
-   iwavsk = lr1 + nrlogd * lrlogd &
-        + (irecr - 4 - nrlogd) * lrairy + 1
+   iwavsk = lr1 + wfu_file%nrlogd * lrlogd &
+        + (irecr - 4 - wfu_file%nrlogd) * lrairy + 1
    goto 100
 end if
 !     should never reach here if function called properly
@@ -281,7 +282,7 @@ ASSERT(iwavsk > 0)
 end
 !
 ! -------------------------------------------------------------------------
-subroutine wavewr(jtot,jlpar,nu,nch,rstart,rendld, bqs)
+subroutine wavewr(jtot,jlpar,nu,nch,rstart,rendld, bqs, wfu_file)
 ! -------------------------------------------------------
 !  subroutine to write initial header information on wavefunction file
 !  (file jobname.WFU, logical unit 22), unit is opened in subroutine openfi
@@ -311,7 +312,7 @@ use mod_coamat, only: amat ! amat(25)
 #endif
 use mod_par, only: csflag, flaghf, wrsmat, photof
 use funit
-use mod_wave, only: irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, get_wfu_rec1_length, wfu_format_version
+use mod_wave, only: wfu_file_type, get_wfu_rec1_length, wfu_format_version
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
 use mod_hiutil, only: dater
@@ -324,7 +325,7 @@ integer, intent(in) :: nch
 real(8), intent(in) :: rstart
 real(8), intent(in) :: rendld
 type(bqs_type), intent(in) :: bqs
-
+type(wfu_file_type), allocatable, intent(out) :: wfu_file
 character*20 :: cdate
 
 integer :: i
@@ -334,44 +335,46 @@ integer(8) :: end_of_rec1_pos
 real, pointer :: amat_as_vec(:)
 #endif
 ASSERT( bqs%length == nch )
-ifil = FUNIT_WFU
+ASSERT(.not. allocated(wfu_file))
+allocate(wfu_file)
+wfu_file%ifil = FUNIT_WFU
 
-nchwfu = nch
-ipos2 = -1
-ipos3 = -1
-nrlogd = 0
+wfu_file%nchwfu = nch
+wfu_file%ipos2 = -1
+wfu_file%ipos3 = -1
+wfu_file%nrlogd = 0
 !     Mark the position of the EOF of the WFU file in order to by pass
 !     (likely) a bug in the intel compiler that INQUIRE does not return
 !     the proper offset
-iendwv = 1
+wfu_file%iendwv = 1
 !     Write magic number
-write (ifil, err=950) char(128), 'WFU'
+write (wfu_file%ifil, err=950) char(128), 'WFU'
 
 if (wrsmat) then
-   write (ifil, err=950) char(0), wfu_format_version, char(0), char(0)
+   write (wfu_file%ifil, err=950) char(0), wfu_format_version, char(0), char(0)
 else
-   write (ifil, err=950) char(1), wfu_format_version, char(0), char(0)
+   write (wfu_file%ifil, err=950) char(1), wfu_format_version, char(0), char(0)
 end if
 !
-write (ifil, err=950) ipos2, ipos3, nrlogd
+write (wfu_file%ifil, err=950) wfu_file%ipos2, wfu_file%ipos3, wfu_file%nrlogd
 call dater(cdate)
-write (ifil, err=950) cdate, label, potnam
+write (wfu_file%ifil, err=950) cdate, label, potnam
 !     Four zero-bytes for alignment / C struct compatibility
-write (ifil, err=950) char(0), char(0), char(0), char(0)
+write (wfu_file%ifil, err=950) char(0), char(0), char(0), char(0)
 !
-write (ifil, err=950) jtot, jlpar, nu, nch, csflag, flaghf, photof
-write (ifil, err=950) ered, rmu, rstart, rendld
+write (wfu_file%ifil, err=950) jtot, jlpar, nu, nch, csflag, flaghf, photof
+write (wfu_file%ifil, err=950) ered, rmu, rstart, rendld
 !
-write (ifil, err=950) (bqs%jq(i), i=1, nch), (bqs%lq(i), i=1, nch), &
+write (wfu_file%ifil, err=950) (bqs%jq(i), i=1, nch), (bqs%lq(i), i=1, nch), &
      (bqs%inq(i), i=1, nch)
-write (ifil, err=950) (eint(i), i=1, nch)
+write (wfu_file%ifil, err=950) (eint(i), i=1, nch)
 !
-write (ifil, err=950) 'ENDWFUR', char(1)
-inquire(ifil, pos=end_of_rec1_pos)
-ASSERT(end_of_rec1_pos == (get_wfu_rec1_length(nchwfu) + 1))
+write (wfu_file%ifil, err=950) 'ENDWFUR', char(1)
+inquire(wfu_file%ifil, pos=end_of_rec1_pos)
+ASSERT(end_of_rec1_pos == (get_wfu_rec1_length(wfu_file%nchwfu) + 1))
 !
-iendwv = iendwv + get_wfu_rec1_length(nchwfu)
-irec=3  ! irec=2 and irec=3 are reserved and their position in the file are stored in ipos2 and ipos3
+wfu_file%iendwv = wfu_file%iendwv + get_wfu_rec1_length(wfu_file%nchwfu)
+wfu_file%irec=3  ! irec=2 and irec=3 are reserved and their position in the file are stored in ipos2 and ipos3
 return
 
 950 write (0, *) '*** ERROR WRITING WFU FILE. ABORT.'
@@ -383,8 +386,8 @@ end subroutine wavewr
 !     ------------------------------------------------------------------
 !     reads header file for wavefunction (wfu file)
 subroutine waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto,jflux, &
-     rstart,rendld,rinf, rbesself, bqs)
-use mod_wave, only: irec, ifil, nchwfu, ipos2, ipos3, nrlogd, inflev, get_wfu_rec1_length, wfu_format_version
+     rstart,rendld,rinf, rbesself, bqs, wfu_file)
+use mod_wave, only: wfu_file_type, get_wfu_rec1_length, wfu_format_version
 use mod_coeint, only: eint
 #if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_DISTINCT)
 use mod_coamat, only: amat => psir ! amat(25) psir(nopen, nopen)
@@ -424,6 +427,7 @@ real(8), intent(out) :: rendld
 real(8), intent(out) :: rinf
 type(rbesself_type), intent(out) :: rbesself
 type(bqs_type), intent(out) :: bqs
+type(wfu_file_type), allocatable, intent(out) :: wfu_file
 
 character*48 :: oldlab, oldpot
 character*20 :: olddat
@@ -433,30 +437,31 @@ integer :: i
 integer :: nopsq
 integer :: nrecs
 ! integer, parameter :: izero=0
-
 !
-ifil = FUNIT_WFU ! the wfu file is expected to be open using this unit
+ASSERT(.not. allocated(wfu_file))
+allocate(wfu_file)
+wfu_file%ifil = FUNIT_WFU ! the wfu file is expected to be open using this unit
 !     Read the magic number (from the start of the file)
-read (ifil, pos=1, end=900, err=950) csize8
-inflev = ichar(csize8(5))
+read (wfu_file%ifil, pos=1, end=900, err=950) csize8
+wfu_file%inflev = ichar(csize8(5))
 if (csize8(6) /= wfu_format_version) then
   write (0,'(a,i3,a,i3,a)') '*** UNHANDLED VERSION OF WFU FORMAT : ', ichar(csize8(6)), ' (THIS VERSION OF HIBRIDON ONLY HANDLES WFU FORMAT VERSION ',  ichar(wfu_format_version),'). ABORT.'
   call exit()
 end if
 !
-read (ifil, end=900, err=950) ipos2, ipos3, nrlogd
+read (wfu_file%ifil, end=900, err=950) wfu_file%ipos2, wfu_file%ipos3, wfu_file%nrlogd
 !
-read (ifil, end=900, err=950) olddat, oldlab, oldpot
+read (wfu_file%ifil, end=900, err=950) olddat, oldlab, oldpot
 label = oldlab
 potnam = oldpot
 !     Read four zero bytes
-read (ifil, end=900, err=950) csize4
+read (wfu_file%ifil, end=900, err=950) csize4
 !
-read (ifil, end=900, err=950) jtot, jlpar, nu, nch, csflag, &
+read (wfu_file%ifil, end=900, err=950) jtot, jlpar, nu, nch, csflag, &
      flaghf, photof
 !     nchwfu is used in locating the position for records
-nchwfu = nch
-read (ifil, end=900, err=950) ered, rmu, rstart, rendld
+wfu_file%nchwfu = nch
+read (wfu_file%ifil, end=900, err=950) ered, rmu, rstart, rendld
 write (6, 245) olddat
 if (jflux .ne. 0) write (FUNIT_FLX, 245) olddat
 if (jflux .eq. 0) write (2, 245) olddat
@@ -472,13 +477,13 @@ write (6, 251) oldpot
 !
 !     Read in channel labels
 call bqs%init(nch)
-read (ifil, end=900, err=950) (bqs%jq(i), i=1, nch), &
+read (wfu_file%ifil, end=900, err=950) (bqs%jq(i), i=1, nch), &
      (bqs%lq(i), i=1, nch), (bqs%inq(i), i=1, nch), &
      (eint(i), i=1, nch)
 bqs%length = nch
 !
 ! start reading in information from record 2 here
-read (ifil, end=900, err=950, pos=iwavsk(2)) nrecs, nopen, &
+read (wfu_file%ifil, end=900, err=950, pos=iwavsk(wfu_file, 2)) nrecs, nopen, &
      nphoto, rinf
 npts = nrecs - 3
 ! read in wavevectors, bessel functions j, j', n, n'
@@ -489,13 +494,13 @@ call dset(nch,zero,rbesself%fj,1)  ! fj
 call dset(nch,zero,rbesself%fpj,1)  ! fpj
 call dset(nch,zero,rbesself%fn,1)  ! fn
 call dset(nch,zero,rbesself%fpn,1)  ! fpn
-read (ifil, end=900, err=950) (pk(i), i=1, nopen), &
+read (wfu_file%ifil, end=900, err=950) (pk(i), i=1, nopen), &
      (rbesself%fj(i), i=1, nopen), (rbesself%fpj(i), i=1, nopen), &
      (rbesself%fn(i), i=1, nopen), (rbesself%fpn(i), i=1, nopen)
 rbesself%length = nopen
 nopsq = nopen ** 2
 ! read in sreal and simag, store in w and zmat
-read (ifil, end=900, err=950) (w(i), i=1, nopsq), &
+read (wfu_file%ifil, end=900, err=950) (w(i), i=1, nopsq), &
      (zmat(i), i=1, nopsq)
 if (photof) then
 ! read in number of initial photodissociation states
@@ -503,15 +508,15 @@ if (photof) then
 !        nphoto=mphoto
 ! read in real part of photodissociation amplitude
 ! overlay sreal which is not needed for photodissociation problem
-   read (ifil, end=900, err=950) (w(i), i=1, nphoto * nopen)
+   read (wfu_file%ifil, end=900, err=950) (w(i), i=1, nphoto * nopen)
 ! read in imaginary part of photodissociation amplitude
 ! overlay simag which is not needed for photodissociation problem
-   read (ifil, end=900, err=950) (zmat(i), i=1, nphoto * nopen)
+   read (wfu_file%ifil, end=900, err=950) (zmat(i), i=1, nphoto * nopen)
 endif
 ! read in channel packing list and real and imaginary parts
 ! of scattering wavefunction and derivative
 #if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_DISTINCT)
-read (ifil, end=900, err=950, pos=iwavsk(3)) &
+read (wfu_file%ifil, end=900, err=950, pos=iwavsk(wfu_file, 3)) &
      (isc1(i), i=1, nopen), (amat(i), i=1, nopsq), &
      (bmat(i), i=1, nopsq), (dpsir(i), i=1, nopsq), &
      (dpsii(i), i=1, nopsq)
@@ -519,18 +524,18 @@ read (ifil, end=900, err=950, pos=iwavsk(3)) &
 #if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_POINTER)
 ! amat_as_vec is a view of the matrix amat(nopen, nopen) as a vector(nopen*nopen)
 call C_F_POINTER (C_LOC(amat), amat_as_vec, [nopsq])
-read (ifil, end=900, err=950, pos=iwavsk(3)) &
+read (wfu_file%ifil, end=900, err=950, pos=iwavsk(wfu_file, 3)) &
      (isc1(i), i=1, nopen), (amat_as_vec(i), i=1, nopsq), &
      (bmat(i), i=1, nopsq), (dpsir(i), i=1, nopsq), &
      (dpsii(i), i=1, nopsq)
 #endif
 #if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_NOVEC)
-read (ifil, end=900, err=950, pos=iwavsk(3)) &
+read (wfu_file%ifil, end=900, err=950, pos=iwavsk(wfu_file, 3)) &
      (isc1(i), i=1, nopen), amat, &
      (bmat(i), i=1, nopsq), (dpsir(i), i=1, nopsq), &
      (dpsii(i), i=1, nopsq)
 #endif
-irec = 3
+wfu_file%irec = 3
 return
 !
 900 continue
@@ -669,7 +674,7 @@ use mod_version, only : version
 use mod_hibrid3, only: expand
 use mod_hiba07_13p, only: tcasea
 use mod_par, only: batch, csflag, photof
-use mod_wave, only: irec, inflev
+use mod_wave, only: wfu_file_type
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_hiutil, only: gennam, mtime, gettim, dater
@@ -701,6 +706,7 @@ character*20  cdate
 character*10  elaps, cpu
 character*5   s13p(12)
 logical exstfl, kill, propf
+type(wfu_file_type), allocatable :: wfu_file
                 
 ! common for y1, y2, y4
 data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f', &
@@ -796,8 +802,8 @@ endif
 ! derivative
 call bqs%init(nmax)
 call waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto, &
-            jflux,rstart,rendld,rinf,rbesself, bqs)
-if (inflev .ne. 0) then
+            jflux,rstart,rendld,rinf,rbesself, bqs, wfu_file)
+if (wfu_file%inflev .ne. 0) then
    write (6, *) '** CALCULATION WITH WRSMAT=.T. REQUIRED.'
    goto 700
 end if
@@ -1222,14 +1228,14 @@ if (jflux .eq. 0) then
     write(FUNIT_PSI, 150)
 150     format(/' R (BOHR) AND REAL PART OF WAVEFUNCTION', &
           ' (R < 0 INDICATES AIRY PROPAGATION)',/)
-    call psicalc(npts, nch, nchsq, nj, FUNIT_PSI)
+    call psicalc(npts, nch, nchsq, nj, FUNIT_PSI, wfu_file)
 ! copy imaginary part of asymptotic wavefunction into first column of psir
 ! so we can use same loop as above
     call dcopy(nch,psir(nch+1),1,psir,1)
     write(FUNIT_PSI, 185)
 185     format(/' R (BOHR) AND IMAGINARY PART OF WAVEFUNCTION', &
           '(R < 0 INDICATES AIRY PROPAGATION)',/)
-    call psicalc(npts,nch,nchsq,nj, FUNIT_PSI)
+    call psicalc(npts,nch,nchsq,nj, FUNIT_PSI, wfu_file)
   else
 ! here for photdissociation, in which case outgoing wavefunction is a
 ! given column of chi
@@ -1249,18 +1255,19 @@ if (jflux .eq. 0) then
     call dcopy(nch,dpsir(npoint),1,psir(2*nch+1),1)
     call dcopy(nch,dpsii(npoint),1,psir(3*nch+1),1)
     ipoint=2*nch+1
-    irec=npts+4
+    wfu_file%irec=npts+4
     write(FUNIT_PSI, 200)
 200     format(/' R (BOHR) AND REAL PART OF CHI')
     iwf = 1
     propf=.true.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX)
     write(FUNIT_PSI, 210)
 210     format(/' R (BOHR) AND IMAGINARY PART OF CHI')
 ! reread asymptotic information
+    if (allocated(wfu_file)) deallocate(wfu_file)
     call waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto, &
-            jflux,rstart,rendld,rinf,rbesself, bqs)
+            jflux,rstart,rendld,rinf,rbesself, bqs, wfu_file)
     if (nch .gt. nopen) then
       call expand(nopen,nopen,nch,nch,ipack, &
                   psir,psii,scmat)
@@ -1275,17 +1282,17 @@ if (jflux .eq. 0) then
     call dcopy(nch,dpsir(npoint),1,psir(2*nch+1),1)
     call dcopy(nch,dpsii(npoint),1,psir(3*nch+1),1)
     iwf = -1
-    irec=npts+4
+    wfu_file%irec=npts+4
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX)
   endif
 else if (jflux .eq. 2) then
   write(FUNIT_FLX, 300)
 300   format(/' R (BOHR) AND ADIABATIC ENERGIES (CM-1)',/)
-  irec=npts+4
-  call eadiab(npts,nch,nj)
+  wfu_file%irec=npts+4
+  call eadiab(npts,nch,nj, wfu_file)
 else if (jflux .eq. 4) then
-  call transmt(npts,nch,rout,FUNIT_FLX)
+  call transmt(npts,nch,rout,FUNIT_FLX, wfu_file)
 else if (jflux .eq. 1) then
 ! here for flux calculation
 ! first for total flux (only for scattering)
@@ -1352,14 +1359,14 @@ else if (jflux .eq. 1) then
     endif
     write(FUNIT_FLX, 320) rinf, (sc(i), i=1,nout), scsum
     endif
-    irec=npts+4
+    wfu_file%irec=npts+4
     ipoint=2*nch+1
     iwf = 0
     propf=.true.
 ! plot out all fluxes for total flux which is numerically well behaved
     tthresh=-1.e9
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,.false., &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq,wfu_file,FUNIT_FLX)
   endif
   if (.not. photof) then
 ! now for incoming flux (only for scattering)
@@ -1420,12 +1427,12 @@ else if (jflux .eq. 1) then
       endif
       write(FUNIT_FLX, 320) rinf, (sc(i), i=1,nout), scsum
     endif
-    irec=npts+4
+    wfu_file%irec=npts+4
     ipoint=2*nch+1
     iwf = 0
     propf=.false.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX)
   endif
 ! now for outgoing flux
   if (.not.photof) then
@@ -1555,12 +1562,12 @@ else if (jflux .eq. 1) then
     write(FUNIT_FLX, 320) rinf, (sc(i), i=1,nout), scsum
   endif
   ipoint=2*nch+1
-  irec=npts+4
+  wfu_file%irec=npts+4
   iwf = 0
   if (photof) propf=.true.
   if (.not. photof) propf=.false.
   call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX)
 endif
 700 if (photof .or. jflux .eq. 0) close (FUNIT_PSI)
 if (jflux .ne. 0) close (FUNIT_FLX)
@@ -1582,7 +1589,7 @@ return
 end
 ! ------------------------------------------------------------------
 subroutine flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-                photof, propf, sumf,iwf,coordf,nny,ymin,dy,psifil_unit,inq)
+                photof, propf, sumf,iwf,coordf,nny,ymin,dy,psifil_unit,inq,wfu_file,flx_unit)
 !
 ! subroutine to calculate fluxes
 !
@@ -1607,7 +1614,7 @@ use mod_cosc8, only: sc8
 use mod_cosc9, only: sc9
 use mod_coz, only: scmat => z_as_vec ! scmat(100)
 use mod_cozmat, only: tcoord => zmat_as_vec ! tcoord(100)
-use mod_wave, only: irec, ifil
+use mod_wave, only: wfu_file_type
 use mod_coqvec, only: nphoto
 use mod_selb, only: ibasty
 use mod_ered, only: rmu
@@ -1619,12 +1626,16 @@ use mod_hipot, only: wfintern
 ! steve, you may need more space, but i doubt it since tcoord is dimensioned n
 implicit double precision (a-h,o-z)
 integer, intent(in) :: inq(nch)
+type(wfu_file_type), allocatable, intent(inout) :: wfu_file
+integer, intent(in) :: flx_unit
 logical adiab, kill, photof, propf, sumf, coordf
 
 dimension scc(100)
 data zero, one, onemin /0.d0, 1.d0, -1.d0/
 data ione, mone /1,-1/
 integer :: psifil_unit
+
+ASSERT(allocated(wfu_file))
 ! if propf = true then true back-subsititution for flux
 ! if propf = false then inward propagation
 ! noffset is start of 5th column of psir
@@ -1657,20 +1668,20 @@ integer :: psifil_unit
 
 ! here beings loop over sectors (R), starting from outermost sector
   do 420 kstep=1, npts
-    irec=irec-1
-    read (ifil, end=900, err=950, pos=iwavsk(irec)) r
+    wfu_file%irec=wfu_file%irec-1
+    read (wfu_file%ifil, end=900, err=950, pos=iwavsk(wfu_file, wfu_file%irec)) r
 ! branch out if we've gone beyond airy propagation region
     if (r .gt. 0) goto 450
-    read (ifil, end=900, err=950) drnow
+    read (wfu_file%ifil, end=900, err=950) drnow
 ! read in local wavevectors
-    read (ifil, end=900, err=950) (sc8(i), i=1, nch)
+    read (wfu_file%ifil, end=900, err=950) (sc8(i), i=1, nch)
 ! read in first G(n,n+1) matrix,  then Tn transformation
 ! matrix into local interval
-    read (ifil, end=900, err=950) (scmat3(i), i=1, nchsq), &
+    read (wfu_file%ifil, end=900, err=950) (scmat3(i), i=1, nchsq), &
          (scmat(i), i=1, nchsq)
 ! read in propagators (y1=pk, y2=sc1, y4=sc2, gam1=sc9,
 !     muab= 5th column of psi)
-    read (ifil, end=900, err=950) (pk(i), i=1, nch), &
+    read (wfu_file%ifil, end=900, err=950) (pk(i), i=1, nch), &
          (sc1(i), i=1, nch), (sc2(i), i=1, nch), &
          (sc9(i), i=1, nch), (psir(noffset - 1 + i), i=1, nch)
 !          write (23, 299) -r, drnow, (scmat(ii), ii=1,4),
@@ -1889,9 +1900,9 @@ integer :: psifil_unit
         if (scsum .lt. 1.d-13) scsum=zero
       endif
       if (sumf) then
-        write (3, 400) -r, (scc(i), i=1,nout), scsum
+        write (flx_unit, 400) -r, (scc(i), i=1,nout), scsum
       else
-        write (3, 400) -r, (sc(i), i=1,nout), scsum
+        write (flx_unit, 400) -r, (sc(i), i=1,nout), scsum
 ! steve you'll also have to write out sc9
       endif
 400       format(f10.4,30(1pe11.3))
@@ -1907,7 +1918,7 @@ integer :: psifil_unit
   call exit()
   end
 ! ------------------------------------------------------------------
-subroutine eadiab(npts,nch,nj)
+subroutine eadiab(npts,nch,nj,wfu_file)
 !
 ! subroutine to readin and print out adiabatic energies
 !
@@ -1919,12 +1930,13 @@ subroutine eadiab(npts,nch,nj)
 use mod_coisc3, only: nalist => isc3 ! nalist(10)
 use mod_cosc6, only: sc => sc6 ! sc(6)
 use mod_cosc8, only: sc8
-use mod_wave, only: irec, ifil
+use mod_wave, only: wfu_file_type
 use mod_ered, only: ered, rmu
 implicit none
 integer, intent(in) :: npts
 integer, intent(in) :: nch
 integer, intent(in) :: nj
+type(wfu_file_type), intent(inout) :: wfu_file
 integer :: i, nni
 integer :: kstep
 real(8) :: r
@@ -1933,13 +1945,13 @@ real(8) :: drnow
 real(8), parameter :: two = 2.d0
 real(8), parameter :: conv = 219474.6d0
   do 420 kstep=1, npts
-    irec=irec-1
-    read (ifil, end=900, err=950, pos=iwavsk(irec)) r
+    wfu_file%irec=wfu_file%irec-1
+    read (wfu_file%ifil, end=900, err=950, pos=iwavsk(wfu_file, wfu_file%irec)) r
 ! branch out if we've gone beyond airy propagation region
     if (r .gt. 0) return
-    read (ifil, end=900, err=950) drnow
+    read (wfu_file%ifil, end=900, err=950) drnow
 ! read in local wavevectors
-    read (ifil, end=900, err=950) (sc8(i), i=1, nch)
+    read (wfu_file%ifil, end=900, err=950) (sc8(i), i=1, nch)
     do 370 i=1, nj
       nni=nalist(i)
       sc(i)=-conv*(sc8(nni)/(two*rmu)-ered)
@@ -1991,7 +2003,7 @@ call drot(nch,dpsii(jpoint),1,dpsii(jpoint+nch),1,cs,sn)
 return
 end
 ! ------------------------------------------------------------------
-subroutine psicalc(npts, nch, nchsq, nj, psifil_unit)
+subroutine psicalc(npts, nch, nchsq, nj, psifil_unit, wfu_file)
 !
 ! subroutine to propagate wavefunctions inward
 !
@@ -2006,7 +2018,7 @@ use mod_cosc6, only: sc => sc6 ! sc(6)
 use mod_cosc7, only: sc1 => sc7 ! sc1(6)
 use mod_cow, only: sr => w_as_vec ! sr(100)
 use mod_cozmat, only: si => zmat_as_vec ! si(100)
-use mod_wave, only: irec, ifil
+use mod_wave, only: wfu_file_type
 use mod_himatrix, only: mxma
 use mod_hiiolib1, only: openf
 use mod_hiblas, only: dcopy
@@ -2016,16 +2028,17 @@ integer, intent(in) :: nch
 integer, intent(in) :: nchsq
 integer, intent(in) :: nj
 integer, intent(in) :: psifil_unit
+type(wfu_file_type), intent(inout) :: wfu_file
 integer :: i, kstep
 real(8) :: drnow, r
-  irec=npts+4
+  wfu_file%irec=npts+4
   do 180 kstep=1, npts
-    irec=irec-1
-    read (ifil, end=900, err=950, pos=iwavsk(irec)) r, drnow
+    wfu_file%irec=wfu_file%irec-1
+    read (wfu_file%ifil, end=900, err=950, pos=iwavsk(wfu_file, wfu_file%irec)) r, drnow
 ! read in adiabtic energies (which we don't need)
-    read (ifil, end=900, err=950) (sc1(i), i=1, nch)
+    read (wfu_file%ifil, end=900, err=950) (sc1(i), i=1, nch)
 ! read in transformation matrices
-    read (ifil, end=900, err=950) (sr(i), i=1, nchsq)
+    read (wfu_file%ifil, end=900, err=950) (sr(i), i=1, nchsq)
 ! si(nch, 1) = sr(nch, nch) * psir(nch, 1)
     call mxma(sr,1,nch,psir,1,nch,si,1,nch,nch,nch,1)
     do 160 i=1, nj
@@ -2123,7 +2136,7 @@ end subroutine print_trans_mat
 
 
 ! ------------------------------------------------------------------
-subroutine transmt(npts,nch,rout,flx_file)
+subroutine transmt(npts,nch,rout,flx_file, wfu_file)
 !
 ! subroutine to print out transformation matrix at rout
 !
@@ -2135,13 +2148,14 @@ subroutine transmt(npts,nch,rout,flx_file)
 ! ------------------------------------------------------------------
 use mod_cow, only: sr => w_as_vec ! sr(100) (real part)
 use mod_cozmat, only: si => zmat_as_vec ! si(100) (imaginary part)
-use mod_wave, only: wfu_file => ifil  ! FUNIT_WFU
+use mod_wave, only: wfu_file_type
 use mod_hiblas, only: dcopy
 implicit none
 integer, intent(in) :: npts
 integer, intent(in) :: nch
 real(8), intent(in) :: rout
 integer, intent(in) :: flx_file  ! file unit of <job>.flx file
+type(wfu_file_type), intent(in) :: wfu_file
 integer :: irec
 real(8) :: del, delold
 integer :: kstep
@@ -2155,13 +2169,13 @@ irec=npts+4
 delold=1.d+18
 do kstep=1, npts
   irec=irec-1
-  read (wfu_file, end=900, err=950, pos=iwavsk(irec)) r, drnow  ! we assume that we are reading an airy record, in which case r < 0.0
+  read (wfu_file%ifil, end=900, err=950, pos=iwavsk(wfu_file, irec)) r, drnow  ! we assume that we are reading an airy record, in which case r < 0.0
   del=abs(abs(r)-rout)
   ! read in adiabatic energies (which we don't need)
-  read (wfu_file, end=900, err=950) (sc1(i), i=1, nch)
+  read (wfu_file%ifil, end=900, err=950) (sc1(i), i=1, nch)
   ! read in first G(n,n+1) matrix,  then Tn transformation
   ! matrix into local interval
-  read (wfu_file, end=900, err=950) (sr(i), i=1, nchsq), (si(i), i=1, nchsq)
+  read (wfu_file%ifil, end=900, err=950) (sr(i), i=1, nchsq), (si(i), i=1, nchsq)
   if (rout > 0.d0) then
     if (del > delold) then
       call print_trans_mat(r, drnow, si, nch, flx_file, NUM_CONSIDERED_CHANNELS, 12, .true.)
@@ -2202,7 +2216,7 @@ subroutine eadiab1(filnam, nchmin, nchmax)
 !     ------------------------------------------------------------------
 use constants
 use mod_cosc8, only: sc8
-use mod_wave, only: ifil, nrlogd
+use mod_wave, only: wfu_file_type
 use funit
 use mod_ered, only: ered, rmu
 use mod_hiutil, only: gennam
@@ -2213,6 +2227,7 @@ character*(*), intent(in) :: filnam
 integer, intent(in) :: nchmin
 integer, intent(inout) :: nchmax
 
+type(wfu_file_type), allocatable :: wfu_file
 integer :: i, j
 integer :: jtot, jlpar, nu, nch, npts, nopen, nphoto
 integer(8) :: noffst
@@ -2250,7 +2265,7 @@ write (6, 15) eadfil(1:lenft)
 15 format (' ** WRITING ADIABATIC ENERGIES TO ', (a))
 !
 call waverd(jtot, jlpar, nu, nch, npts, nopen, nphoto, &
-     jflux, rstart, rendld, rinf, rbesself, bqs)
+     jflux, rstart, rendld, rinf, rbesself, bqs, wfu_file)
 if (nchmin .gt. nch) goto 990
 if (nchmax .eq. 0 .or. nchmax .gt. nch) nchmax = nch
 nchpr = nchmax - nchmin + 1
@@ -2259,10 +2274,10 @@ noffst = (nch - nchmax + 2) * sizeof(dble_t)
 write(eadfil_unit, 17) nchmin, nchmax
 17 format (' ** ADIABATIC ENERGIES FROM NO.', i5, ' TO NO.', &
      i5, ' REQUESTED')
-do i = 4 + nrlogd, npts + 3
-   seek_pos = iwavsk(i)
-   read (ifil, end=900, err=950, pos=seek_pos) r, drnow
-   read (ifil, end=900, err=950, pos=seek_pos+noffst) &
+do i = 4 + wfu_file%nrlogd, npts + 3
+   seek_pos = iwavsk(wfu_file, i)
+   read (wfu_file%ifil, end=900, err=950, pos=seek_pos) r, drnow
+   read (wfu_file%ifil, end=900, err=950, pos=seek_pos+noffst) &
         (sc8(j), j=1, nchpr)
    write(eadfil_unit, 20) -r + 0.5 * drnow
 20    format (f10.5, 1x, $)
@@ -2277,7 +2292,7 @@ goto 990
 !
 900 continue
 950 write (0, *) '*** ERROR READING WFU FILE'
-990 close(ifil)
+990 close(wfu_file%ifil)
 close(eadfil_unit)
 return
 end
