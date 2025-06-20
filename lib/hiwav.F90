@@ -491,6 +491,7 @@ integer :: i, ich, icol
   !
   write (wfu_file%ifil, err=950) 'ENDWFUR', char(mod(wfu_file%irec, 256))
   wfu_file%iendwv = wfu_file%iendwv + lrairy
+  return
 
 950 write (0, *) ' *** ERROR WRITING WFU FILE (AIRY). ABORT.'
   call exit()
