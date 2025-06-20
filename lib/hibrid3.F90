@@ -177,7 +177,7 @@ integer, intent(in) :: nmax
 type(ancou_type), intent(in) :: v2
 integer, intent(inout) :: isteps
 integer, intent(inout) :: nsteps
-type(wfu_file_type), intent(inout) :: wfu_file
+type(wfu_file_type), intent(inout), allocatable :: wfu_file
 
 logical :: twoen
 logical ::  first

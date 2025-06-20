@@ -443,4 +443,58 @@ call exit
 return
 end
 
+subroutine write_airy_record(wfu_file, rlast, drnow, nch, eigold, writs, nmax, z, vecnow, y1, y2, y4, gam1, lmuab)
+implicit none
+type(wfu_file_type), allocatable, intent(inout) :: wfu_file
+real(8), intent(in) :: rlast
+real(8), intent(in) :: drnow
+integer, intent(in) :: nch
+real(8), intent(in) :: eigold(nch)
+logical, intent(in) :: writs
+integer, intent(in) :: nmax
+real(8), intent(in) :: z(nch*nmax)  ! this is G(n-1,n) in the local basis
+real(8), intent(in) :: vecnow(nch*nmax)  ! vecnow is transformation from free basis into local basis in first interval
+real(8), intent(in) :: y1(nch)
+real(8), intent(in) :: y2(nch)
+real(8), intent(in) :: y4(nch)
+real(8), intent(in) :: gam1(nch)
+real(8), intent(in) :: lmuab(nch)
+
+integer :: lrairy
+integer :: i, ich, icol
+
+  ASSERT(allocated(wfu_file))
+  wfu_file%irec = wfu_file%irec + 1
+  write (wfu_file%ifil, err=950) -rlast, drnow
+  !     Adiabatic energies
+  write (wfu_file%ifil, err=950) (eigold(i), i=1, nch)
+  !     The following information will not be written if writs set to F
+  if (writs) then
+    icol = 1
+    do ich = 1, nch
+       write (wfu_file%ifil, err=950) (z(icol - 1 + i), i=1, nch)
+       icol = icol + nmax
+    end do
+    icol = 1
+    do ich = 1, nch
+       write (wfu_file%ifil, err=950) (vecnow(icol - 1 + i), i=1, nch)
+       icol = icol + nmax
+    end do
+    !
+    write (wfu_file%ifil, err=950) (y1(i), i=1, nch), (y2(i), i=1, nch), &
+         (y4(i), i=1, nch), (gam1(i), i=1, nch), &
+         (lmuab(i), i=1, nch)
+    lrairy = get_wfu_airy_rec_length(wfu_file%nchwfu, 0)
+  else
+    lrairy = get_wfu_airy_rec_length(wfu_file%nchwfu, 1)
+  end if
+  !
+  write (wfu_file%ifil, err=950) 'ENDWFUR', char(mod(wfu_file%irec, 256))
+  wfu_file%iendwv = wfu_file%iendwv + lrairy
+
+950 write (0, *) ' *** ERROR WRITING WFU FILE (AIRY). ABORT.'
+  call exit()
+
+end subroutine
+
 end module mod_wave

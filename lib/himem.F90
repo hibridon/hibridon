@@ -780,16 +780,6 @@ module mod_cosc9
    end subroutine allocate_cosc9
 end module mod_cosc9
 
-module mod_cosc10
-   implicit none
-   real(8), dimension(:), allocatable :: sc10
-   contains
-   subroutine allocate_cosc10(amax)
-      integer, intent(in) :: amax
-      allocate(sc10(amax))
-   end subroutine allocate_cosc10
-end module mod_cosc10
-
 module mod_cosc11
    implicit none
    real(8), dimension(:), allocatable :: sc11

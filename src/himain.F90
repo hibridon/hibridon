@@ -57,7 +57,6 @@ use mod_cosc6, only: allocate_cosc6
 use mod_cosc7, only: allocate_cosc7
 use mod_cosc8, only: allocate_cosc8
 use mod_cosc9, only: allocate_cosc9
-use mod_cosc10, only: allocate_cosc10
 use mod_cosc11, only: allocate_cosc11
 use mod_coeig, only: allocate_coeig
 use mod_coeig2, only: allocate_coeig2
@@ -266,7 +265,6 @@ call allocate_cosc6(kmax)
 call allocate_cosc7(kmax)
 call allocate_cosc8(kmax)
 call allocate_cosc9(kmax)
-call allocate_cosc10(kmax)
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 call allocate_cosc11(kaux3)
 #endif

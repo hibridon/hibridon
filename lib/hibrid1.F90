@@ -1342,11 +1342,10 @@ subroutine airprp (z, &
 ! ----------------------------------------------------------------------------
 use mod_coqvec, only: nphoto, q
 use mod_coqvec2, only: q2
-use mod_cosc10, only: sc10
 use mod_ancou, only: ancou_type
 use mod_hiba10_22p, only: energ22
 use mod_par, only: par_iprint=>iprint
-use mod_wave, only: wfu_file_type, get_wfu_airy_rec_length
+use mod_wave, only: wfu_file_type, get_wfu_airy_rec_length, write_airy_record
 use mod_selb, only: ibasty
 use mod_phot, only: photof, wavefn, writs
 use mod_cotq1, only: tmat2 => dpsir
@@ -1378,7 +1377,7 @@ logical, intent(in) :: iprint
 logical, intent(in) :: twoen
 logical, intent(in) :: noprin
 type(ancou_type), intent(in) :: v2
-type(wfu_file_type), intent(inout) :: wfu_file
+type(wfu_file_type), intent(inout), allocatable :: wfu_file
 logical :: airy_prop_completed
 integer i, icol, ierr, ipt, izero, kstep, maxstp, &
         ncol, npt, nskip
@@ -1407,6 +1406,8 @@ real(8), dimension(nch) :: cc
 real(8), dimension(nch) :: y4
 real(8), dimension(nch) :: gam1
 real(8), dimension(nch) :: gam2
+real(8), dimension(nch) :: lmuab  ! local mu(a,b) propagator
+
 integer(8) :: lrairy ! length of an airy record in bytes
 ! ----------------------------------------------------------------------------
 ! Save variables for subsequent energies
@@ -1563,7 +1564,7 @@ do kstep = 1, maxstp
 #endif
     ! if wavefunction desired, temporarily save local mu(a,b) propagator
     ! this is now in the first column of tmat
-    if (wavefn) call dcopy(nch,tmat,1,sc10,1)
+    if (wavefn) call dcopy(nch,tmat,1,lmuab,1)
     !  premultiply by y3 and add to existing q
     !  cc is used as scratch array here
     ind=1
@@ -1600,33 +1601,7 @@ do kstep = 1, maxstp
     ! save this matrix as well as transformation matrix
     ! into local interval and local propagators
     !
-    wfu_file%irec = wfu_file%irec + 1
-    write (wfu_file%ifil, err=950) -rlast, drnow
-    !     Adiabatic energies
-    write (wfu_file%ifil, err=950) (eigold(i), i=1, nch)
-    !     The following information will not be written if writs set to F
-    if (writs) then
-      icol = 1
-      do ich = 1, nch
-         write (wfu_file%ifil, err=950) (z(icol - 1 + i), i=1, nch)
-         icol = icol + nmax
-      end do
-      icol = 1
-      do ich = 1, nch
-         write (wfu_file%ifil, err=950) (vecnow(icol - 1 + i), i=1, nch)
-         icol = icol + nmax
-      end do
-      !
-      write (wfu_file%ifil, err=950) (y1(i), i=1, nch), (y2(i), i=1, nch), &
-           (y4(i), i=1, nch), (gam1(i), i=1, nch), &
-           (sc10(i), i=1, nch)
-      lrairy = get_wfu_airy_rec_length(wfu_file%nchwfu, 0)
-    else
-      lrairy = get_wfu_airy_rec_length(wfu_file%nchwfu, 1)
-    end if
-    !
-    write (wfu_file%ifil, err=950) 'ENDWFUR', char(mod(wfu_file%irec, 256))
-    wfu_file%iendwv = wfu_file%iendwv + lrairy
+    call write_airy_record(wfu_file, rlast, drnow, nch, eigold, writs, nmax, z, vecnow, y1, y2, y4, gam1, lmuab)
 
   end if
   !
@@ -1839,8 +1814,6 @@ deallocate(vecnew)
 
 return
 !
-950 write (0, *) ' *** ERROR WRITING WFU FILE (AIRY). ABORT.'
-call exit()
 end
 ! ----------------------------------------------------------------------
 subroutine gndloc (vecnow, rnow, drnow, nch, nmax, q)
