@@ -495,7 +495,35 @@ integer :: i, ich, icol
 
 950 write (0, *) ' *** ERROR WRITING WFU FILE (AIRY). ABORT.'
   call exit()
+end subroutine write_airy_record
 
-end subroutine
+subroutine write_logd_record(wfu_file, r, h, w, nch, nmax)
+implicit none
+type(wfu_file_type), allocatable, intent(inout) :: wfu_file
+real(8), intent(in) :: r
+real(8), intent(in) :: h
+real(8), intent(in) :: w(nch*nmax)  ! contains the matrix g(a,m)g(m,b)=g(a,b)
 
+integer, intent(in) :: nch
+integer, intent(in) :: nmax
+
+integer :: i, ich, icol
+
+  wfu_file%irec = wfu_file%irec + 1
+!     nrlogd is the number of LOGD records - used to seek the wfu file
+  wfu_file%nrlogd = wfu_file%nrlogd + 1
+  write (wfu_file%ifil, err=950) r - h, r, (w(i), i=1, nch)
+  icol = 1
+  do ich = 1, nch
+    write (wfu_file%ifil, err=950) (w(icol - 1 + i), i=1, nch)
+    icol = icol + nmax
+  end do
+  write (wfu_file%ifil, err=950) 'ENDWFUR', char(mod(wfu_file%irec, 256))
+  wfu_file%iendwv = wfu_file%iendwv + get_wfu_logd_rec_length(wfu_file%nchwfu, 0)
+
+  return
+950 write (0, *) ' *** ERROR WRITING WFU FILE (LOGD). ABORT'
+  call exit()
+
+end subroutine write_logd_record
 end module mod_wave
