@@ -1408,7 +1408,6 @@ real(8), dimension(nch) :: gam1
 real(8), dimension(nch) :: gam2
 real(8), dimension(nch) :: lmuab  ! local mu(a,b) propagator
 
-integer(8) :: lrairy ! length of an airy record in bytes
 ! ----------------------------------------------------------------------------
 ! Save variables for subsequent energies
 save spcmn, spcmx, rmin, maxstp

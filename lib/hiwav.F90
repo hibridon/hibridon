@@ -460,7 +460,7 @@ real(8), intent(in) :: y4(nch)
 real(8), intent(in) :: gam1(nch)
 real(8), intent(in) :: lmuab(nch)
 
-integer :: lrairy
+integer(8) :: lrairy ! length of an airy record in bytes
 integer :: i, ich, icol
 
   ASSERT(allocated(wfu_file))
