@@ -526,4 +526,50 @@ integer :: i, ich, icol
   call exit()
 
 end subroutine write_logd_record
+
+
+subroutine write_record2_header(wfu_file, nopen, nphoto, r, pk, fj, fpj, fn, fpn)
+implicit none
+type(wfu_file_type), allocatable, intent(inout) :: wfu_file
+integer, intent(in) :: nopen
+integer, intent(in) :: nphoto
+real(8), intent(in) :: r
+real(8), intent(in) :: pk(nopen)  ! wavevectors for open channels
+real(8), intent(in) :: fj(nopen)  ! ricatti-bessel functions
+real(8), intent(in) :: fpj(nopen)  ! ricatti-bessel functions
+real(8), intent(in) :: fn(nopen)  ! ricatti-bessel functions
+real(8), intent(in) :: fpn(nopen)  ! ricatti-bessel functions
+
+integer int_t  ! used to determine the (machine dependent) size of built-in types
+double precision dble_t    ! used to determine the (machine dependent) size of built-in types
+
+integer :: i
+  ! save in record 2 of direct access file:
+  ! 1. number of open channels,
+  ! 2. total number of records on wavefunction
+  ! 3. asymptotic interparticle separation
+  ! 4. wavevectors of open channels
+  ! 5. bessel functions and derivatives for open channels
+  !
+  !     As of the 12.1.3 version of ifort, a big hole is likely to be
+  !     created here in the wfu file.  Most likely to be a bug of ifort.
+  !
+  !     If the bug is fixed in the future, use the following line and
+  !     remove ALL references to iendwv
+  !$$$         inquire (ifil, pos=ipos2)
+  !
+  wfu_file%ipos2 = wfu_file%iendwv
+  write (wfu_file%ifil, err=950, pos=ipos2_location) wfu_file%ipos2, wfu_file%ipos3, wfu_file%nrlogd
+  write (wfu_file%ifil, err=950, pos=wfu_file%ipos2) wfu_file%irec, nopen, nphoto, &
+       r, (pk(i), i=1, nopen), (fj(i), i=1, nopen), &
+       (fpj(i), i=1, nopen), (fn(i), i=1, nopen), &
+       (fpn(i), i=1, nopen)
+  wfu_file%iendwv = wfu_file%iendwv + 3 * int(sizeof(int_t), kind(int_t)) + &
+       (5 * nopen + 1) * int(sizeof(dble_t), kind(int_t))
+  return
+
+  950 write (0, *) '*** ERROR WRITING WFU FILE (write_record2_header). ABORT'
+  call exit()
+end subroutine write_record2_header
+
 end module mod_wave

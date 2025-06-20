@@ -1331,7 +1331,7 @@ use mod_cotq1, only: srsave => dpsir ! srsave(100)
 use mod_cotq2, only: sisave => tq2 ! sisave(100)
 use mod_hibrid2, only: mxoutd, mxoutr
 use mod_par, only: prsmat, jlpar! spac=>scat_spac
-use mod_wave, only: wfu_file_type, ipos2_location
+use mod_wave, only: wfu_file_type, write_record2_header
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_phot, only: photof, wavefn
@@ -1361,7 +1361,7 @@ integer, intent(in) :: nopen
 integer, intent(in) :: nmax
 logical, intent(in) :: kwrit
 logical, intent(in) :: ipos
-type(wfu_file_type), intent(inout) :: wfu_file
+type(wfu_file_type), intent(inout), allocatable :: wfu_file
 
 ! ricatti-bessel functions
 real(8), dimension(nopen) :: fj  
@@ -1378,9 +1378,9 @@ integer isw, i, icol, l
 character*1 forma
 #endif
 character*40 flxfil
-!     The following three variables are used to determine the (machine
-!     dependent) size of built-in types
-integer int_t
+! !     The following three variables are used to determine the (machine
+! !     dependent) size of built-in types
+! integer int_t
 double precision dble_t
 character char_t
 data isw / 0 /
@@ -1435,29 +1435,8 @@ real(8), parameter :: twomin = -2.d0
     end if
       50 format (' *** R-END TOO SMALL FOR BESSEL FUNCTIONS IN CHANNEL', i3, '; ABORT ***')
   end do
-  ! if wavefunction desired, then save in record 2 of direct access file
-  ! 1. number of open channels,
-  ! 2. total number of records on wavefunction
-  ! 3. asymptotic interparticle separation
-  ! 4. wavevectors of open channels
-  ! 5. bessel functions and derivatives for open channels
   if (wavefn) then
-    !
-    !     As of the 12.1.3 version of ifort, a big hole is likely to be
-    !     created here in the wfu file.  Most likely to be a bug of ifort.
-    !
-    !     If the bug is fixed in the future, use the following line and
-    !     remove ALL references to iendwv
-    !$$$         inquire (ifil, pos=ipos2)
-    !
-    wfu_file%ipos2 = wfu_file%iendwv
-    write (wfu_file%ifil, err=950, pos=ipos2_location) wfu_file%ipos2, wfu_file%ipos3, wfu_file%nrlogd
-    write (wfu_file%ifil, err=950, pos=wfu_file%ipos2) wfu_file%irec, nopen, nphoto, &
-         r, (pk(i), i=1, nopen), (fj(i), i=1, nopen), &
-         (fpj(i), i=1, nopen), (fn(i), i=1, nopen), &
-         (fpn(i), i=1, nopen)
-    wfu_file%iendwv = wfu_file%iendwv + 3 * int(sizeof(int_t), kind(int_t)) + &
-         (5 * nopen + 1) * int(sizeof(dble_t), kind(int_t))
+    call write_record2_header(wfu_file, nopen, nphoto, r, pk, fj, fpj, fn, fpn)
   endif ! (wavefn)
   ! save derivatives
   call dcopy(nopen,fpj,1,derj,1)
@@ -1567,36 +1546,37 @@ real(8), parameter :: twomin = -2.d0
         tmod(icol,icol) = scmat(icol,icol) + sr(icol,icol) ** 2
       end do
     end if
-    if (.not. wavefn) return
-    ! if wavefunction desired, then save
-    ! real and imaginary part of s-matrix in record 2 of direct access file
-
-    do icol=1, nopen
-       write (wfu_file%ifil, err=950) (sr(i, icol), i=1, nopen)
-    end do
-    do icol=1, nopen
-       write (wfu_file%ifil, err=950) (si(i, icol), i=1, nopen)
-    end do
-    if (kwrit .and. photof) then
-      write (9,121)
-        121 format(/,'** REAL PART OF S MATRIX')
-      call mxoutd (9, sr, nopen, nmax, isym, ipos)
-      write (9,122)
-        122 format(/,'** IMAGINARY PART OF S MATRIX')
-      call mxoutd (9, si, nopen, nmax, isym, ipos)
-    endif
-    write (wfu_file%ifil, err=950) 'ENDWFUR', char(2)
-    wfu_file%iendwv = wfu_file%iendwv + 8 * sizeof(char_t) + (2 * nopen ** 2) * sizeof(dble_t)
-    ! save smatrix temporarily
-    call matcopy(sr,srsave,nopen,nopen,nmax,nmax)
-    call matcopy(si,sisave,nopen,nopen,nmax,nmax)
-    ! here if wavefunction wanted
-    call psiasy(fj,fn,sr,si,tmod,scmat,nopen,nmax)
-    ! on return, sr contains real part of asymptotic wavefunction, si contains
-    ! imaginary part of asymptotic wavefunction
-    ! also determine real and imaginary part of derivative of
-    ! asymptotic wavefunction
-    call psiasy(derj,dern,srsave,sisave,tmod,scmat,nopen,nmax)
+    if (wavefn) then
+      
+      ! if wavefunction desired, then save
+      ! real and imaginary part of s-matrix in record 2 of direct access file
+      do icol=1, nopen
+         write (wfu_file%ifil, err=950) (sr(i, icol), i=1, nopen)
+      end do
+      do icol=1, nopen
+         write (wfu_file%ifil, err=950) (si(i, icol), i=1, nopen)
+      end do
+      write (wfu_file%ifil, err=950) 'ENDWFUR', char(2)
+      wfu_file%iendwv = wfu_file%iendwv + 8 * sizeof(char_t) + (2 * nopen ** 2) * sizeof(dble_t)
+      if (kwrit .and. photof) then
+        write (9,121)
+          121 format(/,'** REAL PART OF S MATRIX')
+        call mxoutd (9, sr, nopen, nmax, isym, ipos)
+        write (9,122)
+          122 format(/,'** IMAGINARY PART OF S MATRIX')
+        call mxoutd (9, si, nopen, nmax, isym, ipos)
+      endif
+      ! save smatrix temporarily
+      call matcopy(sr,srsave,nopen,nopen,nmax,nmax)
+      call matcopy(si,sisave,nopen,nopen,nmax,nmax)
+      ! here if wavefunction wanted
+      call psiasy(fj,fn,sr,si,tmod,scmat,nopen,nmax)
+      ! on return, sr contains real part of asymptotic wavefunction, si contains
+      ! imaginary part of asymptotic wavefunction
+      ! also determine real and imaginary part of derivative of
+      ! asymptotic wavefunction
+      call psiasy(derj,dern,srsave,sisave,tmod,scmat,nopen,nmax)
+    end if
   else
     ! here for photodissociation, at this point:
     !              tmod contains K matrix
@@ -1822,7 +1802,7 @@ integer, intent(in) :: nch
 integer, intent(in) :: nmax
 logical, intent(in) :: kwrit
 logical, intent(in) :: ipos
-type(wfu_file_type), intent(inout) :: wfu_file
+type(wfu_file_type), intent(inout), allocatable :: wfu_file
 
 real(8), allocatable :: amat(:,:)
 integer :: isc1(nch)
