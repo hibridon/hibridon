@@ -1733,7 +1733,7 @@ subroutine smatrx (z, sr, si, &
 !     bmat
 !    bqs:     rotational angular momenta, orbital angular momenta, and
 !             additional quantum index for each channel
-!    isc1,sc1,
+!    sc1,
 !    sc2,sc3,   scratch vectors of dimension at least equal to the number of
 !    sc4,sc5:   channels
 !    sc6, sc7
@@ -1752,7 +1752,7 @@ subroutine smatrx (z, sr, si, &
 use mod_coqvec, only: nphoto, q
 use mod_coeint, only: eint
 use mod_hibrid2, only: mxoutd, mxoutr
-use mod_wave, only: wfu_file_type, ipos2_location
+use mod_wave, only: wfu_file_type, write_record3
 use mod_ered, only: ered
 use mod_phot, only: photof, wavefn
 use mod_hiutil, only: mtime
@@ -1775,15 +1775,11 @@ logical, intent(in) :: ipos
 type(wfu_file_type), intent(inout), allocatable :: wfu_file
 
 real(8), allocatable :: amat(:,:)
-integer :: isc1(nch)
+integer :: opench_to_ch(nch)  ! stores the channel index for each open channel
 integer :: i, ic, icol, ir, irow, isym
 integer :: npoint
 real(8) :: t1, t2, t11, t22
 
-!     The following variables are used to determine the (machine
-!     dependent) size of built-in types
-double precision dble_t
-character char_t
 !  if kwrit (prlogd) = .true. and photodissociation calculation, print out
 !  <psi|mu matrix at end of airprp
 if (kwrit .and. photof) then
@@ -1799,7 +1795,7 @@ do   50  i = 1, nch
   if (eint(i) .le. ered) then
 !  here if this channel is open
     nopen = nopen + 1
-    isc1(nopen) = i
+    opench_to_ch(nopen) = i
     eint(nopen) = eint(i)
     bqs%jq(nopen) = bqs%jq(i)
     bqs%inq(nopen) = bqs%inq(i)
@@ -1813,9 +1809,9 @@ if (nopen .lt. nch) then
 !  keeping only the open-channel components
 !  if photodissociation calculation, pack gamma2 also
   do  120  icol = 1, nopen
-  ic = isc1(icol)
+  ic = opench_to_ch(icol)
     do  100  irow = 1, nopen
-      ir = isc1(irow)
+      ir = opench_to_ch(irow)
       amat(irow,icol) = z(ir,ic)
 100     continue
     call dcopy (nopen, amat(1, icol), 1, z(1, icol), 1)
@@ -1823,7 +1819,7 @@ if (nopen .lt. nch) then
   do 140 icol =1, nphoto
     npoint=0
     do 130 irow = 1, nopen
-      ir = isc1(irow)
+      ir = opench_to_ch(irow)
       amat(irow,icol)=q(ir+npoint)
 130     continue
     npoint=npoint+nch
@@ -1841,48 +1837,18 @@ if (nopen .lt. nch) then
   endif
 endif
 !  now determine s-matrix and modulus squared t-matrix
-!  isc1, sc1, sc2, sc3, and sc4 are all used as scratch arrays
+!  opench_to_ch, sc1, sc2, sc3, and sc4 are all used as scratch arrays
 !  scmat is used as scratch matrix here
 !  this uses new smat routine involving just open channels
 call smatop (z, sr, si, amat, bqs%lq, r, prec, nopen, nmax, kwrit,ipos, wfu_file)
 if (wavefn) then
-! if wavefunction desired, then
-! sr and si contain open channel portion of asymptotic wavefunction
-! and z and amat contain derivative (real and imag) of asymptotic wfn
-! now save channel packing list and
-! real and imaginary part of wavefunction
-! in record 3 of direct access file
-!
-!     Please refer to subroutine smatop for the info regarding the
-!     following commented statement
-!$$$         inquire (ifil, pos=ipos3)
-   wfu_file%ipos3 = wfu_file%iendwv
-   write (wfu_file%ifil, pos=ipos2_location) wfu_file%ipos2, wfu_file%ipos3, wfu_file%nrlogd
-   write (wfu_file%ifil, err=950, pos=wfu_file%ipos3) (isc1(i), i=1, nopen)
-   do icol = 1, nopen
-      write (wfu_file%ifil, err=950) (sr(i, icol), i=1, nopen)
-   end do
-   do icol = 1, nopen
-      write (wfu_file%ifil, err=950) (si(i, icol), i=1, nopen)
-   end do
-   do icol = 1, nopen
-      write (wfu_file%ifil, err=950) (z(i, icol), i=1, nopen)
-   end do
-   do icol = 1, nopen
-      write (wfu_file%ifil, err=950) (amat(i, icol), i=1, nopen)
-   end do
-   write (wfu_file%ifil, err=950) 'ENDWFUR', char(3)
-   wfu_file%iendwv = wfu_file%iendwv + 8 * sizeof(char_t) &
-        + (4 * nopen ** 2 + nopen) * sizeof(dble_t)
+  call write_record3(wfu_file, opench_to_ch, sr, si, z, amat, nopen, nmax)
 endif
 deallocate(amat)
 call mtime(t11,t22)
 ts=t11 - t1
 tsw=t22 -t2
 return
-!
-950 write (0, *) '*** ERROR WRITING WFU FILE (SMATRX). ABORT.'
-call exit()
 end
 !  ---------------------------------------------------------------------------
 subroutine expand(ncol,nopen,nch,nmax,ipack,sr,si,bmat)

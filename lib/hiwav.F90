@@ -633,5 +633,55 @@ double precision dble_t    ! used to determine the (machine dependent) size of b
   call exit()
 end subroutine write_record2_photo_data
 
+subroutine write_record3(wfu_file, opench_to_ch, sr, si, z, amat, nopen, nmax)
+implicit none
+type(wfu_file_type), allocatable, intent(inout) :: wfu_file
+integer, intent(in) :: opench_to_ch(nopen)  ! stores the channel index for each open channel
+real(8), intent(in) :: sr(nmax, nmax)  ! s-matrix real part
+real(8), intent(in) :: si(nmax, nmax)  ! s-matrix imaginary part
+real(8), intent(in) :: z(nmax, nmax)
+real(8), intent(in) :: amat(nmax, nmax)
+integer, intent(in) :: nopen
+integer, intent(in) :: nmax
+
+integer :: i, icol
+integer char_t  ! used to determine the (machine dependent) size of built-in types
+double precision dble_t    ! used to determine the (machine dependent) size of built-in types
+
+  ! if wavefunction desired, then
+  ! sr and si contain open channel portion of asymptotic wavefunction
+  ! and z and amat contain derivative (real and imag) of asymptotic wfn
+  ! now save channel packing list and
+  ! real and imaginary part of wavefunction
+  ! in record 3 of direct access file
+  !
+  !     Please refer to subroutine smatop for the info regarding the
+  !     following commented statement
+  !$$$         inquire (ifil, pos=ipos3)
+  wfu_file%ipos3 = wfu_file%iendwv
+  write (wfu_file%ifil, pos=ipos2_location) wfu_file%ipos2, wfu_file%ipos3, wfu_file%nrlogd
+  write (wfu_file%ifil, err=950, pos=wfu_file%ipos3) (opench_to_ch(i), i=1, nopen)
+  do icol = 1, nopen
+    write (wfu_file%ifil, err=950) (sr(i, icol), i=1, nopen)
+  end do
+  do icol = 1, nopen
+    write (wfu_file%ifil, err=950) (si(i, icol), i=1, nopen)
+  end do
+  do icol = 1, nopen
+    write (wfu_file%ifil, err=950) (z(i, icol), i=1, nopen)
+  end do
+  do icol = 1, nopen
+    write (wfu_file%ifil, err=950) (amat(i, icol), i=1, nopen)
+  end do
+  write (wfu_file%ifil, err=950) 'ENDWFUR', char(3)
+  wfu_file%iendwv = wfu_file%iendwv + 8 * sizeof(char_t) &
+      + (4 * nopen ** 2 + nopen) * sizeof(dble_t)
+  return
+
+  950 write (0, *) '*** ERROR WRITING WFU FILE (write_record3). ABORT'
+  call exit()
+end subroutine write_record3
+
+
 
 end module mod_wave

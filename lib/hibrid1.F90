@@ -1345,7 +1345,7 @@ use mod_coqvec2, only: q2
 use mod_ancou, only: ancou_type
 use mod_hiba10_22p, only: energ22
 use mod_par, only: par_iprint=>iprint
-use mod_wave, only: wfu_file_type, get_wfu_airy_rec_length, write_airy_record
+use mod_wave, only: wfu_file_type, write_airy_record
 use mod_selb, only: ibasty
 use mod_phot, only: photof, wavefn, writs
 use mod_cotq1, only: tmat2 => dpsir
