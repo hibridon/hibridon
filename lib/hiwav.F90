@@ -522,7 +522,7 @@ integer :: i, ich, icol
   wfu_file%iendwv = wfu_file%iendwv + get_wfu_logd_rec_length(wfu_file%nchwfu, 0)
 
   return
-950 write (0, *) ' *** ERROR WRITING WFU FILE (LOGD). ABORT'
+950 write (0, *) ' *** ERROR WRITING WFU FILE (write_logd_record). ABORT'
   call exit()
 
 end subroutine write_logd_record
@@ -571,5 +571,67 @@ integer :: i
   950 write (0, *) '*** ERROR WRITING WFU FILE (write_record2_header). ABORT'
   call exit()
 end subroutine write_record2_header
+
+subroutine write_record2_scat_data(wfu_file, nopen, nmax, sr, si)
+implicit none
+type(wfu_file_type), allocatable, intent(inout) :: wfu_file
+integer, intent(in) :: nopen
+integer, intent(in) :: nmax
+real(8), intent(in) :: sr(nmax, nmax)  ! s-matrix real part
+real(8), intent(in) :: si(nmax, nmax)  ! s-matrix imaginary part
+
+integer :: i, icol
+
+integer char_t  ! used to determine the (machine dependent) size of built-in types
+double precision dble_t    ! used to determine the (machine dependent) size of built-in types
+
+  ! save real and imaginary part of s-matrix in record 2 of direct access file
+  do icol=1, nopen
+     write (wfu_file%ifil, err=950) (sr(i, icol), i=1, nopen)
+  end do
+  do icol=1, nopen
+     write (wfu_file%ifil, err=950) (si(i, icol), i=1, nopen)
+  end do
+  write (wfu_file%ifil, err=950) 'ENDWFUR', char(2)
+  wfu_file%iendwv = wfu_file%iendwv + 8 * sizeof(char_t) + (2 * nopen ** 2) * sizeof(dble_t)
+  return
+
+  950 write (0, *) '*** ERROR WRITING WFU FILE (write_record2_scat_data). ABORT'
+  call exit()
+end subroutine write_record2_scat_data
+
+
+subroutine write_record2_photo_data(wfu_file, nphoto, nopen, nmax, sr, si)
+implicit none
+type(wfu_file_type), allocatable, intent(inout) :: wfu_file
+integer, intent(in) :: nphoto
+integer, intent(in) :: nopen
+integer, intent(in) :: nmax
+real(8), intent(in) :: sr(nmax, nmax)  ! s-matrix real part
+real(8), intent(in) :: si(nmax, nmax)  ! s-matrix imaginary part
+
+integer :: jrow, jcol
+
+integer char_t  ! used to determine the (machine dependent) size of built-in types
+double precision dble_t    ! used to determine the (machine dependent) size of built-in types
+
+  ! call dbwi(nphoto,1,ifil,REC_LAST_USED)
+  do jrow = 1, nphoto
+    write (wfu_file%ifil, err=950) (sr(jrow, jcol), jcol=1, nopen)
+  end do
+  ! NB there were 2*nphoto!
+  do jrow = 1, nphoto
+    write (wfu_file%ifil, err=950) (si(jrow, jcol), jcol=1, nopen)
+  end do
+
+  write (wfu_file%ifil, err=950) 'ENDWFUR', char(2)
+  wfu_file%iendwv = wfu_file%iendwv + 8 * sizeof(char_t) &
+        + (2 * nopen ** 2) * sizeof(dble_t)
+  return
+
+  950 write (0, *) '*** ERROR WRITING WFU FILE (write_record2_photo_data). ABORT'
+  call exit()
+end subroutine write_record2_photo_data
+
 
 end module mod_wave

@@ -1331,7 +1331,7 @@ use mod_cotq1, only: srsave => dpsir ! srsave(100)
 use mod_cotq2, only: sisave => tq2 ! sisave(100)
 use mod_hibrid2, only: mxoutd, mxoutr
 use mod_par, only: prsmat, jlpar! spac=>scat_spac
-use mod_wave, only: wfu_file_type, write_record2_header
+use mod_wave, only: wfu_file_type, write_record2_header, write_record2_scat_data, write_record2_photo_data
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_phot, only: photof, wavefn
@@ -1378,16 +1378,10 @@ integer isw, i, icol, l
 character*1 forma
 #endif
 character*40 flxfil
-! !     The following three variables are used to determine the (machine
-! !     dependent) size of built-in types
-! integer int_t
-double precision dble_t
-character char_t
 data isw / 0 /
 integer, pointer :: ipol
 real(8) :: cj, cn, cpj, cpn, cs, cs2, cssn, fac
 integer :: irow, ierr, isym
-integer :: jcol, jrow
 integer :: lenft
 integer :: ncol, nst
 real(8) :: p, p2
@@ -1547,17 +1541,8 @@ real(8), parameter :: twomin = -2.d0
       end do
     end if
     if (wavefn) then
-      
       ! if wavefunction desired, then save
-      ! real and imaginary part of s-matrix in record 2 of direct access file
-      do icol=1, nopen
-         write (wfu_file%ifil, err=950) (sr(i, icol), i=1, nopen)
-      end do
-      do icol=1, nopen
-         write (wfu_file%ifil, err=950) (si(i, icol), i=1, nopen)
-      end do
-      write (wfu_file%ifil, err=950) 'ENDWFUR', char(2)
-      wfu_file%iendwv = wfu_file%iendwv + 8 * sizeof(char_t) + (2 * nopen ** 2) * sizeof(dble_t)
+      call write_record2_scat_data(wfu_file, nopen, nmax, sr, si)
       if (kwrit .and. photof) then
         write (9,121)
           121 format(/,'** REAL PART OF S MATRIX')
@@ -1643,18 +1628,7 @@ real(8), parameter :: twomin = -2.d0
     endif
   ! save transition amplitudes
     if (wavefn) then
-      ! call dbwi(nphoto,1,ifil,REC_LAST_USED)
-      do jrow = 1, nphoto
-        write (wfu_file%ifil, err=950) (sr(jrow, jcol), jcol=1, nopen)
-      end do
-      ! NB there were 2*nphoto!
-      do jrow = 1, nphoto
-        write (wfu_file%ifil, err=950) (si(jrow, jcol), jcol=1, nopen)
-      end do
-
-      write (wfu_file%ifil, err=950) 'ENDWFUR', char(2)
-      wfu_file%iendwv = wfu_file%iendwv + 8 * sizeof(char_t) &
-            + (2 * nopen ** 2) * sizeof(dble_t)
+      call write_record2_photo_data(wfu_file, nphoto, nopen, nmax, sr, si)
     endif
     ! now determine transition probabilities by squaring
     ! and normalize to unit total probability
@@ -1734,10 +1708,6 @@ real(8), parameter :: twomin = -2.d0
       end do
     endif
   endif ! (photof)
-  return
-  !
-  950 write (0, *) '*** ERROR WRITING WFU FILE (SMATOP). ABORT'
-  call exit()
 end
 ! -----------------------------------------------------------------------
 subroutine smatrx (z, sr, si, &
