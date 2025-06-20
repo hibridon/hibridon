@@ -1851,7 +1851,6 @@ integer :: i, ic, icol, ir, irow, isym
 integer :: npoint
 real(8) :: t1, t2, t11, t22
 
-integer, parameter :: izero = 0
 !     The following variables are used to determine the (machine
 !     dependent) size of built-in types
 double precision dble_t
