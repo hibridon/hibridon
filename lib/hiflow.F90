@@ -62,12 +62,11 @@ use mod_cputim, only: cpuld, cpuai, cpupot, cpusmt, cpupht
 #endif
 use mod_opti, only: optifl
 use mod_hiutil, only: mtime, gettim, dater, get_cpu_time
-use mod_hibrid4, only: wavewr
 use mod_hismat, only: wrhead
 use mod_savfile, only: REC_EN_START, EN_REC_COUNT, EN_REC_PRESENT_INTEGRAL_XS, EN_REC_PREVIOUS_INTEGRAL_XS, EN_REC_PRESENT_PARTIAL_XS, EN_REC_PREVIOUS_PARTIAL_XS, EN_REC_2NDLAST_PARTIAL_XS
 use mod_hitypes, only: bqs_type
 use mod_hiiolib1, only: openfi, fimovs, dres, dsave, dclos, closf
-use mod_wave, only: wfu_file_type
+use mod_wave, only: wfu_file_type, wavewr
 implicit none
 real(8), intent(out) :: z(nmax,nmax)
 real(8), intent(out) :: w(nmax,nmax)

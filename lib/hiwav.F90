@@ -120,4 +120,327 @@ function get_wfu_airy_rec_length(nchwfu, inflev)
 
 end function
 
+!     ------------------------------------------------------------------
+function iwavsk(wfu_file, irecr)
+!     ------------------------------------------------------------------
+!     Function to return offset of wfu file for recrod #irec (stream IO)
+!
+!     Written by: Qianli Ma
+!     Latest revision: 20-apr-2012
+!
+!     This function needs nchwfu, ipos2 and ipos3 from the mod_wave
+!     module.  These variables are set by waverd.
+!
+!     The stream IO counterpart for `dbrr(,,,irec)` is `read
+!     (,pos=wavesk(irec))...
+!     ------------------------------------------------------------------
+implicit none
+type(wfu_file_type), intent(in) :: wfu_file
+integer, intent(in) :: irecr
+integer(8) :: iwavsk  ! 1-based offset in the wfu file, in bytes
+
+integer(8) :: lr1  ! length of record 1 in bytes
+integer(8) :: lrlogd  ! length of a logd record
+integer(8) :: lrairy  ! length of an airy record
+!
+if (irecr .le. 0) then
+   iwavsk = -1
+   goto 100
+end if
+if (irecr .eq. 1) then
+   iwavsk = 1
+   goto 100
+end if
+if (irecr .eq. 2) then
+   iwavsk = wfu_file%ipos2
+   goto 100
+end if
+if (irecr .eq. 3) then
+   iwavsk = wfu_file%ipos3
+   goto 100
+end if
+!     Length for record 1 (at the beginning of the file)
+lr1 = get_wfu_rec1_length(wfu_file%nchwfu)
+!     Length for each block written by the Airy and LOGDpropagator
+lrairy = get_wfu_airy_rec_length(wfu_file%nchwfu, wfu_file%inflev)
+lrlogd = get_wfu_logd_rec_length(wfu_file%nchwfu, wfu_file%inflev)
+!
+if ((irecr - 3) .le. wfu_file%nrlogd) then
+!     within the logd range of the file
+   iwavsk = lr1 + (irecr - 4) * lrlogd + 1
+   goto 100
+else
+!     airy range of the file
+   iwavsk = lr1 + wfu_file%nrlogd * lrlogd &
+        + (irecr - 4 - wfu_file%nrlogd) * lrairy + 1
+   goto 100
+end if
+!     should never reach here if function called properly
+write (0, *) '*** OOPS! ERROR SEEKING WFU FILE. ABORT.'
+call exit()
+100 continue
+ASSERT(iwavsk > 0)
+end
+!
+! -------------------------------------------------------------------------
+subroutine wavewr(jtot,jlpar,nu,nch,rstart,rendld, bqs, wfu_file)
+! -------------------------------------------------------
+!  subroutine to write initial header information on wavefunction file
+!  (file jobname.WFU, logical unit 22), unit is opened in subroutine openfi
+!     written by:  millard alexander
+!     latest revision:  11-dec-2011
+!     common blocks amat and bmat are used to store real and
+!     imaginary parts of asymptotic wavefunction (only used in
+!     read of wavefunction from saved file)
+!
+!     Major revision: 16-mar-2012 by Q. Ma
+!     Use stream I/O for smaller file size and better compatibility
+!
+!     current revision: 20-apr-2012 by q. ma
+!
+! -------------------------------------------------------
+#define AMAT_AS_VEC_METHOD_DISTINCT 1
+#define AMAT_AS_VEC_METHOD_POINTER 2
+#define AMAT_AS_VEC_METHOD_NOVEC 3
+#define AMAT_AS_VEC_METHOD AMAT_AS_VEC_METHOD_DISTINCT
+use mod_coeint, only: eint
+#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_POINTER)
+use, intrinsic :: ISO_C_BINDING
+use mod_coamat, only: amat ! amat(25)
+#endif
+#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_NOVEC)
+use mod_coamat, only: amat ! amat(25)
+#endif
+use mod_par, only: csflag, flaghf, wrsmat, photof
+use funit
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_ered, only: ered, rmu
+use mod_hiutil, only: dater
+use mod_hitypes, only: bqs_type
+implicit none
+integer, intent(in) :: jtot
+integer, intent(in) :: jlpar
+integer, intent(in) :: nu
+integer, intent(in) :: nch
+real(8), intent(in) :: rstart
+real(8), intent(in) :: rendld
+type(bqs_type), intent(in) :: bqs
+type(wfu_file_type), allocatable, intent(out) :: wfu_file
+character*20 :: cdate
+
+integer :: i
+integer(8) :: end_of_rec1_pos
+!
+#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_POINTER)
+real, pointer :: amat_as_vec(:)
+#endif
+ASSERT( bqs%length == nch )
+ASSERT(.not. allocated(wfu_file))
+allocate(wfu_file)
+wfu_file%ifil = FUNIT_WFU
+
+wfu_file%nchwfu = nch
+wfu_file%ipos2 = -1
+wfu_file%ipos3 = -1
+wfu_file%nrlogd = 0
+!     Mark the position of the EOF of the WFU file in order to by pass
+!     (likely) a bug in the intel compiler that INQUIRE does not return
+!     the proper offset
+wfu_file%iendwv = 1
+!     Write magic number
+write (wfu_file%ifil, err=950) char(128), 'WFU'
+
+if (wrsmat) then
+   write (wfu_file%ifil, err=950) char(0), wfu_format_version, char(0), char(0)
+else
+   write (wfu_file%ifil, err=950) char(1), wfu_format_version, char(0), char(0)
+end if
+!
+write (wfu_file%ifil, err=950) wfu_file%ipos2, wfu_file%ipos3, wfu_file%nrlogd
+call dater(cdate)
+write (wfu_file%ifil, err=950) cdate, label, potnam
+!     Four zero-bytes for alignment / C struct compatibility
+write (wfu_file%ifil, err=950) char(0), char(0), char(0), char(0)
+!
+write (wfu_file%ifil, err=950) jtot, jlpar, nu, nch, csflag, flaghf, photof
+write (wfu_file%ifil, err=950) ered, rmu, rstart, rendld
+!
+write (wfu_file%ifil, err=950) (bqs%jq(i), i=1, nch), (bqs%lq(i), i=1, nch), &
+     (bqs%inq(i), i=1, nch)
+write (wfu_file%ifil, err=950) (eint(i), i=1, nch)
+!
+write (wfu_file%ifil, err=950) 'ENDWFUR', char(1)
+inquire(wfu_file%ifil, pos=end_of_rec1_pos)
+ASSERT(end_of_rec1_pos == (get_wfu_rec1_length(wfu_file%nchwfu) + 1))
+!
+wfu_file%iendwv = wfu_file%iendwv + get_wfu_rec1_length(wfu_file%nchwfu)
+wfu_file%irec=3  ! irec=2 and irec=3 are reserved and their position in the file are stored in ipos2 and ipos3
+return
+
+950 write (0, *) '*** ERROR WRITING WFU FILE. ABORT.'
+call exit
+return
+
+end subroutine wavewr
+!
+!     ------------------------------------------------------------------
+!     reads header file for wavefunction (wfu file)
+subroutine waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto,jflux, &
+     rstart,rendld,rinf, rbesself, bqs, wfu_file)
+use mod_coeint, only: eint
+#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_DISTINCT)
+use mod_coamat, only: amat => psir ! amat(25) psir(nopen, nopen)
+#endif
+#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_POINTER)
+use, intrinsic :: ISO_C_BINDING
+use mod_coamat, only: amat ! amat(25)
+#endif
+#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_NOVEC)
+use mod_coamat, only: amat ! amat(25)
+#endif
+use mod_cobmat, only: bmat => psii ! bmat(25), here bmat is used as a vector 
+use mod_cotq1, only: dpsir ! dpsir(25)
+use mod_cotq2, only: dpsii ! dpsii(25)
+use mod_coisc1, only: isc1 ! isc1(25)
+use mod_cosc1, only: pk => sc1 ! sc1(10)  ! pk (asymptotic wavevectors)
+use mod_cow, only: w => w_as_vec ! w(25)
+use mod_cozmat, only: zmat => zmat_as_vec ! zmat(25)
+use mod_par, only: csflag, flaghf, photof
+use funit
+use mod_parpot, only: potnam=>pot_name, label=>pot_label
+use mod_ered, only: ered, rmu
+use mod_hivector, only: dset
+use mod_hitypes, only: rbesself_type, bqs_type
+use constants, only: zero
+implicit none
+integer, intent(out) :: jtot
+integer, intent(out) :: jlpar
+integer, intent(out) :: nu
+integer, intent(out) :: nch
+integer, intent(out) :: npts
+integer, intent(out) :: nopen
+integer, intent(out) :: nphoto
+integer, intent(in) :: jflux
+real(8), intent(out) :: rstart
+real(8), intent(out) :: rendld
+real(8), intent(out) :: rinf
+type(rbesself_type), intent(out) :: rbesself
+type(bqs_type), intent(out) :: bqs
+type(wfu_file_type), allocatable, intent(out) :: wfu_file
+
+character*48 :: oldlab, oldpot
+character*20 :: olddat
+
+character :: csize8(8), csize4(4)
+integer :: i
+integer :: nopsq
+integer :: nrecs
+! integer, parameter :: izero=0
+!
+ASSERT(.not. allocated(wfu_file))
+allocate(wfu_file)
+wfu_file%ifil = FUNIT_WFU ! the wfu file is expected to be open using this unit
+!     Read the magic number (from the start of the file)
+read (wfu_file%ifil, pos=1, end=900, err=950) csize8
+wfu_file%inflev = ichar(csize8(5))
+if (csize8(6) /= wfu_format_version) then
+  write (0,'(a,i3,a,i3,a)') '*** UNHANDLED VERSION OF WFU FORMAT : ', ichar(csize8(6)), ' (THIS VERSION OF HIBRIDON ONLY HANDLES WFU FORMAT VERSION ',  ichar(wfu_format_version),'). ABORT.'
+  call exit()
+end if
+!
+read (wfu_file%ifil, end=900, err=950) wfu_file%ipos2, wfu_file%ipos3, wfu_file%nrlogd
+!
+read (wfu_file%ifil, end=900, err=950) olddat, oldlab, oldpot
+label = oldlab
+potnam = oldpot
+!     Read four zero bytes
+read (wfu_file%ifil, end=900, err=950) csize4
+!
+read (wfu_file%ifil, end=900, err=950) jtot, jlpar, nu, nch, csflag, &
+     flaghf, photof
+!     nchwfu is used in locating the position for records
+wfu_file%nchwfu = nch
+read (wfu_file%ifil, end=900, err=950) ered, rmu, rstart, rendld
+write (6, 245) olddat
+if (jflux .ne. 0) write (FUNIT_FLX, 245) olddat
+if (jflux .eq. 0) write (2, 245) olddat
+245 format('    FROM CALCULATION ON: ',(a))
+if (jflux .ne. 0) write (FUNIT_FLX, 250) oldlab
+if (jflux .eq. 0) write (2, 250) oldlab
+write (6, 250) oldlab
+250 format('    INITIAL JOB LABEL: ', (a))
+if (jflux .ne. 0) write (FUNIT_FLX, 251) oldpot
+if (jflux .eq. 0) write (2, 251) oldpot
+write (6, 251) oldpot
+251 format('    INITIAL POT NAME: ', (a))
+!
+!     Read in channel labels
+call bqs%init(nch)
+read (wfu_file%ifil, end=900, err=950) (bqs%jq(i), i=1, nch), &
+     (bqs%lq(i), i=1, nch), (bqs%inq(i), i=1, nch), &
+     (eint(i), i=1, nch)
+bqs%length = nch
+!
+! start reading in information from record 2 here
+read (wfu_file%ifil, end=900, err=950, pos=iwavsk(wfu_file, 2)) nrecs, nopen, &
+     nphoto, rinf
+npts = nrecs - 3
+! read in wavevectors, bessel functions j, j', n, n'
+! first initialize to zero for all channels
+call rbesself%init(nch)
+call dset(nch,zero,pk,1)  ! pk (asymptotic wavevectors)
+call dset(nch,zero,rbesself%fj,1)  ! fj
+call dset(nch,zero,rbesself%fpj,1)  ! fpj
+call dset(nch,zero,rbesself%fn,1)  ! fn
+call dset(nch,zero,rbesself%fpn,1)  ! fpn
+read (wfu_file%ifil, end=900, err=950) (pk(i), i=1, nopen), &
+     (rbesself%fj(i), i=1, nopen), (rbesself%fpj(i), i=1, nopen), &
+     (rbesself%fn(i), i=1, nopen), (rbesself%fpn(i), i=1, nopen)
+rbesself%length = nopen
+nopsq = nopen ** 2
+! read in sreal and simag, store in w and zmat
+read (wfu_file%ifil, end=900, err=950) (w(i), i=1, nopsq), &
+     (zmat(i), i=1, nopsq)
+if (photof) then
+! read in number of initial photodissociation states
+!        call dbri(mphoto,1,ifil,REC_LAST_USED)
+!        nphoto=mphoto
+! read in real part of photodissociation amplitude
+! overlay sreal which is not needed for photodissociation problem
+   read (wfu_file%ifil, end=900, err=950) (w(i), i=1, nphoto * nopen)
+! read in imaginary part of photodissociation amplitude
+! overlay simag which is not needed for photodissociation problem
+   read (wfu_file%ifil, end=900, err=950) (zmat(i), i=1, nphoto * nopen)
+endif
+! read in channel packing list and real and imaginary parts
+! of scattering wavefunction and derivative
+#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_DISTINCT)
+read (wfu_file%ifil, end=900, err=950, pos=iwavsk(wfu_file, 3)) &
+     (isc1(i), i=1, nopen), (amat(i), i=1, nopsq), &
+     (bmat(i), i=1, nopsq), (dpsir(i), i=1, nopsq), &
+     (dpsii(i), i=1, nopsq)
+#endif
+#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_POINTER)
+! amat_as_vec is a view of the matrix amat(nopen, nopen) as a vector(nopen*nopen)
+call C_F_POINTER (C_LOC(amat), amat_as_vec, [nopsq])
+read (wfu_file%ifil, end=900, err=950, pos=iwavsk(wfu_file, 3)) &
+     (isc1(i), i=1, nopen), (amat_as_vec(i), i=1, nopsq), &
+     (bmat(i), i=1, nopsq), (dpsir(i), i=1, nopsq), &
+     (dpsii(i), i=1, nopsq)
+#endif
+#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_NOVEC)
+read (wfu_file%ifil, end=900, err=950, pos=iwavsk(wfu_file, 3)) &
+     (isc1(i), i=1, nopen), amat, &
+     (bmat(i), i=1, nopsq), (dpsir(i), i=1, nopsq), &
+     (dpsii(i), i=1, nopsq)
+#endif
+wfu_file%irec = 3
+return
+!
+900 continue
+950 write (0, *) '*** ERROR READING WFU FILE. ABORT.'
+call exit
+return
+end
+
 end module mod_wave
