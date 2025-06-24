@@ -1298,16 +1298,42 @@ use mod_hivector, only: dset, vadd, vmul, dsum
 use mod_hiblas, only: dcopy, daxpy_wrapper, ddot, dscal
 use mod_hipot, only: wfintern
 ! steve, you may need more space, but i doubt it since tcoord is dimensioned n
-implicit double precision (a-h,o-z)
+implicit none
+integer, intent(in) :: npts
+integer, intent(in) :: nch
+integer, intent(in) :: nchsq
+integer, intent(in) :: ipoint
+integer, intent(in) :: nj
+logical, intent(in) :: adiab
+real(8), intent(in) :: thresh  ! thresh is the threshold for killing closed channel components
+real(8), intent(in) :: factr
+logical, intent(in) :: kill
+logical, intent(in) :: photof
+logical, intent(in) :: propf
+logical, intent(in) :: sumf
+integer, intent(in) :: iwf
+logical, intent(in) :: coordf
+integer, intent(in) :: nny
+real(8), intent(in) :: ymin
+real(8), intent(in) :: dy
+integer, intent(in) :: psifil_unit
 integer, intent(in) :: inq(nch)
 type(wfu_file_type), allocatable, intent(inout) :: wfu_file
 integer, intent(in) :: flx_unit
-logical adiab, kill, photof, propf, sumf, coordf
 
-dimension scc(100)
-data zero, one, onemin /0.d0, 1.d0, -1.d0/
+real(8), parameter :: zero = 0.d0
+real(8), parameter :: one = 1.d0
+real(8), parameter :: onemin = -1.d0
 data ione, mone /1,-1/
-integer :: psifil_unit
+real(8) :: drnow, fact
+integer :: i, ii, ind, ione, iy
+integer :: kstep
+integer :: mmi, mone
+integer :: ni, nni, noffset, nout, ny
+real(8) :: r
+real(8) :: scc(100)
+real(8) :: scc1, scc2, scc3, scc4, scsum
+real(8) :: y
 
 ASSERT(allocated(wfu_file))
 ! if propf = true then true back-subsititution for flux
