@@ -1570,7 +1570,7 @@ do kstep = 1, maxstp
     jnd=1
     do i = 1, nphoto
       call vmul(y2,1,tmat(jnd:),1,cc,1,nch)
-      call vadd(1,gam2(ind),1,cc,1,nch)
+      call vadd(1,gam2(ind:),1,cc,1,nch)
       call dcopy(nch,gam2(ind),1,q(ind),1)
       ind=ind+nch
       jnd=jnd+nmax

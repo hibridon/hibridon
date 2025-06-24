@@ -141,7 +141,7 @@ subroutine vmul (a, na, b, nb, c, nc, n)
 !  n:   integer element count
 !  c(m) = a(m) * b(m) for m=1 to n
 !  -----------------------------------------------------------------------
-implicit double precision (a-h,o-z)
+implicit none
 real(8), intent(in) :: a(:)
 integer, intent(in) :: na
 real(8), intent(in) :: b(:)
@@ -153,12 +153,12 @@ integer i, inda, indb, indc
 inda = 1
 indb = 1
 indc = 1
-do 4  i = 1, n
+do i = 1, n
   c(indc) = b(indb) * a(inda)
   inda = inda + na
   indb = indb + nb
   indc = indc + nc
-4 continue
+end do
 return
 end
 !  -----------------------------------------------------------------------
@@ -175,26 +175,32 @@ subroutine vadd (ic,a, na, b, nb, n)
 !  n:   integer element count
 !  a(m) = a(m) + ic*b(m) for m=1 to n
 !  -----------------------------------------------------------------------
-implicit double precision (a-h,o-z)
-integer i,ic, inda, indb, n, na, nb
-dimension a(1), b(1)
+implicit none
+integer, intent(in) :: ic  !  ic = 1 for addition, -1 for subtraction
+real(8), intent(inout) :: a(:)
+integer, intent(in) :: na
+real(8), intent(in) :: b(:)
+integer, intent(in) :: nb
+integer, intent(in) :: n
+integer :: i, inda, indb
 inda = 1
 indb = 1
 if (ic .gt. 0) then
-  do 4  i = 1, n
+  do i = 1, n
     a(inda) = a(inda) + b(indb)
     inda = inda + na
     indb = indb + nb
-4   continue
+  end do
 else
-  do 5  i = 1, n
+  do i = 1, n
     a(inda) = a(inda) - b(indb)
     inda = inda + na
     indb = indb + nb
-5   continue
+  end do
 endif
 return
 end
+
 double precision function dsum(n,dx,incx)
 !
 !     returns sum of double precision dx

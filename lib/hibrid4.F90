@@ -1274,18 +1274,15 @@ subroutine flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
 !
 ! ------------------------------------------------------------------
 use mod_coiout, only: niout, indout
-use mod_cocent, only: sc2 => cent
+
 use mod_coamat, only: psir ! psir(100) (4,nch)
 use mod_cobmat, only: psii ! psii(100) Here psii is used as a vector
 use mod_cotq2, only: scmat2 => dpsii ! scmat2(100)
 use mod_cotq3, only: scmat3 => scmat ! scmat3(100)
-use mod_cosc1, only: pk => sc1 ! pk(6)
 use mod_coisc2, only: nlist => isc2 ! nlist(60)
 use mod_coisc3, only: nalist => isc3 ! nalist(60)
 use mod_cosc6, only: sc => sc6 ! sc(60)
-use mod_cosc7, only: sc1 => sc7 ! sc1(6)
 use mod_cosc8, only: sc8
-use mod_cosc9, only: sc9
 use mod_coz, only: scmat => z_as_vec ! scmat(100)
 use mod_cozmat, only: tcoord => zmat_as_vec ! tcoord(100)
 use mod_wave, only: wfu_file_type, iwavsk
@@ -1334,6 +1331,10 @@ real(8) :: r
 real(8) :: scc(100)
 real(8) :: scc1, scc2, scc3, scc4, scsum
 real(8) :: y
+real(8) :: y1(nch)
+real(8) :: y2(nch)
+real(8) :: y4(nch)
+real(8) :: gam1(nch)
 
   ASSERT(allocated(wfu_file))
   ! if propf = true then true back-subsititution for flux
@@ -1379,14 +1380,14 @@ real(8) :: y
     ! matrix into local interval
     read (wfu_file%ifil, end=900, err=950) (scmat3(i), i=1, nchsq), &
          (scmat(i), i=1, nchsq)
-    ! read in propagators (y1=pk, y2=sc1, y4=sc2, gam1=sc9,
-    !     muab= 5th column of psi)
-    read (wfu_file%ifil, end=900, err=950) (pk(i), i=1, nch), &
-         (sc1(i), i=1, nch), (sc2(i), i=1, nch), &
-         (sc9(i), i=1, nch), (psir(noffset - 1 + i), i=1, nch)
+    ! read in propagators (y1, y2, y4, gam1,
+    !     muab= 5th column of psir)
+    read (wfu_file%ifil, end=900, err=950) (y1(i), i=1, nch), &
+         (y2(i), i=1, nch), (y4(i), i=1, nch), &
+         (gam1(i), i=1, nch), (psir(noffset - 1 + i), i=1, nch)
     !          write (23, 299) -r, drnow, (scmat(ii), ii=1,4),
-    !     :      (pk(ii),ii=1,2),(sc1(ii),ii=1,2),
-    !     :      (sc2(ii),ii=1,2),(sc9(ii),ii=1,2),(psir(noffset+ii),ii=0,1)
+    !     :      (y1(ii),ii=1,2),(y2(ii),ii=1,2),
+    !     :      (y4(ii),ii=1,2),(gam1(ii),ii=1,2),(psir(noffset+ii),ii=0,1)
 
     ! 299     format (2f16.12,14(1pe22.12e3))
     ! transform wave function into local basis
@@ -1403,16 +1404,16 @@ real(8) :: y
       ! 1st two column of psii now contain G-tilde(A-B)*psi-tilde(b)
       ! if photodissociation, subtract off mu-tilde(a,b) from real part
       if (photof) call vadd(mone,psii,1 &
-                          ,psir(noffset),1,nch)
+                          ,psir(noffset:),1,nch)
       ! at this point 1st two columns of psii contain real and imaginary
       !   psi-tilde(a)
       ! 3rd and 4th columns still contain psi-tilde(b)
       ! propagate derivatives
-      call vmul(pk,1,psii,1,scmat2,1,nch)
-      call vmul(pk,1,psii(1+nch:),1,scmat2(1+nch:),1,nch)
+      call vmul(y1,1,psii,1,scmat2,1,nch)
+      call vmul(y1,1,psii(1+nch:),1,scmat2(1+nch:),1,nch)
       ! first and second columns of scmat2 now contain y1 Fa
-      call vmul(sc1,1,psii(ipoint:),1,scmat2(ipoint:),1,nch)
-      call vmul(sc1,1,psii(ipoint+nch:),1, &
+      call vmul(y2,1,psii(ipoint:),1,scmat2(ipoint:),1,nch)
+      call vmul(y2,1,psii(ipoint+nch:),1, &
                 scmat2(ipoint+nch:),1,nch)
       ! 3rd and 4th columns of scmat2 now contain y2 Fb
       call daxpy_wrapper(2*nch,onemin,scmat2,1,scmat2(ipoint),1)
@@ -1420,13 +1421,13 @@ real(8) :: y
       ! this is psip-tilde(a)  move to 2nd and 3rd columns of psir
       call dcopy(2*nch,scmat2(ipoint),1,psir(ipoint),1)
       ! if photodissociation subtract off gamma1 from real part of derivative
-      if (photof) call vadd(mone,psir(ipoint),1,sc9,1,nch)
+      if (photof) call vadd(mone,psir(ipoint:),1,gam1,1,nch)
       ! for compatibility with previous version, copy derivative into 3rd and
       ! 4th columns of psii
       call dcopy(2*nch,psir(ipoint),1,psii(ipoint),1)
     else
       do ii=1, nch
-        sc1(ii)=onemin/sc1(ii)
+        y2(ii)=onemin/y2(ii)
       end do
       ! scmat2(nch, 4) = scmat(nch, nch) * psir(nch, 4)
       call mxma(scmat,1,nch,psir,1,nch,scmat2,1,nch,nch,nch,4)
@@ -1435,31 +1436,31 @@ real(8) :: y
       ! 1st two columns of psii now contain real and imaginary part of derivative
       ! 3rd and 4th columns contain real and imaginary parts of function
       ! propagate functions
-      call vmul(sc2,1,psii(ipoint:),1,scmat2,1,nch)
-      call vmul(sc2,1,psii(ipoint+nch:),1,scmat2(1+nch:),1,nch)
+      call vmul(y4,1,psii(ipoint:),1,scmat2,1,nch)
+      call vmul(y4,1,psii(ipoint+nch:),1,scmat2(1+nch:),1,nch)
       ! first and second columns of scmat2 now contain y4 Fb
       call daxpy_wrapper(2*nch,onemin,scmat2,1,scmat2(ipoint),1)
       ! 3rd and 4th columns of scmat2 now contains (Fb' - y4 Fb)
       ! if photodissociation, subtract off gamma2 from real part
-      if (photof) call vadd(mone,scmat2(2*nch+1),1 &
-                          ,psir(noffset),1,nch)
+      if (photof) call vadd(mone,scmat2(2*nch+1:),1 &
+                          ,psir(noffset:),1,nch)
       ! if photodissociation, 3rd column of scmat2 now contains
       !     Re(Fb' - y4 Fb - gamma 2)
       ! multiply by - y2^-1 to get Fa
-      call vmul(sc1,1,scmat2(ipoint:),1,psii,1,nch)
-      call vmul(sc1,1,scmat2(ipoint+nch:),1,psii(1+nch:),1,nch)
+      call vmul(y2,1,scmat2(ipoint:),1,psii,1,nch)
+      call vmul(y2,1,scmat2(ipoint+nch:),1,psii(1+nch:),1,nch)
       ! 1st and 2nd columns of psii now contain Fa
       do ii=1, nch
-        sc1(ii)=onemin/sc1(ii)
+        y2(ii)=onemin/y2(ii)
       end do
-      call vmul(sc1,1,psii(ipoint:),1,scmat2,1,nch)
-      call vmul(sc1,1,psii(ipoint+nch:),1,scmat2(1+nch:),1,nch)
+      call vmul(y2,1,psii(ipoint:),1,scmat2,1,nch)
+      call vmul(y2,1,psii(ipoint+nch:),1,scmat2(1+nch:),1,nch)
       ! 1st and 2nd columns of scmat2 now contain y2 Fb
       ! if photodissociation subtract off gamma1 from real part
-      if (photof) call vadd(mone,scmat2,1,sc9,1,nch)
-      call dscal(nch,onemin,pk,1)
-      call vmul(pk,1,psii,1,psii(ipoint:),1,nch)
-      call vmul(pk,1,psii(1+nch:),1,psii(ipoint+nch:),1,nch)
+      if (photof) call vadd(mone,scmat2,1,gam1,1,nch)
+      call dscal(nch,onemin,y1,1)
+      call vmul(y1,1,psii,1,psii(ipoint:),1,nch)
+      call vmul(y1,1,psii(1+nch:),1,psii(ipoint+nch:),1,nch)
       ! 3rd and 4th columns of psii now contain -y1 Fa
       ! add on y2 Fb and store in 3rd and 4th columns of psii
       call daxpy_wrapper(2*nch,one,scmat2,1,psii(ipoint),1)
@@ -1486,14 +1487,14 @@ real(8) :: y
         sc(i)=psii(nni)*psii(3*nch+nni)- &
               psii(nch+nni)*psii(2*nch+nni)
         !  store real or imaginary parts of wf if desired
-        if (iwf .eq. 1) pk(i)=psii(nni)
-        if (iwf .eq. -1) pk(i)=psii(nch+nni)
+        if (iwf .eq. 1) y1(i)=psii(nni)
+        if (iwf .eq. -1) y1(i)=psii(nch+nni)
         ! if wavevector matrix positive (lambda negative) channel is closed
         ! kill the corresponding components of psi and psi'
         !              if (sc8(nni) .lt. thresh.and.kill) then
         if (sc8(nni) .lt. 0.d0.and.kill) then
           sc(i)=zero
-          if (iwf .ne. 0) pk(i)=0.d0
+          if (iwf .ne. 0) y1(i)=0.d0
         endif
         scsum=scsum+sc(i)
       end do
@@ -1552,14 +1553,14 @@ real(8) :: y
           sc(i)=psir(nni)*psir(3*nch+nni)- &
             psir(nch+nni)*psir(2*nch+nni)
           !  store real or imaginary parts of wf if desired
-          if (iwf .eq. 1) pk(i)=psii(nni)
-          if (iwf .eq. -1) pk(i)=psii(nch+nni)
+          if (iwf .eq. 1) y1(i)=psii(nni)
+          if (iwf .eq. -1) y1(i)=psii(nch+nni)
           ! if wavevector matrix positive (lambda negative) channel is closed
           ! kill the corresponding components of psi and psi'
           if (sc8(mmi) .lt. 0.d0.and.kill) then
             ! if (sc8(mmi) .lt. thresh.and.kill) then
             sc(i)=zero
-            if (iwf .ne. 0) pk(i)=0.d0
+            if (iwf .ne. 0) y1(i)=0.d0
           endif
         end do
         if (sumf) then
@@ -1591,11 +1592,11 @@ real(8) :: y
       endif
     endif
     if (iwf .ne. 0) then
-      write(psifil_unit, 400) -r, (pk(i), i=1,nj)
+      write(psifil_unit, 400) -r, (y1(i), i=1,nj)
     end if
     if (iwf .eq. 0) then
       if (photof) then
-        ! for photodissociation, so, steve, you'll need to scale sc9 also
+        ! for photodissociation, so, steve, you'll need to scale gam1 also
         call dscal(nout,1.d0/rmu,sc,1)
         scsum=scsum/rmu
         if (scsum .lt. 1.d-13) scsum=zero
@@ -1604,7 +1605,7 @@ real(8) :: y
         write (flx_unit, 400) -r, (scc(i), i=1,nout), scsum
       else
         write (flx_unit, 400) -r, (sc(i), i=1,nout), scsum
-        ! steve you'll also have to write out sc9
+        ! steve you'll also have to write out gam1
       endif
       400 format(f10.4,30(1pe11.3))
     endif
