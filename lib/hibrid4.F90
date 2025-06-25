@@ -1277,13 +1277,10 @@ use mod_coiout, only: niout, indout
 
 use mod_coamat, only: psir ! psir(100) (4,nch)
 use mod_cobmat, only: psii ! psii(100) Here psii is used as a vector
-use mod_cotq2, only: scmat2 => dpsii ! scmat2(100)
-use mod_cotq3, only: scmat3 => scmat ! scmat3(100)
 use mod_coisc2, only: nlist => isc2 ! nlist(60)
 use mod_coisc3, only: nalist => isc3 ! nalist(60)
 use mod_cosc6, only: sc => sc6 ! sc(60)
 use mod_cosc8, only: sc8
-use mod_coz, only: scmat => z_as_vec ! scmat(100)
 use mod_cozmat, only: tcoord => zmat_as_vec ! tcoord(100)
 use mod_wave, only: wfu_file_type, iwavsk
 use mod_coqvec, only: nphoto
@@ -1335,6 +1332,9 @@ real(8) :: y1(nch)
 real(8) :: y2(nch)
 real(8) :: y4(nch)
 real(8) :: gam1(nch)
+real(8) :: scmat(nch*nch)
+real(8) :: scmat2(nch*nch)
+real(8) :: scmat3(nch*nch)
 
   ASSERT(allocated(wfu_file))
   ! if propf = true then true back-subsititution for flux
