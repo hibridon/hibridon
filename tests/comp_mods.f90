@@ -293,7 +293,7 @@ end
 module m_diff
     implicit none
     contains
-    function vectors_differ(va, vb, tolerance, min_significant_value)
+    function vectors_differ(va, vb, tolerance, min_significant_value, compare_absolute_values)
         use iso_fortran_env, only: Error_Unit
         implicit none
         logical :: vectors_differ
@@ -301,7 +301,9 @@ module m_diff
         real(8), intent(in) :: vb(:)
         real(8), intent(in) :: tolerance
         real(8), intent(in) :: min_significant_value
+        logical, intent(in) :: compare_absolute_values  ! if true, ignre the sign of the numbers
         integer :: number_index
+        real(8) :: xa, xb
 
         vectors_differ = .FALSE.
 
@@ -313,10 +315,16 @@ module m_diff
         else
             number_index = 1
             do while(number_index <= size(va))
-                if(abs(va(number_index)) > min_significant_value ) then
-                    if( abs(va(number_index) - vb(number_index))/max(abs(va(number_index)),1d-300) > tolerance ) then
+                xa = va(number_index)
+                xb = vb(number_index)
+                if (compare_absolute_values) then
+                    xa = abs(xa)
+                    xb = abs(xb)
+                end if
+                if(abs(xa) > min_significant_value ) then
+                    if( abs(xa - xb)/max(abs(xa),1d-300) > tolerance ) then
                         write(Error_Unit, "(a,i0,a,e12.5,a,e12.5,a,f3.1,a)") "at number_index ", number_index, ": ",&
-                        va(number_index), " and ", vb(number_index), " differ by more than ", tolerance*100.0d0,&
+                        xa, " and ", xb, " differ by more than ", tolerance*100.0d0,&
                         " percent"
                         vectors_differ = .TRUE.
                         !return
@@ -328,7 +336,7 @@ module m_diff
         return
         end function vectors_differ
 
-    function result_files_differ(results1_file_name, results2_file_name, num_header_lines, tolerance, min_significant_value)
+    function result_files_differ(results1_file_name, results2_file_name, num_header_lines, tolerance, min_significant_value, compare_absolute_values)
         use m_vector, only: t_vector
         use iso_fortran_env, only: Output_Unit
         ! use m_diff, only: vectors_differ
@@ -338,6 +346,7 @@ module m_diff
         integer, intent(in) :: num_header_lines(2)
         real(8), intent(in) :: tolerance
         real(8), intent(in) :: min_significant_value
+        logical, intent(in) :: compare_absolute_values  ! if true, ignre the sign of the numbers
         logical :: result_files_differ
         logical :: debug_mode
 
@@ -359,7 +368,7 @@ module m_diff
 
         call get_file_numbers(results2_file_name, test_numbers, num_header_lines(2))
     
-        result_files_differ = vectors_differ(ref_numbers%array, test_numbers%array, tolerance, min_significant_value)
+        result_files_differ = vectors_differ(ref_numbers%array, test_numbers%array, tolerance, min_significant_value, compare_absolute_values)
     
         end function result_files_differ
         

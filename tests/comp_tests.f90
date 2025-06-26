@@ -15,6 +15,7 @@ program comp_tests
     integer :: num_patterns
     integer :: pattern_index
     logical :: pattern_is_found
+    logical :: compare_absolute_values  ! if true, ignre the sign of the numbers
     ! Get test and reference files paths from command arguments
     call get_command_argument(1,ref)
     call get_command_argument(2,test)
@@ -27,6 +28,7 @@ program comp_tests
     ! Tolerance is set to 1%
     tolerance=0.01d0
 
+    compare_absolute_values=.false.  ! by default, we compare the values with their sign
     min_significant_value = 1e-30
 
     ! Set the number of header lines depending on the type of output file
@@ -49,6 +51,7 @@ program comp_tests
                 pattern = "R (BOHR) AND OUTGOING FLUXES"
             else if (pattern_index == 2) then
                 pattern = "TRANSFORMATION MATRIX AT R = "
+                compare_absolute_values = .true. ! For some reason, the sign of the values in the transformation matrix can vary depending on the build environment (compiler or blas libraries). Unless this comes from a bug (eg uninitialized variable), I assume that both signs are correct, and that this sign variation comes from multiple valid solutions to the same problem.
             else
                 write(Error_Unit, "(a)") "Error: Invalid pattern index."
                 stop 1
@@ -84,7 +87,7 @@ program comp_tests
     end select
 
     ! Compare numeric values between reference and test files
-    if(result_files_differ(ref, test, num_header_lines, tolerance, min_significant_value)) stop 1
+    if(result_files_differ(ref, test, num_header_lines, tolerance, min_significant_value, compare_absolute_values)) stop 1
 
 
 contains 
