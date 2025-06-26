@@ -528,8 +528,8 @@ rl=>rspar(17:20); cl=> rspar(21:24); cmix=>rspar(25)
 
 if (j .lt. 2) then
 ! error if jtot is less than 2
-  write (6, 5) jtot
-5   format (' *** JTOT = ',i2,' .LT. 2 IN TCASEA; ABORT **')
+  write (6, 5) j
+5   format (' *** JTOT = ',i3,' .LT. 2 IN TCASEA; ABORT **')
   stop
 endif
 if (cmix .le. 0.8d0) then

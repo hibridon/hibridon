@@ -1,5 +1,17 @@
 # Hibridon ChangeLog
 
+## next version
+
+### Changed
+
+
+### Added
+
+
+### Fixed 
+
+- Fixed minor bug in flux that caused the displayed value of `jtot` to be wrong in the error message `' *** JTOT = <jtot> .LT. 2 IN TCASEA; ABORT **'`
+
 ## [v5.2.0] - 2025-06-08
 
 ### Changed
@@ -14,6 +26,7 @@
 
 ### Fixed 
 
+- Fixed bug that caused `hypxsc` to crash when the s-matrix is intentionally not present in `smt` file for some values of `(jtot, jlpar)`
 - Fixed cmake build system with ENABLE_PROFILING=ON
 - Increased the maximum length of path to the help file is (256 instead of 80), thus reducing the risk of the help command to fail (commit ecc26b5).
 - Fixed a buffer overwrite bug in `bound`, where `dsygvx` was called with a vector `ifail` that was undersized

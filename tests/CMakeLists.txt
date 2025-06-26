@@ -1,5 +1,11 @@
 # Add the executable that will compare output files
 add_executable(check_outputs comp_mods.f90 comp_tests.f90)
+if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(check_outputs
+      PUBLIC
+      -ffree-line-length-none                   # Allow arbitrary long lines.
+    )
+endif()
 
 # Add all test subdirectories
 add_subdirectory(arch4)
