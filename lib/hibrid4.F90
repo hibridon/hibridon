@@ -935,7 +935,7 @@ if (jflux .eq. 0) then
     iwf = 1
     propf=.true.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX,psir)
     write(FUNIT_PSI, 210)
 210     format(/' R (BOHR) AND IMAGINARY PART OF CHI')
 ! reread asymptotic information
@@ -958,7 +958,7 @@ if (jflux .eq. 0) then
     iwf = -1
     wfu_file%irec=npts+4
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX,psir)
   endif
 else if (jflux .eq. 2) then
   write(FUNIT_FLX, 300)
@@ -1040,7 +1040,7 @@ else if (jflux .eq. 1) then
 ! plot out all fluxes for total flux which is numerically well behaved
     tthresh=-1.e9
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,.false., &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq,wfu_file,FUNIT_FLX)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq,wfu_file,FUNIT_FLX,psir)
   endif
   if (.not. photof) then
 ! now for incoming flux (only for scattering)
@@ -1106,7 +1106,7 @@ else if (jflux .eq. 1) then
     iwf = 0
     propf=.false.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX,psir)
   endif
 ! now for outgoing flux
   if (.not.photof) then
@@ -1241,7 +1241,7 @@ else if (jflux .eq. 1) then
   if (photof) propf=.true.
   if (.not. photof) propf=.false.
   call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX,psir)
 endif
 700 if (photof .or. jflux .eq. 0) close (FUNIT_PSI)
 if (jflux .ne. 0) close (FUNIT_FLX)
@@ -1263,7 +1263,7 @@ return
 end
 ! ------------------------------------------------------------------
 subroutine flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-                photof, propf, sumf,iwf,coordf,nny,ymin,dy,psifil_unit,inq,wfu_file,flx_unit)
+                photof, propf, sumf,iwf,coordf,nny,ymin,dy,psifil_unit,inq,wfu_file,flx_unit, psir)
 !
 ! subroutine to calculate fluxes
 !
@@ -1275,8 +1275,6 @@ subroutine flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
 ! ------------------------------------------------------------------
 use mod_coiout, only: niout, indout
 
-use mod_coamat, only: psir ! psir(100) (4,nch)
-use mod_cobmat, only: psii ! psii(100) Here psii is used as a vector
 use mod_coisc2, only: nlist => isc2 ! nlist(60)
 use mod_coisc3, only: nalist => isc3 ! nalist(60)
 use mod_cosc6, only: sc => sc6 ! sc(60)
@@ -1314,6 +1312,7 @@ integer, intent(in) :: psifil_unit
 integer, intent(in) :: inq(nch)
 type(wfu_file_type), allocatable, intent(inout) :: wfu_file
 integer, intent(in) :: flx_unit
+real(8), intent(inout) :: psir(nch*nch)  ! used as input and as work, but not as output
 
 real(8), parameter :: zero = 0.d0
 real(8), parameter :: one = 1.d0
@@ -1335,7 +1334,9 @@ real(8) :: gam1(nch)
 real(8) :: scmat(nch*nch)
 real(8) :: scmat2(nch*nch)
 real(8) :: scmat3(nch*nch)
+real(8) :: psii(nch*nch)
 
+  psii = zero
   ASSERT(allocated(wfu_file))
   ! if propf = true then true back-subsititution for flux
   ! if propf = false then inward propagation
@@ -1613,6 +1614,7 @@ real(8) :: scmat3(nch*nch)
 
 450   continue
 !        close (23)
+  psir = zero
   return
 !
 900   continue
