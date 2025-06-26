@@ -8,7 +8,7 @@ code status (hibridon main branch):
 [What does that mean ?](https://github.com/hibridon/hibridon/wiki/Continuous-Integration)
 
 ---
-# Hibridon v5.1
+# Hibridon v5.2
 
 Hibridon is a program package to solve the close-coupled equations which occur in the quantum treatment of inelastic atomic and molecular collisions. Gas-phase scattering, photodissociation, collisions of atoms and/or molecules with flat surfaces, and bound states of weakly-bound complexes can be treated
 
@@ -112,7 +112,8 @@ This will automatically find the required libraries and compiler and create a Ma
     Where `<compiler>` is your compiler executable e.g.:
     - `gfortran`
     - `gfortran-8`
-    - `ifort` 
+    - `ifort`
+    - `ifx`
 
 - **Use a specific BLAS/LAPACK library**
 

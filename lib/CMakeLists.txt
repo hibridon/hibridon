@@ -84,13 +84,31 @@ add_library(hib
 # This for preprocessed includes from the subdirectory bases to work
 target_include_directories(hib PRIVATE ./)
 
-# Link Blas and Lapack libraries
-target_link_libraries(hib INTERFACE "${BLAS_LIBRARIES}")
-target_link_libraries(hib INTERFACE "${LAPACK_LIBRARIES}")
 # Link OpenMP if found
 if(OpenMP_Fortran_FOUND)
     target_link_libraries(hib INTERFACE OpenMP::OpenMP_Fortran)
 endif()
+
+# Link Blas and Lapack libraries
+message(STATUS "BLAS_LIBRARIES = ${BLAS_LIBRARIES}")
+message(STATUS "LAPACK_LIBRARIES = ${LAPACK_LIBRARIES}")
+if(Fortran_COMPILER_NAME STREQUAL "ifx")
+  if(BLA_VENDOR STREQUAL "Intel10_64lp")
+    # -- BLAS_LIBRARIES = /opt/intel/oneapi-2024.2.1/mkl/2024.2/lib/libmkl_intel_lp64.so;/opt/intel/oneapi-2024.2.1/mkl/2024.2/lib/libmkl_intel_thread.so;/opt/intel/oneapi-2024.2.1/mkl/2024.2/lib/libmkl_core.so;/opt/intel/oneapi-2024.2.1/compiler/2024.2/lib/libiomp5.so;-lm;-ldl
+    # -- LAPACK_LIBRARIES = /opt/intel/oneapi-2024.2.1/mkl/2024.2/lib/libmkl_intel_lp64.so;/opt/intel/oneapi-2024.2.1/mkl/2024.2/lib/libmkl_intel_thread.so;/opt/intel/oneapi-2024.2.1/mkl/2024.2/lib/libmkl_core.so;/opt/intel/oneapi-2024.2.1/compiler/2024.2/lib/libiomp5.so;-lm;-ldl;-lm;-ldl
+
+    # in this case, BLAS_LIBRARIES and LAPACK_LIBRARIES are the same, and linking bith would cause ifx to faiol with the error:
+    # "ld: attempted static link of dynamic object `/opt/intel/oneapi-2024.2.1/mkl/2024.2/lib/libmkl_intel_lp64.so'
+    target_link_libraries(hib INTERFACE "${BLAS_LIBRARIES}")
+  else()
+    target_link_libraries(hib INTERFACE "${BLAS_LIBRARIES}")
+    target_link_libraries(hib INTERFACE "${LAPACK_LIBRARIES}")
+  endif()
+else()
+  target_link_libraries(hib INTERFACE "${BLAS_LIBRARIES}")
+  target_link_libraries(hib INTERFACE "${LAPACK_LIBRARIES}")
+endif()
+
 
 set_compile_options(hib "OFF")
 
@@ -137,6 +155,8 @@ if (CMake_Fortran_COMPILER_ID STREQUAL "GNU")
   target_compile_definitions(hib PUBLIC HIB_UNIX_GFORTRAN=1)
 elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
   target_compile_definitions(hib PUBLIC HIB_UNIX_IFORT=1)
+elseif (Fortran_COMPILER_NAME STREQUAL "ifx")
+  target_compile_definitions(hib PUBLIC HIB_UNIX_IFX=1)
 endif()
 
 if(ENABLE_CODE_COVERAGE)
@@ -212,6 +232,11 @@ target_compile_definitions(hib PUBLIC _BUILD_COMP_="${CMAKE_Fortran_COMPILER}")
 target_compile_definitions(hib PUBLIC _HELPDIR_="${CMAKE_CURRENT_SOURCE_DIR}/../doc/")
 target_compile_definitions(hib PUBLIC _BUILD_FLAGS_="")#"${HIBRIDON_COMPILE_OPTIONS}")
 string(TIMESTAMP TODAY "%Y-%m-%d at %H:%M")
+if (CMAKE_Fortran_COMPILER_ID STREQUAL "IntelLLVM")  # ifx
+  # add a non digit character at the beginning of the space containing string as a workaround of ifx bug described in  https://community.intel.com/t5/Intel-Fortran-Compiler/Preprocessor-directives-in-ifx/m-p/1504678
+  message(WARNING "ifx compiler has a bug (bug report CMPLRLLVM-49553) that prevents it from compiling preprocessor directives contining spaces. Adding a non digit character to the beginning of the variable value as a workaround.")
+  set(TODAY " ${TODAY}")
+endif()
 target_compile_definitions(hib PUBLIC _BUILD_DATE_="${TODAY}")
 # The following is for preprocessing of hiutil.F90
 target_compile_definitions(hib PUBLIC _HELPDIR_="${CMAKE_CURRENT_SOURCE_DIR}/../doc/")

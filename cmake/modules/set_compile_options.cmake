@@ -97,6 +97,52 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
       # -diag-disable 7712       # disable remark #7712: This variable has not been used. until all variables have been declared explicitely (implicit None)
       $<$<CONFIG:DEBUG>:-warn all,nounused,nodeclarations,errors>                # Enable all warnings except for some that have not been fixed yet, and treat warnings as errors for a zero warning policy
     )
+# Intel (Fortran_COMPILER_NAME=ifx, Fortran_COMPILER_ID=IntelLLVM) 
+elseif (Fortran_COMPILER_NAME STREQUAL "ifx")
+    target_compile_options(${TARGET}
+      PUBLIC
+      # Non-specific options
+      # force arrays to be allocated on the heap instead of the stack, this removes segmentation faults crash, not sure why
+      # the following option means : automatic arrays and arrays created for temporary computations are allocated on the stack if their size can be determined at compile time and if it doesn't exceed 10kb.
+      # this option seems necessary for big values of kmax (eg kmax=5000), according to bdesrousseaux, otherwise the user will experience a segmentation fault. I guess that without this option, the stack becomes too small to contain such big arrays...
+      -heap-arrays                                # Put everything on the heap
+      # "-extend-source 132"                        # Allow arbitrary long lines (132 seems the longest allowed with ifort). Needed as preprocessing could generate long lines.
+      -no-wrap-margin                             # Don't wrap output files
+      $<$<PLATFORM_ID:Linux>:-mcmodel=large>      # Required on Linux
+      $<$<BOOL:${OpenMP_Fortran_FOUND}>:-qopenmp> # Compile with qopenmp option if OpenMP libs are found
+      # Config-specific options: RELEASE
+      $<$<CONFIG:RELEASE>:-O3>                    # Optimization level at 3 for Release
+      $<$<AND:$<BOOL:${LINK_TIME_OPTIMIZATION}>,$<CONFIG:RELEASE>>:-ipo>  # activate interprocediral optimization (aka link time optimization)
+      $<$<CONFIG:RELEASE>:-init=zero>             # Init variables to zero/false/null
+      # Config-specific options: DEBUG
+      $<$<CONFIG:DEBUG>:-O0>                      # Disable all optimizations
+      $<$<CONFIG:DEBUG>:-g>                       # Generates complete debugging information
+      $<$<CONFIG:DEBUG>:-traceback>               # Generates extra information in the object file to provide source file traceback information when a severe error occurs at run time
+      #$<$<CONFIG:DEBUG>:-warn all>                # Enable all warnings
+
+      # handle ENABLE_UNINIT_VAR_RUNTIME_DETECTOR
+      # Force à NaN toutes les variables de type intrinsèque ainsi que les tableaux non initialisés. Cette option implique -fpe0. Pour éviter de récupérer des exceptions, qui ne soient pas relatives à des variables non-initialisées, nous recommandons de réduire le niveau d'optimisation à -O1 ou -O0 ou alors d'utiliser -fp-speculation=safe pour faire la détection de variables non-initialisés.
+      $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-init=zero>   # Init integer and logical variables to zero/false/null instead of random to avoid random bugs
+      $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-init=snan>    # Init real variables to signaling nans to detect uninitialized variables
+      $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-init=arrays>    # also initialize arrays to avoid random behaviours caused by use of uninitialized variables
+
+      # check uses of uninitialized variables in run time
+      # this is very useful as these are always bugs that cause the program to behave randomly with ifort (gfortran initializes data with zero)
+      $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-check uninit>
+
+      # Cette combinaison d'options stoppe l'exécution dès qu'une exception (overflow, underflow, division par zéro, opération invalide,…) se produit; elle indique à quel niveau du code elle s'est produite. Le contrôle s'opère dans chaque subroutine, contrairement à l'option -fpe0 qui agit uniquement sur le programme principal. 
+      # $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-fpe-all=0>
+      # $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-no-ftz=0>
+      # $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-traceback=0>
+
+      $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
+      $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
+      -diag-disable 6717,7712       # disable warning #6717 (This name has not been given an explicit type.   [LMAXP]) until all variables have been declared explicitely (implicit None)
+      # -diag-disable 7712       # disable remark #7712: This variable has not been used. until all variables have been declared explicitely (implicit None)
+      $<$<CONFIG:DEBUG>:-warn all,nounused,nodeclarations,errors>                # Enable all warnings except for some that have not been fixed yet, and treat warnings as errors for a zero warning policy
+    )
+else()
+    message(FATAL_ERROR "Unsupported Fortran compiler: ${CMAKE_Fortran_COMPILER_ID} (${Fortran_COMPILER_NAME})")
 endif()
 
 endfunction()

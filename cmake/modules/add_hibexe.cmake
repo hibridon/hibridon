@@ -29,7 +29,11 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
       $<$<CONFIG:DEBUG>:-fsanitize=address>         # Address sanitizer
       $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -lgcov at link time)
     )
-# Intel (ifort)
+elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "IntelLLVM") # Intel (ifx)
+    target_link_options(${EXE_NAME}
+      PUBLIC
+      $<$<AND:$<BOOL:${ENABLE_UNINIT_VAR_RUNTIME_DETECTOR}>,$<CONFIG:DEBUG>>:-check uninit>  # https://community.intel.com/t5/Intel-Fortran-Compiler/Linking-errors-when-using-memory-sanitizer-in-fortran-project/td-p/1521476: When you compile with -check uninit (or -check all) you also need to link with that compiler option.
+    )
 endif()
 
 

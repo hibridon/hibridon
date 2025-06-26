@@ -569,7 +569,7 @@ use mod_cosysi, only: ispar
 use mod_parbas, only: lammin, lammax, mproj, lam2, m2proj
 use mod_parpot, only: potnam=>pot_name
 use mod_nh3h2, only: nvv, ivv, vinit
-#if defined(HIB_UNIX_IFORT)
+#if defined(HIB_UNIX_IFORT) || defined(HIB_UNIX_IFX)
   use ifport, only: abort
 #endif
 implicit double precision (a-h,o-z)
