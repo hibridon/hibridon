@@ -1,7 +1,7 @@
 <TITLE>hypxsc</TITLE>
 <h3><center><font color=#brown >Command HYPXSC</h3>
 </center></font><hr>
- The command HYPXSC allows you to calculate  hyperfine-resolved integral cross 
+ The command HYPXSC allows you to calculate  hyperfine-resolved integral cross sections.
 These integral cross sections are printed in the terminal output and outputted  
  to the file
  <tt>{jobname}n.hfx</tt>, where <tt>n</tt> is the cardinal value of the energy (see below).  The hyperfine-resolved
@@ -34,8 +34,7 @@ default value of
                  second energy <i>S</i> matrix file <tt>{jobname}2.smt</tt> or second energy
                  integral cross section file <tt>{jobname}2.ics</tt> are used.  The
                  default value of inerg is 1
-     <tt>nucspin:</tt>&#160;The value denoting  the total nuclear spin I of the diatomic,
-                            <tt> nucspin=2*I</tt> (0 for I=0, 1 for I=1/2, 2 for I=1 etc)<p>
+     <tt>nucspin:</tt>&#160;nuclear spin of the diatomic. if nucspin &lt; 100, denotes the total nuclear spin I of the diatomic, <tt> nucspin=2*I</tt>. If nucspin &ge; 100, nucspin` encodes the 2 nuclear spins n1 and n2 of the diatomic in form n1 * 100 + n2<p>
 
      <tt>j1min:</tt>&#160;Minimum value of the rotational angular momentum for which hyperfine cross sections will be calculated.<p>
       

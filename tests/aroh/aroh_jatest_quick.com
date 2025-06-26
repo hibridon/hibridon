@@ -1,0 +1,16 @@
+inp=Aroh_jatestq.inp
+job=Aroh_q
+noprin=t
+wrsmat=t
+wrpart=t
+jout,5,0,1,2,3,4
+indout,4,-1,1,-2,2
+jtotd=1
+jtot2=3
+show
+run
+intcrs
+printc
+partc,,1,2
+partc,,1,-1
+exit

@@ -32,16 +32,16 @@ end module m_vector
 module m_stringsplitter
 contains
 ! from https://fpm.fortran-lang.org/proc/split.html
-subroutine split(input_line,array,delimiters,order,nulls)
-    !! given a line of structure " par1 par2 par3 ... parn " store each par(n) into a separate variable in array.
+subroutine split(input_line,tokens,delimiters,order,nulls)
+    !! given a line of structure " par1 par2 par3 ... parn " store each par(n) into a separate variable in tokens.
     !!
-    !! * by default adjacent delimiters in the input string do not create an empty string in the output array
+    !! * by default adjacent delimiters in the input string do not create an empty string in the output tokens
     !! * no quoting of delimiters is supported
     character(len=*),intent(in)              :: input_line  !! input string to tokenize
     character(len=*),optional,intent(in)     :: delimiters  !! list of delimiter characters
-    character(len=*),optional,intent(in)     :: order       !! order of output array sequential|[reverse|right]
+    character(len=*),optional,intent(in)     :: order       !! order of output tokens sequential|[reverse|right]
     character(len=*),optional,intent(in)     :: nulls       !! return strings composed of delimiters or not ignore|return|ignoreend
-    character(len=:),allocatable,intent(out) :: array(:)    !! output array of tokens
+    character(len=:),allocatable,intent(out) :: tokens(:)    !! output array of tokens
 
     integer                       :: n                      ! max number of strings INPUT_LINE could split into if all delimiter
     integer,allocatable           :: ibegin(:)              ! positions in input string where tokens start
@@ -59,18 +59,25 @@ subroutine split(input_line,array,delimiters,order,nulls)
     integer                       :: inotnull               ! count strings not composed of delimiters
     integer                       :: ireturn                ! number of tokens returned
     integer                       :: imax                   ! length of longest token
-
+    character, parameter :: ASCII_NULL = char(0) ! ASCII NULL character
+    character, parameter :: ASCII_SPACE = ' '
+    character, parameter :: ASCII_TAB = char(9)
+    character, parameter :: ASCII_NEWLINE = char(10)
+    character, parameter :: ASCII_VERTICAL_TAB = char(11)
+    character, parameter :: ASCII_FORM_FEED = char(12)
+    character, parameter :: ASCII_CARRIAGE_RETURN = char(13)
+    character(len=*), parameter :: default_delimiters = ASCII_SPACE//ASCII_TAB//ASCII_NEWLINE//ASCII_VERTICAL_TAB//ASCII_FORM_FEED//ASCII_CARRIAGE_RETURN//ASCII_NULL
+    allocate(character(len=0) :: dlim)
+    allocate(character(len=0) :: ordr)
+    allocate(character(len=0) :: nlls)
     ! decide on value for optional DELIMITERS parameter
+    dlim = default_delimiters   ! use default delimiter when not specified
     if (present(delimiters)) then                                     ! optional delimiter list was present
         if(delimiters.ne.'')then                                       ! if DELIMITERS was specified and not null use it
             dlim=delimiters
-        else                                                           ! DELIMITERS was specified on call as empty string
-            dlim=' '//char(9)//char(10)//char(11)//char(12)//char(13)//char(0) ! use default delimiter when not specified
         endif
-    else                                                              ! no delimiter value was specified
-        dlim=' '//char(9)//char(10)//char(11)//char(12)//char(13)//char(0)    ! use default delimiter when not specified
     endif
-    idlim=len(dlim)                                                   ! dlim a lot of blanks on some machines if dlim is a big string
+    idlim = len(dlim)                                                   ! dlim a lot of blanks on some machines if dlim is a big string
 
     if(present(order))then; ordr=(adjustl(order)); else; ordr='sequential'; endif ! decide on value for optional ORDER parameter
     if(present(nulls))then; nlls=(adjustl(nulls)); else; nlls='ignore'    ; endif ! optional parameter
@@ -123,8 +130,9 @@ subroutine split(input_line,array,delimiters,order,nulls)
     case default
         ireturn=icount
     end select
-    allocate(character(len=imax) :: array(ireturn))                ! allocate the array to return
-    !allocate(array(ireturn))                                       ! allocate the array to turn
+    if (allocated(tokens)) deallocate(tokens)  ! deallocate tokens if already allocated
+    allocate(character(len=imax) :: tokens(ireturn))                ! allocate the tokens to return
+    !allocate(tokens(ireturn))                                       ! allocate the tokens to turn
 
     select case (trim(adjustl(ordr)))                              ! decide which order to store tokens
     case ('reverse','right') ; ii=ireturn ; iiii=-1                ! last to first
@@ -136,11 +144,11 @@ subroutine split(input_line,array,delimiters,order,nulls)
             select case (trim(adjustl(nlls)))
             case ('ignore','','ignoreend')
             case default
-            array(ii)=' '
+            tokens(ii)=' '
             ii=ii+iiii
             end select
         else
-            array(ii)=input_line(ibegin(i20):iterm(i20))
+            tokens(ii)=input_line(ibegin(i20):iterm(i20))
             ii=ii+iiii
         endif
     enddo
@@ -150,12 +158,10 @@ end subroutine split
 end module m_stringsplitter
 
 function contains_time_information(line)
-    use iso_fortran_env, only: Output_Unit
     use m_stringsplitter, only: split
     ! returns true if the line contains time information (eg parts of a date, elapsed time, etc.)
     character(len=*), intent(in) :: line
     logical :: contains_time_information
-
     character(len=:), allocatable :: tokens(:)
     integer :: token_index
     call split(line, tokens)
@@ -184,7 +190,7 @@ function contains_time_information(line)
 end function contains_time_information
 
 FUNCTION is_numeric(string)
-    USE ieee_arithmetic
+    ! USE ieee_arithmetic
     IMPLICIT NONE
     CHARACTER(len=*), INTENT(IN) :: string
     LOGICAL :: is_numeric
@@ -287,15 +293,17 @@ end
 module m_diff
     implicit none
     contains
-    function vectors_differ(va, vb, tolerance, min_significant_value)
-        use iso_fortran_env, only: Error_Unit, Output_Unit
+    function vectors_differ(va, vb, tolerance, min_significant_value, compare_absolute_values)
+        use iso_fortran_env, only: Error_Unit
         implicit none
         logical :: vectors_differ
         real(8), intent(in) :: va(:)
         real(8), intent(in) :: vb(:)
         real(8), intent(in) :: tolerance
         real(8), intent(in) :: min_significant_value
+        logical, intent(in) :: compare_absolute_values  ! if true, ignre the sign of the numbers
         integer :: number_index
+        real(8) :: xa, xb
 
         vectors_differ = .FALSE.
 
@@ -307,10 +315,16 @@ module m_diff
         else
             number_index = 1
             do while(number_index <= size(va))
-                if(abs(va(number_index)) > min_significant_value ) then
-                    if( abs(va(number_index) - vb(number_index))/max(abs(va(number_index)),1d-300) > tolerance ) then
+                xa = va(number_index)
+                xb = vb(number_index)
+                if (compare_absolute_values) then
+                    xa = abs(xa)
+                    xb = abs(xb)
+                end if
+                if(abs(xa) > min_significant_value ) then
+                    if( abs(xa - xb)/max(abs(xa),1d-300) > tolerance ) then
                         write(Error_Unit, "(a,i0,a,e12.5,a,e12.5,a,f3.1,a)") "at number_index ", number_index, ": ",&
-                        va(number_index), " and ", vb(number_index), " differ by more than ", tolerance*100.0d0,&
+                        xa, " and ", xb, " differ by more than ", tolerance*100.0d0,&
                         " percent"
                         vectors_differ = .TRUE.
                         !return
@@ -322,8 +336,9 @@ module m_diff
         return
         end function vectors_differ
 
-    function result_files_differ(results1_file_name, results2_file_name, num_header_lines, tolerance, min_significant_value)
+    function result_files_differ(results1_file_name, results2_file_name, num_header_lines, tolerance, min_significant_value, compare_absolute_values)
         use m_vector, only: t_vector
+        use iso_fortran_env, only: Output_Unit
         ! use m_diff, only: vectors_differ
         implicit none
         character(len=200), intent(in) :: results1_file_name
@@ -331,24 +346,29 @@ module m_diff
         integer, intent(in) :: num_header_lines(2)
         real(8), intent(in) :: tolerance
         real(8), intent(in) :: min_significant_value
+        logical, intent(in) :: compare_absolute_values  ! if true, ignre the sign of the numbers
         logical :: result_files_differ
-    
+        logical :: debug_mode
+
         type(t_vector) :: ref_numbers
         type(t_vector) :: test_numbers
-        ! integer :: number_index
-        ! real(8) :: number
+        integer :: number_index
+        real(8) :: number
     
+        debug_mode = .false.
         call get_file_numbers(results1_file_name, ref_numbers, num_header_lines(1))
-        ! number_index = 1
-        ! do while(number_index <= size(ref_numbers%array))
-        !     number = ref_numbers%array(number_index)
-        !     write(Output_Unit, *) "number(", number_index, ") = ", number
-        !     number_index = number_index + 1
-        ! enddo
-    
+        if (debug_mode) then        
+            number_index = 1
+            do while(number_index <= size(ref_numbers%array))
+                number = ref_numbers%array(number_index)
+                write(Output_Unit, *) "number(", number_index, ") = ", number
+                number_index = number_index + 1
+            enddo
+        end if
+
         call get_file_numbers(results2_file_name, test_numbers, num_header_lines(2))
     
-        result_files_differ = vectors_differ(ref_numbers%array, test_numbers%array, tolerance, min_significant_value)
+        result_files_differ = vectors_differ(ref_numbers%array, test_numbers%array, tolerance, min_significant_value, compare_absolute_values)
     
         end function result_files_differ
         
