@@ -103,9 +103,6 @@ function get_first_occ_of(pattern, file_path, pattern_is_found) result(iline)
     do
         read(1,'(a)', iostat=ierr) line ; if(ierr.ne.0) exit ! Try to read the current line. If it fails, exit the do loop.
         iline = iline+1 ! Increment the line number
-        if (iline == 49) then
-            write(Error_Unit, "(a)") "line=" // trim(line)
-        end if
         if (index(line, trim(pattern)).ne.0) then
             ! If the substring is found, close the file and return.
             close(1)
