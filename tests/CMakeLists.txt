@@ -1,27 +1,11 @@
 # Add the executable that will compare output files
 add_executable(check_outputs comp_mods.f90 comp_tests.f90)
-set_compile_options(check_outputs "OFF")
-# GNU (gfortran)
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
-    target_link_libraries(check_outputs
+    target_compile_options(check_outputs
       PUBLIC
-      $<$<CONFIG:DEBUG>:-fsanitize=address>         # Address sanitizer (beware: tests showed that with -fsanitize=address memory is not actually released when deallocate is called. Is this a true memory leak in address sanitizer?)
-      $<$<BOOL:${ENABLE_CODE_COVERAGE}>:--coverage> # Code coverage (same as -lgcov at link time)
-      $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
-      $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
-      $<$<AND:$<BOOL:${LINK_TIME_OPTIMIZATION}>,$<CONFIG:RELEASE>>:-flto>  # Activate link time optimizations so that gfortran can inline some function calls
-      #$<$<CONFIG:RELEASE>:-fopt-info>           # You can get some information from gfortran with the flag -fopt-info that will tell you about optimizations missed or performed by the compiler
-    )
-# Intel (ifort)
-elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
-    target_link_libraries(check_outputs
-      PUBLIC
-      $<$<BOOL:${ENABLE_PROFILING}>:-g>         # The profiler requires both the debug and profile directives (-g and -p)
-      $<$<BOOL:${ENABLE_PROFILING}>:-p>         # The profiler requires both the debug and profile directives (-g and -p)
-      $<$<AND:$<BOOL:${LINK_TIME_OPTIMIZATION}>,$<CONFIG:RELEASE>>:-ipo>  # activate interprocediral optimization (aka link time optimization)
+      -ffree-line-length-none                   # Allow arbitrary long lines.
     )
 endif()
-
 
 # Add all test subdirectories
 add_subdirectory(arch4)
