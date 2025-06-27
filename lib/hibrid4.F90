@@ -1281,7 +1281,6 @@ use mod_coiout, only: niout, indout
 use mod_coisc2, only: nlist => isc2 ! nlist(60)
 use mod_cosc6, only: sc => sc6 ! sc(60)
 use mod_cosc8, only: sc8
-use mod_cozmat, only: tcoord => zmat_as_vec ! tcoord(100)
 use mod_wave, only: wfu_file_type, iwavsk
 use mod_coqvec, only: nphoto
 use mod_selb, only: ibasty
@@ -1338,6 +1337,7 @@ real(8) :: scmat(nch*nch)
 real(8) :: scmat2(nch*nch)
 real(8) :: scmat3(nch*nch)
 real(8) :: psii(nch*nch)
+real(8) :: tcoord(nch)
 
   psii = zero
   ASSERT(allocated(wfu_file))
@@ -1724,7 +1724,6 @@ use mod_coisc2, only: nlist => isc2 ! nlist(6)
 use mod_cosc6, only: sc => sc6 ! sc(6)
 use mod_cosc7, only: sc1 => sc7 ! sc1(6)
 use mod_cow, only: sr => w_as_vec ! sr(100)
-use mod_cozmat, only: si => zmat_as_vec ! si(100)
 use mod_wave, only: wfu_file_type, iwavsk
 use mod_himatrix, only: mxma
 use mod_hiiolib1, only: openf
@@ -1738,6 +1737,7 @@ integer, intent(in) :: psifil_unit
 type(wfu_file_type), intent(inout) :: wfu_file
 integer :: i, kstep
 real(8) :: drnow, r
+real(8) :: si(nch)
   wfu_file%irec=npts+4
   do 180 kstep=1, npts
     wfu_file%irec=wfu_file%irec-1
@@ -1854,7 +1854,6 @@ subroutine transmt(npts,nch,rout,flx_file, wfu_file)
 !
 ! ------------------------------------------------------------------
 use mod_cow, only: sr => w_as_vec ! sr(100) (real part)
-use mod_cozmat, only: si => zmat_as_vec ! si(100) (imaginary part)
 use mod_wave, only: wfu_file_type, iwavsk
 use mod_hiblas, only: dcopy
 implicit none
@@ -1871,6 +1870,7 @@ integer :: i
 integer :: nchsq
 real(8) :: sc1(nch)
 integer, parameter :: NUM_CONSIDERED_CHANNELS = 64
+real(8) :: si(nch*nch)
 nchsq = nch * nch
 irec=npts+4
 delold=1.d+18
