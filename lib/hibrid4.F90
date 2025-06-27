@@ -11,7 +11,6 @@ contains
 !                                                                       *
 !   2. sprint         prints s-matrices on the screen                   *
 !   6. turn           function, determines classical turning point      *
-!   9. waverd         writes and reads header file for wavefunction     *
 !  10. psi            to determine wavefunction
 !  11. flux           to determine fluxes
 !  12. transmt        print out transformation matrix at rout
@@ -217,328 +216,8 @@ goto 30
 close(1)
 return
 end
-!
-!     ------------------------------------------------------------------
-function iwavsk(irecr)
-!     ------------------------------------------------------------------
-!     Function to return offset of wfu file for recrod #irec (stream IO)
-!
-!     Written by: Qianli Ma
-!     Latest revision: 20-apr-2012
-!
-!     This function needs nchwfu, ipos2 and ipos3 from the mod_wave
-!     module.  These variables are set by waverd.
-!
-!     The stream IO counterpart for `dbrr(,,,irec)` is `read
-!     (,pos=wavesk(irec))...
-!     ------------------------------------------------------------------
-use mod_wave, only: nchwfu, ipos2, ipos3, nrlogd, inflev, get_wfu_rec1_length, get_wfu_logd_rec_length, get_wfu_airy_rec_length
-implicit none
-integer, intent(in) :: irecr
-integer(8) :: iwavsk  ! 1-based offset in the wfu file, in bytes
+!!
 
-integer(8) :: lr1  ! length of record 1 in bytes
-integer(8) :: lrlogd  ! length of a logd record
-integer(8) :: lrairy  ! length of an airy record
-!
-if (irecr .le. 0) then
-   iwavsk = -1
-   goto 100
-end if
-if (irecr .eq. 1) then
-   iwavsk = 1
-   goto 100
-end if
-if (irecr .eq. 2) then
-   iwavsk = ipos2
-   goto 100
-end if
-if (irecr .eq. 3) then
-   iwavsk = ipos3
-   goto 100
-end if
-!     Length for record 1 (at the beginning of the file)
-lr1 = get_wfu_rec1_length(nchwfu)
-!     Length for each block written by the Airy and LOGDpropagator
-lrairy = get_wfu_airy_rec_length(nchwfu, inflev)
-lrlogd = get_wfu_logd_rec_length(nchwfu, inflev)
-!
-if ((irecr - 3) .le. nrlogd) then
-!     within the logd range of the file
-   iwavsk = lr1 + (irecr - 4) * lrlogd + 1
-   goto 100
-else
-!     airy range of the file
-   iwavsk = lr1 + nrlogd * lrlogd &
-        + (irecr - 4 - nrlogd) * lrairy + 1
-   goto 100
-end if
-!     should never reach here if function called properly
-write (0, *) '*** OOPS! ERROR SEEKING WFU FILE. ABORT.'
-call exit()
-100 continue
-ASSERT(iwavsk > 0)
-end
-!
-! -------------------------------------------------------------------------
-subroutine wavewr(jtot,jlpar,nu,nch,rstart,rendld, bqs)
-! -------------------------------------------------------
-!  subroutine to write initial header information on wavefunction file
-!  (file jobname.WFU, logical unit 22), unit is opened in subroutine openfi
-!     written by:  millard alexander
-!     latest revision:  11-dec-2011
-!     common blocks amat and bmat are used to store real and
-!     imaginary parts of asymptotic wavefunction (only used in
-!     read of wavefunction from saved file)
-!
-!     Major revision: 16-mar-2012 by Q. Ma
-!     Use stream I/O for smaller file size and better compatibility
-!
-!     current revision: 20-apr-2012 by q. ma
-!
-! -------------------------------------------------------
-#define AMAT_AS_VEC_METHOD_DISTINCT 1
-#define AMAT_AS_VEC_METHOD_POINTER 2
-#define AMAT_AS_VEC_METHOD_NOVEC 3
-#define AMAT_AS_VEC_METHOD AMAT_AS_VEC_METHOD_DISTINCT
-use mod_coeint, only: eint
-#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_POINTER)
-use, intrinsic :: ISO_C_BINDING
-use mod_coamat, only: amat ! amat(25)
-#endif
-#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_NOVEC)
-use mod_coamat, only: amat ! amat(25)
-#endif
-use mod_par, only: csflag, flaghf, wrsmat, photof
-use funit
-use mod_wave, only: irec, ifil, nchwfu, ipos2, ipos3, nrlogd, iendwv, get_wfu_rec1_length, wfu_format_version
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
-use mod_ered, only: ered, rmu
-use mod_hiutil, only: dater
-use mod_hitypes, only: bqs_type
-implicit none
-integer, intent(in) :: jtot
-integer, intent(in) :: jlpar
-integer, intent(in) :: nu
-integer, intent(in) :: nch
-real(8), intent(in) :: rstart
-real(8), intent(in) :: rendld
-type(bqs_type), intent(in) :: bqs
-
-character*20 :: cdate
-
-integer :: i
-integer(8) :: end_of_rec1_pos
-!
-#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_POINTER)
-real, pointer :: amat_as_vec(:)
-#endif
-ASSERT( bqs%length == nch )
-ifil = FUNIT_WFU
-
-nchwfu = nch
-ipos2 = -1
-ipos3 = -1
-nrlogd = 0
-!     Mark the position of the EOF of the WFU file in order to by pass
-!     (likely) a bug in the intel compiler that INQUIRE does not return
-!     the proper offset
-iendwv = 1
-!     Write magic number
-write (ifil, err=950) char(128), 'WFU'
-
-if (wrsmat) then
-   write (ifil, err=950) char(0), wfu_format_version, char(0), char(0)
-else
-   write (ifil, err=950) char(1), wfu_format_version, char(0), char(0)
-end if
-!
-write (ifil, err=950) ipos2, ipos3, nrlogd
-call dater(cdate)
-write (ifil, err=950) cdate, label, potnam
-!     Four zero-bytes for alignment / C struct compatibility
-write (ifil, err=950) char(0), char(0), char(0), char(0)
-!
-write (ifil, err=950) jtot, jlpar, nu, nch, csflag, flaghf, photof
-write (ifil, err=950) ered, rmu, rstart, rendld
-!
-write (ifil, err=950) (bqs%jq(i), i=1, nch), (bqs%lq(i), i=1, nch), &
-     (bqs%inq(i), i=1, nch)
-write (ifil, err=950) (eint(i), i=1, nch)
-!
-write (ifil, err=950) 'ENDWFUR', char(1)
-inquire(ifil, pos=end_of_rec1_pos)
-ASSERT(end_of_rec1_pos == (get_wfu_rec1_length(nchwfu) + 1))
-!
-iendwv = iendwv + get_wfu_rec1_length(nchwfu)
-irec=3  ! irec=2 and irec=3 are reserved and their position in the file are stored in ipos2 and ipos3
-return
-
-950 write (0, *) '*** ERROR WRITING WFU FILE. ABORT.'
-call exit
-return
-
-end subroutine wavewr
-!
-!     ------------------------------------------------------------------
-!     reads header file for wavefunction (wfu file)
-subroutine waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto,jflux, &
-     rstart,rendld,rinf, rbesself, bqs)
-use mod_wave, only: irec, ifil, nchwfu, ipos2, ipos3, nrlogd, inflev, get_wfu_rec1_length, wfu_format_version
-use mod_coeint, only: eint
-#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_DISTINCT)
-use mod_coamat, only: amat => psir ! amat(25) psir(nopen, nopen)
-#endif
-#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_POINTER)
-use, intrinsic :: ISO_C_BINDING
-use mod_coamat, only: amat ! amat(25)
-#endif
-#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_NOVEC)
-use mod_coamat, only: amat ! amat(25)
-#endif
-use mod_cobmat, only: bmat => psii ! bmat(25), here bmat is used as a vector 
-use mod_cotq1, only: dpsir ! dpsir(25)
-use mod_cotq2, only: dpsii ! dpsii(25)
-use mod_coisc1, only: isc1 ! isc1(25)
-use mod_cosc1, only: pk => sc1 ! sc1(10)  ! pk (asymptotic wavevectors)
-use mod_cow, only: w => w_as_vec ! w(25)
-use mod_cozmat, only: zmat => zmat_as_vec ! zmat(25)
-use mod_par, only: csflag, flaghf, photof
-use funit
-use mod_parpot, only: potnam=>pot_name, label=>pot_label
-use mod_ered, only: ered, rmu
-use mod_hivector, only: dset
-use mod_hitypes, only: rbesself_type, bqs_type
-use constants, only: zero
-implicit none
-integer, intent(out) :: jtot
-integer, intent(out) :: jlpar
-integer, intent(out) :: nu
-integer, intent(out) :: nch
-integer, intent(out) :: npts
-integer, intent(out) :: nopen
-integer, intent(out) :: nphoto
-integer, intent(in) :: jflux
-real(8), intent(out) :: rstart
-real(8), intent(out) :: rendld
-real(8), intent(out) :: rinf
-type(rbesself_type), intent(out) :: rbesself
-type(bqs_type), intent(out) :: bqs
-
-character*48 :: oldlab, oldpot
-character*20 :: olddat
-
-character :: csize8(8), csize4(4)
-integer :: i
-integer :: nopsq
-integer :: nrecs
-! integer, parameter :: izero=0
-
-!
-ifil = FUNIT_WFU ! the wfu file is expected to be open using this unit
-!     Read the magic number (from the start of the file)
-read (ifil, pos=1, end=900, err=950) csize8
-inflev = ichar(csize8(5))
-if (csize8(6) /= wfu_format_version) then
-  write (0,'(a,i3,a,i3,a)') '*** UNHANDLED VERSION OF WFU FORMAT : ', ichar(csize8(6)), ' (THIS VERSION OF HIBRIDON ONLY HANDLES WFU FORMAT VERSION ',  ichar(wfu_format_version),'). ABORT.'
-  call exit()
-end if
-!
-read (ifil, end=900, err=950) ipos2, ipos3, nrlogd
-!
-read (ifil, end=900, err=950) olddat, oldlab, oldpot
-label = oldlab
-potnam = oldpot
-!     Read four zero bytes
-read (ifil, end=900, err=950) csize4
-!
-read (ifil, end=900, err=950) jtot, jlpar, nu, nch, csflag, &
-     flaghf, photof
-!     nchwfu is used in locating the position for records
-nchwfu = nch
-read (ifil, end=900, err=950) ered, rmu, rstart, rendld
-write (6, 245) olddat
-if (jflux .ne. 0) write (FUNIT_FLX, 245) olddat
-if (jflux .eq. 0) write (2, 245) olddat
-245 format('    FROM CALCULATION ON: ',(a))
-if (jflux .ne. 0) write (FUNIT_FLX, 250) oldlab
-if (jflux .eq. 0) write (2, 250) oldlab
-write (6, 250) oldlab
-250 format('    INITIAL JOB LABEL: ', (a))
-if (jflux .ne. 0) write (FUNIT_FLX, 251) oldpot
-if (jflux .eq. 0) write (2, 251) oldpot
-write (6, 251) oldpot
-251 format('    INITIAL POT NAME: ', (a))
-!
-!     Read in channel labels
-call bqs%init(nch)
-read (ifil, end=900, err=950) (bqs%jq(i), i=1, nch), &
-     (bqs%lq(i), i=1, nch), (bqs%inq(i), i=1, nch), &
-     (eint(i), i=1, nch)
-bqs%length = nch
-!
-! start reading in information from record 2 here
-read (ifil, end=900, err=950, pos=iwavsk(2)) nrecs, nopen, &
-     nphoto, rinf
-npts = nrecs - 3
-! read in wavevectors, bessel functions j, j', n, n'
-! first initialize to zero for all channels
-call rbesself%init(nch)
-call dset(nch,zero,pk,1)  ! pk (asymptotic wavevectors)
-call dset(nch,zero,rbesself%fj,1)  ! fj
-call dset(nch,zero,rbesself%fpj,1)  ! fpj
-call dset(nch,zero,rbesself%fn,1)  ! fn
-call dset(nch,zero,rbesself%fpn,1)  ! fpn
-read (ifil, end=900, err=950) (pk(i), i=1, nopen), &
-     (rbesself%fj(i), i=1, nopen), (rbesself%fpj(i), i=1, nopen), &
-     (rbesself%fn(i), i=1, nopen), (rbesself%fpn(i), i=1, nopen)
-rbesself%length = nopen
-nopsq = nopen ** 2
-! read in sreal and simag, store in w and zmat
-read (ifil, end=900, err=950) (w(i), i=1, nopsq), &
-     (zmat(i), i=1, nopsq)
-if (photof) then
-! read in number of initial photodissociation states
-!        call dbri(mphoto,1,ifil,REC_LAST_USED)
-!        nphoto=mphoto
-! read in real part of photodissociation amplitude
-! overlay sreal which is not needed for photodissociation problem
-   read (ifil, end=900, err=950) (w(i), i=1, nphoto * nopen)
-! read in imaginary part of photodissociation amplitude
-! overlay simag which is not needed for photodissociation problem
-   read (ifil, end=900, err=950) (zmat(i), i=1, nphoto * nopen)
-endif
-! read in channel packing list and real and imaginary parts
-! of scattering wavefunction and derivative
-#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_DISTINCT)
-read (ifil, end=900, err=950, pos=iwavsk(3)) &
-     (isc1(i), i=1, nopen), (amat(i), i=1, nopsq), &
-     (bmat(i), i=1, nopsq), (dpsir(i), i=1, nopsq), &
-     (dpsii(i), i=1, nopsq)
-#endif
-#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_POINTER)
-! amat_as_vec is a view of the matrix amat(nopen, nopen) as a vector(nopen*nopen)
-call C_F_POINTER (C_LOC(amat), amat_as_vec, [nopsq])
-read (ifil, end=900, err=950, pos=iwavsk(3)) &
-     (isc1(i), i=1, nopen), (amat_as_vec(i), i=1, nopsq), &
-     (bmat(i), i=1, nopsq), (dpsir(i), i=1, nopsq), &
-     (dpsii(i), i=1, nopsq)
-#endif
-#if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_NOVEC)
-read (ifil, end=900, err=950, pos=iwavsk(3)) &
-     (isc1(i), i=1, nopen), amat, &
-     (bmat(i), i=1, nopsq), (dpsir(i), i=1, nopsq), &
-     (dpsii(i), i=1, nopsq)
-#endif
-irec = 3
-return
-!
-900 continue
-950 write (0, *) '*** ERROR READING WFU FILE. ABORT.'
-call exit
-return
-!
-end
 ! ------------------------------------------------------------------
 subroutine psi(filnam,a)
 !
@@ -657,7 +336,6 @@ use mod_cotq1, only: dpsir ! dpsir(100)
 use mod_cotq2, only: dpsii ! dpsii(100)
 use mod_coisc1, only: ipack => isc1 ! ipack(10)
 use mod_coisc2, only: nlist => isc2 ! nlist(50)
-use mod_coisc3, only: nalist => isc3 ! nalist(60)
 use mod_coisc5, only: nblist  => isc5   ! nblist(60)
 use mod_cosc6, only: sc  => sc6   ! sc(100)
 use mod_cosc7, only: sc1  => sc7   ! sc1(100)
@@ -669,7 +347,7 @@ use mod_version, only : version
 use mod_hibrid3, only: expand
 use mod_hiba07_13p, only: tcasea
 use mod_par, only: batch, csflag, photof
-use mod_wave, only: irec, inflev
+use mod_wave, only: wfu_file_type, waverd
 use mod_selb, only: ibasty
 use mod_ered, only: ered, rmu
 use mod_hiutil, only: gennam, mtime, gettim, dater
@@ -701,6 +379,7 @@ character*20  cdate
 character*10  elaps, cpu
 character*5   s13p(12)
 logical exstfl, kill, propf
+type(wfu_file_type), allocatable :: wfu_file
                 
 ! common for y1, y2, y4
 data s13p /'3SG0f','3SG1f','3PI0f','3PI1f','3PI2f','1PI1f', &
@@ -711,6 +390,8 @@ integer, pointer :: ipol
 type(rbesself_type) :: rbesself
 
 type(bqs_type) :: bqs
+integer, allocatable :: nalist(:)
+
 
 ipol=>ispar(3)
 
@@ -796,8 +477,8 @@ endif
 ! derivative
 call bqs%init(nmax)
 call waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto, &
-            jflux,rstart,rendld,rinf,rbesself, bqs)
-if (inflev .ne. 0) then
+            jflux,rstart,rendld,rinf,rbesself, bqs, wfu_file)
+if (wfu_file%inflev .ne. 0) then
    write (6, *) '** CALCULATION WITH WRSMAT=.T. REQUIRED.'
    goto 700
 end if
@@ -955,6 +636,7 @@ if (.not. photof) then
     return
   endif
 endif
+allocate(nalist(nch))
 do 45 i = 1, nch
 45   nalist(i)=i
 ! reorder channels in increasing energy since this is eispack ordering
@@ -1222,14 +904,14 @@ if (jflux .eq. 0) then
     write(FUNIT_PSI, 150)
 150     format(/' R (BOHR) AND REAL PART OF WAVEFUNCTION', &
           ' (R < 0 INDICATES AIRY PROPAGATION)',/)
-    call psicalc(npts, nch, nchsq, nj, FUNIT_PSI)
+    call psicalc(npts, nch, nchsq, nj, FUNIT_PSI, wfu_file)
 ! copy imaginary part of asymptotic wavefunction into first column of psir
 ! so we can use same loop as above
     call dcopy(nch,psir(nch+1),1,psir,1)
     write(FUNIT_PSI, 185)
 185     format(/' R (BOHR) AND IMAGINARY PART OF WAVEFUNCTION', &
           '(R < 0 INDICATES AIRY PROPAGATION)',/)
-    call psicalc(npts,nch,nchsq,nj, FUNIT_PSI)
+    call psicalc(npts,nch,nchsq,nj, FUNIT_PSI, wfu_file)
   else
 ! here for photdissociation, in which case outgoing wavefunction is a
 ! given column of chi
@@ -1249,18 +931,19 @@ if (jflux .eq. 0) then
     call dcopy(nch,dpsir(npoint),1,psir(2*nch+1),1)
     call dcopy(nch,dpsii(npoint),1,psir(3*nch+1),1)
     ipoint=2*nch+1
-    irec=npts+4
+    wfu_file%irec=npts+4
     write(FUNIT_PSI, 200)
 200     format(/' R (BOHR) AND REAL PART OF CHI')
     iwf = 1
     propf=.true.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX,psir,nalist)
     write(FUNIT_PSI, 210)
 210     format(/' R (BOHR) AND IMAGINARY PART OF CHI')
 ! reread asymptotic information
+    if (allocated(wfu_file)) deallocate(wfu_file)
     call waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto, &
-            jflux,rstart,rendld,rinf,rbesself, bqs)
+            jflux,rstart,rendld,rinf,rbesself, bqs, wfu_file)
     if (nch .gt. nopen) then
       call expand(nopen,nopen,nch,nch,ipack, &
                   psir,psii,scmat)
@@ -1275,17 +958,17 @@ if (jflux .eq. 0) then
     call dcopy(nch,dpsir(npoint),1,psir(2*nch+1),1)
     call dcopy(nch,dpsii(npoint),1,psir(3*nch+1),1)
     iwf = -1
-    irec=npts+4
+    wfu_file%irec=npts+4
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX,psir,nalist)
   endif
 else if (jflux .eq. 2) then
   write(FUNIT_FLX, 300)
 300   format(/' R (BOHR) AND ADIABATIC ENERGIES (CM-1)',/)
-  irec=npts+4
-  call eadiab(npts,nch,nj)
+  wfu_file%irec=npts+4
+  call eadiab(npts,nch,nj, wfu_file, nalist)
 else if (jflux .eq. 4) then
-  call transmt(npts,nch,rout,FUNIT_FLX)
+  call transmt(npts,nch,rout,FUNIT_FLX, wfu_file)
 else if (jflux .eq. 1) then
 ! here for flux calculation
 ! first for total flux (only for scattering)
@@ -1352,14 +1035,14 @@ else if (jflux .eq. 1) then
     endif
     write(FUNIT_FLX, 320) rinf, (sc(i), i=1,nout), scsum
     endif
-    irec=npts+4
+    wfu_file%irec=npts+4
     ipoint=2*nch+1
     iwf = 0
     propf=.true.
 ! plot out all fluxes for total flux which is numerically well behaved
     tthresh=-1.e9
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,.false., &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq,wfu_file,FUNIT_FLX,psir,nalist)
   endif
   if (.not. photof) then
 ! now for incoming flux (only for scattering)
@@ -1420,12 +1103,12 @@ else if (jflux .eq. 1) then
       endif
       write(FUNIT_FLX, 320) rinf, (sc(i), i=1,nout), scsum
     endif
-    irec=npts+4
+    wfu_file%irec=npts+4
     ipoint=2*nch+1
     iwf = 0
     propf=.false.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX,psir,nalist)
   endif
 ! now for outgoing flux
   if (.not.photof) then
@@ -1555,13 +1238,14 @@ else if (jflux .eq. 1) then
     write(FUNIT_FLX, 320) rinf, (sc(i), i=1,nout), scsum
   endif
   ipoint=2*nch+1
-  irec=npts+4
+  wfu_file%irec=npts+4
   iwf = 0
   if (photof) propf=.true.
   if (.not. photof) propf=.false.
   call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX,psir,nalist)
 endif
+deallocate(nalist)
 700 if (photof .or. jflux .eq. 0) close (FUNIT_PSI)
 if (jflux .ne. 0) close (FUNIT_FLX)
 close (FUNIT_WFU)
@@ -1582,7 +1266,7 @@ return
 end
 ! ------------------------------------------------------------------
 subroutine flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-                photof, propf, sumf,iwf,coordf,nny,ymin,dy,psifil_unit,inq)
+                photof, propf, sumf,iwf,coordf,nny,ymin,dy,psifil_unit,inq,wfu_file,flx_unit, psir, nalist)
 !
 ! subroutine to calculate fluxes
 !
@@ -1593,21 +1277,11 @@ subroutine flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
 !
 ! ------------------------------------------------------------------
 use mod_coiout, only: niout, indout
-use mod_cocent, only: sc2 => cent
-use mod_coamat, only: psir ! psir(100) (4,nch)
-use mod_cobmat, only: psii ! psii(100) Here psii is used as a vector
-use mod_cotq2, only: scmat2 => dpsii ! scmat2(100)
-use mod_cotq3, only: scmat3 => scmat ! scmat3(100)
-use mod_cosc1, only: pk => sc1 ! pk(6)
+
 use mod_coisc2, only: nlist => isc2 ! nlist(60)
-use mod_coisc3, only: nalist => isc3 ! nalist(60)
 use mod_cosc6, only: sc => sc6 ! sc(60)
-use mod_cosc7, only: sc1 => sc7 ! sc1(6)
 use mod_cosc8, only: sc8
-use mod_cosc9, only: sc9
-use mod_coz, only: scmat => z_as_vec ! scmat(100)
-use mod_cozmat, only: tcoord => zmat_as_vec ! tcoord(100)
-use mod_wave, only: irec, ifil
+use mod_wave, only: wfu_file_type, iwavsk
 use mod_coqvec, only: nphoto
 use mod_selb, only: ibasty
 use mod_ered, only: rmu
@@ -1617,249 +1291,291 @@ use mod_hivector, only: dset, vadd, vmul, dsum
 use mod_hiblas, only: dcopy, daxpy_wrapper, ddot, dscal
 use mod_hipot, only: wfintern
 ! steve, you may need more space, but i doubt it since tcoord is dimensioned n
-implicit double precision (a-h,o-z)
+implicit none
+integer, intent(in) :: npts
+integer, intent(in) :: nch
+integer, intent(in) :: nchsq
+integer, intent(in) :: ipoint
+integer, intent(in) :: nj
+logical, intent(in) :: adiab
+real(8), intent(in) :: thresh  ! thresh is the threshold for killing closed channel components
+real(8), intent(in) :: factr
+logical, intent(in) :: kill
+logical, intent(in) :: photof
+logical, intent(in) :: propf
+logical, intent(in) :: sumf
+integer, intent(in) :: iwf
+logical, intent(in) :: coordf
+integer, intent(in) :: nny
+real(8), intent(in) :: ymin
+real(8), intent(in) :: dy
+integer, intent(in) :: psifil_unit
 integer, intent(in) :: inq(nch)
-logical adiab, kill, photof, propf, sumf, coordf
+type(wfu_file_type), allocatable, intent(inout) :: wfu_file
+integer, intent(in) :: flx_unit
+real(8), intent(inout) :: psir(nch*nch)  ! used as input and as work, but not as output
+integer, intent(in) :: nalist(nj)
 
-dimension scc(100)
-data zero, one, onemin /0.d0, 1.d0, -1.d0/
+real(8), parameter :: zero = 0.d0
+real(8), parameter :: one = 1.d0
+real(8), parameter :: onemin = -1.d0
 data ione, mone /1,-1/
-integer :: psifil_unit
-! if propf = true then true back-subsititution for flux
-! if propf = false then inward propagation
-! noffset is start of 5th column of psir
+real(8) :: drnow, fact
+integer :: i, ii, ind, ione, iy
+integer :: kstep
+integer :: mmi, mone
+integer :: ni, nni, noffset, nout, ny
+real(8) :: r
+real(8) :: scc(100)
+real(8) :: scc1, scc2, scc3, scc4, scsum
+real(8) :: y
+real(8) :: y1(nch)
+real(8) :: y2(nch)
+real(8) :: y4(nch)
+real(8) :: gam1(nch)
+real(8) :: scmat(nch*nch)
+real(8) :: scmat2(nch*nch)
+real(8) :: scmat3(nch*nch)
+real(8) :: psii(nch*nch)
+real(8) :: tcoord(nch)
+
+  psii = zero
+  ASSERT(allocated(wfu_file))
+  ! if propf = true then true back-subsititution for flux
+  ! if propf = false then inward propagation
+  ! noffset is start of 5th column of psir
   noffset=4*nch+1
-!        open (unit=23, file='propagators.txt',status='unknown')
-! determine coordinate matrix if coordf true
+  !        open (unit=23, file='propagators.txt',status='unknown')
+  ! determine coordinate matrix if coordf true
   if (coordf) then
     ind=1
     ny=iabs(nny)
-    do 50 i= 1, nch
+    do i= 1, nch
       sc(i)=zero
       if(nny .gt. 0 .and. inq(i).gt. 0) sc(i)=one
       if(nny .lt. 0 .and. inq(i).lt. 0) sc(i)=one
-50     continue
-! sc is now mask for those states for which index is desired
-    do 100 iy = 1, ny
+    end do
+    ! sc is now mask for those states for which index is desired
+    do iy = 1, ny
       y=ymin+(iy-1)*dy
       call wfintern(scmat, y, nch, nphoto, 1, .false.)
-! steve, you'll need to modify wfintern so that scmat returns both function an
-! scmat is a vector of length nch containing the nch internal states
-! evaluated at internal coordinate y
+      ! steve, you'll need to modify wfintern so that scmat returns both function an
+      ! scmat is a vector of length nch containing the nch internal states
+      ! evaluated at internal coordinate y
       call vmul(sc,1,scmat,1,tcoord(ind:),1,nch)
-! this masks the internal states depending on whether the index is
-! positive or negative
+      ! this masks the internal states depending on whether the index is
+      ! positive or negative
       ind=ind+nch
-100     continue
+    end do
   endif
-! tcoord now contains as rows internal states and as columns
-! values of internal coordinate
+  ! tcoord now contains as rows internal states and as columns
+  ! values of internal coordinate
 
-! here beings loop over sectors (R), starting from outermost sector
-  do 420 kstep=1, npts
-    irec=irec-1
-    read (ifil, end=900, err=950, pos=iwavsk(irec)) r
-! branch out if we've gone beyond airy propagation region
+  ! here beings loop over sectors (R), starting from outermost sector
+  do kstep=1, npts
+    wfu_file%irec=wfu_file%irec-1
+    read (wfu_file%ifil, end=900, err=950, pos=iwavsk(wfu_file, wfu_file%irec)) r
+    ! branch out if we've gone beyond airy propagation region
     if (r .gt. 0) goto 450
-    read (ifil, end=900, err=950) drnow
-! read in local wavevectors
-    read (ifil, end=900, err=950) (sc8(i), i=1, nch)
-! read in first G(n,n+1) matrix,  then Tn transformation
-! matrix into local interval
-    read (ifil, end=900, err=950) (scmat3(i), i=1, nchsq), &
+    read (wfu_file%ifil, end=900, err=950) drnow
+    ! read in local wavevectors
+    read (wfu_file%ifil, end=900, err=950) (sc8(i), i=1, nch)
+    ! read in first G(n,n+1) matrix,  then Tn transformation
+    ! matrix into local interval
+    read (wfu_file%ifil, end=900, err=950) (scmat3(i), i=1, nchsq), &
          (scmat(i), i=1, nchsq)
-! read in propagators (y1=pk, y2=sc1, y4=sc2, gam1=sc9,
-!     muab= 5th column of psi)
-    read (ifil, end=900, err=950) (pk(i), i=1, nch), &
-         (sc1(i), i=1, nch), (sc2(i), i=1, nch), &
-         (sc9(i), i=1, nch), (psir(noffset - 1 + i), i=1, nch)
-!          write (23, 299) -r, drnow, (scmat(ii), ii=1,4),
-!     :      (pk(ii),ii=1,2),(sc1(ii),ii=1,2),
-!     :      (sc2(ii),ii=1,2),(sc9(ii),ii=1,2),(psir(noffset+ii),ii=0,1)
+    ! read in propagators (y1, y2, y4, gam1,
+    !     muab= 5th column of psir)
+    read (wfu_file%ifil, end=900, err=950) (y1(i), i=1, nch), &
+         (y2(i), i=1, nch), (y4(i), i=1, nch), &
+         (gam1(i), i=1, nch), (psir(noffset - 1 + i), i=1, nch)
+    !          write (23, 299) -r, drnow, (scmat(ii), ii=1,4),
+    !     :      (y1(ii),ii=1,2),(y2(ii),ii=1,2),
+    !     :      (y4(ii),ii=1,2),(gam1(ii),ii=1,2),(psir(noffset+ii),ii=0,1)
 
-! 299     format (2f16.12,14(1pe22.12e3))
-! transform wave function into local basis
+    ! 299     format (2f16.12,14(1pe22.12e3))
+    ! transform wave function into local basis
     if (propf) then
-! scmat2(nch, 2) = scmat(nch, nch) * psir(nch, 2)
+      ! scmat2(nch, 2) = scmat(nch, nch) * psir(nch, 2)
       call mxma(scmat,1,nch,psir,1,nch,scmat2,1,nch,nch,nch,2)
       call dcopy(2*nch,scmat2,1,psii(ipoint),1)
-! here for back substitution for wavefunction
-! 3rd and 4th columns of psii contain real and imaginary parts of function
-! propagate functions
-! evaluate G-tilde* psi-tilde(b)
-       call mxma(scmat3,1,nch,psii(ipoint),1,nch,psii,1, &
+      ! here for back substitution for wavefunction
+      ! 3rd and 4th columns of psii contain real and imaginary parts of function
+      ! propagate functions
+      ! evaluate G-tilde* psi-tilde(b)
+      call mxma(scmat3,1,nch,psii(ipoint),1,nch,psii,1, &
                nch,nch,nch,2)
-! 1st two column of psii now contain G-tilde(A-B)*psi-tilde(b)
-! if photodissociation, subtract off mu-tilde(a,b) from real part
+      ! 1st two column of psii now contain G-tilde(A-B)*psi-tilde(b)
+      ! if photodissociation, subtract off mu-tilde(a,b) from real part
       if (photof) call vadd(mone,psii,1 &
-                          ,psir(noffset),1,nch)
-! at this point 1st two columns of psii contain real and imaginary
-!   psi-tilde(a)
-! 3rd and 4th columns still contain psi-tilde(b)
-! propagate derivatives
-      call vmul(pk,1,psii,1,scmat2,1,nch)
-      call vmul(pk,1,psii(1+nch:),1,scmat2(1+nch:),1,nch)
-! first and second columns of scmat2 now contain y1 Fa
-      call vmul(sc1,1,psii(ipoint:),1,scmat2(ipoint:),1,nch)
-      call vmul(sc1,1,psii(ipoint+nch:),1, &
+                          ,psir(noffset:),1,nch)
+      ! at this point 1st two columns of psii contain real and imaginary
+      !   psi-tilde(a)
+      ! 3rd and 4th columns still contain psi-tilde(b)
+      ! propagate derivatives
+      call vmul(y1,1,psii,1,scmat2,1,nch)
+      call vmul(y1,1,psii(1+nch:),1,scmat2(1+nch:),1,nch)
+      ! first and second columns of scmat2 now contain y1 Fa
+      call vmul(y2,1,psii(ipoint:),1,scmat2(ipoint:),1,nch)
+      call vmul(y2,1,psii(ipoint+nch:),1, &
                 scmat2(ipoint+nch:),1,nch)
-! 3rd and 4th columns of scmat2 now contain y2 Fb
+      ! 3rd and 4th columns of scmat2 now contain y2 Fb
       call daxpy_wrapper(2*nch,onemin,scmat2,1,scmat2(ipoint),1)
-! 3rd and 4th columns of scmat2 now contains (-y1 Fa + y2 Fb)
-! this is psip-tilde(a)  move to 2nd and 3rd columns of psir
+      ! 3rd and 4th columns of scmat2 now contains (-y1 Fa + y2 Fb)
+      ! this is psip-tilde(a)  move to 2nd and 3rd columns of psir
       call dcopy(2*nch,scmat2(ipoint),1,psir(ipoint),1)
-! if photodissociation subtract off gamma1 from real part of derivative
-      if (photof) call vadd(mone,psir(ipoint),1,sc9,1,nch)
-! for compatibility with previous version, copy derivative into 3rd and
-! 4th columns of psii
+      ! if photodissociation subtract off gamma1 from real part of derivative
+      if (photof) call vadd(mone,psir(ipoint:),1,gam1,1,nch)
+      ! for compatibility with previous version, copy derivative into 3rd and
+      ! 4th columns of psii
       call dcopy(2*nch,psir(ipoint),1,psii(ipoint),1)
     else
-      do 300 ii=1, nch
-        sc1(ii)=onemin/sc1(ii)
-300       continue
-! scmat2(nch, 4) = scmat(nch, nch) * psir(nch, 4)
+      do ii=1, nch
+        y2(ii)=onemin/y2(ii)
+      end do
+      ! scmat2(nch, 4) = scmat(nch, nch) * psir(nch, 4)
       call mxma(scmat,1,nch,psir,1,nch,scmat2,1,nch,nch,nch,4)
       call dcopy(2*nch,scmat2,1,psii(ipoint),1)
       call dcopy(2*nch,scmat2(ipoint),1,psii,1)
-! 1st two columns of psii now contain real and imaginary part of derivative
-! 3rd and 4th columns contain real and imaginary parts of function
-! propagate functions
-      call vmul(sc2,1,psii(ipoint:),1,scmat2,1,nch)
-      call vmul(sc2,1,psii(ipoint+nch:),1,scmat2(1+nch:),1,nch)
-! first and second columns of scmat2 now contain y4 Fb
+      ! 1st two columns of psii now contain real and imaginary part of derivative
+      ! 3rd and 4th columns contain real and imaginary parts of function
+      ! propagate functions
+      call vmul(y4,1,psii(ipoint:),1,scmat2,1,nch)
+      call vmul(y4,1,psii(ipoint+nch:),1,scmat2(1+nch:),1,nch)
+      ! first and second columns of scmat2 now contain y4 Fb
       call daxpy_wrapper(2*nch,onemin,scmat2,1,scmat2(ipoint),1)
-! 3rd and 4th columns of scmat2 now contains (Fb' - y4 Fb)
-! if photodissociation, subtract off gamma2 from real part
-      if (photof) call vadd(mone,scmat2(2*nch+1),1 &
-                          ,psir(noffset),1,nch)
-! if photodissociation, 3rd column of scmat2 now contains
-!     Re(Fb' - y4 Fb - gamma 2)
-! multiply by - y2^-1 to get Fa
-      call vmul(sc1,1,scmat2(ipoint:),1,psii,1,nch)
-      call vmul(sc1,1,scmat2(ipoint+nch:),1,psii(1+nch:),1,nch)
-! 1st and 2nd columns of psii now contain Fa
-      do 320 ii=1, nch
-        sc1(ii)=onemin/sc1(ii)
-320       continue
-      call vmul(sc1,1,psii(ipoint:),1,scmat2,1,nch)
-      call vmul(sc1,1,psii(ipoint+nch:),1,scmat2(1+nch:),1,nch)
-! 1st and 2nd columns of scmat2 now contain y2 Fb
-! if photodissociation subtract off gamma1 from real part
-      if (photof) call vadd(mone,scmat2,1,sc9,1,nch)
-      call dscal(nch,onemin,pk,1)
-      call vmul(pk,1,psii,1,psii(ipoint:),1,nch)
-      call vmul(pk,1,psii(1+nch:),1,psii(ipoint+nch:),1,nch)
-! 3rd and 4th columns of psii now contain -y1 Fa
-! add on y2 Fb and store in 3rd and 4th columns of psii
+      ! 3rd and 4th columns of scmat2 now contains (Fb' - y4 Fb)
+      ! if photodissociation, subtract off gamma2 from real part
+      if (photof) call vadd(mone,scmat2(2*nch+1:),1 &
+                          ,psir(noffset:),1,nch)
+      ! if photodissociation, 3rd column of scmat2 now contains
+      !     Re(Fb' - y4 Fb - gamma 2)
+      ! multiply by - y2^-1 to get Fa
+      call vmul(y2,1,scmat2(ipoint:),1,psii,1,nch)
+      call vmul(y2,1,scmat2(ipoint+nch:),1,psii(1+nch:),1,nch)
+      ! 1st and 2nd columns of psii now contain Fa
+      do ii=1, nch
+        y2(ii)=onemin/y2(ii)
+      end do
+      call vmul(y2,1,psii(ipoint:),1,scmat2,1,nch)
+      call vmul(y2,1,psii(ipoint+nch:),1,scmat2(1+nch:),1,nch)
+      ! 1st and 2nd columns of scmat2 now contain y2 Fb
+      ! if photodissociation subtract off gamma1 from real part
+      if (photof) call vadd(mone,scmat2,1,gam1,1,nch)
+      call dscal(nch,onemin,y1,1)
+      call vmul(y1,1,psii,1,psii(ipoint:),1,nch)
+      call vmul(y1,1,psii(1+nch:),1,psii(ipoint+nch:),1,nch)
+      ! 3rd and 4th columns of psii now contain -y1 Fa
+      ! add on y2 Fb and store in 3rd and 4th columns of psii
       call daxpy_wrapper(2*nch,one,scmat2,1,psii(ipoint),1)
-! if wavevector matrix positive (lambda negative) channel is closed
-! kill the corresponding components of psi and psi'
-! thresh is the threshold for killing closed channel components
-    do 330 ii=1, nch
-      if (sc8(ii) .lt. thresh) then
-        fact=exp(-sqrt(abs(sc8(ii)))*drnow*factr)
-        psii(ii)=fact*psii(ii)
-        psii(ii+nch)=fact*psii(ii+nch)
-        psii(ii+2*nch)=fact*psii(ii+2*nch)
-        psii(ii+3*nch)=fact*psii(ii+3*nch)
-      endif
-330     continue
-    endif
-! 1st two columns of psii now contain Fa
-! 3rd and 4th columns of psii now contain Fa'
+      ! if wavevector matrix positive (lambda negative) channel is closed
+      ! kill the corresponding components of psi and psi'
+      ! thresh is the threshold for killing closed channel components
+      do ii=1, nch
+        if (sc8(ii) .lt. thresh) then
+          fact=exp(-sqrt(abs(sc8(ii)))*drnow*factr)
+          psii(ii)=fact*psii(ii)
+          psii(ii+nch)=fact*psii(ii+nch)
+          psii(ii+2*nch)=fact*psii(ii+2*nch)
+          psii(ii+3*nch)=fact*psii(ii+3*nch)
+        end if
+      end do
+    end if
+    ! 1st two columns of psii now contain Fa
+    ! 3rd and 4th columns of psii now contain Fa'
     if (adiab) then
-! here for flux calculation in locally adiabatic basis
+      ! here for flux calculation in locally adiabatic basis
       scsum=0.d0
-      do 360 i=1, nj
+      do i=1, nj
         nni=nalist(i)
         sc(i)=psii(nni)*psii(3*nch+nni)- &
               psii(nch+nni)*psii(2*nch+nni)
-!  store real or imaginary parts of wf if desired
-        if (iwf .eq. 1) pk(i)=psii(nni)
-        if (iwf .eq. -1) pk(i)=psii(nch+nni)
-! if wavevector matrix positive (lambda negative) channel is closed
-! kill the corresponding components of psi and psi'
-!              if (sc8(nni) .lt. thresh.and.kill) then
+        !  store real or imaginary parts of wf if desired
+        if (iwf .eq. 1) y1(i)=psii(nni)
+        if (iwf .eq. -1) y1(i)=psii(nch+nni)
+        ! if wavevector matrix positive (lambda negative) channel is closed
+        ! kill the corresponding components of psi and psi'
+        !              if (sc8(nni) .lt. thresh.and.kill) then
         if (sc8(nni) .lt. 0.d0.and.kill) then
           sc(i)=zero
-          if (iwf .ne. 0) pk(i)=0.d0
+          if (iwf .ne. 0) y1(i)=0.d0
         endif
         scsum=scsum+sc(i)
-360       continue
+      end do
       nout=nj
     endif
-! transform wavefunction and derivative into asymptotic basis
+    ! transform wavefunction and derivative into asymptotic basis
     call mxma(scmat,nch,1,psii,1,nch,psir,1,nch,nch,nch,4)
-! psir now contains this information
-!          write (23, 299) -r, drnow, (psir(ii), ii=1,8)
+    ! psir now contains this information
+    !          write (23, 299) -r, drnow, (psir(ii), ii=1,8)
     if (.not.adiab) then
-! here for flux calculation in asymptotic basis
-! calculate flux
+      ! here for flux calculation in asymptotic basis
+      ! calculate flux
       if (coordf) then
-! here for coordinate space calculation of fluxes
+        ! here for coordinate space calculation of fluxes
         scsum=zero
-! fluxes will be stored in vector sc, initialize to zero
+        ! fluxes will be stored in vector sc, initialize to zero
         call dset(nch,zero,sc,1)
         do i=1,ny
           ind=(i-1)*nch+1
           scc1=ddot(nch,psir,1,tcoord(ind:),1)
-! scc1 contains sum(psi-real*phi_internal)
+          ! scc1 contains sum(psi-real*phi_internal)
           scc2=ddot(nch,psir(nch+1),1,tcoord(ind:),1)
-! scc2 contains sum(psi-imag*phi_internal)
+          ! scc2 contains sum(psi-imag*phi_internal)
           scc3=ddot(nch,psir(2*nch+1),1,tcoord(ind:),1)
-! scc3 contains sum(dpsi-real*phi_internal)
+          ! scc3 contains sum(dpsi-real*phi_internal)
           scc4=ddot(nch,psir(3*nch+1),1,tcoord(ind:),1)
-! scc4 contains sum(dpsi-imag*phi_internal)
+          ! scc4 contains sum(dpsi-imag*phi_internal)
           sc(i)=scc1*scc4-scc2*scc3
-!steve, you'll need to append to this to calculate r-component of current dens
-! try using sc9 as scratch storage for these
-        enddo
+          !steve, you'll need to append to this to calculate r-component of current dens
+          ! try using sc9 as scratch storage for these
+        end do
         call dscal(ny,dy,sc,1)
-! multiply by step width to recover J.R at ri times dri
+        ! multiply by step width to recover J.R at ri times dri
         do i=1, ny
           scsum=scsum+sc(i)
-        enddo
+        end do
         nout=ny
-      endif
+      end if
       if (.not. coordf) then
-! here for channel fluxes in diabatic basis
-! transform wavefunction and derivative into molecular basis (only for
-! 13p or 2s-2p
+        ! here for channel fluxes in diabatic basis
+        ! transform wavefunction and derivative into molecular basis (only for
+        ! 13p or 2s-2p
         if (sumf) call dset(niout,zero,scc,1)
         if (ibasty .eq. 7) then
-! psii(nch, 4) = ttrans(nch, nch) * psir(nch, 4)
+          ! psii(nch, 4) = ttrans(nch, nch) * psir(nch, 4)
           call mxma(ttrans,nch,1,psir,1,nch, &
                     psii,1,nch,nch,nch,4)
-! N. B.  as written, mxma multiplies psir by the transpose of ttrans
-! psii now contains this transformed wavefunction and derivative
-! copy these back to psir
+          ! N. B.  as written, mxma multiplies psir by the transpose of ttrans
+          ! psii now contains this transformed wavefunction and derivative
+          ! copy these back to psir
           call dcopy(4*nch,psii,1,psir,1)
         endif
-        do 370 i=1, nj
+        do i=1, nj
           mmi=nalist(i)
           nni=nlist(i)
           sc(i)=psir(nni)*psir(3*nch+nni)- &
             psir(nch+nni)*psir(2*nch+nni)
-!  store real or imaginary parts of wf if desired
-          if (iwf .eq. 1) pk(i)=psii(nni)
-          if (iwf .eq. -1) pk(i)=psii(nch+nni)
-! if wavevector matrix positive (lambda negative) channel is closed
-! kill the corresponding components of psi and psi'
+          !  store real or imaginary parts of wf if desired
+          if (iwf .eq. 1) y1(i)=psii(nni)
+          if (iwf .eq. -1) y1(i)=psii(nch+nni)
+          ! if wavevector matrix positive (lambda negative) channel is closed
+          ! kill the corresponding components of psi and psi'
           if (sc8(mmi) .lt. 0.d0.and.kill) then
-!              if (sc8(mmi) .lt. thresh.and.kill) then
+            ! if (sc8(mmi) .lt. thresh.and.kill) then
             sc(i)=zero
-            if (iwf .ne. 0) pk(i)=0.d0
+            if (iwf .ne. 0) y1(i)=0.d0
           endif
-370         continue
+        end do
         if (sumf) then
-          do 390 i=1, nj
+          do i=1, nj
             mmi=nalist(i)
-            do 375 ni=1, niout
+            do ni=1, niout
               if (inq(mmi) .eq. indout(ni)) then
                 scc(ni)=scc(ni)+sc(mmi)
               endif
-375             continue
-390           continue
+            end do
+          end do
         endif
         if (.not.sumf) then
           nout=nj
@@ -1868,38 +1584,40 @@ integer :: psifil_unit
           nout=niout
           scsum=dsum(niout,scc,1)
         endif
-! transform wavefunction and derivative back into asymptotic basis (only for
-! 13p or 2s-2p
+      ! transform wavefunction and derivative back into asymptotic basis (only for
+      ! 13p or 2s-2p
         if (ibasty .eq. 7) then
           call mxma(ttrans,1,nch,psir,1,nch, &
                     psii,1,nch,nch,nch,4)
-! psii now contains this transformed wavefunction and derivative
-! copy these back to psir
+          ! psii now contains this transformed wavefunction and derivative
+          ! copy these back to psir
           call dcopy(4*nch,psii,1,psir,1)
         endif
       endif
     endif
-    if (iwf .ne. 0) &
-      write(psifil_unit, 400) -r, (pk(i), i=1,nj)
+    if (iwf .ne. 0) then
+      write(psifil_unit, 400) -r, (y1(i), i=1,nj)
+    end if
     if (iwf .eq. 0) then
       if (photof) then
-! for photodissociation, so, steve, you'll need to scale sc9 also
+        ! for photodissociation, so, steve, you'll need to scale gam1 also
         call dscal(nout,1.d0/rmu,sc,1)
         scsum=scsum/rmu
         if (scsum .lt. 1.d-13) scsum=zero
       endif
       if (sumf) then
-        write (3, 400) -r, (scc(i), i=1,nout), scsum
+        write (flx_unit, 400) -r, (scc(i), i=1,nout), scsum
       else
-        write (3, 400) -r, (sc(i), i=1,nout), scsum
-! steve you'll also have to write out sc9
+        write (flx_unit, 400) -r, (sc(i), i=1,nout), scsum
+        ! steve you'll also have to write out gam1
       endif
-400       format(f10.4,30(1pe11.3))
+      400 format(f10.4,30(1pe11.3))
     endif
-420   continue
+  end do
 
 450   continue
 !        close (23)
+  psir = zero
   return
 !
 900   continue
@@ -1907,7 +1625,7 @@ integer :: psifil_unit
   call exit()
   end
 ! ------------------------------------------------------------------
-subroutine eadiab(npts,nch,nj)
+subroutine eadiab(npts,nch,nj,wfu_file,nalist)
 !
 ! subroutine to readin and print out adiabatic energies
 !
@@ -1916,15 +1634,15 @@ subroutine eadiab(npts,nch,nj)
 ! revised on 30-mar-2012 by q. ma for stream I/O of wfu files
 !
 ! ------------------------------------------------------------------
-use mod_coisc3, only: nalist => isc3 ! nalist(10)
 use mod_cosc6, only: sc => sc6 ! sc(6)
-use mod_cosc8, only: sc8
-use mod_wave, only: irec, ifil
+use mod_wave, only: wfu_file_type, iwavsk
 use mod_ered, only: ered, rmu
 implicit none
 integer, intent(in) :: npts
 integer, intent(in) :: nch
 integer, intent(in) :: nj
+type(wfu_file_type), intent(inout) :: wfu_file
+integer, intent(in) :: nalist(nj)
 integer :: i, nni
 integer :: kstep
 real(8) :: r
@@ -1932,17 +1650,18 @@ real(8) :: drnow
 ! common for y1, y2, y4
 real(8), parameter :: two = 2.d0
 real(8), parameter :: conv = 219474.6d0
+real(8) :: lwv(nch)  ! local wavevectors
   do 420 kstep=1, npts
-    irec=irec-1
-    read (ifil, end=900, err=950, pos=iwavsk(irec)) r
+    wfu_file%irec=wfu_file%irec-1
+    read (wfu_file%ifil, end=900, err=950, pos=iwavsk(wfu_file, wfu_file%irec)) r
 ! branch out if we've gone beyond airy propagation region
     if (r .gt. 0) return
-    read (ifil, end=900, err=950) drnow
+    read (wfu_file%ifil, end=900, err=950) drnow
 ! read in local wavevectors
-    read (ifil, end=900, err=950) (sc8(i), i=1, nch)
+    read (wfu_file%ifil, end=900, err=950) (lwv(i), i=1, nch)
     do 370 i=1, nj
       nni=nalist(i)
-      sc(i)=-conv*(sc8(nni)/(two*rmu)-ered)
+      sc(i)=-conv*(lwv(nni)/(two*rmu)-ered)
 370     continue
 !          write (3, 170) -r+0.5*drnow, (nalist(i), i=1,nj),
     write (3, 170) -r+0.5*drnow, &
@@ -1991,7 +1710,7 @@ call drot(nch,dpsii(jpoint),1,dpsii(jpoint+nch),1,cs,sn)
 return
 end
 ! ------------------------------------------------------------------
-subroutine psicalc(npts, nch, nchsq, nj, psifil_unit)
+subroutine psicalc(npts, nch, nchsq, nj, psifil_unit, wfu_file)
 !
 ! subroutine to propagate wavefunctions inward
 !
@@ -2005,8 +1724,7 @@ use mod_coisc2, only: nlist => isc2 ! nlist(6)
 use mod_cosc6, only: sc => sc6 ! sc(6)
 use mod_cosc7, only: sc1 => sc7 ! sc1(6)
 use mod_cow, only: sr => w_as_vec ! sr(100)
-use mod_cozmat, only: si => zmat_as_vec ! si(100)
-use mod_wave, only: irec, ifil
+use mod_wave, only: wfu_file_type, iwavsk
 use mod_himatrix, only: mxma
 use mod_hiiolib1, only: openf
 use mod_hiblas, only: dcopy
@@ -2016,16 +1734,18 @@ integer, intent(in) :: nch
 integer, intent(in) :: nchsq
 integer, intent(in) :: nj
 integer, intent(in) :: psifil_unit
+type(wfu_file_type), intent(inout) :: wfu_file
 integer :: i, kstep
 real(8) :: drnow, r
-  irec=npts+4
+real(8) :: si(nch)
+  wfu_file%irec=npts+4
   do 180 kstep=1, npts
-    irec=irec-1
-    read (ifil, end=900, err=950, pos=iwavsk(irec)) r, drnow
+    wfu_file%irec=wfu_file%irec-1
+    read (wfu_file%ifil, end=900, err=950, pos=iwavsk(wfu_file, wfu_file%irec)) r, drnow
 ! read in adiabtic energies (which we don't need)
-    read (ifil, end=900, err=950) (sc1(i), i=1, nch)
+    read (wfu_file%ifil, end=900, err=950) (sc1(i), i=1, nch)
 ! read in transformation matrices
-    read (ifil, end=900, err=950) (sr(i), i=1, nchsq)
+    read (wfu_file%ifil, end=900, err=950) (sr(i), i=1, nchsq)
 ! si(nch, 1) = sr(nch, nch) * psir(nch, 1)
     call mxma(sr,1,nch,psir,1,nch,si,1,nch,nch,nch,1)
     do 160 i=1, nj
@@ -2123,7 +1843,7 @@ end subroutine print_trans_mat
 
 
 ! ------------------------------------------------------------------
-subroutine transmt(npts,nch,rout,flx_file)
+subroutine transmt(npts,nch,rout,flx_file, wfu_file)
 !
 ! subroutine to print out transformation matrix at rout
 !
@@ -2134,14 +1854,14 @@ subroutine transmt(npts,nch,rout,flx_file)
 !
 ! ------------------------------------------------------------------
 use mod_cow, only: sr => w_as_vec ! sr(100) (real part)
-use mod_cozmat, only: si => zmat_as_vec ! si(100) (imaginary part)
-use mod_wave, only: wfu_file => ifil  ! FUNIT_WFU
+use mod_wave, only: wfu_file_type, iwavsk
 use mod_hiblas, only: dcopy
 implicit none
 integer, intent(in) :: npts
 integer, intent(in) :: nch
 real(8), intent(in) :: rout
 integer, intent(in) :: flx_file  ! file unit of <job>.flx file
+type(wfu_file_type), intent(in) :: wfu_file
 integer :: irec
 real(8) :: del, delold
 integer :: kstep
@@ -2150,18 +1870,19 @@ integer :: i
 integer :: nchsq
 real(8) :: sc1(nch)
 integer, parameter :: NUM_CONSIDERED_CHANNELS = 64
+real(8) :: si(nch*nch)
 nchsq = nch * nch
 irec=npts+4
 delold=1.d+18
 do kstep=1, npts
   irec=irec-1
-  read (wfu_file, end=900, err=950, pos=iwavsk(irec)) r, drnow  ! we assume that we are reading an airy record, in which case r < 0.0
+  read (wfu_file%ifil, end=900, err=950, pos=iwavsk(wfu_file, irec)) r, drnow  ! we assume that we are reading an airy record, in which case r < 0.0
   del=abs(abs(r)-rout)
   ! read in adiabatic energies (which we don't need)
-  read (wfu_file, end=900, err=950) (sc1(i), i=1, nch)
+  read (wfu_file%ifil, end=900, err=950) (sc1(i), i=1, nch)
   ! read in first G(n,n+1) matrix,  then Tn transformation
   ! matrix into local interval
-  read (wfu_file, end=900, err=950) (sr(i), i=1, nchsq), (si(i), i=1, nchsq)
+  read (wfu_file%ifil, end=900, err=950) (sr(i), i=1, nchsq), (si(i), i=1, nchsq)
   if (rout > 0.d0) then
     if (del > delold) then
       call print_trans_mat(r, drnow, si, nch, flx_file, NUM_CONSIDERED_CHANNELS, 12, .true.)
@@ -2202,7 +1923,7 @@ subroutine eadiab1(filnam, nchmin, nchmax)
 !     ------------------------------------------------------------------
 use constants
 use mod_cosc8, only: sc8
-use mod_wave, only: ifil, nrlogd
+use mod_wave, only: wfu_file_type, iwavsk, waverd
 use funit
 use mod_ered, only: ered, rmu
 use mod_hiutil, only: gennam
@@ -2213,6 +1934,7 @@ character*(*), intent(in) :: filnam
 integer, intent(in) :: nchmin
 integer, intent(inout) :: nchmax
 
+type(wfu_file_type), allocatable :: wfu_file
 integer :: i, j
 integer :: jtot, jlpar, nu, nch, npts, nopen, nphoto
 integer(8) :: noffst
@@ -2250,7 +1972,7 @@ write (6, 15) eadfil(1:lenft)
 15 format (' ** WRITING ADIABATIC ENERGIES TO ', (a))
 !
 call waverd(jtot, jlpar, nu, nch, npts, nopen, nphoto, &
-     jflux, rstart, rendld, rinf, rbesself, bqs)
+     jflux, rstart, rendld, rinf, rbesself, bqs, wfu_file)
 if (nchmin .gt. nch) goto 990
 if (nchmax .eq. 0 .or. nchmax .gt. nch) nchmax = nch
 nchpr = nchmax - nchmin + 1
@@ -2259,10 +1981,10 @@ noffst = (nch - nchmax + 2) * sizeof(dble_t)
 write(eadfil_unit, 17) nchmin, nchmax
 17 format (' ** ADIABATIC ENERGIES FROM NO.', i5, ' TO NO.', &
      i5, ' REQUESTED')
-do i = 4 + nrlogd, npts + 3
-   seek_pos = iwavsk(i)
-   read (ifil, end=900, err=950, pos=seek_pos) r, drnow
-   read (ifil, end=900, err=950, pos=seek_pos+noffst) &
+do i = 4 + wfu_file%nrlogd, npts + 3
+   seek_pos = iwavsk(wfu_file, i)
+   read (wfu_file%ifil, end=900, err=950, pos=seek_pos) r, drnow
+   read (wfu_file%ifil, end=900, err=950, pos=seek_pos+noffst) &
         (sc8(j), j=1, nchpr)
    write(eadfil_unit, 20) -r + 0.5 * drnow
 20    format (f10.5, 1x, $)
@@ -2277,7 +1999,7 @@ goto 990
 !
 900 continue
 950 write (0, *) '*** ERROR READING WFU FILE'
-990 close(ifil)
+990 close(wfu_file%ifil)
 close(eadfil_unit)
 return
 end

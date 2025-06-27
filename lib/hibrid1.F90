@@ -1285,7 +1285,7 @@ end
 
 subroutine airprp (z, &
    xf, rend, drnow, en, &
-   tolai, rincr, eshift, nch, nmax, itwo, iprint, twoen, noprin, v2)
+   tolai, rincr, eshift, nch, nmax, itwo, iprint, twoen, noprin, v2, wfu_file)
 !  airy zeroth-order propagator from r=xf to r=rend
 !  for reference see m. alexander, "hybrid quantum scattering algorithms ...",
 !                    j. chem. phys. 81, 4510 (1984)
@@ -1342,11 +1342,10 @@ subroutine airprp (z, &
 ! ----------------------------------------------------------------------------
 use mod_coqvec, only: nphoto, q
 use mod_coqvec2, only: q2
-use mod_cosc10, only: sc10
 use mod_ancou, only: ancou_type
 use mod_hiba10_22p, only: energ22
 use mod_par, only: par_iprint=>iprint
-use mod_wave, only: irec, ifil, nchwfu, iendwv, get_wfu_airy_rec_length
+use mod_wave, only: wfu_file_type, write_airy_record
 use mod_selb, only: ibasty
 use mod_phot, only: photof, wavefn, writs
 use mod_cotq1, only: tmat2 => dpsir
@@ -1378,6 +1377,7 @@ logical, intent(in) :: iprint
 logical, intent(in) :: twoen
 logical, intent(in) :: noprin
 type(ancou_type), intent(in) :: v2
+type(wfu_file_type), intent(inout), allocatable :: wfu_file
 logical :: airy_prop_completed
 integer i, icol, ierr, ipt, izero, kstep, maxstp, &
         ncol, npt, nskip
@@ -1406,7 +1406,8 @@ real(8), dimension(nch) :: cc
 real(8), dimension(nch) :: y4
 real(8), dimension(nch) :: gam1
 real(8), dimension(nch) :: gam2
-integer(8) :: lrairy ! length of an airy record in bytes
+real(8), dimension(nch) :: lmuab  ! local mu(a,b) propagator
+
 ! ----------------------------------------------------------------------------
 ! Save variables for subsequent energies
 save spcmn, spcmx, rmin, maxstp
@@ -1562,14 +1563,14 @@ do kstep = 1, maxstp
 #endif
     ! if wavefunction desired, temporarily save local mu(a,b) propagator
     ! this is now in the first column of tmat
-    if (wavefn) call dcopy(nch,tmat,1,sc10,1)
+    if (wavefn) call dcopy(nch,tmat,1,lmuab,1)
     !  premultiply by y3 and add to existing q
     !  cc is used as scratch array here
     ind=1
     jnd=1
     do i = 1, nphoto
       call vmul(y2,1,tmat(jnd:),1,cc,1,nch)
-      call vadd(1,gam2(ind),1,cc,1,nch)
+      call vadd(1,gam2(ind:),1,cc,1,nch)
       call dcopy(nch,gam2(ind),1,q(ind),1)
       ind=ind+nch
       jnd=jnd+nmax
@@ -1599,33 +1600,7 @@ do kstep = 1, maxstp
     ! save this matrix as well as transformation matrix
     ! into local interval and local propagators
     !
-    irec = irec + 1
-    write (ifil, err=950) -rlast, drnow
-    !     Adiabatic energies
-    write (ifil, err=950) (eigold(i), i=1, nch)
-    !     The following information will not be written if writs set to F
-    if (writs) then
-      icol = 1
-      do ich = 1, nch
-         write (ifil, err=950) (z(icol - 1 + i), i=1, nch)
-         icol = icol + nmax
-      end do
-      icol = 1
-      do ich = 1, nch
-         write (ifil, err=950) (vecnow(icol - 1 + i), i=1, nch)
-         icol = icol + nmax
-      end do
-      !
-      write (ifil, err=950) (y1(i), i=1, nch), (y2(i), i=1, nch), &
-           (y4(i), i=1, nch), (gam1(i), i=1, nch), &
-           (sc10(i), i=1, nch)
-      lrairy = get_wfu_airy_rec_length(nchwfu, 0)
-    else
-      lrairy = get_wfu_airy_rec_length(nchwfu, 1)
-    end if
-    !
-    write (ifil, err=950) 'ENDWFUR', char(mod(irec, 256))
-    iendwv = iendwv + lrairy
+    call write_airy_record(wfu_file, rlast, drnow, nch, eigold, writs, nmax, z, vecnow, y1, y2, y4, gam1, lmuab)
 
   end if
   !
@@ -1838,8 +1813,6 @@ deallocate(vecnew)
 
 return
 !
-950 write (0, *) ' *** ERROR WRITING WFU FILE (AIRY). ABORT.'
-call exit()
 end
 ! ----------------------------------------------------------------------
 subroutine gndloc (vecnow, rnow, drnow, nch, nmax, q)

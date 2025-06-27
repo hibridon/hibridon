@@ -490,22 +490,6 @@ module mod_cotq2
    end subroutine allocate_cotq2
 end module mod_cotq2
 
-module mod_cotq3
-   ! note: these members are not used at the same time
-   ! (they used to be a different view of the same area in memory
-   ! when this module was a common block)
-   ! stores t matrix
-   implicit none
-   real(8), dimension(:,:), allocatable :: tq3
-   real(8), dimension(:), allocatable :: scmat
-   contains
-   subroutine allocate_cotq3(n)
-      integer, intent(in) :: n
-      allocate(tq3(n,n))
-      allocate(scmat(n*n))  ! note : the size has been found by trial and error (with all tests passing)
-   end subroutine allocate_cotq3
-end module mod_cotq3
-
 module mod_cojhld
    implicit none
    integer, dimension(:), allocatable :: jhold
@@ -769,26 +753,6 @@ module mod_cosc8
       allocate(sc8(n))
    end subroutine allocate_cosc8
 end module mod_cosc8
-
-module mod_cosc9
-   implicit none
-   real(8), dimension(:), allocatable :: sc9
-   contains
-   subroutine allocate_cosc9(n)
-      integer, intent(in) :: n
-      allocate(sc9(n))
-   end subroutine allocate_cosc9
-end module mod_cosc9
-
-module mod_cosc10
-   implicit none
-   real(8), dimension(:), allocatable :: sc10
-   contains
-   subroutine allocate_cosc10(amax)
-      integer, intent(in) :: amax
-      allocate(sc10(amax))
-   end subroutine allocate_cosc10
-end module mod_cosc10
 
 module mod_cosc11
    implicit none
@@ -1648,7 +1612,6 @@ end module mod_cputim
     !!   common /cobmat/ bmat(kairy,kairy)
     !!   common /cotq1/ tq1(kmax,kmax)
     !!   common /cotq2/ tq2(kmax,kmax)
-    !!   common /cotq3/ tq3(kmax,kmax)
     !!   common /cojhld/ jhold(kmax)
     !!   common /coehld/ ehold(kmax)
     !!   common /coinhl/ inhold(kmax)
@@ -1673,7 +1636,6 @@ end module mod_cputim
     !!   common /cosc6/ sc6(kmax)
     !!   common /cosc7/ sc7(kmax)
     !!   common /cosc8/ sc8(kmax)
-    !!   common /cosc9/ sc9(kmax)
     !!   common /cosc10/ sc10(kmax)
     !!   common /coeig2/  t12(5,5), t32(3,3)
     !!   common /coeig/  c0(4,4), c1(3,3), c2(2,2)

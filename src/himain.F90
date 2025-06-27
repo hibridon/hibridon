@@ -31,7 +31,6 @@ use mod_coamat, only: allocate_coamat, amat
 use mod_cobmat, only: allocate_cobmat, bmat
 use mod_cotq1, only: allocate_cotq1, tq1
 use mod_cotq2, only: allocate_cotq2
-use mod_cotq3, only: allocate_cotq3
 use mod_cojhld, only: allocate_cojhld, jhold
 use mod_coehld, only: allocate_coehld, ehold
 use mod_coinhl, only: allocate_coinhl, inhold
@@ -56,8 +55,6 @@ use mod_cosc5, only: allocate_cosc5
 use mod_cosc6, only: allocate_cosc6
 use mod_cosc7, only: allocate_cosc7
 use mod_cosc8, only: allocate_cosc8
-use mod_cosc9, only: allocate_cosc9
-use mod_cosc10, only: allocate_cosc10
 use mod_cosc11, only: allocate_cosc11
 use mod_coeig, only: allocate_coeig
 use mod_coeig2, only: allocate_coeig2
@@ -240,7 +237,6 @@ call allocate_coamat(kmax)
 call allocate_cobmat(kairy)
 call allocate_cotq1(T_MATRIX_SIZE)
 call allocate_cotq2(T_MATRIX_SIZE)
-call allocate_cotq3(T_MATRIX_SIZE)
 call allocate_cojhld(kmax)
 call allocate_coehld(kmax)
 call allocate_coinhl(kmax)
@@ -265,8 +261,6 @@ call allocate_cosc5(kmax)
 call allocate_cosc6(kmax)
 call allocate_cosc7(kmax)
 call allocate_cosc8(kmax)
-call allocate_cosc9(kmax)
-call allocate_cosc10(kmax)
 #if defined(HIB_UNIX_DARWIN) || defined(HIB_UNIX_X86)
 call allocate_cosc11(kaux3)
 #endif

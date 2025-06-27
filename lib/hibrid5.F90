@@ -1808,7 +1808,6 @@ use mod_codim, only: mmax
 use mod_cosout
 use constants
 use mod_cotq1, only: sc1 => scmat ! sc1(1)
-use mod_cotq3, only: sc3 => scmat ! sc3(1)
 use mod_coamat, only: sc4 => toto ! sc4(1)
 use mod_coisc2, only: nj, jlist => isc2 ! nj,jlist(1)
 use mod_cosc1, only: elev => sc1 ! elev(1)
@@ -1932,7 +1931,7 @@ end if
 ! now compute cross sections
 call intcr(csflag,flaghf,twomol,flagsu,nucros, &
             numin,numax,nud,jfirst,jfinal,jtotd,maxjt, &
-            sigma,sreal,simag,sc1,sc3,sc4,nlevop,mmax,tmp_file)
+            sigma,sreal,simag,sc1,sc4,nlevop,mmax,tmp_file)
 string=' '
 if(nnout.lt.0) string='(COLUMNS)'
 write (ics_unit, 210) string
@@ -2013,7 +2012,7 @@ end
 ! ----------------------------------------------------------------------
 subroutine intcr(csflag,flaghf,twomol,flagsu,nucros, &
            numin,numax,nud,jfirst,jfinal,jtotd,maxjt, &
-           sigma,sreal,simag,sc1,scmat,tsq,nlevop,nmax,tmp_file)
+           sigma,sreal,simag,sc1,tsq,nlevop,nmax,tmp_file)
 !
 ! subroutine to calculate integral cross sections from s-matrix
 ! elements
@@ -2048,7 +2047,6 @@ real(8), intent(out) :: sigma(nmax, nlevop)
 real(8), intent(out) :: sreal(nmax, nlevop)
 real(8), intent(out) :: simag(nmax, nlevop)
 real(8), intent(out) :: sc1(nmax, nlevop)
-real(8), intent(out) :: scmat(nmax, nlevop)
 real(8), intent(out) :: tsq(nmax, nlevop)
 integer, intent(in) :: nlevop
 integer, intent(in) :: nmax
@@ -2056,6 +2054,7 @@ integer, intent(in) :: tmp_file
 
 type(bqs_type) :: row_bqs
 type(bqs_type) :: packed_bqs
+real(8) :: scmat(nmax, nlevop)
 
 ! clear sigma array
 one=1.0d0
