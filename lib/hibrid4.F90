@@ -336,7 +336,6 @@ use mod_cotq1, only: dpsir ! dpsir(100)
 use mod_cotq2, only: dpsii ! dpsii(100)
 use mod_coisc1, only: ipack => isc1 ! ipack(10)
 use mod_coisc2, only: nlist => isc2 ! nlist(50)
-use mod_coisc3, only: nalist => isc3 ! nalist(60)
 use mod_coisc5, only: nblist  => isc5   ! nblist(60)
 use mod_cosc6, only: sc  => sc6   ! sc(100)
 use mod_cosc7, only: sc1  => sc7   ! sc1(100)
@@ -391,6 +390,8 @@ integer, pointer :: ipol
 type(rbesself_type) :: rbesself
 
 type(bqs_type) :: bqs
+integer, allocatable :: nalist(:)
+
 
 ipol=>ispar(3)
 
@@ -635,6 +636,7 @@ if (.not. photof) then
     return
   endif
 endif
+allocate(nalist(nch))
 do 45 i = 1, nch
 45   nalist(i)=i
 ! reorder channels in increasing energy since this is eispack ordering
@@ -935,7 +937,7 @@ if (jflux .eq. 0) then
     iwf = 1
     propf=.true.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX,psir)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX,psir,nalist)
     write(FUNIT_PSI, 210)
 210     format(/' R (BOHR) AND IMAGINARY PART OF CHI')
 ! reread asymptotic information
@@ -958,13 +960,13 @@ if (jflux .eq. 0) then
     iwf = -1
     wfu_file%irec=npts+4
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX,psir)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX,psir,nalist)
   endif
 else if (jflux .eq. 2) then
   write(FUNIT_FLX, 300)
 300   format(/' R (BOHR) AND ADIABATIC ENERGIES (CM-1)',/)
   wfu_file%irec=npts+4
-  call eadiab(npts,nch,nj, wfu_file)
+  call eadiab(npts,nch,nj, wfu_file, nalist)
 else if (jflux .eq. 4) then
   call transmt(npts,nch,rout,FUNIT_FLX, wfu_file)
 else if (jflux .eq. 1) then
@@ -1040,7 +1042,7 @@ else if (jflux .eq. 1) then
 ! plot out all fluxes for total flux which is numerically well behaved
     tthresh=-1.e9
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,.false., &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq,wfu_file,FUNIT_FLX,psir)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq,wfu_file,FUNIT_FLX,psir,nalist)
   endif
   if (.not. photof) then
 ! now for incoming flux (only for scattering)
@@ -1106,7 +1108,7 @@ else if (jflux .eq. 1) then
     iwf = 0
     propf=.false.
     call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX,psir)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX,psir,nalist)
   endif
 ! now for outgoing flux
   if (.not.photof) then
@@ -1241,8 +1243,9 @@ else if (jflux .eq. 1) then
   if (photof) propf=.true.
   if (.not. photof) propf=.false.
   call flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX,psir)
+            photof,propf,sumf,iwf,coordf,ny,ymin,dy,FUNIT_PSI,bqs%inq, wfu_file,FUNIT_FLX,psir,nalist)
 endif
+deallocate(nalist)
 700 if (photof .or. jflux .eq. 0) close (FUNIT_PSI)
 if (jflux .ne. 0) close (FUNIT_FLX)
 close (FUNIT_WFU)
@@ -1263,7 +1266,7 @@ return
 end
 ! ------------------------------------------------------------------
 subroutine flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
-                photof, propf, sumf,iwf,coordf,nny,ymin,dy,psifil_unit,inq,wfu_file,flx_unit, psir)
+                photof, propf, sumf,iwf,coordf,nny,ymin,dy,psifil_unit,inq,wfu_file,flx_unit, psir, nalist)
 !
 ! subroutine to calculate fluxes
 !
@@ -1276,7 +1279,6 @@ subroutine flux(npts,nch,nchsq,ipoint,nj,adiab,thresh,factr,kill, &
 use mod_coiout, only: niout, indout
 
 use mod_coisc2, only: nlist => isc2 ! nlist(60)
-use mod_coisc3, only: nalist => isc3 ! nalist(60)
 use mod_cosc6, only: sc => sc6 ! sc(60)
 use mod_cosc8, only: sc8
 use mod_cozmat, only: tcoord => zmat_as_vec ! tcoord(100)
@@ -1313,6 +1315,7 @@ integer, intent(in) :: inq(nch)
 type(wfu_file_type), allocatable, intent(inout) :: wfu_file
 integer, intent(in) :: flx_unit
 real(8), intent(inout) :: psir(nch*nch)  ! used as input and as work, but not as output
+integer, intent(in) :: nalist(nj)
 
 real(8), parameter :: zero = 0.d0
 real(8), parameter :: one = 1.d0
@@ -1622,7 +1625,7 @@ real(8) :: psii(nch*nch)
   call exit()
   end
 ! ------------------------------------------------------------------
-subroutine eadiab(npts,nch,nj,wfu_file)
+subroutine eadiab(npts,nch,nj,wfu_file,nalist)
 !
 ! subroutine to readin and print out adiabatic energies
 !
@@ -1631,9 +1634,7 @@ subroutine eadiab(npts,nch,nj,wfu_file)
 ! revised on 30-mar-2012 by q. ma for stream I/O of wfu files
 !
 ! ------------------------------------------------------------------
-use mod_coisc3, only: nalist => isc3 ! nalist(10)
 use mod_cosc6, only: sc => sc6 ! sc(6)
-use mod_cosc8, only: sc8
 use mod_wave, only: wfu_file_type, iwavsk
 use mod_ered, only: ered, rmu
 implicit none
@@ -1641,6 +1642,7 @@ integer, intent(in) :: npts
 integer, intent(in) :: nch
 integer, intent(in) :: nj
 type(wfu_file_type), intent(inout) :: wfu_file
+integer, intent(in) :: nalist(nj)
 integer :: i, nni
 integer :: kstep
 real(8) :: r
@@ -1648,6 +1650,7 @@ real(8) :: drnow
 ! common for y1, y2, y4
 real(8), parameter :: two = 2.d0
 real(8), parameter :: conv = 219474.6d0
+real(8) :: lwv(nch)  ! local wavevectors
   do 420 kstep=1, npts
     wfu_file%irec=wfu_file%irec-1
     read (wfu_file%ifil, end=900, err=950, pos=iwavsk(wfu_file, wfu_file%irec)) r
@@ -1655,10 +1658,10 @@ real(8), parameter :: conv = 219474.6d0
     if (r .gt. 0) return
     read (wfu_file%ifil, end=900, err=950) drnow
 ! read in local wavevectors
-    read (wfu_file%ifil, end=900, err=950) (sc8(i), i=1, nch)
+    read (wfu_file%ifil, end=900, err=950) (lwv(i), i=1, nch)
     do 370 i=1, nj
       nni=nalist(i)
-      sc(i)=-conv*(sc8(nni)/(two*rmu)-ered)
+      sc(i)=-conv*(lwv(nni)/(two*rmu)-ered)
 370     continue
 !          write (3, 170) -r+0.5*drnow, (nalist(i), i=1,nj),
     write (3, 170) -r+0.5*drnow, &
