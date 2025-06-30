@@ -382,7 +382,7 @@ end subroutine wavewr
 !
 !     ------------------------------------------------------------------
 !     reads header file for wavefunction (wfu file)
-subroutine waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto,jflux, &
+subroutine waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto, &
      rstart,rendld,rinf, rbesself, bqs, log_unit)
 use mod_wave, only: irec, ifil, nchwfu, ipos2, ipos3, nrlogd, inflev, get_wfu_rec1_length, wfu_format_version
 use mod_coeint, only: eint
@@ -418,7 +418,6 @@ integer, intent(out) :: nch
 integer, intent(out) :: npts
 integer, intent(out) :: nopen
 integer, intent(out) :: nphoto
-integer, intent(in) :: jflux
 real(8), intent(out) :: rstart
 real(8), intent(out) :: rendld
 real(8), intent(out) :: rinf
@@ -799,7 +798,7 @@ endif
 ! derivative
 call bqs%init(nmax)
 call waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto, &
-            jflux,rstart,rendld,rinf,rbesself, bqs, output_file_unit)
+            rstart,rendld,rinf,rbesself, bqs, output_file_unit)
 if (inflev .ne. 0) then
    write (6, *) '** CALCULATION WITH WRSMAT=.T. REQUIRED.'
    goto 700
@@ -1263,7 +1262,7 @@ if (jflux .eq. 0) then
 210     format(/' R (BOHR) AND IMAGINARY PART OF CHI')
 ! reread asymptotic information
     call waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto, &
-            jflux,rstart,rendld,rinf,rbesself, bqs, log_unit=FUNIT_NONE)  ! use FUNIT_NONE to prevent log info to be rewritten in the middle of the psi file (it's aleady in the header); this causes unneeded difficulties when comparing results
+            rstart,rendld,rinf,rbesself, bqs, log_unit=FUNIT_NONE)  ! use FUNIT_NONE to prevent log info to be rewritten in the middle of the psi file (it's aleady in the header); this causes unneeded difficulties when comparing results
     if (nch .gt. nopen) then
       call expand(nopen,nopen,nch,nch,ipack, &
                   psir,psii,scmat)
@@ -2253,7 +2252,7 @@ write (6, 15) eadfil(1:lenft)
 15 format (' ** WRITING ADIABATIC ENERGIES TO ', (a))
 !
 call waverd(jtot, jlpar, nu, nch, npts, nopen, nphoto, &
-     jflux, rstart, rendld, rinf, rbesself, bqs, eadfil_unit)
+     rstart, rendld, rinf, rbesself, bqs, eadfil_unit)
 if (nchmin .gt. nch) goto 990
 if (nchmax .eq. 0 .or. nchmax .gt. nch) nchmax = nch
 nchpr = nchmax - nchmin + 1
