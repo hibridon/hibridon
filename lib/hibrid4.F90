@@ -2218,7 +2218,7 @@ integer, intent(inout) :: nchmax
 integer :: i, j
 integer :: jtot, jlpar, nu, nch, npts, nopen, nphoto
 integer(8) :: noffst
-integer :: lenfs, lenft, jflux
+integer :: lenfs, lenft
 integer :: nchpr
 real(8) :: drnow, rstart, rendld, rinf, r
 logical :: exstfl
