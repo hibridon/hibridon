@@ -42,6 +42,7 @@ implicit none
 
    enum, bind( C )
    enumerator ::  &
+      FUNIT_NONE           = -1, &   ! no file unit (ivalid file unit)
       FUNIT_CS             =  1, &   ! cross sections 
       FUNIT_ICS            =  1, &   ! <job-name>.ics
       FUNIT_EADIAB         =  2, &   ! <job-name>.eadiab
