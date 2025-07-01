@@ -7,7 +7,7 @@ set(TEST_POT_SRC_FILE "pot_ch3i.F90")
 set(TEST_POT_DATA_FILES "")
 set(TEST_COMMAND_FILE "ch3i_test.com")
 set(TEST_INPUT_FILES "Ch3i.inp")
-set(TEST_OUTPUT_FILES "Ch3itest.flx")  #  TODO: add Ch3itest.psi to the checked files
+set(TEST_OUTPUT_FILES "Ch3itest.flx Ch3itest.psi")
 set(TEST_KMAX 100)
 set(TEST_T_MATRIX_SIZE kmax)
 set(TEST_LABELS "coverage")
