@@ -4,6 +4,79 @@ module mod_himatrix
 !                     of n x n matrix a                                 *
 
 contains
+
+! -------------------
+! subroutine to display all or a part of the given matrix (stored in the form of a vector)
+! -------------------
+subroutine print_matrix(out_unit, a, num_rows, num_cols, lda, label, row_min, col_min, row_max, col_max, num_sig_digits)
+integer, intent(in) :: out_unit
+real(8), intent(in) :: a(num_cols*lda)  ! the matrix stored as a vector
+integer, intent(in) :: num_rows
+integer, intent(in) :: num_cols
+integer, intent(in) :: lda  ! the leading dimension of the array a (the number of elements to skip to get to the next column)
+character(len=*), intent(in) :: label
+integer, intent(in), optional :: row_min
+integer, intent(in), optional :: col_min
+integer, intent(in), optional :: row_max
+integer, intent(in), optional :: col_max
+integer, intent(in), optional :: num_sig_digits  ! number of significant digits when diplaying the numbers
+
+
+integer :: row, col
+integer :: rmin, rmax, cmin, cmax
+integer, parameter :: num_extra_chars = 6 ! number of characters needed to display a real number, in addition to the significant digits:
+  ! 1 character for the sign of the real
+  ! 1 character for the dot
+  ! 1 character for the 'E' exponent
+  ! 1 character for the sign of the exponent
+  ! 2 digits for the absolute value of the exponent
+integer :: number_width  ! number of characters used to represent a number
+integer, parameter :: integer_width = 3 ! number of characters used to represent an integer (eg row or column index)
+integer, parameter :: col_sep_width = 1 ! number of characters used to separate columns
+character(len=32) :: real_format  ! format for a real number element of the matrix, eg '(" ", es10.3)'
+integer :: col_width
+character(len=32) :: col_header_format  ! format for each column header eg '("   ", I3, "   ")'
+integer :: nfs  ! number of filling spaces
+integer :: nsd  ! number of significant digits when diplaying the numbers
+  nsd = 3
+  if (present(num_sig_digits)) nsd = num_sig_digits
+  number_width = nsd + num_extra_chars
+  col_width = number_width
+  nfs = col_width + col_sep_width - integer_width
+  ! f1: "("" "", es"
+  ! f2: I0
+  ! f3: "."
+  ! f4: I0
+  ! f5: ")"
+  write(real_format, '("("" "", es", I0, ".", I0, ")")') number_width, nsd-1 ! eg (" ", es10.3)
+  ! ['("', A, '", I', I0, ', "', A, '")']
+  write(col_header_format, '("(""", A, """, I", I0, ", """, A, """)")') repeat(' ', nfs / 2), integer_width, repeat(' ', nfs - nfs / 2)
+  rmin = 1
+  cmin = 1
+  rmax = num_rows
+  cmax = num_cols
+  if (present(row_min)) rmin = row_min
+  if (present(col_min)) cmin = col_min
+  if (present(row_max)) rmax = row_max
+  if (present(col_max)) cmax = col_max
+
+  write (out_unit, '("matrix ", A, "(",i3 ,", ", i3, "): ")') label, num_rows, num_cols
+  ! write head
+  write (out_unit, '("      ")', advance='no')
+  do col=cmin, cmax
+    write (out_unit, col_header_format, advance='no') col
+  end do
+  write (out_unit, *) char(13)
+  ! write elements
+  do row=rmin, rmax
+    write (out_unit, '(i3, " :")', advance='no') row
+    do col=cmin, cmax
+      write (out_unit, real_format, advance='no') a((col-1)*lda + row)
+    end do
+    write (out_unit, *) char(13)
+  end do
+end subroutine
+
 ! NB #if defined(HIB_UNIX_AIX) rather than unix-ibm for fortran not essl routines
 #if defined(HIB_UNIX_IBM)
 subroutine rs(nm,n,a,w,matz,z,fv1,fv2,ierr)
