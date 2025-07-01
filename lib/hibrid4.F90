@@ -937,8 +937,8 @@ if (.not. photof) then
 
 
 
- write(6,443) nn,j1,l1,il,inchj,inchl,inchi
-443  format(' ch#',i3,3i5,'  req:',3i5)
+ write(6,443) nn,j1,l1,i1,inchj,inchl,inchi
+443  format(' ch#',i3,3i15,'  req:',3i5)
 
 
 
