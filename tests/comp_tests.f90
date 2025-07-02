@@ -72,6 +72,11 @@ program comp_tests
         ! the values of the flx files can be highly sensitive to compilers (see doc/hib_html/tests.html and issue #37)
         ! so we ignore more values
         min_significant_value = 1e-10
+        
+    case("psi") ! Header ends at first occurence of "** EIGENVALUES"
+        pattern = "WF DEFINED FROM R = "
+        call get_header_lines_counts(ref, test, pattern, num_header_lines(1), num_header_lines(2), pattern_is_found)
+        compare_absolute_values = .true. ! For some reason, the sign of the values can vary. Is this normal ?
     case("evl") ! Header ends at first occurence of "** EIGENVALUES"
         pattern = "** EIGENVALUES"
         call get_header_lines_counts(ref, test, pattern, num_header_lines(1), num_header_lines(2), pattern_is_found)

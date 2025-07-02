@@ -382,8 +382,8 @@ end subroutine wavewr
 !
 !     ------------------------------------------------------------------
 !     reads header file for wavefunction (wfu file)
-subroutine waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto,jflux, &
-     rstart,rendld,rinf, rbesself, bqs)
+subroutine waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto, &
+     rstart,rendld,rinf, rbesself, bqs, log_unit)
 use mod_wave, only: irec, ifil, nchwfu, ipos2, ipos3, nrlogd, inflev, get_wfu_rec1_length, wfu_format_version
 use mod_coeint, only: eint
 #if (AMAT_AS_VEC_METHOD == AMAT_AS_VEC_METHOD_DISTINCT)
@@ -404,7 +404,7 @@ use mod_cosc1, only: pk => sc1 ! sc1(10)  ! pk (asymptotic wavevectors)
 use mod_cow, only: w => w_as_vec ! w(25)
 use mod_cozmat, only: zmat => zmat_as_vec ! zmat(25)
 use mod_par, only: csflag, flaghf, photof
-use funit
+use funit, only: FUNIT_WFU, FUNIT_NONE
 use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_ered, only: ered, rmu
 use mod_hivector, only: dset
@@ -418,12 +418,12 @@ integer, intent(out) :: nch
 integer, intent(out) :: npts
 integer, intent(out) :: nopen
 integer, intent(out) :: nphoto
-integer, intent(in) :: jflux
 real(8), intent(out) :: rstart
 real(8), intent(out) :: rendld
 real(8), intent(out) :: rinf
 type(rbesself_type), intent(out) :: rbesself
 type(bqs_type), intent(out) :: bqs
+integer, intent(in) :: log_unit  ! file where header information is logged on (FUNIT_NONE if not used))
 
 character*48 :: oldlab, oldpot
 character*20 :: olddat
@@ -457,16 +457,13 @@ read (ifil, end=900, err=950) jtot, jlpar, nu, nch, csflag, &
 !     nchwfu is used in locating the position for records
 nchwfu = nch
 read (ifil, end=900, err=950) ered, rmu, rstart, rendld
+if (log_unit /= FUNIT_NONE) write (log_unit, 245) olddat
 write (6, 245) olddat
-if (jflux .ne. 0) write (FUNIT_FLX, 245) olddat
-if (jflux .eq. 0) write (2, 245) olddat
 245 format('    FROM CALCULATION ON: ',(a))
-if (jflux .ne. 0) write (FUNIT_FLX, 250) oldlab
-if (jflux .eq. 0) write (2, 250) oldlab
+if (log_unit /= FUNIT_NONE) write (log_unit, 245) oldlab
 write (6, 250) oldlab
 250 format('    INITIAL JOB LABEL: ', (a))
-if (jflux .ne. 0) write (FUNIT_FLX, 251) oldpot
-if (jflux .eq. 0) write (2, 251) oldpot
+if (log_unit /= FUNIT_NONE) write (log_unit, 245) oldpot
 write (6, 251) oldpot
 251 format('    INITIAL POT NAME: ', (a))
 !
@@ -676,7 +673,7 @@ use mod_hiutil, only: gennam, mtime, gettim, dater
 use mod_hivector, only: dset, matcopy, dsum
 use mod_hitypes, only: rbesself_type, bqs_type
 use mod_hiiolib1, only: openf
-use funit, only: FUNIT_WFU, FUNIT_PSI, FUNIT_FLX
+use funit, only: FUNIT_WFU, FUNIT_PSI, FUNIT_FLX, FUNIT_NONE
 use mod_hiblas, only: dscal, dcopy, daxpy_wrapper
 implicit double precision (a-h,o-z)
 ! filnam, iflux, iprint, thresh, factr, inchj, inchl, inchi, coordf, sumf, adiab, jflux, ny, ymin, dy, rout
@@ -711,7 +708,7 @@ integer, pointer :: ipol
 type(rbesself_type) :: rbesself
 
 type(bqs_type) :: bqs
-
+integer :: output_file_unit
 ipol=>ispar(3)
 
 ASSERT( (jflux == 0) .or. (jflux == 1) .or. (jflux == 2) .or. (jflux == 4) )
@@ -747,6 +744,11 @@ end if
 call openf(FUNIT_WFU, wavfil, 'TU', 0)
 call dater(cdate)
 ! open file to save generated wavefunction
+if (jflux .eq. 0) then
+  output_file_unit = FUNIT_PSI
+else
+  output_file_unit = FUNIT_FLX
+end if
 if (jflux .eq. 0) then
   call gennam(psifil,filnam,ien,'psi',lenft)
   call openf(FUNIT_PSI, psifil,'sf',0)
@@ -796,7 +798,7 @@ endif
 ! derivative
 call bqs%init(nmax)
 call waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto, &
-            jflux,rstart,rendld,rinf,rbesself, bqs)
+            rstart,rendld,rinf,rbesself, bqs, output_file_unit)
 if (inflev .ne. 0) then
    write (6, *) '** CALCULATION WITH WRSMAT=.T. REQUIRED.'
    goto 700
@@ -935,8 +937,8 @@ if (.not. photof) then
 
 
 
- write(6,443) nn,j1,l1,il,inchj,inchl,inchi
-443  format(' ch#',i3,3i5,'  req:',3i5)
+ write(6,443) nn,j1,l1,i1,inchj,inchl,inchi
+443  format(' ch#',i3,3i15,'  req:',3i5)
 
 
 
@@ -1260,7 +1262,7 @@ if (jflux .eq. 0) then
 210     format(/' R (BOHR) AND IMAGINARY PART OF CHI')
 ! reread asymptotic information
     call waverd(jtot,jlpar,nu,nch,npts,nopen,nphoto, &
-            jflux,rstart,rendld,rinf,rbesself, bqs)
+            rstart,rendld,rinf,rbesself, bqs, log_unit=FUNIT_NONE)  ! use FUNIT_NONE to prevent log info to be rewritten in the middle of the psi file (it's aleady in the header); this causes unneeded difficulties when comparing results
     if (nch .gt. nopen) then
       call expand(nopen,nopen,nch,nch,ipack, &
                   psir,psii,scmat)
@@ -2216,7 +2218,7 @@ integer, intent(inout) :: nchmax
 integer :: i, j
 integer :: jtot, jlpar, nu, nch, npts, nopen, nphoto
 integer(8) :: noffst
-integer :: lenfs, lenft, jflux
+integer :: lenfs, lenft
 integer :: nchpr
 real(8) :: drnow, rstart, rendld, rinf, r
 logical :: exstfl
@@ -2250,7 +2252,7 @@ write (6, 15) eadfil(1:lenft)
 15 format (' ** WRITING ADIABATIC ENERGIES TO ', (a))
 !
 call waverd(jtot, jlpar, nu, nch, npts, nopen, nphoto, &
-     jflux, rstart, rendld, rinf, rbesself, bqs)
+     rstart, rendld, rinf, rbesself, bqs, eadfil_unit)
 if (nchmin .gt. nch) goto 990
 if (nchmax .eq. 0 .or. nchmax .gt. nch) nchmax = nch
 nchpr = nchmax - nchmin + 1

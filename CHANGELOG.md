@@ -10,7 +10,9 @@
 
 ### Fixed 
 
+- Fixed minor bug that caused the output of `flux` command to display an erroneus message when checking the presence of the initial channel (this message is only displayed for scattering collisions and for some bases)
 - Fixed minor bug in flux that caused the displayed value of `jtot` to be wrong in the error message `' *** JTOT = <jtot> .LT. 2 IN TCASEA; ABORT **'`
+- Fixed bug that caused the output `psi` files to unintentionally insert potentioal info at the beginning of the `R (BOHR) AND IMAGINARY PART OF CHI` section.
 
 ## [v5.2.0] - 2025-06-08
 

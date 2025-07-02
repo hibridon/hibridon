@@ -1,0 +1,9 @@
+inp=ch3iscat.inp
+rstart=3.5;spac=0.1
+wavefl=t
+vmax(1)=4;vmax(2)=4
+job=ch3iscat
+run
+flux,,1,,,,0,0,1
+psi,,,,,,0,0,1
+exit
