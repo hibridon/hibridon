@@ -43,7 +43,7 @@ subroutine get_command_stdout(command, stdout, default_stdout)
   character(*), parameter :: redirect_operator = ' > '
 
   call get_tmp_dir(tmp_dir)
-  tmp_file_path = trim(tmp_dir) // '/hw.info'
+  tmp_file_path = trim(tmp_dir) // '/command.stdout'
 
   allocate(character(len=len(command) + len(redirect_operator) + len(tmp_file_path)) :: redirected_command)
   redirected_command = trim(command) // redirect_operator // tmp_file_path
@@ -103,8 +103,8 @@ write (out_unit,30)
 30 format(11x,' CURRENT HARDWARE CONFIGURATION:')
   write(out_unit,*)
   if (_BUILD_SYS1_ == "Darwin") then
-      call execute_command_line('system_profiler SPHardwareDataType | grep -E "Model|Processor|Cores|Cache|Hyper|Memory" > ' // trim(tmp_dir) // '/hw.info')
-      open(unit=666, file=(trim(tmp_dir) // "/hw.info"), status="old")
+      call execute_command_line('system_profiler SPHardwareDataType | grep -E "Model|Processor|Cores|Cache|Hyper|Memory" > ' // trim(tmp_dir) // '/command.stdout')
+      open(unit=666, file=(trim(tmp_dir) // "/command.stdout"), status="old")
       do 
           read(666,'(a)', iostat=i) txt
           if(i.ne.0) exit
