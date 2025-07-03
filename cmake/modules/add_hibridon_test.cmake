@@ -48,13 +48,14 @@ function(add_hibridon_test TEST_ID TEST_POT_SRC_FILE TEST_POT_DATA_FILES TEST_CO
   set_property(TEST ${TEST_ID}_build PROPERTY LABELS ${TEST_ID} ${TEST_LABELS})
 
   # Create a test that runs the executable using the provided com files
-  add_test(NAME ${TEST_ID}_test_run COMMAND ${TEST_EXE} --kmax ${TEST_KMAX} --com ${TEST_COMMAND_FILE} )
+  # add_test(NAME ${TEST_ID}_test_run COMMAND ${TEST_EXE} --kmax ${TEST_KMAX} --com ${TEST_COMMAND_FILE} )
+  add_test(NAME ${TEST_ID}_test_run COMMAND sh -c "$<TARGET_FILE:${TEST_EXE}> --kmax ${TEST_KMAX} --com ${TEST_COMMAND_FILE} | tee ${TEST_ID}.stdout" )
   set_property(TEST ${TEST_ID}_test_run PROPERTY LABELS ${TEST_ID} ${TEST_LABELS})
   set_property(TEST ${TEST_ID}_test_run PROPERTY DEPENDS ${TEST_ID}_test_prolog)
 
   # Check the outputs of the test
   foreach(OUTPUT_FILE ${TEST_OUTPUT_FILES})
-    add_test(NAME ${TEST_ID}_test_check_${OUTPUT_FILE} COMMAND check_outputs ${TEST_SRC_DIR}/${OUTPUT_FILE} ${TEST_BUILD_DIR}/${OUTPUT_FILE})
+    add_test(NAME ${TEST_ID}_test_check_${OUTPUT_FILE} COMMAND ${PROJECT_SOURCE_DIR}/bin/chkoutf.py --backend-path=$<TARGET_FILE:check_outputs> --ref-path=${TEST_SRC_DIR}/${OUTPUT_FILE} --out-path=${TEST_BUILD_DIR}/${OUTPUT_FILE})
     set_property(TEST ${TEST_ID}_test_check_${OUTPUT_FILE} PROPERTY LABELS ${TEST_ID} ${TEST_LABELS})
   endforeach()
 

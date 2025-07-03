@@ -20,6 +20,8 @@ program comp_tests
     call get_command_argument(1,ref)
     call get_command_argument(2,test)
 
+    pattern_is_found = .true.
+
     ! Extract file extension in ext string variable
     ext = ref(scan(trim(ref),".", BACK= .true.)+1:len(ref))
 
@@ -83,13 +85,11 @@ program comp_tests
     case("xsc") ! Header ends at first occurence of "INTEGRAL CROSS SECTIONS"
         pattern = "INTEGRAL CROSS SECTIONS"
         call get_header_lines_counts(ref, test, pattern, num_header_lines(1), num_header_lines(2), pattern_is_found)
-    case("stdout") ! Header ends at first occurence of "Hibridon>"
-        pattern = "Hibridon>"
-        call get_header_lines_counts(ref, test, pattern, num_header_lines(1), num_header_lines(2), pattern_is_found)
     case("out")
         pattern = "** LABEL:"
         call get_header_lines_counts(ref, test, pattern, num_header_lines(1), num_header_lines(2), pattern_is_found)
     end select
+    if (.not. pattern_is_found) stop 2
 
     ! Compare numeric values between reference and test files
     if(result_files_differ(ref, test, num_header_lines, tolerance, min_significant_value, compare_absolute_values)) stop 1

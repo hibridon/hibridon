@@ -199,7 +199,7 @@ COMPILE OPTIONS:
 %      ETOT:         913.693 CM(-1)
 
 % NUCLEAR SPIN =  1.0
-
+HYPXSC | Molecule-Atom with 1 nuclear spin
  Computing partial wave J_tot =  0.0, jlpar=   1
  Computing partial wave J_tot =  0.0, jlpar=  -1
  Computing partial wave J_tot =  1.0, jlpar=   1
