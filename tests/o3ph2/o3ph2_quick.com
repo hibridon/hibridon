@@ -3,4 +3,5 @@ job=Jobq
 show
 run
 printc
+prints
 difcrs,,0,0,0,1,0,180,1,1,50
