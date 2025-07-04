@@ -202,6 +202,12 @@ FUNCTION is_numeric(string)
       x = 0
       READ(string,*,IOSTAT=e) x
       is_numeric = ((e == 0) .and. (.NOT. ISNAN(X)))
+      if (is_numeric) then
+        ! for some reason, '/usr/local/bin/gfortran number' is seen as the number 4.9406564584124654E-324
+        if (string(1:1) == '/') then
+             is_numeric = .false.
+        end if
+      end if
     end if
     END FUNCTION is_numeric
 
