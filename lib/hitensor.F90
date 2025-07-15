@@ -1320,8 +1320,6 @@ if(.not.batch) write(6,60) &
 ! write level list
 write(FUNIT_TENS_OUTPUT, 65)
 if(.not. batch) write(6,65)
-if (abs(iframe) .le. 1)  write(6,64)
-64 format(/,' COLUMNS ARE INITIAL STATES; ROWS ARE FINAL STATES')
 ! switch row and column headings to match integral cross section output
 ! CORRESPONDING CHANGE IN CREATING XS ARRAYS MADE ONLY IN sigk AND sigkkp SUBRS
 65 format (/,' LEVEL LIST FOR TENSOR OPACITIES (OPEN CHANNELS)', &
@@ -1342,7 +1340,11 @@ do 68 i = 1, nj
 
 68 continue
 
-if (abs(iframe) .le. 1) write(FUNIT_TENS_OUTPUT, 64)
+if (abs(iframe) .le. 1) then
+  write(FUNIT_TENS_OUTPUT, 69)
+  if (.not. batch) write(6,69)
+end if
+69 format(/,' COLUMNS ARE INITIAL STATES; ROWS ARE FINAL STATES')
 ! loop over n
 n = minn
 ! fast algorithm if n = 0

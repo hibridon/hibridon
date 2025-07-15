@@ -1,0 +1,109 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.20
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2025-07-15 at 08:57
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: a0580a50ac5f357ef282ebd0ae858f106bb0de34
+SYS: Linux 5.4.0-216-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                         Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                            3556.484
+Socket(s):                          1
+Core(s) per socket:                 4
+L2 cache:                           1 MiB
+L3 cache:                           6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16255508 kB
+ --------------------------------------------------------------------------
+
+ POTENTIAL LOADED FROM FILE FOLLMEG.BIN                                                 
+
+ LABEL:  mha's 16-apr-1997 fit to follmeg's points                              
+ Molecule is homonuclear                                                 
+ NUMBER OF TERMS (NTRM) READ IN:  1
+
+  NTRM    LMMIN    LMMAX    MLD    NVBLOCKS
+    1       2        4       0      1
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 15 15:01:51 2025
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 15 15:01:51 2025
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 15 15:01:51 2025
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 15 15:01:51 2025
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 15 15:01:51 2025
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 15 15:01:51 2025
+ ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 15 15:01:51 2025
+ ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Jul 15 15:01:51 2025
+ ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Jul 15 15:01:51 2025
+ ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:00:03   WALL: 00:00:00   DATE: Jul 15 15:01:51 2025
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:03   WALL: 00:00:00   DATE: Jul 15 15:01:51 2025
+ ** J =   11 JLPAR = 1 FINISHED;  CPU: 00:00:04   WALL: 00:00:00   DATE: Jul 15 15:01:51 2025
+ ** J =   12 JLPAR = 1 FINISHED;  CPU: 00:00:04   WALL: 00:00:00   DATE: Jul 15 15:01:51 2025
+ ** J =   13 JLPAR = 1 FINISHED;  CPU: 00:00:05   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =   14 JLPAR = 1 FINISHED;  CPU: 00:00:05   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:05   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =   16 JLPAR = 1 FINISHED;  CPU: 00:00:06   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =   17 JLPAR = 1 FINISHED;  CPU: 00:00:06   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =   18 JLPAR = 1 FINISHED;  CPU: 00:00:07   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =   19 JLPAR = 1 FINISHED;  CPU: 00:00:07   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:08   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+
+ ** NCH = 0, MOVE ON TO NEXT PARTIAL WAVE
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:08   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:00:08   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:00:08   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:00:09   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:00:09   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:00:09   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:00:10   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:00:10   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:00:10   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:00:11   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =   11 JLPAR =-1 FINISHED;  CPU: 00:00:11   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =   12 JLPAR =-1 FINISHED;  CPU: 00:00:11   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =   13 JLPAR =-1 FINISHED;  CPU: 00:00:12   WALL: 00:00:01   DATE: Jul 15 15:01:52 2025
+ ** J =   14 JLPAR =-1 FINISHED;  CPU: 00:00:12   WALL: 00:00:02   DATE: Jul 15 15:01:53 2025
+ ** J =   15 JLPAR =-1 FINISHED;  CPU: 00:00:13   WALL: 00:00:02   DATE: Jul 15 15:01:53 2025
+ ** J =   16 JLPAR =-1 FINISHED;  CPU: 00:00:13   WALL: 00:00:02   DATE: Jul 15 15:01:53 2025
+ ** J =   17 JLPAR =-1 FINISHED;  CPU: 00:00:13   WALL: 00:00:02   DATE: Jul 15 15:01:53 2025
+ ** J =   18 JLPAR =-1 FINISHED;  CPU: 00:00:14   WALL: 00:00:02   DATE: Jul 15 15:01:53 2025
+ ** J =   19 JLPAR =-1 FINISHED;  CPU: 00:00:14   WALL: 00:00:02   DATE: Jul 15 15:01:53 2025
+ ** J =   20 JLPAR =-1 FINISHED;  CPU: 00:00:14   WALL: 00:00:02   DATE: Jul 15 15:01:53 2025
+ ===============================================================================
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:    20
+      TIMING:  ELAPSED 00:00:02 / CPU 00:00:14 / MP RATIO  745.2 %
+      CURRENT DATE:  Jul 15 15:01:53 2025
+ ===============================================================================
+
+ INTEGRAL CROSS SECTIONS READ FROM FILE Vfit_test1.ics                          
+ WRITTEN:   Jul 15 15:01:53 2025
+ LABEL:     Test of N2+_He using Follmeg-Rosmus PES         
+ POT NAME:  WERNER-FOLLMEG VFIT                             
+
+ ** INTEGRAL CROSS SECTIONS; IEN= 1 **
+    RMU=   3.5022  E=   150.00  JLPAR=-1  JTOT-1=  1  JTOT-2=  20  JTOT-D=  1
+ ** CC CALCULATION, JLPAR=-1 **
+
+ ** COLUMN HEADINGS ARE INITIAL STATES, ROW HEADINGS ARE FINAL STATES **
+
+            J=    0         2         4         6         8
+   J    I | I=    0         0         0         0         0
+ 
+    0    0   5.758E+01  3.590E+00  5.042E-01  1.346E-01  9.394E-02
+    2    0   1.655E+01  6.070E+01  7.313E+00  1.594E+00  1.183E+00
+    4    0   3.363E+00  1.058E+01  6.302E+01  1.219E+01  9.676E+00
+    6    0   7.985E-01  2.051E+00  1.084E+01  1.845E+02  6.045E+01
+    8    0   1.090E-01  2.976E-01  1.682E+00  1.182E+01  9.139E+02
+ tcbfil:  Vfit_test1.tcb                          
+ mcsfil:  Vfit_test1.mcs                          
