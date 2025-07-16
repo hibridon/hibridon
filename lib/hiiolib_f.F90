@@ -585,28 +585,28 @@ rewind FUNIT_INP
 iline=1
 !  read in input data
 !  line 1
-read (8, 40, err=195) label
+read (FUNIT_INP, 40, err=195) label
 40 format(a40)
 iline = iline + 1
 !  line 1a
-read (8, *, err=195) ibasty
+read (FUNIT_INP, *, err=195) ibasty
 iline=iline+1
 !  line 2
-read (8, 50, err=195) logdfl, airyfl, readpt, bastst
+read (FUNIT_INP, 50, err=195) logdfl, airyfl, readpt, bastst
 50 format (8l3)
 iline = iline + 1
 !  line 3
-read (8, *, err=195) rstart, rendld, spac
+read (FUNIT_INP, *, err=195) rstart, rendld, spac
 iline = iline + 1
 !  set rendld = rstart if logdfl=.false.
 if (.not. logdfl) then
   rendld = rstart
 end if
 !  line 4
-  read (8, 50, err=195) prairy
+  read (FUNIT_INP, 50, err=195) prairy
 iline = iline + 1
 !  line 5
-  read (8, *, err=195) tolai, rincr, rendai, fstfac
+  read (FUNIT_INP, *, err=195) tolai, rincr, rendai, fstfac
 iline = iline + 1
 if (.not. airyfl) then
 !  give dummy values to airy parameters if airyfl = .false.
@@ -616,51 +616,51 @@ if (.not. airyfl) then
   rendai = rendld
 end if
 !  line 6
-read (8, *, err=195) nerg
+read (FUNIT_INP, *, err=195) nerg
 iline = iline + 1
 !  line 7
-read (8, *, err=195) (energ(i), i = 1, nerg)
+read (FUNIT_INP, *, err=195) (energ(i), i = 1, nerg)
 iline = iline + 1
 !  line 8
-read (8, *, err=195) xmu
+read (FUNIT_INP, *, err=195) xmu
 ! convert to atomic units of mass and store in mod_ered
 rmu=xmu/xmconv
 iline = iline + 1
 !  line 9
-read (8, *, err=195) rcut
+read (FUNIT_INP, *, err=195) rcut
 iline = iline + 1
 !  line 10
-read (8, *, err=195) jtot1,jtot2,jtotd,jlpar,numin,numax,nud
+read (FUNIT_INP, *, err=195) jtot1,jtot2,jtotd,jlpar,numin,numax,nud
 iline = iline + 1
-read (8, *, err=195) lscreen, iprint
+read (FUNIT_INP, *, err=195) lscreen, iprint
 iline = iline + 1
 !  line 11
-read (8, *, err=195) nnout,niout
+read (FUNIT_INP, *, err=195) nnout,niout
 iline = iline + 1
 !  line 12
-read (8, *, err=195) (jout(i), i=1, iabs(nnout))
+read (FUNIT_INP, *, err=195) (jout(i), i=1, iabs(nnout))
 iline = iline + 1
 if(niout.gt.0) then
 !  line 13
-  read (8, *, err=195) (indout(i), i=1, niout)
+  read (FUNIT_INP, *, err=195) (indout(i), i=1, niout)
   iline = iline + 1
 end if
 !  line 14
-read (8, 50, err=195) prlogd, prsmat, prt2, t2test, wrsmat
+read (FUNIT_INP, 50, err=195) prlogd, prsmat, prt2, t2test, wrsmat
 iline = iline + 1
 !  line 15
-read (8, 50, err=195) wrpart, prpart, prxsec, wrxsec, wavefl
+read (FUNIT_INP, 50, err=195) wrpart, prpart, prxsec, wrxsec, wavefl
 iline = iline + 1
 !  line 16
-read (8, 50 ,err=195) noprin, chlist, ipos, nucros, photof
+read (FUNIT_INP, 50 ,err=195) noprin, chlist, ipos, nucros, photof
 iline = iline + 1
 !  line 17
-read (8, 50, err=195) flaghf, csflag, flagsu, ihomo, twomol
+read (FUNIT_INP, 50, err=195) flaghf, csflag, flagsu, ihomo, twomol
 nskip=1
 if(ihomo) nskip=2
 iline = iline + 1
 !  line 18
-read (8, 50, err=195) rsflag, boundc
+read (FUNIT_INP, 50, err=195) rsflag, boundc
 !  open unit 9 for standard output under filename outpt
 call openf(9, output, 'sf', 0)
 ! ----------------------------------------------------------------
