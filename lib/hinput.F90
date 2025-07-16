@@ -1196,7 +1196,6 @@ goto 1  ! label:read_next_command
      call get_token(line,l,code,lc)
      call assignment_parse(code(1:lc),empty_var_list,j,a(i))
 2010   continue
-  write (6,*) 'hinput : lpar = ' 
   call difcrs(fnam1,a,lpar(LPAR_FLAGHF))
 else
   write (6, 2011)
