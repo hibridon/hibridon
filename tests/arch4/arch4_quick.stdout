@@ -1,0 +1,45 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.20
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2025-07-16 at 07:38
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: 508df64e7ee5f2351dd3f8a4a6b10a16f0ff30ab
+SYS: Linux 5.4.0-216-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                         Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                            3299.403
+Socket(s):                          1
+Core(s) per socket:                 4
+L2 cache:                           1 MiB
+L3 cache:                           6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16255508 kB
+ --------------------------------------------------------------------------
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 07:46:19 2025
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 16 07:46:19 2025
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:06   WALL: 00:00:01   DATE: Jul 16 07:46:20 2025
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:13   WALL: 00:00:02   DATE: Jul 16 07:46:21 2025
+ ** J =    0 JLPAR =-1 FINISHED;  CPU: 00:00:13   WALL: 00:00:02   DATE: Jul 16 07:46:21 2025
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:13   WALL: 00:00:02   DATE: Jul 16 07:46:21 2025
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:00:15   WALL: 00:00:02   DATE: Jul 16 07:46:21 2025
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:00:23   WALL: 00:00:03   DATE: Jul 16 07:46:22 2025
+ ===============================================================================
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:    33
+      TIMING:  ELAPSED 00:00:03 / CPU 00:00:23 / MP RATIO  772.1 %
+      CURRENT DATE:  Jul 16 07:46:22 2025
+ ===============================================================================
+  *** NEW INPUT FILE Saveq1.inp CREATED
+

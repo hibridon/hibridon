@@ -1,0 +1,89 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.20
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2025-07-16 at 08:37
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: aa24d737db7d81c9bc1fe25cf338a9c90b4491a2
+SYS: Linux 5.4.0-216-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                         Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                            3364.830
+Socket(s):                          1
+Core(s) per socket:                 4
+L2 cache:                           1 MiB
+L3 cache:                           6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16255508 kB
+ --------------------------------------------------------------------------
+     *** Parameters (scattering):
+ JTOT1  =   0        JTOT2  =   2        JTOTD  =   1        JLPAR  =   0
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  80        IPRINT =  -1
+ FSTFAC =  1.200     RINCR  =  1.000     RCUT   =  100.0     RENDAI =  100.0    
+ RENDLD =  8.000     RSTART =  4.000     SPAC   = 5.0000E-02 TOLAI  =  1.050    
+ XMU    =   3.16056
+ NOUT:  7; JOUT:  0   1   2   3   4   5   6
+ INDOUT:    0    3   -3    6   -6
+     *** SYM-TOP-N system parameters:
+ NTERM  =   4        NUMPOT =   0        IPOTSY =   3        IOP    =  -1
+ JMAX   =  25
+ BROT   =  9.578     CROT   =  4.742     EMAX   =  800.0    
+ LAMMIN:    2   3   6   9
+ LAMMAX:    8   9   8   9
+ MPROJ:     0   3   6   9
+     *** Flags:
+ AIRYFL= T    BASTST= F    BATCH = T    CHLIST= T    CSFLAG= F    FLAGHF= F
+ FLAGSU= F    IHOMO = T    IPOS  = F    LOGDFL= T    NOPRIN= T    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= F    WAVEFL= F
+ WRPART= F    WRSMAT= T    WRXSEC= T    BOUNDC= F
+ ** Maximum Channels:  151; Maximum Anisotropic Terms:    11
+ ** Energies:      150.000000
+ ** Label:      TEST INPUT FOR CH3-HE SCATTERING                
+ ** Pot name:      Dagdigian CH3-He PES                            
+ ** Input File:  Ch3he_testq.inp
+ ** Output file: Outpt
+ ** Jobname:     Ch3heq
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 08:40:57 2025
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Jul 16 08:40:57 2025
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:06   WALL: 00:00:01   DATE: Jul 16 08:40:58 2025
+ ** J =    0 JLPAR =-1 FINISHED;  CPU: 00:00:06   WALL: 00:00:01   DATE: Jul 16 08:40:58 2025
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:08   WALL: 00:00:01   DATE: Jul 16 08:40:58 2025
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:00:11   WALL: 00:00:01   DATE: Jul 16 08:40:58 2025
+ ===============================================================================
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:    40
+      TIMING:  ELAPSED 00:00:01 / CPU 00:00:11 / MP RATIO 1132.2 %
+      CURRENT DATE:  Jul 16 08:40:58 2025
+ ===============================================================================
+
+ INTEGRAL CROSS SECTIONS READ FROM FILE Ch3heq1.ics                             
+ WRITTEN:   Jul 16 08:40:58 2025
+ LABEL:     TEST INPUT FOR CH3-HE SCATTERING                
+ POT NAME:  Dagdigian CH3-He PES                            
+
+ ** INTEGRAL CROSS SECTIONS; IEN= 1 **
+    RMU=   3.1606  E=   150.00  JLPAR=-1  JTOT-1=  0  JTOT-2=   2  JTOT-D=  1
+ ** CC CALCULATION, JLPAR=-1 **
+
+ ** COLUMN HEADINGS ARE INITIAL STATES, ROW HEADINGS ARE FINAL STATES **
+
+            J=    0         2         4         3
+   J    I | I=    0         0         3        -3
+ 
+    0    0   1.352E+00  2.211E-02  3.637E-05  1.294E-01
+    2    0   6.820E-02  2.134E+00  1.175E+00  2.576E-01
+    3   -3   4.747E-01  3.063E-01  2.652E-01  1.787E+00
+    4    3   4.288E-06  4.492E-02  6.736E+00  8.526E-03

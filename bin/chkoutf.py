@@ -36,6 +36,7 @@ def remove_time_dependent_lines(input_path: Path, output_path: Path):
     ignored_patterns.append('WRITTEN')
 
     # other patterns
+    ignored_patterns.append('<thread>')  # <thread> is the tag used for messages from multithreaded sections (ignored at the moment, as the threads are not generaly executed in the same order)
     ignored_patterns.append('Maximum number of threads used by OpenMP: ')  # eg 'Maximum number of threads used by OpenMP: 8'
 
     subprocess.run(f'cat {input_path} | grep -E -v \'({"|".join(ignored_patterns)})\' > {output_path}', shell=True, check=True)
