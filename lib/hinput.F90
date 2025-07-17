@@ -118,7 +118,8 @@ use mod_version, only : version
 use mod_hibrid5, only : intcrs, readpc
 use mod_difcrs, only: difcrs
 use mod_hibasis, only: is_twomol
-use mod_hibrid2, only: enord, prsg
+use mod_hibrid2, only: enord
+use mod_hiprintixssg, only: prsg
 use mod_hibrid3, only: potmin
 use mod_hiutil, only: assignment_parse
 use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT, RPAR_COUNT
