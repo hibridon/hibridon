@@ -15,7 +15,6 @@ subroutine prsgpi (fname, a)
 !  subroutine to write out selected integral cross sections
 !  from file {fname1}.ics for sigma - pi transitions
 !  author:  millard alexander
-!  latest revision date:  5-apr-2004 by mha
 !  ------------------------------------------------------------------
 !  variables in call list:
 !    zmat:    on return:  contains the nlevop x nlevop matrix of integral
@@ -51,17 +50,14 @@ subroutine prsgpi (fname, a)
 !    xmu:       collision reduced mass in (c12) atomic mass units
 !    econv:     conversion factor from cm-1 to hartrees
 !  ------------------------------------------------------------------
-!      implicit none
 use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
 use constants
 use mod_coamat, only: zbuf ! zbuf(1)
-use mod_cojhld, only: jlev => jhold ! jlev(1)
-use mod_coisc1, only: inlev => isc1 ! inlev(1)
-!mha
+use mod_cojhld, only: jlev => jhold ! jlev(5)
+use mod_coisc1, only: inlev => isc1 ! inlev(5)
 use mod_coisc2, only: jpoint => isc2 ! jpoint(5)
-!mha
-use mod_cosc1, only: elev => sc1 ! elev(1)
+use mod_cosc1, only: elev => sc1 ! elev(5)
 use mod_coener, only: energ
 use mod_coz, only: zmat => z_as_vec ! zmat(1)
 use mod_cow, only: scmat => w_as_vec ! scmat(1)
@@ -73,30 +69,23 @@ use funit, only: FUNIT_ICS, FUNIT_XSC
 implicit double precision (a-h,o-z)
 character*(*) fname
 character*20 cdate
-character*40 xnam1, xnam2
 character*80 line
-!mha
 character*3 stat
 character*12 accs
-!mha
+character*40 xnam1, xnam2
 logical iprint, twomol, existf, &
         openfl, eprint
 dimension  a(4)
 integer, allocatable :: ipoint(:)
 !  input parameters
-!mha
 iprint=.true.
 eprint=.false.
 iaver = 0
-!mha
-!ABER
 if (a(1) .lt. 0.0d0) iprint = .false.
-!mha
 if (a(1) .gt. 0.d0) eprint = .true.
 if (a(2) .lt. 0.5) iaver = 0
 if (a(2).gt. 0.d0) iaver=1
 if (a(2) .gt. 1.5) iaver = 2
-!ABER
 ienerg = a(3) + 0.1
 xthresh=a(4)
 iener=energ(1)
@@ -114,7 +103,7 @@ open (FUNIT_ICS, file = xnam1,status = 'old')
 call gennam (xnam2, fname, ienerg, 'xsc', lenx)
 ! inquire file specifications
 inquire(file=xnam2, exist=existf, opened=openfl)
-!mha .xsc file is appended if it already exists
+!.xsc file is appended if it already exists
 if (.not. openfl) then
   accs='sequential'
   if (existf) then
@@ -126,19 +115,16 @@ if (.not. openfl) then
 #if defined(HIB_UNIX_HP) || defined(HIB_UNIX_DEC) || defined(HIB_UNIX_IRIS) || defined(HIB_UNIX_SUN)
     accs='append'
 #endif
-
   else
     stat='new'
   end if
-  open (FUNIT_XSC, file = xnam2, status = stat,access = accs)
+  open (FUNIT_XSC, file = xnam2, status = stat, access = accs)
 endif
-!mha
 !mha (print out message only if no other print out)
 if (.not.iprint) write(6,20) xnam2
 20 format( &
   ' PRINTING SELECTED SIGMA-PI CROSS SECTIONS; OUTPUT IN FILE ', &
         (a))
-!mha
 !      call version(3)
 read (FUNIT_ICS, 40) cdate
 40 format (1x, a)
@@ -147,21 +133,18 @@ read (FUNIT_ICS, 40) potnam
 !  print job information
 write (FUNIT_XSC, 50) xnam1, cdate, label, potnam
 if (iprint) write (6, 50) xnam1, cdate, label, potnam
-50 format( &
-!mha
-  /'% INTEGRAL SIGMA-PI CROSS SECTIONS READ FROM FILE ',(a)/ &
-!mha
-        '% WRITTEN:   ',(a)/ &
-        '% LABEL:     ',(a)/, &
-        '% POT NAME:  ',(a) )
+50 format(/' INTEGRAL SIGMA-PI CROSS SECTIONS READ FROM FILE ',(a)/ &
+        ' WRITTEN:   ',(a)/ &
+        ' LABEL:     ',(a)/, &
+        ' POT NAME:  ',(a) )
 read (FUNIT_ICS, 60) ener, xmu
 60 format (f10.3, f15.11)
 read (FUNIT_ICS, 70) csflag, flaghf, flagsu, twomol, ihomo
 70 format (5l3)
 read (FUNIT_ICS, 80) jfirst, jfinal, jtotd, numin, numax, &
              nud, jlpar, isa
-80 format (24i5)
 if (ipos) then
+80 format (24i5)
   read (FUNIT_ICS, 80)  nlevel, nlevop
   read (FUNIT_ICS, 80) (jlev(i), inlev(i), i = 1, nlevel)
   read (FUNIT_ICS, 90) (elev(i), i = 1, nlevel)
@@ -171,10 +154,8 @@ else
   read (FUNIT_ICS, *) (jlev(i), inlev(i), i = 1, nlevel)
   read (FUNIT_ICS, *) (elev(i), i = 1, nlevel)
 endif
-!aber_begin
 !  zero out zmat
 call dset(nlevop*nlevop,0.d0, zmat,1)
-!aber_end
 !  read in matrix of cross sections, column by column
 99 do 95  i = 1, nlevop
 !  jbegin and jend point to first element and last element of column i of
@@ -182,7 +163,7 @@ call dset(nlevop*nlevop,0.d0, zmat,1)
   jbegin = (i - 1) * nlevop + 1
   jend = i * nlevop
 !            write (nxfile, 90) (zmat(j,i), j = 1, nlevop)
-!  chnage format of reac statement (p. dagdigian, 7-mar-2012)
+!  change format of reac statement (p. dagdigian, 7-mar-2012)
 !        read (FUNIT_ICS, 90) (zbuf(j), j = jbegin, jend)
   read (FUNIT_ICS, *) (zbuf(j), j = jbegin, jend)
   do 96 j=jbegin,jend
@@ -209,8 +190,8 @@ end if
                                 jfirst, jfinal, jtotd
     write (FUNIT_XSC, 100) ienerg, xmu, ener, jlpar, jfirst, &
                    jfinal, jtotd
-100     format ('% ** INTEGRAL CROSS SECTIONS; IEN=', i2,' **', &
-            /'%    RMU=', f9.4, '  E=', f9.2,'  JLPAR=', i2, &
+100     format (/' ** INTEGRAL CROSS SECTIONS; IEN=', i2,' **', &
+            /'    RMU=', f9.4, '  E=', f9.2,'  JLPAR=', i2, &
              '  JTOT-1=', i3, &
              '  JTOT-2=', i4,'  JTOT-D=', i3)
   else
@@ -218,8 +199,8 @@ end if
                       (jfirst+0.5), (jfinal+0.5), jtotd
     write (FUNIT_XSC, 105) ienerg, xmu, ener, jlpar, (jfirst+0.5), &
                    (jfinal+0.5), jtotd
-105     format ('% ** INTEGRAL CROSS SECTIONS; IEN=', i2,' **', &
-            /'%    RMU=', f9.4, '  E=', f9.2,'  JLPAR=', i2, &
+105     format (/' ** INTEGRAL CROSS SECTIONS; IEN=', i2,' **', &
+            /'    RMU=', f9.4, '  E=', f9.2,'  JLPAR=', i2, &
              '  JTOT-1=', f5.1, &
              '  JTOT-2=', f6.1,'  JTOT-D=', i3)
   end if
@@ -228,7 +209,7 @@ else
     if (iprint) write (6, 110) ienerg, xmu, ener, numin, &
                                numax, nud
     write (FUNIT_XSC, 110) ienerg, xmu, ener, numin, numax, nud
-110     format ('% ** SUMMED DEGENERACY AVERAGED TRANSITION', &
+110     format (/' ** SUMMED DEGENERACY AVERAGED TRANSITION', &
              ' PROBABILITIES;  IEN=', i2,' **', &
             /'    RMU=', f9.4, '  E=', f8.2,'  M-MIN=', i3, &
              '  M-MAX=', i4, '  M-STEP=', i2)
@@ -237,7 +218,7 @@ else
                                (numax+0.5), nud
     write (FUNIT_XSC, 115) ienerg, xmu, ener, (numin+0.5), &
                    (numax+0.5), nud
-115     format ('% ** SUMMED DEGENERACY AVERAGED TRANSITION', &
+115     format (/' ** SUMMED DEGENERACY AVERAGED TRANSITION', &
              ' PROBABILITIES;  IEN=', i2,' **', &
             /'    RMU=', f9.4, '  E=', f8.2,'  M-MIN=', f5.1, &
              '  M-MAX=', f6.1, '  M-STEP=', i2)
@@ -247,26 +228,25 @@ if (.not. csflag) then
   if (jlpar .eq. 0) then
     write (FUNIT_XSC, 120)
     if (iprint) write (6, 120)
-120     format ('$ ** CC CALCULATION, BOTH PARITIES **')
+120     format (' ** CC CALCULATION, BOTH PARITIES **')
   else
     write (FUNIT_XSC, 125) jlpar
     if (iprint) write (6, 125) jlpar
-125     format ('% ** CC CALCULATION, JLPAR=', i2, ' **')
+125     format (' ** CC CALCULATION, JLPAR=', i2, ' **')
   end if
 else
   if (.not. flaghf) then
-    write (FUNIT_XSC, 130) numin, numax
+    write (FUNIT_XSC, 130) numin, numax, nud
     if (iprint) write (6, 130) numin, numax, nud
-130     format ('% ** CS CALCULATION, NUMIN=', i2,', NUMAX=', &
-               i2,', NUD=',i2,' **')
+130     format (' ** CS CALCULATION, NUMIN=', i2,', NUMAX=', &
+               i2,', NUD=', i2, ' **')
   else
-    write (FUNIT_XSC, 140) numin + 0.5, numax + 0.5
-    if (iprint) write (6, 140) numin+0.5, numax+ 0.5,nud
-140     format ('% ** CS CALCULATION, NUMIN=', f4.1, ', NUMAX=', &
-            f4.1,', NUD=',i2,' **')
+    write (FUNIT_XSC, 140) numin + 0.5, numax + 0.5, nud
+    if (iprint) write (6, 140) numin+0.5, numax+ 0.5, nud
+140     format (' ** CS CALCULATION, NUMIN=', f4.1, ', NUMAX=', &
+            f4.1,', NUD=', i2, ' **')
   end if
 end if
-!mha
 ! print out of level list only for iprint .ge. 1
 if (eprint) then
   if (.not. twomol) then
@@ -274,13 +254,13 @@ if (eprint) then
       if (iprint) write (6, 145)
       write (FUNIT_XSC, 145)
 145       format &
-       (/'% LEVEL LIST FOR INTEGRAL CROSS SECTIONS', &
+       (' LEVEL LIST FOR INTEGRAL CROSS SECTIONS', &
         /'   N   J  INDEX  EINT(CM-1)',/)
     else
       if (iprint) write (6, 150)
       write (FUNIT_XSC, 150)
 150       format &
-       (/'% LEVEL LIST FOR DEGENERACY AVERAGED', &
+       (' LEVEL LIST FOR DEGENERACY AVERAGED', &
          ' TRANSITION PROBABILITIES', &
         /'   N   J  INDEX  EINT(CM-1)',/)
     end if
@@ -295,25 +275,24 @@ if (eprint) then
                        elev(i) * econv
         write (FUNIT_XSC, 165) i, (jlev(i)+0.5), inlev(i), &
                        elev(i) * econv
-165         format (1x,'%',i4, f5.1, i6, f11.3)
+165         format (i4, f5.1, i6, f11.3)
       end if
 170     continue
   else
     if (iprint) write (6, 175)
     write (FUNIT_XSC, 175)
-175       format (/'% LEVEL LIST FOR INTEGRAL CROSS SECTIONS', &
-              /'%   N   J1   J2  INDEX  EINT(CM-1)'/)
+175       format (' LEVEL LIST FOR INTEGRAL CROSS SECTIONS', &
+              /'   N   J1   J2  INDEX  EINT(CM-1)'/)
     do 190  i = 1, nlevop
       jj2 = mod( jlev(i), 10)
       jj1 = jlev(i) / 10
       if (iprint) &
       write (6, 180) i, jj1, jj2, inlev(i), elev(i) * econv
       write (FUNIT_XSC, 180) i, jj1, jj2, inlev(i), elev(i) * econv
-180       format ('%',i4, 2i5, i6, f11.3)
+180       format (i4, 2i5, i6, f11.3)
 190     continue
   end if
 endif
-!mha
 !  now sum and average over positive and negative values of index
 !     check that number of levels with index negative equals number of levels
 !     with index positive, if not abort
@@ -322,22 +301,18 @@ endif
 !     should equal zero if there are as many levels with index negative
 !     as index positive
 if (iaver .gt. 0) then
-!ABER
-!mha
   if (iaver.gt.1.d0.and.ihomo) then
-!mha
     write(6,194)
 194     format(' *** HOMONUCLEAR MOLECULE : AVERAGING', &
             ' MAKES NO SENSE ! ***')
     iaver=1
   end if
-!ABER
   isum = 0
   do  200 i = 1, nlevop
     if (inlev(i) .eq. 0) then
       write (6, 195) i
       write (6, 195) i
-195       format(/' *** INLEV(',i4,')=0;', &
+195       format(' *** INLEV(',i4,')=0;', &
                ' AVERAGING MAY NOT WORK ***')
     else if (inlev(i) .ne. 0) then
       isum = isum + inlev(i)
@@ -346,29 +321,26 @@ if (iaver .gt. 0) then
   if (isum .ne. 0 .and. .not.flaghf) then
     write (6, 230) isum
     write (FUNIT_XSC, 230) isum
-230     format ('% *** SUM OF INDICES =',i4, &
+230     format (' *** SUM OF INDICES =',i4, &
                ' AVERAGING MAY NOT WORK ***')
   end if
   if  (iaver .eq. 2) then
     if (iprint) write (6, 245)
     write (FUNIT_XSC, 245)
 245     format &
-      ('% ** CROSS SECTIONS SUMMED AND AVERAGED OVER INDEX **')
+      (' ** CROSS SECTIONS SUMMED AND AVERAGED OVER INDEX **')
     call aver2 (zmat, scmat, nlevop)
   else if (iaver .eq. 1) then
     if (iprint) write (6, 250)
     write (FUNIT_XSC, 250)
 250     format &
-      ('% ** CROSS SECTIONS SUMMED FINAL STATE INDEX **')
+      (' ** CROSS SECTIONS SUMMED OVER FINAL STATE INDEX **')
   end if
 end if
-!mha
-! 4 lines moved from here 2/27/92
-!mha
 !  find all rows of cross sections matrix for which initial rotational
 !  quantum number is equal to one of the values of jout
-allocate(ipoint(nlevop))
 isize = 0
+allocate(ipoint(nlevop))
 insize=0
 nout = abs (nnout)
 do  280  iout = 1, nout
@@ -377,13 +349,10 @@ do  280  iout = 1, nout
     if (jlev(n) .eq. jtemp) then
       isize = isize + 1
       jpoint(isize) = n
-!mha
       ipoint(isize) = n
-!mha
     end if
 270   continue
 280 continue
-!mha
 if (niout .gt. 0) then
   nout=abs(niout)
   do  282  iout = 1, nout
@@ -392,22 +361,22 @@ if (niout .gt. 0) then
       if (inlev(jpoint(n)) .eq. indtemp) then
         insize = insize + 1
         ipoint(insize) = jpoint(n)
-      endif
+      end if
 281     continue
 282   continue
   isize=insize
 endif
-!mha
 !  isize is the number of cross sections to be printed
 if (isize .eq. 0) then
 !  here if no initial states found
   write (6, 283)
   write (FUNIT_XSC, 283)
-283   format ('% ** NO INITIAL STATES FOUND; ABORT')
+283   format (' ** NO INITIAL STATES FOUND; ABORT')
 else
+!  now print out desired columns of cross section matrix
   write (FUNIT_XSC, 290) xthresh
   if (iprint) write (6, 290) xthresh
-290   format (/'% ** COLUMN HEADINGS ARE INITIAL STATES, ROW', &
+290   format (/' ** COLUMN HEADINGS ARE INITIAL STATES, ROW', &
         ' HEADINGS ARE FINAL STATES **', &
       /'%      CROSS SECTION PRINT THRESHOLD=',1pd8.1)
   if (iener.lt.10) then
@@ -426,7 +395,6 @@ else
 297   format('x',i3,'=[')
 298   format('x',i4,'=[')
 299   format('x',i5,'=[')
-!  now print out desired columns of cross section matrix
   call xscpr2(zmat, xthresh, nlevop, isize, iaver, iprint, isa, FUNIT_XSC, ipoint)
   write (FUNIT_XSC,300)
 300   format('];')
@@ -441,7 +409,6 @@ use mod_cojhld, only: jlev => jhold ! jlev(1)
 use mod_coisc1, only: inlev => isc1 ! inlev(1)
 use mod_himatrix, only: transp
 use mod_hivector, only: matcopy
-
 implicit double precision (a-h,o-z)
 !  subroutine to sum and average cross section matrix over positive
 !  and negative values of index
@@ -460,7 +427,7 @@ do  30  i = 1, nn
     zmat(index) = ( scmat(ind - 1, jnd - 1) + &
                    scmat(ind - 1, jnd) + &
                    scmat(ind, jnd - 1) + &
-                   scmat(ind, jnd) ) * 0.5d0
+                   scmat(ind, jnd) ) * 0.5
 20   continue
    jlev (i) = jlev (ind - 1)
   inlev(i) = iabs(inlev(ind - 1))
@@ -471,18 +438,16 @@ call transp (zmat, nn, nn)
 n = nn
 return
 end
-! ------------------------------------------------------
+! -------------------------------------------------
 subroutine xscpr2 (zmat, xthresh, nlevop, isize, iaver, &
                    iprint, isa, xsc_funit, ipoint)
-use mod_cojhld, only: jlev => jhold ! jlev(1)
-use mod_coisc1, only: inlev => isc1 ! inlev(1)
+use mod_cojhld, only: jlev => jhold ! jlev(4)
+use mod_coisc1, only: inlev => isc1 ! inlev(4)
 use mod_par, only: flaghf, ihomo, ipos
 use mod_himatrix, only: transp
 implicit double precision (a-h,o-z)
 integer, intent(in) :: xsc_funit  ! the file unit for xsc file (it's expected to be open in write mode)
 integer, intent(in) :: ipoint(*)
-
-!  current revision date:  10-oct-2001 by ab
 !  subroutine to print out specified columns of cross section matrix
 !  if iaver = 1, then nth and (n+1) st rows are added before printing
 integer i, isize, iskip, j, jcol, jhigh, jj, jlow, jmax, &
@@ -490,14 +455,13 @@ integer i, isize, iskip, j, jcol, jhigh, jj, jlow, jmax, &
 integer ind, isa
 logical iprint
 dimension zmat(nlevop,nlevop), ind(50)
-!  first transpose cross section matrix so that initial states are
-!  columns and final states are rows
+!  first transpose the cross section matrix so that initial states are columns and final states are rows
 call transp (zmat, nlevop, nlevop)
 !  if 132 line printer, then 13 columns of matrix are printed simultaneously
 !  if  80 line printer, then  7 columns of matrix are printed simultaneously
 iskip = 13
 if (.not. ipos) iskip = 7
-!  jamx is the total number of the groups of columns to be printed
+!  jmax is the total number of the groups of columns to be printed
 if (mod(isize, iskip) .eq. 0) then
   jmax = isize / iskip
 else
@@ -505,7 +469,7 @@ else
 end if
 jlow = 1
 jhigh = min (iskip, isize)
-!  loop ovr columns by groups of 6 or 10
+!  loop over columns by groups of 6 or 10
 do  150   j = 1, jmax
 !  ncol is the number of columns to be printed
   ncol = jhigh - jlow + 1
@@ -515,27 +479,27 @@ do  150   j = 1, jmax
 10   continue
 !  write as a heading the column index of each column to be printed
   if (.not. flaghf) then
-    if (iprint) write (6, 15) ( jlev(ind(i)),i = 1,ncol)
-    write (xsc_funit, 15) ( jlev(ind(i)), i = 1,ncol)
-15     format (/11x,'J= ', i4, 2x, 12 (2x, i5, 2x) )
+    if (iprint) write (6, 15) ( jlev(ind(i)), i = 1,ncol)
+    write (xsc_funit, 15) ( jlev(ind(i)), i = 1, ncol)
+15     format (/12x,'J=', i5, 2x, 12 (2x, i6, 2x) )
   else
     if (iprint) write (6, 30) ( jlev(ind(i))+0.5, &
                                  i = 1,ncol)
     write (xsc_funit, 30) ( jlev(ind(i))+0.5, i = 1,ncol)
-30     format (/'%',11x,'J= ', f4.1, 2x, 12 (2x, f5.1, 2x) )
+30     format (/11x,'J= ', f5.1, 2x, 12 (2x, f6.1, 2x) )
   end if
   if (iprint) write (6, 40) ( inlev(ind(i)), i = 1,ncol)
   write (xsc_funit, 40) ( inlev(ind(i)), i = 1,ncol)
-40   format ('%   J    I | I=', i4, 2x, 12 (2x, i5, 2x))
+40   format ('   J    I | I=', i5, 2x, 12 (2x, i6, 2x))
   if (iprint) write (6, 50)
   write (xsc_funit, 50)
 50   format (1h )
 !  now loop through the rows of the matrix, which will be printed out
 !  in groups of 10 with a blank line in between
-!  lopp over the rows of the matrix which will be printed
+!  loop over the rows of the matrix which will be printed
   nlev = 0
 !  nlev is the n quantum number for sigma states
-  do 95 jrow = 1 , nlevop
+  do 95 jrow = 1, nlevop
 !  inrow holds additional quantum index for this row
     inrow = inlev(jrow)
 !ABER  summing will be done for HETERONUCLEAR case (PI and SIGMA)
@@ -567,7 +531,7 @@ do  150   j = 1, jmax
       end if
 !ABER  now write out the row index followed by the desired matrix elements
 !ABER  here for PI states
-94       if (aint(iabs(inrow)/100.0).ne.3) then
+94    if (aint(iabs(inrow)/100.0).ne.3) then
         if (.not. flaghf) then
           if (iprint) &
           write (6, 60) jlev(jrow),inrow, &
@@ -627,19 +591,28 @@ do  150   j = 1, jmax
                ( zmat(jrow,ind(jcol)), jcol = 1,ncol)
            write (xsc_funit, 70) jlev(jrow)+0.5, inrow, &
              ( zmat(jrow,ind(jcol)), jcol = 1,ncol)
-         end if
+         end if!aber
+
       endif
     end if
+!  if this row is an integer multiple of 10, add a blank line
+!  to output on unit 6 only
     jj = jrow / 10
     if (10 * jj .eq. jrow .and. jrow .ne. nlevop) then
       if (iprint) write (6, 80)
     end if
 80     format(1h )
 95   continue
+!  all rows have been printed out for this group of columns
+!  move to the next group of columns
+!  jlow becomes old jhigh
+!  jhigh is set equal to jhigh plus skip distance
   if (jhigh .eq. nlevop) go to 160
   jlow = jhigh + 1
   jhigh = min ( (jlow + iskip - 1), isize)
 150 continue
+!  entire matrix has been printed, return
 160 return
 end
+
 end module mod_hiprintixssgpi

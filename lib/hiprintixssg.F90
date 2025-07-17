@@ -15,8 +15,6 @@ subroutine prsg (fname, a)
 !  subroutine to write out selected integral cross sections
 !  from file {fname1}.ics
 !  author:  millard alexander
-!  last bug fix:17-may-1993 by mha
-!  latest revision date:  23-feb-2013 by p. dagdigian
 !  ------------------------------------------------------------------
 !  variables in call list:
 !    zmat:    on return:  contains the nlevop x nlevop matrix of integral
@@ -106,6 +104,7 @@ if (.not.iprint) write(6,20) xnam2
         (a))
 ! inquire file specifications
 inquire(file=xnam2, exist=existf, opened=openfl)
+!.xsc file is appended if it already exists
 accs='sequential'
 
 if (.not. openfl) then
@@ -143,12 +142,12 @@ read (FUNIT_ICS, 75) jfirst, jfinal, jtotd, numin, numax, &
              nud, jlpar
 75 format (7i5)
 if (ipos) then
-80   format (24i5)
+80 format (24i5)
   read (FUNIT_ICS, 80)  nlevel, nlevop
   read (FUNIT_ICS, 80) (jlev(i), inlev(i), i = 1, nlevel)
   read (FUNIT_ICS, 90) (elev(i), i = 1, nlevel)
 90   format (8(1pe15.8))
-!90      format (8f16.9)
+!90   format (8f16.9)
 else
   read (FUNIT_ICS, *)  nlevel, nlevop
   read (FUNIT_ICS, *) (jlev(i), inlev(i), i = 1, nlevel)
@@ -221,12 +220,12 @@ else
     write (FUNIT_XSC, 130) numin, numax, nud
     if (iprint) write (6, 130) numin, numax, nud
 130     format (' ** CS CALCULATION, NUMIN=', i2,', NUMAX=', &
-               i2,' NUD=', i2, ' **')
+               i2,', NUD=', i2, ' **')
   else
     write (FUNIT_XSC, 140) numin + 0.5, numax + 0.5, nud
     if (iprint) write (6, 140) numin+0.5, numax+ 0.5, nud
 140     format (' ** CS CALCULATION, NUMIN=', f4.1, ', NUMAX=', &
-            f4.1,' NUD=', i2, ' **')
+            f4.1,', NUD=', i2, ' **')
   end if
 end if
 if (eprint) then
@@ -305,12 +304,12 @@ if (iaver .gt. 0) then
 245     format &
       (' ** CROSS SECTIONS SUMMED AND AVERAGED OVER INDEX **')
     call aver1 (zmat, scmat, nlevop)
-   else if (iaver .eq. 1) then
+  else if (iaver .eq. 1) then
     if (iprint) write (6, 250)
     write (FUNIT_XSC, 250)
 250     format &
       (' ** CROSS SECTIONS SUMMED OVER FINAL STATE INDEX **')
-   end if
+  end if
 end if
 !  find all rows of cross sections matrix for which initial rotational
 !  quantum number is equal to one of the values of jout
@@ -327,9 +326,7 @@ do  280  iout = 1, nout
     end if
 270   continue
 280 continue
-!aber
 insize=0
-!aber
 if (niout .gt. 0) then
   nout=abs(niout)
   do  282  iout = 1, nout
@@ -351,9 +348,9 @@ if (isize .eq. 0) then
 283   format (' ** NO INITIAL STATES FOUND; ABORT')
 else
 !  now print out desired columns of cross section matrix
-  write (FUNIT_XSC, 260)
-  if (iprint) write (6, 260)
-260   format (/' ** COLUMN HEADINGS ARE INITIAL STATES, ROW', &
+  write (FUNIT_XSC, 290)
+  if (iprint) write (6, 290)
+290   format (/' ** COLUMN HEADINGS ARE INITIAL STATES, ROW', &
         ' HEADINGS ARE FINAL STATES **')
   call xscpr1(zmat, nlevop, isize, iaver, ipos, iprint, flaghf, FUNIT_XSC, ipoint)
 endif
@@ -407,7 +404,6 @@ use mod_himatrix, only: transp
 implicit double precision (a-h,o-z)
 integer, intent(in) :: xsc_funit  ! the file unit for xsc file (it's expected to be open in write mode)
 integer, intent(in) :: ipoint(*)
-!      current revision date: 16-dec-2007
 !  subroutine to print out specified columns of cross section matrix
 !  if iaver = 1, then nth and (n+1) st rows are added before printing
 integer i, isize, iskip, j, jcol, jhigh, jj, jlow, jmax, &
@@ -416,8 +412,7 @@ integer ind
 !     real elev, zmat
 logical ipos, iprint, flaghf
 dimension zmat(nlevop,nlevop), ind(50)
-!     first transpose the cross section matrix so that initial
-!     states are columns and final states are rows
+!  first transpose the cross section matrix so that initial states are columns and final states are rows
 call transp (zmat, nlevop, nlevop)
 !  if 132 line printer, then 13 columns of matrix are printed simultaneously
 !  if  80 line printer, then  7 columns of matrix are printed simultaneously
@@ -444,7 +439,7 @@ do  150   j = 1, jmax
 !  write as a heading the column index of each column to be printed
   if (.not. flaghf .or. ibasty.eq.12) then
     if (iprint) write (6, 15) ( jlev(ind(i)), i = 1,ncol)
-    write (xsc_funit, 15) ( jlev(ind(i)), i = 1, ncol )
+    write (xsc_funit, 15) ( jlev(ind(i)), i = 1, ncol)
 15     format (/12x,'J=', i5, 2x, 12 (2x, i6, 2x) )
   else
     if (iprint) write (6, 30) ( jlev(ind(i))+0.5, &
@@ -461,7 +456,7 @@ do  150   j = 1, jmax
 !  now loop through the rows of the matrix, which will be printed out
 !  in groups of 10 with a blank line in between
 !  loop over the rows of the matrix which will be printed
-  do  95   jrow =  1 , nlevop, irowsk
+  do 95 jrow = 1, nlevop, irowsk
 !  now write out the row index followed by the desired matrix elements
     jj=jrow/10
 !  inrow holds additional quantum index for this row
