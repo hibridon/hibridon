@@ -8,6 +8,8 @@ show
 label=CC Integral Cross Section tests
 run
 printc
+printc,,0,1
+printc,,1,2
 label=CC Differential and Steric Effect Tests
 wrsmat=t
 run
