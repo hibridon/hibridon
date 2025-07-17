@@ -34,6 +34,7 @@ def remove_time_dependent_lines(input_path: Path, output_path: Path):
     ignored_patterns.append('DATE')
     ignored_patterns.append('ELAPSED')
     ignored_patterns.append('WRITTEN')
+    ignored_patterns.append('FROM CALCULATION ON:')  # eg '    FROM CALCULATION ON: Jul 17 09:41:12 2025'
 
     # other patterns
     ignored_patterns.append('<thread>')  # <thread> is the tag used for messages from multithreaded sections (ignored at the moment, as the threads are not generaly executed in the same order)
