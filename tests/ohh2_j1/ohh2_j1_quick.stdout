@@ -1,0 +1,42 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.20
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2025-07-16 at 12:46
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: aa24d737db7d81c9bc1fe25cf338a9c90b4491a2
+SYS: Linux 5.4.0-216-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                         Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                            3037.268
+Socket(s):                          1
+Core(s) per socket:                 4
+L2 cache:                           1 MiB
+L3 cache:                           6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16255508 kB
+ --------------------------------------------------------------------------
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Jul 16 14:23:58 2025
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:13   WALL: 00:00:02   DATE: Jul 16 14:23:59 2025
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:33   WALL: 00:00:05   DATE: Jul 16 14:24:02 2025
+ ** J =    0 JLPAR =-1 FINISHED;  CPU: 00:00:37   WALL: 00:00:06   DATE: Jul 16 14:24:03 2025
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:49   WALL: 00:00:07   DATE: Jul 16 14:24:04 2025
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:01:08   WALL: 00:00:10   DATE: Jul 16 14:24:07 2025
+ ===============================================================================
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:   134
+      TIMING:  ELAPSED 00:00:10 / CPU 00:01:08 / MP RATIO  683.8 %
+      CURRENT DATE:  Jul 16 14:24:07 2025
+ ===============================================================================
+

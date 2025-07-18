@@ -1,0 +1,40 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.20
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2025-07-16 at 12:46
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: aa24d737db7d81c9bc1fe25cf338a9c90b4491a2
+SYS: Linux 5.4.0-216-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                         Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                            3141.257
+Socket(s):                          1
+Core(s) per socket:                 4
+L2 cache:                           1 MiB
+L3 cache:                           6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16255508 kB
+ --------------------------------------------------------------------------
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:19   WALL: 00:00:03   DATE: Jul 16 14:25:23 2025
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:01:36   WALL: 00:00:14   DATE: Jul 16 14:25:34 2025
+ ** J =    0 JLPAR =-1 FINISHED;  CPU: 00:02:02   WALL: 00:00:18   DATE: Jul 16 14:25:38 2025
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:03:21   WALL: 00:00:29   DATE: Jul 16 14:25:49 2025
+ ===============================================================================
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:   290
+      TIMING:  ELAPSED 00:00:29 / CPU 00:03:21 / MP RATIO  695.4 %
+      CURRENT DATE:  Jul 16 14:25:49 2025
+ ===============================================================================
+

@@ -1,0 +1,77 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.20
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2025-07-16 at 08:49
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: aa24d737db7d81c9bc1fe25cf338a9c90b4491a2
+SYS: Linux 5.4.0-216-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                         Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                            3288.724
+Socket(s):                          1
+Core(s) per socket:                 4
+L2 cache:                           1 MiB
+L3 cache:                           6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16255508 kB
+ --------------------------------------------------------------------------
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Jul 16 09:11:18 2025
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:04   WALL: 00:00:01   DATE: Jul 16 09:11:18 2025
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:07   WALL: 00:00:01   DATE: Jul 16 09:11:18 2025
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:10   WALL: 00:00:02   DATE: Jul 16 09:11:19 2025
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:13   WALL: 00:00:02   DATE: Jul 16 09:11:19 2025
+ ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:00:16   WALL: 00:00:03   DATE: Jul 16 09:11:20 2025
+ ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:00:19   WALL: 00:00:03   DATE: Jul 16 09:11:20 2025
+ ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:00:23   WALL: 00:00:03   DATE: Jul 16 09:11:20 2025
+ ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:00:27   WALL: 00:00:04   DATE: Jul 16 09:11:21 2025
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:30   WALL: 00:00:04   DATE: Jul 16 09:11:21 2025
+ ** J =   11 JLPAR = 1 FINISHED;  CPU: 00:00:34   WALL: 00:00:05   DATE: Jul 16 09:11:22 2025
+ ** J =   12 JLPAR = 1 FINISHED;  CPU: 00:00:38   WALL: 00:00:05   DATE: Jul 16 09:11:22 2025
+ ** J =   13 JLPAR = 1 FINISHED;  CPU: 00:00:42   WALL: 00:00:06   DATE: Jul 16 09:11:23 2025
+ ** J =   14 JLPAR = 1 FINISHED;  CPU: 00:00:46   WALL: 00:00:06   DATE: Jul 16 09:11:23 2025
+ ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:49   WALL: 00:00:07   DATE: Jul 16 09:11:24 2025
+ ** J =   16 JLPAR = 1 FINISHED;  CPU: 00:00:53   WALL: 00:00:07   DATE: Jul 16 09:11:24 2025
+ ** J =   17 JLPAR = 1 FINISHED;  CPU: 00:00:57   WALL: 00:00:08   DATE: Jul 16 09:11:25 2025
+ ** J =   18 JLPAR = 1 FINISHED;  CPU: 00:01:01   WALL: 00:00:08   DATE: Jul 16 09:11:25 2025
+ ** J =   19 JLPAR = 1 FINISHED;  CPU: 00:01:04   WALL: 00:00:09   DATE: Jul 16 09:11:26 2025
+ ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:01:08   WALL: 00:00:09   DATE: Jul 16 09:11:26 2025
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:01:09   WALL: 00:00:09   DATE: Jul 16 09:11:26 2025
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:01:12   WALL: 00:00:10   DATE: Jul 16 09:11:27 2025
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:01:15   WALL: 00:00:10   DATE: Jul 16 09:11:27 2025
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:01:18   WALL: 00:00:11   DATE: Jul 16 09:11:28 2025
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:01:21   WALL: 00:00:11   DATE: Jul 16 09:11:28 2025
+ ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:01:25   WALL: 00:00:11   DATE: Jul 16 09:11:28 2025
+ ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:01:28   WALL: 00:00:12   DATE: Jul 16 09:11:29 2025
+ ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:01:32   WALL: 00:00:12   DATE: Jul 16 09:11:29 2025
+ ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:01:37   WALL: 00:00:13   DATE: Jul 16 09:11:30 2025
+ ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:01:40   WALL: 00:00:13   DATE: Jul 16 09:11:30 2025
+ ** J =   11 JLPAR =-1 FINISHED;  CPU: 00:01:43   WALL: 00:00:14   DATE: Jul 16 09:11:31 2025
+ ** J =   12 JLPAR =-1 FINISHED;  CPU: 00:01:46   WALL: 00:00:14   DATE: Jul 16 09:11:31 2025
+ ** J =   13 JLPAR =-1 FINISHED;  CPU: 00:01:49   WALL: 00:00:15   DATE: Jul 16 09:11:32 2025
+ ** J =   14 JLPAR =-1 FINISHED;  CPU: 00:01:52   WALL: 00:00:15   DATE: Jul 16 09:11:32 2025
+ ** J =   15 JLPAR =-1 FINISHED;  CPU: 00:01:56   WALL: 00:00:15   DATE: Jul 16 09:11:32 2025
+ ** J =   16 JLPAR =-1 FINISHED;  CPU: 00:01:59   WALL: 00:00:16   DATE: Jul 16 09:11:33 2025
+ ** J =   17 JLPAR =-1 FINISHED;  CPU: 00:02:02   WALL: 00:00:16   DATE: Jul 16 09:11:33 2025
+ ** J =   18 JLPAR =-1 FINISHED;  CPU: 00:02:06   WALL: 00:00:17   DATE: Jul 16 09:11:34 2025
+ ** J =   19 JLPAR =-1 FINISHED;  CPU: 00:02:10   WALL: 00:00:17   DATE: Jul 16 09:11:34 2025
+ ** J =   20 JLPAR =-1 FINISHED;  CPU: 00:02:14   WALL: 00:00:18   DATE: Jul 16 09:11:35 2025
+ ===============================================================================
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:    40
+      TIMING:  ELAPSED 00:00:18 / CPU 00:02:14 / MP RATIO  746.9 %
+      CURRENT DATE:  Jul 16 09:11:35 2025
+ ===============================================================================
+++ STARTING JTOT =  10
+++ STARTING JTOT =  20

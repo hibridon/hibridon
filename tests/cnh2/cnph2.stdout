@@ -1,0 +1,95 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.20
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2025-07-16 at 12:46
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: aa24d737db7d81c9bc1fe25cf338a9c90b4491a2
+SYS: Linux 5.4.0-216-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                         Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                            3453.282
+Socket(s):                          1
+Core(s) per socket:                 4
+L2 cache:                           1 MiB
+L3 cache:                           6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16255508 kB
+ --------------------------------------------------------------------------
+ ** NERG HAS BEEN RESET TO  1
+     *** Parameters (scattering):
+ JTOT1  =   0        JTOT2  =  15        JTOTD  =   1        JLPAR  =   0
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  80        IPRINT =  -1
+ FSTFAC =  1.100     RINCR  =  1.000     RCUT   = -100.0     RENDAI =  50.00    
+ RENDLD =  10.00     RSTART =  4.500     SPAC   = 0.2000     TOLAI  =  1.100    
+ XMU    =   1.89640
+ NOUT: 15; J1/J2-OUT: 00  10  20  30  40  50  60  70  02  12  22  32  42  52  62  
+ INDOUT:    0
+     *** 1SG-1SG system parameters:
+ J1MAX  =   5        J2MIN  =   0        J2MAX  =   2        POTSY2 =   2
+ B1ROT  =  1.891     D1ROT  = 6.4000E-06 B2ROT  =  59.32    
+ J1/J2: 
+     *** Flags:
+ AIRYFL= T    BASTST= F    BATCH = T    CHLIST= F    CSFLAG= F    FLAGHF= F
+ FLAGSU= F    IHOMO = F    IPOS  = F    LOGDFL= T    NOPRIN= T    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= T    WAVEFL= F
+ WRPART= F    WRSMAT= T    WRXSEC= F    BOUNDC= F
+ ** Maximum Channels:  300; Maximum Anisotropic Terms:  2000
+ ** Energies:       10.000000
+ ** Label:      CN--H2 - treat CN as 1Sigma                     
+ ** Pot name:      KALUGINA ET AL. CN-H2 RCCSD(T) PES              
+ ** Input File:  Cnph2.inp
+ ** Output file: Outpt
+ ** Jobname:     E10p
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 14:57:25 2025
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Jul 16 14:57:26 2025
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:08   WALL: 00:00:01   DATE: Jul 16 14:57:26 2025
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:13   WALL: 00:00:02   DATE: Jul 16 14:57:27 2025
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:21   WALL: 00:00:03   DATE: Jul 16 14:57:28 2025
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:32   WALL: 00:00:05   DATE: Jul 16 14:57:30 2025
+ ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:00:40   WALL: 00:00:06   DATE: Jul 16 14:57:31 2025
+ ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:00:51   WALL: 00:00:08   DATE: Jul 16 14:57:33 2025
+ ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:01:02   WALL: 00:00:10   DATE: Jul 16 14:57:35 2025
+ ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:01:15   WALL: 00:00:12   DATE: Jul 16 14:57:37 2025
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:01:26   WALL: 00:00:14   DATE: Jul 16 14:57:39 2025
+ ** J =   11 JLPAR = 1 FINISHED;  CPU: 00:01:54   WALL: 00:00:18   DATE: Jul 16 14:57:43 2025
+ ** J =   12 JLPAR = 1 FINISHED;  CPU: 00:02:05   WALL: 00:00:20   DATE: Jul 16 14:57:45 2025
+ ** J =   13 JLPAR = 1 FINISHED;  CPU: 00:02:15   WALL: 00:00:22   DATE: Jul 16 14:57:47 2025
+ ** J =   14 JLPAR = 1 FINISHED;  CPU: 00:02:27   WALL: 00:00:24   DATE: Jul 16 14:57:49 2025
+ ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:02:37   WALL: 00:00:25   DATE: Jul 16 14:57:50 2025
+
+ ** NCH = 0, MOVE ON TO NEXT PARTIAL WAVE
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:02:40   WALL: 00:00:26   DATE: Jul 16 14:57:51 2025
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:02:44   WALL: 00:00:26   DATE: Jul 16 14:57:51 2025
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:02:49   WALL: 00:00:27   DATE: Jul 16 14:57:52 2025
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:03:02   WALL: 00:00:29   DATE: Jul 16 14:57:54 2025
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:03:11   WALL: 00:00:31   DATE: Jul 16 14:57:56 2025
+ ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:03:20   WALL: 00:00:32   DATE: Jul 16 14:57:57 2025
+ ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:03:30   WALL: 00:00:34   DATE: Jul 16 14:57:59 2025
+ ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:03:38   WALL: 00:00:35   DATE: Jul 16 14:58:00 2025
+ ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:03:50   WALL: 00:00:37   DATE: Jul 16 14:58:02 2025
+ ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:04:08   WALL: 00:00:40   DATE: Jul 16 14:58:05 2025
+ ** J =   11 JLPAR =-1 FINISHED;  CPU: 00:04:17   WALL: 00:00:42   DATE: Jul 16 14:58:07 2025
+ ** J =   12 JLPAR =-1 FINISHED;  CPU: 00:04:27   WALL: 00:00:43   DATE: Jul 16 14:58:08 2025
+ ** J =   13 JLPAR =-1 FINISHED;  CPU: 00:04:36   WALL: 00:00:45   DATE: Jul 16 14:58:10 2025
+ ** J =   14 JLPAR =-1 FINISHED;  CPU: 00:04:47   WALL: 00:00:46   DATE: Jul 16 14:58:11 2025
+ ** J =   15 JLPAR =-1 FINISHED;  CPU: 00:05:11   WALL: 00:00:51   DATE: Jul 16 14:58:16 2025
+ ===============================================================================
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:   102
+      TIMING:  ELAPSED 00:00:51 / CPU 00:05:11 / MP RATIO  611.3 %
+      CURRENT DATE:  Jul 16 14:58:16 2025
+ ===============================================================================

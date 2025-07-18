@@ -4,12 +4,15 @@
 
 ### Changed
 
+- moved hibridon documentation from [https://github.com/hibridon/hibridon/wiki] to `docs/` to make the documentation support branches ([#223](https://github.com/hibridon/hibridon/issues/223))
 
 ### Added
 
 
 ### Fixed 
 
+- Fixes bug where attempting to change the value of BATCH in batch mode could unset batch mode while displaying a message saying that it is not allowed and has no effect.
+- Fixed minor bug that caused `tenxsc` in batch mode to output an unwanted message on stdout
 - Fixed minor bug that caused the output of `flux` command to display an erroneus message when checking the presence of the initial channel (this message is only displayed for scattering collisions and for some bases)
 - Fixed minor bug in flux that caused the displayed value of `jtot` to be wrong in the error message `' *** JTOT = <jtot> .LT. 2 IN TCASEA; ABORT **'`
 - Fixed bug that caused the output `psi` files to unintentionally insert potentioal info at the beginning of the `R (BOHR) AND IMAGINARY PART OF CHI` section.

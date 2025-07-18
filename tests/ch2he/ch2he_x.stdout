@@ -200,90 +200,90 @@ COMPILE OPTIONS:
 
 % NUCLEAR SPIN =  1.0
 HYPXSC | Molecule-Atom with 1 nuclear spin
- Computing partial wave J_tot =  0.0, jlpar=   1
- Computing partial wave J_tot =  0.0, jlpar=  -1
- Computing partial wave J_tot =  1.0, jlpar=   1
- Computing partial wave J_tot =  1.0, jlpar=  -1
- Computing partial wave J_tot =  2.0, jlpar=   1
- Computing partial wave J_tot =  2.0, jlpar=  -1
- Computing partial wave J_tot =  3.0, jlpar=   1
- Computing partial wave J_tot =  3.0, jlpar=  -1
- Computing partial wave J_tot =  4.0, jlpar=   1
- Computing partial wave J_tot =  4.0, jlpar=  -1
- Computing partial wave J_tot =  5.0, jlpar=   1
- Computing partial wave J_tot =  5.0, jlpar=  -1
- Computing partial wave J_tot =  6.0, jlpar=   1
- Computing partial wave J_tot =  6.0, jlpar=  -1
- Computing partial wave J_tot =  7.0, jlpar=   1
- Computing partial wave J_tot =  7.0, jlpar=  -1
- Computing partial wave J_tot =  8.0, jlpar=   1
- Computing partial wave J_tot =  8.0, jlpar=  -1
- Computing partial wave J_tot =  9.0, jlpar=   1
- Computing partial wave J_tot =  9.0, jlpar=  -1
- Computing partial wave J_tot = 10.0, jlpar=   1
- Computing partial wave J_tot = 10.0, jlpar=  -1
- Computing partial wave J_tot = 11.0, jlpar=   1
- Computing partial wave J_tot = 11.0, jlpar=  -1
- Computing partial wave J_tot = 12.0, jlpar=   1
- Computing partial wave J_tot = 12.0, jlpar=  -1
- Computing partial wave J_tot = 13.0, jlpar=   1
- Computing partial wave J_tot = 13.0, jlpar=  -1
- Computing partial wave J_tot = 14.0, jlpar=   1
- Computing partial wave J_tot = 14.0, jlpar=  -1
- Computing partial wave J_tot = 15.0, jlpar=   1
- Computing partial wave J_tot = 15.0, jlpar=  -1
- Computing partial wave J_tot = 16.0, jlpar=   1
- Computing partial wave J_tot = 16.0, jlpar=  -1
- Computing partial wave J_tot = 17.0, jlpar=   1
- Computing partial wave J_tot = 17.0, jlpar=  -1
- Computing partial wave J_tot = 18.0, jlpar=   1
- Computing partial wave J_tot = 18.0, jlpar=  -1
- Computing partial wave J_tot = 19.0, jlpar=   1
- Computing partial wave J_tot = 19.0, jlpar=  -1
- Computing partial wave J_tot = 20.0, jlpar=   1
- Computing partial wave J_tot = 20.0, jlpar=  -1
- Computing partial wave J_tot = 21.0, jlpar=   1
- Computing partial wave J_tot = 21.0, jlpar=  -1
- Computing partial wave J_tot = 22.0, jlpar=   1
- Computing partial wave J_tot = 22.0, jlpar=  -1
- Computing partial wave J_tot = 23.0, jlpar=   1
- Computing partial wave J_tot = 23.0, jlpar=  -1
- Computing partial wave J_tot = 24.0, jlpar=   1
- Computing partial wave J_tot = 24.0, jlpar=  -1
- Computing partial wave J_tot = 25.0, jlpar=   1
- Computing partial wave J_tot = 25.0, jlpar=  -1
- Computing partial wave J_tot = 26.0, jlpar=   1
- Computing partial wave J_tot = 26.0, jlpar=  -1
- Computing partial wave J_tot = 27.0, jlpar=   1
- Computing partial wave J_tot = 27.0, jlpar=  -1
- Computing partial wave J_tot = 28.0, jlpar=   1
- Computing partial wave J_tot = 28.0, jlpar=  -1
- Computing partial wave J_tot = 29.0, jlpar=   1
- Computing partial wave J_tot = 29.0, jlpar=  -1
- Computing partial wave J_tot = 30.0, jlpar=   1
- Computing partial wave J_tot = 30.0, jlpar=  -1
- Computing partial wave J_tot = 31.0, jlpar=   1
- Computing partial wave J_tot = 31.0, jlpar=  -1
- Computing partial wave J_tot = 32.0, jlpar=   1
- Computing partial wave J_tot = 32.0, jlpar=  -1
- Computing partial wave J_tot = 33.0, jlpar=   1
- Computing partial wave J_tot = 33.0, jlpar=  -1
- Computing partial wave J_tot = 34.0, jlpar=   1
- Computing partial wave J_tot = 34.0, jlpar=  -1
- Computing partial wave J_tot = 35.0, jlpar=   1
- Computing partial wave J_tot = 35.0, jlpar=  -1
- Computing partial wave J_tot = 36.0, jlpar=   1
- Computing partial wave J_tot = 36.0, jlpar=  -1
- Computing partial wave J_tot = 37.0, jlpar=   1
- Computing partial wave J_tot = 37.0, jlpar=  -1
- Computing partial wave J_tot = 38.0, jlpar=   1
- Computing partial wave J_tot = 38.0, jlpar=  -1
- Computing partial wave J_tot = 39.0, jlpar=   1
- Computing partial wave J_tot = 39.0, jlpar=  -1
- Computing partial wave J_tot = 40.0, jlpar=   1
- Computing partial wave J_tot = 40.0, jlpar=  -1
- Computing partial wave J_tot = 41.0, jlpar=   1
- Computing partial wave J_tot = 41.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot =  0.0, jlpar=   1
+ <thread>: Computing partial wave J_tot =  0.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot =  1.0, jlpar=   1
+ <thread>: Computing partial wave J_tot =  1.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot =  2.0, jlpar=   1
+ <thread>: Computing partial wave J_tot =  2.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot =  3.0, jlpar=   1
+ <thread>: Computing partial wave J_tot =  3.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot =  4.0, jlpar=   1
+ <thread>: Computing partial wave J_tot =  4.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot =  5.0, jlpar=   1
+ <thread>: Computing partial wave J_tot =  5.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot =  6.0, jlpar=   1
+ <thread>: Computing partial wave J_tot =  6.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot =  7.0, jlpar=   1
+ <thread>: Computing partial wave J_tot =  7.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot =  8.0, jlpar=   1
+ <thread>: Computing partial wave J_tot =  8.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot =  9.0, jlpar=   1
+ <thread>: Computing partial wave J_tot =  9.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 10.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 10.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 11.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 11.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 12.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 12.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 13.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 13.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 14.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 14.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 15.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 15.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 16.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 16.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 17.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 17.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 18.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 18.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 19.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 19.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 20.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 20.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 21.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 21.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 22.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 22.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 23.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 23.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 24.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 24.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 25.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 25.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 26.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 26.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 27.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 27.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 28.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 28.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 29.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 29.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 30.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 30.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 31.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 31.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 32.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 32.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 33.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 33.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 34.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 34.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 35.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 35.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 36.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 36.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 37.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 37.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 38.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 38.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 39.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 39.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 40.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 40.0, jlpar=  -1
+ <thread>: Computing partial wave J_tot = 41.0, jlpar=   1
+ <thread>: Computing partial wave J_tot = 41.0, jlpar=  -1
 %     E(CM-1)     JI     INI   FI      JF     INF   FF      CROSS SECTION (ANG^2)
      913.693     1.0     0   0.0      1.0     0   0.0          4.4416E+01
      913.693     1.0     0   0.0      1.0     0   1.0          2.4431E-02

@@ -1,0 +1,327 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.20
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2025-07-16 at 07:38
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: 508df64e7ee5f2351dd3f8a4a6b10a16f0ff30ab
+SYS: Linux 5.4.0-216-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                         Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                            3055.968
+Socket(s):                          1
+Core(s) per socket:                 4
+L2 cache:                           1 MiB
+L3 cache:                           6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16255508 kB
+ --------------------------------------------------------------------------
+     *** Parameters (scattering):
+ JTOT1  =   0        JTOT2  =   5        JTOTD  =   1        JLPAR  =   0
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  48        IPRINT =   0
+ FSTFAC =  15.00     RINCR  =  3.000     RCUT   =  30.00     RENDAI =  25.00    
+ RENDLD =  8.000     RSTART =  5.600     SPAC   = 0.1500     TOLAI  =  1.150    
+ XMU    =  16.47000
+ NOUT:  4; JOUT:  0   2   4   6
+ INDOUT:    0
+     *** 1-SIGMA system parameters:
+ NTERM  =   1        VMIN   =   0        VMAX   =   0        JMIN   =   0
+ JMAX   =   4
+ BROT   =  2.010     DROT   =  0.000     HROT   =  0.000     EVIB   =  0.000    
+ LAMMIN:    2
+ LAMMAX:    2
+ MPROJ:     0
+     *** Flags:
+ AIRYFL= T    BASTST= F    BATCH = T    CHLIST= T    CSFLAG= F    FLAGHF= F
+ FLAGSU= F    IHOMO = T    IPOS  = F    LOGDFL= T    NOPRIN= F    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= T    PRPART= F    PRSMAT= T    PRT2  = T
+ PRXSEC= T    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= F    WAVEFL= F
+ WRPART= F    WRSMAT= T    WRXSEC= F    BOUNDC= F
+ ** Maximum Channels:  151; Maximum Anisotropic Terms:  2000
+ ** Energies:      500.000000
+ ** Label:           N2-Ar CC PATTENGILL POTENTIAL              
+ ** Pot name:      PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
+ ** Input File:  Arn2_hyp.inp
+ ** Output file: Arn2_hyp.out
+ ** Jobname:     Arn2_hyp
+
+ **  CC SINGLET SIGMA DIATOMIC ** RMU=  16.4700       E= 500.00   JTOT=    0   JLPAR= 1
+
+ State    B(v)         D(v)        H(v)          E(v)
+   0    2.0100      0.0000      0.0000         0.00000000
+
+   N   V   J    L      EINT(CM-1)
+
+   1   0   0    0        0.000
+   2   0   2    2       12.060
+   3   0   4    4       40.200
+
+ OPEN LEVELS:
+
+   N   V   J      EINT(CM-1)
+
+   1   0   0        0.000
+   2   0   2       12.060
+   3   0   4       40.200
+ ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS     4
+ ** LOGD:  RSTART =  5.600   REND =  8.000   SPAC =   0.150   NSTEP =   17
+ ** AIRY:  RSTART =  8.000  REND = 25.000   RINCR =  3.000   DRMIN =  2.250   DRMAX =  3.935   NSTEP =   6
+ ** CPU TIMES:  BASIS= 00:00:00   POT= 00:00:00   LOGD= 00:00:00   AIRY=  00:00:00 
+                PSI0= 00:00:00   SMAT= 00:00:00 
+
+ ** J =    0 JLPAR = 1 COMPLETED
+ CPU-TIMES:  BASIS: 00:00:00   POT: 00:00:00   LOGD:  00:00:00   AIRY:  00:00:00 
+             PSI0: 00:00:00   SMAT: 00:00:00   SOUT:  00:00:00   CUMULATIVE: 00:00:00 
+             ELAPSED:  00:00:00   CURRENT DATE:  Jul 16 08:02:49 2025
+ TURNING POINTS (MIN/MAX) =    6.02    6.09
+ ** LOGD:  RSTART =  5.600   REND =  8.000   SPAC =   0.150   NSTEP =   17
+ ** AIRY:  RSTART =  8.000  REND = 25.000   RINCR =  3.000   DRMIN =  2.250   DRMAX =  3.935   NSTEP =   6
+ ** CPU TIMES:  BASIS= 00:00:00   POT= 00:00:00   LOGD= 00:00:00   AIRY=  00:00:00 
+                PSI0= 00:00:00   SMAT= 00:00:00 
+
+ ** J =    1 JLPAR = 1 COMPLETED
+ CPU-TIMES:  BASIS: 00:00:00   POT: 00:00:00   LOGD:  00:00:00   AIRY:  00:00:00 
+             PSI0: 00:00:00   SMAT: 00:00:00   SOUT:  00:00:00   CUMULATIVE: 00:00:00 
+             ELAPSED:  00:00:00   CURRENT DATE:  Jul 16 08:02:49 2025
+ TURNING POINTS (MIN/MAX) =    6.02    6.09
+ ** LOGD:  RSTART =  5.600   REND =  8.000   SPAC =   0.150   NSTEP =   17
+ ** AIRY:  RSTART =  8.000  REND = 25.000   RINCR =  3.000   DRMIN =  2.250   DRMAX =  3.935   NSTEP =   6
+ ** CPU TIMES:  BASIS= 00:00:00   POT= 00:00:00   LOGD= 00:00:00   AIRY=  00:00:00 
+                PSI0= 00:00:00   SMAT= 00:00:00 
+
+ ** J =    2 JLPAR = 1 COMPLETED
+ CPU-TIMES:  BASIS: 00:00:00   POT: 00:00:00   LOGD:  00:00:00   AIRY:  00:00:00 
+             PSI0: 00:00:00   SMAT: 00:00:00   SOUT:  00:00:00   CUMULATIVE: 00:00:00 
+             ELAPSED:  00:00:00   CURRENT DATE:  Jul 16 08:02:49 2025
+ TURNING POINTS (MIN/MAX) =    6.02    6.09
+ ** LOGD:  RSTART =  5.600   REND =  8.000   SPAC =   0.150   NSTEP =   17
+ ** AIRY:  RSTART =  8.000  REND = 25.000   RINCR =  3.000   DRMIN =  2.250   DRMAX =  3.935   NSTEP =   6
+ ** CPU TIMES:  BASIS= 00:00:00   POT= 00:00:00   LOGD= 00:00:00   AIRY=  00:00:00 
+                PSI0= 00:00:00   SMAT= 00:00:00 
+
+ ** J =    3 JLPAR = 1 COMPLETED
+ CPU-TIMES:  BASIS: 00:00:00   POT: 00:00:00   LOGD:  00:00:00   AIRY:  00:00:00 
+             PSI0: 00:00:00   SMAT: 00:00:00   SOUT:  00:00:00   CUMULATIVE: 00:00:00 
+             ELAPSED:  00:00:00   CURRENT DATE:  Jul 16 08:02:49 2025
+ TURNING POINTS (MIN/MAX) =    6.02    6.09
+ ** LOGD:  RSTART =  5.600   REND =  8.000   SPAC =   0.150   NSTEP =   17
+ ** AIRY:  RSTART =  8.000  REND = 25.000   RINCR =  3.000   DRMIN =  2.250   DRMAX =  3.935   NSTEP =   6
+ ** CPU TIMES:  BASIS= 00:00:00   POT= 00:00:00   LOGD= 00:00:00   AIRY=  00:00:00 
+                PSI0= 00:00:00   SMAT= 00:00:00 
+
+ ** J =    4 JLPAR = 1 COMPLETED
+ CPU-TIMES:  BASIS: 00:00:00   POT: 00:00:00   LOGD:  00:00:00   AIRY:  00:00:00 
+             PSI0: 00:00:00   SMAT: 00:00:00   SOUT:  00:00:00   CUMULATIVE: 00:00:00 
+             ELAPSED:  00:00:00   CURRENT DATE:  Jul 16 08:02:49 2025
+ TURNING POINTS (MIN/MAX) =    6.02    6.09
+ ** LOGD:  RSTART =  5.600   REND =  8.000   SPAC =   0.150   NSTEP =   17
+ ** AIRY:  RSTART =  8.000  REND = 25.000   RINCR =  3.000   DRMIN =  2.250   DRMAX =  3.935   NSTEP =   6
+ ** CPU TIMES:  BASIS= 00:00:00   POT= 00:00:00   LOGD= 00:00:00   AIRY=  00:00:00 
+                PSI0= 00:00:00   SMAT= 00:00:00 
+
+ ** J =    5 JLPAR = 1 COMPLETED
+ CPU-TIMES:  BASIS: 00:00:00   POT: 00:00:00   LOGD:  00:00:00   AIRY:  00:00:00 
+             PSI0: 00:00:00   SMAT: 00:00:00   SOUT:  00:00:00   CUMULATIVE: 00:00:00 
+             ELAPSED:  00:00:00   CURRENT DATE:  Jul 16 08:02:49 2025
+ TURNING POINTS (MIN/MAX) =    6.02    6.09
+
+ **  CC SINGLET SIGMA DIATOMIC ** RMU=  16.4700       E= 500.00   JTOT=    0   JLPAR=-1
+
+ State    B(v)         D(v)        H(v)          E(v)
+   0    2.0100      0.0000      0.0000         0.00000000
+
+ ** NCH = 0, MOVE ON TO NEXT PARTIAL WAVE
+
+ **  CC SINGLET SIGMA DIATOMIC ** RMU=  16.4700       E= 500.00   JTOT=    1   JLPAR=-1
+
+ State    B(v)         D(v)        H(v)          E(v)
+   0    2.0100      0.0000      0.0000         0.00000000
+
+   N   V   J    L      EINT(CM-1)
+
+   1   0   2    2       12.060
+   2   0   4    4       40.200
+
+ OPEN LEVELS:
+
+   N   V   J      EINT(CM-1)
+
+   1   0   0        0.000
+   2   0   2       12.060
+   3   0   4       40.200
+ ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS     3
+ ** LOGD:  RSTART =  5.600   REND =  8.000   SPAC =   0.150   NSTEP =   17
+ ** AIRY:  RSTART =  8.000  REND = 25.000   RINCR =  3.000   DRMIN =  2.250   DRMAX =  3.935   NSTEP =   6
+ ** CPU TIMES:  BASIS= 00:00:00   POT= 00:00:00   LOGD= 00:00:00   AIRY=  00:00:00 
+                PSI0= 00:00:00   SMAT= 00:00:00 
+
+ ** J =    1 JLPAR =-1 COMPLETED
+ CPU-TIMES:  BASIS: 00:00:00   POT: 00:00:00   LOGD:  00:00:00   AIRY:  00:00:00 
+             PSI0: 00:00:00   SMAT: 00:00:00   SOUT:  00:00:00   CUMULATIVE: 00:00:00 
+             ELAPSED:  00:00:00   CURRENT DATE:  Jul 16 08:02:49 2025
+ TURNING POINTS (MIN/MAX) =    6.09    6.16
+ ** LOGD:  RSTART =  5.600   REND =  8.000   SPAC =   0.150   NSTEP =   17
+ ** AIRY:  RSTART =  8.000  REND = 25.000   RINCR =  3.000   DRMIN =  2.250   DRMAX =  3.935   NSTEP =   6
+ ** CPU TIMES:  BASIS= 00:00:00   POT= 00:00:00   LOGD= 00:00:00   AIRY=  00:00:00 
+                PSI0= 00:00:00   SMAT= 00:00:00 
+
+ ** J =    2 JLPAR =-1 COMPLETED
+ CPU-TIMES:  BASIS: 00:00:00   POT: 00:00:00   LOGD:  00:00:00   AIRY:  00:00:00 
+             PSI0: 00:00:00   SMAT: 00:00:00   SOUT:  00:00:00   CUMULATIVE: 00:00:00 
+             ELAPSED:  00:00:00   CURRENT DATE:  Jul 16 08:02:49 2025
+ TURNING POINTS (MIN/MAX) =    5.95    6.09
+ ** LOGD:  RSTART =  5.600   REND =  8.000   SPAC =   0.150   NSTEP =   17
+ ** AIRY:  RSTART =  8.000  REND = 25.000   RINCR =  3.000   DRMIN =  2.250   DRMAX =  3.935   NSTEP =   6
+ ** CPU TIMES:  BASIS= 00:00:00   POT= 00:00:00   LOGD= 00:00:00   AIRY=  00:00:00 
+                PSI0= 00:00:00   SMAT= 00:00:00 
+
+ ** J =    3 JLPAR =-1 COMPLETED
+ CPU-TIMES:  BASIS: 00:00:00   POT: 00:00:00   LOGD:  00:00:00   AIRY:  00:00:00 
+             PSI0: 00:00:00   SMAT: 00:00:00   SOUT:  00:00:00   CUMULATIVE: 00:00:01 
+             ELAPSED:  00:00:00   CURRENT DATE:  Jul 16 08:02:49 2025
+ TURNING POINTS (MIN/MAX) =    5.95    6.09
+ ** LOGD:  RSTART =  5.600   REND =  8.000   SPAC =   0.150   NSTEP =   17
+ ** AIRY:  RSTART =  8.000  REND = 25.000   RINCR =  3.000   DRMIN =  2.250   DRMAX =  3.935   NSTEP =   6
+ ** CPU TIMES:  BASIS= 00:00:00   POT= 00:00:00   LOGD= 00:00:00   AIRY=  00:00:00 
+                PSI0= 00:00:00   SMAT= 00:00:00 
+
+ ** J =    4 JLPAR =-1 COMPLETED
+ CPU-TIMES:  BASIS: 00:00:00   POT: 00:00:00   LOGD:  00:00:00   AIRY:  00:00:00 
+             PSI0: 00:00:00   SMAT: 00:00:00   SOUT:  00:00:00   CUMULATIVE: 00:00:01 
+             ELAPSED:  00:00:00   CURRENT DATE:  Jul 16 08:02:49 2025
+ TURNING POINTS (MIN/MAX) =    5.95    6.09
+ ** LOGD:  RSTART =  5.600   REND =  8.000   SPAC =   0.150   NSTEP =   17
+ ** AIRY:  RSTART =  8.000  REND = 25.000   RINCR =  3.000   DRMIN =  2.250   DRMAX =  3.935   NSTEP =   6
+ ** CPU TIMES:  BASIS= 00:00:00   POT= 00:00:00   LOGD= 00:00:00   AIRY=  00:00:00 
+                PSI0= 00:00:00   SMAT= 00:00:00 
+
+ ** J =    5 JLPAR =-1 COMPLETED
+ CPU-TIMES:  BASIS: 00:00:00   POT: 00:00:00   LOGD:  00:00:00   AIRY:  00:00:00 
+             PSI0: 00:00:00   SMAT: 00:00:00   SOUT:  00:00:00   CUMULATIVE: 00:00:01 
+             ELAPSED:  00:00:00   CURRENT DATE:  Jul 16 08:02:49 2025
+ TURNING POINTS (MIN/MAX) =    5.95    6.09
+ ===============================================================================
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:     6
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:01 / MP RATIO  264.9 %
+      CURRENT DATE:  Jul 16 08:02:49 2025
+ ===============================================================================
+
+% HYPERFINE-RESOLVED CROSS SECTIONS
+%      LABEL:     HYPERFINE STRUCTURE WITH 2 SPINS                
+%      POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
+%      S-MATRICES READ FROM FILE: Arn2_hyp1.smt                           
+%      WRITTEN:   Jul 16 08:02:49 2025
+%      JTOT2:              5
+%      ETOT:         500.000 (cm-1)
+%      NUCLEAR SPINS:         1.0   1.0
+HYPXSC | Molecule-Atom with 2 nuclear spins
+ <thread>: computing partial wave K_tot =  0.0, jlpar=   1
+ <thread>: computing partial wave K_tot =  1.0, jlpar=   1
+ <thread>: computing partial wave K_tot =  4.0, jlpar=   1
+ <thread>: computing partial wave K_tot =  2.0, jlpar=   1
+ <thread>: computing partial wave K_tot =  6.0, jlpar=   1
+ <thread>: computing partial wave K_tot =  5.0, jlpar=   1
+ <thread>: computing partial wave K_tot =  3.0, jlpar=   1
+ <thread>: computing partial wave K_tot =  0.0, jlpar=  -1
+ <thread>: computing partial wave K_tot =  1.0, jlpar=  -1
+ <thread>: computing partial wave K_tot =  6.0, jlpar=  -1
+ <thread>: computing partial wave K_tot =  2.0, jlpar=  -1
+ <thread>: computing partial wave K_tot =  4.0, jlpar=  -1
+ <thread>: computing partial wave K_tot =  5.0, jlpar=  -1
+ <thread>: computing partial wave K_tot =  3.0, jlpar=  -1
+Maximum number of threads used by OpenMP: 8
+%     E(CM-1)  JI   INI  F1I   F2I     JF  INF  F1F   F2F  CROSS SECTION (ANG^2)
+     500.000   4.0   0   3.0   2.0    4.0   0   3.0   2.0       1.7204E-01
+     500.000   4.0   0   3.0   2.0    4.0   0   3.0   3.0       2.5041E-02
+     500.000   4.0   0   3.0   2.0    4.0   0   3.0   4.0       1.0820E-02
+     500.000   4.0   0   3.0   2.0    4.0   0   4.0   3.0       1.5025E-02
+     500.000   4.0   0   3.0   2.0    4.0   0   4.0   4.0       2.7265E-02
+     500.000   4.0   0   3.0   2.0    4.0   0   4.0   5.0       2.3291E-02
+     500.000   4.0   0   3.0   2.0    4.0   0   5.0   4.0       4.4065E-03
+     500.000   4.0   0   3.0   2.0    4.0   0   5.0   5.0       1.5527E-02
+     500.000   4.0   0   3.0   2.0    4.0   0   5.0   6.0       6.1978E-02
+     500.000   4.0   0   3.0   3.0    4.0   0   3.0   2.0       1.7887E-02
+     500.000   4.0   0   3.0   3.0    4.0   0   3.0   3.0       1.6823E-01
+     500.000   4.0   0   3.0   3.0    4.0   0   3.0   4.0       2.4157E-02
+     500.000   4.0   0   3.0   3.0    4.0   0   4.0   3.0       2.1855E-02
+     500.000   4.0   0   3.0   3.0    4.0   0   4.0   4.0       1.4890E-02
+     500.000   4.0   0   3.0   3.0    4.0   0   4.0   5.0       2.9593E-02
+     500.000   4.0   0   3.0   3.0    4.0   0   5.0   4.0       1.2999E-02
+     500.000   4.0   0   3.0   3.0    4.0   0   5.0   5.0       4.1081E-02
+     500.000   4.0   0   3.0   3.0    4.0   0   5.0   6.0       3.1486E-02
+     500.000   4.0   0   3.0   4.0    4.0   0   3.0   2.0       6.0108E-03
+     500.000   4.0   0   3.0   4.0    4.0   0   3.0   3.0       1.8789E-02
+     500.000   4.0   0   3.0   4.0    4.0   0   3.0   4.0       1.8823E-01
+     500.000   4.0   0   3.0   4.0    4.0   0   4.0   3.0       1.6673E-02
+     500.000   4.0   0   3.0   4.0    4.0   0   4.0   4.0       2.5296E-02
+     500.000   4.0   0   3.0   4.0    4.0   0   4.0   5.0       2.7759E-02
+     500.000   4.0   0   3.0   4.0    4.0   0   5.0   4.0       4.8818E-02
+     500.000   4.0   0   3.0   4.0    4.0   0   5.0   5.0       3.1636E-02
+     500.000   4.0   0   3.0   4.0    4.0   0   5.0   6.0       1.1153E-02
+     500.000   4.0   0   4.0   3.0    4.0   0   3.0   2.0       1.0732E-02
+     500.000   4.0   0   4.0   3.0    4.0   0   3.0   3.0       2.1855E-02
+     500.000   4.0   0   4.0   3.0    4.0   0   3.0   4.0       2.1437E-02
+     500.000   4.0   0   4.0   3.0    4.0   0   4.0   3.0       1.7815E-01
+     500.000   4.0   0   4.0   3.0    4.0   0   4.0   4.0       1.2299E-02
+     500.000   4.0   0   4.0   3.0    4.0   0   4.0   5.0       4.2159E-02
+     500.000   4.0   0   4.0   3.0    4.0   0   5.0   4.0       2.6742E-02
+     500.000   4.0   0   4.0   3.0    4.0   0   5.0   5.0       3.9300E-02
+     500.000   4.0   0   4.0   3.0    4.0   0   5.0   6.0       1.8892E-02
+     500.000   4.0   0   4.0   4.0    4.0   0   3.0   2.0       1.5147E-02
+     500.000   4.0   0   4.0   4.0    4.0   0   3.0   3.0       1.1581E-02
+     500.000   4.0   0   4.0   4.0    4.0   0   3.0   4.0       2.5296E-02
+     500.000   4.0   0   4.0   4.0    4.0   0   4.0   3.0       9.5657E-03
+     500.000   4.0   0   4.0   4.0    4.0   0   4.0   4.0       1.9622E-01
+     500.000   4.0   0   4.0   4.0    4.0   0   4.0   5.0       2.2588E-02
+     500.000   4.0   0   4.0   4.0    4.0   0   5.0   4.0       3.2399E-02
+     500.000   4.0   0   4.0   4.0    4.0   0   5.0   5.0       1.6477E-02
+     500.000   4.0   0   4.0   4.0    4.0   0   5.0   6.0       2.8104E-02
+     500.000   4.0   0   4.0   5.0    4.0   0   3.0   2.0       1.0587E-02
+     500.000   4.0   0   4.0   5.0    4.0   0   3.0   3.0       1.8832E-02
+     500.000   4.0   0   4.0   5.0    4.0   0   3.0   4.0       2.2712E-02
+     500.000   4.0   0   4.0   5.0    4.0   0   4.0   3.0       2.6829E-02
+     500.000   4.0   0   4.0   5.0    4.0   0   4.0   4.0       1.8481E-02
+     500.000   4.0   0   4.0   5.0    4.0   0   4.0   5.0       1.8252E-01
+     500.000   4.0   0   4.0   5.0    4.0   0   5.0   4.0       1.7247E-02
+     500.000   4.0   0   4.0   5.0    4.0   0   5.0   5.0       3.1115E-02
+     500.000   4.0   0   4.0   5.0    4.0   0   5.0   6.0       2.6881E-02
+     500.000   4.0   0   5.0   4.0    4.0   0   3.0   2.0       2.4481E-03
+     500.000   4.0   0   5.0   4.0    4.0   0   3.0   3.0       1.0111E-02
+     500.000   4.0   0   5.0   4.0    4.0   0   3.0   4.0       4.8818E-02
+     500.000   4.0   0   5.0   4.0    4.0   0   4.0   3.0       2.0799E-02
+     500.000   4.0   0   5.0   4.0    4.0   0   4.0   4.0       3.2399E-02
+     500.000   4.0   0   5.0   4.0    4.0   0   4.0   5.0       2.1079E-02
+     500.000   4.0   0   5.0   4.0    4.0   0   5.0   4.0       2.1077E-01
+     500.000   4.0   0   5.0   4.0    4.0   0   5.0   5.0       3.0108E-02
+     500.000   4.0   0   5.0   4.0    4.0   0   5.0   6.0       4.5421E-03
+     500.000   4.0   0   5.0   5.0    4.0   0   3.0   2.0       7.0577E-03
+     500.000   4.0   0   5.0   5.0    4.0   0   3.0   3.0       2.6142E-02
+     500.000   4.0   0   5.0   5.0    4.0   0   3.0   4.0       2.5884E-02
+     500.000   4.0   0   5.0   5.0    4.0   0   4.0   3.0       2.5009E-02
+     500.000   4.0   0   5.0   5.0    4.0   0   4.0   4.0       1.3481E-02
+     500.000   4.0   0   5.0   5.0    4.0   0   4.0   5.0       3.1115E-02
+     500.000   4.0   0   5.0   5.0    4.0   0   5.0   4.0       2.4634E-02
+     500.000   4.0   0   5.0   5.0    4.0   0   5.0   5.0       1.9393E-01
+     500.000   4.0   0   5.0   5.0    4.0   0   5.0   6.0       1.7921E-02
+     500.000   4.0   0   5.0   6.0    4.0   0   3.0   2.0       2.3838E-02
+     500.000   4.0   0   5.0   6.0    4.0   0   3.0   3.0       1.6954E-02
+     500.000   4.0   0   5.0   6.0    4.0   0   3.0   4.0       7.7210E-03
+     500.000   4.0   0   5.0   6.0    4.0   0   4.0   3.0       1.0173E-02
+     500.000   4.0   0   5.0   6.0    4.0   0   4.0   4.0       1.9457E-02
+     500.000   4.0   0   5.0   6.0    4.0   0   4.0   5.0       2.2746E-02
+     500.000   4.0   0   5.0   6.0    4.0   0   5.0   4.0       3.1446E-03
+     500.000   4.0   0   5.0   6.0    4.0   0   5.0   5.0       1.5164E-02
+     500.000   4.0   0   5.0   6.0    4.0   0   5.0   6.0       1.8822E-01

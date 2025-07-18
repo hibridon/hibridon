@@ -118,7 +118,8 @@ use mod_version, only : version
 use mod_hibrid5, only : intcrs, readpc
 use mod_difcrs, only: difcrs
 use mod_hibasis, only: is_twomol
-use mod_hibrid2, only: enord, prsg
+use mod_hibrid2, only: enord
+use mod_hiprintixssg, only: prsg
 use mod_hibrid3, only: potmin
 use mod_hiutil, only: assignment_parse
 use mod_hiparcst, only: LPAR_COUNT, IPAR_COUNT, RPAR_COUNT
@@ -195,9 +196,6 @@ integer :: lindx(LPAR_COUNT)
 integer :: irpot  ! 1 if potentiel has been defined, 0 otherwise
 integer :: irinp
 data irpot, irinp /0, 0/
-
-logical :: batch
-data batch /.false./
 
 integer :: ipr, istep, inam, i, ienerg, iflux, ii, im, imx, incode, inew, ione, iprint, iskip, itx, ityp, izero
 integer :: j, jm, jmx, jtot2x, l, l1, l2, lc, lcc, ld, len, lend, length, leninp, lenjob, lenout, low
@@ -309,7 +307,7 @@ else
   if(opti) goto 2160
 end if
 ! label:read_next_command
-1 if (.not. lpar(LPAR_BATCH) .and. .not. batch) write (6, 2)
+1 if (.not. lpar(LPAR_BATCH)) write (6, 2)
 optifl = .false.
 !  in this next statement the $ sign implies no line feed
 !  replace this with an equivalent formatting character if your system
@@ -342,7 +340,6 @@ else if (line (1:4).eq.'help' .or. line (1:4).eq.'HELP') then
 else if (line(1:3) .eq.'BAT' .or. line(1:3) .eq. 'bat' .or. &
          line(1:4) .eq.' BAT' .or. line(1:4) .eq.' bat') then
     lpar(LPAR_BATCH)=.true.
-    batch = .true.
     goto 1  ! label:read_next_command
 end if
 call upper(line)
@@ -549,10 +546,10 @@ if(j .eq. 0) goto 15  ! label:interpret_statement(line, l1)
 if(j .lt.0) goto 1  ! label:read_next_command
 logp = .false.
 if(val .eq. 1) logp = .true.
-if (j .eq. 3) then
+! if (j .eq. 3) then
+if (j .eq. FCOD_BATCH) then
   write (6, 201)
 201   format (' ** BATCH FLAG CAN NOT BE SET INTERACTIVELY!')
-  lpar(LPAR_BATCH) = batch
   goto 1  ! label:read_next_command
 end if
 lpar(lindx(j)) = logp
@@ -836,7 +833,7 @@ else if (lpar(LPAR_TWOMOL)) then
 end if
 write(6,730) 'Flags:',(fcod(j),lpar(lindx(j)),j = 1,lcode)
 write(6,731)  nmax, nlammx
-if (ipar(IPAR_LSCREEN) .le. 24 .and. .not. batch) then
+if (ipar(IPAR_LSCREEN) .le. 24 .and. .not. lpar(LPAR_BATCH)) then
   write (6, 703)
 703   format (6x,'enter <return> to continue,', &
              ' <q> for prompt, or new data')
@@ -890,7 +887,6 @@ ione=1
 call sysdat(irpot, lpar(LPAR_READPT),ione)
 irinp=1
 l1 = l
-if (batch) lpar(LPAR_BATCH) = .true.
 goto 15  ! label:interpret_statement(line, l1)
 ! input, output, label and job file names
 ! input=infile, output=outfile, job=jobfile
@@ -907,7 +903,7 @@ if(i .eq. 8) then
     len = index (input,' ')
     write (6, 901) input(1:len)
 901     format (' *** INPUT FILE ',(a),' DOES NOT EXIST')
-    if(batch) call exit
+    if(lpar(LPAR_BATCH)) call exit
     goto 1  ! label:read_next_command
   end if
   goto 800
@@ -1201,7 +1197,6 @@ goto 1  ! label:read_next_command
      call get_token(line,l,code,lc)
      call assignment_parse(code(1:lc),empty_var_list,j,a(i))
 2010   continue
-  write (6,*) 'hinput : lpar = ' 
   call difcrs(fnam1,a,lpar(LPAR_FLAGHF))
 else
   write (6, 2011)

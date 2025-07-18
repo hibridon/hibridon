@@ -613,13 +613,6 @@ subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
   jmx = maxval(jlev(1:nlevel))
   idim = (iftmx + 2*jmx + 3) * (iftmx + jmx + 2)
 
-  do iftot = iftmn, iftmx
-    xftot = iftot + spins%h
-    do jlp = 1, 2
-      jlpar = 1 - (jlp -1)*2
-      write(6,"(A,F5.1,A,I4)") ' Computing partial wave J_tot =', xftot, ', jlpar=', jlpar
-    end do
-  end do
 !$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,spins,bqs,hf,sr,si) REDUCTION(+:sigma)
   allocate(tmatr(idim, idim)) 
   allocate(tmati(idim, idim)) 
@@ -628,6 +621,7 @@ subroutine molecule_atom_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
     xftot = iftot + spins%h
     do jlp = 1, 2
       jlpar = 1 - (jlp -1)*2
+      write(6,"(A,F5.1,A,I4)") ' <thread>: Computing partial wave J_tot =', xftot, ', jlpar=', jlpar
       do i = 1, hf%n
         do ii = i, hf%n
           xj = hf%j(i) + spins%f
@@ -767,6 +761,7 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
   endif
 
   !  NOTE:  xftot is called K in Lara-Moreno et al.
+
 !$OMP PARALLEL DEFAULT(PRIVATE) SHARED(idim,jfrst,jfinl,iftmn,iftmx,spins,bqs,hf,sr,si, dspin) REDUCTION(+:sigma)
   allocate(tmatr(idim, idim))
   allocate(tmati(idim, idim))
@@ -775,7 +770,7 @@ subroutine molecule_atom_2spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spins, h
     xftot = float(iftot) + dspin
     do jlp = 1, 2
       jlpar = 1 - (jlp -1)*2
-      write(6,"(A,F5.1,A,I4)") ' Computing partial wave K_tot =', xftot, ', jlpar=', jlpar
+      write(6,"(A,F5.1,A,I4)") ' <thread>: computing partial wave K_tot =', xftot, ', jlpar=', jlpar
       do i=1, hf%n
         xj = hf%j(i) + spins%f
         xf = hf%f(i)
@@ -929,7 +924,7 @@ subroutine molecule_molecule_1spin(jfrst, jfinl, nlevel, jlev, bqs, sr, si, spin
     xftot = iftot + spins%h
     do jlp = 1, 2
       jlpar = 1 - (jlp -1) * 2
-      write(6,"(A,F5.1,A,I4)") ' Computing partial wave J_tot =', xftot, ', jlpar=', jlpar
+      write(6,"(A,F5.1,A,I4)") ' <thread>: Computing partial wave J_tot =', xftot, ', jlpar=', jlpar
       do i = 1, hf%n
         do ii = i, hf%n
           xj = (hf%j(i)/10) + spins%f
