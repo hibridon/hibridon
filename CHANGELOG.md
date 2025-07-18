@@ -4,6 +4,7 @@
 
 ### Changed
 
+- moved hibridon documentation from [https://github.com/hibridon/hibridon/wiki] to `docs/` to make the documentation support branches ([#223](https://github.com/hibridon/hibridon/issues/223))
 
 ### Added
 

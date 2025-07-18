@@ -5,14 +5,14 @@ code status (hibridon main branch):
 
 ![main CI](https://github.com/hibridon/hibridon/actions/workflows/ci.yml/badge.svg?event=push)
 
-[What does that mean ?](https://github.com/hibridon/hibridon/wiki/Continuous-Integration)
+[What does that mean ?](./docs/Continuous-Integration.md)
 
 ---
 # Hibridon v5.2
 
 Hibridon is a program package to solve the close-coupled equations which occur in the quantum treatment of inelastic atomic and molecular collisions. Gas-phase scattering, photodissociation, collisions of atoms and/or molecules with flat surfaces, and bound states of weakly-bound complexes can be treated
 
-The full documentation is available on [https://github.com/hibridon/hibridon/wiki](https://github.com/hibridon/hibridon/wiki)
+The full user documentation is available on [docs/Home.md](./docs/Home.md)
 
 Changes:
 - [CHANGELOG](CHANGELOG.md)
@@ -213,7 +213,7 @@ Once your executables are created (step 4), you can interactively run hibridon u
 # or 
 ./<executable> --kmax <kmax>
 ```
-Where `<kmax>` is the maximum number of channels (see [Memory Requirements](https://github.com/hibridon/hibridon/wiki/Memory-requirements)).
+Where `<kmax>` is the maximum number of channels (see [Memory Requirements](./docs/Memory-requirements.md)).
 
 
 You can also run your Hibridon executable using a command file:
@@ -224,7 +224,7 @@ You can also run your Hibridon executable using a command file:
 # or
 ./<executable> -k <kmax> --com <command file>
 ```
-Where `<commands file>` is a file containing the input commands you want to execute (see [Batch-mode-and-background-execution](https://github.com/hibridon/hibridon/wiki/Batch-mode-and-background-execution))
+Where `<commands file>` is a file containing the input commands you want to execute (see [Batch-mode-and-background-execution](./docs/Batch-mode-and-background-execution.md))
 
 ### 7. One liner example
 
