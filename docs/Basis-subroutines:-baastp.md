@@ -28,16 +28,16 @@
 
 The rotational eigenfunctions of an asymmetric top are expanded in a symmetrized symmetric top basis as: [S. Green, J. Chem. Phys. **64**, 3463 (1976)]
 
-![image](https://user-images.githubusercontent.com/20931653/171144778-1c6802bc-6d98-4d72-8ad0-b771662b34db.png)
+$$ \ket{j\ k\ m\ s} = [2(1+\delta_{k0})]^{-1/2}(\ket{j\ k\ m} + s\ket{j\ -k\ m})$$
 
-where *s* is the symmetry index (+1 or −1). In this basis, the asymmetric top hamiltonian block diagonalizes into 4 groups: 
-  - (1) *k* even, *s* = +1
-  - (2) *k* even, *s* = −1
-  - (3) *k* odd, *s* = +1
-  - (4) *k* odd, *s* = −1
+where $s$ is the symmetry index (+1 or −1). In this basis, the asymmetric top hamiltonian block diagonalizes into 4 groups: 
+  - (1) $k$ even, $s$ = +1
+  - (2) $k$ even, $s$ = −1
+  - (3) $k$ odd, $s$ = +1
+  - (4) $k$ odd, $s$ = −1
 
 The expansion coefficients are stored in the array c as:
-  - *c*(*k* = 0), *c*(*k* = 2), ... *c*(*k* = *j*), for even *k*
-  - *c*(*k* = 1), *c*(*k* = 3), ... *c*(*k* = *j*), for odd *k*
+  - $c(k = 0), c(k = 2), ... c(k = j)$, for even $k$
+  - $c(k = 1), c(k = 3), ... c(k = j)$, for odd $k$
 
-By setting `BASTST`=.TRUE., you can output the values of *j*, *s*, the values of the prolate and oblate projection quantum numbers [*k<sub>p</sub>* and *k<sub>o</sub>*], and the internal energies, as well as the expansion coefficients.
+By setting `BASTST`=.TRUE., you can output the values of $j$, $s$, the values of the prolate and oblate projection quantum numbers [$k_p$ and $k_o$], and the internal energies, as well as the expansion coefficients.

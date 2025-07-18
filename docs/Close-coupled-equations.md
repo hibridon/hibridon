@@ -14,57 +14,53 @@ In the close coupled treatment of both scattering and photodissociation, the sca
 
 The full scattering wavefunction is written as:
 
-<img src="https://user-images.githubusercontent.com/20931653/170126825-46f3739d-8a18-4215-99ce-6facca083398.png" height="30px"> (1)
+(1)$$ \Psi(\mathbf{R},\mathbf{r}) = \sum \mathbf{F(R)} \times \Phi(\mathbf{r}) $$
 
-Each column of the **F**(R) matrix defines the expansion coefficients for collisions in which the collision partners start out in the particular initial state whose index is that of the selected column.
-Substitution of the expansion (1) into the Schrödinger equation, premultiplication by one of the internal states, and integration over **r** gives rise to a set of coupled ordinary differential equations for the expansion coefficients **F**(R).
+Each column of the $\mathbf{F}(R)$ matrix defines the expansion coefficients for collisions in which the collision partners start out in the particular initial state whose index is that of the selected column.
+Substitution of the expansion (1) into the Schrödinger equation, premultiplication by one of the internal states, and integration over $r$ gives rise to a set of coupled ordinary differential equations for the expansion coefficients $\mathbf{F}(R)$.
 
 The general structure of these coupled second-order differential equations is expressed by the matrix equation:
 
-<img src="https://user-images.githubusercontent.com/20931653/170127870-e57eebf5-87be-4438-b74d-80b2eaf0d2e5.png" height="50px"> (2)
+(2)$$ \left[ \mathbf{1}\frac{\partial^2}{\partial R²} + \mathbf{W}(R)\right] \mathbf{F}(R) = 0 $$
 
-Here **1** designates the identity matrix, R is the interparticle distance, and the matrix **W**(R) is given by:
+Here $\mathbf{1}$ designates the identity matrix, $R$ is the interparticle distance, and the matrix $\mathbf{W}(R)$ is given by:
 
-
-<img src="https://user-images.githubusercontent.com/20931653/170128659-979154fa-ad5c-4bc1-9266-d240809125db.png" height="50px"> (3)
-
-
-where $h$ designates Planck's constant divided by $2\pi$, $m$ is the reduced mass of the collision system and **k**<sup>2</sup> and **l**<sup>2</sup> designate, respectively, the (diagonal) matrices of the wavevector and the relative orbital angular momentum of the collision partners. We have
-
-<img src="https://user-images.githubusercontent.com/20931653/170129917-ff42ce5a-bc12-42ce-bf48-c0a80a8d4b54.png" height="50px"> (4)
-
-where E is the total energy and e<sub>i</sub> is the internal energy of the i<sup>th</sup> channel. Also, we have
-
-<img src="https://user-images.githubusercontent.com/20931653/170130164-27fb8436-11a0-49d4-8310-d318edd2f517.png" height="50px"> (5)
+(3)$$ \mathbf{W}(R)= \mathbf{k}^2 - \mathbf{l}^2 - \left( \frac{2m}{\hbar^2} \right)  \mathbf{V}(R)$$
 
 
-where l<sub>i</sub> is the relative orbital angular momentum in the i<sup>th</sup> channel. In Eq. (3) the matrix **V**(R) is the (full, symmetric) matrix of the coupling potential.
+where $\hbar$ designates Planck's constant divided by $2\pi$, $m$ is the reduced mass of the collision system and $\mathbf{k}^2$ and $\mathbf{l}^2$ designate, respectively, the (diagonal) matrices of the wavevector and the relative orbital angular momentum of the collision partners. We have
 
-Diagonalization of the W(R) matrix yields the diagonal matrix of adiabatic wavevectors k(R). The eigenvectors define the locally adiabatic states, which are transformations of the internal states used to expand the scattering wavefunction, (r). If C(R) designates the matrix of eigenvectors, column ordered, then the diagonal matrix of adiabatic energies is defined as
+(4)$$ (k^2)_{ii} = \left( \frac{2m}{\hbar^2} \right) (E-e_i) $$
 
-<img src="https://user-images.githubusercontent.com/20931653/170130776-31a56947-3017-40aa-8771-440d1529d802.png" height="20px"> (6)
+where $E$ is the total energy and $e_i$ is the internal energy of the $i$<sup>th</sup> channel. Also, we have
 
+(5)$$ (l^2)_{ii} = \left( \frac{\hbar^2}{2mR^2} \right) l_i(l_i + 1) $$
 
-One obtains numerically the matrix of solutions **F**(R) by outward propagation. You start this propagation at a value of the interparticle distance R = Rstart which lies well inside the innermost classical turning point. Once you have propagated **F**(R) out to a value of R which is so large that the potential **V**(R) is negligible, compared to the wavevectors **k**<sup>2</sup>, you can then match **F**(R) to the known [asymptotic form](Boundary) and obtain the S matrix. This has to be done over and over at many values of the total angular momentum Jtot. In a semiclassical description the total angular momentum corresponds to the impact parameter b. From the **S** matrix at all these values of Jtot, you can calculate differential and integral cross sections.[2,3]
+where $l_i$ is the relative orbital angular momentum in the $i$<sup>th</sup> channel. In Eq. (3) the matrix $\mathbf{V}(R)$ is the (full, symmetric) matrix of the coupling potential.
+
+Diagonalization of the $\mathbf{W}(R)$ matrix yields the diagonal matrix of adiabatic wavevectors $\mathbf{k}(R)$. The eigenvectors define the locally adiabatic states, which are transformations of the internal states used to expand the scattering wavefunction, (r). If $\mathbf{C}(R)$ designates the matrix of eigenvectors, column ordered, then the diagonal matrix of adiabatic energies is defined as
+
+(6)$$ \mathbf{e}(R) = \mathbf{C}(R)^T\mathbf{V}(R)\mathbf{C}(R) $$
+
+One obtains numerically the matrix of solutions $\mathbf{F}(R)$ by outward propagation. You start this propagation at a value of the interparticle distance $R$ = $R_{start}$ which lies well inside the innermost classical turning point. Once you have propagated $\mathbf{F}(R)$ out to a value of $R$ which is so large that the potential $\mathbf{V}(R)$ is negligible, compared to the wavevectors $\mathbf{k}^2$, you can then match $\mathbf{F}(R)$ to the known [asymptotic form](Boundary) and obtain the S matrix. This has to be done over and over at many values of the total angular momentum $J_{tot}$. In a semiclassical description the total angular momentum corresponds to the impact parameter b. From the $\mathbf{S}$ matrix at all these values of $J_{tot}$, you can calculate differential and integral cross sections.[2,3]
 
 ## Cross sections
 
-Within the CC formulation, the integral cross section for a transition from an initial state i to a final state f is given by
+Within the CC formulation, the integral cross section for a transition from an initial state $i$ to a final state $f$ is given by
+
+(7)$$\sigma_{i \rightarrow f} = \frac{\pi}{(2j_i + 1)k_i^2} \sum_{J_{tot}, l, p} \left|T_{ij}^{J_{tot}} \right|^2$$
  
-<img src="https://user-images.githubusercontent.com/20931653/170131970-6c8de6ad-dfb0-4c14-b100-be503583ba0b.png" height="50px"> (7)
+where $k_i$ is the wavevector of the initial state and the sum runs over:
 
-where k<sub>I</sub> is the wavevector of the initial state and the sum runs over:
+- all values of the total angular momentum for which the $\mathbf{S}$ matrix elements differ from unity. You must ensure that the parameter [JTOT2](JTOT) has been set large enough so that increasing its value will not significantly change the cross section(s) of interest,
+- all values of the orbital angular momentum $l$ allowed by the triangular rule
+- both values ($p$ = +1 and -1) of the total parity of the scattering wavefunction. The total parity is related to the important input parameter [JLPAR](JLPAR). Note that for full close-coupled determinations of either integral or differential cross sections, the calculations must be carried out for both values of [JLPAR](JLPAR).
 
-- all values of the total angular momentum for which the S matrix elements differ from unity. You must ensure that the parameter [JTOT2](JTOT) has been set large enough so that increasing its value will not significantly change the cross section(s) of interest,
-- all values of the orbital angular momentum l allowed by the triangular rule
-- both values (p = +1 and -1) of the total parity of the scattering wavefunction. The total parity is related to the important input parameter [JLPAR](JLPAR).  Note that for full close-coupled determinations of either integral or differential cross sections, the calculations must be carried out for both values of [JLPAR](JLPAR).
+Here, the $\mathbf{T}$ or transition matrix is defined as:
 
-Here, the T or transition matrix is defined as:
+(8)$$ \mathbf{T} = \mathbf{1} - \mathbf{S} $$
 
-<img src="https://user-images.githubusercontent.com/20931653/170132396-e65670f4-6c49-4aa0-8dcc-f2bdadd8e7eb.png" height="15px"> (8)
-
-
-where **1** is the unit matrix. At large Jtot the **T** matrix goes to zero as the centrifugal potential becomes so large that the colliding particles are kept beyond the range of the interaction potential. This defines the range of total angular momentum for which scattering calculations need be done. The minimum and maximum values of the total angular momentum for which the calculation is done are set by the parameters [JTOT1](JTOT) and [JTOT2](JTOT), respectively.
+where $\mathbf{1}$ is the unit matrix. At large $J_{tot}$ the $\mathbf{T}$ matrix goes to zero as the centrifugal potential becomes so large that the colliding particles are kept beyond the range of the interaction potential. This defines the range of total angular momentum for which scattering calculations need be done. The minimum and maximum values of the total angular momentum for which the calculation is done are set by the parameters [JTOT1](JTOT) and [JTOT2](JTOT), respectively.
 
 See Refs. 1 and 2 for an expression for the differential cross section equivalent to Eq. (7).
 
@@ -72,44 +68,44 @@ In general, the CC equations are block diagonal in the overall parity of the sca
 
 Equation (7) can be written equivalently in terms of partial cross sections
 
-<img src="https://user-images.githubusercontent.com/20931653/170133078-1bda8982-5028-4a3b-ac5b-94d95b3e7975.png" height="50px"> (9)
+(9)$$\sigma_{i \rightarrow f} = \sum_{J_{tot}} \sigma_{i \rightarrow f}^{J_{tot}}$$
 
 where the partial cross sections, which can be calculated with the command [PARTC](PARTC), are defined by:
- 
-<img src="https://user-images.githubusercontent.com/20931653/170132875-54de9fa0-6f1d-433d-b7db-a4a817f95c54.png" height="50px"> (10)
+
+(10)$$\sigma_{i \rightarrow f}^{J_{tot}} = \frac{\pi}{(2j_i + 1)k_i^2} \sum_{l, p} \left|T_{ij}^{J_{tot}} \right|^2$$
 
 In a semiclassical formulation, the integral cross section is written as
 
-<img src="https://user-images.githubusercontent.com/20931653/170133327-e3a6f6e4-f199-4dfb-b064-e99aca37323a.png" height="60px"> (11)
+(11)$$\sigma_{i \rightarrow f} = \int_0^\infty 2\pi b P_{i \rightarrow f}(b)db$$
 
-in terms of a transition probability which depends on the impact parameter b. The partial cross section is thus equivalent to this semi-classical transition probability, as follows:
 
-<img src="https://user-images.githubusercontent.com/20931653/170133476-e2f357a8-1eb4-4201-aee1-47e65694e15d.png" height="25px"> (12)
+in terms of a transition probability which depends on the impact parameter $b$. The partial cross section is thus equivalent to this semi-classical transition probability, as follows:
 
+(12)$$\sigma_{i \rightarrow f}^{J_{tot}} = 2\pi b P_{i \rightarrow f}(b)db$$
 
 ## Wavefunction and Fluxes
 
-In addition to the determination of cross sections, which depend on the asymptotic form of the expansion coefficients **F**(R) in Eq. (1), the Hibridon code allows you determine the R dependence of these coefficients. In addition, one can also determine the flux associated with the scattering and photodissociation wavefunctions, which is a more meaningful physical quantity. For a further discussion see Ref. 4 and 5.)
+In addition to the determination of cross sections, which depend on the asymptotic form of the expansion coefficients $\mathbf{F}(R)$ in Eq. (1), the Hibridon code allows you determine the R dependence of these coefficients. In addition, one can also determine the flux associated with the scattering and photodissociation wavefunctions, which is a more meaningful physical quantity. For a further discussion see Ref. 4 and 5.)
 
 ## Methods
 
 The determination of differential and/or integral cross sections involves three steps:
-The development of subroutines to calculate the potential matrix V(R) for a particular collision system.
-Solution of the CC equations to obtain and store the S matrix elements, at both values of the parity index [JLPAR](JLPAR).
+The development of subroutines to calculate the potential matrix $\mathbf{V}(R)$ for a particular collision system.
+Solution of the CC equations to obtain and store the $\mathbf{S}$ matrix elements, at both values of the parity index [JLPAR](JLPAR).
 The subsequent calculation of differential and/or integral cross sections for the transitions which interest you.
 The major part of this manual is devoted to the description of a complex family of subroutines for solution of the CC equations - step 2 above.
    Historically, there have been many algorithms developed to solve these equations. These algorithms can be grouped into two categories[3]:
 
-- Solution-following methods. In these methods you approximate the matrix of solutions **F**(R) by a power series and then solve Eq. (1) exactly. This is similar in spirit to the usual numerical techniques for solution of ordinary differential equations (Runge-Kutta, Euler, Adams-Moulton).
-- Potential-following methods. In these methods the matrix **V**(R) is approximated by a sequence of constant or linear segments. In these local regions the approximated CC equations can be solved exactly.
+- Solution-following methods. In these methods you approximate the matrix of solutions $\mathbf{F}(R)$ by a power series and then solve Eq. (1) exactly. This is similar in spirit to the usual numerical techniques for solution of ordinary differential equations (Runge-Kutta, Euler, Adams-Moulton).
+- Potential-following methods. In these methods the matrix $\mathbf{V}(R)$ is approximated by a sequence of constant or linear segments. In these local regions the approximated CC equations can be solved exactly.
 
 In solution-following methods the solution is approximated while the potential is retained exactly. On the other hand, in potential-following methods the potential is approximated but the solution (to this approximate potential) is exact.
 
-   No one method is superior at all values of the internuclear separation. Rather, it is best to combine a solution-following method at short-range (R small), where most intermolecular potentials vary rapidly, with a potential-following method at longer range, where the potential varies more slowly but where for many problems the solution can be highly oscillatory. This combination of two methods is called a hybrid integrator.
+   No one method is superior at all values of the internuclear separation. Rather, it is best to combine a solution-following method at short-range ($R$ small), where most intermolecular potentials vary rapidly, with a potential-following method at longer range, where the potential varies more slowly but where for many problems the solution can be highly oscillatory. This combination of two methods is called a hybrid integrator.
 
-   The Hibridon program package uses a particular hybrid integrator. The solution following method used at short range is based on the log-derivative propagator of Johnson,[6-8] as modified recently by Manolopoulos.[9] This propagator is designated LOGD. The potential-following method used at long-range is based on the linear-reference potential of Gordon,[10,11] as modified recently by Alexander and Manolopoulos.[12,13] This propagtor is designated AIRY. The Hibridon code combines these two fast algorithms (LOGD and AIRY). Both are fast and exceptionally stable. To a large degree the numerical stability is obtained by propagation of the logarithmic derivative of the solution matrix **F**(R), namely
+   The Hibridon program package uses a particular hybrid integrator. The solution following method used at short range is based on the log-derivative propagator of Johnson,[6-8] as modified recently by Manolopoulos.[9] This propagator is designated LOGD. The potential-following method used at long-range is based on the linear-reference potential of Gordon,[10,11] as modified recently by Alexander and Manolopoulos.[12,13] This propagator is designated AIRY. The Hibridon code combines these two fast algorithms (LOGD and AIRY). Both are fast and exceptionally stable. To a large degree the numerical stability is obtained by propagation of the logarithmic derivative of the solution matrix $\mathbf{F}(R)$, namely
 
-<img src="https://user-images.githubusercontent.com/20931653/170139815-781c5702-8cf0-46ce-87c2-5f86f7948cbd.png" height="25px"> (13)
+(13)$$ \mathbf{Y}(R) = \mathbf{F}'(R) \mathbf{F}(R)^{-1}$$
 
 rather than the solution matrix itself.
 
