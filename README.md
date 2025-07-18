@@ -1,9 +1,9 @@
 
 code status (hibridon main branch):
 
-![full CI](https://github.com/hibridon/hibridon/actions/workflows/ci.yml/badge.svg?event=scheduler)
+- `Main CI`: [![main CI](https://github.com/hibridon/hibridon/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/hibridon/hibridon/actions/workflows/ci.yml)
+- `Full CI`: [![Full CI](https://github.com/hibridon/hibridon/actions/workflows/ci.yml/badge.svg?event=schedule)](https://github.com/hibridon/hibridon/actions/workflows/ci.yml)
 
-![main CI](https://github.com/hibridon/hibridon/actions/workflows/ci.yml/badge.svg?event=push)
 
 [What does that mean ?](./docs/Continuous-Integration.md)
 
