@@ -2,27 +2,21 @@ Each time Hibridon source code is modified merging a Pull Request or directly pu
 
 On the main page of the [Hibridon GitHub repository](https://github.com/hibridon/hibridon/), the four labels at the top of the build instructions allow you to check if the last bunch of tests were successful (passing):
 
-<img width="400px" src="https://user-images.githubusercontent.com/20931653/227159633-aba7db5a-4ecf-4f63-b83e-595d8b9edd19.jpg">
+![ci-badges](./resources/ci-badges.png)
 
- 
 Currently, these tests are done on two different platforms (macOS and Linux), using different build modes (Release and Debug), compilers, and BLAS/LAPACK libraries.
 The full list of the configurations used for the continuous integration is the following:
 
-| Platform  | OS version  | Build mode  | Compiler  | BLAS/LAPACK Library |
-|---|---|---|---|---|
-| macOS  | 11.2  | Debug  | gfortran 9  |  Intel MKL |
-| macOS  | 11.2  | Debug  | gfortran 10 |  Intel MKL |
-| macOS  | 11.2  | Debug  | gfortran 11 |  Intel MKL |
-| macOS  | 11.2  | Debug  | Intel ifort 2022  |  Intel MKL |
-| macOS  | 11.2  | Release  | gfortran 9 |  Intel MKL |
-| macOS  | 11.2  | Release  | gfortran 10 |  Intel MKL |
-| macOS  | 11.2  | Release  | gfortran 11 |  Intel MKL |
-| macOS  | 11.2  | Release  | Intel ifort 2022 |  Intel MKL |
-|---|---|---|---|---|
-| Linux  | Debian 9  | Debug | gfortran 6 |  Atlas |
-| Linux  | Debian 9  | Debug | Intel ifort 2021 |  Intel MKL |
-| Linux  | Debian 9  | Release | gfortran 6 |  Atlas |
-| Linux  | Debian 9  | Release | Intel ifort 2021 |  Intel MKL |
+| Platform | OS version | Build mode | Compiler           | BLAS/LAPACK Library |
+| -------- | ---------- | ---------- | ------------------ | ------------------- |
+| macOS    | 11.2       | Debug      | gfortran 11        | Apple               |
+| macOS    | 11.2       | Debug      | Intel ifort 2022   | Intel MKL           |
+| macOS    | 11.2       | Release    | gfortran 11        | Apple               |
+| macOS    | 11.2       | Release    | Intel ifort 2022   | Intel MKL           |
+| Linux    | Debian 12  | Debug      | gfortran 12.2      | OpenBLAS 0.3.21     |
+| Linux    | Debian 12  | Debug      | Intel ifx 2024.2.1 | Intel MKL 2024.2.1  |
+| Linux    | Debian 12  | Release    | gfortran 12.2      | OpenBLAS 0.3.21     |
+| Linux    | Debian 12  | Release    | Intel ifx 2024.2.1 | Intel MKL 2024.2.1  |
 
 
 Tow tests suites are executed for the continuous integration:
