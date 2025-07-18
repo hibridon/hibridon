@@ -53,5 +53,3 @@ Hibridon v5 is an open-source software under the [GNU General Public Licence v3]
 Everyone is free to use, distribute, modify, and distribute modified versions of this software.
 
 The GitHub repository is public. We encourage contributors to submit their modifications by opening Pull Requests on this repository. Several useful guides on how to collaborate using GitHub can be found [here](https://lab.github.com).
-
-Contributions to the present documentation Wiki are also welcome. A guide on how to edit and create new pages can be found [here](Wiki-guide).
