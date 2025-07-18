@@ -12,7 +12,7 @@ code status (hibridon main branch):
 
 Hibridon is a program package to solve the close-coupled equations which occur in the quantum treatment of inelastic atomic and molecular collisions. Gas-phase scattering, photodissociation, collisions of atoms and/or molecules with flat surfaces, and bound states of weakly-bound complexes can be treated
 
-The full user documentation is available on [docs/Home.md](./docs/Home.md)
+The full user documentation is available on [docs/Home.md](./docs/Home.md) (or [https://hibridon.github.io/hibridon/Home.html] for the latest released version).
 
 Changes:
 - [CHANGELOG](CHANGELOG.md)
