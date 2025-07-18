@@ -2,7 +2,6 @@
 
 
 ![image](./resources/hibridon-logo.png)
-![image](./resources/hibridon-logo-nobg.png)
 
 
 1. [What is Hibridon?](#what-is-Hibridon)
