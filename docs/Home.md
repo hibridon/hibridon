@@ -1,7 +1,8 @@
 ⚠️ This wiki is still under construction. Original documentation for the Hibridon package can be found [here](https://www2.chem.umd.edu/groups/alexander/hibridon/hib43/)
 
 
-<img src="https://user-images.githubusercontent.com/20931653/170123209-bc40be8a-c9ea-479d-862f-323c07d53aec.png" width="500px">
+![image](./resources/hibridon-logo.png)
+![image](./resources/hibridon-logo-nobg.png)
 
 
 1. [What is Hibridon?](#what-is-Hibridon)

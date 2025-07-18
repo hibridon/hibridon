@@ -2,7 +2,7 @@
   "menu": {
     "item": "{{#levelRepeat}}  {{/levelRepeat}}* [{{{title}}}]({{{link}}})\n",
     "category": "{{#levelRepeat}}  {{/levelRepeat}}* {{#link}}[{{{title}}}]({{{link}}}){{/link}}{{^link}}{{{title}}}{{/link}}\n{{{subitems}}}",
-    "category-1": "![Hibridon](https://user-images.githubusercontent.com/20931653/170141644-160a2101-8892-42f5-adb8-ca5270db1a93.png)\n\n{{{subitems}}}\n"
+    "category-1": "![Hibridon](./resources/hibridon-logo-nobg.png)\n\n{{{subitems}}}\n"
   },
   "rules": {
     "exclude": [],
