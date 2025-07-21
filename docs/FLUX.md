@@ -14,7 +14,7 @@ where
   - `IFLUX` =  
     - 1:  for a determination of the fluxes in the diabatic (asymptotic) basis
     - −1:  for a determination of the fluxes in the locally adiabatic basis
-    - 2:  for a determination of the adiabatic energies (see also the [EADIAB](EADIAB) command
+    - 2:  for a determination of the adiabatic energies (see also the [EADIAB](EADIAB) command)
     - −2:  for fluxes summed over the sign of the additional channel index
     - 3:  for fluxes in coordinate space
     - 4:  for determination of the transformation matrix C(R), defined in Eq. (6) of the help file describing the [close coupling method](Close-coupled-equations)
