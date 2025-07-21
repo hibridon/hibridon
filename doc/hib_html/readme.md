@@ -1,0 +1,1 @@
+**warning**: this directory contains the hibridon 4.3.7 documentation in html format. This documentation is now obsolete and has been migrated to markdown format. It is not meant to be modified anymore as it is kept as reference. We keep it here until we are sure it has been fully migrated.
