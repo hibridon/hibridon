@@ -943,7 +943,7 @@ end module mod_codim
 ! cotwo
 ! stores data related to systems with 2 molecules
 !    numj:     number of j1-j2 values
-!    nj1j2:    specific j1-j2 values (up to a maximum of 50)
+!    nj1j2:    specific j1-j2 values (up to a maximum of 50) stored using the encoding j1*10+j2
 !              N.B. this dimension is set here
 module mod_two
    integer :: numj
