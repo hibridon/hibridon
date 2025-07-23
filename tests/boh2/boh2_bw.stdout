@@ -1,0 +1,75 @@
+
+ --------------------------------------------------------------------------
+           HIBRIDON SCATTERING CODE V 5.20
+
+      AUTHORS: M. ALEXANDER, D. MANOLOPOULOS, H.-J. WERNER, B. FOLLMEG,
+               P. DAGDIGIAN
+ CONTRIBUTORS: D. LEMOINE, P. VOHRALIK, G. COREY, R. JOHNSON, T. ORLIKOWSKI,
+          A. BERNING, A. DEGLI-ESPOSTI, C. RIST, B. POUILLY, J. KLOS, Q. MA,
+          G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
+ --------------------------------------------------------------------------
+           BUILD CONFIGURATION:
+CMAKE BUILD DATE: 2025-07-23 at 18:26
+CMAKE BUILD TYPE: Debug
+CODE GIT REVISION: af6816f39386cd70fcadeba55af47aa1fb4cbdb4
+SYS: Linux 5.4.0-216-generic x86_64
+COMPILER: /usr/bin/gfortran
+COMPILE OPTIONS: 
+ --------------------------------------------------------------------------
+            CURRENT HARDWARE CONFIGURATION:
+
+Model name:                         Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
+CPU MHz:                            3176.272
+Socket(s):                          1
+Core(s) per socket:                 4
+L2 cache:                           1 MiB
+L3 cache:                           6 MiB
+Hyper-Threading Technology: Enabled
+MemTotal:       16255508 kB
+ --------------------------------------------------------------------------
+ WRSMAT IS .FALSE., ONLY ADIABATIC ENERGIES SAVED
+     *** Parameters (bound-state):
+ JTOT1  =   0        JTOT2  =   0        JTOTD  =  20        JLPAR  =   1
+ NERG   =   1        NUMAX  =   0        NUMIN  =   0        NUD    =   1
+ LSCREEN=  48        IPRINT =   2
+ R1     =  4.000     R2     =  10.00     C      = 0.5000     SPAC   = 0.5000    
+ DELR   =  1.000     HSIMP  = 0.1000     EIGMIN = 1.0000E-08 TOLAI  = 0.1000    
+ XMU    =   1.70370
+ NOUT:  5; JOUT:  0   1   0   1   2
+ INDOUT:    0  200    1  201  201
+     *** HOMO+2P system parameters:
+ NTERM  =   1        IOP    =   1        JMAX   =   1
+ BROT   =  59.33     ASO    =  10.17    
+ LAMMIN:    1
+ LAMMAX:    9
+ MPROJ:     0
+     *** Flags:
+ AIRYFL= T    BASTST= F    BATCH = T    CHLIST= T    CSFLAG= T    FLAGHF= T
+ FLAGSU= F    IHOMO = T    IPOS  = F    LOGDFL= T    NOPRIN= F    NUCROS= F
+ PHOTOF= F    PRAIRY= F    PRLOGD= F    PRPART= F    PRSMAT= F    PRT2  = F
+ PRXSEC= F    READPT= F    RSFLAG= F    T2TEST= F    TWOMOL= F    WAVEFL= T
+ WRPART= F    WRSMAT= F    WRXSEC= F    BOUNDC= T
+ ** Maximum Channels:  120; Maximum Anisotropic Terms:  2000
+ ** Energies:      208.500000
+ ** Label:      B-H2 PES's of ALEXANDER                         
+ ** Pot name:      ALEXANDER B(2P)H2(J=0,1) DUBERNET-HUTSON        
+ ** Input File:  Boh2_bw.inp
+ ** Output file: Outpt
+ ** Jobname:     Boh2_bw
+ WRSMAT IS .FALSE., ONLY ADIABATIC ENERGIES SAVED
+ ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS    35
+
+ ** BOUND STATE CALCULATION:  R1 = 4.00;  R2 =10.00
+      SPAC-TRY = 0.500, SPAC-EXACT = 0.500000, NO. GAUSSIANS = 13, SIZE OF TOTAL BASIS =   65
+      C = 0.50, ALPH =  1.0000    
+ ** MINIMUM EIGENVALUE OF S MATRIX = 2.7416E-06
+ ** SIMPSON'S 3/8 RULE INTEGRATION OF POTENTIAL
+      DEL-R = 1.00, H-START = 0.100, N-POINTS =  81, H-EXACT = 0.100000
+ ** CALL DSYGVD TO CALCULATE ALL EIGENVALUES AND EIGENVECTORS.
+ ** NEGATIVE AND LOWEST POSITIVE EIGENVALUES SAVED IN FILE Boh2_bw.evl                             
+      LABEL:B-H2 PES's of ALEXANDER                         
+ ** NEGATIVE EIGENVALUES ARE (CM-1):
+      -37.596
+      -26.462
+      -20.581
+ *** CPU TIME FOR BOUND =  00:00:00 
