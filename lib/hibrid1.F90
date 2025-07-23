@@ -2299,12 +2299,20 @@ idif=0
 if (rmu1.ne.rmu2) idif=idif+1
 if (ered1.ne.ered2) idif=idif+1
 if (nnout1.ne.nnout2) idif=idif+1
+if(idif.ne.0) then
+  write(6, '(a,i0,a)') '*** ERROR: ',idif,' parameters differ between the 2 smt files:'
+  write(6, '(a,f11.8,a,f11.8)') '  RMU:', rmu1, ' =? ', rmu2
+  write(6, '(a,f11.8,a,f11.8)') '  ERED:', ered1, ' =? ', ered2
+  write(6, '(a,i0,a,i0)') '  NNOUT:', nnout1, ' =? ', nnout2
+  goto 200
+end if
 if (csflg1.neqv.csflg2) idif=idif+1
 if (flghf1.neqv.flghf2) idif=idif+1
 if (flgsu1.neqv.flgsu2) idif=idif+1
 if (twoml1.neqv.twoml2) idif=idif+1
-do 26 i=1,iabs(nnout1)
-26 if (jout1(i).ne.jout2(i)) idif=idif+1
+do i=1,iabs(nnout1)
+  if (jout1(i).ne.jout2(i)) idif=idif+1
+end do
 !
 30 nopen1 = 0
 call sread (0,sreal1, simag1, jtot1, jlpar1, nu1, &
@@ -2329,13 +2337,21 @@ if(nu1.ne.nu2) idif=idif+1
 if(jtot1.ne.jtot2) idif=idif+1
 if(jlpar1.ne.jlpar2) idif=idif+1
 if(pack1%length /= pack2%length) idif=idif+1
-do 60 i=1,pack1%length
-if(pack1%jq(i) /= pack2%jq(i)) idif=idif+1
-if(pack1%lq(i) /= pack2%lq(i)) idif=idif+1
-60 if(pack1%inq(i) /= pack2%inq(i)) idif=idif+1
 if(idif.ne.0) then
-  write(6,70) jtot1,jtot2
-70   format(/' PARAMETERS NOT EQUAL FOR JTOT1=',i3,'  JTOT2=',i3)
+  write(6, '(a,i0,a)') '*** ERROR: ',idif,' parameters differ between the 2 smt files:'
+  write(6, '(a,i0,a,i0)') '  NU:', nu1, ' =? ', nu2
+  write(6, '(a,i0,a,i0)') '  JTOT:', jtot1, ' =? ', jtot2
+  write(6, '(a,i0,a,i0)') '  JLPAR:', jlpar1, ' =? ', jlpar2
+  write(6, '(a,i0,a,i0)') '  num non zero elements in angular coupling matrics:', pack1%length, ' =? ', pack2%length
+  goto 200
+end if
+do i=1,pack1%length
+  if(pack1%jq(i) /= pack2%jq(i)) idif=idif+1
+  if(pack1%lq(i) /= pack2%lq(i)) idif=idif+1
+  if(pack1%inq(i) /= pack2%inq(i)) idif=idif+1
+end do
+if(idif.ne.0) then
+  write(6, '(a,i0,a)') '** ERROR: ', idif, ' different indices for elements of the angular coupling matrices'
   goto 200
 end if
 ncol=pack1%length

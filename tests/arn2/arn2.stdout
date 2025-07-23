@@ -9,9 +9,9 @@
           G. VAN DER SANDEN, M. YANG, F. DE WEERD, S. GREGURICK, F. LIQUE
  --------------------------------------------------------------------------
            BUILD CONFIGURATION:
-CMAKE BUILD DATE: 2025-07-16 at 12:46
+CMAKE BUILD DATE: 2025-07-23 at 18:26
 CMAKE BUILD TYPE: Debug
-CODE GIT REVISION: aa24d737db7d81c9bc1fe25cf338a9c90b4491a2
+CODE GIT REVISION: af6816f39386cd70fcadeba55af47aa1fb4cbdb4
 SYS: Linux 5.4.0-216-generic x86_64
 COMPILER: /usr/bin/gfortran
 COMPILE OPTIONS: 
@@ -19,7 +19,7 @@ COMPILE OPTIONS:
             CURRENT HARDWARE CONFIGURATION:
 
 Model name:                         Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz
-CPU MHz:                            3309.190
+CPU MHz:                            3274.283
 Socket(s):                          1
 Core(s) per socket:                 4
 L2 cache:                           1 MiB
@@ -90,13 +90,13 @@ MemTotal:       16255508 kB
  ** J =   20 JLPAR = 1 COMPLETED
  CPU-TIMES:  BASIS: 00:00:00   POT: 00:00:00   LOGD:  00:00:00   AIRY:  00:00:00 
              PSI0: 00:00:00   SMAT: 00:00:00   SOUT:  00:00:00   CUMULATIVE: 00:00:00 
-             ELAPSED:  00:00:00   CURRENT DATE:  Jul 16 17:16:29 2025
+             ELAPSED:  00:00:00   CURRENT DATE:  Jul 24 00:08:29 2025
  TURNING POINTS (MIN/MAX) =    6.02    6.16
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:     9
-      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO   15.4 %
-      CURRENT DATE:  Jul 16 17:16:29 2025
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO   23.0 %
+      CURRENT DATE:  Jul 24 00:08:29 2025
  ===============================================================================
 
  **  CS SINGLET SIGMA DIATOMIC ** RMU=  16.4700       E= 500.00   JTOT=   20   NU= 0
@@ -245,14 +245,14 @@ MemTotal:       16255508 kB
 
  ** J =   20 JLPAR = 1 COMPLETED
  CPU-TIMES:  BASIS: 00:00:00   POT: 00:00:00   LOGD:  00:00:00   AIRY:  00:00:00 
-             PSI0: 00:00:00   SMAT: 00:00:00   SOUT:  00:00:00   CUMULATIVE: 00:00:01 
-             ELAPSED:  00:00:00   CURRENT DATE:  Jul 16 17:16:29 2025
+             PSI0: 00:00:00   SMAT: 00:00:00   SOUT:  00:00:00   CUMULATIVE: 00:00:00 
+             ELAPSED:  00:00:00   CURRENT DATE:  Jul 24 00:08:29 2025
  TURNING POINTS (MIN/MAX) =    5.95    6.31
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:     6
-      TIMING:  ELAPSED 00:00:00 / CPU 00:00:01 / MP RATIO  218.6 %
-      CURRENT DATE:  Jul 16 17:16:29 2025
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO  199.5 %
+      CURRENT DATE:  Jul 24 00:08:29 2025
  ===============================================================================
      *** Parameters (scattering):
  JTOT1  =   0        JTOT2  =  20        JTOTD  =   5        JLPAR  =   1
@@ -285,20 +285,20 @@ MemTotal:       16255508 kB
  ** Jobname:     Cctest
   CC calculation, numax set to zero
  NOPRIN = .TRUE., SO IPRINT SET TO -1
- ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:29 2025
- ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:01   DATE: Jul 16 17:16:30 2025
- ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Jul 16 17:16:30 2025
- ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Jul 16 17:16:30 2025
- ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Jul 16 17:16:30 2025
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:29 2025
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:29 2025
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 24 00:08:29 2025
+ ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 24 00:08:29 2025
+ ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Jul 24 00:08:29 2025
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:    36
-      TIMING:  ELAPSED 00:00:01 / CPU 00:00:02 / MP RATIO  248.9 %
-      CURRENT DATE:  Jul 16 17:16:30 2025
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:02 / MP RATIO  420.2 %
+      CURRENT DATE:  Jul 24 00:08:29 2025
  ===============================================================================
 
  INTEGRAL CROSS SECTIONS READ FROM FILE Cctest1.ics                             
- WRITTEN:   Jul 16 17:16:30 2025
+ WRITTEN:   Jul 24 00:08:29 2025
  LABEL:     CC INTEGRAL AND PARTIAL TESTS                   
  POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
 
@@ -319,7 +319,7 @@ MemTotal:       16255508 kB
    10    0   1.921E-01  1.585E-01  2.230E-01  3.167E-01
 
  PARTIAL CROSS SECTIONS READ FROM FILE Cctest1.pcs                             
- WRITTEN:    Jul 16 17:16:29 2025
+ WRITTEN:    Jul 24 00:08:29 2025
  LABEL:      CC INTEGRAL AND PARTIAL TESTS                   
  POT NAME:   PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
 
@@ -342,14 +342,14 @@ MemTotal:       16255508 kB
 
  SUM 2.9843D+00 6.7025D-01 1.2690D-01 9.2130D-01
  NOPRIN = .TRUE., SO IPRINT SET TO -1
- ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:30 2025
- ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:30 2025
- ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:30 2025
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:30 2025
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:30 2025
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:30 2025
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:    36
-      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO  182.4 %
-      CURRENT DATE:  Jul 16 17:16:30 2025
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO  140.5 %
+      CURRENT DATE:  Jul 24 00:08:30 2025
  ===============================================================================
  NOPRIN = .TRUE., SO IPRINT SET TO -1
 
@@ -367,17 +367,17 @@ MemTotal:       16255508 kB
 
  NO ERRORS DETECTED.
  ** CONTINUE CC CALCULATION AT JTOT=   15, JLPAR=    1
- ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 16 17:16:30 2025
- ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 16 17:16:30 2025
+ ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 24 00:08:30 2025
+ ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 24 00:08:30 2025
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:    36
-      TIMING:  ELAPSED 00:00:00 / CPU 00:00:01 / MP RATIO  335.0 %
-      CURRENT DATE:  Jul 16 17:16:30 2025
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:01 / MP RATIO  317.6 %
+      CURRENT DATE:  Jul 24 00:08:30 2025
  ===============================================================================
 
  INTEGRAL CROSS SECTIONS READ FROM FILE Ccrstest1.ics                           
- WRITTEN:   Jul 16 17:16:30 2025
+ WRITTEN:   Jul 24 00:08:30 2025
  LABEL:     CC TEST OF RESTART                              
  POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
 
@@ -398,7 +398,7 @@ MemTotal:       16255508 kB
    10    0   1.921E-01  1.585E-01  2.230E-01  3.167E-01
 
  PARTIAL CROSS SECTIONS READ FROM FILE Ccrstest1.pcs                           
- WRITTEN:    Jul 16 17:16:30 2025
+ WRITTEN:    Jul 24 00:08:30 2025
  LABEL:      CC TEST OF RESTART                              
  POT NAME:   PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
 
@@ -421,38 +421,38 @@ MemTotal:       16255508 kB
 
  SUM 2.9843D+00 6.7025D-01 1.2690D-01 9.2130D-01
  NOPRIN = .TRUE., SO IPRINT SET TO -1
- ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:31 2025
- ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:31 2025
- ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:31 2025
- ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 16 17:16:31 2025
- ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 16 17:16:31 2025
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:30 2025
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:30 2025
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:30 2025
+ ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 24 00:08:30 2025
+ ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Jul 24 00:08:31 2025
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:    36
-      TIMING:  ELAPSED 00:00:00 / CPU 00:00:01 / MP RATIO  370.8 %
-      CURRENT DATE:  Jul 16 17:16:31 2025
+      TIMING:  ELAPSED 00:00:01 / CPU 00:00:01 / MP RATIO  199.0 %
+      CURRENT DATE:  Jul 24 00:08:31 2025
  ===============================================================================
  NOPRIN = .TRUE., SO IPRINT SET TO -1
- ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:31 2025
- ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 16 17:16:31 2025
- ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 16 17:16:31 2025
- ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 16 17:16:31 2025
- ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Jul 16 17:16:31 2025
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:     6
-      TIMING:  ELAPSED 00:00:00 / CPU 00:00:02 / MP RATIO  421.6 %
-      CURRENT DATE:  Jul 16 17:16:31 2025
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:01 / MP RATIO  288.3 %
+      CURRENT DATE:  Jul 24 00:08:31 2025
  ===============================================================================
 
  INTEGRAL CROSS SECTIONS READ FROM FILE Cstest1.ics                             
- WRITTEN:   Jul 16 17:16:31 2025
+ WRITTEN:   Jul 24 00:08:31 2025
  LABEL:     CC TEST OF RESTART                              
  POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
 
  ** INTEGRAL CROSS SECTIONS; IEN= 1 **
     RMU=  16.4700  E=   500.00  JLPAR= 1  JTOT-1=  0  JTOT-2=  20  JTOT-D=  5
- ** CS CALCULATION, NUMIN= 0, NUMAX= 4 NUD= 1 **
+ ** CS CALCULATION, NUMIN= 0, NUMAX= 4, NUD= 1 **
 
  ** COLUMN HEADINGS ARE INITIAL STATES, ROW HEADINGS ARE FINAL STATES **
 
@@ -467,7 +467,7 @@ MemTotal:       16255508 kB
    10    0   2.164E-01  2.966E-01  4.342E-01  5.476E-01
 
  PARTIAL CROSS SECTIONS READ FROM FILE Cstest1.pcs                             
- WRITTEN:    Jul 16 17:16:31 2025
+ WRITTEN:    Jul 24 00:08:31 2025
  LABEL:      CC TEST OF RESTART                              
  POT NAME:   PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
 
@@ -492,20 +492,20 @@ MemTotal:       16255508 kB
   CC calculation, numax set to zero
  ** NERG HAS BEEN RESET TO  6
  NOPRIN = .TRUE., SO IPRINT SET TO -1
- ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:31 2025
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
 
  ** NCH = 0, MOVE ON TO NEXT PARTIAL WAVE
- ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:01   DATE: Jul 16 17:16:32 2025
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:     5
-      TIMING (FIRST ENERGY):  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO   55.7
-      TIMING (SECOND ENERGY): ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    7.9
-      CURRENT DATE:  Jul 16 17:16:32 2025
+      TIMING (FIRST ENERGY):  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO   81.1
+      TIMING (SECOND ENERGY): ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    7.6
+      CURRENT DATE:  Jul 24 00:08:31 2025
  ===============================================================================
 
  INTEGRAL CROSS SECTIONS READ FROM FILE Multien4.ics                            
- WRITTEN:   Jul 16 17:16:32 2025
+ WRITTEN:   Jul 24 00:08:31 2025
  LABEL:     TEST OF MULTIPLE ENERGIES                       
  POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
 
@@ -524,7 +524,7 @@ MemTotal:       16255508 kB
     6    0   9.911E-03  1.420E-02  6.819E-03  3.358E-02
 
  INTEGRAL CROSS SECTIONS READ FROM FILE Multien6.ics                            
- WRITTEN:   Jul 16 17:16:32 2025
+ WRITTEN:   Jul 24 00:08:31 2025
  LABEL:     TEST OF MULTIPLE ENERGIES                       
  POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
 
@@ -542,16 +542,16 @@ MemTotal:       16255508 kB
     4    0   1.474E-02  9.305E-03  4.993E-02  1.812E-02
     6    0   9.911E-03  1.420E-02  6.819E-03  3.358E-02
  NOPRIN = .TRUE., SO IPRINT SET TO -1
- ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
 
  ** NCH = 0, MOVE ON TO NEXT PARTIAL WAVE
- ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:     5
-      TIMING (FIRST ENERGY):  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO   34.7
-      TIMING (SECOND ENERGY): ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    3.3
-      CURRENT DATE:  Jul 16 17:16:32 2025
+      TIMING (FIRST ENERGY):  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO   32.8
+      TIMING (SECOND ENERGY): ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    3.1
+      CURRENT DATE:  Jul 24 00:08:31 2025
  ===============================================================================
  NOPRIN = .TRUE., SO IPRINT SET TO -1
      *** Parameters (scattering):
@@ -584,60 +584,60 @@ MemTotal:       16255508 kB
  ** Output file: Arn2_test.out
  ** Jobname:     Mltien
  NOPRIN = .TRUE., SO IPRINT SET TO -1
- ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   11 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   12 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   13 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   14 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   16 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   17 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   18 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   19 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =    1 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =    2 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =    3 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =    4 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =    5 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =    6 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =    7 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =    8 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =    9 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =   10 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =   11 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =   12 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =   13 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =   14 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =   15 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:00   DATE: Jul 24 00:08:31 2025
+ ** J =   16 JLPAR = 1 FINISHED;  CPU: 00:00:01   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =   17 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =   18 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =   19 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =   20 JLPAR = 1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
 
  ** NCH = 0, MOVE ON TO NEXT PARTIAL WAVE
- ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   11 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   12 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   13 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   14 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   15 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   16 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   17 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   18 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   19 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
- ** J =   20 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
+ ** J =    1 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =    2 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =    3 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =    4 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =    5 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =    6 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =    7 JLPAR =-1 FINISHED;  CPU: 00:00:02   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =    8 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =    9 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =   10 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =   11 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =   12 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =   13 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =   14 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =   15 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =   16 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =   17 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =   18 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =   19 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
+ ** J =   20 JLPAR =-1 FINISHED;  CPU: 00:00:03   WALL: 00:00:01   DATE: Jul 24 00:08:32 2025
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:    12
-      TIMING:  ELAPSED 00:00:00 / CPU 00:00:03 / MP RATIO  704.1 %
-      CURRENT DATE:  Jul 16 17:16:32 2025
+      TIMING:  ELAPSED 00:00:01 / CPU 00:00:03 / MP RATIO  376.3 %
+      CURRENT DATE:  Jul 24 00:08:32 2025
  ===============================================================================
 
 **  DIFFERENTIAL CROSS SECTION (ANG^2/SR)
-    TODAYS DATE:  Jul 16 17:16:32 2025
+    TODAYS DATE:  Jul 24 00:08:32 2025
     S-MATRICES READ FROM FILE Ccdxsec1.smt                            
-      WRITTEN:   Jul 16 17:16:32 2025
+      WRITTEN:   Jul 24 00:08:31 2025
       LABEL:     DIFFERENTIAL XSEC TESTS                         
       POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
     E-TOT:      500.000;  REDUCED MASS:    16.47    
@@ -651,9 +651,9 @@ MemTotal:       16255508 kB
     ELAPSED TIME: 00:00:00   CPU TIME:  00:00:00 
 
 **  DIFFERENTIAL CROSS SECTION (ANG^2/SR)
-    TODAYS DATE:  Jul 16 17:16:32 2025
+    TODAYS DATE:  Jul 24 00:08:32 2025
     S-MATRICES READ FROM FILE Ccdxsec1.smt                            
-      WRITTEN:   Jul 16 17:16:32 2025
+      WRITTEN:   Jul 24 00:08:31 2025
       LABEL:     DIFFERENTIAL XSEC TESTS                         
       POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
     E-TOT:      500.000;  REDUCED MASS:    16.47    
@@ -697,16 +697,16 @@ MemTotal:       16255508 kB
  ** Jobname:     Ccdxsec
  WARNING *** WRSMAT = .TRUE. BUT JTOTD=  4 .NE. 1 
  ** WAVEFUNCTION SAVED IN FILE Cc.wfu
- ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:32 2025
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:32 2025
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:     5
-      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO   64.6 %
-      CURRENT DATE:  Jul 16 17:16:32 2025
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO   69.2 %
+      CURRENT DATE:  Jul 24 00:08:32 2025
  ===============================================================================
 
  ** DETERMINATION OF INCOMING AND OUTGOING FLUX ***
-    FROM CALCULATION ON: Jul 16 17:16:32 2025
+    FROM CALCULATION ON: Jul 24 00:08:32 2025
     INITIAL JOB LABEL: FLUX AND WAVEFUNCTION TESTS                     
     INITIAL POT NAME: PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
     SCATTERING BOUNDARY CONDITIONS
@@ -729,7 +729,7 @@ MemTotal:       16255508 kB
                  TOTAL:  LAST COLUMN
 
  ** DETERMINATION OF INCOMING AND OUTGOING FLUX ***
-    FROM CALCULATION ON: Jul 16 17:16:32 2025
+    FROM CALCULATION ON: Jul 24 00:08:32 2025
     INITIAL JOB LABEL: FLUX AND WAVEFUNCTION TESTS                     
     INITIAL POT NAME: PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
     SCATTERING BOUNDARY CONDITIONS
@@ -753,7 +753,7 @@ MemTotal:       16255508 kB
 
  ** ADIABATIC ENERGIES ***
 
-    FROM CALCULATION ON: Jul 16 17:16:32 2025
+    FROM CALCULATION ON: Jul 24 00:08:32 2025
     INITIAL JOB LABEL: FLUX AND WAVEFUNCTION TESTS                     
     INITIAL POT NAME: PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
     SCATTERING BOUNDARY CONDITIONS
@@ -767,7 +767,7 @@ MemTotal:       16255508 kB
                 PROBED:   1   0   0    0        0.000       6.0773
 
  ** DETERMINATION OF INCOMING AND OUTGOING FLUX ***
-    FROM CALCULATION ON: Jul 16 17:16:32 2025
+    FROM CALCULATION ON: Jul 24 00:08:32 2025
     INITIAL JOB LABEL: FLUX AND WAVEFUNCTION TESTS                     
     INITIAL POT NAME: PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
     SCATTERING BOUNDARY CONDITIONS
@@ -786,17 +786,17 @@ MemTotal:       16255508 kB
                  TOTAL:  LAST COLUMN
  WARNING *** WRSMAT = .TRUE. BUT JTOTD=  4 .NE. 1 
  ** WAVEFUNCTION SAVED IN FILE Cc.wfu
- ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 16 17:16:33 2025
+ ** J =    0 JLPAR = 1 FINISHED;  CPU: 00:00:00   WALL: 00:00:00   DATE: Jul 24 00:08:32 2025
  ===============================================================================
  **** END OF CALCULATION ****
       MAXIMUM NUMBER OF CHANNELS USED WAS:     5
-      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    2.0 %
-      CURRENT DATE:  Jul 16 17:16:33 2025
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO    1.6 %
+      CURRENT DATE:  Jul 24 00:08:32 2025
  ===============================================================================
 
  ** WAVEFUNCTION DETERMINATION ***
 
-    FROM CALCULATION ON: Jul 16 17:16:33 2025
+    FROM CALCULATION ON: Jul 24 00:08:32 2025
     INITIAL JOB LABEL: FLUX AND WAVEFUNCTION TESTS                     
     INITIAL POT NAME: PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
     SCATTERING BOUNDARY CONDITIONS
@@ -816,3 +816,129 @@ MemTotal:       16255508 kB
                 PROBED:   3   4   4    0       40.200       5.0927
                 PROBED:   4   6   6    0       84.420       3.7199
                 PROBED:   5   8   8    0      144.720      -1.6307
+
+ **  CC SINGLET SIGMA DIATOMIC ** RMU=  16.4700       E= 500.00   JTOT=   20   JLPAR= 1
+
+ State    B(v)         D(v)        H(v)          E(v)
+   0    2.0100      0.0000      0.0000         0.00000000
+
+   N   V   J    L      EINT(CM-1)
+
+   1   0   0   20        0.000
+   2   0   2   18       12.060
+   3   0   2   20       12.060
+   4   0   2   22       12.060
+   5   0   4   16       40.200
+   6   0   4   18       40.200
+   7   0   4   20       40.200
+   8   0   4   22       40.200
+   9   0   4   24       40.200
+
+ OPEN LEVELS:
+
+   N   V   J      EINT(CM-1)
+
+   1   0   0        0.000
+   2   0   2       12.060
+   3   0   4       40.200
+ ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS    26
+ ** LOGD:  RSTART =  4.000   REND =  8.000   SPAC =   0.150   NSTEP =   27
+ ** AIRY:  RSTART =  8.000  REND = 25.000   RINCR =  3.000   DRMIN =  2.250   DRMAX =  3.935   NSTEP =   6
+ ** CPU TIMES:  BASIS= 00:00:00   POT= 00:00:00   LOGD= 00:00:00   AIRY=  00:00:00 
+                PSI0= 00:00:00   SMAT= 00:00:00 
+
+ ** J =   20 JLPAR = 1 COMPLETED
+ CPU-TIMES:  BASIS: 00:00:00   POT: 00:00:00   LOGD:  00:00:00   AIRY:  00:00:00 
+             PSI0: 00:00:00   SMAT: 00:00:00   SOUT:  00:00:00   CUMULATIVE: 00:00:00 
+             ELAPSED:  00:00:00   CURRENT DATE:  Jul 24 00:08:32 2025
+ TURNING POINTS (MIN/MAX) =    6.00    6.15
+ ===============================================================================
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:     9
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO   47.9 %
+      CURRENT DATE:  Jul 24 00:08:32 2025
+ ===============================================================================
+
+ **  CC SINGLET SIGMA DIATOMIC ** RMU=  16.4700       E= 500.00   JTOT=   20   JLPAR= 1
+
+ State    B(v)         D(v)        H(v)          E(v)
+   0    2.0100      0.0000      0.0000         0.00000000
+
+   N   V   J    L      EINT(CM-1)
+
+   1   0   0   20        0.000
+   2   0   2   18       12.060
+   3   0   2   20       12.060
+   4   0   2   22       12.060
+   5   0   4   16       40.200
+   6   0   4   18       40.200
+   7   0   4   20       40.200
+   8   0   4   22       40.200
+   9   0   4   24       40.200
+
+ OPEN LEVELS:
+
+   N   V   J      EINT(CM-1)
+
+   1   0   0        0.000
+   2   0   2       12.060
+   3   0   4       40.200
+ ** TOTAL NUMBER OF NONZERO V2 MATRIX ELEMENTS IS    26
+ ** LOGD:  RSTART =  5.000   REND =  8.000   SPAC =   0.150   NSTEP =   21
+ ** AIRY:  RSTART =  8.000  REND = 25.000   RINCR =  3.000   DRMIN =  2.250   DRMAX =  3.935   NSTEP =   6
+ ** CPU TIMES:  BASIS= 00:00:00   POT= 00:00:00   LOGD= 00:00:00   AIRY=  00:00:00 
+                PSI0= 00:00:00   SMAT= 00:00:00 
+
+ ** J =   20 JLPAR = 1 COMPLETED
+ CPU-TIMES:  BASIS: 00:00:00   POT: 00:00:00   LOGD:  00:00:00   AIRY:  00:00:00 
+             PSI0: 00:00:00   SMAT: 00:00:00   SOUT:  00:00:00   CUMULATIVE: 00:00:00 
+             ELAPSED:  00:00:00   CURRENT DATE:  Jul 24 00:08:32 2025
+ TURNING POINTS (MIN/MAX) =    6.00    6.14
+ ===============================================================================
+ **** END OF CALCULATION ****
+      MAXIMUM NUMBER OF CHANNELS USED WAS:     9
+      TIMING:  ELAPSED 00:00:00 / CPU 00:00:00 / MP RATIO  146.5 %
+      CURRENT DATE:  Jul 24 00:08:32 2025
+ ===============================================================================
+
+ COMPARE modulus of S matrix
+ FIRST FILE: Joba1.smt
+ WRITTEN:   Jul 24 00:08:32 2025
+ LABEL:     JOBA RSTART 4.0                                 
+ POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
+
+ SECOND FILE: Jobb1.smt
+ WRITTEN:   Jul 24 00:08:32 2025
+ LABEL:     JOBB RSTART 5.0                                 
+ POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
+
+ moduli of S matrices for jtot= 20  jlpar= 1  NU=  0
+
+ average absolute difference:  0.00008186
+ largest absolute difference:  0.00027643
+ average relative difference:       0.03%
+ largest relative differencE:       0.12%
+ mod(S1)( 6, 6) =  0.2011     mod(S2)( 6, 6) =  0.2013    
+ inspection threshold is  1.0E-05
+ *** WARNING: Joba1.smt NOT CLOSED
+ *** WARNING: Jobb1.smt NOT CLOSED
+
+ COMPARE modulus of S matrix
+ FIRST FILE: Joba1.smt
+ WRITTEN:   Jul 24 00:08:32 2025
+ LABEL:     JOBA RSTART 4.0                                 
+ POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
+
+ SECOND FILE: Jobb1.smt
+ WRITTEN:   Jul 24 00:08:32 2025
+ LABEL:     JOBB RSTART 5.0                                 
+ POT NAME:  PATTENGILL-LABUDDE-BERNSTEIN AR-N2              
+
+ moduli of S matrices for jtot= 20  jlpar= 1  NU=  0
+
+ average absolute difference:  0.00008186
+ largest absolute difference:  0.00027643
+ average relative difference:       0.03%
+ largest relative differencE:       0.12%
+ mod(S1)( 6, 6) =  0.2011     mod(S2)( 6, 6) =  0.2013    
+ inspection threshold is  1.0E-05

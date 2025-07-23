@@ -1068,7 +1068,7 @@ if (mode .eq. 'TU') then
       call exit()
    end if
    if (openfl) then
-      print *, '*** WARNING: ', filnam, 'NOT CLOSED'
+      print *, '*** WARNING: ', filnam, ' NOT CLOSED'
    end if
    open (unit=iunit, file=filnam, access='STREAM', status='OLD', err=999, iostat=ierr)
    return
