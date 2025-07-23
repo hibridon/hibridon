@@ -48,10 +48,10 @@ subroutine prsg (fname, a)
 !    stored in jlev, jtot, jfirst, jfinal, nu, numin, and numax plus 1/2
 !    flagsu:    if .true., then molecule-surface collisons
 !    xmu:       collision reduced mass in (c12) atomic mass units
-!    econv:     conversion factor from cm-1 to hartrees
 !  ------------------------------------------------------------------
 use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
+use constants, only: econv
 use mod_cojhld, only: jlev => jhold ! jlev(5)
 use mod_coisc1, only: inlev => isc1 ! inlev(5)
 use mod_coisc2, only: jpoint => isc2 ! jpoint(5)
@@ -78,7 +78,6 @@ integer i, ienerg, iout, isize, j, jbegin, jend, jfinal, &
         jfirst, jj1, jj2, jlpar, jtemp, jtotd, lenx, n, nlevel, &
         nlevop, nout, numax, numin, nud, iaver
 dimension  a(3)
-data econv / 219474.6d0/
 integer, allocatable :: ipoint(:)
 !  input parameters
 iprint=.true.
@@ -99,15 +98,11 @@ end if
 open (FUNIT_ICS, file = xnam1,status = 'old')
 !  open output file for integral cross sections
 call gennam (xnam2, fname, ienerg, 'xsc', lenx)
-if (.not.iprint) write(6,20) xnam2
-20 format(' PRINTING SELECTED CROSS SECTIONS; OUTPUT IN FILE ', &
-        (a))
 ! inquire file specifications
 inquire(file=xnam2, exist=existf, opened=openfl)
 !.xsc file is appended if it already exists
-accs='sequential'
-
 if (.not. openfl) then
+  accs='sequential'
   if (existf) then
     stat='old'
 ! make sure sequential formatted files are appended not overwritten
@@ -122,6 +117,10 @@ if (.not. openfl) then
   end if
   open (FUNIT_XSC, file = xnam2, status = stat, access = accs)
 endif
+! print out message only if no other print out
+if (.not.iprint) write(6,20) xnam2
+20 format(' PRINTING SELECTED CROSS SECTIONS; OUTPUT IN FILE ', &
+        (a))
 call version(FUNIT_XSC)
 read (FUNIT_ICS, 40) cdate
 40 format (1x, a)
@@ -147,7 +146,6 @@ if (ipos) then
   read (FUNIT_ICS, 80) (jlev(i), inlev(i), i = 1, nlevel)
   read (FUNIT_ICS, 90) (elev(i), i = 1, nlevel)
 90   format (8(1pe15.8))
-!90   format (8f16.9)
 else
   read (FUNIT_ICS, *)  nlevel, nlevop
   read (FUNIT_ICS, *) (jlev(i), inlev(i), i = 1, nlevel)
@@ -286,7 +284,7 @@ if (iaver .gt. 0) then
     if (inlev(i) .eq. 0) then
       write (6, 195) i
       write (6, 195) i
-195       format(' *** INLEV(',i3,')=0;', &
+195       format(' *** INLEV(',i4,')=0;', &
                ' AVERAGING MAY NOT WORK ***')
     else if (inlev(i) .ne. 0) then
       isum = isum + inlev(i)
@@ -295,7 +293,7 @@ if (iaver .gt. 0) then
   if (isum .ne. 0) then
     write (6, 230) isum
     write (FUNIT_XSC, 230) isum
-230     format (' *** SUM OF INDICES =',i3, &
+230     format (' *** SUM OF INDICES =',i4, &
                ' AVERAGING MAY NOT WORK ***')
   end if
   if  (iaver .eq. 2) then
@@ -316,16 +314,16 @@ end if
 isize = 0
 allocate(ipoint(nlevop))
 nout = abs (nnout)
-do  280  iout = 1, nout
+do iout = 1, nout
   jtemp = jout(iout)
-  do 270 n = 1, nlevop
+  do n = 1, nlevop
     if (jlev(n) .eq. jtemp) then
       isize = isize + 1
       jpoint(isize) = n
       ipoint(isize) = n
     end if
-270   continue
-280 continue
+  end do
+end do
 insize=0
 if (niout .gt. 0) then
   nout=abs(niout)
@@ -355,8 +353,8 @@ else
   call xscpr1(zmat, nlevop, isize, iaver, ipos, iprint, flaghf, FUNIT_XSC, ipoint)
 endif
 deallocate(ipoint)
-close (1)
-close (3)
+close (FUNIT_ICS)
+close (FUNIT_XSC)
 return
 end
 subroutine aver1 (zmat, scmat, n)
@@ -402,6 +400,9 @@ use mod_selb, only: ibasty
 use mod_himatrix, only: transp
 
 implicit double precision (a-h,o-z)
+logical, intent(in) :: ipos
+logical, intent(in) :: iprint
+logical, intent(in) :: flaghf
 integer, intent(in) :: xsc_funit  ! the file unit for xsc file (it's expected to be open in write mode)
 integer, intent(in) :: ipoint(*)
 !  subroutine to print out specified columns of cross section matrix
@@ -410,7 +411,6 @@ integer i, isize, iskip, j, jcol, jhigh, jj, jlow, jmax, &
         jrow, ncol, nlevop, iaver
 integer ind
 !     real elev, zmat
-logical ipos, iprint, flaghf
 dimension zmat(nlevop,nlevop), ind(50)
 !  first transpose the cross section matrix so that initial states are columns and final states are rows
 call transp (zmat, nlevop, nlevop)
@@ -463,6 +463,7 @@ do  150   j = 1, jmax
 !  if iaver = 1, then this is positive, since both indices are summed
     inrow = inlev(jrow)
     if (iaver .ne. 1) then
+! realign 1 for comparison
       if (.not. flaghf .or. ibasty.eq.12) then
         if (iprint) &
           write (6, 60) jlev(jrow),inrow, &
@@ -478,6 +479,11 @@ do  150   j = 1, jmax
           ( zmat(jrow,ind(jcol)), jcol = 1,ncol)
 70         format (f5.1, i5, 2x, 13 (1pe10.3,1x) )
       end if
+! realign 2 for comparison
+! force realign 33 for comparison
+! force realign 33 for comparison comparison
+! force realign 33 for comparison
+! force realign 33 for comparison comparison
     else
       if (.not. flaghf .or. ibasty.eq.12) then
         if (iprint) &
