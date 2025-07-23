@@ -528,7 +528,6 @@ do  150   j = 1, jmax
 !ABER  now write out the row index followed by the desired matrix elements
 !ABER  here for PI states
 94    if (aint(iabs(inrow)/100.0).ne.3) then
-! realign 1 for comparison
         if (.not. flaghf) then
           if (iprint) &
           write (6, 60) jlev(jrow),inrow, &
@@ -548,11 +547,6 @@ do  150   j = 1, jmax
                 jcol = 1,ncol)
 70           format (f5.1, i5, 2x, 13 (1pe10.3,1x) )
         end if
-! realign 2 for comparison
-! force realign 33 for comparison
-! force realign 33 for comparison comparison
-! force realign 33 for comparison
-! force realign 33 for comparison comparison
 !ABER  here for SIGMA states
       else if (aint(iabs(inrow)/100.0).eq.3) then
         if (nlev.eq.0.and.isa.ne.-1) then

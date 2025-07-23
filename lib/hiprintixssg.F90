@@ -464,7 +464,6 @@ do  150   j = 1, jmax
 !  if iaver = 1, then this is positive, since both indices are summed
     inrow = inlev(jrow)
     if (iaver .ne. 1) then
-! realign 1 for comparison
       if (.not. flaghf .or. ibasty.eq.12) then
         if (iprint) &
           write (6, 60) jlev(jrow),inrow, &
@@ -480,11 +479,6 @@ do  150   j = 1, jmax
           ( zmat(jrow,ind(jcol)), jcol = 1,ncol)
 70         format (f5.1, i5, 2x, 13 (1pe10.3,1x) )
       end if
-! realign 2 for comparison
-! force realign 33 for comparison
-! force realign 33 for comparison comparison
-! force realign 33 for comparison
-! force realign 33 for comparison comparison
     else
       if (.not. flaghf .or. ibasty.eq.12) then
         if (iprint) &
