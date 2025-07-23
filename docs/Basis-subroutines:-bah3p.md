@@ -1,11 +1,11 @@
 ### Collisions between an Atom in a <sup>3</sup>P electronic state and a Homonuclear Diatomic
 
 
-> BASISTYPE = 16
+> BASISTYPE = 13
 >
 > System subroutine:  syh3p
 >
-> Basis subroutine:  hiba16_h3p.F90
+> Basis subroutine:  hiba13_h3p.F90
 >
 > Ref. M.-L. Dubernet and J. M. Hutson, J. Chem. Phys. **101**, 1939 (1994).
 

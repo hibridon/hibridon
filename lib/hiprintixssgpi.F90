@@ -48,12 +48,10 @@ subroutine prsgpi (fname, a)
 !    stored in jlev, jtot, jfirst, jfinal, nu, numin, and numax plus 1/2
 !    flagsu:    if .true., then molecule-surface collisons
 !    xmu:       collision reduced mass in (c12) atomic mass units
-!    econv:     conversion factor from cm-1 to hartrees
 !  ------------------------------------------------------------------
 use mod_cosout, only: nnout, jout
 use mod_coiout, only: niout, indout
-use constants
-use mod_coamat, only: zbuf ! zbuf(1)
+use constants, only: econv
 use mod_cojhld, only: jlev => jhold ! jlev(5)
 use mod_coisc1, only: inlev => isc1 ! inlev(5)
 use mod_coisc2, only: jpoint => isc2 ! jpoint(5)
@@ -66,23 +64,31 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam
 use mod_hivector, only: dset
 use funit, only: FUNIT_ICS, FUNIT_XSC
-implicit double precision (a-h,o-z)
-character*(*) fname
+implicit none
+character*(*), intent(in) :: fname
+real(8), intent(in) :: a(4)
+
 character*20 cdate
 character*80 line
 character*3 stat
 character*12 accs
 character*40 xnam1, xnam2
-logical iprint, twomol, existf, &
-        openfl, eprint
-dimension  a(4)
+logical iprint, twomol, existf, openfl, eprint
+integer :: isa, idum, iener
+integer :: i, ienerg, indtemp, iout, insize, isize, isum
+integer :: j, jbegin, jend, jfinal, &
+        jfirst, jj1, jj2, jlpar, jtemp, jtotd, lenx, n, nlevel, &
+        nlevop, nout, numax, numin, nud, iaver
 integer, allocatable :: ipoint(:)
+real(8) :: ener, xmu
+real(8) :: xthresh
+real(8), allocatable :: zbuf(:)
 !  input parameters
 iprint=.true.
 eprint=.false.
 iaver = 0
-if (a(1) .lt. 0.0d0) iprint = .false.
-if (a(1) .gt. 0.d0) eprint = .true.
+if (a(1) .lt. 0.0) iprint = .false.
+if (a(1) .gt. 0.0) eprint = .true.
 if (a(2) .lt. 0.5) iaver = 0
 if (a(2).gt. 0.d0) iaver=1
 if (a(2) .gt. 1.5) iaver = 2
@@ -120,12 +126,11 @@ if (.not. openfl) then
   end if
   open (FUNIT_XSC, file = xnam2, status = stat, access = accs)
 endif
-!mha (print out message only if no other print out)
+! print out message only if no other print out
 if (.not.iprint) write(6,20) xnam2
-20 format( &
-  ' PRINTING SELECTED SIGMA-PI CROSS SECTIONS; OUTPUT IN FILE ', &
+20 format(' PRINTING SELECTED SIGMA-PI CROSS SECTIONS; OUTPUT IN FILE ', &
         (a))
-!      call version(3)
+!      call version(FUNIT_XSC)
 read (FUNIT_ICS, 40) cdate
 40 format (1x, a)
 read (FUNIT_ICS, 40) label
@@ -141,19 +146,21 @@ read (FUNIT_ICS, 60) ener, xmu
 60 format (f10.3, f15.11)
 read (FUNIT_ICS, 70) csflag, flaghf, flagsu, twomol, ihomo
 70 format (5l3)
-read (FUNIT_ICS, 80) jfirst, jfinal, jtotd, numin, numax, &
+read (FUNIT_ICS, 75) jfirst, jfinal, jtotd, numin, numax, &
              nud, jlpar, isa
+75 format (8i5)
 if (ipos) then
 80 format (24i5)
   read (FUNIT_ICS, 80)  nlevel, nlevop
   read (FUNIT_ICS, 80) (jlev(i), inlev(i), i = 1, nlevel)
   read (FUNIT_ICS, 90) (elev(i), i = 1, nlevel)
-90   format (8f16.9)
+90   format (8(1pe15.8))
 else
   read (FUNIT_ICS, *)  nlevel, nlevop
   read (FUNIT_ICS, *) (jlev(i), inlev(i), i = 1, nlevel)
   read (FUNIT_ICS, *) (elev(i), i = 1, nlevel)
 endif
+allocate(zbuf(nlevop))
 !  zero out zmat
 call dset(nlevop*nlevop,0.d0, zmat,1)
 !  read in matrix of cross sections, column by column
@@ -341,18 +348,18 @@ end if
 !  quantum number is equal to one of the values of jout
 isize = 0
 allocate(ipoint(nlevop))
-insize=0
 nout = abs (nnout)
-do  280  iout = 1, nout
+do iout = 1, nout
   jtemp = jout(iout)
-  do 270 n = 1, nlevop
+  do n = 1, nlevop
     if (jlev(n) .eq. jtemp) then
       isize = isize + 1
       jpoint(isize) = n
       ipoint(isize) = n
     end if
-270   continue
-280 continue
+  end do
+end do
+insize=0
 if (niout .gt. 0) then
   nout=abs(niout)
   do  282  iout = 1, nout
@@ -379,29 +386,16 @@ else
 290   format (/' ** COLUMN HEADINGS ARE INITIAL STATES, ROW', &
         ' HEADINGS ARE FINAL STATES **', &
       /'%      CROSS SECTION PRINT THRESHOLD=',1pd8.1)
-  if (iener.lt.10) then
-      write (FUNIT_XSC,295) iener
-  elseif (iener.lt.100) then
-      write (FUNIT_XSC,296) iener
-  elseif (iener.lt.1000) then
-      write (FUNIT_XSC,297) iener
-  elseif (iener.lt.10000) then
-      write (FUNIT_XSC,298) iener
-  elseif (iener.lt.100000) then
-      write (FUNIT_XSC,299) iener
-  endif
-295   format('x',i1,'=[')
-296   format('x',i2,'=[')
-297   format('x',i3,'=[')
-298   format('x',i4,'=[')
-299   format('x',i5,'=[')
-  call xscpr2(zmat, xthresh, nlevop, isize, iaver, iprint, isa, FUNIT_XSC, ipoint)
+  write (FUNIT_XSC,295) iener
+295   format('x',i0,'=[')
+  call xscpr2(zmat, xthresh, nlevop, isize, iaver, ipos, iprint, flaghf, isa, FUNIT_XSC, ipoint)
   write (FUNIT_XSC,300)
 300   format('];')
 endif
 deallocate(ipoint)
-close (1)
-close (3)
+deallocate(zbuf)
+close (FUNIT_ICS)
+close (FUNIT_XSC)
 return
 end
 subroutine aver2 (zmat, scmat, n)
@@ -440,12 +434,15 @@ return
 end
 ! -------------------------------------------------
 subroutine xscpr2 (zmat, xthresh, nlevop, isize, iaver, &
-                   iprint, isa, xsc_funit, ipoint)
+                  ipos, iprint, flaghf, isa, xsc_funit, ipoint)
 use mod_cojhld, only: jlev => jhold ! jlev(4)
 use mod_coisc1, only: inlev => isc1 ! inlev(4)
-use mod_par, only: flaghf, ihomo, ipos
+use mod_par, only: ihomo
 use mod_himatrix, only: transp
 implicit double precision (a-h,o-z)
+logical, intent(in) :: ipos
+logical, intent(in) :: iprint
+logical, intent(in) :: flaghf
 integer, intent(in) :: xsc_funit  ! the file unit for xsc file (it's expected to be open in write mode)
 integer, intent(in) :: ipoint(*)
 !  subroutine to print out specified columns of cross section matrix
@@ -453,7 +450,6 @@ integer, intent(in) :: ipoint(*)
 integer i, isize, iskip, j, jcol, jhigh, jj, jlow, jmax, &
         jrow, ncol, nlevop, iaver
 integer ind, isa
-logical iprint
 dimension zmat(nlevop,nlevop), ind(50)
 !  first transpose the cross section matrix so that initial states are columns and final states are rows
 call transp (zmat, nlevop, nlevop)
@@ -540,7 +536,7 @@ do  150   j = 1, jmax
           write (xsc_funit, 60) jlev(jrow),inrow, &
             (zmat(jrow,ind(jcol)) + zmat(jrow + 1,ind(jcol)), &
                 jcol = 1,ncol)
-60           format (i5, i5, 2x, 13 (1pe9.2,1x) )
+60           format (i5, i5, 2x, 13 (1pe10.3,1x) )
         else
           if (iprint) &
             write (6, 70) jlev(jrow)+0.5, inrow, &
@@ -549,7 +545,7 @@ do  150   j = 1, jmax
           write (xsc_funit, 70) jlev(jrow)+0.5, inrow, &
             (zmat(jrow,ind(jcol)) + zmat(jrow + 1,ind(jcol)), &
                 jcol = 1,ncol)
-70           format (f5.1, i5, 2x, 13 (1pe9.2,1x) )
+70           format (f5.1, i5, 2x, 13 (1pe10.3,1x) )
         end if
 !ABER  here for SIGMA states
       else if (aint(iabs(inrow)/100.0).eq.3) then

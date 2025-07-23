@@ -5,7 +5,7 @@
 >
 > System subroutine:  sysphtp
 >
-> Basis subroutine:  hiba25_sphtp.F90
+> Basis subroutine:  hiba24_sphtp.F90
 >
 > Ref. J. M. Hutson and A. E. Thornley, J. Chem. Phys. **100**, 2505 (1994); T. G. A. Hiejmen, T. Korona, R. Moszynski, P. E. B. Wormer, and A. van der Avoird, J. Chem. Phys. **107**, 902 (1997).
 

@@ -7,6 +7,7 @@ The system independent parameters are:
 - [FSTFAC](FSTFAC)
 - [INDOUT](INDOUT)
 - [IPRINT](IPRINT)
+- [J1J2](J1J2)
 - [JOUT](JOUT)
 - [JTOT1](JTOT1) 
 - [JTOT2](JTOT2)

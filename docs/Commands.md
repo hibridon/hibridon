@@ -13,6 +13,7 @@ A number of commands are available to direct the operation of the Hibridon code:
 - [`PARTC`](PARTC): Print out a subset of previously calculated partial cross sections
 - [`PRINTC`](PRINTC): Print out a subset of previously calculated integral cross sections
 - [`PRINTS`](PRINTS): Print out previously calculated S matrices
+- [`PRSBR`](PRSBR): Calculate pressure-broadening cross sections
 - [`PSI`](PSI): Determine the expansion coefficients of selected channel components of the scattering wavefunction
 - [`READ`](READ): Read in [parameters](Parameters) and [flags](Flags) from the currently defined [input](Input) file
 - [`OPTIMIZE`](OPTIMIZE): Optimize one (or more) [parameters](Parameters)

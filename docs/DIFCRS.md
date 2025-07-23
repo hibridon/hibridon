@@ -38,7 +38,7 @@ The default value of {jobname} is the value you have set with the command [JOB](
   - If mflag .ne. 0, then
     - All m→m' differential cross sections are calculated and printed. Quantization is in the collision frame, where the initial relative velocity vector defines the z axis.
     - The integral m→ m' cross sections are determined, by integration from ang1 to ang2 in steps of dang. 
-    - The diagonal (ρm,m) and the real part of the 2nd supra-diagonal (ρm,m+2) elements of the rotational density matrix of the scattered products are output into file {jobnam}n.rho.. These quantities are defined here in terms of the scattering amplitudes.
+    - The diagonal (ρm,m) and the real part of the 2nd supra-diagonal (ρm,m+2) elements of the rotational density matrix of the scattered products are output into file `<jobnam>n.rho`. These quantities are defined here in terms of the scattering amplitudes.
 
 - stflag:
   - stflag = 0 is the default. If stflag .ne. 0, then "heads" and "tails" steric cross sections are calculated (see M. H. Alexander, Faraday Discuss. **113**, 437 (1999). This is only allowed if [`FLAGHF`](FLAGHF) = .true. and [`BASISTY`](Basis-subroutines) = 3 (doublet pi). If stflag .ne. 0, then the following two parameters must be defined:

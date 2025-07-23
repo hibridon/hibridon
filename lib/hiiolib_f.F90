@@ -5,7 +5,7 @@
 !********************************************************************
 !                         routines included:                        *
 !                                                                   *
-!   3. fimove   moves a sequential file to its end                  *
+!   3. seqfile_seek_end   moves a sequential file to its end                  *
 !   4. fimovs   moves s-matrix file to a specific record            *
 !   6. gendat (sysdat) reads (saves) input for hibridon             *
 !   7. io       block data, contains machine dependent settings     *
@@ -305,7 +305,7 @@ module mod_hiiolib1
   use mod_assert, only: fassert
 contains
 ! ---------------------------------------------------------------
-subroutine fimove (nxfile)
+subroutine seqfile_seek_end (nxfile)
 ! ---------------------------------------------------------------
 !  subroutine to move sequential file on unit nxfile to its end
 !  author:  millard alexander
@@ -1821,7 +1821,7 @@ if (wrpart) then
         call exit
       end if
       rewind nfile
-      call fimove (nfile)
+      call seqfile_seek_end (nfile)
 !            write (nfile, '('' ** RESTART **'')')
     end if
 230   continue

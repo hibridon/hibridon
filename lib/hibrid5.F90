@@ -1324,7 +1324,8 @@ character*40 xnam1, xnam2
 character*80 line
 logical csflag, flaghf, iprint, flagsu, twomol, existf, nucros
 dimension  a(4),scmat(nmax,1)
-
+integer, parameter :: pcs_unit = 1
+integer, parameter :: psc_unit = 3
 !  input parameters
 iprint=.true.
 jini=nint(a(1))
@@ -1340,31 +1341,31 @@ if (.not. existf) then
 10   format(/' Partial cross section file ',(a),' not found',/)
   return
 end if
-open (1, file = xnam1,status = 'old')
+open (pcs_unit, file = xnam1,status = 'old')
 !  open output file for partial cross sections
 call gennam (xnam2, fname, iene, 'psc', lenx)
-call openf(3,xnam2,'sf',0)
-call version(3)
-read (1, 40) cdate
+call openf(psc_unit,xnam2,'sf',0)
+call version(psc_unit)
+read (pcs_unit, 40) cdate
 40 format (1x, a)
-read (1, 40) label
-read (1, 40) potnam
+read (pcs_unit, 40) label
+read (pcs_unit, 40) potnam
 !  print job information
-write (3, 50) xnam1, cdate, label, potnam
+write (psc_unit, 50) xnam1, cdate, label, potnam
 if (iprint) write (6, 50) xnam1, cdate, label, potnam
 50 format(/' PARTIAL CROSS SECTIONS READ FROM FILE ',(a)/ &
         ' WRITTEN:    ',(a)/ &
         ' LABEL:      ',(a)/ &
         ' POT NAME:   ',(a) )
-read (1, *) ered, rmu
-read (1, *) csflag, flaghf, flagsu, twomol, nucros
-read (1, *) jfirst, jfinal, jtotd,numin, numax, jlpar, nud
-read (1, *) nj, nlev
-read (1, *) (jlev(i), inlev(i), i = 1, nlev)
-read (1, *) (elev(i), i = 1, nlev)
+read (pcs_unit, *) ered, rmu
+read (pcs_unit, *) csflag, flaghf, flagsu, twomol, nucros
+read (pcs_unit, *) jfirst, jfinal, jtotd,numin, numax, jlpar, nud
+read (pcs_unit, *) nj, nlev
+read (pcs_unit, *) (jlev(i), inlev(i), i = 1, nlev)
+read (pcs_unit, *) (elev(i), i = 1, nlev)
 irow=0
 if( .not. twomol) then
-  write (3, 60) ered
+  write (psc_unit, 60) ered
   if(iprint) write (6, 60) ered
 60   format (/' LEVEL LIST FOR PARTIAL CROSS SECTIONS AT E=', &
           f8.2,' CM-1'/'   N    J  INDEX  EINT(CM-1)',/)
@@ -1372,19 +1373,19 @@ if( .not. twomol) then
     if(jlev(i).eq.jini.and.inlev(i).eq.indi) irow=i
     if (ibasty.ne.12) then
       if (.not. flaghf) then
-        write (3, 70) i, jlev(i), inlev(i), elev(i) * econv
+        write (psc_unit, 70) i, jlev(i), inlev(i), elev(i) * econv
         if(iprint) &
           write (6, 70) i, jlev(i),inlev(i),elev(i)*econv
 70         format (i4, i5, i6, f11.3)
       else
-        write (3, 80) i, (jlev(i)+0.5d0), inlev(i), &
+        write (psc_unit, 80) i, (jlev(i)+0.5d0), inlev(i), &
                      elev(i) * econv
         if(iprint) write (6, 80) i, (jlev(i)+0.5d0), inlev(i), &
                      elev(i) * econv
 80         format (i4, f5.1, i6, f11.3)
       endif
     else
-        write (3, 81) i, jlev(i), inlev(i)+0.5d0, &
+        write (psc_unit, 81) i, jlev(i), inlev(i)+0.5d0, &
                      elev(i) * econv
         if(iprint) write (6, 81) i,jlev(i),inlev(i)+0.5d0, &
                      elev(i) * econv
@@ -1400,7 +1401,7 @@ else
     if(jlev(i).eq.jini.and.inlev(i).eq.indi) irow=i
     jj1 = jlev(i) / 10
     jj2 = mod(jlev(i), 10)
-    write (3, 110) i, jj1, jj2, inlev(i), elev(i) * econv
+    write (psc_unit, 110) i, jj1, jj2, inlev(i), elev(i) * econv
     if(iprint) write (9, 110) i, jj1, jj2,inlev(i),elev(i)*econv
 110     format (i4, 2i5, i6, f11.3)
 120   continue
@@ -1443,27 +1444,27 @@ if(iprint) then
 endif
 wt=1d0
 if (jtotd.gt.1) wt=0.5d0
-160 read (1, '(a)',end=210) line
+160 read (pcs_unit, '(a)',end=210) line
 
 !.....here if RESTART-calculation has been done
 if (line(1:14).eq.' ** RESTART **') then
-  read (1, 40) cdate
-  read (1, 40) label
-  read (1, 40) potnam
-  read (1, *) ered, rmu
-  read (1, *) csflag, flaghf, flagsu, twomol, nucros
-  read (1, *) jfirst, jfinal, jtotd,numin, numax, jlpar, nud
-  read (1, *) nj, nlev
-  read (1, *) (jlev(i), inlev(i), i = 1, nlev)
-  read (1, *) (elev(i), i = 1, nlev)
-  read (1, '(a)') line
+  read (pcs_unit, 40) cdate
+  read (pcs_unit, 40) label
+  read (pcs_unit, 40) potnam
+  read (pcs_unit, *) ered, rmu
+  read (pcs_unit, *) csflag, flaghf, flagsu, twomol, nucros
+  read (pcs_unit, *) jfirst, jfinal, jtotd,numin, numax, jlpar, nud
+  read (pcs_unit, *) nj, nlev
+  read (pcs_unit, *) (jlev(i), inlev(i), i = 1, nlev)
+  read (pcs_unit, *) (elev(i), i = 1, nlev)
+  read (pcs_unit, '(a)') line
 end if
 !.....end RESTART handling
 read (line, '(i8)') jtot
 ! loop over initial states as specified in jout
 irow=0
 do 170 i=1,nj
-  read (1,*) ji, in, (scmat(i,j), j = 1, nlev)
+  read (pcs_unit,*) ji, in, (scmat(i,j), j = 1, nlev)
   if(ji.eq.jini.and.in.eq.indi) irow=i
 170 continue
 180 if(irow.eq.0) then
@@ -1503,8 +1504,8 @@ write(3,220) (csum(j),j=1,njj)
 220 format(/1x,'SUM:',(t5,10(1pd11.4)))
 225 format(/1x,'SUM OF PARTIAL CROSS SECTIONS:  ', &
  /5x,(t5,10(1pd11.4)))
-close(1)
-close(3)
+close(pcs_unit)
+close(psc_unit)
 return
 end
 ! ---------------------------------------------------------------------------
