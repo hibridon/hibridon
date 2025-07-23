@@ -64,23 +64,31 @@ use mod_parpot, only: potnam=>pot_name, label=>pot_label
 use mod_hiutil, only: gennam
 use mod_hivector, only: dset
 use funit, only: FUNIT_ICS, FUNIT_XSC
-implicit double precision (a-h,o-z)
-character*(*) fname
+implicit none
+character*(*), intent(in) :: fname
+real(8), intent(in) :: a(4)
+
 character*20 cdate
 character*80 line
 character*3 stat
 character*12 accs
 character*40 xnam1, xnam2
 logical iprint, twomol, existf, openfl, eprint
-dimension  a(4)
+integer :: isa, idum, iener
+integer :: i, ienerg, indtemp, iout, insize, isize, isum
+integer :: j, jbegin, jend, jfinal, &
+        jfirst, jj1, jj2, jlpar, jtemp, jtotd, lenx, n, nlevel, &
+        nlevop, nout, numax, numin, nud, iaver
 integer, allocatable :: ipoint(:)
+real(8) :: ener, xmu
+real(8) :: xthresh
 real(8), allocatable :: zbuf(:)
 !  input parameters
 iprint=.true.
 eprint=.false.
 iaver = 0
-if (a(1) .lt. 0.0d0) iprint = .false.
-if (a(1) .gt. 0.d0) eprint = .true.
+if (a(1) .lt. 0.0) iprint = .false.
+if (a(1) .gt. 0.0) eprint = .true.
 if (a(2) .lt. 0.5) iaver = 0
 if (a(2).gt. 0.d0) iaver=1
 if (a(2) .gt. 1.5) iaver = 2

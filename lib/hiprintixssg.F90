@@ -65,24 +65,25 @@ use mod_selb, only: ibasty
 use mod_hiutil, only: gennam
 use mod_hivector, only: matcopy
 use funit, only: FUNIT_ICS, FUNIT_XSC
-implicit double precision (a-h,o-z)
-character*(*) fname
+implicit none
+character*(*), intent(in) :: fname
+real(8), intent(in) :: a(3)
+
 character*20 cdate
 character*3 stat
 character*12 accs
 character*40 xnam1, xnam2
 logical iprint, twomol, existf, openfl, eprint
-!     real econv, ener, xmu
-!     real a, elev, scmat, zmat
-integer i, ienerg, iout, isize, j, jbegin, jend, jfinal, &
+integer :: i, ienerg, indtemp, iout, insize, isize, isum
+integer :: j, jbegin, jend, jfinal, &
         jfirst, jj1, jj2, jlpar, jtemp, jtotd, lenx, n, nlevel, &
         nlevop, nout, numax, numin, nud, iaver
-dimension  a(3)
 integer, allocatable :: ipoint(:)
+real(8) :: ener, xmu
 !  input parameters
 iprint=.true.
 eprint=.false.
-if (a(1) .lt. 0.0) iprint =  .false.
+if (a(1) .lt. 0.0) iprint = .false.
 if (a(1) .gt. 0.0) eprint = .true.
 iaver=nint(a(2))
 ienerg = a(3) + 0.1
