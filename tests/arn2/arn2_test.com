@@ -81,4 +81,17 @@ airyfl=f
 rendld=12
 run
 psi
+inp=arn2_test.inp
+job=joba
+label=joba rstart 4.0
+wrsmat=t
+jtotd=1
+rstart=4.0
+run
+job=jobb
+label=jobb rstart 5.0
+rstart=5.0
+run
+differ,joba,jobb,1,1.e-2
+differ,joba,jobb,1,-1.e-2
 exit
