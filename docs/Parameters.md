@@ -1,6 +1,6 @@
-The scattering calculation is controlled by GENERAL (system independent) and [SYSTEM](Basis-subroutines) parameters (those which are specific to a particular collision system).
+The scattering calculation is controlled by GENERAL (system independent) and [SYSTEM](basis) parameters (those which are specific to a particular collision system).
 
-More information on the collision systems which can be treated is given [here](Basis-subroutines).
+More information on the collision systems which can be treated is given [here](basis).
 
 The system independent parameters are:
 - [ENERG](ENERG)
@@ -19,6 +19,7 @@ The system independent parameters are:
 - [NUMIN](NUMIN) 
 - [NUD](NUD)
 - [RCUT](RCUT)
+- [READPT](./param/readpt.md)
 - [RENDAI](RSTART,-RENDLD,-and-RENDAI)
 - [RENDLD](RSTART,-RENDLD,-and-RENDAI)
 - [RINCR](RINCR) 

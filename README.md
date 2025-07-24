@@ -213,7 +213,7 @@ Once your executables are created (step 4), you can interactively run hibridon u
 # or 
 ./<executable> --kmax <kmax>
 ```
-Where `<kmax>` is the maximum number of channels (see [Memory Requirements](./docs/Memory-requirements.md)).
+Where `<kmax>` is the maximum number of channels (see [Memory Requirements](./docs/memory.md)).
 
 
 You can also run your Hibridon executable using a command file:

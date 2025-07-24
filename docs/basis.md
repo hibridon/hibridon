@@ -1,6 +1,17 @@
-For each of the twelve collision [systems](systems) that can currently be treated by the Hibridon package, the channel list, channel energies, and coupling matrix elements of the potential are determined by an appropriate BASIS subroutine. This is done before the propagation is initiated. A specific description of these particular BASIS subroutines can be obtained by clicking the button for the following cases:
+# Basis subroutines
+In addition to the general parameters, input parameters must be supplied to define the particular collision system to be treated and to control the choice of channels and internal energies.
 
-The appropriate BASIS (and [SYSDAT](sysdat) subroutines are selected by the input parameter `BASISTYP`, whose value is the index of the following ordered list.
+Currently the Hibridon package can accomodate collision systems listed at the bottom of this page. Consult the page dedicated to each basis for a further description of its system-dependent variables.
+
+note:
+
+> For systems (1) - (7), (9), and (11) below, by setting the [flag](Flags.md) [FLAGSU](FLAGSU.md) = `.TRUE.`, it is possible to treat the collision of the
+partner (atom or molecule) with internal structure with a flat, rigid surface.
+
+
+For each of the collision [systems](systems) that can currently be treated by the Hibridon package, the channel list, channel energies, and coupling matrix elements of the potential are determined by an appropriate BASIS subroutine. This is done before the propagation is initiated. A specific description of these particular BASIS subroutines can be obtained by clicking the button for the following cases:
+
+The appropriate BASIS (and [SYSDAT](sysdat)) subroutines are selected by the input parameter `BASISTYP`, whose value is the index of the following ordered list.
 
 To print out the list of system dependent parameters, enter:
 ```
@@ -84,4 +95,4 @@ will print out a sample input file called  `Test.inp` , which you can then exami
 
 ### [99. User-defined basis routine - bausr](Basis-subroutines%3A-bausr)
 
-Setting the parameter `BASISTYPE = 99` allows the user to define his own basis routine, in addition to the fifteen types enumerated above.  For an example see the file `tests/ch3i/pot_ch3i.F90`
+Setting the parameter `BASISTYPE = 99` allows the user to define his own basis routine, in addition to the types enumerated above. For an example see the file `tests/ch3i/pot_ch3i.F90`

@@ -41,7 +41,7 @@ Execution of the Hibridon package is controlled by the Hibridon driver.
   - input and output [files](Files), and job [names](Files)
 
 - At present Hibridon can treat a number of different types of collision [systems](Systems). This is made possible by the presence of multiple system specific subroutines:
-  - [BASIS](Basis-subroutines) subroutines which define the Hamiltonian matrix
+  - [BASIS](basis) subroutines which define the Hamiltonian matrix
   - [SYSDAT](SYSDAT) subroutines which control the input of system specific data
   - System specific [POT](POT) subroutines which determine the distance dependence of the potential matrix [V(R)](Close-coupled-equations).
 

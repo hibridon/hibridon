@@ -101,7 +101,7 @@ The, decrease [JTOTD](JTOT) until you have reached convergence in the integral c
 
 ## Size of channel basis
 
-Once you have decided on the parameters which control the integration and the parameters which control the partial wave sum, you need only decide on the size of the channel basis. The number of channels is, of course, dependnet on the particular system and/or [BASIS](Basis-subroutines) subroutine selected. In many cases, this is controled by the parameter JMAX. By following a similar procedure outlined in step #4 above (optimization of the partial wave sum), one can decide how large a channel basis is necessary to obtain convergence.
+Once you have decided on the parameters which control the integration and the parameters which control the partial wave sum, you need only decide on the size of the channel basis. The number of channels is, of course, dependnet on the particular system and/or [BASIS](basis) subroutine selected. In many cases, this is controled by the parameter JMAX. By following a similar procedure outlined in step #4 above (optimization of the partial wave sum), one can decide how large a channel basis is necessary to obtain convergence.
 
 Unfortunately, since the cpu requirement of any close-coupled calculation goes up as the thirdpower of the number of channels, the choice of the maximum size of the channel basis may involve significant computational effort.
 

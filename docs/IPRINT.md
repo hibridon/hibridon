@@ -1,4 +1,4 @@
-IPRINT is a general print control parameter which can vary from -1 to 2. In some of the [basis](Basis-subroutines) subroutines the amount of diagnostic printing is controlled by IPRINT with the understanding that
+IPRINT is a general print control parameter which can vary from -1 to 2. In some of the [basis](basis) subroutines the amount of diagnostic printing is controlled by IPRINT with the understanding that
   - IPRINT = - 1 : no print
   - IPRINT = 0 : minimal print
   - IPRINT = 1 : moderate diagnostic print
