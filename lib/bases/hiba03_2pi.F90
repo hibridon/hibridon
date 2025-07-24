@@ -881,6 +881,7 @@ end
 
 subroutine read_pot(line, readpt, pot_filename)
 use mod_hiutil, only: gennam, get_token
+use mod_hipot, only: loapot
 implicit none
 character*(*), intent(in) :: line
 logical, intent(in) :: readpt
