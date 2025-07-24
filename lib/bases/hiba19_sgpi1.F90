@@ -1151,7 +1151,6 @@ integer :: j, l, lc, nmax
 logical existf
 character*4 char
 character*(*) fname
-character*1 dot
 character*60 filnam, line
 character*68 filnm1
 integer, pointer :: nterm, isym, isa, nparsg, numvpi

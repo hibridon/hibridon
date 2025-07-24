@@ -744,7 +744,6 @@ subroutine gennam(xname,jobnam,ifil,xtens,ln)
 ! current revision date: 15-jul-2014
 !
 character*(*) xname,jobnam,xtens
-character*1 dot
 #include "common/comdot.F90"
 xname=jobnam
 i=index(xname,dot)

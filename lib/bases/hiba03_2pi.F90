@@ -5,6 +5,7 @@
 #include "unused.h"
 module mod_hiba03_2pi
   use mod_assert, only: fassert
+character*60 potfil
 contains
 subroutine ba2pi (bqs, jhold, ehold, ishold, nlevel, &
                   nlevop, sc1, c12, c32, sc4, rcut, jtot, &
@@ -877,6 +878,45 @@ iphase = (-1) ** iabs(iphase)
 v = iphase * x * sqrt(xnorm)
 return
 end
+
+subroutine read_pot(line, readpt, pot_filename)
+use mod_hiutil, only: gennam, get_token
+implicit none
+character*(*), intent(in) :: line
+logical, intent(in) :: readpt
+character*60, intent(out) :: pot_filename
+
+#include "common/comdot.F90"
+character*60 filnam
+integer :: j, l, lc
+logical existf
+character*69 filnm1
+
+if (readpt) then
+  l=1
+  call get_token(line,l,filnam,lc)
+  if(lc.eq.0) then
+    write(6,1020)
+1020     format(' FILENAME MISSING FOR POTENTIAL INPUT')
+  end if
+  j=index(filnam(1:lc),dot)
+  if(j.eq.0) then
+    call gennam(pot_filename,filnam,0,'BIN',lc)
+    filnam = potfil
+  end if
+  pot_filename=filnam
+  filnm1 = 'potdata/'//filnam
+  inquire(file=filnm1,exist=existf)
+  if(.not.existf) then
+    write(6,1025) filnam(1:lc)
+1025     format(' FILE ',(a),' NOT FOUND')
+    return
+  end if
+! now call loapot(iunit,filnam) routine to read potential parameters
+  call loapot(1,filnam)
+end if
+end subroutine
+
 !  -----------------------------------------------------------------------
 ! ----------------------------------------------------------------
 subroutine sy2pi (irpot, readpt, iread)
@@ -919,20 +959,12 @@ use mod_cosysi, only: nscode, isicod, ispar
 use mod_cosysr, only: isrcod, rspar
 use funit, only: FUNIT_INP
 use mod_parbas, only: lammin, lammax, mproj
-use mod_hiutil, only: gennam, get_token
 use mod_hipot, only: loapot
 implicit none
 integer, intent(inout) :: irpot
 logical, intent(inout) :: readpt
 integer, intent(in) :: iread
-integer :: j, l, lc
-logical existf
-character*1 dot
-character*(*) fname
-character*60 filnam, line, potfil
-character*69 filnm1
-save potfil
-#include "common/comdot.F90"
+character*60 line
 integer, pointer, save :: nterm, jmax, igu, isa, npar
 real(8), pointer, save :: brot, aso, p, q
 nterm=>ispar(1); jmax=>ispar(2); igu=>ispar(3); isa=>ispar(4); npar=>ispar(5) 
@@ -980,54 +1012,45 @@ if(.not.readpt.or.iread.eq.0) then
   call loapot(1,' ')
   return
 endif
-read (8, 285, end=286) line
+read (8, 285) line
 285 format (a)
-goto 286
+call read_pot(line, readpt, potfil)
 ! here if read error occurs
-888 write(6,1000)
-1000 format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
-return
-!
-entry ptr2pi (fname,readpt)
-line = fname
-readpt = .true.
-286 if (readpt) then
-  l=1
-  call get_token(line,l,filnam,lc)
-  if(lc.eq.0) then
-    write(6,1020)
-1020     format(' FILENAME MISSING FOR POTENTIAL INPUT')
-  end if
-  j=index(filnam(1:lc),dot)
-  if(j.eq.0) then
-    call gennam(potfil,filnam,0,'BIN',lc)
-    filnam = potfil
-  end if
-  potfil=filnam
-  filnm1 = 'potdata/'//filnam
-  inquire(file=filnm1,exist=existf)
-  if(.not.existf) then
-    write(6,1025) filnam(1:lc)
-1025     format(' FILE ',(a),' NOT FOUND')
-    return
-  end if
-! now call loapot(iunit,filnam) routine to read potential parameters
-  call loapot(1,filnam)
-  end if
 close (8)
 irpot=1
 return
-!
-entry sav2pi ()
-!  save input parameters for doublet-pi + atom scattering
-!  line 13:
-write (FUNIT_INP, 315) jmax, igu, isa, npar
-315 format(4i4,18x,'jmax, igu, isa, npar')
-!  line 14
-write (FUNIT_INP, 320) brot, aso, p, q
-320 format(f10.5,f10.4,2(1pg11.3),' brot, aso, p, q')
-!  line 15
-write (FUNIT_INP, 285) potfil
+
+888 write(6,1000)
+1000 format(/'   *** ERROR DURING READ FROM INPUT FILE ***')
 return
-end
+
+entry sav2pi ()
+  !  save input parameters for doublet-pi + atom scattering
+  !  line 13:
+  write (FUNIT_INP, 315) jmax, igu, isa, npar
+  315 format(4i4,18x,'jmax, igu, isa, npar')
+  !  line 14
+  write (FUNIT_INP, 320) brot, aso, p, q
+  320 format(f10.5,f10.4,2(1pg11.3),' brot, aso, p, q')
+  !  line 15
+  write (FUNIT_INP, 285) potfil
+  return
+
+!
+end subroutine
+
+
+subroutine ptr2pi (fname,readpt)
+use mod_hiutil, only: gennam, get_token
+implicit none
+character*(*), intent(in) :: fname
+logical, intent(inout) :: readpt
+
+character*60 line
+  line = fname
+  readpt = .true.
+  call read_pot(line, readpt, potfil)
+  return
+end subroutine
+
 end module mod_hiba03_2pi
