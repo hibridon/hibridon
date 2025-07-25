@@ -11,6 +11,7 @@ A number of commands are available to direct the operation of the Hibridon code:
 - [`MRCRS`](MRCRS): Determine m-state resolved integral cross sections using previously determined tensor cross sections
 - [`OPTIMIZE`](OPTIMIZE): Optimize system independent [parameters](Parameters)
 - [`PARTC`](PARTC): Print out a subset of previously calculated partial cross sections
+- [`POT`](./com/pot.md): Allows the user to use another potential datafile
 - [`PRINTC`](PRINTC): Print out a subset of previously calculated integral cross sections
 - [`PRINTS`](PRINTS): Print out previously calculated S matrices
 - [`PRSBR`](PRSBR): Calculate pressure-broadening cross sections
