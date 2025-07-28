@@ -6,7 +6,7 @@
 
 
 set(TEST_POT_SRC_FILE "pot_bastst.F90")
-set(TEST_POT_DATA_FILES "")
+set(TEST_POT_DATA_FILES "FOLLMEG.BIN")
 set(TEST_KMAX 500)
 set(TEST_T_MATRIX_SIZE kmax)
 set(TEST_LABELS "coverage")

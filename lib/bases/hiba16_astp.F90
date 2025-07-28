@@ -1012,7 +1012,6 @@ logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: icod, ircod, j, l, lc
 logical existf
-character*1 dot
 character*(*) fname
 character*60 line, filnam, potfil
 character*68 filnm1

@@ -1062,7 +1062,6 @@ integer, intent(in) :: iread
 integer :: j, l, lc
 logical existf
 integer icod, ircod
-character*1 dot
 character*(*) fname
 character*60 line, filnam, potfil
 character*68 filnm1

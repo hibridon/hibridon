@@ -537,7 +537,6 @@ logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: i, ihigh, ij, iline, ilow, itop, j, l, lc
 logical existf
-character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil
 character*68 filnm1

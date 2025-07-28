@@ -646,12 +646,10 @@ logical, intent(inout) :: readpt
 integer, intent(in) :: iread
 integer :: i, j, iel, iofi, iofr, ndip, nel
 real(8) :: rshift, rsm
-character*1 dot
 character*4 char
 character*(*) fname
 character*40 filnam, potfil
 save potfil
-#include "common/comdot.F90"
 
 !     default number and names of system dependent parameters
 isicod = 7

@@ -1008,7 +1008,6 @@ logical existf
 character*(*) fname
 character*60 filnam, line, potfil
 character*68 filnm1
-character*1 dot
 save potfil
 #include "common/comdot.F90"
 integer, pointer, save :: nterm, jmax, igu, isa, npar, imult, nman

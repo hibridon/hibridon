@@ -1,1 +1,0 @@
-The commands `QUIT` and, equivalently, [`EXIT`](exit) terminate the currently running scattering program.

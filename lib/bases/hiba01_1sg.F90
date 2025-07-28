@@ -635,7 +635,6 @@ integer, intent(in) :: iread
 integer :: i, iofi, iofr
 integer :: j, l, lc
 logical existf
-character*1 dot
 character*4 char
 character*(*) fname
 character*60 filnam, line, potfil

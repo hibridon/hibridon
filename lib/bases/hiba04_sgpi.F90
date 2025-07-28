@@ -1394,7 +1394,6 @@ integer :: i, ipi, isg, isgpi, ivp, ivs, j, k, l, lc, nterm, nvmaxp, nvmaxs, nvm
 logical existf
 character*4 char
 character*(*) fname
-character*1 dot
 character*60 filnam, line, potfil
 character*68 filnm1
 save potfil

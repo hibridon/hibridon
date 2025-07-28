@@ -32,21 +32,21 @@ The Hibridon package source code and the instructions to compile it can be found
 
 Execution of the Hibridon package is controlled by the Hibridon driver.
 
-- Description of the commands to the driver can be found [here](Commands)
+- Description of the commands to the driver can be found [here](./Commands.md)
 
 - The scattering calculation is controlled by:
-  - system independent [parameters](Parameters)
-  - system dependent [parameters](Parameters)
-  - logical [flags](Flags)
-  - input and output [files](Files), and job [names](Files)
+  - system independent [parameters](./Parameters.md)
+  - system dependent [parameters](./Parameters.md)
+  - logical [flags](./Flags.md)
+  - input and output [files](./Files.md), and job [names](./Files.md)
 
-- At present Hibridon can treat a number of different types of collision [systems](Systems). This is made possible by the presence of multiple system specific subroutines:
-  - [BASIS](Basis-subroutines) subroutines which define the Hamiltonian matrix
-  - [SYSDAT](SYSDAT) subroutines which control the input of system specific data
-  - System specific [POT](POT) subroutines which determine the distance dependence of the potential matrix [V(R)](Close-coupled-equations).
+- At present Hibridon can treat a number of different types of collision systems. This is made possible by the presence of multiple system specific subroutines:
+  - [`BASIS`](./basis.md) subroutines which define the Hamiltonian matrix
+  - [`SYSDAT`](./sysdat.md) subroutines which control the input of system specific data
+  - System specific [`POT`](./potlist.md) subroutines which determine the distance dependence of the potential matrix [V(R)](Close-coupled-equations).
 
 ## How do I use it?
-A number of [examples](Examples) are available to help you learn how to use the Hibridon package.
+A number of [examples](./Examples.md) are available to help you learn how to use the Hibridon package.
 
 ## I want to contribute
 Hibridon v5 is an open-source software under the [GNU General Public Licence v3](https://www.gnu.org/licenses/gpl-3.0.html).

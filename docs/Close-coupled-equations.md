@@ -10,7 +10,7 @@ The close coupled (CC) equations arise whenever one describes the scattering of 
 These equations were introduced into the field of molecular collisions in 1960 by Arthurs and Dalgarno.[1,2]
 An excellent description of these equations and the role they play in the quantum theory of inelastic collisions is given in a review article by Secrest.[3] In this Introduction we shall assume that you have a basic familiarity with quantum scattering theory and with the CC equations.
 
-In the close coupled treatment of both scattering and photodissociation, the scattering wavefunction is expanded in a complete set of internal states of the system, usually constructed as direct products of the internal states of one (or both) fragments, multiplied by angular functions which describe the rotation of one collision partner about the other. Let us designate these internal states as (r), where r designates the internal coordinates. Each internal state is called a channel. In the Hibridon code, the channels are labelled by two integer indices, a rotational angular momentum (contained in the array [JOUT](JOUT)) and an additional quantum number or index (contained in the array [INDOUT](INDOUT)).
+In the close coupled treatment of both scattering and photodissociation, the scattering wavefunction is expanded in a complete set of internal states of the system, usually constructed as direct products of the internal states of one (or both) fragments, multiplied by angular functions which describe the rotation of one collision partner about the other. Let us designate these internal states as (r), where r designates the internal coordinates. Each internal state is called a channel. In the Hibridon code, the channels are labelled by two integer indices, a rotational angular momentum (contained in the array [`JOUT`](./com/jout.md)) and an additional quantum number or index (contained in the array [`INDOUT`](./com/indout.md)).
 
 The full scattering wavefunction is written as:
 
@@ -52,25 +52,25 @@ Within the CC formulation, the integral cross section for a transition from an i
  
 where $k_i$ is the wavevector of the initial state and the sum runs over:
 
-- all values of the total angular momentum for which the $\mathbf{S}$ matrix elements differ from unity. You must ensure that the parameter [JTOT2](JTOT) has been set large enough so that increasing its value will not significantly change the cross section(s) of interest,
+- all values of the total angular momentum for which the $\mathbf{S}$ matrix elements differ from unity. You must ensure that the parameter [`JTOT2`](./param/jtot2.md) has been set large enough so that increasing its value will not significantly change the cross section(s) of interest,
 - all values of the orbital angular momentum $l$ allowed by the triangular rule
-- both values ($p$ = +1 and -1) of the total parity of the scattering wavefunction. The total parity is related to the important input parameter [JLPAR](JLPAR). Note that for full close-coupled determinations of either integral or differential cross sections, the calculations must be carried out for both values of [JLPAR](JLPAR).
+- both values ($p$ = +1 and -1) of the total parity of the scattering wavefunction. The total parity is related to the important input parameter [`JLPAR`](./param/jlpar.md). Note that for full close-coupled determinations of either integral or differential cross sections, the calculations must be carried out for both values of [`JLPAR`](./param/jlpar.md).
 
 Here, the $\mathbf{T}$ or transition matrix is defined as:
 
 (8)$$ \mathbf{T} = \mathbf{1} - \mathbf{S} $$
 
-where $\mathbf{1}$ is the unit matrix. At large $J_{tot}$ the $\mathbf{T}$ matrix goes to zero as the centrifugal potential becomes so large that the colliding particles are kept beyond the range of the interaction potential. This defines the range of total angular momentum for which scattering calculations need be done. The minimum and maximum values of the total angular momentum for which the calculation is done are set by the parameters [JTOT1](JTOT) and [JTOT2](JTOT), respectively.
+where $\mathbf{1}$ is the unit matrix. At large $J_{tot}$ the $\mathbf{T}$ matrix goes to zero as the centrifugal potential becomes so large that the colliding particles are kept beyond the range of the interaction potential. This defines the range of total angular momentum for which scattering calculations need be done. The minimum and maximum values of the total angular momentum for which the calculation is done are set by the parameters [`JTOT1`](./param/jtot1.md) and [`JTOT2`](./param/jtot2.md), respectively.
 
 See Refs. 1 and 2 for an expression for the differential cross section equivalent to Eq. (7).
 
-In general, the CC equations are block diagonal in the overall parity of the scattering wavefunction. To obtain integral and/or differential cross sections it is necessary to carry out calculations for both values of this parity (this is ensured by setting [JLPAR](JLPAR)=0; see the [JLPAR](JLPAR) page for more information).
+In general, the CC equations are block diagonal in the overall parity of the scattering wavefunction. To obtain integral and/or differential cross sections it is necessary to carry out calculations for both values of this parity (this is ensured by setting [`JLPAR`](./param/jlpar.md)=0; see the [`JLPAR`](./param/jlpar.md) page for more information).
 
 Equation (7) can be written equivalently in terms of partial cross sections
 
 (9)$$\sigma_{i \rightarrow f} = \sum_{J_{tot}} \sigma_{i \rightarrow f}^{J_{tot}}$$
 
-where the partial cross sections, which can be calculated with the command [PARTC](PARTC), are defined by:
+where the partial cross sections, which can be calculated with the command [`PARTC`](./com/partc.md), are defined by:
 
 (10)$$\sigma_{i \rightarrow f}^{J_{tot}} = \frac{\pi}{(2j_i + 1)k_i^2} \sum_{l, p} \left|T_{ij}^{J_{tot}} \right|^2$$
 
@@ -91,7 +91,7 @@ In addition to the determination of cross sections, which depend on the asymptot
 
 The determination of differential and/or integral cross sections involves three steps:
 The development of subroutines to calculate the potential matrix $\mathbf{V}(R)$ for a particular collision system.
-Solution of the CC equations to obtain and store the $\mathbf{S}$ matrix elements, at both values of the parity index [JLPAR](JLPAR).
+Solution of the CC equations to obtain and store the $\mathbf{S}$ matrix elements, at both values of the parity index [`JLPAR`](./param/jlpar.md).
 The subsequent calculation of differential and/or integral cross sections for the transitions which interest you.
 The major part of this manual is devoted to the description of a complex family of subroutines for solution of the CC equations - step 2 above.
    Historically, there have been many algorithms developed to solve these equations. These algorithms can be grouped into two categories[3]:
@@ -109,7 +109,7 @@ In solution-following methods the solution is approximated while the potential i
 
 rather than the solution matrix itself.
 
-   Another, powerful program package for the solution of the close coupled equations is the [MOLSCAT](http://www.giss.nasa.gov/tools/molscat/) code developed by S. Green and maintained by J. Hutson.
+   Another, powerful program package for the solution of the close coupled equations is the [`MOLSCAT`](http://www.giss.nasa.gov/tools/molscat/) code developed by S. Green and maintained by J. Hutson.
 
 ## References
 1. A. Arthurs and A. Dalgarno, Proc. Roy. Soc. (London Ser.) **A256**, 540 (1960). 

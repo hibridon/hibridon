@@ -663,7 +663,6 @@ integer :: i, j, l, lc
 real(8) :: rms
 logical existf
 
-character*1 dot
 character*(*) fname
 character*60 filnam, line, potfil
 character*68 filnm1

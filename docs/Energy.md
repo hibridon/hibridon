@@ -4,7 +4,7 @@ ENERG = {energy1},{energy2}...{energyN}
 ```
 If other input data occurs on the same line, then the string of energies must be terminated by a backslash.
 
-Note that if the length of the array of energies is greater than the current value of [NERG](NERG), then [NERG](NERG) is reset accordingly. The maximum number of energies cannot exceed 25.
+Note that if the length of the array of energies is greater than the current value of [`NERG`](./com/nerg.md), then [`NERG`](./com/nerg.md) is reset accordingly. The maximum number of energies cannot exceed 25.
 
 If the first energy is negative, then the calculations are to be preformed on a regular grid of energies, specified by
 ```

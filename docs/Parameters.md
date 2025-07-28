@@ -1,31 +1,32 @@
-The scattering calculation is controlled by GENERAL (system independent) and [SYSTEM](Basis-subroutines) parameters (those which are specific to a particular collision system).
+The scattering calculation is controlled by GENERAL (system independent) and [`SYSTEM`](basis) parameters (those which are specific to a particular collision system).
 
-More information on the collision systems which can be treated is given [here](Basis-subroutines).
+More information on the collision systems which can be treated is given [here](basis).
 
 The system independent parameters are:
-- [ENERG](ENERG)
-- [FSTFAC](FSTFAC)
-- [INDOUT](INDOUT)
-- [IPRINT](IPRINT)
-- [J1J2](J1J2)
-- [JOUT](JOUT)
-- [JTOT1](JTOT1) 
-- [JTOT2](JTOT2)
-- [JTOTD](JTOTD)
-- [JLPAR](JLPAR) 
-- [LSCREEN](LSCREEN)
-- [NERG](NERG)
-- [NUMAX](NUMAX)
-- [NUMIN](NUMIN) 
-- [NUD](NUD)
-- [RCUT](RCUT)
-- [RENDAI](RSTART,-RENDLD,-and-RENDAI)
-- [RENDLD](RSTART,-RENDLD,-and-RENDAI)
-- [RINCR](RINCR) 
-- [RSTART](RSTART,-RENDLD,-and-RENDAI)
-- [SPAC](SPAC)
-- [TOLAI](TOLAI)
-- [XMU](XMU)
+- [`ENERG`](./com/energ.md)
+- [`FSTFAC`](./param/fstfac.md)
+- [`INDOUT`](./com/indout.md)
+- [`IPRINT`](./param/iprint.md)
+- [`J1J2`](./com/j1j2.md)
+- [`JOUT`](./com/jout.md)
+- [`JTOT1`](./param/jtot1.md) 
+- [`JTOT2`](./param/jtot2.md)
+- [`JTOTD`](./param/jtotd.md)
+- [`JLPAR`](./param/jlpar.md) 
+- [`LSCREEN`](./param/lscreen.md)
+- [`NERG`](./com/nerg.md)
+- [`NUMAX`](./param/numax.md)
+- [`NUMIN`](./param/numin.md) 
+- [`NUD`](./param/nud.md)
+- [`RCUT`](./param/rcut.md)
+- [`READPT`](./param/readpt.md)
+- [`RENDAI`](./param/rendai.md)
+- [`RENDLD`](./param/rendld.md)
+- [`RINCR`](./param/rincr.md) 
+- [`RSTART`](./param/rstart.md)
+- [`SPAC`](./param/spac.md)
+- [`TOLAI`](./param/tolai.md)
+- [`XMU`](./param/xmu.md)
 
 
 To change values of any parameters enter the command
@@ -34,7 +35,7 @@ PARAMETER1=VAL1,PARAMETER2=VAL2 etc.
 ```
 Different parameters can be separated by commas or by semicolons.
 
-Note that values for the parameters [ENERG](ENERG), [INDOUT](INDOUT), or [JOUT](JOUT) must be terminated by a backslash (\) if other PARAMETER=VAL strings follow, e.g.
+Note that values for the parameters [`ENERG`](./com/energ.md), [`INDOUT`](./com/indout.md), or [`JOUT`](./com/jout.md) must be terminated by a backslash (\) if other PARAMETER=VAL strings follow, e.g.
 ```
 ENERG=1000,2000\AIRYFL=T
 ```
