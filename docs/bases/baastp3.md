@@ -19,10 +19,10 @@ For a molecule with $C_{v}$ symmetry, the body-frame z axis is taken to lie alon
 
 - NTERM: the number of potential surfaces involved. This parameter can not be changed
 - NUMPOT: an index representing the particular potential used. This variable is passed to the POT subroutine
-- IOP: ortho/para label for molecular states of the asymmetric top of $C_{2v}$ symmetry. If [IHOMO](IHOMO) =.true. then
+- IOP: ortho/para label for molecular states of the asymmetric top of $C_{2v}$ symmetry. If [`IHOMO`](../param/ihomo.md) =.true. then
   - if IOP = 1: only para states included in channel expansion
   - if IOP = −1: only ortho states included in channel expansion
-  IOP is not needed if [IHOMO](IHOMO) =.false. (for a molecule of $C_{s}$ symmetry, but a number should be entered for this parameter nevertheless.
+  IOP is not needed if [`IHOMO`](../param/ihomo.md) =.false. (for a molecule of $C_{s}$ symmetry, but a number should be entered for this parameter nevertheless.
 
 - JMAX: the maximum rotational angular momentum included in the channel expansion
 
@@ -46,4 +46,4 @@ The expansion coefficients are stored in the array c as:
 - $c(k=0)$, $c(k=2)$, ... $c(k=j)$, for even $k$
 - $c(k=1)$, $c(k=3)$, ... $c(k=j)$, for odd $k$
 
-By setting [BASTST](BASTST)=.TRUE., you can output the values of $j$, $s$, the values of the prolate and oblate projection quantum numbers [ $k_p$ and $k_o$], and the internal energies, as well as the expansion coefficients.
+By setting [`BASTST`](../param/bastst.md)=.TRUE., you can output the values of $j$, $s$, the values of the prolate and oblate projection quantum numbers [ $k_p$ and $k_o$], and the internal energies, as well as the expansion coefficients.

@@ -17,9 +17,9 @@ Here, the body-frame z axis is taken to lie along the $C_2$ axis of a molecule w
 
 - NUMPOT: an index representing the particular potential used. This variable is passed to the POT subroutine
 
-- IPOTSY: cylindrical symmetry of potential. The variables (theta,phi) describing the angular expansion of the potential should be defined with the a inertial axis defined as the body-frame z axis and, if possible, the xz plane as a plane of symmetry of the molecule (in this case, POTSY = 2). If the [flag](Flags) [IHOMO](IHOMO) = .true., only terms with LAMBDA + MU equal to an integer multiple of IPOTSY can be included in the potential. Example: for H2O, IPOTSY = 2
+- IPOTSY: cylindrical symmetry of potential. The variables (theta,phi) describing the angular expansion of the potential should be defined with the a inertial axis defined as the body-frame z axis and, if possible, the xz plane as a plane of symmetry of the molecule (in this case, POTSY = 2). If the [flag](../Flags.md) [`IHOMO`](../param/ihomo.md) = .true., only terms with LAMBDA + MU equal to an integer multiple of IPOTSY can be included in the potential. Example: for H2O, IPOTSY = 2
 
-- IOP: ortho/para label for molecular states of the asymmetric top. If [IHOMO](IHOMO) =.true. then
+- IOP: ortho/para label for molecular states of the asymmetric top. If [`IHOMO`](../param/ihomo.md) =.true. then
   - if IOP = 1: only para states included in channel expansion
   - if IOP = −1: only ortho states included in channel expansion
 
@@ -44,4 +44,4 @@ The expansion coefficients are stored in the array c as:
 - $c(k=0)$, $c(k=2)$, ... $c(k=j)$, for even $k$
 - $c(k=1)$, $c(k=3)$, ... $c(k=j)$, for odd $k$
 
-By setting [BASTST](BASTST)=.TRUE., you can output the values of $j$, $s$, the values of the prolate and oblate projection quantum numbers [ $k_p$ and $k_o$], and the internal energies, as well as the expansion coefficients.
+By setting [`BASTST`](../param/bastst.md)=.TRUE., you can output the values of $j$, $s$, the values of the prolate and oblate projection quantum numbers [ $k_p$ and $k_o$], and the internal energies, as well as the expansion coefficients.

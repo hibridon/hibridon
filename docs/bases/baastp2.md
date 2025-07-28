@@ -35,4 +35,4 @@ The expansion coefficients are stored in the array c as:
 - $c(k=0)$, $c(k=2)$, ... $c(k=j)$, for even $k$
 - $c(k=1)$, $c(k=3)$, ... $c(k=j)$, for odd $k$
 
-By setting [BASTST](BASTST)=.TRUE., you can output the values of $j$, $s$, the values of the prolate and oblate projection quantum numbers [ $k_p$ and $k_o$], and the internal energies, as well as the expansion coefficients.
+By setting [`BASTST`](../param/bastst.md)=.TRUE., you can output the values of $j$, $s$, the values of the prolate and oblate projection quantum numbers [ $k_p$ and $k_o$], and the internal energies, as well as the expansion coefficients.

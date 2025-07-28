@@ -1,0 +1,25 @@
+name: hibridon ci
+
+on:
+  pull_request:
+    branches: [ master ]     # run basic ci on pull requests on master
+  push:
+    branches: [ master ]     # run basic ci on pushes on master
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test-config:
+    runs-on: debian-12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: 
+        run: |
+          echo "detecting dead links in the documentation"
+          ./bin/chkmddoc.py --md-doc-root=./docs
+
+

@@ -19,7 +19,7 @@
   - 2: both singlet and triplet state
 - IPOL: selects whether $^1P_{1e}$ states are combined to form proper $^1\Pi_e$ and $^1\Sigma_e$ combinations [see B. Pouilly and M. H. Alexander, Chem. Phys. **145**, 191 (1990)]
   - 0: normal case, no linear combinations made
-  - 1: linear combinations made (just for [JLPAR](JLPAR) = -1)
+  - 1: linear combinations made (just for [`JLPAR`](../param/jlpar.md) = -1)
 
 #### The definition of the real system dependent parameters is as follows:
 

@@ -22,8 +22,7 @@ is now available for the following machines:
 
 Only the Apple (10.5 and 10.6) and Linux x86 versions will be actively maintained.
 
-You can obtain a copy of  Hibridon 4.3 as a `g'zipped tar` [archive](hib43.tar.gz)  in binary format (~1 MB)
----
+You can obtain a copy of Hibridon 4.3 as a `g'zipped tar` [archive](https://www2.chem.umd.edu/groups/alexander/hibridon/hib43/hib43.tar.gz) in binary format (~1 MB)
 
 ## Prerequisites
 
@@ -84,7 +83,7 @@ gunzip hib4.3.tar.gz |tar xvf -
 ```
 4. The Hibridon hypertext help facility (a copy of the help facility you are reading here) is contained  in the directory `hib43x/doc/hib_html`. The initial target file for your web browser should be `hib43x/doc/hib_html/index.html`
 5. Extend your PATH environmental variable to include the `bin` subdirectory of your main hibridon directory, that is `hib43x/bin`  
-6. ⚠️ Read the [license](license.html) agreement.  If you **do not accept** all provisions of this agreement, **stop here** and destroy the software. If you **accept** the license agreement, please read [the instructions for acknowledgement](../Home.md) of the code in any future publications from your group that use the Hibridon package.
+6. ⚠️ Read the [license](./license.md) agreement.  If you **do not accept** all provisions of this agreement, **stop here** and destroy the software. If you **accept** the license agreement, please read [the instructions for acknowledgement](../Home.md) of the code in any future publications from your group that use the Hibridon package.
 7. `cd` to the subdirectory `hib43x/bin`.
 8. Execute the command
 ```
@@ -120,7 +119,7 @@ To obtain help at any time you can either
 hibtest
 ```
 
-which runs a series of [test](tests.html) calculations. After the tests are run, the results are saved
+which runs a series of [test](../tests.md) calculations. After the tests are run, the results are saved
 in the directory `hib43x/testnew`. All files in this directory should be compared with the canonical results, which are stored in the directory `hib43x/tests`.  
   - On Apple platforms this comparison can be done graphically, using Apple's `FileMerge` application, by executing the command
   
@@ -134,7 +133,7 @@ compare.com
 
 The comparison between the files in `../tests` and those in `../testnew` should agree to within at least 6 significant figures.
 
-11. You are now ready to [link](./linking.md) and [run](../Run.md) your own code for your particular scattering problem.  Use one of the [potential](../potlist.md) subroutines in the directory `hib43x/src/pot` as a guide for writing your own. You will certainly find it helpful to consult the [Basis](../basis.md) help files.
+11. You are now ready to [link](./linking.md) and [run](../com/run.md) your own code for your particular scattering problem.  Use one of the [potential](../potlist.md) subroutines in the directory `hib43x/src/pot` as a guide for writing your own. You will certainly find it helpful to consult the [Basis](../basis.md) help files.
 
 12. You can run several timing benchmarks by the command `hib_timer` and compare with the results obtained on other platforms (as discussed in more detail on the [timing](./timing.md) page).
 

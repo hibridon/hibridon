@@ -4,7 +4,7 @@ In the usual implementation of [close coupled](./Close-coupled-equations.md) met
 
 $$ V(R,q) = \sum V_\lambda(R) \times f_\lambda(q) $$
 
-where $q$ designates the internal coordinates.  Often these are angles, in which case
+where $q$ designates the internal coordinates. Often these are angles, in which case
 the functions $f_\lambda$ are spherical harmonics, rotation matrix elements,
 or products of these. The particular choice of functions depends on which kind of system you
 are describing, and is controlled, within the Hibridon package, by the 
@@ -28,7 +28,7 @@ appears below.
 
 To write your own `POT` subroutine, you can use any of the supplied subroutine as an example<p>
 If your `POT` requires data from an additional file, make sure you set the flag 
-[READPT](./param/readpt.md) to be `.true.`  Data files should be placed in the directory `bin/progs/potdata`.
+[`READPT`](./param/readpt.md) to be `.true.`  Data files should be placed in the directory `bin/progs/potdata`.
 
 To [link](./hib4only/linking.md) an executable program, you need to specify the name
 of a particular `POT` subroutine.  Specifically, if you wish to link with the potential

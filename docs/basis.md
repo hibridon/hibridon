@@ -5,13 +5,13 @@ Currently the Hibridon package can accomodate collision systems listed at the bo
 
 note:
 
-> For systems (1) - (7), (9), and (11) below, by setting the [flag](Flags.md) [FLAGSU](FLAGSU.md) = `.TRUE.`, it is possible to treat the collision of the
+> For systems (1) - (7), (9), and (11) below, by setting the [flag](./Flags.md) [`FLAGSU`](./param/flagsu.md) = `.TRUE.`, it is possible to treat the collision of the
 partner (atom or molecule) with internal structure with a flat, rigid surface.
 
 
-For each of the collision [systems](systems) that can currently be treated by the Hibridon package, the channel list, channel energies, and coupling matrix elements of the potential are determined by an appropriate BASIS subroutine. This is done before the propagation is initiated. A specific description of these particular BASIS subroutines can be obtained by clicking the button for the following cases:
+For each of the collision systems that can currently be treated by the Hibridon package, the channel list, channel energies, and coupling matrix elements of the potential are determined by an appropriate BASIS subroutine. This is done before the propagation is initiated. A specific description of these particular BASIS subroutines can be obtained by clicking the button for the following cases:
 
-The appropriate BASIS (and [SYSDAT](sysdat)) subroutines are selected by the input parameter `BASISTYP`, whose value is the index of the following ordered list.
+The appropriate BASIS (and [`SYSDAT`](sysdat)) subroutines are selected by the input parameter `BASISTYP`, whose value is the index of the following ordered list.
 
 To print out the list of system dependent parameters, enter:
 ```
@@ -27,7 +27,7 @@ The subsequent command:
 ```
 save=test.inp
 ```
-will print out a sample input file called  `Test.inp` , which you can then examine.
+will print out a sample input file called `Test.inp` , which you can then examine.
 
 
 ## Basis Routines
@@ -44,7 +44,7 @@ will print out a sample input file called  `Test.inp` , which you can then exami
 
 ### [6. A singlet symmetric top molecule and a spherical atom - bastp](./bases/bastp.md)
 
-### [7. An atom in a  <sup>1</sup>P and/or  <sup>3</sup>P state and a spherical atom - bas13p](./bases/ba13p.md)
+### [7. An atom in a  <sup>1</sup>P and/or  <sup>3</sup>P state and a spherical atom - ba13p](./bases/ba13p.md)
 
 ### [8. Two  <sup>1</sup>&Sigma; diatomics - ba2mol](./bases/ba2mol.md)
 
@@ -62,7 +62,7 @@ will print out a sample input file called  `Test.inp` , which you can then exami
 
 ### [15. Collisions between an atom in a <sup>2</sup>P electronic state and a heteronuclear diatomic](./bases/badiat2p.md)
 
-### [16. Collisions between of an atom with a symmetric top](./bases/bastp.md)
+### [16. Collisions between of an atom with a symmetric top](./bases/baastp.md)
 
 ### [17. Collision of an Atom with a CH<sub>2</sub>(X <sup>3</sup>B<sub>1</sub>) (0,v<sub>2</sub>,0) bender vibrational level](./bases/bach2x.md)
 
@@ -93,6 +93,6 @@ will print out a sample input file called  `Test.inp` , which you can then exami
 ### [30. Collisions of an asymmetric top with a closed-shell linear molecule](./bases/baastp3.md)
 
 
-### [99. User-defined basis routine - bausr](./bases/bausr.md)
+### 99. User-defined basis routine - bausr
 
 Setting the parameter `BASISTYPE = 99` allows the user to define his own basis routine, in addition to the types enumerated above. For an example see the file `tests/ch3i/pot_ch3i.F90`

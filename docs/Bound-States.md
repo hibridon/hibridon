@@ -1,10 +1,10 @@
 ## Introduction
-In an entirely equivalent manner to the description of molecular collisions, one can make a [Close-Coupled (CC)](Close-coupled-equations) expansion for wavefunctions of bound states of weakly bound complexes. For more detail we refer the reader to an excellent review by Hutson.[1] The wavefunction of the complex is expanded in a complete set of internal states of the system, usually constructed as direct products of the internal states of one (or both) fragments, multiplied by angular functions which describe the rotation of one collision partner about the other. As in the [CC](Close-coupled-equations) description of scattering we designate these internal states as (r), where r designates the internal coordinates. Each internal state is called a channel. The full wavefunction of the complex is written as:
+In an entirely equivalent manner to the description of molecular collisions, one can make a [Close-Coupled (CC)](Close-coupled-equations) expansion for wavefunctions of bound states of weakly bound complexes. For more detail we refer the reader to an excellent review by Hutson.[1] The wavefunction of the complex is expanded in a complete set of internal states of the system, usually constructed as direct products of the internal states of one (or both) fragments, multiplied by angular functions which describe the rotation of one collision partner about the other. As in the [`CC`](Close-coupled-equations) description of scattering we designate these internal states as (r), where r designates the internal coordinates. Each internal state is called a channel. The full wavefunction of the complex is written as:
 
 $\Psi(\mathbf{R}, \mathbf{r}) = \sum \mathbf{F}(\mathbf{R}) \times \Phi(\mathbf{r})$    (1)
 
 The nth column of the \mathbf{F}(\mathbf{R}) matrix defines the expansion coefficients for the nth bound state.
-Substitution of expansion (1) into the Schrödinger equation, premultiplication by one of the internal states, and integration over r gives rise to a set of coupled ordinary differential equations for the expansion coefficients \mathbf{F}(\mathbf{R}), which are identical to the [CC](Close-coupled-equations) description of molecular scattering.
+Substitution of expansion (1) into the Schrödinger equation, premultiplication by one of the internal states, and integration over r gives rise to a set of coupled ordinary differential equations for the expansion coefficients \mathbf{F}(\mathbf{R}), which are identical to the [`CC`](Close-coupled-equations) description of molecular scattering.
 
 The general structure of these coupled second-order differential equations is expressed by the matrix equation:
 
@@ -57,10 +57,10 @@ in the $\chi(R)$ basis. The dimensions of this Hamiltonian matrix are $M \times 
 
 ## Coupled States Approximation
 
-Similarly to the treatment of molecular scattering, the [Coupled-States](Coupled-state) approximation can be made for bound states. (This is sometimes called the centrifugal decoupling (CD) approximation [1]). Here, the energies and eigenfunctions refer to a system in which the projection of the total angular momentum along R is assumed to be conserved, so that this projection is a good quantum number.
-The Hibridon code will calculate bound-state energies if the flag [BOUNDC](BOUNDC) is set .TRUE.
+Similarly to the treatment of molecular scattering, the [Coupled-States](./Coupled-states.md) approximation can be made for bound states. (This is sometimes called the centrifugal decoupling (CD) approximation [1]). Here, the energies and eigenfunctions refer to a system in which the projection of the total angular momentum along R is assumed to be conserved, so that this projection is a good quantum number.
+The Hibridon code will calculate bound-state energies if the flag [`BOUNDC`](./param/boundc.md) is set .TRUE.
 
-Another, powerful program package for the solution of the close-coupled equations for bound states is the [BOUND](http://www.dur.ac.uk/~dch0www/Staff/jmh) code developed by J. Hutson.
+Another, powerful program package for the solution of the close-coupled equations for bound states is the [`BOUND`](http://www.dur.ac.uk/~dch0www/Staff/jmh) code developed by J. Hutson.
 
 
 ***

@@ -29,4 +29,4 @@
 
 - B2ROT: rotational constant for molecule 2
 
-By setting [BASTST](BASTST)=.TRUE., you can output the values of quantum numbers of the two molecules and the internal energies.
+By setting [`BASTST`](../param/bastst.md)=.TRUE., you can output the values of quantum numbers of the two molecules and the internal energies.

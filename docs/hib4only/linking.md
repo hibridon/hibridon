@@ -7,13 +7,13 @@ makehib [-b -d -c] {potname} [kmax]
 ```
 
 where
-- `{potname}` is the name of the [potential](./potlist.md) subroutine `pot_{potname}.f`, which
+- `{potname}` is the name of the [potential](../potlist.md) subroutine `pot_{potname}.f`, which
 describes the system under investigation and which must be located in the Hibridon subdirectory `src/pot`
 - `kmax` is the numerical value of the maximum number of channels. If this field is omitted, a default value of `kmax = 151` is used.
   - ⚠️  On Intel X86 platforms, to link and run jobs with kmax greater than 3941, you must change the `FI64` line in the [`CONFIG`](./config.md) file to read:
     > `FI64="-mcmodel=medium -shared-intel"`
-- `-b` (optional) forces creation of a code requires fewer matrices and can thus handle larger number of channels (for more details see [Memory Requirements](./memory.md))
-- `-d` (optional) forces creation of a code in which the [potential](./potlist.md) subroutine `pot_{potname}.f` is compiled with the debug (f77 -g) option.
+- `-b` (optional) forces creation of a code requires fewer matrices and can thus handle larger number of channels (for more details see [Memory Requirements](../memory.md))
+- `-d` (optional) forces creation of a code in which the [potential](../potlist.md) subroutine `pot_{potname}.f` is compiled with the debug (f77 -g) option.
 - `-c` (optional) forces creation of a code in which direct access I/O is handled by C rather than FORTRAN routines.
 
 the `makehib` command creates an executable module `bin/progs/hib_{potname}_kmax`.

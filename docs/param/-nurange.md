@@ -1,0 +1,6 @@
+# NUMIN and NUMAX
+For [Coupled States](../Coupled-states.md) calculations the parameters NUMIN and NUMAX designate the minimum and maximum value of the projection index *nu*. For collisions involving molecules with half-integer spin, the minimum and maximum value of *nu* is equal to NUMIN+1/2 and NUMAX+1/2. If you are interested in cross sections out of or into a level with rotational quantum number *j*, you must set NUMAX at least equal to *j*.
+
+NUMIN should be a positive number (or zero), since the CS S matrices for negative nu can be related to those for positive nu by symmetry and thus need not be computed. If you set NUMIN=0, then you will compute correctly cross sections for all *j*->*j*' transitions with *j* and *j*' less than or equal to NUMAX.
+
+For [Close Coupled](../Close-coupled-equations.md) calculations the parameters NUMIN and NUMAX can be given any values, but are then set internally to 0.

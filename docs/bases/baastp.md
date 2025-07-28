@@ -16,8 +16,8 @@ Here, the body-frame $z$ axis is taken to lie along the $a$ inertial axis. For a
 
 - `NTERM`: the number of potential surfaces involved. This parameter should equal the number of `MU` terms in the angular expansion of the potential. This parameter can not be changed
 - `NUMPOT`: an index representing the particular potential used. This variable is passed to the `POT` subroutine
-- `IPOTSY`: cylindrical symmetry of potential. The variables ($\theta$,$\phi$) describing the angular expansion of the potential should be defined with the *a* inertial axis defined as the body-frame *z* axis and, if possible, the *xz* plane as a plane of symmetry of the molecule (in this case, `IPOTSY` = 2). If the [flag](Flags) [`IHOMO`](IHOMO-and-TWOMOL) = .true., only terms with `LAMBDA` + `MU` equal to an integer multiple of `IPOTSY` can be included in the potential. Example: for H<sub>2</sub>O, `IPOTSY` = 2
-- `IOP`: *ortho/para* label for molecular states of the asymmetric top. If [`IHOMO`](IHOMO-and-TWOMOL) =.true. then
+- `IPOTSY`: cylindrical symmetry of potential. The variables ($\theta$,$\phi$) describing the angular expansion of the potential should be defined with the *a* inertial axis defined as the body-frame *z* axis and, if possible, the *xz* plane as a plane of symmetry of the molecule (in this case, `IPOTSY` = 2). If the [flag](../Flags.md) [`IHOMO`](../param/ihomo.md) = .true., only terms with `LAMBDA` + `MU` equal to an integer multiple of `IPOTSY` can be included in the potential. Example: for H<sub>2</sub>O, `IPOTSY` = 2
+- `IOP`: *ortho/para* label for molecular states of the asymmetric top. If [`IHOMO`](../param/ihomo.md) =.true. then
   - if `IOP` = 1: only *para* states are included in channel expansion
   - if `IOP` = -1: only *ortho* states are included in channel expansion
 - `JMAX`:  the maximum rotational angular momentum included in the channel expansion
